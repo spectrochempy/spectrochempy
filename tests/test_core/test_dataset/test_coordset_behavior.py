@@ -449,6 +449,44 @@ class TestCoordSetLookupAmbiguities:
 
 
 # ==============================================================================
+# Private lookup context
+# ==============================================================================
+
+
+class TestCoordSetLookupContext:
+    """Private lookup context used to prepare storage migration work."""
+
+    def test_resolve_get_result_reports_reference_context(self):
+        c = Coord([1.0, 2.0, 3.0], name="x")
+        cs = CoordSet(x=c, y="x")
+        result = cs._resolve_get_result("y")
+        assert result.value == "x"
+        assert result.lookup_kind == "reference"
+        assert result.owner_dim == "y"
+        assert result.compat_key == "y"
+
+    def test_resolve_get_result_reports_child_name_owner_dim(self):
+        cs = CoordSet(
+            x=CoordSet(Coord([1, 2, 3], name="a"), Coord([4, 5, 6], name="b"))
+        )
+        result = cs._resolve_get_result("_1")
+        assert result.value == cs["_1"]
+        assert result.lookup_kind == "child_name"
+        assert result.owner_dim == "x"
+        assert result.compat_key == "_1"
+
+    def test_resolve_get_result_reports_synthetic_alias_context(self):
+        cs = CoordSet(
+            x=CoordSet(Coord([1, 2, 3], name="a"), Coord([4, 5, 6], name="b"))
+        )
+        result = cs._resolve_get_result("x_1")
+        assert result.value == cs["x_1"]
+        assert result.lookup_kind == "synthetic_alias"
+        assert result.owner_dim == "x"
+        assert result.compat_key == "x_1"
+
+
+# ==============================================================================
 # Call syntax
 # ==============================================================================
 
