@@ -31,6 +31,25 @@ See `docs/sources/devguide/contributing.rst` for the full PR workflow.
 
 ---
 
+## PR title prefixes
+
+Use the same prefix style as commit messages:
+
+| Prefix     | Usage                              |
+|------------|------------------------------------|
+| `MAINT:`   | Refactoring, cleanup               |
+| `FIX:`     | Bug fix (including test/CI fixes)  |
+| `DOC:`     | Documentation changes              |
+| `TEST:`    | Test addition or change            |
+| `CI:`      | CI/CD workflow changes             |
+| `DEV:`     | Developer tooling                   |
+| `FEATURE:` | New feature                        |
+
+The PR description should begin with a summary of changes, state what is out
+of scope, and reference the related issue/PR when applicable.
+
+---
+
 ## Changelog entries
 
 Edit `docs/sources/whatsnew/changelog.rst`. Never edit `latest.rst` manually.
@@ -98,12 +117,15 @@ Install hooks:
 pip install pre-commit && pre-commit install
 ```
 
-Run once before the final commit:
+Run once near PR packaging time (not repeatedly during intermediate work):
 ```bash
 pre-commit run --all-files
 ```
 
 Hooks: ruff (lint+format), regenerate requirements, regenerate lazy stubs, update version/release notes.
+
+Generated files updated by pre-commit (e.g. ``latest.rst``) belong in the final
+PR state — do not discard them after pre-commit runs.
 
 ---
 

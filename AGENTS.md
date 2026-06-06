@@ -168,6 +168,8 @@ Run pre-commit only:
 In normal workflows this should happen only once near PR completion.
 
 If pre-commit modifies files, include those modifications in the final commit.
+Generated files updated by pre-commit hooks (e.g. ``latest.rst``) belong in
+the final PR state — do not discard them after pre-commit runs.
 
 ---
 
@@ -243,10 +245,22 @@ Unless explicitly requested:
 - do not alter release workflows;
 - do not alter publication workflows.
 
+PR titles should use the same prefix style as commit messages:
+
+| Prefix     | Usage                              |
+|------------|------------------------------------|
+| `MAINT:`   | Refactoring, cleanup               |
+| `FIX:`     | Bug fix (including test/CI fixes)  |
+| `DOC:`     | Documentation changes              |
+| `TEST:`    | Test addition or change            |
+| `CI:`      | CI/CD workflow changes             |
+| `DEV:`     | Developer tooling                   |
+| `FEATURE:` | New feature                        |
+
 At the end of a chantier:
 
 - prepare a clean final commit;
-- prepare a concise PR description;
+- prepare a concise PR description using the same prefix as the PR title;
 - update changelog when appropriate;
 - run pre-commit before finalizing the PR.
 
@@ -296,6 +310,7 @@ Do not edit manually:
 requirements/*.txt
 src/spectrochempy/__init__.pyi
 docs/sources/reference/generated/*
+docs/sources/whatsnew/latest.rst
 ```
 
 These files are generated.
