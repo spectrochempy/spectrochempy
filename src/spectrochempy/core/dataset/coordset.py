@@ -497,6 +497,11 @@ class CoordSet(HasTraits):
         return self._coords[self._default]
 
     @property
+    def default_index(self):
+        """Selected default coordinate index (int)."""
+        return self._default
+
+    @property
     def data(self):
         # in case data is called on a coordset for dimension with multiple coordinates
         # return the default coordinates data
@@ -1036,7 +1041,7 @@ class CoordSet(HasTraits):
     # ----------------------------------------------------------------------------------
     # @staticmethod
     def _attributes_(self):
-        return ["coords", "references", "is_same_dim", "name"]
+        return ["coords", "references", "is_same_dim", "default_index", "name"]
 
     def __call__(self, *args, **kwargs):
         # allow the following syntax: coords(), coords(0,2) or

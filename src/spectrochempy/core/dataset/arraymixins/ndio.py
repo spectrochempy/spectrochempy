@@ -380,6 +380,15 @@ class NDIO(tr.HasTraits):
         from spectrochempy.core.script import Script
 
         # .........................
+        def restore_coordset_state(coordset: CoordSet, val: dict[str, Any]) -> CoordSet:
+            default_index = val.get("default_index")
+            if default_index is None and isinstance(val.get("default"), int):
+                default_index = val["default"]
+            if default_index is not None:
+                coordset._default = default_index
+            coordset._references = val.get("references", {})
+            return coordset
+
         def item_to_attr(obj: Any, dic: dict[str, Any]) -> Any:
             for key, val in dic.items():
                 try:
@@ -411,14 +420,15 @@ class NDIO(tr.HasTraits):
                                         _mcoords.append(item_to_attr(Coord(), mv))
 
                                     cs = CoordSet(*_mcoords[::-1], name=v["name"])
+                                    restore_coordset_state(cs, v)
                                     _coords.append(cs)
                                 else:
                                     raise ValueError("Invalid : not a multicoordinate")
 
                         coords = {c.name: c for c in _coords}
                         obj.set_coordset(coords)
-                        obj._name = val["name"]
-                        obj._references = val["references"]
+                        restore_coordset_state(obj._coordset, val)
+                        obj._coordset._name = val["name"]
 
                     elif key in ["_datasets"]:
                         # datasets = [item_to_attr(NDDataset(name=k),
