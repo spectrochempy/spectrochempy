@@ -500,51 +500,6 @@ def read_dir(directory=None, **kwargs):
     return importer(directory, **kwargs)
 
 
-# _docstring.delete_params("Importer.see_also", "read_remote")
-# @_docstring.dedent
-# def read_remote(file_or_dir, **kwargs):
-#     """
-#     Download and read files or an entire directory from any url
-#
-#     The first usage in spectrochempy is the loading of test files in the
-#     `spectrochempy_data repository <https://github.com/spectrochempy/spectrochempy_data>`__.
-#     This is done only if the data are not yet
-#     downloaded and present in the `~spectrochempy.preferences.datadir` directory.
-#
-#     It can also be used to download and read file or directory from any url.
-#
-#     Parameters
-#     ----------
-#     path : `str`, `~pathlib.Path` object or an url.
-#         When a file or folder is specified, it must be written as if it were present
-#         locally exactly as for the `read` function. The correponding file or directory
-#         is downloaded from the ``github spectrochemp_data`` repository.
-#         Otherwise it should be a full and valid url.
-#     %(kwargs)s
-#
-#     Returns
-#     --------
-#     %(Importer.returns)s
-#
-#     Other Parameters
-#     ----------------
-#     %(Importer.other_parameters)s
-#
-#     See Also
-#     --------
-#     %(Importer.see_also.no_read_remote)s
-#
-#     Examples
-#     --------
-#
-#     >>> A = scp.read_remote('irdata/subdir')
-#     """
-#     kwargs["remote"] = True
-#     importer = Importer()
-#     return importer(file_or_dir, **kwargs)
-#
-
-
 # ======================================================================================
 # Private read functions
 # ======================================================================================

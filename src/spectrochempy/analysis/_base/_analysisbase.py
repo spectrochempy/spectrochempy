@@ -398,7 +398,6 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
         return self._inverse_transform(X_transform)
 
-    # _docstring.keep_params("analysis_inverse_transform.parameters", "X_transform")
     def fit_transform(self, X, Y=None, **kwargs):
         r"""
         Fit the model with `X` and apply the dimensionality reduction on `X`.
@@ -799,7 +798,6 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         X, Y = self._inverse_transform(X_transform, X_transform)
         return X, Y
 
-    # _docstring.keep_params("analysis_inverse_transform.parameters", "X_transform")
     def fit_transform(self, X, Y, both=False):
         r"""
         Fit the model with `X` and `Y` and apply the dimensionality reduction on `X` and optionally on `Y`.
