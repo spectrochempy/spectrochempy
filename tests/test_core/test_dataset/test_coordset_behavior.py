@@ -464,6 +464,7 @@ class TestCoordSetLookupContext:
         assert result.lookup_kind == "reference"
         assert result.owner_dim == "y"
         assert result.compat_key == "y"
+        assert result.reference_target == "x"
 
     def test_resolve_get_result_reports_child_name_owner_dim(self):
         cs = CoordSet(
@@ -474,16 +475,29 @@ class TestCoordSetLookupContext:
         assert result.lookup_kind == "child_name"
         assert result.owner_dim == "x"
         assert result.compat_key == "_1"
+        assert result.entry_id is not None
+        assert result.alias == "_1"
 
     def test_resolve_get_result_reports_synthetic_alias_context(self):
         cs = CoordSet(
             x=CoordSet(Coord([1, 2, 3], name="a"), Coord([4, 5, 6], name="b"))
         )
         result = cs._resolve_get_result("x_1")
+        nested = cs["x"]._resolve_get_result("_1")
         assert result.value == cs["x_1"]
         assert result.lookup_kind == "synthetic_alias"
         assert result.owner_dim == "x"
         assert result.compat_key == "x_1"
+        assert result.entry_id == nested.entry_id
+        assert result.alias == "_1"
+
+    def test_resolve_get_result_reports_title_entry_context(self):
+        cs = CoordSet(x=Coord([1, 2, 3], title="distance"))
+        result = cs._resolve_get_result("distance")
+        assert result.value == cs["distance"]
+        assert result.lookup_kind == "title"
+        assert result.owner_dim == "x"
+        assert result.entry_id is not None
 
 
 # ==============================================================================
