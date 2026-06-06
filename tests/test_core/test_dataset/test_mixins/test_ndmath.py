@@ -736,6 +736,156 @@ def test_max_min_operations(IR_dataset_1D, IR_dataset_2D):
     assert nd2m.shape == (55, 1)
 
 
+# ===============================================================================
+# CoordSet lifecycle — amax / amin dimension cleanup
+# ===============================================================================
+
+
+def test_amax_dim_reduces_coordset():
+    """amax(dim=...) removes the reduced coordinate when keepdims=False."""
+    y = Coord(np.arange(4.0), title="rows")
+    x = Coord(np.arange(5.0), title="cols")
+    ds = NDDataset(
+        np.arange(20.0).reshape(4, 5),
+        coordset=[y, x],
+        title="test",
+        units="m",
+    )
+
+    result = ds.amax(dim="y")
+    assert "y" not in result.dims
+    assert result.coordset is not None
+    assert result.coordset.names == ["x"]
+    assert result.title == "test"
+    assert_units_equal(result.units, ur.m)
+
+    result = ds.amax(dim="x")
+    assert "x" not in result.dims
+    assert result.coordset is not None
+    assert result.coordset.names == ["y"]
+    assert result.title == "test"
+    assert_units_equal(result.units, ur.m)
+
+
+def test_amin_dim_reduces_coordset():
+    """amin(dim=...) removes the reduced coordinate when keepdims=False."""
+    y = Coord(np.arange(4.0), title="rows")
+    x = Coord(np.arange(5.0), title="cols")
+    ds = NDDataset(
+        np.arange(20.0).reshape(4, 5),
+        coordset=[y, x],
+        title="test",
+        units="m",
+    )
+
+    result = ds.amin(dim="y")
+    assert "y" not in result.dims
+    assert result.coordset is not None
+    assert result.coordset.names == ["x"]
+
+    result = ds.amin(dim="x")
+    assert "x" not in result.dims
+    assert result.coordset is not None
+    assert result.coordset.names == ["y"]
+
+
+def test_amax_keepdims_preserves_coord():
+    """amax(dim=..., keepdims=True) keeps dim with singleton coordinate."""
+    x = Coord(np.arange(5.0), title="cols")
+    ds = NDDataset(np.arange(5.0), coordset=CoordSet(x=x))
+
+    result = ds.amax(dim="x", keepdims=True)
+    assert "x" in result.dims
+    assert result.shape == (1,)
+    assert result.coordset is not None
+    assert result.coordset["x"].data == [0]
+
+
+def test_amin_keepdims_preserves_coord():
+    """amin(dim=..., keepdims=True) keeps dim with singleton coordinate."""
+    x = Coord(np.arange(5.0), title="cols")
+    ds = NDDataset(np.arange(5.0), coordset=CoordSet(x=x))
+
+    result = ds.amin(dim="x", keepdims=True)
+    assert "x" in result.dims
+    assert result.shape == (1,)
+    assert result.coordset is not None
+    assert result.coordset["x"].data == [0]
+
+
+def test_amax_preserves_surviving_coords():
+    """amax(dim=...) preserves coordinates of non-reduced dimensions."""
+    y = Coord(np.arange(4.0), title="rows")
+    x = Coord(np.linspace(100, 500, 5), title="wavenumber", units="cm^-1")
+    ds = NDDataset(
+        np.arange(20.0).reshape(4, 5),
+        coordset=[y, x],
+        title="spectrum",
+        units="absorbance",
+    )
+
+    result = ds.amax(dim="y")
+    assert result.coordset is not None
+    assert "x" in result.dims
+    surviving = result.coordset["x"]
+    assert surviving.title == "wavenumber"
+    assert_units_equal(surviving.units, ur.cm**-1)
+
+
+def test_amax_preserves_multi_coord_other_dim():
+    """Amax on one dim preserves multiple coords on the other dim."""
+    y = Coord(np.arange(4.0), title="rows")
+    x1 = Coord(np.linspace(100, 500, 5), title="wavenumber")
+    x2 = Coord(np.arange(5.0), title="second")
+    ds = NDDataset(
+        np.arange(20.0).reshape(4, 5),
+        coordset=[y, CoordSet(x1, x2)],
+        title="test",
+    )
+
+    # Determine which dim name was assigned to the inner CoordSet
+    # (2D datasets have default dims ["y", "x"]; the inner CoordSet
+    # spanning 5 elements gets the second dim)
+    non_reduced_dim = ds.dims[1]
+
+    result = ds.amax(dim="y")
+    assert result.coordset is not None
+    assert "y" not in result.dims
+    # The non-reduced dim survived with both inner coordinates
+    surviving = result.coordset[non_reduced_dim]
+    assert isinstance(surviving, CoordSet)
+    assert len(surviving) == 2
+
+
+def test_global_amax_amin_keepdims_reconstructs_coords():
+    """
+    amax/amin with dim=None, keepdims=True reconstructs coords.
+
+    This exercises the extrema-coordinate path that remains in ndmath.py.
+    """
+    y = Coord(np.array([10.0, 20.0, 30.0, 40.0]), title="y-coord")
+    x = Coord(np.array([1.0, 5.0, 2.0]), title="x-coord")
+    data = np.array(
+        [[1.0, 9.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 2.0], [0.0, 3.0, 1.0]]
+    )
+    ds = NDDataset(data, coordset=[y, x])
+
+    # dim=None + keepdims=True goes through the extrema coord reconstruction path
+    result = ds.amax(dim=None, keepdims=True)
+    assert isinstance(result, NDDataset)
+    assert result.coordset is not None
+    # The global max (9.0) is at (y=0, x=1)
+    assert result.coordset["y"].data[0] == 10.0
+    assert result.coordset["x"].data[0] == 5.0
+
+    result = ds.amin(dim=None, keepdims=True)
+    assert isinstance(result, NDDataset)
+    assert result.coordset is not None
+    # The global min (0.0) is at (y=3, x=0)
+    assert result.coordset["y"].data[0] == 40.0
+    assert result.coordset["x"].data[0] == 1.0
+
+
 def test_clip_operation():
     """Test clip operation."""
     # Create dataset with negative values

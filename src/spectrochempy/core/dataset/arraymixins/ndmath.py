@@ -787,14 +787,10 @@ class NDMath:
             coordset = cls.coordset
             if coordset is not None:
                 if dim is not None:
-                    idx = coordset.names.index(dim)
+                    new_coordset = coordset._reduce_dim(dim, keepdims=keepdims)
+                    cls._coordset = new_coordset
                     if not keepdims:
-                        del coordset.coords[idx]
                         dims.remove(dim)
-                    else:
-                        coordset.coords[idx].data = [
-                            0,
-                        ]
                 else:
                     # find the coordinates
                     idx = np.ma.argmax(dataset)
@@ -871,14 +867,10 @@ class NDMath:
             coordset = cls.coordset
             if coordset is not None:
                 if dim is not None:
-                    idx = coordset.names.index(dim)
+                    new_coordset = coordset._reduce_dim(dim, keepdims=keepdims)
+                    cls._coordset = new_coordset
                     if not keepdims:
-                        del coordset.coords[idx]
                         dims.remove(dim)
-                    else:
-                        coordset.coords[idx].data = [
-                            0,
-                        ]
                 else:
                     # find the coordinates
                     idx = np.ma.argmin(dataset)
