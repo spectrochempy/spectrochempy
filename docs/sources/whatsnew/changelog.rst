@@ -95,3 +95,9 @@ Developer
 - TEST: Added public-contract behavioral tests for ``NDDataset`` ``coord()``,
   ``set_coordset()``, dim attribute access, multi-coord dimensions, and
   ``None``/size-only coordinate entries.
+
+- MAINT: Extracted private resolver helpers ``_resolve_string_lookup``,
+  ``_resolve_numeric_lookup``, and ``_resolve_get`` from
+  ``CoordSet.__getitem__`` to centralize read-lookup logic before storage
+  redesign, preserving existing behavior without changing public APIs,
+  storage, or serialization.
