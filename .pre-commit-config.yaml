@@ -48,9 +48,3 @@ repos:
       - id: ruff
         args: [--fix]
       - id: ruff-format
-
-  # This is not working correctly because the use of docrep for some docstrings
-  # - repo: https://github.com/numpy/numpydoc
-  #   rev: v1.8.0
-  #   hooks:
-  #     - id: numpydoc-validation

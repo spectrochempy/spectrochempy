@@ -30,7 +30,7 @@ def analyze_methods():
                     print(f"- Line: {node.lineno}")
                     print(f"- Args: `{', '.join(args)}`")
                     if docstring:
-                        print(f"- Doc: {docstring.split('\n')[0]}")
+                        print(f"- Doc: {docstring.splitlines()[0]}")
 
                     # Register method for duplicate checking
                     method_registry[node.name].append(

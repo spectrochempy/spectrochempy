@@ -15,6 +15,12 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 Developer
 ~~~~~~~~~
 
+- MAINT: Removed stale commented ``docrep`` residue and the unused commented
+  ``numpydoc`` pre-commit hook block.
+
+- TEST: Added a project-wide source-docstring guard to detect stale
+  ``docrep``-style placeholders in ``spectrochempy`` source docstrings.
+
 - MAINT: Added private ``CoordSet`` group-model conversion helpers to prepare
   storage migration without changing runtime storage, lookup, serialization, or
   lifecycle behavior.
