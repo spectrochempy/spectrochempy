@@ -27,6 +27,10 @@ Bug Fixes
 Developer
 ~~~~~~~~~
 
+- MAINT: Started consuming private CoordSet group-model metadata inside read
+  lookup context generation while preserving legacy storage and public lookup
+  behavior.
+
 - MAINT: Added private CoordSet serializer adapter helpers for converting
   legacy serialized coordset state to and from the private group model,
   without changing runtime storage or native I/O behavior.

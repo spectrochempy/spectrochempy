@@ -25,6 +25,7 @@ from traitlets import observe
 from traitlets import signature_has_traits
 from traitlets import validate
 
+from spectrochempy.core.dataset._coordgroup import _coordset_to_groups
 from spectrochempy.core.dataset.basearrays.ndarray import DEFAULT_DIM_NAME
 from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 from spectrochempy.core.dataset.coord import Coord
@@ -45,6 +46,9 @@ class _CoordLookupResult:
     owner_dim: str | None = None
     compat_key: str | int | None = None
     warning_message: str | None = None
+    entry_id: str | None = None
+    alias: str | None = None
+    reference_target: str | None = None
 
 
 @signature_has_traits
@@ -1103,6 +1107,47 @@ class CoordSet(HasTraits):
     # Private resolver helpers (read-lookup only)
     # ------------------------------------------------------------------
 
+    def _lookup_groups(self):
+        """Project current legacy storage to private lookup groups."""
+        return _coordset_to_groups(self)
+
+    def _coordinate_lookup_groups(self):
+        """Private groups that correspond positionally to legacy ``_coords``."""
+        return tuple(
+            group for group in self._lookup_groups() if group.reference is None
+        )
+
+    def _lookup_group_for_legacy_index(self, coord_groups, index):
+        """Return the projected group corresponding to one legacy coord index."""
+        if self.is_same_dim:
+            return coord_groups[0] if coord_groups else None
+        return coord_groups[index] if index < len(coord_groups) else None
+
+    @staticmethod
+    def _lookup_entry(group, index):
+        """Return one private group entry by position if available."""
+        if group is None or index < 0 or index >= len(group.entries):
+            return None
+        return group.entries[index]
+
+    @staticmethod
+    def _lookup_alias(group, entry_id):
+        """Return the first compatibility alias for *entry_id* in one group."""
+        if group is None:
+            return None
+        for alias, candidate_id in group.aliases.items():
+            if candidate_id == entry_id:
+                return alias
+        return None
+
+    @staticmethod
+    def _lookup_reference_group(groups, dim):
+        """Return the private reference group for *dim* if present."""
+        for group in groups:
+            if group.reference is not None and group.reference.dim == dim:
+                return group
+        return None
+
     def _resolve_string_lookup_result(self, index):
         """
         Resolve a string key using current lookup precedence.
@@ -1115,20 +1160,44 @@ class CoordSet(HasTraits):
         5. nested child name
         6. canonical synthetic alias (e.g. ``x_1``)
         """
+        groups = self._lookup_groups()
+        coord_groups = tuple(group for group in groups if group.reference is None)
+
         # find by name
         if index in self.names:
             idx = self.names.index(index)
             coord = self._coords.__getitem__(idx)
-            owner_dim = getattr(coord, "name", None)
-            return _CoordLookupResult(coord, "dimension", owner_dim, index)
+            group = self._lookup_group_for_legacy_index(coord_groups, idx)
+            entry = self._lookup_entry(group, idx) if self.is_same_dim else None
+            entry_id = entry.id if entry is not None else None
+            if group is not None and entry_id is None:
+                entry_id = group.default_id
+                if len(group.entries) == 1:
+                    entry_id = group.entries[0].id
+            owner_dim = group.dim if group is not None else getattr(coord, "name", None)
+            return _CoordLookupResult(
+                coord,
+                "dimension",
+                owner_dim,
+                index,
+                entry_id=entry_id,
+                alias=index if self.is_same_dim else None,
+            )
 
         # try in references
         if index in self._references:
+            group = self._lookup_reference_group(groups, index)
+            target_dim = (
+                group.reference.target_dim
+                if group is not None and group.reference is not None
+                else self._references[index]
+            )
             return _CoordLookupResult(
                 self._references[index],
                 "reference",
                 index,
                 index,
+                reference_target=target_dim,
             )
 
         # try in the title
@@ -1143,47 +1212,95 @@ class CoordSet(HasTraits):
                 warnings.warn(warning_message, stacklevel=2)
             idx = self.titles.index(index)
             coord = self._coords.__getitem__(idx)
-            owner_dim = getattr(coord, "name", None)
+            group = self._lookup_group_for_legacy_index(coord_groups, idx)
+            entry = self._lookup_entry(group, idx) if self.is_same_dim else None
+            entry_id = entry.id if entry is not None else None
+            if group is not None and entry_id is None:
+                entry_id = group.default_id
+                if len(group.entries) == 1:
+                    entry_id = group.entries[0].id
+            owner_dim = group.dim if group is not None else getattr(coord, "name", None)
             return _CoordLookupResult(
                 coord,
                 "title",
                 owner_dim,
                 index,
                 warning_message,
+                entry_id=entry_id,
+                alias=(
+                    self._lookup_alias(group, entry.id)
+                    if self.is_same_dim and entry is not None
+                    else None
+                ),
             )
 
         # may be it is a title or a name in a sub-coords
-        for item in self._coords:
+        for item, group in zip(self._coords, coord_groups, strict=False):
             if isinstance(item, CoordSet) and index in item.titles:
                 # selection by subcoord title
                 idx = item.titles.index(index)
                 coord = item._coords.__getitem__(idx)
-                return _CoordLookupResult(coord, "child_title", item.name, index)
+                entry = self._lookup_entry(group, idx)
+                return _CoordLookupResult(
+                    coord,
+                    "child_title",
+                    group.dim,
+                    index,
+                    entry_id=entry.id if entry is not None else None,
+                    alias=(
+                        self._lookup_alias(group, entry.id)
+                        if entry is not None
+                        else None
+                    ),
+                )
 
-        for item in self._coords:
+        for item, group in zip(self._coords, coord_groups, strict=False):
             if isinstance(item, CoordSet) and index in item.names:
                 # selection by subcoord name
                 idx = item.names.index(index)
                 coord = item._coords.__getitem__(idx)
-                return _CoordLookupResult(coord, "child_name", item.name, index)
+                entry = self._lookup_entry(group, idx)
+                return _CoordLookupResult(
+                    coord,
+                    "child_name",
+                    group.dim,
+                    index,
+                    entry_id=entry.id if entry is not None else None,
+                    alias=index,
+                )
 
         try:
             # let try with the canonical dimension names
             if index[0] in self.names:
-                c = self._coords.__getitem__(self.names.index(index[0]))
-                owner_dim = getattr(c, "name", None)
+                idx = self.names.index(index[0])
+                c = self._coords.__getitem__(idx)
+                group = coord_groups[idx] if idx < len(coord_groups) else None
+                owner_dim = group.dim if group is not None else getattr(c, "name", None)
                 if len(index) > 1 and index[1] == "_":
                     if isinstance(c, CoordSet):
                         result = c._resolve_get_result(index[1:])
                         return _CoordLookupResult(
                             result.value,
                             "synthetic_alias",
-                            c.name,
+                            owner_dim,
                             index,
                             result.warning_message,
+                            entry_id=result.entry_id,
+                            alias=result.alias,
                         )
                     c = c.__getitem__(index[2:])  # try on labels
-                return _CoordLookupResult(c, "dimension", owner_dim, index)
+                entry_id = None
+                if group is not None:
+                    entry_id = group.default_id
+                    if len(group.entries) == 1:
+                        entry_id = group.entries[0].id
+                return _CoordLookupResult(
+                    c,
+                    "dimension",
+                    owner_dim,
+                    index,
+                    entry_id=entry_id,
+                )
         except IndexError:
             pass
 
@@ -1197,11 +1314,24 @@ class CoordSet(HasTraits):
         For same-dimension multi-coordinate groups this slices every child.
         """
         multi = bool(self.is_same_dim)
+        coord_groups = self._coordinate_lookup_groups()
 
         if not multi:
             coord = self._coords.__getitem__(index)
-            owner_dim = getattr(coord, "name", None)
-            return _CoordLookupResult(coord, "numeric", owner_dim, index)
+            group = self._lookup_group_for_legacy_index(coord_groups, index)
+            owner_dim = group.dim if group is not None else getattr(coord, "name", None)
+            entry_id = None
+            if group is not None:
+                entry_id = group.default_id
+                if len(group.entries) == 1:
+                    entry_id = group.entries[0].id
+            return _CoordLookupResult(
+                coord,
+                "numeric",
+                owner_dim,
+                index,
+                entry_id=entry_id,
+            )
 
         res = []
         for c in self._coords:
@@ -1210,7 +1340,14 @@ class CoordSet(HasTraits):
         coords.name = self.name
         coords._is_same_dim = self._is_same_dim
         coords._default = self._default
-        return _CoordLookupResult(coords, "numeric", self.name, index)
+        group = coord_groups[0] if coord_groups else None
+        return _CoordLookupResult(
+            coords,
+            "numeric",
+            group.dim if group is not None else self.name,
+            index,
+            entry_id=group.default_id if group is not None else None,
+        )
 
     def _resolve_get_result(self, index):
         """
