@@ -952,6 +952,51 @@ class CoordSet(HasTraits):
         result[dim] = new_coord
         return result
 
+    def _interpolate_dim(self, dim, target_coord, *, interpolate_secondary):
+        """
+        Return a coordset with the interpolated dimension coordinate updated.
+
+        This lifecycle wrapper reconstructs the coordinate container for a
+        single interpolated dimension, delegating per-coordinate numerical
+        interpolation to the ``interpolate_secondary`` callable.
+
+        Parameters
+        ----------
+        dim : str
+            Name of the interpolated dimension.
+        target_coord : Coord
+            Target coordinate for the new grid (normalized, unit-converted).
+        interpolate_secondary : callable
+            Callable ``(Coord) -> Coord`` that copies a secondary coordinate,
+            interpolates its numeric data (when usable), clears labels, and
+            returns the result.
+        """
+        result = self.copy()
+
+        if dim not in result.names:
+            new_coord = target_coord.copy()
+            new_coord._labels = None
+            new_coord.name = dim
+            result._coords = tuple(result._coords) + (new_coord,)
+            return result
+
+        coord_idx = result.names.index(dim)
+        old_container = result._coords[coord_idx]
+
+        if isinstance(old_container, CoordSet):
+            new_sec_coords = [interpolate_secondary(c) for c in old_container._coords]
+            new_coordset = CoordSet(*new_sec_coords[::-1], name=dim)
+            new_coordset._default = old_container._default
+            new_coordset._is_same_dim = True
+            result._coords[coord_idx] = new_coordset
+        else:
+            new_coord = target_coord.copy()
+            new_coord._labels = None
+            new_coord.name = dim
+            result._coords[coord_idx] = new_coord
+
+        return result
+
     def _append(self, coord):
         # utility function to append coordinate with full validation
         if not isinstance(coord, tuple):
