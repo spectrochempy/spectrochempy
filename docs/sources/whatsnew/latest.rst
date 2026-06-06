@@ -48,3 +48,11 @@ Developer
   coordinate reconstruction and migrated ``interpolate()`` to use it,
   preserving existing behavior without changing public APIs, storage, or
   serialization.
+
+- TEST: Added public-contract behavioral tests for ``CoordSet`` multi-coord
+  construction, attribute access, iteration, keepnames, and additional
+  properties (``name``, ``coords``).
+
+- TEST: Added public-contract behavioral tests for ``NDDataset`` ``coord()``,
+  ``set_coordset()``, dim attribute access, multi-coord dimensions, and
+  ``None``/size-only coordinate entries.

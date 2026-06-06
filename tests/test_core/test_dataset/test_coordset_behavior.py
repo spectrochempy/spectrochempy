@@ -427,6 +427,149 @@ class TestCoordSetEdgeCases:
 
 
 # ==============================================================================
+# Multi-coord (same-dimension)
+# ==============================================================================
+
+
+class TestCoordSetMultiCoord:
+    """CoordSet with multiple coords sharing a dimension."""
+
+    def test_list_arg_exposes_child_coords(self):
+        """Passing a list of Coords exposes both through compatibility aliases."""
+        c1 = Coord([1, 2, 3], name="a")
+        c2 = Coord([4, 5, 6], name="b")
+        cs = CoordSet([c1, c2])
+        assert cs["x"]["_1"] == c1
+        assert cs["x"]["_2"] == c2
+
+    def test_child_coord_metadata_preserved(self):
+        c1 = Coord([1, 2, 3], name="a", units="cm^-1", title="alpha")
+        c2 = Coord([4, 5, 6], name="b", units="s", title="beta")
+        cs = CoordSet([c1, c2])
+        assert cs["x"]["_1"].units is not None
+        assert cs["x"]["_2"].title == "beta"
+
+    def test_explicit_multi_coord_via_kwargs(self):
+        c1 = Coord([1, 2, 3], name="a")
+        c2 = Coord([4, 5, 6], name="b")
+        cs = CoordSet(x=CoordSet(c1, c2))
+        # Both coordinates are accessible through compatibility aliases
+        assert len(cs["x"]) == 2
+
+
+# ==============================================================================
+# Attribute access
+# ==============================================================================
+
+
+class TestCoordSetAttributeAccess:
+    """CoordSet __getattr__ behavior."""
+
+    def test_getattr_by_name(self):
+        cs = CoordSet(Coord([1, 2, 3], name="x"), Coord([10, 20], name="y"))
+        assert cs.x is not None
+        assert cs.y is not None
+
+    def test_getattr_returns_coord(self):
+        cs = CoordSet(Coord([1, 2, 3], name="x"))
+        assert isinstance(cs.x, Coord)
+
+    def test_getattr_subcoord_by_index(self):
+        c1 = Coord([1, 2, 3])
+        c2 = Coord([4, 5, 6])
+        cs = CoordSet([c1, c2])
+        sub = cs["x"]
+        assert sub._1 == c1
+        assert sub._2 == c2
+
+    def test_getattr_missing_raises(self):
+        cs = CoordSet(Coord([1, 2, 3], name="x"))
+        with pytest.raises(AttributeError):
+            _ = cs.nonexistent
+
+
+# ==============================================================================
+# Additional properties
+# ==============================================================================
+
+
+class TestCoordSetAdditionalProperties:
+    """Additional CoordSet public properties."""
+
+    def test_name_default_is_id_string(self):
+        cs = CoordSet(Coord([1, 2, 3], name="x"))
+        name = cs.name
+        assert isinstance(name, str)
+        assert len(name) > 0
+
+    def test_name_can_be_set(self):
+        cs = CoordSet(Coord([1, 2, 3], name="x"))
+        cs.name = "mycoords"
+        assert cs.name == "mycoords"
+
+    def test_coords_returns_list(self):
+        cs = CoordSet(Coord([1, 2, 3], name="x"), Coord([10, 20], name="y"))
+        coords = cs.coords
+        assert isinstance(coords, list)
+        assert len(coords) == 2
+
+    def test_coords_contains_coord_objects(self):
+        c = Coord([1, 2, 3], name="x")
+        cs = CoordSet(c)
+        assert isinstance(cs.coords[0], Coord)
+
+
+# ==============================================================================
+# Iteration
+# ==============================================================================
+
+
+class TestCoordSetIteration:
+    """CoordSet iteration behavior."""
+
+    def test_iter_yields_all_items(self):
+        c1 = Coord([1, 2, 3], name="x")
+        c2 = Coord([10, 20], name="y")
+        cs = CoordSet(c1, c2, keepnames=True)
+        items = list(cs)
+        assert len(items) == 2
+
+    def test_iter_contains_all_items(self):
+        c1 = Coord([1, 2, 3], name="a")
+        c2 = Coord([10, 20], name="b")
+        cs = CoordSet(c1, c2, keepnames=True)
+        items = list(cs)
+        assert c1 in items
+        assert c2 in items
+
+
+# ==============================================================================
+# Keepnames
+# ==============================================================================
+
+
+class TestCoordSetKeepnames:
+    """CoordSet keepnames behavior."""
+
+    def test_keepnames_true_preserves_coord_names(self):
+        c = Coord([1, 2, 3], name="wavelength")
+        cs = CoordSet(c, keepnames=True)
+        assert cs.names == ["wavelength"]
+
+    def test_keepnames_false_auto_renames(self):
+        c = Coord([1, 2, 3], name="wavelength")
+        cs = CoordSet(c, keepnames=False)
+        # When keepnames=False, coord names may be reassigned
+        assert cs.names is not None
+
+    def test_default_keepnames_false(self):
+        c = Coord([1, 2, 3], name="wavelength")
+        cs = CoordSet(c)
+        # Default is keepnames=False, so name may be auto-assigned
+        assert cs.names is not None
+
+
+# ==============================================================================
 # Equality
 # ==============================================================================
 

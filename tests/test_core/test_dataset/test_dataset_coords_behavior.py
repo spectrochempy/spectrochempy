@@ -280,6 +280,159 @@ class TestCoordMetadataAfterSlice:
 
 
 # ==============================================================================
+# coord() method
+# ==============================================================================
+
+
+class TestNDDatasetCoordMethod:
+    """NDDataset.coord() public method."""
+
+    def test_coord_by_dim_name(self):
+        c = Coord([100.0, 200.0, 300.0], name="x")
+        ds = NDDataset([1.0, 2.0, 3.0], coordset=CoordSet(c))
+        retrieved = ds.coord("x")
+        assert isinstance(retrieved, Coord)
+        assert_array_equal(retrieved.data, [100.0, 200.0, 300.0])
+
+    def test_coord_by_dim_index(self):
+        c = Coord([100.0, 200.0, 300.0], name="x")
+        ds = NDDataset([1.0, 2.0, 3.0], coordset=CoordSet(c))
+        retrieved = ds.coord(0)
+        assert isinstance(retrieved, Coord)
+        assert_array_equal(retrieved.data, [100.0, 200.0, 300.0])
+
+    def test_coord_returns_none_when_no_coordset(self):
+        ds = NDDataset([1.0, 2.0, 3.0])
+        assert ds.coord("x") is None
+
+    def test_coord_with_custom_dim_name(self):
+        coord_y = Coord([1.0, 2.0, 3.0], name="y")
+        coord_x = Coord([10.0, 20.0], name="x")
+        ds = NDDataset(np.ones((3, 2)), coordset=[coord_y, coord_x])
+        assert_array_equal(ds.coord("y").data, [1.0, 2.0, 3.0])
+        assert_array_equal(ds.coord("x").data, [10.0, 20.0])
+
+
+# ==============================================================================
+# set_coordset() method
+# ==============================================================================
+
+
+class TestNDDatasetSetCoordset:
+    """NDDataset.set_coordset() public method."""
+
+    def test_set_coordset_with_kwargs(self):
+        c_x = Coord([10.0, 20.0, 30.0], name="x")
+        c_y = Coord([1.0, 2.0], name="y")
+        ds = NDDataset(np.ones((2, 3)))
+        ds.set_coordset(x=c_x, y=c_y)
+        assert ds.coordset is not None
+        assert "x" in ds.coordset.names
+        assert "y" in ds.coordset.names
+
+    def test_set_coordset_matches_shape(self):
+        c_x = Coord([10.0, 20.0, 30.0], name="x")
+        c_y = Coord([1.0, 2.0], name="y")
+        ds = NDDataset(np.ones((2, 3)))
+        ds.set_coordset(x=c_x, y=c_y)
+        assert ds.shape == (2, 3)
+        assert ds.coordset["x"].size == 3
+        assert ds.coordset["y"].size == 2
+
+    def test_set_coordset_replaces_previous(self):
+        c1 = Coord([1.0, 2.0, 3.0], name="x")
+        ds = NDDataset([10, 20, 30], coordset=CoordSet(c1))
+        c2 = Coord([100.0, 200.0, 300.0], name="x")
+        ds.set_coordset(x=c2)
+        assert_array_equal(ds.coordset["x"].data, [100.0, 200.0, 300.0])
+
+
+# ==============================================================================
+# Dim attribute access
+# ==============================================================================
+
+
+class TestNDDatasetDimAttributeAccess:
+    """Accessing coordinates via dataset dimension attributes."""
+
+    def test_1d_dim_attribute(self):
+        c = Coord([100.0, 200.0, 300.0], name="x")
+        ds = NDDataset([1.0, 2.0, 3.0], coordset=CoordSet(c))
+        assert isinstance(ds.x, Coord)
+        assert_array_equal(ds.x.data, [100.0, 200.0, 300.0])
+
+    def test_2d_dim_attributes(self):
+        coord_y = Coord([1.0, 2.0, 3.0], name="y")
+        coord_x = Coord([10.0, 20.0], name="x")
+        ds = NDDataset(np.ones((3, 2)), coordset=[coord_y, coord_x])
+        assert_array_equal(ds.y.data, [1.0, 2.0, 3.0])
+        assert_array_equal(ds.x.data, [10.0, 20.0])
+
+    def test_dim_attribute_preserves_after_copy(self):
+        c = Coord([100.0, 200.0, 300.0], name="x", units="cm^-1")
+        ds = NDDataset([1.0, 2.0, 3.0], coordset=CoordSet(c))
+        ds2 = ds.copy()
+        assert_array_equal(ds2.x.data, [100.0, 200.0, 300.0])
+        assert_units_equal(ds2.x.units, ur("cm^-1"))
+
+
+# ==============================================================================
+# Multi-coord dimension
+# ==============================================================================
+
+
+class TestNDDatasetMultiCoordDim:
+    """Dataset dimension with multiple coordinates (CoordSet per dim)."""
+
+    def test_assign_multi_coord_to_dim(self):
+        ds = NDDataset([0.0, 1.0, 2.0])
+        x1 = Coord(np.array([1.5, 5.8, -9.0]))
+        x2 = Coord(np.array([0.5, 0.8, 9.0]))
+        ds.x = CoordSet(Coord(x2), Coord(x1))
+        assert len(ds.x) == 2
+
+    def test_multi_coord_preserves_sub_coords(self):
+        ds = NDDataset([0.0, 1.0, 2.0])
+        x1 = Coord(np.array([1.5, 5.8, -9.0]))
+        x2 = Coord(np.array([0.5, 0.8, 9.0]))
+        ds.x = CoordSet(Coord(x2), Coord(x1))
+        assert_array_equal(ds.x["_2"].data, [0.5, 0.8, 9.0])
+        assert_array_equal(ds.x["_1"].data, [1.5, 5.8, -9.0])
+
+    def test_multi_coord_dim_attribute_after_slice(self):
+        coord_y = Coord([1.0, 2.0, 3.0], name="y")
+        coord_x = Coord([10.0, 20.0, 30.0], name="x")
+        ds = NDDataset(np.ones((3, 3)), coordset=[coord_y, coord_x])
+        ds.x = CoordSet(Coord([11.0, 21.0, 31.0]), Coord([12.0, 22.0, 32.0]))
+        sliced = ds[0:2, 0:2]
+        assert len(sliced.x) == 2
+
+
+# ==============================================================================
+# Coord with None data / size only
+# ==============================================================================
+
+
+class TestNDDatasetNoneCoord:
+    """Dataset with None-valued or size-only coordinate entries."""
+
+    def test_coord_none_size_creates_default(self):
+        c = Coord(None, size=5)
+        ds = NDDataset(np.ones(5), coordset=CoordSet(c))
+        assert ds.shape == (5,)
+
+    def test_none_coord_in_list(self):
+        c = Coord([1.0, 2.0, 3.0], name="x")
+        ds = NDDataset(np.ones((3, 1)), coordset=[c, None])
+        assert ds.shape == (3, 1)
+
+    def test_none_coord_keeps_dim_count(self):
+        c = Coord([1.0, 2.0, 3.0], name="x")
+        ds = NDDataset(np.ones((3, 1)), coordset=[c, None])
+        assert len(ds.dims) == 2
+
+
+# ==============================================================================
 # Edge cases
 # ==============================================================================
 
