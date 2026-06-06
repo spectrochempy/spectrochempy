@@ -289,6 +289,78 @@ class TestCoordSetMutation:
         cs.update(x=[4, 5, 6])
         assert_array_equal(cs["x"].data, [4, 5, 6])
 
+    def test_setitem_by_title_replaces_top_level(self):
+        c1 = Coord([1, 2, 3], name="x", title="wavelength")
+        cs = CoordSet(c1)
+        cs["wavelength"] = Coord([7, 8, 9], name="x")
+        assert_array_equal(cs["x"].data, [7, 8, 9])
+
+    def test_setitem_by_title_in_nested_child(self):
+        c1 = Coord([1, 2, 3])
+        c2 = Coord([4, 5, 6], title="alpha")
+        cs = CoordSet([c1, c2])
+        cs["alpha"] = Coord([7, 8, 9])
+        assert_array_equal(cs["x"]["_2"].data, [7, 8, 9])
+
+    def test_setitem_by_nested_child_name(self):
+        c1 = Coord([1, 2, 3])
+        c2 = Coord([4, 5, 6])
+        cs = CoordSet([c1, c2])
+        cs["_2"] = Coord([7, 8, 9])
+        assert_array_equal(cs["x"]["_2"].data, [7, 8, 9])
+
+    def test_setitem_by_synthetic_alias(self):
+        c1 = Coord([1, 2, 3])
+        c2 = Coord([4, 5, 6])
+        cs = CoordSet([c1, c2])
+        cs["x_2"] = Coord([7, 8, 9])
+        assert_array_equal(cs["x"]["_2"].data, [7, 8, 9])
+
+    def test_setitem_appends_via_available_name(self):
+        cs = CoordSet(Coord([1, 2, 3], name="x"))
+        cs["y"] = Coord([10, 20, 30], name="y")
+        assert "y" in cs.names
+        assert len(cs) == 2
+
+    def test_setitem_appends_via_synthetic_alias(self):
+        """Append new child to nested CoordSet via synthetic alias."""
+        c1 = Coord([1, 2, 3])
+        c2 = Coord([4, 5, 6])
+        cs = CoordSet([c1, c2])
+        before = len(cs["x"])
+        cs["x_3"] = Coord([7, 8, 9])
+        assert len(cs["x"]) == before + 1
+        assert cs["x"]["_3"] is not None
+
+    def test_delitem_by_title_removes_top_level(self):
+        c1 = Coord([1, 2, 3], name="x", title="wavelength")
+        cs = CoordSet(c1)
+        assert "wavelength" in cs.titles
+        del cs["wavelength"]
+        assert len(cs) == 0
+
+    def test_delitem_by_synthetic_alias(self):
+        c1 = Coord([1, 2, 3])
+        c2 = Coord([4, 5, 6])
+        cs = CoordSet([c1, c2])
+        assert len(cs["x"]) == 2
+        del cs["x_1"]
+        assert len(cs["x"]) == 1
+
+    def test_delitem_by_title_in_nested_child(self):
+        c1 = Coord([1, 2, 3])
+        c2 = Coord([4, 5, 6], title="alpha")
+        cs = CoordSet([c1, c2])
+        del cs["alpha"]
+        assert len(cs["x"]) == 1
+
+    def test_setitem_by_title_duplicate_warns(self):
+        c1 = Coord([1, 2, 3], name="x", title="dup")
+        c2 = Coord([4, 5, 6], name="y", title="dup")
+        cs = CoordSet(c1, c2)
+        with pytest.warns(UserWarning, match="occurs several time"):
+            cs["dup"] = Coord([7, 8, 9], name="x")
+
 
 # ==============================================================================
 # Call syntax

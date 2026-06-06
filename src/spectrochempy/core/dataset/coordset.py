@@ -1176,8 +1176,139 @@ class CoordSet(HasTraits):
             return self._resolve_string_lookup(index)
         return self._resolve_numeric_lookup(index)
 
+    # ------------------------------------------------------------------
+    # Private resolver helpers (write/delete lookup)
+    # ------------------------------------------------------------------
+
+    def _resolve_set(self, index, coord):
+        """
+        Resolve *index* and apply the coordinate assignment.
+
+        Precedence (highest first):
+        1. top-level name replacement
+        2. top-level title replacement
+        3. nested child title replacement
+        4. nested child name replacement
+        5. canonical synthetic alias replacement
+        6. append new coordinate
+        """
+        try:
+            coord = coord.copy(keepname=True)  # to avoid modifying the original
+        except TypeError as e:
+            if isinstance(coord, list):
+                coord = [c.copy(keepname=True) for c in coord[:]]
+            else:
+                raise e
+
+        if not isinstance(index, str):
+            self._coords[index] = coord
+            return
+
+        # 1. top-level name replacement
+        if index in self.names:
+            idx = self.names.index(index)
+            coord.name = index
+            self._coords.__setitem__(idx, coord)
+            return
+
+        # 2. top-level title replacement
+        if index in self.titles:
+            if self.titles.count(index) > 1:
+                warnings.warn(
+                    f"Getting a coordinate from its title. However `{index}` "
+                    f"occurs several time. Only"
+                    f" the first occurrence is returned!",
+                    stacklevel=3,
+                )
+            idx = self.titles.index(index)
+            coord.name = self.names[idx]
+            self._coords.__setitem__(idx, coord)
+            return
+
+        # 3. nested child title replacement
+        for item in self._coords:
+            if isinstance(item, CoordSet) and index in item.titles:
+                idx = item.titles.index(index)
+                coord.name = item.names[idx]
+                item.__setitem__(idx, coord)
+                return
+
+        # 4. nested child name replacement
+        for item in self._coords:
+            if isinstance(item, CoordSet) and index in item.names:
+                idx = item.names.index(index)
+                coord.name = item.names[idx]
+                item.__setitem__(idx, coord)
+                return
+
+        # 5. canonical synthetic alias replacement
+        try:
+            if index[0] in self.names:
+                c = self._coords.__getitem__(self.names.index(index[0]))
+                if len(index) > 1 and index[1] == "_":
+                    c.__setitem__(index[1:], coord)
+                return
+        except KeyError:
+            pass
+
+        # 6. append new coordinate
+        if index in self.available_names or (
+            len(index) == 2 and index.startswith("_") and index[1] in list("123456789")
+        ):
+            coord.name = index
+            self._coords.append(coord)
+            return
+
+        raise KeyError(f"Could not find `{index}` in coordinates names or titles")
+
+    def _resolve_delete(self, index):
+        """
+        Resolve *index* and apply the coordinate deletion.
+
+        Precedence (highest first):
+        1. top-level name deletion
+        2. top-level title deletion
+        3. nested child title deletion
+        4. canonical synthetic alias deletion
+        """
+        if not isinstance(index, str):
+            return
+
+        # 1. top-level name deletion
+        if index in self.names:
+            idx = self.names.index(index)
+            del self._coords[idx]
+            return
+
+        # 2. top-level title deletion
+        if index in self.titles:
+            idx = self.titles.index(index)
+            self._coords.__delitem__(idx)
+            return
+
+        # 3. nested child title deletion
+        for item in self._coords:
+            if isinstance(item, CoordSet) and index in item.titles:
+                item.__delitem__(index)
+                return
+
+        # 4. canonical synthetic alias deletion
+        if index[0] in self.names:
+            c = self._coords.__getitem__(self.names.index(index[0]))
+            if len(index) > 1 and index[1] == "_" and isinstance(c, CoordSet):
+                c.__delitem__(index[1:])
+                return
+
+        raise KeyError(f"Could not find `{index}` in coordinates names or titles")
+
     def __getitem__(self, index):
         return self._resolve_get(index)
+
+    def __setitem__(self, index, coord):
+        self._resolve_set(index, coord)
+
+    def __delitem__(self, index):
+        self._resolve_delete(index)
 
     def __setattr__(self, key, value):
         keyb = key[1:] if key.startswith("_") else key
@@ -1204,112 +1335,6 @@ class CoordSet(HasTraits):
             self.__setitem__(key, value)
         except Exception:
             super().__setattr__(key, value)
-
-    def __setitem__(self, index, coord):
-        try:
-            coord = coord.copy(keepname=True)  # to avoid modifying the original
-        except TypeError as e:
-            if isinstance(coord, list):
-                coord = [c.copy(keepname=True) for c in coord[:]]
-            else:
-                raise e
-
-        if isinstance(index, str):
-            # find by name
-            if index in self.names:
-                idx = self.names.index(index)
-                coord.name = index
-                self._coords.__setitem__(idx, coord)
-                return
-
-            # ok we did not find it!
-            # let's try in the title
-            if index in self.titles:
-                # selection by coord titles
-                if self.titles.count(index) > 1:
-                    warnings.warn(
-                        f"Getting a coordinate from its title. However `{index}` "
-                        f"occurs several time. Only"
-                        f" the first occurrence is returned!",
-                        stacklevel=2,
-                    )
-                index = self.titles.index(index)
-                coord.name = self.names[index]
-                self._coords.__setitem__(index, coord)
-                return
-
-            # may be it is a title or a name in a sub-coords
-            for item in self._coords:
-                if isinstance(item, CoordSet) and index in item.titles:
-                    # selection by subcoord title
-                    index = item.titles.index(index)
-                    coord.name = item.names[index]
-                    item.__setitem__(index, coord)
-                    return
-            for item in self._coords:
-                if isinstance(item, CoordSet) and index in item.names:
-                    # selection by subcoord title
-                    index = item.names.index(index)
-                    coord.name = item.names[index]
-                    item.__setitem__(index, coord)
-                    return
-
-            try:
-                # let try with the canonical dimension names
-                if index[0] in self.names:
-                    # ok we can find it a a canonical name:
-                    c = self._coords.__getitem__(self.names.index(index[0]))
-                    if len(index) > 1 and index[1] == "_":
-                        c.__setitem__(index[1:], coord)
-                    return
-
-            except KeyError:
-                pass
-
-            # add the new coordinates
-            if index in self.available_names or (
-                len(index) == 2
-                and index.startswith("_")
-                and index[1] in list("123456789")
-            ):
-                coord.name = index
-                self._coords.append(coord)
-                return
-
-            raise KeyError(f"Could not find `{index}` in coordinates names or titles")
-
-        self._coords[index] = coord
-
-    def __delitem__(self, index):
-        if isinstance(index, str):
-            # find by name
-            if index in self.names:
-                idx = self.names.index(index)
-                del self._coords[idx]
-                return None
-
-            # let's try in the title
-            if index in self.titles:
-                # selection by coord titles
-                index = self.titles.index(index)
-                self._coords.__delitem__(index)
-                return None
-
-            # may be it is a title in a sub-coords
-            for item in self._coords:
-                if isinstance(item, CoordSet) and index in item.titles:
-                    # selection by subcoord title
-                    return item.__delitem__(index)
-
-            # let try with the canonical dimension names
-            if index[0] in self.names:
-                # ok we can find it a a canonical name:
-                c = self._coords.__getitem__(self.names.index(index[0]))
-                if len(index) > 1 and index[1] == "_" and isinstance(c, CoordSet):
-                    return c.__delitem__(index[1:])
-
-            raise KeyError(f"Could not find `{index}` in coordinates names or titles")
-        return None
 
     # def __iter__(self):
     #    for item in self._coords:
