@@ -143,36 +143,7 @@ def concatenate(*datasets, **kwargs):
     coords = datasets[0].coordset
 
     if coords is not None and not coords[dim].is_empty:
-        labels = []
-        if coords[dim].is_labeled:
-            for ds in datasets:
-                labels.append(ds.coordset[dim].labels)
-
-        if coords[dim]._implements() in ["Coord"]:
-            coords[dim] = Coord(coords[dim])
-            if labels != []:
-                coords[dim]._labels = np.concatenate(labels)
-        elif coords[dim]._implements("CoordSet"):
-            if labels != []:
-                labels = np.array(labels, dtype=object)
-                for i, coord in enumerate(coords[dim]._coords):
-                    try:
-                        labels_not_none = np.all(
-                            labels[:, i] != [None] * len(labels[:, i]),
-                        )
-                    except ValueError:
-                        labels_not_none = True
-                    if labels_not_none:
-                        coord._labels = np.concatenate(list(labels[:, i]))
-        coord_data_tuple = tuple(ds.coordset[dim].data for ds in datasets)
-        none_coord = len([x for x in coord_data_tuple if x is None])
-        if not none_coord:
-            coords[dim]._data = np.concatenate(coord_data_tuple)
-        else:
-            warn(
-                f"Some dataset(s) coordinates in the {dim} dimension are None.",
-                stacklevel=2,
-            )
+        coords = coords._concatenate_dim(dim, [ds.coordset for ds in datasets])
 
     out = dataset.copy()
     out._data = data

@@ -902,6 +902,56 @@ class CoordSet(HasTraits):
 
         return new_coords
 
+    def _concatenate_dim(self, dim, coordsets):
+        """
+        Return a coordset with the concatenated dimension coordinate updated.
+
+        This lifecycle wrapper concatenates labels and data from multiple
+        coordsets for the specified dimension coordinate, preserving the
+        existing concatenation-time coordinate semantics.
+        """
+        result = self.copy()
+        coord = result[dim]
+
+        if coord.is_empty:
+            return result
+
+        labels = []
+        if coord.is_labeled:
+            for cs in coordsets:
+                labels.append(cs[dim].labels)
+
+        if coord._implements() in ["Coord"]:
+            new_coord = Coord(coord)
+            if labels:
+                new_coord._labels = np.concatenate(labels)
+        elif coord._implements("CoordSet"):
+            new_coord = cpy.deepcopy(coord)
+            if labels:
+                labels_arr = np.array(labels, dtype=object)
+                for i, c in enumerate(new_coord._coords):
+                    try:
+                        labels_not_none = np.all(
+                            labels_arr[:, i] != [None] * len(labels_arr[:, i]),
+                        )
+                    except ValueError:
+                        labels_not_none = True
+                    if labels_not_none:
+                        c._labels = np.concatenate(list(labels_arr[:, i]))
+
+        data_tuple = tuple(cs[dim].data for cs in coordsets)
+        none_coord = any(x is None for x in data_tuple)
+        if not none_coord:
+            new_coord._data = np.concatenate(data_tuple)
+        else:
+            warnings.warn(
+                f"Some dataset(s) coordinates in the {dim} dimension are None.",
+                stacklevel=2,
+            )
+
+        result[dim] = new_coord
+        return result
+
     def _append(self, coord):
         # utility function to append coordinate with full validation
         if not isinstance(coord, tuple):

@@ -61,6 +61,9 @@ Developer
 - MAINT: Reused the internal ``CoordSet`` reduction lifecycle helper for extrema
   reduction dimension cleanup, preserving existing behavior without changing
   public APIs, storage, or serialization.
+- MAINT: Added an internal ``CoordSet`` lifecycle helper for concatenate-related
+  coordinate propagation and migrated ``concatenate()`` to use it, preserving
+  existing behavior without changing public APIs, storage, or serialization.
 
 - MAINT: Added an internal ``CoordSet`` lifecycle helper for reshape-related
   coordinate handling and migrated ``NDDataset.reshape()`` to use it,
