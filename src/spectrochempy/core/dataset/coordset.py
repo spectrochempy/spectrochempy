@@ -1082,85 +1082,102 @@ class CoordSet(HasTraits):
         except (IndexError, KeyError):
             raise AttributeError from None
 
-    def __getitem__(self, index):
-        # String index
-        # ------------
-        if isinstance(index, str):
-            # find by name
-            if index in self.names:
-                idx = self.names.index(index)
-                return self._coords.__getitem__(idx)
+    # ------------------------------------------------------------------
+    # Private resolver helpers (read-lookup only)
+    # ------------------------------------------------------------------
 
-            # ok we did not find it!
-            # let's try in references
-            if index in self._references:
-                return self._references[index]
+    def _resolve_string_lookup(self, index):
+        """
+        Resolve a string key using current lookup precedence.
 
-            # let's try in the title
-            if index in self.titles:
-                # selection by coord titles
-                if self.titles.count(index) > 1:
-                    warnings.warn(
-                        f"Getting a coordinate from its title. However `{index}` occurs "
-                        f"several time. Only"
-                        f" the first occurrence is returned!",
-                        stacklevel=2,
-                    )
-                return self._coords.__getitem__(self.titles.index(index))
+        Precedence (highest first):
+        1. top-level name
+        2. reference
+        3. top-level title
+        4. nested child title
+        5. nested child name
+        6. canonical synthetic alias (e.g. ``x_1``)
+        """
+        # find by name
+        if index in self.names:
+            idx = self.names.index(index)
+            return self._coords.__getitem__(idx)
 
-            # may be it is a title or a name in a sub-coords
-            for item in self._coords:
-                if isinstance(item, CoordSet) and index in item.titles:
-                    # selection by subcoord title
-                    return item._coords.__getitem__(item.titles.index(index))
+        # try in references
+        if index in self._references:
+            return self._references[index]
 
-            for item in self._coords:
-                if isinstance(item, CoordSet) and index in item.names:
-                    # selection by subcoord name
-                    return item._coords.__getitem__(item.names.index(index))
+        # try in the title
+        if index in self.titles:
+            # selection by coord titles
+            if self.titles.count(index) > 1:
+                warnings.warn(
+                    f"Getting a coordinate from its title. However `{index}` occurs "
+                    f"several time. Only"
+                    f" the first occurrence is returned!",
+                    stacklevel=2,
+                )
+            return self._coords.__getitem__(self.titles.index(index))
 
-            try:
-                # let try with the canonical dimension names
-                if index[0] in self.names:
-                    # ok we can find it a a canonical name:
-                    c = self._coords.__getitem__(self.names.index(index[0]))
-                    if len(index) > 1 and index[1] == "_":
-                        if isinstance(c, CoordSet):
-                            c = c.__getitem__(index[1:])
-                        else:
-                            c = c.__getitem__(index[2:])  # try on labels
-                    return c
-            except IndexError:
-                pass
+        # may be it is a title or a name in a sub-coords
+        for item in self._coords:
+            if isinstance(item, CoordSet) and index in item.titles:
+                # selection by subcoord title
+                return item._coords.__getitem__(item.titles.index(index))
 
-            raise KeyError(f"Could not find `{index}` in coordinates names or titles")
+        for item in self._coords:
+            if isinstance(item, CoordSet) and index in item.names:
+                # selection by subcoord name
+                return item._coords.__getitem__(item.names.index(index))
 
-        # numerical index
-        # ---------------
+        try:
+            # let try with the canonical dimension names
+            if index[0] in self.names:
+                c = self._coords.__getitem__(self.names.index(index[0]))
+                if len(index) > 1 and index[1] == "_":
+                    if isinstance(c, CoordSet):
+                        c = c.__getitem__(index[1:])
+                    else:
+                        c = c.__getitem__(index[2:])  # try on labels
+                return c
+        except IndexError:
+            pass
 
-        # It can be that we are dealing with slicing of multicoordinates
+        raise KeyError(f"Could not find `{index}` in coordinates names or titles")
+
+    def _resolve_numeric_lookup(self, index):
+        """
+        Resolve a numeric key.
+
+        For top-level CoordSets this is positional access into ``_coords``.
+        For same-dimension multi-coordinate groups this slices every child.
+        """
         multi = bool(self.is_same_dim)
 
         if not multi:
-            return self._coords.__getitem__(index)  # It's the index of one of the
-            # coordinate in the coordset. return it.
-        res = []  # Slice of a multicoordinate
+            return self._coords.__getitem__(index)
+
+        res = []
         for c in self._coords:
             res.append(c.__getitem__(index))
         coords = self.__class__(*res, keepnames=True)
-        # name must be changed
         coords.name = self.name
-        # and is_same_dim and default for coordset
         coords._is_same_dim = self._is_same_dim
         coords._default = self._default
         return coords
 
-        # if isinstance(index, slice):
-        #     if isinstance(res, CoordSet):
-        #         res = (res,)
-        #     return CoordSet(*res, keepnames=True)
-        # else:
-        #     return res
+    def _resolve_get(self, index):
+        """
+        Resolve *index* and return the matching coordinate(s).
+
+        Dispatches to ``_resolve_string_lookup`` or ``_resolve_numeric_lookup``.
+        """
+        if isinstance(index, str):
+            return self._resolve_string_lookup(index)
+        return self._resolve_numeric_lookup(index)
+
+    def __getitem__(self, index):
+        return self._resolve_get(index)
 
     def __setattr__(self, key, value):
         keyb = key[1:] if key.startswith("_") else key
