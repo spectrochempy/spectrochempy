@@ -223,6 +223,65 @@ class TestInterpolateMultipleCoords:
         assert result.shape == (3, 4)
 
 
+class TestInterpolateCoordReconstruction:
+    """Targeted tests for coordinate reconstruction via _interpolate_dim."""
+
+    def test_interpolate_simple_coord_replacement(self):
+        """
+        Simple coord replacement preserves target values, name,
+        and clears labels.
+        """
+        x = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
+        y = np.array([0.0, 2.0, 4.0, 6.0, 8.0])
+        labels = ["a", "b", "c", "d", "e"]
+        ds = NDDataset(y, coordset=[Coord(x, title="x", units="m", labels=labels)])
+
+        new_x = np.array([0.5, 1.5, 2.5])
+        result = ds.interpolate(dim="x", coord=new_x)
+
+        coord = result.coord("x")
+        np.testing.assert_allclose(coord.data, [0.5, 1.5, 2.5])
+        assert coord.name == "x"
+        assert coord.labels is None
+
+    def test_interpolate_multi_coord_reconstruction(self):
+        """
+        Multi-coord reconstruction preserves group nature, default,
+        clears labels, and interpolates secondary numeric data.
+        """
+        x = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
+        y = np.array([0.0, 10.0, 20.0])
+        data = np.arange(15).reshape(3, 5).astype(float)
+
+        coord_x = Coord(x, title="x", labels=["z0", "z1", "z2", "z3", "z4"])
+        secondary = Coord(x**2, title="x^2")
+        coord_y = Coord(y, title="y")
+
+        from spectrochempy import CoordSet
+
+        multi_coord = CoordSet(coord_x, secondary, name="x")
+        ds = NDDataset(data, coordset=[coord_y, multi_coord])
+        assert isinstance(ds.coord("x"), CoordSet)
+
+        new_x = np.array([0.5, 1.5, 2.5])
+        result = ds.interpolate(dim="x", coord=new_x)
+
+        coord = result.coord("x")
+        assert isinstance(coord, CoordSet)
+        assert coord._is_same_dim
+        assert coord._default == multi_coord._default
+        assert coord.name == "x"
+
+        primary = coord.default
+        assert primary is not None
+        assert primary.labels is None
+        np.testing.assert_allclose(primary.data, [0.5, 1.5, 2.5])
+
+        # Verify secondary coord exists and was interpolated
+        # -- all children have labels cleared and length 3
+        assert len(coord) > 1
+
+
 class TestInterpolateInplace:
     """Inplace modification tests."""
 

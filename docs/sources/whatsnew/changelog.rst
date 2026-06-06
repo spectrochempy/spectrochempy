@@ -82,3 +82,8 @@ Developer
 - MAINT: Introduced an initial internal ``CoordSet`` lifecycle slicing API and
   migrated ``NDDataset`` slicing to use it, preserving existing behavior
   without changing public APIs, storage, or serialization.
+
+- MAINT: Added an internal ``CoordSet`` lifecycle helper for interpolation
+  coordinate reconstruction and migrated ``interpolate()`` to use it,
+  preserving existing behavior without changing public APIs, storage, or
+  serialization.

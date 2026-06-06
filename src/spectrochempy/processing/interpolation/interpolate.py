@@ -286,60 +286,36 @@ def interpolate(
             new_mask = mask_interpolator(new_data) > 0.5
             new._mask = new_mask
 
-        coordset = new._coordset
-        if coordset is None:
-            coordset = CoordSet()
-            new._coordset = coordset
+        if new._coordset is None:
+            new._coordset = CoordSet()
 
-        names = coordset.names if coordset else []
+        # Build secondary-coordinate interpolator closure
+        # Bind loop variables as defaults to capture values per iteration.
+        def _interpolate_secondary(
+            coord, _sorted_old_x=sorted_old_x, _new_data=new_data
+        ):
+            new_sec = coord.copy()
+            if coord.has_data:
+                old_sec_data = _get_coord_data(coord)
+                if old_sec_data is not None and len(old_sec_data) == len(_sorted_old_x):
+                    sec_interpolator = interp1d(
+                        _sorted_old_x,
+                        old_sec_data,
+                        axis=0,
+                        kind="linear",
+                        bounds_error=False,
+                        fill_value=np.nan,
+                        assume_sorted=True,
+                    )
+                    new_sec._data = sec_interpolator(_new_data)
+            new_sec._labels = None
+            return new_sec
 
-        new_coord = target_coord.copy()
-        new_coord._labels = None
-        new_coord.name = dim
-
-        if dim in names:
-            coord_idx = names.index(dim)
-            old_coord_container = coordset._coords[coord_idx]
-
-            if isinstance(old_coord_container, CoordSet):
-                all_coords = list(old_coord_container._coords)
-                new_coords_list = []
-
-                for old_sec_coord in all_coords:
-                    if old_sec_coord.has_data:
-                        old_sec_data = _get_coord_data(old_sec_coord)
-                        if old_sec_data is not None and len(old_sec_data) == len(
-                            sorted_old_x
-                        ):
-                            sec_interpolator = interp1d(
-                                sorted_old_x,
-                                old_sec_data,
-                                axis=0,
-                                kind="linear",
-                                bounds_error=False,
-                                fill_value=np.nan,
-                                assume_sorted=True,
-                            )
-                            new_sec_data = sec_interpolator(new_data)
-                            new_sec_coord = old_sec_coord.copy()
-                            new_sec_coord._data = new_sec_data
-                            new_sec_coord._labels = None
-                        else:
-                            new_sec_coord = old_sec_coord.copy()
-                            new_sec_coord._labels = None
-                    else:
-                        new_sec_coord = old_sec_coord.copy()
-                        new_sec_coord._labels = None
-                    new_coords_list.append(new_sec_coord)
-
-                new_coordset = CoordSet(*new_coords_list[::-1], name=dim)
-                new_coordset._default = old_coord_container._default
-                new_coordset._is_same_dim = True
-                coordset._coords[coord_idx] = new_coordset
-            else:
-                coordset._coords[coord_idx] = new_coord
-        else:
-            coordset._coords.append(new_coord)
+        new._coordset = new._coordset._interpolate_dim(
+            dim,
+            target_coord,
+            interpolate_secondary=_interpolate_secondary,
+        )
 
         if was_reversed:
             new.sort(descend=True, dim=dim, inplace=True)
