@@ -1121,6 +1121,8 @@ class CoordSet(HasTraits):
         """Return the projected group corresponding to one legacy coord index."""
         if self.is_same_dim:
             return coord_groups[0] if coord_groups else None
+        if not isinstance(index, int):
+            return None
         return coord_groups[index] if index < len(coord_groups) else None
 
     @staticmethod
