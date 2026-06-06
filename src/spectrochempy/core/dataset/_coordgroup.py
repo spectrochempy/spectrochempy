@@ -66,7 +66,11 @@ def _coordset_group_to_dimension(coordset: CoordSet) -> _DimensionCoordinates:
     entries: list[_CoordinateEntry] = []
 
     for index, coord in enumerate(coordset.coords, start=1):
-        alias = coordset.names[index - 1] if index - 1 < len(coordset.names) else f"_{index}"
+        alias = (
+            coordset.names[index - 1]
+            if index - 1 < len(coordset.names)
+            else f"_{index}"
+        )
         entry_id = _make_entry_id(coord, alias, used_ids)
         entries.append(
             _CoordinateEntry(
@@ -164,11 +168,7 @@ def _groups_to_coordset(
         alias_names = []
         for index, entry in enumerate(group.entries, start=1):
             alias = next(
-                (
-                    item
-                    for item in entry.aliases
-                    if group.aliases.get(item) == entry.id
-                ),
+                (item for item in entry.aliases if group.aliases.get(item) == entry.id),
                 None,
             )
             alias_names.append(alias or f"_{index}")
