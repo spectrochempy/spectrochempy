@@ -62,3 +62,9 @@ Developer
   ``CoordSet.__getitem__`` to centralize read-lookup logic before storage
   redesign, preserving existing behavior without changing public APIs,
   storage, or serialization.
+
+- MAINT: Extracted private resolver helpers ``_resolve_set`` and
+  ``_resolve_delete`` from ``CoordSet.__setitem__`` and
+  ``CoordSet.__delitem__`` to centralize write/delete lookup logic before
+  storage redesign, preserving existing behavior without changing public
+  APIs, storage, or serialization.
