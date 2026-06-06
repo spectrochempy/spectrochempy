@@ -63,6 +63,10 @@ Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
 
+- MAINT: Added private CoordSet serializer adapter helpers for converting
+  legacy serialized coordset state to and from the private group model,
+  without changing runtime storage or native I/O behavior.
+
 - MAINT: Added a private `CoordSet` lookup-result context object for internal
   read-lookup resolution, preserving all existing public lookup behavior while
   preparing future storage-migration work.
