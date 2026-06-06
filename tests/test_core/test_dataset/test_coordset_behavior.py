@@ -524,6 +524,22 @@ class TestCoordSetCopy:
         assert cs2["x"].default == cs2["x"]["_2"]
         assert_array_equal(cs2["x"].data, [4.0, 5.0, 6.0])
 
+    def test_copy_preserves_reference_lookup(self):
+        c = Coord([1.0, 2.0, 3.0], name="x")
+        cs = CoordSet(x=c, y="x")
+        cs2 = cs.copy()
+        assert cs2.references == {"y": "x"}
+        assert cs2["y"] == "x"
+        assert_array_equal(cs2["x"].data, [1.0, 2.0, 3.0])
+
+    def test_deepcopy_preserves_reference_lookup(self):
+        c = Coord([1.0, 2.0, 3.0], name="x")
+        cs = CoordSet(x=c, y="x")
+        cs2 = deepcopy(cs)
+        assert cs2.references == {"y": "x"}
+        assert cs2["y"] == "x"
+        assert_array_equal(cs2["x"].data, [1.0, 2.0, 3.0])
+
 
 # ==============================================================================
 # Arithmetic

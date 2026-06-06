@@ -382,6 +382,14 @@ class TestNDDatasetDimAttributeAccess:
         assert ds.coordset.references == {"y": "x"}
         assert_coord_almost_equal(ds.y, ds.x)
 
+    def test_reference_dimension_attribute_preserves_after_copy(self):
+        c = Coord([100.0, 200.0, 300.0], name="x")
+        ds = NDDataset([1.0, 2.0, 3.0], coordset=CoordSet(x=c, y="x"))
+        ds2 = ds.copy()
+        assert ds2.coordset.references == {"y": "x"}
+        assert ds2.coordset["y"] == "x"
+        assert_coord_almost_equal(ds2.y, ds2.x)
+
 
 # ==============================================================================
 # Multi-coord dimension
