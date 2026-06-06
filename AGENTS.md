@@ -25,6 +25,39 @@ Key characteristics:
 
 ---
 
+## Branching Policy
+
+Do not work directly on `master`.
+
+Use this workflow for all new work:
+
+1. keep local `master` aligned with `upstream/master`;
+2. create a dedicated development branch for the chantier;
+3. commit and push work on that branch only;
+4. open the pull request from the development branch to `upstream/master`;
+5. after merge, resync local `master` and only then start the next branch.
+
+Practical rules:
+
+- treat local `master` as a clean mirror of `upstream/master`;
+- do not accumulate chantier commits on `master`;
+- prefer branch names derived from the chantier, for example:
+  - `coordset-storage-pr5`
+  - `analysis-pca-cleanup`
+  - `dev/<topic>` if a generic prefix is useful;
+- if a PR needs follow-up fixes, continue on the same PR branch rather than on
+  `master`.
+
+This reduces divergence between:
+
+- local `master`;
+- `origin/master`;
+- `upstream/master`.
+
+It also makes post-merge cleanup and the start of the next chantier simpler.
+
+---
+
 ## Resource Usage and Sobriety
 
 Be conservative with:
