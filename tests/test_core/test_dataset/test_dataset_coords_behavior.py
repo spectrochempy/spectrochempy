@@ -375,6 +375,13 @@ class TestNDDatasetDimAttributeAccess:
         assert_array_equal(ds2.x.data, [100.0, 200.0, 300.0])
         assert_units_equal(ds2.x.units, ur("cm^-1"))
 
+    def test_reference_dimension_attribute_returns_target_coord(self):
+        c = Coord([100.0, 200.0, 300.0], name="x")
+        ds = NDDataset([1.0, 2.0, 3.0], coordset=CoordSet(x=c, y="x"))
+        assert ds.coordset["y"] == "x"
+        assert ds.coordset.references == {"y": "x"}
+        assert_coord_almost_equal(ds.y, ds.x)
+
 
 # ==============================================================================
 # Multi-coord dimension
@@ -406,6 +413,26 @@ class TestNDDatasetMultiCoordDim:
         ds.x = CoordSet(Coord([11.0, 21.0, 31.0]), Coord([12.0, 22.0, 32.0]))
         sliced = ds[0:2, 0:2]
         assert len(sliced.x) == 2
+
+    def test_copy_preserves_selected_non_first_default_for_multicoord_dim(self):
+        ds = NDDataset([0.0, 1.0, 2.0])
+        x1 = Coord(np.array([1.5, 5.8, -9.0]))
+        x2 = Coord(np.array([0.5, 0.8, 9.0]))
+        ds.x = CoordSet(Coord(x2), Coord(x1))
+        ds.x.select(2)
+        ds2 = ds.copy()
+        assert ds2.x.default == ds2.x["_2"]
+        assert_array_equal(ds2.x.data, [0.5, 0.8, 9.0])
+
+    def test_slice_preserves_selected_non_first_default_for_multicoord_dim(self):
+        ds = NDDataset([0.0, 1.0, 2.0])
+        x1 = Coord(np.array([1.5, 5.8, -9.0]))
+        x2 = Coord(np.array([0.5, 0.8, 9.0]))
+        ds.x = CoordSet(Coord(x2), Coord(x1))
+        ds.x.select(2)
+        ds2 = ds[1:]
+        assert ds2.x.default == ds2.x["_2"]
+        assert_array_equal(ds2.x.data, [0.8, 9.0])
 
 
 # ==============================================================================

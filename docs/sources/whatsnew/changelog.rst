@@ -54,6 +54,10 @@ Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
 
+- TEST: Added CoordSet public-contract edge tests covering duplicate-title
+  lookup, title/name collisions, synthetic alias collisions, reference lookup,
+  and selected non-first default preservation across copy and slicing.
+
 - MAINT: Removed stale commented ``docrep`` residue and the unused commented
   ``numpydoc`` pre-commit hook block.
 

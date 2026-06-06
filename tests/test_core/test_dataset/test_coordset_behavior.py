@@ -8,6 +8,9 @@ Tests focus on public API behavior, not private implementation details.
 Uses deterministic synthetic data only. No external files, no plotting.
 """
 
+import warnings
+from copy import deepcopy
+
 import pytest
 
 from spectrochempy.core.dataset.coord import Coord
@@ -363,6 +366,89 @@ class TestCoordSetMutation:
 
 
 # ==============================================================================
+# Lookup ambiguities
+# ==============================================================================
+
+
+class TestCoordSetLookupAmbiguities:
+    """Current public lookup behavior for ambiguous CoordSet cases."""
+
+    def test_getitem_duplicate_top_level_title_warns_and_returns_first(self):
+        c1 = Coord([1, 2, 3], name="x", title="dup")
+        c2 = Coord([4, 5], name="y", title="dup")
+        cs = CoordSet(c1, c2, keepnames=True)
+        with pytest.warns(UserWarning, match="occurs several time"):
+            found = cs["dup"]
+        assert found == c1
+
+    def test_getitem_duplicate_child_titles_same_group_returns_first_without_warning(
+        self,
+    ):
+        c1 = Coord([1, 2, 3], name="a", title="dup")
+        c2 = Coord([4, 5, 6], name="b", title="dup")
+        cs = CoordSet([c1, c2])
+        with warnings.catch_warnings(record=True) as recorded:
+            warnings.simplefilter("always")
+            found = cs["dup"]
+        assert recorded == []
+        assert found == cs["x"]["_1"]
+
+    def test_getitem_duplicate_child_titles_across_groups_returns_first_without_warning(
+        self,
+    ):
+        xa = Coord([1, 2, 3], name="a", title="dup")
+        xb = Coord([4, 5, 6], name="b", title="dup")
+        ya = Coord([10, 20], name="c", title="dup")
+        yb = Coord([30, 40], name="d", title="dup")
+        cs = CoordSet(x=CoordSet(xa, xb), y=CoordSet(ya, yb))
+        with warnings.catch_warnings(record=True) as recorded:
+            warnings.simplefilter("always")
+            found = cs["dup"]
+        assert recorded == []
+        assert found == cs["x"]["_1"]
+
+    def test_dimension_name_takes_precedence_over_top_level_title(self):
+        c1 = Coord([1, 2, 3], name="x")
+        c2 = Coord([4, 5], name="y", title="x")
+        cs = CoordSet(c1, c2, keepnames=True)
+        found = cs["x"]
+        assert found == c1
+        assert found.title != "x"
+
+    def test_dimension_name_takes_precedence_over_child_title(self):
+        child = Coord([1, 2, 3], name="a", title="y")
+        sibling = Coord([4, 5, 6], name="b")
+        cs = CoordSet(x=CoordSet(child, sibling), y=Coord([10, 20, 30], name="y"))
+        found = cs["y"]
+        assert found.name == "y"
+        assert found.title != "y"
+
+    def test_reference_key_takes_precedence_over_title(self):
+        c1 = Coord([1, 2, 3], name="x", title="y")
+        cs = CoordSet(x=c1, y="x")
+        assert cs["y"] == "x"
+        assert cs["x"].title == "y"
+
+    def test_global_synthetic_alias_collision_returns_first_group_child(self):
+        cs = CoordSet(
+            x=CoordSet(Coord([1, 2, 3], name="a"), Coord([4, 5, 6], name="b")),
+            y=CoordSet(Coord([10, 20, 30], name="c"), Coord([40, 50, 60], name="d")),
+        )
+        assert cs["_1"] == cs["x"]["_1"]
+        assert_array_equal(cs["_1"].data, [4.0, 5.0, 6.0])
+
+    def test_dimension_scoped_synthetic_alias_collision_targets_requested_group(self):
+        cs = CoordSet(
+            x=CoordSet(Coord([1, 2, 3], name="a"), Coord([4, 5, 6], name="b")),
+            y=CoordSet(Coord([10, 20, 30], name="c"), Coord([40, 50, 60], name="d")),
+        )
+        assert cs["x_1"] == cs["x"]["_1"]
+        assert cs["y_1"] == cs["y"]["_1"]
+        assert_array_equal(cs["x_1"].data, [4.0, 5.0, 6.0])
+        assert_array_equal(cs["y_1"].data, [40.0, 50.0, 60.0])
+
+
+# ==============================================================================
 # Call syntax
 # ==============================================================================
 
@@ -419,6 +505,24 @@ class TestCoordSetCopy:
         cs = CoordSet(c)
         cs2 = cs.copy()
         assert_array_equal(cs2["x"].data, cs["x"].data)
+
+    def test_copy_preserves_selected_non_first_default_for_multicoord(self):
+        c1 = Coord([1, 2, 3], name="a")
+        c2 = Coord([4, 5, 6], name="b")
+        cs = CoordSet([c1, c2])
+        cs["x"].select(2)
+        cs2 = cs.copy()
+        assert cs2["x"].default == cs2["x"]["_2"]
+        assert_array_equal(cs2["x"].data, [4.0, 5.0, 6.0])
+
+    def test_deepcopy_preserves_selected_non_first_default_for_multicoord(self):
+        c1 = Coord([1, 2, 3], name="a")
+        c2 = Coord([4, 5, 6], name="b")
+        cs = CoordSet([c1, c2])
+        cs["x"].select(2)
+        cs2 = deepcopy(cs)
+        assert cs2["x"].default == cs2["x"]["_2"]
+        assert_array_equal(cs2["x"].data, [4.0, 5.0, 6.0])
 
 
 # ==============================================================================
