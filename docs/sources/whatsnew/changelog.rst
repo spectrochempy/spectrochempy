@@ -54,6 +54,14 @@ Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
 
+- MAINT: Added private ``CoordSet`` group-model conversion helpers to prepare
+  storage migration without changing runtime storage, lookup, serialization, or
+  lifecycle behavior.
+
+- TEST: Added focused round-trip tests covering simple, multi-coordinate,
+  selected-default, and reference ``CoordSet`` conversion through the private
+  group model.
+
 - MAINT: Added an internal ``CoordSet`` lifecycle helper for reduction-related
   dimension cleanup and migrated ``ndmath._reduce_dims()`` to use it,
   preserving existing behavior without changing public APIs, storage, or

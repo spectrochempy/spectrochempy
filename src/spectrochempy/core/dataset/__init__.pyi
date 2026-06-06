@@ -7,6 +7,7 @@
 # ruff: noqa
 
 __all__ = [
+    "_coordgroup",
     "arraymixins",
     "basearrays",
     "coord",
@@ -14,6 +15,7 @@ __all__ = [
     "nddataset",
 ]
 
+from . import _coordgroup
 from . import arraymixins
 from . import basearrays
 from . import coord
