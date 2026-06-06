@@ -26,6 +26,12 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Fixed native round-trip preservation of selected non-first default
+  coordinates in same-dimension multi-coordinate datasets.
+
+- Fixed restoration of reference-based coordinates after native
+  save/load round-trips.
+
 - Fixed preservation of reference-based coordinates when copying
   ``CoordSet`` and ``NDDataset`` objects.
 
@@ -56,6 +62,10 @@ Deprecations
 Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
+
+- TEST: Added focused native serialization round-trip tests for selected
+  defaults, reference lookup, and backward-compatible loading without a
+  serialized default field.
 
 - TEST: Added focused behavioral tests covering reference preservation through
   ``CoordSet.copy()``, ``copy.deepcopy(CoordSet)``, and ``NDDataset.copy()``.

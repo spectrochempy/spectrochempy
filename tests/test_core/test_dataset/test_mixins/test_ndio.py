@@ -7,8 +7,13 @@
 
 """Tests for the ndplugin module"""
 
+import json
+import zipfile
+
 import pytest
 
+from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils.testing import assert_array_equal, assert_dataset_equal
 
@@ -70,6 +75,55 @@ def test_ndio_2D(ndataset_2d, tmp_path):
     nd = NDDataset.load(tmp_path / "essai2D")
     assert nd.directory == tmp_path
     f.unlink()
+
+
+def test_ndio_roundtrip_preserves_selected_non_first_default(tmp_path):
+    ds = NDDataset([0.0, 1.0, 2.0])
+    ds.x = CoordSet(Coord([10.0, 20.0, 30.0]), Coord([100.0, 200.0, 300.0]))
+    ds.x.select(2)
+    selected_data = ds.x.data.copy()
+    filename = ds.save_as(tmp_path / "multicoord_default", confirm=False)
+
+    loaded = NDDataset.load(filename)
+
+    assert loaded.x.default == loaded.x["_2"]
+    assert_array_equal(loaded.x.default.data, selected_data)
+    assert_array_equal(loaded.x.data, selected_data)
+
+
+def test_ndio_roundtrip_preserves_reference_lookup(tmp_path):
+    c = Coord([100.0, 200.0, 300.0], name="x")
+    ds = NDDataset([1.0, 2.0, 3.0], coordset=CoordSet(x=c, y="x"))
+    filename = ds.save_as(tmp_path / "reference_coords", confirm=False)
+
+    loaded = NDDataset.load(filename)
+
+    assert loaded.coordset.references == ds.coordset.references
+    assert loaded.coordset["y"] == "x"
+    assert_array_equal(loaded.y.data, loaded.x.data)
+    assert_array_equal(loaded.x.data, [100.0, 200.0, 300.0])
+
+
+def test_ndio_load_without_default_field_keeps_legacy_behavior(tmp_path):
+    ds = NDDataset([0.0, 1.0, 2.0])
+    ds.x = CoordSet(Coord([10.0, 20.0, 30.0]), Coord([100.0, 200.0, 300.0]))
+    ds.x.select(2)
+    legacy_default_data = ds.x["_1"].data.copy()
+    filename = ds.save_as(tmp_path / "legacy_default", confirm=False)
+
+    with zipfile.ZipFile(filename, "r") as zipf:
+        member = zipf.namelist()[0]
+        js = json.loads(zipf.read(member).decode("utf-8"))
+
+    js["coordset"]["coords"][0].pop("default_index", None)
+
+    with zipfile.ZipFile(filename, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
+        zipf.writestr(member, json.dumps(js, indent=2))
+
+    loaded = NDDataset.load(filename)
+
+    assert loaded.x.default == loaded.x["_1"]
+    assert_array_equal(loaded.x.data, legacy_default_data)
 
 
 if __name__ == "__main__":
