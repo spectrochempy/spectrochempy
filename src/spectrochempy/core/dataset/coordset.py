@@ -10,6 +10,7 @@ __all__ = ["CoordSet"]
 import copy as cpy
 import uuid
 import warnings
+from dataclasses import dataclass
 
 import numpy as np
 from traitlets import All
@@ -35,6 +36,17 @@ from spectrochempy.utils.typeutils import is_sequence
 # ======================================================================================
 # CoordSet
 # ======================================================================================
+@dataclass(frozen=True)
+class _CoordLookupResult:
+    """Private lookup result carrying legacy value plus resolver context."""
+
+    value: object
+    lookup_kind: str
+    owner_dim: str | None = None
+    compat_key: str | int | None = None
+    warning_message: str | None = None
+
+
 @signature_has_traits
 class CoordSet(HasTraits):
     r"""
@@ -1091,7 +1103,7 @@ class CoordSet(HasTraits):
     # Private resolver helpers (read-lookup only)
     # ------------------------------------------------------------------
 
-    def _resolve_string_lookup(self, index):
+    def _resolve_string_lookup_result(self, index):
         """
         Resolve a string key using current lookup precedence.
 
@@ -1106,51 +1118,78 @@ class CoordSet(HasTraits):
         # find by name
         if index in self.names:
             idx = self.names.index(index)
-            return self._coords.__getitem__(idx)
+            coord = self._coords.__getitem__(idx)
+            owner_dim = getattr(coord, "name", None)
+            return _CoordLookupResult(coord, "dimension", owner_dim, index)
 
         # try in references
         if index in self._references:
-            return self._references[index]
+            return _CoordLookupResult(
+                self._references[index],
+                "reference",
+                index,
+                index,
+            )
 
         # try in the title
         if index in self.titles:
             # selection by coord titles
+            warning_message = None
             if self.titles.count(index) > 1:
-                warnings.warn(
+                warning_message = (
                     f"Getting a coordinate from its title. However `{index}` occurs "
-                    f"several time. Only"
-                    f" the first occurrence is returned!",
-                    stacklevel=2,
+                    f"several time. Only the first occurrence is returned!"
                 )
-            return self._coords.__getitem__(self.titles.index(index))
+                warnings.warn(warning_message, stacklevel=2)
+            idx = self.titles.index(index)
+            coord = self._coords.__getitem__(idx)
+            owner_dim = getattr(coord, "name", None)
+            return _CoordLookupResult(
+                coord,
+                "title",
+                owner_dim,
+                index,
+                warning_message,
+            )
 
         # may be it is a title or a name in a sub-coords
         for item in self._coords:
             if isinstance(item, CoordSet) and index in item.titles:
                 # selection by subcoord title
-                return item._coords.__getitem__(item.titles.index(index))
+                idx = item.titles.index(index)
+                coord = item._coords.__getitem__(idx)
+                return _CoordLookupResult(coord, "child_title", item.name, index)
 
         for item in self._coords:
             if isinstance(item, CoordSet) and index in item.names:
                 # selection by subcoord name
-                return item._coords.__getitem__(item.names.index(index))
+                idx = item.names.index(index)
+                coord = item._coords.__getitem__(idx)
+                return _CoordLookupResult(coord, "child_name", item.name, index)
 
         try:
             # let try with the canonical dimension names
             if index[0] in self.names:
                 c = self._coords.__getitem__(self.names.index(index[0]))
+                owner_dim = getattr(c, "name", None)
                 if len(index) > 1 and index[1] == "_":
                     if isinstance(c, CoordSet):
-                        c = c.__getitem__(index[1:])
-                    else:
-                        c = c.__getitem__(index[2:])  # try on labels
-                return c
+                        result = c._resolve_get_result(index[1:])
+                        return _CoordLookupResult(
+                            result.value,
+                            "synthetic_alias",
+                            c.name,
+                            index,
+                            result.warning_message,
+                        )
+                    c = c.__getitem__(index[2:])  # try on labels
+                return _CoordLookupResult(c, "dimension", owner_dim, index)
         except IndexError:
             pass
 
         raise KeyError(f"Could not find `{index}` in coordinates names or titles")
 
-    def _resolve_numeric_lookup(self, index):
+    def _resolve_numeric_lookup_result(self, index):
         """
         Resolve a numeric key.
 
@@ -1160,7 +1199,9 @@ class CoordSet(HasTraits):
         multi = bool(self.is_same_dim)
 
         if not multi:
-            return self._coords.__getitem__(index)
+            coord = self._coords.__getitem__(index)
+            owner_dim = getattr(coord, "name", None)
+            return _CoordLookupResult(coord, "numeric", owner_dim, index)
 
         res = []
         for c in self._coords:
@@ -1169,7 +1210,18 @@ class CoordSet(HasTraits):
         coords.name = self.name
         coords._is_same_dim = self._is_same_dim
         coords._default = self._default
-        return coords
+        return _CoordLookupResult(coords, "numeric", self.name, index)
+
+    def _resolve_get_result(self, index):
+        """
+        Resolve *index* and return the matching private lookup result.
+
+        Public callers should continue to use ``__getitem__`` or
+        ``_resolve_get()``, which unwrap the legacy value.
+        """
+        if isinstance(index, str):
+            return self._resolve_string_lookup_result(index)
+        return self._resolve_numeric_lookup_result(index)
 
     def _resolve_get(self, index):
         """
@@ -1177,9 +1229,7 @@ class CoordSet(HasTraits):
 
         Dispatches to ``_resolve_string_lookup`` or ``_resolve_numeric_lookup``.
         """
-        if isinstance(index, str):
-            return self._resolve_string_lookup(index)
-        return self._resolve_numeric_lookup(index)
+        return self._resolve_get_result(index).value
 
     # ------------------------------------------------------------------
     # Private resolver helpers (write/delete lookup)

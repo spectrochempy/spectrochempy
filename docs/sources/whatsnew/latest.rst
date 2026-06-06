@@ -27,6 +27,10 @@ Bug Fixes
 Developer
 ~~~~~~~~~
 
+- MAINT: Added a private `CoordSet` lookup-result context object for internal
+  read-lookup resolution, preserving all existing public lookup behavior while
+  preparing future storage-migration work.
+
 - TEST: Added focused native serialization round-trip tests for selected
   defaults, reference lookup, and backward-compatible loading without a
   serialized default field.
