@@ -546,7 +546,29 @@ def test_coordset__drop_dims_preserves_remaining_multicoord_state(
     assert updated.y.default == updated.y._2
     assert_coord_almost_equal(updated.y._1, coords.y._1, decimal=1)
     assert_coord_almost_equal(updated.y._2, coords.y._2, decimal=1)
+    assert updated.y._1._parent_dim == "y"
+    assert updated.y._2._parent_dim == "y"
     assert updated.x == coords.x
+
+
+def test_coordset__drop_dims_preserves_reference_state():
+    coords = CoordSet(
+        x=Coord([1.0, 2.0, 3.0]),
+        y="x",
+        z=Coord([10.0, 20.0, 30.0]),
+    )
+
+    updated = coords._drop_dims("z")
+
+    assert updated.names == ["x"]
+    assert updated.references == {"y": "x"}
+    assert updated["y"] == "x"
+
+    dangling = coords._drop_dims("x")
+
+    assert dangling.names == ["z"]
+    assert dangling.references == {"y": "x"}
+    assert dangling["y"] == "x"
 
 
 def test_coordset__reduce_dim_drops_target_coordinate(coord0, coord1, coord2):

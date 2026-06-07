@@ -31,6 +31,10 @@ Bug Fixes
 Developer
 ~~~~~~~~~
 
+- MAINT: Established the first group-aware ``CoordSet`` lifecycle adapter
+  pattern for dimension dropping while preserving legacy runtime storage and
+  public behavior.
+
 - MAINT: Moved additional ``CoordSet`` read-lookup branch decisions onto
   transient group projection metadata while preserving legacy runtime storage
   and public lookup behavior.

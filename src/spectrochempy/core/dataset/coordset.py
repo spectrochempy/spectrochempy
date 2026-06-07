@@ -26,6 +26,7 @@ from traitlets import signature_has_traits
 from traitlets import validate
 
 from spectrochempy.core.dataset._coordgroup import _coordset_to_groups
+from spectrochempy.core.dataset._coordgroup import _groups_to_coordset
 from spectrochempy.core.dataset.basearrays.ndarray import DEFAULT_DIM_NAME
 from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 from spectrochempy.core.dataset.coord import Coord
@@ -816,14 +817,32 @@ class CoordSet(HasTraits):
         if isinstance(dims, str):
             dims = (dims,)
 
-        new_coords = self.copy()
+        groups = self._lookup_groups()
+        groups = self._drop_lifecycle_groups(groups, dims, missing=missing)
+        return self._legacy_coordset_from_lifecycle_groups(groups)
+
+    @staticmethod
+    def _drop_lifecycle_groups(groups, dims, *, missing):
+        """Return projected groups after applying legacy dimension dropping."""
+        coord_dims = {group.dim for group in groups if group.reference is None}
+        drop_dims = set()
+
         for dim in dims:
-            if dim in new_coords.names:
-                del new_coords[dim]
-            elif missing == "raise":
+            if dim in coord_dims:
+                drop_dims.add(dim)
+                continue
+            if missing == "raise":
                 raise KeyError(dim)
 
-        return new_coords
+        return tuple(
+            group
+            for group in groups
+            if group.reference is not None or group.dim not in drop_dims
+        )
+
+    def _legacy_coordset_from_lifecycle_groups(self, groups):
+        """Reconstruct the current legacy CoordSet shape from lifecycle groups."""
+        return _groups_to_coordset(groups, name=self.name)
 
     def _reshape_dims(
         self,
