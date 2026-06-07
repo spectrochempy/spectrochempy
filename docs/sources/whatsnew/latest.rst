@@ -31,6 +31,10 @@ Bug Fixes
 Developer
 ~~~~~~~~~
 
+- MAINT: Moved additional ``CoordSet`` read-lookup branch decisions onto
+  transient group projection metadata while preserving legacy runtime storage
+  and public lookup behavior.
+
 - MAINT: Split ``CoordSet`` string read-lookup matching into private
   group-aware helper methods while preserving legacy storage and public lookup
   behavior.

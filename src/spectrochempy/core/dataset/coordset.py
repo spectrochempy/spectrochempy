@@ -1136,6 +1136,16 @@ class CoordSet(HasTraits):
         return group.entries[index]
 
     @staticmethod
+    def _lookup_entry_index(group, entry_id):
+        """Return the position of one private group entry id if available."""
+        if group is None or entry_id is None:
+            return None
+        for index, entry in enumerate(group.entries):
+            if entry.id == entry_id:
+                return index
+        return None
+
+    @staticmethod
     def _lookup_alias(group, entry_id):
         """Return the first compatibility alias for *entry_id* in one group."""
         if group is None:
@@ -1154,6 +1164,40 @@ class CoordSet(HasTraits):
         return None
 
     @staticmethod
+    def _lookup_coordinate_group_by_dim(coord_groups, dim):
+        """Return a projected coordinate group and legacy index for *dim*."""
+        for index, group in enumerate(coord_groups):
+            if group.dim == dim:
+                return index, group
+        return None, None
+
+    @staticmethod
+    def _lookup_entry_title(entry):
+        """Return the legacy title lookup key for one projected entry."""
+        return entry.coord.title if entry.coord.title else entry.coord.name
+
+    def _lookup_entry_by_alias(self, group, alias):
+        """Return an entry and its position for a compatibility alias."""
+        if group is None:
+            return None, None
+        for index, entry in enumerate(group.entries):
+            if alias in entry.aliases:
+                return index, entry
+
+        entry_id = group.aliases.get(alias)
+        index = self._lookup_entry_index(group, entry_id)
+        return index, self._lookup_entry(group, index) if index is not None else None
+
+    def _lookup_entry_by_title(self, group, title):
+        """Return the first entry matching one legacy title lookup key."""
+        if group is None:
+            return None, None
+        for index, entry in enumerate(group.entries):
+            if self._lookup_entry_title(entry) == title:
+                return index, entry
+        return None, None
+
+    @staticmethod
     def _lookup_default_entry_id(group):
         """Return the selected private entry id for one projected group."""
         if group is None:
@@ -1166,13 +1210,17 @@ class CoordSet(HasTraits):
 
     def _lookup_dimension_match(self, index, coord_groups):
         """Resolve exact dimension/name lookup using projected group metadata."""
-        if index not in self.names:
+        if self.is_same_dim:
+            group = coord_groups[0] if coord_groups else None
+            idx, entry = self._lookup_entry_by_alias(group, index)
+        else:
+            idx, group = self._lookup_coordinate_group_by_dim(coord_groups, index)
+            entry = None
+
+        if idx is None:
             return None
 
-        idx = self.names.index(index)
         coord = self._coords.__getitem__(idx)
-        group = self._lookup_group_for_legacy_index(coord_groups, idx)
-        entry = self._lookup_entry(group, idx) if self.is_same_dim else None
         entry_id = (
             entry.id if entry is not None else self._lookup_default_entry_id(group)
         )
@@ -1188,40 +1236,55 @@ class CoordSet(HasTraits):
 
     def _lookup_reference_match(self, index, groups):
         """Resolve reference lookup using projected reference metadata."""
-        if index not in self._references:
+        group = self._lookup_reference_group(groups, index)
+        if group is None or group.reference is None:
             return None
 
-        group = self._lookup_reference_group(groups, index)
-        target_dim = (
-            group.reference.target_dim
-            if group is not None and group.reference is not None
-            else self._references[index]
-        )
+        target_dim = group.reference.target_dim
         return _CoordLookupResult(
-            self._references[index],
+            target_dim,
             "reference",
             index,
             index,
             reference_target=target_dim,
         )
 
+    def _lookup_top_level_title_matches(self, index, coord_groups):
+        """Return top-level title matches from projected group metadata."""
+        matches = []
+
+        if self.is_same_dim:
+            group = coord_groups[0] if coord_groups else None
+            for idx, entry in enumerate(group.entries if group is not None else ()):
+                if self._lookup_entry_title(entry) == index:
+                    matches.append((idx, group, entry))
+            return matches
+
+        for idx, group in enumerate(coord_groups):
+            if group.aliases or len(group.entries) != 1:
+                continue
+            entry = group.entries[0]
+            if self._lookup_entry_title(entry) == index:
+                matches.append((idx, group, entry))
+
+        return matches
+
     def _lookup_top_level_title_match(self, index, coord_groups):
         """Resolve top-level title lookup while preserving warning behavior."""
-        if index not in self.titles:
+        matches = self._lookup_top_level_title_matches(index, coord_groups)
+        if not matches:
             return None
 
         warning_message = None
-        if self.titles.count(index) > 1:
+        if len(matches) > 1:
             warning_message = (
                 f"Getting a coordinate from its title. However `{index}` occurs "
                 f"several time. Only the first occurrence is returned!"
             )
             warnings.warn(warning_message, stacklevel=2)
 
-        idx = self.titles.index(index)
+        idx, group, entry = matches[0]
         coord = self._coords.__getitem__(idx)
-        group = self._lookup_group_for_legacy_index(coord_groups, idx)
-        entry = self._lookup_entry(group, idx) if self.is_same_dim else None
         entry_id = (
             entry.id if entry is not None else self._lookup_default_entry_id(group)
         )
@@ -1243,10 +1306,13 @@ class CoordSet(HasTraits):
     def _lookup_child_title_match(self, index, coord_groups):
         """Resolve nested child title lookup using projected group entries."""
         for item, group in zip(self._coords, coord_groups, strict=False):
-            if isinstance(item, CoordSet) and index in item.titles:
-                idx = item.titles.index(index)
+            if isinstance(item, CoordSet):
+                idx, entry = self._lookup_entry_by_title(group, index)
+            else:
+                idx, entry = None, None
+
+            if idx is not None:
                 coord = item._coords.__getitem__(idx)
-                entry = self._lookup_entry(group, idx)
                 return _CoordLookupResult(
                     coord,
                     "child_title",
@@ -1264,10 +1330,13 @@ class CoordSet(HasTraits):
     def _lookup_child_alias_match(self, index, coord_groups):
         """Resolve global nested child alias lookup using projected group entries."""
         for item, group in zip(self._coords, coord_groups, strict=False):
-            if isinstance(item, CoordSet) and index in item.names:
-                idx = item.names.index(index)
+            if isinstance(item, CoordSet):
+                idx, entry = self._lookup_entry_by_alias(group, index)
+            else:
+                idx, entry = None, None
+
+            if idx is not None:
                 coord = item._coords.__getitem__(idx)
-                entry = self._lookup_entry(group, idx)
                 return _CoordLookupResult(
                     coord,
                     "child_name",
@@ -1281,12 +1350,11 @@ class CoordSet(HasTraits):
     def _lookup_synthetic_alias_match(self, index, coord_groups):
         """Resolve scoped synthetic aliases while preserving legacy parsing."""
         try:
-            if index[0] not in self.names:
+            idx, group = self._lookup_coordinate_group_by_dim(coord_groups, index[0])
+            if idx is None:
                 return None
 
-            idx = self.names.index(index[0])
             coord = self._coords.__getitem__(idx)
-            group = coord_groups[idx] if idx < len(coord_groups) else None
             owner_dim = group.dim if group is not None else getattr(coord, "name", None)
             if len(index) > 1 and index[1] == "_":
                 if isinstance(coord, CoordSet):
