@@ -165,7 +165,18 @@ Inspect first, then validate.
 
 ## Linting and Formatting
 
-Use Ruff as configured by the repository.
+Use Ruff as configured by the repository, but do not run Ruff routinely during
+intermediate work.
+
+Prefer source inspection and targeted tests while developing. Run Ruff only:
+
+- when explicitly requested;
+- when investigating a formatting/lint failure that blocks the current task;
+- near PR completion, normally through the final pre-commit pass.
+
+Avoid targeted Ruff commands on changed files during normal iteration unless
+there is a clear, immediate need. They can be unexpectedly expensive in this
+repository and are already covered by pre-commit before finalization.
 
 Examples:
 
