@@ -872,6 +872,30 @@ class CoordSet(HasTraits):
         if coord_policy == "drop":
             return None
 
+        groups = self._lookup_groups()
+        groups = self._reshape_lifecycle_groups(
+            groups,
+            old_dims,
+            old_shape,
+            new_dims,
+            new_shape,
+            coord_policy=coord_policy,
+            coords=coords,
+        )
+        return _groups_to_coordset(groups)
+
+    @staticmethod
+    def _reshape_lifecycle_groups(
+        groups,
+        old_dims,
+        old_shape,
+        new_dims,
+        new_shape,
+        *,
+        coord_policy,
+        coords=None,
+    ):
+        """Return projected groups after applying legacy reshape policies."""
         if coords is not None:
             for dim_name, coord in coords.items():
                 if dim_name not in new_dims:
@@ -884,7 +908,25 @@ class CoordSet(HasTraits):
                         f"expected {new_shape[new_dims.index(dim_name)]}."
                     )
 
+        coord_groups = {group.dim: group for group in groups if group.reference is None}
         new_coords = []
+
+        if coord_policy == "strict":
+            for old_idx_s, old_dim_s in enumerate(old_dims):
+                old_size_s = old_shape[old_idx_s]
+                matches = [i for i, size in enumerate(new_shape) if size == old_size_s]
+                if len(matches) != 1:
+                    raise ValueError(
+                        f"strict mode: cannot unambiguously map dim "
+                        f"'{old_dim_s}' (size {old_size_s}) to the new "
+                        f"shape {new_shape}."
+                    )
+                if new_dims[matches[0]] != old_dim_s:
+                    raise ValueError(
+                        f"strict mode: dim '{old_dim_s}' maps to new dim "
+                        f"'{new_dims[matches[0]]}' but name changed."
+                    )
+
         for new_idx, new_dim in enumerate(new_dims):
             new_size = new_shape[new_idx]
 
@@ -893,37 +935,31 @@ class CoordSet(HasTraits):
                 continue
 
             if coord_policy == "strict":
-                for old_idx_s, old_dim_s in enumerate(old_dims):
-                    old_size_s = old_shape[old_idx_s]
-                    matches = [
-                        i for i, size in enumerate(new_shape) if size == old_size_s
-                    ]
-                    if len(matches) != 1:
-                        raise ValueError(
-                            f"strict mode: cannot unambiguously map dim "
-                            f"'{old_dim_s}' (size {old_size_s}) to the new "
-                            f"shape {new_shape}."
-                        )
-                    if new_dims[matches[0]] != old_dim_s:
-                        raise ValueError(
-                            f"strict mode: dim '{old_dim_s}' maps to new dim "
-                            f"'{new_dims[matches[0]]}' but name changed."
-                        )
-                if new_dim in self.names:
-                    new_coords.append(self[new_dim].copy())
+                if new_dim in coord_groups:
+                    new_coords.append(
+                        CoordSet._reshape_lifecycle_coord(coord_groups[new_dim])
+                    )
                 else:
                     new_coords.append(None)
             else:  # "safe"
                 if (
                     new_dim in old_dims
                     and old_shape[old_dims.index(new_dim)] == new_size
-                    and new_dim in self.names
+                    and new_dim in coord_groups
                 ):
-                    new_coords.append(self[new_dim].copy())
+                    new_coords.append(
+                        CoordSet._reshape_lifecycle_coord(coord_groups[new_dim])
+                    )
                 else:
                     new_coords.append(None)
 
-        return CoordSet(*new_coords, dims=new_dims.copy())
+        return _coordset_to_groups(CoordSet(*new_coords, dims=new_dims.copy()))
+
+    @staticmethod
+    def _reshape_lifecycle_coord(group):
+        """Rebuild one legacy coordinate container from one projected group."""
+        coordset = _groups_to_coordset((group,))
+        return coordset[group.dim].copy()
 
     def _reduce_dim(self, dim, *, keepdims=False):
         """

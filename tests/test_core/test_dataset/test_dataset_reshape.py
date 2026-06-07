@@ -78,6 +78,18 @@ def test_reshape_strict_preserves_current_ambiguity_error():
         ds.reshape((2, 2), coord_policy="strict")
 
 
+def test_reshape_strict_preserves_unambiguous_coordinates():
+    coord_y = scp.Coord(np.array([1.0, 2.0, 3.0]), title="rows")
+    coord_x = scp.Coord(np.array([10.0, 20.0]), title="cols")
+    ds = scp.NDDataset(np.arange(6.0).reshape(3, 2), coordset=[coord_y, coord_x])
+
+    reshaped = ds.reshape((3, 2), coord_policy="strict")
+
+    assert reshaped.shape == (3, 2)
+    assert_array_equal(reshaped.y.data, coord_y.data)
+    assert_array_equal(reshaped.x.data, coord_x.data)
+
+
 def test_reshape_preserves_same_dimension_multicoord_when_dim_survives():
     coord_y = scp.Coord(np.array([1.0, 2.0, 3.0]), title="time")
     coord_x_primary = scp.Coord(np.array([10.0, 20.0]), title="wavelength")
@@ -93,6 +105,25 @@ def test_reshape_preserves_same_dimension_multicoord_when_dim_survives():
     assert reshaped.shape == (1, 3, 2)
     assert isinstance(reshaped.x, scp.CoordSet)
     assert reshaped.x.is_same_dim
+    assert reshaped.x.names == ["_1", "_2"]
     assert reshaped.x.default == reshaped.x._2
     assert_array_equal(reshaped.x._1.data, coord_x_primary.data)
     assert_array_equal(reshaped.x._2.data, coord_x_secondary.data)
+    assert reshaped.x._1.title == coord_x_primary.title
+    assert reshaped.x._2.title == coord_x_secondary.title
+    assert reshaped.x._1._parent_dim == "x"
+    assert reshaped.x._2._parent_dim == "x"
+
+
+def test_reshape_preserves_current_reference_removal_behavior():
+    coord_x = scp.Coord(np.array([1.0, 2.0, 3.0]), title="time")
+    ds = scp.NDDataset(
+        np.arange(3.0),
+        coordset=scp.CoordSet(x=coord_x, y="x"),
+    )
+
+    reshaped = ds.reshape((3,))
+
+    assert reshaped.shape == (3,)
+    assert reshaped.coordset.references == {}
+    assert_array_equal(reshaped.x.data, coord_x.data)

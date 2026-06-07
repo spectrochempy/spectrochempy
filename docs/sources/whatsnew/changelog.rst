@@ -67,6 +67,10 @@ Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
 
+- MAINT: Moved ``CoordSet`` reshape lifecycle coordinate survival decisions
+  onto transient group projection metadata while preserving legacy storage and
+  public reshape behavior.
+
 - MAINT: Moved ``CoordSet`` dimension slicing lifecycle handling onto
   transient group projection metadata while preserving legacy storage and
   public slicing behavior.
