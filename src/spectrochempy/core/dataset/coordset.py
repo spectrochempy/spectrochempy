@@ -744,33 +744,40 @@ class CoordSet(HasTraits):
         This lifecycle wrapper preserves the existing slicing semantics while
         keeping same-dimension multi-coordinate details inside CoordSet.
         """
-        names = self.names
-        new_coords = self.copy()
-
         if isinstance(items, np.ndarray):
             # Fancy indexing from NDDataset can be returned as a single array.
             items = (items,)
 
+        groups = self._lookup_groups()
+        groups = self._slice_lifecycle_groups(groups, dims, items)
+        return self._legacy_coordset_from_lifecycle_groups(groups)
+
+    @staticmethod
+    def _slice_lifecycle_groups(groups, dims, items):
+        """Return projected groups after applying legacy dimension slicing."""
+        sliced_groups = list(groups)
+        coord_dims = [group.dim for group in groups if group.reference is None]
+        coord_group_indexes = [
+            index for index, group in enumerate(groups) if group.reference is None
+        ]
+
         for axis, item in enumerate(items):
             name = dims[axis]
-            idx = names.index(name)
-            coord = self[idx]
+            coord_index = coord_dims.index(name)
+            group_index = coord_group_indexes[coord_index]
+            group = sliced_groups[group_index]
+            entries = []
 
-            if coord.is_empty:
-                new_coords[idx] = Coord(None, name=name)
-            elif not isinstance(coord, CoordSet):
-                new_coords[idx] = coord[item]
-            else:
-                newc = [c[item] for c in coord._coords]
-                new_coords[idx] = CoordSet(*newc[::-1], name=name)
-                new_coords[idx]._default = coord._default
-                new_coords[idx]._is_same_dim = coord._is_same_dim
-                new_coords[idx]._set_names(
-                    [f"_{i + 1}" for i in range(len(new_coords[idx]))]
-                )
-                new_coords[idx]._set_parent_dim(name)
+            for entry in group.entries:
+                if entry.coord.is_empty:
+                    coord = Coord(None, name=name)
+                else:
+                    coord = entry.coord[item]
+                entries.append(replace(entry, coord=coord))
 
-        return new_coords
+            sliced_groups[group_index] = replace(group, entries=tuple(entries))
+
+        return tuple(sliced_groups)
 
     def _replace_dim(self, dim, value):
         """

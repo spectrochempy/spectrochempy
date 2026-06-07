@@ -67,6 +67,10 @@ Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
 
+- MAINT: Moved ``CoordSet`` dimension slicing lifecycle handling onto
+  transient group projection metadata while preserving legacy storage and
+  public slicing behavior.
+
 - MAINT: Extended the group-aware ``CoordSet`` lifecycle adapter pattern to
   keep-dimension reductions while preserving legacy runtime storage and public
   behavior.
