@@ -40,6 +40,8 @@ Use this workflow for all new work:
 Practical rules:
 
 - treat local `master` as a clean mirror of `upstream/master`;
+- for direct commits to `master`, push to `upstream/master`; `origin/master`
+  may be used only as a backup mirror;
 - do not accumulate chantier commits on `master`;
 - prefer branch names derived from the chantier, for example:
   - `coordset-storage-pr5`
@@ -47,6 +49,13 @@ Practical rules:
   - `dev/<topic>` if a generic prefix is useful;
 - if a PR needs follow-up fixes, continue on the same PR branch rather than on
   `master`.
+- temporary PR branches may be pushed to `upstream` and optionally to `origin`
+  as backup, but delete them promptly after the PR is merged:
+  - resync local `master` with `upstream/master`;
+  - delete the local temporary branch;
+  - delete the matching temporary branch on `upstream`;
+  - delete the matching temporary branch on `origin` if it exists.
+- keep only long-lived branches that have an explicit ongoing purpose.
 
 This reduces divergence between:
 
