@@ -31,6 +31,10 @@ Bug Fixes
 Developer
 ~~~~~~~~~
 
+- MAINT: Split ``CoordSet`` string read-lookup matching into private
+  group-aware helper methods while preserving legacy storage and public lookup
+  behavior.
+
 - MAINT: Started consuming private CoordSet group-model metadata inside read
   lookup context generation while preserving legacy storage and public lookup
   behavior.
