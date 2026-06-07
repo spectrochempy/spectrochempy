@@ -318,10 +318,14 @@ def _get_timestamp_from(params):
     acqtime = params.tim
     gmt_offset_hour = float(acqtime.split("GMT")[1].split(")")[0])
     if len(acqdate.split("/")[0]) == 2:
-        date_time = datetime.strptime(
-            acqdate + "_" + acqtime.split()[0],
-            "%d/%m/%Y_%H:%M:%S.%f",
-        )
+        dt_str = acqdate + "_" + acqtime.split()[0]
+        try:
+            date_time = datetime.strptime(dt_str, "%d/%m/%Y_%H:%M:%S.%f")
+        except ValueError:
+            # Some OPUS files store a malformed sub-second field, e.g.
+            # "10:31:19.-70"; fall back to whole-second precision instead of
+            # failing the whole read (#1036).
+            date_time = datetime.strptime(dt_str.split(".")[0], "%d/%m/%Y_%H:%M:%S")
     elif len(acqdate.split("/")[0]) == 4:
         date_time = datetime.strptime(
             acqdate + "_" + acqtime.split()[0],

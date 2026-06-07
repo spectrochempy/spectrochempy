@@ -15,6 +15,10 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 Bug Fixes
 ~~~~~~~~~
 
+- ``read_opus`` no longer fails when an OPUS file stores a malformed
+  acquisition sub-second field (e.g. ``10:31:19.-70``); the timestamp now
+  falls back to whole-second precision instead of returning ``None`` (#1036).
+
 - Fixed native round-trip preservation of selected non-first default
   coordinates in same-dimension multi-coordinate datasets.
 
