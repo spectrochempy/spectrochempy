@@ -11,6 +11,7 @@ import copy as cpy
 import uuid
 import warnings
 from dataclasses import dataclass
+from dataclasses import replace
 
 import numpy as np
 from traitlets import All
@@ -930,17 +931,32 @@ class CoordSet(HasTraits):
         if not keepdims:
             return self._drop_dims(dim, missing="raise")
 
-        new_coords = self.copy()
-        idx = new_coords.names.index(dim)
-        coord = new_coords[idx]
+        groups = self._lookup_groups()
+        groups = self._reduce_lifecycle_groups(groups, dim)
+        return self._legacy_coordset_from_lifecycle_groups(groups)
 
-        if isinstance(coord, CoordSet):
-            for child in coord._coords:
-                child.data = [0]
-        else:
-            coord.data = [0]
+    @staticmethod
+    def _reduce_lifecycle_groups(groups, dim):
+        """Return projected groups after applying legacy keepdims reduction."""
+        coord_dims = [group.dim for group in groups if group.reference is None]
+        if dim not in coord_dims:
+            raise ValueError(f"{dim!r} is not in list")
 
-        return new_coords
+        reduced_groups = []
+        for group in groups:
+            if group.reference is not None or group.dim != dim:
+                reduced_groups.append(group)
+                continue
+
+            reduced_entries = []
+            for entry in group.entries:
+                coord = entry.coord.copy(keepname=True)
+                coord.data = [0]
+                reduced_entries.append(replace(entry, coord=coord))
+
+            reduced_groups.append(replace(group, entries=tuple(reduced_entries)))
+
+        return tuple(reduced_groups)
 
     def _concatenate_dim(self, dim, coordsets):
         """

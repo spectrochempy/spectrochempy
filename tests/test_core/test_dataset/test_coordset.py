@@ -591,10 +591,35 @@ def test_coordset__reduce_dim_keepdims_preserves_multicoord_group(coord0, coord1
 
     assert updated.names == ["x", "z"]
     assert updated.x.is_same_dim
+    assert updated.x.names == ["_1", "_2"]
     assert updated.x.default == updated.x._2
     assert_array_equal(updated.x._1.data, [0])
     assert_array_equal(updated.x._2.data, [0])
+    assert_array_equal(updated.x._1.labels, coords.x._1.labels)
+    assert_array_equal(updated.x._2.labels, coords.x._2.labels)
+    assert updated.x._1.title == coords.x._1.title
+    assert updated.x._2.title == coords.x._2.title
+    assert updated.x._1.units == coords.x._1.units
+    assert updated.x._2.units == coords.x._2.units
+    assert updated.x._1._parent_dim == "x"
+    assert updated.x._2._parent_dim == "x"
     assert updated.z == coords.z
+
+
+def test_coordset__reduce_dim_keepdims_preserves_reference_state():
+    coords = CoordSet(
+        x=Coord([0.0, 1.0, 2.0]),
+        y="x",
+        z=Coord([1.0, 2.0, 3.0]),
+    )
+
+    updated = coords._reduce_dim("x", keepdims=True)
+
+    assert updated.names == ["x", "z"]
+    assert updated.references == {"y": "x"}
+    assert_array_equal(updated.x.data, [0])
+    assert updated.z == coords.z
+    assert updated["y"] == "x"
 
 
 def test_coordset_arithmetics():

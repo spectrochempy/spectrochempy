@@ -67,6 +67,10 @@ Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
 
+- MAINT: Extended the group-aware ``CoordSet`` lifecycle adapter pattern to
+  keep-dimension reductions while preserving legacy runtime storage and public
+  behavior.
+
 - MAINT: Established the first group-aware ``CoordSet`` lifecycle adapter
   pattern for dimension dropping while preserving legacy runtime storage and
   public behavior.
