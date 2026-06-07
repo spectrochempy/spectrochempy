@@ -13,6 +13,7 @@ __all__ = [
     "DimensionalityError",
 ]
 
+import re
 import warnings
 
 from pint import __version__
@@ -30,6 +31,40 @@ if pint_version < 24:
         f"Please consider upgrading it to 0.24 or higher (e.g. `> pip install pint --upgrade` or `> conda update pint`)\n",
         stacklevel=2,
     )
+
+
+def _register_dotted_symbols(registry):
+    """
+    Allow parsing custom unit symbols that contain dots (e.g. ``a.u.``).
+
+    pint interprets ``.`` as a multiplication operator, so SpectroChemPy's
+    dotted display symbols (``a.u.`` for absorbance, ``K.M.`` for Kubelka-Munk)
+    round-trip on output but cannot be read back from a string. This installs a
+    registry preprocessor that rewrites those symbols, with or without their
+    trailing dot, to the canonical unit name before parsing. See issue #913.
+    """
+    mapping = {}
+    for name in list(registry):
+        if "." in name:
+            continue
+        try:
+            symbol = registry.get_symbol(name)
+        except Exception:  # noqa: S112 - skip units without a resolvable symbol
+            continue
+        if "." in symbol:
+            mapping[symbol] = name
+            mapping[symbol.rstrip(".")] = name
+    if not mapping:
+        return
+    pattern = re.compile(
+        r"(?<![\w.])("
+        + "|".join(re.escape(s) for s in sorted(mapping, key=len, reverse=True))
+        + r")(?![\w.])",
+    )
+    registry.preprocessors.append(
+        lambda string: pattern.sub(lambda m: mapping[m.group(1)], string),
+    )
+
 
 if pint_version < 24:
     from functools import wraps
@@ -513,6 +548,13 @@ else:  # pint version >= 24
         ur.define("absorbance = 1. = a.u.")
         ur.define("Kubelka_Munk = 1. = K.M.")
         ur.define("ppm = 1. = ppm")
+
+        # pint reads "." as multiplication, so custom display symbols that
+        # contain dots (e.g. "a.u." for absorbance, "K.M." for Kubelka-Munk)
+        # cannot be parsed back from their string form. Register a preprocessor
+        # mapping those symbols (with or without the trailing dot) to their
+        # canonical unit name before parsing. See #913.
+        _register_dotted_symbols(ur)
 
         set_application_registry(ur)
         del UnitRegistry  # to avoid importing it
