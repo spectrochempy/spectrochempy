@@ -510,14 +510,44 @@ def test_coordset__slice_dims_preserves_multicoord_default(coord0, coord1, coord
     coords = CoordSet(coord2, [coord0, coord0.copy()], coord1)
     coords.y.select(2)
 
-    sliced = coords._slice_dims(["z", "y", "x"], (slice(1, 4), slice(2, 5)))
+    item = np.array([2, 4])
+
+    sliced = coords._slice_dims(["z", "y", "x"], (slice(1, 4), item))
 
     assert sliced.z.size == 2
     assert sliced.y.is_same_dim
+    assert sliced.y.names == ["_1", "_2"]
     assert sliced.y.default == sliced.y._2
-    assert_coord_almost_equal(sliced.y._1, coord0[2:5], decimal=1)
-    assert_coord_almost_equal(sliced.y._2, coord0[2:5], decimal=1)
+    assert_coord_almost_equal(sliced.y._1, coord0[item], decimal=1)
+    assert_coord_almost_equal(sliced.y._2, coord0[item], decimal=1)
+    assert sliced.y._1._parent_dim == "y"
+    assert sliced.y._2._parent_dim == "y"
     assert sliced.x == coords.x
+
+
+def test_coordset__slice_dims_preserves_reference_and_empty_state():
+    coords = CoordSet(
+        x=Coord(
+            [0.0, 1.0, 2.0],
+            labels=["low", "mid", "high"],
+            units="s",
+            title="time",
+        ),
+        y="x",
+        z=Coord(None),
+    )
+
+    sliced = coords._slice_dims(["x", "z"], (1, slice(None)))
+
+    assert sliced.names == ["x", "z"]
+    assert sliced.references == {"y": "x"}
+    assert_array_equal(sliced.x.data, [1.0])
+    assert_array_equal(sliced.x.labels, ["mid"])
+    assert sliced.x.units == coords.x.units
+    assert sliced.x.title == coords.x.title
+    assert sliced.z.is_empty
+    assert sliced.z.name == "z"
+    assert sliced["y"] == "x"
 
 
 def test_coordset__replace_dim_preserves_multicoord_behavior():
