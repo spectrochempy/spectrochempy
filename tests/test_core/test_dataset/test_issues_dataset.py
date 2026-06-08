@@ -5,12 +5,21 @@
 # ======================================================================================
 # ruff: noqa
 import os
+from pathlib import Path
 
 import numpy as np
 
 from spectrochempy import read_omnic
 from spectrochempy.core.units import ur
 from spectrochempy.utils.mplutils import show
+
+WODGER = (
+    Path(__file__).resolve().parent.parent
+    / "test_readers"
+    / "ressources"
+    / "omnic"
+    / "wodger.spg"
+)
 
 
 # ======================================================================================
@@ -63,7 +72,7 @@ def test_fix_issue_58():
 def test_fix_issue_186():
     import spectrochempy as scp
 
-    da = scp.read_omnic(os.path.join("irdata", "nh4y-activation.spg"))
+    da = scp.read_omnic(WODGER)
     da -= da.min()
     da.plot()
 
