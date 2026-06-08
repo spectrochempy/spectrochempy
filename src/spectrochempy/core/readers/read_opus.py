@@ -440,9 +440,10 @@ def _read_opus(*args, **kwargs):
     name = opus_data.params.snm
     if d.y.ndim > 1 and d.y.shape[0] > 1:
         # assembled / time-resolved data series
-        if "ert" in d.params and len(d.params.ert) == d.y.shape[0]:
+        ert = getattr(d.params, "ert", None)
+        if ert is not None and len(ert) == d.y.shape[0]:
             yaxis = Coord(
-                d.params.ert,
+                ert,
                 title="elapsed time",
                 units="s",
             )
