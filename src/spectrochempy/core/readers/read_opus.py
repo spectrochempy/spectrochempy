@@ -69,6 +69,9 @@ def read_opus(*paths, **kwargs):
         - "IGSM": Sample interferogram
         - "PHRF": Reference phase
         - "PHSM": Sample phase
+        - "TRACE": Trace (intensity over time) for time-resolved files
+        - "GCIG": GC file (series of interferograms)
+        - "GCSC": GC file (series of spectra)
 
         An error is raised if the specified type is not present in the file.
 
@@ -282,6 +285,9 @@ _types_parameters = {
     "LRF": "logr",
     "ATR": "atr",
     "PAS": "pas",
+    "TRACE": "tr",
+    "GCIG": "gcig",
+    "GCSC": "gcsc",
 }
 
 _types_parameters_inv = {v: k for k, v in _types_parameters.items()}
@@ -306,6 +312,8 @@ _blocks_parameters_inv = {v: k for k, v in _blocks_parameters.items()}
 _units = {
     "WN": ("wavenumber", "cm^-1"),
     "WL": ("wavelength", "µm"),
+    "SEC": ("time", "s"),
+    "PNT": ("points", "index"),
     "Absorbance": "absorbance",  # defined in core/units
     "Transmittance": "transmittance",
     "Kubelka-Munk": "Kubelka_Munk",
@@ -420,20 +428,38 @@ def _read_opus(*args, **kwargs):
     dataset.units = _units.get(desc)  # None if not found in _units
 
     # xaxis
-    title, units = _units.get(getattr(d.params, "dxu"))  # noqa: B009
+    dxu = getattr(d.params, "dxu", None)  # noqa: B009
+    xu = _units.get(dxu) if dxu else None
+    if xu is None:
+        title, units = "points", "index"
+    else:
+        title, units = xu
     xaxis = Coord(d.x, title=title, units=units)
 
-    # yaxis (in case this is not a data series)
-    # TODO: check if this is a data series and read eventually 2D data
+    # yaxis
     name = opus_data.params.snm
-    dt, timestamp = _get_timestamp_from(d.params)
-
-    yaxis = Coord(
-        [timestamp],
-        title="acquisition timestamp (GMT)",
-        units="s",
-        labels=([dt], [name], [filename]),
-    )
+    if d.y.ndim > 1 and d.y.shape[0] > 1:
+        # assembled / time-resolved data series
+        ert = getattr(d.params, "ert", None)
+        if ert is not None and len(ert) == d.y.shape[0]:
+            yaxis = Coord(
+                ert,
+                title="elapsed time",
+                units="s",
+            )
+        else:
+            yaxis = Coord(
+                np.arange(d.y.shape[0]),
+                title="spectrum index",
+            )
+    else:
+        dt, timestamp = _get_timestamp_from(d.params)
+        yaxis = Coord(
+            [timestamp],
+            title="acquisition timestamp (GMT)",
+            units="s",
+            labels=([dt], [name], [filename]),
+        )
 
     # set dataset's Coordset
     dataset.set_coordset(y=yaxis, x=xaxis)
