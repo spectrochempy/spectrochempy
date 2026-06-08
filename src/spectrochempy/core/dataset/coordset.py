@@ -787,30 +787,54 @@ class CoordSet(HasTraits):
         by ``NDDataset`` for simple coordinates and same-dimension
         multi-coordinate groups.
         """
-        new_coords = self.copy()
-        idx = new_coords.names.index(dim)
+        groups = self._lookup_groups()
+        groups = self._replace_lifecycle_groups(groups, dim, value)
+        return self._legacy_coordset_from_lifecycle_groups(groups)
 
+    @staticmethod
+    def _replace_lifecycle_groups(groups, dim, value):
+        """Return projected groups after applying legacy dimension replacement."""
+        coord_dims = [group.dim for group in groups if group.reference is None]
+        coord_group_indexes = [
+            index for index, group in enumerate(groups) if group.reference is None
+        ]
+        coord_index = coord_dims.index(dim)
+        group_index = coord_group_indexes[coord_index]
+        replacement = CoordSet._replace_lifecycle_coord(dim, value)
+        replacement_group = _coordset_to_groups(
+            CoordSet(replacement, keepnames=True, sorted=False)
+        )[0]
+
+        replaced_groups = list(groups)
+        replaced_groups[group_index] = replacement_group
+        return tuple(replaced_groups)
+
+    @staticmethod
+    def _replace_lifecycle_coord(dim, value):
+        """Normalize a replacement value using legacy replacement semantics."""
         listcoord = False
         if isinstance(value, list):
             listcoord = all(isinstance(item, Coord) for item in value)
 
         if listcoord:
-            new_coords[idx] = list(CoordSet(value).to_dict().values())[0]
-            new_coords[idx].name = dim
-            new_coords[idx]._is_same_dim = True
-        elif isinstance(value, CoordSet):
+            coord = list(CoordSet(value).to_dict().values())[0]
+            coord.name = dim
+            coord._is_same_dim = True
+            return coord
+
+        if isinstance(value, CoordSet):
             if len(value) > 1:
                 value = CoordSet(value)
-            new_coords[idx] = list(value.to_dict().values())[0]
-            new_coords[idx].name = dim
-            new_coords[idx]._is_same_dim = True
-        elif isinstance(value, Coord):
-            value.name = dim
-            new_coords[idx] = value
-        else:
-            new_coords[idx] = Coord(value, name=dim)
+            coord = list(value.to_dict().values())[0]
+            coord.name = dim
+            coord._is_same_dim = True
+            return coord
 
-        return new_coords
+        if isinstance(value, Coord):
+            value.name = dim
+            return value
+
+        return Coord(value, name=dim)
 
     def _drop_dims(self, dims, *, missing="ignore"):
         """
