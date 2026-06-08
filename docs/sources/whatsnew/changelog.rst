@@ -30,6 +30,10 @@ Bug Fixes
   acquisition sub-second field (e.g. ``10:31:19.-70``); the timestamp now
   falls back to whole-second precision instead of returning ``None`` (#1036).
 
+- Fixed parsing of the ``a.u.`` (absorbance) and ``K.M.`` (Kubelka-Munk) unit
+  symbols from strings, which previously failed because the dots were read as a
+  multiplication.
+
 - Fixed native round-trip preservation of selected non-first default
   coordinates in same-dimension multi-coordinate datasets.
 

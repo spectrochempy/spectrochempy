@@ -13,6 +13,18 @@ def test_ppm():
     assert x.units == ur.ppm
 
 
+def test_dotted_symbol_parsing():
+    # custom display symbols that contain dots must parse back to the unit
+    # they are the symbol of (pint reads "." as multiplication). See #913.
+    assert ur.Unit("a.u.") == ur.absorbance
+    assert ur.Unit("a.u") == ur.absorbance
+    assert ur.Unit("K.M.") == ur.Kubelka_Munk
+    assert ur.Unit("K.M") == ur.Kubelka_Munk
+    # the full names keep working and ordinary dotted products are untouched
+    assert ur.Unit("absorbance") == ur.absorbance
+    assert ur.Unit("kg.m") == ur.kg * ur.m
+
+
 def test_units():
     assert 10 * ur.km == 10000 * ur.m
     assert ur.km / ur.m == 1000.0
