@@ -8,11 +8,14 @@ import os
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 from spectrochempy import read_omnic
+from spectrochempy.application.preferences import preferences as prefs
 from spectrochempy.core.units import ur
 from spectrochempy.utils.mplutils import show
 
+IRDATA = prefs.datadir / "irdata"
 WODGER = (
     Path(__file__).resolve().parent.parent
     / "test_readers"
@@ -22,8 +25,14 @@ WODGER = (
 )
 
 
+def _requires_irdata():
+    if not IRDATA.exists():
+        pytest.skip("IR test data not available (set SCP_TEST_DATA_DOWNLOAD=1)")
+
+
 # ======================================================================================
 def test_fix_issue_20():
+    _requires_irdata()
     # Description of bug #20
     # -----------------------
     # X = read_omnic(os.path.join('irdata', 'CO@Mo_Al2O3.SPG'))
@@ -60,6 +69,7 @@ def test_fix_issue_20():
 
 
 def test_fix_issue_58():
+    _requires_irdata()
     X = read_omnic(os.path.join("irdata", "CO@Mo_Al2O3.SPG"))
     X.y = X.y - X.y[0]  # subtract the acquisition timestamp of the first spectrum
     X.y = X.y.to("minute")  # convert to minutes
@@ -97,6 +107,7 @@ def test_fix_issue_186():
 def test_issue_668():
     import spectrochempy as scp
 
+    _requires_irdata()
     s = scp.read("irdata/CO@Mo_Al2O3.SPG")[-1, 2300.0:1900.0]
 
     # print(s[:, [0, 1, 2, 7, 15]].x.data)
