@@ -312,6 +312,8 @@ _blocks_parameters_inv = {v: k for k, v in _blocks_parameters.items()}
 _units = {
     "WN": ("wavenumber", "cm^-1"),
     "WL": ("wavelength", "µm"),
+    "SEC": ("time", "s"),
+    "PNT": ("points", "index"),
     "Absorbance": "absorbance",  # defined in core/units
     "Transmittance": "transmittance",
     "Kubelka-Munk": "Kubelka_Munk",
@@ -429,7 +431,7 @@ def _read_opus(*args, **kwargs):
     dxu = getattr(d.params, "dxu", None)  # noqa: B009
     xu = _units.get(dxu) if dxu else None
     if xu is None:
-        title, units = "wavenumber", "cm^-1"
+        title, units = "points", "index"
     else:
         title, units = xu
     xaxis = Coord(d.x, title=title, units=units)
@@ -438,7 +440,7 @@ def _read_opus(*args, **kwargs):
     name = opus_data.params.snm
     if d.y.ndim > 1 and d.y.shape[0] > 1:
         # assembled / time-resolved data series
-        if "ert" in d.params:
+        if "ert" in d.params and len(d.params.ert) == d.y.shape[0]:
             yaxis = Coord(
                 d.params.ert,
                 title="elapsed time",
