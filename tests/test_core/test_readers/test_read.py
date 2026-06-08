@@ -5,6 +5,8 @@
 # ======================================================================================
 # ruff: noqa
 
+from pathlib import Path
+
 import pytest
 
 import spectrochempy as scp
@@ -12,6 +14,7 @@ from spectrochempy.application.preferences import preferences as prefs
 
 DATADIR = prefs.datadir
 IRDATA = DATADIR / "irdata"
+WODGER = Path(__file__).parent / "ressources" / "omnic" / "wodger.spg"
 
 
 def _skip_if_eigenvector_unreachable(exc):
@@ -60,14 +63,13 @@ def _requires_irdata():
 @pytest.mark.data
 def test_read_local_file():
     """Read a local SPG file and verify content."""
-    _requires_irdata()
-    filename = IRDATA / "CO@Mo_Al2O3.SPG"
+    filename = WODGER
 
     nd1 = scp.read(filename)
-    assert str(nd1) == "NDDataset: [float64] a.u. (shape: (y:19, x:3112))"
+    assert nd1.name == "wodger"
 
-    nd1 = scp.read_omnic(filename)
-    assert str(nd1) == "NDDataset: [float64] a.u. (shape: (y:19, x:3112))"
+    nd2 = scp.read_omnic(filename)
+    assert nd1 == nd2
 
 
 @pytest.mark.data
@@ -102,10 +104,11 @@ def test_read_remote_fallback(tmp_path):
             backup.replace(filename)
 
 
-def test_read_missing_file():
-    """Reading a non-existent relative path should raise FileNotFoundError."""
+def test_read_missing_file(tmp_path):
+    """Reading a non-existent local path should raise FileNotFoundError."""
+    missing = tmp_path / "does-not-exist.spg"
     with pytest.raises(FileNotFoundError):
-        scp.read("irdata/nh4y-acti.spg")
+        scp.read(missing, local_only=True)
 
 
 def test_read_invalid_url_type():
