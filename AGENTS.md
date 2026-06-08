@@ -29,7 +29,8 @@ Key characteristics:
 
 Do not work directly on `master`.
 
-Use this workflow for all new work:
+When branch/commit/push/PR operations are explicitly delegated, use this
+workflow for new work:
 
 1. keep local `master` aligned with `upstream/master`;
 2. create a dedicated development branch for the chantier;
@@ -64,6 +65,45 @@ This reduces divergence between:
 - `upstream/master`.
 
 It also makes post-merge cleanup and the start of the next chantier simpler.
+
+---
+
+## Local/Remote Action Policy
+
+Avoid costly operational actions unless explicitly requested.
+
+By default, agents may:
+
+- inspect files;
+- audit code;
+- implement source, test, and documentation changes;
+- update local audit notes;
+- suggest targeted validation commands;
+- provide commit titles;
+- provide PR titles;
+- provide concise PR descriptions.
+
+Agents should not, unless explicitly requested:
+
+- create branches;
+- commit changes;
+- push branches;
+- open PRs;
+- run broad test suites;
+- run pre-commit;
+- perform release-note generation;
+- perform remote GitHub operations.
+
+At the end of a task, agents should provide:
+
+- suggested commit title;
+- suggested PR title;
+- PR description;
+- targeted validation commands;
+- remaining risks or follow-up notes.
+
+The maintainer will perform local validation, commits, pushes, and PR creation
+manually unless explicitly delegated.
 
 ---
 
@@ -204,6 +244,9 @@ Follow project configuration from `pyproject.toml`.
 
 ## Pre-commit Policy
 
+Do not run pre-commit unless explicitly requested or explicitly delegated for
+finalization.
+
 Do not run:
 
 ```bash
@@ -212,7 +255,7 @@ pre-commit run --all-files
 
 during intermediate work.
 
-Run pre-commit only:
+When delegated, run pre-commit only:
 
 - before the final commit;
 - before opening a pull request;
@@ -229,6 +272,17 @@ the final PR state — do not discard them after pre-commit runs.
 ## Changelog Policy
 
 Entry file: `docs/sources/whatsnew/changelog.rst`. Never edit `latest.rst`.
+
+For multi-PR internal refactoring work, do not add one changelog entry per
+micro-step.
+
+Use audit notes for detailed PR-by-PR implementation history.
+
+The public/developer changelog should summarize only meaningful release-level
+outcomes, preferably by updating or consolidating an existing entry.
+
+Avoid noisy MAINT/TEST entries that merely describe intermediate refactoring
+steps unless the change is independently meaningful for downstream developers.
 
 User-facing changes (New Features, Bug Fixes, Dependency Updates, Breaking Changes, Deprecations) go without prefix.
 
@@ -278,6 +332,9 @@ Whenever producing a substantial report, analysis or audit, write it to an audit
 
 ## Commit Policy
 
+Do not commit unless explicitly requested or explicitly delegated for
+finalization.
+
 Commit only when:
 
 - work is complete;
@@ -294,6 +351,7 @@ Prefer a single coherent commit per completed phase.
 
 Unless explicitly requested:
 
+- do not create pull requests;
 - do not merge;
 - do not alter release workflows;
 - do not alter publication workflows.
@@ -310,12 +368,17 @@ PR titles should use the same prefix style as commit messages:
 | `DEV:`     | Developer tooling                   |
 | `FEATURE:` | New feature                        |
 
-At the end of a chantier:
+When PR creation/finalization is explicitly delegated, at the end of a
+chantier:
 
 - prepare a clean final commit;
 - prepare a concise PR description using the same prefix as the PR title;
 - update changelog when appropriate;
 - run pre-commit before finalizing the PR.
+
+Otherwise, provide the suggested commit title, PR title, concise PR
+description, targeted validation commands, and remaining risks or follow-up
+notes for the maintainer to run manually.
 
 ---
 
