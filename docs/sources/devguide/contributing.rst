@@ -93,14 +93,16 @@ Making Changes
        git add modified-files
        git commit -m "ENH: Your descriptive commit message"
 
-   Commit prefix conventions:
+   Commit and pull request title prefix conventions:
    * ENH: Enhancement
    * FIX: Bug fix
    * DOC: Documentation
    * TEST: Testing
-   * BUILD: Build changes
+   * CI: CI/CD and workflow changes
+   * DEV: Developer tooling
    * PERF: Performance
    * MAINT: Maintenance
+   * REL: Release-related work
 
 3. Push to GitHub:
 

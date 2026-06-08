@@ -390,11 +390,16 @@ The sections are organised in two groups:
 **Developer section** (for maintainers and contributors):
 
 - ``Developer`` — internal changes such as tests, CI, refactoring, tooling,
-  and documentation infrastructure. Each entry must be prefixed with one of
-  the following keywords:
+  documentation infrastructure, and release engineering. Entries should use
+  the same project-wide prefix vocabulary as commit messages and pull request
+  titles when applicable:
 
-  - ``FEATURE:`` — new developer-facing capability (test harness, script, …)
+  - ``ENH:`` — developer-facing enhancement or contributor workflow improvement
   - ``FIX:`` — correction of a test, CI or internal bug
-  - ``MAINT:`` — maintenance, refactoring, cleanup
+  - ``DOC:`` — documentation changes relevant to contributors or maintainers
+  - ``TEST:`` — test addition, rework, or regression coverage improvements
   - ``CI:`` — CI/CD workflow changes
-  - ``DEV:`` — developer tooling (version bump scripts, …)
+  - ``DEV:`` — developer tooling (version bump scripts, local helpers, ...)
+  - ``PERF:`` — performance improvements in internal or developer-facing paths
+  - ``MAINT:`` — maintenance, refactoring, cleanup
+  - ``REL:`` — release-process or release-engineering changes

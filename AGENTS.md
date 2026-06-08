@@ -1,454 +1,329 @@
-# SpectroChemPy — Agent Guide
+# AGENTS.md
 
-## Project
+## Scope
 
-SpectroChemPy (SCPy) is a framework for processing, analyzing and modeling spectroscopic data.
+This document supplements:
 
-Key characteristics:
+* CONTRIBUTING.md
+* docs/sources/devguide/
+* maintainers/
 
-- Python >= 3.11
-- src/ layout
-- setuptools + setuptools-scm
-- versioning from git tags
-- monorepo containing core package and official plugins
+Agents must follow all project contribution rules defined there.
 
----
+This file defines additional requirements specific to AI-assisted development.
 
-## General Principles
-
-- Prefer minimal and targeted changes.
-- Preserve backward compatibility whenever possible.
-- Avoid unrelated refactoring.
-- Keep pull requests focused on a single objective.
-- Inspect existing code before proposing architectural changes.
-- Prefer maintainability over short-term fixes.
+When rules overlap, follow the stricter requirement.
 
 ---
 
-## Branching Policy
+# Core Principles
 
-Do not work directly on `master`.
+Priorities:
 
-When branch/commit/push/PR operations are explicitly delegated, use this
-workflow for new work:
+1. correctness;
+2. behavior preservation;
+3. maintainability;
+4. reviewability;
+5. resource efficiency.
 
-1. keep local `master` aligned with `upstream/master`;
-2. create a dedicated development branch for the chantier;
-3. commit and push work on that branch only;
-4. open the pull request from the development branch to `upstream/master`;
-5. after merge, resync local `master` and only then start the next branch.
+Prefer small, reversible, reviewable changes.
 
-Practical rules:
-
-- treat local `master` as a clean mirror of `upstream/master`;
-- for direct commits to `master`, push to `upstream/master`; `origin/master`
-  may be used only as a backup mirror;
-- do not accumulate chantier commits on `master`;
-- prefer branch names derived from the chantier, for example:
-  - `coordset-storage-pr5`
-  - `analysis-pca-cleanup`
-  - `dev/<topic>` if a generic prefix is useful;
-- if a PR needs follow-up fixes, continue on the same PR branch rather than on
-  `master`.
-- temporary PR branches may be pushed to `upstream` and optionally to `origin`
-  as backup, but delete them promptly after the PR is merged:
-  - resync local `master` with `upstream/master`;
-  - delete the local temporary branch;
-  - delete the matching temporary branch on `upstream`;
-  - delete the matching temporary branch on `origin` if it exists.
-- keep only long-lived branches that have an explicit ongoing purpose.
-
-This reduces divergence between:
-
-- local `master`;
-- `origin/master`;
-- `upstream/master`.
-
-It also makes post-merge cleanup and the start of the next chantier simpler.
+Avoid broad rewrites unless explicitly requested.
 
 ---
 
-## Local/Remote Action Policy
+# Public Behavior Preservation
 
-Avoid costly operational actions unless explicitly requested.
+Unless explicitly requested otherwise:
 
-By default, agents may:
+* preserve public APIs;
+* preserve public behavior;
+* preserve backward compatibility;
+* preserve serialization compatibility;
+* preserve warning behavior;
+* preserve documented semantics.
 
-- inspect files;
-- audit code;
-- implement source, test, and documentation changes;
-- update local audit notes;
-- suggest targeted validation commands;
-- provide commit titles;
-- provide PR titles;
-- provide concise PR descriptions.
-
-Agents should not, unless explicitly requested:
-
-- create branches;
-- commit changes;
-- push branches;
-- open PRs;
-- run broad test suites;
-- run pre-commit;
-- perform release-note generation;
-- perform remote GitHub operations.
-
-At the end of a task, agents should provide:
-
-- suggested commit title;
-- suggested PR title;
-- PR description;
-- targeted validation commands;
-- remaining risks or follow-up notes.
-
-The maintainer will perform local validation, commits, pushes, and PR creation
-manually unless explicitly delegated.
+Internal refactoring should not introduce user-visible behavior changes.
 
 ---
 
-## Resource Usage and Sobriety
+# Architecture Strategy
 
-Be conservative with:
+For large refactoring or migration projects, prefer:
 
-- token usage;
-- execution time;
-- CI consumption;
-- test execution.
-
-Prefer:
-
-- static analysis;
-- source inspection;
-- targeted validation;
-- small reproducible checks.
-
-Avoid:
-
-- full test suite execution;
-- coverage runs;
-- unnecessary CI runs;
-- unnecessary pushes;
-- repeated validation cycles.
-
-When a potentially expensive validation is required:
-
-- run only the smallest validation necessary;
-- avoid unrelated tests;
-- avoid triggering CI unnecessarily.
-
----
-
-## Development Environment
-
-Use the smallest suitable environment for the task.
-
-For core development, prefer a dedicated core-only environment.
-
-Example:
-
-```bash
-conda create -n scpy-core python=3.12
-conda activate scpy-core
-pip install -e ".[dev]"
+```text id="px8jk3"
+behavioral tests
+    ->
+responsibility extraction
+    ->
+adapter layer
+    ->
+internal migration
+    ->
+implementation switch
+    ->
+serialization update
 ```
 
-The environment name `scpy-core` is only a convention. Contributors may use a different name.
+Avoid combining multiple migration phases in a single PR.
 
-For plugin-specific work, install only the plugin required by the task.
-
-Example:
-
-```bash
-pip install -e plugins/spectrochempy-nmr
-```
-
-Avoid installing all plugins unless explicitly required.
+Prefer incremental migration.
 
 ---
 
-## Testing Policy
+# Audit Policy
 
-Run only the smallest validation necessary for the current task.
+Audit files are the authoritative implementation history.
+
+Use audit notes for:
+
+* migration details;
+* architectural decisions;
+* implementation notes;
+* roadmap planning;
+* risk analysis;
+* test results.
+
+For multi-PR projects, maintain dedicated audit files.
 
 Examples:
 
-```bash
-pytest tests/test_analysis/test_decomposition/test_pca.py
+```text id="llqkmn"
+audit/project-architecture-audit.md
+audit/project-pr12-notes.md
+audit/project-pr13-notes.md
 ```
 
-```bash
-pytest tests/test_analysis/test_decomposition/test_pca.py::TestPCA::test_fit
+Detailed implementation history belongs in audits, not changelog entries.
+
+Agents should update relevant audit notes before considering a multi-PR task complete.
+
+---
+
+# Changelog Policy
+
+The changelog is a release document.
+
+It should explain:
+
+* what changed;
+* why it matters.
+
+Do not use the changelog as a PR-by-PR implementation journal.
+
+For multi-PR projects:
+
+* keep detailed history in audit notes;
+* consolidate related work into meaningful release-level entries;
+* prefer updating an existing entry over creating many near-duplicate entries.
+
+Never edit:
+
+```text id="c90b8w"
+docs/sources/whatsnew/latest.rst
 ```
 
-Avoid:
+manually.
 
-```bash
-pytest tests
+Edit:
+
+```text id="z9ggiw"
+docs/sources/whatsnew/changelog.rst
+```
+
+only.
+
+Generated files derived from changelog entries (for example `latest.rst`)
+should not be edited manually.
+
+Agents should update `changelog.rst` only and leave generation of derived files
+to the normal project workflow.
+
+---
+
+# Cost-Aware Development
+
+Assume agent actions consume limited resources.
+
+Prefer:
+
+* focused context;
+* focused searches;
+* targeted validation;
+* incremental work.
+
+Avoid unnecessary expensive operations.
+
+Prefer analysis over execution whenever possible.
+
+When multiple valid approaches exist, prefer the one requiring:
+
+* fewer agent actions;
+* fewer test executions;
+* fewer CI runs;
+* fewer GitHub operations.
+
+---
+
+# Testing Policy
+
+Run only the smallest validation necessary.
+
+Prefer:
+
+* a single test;
+* a focused test file;
+* a targeted marker selection;
+
+over broad test execution.
+
+Do not run large validation suites unless:
+
+* explicitly requested;
+* preparing final validation;
+* investigating a specific failure.
+
+When possible:
+
+* propose validation commands;
+* let the maintainer execute them.
+
+---
+
+# Pre-commit Policy
+
+Do not run:
+
+```bash id="4qukx8"
+pre-commit run --all-files
 ```
 
 unless explicitly requested.
 
-Useful markers:
+When not delegated:
 
-- slow
-- network
-- serial
-- docs
-- plugin
-- data
-
-External test data are optional and tests should continue to skip gracefully when unavailable.
-
-Prefer understanding the code before executing tests.
-
-Avoid repeated cycles of:
-
-```text
-test -> fail -> small fix -> retest
-```
-
-Inspect first, then validate.
+* provide the command;
+* explain why it should be run.
 
 ---
 
-## Linting and Formatting
+# Local and Remote Action Policy
 
-Use Ruff as configured by the repository, but do not run Ruff routinely during
-intermediate work.
+The maintainer controls:
 
-Prefer source inspection and targeted tests while developing. Run Ruff only:
+* commits;
+* branches;
+* pushes;
+* pull requests;
+* releases;
+* package publication.
 
-- when explicitly requested;
-- when investigating a formatting/lint failure that blocks the current task;
-- near PR completion, normally through the final pre-commit pass.
+Agents assist development.
 
-Avoid targeted Ruff commands on changed files during normal iteration unless
-there is a clear, immediate need. They can be unexpectedly expensive in this
-repository and are already covered by pre-commit before finalization.
-
-Examples:
-
-```bash
-ruff check src/spectrochempy/
-```
-
-```bash
-ruff check --fix src/spectrochempy/
-ruff format src/spectrochempy/
-```
-
-Follow project configuration from `pyproject.toml`.
+Agents do not operate the repository by default.
 
 ---
 
-## Pre-commit Policy
+# Allowed By Default
 
-Do not run pre-commit unless explicitly requested or explicitly delegated for
-finalization.
+Agents may:
 
-Do not run:
-
-```bash
-pre-commit run --all-files
-```
-
-during intermediate work.
-
-When delegated, run pre-commit only:
-
-- before the final commit;
-- before opening a pull request;
-- when explicitly requested.
-
-In normal workflows this should happen only once near PR completion.
-
-If pre-commit modifies files, include those modifications in the final commit.
-Generated files updated by pre-commit hooks (e.g. ``latest.rst``) belong in
-the final PR state — do not discard them after pre-commit runs.
+* inspect files;
+* modify source code;
+* modify tests;
+* modify documentation;
+* update audit notes;
+* analyze architecture;
+* review code;
+* suggest validation commands.
 
 ---
 
-## Changelog Policy
+# Not Allowed By Default
 
-Entry file: `docs/sources/whatsnew/changelog.rst`. Never edit `latest.rst`.
+Unless explicitly requested, do not:
 
-For multi-PR internal refactoring work, do not add one changelog entry per
-micro-step.
-
-Use audit notes for detailed PR-by-PR implementation history.
-
-The public/developer changelog should summarize only meaningful release-level
-outcomes, preferably by updating or consolidating an existing entry.
-
-Avoid noisy MAINT/TEST entries that merely describe intermediate refactoring
-steps unless the change is independently meaningful for downstream developers.
-
-User-facing changes (New Features, Bug Fixes, Dependency Updates, Breaking Changes, Deprecations) go without prefix.
-
-Developer section entries require a prefix:
-
-| Prefix    | Usage                                |
-|-----------|--------------------------------------|
-| `FEATURE` | New dev-facing capability            |
-| `FIX`     | Test, CI, or internal bug fix        |
-| `MAINT`   | Refactoring, cleanup                 |
-| `CI`      | CI/CD workflow changes               |
-| `DEV`     | Developer tooling (bump scripts, …)  |
-
-See `docs/sources/devguide/contributing_codebase.rst` for the full reference.
+* create branches;
+* create commits;
+* push branches;
+* open pull requests;
+* merge pull requests;
+* create releases;
+* publish packages;
+* run broad test suites;
+* run pre-commit.
 
 ---
 
-## Audit Policy
+# Task Execution Defaults
 
-For substantial work:
+Unless explicitly requested otherwise:
 
-- create or update a file in `audit/`;
-- prefix filenames with `~`;
-- audit files must remain untracked;
-- audit files must never be included in a PR.
+* do not create branches;
+* do not commit changes;
+* do not push changes;
+* do not open pull requests;
+* do not run pre-commit;
+* do not run broad test suites.
 
-Example:
+Prefer producing:
 
-```text
-audit/~analysis phase5 - pca modernization.md
-```
+* code changes;
+* audit updates;
+* suggested commit title;
+* suggested PR title;
+* concise PR description;
+* targeted validation commands.
 
-Audit files should contain:
-
-- objective;
-- inspected files;
-- modified files;
-- rationale;
-- validation commands;
-- results;
-- remaining concerns;
-- recommendations for the next phase.
-
-Whenever producing a substantial report, analysis or audit, write it to an audit file rather than keeping it only in the chat.
+The maintainer is expected to perform final validation, commits, pushes, and
+PR creation unless explicitly delegated otherwise.
 
 ---
 
-## Commit Policy
+# Commit and PR Titles
 
-Do not commit unless explicitly requested or explicitly delegated for
-finalization.
+Follow the prefix conventions defined in CONTRIBUTING.md.
 
-Commit only when:
+Always propose:
 
-- work is complete;
-- validation succeeds;
-- changes are coherent.
+* a prefixed commit title;
+* a prefixed PR title.
 
-Avoid unnecessary intermediate commits.
-
-Prefer a single coherent commit per completed phase.
+Never propose unprefixed titles.
 
 ---
 
-## Pull Request Policy
+# Default Deliverable
 
-Unless explicitly requested:
+Unless explicitly delegated to finalize work, provide:
 
-- do not create pull requests;
-- do not merge;
-- do not alter release workflows;
-- do not alter publication workflows.
+* source changes;
+* test updates if needed;
+* documentation updates if needed;
+* audit updates;
+* suggested commit title;
+* suggested PR title;
+* concise PR description;
+* targeted validation commands;
+* remaining risks;
+* recommended follow-up work.
 
-PR titles should use the same prefix style as commit messages:
+For multi-PR projects, update or create the relevant audit note before
+considering the task complete.
 
-| Prefix     | Usage                              |
-|------------|------------------------------------|
-| `MAINT:`   | Refactoring, cleanup               |
-| `FIX:`     | Bug fix (including test/CI fixes)  |
-| `DOC:`     | Documentation changes              |
-| `TEST:`    | Test addition or change            |
-| `CI:`      | CI/CD workflow changes             |
-| `DEV:`     | Developer tooling                   |
-| `FEATURE:` | New feature                        |
-
-When PR creation/finalization is explicitly delegated, at the end of a
-chantier:
-
-- prepare a clean final commit;
-- prepare a concise PR description using the same prefix as the PR title;
-- update changelog when appropriate;
-- run pre-commit before finalizing the PR.
-
-Otherwise, provide the suggested commit title, PR title, concise PR
-description, targeted validation commands, and remaining risks or follow-up
-notes for the maintainer to run manually.
+Do not perform git operations automatically.
 
 ---
 
-## Plugin Architecture
+# Code Review Expectations
 
-Plugins are independent packages located under:
+Evaluate:
 
-```text
-plugins/
-```
+* correctness;
+* behavior preservation;
+* regression risk;
+* architectural consistency;
+* testing adequacy;
+* roadmap alignment.
 
-Examples:
-
-- spectrochempy-nmr
-- spectrochempy-iris
-- spectrochempy-hypercomplex
-- spectrochempy-carroucell
-
-Keep core/plugin separation intact.
-
-Do not move plugin functionality into the core package without explicit justification.
-
----
-
-## Test Ownership
-
-Plugin-specific tests should generally live in plugin repositories.
-
-Core repository tests should focus on:
-
-- plugin discovery;
-- plugin loading;
-- compatibility;
-- missing-plugin user experience.
-
-Avoid detailed plugin algorithm testing in the core repository.
-
----
-
-## Generated Files
-
-Do not edit manually:
-
-```text
-requirements/*.txt
-src/spectrochempy/__init__.pyi
-docs/sources/reference/generated/*
-docs/sources/whatsnew/latest.rst
-```
-
-These files are generated.
-
----
-
-## Documentation
-
-Use NumPyDoc conventions.
-
-Respect existing documentation structure and validation rules.
-
----
-
-## Repository Structure
-
-Main locations:
-
-```text
-src/spectrochempy/    Core package
-tests/                Test suite
-plugins/              Official plugins
-docs/                 Documentation
-audit/                Local audit files (untracked)
-```
+Do not approve changes solely because tests pass.
