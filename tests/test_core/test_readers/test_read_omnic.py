@@ -5,6 +5,8 @@
 # ======================================================================================
 # ruff: noqa
 
+from pathlib import Path
+
 import pytest
 
 import spectrochempy as scp
@@ -14,16 +16,32 @@ from spectrochempy.utils.testing import assert_dataset_equal
 
 DATADIR = prefs.datadir
 IRDATA = DATADIR / "irdata"
+WODGER = Path(__file__).parent / "ressources" / "omnic" / "wodger.spg"
 
 pytestmark = pytest.mark.data
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def _skip_if_no_testdata():
     if not IRDATA.exists():
         pytest.skip("test data not available (set SCP_TEST_DATA_DOWNLOAD=1)")
 
 
+def test_read_omnic_local_wodger():
+    # It is also possible to use more specific reader function such as
+    # `read_spg` , `read_spa` or `read_srs` - they are alias of the read_omnic function.
+    nd1 = scp.read_omnic(WODGER)
+    assert nd1.name == "wodger"
+
+    # test read_omnic with byte spg content
+    filename_wodger = "wodger.spg"
+    with open(WODGER, "rb") as fil:
+        content = fil.read()
+    nd2 = scp.read_omnic({filename_wodger: content})
+    assert nd1 == nd2
+
+
+@pytest.mark.usefixtures("_skip_if_no_testdata")
 def test_read_omnic():
     # Class method opening a dialog (but for test it is preset)
     nd1 = scp.read_omnic(IRDATA / "nh4y-activation.spg")
@@ -35,16 +53,8 @@ def test_read_omnic():
 
     # It is also possible to use more specific reader function such as
     # `read_spg` , `read_spa` or `read_srs` - they are alias of the read_omnic function.
-    l2 = scp.read_spg("wodger.spg", "irdata/nh4y-activation.spg")
+    l2 = scp.read_spg(WODGER, "irdata/nh4y-activation.spg")
     assert len(l2) == 2
-
-    # test read_omnic with byte spg content
-    filename_wodger = "wodger.spg"
-    with open(DATADIR / filename_wodger, "rb") as fil:
-        content = fil.read()
-    nd1 = scp.read_omnic(filename_wodger)
-    nd2 = scp.read_omnic({filename_wodger: content})
-    assert nd1 == nd2
 
     # Test bytes contents for spa files
     filename = IRDATA / "subdir" / "7_CZ0-100_Pd_101.SPA"
