@@ -26,6 +26,11 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- ``read_opus`` now correctly reads assembled / time-resolved OPUS files
+  containing data series blocks such as ``a``, ``sm``, ``igsm``, ``phsm``,
+  ``tr``, and exposes the new ``TRACE``, ``GCIG``, ``GCSC`` type selectors
+  (#1035).
+
 - ``read_opus`` no longer fails when an OPUS file stores a malformed
   acquisition sub-second field (e.g. ``10:31:19.-70``); the timestamp now
   falls back to whole-second precision instead of returning ``None`` (#1036).

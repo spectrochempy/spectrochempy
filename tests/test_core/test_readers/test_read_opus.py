@@ -169,13 +169,44 @@ class TestOpusMerging:
         # Test reading without merge
         datasets = read_opus(directory=OPUSDATA)
         assert len(datasets) > 0
-        assert all(d.shape[1] in [2567, 4096] for d in datasets)
+        assert all(d.shape[1] in [1607, 2567, 4096] for d in datasets)
 
         # Test reading with merge
         grouped = read_opus(directory=OPUSDATA, merge=True)
-        assert len(grouped) == 2  # Two groups by shape
-        assert grouped[0].shape[1] == 2567
-        assert grouped[1].shape[1] == 4096
+        assert len(grouped) == 3  # Three groups by shape
+        shapes = sorted([g.shape[1] for g in grouped])
+        assert shapes == [1607, 2567, 4096]
+
+
+class TestOpusAssembledTimeResolved:
+    """Test reading assembled / time-resolved OPUS files (data series)."""
+
+    @pytest.fixture(autouse=True)
+    def require_assembled_file(self):
+        path = OPUSDATA / "OPUS_assembled_file.0"
+        if not path.exists():
+            pytest.skip("assembled OPUS test file not available")
+
+    def test_default_absorbance(self):
+        """Default read should return absorbance (a) series."""
+        dataset = read_opus(OPUSDATA / "OPUS_assembled_file.0")
+        assert dataset.shape == (95, 1607)
+        assert dataset.x.size == 1607
+        assert dataset.y.size == 95
+        assert dataset.units == "absorbance"
+
+    def test_sm_series(self):
+        """Reading SM type should return sample spectra series."""
+        dataset = read_opus(OPUSDATA / "OPUS_assembled_file.0", type="SM")
+        assert dataset.shape == (95, 1607)
+        assert dataset.y.size == 95
+
+    def test_trace_type(self):
+        """Reading TRACE type should return trace (intensity over time)."""
+        dataset = read_opus(OPUSDATA / "OPUS_assembled_file.0", type="TRACE")
+        assert dataset is not None
+        assert dataset.shape == (2, 95)
+        assert dataset.y.size == 2
 
 
 if __name__ == "__main__":
