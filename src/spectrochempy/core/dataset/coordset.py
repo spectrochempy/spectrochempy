@@ -798,6 +798,8 @@ class CoordSet(HasTraits):
         coord_group_indexes = [
             index for index, group in enumerate(groups) if group.reference is None
         ]
+        if dim not in coord_dims:
+            raise ValueError(f"{dim!r} is not in list")
         coord_index = coord_dims.index(dim)
         group_index = coord_group_indexes[coord_index]
         replacement = CoordSet._replace_lifecycle_coord(dim, value)
