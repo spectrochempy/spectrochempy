@@ -563,6 +563,55 @@ def test_coordset__replace_dim_preserves_multicoord_behavior():
     assert_coord_almost_equal(updated.x["_2"], x2)
 
 
+def test_coordset__replace_dim_preserves_reference_state():
+    coords = CoordSet(
+        x=Coord([1.0, 2.0, 3.0]),
+        y="x",
+        z=Coord([10.0, 20.0, 30.0]),
+    )
+
+    updated = coords._replace_dim("x", Coord([4.0, 5.0, 6.0], title="new"))
+
+    assert updated.names == ["x", "z"]
+    assert updated.references == {"y": "x"}
+    assert_array_equal(updated.x.data, [4.0, 5.0, 6.0])
+    assert updated.x.title == "new"
+    assert updated["y"] == "x"
+
+
+def test_coordset__replace_dim_preserves_multicoord_default_and_aliases():
+    coords = CoordSet(x=Coord([0.0, 1.0, 2.0]))
+    primary = Coord([10.0, 20.0, 30.0], title="primary")
+    secondary = Coord([100.0, 200.0, 300.0], title="secondary")
+    replacement = CoordSet(primary, secondary)
+    replacement.select(2)
+
+    updated = coords._replace_dim("x", replacement)
+
+    assert updated.x.is_same_dim
+    assert updated.x.names == ["_1", "_2"]
+    assert updated.x.default == updated.x._2
+    assert_array_equal(updated.x._1.data, secondary.data)
+    assert_array_equal(updated.x._2.data, primary.data)
+    assert updated.x._1.title == secondary.title
+    assert updated.x._2.title == primary.title
+    assert updated.x._1._parent_dim == "x"
+    assert updated.x._2._parent_dim == "x"
+
+
+def test_coordset__replace_dim_preserves_validation_behavior():
+    coords = CoordSet(x=Coord([0.0, 1.0, 2.0]))
+
+    with pytest.raises(ValueError, match="'y' is not in list"):
+        coords._replace_dim("y", Coord([1.0, 2.0, 3.0]))
+
+    with pytest.raises(ValueError, match="Data for coordinates must be an iterable"):
+        coords._replace_dim("x", 4)
+
+    with pytest.raises(ValueError, match="Only one 1D arrays"):
+        coords._replace_dim("x", (Coord([1, 2, 3]), Coord([4, 5, 6])))
+
+
 def test_coordset__drop_dims_preserves_remaining_multicoord_state(
     coord0, coord1, coord2
 ):
