@@ -1110,8 +1110,9 @@ class CoordSet(HasTraits):
         Return a coordset with the interpolated dimension coordinate updated.
 
         This lifecycle wrapper reconstructs the coordinate container for a
-        single interpolated dimension, delegating per-coordinate numerical
-        interpolation to the ``interpolate_secondary`` callable.
+        single interpolated dimension using group projection, delegating
+        per-coordinate numerical interpolation to the
+        ``interpolate_secondary`` callable.
 
         Parameters
         ----------
@@ -1124,31 +1125,56 @@ class CoordSet(HasTraits):
             interpolates its numeric data (when usable), clears labels, and
             returns the result.
         """
-        result = self.copy()
+        groups = self._lookup_groups()
+        groups = self._interpolate_lifecycle_groups(
+            groups,
+            dim,
+            target_coord,
+            interpolate_secondary,
+        )
+        return self._legacy_coordset_from_lifecycle_groups(groups)
 
-        if dim not in result.names:
+    @staticmethod
+    def _interpolate_lifecycle_groups(groups, dim, target_coord, interpolate_secondary):
+        """
+        Return projected groups after applying interpolation dimension updates.
+
+        Handles three cases:
+        1. **Dim not found** -- appends a new group with *target_coord*.
+        2. **Simple coord** (single entry, no aliases) -- replaces the entry's
+           coord with a copy of *target_coord* (labels cleared).
+        3. **Same-dim multi-coord** (multiple entries or aliases) -- applies
+           *interpolate_secondary* to each entry's coord.
+        """
+        coord_dims = [g.dim for g in groups if g.reference is None]
+
+        if dim not in coord_dims:
             new_coord = target_coord.copy()
             new_coord._labels = None
-            new_coord.name = dim
-            result._coords = tuple(result._coords) + (new_coord,)
-            return result
+            temp_coordset = CoordSet(new_coord, keepnames=True, sorted=False)
+            new_group = _coordset_to_groups(temp_coordset)[0]
+            return tuple(groups) + (new_group,)
 
-        coord_idx = result.names.index(dim)
-        old_container = result._coords[coord_idx]
+        coord_indices = [i for i, g in enumerate(groups) if g.reference is None]
+        idx = coord_dims.index(dim)
+        group_idx = coord_indices[idx]
+        group = groups[group_idx]
 
-        if isinstance(old_container, CoordSet):
-            new_sec_coords = [interpolate_secondary(c) for c in old_container._coords]
-            new_coordset = CoordSet(*new_sec_coords[::-1], name=dim)
-            new_coordset._default = old_container._default
-            new_coordset._is_same_dim = True
-            result._coords[coord_idx] = new_coordset
+        if len(group.entries) == 1 and not group.aliases:
+            new_coord = target_coord.copy()
+            new_coord._labels = None
+            new_entry = replace(group.entries[0], coord=new_coord)
+            new_group = replace(group, entries=(new_entry,))
         else:
-            new_coord = target_coord.copy()
-            new_coord._labels = None
-            new_coord.name = dim
-            result._coords[coord_idx] = new_coord
+            new_entries = tuple(
+                replace(entry, coord=interpolate_secondary(entry.coord))
+                for entry in group.entries
+            )
+            new_group = replace(group, entries=new_entries)
 
-        return result
+        result_groups = list(groups)
+        result_groups[group_idx] = new_group
+        return tuple(result_groups)
 
     def _append(self, coord):
         # utility function to append coordinate with full validation
