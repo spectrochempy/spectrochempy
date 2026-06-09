@@ -21,6 +21,7 @@ PLUGIN_TESTS = {
     "spectrochempy-hypercomplex": "plugins/spectrochempy-hypercomplex/tests",
     "spectrochempy-iris": "plugins/spectrochempy-iris/tests",
     "spectrochempy-nmr": "plugins/spectrochempy-nmr/tests",
+    "spectrochempy-tensor": "plugins/spectrochempy-tensor/tests",
 }
 FULL_PLUGIN_TARGETS = [
     target

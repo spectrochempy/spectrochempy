@@ -80,7 +80,7 @@ jobs:
         run: |
           # Official plugins are explicitly listed. Experimental plugins should be
           # released manually and are not handled by this workflow.
-          OFFICIAL_PLUGINS="spectrochempy-nmr spectrochempy-iris spectrochempy-hypercomplex spectrochempy-carroucell"
+          OFFICIAL_PLUGINS="spectrochempy-nmr spectrochempy-iris spectrochempy-tensor spectrochempy-hypercomplex spectrochempy-carroucell"
           if ! echo "$OFFICIAL_PLUGINS" | grep -qw "${{ inputs.plugin_name }}"; then
             echo "::error::${{ inputs.plugin_name }} is not in the official plugin allowlist. Experimental plugins must be released manually."
             exit 1

@@ -17,6 +17,7 @@ from pathlib import Path
 OFFICIAL_PLUGINS = (
     "spectrochempy-nmr",
     "spectrochempy-iris",
+    "spectrochempy-tensor",
     "spectrochempy-hypercomplex",
     "spectrochempy-carroucell",
 )

@@ -85,9 +85,10 @@ jobs:
               git config --global --add safe.directory /workspace && \
               SETUPTOOLS_SCM_PRETEND_VERSION=${SCPY_COLAB_PRETEND_VERSION} \
                 pip install --no-build-isolation --no-deps /workspace && \
-              pip install -q colorama pint numpy-quaternion && \
+              pip install -q colorama pint numpy-quaternion tensorly && \
               pip install --no-build-isolation --no-deps /workspace/plugins/spectrochempy-iris && \
               pip install --no-build-isolation --no-deps /workspace/plugins/spectrochempy-nmr && \
+              pip install --no-build-isolation --no-deps /workspace/plugins/spectrochempy-tensor && \
               pip install --no-build-isolation --no-deps /workspace/plugins/spectrochempy-hypercomplex && \
               pip install --no-build-isolation --no-deps /workspace/plugins/spectrochempy-carroucell && \
               python3 /workspace/.github/workflows/scripts/test_colab_plugins.py --mode with-plugins

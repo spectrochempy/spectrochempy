@@ -51,6 +51,7 @@ for specific domains. Install them as needed:
 
           pip install spectrochempy[iris]      # 2D-IRIS analysis
           pip install spectrochempy[nmr]       # Bruker TopSpin reader & NMR processing
+          pip install spectrochempy[tensor]    # TensorLy-backed tensor decompositions
           pip install spectrochempy-carroucell  # Carroucell experiment reader
 
     .. tab:: Using mamba (recommended)
@@ -59,6 +60,7 @@ for specific domains. Install them as needed:
 
           mamba install -c spectrocat spectrochempy-iris    # 2D-IRIS analysis
           mamba install -c spectrocat spectrochempy-nmr     # Bruker TopSpin & NMR
+          mamba install -c spectrocat spectrochempy-tensor  # Tensor decompositions
           mamba install -c spectrocat spectrochempy-hypercomplex  # Quaternion support
           mamba install -c spectrocat spectrochempy-carroucell  # Carroucell reader
 
@@ -68,6 +70,7 @@ for specific domains. Install them as needed:
 
          pip install -e plugins/spectrochempy-iris
          pip install -e plugins/spectrochempy-nmr
+         pip install -e plugins/spectrochempy-tensor
          pip install -e plugins/spectrochempy-carroucell
 
 Each plugin is independently versioned and maintained. Missing plugins

@@ -247,7 +247,7 @@ def make_release_note_index(revision):
         revision = revision + ".dev"
 
     # Process changelog content
-    content = (WN / "changelog.rst").read_text()
+    content = (WN / "changelog.rst").read_text(encoding="utf-8")
     sections = re.split(r"^\.\. section$", content, flags=re.M)
 
     # Clean and organize sections
@@ -285,13 +285,23 @@ def make_release_note_index(revision):
 
     # Write appropriate files based on version type
     if ".dev" in revision:
-        (WN / "latest.rst").write_text(latest_content)
+        (WN / "latest.rst").write_text(
+            latest_content,
+            encoding="utf-8",
+            newline="\n",
+        )
     else:
         # Handle release version
-        (WN / f"v{revision}.rst").write_text(changelog_content)
-        (WN / "latest.rst").write_text(latest_content)
+        (WN / f"v{revision}.rst").write_text(
+            changelog_content,
+            encoding="utf-8",
+            newline="\n",
+        )
+        (WN / "latest.rst").write_text(latest_content, encoding="utf-8", newline="\n")
         # Reset changelog template
-        (WN / "changelog.rst").write_text(_get_changelog_template())
+        (WN / "changelog.rst").write_text(
+            _get_changelog_template(), encoding="utf-8", newline="\n"
+        )
 
     # Generate index file
     _generate_release_index(revision)

@@ -249,7 +249,7 @@ jobs:
         run: |
           # Official plugins are explicitly listed. Experimental plugins may live in
           # the repository but are NOT auto-published by this workflow.
-          OFFICIAL_PLUGINS="spectrochempy-nmr spectrochempy-iris spectrochempy-hypercomplex spectrochempy-carroucell"
+          OFFICIAL_PLUGINS="spectrochempy-nmr spectrochempy-iris spectrochempy-tensor spectrochempy-hypercomplex spectrochempy-carroucell"
 
           plugins=()
           for dir in plugins/*/; do

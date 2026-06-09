@@ -21,4 +21,4 @@
 
 # CP dependencies
 # ---------------
-tensorly
+spectrochempy[tensor]

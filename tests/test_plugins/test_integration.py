@@ -29,6 +29,8 @@ from spectrochempy.plugins.registry import PluginRegistry
 
 _CANTERA_INSTALLED = importlib.util.find_spec("spectrochempy_cantera") is not None
 _IRIS_INSTALLED = importlib.util.find_spec("spectrochempy_iris") is not None
+_TENSOR_INSTALLED = importlib.util.find_spec("spectrochempy_tensor") is not None
+_TENSORLY_INSTALLED = importlib.util.find_spec("tensorly") is not None
 
 # ------------------------------------------------------------------
 # Fake plugins for integration testing
@@ -164,6 +166,8 @@ class TestLazyLoadingNonRegression:
         "spectrochempy_cantera._pfr",
         "spectrochempy_iris",
         "spectrochempy_iris._core",
+        "spectrochempy_tensor",
+        "spectrochempy_tensor.decompositions.cp",
         "cantera",
     ]
 
@@ -244,12 +248,13 @@ raise SystemExit(0)
         assert result.returncode == 0, result.stderr or result.stdout
 
     def test_namespace_access(self):
-        """``scp.iris / scp.nmr / scp.cantera`` do not load plugin modules."""
+        """Official/experimental namespace access does not load plugin modules."""
         self._run(
             setup="import spectrochempy",
             operation=(
                 "_ = spectrochempy.iris\n"
                 "_ = spectrochempy.nmr\n"
+                "_ = spectrochempy.tensor\n"
                 "_ = spectrochempy.cantera"
             ),
             description="namespace access",
@@ -257,7 +262,7 @@ raise SystemExit(0)
 
     def test_submodule_import(self):
         """``import spectrochempy.<ns>`` does not load plugin modules."""
-        for ns in ("iris", "nmr", "cantera"):
+        for ns in ("iris", "nmr", "tensor", "cantera"):
             self._run(
                 setup="import spectrochempy",
                 operation=f"import spectrochempy.{ns}",
@@ -333,7 +338,7 @@ class TestMissingPluginError:
         """Accessing an attribute on a missing known namespace raises MissingPluginNamespaceError."""
         from spectrochempy.plugins.deps import MissingPluginNamespaceError
 
-        for ns_name in ("nmr", "iris", "carroucell", "cantera"):
+        for ns_name in ("nmr", "iris", "tensor", "carroucell", "cantera"):
             ns = self._make_missing_namespace(ns_name, monkeypatch)
             with pytest.raises(MissingPluginNamespaceError) as excinfo:
                 _ = ns.some_attribute
@@ -368,6 +373,7 @@ class TestMissingPluginError:
         self._simulate_no_discovered_plugins(monkeypatch)
 
         assert hasattr(spectrochempy, "IRIS") is False
+        assert hasattr(spectrochempy, "CP") is False
 
     def test_experimental_root_symbol_has_no_special_hint(self, monkeypatch):
         """Experimental plugin symbols are not promoted by install guidance."""
@@ -449,6 +455,25 @@ class TestDeprecatedRootAliases:
                 str(m.message) for m in w if "deprecated" in str(m.message).lower()
             ]
             assert len(dep_msgs) == 0, f"Unexpected warnings: {dep_msgs}"
+
+    @pytest.mark.skipif(
+        not (_TENSOR_INSTALLED and _TENSORLY_INSTALLED),
+        reason="tensor plugin dependencies not installed",
+    )
+    def test_cp_root_alias_deprecated(self):
+        """scp.CP emits DeprecationWarning pointing to scp.tensor.CP."""
+        import warnings
+
+        import spectrochempy as scp
+
+        scp._EMITTED_PLUGIN_ROOT_WARNINGS.discard("CP")
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            obj = scp.CP
+            assert obj is not None, "CP should still be accessible"
+            assert any(
+                "scp.tensor.CP" in str(msg.message) for msg in w
+            ), f"No CP deprecation warning: {[str(m.message) for m in w]}"
 
 
 class TestSubmoduleImport:
@@ -598,7 +623,7 @@ class TestMissingPlugin:
 
         # Remove existing sys.modules entries so they get recreated with
         # the monkeypatched manager.
-        for ns in ("nmr", "iris", "cantera"):
+        for ns in ("nmr", "iris", "tensor", "cantera"):
             key = f"spectrochempy.{ns}"
             if key in sys.modules:
                 del sys.modules[key]
@@ -620,7 +645,7 @@ class TestMissingPlugin:
 
         # Remove existing sys.modules entries so they get recreated with
         # the monkeypatched manager.
-        for ns in ("nmr", "iris", "cantera"):
+        for ns in ("nmr", "iris", "tensor", "cantera"):
             key = f"spectrochempy.{ns}"
             if key in sys.modules:
                 del sys.modules[key]

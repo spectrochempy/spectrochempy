@@ -37,6 +37,7 @@ def test_core_install():
     for ns, symbol, pkg in (
         ("iris", "IRIS", "spectrochempy-iris"),
         ("nmr", "read_topspin", "spectrochempy-nmr"),
+        ("tensor", "CP", "spectrochempy-tensor"),
         ("carroucell", "Carroucell", "spectrochempy-carroucell"),
     ):
         try:
@@ -99,6 +100,7 @@ def test_with_plugins():
     for mod_name in (
         "spectrochempy_iris",
         "spectrochempy_nmr",
+        "spectrochempy_tensor",
         "spectrochempy_hypercomplex",
         "spectrochempy_carroucell",
     ):
@@ -113,6 +115,7 @@ def test_with_plugins():
     for mod_name, attr, label in (
         ("spectrochempy_iris", "IRIS", "iris.IRIS"),
         ("spectrochempy_nmr", "read_topspin", "nmr.read_topspin"),
+        ("spectrochempy_tensor", "CP", "tensor.CP"),
     ):
         try:
             mod = importlib.import_module(mod_name)

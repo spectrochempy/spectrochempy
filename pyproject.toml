@@ -46,7 +46,7 @@ requires-python = ">=3.11"
 
 [project.optional-dependencies]
 build = ["setuptools", "setuptools_scm", "toml", "jinja2", "anaconda-client"]
-cp = ["tensorly"]
+cp = ["spectrochempy[tensor]"]
 dev = [
   "toml",
   "ruff",
@@ -88,9 +88,11 @@ interactive = [
 ]
 nmr = ["spectrochempy-nmr>=0.1,<0.2"]
 iris = ["spectrochempy-iris>=0.1,<0.2"]
+tensor = ["spectrochempy-tensor>=0.1,<0.2"]
 plugins = [
     "spectrochempy[nmr]",
     "spectrochempy[iris]",
+    "spectrochempy[tensor]",
     "spectrochempy-hypercomplex>=0.1,<0.2",
     "spectrochempy-carroucell>=0.1,<0.2",
 ]

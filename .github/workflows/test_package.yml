@@ -186,6 +186,7 @@ jobs:
           python -m pip install -e plugins/spectrochempy-hypercomplex
           python -m pip install -e plugins/spectrochempy-nmr
           python -m pip install -e plugins/spectrochempy-iris
+          python -m pip install -e plugins/spectrochempy-tensor
           python -m pip install -e plugins/spectrochempy-carroucell
           duration=$((SECONDS - start))
           echo "plugin installation: ${duration}s" | tee -a "$CI_TIMING_FILE"
@@ -206,12 +207,14 @@ jobs:
               "spectrochempy-hypercomplex",
               "spectrochempy-nmr",
               "spectrochempy-iris",
+              "spectrochempy-tensor",
               "spectrochempy-carroucell",
           ]
           import_names = {
               "spectrochempy-hypercomplex": "spectrochempy_hypercomplex",
               "spectrochempy-nmr": "spectrochempy_nmr",
               "spectrochempy-iris": "spectrochempy_iris",
+              "spectrochempy-tensor": "spectrochempy_tensor",
               "spectrochempy-carroucell": "spectrochempy_carroucell",
           }
 

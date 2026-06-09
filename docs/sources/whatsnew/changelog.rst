@@ -19,6 +19,9 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- Added the official ``spectrochempy-tensor`` plugin for TensorLy-backed tensor
+  decompositions, exposing CP/PARAFAC as ``scp.tensor.CP``.
+
 
 .. section
 
@@ -69,12 +72,18 @@ Deprecations
 ~~~~~~~~~~~~
 .. Add here new deprecations (do not delete this comment)
 
+- ``scp.CP`` and ``spectrochempy.analysis.decomposition.cp.CP`` are now
+  deprecated compatibility paths for ``scp.tensor.CP``.
+
 
 .. section
 
 Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
+
+- MAINT: Moved CP/PARAFAC implementation and TensorLy dependency ownership into
+  the new tensor plugin, keeping the core package tensor-agnostic.
 
 - MAINT: Advanced the internal ``CoordSet`` storage migration by consolidating
   lookup, serializer adapters, group conversion, and lifecycle helpers around

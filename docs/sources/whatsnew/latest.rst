@@ -12,6 +12,12 @@ What's New in Revision 0.9.4.dev
 These are the changes in SpectroChemPy-0.9.4.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
 
+New Features
+~~~~~~~~~~~~
+
+- Added the official ``spectrochempy-tensor`` plugin for TensorLy-backed tensor
+  decompositions, exposing CP/PARAFAC as ``scp.tensor.CP``.
+
 Bug Fixes
 ~~~~~~~~~
 
@@ -37,8 +43,17 @@ Bug Fixes
 - Fixed preservation of reference-based coordinates when copying
   ``CoordSet`` and ``NDDataset`` objects.
 
+Deprecations
+~~~~~~~~~~~~
+
+- ``scp.CP`` and ``spectrochempy.analysis.decomposition.cp.CP`` are now
+  deprecated compatibility paths for ``scp.tensor.CP``.
+
 Developer
 ~~~~~~~~~
+
+- MAINT: Moved CP/PARAFAC implementation and TensorLy dependency ownership into
+  the new tensor plugin, keeping the core package tensor-agnostic.
 
 - MAINT: Advanced the internal ``CoordSet`` storage migration by consolidating
   lookup, serializer adapters, group conversion, and lifecycle helpers around
