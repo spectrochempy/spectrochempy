@@ -58,6 +58,7 @@ Dependency Updates
 ~~~~~~~~~~~~~~~~~~
 .. Add here new dependency updates (do not delete this comment)
 
+- pint >= 0.24 is now required
 
 .. section
 
