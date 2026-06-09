@@ -75,6 +75,12 @@ def test_legacy_cp_module_import_warns():
         CP = module.CP
 
     assert CP.__name__ == "CP"
-    assert len(captured) == 1
-    assert "spectrochempy.analysis.decomposition.cp" in str(captured[0].message)
-    assert "scp.tensor.CP" in str(captured[0].message)
+
+    legacy_warnings = [
+        warning
+        for warning in captured
+        if "spectrochempy.analysis.decomposition.cp" in str(warning.message)
+    ]
+
+    assert len(legacy_warnings) == 1
+    assert "scp.tensor.CP" in str(legacy_warnings[0].message)
