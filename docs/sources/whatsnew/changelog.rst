@@ -93,10 +93,11 @@ Developer
 - MAINT: Advanced the internal ``CoordSet`` storage migration by consolidating
   lookup, serializer adapters, group conversion, and lifecycle helpers around
   transient group metadata while preserving legacy runtime storage,
-  serialization, and public behavior.  Migrated ``_concatenate_dim`` to the
-  lifecycle adapter pattern, completing the migration of all dimension
-  manipulation methods.  Same-dimension multi-coordinate labels, alias metadata,
-  empty coordinate handling, and non-first default selection are preserved.
+  serialization, and public behavior.  Migrated ``_concatenate_dim`` and
+  ``_interpolate_dim`` to the lifecycle adapter pattern, completing the
+  migration of all dimension manipulation methods.  Same-dimension
+  multi-coordinate semantics, label metadata, alias and default preservation,
+  reference pass-through, and coordinate metadata propagation are maintained.
 
 - MAINT: Removed stale commented ``docrep`` residue and the unused commented
   ``numpydoc`` pre-commit hook block.
