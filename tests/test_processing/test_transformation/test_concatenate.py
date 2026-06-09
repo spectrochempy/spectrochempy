@@ -204,10 +204,73 @@ def test_concatenate_preserves_multi_coord_labels():
 
     result = concatenate(ds1, ds2, dims="x")
     # The x dim has two sub-coords; each should have concatenated labels.
-    # CoordSet processes coords in reverse order, so sub-coord order is reversed.
     x_coords = result.coordset["x"]
     assert isinstance(x_coords, scp.CoordSet)
     assert len(x_coords) == 2
+
+    # Collect labels from sub-coords without assuming _coords order.
+    all_label_sets = {tuple(c.labels.tolist()) for c in x_coords._coords}
+    assert ("a", "b", "c", "g", "h", "i") in all_label_sets
+    assert ("d", "e", "f", "j", "k", "l") in all_label_sets
+
+
+def test_concatenate_multi_coord_default_data_is_not_concatenated():
+    """Multi-coord data is not concatenated through ``CoordSet.data``.
+
+    ``CoordSet.data`` delegates to ``self.default.data``, and the old code
+    only sets a dead ``_data`` dynamic attribute on the CoordSet that is
+    never read.  Behavior is preserved.
+    """
+    y = scp.Coord(np.arange(2.0), title="rows")
+    inner1 = scp.CoordSet(
+        scp.Coord(np.arange(3.0)),
+        scp.Coord(np.arange(3.0, 6.0)),
+    )
+    inner2 = scp.CoordSet(
+        scp.Coord(np.arange(3.0, 6.0)),
+        scp.Coord(np.arange(6.0, 9.0)),
+    )
+    ds1 = scp.NDDataset(np.ones((2, 3)), coordset=[y, inner1])
+    ds2 = scp.NDDataset(np.ones((2, 3)), coordset=[y, inner2])
+
+    result = concatenate(ds1, ds2, dims="x")
+    # Each sub-coord data length is unchanged (concatenation not applied).
+    for c in result.coordset["x"]._coords:
+        assert len(c.data) == 3
+
+
+def test_concatenate_with_empty_coord_returns_coordset_unchanged():
+    """Concatenate on an empty dimension coordinate returns the coordset unchanged."""
+    x_empty = scp.Coord(None, size=3)
+    y1 = scp.Coord(np.arange(2.0))
+    y2 = scp.Coord(np.arange(2.0, 4.0))
+    ds1 = scp.NDDataset(np.ones((2, 3)), coordset=[y1, x_empty])
+    ds2 = scp.NDDataset(np.ones((2, 3)), coordset=[y2, x_empty])
+
+    result = concatenate(ds1, ds2, dims="x")
+    # The x coord is empty in both; the result should still have an empty x coord.
+    assert result.x.is_empty
+
+
+def test_concatenate_preserves_non_first_default():
+    """Concatenate preserves the selected non-first default for multi-coord dims."""
+    y = scp.Coord(np.arange(2.0), title="rows")
+    inner1 = scp.CoordSet(
+        scp.Coord(np.arange(3.0), title="first"),
+        scp.Coord(np.arange(3.0, 6.0), title="second"),
+    )
+    # select uses 1-indexed ints: select(2) makes the second sub-coord default.
+    inner1.select(2)
+    inner2 = scp.CoordSet(
+        scp.Coord(np.arange(3.0, 6.0), title="first"),
+        scp.Coord(np.arange(6.0, 9.0), title="second"),
+    )
+    ds1 = scp.NDDataset(np.ones((2, 3)), coordset=[y, inner1])
+    ds2 = scp.NDDataset(np.ones((2, 3)), coordset=[y, inner2])
+
+    result = concatenate(ds1, ds2, dims="x")
+    # The default index should be preserved from the first coordset.
+    assert result.coordset["x"]._default == 1
 
 
 def test_concatenate_none_coord_warns():

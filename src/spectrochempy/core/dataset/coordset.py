@@ -1035,47 +1035,75 @@ class CoordSet(HasTraits):
         coordsets for the specified dimension coordinate, preserving the
         existing concatenation-time coordinate semantics.
         """
-        result = self.copy()
-        coord = result[dim]
-
-        if coord.is_empty:
-            return result
-
-        labels = []
-        if coord.is_labeled:
-            for cs in coordsets:
-                labels.append(cs[dim].labels)
-
-        if coord._implements() in ["Coord"]:
-            new_coord = Coord(coord)
-            if labels:
-                new_coord._labels = np.concatenate(labels)
-        elif coord._implements("CoordSet"):
-            new_coord = cpy.deepcopy(coord)
-            if labels:
-                labels_arr = np.array(labels, dtype=object)
-                for i, c in enumerate(new_coord._coords):
-                    try:
-                        labels_not_none = np.all(
-                            labels_arr[:, i] != [None] * len(labels_arr[:, i]),
-                        )
-                    except ValueError:
-                        labels_not_none = True
-                    if labels_not_none:
-                        c._labels = np.concatenate(list(labels_arr[:, i]))
+        groups = self._lookup_groups()
+        groups = self._concatenate_lifecycle_groups(groups, dim, coordsets)
+        result = self._legacy_coordset_from_lifecycle_groups(groups)
 
         data_tuple = tuple(cs[dim].data for cs in coordsets)
         none_coord = any(x is None for x in data_tuple)
         if not none_coord:
-            new_coord._data = np.concatenate(data_tuple)
+            result[dim]._data = np.concatenate(data_tuple)
         else:
             warnings.warn(
                 f"Some dataset(s) coordinates in the {dim} dimension are None.",
                 stacklevel=2,
             )
 
-        result[dim] = new_coord
         return result
+
+    @staticmethod
+    def _concatenate_lifecycle_groups(groups, dim, coordsets):
+        """
+        Return projected groups after concatenating dimension coordinate labels.
+
+        This helper applies the per-entry label concatenation logic on the
+        transient group projection.  Data concatenation is handled by the
+        caller since it applies to the reconstructed container (Coord or
+        CoordSet) rather than individual group entries.
+        """
+        coord_dims = [g.dim for g in groups if g.reference is None]
+        if dim not in coord_dims:
+            return tuple(groups)
+
+        coord_indices = [i for i, g in enumerate(groups) if g.reference is None]
+        idx = coord_dims.index(dim)
+        group_idx = coord_indices[idx]
+        group = groups[group_idx]
+
+        if not group.entries or group.entries[0].coord.is_empty:
+            return tuple(groups)
+
+        new_entries = []
+        for i, entry in enumerate(group.entries):
+            new_coord = entry.coord.copy(keepname=True)
+
+            per_coord_labels = []
+            for cs in coordsets:
+                legacy = cs[dim]
+                if isinstance(legacy, CoordSet) and i < len(legacy._coords):
+                    lbl = legacy._coords[i].labels
+                elif i == 0:
+                    lbl = legacy.labels
+                else:
+                    lbl = None
+                if lbl is not None:
+                    per_coord_labels.append(lbl)
+
+            if per_coord_labels:
+                try:
+                    has_labels = np.all(
+                        np.array(per_coord_labels) != [None] * len(per_coord_labels),
+                    )
+                except ValueError:
+                    has_labels = True
+                if has_labels:
+                    new_coord._labels = np.concatenate(per_coord_labels)
+
+            new_entries.append(replace(entry, coord=new_coord))
+
+        result_groups = list(groups)
+        result_groups[group_idx] = replace(group, entries=tuple(new_entries))
+        return tuple(result_groups)
 
     def _interpolate_dim(self, dim, target_coord, *, interpolate_secondary):
         """

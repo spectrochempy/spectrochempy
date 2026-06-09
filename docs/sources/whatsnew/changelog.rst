@@ -51,6 +51,10 @@ Bug Fixes
 - Fixed preservation of reference-based coordinates when copying
   ``CoordSet`` and ``NDDataset`` objects.
 
+- Fixed a crash when concatenating datasets along a dimension where one
+  dataset has labels and another does not.  Previously, a ``TypeError``
+  was raised on mixed labeled/unlabeled coordinates.
+
 
 .. section
 
@@ -89,7 +93,10 @@ Developer
 - MAINT: Advanced the internal ``CoordSet`` storage migration by consolidating
   lookup, serializer adapters, group conversion, and lifecycle helpers around
   transient group metadata while preserving legacy runtime storage,
-  serialization, and public behavior.
+  serialization, and public behavior.  Migrated ``_concatenate_dim`` to the
+  lifecycle adapter pattern, completing the migration of all dimension
+  manipulation methods.  Same-dimension multi-coordinate labels, alias metadata,
+  empty coordinate handling, and non-first default selection are preserved.
 
 - MAINT: Removed stale commented ``docrep`` residue and the unused commented
   ``numpydoc`` pre-commit hook block.
