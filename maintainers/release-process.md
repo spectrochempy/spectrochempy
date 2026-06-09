@@ -71,6 +71,7 @@ services externes.
   ```bash
   anaconda show spectrocat/spectrochempy-nmr
   anaconda show spectrocat/spectrochempy-iris
+  anaconda show spectrocat/spectrochempy-tensor
   anaconda show spectrocat/spectrochempy-hypercomplex
   anaconda show spectrocat/spectrochempy-carroucell
   ```
@@ -258,7 +259,7 @@ déclenché manuellement depuis Actions → **Check plugin release status** →
 **Run workflow**.
 
 Il produit un tableau de synthèse dans le *workflow summary* (onglet
-Summary du run) listant les 4 plugins officiels avec :
+Summary du run) listant les plugins officiels avec :
 
 - Statut (unchanged / modified / no previous tag)
 - Dernier tag publié
@@ -459,6 +460,7 @@ entrées sont incorrectes car :
 6. **Release des plugins** (dans cet ordre) :
    - `spectrochempy-nmr`
    - `spectrochempy-iris`
+   - `spectrochempy-tensor`
    - `spectrochempy-hypercomplex`
    - `spectrochempy-carroucell`
 
@@ -507,7 +509,7 @@ entrées sont incorrectes car :
 - [ ] Lancer **Release an official plugin** avec `confirm_zenodo_disabled=true`
 - [ ] Vérifier PyPI : `pip install spectrochempy-XXX==X.Y.Z`
 - [ ] Vérifier Anaconda : `anaconda show spectrocat/spectrochempy-XXX`
-- [ ] Répéter pour chaque plugin (nmr → iris → hypercomplex → carroucell)
+- [ ] Répéter pour chaque plugin (nmr → iris → tensor → hypercomplex → carroucell)
 - [ ] Réactiver l'intégration GitHub → Zenodo (avant la prochaine release core)
 
 ### TestPyPI cleanup

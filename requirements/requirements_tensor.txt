@@ -19,10 +19,6 @@
 # -----------------
 -r requirements.txt
 
-# PLUGINS dependencies
-# --------------------
-spectrochempy[nmr]
-spectrochempy[iris]
-spectrochempy[tensor]
-spectrochempy-hypercomplex>=0.1,<0.2
-spectrochempy-carroucell>=0.1,<0.2
+# TENSOR dependencies
+# -------------------
+spectrochempy-tensor>=0.1,<0.2

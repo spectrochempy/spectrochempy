@@ -15,7 +15,6 @@ from packaging.version import Version
 VERSIONS = {
     "xarray": "*",
     "PyQt5": "*",
-    "tensorly": "*",
 }
 
 # A mapping from import name to package name (on PyPI) for packages where

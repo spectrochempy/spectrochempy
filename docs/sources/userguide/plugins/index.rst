@@ -20,6 +20,7 @@ Install official plugins with extras:
 
     pip install spectrochempy[nmr]
     pip install spectrochempy[iris]
+    pip install spectrochempy[tensor]
     pip install spectrochempy[nmr,hypercomplex]
 
 or install plugin packages directly:
@@ -28,6 +29,7 @@ or install plugin packages directly:
 
     pip install spectrochempy-nmr
     pip install spectrochempy-iris
+    pip install spectrochempy-tensor
     pip install spectrochempy-hypercomplex
     pip install spectrochempy-carroucell
 
@@ -55,6 +57,7 @@ Plugin APIs are exposed through namespaces:
 
     dataset = scp.nmr.read_topspin("path/to/fid")
     analysis = scp.iris.IRIS()
+    model = scp.tensor.CP(n_components=2)
 
 Operations that act on an existing dataset use dataset accessors:
 
@@ -65,7 +68,8 @@ Operations that act on an existing dataset use dataset accessors:
     ri = dataset.hyper.component("RI")
 
 Some former top-level names remain as compatibility aliases. New code should
-prefer namespaced APIs such as ``scp.nmr.read_topspin`` and ``scp.iris.IRIS``.
+prefer namespaced APIs such as ``scp.nmr.read_topspin``, ``scp.iris.IRIS``,
+and ``scp.tensor.CP``.
 
 Inspecting plugins
 ------------------
@@ -114,6 +118,7 @@ Plugin pages
 
    official_plugins
    nmr
+   tensor
    hypercomplex
    iris
    experimental_plugins

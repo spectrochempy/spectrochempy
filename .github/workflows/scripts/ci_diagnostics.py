@@ -32,6 +32,7 @@ OPTIONAL_DEPENDENCIES = [
 OFFICIAL_PLUGIN_DISTRIBUTIONS = [
     "spectrochempy-iris",
     "spectrochempy-nmr",
+    "spectrochempy-tensor",
     "spectrochempy-hypercomplex",
     "spectrochempy-carroucell",
 ]

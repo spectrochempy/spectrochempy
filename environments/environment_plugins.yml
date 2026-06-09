@@ -47,5 +47,7 @@ dependencies:
     - spectrochempy-nmr>=0.1,<0.2
     # iris
     - spectrochempy-iris>=0.1,<0.2
+    # tensor
+    - spectrochempy-tensor>=0.1,<0.2
     - spectrochempy-hypercomplex>=0.1,<0.2
     - spectrochempy-carroucell>=0.1,<0.2

@@ -24,6 +24,7 @@ KNOWN_PLUGIN_READERS = {
 KNOWN_PLUGIN_NAMESPACES = {
     "nmr": ("spectrochempy-nmr", "spectrochempy[nmr]"),
     "iris": ("spectrochempy-iris", "spectrochempy[iris]"),
+    "tensor": ("spectrochempy-tensor", "spectrochempy[tensor]"),
     "carroucell": ("spectrochempy-carroucell", "spectrochempy-carroucell"),
 }
 
@@ -44,6 +45,12 @@ OFFICIAL_PLUGINS = {
         "extra": "spectrochempy[nmr]",
         "namespace": "nmr",
     },
+    "tensor": {
+        "title": "Tensor plugin",
+        "package": "spectrochempy-tensor",
+        "extra": "spectrochempy[tensor]",
+        "namespace": "tensor",
+    },
     "hypercomplex": {
         "title": "Hypercomplex plugin",
         "package": "spectrochempy-hypercomplex",
@@ -59,6 +66,11 @@ OFFICIAL_PLUGINS = {
 }
 
 PLUGIN_SYMBOL_HINTS = {
+    "CP": {
+        "plugin_title": "Tensor plugin",
+        "plugin_package": "spectrochempy-tensor",
+        "namespace": "scp.tensor.CP",
+    },
     "IRIS": {
         "plugin_title": "IRIS plugin",
         "plugin_package": "spectrochempy-iris",

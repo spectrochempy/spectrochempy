@@ -43,4 +43,5 @@ dependencies:
     # CP dependencies
     # ---------------
 
-    - tensorly
+    # tensor
+    - spectrochempy-tensor>=0.1,<0.2

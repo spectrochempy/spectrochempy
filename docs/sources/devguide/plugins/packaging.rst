@@ -78,6 +78,7 @@ used by PyPI wheels:
     pip install -e .
     pip install -e plugins/spectrochempy-nmr
     pip install -e plugins/spectrochempy-iris
+    pip install -e plugins/spectrochempy-tensor
     pip install -e plugins/spectrochempy-cantera
 
 The bundled plugins can also be installed with the helper:
@@ -98,6 +99,7 @@ Users can install official plugins through SpectroChemPy extras:
 
     pip install "spectrochempy[nmr]"
     pip install "spectrochempy[iris]"
+    pip install "spectrochempy[tensor]"
     pip install "spectrochempy[plugins]"
 
 The ``nmr`` extra installs the NMR plugin, currently including the TopSpin

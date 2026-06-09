@@ -31,6 +31,10 @@ Current official plugins
      - ``spectrochempy-nmr``
      - ``scp.nmr``
      - TopSpin/Bruker NMR reading and NMR-specific processing utilities.
+   * - Tensor
+     - ``spectrochempy-tensor``
+     - ``scp.tensor``
+     - TensorLy-backed tensor decompositions such as CP/PARAFAC.
    * - Hypercomplex
      - ``spectrochempy-hypercomplex``
      - ``dataset.hyper``
@@ -49,6 +53,7 @@ Official plugins can be installed through SpectroChemPy extras:
 
     pip install spectrochempy[iris]
     pip install spectrochempy[nmr]
+    pip install spectrochempy[tensor]
     pip install spectrochempy[nmr,hypercomplex]  # NMR with 2D hypercomplex support
 
 or directly:
@@ -57,6 +62,7 @@ or directly:
 
     pip install spectrochempy-iris
     pip install spectrochempy-nmr
+    pip install spectrochempy-tensor
     pip install spectrochempy-hypercomplex
     pip install spectrochempy-carroucell
 
@@ -102,6 +108,7 @@ The recommended form is namespaced:
     import spectrochempy as scp
 
     analysis = scp.iris.IRIS()
+    model = scp.tensor.CP(n_components=2)
     dataset = scp.nmr.read_topspin("path/to/fid")
 
 Dataset accessors are reserved for operations that act on an existing dataset:
@@ -112,7 +119,7 @@ Dataset accessors are reserved for operations that act on an existing dataset:
 
 Some official plugins may expose limited root-level compatibility aliases, such
 as ``scp.IRIS``. New examples should prefer the namespaced form,
-``scp.iris.IRIS``.
+``scp.iris.IRIS`` or ``scp.tensor.CP``.
 
 Plugin summaries
 ================
@@ -149,6 +156,24 @@ NMR-specific workflows.
     import spectrochempy as scp
 
     dataset = scp.nmr.read_topspin("path/to/fid")
+
+Tensor
+------
+
+The ``spectrochempy-tensor`` plugin provides TensorLy-backed tensor
+decomposition classes. CP/PARAFAC is available now; the package layout reserves
+space for future tensor methods such as Tucker and TensorTrain.
+
+.. code-block:: bash
+
+    pip install spectrochempy[tensor]
+
+.. code-block:: python
+
+    import spectrochempy as scp
+
+    model = scp.tensor.CP(n_components=2)
+    model.fit(dataset)
 
 Hypercomplex
 ------------
