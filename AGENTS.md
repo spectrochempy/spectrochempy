@@ -86,12 +86,19 @@ Use audit notes for:
 
 For multi-PR projects, maintain dedicated audit files.
 
+Architecture and migration audit files are maintainer working notes and should
+be ignored by git by default. Name new audit files with a leading tilde so they
+match the repository ignore rule, for example `audit/~project-architecture-audit.md`.
+
+Only create a tracked audit file when the maintainer explicitly asks for a
+versioned audit artifact.
+
 Examples:
 
 ```text id="llqkmn"
-audit/project-architecture-audit.md
-audit/project-pr12-notes.md
-audit/project-pr13-notes.md
+audit/~project-architecture-audit.md
+audit/~project-pr12-notes.md
+audit/~project-pr13-notes.md
 ```
 
 Detailed implementation history belongs in audits, not changelog entries.
