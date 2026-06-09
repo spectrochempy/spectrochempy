@@ -43,6 +43,11 @@ Bug Fixes
 - Fixed preservation of reference-based coordinates when copying
   ``CoordSet`` and ``NDDataset`` objects.
 
+Dependency Updates
+~~~~~~~~~~~~~~~~~~
+
+- pint >= 0.24 is now required
+
 Deprecations
 ~~~~~~~~~~~~
 
