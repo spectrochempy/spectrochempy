@@ -9,7 +9,7 @@ SpectroChemPy
 ![Conda](https://img.shields.io/conda/v/spectrocat/spectrochempy)
 [![PyPI version](https://badge.fury.io/py/spectrochempy.svg)](https://badge.fury.io/py/spectrochempy)
 [![Docs](https://readthedocs.org/projects/docs/badge/?version=latest)](https://www.spectrochempy.fr/latest)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3823841.svg)](https://doi.org/10.5281/zenodo.3823841)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.3823841-blue.svg)](https://doi.org/10.5281/zenodo.3823841)
 ![Conda](https://img.shields.io/conda/l/spectrocat/spectrochempy)
 
 ## What is SpectroChemPy?
