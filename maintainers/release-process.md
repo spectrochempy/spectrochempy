@@ -47,11 +47,11 @@ services externes.
 1. Aller sur la [page GitHub de Zenodo](https://zenodo.org/account/settings/github/)
 2. Ouvrir l'onglet **GitHub** (premier onglet, par défaut)
 3. Chercher `spectrochempy/spectrochempy` dans la liste des dépôts
-4. Vérifier que le bouton est sur **Enabled** (vert) — pas grisé (Disabled)
-5. Si le dépôt est grisé, cliquer sur le bouton pour le réactiver
-6. Si le dépôt est déjà Enabled mais que l'intégration semble ne pas
+4. Vérifier que le bouton à droite indique **On** (vert) — pas **Off** (grisé)
+5. Si le dépôt est grisé (Off), cliquer sur le bouton pour le réactiver (On)
+6. Si le dépôt est déjà On mais que l'intégration semble ne pas
    fonctionner (par exemple après une phase de releases plugins), on peut
-   **toggle** (Disabled → Enabled) pour forcer Zenodo à reconnaître le dépôt
+   **toggle** (Off → On) pour forcer Zenodo à reconnaître le dépôt
 7. Vérifier l'onglet **Errors** (deuxième onglet) : aucune erreur active
    (pas de croix rouge)
 8. Vérifier que `CITATION.cff` et `zenodo.json` sont valides (les versions
@@ -59,7 +59,7 @@ services externes.
 
 **Avant une release de plugins :**
 
-- Vérifier que l'intégration GitHub est **désactivée** dans Zenodo
+- Vérifier que l'intégration GitHub est **Off** (grisée) dans Zenodo
   (voir [Zenodo and plugin releases](#zenodo-and-plugin-releases))
 
 ### Anaconda.org
@@ -121,7 +121,7 @@ confirm_zenodo_enabled = true                  # ← cocher après avoir vérifi
 ```
 
 > **Important** : avant de lancer le workflow, vérifier que l'intégration
-> GitHub → Zenodo est **Enabled** (voir [Zenodo](#zenodo) ci-dessus).
+> GitHub → Zenodo est **On** (voir [Zenodo](#zenodo) ci-dessus).
 > La case `confirm_zenodo_enabled` doit être cochée pour que le workflow
 > démarre — cela garantit que Zenodo est prêt à archiver la future release
 > sans intervention manuelle au moment de la publication.
@@ -246,6 +246,68 @@ Si la version n'apparaît pas dans le dropdown alors que la release existe :
 
 ---
 
+## plugin_version_status.py — le moteur de décision central
+
+Le script `.github/workflows/scripts/plugin_version_status.py` est le
+composant central qui détermine l'état de publication des plugins.
+
+### Rôle
+
+- Trouve le dernier tag de release d'un plugin (`spectrochempy-XXX-v*`)
+- Détecte les changements depuis ce tag dans les fichiers distribués
+  (`src/`, `pyproject.toml`, `recipe.yaml`, `meta.yaml`, `README.md`,
+  `LICENSE`, `MANIFEST.in`)
+- Compte le nombre de commits pertinents depuis le dernier tag
+- Calcule une version de développement (`next_patch.devN`) selon PEP 440
+- Détermine si le plugin doit être publié (`has_changes`)
+
+### Script unique, trois workflows
+
+Un seul script est utilisé par trois workflows, ce qui garantit que la
+logique de détection des changements reste cohérente :
+
+| Workflow | Usage du script |
+|----------|----------------|
+| `plugin_release_status.yml` | `--all-official --summary` — Affiche un tableau read-only dans le résumé du workflow |
+| `release_plugin.yml` | `--all-official --summary` — Affiche le même tableau comme confirmation avant release |
+| `publish_plugins.yml` | `--plugin <name> --apply-dev-version --github-output --json` — Injecte la version de développement et expose les métadonnées |
+
+### Pourquoi pas de logique dupliquée dans les workflows
+
+Les workflows YAML n'ont pas besoin de recalculer les versions ou de
+détecter les changements : ils déléguent tout au script Python. Cela évite
+les divergences entre la logique de statut (read-only) et la logique de
+build/publication.
+
+### Première release d'un plugin
+
+Quand un plugin n'a encore aucun tag de release :
+
+- `plugin_version_status.py` retourne `latest_tag: ""` et
+  `has_changes: true` (car tous les fichiers du plugin sont considérés
+  comme nouveaux)
+- La version de base est lue depuis `pyproject.toml`
+- La version de développement est calculée comme `X.Y.Z.dev<N>` (où
+  `X.Y.Z` est la version du fichier et `<N>` le nombre de commits
+  depuis le début)
+- Le tableau de statut affiche :no_entry: `no previous plugin tag`
+
+### Tests dédiés
+
+Le script a des tests unitaires dans
+`tests/test_core/test_scripts/test_plugin_version_status.py` qui
+couvrent :
+
+- `test_parse_plugin_tag` — parsing des tags plugins spécifiques
+- `test_next_patch_dev_version_is_newer_than_latest_stable` — calcul de
+  `next_patch.devN`
+- `test_release_relevant_paths_excludes_tests_and_docs` — filtrage des
+  chemins pertinents
+- `test_apply_dev_version_updates_plugin_metadata` — application de la
+  version de développement
+
+---
+
 ## Décider si un plugin nécessite une release
 
 Avant de publier un plugin, comparer les changements depuis son dernier
@@ -258,7 +320,8 @@ s'exécute automatiquement à chaque push sur `master` et peut aussi être
 déclenché manuellement depuis Actions → **Check plugin release status** →
 **Run workflow**.
 
-Il produit un tableau de synthèse dans le *workflow summary* (onglet
+Il utilise `plugin_version_status.py --all-official --summary` pour
+produire un tableau de synthèse dans le *workflow summary* (onglet
 Summary du run) listant les plugins officiels avec :
 
 - Statut (unchanged / modified / no previous tag)
@@ -278,15 +341,15 @@ nouvelle release.
 ### Trouver le dernier tag
 
 ```bash
-git tag --list 'spectrochempy-nmr-v*' --sort=-v:refname
-git log --oneline spectrochempy-nmr-v0.1.1..HEAD -- plugins/spectrochempy-nmr
+git tag --list 'spectrochempy-XXX-v*' --sort=-v:refname
+git log --oneline spectrochempy-XXX-v0.1.1..HEAD -- plugins/spectrochempy-XXX
 ```
 
 ### Vérifier la dernière version publiée
 
 ```bash
-pip index versions spectrochempy-nmr
-anaconda show spectrocat/spectrochempy-nmr
+pip index versions spectrochempy-XXX
+anaconda show spectrocat/spectrochempy-XXX
 ```
 
 ### Qu'est-ce qui justifie une nouvelle release ?
@@ -319,7 +382,7 @@ généralement pas de publication :
 - Les builds de développement calculent automatiquement `next_patch.devN`
   depuis le dernier tag plugin et le nombre de commits ayant touché les
   fichiers distribués qui diffèrent encore du tag. Exemple : après
-  `spectrochempy-nmr-v0.1.3`, avec 12 commits pertinents, la version de build
+  `spectrochempy-XXX-v0.1.3`, avec 12 commits pertinents, la version de build
   est `0.1.4.dev12`.
 - `next_patch.devN` est volontaire : selon PEP 440, `0.1.3.dev12` serait plus
   ancien que `0.1.3`, alors que `0.1.4.dev12` est bien plus récent que la
@@ -368,12 +431,51 @@ confirm_zenodo_disabled: true   # ← doit être coché
    - Vérifie que le workflow est déclenché depuis `master`
    - Vérifie que le plugin est dans la liste officielle
    - Bump la version dans `pyproject.toml`, `recipe.yaml` et `__init__.py`
-   - Pousse le commit sur `master` (via `BOT_TOKEN`)
+   - Si la version était déjà à jour (cas de la **première release** d'un
+     plugin, où la version a déjà été commitée sur `master`), le workflow
+     détecte qu'aucun changement n'est nécessaire et **saute les étapes
+     de commit et de push** — le tag et la Release sont créés depuis le
+     HEAD existant
+   - Pousse le commit sur `master` (via `BOT_TOKEN`) uniquement si un
+     bump de version a eu lieu
    - Crée le tag `spectrochempy-XXX-vX.Y.Z`
    - Crée une Release GitHub
+   - **Désactive le flag "Latest"** de la Release plugin, afin que la
+     page d'accueil du dépôt continue d'afficher la dernière release du
+     **core** comme "Latest" (cf. [GitHub "Latest" release handling](#github-latest-release-handling))
 2. La Release GitHub déclenche automatiquement :
    - `publish_plugins.yml` → publication **PyPI**
    - `build_package.yml` → publication **Anaconda.org** (label `main`)
+
+### Cas particulier : première release d'un plugin
+
+Lors de la première release d'un plugin :
+
+- La version du plugin est généralement déjà présente dans
+  `pyproject.toml`, `recipe.yaml` et `__init__.py` depuis le commit
+  d'ajout du plugin
+- Le workflow détecte que toutes les sources de version sont déjà à jour
+  et **saute l'étape de commit** (`git diff --cached --quiet`)
+- Les étapes de rebase et de push sont également sautées
+- Le tag et la Release GitHub sont créés normalement
+
+Ce comportement est intentionnel : il évite de créer un commit vide de
+bump de version quand la version cible est déjà en place.
+
+### GitHub "Latest" release handling
+
+Parce que le core et les plugins partagent le même dépôt GitHub, une
+release plugin peut être automatiquement marquée comme **Latest** par
+GitHub, prenant la place de la dernière release du core sur la page
+d'accueil du dépôt.
+
+Le workflow `release_plugin.yml` désactive automatiquement le flag
+"Latest" après chaque création de release plugin (via
+`gh release edit <tag> --latest=false`).
+
+La release du core reste donc toujours celle affichée comme **Latest**
+dans l'interface GitHub. Ce comportement est automatique et ne nécessite
+aucune intervention manuelle.
 
 ### Vérification
 
@@ -423,7 +525,8 @@ entrées sont incorrectes car :
    :
    - Aller sur [zenodo.org → GitHub](https://zenodo.org/account/settings/github/)
    - Chercher le dépôt `spectrochempy/spectrochempy` dans la liste
-   - Basculer le bouton sur **Disabled** (le dépôt passe en grisé)
+   - Vérifier que le bouton à droite indique **Off** (grisé) ; ou passer
+     sur **Off** s'il indique **On**
    - Vérifier que la croix rouge est absente (l'état grisé signifie
      désactivé, pas en erreur)
 2. **Publier les plugins** via le workflow **Release an official plugin**
@@ -439,11 +542,12 @@ entrées sont incorrectes car :
 4. **Ne réactiver Zenodo** que pour la release du core suivante :
    - Aller sur [zenodo.org → GitHub](https://zenodo.org/account/settings/github/)
    - Chercher le dépôt `spectrochempy/spectrochempy`
-   - Basculer le bouton sur **Enabled**
-   - Vérifier que l'intégration est active (pas de croix rouge)
+   - Vérifier que le bouton à droite indique **On** (vert) ; ou passer
+     sur **On** s'il indique **Off**
+   - Vérifier que la croix rouge est absente
 
-> **Rappel** : l'état Zenodo doit toujours être **Enabled** pendant une
-> release du core et **Disabled** pendant une release de plugins.
+> **Rappel** : l'état Zenodo doit toujours être **On** pendant une
+> release du core et **Off** pendant une release de plugins.
 > Ne jamais laisser Zenodo actif pendant une release plugin.
 
 ---
@@ -485,8 +589,8 @@ entrées sont incorrectes car :
 
 - [ ] Vérifier que l'intégration GitHub → Zenodo est active
       (aller sur https://zenodo.org/account/settings/github/ → onglet GitHub →
-      `spectrochempy/spectrochempy` doit être **Enabled** ; si besoin,
-      toggle Disabled → Enabled pour forcer la prise en compte)
+      `spectrochempy/spectrochempy` doit être **On** ; si besoin,
+      toggle Off → On pour forcer la prise en compte)
 - [ ] Vérifier que le workflow `build_package.yml` est configuré comme
       Trusted Publisher sur PyPI et TestPyPI (paramètres du projet
       `spectrochempy` sur PyPI → Trusted Publishers → GitHub repository
@@ -507,6 +611,10 @@ entrées sont incorrectes car :
 - [ ] Vérifier que `BOT_TOKEN` est valide (expire tous les 3 mois)
 - [ ] Désactiver l'intégration GitHub → Zenodo
 - [ ] Lancer **Release an official plugin** avec `confirm_zenodo_disabled=true`
+- [ ] Vérifier que le workflow termine sans erreur (commit sauté si version déjà à jour)
+- [ ] Vérifier que le flag "Latest" a bien été désactivé sur la Release GitHub du plugin
+      (aller sur https://github.com/spectrochempy/spectrochempy/releases →
+      vérifier que la release plugin n'affiche pas le badge "Latest")
 - [ ] Vérifier PyPI : `pip install spectrochempy-XXX==X.Y.Z`
 - [ ] Vérifier Anaconda : `anaconda show spectrocat/spectrochempy-XXX`
 - [ ] Répéter pour chaque plugin (nmr → iris → tensor → hypercomplex → carroucell)
