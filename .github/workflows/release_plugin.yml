@@ -1,17 +1,28 @@
 name: Release an official plugin
 
 # This workflow prepares and releases a single official plugin.
-# It bumps the plugin version, commits, pushes, creates the release tag,
-# and creates a GitHub Release. The release event triggers
-# publish_plugins.yml (PyPI) and build_package.yml (conda).
+# It bumps the plugin version (if not already set), commits, pushes,
+# creates the release tag, and creates a GitHub Release.
+# The release event triggers publish_plugins.yml (PyPI) and
+# build_package.yml (conda).
 #
 # Usage:
 #   1. Run this workflow manually (workflow_dispatch).
 #   2. Enter the plugin name (e.g. "spectrochempy-nmr") and version (e.g. "0.1.1").
 #   3. The workflow bumps pyproject.toml, recipe.yaml, and the plugin's
-#      ``__init__.py`` version string, commits, creates
-#      the tag spectrochempy-nmr-v0.1.1, and opens a GitHub Release.
-#   4. The release event automatically triggers the CI publish jobs.
+#      ``__init__.py`` version string, commits (if there are changes),
+#      creates the tag spectrochempy-nmr-v0.1.1, and opens a GitHub Release.
+#   4. After creating the release, the workflow unsets the "Latest" flag
+#      so plugin releases do not appear as the latest release on the
+#      repository front page.  The "Latest" badge is reserved for core
+#      SpectroChemPy releases.
+#   5. The release event automatically triggers the CI publish jobs.
+#
+# First-release note:
+#   For the first release of a plugin (no previous tag, version already
+#   committed on master), the workflow detects that no version bump is
+#   needed and skips the commit and push steps.  The tag and release
+#   are created from the existing HEAD.
 
 on:
   workflow_dispatch:
@@ -152,6 +163,7 @@ jobs:
           git config user.name "GitHub Actions"
 
       - name: Commit version bump
+        id: commit-bump
         run: |
           plugin_name="${{ inputs.plugin_name }}"
           plugin_dir="plugins/$plugin_name"
@@ -167,16 +179,20 @@ jobs:
 
           if git diff --cached --quiet; then
             echo "No version changes to commit; continuing."
+            echo "committed=false" >> "$GITHUB_OUTPUT"
           else
             git commit --no-verify -m "Bump ${{ inputs.plugin_name }} to v${{ inputs.version }}"
+            echo "committed=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Rebase on latest remote branch
+        if: steps.commit-bump.outputs.committed == 'true'
         run: |
           git fetch origin ${{ github.ref_name }}
           git rebase origin/${{ github.ref_name }}
 
       - name: Push commit to current branch
+        if: steps.commit-bump.outputs.committed == 'true'
         run: git push origin HEAD:${{ github.ref_name }}
 
       - name: Check release tag does not exist
@@ -202,5 +218,19 @@ jobs:
             --title "${{ inputs.plugin_name }} v${{ inputs.version }}" \
             --notes "Release of ${{ inputs.plugin_name }} v${{ inputs.version }}." \
             --verify-tag
+        env:
+          GH_TOKEN: ${{ secrets.BOT_TOKEN }}
+
+      - name: Unset "Latest" flag for plugin release
+        # Reserve the "Latest" badge on the repository front page for core
+        # SpectroChemPy releases only.  Plugin releases share the same
+        # repository and would otherwise be shown as "Latest" after
+        # publication, which confuses users looking for the latest core
+        # release.
+        run: |
+          tag="${{ inputs.plugin_name }}-v${{ inputs.version }}"
+          gh release edit "$tag" \
+            --repo "${{ github.repository }}" \
+            --latest=false
         env:
           GH_TOKEN: ${{ secrets.BOT_TOKEN }}

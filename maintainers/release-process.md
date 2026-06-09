@@ -246,6 +246,68 @@ Si la version n'apparaît pas dans le dropdown alors que la release existe :
 
 ---
 
+## plugin_version_status.py — le moteur de décision central
+
+Le script `.github/workflows/scripts/plugin_version_status.py` est le
+composant central qui détermine l'état de publication des plugins.
+
+### Rôle
+
+- Trouve le dernier tag de release d'un plugin (`spectrochempy-XXX-v*`)
+- Détecte les changements depuis ce tag dans les fichiers distribués
+  (`src/`, `pyproject.toml`, `recipe.yaml`, `meta.yaml`, `README.md`,
+  `LICENSE`, `MANIFEST.in`)
+- Compte le nombre de commits pertinents depuis le dernier tag
+- Calcule une version de développement (`next_patch.devN`) selon PEP 440
+- Détermine si le plugin doit être publié (`has_changes`)
+
+### Script unique, trois workflows
+
+Un seul script est utilisé par trois workflows, ce qui garantit que la
+logique de détection des changements reste cohérente :
+
+| Workflow | Usage du script |
+|----------|----------------|
+| `plugin_release_status.yml` | `--all-official --summary` — Affiche un tableau read-only dans le résumé du workflow |
+| `release_plugin.yml` | `--all-official --summary` — Affiche le même tableau comme confirmation avant release |
+| `publish_plugins.yml` | `--plugin <name> --apply-dev-version --github-output --json` — Injecte la version de développement et expose les métadonnées |
+
+### Pourquoi pas de logique dupliquée dans les workflows
+
+Les workflows YAML n'ont pas besoin de recalculer les versions ou de
+détecter les changements : ils déléguent tout au script Python. Cela évite
+les divergences entre la logique de statut (read-only) et la logique de
+build/publication.
+
+### Première release d'un plugin
+
+Quand un plugin n'a encore aucun tag de release :
+
+- `plugin_version_status.py` retourne `latest_tag: ""` et
+  `has_changes: true` (car tous les fichiers du plugin sont considérés
+  comme nouveaux)
+- La version de base est lue depuis `pyproject.toml`
+- La version de développement est calculée comme `X.Y.Z.dev<N>` (où
+  `X.Y.Z` est la version du fichier et `<N>` le nombre de commits
+  depuis le début)
+- Le tableau de statut affiche :no_entry: `no previous plugin tag`
+
+### Tests dédiés
+
+Le script a des tests unitaires dans
+`tests/test_core/test_scripts/test_plugin_version_status.py` qui
+couvrent :
+
+- `test_parse_plugin_tag` — parsing des tags plugins spécifiques
+- `test_next_patch_dev_version_is_newer_than_latest_stable` — calcul de
+  `next_patch.devN`
+- `test_release_relevant_paths_excludes_tests_and_docs` — filtrage des
+  chemins pertinents
+- `test_apply_dev_version_updates_plugin_metadata` — application de la
+  version de développement
+
+---
+
 ## Décider si un plugin nécessite une release
 
 Avant de publier un plugin, comparer les changements depuis son dernier
@@ -258,7 +320,8 @@ s'exécute automatiquement à chaque push sur `master` et peut aussi être
 déclenché manuellement depuis Actions → **Check plugin release status** →
 **Run workflow**.
 
-Il produit un tableau de synthèse dans le *workflow summary* (onglet
+Il utilise `plugin_version_status.py --all-official --summary` pour
+produire un tableau de synthèse dans le *workflow summary* (onglet
 Summary du run) listant les plugins officiels avec :
 
 - Statut (unchanged / modified / no previous tag)
@@ -368,12 +431,51 @@ confirm_zenodo_disabled: true   # ← doit être coché
    - Vérifie que le workflow est déclenché depuis `master`
    - Vérifie que le plugin est dans la liste officielle
    - Bump la version dans `pyproject.toml`, `recipe.yaml` et `__init__.py`
-   - Pousse le commit sur `master` (via `BOT_TOKEN`)
+   - Si la version était déjà à jour (cas de la **première release** d'un
+     plugin, où la version a déjà été commitée sur `master`), le workflow
+     détecte qu'aucun changement n'est nécessaire et **saute les étapes
+     de commit et de push** — le tag et la Release sont créés depuis le
+     HEAD existant
+   - Pousse le commit sur `master` (via `BOT_TOKEN`) uniquement si un
+     bump de version a eu lieu
    - Crée le tag `spectrochempy-XXX-vX.Y.Z`
    - Crée une Release GitHub
+   - **Désactive le flag "Latest"** de la Release plugin, afin que la
+     page d'accueil du dépôt continue d'afficher la dernière release du
+     **core** comme "Latest" (cf. [GitHub "Latest" release handling](#github-latest-release-handling))
 2. La Release GitHub déclenche automatiquement :
    - `publish_plugins.yml` → publication **PyPI**
    - `build_package.yml` → publication **Anaconda.org** (label `main`)
+
+### Cas particulier : première release d'un plugin
+
+Lors de la première release d'un plugin :
+
+- La version du plugin est généralement déjà présente dans
+  `pyproject.toml`, `recipe.yaml` et `__init__.py` depuis le commit
+  d'ajout du plugin
+- Le workflow détecte que toutes les sources de version sont déjà à jour
+  et **saute l'étape de commit** (`git diff --cached --quiet`)
+- Les étapes de rebase et de push sont également sautées
+- Le tag et la Release GitHub sont créés normalement
+
+Ce comportement est intentionnel : il évite de créer un commit vide de
+bump de version quand la version cible est déjà en place.
+
+### GitHub "Latest" release handling
+
+Parce que le core et les plugins partagent le même dépôt GitHub, une
+release plugin peut être automatiquement marquée comme **Latest** par
+GitHub, prenant la place de la dernière release du core sur la page
+d'accueil du dépôt.
+
+Le workflow `release_plugin.yml` désactive automatiquement le flag
+"Latest" après chaque création de release plugin (via
+`gh release edit <tag> --latest=false`).
+
+La release du core reste donc toujours celle affichée comme **Latest**
+dans l'interface GitHub. Ce comportement est automatique et ne nécessite
+aucune intervention manuelle.
 
 ### Vérification
 
@@ -507,6 +609,10 @@ entrées sont incorrectes car :
 - [ ] Vérifier que `BOT_TOKEN` est valide (expire tous les 3 mois)
 - [ ] Désactiver l'intégration GitHub → Zenodo
 - [ ] Lancer **Release an official plugin** avec `confirm_zenodo_disabled=true`
+- [ ] Vérifier que le workflow termine sans erreur (commit sauté si version déjà à jour)
+- [ ] Vérifier que le flag "Latest" a bien été désactivé sur la Release GitHub du plugin
+      (aller sur https://github.com/spectrochempy/spectrochempy/releases →
+      vérifier que la release plugin n'affiche pas le badge "Latest")
 - [ ] Vérifier PyPI : `pip install spectrochempy-XXX==X.Y.Z`
 - [ ] Vérifier Anaconda : `anaconda show spectrocat/spectrochempy-XXX`
 - [ ] Répéter pour chaque plugin (nmr → iris → tensor → hypercomplex → carroucell)

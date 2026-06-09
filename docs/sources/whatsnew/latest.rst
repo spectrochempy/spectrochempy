@@ -70,3 +70,12 @@ Developer
 
 - TEST: Added a project-wide source-docstring guard to detect stale
   ``docrep``-style placeholders in ``spectrochempy`` source docstrings.
+
+- MAINT: Harmonized plugin release workflows and maintainer documentation:
+  the ``release_plugin.yml`` workflow now gracefully handles first plugin
+  releases (where the version is already committed) by skipping the commit
+  and push steps instead of failing, and automatically unsets the GitHub
+  "Latest" flag on plugin releases so the core release remains the primary
+  release on the repository front page.  The maintainer documentation now
+  describes the role of ``plugin_version_status.py``, the first-release
+  workflow, and the "Latest" flag policy (#1082).
