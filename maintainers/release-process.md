@@ -47,11 +47,11 @@ services externes.
 1. Aller sur la [page GitHub de Zenodo](https://zenodo.org/account/settings/github/)
 2. Ouvrir l'onglet **GitHub** (premier onglet, par défaut)
 3. Chercher `spectrochempy/spectrochempy` dans la liste des dépôts
-4. Vérifier que le bouton est sur **Enabled** (vert) — pas grisé (Disabled)
-5. Si le dépôt est grisé, cliquer sur le bouton pour le réactiver
-6. Si le dépôt est déjà Enabled mais que l'intégration semble ne pas
+4. Vérifier que le bouton à droite indique **On** (vert) — pas **Off** (grisé)
+5. Si le dépôt est grisé (Off), cliquer sur le bouton pour le réactiver (On)
+6. Si le dépôt est déjà On mais que l'intégration semble ne pas
    fonctionner (par exemple après une phase de releases plugins), on peut
-   **toggle** (Disabled → Enabled) pour forcer Zenodo à reconnaître le dépôt
+   **toggle** (Off → On) pour forcer Zenodo à reconnaître le dépôt
 7. Vérifier l'onglet **Errors** (deuxième onglet) : aucune erreur active
    (pas de croix rouge)
 8. Vérifier que `CITATION.cff` et `zenodo.json` sont valides (les versions
@@ -59,7 +59,7 @@ services externes.
 
 **Avant une release de plugins :**
 
-- Vérifier que l'intégration GitHub est **désactivée** dans Zenodo
+- Vérifier que l'intégration GitHub est **Off** (grisée) dans Zenodo
   (voir [Zenodo and plugin releases](#zenodo-and-plugin-releases))
 
 ### Anaconda.org
@@ -121,7 +121,7 @@ confirm_zenodo_enabled = true                  # ← cocher après avoir vérifi
 ```
 
 > **Important** : avant de lancer le workflow, vérifier que l'intégration
-> GitHub → Zenodo est **Enabled** (voir [Zenodo](#zenodo) ci-dessus).
+> GitHub → Zenodo est **On** (voir [Zenodo](#zenodo) ci-dessus).
 > La case `confirm_zenodo_enabled` doit être cochée pour que le workflow
 > démarre — cela garantit que Zenodo est prêt à archiver la future release
 > sans intervention manuelle au moment de la publication.
@@ -525,7 +525,8 @@ entrées sont incorrectes car :
    :
    - Aller sur [zenodo.org → GitHub](https://zenodo.org/account/settings/github/)
    - Chercher le dépôt `spectrochempy/spectrochempy` dans la liste
-   - Basculer le bouton sur **Disabled** (le dépôt passe en grisé)
+   - Vérifier que le bouton à droite indique **Off** (grisé) ; ou passer
+     sur **Off** s'il indique **On**
    - Vérifier que la croix rouge est absente (l'état grisé signifie
      désactivé, pas en erreur)
 2. **Publier les plugins** via le workflow **Release an official plugin**
@@ -541,11 +542,12 @@ entrées sont incorrectes car :
 4. **Ne réactiver Zenodo** que pour la release du core suivante :
    - Aller sur [zenodo.org → GitHub](https://zenodo.org/account/settings/github/)
    - Chercher le dépôt `spectrochempy/spectrochempy`
-   - Basculer le bouton sur **Enabled**
-   - Vérifier que l'intégration est active (pas de croix rouge)
+   - Vérifier que le bouton à droite indique **On** (vert) ; ou passer
+     sur **On** s'il indique **Off**
+   - Vérifier que la croix rouge est absente
 
-> **Rappel** : l'état Zenodo doit toujours être **Enabled** pendant une
-> release du core et **Disabled** pendant une release de plugins.
+> **Rappel** : l'état Zenodo doit toujours être **On** pendant une
+> release du core et **Off** pendant une release de plugins.
 > Ne jamais laisser Zenodo actif pendant une release plugin.
 
 ---
@@ -587,8 +589,8 @@ entrées sont incorrectes car :
 
 - [ ] Vérifier que l'intégration GitHub → Zenodo est active
       (aller sur https://zenodo.org/account/settings/github/ → onglet GitHub →
-      `spectrochempy/spectrochempy` doit être **Enabled** ; si besoin,
-      toggle Disabled → Enabled pour forcer la prise en compte)
+      `spectrochempy/spectrochempy` doit être **On** ; si besoin,
+      toggle Off → On pour forcer la prise en compte)
 - [ ] Vérifier que le workflow `build_package.yml` est configuré comme
       Trusted Publisher sur PyPI et TestPyPI (paramètres du projet
       `spectrochempy` sur PyPI → Trusted Publishers → GitHub repository
