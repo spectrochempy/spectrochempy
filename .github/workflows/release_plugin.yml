@@ -8,10 +8,10 @@ name: Release an official plugin
 #
 # Usage:
 #   1. Run this workflow manually (workflow_dispatch).
-#   2. Enter the plugin name (e.g. "spectrochempy-nmr") and version (e.g. "0.1.1").
+#   2. Enter the plugin name (e.g. "spectrochempy-XXX") and version (e.g. "0.1.1").
 #   3. The workflow bumps pyproject.toml, recipe.yaml, and the plugin's
 #      ``__init__.py`` version string, commits (if there are changes),
-#      creates the tag spectrochempy-nmr-v0.1.1, and opens a GitHub Release.
+#      creates the tag spectrochempy-XXX-v0.1.1, and opens a GitHub Release.
 #   4. After creating the release, the workflow unsets the "Latest" flag
 #      so plugin releases do not appear as the latest release on the
 #      repository front page.  The "Latest" badge is reserved for core
@@ -28,7 +28,7 @@ on:
   workflow_dispatch:
     inputs:
       plugin_name:
-        description: "Plugin package name (e.g. spectrochempy-nmr)"
+        description: "Plugin package name (e.g. spectrochempy-XXX)"
         required: true
         type: string
       version:

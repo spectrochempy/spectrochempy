@@ -341,15 +341,15 @@ nouvelle release.
 ### Trouver le dernier tag
 
 ```bash
-git tag --list 'spectrochempy-nmr-v*' --sort=-v:refname
-git log --oneline spectrochempy-nmr-v0.1.1..HEAD -- plugins/spectrochempy-nmr
+git tag --list 'spectrochempy-XXX-v*' --sort=-v:refname
+git log --oneline spectrochempy-XXX-v0.1.1..HEAD -- plugins/spectrochempy-XXX
 ```
 
 ### Vérifier la dernière version publiée
 
 ```bash
-pip index versions spectrochempy-nmr
-anaconda show spectrocat/spectrochempy-nmr
+pip index versions spectrochempy-XXX
+anaconda show spectrocat/spectrochempy-XXX
 ```
 
 ### Qu'est-ce qui justifie une nouvelle release ?
@@ -382,7 +382,7 @@ généralement pas de publication :
 - Les builds de développement calculent automatiquement `next_patch.devN`
   depuis le dernier tag plugin et le nombre de commits ayant touché les
   fichiers distribués qui diffèrent encore du tag. Exemple : après
-  `spectrochempy-nmr-v0.1.3`, avec 12 commits pertinents, la version de build
+  `spectrochempy-XXX-v0.1.3`, avec 12 commits pertinents, la version de build
   est `0.1.4.dev12`.
 - `next_patch.devN` est volontaire : selon PEP 440, `0.1.3.dev12` serait plus
   ancien que `0.1.3`, alors que `0.1.4.dev12` est bien plus récent que la
