@@ -1092,8 +1092,7 @@ class CoordSet(HasTraits):
             if per_coord_labels:
                 try:
                     has_labels = np.all(
-                        np.array(per_coord_labels)
-                        != [None] * len(per_coord_labels),
+                        np.array(per_coord_labels) != [None] * len(per_coord_labels),
                     )
                 except ValueError:
                     has_labels = True

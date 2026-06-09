@@ -209,9 +209,7 @@ def test_concatenate_preserves_multi_coord_labels():
     assert len(x_coords) == 2
 
     # Collect labels from sub-coords without assuming _coords order.
-    all_label_sets = {
-        tuple(c.labels.tolist()) for c in x_coords._coords
-    }
+    all_label_sets = {tuple(c.labels.tolist()) for c in x_coords._coords}
     assert ("a", "b", "c", "g", "h", "i") in all_label_sets
     assert ("d", "e", "f", "j", "k", "l") in all_label_sets
 
@@ -273,9 +271,6 @@ def test_concatenate_preserves_non_first_default():
     result = concatenate(ds1, ds2, dims="x")
     # The default index should be preserved from the first coordset.
     assert result.coordset["x"]._default == 1
-
-
-
 
 
 def test_concatenate_none_coord_warns():
