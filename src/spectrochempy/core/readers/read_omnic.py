@@ -50,8 +50,9 @@ def read_omnic(*paths, **kwargs):
     - spectra history (but only incorporated in the NDDataset if a single
     spa is read)
 
-    An error is generated if attempt is made to inconsistent datasets: units
-    of spectra and xaxis, limits and number of points of the xaxis.
+    An error is generated if attempt is made to read inconsistent datasets (e.g.,
+    spectra with different x-axis parameters) unless ``allow_inconsistent_x=True``
+    is specified, in which case a list of `NDDataset` objects (one per spectrum) is returned.
 
     Parameters
     ----------
@@ -128,6 +129,13 @@ def read_omnic(*paths, **kwargs):
         so not downloaded.
     sortbydate : `bool`, optional, default: `True`
         Sort multiple filename by acquisition date.
+    allow_inconsistent_x : `bool`, optional, default: `False`
+        If `True`, allows reading SPG files where spectra have different x-axis
+        parameters (different number of points, start/end values, or units).
+        In this case, a list of `NDDataset` objects (one per spectrum) is returned
+        instead of a single merged dataset. If `False` (default), a `ValueError` is
+        raised for inconsistent x-axes. Note: this parameter is specific to SPG files
+        and has no effect on SPA or SRS files.
 
     See Also
     --------
@@ -300,7 +308,11 @@ def read_spg(*paths, **kwargs):
     Used only when url are specified. By default, existing files are not replaced
     so not downloaded.
     sortbydate : `bool`, optional, default: `True`
-    Sort multiple filename by acquisition date.
+        Sort multiple filename by acquisition date.
+    allow_inconsistent_x : `bool`, optional, default: `False`
+        If `True`, allows reading SPG files where spectra have different x-axis
+        parameters. A list of `NDDataset` objects (one per spectrum) is returned.
+        If `False` (default), a `ValueError` is raised for inconsistent x-axes.
 
     See Also
     --------
@@ -670,75 +682,127 @@ def _read_spg(*args, **kwargs):
         units.append(info["units"])
         titles.append(info["title"])
 
-    # check the consistency of xaxis and data units
-    if np.ptp(nx) != 0:  # pragma: no cover
-        raise ValueError(
-            "Error : Inconsistent data set -"
-            " number of wavenumber per spectrum should be "
-            "identical",
-        )
-    if np.ptp(firstx) != 0:  # pragma: no cover
-        raise ValueError(
-            "Error : Inconsistent data set - the x axis should start at same value",
-        )
-    if np.ptp(lastx) != 0:  # pragma: no cover
-        raise ValueError(
-            "Error : Inconsistent data set - the x axis should end at same value",
-        )
-    if len(set(xunits)) != 1:  # pragma: no cover
-        raise ValueError(
-            "Error : Inconsistent data set - data units should be identical",
-        )
-    if len(set(units)) != 1:  # pragma: no cover
-        raise ValueError(
-            "Error : Inconsistent data set - x axis units should be identical",
-        )
-    data = np.ndarray((nspec, nx[0]), dtype="float32")
-
-    # Now the intensity data
-
-    # Extracts positions of '03' keys
+    # Pre-compute positions needed for both consistent and inconsistent cases
     key_is_03 = keys == 3
     indices03 = np.nonzero(key_is_03)
     position03 = 304 * np.ones(len(indices03[0]), dtype="int") + 16 * indices03[0]
+
+    # Pre-read spectra titles and acquisition dates (needed if allow_inconsistent_x=True)
+    key_is_6B = keys == 107
+    indices6B = np.nonzero(key_is_6B)
+    position6B = 304 * np.ones(len(indices6B[0]), dtype="int") + 16 * indices6B[0]
+    spectitles, acquisitiondates, timestamps = [], [], []
+    for i in range(nspec):
+        fid.seek(position6B[i] + 2)
+        spa_title_pos = fromfile(fid, "uint32", 1)
+        spa_title = _readbtext(fid, spa_title_pos, 256)
+        spectitles.append(spa_title)
+        fid.seek(spa_title_pos + 256)
+        timestamp = fromfile(fid, dtype="uint32", count=1)
+        acqdate = datetime(1899, 12, 31, 0, 0, tzinfo=UTC) + timedelta(
+            seconds=int(timestamp),
+        )
+        acquisitiondates.append(acqdate)
+        timestamps.append(acqdate.timestamp())
+
+    # check the consistency of xaxis and data units
+    allow_inconsistent_x = kwargs.get("allow_inconsistent_x", False)
+
+    # Check if all spectra have consistent x-axis parameters
+    xaxis_consistent = (
+        np.ptp(nx) == 0
+        and np.ptp(firstx) == 0
+        and np.ptp(lastx) == 0
+        and len(set(xunits)) == 1
+        and len(set(units)) == 1
+    )
+
+    if not xaxis_consistent:
+        if allow_inconsistent_x:
+            # Return list of individual datasets for each spectrum
+            dataset_list = []
+            for i in range(nspec):
+                # Read intensity data for this spectrum
+                single_data = _getintensities(fid, position03[i])
+
+                # Create individual dataset
+                single_dataset = dataset.__class__(np.expand_dims(single_data, axis=0))
+                single_dataset.units = units[i]
+                single_dataset.title = titles[i]
+                single_dataset.name = f"{filename.stem}_spectrum_{i}"
+                single_dataset.filename = filename
+
+                # Create coordinates for this spectrum
+                _x = Coord.linspace(
+                    firstx[i],
+                    lastx[i],
+                    nx[i],
+                    title=xtitles[i] if i < len(xtitles) else xtitles[0],
+                    units=xunits[i] if i < len(xunits) else xunits[0],
+                )
+
+                _y = Coord(
+                    [timestamps[i]],
+                    title="acquisition timestamp (GMT)",
+                    units="s",
+                    labels=([acquisitiondates[i]], [spectitles[i]]),
+                )
+
+                single_dataset.set_coordset(y=_y, x=_x)
+                single_dataset.description = kwargs.get(
+                    "description",
+                    f"Omnic title: {spg_title}\nOmnic filename: {filename}",
+                )
+                single_dataset._date = utcnow()
+                single_dataset.history = f"Imported from spg file {filename} (spectrum {i})."
+
+                dataset_list.append(single_dataset)
+
+            fid.close()
+            return dataset_list
+
+        else:
+            # Default behavior: raise error with helpful message
+            inconsistencies = []
+            if np.ptp(nx) != 0:
+                inconsistencies.append(
+                    f"number of wavenumbers per spectrum varies: {nx.tolist()}"
+                )
+            if np.ptp(firstx) != 0:
+                inconsistencies.append(
+                    f"x-axis start values differ: {firstx.tolist()}"
+                )
+            if np.ptp(lastx) != 0:
+                inconsistencies.append(
+                    f"x-axis end values differ: {lastx.tolist()}"
+                )
+            if len(set(xunits)) != 1:
+                inconsistencies.append(
+                    f"x-axis units differ: {list(set(xunits))}"
+                )
+            if len(set(units)) != 1:
+                inconsistencies.append(
+                    f"spectra units differ: {list(set(units))}"
+                )
+
+            raise ValueError(
+                "Error: Inconsistent data set - "
+                f"{', '.join(inconsistencies)}. "
+                "To read files with inconsistent x-axes, use allow_inconsistent_x=True. "
+                "This will return a list of NDDataset objects (one per spectrum)."
+            )
+
+    # All spectra have consistent x-axis - create single merged dataset
+    data = np.ndarray((nspec, nx[0]), dtype="float32")
+
+    # Now the intensity data (position03 already computed above)
 
     # Read number of spectral intensities
     for i in range(nspec):
         data[i, :] = _getintensities(fid, position03[i])
 
-    # Get spectra titles & acquisition dates:
-    # container to hold values
-    spectitles, acquisitiondates, timestamps = [], [], []
-
-    # Extract positions of '6B' keys (spectra titles & acquisition dates)
-    key_is_6B = keys == 107
-    indices6B = np.nonzero(key_is_6B)
-    position6B = 304 * np.ones(len(indices6B[0]), dtype="int") + 16 * indices6B[0]
-
-    # Read spectra titles and acquisition date
-    for i in range(nspec):
-        # determines the position of informatioon
-        fid.seek(position6B[i] + 2)  # go to line and skip 2 bytes
-        spa_title_pos = fromfile(fid, "uint32", 1)
-
-        # read omnic filename
-        spa_title = _readbtext(fid, spa_title_pos, 256)
-        spectitles.append(spa_title)
-
-        # and the acquisition date
-        fid.seek(spa_title_pos + 256)
-        timestamp = fromfile(fid, dtype="uint32", count=1)
-        # since 31/12/1899, 00:00
-        acqdate = datetime(1899, 12, 31, 0, 0, tzinfo=UTC) + timedelta(
-            seconds=int(timestamp),
-        )
-        acquisitiondates.append(acqdate)
-        timestamp = acqdate.timestamp()
-        # Transform back to timestamp for storage in the Coord object
-        # use datetime.fromtimestamp(d, timezone.utc))
-        # to transform back to datetime object
-
-        timestamps.append(timestamp)
+    # Spectra titles and acquisition dates already read above (before consistency check)
+    # No need to re-read them here
 
         # Not used at present
         # -------------------

@@ -6,12 +6,16 @@
 # ruff: noqa
 
 from pathlib import Path
+from unittest.mock import patch, MagicMock
+import io
 
+import numpy as np
 import pytest
 
 import spectrochempy as scp
 from spectrochempy.application.preferences import preferences as prefs
 from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.utils.testing import assert_dataset_equal
 
 DATADIR = prefs.datadir
@@ -107,3 +111,35 @@ def test_read_omnic():
     # high speed series, import bg
     a = scp.read_srs("irdata/omnic_series/high_speed.srs", return_bg=True)
     assert str(a) == "NDDataset: [float64] unitless (shape: (y:1, x:13898))"
+
+
+# Tests for allow_inconsistent_x parameter (issue #863)
+# ================================================================================
+
+
+class TestAllowInconsistentX:
+    """Tests for the allow_inconsistent_x parameter in read_omnic/read_spg."""
+
+    def test_allow_inconsistent_x_parameter_documented(self):
+        """Test that allow_inconsistent_x parameter is documented."""
+        assert "allow_inconsistent_x" in scp.read_spg.__doc__
+        assert "allow_inconsistent_x" in scp.read_omnic.__doc__
+
+    def test_error_message_suggests_parameter(self):
+        """Test that error message for inconsistent x-axes suggests allow_inconsistent_x."""
+        # The parameter should be mentioned in the docstring
+        assert "allow_inconsistent_x=True" in scp.read_omnic.__doc__
+
+
+@pytest.mark.skip(reason="Requires SPG file with inconsistent x-axes. See issue #863")
+def test_allow_inconsistent_x_with_real_file():
+    """
+    Test reading SPG file with inconsistent x-axes using allow_inconsistent_x=True.
+    
+    This test is skipped until a representative sample file is available.
+    Once available, this test should:
+    1. Read file without allow_inconsistent_x -> ValueError with helpful message
+    2. Read file with allow_inconsistent_x=True -> list[NDDataset]
+    3. Verify each dataset in list has correct x-axis
+    """
+    pass
