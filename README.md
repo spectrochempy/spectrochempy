@@ -41,10 +41,12 @@ Extend SpectroChemPy with official plugins (installed separately):
 
 | Plugin | Install | What it provides |
 |--------|---------|------------------|
-| `spectrochempy-nmr` | `pip install spectrochempy-nmr` | Bruker TopSpin reader, NMR-specific processing |
-| `spectrochempy-iris` | `pip install spectrochempy-iris` | 2D-IRIS analysis tools |
-| `spectrochempy-hypercomplex` | `pip install spectrochempy-hypercomplex` | Quaternion / hypercomplex support |
 | `spectrochempy-carroucell` | `pip install spectrochempy-carroucell` | Carroucell experiment reader |
+| `spectrochempy-hypercomplex` | `pip install spectrochempy-hypercomplex` | Quaternion / hypercomplex support |
+| `spectrochempy-iris` | `pip install spectrochempy-iris` | 2D-IRIS analysis tools |
+| `spectrochempy-nmr` | `pip install spectrochempy-nmr` | Bruker TopSpin reader, NMR-specific processing |
+| `spectrochempy-tensor` | `pip install spectrochempy-tensor` | Tensor learning tools |
+
 
 Or via conda from the `spectrocat` channel (`conda-forge` provides the dependencies):
 
