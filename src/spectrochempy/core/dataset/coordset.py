@@ -1642,6 +1642,11 @@ class CoordSet(HasTraits):
         """Replace one group in a groups tuple by identity."""
         return tuple(new_group if g is old_group else g for g in groups)
 
+    @staticmethod
+    def _remove_group_from_groups(groups, group):
+        """Remove one group from a groups tuple by identity."""
+        return tuple(g for g in groups if g is not group)
+
     def _resolve_set_numeric_groups(self, groups, index, coord):
         """Group-backed numeric positional assignment."""
         if isinstance(index, str):
@@ -1828,6 +1833,61 @@ class CoordSet(HasTraits):
 
         return None
 
+    # ------------------------------------------------------------------
+    # Group-backed deletion resolvers (PR20)
+    # ------------------------------------------------------------------
+
+    def _resolve_delete_name_groups(self, groups, coord_groups, index):
+        """Group-backed name-based deletion."""
+        if self.is_same_dim:
+            # Same-dim CoordSets fall through to legacy in-place mutation
+            # to avoid double-wrapping via _groups_to_coordset.
+            return None
+
+        idx, group = self._lookup_coordinate_group_by_dim(coord_groups, index)
+        if idx is None:
+            return None
+
+        return self._remove_group_from_groups(groups, group)
+
+    def _resolve_delete_title_groups(self, groups, coord_groups, index):
+        """Group-backed title-based deletion."""
+        if self.is_same_dim:
+            # Same-dim CoordSets fall through to legacy in-place mutation
+            # to avoid double-wrapping via _groups_to_coordset.
+            return None
+
+        matches = self._lookup_top_level_title_matches(index, coord_groups)
+        if not matches:
+            return None
+
+        if len(matches) > 1:
+            warnings.warn(
+                f"Getting a coordinate from its title. However `{index}` "
+                f"occurs several time. Only"
+                f" the first occurrence is returned!",
+                stacklevel=3,
+            )
+
+        _, group, _ = matches[0]
+        return self._remove_group_from_groups(groups, group)
+
+    def _resolve_delete_groups(self, groups, coord_groups, index):
+        """
+        Orchestrate group-backed deletion resolution.
+
+        Returns transformed groups tuple if a branch matched, or None to
+        fall through to the legacy path.
+        """
+        for resolver in (
+            self._resolve_delete_name_groups,
+            self._resolve_delete_title_groups,
+        ):
+            result = resolver(groups, coord_groups, index)
+            if result is not None:
+                return result
+        return None
+
     def _resolve_set(self, index, coord):
         """
         Resolve *index* and apply the coordinate assignment.
@@ -1940,6 +2000,7 @@ class CoordSet(HasTraits):
         Resolve *index* and apply the coordinate deletion.
 
         Precedence (highest first):
+        0. canonical synthetic alias deletion (pre-group delegation)
         1. top-level name deletion
         2. top-level title deletion
         3. nested child title deletion
@@ -1947,6 +2008,45 @@ class CoordSet(HasTraits):
         """
         if not isinstance(index, str):
             return
+
+        # 0. Canonical synthetic alias: handled before group-backed path to
+        #    preserve legacy in-place mutation on the child CoordSet.
+        if (
+            len(index) > 1
+            and index[1] == "_"
+            and index[0] in self.names
+            and isinstance(
+                c := self._coords.__getitem__(self.names.index(index[0])), CoordSet
+            )
+        ):
+            c.__delitem__(index[1:])
+            return
+
+        # Group-backed resolution (preferred path)
+        groups = self._lookup_groups()
+        coord_groups = self._filter_coordinate_lookup_groups(groups)
+        groups = self._resolve_delete_groups(groups, coord_groups, index)
+        if groups is not None:
+            if not self._filter_coordinate_lookup_groups(groups):
+                # All dimension groups removed.  Sync empty state directly
+                # since _groups_to_coordset does not handle empty groups.
+                # Use in-place mutation (del [:] ) to avoid triggering the
+                # _coords_validate validator, which would convert empty list
+                # to None and break __len__().
+                del self._coords[:]
+                self._default = 0
+                self._is_same_dim = False
+                self._references = {}
+                return
+            try:
+                result = self._legacy_coordset_from_lifecycle_groups(groups)
+            except ValueError:
+                pass
+            else:
+                self._sync_from_coordset(result)
+                return
+
+        # Legacy paths (fallthrough)
 
         # 1. top-level name deletion
         if index in self.names:
