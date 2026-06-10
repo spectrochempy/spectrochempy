@@ -1666,7 +1666,9 @@ class CoordSet(HasTraits):
                 group = coord_groups[index]
                 new_entry = replace(group.entries[0], coord=coord.copy(keepname=True))
                 return self._replace_group_in_groups(
-                    groups, group, replace(group, entries=(new_entry,))
+                    groups,
+                    group,
+                    replace(group, entries=(new_entry,), aliases={}),
                 )
 
         return None
@@ -1715,7 +1717,9 @@ class CoordSet(HasTraits):
         coord.name = group.dim
         new_entry = replace(group.entries[0], coord=coord)
         return self._replace_group_in_groups(
-            groups, group, replace(group, entries=(new_entry,))
+            groups,
+            group,
+            replace(group, entries=(new_entry,), aliases={}),
         )
 
     def _resolve_set_child_title_groups(self, groups, coord_groups, index, coord):

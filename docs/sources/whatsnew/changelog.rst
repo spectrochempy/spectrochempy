@@ -56,13 +56,15 @@ Bug Fixes
   was raised on mixed labeled/unlabeled coordinates.
 
 - Fixed structural corruption of same-dimension ``CoordSet`` when setting
-  coordinates by name.  The group-backed resolution path left stale child
-  aliases on the dimension group after replacing multiple entries with a
-  single incoming ``CoordSet`` (e.g. ``cs["x"] = CoordSet(...)``), causing
-  ``_groups_to_coordset`` to double-wrap the inner coordinates under an
-  extra ``CoordSet`` layer.  This affected concatenation of multi-coordinate
-  datasets.  Also fixed the related case of setting a child coordinate by
-  synthetic alias (e.g. ``cs["x_2"] = coord``).
+  coordinates by name, numeric index, or title.  The group-backed resolution
+  path left stale child aliases on the dimension group after replacing
+  multiple entries with a single incoming ``CoordSet`` (e.g.
+  ``cs["x"] = CoordSet(...)``, ``cs[0] = CoordSet(...)``,
+  ``cs["wavenumber"] = CoordSet(...)``), causing ``_groups_to_coordset``
+  to double-wrap the inner coordinates under an extra ``CoordSet`` layer.
+  This affected concatenation of multi-coordinate datasets.  Also fixed the
+  related case of setting a child coordinate by synthetic alias
+  (e.g. ``cs["x_2"] = coord``).
 
 
 .. section
