@@ -364,6 +364,43 @@ class TestCoordSetMutation:
         with pytest.warns(UserWarning, match="occurs several time"):
             cs["dup"] = Coord([7, 8, 9], name="x")
 
+    def test_delitem_repeated_synthetic_alias(self):
+        c1 = Coord([1, 2, 3])
+        c2 = Coord([4, 5, 6])
+        c3 = Coord([7, 8, 9])
+        cs = CoordSet([c1, c2, c3])
+        assert len(cs["x"]) == 3
+        del cs["x_2"]
+        assert cs["x"].names == ["_1", "_3"]
+        del cs["x_1"]
+        assert cs["x"].names == ["_3"]
+        assert len(cs["x"]) == 1
+
+    def test_delitem_no_double_wrap(self):
+        c1 = Coord([1, 2, 3])
+        c2 = Coord([4, 5, 6])
+        cs = CoordSet([c1, c2])
+        del cs["x_2"]
+        x = cs["x"]
+        for child in x._coords:
+            assert not isinstance(
+                child, CoordSet
+            ), f"double-wrap: {type(child).__name__}"
+
+    def test_delitem_by_name_removes_top_level(self):
+        c1 = Coord([1, 2, 3], name="x")
+        cs = CoordSet(c1)
+        assert "x" in cs.names
+        del cs["x"]
+        assert len(cs) == 0
+
+    def test_delitem_numeric_is_noop(self):
+        cs = CoordSet(Coord([1, 2, 3], name="x"), Coord([4, 5, 6], name="y"))
+        del cs[0]
+        assert cs.names == ["x", "y"]
+        del cs[99]
+        assert cs.names == ["x", "y"]
+
 
 # ==============================================================================
 # Lookup ambiguities

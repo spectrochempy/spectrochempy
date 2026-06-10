@@ -80,7 +80,10 @@ Developer
   transient group metadata while preserving legacy runtime storage,
   serialization, and public behavior.  Migrated ``_concatenate_dim`` and
   ``_interpolate_dim`` to the lifecycle adapter pattern, completing the
-  migration of all dimension manipulation methods.  Same-dimension
+  migration of all dimension manipulation methods.  Migrated ``_resolve_delete``
+  to the group-backed architecture following the same projection-resolution-
+  reconstruction pattern, covering top-level name and title deletion, synthetic
+  alias delegation, and same-dimension fallthrough.  Same-dimension
   multi-coordinate semantics, label metadata, alias and default preservation,
   reference pass-through, and coordinate metadata propagation are maintained.
 
