@@ -66,6 +66,12 @@ Bug Fixes
   related case of setting a child coordinate by synthetic alias
   (e.g. ``cs["x_2"] = coord``).
 
+- Stabilized 1D CSV round-trip support: ``read_csv`` now tolerates header rows
+  (e.g., column titles) written by ``write_csv``, and correctly handles both
+  single-column (data-only) and multi-column (coordinate + data) CSV files.
+  Synthetic tests for CSV reading/writing have been added, removing the dependency
+  on external test data for these functionalities (#1077).
+
 
 .. section
 

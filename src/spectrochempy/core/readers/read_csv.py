@@ -169,16 +169,34 @@ def _read_csv(*args, **kwargs):
         delimiter = ";"
 
     d = list(csv.reader(txt.splitlines(), delimiter=delimiter))
+
+    # Skip header row if present (non-numeric first row from write_csv)
+    def _is_numeric_row(row):
+        """Check if a row contains only numeric values."""
+        for item in row:
+            try:
+                float(item)
+            except (ValueError, TypeError):
+                return False
+        return True
+
+    if d and not _is_numeric_row(d[0]):
+        d = d[1:]
+
     d = np.array(d, dtype=float).T
 
-    # First column is the x coordinates
-    coordx = Coord(d[0])
+    # Handle both single-column (data only) and multi-column (x + data) CSV files
+    if d.shape[0] == 1:
+        # Single column: data only, create synthetic x coordinates
+        data = d[0].reshape((1, d.shape[1]))
+        coordx = Coord(np.arange(d.shape[1]))
+    else:
+        # Multiple columns: first is x, second is data
+        coordx = Coord(d[0])
+        data = d[1].reshape((1, coordx.size))
 
     # Create a second coordinate for dimension y of size 1
     coordy = Coord([0])
-
-    # and data is the second column -  we make it a vector
-    data = d[1].reshape((1, coordx.size))
 
     # try:
     #     d = np.loadtxt(fid, unpack=True, delimiter=delimiter)
@@ -265,30 +283,34 @@ def _add_omnic_info(dataset, **kwargs):
 
     # y axis ?
     if "_" in name:
-        name, dat = name.split("_")
-        # if needed convert weekday name to English
-        dat = dat.replace("Lun", "Mon")
-        dat = dat[:3].replace("Mar", "Tue") + dat[3:]
-        dat = dat.replace("Mer", "Wed")
-        dat = dat.replace("Jeu", "Thu")
-        dat = dat.replace("Ven", "Fri")
-        dat = dat.replace("Sam", "Sat")
-        dat = dat.replace("Dim", "Sun")
-        # convert month name to English
-        dat = dat.replace("Aout", "Aug")
+        try:
+            name, dat = name.split("_")
+            # if needed convert weekday name to English
+            dat = dat.replace("Lun", "Mon")
+            dat = dat[:3].replace("Mar", "Tue") + dat[3:]
+            dat = dat.replace("Mer", "Wed")
+            dat = dat.replace("Jeu", "Thu")
+            dat = dat.replace("Ven", "Fri")
+            dat = dat.replace("Sam", "Sat")
+            dat = dat.replace("Dim", "Sun")
+            # convert month name to English
+            dat = dat.replace("Aout", "Aug")
 
-        # get the dates
-        acqdate = datetime.strptime(dat, "%a %b %d %H-%M-%S %Y")
+            # get the dates
+            acqdate = datetime.strptime(dat, "%a %b %d %H-%M-%S %Y")
 
-        # Transform back to timestamp for storage in the Coord object
-        # use datetime.fromtimestamp(d, timezone.utc))
-        # to transform back to datetime obkct
-        timestamp = acqdate.timestamp()
+            # Transform back to timestamp for storage in the Coord object
+            # use datetime.fromtimestamp(d, timezone.utc))
+            # to transform back to datetime obkct
+            timestamp = acqdate.timestamp()
 
-        dataset.y = Coord(np.array([timestamp]), name="y")
-        dataset.set_coordtitles(y="acquisition timestamp (GMT)", x="wavenumbers")
-        dataset.y.labels = np.array([[acqdate], [name]])
-        dataset.y.units = "s"
+            dataset.y = Coord(np.array([timestamp]), name="y")
+            dataset.set_coordtitles(y="acquisition timestamp (GMT)", x="wavenumbers")
+            dataset.y.labels = np.array([[acqdate], [name]])
+            dataset.y.units = "s"
+        except (ValueError, AttributeError):
+            # If date parsing fails, just keep default y coordinate
+            pass
 
     # reset modification date to cretion date
     dataset._modified = dataset._created
