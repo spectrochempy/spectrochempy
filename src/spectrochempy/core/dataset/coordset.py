@@ -26,8 +26,10 @@ from traitlets import observe
 from traitlets import signature_has_traits
 from traitlets import validate
 
+from spectrochempy.core.dataset._coordgroup import _CoordinateEntry
 from spectrochempy.core.dataset._coordgroup import _coordset_to_groups
 from spectrochempy.core.dataset._coordgroup import _groups_to_coordset
+from spectrochempy.core.dataset._coordgroup import _make_entry_id
 from spectrochempy.core.dataset.basearrays.ndarray import DEFAULT_DIM_NAME
 from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 from spectrochempy.core.dataset.coord import Coord
@@ -1628,11 +1630,206 @@ class CoordSet(HasTraits):
     # Private resolver helpers (write/delete lookup)
     # ------------------------------------------------------------------
 
+    def _sync_from_coordset(self, other):
+        """Replace legacy runtime state from a reconstructed CoordSet."""
+        self._coords = other._coords
+        self._default = other._default
+        self._is_same_dim = other._is_same_dim
+        self._references = other._references
+
+    @staticmethod
+    def _replace_group_in_groups(groups, old_group, new_group):
+        """Replace one group in a groups tuple by identity."""
+        return tuple(new_group if g is old_group else g for g in groups)
+
+    def _resolve_set_numeric_groups(self, groups, index, coord):
+        """Group-backed numeric positional assignment."""
+        if isinstance(index, str):
+            return None
+
+        coord_groups = self._filter_coordinate_lookup_groups(groups)
+        if not coord_groups:
+            return None
+
+        if self.is_same_dim:
+            group = coord_groups[0]
+            if 0 <= index < len(group.entries):
+                entries = list(group.entries)
+                entries[index] = replace(
+                    entries[index], coord=coord.copy(keepname=True)
+                )
+                return self._replace_group_in_groups(
+                    groups, group, replace(group, entries=tuple(entries))
+                )
+        else:
+            if 0 <= index < len(coord_groups):
+                group = coord_groups[index]
+                new_entry = replace(group.entries[0], coord=coord.copy(keepname=True))
+                return self._replace_group_in_groups(
+                    groups, group, replace(group, entries=(new_entry,))
+                )
+
+        return None
+
+    def _resolve_set_name_groups(self, groups, coord_groups, index, coord):
+        """Group-backed top-level name replacement."""
+        if self.is_same_dim:
+            return None
+
+        idx, group = self._lookup_coordinate_group_by_dim(coord_groups, index)
+        if idx is None:
+            return None
+        coord.name = index
+        new_entry = replace(group.entries[0], coord=coord)
+        new_group = replace(
+            group,
+            entries=(new_entry,),
+            aliases={},
+        )
+        return self._replace_group_in_groups(groups, group, new_group)
+
+    def _resolve_set_title_groups(self, groups, coord_groups, index, coord):
+        """Group-backed top-level title replacement."""
+        matches = self._lookup_top_level_title_matches(index, coord_groups)
+        if not matches:
+            return None
+
+        if len(matches) > 1:
+            warnings.warn(
+                f"Getting a coordinate from its title. However `{index}` "
+                f"occurs several time. Only"
+                f" the first occurrence is returned!",
+                stacklevel=3,
+            )
+
+        idx, group, entry = matches[0]
+
+        if self.is_same_dim:
+            coord.name = entry.aliases[0] if entry.aliases else group.dim
+            entries = list(group.entries)
+            entries[idx] = replace(entry, coord=coord)
+            return self._replace_group_in_groups(
+                groups, group, replace(group, entries=tuple(entries))
+            )
+
+        coord.name = group.dim
+        new_entry = replace(group.entries[0], coord=coord)
+        return self._replace_group_in_groups(
+            groups, group, replace(group, entries=(new_entry,))
+        )
+
+    def _resolve_set_child_title_groups(self, groups, coord_groups, index, coord):
+        """Group-backed nested child title replacement."""
+        if self.is_same_dim:
+            return None
+        for group in coord_groups:
+            if len(group.entries) <= 1:
+                continue
+            for entry_idx, entry in enumerate(group.entries):
+                if self._lookup_entry_title(entry) == index:
+                    coord.name = entry.aliases[0] if entry.aliases else group.dim
+                    entries = list(group.entries)
+                    entries[entry_idx] = replace(entry, coord=coord)
+                    return self._replace_group_in_groups(
+                        groups, group, replace(group, entries=tuple(entries))
+                    )
+        return None
+
+    def _resolve_set_child_name_groups(self, groups, coord_groups, index, coord):
+        """Group-backed nested child name (alias) replacement."""
+        if self.is_same_dim:
+            return None
+        for group in coord_groups:
+            if len(group.entries) <= 1:
+                continue
+            entry_idx, entry = self._lookup_entry_by_alias(group, index)
+            if entry is not None:
+                coord.name = index
+                entries = list(group.entries)
+                entries[entry_idx] = replace(entry, coord=coord)
+                return self._replace_group_in_groups(
+                    groups, group, replace(group, entries=tuple(entries))
+                )
+        return None
+
+    def _resolve_set_synthetic_alias_groups(self, groups, coord_groups, index, coord):
+        """
+        Group-backed synthetic alias replacement.
+
+        Handles both existing child replacement and append-to-group
+        for synthetic patterns like ``x_3`` where ``x`` is an existing
+        dimension and ``_3`` is a new synthetic child alias.
+        """
+        try:
+            idx, group = self._lookup_coordinate_group_by_dim(coord_groups, index[0])
+            if idx is None:
+                return None
+
+            if len(index) > 1 and index[1] == "_":
+                alias = index[1:]
+                entry_id = group.aliases.get(alias)
+
+                if entry_id is not None:
+                    for entry_idx, entry in enumerate(group.entries):
+                        if entry.id == entry_id:
+                            coord.name = alias
+                            entries = list(group.entries)
+                            entries[entry_idx] = replace(entry, coord=coord)
+                            return self._replace_group_in_groups(
+                                groups,
+                                group,
+                                replace(group, entries=tuple(entries)),
+                            )
+
+                new_entry = _CoordinateEntry(
+                    id=_make_entry_id(coord, alias, set()),
+                    coord=coord,
+                    aliases=(alias,),
+                )
+                new_aliases = dict(group.aliases)
+                new_aliases[alias] = new_entry.id
+                new_entries = list(group.entries) + [new_entry]
+                new_group = replace(
+                    group,
+                    entries=tuple(new_entries),
+                    aliases=new_aliases,
+                )
+                return self._replace_group_in_groups(groups, group, new_group)
+
+            return groups
+        except (KeyError, IndexError):
+            return None
+
+    def _resolve_set_groups(self, groups, index, coord):
+        """
+        Orchestrate group-backed assignment resolution.
+
+        Returns transformed groups tuple if a branch matched, or None to
+        fall through to the legacy append path.
+        """
+        if not isinstance(index, str):
+            return self._resolve_set_numeric_groups(groups, index, coord)
+
+        coord_groups = self._filter_coordinate_lookup_groups(groups)
+
+        for resolver in (
+            self._resolve_set_name_groups,
+            self._resolve_set_title_groups,
+            self._resolve_set_child_title_groups,
+            self._resolve_set_child_name_groups,
+        ):
+            result = resolver(groups, coord_groups, index, coord)
+            if result is not None:
+                return result
+
+        return None
+
     def _resolve_set(self, index, coord):
         """
         Resolve *index* and apply the coordinate assignment.
 
         Precedence (highest first):
+        0. canonical synthetic alias (pre-group, preserves legacy in-place mutation)
         1. top-level name replacement
         2. top-level title replacement
         3. nested child title replacement
@@ -1648,6 +1845,39 @@ class CoordSet(HasTraits):
             else:
                 raise e
 
+        # Canonical synthetic alias: handled before group-backed path to
+        # preserve legacy in-place mutation on the child CoordSet.
+        # The group reconstruction would validate same-dim sizes, but the
+        # legacy code allows size changes via in-place mutation.
+        if (
+            isinstance(index, str)
+            and len(index) > 1
+            and index[1] == "_"
+            and index[0] in self.names
+            and isinstance(
+                c := self._coords.__getitem__(self.names.index(index[0])), CoordSet
+            )
+        ):
+            c.__setitem__(index[1:], coord)
+            return
+
+        # Group-backed resolution (preferred path)
+        groups = self._lookup_groups()
+        groups = self._resolve_set_groups(groups, index, coord)
+        if groups is not None:
+            try:
+                result = self._legacy_coordset_from_lifecycle_groups(groups)
+            except ValueError:
+                # Validation failed during reconstruction (e.g., same-dim
+                # size mismatch). Fall through to legacy in-place mutation.
+                pass
+            else:
+                self._sync_from_coordset(result)
+                return
+
+        # Legacy paths (fallthrough)
+
+        # 1. numeric index replacement
         if not isinstance(index, str):
             self._coords[index] = coord
             return
@@ -1661,47 +1891,39 @@ class CoordSet(HasTraits):
 
         # 2. top-level title replacement
         if index in self.titles:
-            if self.titles.count(index) > 1:
-                warnings.warn(
-                    f"Getting a coordinate from its title. However `{index}` "
-                    f"occurs several time. Only"
-                    f" the first occurrence is returned!",
-                    stacklevel=3,
-                )
             idx = self.titles.index(index)
-            coord.name = self.names[idx]
+            coord.name = index
             self._coords.__setitem__(idx, coord)
             return
 
         # 3. nested child title replacement
         for item in self._coords:
             if isinstance(item, CoordSet) and index in item.titles:
-                idx = item.titles.index(index)
-                coord.name = item.names[idx]
-                item.__setitem__(idx, coord)
+                item.__setitem__(index, coord)
                 return
 
         # 4. nested child name replacement
         for item in self._coords:
             if isinstance(item, CoordSet) and index in item.names:
-                idx = item.names.index(index)
-                coord.name = item.names[idx]
-                item.__setitem__(idx, coord)
+                item.__setitem__(index, coord)
                 return
 
-        # 5. canonical synthetic alias replacement
-        try:
-            if index[0] in self.names:
-                c = self._coords.__getitem__(self.names.index(index[0]))
-                if len(index) > 1 and index[1] == "_":
-                    c.__setitem__(index[1:], coord)
+        # 5. canonical synthetic alias (append case only; replacement is
+        #    handled above before the group-backed path)
+        if index[0] in self.names:
+            c = self._coords.__getitem__(self.names.index(index[0]))
+            if len(index) > 1 and index[1] == "_" and isinstance(c, CoordSet):
+                c.__setitem__(index[1:], coord)
                 return
-        except KeyError:
-            pass
 
         # 6. append new coordinate
-        if index in self.available_names or (
-            len(index) == 2 and index.startswith("_") and index[1] in list("123456789")
+        if isinstance(index, str) and (
+            index in self.available_names
+            or (
+                len(index) == 2
+                and index.startswith("_")
+                and index[1] in list("123456789")
+            )
         ):
             coord.name = index
             self._coords.append(coord)
