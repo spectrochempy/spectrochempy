@@ -754,7 +754,9 @@ def _read_spg(*args, **kwargs):
                     f"Omnic title: {spg_title}\nOmnic filename: {filename}",
                 )
                 single_dataset._date = utcnow()
-                single_dataset.history = f"Imported from spg file {filename} (spectrum {i})."
+                single_dataset.history = (
+                    f"Imported from spg file {filename} (spectrum {i})."
+                )
 
                 dataset_list.append(single_dataset)
 
@@ -769,21 +771,13 @@ def _read_spg(*args, **kwargs):
                     f"number of wavenumbers per spectrum varies: {nx.tolist()}"
                 )
             if np.ptp(firstx) != 0:
-                inconsistencies.append(
-                    f"x-axis start values differ: {firstx.tolist()}"
-                )
+                inconsistencies.append(f"x-axis start values differ: {firstx.tolist()}")
             if np.ptp(lastx) != 0:
-                inconsistencies.append(
-                    f"x-axis end values differ: {lastx.tolist()}"
-                )
+                inconsistencies.append(f"x-axis end values differ: {lastx.tolist()}")
             if len(set(xunits)) != 1:
-                inconsistencies.append(
-                    f"x-axis units differ: {list(set(xunits))}"
-                )
+                inconsistencies.append(f"x-axis units differ: {list(set(xunits))}")
             if len(set(units)) != 1:
-                inconsistencies.append(
-                    f"spectra units differ: {list(set(units))}"
-                )
+                inconsistencies.append(f"spectra units differ: {list(set(units))}")
 
             raise ValueError(
                 "Error: Inconsistent data set - "
@@ -804,19 +798,19 @@ def _read_spg(*args, **kwargs):
     # Spectra titles and acquisition dates already read above (before consistency check)
     # No need to re-read them here
 
-        # Not used at present
-        # -------------------
-        # extract positions of '1B' codes (history text), sometimes absent,
-        # e.g. peakresolve)
-        #  key_is_1B = (keys == 27)
-        #  indices1B =  # np.nonzero(key_is_1B)
-        #  position1B = 304 * np.ones(len(indices1B[0]), dtype='int') + 16 * indices6B[0]
-        #  if len(position1B) != 0:  # read history texts
-        #     for j in range(nspec):  determine the position of information
-        #        f.seek(position1B[j] + 2)  #
-        #        history_pos = fromfile(f,  'uint32', 1)
-        #        history =  _readbtext(f, history_pos[0])
-        #        allhistories.append(history)
+    # Not used at present
+    # -------------------
+    # extract positions of '1B' codes (history text), sometimes absent,
+    # e.g. peakresolve)
+    #  key_is_1B = (keys == 27)
+    #  indices1B =  # np.nonzero(key_is_1B)
+    #  position1B = 304 * np.ones(len(indices1B[0]), dtype='int') + 16 * indices6B[0]
+    #  if len(position1B) != 0:  # read history texts
+    #     for j in range(nspec):  determine the position of information
+    #        f.seek(position1B[j] + 2)  #
+    #        history_pos = fromfile(f,  'uint32', 1)
+    #        history =  _readbtext(f, history_pos[0])
+    #        allhistories.append(history)
 
     fid.close()
 
