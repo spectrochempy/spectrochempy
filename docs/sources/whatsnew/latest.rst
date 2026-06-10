@@ -14,16 +14,16 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 
 New Features
 ~~~~~~~~~~~~
+- ``read_omnic`` and ``read_spg`` can now read OMNIC SPG files containing
+  spectra with non-identical x-axis definitions using
+  ``allow_inconsistent_x=True``. Incompatible spectra are returned as a list
+  of ``NDDataset`` objects instead of raising an error (#863).
 
 - Added the official ``spectrochempy-tensor`` plugin for TensorLy-backed tensor
   decompositions, exposing CP/PARAFAC as ``scp.tensor.CP``.
 
 Bug Fixes
 ~~~~~~~~~
-- ``read_omnic`` and ``read_spg`` can now read OMNIC SPG files containing
-  spectra with non-identical x-axis definitions using
-  ``allow_inconsistent_x=True``. Incompatible spectra are returned as a list
-  of ``NDDataset`` objects instead of raising an error (#863).
 
 - ``read_opus`` now correctly reads assembled / time-resolved OPUS files
   containing data series blocks such as ``a``, ``sm``, ``igsm``, ``phsm``,
