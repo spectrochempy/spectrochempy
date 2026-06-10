@@ -1681,9 +1681,12 @@ class CoordSet(HasTraits):
             return None
         coord.name = index
         new_entry = replace(group.entries[0], coord=coord)
-        return self._replace_group_in_groups(
-            groups, group, replace(group, entries=(new_entry,))
+        new_group = replace(
+            group,
+            entries=(new_entry,),
+            aliases={},
         )
+        return self._replace_group_in_groups(groups, group, new_group)
 
     def _resolve_set_title_groups(self, groups, coord_groups, index, coord):
         """Group-backed top-level title replacement."""
