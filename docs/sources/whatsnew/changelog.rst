@@ -55,6 +55,12 @@ Bug Fixes
   dataset has labels and another does not.  Previously, a ``TypeError``
   was raised on mixed labeled/unlabeled coordinates.
 
+- Fixed structural corruption of same-dimension ``CoordSet`` when setting
+  a child coordinate by synthetic alias (e.g. ``cs["x_2"] = coord``).  The
+  group-backed resolution path incorrectly double-wrapped the inner
+  coordinate list via ``_groups_to_coordset``, causing child names and
+  coordinate references to become nested under an extra ``CoordSet`` layer.
+
 
 .. section
 
