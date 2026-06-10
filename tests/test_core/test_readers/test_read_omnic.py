@@ -135,7 +135,7 @@ class TestAllowInconsistentX:
 def test_allow_inconsistent_x_with_real_file():
     """
     Test reading SPG file with inconsistent x-axes using allow_inconsistent_x=True.
-    
+
     This test is skipped until a representative sample file is available.
     Once available, this test should:
     1. Read file without allow_inconsistent_x -> ValueError with helpful message

@@ -138,6 +138,7 @@ def read_omnic(*paths, **kwargs):
         and has no effect on SPA or SRS files.
 
         .. versionadded:: 0.9.4
+
     See Also
     --------
     read : Generic reader inferring protocol from the filename extension.
@@ -316,6 +317,7 @@ def read_spg(*paths, **kwargs):
         If `False` (default), a `ValueError` is raised for inconsistent x-axes.
 
         .. versionadded:: 0.9.4
+
     See Also
     --------
     read_spg : Read grouped Omnic spectra.
@@ -765,28 +767,27 @@ def _read_spg(*args, **kwargs):
             fid.close()
             return dataset_list
 
-        else:
-            # Default behavior: raise error with helpful message
-            inconsistencies = []
-            if np.ptp(nx) != 0:
-                inconsistencies.append(
-                    f"number of wavenumbers per spectrum varies: {nx.tolist()}"
-                )
-            if np.ptp(firstx) != 0:
-                inconsistencies.append(f"x-axis start values differ: {firstx.tolist()}")
-            if np.ptp(lastx) != 0:
-                inconsistencies.append(f"x-axis end values differ: {lastx.tolist()}")
-            if len(set(xunits)) != 1:
-                inconsistencies.append(f"x-axis units differ: {list(set(xunits))}")
-            if len(set(units)) != 1:
-                inconsistencies.append(f"spectra units differ: {list(set(units))}")
-
-            raise ValueError(
-                "Error: Inconsistent data set - "
-                f"{', '.join(inconsistencies)}. "
-                "To read files with inconsistent x-axes, use allow_inconsistent_x=True. "
-                "This will return a list of NDDataset objects (one per spectrum)."
+        # Default behavior: raise error with helpful message
+        inconsistencies = []
+        if np.ptp(nx) != 0:
+            inconsistencies.append(
+                f"number of wavenumbers per spectrum varies: {nx.tolist()}"
             )
+        if np.ptp(firstx) != 0:
+            inconsistencies.append(f"x-axis start values differ: {firstx.tolist()}")
+        if np.ptp(lastx) != 0:
+            inconsistencies.append(f"x-axis end values differ: {lastx.tolist()}")
+        if len(set(xunits)) != 1:
+            inconsistencies.append(f"x-axis units differ: {list(set(xunits))}")
+        if len(set(units)) != 1:
+            inconsistencies.append(f"spectra units differ: {list(set(units))}")
+
+        raise ValueError(
+            "Error: Inconsistent data set - "
+            f"{', '.join(inconsistencies)}. "
+            "To read files with inconsistent x-axes, use allow_inconsistent_x=True. "
+            "This will return a list of NDDataset objects (one per spectrum)."
+        )
 
     # All spectra have consistent x-axis - create single merged dataset
     data = np.ndarray((nspec, nx[0]), dtype="float32")
