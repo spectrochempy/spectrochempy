@@ -33,15 +33,8 @@ def test_read_csv_roundtrip_no_coords(tmp_path):
 
 def test_read_csv_roundtrip_with_coords(tmp_path):
     """Test that a 1D dataset with coords can be written and read back."""
-    coord = scp.Coord(
-        np.linspace(4000, 1000, 5),
-        title="wavenumber",
-        units="cm^-1"
-    )
-    ds = scp.NDDataset(
-        np.array([1.0, 2.0, 3.0, 4.0, 5.0]),
-        coordset=[coord]
-    )
+    coord = scp.Coord(np.linspace(4000, 1000, 5), title="wavenumber", units="cm^-1")
+    ds = scp.NDDataset(np.array([1.0, 2.0, 3.0, 4.0, 5.0]), coordset=[coord])
     filepath = tmp_path / "test_with_coords.csv"
     ds.write_csv(filepath)
 
@@ -66,15 +59,9 @@ def test_read_csv_roundtrip_semicolon(tmp_path):
 
 def test_read_csv_roundtrip_with_units(tmp_path):
     """Test that units are preserved in roundtrip."""
-    coord = scp.Coord(
-        np.linspace(100, 500, 5),
-        title="wavelength",
-        units="nm"
-    )
+    coord = scp.Coord(np.linspace(100, 500, 5), title="wavelength", units="nm")
     ds = scp.NDDataset(
-        np.array([0.1, 0.2, 0.3, 0.4, 0.5]),
-        coordset=[coord],
-        units="absorbance"
+        np.array([0.1, 0.2, 0.3, 0.4, 0.5]), coordset=[coord], units="absorbance"
     )
     filepath = tmp_path / "test_with_units.csv"
     ds.write_csv(filepath)
