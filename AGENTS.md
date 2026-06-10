@@ -172,6 +172,22 @@ When multiple valid approaches exist, prefer the one requiring:
 
 ---
 
+# Python Environment
+
+Prefer using an existing Conda environment over creating ad-hoc venvs or
+relying on system paths.  If a Conda environment named ``scpy-core`` exists
+(the project's test environment), use it for all Python and pytest commands:
+
+```bash
+conda run -n scpy-core python ...
+conda run -n scpy-core python -m pytest ...
+```
+
+If ``scpy-core`` is not available, fall back to the project's ``.venv`` or a
+system Python with ``PYTHONPATH`` pointing to ``src/``.
+
+---
+
 # Testing Policy
 
 Run only the smallest validation necessary.
