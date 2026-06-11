@@ -28,6 +28,7 @@ from traitlets import validate
 
 from spectrochempy.core.dataset._coordgroup import _CoordinateEntry
 from spectrochempy.core.dataset._coordgroup import _coordset_to_groups
+from spectrochempy.core.dataset._coordgroup import _DimensionCoordinates
 from spectrochempy.core.dataset._coordgroup import _groups_to_coordset
 from spectrochempy.core.dataset._coordgroup import _make_entry_id
 from spectrochempy.core.dataset.basearrays.ndarray import DEFAULT_DIM_NAME
@@ -1637,6 +1638,23 @@ class CoordSet(HasTraits):
         self._is_same_dim = other._is_same_dim
         self._references = other._references
 
+    def _sync_same_dim_from_groups(self, groups):
+        """Update legacy storage for a same-dim CoordSet from updated groups."""
+        group = groups[0]
+        # Use in-place list mutation to avoid triggering _coords_validate,
+        # which would convert empty list to None or raise on unnamed coords.
+        del self._coords[:]
+        for entry in group.entries:
+            self._coords.append(entry.coord)
+        self._default = 0
+        if group.default_id:
+            for i, entry in enumerate(group.entries):
+                if entry.id == group.default_id:
+                    self._default = i
+                    break
+        self._is_same_dim = True
+        self._references = {}
+
     @staticmethod
     def _replace_group_in_groups(groups, old_group, new_group):
         """Replace one group in a groups tuple by identity."""
@@ -1681,6 +1699,15 @@ class CoordSet(HasTraits):
     def _resolve_set_name_groups(self, groups, coord_groups, index, coord):
         """Group-backed top-level name replacement."""
         if self.is_same_dim:
+            group = coord_groups[0] if coord_groups else None
+            entry_idx, entry = self._lookup_entry_by_alias(group, index)
+            if entry is not None:
+                coord.name = index
+                entries = list(group.entries)
+                entries[entry_idx] = replace(entry, coord=coord)
+                return self._replace_group_in_groups(
+                    groups, group, replace(group, entries=tuple(entries))
+                )
             return None
 
         idx, group = self._lookup_coordinate_group_by_dim(coord_groups, index)
@@ -1770,6 +1797,42 @@ class CoordSet(HasTraits):
         dimension and ``_3`` is a new synthetic child alias.
         """
         try:
+            # New: same-dim raw _N append/replacement
+            if self.is_same_dim and index.startswith("_"):
+                alias = index
+                group = coord_groups[0] if coord_groups else None
+                if group is None:
+                    return None
+                if alias in group.aliases:
+                    entry_id = group.aliases[alias]
+                    for entry_idx, entry in enumerate(group.entries):
+                        if entry.id == entry_id:
+                            coord.name = alias
+                            entries = list(group.entries)
+                            entries[entry_idx] = replace(entry, coord=coord)
+                            return self._replace_group_in_groups(
+                                groups,
+                                group,
+                                replace(group, entries=tuple(entries)),
+                            )
+                    return None
+                coord.name = alias
+                new_entry = _CoordinateEntry(
+                    id=_make_entry_id(coord, alias, set()),
+                    coord=coord,
+                    aliases=(alias,),
+                )
+                new_aliases = dict(group.aliases)
+                new_aliases[alias] = new_entry.id
+                new_entries = list(group.entries) + [new_entry]
+                new_group = replace(
+                    group,
+                    entries=tuple(new_entries),
+                    aliases=new_aliases,
+                )
+                return self._replace_group_in_groups(groups, group, new_group)
+
+            # Existing: x_N pattern for non-same-dim
             idx, group = self._lookup_coordinate_group_by_dim(coord_groups, index[0])
             if idx is None:
                 return None
@@ -1805,9 +1868,25 @@ class CoordSet(HasTraits):
                 )
                 return self._replace_group_in_groups(groups, group, new_group)
 
-            return groups
+            return None
         except (KeyError, IndexError):
             return None
+
+    def _resolve_set_append_groups(self, groups, coord_groups, index, coord):
+        """Group-backed append for new dimension names."""
+        if isinstance(index, str) and index in self.available_names:
+            coord.name = index
+            new_entry = _CoordinateEntry(
+                id=_make_entry_id(coord, index, set()),
+                coord=coord,
+            )
+            new_group = _DimensionCoordinates(
+                dim=index,
+                entries=(new_entry,),
+                default_id=new_entry.id,
+            )
+            return groups + (new_group,)
+        return None
 
     def _resolve_set_groups(self, groups, index, coord):
         """
@@ -1826,6 +1905,8 @@ class CoordSet(HasTraits):
             self._resolve_set_title_groups,
             self._resolve_set_child_title_groups,
             self._resolve_set_child_name_groups,
+            self._resolve_set_synthetic_alias_groups,
+            self._resolve_set_append_groups,
         ):
             result = resolver(groups, coord_groups, index, coord)
             if result is not None:
@@ -1840,8 +1921,23 @@ class CoordSet(HasTraits):
     def _resolve_delete_name_groups(self, groups, coord_groups, index):
         """Group-backed name-based deletion."""
         if self.is_same_dim:
-            # Same-dim CoordSets fall through to legacy in-place mutation
-            # to avoid double-wrapping via _groups_to_coordset.
+            group = coord_groups[0] if coord_groups else None
+            entry_idx, entry = self._lookup_entry_by_alias(group, index)
+            if entry is not None:
+                entries = list(group.entries)
+                del entries[entry_idx]
+                new_aliases = dict(group.aliases)
+                new_aliases.pop(index, None)
+                new_default_id = group.default_id
+                if group.default_id == entry.id:
+                    new_default_id = entries[0].id if entries else None
+                new_group = replace(
+                    group,
+                    entries=tuple(entries),
+                    aliases=new_aliases,
+                    default_id=new_default_id,
+                )
+                return self._replace_group_in_groups(groups, group, new_group)
             return None
 
         idx, group = self._lookup_coordinate_group_by_dim(coord_groups, index)
@@ -1853,9 +1949,37 @@ class CoordSet(HasTraits):
     def _resolve_delete_title_groups(self, groups, coord_groups, index):
         """Group-backed title-based deletion."""
         if self.is_same_dim:
-            # Same-dim CoordSets fall through to legacy in-place mutation
-            # to avoid double-wrapping via _groups_to_coordset.
-            return None
+            matches = self._lookup_top_level_title_matches(index, coord_groups)
+            if not matches:
+                return None
+
+            if len(matches) > 1:
+                warnings.warn(
+                    f"Getting a coordinate from its title. However `{index}` "
+                    f"occurs several time. Only"
+                    f" the first occurrence is returned!",
+                    stacklevel=3,
+                )
+
+            entry_idx, group, entry = matches[0]
+            entries = list(group.entries)
+            del entries[entry_idx]
+            alias = next(
+                (a for a, eid in group.aliases.items() if eid == entry.id), None
+            )
+            new_aliases = dict(group.aliases)
+            if alias:
+                new_aliases.pop(alias, None)
+            new_default_id = group.default_id
+            if group.default_id == entry.id:
+                new_default_id = entries[0].id if entries else None
+            new_group = replace(
+                group,
+                entries=tuple(entries),
+                aliases=new_aliases,
+                default_id=new_default_id,
+            )
+            return self._replace_group_in_groups(groups, group, new_group)
 
         matches = self._lookup_top_level_title_matches(index, coord_groups)
         if not matches:
@@ -1929,6 +2053,12 @@ class CoordSet(HasTraits):
         groups = self._lookup_groups()
         groups = self._resolve_set_groups(groups, index, coord)
         if groups is not None:
+            if self.is_same_dim:
+                # Same-dim CoordSets bypass _groups_to_coordset to avoid
+                # double-wrapping (the reconstruction wraps the inner
+                # same-dim group in an extra CoordSet layer).
+                self._sync_same_dim_from_groups(groups)
+                return
             try:
                 result = self._legacy_coordset_from_lifecycle_groups(groups)
             except ValueError:
@@ -2027,6 +2157,12 @@ class CoordSet(HasTraits):
         coord_groups = self._filter_coordinate_lookup_groups(groups)
         groups = self._resolve_delete_groups(groups, coord_groups, index)
         if groups is not None:
+            if self.is_same_dim:
+                # Same-dim CoordSets bypass _groups_to_coordset to avoid
+                # double-wrapping (the reconstruction wraps the inner
+                # same-dim group in an extra CoordSet layer).
+                self._sync_same_dim_from_groups(groups)
+                return
             if not self._filter_coordinate_lookup_groups(groups):
                 # All dimension groups removed.  Sync empty state directly
                 # since _groups_to_coordset does not handle empty groups.
