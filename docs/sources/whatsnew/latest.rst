@@ -72,6 +72,10 @@ Bug Fixes
   Synthetic tests for CSV reading/writing have been added, removing the dependency
   on external test data for these functionalities (#1077).
 
+- Preserved scientific-context metadata (``meta``, ``author``,
+  ``description``, ``origin``, and ``filename``) in wrapper-based processing
+  and analysis outputs such as ``Filter(...).transform(...)`` (#1103).
+
 Dependency Updates
 ~~~~~~~~~~~~~~~~~~
 

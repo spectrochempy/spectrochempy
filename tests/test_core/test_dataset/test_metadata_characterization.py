@@ -28,6 +28,7 @@ def metadata_dataset():
     dataset.name = "sample_001"
     dataset.meta.project = "metadata_contract"
     dataset.meta.instrument = "test_instrument"
+    dataset.meta.processing = ["source"]
     dataset.author = "test_author"
     dataset.description = "test_description"
     dataset.origin = "test_origin"
@@ -159,20 +160,25 @@ def test_mean_along_dimension_preserves_metadata_and_drops_reduced_coord(
     assert "Initial history marker" in result.history[0]
 
 
-def test_wrapper_based_filter_drops_meta_and_source_provenance(
+def test_wrapper_based_filter_preserves_scientific_context_metadata(
     metadata_dataset,
 ):
     result = scp.Filter(method="savgol", size=5, order=2).transform(metadata_dataset)
 
     assert result.name == "sample_001_Filter.transform"
     assert result.title == metadata_dataset.title
-    assert result.meta.project is None
-    assert result.meta.instrument is None
-    assert result.author != metadata_dataset.author
-    assert result.description == ""
-    assert result.origin == ""
-    assert result.filename != metadata_dataset.filename
-    assert result.filename.name == "sample_001_Filter.scp"
+    assert result.meta == metadata_dataset.meta
+    assert result.meta is not metadata_dataset.meta
+    assert result.meta.project == metadata_dataset.meta.project
+    assert result.meta.instrument == metadata_dataset.meta.instrument
+    assert result.meta.processing == metadata_dataset.meta.processing
+    assert result.meta.processing is not metadata_dataset.meta.processing
+    result.meta.processing.append("result")
+    assert metadata_dataset.meta.processing == ["source"]
+    assert result.author == metadata_dataset.author
+    assert result.description == metadata_dataset.description
+    assert result.origin == metadata_dataset.origin
+    assert result.filename == metadata_dataset.filename
     assert result.units == metadata_dataset.units
     assert result.dims == ["y", "x"]
     assert result.coordset is not None
