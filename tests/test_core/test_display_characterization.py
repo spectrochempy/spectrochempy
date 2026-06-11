@@ -407,6 +407,7 @@ class TestProjectCurrentBehavior:
     def test_script_appears_with_type_indicator(self):
         """Scripts appear with (script) type indicator."""
         from spectrochempy.core.script import Script
+
         proj = Project(name="test_project")
         script = Script(name="my_script", content="print('hello')")
         proj._scripts["my_script"] = script
@@ -426,6 +427,7 @@ class TestProjectCurrentBehavior:
 # ======================================================================================
 # ADDITIONAL SAFETY-NET TESTS
 # ======================================================================================
+
 
 class TestDisplaySafetyNet:
     """Safety-net tests to catch regressions."""
