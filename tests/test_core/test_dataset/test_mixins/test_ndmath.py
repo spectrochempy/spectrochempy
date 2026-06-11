@@ -1485,13 +1485,28 @@ def test_operator_quantity_operand():
     assert r.units == ds.units
 
 
-def test_operator_coord_operand():
-    """Arithmetic with a Coord operand works."""
+@pytest.mark.parametrize(
+    "operation",
+    [
+        lambda ds, coord: ds + coord,
+        lambda ds, coord: ds - coord,
+        lambda ds, coord: ds * coord,
+        lambda ds, coord: ds / coord,
+        lambda ds, coord: coord + ds,
+        lambda ds, coord: coord - ds,
+        lambda ds, coord: coord * ds,
+        lambda ds, coord: coord / ds,
+    ],
+)
+def test_operator_coord_operand_rejected(operation):
+    """Mixed NDDataset/Coord arithmetic is rejected."""
     ds = NDDataset(np.ones((3,)), units="m")
     coord = Coord(np.array([0.1, 0.2, 0.3]), units="m")
-    r = ds + coord
-    assert_array_equal(r.data, np.array([1.1, 1.2, 1.3]))
-    assert isinstance(r, NDDataset)
+    with pytest.raises(
+        TypeError,
+        match="Arithmetic between NDDataset and Coord is not supported",
+    ):
+        operation(ds, coord)
 
 
 def test_mask_propagation():
@@ -2173,12 +2188,37 @@ def test_operation_matching_coordinates_succeeds():
     assert isinstance(r, NDDataset)
 
 
-def test_operation_coord_vs_dataset_no_check():
-    """Operation with a Coord and a Dataset skips coord check."""
+def test_operation_coord_vs_dataset_scalar_still_allowed():
+    """The Coord-specific restriction does not affect dataset-scalar arithmetic."""
     x = Coord.linspace(0, 9, 10)
     ds = NDDataset(np.ones(10), coordset=CoordSet(x=x))
     r = ds + 1.0
     assert isinstance(r, NDDataset)
+
+
+@pytest.mark.parametrize(
+    ("ufunc", "label"),
+    [
+        (np.add, "add"),
+        (np.subtract, "subtract"),
+        (np.multiply, "multiply"),
+        (np.divide, "divide"),
+    ],
+)
+def test_coord_dataset_ufunc_operand_rejected(ufunc, label):
+    """NumPy ufuncs also reject mixed NDDataset/Coord arithmetic."""
+    ds = NDDataset(np.ones((3,)), units="m")
+    coord = Coord(np.array([0.1, 0.2, 0.3]), units="m")
+    with pytest.raises(
+        TypeError,
+        match="Arithmetic between NDDataset and Coord is not supported",
+    ):
+        ufunc(ds, coord)
+    with pytest.raises(
+        TypeError,
+        match="Arithmetic between NDDataset and Coord is not supported",
+    ):
+        ufunc(coord, ds)
 
 
 # ===============================================================================
