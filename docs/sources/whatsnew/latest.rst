@@ -81,6 +81,17 @@ Dependency Updates
 
 - pint >= 0.24 is now required
 
+Breaking Changes
+~~~~~~~~~~~~~~~~
+
+- Mixed arithmetic between ``NDDataset`` and ``Coord`` is now rejected
+  (e.g. ``dataset + coord`` or ``coord * dataset``).  ``Coord`` is treated as
+  axis support, not as a signal-bearing operand.  Workflows needing correction
+  vectors, weighting profiles, response curves, or other signal-like 1D
+  operands should represent them as 1D ``NDDataset`` objects instead.  This
+  clarifies the math semantics under the broader ``#1103`` arithmetic and
+  metadata characterization work.
+
 Deprecations
 ~~~~~~~~~~~~
 
