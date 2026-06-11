@@ -428,6 +428,12 @@ class _set_output:
         if args and type(args[0]) is type(obj):
             args = args[1:]
 
+        original_X = None
+        if args and isinstance(args[0], NDDataset):
+            original_X = args[0]
+        elif isinstance(kwargs.get("dataset"), NDDataset):
+            original_X = kwargs["dataset"]
+
         # get the method output - one or two arrays depending on the method and *args
         output = self.method(obj, *args, **kwargs)
 
@@ -460,7 +466,15 @@ class _set_output:
 
             # determine the input X dataset
             X = getattr(obj, meta_from)
+            metadata_source = (
+                original_X if meta_from == "_X" and original_X is not None else X
+            )
 
+            X_transf.meta = copy.deepcopy(metadata_source.meta)
+            X_transf.author = copy.copy(metadata_source.author)
+            X_transf.description = copy.copy(metadata_source.description)
+            X_transf.origin = copy.copy(metadata_source.origin)
+            X_transf.filename = copy.copy(metadata_source.filename)
             if self.units is not None:
                 if self.units == "keep":
                     X_transf.units = X.units

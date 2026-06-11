@@ -76,6 +76,10 @@ Bug Fixes
   Synthetic tests for CSV reading/writing have been added, removing the dependency
   on external test data for these functionalities (#1077).
 
+- Preserved scientific-context metadata (``meta``, ``author``,
+  ``description``, ``origin``, and ``filename``) in wrapper-based processing
+  and analysis outputs such as ``Filter(...).transform(...)`` (#1103).
+
 Dependency Updates
 ~~~~~~~~~~~~~~~~~~
 
@@ -104,6 +108,16 @@ Developer
    pre-existing corruption bug in same-dimension title set.  Alias invariants,
    ``default_id`` semantics, label metadata, reference pass-through, and
    coordinate metadata are preserved throughout.
+
+- MAINT: Switched ``CoordSet`` internal storage from the ``_coords``
+  ``traitlets.List`` trait (with its ``@validate`` hook) to a plain Python
+  ``_storage`` list, completing the migration away from trait-based
+  coercion.  The ``_coords`` trait and ``_coords_validate`` method have been
+  removed; ``_finalize_child_coordset`` now handles nested ``CoordSet``
+  setup explicitly in ``_append`` and mutation paths.  Sorting, copying,
+  and name-validation logic that was previously in the validator are now
+  performed in ``__init__``, ``_append``, and ``set``.  The internal
+  observer ``_coords_update`` was renamed to ``_child_name_changed``.
 
 - MAINT: Removed stale commented ``docrep`` residue and the unused commented
   ``numpydoc`` pre-commit hook block.

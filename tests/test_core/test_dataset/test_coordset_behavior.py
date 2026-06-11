@@ -432,7 +432,7 @@ class TestCoordSetMutation:
         cs = CoordSet([c1, c2])
         del cs["x_2"]
         x = cs["x"]
-        for child in x._coords:
+        for child in x.coords:
             assert not isinstance(
                 child, CoordSet
             ), f"double-wrap: {type(child).__name__}"
@@ -910,7 +910,7 @@ class TestCoordSetSameDimMutation:
         inner = cs["x"]
         inner["_3"] = Coord([7, 8, 9])
         x = cs["x"]
-        for child in x._coords:
+        for child in x.coords:
             assert not isinstance(
                 child, CoordSet
             ), f"double-wrap: {type(child).__name__}"
@@ -958,7 +958,7 @@ class TestCoordSetSameDimMutation:
         inner = cs["x"]
         inner["_3"] = Coord([7, 8, 9])
         x = cs["x"]
-        for child in x._coords:
+        for child in x.coords:
             assert not isinstance(
                 child, CoordSet
             ), f"double-wrap: {type(child).__name__}"
@@ -975,7 +975,7 @@ class TestCoordSetSameDimMutation:
         inner = cs["x"]
         del inner["_2"]
         assert cs["x"].names == ["_1", "_3"]
-        assert cs["x"]._is_same_dim
+        assert cs["x"].is_same_dim
 
     def test_same_dim_two_to_one(self):
         c1 = Coord([1, 2, 3], name="a")
