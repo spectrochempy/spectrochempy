@@ -110,17 +110,17 @@ Developer
 - MAINT: Moved CP/PARAFAC implementation and TensorLy dependency ownership into
   the new tensor plugin, keeping the core package tensor-agnostic.
 
-- MAINT: Advanced the internal ``CoordSet`` storage migration by consolidating
-  lookup, serializer adapters, group conversion, and lifecycle helpers around
-  transient group metadata while preserving legacy runtime storage,
-  serialization, and public behavior.  Migrated ``_concatenate_dim`` and
-  ``_interpolate_dim`` to the lifecycle adapter pattern, completing the
-  migration of all dimension manipulation methods.  Migrated ``_resolve_delete``
-  to the group-backed architecture following the same projection-resolution-
-  reconstruction pattern, covering top-level name and title deletion, synthetic
-  alias delegation, and same-dimension fallthrough.  Same-dimension
-  multi-coordinate semantics, label metadata, alias and default preservation,
-  reference pass-through, and coordinate metadata propagation are maintained.
+- MAINT: Internal ``CoordSet`` storage redesign — all mutation paths (set,
+   delete, append, lifecycle) now resolve through the group-backed
+   projection-resolution-reconstruction pipeline instead of legacy in-place
+   ``_coords`` mutation.  The migration consolidated lookup, serializer
+   adapters, group conversion, and lifecycle helpers around transient group
+   metadata while preserving runtime storage, serialization, and public
+   behavior.  Same-dimension mutations apply group state directly to legacy
+   storage to avoid double-wrapping in ``_groups_to_coordset``, which fixed a
+   pre-existing corruption bug in same-dimension title set.  Alias invariants,
+   ``default_id`` semantics, label metadata, reference pass-through, and
+   coordinate metadata are preserved throughout.
 
 - MAINT: Removed stale commented ``docrep`` residue and the unused commented
   ``numpydoc`` pre-commit hook block.
