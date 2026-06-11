@@ -17,6 +17,7 @@ de récupération après incident.
 | [`emergency-recovery.md`](emergency-recovery.md) | Incidents connus et résolutions |
 | [`rfcs/metadata-contract.md`](rfcs/metadata-contract.md) | RFC mainteneur définissant la sémantique normative des métadonnées `NDDataset` |
 | [`rfcs/coordinate-arithmetic-semantics.md`](rfcs/coordinate-arithmetic-semantics.md) | RFC mainteneur décrivant la position actuelle sur la sémantique de l'arithmétique coordonnée |
+| [`completed/coordset_storage_final_notes.md`](completed/coordset_storage_final_notes.md) | Note finale de clôture du chantier de refonte du stockage `CoordSet` |
 
 ## Workflows GitHub associés
 
