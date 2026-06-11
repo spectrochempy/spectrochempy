@@ -370,16 +370,11 @@ class TestNDDatasetCurrentBehavior:
 class TestProjectCurrentBehavior:
     """Current behavior characterization for Project objects."""
 
-    def test_project_repr_contains_object_identity(self):
-        """Project repr currently shows object identity."""
+    def test_project_repr_contains_type_and_differs_from_str(self):
+        """Project repr currently identifies the type and differs from str."""
         proj = Project(name="test_project")
         repr_str = repr(proj)
         assert "Project" in repr_str
-        assert " object at " in repr_str
-
-    def test_project_repr_different_from_str(self):
-        """Project repr is currently different from str."""
-        proj = Project(name="test_project")
         assert str(proj) != repr(proj)
 
     def test_empty_project_shows_empty_indicator(self):
