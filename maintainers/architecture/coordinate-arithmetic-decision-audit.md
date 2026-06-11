@@ -135,4 +135,3 @@ The project must choose where it wants to sit between:
 For now, the current spectroscopy-oriented compromise remains acceptable.
 Future changes should be driven by demonstrated scientific requirements rather
 than by architectural preference alone.
-

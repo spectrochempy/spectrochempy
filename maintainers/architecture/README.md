@@ -155,4 +155,3 @@ repeating recent investigations.
 Why it exists:
 PR-by-PR audit details should remain local, while their durable outcomes should
 be visible to future maintainers.
-

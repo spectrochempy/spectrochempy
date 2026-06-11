@@ -158,4 +158,3 @@ Future coordinate arithmetic work should explicitly decide:
 - whether multi-dimensional compatibility should remain partial or become
   all-dimension-aware;
 - how much deviation from NumPy broadcasting is acceptable.
-

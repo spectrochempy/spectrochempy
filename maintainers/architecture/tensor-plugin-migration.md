@@ -53,4 +53,3 @@ plugin while keeping compatibility paths for existing users.
 - Add future TensorLy-derived classes under
   `spectrochempy_tensor.decompositions`.
 - Add shared conversion helpers under `spectrochempy_tensor.adapters`.
-

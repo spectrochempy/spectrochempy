@@ -201,4 +201,3 @@ history/title behavior
 
 This would distinguish stable public behavior from incidental internal
 structure before any responsibility extraction begins.
-

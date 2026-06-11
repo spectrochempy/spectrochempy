@@ -156,4 +156,3 @@ The value would be semantic rather than cosmetic:
 - separate representation semantics from formatting mechanics;
 - reduce path-dependent display behavior;
 - provide one reference for display reviews.
-

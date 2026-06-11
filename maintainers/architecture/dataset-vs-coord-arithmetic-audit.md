@@ -124,4 +124,3 @@ and what should make it a 1D NDDataset instead?
 ```
 
 That boundary is the real pressure point behind dataset-vs-`Coord` arithmetic.
-
