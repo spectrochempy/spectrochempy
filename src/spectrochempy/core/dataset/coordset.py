@@ -124,7 +124,7 @@ class CoordSet(HasTraits):
     """
 
     # Hidden attributes containing the collection of objects
-    _coords = List(allow_none=True)
+    _coords = List()
     _references = Dict()
     _updated = Bool(False)
 
@@ -362,7 +362,7 @@ class CoordSet(HasTraits):
     def _coords_validate(self, proposal):
         coords = proposal["value"]
         if not coords:
-            return None
+            return []
 
         for id, coord in enumerate(coords):
             if coord and not isinstance(coord, Coord | CoordSet):
@@ -412,7 +412,7 @@ class CoordSet(HasTraits):
                 )  # Final sort
                 coords = list(zip(*_sortedtuples, strict=False))[1]
             return list(coords)  # be sure its a list not a tuple
-        return None
+        return []
 
     @default("_id")
     def _id_default(self):
@@ -453,9 +453,7 @@ class CoordSet(HasTraits):
     @property
     def is_empty(self):
         """True if there is no coords defined (bool)."""
-        if self._coords:
-            return len(self._coords) == 0
-        return False
+        return not self._coords
 
     @property
     def is_same_dim(self):
@@ -474,6 +472,8 @@ class CoordSet(HasTraits):
         (readonly property). If the set is for a single dimension return a
         single size as all coordinates must have the same.
         """
+        if not self._coords:
+            return []
         _sizes = []
         for _i, item in enumerate(self._coords):
             _sizes.append(item.size)  # recurrence if item is a CoordSet
@@ -514,18 +514,24 @@ class CoordSet(HasTraits):
     # ----------------------------------------------------------------------------------
     @property
     def default(self):
-        """Default coordinates (Coord)."""
+        """Default coordinates (Coord), or None if empty."""
+        if not self._coords:
+            return None
         return self._coords[self._default]
 
     @property
     def default_index(self):
-        """Selected default coordinate index (int)."""
+        """Selected default coordinate index (int), or None if empty."""
+        if not self._coords:
+            return None
         return self._default
 
     @property
     def data(self):
         # in case data is called on a coordset for dimension with multiple coordinates
         # return the default coordinates data
+        if not self._coords:
+            return None
         return self.default.data
 
     @property
@@ -542,6 +548,8 @@ class CoordSet(HasTraits):
     @property
     def titles(self):
         """Titles of the coords in the current coords (list)."""
+        if not self._coords:
+            return []
         _titles = []
         for item in self._coords:
             if isinstance(item, Coord):
@@ -557,16 +565,22 @@ class CoordSet(HasTraits):
     @property
     def labels(self):
         """Labels of the coordinates in the current coordset (list)."""
+        if not self._coords:
+            return []
         return [item.labels for item in self._coords]
 
     @property
     def is_labeled(self):
         """Returns True if one of the coords is labeled."""
+        if not self._coords:
+            return False
         return any(item.is_labeled for item in self._coords)
 
     @property
     def units(self):
         """Units of the coords in the current coords (list)."""
+        if not self._coords:
+            return []
         return [item.units for item in self._coords]
 
     # ----------------------------------------------------------------------------------

@@ -74,9 +74,59 @@ class TestCoordSetConstruction:
             assert len(name) > 0
 
     def test_construction_without_args(self):
-        # CoordSet() currently raises TypeError (existing bug in _coords validator)
-        with pytest.raises(TypeError):
-            CoordSet()
+        cs = CoordSet()
+        assert len(cs) == 0
+        assert cs.is_empty
+
+
+# ==============================================================================
+# Empty CoordSet
+# ==============================================================================
+
+
+class TestCoordSetEmpty:
+    """Empty CoordSet invariants."""
+
+    def test_empty_coordset_invariants(self):
+        cs = CoordSet()
+        assert len(cs) == 0
+        assert cs.is_empty
+        assert cs.names == []
+        assert cs.titles == []
+        assert cs.labels == []
+        assert cs.units == []
+        assert cs.sizes == []
+        assert not cs.is_labeled
+        assert cs.default is None
+        assert cs.default_index is None
+        assert repr(cs) == "CoordSet: []"
+        assert cs == CoordSet()
+        assert cs.coords == []
+
+    def test_empty_after_delete_last(self):
+        c1 = Coord([1, 2, 3], name="x", title="test")
+        cs = CoordSet(c1, keepnames=True)
+        assert not cs.is_empty
+        del cs["x"]
+        assert len(cs) == 0
+        assert cs.is_empty
+        assert cs.names == []
+        assert cs.titles == []
+        assert cs.default is None
+        assert cs.default_index is None
+
+    def test_empty_after_delete_last_by_title(self):
+        c1 = Coord([1, 2, 3], name="x", title="wavelength")
+        cs = CoordSet(c1, keepnames=True)
+        del cs["wavelength"]
+        assert len(cs) == 0
+        assert cs.is_empty
+
+    def test_two_empty_coordsets_are_equal(self):
+        assert CoordSet() == CoordSet()
+
+    def test_empty_coordset_hash(self):
+        hash(CoordSet())  # does not raise
 
 
 # ==============================================================================
