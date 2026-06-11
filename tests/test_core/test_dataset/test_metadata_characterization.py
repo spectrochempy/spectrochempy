@@ -198,7 +198,9 @@ def test_integrate_preserves_metadata_with_operation_overrides(metadata_dataset)
     assert result.coordset is not None
     np.testing.assert_allclose(result.y.data, metadata_dataset.y.data)
     assert len(result.history) == 1
-    assert "Dataset resulting from application of `trapezoid` method" in result.history[0]
+    assert (
+        "Dataset resulting from application of `trapezoid` method" in result.history[0]
+    )
 
 
 def test_interpolate_preserves_metadata_and_replaces_interpolated_coord(
@@ -223,8 +225,9 @@ def test_interpolate_preserves_metadata_and_replaces_interpolated_coord(
     np.testing.assert_allclose(result.x.data, new_x)
     assert len(result.history) == 2
     assert "Initial history marker" in result.history[0]
-    assert "Interpolated along dims ['x'] to 4 points using linear method" in (
-        result.history[1]
+    assert (
+        "Interpolated along dims ['x'] to 4 points using linear method"
+        in (result.history[1])
     )
 
 
