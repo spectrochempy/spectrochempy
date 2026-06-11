@@ -270,7 +270,7 @@ def test_concatenate_preserves_non_first_default():
 
     result = concatenate(ds1, ds2, dims="x")
     # The default index should be preserved from the first coordset.
-    assert result.coordset["x"]._default == 1
+    assert result.coordset["x"].default_index == 1
 
 
 def test_concatenate_none_coord_warns():
