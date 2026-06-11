@@ -739,6 +739,223 @@ class TestCoordSetMultiCoord:
 
 
 # ==============================================================================
+# Same-dim mutation (PR22)
+# ==============================================================================
+
+
+class TestCoordSetSameDimMutation:
+    """CoordSet same-dimension mutation behavior (group-backed)."""
+
+    # ------------------------------------------------------------------
+    # Same-dim assignment
+    # ------------------------------------------------------------------
+
+    def test_same_dim_set_by_alias_replaces(self):
+        c1 = Coord([1, 2, 3], name="a")
+        c2 = Coord([4, 5, 6], name="b")
+        cs = CoordSet([c1, c2])
+        inner = cs["x"]
+        inner["_1"] = Coord([7, 8, 9], name="a")
+        assert_array_equal(cs["x"]["_1"].data, [7, 8, 9])
+        assert cs["x"].names == ["_1", "_2"]
+
+    def test_same_dim_set_by_alias_keeps_other_entries(self):
+        c1 = Coord([1, 2, 3], name="a")
+        c2 = Coord([4, 5, 6], name="b")
+        cs = CoordSet([c1, c2])
+        inner = cs["x"]
+        inner["_2"] = Coord([10, 11, 12], name="b")
+        assert_array_equal(cs["x"]["_2"].data, [10, 11, 12])
+        assert_array_equal(cs["x"]["_1"].data, [1, 2, 3])
+
+    def test_same_dim_set_preserves_default_id(self):
+        c1 = Coord([1, 2, 3], name="a")
+        c2 = Coord([4, 5, 6], name="b")
+        cs = CoordSet([c1, c2])
+        cs["x"].select(2)
+        before_default = cs["x"].default
+        inner = cs["x"]
+        inner["_1"] = Coord([7, 8, 9], name="a")
+        assert cs["x"].default == before_default
+
+    # ------------------------------------------------------------------
+    # Same-dim deletion
+    # ------------------------------------------------------------------
+
+    def test_same_dim_del_by_alias_removes_entry(self):
+        c1 = Coord([1, 2, 3], name="a")
+        c2 = Coord([4, 5, 6], name="b")
+        c3 = Coord([7, 8, 9], name="c")
+        cs = CoordSet([c1, c2, c3])
+        del cs["x"]["_2"]
+        assert cs["x"].names == ["_1", "_3"]
+
+    def test_same_dim_del_by_alias_no_renumber(self):
+        c1 = Coord([1, 2, 3], name="a")
+        c2 = Coord([4, 5, 6], name="b")
+        c3 = Coord([7, 8, 9], name="c")
+        cs = CoordSet([c1, c2, c3])
+        del cs["x"]["_2"]
+        assert cs["x"].names == ["_1", "_3"]
+
+    def test_same_dim_del_by_title_removes_entry(self):
+        c1 = Coord([1, 2, 3], name="a", title="alpha")
+        c2 = Coord([4, 5, 6], name="b", title="beta")
+        cs = CoordSet([c1, c2])
+        del cs["x"]["beta"]
+        assert cs["x"].names == ["_1"]
+        assert_array_equal(cs["x"]["_1"].data, [1, 2, 3])
+
+    def test_same_dim_del_duplicate_title_warns(self):
+        c1 = Coord([1, 2, 3], name="a", title="dup")
+        c2 = Coord([4, 5, 6], name="b", title="dup")
+        cs = CoordSet([c1, c2])
+        with pytest.warns(UserWarning, match="occurs several time"):
+            del cs["x"]["dup"]
+        assert cs["x"].names == ["_2"]
+
+    def test_same_dim_del_default_entry_updates_default(self):
+        c1 = Coord([1, 2, 3], name="a")
+        c2 = Coord([4, 5, 6], name="b")
+        cs = CoordSet([c1, c2])
+        cs["x"].select(2)
+        del cs["x"]["_2"]
+        assert cs["x"].default is not None
+        assert cs["x"].names == ["_1"]
+
+    def test_same_dim_del_last_entry_empties(self):
+        c1 = Coord([1, 2, 3], name="a")
+        cs = CoordSet([c1])
+        inner = cs["x"]
+        del inner["_1"]
+        assert len(cs["x"]) == 0
+
+    # ------------------------------------------------------------------
+    # Same-dim append via _N
+    # ------------------------------------------------------------------
+
+    def test_same_dim_append_via_synthetic_alias(self):
+        c1 = Coord([1, 2, 3], name="a")
+        c2 = Coord([4, 5, 6], name="b")
+        cs = CoordSet([c1, c2])
+        inner = cs["x"]
+        inner["_3"] = Coord([7, 8, 9])
+        assert len(cs["x"]) == 3
+        assert cs["x"].names == ["_1", "_2", "_3"]
+        assert_array_equal(cs["x"]["_3"].data, [7, 8, 9])
+
+    def test_same_dim_append_preserves_existing(self):
+        c1 = Coord([1, 2, 3], name="a")
+        c2 = Coord([4, 5, 6], name="b")
+        cs = CoordSet([c1, c2])
+        inner = cs["x"]
+        inner["_3"] = Coord([7, 8, 9])
+        assert_array_equal(cs["x"]["_1"].data, [1, 2, 3])
+        assert_array_equal(cs["x"]["_2"].data, [4, 5, 6])
+
+    def test_same_dim_append_no_double_wrap(self):
+        c1 = Coord([1, 2, 3], name="a")
+        c2 = Coord([4, 5, 6], name="b")
+        cs = CoordSet([c1, c2])
+        inner = cs["x"]
+        inner["_3"] = Coord([7, 8, 9])
+        x = cs["x"]
+        for child in x._coords:
+            assert not isinstance(
+                child, CoordSet
+            ), f"double-wrap: {type(child).__name__}"
+
+    # ------------------------------------------------------------------
+    # New dimension append
+    # ------------------------------------------------------------------
+
+    def test_append_new_dim_via_available_name(self):
+        cs = CoordSet(Coord([1, 2, 3], name="x"))
+        cs["y"] = Coord([10, 20, 30], name="y")
+        assert "y" in cs.names
+        assert len(cs) == 2
+
+    def test_append_preserves_ordering(self):
+        c1 = Coord([1, 2, 3], name="x")
+        c2 = Coord([10, 20], name="y")
+        cs = CoordSet(c1, c2, keepnames=True)
+        cs["z"] = Coord([5, 5], name="z")
+        assert cs.names == ["x", "y", "z"]
+
+    # ------------------------------------------------------------------
+    # Mutation sequences
+    # ------------------------------------------------------------------
+
+    def test_same_dim_sequence_set_del_append(self):
+        c1 = Coord([1, 2, 3], name="a")
+        c2 = Coord([4, 5, 6], name="b")
+        cs = CoordSet([c1, c2])
+        inner = cs["x"]
+        inner["_2"] = Coord([10, 11, 12], name="b")
+        assert_array_equal(cs["x"]["_2"].data, [10, 11, 12])
+        del cs["x"]["_1"]
+        assert cs["x"].names == ["_2"]
+        inner = cs["x"]
+        inner["_3"] = Coord([7, 8, 9])
+        assert cs["x"].names == ["_2", "_3"]
+        assert_array_equal(cs["x"]["_3"].data, [7, 8, 9])
+
+    def test_same_dim_del_then_append_reconstructs(self):
+        c1 = Coord([1, 2, 3], name="a")
+        c2 = Coord([4, 5, 6], name="b")
+        cs = CoordSet([c1, c2])
+        del cs["x"]["_1"]
+        inner = cs["x"]
+        inner["_3"] = Coord([7, 8, 9])
+        x = cs["x"]
+        for child in x._coords:
+            assert not isinstance(
+                child, CoordSet
+            ), f"double-wrap: {type(child).__name__}"
+
+    # ------------------------------------------------------------------
+    # Boundary cases
+    # ------------------------------------------------------------------
+
+    def test_same_dim_three_to_two(self):
+        c1 = Coord([1, 2, 3], name="a")
+        c2 = Coord([4, 5, 6], name="b")
+        c3 = Coord([7, 8, 9], name="c")
+        cs = CoordSet([c1, c2, c3])
+        inner = cs["x"]
+        del inner["_2"]
+        assert cs["x"].names == ["_1", "_3"]
+        assert cs["x"]._is_same_dim
+
+    def test_same_dim_two_to_one(self):
+        c1 = Coord([1, 2, 3], name="a")
+        c2 = Coord([4, 5, 6], name="b")
+        cs = CoordSet([c1, c2])
+        inner = cs["x"]
+        del inner["_1"]
+        assert cs["x"].names == ["_2"]
+        assert len(cs["x"]) == 1
+
+    def test_same_dim_one_to_zero(self):
+        c1 = Coord([1, 2, 3], name="a")
+        cs = CoordSet([c1])
+        inner = cs["x"]
+        del inner["_1"]
+        assert len(cs["x"]) == 0
+
+    def test_same_dim_zero_to_one_append(self):
+        c1 = Coord([1, 2, 3], name="a")
+        cs = CoordSet([c1])
+        inner = cs["x"]
+        del inner["_1"]
+        assert len(cs["x"]) == 0
+        inner = cs["x"]
+        inner["_2"] = Coord([4, 5, 6])
+        assert len(cs["x"]) == 1
+        assert_array_equal(cs["x"]["_2"].data, [4, 5, 6])
+
+
+# ==============================================================================
 # Attribute access
 # ==============================================================================
 
