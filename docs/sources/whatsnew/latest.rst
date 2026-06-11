@@ -105,16 +105,16 @@ Developer
   the new tensor plugin, keeping the core package tensor-agnostic.
 
 - MAINT: Internal ``CoordSet`` storage redesign — all mutation paths (set,
-   delete, append, lifecycle) now resolve through the group-backed
-   projection-resolution-reconstruction pipeline instead of legacy in-place
-   ``_coords`` mutation.  The migration consolidated lookup, serializer
-   adapters, group conversion, and lifecycle helpers around transient group
-   metadata while preserving runtime storage, serialization, and public
-   behavior.  Same-dimension mutations apply group state directly to legacy
-   storage to avoid double-wrapping in ``_groups_to_coordset``, which fixed a
-   pre-existing corruption bug in same-dimension title set.  Alias invariants,
-   ``default_id`` semantics, label metadata, reference pass-through, and
-   coordinate metadata are preserved throughout.
+  delete, append, lifecycle) now resolve through the group-backed
+  projection-resolution-reconstruction pipeline instead of legacy in-place
+  ``_coords`` mutation.  The migration consolidated lookup, serializer
+  adapters, group conversion, and lifecycle helpers around transient group
+  metadata while preserving runtime storage, serialization, and public
+  behavior.  Same-dimension mutations apply group state directly to legacy
+  storage to avoid double-wrapping in ``_groups_to_coordset``, which fixed a
+  pre-existing corruption bug in same-dimension title set.  Alias invariants,
+  ``default_id`` semantics, label metadata, reference pass-through, and
+  coordinate metadata are preserved throughout.
 
 - MAINT: Switched ``CoordSet`` internal storage from the ``_coords``
   ``traitlets.List`` trait (with its ``@validate`` hook) to a plain Python
