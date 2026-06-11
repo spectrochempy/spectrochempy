@@ -270,7 +270,6 @@ class CoordSet(HasTraits):
                 )
 
         # store the item (validation will be performed)
-        # self._storage = _coords
 
         # Validate and sort
         for coord in self._storage:
@@ -1251,11 +1250,11 @@ class CoordSet(HasTraits):
     # ------------------------------------------------------------------
 
     def _lookup_groups(self):
-        """Project current legacy storage to private lookup groups."""
+        """Project current storage to private lookup groups."""
         return _coordset_to_groups(self)
 
     def _coordinate_lookup_groups(self):
-        """Private groups that correspond positionally to legacy ``_coords``."""
+        """Coordinate lookup groups for the current CoordSet."""
         return self._filter_coordinate_lookup_groups(self._lookup_groups())
 
     @staticmethod
@@ -1556,7 +1555,7 @@ class CoordSet(HasTraits):
         """
         Resolve a numeric key.
 
-        For top-level CoordSets this is positional access into ``_coords``.
+        For top-level CoordSets this is positional access into ``_storage``.
         For same-dimension multi-coordinate groups this slices every child.
         """
         multi = bool(self.is_same_dim)
@@ -1614,26 +1613,28 @@ class CoordSet(HasTraits):
     # ------------------------------------------------------------------
 
     def _sync_from_coordset(self, other):
-        """Replace legacy runtime state from a reconstructed CoordSet."""
+        """Replace runtime state from a reconstructed CoordSet."""
         self._storage = other._storage
         self._default = other._default
         self._is_same_dim = other._is_same_dim
         self._references = other._references
 
     def _sync_same_dim_from_groups(self, groups):
-        """Update legacy storage for a same-dim CoordSet from updated groups."""
+        """Update storage for a same-dim CoordSet from updated groups."""
         group = groups[0]
-        # Use in-place list mutation to avoid triggering _coords_validate,
+        # Use in-place list mutation to avoid triggering validation,
         # which would convert empty list to None or raise on unnamed coords.
         del self._storage[:]
         for entry in group.entries:
             self._storage.append(entry.coord)
-        self._default = 0
-        if group.default_id:
-            for i, entry in enumerate(group.entries):
-                if entry.id == group.default_id:
-                    self._default = i
-                    break
+        self._default = next(
+            (
+                i
+                for i, entry in enumerate(group.entries)
+                if entry.id == group.default_id
+            ),
+            0,
+        )
         self._is_same_dim = True
         self._references = {}
 
@@ -2153,7 +2154,7 @@ class CoordSet(HasTraits):
                 # All dimension groups removed.  Sync empty state directly
                 # since _groups_to_coordset does not handle empty groups.
                 # Use in-place mutation (del [:] ) to avoid triggering the
-                # _coords_validate validator, which would convert empty list
+                # validator which would convert empty list
                 # to None and break __len__().
                 del self._storage[:]
                 self._default = 0

@@ -268,8 +268,8 @@ class TestInterpolateCoordReconstruction:
 
         coord = result.coord("x")
         assert isinstance(coord, CoordSet)
-        assert coord._is_same_dim
-        assert coord._default == multi_coord._default
+        assert coord.is_same_dim
+        assert coord.default_index == multi_coord.default_index
         assert coord.name == "x"
 
         primary = coord.default

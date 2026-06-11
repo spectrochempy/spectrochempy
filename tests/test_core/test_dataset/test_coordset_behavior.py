@@ -975,7 +975,7 @@ class TestCoordSetSameDimMutation:
         inner = cs["x"]
         del inner["_2"]
         assert cs["x"].names == ["_1", "_3"]
-        assert cs["x"]._is_same_dim
+        assert cs["x"].is_same_dim
 
     def test_same_dim_two_to_one(self):
         c1 = Coord([1, 2, 3], name="a")
