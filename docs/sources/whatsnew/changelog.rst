@@ -66,6 +66,14 @@ Bug Fixes
   related case of setting a child coordinate by synthetic alias
   (e.g. ``cs["x_2"] = coord``).
 
+- Fixed ``CoordSet`` empty-state invariants: ``CoordSet()`` now correctly
+  creates a valid empty coordinate set instead of raising ``TypeError``.
+  Properties ``default``, ``default_index``, ``data`` return ``None`` and
+  ``titles``, ``labels``, ``units``, ``sizes`` return ``[]`` when the
+  coordinate set is empty, instead of raising ``IndexError`` or
+  ``TypeError``.  The internal ``_coords`` list is never set to ``None``,
+  eliminating fragile None-guards in read-side properties.
+
 - Stabilized 1D CSV round-trip support: ``read_csv`` now tolerates header rows
   (e.g., column titles) written by ``write_csv``, and correctly handles both
   single-column (data-only) and multi-column (coordinate + data) CSV files.
