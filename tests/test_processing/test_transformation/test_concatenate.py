@@ -209,7 +209,7 @@ def test_concatenate_preserves_multi_coord_labels():
     assert len(x_coords) == 2
 
     # Collect labels from sub-coords without assuming _coords order.
-    all_label_sets = {tuple(c.labels.tolist()) for c in x_coords._coords}
+    all_label_sets = {tuple(c.labels.tolist()) for c in x_coords.coords}
     assert ("a", "b", "c", "g", "h", "i") in all_label_sets
     assert ("d", "e", "f", "j", "k", "l") in all_label_sets
 
@@ -235,7 +235,7 @@ def test_concatenate_multi_coord_default_data_is_not_concatenated():
 
     result = concatenate(ds1, ds2, dims="x")
     # Each sub-coord data length is unchanged (concatenation not applied).
-    for c in result.coordset["x"]._coords:
+    for c in result.coordset["x"].coords:
         assert len(c.data) == 3
 
 

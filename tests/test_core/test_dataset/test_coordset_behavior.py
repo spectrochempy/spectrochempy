@@ -432,7 +432,7 @@ class TestCoordSetMutation:
         cs = CoordSet([c1, c2])
         del cs["x_2"]
         x = cs["x"]
-        for child in x._coords:
+        for child in x.coords:
             assert not isinstance(
                 child, CoordSet
             ), f"double-wrap: {type(child).__name__}"
@@ -910,7 +910,7 @@ class TestCoordSetSameDimMutation:
         inner = cs["x"]
         inner["_3"] = Coord([7, 8, 9])
         x = cs["x"]
-        for child in x._coords:
+        for child in x.coords:
             assert not isinstance(
                 child, CoordSet
             ), f"double-wrap: {type(child).__name__}"
@@ -958,7 +958,7 @@ class TestCoordSetSameDimMutation:
         inner = cs["x"]
         inner["_3"] = Coord([7, 8, 9])
         x = cs["x"]
-        for child in x._coords:
+        for child in x.coords:
             assert not isinstance(
                 child, CoordSet
             ), f"double-wrap: {type(child).__name__}"

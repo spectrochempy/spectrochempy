@@ -101,6 +101,16 @@ Developer
    ``default_id`` semantics, label metadata, reference pass-through, and
    coordinate metadata are preserved throughout.
 
+- MAINT: Switched ``CoordSet`` internal storage from the ``_coords``
+  ``traitlets.List`` trait (with its ``@validate`` hook) to a plain Python
+  ``_storage`` list, completing the migration away from trait-based
+  coercion.  The ``_coords`` trait and ``_coords_validate`` method have been
+  removed; ``_finalize_child_coordset`` now handles nested ``CoordSet``
+  setup explicitly in ``_append`` and mutation paths.  Sorting, copying,
+  and name-validation logic that was previously in the validator are now
+  performed in ``__init__``, ``_append``, and ``set``.  The internal
+  observer ``_coords_update`` was renamed to ``_child_name_changed``.
+
 - MAINT: Removed stale commented ``docrep`` residue and the unused commented
   ``numpydoc`` pre-commit hook block.
 
