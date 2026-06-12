@@ -32,6 +32,7 @@ from spectrochempy.core.dataset._coordgroup import _make_entry_id
 from spectrochempy.core.dataset.basearrays.ndarray import DEFAULT_DIM_NAME
 from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.utils import exceptions
 from spectrochempy.utils.print import colored_output
 from spectrochempy.utils.print import convert_to_html
 from spectrochempy.utils.typeutils import is_sequence
@@ -1027,7 +1028,10 @@ class CoordSet(HasTraits):
         groups = self._concatenate_lifecycle_groups(groups, dim, coordsets)
         result = self._legacy_coordset_from_lifecycle_groups(groups)
 
-        data_tuple = tuple(cs[dim].data for cs in coordsets)
+        base = result[dim]
+        data_tuple = tuple(
+            self._coord_data_in_base_units(cs[dim], base, dim) for cs in coordsets
+        )
         none_coord = any(x is None for x in data_tuple)
         if not none_coord:
             result[dim]._data = np.concatenate(data_tuple)
@@ -1038,6 +1042,38 @@ class CoordSet(HasTraits):
             )
 
         return result
+
+    @staticmethod
+    def _coord_data_in_base_units(coord, base, dim):
+        """
+        Return coord data expressed in the base coordinate units.
+
+        Coordinate values were previously concatenated as raw magnitudes, so
+        compatible but different units (e.g. cm^-1 and um^-1) were silently
+        mixed and incompatible units went undetected (issue #1101).  Multiple
+        coordinates per dimension (CoordSet) keep the previous behavior.
+        """
+        data = getattr(coord, "data", None)
+        if (
+            data is None
+            or not isinstance(coord, Coord)
+            or not isinstance(base, Coord)
+            or coord.units == base.units
+        ):
+            return data
+        if (
+            coord.units is None
+            or base.units is None
+            or coord.units.dimensionality != base.units.dimensionality
+        ):
+            raise exceptions.UnitsCompatibilityError(
+                f"Coordinates of the '{dim}' dimension have incompatible units "
+                f"({coord.units} and {base.units}). The datasets can't be "
+                "concatenated.",
+            )
+        converted = coord.copy()
+        converted.ito(base.units)
+        return converted.data
 
     @staticmethod
     def _concatenate_lifecycle_groups(groups, dim, coordsets):
