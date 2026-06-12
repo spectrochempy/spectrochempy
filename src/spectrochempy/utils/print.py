@@ -24,7 +24,8 @@ def pstr(object, **kwargs):
 
 
 def _html_heading(obj):
-    """Build a compact HTML heading identifying *obj*.
+    """
+    Build a compact HTML heading identifying *obj*.
 
     Returns a string like ``"Coord [mycoord]"`` or ``"Project [my_project]"``.
     Falls back to the bare type name when the object has no meaningful name.

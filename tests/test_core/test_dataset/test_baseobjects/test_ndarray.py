@@ -319,10 +319,7 @@ def test_ndarray_methods(refarray, ndarray, ndarrayunit):
     assert nd.is_masked
 
     # test repr_html
-    assert (
-        "<div class='scp-output'><details><summary>NDArray"
-        in nd._repr_html_()
-    )
+    assert "<div class='scp-output'><details><summary>NDArray" in nd._repr_html_()
 
     # test iterations
 
