@@ -462,6 +462,43 @@ class TestProjectCurrentBehavior:
         assert "Test description" in detailed
 
 
+class TestProjectNameModel:
+    """Tests for Project's explicit-name signal (has_defined_name)."""
+
+    def test_project_named_has_defined_name(self):
+        """Project with explicit name has has_defined_name == True."""
+        proj = Project(name="my_project")
+        assert proj.has_defined_name is True
+
+    def test_project_default_has_no_defined_name(self):
+        """Project with no name argument has has_defined_name == False."""
+        proj = Project()
+        assert proj.has_defined_name is False
+
+    def test_project_none_has_no_defined_name(self):
+        """Project(name=None) has has_defined_name == False."""
+        proj = Project(name=None)
+        assert proj.has_defined_name is False
+
+    def test_project_auto_name_not_in_html_heading(self):
+        """Default Project should not show generated name in HTML heading."""
+        proj = Project()
+        html = proj._repr_html_()
+        # Extract the outer summary line (the heading)
+        import re
+
+        summary = re.search(r"<summary>(.*?)</summary>", html)
+        assert summary is not None
+        assert "Project-Project_" not in summary.group(0)
+
+    def test_project_explicit_name_in_html_heading(self):
+        """Named Project should show name in HTML heading."""
+        proj = Project(name="myproj")
+        html = proj._repr_html_()
+        assert "myproj" in html
+        assert "Project" in html
+
+
 # ======================================================================================
 # HTML HEADING TESTS
 # ======================================================================================

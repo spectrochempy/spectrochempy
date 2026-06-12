@@ -76,6 +76,7 @@ class Project(AbstractProject, NDIO):
 
     _id = tr.Unicode()
     _name = tr.Unicode(allow_none=True)
+    _explicit_name = tr.Bool(False)
 
     _parent = tr.This()
     _projects = tr.Dict(tr.This())
@@ -315,11 +316,16 @@ class Project(AbstractProject, NDIO):
 
     @name.setter
     def name(self, name):
-        # property.setter for name
         if name is not None:
             self._name = name
+            self._explicit_name = True
         else:
-            self.name = "Project-" + self.id.split("-")[0]
+            self._name = "Project-" + self.id.split("-")[0]
+
+    @property
+    def has_defined_name(self):
+        """True if the name was explicitly provided by the user (bool)."""
+        return self._explicit_name
 
     @property
     def parent(self):
