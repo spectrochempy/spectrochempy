@@ -21,6 +21,12 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- ``concatenate`` now converts coordinate values expressed in compatible but
+  different units to the units of the first dataset instead of silently
+  concatenating raw magnitudes, and raises a ``UnitsCompatibilityError`` when
+  the coordinate units of the concatenation dimension are incompatible
+  (#1101).
+
 - ``read_opus`` now correctly reads assembled / time-resolved OPUS files
   containing data series blocks such as ``a``, ``sm``, ``igsm``, ``phsm``,
   ``tr``, and exposes the new ``TRACE``, ``GCIG``, ``GCSC`` type selectors
