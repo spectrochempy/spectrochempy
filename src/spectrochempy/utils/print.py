@@ -17,6 +17,7 @@ def pstr(object, **kwargs):
         "NDDataset",
         "Coord",
         "CoordSet",
+        "Project",
     ]:
         return object._cstr(**kwargs).strip()
     return str(object).strip()

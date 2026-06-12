@@ -7,6 +7,7 @@ __all__ = ["Project"]
 
 import copy as cpy
 import pathlib
+import textwrap
 import uuid
 import warnings
 from functools import wraps
@@ -18,6 +19,8 @@ from spectrochempy.core.dataset.nddataset import NDIO
 from spectrochempy.core.project.abstractproject import AbstractProject
 from spectrochempy.core.script import Script
 from spectrochempy.utils.meta import Meta
+from spectrochempy.utils.print import colored_output
+from spectrochempy.utils.print import convert_to_html
 from spectrochempy.utils.traits import NDDatasetType
 
 # from collections import OrderedDict
@@ -83,6 +86,7 @@ class Project(AbstractProject, NDIO):
 
     _filename = tr.Instance(pathlib.Path, allow_none=True)
     _directory = tr.Instance(pathlib.Path, allow_none=True)
+    _html_output = tr.Bool(False)
 
     def __init__(self, *args, argnames=None, name=None, **meta):
         super().__init__()
@@ -129,9 +133,51 @@ class Project(AbstractProject, NDIO):
         pass  # TODO: ???
 
     def _repr_html_(self):
-        h = self.__str__()
-        h = h.replace("\n", "<br/>\n")
-        return h.replace(" ", "&nbsp;")
+        return convert_to_html(self)
+
+    def __repr__(self):
+        return f"Project: {self.name}"
+
+    def _cstr(self):
+        out = ""
+        out += f"         name: {self.name}\n"
+
+        author = self.meta.get("author", None)
+        if author:
+            out += f"       author: {author}\n"
+
+        description = self.meta.get("description", None)
+        if description:
+            wrapper = textwrap.TextWrapper(
+                initial_indent="",
+                subsequent_indent=" " * 15,
+                replace_whitespace=True,
+                width=80,
+            )
+            pars = description.strip().splitlines()
+            desc = ""
+            if pars:
+                desc += f"{wrapper.fill(pars[0])}\n"
+            for par in pars[1:]:
+                desc += "{}\n".format(textwrap.indent(par, " " * 15))
+            desc = f"\0\0\0{desc.rstrip()}\0\0\0\n"
+            out += "  description: "
+            out += desc
+
+        out += "DATA\n"
+
+        str_output = self.__str__()
+        lines = str_output.split("\n")
+        hier_lines = lines[1:] if len(lines) > 1 else []
+        out += "\n".join(hier_lines)
+
+        if not out.endswith("\n"):
+            out += "\n"
+        out += "\n"
+
+        if not self._html_output:
+            return colored_output(out.rstrip())
+        return out.rstrip()
 
     # ----------------------------------------------------------------------------------
     # Special methods
@@ -223,9 +269,9 @@ class Project(AbstractProject, NDIO):
                 # nothing has been found in the project
                 s += f"{sep} (empty project)\n"
 
-            return s.strip("\n")
+            return s
 
-        return _listproj(s, self, 0)
+        return _listproj(s, self, 0).rstrip("\n")
 
     def _attributes_(self):
         return [

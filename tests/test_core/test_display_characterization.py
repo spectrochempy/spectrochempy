@@ -205,6 +205,20 @@ class TestProjectObservedDisplay:
         proj = Project(name="test_project")
         assert len(str(proj)) > 0
 
+    def test_repr_is_compact(self):
+        """Project repr should be compact and contain type and name."""
+        proj = Project(name="test_project")
+        repr_str = repr(proj)
+        assert "Project" in repr_str
+        assert "test_project" in repr_str
+        assert "\n" not in repr_str.strip()
+
+    def test_repr_differs_from_default_object_repr(self):
+        """Project repr should not be the default Python object repr."""
+        proj = Project(name="test_project")
+        repr_str = repr(proj)
+        assert "object at 0x" not in repr_str
+
     def test_repr_html_exists(self):
         """Project should have a _repr_html_ method that produces output."""
         proj = Project(name="test_project")
@@ -241,6 +255,28 @@ class TestProjectObservedDisplay:
         proj._datasets["my_dataset"] = ds
         str_output = str(proj)
         assert "my_dataset" in str_output
+
+    def test_cstr_contains_metadata_when_present(self):
+        """Project _cstr should include metadata fields when present."""
+        proj = Project(name="test_project", author="test_author")
+        proj.meta.description = "Test description"
+        detailed = pstr(proj)
+        assert "test_project" in detailed
+        assert "test_author" in detailed
+        assert "Test description" in detailed
+
+    def test_cstr_contains_hierarchy(self):
+        """Project _cstr should include hierarchy information."""
+        proj = Project(name="parent")
+        subproj = Project(name="child")
+        proj._projects["child"] = subproj
+        ds = NDDataset([1.0, 2.0, 3.0], name="my_dataset")
+        proj._datasets["my_dataset"] = ds
+        detailed = pstr(proj)
+        assert "child" in detailed
+        assert "(sub-project)" in detailed
+        assert "my_dataset" in detailed
+        assert "(dataset)" in detailed
 
 
 # ======================================================================================
@@ -409,14 +445,21 @@ class TestProjectCurrentBehavior:
         str_output = str(proj)
         assert "(script)" in str_output
 
-    def test_project_does_not_show_metadata(self):
-        """Project currently does not show metadata in str output."""
-        proj = Project(name="test_project")
-        proj.author = "test_author"
-        proj.description = "Test description"
+    def test_project_does_not_show_metadata_in_str(self):
+        """Project __str__ does not show metadata (metadata belongs in _cstr)."""
+        proj = Project(name="test_project", author="test_author")
+        proj.meta.description = "Test description"
         str_output = str(proj)
         assert "test_author" not in str_output
         assert "Test description" not in str_output
+
+    def test_project_metadata_appears_in_cstr(self):
+        """Project metadata does appear in _cstr / detailed display."""
+        proj = Project(name="test_project", author="test_author")
+        proj.meta.description = "Test description"
+        detailed = pstr(proj)
+        assert "test_author" in detailed
+        assert "Test description" in detailed
 
 
 # ======================================================================================
