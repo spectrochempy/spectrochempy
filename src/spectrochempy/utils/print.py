@@ -23,6 +23,19 @@ def pstr(object, **kwargs):
     return str(object).strip()
 
 
+def _html_heading(obj):
+    """Build a compact HTML heading identifying *obj*.
+
+    Returns a string like ``"Coord [mycoord]"`` or ``"Project [my_project]"``.
+    Falls back to the bare type name when the object has no meaningful name.
+    """
+    type_name = type(obj).__name__
+    name = obj.name
+    if name:
+        return f"{type_name} [{name}]"
+    return type_name
+
+
 # ======================================================================================
 # Terminal colors and styles
 # ======================================================================================
@@ -195,7 +208,7 @@ def convert_to_html(obj, open=False, id=None):
     s = "<div class='scp-output'>"
     open = "" if not open else " open"
     idx = f"{id}: " if id is not None else ""
-    s += f"<details{open}><summary>{idx}{obj.__str__()}[{obj.name}]</summary>"
+    s += f"<details{open}><summary>{idx}{_html_heading(obj)}</summary>"
     s += "\n".join(html_output)
     s += "</details>"
     s += "</div>"
