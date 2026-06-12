@@ -32,13 +32,13 @@ def _html_heading(obj):
     (i.e. when the name was auto-generated rather than user-provided).
     """
     type_name = type(obj).__name__
-    # Use has_defined_name when available (NDArray, Coord, NDDataset, CoordSet)
-    # to distinguish user-provided names from auto-generated internal IDs.
+    # Use has_defined_name when available (NDArray, Coord, NDDataset, CoordSet,
+    # Project) to distinguish user-provided names from auto-generated IDs.
     if hasattr(obj, "has_defined_name"):
         if obj.has_defined_name:
             return f"{type_name} [{obj.name}]"
         return type_name
-    # For types without has_defined_name (e.g. Project), check _name directly.
+    # Fallback for types without has_defined_name.
     name = getattr(obj, "_name", None)
     if name:
         return f"{type_name} [{name}]"

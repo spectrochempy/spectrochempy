@@ -133,6 +133,15 @@ Developer
   headings may differ from terminal display.  This is PR4 of the Display /
   Representation Architecture (#843).
 
+- MAINT: Added ``has_defined_name`` to ``Project`` — a boolean trait signal
+  distinguishing user-provided names from auto-generated fallbacks.  The name
+  setter now sets ``_explicit_name = True`` only when ``name is not None``;
+  the auto-generated fallback assigns directly to ``_name`` (no recursive
+  call) to preserve the distinction.  ``_html_heading()`` now handles Project
+  via the ``has_defined_name`` property, so auto-generated names no longer
+  appear in notebook headings.  This is PR4.5 of the Display / Representation
+  Architecture (#843).
+
 - MAINT: Moved CP/PARAFAC implementation and TensorLy dependency ownership into
   the new tensor plugin, keeping the core package tensor-agnostic.
 
