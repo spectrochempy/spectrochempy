@@ -161,10 +161,12 @@ Developer
   sets, and ``Project [name]`` for projects.  Auto-generated internal IDs
   (UUIDs) are never shown in headings, and ``Project.__str__()`` hierarchy
   is preserved in HTML through block-level rendering of indented lines.
-  ``_repr_html_()`` headings are now decoupled from terminal ``__str__()``,
-  aligning with the RFC decision that notebook headings may differ from
-  terminal display.  This consolidates PR4 through PR7 of the Display /
-  Representation Architecture (#843).
+  The SUMMARY section metadata is now rendered inline under the main heading
+  instead of inside a collapsible ``<details>`` block, reducing unnecessary
+  nesting.  ``_repr_html_()`` headings are now decoupled from terminal
+  ``__str__()``, aligning with the RFC decision that notebook headings may
+  differ from terminal display.  This consolidates PR4 through PR8 of the
+  Display / Representation Architecture (#843).
 
 - MAINT: Moved CP/PARAFAC implementation and TensorLy dependency ownership into
   the new tensor plugin, keeping the core package tensor-agnostic.

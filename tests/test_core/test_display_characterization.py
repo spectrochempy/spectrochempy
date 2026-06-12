@@ -662,6 +662,50 @@ class TestHTMLHeading:
         assert "Coord" in html
 
 
+class TestInlineSummary:
+    """Tests that summary metadata renders inline (no collapsible Summary section)."""
+
+    def test_no_summary_collapsible_in_nddataset(self):
+        """NDDataset HTML should not contain a collapsible Summary section."""
+        ds = NDDataset([1.0, 2.0], name="ds")
+        html = ds._repr_html_()
+        assert "<summary>Summary</summary>" not in html
+
+    def test_metadata_visible_inline_nddataset(self):
+        """NDDataset metadata fields appear directly under heading."""
+        ds = NDDataset([1.0, 2.0], name="ds")
+        html = ds._repr_html_()
+        assert "name" in html
+        assert "ds" in html
+
+    def test_data_section_still_collapsible(self):
+        """Data section should still be wrapped in <details>."""
+        ds = NDDataset([1.0, 2.0])
+        html = ds._repr_html_()
+        # The data section <details> should exist
+        assert "<details>" in html
+
+    def test_no_summary_collapsible_in_project(self):
+        """Project HTML should not contain a collapsible Summary section."""
+        proj = Project(name="proj")
+        html = proj._repr_html_()
+        assert "<summary>Summary" not in html
+        assert "<summary>Data" in html
+
+    def test_project_metadata_inline(self):
+        """Project metadata appears inline under heading."""
+        proj = Project(name="proj", author="test")
+        html = proj._repr_html_()
+        assert "test" in html
+        assert "proj" in html
+
+    def test_coord_no_summary_collapsible(self):
+        """Coord HTML should not contain a collapsible Summary section."""
+        coord = Coord([1.0, 2.0], name="x")
+        html = coord._repr_html_()
+        assert "<summary>Summary</summary>" not in html
+
+
 class TestDisplaySafetyNet:
     """Safety-net tests to catch regressions."""
 
