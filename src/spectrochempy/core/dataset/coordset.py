@@ -1146,8 +1146,8 @@ class CoordSet(HasTraits):
             Target coordinate for the new grid (normalized, unit-converted).
         interpolate_secondary : callable
             Callable ``(Coord) -> Coord`` that copies a secondary coordinate,
-            interpolates its numeric data (when usable), clears labels, and
-            returns the result.
+            interpolates its numeric data (when usable), carries labels onto
+            exactly-matching target points, and returns the result.
         """
         groups = self._lookup_groups()
         groups = self._interpolate_lifecycle_groups(
@@ -1166,7 +1166,8 @@ class CoordSet(HasTraits):
         Handles three cases:
         1. **Dim not found** -- appends a new group with *target_coord*.
         2. **Simple coord** (single entry, no aliases) -- replaces the entry's
-           coord with a copy of *target_coord* (labels cleared).
+           coord with a copy of *target_coord*, whose labels have already been
+           carried over for exactly-matching points by the caller.
         3. **Same-dim multi-coord** (multiple entries or aliases) -- applies
            *interpolate_secondary* to each entry's coord.
         """
@@ -1174,7 +1175,6 @@ class CoordSet(HasTraits):
 
         if dim not in coord_dims:
             new_coord = target_coord.copy()
-            new_coord._labels = None
             temp_coordset = CoordSet(new_coord, keepnames=True, sorted=False)
             new_group = _coordset_to_groups(temp_coordset)[0]
             return tuple(groups) + (new_group,)
@@ -1186,7 +1186,6 @@ class CoordSet(HasTraits):
 
         if len(group.entries) == 1 and not group.aliases:
             new_coord = target_coord.copy()
-            new_coord._labels = None
             new_entry = replace(group.entries[0], coord=new_coord)
             new_group = replace(group, entries=(new_entry,))
         else:

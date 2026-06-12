@@ -43,6 +43,15 @@ Bug Fixes
   with the data before interpolation, so they stay aligned when the source
   coordinate is decreasing.
 
+- ``interpolate`` now carries coordinate labels onto target points that exactly
+  match an original coordinate value, instead of dropping all labels (#1098).
+  Identity, reordering and subsetting therefore keep their labels (attached to
+  the correct values), while genuinely resampled points are left unlabelled.
+  The same point-wise policy is applied to the primary dimension coordinate and
+  to same-dimension secondary coordinates.  Matching is exact: SpectroChemPy
+  has no coordinate-matching tolerance convention, so a broader tolerance would
+  be a separate, explicit design decision.
+
 - Fixed ``Project.__str__()`` tree formatting when a project contains both
   sub-projects and sibling datasets or scripts at the same level.  The
   recursive ``_listproj`` helper previously used ``s.strip("\\n")`` which

@@ -242,10 +242,10 @@ class TestInterpolateUnits:
 
 
 class TestInterpolateLabels:
-    """Label handling tests."""
+    """Label handling tests (point-wise carry-over policy, GH #1098)."""
 
-    def test_interpolate_removes_labels(self):
-        """Test that labels are removed after interpolation."""
+    def test_interpolate_resampled_points_unlabelled(self):
+        """Genuinely resampled points (no exact match) are left unlabelled."""
         x = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
         labels = ["a", "b", "c", "d", "e"]
         y = np.array([0.0, 2.0, 4.0, 6.0, 8.0])
@@ -255,7 +255,102 @@ class TestInterpolateLabels:
         result = ds.interpolate(dim="x", coord=new_x)
 
         coord = result.coord("x")
+        # none of the target points match an original value -> unlabelled
         assert coord._labels is None
+
+    def test_interpolate_identity_preserves_all_labels(self):
+        """An identity target grid keeps every label."""
+        x = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
+        labels = ["a", "b", "c", "d", "e"]
+        y = np.array([0.0, 2.0, 4.0, 6.0, 8.0])
+        ds = NDDataset(y, coordset=[Coord(x, title="x", labels=labels)])
+
+        result = ds.interpolate(dim="x", coord=x.copy())
+
+        coord = result.coord("x")
+        assert coord.is_labeled
+        assert list(np.asarray(coord.get_labels())) == labels
+
+    def test_interpolate_reordered_preserves_labels_at_values(self):
+        """A reordered target grid keeps labels attached to their values."""
+        x = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
+        labels = ["a", "b", "c", "d", "e"]
+        y = np.array([0.0, 2.0, 4.0, 6.0, 8.0])
+        ds = NDDataset(y, coordset=[Coord(x, title="x", labels=labels)])
+
+        new_x = np.array([2.0, 0.0, 4.0, 1.0, 3.0])
+        result = ds.interpolate(dim="x", coord=new_x)
+
+        coord = result.coord("x")
+        assert list(np.asarray(coord.get_labels())) == ["c", "a", "e", "b", "d"]
+
+    def test_interpolate_subset_preserves_matching_labels(self):
+        """A subset target grid keeps only the matching labels."""
+        x = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
+        labels = ["a", "b", "c", "d", "e"]
+        y = np.array([0.0, 2.0, 4.0, 6.0, 8.0])
+        ds = NDDataset(y, coordset=[Coord(x, title="x", labels=labels)])
+
+        new_x = np.array([1.0, 3.0])
+        result = ds.interpolate(dim="x", coord=new_x)
+
+        coord = result.coord("x")
+        assert list(np.asarray(coord.get_labels())) == ["b", "d"]
+
+    def test_interpolate_mixed_grid_labels_exact_matches_only(self):
+        """A mixed grid labels exact matches and leaves new points unlabelled."""
+        x = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
+        labels = ["a", "b", "c", "d", "e"]
+        y = np.array([0.0, 2.0, 4.0, 6.0, 8.0])
+        ds = NDDataset(y, coordset=[Coord(x, title="x", labels=labels)])
+
+        new_x = np.array([0.0, 1.5, 2.0, 3.5])
+        result = ds.interpolate(dim="x", coord=new_x)
+
+        coord = result.coord("x")
+        assert list(np.asarray(coord.get_labels())) == ["a", "", "c", ""]
+
+    def test_interpolate_no_match_gives_unlabelled_coord(self):
+        """When no target point matches, the coordinate stays unlabelled."""
+        x = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
+        labels = ["a", "b", "c", "d", "e"]
+        y = np.array([0.0, 2.0, 4.0, 6.0, 8.0])
+        ds = NDDataset(y, coordset=[Coord(x, title="x", labels=labels)])
+
+        new_x = np.array([0.1, 1.1, 2.1])
+        result = ds.interpolate(dim="x", coord=new_x)
+
+        coord = result.coord("x")
+        assert not coord.is_labeled
+        assert coord._labels is None
+
+    def test_interpolate_secondary_coord_labels_consistent(self):
+        """Same-dim secondary coordinates follow the same point-wise policy."""
+        from spectrochempy import CoordSet
+
+        x = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
+        y = np.array([0.0, 10.0, 20.0])
+        data = np.arange(15).reshape(3, 5).astype(float)
+
+        primary = Coord(x, title="x", labels=["a", "b", "c", "d", "e"])
+        secondary = Coord(10.0 * x, title="x10", labels=["p", "q", "r", "s", "t"])
+        multi_coord = CoordSet(primary, secondary, name="x")
+        ds = NDDataset(data, coordset=[Coord(y, title="y"), multi_coord])
+
+        # Matching is driven by the default coordinate; pick a target that is a
+        # reordered subset of its own values (original positions 3 then 1).
+        default_values = np.asarray(multi_coord.default.data)
+        new_x = default_values[[3, 1]]
+        result = ds.interpolate(dim="x", coord=new_x)
+
+        coord = result.coord("x")
+        assert isinstance(coord, CoordSet)
+        # every same-dim coordinate carries its own labels for the matched
+        # points, consistently with the default/primary coordinate
+        for cc in coord.coords:
+            labels = list(np.asarray(cc.get_labels()))
+            assert cc.is_labeled
+            assert labels[0] != "" and labels[1] != ""
 
 
 class TestInterpolateMask:
@@ -300,8 +395,8 @@ class TestInterpolateCoordReconstruction:
 
     def test_interpolate_simple_coord_replacement(self):
         """
-        Simple coord replacement preserves target values, name,
-        and clears labels.
+        Simple coord replacement preserves target values and name, and leaves
+        genuinely resampled points unlabelled.
         """
         x = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
         y = np.array([0.0, 2.0, 4.0, 6.0, 8.0])
@@ -318,8 +413,8 @@ class TestInterpolateCoordReconstruction:
 
     def test_interpolate_multi_coord_reconstruction(self):
         """
-        Multi-coord reconstruction preserves group nature, default,
-        clears labels, and interpolates secondary numeric data.
+        Multi-coord reconstruction preserves group nature and default, leaves
+        resampled points unlabelled, and interpolates secondary numeric data.
         """
         x = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
         y = np.array([0.0, 10.0, 20.0])
@@ -350,7 +445,7 @@ class TestInterpolateCoordReconstruction:
         np.testing.assert_allclose(primary.data, [0.5, 1.5, 2.5])
 
         # Verify secondary coord exists and was interpolated
-        # -- all children have labels cleared and length 3
+        # -- resampled (non-matching) points leave children unlabelled, length 3
         assert len(coord) > 1
 
 
