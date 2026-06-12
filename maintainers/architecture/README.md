@@ -97,6 +97,30 @@ Why it exists:
 The object-model boundary matters for future arithmetic changes and for
 deciding when a 1D operand should be a `Coord` or an `NDDataset`.
 
+
+### Units Audit
+
+File: `units-audit.md`
+
+Status: Completed architecture audit
+
+Summary:
+Comprehensive audit of the unit system and quantity propagation across SpectroChemPy.
+Maps current implementation (Pint integration, unit storage in NDArray, NDMath
+arithmetic propagation, Coord unit handling), identifies tested vs. untested
+behaviors, catalogs inconsistent or underspecified semantics (e.g., coordinate units
+ignored in arithmetic, silent unit drops in comparisons, power operation edge cases),
+and proposes a conservative v1 unit contract alongside prioritized recommendations.
+
+Why it exists:
+Unit handling is central to SpectroChemPy's value proposition in spectroscopy.
+This audit preserves the technical baseline for future unit-system evolution,
+including immediate fixes (coordinate unit validation, comparison fixes, power
+validation), medium-term improvements (coordinate unit semantics redesign,
+Quantity/NDDataset unification), and long-term redesign (full Pint Quantity
+integration, dimensional coordinate system).
+
+
 ### NDMath Maintainability Audit
 
 File: `ndmath-maintainability-audit.md`
