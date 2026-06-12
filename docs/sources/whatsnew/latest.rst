@@ -142,6 +142,12 @@ Developer
   appear in notebook headings.  This is PR4.5 of the Display / Representation
   Architecture (#843).
 
+- MAINT: Preserved Project hierarchy in HTML display — ``_process_section()``
+  now wraps indented hierarchy lines (prefixed by ``⤷``) in ``<div>`` elements,
+  preventing HTML whitespace collapsing from flattening nested sub-projects and
+  datasets into a single line.  This is PR6 of the Display / Representation
+  Architecture (#843).
+
 - MAINT: Moved CP/PARAFAC implementation and TensorLy dependency ownership into
   the new tensor plugin, keeping the core package tensor-agnostic.
 
