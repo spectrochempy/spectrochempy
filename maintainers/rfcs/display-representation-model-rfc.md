@@ -510,15 +510,26 @@ the contract is protected.
 
 ## Summary of Design Decisions Reached
 
-*To be filled in after RFC review.*
+| Question                                                      | Decision                                                                                                                                                                                                                                                                      |
+| ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Should `str(obj) == repr(obj)` for array-like types?          | **Yes.** Keep `str(obj) == repr(obj)` for `Coord`, `CoordSet`, and `NDDataset`. Compact display remains the default terminal representation. Detailed inspection remains the role of `pstr(obj)`.                                                                             |
+| Should Project implement `__repr__` with name?                | **Yes.** `Project` should define a custom compact `__repr__` including at least the project name.                                                                                                                                                                             |
+| Should Project metadata be visible in display?                | **Yes.** Project metadata should become visible in detailed display (`pstr(project)` / HTML display), while remaining absent from compact `__repr__`.                                                                                                                         |
+| Should Project join the common `_cstr()` pipeline?            | **Yes.** Project should eventually participate in the common representation model through a dedicated `_cstr()` implementation.                                                                                                                                               |
+| Should the HTML pipeline be separated from `_cstr()` parsing? | **Yes (long-term direction).** HTML display should eventually be generated from a semantic representation model rather than by parsing `_cstr()` output. This is considered an architectural improvement and may be implemented incrementally.                                |
+| Should there be a shared representation contract document?    | **Yes.** This RFC becomes the maintainer-facing representation contract for SpectroChemPy display behavior.                                                                                                                                                                   |
+| Is the CoordSet compact-repr showing titles acceptable?       | **Yes.** Coordinate names and titles provide useful identification in compact `CoordSet` representations, provided the representation remains concise.                                                                                                                        |
+| Should `_repr_html_` heading differ from `__str__()`?         | **Yes.** Notebook display has different usability requirements than terminal display. HTML headings may provide richer object identity (for example name/title) while `__str__()` remains compact. Semantic consistency should be preserved even if the presentation differs. |
 
-| Question | Decision |
-|---|---|
-| Should `str(obj) == repr(obj)` for array-like types? | |
-| Should Project implement `_repr__` with name? | |
-| Should Project metadata be visible in display? | |
-| Should Project join the common `_cstr()` pipeline? | |
-| Should the HTML pipeline be separated from `_cstr()` parsing? | |
-| Should there be a shared representation contract document? | |
-| Is the CoordSet compact-repr showing titles acceptable? | |
-| Should `_repr_html_` heading differ from `__str__()`? | |
+### Additional Notes
+
+The representation model intentionally distinguishes four levels:
+
+* `repr(obj)` → compact object fingerprint
+* `str(obj)` → compact human-readable terminal representation
+* `pstr(obj)` → detailed inspection representation
+* `_repr_html_()` → rich notebook representation
+
+HTML display is not required to mirror text display exactly. It should communicate the same semantic information while optimizing presentation for notebook environments.
+
+Project is considered a first-class display object and should progressively converge toward the same representation model as Coord, CoordSet, and NDDataset.
