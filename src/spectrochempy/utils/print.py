@@ -182,7 +182,19 @@ def _process_section(section):
     out = re.sub(regex, subst, out, count=0, flags=re.MULTILINE)
 
     regex = r"\.{3}\s+\n"
-    return re.sub(regex, "", out, count=0, flags=re.MULTILINE)
+    out = re.sub(regex, "", out, count=0, flags=re.MULTILINE)
+
+    # Preserve hierarchy lines (prefixed by ⤷ or containing "empty project")
+    # as block elements so that whitespace collapsing in HTML does not flatten
+    # Project nesting.
+    regex = r"^(\s*(?:⤷\s*.*|\(empty project\)))$"
+
+    def subst(match):
+        line = match.group(1)
+        n_spaces = len(line) - len(line.lstrip())
+        return f"<div>{'&nbsp;' * n_spaces}{line.lstrip()}</div>"
+
+    return re.sub(regex, subst, out, count=0, flags=re.MULTILINE)
 
 
 def convert_to_html(obj, open=False, id=None):
