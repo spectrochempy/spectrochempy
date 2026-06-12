@@ -121,6 +121,28 @@ Quantity/NDDataset unification), and long-term redesign (full Pint Quantity
 integration, dimensional coordinate system).
 
 
+
+### Plotting Architecture Audit
+
+File: `plotting-audit.md`
+
+Status: Completed architecture audit
+
+Summary:
+Comprehensive audit of the plotting subsystem architecture, Matplotlib
+dependencies, backend extensibility, and migration path toward backend-neutral
+design. Maps current component hierarchy (dispatcher, backends, plot1d/2d/3d,
+multiplot, style utilities), analyzes coupling points (loose at dispatcher
+level, tight at rendering level), inventories 46 Matplotlib dependencies
+(classified as essential/incidental/removable), assesses extensibility for
+Plotly/Bokeh/Altair backends, audits test coverage, and proposes phased
+roadmap from current state through complete backend abstraction.
+
+Why it exists:
+Plotting backend extensibility is a key evolution path. This audit preserves
+the technical baseline for incremental migration toward a backend-independent
+plotting architecture while preserving the existing user API.
+
 ### NDMath Maintainability Audit
 
 File: `ndmath-maintainability-audit.md`
