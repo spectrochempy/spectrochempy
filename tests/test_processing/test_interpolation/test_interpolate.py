@@ -190,6 +190,48 @@ class TestInterpolateMultidimensional:
         assert result.shape == (2, 3)
 
 
+class TestInterpolateFillValue:
+    """``fill_value`` handling, consistent between linear and PCHIP (#1093)."""
+
+    @staticmethod
+    def _dataset():
+        x = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
+        y = x**2
+        return NDDataset(y, coordset=[Coord(x, title="x")])
+
+    # -1.0 and 5.0 fall outside the original [0, 4] range; 0.5 and 2.5 are inside.
+    new_x = np.array([-1.0, 0.5, 2.5, 5.0])
+
+    @pytest.mark.parametrize("method", ["linear", "pchip"])
+    def test_default_fill_value_is_nan_outside_range(self, method):
+        """Both methods leave out-of-range points as NaN by default."""
+        result = self._dataset().interpolate(dim="x", coord=self.new_x, method=method)
+        assert np.isnan(result.data[0])
+        assert np.isnan(result.data[-1])
+        assert not np.isnan(result.data[1])
+        assert not np.isnan(result.data[2])
+
+    @pytest.mark.parametrize("method", ["linear", "pchip"])
+    def test_constant_fill_value_outside_range(self, method):
+        """A finite ``fill_value`` fills out-of-range points for both methods."""
+        result = self._dataset().interpolate(
+            dim="x", coord=self.new_x, method=method, fill_value=0.0
+        )
+        assert result.data[0] == 0.0
+        assert result.data[-1] == 0.0
+
+    def test_pchip_fill_value_leaves_in_range_unchanged(self):
+        """Changing ``fill_value`` only affects out-of-range points for PCHIP."""
+        ds = self._dataset()
+        ref = ds.interpolate(dim="x", coord=self.new_x, method="pchip")
+        filled = ds.interpolate(
+            dim="x", coord=self.new_x, method="pchip", fill_value=0.0
+        )
+        np.testing.assert_allclose(filled.data[1:3], ref.data[1:3], rtol=1e-10)
+        assert filled.data[0] == 0.0
+        assert filled.data[-1] == 0.0
+
+
 class TestInterpolateErrorCases:
     """Error handling tests."""
 

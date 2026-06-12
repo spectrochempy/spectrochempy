@@ -27,6 +27,12 @@ Bug Fixes
   (became ``<untitled>``); the array values are assumed to be expressed in the
   source coordinate's units, so the units are attached rather than converted.
 
+- PCHIP interpolation (``method="pchip"``) now honours the ``fill_value``
+  argument, consistently with the linear method (#1093).  Out-of-range points
+  are filled with the requested constant (e.g. ``fill_value=0.0``), and
+  ``fill_value="extrapolate"`` extrapolates, while the default
+  ``fill_value=np.nan`` still returns NaN outside the original range.
+
 - ``interpolate`` now returns the result in the order of the requested target
   coordinate.  Interpolating a dataset stored with decreasing coordinates (e.g.
   wavenumbers from 4000 to 400 cm⁻¹) onto an increasing target previously

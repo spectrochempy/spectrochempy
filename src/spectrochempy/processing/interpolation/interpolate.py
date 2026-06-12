@@ -189,8 +189,11 @@ def interpolate(
         For multiple dims: dict {dim: coord} or sequential application.
     method : str, optional, default='linear'
         Interpolation method: 'linear' or 'pchip'.
-    fill_value : any, optional, default=np.nan
-        Value for points outside the original range.
+    fill_value : float or str, optional, default=np.nan
+        Value used for points outside the original range. This applies to both
+        the ``'linear'`` and ``'pchip'`` methods: a finite value fills
+        out-of-range points with that constant, the default ``np.nan`` returns
+        NaN outside the range, and ``"extrapolate"`` extrapolates instead.
     assume_sorted : bool, optional, default=False
         If True, skip monotonicity checks.
     inplace : bool, optional, default=False
@@ -305,6 +308,13 @@ def interpolate(
         else:
             sorted_data = new._data
 
+        # ``fill_value`` may be NaN (the default), a finite constant or the
+        # string ``"extrapolate"``. ``interp1d`` (linear) handles all three
+        # natively; ``PchipInterpolator`` only knows ``extrapolate`` True/False,
+        # so the finite-constant case is applied by hand below so that
+        # ``fill_value`` behaves consistently for both methods (#1093).
+        extrapolate = isinstance(fill_value, str) and fill_value == "extrapolate"
+
         if method == "linear":
             interpolator = interp1d(
                 sorted_old_x,
@@ -325,12 +335,30 @@ def interpolate(
                 sorted_old_x,
                 sorted_data,
                 axis=ax,
-                extrapolate=False,
+                extrapolate=extrapolate,
             )
         else:
             raise ValueError(f"Unknown method: {method}")
 
         interpolated_data = interpolator(new_data)
+
+        if (
+            method == "pchip"
+            and not extrapolate
+            and not (isinstance(fill_value, float) and np.isnan(fill_value))
+        ):
+            # PCHIP leaves out-of-range points as NaN (``extrapolate=False``);
+            # replace them with the requested constant so ``fill_value`` matches
+            # the linear method. ``sorted_old_x`` is ascending, so this mask is
+            # independent of the target-coordinate direction.
+            out_of_range = (new_data < sorted_old_x[0]) | (new_data > sorted_old_x[-1])
+            if out_of_range.any():
+                interpolated_data[
+                    tuple(
+                        out_of_range if i == ax else slice(None)
+                        for i in range(interpolated_data.ndim)
+                    )
+                ] = fill_value
 
         if sort_idx is not None and len(sort_idx) > 0:
             new._data = interpolated_data
