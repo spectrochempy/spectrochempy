@@ -28,10 +28,18 @@ def _html_heading(obj):
     Build a compact HTML heading identifying *obj*.
 
     Returns a string like ``"Coord [mycoord]"`` or ``"Project [my_project]"``.
-    Falls back to the bare type name when the object has no meaningful name.
+    Falls back to the bare type name when the object has no meaningful name
+    (i.e. when the name was auto-generated rather than user-provided).
     """
     type_name = type(obj).__name__
-    name = obj.name
+    # Use has_defined_name when available (NDArray, Coord, NDDataset, CoordSet)
+    # to distinguish user-provided names from auto-generated internal IDs.
+    if hasattr(obj, "has_defined_name"):
+        if obj.has_defined_name:
+            return f"{type_name} [{obj.name}]"
+        return type_name
+    # For types without has_defined_name (e.g. Project), check _name directly.
+    name = getattr(obj, "_name", None)
     if name:
         return f"{type_name} [{name}]"
     return type_name
