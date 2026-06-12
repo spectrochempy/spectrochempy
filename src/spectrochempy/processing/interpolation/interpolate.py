@@ -230,7 +230,7 @@ def interpolate(
                 target_coord.ito(primary_old_coord.units)
                 new_data = _get_coord_data(target_coord)
 
-        sorted_old_x, sort_idx, was_reversed = _validate_monotonic(
+        sorted_old_x, sort_idx, _was_reversed = _validate_monotonic(
             primary_old_coord, assume_sorted
         )
 
@@ -317,8 +317,11 @@ def interpolate(
             interpolate_secondary=_interpolate_secondary,
         )
 
-        if was_reversed:
-            new.sort(descend=True, dim=dim, inplace=True)
+        # The interpolated data, mask and coordinates are produced in the order
+        # of the target coordinate, so the result already follows the requested
+        # ordering. Re-sorting to the *old* coordinate's direction (as was done
+        # before) would silently flip a decreasing input onto an increasing
+        # target back to decreasing, ignoring the user's requested order (#1100).
 
     new.history = (
         f"Interpolated along dims {dim_list} to {len(new_data)} points "

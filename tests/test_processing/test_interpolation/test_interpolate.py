@@ -88,6 +88,37 @@ class TestInterpolateBasic:
         assert result.shape == (4,)
 
 
+class TestInterpolateDecreasingCoord:
+    """Interpolation must honour the target order even for decreasing axes (#1100)."""
+
+    @pytest.mark.parametrize("method", ["linear", "pchip"])
+    def test_decreasing_source_increasing_target(self, method):
+        # spectra are commonly stored as decreasing wavenumbers (4000 -> 400)
+        x = np.linspace(4000.0, 400.0, 9)
+        ds = NDDataset(x.copy(), coordset=[Coord(x, title="wn")])
+
+        target = np.linspace(500.0, 3500.0, 7)  # increasing
+        result = ds.interpolate(dim="x", coord=target, method=method)
+
+        out = result.coord("x").data
+        # the result follows the requested (increasing) order, not the source's
+        assert np.all(np.diff(out) > 0)
+        np.testing.assert_allclose(out, target, rtol=1e-9)
+        np.testing.assert_allclose(result.data, target, rtol=1e-9)
+
+    def test_decreasing_source_decreasing_target(self):
+        x = np.linspace(4000.0, 400.0, 9)
+        ds = NDDataset(x.copy(), coordset=[Coord(x, title="wn")])
+
+        target = np.linspace(3500.0, 500.0, 7)  # decreasing
+        result = ds.interpolate(dim="x", coord=target)
+
+        out = result.coord("x").data
+        assert np.all(np.diff(out) < 0)
+        np.testing.assert_allclose(out, target, rtol=1e-9)
+        np.testing.assert_allclose(result.data, target, rtol=1e-9)
+
+
 class TestInterpolateMultidimensional:
     """Multi-dimensional interpolation tests."""
 
