@@ -274,9 +274,19 @@ def interpolate(
             new._data = interpolated_data
 
         if new.is_masked:
+            # The mask must be reordered with the same ``sort_idx`` as the data
+            # so it is interpolated against ``sorted_old_x`` in matching order;
+            # otherwise a decreasing source coordinate flips the mask relative to
+            # its samples (closely related to #1100).
+            if sort_idx is not None and len(sort_idx) > 0:
+                sorted_mask = new._mask[
+                    tuple(sort_idx if i == ax else slice(None) for i in range(new.ndim))
+                ]
+            else:
+                sorted_mask = new._mask
             mask_interpolator = interp1d(
                 sorted_old_x,
-                new._mask.astype(float),
+                sorted_mask.astype(float),
                 axis=ax,
                 kind="linear",
                 bounds_error=False,
@@ -292,12 +302,20 @@ def interpolate(
         # Build secondary-coordinate interpolator closure
         # Bind loop variables as defaults to capture values per iteration.
         def _interpolate_secondary(
-            coord, _sorted_old_x=sorted_old_x, _new_data=new_data
+            coord,
+            _sorted_old_x=sorted_old_x,
+            _new_data=new_data,
+            _sort_idx=sort_idx,
         ):
             new_sec = coord.copy()
             if coord.has_data:
                 old_sec_data = _get_coord_data(coord)
                 if old_sec_data is not None and len(old_sec_data) == len(_sorted_old_x):
+                    # Reorder the secondary coordinate with the primary's
+                    # ``sort_idx`` so it aligns with ``sorted_old_x`` (matches the
+                    # data/mask handling; needed when the primary is decreasing).
+                    if _sort_idx is not None and len(_sort_idx) > 0:
+                        old_sec_data = old_sec_data[_sort_idx]
                     sec_interpolator = interp1d(
                         _sorted_old_x,
                         old_sec_data,

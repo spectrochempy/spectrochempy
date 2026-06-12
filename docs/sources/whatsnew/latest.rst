@@ -25,7 +25,9 @@ Bug Fixes
   coordinate.  Interpolating a dataset stored with decreasing coordinates (e.g.
   wavenumbers from 4000 to 400 cm⁻¹) onto an increasing target previously
   flipped the output back to decreasing, ignoring the requested ordering
-  (#1100).
+  (#1100).  The mask and any secondary coordinates are now reordered together
+  with the data before interpolation, so they stay aligned when the source
+  coordinate is decreasing.
 
 - Fixed ``Project.__str__()`` tree formatting when a project contains both
   sub-projects and sibling datasets or scripts at the same level.  The
