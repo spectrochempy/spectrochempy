@@ -194,10 +194,12 @@ def interpolate(
         # Handle different target coordinate types
         from spectrochempy.core.dataset.nddataset import NDDataset
 
+        target_from_array = False
         if isinstance(target_coord, NDDataset):
             target_coord = target_coord.coord(dim)
         elif isinstance(target_coord, np.ndarray):
             target_coord = Coord(target_coord)
+            target_from_array = True
         elif not isinstance(target_coord, Coord):
             raise TypeError(
                 f"coord must be Coord, np.ndarray, or NDDataset, got {type(target_coord)}"
@@ -211,6 +213,16 @@ def interpolate(
 
         if primary_old_coord is None or not primary_old_coord.has_data:
             raise ValueError(f"Dimension '{dim}' has no coordinate data to interpolate")
+
+        if target_from_array:
+            # A coordinate generated from a bare array carries no metadata. Keep
+            # the semantics of the axis being interpolated by inheriting the
+            # source coordinate's units and title (#1094). The array values are
+            # assumed to already be expressed in the source coordinate's units,
+            # so the units are *attached*, not converted.
+            if primary_old_coord.has_units:
+                target_coord.units = primary_old_coord.units
+            target_coord.title = primary_old_coord.title
 
         old_data = _get_coord_data(primary_old_coord)
         if old_data is None:

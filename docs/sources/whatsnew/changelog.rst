@@ -29,6 +29,12 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- ``interpolate`` now preserves the source coordinate's units and title when the
+  target is given as a bare array (e.g. ``np.linspace(...)``) (#1094).  The
+  generated coordinate previously lost its units (became unitless) and title
+  (became ``<untitled>``); the array values are assumed to be expressed in the
+  source coordinate's units, so the units are attached rather than converted.
+
 - ``interpolate`` now returns the result in the order of the requested target
   coordinate.  Interpolating a dataset stored with decreasing coordinates (e.g.
   wavenumbers from 4000 to 400 cm⁻¹) onto an increasing target previously

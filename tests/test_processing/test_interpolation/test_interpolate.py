@@ -387,6 +387,35 @@ class TestInterpolateMetadata:
         assert result.name == "test_name"
         assert result.title == "test title"
 
+    def test_interpolate_array_target_preserves_coord_units_title(self):
+        """A plain-array target keeps the source coordinate units/title (#1094)."""
+        x = np.linspace(4000.0, 400.0, 10)
+        ds = NDDataset(
+            np.linspace(0.0, 1.0, 10),
+            coordset=[Coord(x, title="wavenumber", units="cm^-1")],
+        )
+
+        new_x = np.linspace(3500.0, 500.0, 6)  # bare ndarray, no metadata
+        result = ds.interpolate(dim="x", coord=new_x)
+
+        assert result.coord("x").units == ds.coord("x").units
+        assert result.coord("x").title == ds.coord("x").title
+        # coordinate values follow the requested target, units only attached
+        np.testing.assert_allclose(result.coord("x").data, new_x, rtol=1e-10)
+
+    def test_interpolate_explicit_coord_target_keeps_own_metadata(self):
+        """An explicit Coord target keeps its own title, not the source's (#1094)."""
+        x = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
+        ds = NDDataset(
+            np.array([0.0, 2.0, 4.0, 6.0, 8.0]),
+            coordset=[Coord(x, title="wavenumber", units="cm^-1")],
+        )
+
+        target = Coord(np.array([0.5, 1.5, 2.5, 3.5]), title="mine", units="cm^-1")
+        result = ds.interpolate(dim="x", coord=target)
+
+        assert result.coord("x").title == "mine"
+
     def test_interpolate_updates_history(self):
         """Test that history is updated."""
         x = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
