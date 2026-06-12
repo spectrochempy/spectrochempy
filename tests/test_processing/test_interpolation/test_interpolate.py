@@ -88,6 +88,78 @@ class TestInterpolateBasic:
         assert result.shape == (4,)
 
 
+class TestInterpolateDecreasingCoord:
+    """Interpolation must honour the target order even for decreasing axes (#1100)."""
+
+    @pytest.mark.parametrize("method", ["linear", "pchip"])
+    def test_decreasing_source_increasing_target(self, method):
+        # spectra are commonly stored as decreasing wavenumbers (4000 -> 400)
+        x = np.linspace(4000.0, 400.0, 9)
+        ds = NDDataset(x.copy(), coordset=[Coord(x, title="wn")])
+
+        target = np.linspace(500.0, 3500.0, 7)  # increasing
+        result = ds.interpolate(dim="x", coord=target, method=method)
+
+        out = result.coord("x").data
+        # the result follows the requested (increasing) order, not the source's
+        assert np.all(np.diff(out) > 0)
+        np.testing.assert_allclose(out, target, rtol=1e-9)
+        np.testing.assert_allclose(result.data, target, rtol=1e-9)
+
+    def test_decreasing_source_decreasing_target(self):
+        x = np.linspace(4000.0, 400.0, 9)
+        ds = NDDataset(x.copy(), coordset=[Coord(x, title="wn")])
+
+        target = np.linspace(3500.0, 500.0, 7)  # decreasing
+        result = ds.interpolate(dim="x", coord=target)
+
+        out = result.coord("x").data
+        assert np.all(np.diff(out) < 0)
+        np.testing.assert_allclose(out, target, rtol=1e-9)
+        np.testing.assert_allclose(result.data, target, rtol=1e-9)
+
+    def test_decreasing_source_mask_follows_data(self):
+        # When the source coordinate is decreasing, the mask must be reordered
+        # together with the data, so a masked sample keeps its own coordinate
+        # value after interpolation onto an increasing target (follow-up to #1100).
+        x = np.linspace(5.0, 1.0, 5)  # decreasing 5 -> 1
+        data = x.copy()  # data[i] == x[i]
+        mask = np.array([False, True, False, False, False])  # mask the x == 4 sample
+        ds = NDDataset(data, coordset=[Coord(x, title="x")], mask=mask)
+
+        result = ds.interpolate(dim="x", coord=np.linspace(1.0, 5.0, 5))
+
+        out_x = result.coord("x").data
+        np.testing.assert_allclose(result.data, out_x)  # data identity preserved
+        # the x == 4 node stays masked, not its mirror image x == 2
+        np.testing.assert_allclose(out_x[np.asarray(result.mask)], [4.0])
+
+    def test_decreasing_source_secondary_coord_follows_primary(self):
+        # A secondary coordinate sharing a decreasing primary must be reordered
+        # with the primary's sort order; otherwise it comes out reversed relative
+        # to the interpolated primary (follow-up to #1100).
+        from spectrochempy import CoordSet
+
+        xp = np.array([5.0, 4.0, 2.5, 1.5, 1.0])  # decreasing primary
+        xs = np.array([100.0, 64.0, 30.0, 18.0, 9.0])  # secondary, grows with xp
+        multi = CoordSet(Coord(xp, title="wn"), Coord(xs, title="sec"), name="x")
+        # make the decreasing primary the default (the interpolation axis)
+        multi.select([c.title for c in multi.coords].index("wn") + 1)
+        ds = NDDataset(np.arange(5.0), coordset=[multi])
+
+        target = np.array([1.2, 2.0, 3.0, 4.0, 4.8])  # increasing
+        result = ds.interpolate(dim="x", coord=target)
+
+        rc = result.coord("x")
+        out_sec = np.asarray(next(c for c in rc.coords if c.title == "sec").data)
+        # the secondary tracks the now-increasing primary instead of reversing
+        assert np.all(np.diff(out_sec) > 0)
+        order = np.argsort(xp)
+        np.testing.assert_allclose(
+            out_sec, np.interp(target, xp[order], xs[order]), rtol=1e-3
+        )
+
+
 class TestInterpolateMultidimensional:
     """Multi-dimensional interpolation tests."""
 
