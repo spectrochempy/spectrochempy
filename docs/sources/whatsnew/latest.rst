@@ -25,6 +25,12 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- ``concatenate`` now converts coordinate values expressed in compatible but
+  different units to the units of the first dataset instead of silently
+  concatenating raw magnitudes, and raises a ``UnitsCompatibilityError`` when
+  the coordinate units of the concatenation dimension are incompatible
+  (#1101).
+
 - ``read_opus`` now correctly reads assembled / time-resolved OPUS files
   containing data series blocks such as ``a``, ``sm``, ``igsm``, ``phsm``,
   ``tr``, and exposes the new ``TRACE``, ``GCIG``, ``GCSC`` type selectors
@@ -85,6 +91,17 @@ Dependency Updates
 
 - pint >= 0.24 is now required
 
+Breaking Changes
+~~~~~~~~~~~~~~~~
+
+- Mixed arithmetic between ``NDDataset`` and ``Coord`` is now rejected
+  (e.g. ``dataset + coord`` or ``coord * dataset``).  ``Coord`` is treated as
+  axis support, not as a signal-bearing operand.  Workflows needing correction
+  vectors, weighting profiles, response curves, or other signal-like 1D
+  operands should represent them as 1D ``NDDataset`` objects instead.  This
+  clarifies the math semantics under the broader ``#1103`` arithmetic and
+  metadata characterization work.
+
 Deprecations
 ~~~~~~~~~~~~
 
@@ -98,16 +115,16 @@ Developer
   the new tensor plugin, keeping the core package tensor-agnostic.
 
 - MAINT: Internal ``CoordSet`` storage redesign — all mutation paths (set,
-   delete, append, lifecycle) now resolve through the group-backed
-   projection-resolution-reconstruction pipeline instead of legacy in-place
-   ``_coords`` mutation.  The migration consolidated lookup, serializer
-   adapters, group conversion, and lifecycle helpers around transient group
-   metadata while preserving runtime storage, serialization, and public
-   behavior.  Same-dimension mutations apply group state directly to legacy
-   storage to avoid double-wrapping in ``_groups_to_coordset``, which fixed a
-   pre-existing corruption bug in same-dimension title set.  Alias invariants,
-   ``default_id`` semantics, label metadata, reference pass-through, and
-   coordinate metadata are preserved throughout.
+  delete, append, lifecycle) now resolve through the group-backed
+  projection-resolution-reconstruction pipeline instead of legacy in-place
+  ``_coords`` mutation.  The migration consolidated lookup, serializer
+  adapters, group conversion, and lifecycle helpers around transient group
+  metadata while preserving runtime storage, serialization, and public
+  behavior.  Same-dimension mutations apply group state directly to legacy
+  storage to avoid double-wrapping in ``_groups_to_coordset``, which fixed a
+  pre-existing corruption bug in same-dimension title set.  Alias invariants,
+  ``default_id`` semantics, label metadata, reference pass-through, and
+  coordinate metadata are preserved throughout.
 
 - MAINT: Switched ``CoordSet`` internal storage from the ``_coords``
   ``traitlets.List`` trait (with its ``@validate`` hook) to a plain Python

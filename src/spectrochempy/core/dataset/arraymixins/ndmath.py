@@ -2772,6 +2772,13 @@ class NDMath:
         """
         from spectrochempy.core.units import Quantity  # noqa: PLC0415
 
+        if {objtype, othertype} == {"NDDataset", "Coord"}:
+            raise TypeError(
+                "Arithmetic between NDDataset and Coord is not supported. "
+                "Coord represents an axis, not signal data. Use a 1D "
+                "NDDataset for correction vectors or signal-like operands."
+            )
+
         def reduce_(magnitude):
             if hasattr(magnitude, "dtype"):
                 if magnitude.dtype in TYPE_COMPLEX:

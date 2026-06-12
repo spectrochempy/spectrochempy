@@ -284,6 +284,31 @@ def test_concatenate_none_coord_warns():
         concatenate(ds1, ds2, dims="x")
 
 
+def test_concatenate_converts_compatible_coord_units():
+    """Concatenate converts coordinate values to the first dataset coord units (issue #1101)."""
+    x1 = scp.Coord([100.0, 200.0, 300.0], units="cm^-1", title="wavenumbers")
+    x2 = scp.Coord([0.04, 0.05, 0.06], units="1/um", title="wavenumbers")
+    ds1 = scp.NDDataset([1.0, 2.0, 3.0], coordset=[x1])
+    ds2 = scp.NDDataset([4.0, 5.0, 6.0], coordset=[x2])
+
+    result = concatenate(ds1, ds2)
+
+    assert result.x.units == x1.units
+    assert result.x.title == "wavenumbers"
+    np.testing.assert_allclose(
+        result.x.data, [100.0, 200.0, 300.0, 400.0, 500.0, 600.0]
+    )
+
+
+def test_concatenate_rejects_incompatible_coord_units():
+    """Concatenate raises when dimension coordinate units are incompatible (issue #1101)."""
+    ds1 = scp.NDDataset([1.0, 2.0], coordset=[scp.Coord([1.0, 2.0], units="cm^-1")])
+    ds2 = scp.NDDataset([3.0, 4.0], coordset=[scp.Coord([1.0, 2.0], units="s")])
+
+    with pytest.raises(UnitsCompatibilityError):
+        concatenate(ds1, ds2)
+
+
 def test_stack_regression():
     """Stack creates prepended dimension and delegates to concatenate."""
     y = scp.Coord(np.arange(2.0), title="rows")
