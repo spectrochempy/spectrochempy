@@ -29,6 +29,13 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Fixed ``Project.__str__()`` tree formatting when a project contains both
+  sub-projects and sibling datasets or scripts at the same level.  The
+  recursive ``_listproj`` helper previously used ``s.strip("\\n")`` which
+  stripped the trailing newline from the entire accumulated string, causing
+  sibling entries to appear on the same line as the last child of the
+  preceding sub-project.
+
 - ``concatenate`` now converts coordinate values expressed in compatible but
   different units to the units of the first dataset instead of silently
   concatenating raw magnitudes, and raises a ``UnitsCompatibilityError`` when
@@ -128,6 +135,15 @@ Deprecations
 Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
+
+- MAINT: Integrated ``Project`` into the common display/representation model:
+  added a custom compact ``__repr__`` (``Project: <name>``), a ``_cstr()``
+  detailed representation (name, author, description, hierarchy), and migrated
+  ``_repr_html_()`` from ad-hoc string replacement to the shared
+  ``convert_to_html()`` pipeline.  ``pstr(project)`` now returns the detailed
+  ``_cstr()`` output.  Observable behavior is preserved for Coord, CoordSet,
+  and NDDataset.  This is PR3 of the Display / Representation Architecture
+  (#843).
 
 - MAINT: Moved CP/PARAFAC implementation and TensorLy dependency ownership into
   the new tensor plugin, keeping the core package tensor-agnostic.
