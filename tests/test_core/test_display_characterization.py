@@ -499,6 +499,57 @@ class TestProjectNameModel:
         assert "Project" in html
 
 
+class TestProjectHTMLHierarchy:
+    """Tests for Project HTML hierarchy rendering."""
+
+    def test_project_html_contains_hierarchy(self):
+        """Project HTML contains sub-project and dataset names."""
+        top = Project(name="top")
+        sub = Project(name="subproj")
+        top.add_project(sub)
+        sub.add_dataset(NDDataset([1, 2, 3], name="ds1"))
+        html = top._repr_html_()
+        assert "subproj" in html
+        assert "ds1" in html
+        assert "sub-project" in html
+        assert "dataset" in html
+
+    def test_project_hierarchy_nesting_preserved(self):
+        """Nested projects preserve structure in HTML."""
+        top = Project(name="top")
+        mid = Project(name="mid")
+        bot = Project(name="bot")
+        top.add_project(mid)
+        mid.add_project(bot)
+        bot.add_dataset(NDDataset([1], name="leaf"))
+        html = top._repr_html_()
+        assert "top" in html
+        assert "mid" in html
+        assert "bot" in html
+        assert "leaf" in html
+        # Hierarchy lines are wrapped in <div> tags
+        assert "<div>" in html
+        assert "⤷" in html
+
+    def test_project_empty_html_shows_empty(self):
+        """Empty project HTML shows empty indicator."""
+        proj = Project(name="empty")
+        html = proj._repr_html_()
+        assert "empty project" in html
+
+    def test_project_mixed_items_in_html(self):
+        """Project with sub-projects, datasets, and scripts shows all."""
+        proj = Project(name="mixed")
+        proj.add_dataset(NDDataset([1], name="ds1"))
+        sub = Project(name="sub")
+        proj.add_project(sub)
+        sub.add_dataset(NDDataset([2], name="sub_ds"))
+        html = proj._repr_html_()
+        assert "ds1" in html
+        assert "sub" in html
+        assert "sub_ds" in html
+
+
 # ======================================================================================
 # HTML HEADING TESTS
 # ======================================================================================
