@@ -1,8 +1,8 @@
 # SpectroChemPy Units and Quantity Semantics Audit
 
-**Date:** 2026-06-12  
-**Audit Scope:** Unit system and quantity propagation across SpectroChemPy  
-**Version:** master  
+**Date:** 2026-06-12
+**Audit Scope:** Unit system and quantity propagation across SpectroChemPy
+**Version:** master
 **Status:** Analysis Complete
 
 ---
