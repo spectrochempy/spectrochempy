@@ -580,12 +580,32 @@ class TestHTMLHeading:
         html = coord._repr_html_()
         assert "[]" not in html
 
+    def test_coord_heading_scientific_identity(self):
+        """Coord heading includes dtype, size/shape, and units when present."""
+        coord = Coord([1.0, 2.0, 3.0], name="x", units="m")
+        html = coord._repr_html_()
+        assert "Coord" in html
+        assert "x" in html
+        assert "float" in html.lower()
+        assert "size" in html.lower() or "shape" in html.lower()
+        assert "m" in html
+
     def test_coordset_heading_contains_type(self):
         """CoordSet HTML heading contains the type name."""
         x = Coord([1.0, 2.0])
         cs = CoordSet(x=x)
         html = cs._repr_html_()
         assert "CoordSet" in html
+
+    def test_coordset_heading_shows_coord_names(self):
+        """CoordSet heading lists child coordinate names."""
+        x = Coord([1.0, 2.0], name="x")
+        y = Coord([3.0, 4.0], name="y")
+        cs = CoordSet(x=x, y=y)
+        html = cs._repr_html_()
+        assert "CoordSet" in html
+        assert "x" in html
+        assert "y" in html
 
     def test_nddataset_heading_contains_type(self):
         """NDDataset HTML heading contains the type name."""
@@ -598,6 +618,23 @@ class TestHTMLHeading:
         ds = NDDataset([1.0, 2.0], name="myds")
         html = ds._repr_html_()
         assert "myds" in html
+
+    def test_nddataset_heading_scientific_identity(self):
+        """NDDataset heading includes dtype, shape/size, and units when present."""
+        ds = NDDataset([[1, 2], [3, 4]], units="cm⁻¹", name="spec")
+        html = ds._repr_html_()
+        assert "NDDataset" in html
+        assert "spec" in html
+        assert "float" in html.lower()
+        assert "shape" in html.lower() or "size" in html.lower()
+        assert "cm" in html
+
+    def test_nddataset_heading_no_auto_id(self):
+        """Unnamed NDDataset should not show auto-generated ID in heading."""
+        ds = NDDataset([1.0, 2.0])
+        html = ds._repr_html_()
+        # The auto-generated name is the id (starts with NDDataset_)
+        assert "NDDataset_NDDataset_" not in html
 
     def test_project_heading_no_duplicate_name(self):
         """Project HTML heading should not duplicate the project name."""

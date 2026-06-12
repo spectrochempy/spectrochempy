@@ -155,28 +155,16 @@ Developer
 
 - MAINT: Harmonized notebook HTML headings — replaced the ad-hoc
   ``obj.__str__() + [obj.name]`` summary line in ``convert_to_html()`` with
-  a dedicated ``_html_heading()`` helper.  Headings now follow the pattern
-  ``TypeName [name]`` (user-provided name) or just ``TypeName``
-  (auto-generated ID), eliminating duplicated project names and exposing no
-  internal UUIDs.  ``_repr_html_()`` headings are now decoupled from
-  terminal ``__str__()``, aligning with the RFC decision that notebook
-  headings may differ from terminal display.  This is PR4 of the Display /
+  a dedicated ``_html_heading()`` helper.  Headings now follow a
+  type-specific format: ``TypeName [name] — dtype, shape, units`` for
+  array-like objects (Coord, NDDataset), ``CoordSet — x, y`` for coordinate
+  sets, and ``Project [name]`` for projects.  Auto-generated internal IDs
+  (UUIDs) are never shown in headings, and ``Project.__str__()`` hierarchy
+  is preserved in HTML through block-level rendering of indented lines.
+  ``_repr_html_()`` headings are now decoupled from terminal ``__str__()``,
+  aligning with the RFC decision that notebook headings may differ from
+  terminal display.  This consolidates PR4 through PR7 of the Display /
   Representation Architecture (#843).
-
-- MAINT: Added ``has_defined_name`` to ``Project`` — a boolean trait signal
-  distinguishing user-provided names from auto-generated fallbacks.  The name
-  setter now sets ``_explicit_name = True`` only when ``name is not None``;
-  the auto-generated fallback assigns directly to ``_name`` (no recursive
-  call) to preserve the distinction.  ``_html_heading()`` now handles Project
-  via the ``has_defined_name`` property, so auto-generated names no longer
-  appear in notebook headings.  This is PR4.5 of the Display / Representation
-  Architecture (#843).
-
-- MAINT: Preserved Project hierarchy in HTML display — ``_process_section()``
-  now wraps indented hierarchy lines (prefixed by ``⤷``) in ``<div>`` elements,
-  preventing HTML whitespace collapsing from flattening nested sub-projects and
-  datasets into a single line.  This is PR6 of the Display / Representation
-  Architecture (#843).
 
 - MAINT: Moved CP/PARAFAC implementation and TensorLy dependency ownership into
   the new tensor plugin, keeping the core package tensor-agnostic.
