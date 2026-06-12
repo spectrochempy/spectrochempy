@@ -23,6 +23,28 @@ def pstr(object, **kwargs):
     return str(object).strip()
 
 
+def _html_heading(obj):
+    """
+    Build a compact HTML heading identifying *obj*.
+
+    Returns a string like ``"Coord [mycoord]"`` or ``"Project [my_project]"``.
+    Falls back to the bare type name when the object has no meaningful name
+    (i.e. when the name was auto-generated rather than user-provided).
+    """
+    type_name = type(obj).__name__
+    # Use has_defined_name when available (NDArray, Coord, NDDataset, CoordSet)
+    # to distinguish user-provided names from auto-generated internal IDs.
+    if hasattr(obj, "has_defined_name"):
+        if obj.has_defined_name:
+            return f"{type_name} [{obj.name}]"
+        return type_name
+    # For types without has_defined_name (e.g. Project), check _name directly.
+    name = getattr(obj, "_name", None)
+    if name:
+        return f"{type_name} [{name}]"
+    return type_name
+
+
 # ======================================================================================
 # Terminal colors and styles
 # ======================================================================================
@@ -195,7 +217,7 @@ def convert_to_html(obj, open=False, id=None):
     s = "<div class='scp-output'>"
     open = "" if not open else " open"
     idx = f"{id}: " if id is not None else ""
-    s += f"<details{open}><summary>{idx}{obj.__str__()}[{obj.name}]</summary>"
+    s += f"<details{open}><summary>{idx}{_html_heading(obj)}</summary>"
     s += "\n".join(html_output)
     s += "</details>"
     s += "</div>"
