@@ -33,6 +33,8 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.project.project import Project
+from spectrochempy.utils.print import DisplayItem
+from spectrochempy.utils.print import DisplaySection
 from spectrochempy.utils.print import pstr
 
 # ======================================================================================
@@ -769,3 +771,224 @@ class TestDisplaySafetyNet:
         str(proj)
         repr(proj)
         proj._repr_html_()
+
+
+class TestSemanticCoord:
+    """
+    Semantic display model validation for Coord.
+
+    These tests validate that Coord._repr_sections() produces the correct
+    semantic structure without using the _cstr() → regex pipeline.
+
+    No HTML is generated or tested here.  Only semantic structure.
+    """
+
+    def test_returns_list_with_one_section(self):
+        """Coord._repr_sections() returns a single summary section."""
+        coord = Coord([1.0, 2.0, 3.0])
+        sections = coord._repr_sections()
+        assert isinstance(sections, list)
+        assert len(sections) == 1
+
+    def test_section_role_is_summary(self):
+        """The single section role is 'summary'."""
+        coord = Coord([1.0, 2.0])
+        sections = coord._repr_sections()
+        assert sections[0].role == "summary"
+
+    def test_section_title_is_summary(self):
+        """The single section title is 'Summary'."""
+        coord = Coord([1.0, 2.0])
+        sections = coord._repr_sections()
+        assert sections[0].title == "Summary"
+
+    def test_contains_size_field(self):
+        """A non-empty Coord has a size field."""
+        coord = Coord([1.0, 2.0, 3.0])
+        sections = coord._repr_sections()
+        size_items = [
+            i for i in sections[0].items if i.kind == "field" and i.key == "size"
+        ]
+        assert len(size_items) == 1
+        assert size_items[0].value == "3"
+
+    def test_size_field_value_matches_size_attr(self):
+        """The size field value equals str(coord.size)."""
+        coord = Coord([1.0, 2.0, 3.0, 4.0])
+        sections = coord._repr_sections()
+        size_item = next(
+            i for i in sections[0].items if i.kind == "field" and i.key == "size"
+        )
+        assert size_item.value == str(coord.size)
+
+    def test_contains_title_field_when_title_set(self):
+        """Coord with an explicit title has a title field."""
+        coord = Coord([1.0, 2.0], title="wavenumber")
+        sections = coord._repr_sections()
+        title_items = [
+            i for i in sections[0].items if i.kind == "field" and i.key == "title"
+        ]
+        assert len(title_items) == 1
+        assert title_items[0].value == "wavenumber"
+
+    def test_title_field_absent_when_title_unset(self):
+        """
+        Coord with default (None) title does not have a title field.
+
+        The _cstr() method only emits 'title:' when the title is truthy.
+        Note: Coord always has a default title '<untitled>' which is truthy,
+        so this test is informational only and only passes if title is None.
+
+        This test documents the current behavior: the default title trait
+        value is '<untitled>', not None.
+        """
+        coord = Coord([1.0, 2.0])
+        sections = coord._repr_sections()
+        title_items = [
+            i for i in sections[0].items if i.kind == "field" and i.key == "title"
+        ]
+        # Currently Coord._title_default returns '<untitled>', so title
+        # is always truthy.  If that changes, this assertion becomes valid.
+        if coord.title:
+            assert len(title_items) == 1
+        else:
+            assert len(title_items) == 0
+
+    def test_contains_data_item_when_has_data(self):
+        """A Coord with data has a data item."""
+        coord = Coord([1.0, 2.0, 3.0])
+        sections = coord._repr_sections()
+        data_items = [i for i in sections[0].items if i.kind == "data"]
+        assert len(data_items) == 1
+
+    def test_data_item_contains_numeric_text(self):
+        """The data item value contains numeric representation."""
+        coord = Coord([1.5, 2.5, 3.5])
+        sections = coord._repr_sections()
+        data_item = next(i for i in sections[0].items if i.kind == "data")
+        assert "1.5" in data_item.value
+        assert "3.5" in data_item.value
+
+    def test_data_item_includes_units(self):
+        """When units are set, the data item includes unit text."""
+        coord = Coord([1.0, 2.0, 3.0], units="m")
+        sections = coord._repr_sections()
+        data_item = next(i for i in sections[0].items if i.kind == "data")
+        assert "m" in data_item.value
+
+    def test_data_item_unitless_when_no_units(self):
+        """When no units are set, the data item has no unit text."""
+        coord = Coord([1.0, 2.0, 3.0])
+        sections = coord._repr_sections()
+        data_item = next(i for i in sections[0].items if i.kind == "data")
+        assert "unitless" not in data_item.value
+
+    def test_undefined_data_when_empty_unlabeled(self):
+        """An empty unlabeled Coord has a data item with 'Undefined'."""
+        coord = Coord([])
+        sections = coord._repr_sections()
+        data_item = next(i for i in sections[0].items if i.kind == "data")
+        assert "Undefined" in data_item.value
+
+    def test_contains_label_item_when_labeled(self):
+        """A labeled Coord has a label item."""
+        coord = Coord([1.0, 2.0, 3.0], labels=["A", "B", "C"])
+        sections = coord._repr_sections()
+        label_items = [i for i in sections[0].items if i.kind == "label"]
+        assert len(label_items) == 1
+
+    def test_label_item_contains_label_text(self):
+        """The label item value contains the label content."""
+        coord = Coord([1.0, 2.0, 3.0], labels=["A", "B", "C"])
+        sections = coord._repr_sections()
+        label_item = next(i for i in sections[0].items if i.kind == "label")
+        assert "A" in label_item.value
+
+    def test_no_label_item_when_not_labeled(self):
+        """A non-labeled Coord has no label item."""
+        coord = Coord([1.0, 2.0, 3.0])
+        sections = coord._repr_sections()
+        label_items = [i for i in sections[0].items if i.kind == "label"]
+        assert len(label_items) == 0
+
+    def test_item_order_matches_cstr_semantics(self):
+        """
+        Item kinds appear in the same semantic order as _cstr() output.
+
+        Expected order: fields first (size, title), then data, then labels.
+        """
+        coord = Coord([1.0, 2.0, 3.0], labels=["A", "B", "C"])
+        sections = coord._repr_sections()
+        kinds = [i.kind for i in sections[0].items]
+        # fields first, then data, then labels
+        assert kinds[:2] == ["field", "field"]
+        assert "data" in kinds
+        assert "label" in kinds
+        # data should come before label
+        assert kinds.index("data") < kinds.index("label")
+
+    def test_semantic_equivalence_with_cstr_empty(self):
+        """Empty Coord: _repr_sections semantics match _cstr."""
+        coord = Coord([])
+        sections = coord._repr_sections()
+        items = sections[0].items
+
+        # Empty coord has no size (is_empty → skip size)
+        size_items = [i for i in items if i.kind == "field" and i.key == "size"]
+        assert len(size_items) == 0
+
+        # Has title if title is truthy
+        if coord.title:
+            assert any(i.kind == "field" and i.key == "title" for i in items)
+
+        # Has Undefined data
+        data_items = [i for i in items if i.kind == "data"]
+        assert len(data_items) == 1
+        assert data_items[0].value == "Undefined"
+
+    def test_semantic_equivalence_with_cstr_data(self):
+        """Data Coord: _repr_sections semantics match _cstr."""
+        coord = Coord([1.0, 2.0, 3.0], units="cm", title="shift")
+        sections = coord._repr_sections()
+        items = sections[0].items
+
+        # Has size
+        assert any(
+            i.kind == "field" and i.key == "size" and i.value == "3" for i in items
+        )
+
+        # Has title
+        assert any(
+            i.kind == "field" and i.key == "title" and i.value == "shift" for i in items
+        )
+
+        # Has data (not Undefined)
+        data_items = [i for i in items if i.kind == "data"]
+        assert len(data_items) == 1
+        assert "Undefined" not in data_items[0].value
+        assert "cm" in data_items[0].value
+
+    def test_display_item_repr(self):
+        """DisplayItem repr is readable."""
+        item = DisplayItem("field", "5", "size")
+        r = repr(item)
+        assert "field" in r
+        assert "size" in r
+
+    def test_display_item_equality(self):
+        """DisplayItem equality compares kind, value, key."""
+        a = DisplayItem("field", "5", "size")
+        b = DisplayItem("field", "5", "size")
+        assert a == b
+
+    def test_display_section_equality(self):
+        """DisplaySection equality compares role, title, items."""
+        items = [DisplayItem("field", "5", "size")]
+        a = DisplaySection("summary", "Summary", items)
+        b = DisplaySection("summary", "Summary", items)
+        assert a == b
+
+    def test_display_section_default_items(self):
+        """DisplaySection with no items defaults to empty list."""
+        section = DisplaySection("summary", "Summary")
+        assert section.items == []
