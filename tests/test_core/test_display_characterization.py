@@ -613,6 +613,36 @@ class TestHTMLHeading:
         assert "x" in html
         assert "y" in html
 
+    def test_coordset_heading_shows_coord_titles(self):
+        """CoordSet heading includes name:title when title is meaningful."""
+        x = Coord([1.0, 2.0], name="x", title="wavenumbers")
+        y = Coord([3.0, 4.0], name="y", title="acquisition timestamp (GMT)")
+        cs = CoordSet(x=x, y=y)
+        html = cs._repr_html_()
+        assert "x:wavenumbers" in html
+        assert "y:acquisition timestamp (GMT)" in html
+
+    def test_coordset_heading_omits_untitled(self):
+        """CoordSet heading does not display '<untitled>'."""
+        x = Coord([1.0, 2.0], name="x")
+        y = Coord([3.0, 4.0], name="y")
+        cs = CoordSet(x=x, y=y)
+        html = cs._repr_html_()
+        summary = html.split("</summary>")[0]
+        assert "<untitled>" not in summary
+
+    def test_coordset_heading_no_auto_id(self):
+        """CoordSet heading does not expose auto-generated internal names."""
+        # Coord assigned without a user-defined name is given
+        # the dimension key (e.g. 'x'), not the auto-generated id.
+        c = Coord([1.0, 2.0])  # auto-generated id like Coord_...
+        cs = CoordSet(x=c)
+        html = cs._repr_html_()
+        summary = html.split("</summary>")[0]
+        assert "Coord_" not in summary
+        # The heading should show the dimension name, not the auto id
+        assert "x" in summary
+
     def test_nddataset_heading_contains_type(self):
         """NDDataset HTML heading contains the type name."""
         ds = NDDataset([1.0, 2.0])

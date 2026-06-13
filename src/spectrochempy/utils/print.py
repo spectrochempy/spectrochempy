@@ -191,7 +191,11 @@ def _html_heading(obj):
 
         NDDataset — float64, shape: (y:10, x:20)
 
-    For CoordSet the child coordinate names are shown::
+    For CoordSet the child coordinate names and meaningful titles are shown::
+
+        CoordSet — x:wavenumbers, y:acquisition timestamp (GMT)
+
+    For unnamed / untitled child coordinates only the name is shown::
 
         CoordSet — x, y
 
@@ -222,11 +226,25 @@ def _html_heading(obj):
         if parts:
             extras = " — " + ", ".join(parts)
 
-    # CoordSet: show child coordinate names
+    # CoordSet: show child coordinate names and meaningful titles
     elif type_name == "CoordSet":
-        names = obj.names
-        if names:
-            extras = f" — {', '.join(names)}"
+        parts = []
+        if obj._storage:
+            for item in obj._storage:
+                if not item.has_defined_name:
+                    continue
+                name = item.name
+                if type(item).__name__ == "CoordSet":
+                    # Nested CoordSet: name only, no recursion
+                    parts.append(name)
+                else:
+                    title = item.title
+                    if title and title != "<untitled>":
+                        parts.append(f"{name}:{title}")
+                    else:
+                        parts.append(name)
+        if parts:
+            extras = " — " + ", ".join(parts)
 
     return f"{type_name}{name_part}{extras}"
 
