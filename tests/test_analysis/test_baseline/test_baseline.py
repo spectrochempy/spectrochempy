@@ -220,3 +220,60 @@ def test_baseline_ms_profile(synthetic_ms_like_dataset):
     assert baseline.shape == dataset.shape
     assert np.all(np.isfinite(baseline.data))
     assert np.all(np.isfinite(corrected.data))
+
+
+def test_baseline_preserves_mask_2d(synthetic_2d_baseline_dataset):
+    # #1097: masking a spectral region must survive baseline correction unchanged.
+    # The existing masked-baseline tests only check shape and finiteness; none assert
+    # that the mask locations themselves are preserved on the baseline/corrected output.
+    dataset, _, _ = synthetic_2d_baseline_dataset
+
+    dataset[:, 3000.0:2000.0] = scp.MASKED
+    expected_mask = np.asarray(dataset.mask).copy()
+    assert expected_mask.any()
+
+    blc = Baseline()
+    blc.model = "polynomial"
+    blc.order = 3
+    blc.fit(dataset)
+    baseline = blc.baseline
+    corrected = blc.transform()
+
+    # mask locations remain unchanged on both the baseline and the corrected dataset
+    assert np.array_equal(np.asarray(baseline.mask), expected_mask)
+    assert np.array_equal(np.asarray(corrected.mask), expected_mask)
+
+    # units, dimensions and shape are preserved
+    assert corrected.shape == dataset.shape
+    assert corrected.units == dataset.units
+    assert baseline.units == dataset.units
+    assert corrected.dims == dataset.dims
+
+    # no values are introduced into the masked region: unmasked data stays finite
+    unmasked = ~np.asarray(corrected.mask)
+    assert np.all(np.isfinite(corrected.data[unmasked]))
+    assert np.all(np.isfinite(baseline.data[unmasked]))
+
+
+def test_baseline_preserves_mask_1d(synthetic_1d_baseline_dataset):
+    # #1097, 1D case: a masked region in a 1D spectrum survives baseline correction.
+    # The dataset is processed as a single-row 2D internally, but the mask is restored
+    # at the same coordinate positions.
+    dataset, _, _ = synthetic_1d_baseline_dataset
+
+    dataset[3000.0:2000.0] = scp.MASKED
+    expected_positions = np.flatnonzero(np.asarray(dataset.mask).ravel())
+    assert expected_positions.size
+
+    blc = Baseline()
+    blc.model = "polynomial"
+    blc.order = 3
+    blc.fit(dataset)
+    corrected = blc.transform()
+
+    out_positions = np.flatnonzero(np.asarray(corrected.mask).ravel())
+    assert np.array_equal(out_positions, expected_positions)
+    assert corrected.units == dataset.units
+
+    unmasked = ~np.asarray(corrected.mask).ravel()
+    assert np.all(np.isfinite(corrected.data.ravel()[unmasked]))
