@@ -534,6 +534,48 @@ def insert_masked_print(ds, mask_string="--"):
 # ======================================================================================
 # numpy printoptions
 # ======================================================================================
+def _format_array_values(
+    data, is_masked=False, dtype=None, sep="\n", prefix="", units=""
+):
+    r"""
+    Format array values into display text, shared by terminal and semantic paths.
+
+    Parameters
+    ----------
+    data : ndarray or MaskedArray
+        The data to format, already unwrapped from Quantity (i.e. the
+        magnitude only).  If ``is_masked`` is True, *data* must be a
+        ``MaskedArray`` so that ``insert_masked_print`` can read its
+        ``_mask`` attribute.
+    is_masked : bool, default=False
+        Whether *data* has active masked entries.
+    dtype : numpy dtype, optional
+        The original dtype of the unmasked data, used to construct the
+        mask display string (e.g. ``"--float64"``).  Required when
+        ``is_masked=True``.
+    sep : str, default="\\n"
+        Replacement for internal newlines in multi-line array output.
+    prefix : str, default=""
+        Prefix prepended to the array string (used for complex component
+        labels such as ``"R"`` or ``"I"``).
+    units : str, default=""
+        Pre-formatted unit suffix (e.g. ``" m"`` or ``""``).
+
+    Returns
+    -------
+    str
+        Plain formatted text without trailing newline or sentinel markers.
+    """
+    if is_masked and dtype is not None:
+        ds = data.copy()
+        mask_string = f"--{dtype}"
+        data = insert_masked_print(ds, mask_string=mask_string)
+
+    body = np.array2string(data, separator=" ", prefix=prefix)
+    body = body.replace("\n", sep)
+    return "".join([prefix, body, units])
+
+
 def numpyprintoptions(
     precision=4,
     threshold=6,

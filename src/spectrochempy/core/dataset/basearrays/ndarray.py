@@ -33,8 +33,8 @@ from spectrochempy.utils.constants import TYPE_INTEGER
 from spectrochempy.utils.constants import MaskedConstant
 from spectrochempy.utils.meta import Meta
 from spectrochempy.utils.objects import make_new_object
+from spectrochempy.utils.print import _format_array_values
 from spectrochempy.utils.print import convert_to_html
-from spectrochempy.utils.print import insert_masked_print
 from spectrochempy.utils.print import numpyprintoptions
 from spectrochempy.utils.typeutils import is_number
 from spectrochempy.utils.typeutils import is_sequence
@@ -1038,7 +1038,6 @@ class NDArray(tr.HasTraits):
         return out
 
     def _str_value(self, sep="\n", ufmt=" {:~P}", header="         data: ... \n"):
-        # prefix = ['']
         if self.is_empty and "data: ..." not in header:
             return header + "{}".format(textwrap.indent("empty", " " * 9))
         if self.is_empty:
@@ -1046,19 +1045,6 @@ class NDArray(tr.HasTraits):
 
         print_unit = True
         units = ""
-
-        def mkbody(d, pref, _units):
-            # work around printing masked values with formatting
-            ds = d.copy()
-            if self.is_masked:
-                dtype = self.data.dtype
-                mask_string = f"--{dtype}"
-                ds = insert_masked_print(ds, mask_string=mask_string)
-            _body = np.array2string(ds, separator=" ", prefix=pref)
-            _body = _body.replace("\n", sep)
-            _text = "".join([pref, _body, _units])
-            _text += sep
-            return _text
 
         text = ""
         if not self.is_empty:
@@ -1075,9 +1061,16 @@ class NDArray(tr.HasTraits):
             if print_unit:
                 units = ufmt.format(self.units) if self.has_units else ""
 
-            text += mkbody(data, "", units)
+            text += _format_array_values(
+                data,
+                is_masked=self.is_masked,
+                dtype=self._data.dtype if self._data is not None else None,
+                sep=sep,
+                prefix="",
+                units=units,
+            )
 
-        out = ""  # f'        title: {self.title}\n' if self.title else ''
+        out = ""
         text = text.strip()
         if "\n" not in text:  # single line!
             out += header.replace("...", f"\0{text}\0")

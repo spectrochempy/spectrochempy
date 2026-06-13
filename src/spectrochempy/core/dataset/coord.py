@@ -24,6 +24,7 @@ from spectrochempy.utils.numutils import get_n_decimals
 from spectrochempy.utils.numutils import spacings
 from spectrochempy.utils.print import DisplayItem
 from spectrochempy.utils.print import DisplaySection
+from spectrochempy.utils.print import _format_array_values
 from spectrochempy.utils.print import colored_output
 from spectrochempy.utils.typeutils import is_iterable
 from spectrochempy.utils.typeutils import is_number
@@ -727,9 +728,16 @@ class Coord(NDMath, NDArray):
             data = self.umasked_data
             if isinstance(data, Quantity):
                 data = data.magnitude
-            formatted = np.array2string(data, separator=" ", prefix="")
             units = f" {self.units:~P}" if self.has_units else ""
-            items.append(DisplayItem("data", f"{formatted}{units}"))
+            formatted = _format_array_values(
+                data,
+                is_masked=self.is_masked,
+                dtype=self.dtype,
+                sep="\n",
+                prefix="",
+                units=units,
+            )
+            items.append(DisplayItem("data", formatted))
         elif self.is_empty and not self.is_labeled:
             items.append(DisplayItem("data", "Undefined"))
 
