@@ -27,22 +27,53 @@ def _html_heading(obj):
     """
     Build a compact HTML heading identifying *obj*.
 
-    Returns a string like ``"Coord [mycoord]"`` or ``"Project [my_project]"``.
-    Falls back to the bare type name when the object has no meaningful name
-    (i.e. when the name was auto-generated rather than user-provided).
+    For array-like objects (Coord, NDDataset, NDArray) the heading includes
+    dtype, shape/size, and units when available::
+
+        Coord [x] — float64, size: 50, m
+
+    For unnamed objects the bracketed name is omitted::
+
+        NDDataset — float64, shape: (y:10, x:20)
+
+    For CoordSet the child coordinate names are shown::
+
+        CoordSet — x, y
+
+    For Project the bare type name with optional bracketed name is used::
+
+        Project [my_project]
     """
     type_name = type(obj).__name__
-    # Use has_defined_name when available (NDArray, Coord, NDDataset, CoordSet,
-    # Project) to distinguish user-provided names from auto-generated IDs.
+
+    # --- name part ---
     if hasattr(obj, "has_defined_name"):
-        if obj.has_defined_name:
-            return f"{type_name} [{obj.name}]"
-        return type_name
-    # Fallback for types without has_defined_name.
-    name = getattr(obj, "_name", None)
-    if name:
-        return f"{type_name} [{name}]"
-    return type_name
+        name_part = f" [{obj.name}]" if obj.has_defined_name else ""
+    else:
+        name_part = ""
+
+    # --- scientific identity part ---
+    extras = ""
+
+    # Array-like objects (Coord, NDArray, NDDataset)
+    if hasattr(obj, "_repr_shape"):
+        parts = []
+        if hasattr(obj, "dtype") and obj.dtype is not None:
+            parts.append(str(obj.dtype))
+        parts.append(obj._repr_shape())
+        units = obj._repr_units() if hasattr(obj, "_repr_units") else ""
+        if units and units != "unitless":
+            parts.append(units)
+        if parts:
+            extras = " — " + ", ".join(parts)
+
+    # CoordSet: show child coordinate names
+    elif type_name == "CoordSet":
+        names = obj.names
+        if names:
+            extras = f" — {', '.join(names)}"
+
+    return f"{type_name}{name_part}{extras}"
 
 
 # ======================================================================================
@@ -215,14 +246,21 @@ def convert_to_html(obj, open=False, id=None):
 
     # Process each section with CSS classes
     html_output = []
-    for section in collapsable_sections.values():
+    for i, section in enumerate(collapsable_sections.values()):
         open = ""  # if section[0] != "SUMMARY" else " open"  # closed by default
         ps = _process_section(section)
         if ps == "<summary>SUMMARY</summary>":
             continue  # summary empty
-        html_output.append(
-            f'<div class="scp-output section"><details{open}>{ps}</details></div>'
-        )
+        if i == 0:
+            # Render summary metadata inline (no collapsible wrapper)
+            # Remove the <summary>SUMMARY</summary> tag from section 0
+            ps = ps.replace("<summary>SUMMARY</summary>\n", "")
+            ps = ps.replace("<summary>SUMMARY</summary>", "")
+            html_output.append(ps)
+        else:
+            html_output.append(
+                f'<div class="scp-output section"><details{open}>{ps}</details></div>'
+            )
 
     obj._html_output = False
 
