@@ -17,7 +17,7 @@ from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 from spectrochempy.core.units import Quantity
 from spectrochempy.utils.constants import TYPE_COMPLEX
 from spectrochempy.utils.constants import TYPE_FLOAT
-from spectrochempy.utils.print import insert_masked_print
+from spectrochempy.utils.print import _format_array_values
 
 
 # ======================================================================================
@@ -402,26 +402,20 @@ class NDComplexArray(NDArray):
 
         units = ufmt.format(self.units) if self.has_units else ""
 
-        def mkbody(d, pref, units):
-            # work around printing masked values with formatting
-            ds = d.copy()
-            if self.is_masked:
-                dtype = self.dtype
-                mask_string = f"--{dtype}"
-                ds = insert_masked_print(ds, mask_string=mask_string)
-            body = np.array2string(ds, separator=" ", prefix=pref)
-            body = body.replace("\n", sep)
-            text = "".join([pref, body, units])
-            text += sep
-            return text
-
         text = ""
         if "I" not in "".join(prefix):  # case of pure real data
             if self._data is not None:
                 data = self.umasked_data
                 if isinstance(data, Quantity):
                     data = data.magnitude
-                text += mkbody(data, "", units)
+                text += _format_array_values(
+                    data,
+                    is_masked=self.is_masked,
+                    dtype=self.dtype,
+                    sep=sep,
+                    prefix="",
+                    units=units,
+                )
         else:
             for pref in prefix:
                 if self._data is not None:
@@ -433,7 +427,14 @@ class NDComplexArray(NDArray):
                     data = component.umasked_data
                     if isinstance(data, Quantity):
                         data = data.magnitude
-                    text += mkbody(data, pref, units)
+                    text += _format_array_values(
+                        data,
+                        is_masked=self.is_masked,
+                        dtype=self.dtype,
+                        sep=sep,
+                        prefix=pref,
+                        units=units,
+                    )
 
         out = "          DATA \n"
         out += f"        title: {self.title}\n" if self.title else ""

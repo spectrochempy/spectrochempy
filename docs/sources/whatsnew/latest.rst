@@ -173,6 +173,14 @@ Developer
   differ from terminal display.  This consolidates PR4 through PR8 of the
   Display / Representation Architecture (#843).
 
+- MAINT: Established the semantic display model foundation for the Display /
+  Representation Architecture (#843).  Added ``DisplayItem`` and
+  ``DisplaySection`` data classes as the structured intermediate
+  representation, introduced ``Coord._repr_sections()`` as the first semantic
+  provider, and extracted the shared ``_format_array_values()`` helper to
+  eliminate three near-identical formatting pipelines across ``NDArray``,
+  ``NDComplexArray``, and ``Coord``.
+
 - MAINT: Moved CP/PARAFAC implementation and TensorLy dependency ownership into
   the new tensor plugin, keeping the core package tensor-agnostic.
 

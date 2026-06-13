@@ -29,12 +29,16 @@ DO NOT:
 - Test private display helpers or implementation mechanisms
 """
 
+import numpy as np
+
+from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.project.project import Project
 from spectrochempy.utils.print import DisplayItem
 from spectrochempy.utils.print import DisplaySection
+from spectrochempy.utils.print import _format_array_values
 from spectrochempy.utils.print import pstr
 
 # ======================================================================================
@@ -992,3 +996,152 @@ class TestSemanticCoord:
         """DisplaySection with no items defaults to empty list."""
         section = DisplaySection("summary", "Summary")
         assert section.items == []
+
+
+class TestFormatArrayValues:
+    """
+    Tests for the shared _format_array_values() helper.
+
+    This helper is used by NDArray._str_value(), NDComplex._str_value(),
+    and Coord._repr_sections().  It encapsulates np.array2string(),
+    masked value formatting, newline replacement, and unit suffix
+    handling.
+    """
+
+    def test_float_array(self):
+        """Float array produces correct numeric text."""
+        data = np.array([1.5, 2.5, 3.5])
+        text = _format_array_values(data)
+        assert "1.5" in text
+        assert "3.5" in text
+
+    def test_integer_array(self):
+        """Integer array produces correct numeric text."""
+        data = np.array([1, 2, 3])
+        text = _format_array_values(data)
+        assert "1" in text
+        assert "3" in text
+
+    def test_array_with_units(self):
+        """Unit suffix is appended when provided."""
+        data = np.array([1.0, 2.0, 3.0])
+        text = _format_array_values(data, units=" m")
+        assert "m" in text
+        assert text.endswith("m")
+
+    def test_array_without_units(self):
+        """No extraneous unit text when units are empty."""
+        data = np.array([1.0, 2.0, 3.0])
+        text = _format_array_values(data, units="")
+        assert "unitless" not in text
+
+    def test_masked_array(self):
+        """Masked values are replaced by --dtype string."""
+        data = np.ma.MaskedArray(
+            np.array([1.0, 2.0, 3.0]),
+            mask=[False, True, False],
+        )
+        text = _format_array_values(data, is_masked=True, dtype=np.dtype("float64"))
+        assert "--" in text
+
+    def test_masked_integer_array(self):
+        """Masked integer values show --int64."""
+        data = np.ma.MaskedArray(
+            np.array([1, 2, 3]),
+            mask=[False, True, False],
+        )
+        text = _format_array_values(data, is_masked=True, dtype=np.dtype("int64"))
+        assert "--" in text
+
+    def test_multiline_array(self):
+        """Multi-line arrays replace internal newlines with sep."""
+        data = np.array([[1.0, 2.0], [3.0, 4.0]])
+        text = _format_array_values(data, sep="\n")
+        assert "\n" in text
+        assert "1" in text
+        assert "4" in text
+
+    def test_newline_replacement(self):
+        """Sep parameter controls newline replacement."""
+        data = np.array([[1.0, 2.0], [3.0, 4.0]])
+        text = _format_array_values(data, sep=" | ")
+        assert " | " in text
+        lines = text.split(" | ")
+        assert len(lines) == 2
+
+    def test_prefix(self):
+        """Prefix is prepended to the output."""
+        data = np.array([1.0, 2.0, 3.0])
+        text = _format_array_values(data, prefix="R")
+        assert text.startswith("R")
+
+    def test_no_trailing_separator(self):
+        """Helper does not append a trailing sep."""
+        data = np.array([1.0, 2.0, 3.0])
+        text = _format_array_values(data)
+        assert not text.endswith("\n")
+
+    def test_no_trailing_separator_multiline(self):
+        """Multi-line output does not end with sep."""
+        data = np.array([[1.0, 2.0], [3.0, 4.0]])
+        text = _format_array_values(data, sep="\n")
+        assert "\n" in text
+        assert "1" in text
+
+
+class TestStrValuePreservation:
+    """Verify that NDArray._str_value() output is unchanged after refactoring."""
+
+    def test_str_value_float_no_units(self):
+        """NDArray._str_value produces expected output for float data."""
+        nd = NDArray([1.0, 2.0, 3.0])
+        text = nd._str_value()
+        assert "1" in text
+        assert "3" in text
+
+    def test_str_value_float_with_units(self):
+        """NDArray._str_value includes unit suffix."""
+        nd = NDArray([1.0, 2.0, 3.0], units="m")
+        text = nd._str_value()
+        assert "m" in text
+
+    def test_str_value_masked(self):
+        """NDArray._str_value shows -- for masked entries."""
+        nd = NDArray([1.0, 2.0, 3.0], mask=[False, True, False])
+        text = nd._str_value()
+        assert "--" in text
+
+    def test_str_value_empty(self):
+        """NDArray._str_value returns 'empty' for empty array."""
+        nd = NDArray([])
+        text = nd._str_value()
+        assert "empty" in text
+
+    def test_str_value_units_in_data_block(self):
+        """NDArray._str_value puts units inside the sentinel block."""
+        nd = NDArray([1.0, 2.0, 3.0], units="m")
+        text = nd._str_value()
+        assert "m" in text
+        assert "\x00" in text
+
+
+class TestNDComplexStrValuePreservation:
+    """Verify that NDComplexArray._str_value() output is unchanged after refactoring."""
+
+    def test_str_value_real(self):
+        """NDComplexArray._str_value for real data."""
+        from spectrochempy.core.dataset.basearrays.ndcomplex import NDComplexArray
+
+        nd = NDComplexArray([1.0, 2.0, 3.0])
+        text = nd._str_value()
+        assert "DATA" in text
+        assert "1" in text
+
+    def test_str_value_complex(self):
+        """NDComplexArray._str_value splits R and I components."""
+        from spectrochempy.core.dataset.basearrays.ndcomplex import NDComplexArray
+
+        nd = NDComplexArray([1.0 + 2.0j, 3.0 + 4.0j])
+        text = nd._str_value()
+        assert "R[" in text
+        assert "I[" in text
