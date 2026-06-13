@@ -9,6 +9,96 @@ import numpy as np
 from colorama import Fore
 from colorama import Style
 
+# ======================================================================================
+# Semantic display model
+# ======================================================================================
+# DisplaySection and DisplayItem are the building blocks of a semantic
+# representation of an object's display content.  They decouple what is
+# displayed (the semantic structure) from how it is rendered (HTML / terminal).
+#
+# Currently used by Coord._repr_sections() to expose display semantics without
+# going through the text-based _cstr() → regex pipeline.
+#
+# Rendering helpers (render_display, etc.) will be added in a later phase.
+# ======================================================================================
+
+
+class ItemKind(str):
+    """Discriminator for DisplayItem rendering strategy."""
+
+    FIELD = "field"
+    DATA = "data"
+    LABEL = "label"
+    BLOCK = "block"
+
+
+class DisplayItem:
+    """
+    A single element within a display section.
+
+    Parameters
+    ----------
+    kind : str or ItemKind
+        Rendering strategy: ``"field"`` | ``"data"`` | ``"label"`` | ``"block"``.
+    value : str
+        Pre-formatted display text.
+    key : str, optional
+        Metadata key name (only meaningful for ``kind="field"``).
+    """
+
+    __slots__ = ("kind", "value", "key")
+
+    def __init__(self, kind: str, value: str, key: str = "") -> None:
+        self.kind = kind
+        self.value = value
+        self.key = key
+
+    def __repr__(self) -> str:
+        if self.key:
+            return f"DisplayItem({self.kind}, {self.key}={self.value!r})"
+        return f"DisplayItem({self.kind}, {self.value!r})"
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, DisplayItem):
+            return NotImplemented
+        return (self.kind, self.value, self.key) == (other.kind, other.value, other.key)
+
+
+class DisplaySection:
+    """
+    A named section in an object's HTML display.
+
+    Parameters
+    ----------
+    role : str
+        Section type: ``"summary"`` | ``"data"`` | ``"dimension"``.
+    title : str
+        Section heading text (e.g. ``"Data"``, ``"Dimension ``x```"``).
+    items : list of DisplayItem, optional
+        Ordered display elements.
+    """
+
+    __slots__ = ("role", "title", "items")
+
+    def __init__(
+        self, role: str, title: str, items: list[DisplayItem] | None = None
+    ) -> None:
+        self.role = role
+        self.title = title
+        self.items = items or []
+
+    def __repr__(self) -> str:
+        return f"DisplaySection({self.role}, {self.title!r}, {len(self.items)} items)"
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, DisplaySection):
+            return NotImplemented
+        return (self.role, self.title, self.items) == (
+            other.role,
+            other.title,
+            other.items,
+        )
+
 
 def pstr(object, **kwargs):
     if hasattr(object, "_implements") and object._implements() in [

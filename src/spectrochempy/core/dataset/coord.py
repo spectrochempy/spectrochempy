@@ -22,6 +22,8 @@ from spectrochempy.utils.constants import INPLACE
 from spectrochempy.utils.constants import NOMASK
 from spectrochempy.utils.numutils import get_n_decimals
 from spectrochempy.utils.numutils import spacings
+from spectrochempy.utils.print import DisplayItem
+from spectrochempy.utils.print import DisplaySection
 from spectrochempy.utils.print import colored_output
 from spectrochempy.utils.typeutils import is_iterable
 from spectrochempy.utils.typeutils import is_number
@@ -695,6 +697,47 @@ class Coord(NDMath, NDArray):
         if not self._html_output:
             return colored_output(out)
         return out
+
+    def _repr_sections(self):
+        """
+        Build semantic display sections from Coord attributes.
+
+        Returns
+        -------
+        list of DisplaySection
+            Semantic representation of this Coord's display content,
+            equivalent to what ``_cstr()`` produces but built from
+            structured attributes instead of formatted text.
+
+        Notes
+        -----
+        - Does NOT call ``_cstr()``.
+        - Not used for HTML rendering yet (Phase A — model validation).
+        - Rendering from this representation will be added separately.
+        """
+        items: list[DisplayItem] = []
+
+        if not self.is_empty:
+            items.append(DisplayItem("field", str(self.size), "size"))
+
+        if self.title:
+            items.append(DisplayItem("field", str(self.title), "title"))
+
+        if self.has_data:
+            data = self.umasked_data
+            if isinstance(data, Quantity):
+                data = data.magnitude
+            formatted = np.array2string(data, separator=" ", prefix="")
+            units = f" {self.units:~P}" if self.has_units else ""
+            items.append(DisplayItem("data", f"{formatted}{units}"))
+        elif self.is_empty and not self.is_labeled:
+            items.append(DisplayItem("data", "Undefined"))
+
+        if self.is_labeled:
+            text = str(self.labels.T).strip()
+            items.append(DisplayItem("label", text))
+
+        return [DisplaySection("summary", "Summary", items)]
 
     def __repr__(self):
         return self._repr_value().rstrip()
