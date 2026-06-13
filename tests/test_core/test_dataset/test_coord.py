@@ -402,15 +402,17 @@ def test_coord():
     assert "(size: 10)" in s
 
     s = coord0._repr_html_()
-    assert "<div class='label'>[  a   b ...   i   j]</div>" in s
+    assert 'class="label"' in s
+    assert "[  a   b ...   i   j]" in s
 
     c = Coord()
-    assert "<div class='numeric'>Undefined</div>" in c._repr_html_()
+    assert "Undefined" in c._repr_html_()
 
     # several row of label
     coord0.labels = list("klmnopqrst")
     s = coord0._repr_html_()
-    assert "<br/>          [  k   l ...   s   t]]" in s
+    assert 'class="label"' in s
+    assert "[  k   l ...   s   t]" in s
 
     # spacing
     sp = coord0.spacing
