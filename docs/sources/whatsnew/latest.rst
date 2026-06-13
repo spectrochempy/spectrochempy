@@ -21,6 +21,12 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- ``write_jcamp`` now exports masked samples as JCAMP-DX missing values (``?``)
+  instead of writing their underlying data (#1132).  Masked points are treated
+  like NaNs: they are excluded from the ``##MAXY``/``##MINY`` header extrema and
+  written as the ``?`` marker in the ``XYDATA`` block, so masking information is
+  preserved on round-trip instead of leaking stale values.
+
 - ``interpolate`` now preserves the source coordinate's units and title when the
   target is given as a bare array (e.g. ``np.linspace(...)``) (#1094).  The
   generated coordinate previously lost its units (became unitless) and title
