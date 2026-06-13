@@ -21,6 +21,12 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- ``interpolate`` now preserves the source coordinate's units and title when the
+  target is given as a bare array (e.g. ``np.linspace(...)``) (#1094).  The
+  generated coordinate previously lost its units (became unitless) and title
+  (became ``<untitled>``); the array values are assumed to be expressed in the
+  source coordinate's units, so the units are attached rather than converted.
+
 - ``interpolate`` now returns the result in the order of the requested target
   coordinate.  Interpolating a dataset stored with decreasing coordinates (e.g.
   wavenumbers from 4000 to 400 cm⁻¹) onto an increasing target previously
@@ -28,6 +34,15 @@ Bug Fixes
   (#1100).  The mask and any secondary coordinates are now reordered together
   with the data before interpolation, so they stay aligned when the source
   coordinate is decreasing.
+
+- ``interpolate`` now carries coordinate labels onto target points that exactly
+  match an original coordinate value, instead of dropping all labels (#1098).
+  Identity, reordering and subsetting therefore keep their labels (attached to
+  the correct values), while genuinely resampled points are left unlabelled.
+  The same point-wise policy is applied to the primary dimension coordinate and
+  to same-dimension secondary coordinates.  Matching is exact: SpectroChemPy
+  has no coordinate-matching tolerance convention, so a broader tolerance would
+  be a separate, explicit design decision.
 
 - Fixed ``Project.__str__()`` tree formatting when a project contains both
   sub-projects and sibling datasets or scripts at the same level.  The
