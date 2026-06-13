@@ -100,6 +100,71 @@ class DisplaySection:
         )
 
 
+def _render_sections(sections: list[DisplaySection]) -> str:
+    """
+    Render DisplaySections to HTML body content (no heading or outer wrapper).
+
+    Parameters
+    ----------
+    sections : list of DisplaySection
+        Semantic display sections to render.
+
+    Returns
+    -------
+    str
+        HTML string without outer ``<div class='scp-output'>`` or heading.
+    """
+    parts = []
+    for section in sections:
+        items_html = []
+        for item in section.items:
+            v = item.value.replace("\n", "<br/>")
+            if item.kind == "field":
+                items_html.append(
+                    f'<div class="scp-output section">'
+                    f'<div class="attr-name">{item.key}</div><div>:</div>'
+                    f'<div class="attr-value">{v}</div></div>'
+                )
+            elif item.kind == "data":
+                if item.key:
+                    items_html.append(
+                        '<div class="scp-output section">'
+                        f'<div class="attr-name">{item.key}</div><div>:</div>'
+                        f'<div class="attr-value"> <div class="numeric">{v}</div></div>'
+                        "</div>"
+                    )
+                else:
+                    items_html.append(f'<div class="numeric">{v}</div>')
+            elif item.kind == "label":
+                if item.key:
+                    items_html.append(
+                        '<div class="scp-output section">'
+                        f'<div class="attr-name">{item.key}</div><div>:</div>'
+                        f'<div class="attr-value"> <div class="label">{v}</div></div>'
+                        "</div>"
+                    )
+                else:
+                    items_html.append(f'<div class="label">{v}</div>')
+            elif item.kind == "block":
+                items_html.append(f"<div>{v}</div>")
+
+        body = "\n".join(items_html)
+
+        if section.role == "summary":
+            parts.append(body)
+        elif section.role in ("data", "dimension"):
+            title = section.title or section.role.capitalize()
+            parts.append(
+                f'<div class="scp-output section">'
+                f"<details><summary>{title}</summary>\n{body}\n"
+                f"</details></div>"
+            )
+        else:
+            parts.append(body)
+
+    return "\n".join(parts)
+
+
 def pstr(object, **kwargs):
     if hasattr(object, "_implements") and object._implements() in [
         "NDArray",

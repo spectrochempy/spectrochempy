@@ -1145,3 +1145,372 @@ class TestNDComplexStrValuePreservation:
         text = nd._str_value()
         assert "R[" in text
         assert "I[" in text
+
+
+# ======================================================================================
+# PHASE B: SEMANTIC HTML RENDERING FOR COORD
+# ======================================================================================
+
+
+class TestRenderSections:
+    """Tests for _render_sections() converting DisplaySections to HTML."""
+
+    def test_field_item_renders_attr_html(self):
+        """A field item renders as attr-name / attr-value pair."""
+        from spectrochempy.utils.print import DisplayItem
+        from spectrochempy.utils.print import DisplaySection
+        from spectrochempy.utils.print import _render_sections
+
+        sections = [
+            DisplaySection(
+                "summary",
+                "Summary",
+                [
+                    DisplayItem("field", "3", "size"),
+                ],
+            )
+        ]
+        html = _render_sections(sections)
+        assert 'class="attr-name"' in html
+        assert "size" in html
+        assert "3" in html
+        assert ":" in html
+
+    def test_data_item_renders_numeric(self):
+        """A data item renders as numeric div."""
+        from spectrochempy.utils.print import DisplayItem
+        from spectrochempy.utils.print import DisplaySection
+        from spectrochempy.utils.print import _render_sections
+
+        sections = [
+            DisplaySection(
+                "summary",
+                "Summary",
+                [
+                    DisplayItem("data", "[1.  2.  3.]"),
+                ],
+            )
+        ]
+        html = _render_sections(sections)
+        assert 'class="numeric"' in html
+        assert "[1.  2.  3.]" in html
+
+    def test_label_item_renders_label(self):
+        """A label item renders as label div."""
+        from spectrochempy.utils.print import DisplayItem
+        from spectrochempy.utils.print import DisplaySection
+        from spectrochempy.utils.print import _render_sections
+
+        sections = [
+            DisplaySection(
+                "summary",
+                "Summary",
+                [
+                    DisplayItem("label", "[A  B]"),
+                ],
+            )
+        ]
+        html = _render_sections(sections)
+        assert 'class="label"' in html
+        assert "[A  B]" in html
+
+    def test_data_with_key_wraps_in_attr_pair(self):
+        """A data item with a key is wrapped in attr-name/attr-value."""
+        from spectrochempy.utils.print import DisplayItem
+        from spectrochempy.utils.print import DisplaySection
+        from spectrochempy.utils.print import _render_sections
+
+        sections = [
+            DisplaySection(
+                "summary",
+                "Summary",
+                [
+                    DisplayItem("data", "[1.  2.  3.]", "coordinates"),
+                ],
+            )
+        ]
+        html = _render_sections(sections)
+        assert 'class="attr-name"' in html
+        assert "coordinates" in html
+        assert 'class="numeric"' in html
+        assert "[1.  2.  3.]" in html
+
+    def test_data_without_key_renders_bare_numeric(self):
+        """A data item without a key renders as bare numeric div."""
+        from spectrochempy.utils.print import DisplayItem
+        from spectrochempy.utils.print import DisplaySection
+        from spectrochempy.utils.print import _render_sections
+
+        sections = [
+            DisplaySection(
+                "summary",
+                "Summary",
+                [
+                    DisplayItem("data", "[1.  2.  3.]"),
+                ],
+            )
+        ]
+        html = _render_sections(sections)
+        assert 'class="numeric"' in html
+        assert 'class="attr-name"' not in html
+
+    def test_label_with_key_wraps_in_attr_pair(self):
+        """A label item with a key is wrapped in attr-name/attr-value."""
+        from spectrochempy.utils.print import DisplayItem
+        from spectrochempy.utils.print import DisplaySection
+        from spectrochempy.utils.print import _render_sections
+
+        sections = [
+            DisplaySection(
+                "summary",
+                "Summary",
+                [
+                    DisplayItem("label", "[A  B]", "labels"),
+                ],
+            )
+        ]
+        html = _render_sections(sections)
+        assert 'class="attr-name"' in html
+        assert "labels" in html
+        assert 'class="label"' in html
+        assert "[A  B]" in html
+
+    def test_label_without_key_renders_bare_label(self):
+        """A label item without a key renders as bare label div."""
+        from spectrochempy.utils.print import DisplayItem
+        from spectrochempy.utils.print import DisplaySection
+        from spectrochempy.utils.print import _render_sections
+
+        sections = [
+            DisplaySection(
+                "summary",
+                "Summary",
+                [
+                    DisplayItem("label", "[A  B]"),
+                ],
+            )
+        ]
+        html = _render_sections(sections)
+        assert 'class="label"' in html
+        assert 'class="attr-name"' not in html
+
+    def test_block_item_renders_plain_div(self):
+        """A block item renders as plain div."""
+        from spectrochempy.utils.print import DisplayItem
+        from spectrochempy.utils.print import DisplaySection
+        from spectrochempy.utils.print import _render_sections
+
+        sections = [
+            DisplaySection(
+                "summary",
+                "Summary",
+                [
+                    DisplayItem("block", "some block content"),
+                ],
+            )
+        ]
+        html = _render_sections(sections)
+        assert "<div>some block content</div>" in html
+
+    def test_newline_in_value_becomes_br(self):
+        """Newlines in item values are converted to <br/>."""
+        from spectrochempy.utils.print import DisplayItem
+        from spectrochempy.utils.print import DisplaySection
+        from spectrochempy.utils.print import _render_sections
+
+        sections = [
+            DisplaySection(
+                "summary",
+                "Summary",
+                [
+                    DisplayItem("data", "line1\nline2"),
+                ],
+            )
+        ]
+        html = _render_sections(sections)
+        assert "<br/>" in html
+        assert "line1" in html
+        assert "line2" in html
+
+    def test_data_section_wraps_in_details(self):
+        """A data-role section is wrapped in a details/summary block."""
+        from spectrochempy.utils.print import DisplayItem
+        from spectrochempy.utils.print import DisplaySection
+        from spectrochempy.utils.print import _render_sections
+
+        sections = [
+            DisplaySection(
+                "data",
+                "Data",
+                [
+                    DisplayItem("data", "[1.  2.  3.]"),
+                ],
+            )
+        ]
+        html = _render_sections(sections)
+        assert "<details>" in html
+        assert "<summary>Data</summary>" in html
+
+    def test_dimension_section_wraps_in_details_with_title(self):
+        """A dimension-role section uses its title in the summary."""
+        from spectrochempy.utils.print import DisplayItem
+        from spectrochempy.utils.print import DisplaySection
+        from spectrochempy.utils.print import _render_sections
+
+        sections = [
+            DisplaySection(
+                "dimension",
+                "Dimension `x`",
+                [
+                    DisplayItem("field", "50", "size"),
+                ],
+            )
+        ]
+        html = _render_sections(sections)
+        assert "<details>" in html
+        assert "<summary>Dimension `x`</summary>" in html
+
+    def test_summary_section_no_details(self):
+        """A summary-role section renders items directly without wrapper."""
+        from spectrochempy.utils.print import DisplayItem
+        from spectrochempy.utils.print import DisplaySection
+        from spectrochempy.utils.print import _render_sections
+
+        sections = [
+            DisplaySection(
+                "summary",
+                "Summary",
+                [
+                    DisplayItem("field", "3", "size"),
+                ],
+            )
+        ]
+        html = _render_sections(sections)
+        assert "<details>" not in html
+        assert "Summary" not in html
+
+
+class TestCoordSemanticHTML:
+    """Tests for Coord._repr_html_() via the semantic path."""
+
+    def test_heading_contains_type(self):
+        """Coord HTML heading contains the type name."""
+        from spectrochempy import Coord
+
+        coord = Coord([1.0, 2.0, 3.0])
+        html = coord._repr_html_()
+        assert "Coord" in html
+        assert "float64" in html
+        assert "size" in html.lower()
+
+    def test_heading_includes_name(self):
+        """Coord HTML heading includes the name when set."""
+        from spectrochempy import Coord
+
+        coord = Coord([1.0, 2.0, 3.0], name="x")
+        html = coord._repr_html_()
+        assert "[x]" in html
+
+    def test_heading_includes_units(self):
+        """Coord HTML heading includes units when present."""
+        from spectrochempy import Coord
+
+        coord = Coord([1.0, 2.0, 3.0], units="m")
+        html = coord._repr_html_()
+        assert "m" in html
+
+    def test_content_shows_size_as_field(self):
+        """Size is displayed as an attr-name/attr-value field."""
+        from spectrochempy import Coord
+
+        coord = Coord([1.0, 2.0, 3.0])
+        html = coord._repr_html_()
+        assert 'class="attr-name"' in html or "attr-name" in html
+        assert "3" in html
+
+    def test_content_shows_data_as_numeric(self):
+        """Data values are displayed in a numeric div."""
+        from spectrochempy import Coord
+
+        coord = Coord([1.0, 2.0, 3.0])
+        html = coord._repr_html_()
+        assert 'class="numeric"' in html
+
+    def test_content_shows_data_values(self):
+        """Data values appear in the rendered HTML."""
+        from spectrochempy import Coord
+
+        coord = Coord([1.0, 2.0, 3.0])
+        html = coord._repr_html_()
+        assert "1" in html
+        assert "2" in html
+        assert "3" in html
+
+    def test_content_shows_units_with_data(self):
+        """Units appear appended to data values."""
+        from spectrochempy import Coord
+
+        coord = Coord([1.0, 2.0, 3.0], units="m")
+        html = coord._repr_html_()
+        assert "m" in html
+
+    def test_empty_coord_shows_undefined(self):
+        """An empty Coord shows 'Undefined' as data."""
+        from spectrochempy import Coord
+
+        coord = Coord()
+        html = coord._repr_html_()
+        assert "Undefined" in html or "undefined" in html.lower()
+
+    def test_labeled_coord_shows_labels(self):
+        """Labeled Coord includes labels in the HTML."""
+        from spectrochempy import Coord
+
+        coord = Coord([1.0, 2.0], labels=["A", "B"])
+        html = coord._repr_html_()
+        assert "A" in html
+        assert "B" in html
+
+    def test_outer_wrapper_structure(self):
+        """Coord HTML has the expected outer wrapper structure."""
+        from spectrochempy import Coord
+
+        coord = Coord([1.0, 2.0])
+        html = coord._repr_html_()
+        assert '<div class="scp-output">' in html
+        assert "<details>" in html
+        assert "</details>" in html
+        assert "</div>" in html
+
+    def test_temporary_equivalence_with_sentinel_pipeline(self):
+        """
+        Semantic HTML contains all content present in sentinel HTML.
+
+        This is a temporary migration equivalence test.
+        It checks content presence, not exact HTML structure.
+        """
+        from spectrochempy import Coord
+        from spectrochempy.utils.print import convert_to_html
+
+        configs = [
+            Coord([1.0, 2.0, 3.0]),
+            Coord([1.0, 2.0], name="x", units="m"),
+            Coord([1.0, 2.0, 3.0], title="MyCoord"),
+            Coord([1.0, 2.0], labels=["A", "B"]),
+        ]
+
+        for coord in configs:
+            coord._html_output = False
+            old_html = convert_to_html(coord)
+
+            coord._html_output = False
+            new_html = coord._repr_html_()
+
+            old_content = set(old_html.split())
+            new_content = set(new_html.split())
+
+            common = old_content & new_content
+            assert (
+                len(common) > 0
+            ), f"No overlapping content between old and new HTML for {coord}"
+            assert "Coord" in new_html

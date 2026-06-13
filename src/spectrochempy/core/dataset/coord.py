@@ -25,6 +25,8 @@ from spectrochempy.utils.numutils import spacings
 from spectrochempy.utils.print import DisplayItem
 from spectrochempy.utils.print import DisplaySection
 from spectrochempy.utils.print import _format_array_values
+from spectrochempy.utils.print import _html_heading
+from spectrochempy.utils.print import _render_sections
 from spectrochempy.utils.print import colored_output
 from spectrochempy.utils.typeutils import is_iterable
 from spectrochempy.utils.typeutils import is_number
@@ -737,15 +739,25 @@ class Coord(NDMath, NDArray):
                 prefix="",
                 units=units,
             )
-            items.append(DisplayItem("data", formatted))
+            items.append(DisplayItem("data", formatted, "coordinates"))
         elif self.is_empty and not self.is_labeled:
-            items.append(DisplayItem("data", "Undefined"))
+            items.append(DisplayItem("data", "Undefined", "coordinates"))
 
         if self.is_labeled:
             text = str(self.labels.T).strip()
-            items.append(DisplayItem("label", text))
+            items.append(DisplayItem("label", text, "labels"))
 
         return [DisplaySection("summary", "Summary", items)]
+
+    def _repr_html_(self):
+        sections = self._repr_sections()
+        body = _render_sections(sections)
+        heading = _html_heading(self)
+        return (
+            '<div class="scp-output">'
+            f"<details><summary>{heading}</summary>\n{body}\n"
+            "</details></div>"
+        )
 
     def __repr__(self):
         return self._repr_value().rstrip()
