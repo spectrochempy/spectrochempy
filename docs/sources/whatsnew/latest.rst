@@ -21,48 +21,21 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
-- ``read_jcamp`` is more robust and complete when importing JCAMP-DX files
-  (#1080, #1150): datasets declaring ``##YUNITS=TRANSMITTANCE`` now come back with
-  the ``transmittance`` unit assigned instead of only the dataset title; a header
-  value that itself contains ``=`` is split on the first ``=`` only, instead of
-  raising ``too many values to unpack``; the invalid axis-metadata error is a
-  clear formatted message rather than a tuple-style exception; and the deprecated
-  ``read_jdx`` alias now points at the correct ``read_jcamp`` replacement.
+- JCAMP-DX I/O is more robust (#1080, #1132, #1150).  ``read_jcamp`` now
+  handles ``##YUNITS=TRANSMITTANCE`` as the ``transmittance`` unit, accepts
+  header values containing ``=``, reports invalid axis metadata with a clear
+  formatted error, and keeps the deprecated ``read_jdx`` alias pointed at
+  ``read_jcamp``.  ``write_jcamp`` now exports masked samples as JCAMP-DX
+  missing values (``?``), excludes them from ``##MAXY``/``##MINY``, and
+  preserves masking on round-trip instead of leaking stale values.
 
-- ``write_jcamp`` now exports masked samples as JCAMP-DX missing values (``?``)
-  instead of writing their underlying data (#1132).  Masked points are treated
-  like NaNs: they are excluded from the ``##MAXY``/``##MINY`` header extrema and
-  written as the ``?`` marker in the ``XYDATA`` block, so masking information is
-  preserved on round-trip instead of leaking stale values.
-
-- ``interpolate`` now preserves the source coordinate's units and title when the
-  target is given as a bare array (e.g. ``np.linspace(...)``) (#1094).  The
-  generated coordinate previously lost its units (became unitless) and title
-  (became ``<untitled>``); the array values are assumed to be expressed in the
-  source coordinate's units, so the units are attached rather than converted.
-
-- PCHIP interpolation (``method="pchip"``) now honours the ``fill_value``
-  argument, consistently with the linear method (#1093).  Out-of-range points
-  are filled with the requested constant (e.g. ``fill_value=0.0``), and
-  ``fill_value="extrapolate"`` extrapolates, while the default
-  ``fill_value=np.nan`` still returns NaN outside the original range.
-
-- ``interpolate`` now returns the result in the order of the requested target
-  coordinate.  Interpolating a dataset stored with decreasing coordinates (e.g.
-  wavenumbers from 4000 to 400 cm⁻¹) onto an increasing target previously
-  flipped the output back to decreasing, ignoring the requested ordering
-  (#1100).  The mask and any secondary coordinates are now reordered together
-  with the data before interpolation, so they stay aligned when the source
-  coordinate is decreasing.
-
-- ``interpolate`` now carries coordinate labels onto target points that exactly
-  match an original coordinate value, instead of dropping all labels (#1098).
-  Identity, reordering and subsetting therefore keep their labels (attached to
-  the correct values), while genuinely resampled points are left unlabelled.
-  The same point-wise policy is applied to the primary dimension coordinate and
-  to same-dimension secondary coordinates.  Matching is exact: SpectroChemPy
-  has no coordinate-matching tolerance convention, so a broader tolerance would
-  be a separate, explicit design decision.
+- ``interpolate`` now preserves coordinate metadata and target semantics
+  (#1093, #1094, #1098, #1100).  Bare-array targets keep the source
+  coordinate's units and title; PCHIP interpolation honours ``fill_value``;
+  output follows the requested target order even when the source coordinate is
+  decreasing; masks and secondary coordinates stay aligned; and labels are
+  carried to target points that exactly match original coordinate values while
+  genuinely resampled points remain unlabelled.
 
 - Fixed ``Project.__str__()`` tree formatting when a project contains both
   sub-projects and sibling datasets or scripts at the same level.  The
@@ -71,56 +44,31 @@ Bug Fixes
   sibling entries to appear on the same line as the last child of the
   preceding sub-project.
 
-- ``concatenate`` now converts coordinate values expressed in compatible but
-  different units to the units of the first dataset instead of silently
-  concatenating raw magnitudes, and raises a ``UnitsCompatibilityError`` when
-  the coordinate units of the concatenation dimension are incompatible
-  (#1101).
+- ``concatenate`` now handles coordinate metadata more consistently (#1101).
+  Coordinate values expressed in compatible but different units are converted
+  to the units of the first dataset, incompatible coordinate units raise a
+  ``UnitsCompatibilityError``, and mixed labeled/unlabeled coordinates no
+  longer crash during concatenation.
 
-- ``read_opus`` now correctly reads assembled / time-resolved OPUS files
-  containing data series blocks such as ``a``, ``sm``, ``igsm``, ``phsm``,
-  ``tr``, and exposes the new ``TRACE``, ``GCIG``, ``GCSC`` type selectors
-  (#1035).
-
-- ``read_opus`` no longer fails when an OPUS file stores a malformed
-  acquisition sub-second field (e.g. ``10:31:19.-70``); the timestamp now
-  falls back to whole-second precision instead of returning ``None`` (#1036).
+- ``read_opus`` now supports more assembled and time-resolved OPUS files
+  (#1035, #1036): data series blocks such as ``a``, ``sm``, ``igsm``,
+  ``phsm``, and ``tr`` are read, the ``TRACE``, ``GCIG``, and ``GCSC`` type
+  selectors are exposed, and malformed acquisition sub-second fields fall back
+  to whole-second precision instead of returning ``None``.
 
 - Fixed parsing of the ``a.u.`` (absorbance) and ``K.M.`` (Kubelka-Munk) unit
   symbols from strings, which previously failed because the dots were read as a
   multiplication.
 
-- Fixed native round-trip preservation of selected non-first default
-  coordinates in same-dimension multi-coordinate datasets.
-
-- Fixed restoration of reference-based coordinates after native
-  save/load round-trips.
-
-- Fixed preservation of reference-based coordinates when copying
-  ``CoordSet`` and ``NDDataset`` objects.
-
-- Fixed a crash when concatenating datasets along a dimension where one
-  dataset has labels and another does not.  Previously, a ``TypeError``
-  was raised on mixed labeled/unlabeled coordinates.
-
-- Fixed structural corruption of same-dimension ``CoordSet`` when setting
-  coordinates by name, numeric index, or title.  The group-backed resolution
-  path left stale child aliases on the dimension group after replacing
-  multiple entries with a single incoming ``CoordSet`` (e.g.
-  ``cs["x"] = CoordSet(...)``, ``cs[0] = CoordSet(...)``,
-  ``cs["wavenumber"] = CoordSet(...)``), causing ``_groups_to_coordset``
-  to double-wrap the inner coordinates under an extra ``CoordSet`` layer.
-  This affected concatenation of multi-coordinate datasets.  Also fixed the
-  related case of setting a child coordinate by synthetic alias
-  (e.g. ``cs["x_2"] = coord``).
-
-- Fixed ``CoordSet`` empty-state invariants: ``CoordSet()`` now correctly
-  creates a valid empty coordinate set instead of raising ``TypeError``.
-  Properties ``default``, ``default_index``, ``data`` return ``None`` and
-  ``titles``, ``labels``, ``units``, ``sizes`` return ``[]`` when the
-  coordinate set is empty, instead of raising ``IndexError`` or
-  ``TypeError``.  The internal ``_coords`` list is never set to ``None``,
-  eliminating fragile None-guards in read-side properties.
+- ``CoordSet`` and same-dimension coordinate handling are more stable.  Native
+  save/load now preserves selected non-first default coordinates and restores
+  reference-based coordinates, while copying ``CoordSet`` and ``NDDataset``
+  objects keeps reference-based coordinates intact.  Same-dimension
+  ``CoordSet`` replacement by name, numeric index, title, or synthetic child
+  alias no longer double-wraps inner coordinates, which also improves
+  concatenation of multi-coordinate datasets.  Empty ``CoordSet`` objects now
+  have consistent empty-state properties instead of raising ``TypeError`` or
+  ``IndexError``.
 
 - Stabilized 1D CSV round-trip support: ``read_csv`` now tolerates header rows
   (e.g., column titles) written by ``write_csv``, and correctly handles both
@@ -157,62 +105,28 @@ Deprecations
 Developer
 ~~~~~~~~~
 
-- MAINT: Integrated ``Project`` into the common display/representation model:
-  added a custom compact ``__repr__`` (``Project: <name>``), a ``_cstr()``
-  detailed representation (name, author, description, hierarchy), and migrated
-  ``_repr_html_()`` from ad-hoc string replacement to the shared
-  ``convert_to_html()`` pipeline.  ``pstr(project)`` now returns the detailed
-  ``_cstr()`` output.  Observable behavior is preserved for Coord, CoordSet,
-  and NDDataset.  This is PR3 of the Display / Representation Architecture
-  (#843).
-
-- MAINT: Harmonized notebook HTML headings — replaced the ad-hoc
-  ``obj.__str__() + [obj.name]`` summary line in ``convert_to_html()`` with
-  a dedicated ``_html_heading()`` helper.  Headings now follow a
-  type-specific format: ``TypeName [name] — dtype, shape, units`` for
-  array-like objects (Coord, NDDataset), ``CoordSet — x, y`` for coordinate
-  sets, and ``Project [name]`` for projects.  Auto-generated internal IDs
-  (UUIDs) are never shown in headings, and ``Project.__str__()`` hierarchy
-  is preserved in HTML through block-level rendering of indented lines.
-  The SUMMARY section metadata is now rendered inline under the main heading
-  instead of inside a collapsible ``<details>`` block, reducing unnecessary
-  nesting.  ``_repr_html_()`` headings are now decoupled from terminal
-  ``__str__()``, aligning with the RFC decision that notebook headings may
-  differ from terminal display.  This consolidates PR4 through PR8 of the
-  Display / Representation Architecture (#843).
-
-- MAINT: Established the semantic display model foundation for the Display /
-  Representation Architecture (#843).  Added ``DisplayItem`` and
-  ``DisplaySection`` data classes as the structured intermediate
-  representation, introduced ``Coord._repr_sections()`` as the first semantic
-  provider, and extracted the shared ``_format_array_values()`` helper to
-  eliminate three near-identical formatting pipelines across ``NDArray``,
-  ``NDComplexArray``, and ``Coord``.
+- MAINT: Continued the Display / Representation Architecture work (#843).
+  Added the semantic ``DisplayItem`` and ``DisplaySection`` representation
+  layer, introduced ``Coord._repr_sections()``, shared array value formatting
+  across ``NDArray``, ``NDComplexArray``, and ``Coord``, integrated
+  ``Project`` into the common terminal and HTML display model, and harmonized
+  notebook headings through ``_html_heading()``.  HTML headings now use stable
+  type-specific summaries without exposing internal UUIDs, project hierarchies
+  render through the shared ``convert_to_html()`` path, and summary metadata is
+  displayed inline under the main heading.
 
 - MAINT: Moved CP/PARAFAC implementation and TensorLy dependency ownership into
   the new tensor plugin, keeping the core package tensor-agnostic.
 
-- MAINT: Internal ``CoordSet`` storage redesign — all mutation paths (set,
-  delete, append, lifecycle) now resolve through the group-backed
-  projection-resolution-reconstruction pipeline instead of legacy in-place
-  ``_coords`` mutation.  The migration consolidated lookup, serializer
-  adapters, group conversion, and lifecycle helpers around transient group
-  metadata while preserving runtime storage, serialization, and public
-  behavior.  Same-dimension mutations apply group state directly to legacy
-  storage to avoid double-wrapping in ``_groups_to_coordset``, which fixed a
-  pre-existing corruption bug in same-dimension title set.  Alias invariants,
-  ``default_id`` semantics, label metadata, reference pass-through, and
-  coordinate metadata are preserved throughout.
-
-- MAINT: Switched ``CoordSet`` internal storage from the ``_coords``
-  ``traitlets.List`` trait (with its ``@validate`` hook) to a plain Python
-  ``_storage`` list, completing the migration away from trait-based
-  coercion.  The ``_coords`` trait and ``_coords_validate`` method have been
-  removed; ``_finalize_child_coordset`` now handles nested ``CoordSet``
-  setup explicitly in ``_append`` and mutation paths.  Sorting, copying,
-  and name-validation logic that was previously in the validator are now
-  performed in ``__init__``, ``_append``, and ``set``.  The internal
-  observer ``_coords_update`` was renamed to ``_child_name_changed``.
+- MAINT: Completed the internal ``CoordSet`` storage migration.  Mutation
+  paths now resolve through the group-backed
+  projection-resolution-reconstruction pipeline, lookup and serializer adapters
+  share transient group metadata, and runtime storage uses a plain
+  ``_storage`` list instead of the legacy trait-based ``_coords`` validator.
+  Nested ``CoordSet`` setup, sorting, copying, and name validation are handled
+  explicitly in lifecycle and mutation paths while preserving public behavior,
+  serialization, alias invariants, ``default_id`` semantics, label metadata,
+  reference pass-through, and coordinate metadata.
 
 - MAINT: Removed stale commented ``docrep`` residue and the unused commented
   ``numpydoc`` pre-commit hook block.
