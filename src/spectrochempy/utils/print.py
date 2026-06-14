@@ -185,7 +185,7 @@ def _html_heading(obj):
     For array-like objects (Coord, NDDataset, NDArray) the heading includes
     dtype, shape/size, and units when available::
 
-        Coord [x] — float64, size: 50, m
+        Coord [x:wavenumbers] — float64, size: 50, m
 
     For unnamed objects the bracketed name is omitted::
 
@@ -210,6 +210,12 @@ def _html_heading(obj):
         name_part = f" [{obj.name}]" if obj.has_defined_name else ""
     else:
         name_part = ""
+
+    # Enrich name with title for Coord when meaningful
+    if name_part and type_name == "Coord" and hasattr(obj, "title"):
+        title = obj.title
+        if title and title != "<untitled>":
+            name_part = f" [{obj.name}:{title}]"
 
     # --- scientific identity part ---
     extras = ""

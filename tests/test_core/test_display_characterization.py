@@ -691,11 +691,42 @@ class TestHTMLHeading:
         assert "empty" in html
         assert "Project" in html
 
-    def test_heading_starts_with_type(self):
+    def test_coord_heading_starts_with_type(self):
         """The outermost summary starts with the type name."""
         coord = Coord([1.0, 2.0, 3.0], name="c")
         html = coord._repr_html_()
         assert "Coord" in html
+
+    def test_coord_heading_with_title(self):
+        """Coord heading shows name:title when title is meaningful."""
+        coord = Coord([1.0, 2.0, 3.0], name="x", title="wavenumbers")
+        html = coord._repr_html_()
+        assert "x:wavenumbers" in html
+
+    def test_coord_heading_without_title(self):
+        """Coord heading shows name only when title is missing or <untitled>."""
+        coord = Coord([1.0, 2.0, 3.0], name="x")
+        html = coord._repr_html_()
+        assert "x" in html
+        summary = html.split("</summary>")[0]
+        assert "<untitled>" not in summary
+        assert "x:" not in summary
+
+    def test_coord_heading_unnamed_with_title(self):
+        """Unnamed Coord with meaningful title keeps bare heading, no bracket noise."""
+        coord = Coord([1.0, 2.0, 3.0], title="wavenumbers")
+        html = coord._repr_html_()
+        summary = html.split("</summary>")[0]
+        assert "<untitled>" not in summary
+        # Title should not appear in heading since there's no explicit name
+        assert ":wavenumbers" not in summary
+
+    def test_coord_heading_title_not_exposed_without_name(self):
+        """Coord heading does not show title when the coord has no defined name."""
+        coord = Coord([1.0, 2.0, 3.0], title="wavenumbers")
+        html = coord._repr_html_()
+        summary = html.split("</summary>")[0]
+        assert "Coord_" not in summary
 
 
 class TestInlineSummary:
