@@ -49,6 +49,28 @@ def test_read_jcamp_transmittance_units():
     assert ds.units == "transmittance"
 
 
+def test_read_jcamp_header_value_with_equals():
+    # A header value containing "=" (e.g. a sample id) must not break the
+    # ``keyword=text`` split (#1150): the parser now splits on the first "="
+    # only, instead of raising "too many values to unpack".
+    jdx = """##TITLE=sample=A/2
+##JCAMP-DX=5.01
+##DATA TYPE=INFRARED SPECTRUM
+##XUNITS=1/CM
+##YUNITS=ABSORBANCE
+##FIRSTX=4000.0
+##LASTX=3997.0
+##XFACTOR=1.0
+##YFACTOR=1.0
+##NPOINTS=4
+##XYDATA=(X++(Y..Y))
+4000.0 1.0 0.9 0.8 0.7
+##END
+"""
+    ds = read_jcamp({"sample.jdx": jdx.encode("utf8")})
+    assert ds.name == "sample=A/2"
+
+
 def test_write_jcamp_masked_values(tmp_path):
     # masked samples must be exported as JCAMP missing values ("?"), not as
     # their (stale) underlying data, and must be excluded from MAXY/MINY (#1132)
