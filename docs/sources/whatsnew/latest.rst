@@ -21,6 +21,12 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- ``read_jcamp`` now assigns the ``transmittance`` unit to datasets imported
+  from JCAMP-DX files declaring ``##YUNITS=TRANSMITTANCE`` (#1080).  The reader
+  previously set only the dataset title and left the units unset (an outdated
+  ``TODO`` noted the unit was missing from the registry); SpectroChemPy now
+  defines ``transmittance``, so it is attached just like ``absorbance``.
+
 - ``write_jcamp`` now exports masked samples as JCAMP-DX missing values (``?``)
   instead of writing their underlying data (#1132).  Masked points are treated
   like NaNs: they are excluded from the ``##MAXY``/``##MINY`` header extrema and

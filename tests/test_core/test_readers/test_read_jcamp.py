@@ -25,6 +25,30 @@ def test_read_jcamp(JDX_2D):
     f.unlink()
 
 
+def test_read_jcamp_transmittance_units():
+    # a JCAMP-DX file declaring ##YUNITS=TRANSMITTANCE must come back with the
+    # transmittance unit assigned, not just the title (#1080). Previously the
+    # reader set the title but left units unset.
+    jdx = """##TITLE=transmittance_test
+##JCAMP-DX=5.01
+##DATA TYPE=INFRARED SPECTRUM
+##XUNITS=1/CM
+##YUNITS=TRANSMITTANCE
+##FIRSTX=4000.0
+##LASTX=3996.0
+##XFACTOR=1.0
+##YFACTOR=1.0
+##NPOINTS=4
+##XYDATA=(X++(Y..Y))
+4000.0 90.0 85.0 80.0 75.0
+##END
+"""
+    ds = read_jcamp({"transmittance_test.jdx": jdx.encode("utf8")})
+    assert ds.title == "transmittance"
+    assert ds.units is not None
+    assert ds.units == "transmittance"
+
+
 def test_write_jcamp_masked_values(tmp_path):
     # masked samples must be exported as JCAMP missing values ("?"), not as
     # their (stale) underlying data, and must be excluded from MAXY/MINY (#1132)
