@@ -29,11 +29,13 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
-- ``read_jcamp`` now assigns the ``transmittance`` unit to datasets imported
-  from JCAMP-DX files declaring ``##YUNITS=TRANSMITTANCE`` (#1080).  The reader
-  previously set only the dataset title and left the units unset (an outdated
-  ``TODO`` noted the unit was missing from the registry); SpectroChemPy now
-  defines ``transmittance``, so it is attached just like ``absorbance``.
+- ``read_jcamp`` is more robust and complete when importing JCAMP-DX files
+  (#1080, #1150): datasets declaring ``##YUNITS=TRANSMITTANCE`` now come back with
+  the ``transmittance`` unit assigned instead of only the dataset title; a header
+  value that itself contains ``=`` is split on the first ``=`` only, instead of
+  raising ``too many values to unpack``; the invalid axis-metadata error is a
+  clear formatted message rather than a tuple-style exception; and the deprecated
+  ``read_jdx`` alias now points at the correct ``read_jcamp`` replacement.
 
 - ``write_jcamp`` now exports masked samples as JCAMP-DX missing values (``?``)
   instead of writing their underlying data (#1132).  Masked points are treated

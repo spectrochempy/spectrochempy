@@ -130,7 +130,7 @@ def read_jcamp(*paths, **kwargs):
     return importer(*paths, **kwargs)
 
 
-@deprecated(replace="read__jcamp", removed="0.10.0")
+@deprecated(replace="read_jcamp", removed="0.10.0")
 def read_jdx(*args, **kwargs):
     return read_jcamp(*args, **kwargs)
 
@@ -280,8 +280,7 @@ def _read_jdx(*args, **kwargs):
                     )
         else:
             raise ValueError(
-                "##FIRST, ##LASTX or ##NPOINTS are unusable in the spectrum n°",
-                i + 1,
+                f"##FIRSTX, ##LASTX or ##NPOINTS are unusable in spectrum n°{i + 1}"
             )
 
         # Creation of the acquisition date
@@ -410,7 +409,7 @@ def _readl(fid):
             keyword = "##END"
             text = ""
         else:  # keyword + text
-            keyword, text = line.split("=")
+            keyword, text = line.split("=", 1)
     else:
         keyword = ""
         text = line.strip()
