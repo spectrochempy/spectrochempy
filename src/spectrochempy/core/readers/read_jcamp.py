@@ -352,7 +352,7 @@ def _read_jdx(*args, **kwargs):
         dataset.units = "absorbance"
         dataset.title = "absorbance"
     elif yunits[0].strip() == "TRANSMITTANCE":
-        # TODO: This units not in pint. Add this
+        dataset.units = "transmittance"
         dataset.title = "transmittance"
 
     # now add coordinates
