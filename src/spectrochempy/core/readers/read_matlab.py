@@ -121,6 +121,17 @@ def read_matlab(*paths, **kwargs):
     read_jcamp : Read Infrared JCAMP-DX files (:file:`.jdx`, :file:`.dx`).
     read_wire : Read Renishaw Wire files (:file:`.wdf`).
 
+    Notes
+    -----
+    A single Matlab file may hold several variables.  Each numeric variable is
+    imported as its own `NDDataset`, named after the Matlab variable.
+    Non-numeric variables (e.g. character arrays) and Matlab-internal entries
+    (``__header__``, ``__version__``, ``__globals__``) are skipped.  When a file
+    holds a single numeric variable a lone `NDDataset` is returned; otherwise
+    the numeric variables are grouped by compatible shape, with same-shape
+    arrays stacked into one `NDDataset` and incompatible ones returned as a
+    list.
+
     Examples
     --------
     Reading a single Matlab file
