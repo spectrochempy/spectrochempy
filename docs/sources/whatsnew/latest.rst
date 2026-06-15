@@ -37,6 +37,13 @@ Bug Fixes
   carried to target points that exactly match original coordinate values while
   genuinely resampled points remain unlabelled.
 
+- ``write_csv`` now exports masked samples as missing values (``NaN``) instead
+  of writing their underlying data (#1135).  The writer previously iterated over
+  ``dataset.data`` directly, leaking the stored values of points the user had
+  explicitly masked; masked samples are now filled with ``NaN`` (mirroring the
+  ``write_jcamp`` fix), so they round-trip back as ``NaN`` through ``read_csv``
+  and unmasked datasets are unaffected.
+
 - Fixed ``Project.__str__()`` tree formatting when a project contains both
   sub-projects and sibling datasets or scripts at the same level.  The
   recursive ``_listproj`` helper previously used ``s.strip("\\n")`` which
