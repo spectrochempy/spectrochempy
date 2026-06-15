@@ -21,6 +21,11 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- Restored historical hypercomplex/quaternion dataset display (#1147).  Detailed
+  terminal and HTML representations once again show explicit ``RR``/``RI``/``IR``/``II``
+  component blocks and preserve complex-dimension shape annotations, instead of
+  falling back to raw quaternion scalar dumps.
+
 - JCAMP-DX I/O is more robust (#1080, #1132, #1150).  ``read_jcamp`` now
   handles ``##YUNITS=TRANSMITTANCE`` as the ``transmittance`` unit, accepts
   header values containing ``=``, reports invalid axis metadata with a clear
@@ -36,6 +41,13 @@ Bug Fixes
   decreasing; masks and secondary coordinates stay aligned; and labels are
   carried to target points that exactly match original coordinate values while
   genuinely resampled points remain unlabelled.
+
+- ``write_csv`` now exports masked samples as missing values (``NaN``) instead
+  of writing their underlying data (#1135).  The writer previously iterated over
+  ``dataset.data`` directly, leaking the stored values of points the user had
+  explicitly masked; masked samples are now filled with ``NaN`` (mirroring the
+  ``write_jcamp`` fix), so they round-trip back as ``NaN`` through ``read_csv``
+  and unmasked datasets are unaffected.
 
 - Fixed ``Project.__str__()`` tree formatting when a project contains both
   sub-projects and sibling datasets or scripts at the same level.  The
@@ -144,6 +156,14 @@ Developer
   shared dimension, not dimensions themselves.  The docs cache key was
   updated to invalidate the sphinx-gallery cache when display source
   files change.
+
+- TEST: Added synthetic, offline tests for multi-variable Matlab (``.mat``)
+  import and documented the behavior in the ``read_matlab`` docstring: numeric
+  variables are converted to ``NDDataset`` objects and then grouped by the
+  importer when shapes are compatible (same-shape arrays are stacked into one
+  dataset, incompatible ones returned separately), while non-numeric and
+  Matlab-internal (``__header__``, ``__version__``, ``__globals__``) variables
+  are skipped (#1142).
 
 - MAINT: Moved CP/PARAFAC implementation and TensorLy dependency ownership into
   the new tensor plugin, keeping the core package tensor-agnostic.

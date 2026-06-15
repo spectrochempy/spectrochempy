@@ -56,3 +56,29 @@ def test_write_csv_with_coords(mock_cwd, ds_1d_with_coords, ds_2d_with_coords):
     assert f.name == "myfile.csv"
     assert scp.pathclean(mock_cwd.joinpath("../myfile.csv")).exists()
     f.unlink()
+
+
+def test_write_csv_masked_values(tmp_path):
+    # masked samples must be exported as missing values (NaN), not as their
+    # (stale) underlying data (#1135), mirroring the JCAMP-DX writer (#1132)
+    coord = scp.Coord(np.linspace(4000, 1000, 10), title="wavenumber", units="cm^-1")
+    data = np.linspace(0.1, 0.9, 10)
+    data[3:6] = 999.0  # sentinel hidden under the mask
+    ds = scp.NDDataset(data, coordset=[coord], units="absorbance", name="masked")
+    mask = np.zeros(10, dtype=bool)
+    mask[3:6] = True
+    ds.mask = mask
+
+    f = ds.write_csv(tmp_path / "masked.csv", confirm=False)
+    text = f.read_text()
+
+    # the masked underlying value never leaks into the file
+    assert "999" not in text
+    # each masked sample is written as the missing-value marker (NaN)
+    assert text.lower().count("nan") == 3
+
+    # round-trip: the masked region reads back as NaN, the rest stays finite
+    back = scp.read_csv(f)
+    arr = np.asarray(back.data, dtype=float).ravel()
+    assert np.isnan(arr[3:6]).all()
+    assert np.isfinite(np.concatenate([arr[:3], arr[6:]])).all()
