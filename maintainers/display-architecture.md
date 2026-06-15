@@ -54,50 +54,26 @@ _html_heading()     → heading string
 
 ## Semantic Display Model
 
-The core model consists of two simple dataclasses:
+HTML content is built from two dataclasses in `src/spectrochempy/utils/print.py`:
 
-### DisplayItem
+| Class | Key fields | Purpose |
+|-------|------------|---------|
+| `DisplayItem` | `kind` (`field`, `data`, `label`, `block`), `value`, optional `key` | A single piece of display content |
+| `DisplaySection` | `role` (`summary`, `data`, `dimension`), `title`, `items: list[DisplayItem]` | Groups related items under a role |
 
-Represents a single piece of display content.
+Role behaviour:
 
-| Attribute | Type   | Purpose                            |
-|-----------|--------|------------------------------------|
-| `kind`    | `str`  | Content type: `field`, `data`, `label`, `block` |
-| `value`   | `str`  | Display value                      |
-| `key`     | `str`  | Optional label key for field items |
+* **`summary`** — items rendered inline under the heading (no collapsible toggle).
+* **`data`** — primary data, wrapped in `<details>`.
+* **`dimension`** — coordinate dimension info, wrapped in `<details>`.
 
-Kind semantics:
+Item kind behaviour:
 
-* **`field`** — key-value pair (e.g. `name: myproj`).  Rendered inline
-  when under a `summary` section, or in a table when under other roles.
-* **`data`** — numeric array content.  Rendered with type-appropriate
-  formatting.
-* **`label`** — coordinate label.  Rendered with distinct styling.
-* **`block`** — opaque content block (e.g. a project hierarchy line).
-  Rendered as `<div>value</div>`.
-
-### DisplaySection
-
-Groups related `DisplayItem` objects under a role.
-
-| Attribute | Type              | Purpose                          |
-|-----------|-------------------|----------------------------------|
-| `role`    | `str`             | Section type: `summary`, `data`, `dimension` |
-| `title`   | `str`             | Section heading                  |
-| `items`   | `list[DisplayItem]` | Contained items                |
-
-Role semantics:
-
-* **`summary`** — key-value metadata displayed inline under the object
-  heading (no collapsible wrapper).
-* **`data`** — primary data content.  Wrapped in a collapsible
-  `<details>` toggle.
-* **`dimension`** — coordinate dimension information.  Wrapped in a
-  collapsible `<details>` toggle.
+* **`field`** — key-value pair rendered as a labeled row.
+* **`data`** / **`label`** — array content with type-appropriate formatting.
+* **`block`** — opaque content (e.g. a project hierarchy line) rendered as `<div>`.
 
 ### Example
-
-For `NDDataset([1.0, 2.0], name="spectrum", author="lab")`:
 
 ```
 heading:  NDDataset [spectrum]
@@ -108,7 +84,7 @@ heading:  NDDataset [spectrum]
   [1.  2.]   float32 | size: 2
 ```
 
-The semantic model reifies this structure as:
+Backed by:
 
 ```python
 [
@@ -183,21 +159,12 @@ These decisions were reached during the RFC and migration work:
 
 ## Lessons Learned
 
-* **Semantic rendering can be introduced incrementally.**  Each object
-  was migrated independently without breaking the others.
-
-* **The renderer (`_render_sections()`) did not require hierarchical
-  extensions.**  A flat list of `DisplaySection` × `DisplayItem` was
-  sufficient for all four migrated objects.
-
-* **Coord semantic items could be reused by CoordSet.**  CoordSet
-  `_repr_sections()` delegates to child `Coord._repr_sections()` for
-  simple (single-coordinate) dimensions, avoiding duplicated formatting.
-
-* **CoordSet semantic sections could be reused by NDDataset.**
-  NDDataset `_repr_sections()` delegates to
-  `CoordSet._repr_sections()` for coordinate dimensions, keeping
-  dimension rendering consistent between CoordSet and NDDataset.
+* Semantic rendering can be introduced incrementally — each object was
+  migrated independently without breaking the others.
+* A flat `DisplaySection` × `DisplayItem` model was sufficient for all
+  four migrated objects; the renderer did not require hierarchy.
+* `Coord` items are reused by `CoordSet`, and `CoordSet` sections are
+  reused by `NDDataset`, avoiding duplicated formatting across layers.
 
 ---
 

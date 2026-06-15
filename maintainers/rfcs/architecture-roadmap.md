@@ -156,25 +156,12 @@ Current priority: Closed.
 
 Status: Completed
 
-Major outcomes:
+Refer to [`maintainers/display-architecture.md`](../display-architecture.md)
+for the final architecture.
 
-* Coord, CoordSet, NDDataset, and Project now use the semantic HTML path
-  (`_repr_sections()` → `_render_sections()`).
-* The old sentinel-based path (`_cstr()` → `convert_to_html()`) is no
-  longer used by the migrated objects.
-* A shared `DisplaySection` / `DisplayItem` model was introduced, with
-  four item kinds (field, data, label, block) and three section roles
-  (summary, data, dimension).
-* Coord `_repr_sections()` output is reusable by CoordSet; CoordSet
-  `_repr_sections()` output is reusable by NDDataset.
-* Headings are generated through `_html_heading()` with stable
-  type-specific summaries.
-* Project metadata (author, description) is visible inline.
-* Same-dimension CoordSets use Coord terminology rather than Dimension
-  terminology.
-* `maintainers/display-architecture.md` records the final architecture.
-
-Current priority: Closed.
+Key outcomes: Coord, CoordSet, NDDataset, and Project now use the
+semantic HTML path (`_repr_sections()` → `_render_sections()`). The
+authoritative reference is `display-architecture.md`.
 
 ---
 
