@@ -68,7 +68,15 @@ This draft was prepared from:
 
 No production code changes were made for this RFC.
 
-No tests were added for this RFC.
+PR1 characterization tests (144 tests) were added in
+`tests/test_core/test_dataset/test_math_semantics_baseline.py` covering
+arithmetic and ufunc semantics.
+
+PR2 characterization tests (101 tests) were added in
+`tests/test_core/test_dataset/test_shape_semantics_baseline.py` covering
+shape operations and CoordSet semantics.
+
+See Audit Policy in `AGENTS.md` for test-first refactoring requirements.
 
 ## Semantics Matrix
 
@@ -718,6 +726,18 @@ validity depends on shape, coordinate support, or model domain:
 - `roi`
 - `modeldata`
 - transposition state and other geometry-derived flags.
+
+Of these, `roi` and `modeldata` deserve special mention:
+
+- **`roi`** is likely historical UI/interactive selection state, not stable
+  scientific metadata. Its propagation through shape operations, reductions, and
+  copy-first assembly should be reassessed once its current usage is understood.
+- **`modeldata`** is derived model or fit information, historically linked to
+  fitting workflows and probably designed mainly for 1D use. Its propagation
+  rules (currently stale after shape changes) should be reviewed separately in a
+  dedicated RFC or issue before any lifecycle change.
+
+Neither field should be treated as ordinary scientific context in the long term.
 
 Provenance describes lineage and attribution:
 
@@ -1441,9 +1461,9 @@ These tests protect behavior that sits directly under future `NDMath`, result
 assembly, or metadata work.
 
 - `NDDataset` with scalar: return type, units, mask, title, name, history,
-  `description`, `origin`, and custom `meta`.
+  `description`, `origin`, and custom `meta`. — [x] delivered
 - `NDDataset` with `NDDataset`: compatible units, incompatible units,
-  coordinate match, coordinate mismatch, mask propagation.
+  coordinate match, coordinate mismatch, mask propagation. — partial coverage
 - result assembly field comparison for arithmetic, reduction, shape operation,
   wrapper processing, and analysis-style output using the same seeded context.
 - identity-class characterization for representative same-object,
@@ -1454,16 +1474,17 @@ assembly, or metadata work.
 - `sum`, `mean`, `std`, `min`, `max` with `dim=None`, named dims, and
   `keepdims=True`;
 - slicing with coordinate labels and masks;
-- `transpose`, `swapdims`, `squeeze`, `reshape`, `atleast_2d`;
+- `transpose`, `swapdims`, `squeeze`, `reshape`, `atleast_2d`; — [x] delivered
 - propagation of `dims`, `coordset`, labels, masks, title, history, and custom
-  metadata.
+  metadata. — [x] delivered
 - stale-field behavior for `roi` and `modeldata` across preserve-geometry and
-  modify-geometry operations.
+  modify-geometry operations. — [x] delivered
 - `title`, `name`, `history`, `origin`, `author`, and custom `meta` behavior
   when an operation preserves identity versus creates a derived identity.
+  — [x] delivered
 - separation of identity fields (`title`, `name`) from provenance fields
   (`history`, `origin`, `author`) in representative analysis and combination
-  outputs.
+  outputs. — [x] delivered
 - wrapper-based processing metadata preservation versus copy-first arithmetic.
 - ordinary complex and plugin-backed hypercomplex operation branches.
 
@@ -1474,7 +1495,8 @@ These tests clarify policy but need not block all maintainability work.
 - `Coord` with scalar: value, units, labels, title, metadata.
 - `Coord` with `Coord`: compatible/incompatible units and label behavior.
 - representative dataset-returning ufuncs: `abs`, `sqrt`, `sin`, `cos`, `tan`;
-- unit-restricted ufuncs: `log`, `exp`;
+  — partial coverage
+- unit-restricted ufuncs: `log`, `exp`; — [x] delivered
 - raw-return ufuncs: `isfinite`, `isnan`, `logical_not`;
 - `argmin` / `argmax` return and coordinate semantics;
 - cumulative operations and unsupported `Coord` reductions;
