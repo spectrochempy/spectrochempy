@@ -24,7 +24,6 @@ from spectrochempy.utils.print import DisplaySection
 from spectrochempy.utils.print import _html_heading
 from spectrochempy.utils.print import _render_sections
 from spectrochempy.utils.print import colored_output
-from spectrochempy.utils.print import convert_to_html
 from spectrochempy.utils.traits import NDDatasetType
 
 # from collections import OrderedDict
