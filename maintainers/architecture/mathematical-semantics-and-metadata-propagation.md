@@ -76,6 +76,12 @@ PR2 characterization tests (101 tests) were added in
 `tests/test_core/test_dataset/test_shape_semantics_baseline.py` covering
 shape operations and CoordSet semantics.
 
+PR3 characterization tests (100 tests) were added in
+`tests/test_core/test_dataset/test_reduction_semantics_baseline.py` covering
+dimension reduction, keepdims, units, masks, CoordSet, metadata, history,
+ROI/modeldata, and identity/provenance for sum, mean, std, min, max, argmin,
+and argmax.
+
 See Audit Policy in `AGENTS.md` for test-first refactoring requirements.
 
 ## Semantics Matrix
