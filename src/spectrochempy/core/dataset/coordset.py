@@ -2344,7 +2344,8 @@ class CoordSet(HasTraits):
         for dim in self.names:
             coord = getattr(self, dim)
 
-            title = f"Dimension `{dim}`"
+            prefix = "Coord" if self._is_same_dim else "Dimension"
+            title = f"{prefix} `{dim}`"
             for k, v in self.references.items():
                 if dim == v:
                     title += f"={k}"
