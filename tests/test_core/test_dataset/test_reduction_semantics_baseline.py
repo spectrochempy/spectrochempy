@@ -5,12 +5,12 @@ This suite characterizes CURRENT behavior of reduction operations.
 It does NOT validate a desired future policy.
 
 Coverage:
-    - sum, mean, std (statistical reductions)
-    - min, max (extrema reductions)
-    - argmin, argmax (index-finding reductions)
+    - sum, mean, std (aggregating reductions)
+    - min, max (selection reductions)
+    - argmin, argmax (index reductions)
     - dimension reduction (specific dim, all dims)
     - keepdims behavior
-    - unit semantics
+    - unit semantics (all reduction types)
     - mask semantics
     - metadata propagation
     - CoordSet reduction / preservation
@@ -398,6 +398,52 @@ class TestArgminArgmaxCharacterization:
         am = reduction_dataset.argmin(dim="x")
         assert not isinstance(am, NDDataset)
 
+    def test_argmax_keepdims_accepted_but_ignored(self, reduction_dataset):
+        """
+        SURPRISE: keepdims is accepted by argmax but has no effect
+        on the return type or shape — it is a no-op.
+        """
+        am = reduction_dataset.argmax(dim="x", keepdims=True)
+        assert isinstance(am, np.ndarray)
+        assert am.shape == (5,)
+        expected = np.argmax(np.arange(35.0).reshape(5, 7), axis=1)
+        assert np.array_equal(am, expected)
+
+    def test_argmin_keepdims_accepted_but_ignored(self, reduction_dataset):
+        """
+        SURPRISE: keepdims is accepted by argmin but has no effect
+        on the return type or shape — it is a no-op.
+        """
+        am = reduction_dataset.argmin(dim="x", keepdims=True)
+        assert isinstance(am, np.ndarray)
+        assert am.shape == (5,)
+        expected = np.argmin(np.arange(35.0).reshape(5, 7), axis=1)
+        assert np.array_equal(am, expected)
+
+    def test_argmax_global_keepdims_ignored(self, reduction_dataset):
+        """keepdims=True with dim=None still returns a tuple (no effect)."""
+        am = reduction_dataset.argmax(dim=None, keepdims=True)
+        assert isinstance(am, tuple)
+        assert len(am) == 2
+
+    def test_argmin_global_keepdims_ignored(self, reduction_dataset):
+        """keepdims=True with dim=None still returns a tuple (no effect)."""
+        am = reduction_dataset.argmin(dim=None, keepdims=True)
+        assert isinstance(am, tuple)
+        assert len(am) == 2
+
+    def test_argmax_1d_keepdims_ignored(self):
+        ds = NDDataset(np.array([10.0, 5.0, 20.0, 3.0]))
+        am = ds.argmax(dim="x", keepdims=True)
+        assert isinstance(am, (int, np.integer))
+        assert am == 2
+
+    def test_argmin_1d_keepdims_ignored(self):
+        ds = NDDataset(np.array([10.0, 5.0, 20.0, 3.0]))
+        am = ds.argmin(dim="x", keepdims=True)
+        assert isinstance(am, (int, np.integer))
+        assert am == 3
+
 
 # ======================================================================================
 # COORDSET SEMANTICS
@@ -658,6 +704,40 @@ class TestReductionIdentityProvenance:
 
 class TestReductionUnits:
     """Characterize unit behavior through reductions."""
+
+    def test_std_preserves_units_dim_specific(self, unitful_dataset):
+        s = unitful_dataset.std(dim="x")
+        assert str(s.units) == "m"
+
+    def test_std_global_returns_quantity(self, unitful_dataset):
+        s = unitful_dataset.std(dim=None)
+        assert hasattr(s, "units")
+        assert str(s.units) == "m"
+
+    def test_std_global_with_keepdims_preserves_units(self, unitful_dataset):
+        s = unitful_dataset.std(dim=None, keepdims=True)
+        assert isinstance(s, NDDataset)
+        assert str(s.units) == "m"
+
+    def test_max_global_returns_quantity(self, unitful_dataset):
+        mx = unitful_dataset.max(dim=None)
+        assert hasattr(mx, "units")
+        assert str(mx.units) == "m"
+
+    def test_min_global_returns_quantity(self, unitful_dataset):
+        mn = unitful_dataset.min(dim=None)
+        assert hasattr(mn, "units")
+        assert str(mn.units) == "m"
+
+    def test_max_global_with_keepdims_preserves_units(self, unitful_dataset):
+        mx = unitful_dataset.max(dim=None, keepdims=True)
+        assert isinstance(mx, NDDataset)
+        assert str(mx.units) == "m"
+
+    def test_min_global_with_keepdims_preserves_units(self, unitful_dataset):
+        mn = unitful_dataset.min(dim=None, keepdims=True)
+        assert isinstance(mn, NDDataset)
+        assert str(mn.units) == "m"
 
     def test_sum_preserves_units_dim_specific(self, unitful_dataset):
         s = unitful_dataset.sum(dim="x")
