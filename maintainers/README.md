@@ -19,6 +19,7 @@ de récupération après incident.
 | [`rfcs/architecture-roadmap.md`](rfcs/architecture-roadmap.md) | Feuille de route légère des sujets d'architecture récents, terminés ou différés |
 | [`rfcs/metadata-contract.md`](rfcs/metadata-contract.md) | RFC mainteneur définissant la sémantique normative des métadonnées `NDDataset` |
 | [`rfcs/coordinate-arithmetic-semantics.md`](rfcs/coordinate-arithmetic-semantics.md) | RFC mainteneur décrivant la position actuelle sur la sémantique de l'arithmétique coordonnée |
+| [`display-architecture.md`](display-architecture.md) | Architecture d'affichage finale — documentation mainteneur pour la couche d'affichage HTML sémantique |
 
 ## Workflows GitHub associés
 

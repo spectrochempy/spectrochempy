@@ -152,35 +152,35 @@ Current priority: Closed.
 
 ---
 
+## Display Architecture (#843)
+
+Status: Completed
+
+Major outcomes:
+
+* Coord, CoordSet, NDDataset, and Project now use the semantic HTML path
+  (`_repr_sections()` → `_render_sections()`).
+* The old sentinel-based path (`_cstr()` → `convert_to_html()`) is no
+  longer used by the migrated objects.
+* A shared `DisplaySection` / `DisplayItem` model was introduced, with
+  four item kinds (field, data, label, block) and three section roles
+  (summary, data, dimension).
+* Coord `_repr_sections()` output is reusable by CoordSet; CoordSet
+  `_repr_sections()` output is reusable by NDDataset.
+* Headings are generated through `_html_heading()` with stable
+  type-specific summaries.
+* Project metadata (author, description) is visible inline.
+* Same-dimension CoordSets use Coord terminology rather than Dimension
+  terminology.
+* `maintainers/display-architecture.md` records the final architecture.
+
+Current priority: Closed.
+
+---
+
 # Near-Term Architectural Candidates
 
 The following topics appear to offer the highest architectural value relative to their expected complexity.
-
-## Display Architecture (#843)
-
-Motivation:
-
-Display behavior has evolved independently across:
-
-* `Coord`
-* `CoordSet`
-* `NDDataset`
-* `Project`
-* `__repr__`
-* `_repr_html_`
-
-Potential benefits:
-
-* reduced duplication;
-* more consistent user experience;
-* clearer object identity;
-* simpler maintenance.
-
-Questions:
-
-* Can textual and HTML representations share more infrastructure?
-* Can display responsibilities be better centralized?
-* Can object presentation become more consistent across the project?
 
 ---
 

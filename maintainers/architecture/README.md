@@ -158,19 +158,23 @@ Why it exists:
 No immediate refactor is planned, but future changes to shared arithmetic paths
 need this risk map.
 
-### Display Architecture Audit
+### Display Architecture
 
-File: `display-architecture-audit.md`
+File: `../display-architecture.md`
 
-Status: Deferred architecture audit
+Status: Completed reference document
 
 Summary:
-Documents fragmentation across compact text, detailed text, HTML display, and
-`Project` representation paths.
+Documents the final post-migration display architecture.  Coord, CoordSet,
+NDDataset, and Project now use the semantic HTML path
+(`_repr_sections()` → `_render_sections()`).  The legacy sentinel path
+(`_cstr()` → `convert_to_html()`) is preserved for NDArray and
+NDComplexArray.
 
 Why it exists:
-It provides a starting point for a future display contract if representation
-consistency becomes an active maintenance priority.
+The display architecture was migrated incrementally across multiple PRs.
+This note captures the final invariants, design decisions, and open
+questions without preserving every intermediate audit note.
 
 ### Tensor Plugin Migration
 
