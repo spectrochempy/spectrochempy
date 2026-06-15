@@ -115,6 +115,16 @@ Developer
   render through the shared ``convert_to_html()`` path, and summary metadata is
   displayed inline under the main heading.
 
+- MAINT: Extended the semantic HTML migration to ``CoordSet`` (#843).
+  Added ``CoordSet._repr_sections()`` which builds one ``DisplaySection``
+  per dimension, reusing child ``Coord._repr_sections()`` items for simple
+  coordinates and flattening same-dimension multi-coordinate content with
+  subgroup separators.  ``CoordSet._repr_html_()`` now uses the semantic
+  path (``_repr_sections`` + ``_render_sections``) instead of the
+  sentinel-based ``convert_to_html()``, producing cleaner HTML without
+  inline sentinel markers.  The docs cache key was updated to invalidate
+  the sphinx-gallery cache when display source files change.
+
 - MAINT: Moved CP/PARAFAC implementation and TensorLy dependency ownership into
   the new tensor plugin, keeping the core package tensor-agnostic.
 
