@@ -144,8 +144,12 @@ Developer
   subgroup separators.  ``CoordSet._repr_html_()`` now uses the semantic
   path (``_repr_sections`` + ``_render_sections``) instead of the
   sentinel-based ``convert_to_html()``, producing cleaner HTML without
-  inline sentinel markers.  The docs cache key was updated to invalidate
-  the sphinx-gallery cache when display source files change.
+  inline sentinel markers.  Same-dimension ``CoordSet`` sections now show
+  ``Coord`` headings (e.g. ``Coord \`_1\```) instead of ``Dimension``,
+  since synthetic child names like ``_1`` / ``_2`` are coordinates of a
+  shared dimension, not dimensions themselves.  The docs cache key was
+  updated to invalidate the sphinx-gallery cache when display source
+  files change.
 
 - MAINT: Moved CP/PARAFAC implementation and TensorLy dependency ownership into
   the new tensor plugin, keeping the core package tensor-agnostic.
