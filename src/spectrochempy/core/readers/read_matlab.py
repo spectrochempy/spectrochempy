@@ -124,13 +124,12 @@ def read_matlab(*paths, **kwargs):
     Notes
     -----
     A single Matlab file may hold several variables.  Each numeric variable is
-    imported as its own `NDDataset`, named after the Matlab variable.
+    converted to an `NDDataset` named after the Matlab variable; the importer
+    then groups them by compatible shape, stacking same-shape arrays into a
+    single `NDDataset` and returning incompatible ones as separate datasets.
     Non-numeric variables (e.g. character arrays) and Matlab-internal entries
     (``__header__``, ``__version__``, ``__globals__``) are skipped.  When a file
-    holds a single numeric variable a lone `NDDataset` is returned; otherwise
-    the numeric variables are grouped by compatible shape, with same-shape
-    arrays stacked into one `NDDataset` and incompatible ones returned as a
-    list.
+    holds a single numeric variable a lone `NDDataset` is returned.
 
     Examples
     --------

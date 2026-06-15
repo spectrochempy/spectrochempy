@@ -180,10 +180,12 @@ Developer
   files change.
 
 - TEST: Added synthetic, offline tests for multi-variable Matlab (``.mat``)
-  import and documented the behavior in the ``read_matlab`` docstring: each
-  numeric variable is imported as its own ``NDDataset`` named after the Matlab
-  variable, while non-numeric and Matlab-internal (``__header__``,
-  ``__version__``, ``__globals__``) variables are skipped (#1142).
+  import and documented the behavior in the ``read_matlab`` docstring: numeric
+  variables are converted to ``NDDataset`` objects and then grouped by the
+  importer when shapes are compatible (same-shape arrays are stacked into one
+  dataset, incompatible ones returned separately), while non-numeric and
+  Matlab-internal (``__header__``, ``__version__``, ``__globals__``) variables
+  are skipped (#1142).
 
 - MAINT: Moved CP/PARAFAC implementation and TensorLy dependency ownership into
   the new tensor plugin, keeping the core package tensor-agnostic.
