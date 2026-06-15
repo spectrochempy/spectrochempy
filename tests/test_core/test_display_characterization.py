@@ -1898,3 +1898,257 @@ class TestCoordSetSemanticHTML:
                 len(common) > 0
             ), f"No overlapping content between old and new HTML for {cs}"
             assert "CoordSet" in new_html
+
+
+# ======================================================================================
+# PHASE D: SEMANTIC DISPLAY FOR NDDataset
+# ======================================================================================
+
+
+class TestSemanticNDDataset:
+    """Tests for NDDataset._repr_sections() semantic structure."""
+
+    def test_returns_list(self):
+        """_repr_sections returns a list."""
+        ds = NDDataset([1.0, 2.0])
+        sections = ds._repr_sections()
+        assert isinstance(sections, list)
+
+    def test_has_summary_and_data_sections(self):
+        """Simple dataset returns summary + data sections."""
+        ds = NDDataset([1.0, 2.0])
+        sections = ds._repr_sections()
+        roles = [s.role for s in sections]
+        assert "summary" in roles
+        assert "data" in roles
+
+    def test_summary_contains_name(self):
+        """Summary includes the dataset name."""
+        ds = NDDataset([1.0, 2.0], name="test_ds")
+        sections = ds._repr_sections()
+        summary = next(s for s in sections if s.role == "summary")
+        name_items = [i for i in summary.items if i.key == "name"]
+        assert len(name_items) == 1
+        assert name_items[0].value == "test_ds"
+
+    def test_summary_contains_author(self):
+        """Summary includes the author."""
+        ds = NDDataset([1.0, 2.0])
+        ds.author = "test_author"
+        sections = ds._repr_sections()
+        summary = next(s for s in sections if s.role == "summary")
+        auth_items = [i for i in summary.items if i.key == "author"]
+        assert len(auth_items) == 1
+        assert auth_items[0].value == "test_author"
+
+    def test_summary_contains_created(self):
+        """Summary includes the creation timestamp."""
+        ds = NDDataset([1.0, 2.0])
+        sections = ds._repr_sections()
+        summary = next(s for s in sections if s.role == "summary")
+        created_items = [i for i in summary.items if i.key == "created"]
+        assert len(created_items) == 1
+
+    def test_summary_contains_description_when_set(self):
+        """Description is present when set."""
+        ds = NDDataset([1.0, 2.0], description="test description")
+        sections = ds._repr_sections()
+        summary = next(s for s in sections if s.role == "summary")
+        desc_items = [i for i in summary.items if i.key == "description"]
+        assert len(desc_items) == 1
+        assert desc_items[0].value == "test description"
+
+    def test_summary_no_description_when_empty(self):
+        """No description item when description is empty."""
+        ds = NDDataset([1.0, 2.0])
+        sections = ds._repr_sections()
+        summary = next(s for s in sections if s.role == "summary")
+        desc_items = [i for i in summary.items if i.key == "description"]
+        assert len(desc_items) == 0
+
+    def test_data_contains_title(self):
+        """Data section has a title field."""
+        ds = NDDataset([1.0, 2.0], title="my_data")
+        sections = ds._repr_sections()
+        data = next(s for s in sections if s.role == "data")
+        title_items = [i for i in data.items if i.key == "title"]
+        assert len(title_items) == 1
+        assert title_items[0].value == "my_data"
+
+    def test_data_contains_values(self):
+        """Data section has a values field."""
+        ds = NDDataset([1.0, 2.0, 3.0])
+        sections = ds._repr_sections()
+        data = next(s for s in sections if s.role == "data")
+        values_items = [i for i in data.items if i.key == "values"]
+        assert len(values_items) == 1
+        assert "1" in values_items[0].value
+        assert "3" in values_items[0].value
+
+    def test_data_contains_shape(self):
+        """Data section has a size or shape field."""
+        ds = NDDataset([1.0, 2.0, 3.0])
+        sections = ds._repr_sections()
+        data = next(s for s in sections if s.role == "data")
+        shape_items = [i for i in data.items if i.key in ("size", "shape")]
+        assert len(shape_items) >= 1
+
+    def test_coordset_adds_dimension_sections(self):
+        """Dataset with CoordSet appends dimension sections."""
+        x = Coord([1.0, 2.0, 3.0])
+        y = Coord([4.0, 5.0])
+        # CoordSet iterates coords in reverse and pops dims from end,
+        # so we pass reversed: [y, x] → after reverse + pop gives x→"x", y→"y"
+        ds = NDDataset([[1, 2, 3], [4, 5, 6]], coordset=[y, x])
+        sections = ds._repr_sections()
+        dim_sections = [s for s in sections if s.role == "dimension"]
+        assert len(dim_sections) == 2
+
+    def test_unit_preserved_in_values(self):
+        """Data values include unit string when units are set."""
+        ds = NDDataset([1.0, 2.0, 3.0], units="m")
+        sections = ds._repr_sections()
+        data = next(s for s in sections if s.role == "data")
+        values = next(i for i in data.items if i.key == "values")
+        assert "m" in values.value
+
+    def test_complex_shows_r_and_i(self):
+        """Complex data shows R and I components."""
+        ds = NDDataset([1 + 2j, 3 + 4j])
+        sections = ds._repr_sections()
+        data = next(s for s in sections if s.role == "data")
+        values = next(i for i in data.items if i.key == "values")
+        assert "R" in values.value
+        assert "I" in values.value
+
+    def test_masked_shows_mask_symbol(self):
+        """Masked data shows -- for masked values."""
+        data = np.ma.MaskedArray(
+            [1.0, 2.0, 3.0], mask=[False, True, False]
+        )
+        ds = NDDataset(data)
+        sections = ds._repr_sections()
+        data_sec = next(s for s in sections if s.role == "data")
+        values = next(i for i in data_sec.items if i.key == "values")
+        assert "--" in values.value
+
+    def test_empty_has_sections(self):
+        """Empty dataset still returns summary and data sections."""
+        ds = NDDataset()
+        sections = ds._repr_sections()
+        roles = [s.role for s in sections]
+        assert "summary" in roles
+        assert "data" in roles
+
+
+class TestNDDatasetSemanticHTML:
+    """Tests for NDDataset._repr_html_() via the semantic path."""
+
+    def test_heading_contains_type(self):
+        """HTML heading contains the type name."""
+        ds = NDDataset([1.0, 2.0])
+        html = ds._repr_html_()
+        assert "NDDataset" in html
+
+    def test_heading_contains_name(self):
+        """HTML heading contains the dataset name when set."""
+        ds = NDDataset([1.0, 2.0], name="my_ds")
+        html = ds._repr_html_()
+        assert "my_ds" in html
+
+    def test_summary_inline_no_details(self):
+        """Summary metadata is rendered inline (no details wrapper)."""
+        ds = NDDataset([1.0, 2.0], name="inline_test")
+        html = ds._repr_html_()
+        # Summary items should not have their own <details> tag
+        assert "inline_test" in html
+
+    def test_data_section_collapsible(self):
+        """Data section has a details collapsible wrapper."""
+        ds = NDDataset([1.0, 2.0])
+        html = ds._repr_html_()
+        assert "<summary>Data</summary>" in html
+
+    def test_dimension_sections_present(self):
+        """Dimension sections appear in HTML for datasets with coords."""
+        x = Coord([1.0, 2.0])
+        y = Coord([3.0, 4.0])
+        ds = NDDataset([[1, 2], [3, 4]], coordset=[y, x])
+        html = ds._repr_html_()
+        assert "Dimension" in html
+
+    def test_data_values_present(self):
+        """Data values appear in the HTML."""
+        ds = NDDataset([1.0, 2.0, 3.0])
+        html = ds._repr_html_()
+        assert "1" in html
+        assert "3" in html
+
+    def test_units_present(self):
+        """Units appear in the HTML."""
+        ds = NDDataset([1.0, 2.0, 3.0], units="m")
+        html = ds._repr_html_()
+        assert "m" in html
+
+    def test_no_uuid_in_heading(self):
+        """No internal UUID or long hex IDs in the heading."""
+        ds = NDDataset([1.0, 2.0], name="no_uuid")
+        html = ds._repr_html_()
+        # The heading is in the first <summary> tag
+        import re
+
+        match = re.search(r"<summary>(.*?)</summary>", html)
+        assert match is not None
+        heading = match.group(1)
+        # Should not contain long hex strings
+        assert not re.search(r"[0-9a-f]{8,}", heading)
+
+    def test_outer_wrapper_structure(self):
+        """HTML has the expected outer wrapper structure."""
+        ds = NDDataset([1.0, 2.0])
+        html = ds._repr_html_()
+        assert '<div class="scp-output">' in html
+        assert "<details>" in html
+        assert "</details>" in html
+        assert "</div>" in html
+
+    def test_complex_r_i_in_html(self):
+        """Complex data R/I notation appears in HTML."""
+        ds = NDDataset([1 + 2j, 3 + 4j])
+        html = ds._repr_html_()
+        assert "R[" in html
+        assert "I[" in html
+
+    def test_temporary_equivalence_with_sentinel(self):
+        """
+        Semantic HTML contains core content present in sentinel HTML.
+
+        This is a temporary migration equivalence test.
+        """
+        from spectrochempy.utils.print import convert_to_html
+
+        x = Coord([1.0, 2.0], title="alpha", units="m")
+        y = Coord([3.0, 4.0], title="beta", units="s")
+
+        configs = [
+            NDDataset([1.0, 2.0, 3.0], name="simple"),
+            NDDataset(
+                [[1, 2], [3, 4]],
+                coordset=[y, x],
+                name="with_coords",
+                title="test",
+            ),
+        ]
+
+        for ds in configs:
+            old_html = convert_to_html(ds)
+            new_html = ds._repr_html_()
+
+            old_content = set(old_html.split())
+            new_content = set(new_html.split())
+
+            common = old_content & new_content
+            assert len(common) > 0, (
+                f"No overlapping content between old and new HTML for {ds}"
+            )
+            assert "NDDataset" in new_html

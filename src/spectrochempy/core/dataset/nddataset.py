@@ -58,7 +58,13 @@ from spectrochempy.utils._logging import warning_
 from spectrochempy.utils.datetimeutils import utcnow
 from spectrochempy.utils.exceptions import SpectroChemPyError
 from spectrochempy.utils.optional import import_optional_dependency
+from spectrochempy.core.units import Quantity
+from spectrochempy.utils.print import _format_array_values
+from spectrochempy.utils.print import _html_heading
+from spectrochempy.utils.print import _render_sections
 from spectrochempy.utils.print import colored_output
+from spectrochempy.utils.print import DisplayItem
+from spectrochempy.utils.print import DisplaySection
 from spectrochempy.utils.system import get_user_and_node
 from spectrochempy.utils.typeutils import is_sequence
 
@@ -645,6 +651,113 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         return txt.rstrip()  # remove the trailing '\n'
 
     _repr_dims = _str_dims
+
+    def _repr_sections(self):
+        """
+        Build semantic display sections from NDDataset attributes.
+
+        Returns
+        -------
+        list of DisplaySection
+            ``"summary"``, ``"data"``, and ``"dimension"`` sections.
+        """
+        sections: list[DisplaySection] = []
+
+        # ------------------------------------------------------------------
+        # SUMMARY
+        # ------------------------------------------------------------------
+        summary_items: list[DisplayItem] = []
+        summary_items.append(DisplayItem("field", self.name, "name"))
+        summary_items.append(DisplayItem("field", self.author, "author"))
+        summary_items.append(DisplayItem("field", self.created, "created"))
+        if (self._modified - self._created.replace(tzinfo=UTC)).seconds > 30:
+            summary_items.append(DisplayItem("field", self.modified, "modified"))
+        if self.description.strip():
+            summary_items.append(
+                DisplayItem("field", self.description.strip(), "description")
+            )
+        if self._history:
+            hist = self.history
+            if isinstance(hist, list):
+                hist = "\n".join(hist)
+            summary_items.append(DisplayItem("field", hist, "history"))
+
+        sections.append(DisplaySection("summary", "Summary", summary_items))
+
+        # ------------------------------------------------------------------
+        # DATA
+        # ------------------------------------------------------------------
+        data_items: list[DisplayItem] = []
+        data_items.append(
+            DisplayItem("field", self.title if self.title else "<untitled>", "title")
+        )
+
+        if not self.is_empty and self._data is not None:
+            units = f" {self.units:~P}" if self.has_units else ""
+
+            if self.has_complex_dims:
+                # R/I split — mirrors NDComplexArray._str_value()
+                text = ""
+                for pref in ("R", "I"):
+                    component = self.copy()
+                    if pref == "R":
+                        component._data = component._data.real
+                    else:
+                        component._data = component._data.imag
+                    data = component.umasked_data
+                    if isinstance(data, Quantity):
+                        data = data.magnitude
+                    text += _format_array_values(
+                        data,
+                        is_masked=self.is_masked,
+                        dtype=self.dtype,
+                        sep="\n",
+                        prefix=pref,
+                        units=units,
+                    )
+                data_items.append(DisplayItem("data", text, "values"))
+            else:
+                data = self.umasked_data
+                if isinstance(data, Quantity):
+                    data = data.magnitude
+                formatted = _format_array_values(
+                    data,
+                    is_masked=self.is_masked,
+                    dtype=self.dtype,
+                    sep="\n",
+                    prefix="",
+                    units=units,
+                )
+                data_items.append(DisplayItem("data", formatted, "values"))
+
+        shape_text = self._str_shape()
+        if shape_text:
+            stripped = shape_text.strip()
+            if ": " in stripped:
+                skey, sval = stripped.split(": ", 1)
+                data_items.append(DisplayItem("field", sval, skey.strip()))
+            else:
+                data_items.append(DisplayItem("field", stripped, "shape"))
+
+        sections.append(DisplaySection("data", "Data", data_items))
+
+        # ------------------------------------------------------------------
+        # DIMENSION
+        # ------------------------------------------------------------------
+        if self._coordset and not self.is_empty and len(self._coordset) > 0:
+            sections.extend(self._coordset._repr_sections())
+
+        return sections
+
+    def _repr_html_(self):
+        sections = self._repr_sections()
+        body = _render_sections(sections)
+        heading = _html_heading(self)
+        return (
+            '<div class="scp-output">'
+            f"<details><summary>{heading}</summary>\n{body}\n"
+            "</details></div>"
+        )
 
     def _dims_update(self, change=None):
         # when notified that a coords names have been updated
