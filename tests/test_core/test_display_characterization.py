@@ -1575,3 +1575,288 @@ class TestCoordSemanticHTML:
                 len(common) > 0
             ), f"No overlapping content between old and new HTML for {coord}"
             assert "Coord" in new_html
+
+
+# ======================================================================================
+# PHASE C: SEMANTIC DISPLAY FOR COORDSET
+# ======================================================================================
+
+
+class TestSemanticCoordSet:
+    """
+    Semantic display model validation for CoordSet.
+
+    These tests validate that CoordSet._repr_sections() produces the correct
+    semantic structure without using the _cstr() -> regex pipeline.
+
+    No HTML is generated or tested here.  Only semantic structure.
+    """
+
+    def test_returns_list(self):
+        """_repr_sections() returns a list."""
+        x = Coord([1.0, 2.0, 3.0])
+        cs = CoordSet(x=x)
+        sections = cs._repr_sections()
+        assert isinstance(sections, list)
+
+    def test_one_section_per_dimension(self):
+        """Two coords produce two dimension sections."""
+        x = Coord([1.0, 2.0, 3.0])
+        y = Coord([4.0, 5.0])
+        cs = CoordSet(x=x, y=y)
+        sections = cs._repr_sections()
+        assert len(sections) == 2
+
+    def test_sections_role_is_dimension(self):
+        """Each section role is 'dimension'."""
+        x = Coord([1.0, 2.0])
+        y = Coord([3.0, 4.0])
+        cs = CoordSet(x=x, y=y)
+        sections = cs._repr_sections()
+        for s in sections:
+            assert s.role == "dimension"
+
+    def test_section_title_contains_dim_name(self):
+        """Section title includes the dimension name."""
+        x = Coord([1.0, 2.0])
+        cs = CoordSet(x=x)
+        sections = cs._repr_sections()
+        assert "Dimension `x`" in sections[0].title
+
+    def test_contains_size_field(self):
+        """Each section has a size field."""
+        x = Coord([1.0, 2.0, 3.0])
+        y = Coord([4.0, 5.0])
+        cs = CoordSet(x=x, y=y)
+        sections = cs._repr_sections()
+        for s in sections:
+            size_items = [i for i in s.items if i.kind == "field" and i.key == "size"]
+            assert len(size_items) == 1
+
+    def test_size_value_matches(self):
+        """Size field value matches the child coord size."""
+        x = Coord([1.0, 2.0, 3.0])
+        cs = CoordSet(x=x)
+        sections = cs._repr_sections()
+        size_item = next(
+            i for i in sections[0].items if i.kind == "field" and i.key == "size"
+        )
+        assert size_item.value == "3"
+
+    def test_contains_title_field_when_title_set(self):
+        """Coord with an explicit title has a title field in the section."""
+        x = Coord([1.0, 2.0], title="wavenumber")
+        cs = CoordSet(x=x)
+        sections = cs._repr_sections()
+        title_items = [
+            i for i in sections[0].items if i.kind == "field" and i.key == "title"
+        ]
+        assert len(title_items) == 1
+        assert title_items[0].value == "wavenumber"
+
+    def test_contains_data_item(self):
+        """Each section has a data item for coord values."""
+        x = Coord([1.0, 2.0, 3.0])
+        cs = CoordSet(x=x)
+        sections = cs._repr_sections()
+        data_items = [i for i in sections[0].items if i.kind == "data"]
+        assert len(data_items) == 1
+
+    def test_data_item_includes_units(self):
+        """When coord units are set, the data item includes unit text."""
+        x = Coord([1.0, 2.0, 3.0], units="m")
+        cs = CoordSet(x=x)
+        sections = cs._repr_sections()
+        data_item = next(i for i in sections[0].items if i.kind == "data")
+        assert "m" in data_item.value
+
+    def test_contains_label_item_when_labeled(self):
+        """A labeled coord produces a label item in the section."""
+        x = Coord([1.0, 2.0, 3.0], labels=["A", "B", "C"])
+        cs = CoordSet(x=x)
+        sections = cs._repr_sections()
+        label_items = [i for i in sections[0].items if i.kind == "label"]
+        assert len(label_items) == 1
+
+    def test_label_item_contains_label_text(self):
+        """The label item value contains the label content."""
+        x = Coord([1.0, 2.0, 3.0], labels=["A", "B", "C"])
+        cs = CoordSet(x=x)
+        sections = cs._repr_sections()
+        label_item = next(i for i in sections[0].items if i.kind == "label")
+        assert "A" in label_item.value
+
+    def test_reference_annotation_in_title(self):
+        """References are annotated in the section title."""
+        x = Coord(
+            [0.0, 1.0, 2.0], labels=["low", "mid", "high"], units="s", title="time"
+        )
+        cs = CoordSet(x=x, y="x")
+        sections = cs._repr_sections()
+        # The 'x' section should have '=y' in its title
+        x_section = next(s for s in sections if "x" in s.title and "=" in s.title)
+        assert "=y" in x_section.title
+
+    def test_same_dim_has_block_markers(self):
+        """Same-dim nested CoordSet has block items as subgroup separators."""
+        c1 = Coord([1.0, 2.0, 3.0], title="alpha")
+        c2 = Coord([4.0, 5.0, 6.0], title="beta")
+        cs = CoordSet([c1, c2])
+        sections = cs._repr_sections()
+        block_items = [i for i in sections[0].items if i.kind == "block"]
+        assert len(block_items) >= 1
+
+    def test_same_dim_block_text_contains_child_name(self):
+        """Block items contain the nested child name."""
+        c1 = Coord([1.0, 2.0, 3.0], title="alpha")
+        c2 = Coord([4.0, 5.0, 6.0], title="beta")
+        cs = CoordSet([c1, c2])
+        sections = cs._repr_sections()
+        for item in sections[0].items:
+            if item.kind == "block":
+                assert item.value.startswith("(_")
+                assert item.value.endswith(")")
+
+    def test_same_dim_child_items_reused(self):
+        """Same-dim children have their items included (except size)."""
+        c1 = Coord([1.0, 2.0, 3.0], title="alpha")
+        c2 = Coord([4.0, 5.0, 6.0], title="beta")
+        cs = CoordSet([c1, c2])
+        sections = cs._repr_sections()
+        # Should have title items for both children
+        title_items = [i for i in sections[0].items if i.key == "title"]
+        assert len(title_items) == 2
+        titles = [i.value for i in title_items]
+        assert "alpha" in titles
+        assert "beta" in titles
+
+    def test_same_dim_single_size(self):
+        """Same-dim sections have exactly one size item (no duplication)."""
+        c1 = Coord([1.0, 2.0, 3.0], title="alpha")
+        c2 = Coord([4.0, 5.0, 6.0], title="beta")
+        cs = CoordSet([c1, c2])
+        sections = cs._repr_sections()
+        size_items = [i for i in sections[0].items if i.key == "size"]
+        assert len(size_items) == 1
+
+    def test_empty_returns_empty_list(self):
+        """An empty CoordSet returns an empty list."""
+        cs = CoordSet()
+        sections = cs._repr_sections()
+        assert sections == []
+
+
+class TestCoordSetSemanticHTML:
+    """Tests for CoordSet._repr_html_() via the semantic path."""
+
+    def test_heading_contains_type(self):
+        """CoordSet HTML heading contains the type name."""
+        x = Coord([1.0, 2.0, 3.0])
+        cs = CoordSet(x=x)
+        html = cs._repr_html_()
+        assert "CoordSet" in html
+
+    def test_heading_includes_child_names(self):
+        """CoordSet heading includes child coordinate names."""
+        x = Coord([1.0, 2.0, 3.0], title="wavenumber")
+        y = Coord([4.0, 5.0], title="time")
+        cs = CoordSet(x=x, y=y)
+        html = cs._repr_html_()
+        assert "x" in html
+        assert "y" in html
+
+    def test_outer_wrapper_structure(self):
+        """CoordSet HTML has the expected outer wrapper structure."""
+        x = Coord([1.0, 2.0])
+        cs = CoordSet(x=x)
+        html = cs._repr_html_()
+        assert '<div class="scp-output">' in html
+        assert "<details>" in html
+        assert "</details>" in html
+        assert "</div>" in html
+
+    def test_dimension_sections_present(self):
+        """Dimension sections appear in the HTML."""
+        x = Coord([1.0, 2.0, 3.0])
+        y = Coord([4.0, 5.0])
+        cs = CoordSet(x=x, y=y)
+        html = cs._repr_html_()
+        assert "Dimension" in html
+
+    def test_dimension_names_in_sections(self):
+        """Dimension names appear inside detail sections."""
+        x = Coord([1.0, 2.0, 3.0])
+        y = Coord([4.0, 5.0])
+        cs = CoordSet(x=x, y=y)
+        html = cs._repr_html_()
+        assert "`x`" in html
+        assert "`y`" in html
+
+    def test_data_values_present(self):
+        """Coord data values appear in the rendered HTML."""
+        x = Coord([1.0, 2.0, 3.0])
+        cs = CoordSet(x=x)
+        html = cs._repr_html_()
+        assert "1" in html
+        assert "2" in html
+        assert "3" in html
+
+    def test_labels_present(self):
+        """Label content appears in the HTML."""
+        x = Coord([1.0, 2.0], labels=["A", "B"])
+        cs = CoordSet(x=x)
+        html = cs._repr_html_()
+        assert "A" in html
+
+    def test_reference_annotation_in_html(self):
+        """Reference annotations appear in dimension sections."""
+        x = Coord(
+            [0.0, 1.0, 2.0], labels=["low", "mid", "high"], units="s", title="time"
+        )
+        cs = CoordSet(x=x, y="x")
+        html = cs._repr_html_()
+        assert "=y" in html.replace(" ", "")
+
+    def test_subgroup_markers_in_html(self):
+        """Same-dim nested CoordSet shows subgroup markers in HTML."""
+        c1 = Coord([1.0, 2.0, 3.0], title="alpha")
+        c2 = Coord([4.0, 5.0, 6.0], title="beta")
+        cs = CoordSet([c1, c2])
+        html = cs._repr_html_()
+        assert "(_1)" in html or "(_2)" in html
+
+    def test_temporary_equivalence_with_sentinel_pipeline(self):
+        """
+        Semantic HTML contains all content present in sentinel HTML.
+
+        This is a temporary migration equivalence test.
+        It checks content presence, not exact HTML structure.
+        """
+        from spectrochempy.utils.print import convert_to_html
+
+        c1 = Coord([1.0, 2.0, 3.0], title="alpha", units="m")
+        c2 = Coord([4.0, 5.0, 6.0], title="beta", units="s")
+        c3 = Coord([7.0, 8.0], labels=["X", "Y"])
+
+        configs = [
+            CoordSet(x=c1),
+            CoordSet(x=c1, y=c2),
+            CoordSet([c1, c2]),
+            CoordSet(x=c3, y=c2),
+        ]
+
+        for cs in configs:
+            cs._html_output = False
+            old_html = convert_to_html(cs)
+
+            cs._html_output = False
+            new_html = cs._repr_html_()
+
+            old_content = set(old_html.split())
+            new_content = set(new_html.split())
+
+            common = old_content & new_content
+            assert (
+                len(common) > 0
+            ), f"No overlapping content between old and new HTML for {cs}"
+            assert "CoordSet" in new_html
