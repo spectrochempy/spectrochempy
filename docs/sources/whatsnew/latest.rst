@@ -115,6 +115,14 @@ Developer
   render through the shared ``convert_to_html()`` path, and summary metadata is
   displayed inline under the main heading.
 
+- MAINT: Extended the semantic HTML migration to ``NDDataset`` (#843).
+  ``NDDataset._repr_sections()`` builds summary, data, and dimension
+  ``DisplaySection`` objects, reusing ``CoordSet._repr_sections()``
+  for coordinate dimensions.  ``NDDataset._repr_html_()`` now uses the
+  semantic path instead of the sentinel-based ``convert_to_html()``,
+  producing clean inline summary metadata, collapsible data and dimension
+  sections, and removing exposure of internal UUIDs from the heading.
+
 - MAINT: Extended the semantic HTML migration to ``CoordSet`` (#843).
   Added ``CoordSet._repr_sections()`` which builds one ``DisplaySection``
   per dimension, reusing child ``Coord._repr_sections()`` items for simple

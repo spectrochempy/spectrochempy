@@ -2023,9 +2023,7 @@ class TestSemanticNDDataset:
 
     def test_masked_shows_mask_symbol(self):
         """Masked data shows -- for masked values."""
-        data = np.ma.MaskedArray(
-            [1.0, 2.0, 3.0], mask=[False, True, False]
-        )
+        data = np.ma.MaskedArray([1.0, 2.0, 3.0], mask=[False, True, False])
         ds = NDDataset(data)
         sections = ds._repr_sections()
         data_sec = next(s for s in sections if s.role == "data")
@@ -2148,7 +2146,7 @@ class TestNDDatasetSemanticHTML:
             new_content = set(new_html.split())
 
             common = old_content & new_content
-            assert len(common) > 0, (
-                f"No overlapping content between old and new HTML for {ds}"
-            )
+            assert (
+                len(common) > 0
+            ), f"No overlapping content between old and new HTML for {ds}"
             assert "NDDataset" in new_html

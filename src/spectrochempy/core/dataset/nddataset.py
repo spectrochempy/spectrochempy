@@ -53,18 +53,18 @@ from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 from spectrochempy.core.dataset.basearrays.ndcomplex import NDComplexArray
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
+from spectrochempy.core.units import Quantity
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils._logging import warning_
 from spectrochempy.utils.datetimeutils import utcnow
 from spectrochempy.utils.exceptions import SpectroChemPyError
 from spectrochempy.utils.optional import import_optional_dependency
-from spectrochempy.core.units import Quantity
+from spectrochempy.utils.print import DisplayItem
+from spectrochempy.utils.print import DisplaySection
 from spectrochempy.utils.print import _format_array_values
 from spectrochempy.utils.print import _html_heading
 from spectrochempy.utils.print import _render_sections
 from spectrochempy.utils.print import colored_output
-from spectrochempy.utils.print import DisplayItem
-from spectrochempy.utils.print import DisplaySection
 from spectrochempy.utils.system import get_user_and_node
 from spectrochempy.utils.typeutils import is_sequence
 
