@@ -228,12 +228,5 @@ items.
 
 | Document | Purpose |
 |----------|---------|
-| [`audit/~display-architecture-current-state.md`](../audit/~display-architecture-current-state.md) | State after Phase D (NDDataset migration) |
-| [`audit/~project-semantic-display-migration.md`](../audit/~project-semantic-display-migration.md) | Project migration notes |
-| [`audit/~semantic-display-phase-a.md`](../audit/~semantic-display-phase-a.md) | Phase A — model validation |
-| [`audit/~semantic-display-phase-b.md`](../audit/~semantic-display-phase-b.md) | Phase B — Coord migration |
-| [`audit/~semantic-display-phase-c.md`](../audit/~semantic-display-phase-c.md) | Phase C — CoordSet migration |
-| [`audit/~semantic-display-phase-d.md`](../audit/~semantic-display-phase-d.md) | Phase D — NDDataset migration |
-| [`audit/~display-html-architecture-audit.md`](../audit/~display-html-architecture-audit.md) | Initial fragmentation analysis |
-| [`audit/~display-representation-model-rfc.md`](../audit/~display-representation-model-rfc.md) | Original RFC for the semantic model |
+| [`architecture/display-architecture-audit.md`](architecture/display-architecture-audit.md) | Original fragmentation analysis (archived) |
 | [`src/spectrochempy/utils/print.py`](../src/spectrochempy/utils/print.py) | `DisplayItem`, `DisplaySection`, `_render_sections()`, `_html_heading()` |

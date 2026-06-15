@@ -1,9 +1,8 @@
 # Display / Representation Model RFC
 
-**Status:** Draft for discussion
+**Status:** Completed — superseded by [`maintainers/display-architecture.md`](../display-architecture.md)
 **Issue:** #843 — Display / Representation Architecture
 **Precedes:** PR #1116 (display characterization tests)
-**Audit context:** `audit/~display-architecture-audit.md`, `audit/~display-representation-characterization-audit.md`
 
 ---
 
