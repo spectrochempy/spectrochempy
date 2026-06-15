@@ -1406,6 +1406,143 @@ class TestNDComplexStrValuePreservation:
         assert "I[" in text
 
 
+class TestDisplayPluginHookFallbacks:
+    """Plugin-facing display hooks must always preserve core fallback behavior."""
+
+    @staticmethod
+    def _complex_dataset():
+        return NDDataset([[1 + 2j, 3 + 4j], [5 + 6j, 7 + 8j]])
+
+    def test_array_values_no_handler_uses_core_fallback(self, monkeypatch):
+        """Missing display.array_values handler leaves standard R/I display intact."""
+        from spectrochempy.plugins import manager as manager_module
+
+        monkeypatch.setattr(
+            manager_module.plugin_manager.registry,
+            "get_handler",
+            lambda name: None if name == "display.array_values" else None,
+        )
+
+        ds = self._complex_dataset()
+        assert "R[" in ds._str_value()
+        assert "I[" in ds._str_value()
+        assert "R[" in ds._repr_html_()
+        assert "I[" in ds._repr_html_()
+
+    def test_array_values_none_uses_core_fallback(self, monkeypatch):
+        """A None-valued display.array_values result falls back safely."""
+        from spectrochempy.plugins import manager as manager_module
+
+        monkeypatch.setattr(
+            manager_module.plugin_manager.registry,
+            "get_handler",
+            lambda name: (lambda dataset, **kwargs: None)
+            if name == "display.array_values"
+            else None,
+        )
+
+        ds = self._complex_dataset()
+        assert "R[" in ds._str_value()
+        assert "I[" in ds._str_value()
+
+    def test_array_values_handler_exception_uses_core_fallback(self, monkeypatch):
+        """A faulty display.array_values handler must not break core display."""
+        from spectrochempy.plugins import manager as manager_module
+
+        def broken_handler(dataset, **kwargs):
+            raise RuntimeError("boom")
+
+        monkeypatch.setattr(
+            manager_module.plugin_manager.registry,
+            "get_handler",
+            lambda name: broken_handler if name == "display.array_values" else None,
+        )
+
+        ds = self._complex_dataset()
+        assert "R[" in ds._str_value()
+        assert "I[" in ds._str_value()
+        assert "R[" in ds._repr_html_()
+        assert "I[" in ds._repr_html_()
+
+    def test_complex_dim_flags_non_iterable_uses_core_fallback(self, monkeypatch):
+        """A non-iterable display.complex_dim_flags result falls back safely."""
+        from spectrochempy.plugins import manager as manager_module
+
+        monkeypatch.setattr(
+            manager_module.plugin_manager.registry,
+            "get_handler",
+            lambda name: (lambda dataset: 1)
+            if name == "display.complex_dim_flags"
+            else None,
+        )
+
+        ds = self._complex_dataset()
+        assert "(y:2, x:2(complex))" in ds._str_shape()
+
+    def test_complex_dim_flags_none_uses_core_fallback(self, monkeypatch):
+        """A None-valued display.complex_dim_flags result falls back safely."""
+        from spectrochempy.plugins import manager as manager_module
+
+        monkeypatch.setattr(
+            manager_module.plugin_manager.registry,
+            "get_handler",
+            lambda name: (lambda dataset: None)
+            if name == "display.complex_dim_flags"
+            else None,
+        )
+
+        ds = self._complex_dataset()
+        assert "(y:2, x:2(complex))" in ds._str_shape()
+
+    def test_complex_dim_flags_handler_exception_uses_core_fallback(self, monkeypatch):
+        """A faulty display.complex_dim_flags handler must not break core display."""
+        from spectrochempy.plugins import manager as manager_module
+
+        def broken_handler(dataset):
+            raise RuntimeError("boom")
+
+        monkeypatch.setattr(
+            manager_module.plugin_manager.registry,
+            "get_handler",
+            lambda name: broken_handler
+            if name == "display.complex_dim_flags"
+            else None,
+        )
+
+        ds = self._complex_dataset()
+        assert "(y:2, x:2(complex))" in ds._str_shape()
+
+    def test_complex_dim_flags_wrong_length_uses_core_fallback(self, monkeypatch):
+        """A wrong-length display.complex_dim_flags result falls back safely."""
+        from spectrochempy.plugins import manager as manager_module
+
+        monkeypatch.setattr(
+            manager_module.plugin_manager.registry,
+            "get_handler",
+            lambda name: (lambda dataset: [True])
+            if name == "display.complex_dim_flags"
+            else None,
+        )
+
+        ds = self._complex_dataset()
+        assert "(y:2, x:2(complex))" in ds._str_shape()
+
+    def test_complex_dim_flags_invalid_contents_are_rejected(self, monkeypatch):
+        """Non-boolean display.complex_dim_flags contents are rejected and fallback is used."""
+        from spectrochempy.plugins import manager as manager_module
+
+        monkeypatch.setattr(
+            manager_module.plugin_manager.registry,
+            "get_handler",
+            lambda name: (lambda dataset: [True, 1])
+            if name == "display.complex_dim_flags"
+            else None,
+        )
+
+        ds = self._complex_dataset()
+        assert "(y:2, x:2(complex))" in ds._str_shape()
+
+
 # ======================================================================================
 # PHASE B: SEMANTIC HTML RENDERING FOR COORD
 # ======================================================================================
