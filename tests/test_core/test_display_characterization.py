@@ -1697,6 +1697,26 @@ class TestSemanticCoordSet:
         x_section = next(s for s in sections if "x" in s.title and "=" in s.title)
         assert "=y" in x_section.title
 
+    def test_multi_dim_uses_dimension_title(self):
+        """Multi-dim CoordSet uses 'Dimension' in section titles."""
+        x = Coord([1.0, 2.0])
+        y = Coord([3.0, 4.0])
+        cs = CoordSet(x=x, y=y)
+        sections = cs._repr_sections()
+        for s in sections:
+            assert "Dimension" in s.title
+
+    def test_same_dim_uses_coord_title(self):
+        """Same-dim CoordSet shows 'Coord' not 'Dimension' for child names."""
+        c1 = Coord([1.0, 2.0, 3.0], title="alpha")
+        c2 = Coord([4.0, 5.0, 6.0], title="beta")
+        cs = CoordSet([c1, c2])
+        # cs.x is the inner same-dim CoordSet with _is_same_dim=True
+        inner = cs.x
+        sections = inner._repr_sections()
+        for s in sections:
+            assert "Coord" in s.title
+
     def test_same_dim_has_block_markers(self):
         """Same-dim nested CoordSet has block items as subgroup separators."""
         c1 = Coord([1.0, 2.0, 3.0], title="alpha")
@@ -1816,6 +1836,24 @@ class TestCoordSetSemanticHTML:
         cs = CoordSet(x=x, y="x")
         html = cs._repr_html_()
         assert "=y" in html.replace(" ", "")
+
+    def test_multi_dim_html_has_dimension(self):
+        """Multi-dim CoordSet HTML contains Dimension labels."""
+        x = Coord([1.0, 2.0])
+        y = Coord([3.0, 4.0])
+        cs = CoordSet(x=x, y=y)
+        html = cs._repr_html_()
+        assert "Dimension" in html
+
+    def test_same_dim_html_has_coord_not_dimension(self):
+        """Same-dim CoordSet HTML uses Coord labels, not Dimension."""
+        c1 = Coord([1.0, 2.0, 3.0], title="alpha")
+        c2 = Coord([4.0, 5.0, 6.0], title="beta")
+        cs = CoordSet([c1, c2])
+        # cs.x is the inner same-dim CoordSet
+        inner = cs.x
+        html = inner._repr_html_()
+        assert "Coord" in html
 
     def test_subgroup_markers_in_html(self):
         """Same-dim nested CoordSet shows subgroup markers in HTML."""
