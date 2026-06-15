@@ -53,7 +53,6 @@ from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 from spectrochempy.core.dataset.basearrays.ndcomplex import NDComplexArray
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
-from spectrochempy.core.units import Quantity
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils._logging import warning_
 from spectrochempy.utils.datetimeutils import utcnow
@@ -61,7 +60,6 @@ from spectrochempy.utils.exceptions import SpectroChemPyError
 from spectrochempy.utils.optional import import_optional_dependency
 from spectrochempy.utils.print import DisplayItem
 from spectrochempy.utils.print import DisplaySection
-from spectrochempy.utils.print import _format_array_values
 from spectrochempy.utils.print import _html_heading
 from spectrochempy.utils.print import _render_sections
 from spectrochempy.utils.print import colored_output
@@ -693,42 +691,13 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         )
 
         if not self.is_empty and self._data is not None:
-            units = f" {self.units:~P}" if self.has_units else ""
-
-            if self.has_complex_dims:
-                # R/I split — mirrors NDComplexArray._str_value()
-                text = ""
-                for pref in ("R", "I"):
-                    component = self.copy()
-                    if pref == "R":
-                        component._data = component._data.real
-                    else:
-                        component._data = component._data.imag
-                    data = component.umasked_data
-                    if isinstance(data, Quantity):
-                        data = data.magnitude
-                    text += _format_array_values(
-                        data,
-                        is_masked=self.is_masked,
-                        dtype=self.dtype,
-                        sep="\n",
-                        prefix=pref,
-                        units=units,
-                    )
-                data_items.append(DisplayItem("data", text, "values"))
-            else:
-                data = self.umasked_data
-                if isinstance(data, Quantity):
-                    data = data.magnitude
-                formatted = _format_array_values(
-                    data,
-                    is_masked=self.is_masked,
-                    dtype=self.dtype,
-                    sep="\n",
-                    prefix="",
-                    units=units,
+            data_items.append(
+                DisplayItem(
+                    "data",
+                    self._format_display_values(sep="\n"),
+                    "values",
                 )
-                data_items.append(DisplayItem("data", formatted, "values"))
+            )
 
         shape_text = self._str_shape()
         if shape_text:
