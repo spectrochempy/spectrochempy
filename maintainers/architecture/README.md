@@ -1,207 +1,50 @@
 # Maintainer Architecture Documents
 
-This directory contains curated architecture references for maintainers.
-
-These documents are not user documentation. They preserve durable decisions,
-risks, invariants, and review context that should remain available after local
-audit notes are discarded.
-
-## Current Reference Documents
-
-### CoordSet Storage Architecture
-
-File: `coordset-storage-architecture.md`
-
-Status: Completed architecture note
-
-Summary:
-Documents the final post-redesign `CoordSet` storage model. `_storage` is now
-the runtime coordinate container, the group model is the semantic reference for
-lookup and lifecycle reasoning, and the historical `_coords` validator model
-must not return as runtime storage.
-
-Why it exists:
-The storage redesign was a multi-PR migration. This note captures the final
-invariants without preserving every intermediate PR note.
-
-### Metadata Contract
-
-File: `../rfcs/metadata-contract.md`
-
-Status: Draft Maintainer RFC
-
-Summary:
-Defines how `NDDataset` metadata should be preserved, recomputed, overridden,
-or dropped across operation categories.
-
-Why it exists:
-Metadata behavior should depend on operation semantics, not on the internal
-construction path used to build a result.
-
-### Coordinate Arithmetic Semantics
-
-File: `../rfcs/coordinate-arithmetic-semantics.md`
-
-Status: Draft Maintainer RFC
-
-Summary:
-Records the current maintainer position on coordinate arithmetic: NumPy-style
-broadcasting, unit-aware arithmetic, and last-dimension coordinate validation
-for dataset-vs-dataset arithmetic.
-
-Why it exists:
-The arithmetic model is intentionally spectroscopy-oriented and should be
-discussed from an explicit baseline rather than rediscovered from `NDMath`.
-
-### Coordinate Arithmetic Audit
-
-File: `coordinate-arithmetic-audit.md`
-
-Status: Completed architecture audit
-
-Summary:
-Describes the current implementation contract for coordinate compatibility in
-arithmetic, including what is checked, what is ignored, and where the source of
-truth lives.
-
-Why it exists:
-The RFC records the maintainer position. This audit preserves the technical
-map that led to it.
-
-### Coordinate Arithmetic Decision Audit
-
-File: `coordinate-arithmetic-decision-audit.md`
-
-Status: Historical decision-space audit
-
-Summary:
-Compares the plausible future models for coordinate arithmetic, from preserving
-the current spectroscopic last-dimension model to adopting richer coordinate
-or dimension semantics.
-
-Why it exists:
-Future arithmetic proposals should account for the tradeoffs already explored
-before reopening the design space.
-
-### Dataset-vs-Coord Arithmetic Audit
-
-File: `dataset-vs-coord-arithmetic-audit.md`
-
-Status: Completed semantic audit
-
-Summary:
-Documents why `Coord` is best treated as an axis/support object rather than a
-signal-bearing operand for `NDDataset` arithmetic.
-
-Why it exists:
-The object-model boundary matters for future arithmetic changes and for
-deciding when a 1D operand should be a `Coord` or an `NDDataset`.
-
-
-### Units Audit
-
-File: `units-audit.md`
-
-Status: Completed architecture audit
-
-Summary:
-Comprehensive audit of the unit system and quantity propagation across SpectroChemPy.
-Maps current implementation (Pint integration, unit storage in NDArray, NDMath
-arithmetic propagation, Coord unit handling), identifies tested vs. untested
-behaviors, catalogs inconsistent or underspecified semantics (e.g., coordinate units
-ignored in arithmetic, silent unit drops in comparisons, power operation edge cases),
-and proposes a conservative v1 unit contract alongside prioritized recommendations.
-
-Why it exists:
-Unit handling is central to SpectroChemPy's value proposition in spectroscopy.
-This audit preserves the technical baseline for future unit-system evolution,
-including immediate fixes (coordinate unit validation, comparison fixes, power
-validation), medium-term improvements (coordinate unit semantics redesign,
-Quantity/NDDataset unification), and long-term redesign (full Pint Quantity
-integration, dimensional coordinate system).
-
-
-
-### Plotting Architecture Audit
-
-File: `plotting-audit.md`
-
-Status: Completed architecture audit
-
-Summary:
-Comprehensive audit of the plotting subsystem architecture, Matplotlib
-dependencies, backend extensibility, and migration path toward backend-neutral
-design. Maps current component hierarchy (dispatcher, backends, plot1d/2d/3d,
-multiplot, style utilities), analyzes coupling points (loose at dispatcher
-level, tight at rendering level), inventories 46 Matplotlib dependencies
-(classified as essential/incidental/removable), assesses extensibility for
-Plotly/Bokeh/Altair backends, audits test coverage, and proposes phased
-roadmap from current state through complete backend abstraction.
-
-Why it exists:
-Plotting backend extensibility is a key evolution path. This audit preserves
-the technical baseline for incremental migration toward a backend-independent
-plotting architecture while preserving the existing user API.
-
-### NDMath Maintainability Audit
-
-File: `ndmath-maintainability-audit.md`
-
-Status: Deferred maintenance reference
-
-Summary:
-Maps the responsibilities concentrated in `NDMath`, including NumPy wrapping,
-operator dispatch, unit handling, masks, coordinate checks, result construction,
-history, and plugin hooks.
-
-Why it exists:
-No immediate refactor is planned, but future changes to shared arithmetic paths
-need this risk map.
-
-### Display Architecture
-
-File: `../display-architecture.md`
-
-Status: Completed reference document
-
-Summary:
-Documents the final post-migration display architecture.  Coord, CoordSet,
-NDDataset, and Project now use the semantic HTML path
-(`_repr_sections()` → `_render_sections()`).  The legacy sentinel path
-(`_cstr()` → `convert_to_html()`) is preserved for NDArray and
-NDComplexArray.
-
-Why it exists:
-The display architecture was migrated incrementally across multiple PRs.
-This note captures the final invariants, design decisions, and open
-questions without preserving every intermediate audit note.
-
-### Tensor Plugin Migration
-
-File: `tensor-plugin-migration.md`
-
-Status: Completed architecture note
-
-Summary:
-Records the boundary created when CP/PARAFAC decomposition moved from core into
-the official tensor plugin.
-
-Why it exists:
-Plugin boundaries, compatibility shims, and dependency ownership are durable
-maintainer decisions.
-
-## Planning Documents
-
-### Architecture Roadmap
-
-File: `../rfcs/architecture-roadmap.md`
-
-Status: Maintainer discussion document
-
-Summary:
-Summarizes completed and deferred architecture topics so maintainers can avoid
-repeating recent investigations.
-
-Why it exists:
-PR-by-PR audit details should remain local, while their durable outcomes should
-be visible to future maintainers.
+This directory contains durable architecture notes for maintainers. These files
+preserve decisions, invariants, risks, and technical context that should remain
+available after local audit notes are discarded.
+
+For active maintainer contracts and RFCs, also see [`../rfcs/`](../rfcs/).
+
+## Placement Guide
+
+| Location | Use for |
+|---|---|
+| `../rfcs/` | Normative or near-normative behavior contracts and roadmap documents |
+| this directory | Durable audits, implementation maps, design baselines, and draft architecture analyses |
+| `audit/~*.md` | Local working notes that should not be versioned by default |
+
+## Active Draft Architecture Analyses
+
+| Document | Status | Purpose |
+|---|---|---|
+| [`array-class-responsibility.md`](array-class-responsibility.md) | Draft RFC | Maps responsibilities across `NDArray`, `NDComplexArray`, `Coord`, `NDDataset`, `NDMath`, and `NDIO` before any hierarchy cleanup. |
+| [`mathematical-semantics-and-metadata-propagation.md`](mathematical-semantics-and-metadata-propagation.md) | Draft RFC / audit | Characterizes operation behavior, result assembly, scientific object identity, provenance, and metadata propagation before `NDMath` or class hierarchy changes. |
+
+## Reference Architecture Notes
+
+| Document | Status | Purpose |
+|---|---|---|
+| [`coordset-storage-architecture.md`](coordset-storage-architecture.md) | Completed note | Captures final `CoordSet` storage invariants after the storage redesign. |
+| [`display-architecture.md`](display-architecture.md) | Completed note | Documents the final post-migration display architecture and semantic HTML path. |
+| [`tensor-plugin-migration.md`](tensor-plugin-migration.md) | Completed note | Records the core/plugin boundary after CP/PARAFAC decomposition moved to the tensor plugin. |
+
+## Completed Audits
+
+| Document | Status | Purpose |
+|---|---|---|
+| [`coordinate-arithmetic-audit.md`](coordinate-arithmetic-audit.md) | Completed audit | Technical map for coordinate compatibility in arithmetic. |
+| [`coordinate-arithmetic-decision-audit.md`](coordinate-arithmetic-decision-audit.md) | Decision-space audit | Tradeoff analysis for possible future coordinate arithmetic models. |
+| [`dataset-vs-coord-arithmetic-audit.md`](dataset-vs-coord-arithmetic-audit.md) | Completed audit | Explains why `Coord` is an axis/support object rather than a signal operand. |
+| [`display-architecture-audit.md`](display-architecture-audit.md) | Completed audit | Historical context for the display architecture migration. |
+| [`ndmath-maintainability-audit.md`](ndmath-maintainability-audit.md) | Deferred reference | Maps risks concentrated in `NDMath`. |
+| [`plotting-audit.md`](plotting-audit.md) | Completed audit | Baseline for plotting backend extensibility and Matplotlib coupling. |
+| [`units-audit.md`](units-audit.md) | Completed audit | Baseline for unit handling, quantity propagation, and unit semantics. |
+
+## Related RFCs
+
+| Document | Status | Purpose |
+|---|---|---|
+| [`../rfcs/architecture-roadmap.md`](../rfcs/architecture-roadmap.md) | Roadmap | Summarizes completed, active, and deferred architecture topics. |
+| [`../rfcs/coordinate-arithmetic-semantics.md`](../rfcs/coordinate-arithmetic-semantics.md) | Draft RFC | Maintainer position on coordinate arithmetic semantics. |
+| [`../rfcs/metadata-contract.md`](../rfcs/metadata-contract.md) | Draft RFC | Normative direction for `NDDataset` metadata preservation, recomputation, override, merge, and drop behavior. |

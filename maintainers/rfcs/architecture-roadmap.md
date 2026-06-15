@@ -80,6 +80,21 @@ Issue closed unless regressions appear.
 
 ---
 
+### Display Architecture and Hypercomplex Display Follow-Up
+
+Decision:
+
+* semantic display architecture work is considered complete for Coord, CoordSet,
+  NDDataset, and Project;
+* the later hypercomplex display review identified RR/RI/IR/II quaternion
+  display as plugin-owned display semantics;
+* the intended ownership boundary is core dispatch/fallback plus plugin-owned
+  hypercomplex formatting.
+
+Future display work should preserve this plugin/core separation.
+
+---
+
 ### NDMath
 
 Decision:
@@ -156,7 +171,7 @@ Current priority: Closed.
 
 Status: Completed
 
-Refer to [`maintainers/display-architecture.md`](../display-architecture.md)
+Refer to [`maintainers/architecture/display-architecture.md`](../architecture/display-architecture.md)
 for the final architecture.
 
 Key outcomes: Coord, CoordSet, NDDataset, and Project now use the
@@ -165,9 +180,74 @@ authoritative reference is `display-architecture.md`.
 
 ---
 
+# Active Draft RFCs
+
+## Array Class Responsibility
+
+Status: Draft RFC
+
+Reference:
+[`maintainers/architecture/array-class-responsibility.md`](../architecture/array-class-responsibility.md)
+
+Purpose:
+
+* documents where responsibilities currently live across `NDArray`,
+  `NDComplexArray`, `Coord`, `NDDataset`, `NDMath`, and `NDIO`;
+* identifies responsibility mismatches around labels, masks, math/result
+  assembly, complex/hypercomplex support, metadata, and serialization;
+* treats `NDLabelled` or an equivalent layer as a candidate future direction,
+  not a decision.
+
+Current recommendation:
+
+Clarify mathematical semantics before any hierarchy redesign.
+
+---
+
+## Mathematical Semantics and Metadata Propagation
+
+Status: Draft RFC / Audit in progress
+
+Reference:
+[`maintainers/architecture/mathematical-semantics-and-metadata-propagation.md`](../architecture/mathematical-semantics-and-metadata-propagation.md)
+
+Purpose:
+
+* documents how operations should behave across arithmetic, ufuncs,
+  reductions, shape operations, combination operations, labels, masks, units,
+  and metadata;
+* separates behavior questions from class hierarchy questions;
+* connects operation semantics to the Metadata Contract.
+
+Current recommendation:
+
+Establish and characterize the math semantics contract before introducing a
+responsibility split such as `NDLabelled`.
+
+---
+
 # Near-Term Architectural Candidates
 
 The following topics appear to offer the highest architectural value relative to their expected complexity.
+
+---
+
+## Mathematical Semantics Clarification
+
+Motivation:
+
+The current math layer is usable, but operation semantics are still partly
+implicit and path-dependent.
+
+Questions include:
+
+* metadata propagation by operation category;
+* direct labels versus coordinate labels;
+* coordinate compatibility policy;
+* mask behavior for geometry-changing operations;
+* result assembly consistency across core, processing, analysis, and plugins.
+
+This topic should be addressed before any class hierarchy split.
 
 ---
 
@@ -224,7 +304,13 @@ Future work may focus on:
 * readability;
 * maintenance cost reduction.
 
-No active work planned.
+Active related work:
+
+* mathematical semantics and metadata propagation RFC;
+* array class responsibility RFC.
+
+Implementation refactoring remains deferred until the behavior contract is
+clearer.
 
 ---
 

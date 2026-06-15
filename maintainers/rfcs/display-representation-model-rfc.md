@@ -1,11 +1,11 @@
 # Display / Representation Model RFC
 
-**Status:** Completed — superseded by [`maintainers/display-architecture.md`](../display-architecture.md)
+**Status:** Completed — superseded by [`maintainers/architecture/display-architecture.md`](../architecture/display-architecture.md)
 **Issue:** #843 — Display / Representation Architecture
 
 This RFC defined the representation model contract before implementation
 began. All major decisions were implemented. The authoritative reference
-for the final architecture is `maintainers/display-architecture.md`.
+for the final architecture is `maintainers/architecture/display-architecture.md`.
 
 ## Original Context
 
