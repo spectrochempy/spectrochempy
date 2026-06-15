@@ -21,6 +21,11 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- Restored historical hypercomplex/quaternion dataset display (#1147).  Detailed
+  terminal and HTML representations once again show explicit ``RR``/``RI``/``IR``/``II``
+  component blocks and preserve complex-dimension shape annotations, instead of
+  falling back to raw quaternion scalar dumps.
+
 - JCAMP-DX I/O is more robust (#1080, #1132, #1150).  ``read_jcamp`` now
   handles ``##YUNITS=TRANSMITTANCE`` as the ``transmittance`` unit, accepts
   header values containing ``=``, reports invalid axis metadata with a clear

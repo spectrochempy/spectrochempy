@@ -10,6 +10,7 @@ import numpy as np
 from spectrochempy.api.plugins import CORE_PLUGIN_API_VERSION
 from spectrochempy.api.plugins import PluginCapability
 from spectrochempy.api.plugins import SpectroChemPyPlugin
+from spectrochempy.utils.print import _format_array_values
 
 # Public quaternion utilities — safe for other plugins to import
 from ._quaternion import _HAS_QUATERNION as is_available  # noqa: F401, N811
@@ -302,6 +303,44 @@ def _hyper_numpy_min(dataset, *args, **kwargs):
 
 
 # ------------------------------------------------------------------
+# Display handlers for quaternion data
+# ------------------------------------------------------------------
+
+
+def _hyper_display_array_values(dataset, *, sep="\n", ufmt=" {:~P}"):
+    """Return RR/RI/IR/II display blocks for quaternion datasets."""
+    if not _is_quaternion_dataset(dataset):
+        return None
+
+    hyper = getattr(dataset, "hyper", None)
+    if hyper is None or not hyper.is_quaternion:
+        return None
+
+    units = ufmt.format(dataset.units) if dataset.has_units else ""
+    parts = []
+    for pref in ("RR", "RI", "IR", "II"):
+        data = np.asarray(getattr(hyper, pref))
+        parts.append(
+            _format_array_values(
+                data,
+                is_masked=False,
+                dtype=data.dtype,
+                sep=sep,
+                prefix=pref,
+                units=units,
+            )
+        )
+    return sep.join(parts)
+
+
+def _hyper_display_complex_dim_flags(dataset):
+    """Mark quaternion dataset dimensions as complex in detailed display."""
+    if not _is_quaternion_dataset(dataset):
+        return None
+    return [True] * dataset.ndim
+
+
+# ------------------------------------------------------------------
 # Plugin class
 # ------------------------------------------------------------------
 
@@ -335,4 +374,6 @@ class HyperComplexPlugin(SpectroChemPyPlugin):
             "ndmath.numpy_method.conjugate": _hyper_numpy_conjugate,
             "ndmath.numpy_method.amax": _hyper_numpy_max,
             "ndmath.numpy_method.amin": _hyper_numpy_min,
+            "display.array_values": _hyper_display_array_values,
+            "display.complex_dim_flags": _hyper_display_complex_dim_flags,
         }
