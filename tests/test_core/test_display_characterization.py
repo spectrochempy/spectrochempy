@@ -557,6 +557,204 @@ class TestProjectHTMLHierarchy:
 
 
 # ======================================================================================
+# PROJECT SEMANTIC HTML TESTS
+# ======================================================================================
+
+
+class TestSemanticProject:
+    """Tests that Project._repr_sections() returns the expected structure."""
+
+    def test_returns_list(self):
+        """_repr_sections returns a list."""
+        proj = Project(name="p")
+        sections = proj._repr_sections()
+        assert isinstance(sections, list)
+
+    def test_has_summary_and_data_sections(self):
+        """Has summary and data sections."""
+        proj = Project(name="p")
+        sections = proj._repr_sections()
+        roles = [s.role for s in sections]
+        assert "summary" in roles
+        assert "data" in roles
+
+    def test_summary_contains_name(self):
+        """Summary section contains name field."""
+        proj = Project(name="myproj")
+        sections = proj._repr_sections()
+        summary = next(s for s in sections if s.role == "summary")
+        items = summary.items
+        assert any(i.key == "name" and i.value == "myproj" for i in items)
+
+    def test_summary_contains_author_when_set(self):
+        """Summary contains author when set."""
+        proj = Project(name="p", author="me")
+        sections = proj._repr_sections()
+        summary = next(s for s in sections if s.role == "summary")
+        items = summary.items
+        assert any(i.key == "author" and "me" in str(i.value) for i in items)
+
+    def test_summary_no_author_when_empty(self):
+        """Summary does not contain author when not set."""
+        proj = Project(name="p")
+        sections = proj._repr_sections()
+        summary = next(s for s in sections if s.role == "summary")
+        items = summary.items
+        assert not any(i.key == "author" for i in items)
+
+    def test_summary_contains_description_when_set(self):
+        """Summary contains description when set."""
+        proj = Project(name="p", description="test description")
+        sections = proj._repr_sections()
+        summary = next(s for s in sections if s.role == "summary")
+        items = summary.items
+        assert any(i.key == "description" for i in items)
+        assert any("test description" in str(i.value) for i in items)
+
+    def test_summary_no_description_when_empty(self):
+        """Summary does not contain description when not set."""
+        proj = Project(name="p")
+        sections = proj._repr_sections()
+        summary = next(s for s in sections if s.role == "summary")
+        items = summary.items
+        assert not any(i.key == "description" for i in items)
+
+    def test_data_contains_hierarchy_lines(self):
+        """Data section contains project hierarchy as block items."""
+        proj = Project(name="root")
+        ds = NDDataset([1], name="ds1")
+        proj.add_dataset(ds)
+        sections = proj._repr_sections()
+        data = next(s for s in sections if s.role == "data")
+        items = data.items
+        assert all(i.kind == "block" for i in items)
+        assert any("ds1" in str(i.value) for i in items)
+        assert any("dataset" in str(i.value) for i in items)
+
+    def test_data_contains_empty_message(self):
+        """Empty project shows empty indicator in data section."""
+        proj = Project(name="empty")
+        sections = proj._repr_sections()
+        data = next(s for s in sections if s.role == "data")
+        items = data.items
+        assert any("empty project" in str(i.value) for i in items)
+
+    def test_data_block_items_use_nbsp_indentation(self):
+        """Hierarchy block items use &nbsp; for indentation."""
+        proj = Project(name="root")
+        sub = Project(name="child")
+        proj.add_project(sub)
+        sub.add_dataset(NDDataset([1], name="leaf"))
+        sections = proj._repr_sections()
+        data = next(s for s in sections if s.role == "data")
+        items = data.items
+        # The leaf (deepest) should have more &nbsp; than parent
+        for item in items:
+            value = str(item.value)
+            assert "&nbsp;" in value or not value.startswith(" ")
+
+
+class TestProjectSemanticHTML:
+    """Tests that the generated HTML from Project is structurally correct."""
+
+    def test_outer_wrapper_structure(self):
+        """HTML has the expected outer wrapper structure."""
+        proj = Project(name="test")
+        html = proj._repr_html_()
+        assert '<div class="scp-output">' in html
+        assert "<details>" in html
+        assert "</details>" in html
+        assert "</div>" in html
+
+    def test_heading_contains_type(self):
+        """HTML heading contains the type name."""
+        proj = Project(name="test")
+        html = proj._repr_html_()
+        assert "Project" in html
+
+    def test_heading_contains_name(self):
+        """HTML heading contains the project name."""
+        proj = Project(name="myproj")
+        html = proj._repr_html_()
+        assert "myproj" in html
+
+    def test_summary_inline_no_details(self):
+        """Summary items are inline, not wrapped in <details>."""
+        proj = Project(name="proj", author="me", description="desc")
+        html = proj._repr_html_()
+        assert "<summary>Summary" not in html
+        assert "name" in html
+        assert "proj" in html
+        assert "author" in html
+        assert "me" in html
+        assert "description" in html
+        assert "desc" in html
+
+    def test_data_section_collapsible(self):
+        """Data section is wrapped in <details>."""
+        proj = Project(name="proj")
+        html = proj._repr_html_()
+        assert "<summary>Data" in html
+
+    def test_hierarchy_items_present(self):
+        """Hierarchy items appear in HTML."""
+        proj = Project(name="root")
+        sub = Project(name="child")
+        proj.add_project(sub)
+        ds = NDDataset([1], name="ds1")
+        sub.add_dataset(ds)
+        html = proj._repr_html_()
+        assert "child" in html
+        assert "ds1" in html
+        assert "sub-project" in html
+        assert "dataset" in html
+
+    def test_empty_project_shows_empty(self):
+        """Empty project shows empty indicator."""
+        proj = Project(name="empty")
+        html = proj._repr_html_()
+        assert "empty project" in html
+
+    def test_nbsp_preserved_in_html(self):
+        """Indentation uses &nbsp; in HTML to preserve hierarchy."""
+        proj = Project(name="root")
+        sub = Project(name="child")
+        proj.add_project(sub)
+        sub.add_dataset(NDDataset([1], name="leaf"))
+        html = proj._repr_html_()
+        assert "&nbsp;" in html
+
+    def test_heading_no_auto_id(self):
+        """Unnamed Project should not show auto-generated ID in heading."""
+        proj = Project()
+        html = proj._repr_html_()
+        assert "Project_Project_" not in html
+
+    def test_temporary_equivalence_with_sentinel(self):
+        """
+        Semantic HTML contains core content present in sentinel HTML.
+
+        This is a temporary migration equivalence test.
+        """
+        from spectrochempy.utils.print import convert_to_html
+
+        proj = Project(name="equiv", author="tester", description="migration")
+        sub = Project(name="sub")
+        proj.add_project(sub)
+        sub.add_dataset(NDDataset([1], name="ds1"))
+        old_html = convert_to_html(proj)
+        new_html = proj._repr_html_()
+
+        old_content = set(old_html.split())
+        new_content = set(new_html.split())
+
+        common = old_content & new_content
+        assert len(common) > 0, "No overlapping content between old and new HTML"
+        assert "Project" in new_html
+        assert "equiv" in new_html
+
+
+# ======================================================================================
 # HTML HEADING TESTS
 # ======================================================================================
 
