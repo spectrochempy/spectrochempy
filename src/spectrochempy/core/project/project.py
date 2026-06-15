@@ -19,6 +19,10 @@ from spectrochempy.core.dataset.nddataset import NDIO
 from spectrochempy.core.project.abstractproject import AbstractProject
 from spectrochempy.core.script import Script
 from spectrochempy.utils.meta import Meta
+from spectrochempy.utils.print import DisplayItem
+from spectrochempy.utils.print import DisplaySection
+from spectrochempy.utils.print import _html_heading
+from spectrochempy.utils.print import _render_sections
 from spectrochempy.utils.print import colored_output
 from spectrochempy.utils.print import convert_to_html
 from spectrochempy.utils.traits import NDDatasetType
@@ -134,7 +138,49 @@ class Project(AbstractProject, NDIO):
         pass  # TODO: ???
 
     def _repr_html_(self):
-        return convert_to_html(self)
+        sections = self._repr_sections()
+        body = _render_sections(sections)
+        heading = _html_heading(self)
+        return (
+            '<div class="scp-output">'
+            f"<details><summary>{heading}</summary>\n{body}\n"
+            "</details></div>"
+        )
+
+    def _repr_sections(self):
+        sections: list[DisplaySection] = []
+
+        # ------------------------------------------------------------------
+        # SUMMARY
+        # ------------------------------------------------------------------
+        summary_items: list[DisplayItem] = []
+        summary_items.append(DisplayItem("field", self.name, "name"))
+        author = self.meta.get("author", None)
+        if author:
+            summary_items.append(DisplayItem("field", author, "author"))
+        description = self.meta.get("description", None)
+        if description:
+            summary_items.append(
+                DisplayItem("field", description.strip(), "description")
+            )
+        sections.append(DisplaySection("summary", "Summary", summary_items))
+
+        # ------------------------------------------------------------------
+        # DATA — project hierarchy
+        # ------------------------------------------------------------------
+        data_items: list[DisplayItem] = []
+        str_output = self.__str__()
+        lines = str_output.split("\n")
+        hier_lines = lines[1:] if len(lines) > 1 else []
+        if not hier_lines:
+            hier_lines = ["(empty project)"]
+        for line in hier_lines:
+            n_spaces = len(line) - len(line.lstrip())
+            line = "&nbsp;" * n_spaces + line.lstrip()
+            data_items.append(DisplayItem("block", line))
+        sections.append(DisplaySection("data", "Data", data_items))
+
+        return sections
 
     def __repr__(self):
         return f"Project: {self.name}"

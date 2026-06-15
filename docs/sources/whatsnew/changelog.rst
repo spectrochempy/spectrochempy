@@ -145,6 +145,14 @@ Developer
   producing clean inline summary metadata, collapsible data and dimension
   sections, and removing exposure of internal UUIDs from the heading.
 
+- MAINT: Extended the semantic HTML migration to ``Project`` (#843).
+  ``Project._repr_sections()`` builds summary (name, author, description)
+  and data (hierarchy tree) ``DisplaySection`` objects.  ``Project._repr_html_()``
+  now uses the semantic path instead of ``convert_to_html()``, producing
+  clean inline metadata and ``&nbsp;``-indented collapsible hierarchy
+  sections.  The sentinel ``_cstr()`` method is preserved unchanged for
+  terminal output.
+
 - MAINT: Extended the semantic HTML migration to ``CoordSet`` (#843).
   Added ``CoordSet._repr_sections()`` which builds one ``DisplaySection``
   per dimension, reusing child ``Coord._repr_sections()`` items for simple
