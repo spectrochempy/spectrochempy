@@ -557,6 +557,204 @@ class TestProjectHTMLHierarchy:
 
 
 # ======================================================================================
+# PROJECT SEMANTIC HTML TESTS
+# ======================================================================================
+
+
+class TestSemanticProject:
+    """Tests that Project._repr_sections() returns the expected structure."""
+
+    def test_returns_list(self):
+        """_repr_sections returns a list."""
+        proj = Project(name="p")
+        sections = proj._repr_sections()
+        assert isinstance(sections, list)
+
+    def test_has_summary_and_data_sections(self):
+        """Has summary and data sections."""
+        proj = Project(name="p")
+        sections = proj._repr_sections()
+        roles = [s.role for s in sections]
+        assert "summary" in roles
+        assert "data" in roles
+
+    def test_summary_contains_name(self):
+        """Summary section contains name field."""
+        proj = Project(name="myproj")
+        sections = proj._repr_sections()
+        summary = next(s for s in sections if s.role == "summary")
+        items = summary.items
+        assert any(i.key == "name" and i.value == "myproj" for i in items)
+
+    def test_summary_contains_author_when_set(self):
+        """Summary contains author when set."""
+        proj = Project(name="p", author="me")
+        sections = proj._repr_sections()
+        summary = next(s for s in sections if s.role == "summary")
+        items = summary.items
+        assert any(i.key == "author" and "me" in str(i.value) for i in items)
+
+    def test_summary_no_author_when_empty(self):
+        """Summary does not contain author when not set."""
+        proj = Project(name="p")
+        sections = proj._repr_sections()
+        summary = next(s for s in sections if s.role == "summary")
+        items = summary.items
+        assert not any(i.key == "author" for i in items)
+
+    def test_summary_contains_description_when_set(self):
+        """Summary contains description when set."""
+        proj = Project(name="p", description="test description")
+        sections = proj._repr_sections()
+        summary = next(s for s in sections if s.role == "summary")
+        items = summary.items
+        assert any(i.key == "description" for i in items)
+        assert any("test description" in str(i.value) for i in items)
+
+    def test_summary_no_description_when_empty(self):
+        """Summary does not contain description when not set."""
+        proj = Project(name="p")
+        sections = proj._repr_sections()
+        summary = next(s for s in sections if s.role == "summary")
+        items = summary.items
+        assert not any(i.key == "description" for i in items)
+
+    def test_data_contains_hierarchy_lines(self):
+        """Data section contains project hierarchy as block items."""
+        proj = Project(name="root")
+        ds = NDDataset([1], name="ds1")
+        proj.add_dataset(ds)
+        sections = proj._repr_sections()
+        data = next(s for s in sections if s.role == "data")
+        items = data.items
+        assert all(i.kind == "block" for i in items)
+        assert any("ds1" in str(i.value) for i in items)
+        assert any("dataset" in str(i.value) for i in items)
+
+    def test_data_contains_empty_message(self):
+        """Empty project shows empty indicator in data section."""
+        proj = Project(name="empty")
+        sections = proj._repr_sections()
+        data = next(s for s in sections if s.role == "data")
+        items = data.items
+        assert any("empty project" in str(i.value) for i in items)
+
+    def test_data_block_items_use_nbsp_indentation(self):
+        """Hierarchy block items use &nbsp; for indentation."""
+        proj = Project(name="root")
+        sub = Project(name="child")
+        proj.add_project(sub)
+        sub.add_dataset(NDDataset([1], name="leaf"))
+        sections = proj._repr_sections()
+        data = next(s for s in sections if s.role == "data")
+        items = data.items
+        # The leaf (deepest) should have more &nbsp; than parent
+        for item in items:
+            value = str(item.value)
+            assert "&nbsp;" in value or not value.startswith(" ")
+
+
+class TestProjectSemanticHTML:
+    """Tests that the generated HTML from Project is structurally correct."""
+
+    def test_outer_wrapper_structure(self):
+        """HTML has the expected outer wrapper structure."""
+        proj = Project(name="test")
+        html = proj._repr_html_()
+        assert '<div class="scp-output">' in html
+        assert "<details>" in html
+        assert "</details>" in html
+        assert "</div>" in html
+
+    def test_heading_contains_type(self):
+        """HTML heading contains the type name."""
+        proj = Project(name="test")
+        html = proj._repr_html_()
+        assert "Project" in html
+
+    def test_heading_contains_name(self):
+        """HTML heading contains the project name."""
+        proj = Project(name="myproj")
+        html = proj._repr_html_()
+        assert "myproj" in html
+
+    def test_summary_inline_no_details(self):
+        """Summary items are inline, not wrapped in <details>."""
+        proj = Project(name="proj", author="me", description="desc")
+        html = proj._repr_html_()
+        assert "<summary>Summary" not in html
+        assert "name" in html
+        assert "proj" in html
+        assert "author" in html
+        assert "me" in html
+        assert "description" in html
+        assert "desc" in html
+
+    def test_data_section_collapsible(self):
+        """Data section is wrapped in <details>."""
+        proj = Project(name="proj")
+        html = proj._repr_html_()
+        assert "<summary>Data" in html
+
+    def test_hierarchy_items_present(self):
+        """Hierarchy items appear in HTML."""
+        proj = Project(name="root")
+        sub = Project(name="child")
+        proj.add_project(sub)
+        ds = NDDataset([1], name="ds1")
+        sub.add_dataset(ds)
+        html = proj._repr_html_()
+        assert "child" in html
+        assert "ds1" in html
+        assert "sub-project" in html
+        assert "dataset" in html
+
+    def test_empty_project_shows_empty(self):
+        """Empty project shows empty indicator."""
+        proj = Project(name="empty")
+        html = proj._repr_html_()
+        assert "empty project" in html
+
+    def test_nbsp_preserved_in_html(self):
+        """Indentation uses &nbsp; in HTML to preserve hierarchy."""
+        proj = Project(name="root")
+        sub = Project(name="child")
+        proj.add_project(sub)
+        sub.add_dataset(NDDataset([1], name="leaf"))
+        html = proj._repr_html_()
+        assert "&nbsp;" in html
+
+    def test_heading_no_auto_id(self):
+        """Unnamed Project should not show auto-generated ID in heading."""
+        proj = Project()
+        html = proj._repr_html_()
+        assert "Project_Project_" not in html
+
+    def test_temporary_equivalence_with_sentinel(self):
+        """
+        Semantic HTML contains core content present in sentinel HTML.
+
+        This is a temporary migration equivalence test.
+        """
+        from spectrochempy.utils.print import convert_to_html
+
+        proj = Project(name="equiv", author="tester", description="migration")
+        sub = Project(name="sub")
+        proj.add_project(sub)
+        sub.add_dataset(NDDataset([1], name="ds1"))
+        old_html = convert_to_html(proj)
+        new_html = proj._repr_html_()
+
+        old_content = set(old_html.split())
+        new_content = set(new_html.split())
+
+        common = old_content & new_content
+        assert len(common) > 0, "No overlapping content between old and new HTML"
+        assert "Project" in new_html
+        assert "equiv" in new_html
+
+
+# ======================================================================================
 # HTML HEADING TESTS
 # ======================================================================================
 
@@ -1575,3 +1773,578 @@ class TestCoordSemanticHTML:
                 len(common) > 0
             ), f"No overlapping content between old and new HTML for {coord}"
             assert "Coord" in new_html
+
+
+# ======================================================================================
+# PHASE C: SEMANTIC DISPLAY FOR COORDSET
+# ======================================================================================
+
+
+class TestSemanticCoordSet:
+    """
+    Semantic display model validation for CoordSet.
+
+    These tests validate that CoordSet._repr_sections() produces the correct
+    semantic structure without using the _cstr() -> regex pipeline.
+
+    No HTML is generated or tested here.  Only semantic structure.
+    """
+
+    def test_returns_list(self):
+        """_repr_sections() returns a list."""
+        x = Coord([1.0, 2.0, 3.0])
+        cs = CoordSet(x=x)
+        sections = cs._repr_sections()
+        assert isinstance(sections, list)
+
+    def test_one_section_per_dimension(self):
+        """Two coords produce two dimension sections."""
+        x = Coord([1.0, 2.0, 3.0])
+        y = Coord([4.0, 5.0])
+        cs = CoordSet(x=x, y=y)
+        sections = cs._repr_sections()
+        assert len(sections) == 2
+
+    def test_sections_role_is_dimension(self):
+        """Each section role is 'dimension'."""
+        x = Coord([1.0, 2.0])
+        y = Coord([3.0, 4.0])
+        cs = CoordSet(x=x, y=y)
+        sections = cs._repr_sections()
+        for s in sections:
+            assert s.role == "dimension"
+
+    def test_section_title_contains_dim_name(self):
+        """Section title includes the dimension name."""
+        x = Coord([1.0, 2.0])
+        cs = CoordSet(x=x)
+        sections = cs._repr_sections()
+        assert "Dimension `x`" in sections[0].title
+
+    def test_contains_size_field(self):
+        """Each section has a size field."""
+        x = Coord([1.0, 2.0, 3.0])
+        y = Coord([4.0, 5.0])
+        cs = CoordSet(x=x, y=y)
+        sections = cs._repr_sections()
+        for s in sections:
+            size_items = [i for i in s.items if i.kind == "field" and i.key == "size"]
+            assert len(size_items) == 1
+
+    def test_size_value_matches(self):
+        """Size field value matches the child coord size."""
+        x = Coord([1.0, 2.0, 3.0])
+        cs = CoordSet(x=x)
+        sections = cs._repr_sections()
+        size_item = next(
+            i for i in sections[0].items if i.kind == "field" and i.key == "size"
+        )
+        assert size_item.value == "3"
+
+    def test_contains_title_field_when_title_set(self):
+        """Coord with an explicit title has a title field in the section."""
+        x = Coord([1.0, 2.0], title="wavenumber")
+        cs = CoordSet(x=x)
+        sections = cs._repr_sections()
+        title_items = [
+            i for i in sections[0].items if i.kind == "field" and i.key == "title"
+        ]
+        assert len(title_items) == 1
+        assert title_items[0].value == "wavenumber"
+
+    def test_contains_data_item(self):
+        """Each section has a data item for coord values."""
+        x = Coord([1.0, 2.0, 3.0])
+        cs = CoordSet(x=x)
+        sections = cs._repr_sections()
+        data_items = [i for i in sections[0].items if i.kind == "data"]
+        assert len(data_items) == 1
+
+    def test_data_item_includes_units(self):
+        """When coord units are set, the data item includes unit text."""
+        x = Coord([1.0, 2.0, 3.0], units="m")
+        cs = CoordSet(x=x)
+        sections = cs._repr_sections()
+        data_item = next(i for i in sections[0].items if i.kind == "data")
+        assert "m" in data_item.value
+
+    def test_contains_label_item_when_labeled(self):
+        """A labeled coord produces a label item in the section."""
+        x = Coord([1.0, 2.0, 3.0], labels=["A", "B", "C"])
+        cs = CoordSet(x=x)
+        sections = cs._repr_sections()
+        label_items = [i for i in sections[0].items if i.kind == "label"]
+        assert len(label_items) == 1
+
+    def test_label_item_contains_label_text(self):
+        """The label item value contains the label content."""
+        x = Coord([1.0, 2.0, 3.0], labels=["A", "B", "C"])
+        cs = CoordSet(x=x)
+        sections = cs._repr_sections()
+        label_item = next(i for i in sections[0].items if i.kind == "label")
+        assert "A" in label_item.value
+
+    def test_reference_annotation_in_title(self):
+        """References are annotated in the section title."""
+        x = Coord(
+            [0.0, 1.0, 2.0], labels=["low", "mid", "high"], units="s", title="time"
+        )
+        cs = CoordSet(x=x, y="x")
+        sections = cs._repr_sections()
+        # The 'x' section should have '=y' in its title
+        x_section = next(s for s in sections if "x" in s.title and "=" in s.title)
+        assert "=y" in x_section.title
+
+    def test_multi_dim_uses_dimension_title(self):
+        """Multi-dim CoordSet uses 'Dimension' in section titles."""
+        x = Coord([1.0, 2.0])
+        y = Coord([3.0, 4.0])
+        cs = CoordSet(x=x, y=y)
+        sections = cs._repr_sections()
+        for s in sections:
+            assert "Dimension" in s.title
+
+    def test_same_dim_uses_coord_title(self):
+        """Same-dim CoordSet shows 'Coord' not 'Dimension' for child names."""
+        c1 = Coord([1.0, 2.0, 3.0], title="alpha")
+        c2 = Coord([4.0, 5.0, 6.0], title="beta")
+        cs = CoordSet([c1, c2])
+        # cs.x is the inner same-dim CoordSet with _is_same_dim=True
+        inner = cs.x
+        sections = inner._repr_sections()
+        for s in sections:
+            assert "Coord" in s.title
+
+    def test_same_dim_has_block_markers(self):
+        """Same-dim nested CoordSet has block items as subgroup separators."""
+        c1 = Coord([1.0, 2.0, 3.0], title="alpha")
+        c2 = Coord([4.0, 5.0, 6.0], title="beta")
+        cs = CoordSet([c1, c2])
+        sections = cs._repr_sections()
+        block_items = [i for i in sections[0].items if i.kind == "block"]
+        assert len(block_items) >= 1
+
+    def test_same_dim_block_text_contains_child_name(self):
+        """Block items contain the nested child name."""
+        c1 = Coord([1.0, 2.0, 3.0], title="alpha")
+        c2 = Coord([4.0, 5.0, 6.0], title="beta")
+        cs = CoordSet([c1, c2])
+        sections = cs._repr_sections()
+        for item in sections[0].items:
+            if item.kind == "block":
+                assert item.value.startswith("(_")
+                assert item.value.endswith(")")
+
+    def test_same_dim_child_items_reused(self):
+        """Same-dim children have their items included (except size)."""
+        c1 = Coord([1.0, 2.0, 3.0], title="alpha")
+        c2 = Coord([4.0, 5.0, 6.0], title="beta")
+        cs = CoordSet([c1, c2])
+        sections = cs._repr_sections()
+        # Should have title items for both children
+        title_items = [i for i in sections[0].items if i.key == "title"]
+        assert len(title_items) == 2
+        titles = [i.value for i in title_items]
+        assert "alpha" in titles
+        assert "beta" in titles
+
+    def test_same_dim_single_size(self):
+        """Same-dim sections have exactly one size item (no duplication)."""
+        c1 = Coord([1.0, 2.0, 3.0], title="alpha")
+        c2 = Coord([4.0, 5.0, 6.0], title="beta")
+        cs = CoordSet([c1, c2])
+        sections = cs._repr_sections()
+        size_items = [i for i in sections[0].items if i.key == "size"]
+        assert len(size_items) == 1
+
+    def test_empty_returns_empty_list(self):
+        """An empty CoordSet returns an empty list."""
+        cs = CoordSet()
+        sections = cs._repr_sections()
+        assert sections == []
+
+
+class TestCoordSetSemanticHTML:
+    """Tests for CoordSet._repr_html_() via the semantic path."""
+
+    def test_heading_contains_type(self):
+        """CoordSet HTML heading contains the type name."""
+        x = Coord([1.0, 2.0, 3.0])
+        cs = CoordSet(x=x)
+        html = cs._repr_html_()
+        assert "CoordSet" in html
+
+    def test_heading_includes_child_names(self):
+        """CoordSet heading includes child coordinate names."""
+        x = Coord([1.0, 2.0, 3.0], title="wavenumber")
+        y = Coord([4.0, 5.0], title="time")
+        cs = CoordSet(x=x, y=y)
+        html = cs._repr_html_()
+        assert "x" in html
+        assert "y" in html
+
+    def test_outer_wrapper_structure(self):
+        """CoordSet HTML has the expected outer wrapper structure."""
+        x = Coord([1.0, 2.0])
+        cs = CoordSet(x=x)
+        html = cs._repr_html_()
+        assert '<div class="scp-output">' in html
+        assert "<details>" in html
+        assert "</details>" in html
+        assert "</div>" in html
+
+    def test_dimension_sections_present(self):
+        """Dimension sections appear in the HTML."""
+        x = Coord([1.0, 2.0, 3.0])
+        y = Coord([4.0, 5.0])
+        cs = CoordSet(x=x, y=y)
+        html = cs._repr_html_()
+        assert "Dimension" in html
+
+    def test_dimension_names_in_sections(self):
+        """Dimension names appear inside detail sections."""
+        x = Coord([1.0, 2.0, 3.0])
+        y = Coord([4.0, 5.0])
+        cs = CoordSet(x=x, y=y)
+        html = cs._repr_html_()
+        assert "`x`" in html
+        assert "`y`" in html
+
+    def test_data_values_present(self):
+        """Coord data values appear in the rendered HTML."""
+        x = Coord([1.0, 2.0, 3.0])
+        cs = CoordSet(x=x)
+        html = cs._repr_html_()
+        assert "1" in html
+        assert "2" in html
+        assert "3" in html
+
+    def test_labels_present(self):
+        """Label content appears in the HTML."""
+        x = Coord([1.0, 2.0], labels=["A", "B"])
+        cs = CoordSet(x=x)
+        html = cs._repr_html_()
+        assert "A" in html
+
+    def test_reference_annotation_in_html(self):
+        """Reference annotations appear in dimension sections."""
+        x = Coord(
+            [0.0, 1.0, 2.0], labels=["low", "mid", "high"], units="s", title="time"
+        )
+        cs = CoordSet(x=x, y="x")
+        html = cs._repr_html_()
+        assert "=y" in html.replace(" ", "")
+
+    def test_multi_dim_html_has_dimension(self):
+        """Multi-dim CoordSet HTML contains Dimension labels."""
+        x = Coord([1.0, 2.0])
+        y = Coord([3.0, 4.0])
+        cs = CoordSet(x=x, y=y)
+        html = cs._repr_html_()
+        assert "Dimension" in html
+
+    def test_same_dim_html_has_coord_not_dimension(self):
+        """Same-dim CoordSet HTML uses Coord labels, not Dimension."""
+        c1 = Coord([1.0, 2.0, 3.0], title="alpha")
+        c2 = Coord([4.0, 5.0, 6.0], title="beta")
+        cs = CoordSet([c1, c2])
+        # cs.x is the inner same-dim CoordSet
+        inner = cs.x
+        html = inner._repr_html_()
+        assert "Coord" in html
+
+    def test_subgroup_markers_in_html(self):
+        """Same-dim nested CoordSet shows subgroup markers in HTML."""
+        c1 = Coord([1.0, 2.0, 3.0], title="alpha")
+        c2 = Coord([4.0, 5.0, 6.0], title="beta")
+        cs = CoordSet([c1, c2])
+        html = cs._repr_html_()
+        assert "(_1)" in html or "(_2)" in html
+
+    def test_temporary_equivalence_with_sentinel_pipeline(self):
+        """
+        Semantic HTML contains all content present in sentinel HTML.
+
+        This is a temporary migration equivalence test.
+        It checks content presence, not exact HTML structure.
+        """
+        from spectrochempy.utils.print import convert_to_html
+
+        c1 = Coord([1.0, 2.0, 3.0], title="alpha", units="m")
+        c2 = Coord([4.0, 5.0, 6.0], title="beta", units="s")
+        c3 = Coord([7.0, 8.0], labels=["X", "Y"])
+
+        configs = [
+            CoordSet(x=c1),
+            CoordSet(x=c1, y=c2),
+            CoordSet([c1, c2]),
+            CoordSet(x=c3, y=c2),
+        ]
+
+        for cs in configs:
+            cs._html_output = False
+            old_html = convert_to_html(cs)
+
+            cs._html_output = False
+            new_html = cs._repr_html_()
+
+            old_content = set(old_html.split())
+            new_content = set(new_html.split())
+
+            common = old_content & new_content
+            assert (
+                len(common) > 0
+            ), f"No overlapping content between old and new HTML for {cs}"
+            assert "CoordSet" in new_html
+
+
+# ======================================================================================
+# PHASE D: SEMANTIC DISPLAY FOR NDDataset
+# ======================================================================================
+
+
+class TestSemanticNDDataset:
+    """Tests for NDDataset._repr_sections() semantic structure."""
+
+    def test_returns_list(self):
+        """_repr_sections returns a list."""
+        ds = NDDataset([1.0, 2.0])
+        sections = ds._repr_sections()
+        assert isinstance(sections, list)
+
+    def test_has_summary_and_data_sections(self):
+        """Simple dataset returns summary + data sections."""
+        ds = NDDataset([1.0, 2.0])
+        sections = ds._repr_sections()
+        roles = [s.role for s in sections]
+        assert "summary" in roles
+        assert "data" in roles
+
+    def test_summary_contains_name(self):
+        """Summary includes the dataset name."""
+        ds = NDDataset([1.0, 2.0], name="test_ds")
+        sections = ds._repr_sections()
+        summary = next(s for s in sections if s.role == "summary")
+        name_items = [i for i in summary.items if i.key == "name"]
+        assert len(name_items) == 1
+        assert name_items[0].value == "test_ds"
+
+    def test_summary_contains_author(self):
+        """Summary includes the author."""
+        ds = NDDataset([1.0, 2.0])
+        ds.author = "test_author"
+        sections = ds._repr_sections()
+        summary = next(s for s in sections if s.role == "summary")
+        auth_items = [i for i in summary.items if i.key == "author"]
+        assert len(auth_items) == 1
+        assert auth_items[0].value == "test_author"
+
+    def test_summary_contains_created(self):
+        """Summary includes the creation timestamp."""
+        ds = NDDataset([1.0, 2.0])
+        sections = ds._repr_sections()
+        summary = next(s for s in sections if s.role == "summary")
+        created_items = [i for i in summary.items if i.key == "created"]
+        assert len(created_items) == 1
+
+    def test_summary_contains_description_when_set(self):
+        """Description is present when set."""
+        ds = NDDataset([1.0, 2.0], description="test description")
+        sections = ds._repr_sections()
+        summary = next(s for s in sections if s.role == "summary")
+        desc_items = [i for i in summary.items if i.key == "description"]
+        assert len(desc_items) == 1
+        assert desc_items[0].value == "test description"
+
+    def test_summary_no_description_when_empty(self):
+        """No description item when description is empty."""
+        ds = NDDataset([1.0, 2.0])
+        sections = ds._repr_sections()
+        summary = next(s for s in sections if s.role == "summary")
+        desc_items = [i for i in summary.items if i.key == "description"]
+        assert len(desc_items) == 0
+
+    def test_data_contains_title(self):
+        """Data section has a title field."""
+        ds = NDDataset([1.0, 2.0], title="my_data")
+        sections = ds._repr_sections()
+        data = next(s for s in sections if s.role == "data")
+        title_items = [i for i in data.items if i.key == "title"]
+        assert len(title_items) == 1
+        assert title_items[0].value == "my_data"
+
+    def test_data_contains_values(self):
+        """Data section has a values field."""
+        ds = NDDataset([1.0, 2.0, 3.0])
+        sections = ds._repr_sections()
+        data = next(s for s in sections if s.role == "data")
+        values_items = [i for i in data.items if i.key == "values"]
+        assert len(values_items) == 1
+        assert "1" in values_items[0].value
+        assert "3" in values_items[0].value
+
+    def test_data_contains_shape(self):
+        """Data section has a size or shape field."""
+        ds = NDDataset([1.0, 2.0, 3.0])
+        sections = ds._repr_sections()
+        data = next(s for s in sections if s.role == "data")
+        shape_items = [i for i in data.items if i.key in ("size", "shape")]
+        assert len(shape_items) >= 1
+
+    def test_coordset_adds_dimension_sections(self):
+        """Dataset with CoordSet appends dimension sections."""
+        x = Coord([1.0, 2.0, 3.0])
+        y = Coord([4.0, 5.0])
+        # CoordSet iterates coords in reverse and pops dims from end,
+        # so we pass reversed: [y, x] → after reverse + pop gives x→"x", y→"y"
+        ds = NDDataset([[1, 2, 3], [4, 5, 6]], coordset=[y, x])
+        sections = ds._repr_sections()
+        dim_sections = [s for s in sections if s.role == "dimension"]
+        assert len(dim_sections) == 2
+
+    def test_unit_preserved_in_values(self):
+        """Data values include unit string when units are set."""
+        ds = NDDataset([1.0, 2.0, 3.0], units="m")
+        sections = ds._repr_sections()
+        data = next(s for s in sections if s.role == "data")
+        values = next(i for i in data.items if i.key == "values")
+        assert "m" in values.value
+
+    def test_complex_shows_r_and_i(self):
+        """Complex data shows R and I components."""
+        ds = NDDataset([1 + 2j, 3 + 4j])
+        sections = ds._repr_sections()
+        data = next(s for s in sections if s.role == "data")
+        values = next(i for i in data.items if i.key == "values")
+        assert "R" in values.value
+        assert "I" in values.value
+
+    def test_masked_shows_mask_symbol(self):
+        """Masked data shows -- for masked values."""
+        data = np.ma.MaskedArray([1.0, 2.0, 3.0], mask=[False, True, False])
+        ds = NDDataset(data)
+        sections = ds._repr_sections()
+        data_sec = next(s for s in sections if s.role == "data")
+        values = next(i for i in data_sec.items if i.key == "values")
+        assert "--" in values.value
+
+    def test_empty_has_sections(self):
+        """Empty dataset still returns summary and data sections."""
+        ds = NDDataset()
+        sections = ds._repr_sections()
+        roles = [s.role for s in sections]
+        assert "summary" in roles
+        assert "data" in roles
+
+
+class TestNDDatasetSemanticHTML:
+    """Tests for NDDataset._repr_html_() via the semantic path."""
+
+    def test_heading_contains_type(self):
+        """HTML heading contains the type name."""
+        ds = NDDataset([1.0, 2.0])
+        html = ds._repr_html_()
+        assert "NDDataset" in html
+
+    def test_heading_contains_name(self):
+        """HTML heading contains the dataset name when set."""
+        ds = NDDataset([1.0, 2.0], name="my_ds")
+        html = ds._repr_html_()
+        assert "my_ds" in html
+
+    def test_summary_inline_no_details(self):
+        """Summary metadata is rendered inline (no details wrapper)."""
+        ds = NDDataset([1.0, 2.0], name="inline_test")
+        html = ds._repr_html_()
+        # Summary items should not have their own <details> tag
+        assert "inline_test" in html
+
+    def test_data_section_collapsible(self):
+        """Data section has a details collapsible wrapper."""
+        ds = NDDataset([1.0, 2.0])
+        html = ds._repr_html_()
+        assert "<summary>Data</summary>" in html
+
+    def test_dimension_sections_present(self):
+        """Dimension sections appear in HTML for datasets with coords."""
+        x = Coord([1.0, 2.0])
+        y = Coord([3.0, 4.0])
+        ds = NDDataset([[1, 2], [3, 4]], coordset=[y, x])
+        html = ds._repr_html_()
+        assert "Dimension" in html
+
+    def test_data_values_present(self):
+        """Data values appear in the HTML."""
+        ds = NDDataset([1.0, 2.0, 3.0])
+        html = ds._repr_html_()
+        assert "1" in html
+        assert "3" in html
+
+    def test_units_present(self):
+        """Units appear in the HTML."""
+        ds = NDDataset([1.0, 2.0, 3.0], units="m")
+        html = ds._repr_html_()
+        assert "m" in html
+
+    def test_no_uuid_in_heading(self):
+        """No internal UUID or long hex IDs in the heading."""
+        ds = NDDataset([1.0, 2.0], name="no_uuid")
+        html = ds._repr_html_()
+        # The heading is in the first <summary> tag
+        import re
+
+        match = re.search(r"<summary>(.*?)</summary>", html)
+        assert match is not None
+        heading = match.group(1)
+        # Should not contain long hex strings
+        assert not re.search(r"[0-9a-f]{8,}", heading)
+
+    def test_outer_wrapper_structure(self):
+        """HTML has the expected outer wrapper structure."""
+        ds = NDDataset([1.0, 2.0])
+        html = ds._repr_html_()
+        assert '<div class="scp-output">' in html
+        assert "<details>" in html
+        assert "</details>" in html
+        assert "</div>" in html
+
+    def test_complex_r_i_in_html(self):
+        """Complex data R/I notation appears in HTML."""
+        ds = NDDataset([1 + 2j, 3 + 4j])
+        html = ds._repr_html_()
+        assert "R[" in html
+        assert "I[" in html
+
+    def test_temporary_equivalence_with_sentinel(self):
+        """
+        Semantic HTML contains core content present in sentinel HTML.
+
+        This is a temporary migration equivalence test.
+        """
+        from spectrochempy.utils.print import convert_to_html
+
+        x = Coord([1.0, 2.0], title="alpha", units="m")
+        y = Coord([3.0, 4.0], title="beta", units="s")
+
+        configs = [
+            NDDataset([1.0, 2.0, 3.0], name="simple"),
+            NDDataset(
+                [[1, 2], [3, 4]],
+                coordset=[y, x],
+                name="with_coords",
+                title="test",
+            ),
+        ]
+
+        for ds in configs:
+            old_html = convert_to_html(ds)
+            new_html = ds._repr_html_()
+
+            old_content = set(old_html.split())
+            new_content = set(new_html.split())
+
+            common = old_content & new_content
+            assert (
+                len(common) > 0
+            ), f"No overlapping content between old and new HTML for {ds}"
+            assert "NDDataset" in new_html

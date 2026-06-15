@@ -323,7 +323,7 @@ class TestRepr:
     def test_repr_html(self):
         proj = Project(name="test")
         html = proj._repr_html_()
-        assert "<div class='scp-output'>" in html
+        assert '<div class="scp-output">' in html
         assert "test" in html
 
     def test_str_empty_project(self):
