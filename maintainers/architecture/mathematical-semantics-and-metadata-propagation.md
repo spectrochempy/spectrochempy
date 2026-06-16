@@ -1172,6 +1172,11 @@ The last category is not a major mathematical result family. Most operations
 that return a new `NDDataset` either update provenance, change representation,
 or both.
 
+Interpolation is currently the clearest example identified during the
+characterization campaign of *same scientific object + changed representation*.
+Scientific context survives, provenance is extended, while coordinate geometry
+is rebuilt.
+
 Field-level identity implications:
 
 | Field | Primary role | If identity is preserved | If identity changes | Current concern |
@@ -1492,7 +1497,9 @@ Current behavior:
 - reductions calculate through masked-array behavior;
 - slicing slices masks with data;
 - concatenation concatenates masks with data;
-- interpolation may interpolate/reorder masks according to the operation path;
+- interpolation reconstructs masks through numerical float interpolation of
+  the source mask followed by 0.5 thresholding — not a copy operation
+  (mask handling is closer to a rebuild policy than a preservation policy);
 - `Coord` rejects masks and always behaves as unmasked.
 
 Consistent behaviors:
