@@ -226,7 +226,15 @@ def interpolate(
     """
     new = dataset if inplace else dataset.copy()
 
-    axis_list, dim_list = new.get_axis(only_first=False, dim=dim, dims=dims)
+    # Only pass non-None dims to get_axis to avoid the dims=None shadowing dim=…
+    # (_get_dims_from_args pops "dims" first, and if it exists (even as None)
+    # the "dim" keyword is never consulted).
+    kw = {}
+    if dim is not None:
+        kw["dim"] = dim
+    if dims is not None:
+        kw["dims"] = dims
+    axis_list, dim_list = new.get_axis(only_first=False, **kw)
 
     coord_map = {}
     if coord is not None:

@@ -21,6 +21,12 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- Fixed ``interpolate`` `dim` argument resolution when ``dims=None`` is in
+  scope.  Calling ``interpolate(dim=0, ...)`` or ``interpolate(dim="y", ...)``
+  previously defaulted to the last axis instead of honouring the requested
+  dimension, because ``_get_dims_from_args`` pops the ``dims`` key first and
+  could not distinguish an explicit ``None`` from an absent argument.
+
 - Restored historical hypercomplex/quaternion dataset display (#1147).  Detailed
   terminal and HTML representations once again show explicit ``RR``/``RI``/``IR``/``II``
   component blocks and preserve complex-dimension shape annotations, instead of
