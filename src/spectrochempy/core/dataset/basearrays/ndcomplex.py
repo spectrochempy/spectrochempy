@@ -17,7 +17,7 @@ from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 from spectrochempy.core.units import Quantity
 from spectrochempy.utils.constants import TYPE_COMPLEX
 from spectrochempy.utils.constants import TYPE_FLOAT
-from spectrochempy.utils.print import insert_masked_print
+from spectrochempy.utils.print import _format_array_values
 
 
 # ======================================================================================
@@ -363,7 +363,10 @@ class NDComplexArray(NDArray):
 
         out = ""
         cplx = [False] * self.ndim
-        if self.is_complex:
+        display_flags = self._display_complex_dim_flags()
+        if display_flags is not None:
+            cplx = display_flags
+        elif self.is_complex:
             cplx[-1] = True
 
         shcplx = (
@@ -391,49 +394,96 @@ class NDComplexArray(NDArray):
 
         return out
 
-    def _str_value(self, sep="\n", ufmt=" {:~P}", header="       values: ... \n"):
-        prefix = [""]
-        if self.is_empty:
-            return header + "{}".format(textwrap.indent("empty", " " * 9))
+    def _display_complex_dim_flags(self):
+        """Return plugin-provided complex dimension flags for display, if any."""
+        from spectrochempy.plugins import manager as manager_module  # noqa: PLC0415
 
-        if self.has_complex_dims:
-            # we will display the different component separately
-            prefix = ["R", "I"]
+        handler = manager_module.plugin_manager.registry.get_handler(
+            "display.complex_dim_flags"
+        )
+        if handler is None:
+            return None
+        try:
+            flags = handler(self)
+        except Exception:
+            return None
+        if flags is None:
+            return None
+        if isinstance(flags, (str, bytes)):
+            return None
+        try:
+            flags = list(flags)
+        except TypeError:
+            return None
+        if len(flags) != self.ndim:
+            return None
+        if not all(isinstance(flag, (bool, np.bool_)) for flag in flags):
+            return None
+        return [bool(flag) for flag in flags]
+
+    def _plugin_display_values(self, sep="\n", ufmt=" {:~P}"):
+        """Return plugin-provided display values, if any."""
+        from spectrochempy.plugins import manager as manager_module  # noqa: PLC0415
+
+        handler = manager_module.plugin_manager.registry.get_handler(
+            "display.array_values"
+        )
+        if handler is None:
+            return None
+        try:
+            return handler(self, sep=sep, ufmt=ufmt)
+        except Exception:
+            return None
+
+    def _format_display_values(self, sep="\n", ufmt=" {:~P}"):
+        """Format array values for terminal and HTML display paths."""
+        plugin_values = self._plugin_display_values(sep=sep, ufmt=ufmt)
+        if plugin_values is not None:
+            return plugin_values
 
         units = ufmt.format(self.units) if self.has_units else ""
 
-        def mkbody(d, pref, units):
-            # work around printing masked values with formatting
-            ds = d.copy()
-            if self.is_masked:
-                dtype = self.dtype
-                mask_string = f"--{dtype}"
-                ds = insert_masked_print(ds, mask_string=mask_string)
-            body = np.array2string(ds, separator=" ", prefix=pref)
-            body = body.replace("\n", sep)
-            text = "".join([pref, body, units])
-            text += sep
-            return text
-
         text = ""
-        if "I" not in "".join(prefix):  # case of pure real data
+        if not self.has_complex_dims:  # case of pure real data
             if self._data is not None:
                 data = self.umasked_data
                 if isinstance(data, Quantity):
                     data = data.magnitude
-                text += mkbody(data, "", units)
-        else:
-            for pref in prefix:
-                if self._data is not None:
-                    component = self.copy()
-                    if pref == "R":
-                        component._data = component._data.real
-                    else:
-                        component._data = component._data.imag
-                    data = component.umasked_data
-                    if isinstance(data, Quantity):
-                        data = data.magnitude
-                    text += mkbody(data, pref, units)
+                text += _format_array_values(
+                    data,
+                    is_masked=self.is_masked,
+                    dtype=self.dtype,
+                    sep=sep,
+                    prefix="",
+                    units=units,
+                )
+            return text
+
+        for pref in ("R", "I"):
+            if self._data is not None:
+                component = self.copy()
+                if pref == "R":
+                    component._data = component._data.real
+                else:
+                    component._data = component._data.imag
+                data = component.umasked_data
+                if isinstance(data, Quantity):
+                    data = data.magnitude
+                text += _format_array_values(
+                    data,
+                    is_masked=self.is_masked,
+                    dtype=self.dtype,
+                    sep=sep,
+                    prefix=pref,
+                    units=units,
+                )
+
+        return text
+
+    def _str_value(self, sep="\n", ufmt=" {:~P}", header="       values: ... \n"):
+        if self.is_empty:
+            return header + "{}".format(textwrap.indent("empty", " " * 9))
+        text = self._format_display_values(sep=sep, ufmt=ufmt)
 
         out = "          DATA \n"
         out += f"        title: {self.title}\n" if self.title else ""

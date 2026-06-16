@@ -118,6 +118,50 @@ def _get_coord_data(coord):
     return None
 
 
+def _match_indices(old_data, new_data):
+    """
+    Map each target point to an exactly matching original index, or ``-1``.
+
+    Implements the point-wise label policy (#1098): a target point counts as
+    "the same" as an original point only on exact value equality, so identity,
+    reordering and subsetting carry labels over while genuinely resampled
+    points (which fall between original values) do not. Matching is exact on
+    purpose -- SpectroChemPy has no coordinate-matching tolerance convention,
+    so a broader tolerance would be a separate, explicit design decision.
+    """
+    old_data = np.asarray(old_data)
+    new_data = np.asarray(new_data)
+    match_idx = np.full(len(new_data), -1, dtype=int)
+    for j, value in enumerate(new_data):
+        hits = np.flatnonzero(old_data == value)
+        if hits.size:
+            match_idx[j] = hits[0]
+    return match_idx
+
+
+def _carry_labels(old_labels, match_idx):
+    """
+    Carry labels onto interpolated points using precomputed match indices.
+
+    Each target point that exactly matches an original coordinate value
+    inherits that point's label(s); the others stay unlabelled (empty string).
+    Returns ``None`` when there is nothing to carry, leaving the interpolated
+    coordinate unlabelled (#1098). The label level structure is preserved by
+    copying whole per-point rows (labels are stored with points on axis 0).
+    """
+    if old_labels is None:
+        return None
+    old_labels = np.asarray(old_labels)
+    matched = match_idx >= 0
+    if not np.any(matched):
+        return None
+    new_labels = np.full(
+        (len(match_idx),) + old_labels.shape[1:], "", dtype=old_labels.dtype
+    )
+    new_labels[matched] = old_labels[match_idx[matched]]
+    return new_labels
+
+
 def interpolate(
     dataset,
     dim=None,
@@ -145,8 +189,11 @@ def interpolate(
         For multiple dims: dict {dim: coord} or sequential application.
     method : str, optional, default='linear'
         Interpolation method: 'linear' or 'pchip'.
-    fill_value : any, optional, default=np.nan
-        Value for points outside the original range.
+    fill_value : float or str, optional, default=np.nan
+        Value used for points outside the original range. This applies to both
+        the ``'linear'`` and ``'pchip'`` methods: a finite value fills
+        out-of-range points with that constant, the default ``np.nan`` returns
+        NaN outside the range, and ``"extrapolate"`` extrapolates instead.
     assume_sorted : bool, optional, default=False
         If True, skip monotonicity checks.
     inplace : bool, optional, default=False
@@ -166,7 +213,10 @@ def interpolate(
 
     Notes
     -----
-    - Labels are NOT interpolated and are reset after interpolation.
+    - Labels are not interpolated. A target point carries over the label of an
+      original point only when it exactly matches that point's coordinate value
+      (so identity, reordering and subsetting keep their labels); genuinely
+      resampled points are left unlabelled (#1098).
     - For multiple coordinates per dimension, all are interpolated consistently.
     - Secondary coordinates are interpolated numerically. If they represent
       analytical transformations of the primary coordinate (e.g., wavelength = 1/wavenumber),
@@ -194,10 +244,12 @@ def interpolate(
         # Handle different target coordinate types
         from spectrochempy.core.dataset.nddataset import NDDataset
 
+        target_from_array = False
         if isinstance(target_coord, NDDataset):
             target_coord = target_coord.coord(dim)
         elif isinstance(target_coord, np.ndarray):
             target_coord = Coord(target_coord)
+            target_from_array = True
         elif not isinstance(target_coord, Coord):
             raise TypeError(
                 f"coord must be Coord, np.ndarray, or NDDataset, got {type(target_coord)}"
@@ -211,6 +263,16 @@ def interpolate(
 
         if primary_old_coord is None or not primary_old_coord.has_data:
             raise ValueError(f"Dimension '{dim}' has no coordinate data to interpolate")
+
+        if target_from_array:
+            # A coordinate generated from a bare array carries no metadata. Keep
+            # the semantics of the axis being interpolated by inheriting the
+            # source coordinate's units and title (#1094). The array values are
+            # assumed to already be expressed in the source coordinate's units,
+            # so the units are *attached*, not converted.
+            if primary_old_coord.has_units:
+                target_coord.units = primary_old_coord.units
+            target_coord.title = primary_old_coord.title
 
         old_data = _get_coord_data(primary_old_coord)
         if old_data is None:
@@ -230,7 +292,12 @@ def interpolate(
                 target_coord.ito(primary_old_coord.units)
                 new_data = _get_coord_data(target_coord)
 
-        sorted_old_x, sort_idx, was_reversed = _validate_monotonic(
+        # Point-wise label carry-over: for each target point, find the exactly
+        # matching original index so labels can follow the data (#1098). Both
+        # arrays are now expressed in the source coordinate's units.
+        match_idx = _match_indices(old_data, new_data)
+
+        sorted_old_x, sort_idx, _was_reversed = _validate_monotonic(
             primary_old_coord, assume_sorted
         )
 
@@ -240,6 +307,13 @@ def interpolate(
             ].copy()
         else:
             sorted_data = new._data
+
+        # ``fill_value`` may be NaN (the default), a finite constant or the
+        # string ``"extrapolate"``. ``interp1d`` (linear) handles all three
+        # natively; ``PchipInterpolator`` only knows ``extrapolate`` True/False,
+        # so the finite-constant case is applied by hand below so that
+        # ``fill_value`` behaves consistently for both methods (#1093).
+        extrapolate = isinstance(fill_value, str) and fill_value == "extrapolate"
 
         if method == "linear":
             interpolator = interp1d(
@@ -261,12 +335,30 @@ def interpolate(
                 sorted_old_x,
                 sorted_data,
                 axis=ax,
-                extrapolate=False,
+                extrapolate=extrapolate,
             )
         else:
             raise ValueError(f"Unknown method: {method}")
 
         interpolated_data = interpolator(new_data)
+
+        if (
+            method == "pchip"
+            and not extrapolate
+            and not (isinstance(fill_value, float) and np.isnan(fill_value))
+        ):
+            # PCHIP leaves out-of-range points as NaN (``extrapolate=False``);
+            # replace them with the requested constant so ``fill_value`` matches
+            # the linear method. ``sorted_old_x`` is ascending, so this mask is
+            # independent of the target-coordinate direction.
+            out_of_range = (new_data < sorted_old_x[0]) | (new_data > sorted_old_x[-1])
+            if out_of_range.any():
+                interpolated_data[
+                    tuple(
+                        out_of_range if i == ax else slice(None)
+                        for i in range(interpolated_data.ndim)
+                    )
+                ] = fill_value
 
         if sort_idx is not None and len(sort_idx) > 0:
             new._data = interpolated_data
@@ -274,9 +366,19 @@ def interpolate(
             new._data = interpolated_data
 
         if new.is_masked:
+            # The mask must be reordered with the same ``sort_idx`` as the data
+            # so it is interpolated against ``sorted_old_x`` in matching order;
+            # otherwise a decreasing source coordinate flips the mask relative to
+            # its samples (closely related to #1100).
+            if sort_idx is not None and len(sort_idx) > 0:
+                sorted_mask = new._mask[
+                    tuple(sort_idx if i == ax else slice(None) for i in range(new.ndim))
+                ]
+            else:
+                sorted_mask = new._mask
             mask_interpolator = interp1d(
                 sorted_old_x,
-                new._mask.astype(float),
+                sorted_mask.astype(float),
                 axis=ax,
                 kind="linear",
                 bounds_error=False,
@@ -292,12 +394,21 @@ def interpolate(
         # Build secondary-coordinate interpolator closure
         # Bind loop variables as defaults to capture values per iteration.
         def _interpolate_secondary(
-            coord, _sorted_old_x=sorted_old_x, _new_data=new_data
+            coord,
+            _sorted_old_x=sorted_old_x,
+            _new_data=new_data,
+            _sort_idx=sort_idx,
+            _match_idx=match_idx,
         ):
             new_sec = coord.copy()
             if coord.has_data:
                 old_sec_data = _get_coord_data(coord)
                 if old_sec_data is not None and len(old_sec_data) == len(_sorted_old_x):
+                    # Reorder the secondary coordinate with the primary's
+                    # ``sort_idx`` so it aligns with ``sorted_old_x`` (matches the
+                    # data/mask handling; needed when the primary is decreasing).
+                    if _sort_idx is not None and len(_sort_idx) > 0:
+                        old_sec_data = old_sec_data[_sort_idx]
                     sec_interpolator = interp1d(
                         _sorted_old_x,
                         old_sec_data,
@@ -308,8 +419,15 @@ def interpolate(
                         assume_sorted=True,
                     )
                     new_sec._data = sec_interpolator(_new_data)
-            new_sec._labels = None
+            # Carry the secondary coordinate's labels onto exactly-matching
+            # target points, consistently with the primary coordinate (#1098).
+            new_sec._labels = _carry_labels(coord._labels, _match_idx)
             return new_sec
+
+        # Carry the primary coordinate's labels onto exactly-matching target
+        # points (#1098); copy first so a user-supplied target is not mutated.
+        target_coord = target_coord.copy()
+        target_coord._labels = _carry_labels(primary_old_coord._labels, match_idx)
 
         new._coordset = new._coordset._interpolate_dim(
             dim,
@@ -317,8 +435,11 @@ def interpolate(
             interpolate_secondary=_interpolate_secondary,
         )
 
-        if was_reversed:
-            new.sort(descend=True, dim=dim, inplace=True)
+        # The interpolated data, mask and coordinates are produced in the order
+        # of the target coordinate, so the result already follows the requested
+        # ordering. Re-sorting to the *old* coordinate's direction (as was done
+        # before) would silently flip a decreasing input onto an increasing
+        # target back to decreasing, ignoring the user's requested order (#1100).
 
     new.history = (
         f"Interpolated along dims {dim_list} to {len(new_data)} points "
