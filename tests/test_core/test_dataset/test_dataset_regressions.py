@@ -132,9 +132,7 @@ def test_indexing_no_modeldata():
 def test_interpolation_no_modeldata():
     """Interpolation operations should not carry modeldata."""
     x = scp.Coord(np.linspace(1.0, 3.0, 3), title="x")
-    ds = scp.NDDataset(
-        np.array([1.0, 2.0, 3.0]), coordset=[x]
-    )
+    ds = scp.NDDataset(np.array([1.0, 2.0, 3.0]), coordset=[x])
     itp = ds.interpolate(coord=scp.Coord(np.array([1.5, 2.5]), title="x"))
     assert not hasattr(itp, "modeldata")
 
