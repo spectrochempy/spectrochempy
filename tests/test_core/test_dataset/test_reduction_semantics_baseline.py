@@ -163,7 +163,7 @@ class TestSumCharacterization:
         assert s.roi == [0.0, 10.0]
 
     def test_sum_modeldata_shape_stale(self, reduction_dataset):
-        """SURPRISE: modeldata retains original shape after reduction (stale)."""
+        """Notable behavior: modeldata retains original shape after reduction (stale)."""
         s = reduction_dataset.sum(dim="x")
         assert s.modeldata.shape == (5, 7)
         assert s.shape == (5,)
@@ -304,7 +304,7 @@ class TestMinMaxCharacterization:
 
     def test_max_keepdims_reconstructs_coords(self, reduction_dataset):
         """
-        SURPRISE: max with dim=None, keepdims=True reconstructs coords
+        Notable behavior: max with dim=None, keepdims=True reconstructs coords
         at the extremum location rather than dropping all coords.
         """
         mx = reduction_dataset.max(dim=None, keepdims=True)
@@ -314,7 +314,7 @@ class TestMinMaxCharacterization:
         assert set(mx.coordset.names) == {"x", "y"}
 
     def test_min_keepdims_reconstructs_coords(self, reduction_dataset):
-        """SURPRISE: min also reconstructs coords at extremum location."""
+        """Notable behavior: min also reconstructs coords at extremum location."""
         mn = reduction_dataset.min(dim=None, keepdims=True)
         assert isinstance(mn, NDDataset)
         assert mn.coordset is not None
@@ -355,7 +355,7 @@ class TestArgminArgmaxCharacterization:
         assert am.shape == (5,)
 
     def test_argmax_all_dims_returns_tuple(self, reduction_dataset):
-        """SURPRISE: argmax over all dims returns a tuple of indices."""
+        """Notable behavior: argmax over all dims returns a tuple of indices."""
         am = reduction_dataset.argmax(dim=None)
         assert isinstance(am, tuple)
         assert len(am) == 2
@@ -400,7 +400,7 @@ class TestArgminArgmaxCharacterization:
 
     def test_argmax_keepdims_accepted_but_ignored(self, reduction_dataset):
         """
-        SURPRISE: keepdims is accepted by argmax but has no effect
+        Notable behavior: keepdims is accepted by argmax but has no effect
         on the return type or shape — it is a no-op.
         """
         am = reduction_dataset.argmax(dim="x", keepdims=True)
@@ -411,7 +411,7 @@ class TestArgminArgmaxCharacterization:
 
     def test_argmin_keepdims_accepted_but_ignored(self, reduction_dataset):
         """
-        SURPRISE: keepdims is accepted by argmin but has no effect
+        Notable behavior: keepdims is accepted by argmin but has no effect
         on the return type or shape — it is a no-op.
         """
         am = reduction_dataset.argmin(dim="x", keepdims=True)
@@ -630,7 +630,7 @@ class TestReductionRoiModeldata:
         assert mx.roi == [0.0, 10.0]
 
     def test_modeldata_stale_after_sum(self, reduction_dataset):
-        """SURPRISE: modeldata retains original shape after dim reduction."""
+        """Notable behavior: modeldata retains original shape after dim reduction."""
         s = reduction_dataset.sum(dim="x")
         assert s.modeldata.shape == (5, 7)
         assert s.shape == (5,)
@@ -758,7 +758,7 @@ class TestReductionUnits:
 
     def test_unitful_global_sum_scalar_is_quantity(self):
         """
-        SURPRISE: when units are present, dim=None returns a Quantity,
+        Notable behavior: when units are present, dim=None returns a Quantity,
         not a plain scalar. But when units are absent, it returns a float.
         """
         ds = NDDataset(np.array([1.0, 2.0, 3.0]), units="m")
