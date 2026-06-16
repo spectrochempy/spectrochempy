@@ -20,12 +20,10 @@ import pytest
 
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.processing.transformation.concatenate import concatenate, stack
-from spectrochempy.utils.exceptions import (
-    DimensionsCompatibilityError,
-    UnitsCompatibilityError,
-)
-
+from spectrochempy.processing.transformation.concatenate import concatenate
+from spectrochempy.processing.transformation.concatenate import stack
+from spectrochempy.utils.exceptions import DimensionsCompatibilityError
+from spectrochempy.utils.exceptions import UnitsCompatibilityError
 
 # ======================================================================================
 # FIXTURES
@@ -34,7 +32,8 @@ from spectrochempy.utils.exceptions import (
 
 @pytest.fixture
 def dataset_x():
-    """Semantic-rich 2D dataset — first in concatenation.
+    """
+    Semantic-rich 2D dataset — first in concatenation.
 
     - dims: ['y', 'x'] (5, 7)
     - CoordSet with titles, units
@@ -60,7 +59,8 @@ def dataset_x():
 
 @pytest.fixture
 def dataset_y():
-    """Semantic-rich 2D dataset — second in concatenation.
+    """
+    Semantic-rich 2D dataset — second in concatenation.
 
     Same shape as dataset_x along non-concatenated dimensions.
     Different metadata values for propagation characterization.
@@ -120,9 +120,7 @@ def masked_dataset_x():
 @pytest.fixture
 def masked_dataset_y():
     """2D dataset with a masked value at a different position."""
-    arr = np.ma.MaskedArray(
-        np.full((5, 7), 99.0), mask=np.zeros((5, 7), dtype=bool)
-    )
+    arr = np.ma.MaskedArray(np.full((5, 7), 99.0), mask=np.zeros((5, 7), dtype=bool))
     arr[1, 1] = np.ma.masked
     return NDDataset(arr)
 
@@ -246,7 +244,22 @@ class TestConcatenateCoordSet:
 
     def test_labels_concatenated(self, labeled_dataset_x, labeled_dataset_y):
         c = concatenate(labeled_dataset_x, labeled_dataset_y, dims="x")
-        expected = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n"]
+        expected = [
+            "a",
+            "b",
+            "c",
+            "d",
+            "e",
+            "f",
+            "g",
+            "h",
+            "i",
+            "j",
+            "k",
+            "l",
+            "m",
+            "n",
+        ]
         assert c.x.labels.tolist() == expected
 
     def test_concat_dim_matches_dim_name(self, dataset_x, dataset_y):
@@ -273,8 +286,10 @@ class TestConcatenateCoordSet:
         assert str(c.y.units) == "s"
 
     def test_compatible_coord_units_convert(self):
-        """Notable: coordinate with compatible units is auto-converted
-        to match the first dataset's coordinate units."""
+        """
+        Notable: coordinate with compatible units is auto-converted
+        to match the first dataset's coordinate units.
+        """
         y = Coord(np.linspace(0.0, 60.0, 5), title="time", units="s")
         x1 = Coord(np.linspace(4000.0, 1000.0, 7), title="dist", units="m")
         x2 = Coord(np.linspace(4000.0, 1000.0, 7), title="dist", units="cm")
@@ -302,8 +317,10 @@ class TestConcatenateUnits:
         assert str(c.units) == "m"
 
     def test_compatible_units_converted_to_first(self):
-        """Notable behavior: compatible units are auto-converted
-        to the first dataset's units."""
+        """
+        Notable behavior: compatible units are auto-converted
+        to the first dataset's units.
+        """
         a = NDDataset(np.array([1.0, 2.0, 3.0]), units="m")
         b = NDDataset(np.array([400.0, 500.0, 600.0]), units="cm")
         c = concatenate(a, b, dims="x")
@@ -349,7 +366,8 @@ class TestConcatenateMasks:
 
 
 class TestConcatenateMetadata:
-    """Characterize metadata propagation through concatenation.
+    r"""
+    Characterize metadata propagation through concatenation.
 
     Observations (not policy):
     - title comes from the FIRST dataset (with warning if different)
@@ -406,7 +424,8 @@ class TestConcatenateMetadata:
 
 
 class TestConcatenateHistory:
-    """Characterize history behavior through concatenation.
+    """
+    Characterize history behavior through concatenation.
 
     Notable behavior: history is REWRITTEN, not appended.
     Original history entries from input datasets are lost.
@@ -434,7 +453,8 @@ class TestConcatenateHistory:
 
 
 class TestConcatenateRoiModeldata:
-    """Characterize ROI and modeldata behavior through concatenation.
+    """
+    Characterize ROI and modeldata behavior through concatenation.
 
     Observations (not policy):
     - ROI propagates from the LAST dataset (via copy of last input)
@@ -451,8 +471,10 @@ class TestConcatenateRoiModeldata:
         assert np.allclose(c.modeldata, 99.0)
 
     def test_modeldata_shape_stale(self, dataset_x, dataset_y):
-        """Notable behavior: modeldata retains input shape,
-        not the concatenated output shape."""
+        """
+        Notable behavior: modeldata retains input shape,
+        not the concatenated output shape.
+        """
         c = concatenate(dataset_x, dataset_y, dims="x")
         assert c.modeldata.shape == (5, 7)
         assert c.shape == (5, 14)
@@ -513,7 +535,8 @@ class TestConcatenateIdentityProvenance:
 
 
 class TestStackCharacterization:
-    """Characterize stack() current behavior.
+    """
+    Characterize stack() current behavior.
 
     stack prepends a new dimension, creates a coordinate with labels
     from dataset names, then delegates to concatenate(dims=0).
@@ -607,8 +630,10 @@ class TestStackCharacterization:
     # ------------------------------------------------------------------
 
     def test_stack_origin_from_last_dataset(self):
-        """Notable: origin propagates from the LAST dataset
-        (consistent with concatenate's copy-of-last pattern)."""
+        """
+        Notable: origin propagates from the LAST dataset
+        (consistent with concatenate's copy-of-last pattern).
+        """
         x = Coord(np.linspace(0.0, 10.0, 3))
         a = NDDataset(np.array([10.0, 20.0, 30.0]), coordset=[x])
         b = NDDataset(np.array([40.0, 50.0, 60.0]), coordset=[x])
@@ -632,8 +657,10 @@ class TestStackCharacterization:
         assert s.meta.project == "project_last"
 
     def test_stack_meta_deep_copied(self):
-        """Notable: result meta is deep-copied, not aliased
-        to the source dataset object."""
+        """
+        Notable: result meta is deep-copied, not aliased
+        to the source dataset object.
+        """
         x = Coord(np.linspace(0.0, 10.0, 3))
         a = NDDataset(np.array([10.0, 20.0, 30.0]), coordset=[x])
         b = NDDataset(np.array([40.0, 50.0, 60.0]), coordset=[x])
@@ -678,13 +705,13 @@ class TestConcatenateEdgeCases:
         assert isinstance(c, NDDataset)
 
     def test_concat_as_method(self, dataset_x, dataset_y):
-        """concatenate is available as a dataset method."""
+        """Concatenate is available as a dataset method."""
         c = dataset_x.concatenate(dataset_y, dims="x")
         assert isinstance(c, NDDataset)
         assert c.shape == (5, 14)
 
     def test_concat_with_tuple(self, dataset_x, dataset_y):
-        """concatenate accepts a tuple of datasets."""
+        """Concatenate accepts a tuple of datasets."""
         c = concatenate((dataset_x, dataset_y), dims="x")
         assert isinstance(c, NDDataset)
         assert c.shape == (5, 14)
