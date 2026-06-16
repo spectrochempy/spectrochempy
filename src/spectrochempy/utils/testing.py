@@ -391,7 +391,6 @@ def compare_datasets(
             "roi",
             "size",
             "name",
-            "modeldata",
             "processeddata",
             "baselinedata",
             "referencedata",

@@ -32,6 +32,12 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Fixed ``interpolate`` `dim` argument resolution when ``dims=None`` is in
+  scope.  Calling ``interpolate(dim=0, ...)`` or ``interpolate(dim="y", ...)``
+  previously defaulted to the last axis instead of honouring the requested
+  dimension, because ``_get_dims_from_args`` pops the ``dims`` key first and
+  could not distinguish an explicit ``None`` from an absent argument.
+
 - Restored historical hypercomplex/quaternion dataset display (#1147).  Detailed
   terminal and HTML representations once again show explicit ``RR``/``RI``/``IR``/``II``
   component blocks and preserve complex-dimension shape annotations, instead of
@@ -123,8 +129,14 @@ Breaking Changes
   axis support, not as a signal-bearing operand.  Workflows needing correction
   vectors, weighting profiles, response curves, or other signal-like 1D
   operands should represent them as 1D ``NDDataset`` objects instead.  This
-  clarifies the math semantics under the broader ``#1103`` arithmetic and
-  metadata characterization work.
+   clarifies the math semantics under the broader ``#1103`` arithmetic and
+   metadata characterization work.
+
+- Removed the orphaned ``NDDataset.modeldata`` attribute (#1168).  Fit/model
+  outputs should be stored and plotted as explicit ``NDDataset`` objects or
+  dedicated fit-result objects rather than hidden structural state on
+  ``NDDataset``.  ``plot(plot_model=True)`` now emits a ``FutureWarning``
+  explaining the removal.
 
 .. section
 

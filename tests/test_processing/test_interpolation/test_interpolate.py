@@ -720,3 +720,83 @@ class TestAlignInterpolate:
             ds1_aligned.coord("x").data, ds3_aligned.coord("x").data
         )
         assert len(ds2_aligned.coord("x").data) == 10
+
+
+class TestInterpolateDimResolution:
+    """
+    Regression tests for dim/dims argument resolution.
+
+    The get_axis helper pops the ``dims`` key first; if ``dims=None``
+    is explicitly in scope (the default), the ``dim`` keyword is never
+    consulted, causing ``dim=0`` / ``dim="y"`` to silently fall back to
+    the last axis.  These tests verify that every supported dim
+    specification form is honoured correctly.
+    """
+
+    @pytest.fixture
+    def ds(self):
+        """2D dataset with dims ['y', 'x'] and shape (5, 7)."""
+        x = Coord(np.linspace(4000.0, 1000.0, 7), title="wavenumber", units="cm^-1")
+        y = Coord(np.linspace(0.0, 60.0, 5), title="time", units="s")
+        return NDDataset(
+            np.arange(35.0, dtype="float64").reshape(5, 7),
+            coordset=[y, x],
+        )
+
+    def test_dim_0_interpolates_first_axis(self, ds):
+        """dim=0 must interpolate axis 0 (y dimension)."""
+        target = np.linspace(10.0, 50.0, 3)
+        r = ds.interpolate(dim=0, coord=target)
+        assert r.shape == (3, 7)
+        np.testing.assert_allclose(r.y.data, target, rtol=1e-10)
+
+    def test_dim_y_interpolates_y_dimension(self, ds):
+        """dim='y' must interpolate the y dimension."""
+        target = np.linspace(10.0, 50.0, 3)
+        r = ds.interpolate(dim="y", coord=target)
+        assert r.shape == (3, 7)
+        np.testing.assert_allclose(r.y.data, target, rtol=1e-10)
+
+    def test_dim_1_interpolates_last_axis(self, ds):
+        """dim=1 must interpolate axis 1 (x dimension)."""
+        target = np.linspace(3500.0, 1500.0, 3)
+        r = ds.interpolate(dim=1, coord=target)
+        assert r.shape == (5, 3)
+        np.testing.assert_allclose(r.x.data, target, rtol=1e-10)
+
+    def test_dim_negative_one_interpolates_last_axis(self, ds):
+        """dim=-1 must interpolate the last axis (x)."""
+        target = np.linspace(3500.0, 1500.0, 3)
+        r = ds.interpolate(dim=-1, coord=target)
+        assert r.shape == (5, 3)
+        np.testing.assert_allclose(r.x.data, target, rtol=1e-10)
+
+    def test_dim_x_interpolates_x_dimension(self, ds):
+        """dim='x' must interpolate the x dimension."""
+        target = np.linspace(3500.0, 1500.0, 3)
+        r = ds.interpolate(dim="x", coord=target)
+        assert r.shape == (5, 3)
+        np.testing.assert_allclose(r.x.data, target, rtol=1e-10)
+
+    def test_default_dim_none_interpolates_last(self, ds):
+        """Default dim=None must interpolate the last dimension (x)."""
+        target = np.linspace(3500.0, 1500.0, 3)
+        r = ds.interpolate(coord=target)
+        assert r.shape == (5, 3)
+        np.testing.assert_allclose(r.x.data, target, rtol=1e-10)
+
+    def test_dims_keyword_passed_explicitly_none(self, ds):
+        """Explicit dims=None must not shadow dim for the default path."""
+        target = np.linspace(3500.0, 1500.0, 3)
+        r = ds.interpolate(dims=None, coord=target)
+        assert r.shape == (5, 3)
+        np.testing.assert_allclose(r.x.data, target, rtol=1e-10)
+
+    def test_1d_default_interpolates_last(self):
+        """1D dataset: default dim must interpolate the only dimension."""
+        x = Coord(np.linspace(0.0, 10.0, 5), title="x")
+        ds = NDDataset(np.arange(5.0), coordset=[x])
+        target = np.array([2.0, 4.0, 6.0])
+        r = ds.interpolate(coord=target)
+        assert r.shape == (3,)
+        np.testing.assert_allclose(r.x.data, target, rtol=1e-10)
