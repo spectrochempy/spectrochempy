@@ -326,7 +326,6 @@ class Coord(NDMath, NDArray):
             # the _linear attribute is set to True if the data are linearized
             self._units = new._units
             self._title = new._title
-            self._roi = new._roi
             return None
         new.data = new._data  # here we assign to the data attribute to fire
         # the linearisation (eventually) and the rounding
@@ -594,7 +593,6 @@ class Coord(NDMath, NDArray):
             "meta",
             "title",
             "name",
-            "roi",
             "linear",
             "sigdigits",
         ]
@@ -768,9 +766,6 @@ class Coord(NDMath, NDArray):
         udata = (new.data * oldunits).to(units)
         new._data = udata.m
         new._units = udata.units
-        if new._roi is not None:
-            roi = (np.array(new._roi) * oldunits).to(units)
-            new._roi = list(roi)
         return new
 
     # ----------------------------------------------------------------------------------

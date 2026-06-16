@@ -126,6 +126,44 @@ def test_ndio_load_without_default_field_keeps_legacy_behavior(tmp_path):
     assert_array_equal(loaded.x.data, legacy_default_data)
 
 
+def test_ndio_load_ignores_legacy_roi_fields(tmp_path):
+    ds = NDDataset([0.0, 1.0, 2.0], coordset=[Coord([10.0, 20.0, 30.0], title="x")])
+    filename = ds.save_as(tmp_path / "legacy_roi", confirm=False)
+
+    with zipfile.ZipFile(filename, "r") as zipf:
+        member = zipf.namelist()[0]
+        js = json.loads(zipf.read(member).decode("utf-8"))
+
+    js["roi"] = [0.0, 1.0]
+    js["coordset"]["coords"][0]["roi"] = [10.0, 20.0]
+
+    with zipfile.ZipFile(filename, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
+        zipf.writestr(member, json.dumps(js, indent=2))
+
+    loaded = NDDataset.load(filename)
+
+    assert not hasattr(loaded, "roi")
+    assert not hasattr(loaded.x, "roi")
+
+
+def test_ndio_load_ignores_legacy_modeldata_field(tmp_path):
+    ds = NDDataset([0.0, 1.0, 2.0])
+    filename = ds.save_as(tmp_path / "legacy_modeldata", confirm=False)
+
+    with zipfile.ZipFile(filename, "r") as zipf:
+        member = zipf.namelist()[0]
+        js = json.loads(zipf.read(member).decode("utf-8"))
+
+    js["modeldata"] = [42.0, 42.0, 42.0]
+
+    with zipfile.ZipFile(filename, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
+        zipf.writestr(member, json.dumps(js, indent=2))
+
+    loaded = NDDataset.load(filename)
+
+    assert not hasattr(loaded, "modeldata")
+
+
 if __name__ == "__main__":
     pytest.main([__file__])
 

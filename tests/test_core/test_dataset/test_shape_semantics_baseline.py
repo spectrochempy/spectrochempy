@@ -11,7 +11,6 @@ Coverage:
     - reshape
     - atleast_2d
     - CoordSet semantics (Preserve / Reduce / Rebuild / Synthesize)
-    - ROI behavior
     - history behavior
 """
 
@@ -35,7 +34,6 @@ def shape_dataset():
     - dims: ['y', 'x'] (5, 7)
     - CoordSet with titles, units
     - title, name, metadata, history
-    - ROI (UI/selection state — to reassess)
     """
     y = Coord(np.linspace(0.0, 60.0, 5), title="time", units="s")
     x = Coord(np.linspace(4000.0, 1000.0, 7), title="wavenumber", units="cm^-1")
@@ -46,7 +44,6 @@ def shape_dataset():
     ds.origin = "test_origin"
     ds.meta.project = "test_project"
     ds.history = ["original entry"]
-    ds.roi = [0.0, 10.0]
     return ds
 
 
@@ -174,10 +171,6 @@ class TestTransposeCharacterization:
         t = shape_dataset.transpose()
         assert t is not shape_dataset
 
-    def test_transpose_preserves_roi(self, shape_dataset):
-        t = shape_dataset.transpose()
-        assert t.roi == [0.0, 10.0]
-
     def test_transpose_noop_for_1d(self, shape_dataset_1d):
         t = shape_dataset_1d.transpose()
         assert t.dims == shape_dataset_1d.dims
@@ -250,10 +243,6 @@ class TestSwapdimsCharacterization:
     def test_swapdims_inplace_returns_same(self, shape_dataset):
         s = shape_dataset.swapdims("y", "x", inplace=True)
         assert s is shape_dataset
-
-    def test_swapdims_preserves_roi(self, shape_dataset):
-        s = shape_dataset.swapdims("y", "x")
-        assert s.roi == [0.0, 10.0]
 
     def test_swapdims_noop_on_1d(self, shape_dataset_1d):
         """SURPRISE: swapdims on 1D returns a copy without error (no-op)."""
@@ -337,12 +326,6 @@ class TestSqueezeCharacterization:
         sq = ds.squeeze(inplace=True)
         assert sq is ds
 
-    def test_squeeze_preserves_roi(self):
-        ds = NDDataset(np.ones((1, 4)), roi=[0.0, 10.0])
-        ds.roi = [0.0, 10.0]
-        sq = ds.squeeze()
-        assert sq.roi == [0.0, 10.0]
-
     def test_squeeze_preserves_metadata(self):
         ds = NDDataset(np.ones((1, 4)), title="squeeze_meta")
         ds.author = "author_x"
@@ -424,10 +407,6 @@ class TestReshapeCharacterization:
         r = shape_dataset.reshape((7, 5), dims=("x", "y"))
         assert r is not shape_dataset
 
-    def test_reshape_preserves_roi(self, shape_dataset):
-        r = shape_dataset.reshape((7, 5), dims=("x", "y"))
-        assert r.roi == [0.0, 10.0]
-
     def test_reshape_with_explicit_coords(self, shape_dataset):
         c = Coord(np.linspace(0.0, 60.0, 7), title="new_time", units="s")
         r = shape_dataset.reshape((7, 5), dims=("y", "x"), coords={"y": c})
@@ -496,11 +475,6 @@ class TestAtleast2dCharacterization:
         a = shape_dataset_1d.atleast_2d()
         assert len(a.history) == 1
         assert a.history[0] == shape_dataset_1d.history[0]
-
-    def test_atleast_2d_preserves_roi(self, shape_dataset_1d):
-        shape_dataset_1d.roi = [0.0, 100.0]
-        a = shape_dataset_1d.atleast_2d()
-        assert a.roi == [0.0, 100.0]
 
     def test_atleast_2d_semantic_pattern(self):
         """CoordSet semantics: Rebuild (new dim 'u' gets None coord, original preserved)."""
@@ -588,39 +562,6 @@ class TestCoordSetSemanticsClassification:
         a = shape_dataset.atleast_2d()
         assert a.coordset is not None
         assert a.coordset.names == shape_dataset.coordset.names
-
-
-# ======================================================================================
-# ROI CHARACTERIZATION
-# ======================================================================================
-
-
-class TestRoiCharacterization:
-    """
-    Characterize ROI behavior under shape operations.
-
-    ROI is current behavior only — it is likely historical UI/interactive
-    selection state, not stable scientific metadata. Its propagation through
-    shape operations should be reassessed later.
-    """
-
-    def test_roi_preserved_through_all_ops(self, shape_dataset):
-        """ROI is preserved through all shape ops (current behavior, to reassess)."""
-        t = shape_dataset.transpose()
-        assert t.roi == [0.0, 10.0]
-        s = shape_dataset.swapdims("y", "x")
-        assert s.roi == [0.0, 10.0]
-        sq = shape_dataset.squeeze()
-        assert sq.roi == [0.0, 10.0]
-        r = shape_dataset.reshape((7, 5), dims=("x", "y"))
-        assert r.roi == [0.0, 10.0]
-        a = shape_dataset.atleast_2d()
-        assert a.roi == [0.0, 10.0]
-
-    def test_roi_defaults_to_limits(self):
-        """Roi falls back to data limits when not explicitly set."""
-        ds = NDDataset(np.array([1.0, 2.0, 3.0]))
-        assert ds.roi == [1.0, 3.0]
 
 
 # ======================================================================================

@@ -134,16 +134,6 @@
 #     dimy = new.dims[-2]
 #     y = getattr(new, dimy)
 #
-#     # ------------------------------------------------------------------------
-#     # Should we display only ROI region?
-#     # ------------------------------------------------------------------------
-#
-#     if 'Processed' in selector:
-#         # in this case we make the selection
-#         new = new[y.roi[0]:y.roi[1], x.roi[0]:x.roi[1]]
-#         x = getattr(new, dimx)
-#         y = getattr(new, dimy)
-#
 #     xsize = new.shape[-1]
 #     ysize = new.shape[-2]
 #
@@ -398,12 +388,6 @@
 #                     )
 #     fig.add_traces(data)
 #
-#     # show out of X ROI zone
-#     fullrange = getattr(new, dimx).limits
-#     roirange = getattr(new, dimx).roi
-#
-#     x0, x1 = fullrange[0], roirange[0] - offset
-#     x2, x3 = fullrange[1], roirange[1] - offset
 #     fig.update_layout(
 #             shapes=[
 #                     dict(

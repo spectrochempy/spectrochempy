@@ -6,7 +6,7 @@ It does NOT validate a desired future policy.
 
 Coverage:
     - concatenate: data, CoordSet, units, masks, metadata, history,
-      ROI, identity/provenance, edge cases
+      identity/provenance, edge cases
     - stack: data, CoordSet, metadata, provenance
 
 Result Assembly Pattern observations (see RFC):
@@ -51,7 +51,6 @@ def dataset_x():
     ds.description = "description_x"
     ds.origin = "origin_x"
     ds.meta.project = "project_x"
-    ds.roi = [0.0, 10.0]
     ds.history = ["original_x"]
     return ds
 
@@ -76,7 +75,6 @@ def dataset_y():
     ds.description = "description_y"
     ds.origin = "origin_y"
     ds.meta.project = "project_y"
-    ds.roi = [5.0, 20.0]
     ds.history = ["original_y"]
     return ds
 
@@ -446,24 +444,6 @@ class TestConcatenateHistory:
 
 
 # ======================================================================================
-# ROI
-# ======================================================================================
-
-
-class TestConcatenateRoi:
-    """
-    Characterize ROI behavior through concatenation.
-
-    Observations (not policy):
-    - ROI propagates from the LAST dataset (via copy of last input)
-    """
-
-    def test_roi_from_last_dataset(self, dataset_x, dataset_y):
-        c = concatenate(dataset_x, dataset_y, dims="x")
-        assert c.roi == [5.0, 20.0]
-
-
-# ======================================================================================
 # IDENTITY / PROVENANCE OBSERVATIONS
 # ======================================================================================
 
@@ -476,7 +456,7 @@ class TestConcatenateIdentityProvenance:
     - title, author, description, name are handled individually
       (title: first, name: last, author: merged, description: synthesized)
       This is NOT a copy-first identity preservation pattern.
-    - origin, meta, roi come from the last dataset (copy artifact)
+    - origin and meta come from the last dataset (copy artifact)
     - history is rewritten — provenance is not preserved
     - This most closely resembles Pattern B (Rebuild / Synthesize):
       the result is a synthesized object, not an identity-preserved
