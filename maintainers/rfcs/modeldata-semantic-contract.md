@@ -341,20 +341,16 @@ behaviour is accidental, not intentional.
 
 ### Whether a future implementation RFC is justified
 
-**Yes**, but only once a semantic direction is chosen.  The three dimensions
-to decide are:
+At audit time, the open design dimensions were:
 
 1. **Ownership** — does `modeldata` belong on `NDDataset` or on a fit result?
 2. **Propagation** — should it survive all operations, geometry-preserving
    only, or none?
 3. **Validation** — should the setter enforce shape compatibility?
 
-The minimal safe next step is **Option E** (document the current narrow usage
-as a visualisation hint), followed by a decision on ownership before any
-implementation work.
-
-That was the audit-time assessment.  Maintainer review subsequently chose the
-stronger option: remove the orphaned field rather than narrow and retain it.
+The audit-phase text above is preserved as historical context.  Maintainer
+review subsequently chose the stronger option: remove the orphaned field
+rather than narrow and retain it.
 
 ### Summary
 
@@ -365,8 +361,8 @@ stronger option: remove the orphaned field rather than narrow and retain it.
 | Does anything write it? | No production code |
 | Does anything read it? | One plotting code path |
 | Is current propagation correct? | Only by accident (nothing sets it) |
-| Should it be redesigned? | Yes — but semantic direction first |
-| Recommended next step | Option E (document) then Option C or D (ownership) |
+| Should it be redesigned? | The redesign question was resolved by removal from `NDDataset` |
+| Recommended next step | Keep load compatibility for legacy files; keep fit/model state explicit and out of `NDDataset` |
 
 ---
 
