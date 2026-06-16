@@ -844,12 +844,20 @@ history append is consistent with copy-first arithmetic assembly.
 | History | rewritten (single entry) | appended (original survives) |
 | Author | preserved (except denoise) | preserved |
 
-The split between Groups A and B is not documented or enforced by any shared
-assembly layer. The divergence appears to be an emergent consequence of how
-each wrapper constructs its output object. A future unification policy should
-decide whether all processing wrappers should follow one pattern or whether
-the Group A / Group B distinction reflects a meaningful semantic difference
-(producing a new derivative dataset vs. transforming the same dataset).
+#### Interpretation
+
+Group A and Group B do not appear to differ because of an explicit
+processing policy.
+
+The split currently follows implementation families
+(Filter/PCA versus Baseline).
+
+Whether this reflects an intentional semantic distinction
+(derived object vs same-object transformation)
+or historical implementation divergence remains unknown.
+
+Further architectural work should avoid treating either pattern as
+normative until the semantic intent is clarified.
 
 ## Result Assembly by Operation Family
 
@@ -1031,10 +1039,29 @@ Of these, `roi` and `modeldata` deserve special mention:
 - **`roi`** is likely historical UI/interactive selection state, not stable
   scientific metadata. Its propagation through shape operations, reductions, and
   copy-first assembly should be reassessed once its current usage is understood.
+
+  Current observed ROI behaviors include:
+
+  - preserved through shape operations;
+  - preserved through indexing and slicing;
+  - recomputed by some processing wrappers (Group A).
+
+  No global ROI semantic contract is currently visible.
+
 - **`modeldata`** is derived model or fit information, historically linked to
   fitting workflows and probably designed mainly for 1D use. Its propagation
   rules (currently stale after shape changes) should be reviewed separately in a
   dedicated RFC or issue before any lifecycle change.
+
+  Current observed modeldata behaviors include:
+
+  - preserved unchanged through many copy-first operations;
+  - preserved by baseline wrappers (Group B);
+  - dropped by filter/PCA wrappers (Group A);
+  - potentially stale after shape, reduction,
+    combination, and indexing operations.
+
+  No consistent propagation policy is currently visible.
 
 Neither field should be treated as ordinary scientific context in the long term.
 
@@ -1100,6 +1127,17 @@ Observed identity classes:
 | Same object, changed representation | Same object, but grid, domain, dimensionality, or representation changed | interpolation, reshape-like operations, some integrations and domain transforms | preserve context, recompute structural fields, update history/title as needed |
 | Derived scientific object | Output has distinct scientific meaning from the input | analysis outputs, scores, components, features, model-derived outputs | synthesize title/description/coords/history, preserve provenance selectively |
 | Multi-source synthesized object | Result combines multiple scientifically meaningful inputs | concatenate, stack, multi-input analysis | synthesize provenance, avoid pretending first input identity is the whole result |
+
+PR6 reveals two different identity signals among processing wrappers.
+
+Group A wrappers modify identity markers (name suffixes, rewritten
+history, dropped modeldata), suggesting a derived-object reading.
+
+Group B wrappers preserve identity markers and extend provenance,
+suggesting a same-object transformation.
+
+It is currently unclear whether this distinction is intentional or
+emergent from implementation history.
 
 Operation-family identity reading:
 
