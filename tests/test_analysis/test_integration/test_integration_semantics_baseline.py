@@ -34,7 +34,6 @@ import pytest
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 
-
 # ======================================================================================
 # FIXTURES
 # ======================================================================================
@@ -128,7 +127,9 @@ class TestReturnTypeShapeDims:
             integration_dataset.trapezoid(dim=None, keepdims=True)
 
     def test_multi_axis_via_axis_kwarg_not_supported(self, integration_dataset):
-        with pytest.raises(TypeError, match="multiple values for keyword argument 'axis'"):
+        with pytest.raises(
+            TypeError, match="multiple values for keyword argument 'axis'"
+        ):
             integration_dataset.trapezoid(axis=(0, 1))
 
     def test_multi_axis_via_dim_tuple_not_supported(self, integration_dataset):
@@ -281,7 +282,9 @@ class TestHistoryProvenance:
 
     def test_history_contains_timestamp_prefix(self, integration_dataset):
         r = integration_dataset.trapezoid(dim="x")
-        assert "> Dataset resulting from application of `trapezoid` method" in r.history[0]
+        assert (
+            "> Dataset resulting from application of `trapezoid` method" in r.history[0]
+        )
 
 
 # ======================================================================================
@@ -292,7 +295,9 @@ class TestHistoryProvenance:
 class TestIdentity:
     """Characterize integration as a derived-quantity operation."""
 
-    def test_integration_rewrites_identity_markers_for_derived_quantity(self, integration_dataset):
+    def test_integration_rewrites_identity_markers_for_derived_quantity(
+        self, integration_dataset
+    ):
         r = integration_dataset.trapezoid(dim="x")
         assert r.title == "area"
         assert r.description == "Integration of NDDataset 'source_name' along dim: 'x'."
@@ -348,7 +353,9 @@ class TestEdgeCases:
 
     def test_no_coordset_raises_attribute_error(self):
         ds = NDDataset(np.array([1.0, 2.0, 3.0]), units="V")
-        with pytest.raises(AttributeError, match="'NoneType' object has no attribute 'data'"):
+        with pytest.raises(
+            AttributeError, match="'NoneType' object has no attribute 'data'"
+        ):
             ds.trapezoid()
 
     def test_partial_then_full_integration_stays_nddataset(self, integration_dataset):
