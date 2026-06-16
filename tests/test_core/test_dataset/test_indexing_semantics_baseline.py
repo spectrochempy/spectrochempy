@@ -8,7 +8,6 @@ Coverage:
     - Return type, shape, dims
     - CoordSet behavior (preserve/reduce/slice)
     - Units, masks, metadata, history
-    - ROI
     - Identity, provenance
     - Integer, slice, ellipsis, step, label, float, fancy indexing
 """
@@ -50,7 +49,6 @@ def ds():
     ds.description = "test description"
     ds.origin = "test_origin"
     ds.meta.project = "test_project"
-    ds.roi = [0.0, 10.0]
     ds.history = ["original entry"]
     return ds
 
@@ -493,41 +491,6 @@ class TestHistory:
         assert "Original entry" in r.history[0]
 
 
-# ======================================================================================
-# ROI
-# ======================================================================================
-
-
-class TestRoi:
-    """
-    Characterize ROI behavior through indexing.
-
-    Observations: roi is copied unchanged through all indexing forms.
-    It is NOT sliced or adjusted to match the new data shape.
-    """
-
-    def test_roi_preserved_on_single_index(self, ds):
-        r = ds[0]
-        assert r.roi == [0.0, 10.0]
-
-    def test_roi_preserved_on_slice(self, ds):
-        r = ds[1:3]
-        assert r.roi == [0.0, 10.0]
-
-    def test_roi_preserved_on_submatrix(self, ds):
-        r = ds[1:4, 2:5]
-        assert r.roi == [0.0, 10.0]
-
-    def test_roi_preserved_on_scalar_like(self, ds):
-        r = ds[0, 0]
-        assert r.roi == [0.0, 10.0]
-
-    def test_roi_preserved_on_fancy(self, ds):
-        r = ds[[0, 2, 4]]
-        assert r.roi == [0.0, 10.0]
-
-
-# ======================================================================================
 # LABELS
 # ======================================================================================
 

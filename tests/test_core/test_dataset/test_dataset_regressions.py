@@ -98,6 +98,18 @@ def test_modeldata_removed_from_nddataset():
     assert not hasattr(ds, "modeldata")
 
 
+def test_roi_removed_from_nddataset():
+    """NDDataset should no longer expose a roi property."""
+    ds = scp.NDDataset([1, 2, 3])
+    assert not hasattr(ds, "roi")
+
+
+def test_roi_removed_from_coord():
+    """Coord should no longer expose a roi property."""
+    coord = scp.Coord(np.array([1.0, 2.0, 3.0]), title="x")
+    assert not hasattr(coord, "roi")
+
+
 def test_plot_model_emits_future_warning():
     """plot(plot_model=True) should emit FutureWarning, not error."""
     import warnings
@@ -113,6 +125,13 @@ def test_copy_no_modeldata():
     ds = scp.NDDataset([1, 2, 3])
     ds2 = ds.copy()
     assert not hasattr(ds2, "modeldata")
+
+
+def test_copy_no_roi():
+    """copy() should not carry roi."""
+    ds = scp.NDDataset([1, 2, 3])
+    ds2 = ds.copy()
+    assert not hasattr(ds2, "roi")
 
 
 def test_arithmetic_no_modeldata():
@@ -135,6 +154,13 @@ def test_interpolation_no_modeldata():
     ds = scp.NDDataset(np.array([1.0, 2.0, 3.0]), coordset=[x])
     itp = ds.interpolate(coord=scp.Coord(np.array([1.5, 2.5]), title="x"))
     assert not hasattr(itp, "modeldata")
+
+
+def test_unit_conversion_no_roi():
+    """Unit conversion should not create or propagate roi."""
+    ds = scp.NDDataset(np.array([1.0, 2.0, 3.0]), units="m")
+    converted = ds.to("cm")
+    assert not hasattr(converted, "roi")
 
 
 def test_optimize_modeldata_preserved():

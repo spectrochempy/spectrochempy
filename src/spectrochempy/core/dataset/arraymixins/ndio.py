@@ -390,8 +390,12 @@ class NDIO(tr.HasTraits):
             return coordset
 
         def item_to_attr(obj: Any, dic: dict[str, Any]) -> Any:
+            legacy_ignored_fields = {"roi", "_roi", "modeldata", "_modeldata"}
             for key, val in dic.items():
                 try:
+                    if key in legacy_ignored_fields:
+                        continue
+
                     if "readonly" in dic and key in ["readonly", "name"]:
                         # case of the meta and preferences
                         pass

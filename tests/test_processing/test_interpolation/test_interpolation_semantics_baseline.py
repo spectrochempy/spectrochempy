@@ -14,7 +14,7 @@ characterised separately.
 Coverage:
     - Return type, shape, dims, CoordSet, units, masks
     - Metadata (title, name, author, description, origin, meta)
-    - History, ROI, identity, provenance
+    - History, identity, provenance
     - Coordinate rebuild semantics (increasing, decreasing, shifted,
       denser / sparser grids)
     - Label point-wise carry-over policy
@@ -27,7 +27,6 @@ Key observed patterns:
     - Copy-first + domain rebuild (not inplace by default)
     - Same scientific object, changed representation
     - History appended with timestamp formatting
-    - ROI preserved but stale after coordinate rebuild
     - Mask reconstruction is operation-dependent
     - Labels on exact coordinate matches only
     - Multi-coordinate interpolation currently raises a ValueError
@@ -73,7 +72,6 @@ def ds_2d():
     ds.description = "test description"
     ds.origin = "test_origin"
     ds.meta.project = "test_project"
-    ds.roi = [0.0, 10.0]
     ds.history = ["original entry"]
     return ds
 
@@ -387,28 +385,6 @@ class TestHistory:
             dim="x", coord=np.linspace(3500.0, 1500.0, 3), inplace=True
         )
         assert len(r.history) == 2
-
-
-# ======================================================================================
-# ROI
-# ======================================================================================
-
-
-class TestROI:
-    """Characterize ROI (region of interest) behavior: preserved but stale."""
-
-    def test_roi_preserved_after_interpolation(self, ds_2d):
-        r = ds_2d.interpolate(dim="x", coord=np.linspace(3500.0, 1500.0, 3))
-        assert r.roi == ds_2d.roi
-
-    def test_roi_preserved_unchanged(self, ds_2d):
-        """
-        ROI is preserved unchanged and may therefore become stale
-        when the coordinate grid is rebuilt.
-        """
-        r = ds_2d.interpolate(dim="x", coord=np.linspace(3500.0, 1500.0, 3))
-        assert r.roi[0] == ds_2d.roi[0]
-        assert r.roi[1] == ds_2d.roi[1]
 
 
 # ======================================================================================
