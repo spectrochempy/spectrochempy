@@ -95,6 +95,14 @@ modeldata, labels, identity, provenance, scalar extraction, label indexing,
 ellipsis, step slicing, float indexing, and edge cases for integer, slice,
 label, bool, and list indexing forms.
 
+PR6 characterization tests (81 tests) are in
+`tests/test_processing/test_processing_wrapper_semantics_baseline.py` covering
+processing wrapper semantics for smooth, savgol, whittaker, basc, detrend,
+asls, and denoise: return type, shape/dims, CoordSet, units, masks, metadata,
+history, ROI, modeldata, identity, provenance, and shared behavior. Reveals
+two distinct assembly patterns (Group A: Filter/PCA-based, Group B:
+Baseline-based).
+
 See Audit Policy in `AGENTS.md` for test-first refactoring requirements.
 
 ## Semantics Matrix
@@ -117,7 +125,8 @@ following sections.
 | Concatenation | concatenated data | compatible, converted to first units | concatenated with data | concatenated selected dim | concatenated selected coord labels | synthesized multi-source metadata | first title wins | reset/synthesized | `NDDataset` |
 | Stack | new leading dim plus concatenation | same as concatenate | stacked with data | new coord labels from dataset names | new stack labels from names | follows concatenate | follows concatenate | follows concatenate | `NDDataset` |
 | Analysis outputs | derived result | local operation rules | local operation rules | local operation rules | local operation rules | often synthesized locally | often synthesized locally | often rewritten | operation-specific |
-| Processing outputs | transformed data | wrapper/local rules | wrapper/local rules | reconstructed if compatible | operation-specific | wrapper may restore subset | wrapper/local rules | wrapper/local rules | usually `NDDataset` |
+| Processing outputs (Group A: Filter/PCA) | processed data | preserved | wrapper-dependent | preserved (unchanged) | mostly preserved | name appended/rewritten, modeldata dropped, roi recomputed, history rewritten | author preserved (except denoise where overridden), title preserved | rewritten to single method entry | `NDDataset` (wrapper-assembled) |
+| Processing outputs (Group B: Baseline) | baseline-corrected data | preserved | wrapper-dependent | preserved (unchanged) | mostly preserved | name/title preserved, modeldata/roi preserved | author preserved, title preserved | appended | `NDDataset` (wrapper-assembled) |
 
 The main pattern visible in this table is that arithmetic and many ufuncs have
 a relatively coherent center in `NDMath`, while processing, analysis,
@@ -767,6 +776,81 @@ Wrapper-based paths are the clearest source of metadata fragmentation. They may
 produce scientifically valid data while preserving less context than copy-first
 paths.
 
+### Observed Wrapper Assembly Patterns (PR6)
+
+PR6 characterization tests (`test_processing_wrapper_semantics_baseline.py`)
+reveal two distinct assembly patterns among the current processing wrappers,
+driven by the underlying algorithm class rather than by any shared policy.
+
+#### Group A: Filter/PCA-Based Wrappers
+
+Wrappers: `smooth`, `savgol`, `whittaker`, `denoise`
+
+Pattern:
+
+```text
+name:              appended with "_Filter.transform" or "_PCA.inverse_transform"
+modeldata:         dropped (set to None)
+roi:               recomputed from data range after processing
+history:           rewritten (original entries lost; single entry "Created using method ...")
+title:             preserved
+author:            preserved by filter wrappers; overridden to system hostname by denoise
+description:       preserved
+origin:            preserved
+meta:              preserved
+coordset:          preserved
+units:             preserved
+```
+
+Key observation: Group A wrappers behave as if producing a new or derived
+dataset, not the original dataset after a transformation. The history rewrite
+and name suffix are the clearest signals.
+
+Within Group A, `denoise` (PCA-based) diverges from the filter wrappers in one
+field: `author` is set to `"user@hostname"` (system-dependent) rather than
+preserved from the source dataset. This may indicate an incidental difference
+in how `denoise` constructs its output object versus `Filter.transform`.
+
+#### Group B: Baseline-Based Wrappers
+
+Wrappers: `basc`, `detrend`, `asls`
+
+Pattern:
+
+```text
+name:              preserved unchanged
+modeldata:         preserved (shape and values unchanged)
+roi:               preserved unchanged
+history:           appended (original entries survive, operation appended)
+title:             preserved
+author:            preserved
+description:       preserved
+origin:            preserved
+meta:              preserved
+coordset:          preserved
+units:             preserved
+```
+
+Key observation: Group B wrappers behave as same-object transformations. The
+history append is consistent with copy-first arithmetic assembly.
+
+#### Summary
+
+| Property | Group A (Filter/PCA) | Group B (Baseline) |
+|---|---|---|
+| Name | appended with method suffix | preserved unchanged |
+| Modeldata | dropped | preserved |
+| ROI | recomputed from data range | preserved unchanged |
+| History | rewritten (single entry) | appended (original survives) |
+| Author | preserved (except denoise) | preserved |
+
+The split between Groups A and B is not documented or enforced by any shared
+assembly layer. The divergence appears to be an emergent consequence of how
+each wrapper constructs its output object. A future unification policy should
+decide whether all processing wrappers should follow one pattern or whether
+the Group A / Group B distinction reflects a meaningful semantic difference
+(producing a new derivative dataset vs. transforming the same dataset).
+
 ## Result Assembly by Operation Family
 
 Result assembly is the step that turns computed values back into a
@@ -787,7 +871,8 @@ implicit architectural concept already present in the codebase.
 | Indexing / selection | Copy-first with sliced assembly | units, masks, coordset (sliced), scientific context, history append | coordset sliced along indexed dims | all metadata preserved, deep-copied | `modeldata` and `roi` stale after subsetting |
 | Concatenate | Rebuild / synthesize | compatible units, selected coordinates, masks | data, concatenated coord, description/author/history | first input title/name in some paths | misleading first-input identity; custom `meta` ambiguity |
 | Stack | Rebuild / synthesize via concatenate | compatible units, masks, source names as stack labels | new leading dim, stack coord, multi-source provenance | concatenate-dependent fields | first-input title/name; ambiguous multi-source context |
-| Processing outputs | Wrapper-based | data units, selected coordset when shape-compatible, local history | data, possibly mask/coords/title/history | depends on wrapper; often less than copy-first | dropped scientific context or stale structural context |
+| Processing outputs (Group A: Filter/PCA) | Wrapper-based — identity-changing | data units, coordset, scientific context after wrapper | data, name, roi, modeldata, history rewritten | title, author (except denoise), description, origin, meta | name overwritten with method suffix; history lost; roi recomputed; modeldata dropped |
+| Processing outputs (Group B: Baseline) | Wrapper-based — identity-preserving | data units, coordset, name, roi, modeldata, scientific context | data, history appended | title, author, description, origin, meta | modeldata may become stale for baseline-corrected domain |
 | Analysis outputs | Rebuild / synthesize | operation-defined context | data, coordset, title, description, history, units | operation-specific | preserving source identity when output is a new object |
 
 This table should not be read as a proposed policy. It is a map of the current
@@ -884,6 +969,14 @@ The current codebase does not always label this distinction explicitly, but the
 behavior often follows it. Wrapper-based processing paths are the main weak
 spot: they may behave like processing conceptually while preserving context more
 like a rebuilt analysis output.
+
+PR6 characterization reveals an internal split: Group A wrappers (Filter/PCA:
+`smooth`, `savgol`, `whittaker`, `denoise`) follow the analysis-like pattern —
+they rewrite history, append method suffixes to names, drop modeldata, and
+recompute roi. Group B wrappers (Baseline: `basc`, `detrend`, `asls`) follow
+the processing pattern — they preserve name, modeldata, roi, and append
+history. This suggests the split is driven by the underlying algorithm class
+(Filter vs. Baseline) rather than by an explicit processing-vs-analysis policy.
 
 Object identity explains this distinction more directly than metadata
 propagation alone. Processing usually preserves context because the output is
@@ -1021,14 +1114,16 @@ Operation-family identity reading:
 | Indexing / selection | same object with restricted support | consistent: copy-first preserves identity, CoordSet sliced, metadata unchanged |
 | Concatenate | multi-source synthesized object | partly consistent: provenance is synthesized, but first-title/name behavior can overstate identity |
 | Stack | multi-source synthesized object with new stack axis | partly consistent: source names become labels, other identity fields follow concatenate |
-| Processing outputs | usually same object or changed representation | conceptually consistent, but wrapper paths may under-preserve context |
+| Processing outputs (Group A: Filter/PCA) | processed or transformed — identity partially changed (name suffix, history rewrite suggest derived identity) | wrapper paths create derived identity while preserving most context; denoise further overrides author |
+| Processing outputs (Group B: Baseline) | same object, baseline-corrected — identity preserved | consistent: same-object identity preserved with history append |
 | Analysis outputs | usually derived scientific object | broadly consistent: local synthesis is expected, but provenance preservation varies |
 
 Identity and provenance combinations:
 
 | Case | Typical operations | Identity | Provenance |
-|---|---|---|---|
-| Identity survives, provenance grows | arithmetic, many ufuncs, filtering-like processing, indexing/slicing | same object | history appended |
+|---|---|---|---|---|
+| Identity survives, provenance grows | arithmetic, many ufuncs, baseline-like processing (Group B), indexing/slicing | same object | history appended |
+| Identity partially changed, provenance reset | filter/PCA-like processing (Group A: smooth, savgol, whittaker, denoise) | same object with derived-identity name suffix; context otherwise preserved | history rewritten (original lost); denoise also overrides author |
 | Identity survives with changed representation | interpolation, reshape-like operations, some integrations | same object in new representation | lineage preserved and operation recorded |
 | Identity changes, provenance survives | PCA-like scores, decomposition outputs, model-derived datasets | derived object | source attribution/history should remain visible |
 | Synthesized identity, synthesized provenance | concatenate, stack, multi-source analysis | multi-source result | lineage combined or synthesized |
@@ -1046,7 +1141,7 @@ Field-level identity implications:
 | `title` | identity / scientific context | usually preserve or wrap | synthesize/override when meaning changes | operation-local wording |
 | `name` | identity | may preserve workflow identity | may misidentify derived or multi-source outputs | copy-first can preserve too much |
 | `description` | scientific context | should usually survive | may need synthesized description | wrapper/analysis paths vary |
-| `author` | provenance, mixed | should usually survive as attribution | should remain provenance, not necessarily authorship of new object | concatenate synthesis is local |
+| `author` | provenance, mixed | should usually survive as attribution | should remain provenance, not necessarily authorship of new object | concatenate synthesis is local; denoise overrides to system hostname |
 | `origin` | provenance, mixed | should usually survive as lineage | should remain lineage/provenance when meaningful | may be copied without explicit decision |
 | custom `meta` | mixed | should not disappear silently | should preserve, namespace, or explicitly drop by rule | copy-first vs wrapper inconsistency |
 | `history` | provenance | should append operation | should record derivation/provenance | append/reset/synthesize varies |
@@ -1074,7 +1169,7 @@ Identity and result assembly are correlated but not equivalent:
 | Copy-first | often identity-preserving | may accidentally preserve stale structural fields |
 | Rebuild / synthesize | often identity-changing or multi-source | can also represent same-object domain changes such as interpolation |
 | Reduction-specific | mixed | depends on whether reduction is a summary of the same object or a derived quantity |
-| Wrapper-based | depends on operation | processing wrappers should often preserve identity; analysis wrappers may create new identity |
+| Wrapper-based | depends on operation: Group A (Filter/PCA) tends toward derived identity; Group B (Baseline) preserves identity | processing wrappers should often preserve identity; analysis wrappers may create new identity; current Group A behavior contradicts that expectation |
 
 This suggests that object identity is the conceptual layer connecting metadata,
 coordinates, result assembly, and mathematical semantics. The metadata contract
