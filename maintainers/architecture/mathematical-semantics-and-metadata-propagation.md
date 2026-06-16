@@ -91,7 +91,7 @@ coord-unit conversion, stack origin and meta propagation, and edge cases.
 PR5 characterization tests (135 tests) are in
 `tests/test_core/test_dataset/test_indexing_semantics_baseline.py` covering
 return type, shape/dims, CoordSet, units, masks, metadata, history, ROI,
- ROI, identity, provenance, scalar extraction, label indexing,
+identity, provenance, scalar extraction, label indexing,
 ellipsis, step slicing, float indexing, and edge cases for integer, slice,
 label, bool, and list indexing forms.
 
@@ -805,7 +805,7 @@ Pattern:
 
 ```text
 name:              appended with "_Filter.transform" or "_PCA.inverse_transform"
-modeldata:         dropped (set to None)  [Note: modeldata removed from NDDataset]
+modeldata:         dropped (set to None)  [Note: modeldata removed from the runtime array model]
 roi:               recomputed from data range after processing
 history:           rewritten (original entries lost; single entry "Created using method ...")
 title:             preserved
@@ -1005,7 +1005,7 @@ they rewrite history, append method suffixes to names, and
 recompute roi. Group B wrappers (Baseline: `basc`, `detrend`, `asls`) follow
 the processing pattern — they preserve name, roi, and append
 history. (modeldata was also dropped/preserved respectively but has since been
-removed from NDDataset — see the modeldata RFC.) This suggests the split is driven by the underlying algorithm class
+removed from the runtime array model — see the modeldata RFC.) This suggests the split is driven by the underlying algorithm class
 (Filter vs. Baseline) rather than by an explicit processing-vs-analysis policy.
 
 Object identity explains this distinction more directly than metadata
@@ -1146,7 +1146,7 @@ history), suggesting a derived-object reading.
 
 Group B wrappers preserve identity markers and extend provenance,
 suggesting a same-object transformation.
-(modeldata has since been removed from NDDataset.)
+(modeldata has since been removed from the runtime array model.)
 
 It is currently unclear whether this distinction is intentional or
 emergent from implementation history.
@@ -1203,7 +1203,7 @@ Field-level identity implications:
 | `coordset` | structural information | preserve if support unchanged | reduce/rebuild/synthesize if support changes | mostly coherent but implicit |
 | labels | structural / scientific context | preserve with coordinate support | recompute/synthesize with new axes/domains | follows CoordSet but not separately contracted |
 | `roi` | structural information | preserve only if still valid on same support | drop/recompute if support/domain changes | high stale-field risk |
-| `modeldata` | *(removed from NDDataset)* | — | — | — |
+| `modeldata` | *(removed from the runtime array model)* | — | — | — |
 
 Identity and CoordSet are related but not identical.
 
@@ -1992,18 +1992,20 @@ original processing trail survives in the result.
 
 ### 5. Structural Information Categories
 
-CoordSet, labels, masks, and ROI share a common property: their
-validity depends on geometry, domain, shape, or representation.  They are
-not ordinary scientific context.  (`modeldata` also previously shared this
-property but has been removed from `NDDataset` — see the modeldata RFC.)
+CoordSet, labels, and masks are active structural information.
+ROI and modeldata were historical structural-like fields removed after audit.
+
+CoordSet, labels, and masks share a common property: their validity depends on
+geometry, domain, shape, or representation.  They are not ordinary scientific
+context.
 
 | Field | Dependency | Behaviour after geometry change |
 |-------|-----------|--------------------------------|
 | **CoordSet** | Coordinate geometry | Rebuilt or synthesised |
 | **Labels** | Coordinate value equality | Carried over on exact match only |
 | **Masks** | Data shape and position | Reconstructed via float interpolation + threshold; not copied |
-| **ROI** | Data domain range | Preserved verbatim — may become stale |
-| **modeldata** | *(removed from NDDataset)* | — |
+| **ROI** | Historical data-domain range state | Removed from the runtime array model after audit |
+| **modeldata** | Historical derived model state | Removed from the runtime array model after audit |
 
 These fields differ from title, name, author, description, origin, and meta,
 which survive geometry changes unconditionally.

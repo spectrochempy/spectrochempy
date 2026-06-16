@@ -218,12 +218,12 @@ multi-source rules in Section 6 apply.
 
 ### Historical field decisions
 
-- `roi` — **removed from NDDataset.**  The ROI audit showed inconsistent stale
+- `roi` — **removed from the runtime array model.**  The ROI audit showed inconsistent stale
   propagation, no visible global semantic contract, and no active documented
   user-facing feature depending on it.  Future interactive selection work, if
   needed, should use explicit view/model state rather than hidden dataset
   structure.
-- `modeldata` — **removed from NDDataset.**  The modeldata RFC audit showed
+- `modeldata` — **removed from the runtime array model.**  The modeldata RFC audit showed
   zero production writes, accidental stale propagation, and a single
   production reader (`plot1d`).  Fit/model outputs should be explicit datasets
   or future fit-result objects.

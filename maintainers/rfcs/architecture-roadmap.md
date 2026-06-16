@@ -27,6 +27,23 @@ This document should evolve as the project evolves.
 
 ## 2026-06
 
+### Modeldata Removal
+
+- Decision: remove orphaned `NDDataset.modeldata` from the runtime array model.
+- Rationale: no production writers, accidental stale propagation, and only one
+  legacy plotting reader.
+- Compatibility posture: keep loading legacy serialized `modeldata` fields, but
+  ignore them on read.
+
+### ROI Removal
+
+- Decision: remove orphaned `roi` support from the runtime array model
+  (`NDArray` / `Coord` / `NDDataset`).
+- Rationale: inconsistent stale propagation, no stable global semantic
+  contract, and no active documented user-facing feature.
+- Compatibility posture: keep loading legacy serialized `roi` fields, but
+  ignore them on read.
+
 ### CoordSet Storage Redesign
 
 Decision:
