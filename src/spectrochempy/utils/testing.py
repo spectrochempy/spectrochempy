@@ -388,7 +388,6 @@ def compare_datasets(
             "created",
             "modified",
             "origin",
-            "roi",
             "size",
             "name",
             "processeddata",

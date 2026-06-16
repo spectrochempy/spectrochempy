@@ -199,9 +199,6 @@ class NDArray(tr.HasTraits):
     _units = tr.Instance(Unit, allow_none=True)
     _meta = tr.Instance(Meta, allow_none=True)
 
-    # Region of interest
-    _roi = tr.List(allow_none=True)
-
     # Transposition flag
     _transposed = tr.Bool(False)
 
@@ -266,7 +263,6 @@ class NDArray(tr.HasTraits):
             "meta",
             "title",
             "name",
-            "roi",
             "transposed",
         ]
 
@@ -304,7 +300,7 @@ class NDArray(tr.HasTraits):
         if attrs is None:
             attrs = self._attributes_()
 
-        for attr in ["name", "linear", "roi"]:
+        for attr in ["name", "linear"]:
             if attr in attrs:
                 attrs.remove(attr)
 
@@ -935,10 +931,6 @@ class NDArray(tr.HasTraits):
         numpyprintoptions()
         return "".join([prefix, body, units, size])
 
-    @tr.default("_roi")
-    def _roi_default(self):
-        return None
-
     def _set_data(self, data):
         if data is None:
             return
@@ -1089,10 +1081,6 @@ class NDArray(tr.HasTraits):
         udata = (new.data * oldunits).to(units)
         new._data = udata.m
         new._units = udata.units
-
-        if new._roi is not None:
-            roi = (np.array(new.roi) * oldunits).to(units)
-            new._roi = list(roi)
 
         return new
 
@@ -1734,23 +1722,6 @@ class NDArray(tr.HasTraits):
         self._mask = NOMASK
 
     @property
-    def roi(self):
-        """Region of interest (ROI) limits (list)."""
-        if self._roi is None:
-            self._roi = self.limits
-        return self._roi
-
-    @roi.setter
-    def roi(self, val):
-        self._roi = val
-
-    @property
-    def roi_values(self):
-        if self.units is None:
-            return list(np.array(self.roi))
-        return list(self._uarray(self.roi, self.units))
-
-    @property
     def shape(self):
         """
         A tuple with the size of each dimension - Readonly property.
@@ -2073,7 +2044,6 @@ class NDArray(tr.HasTraits):
             self._data = new._data
             self._units = new._units
             self._title = new._title
-            self._roi = new._roi
             return None
 
         return new

@@ -15,7 +15,6 @@ Coverage:
     - metadata propagation
     - CoordSet reduction / preservation
     - history behavior (appended, not replaced)
-    - ROI stale-field behavior
     - identity / provenance observations
 """
 
@@ -38,7 +37,6 @@ def reduction_dataset():
     - dims: ['y', 'x'] (5, 7)
     - CoordSet with titles, units
     - title, name, metadata, history
-    - ROI (UI/selection state — to reassess)
     """
     y = Coord(np.linspace(0.0, 60.0, 5), title="time", units="s")
     x = Coord(np.linspace(4000.0, 1000.0, 7), title="wavenumber", units="cm^-1")
@@ -48,7 +46,6 @@ def reduction_dataset():
     ds.description = "test description"
     ds.origin = "test_origin"
     ds.meta.project = "test_project"
-    ds.roi = [0.0, 10.0]
     ds.history = ["original entry"]
     return ds
 
@@ -155,10 +152,6 @@ class TestSumCharacterization:
         expected = np.sum(np.arange(35.0).reshape(5, 7), axis=1)
         expected[0] = expected[0] - 0.0
         assert np.isclose(s.data[0], expected[0])
-
-    def test_sum_preserves_roi(self, reduction_dataset):
-        s = reduction_dataset.sum(dim="x")
-        assert s.roi == [0.0, 10.0]
 
 
 # ======================================================================================
@@ -594,31 +587,6 @@ class TestReductionHistory:
         """Original history entry is preserved, history is appended."""
         s = reduction_dataset.sum(dim="x")
         assert "original entry" in s.history[0].lower()
-
-
-# ======================================================================================
-# ROI
-# ======================================================================================
-
-
-class TestReductionRoi:
-    """
-    Characterize ROI behavior through reductions.
-
-    ROI is current behavior only — likely UI/selection state, to reassess.
-    """
-
-    def test_roi_preserved_after_sum(self, reduction_dataset):
-        s = reduction_dataset.sum(dim="x")
-        assert s.roi == [0.0, 10.0]
-
-    def test_roi_preserved_after_mean(self, reduction_dataset):
-        m = reduction_dataset.mean(dim="x")
-        assert m.roi == [0.0, 10.0]
-
-    def test_roi_preserved_after_max(self, reduction_dataset):
-        mx = reduction_dataset.max(dim="x")
-        assert mx.roi == [0.0, 10.0]
 
 
 # ======================================================================================

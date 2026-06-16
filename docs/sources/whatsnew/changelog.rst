@@ -129,11 +129,13 @@ Breaking Changes
    clarifies the math semantics under the broader ``#1103`` arithmetic and
    metadata characterization work.
 
-- Removed the orphaned ``NDDataset.modeldata`` attribute (#1168).  Fit/model
+- Removed the orphaned ``roi`` and ``NDDataset.modeldata`` attributes from the
+  public data model (#1168).  ``roi`` no longer had active production use, and
+  ``NDDataset.modeldata`` no longer had a reliable semantic contract.  Fit/model
   outputs should be stored and plotted as explicit ``NDDataset`` objects or
   dedicated fit-result objects rather than hidden structural state on
-  ``NDDataset``.  ``plot(plot_model=True)`` now emits a ``FutureWarning``
-  explaining the removal.
+  ``NDDataset``.  Legacy serialized ``roi`` and ``modeldata`` fields in native
+  SpectroChemPy files remain load-compatible and are ignored during loading.
 
 .. section
 
