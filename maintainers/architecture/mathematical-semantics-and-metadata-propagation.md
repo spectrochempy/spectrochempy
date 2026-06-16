@@ -82,6 +82,12 @@ dimension reduction, keepdims, units, masks, CoordSet, metadata, history,
 ROI/modeldata, and identity/provenance for sum, mean, std, min, max, argmin,
 and argmax.
 
+PR4 characterization tests (63 tests) are in
+`tests/test_core/test_dataset/test_combination_semantics_baseline.py` covering
+concatenate and stack data, CoordSet, units, masks, metadata, history,
+ROI/modeldata, identity/provenance, coordinate-unit preservation, compatible
+coord-unit conversion, stack origin and meta propagation, and edge cases.
+
 See Audit Policy in `AGENTS.md` for test-first refactoring requirements.
 
 ## Semantics Matrix
@@ -429,8 +435,8 @@ Representative current behavior:
 
 | Operation | Data/mask behavior | Units | Coordinates/labels | Metadata |
 |---|---|---|---|---|
-| `concatenate` | masked arrays concatenated | compatible units required; converted to first units | concatenated along selected dim; other dims must match shape | title from first dataset; authors combined; description/history rewritten |
-| `stack` | adds new leading dimension then delegates to concatenate | same compatibility as concatenate | new coordinate labels derive from dataset names | metadata follows concatenate path |
+| `concatenate` | masked arrays concatenated | compatible units required; converted to first units | concatenated along selected dim; coord units preserved; compatible coord units auto-converted to first dataset's coord units | title from first dataset; authors combined; description/history rewritten; origin/meta/roi/modeldata from last dataset (copy artifact) |
+| `stack` | adds new leading dimension then delegates to concatenate | same compatibility as concatenate | new coordinate labels derive from dataset names | metadata follows concatenate path; origin from last dataset; meta from last dataset (deep-copied) |
 | analysis assembly | operation-specific | operation-specific | operation-specific | often locally synthesized |
 
 Consistent behaviors:
@@ -438,19 +444,30 @@ Consistent behaviors:
 - concatenation checks non-concatenated shapes;
 - data units must be compatible;
 - masks are concatenated with the data;
-- coordinate labels along the concatenated dimension can be concatenated.
+- coordinate labels along the concatenated dimension can be concatenated;
+- coordinate units are preserved for both concatenated and non-concatenated dimensions;
+- compatible coordinate units (e.g., m and cm) are auto-converted to the first
+  dataset's coordinate units, with data values converted accordingly;
+- `origin` propagates from the last dataset for both concatenate and stack;
+- custom `meta` propagates from the last dataset and is deep-copied (not aliased
+  to the source object).
 
 Ambiguous or surprising behaviors:
 
 - title from the first dataset wins when titles differ;
 - `description`, `author`, and `history` are synthesized locally;
-- custom `meta` merge/drop behavior is not yet a clear contract;
+- custom `meta` merge/drop behavior is not yet a clear contract — current
+  behavior takes meta from the last dataset, which may or may not be intended
+  for multi-source operations;
+- `modeldata` retains the shape of the last input dataset, not the concatenated
+  output shape (stale);
 - plugin post-processing can affect concatenation semantics.
 
 Open questions:
 
 - Should custom `meta` be merged, preserved from first input, or dropped for
   multi-source operations?
+- Should `modeldata` be cleared or recomputed after concatenation?
 - Should title/name behavior be standardized across all combination operations?
 - Should stack/concatenate expose a documented metadata policy?
 
