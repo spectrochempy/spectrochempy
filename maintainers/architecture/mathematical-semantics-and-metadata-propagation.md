@@ -353,6 +353,35 @@ Open questions:
   reductions?
 - Should integration be governed by a shared reduction/geometry contract?
 
+### Reduction Families
+
+PR3 characterization tests (100 tests) identify three distinct reduction
+categories with different semantic behaviors:
+
+**Aggregating reductions (`sum`, `mean`, `std`):**
+  Return type depends on dimensionality: global reduction (`dim=None`) returns
+  a plain scalar (or `Quantity` if units present), named-dim reduction returns
+  `NDDataset`, and `keepdims=True` preserves singleton dimensions. History is
+  appended with the method name. Units are preserved consistently. CoordSet is
+  reduced (dropped for global, surviving coords preserved for named-dim).
+  Extremum coordinates are not reconstructed.
+
+**Selection reductions (`min`, `max`):**
+  Same return-type pattern as aggregating reductions for most cases. However,
+  `max(dim=None, keepdims=True)` and `min(dim=None, keepdims=True)` reconstruct
+  coordinate values at the extremum location rather than dropping all
+  coordinates. This asymmetric behavior is not present in aggregating
+  reductions, where `sum(dim=None, keepdims=True)` drops all coordinates.
+  History records `amax`/`amin` (not `max`/`min`), reflecting the underlying
+  numpy dispatch.
+
+**Index reductions (`argmin`, `argmax`):**
+  Never return `NDDataset`. Return type depends on dimensionality: `ndarray`
+  for named-dim reductions, `tuple` of ints for global reduction (unraveled
+  multi-index), and scalar `int` for 1D datasets. The `keepdims` parameter is
+  accepted but has no observable effect on return type or shape — it is
+  effectively a no-op for index reductions.
+
 ## Shape Operation Semantics
 
 Shape operations include slicing, transpose, swapdims, squeeze, reshape, and
