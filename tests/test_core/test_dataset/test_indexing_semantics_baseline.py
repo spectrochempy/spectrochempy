@@ -19,7 +19,6 @@ import pytest
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 
-
 # ======================================================================================
 # FIXTURES
 # ======================================================================================
@@ -27,7 +26,8 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 
 @pytest.fixture
 def ds():
-    """Semantic-rich 2D dataset with labels on x.
+    """
+    Semantic-rich 2D dataset with labels on x.
 
     - dims: ['y', 'x'] (5, 7)
     - CoordSet with titles, units, labels
@@ -88,7 +88,8 @@ def ds_1d():
 
 
 class TestReturnType:
-    """Characterize return type for various indexing forms.
+    """
+    Characterize return type for various indexing forms.
 
     Observation: all indexing forms that return a result return NDDataset.
     Scalar extraction (ds[0, 0]) returns NDDataset with singleton dims.
@@ -371,8 +372,10 @@ class TestMasks:
         assert not np.any(r.mask)
 
     def test_unmasked_slice_mask_is_false(self, ds_masked):
-        """Notable: slices that don't include masked elements
-        may have a scalar False mask rather than an array."""
+        """
+        Notable: slices that don't include masked elements
+        may have a scalar False mask rather than an array.
+        """
         r = ds_masked[2:5, 2:5]
         assert not np.any(r.mask)
 
@@ -388,7 +391,8 @@ class TestMasks:
 
 
 class TestMetadata:
-    """Characterize metadata propagation through indexing.
+    """
+    Characterize metadata propagation through indexing.
 
     Observations: indexing uses copy-first assembly. All metadata
     (title, name, author, description, origin, custom meta) is
@@ -443,7 +447,8 @@ class TestMetadata:
 
 
 class TestHistory:
-    """Characterize history behavior through indexing.
+    """
+    Characterize history behavior through indexing.
 
     Observations: history is APPENDED for all indexing forms.
     Original entries are preserved, and a new entry is added
@@ -497,7 +502,8 @@ class TestHistory:
 
 
 class TestRoi:
-    """Characterize ROI behavior through indexing.
+    """
+    Characterize ROI behavior through indexing.
 
     Observations: roi is copied unchanged through all indexing forms.
     It is NOT sliced or adjusted to match the new data shape.
@@ -530,7 +536,8 @@ class TestRoi:
 
 
 class TestModeldata:
-    """Characterize modeldata behavior through indexing.
+    """
+    Characterize modeldata behavior through indexing.
 
     Notable behavior: modeldata is NOT sliced with the data.
     It retains the original full shape even after subsetting.
@@ -606,7 +613,8 @@ class TestLabels:
 
 
 class TestIdentity:
-    """Characterize scientific object identity after indexing.
+    """
+    Characterize scientific object identity after indexing.
 
     Observations:
     - Slicing preserves identity: title, name, author, description,
@@ -645,7 +653,8 @@ class TestIdentity:
 
 
 class TestProvenance:
-    """Characterize provenance through indexing.
+    """
+    Characterize provenance through indexing.
 
     Observations:
     - origin and author are preserved via copy-first.
@@ -687,7 +696,8 @@ class TestProvenance:
 
 
 class TestScalarExtraction:
-    """Characterize behavior of single-element extraction.
+    """
+    Characterize behavior of single-element extraction.
 
     Notable behavior: ds[0, 0] returns NDDataset(1,1), not a scalar.
     All identity and provenance is preserved. The object never leaves
@@ -742,14 +752,18 @@ class TestLabelIndexing:
         assert list(r.x.labels) == ["a", "c", "e", "g"]
 
     def test_label_slice_reversed_gives_original_order(self, ds):
-        """Notable: reversed label slice returns labels in original
-        order (a..g), not reversed. A negative step returns None."""
+        """
+        Notable: reversed label slice returns labels in original
+        order (a..g), not reversed. A negative step returns None.
+        """
         r = ds[:, "g":"a"]
         assert list(r.x.labels) == ["a", "b", "c", "d", "e", "f", "g"]
 
     def test_label_on_y_without_labels(self, ds):
-        """Notable: slicing a dim without labels by string raises
-        IndexError because the string is not found as a label."""
+        """
+        Notable: slicing a dim without labels by string raises
+        IndexError because the string is not found as a label.
+        """
         with pytest.raises(IndexError):
             ds["a":"c", :]
 
@@ -825,8 +839,10 @@ class TestFloatIndexing:
         assert r.shape == (5, 1)
 
     def test_float_out_of_limits_clips(self, ds):
-        """Notable: out-of-limits float returns nearest boundary value
-        with a log message, not None."""
+        """
+        Notable: out-of-limits float returns nearest boundary value
+        with a log message, not None.
+        """
         r = ds[5000.0]
         assert r is not None
         assert isinstance(r, NDDataset)
@@ -891,8 +907,10 @@ class TestEdgeCases:
             ds[0, 0, 0]
 
     def test_integer_out_of_range_returns_none(self, ds):
-        """Notable: out-of-range integer returns None (with error log),
-        rather than raising IndexError directly."""
+        """
+        Notable: out-of-range integer returns None (with error log),
+        rather than raising IndexError directly.
+        """
         r = ds[100]
         assert r is None
 
