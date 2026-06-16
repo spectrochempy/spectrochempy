@@ -123,12 +123,6 @@ Breaking Changes
   clarifies the math semantics under the broader ``#1103`` arithmetic and
   metadata characterization work.
 
-- Removed the orphaned ``NDDataset.modeldata`` attribute (#1168).  Fit/model
-  outputs should be stored and plotted as explicit ``NDDataset`` objects or
-  dedicated fit-result objects rather than hidden structural state on
-  ``NDDataset``.  ``plot(plot_model=True)`` now emits a ``FutureWarning``
-  explaining the removal.
-
 .. section
 
 Deprecations
