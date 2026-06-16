@@ -5,23 +5,25 @@
 # ======================================================================================
 # ruff: noqa
 
+import numpy as np
 import pytest
 
 import spectrochempy as scp
 from spectrochempy.application.preferences import preferences as prefs
+from spectrochempy.core.readers.read_spc import _SpcFile
 
 DATADIR = prefs.datadir
 
-pytestmark = pytest.mark.data
 
-
-@pytest.fixture(autouse=True)
-def _skip_if_no_testdata():
+@pytest.fixture
+def galacticdata():
     if not (DATADIR / "galacticdata").exists():
         pytest.skip("test data not available (set SCP_TEST_DATA_DOWNLOAD=1)")
+    return DATADIR / "galacticdata"
 
 
-def test_read_spc_merge_behavior():
+@pytest.mark.data
+def test_read_spc_merge_behavior(galacticdata):
     """Test that read_spc respects merge parameter for multi-subfile SPC files."""
     # BARBITUATES.SPC has 286 subfiles with different x-axis lengths
     # Default behavior (merge=False) should return all 286 subfiles individually
@@ -63,7 +65,8 @@ def test_read_spc_merge_behavior():
     ), "Single file with merge=False should still be single dataset"
 
 
-def test_read_spc():
+@pytest.mark.data
+def test_read_spc(galacticdata):
     A = scp.read_spc("galacticdata/BARBITUATES.SPC")
     assert len(A) == 286
     assert A[90].shape == (1, 17)
@@ -133,3 +136,45 @@ def test_read_spc():
 
     W = scp.read_spc("galacticdata/XYTRACE.SPC")
     assert W.shape == (1, 3469)
+
+
+def test_extract_x_data_reads_from_head_size_not_offset():
+    # AUDIT (#1151): pin the CURRENT behavior of ``_SpcFile._extract_x_data``.
+    #
+    # The method reads the explicit X array from the fixed header boundary
+    # (``offset=self.head_size``) and discards the ``np.frombuffer`` read at the
+    # supplied ``offset`` argument, so the returned X never depends on
+    # ``offset``.  This synthetic, data-free test documents that behavior so any
+    # future correction is a deliberate, reviewed change.
+    #
+    # Impact, verified against the Galactic SPC layout and the two call sites in
+    # ``_get_sub_file``:
+    #   * X-Y / X-MY files: the single explicit X block sits immediately after
+    #     the header, so the call site passes ``offset == head_size`` and the
+    #     returned X is correct (the discarded read would have produced the same
+    #     bytes).
+    #   * MXY (TXVALS + TXYXYS) files: each subfile owns a separate X array at a
+    #     varying offset (after its 32-byte subheader), so reading from the fixed
+    #     ``head_size`` returns the first block's bytes for every subfile -- a
+    #     latent coordinate-extraction error that leaves the dataset shape intact
+    #     while corrupting the X coordinates.
+    spc = object.__new__(_SpcFile)
+    spc.head_size = 512
+    spc.float32_dtype = "<f4"
+
+    npts = 4
+    x_at_head_size = np.array([10.0, 11.0, 12.0, 13.0], dtype="<f4")
+    x_at_subfile_offset = np.array([90.0, 91.0, 92.0, 93.0], dtype="<f4")
+
+    # an offset like a later subfile's X array (after head + subheader + X/Y)
+    offset = spc.head_size + 32 + npts * 4
+    content = bytearray(offset + npts * 4)
+    content[spc.head_size : spc.head_size + npts * 4] = x_at_head_size.tobytes()
+    content[offset : offset + npts * 4] = x_at_subfile_offset.tobytes()
+    content = bytes(content)
+
+    x = np.asarray(spc._extract_x_data(offset, content, npts))
+
+    # current behavior: X comes from head_size, the ``offset`` argument is unused
+    np.testing.assert_array_equal(x, x_at_head_size)
+    assert not np.array_equal(x, x_at_subfile_offset)
