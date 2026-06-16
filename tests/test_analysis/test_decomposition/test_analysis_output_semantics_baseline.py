@@ -148,12 +148,16 @@ class TestLatentOutputs:
         assert loadings.x.units == semantic_dataset.x.units
 
     def test_nmf_transform_matches_latent_output_contract(self, efa_dataset):
-        scores = NMF(
-            n_components=2,
-            init="nndsvda",
-            max_iter=500,
-            random_state=0,
-        ).fit(efa_dataset).transform()
+        scores = (
+            NMF(
+                n_components=2,
+                init="nndsvda",
+                max_iter=500,
+                random_state=0,
+            )
+            .fit(efa_dataset)
+            .transform()
+        )
 
         assert scores.shape == (efa_dataset.shape[0], 2)
         assert scores.dims == ["y", "k"]
