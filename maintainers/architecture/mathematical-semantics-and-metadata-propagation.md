@@ -103,6 +103,14 @@ history, ROI, identity, provenance, and shared behavior. Reveals
 two distinct assembly patterns (Group A: Filter/PCA-based, Group B:
 Baseline-based).
 
+PR8 characterization tests (38 tests) are in
+`tests/test_analysis/test_integration/test_integration_semantics_baseline.py`
+covering integration semantics for `trapezoid()` / `simpson()`: return type,
+single-axis dimensional reduction, CoordSet reduction, unit transformation,
+metadata overrides, rewritten provenance, identity as derived quantity, label
+survival on non-integrated dimensions, mask behavior, and representative edge
+cases.
+
 See Audit Policy in `AGENTS.md` for test-first refactoring requirements.
 
 > **Note (June 2026):** `modeldata` has been removed from `NDDataset` as
@@ -358,14 +366,16 @@ Representative behavior:
 | `min` / `max` | scalar quantity or reduced object | preserved when scalar quantity | may preserve selected/reduced coords | special coordinate selection for global extrema |
 | `argmin` / `argmax` | index/coordinate-related result | not always dataset-like | operation-specific | needs characterization |
 | cumulative ops | shape-preserving or dimension-aware | operation-specific | likely copied | some are unsupported for `Coord` |
-| `trapezoid` / `simpson` | integrated dataset or scalar-like result | multiplies data units by coordinate units | integrated dimension removed | local title/description/history behavior |
+| `trapezoid` / `simpson` | integrated dataset, including 0-d dataset results | multiplies data units by coordinate units | integrated dimension removed | local title/description/history rewrite for derived quantity |
 
 Observed current behavior:
 
 - reducing all dimensions can return a `Quantity` rather than an `NDDataset`;
 - named-dimension reductions can return reduced datasets;
 - `keepdims=True` preserves singleton dimensions where implemented;
-- masks participate in the reduction calculation;
+- many ordinary reductions use masked-array calculation, but integration is a
+  notable exception: mask information survives on the returned object while
+  masked source values still appear to contribute numerically to the integral;
 - coordinate propagation is handled by reduction helpers and local operation
   code.
 
@@ -381,6 +391,8 @@ Ambiguous or surprising behaviors:
 - title/history behavior is not uniform;
 - global extrema may rebuild coordinates differently from ordinary reductions;
 - integration has local physical semantics and result assembly rules;
+- integration is the clearest current example of a derived scientific quantity
+  generated through reduction;
 - cumulative operations are not uniformly meaningful for `Coord`.
 
 Open questions:
@@ -1160,7 +1172,7 @@ Operation-family identity reading:
 | Reductions | mixed: same object summarized, or changed representation if dimensions collapse | partially consistent; dims/CoordSet are reduced, but title/name/provenance need characterization |
 | Shape operations | same object, changed representation | mostly consistent when CoordSet is transformed with dims; stale structural fields remain a risk |
 | Interpolation | same object on a new coordinate grid | conceptually consistent: context survives, CoordSet is rebuilt locally |
-| Integration | often same object summarized over a domain, sometimes a derived quantity | mixed; unit/CoordSet changes are meaningful, title/name behavior needs policy |
+| Integration | derived scientific quantity generated through reduction | notably coherent: unit transformation, rewritten title/description/history, CoordSet reduction |
 | Indexing / selection | same object with restricted support | consistent: copy-first preserves identity, CoordSet sliced, metadata unchanged |
 | Concatenate | multi-source synthesized object | partly consistent: provenance is synthesized, but first-title/name behavior can overstate identity |
 | Stack | multi-source synthesized object with new stack axis | partly consistent: source names become labels, other identity fields follow concatenate |
@@ -1174,7 +1186,8 @@ Identity and provenance combinations:
 |---|---|---|---|---|
 | Identity survives, provenance grows | arithmetic, many ufuncs, baseline-like processing (Group B), indexing/slicing | same object | history appended |
 | Identity partially changed, provenance reset | filter/PCA-like processing (Group A: smooth, savgol, whittaker, denoise) | same object with derived-identity name suffix; context otherwise preserved | history rewritten (original lost); denoise also overrides author |
-| Identity survives with changed representation | interpolation, reshape-like operations, some integrations | same object in new representation | lineage preserved and operation recorded |
+| Identity survives with changed representation | interpolation, reshape-like operations | same object in new representation | lineage preserved and operation recorded |
+| Identity changes with reduction-derived quantity | integration | derived quantity from the same source dataset | rewritten history; transformed units; surviving broad context |
 | Identity changes, provenance survives | PCA-like scores, decomposition outputs, model-derived datasets | derived object | source attribution/history should remain visible |
 | Synthesized identity, synthesized provenance | concatenate, stack, multi-source analysis | multi-source result | lineage combined or synthesized |
 | Object identity leaves the dataset surface | raw-return logical/testing ufuncs, scalar reductions | no dataset identity | provenance usually unavailable in returned raw value |
@@ -1512,6 +1525,9 @@ Current behavior:
 - interpolation reconstructs masks through numerical float interpolation of
   the source mask followed by 0.5 thresholding — not a copy operation
   (mask handling is closer to a rebuild policy than a preservation policy);
+- integration preserves mask information on the returned object, but current
+  characterization suggests masked source values are still included in the
+  numerical integration itself;
 - `Coord` rejects masks and always behaves as unmasked.
 
 Consistent behaviors:
@@ -1522,6 +1538,8 @@ Consistent behaviors:
 
 Ambiguous or surprising behaviors:
 
+- integration currently mixes mask preservation with apparent numeric inclusion
+  of masked values;
 - geometry-changing processing operations can recompute masks locally;
 - analysis outputs may not preserve masks in the same way as arithmetic;
 - mask semantics for derived quantities are not centrally documented.
@@ -1530,6 +1548,8 @@ Open questions:
 
 - When should masks be preserved versus recomputed?
 - Should derived analysis results carry masks from input data?
+- Should integration exclude masked values numerically, or is the current
+  historical behavior intentional?
 - Should interpolation mask behavior be part of a general geometry-changing
   operation contract?
 
@@ -1555,6 +1575,7 @@ Consistent behaviors:
 - dimensional analysis is meaningful in `NDMath`;
 - incompatible additive units are rejected;
 - many ufunc unit requirements are explicit.
+- integration is the clearest current unit-transforming reduction family.
 
 Ambiguous or surprising behaviors:
 
@@ -1881,7 +1902,7 @@ The purpose is to make intentional changes visible and reviewable.
 
 ## Semantic Building Blocks
 
-The PR1–PR7 campaign revealed a small set of recurring semantic patterns.
+The PR1–PR8 campaign revealed a small set of recurring semantic patterns.
 These patterns are not proposed as a new architecture.  They describe the
 reusable building blocks already present in the codebase.
 
@@ -1912,12 +1933,13 @@ The campaign confirmed four distinct identity classes:
 **Same object, changed representation**
 :   The entity is unchanged but its coordinate grid or dimensionality is
     different.
-    *Interpolation, reshape-like operations, some integrations.*
+    *Interpolation, reshape-like operations.*
     Scientific context survives, provenance extended, geometry rebuilt.
 
 **Derived scientific object**
 :   The result has a distinct scientific meaning from the input.
-    *Analysis outputs (PCA scores, components), model-derived datasets.*
+    *Analysis outputs (PCA scores, components), model-derived datasets,
+    integration-derived quantities.*
     Title/description/coords/history synthesised locally, provenance
     selectively preserved.
 
@@ -1942,9 +1964,10 @@ are distinct concerns:
   filename, creation time.
 
 An operation can preserve identity while extending provenance (arithmetic),
-change representation while preserving lineage (interpolation), or synthesise
-both identity and provenance (concatenate).  Treating them as a single concept
-obscures the semantic distinctions that result assembly must handle.
+change representation while preserving lineage (interpolation), generate a
+derived quantity through reduction (integration), or synthesise both identity
+and provenance (concatenate).  Treating them as a single concept obscures the
+semantic distinctions that result assembly must handle.
 
 ### 3. Result Assembly Categories
 
@@ -1956,7 +1979,7 @@ or dropped.
 |---------|------------------------|--------------------------|-------------------|
 | **Copy-First Assembly** | Copy the input, then modify data locally | arithmetic, ufuncs | Broad preservation; history appended |
 | **Sliced Assembly** | Slice/copy, then assign sliced data into the copy | indexing, selection | Full preservation; history appended |
-| **Reduction Assembly** | Build result from reduced data, attach surviving context | reductions, integration | Partially preserved; operation-specific |
+| **Reduction Assembly** | Build result from reduced data, attach surviving context | reductions, integration | Partially preserved; operation-specific, with integration as the strongest derived-quantity case |
 | **Domain-Rebuild Assembly** | Copy, then rebuild coordinate domain and interpolate/recompute data | interpolation, reshape-like ops | Scientific context preserved; geometry rebuilt |
 | **Wrapper Assembly** | Call an underlying library, then wrap the result back into NDDataset | processing wrappers (smooth, savgol, etc.) | Two sub-patterns: Group A rewrites identity markers; Group B appends history |
 | **Synthesize Assembly** | Combine multiple inputs into a new result | concatenate, stack | Multi-source metadata; provenance synthesised |
@@ -2017,7 +2040,7 @@ useful as historical evidence of why removal was chosen.
 
 ### 6. Campaign Conclusions
 
-The PR1–PR7 characterisation campaign clarified the following:
+The PR1–PR8 characterisation campaign clarified the following:
 
 - **CoordSet semantics** are now reasonably understood across four categories
   (preserve, reduce, rebuild, synthesise).
@@ -2027,6 +2050,9 @@ The PR1–PR7 characterisation campaign clarified the following:
 - **Result assembly** is a first-class architectural concern, not a detail of
   `NDMath` internals.  The assembly pattern determines which fields survive
   and how.
+- **Integration** is now the clearest characterized example of a derived
+  scientific quantity produced through reduction: geometry is reduced, units
+  transform, and identity/provenance markers are rewritten locally.
 - **ROI** was the least well-defined runtime structure identified by the
   campaign.  It was preserved verbatim by most operations, including those
   that changed the coordinate grid, which made it frequently stale.  That

@@ -27,6 +27,21 @@ This document should evolve as the project evolves.
 
 ## 2026-06
 
+### Integration Semantics Characterization
+
+- Decision: PR8 characterization is complete for `trapezoid()` / `simpson()`.
+- Main conclusion: integration is reduction-like in geometry, but is the
+  clearest current example of a derived scientific quantity generated through
+  reduction.
+- Architectural reading:
+  - CoordSet category: Reduce
+  - result assembly: Reduction Assembly with local unit / metadata rewrite
+  - provenance: rewritten, not appended
+  - identity: derived scientific object / derived quantity
+- Follow-up note: current mask handling during integration warrants separate
+  scientific review, because masked values appear to contribute numerically to
+  the computed integral while mask information survives on the returned object.
+
 ### Modeldata Removal
 
 - Decision: remove orphaned `NDDataset.modeldata` from the runtime array model.
@@ -153,6 +168,22 @@ Major outcomes:
 * architectural direction established.
 
 Current priority: Low.
+
+---
+
+## Integration Semantics
+
+Status: Characterized
+
+Major outcomes:
+
+* single-axis integration behavior documented for `trapezoid()` and `simpson()`;
+* unit transformation behavior documented as central operation semantics;
+* integration classified as reduction-like in geometry but derived in
+  scientific identity;
+* mask handling flagged for separate scientific review.
+
+Current priority: Low, except for possible mask-handling follow-up.
 
 ---
 
