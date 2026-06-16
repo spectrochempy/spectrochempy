@@ -93,6 +93,10 @@ additional user-supplied scientific context attached to the dataset.
 These fields depend on array structure, coordinate structure, masking, or
 derived model state. They become stale when geometry or domain changes.
 
+*Note: `modeldata` was previously listed here but has been removed from
+`NDDataset` as orphaned infrastructure — see the `modeldata RFC
+<modeldata-semantic-contract.md>`_ and issue `#1168`_ for details.*
+
 ### Provenance metadata
 
 - `author`
@@ -119,8 +123,6 @@ For example:
 - `title` is scientific context even though some operations may override it;
 - `filename` is provenance even though users often treat it as scientific
   context;
-- `modeldata` is geometry-dependent in v1 because it is easily invalidated by
-  result transformation.
 
 ## 4. Operation Categories
 
@@ -177,7 +179,6 @@ multi-source rules in Section 6 apply.
 | `origin` | preserve | preserve | preserve | preserve |
 | `roi` | preserve | drop | drop | drop |
 | `transposed` | preserve | recompute | recompute | recompute |
-| `modeldata` | unspecified | unspecified | drop | drop |
 | `filename` | preserve | preserve | preserve | preserve |
 
 ### Matrix interpretation
@@ -202,9 +203,11 @@ multi-source rules in Section 6 apply.
   Section 7.
 - `created` is preserved in v1 as the creation date of the source dataset
   lineage. This remains an open question for future revisions.
-- `modeldata` remains intentionally unspecified for Categories A and B in v1.
-  Categories C and D drop it by default. Future revisions may refine this rule
-  based on practical experience.
+- `modeldata` — **removed from NDDataset.**  The modeldata RFC audit showed
+  zero production writes, accidental stale propagation, and a single
+  production reader (`plot1d`).  `NDDataset.modeldata` was removed as
+  orphaned historical infrastructure; fit/model outputs should be explicit
+  datasets or future fit-result objects.
 - `filename` is preserved for single-source operations. Multi-source
   operations follow the stricter rules in Section 6.
 
@@ -348,8 +351,8 @@ resetting both for new result objects. This question is intentionally left open.
 
 ### Modeldata semantics
 
-v1 leaves `modeldata` unspecified for Categories A and B, and drops it for
-Categories C and D. This remains intentionally provisional.
+`modeldata` has been removed from `NDDataset`.  See the `modeldata RFC
+<modeldata-semantic-contract.md>`_ for the full audit and rationale.
 
 ### Title and description semantics
 

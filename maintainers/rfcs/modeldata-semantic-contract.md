@@ -2,6 +2,9 @@
 
 **Status:** Draft / Maintainer discussion document
 
+**Implementation status:** NDDataset.modeldata has been removed following the
+analysis below.  See `#1168`_ and commit logs for details.
+
 ## Purpose
 
 This document answers two questions:
@@ -361,3 +364,49 @@ implementation work.
 | Is current propagation correct? | Only by accident (nothing sets it) |
 | Should it be redesigned? | Yes — but semantic direction first |
 | Recommended next step | Option E (document) then Option C or D (ownership) |
+
+---
+
+## Maintainer Decision
+
+Following the audit above, the maintainer has decided that
+NDDataset.modeldata is **orphaned historical infrastructure** and will be
+removed rather than given a new propagation contract.
+
+### Rationale
+
+1. **No production writes.**  Zero production code paths write to
+   `NDDataset.modeldata`.
+2. **Single production reader.**  The only production read was `plot1d` with
+   `plot_model=True`, which has been updated to emit a `FutureWarning` instead
+   of accessing the removed attribute.
+3. **Accidental propagation.**  `modeldata` was deep-copied through every
+   dataset operation because it was listed in `_attributes_()`, but this
+   propagation was never intentional and always produced stale structural state.
+4. **Optimize already separated.**  The `Optimize` class has its own
+   `modeldata` trait and `_get_modeldata` method that operate independently of
+   `NDDataset.modeldata`.  This separation is correct and is preserved.
+5. **Fit/model outputs should be explicit.**  Rather than storing hidden model
+   state on `NDDataset`, fit and modelling results should be represented as
+   explicit `NDDataset` objects or dedicated fit-result objects.
+
+### What was done
+
+- Removed `_modeldata` trait, default, property getter/setter from `NDDataset`.
+- Removed `modeldata` from `_attributes_()` and from the `__eq__` exclusion list.
+- Updated `plot1d(plot_model=True)` to emit a `FutureWarning` explaining the
+  removal instead of silently reading orphaned dataset state.
+- Removed all test setup and assertions that set or read `NDDataset.modeldata`.
+- Updated the `testing.py` utility to remove `modeldata` from its comparison
+  exclusion list.
+- Updated the Metadata Contract RFC (`metadata-contract.md`) to reflect that
+  `modeldata` is no longer an `NDDataset` field.
+- Added changelog entry documenting the breaking change.
+- Closes `#1168`_.
+
+### Not changed (out of scope)
+
+- `Optimize.modeldata` — left intact; the `Optimize` class manages its own
+  model data independently.
+- Plotting API — no new `ModelResult` or `FitResult` class introduced; no new
+  plotting protocol added.

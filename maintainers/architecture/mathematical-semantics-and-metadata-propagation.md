@@ -79,19 +79,19 @@ shape operations and CoordSet semantics.
 PR3 characterization tests (100 tests) were added in
 `tests/test_core/test_dataset/test_reduction_semantics_baseline.py` covering
 dimension reduction, keepdims, units, masks, CoordSet, metadata, history,
-ROI/modeldata, and identity/provenance for sum, mean, std, min, max, argmin,
+ ROI, and identity/provenance for sum, mean, std, min, max, argmin,
 and argmax.
 
 PR4 characterization tests (63 tests) are in
 `tests/test_core/test_dataset/test_combination_semantics_baseline.py` covering
 concatenate and stack data, CoordSet, units, masks, metadata, history,
-ROI/modeldata, identity/provenance, coordinate-unit preservation, compatible
+ ROI, identity/provenance, coordinate-unit preservation, compatible
 coord-unit conversion, stack origin and meta propagation, and edge cases.
 
 PR5 characterization tests (135 tests) are in
 `tests/test_core/test_dataset/test_indexing_semantics_baseline.py` covering
 return type, shape/dims, CoordSet, units, masks, metadata, history, ROI,
-modeldata, labels, identity, provenance, scalar extraction, label indexing,
+ ROI, identity, provenance, scalar extraction, label indexing,
 ellipsis, step slicing, float indexing, and edge cases for integer, slice,
 label, bool, and list indexing forms.
 
@@ -99,11 +99,17 @@ PR6 characterization tests (81 tests) are in
 `tests/test_processing/test_processing_wrapper_semantics_baseline.py` covering
 processing wrapper semantics for smooth, savgol, whittaker, basc, detrend,
 asls, and denoise: return type, shape/dims, CoordSet, units, masks, metadata,
-history, ROI, modeldata, identity, provenance, and shared behavior. Reveals
+history, ROI, identity, provenance, and shared behavior. Reveals
 two distinct assembly patterns (Group A: Filter/PCA-based, Group B:
 Baseline-based).
 
 See Audit Policy in `AGENTS.md` for test-first refactoring requirements.
+
+> **Note (June 2026):** `modeldata` has been removed from `NDDataset` as
+> orphaned historical infrastructure.  All references to `modeldata` below
+> describe historical characterization-test behavior that is no longer active.
+> See `maintainers/rfcs/modeldata-semantic-contract.md` and issue `#1168` for
+> the full audit and maintainer decision.
 
 ## Semantics Matrix
 
@@ -125,8 +131,8 @@ following sections.
 | Concatenation | concatenated data | compatible, converted to first units | concatenated with data | concatenated selected dim | concatenated selected coord labels | synthesized multi-source metadata | first title wins | reset/synthesized | `NDDataset` |
 | Stack | new leading dim plus concatenation | same as concatenate | stacked with data | new coord labels from dataset names | new stack labels from names | follows concatenate | follows concatenate | follows concatenate | `NDDataset` |
 | Analysis outputs | derived result | local operation rules | local operation rules | local operation rules | local operation rules | often synthesized locally | often synthesized locally | often rewritten | operation-specific |
-| Processing outputs (Group A: Filter/PCA) | processed data | preserved | wrapper-dependent | preserved (unchanged) | mostly preserved | name appended/rewritten, modeldata dropped, roi recomputed, history rewritten | author preserved (except denoise where overridden), title preserved | rewritten to single method entry | `NDDataset` (wrapper-assembled) |
-| Processing outputs (Group B: Baseline) | baseline-corrected data | preserved | wrapper-dependent | preserved (unchanged) | mostly preserved | name/title preserved, modeldata/roi preserved | author preserved, title preserved | appended | `NDDataset` (wrapper-assembled) |
+| Processing outputs (Group A: Filter/PCA) | processed data | preserved | wrapper-dependent | preserved (unchanged) | mostly preserved | name appended/rewritten, roi recomputed, history rewritten | author preserved (except denoise where overridden), title preserved | rewritten to single method entry | `NDDataset` (wrapper-assembled) |
+| Processing outputs (Group B: Baseline) | baseline-corrected data | preserved | wrapper-dependent | preserved (unchanged) | mostly preserved | name/title preserved, roi preserved | author preserved, title preserved | appended | `NDDataset` (wrapper-assembled) |
 
 The main pattern visible in this table is that arithmetic and many ufuncs have
 a relatively coherent center in `NDMath`, while processing, analysis,
@@ -439,7 +445,7 @@ Ambiguous or surprising behaviors:
 Open questions:
 
 - Which shape operations should append history?
-- Should structural metadata such as `roi` and `modeldata` always be dropped or
+- Should structural metadata such as `roi` always be dropped or
   recomputed?
 - Should label preservation be limited to selection-like operations?
 
@@ -452,7 +458,7 @@ Representative current behavior:
 
 | Operation | Data/mask behavior | Units | Coordinates/labels | Metadata |
 |---|---|---|---|---|
-| `concatenate` | masked arrays concatenated | compatible units required; converted to first units | concatenated along selected dim; coord units preserved; compatible coord units auto-converted to first dataset's coord units | title from first dataset; authors combined; description/history rewritten; origin/meta/roi/modeldata from last dataset (copy artifact) |
+| `concatenate` | masked arrays concatenated | compatible units required; converted to first units | concatenated along selected dim; coord units preserved; compatible coord units auto-converted to first dataset's coord units | title from first dataset; authors combined; description/history rewritten; origin/meta/roi from last dataset (copy artifact) |
 | `stack` | adds new leading dimension then delegates to concatenate | same compatibility as concatenate | new coordinate labels derive from dataset names | metadata follows concatenate path; origin from last dataset; meta from last dataset (deep-copied) |
 | analysis assembly | operation-specific | operation-specific | operation-specific | often locally synthesized |
 
@@ -476,15 +482,14 @@ Ambiguous or surprising behaviors:
 - custom `meta` merge/drop behavior is not yet a clear contract — current
   behavior takes meta from the last dataset, which may or may not be intended
   for multi-source operations;
-- `modeldata` retains the shape of the last input dataset, not the concatenated
-  output shape (stale);
+- `modeldata` (removed from `NDDataset`) retained the shape of the last input
+  dataset, not the concatenated output shape (stale);
 - plugin post-processing can affect concatenation semantics.
 
 Open questions:
 
 - Should custom `meta` be merged, preserved from first input, or dropped for
   multi-source operations?
-- Should `modeldata` be cleared or recomputed after concatenation?
 - Should title/name behavior be standardized across all combination operations?
 - Should stack/concatenate expose a documented metadata policy?
 
@@ -530,9 +535,6 @@ History:
     appended with "Slice extracted: ..." entry
 
 ROI:
-    preserved unchanged (stale-field risk)
-
-modeldata:
     preserved unchanged (stale-field risk)
 
 Identity:
@@ -602,8 +604,10 @@ adjusted to match the new data shape. This is a clear stale-field risk.
 
 ### Modeldata
 
-`modeldata` is NOT sliced with the data. It retains the original full shape
-even after subsetting. This is a clear stale-field risk.
+`modeldata` was previously preserved unchanged through all indexing forms
+(retaining the original full shape even after subsetting — a clear stale-field
+risk).  It has since been **removed from `NDDataset`** as orphaned historical
+infrastructure.  See the modeldata RFC for details.
 
 ### Identity
 
@@ -626,7 +630,7 @@ copy input dataset
 slice data, mask, and CoordSet along indexed dimensions
 preserve all metadata unchanged
 append history
-keep roi and modeldata unchanged (stale risk)
+keep roi unchanged (stale risk)
 ```
 
 This is closest to Pattern A (Copy-First) with a systematic geometry-aware
@@ -666,13 +670,14 @@ Fields commonly preserved:
 - `origin`
 - custom `meta`
 - `coordset`, unless shape/domain changes;
-- `roi` and `modeldata`, even when they may become stale.
+- `roi`, even when it may become stale.
 
 Semantic consequence:
 
 This is generous and user-friendly for scientific context, but some preservation
-is likely accidental. A copied `roi`, `modeldata`, or `name` may no longer be
-valid after derived operations.
+is likely accidental. A copied `roi` or `name` may no longer be
+valid after derived operations. (`modeldata` has been removed from `NDDataset`
+— see the modeldata RFC.)
 
 ### Pattern B: Rebuild or Synthesize Result
 
@@ -768,7 +773,9 @@ Fields at risk:
 - `author`;
 - `origin`;
 - `roi`;
-- `modeldata`.
+
+> **Note:** `modeldata` was previously listed among fields at risk but has been
+> removed from `NDDataset` — see the modeldata RFC.
 
 Semantic consequence:
 
@@ -790,7 +797,7 @@ Pattern:
 
 ```text
 name:              appended with "_Filter.transform" or "_PCA.inverse_transform"
-modeldata:         dropped (set to None)
+modeldata:         dropped (set to None)  [Note: modeldata removed from NDDataset]
 roi:               recomputed from data range after processing
 history:           rewritten (original entries lost; single entry "Created using method ...")
 title:             preserved
@@ -819,7 +826,6 @@ Pattern:
 
 ```text
 name:              preserved unchanged
-modeldata:         preserved (shape and values unchanged)
 roi:               preserved unchanged
 history:           appended (original entries survive, operation appended)
 title:             preserved
@@ -830,6 +836,9 @@ meta:              preserved
 coordset:          preserved
 units:             preserved
 ```
+
+> **Note:** `modeldata` (previously preserved, shape and values unchanged) has
+> been removed from `NDDataset` — see the modeldata RFC.
 
 Key observation: Group B wrappers behave as same-object transformations. The
 history append is consistent with copy-first arithmetic assembly.
@@ -869,18 +878,22 @@ The operation families reviewed in this RFC suggest that result assembly is an
 implicit architectural concept already present in the codebase.
 
 | Operation family | Dominant pattern | Intentionally preserved | Structurally recomputed | Copy-surviving fields | Stale-field risk |
-|---|---|---|---|---|---|
-| Arithmetic | Copy-first | units, masks, coordset, scientific context, history append | data, units for algebraic operations | `name`, `origin`, custom `meta`, `roi`, `modeldata` | `roi`, `modeldata`, possibly `name` after derived arithmetic |
-| Ufuncs | Copy-first with ufunc-local edits | units when valid, masks, coordset, scientific context | data, sometimes title/history/units | `name`, `origin`, custom `meta`, `roi`, `modeldata` | geometry-dependent fields when a ufunc changes semantic domain |
-| Reductions | Reduction-specific | units where meaningful, selected context, provenance | data, dims, coordset, mask, sometimes units | copied metadata on dataset-returning reductions | stale `roi` / `modeldata`; ambiguous `name` and title |
-| Shape operations | Copy-first plus geometry edits | units, scientific context, masks when shape-aligned | dims, coordset, sometimes mask geometry | `name`, `origin`, custom `meta`, `roi`, `modeldata` | structural metadata after reshape/squeeze/transpose |
-| Interpolation | Copy-first plus domain rebuild | data units, broad context, target coordinate semantics | coordset along interpolated domain, data, mask/labels locally | `name`, `origin`, custom `meta`, possibly `roi` / `modeldata` | copied region/model state tied to old coordinate grid |
-| Integration | Reduction-specific / local rebuild | scientific context, integrated provenance | units, dims, coordset, title/history locally | `name`, `origin`, custom `meta` | source-domain `roi` / `modeldata`; title/name ambiguity |
-| Indexing / selection | Copy-first with sliced assembly | units, masks, coordset (sliced), scientific context, history append | coordset sliced along indexed dims | all metadata preserved, deep-copied | `modeldata` and `roi` stale after subsetting |
+|---|---|---|---|---|---|---|
+| Arithmetic | Copy-first | units, masks, coordset, scientific context, history append | data, units for algebraic operations | `name`, `origin`, custom `meta`, `roi` | `roi`, possibly `name` after derived arithmetic |
+| Ufuncs | Copy-first with ufunc-local edits | units when valid, masks, coordset, scientific context | data, sometimes title/history/units | `name`, `origin`, custom `meta`, `roi` | geometry-dependent fields when a ufunc changes semantic domain |
+| Reductions | Reduction-specific | units where meaningful, selected context, provenance | data, dims, coordset, mask, sometimes units | copied metadata on dataset-returning reductions | stale `roi`; ambiguous `name` and title |
+| Shape operations | Copy-first plus geometry edits | units, scientific context, masks when shape-aligned | dims, coordset, sometimes mask geometry | `name`, `origin`, custom `meta`, `roi` | structural metadata after reshape/squeeze/transpose |
+| Interpolation | Copy-first plus domain rebuild | data units, broad context, target coordinate semantics | coordset along interpolated domain, data, mask/labels locally | `name`, `origin`, custom `meta`, possibly `roi` | copied region state tied to old coordinate grid |
+| Integration | Reduction-specific / local rebuild | scientific context, integrated provenance | units, dims, coordset, title/history locally | `name`, `origin`, custom `meta` | source-domain `roi`; title/name ambiguity |
+| Indexing / selection | Copy-first with sliced assembly | units, masks, coordset (sliced), scientific context, history append | coordset sliced along indexed dims | all metadata preserved, deep-copied | `roi` stale after subsetting |
 | Concatenate | Rebuild / synthesize | compatible units, selected coordinates, masks | data, concatenated coord, description/author/history | first input title/name in some paths | misleading first-input identity; custom `meta` ambiguity |
 | Stack | Rebuild / synthesize via concatenate | compatible units, masks, source names as stack labels | new leading dim, stack coord, multi-source provenance | concatenate-dependent fields | first-input title/name; ambiguous multi-source context |
-| Processing outputs (Group A: Filter/PCA) | Wrapper-based — identity-changing | data units, coordset, scientific context after wrapper | data, name, roi, modeldata, history rewritten | title, author (except denoise), description, origin, meta | name overwritten with method suffix; history lost; roi recomputed; modeldata dropped |
-| Processing outputs (Group B: Baseline) | Wrapper-based — identity-preserving | data units, coordset, name, roi, modeldata, scientific context | data, history appended | title, author, description, origin, meta | modeldata may become stale for baseline-corrected domain |
+| Processing outputs (Group A: Filter/PCA) | Wrapper-based — identity-changing | data units, coordset, scientific context after wrapper | data, name, roi, history rewritten | title, author (except denoise), description, origin, meta | name overwritten with method suffix; history lost; roi recomputed |
+| Processing outputs (Group B: Baseline) | Wrapper-based — identity-preserving | data units, coordset, name, roi, scientific context | data, history appended | title, author, description, origin, meta | roi may become stale for baseline-corrected domain |
+
+> **Note:** `modeldata` was previously listed across the matrix above as a
+> copy-surviving field and stale-field risk, but has been removed from
+> `NDDataset` — see the modeldata RFC.
 | Analysis outputs | Rebuild / synthesize | operation-defined context | data, coordset, title, description, history, units | operation-specific | preserving source identity when output is a new object |
 
 This table should not be read as a proposed policy. It is a map of the current
@@ -896,8 +909,8 @@ Important field-level observations:
   when geometry survives, and otherwise reduced, rebuilt, or synthesized.
 - coordinate labels usually follow the coordinate object, not the data array
   directly.
-- `roi` and `modeldata` are the clearest stale-field risks because copy-first
-  paths can preserve them without proving they remain valid.
+- `modeldata` (removed from `NDDataset`) was previously the clearest stale-field
+  risk because copy-first paths preserved it without proving it remained valid.
 - `metadata`, `origin`, and `author` behave more like scientific/provenance
   context and generally should not disappear just because an internal assembly
   path changes.
@@ -980,10 +993,11 @@ like a rebuilt analysis output.
 
 PR6 characterization reveals an internal split: Group A wrappers (Filter/PCA:
 `smooth`, `savgol`, `whittaker`, `denoise`) follow the analysis-like pattern —
-they rewrite history, append method suffixes to names, drop modeldata, and
+they rewrite history, append method suffixes to names, and
 recompute roi. Group B wrappers (Baseline: `basc`, `detrend`, `asls`) follow
-the processing pattern — they preserve name, modeldata, roi, and append
-history. This suggests the split is driven by the underlying algorithm class
+the processing pattern — they preserve name, roi, and append
+history. (modeldata was also dropped/preserved respectively but has since been
+removed from NDDataset — see the modeldata RFC.) This suggests the split is driven by the underlying algorithm class
 (Filter vs. Baseline) rather than by an explicit processing-vs-analysis policy.
 
 Object identity explains this distinction more directly than metadata
@@ -1030,11 +1044,10 @@ validity depends on shape, coordinate support, or model domain:
 - `coordset`
 - coordinate labels;
 - masks;
-- `roi`
-- `modeldata`
+- `roi`;
 - transposition state and other geometry-derived flags.
 
-Of these, `roi` and `modeldata` deserve special mention:
+Of these, `roi` deserves special mention:
 
 - **`roi`** is likely historical UI/interactive selection state, not stable
   scientific metadata. Its propagation through shape operations, reductions, and
@@ -1048,20 +1061,10 @@ Of these, `roi` and `modeldata` deserve special mention:
 
   No global ROI semantic contract is currently visible.
 
-- **`modeldata`** is derived model or fit information, historically linked to
-  fitting workflows and probably designed mainly for 1D use. Its propagation
-  rules (currently stale after shape changes) should be reviewed separately in a
-  dedicated RFC or issue before any lifecycle change.
-
-  Current observed modeldata behaviors include:
-
-  - preserved unchanged through many copy-first operations;
-  - preserved by baseline wrappers (Group B);
-  - dropped by filter/PCA wrappers (Group A);
-  - potentially stale after shape, reduction,
-    combination, and indexing operations.
-
-  No consistent propagation policy is currently visible.
+- **`modeldata`** was derived model or fit information, historically linked to
+  fitting workflows.  It has since been **removed from `NDDataset`** as orphaned
+  historical infrastructure — see the modeldata RFC (`#1168`).  The descriptions
+  below document what characterisation tests observed before removal.
 
 Neither field should be treated as ordinary scientific context in the long term.
 
@@ -1131,10 +1134,11 @@ Observed identity classes:
 PR6 reveals two different identity signals among processing wrappers.
 
 Group A wrappers modify identity markers (name suffixes, rewritten
-history, dropped modeldata), suggesting a derived-object reading.
+history), suggesting a derived-object reading.
 
 Group B wrappers preserve identity markers and extend provenance,
 suggesting a same-object transformation.
+(modeldata has since been removed from NDDataset.)
 
 It is currently unclear whether this distinction is intentional or
 emergent from implementation history.
@@ -1191,7 +1195,7 @@ Field-level identity implications:
 | `coordset` | structural information | preserve if support unchanged | reduce/rebuild/synthesize if support changes | mostly coherent but implicit |
 | labels | structural / scientific context | preserve with coordinate support | recompute/synthesize with new axes/domains | follows CoordSet but not separately contracted |
 | `roi` | structural information | preserve only if still valid on same support | drop/recompute if support/domain changes | high stale-field risk |
-| `modeldata` | structural / derived state | preserve only if model remains valid | drop/recompute for derived/changed domains | high stale-field risk |
+| `modeldata` | *(removed from NDDataset)* | — | — | — |
 
 Identity and CoordSet are related but not identical.
 
@@ -1241,7 +1245,7 @@ architectural concept.**
 It should not become a new API or implementation plan now. However, it is
 already useful enough to name in maintainer-facing architecture work because it
 explains otherwise disconnected questions about `title`, `name`, `history`,
-`CoordSet`, `roi`, `modeldata`, custom metadata, and multi-source provenance.
+`CoordSet`, `roi`, custom metadata, and multi-source provenance.
 
 ## Provenance Semantics
 
@@ -1326,7 +1330,7 @@ the first input.
 This contract is currently implicit and unevenly implemented. It is strongest
 for arithmetic and many ufuncs, weaker for processing/analysis wrappers, and
 most ambiguous for multi-source provenance metadata and structural fields such
-as `roi` and `modeldata`.
+as `roi`. (`modeldata` has since been removed from `NDDataset`.)
 
 ## Relationship to Metadata and Responsibility RFCs
 
@@ -1382,7 +1386,7 @@ Assessment: **B. Yes, but only after mathematical semantics is stabilized.**
 Result assembly is clearly significant enough to deserve maintainer attention:
 
 - it is the main source of metadata propagation differences;
-- it determines whether `CoordSet`, masks, labels, `roi`, and `modeldata`
+- it determines whether `CoordSet`, masks, labels, `roi`, and other fields
   remain valid;
 - it explains why processing and analysis outputs differ from arithmetic;
 - it is where `NDMath`, `NDDataset`, `CoordSet`, processing, analysis, and
@@ -1573,7 +1577,7 @@ The current short version is:
 
 | Concern | Current pattern | Risk |
 |---|---|---|
-| Copy-first result assembly | preserves many fields implicitly | can keep stale structural fields such as `roi` or `modeldata` |
+| Copy-first result assembly | preserves many fields implicitly | can keep stale structural fields such as `roi` |
 | Rebuild/wrapper result assembly | restores selected fields explicitly | can drop context or provenance accidentally |
 | Identity fields | `title` and `name` often survive by copy | can misidentify derived or multi-source outputs |
 | Provenance fields | `history`, `origin`, and `author` are appended, copied, or synthesized locally | no single provenance policy yet |
@@ -1646,7 +1650,7 @@ This section classifies observed behavior by confidence.
 | Likely intentional | copy-first paths preserve scientific context | useful behavior, but not always documented |
 | Unclear | preserving `name` after derived operations | may help workflows or misidentify results |
 | Likely accidental | custom `meta` survives some paths but not wrappers | depends on construction path |
-| Likely accidental | `roi` / `modeldata` may survive geometry changes by copy | structural fields need recomputation policy |
+| Likely accidental | `roi` may survive geometry changes by copy | structural fields need recomputation policy |
 
 ### History
 
@@ -1704,7 +1708,7 @@ Stable user context:
     copy, but this is not always an explicit semantic decision.
 
 Structural information:
-    dims, coordset, mask, roi, and modeldata depend on shape/domain and may
+    dims, coordset, mask, and roi depend on shape/domain and may
     need recomputation.
 
 Derived information:
@@ -1769,8 +1773,9 @@ Weak areas:
   last dimension but does not provide full labelled alignment.
 - Processing and analysis operations synthesize metadata locally, so similar
   operation categories can preserve different fields.
-- Structural metadata such as `roi` and `modeldata` can survive by copy even
-  when geometry-changing operations may make them stale.
+- Structural metadata such as `roi` can survive by copy even
+  when geometry-changing operations may make it stale.  (`modeldata` has been
+  removed from `NDDataset` — see the modeldata RFC.)
 - Plugin-backed operations depend on generic dispatch contracts; weak fallback
   or unclear result assembly semantics could regress optional backends.
 
@@ -1785,7 +1790,7 @@ Weak areas:
 - Ufunc return types differ: some operations return `NDDataset`, while
   logical/testing operations return raw arrays.
 - Geometry-changing operations differ in how explicitly they handle
-  coordinates, labels, `roi`, `modeldata`, and history.
+  coordinates, labels, `roi`, and history.
 - Error ordering in mixed semantic/unit failures may make behavior harder to
   explain even when final rejection is correct.
 
@@ -1824,8 +1829,10 @@ assembly, or metadata work.
 - `transpose`, `swapdims`, `squeeze`, `reshape`, `atleast_2d`; — [x] delivered
 - propagation of `dims`, `coordset`, labels, masks, title, history, and custom
   metadata. — [x] delivered
-- stale-field behavior for `roi` and `modeldata` across preserve-geometry and
+- stale-field behavior for `roi` across preserve-geometry and
   modify-geometry operations. — [x] delivered
+  (`modeldata` was also characterised but has since been removed from
+  `NDDataset`.)
 - `title`, `name`, `history`, `origin`, `author`, and custom `meta` behavior
   when an operation preserves identity versus creates a derived identity.
   — [x] delivered
@@ -1950,9 +1957,11 @@ The distinction between Group A and Group B wrappers is a notable divergence
 within the same assembly pattern:
 
 - Group A (Filter/PCA-based: smooth, savgol, whittaker, denoise): name
-  overwritten, modeldata dropped, roi recomputed, history rewritten.
-- Group B (Baseline-based: basc, detrend, asls): name preserved, modeldata
-  preserved, roi preserved, history appended.
+  overwritten, roi recomputed, history rewritten.
+- Group B (Baseline-based: basc, detrend, asls): name preserved,
+  roi preserved, history appended.
+  (`modeldata` was also dropped/preserved respectively but has since been
+  removed from `NDDataset`.)
 
 This divergence is likely emergent from implementation history rather than
 intentional design.
@@ -1975,9 +1984,10 @@ original processing trail survives in the result.
 
 ### 5. Structural Information Categories
 
-CoordSet, labels, masks, ROI, and modeldata share a common property: their
+CoordSet, labels, masks, and ROI share a common property: their
 validity depends on geometry, domain, shape, or representation.  They are
-not ordinary scientific context.
+not ordinary scientific context.  (`modeldata` also previously shared this
+property but has been removed from `NDDataset` — see the modeldata RFC.)
 
 | Field | Dependency | Behaviour after geometry change |
 |-------|-----------|--------------------------------|
@@ -1985,12 +1995,13 @@ not ordinary scientific context.
 | **Labels** | Coordinate value equality | Carried over on exact match only |
 | **Masks** | Data shape and position | Reconstructed via float interpolation + threshold; not copied |
 | **ROI** | Data domain range | Preserved verbatim — may become stale |
-| **modeldata** | Data shape and domain | Preserved verbatim — may become stale |
+| **modeldata** | *(removed from NDDataset)* | — |
 
 These fields differ from title, name, author, description, origin, and meta,
 which survive geometry changes unconditionally.
 
-The stale-field risk for ROI and modeldata is the most actionable finding:
+The stale-field risk for ROI is the most actionable finding (modeldata was also
+at risk but has been removed from NDDataset):
 after interpolation, concatenation, or indexing, these fields refer to the
 old coordinate grid but are not automatically dropped or recomputed.
 
@@ -2006,9 +2017,10 @@ The PR1–PR7 characterisation campaign clarified the following:
 - **Result assembly** is a first-class architectural concern, not a detail of
   `NDMath` internals.  The assembly pattern determines which fields survive
   and how.
-- **ROI and modeldata** remain the least well-defined structures.  They are
+- **ROI** remains the least well-defined structure.  It is
   preserved verbatim by most operations, including those that change the
-  coordinate grid, which means they are frequently stale.
+  coordinate grid, which means it is frequently stale.  (`modeldata` was also
+  poorly defined but has been removed from `NDDataset`.)
 - **Processing wrappers** expose an implementation-family semantic divergence:
   Group A rewrites identity markers while Group B extends provenance.  Whether
   this is intentional is unknown.
@@ -2023,8 +2035,9 @@ These decisions are blockers for any result assembly or `NDMath` refactor.
 
 - Metadata preservation baseline: which fields are preserved by default for
   copy-first single-source operations?
-- Structural metadata policy: when should `roi`, `modeldata`, and coordinate
-  structures be recomputed or dropped?
+- Structural metadata policy: when should `roi` and coordinate
+  structures be recomputed or dropped?  (`modeldata` has been removed from
+  `NDDataset`, removing one stale-field concern.)
 - Wrapper parity: should wrapper-based processing preserve the same scientific
   context as copy-first operations?
 - Result assembly scope: should maintainers treat result assembly as a
