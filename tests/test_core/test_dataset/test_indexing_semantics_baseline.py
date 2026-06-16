@@ -61,9 +61,7 @@ def ds_unitful():
     """2D dataset with data units."""
     x = Coord(np.linspace(4000.0, 1000.0, 7))
     y = Coord(np.linspace(0.0, 60.0, 5))
-    return NDDataset(
-        np.arange(35.0).reshape(5, 7), coordset=[y, x], units="m"
-    )
+    return NDDataset(np.arange(35.0).reshape(5, 7), coordset=[y, x], units="m")
 
 
 @pytest.fixture
