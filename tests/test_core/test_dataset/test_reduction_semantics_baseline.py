@@ -15,7 +15,7 @@ Coverage:
     - metadata propagation
     - CoordSet reduction / preservation
     - history behavior (appended, not replaced)
-    - ROI / modeldata stale-field behavior
+    - ROI stale-field behavior
     - identity / provenance observations
 """
 
@@ -39,7 +39,6 @@ def reduction_dataset():
     - CoordSet with titles, units
     - title, name, metadata, history
     - ROI (UI/selection state — to reassess)
-    - modeldata (derived fit info — stale risk)
     """
     y = Coord(np.linspace(0.0, 60.0, 5), title="time", units="s")
     x = Coord(np.linspace(4000.0, 1000.0, 7), title="wavenumber", units="cm^-1")
@@ -50,7 +49,6 @@ def reduction_dataset():
     ds.origin = "test_origin"
     ds.meta.project = "test_project"
     ds.roi = [0.0, 10.0]
-    ds.modeldata = np.full((5, 7), 42.0)
     ds.history = ["original entry"]
     return ds
 
@@ -161,12 +159,6 @@ class TestSumCharacterization:
     def test_sum_preserves_roi(self, reduction_dataset):
         s = reduction_dataset.sum(dim="x")
         assert s.roi == [0.0, 10.0]
-
-    def test_sum_modeldata_shape_stale(self, reduction_dataset):
-        """Notable behavior: modeldata retains original shape after reduction (stale)."""
-        s = reduction_dataset.sum(dim="x")
-        assert s.modeldata.shape == (5, 7)
-        assert s.shape == (5,)
 
 
 # ======================================================================================
@@ -605,16 +597,15 @@ class TestReductionHistory:
 
 
 # ======================================================================================
-# ROI / MODELDATA
+# ROI
 # ======================================================================================
 
 
-class TestReductionRoiModeldata:
+class TestReductionRoi:
     """
-    Characterize ROI and modeldata behavior through reductions.
+    Characterize ROI behavior through reductions.
 
     ROI is current behavior only — likely UI/selection state, to reassess.
-    Modeldata is derived model/fit information — stale after reduction.
     """
 
     def test_roi_preserved_after_sum(self, reduction_dataset):
@@ -628,27 +619,6 @@ class TestReductionRoiModeldata:
     def test_roi_preserved_after_max(self, reduction_dataset):
         mx = reduction_dataset.max(dim="x")
         assert mx.roi == [0.0, 10.0]
-
-    def test_modeldata_stale_after_sum(self, reduction_dataset):
-        """Notable behavior: modeldata retains original shape after dim reduction."""
-        s = reduction_dataset.sum(dim="x")
-        assert s.modeldata.shape == (5, 7)
-        assert s.shape == (5,)
-
-    def test_modeldata_stale_after_mean(self, reduction_dataset):
-        m = reduction_dataset.mean(dim="x")
-        assert m.modeldata.shape == (5, 7)
-        assert m.shape == (5,)
-
-    def test_modeldata_stale_after_max(self, reduction_dataset):
-        mx = reduction_dataset.max(dim="x")
-        assert mx.modeldata.shape == (5, 7)
-        assert mx.shape == (5,)
-
-    def test_global_reduction_modeldata_shape(self, reduction_dataset):
-        s = reduction_dataset.sum(dim=None, keepdims=True)
-        assert s.modeldata.shape == (5, 7)
-        assert s.shape == (1, 1)
 
 
 # ======================================================================================
@@ -667,8 +637,6 @@ class TestReductionIdentityProvenance:
     - History is appended, not replaced, reinforcing the same-object view.
     - However, global reduction (dim=None) returns a plain scalar, breaking
       the NDDataset chain — this is more like a derived result.
-    - modeldata becomes stale, suggesting the lifecycle of derived fields
-      was not designed for shape-changing operations.
     """
 
     def test_reduction_preserves_scientific_context(self, reduction_dataset):

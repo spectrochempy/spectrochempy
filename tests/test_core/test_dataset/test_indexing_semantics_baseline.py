@@ -8,7 +8,7 @@ Coverage:
     - Return type, shape, dims
     - CoordSet behavior (preserve/reduce/slice)
     - Units, masks, metadata, history
-    - ROI, modeldata, labels
+    - ROI
     - Identity, provenance
     - Integer, slice, ellipsis, step, label, float, fancy indexing
 """
@@ -51,7 +51,6 @@ def ds():
     ds.origin = "test_origin"
     ds.meta.project = "test_project"
     ds.roi = [0.0, 10.0]
-    ds.modeldata = np.full((5, 7), 42.0)
     ds.history = ["original entry"]
     return ds
 
@@ -526,44 +525,6 @@ class TestRoi:
     def test_roi_preserved_on_fancy(self, ds):
         r = ds[[0, 2, 4]]
         assert r.roi == [0.0, 10.0]
-
-
-# ======================================================================================
-# MODELDATA
-# ======================================================================================
-
-
-class TestModeldata:
-    """
-    Characterize modeldata behavior through indexing.
-
-    Notable behavior: modeldata is NOT sliced with the data.
-    It retains the original full shape even after subsetting.
-    """
-
-    def test_modeldata_stale_after_single_index(self, ds):
-        r = ds[0]
-        assert r.modeldata.shape == (5, 7)
-
-    def test_modeldata_stale_after_slice(self, ds):
-        r = ds[1:3]
-        assert r.modeldata.shape == (5, 7)
-
-    def test_modeldata_stale_after_submatrix(self, ds):
-        r = ds[1:4, 2:5]
-        assert r.modeldata.shape == (5, 7)
-
-    def test_modeldata_stale_after_scalar_like(self, ds):
-        r = ds[0, 0]
-        assert r.modeldata.shape == (5, 7)
-
-    def test_modeldata_stale_after_fancy(self, ds):
-        r = ds[[0, 2, 4]]
-        assert r.modeldata.shape == (5, 7)
-
-    def test_modeldata_values_preserved(self, ds):
-        r = ds[0]
-        assert np.allclose(r.modeldata, 42.0)
 
 
 # ======================================================================================

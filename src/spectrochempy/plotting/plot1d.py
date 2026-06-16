@@ -382,14 +382,14 @@ def plot_1D(dataset, method=None, **kwargs):
             ax.plot(xdata, zimagdata.T, ls="--")
 
         if kwargs.get("plot_model", False):
-            modeldata = new.modeldata  # TODO: what's about mask?
-            ax.plot(
-                xdata,
-                modeldata.T,
-                ls=":",
-                lw="2",
-                label=label,
-            )  # TODO: improve this!!!
+            import warnings
+
+            warnings.warn(
+                "NDDataset.modeldata has been removed. "
+                "Fit/model results should be represented as explicit NDDataset objects.",
+                FutureWarning,
+                stacklevel=4,
+            )
 
         # ----------------------------------------------------------------------------------
         # axis

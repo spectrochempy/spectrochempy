@@ -87,5 +87,64 @@ def test_nddataset_comparison_of_dataset(IR_dataset_1D):
     assert lb1 == lb2
 
 
+# ======================================================================================
+# Modeldata removal regression tests
+# ======================================================================================
+
+
+def test_modeldata_removed_from_nddataset():
+    """NDDataset should no longer expose a modeldata property."""
+    ds = scp.NDDataset([1, 2, 3])
+    assert not hasattr(ds, "modeldata")
+
+
+def test_plot_model_emits_future_warning():
+    """plot(plot_model=True) should emit FutureWarning, not error."""
+    import warnings
+
+    x = scp.Coord(np.array([1.0, 2.0, 3.0]), title="x")
+    ds = scp.NDDataset(np.array([1.0, 2.0, 3.0]), coordset=[x])
+    with pytest.warns(FutureWarning, match="NDDataset.modeldata has been removed"):
+        ds.plot(plot_model=True)
+
+
+def test_copy_no_modeldata():
+    """copy() should not carry modeldata."""
+    ds = scp.NDDataset([1, 2, 3])
+    ds2 = ds.copy()
+    assert not hasattr(ds2, "modeldata")
+
+
+def test_arithmetic_no_modeldata():
+    """Arithmetic operations should not carry modeldata."""
+    ds = scp.NDDataset([1, 2, 3])
+    ds2 = ds + 1.0
+    assert not hasattr(ds2, "modeldata")
+
+
+def test_indexing_no_modeldata():
+    """Indexing operations should not carry modeldata."""
+    ds = scp.NDDataset([1, 2, 3])
+    sub = ds[0:2]
+    assert not hasattr(sub, "modeldata")
+
+
+def test_interpolation_no_modeldata():
+    """Interpolation operations should not carry modeldata."""
+    x = scp.Coord(np.linspace(1.0, 3.0, 3), title="x")
+    ds = scp.NDDataset(
+        np.array([1.0, 2.0, 3.0]), coordset=[x]
+    )
+    itp = ds.interpolate(coord=scp.Coord(np.array([1.5, 2.5]), title="x"))
+    assert not hasattr(itp, "modeldata")
+
+
+def test_optimize_modeldata_preserved():
+    """Optimize.modeldata should remain intact (separate from NDDataset)."""
+    from spectrochempy.analysis.curvefitting.optimize import Optimize
+
+    assert hasattr(Optimize, "modeldata")
+
+
 if __name__ == "__main__":
     pytest.main([__file__])
