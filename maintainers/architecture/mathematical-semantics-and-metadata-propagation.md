@@ -88,6 +88,13 @@ concatenate and stack data, CoordSet, units, masks, metadata, history,
 ROI/modeldata, identity/provenance, coordinate-unit preservation, compatible
 coord-unit conversion, stack origin and meta propagation, and edge cases.
 
+PR5 characterization tests (135 tests) are in
+`tests/test_core/test_dataset/test_indexing_semantics_baseline.py` covering
+return type, shape/dims, CoordSet, units, masks, metadata, history, ROI,
+modeldata, labels, identity, provenance, scalar extraction, label indexing,
+ellipsis, step slicing, float indexing, and edge cases for integer, slice,
+label, bool, and list indexing forms.
+
 See Audit Policy in `AGENTS.md` for test-first refactoring requirements.
 
 ## Semantics Matrix
@@ -106,6 +113,7 @@ following sections.
 | Shape operations | shape/dims changed | preserved | shape-aligned | transformed, dropped, or rebuilt | selection-like paths preserve best | broad copy-first preservation | usually preserved | some operations append | same object type |
 | Interpolation | resampled data | data units preserved | interpolated/reordered locally | target coordinates rebuilt | exact matches may preserve labels | copy-first plus local edits | preserved | rewritten locally | `NDDataset` |
 | Integration | integrated data | data units times coordinate units | operation-specific | integrated dim removed | removed with integrated coord | copy-first plus local edits | often operation-defined | rewritten locally | reduced dataset or scalar-like |
+| Indexing / selection | sliced data | preserved | sliced with data | sliced along indexed dim; CoordSet preserved | labels follow coord slice | copy-first preservation | preserved | appended with "Slice extracted" | always `NDDataset` (even single-element) |
 | Concatenation | concatenated data | compatible, converted to first units | concatenated with data | concatenated selected dim | concatenated selected coord labels | synthesized multi-source metadata | first title wins | reset/synthesized | `NDDataset` |
 | Stack | new leading dim plus concatenation | same as concatenate | stacked with data | new coord labels from dataset names | new stack labels from names | follows concatenate | follows concatenate | follows concatenate | `NDDataset` |
 | Analysis outputs | derived result | local operation rules | local operation rules | local operation rules | local operation rules | often synthesized locally | often synthesized locally | often rewritten | operation-specific |
@@ -471,6 +479,110 @@ Open questions:
 - Should title/name behavior be standardized across all combination operations?
 - Should stack/concatenate expose a documented metadata policy?
 
+## Indexing / Selection Semantics
+
+Indexing and selection operations access subsets of an `NDDataset` using
+positional integer indexing, slice notation, ellipsis, label-based slicing,
+float-based nearest-value lookup, and fancy indexing (boolean arrays and
+integer lists).
+
+All indexing is through the unified `ds[...]` syntax. There are no separate
+`loc`/`iloc`/`sel`/`isel` accessors. The type of indexer is auto-detected
+and dispatched through `_make_index` -> `_get_slice` -> `_loc2index`.
+
+PR5 characterization tests (135 tests) are in
+`tests/test_core/test_dataset/test_indexing_semantics_baseline.py`.
+
+### Return Type
+
+All indexing forms that return a result return `NDDataset`, even
+single-element extraction (`ds[0, 0]` returns shape `(1, 1)`). The result
+never leaves the `NDDataset` surface.
+
+### Shape and Dims
+
+- Dimensions are preserved with singleton axes, not squeezed.
+- `ds[0]` on shape `(5, 7)` returns shape `(1, 7)` with dims `["y", "x"]`.
+- `ds[:, 0]` returns shape `(5, 1)`.
+- `ds[0, 0]` returns shape `(1, 1)`.
+
+### CoordSet Behavior
+
+- Coordinates are sliced with the data along the indexed dimension.
+- Non-indexed dimensions preserve their coordinates unchanged.
+- Coordinate titles and units are preserved.
+- Step slices and negative steps correctly slice coordinates.
+- Boolean and list fancy indexing slice coordinates to match the selected
+  rows/columns.
+- Labels follow coordinate slicing.
+
+Classification: **Preserve with slice** for all indexing forms.
+
+### Units
+
+Data units are preserved through all indexing forms: integer, slice, ellipsis,
+label, bool, and list fancy indexing.
+
+### Masks
+
+- Masks are sliced with the data.
+- If the resulting slice contains no masked elements, `r.mask` may be a scalar
+  `False` rather than an array.
+- Mask shape matches the sliced data shape when masked elements are present.
+
+### Metadata
+
+All metadata fields propagate through all indexing forms:
+
+- `title`, `name`, `author`, `description`, `origin` are preserved unchanged.
+- Custom `meta` is preserved and deep-copied (not aliased).
+
+This is a copy-first pattern: the result is assembled from a copy of the
+input, so all non-geometric metadata survives.
+
+### History
+
+History is **appended** for all indexing forms. The original entry is
+preserved and a new `"Slice extracted: ..."` entry is added. History is never
+rewritten or reset for indexing operations.
+
+### ROI
+
+ROI is copied unchanged through all indexing forms. It is NOT sliced or
+adjusted to match the new data shape. This is a clear stale-field risk.
+
+### Modeldata
+
+`modeldata` is NOT sliced with the data. It retains the original full shape
+even after subsetting. This is a clear stale-field risk.
+
+### Identity
+
+- Slicing preserves identity: title, name, author, description, origin, and
+  meta all survive via copy-first assembly.
+- Even single-element extraction (`ds[0, 0]`) returns an `NDDataset` with
+  full identity — identity never leaves the dataset surface.
+
+### Provenance
+
+- `origin` and `author` are preserved via copy-first.
+- History is extended (appended), not rewritten.
+
+### Result Assembly Interpretation
+
+Indexing follows a **Copy-First with Sliced Assembly** pattern:
+
+```text
+copy input dataset
+slice data, mask, and CoordSet along indexed dimensions
+preserve all metadata unchanged
+append history
+keep roi and modeldata unchanged (stale risk)
+```
+
+This is closest to Pattern A (Copy-First) with a systematic geometry-aware
+slice step that the general copy-first path does not explicitly name.
+
 ## Result Assembly Patterns
 
 Current propagation differences mostly come from result assembly, not from
@@ -632,6 +744,7 @@ implicit architectural concept already present in the codebase.
 | Shape operations | Copy-first plus geometry edits | units, scientific context, masks when shape-aligned | dims, coordset, sometimes mask geometry | `name`, `origin`, custom `meta`, `roi`, `modeldata` | structural metadata after reshape/squeeze/transpose |
 | Interpolation | Copy-first plus domain rebuild | data units, broad context, target coordinate semantics | coordset along interpolated domain, data, mask/labels locally | `name`, `origin`, custom `meta`, possibly `roi` / `modeldata` | copied region/model state tied to old coordinate grid |
 | Integration | Reduction-specific / local rebuild | scientific context, integrated provenance | units, dims, coordset, title/history locally | `name`, `origin`, custom `meta` | source-domain `roi` / `modeldata`; title/name ambiguity |
+| Indexing / selection | Copy-first with sliced assembly | units, masks, coordset (sliced), scientific context, history append | coordset sliced along indexed dims | all metadata preserved, deep-copied | `modeldata` and `roi` stale after subsetting |
 | Concatenate | Rebuild / synthesize | compatible units, selected coordinates, masks | data, concatenated coord, description/author/history | first input title/name in some paths | misleading first-input identity; custom `meta` ambiguity |
 | Stack | Rebuild / synthesize via concatenate | compatible units, masks, source names as stack labels | new leading dim, stack coord, multi-source provenance | concatenate-dependent fields | first-input title/name; ambiguous multi-source context |
 | Processing outputs | Wrapper-based | data units, selected coordset when shape-compatible, local history | data, possibly mask/coords/title/history | depends on wrapper; often less than copy-first | dropped scientific context or stale structural context |
@@ -671,6 +784,7 @@ Observed CoordSet behavior can be grouped as follows.
 | Shape operations | transformed with dims or rebuilt to match new shape | coordinate structure follows array geometry |
 | Interpolation | partially rebuilt along the interpolated domain | same scientific object on a new coordinate grid |
 | Integration | integrated dimension removed or transformed | coordinate support changes because a domain was collapsed |
+| Indexing / selection | sliced along indexed dimension, preserved elsewhere | same object with restricted support |
 | Concatenate | rebuilt along concatenated dimension, preserved/validated elsewhere | multi-source geometry is synthesized |
 | Stack | synthesized with a new leading coordinate, often from dataset names | result gains a provenance-like stack axis |
 
@@ -864,6 +978,7 @@ Operation-family identity reading:
 | Shape operations | same object, changed representation | mostly consistent when CoordSet is transformed with dims; stale structural fields remain a risk |
 | Interpolation | same object on a new coordinate grid | conceptually consistent: context survives, CoordSet is rebuilt locally |
 | Integration | often same object summarized over a domain, sometimes a derived quantity | mixed; unit/CoordSet changes are meaningful, title/name behavior needs policy |
+| Indexing / selection | same object with restricted support | consistent: copy-first preserves identity, CoordSet sliced, metadata unchanged |
 | Concatenate | multi-source synthesized object | partly consistent: provenance is synthesized, but first-title/name behavior can overstate identity |
 | Stack | multi-source synthesized object with new stack axis | partly consistent: source names become labels, other identity fields follow concatenate |
 | Processing outputs | usually same object or changed representation | conceptually consistent, but wrapper paths may under-preserve context |
@@ -873,7 +988,7 @@ Identity and provenance combinations:
 
 | Case | Typical operations | Identity | Provenance |
 |---|---|---|---|
-| Identity survives, provenance grows | arithmetic, many ufuncs, filtering-like processing | same object | history appended |
+| Identity survives, provenance grows | arithmetic, many ufuncs, filtering-like processing, indexing/slicing | same object | history appended |
 | Identity survives with changed representation | interpolation, reshape-like operations, some integrations | same object in new representation | lineage preserved and operation recorded |
 | Identity changes, provenance survives | PCA-like scores, decomposition outputs, model-derived datasets | derived object | source attribution/history should remain visible |
 | Synthesized identity, synthesized provenance | concatenate, stack, multi-source analysis | multi-source result | lineage combined or synthesized |
