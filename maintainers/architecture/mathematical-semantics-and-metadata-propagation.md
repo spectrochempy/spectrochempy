@@ -493,6 +493,46 @@ and dispatched through `_make_index` -> `_get_slice` -> `_loc2index`.
 PR5 characterization tests (135 tests) are in
 `tests/test_core/test_dataset/test_indexing_semantics_baseline.py`.
 
+Compact summary:
+
+```text
+Return type:
+    always NDDataset (even single-element extraction)
+
+Shape/dims:
+    dims preserved with singleton axes (not squeezed)
+
+CoordSet:
+    sliced with data, titles/units preserved
+
+Labels:
+    follow coordinate slicing
+
+Units:
+    preserved for all indexing forms
+
+Masks:
+    sliced with data; scalar False if no masked elements
+
+Metadata (title, name, author, description, origin, meta):
+    preserved via copy-first assembly (deep-copied)
+
+History:
+    appended with "Slice extracted: ..." entry
+
+ROI:
+    preserved unchanged (stale-field risk)
+
+modeldata:
+    preserved unchanged (stale-field risk)
+
+Identity:
+    preserved (same object with restricted support)
+
+Provenance:
+    preserved + history append
+```
+
 ### Return Type
 
 All indexing forms that return a result return `NDDataset`, even
