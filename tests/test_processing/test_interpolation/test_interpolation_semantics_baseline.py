@@ -40,7 +40,6 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 
-
 # ======================================================================================
 # FIXTURES
 # ======================================================================================
@@ -96,7 +95,7 @@ def ds_masked():
 def ds_multi_coord():
     """2D dataset with a multi-coord (CoordSet) on x dimension."""
     xp = np.linspace(4000.0, 1000.0, 7)
-    xs = xp ** 2
+    xs = xp**2
     primary = Coord(xp, title="wavenumber", units="cm^-1")
     secondary = Coord(xs, title="wn_squared")
     multi_x = CoordSet(primary, secondary, name="x")
@@ -222,7 +221,7 @@ class TestCoordSet:
         r = ds_multi_coord.interpolate(dim="x", coord=target)
         secondary = [c for c in r.coord("x").coords if c.title == "wn_squared"]
         assert len(secondary) == 1
-        expected = np.interp(target, [4000.0, 1000.0], [4000 ** 2, 1000 ** 2])
+        expected = np.interp(target, [4000.0, 1000.0], [4000**2, 1000**2])
         np.testing.assert_allclose(np.asarray(secondary[0].data), expected, rtol=1e-3)
 
     def test_coord_title_preserved_for_explicit_coord_target(self, ds_2d):
@@ -308,9 +307,7 @@ class TestMasks:
         """A mask at a specific coord value propagates to nearby target points."""
         x = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
         mask = np.array([False, True, False, False, False])
-        ds = NDDataset(
-            np.arange(5.0), coordset=[Coord(x, title="x")], mask=mask
-        )
+        ds = NDDataset(np.arange(5.0), coordset=[Coord(x, title="x")], mask=mask)
         new_x = np.array([0.5, 1.0, 1.5, 2.0])
         r = ds.interpolate(dim="x", coord=new_x)
         # mask at exact original coord passes through
@@ -320,9 +317,7 @@ class TestMasks:
         """Out-of-range target points get mask=True (fill_value=True)."""
         x = np.array([0.0, 1.0, 2.0, 3.0])
         mask = np.array([False, True, False, False])
-        ds = NDDataset(
-            np.arange(4.0), coordset=[Coord(x, title="x")], mask=mask
-        )
+        ds = NDDataset(np.arange(4.0), coordset=[Coord(x, title="x")], mask=mask)
         new_x = np.array([-0.5, 3.5])
         r = ds.interpolate(dim="x", coord=new_x)
         assert r.mask[0] and r.mask[1]
@@ -406,8 +401,10 @@ class TestROI:
         assert r.roi == ds_2d.roi
 
     def test_roi_preserved_unchanged(self, ds_2d):
-        """ROI is preserved unchanged and may therefore become stale
-        when the coordinate grid is rebuilt."""
+        """
+        ROI is preserved unchanged and may therefore become stale
+        when the coordinate grid is rebuilt.
+        """
         r = ds_2d.interpolate(dim="x", coord=np.linspace(3500.0, 1500.0, 3))
         assert r.roi[0] == ds_2d.roi[0]
         assert r.roi[1] == ds_2d.roi[1]
@@ -439,8 +436,10 @@ class TestIdentityProvenance:
     """Characterize identity and provenance semantics."""
 
     def test_identity_same_object(self, ds_2d):
-        """Interpolation returns a new object but represents the same
-        scientific entity on a new coordinate grid."""
+        """
+        Interpolation returns a new object but represents the same
+        scientific entity on a new coordinate grid.
+        """
         r = ds_2d.interpolate(dim="x", coord=np.linspace(3500.0, 1500.0, 3))
         assert r is not ds_2d
 
@@ -514,7 +513,7 @@ class TestSecondaryCoordinates:
         target = np.linspace(3500.0, 1500.0, 3)
         r = ds_multi_coord.interpolate(dim="x", coord=target)
         for c_old, c_new in zip(
-            ds_multi_coord.coord("x").coords, r.coord("x").coords
+            ds_multi_coord.coord("x").coords, r.coord("x").coords, strict=False
         ):
             if c_old.has_units:
                 assert str(c_new.units) == str(c_old.units)
@@ -531,24 +530,30 @@ class TestMultiDimInterpolation:
     def test_multi_dim_shape(self, ds_2d):
         r = ds_2d.interpolate(
             dims=["x", "y"],
-            coord={"x": np.linspace(3500.0, 1500.0, 3),
-                   "y": np.linspace(10.0, 50.0, 2)},
+            coord={
+                "x": np.linspace(3500.0, 1500.0, 3),
+                "y": np.linspace(10.0, 50.0, 2),
+            },
         )
         assert r.shape == (2, 3)
 
     def test_multi_dim_dims_preserved(self, ds_2d):
         r = ds_2d.interpolate(
             dims=["x", "y"],
-            coord={"x": np.linspace(3500.0, 1500.0, 3),
-                   "y": np.linspace(10.0, 50.0, 2)},
+            coord={
+                "x": np.linspace(3500.0, 1500.0, 3),
+                "y": np.linspace(10.0, 50.0, 2),
+            },
         )
         assert r.dims == ds_2d.dims
 
     def test_multi_dim_coords_rebuilt(self, ds_2d):
         r = ds_2d.interpolate(
             dims=["x", "y"],
-            coord={"x": np.linspace(3500.0, 1500.0, 3),
-                   "y": np.linspace(10.0, 50.0, 2)},
+            coord={
+                "x": np.linspace(3500.0, 1500.0, 3),
+                "y": np.linspace(10.0, 50.0, 2),
+            },
         )
         assert len(r.coord("x")) == 3
         assert len(r.coord("y")) == 2
