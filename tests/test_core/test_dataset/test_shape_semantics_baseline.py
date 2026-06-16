@@ -11,7 +11,7 @@ Coverage:
     - reshape
     - atleast_2d
     - CoordSet semantics (Preserve / Reduce / Rebuild / Synthesize)
-    - ROI and modeldata behavior
+    - ROI behavior
     - history behavior
 """
 
@@ -36,7 +36,6 @@ def shape_dataset():
     - CoordSet with titles, units
     - title, name, metadata, history
     - ROI (UI/selection state — to reassess)
-    - modeldata (derived fit info — to reassess)
     """
     y = Coord(np.linspace(0.0, 60.0, 5), title="time", units="s")
     x = Coord(np.linspace(4000.0, 1000.0, 7), title="wavenumber", units="cm^-1")
@@ -48,7 +47,6 @@ def shape_dataset():
     ds.meta.project = "test_project"
     ds.history = ["original entry"]
     ds.roi = [0.0, 10.0]
-    ds.modeldata = np.full((5, 7), 42.0)
     return ds
 
 
@@ -180,12 +178,6 @@ class TestTransposeCharacterization:
         t = shape_dataset.transpose()
         assert t.roi == [0.0, 10.0]
 
-    def test_transpose_modeldata_shape_stale(self, shape_dataset):
-        """SURPRISE: modeldata is NOT transposed and retains original shape."""
-        t = shape_dataset.transpose()
-        assert t.modeldata.shape == (5, 7)
-        assert t.modeldata.shape != t.shape
-
     def test_transpose_noop_for_1d(self, shape_dataset_1d):
         t = shape_dataset_1d.transpose()
         assert t.dims == shape_dataset_1d.dims
@@ -262,12 +254,6 @@ class TestSwapdimsCharacterization:
     def test_swapdims_preserves_roi(self, shape_dataset):
         s = shape_dataset.swapdims("y", "x")
         assert s.roi == [0.0, 10.0]
-
-    def test_swapdims_modeldata_shape_stale(self, shape_dataset):
-        """SURPRISE: modeldata is NOT swapped and retains original shape."""
-        s = shape_dataset.swapdims("y", "x")
-        assert s.modeldata.shape == (5, 7)
-        assert s.modeldata.shape != s.shape
 
     def test_swapdims_noop_on_1d(self, shape_dataset_1d):
         """SURPRISE: swapdims on 1D returns a copy without error (no-op)."""
@@ -357,15 +343,6 @@ class TestSqueezeCharacterization:
         sq = ds.squeeze()
         assert sq.roi == [0.0, 10.0]
 
-    def test_squeeze_modeldata_shape_stale_when_singleton_removed(self):
-        """SURPRISE: modeldata retains original shape even when singleton is squeezed."""
-        ds = NDDataset(np.ones((1, 4)))
-        ds.modeldata = np.full((1, 4), 99.0)
-        sq = ds.squeeze()
-        assert sq.shape == (4,)
-        assert sq.modeldata.shape == (1, 4)
-        assert sq.modeldata.shape != sq.shape
-
     def test_squeeze_preserves_metadata(self):
         ds = NDDataset(np.ones((1, 4)), title="squeeze_meta")
         ds.author = "author_x"
@@ -451,12 +428,6 @@ class TestReshapeCharacterization:
         r = shape_dataset.reshape((7, 5), dims=("x", "y"))
         assert r.roi == [0.0, 10.0]
 
-    def test_reshape_modeldata_shape_stale(self, shape_dataset):
-        """SURPRISE: modeldata is NOT reshaped and retains original shape."""
-        r = shape_dataset.reshape((7, 5), dims=("x", "y"))
-        assert r.modeldata.shape == (5, 7)
-        assert r.modeldata.shape != r.shape
-
     def test_reshape_with_explicit_coords(self, shape_dataset):
         c = Coord(np.linspace(0.0, 60.0, 7), title="new_time", units="s")
         r = shape_dataset.reshape((7, 5), dims=("y", "x"), coords={"y": c})
@@ -530,11 +501,6 @@ class TestAtleast2dCharacterization:
         shape_dataset_1d.roi = [0.0, 100.0]
         a = shape_dataset_1d.atleast_2d()
         assert a.roi == [0.0, 100.0]
-
-    def test_atleast_2d_preserves_modeldata(self, shape_dataset_1d):
-        shape_dataset_1d.modeldata = np.full(10, 99.0)
-        a = shape_dataset_1d.atleast_2d()
-        assert np.array_equal(a.modeldata, np.full(10, 99.0))
 
     def test_atleast_2d_semantic_pattern(self):
         """CoordSet semantics: Rebuild (new dim 'u' gets None coord, original preserved)."""
@@ -625,25 +591,17 @@ class TestCoordSetSemanticsClassification:
 
 
 # ======================================================================================
-# ROI / MODELDATA CHARACTERIZATION
+# ROI CHARACTERIZATION
 # ======================================================================================
 
 
-class TestRoiModeldataCharacterization:
+class TestRoiCharacterization:
     """
-    Characterize ROI and modeldata behavior under shape operations.
+    Characterize ROI behavior under shape operations.
 
     ROI is current behavior only — it is likely historical UI/interactive
     selection state, not stable scientific metadata. Its propagation through
     shape operations should be reassessed later.
-
-    Modeldata is current behavior only — it is derived model/fit information,
-    historically linked to fitting workflows and probably designed mainly for
-    1D use. Its lifecycle should be reviewed separately before changing
-    propagation rules.
-
-    Key finding: modeldata is NOT reshaped/transposed to match the new data
-    shape. This is a stale-field propagation pattern.
     """
 
     def test_roi_preserved_through_all_ops(self, shape_dataset):
@@ -658,38 +616,6 @@ class TestRoiModeldataCharacterization:
         assert r.roi == [0.0, 10.0]
         a = shape_dataset.atleast_2d()
         assert a.roi == [0.0, 10.0]
-
-    def test_modeldata_shape_is_stale_after_transpose(self, shape_dataset):
-        """Modeldata shape unchanged after transpose (stale, to reassess)."""
-        t = shape_dataset.transpose()
-        assert t.modeldata.shape == (5, 7)
-        assert t.shape == (7, 5)
-
-    def test_modeldata_shape_is_stale_after_swapdims(self, shape_dataset):
-        """Modeldata shape unchanged after swapdims (stale, to reassess)."""
-        s = shape_dataset.swapdims("y", "x")
-        assert s.modeldata.shape == (5, 7)
-        assert s.shape == (7, 5)
-
-    def test_modeldata_shape_is_stale_after_reshape(self, shape_dataset):
-        """Modeldata shape unchanged after reshape (stale, to reassess)."""
-        r = shape_dataset.reshape((7, 5), dims=("x", "y"))
-        assert r.modeldata.shape == (5, 7)
-        assert r.shape == (7, 5)
-
-    def test_modeldata_shape_is_stale_after_squeeze(self):
-        """Modeldata shape unchanged after squeeze (stale, to reassess)."""
-        ds = NDDataset(np.ones((1, 4)))
-        ds.modeldata = np.full((1, 4), 99.0)
-        sq = ds.squeeze()
-        assert sq.modeldata.shape == (1, 4)
-        assert sq.shape == (4,)
-
-    def test_modeldata_preserved_after_atleast_2d(self, shape_dataset_1d):
-        """Modeldata preserved after atleast_2d (no geometry change for 1D)."""
-        shape_dataset_1d.modeldata = np.full(10, 99.0)
-        a = shape_dataset_1d.atleast_2d()
-        assert np.array_equal(a.modeldata, np.full(10, 99.0))
 
     def test_roi_defaults_to_limits(self):
         """Roi falls back to data limits when not explicitly set."""
