@@ -425,13 +425,99 @@ Open questions:
 Combination operations include `concatenate`, `stack`, append-like behavior, and
 local merge-like assembly paths in analysis/processing code.
 
-Representative current behavior:
+### concatenate
 
-| Operation | Data/mask behavior | Units | Coordinates/labels | Metadata |
-|---|---|---|---|---|
-| `concatenate` | masked arrays concatenated | compatible units required; converted to first units | concatenated along selected dim; other dims must match shape | title from first dataset; authors combined; description/history rewritten |
-| `stack` | adds new leading dimension then delegates to concatenate | same compatibility as concatenate | new coordinate labels derive from dataset names | metadata follows concatenate path |
-| analysis assembly | operation-specific | operation-specific | operation-specific | often locally synthesized |
+Current result assembly:
+1. Copies all input datasets.
+2. Checks shape compatibility (all non-concatenated dims must match).
+3. Checks unit compatibility; auto-converts compatible units to first dataset's
+   units; raises `UnitsCompatibilityError` for incompatible dimensions.
+4. Calls `np.ma.concatenate` on masked data (masks propagate correctly).
+5. Merges coordinates via `CoordSet._concatenate_dim` (concatenated dim coord
+   values merged; non-concatenated coords preserved).
+6. Builds output from a copy of the **last** dataset, then selectively
+   overwrites fields.
+
+**Data:**
+- Output shape is the sum along the concatenated dimension.
+- Data ordering preserves input order (first dataset's data first).
+- Available as standalone function or `NDDataset.concatenate()` method.
+
+**CoordSet:**
+- Concatenated dimension coordinate data is merged across inputs.
+- Non-concatenated coordinates are preserved (values, titles, units).
+- Labels on the concatenated dimension are concatenated.
+- CoordSet on non-concatenated dims (including multi-coord) is preserved.
+
+**Units:**
+- Same units: preserved as-is.
+- Compatible units (e.g. V + mV): auto-converted to first dataset's units.
+- Incompatible units (e.g. m + s): raises `UnitsCompatibilityError`.
+
+**Masks:**
+- Masks are concatenated via `np.ma.concatenate` with correct alignment.
+- No mask created if no inputs are masked.
+
+**Metadata propagation (documenting current behavior, not policy):**
+- `title`: from the **first** dataset (warning if different).
+- `name`: from the **last** dataset (copy artifact).
+- `author`: merged with `" & "` separator; deduplicated.
+- `description`: synthesized as `"Concatenation of N datasets:\n( name1, name2, ... )"`.
+- `origin`: from the **last** dataset (copy artifact).
+- `meta`: from the **last** dataset (copy artifact, deep-copied).
+
+**History:**
+- **Rewritten**, not appended: `["...> Created by concatenate"]`.
+- Original history entries from input datasets are **lost**.
+
+**ROI / modeldata:**
+- `roi`: from the **last** dataset (copy artifact).
+- `modeldata`: from the **last** dataset (copy artifact).
+- `modeldata` shape is **stale**: retains input shape, not output shape.
+
+**Identity/Provenance observations:**
+- Not identity-preserving (mixed first/last/merged fields).
+- History is rewritten, not appended — provenance is lost.
+- Best classified as **Pattern B (Rebuild / Synthesize)**:
+  the result is a synthesized multi-source object.
+
+### stack
+
+`stack` is implemented as:
+1. Copies all input datasets.
+2. Checks shapes are identical.
+3. Prepends a new dimension via `np.newaxis`.
+4. Creates a new `Coord` for the new dim with labels from dataset names.
+5. Delegates to `concatenate(*datasets, dims=0)`.
+
+**Key observations:**
+- New leading dim name is selected from available names (e.g. `'z'` for 2D
+  inputs).
+- Stack dimension labels come from `dataset.name` (may be `None` if not set).
+- Metadata, history, ROI, modeldata, and provenance follow the same pattern as
+  `concatenate` (since delegation is direct).
+- stack **requires** datasets to have a CoordSet; bare datasets (no CoordSet)
+  raise `KeyError`.
+
+### Summary table
+
+| Aspect | `concatenate` | `stack` |
+|--------|---------------|---------|
+| Shape | sum along dim | new leading dim |
+| CoordSet | merged + preserved | new leading coord from names |
+| Units | auto-convert to first | same as concatenate |
+| Masks | concatenated | same as concatenate |
+| Title | from first dataset | from first dataset |
+| Name | from last dataset | from last dataset |
+| Author | merged with " & " | merged with " & " |
+| Description | synthesized | synthesized |
+| Origin | from last dataset | from last dataset |
+| Meta | from last dataset | from last dataset |
+| History | rewritten | rewritten |
+| ROI | from last dataset | from last dataset |
+| Modeldata | stale (input shape) | stale (input shape) |
+| Identity | synthesized multi-source | synthesized multi-source |
+| Pattern | B (Rebuild / Synthesize) | B (Rebuild / Synthesize) |
 
 Consistent behaviors:
 
@@ -443,7 +529,11 @@ Consistent behaviors:
 Ambiguous or surprising behaviors:
 
 - title from the first dataset wins when titles differ;
+- `name`, `origin`, `meta`, `roi`, `modeldata` come from the last dataset — this
+  is a copy-first artifact, not an intentional metadata policy;
 - `description`, `author`, and `history` are synthesized locally;
+- history is rewritten (original provenance lost);
+- modeldata is stale after concatenation (shape not updated);
 - custom `meta` merge/drop behavior is not yet a clear contract;
 - plugin post-processing can affect concatenation semantics.
 
@@ -452,6 +542,8 @@ Open questions:
 - Should custom `meta` be merged, preserved from first input, or dropped for
   multi-source operations?
 - Should title/name behavior be standardized across all combination operations?
+- Should provenance be preserved through concatenation (history appended rather
+  than rewritten)?
 - Should stack/concatenate expose a documented metadata policy?
 
 ## Result Assembly Patterns
