@@ -8,14 +8,14 @@ It does NOT validate a desired future policy.
 Coverage:
     - Return type, shape, dims, CoordSet, units, masks
     - Metadata (title, name, author, description, origin, meta)
-    - History, ROI, identity, provenance
+    - History, identity, provenance
 
 Two distinct assembly patterns emerge:
     Group A (Filter/PCA-based: smooth, savgol, whittaker, denoise):
-        name appended, no modeldata attribute, roi recomputed,
+        name appended, no modeldata attribute,
         history rewritten
     Group B (Baseline-based: basc, detrend, asls):
-        name preserved, no modeldata attribute, roi preserved,
+        name preserved, no modeldata attribute,
         history appended
 """
 
@@ -63,7 +63,6 @@ def ds():
     ds.description = "test description"
     ds.origin = "test_origin"
     ds.meta.project = "test_project"
-    ds.roi = [0.0, 10.0]
     ds.history = ["original entry"]
     return ds
 
@@ -105,7 +104,7 @@ class TestFilterWrappers:
     Characterize Filter-based wrappers: smooth, savgol, whittaker.
 
     Observation: these all rewrite history, append _Filter.transform
-    to name, expose no modeldata attribute, and recompute roi from data range.
+    to name, and expose no modeldata attribute.
     """
 
     @pytest.mark.parametrize("method", ["smooth", "savgol", "whittaker"])
@@ -178,14 +177,6 @@ class TestFilterWrappers:
         r = _call_filter(ds, method)
         assert not hasattr(r, "modeldata")
 
-    @pytest.mark.parametrize("method", ["smooth", "savgol", "whittaker"])
-    def test_roi_recomputed(self, ds, method):
-        """Notable: roi is recomputed from data range, not preserved."""
-        r = _call_filter(ds, method)
-        assert r.roi != [0.0, 10.0]
-        # roi reflects data min/max after processing
-        assert len(r.roi) == 2
-
 
 # ======================================================================================
 # GROUP B: BASELINE-BASED WRAPPERS (basc, detrend, asls)
@@ -197,7 +188,7 @@ class TestBaselineWrappers:
     Characterize Baseline-based wrappers: basc, detrend, asls.
 
     Observation: these all append history, preserve name unchanged,
-    expose no modeldata attribute, and preserve roi unchanged.
+    and expose no modeldata attribute.
     """
 
     @pytest.mark.parametrize("method", ["basc", "detrend", "asls"])
@@ -266,15 +257,6 @@ class TestBaselineWrappers:
         r = getattr(ds, method)()
         assert not hasattr(r, "modeldata")
 
-    @pytest.mark.parametrize("method", ["basc", "detrend", "asls"])
-    def test_roi_preserved(self, ds, method):
-        """
-        Notable: roi is preserved unchanged (unlike Filter wrappers
-        which recompute it from data range).
-        """
-        r = getattr(ds, method)()
-        assert r.roi == [0.0, 10.0]
-
 
 # ======================================================================================
 # GROUP C: PCA-BASED WRAPPER (denoise)
@@ -286,7 +268,7 @@ class TestPcaWrapper:
     Characterize PCA-based denoise wrapper.
 
     Observation: Follows Group A pattern (name appended, no modeldata
-    attribute, roi recomputed, history rewritten) but with different
+    attribute, history rewritten) but with different
     method suffix (_PCA.inverse_transform).
     """
 
@@ -340,11 +322,6 @@ class TestPcaWrapper:
         """Notable: wrappers no longer expose a modeldata attribute."""
         r = ds.denoise(ratio=99.0)
         assert not hasattr(r, "modeldata")
-
-    def test_roi_recomputed(self, ds):
-        """Notable: roi recomputed from data (Group A pattern)."""
-        r = ds.denoise(ratio=99.0)
-        assert r.roi != [0.0, 10.0]
 
 
 # ======================================================================================

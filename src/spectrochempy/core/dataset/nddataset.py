@@ -172,8 +172,6 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
     origin : `str`, optional
         Origin of the data: Name of organization, address, telephone number,
         name of individual contributor, etc., as appropriate.
-    roi : `list`
-        Region of interest (ROI) limits.
     history : `str`, optional
         A string to add to the object history.
     copy : `bool`, optional
@@ -323,7 +321,6 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             "modified",
             # "acquisition_date",
             "origin",
-            "roi",
             "transposed",
             # "processeddata",
             # "referencedata",
@@ -490,7 +487,6 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             "created",
             "modified",
             "origin",
-            "roi",
         ):
             # These attributes are not used for comparison (comparison based on data and units!)
             with suppress(ValueError):
