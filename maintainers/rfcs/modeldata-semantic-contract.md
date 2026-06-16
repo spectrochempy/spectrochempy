@@ -1,9 +1,11 @@
 # modeldata — Semantic Contract RFC
 
-**Status:** Draft / Maintainer discussion document
+**Status:** Accepted maintainer decision record
 
 **Implementation status:** NDDataset.modeldata has been removed following the
-analysis below.  See `#1168`_ and commit logs for details.
+analysis below.  Legacy serialized `modeldata` / `_modeldata` entries should
+be ignored on load so old native files remain readable.  See `#1168`_ and
+commit logs for details.
 
 ## Purpose
 
@@ -12,11 +14,9 @@ This document answers two questions:
 1. What is `modeldata`?
 2. What semantic contract should govern it?
 
-It is an architectural analysis only.  No implementation changes, no migration
-plans, no deprecation proposals.
-
-The goal is to transform `modeldata` from an implicit historical field into a
-documented architectural concept before any future redesign.
+This document now serves primarily as the decision record for that audit.  It
+captures what `modeldata` was, how it behaved, and why maintainers chose
+removal rather than a new propagation contract.
 
 See also upstream issue `#1168`_ for the original discussion context.
 
@@ -353,6 +353,9 @@ The minimal safe next step is **Option E** (document the current narrow usage
 as a visualisation hint), followed by a decision on ownership before any
 implementation work.
 
+That was the audit-time assessment.  Maintainer review subsequently chose the
+stronger option: remove the orphaned field rather than narrow and retain it.
+
 ### Summary
 
 | Question | Answer |
@@ -402,6 +405,8 @@ removed rather than given a new propagation contract.
 - Updated the Metadata Contract RFC (`metadata-contract.md`) to reflect that
   `modeldata` is no longer an `NDDataset` field.
 - Added changelog entry documenting the breaking change.
+- Added load-compatibility handling so legacy serialized `modeldata` fields are
+  ignored on read instead of being restored onto runtime dataset objects.
 - Closes `#1168`_.
 
 ### Not changed (out of scope)

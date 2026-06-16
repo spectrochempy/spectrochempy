@@ -48,3 +48,5 @@ For active maintainer contracts and RFCs, also see [`../rfcs/`](../rfcs/).
 | [`../rfcs/architecture-roadmap.md`](../rfcs/architecture-roadmap.md) | Roadmap | Summarizes completed, active, and deferred architecture topics. |
 | [`../rfcs/coordinate-arithmetic-semantics.md`](../rfcs/coordinate-arithmetic-semantics.md) | Draft RFC | Maintainer position on coordinate arithmetic semantics. |
 | [`../rfcs/metadata-contract.md`](../rfcs/metadata-contract.md) | Draft RFC | Normative direction for `NDDataset` metadata preservation, recomputation, override, merge, and drop behavior. |
+| [`../rfcs/modeldata-semantic-contract.md`](../rfcs/modeldata-semantic-contract.md) | Accepted decision record | Audit and removal decision for orphaned `NDDataset.modeldata`. |
+| [`../rfcs/roi-semantic-contract.md`](../rfcs/roi-semantic-contract.md) | Accepted decision record | Audit and removal decision for orphaned `NDDataset.roi`. |

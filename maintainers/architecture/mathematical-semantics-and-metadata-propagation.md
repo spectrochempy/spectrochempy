@@ -110,6 +110,14 @@ See Audit Policy in `AGENTS.md` for test-first refactoring requirements.
 > describe historical characterization-test behavior that is no longer active.
 > See `maintainers/rfcs/modeldata-semantic-contract.md` and issue `#1168` for
 > the full audit and maintainer decision.
+>
+> **Decision update (June 2026):** `roi` has also been classified as orphaned
+> historical interactive-selection state and removed from the public runtime
+> `NDDataset` model.  References to `roi` below describe the historical
+> behavior characterized during PR2–PR7 before that removal.  Legacy
+> serialized `roi` / `modeldata` fields should be ignored on load rather than
+> restored onto live objects.  See `maintainers/rfcs/roi-semantic-contract.md`
+> and `maintainers/rfcs/modeldata-semantic-contract.md`.
 
 ## Semantics Matrix
 
@@ -2000,10 +2008,10 @@ property but has been removed from `NDDataset` — see the modeldata RFC.)
 These fields differ from title, name, author, description, origin, and meta,
 which survive geometry changes unconditionally.
 
-The stale-field risk for ROI is the most actionable finding (modeldata was also
-at risk but has been removed from NDDataset):
-after interpolation, concatenation, or indexing, these fields refer to the
-old coordinate grid but are not automatically dropped or recomputed.
+The stale-field risk for ROI was the most actionable finding in the campaign.
+That issue is now resolved by removal from the runtime dataset model rather
+than by introducing a new propagation contract.  The characterization remains
+useful as historical evidence of why removal was chosen.
 
 ### 6. Campaign Conclusions
 
@@ -2017,17 +2025,20 @@ The PR1–PR7 characterisation campaign clarified the following:
 - **Result assembly** is a first-class architectural concern, not a detail of
   `NDMath` internals.  The assembly pattern determines which fields survive
   and how.
-- **ROI** remains the least well-defined structure.  It is
-  preserved verbatim by most operations, including those that change the
-  coordinate grid, which means it is frequently stale.  (`modeldata` was also
-  poorly defined but has been removed from `NDDataset`.)
+- **ROI** was the least well-defined runtime structure identified by the
+  campaign.  It was preserved verbatim by most operations, including those
+  that changed the coordinate grid, which made it frequently stale.  That
+  ambiguity has now been resolved by removing ROI from `NDDataset` rather than
+  defining a new propagation policy.
 - **Processing wrappers** expose an implementation-family semantic divergence:
   Group A rewrites identity markers while Group B extends provenance.  Whether
   this is intentional is unknown.
 - **Interpolation** provides the clearest example of *same object, changed
   representation* — the pattern that the campaign set out to identify.
 
-No behaviour was changed during this consolidation.
+The characterization campaign itself changed no behavior.  Follow-up maintainer
+decisions later removed both `modeldata` and `roi` from the runtime dataset
+model and kept only load-compatibility handling for legacy serialized fields.
 
 ### Needs Decision Now
 
@@ -2035,9 +2046,10 @@ These decisions are blockers for any result assembly or `NDMath` refactor.
 
 - Metadata preservation baseline: which fields are preserved by default for
   copy-first single-source operations?
-- Structural metadata policy: when should `roi` and coordinate
-  structures be recomputed or dropped?  (`modeldata` has been removed from
-  `NDDataset`, removing one stale-field concern.)
+- Structural metadata policy: when should coordinate structures be recomputed
+  or dropped?  `roi` and `modeldata` have now both been removed from
+  `NDDataset`, resolving those specific stale-field concerns by removal rather
+  than by propagation policy.
 - Wrapper parity: should wrapper-based processing preserve the same scientific
   context as copy-first operations?
 - Result assembly scope: should maintainers treat result assembly as a

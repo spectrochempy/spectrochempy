@@ -24,6 +24,8 @@ contrats RFC, et notes d'architecture durables.
 |---|---|
 | [`rfcs/architecture-roadmap.md`](rfcs/architecture-roadmap.md) | Feuille de route légère des sujets d'architecture récents, terminés ou différés |
 | [`rfcs/metadata-contract.md`](rfcs/metadata-contract.md) | Contrat mainteneur pour les métadonnées `NDDataset` |
+| [`rfcs/modeldata-semantic-contract.md`](rfcs/modeldata-semantic-contract.md) | Audit et décision sur la suppression de `NDDataset.modeldata` |
+| [`rfcs/roi-semantic-contract.md`](rfcs/roi-semantic-contract.md) | Audit et décision sur la suppression de `NDDataset.roi` |
 | [`rfcs/coordinate-arithmetic-semantics.md`](rfcs/coordinate-arithmetic-semantics.md) | Position actuelle sur la sémantique de l'arithmétique coordonnée |
 | [`architecture/README.md`](architecture/README.md) | Index consolidé des notes d'architecture |
 | [`architecture/array-class-responsibility.md`](architecture/array-class-responsibility.md) | Responsabilités actuelles des classes array |

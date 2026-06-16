@@ -2,7 +2,7 @@
 
 ## Status
 
-Draft Maintainer RFC.
+Draft Maintainer RFC with June 2026 decision updates.
 
 This document represents the current maintainer consensus and serves as the
 reference for future metadata-related discussions.
@@ -86,16 +86,27 @@ additional user-supplied scientific context attached to the dataset.
 - `dims`
 - `coordset`
 - `mask`
-- `roi`
 - `transposed`
-- `modeldata`
 
 These fields depend on array structure, coordinate structure, masking, or
-derived model state. They become stale when geometry or domain changes.
+representation. They become stale when geometry or domain changes.
 
-*Note: `modeldata` was previously listed here but has been removed from
-`NDDataset` as orphaned infrastructure — see the `modeldata RFC
-<modeldata-semantic-contract.md>`_ and issue `#1168`_ for details.*
+### Historical removed fields
+
+- `roi`
+- `modeldata`
+
+These fields were previously carried on `NDDataset` as geometry-dependent or
+derived state, but both have now been removed from the public runtime data
+model.
+
+- `roi` was removed after audit as orphaned historical interactive-selection
+  state with no stable semantic contract.
+- `modeldata` was removed as orphaned historical fit/model infrastructure —
+  see the `modeldata RFC <modeldata-semantic-contract.md>`_ and issue `#1168`_.
+
+Legacy serialized `roi` and `modeldata` entries remain load-compatible and
+should be ignored on read rather than restored onto live objects.
 
 ### Provenance metadata
 
@@ -177,7 +188,6 @@ multi-source rules in Section 6 apply.
 | `created` | preserve | preserve | preserve | preserve |
 | `modified` | recompute | recompute | recompute | recompute |
 | `origin` | preserve | preserve | preserve | preserve |
-| `roi` | preserve | drop | drop | drop |
 | `transposed` | preserve | recompute | recompute | recompute |
 | `filename` | preserve | preserve | preserve | preserve |
 
@@ -203,13 +213,22 @@ multi-source rules in Section 6 apply.
   Section 7.
 - `created` is preserved in v1 as the creation date of the source dataset
   lineage. This remains an open question for future revisions.
-- `modeldata` — **removed from NDDataset.**  The modeldata RFC audit showed
-  zero production writes, accidental stale propagation, and a single
-  production reader (`plot1d`).  `NDDataset.modeldata` was removed as
-  orphaned historical infrastructure; fit/model outputs should be explicit
-  datasets or future fit-result objects.
 - `filename` is preserved for single-source operations. Multi-source
   operations follow the stricter rules in Section 6.
+
+### Historical field decisions
+
+- `roi` — **removed from NDDataset.**  The ROI audit showed inconsistent stale
+  propagation, no visible global semantic contract, and no active documented
+  user-facing feature depending on it.  Future interactive selection work, if
+  needed, should use explicit view/model state rather than hidden dataset
+  structure.
+- `modeldata` — **removed from NDDataset.**  The modeldata RFC audit showed
+  zero production writes, accidental stale propagation, and a single
+  production reader (`plot1d`).  Fit/model outputs should be explicit datasets
+  or future fit-result objects.
+- Legacy serialized `roi` / `modeldata` fields SHOULD be ignored on load for
+  backwards compatibility rather than reattached to runtime dataset objects.
 
 ## 6. Multi-Source Rules
 
@@ -349,10 +368,13 @@ decide that filename should always represent only a direct external file source.
 v1 preserves `created` and recomputes `modified`. Some maintainers may prefer
 resetting both for new result objects. This question is intentionally left open.
 
-### Modeldata semantics
+### Removed historical fields
 
-`modeldata` has been removed from `NDDataset`.  See the `modeldata RFC
-<modeldata-semantic-contract.md>`_ for the full audit and rationale.
+- `modeldata` has been removed from `NDDataset`.  See the `modeldata RFC
+  <modeldata-semantic-contract.md>`_ for the full audit and rationale.
+- `roi` has been removed from `NDDataset` as orphaned interactive-selection
+  state.  See the `roi RFC <roi-semantic-contract.md>`_ for the audit summary
+  and decision record.
 
 ### Title and description semantics
 

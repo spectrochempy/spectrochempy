@@ -65,7 +65,7 @@ Responsibilities include:
 - labels for 1D labelled arrays;
 - units and unit conversion helpers;
 - dimension names;
-- title, name, id, and ROI;
+- title, name, and id;
 - generic `Meta` metadata;
 - copy/equality/hash behavior;
 - base slicing and location-to-index behavior;
