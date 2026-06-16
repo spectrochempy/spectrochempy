@@ -8,14 +8,14 @@ It does NOT validate a desired future policy.
 Coverage:
     - Return type, shape, dims, CoordSet, units, masks
     - Metadata (title, name, author, description, origin, meta)
-    - History, ROI, modeldata, identity, provenance
+    - History, ROI, identity, provenance
 
 Two distinct assembly patterns emerge:
     Group A (Filter/PCA-based: smooth, savgol, whittaker, denoise):
-        name appended, modeldata dropped, roi recomputed,
+        name appended, no modeldata attribute, roi recomputed,
         history rewritten
     Group B (Baseline-based: basc, detrend, asls):
-        name preserved, modeldata preserved, roi preserved,
+        name preserved, no modeldata attribute, roi preserved,
         history appended
 """
 
@@ -64,7 +64,6 @@ def ds():
     ds.origin = "test_origin"
     ds.meta.project = "test_project"
     ds.roi = [0.0, 10.0]
-    ds.modeldata = np.full((5, 7), 42.0)
     ds.history = ["original entry"]
     return ds
 
@@ -106,7 +105,7 @@ class TestFilterWrappers:
     Characterize Filter-based wrappers: smooth, savgol, whittaker.
 
     Observation: these all rewrite history, append _Filter.transform
-    to name, drop modeldata, and recompute roi from data range.
+    to name, expose no modeldata attribute, and recompute roi from data range.
     """
 
     @pytest.mark.parametrize("method", ["smooth", "savgol", "whittaker"])
@@ -175,9 +174,9 @@ class TestFilterWrappers:
 
     @pytest.mark.parametrize("method", ["smooth", "savgol", "whittaker"])
     def test_modeldata_dropped(self, ds, method):
-        """Notable: modeldata is set to None (dropped)."""
+        """Notable: wrappers no longer expose a modeldata attribute."""
         r = _call_filter(ds, method)
-        assert r.modeldata is None
+        assert not hasattr(r, "modeldata")
 
     @pytest.mark.parametrize("method", ["smooth", "savgol", "whittaker"])
     def test_roi_recomputed(self, ds, method):
@@ -198,7 +197,7 @@ class TestBaselineWrappers:
     Characterize Baseline-based wrappers: basc, detrend, asls.
 
     Observation: these all append history, preserve name unchanged,
-    preserve modeldata, and preserve roi unchanged.
+    expose no modeldata attribute, and preserve roi unchanged.
     """
 
     @pytest.mark.parametrize("method", ["basc", "detrend", "asls"])
@@ -263,14 +262,9 @@ class TestBaselineWrappers:
 
     @pytest.mark.parametrize("method", ["basc", "detrend", "asls"])
     def test_modeldata_preserved(self, ds, method):
-        """
-        Notable: modeldata is preserved (unlike Filter wrappers
-        which drop it).
-        """
+        """Notable: wrappers no longer expose a modeldata attribute."""
         r = getattr(ds, method)()
-        assert r.modeldata is not None
-        assert r.modeldata.shape == (5, 7)
-        assert np.allclose(r.modeldata, 42.0)
+        assert not hasattr(r, "modeldata")
 
     @pytest.mark.parametrize("method", ["basc", "detrend", "asls"])
     def test_roi_preserved(self, ds, method):
@@ -291,8 +285,8 @@ class TestPcaWrapper:
     """
     Characterize PCA-based denoise wrapper.
 
-    Observation: Follows Group A pattern (name appended, modeldata
-    dropped, roi recomputed, history rewritten) but with different
+    Observation: Follows Group A pattern (name appended, no modeldata
+    attribute, roi recomputed, history rewritten) but with different
     method suffix (_PCA.inverse_transform).
     """
 
@@ -343,9 +337,9 @@ class TestPcaWrapper:
         assert "Created using method PCA.inverse_transform" in r.history[0]
 
     def test_modeldata_dropped(self, ds):
-        """Notable: modeldata dropped (Group A pattern)."""
+        """Notable: wrappers no longer expose a modeldata attribute."""
         r = ds.denoise(ratio=99.0)
-        assert r.modeldata is None
+        assert not hasattr(r, "modeldata")
 
     def test_roi_recomputed(self, ds):
         """Notable: roi recomputed from data (Group A pattern)."""
