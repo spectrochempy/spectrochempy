@@ -1864,7 +1864,158 @@ These tests clarify policy but need not block all maintainability work.
 The purpose of these tests is not to freeze every current quirk permanently.
 The purpose is to make intentional changes visible and reviewable.
 
-## Maintainer Decisions
+## Semantic Building Blocks
+
+The PR1–PR7 campaign revealed a small set of recurring semantic patterns.
+These patterns are not proposed as a new architecture.  They describe the
+reusable building blocks already present in the codebase.
+
+### 1. CoordSet Semantic Categories
+
+CoordSet behavior across operations falls into four categories:
+
+| Category | Meaning | Representative operations |
+|----------|---------|--------------------------|
+| **Preserve** | CoordSet survives unchanged in shape and content | binary arithmetic, ufuncs, elementwise processing (baseline group) |
+| **Reduce** | CoordSet is reduced, dropped, or selected along reduced dimensions | reductions (sum, mean, std, min, max, argmin, argmax), integration |
+| **Rebuild** | CoordSet is reconstructed along the affected dimension(s) | interpolation, geometry-changing operations (reshape, squeeze, transpose) |
+| **Synthesize** | A new CoordSet is built from multiple sources | concatenate, stack |
+
+These categories correspond to how the coordinate geometry relates to the
+result.  Arithmetic preserves geometry.  Reductions collapse it.  Interpolation
+replaces it.  Concatenation combines multiple geometries into one.
+
+### 2. Scientific Object Identity Categories
+
+The campaign confirmed four distinct identity classes:
+
+**Same scientific object**
+:   The result is the same measured entity with modified values.
+    *Arithmetic, ufuncs, baseline processing.*
+    Metadata preserved, history appended.
+
+**Same object, changed representation**
+:   The entity is unchanged but its coordinate grid or dimensionality is
+    different.
+    *Interpolation, reshape-like operations, some integrations.*
+    Scientific context survives, provenance extended, geometry rebuilt.
+
+**Derived scientific object**
+:   The result has a distinct scientific meaning from the input.
+    *Analysis outputs (PCA scores, components), model-derived datasets.*
+    Title/description/coords/history synthesised locally, provenance
+    selectively preserved.
+
+**Multi-source synthesized object**
+:   The result combines multiple scientifically meaningful inputs.
+    *Concatenate, stack, multi-input analysis.*
+    Provenance combined or synthesised; first-input identity can overstate
+    the result's nature.
+
+*Interpolation* provides the clearest example of *same object, changed
+representation*: scientific context survives, provenance is extended,
+while coordinate geometry is rebuilt.
+
+#### Identity vs Provenance
+
+One of the major outcomes of the campaign is that *identity* and *provenance*
+are distinct concerns:
+
+- **Identity** answers *what the result is*: same entity, derived entity,
+  or synthesised entity.
+- **Provenance** answers *where it came from*: history, origin, author,
+  filename, creation time.
+
+An operation can preserve identity while extending provenance (arithmetic),
+change representation while preserving lineage (interpolation), or synthesise
+both identity and provenance (concatenate).  Treating them as a single concept
+obscures the semantic distinctions that result assembly must handle.
+
+### 3. Result Assembly Categories
+
+Result assembly describes *how* an operation builds its return value —
+the mechanical pattern that determines which fields are copied, recomputed,
+or dropped.
+
+| Pattern | How the result is built | Representative operations | Metadata tendency |
+|---------|------------------------|--------------------------|-------------------|
+| **Copy-First Assembly** | Copy the input, then modify data locally | arithmetic, ufuncs | Broad preservation; history appended |
+| **Sliced Assembly** | Slice/copy, then assign sliced data into the copy | indexing, selection | Full preservation; history appended |
+| **Reduction Assembly** | Build result from reduced data, attach surviving context | reductions, integration | Partially preserved; operation-specific |
+| **Domain-Rebuild Assembly** | Copy, then rebuild coordinate domain and interpolate/recompute data | interpolation, reshape-like ops | Scientific context preserved; geometry rebuilt |
+| **Wrapper Assembly** | Call an underlying library, then wrap the result back into NDDataset | processing wrappers (smooth, savgol, etc.) | Two sub-patterns: Group A rewrites identity markers; Group B appends history |
+| **Synthesize Assembly** | Combine multiple inputs into a new result | concatenate, stack | Multi-source metadata; provenance synthesised |
+
+The distinction between Group A and Group B wrappers is a notable divergence
+within the same assembly pattern:
+
+- Group A (Filter/PCA-based: smooth, savgol, whittaker, denoise): name
+  overwritten, modeldata dropped, roi recomputed, history rewritten.
+- Group B (Baseline-based: basc, detrend, asls): name preserved, modeldata
+  preserved, roi preserved, history appended.
+
+This divergence is likely emergent from implementation history rather than
+intentional design.
+
+### 4. Provenance Categories
+
+Provenance refers to the record of how a dataset was produced.  Observed
+patterns:
+
+| Pattern | Meaning | Examples |
+|---------|---------|----------|
+| **Preserve** | The existing provenance trail survives unchanged | arithmetic, indexing (history appended but original entries kept) |
+| **Extend** | A new provenance entry is added to the existing trail | interpolation, baseline processing (Group B), slicing |
+| **Rewrite** | The existing trail is replaced by a single new entry | filter/PCA processing (Group A), some analysis outputs |
+| **Synthesise** | Provenance is built from multiple sources | concatenate, stack |
+
+History is the most explicit provenance mechanism.  The append-vs-rewrite
+distinction is the most practically significant: it determines whether the
+original processing trail survives in the result.
+
+### 5. Structural Information Categories
+
+CoordSet, labels, masks, ROI, and modeldata share a common property: their
+validity depends on geometry, domain, shape, or representation.  They are
+not ordinary scientific context.
+
+| Field | Dependency | Behaviour after geometry change |
+|-------|-----------|--------------------------------|
+| **CoordSet** | Coordinate geometry | Rebuilt or synthesised |
+| **Labels** | Coordinate value equality | Carried over on exact match only |
+| **Masks** | Data shape and position | Reconstructed via float interpolation + threshold; not copied |
+| **ROI** | Data domain range | Preserved verbatim — may become stale |
+| **modeldata** | Data shape and domain | Preserved verbatim — may become stale |
+
+These fields differ from title, name, author, description, origin, and meta,
+which survive geometry changes unconditionally.
+
+The stale-field risk for ROI and modeldata is the most actionable finding:
+after interpolation, concatenation, or indexing, these fields refer to the
+old coordinate grid but are not automatically dropped or recomputed.
+
+### 6. Campaign Conclusions
+
+The PR1–PR7 characterisation campaign clarified the following:
+
+- **CoordSet semantics** are now reasonably understood across four categories
+  (preserve, reduce, rebuild, synthesise).
+- **Identity and provenance** emerged as distinct concepts during the campaign.
+  Identity answers *what* the result is; provenance answers *where* it came
+  from.
+- **Result assembly** is a first-class architectural concern, not a detail of
+  `NDMath` internals.  The assembly pattern determines which fields survive
+  and how.
+- **ROI and modeldata** remain the least well-defined structures.  They are
+  preserved verbatim by most operations, including those that change the
+  coordinate grid, which means they are frequently stale.
+- **Processing wrappers** expose an implementation-family semantic divergence:
+  Group A rewrites identity markers while Group B extends provenance.  Whether
+  this is intentional is unknown.
+- **Interpolation** provides the clearest example of *same object, changed
+  representation* — the pattern that the campaign set out to identify.
+
+No behaviour was changed during this consolidation.
 
 ### Needs Decision Now
 
