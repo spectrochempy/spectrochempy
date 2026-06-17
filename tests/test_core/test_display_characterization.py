@@ -441,16 +441,6 @@ class TestProjectCurrentBehavior:
         str_output = str(proj)
         assert "(dataset)" in str_output
 
-    def test_script_appears_with_type_indicator(self):
-        """Scripts appear with (script) type indicator."""
-        from spectrochempy.core.script import Script
-
-        proj = Project(name="test_project")
-        script = Script(name="my_script", content="print('hello')")
-        proj._scripts["my_script"] = script
-        str_output = str(proj)
-        assert "(script)" in str_output
-
     def test_project_does_not_show_metadata_in_str(self):
         """Project __str__ does not show metadata (metadata belongs in _cstr)."""
         proj = Project(name="test_project", author="test_author")

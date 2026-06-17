@@ -8,7 +8,6 @@ import copy
 import pytest
 
 from spectrochempy.core.dataset.basearrays.ndarray import NDArray
-from spectrochempy.core.script import Script
 from spectrochempy.core.units import ur
 from spectrochempy.utils import testing
 
@@ -163,12 +162,6 @@ def test_compare_project(simple_project):
     proj2.name = "PROJ2"
 
     testing.assert_project_equal(proj1, proj2)
-
-    proj3 = copy.deepcopy(proj2)
-    proj3.add_script(Script(content="print()", name="just_a_try"))
-
-    with testing.raises(AssertionError):
-        testing.assert_project_equal(proj1, proj3)
 
     # Test with datasets having different data, including nested projects.
     proj4 = copy.deepcopy(proj1)

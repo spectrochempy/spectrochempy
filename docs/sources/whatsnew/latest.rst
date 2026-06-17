@@ -126,12 +126,15 @@ Dependency Updates
 Breaking Changes
 ~~~~~~~~~~~~~~~~
 
-- Removed ``Script`` integration from the ``Project`` class (#1196).  ``add_script``,
-  ``add_scripts``, ``remove_script``, ``clear_scripts``, ``remove_all_script``,
-  ``scripts`` property, and ``makescript`` decorator are removed without
-  deprecation.  ``Project`` is now a typed container for ``NDDataset`` and
-  ``Project`` only.  Legacy ``.pscp`` files containing ``_scripts`` entries
-  remain load-compatible — the field is silently ignored on deserialization.
+- Removed the ``Script`` class and the entire ``spectrochempy.core.script``
+  module, along with the ``run_script``, ``run_all_scripts`` functions and
+  the ``%addscript`` IPython magic (#1196).  ``Project`` loses all Script
+  integration (``add_script``, ``add_scripts``,
+  ``clear_scripts``, ``remove_all_script``, ``scripts`` property,
+  ``makescript`` decorator) — no deprecation period.  ``Project`` is now a
+  typed container for ``NDDataset`` and ``Project`` only.  Legacy ``.pscp``
+  files containing ``_scripts`` entries remain load-compatible — the field is
+  silently ignored on deserialization.
 
 - Mixed arithmetic between ``NDDataset`` and ``Coord`` is now rejected
   (e.g. ``dataset + coord`` or ``coord * dataset``).  ``Coord`` is treated as
