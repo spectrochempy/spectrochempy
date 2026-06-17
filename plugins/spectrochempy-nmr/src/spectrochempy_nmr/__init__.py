@@ -187,7 +187,7 @@ class NMRPlugin(SpectroChemPyPlugin):
     """NMR plugin, currently providing the Bruker TopSpin reader."""
 
     name = "nmr"
-    version = "0.1.3"
+    version = "0.1.4"
     description = "NMR readers and tools for SpectroChemPy"
     spectrochempy_min_version = "0.9.0"
     PLUGIN_API_VERSION = CORE_PLUGIN_API_VERSION
