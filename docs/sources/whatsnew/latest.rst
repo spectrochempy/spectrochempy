@@ -22,8 +22,12 @@ New Features
   (#1078).  When coordinate units are available, ``distance`` and ``width`` can
   now be passed as `Quantity` objects or unit strings such as ``"10 cm^-1"``,
   and ``wlen`` / ``plateau_size`` follow the same coordinate-aware conversion
-  to sample points.  Plain numeric values keep their previous behavior, and
-  incompatible units now raise a clear error.
+  to sample points.  Plain numeric values keep their previous behavior,
+  incompatible units now raise a clear error, and coordinate-aware spacing
+  constraints are now explicitly rejected on non-linear axes instead of being
+  interpreted approximately.  Peak interpolation near dataset borders is also
+  more robust, and the ``find_peaks`` doc examples are now synthetic instead of
+  depending on downloadable test data.
 
 Bug Fixes
 ~~~~~~~~~
