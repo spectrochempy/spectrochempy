@@ -22,6 +22,13 @@ New Features
 - Added the official ``spectrochempy-tensor`` plugin for TensorLy-backed tensor
   decompositions, exposing CP/PARAFAC as ``scp.tensor.CP``.
 
+- ``find_peaks`` now accepts physical units for point-spacing constraints
+  (#1078).  When coordinate units are available, ``distance`` and ``width`` can
+  now be passed as `Quantity` objects or unit strings such as ``"10 cm^-1"``,
+  and ``wlen`` / ``plateau_size`` follow the same coordinate-aware conversion
+  to sample points.  Plain numeric values keep their previous behavior, and
+  incompatible units now raise a clear error.
+
 
 .. section
 

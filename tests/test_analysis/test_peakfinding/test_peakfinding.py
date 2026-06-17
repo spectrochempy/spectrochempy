@@ -197,6 +197,57 @@ def test_peak_properties(simple_peaks_dataset):
     assert all(p.m > 0 for p in properties["prominences"])
 
 
+def test_distance_accepts_physical_units(simple_peaks_dataset):
+    """Unit-aware distance matches existing numeric coordinate-space behavior."""
+    numeric_peaks, _ = find_peaks(simple_peaks_dataset, height=0.5, distance=1.0)
+    quantity_peaks, _ = find_peaks(
+        simple_peaks_dataset, height=0.5, distance=1.0 * ur("cm^-1")
+    )
+    string_peaks, _ = find_peaks(simple_peaks_dataset, height=0.5, distance="1 cm^-1")
+
+    assert np.allclose(quantity_peaks.x.values, numeric_peaks.x.values)
+    assert np.allclose(string_peaks.x.values, numeric_peaks.x.values)
+
+
+def test_width_accepts_physical_units(simple_peaks_dataset):
+    """Unit-aware width matches existing numeric coordinate-space behavior."""
+    numeric_peaks, numeric_props = find_peaks(
+        simple_peaks_dataset, height=0.5, width=0.1, prominence=0.4
+    )
+    quantity_peaks, quantity_props = find_peaks(
+        simple_peaks_dataset,
+        height=0.5,
+        width=0.1 * ur("cm^-1"),
+        prominence=0.4,
+    )
+    string_peaks, string_props = find_peaks(
+        simple_peaks_dataset, height=0.5, width="0.1 cm^-1", prominence=0.4
+    )
+
+    assert np.allclose(quantity_peaks.x.values, numeric_peaks.x.values)
+    assert np.allclose(string_peaks.x.values, numeric_peaks.x.values)
+    assert np.allclose(
+        [width.m for width in quantity_props["widths"]],
+        [width.m for width in numeric_props["widths"]],
+    )
+    assert np.allclose(
+        [width.m for width in string_props["widths"]],
+        [width.m for width in numeric_props["widths"]],
+    )
+
+
+def test_incompatible_peakfinding_units_raise_clear_error(simple_peaks_dataset):
+    """Incompatible physical units should raise a clear coordinate-space error."""
+    with pytest.raises(ValueError) as exc:
+        find_peaks(simple_peaks_dataset, height=0.5, distance="1 s")
+
+    message = str(exc.value)
+    assert "peak-finding parameter `distance`" in message
+    assert "dimension 'x'" in message
+    assert "s" in message
+    assert "cm" in message
+
+
 def test_window_length_interpolation(simple_peaks_dataset):
     """Test peak position interpolation with different window lengths."""
     # Test with different window lengths
