@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "spectrochempy-carroucell"
-version = "0.1.3"
+version = "0.1.4"
 description = "Carroucell experiment reader for SpectroChemPy"
 requires-python = ">=3.11"
 readme = "README.md"
