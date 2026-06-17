@@ -26,7 +26,7 @@ __configurables__ = ["IRIS"]
 
 _IRIS_DEPRECATION_MSG = (
     "Importing {name!r} from spectrochempy.analysis.decomposition.iris "
-    "is deprecated since SpectroChemPy 0.9.0 and will be removed in 0.10.0. "
+    "is deprecated since SpectroChemPy 0.9.0 and will be removed in 0.11.0. "
     "Use scp.iris.{name} instead."
 )
 
