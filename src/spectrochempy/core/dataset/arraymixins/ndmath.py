@@ -2520,7 +2520,7 @@ class NDMath:
         m = np.ma.var(dataset, axis=axis, dtype=dtype, ddof=ddof, keepdims=keepdims)
 
         if np.isscalar(m):
-            return Quantity(m, cls.units) if cls.units is not None else m
+            return Quantity(m, cls.units ** 2) if cls.units is not None else m
 
         dims, coordset = _reduce_dims(cls, dim, keepdims)
         cls._data = m.data
