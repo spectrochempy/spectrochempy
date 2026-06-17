@@ -28,10 +28,9 @@
 # # Baseline corrections
 #
 # This tutorial shows how to make baseline corrections with **SpectroChemPy** using the
-# `Baseline`class processor - which allows performing all the implemented correction
-# operations with a maximum of flexibility and settings - or using equivalent
-# SpectroChemPy API or NDDataset methods which allow performing specific corrections
-# operations in a more direct way.
+# `Baseline` class processor, which exposes all implemented correction models with a
+# high degree of flexibility, or using the equivalent SpectroChemPy API / NDDataset
+# methods for more direct one-step corrections.
 #
 # As prerequisite,
 # the user is expected to have read the [Import](../importexport/import.rst)
@@ -45,7 +44,7 @@
 import spectrochempy as scp
 
 # %% [markdown]
-# Then we load a FTIR series of spectra on which we will demonstrate the processor capabilities
+# Then we load a FTIR series of spectra on which we will demonstrate the processor capabilities.
 
 # %%
 # loading
@@ -111,19 +110,23 @@ X2 = blc.transform()
 # %% [markdown]
 # The baseline models implemented in SpectroChemPy are able to handle missing data.
 #
-# For instance, let's condider masking the saturated region of the spectra.
+# For instance, let's consider masking the saturated region of the spectra.
 
 # %%
 X[:, 891.0:1234.0] = scp.MASKED
 _ = X.plot()
 
 # %% [markdown]
-# Fitting the baseline is done transparently
+# Fitting the baseline is done transparently, and the masked region is preserved on both
+# the computed baseline and the corrected dataset.
 
 # %%
 blc.fit(X)
 X3 = blc.transform()
 _ = blc.plot()
+
+# %%
+X3[:, 891.0:1234.0].mask.all(), blc.baseline[:, 891.0:1234.0].mask.all()
 
 # %% [markdown]
 # ### Overview of the other model

@@ -667,6 +667,7 @@ baseline/trends for different segments of the data.
             self._X.sort(inplace=True, descend=True)
 
         if self.model == "asls":  # restore the mask
+            baseline = np.ma.array(baseline, mask=self.Xmasked.mask, copy=False)
             self._X._mask = self.Xmasked.mask
 
         self._outfit = (baseline, bplist)  # store the result
@@ -857,6 +858,8 @@ def get_baseline(dataset, *ranges, **kwargs):
     For more flexibility and functionality, it is advised to use the Baseline class
     processor instead.
 
+    Masked input regions are preserved on the returned baseline.
+
     """
     blc = Baseline()
     # by default, model is 'polynomial' and order is 1.
@@ -916,6 +919,8 @@ def basc(dataset, *ranges, **kwargs):
     -----
     For more flexibility and functionality, it is advised to use the Baseline class
     processor instead.
+
+    Masked input regions are preserved on the returned corrected dataset.
 
     """
     return dataset - get_baseline(dataset, *ranges, **kwargs)
@@ -1004,6 +1009,8 @@ def asls(dataset, lamb=1e5, asymmetry=0.05, tol=1e-3, max_iter=50):
     `NDDataset`
         The baseline corrected dataset.
 
+        Masked input regions are preserved in the returned dataset.
+
     See Also
     --------
     Baseline : Manual baseline correction processor.
@@ -1045,6 +1052,8 @@ def snip(dataset, snip_width=50):
     `NDDataset`
         The baseline corrected dataset.
 
+        Masked input regions are preserved in the returned dataset.
+
     See Also
     --------
     Baseline : Manual baseline correction processor.
@@ -1081,6 +1090,8 @@ def rubberband(dataset):
     -------
     `NDDataset`
         The baseline corrected dataset.
+
+        Masked input regions are preserved in the returned dataset.
 
     See Also
     --------
