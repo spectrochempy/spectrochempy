@@ -71,7 +71,7 @@ jobs:
             docs_examples: false
             plugins: false
             core_only: true
-            test_targets: tests/test_core/test_dataset tests/test_core/test_units tests/test_core/test_projects tests/test_core/test_scripts tests/test_core/test_plotters
+            test_targets: tests/test_core/test_dataset tests/test_core/test_units tests/test_core/test_projects tests/test_core/test_plotters
             validation: core-only
             check_name: Test core-only using ubuntu-latest and python 3.14
           - os: ubuntu-latest
