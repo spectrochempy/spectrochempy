@@ -16,5 +16,8 @@ Official plugins may evolve faster than the core package when they depend on
 specialized libraries or domain-specific conventions. Compatibility aliases may
 exist during transitions, but new examples should use plugin namespaces.
 
+This page describes the user-facing direction only. It is not the maintainer
+architecture roadmap.
+
 The detailed architecture roadmap for maintainers and plugin authors lives in
 :ref:`plugin-dev-roadmap`.

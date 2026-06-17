@@ -124,95 +124,17 @@ as ``scp.IRIS``. New examples should prefer the namespaced form,
 Plugin summaries
 ================
 
-IRIS
-----
+The table above is the quick reference. The dedicated plugin pages below
+provide the user-facing details:
 
-The ``spectrochempy-iris`` plugin provides 2D-IRIS analysis tools for
-spectroscopic adsorption and diffusion studies.
+* :doc:`iris` for 2D-IRIS workflows and the ``scp.iris`` / ``dataset.iris`` APIs
+* :doc:`nmr` for TopSpin reading and NMR-specific processing workflows
+* :doc:`tensor` for TensorLy-backed tensor decompositions such as CP/PARAFAC
+* :doc:`hypercomplex` for quaternion support used in phase-sensitive 2D NMR
 
-.. code-block:: bash
-
-    pip install spectrochempy[iris]
-
-.. code-block:: python
-
-    import spectrochempy as scp
-
-    kernel = dataset.iris.kernel_matrix(kernel_type="langmuir")
-    analysis = scp.iris.IRIS()
-
-NMR
----
-
-The ``spectrochempy-nmr`` plugin provides Bruker TopSpin reading and
-NMR-specific workflows.
-
-.. code-block:: bash
-
-    pip install spectrochempy[nmr]
-
-.. code-block:: python
-
-    import spectrochempy as scp
-
-    dataset = scp.nmr.read_topspin("path/to/fid")
-
-Tensor
-------
-
-The ``spectrochempy-tensor`` plugin provides TensorLy-backed tensor
-decomposition classes. CP/PARAFAC is available now; the package layout reserves
-space for future tensor methods such as Tucker and TensorTrain.
-
-.. code-block:: bash
-
-    pip install spectrochempy[tensor]
-
-.. code-block:: python
-
-    import spectrochempy as scp
-
-    model = scp.tensor.CP(n_components=2)
-    model.fit(dataset)
-
-Hypercomplex
-------------
-
-The ``spectrochempy-hypercomplex`` plugin provides quaternion/hypercomplex
-support for multi-dimensional complex data, primarily used in phase-sensitive
-2D NMR.
-
-.. code-block:: bash
-
-    pip install spectrochempy-hypercomplex
-
-.. code-block:: python
-
-    import spectrochempy as scp
-
-    # After reading 2D NMR data, convert to hypercomplex
-    dataset = scp.nmr.read_topspin("path/to/ser")
-    dataset.hyper.set_quaternion(inplace=True)
-
-    # Extract components
-    rr = dataset.hyper.RR
-    ri = dataset.hyper.component("RI")
-
-Carroucell
-----------
-
-The ``spectrochempy-carroucell`` plugin provides the Carroucell experiment
-reader for spectroscopic data analysis.
-
-.. code-block:: bash
-
-    pip install spectrochempy-carroucell
-
-.. code-block:: python
-
-    import spectrochempy as scp
-
-    dataset = scp.carroucell.read_carroucell("path/to/carroucell_dir")
+The Carroucell reader is currently part of the official plugin set but does not
+yet have a separate user page. Use ``scp.carroucell.read_carroucell(...)`` once
+the plugin is installed.
 
 Examples and gallery convention
 ===============================
@@ -221,4 +143,5 @@ Examples remain organized by scientific topic in the central SpectroChemPy
 gallery. Plugin-dependent examples live with the plugin source and are staged
 into the central gallery from the plugin ``examples/gallery.toml`` manifest.
 They should be clearly marked with their required plugin, but they do not need
-a separate plugin-only gallery.
+a separate plugin-only gallery. See :doc:`examples` for the user-facing example
+convention.

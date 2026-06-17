@@ -135,7 +135,8 @@ Your plugin class must implement the
         def register_readers(self) -> list[dict]:
             return [...]
 
-See :ref:`plugin-architecture` for the full API reference.
+See :ref:`plugin-architecture` for the runtime architecture overview and
+:ref:`plugin-author-guide` for the author-facing quick-start guide.
 
 Entry point discovery flow
 ==========================
@@ -305,5 +306,6 @@ testing without touching the global registry.
 See also
 ========
 
-* :ref:`plugin-architecture` — Writing a plugin
+* :ref:`plugin-architecture` — Plugin architecture
+* :ref:`plugin-author-guide` — Plugin author guide
 * :ref:`plugin-testing` — Testing a plugin

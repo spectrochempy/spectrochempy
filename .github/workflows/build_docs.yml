@@ -2,7 +2,7 @@
 # Documentation is built using Sphinx and published to GitHub Pages
 #
 # Branch preview deployment:
-# - Development branches (non-master, non-docs/*, non-release) publish
+# - Development branches (non-master, non-release), including docs/* branches, publish
 #   preview docs under /<branch-name>/ on GitHub Pages.
 # - Branch names are sanitised: "/" becomes "-".
 # - Example: branch "feature/new-nmr" → /feature-new-nmr/
@@ -40,7 +40,9 @@ jobs:
   build_and_publish_documentation:
     # Only run scheduled jobs on main repository.
     # For pull_request events, skip if the PR is from the same repository
-    # (push events on the branch already trigger the workflow).
+    # (push events on the branch already trigger the workflow), except for
+    # documentation branches where the PR itself should still exercise the
+    # docs build and preview path.
     if: >
       github.event_name == 'workflow_dispatch' ||
       (
@@ -49,7 +51,8 @@ jobs:
           (github.event_name == 'schedule') ||
           (github.event_name != 'schedule' &&
            (github.event_name != 'pull_request' ||
-            github.event.pull_request.head.repo.full_name != github.repository))
+            github.event.pull_request.head.repo.full_name != github.repository ||
+            startsWith(github.event.pull_request.head.ref, 'docs/')))
         )
       )
 
@@ -180,8 +183,8 @@ jobs:
         run: |
           BRANCH="${{ github.ref_name }}"
           EVENT="${{ github.event_name }}"
-          # Stable builds: master, docs/* branches, and release events
-          if [[ "$BRANCH" == "master" || "$BRANCH" == docs/* || "$EVENT" == "release" ]]; then
+          # Stable builds: master and release events
+          if [[ "$BRANCH" == "master" || "$EVENT" == "release" ]]; then
             echo "is_preview=false" >> "$GITHUB_OUTPUT"
             echo "preview_path=" >> "$GITHUB_OUTPUT"
             echo "build_subdir=" >> "$GITHUB_OUTPUT"
