@@ -27,6 +27,17 @@ This document should evolve as the project evolves.
 
 ## 2026-06
 
+### Analysis and Fit Result Architecture Audit
+
+- Decision: audit completed; RFC drafted.
+- Main conclusion: current result representation is object-owned but
+  semantically fragmented.
+- No immediate implementation decision.
+- Future work should clarify result-surface conventions and decide whether
+  fit workflows justify a dedicated result object.
+- Reference: `maintainers/rfcs/analysis-fit-result-architecture.md`
+- Audit reference: `audit/~analysis-fit-result-architecture-audit.md`
+
 ### Integration Semantics Characterization
 
 - Decision: PR8 characterization is complete for `trapezoid()` / `simpson()`.
@@ -383,15 +394,25 @@ clearer.
 
 ## Result Assembly Architecture
 
-Potential future topic.
+Status: Audited; RFC drafted.
 
 Motivation:
 
 Several audits revealed multiple result-construction paths throughout the codebase.
 
-Current evidence does not justify immediate work.
+Current state:
 
-This topic should be revisited only if future maintenance difficulties emerge.
+- Analysis and Fit Result Architecture audit completed (`audit/~analysis-fit-result-architecture-audit.md`).
+- RFC drafted (`maintainers/rfcs/analysis-fit-result-architecture.md`).
+- Conclusion: current result representation is functionally workable but
+  semantically fragmented.
+
+Current evidence does not justify immediate implementation work.
+
+Future work should clarify:
+- result-surface conventions across analysis and fit classes
+- whether fit workflows justify a dedicated result object
+- whether multi-output objects need a collection abstraction
 
 ---
 
