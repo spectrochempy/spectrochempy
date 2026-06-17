@@ -167,6 +167,27 @@ class InvalidUnitsError(SpectroChemPyError):
     """Exception raised when units is not valid."""
 
 
+def format_incompatible_units_message(operation, left_units, right_units, dim=None):
+    """
+    Build a clear error message for incompatible units in coordinate-aware operations.
+
+    Parameters
+    ----------
+    operation : str
+        Short operation description, e.g. ``"align datasets"``.
+    left_units, right_units : any
+        Units involved in the failed operation.
+    dim : str, optional
+        Dimension name, when available.
+    """
+    location = f" along dimension '{dim}'" if dim is not None else ""
+    return (
+        f"Cannot {operation}{location}: incompatible coordinate units "
+        f"({left_units} and {right_units}). "
+        "Convert the coordinates to compatible units before retrying."
+    )
+
+
 class InvalidReferenceError(SpectroChemPyError):
     """Exception raised when a reference to another coordinate is not valid."""
 

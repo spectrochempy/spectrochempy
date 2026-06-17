@@ -7,7 +7,11 @@
 
 """Tests for the interpolate module"""
 
+import pytest
+
+import spectrochempy as scp
 from spectrochempy.processing.alignement.align import align
+from spectrochempy.utils.exceptions import UnitsCompatibilityError
 
 # align
 # -------
@@ -40,3 +44,17 @@ def test_align(ds1, ds2):
 
     # align inner
     a, b = align(ds1, ds2, method="inner")
+
+
+def test_align_rejects_incompatible_coord_units_with_clear_message():
+    ds1 = scp.NDDataset([1.0, 2.0], coordset=[scp.Coord([100.0, 200.0], units="cm^-1")])
+    ds2 = scp.NDDataset([3.0, 4.0], coordset=[scp.Coord([1.0, 2.0], units="s")])
+
+    with pytest.raises(UnitsCompatibilityError) as exc:
+        align(ds1, ds2, dim="x")
+    message = str(exc.value)
+    assert "Cannot align datasets" in message
+    assert "dimension 'x'" in message
+    assert "s" in message
+    assert "cm" in message
+    assert "Convert the coordinates to compatible units before retrying." in message

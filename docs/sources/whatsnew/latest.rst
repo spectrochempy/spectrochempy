@@ -73,7 +73,11 @@ Bug Fixes
   Coordinate values expressed in compatible but different units are converted
   to the units of the first dataset, incompatible coordinate units raise a
   ``UnitsCompatibilityError``, and mixed labeled/unlabeled coordinates no
-  longer crash during concatenation.
+  longer crash during concatenation.  Coordinate-aware operations now also
+  report incompatible coordinate units more clearly (#1099): ``align``,
+  ``concatenate``, and ``interpolate`` identify the failing operation, the
+  dimension involved, and the mismatched units instead of surfacing backend or
+  overly generic conversion errors.
 
 - ``read_opus`` now supports more assembled and time-resolved OPUS files
   (#1035, #1036): data series blocks such as ``a``, ``sm``, ``igsm``,
