@@ -2506,12 +2506,12 @@ class NDMath:
         >>> nd
         NDDataset: [float64] a.u. (shape: (y:55, x:5549))
         >>> scp.var(nd)
-        <Quantity(0.652818786, 'absorbance')>
+        <Quantity(0.652818786, 'absorbance ** 2')>
         >>> scp.var(nd, keepdims=True)
-        NDDataset: [float64] a.u. (shape: (y:1, x:1))
+        NDDataset: [float64] a.u. ** 2 (shape: (y:1, x:1))
         >>> m = scp.var(nd, dim='y')
         >>> m
-        NDDataset: [float64] a.u. (size: 5549)
+        NDDataset: [float64] a.u. ** 2 (size: 5549)
         >>> m.data
         array([0.007262, 0.007299, ...,  0.06298,  0.06438])
 
@@ -2520,13 +2520,19 @@ class NDMath:
         m = np.ma.var(dataset, axis=axis, dtype=dtype, ddof=ddof, keepdims=keepdims)
 
         if np.isscalar(m):
-            return Quantity(m, cls.units) if cls.units is not None else m
+            return (
+                Quantity(m, cls.units ** 2)
+                if cls.units is not None
+                else m
+            )
 
         dims, coordset = _reduce_dims(cls, dim, keepdims)
         cls._data = m.data
         cls._mask = m.mask
         cls.dims = dims
         cls._coordset = coordset
+        if cls.units is not None:
+            cls._units = cls.units ** 2
 
         return cls
 
