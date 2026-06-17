@@ -192,9 +192,27 @@ jobs:
             echo "build_subdir=build/branch_preview" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Determine documentation execution mode
+        id: docs_mode
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            BRANCH="${{ github.head_ref }}"
+          else
+            BRANCH="${{ github.ref_name }}"
+          fi
+
+          if [[ "$BRANCH" == docs/* || "$BRANCH" == codex/doc-* ]]; then
+            echo "fresh_docs=true" >> "$GITHUB_OUTPUT"
+            echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+            echo "Documentation fresh-run mode enabled for branch: $BRANCH"
+          else
+            echo "fresh_docs=false" >> "$GITHUB_OUTPUT"
+            echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+          fi
+
       # ---------- restore reusable Sphinx/Sphinx-Gallery outputs for previews ----------
       - name: Restore documentation build cache
-        if: steps.preview.outputs.is_preview == 'true'
+        if: steps.preview.outputs.is_preview == 'true' && steps.docs_mode.outputs.fresh_docs != 'true'
         uses: actions/cache@v5
         with:
           path: |
@@ -205,6 +223,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-docs-${{ steps.preview.outputs.preview_path }}-
             ${{ runner.os }}-docs-
+
+      - name: Clear documentation caches for fresh-run branches
+        if: steps.docs_mode.outputs.fresh_docs == 'true'
+        run: |
+          rm -rf \
+            build/branch_preview/~doctrees \
+            docs/sources/gettingstarted/examples/gallery
+          echo "Cleared reusable documentation caches for fresh-run mode"
 
       # ---------- clone gh-pages (preserve existing content) ----------
       - name: Clone gh-pages branch
@@ -219,7 +245,12 @@ jobs:
           set -e
           . .venv/bin/activate
           start=$SECONDS
-          if [[ "${{ github.event_name }}" == "pull_request" && "${{ steps.preview.outputs.is_preview }}" == "true" ]]; then
+          if [[ "${{ github.event_name }}" == "pull_request" && "${{ steps.preview.outputs.is_preview }}" == "true" && "${{ steps.docs_mode.outputs.fresh_docs }}" == "true" ]]; then
+            SCPY_BUILDDIR=${{ steps.preview.outputs.build_subdir }} \
+              python3 docs/make.py -j auto html
+          elif [[ "${{ github.event_name }}" == "pull_request" && "${{ steps.docs_mode.outputs.fresh_docs }}" == "true" ]]; then
+            python3 docs/make.py -j auto html
+          elif [[ "${{ github.event_name }}" == "pull_request" && "${{ steps.preview.outputs.is_preview }}" == "true" ]]; then
             SCPY_BUILDDIR=${{ steps.preview.outputs.build_subdir }} \
               python3 docs/make.py --no-exec -j auto html
           elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
