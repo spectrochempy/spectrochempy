@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function sortVersions(versions) {
         return versions
-            .filter(v => v)
+            .filter(v => typeof v === 'string' && v)
             .sort((a, b) => {
                 const partsA = a.split('.').map(Number);
                 const partsB = b.split('.').map(Number);
@@ -67,7 +67,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 return fallback;
             }
             const manifest = await response.json();
-            return Array.isArray(manifest.versions) ? manifest.versions : fallback;
+            if (Array.isArray(manifest.versions)) {
+                return manifest.versions;
+            }
+            if (Array.isArray(manifest)) {
+                return manifest
+                    .map(item => typeof item === 'string' ? item : item?.name)
+                    .filter(name => /^\d+\.\d+\.\d+$/.test(name));
+            }
+            return fallback;
         } catch {
             return fallback;
         }
