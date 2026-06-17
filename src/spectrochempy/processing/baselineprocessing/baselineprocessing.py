@@ -667,6 +667,7 @@ baseline/trends for different segments of the data.
             self._X.sort(inplace=True, descend=True)
 
         if self.model == "asls":  # restore the mask
+            baseline = np.ma.array(baseline, mask=self.Xmasked.mask, copy=False)
             self._X._mask = self.Xmasked.mask
 
         self._outfit = (baseline, bplist)  # store the result

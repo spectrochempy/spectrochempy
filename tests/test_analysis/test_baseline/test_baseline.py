@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 import spectrochempy as scp
 from spectrochempy.processing.baselineprocessing.baselineprocessing import Baseline
@@ -274,6 +275,63 @@ def test_baseline_preserves_mask_1d(synthetic_1d_baseline_dataset):
     out_positions = np.flatnonzero(np.asarray(corrected.mask).ravel())
     assert np.array_equal(out_positions, expected_positions)
     assert corrected.units == dataset.units
+
+    unmasked = ~np.asarray(corrected.mask).ravel()
+    assert np.all(np.isfinite(corrected.data.ravel()[unmasked]))
+
+
+@pytest.mark.parametrize(
+    ("model", "kwargs"),
+    [
+        ("polynomial", {"order": 3}),
+        ("asls", {"lamb": 10**8, "asymmetry": 0.002}),
+        ("snip", {"snip_width": 40}),
+        ("rubberband", {}),
+    ],
+)
+def test_baseline_models_preserve_mask_2d(synthetic_2d_baseline_dataset, model, kwargs):
+    """Core baseline models preserve masked regions on baseline and corrected output."""
+    dataset, _, _ = synthetic_2d_baseline_dataset
+    dataset[:, 3000.0:2000.0] = scp.MASKED
+    expected_mask = np.asarray(dataset.mask).copy()
+
+    blc = Baseline()
+    blc.model = model
+    for key, value in kwargs.items():
+        setattr(blc, key, value)
+
+    blc.fit(dataset)
+    baseline = blc.baseline
+    corrected = blc.transform()
+
+    assert np.array_equal(np.asarray(baseline.mask), expected_mask)
+    assert np.array_equal(np.asarray(corrected.mask), expected_mask)
+
+    unmasked = ~np.asarray(corrected.mask)
+    assert np.all(np.isfinite(corrected.data[unmasked]))
+    assert np.all(np.isfinite(baseline.data[unmasked]))
+
+
+@pytest.mark.parametrize(
+    ("func", "kwargs"),
+    [
+        (scp.asls, {"lamb": 10**8, "asymmetry": 0.002}),
+        (scp.snip, {"snip_width": 40}),
+        (scp.rubberband, {}),
+    ],
+)
+def test_baseline_wrapper_functions_preserve_mask_1d(
+    synthetic_1d_baseline_dataset, func, kwargs
+):
+    """Public baseline-correction helpers preserve masks on corrected output."""
+    dataset, _, _ = synthetic_1d_baseline_dataset
+    dataset[3000.0:2000.0] = scp.MASKED
+    expected_positions = np.flatnonzero(np.asarray(dataset.mask).ravel())
+
+    corrected = func(dataset, **kwargs)
+
+    out_positions = np.flatnonzero(np.asarray(corrected.mask).ravel())
+    assert np.array_equal(out_positions, expected_positions)
 
     unmasked = ~np.asarray(corrected.mask).ravel()
     assert np.all(np.isfinite(corrected.data.ravel()[unmasked]))

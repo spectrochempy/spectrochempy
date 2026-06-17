@@ -69,6 +69,11 @@ Bug Fixes
   missing values through CSV I/O instead of leaking the stored data beneath the
   mask.
 
+- Baseline correction now preserves masked regions more consistently (#1097).
+  Masked areas now remain masked not only on corrected outputs but also on the
+  computed baseline itself, including the AsLS path and the public baseline
+  helper functions.
+
 - Fixed ``Project.__str__()`` tree formatting when a project contains both
   sub-projects and sibling datasets or scripts at the same level.  Project
   trees now render with correct line breaks instead of collapsing sibling
