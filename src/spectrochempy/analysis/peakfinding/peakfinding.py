@@ -234,7 +234,7 @@ def find_peaks(
             ):
                 raise ValueError(
                     "Coordinate-aware `distance`, `width`, `wlen`, and "
-                    "`plateau_size` requires a linear coordinate axis. "
+                    "`plateau_size` require a linear coordinate axis. "
                     "Use plain point counts with `use_coord=False` for non-linear "
                     "coordinates."
                 )
