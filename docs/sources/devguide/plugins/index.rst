@@ -1,8 +1,8 @@
 .. _plugin-devguide:
 
-================
-Plugin developer
-================
+======================
+Plugin developer guide
+======================
 
 These pages describe the plugin API, extension points, and architecture used by
 official and third-party SpectroChemPy plugins.

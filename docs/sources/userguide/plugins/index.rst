@@ -8,48 +8,16 @@ SpectroChemPy plugins add optional scientific features while keeping the core
 installation lighter. Once a plugin is installed, it is discovered
 automatically; normal user code does not need a manual loading step.
 
-Official plugins
-================
+This section answers three user-facing questions:
 
-Official plugins are maintained as part of the SpectroChemPy project. They are
-auto-published, officially supported, and included in aggregate extras.
+* Which plugins are official and supported?
+* How should plugin APIs be used in normal code?
+* Where should plugin-dependent workflows and examples be documented?
 
-Install official plugins with extras:
+Quick example
+=============
 
-.. code-block:: bash
-
-    pip install spectrochempy[nmr]
-    pip install spectrochempy[iris]
-    pip install spectrochempy[tensor]
-    pip install spectrochempy[nmr,hypercomplex]
-
-or install plugin packages directly:
-
-.. code-block:: bash
-
-    pip install spectrochempy-nmr
-    pip install spectrochempy-iris
-    pip install spectrochempy-tensor
-    pip install spectrochempy-hypercomplex
-    pip install spectrochempy-carroucell
-
-Conda users can install from the ``spectrocat`` channel::
-
-    mamba install -c spectrocat -c conda-forge spectrochempy-nmr
-
-Plugin versions are independent from the SpectroChemPy core version. For
-example, ``spectrochempy 0.9.2`` may be used with
-``spectrochempy-nmr 0.1.3``. Use ``scp.plugins(verbose=True)`` to inspect the
-plugin versions discovered in the current environment.
-
-Conda development builds for official plugins are not published automatically
-at the moment. Stable plugin packages are available from the main
-``spectrocat`` channel.
-
-Using plugins
--------------
-
-Plugin APIs are exposed through namespaces:
+Plugin APIs are usually exposed through namespaces:
 
 .. code-block:: python
 
@@ -71,8 +39,12 @@ Some former top-level names remain as compatibility aliases. New code should
 prefer namespaced APIs such as ``scp.nmr.read_topspin``, ``scp.iris.IRIS``,
 and ``scp.tensor.CP``.
 
-Inspecting plugins
-------------------
+Install and inspect plugins
+===========================
+
+Official plugins can be installed either through SpectroChemPy extras or by
+installing the plugin package directly. Once installed, use ``scp.plugins()``
+to inspect what SpectroChemPy discovered in the current environment.
 
 Use ``scp.plugins()`` to list discovered plugins:
 
@@ -86,29 +58,16 @@ Use ``scp.plugins()`` to list discovered plugins:
 If an official optional feature is missing, SpectroChemPy raises a clear
 installation hint instead of failing with an import error.
 
-Experimental plugins
-====================
+For installation details, package lists, and per-plugin summaries, see
+:doc:`official_plugins`.
 
-Some plugins in the repository are considered **experimental**. They are
-available mainly for developers and early testers, may change without
-deprecation, and are **not** officially supported.
+For experimental plugin status, see :doc:`experimental_plugins`.
 
-Experimental plugins are **not** auto-published by the official release
-workflows, though they may be published manually or through separate
-workflows. They may still be installed manually and are discoverable via
-the same entry-point mechanism as official plugins.
+For example conventions, see :doc:`examples`.
 
-See :doc:`experimental_plugins` for details.
+For the user-facing plugin direction, see :doc:`roadmap`.
 
-User roadmap
-============
-
-The user-facing direction is simple: official plugins should feel integrated
-once installed, examples should state their plugin requirements, and common
-core workflows should continue to work without optional plugin dependencies.
-
-For implementation details and architecture planning, see
-:ref:`plugin-dev-roadmap`.
+For implementation details and architecture planning, see :ref:`plugin-devguide`.
 
 Plugin pages
 ============
