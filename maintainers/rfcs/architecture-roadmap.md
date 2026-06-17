@@ -44,13 +44,38 @@ This document should evolve as the project evolves.
 - Main conclusion: the unit system (Pint-based) is architecturally coherent
   but has a working-hybrid model (metadata vs scientific quantity) that is
   implicit rather than documented.
-- One confirmed bug: `var()` does not square units (issue #1191).
+- Follow-up note: the previously identified `var()` unit-squaring bug
+  (issue #1191) has now been fixed.
 - Known scope gap: multi-coordinate dimension concatenation lacks unit
   conversion (documented in PR #1117).
 - Minor inconsistency: `PLSRegression.coef` is unitless while
   `LinearRegressionAnalysis.coef` computes explicit `Y/X` unit ratios.
 - No immediate redesign recommended.
 - Audit reference: `audit/~units-and-dimensional-semantics-audit.md`
+
+### History and Provenance Semantics Characterization
+
+- Decision: recent characterization and follow-up fixes materially narrowed the
+  provenance contract.
+- Main conclusion: local shape-like operations should append history rather
+  than silently preserve stale entries, and provenance behavior is now better
+  understood as its own semantic axis rather than a byproduct of metadata copy.
+- Architectural reading:
+  - history is not purely decorative metadata
+  - provenance behavior varies by operation family and must be characterized
+    explicitly
+  - append-vs-rewrite remains a meaningful contract boundary
+
+### Interpolation Semantics Characterization
+
+- Decision: characterization is complete enough for roadmap purposes.
+- Main conclusion: interpolation is the clearest current example of the same
+  scientific object preserved on a changed coordinate grid.
+- Architectural reading:
+  - identity: same scientific object
+  - geometry/support: locally rebuilt along the interpolated axis
+  - provenance: appended rather than rewritten
+  - result assembly: copy-first with local coordinate, mask, and label rebuild
 
 ### Integration Semantics Characterization
 
@@ -298,7 +323,7 @@ Clarify mathematical semantics before any hierarchy redesign.
 
 ## Mathematical Semantics and Metadata Propagation
 
-Status: Draft RFC / Audit in progress
+Status: Draft RFC with characterization largely complete
 
 Reference:
 [`maintainers/architecture/mathematical-semantics-and-metadata-propagation.md`](../architecture/mathematical-semantics-and-metadata-propagation.md)
@@ -315,6 +340,33 @@ Current recommendation:
 
 Establish and characterize the math semantics contract before introducing a
 responsibility split such as `NDLabelled`.
+
+Current remaining work is primarily contract consolidation, open-question
+triage, and selective follow-up decisions rather than broad new
+characterization.
+
+---
+
+## Analysis and Fit Result Architecture
+
+Status: Audited; Draft RFC
+
+Reference:
+[`maintainers/rfcs/analysis-fit-result-architecture.md`](analysis-fit-result-architecture.md)
+
+Purpose:
+
+* documents the current result-surface model across decomposition, analysis,
+  and fit workflows;
+* explains the current object-owned but semantically fragmented result model;
+* frames the remaining decision space around result conventions versus a
+  dedicated result object.
+
+Current recommendation:
+
+Do not implement a result-object redesign yet. First decide whether fit
+workflows need a dedicated result object or whether clarified result-surface
+conventions are sufficient.
 
 ---
 

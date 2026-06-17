@@ -1,6 +1,6 @@
 # Mathematical Semantics and Metadata Propagation
 
-Status: Draft RFC / Audit in progress
+Status: Draft RFC / characterization largely complete
 
 ## Purpose
 

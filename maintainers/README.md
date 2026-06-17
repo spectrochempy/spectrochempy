@@ -24,12 +24,13 @@ contrats RFC, et notes d'architecture durables.
 |---|---|
 | [`rfcs/architecture-roadmap.md`](rfcs/architecture-roadmap.md) | Feuille de route légère des sujets d'architecture récents, terminés ou différés |
 | [`rfcs/metadata-contract.md`](rfcs/metadata-contract.md) | Contrat mainteneur pour les métadonnées `NDDataset` |
+| [`rfcs/analysis-fit-result-architecture.md`](rfcs/analysis-fit-result-architecture.md) | RFC draft sur l'architecture actuelle des résultats d'analyse et de fit |
 | [`rfcs/modeldata-semantic-contract.md`](rfcs/modeldata-semantic-contract.md) | Audit et décision sur la suppression de `NDDataset.modeldata` |
 | [`rfcs/roi-semantic-contract.md`](rfcs/roi-semantic-contract.md) | Audit et décision sur la suppression de `NDDataset.roi` |
 | [`rfcs/coordinate-arithmetic-semantics.md`](rfcs/coordinate-arithmetic-semantics.md) | Position actuelle sur la sémantique de l'arithmétique coordonnée |
 | [`architecture/README.md`](architecture/README.md) | Index consolidé des notes d'architecture |
 | [`architecture/array-class-responsibility.md`](architecture/array-class-responsibility.md) | Responsabilités actuelles des classes array |
-| [`architecture/mathematical-semantics-and-metadata-propagation.md`](architecture/mathematical-semantics-and-metadata-propagation.md) | Audit/RFC en cours sur les opérations mathématiques, result assembly, identité, provenance et métadonnées |
+| [`architecture/mathematical-semantics-and-metadata-propagation.md`](architecture/mathematical-semantics-and-metadata-propagation.md) | RFC de caractérisation largement stabilisé sur les opérations mathématiques, result assembly, identité, provenance et métadonnées |
 | [`architecture/display-architecture.md`](architecture/display-architecture.md) | Architecture d'affichage finale |
 
 ## Workflows GitHub associés
