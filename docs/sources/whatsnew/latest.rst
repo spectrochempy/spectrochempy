@@ -136,6 +136,12 @@ Breaking Changes
   files containing ``_scripts`` entries remain load-compatible — the field is
   silently ignored on deserialization.
 
+- Removed legacy ``Project._others`` support.  The ``_others`` dict and its
+  ``_set_from_type`` fallback are removed — ``Project`` now rejects objects
+  that are neither ``NDDataset`` nor ``Project`` with a clear ``TypeError``.
+  Legacy ``.pscp`` files containing ``_others`` entries remain load-compatible —
+  the field is silently ignored on deserialization.
+
 - Mixed arithmetic between ``NDDataset`` and ``Coord`` is now rejected
   (e.g. ``dataset + coord`` or ``coord * dataset``).  ``Coord`` is treated as
   axis support, not as a signal-bearing operand.  Workflows needing correction
