@@ -266,7 +266,7 @@ def test_iris_root_alias_warns_once(monkeypatch, alias, heavy_module):
     assert f"scp.{alias} is deprecated since SpectroChemPy 0.9.0" in str(
         captured[0].message
     )
-    assert "will be removed in 0.10.0" in str(captured[0].message)
+    assert "will be removed in 0.11.0" in str(captured[0].message)
     assert f"scp.iris.{alias}" in str(captured[0].message)
 
     if heavy_module:

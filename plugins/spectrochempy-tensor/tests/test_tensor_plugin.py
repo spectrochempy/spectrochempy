@@ -106,5 +106,5 @@ def test_root_alias_warns_once(monkeypatch):
     assert captured[0].category is DeprecationWarning
     message = str(captured[0].message)
     assert "scp.CP is deprecated since SpectroChemPy 0.9.0" in message
-    assert "will be removed in 0.10.0" in message
+    assert "will be removed in 0.11.0" in message
     assert "scp.tensor.CP" in message
