@@ -7,6 +7,7 @@ __all__ = ["Project"]
 
 import copy as cpy
 import pathlib
+import textwrap
 import uuid
 import warnings
 from functools import wraps
@@ -18,6 +19,11 @@ from spectrochempy.core.dataset.nddataset import NDIO
 from spectrochempy.core.project.abstractproject import AbstractProject
 from spectrochempy.core.script import Script
 from spectrochempy.utils.meta import Meta
+from spectrochempy.utils.print import DisplayItem
+from spectrochempy.utils.print import DisplaySection
+from spectrochempy.utils.print import _html_heading
+from spectrochempy.utils.print import _render_sections
+from spectrochempy.utils.print import colored_output
 from spectrochempy.utils.traits import NDDatasetType
 
 # from collections import OrderedDict
@@ -73,6 +79,7 @@ class Project(AbstractProject, NDIO):
 
     _id = tr.Unicode()
     _name = tr.Unicode(allow_none=True)
+    _explicit_name = tr.Bool(False)
 
     _parent = tr.This()
     _projects = tr.Dict(tr.This())
@@ -83,6 +90,7 @@ class Project(AbstractProject, NDIO):
 
     _filename = tr.Instance(pathlib.Path, allow_none=True)
     _directory = tr.Instance(pathlib.Path, allow_none=True)
+    _html_output = tr.Bool(False)
 
     def __init__(self, *args, argnames=None, name=None, **meta):
         super().__init__()
@@ -129,9 +137,93 @@ class Project(AbstractProject, NDIO):
         pass  # TODO: ???
 
     def _repr_html_(self):
-        h = self.__str__()
-        h = h.replace("\n", "<br/>\n")
-        return h.replace(" ", "&nbsp;")
+        sections = self._repr_sections()
+        body = _render_sections(sections)
+        heading = _html_heading(self)
+        return (
+            '<div class="scp-output">'
+            f"<details><summary>{heading}</summary>\n{body}\n"
+            "</details></div>"
+        )
+
+    def _repr_sections(self):
+        sections: list[DisplaySection] = []
+
+        # ------------------------------------------------------------------
+        # SUMMARY
+        # ------------------------------------------------------------------
+        summary_items: list[DisplayItem] = []
+        summary_items.append(DisplayItem("field", self.name, "name"))
+        author = self.meta.get("author", None)
+        if author:
+            summary_items.append(DisplayItem("field", author, "author"))
+        description = self.meta.get("description", None)
+        if description:
+            summary_items.append(
+                DisplayItem("field", description.strip(), "description")
+            )
+        sections.append(DisplaySection("summary", "Summary", summary_items))
+
+        # ------------------------------------------------------------------
+        # DATA — project hierarchy
+        # ------------------------------------------------------------------
+        data_items: list[DisplayItem] = []
+        str_output = self.__str__()
+        lines = str_output.split("\n")
+        hier_lines = lines[1:] if len(lines) > 1 else []
+        if not hier_lines:
+            hier_lines = ["(empty project)"]
+        for line in hier_lines:
+            n_spaces = len(line) - len(line.lstrip())
+            line = "&nbsp;" * n_spaces + line.lstrip()
+            data_items.append(DisplayItem("block", line))
+        sections.append(DisplaySection("data", "Data", data_items))
+
+        return sections
+
+    def __repr__(self):
+        return f"Project: {self.name}"
+
+    def _cstr(self):
+        out = ""
+        out += f"         name: {self.name}\n"
+
+        author = self.meta.get("author", None)
+        if author:
+            out += f"       author: {author}\n"
+
+        description = self.meta.get("description", None)
+        if description:
+            wrapper = textwrap.TextWrapper(
+                initial_indent="",
+                subsequent_indent=" " * 15,
+                replace_whitespace=True,
+                width=80,
+            )
+            pars = description.strip().splitlines()
+            desc = ""
+            if pars:
+                desc += f"{wrapper.fill(pars[0])}\n"
+            for par in pars[1:]:
+                desc += "{}\n".format(textwrap.indent(par, " " * 15))
+            desc = f"\0\0\0{desc.rstrip()}\0\0\0\n"
+            out += "  description: "
+            out += desc
+
+        out += "DATA\n"
+
+        str_output = self.__str__()
+        lines = str_output.split("\n")
+        hier_lines = lines[1:] if len(lines) > 1 else []
+        out += "\n".join(hier_lines)
+
+        if not out.endswith("\n"):
+            out += "\n"
+        out += "\n"
+
+        if not self._html_output:
+            return colored_output(out.rstrip())
+        return out.rstrip()
 
     # ----------------------------------------------------------------------------------
     # Special methods
@@ -223,9 +315,9 @@ class Project(AbstractProject, NDIO):
                 # nothing has been found in the project
                 s += f"{sep} (empty project)\n"
 
-            return s.strip("\n")
+            return s
 
-        return _listproj(s, self, 0)
+        return _listproj(s, self, 0).rstrip("\n")
 
     def _attributes_(self):
         return [
@@ -269,11 +361,16 @@ class Project(AbstractProject, NDIO):
 
     @name.setter
     def name(self, name):
-        # property.setter for name
         if name is not None:
             self._name = name
+            self._explicit_name = True
         else:
-            self.name = "Project-" + self.id.split("-")[0]
+            self._name = "Project-" + self.id.split("-")[0]
+
+    @property
+    def has_defined_name(self):
+        """True if the name was explicitly provided by the user (bool)."""
+        return self._explicit_name
 
     @property
     def parent(self):

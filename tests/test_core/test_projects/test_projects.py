@@ -4,6 +4,9 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 
+import json
+import zipfile
+
 import pytest
 
 from spectrochempy.application.preferences import preferences
@@ -323,8 +326,8 @@ class TestRepr:
     def test_repr_html(self):
         proj = Project(name="test")
         html = proj._repr_html_()
-        assert "<br/>" in html
-        assert "&nbsp;" in html
+        assert '<div class="scp-output">' in html
+        assert "test" in html
 
     def test_str_empty_project(self):
         proj = Project(name="root")
@@ -707,6 +710,28 @@ class TestSerializationRoundtrip:
         assert filename1.exists()
         assert filename2.exists()
         assert filename1 != filename2
+
+    def test_save_load_ignores_legacy_roi_and_modeldata_fields(self, ds1):
+        proj = Project(name="legacy_fields_test")
+        ds1.name = "data"
+        proj.add_dataset(ds1)
+
+        filename = proj.save()
+
+        with zipfile.ZipFile(filename, "r") as zipf:
+            member = zipf.namelist()[0]
+            js = json.loads(zipf.read(member).decode("utf-8"))
+
+        js["datasets"][0]["roi"] = [0.0, 1.0]
+        js["datasets"][0]["modeldata"] = [42.0]
+
+        with zipfile.ZipFile(filename, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
+            zipf.writestr(member, json.dumps(js, indent=2))
+
+        loaded = Project.load(filename)
+
+        assert not hasattr(loaded.data, "roi")
+        assert not hasattr(loaded.data, "modeldata")
 
 
 class TestArgNamesEdgeCases:

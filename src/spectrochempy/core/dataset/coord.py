@@ -22,6 +22,11 @@ from spectrochempy.utils.constants import INPLACE
 from spectrochempy.utils.constants import NOMASK
 from spectrochempy.utils.numutils import get_n_decimals
 from spectrochempy.utils.numutils import spacings
+from spectrochempy.utils.print import DisplayItem
+from spectrochempy.utils.print import DisplaySection
+from spectrochempy.utils.print import _format_array_values
+from spectrochempy.utils.print import _html_heading
+from spectrochempy.utils.print import _render_sections
 from spectrochempy.utils.print import colored_output
 from spectrochempy.utils.typeutils import is_iterable
 from spectrochempy.utils.typeutils import is_number
@@ -321,7 +326,6 @@ class Coord(NDMath, NDArray):
             # the _linear attribute is set to True if the data are linearized
             self._units = new._units
             self._title = new._title
-            self._roi = new._roi
             return None
         new.data = new._data  # here we assign to the data attribute to fire
         # the linearisation (eventually) and the rounding
@@ -589,7 +593,6 @@ class Coord(NDMath, NDArray):
             "meta",
             "title",
             "name",
-            "roi",
             "linear",
             "sigdigits",
         ]
@@ -696,6 +699,64 @@ class Coord(NDMath, NDArray):
             return colored_output(out)
         return out
 
+    def _repr_sections(self):
+        """
+        Build semantic display sections from Coord attributes.
+
+        Returns
+        -------
+        list of DisplaySection
+            Semantic representation of this Coord's display content,
+            equivalent to what ``_cstr()`` produces but built from
+            structured attributes instead of formatted text.
+
+        Notes
+        -----
+        - Does NOT call ``_cstr()``.
+        - Not used for HTML rendering yet (Phase A — model validation).
+        - Rendering from this representation will be added separately.
+        """
+        items: list[DisplayItem] = []
+
+        if not self.is_empty:
+            items.append(DisplayItem("field", str(self.size), "size"))
+
+        if self.title:
+            items.append(DisplayItem("field", str(self.title), "title"))
+
+        if self.has_data:
+            data = self.umasked_data
+            if isinstance(data, Quantity):
+                data = data.magnitude
+            units = f" {self.units:~P}" if self.has_units else ""
+            formatted = _format_array_values(
+                data,
+                is_masked=self.is_masked,
+                dtype=self.dtype,
+                sep="\n",
+                prefix="",
+                units=units,
+            )
+            items.append(DisplayItem("data", formatted, "coordinates"))
+        elif self.is_empty and not self.is_labeled:
+            items.append(DisplayItem("data", "Undefined", "coordinates"))
+
+        if self.is_labeled:
+            text = str(self.labels.T).strip()
+            items.append(DisplayItem("label", text, "labels"))
+
+        return [DisplaySection("summary", "Summary", items)]
+
+    def _repr_html_(self):
+        sections = self._repr_sections()
+        body = _render_sections(sections)
+        heading = _html_heading(self)
+        return (
+            '<div class="scp-output">'
+            f"<details><summary>{heading}</summary>\n{body}\n"
+            "</details></div>"
+        )
+
     def __repr__(self):
         return self._repr_value().rstrip()
 
@@ -705,9 +766,6 @@ class Coord(NDMath, NDArray):
         udata = (new.data * oldunits).to(units)
         new._data = udata.m
         new._units = udata.units
-        if new._roi is not None:
-            roi = (np.array(new._roi) * oldunits).to(units)
-            new._roi = list(roi)
         return new
 
     # ----------------------------------------------------------------------------------

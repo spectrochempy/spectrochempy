@@ -1,4 +1,5 @@
 # ruff: noqa: S101
+import re
 from importlib.metadata import version
 
 import numpy as np
@@ -10,6 +11,8 @@ from spectrochempy.api.plugins import PluginCapability
 from spectrochempy.api.plugins import PluginState
 from spectrochempy.api.plugins import check_plugin_compatibility
 from spectrochempy.testing.plugins import PluginTestHarness
+from spectrochempy.utils.print import _format_array_values
+from spectrochempy.utils.print import pstr
 
 
 class TestPluginLifecycle:
@@ -93,6 +96,8 @@ class TestNDMathHandlers:
         registry = manager.plugin_manager.registry
         assert registry.get_handler("ndmath.execution_branch") is not None
         assert registry.get_handler("ndmath.execute") is not None
+        assert registry.get_handler("display.array_values") is not None
+        assert registry.get_handler("display.complex_dim_flags") is not None
 
 
 class TestQuaternionFunctions:
@@ -171,3 +176,66 @@ class TestQuaternionFunctions:
         result = interleaved2complex(data)
         expected = np.array([1.0 + 2.0j, 3.0 + 4.0j, 5.0 + 6.0j])
         assert np.allclose(result, expected)
+
+
+def _make_hypercomplex_dataset():
+    ds = scp.NDDataset(np.arange(16.0).reshape(4, 4))
+    return ds.hyper.set_quaternion()
+
+
+class TestHypercomplexDisplayRegression:
+    def test_terminal_display_restores_component_labels(self):
+        ds = _make_hypercomplex_dataset()
+
+        rendered = ds._str_value()
+
+        for label in ["RR", "RI", "IR", "II"]:
+            assert label in rendered
+        assert "quaternion(" not in rendered
+
+    def test_detailed_display_uses_component_blocks(self):
+        ds = _make_hypercomplex_dataset()
+
+        rendered = pstr(ds)
+
+        for label in ["RR", "RI", "IR", "II"]:
+            assert label in rendered
+        assert "quaternion(" not in rendered
+
+    def test_html_display_restores_component_labels(self):
+        ds = _make_hypercomplex_dataset()
+
+        html = ds._repr_html_()
+
+        for label in ["RR", "RI", "IR", "II"]:
+            assert label in html
+        assert "quaternion(" not in html
+
+    def test_component_values_match_accessor_components_in_terminal_and_html(self):
+        ds = _make_hypercomplex_dataset()
+
+        rendered = ds._str_value()
+        html = ds._repr_html_()
+        normalize_text = lambda s: re.sub(r"\n\s+", "\n", s)
+        normalize_html = lambda s: re.sub(r"<br/>\s+", "<br/>", s)
+
+        for label in ["RR", "RI", "IR", "II"]:
+            component = np.asarray(getattr(ds.hyper, label))
+            expected = _format_array_values(
+                component,
+                dtype=component.dtype,
+                sep="\n",
+                prefix=label,
+                units="",
+            )
+            assert normalize_text(expected) in normalize_text(rendered)
+            assert normalize_html(expected.replace("\n", "<br/>")) in normalize_html(
+                html
+            )
+
+    def test_shape_annotation_marks_quaternion_dimensions_as_complex(self):
+        ds = _make_hypercomplex_dataset()
+
+        shape = ds._str_shape()
+
+        assert "(y:4(complex), x:2(complex))" in shape

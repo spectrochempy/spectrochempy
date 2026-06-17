@@ -90,6 +90,11 @@ def _write_jcamp(*args, **kwargs):
         if timestamp_index is None:
             timestamp = datetime.now(UTC)
 
+        # Masked values are exported as missing values: filling the mask with
+        # NaN lets them flow through the same handling as genuine NaNs below
+        # (excluded from MAXY/MINY and written as the JCAMP "?" marker).
+        ydata = np.ma.filled(dataset.masked_data, np.nan)
+
         for i in range(dataset.shape[0]):
             if dataset.shape[0] > 1:
                 title = (
@@ -122,9 +127,8 @@ def _write_jcamp(*args, **kwargs):
             fid.write(f"##MINX={minx:.6f}\n")
             fid.write(f"##XFACTOR={xfactor}\n")
 
-            firsty, lasty = dataset.data[0, 0], dataset.data[0, -1]
-            # TODO : mask
-            maxy, miny = np.nanmax(dataset.data), np.nanmin(dataset.data)
+            firsty, lasty = ydata[0, 0], ydata[0, -1]
+            maxy, miny = np.nanmax(ydata), np.nanmin(ydata)
             yfactor = 1.0e-8
 
             fid.write(f"##FIRSTY={firsty:.6f}\n")
@@ -141,8 +145,8 @@ def _write_jcamp(*args, **kwargs):
             for j in np.arange(nx):
                 Y = (
                     "? "
-                    if np.isnan(dataset.data[i, j])
-                    else f"{int(dataset.data[i, j] / yfactor):.6f} "
+                    if np.isnan(ydata[i, j])
+                    else f"{int(ydata[i, j] / yfactor):.6f} "
                 )
                 line += Y
                 if len(line) >= 75 or j == nx - 1:

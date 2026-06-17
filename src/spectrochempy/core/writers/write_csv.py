@@ -8,6 +8,8 @@
 # import os as os
 import csv
 
+import numpy as np
+
 from spectrochempy.application.preferences import preferences as prefs
 from spectrochempy.core.writers.exporter import Exporter
 from spectrochempy.core.writers.exporter import exportermethod
@@ -94,11 +96,14 @@ def _write_csv(*args, **kwargs):
             coltitles = [title_1, title_2] if col_coord else [title_2]
 
         writer.writerow(coltitles)
+        # export masked samples as missing values (NaN) instead of leaking their
+        # underlying stored data (#1135), mirroring the JCAMP-DX writer (#1132)
+        ydata = np.ma.filled(dataset.masked_data, np.nan)
         if col_coord:
-            for i, data in enumerate(dataset.data):
+            for i, data in enumerate(ydata):
                 writer.writerow([dataset.coordset[-1].data[i], data])
         else:
-            for _i, data in enumerate(dataset.data):
+            for data in ydata:
                 writer.writerow([data])
 
     return filename

@@ -33,8 +33,8 @@ from spectrochempy.utils.constants import TYPE_INTEGER
 from spectrochempy.utils.constants import MaskedConstant
 from spectrochempy.utils.meta import Meta
 from spectrochempy.utils.objects import make_new_object
+from spectrochempy.utils.print import _format_array_values
 from spectrochempy.utils.print import convert_to_html
-from spectrochempy.utils.print import insert_masked_print
 from spectrochempy.utils.print import numpyprintoptions
 from spectrochempy.utils.typeutils import is_number
 from spectrochempy.utils.typeutils import is_sequence
@@ -199,9 +199,6 @@ class NDArray(tr.HasTraits):
     _units = tr.Instance(Unit, allow_none=True)
     _meta = tr.Instance(Meta, allow_none=True)
 
-    # Region of interest
-    _roi = tr.List(allow_none=True)
-
     # Transposition flag
     _transposed = tr.Bool(False)
 
@@ -266,7 +263,6 @@ class NDArray(tr.HasTraits):
             "meta",
             "title",
             "name",
-            "roi",
             "transposed",
         ]
 
@@ -304,7 +300,7 @@ class NDArray(tr.HasTraits):
         if attrs is None:
             attrs = self._attributes_()
 
-        for attr in ["name", "linear", "roi"]:
+        for attr in ["name", "linear"]:
             if attr in attrs:
                 attrs.remove(attr)
 
@@ -935,10 +931,6 @@ class NDArray(tr.HasTraits):
         numpyprintoptions()
         return "".join([prefix, body, units, size])
 
-    @tr.default("_roi")
-    def _roi_default(self):
-        return None
-
     def _set_data(self, data):
         if data is None:
             return
@@ -1038,7 +1030,6 @@ class NDArray(tr.HasTraits):
         return out
 
     def _str_value(self, sep="\n", ufmt=" {:~P}", header="         data: ... \n"):
-        # prefix = ['']
         if self.is_empty and "data: ..." not in header:
             return header + "{}".format(textwrap.indent("empty", " " * 9))
         if self.is_empty:
@@ -1046,19 +1037,6 @@ class NDArray(tr.HasTraits):
 
         print_unit = True
         units = ""
-
-        def mkbody(d, pref, _units):
-            # work around printing masked values with formatting
-            ds = d.copy()
-            if self.is_masked:
-                dtype = self.data.dtype
-                mask_string = f"--{dtype}"
-                ds = insert_masked_print(ds, mask_string=mask_string)
-            _body = np.array2string(ds, separator=" ", prefix=pref)
-            _body = _body.replace("\n", sep)
-            _text = "".join([pref, _body, _units])
-            _text += sep
-            return _text
 
         text = ""
         if not self.is_empty:
@@ -1075,9 +1053,16 @@ class NDArray(tr.HasTraits):
             if print_unit:
                 units = ufmt.format(self.units) if self.has_units else ""
 
-            text += mkbody(data, "", units)
+            text += _format_array_values(
+                data,
+                is_masked=self.is_masked,
+                dtype=self._data.dtype if self._data is not None else None,
+                sep=sep,
+                prefix="",
+                units=units,
+            )
 
-        out = ""  # f'        title: {self.title}\n' if self.title else ''
+        out = ""
         text = text.strip()
         if "\n" not in text:  # single line!
             out += header.replace("...", f"\0{text}\0")
@@ -1096,10 +1081,6 @@ class NDArray(tr.HasTraits):
         udata = (new.data * oldunits).to(units)
         new._data = udata.m
         new._units = udata.units
-
-        if new._roi is not None:
-            roi = (np.array(new.roi) * oldunits).to(units)
-            new._roi = list(roi)
 
         return new
 
@@ -1741,23 +1722,6 @@ class NDArray(tr.HasTraits):
         self._mask = NOMASK
 
     @property
-    def roi(self):
-        """Region of interest (ROI) limits (list)."""
-        if self._roi is None:
-            self._roi = self.limits
-        return self._roi
-
-    @roi.setter
-    def roi(self, val):
-        self._roi = val
-
-    @property
-    def roi_values(self):
-        if self.units is None:
-            return list(np.array(self.roi))
-        return list(self._uarray(self.roi, self.units))
-
-    @property
     def shape(self):
         """
         A tuple with the size of each dimension - Readonly property.
@@ -2080,7 +2044,6 @@ class NDArray(tr.HasTraits):
             self._data = new._data
             self._units = new._units
             self._title = new._title
-            self._roi = new._roi
             return None
 
         return new

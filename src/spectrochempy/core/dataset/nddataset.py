@@ -53,11 +53,14 @@ from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 from spectrochempy.core.dataset.basearrays.ndcomplex import NDComplexArray
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
-from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils._logging import warning_
 from spectrochempy.utils.datetimeutils import utcnow
 from spectrochempy.utils.exceptions import SpectroChemPyError
 from spectrochempy.utils.optional import import_optional_dependency
+from spectrochempy.utils.print import DisplayItem
+from spectrochempy.utils.print import DisplaySection
+from spectrochempy.utils.print import _html_heading
+from spectrochempy.utils.print import _render_sections
 from spectrochempy.utils.print import colored_output
 from spectrochempy.utils.system import get_user_and_node
 from spectrochempy.utils.typeutils import is_sequence
@@ -169,8 +172,6 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
     origin : `str`, optional
         Origin of the data: Name of organization, address, telephone number,
         name of individual contributor, etc., as appropriate.
-    roi : `list`
-        Region of interest (ROI) limits.
     history : `str`, optional
         A string to add to the object history.
     copy : `bool`, optional
@@ -199,9 +200,6 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
 
     # coordinates
     _coordset = tr.Instance(CoordSet, allow_none=True)
-
-    # model data (e.g., for fit)
-    _modeldata = Array(tr.Float(), allow_none=True)
 
     # some setting for NDDataset
     _copy = tr.Bool(False)
@@ -323,9 +321,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             "modified",
             # "acquisition_date",
             "origin",
-            "roi",
             "transposed",
-            "modeldata",
             # "processeddata",
             # "referencedata",
             # "baselinedata",
@@ -491,8 +487,6 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             "created",
             "modified",
             "origin",
-            "roi",
-            "modeldata",
         ):
             # These attributes are not used for comparison (comparison based on data and units!)
             with suppress(ValueError):
@@ -509,10 +503,6 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
     # ----------------------------------------------------------------------------------
     @tr.default("_coordset")
     def _coordset_default(self):
-        return None
-
-    @tr.default("_modeldata")
-    def _modeldata_default(self):
         return None
 
     @tr.default("_timezone")
@@ -645,6 +635,84 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         return txt.rstrip()  # remove the trailing '\n'
 
     _repr_dims = _str_dims
+
+    def _repr_sections(self):
+        """
+        Build semantic display sections from NDDataset attributes.
+
+        Returns
+        -------
+        list of DisplaySection
+            ``"summary"``, ``"data"``, and ``"dimension"`` sections.
+        """
+        sections: list[DisplaySection] = []
+
+        # ------------------------------------------------------------------
+        # SUMMARY
+        # ------------------------------------------------------------------
+        summary_items: list[DisplayItem] = []
+        summary_items.append(DisplayItem("field", self.name, "name"))
+        summary_items.append(DisplayItem("field", self.author, "author"))
+        summary_items.append(DisplayItem("field", self.created, "created"))
+        if (self._modified - self._created.replace(tzinfo=UTC)).seconds > 30:
+            summary_items.append(DisplayItem("field", self.modified, "modified"))
+        if self.description.strip():
+            summary_items.append(
+                DisplayItem("field", self.description.strip(), "description")
+            )
+        if self._history:
+            hist = self.history
+            if isinstance(hist, list):
+                hist = "\n".join(hist)
+            summary_items.append(DisplayItem("field", hist, "history"))
+
+        sections.append(DisplaySection("summary", "Summary", summary_items))
+
+        # ------------------------------------------------------------------
+        # DATA
+        # ------------------------------------------------------------------
+        data_items: list[DisplayItem] = []
+        data_items.append(
+            DisplayItem("field", self.title if self.title else "<untitled>", "title")
+        )
+
+        if not self.is_empty and self._data is not None:
+            data_items.append(
+                DisplayItem(
+                    "data",
+                    self._format_display_values(sep="\n"),
+                    "values",
+                )
+            )
+
+        shape_text = self._str_shape()
+        if shape_text:
+            stripped = shape_text.strip()
+            if ": " in stripped:
+                skey, sval = stripped.split(": ", 1)
+                data_items.append(DisplayItem("field", sval, skey.strip()))
+            else:
+                data_items.append(DisplayItem("field", stripped, "shape"))
+
+        sections.append(DisplaySection("data", "Data", data_items))
+
+        # ------------------------------------------------------------------
+        # DIMENSION
+        # ------------------------------------------------------------------
+        if self._coordset and not self.is_empty and len(self._coordset) > 0:
+            sections.extend(self._coordset._repr_sections())
+
+        return sections
+
+    def _repr_html_(self):
+        sections = self._repr_sections()
+        body = _render_sections(sections)
+        heading = _html_heading(self)
+        return (
+            '<div class="scp-output">'
+            f"<details><summary>{heading}</summary>\n{body}\n"
+            "</details></div>"
+        )
 
     def _dims_update(self, change=None):
         # when notified that a coords names have been updated
@@ -920,19 +988,6 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
     def local_timezone(self):
         """Return the local timezone."""
         return str(get_localzone())
-
-    @property
-    def modeldata(self):
-        """
-        `~numpy.ndarray` - models data.
-
-        Data eventually generated by modelling of the data.
-        """
-        return self._modeldata
-
-    @modeldata.setter
-    def modeldata(self, data):
-        self._modeldata = data
 
     @property
     def modified(self):

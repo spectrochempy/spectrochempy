@@ -9,6 +9,161 @@ import numpy as np
 from colorama import Fore
 from colorama import Style
 
+# ======================================================================================
+# Semantic display model
+# ======================================================================================
+# DisplaySection and DisplayItem are the building blocks of a semantic
+# representation of an object's display content.  They decouple what is
+# displayed (the semantic structure) from how it is rendered (HTML / terminal).
+#
+# Currently used by Coord._repr_sections() to expose display semantics without
+# going through the text-based _cstr() → regex pipeline.
+#
+# Rendering helpers (render_display, etc.) will be added in a later phase.
+# ======================================================================================
+
+
+class ItemKind(str):
+    """Discriminator for DisplayItem rendering strategy."""
+
+    FIELD = "field"
+    DATA = "data"
+    LABEL = "label"
+    BLOCK = "block"
+
+
+class DisplayItem:
+    """
+    A single element within a display section.
+
+    Parameters
+    ----------
+    kind : str or ItemKind
+        Rendering strategy: ``"field"`` | ``"data"`` | ``"label"`` | ``"block"``.
+    value : str
+        Pre-formatted display text.
+    key : str, optional
+        Metadata key name (only meaningful for ``kind="field"``).
+    """
+
+    __slots__ = ("kind", "value", "key")
+
+    def __init__(self, kind: str, value: str, key: str = "") -> None:
+        self.kind = kind
+        self.value = value
+        self.key = key
+
+    def __repr__(self) -> str:
+        if self.key:
+            return f"DisplayItem({self.kind}, {self.key}={self.value!r})"
+        return f"DisplayItem({self.kind}, {self.value!r})"
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, DisplayItem):
+            return NotImplemented
+        return (self.kind, self.value, self.key) == (other.kind, other.value, other.key)
+
+
+class DisplaySection:
+    """
+    A named section in an object's HTML display.
+
+    Parameters
+    ----------
+    role : str
+        Section type: ``"summary"`` | ``"data"`` | ``"dimension"``.
+    title : str
+        Section heading text (e.g. ``"Data"``, ``"Dimension ``x```"``).
+    items : list of DisplayItem, optional
+        Ordered display elements.
+    """
+
+    __slots__ = ("role", "title", "items")
+
+    def __init__(
+        self, role: str, title: str, items: list[DisplayItem] | None = None
+    ) -> None:
+        self.role = role
+        self.title = title
+        self.items = items or []
+
+    def __repr__(self) -> str:
+        return f"DisplaySection({self.role}, {self.title!r}, {len(self.items)} items)"
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, DisplaySection):
+            return NotImplemented
+        return (self.role, self.title, self.items) == (
+            other.role,
+            other.title,
+            other.items,
+        )
+
+
+def _render_sections(sections: list[DisplaySection]) -> str:
+    """
+    Render DisplaySections to HTML body content (no heading or outer wrapper).
+
+    Parameters
+    ----------
+    sections : list of DisplaySection
+        Semantic display sections to render.
+
+    Returns
+    -------
+    str
+        HTML string without outer ``<div class='scp-output'>`` or heading.
+    """
+    parts = []
+    for section in sections:
+        items_html = []
+        for item in section.items:
+            v = item.value.replace("\n", "<br/>")
+            if item.kind == "field":
+                items_html.append(
+                    f'<div class="scp-output section">'
+                    f'<div class="attr-name">{item.key}</div><div>:</div>'
+                    f'<div class="attr-value">{v}</div></div>'
+                )
+            elif item.kind == "data":
+                if item.key:
+                    items_html.append(
+                        '<div class="scp-output section">'
+                        f'<div class="attr-name">{item.key}</div><div>:</div>'
+                        f'<div class="attr-value"> <div class="numeric">{v}</div></div>'
+                        "</div>"
+                    )
+                else:
+                    items_html.append(f'<div class="numeric">{v}</div>')
+            elif item.kind == "label":
+                if item.key:
+                    items_html.append(
+                        '<div class="scp-output section">'
+                        f'<div class="attr-name">{item.key}</div><div>:</div>'
+                        f'<div class="attr-value"> <div class="label">{v}</div></div>'
+                        "</div>"
+                    )
+                else:
+                    items_html.append(f'<div class="label">{v}</div>')
+            elif item.kind == "block":
+                items_html.append(f"<div>{v}</div>")
+
+        body = "\n".join(items_html)
+
+        if section.role == "summary":
+            parts.append(body)
+        elif section.role in ("data", "dimension"):
+            title = section.title or section.role.capitalize()
+            parts.append(
+                f'<div class="scp-output section">'
+                f"<details><summary>{title}</summary>\n{body}\n"
+                f"</details></div>"
+            )
+        else:
+            parts.append(body)
+
+    return "\n".join(parts)
+
 
 def pstr(object, **kwargs):
     if hasattr(object, "_implements") and object._implements() in [
@@ -17,9 +172,87 @@ def pstr(object, **kwargs):
         "NDDataset",
         "Coord",
         "CoordSet",
+        "Project",
     ]:
         return object._cstr(**kwargs).strip()
     return str(object).strip()
+
+
+def _html_heading(obj):
+    """
+    Build a compact HTML heading identifying *obj*.
+
+    For array-like objects (Coord, NDDataset, NDArray) the heading includes
+    dtype, shape/size, and units when available::
+
+        Coord [x:wavenumbers] — float64, size: 50, m
+
+    For unnamed objects the bracketed name is omitted::
+
+        NDDataset — float64, shape: (y:10, x:20)
+
+    For CoordSet the child coordinate names and meaningful titles are shown::
+
+        CoordSet — x:wavenumbers, y:acquisition timestamp (GMT)
+
+    For unnamed / untitled child coordinates only the name is shown::
+
+        CoordSet — x, y
+
+    For Project the bare type name with optional bracketed name is used::
+
+        Project [my_project]
+    """
+    type_name = type(obj).__name__
+
+    # --- name part ---
+    if hasattr(obj, "has_defined_name"):
+        name_part = f" [{obj.name}]" if obj.has_defined_name else ""
+    else:
+        name_part = ""
+
+    # Enrich name with title for Coord when meaningful
+    if name_part and type_name == "Coord" and hasattr(obj, "title"):
+        title = obj.title
+        if title and title != "<untitled>":
+            name_part = f" [{obj.name}:{title}]"
+
+    # --- scientific identity part ---
+    extras = ""
+
+    # Array-like objects (Coord, NDArray, NDDataset)
+    if hasattr(obj, "_repr_shape"):
+        parts = []
+        if hasattr(obj, "dtype") and obj.dtype is not None:
+            parts.append(str(obj.dtype))
+        parts.append(obj._repr_shape())
+        units = obj._repr_units() if hasattr(obj, "_repr_units") else ""
+        if units and units != "unitless":
+            parts.append(units)
+        if parts:
+            extras = " — " + ", ".join(parts)
+
+    # CoordSet: show child coordinate names and meaningful titles
+    elif type_name == "CoordSet":
+        parts = []
+        if obj._storage:
+            for item in obj._storage:
+                if not item.has_defined_name:
+                    continue
+                name = item.name
+                if type(item).__name__ == "CoordSet":
+                    # Nested CoordSet: name only, no recursion
+                    parts.append(name)
+                else:
+                    title = item.title
+                    if title and title != "<untitled>":
+                        parts.append(f"{name}:{title}")
+                    else:
+                        parts.append(name)
+        if parts:
+            extras = " — " + ", ".join(parts)
+
+    return f"{type_name}{name_part}{extras}"
 
 
 # ======================================================================================
@@ -159,7 +392,19 @@ def _process_section(section):
     out = re.sub(regex, subst, out, count=0, flags=re.MULTILINE)
 
     regex = r"\.{3}\s+\n"
-    return re.sub(regex, "", out, count=0, flags=re.MULTILINE)
+    out = re.sub(regex, "", out, count=0, flags=re.MULTILINE)
+
+    # Preserve hierarchy lines (prefixed by ⤷ or containing "empty project")
+    # as block elements so that whitespace collapsing in HTML does not flatten
+    # Project nesting.
+    regex = r"^(\s*(?:⤷\s*.*|\(empty project\)))$"
+
+    def subst(match):
+        line = match.group(1)
+        n_spaces = len(line) - len(line.lstrip())
+        return f"<div>{'&nbsp;' * n_spaces}{line.lstrip()}</div>"
+
+    return re.sub(regex, subst, out, count=0, flags=re.MULTILINE)
 
 
 def convert_to_html(obj, open=False, id=None):
@@ -180,21 +425,28 @@ def convert_to_html(obj, open=False, id=None):
 
     # Process each section with CSS classes
     html_output = []
-    for section in collapsable_sections.values():
+    for i, section in enumerate(collapsable_sections.values()):
         open = ""  # if section[0] != "SUMMARY" else " open"  # closed by default
         ps = _process_section(section)
         if ps == "<summary>SUMMARY</summary>":
             continue  # summary empty
-        html_output.append(
-            f'<div class="scp-output section"><details{open}>{ps}</details></div>'
-        )
+        if i == 0:
+            # Render summary metadata inline (no collapsible wrapper)
+            # Remove the <summary>SUMMARY</summary> tag from section 0
+            ps = ps.replace("<summary>SUMMARY</summary>\n", "")
+            ps = ps.replace("<summary>SUMMARY</summary>", "")
+            html_output.append(ps)
+        else:
+            html_output.append(
+                f'<div class="scp-output section"><details{open}>{ps}</details></div>'
+            )
 
     obj._html_output = False
 
     s = "<div class='scp-output'>"
     open = "" if not open else " open"
     idx = f"{id}: " if id is not None else ""
-    s += f"<details{open}><summary>{idx}{obj.__str__()}[{obj.name}]</summary>"
+    s += f"<details{open}><summary>{idx}{_html_heading(obj)}</summary>"
     s += "\n".join(html_output)
     s += "</details>"
     s += "</div>"
@@ -371,6 +623,48 @@ def insert_masked_print(ds, mask_string="--"):
 # ======================================================================================
 # numpy printoptions
 # ======================================================================================
+def _format_array_values(
+    data, is_masked=False, dtype=None, sep="\n", prefix="", units=""
+):
+    r"""
+    Format array values into display text, shared by terminal and semantic paths.
+
+    Parameters
+    ----------
+    data : ndarray or MaskedArray
+        The data to format, already unwrapped from Quantity (i.e. the
+        magnitude only).  If ``is_masked`` is True, *data* must be a
+        ``MaskedArray`` so that ``insert_masked_print`` can read its
+        ``_mask`` attribute.
+    is_masked : bool, default=False
+        Whether *data* has active masked entries.
+    dtype : numpy dtype, optional
+        The original dtype of the unmasked data, used to construct the
+        mask display string (e.g. ``"--float64"``).  Required when
+        ``is_masked=True``.
+    sep : str, default="\\n"
+        Replacement for internal newlines in multi-line array output.
+    prefix : str, default=""
+        Prefix prepended to the array string (used for complex component
+        labels such as ``"R"`` or ``"I"``).
+    units : str, default=""
+        Pre-formatted unit suffix (e.g. ``" m"`` or ``""``).
+
+    Returns
+    -------
+    str
+        Plain formatted text without trailing newline or sentinel markers.
+    """
+    if is_masked and dtype is not None:
+        ds = data.copy()
+        mask_string = f"--{dtype}"
+        data = insert_masked_print(ds, mask_string=mask_string)
+
+    body = np.array2string(data, separator=" ", prefix=prefix)
+    body = body.replace("\n", sep)
+    return "".join([prefix, body, units])
+
+
 def numpyprintoptions(
     precision=4,
     threshold=6,

@@ -33,8 +33,11 @@ from spectrochempy.core.dataset.basearrays.ndarray import DEFAULT_DIM_NAME
 from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.utils import exceptions
+from spectrochempy.utils.print import DisplayItem
+from spectrochempy.utils.print import DisplaySection
+from spectrochempy.utils.print import _html_heading
+from spectrochempy.utils.print import _render_sections
 from spectrochempy.utils.print import colored_output
-from spectrochempy.utils.print import convert_to_html
 from spectrochempy.utils.typeutils import is_sequence
 
 
@@ -112,13 +115,13 @@ class CoordSet(HasTraits):
     Display some coordinates
 
     >>> cs.u
-    Coord: [float64] hr (size: 6)
+    Coord: [float64] h (size: 6)
 
     >>> cs.v
-    CoordSet: [_1:temperature, _2:magnetic field]
+    CoordSet: [_1:magnetic field, _2:temperature]
 
     >>> cs.v_1
-    Coord: [float64] K (size: 4)
+    Coord: [float64] mT (size: 4)
 
     """
 
@@ -1146,8 +1149,8 @@ class CoordSet(HasTraits):
             Target coordinate for the new grid (normalized, unit-converted).
         interpolate_secondary : callable
             Callable ``(Coord) -> Coord`` that copies a secondary coordinate,
-            interpolates its numeric data (when usable), clears labels, and
-            returns the result.
+            interpolates its numeric data (when usable), carries labels onto
+            exactly-matching target points, and returns the result.
         """
         groups = self._lookup_groups()
         groups = self._interpolate_lifecycle_groups(
@@ -1166,7 +1169,8 @@ class CoordSet(HasTraits):
         Handles three cases:
         1. **Dim not found** -- appends a new group with *target_coord*.
         2. **Simple coord** (single entry, no aliases) -- replaces the entry's
-           coord with a copy of *target_coord* (labels cleared).
+           coord with a copy of *target_coord*, whose labels have already been
+           carried over for exactly-matching points by the caller.
         3. **Same-dim multi-coord** (multiple entries or aliases) -- applies
            *interpolate_secondary* to each entry's coord.
         """
@@ -1174,7 +1178,6 @@ class CoordSet(HasTraits):
 
         if dim not in coord_dims:
             new_coord = target_coord.copy()
-            new_coord._labels = None
             temp_coordset = CoordSet(new_coord, keepnames=True, sorted=False)
             new_group = _coordset_to_groups(temp_coordset)[0]
             return tuple(groups) + (new_group,)
@@ -1186,7 +1189,6 @@ class CoordSet(HasTraits):
 
         if len(group.entries) == 1 and not group.aliases:
             new_coord = target_coord.copy()
-            new_coord._labels = None
             new_entry = replace(group.entries[0], coord=new_coord)
             new_group = replace(group, entries=(new_entry,))
         else:
@@ -2328,8 +2330,71 @@ class CoordSet(HasTraits):
             return colored_output(txt.rstrip())
         return txt.rstrip()
 
+    def _repr_sections(self):
+        """
+        Build semantic display sections from CoordSet attributes.
+
+        Returns
+        -------
+        list of DisplaySection
+            One ``"dimension"`` section per named coordinate, with items
+            reused from child ``Coord._repr_sections()`` where possible.
+        """
+        sections: list[DisplaySection] = []
+        for dim in self.names:
+            coord = getattr(self, dim)
+
+            prefix = "Coord" if self._is_same_dim else "Dimension"
+            title = f"{prefix} `{dim}`"
+            for k, v in self.references.items():
+                if dim == v:
+                    title += f"={k}"
+                    break
+
+            items: list[DisplayItem] = []
+
+            if isinstance(coord, CoordSet):
+                # Same-dim nested CoordSet — flatten into one section
+                if not coord.is_empty:
+                    sz = coord.sizes
+                    items.append(
+                        DisplayItem(
+                            "field",
+                            str(sz) if isinstance(sz, int) else str(min(sz)),
+                            "size",
+                        )
+                    )
+                    for child_name in coord.names:
+                        child = getattr(coord, child_name)
+                        items.append(DisplayItem("block", f"({child_name})"))
+                        child_sections = child._repr_sections()
+                        if child_sections:
+                            # Sentinel pipeline uses print_size=False for
+                            # nested children, so suppress the child's size
+                            # field — the common size is shown by the parent.
+                            child_items = [
+                                i for i in child_sections[0].items if i.key != "size"
+                            ]
+                            items.extend(child_items)
+            else:
+                # Simple Coord — reuse its items
+                child_sections = coord._repr_sections()
+                if child_sections:
+                    items.extend(child_sections[0].items)
+
+            sections.append(DisplaySection("dimension", title, items))
+
+        return sections
+
     def _repr_html_(self):
-        return convert_to_html(self)
+        sections = self._repr_sections()
+        body = _render_sections(sections)
+        heading = _html_heading(self)
+        return (
+            '<div class="scp-output">'
+            f"<details><summary>{heading}</summary>\n{body}\n"
+            "</details></div>"
+        )
 
     def __deepcopy__(self, memo):
         coords = self.__class__(
