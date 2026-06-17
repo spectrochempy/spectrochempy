@@ -138,6 +138,15 @@ peaks, _ = last.find_peaks(distance=5.0)
 # we do not catch the second output (properties) as it is void in this case
 
 # %% [markdown]
+# On spectra with linear coordinates, spacing-related constraints can also be
+# expressed with physical units. For example, the following call is equivalent
+# to the previous one:
+
+# %%
+peaks_units, _ = last.find_peaks(distance="5 cm^-1")
+peaks_units.x.values
+
+# %% [markdown]
 # `peaks` is a NDDataset. Its `x` attribute gives the peak position:
 
 # %%
@@ -237,18 +246,23 @@ _ = evol.plot(ls=":")
 #
 # **Parameters relative to "peak spacing":**
 # - `distance` : the required minimal horizontal distance between neighbouring peaks.
-# Smaller peaks are removed first.
-# - `width` : Required minimal width of peaks in samples (single number) or minimal and
-# maximal width. The width is
+# Smaller peaks are removed first. On a linear coordinate axis it can be given either
+# in points or in coordinate units, e.g. ``distance="10 cm^-1"``.
+# - `width` : Required minimal width of peaks or minimal and maximal width. The width is
 # assessed from the peak height,
-# prominence and neighboring signal. - In addition the user can define `rel_height`
-# (a float between 0. and 1.) used
+# prominence and neighboring signal. On a linear coordinate axis, `width` can be
+# passed either in points or in coordinate units, e.g. ``width=5 * ur("cm^-1")``.
+# - In addition the user can define `rel_height` (a float between 0. and 1.) used
 # to compute the width - see the [scipy documentation](
 # https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.peak_widths.html)
 # for further details.
 # - Finally, we mention en passant a last parameter, `plateau_size()` used for
-# selecting peaks having truly flat tops (
-# as in e.g. square-boxed signals).
+# selecting peaks having truly flat tops (as in e.g. square-boxed signals).
+# As for `distance` and `width`, `wlen` and `plateau_size` can also be expressed
+# in coordinate units when the axis is linear.
+#
+# Coordinate-aware spacing constraints currently assume a linear axis. On strongly
+# non-linear coordinates, use plain point counts by setting `use_coord=False`.
 #
 # The use of some of these options for the last spectrum of the dataset is
 # exemplified in the following:
@@ -321,6 +335,10 @@ offset = 0.20
 (peaks + offset).plot_scatter(
     ax=ax, label=label, m="v", mfc=color, mec=color, ms=5, clear=False, data_only=True
 )
+
+# The same constraint can be written with explicit coordinate units.
+peaks_units, _ = s.find_peaks(distance="10 cm^-1")
+peaks_units.x.values
 
 # find peaks with width >= 10 (none of the two maxima at ~ 2075 is detected)
 

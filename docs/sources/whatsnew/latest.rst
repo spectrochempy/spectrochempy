@@ -22,17 +22,19 @@ New Features
   (#1078).  When coordinate units are available, ``distance`` and ``width`` can
   now be passed as `Quantity` objects or unit strings such as ``"10 cm^-1"``,
   and ``wlen`` / ``plateau_size`` follow the same coordinate-aware conversion
-  to sample points.  Plain numeric values keep their previous behavior, and
-  incompatible units now raise a clear error.
+  to sample points.  Plain numeric values keep their previous behavior,
+  incompatible units now raise a clear error, and coordinate-aware spacing
+  constraints are now explicitly rejected on non-linear axes instead of being
+  interpreted approximately.  Peak interpolation near dataset borders is also
+  more robust.
 
 Bug Fixes
 ~~~~~~~~~
 
 - Fixed ``interpolate`` `dim` argument resolution when ``dims=None`` is in
   scope.  Calling ``interpolate(dim=0, ...)`` or ``interpolate(dim="y", ...)``
-  previously defaulted to the last axis instead of honouring the requested
-  dimension, because ``_get_dims_from_args`` pops the ``dims`` key first and
-  could not distinguish an explicit ``None`` from an absent argument.
+  now honours the requested dimension instead of incorrectly defaulting to the
+  last axis.
 
 - Restored historical hypercomplex/quaternion dataset display (#1147).  Detailed
   terminal and HTML representations once again show explicit ``RR``/``RI``/``IR``/``II``
@@ -51,23 +53,18 @@ Bug Fixes
   (#1093, #1094, #1098, #1100).  Bare-array targets keep the source
   coordinate's units and title; PCHIP interpolation honours ``fill_value``;
   output follows the requested target order even when the source coordinate is
-  decreasing; masks and secondary coordinates stay aligned; and labels are
-  carried to target points that exactly match original coordinate values while
-  genuinely resampled points remain unlabelled.
+  decreasing; masks and secondary coordinates stay aligned; and labels now
+  follow only target points that exactly match original coordinate values.
 
 - ``write_csv`` now exports masked samples as missing values (``NaN``) instead
-  of writing their underlying data (#1135).  The writer previously iterated over
-  ``dataset.data`` directly, leaking the stored values of points the user had
-  explicitly masked; masked samples are now filled with ``NaN`` (mirroring the
-  ``write_jcamp`` fix), so they round-trip back as ``NaN`` through ``read_csv``
-  and unmasked datasets are unaffected.
+  of writing their underlying data (#1135).  Masked values now round-trip as
+  missing values through CSV I/O instead of leaking the stored data beneath the
+  mask.
 
 - Fixed ``Project.__str__()`` tree formatting when a project contains both
-  sub-projects and sibling datasets or scripts at the same level.  The
-  recursive ``_listproj`` helper previously used ``s.strip("\\n")`` which
-  stripped the trailing newline from the entire accumulated string, causing
-  sibling entries to appear on the same line as the last child of the
-  preceding sub-project.
+  sub-projects and sibling datasets or scripts at the same level.  Project
+  trees now render with correct line breaks instead of collapsing sibling
+  entries onto the same line.
 
 - ``concatenate`` now handles coordinate metadata more consistently (#1101).
   Coordinate values expressed in compatible but different units are converted
@@ -76,14 +73,13 @@ Bug Fixes
   longer crash during concatenation.  Coordinate-aware operations now also
   report incompatible coordinate units more clearly (#1099): ``align``,
   ``concatenate``, and ``interpolate`` identify the failing operation, the
-  dimension involved, and the mismatched units instead of surfacing backend or
-  overly generic conversion errors.
+  dimension involved, and the mismatched units.
 
 - ``read_opus`` now supports more assembled and time-resolved OPUS files
   (#1035, #1036): data series blocks such as ``a``, ``sm``, ``igsm``,
   ``phsm``, and ``tr`` are read, the ``TRACE``, ``GCIG``, and ``GCSC`` type
-  selectors are exposed, and malformed acquisition sub-second fields fall back
-  to whole-second precision instead of returning ``None``.
+  selectors are exposed, and malformed acquisition sub-second fields now fall
+  back to whole-second precision instead of returning ``None``.
 
 - Fixed parsing of the ``a.u.`` (absorbance) and ``K.M.`` (Kubelka-Munk) unit
   symbols from strings, which previously failed because the dots were read as a
@@ -92,18 +88,15 @@ Bug Fixes
 - ``CoordSet`` and same-dimension coordinate handling are more stable.  Native
   save/load now preserves selected non-first default coordinates and restores
   reference-based coordinates, while copying ``CoordSet`` and ``NDDataset``
-  objects keeps reference-based coordinates intact.  Same-dimension
-  ``CoordSet`` replacement by name, numeric index, title, or synthetic child
-  alias no longer double-wraps inner coordinates, which also improves
-  concatenation of multi-coordinate datasets.  Empty ``CoordSet`` objects now
-  have consistent empty-state properties instead of raising ``TypeError`` or
-  ``IndexError``.
+  objects keeps reference-based coordinates intact.  Same-dimension coordinate
+  replacement is also more reliable, which improves concatenation of
+  multi-coordinate datasets.  Empty ``CoordSet`` objects now behave
+  consistently instead of raising ``TypeError`` or ``IndexError``.
 
 - Stabilized 1D CSV round-trip support: ``read_csv`` now tolerates header rows
   (e.g., column titles) written by ``write_csv``, and correctly handles both
-  single-column (data-only) and multi-column (coordinate + data) CSV files.
-  Synthetic tests for CSV reading/writing have been added, removing the dependency
-  on external test data for these functionalities (#1077).
+  single-column (data-only) and multi-column (coordinate + data) CSV files
+  (#1077).
 
 - Preserved scientific-context metadata (``meta``, ``author``,
   ``description``, ``origin``, and ``filename``) in wrapper-based processing
@@ -121,14 +114,11 @@ Breaking Changes
   (e.g. ``dataset + coord`` or ``coord * dataset``).  ``Coord`` is treated as
   axis support, not as a signal-bearing operand.  Workflows needing correction
   vectors, weighting profiles, response curves, or other signal-like 1D
-  operands should represent them as 1D ``NDDataset`` objects instead.  This
-   clarifies the math semantics under the broader ``#1103`` arithmetic and
-   metadata characterization work.
+  operands should represent them as 1D ``NDDataset`` objects instead.
 
 - Removed the orphaned ``roi`` and ``NDDataset.modeldata`` attributes from the
-  public data model (#1168).  ``roi`` no longer had active production use, and
-  ``NDDataset.modeldata`` no longer had a reliable semantic contract.  Fit/model
-  outputs should be stored and plotted as explicit ``NDDataset`` objects or
+  public data model (#1168).  Fit/model outputs should be stored and plotted as
+  explicit ``NDDataset`` objects or
   dedicated fit-result objects rather than hidden structural state on
   ``NDDataset``.  Legacy serialized ``roi`` and ``modeldata`` fields in native
   SpectroChemPy files remain load-compatible and are ignored during loading.
