@@ -126,7 +126,7 @@ X3 = blc.transform()
 _ = blc.plot()
 
 # %%
-X3.mask[:, 891.0:1234.0].all(), blc.baseline.mask[:, 891.0:1234.0].all()
+X3[:, 891.0:1234.0].mask.all(), blc.baseline[:, 891.0:1234.0].mask.all()
 
 # %% [markdown]
 # ### Overview of the other model
