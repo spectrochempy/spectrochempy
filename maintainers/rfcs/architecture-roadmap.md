@@ -38,6 +38,20 @@ This document should evolve as the project evolves.
 - Reference: `maintainers/rfcs/analysis-fit-result-architecture.md`
 - Audit reference: `audit/~analysis-fit-result-architecture-audit.md`
 
+### Units and Dimensional Semantics Audit
+
+- Decision: audit completed.
+- Main conclusion: the unit system (Pint-based) is architecturally coherent
+  but has a working-hybrid model (metadata vs scientific quantity) that is
+  implicit rather than documented.
+- One confirmed bug: `var()` does not square units (issue #1191).
+- Known scope gap: multi-coordinate dimension concatenation lacks unit
+  conversion (documented in PR #1117).
+- Minor inconsistency: `PLSRegression.coef` is unitless while
+  `LinearRegressionAnalysis.coef` computes explicit `Y/X` unit ratios.
+- No immediate redesign recommended.
+- Audit reference: `audit/~units-and-dimensional-semantics-audit.md`
+
 ### Integration Semantics Characterization
 
 - Decision: PR8 characterization is complete for `trapezoid()` / `simpson()`.
