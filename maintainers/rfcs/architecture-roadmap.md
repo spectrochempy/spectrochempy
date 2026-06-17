@@ -128,6 +128,18 @@ This document should evolve as the project evolves.
 - Compatibility posture: keep loading legacy serialized `roi` fields, but
   ignore them on read.
 
+### Script Removal
+
+- Decision: remove the entire Script subsystem from the codebase.
+- Removed: `Script` class, `run_script`, `run_all_scripts`, `%addscript` IPython
+  magic, `makescript` decorator, all Script integration from `Project`.
+- Rationale: the Script feature predates modern SpectroChemPy workflows
+  (notebooks, Python scripts, packages, plugins) and was never widely
+  documented or exercised. Removing it simplifies the Project data model and
+  eliminates a maintenance burden.
+- Compatibility posture: keep loading legacy serialized `_scripts` fields in
+  `.pscp` files, but ignore them on read.
+
 ### CoordSet Storage Redesign
 
 Decision:
