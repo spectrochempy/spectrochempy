@@ -305,8 +305,14 @@ def test_concatenate_rejects_incompatible_coord_units():
     ds1 = scp.NDDataset([1.0, 2.0], coordset=[scp.Coord([1.0, 2.0], units="cm^-1")])
     ds2 = scp.NDDataset([3.0, 4.0], coordset=[scp.Coord([1.0, 2.0], units="s")])
 
-    with pytest.raises(UnitsCompatibilityError):
+    with pytest.raises(UnitsCompatibilityError) as exc:
         concatenate(ds1, ds2)
+    message = str(exc.value)
+    assert "Cannot concatenate datasets" in message
+    assert "dimension 'x'" in message
+    assert "s" in message
+    assert "cm" in message
+    assert "Convert the coordinates to compatible units before retrying." in message
 
 
 def test_stack_regression():
