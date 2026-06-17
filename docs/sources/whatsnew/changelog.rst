@@ -19,112 +19,12 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
-- Added the official ``spectrochempy-tensor`` plugin for TensorLy-backed tensor
-  decompositions, exposing CP/PARAFAC as ``scp.tensor.CP``.
-
-- ``find_peaks`` now accepts physical units for point-spacing constraints
-  (#1078).  When coordinate units are available, ``distance`` and ``width`` can
-  now be passed as `Quantity` objects or unit strings such as ``"10 cm^-1"``,
-  and ``wlen`` / ``plateau_size`` follow the same coordinate-aware conversion
-  to sample points.  Plain numeric values keep their previous behavior,
-  incompatible units now raise a clear error, and coordinate-aware spacing
-  constraints are now explicitly rejected on non-linear axes instead of being
-  interpreted approximately.  Peak interpolation near dataset borders is also
-  more robust.
-
 
 .. section
 
 Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
-
-- Fixed ``interpolate`` `dim` argument resolution when ``dims=None`` is in
-  scope.  Calling ``interpolate(dim=0, ...)`` or ``interpolate(dim="y", ...)``
-  now honours the requested dimension instead of incorrectly defaulting to the
-  last axis.
-
-- Fixed history tracking for ``squeeze()`` and ``diagonal()``: both now preserve
-  existing history and append their own operation entry, consistent with other
-  shape-like operations.
-
-- Restored historical hypercomplex/quaternion dataset display (#1147).  Detailed
-  terminal and HTML representations once again show explicit ``RR``/``RI``/``IR``/``II``
-  component blocks and preserve complex-dimension shape annotations, instead of
-  falling back to raw quaternion scalar dumps.
-
-- JCAMP-DX I/O is more robust (#1080, #1132, #1150).  ``read_jcamp`` now
-  handles ``##YUNITS=TRANSMITTANCE`` as the ``transmittance`` unit, accepts
-  header values containing ``=``, reports invalid axis metadata with a clear
-  formatted error, and keeps the deprecated ``read_jdx`` alias pointed at
-  ``read_jcamp``.  ``write_jcamp`` now exports masked samples as JCAMP-DX
-  missing values (``?``), excludes them from ``##MAXY``/``##MINY``, and
-  preserves masking on round-trip instead of leaking stale values.
-
-- ``interpolate`` now preserves coordinate metadata and target semantics
-  (#1093, #1094, #1098, #1100).  Bare-array targets keep the source
-  coordinate's units and title; PCHIP interpolation honours ``fill_value``;
-  output follows the requested target order even when the source coordinate is
-  decreasing; masks and secondary coordinates stay aligned; and labels now
-  follow only target points that exactly match original coordinate values.
-
-- ``write_csv`` now exports masked samples as missing values (``NaN``) instead
-  of writing their underlying data (#1135).  Masked values now round-trip as
-  missing values through CSV I/O instead of leaking the stored data beneath the
-  mask.
-
-- Baseline correction now preserves masked regions more consistently (#1097).
-  Masked areas now remain masked not only on corrected outputs but also on the
-  computed baseline itself, including the AsLS path and the public baseline
-  helper functions.
-
-- Fixed ``Project.__str__()`` tree formatting when a project contains both
-  sub-projects and sibling datasets or scripts at the same level.  Project
-  trees now render with correct line breaks instead of collapsing sibling
-  entries onto the same line.
-
-- ``concatenate`` now handles coordinate metadata more consistently (#1101).
-  Coordinate values expressed in compatible but different units are converted
-  to the units of the first dataset, incompatible coordinate units raise a
-  ``UnitsCompatibilityError``, and mixed labeled/unlabeled coordinates no
-  longer crash during concatenation.  Coordinate-aware operations now also
-  report incompatible coordinate units more clearly (#1099): ``align``,
-  ``concatenate``, and ``interpolate`` identify the failing operation, the
-  dimension involved, and the mismatched units.
-
-- ``read_opus`` now supports more assembled and time-resolved OPUS files
-  (#1035, #1036): data series blocks such as ``a``, ``sm``, ``igsm``,
-  ``phsm``, and ``tr`` are read, the ``TRACE``, ``GCIG``, and ``GCSC`` type
-  selectors are exposed, and malformed acquisition sub-second fields now fall
-  back to whole-second precision instead of returning ``None``.
-
-- Fixed parsing of the ``a.u.`` (absorbance) and ``K.M.`` (Kubelka-Munk) unit
-  symbols from strings, which previously failed because the dots were read as a
-  multiplication.
-
-- ``CoordSet`` and same-dimension coordinate handling are more stable.  Native
-  save/load now preserves selected non-first default coordinates and restores
-  reference-based coordinates, while copying ``CoordSet`` and ``NDDataset``
-  objects keeps reference-based coordinates intact.  Same-dimension coordinate
-  replacement is also more reliable, which improves concatenation of
-  multi-coordinate datasets.  Empty ``CoordSet`` objects now behave
-  consistently instead of raising ``TypeError`` or ``IndexError``.
-
-- Stabilized 1D CSV round-trip support: ``read_csv`` now tolerates header rows
-  (e.g., column titles) written by ``write_csv``, and correctly handles both
-  single-column (data-only) and multi-column (coordinate + data) CSV files
-  (#1077).
-
-- Preserved scientific-context metadata (``meta``, ``author``,
-  ``description``, ``origin``, and ``filename``) in wrapper-based processing
-  and analysis outputs such as ``Filter(...).transform(...)`` (#1103).
-
-- ``NDDataset.var()`` now squares the units on the result instead of
-  preserving input units unchanged (#1191).  Variance is the average of
-  squared deviations from the mean, so the result units are U² when the
-  input has units U.  This aligns ``var`` with correct dimensional
-  semantics — all other reductions (``sum``, ``mean``, ``std``, ``min``,
-  ``max``) already handled units correctly.
 
 
 .. section
@@ -133,7 +33,6 @@ Dependency Updates
 ~~~~~~~~~~~~~~~~~~
 .. Add here new dependency updates (do not delete this comment)
 
-- pint >= 0.24 is now required
 
 .. section
 
@@ -141,34 +40,6 @@ Breaking Changes
 ~~~~~~~~~~~~~~~~
 .. Add here new breaking changes (do not delete this comment)
 
-- Removed the ``Script`` class and the entire ``spectrochempy.core.script``
-  module, along with the ``run_script``, ``run_all_scripts`` functions and
-  the ``%addscript`` IPython magic (#1196).  ``Project`` loses all Script
-  integration (``add_script``, ``add_scripts``,
-  ``clear_scripts``, ``remove_all_script``, ``scripts`` property,
-  ``makescript`` decorator) — no deprecation period.  ``Project`` is now a
-  typed container for ``NDDataset`` and ``Project`` only.  Legacy ``.pscp``
-  files containing ``_scripts`` entries remain load-compatible — the field is
-  silently ignored on deserialization.
-
-- Removed legacy ``Project._others`` support.  The ``_others`` dict and its
-  ``_set_from_type`` fallback are removed — ``Project`` now rejects objects
-  that are neither ``NDDataset`` nor ``Project`` with a clear ``TypeError``.
-  Legacy ``.pscp`` files containing ``_others`` entries remain load-compatible —
-  the field is silently ignored on deserialization.
-
-- Mixed arithmetic between ``NDDataset`` and ``Coord`` is now rejected
-  (e.g. ``dataset + coord`` or ``coord * dataset``).  ``Coord`` is treated as
-  axis support, not as a signal-bearing operand.  Workflows needing correction
-  vectors, weighting profiles, response curves, or other signal-like 1D
-  operands should represent them as 1D ``NDDataset`` objects instead.
-
-- Removed the orphaned ``roi`` and ``NDDataset.modeldata`` attributes from the
-  public data model (#1168).  Fit/model outputs should be stored and plotted as
-  explicit ``NDDataset`` objects or
-  dedicated fit-result objects rather than hidden structural state on
-  ``NDDataset``.  Legacy serialized ``roi`` and ``modeldata`` fields in native
-  SpectroChemPy files remain load-compatible and are ignored during loading.
 
 .. section
 
@@ -176,58 +47,9 @@ Deprecations
 ~~~~~~~~~~~~
 .. Add here new deprecations (do not delete this comment)
 
-- ``scp.CP`` and ``spectrochempy.analysis.decomposition.cp.CP`` are now
-  deprecated compatibility paths for ``scp.tensor.CP``.
-
 
 .. section
 
 Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
-
-- MAINT: Continued the Display / Representation Architecture work (#843).
-  The semantic ``DisplayItem`` / ``DisplaySection`` representation layer now
-  drives HTML rendering across ``Coord``, ``CoordSet``, ``NDDataset``, and
-  ``Project``.  This consolidates notebook and HTML display on a shared
-  section-based model, produces cleaner inline summary metadata and collapsible
-  content sections, removes exposure of internal UUIDs from headings, and keeps
-  project hierarchies and same-dimension coordinate groups readable through the
-  unified semantic rendering path.  The docs cache key was also updated so
-  sphinx-gallery invalidates cached output when display source files change.
-
-- TEST: Added synthetic, offline tests for multi-variable Matlab (``.mat``)
-  import and documented the behavior in the ``read_matlab`` docstring: numeric
-  variables are converted to ``NDDataset`` objects and then grouped by the
-  importer when shapes are compatible (same-shape arrays are stacked into one
-  dataset, incompatible ones returned separately), while non-numeric and
-  Matlab-internal (``__header__``, ``__version__``, ``__globals__``) variables
-  are skipped (#1142).
-
-- MAINT: Moved CP/PARAFAC implementation and TensorLy dependency ownership into
-  the new tensor plugin, keeping the core package tensor-agnostic.
-
-- MAINT: Completed the internal ``CoordSet`` storage migration.  Mutation
-  paths now resolve through the group-backed
-  projection-resolution-reconstruction pipeline, lookup and serializer adapters
-  share transient group metadata, and runtime storage uses a plain
-  ``_storage`` list instead of the legacy trait-based ``_coords`` validator.
-  Nested ``CoordSet`` setup, sorting, copying, and name validation are handled
-  explicitly in lifecycle and mutation paths while preserving public behavior,
-  serialization, alias invariants, ``default_id`` semantics, label metadata,
-  reference pass-through, and coordinate metadata.
-
-- MAINT: Removed stale commented ``docrep`` residue and the unused commented
-  ``numpydoc`` pre-commit hook block.
-
-- TEST: Added a project-wide source-docstring guard to detect stale
-  ``docrep``-style placeholders in ``spectrochempy`` source docstrings.
-
-- MAINT: Harmonized plugin release workflows and maintainer documentation:
-  the ``release_plugin.yml`` workflow now gracefully handles first plugin
-  releases (where the version is already committed) by skipping the commit
-  and push steps instead of failing, and automatically unsets the GitHub
-  "Latest" flag on plugin releases so the core release remains the primary
-  release on the repository front page.  The maintainer documentation now
-  describes the role of ``plugin_version_status.py``, the first-release
-  workflow, and the "Latest" flag policy (#1082).
