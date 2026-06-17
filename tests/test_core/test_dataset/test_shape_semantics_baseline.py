@@ -311,11 +311,12 @@ class TestSqueezeCharacterization:
         assert sq.coordset is not None
         assert sq.coordset["y"].is_same_dim
 
-    def test_squeeze_does_not_record_history(self, singleton_dataset):
-        """SURPRISE: squeeze does NOT append history."""
+    def test_squeeze_records_history(self, singleton_dataset):
+        """Squeeze now appends a history entry (consistent with other shape ops)."""
         sq = singleton_dataset.squeeze()
-        assert len(sq.history) == 1
+        assert len(sq.history) == 2
         assert sq.history[0] == singleton_dataset.history[0]
+        assert "Data squeezed" in sq.history[-1]
 
     def test_squeeze_returns_new_object(self, singleton_dataset):
         sq = singleton_dataset.squeeze()
@@ -584,11 +585,12 @@ class TestShapeOperationHistory:
         assert isinstance(s.history[-1], str)
         assert "Data swapped" in s.history[-1]
 
-    def test_squeeze_does_not_append_history(self, singleton_dataset):
-        """SURPRISE: squeeze is the only shape op that does NOT record history."""
+    def test_squeeze_appends_history(self, singleton_dataset):
+        """Squeeze now appends history (consistent with other shape ops)."""
         sq = singleton_dataset.squeeze()
-        assert len(sq.history) == 1
+        assert len(sq.history) == 2
         assert sq.history[0] == singleton_dataset.history[0]
+        assert "Data squeezed" in sq.history[-1]
 
     def test_reshape_appends_history(self, shape_dataset):
         r = shape_dataset.reshape((7, 5), dims=("x", "y"))

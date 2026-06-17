@@ -1194,6 +1194,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
                 missing="ignore",
             )
 
+        new.history = "Data squeezed"
         return new
 
     def atleast_2d(self, inplace=False):
