@@ -281,7 +281,8 @@ def test_find_peaks_preserves_metadata_with_name_and_history_overrides(
     assert result.dims == ["x"]
     assert result.coordset is not None
     np.testing.assert_allclose(result.x.data, [0.5, 1.5, 2.5, 3.5])
-    assert len(result.history) == 3
+    assert len(result.history) == 4  # initial + squeezed + slice + find_peaks
     assert "Initial history marker" in result.history[0]
-    assert "Slice extracted" in result.history[1]
-    assert "Find_peaks(): 4 peak(s) found" in result.history[2]
+    assert "Data squeezed" in result.history[1]
+    assert "Slice extracted" in result.history[2]
+    assert "Find_peaks(): 4 peak(s) found" in result.history[3]
