@@ -14,6 +14,7 @@ from scipy.interpolate import interp1d
 
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
+from spectrochempy.utils import exceptions
 
 
 def _interp_along_axis(values, old_x, new_x, axis, method, fill_value):
@@ -293,7 +294,12 @@ def interpolate(
         if primary_old_coord.has_units and target_coord.has_units:
             if not primary_old_coord.is_units_compatible(target_coord):
                 raise ValueError(
-                    f"Incompatible units: {primary_old_coord.units} vs {target_coord.units}"
+                    exceptions.format_incompatible_units_message(
+                        "interpolate coordinates",
+                        primary_old_coord.units,
+                        target_coord.units,
+                        dim=dim,
+                    )
                 )
             if primary_old_coord.units != target_coord.units:
                 target_coord = target_coord.copy()
