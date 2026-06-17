@@ -228,8 +228,9 @@ _ = smoothed.plot(colormap="magma")
 # %% [markdown]
 # ### Baseline Correction
 #
-# Various algorithms are available for baseline correction, including polynomial fitting, rubberband, and more. Here an
-# example of multivariate polynomial baseline correction using PCHIP interpolation is shown:
+# Various algorithms are available for baseline correction, including polynomial
+# fitting, rubberband, and more. Here is an example of multivariate polynomial
+# baseline correction using PCHIP interpolation:
 
 # %% [markdown]
 # Configure baseline correction
