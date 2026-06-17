@@ -1,6 +1,6 @@
 context:
   name: spectrochempy-iris
-  version: "0.1.3"
+  version: "0.1.4"
 
 package:
   name: "${{ name }}"
