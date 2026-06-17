@@ -2,7 +2,7 @@
 # Documentation is built using Sphinx and published to GitHub Pages
 #
 # Branch preview deployment:
-# - Development branches (non-master, non-docs/*, non-release) publish
+# - Development branches (non-master, non-release), including docs/* branches, publish
 #   preview docs under /<branch-name>/ on GitHub Pages.
 # - Branch names are sanitised: "/" becomes "-".
 # - Example: branch "feature/new-nmr" → /feature-new-nmr/
@@ -183,8 +183,8 @@ jobs:
         run: |
           BRANCH="${{ github.ref_name }}"
           EVENT="${{ github.event_name }}"
-          # Stable builds: master, docs/* branches, and release events
-          if [[ "$BRANCH" == "master" || "$BRANCH" == docs/* || "$EVENT" == "release" ]]; then
+          # Stable builds: master and release events
+          if [[ "$BRANCH" == "master" || "$EVENT" == "release" ]]; then
             echo "is_preview=false" >> "$GITHUB_OUTPUT"
             echo "preview_path=" >> "$GITHUB_OUTPUT"
             echo "build_subdir=" >> "$GITHUB_OUTPUT"
