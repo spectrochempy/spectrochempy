@@ -395,6 +395,7 @@ class NDIO(tr.HasTraits):
                 "modeldata",
                 "_modeldata",
                 "_scripts",
+                "_others",
             }
             for key, val in dic.items():
                 try:

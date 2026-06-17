@@ -118,26 +118,14 @@ class TestProjectInit:
 class TestSetFromType:
     """Tests for _set_from_type method."""
 
-    def test_set_from_type_with_other_object_having_name(self):
+    def test_set_from_type_rejects_unsupported_type(self):
         proj = Project(name="test")
 
-        class NamedObject:
-            name = "custom_object"
+        with pytest.raises(TypeError, match="does not accept"):
+            proj._set_from_type(42)
 
-        obj = NamedObject()
-        proj._set_from_type(obj)
-        assert "custom_object" in proj._others
-        assert proj._others["custom_object"] is obj
-
-    def test_set_from_type_invalid_object(self):
-        proj = Project(name="test")
-
-        class UnnamedObject:
-            pass
-
-        obj = UnnamedObject()
-        with pytest.raises(ValueError, match="has no name"):
-            proj._set_from_type(obj)
+        with pytest.raises(TypeError, match="does not accept"):
+            proj._set_from_type("not a supported object")
 
 
 class TestGetItem:
@@ -471,21 +459,6 @@ class TestProjectProperties:
         assert proj.directory is None
 
 
-class TestOthersDict:
-    """Tests for _others dictionary functionality."""
-
-    def test_others_dict_populated(self):
-        proj = Project(name="test")
-
-        class CustomObject:
-            name = "custom"
-
-        obj = CustomObject()
-        proj._set_from_type(obj)
-        assert "custom" in proj._others
-        assert proj._others["custom"] is obj
-
-
 class TestEdgeCases:
     """Edge case tests."""
 
@@ -557,7 +530,7 @@ class TestSerializationRoundtrip:
         assert filename2.exists()
         assert filename1 != filename2
 
-    def test_save_load_ignores_legacy_roi_and_modeldata_fields(self, ds1):
+    def test_save_load_ignores_legacy_fields(self, ds1):
         proj = Project(name="legacy_fields_test")
         ds1.name = "data"
         proj.add_dataset(ds1)
@@ -570,6 +543,7 @@ class TestSerializationRoundtrip:
 
         js["datasets"][0]["roi"] = [0.0, 1.0]
         js["datasets"][0]["modeldata"] = [42.0]
+        js["_others"] = {"unused": "should be ignored"}
 
         with zipfile.ZipFile(filename, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
             zipf.writestr(member, json.dumps(js, indent=2))
@@ -578,6 +552,7 @@ class TestSerializationRoundtrip:
 
         assert not hasattr(loaded.data, "roi")
         assert not hasattr(loaded.data, "modeldata")
+        assert not hasattr(loaded, "_others")
 
 
 class TestArgNamesEdgeCases:

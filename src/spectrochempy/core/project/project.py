@@ -81,7 +81,6 @@ class Project(AbstractProject, NDIO):
     _parent = tr.This()
     _projects = tr.Dict(tr.This())
     _datasets = tr.Dict(NDDatasetType())
-    _others = tr.Dict()
     _meta = tr.Instance(Meta)
 
     _filename = tr.Instance(pathlib.Path, allow_none=True)
@@ -113,16 +112,13 @@ class Project(AbstractProject, NDIO):
             # add it to the _datasets dictionary
             self.add_dataset(obj, name)
 
-        elif isinstance(obj, type(self)):  # can not use Project here!
+        elif isinstance(obj, type(self)):
             self.add_project(obj, name)
 
-        elif hasattr(obj, "name"):
-            self._others[obj.name] = obj
-
         else:
-            raise ValueError(
-                f"objects of type {type(obj).__name__} has no name and so "
-                "cannot be appended to the project ",
+            raise TypeError(
+                f"Project does not accept objects of type {type(obj).__name__}. "
+                "Only NDDataset and Project instances are supported."
             )
 
     def _get_from_type(self, name):
