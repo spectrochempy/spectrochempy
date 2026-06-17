@@ -24,6 +24,7 @@ import scipy
 
 from spectrochempy.application.application import error_
 from spectrochempy.application.application import warning_
+from spectrochempy.core.units import DimensionalityError
 from spectrochempy.core.units import Quantity
 
 # Todo:
@@ -31,6 +32,66 @@ from spectrochempy.core.units import Quantity
 # argrelmin(data[, axis, order, mode]) 	Calculate the relative minima of data.
 # argrelmax(data[, axis, order, mode]) 	Calculate the relative maxima of data.
 # argrelextrema(data, comparator[, axis, ...]) 	Calculate the relative extrema of data.
+
+
+def _as_peakfinding_quantity(value):
+    if isinstance(value, str):
+        return Quantity(value)
+    if isinstance(value, Quantity):
+        return value
+    return None
+
+
+def _format_peakfinding_units_error(name, supplied_units, coord_units, dim):
+    return (
+        f"Cannot use peak-finding parameter `{name}` along dimension '{dim}': "
+        f"incompatible coordinate units ({supplied_units} and {coord_units}). "
+        "Convert the parameter to coordinate units before retrying."
+    )
+
+
+def _convert_peak_parameter_to_points(name, value, step, xunits, use_coord, dim):
+    """
+    Convert coordinate-aware peak-finding constraints to sample-point counts.
+
+    ``scipy.signal.find_peaks()`` expects values such as ``distance`` and
+    ``width`` in sample points. When SpectroChemPy is working in coordinate
+    space, we accept physical-unit inputs and convert them to the nearest
+    integer point count using the current coordinate spacing.
+    """
+    if value is None:
+        return None
+
+    quantity = _as_peakfinding_quantity(value)
+    if quantity is not None:
+        if not use_coord:
+            raise ValueError(
+                f"Parameter `{name}` with physical units requires coordinate-aware "
+                "peak finding. Provide a plain numeric value or keep `use_coord=True`."
+            )
+        try:
+            value = quantity.to(xunits).magnitude
+        except DimensionalityError as exc:
+            raise ValueError(
+                _format_peakfinding_units_error(
+                    name,
+                    quantity.units,
+                    xunits,
+                    dim,
+                )
+            ) from exc
+
+    if isinstance(value, tuple):
+        return tuple(
+            _convert_peak_parameter_to_points(name, item, step, xunits, use_coord, dim)
+            if item is not None
+            else None
+            for item in value
+        )
+
+    if use_coord:
+        return int(round(value / step))
+    return value
 
 
 def find_peaks(
@@ -161,12 +222,18 @@ def find_peaks(
             spacing = spacing.magnitude
         step = np.abs(spacing)
 
-    # transform coord (if exists) to index
-    # TODO: allow units for distance, width, wlen, plateau_size
-    distance = int(round(distance / step)) if distance is not None else None
-    width = int(round(width / step)) if width is not None else None
-    wlen = int(round(wlen / step)) if wlen is not None else None
-    plateau_size = int(round(plateau_size / step)) if plateau_size is not None else None
+    # transform coordinate-aware constraints to sample-point counts
+    dim = X.dims[-1]
+    distance = _convert_peak_parameter_to_points(
+        "distance", distance, step, xunits, use_coord, dim
+    )
+    width = _convert_peak_parameter_to_points(
+        "width", width, step, xunits, use_coord, dim
+    )
+    wlen = _convert_peak_parameter_to_points("wlen", wlen, step, xunits, use_coord, dim)
+    plateau_size = _convert_peak_parameter_to_points(
+        "plateau_size", plateau_size, step, xunits, use_coord, dim
+    )
 
     # now the distance, width ... parameters are given in data points
     peaks, properties = scipy.signal.find_peaks(
