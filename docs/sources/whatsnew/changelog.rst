@@ -115,6 +115,13 @@ Bug Fixes
   ``description``, ``origin``, and ``filename``) in wrapper-based processing
   and analysis outputs such as ``Filter(...).transform(...)`` (#1103).
 
+- ``NDDataset.var()`` now squares the units on the result instead of
+  preserving input units unchanged (#1191).  Variance is the average of
+  squared deviations from the mean, so the result units are U² when the
+  input has units U.  This aligns ``var`` with correct dimensional
+  semantics — all other reductions (``sum``, ``mean``, ``std``, ``min``,
+  ``max``) already handled units correctly.
+
 
 .. section
 
