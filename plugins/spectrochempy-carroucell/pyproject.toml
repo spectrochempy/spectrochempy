@@ -9,7 +9,7 @@ description = "Carroucell experiment reader for SpectroChemPy"
 requires-python = ">=3.11"
 readme = "README.md"
 dependencies = [
-    "spectrochempy>=0.9,<0.10",
+    "spectrochempy>=0.9,<0.11",
     "xlrd",
     "scipy",
 ]
