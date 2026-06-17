@@ -1044,6 +1044,75 @@ return a dataset closely tied to the original support. The useful distinction is
 therefore not the module name, but whether the output represents the same
 scientific object and how source lineage remains visible.
 
+PR9 refines the "analysis" side of this distinction further:
+
+```text
+analysis methods do not produce one semantic class of output
+```
+
+They currently produce three families:
+
+- latent derived analysis objects;
+- diagnostic / model-summary outputs;
+- reconstructed source-space outputs.
+
+## Analysis Output Families
+
+PR9 characterized representative decomposition APIs:
+
+- `PCA`
+- `SVD`
+- `EFA`
+- `NMF`
+- `MCRALS`
+
+The main conclusion is architectural rather than algorithmic:
+
+```text
+analysis outputs do not require a new top-level category yet,
+but they do require an explicit internal split
+```
+
+Current analysis outputs fall into three families:
+
+| Family | Typical examples | Identity reading | CoordSet / dims reading | Units / provenance reading |
+|---|---|---|---|---|
+| Latent derived analysis objects | PCA scores, PCA loadings/components, NMF transform outputs, NMF components, EFA concentration-like profiles, MCRALS concentration and spectral profiles | derived analysis object | synthetic `k` axis; surviving source axis partially preserved; source-space support partly reduced away | usually unitless; `name` / `history` synthesized; source lineage often copied selectively |
+| Diagnostic / model-summary outputs | explained variance, explained variance ratio, cumulative explained variance, singular values, EFA forward/backward eigenvalue matrices | derived diagnostic object | often component-indexed; not source-space datasets | summarize fitted model structure; provenance often method-centric and rewritten |
+| Reconstructed source-space outputs | `PCA.inverse_transform()`, `NMF.inverse_transform()`, conceptually `MCRALS.inverse_transform()` | same scientific object in a modeled / reconstructed representation | source shape, dims, and coordinate metadata restored | source units usually preserved; `name` / `history` remain synthesized around the reconstruction method |
+
+This does **not** require a new top-level taxonomy node.  The existing
+identity classes remain sufficient if maintainers distinguish:
+
+- latent derived outputs;
+- diagnostic derived outputs;
+- reconstructed source-space outputs.
+
+Implementation note:
+
+- many analysis outputs are assembled through
+  `_wrap_ndarray_output_to_nddataset()`;
+- the wrapper class `_set_output()` currently acts as a semantic assembly
+  layer for metadata, coords, names, and provenance;
+- this is an observational note about current behavior, not a refactor
+  proposal.
+
+Metadata and provenance should be documented conservatively:
+
+- `meta`, `origin`, and `filename` often survive;
+- `name` and `history` are usually synthesized;
+- `author` and `description` may differ between apparent implementation intent
+  and observed runtime behavior;
+- provenance is often method-centric and rewritten rather than appended.
+
+`SVD` is a current exception and should not be forced into the same contract as
+`PCA` / `NMF`:
+
+- it exposes diagnostic vectors and raw factor arrays;
+- it does not currently implement the generic `transform()` reduction API;
+- it behaves more like a decomposition-diagnostic surface than a full latent
+  representation API.
+
 ## Scientific Context vs Structural Information
 
 The current behavior broadly distinguishes two kinds of attached information,
@@ -1148,7 +1217,7 @@ Observed identity classes:
 |---|---|---|---|
 | Same scientific object | Values changed, but the measured object and support are still the same | scalar arithmetic, many elementwise ufuncs, preserve-geometry processing | preserve title/name/context, append history, preserve CoordSet |
 | Same object, changed representation | Same object, but grid, domain, dimensionality, or representation changed | interpolation, reshape-like operations, some integrations and domain transforms | preserve context, recompute structural fields, update history/title as needed |
-| Derived scientific object | Output has distinct scientific meaning from the input | analysis outputs, scores, components, features, model-derived outputs | synthesize title/description/coords/history, preserve provenance selectively |
+| Derived scientific object | Output has distinct scientific meaning from the input | latent analysis outputs, scores, components, features, model-derived outputs | synthesize title/description/coords/history, preserve provenance selectively |
 | Multi-source synthesized object | Result combines multiple scientifically meaningful inputs | concatenate, stack, multi-input analysis | synthesize provenance, avoid pretending first input identity is the whole result |
 
 PR6 reveals two different identity signals among processing wrappers.
@@ -1178,7 +1247,9 @@ Operation-family identity reading:
 | Stack | multi-source synthesized object with new stack axis | partly consistent: source names become labels, other identity fields follow concatenate |
 | Processing outputs (Group A: Filter/PCA) | processed or transformed — identity partially changed (name suffix, history rewrite suggest derived identity) | wrapper paths create derived identity while preserving most context; denoise further overrides author |
 | Processing outputs (Group B: Baseline) | same object, baseline-corrected — identity preserved | consistent: same-object identity preserved with history append |
-| Analysis outputs | usually derived scientific object | broadly consistent: local synthesis is expected, but provenance preservation varies |
+| Analysis outputs: latent family | usually derived scientific object | broadly consistent: local synthesis is expected, but provenance preservation varies |
+| Analysis outputs: diagnostic family | derived diagnostic or model-summary object | consistent at a high level: component-indexed summaries are assembled locally and are not source-space datasets |
+| Analysis outputs: reconstructed family | same scientific object in a modeled / reconstructed representation | geometry and units often return, while `name` / `history` remain method-synthesized |
 
 Identity and provenance combinations:
 
@@ -1188,7 +1259,7 @@ Identity and provenance combinations:
 | Identity partially changed, provenance reset | filter/PCA-like processing (Group A: smooth, savgol, whittaker, denoise) | same object with derived-identity name suffix; context otherwise preserved | history rewritten (original lost); denoise also overrides author |
 | Identity survives with changed representation | interpolation, reshape-like operations | same object in new representation | lineage preserved and operation recorded |
 | Identity changes with reduction-derived quantity | integration | derived quantity from the same source dataset | rewritten history; transformed units; surviving broad context |
-| Identity changes, provenance survives | PCA-like scores, decomposition outputs, model-derived datasets | derived object | source attribution/history should remain visible |
+| Identity changes, provenance survives | latent analysis outputs, diagnostic outputs, decomposition-derived datasets | derived object | source attribution/history should remain visible |
 | Synthesized identity, synthesized provenance | concatenate, stack, multi-source analysis | multi-source result | lineage combined or synthesized |
 | Object identity leaves the dataset surface | raw-return logical/testing ufuncs, scalar reductions | no dataset identity | provenance usually unavailable in returned raw value |
 | Neither materially changes | pure inspection/display or no-op-like access paths | no new result identity | no new provenance event expected |
@@ -1296,6 +1367,15 @@ recomputed.
 Derived analysis outputs may change identity but should still preserve source
 attribution in some form.
 
+Analysis-output provenance should be read by family:
+
+- latent outputs usually preserve some copied lineage while synthesizing
+  method-local `name` / `history`;
+- diagnostic outputs are often even more method-centric and should not be read
+  as source-space provenance trails;
+- reconstructed outputs return to source space but still carry synthesized
+  reconstruction provenance rather than a pure append-only lineage.
+
 Multi-source operations synthesize provenance instead of inheriting one source
 unchanged.
 
@@ -1316,8 +1396,10 @@ Examples:
 - arithmetic preserves identity while adding operation history;
 - interpolation preserves identity in a changed representation while retaining
   lineage;
-- PCA-like scores or decomposition outputs create a derived identity while
-  still needing source provenance;
+- latent analysis outputs and diagnostics create a derived identity while still
+  needing source provenance;
+- reconstructed analysis outputs return to source space without becoming
+  latent outputs;
 - concatenation and stack create synthesized identity and should synthesize
   lineage from multiple inputs;
 - scalar reductions may produce scientifically useful values but leave the
@@ -1410,6 +1492,8 @@ Result assembly is clearly significant enough to deserve maintainer attention:
 - it determines whether `CoordSet`, masks, labels, `roi`, and other fields
   remain valid;
 - it explains why processing and analysis outputs differ from arithmetic;
+- PR9 shows that analysis outputs themselves split into multiple assembly
+  families rather than one uniform semantic class;
 - it is where `NDMath`, `NDDataset`, `CoordSet`, processing, analysis, and
   plugin contracts meet.
 

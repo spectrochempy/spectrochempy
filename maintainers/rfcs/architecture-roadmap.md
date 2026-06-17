@@ -42,6 +42,25 @@ This document should evolve as the project evolves.
   scientific review, because masked values appear to contribute numerically to
   the computed integral while mask information survives on the returned object.
 
+### Analysis Output Semantics Characterization
+
+- Decision: PR9 characterization is complete for representative decomposition
+  analysis outputs.
+- Scope covered: `PCA`, `SVD`, `EFA`, `NMF`, `MCRALS`.
+- Main conclusion: analysis methods do not produce one semantic class of
+  output.
+- Architectural reading:
+  - no new top-level taxonomy node required yet
+  - latent outputs: derived analysis objects
+  - diagnostic outputs: derived diagnostic / model-summary objects
+  - reconstructed outputs: same scientific object in a modeled /
+    reconstructed representation
+  - current assembly behavior is largely driven by
+    `_wrap_ndarray_output_to_nddataset()` / `_set_output()`
+- Exception note: `SVD` currently exposes diagnostic vectors and raw factor
+  arrays but does not implement the generic `transform()` reduction API, so it
+  should not be forced into the same contract as `PCA` / `NMF`.
+
 ### Modeldata Removal
 
 - Decision: remove orphaned `NDDataset.modeldata` from the runtime array model.
