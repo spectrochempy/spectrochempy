@@ -44,6 +44,10 @@ Bug Fixes
   now honours the requested dimension instead of incorrectly defaulting to the
   last axis.
 
+- Fixed history tracking for ``squeeze()`` and ``diagonal()``: both now preserve
+  existing history and append their own operation entry, consistent with other
+  shape-like operations.
+
 - Restored historical hypercomplex/quaternion dataset display (#1147).  Detailed
   terminal and HTML representations once again show explicit ``RR``/``RI``/``IR``/``II``
   component blocks and preserve complex-dimension shape annotations, instead of

@@ -1358,7 +1358,6 @@ class NDMath:
 
         if dtype is not None:
             cls.data = cls.data.astype(dtype)
-        cls.history = []
 
         # set the new coordinates
         if hasattr(cls, "coordset") and cls.coordset is not None:

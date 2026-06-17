@@ -132,10 +132,14 @@ class TestSingleSourceTransformations:
         assert len(result.history) == 1
         assert "Data transposed" in _entry(result.history[-1])
 
-    def test_squeeze_preserves_history(self, ds1):
-        """Squeeze preserves history (no explicit append in squeeze)."""
-        result = ds1.squeeze()
-        assert len(result.history) == 0
+    def test_squeeze_appends(self):
+        """Squeeze preserves prior history and appends a new entry."""
+        d = scp.NDDataset([[1.0, 2.0, 3.0]], name="squeeze_test")
+        d.history = "Prior op"
+        result = d.squeeze()
+        assert len(result.history) == 2
+        assert _entry(result.history[0]) == "Prior op"
+        assert "Data squeezed" in _entry(result.history[-1])
 
     def test_reshape_appends(self, ds1):
         """Reshape appends a history entry."""
@@ -254,13 +258,14 @@ class TestReductions:
         result = ds1.argmax()
         assert isinstance(result, (int, np.integer))
 
-    def test_diagonal_resets_history(self):
-        """Diagonal resets history to empty then decorator appends."""
+    def test_diagonal_appends(self):
+        """Diagonal preserves prior history and appends its own entry."""
         d = scp.NDDataset([[1, 2], [3, 4]], name="diag")
         d.history = "Prior"
         result = d.diagonal()
-        # diagonal sets cls.history = [] then decorator appends one entry
-        assert len(result.history) == 1
+        assert len(result.history) == 2
+        assert _entry(result.history[0]) == "Prior"
+        assert "diagonal" in _entry(result.history[-1])
 
     def test_ptp_appends(self, ds2d):
         """Ptp with explicit dim appends."""
@@ -601,12 +606,13 @@ class TestHistoryLoss:
         assert len(result.history) == 1
         assert "trapezoid" in _entry(result.history[0])
 
-    def test_diagonal_loses_prior_history(self):
-        """Diagonal loses prior history."""
+    def test_diagonal_preserves_prior_history(self):
+        """Diagonal preserves prior history."""
         d = scp.NDDataset([[1, 2], [3, 4]], name="diag_test")
         d.history = "Prior operation"
         result = d.diagonal()
-        assert len(result.history) == 1
+        assert len(result.history) == 2
+        assert _entry(result.history[0]) == "Prior operation"
 
 
 # ===========================================================================
