@@ -735,21 +735,6 @@ Project management
 
     Project
 
-
-**********
-Scripting
-**********
-
-This is rather experimental
-
-.. autosummary::
-    :nosignatures:
-    :toctree: generated/
-
-    Script
-    run_script
-    run_all_scripts
-
 **********
 Utilities
 **********

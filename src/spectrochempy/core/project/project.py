@@ -10,14 +10,12 @@ import pathlib
 import textwrap
 import uuid
 import warnings
-from functools import wraps
 
 import dill  # noqa: F401
 import traitlets as tr
 
 from spectrochempy.core.dataset.nddataset import NDIO
 from spectrochempy.core.project.abstractproject import AbstractProject
-from spectrochempy.core.script import Script
 from spectrochempy.utils.meta import Meta
 from spectrochempy.utils.print import DisplayItem
 from spectrochempy.utils.print import DisplaySection
@@ -38,16 +36,16 @@ from spectrochempy.utils.traits import NDDatasetType
 @tr.signature_has_traits
 class Project(AbstractProject, NDIO):
     """
-    A manager for projects, datasets and scripts.
+    A manager for projects and datasets.
 
-    It can handle multiple datasets, subprojects, and scripts in a main
+    It can handle multiple datasets and subprojects in a main
     project.
 
     Parameters
     ----------
     *args : Series of objects, optional
         Argument type will be interpreted correctly if they are of type
-        `NDDataset` ,  `Project` , or other objects such as `Script` .
+        `NDDataset` or `Project` .
         This is optional, as they can be added later.
     argnames : list, optional
         If not None, this list gives the names associated to each
@@ -63,7 +61,6 @@ class Project(AbstractProject, NDIO):
     See Also
     --------
     NDDataset : The main object containing arrays.
-    Script : Executables scripts container.
 
     Examples
     --------
@@ -84,7 +81,6 @@ class Project(AbstractProject, NDIO):
     _parent = tr.This()
     _projects = tr.Dict(tr.This())
     _datasets = tr.Dict(NDDatasetType())
-    _scripts = tr.Dict(tr.Instance(Script))
     _others = tr.Dict()
     _meta = tr.Instance(Meta)
 
@@ -112,7 +108,6 @@ class Project(AbstractProject, NDIO):
     # ----------------------------------------------------------------------------------
     def _set_from_type(self, obj, name=None):
         from spectrochempy.core.dataset.nddataset import NDDataset
-        from spectrochempy.core.script import Script
 
         if isinstance(obj, NDDataset):
             # add it to the _datasets dictionary
@@ -120,9 +115,6 @@ class Project(AbstractProject, NDIO):
 
         elif isinstance(obj, type(self)):  # can not use Project here!
             self.add_project(obj, name)
-
-        elif isinstance(obj, Script):
-            self.add_script(obj, name)
 
         elif hasattr(obj, "name"):
             self._others[obj.name] = obj
@@ -238,17 +230,15 @@ class Project(AbstractProject, NDIO):
         if "/" in key:
             # Case of composed name (we assume not more than one level subproject
             parent, child = key.split("/")[0], key.split("/")[1]
-            if parent in self.projects_names:
-                if child in self._projects[parent].datasets_names:
-                    return self._projects[parent]._datasets[child]
-                if child in self._projects[parent].scripts_names:
-                    return self._projects[parent]._scripts[child]
+            if (
+                parent in self.projects_names
+                and child in self._projects[parent].datasets_names
+            ):
+                return self._projects[parent]._datasets[child]
         if key in self.datasets_names:
             return self._datasets[key]
         if key in self.projects_names:
             return self._projects[key]
-        if key in self.scripts_names:
-            return self._scripts[key]
         raise KeyError(f"{key}: This object name does not exist in this project.")
 
     def __setitem__(self, key, value):
@@ -267,9 +257,6 @@ class Project(AbstractProject, NDIO):
         elif key in self.projects_names:
             value.parent = self
             self._projects[key] = value
-        elif key in self.scripts_names:
-            value.parent = self
-            self._scripts[key] = value
         else:
             # the key does not exist
             self._set_from_type(value, name=key)
@@ -308,9 +295,6 @@ class Project(AbstractProject, NDIO):
             for k, _v in project._datasets.items():
                 s += f"{sep} ⤷ {k} (dataset)\n"
 
-            for k, _v in project._scripts.items():
-                s += f"{sep} ⤷ {k} (script)\n"
-
             if len(s) == lens:
                 # nothing has been found in the project
                 s += f"{sep} (empty project)\n"
@@ -326,7 +310,6 @@ class Project(AbstractProject, NDIO):
             "parent",
             "datasets",
             "projects",
-            "scripts",
         ]
 
     def __copy__(self):
@@ -452,35 +435,14 @@ class Project(AbstractProject, NDIO):
         self.add_projects(*projects)
 
     @property
-    def scripts_names(self):
-        """Names of all scripts included in this project (list)."""
-        return list(self._scripts.keys())
-
-    @property
-    def scripts(self):
-        """Scripts included in this project (list)."""
-        s = []
-        for name in self.scripts_names:
-            s.append(self._scripts[name])
-        return s
-
-    @scripts.setter
-    def scripts(self, scripts):
-        self.add_scripts(*scripts)
-
-    @property
     def allnames(self):
         """Names of all objects contained in this project (list)."""
-        return self.datasets_names + self.projects_names + self.scripts_names
+        return self.datasets_names + self.projects_names
 
     @property
     def allitems(self):
         """All items contained in this project (list)."""
-        return (
-            list(self._datasets.items())
-            + list(self._projects.items())
-            + list(self._scripts.items())
-        )
+        return list(self._datasets.items()) + list(self._projects.items())
 
     # ----------------------------------------------------------------------------------
     # Public methods
@@ -694,86 +656,3 @@ class Project(AbstractProject, NDIO):
             stacklevel=2,
         )
         self.clear_projects()
-
-    # ----------------------------------------------------------------------------------
-    # script items
-    # ----------------------------------------------------------------------------------
-    def add_scripts(self, *scripts):
-        """
-        Add one or a series of scripts to the current project.
-
-        Parameters
-        ----------
-        scripts : `Script` instances
-
-        """
-        for sc in scripts:
-            self.add_script(sc)
-
-    def add_script(self, script, name=None):
-        """
-        Add one script to the current project.
-
-        Parameters
-        ----------
-        script : a `Script` instance
-        name : str
-
-        """
-        script.parent = self
-        if name is None:
-            name = script.name
-        else:
-            script.name = name
-        self._scripts[name] = script
-
-    def remove_script(self, name):
-        self._scripts[name]._parent = None
-        del self._scripts[name]
-
-    def clear_scripts(self):
-        """
-        Remove all scripts from the project.
-
-        See Also
-        --------
-        remove_script : Remove a single script.
-        add_script : Add a script.
-        """
-        for v in self._scripts.values():
-            v._parent = None
-        self._scripts = {}
-
-    def remove_all_script(self):
-        """
-        Remove all scripts from the project.
-
-        .. deprecated::
-            Use :meth:`clear_scripts` instead.
-            Will be removed in version 0.10.0.
-
-        See Also
-        --------
-        clear_scripts : Remove all scripts.
-        """
-        warnings.warn(
-            "remove_all_script() is deprecated and will be removed in 0.10.0; "
-            "use clear_scripts() instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        self.clear_scripts()
-
-
-def makescript(priority=50):
-    def decorator(func):
-        # ss = dill.dumps(func)
-        # print(ss)
-
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            return func(*args, **kwargs)
-
-        return wrapper
-
-    return decorator

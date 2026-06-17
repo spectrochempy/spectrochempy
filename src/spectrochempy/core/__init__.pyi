@@ -12,7 +12,6 @@ __all__ = [
     "plotters",
     "project",
     "readers",
-    "script",
     "units",
     "writers",
 ]
@@ -21,6 +20,5 @@ from . import dataset
 from . import plotters
 from . import project
 from . import readers
-from . import script
 from . import units
 from . import writers

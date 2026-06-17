@@ -120,7 +120,7 @@ nd
 # %% [markdown]
 # The ``User's guide & tutorial`` section is divided into several sections describing the main features of spectrochempy.
 #
-# * [Core objects](../objects/index.rst) : This is really the starting point for understanding how SpectroChemPy works. In fact, virtually all the functions offered by the API use one of these objects: `NDDataset` (the most important!) , `Project` or `Script`.
+# * [Core objects](../objects/index.rst) : This is really the starting point for understanding how SpectroChemPy works. In fact, virtually all the functions offered by the API use one of these objects: `NDDataset` (the most important!) or `Project`.
 #
 # * [Import & export](../importexport/index.rst) : This part shows how to import spectroscopic data and transform it into an NDDataset, the object on which processsing and analysis procedures will then be applied.
 #

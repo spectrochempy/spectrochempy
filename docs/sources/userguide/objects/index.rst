@@ -19,7 +19,7 @@ or other `~spectrochempy.NDDataset` s, etc.).
 
 This offers a lot of flexibility in using `~spectrochempy.NDDataset` s that, we hope, will be useful for the users.
 
-Finally, **Project** is a structure that allows aggregating other `Project` s, `NDDataset` s, and processing scripts (`Script`)
+Finally, **Project** is a structure that allows aggregating other `Project` s and `NDDataset` s
 for a better management of complex set of spectroscopic data.
 
 NDDataset
@@ -39,10 +39,3 @@ Project
    :maxdepth: 2
 
    project/project
-
-Script
-******
-
-.. todo::
-
-   To be documented
