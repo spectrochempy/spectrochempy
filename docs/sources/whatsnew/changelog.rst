@@ -141,6 +141,13 @@ Breaking Changes
 ~~~~~~~~~~~~~~~~
 .. Add here new breaking changes (do not delete this comment)
 
+- Removed ``Script`` integration from the ``Project`` class (#1196).  ``add_script``,
+  ``add_scripts``, ``remove_script``, ``clear_scripts``, ``remove_all_script``,
+  ``scripts`` property, and ``makescript`` decorator are removed without
+  deprecation.  ``Project`` is now a typed container for ``NDDataset`` and
+  ``Project`` only.  Legacy ``.pscp`` files containing ``_scripts`` entries
+  remain load-compatible — the field is silently ignored on deserialization.
+
 - Mixed arithmetic between ``NDDataset`` and ``Coord`` is now rejected
   (e.g. ``dataset + coord`` or ``coord * dataset``).  ``Coord`` is treated as
   axis support, not as a signal-bearing operand.  Workflows needing correction
