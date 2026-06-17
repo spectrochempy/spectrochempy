@@ -560,14 +560,14 @@ class Project(AbstractProject, NDIO):
 
         .. deprecated::
             Use :meth:`clear_datasets` instead.
-            Will be removed in version 0.10.0.
+            Will be removed in version 0.11.0.
 
         See Also
         --------
         clear_datasets : Remove all datasets.
         """
         warnings.warn(
-            "remove_all_dataset() is deprecated and will be removed in 0.10.0; "
+            "remove_all_dataset() is deprecated and will be removed in 0.11.0; "
             "use clear_datasets() instead.",
             DeprecationWarning,
             stacklevel=2,
@@ -639,14 +639,14 @@ class Project(AbstractProject, NDIO):
 
         .. deprecated::
             Use :meth:`clear_projects` instead.
-            Will be removed in version 0.10.0.
+            Will be removed in version 0.11.0.
 
         See Also
         --------
         clear_projects : Remove all subprojects.
         """
         warnings.warn(
-            "remove_all_project() is deprecated and will be removed in 0.10.0; "
+            "remove_all_project() is deprecated and will be removed in 0.11.0; "
             "use clear_projects() instead.",
             DeprecationWarning,
             stacklevel=2,

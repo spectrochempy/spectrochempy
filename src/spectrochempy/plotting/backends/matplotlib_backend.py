@@ -51,7 +51,7 @@ def _normalize_method(method: str | None) -> str | None:
         if method not in _WARNED_ALIASES:
             _WARNED_ALIASES.add(method)
             warnings.warn(
-                f'method="{method}" is deprecated and will be removed in 0.10.0. '
+                f'method="{method}" is deprecated and will be removed in 0.11.0. '
                 f'Use method="{canonical}" instead.',
                 DeprecationWarning,
                 stacklevel=3,
