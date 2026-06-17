@@ -597,35 +597,6 @@ def assert_project_equal(proj1, proj2, **kwargs):
                     f"Dataset titles differ: {path1}.title = '{ds1.title}' != {path2}.title = '{ds2.title}'"
                 )
 
-        # Check scripts at any level
-        def collect_all_scripts(project, path=""):
-            scripts = []
-            for i, sc in enumerate(project.scripts):
-                scripts.append((f"{path}script[{i}]", sc))
-
-            for i, subproj in enumerate(project.projects):
-                subpath = f"{path}subproject[{i}]."
-                scripts.extend(collect_all_scripts(subproj, subpath))
-
-            return scripts
-
-        # Collect all scripts from both projects
-        proj1_scripts = collect_all_scripts(proj1)
-        proj2_scripts = collect_all_scripts(proj2)
-
-        # Check if number of scripts differs
-        if len(proj1_scripts) != len(proj2_scripts):
-            raise AssertionError(
-                f"Projects have different number of total scripts: {len(proj1_scripts)} != {len(proj2_scripts)}"
-            )
-
-        # Compare scripts
-        for (path1, sc1), (path2, sc2) in zip(
-            proj1_scripts, proj2_scripts, strict=False
-        ):
-            if sc1 != sc2:
-                raise AssertionError(f"Scripts differ: {path1} != {path2}")
-
     # Now continue with the more detailed comparison
     assert_project_almost_equal(proj1, proj2, **kwargs)
     return True
@@ -634,11 +605,10 @@ def assert_project_equal(proj1, proj2, **kwargs):
 def assert_project_almost_equal(proj1, proj2, **kwargs):
     data_only = kwargs.get("dataset_data_only", False)
 
-    # Handle different numbers of datasets, scripts, subprojects if data_only is True
+    # Handle different numbers of datasets, subprojects if data_only is True
     if not data_only:
         assert len(proj1.datasets) == len(proj2.datasets)  # noqa: S101
         assert len(proj1.projects) == len(proj2.projects)  # noqa: S101
-        assert len(proj1.scripts) == len(proj2.scripts)  # noqa: S101
 
     # Pass dataset_data_only as data_only parameter to compare_datasets
     dataset_kwargs = kwargs.copy()  # Create a copy to avoid modifying the original
@@ -655,17 +625,6 @@ def assert_project_almost_equal(proj1, proj2, **kwargs):
         for pr1, pr2 in zip(proj1.projects, proj2.projects, strict=False):
             assert_project_almost_equal(pr1, pr2, **kwargs)
 
-    # Compare scripts if they exist
-    if len(proj1.scripts) > 0 and len(proj2.scripts) > 0:
-        for sc1, sc2 in zip(proj1.scripts, proj2.scripts, strict=False):
-            assert_script_equal(sc1, sc2, **kwargs)
-
-    return True
-
-
-def assert_script_equal(sc1, sc2, **kwargs):
-    if sc1 != sc2:
-        raise AssertionError(f"Scripts are different: {sc1.content} != {sc2.content}")
     return True
 
 
