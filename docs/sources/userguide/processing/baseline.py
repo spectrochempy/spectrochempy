@@ -27,13 +27,12 @@
 # %% [markdown]
 # # Baseline corrections
 #
-# This tutorial shows how to make baseline corrections with **SpectroChemPy** using the
-# `Baseline` class processor, which exposes all implemented correction models with a
-# high degree of flexibility, or using the equivalent SpectroChemPy API / NDDataset
-# methods for more direct one-step corrections.
+# This tutorial shows how to perform baseline correction with **SpectroChemPy**
+# using the `Baseline` class processor, which provides access to all implemented
+# correction models with a high degree of flexibility, or using equivalent
+# SpectroChemPy API or NDDataset methods for more direct one-step corrections.
 #
-# As prerequisite,
-# the user is expected to have read the [Import](../importexport/import.rst)
+# As a prerequisite, the user is expected to have read the [Import](../importexport/import.rst)
 # and [Import IR](../importexport/importIR.rst) tutorials.
 
 
@@ -44,7 +43,7 @@
 import spectrochempy as scp
 
 # %% [markdown]
-# Then we load a FTIR series of spectra on which we will demonstrate the processor capabilities.
+# Then we load an FTIR series of spectra on which we will demonstrate the processor capabilities.
 
 # %%
 # loading
@@ -55,30 +54,32 @@ _ = X.plot()
 # %% [markdown]
 # ## The `Baseline` processor
 #
-# The `Baseline` class processor proposes several algorithms (models) for Baseline determination.
+# The `Baseline` class processor provides several algorithms (models) for baseline determination.
 #
 # - `detrend` : Remove polynomial trend along a dimension from dataset.
-# - `polynomial` : Perform a polynomial interpolation on pretermined regions
+# - `polynomial` : Perform a polynomial interpolation on predetermined regions.
 # - `asls` : Perform an Asymmetric Least Squares Smoothing baseline correction.
 # - `snip` : Perform a Simple Non-Iterative Peak (SNIP) detection algorithm.
 # - `rubberband` : Perform a Rubberband baseline correction.
 #
 # ### How it works?
 #
-# Basically, determining a correct `baseline`, belongs to the decomposition type methods (See `Analysis`):
+# Basically, determining a correct `baseline` belongs to the decomposition-type
+# methods (see `Analysis`):
 #
 # The sequence of command is thus quite similar:
 #
-# 1) Initialize an instance of the processor and set the models parameters
+# 1) Initialize an instance of the processor and set the model parameters.
 # 2) Fit the model on a given dataset to extract a `baseline`.
 # 3) Transform the original spectra by subtracting the determined baseline.
 #
 # ### Example
-# Let's fit a simple `rubberband` correction model. This is actually the only model in SpectroChemPy which is fully automatic (no parameter).
+# Let's fit a simple `rubberband` correction model. This is currently the only
+# fully automatic model in SpectroChemPy, with no parameter to tune.
 #
 
 # %%
-# instance initalisation and model selection
+# instance initialization and model selection
 blc = scp.Baseline()
 blc.model = "rubberband"
 # model can also be passed as a parameter
@@ -98,7 +99,7 @@ _ = blc.plot()
 X1 = blc.corrected
 
 # %% [markdown]
-# Of course, we can also apply the model to the complete series sequentially
+# Of course, we can also apply the model sequentially to the complete series.
 
 # %%
 # fit the model on the full X series
@@ -129,17 +130,18 @@ _ = blc.plot()
 X3[:, 891.0:1234.0].mask.all(), blc.baseline[:, 891.0:1234.0].mask.all()
 
 # %% [markdown]
-# ### Overview of the other model
+# ### Overview of the other models
 
 # %% [markdown]
 # #### Polynomial
-# With this model, a polynomial is fitted using range of coordinate which are considered as belonging to the baseline.
+# With this model, a polynomial is fitted using coordinate ranges that are
+# considered to belong to the baseline.
 
 # %% [markdown]
 # - The first step is then to select the various regions that we expect to belong to
 #   the baseline.
-# - Then the degree of the polynomial is set (using the `order` parameters).
-#   A special cas is encountered, if `order` is set to "pchip". In this case a piecewise cubic hermite interpolation
+# - Then the degree of the polynomial is set (using the `order` parameter).
+#   A special case is encountered if `order` is set to `"pchip"`. In this case, a piecewise cubic Hermite interpolation
 #   is performed in place of the classic polynomial interpolation.
 #
 # **Range selection**
@@ -170,7 +172,7 @@ ranges = (
 # In this case, the base methods used for the interpolation are those of the
 # [polynomial module](
 # https://numpy.org/doc/stable/reference/routines.polynomials.polynomial.html)
-# of spectrochempy, in particular the
+# of NumPy, in particular the
 # [numpy.polynomial.polynomial.polyfit()](
 # https://numpy.org/doc/stable/reference/generated/numpy.polynomial.polynomial.polyfit.html#numpy.polynomial.polynomial.polyfit)
 # method.
@@ -238,13 +240,30 @@ _ = X7.plot()
 
 # %% [markdown]
 # ### Multivariate approach
-# In the previous example, we have fitted the model sequentially on all spectra.
+# In the previous example, we fitted the model sequentially on all spectra.
 #
-# Another useful approach is multivariate, where SVD/PCA or NMF is used to perform a dimensionality reduction into principal components (eignenvectors), followed by a model fitting on each of these components. This obviously require a 2D dataset, so it is not applicable to single spectra.
+# Another useful approach is multivariate, where SVD/PCA or NMF is used to perform
+# a dimensionality reduction into principal components (eigenvectors), followed by
+# model fitting on each of these components. This obviously requires a 2D dataset,
+# so it is not applicable to single spectra.
 #
-# The 'multivariate' option is useful when the signal to noise ratio is low and/or when baseline changes in different regions of the spectrum are different regions of the spectrum are correlated. It consists of (i) modeling the baseline regions by a principal component analysis (PCA), (ii) interpolating the loadings of the first principal components over the whole spectrum and (iii) model the baselines of the spectra from the product of the PCA scores and the interpolated loadings. (For details: see Vilmin et al. Analytica Chimica Acta 891 (2015)).
+# The `multivariate` option is useful when the signal-to-noise ratio is low and/or
+# when baseline changes in different regions of the spectrum are correlated. It
+# consists of (i) modeling the baseline regions by principal component analysis
+# (PCA), (ii) interpolating the loadings of the first principal components over
+# the whole spectrum, and (iii) modeling the baselines of the spectra from the
+# product of the PCA scores and the interpolated loadings. For details, see
+# Vilmin et al., Analytica Chimica Acta 891 (2015).
 #
-# If this option is selected, the user must also set the n_components parameter, i.e. the number of principal components used to model the baseline. In a sense, this parameter has the same role as the order parameter, except that it affects how the baseline fits the selected regions on both dimensions: wavelength and acquisition time. In particular, a large value of n_components will lead to an overfitting of the baseline variation with time and lead to the same result as the while a value that is too small may fail to detect a main component underlying the baseline variation over time. Typical optimal values are n_components=2 or n_components=3.
+# If this option is selected, the user must also set the `n_components`
+# parameter, i.e. the number of principal components used to model the baseline.
+# In a sense, this parameter has the same role as the `order` parameter, except
+# that it affects how the baseline fits the selected regions on both dimensions:
+# wavelength and acquisition time. In particular, a large value of
+# `n_components` will lead to overfitting of the baseline variation with time,
+# while a value that is too small may fail to detect a main component underlying
+# the baseline variation over time. Typical optimal values are
+# `n_components=2` or `n_components=3`.
 #
 # Let's demonstrate this on the previously used dataset.
 #
@@ -265,7 +284,10 @@ X8 = blc.transform()
 _ = X8.plot()
 
 # %% [markdown]
-# Finally, for all the example shown above, we have used the same instance of Baseline. It may be a problem to remember which setting has been done, and may impact new output. To know the actual status, one can use the `params` method. This will list all actual parameters.
+# Finally, in all the examples shown above, we used the same `Baseline`
+# instance. It may become difficult to remember which settings have been applied,
+# and this may affect subsequent outputs. To inspect the current state, use the
+# `params` method. This lists all current parameters.
 #
 
 # %%
@@ -275,8 +297,9 @@ blc.params()
 # ## Baseline correction using NDDataset or API methods
 
 # %% [markdown]
-# The `Baseline` processor is very flexible but it may be useful to use simpler way to compute baseline. This is the role of the methods
-# described below (which call the `Baseline` processor transparently).
+# The `Baseline` processor is very flexible, but it can also be useful to use
+# simpler one-step methods to compute a baseline. This is the role of the
+# methods described below, which call the `Baseline` processor transparently.
 
 # %% [markdown]
 # As an example, we can now use a dataset consisting of 80 samples of corn measured on a NIR
@@ -286,7 +309,7 @@ blc.params()
 A = scp.read("http://www.eigenvector.com/data/Corn/corn.mat", merge=False)[4]
 
 # %% [markdown]
-# Add some label for a better reading of the data axis
+# Add some labels for easier reading of the data axis.
 
 # %%
 A.title = "absorbance"
@@ -309,13 +332,14 @@ _ = A.plot()
 # It is quite clear that this spectrum series has an increasing trend with both a
 # vertical shift and a drift.
 #
-# The `detrend` method can help to remove such trends (Note that we did not talk about this before, but the model is also available in the`Baseline`processor:
-# `model='detrend'`)
+# The `detrend` method can help remove such trends. Note that, although we have
+# not discussed it yet, the model is also available in the `Baseline`
+# processor with `model="detrend"`.
 
 # %% [markdown]
 # #### Constant trend
 #
-# When the trend is simply a shift one can subtract the mean absorbance to each spectrum.
+# When the trend is simply a shift, one can subtract the mean absorbance from each spectrum.
 
 # %%
 A1 = A.detrend(order="constant")  # Here we use a NDDataset method
