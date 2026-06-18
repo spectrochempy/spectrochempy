@@ -75,7 +75,7 @@ Scientific data models
 Users interested in interoperable scientific data models and formats may also
 wish to explore:
 
-- `CSDM (Core Scientific Dataset Model) <https://csdmspec.org/>`__
+- `CSDM (Core Scientific Dataset Model) <https://csdmpy.readthedocs.io/en/stable/>`__
 
 CSDM is a community-driven data model designed for scientific spectroscopy,
 magnetic resonance, and multidimensional experimental datasets.
