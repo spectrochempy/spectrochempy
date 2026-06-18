@@ -53,3 +53,9 @@ Deprecations
 Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
+
+- MAINT: introduce ``ResultBase``, ``AnalysisResult``, and ``FitResult`` result
+  object infrastructure as defined in the Result Object Contract RFC. A PCA-only
+  prototype exposes ``pca.result`` as an ``AnalysisResult`` with named outputs
+  (scores, loadings, components) and diagnostics (explained variance metrics)
+  while preserving all existing public API and behavior. (:pr:`1208`)
