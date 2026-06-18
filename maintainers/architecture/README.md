@@ -20,6 +20,7 @@ For active maintainer contracts and RFCs, also see [`../rfcs/`](../rfcs/).
 |---|---|---|
 | [`array-class-responsibility.md`](array-class-responsibility.md) | Draft RFC | Maps responsibilities across `NDArray`, `NDComplexArray`, `Coord`, `NDDataset`, `NDMath`, and `NDIO` before any hierarchy cleanup. |
 | [`mathematical-semantics-and-metadata-propagation.md`](mathematical-semantics-and-metadata-propagation.md) | Draft RFC / characterization largely complete | Characterizes operation behavior, result assembly, scientific object identity, provenance, and metadata propagation before `NDMath` or class hierarchy changes. |
+| [`result-object-contract-rfc.md`](result-object-contract-rfc.md) | Draft RFC | Defines the proposed contract, ownership, provenance, serialization boundary, display contract, and staged migration plan for future analysis and fit result objects. |
 
 ## Reference Architecture Notes
 
