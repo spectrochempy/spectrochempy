@@ -8,15 +8,15 @@
 MCR-ALS with kinetic constraints
 ================================
 
-In this example, we perform the MCR ALS optimization of the UV-vis of spectra resulting
-from a three-component reaction `A` -> `B` -> `C` which was investigated by UV–Vis
-spectroscopy. Full details on the reaction and data acquisition conditions can be found
-in :cite:t:`bijlsma:2001` .
-The data can be downloded from the author website `Biosystems Data Analysis group
-University of Amsterdam
-<http://www.bdagroup.nl/content/Downloads/datasets/datasets.php>`__
-(Copyright 2005 Biosystems Data Analysis Group ; Universiteit van Amsterdam ). For the user convenience,
-# this dataset is present in the 'datadir' of spectrochempy in 'matlabdata/METING9.MAT'.
+In this example, we perform MCR-ALS optimization on UV-Vis spectra from a
+three-component reaction ``A -> B -> C`` investigated by UV-Vis spectroscopy.
+Full details on the reaction and data acquisition conditions can be found in
+:cite:t:`bijlsma:2001`.
+
+The data can be downloaded from the `Biosystems Data Analysis Group, University
+of Amsterdam <http://www.bdagroup.nl/content/Downloads/datasets/datasets.php>`__.
+For convenience, this dataset is also available in the SpectroChemPy test-data
+directory as ``matlabdata/METING9.MAT``.
 """
 
 import numpy as np

@@ -74,8 +74,7 @@ x
 try:
     x.to("hour")
 except Exception as e:
-    scp.error_(e)
-    # scp.error_(pint.DimensionalityError, e)
+    print(f"Expected incompatible-unit conversion error: {e}")
 
 # %%
 # This, of course, also applies to NDDataset.
@@ -95,7 +94,7 @@ _ = ds.plot()
 try:
     ds.x.ito("nanometer")
 except Exception as e:
-    scp.error_(Exception, e)
+    print(f"Expected incompatible coordinate conversion error: {e}")
 
 ds.x = ds.x.to("nanometer")
 ds.x
