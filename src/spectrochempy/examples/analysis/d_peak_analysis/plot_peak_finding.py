@@ -21,6 +21,15 @@ def _as_iterable(values):
     return values
 
 
+def _tracked_peak_position(spec):
+    peaks, _ = spec.find_peaks(distance="5 cm^-1", prominence=0.02)
+    if peaks is not None:
+        return peaks.x.values.max()
+
+    index = spec.data.argmax()
+    return spec.x[index].values
+
+
 # %%
 # Load a time-resolved IR dataset and express the acquisition axis in minutes.
 
@@ -85,10 +94,7 @@ sorted(properties)
 # position.
 
 tracked_region = region[:, 2220.0:2180.0]
-positions = [
-    spec.find_peaks(distance="5 cm^-1", prominence=0.02)[0].x.values.max()
-    for spec in tracked_region
-]
+positions = [_tracked_peak_position(spec) for spec in tracked_region]
 
 evolution = scp.NDDataset(positions, title="peak maxima position")
 evolution.x = scp.Coord(region.y, title="acquisition time")
