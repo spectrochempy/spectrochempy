@@ -9,7 +9,9 @@ import numpy as np
 import traitlets as tr
 
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
+from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis._base._analysisbase import _wrap_ndarray_output_to_nddataset
+from spectrochempy.analysis._base._result import AnalysisResult
 
 __all__ = ["SVD"]
 __configurables__ = ["SVD"]
@@ -266,3 +268,44 @@ class SVD(DecompositionAnalysis):
     def s(self):
         """Return Vector of singular values ."""
         return self._outfit[1]
+
+    @property
+    def result(self):
+        """
+        Return the SVD result object.
+
+        Returns
+        -------
+        AnalysisResult
+            Result object containing outputs (U, s, VT)
+            and diagnostics (singular_values, explained_variance,
+            explained_variance_ratio).
+        """
+        if not self._fitted:
+            raise NotFittedError(
+                "The fit method must be used before accessing the result",
+            )
+
+        # NOTE: a new AnalysisResult is created on every access.
+        # Caching is deliberately deferred to keep the implementation
+        # simple and aligned with the PCA result behaviour.
+
+        diagnostics = {
+            "singular_values": self.singular_values,
+            "explained_variance": self.explained_variance,
+            "explained_variance_ratio": self.explained_variance_ratio,
+        }
+
+        return AnalysisResult(
+            estimator="SVD",
+            parameters={
+                "full_matrices": self.full_matrices,
+                "compute_uv": self.compute_uv,
+            },
+            outputs={
+                "U": self.U,
+                "s": self.s,
+                "VT": self.VT,
+            },
+            diagnostics=diagnostics,
+        )

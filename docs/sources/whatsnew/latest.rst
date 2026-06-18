@@ -28,3 +28,9 @@ Developer
   prototype exposes ``pca.result`` as an ``AnalysisResult`` with named outputs
   (scores, loadings, components) and diagnostics (explained variance metrics)
   while preserving all existing public API and behavior. (:pr:`1208`)
+
+- MAINT: extend ``AnalysisResult`` support to the SVD estimator. The new
+  ``svd.result`` property exposes raw outputs (``U``, ``s``, ``VT``) and
+  diagnostics (``singular_values``, ``explained_variance``,
+  ``explained_variance_ratio``) while preserving all existing public API
+  and backward compatibility. (:pr:`1211`)
