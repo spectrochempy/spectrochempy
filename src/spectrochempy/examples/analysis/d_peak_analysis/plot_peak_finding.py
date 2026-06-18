@@ -80,10 +80,14 @@ for x, y in zip(
 sorted(properties)
 
 # %%
-# The same logic can be applied to each spectrum of the time series.
+# The same logic can be applied to each spectrum of the time series. Here we
+# follow one band in a restricted region so each spectrum contributes one peak
+# position.
 
+tracked_region = region[:, 2220.0:2180.0]
 positions = [
-    spec.find_peaks(distance="5 cm^-1", prominence=0.02)[0].x.values for spec in region
+    spec.find_peaks(distance="5 cm^-1", prominence=0.02)[0].x.values.max()
+    for spec in tracked_region
 ]
 
 evolution = scp.NDDataset(positions, title="peak maxima position")
