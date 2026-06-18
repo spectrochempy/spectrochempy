@@ -86,7 +86,7 @@ def read_omnic(*paths, **kwargs):
     csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
         Set the column delimiter in CSV file.
     description : `str`, optional
-        A Custom description.
+        A custom description.
     directory : `~pathlib.Path` object objects or valid urls, optional
         From where to read the files.
     download_only: `bool`, optional, default: `False`
@@ -102,8 +102,8 @@ def read_omnic(*paths, **kwargs):
         or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
         automatically, but can be set manually.
 
-        It is used for instance whn reading directory with different types of files, for merging
-        the datasets with compatible dimensions and different origin into different groups.
+        It is used, for instance, when reading a directory with different types of
+        files and merging compatible datasets into separate groups by origin.
 
         It is also used when reading with the CSV protocol. In order to properly interpret CSV file
         it can be necessary to set the origin of the spectra. Up to now only ``'omnic'`` and ``'tga'``
@@ -259,7 +259,7 @@ def read_spg(*paths, **kwargs):
     csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
     Set the column delimiter in CSV file.
     description : `str`, optional
-    A Custom description.
+    A custom description.
     directory : `~pathlib.Path` object objects or valid urls, optional
     From where to read the files.
     download_only: `bool`, optional, default: `False`
@@ -275,8 +275,8 @@ def read_spg(*paths, **kwargs):
     or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
     automatically, but can be set manually.
 
-    It is used for instance whn reading directory with different types of files, for merging
-    the datasets with compatible dimensions and different origin into different groups.
+    It is used, for instance, when reading a directory with different types of
+    files and merging compatible datasets into separate groups by origin.
 
     It is also used when reading with the CSV protocol. In order to properly interpret CSV file
     it can be necessary to set the origin of the spectra. Up to now only ``'omnic'`` and ``'tga'``
@@ -375,7 +375,7 @@ def read_spa(*paths, **kwargs):
     csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
     Set the column delimiter in CSV file.
     description : `str`, optional
-    A Custom description.
+    A custom description.
     directory : `~pathlib.Path` object objects or valid urls, optional
     From where to read the files.
     download_only: `bool`, optional, default: `False`
@@ -391,8 +391,8 @@ def read_spa(*paths, **kwargs):
     or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
     automatically, but can be set manually.
 
-    It is used for instance whn reading directory with different types of files, for merging
-    the datasets with compatible dimensions and different origin into different groups.
+    It is used, for instance, when reading a directory with different types of
+    files and merging compatible datasets into separate groups by origin.
 
     It is also used when reading with the CSV protocol. In order to properly interpret CSV file
     it can be necessary to set the origin of the spectra. Up to now only ``'omnic'`` and ``'tga'``
@@ -498,7 +498,7 @@ def read_srs(*paths, **kwargs):
     csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
     Set the column delimiter in CSV file.
     description : `str`, optional
-    A Custom description.
+    A custom description.
     directory : `~pathlib.Path` object objects or valid urls, optional
     From where to read the files.
     download_only: `bool`, optional, default: `False`
@@ -514,8 +514,8 @@ def read_srs(*paths, **kwargs):
     or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
     automatically, but can be set manually.
 
-    It is used for instance whn reading directory with different types of files, for merging
-    the datasets with compatible dimensions and different origin into different groups.
+    It is used, for instance, when reading a directory with different types of
+    files and merging compatible datasets into separate groups by origin.
 
     It is also used when reading with the CSV protocol. In order to properly interpret CSV file
     it can be necessary to set the origin of the spectra. Up to now only ``'omnic'`` and ``'tga'``

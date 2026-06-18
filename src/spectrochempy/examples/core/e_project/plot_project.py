@@ -16,7 +16,7 @@ In this example, we create a Project from scratch
 import spectrochempy as scp
 
 # %%
-# Let's assume we have three subproject to group in a single project
+# Let's assume we have three subprojects to group in a single project.
 
 proj = scp.Project(
     # subprojects

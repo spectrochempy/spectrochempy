@@ -32,7 +32,7 @@ scp.Quantity("10.0 cm^-1")
 scp.Quantity(1.0, "cm^-1/hour")
 
 # %%
-# or may be simpler using `ur`:
+# Or, more simply, using `ur`:
 
 ur = scp.ur
 10.0 * ur.meter / ur.gram / ur.volt

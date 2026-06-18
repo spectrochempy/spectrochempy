@@ -17,8 +17,9 @@ Other contributions have been made by:
 * Abdelhafid Ait Blal (ORCID: `0000-0002-1825-0097 <https://orcid.org/0000-0002-1825-0097>`_)
 * William Guerin
 * Matthias Mailänder
+* Vincent Gao
 
-We thanks all the users who have reported bugs, suggested improvements,
+We thank all the users who have reported bugs, suggested improvements,
 and contributed to improve the documentation.
 
 Third-party Licenses

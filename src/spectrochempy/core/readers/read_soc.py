@@ -53,7 +53,7 @@ def read_soc(*paths, **kwargs):
     csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
         Set the column delimiter in CSV file.
     description : `str`, optional
-        A Custom description.
+        A custom description.
     directory : `~pathlib.Path` object or valid urls, optional
         From where to read the files.
     download_only: `bool`, optional, default: `False`
@@ -150,7 +150,7 @@ def read_ddr(*paths, **kwargs):
     csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
         Set the column delimiter in CSV file.
     description : `str`, optional
-        A Custom description.
+        A custom description.
     directory : `~pathlib.Path` object or valid urls, optional
         From where to read the files.
     download_only: `bool`, optional, default: `False`
@@ -247,7 +247,7 @@ def read_hdr(*paths, **kwargs):
     csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
         Set the column delimiter in CSV file.
     description : `str`, optional
-        A Custom description.
+        A custom description.
     directory : `~pathlib.Path` object or valid urls, optional
         From where to read the files.
     download_only: `bool`, optional, default: `False`
@@ -344,7 +344,7 @@ def read_sdr(*paths, **kwargs):
     csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
         Set the column delimiter in CSV file.
     description : `str`, optional
-        A Custom description.
+        A custom description.
     directory : `~pathlib.Path` object or valid urls, optional
         From where to read the files.
     download_only: `bool`, optional, default: `False`
