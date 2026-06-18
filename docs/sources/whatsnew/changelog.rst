@@ -70,3 +70,9 @@ Developer
   diagnostics (``singular_values``, ``explained_variance``,
   ``explained_variance_ratio``) while preserving all existing public API
   and backward compatibility. (:pr:`1211`)
+
+- MAINT: introduce ``FitResult`` prototype for the ``Optimize`` estimator.
+  The new ``opt.result`` property exposes fitted model outputs
+  (``fitted``, ``components``) and solver diagnostics (``cost``,
+  ``niter``, ``ncalls``) while preserving all existing public API and
+  backward compatibility. (:pr:`1211`)
