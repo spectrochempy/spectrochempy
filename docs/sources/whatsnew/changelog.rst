@@ -44,7 +44,7 @@ Bug Fixes
   a single SPA comment is now included in the description (previously only
   ≥2 comments were shown); SPA history content is now checked via the
   variable instead of a literal string; and invalid ``return_ifg`` values
-  now produce a clear ``ValueError``. (PR by @gaoflow)
+  now produce a clear warning. (PR by @gaoflow)
 
 .. section
 

@@ -119,7 +119,7 @@ def test_read_spg_history_appended():
 
 
 def test_return_ifg_validation(tmp_path):
-    """Regression test for #1144: invalid return_ifg values must raise a clear error.
+    """Regression test for #1144: invalid return_ifg values must warn clearly.
     The Importer catches exceptions and re-emits them as warnings, so we check
     for the warning."""
     import warnings
