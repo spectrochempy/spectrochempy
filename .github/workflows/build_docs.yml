@@ -177,6 +177,10 @@ jobs:
           . .venv/bin/activate
           python3 .github/workflows/scripts/set_env_var.py
 
+      - name: Configure local Jupyter transport for docs execution
+        run: |
+          echo "JUPYTER_CONFIG_DIR=$GITHUB_WORKSPACE/.github/jupyter" >> "$GITHUB_ENV"
+
       # ---------- preview / stable branch detection ----------
       - name: Determine preview parameters
         id: preview
