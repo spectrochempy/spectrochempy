@@ -169,7 +169,13 @@ class TestOptimizeResult:
         opt.max_iter = 10
         opt.fit(synthetic_two_peak_dataset)
         params = opt.result.parameters
-        for name in ("method", "max_iter", "max_fun_calls", "autobase", "amplitude_mode"):
+        for name in (
+            "method",
+            "max_iter",
+            "max_fun_calls",
+            "autobase",
+            "amplitude_mode",
+        ):
             assert name in params, f"{name} missing from result.parameters"
 
     def test_parameters_values_default(self, synthetic_two_peak_dataset, script):
@@ -184,7 +190,9 @@ class TestOptimizeResult:
         assert params["autobase"] is True
         assert params["amplitude_mode"] == "height"
 
-    def test_parameters_match_estimator_config(self, synthetic_two_peak_dataset, script):
+    def test_parameters_match_estimator_config(
+        self, synthetic_two_peak_dataset, script
+    ):
         opt = scp.Optimize()
         opt.script = script
         opt.autobase = True
