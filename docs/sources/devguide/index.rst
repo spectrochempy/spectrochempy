@@ -4,7 +4,7 @@
 Developer's Guide
 *****************************************************
 
-This guide is for contributors and maintainers working on SpectroChemPy code,
+This guide is for contributors working on SpectroChemPy code,
 documentation, tests, or official plugins.
 
 .. note::
@@ -15,6 +15,9 @@ Start with :doc:`contributing` for the development setup and pull request
 workflow. Use :doc:`contributing_codebase` for testing, formatting, deprecations,
 and changelog entries. Plugin-specific architecture and packaging guidance lives
 under :doc:`plugins/index`.
+
+Maintainer-only operational procedures are documented separately in the
+repository and are intentionally kept outside this published guide.
 
 .. toctree::
     :maxdepth: 2
