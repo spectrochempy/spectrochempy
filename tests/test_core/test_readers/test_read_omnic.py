@@ -67,9 +67,9 @@ def test_read_omnic():
     nd = scp.read_spa(IRDATA / "subdir" / "20-50" / "7_CZ0-100_Pd_21.SPA")
     assert str(nd) == "NDDataset: [float64] a.u. (shape: (y:1, x:5549))"
 
-    nd2 = scp.read_spg(
+    nd2 = scp.read_omnic(
         IRDATA / "subdir" / "20-50" / "7_CZ0-100_Pd_21.SPA"
-    )  # wrong protocol but acceptable
+    )
     assert nd2 == nd
 
     # test import sample IFG
@@ -107,3 +107,30 @@ def test_read_omnic():
     # high speed series, import bg
     a = scp.read_srs("irdata/omnic_series/high_speed.srs", return_bg=True)
     assert str(a) == "NDDataset: [float64] unitless (shape: (y:1, x:13898))"
+
+
+def test_read_spg_history_appended():
+    """Regression test for #1144: sort history should be appended, not overwrite
+    the import history. The history setter appends string values — both entries
+    are preserved."""
+    nd = scp.read_spg(WODGER, sortbydate=True)
+    # History is a list of timestamp-prefixed strings
+    history_text = " ".join(nd.history)
+    assert "Imported from spg file" in history_text
+    assert "Sorted by date" in history_text
+
+
+def test_return_ifg_validation(tmp_path):
+    """Regression test for #1144: invalid return_ifg values must raise a clear error.
+    The Importer catches exceptions and re-emits them as warnings, so we check
+    for the warning."""
+    import warnings
+
+    spa_file = tmp_path / "dummy.spa"
+    spa_file.write_bytes(b"\x00" * 1024)
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        result = scp.read_spa(spa_file, return_ifg="invalid")
+    assert result is None
+    assert len(w) >= 1
+    assert any("Invalid return_ifg value" in str(warning.message) for warning in w)

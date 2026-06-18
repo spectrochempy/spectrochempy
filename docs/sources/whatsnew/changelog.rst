@@ -37,6 +37,14 @@ Bug Fixes
   during sklearn initialisation, so the default solver was always used
   regardless of the configured value. (:pr:`TODO`)
 
+- Fixed several inconsistencies in the OMNIC SPA/SPG reader (`#1144
+  <https://github.com/spectrochempy/spectrochempy/issues/1144>`_):
+  ``read_spg()`` no longer advertises the ``spa`` protocol; swapped error
+  messages in SPG unit-consistency checks now name the correct quantity;
+  a single SPA comment is now included in the description (previously only
+  ≥2 comments were shown); SPA history content is now checked via the
+  variable instead of a literal string; and invalid ``return_ifg`` values
+  now produce a clear ``ValueError``. (PR by @gaoflow)
 
 .. section
 
