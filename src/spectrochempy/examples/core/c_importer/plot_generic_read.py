@@ -22,7 +22,7 @@ import spectrochempy as scp
 # Read a IR data recorded in Omnic format (``.spg`` extension).
 # We just pass the file name as parameter.
 dataset = scp.read("irdata/nh4y-activation.spg")
-dataset
+print(dataset)
 
 # %%
 _ = dataset.plot(style="paper")
@@ -37,7 +37,7 @@ dataset = scp.read(filename)
 # Note that is the file is not found in the current working directory, `SpectroChemPy`
 # will try to find it in the ``datadir`` directory defined in `preferences` :
 datadir = scp.preferences.datadir
-datadir
+print(datadir)
 
 # %%
 # If the supplied argument is a directory, then the whole directory is read at once.
@@ -46,7 +46,7 @@ datadir
 # or else a WARNING appears. To avoid the warning and get individual spectra, you can
 # set ``merge`` to `False` .
 dataset_list = scp.read("irdata", merge=False)
-dataset_list
+print(dataset_list)
 
 # %%
 # to get full details on the parameters that can be used, look at the API documentation:
@@ -56,29 +56,34 @@ dataset_list
 # Import dataset from remote files
 # --------------------------------
 # To download and read file from remote server you can use urls.
-dataset_list = scp.read("http://www.eigenvector.com/data/Corn/corn.mat")
-# %%
-# In this case the matlab data contains 7 arrays that have been automatically
-# transformed to `NDDataset` .
-for nd in dataset_list:
-    print(f"{nd.name} : {nd.shape}")
+try:
+    dataset_list = scp.read("http://www.eigenvector.com/data/Corn/corn.mat")
+except FileNotFoundError:
+    dataset_list = None
+    print("Eigenvector corn dataset not reachable; skipping remote import examples.")
+else:
+    # %%
+    # In this case the matlab data contains 7 arrays that have been automatically
+    # transformed to `NDDataset` .
+    for nd in dataset_list:
+        print(f"{nd.name} : {nd.shape}")
 
-# %%
-# The `eigenvector.com <eigenvector.com>`__ website contains the same data in a
-# compressed (zipped) format:
-# `corn.mat_.zip <https://eigenvector.com/wp-content/uploads/2019/06/corn.mat_.zip>`__ .
-# This can also be used by the `read` method.
-dataset_list = scp.read(
-    "https://eigenvector.com/wp-content/uploads/2019/06/corn.mat_.zip"
-)
-dataset_list
+    # %%
+    # The `eigenvector.com <eigenvector.com>`__ website contains the same data in a
+    # compressed (zipped) format:
+    # `corn.mat_.zip <https://eigenvector.com/wp-content/uploads/2019/06/corn.mat_.zip>`__ .
+    # This can also be used by the `read` method.
+    dataset_list = scp.read(
+        "https://eigenvector.com/wp-content/uploads/2019/06/corn.mat_.zip"
+    )
+    print(dataset_list)
 
-# %%
-# Plot each of the datasets
-dataset_list[-1].plot()
-dataset_list[-2].plot()
-dataset_list[-3].plot()
-dataset_list[-4].plot()
+    # %%
+    # Plot each of the datasets
+    dataset_list[-1].plot()
+    dataset_list[-2].plot()
+    dataset_list[-3].plot()
+    dataset_list[-4].plot()
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

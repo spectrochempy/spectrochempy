@@ -1,6 +1,6 @@
 .. _examples-processing-filtering-index:
 
-filtering
+Filtering
 ---------
 
 This section contains examples of how to filter NDDatasets.
