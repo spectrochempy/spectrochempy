@@ -20,6 +20,12 @@ Bug Fixes
   values and crashes for all properties when ``compute_uv=False``.
   (:pr:`1210`)
 
+- FIX: pass the ``solver`` configuration parameter to the underlying
+  ``sklearn.decomposition.NMF`` object. Previously the parameter was
+  accepted by the SpectroChemPy ``NMF`` estimator but silently ignored
+  during sklearn initialisation, so the default solver was always used
+  regardless of the configured value. (:pr:`TODO`)
+
 Developer
 ~~~~~~~~~
 

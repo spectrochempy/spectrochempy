@@ -193,6 +193,7 @@ class NMF(DecompositionAnalysis):
         self._nmf = decomposition.NMF(
             n_components=self.n_components,
             init=self.init,
+            solver=self.solver,
             beta_loss=self.beta_loss,
             tol=self.tol,
             max_iter=self.max_iter,
