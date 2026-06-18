@@ -32,10 +32,11 @@ _ = dataset.plot(method="image")
 
 # %%
 # In this example, the diverging colormap is triggered because the dataset
-# contains few, but some negative values. If the smaller lobe is at larger than `diverging_margin` (default 5%) of
-# the total # range, i.e. if the following condition is satisfied:
-#       min(|vmin|, |vmax|) / (vmax - vmin) > margin
-#  Then a diverging colormap is used.
+# contains a few negative values. If the smaller lobe is larger than
+# `diverging_margin` (default 5%) of the total range, i.e. if the following
+# condition is satisfied:
+# `min(abs(vmin), abs(vmax)) / (vmax - vmin) > margin`
+# then a diverging colormap is used.
 #
 # To avoid this behavior, you can explicitly enforce a sequential colormap,
 # for example "viridis":
@@ -44,7 +45,8 @@ _ = dataset.plot_image(cmap="cividis")
 
 # %%
 # Alternatively, you can increase the `diverging_margin` that determines when the
-# diverging colormap is applied. Then the default sequential colormap (`viridis') will be used:
+# diverging colormap is applied. Then the default sequential colormap
+# (`viridis`) will be used:
 
 _ = dataset.plot(method="image", diverging_margin=0.1)
 

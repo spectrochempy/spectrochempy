@@ -58,7 +58,7 @@ NDDataset can also have labeled coordinates where labels can be different kinds 
 nd.ndarray or other NDDatasets, etc...).
 
 This offers a lot of flexibility in using NDDatasets that, we hope, will be useful for applications. See the
-:ref:`userguide` for more information about such possible applications.
+:ref:`user_guide` for more information about such possible applications.
 
 .. autosummary::
     :nosignatures:
@@ -102,7 +102,7 @@ The above code in `SpectroChemPy` can be simplified using the `random` creation 
     X = NDDataset.random((4,4))
 
 
-(see the :ref:`userguide` for a large set of examples on how to use this constructor.)
+(see the :ref:`user_guide` for a large set of examples on how to use this constructor.)
 
 Many SpectroChemPy methods mimics `numpy` equivalent, but output a `NDDataset` object.
 

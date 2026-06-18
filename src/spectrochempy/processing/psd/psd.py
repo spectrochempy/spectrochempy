@@ -36,14 +36,19 @@ class PSDResult:
     ----------
     prs : NDDataset
         Phase-resolved spectra with shape (n_phi, n_channels).
+
     in_phase : NDDataset
         In-phase component (phi=0°) with shape (n_channels,).
+
     quadrature : NDDataset
         Quadrature component (phi=90°) with shape (n_channels,).
+
     amplitude : NDDataset
         Amplitude = sqrt(in_phase² + quadrature²).
+
     phase : NDDataset
         Phase = atan2(quadrature, in_phase).
+
     T : NDDataset or None
         Transform matrix T with shape (n_phi, n_spectra_per_cycle).
         None when ``demodulation="integration"``.
@@ -82,8 +87,7 @@ class PSD(BaseConfigurable):
 
     Supports two demodulation strategies:
 
-    1. Matrix transform demodulation:
-       ``A_demodulated = T · A_averaged``
+    1. Matrix transform demodulation: ``A_demodulated = T · A_averaged``
     2. Explicit integration demodulation:
        ``A_demodulated(φ, λ) = (2/period) ∫ A_averaged(t, λ) · sin(k·ω·t + φ) dt``
 

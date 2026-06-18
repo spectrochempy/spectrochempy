@@ -1,5 +1,6 @@
 :orphan:
 
+.. _userguide:
 .. _user_guide:
 
 User Guide and Tutorials

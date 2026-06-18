@@ -40,14 +40,13 @@
 # - .spg files which contain a group of spectra
 #
 # Both have been reverse engineered, hence allowing extracting their key data.
-# The Omnic reader of Spectrochempy ( `read_omnic()` ) has been developed based on
+# The OMNIC reader in SpectroChemPy (`read_omnic()`) has been developed based on
 # posts in open forums on the .spa file format and extended to .spg file formats.
 
 # %% [markdown]
 # ## Import spg file
 #
-# Let's import an .spg file from the `datadir` (see :ref:`import.ipynb` for details)):
-# and display its main attributes:
+# Let's import an .spg file from the `datadir` and display its main attributes:
 
 # %%
 import spectrochempy as scp
@@ -69,10 +68,10 @@ X
 #   our knowledge, does not have
 #   this type of attribute). The string is composed of the username and of the machine
 #   name as given by the OS, e.g., `"username@machinename"`.
-#   It can be accessed and changed using `X.author` .
+#   It can be accessed and changed using `X.author`.
 #
 # - `created` is the creation date of the NDDataset (again not that of the .spg file).
-#   It can be accessed (or even changed) using `X.created` .
+#   It can be accessed (or even changed) using `X.created`.
 #
 # - `description` indicates the complete pathname of the .spg file. As the pathname is
 #   also given in the history (below), it can be a good practice to give a
@@ -102,8 +101,8 @@ X.description
 # - `values` shows the data as quantity (with their units when they exist - here a.u.
 #   for absorbance units).
 #
-# - The numerical values ar accessed through the `data` attribute and the units
-#   throughout `units` attribute.
+# - The numerical values are accessed through the `data` attribute and the units
+#   through the `units` attribute.
 
 # %%
 X.values
@@ -140,14 +139,12 @@ X.x
 X.y
 
 # %% [markdown]
-# - `dims` : Note that the `x` and `y` dimensions are the second and first
-#    dimension respectively. Hence, `X[i,j]` will return the absorbance of the ith
-#    spectrum at the jth  wavenumber.
-#    However, this is subject to change, for instance if you perform operation on your
-#    data such as
-#    [Transposition](../processing/transformations.ipynb#Transposition). At any time
-#    the attribute `dims` gives the correct names (which can be modified) and order of
-#    the dimensions.
+# - `dims`: note that the `x` and `y` dimensions are the second and first
+#   dimensions respectively. Hence, `X[i, j]` returns the absorbance of the ith
+#   spectrum at the jth wavenumber.
+#   However, this is subject to change, for instance after a transposition
+#   operation. At any time, the `dims` attribute gives the correct names
+#   (which can be modified) and order of the dimensions.
 
 # %%
 X.dims
@@ -185,10 +182,8 @@ X.y -= X.y[0]
 # It is also possible to use the ability of SpectroChemPy to handle unit changes. For
 # this one can use the `to` or `ito` (inplace) methods.
 #
-# ```ipython
-# val = val.to(some_units)
-# val.ito(some_units)   # the same inplace
-# ```
+#     val = val.to(some_units)
+#     val.ito(some_units)   # same operation, in place
 
 # %%
 X.y.ito("minute")
@@ -248,20 +243,19 @@ X = X[::-1]  # reorders the NDDataset along the first dimension going backward
 X.y.values  # displays the `y` dimension
 
 # %% [markdown]
-# <div class='alert alert-info'>
-# <b>Note</b>
+# **Note**
 #
-# <strong>Case of groups with different wavenumbers</strong> <br/>
-# An OMNIC .spg file can contain spectra having different wavenumber axes (e.g.
-# different spacings or wavenumber
-# ranges). In its current implementation, the spg reader will purposely return an error
-# because such spectra
-# <i>cannot</i> be included in a single NDDataset which, by definition, contains items that
-# share common axes or dimensions !
-# Future releases might include an option to deal with such a case and return a list of
-# NDDatasets. Let us know if you
-# are interested in such a feature, see <a href="https://www.spectrochempy.fr/devguide/issues.html">Bug reports and enhancement requests.</a>
-# </div>
+# **Case of groups with different wavenumbers**
+#
+# An OMNIC `.spg` file can contain spectra having different wavenumber axes
+# (e.g. different spacings or wavenumber ranges). In its current
+# implementation, the `.spg` reader purposely returns an error because such
+# spectra cannot be included in a single `NDDataset`, which by definition
+# contains items that share common axes or dimensions.
+#
+# A future release might include an option to deal with such a case and return
+# a list of NDDatasets. If you are interested in such a feature, see the bug
+# reports and enhancement requests in the project documentation.
 #
 
 # %% [markdown]
@@ -274,7 +268,7 @@ X.y.values  # displays the `y` dimension
 scp.read_omnic("irdata/subdir/7_CZ0-100_Pd_101.SPA")
 
 # %% [markdown]
-# The omnic reader can also import several spa files together, providing that they share
+# The OMNIC reader can also import several `.spa` files together, provided that they share
 # a common axis for the wavenumbers.
 #
 # This is the case of the following files in the irdata/subdir directory:
@@ -294,15 +288,16 @@ list_files = (
 scp.read_omnic(list_files, directory="irdata/subdir", name="Merged 7_CZ0-100 Pd")
 
 # %% [markdown]
-# When compatible .spa files are alone in a directory, a very convenient is to call the
-# read_omnic method
+# When compatible `.spa` files are alone in a directory, a very convenient
+# approach is to call the `read_omnic` method
 # using only the directory path as argument that will gather the .spa files together:
 
 # %%
 scp.read_omnic("irdata/subdir/1-20")
 
 # %% [markdown]
-# In the case  where not all files are compatibles, they are returned in different NDDatasets(with independent merging).
+# In cases where not all files are compatible, they are returned in different
+# NDDatasets (with independent merging).
 #
 # For example:
 
@@ -311,7 +306,8 @@ Y = scp.read_omnic("irdata/subdir/")
 Y
 
 # %% [markdown]
-# Here we get a list of two NDDataset because there is two type of file in the directory (`.spa` and `.srs`).
+# Here we get a list of two NDDatasets because there are two file types in the
+# directory (`.spa` and `.srs`).
 #
 # The desired dataset can be obtained using a list:
 
@@ -319,9 +315,9 @@ Y
 Y[1]
 
 # %% [markdown]
-# Other ways to select only the required file with extension (`.spa`)are:
+# Other ways to select only files with the `.spa` extension are:
 #
-# - writing a list as previously explicitely  listing the required files.
+# - writing a list that explicitly enumerates the required files.
 # - using a more specific reader:
 
 # %%
@@ -334,7 +330,8 @@ scp.read_spa("irdata/subdir/")
 scp.read_omnic("irdata/subdir/", pattern="*.spa")
 
 # %% [markdown]
-# One advantage of the latter solution is a greter flexibility. For instance the lollowing will select only the `*101.spa` and `*102.spa`:
+# One advantage of the latter solution is greater flexibility. For instance,
+# the following selects only `*101.spa` and `*102.spa`:
 
 # %%
 scp.read_omnic("irdata/subdir/", pattern="*10[12].spa", merge=False)
@@ -364,7 +361,7 @@ print(f"Origin: {X.origin}")
 print(f"Description: {X.description}")
 
 # %% [markdown]
-# Reading the metadata now reflect the change
+# Reading the metadata now reflects the change.
 
 # %%
 X.title
@@ -373,7 +370,8 @@ X.title
 # ## Error Handling
 
 # %% [markdown]
-# When trying to read file, it is a good practice to handle errors explicitely. For example:
+# When trying to read a file, it is good practice to handle errors explicitly.
+# For example:
 
 # %%
 try:

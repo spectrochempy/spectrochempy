@@ -66,7 +66,7 @@ def read_omnic(*paths, **kwargs):
         - e.g., ( [filename1, filename2, ...], kwargs )
 
         The returned datasets are merged to form a single dataset,
-        except if ``merge`` is set to `False`.
+        except if ``merge`` is set to ``False``.
     **kwargs : keyword parameters, optional
         See Other Parameters.
 
@@ -113,10 +113,10 @@ def read_omnic(*paths, **kwargs):
 
         .. versionadded:: 0.7.2
     protocol : `str`, optional
-        ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
-        ``'opus'``, ````, ``'matlab'``, ``'jcamp'``, ``'csv'``,
-        ``'excel'``}. If not provided, the correct protocol
-        is inferred (whenever it is possible) from the filename extension.
+        ``Protocol`` used for reading, for example ``'scp'``, ``'omnic'``,
+        ``'opus'``, ``'matlab'``, ``'jcamp'``, ``'csv'``, or ``'excel'``.
+        If not provided, the correct protocol is inferred whenever possible
+        from the filename extension.
     read_only: `bool`, optional, default: `True`
         Used only when url are specified.  If True, saving of the
         files is performed in the current directory, or in the directory specified by
@@ -137,7 +137,7 @@ def read_omnic(*paths, **kwargs):
     read_opus : Read OPUS spectra.
     read_labspec : Read Raman LABSPEC spectra (:file:`.txt`).
     read_omnic : Read Omnic spectra (:file:`.spa`, :file:`.spg`, :file:`.srs`).
-    read_soc : Read Surface Optics Corps. files (:file:`.ddr` , :file:`.hdr` or :file:`.sdr`).
+    read_soc : Read Surface Optics Corp. files (:file:`.ddr`, :file:`.hdr`, or :file:`.sdr`).
     read_galactic : Read Galactic files (:file:`.spc`).
     read_quadera : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
 
@@ -239,7 +239,7 @@ def read_spg(*paths, **kwargs):
         - e.g., ( [filename1, filename2, ...], kwargs )
 
         The returned datasets are merged to form a single dataset,
-        except if ``merge`` is set to `False`.
+        except if ``merge`` is set to ``False``.
     **kwargs : keyword parameters, optional
         See Other Parameters.
 
@@ -286,10 +286,10 @@ def read_spg(*paths, **kwargs):
 
     .. versionadded:: 0.7.2
     protocol : `str`, optional
-    ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
-    ``'opus'``, ````, ``'matlab'``, ``'jcamp'``,
-    ``'csv'``, ``'excel'``}. If not provided, the correct protocol
-    is inferred (whenever it is possible) from the filename extension.
+    ``Protocol`` used for reading, for example ``'scp'``, ``'omnic'``,
+    ``'opus'``, ``'matlab'``, ``'jcamp'``, ``'csv'``, or ``'excel'``.
+    If not provided, the correct protocol is inferred whenever possible
+    from the filename extension.
     read_only: `bool`, optional, default: `True`
     Used only when url are specified.  If True, saving of the
     files is performed in the current directory, or in the directory specified by
@@ -313,7 +313,7 @@ def read_spg(*paths, **kwargs):
     read_opus : Read OPUS spectra.
     read_labspec : Read Raman LABSPEC spectra (:file:`.txt`).
     read_omnic : Read Omnic spectra (:file:`.spa`, :file:`.spg`, :file:`.srs`).
-    read_soc : Read Surface Optics Corps. files (:file:`.ddr` , :file:`.hdr` or :file:`.sdr`).
+    read_soc : Read Surface Optics Corp. files (:file:`.ddr`, :file:`.hdr`, or :file:`.sdr`).
     read_galactic : Read Galactic files (:file:`.spc`).
     read_quadera : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
 
@@ -355,7 +355,7 @@ def read_spa(*paths, **kwargs):
         - e.g., ( [filename1, filename2, ...], kwargs )
 
         The returned datasets are merged to form a single dataset,
-        except if ``merge`` is set to `False`.
+        except if ``merge`` is set to ``False``.
     **kwargs : keyword parameters, optional
         See Other Parameters.
 
@@ -402,10 +402,10 @@ def read_spa(*paths, **kwargs):
 
     .. versionadded:: 0.7.2
     protocol : `str`, optional
-    ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
-    ``'opus'``, ````, ``'matlab'``, ``'jcamp'``,
-    ``'csv'``, ``'excel'``}. If not provided, the correct protocol
-    is inferred (whenever it is possible) from the filename extension.
+    ``Protocol`` used for reading, for example ``'scp'``, ``'omnic'``,
+    ``'opus'``, ``'matlab'``, ``'jcamp'``, ``'csv'``, or ``'excel'``.
+    If not provided, the correct protocol is inferred whenever possible
+    from the filename extension.
     read_only: `bool`, optional, default: `True`
     Used only when url are specified.  If True, saving of the
     files is performed in the current directory, or in the directory specified by
@@ -426,7 +426,7 @@ def read_spa(*paths, **kwargs):
     read_opus : Read OPUS spectra.
     read_labspec : Read Raman LABSPEC spectra (:file:`.txt`).
     read_omnic : Read Omnic spectra (:file:`.spa`, :file:`.spg`, :file:`.srs`).
-    read_soc : Read Surface Optics Corps. files (:file:`.ddr` , :file:`.hdr` or :file:`.sdr`).
+    read_soc : Read Surface Optics Corp. files (:file:`.ddr`, :file:`.hdr`, or :file:`.sdr`).
     read_galactic : Read Galactic files (:file:`.spc`).
     read_quadera : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
 
@@ -470,7 +470,7 @@ def read_srs(*paths, **kwargs):
         - e.g., ( [filename1, filename2, ...], kwargs )
 
         The returned datasets are merged to form a single dataset,
-        except if ``merge`` is set to `False`.
+        except if ``merge`` is set to ``False``.
     **kwargs : keyword parameters, optional
         See Other Parameters.
 
@@ -525,10 +525,10 @@ def read_srs(*paths, **kwargs):
 
     .. versionadded:: 0.7.2
     protocol : `str`, optional
-    ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
-    ``'opus'``, ````, ``'matlab'``, ``'jcamp'``,
-    ``'csv'``, ``'excel'``}. If not provided, the correct protocol
-    is inferred (whenever it is possible) from the filename extension.
+    ``Protocol`` used for reading, for example ``'scp'``, ``'omnic'``,
+    ``'opus'``, ``'matlab'``, ``'jcamp'``, ``'csv'``, or ``'excel'``.
+    If not provided, the correct protocol is inferred whenever possible
+    from the filename extension.
     read_only: `bool`, optional, default: `True`
     Used only when url are specified.  If True, saving of the
     files is performed in the current directory, or in the directory specified by
@@ -549,7 +549,7 @@ def read_srs(*paths, **kwargs):
     read_opus : Read OPUS spectra.
     read_labspec : Read Raman LABSPEC spectra (:file:`.txt`).
     read_omnic : Read Omnic spectra (:file:`.spa`, :file:`.spg`, :file:`.srs`).
-    read_soc : Read Surface Optics Corps. files (:file:`.ddr` , :file:`.hdr` or :file:`.sdr`).
+    read_soc : Read Surface Optics Corp. files (:file:`.ddr`, :file:`.hdr`, or :file:`.sdr`).
     read_galactic : Read Galactic files (:file:`.spc`).
     read_quadera : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
 

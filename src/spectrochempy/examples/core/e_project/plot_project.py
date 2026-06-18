@@ -65,10 +65,3 @@ proj.save()
 
 newproj = scp.Project.load("project_1")
 newproj
-
-
-# %%
-# This ends the example ! The following line can be uncommented if no plot shows when
-# running the .py script with python
-
-# scp.show()

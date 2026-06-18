@@ -38,7 +38,7 @@ Dependency Updates
 - removed docrep dependency
 
 Breaking Changes
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 - Dropped support for Python 3.10 and below.
 - ``restore_rcparams()`` is now deprecated: SpectroChemPy no longer modifies global ``matplotlib.rcParams``, so restoration is unnecessary.
