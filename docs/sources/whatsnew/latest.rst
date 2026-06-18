@@ -46,3 +46,8 @@ Developer
   (``fitted``, ``components``) and solver diagnostics (``cost``,
   ``niter``, ``ncalls``) while preserving all existing public API and
   backward compatibility. (:pr:`1211`)
+
+- MAINT: extend ``AnalysisResult`` support to the NMF estimator. The new
+  ``nmf.result`` property exposes outputs (``components``, ``W``) and
+  diagnostics (``reconstruction_error``, ``n_iter``) while preserving
+  all existing public API and backward compatibility. (:pr:`TODO`)
