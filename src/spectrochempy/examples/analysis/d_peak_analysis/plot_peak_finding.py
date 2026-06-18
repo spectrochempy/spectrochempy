@@ -14,6 +14,12 @@ and visualize the detected positions on top of the last spectrum.
 
 import spectrochempy as scp
 
+
+def _as_iterable(values):
+    if getattr(values, "shape", ()) == ():
+        return [values]
+    return values
+
 # %%
 # Load a time-resolved IR dataset and express the acquisition axis in minutes.
 
@@ -53,9 +59,11 @@ _ = markers.plot_scatter(
     color="black",
 )
 
-for peak in markers:
-    x = peak.x.values
-    y = peak.values
+for x, y in zip(
+    _as_iterable(markers.x.values),
+    _as_iterable(markers.values),
+    strict=False,
+):
     _ = ax.annotate(
         f"{x.m:0.0f}",
         xy=(x.m, y.m),

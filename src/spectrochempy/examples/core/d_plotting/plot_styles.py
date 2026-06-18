@@ -23,7 +23,7 @@ dataset = scp.read("irdata/nh4y-activation.spg")[0]
 
 styles_dir = Path(scp.preferences.stylesheets)
 available_styles = sorted(f.stem for f in styles_dir.glob("*.mplstyle"))
-available_styles[:8]
+print(available_styles[:8])
 
 # %%
 # Apply a style to one plot only.

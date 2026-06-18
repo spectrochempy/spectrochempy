@@ -22,7 +22,7 @@ dataset = scp.read_omnic(
     description="CO adsorption, difference spectra",
 )
 dataset.y = (dataset.y - dataset[0].y).to("minute")
-dataset
+print(dataset)
 
 # %%
 # Plot the full dataset once for context.
