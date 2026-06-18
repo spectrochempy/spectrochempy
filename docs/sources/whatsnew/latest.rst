@@ -12,6 +12,14 @@ What's New in Revision 0.10.1.dev
 These are the changes in SpectroChemPy-0.10.1.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
 
+Bug Fixes
+~~~~~~~~~
+
+- FIX: handle SVD ``compute_uv=False`` outputs consistently. The private
+  ``_outfit`` attribute is now always a ``(U, s, VT)`` tuple, fixing wrong
+  values and crashes for all properties when ``compute_uv=False``.
+  (:pr:`1210`)
+
 Developer
 ~~~~~~~~~
 

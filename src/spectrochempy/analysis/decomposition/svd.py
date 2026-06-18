@@ -142,13 +142,20 @@ class SVD(DecompositionAnalysis):
         # Y is ignored in this model
         full_matrices = self.full_matrices
         compute_uv = self.compute_uv
-        _outfit = np.linalg.svd(X, full_matrices, compute_uv)
+        result = np.linalg.svd(X, full_matrices, compute_uv)
         # Sign correction to ensure deterministic output from SVD.
         # This doesn't work will full_matrices=True.
-        if compute_uv and not full_matrices:
-            U, s, VT = _outfit
-            U, VT = _svd_flip(U, VT)
-            _outfit = U, s, VT
+        if compute_uv:
+            U, s, VT = result
+            if not full_matrices:
+                U, VT = _svd_flip(U, VT)
+            _outfit = (U, s, VT)
+        else:
+            # compute_uv=False: np.linalg.svd returns only the singular
+            # values vector s, not the (U, s, VT) tuple.  Normalise
+            # _outfit to a consistent (U, s, VT) tuple so that all
+            # downstream properties can safely index _outfit[0|1|2].
+            _outfit = (None, result, None)
         return _outfit
 
     # ----------------------------------------------------------------------------------
@@ -158,7 +165,8 @@ class SVD(DecompositionAnalysis):
         if self.compute_uv:
             U, s, VT = self._outfit
             return f"<svd: U{U.shape}, s({s.size}), VT{VT.shape}>"
-        s = self._outfit
+        # _outfit is always a (U, s, VT) tuple after _fit normalisation
+        s = self._outfit[1]
         return f"<svd: s({s.size}), U and VT not computed>"
 
     # ----------------------------------------------------------------------------------

@@ -26,6 +26,11 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- FIX: handle SVD ``compute_uv=False`` outputs consistently. The private
+  ``_outfit`` attribute is now always a ``(U, s, VT)`` tuple, fixing wrong
+  values and crashes for all properties when ``compute_uv=False``.
+  (:pr:`1210`)
+
 
 .. section
 
