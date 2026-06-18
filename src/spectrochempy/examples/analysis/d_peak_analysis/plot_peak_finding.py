@@ -20,6 +20,7 @@ def _as_iterable(values):
         return [values]
     return values
 
+
 # %%
 # Load a time-resolved IR dataset and express the acquisition axis in minutes.
 
@@ -82,8 +83,7 @@ sorted(properties)
 # The same logic can be applied to each spectrum of the time series.
 
 positions = [
-    spec.find_peaks(distance="5 cm^-1", prominence=0.02)[0].x.values
-    for spec in region
+    spec.find_peaks(distance="5 cm^-1", prominence=0.02)[0].x.values for spec in region
 ]
 
 evolution = scp.NDDataset(positions, title="peak maxima position")
