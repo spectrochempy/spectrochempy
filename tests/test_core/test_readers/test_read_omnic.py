@@ -67,9 +67,7 @@ def test_read_omnic():
     nd = scp.read_spa(IRDATA / "subdir" / "20-50" / "7_CZ0-100_Pd_21.SPA")
     assert str(nd) == "NDDataset: [float64] a.u. (shape: (y:1, x:5549))"
 
-    nd2 = scp.read_omnic(
-        IRDATA / "subdir" / "20-50" / "7_CZ0-100_Pd_21.SPA"
-    )
+    nd2 = scp.read_omnic(IRDATA / "subdir" / "20-50" / "7_CZ0-100_Pd_21.SPA")
     assert nd2 == nd
 
     # test import sample IFG
