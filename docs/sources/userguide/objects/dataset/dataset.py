@@ -57,7 +57,7 @@
 # * [Introduction](#Introduction)
 #   * [1D-Dataset (unidimensional dataset)](#1D-Dataset-(unidimensional-dataset))
 #   * [nD-Dataset (multidimensional dataset)](#nD-Dataset-(multidimensional-dataset))
-# * [Metadata and Attributes](#About-the-dates-and-times)
+# * [Metadata and Attributes](#About-dates-and-times)
 #   * [About dates and times](#About-dates-and-times)
 #   * [About the history attribute](#About-the-history-attribute)
 # * [Units](#Units)

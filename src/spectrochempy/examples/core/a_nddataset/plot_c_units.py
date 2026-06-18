@@ -17,8 +17,9 @@ In this example, we show how units can be used in SpectroChemPy
 import spectrochempy as scp
 
 # %%
-# Spectrochempy can do calculations with units - it uses [pint](https://pint.readthedocs.io) to define and perform
-# operation on data with units.
+# SpectroChemPy can do calculations with units. It uses
+# [pint](https://pint.readthedocs.io) to define and perform operations on
+# data with units.
 
 # %%
 # Create quantities
@@ -37,7 +38,8 @@ ur = scp.ur
 10.0 * ur.meter / ur.gram / ur.volt
 
 # %%
-# `ur` stands for **unit registry**, which handle many type of units (and conversion between them)
+# `ur` stands for **unit registry**, which handles many types of units
+# and conversions between them.
 
 # %%
 # Units for dataset
@@ -77,13 +79,15 @@ except Exception as e:
 
 # %%
 # This, of course, also applies to NDDataset.
-# Let's try for the `x` coordinate. It is `wavenumber` in $cm^{-1}$ that can be transformed in $Hz$ for instance:
+# Let's try for the `x` coordinate. It is a `wavenumber` in $cm^{-1}$ that
+# can be transformed to $Hz$, for instance:
 
 ds.x.ito("terahertz")
 _ = ds.plot()
 # %%
-# We can also change the wavenumbers (or frequency units), to energy units or wavelength as
-# Spectrochempy (thanks to [pint](https://pint.readthedocs.io)) knows how to make the transformation.
+# We can also change wavenumber or frequency units to energy or wavelength,
+# as SpectroChemPy, thanks to [pint](https://pint.readthedocs.io), knows how
+# to make the transformation.
 
 ds.x.ito("eV")
 _ = ds.plot()
@@ -104,7 +108,7 @@ _ = ds.plot()
 ds.ito("transmittance")
 _ = ds.plot()
 # %%
-# back into `ansorbance
+# Back to `absorbance`.
 ds.ito("absorbance")
 ds.x.ito("cm^-1")
 _ = ds.plot()

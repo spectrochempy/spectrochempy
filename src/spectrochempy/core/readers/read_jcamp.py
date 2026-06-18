@@ -43,7 +43,7 @@ def read_jcamp(*paths, **kwargs):
         - e.g., ( [filename1, filename2, ...], kwargs )
 
         The returned datasets are merged to form a single dataset,
-        except if ``merge`` is set to `False`.
+        except if ``merge`` is set to ``False``.
     **kwargs : keyword parameters, optional
         See Other Parameters.
 
@@ -90,10 +90,10 @@ def read_jcamp(*paths, **kwargs):
 
         .. versionadded:: 0.7.2
     protocol : `str`, optional
-        ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
-        ``'opus'``, ````, ``'matlab'``, ``'jcamp'``, ``'csv'``,
-        ``'excel'``}. If not provided, the correct protocol
-        is inferred (whenever it is possible) from the filename extension.
+        ``Protocol`` used for reading, for example ``'scp'``, ``'omnic'``,
+        ``'opus'``, ``'matlab'``, ``'jcamp'``, ``'csv'``, or ``'excel'``.
+        If not provided, the correct protocol is inferred whenever possible
+        from the filename extension.
     read_only: `bool`, optional, default: `True`
         Used only when url are specified.  If True, saving of the
         files is performed in the current directory, or in the directory specified by

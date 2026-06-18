@@ -35,18 +35,18 @@ def plot_1D(dataset, method=None, **kwargs):
 
     Parameters
     ----------
-    dataset : :class:~spectrochempy.ddataset.nddataset.NDDataset
+    dataset : :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
         Source of data to plot.
     method : str, optional, default: auto-detected from data dimensionality
         Name of plotting method to use. If None, method is chosen based on data
         dimensionality.
 
-        1D plotting methods:
+        Available 1D plotting methods include:
 
-        - `pen` : Solid line plot
-        - `bar` : Bar graph
-        - `scatter` : Scatter plot
-        - `scatter+pen` : Scatter plot with solid line
+        - ``pen``: solid line plot
+        - ``bar``: bar graph
+        - ``scatter``: scatter plot
+        - ``scatter+pen``: scatter plot with solid line
 
 
     **kwargs
@@ -114,7 +114,7 @@ def plot_1D(dataset, method=None, **kwargs):
         styles for plotting.
     title : str
         Title of the plot (or subplot) axe.
-    twinx : :class:~matplotlib.axes.Axes instance, optional, default: None
+    twinx : :class:`~matplotlib.axes.Axes`, optional, default: None
         If this is not None, then a twin axes will be created with a
         common x dimension.
     uselabel_x: bool, optional
@@ -606,7 +606,7 @@ def plot_scatter(dataset, **kwargs):
         styles for plotting.
     title : str
         Title of the plot (or subplot) axe.
-    twinx : :class:~matplotlib.axes.Axes instance, optional, default: None
+    twinx : :class:`~matplotlib.axes.Axes`, optional, default: None
         If this is not None, then a twin axes will be created with a
         common x dimension.
     uselabel_x: bool, optional
@@ -718,7 +718,7 @@ def plot_pen(dataset, **kwargs):
         styles for plotting.
     title : str
         Title of the plot (or subplot) axe.
-    twinx : :class:~matplotlib.axes.Axes instance, optional, default: None
+    twinx : :class:`~matplotlib.axes.Axes`, optional, default: None
         If this is not None, then a twin axes will be created with a
         common x dimension.
     uselabel_x: bool, optional
@@ -830,7 +830,7 @@ def plot_scatter_pen(dataset, **kwargs):
         styles for plotting.
     title : str
         Title of the plot (or subplot) axe.
-    twinx : :class:~matplotlib.axes.Axes instance, optional, default: None
+    twinx : :class:`~matplotlib.axes.Axes`, optional, default: None
         If this is not None, then a twin axes will be created with a
         common x dimension.
     uselabel_x: bool, optional
@@ -942,7 +942,7 @@ def plot_bar(dataset, **kwargs):
         styles for plotting.
     title : str
         Title of the plot (or subplot) axe.
-    twinx : :class:~matplotlib.axes.Axes instance, optional, default: None
+    twinx : :class:`~matplotlib.axes.Axes`, optional, default: None
         If this is not None, then a twin axes will be created with a
         common x dimension.
     uselabel_x: bool, optional

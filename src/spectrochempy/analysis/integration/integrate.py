@@ -71,7 +71,7 @@ def trapezoid(dataset, **kwargs):
     r"""
     Integrate using the composite trapezoidal rule.
 
-    Wrapper of `scpy.integrate.trapezoid`.
+    Wrapper of ``scipy.integrate.trapezoid``.
 
     Performs the integration along the last or given dimension.
 
@@ -92,11 +92,11 @@ def trapezoid(dataset, **kwargs):
     dim : `int` or `str`, optional, default: ``"x"``
         Dimension along which to integrate.
         If an integer is provided, it is equivalent to the numpy axis
-        parameter for `~numpy.ndarray`s.
+        parameter for ``numpy.ndarray``.
 
     See Also
     --------
-    trapz : An alias of `trapezoid`.
+    trapz : An alias of ``trapezoid``.
     simpson : Integrate using the composite simpson rule.
 
     Example
@@ -115,7 +115,7 @@ def trapz(dataset, **kwargs):
 
 
 trapz.__doc__ = f"""
-    An alias of `trapezoid` kept for backwards compatibility.
+    An alias of ``trapezoid`` kept for backwards compatibility.
 {trapezoid.__doc__}"""
 
 
@@ -124,7 +124,7 @@ def simpson(dataset, *args, **kwargs):
     r"""
     Integrate using the composite Simpson's rule.
 
-    Wrapper of `scpy.integrate.simpson`.
+    Wrapper of ``scipy.integrate.simpson``.
 
     Performs the integration along the last or given dimension.
 
@@ -148,9 +148,9 @@ def simpson(dataset, *args, **kwargs):
     ----------------
     dim : `int` or `str`, optional, default: ``"x"``
         Dimension along which to integrate.
-        If an integer is provided, it is equivalent to the `numpy.axis` parameter
-        for `~numpy.ndarray`s.
-    even : any of [``'avg'``, ``'first'``, ``'last'``\ }, optional, default: ``'avg'``
+        If an integer is provided, it is equivalent to the ``numpy.axis`` parameter
+        for ``numpy.ndarray``.
+    even : {``'avg'``, ``'first'``, ``'last'``}, optional, default: ``'avg'``
 
         * ``'avg'`` : Average two results: 1) use the first N-2 intervals with
           a trapezoidal rule on the last interval and 2) use the last
@@ -162,7 +162,7 @@ def simpson(dataset, *args, **kwargs):
 
     See Also
     --------
-    simps : An alias of simpson (Deprecated).
+    simps : An alias of ``simpson`` (deprecated).
     trapezoid : Integrate using the composite simpson rule.
 
     Example
@@ -182,5 +182,5 @@ def simps(dataset, **kwargs):
 
 
 simps.__doc__ = f"""
-    An alias of `simpson` kept for backwards compatibility.
+    An alias of ``simpson`` kept for backwards compatibility.
 {trapezoid.__doc__}"""

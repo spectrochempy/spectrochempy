@@ -344,7 +344,7 @@ def plot_lines(dataset, **kwargs):
         Title of the plot (or subplot) axe.
     transposed : bool, optional, default: False
         Transpose the data before plotting (2D plots only).
-    twinx : :class:~matplotlib.axes.Axes instance, optional, default: None
+    twinx : :class:`~matplotlib.axes.Axes`, optional, default: None
         If this is not None, then a twin axes will be created with a
         common x dimension.
     uselabel_x: bool, optional
@@ -475,7 +475,7 @@ def plot_contour(dataset, **kwargs):
         Title of the plot (or subplot) axe.
     transposed : bool, optional, default: False
         Transpose the data before plotting (2D plots only).
-    twinx : :class:~matplotlib.axes.Axes instance, optional, default: None
+    twinx : :class:`~matplotlib.axes.Axes`, optional, default: None
         If this is not None, then a twin axes will be created with a
         common x dimension.
     uselabel_x: bool, optional
@@ -610,7 +610,7 @@ def plot_contourf(dataset, **kwargs):
         Title of the plot (or subplot) axe.
     transposed : bool, optional, default: False
         Transpose the data before plotting (2D plots only).
-    twinx : :class:~matplotlib.axes.Axes instance, optional, default: None
+    twinx : :class:`~matplotlib.axes.Axes`, optional, default: None
         If this is not None, then a twin axes will be created with a
         common x dimension.
     uselabel_x: bool, optional
@@ -755,7 +755,7 @@ def plot_stack(dataset, **kwargs):
         Title of the plot (or subplot) axe.
     transposed : bool, optional, default: False
         Transpose the data before plotting (2D plots only).
-    twinx : :class:~matplotlib.axes.Axes instance, optional, default: None
+    twinx : :class:`~matplotlib.axes.Axes`, optional, default: None
         If this is not None, then a twin axes will be created with a
         common x dimension.
     uselabel_x: bool, optional
@@ -890,7 +890,7 @@ def plot_map(dataset, **kwargs):
         Title of the plot (or subplot) axe.
     transposed : bool, optional, default: False
         Transpose the data before plotting (2D plots only).
-    twinx : :class:~matplotlib.axes.Axes instance, optional, default: None
+    twinx : :class:`~matplotlib.axes.Axes`, optional, default: None
         If this is not None, then a twin axes will be created with a
         common x dimension.
     uselabel_x: bool, optional
@@ -1025,7 +1025,7 @@ def plot_image(dataset, **kwargs):
         Title of the plot (or subplot) axe.
     transposed : bool, optional, default: False
         Transpose the data before plotting (2D plots only).
-    twinx : :class:~matplotlib.axes.Axes instance, optional, default: None
+    twinx : :class:`~matplotlib.axes.Axes`, optional, default: None
         If this is not None, then a twin axes will be created with a
         common x dimension.
     uselabel_x: bool, optional
@@ -1160,7 +1160,7 @@ def plot_2D(dataset, method=None, **kwargs):
         Title of the plot (or subplot) axe.
     transposed : bool, optional, default: False
         Transpose the data before plotting (2D plots only).
-    twinx : :class:~matplotlib.axes.Axes instance, optional, default: None
+    twinx : :class:`~matplotlib.axes.Axes`, optional, default: None
         If this is not None, then a twin axes will be created with a
         common x dimension.
     uselabel_x: bool, optional

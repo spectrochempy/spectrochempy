@@ -58,7 +58,7 @@ Breaking Changes
 - IRIS analysis is now provided by the official IRIS plugin. Use
   ``scp.iris.IRIS`` or ``from spectrochempy.iris import IRIS`` after installing
   ``spectrochempy[iris]``. Limited root-level compatibility aliases remain
-   available with deprecation warnings.
+  available with deprecation warnings.
 
 
 Developer

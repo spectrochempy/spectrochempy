@@ -95,7 +95,7 @@ def plot_surface(dataset, **kwargs):
         Title of the plot (or subplot) axe.
     transposed : bool, optional, default: False
         Transpose the data before plotting (2D plots only).
-    twinx : :class:~matplotlib.axes.Axes instance, optional, default: None
+    twinx : :class:`~matplotlib.axes.Axes`, optional, default: None
         If this is not None, then a twin axes will be created with a
         common x dimension.
     uselabel_x: bool, optional
@@ -213,7 +213,7 @@ def plot_waterfall(dataset, **kwargs):
         Title of the plot (or subplot) axe.
     transposed : bool, optional, default: False
         Transpose the data before plotting (2D plots only).
-    twinx : :class:~matplotlib.axes.Axes instance, optional, default: None
+    twinx : :class:`~matplotlib.axes.Axes`, optional, default: None
         If this is not None, then a twin axes will be created with a
         common x dimension.
     uselabel_x: bool, optional
@@ -352,7 +352,7 @@ def plot_3D(dataset, method="surface", **kwargs):
         Title of the plot (or subplot) axe.
     transposed : bool, optional, default: False
         Transpose the data before plotting (2D plots only).
-    twinx : :class:~matplotlib.axes.Axes instance, optional, default: None
+    twinx : :class:`~matplotlib.axes.Axes`, optional, default: None
         If this is not None, then a twin axes will be created with a
         common x dimension.
     uselabel_x: bool, optional

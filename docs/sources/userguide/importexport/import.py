@@ -107,7 +107,8 @@ X
 # Other reader functions return either a single `NDDataset` or multiple `NDDataset`
 # objects, depending on the file type and content.
 #
-# Further details on specific cases are provided below. See the section [Reading directories](#Reading-directories).
+# Further details on specific cases are provided below, especially in the
+# section on reading directories.
 
 # %% [markdown]
 # ## Using relative or absolute pathnames
@@ -117,124 +118,74 @@ X
 #
 # If the file is located in another directory, the full path to the file can be provided. For example:
 #
-# ```ipython
-# X = scp.read('/users/Brian/s/Life/wodger.spg')
-# ```
+#     X = scp.read('/users/Brian/s/Life/wodger.spg')
 #
 # or, for Windows:
 #
-# ```ipython
-# X = scp.read(r'C:\users\Brian\s\Life\wodger.spg')
-# ```
+#     X = scp.read(r'C:\\users\\Brian\\s\\Life\\wodger.spg')
 #
 # Notes:
-# - The path separator is a backslash `\` on Windows, but in many contexts, backslash is also used as an escape character to
+# - The path separator is a backslash ``\\`` on Windows, but in many contexts, backslash is also used as an escape character to
 #   represent non-printable characters.
 #   To avoid problems, either it has to be escaped itself, a double backslash `\\`, or one can also use raw string literals
 #   to represent Windows paths.
-#   These are string literals that have an `r` prepended to them. In raw string literals, the `\\` represents
-#   a literal backslash: `r'C:\users\Brian'`.
+#   These are string literals that have an `r` prepended to them. In raw
+#   string literals, `\\` represents a literal backslash, e.g.
+#   `r'C:\\users\\Brian'`.
 # - In python, the slash `/` is used as the path separator in all systems (Windows, Linux, OSX, ...).
 #   So it can be used in all cases. For exemple:
 #
-#   ```ipython
-#   X = scp.read('C:/users/Brian/s/Life/wodger.spg')
-#
-#   ```
+#       X = scp.read('C:/users/Brian/s/Life/wodger.spg')
 #
 # - The use of relative pathnames is a good practice. SpectroChemPy readers use relative paths.
 #   If the given path is not absolute,
-#   then SpectroChemPy will search relative to the current directory or to a directory specified using the `directory`keywords.
+#   then SpectroChemPy will search relative to the current directory or to a
+#   directory specified using the `directory` keyword.
 #
 #   For example:
 #
-#   ```ipython
-#   X = scp.read('wodger.spg', directory='C:/users/Brian/s/Life')
-#   X = scp.read('Life/wodger.spg', directory='C:\\users\\Brian\\s')
-#
-#   ```
+#       X = scp.read('wodger.spg', directory='C:/users/Brian/s/Life')
+#       X = scp.read('Life/wodger.spg', directory='C:\\users\\Brian\\s')
 #
 # - The `os` or `pathlib` modules can be used to work with pathnames.
-#   See the section
-#   [Good practice:Use of os or pathlib packages](#Use-os-or-pathlib-packages).
+#   See the "Use os or pathlib packages" section below.
 # - The `preferences.datadir` variable can be used to set a default directory where to look for data.
-#   See the section [Another default search directory: datadir](#Another-default-search-directory:-datadir).
+#   See the "Another default search directory: datadir" section below.
 #
 
 # %% [markdown]
 # ## Good practices
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
 # ### Use relative paths
 #
 # As path are system dependent, it is a good practice to use relative pathnames in scripts and notebooks.
 #
-# If, for instance, Brian has a project organised in a folder (`s` ) with a directory
-# dedicated to input data (`Life` )
-# and a notebook for preprocessing (`welease.ipynb` ) as illustrate below:
+# If, for instance, Brian has a project organised in a folder (`s`) with a
+# directory dedicated to input data (`Life`) and a notebook for preprocessing
+# (`welease.ipynb`) as illustrated below:
 #
-# ```
-# C:\users
-# |    +-- Brian
-# |    |    +-- s
-# |    |    |   +-- Life
-# |    |    |   |   +-- wodger.spg
-# |    |    |   +-- welease.ipynb
-#
-# ```
+#     C:\users
+#     |    +-- Brian
+#     |    |    +-- s
+#     |    |    |   +-- Life
+#     |    |    |   |   +-- wodger.spg
+#     |    |    |   +-- welease.ipynb
 #
 # Then running this project in John's Linux computer (e.g. in `/home/john/s_copy` )
 # will certainly result in execution
 # errors if absolute paths are used in the notebook:
 #
-# ```text
-# OSError: Can't find this filename C:\users\Brian\s\life\wodger.spg
-# ```
+#     OSError: Can't find this filename C:\\users\\Brian\\s\\life\\wodger.spg
 #
 # Fortunately, SpectroChemPy readers use relative paths. If the given path is not
 # absolute, then SpectroChemPy will search in the current directory. Hence, the opening
 # of the `spg` file from scripts in `welease.ipynb` can be made
 # by the command:
 #
-# ```ipython
-# X = scp.read('Life/wodger.spg')
-# ```
+#     X = scp.read('Life/wodger.spg')
 #
 # or:
 #
-# ```ipython
-# X = scp.read('wodger.spg', directory='Life')
-# ```
+#     X = scp.read('wodger.spg', directory='Life')
 #
 # ### Use os or pathlib packages
 #
@@ -242,25 +193,17 @@ X
 # `os` or `pathlib` python modules.
 # With `os` we mention the following methods that can be particularly useful:
 #
-# ```ipython
-# import os
-# os.getcwd()              # returns the absolute path of the current working directory
-#                          # preferences.datadir
-# os.path.expanduser("~")  # returns the home directory of the user
-# os.path.join('path1','path2','path3', ...)
-#                          # intelligently concatenates path components
-#                          # using the system separator (`/` or `\\` )
-# ```
+#     import os
+#     os.getcwd()              # returns the absolute path of the current working directory
+#     os.path.expanduser("~")  # returns the home directory of the user
+#     os.path.join('path1', 'path2', 'path3', ...)
 #
 # Using `Pathlib` is even simpler:
 #
-# ```ipython
-# from pathlib import Path
-# Path.cwd()               # returns the absolute path of the current working directory
-# Path.home()              # returns the home directory of the user
-# Path('path1') / 'path2' / 'path3' / '...'   # intelligently concatenates path
-# components
-# ```
+#     from pathlib import Path
+#     Path.cwd()               # returns the absolute path of the current working directory
+#     Path.home()              # returns the home directory of the user
+#     Path('path1') / 'path2' / 'path3' / '...'
 #
 # The interested readers will find more details on the use of these modules here:
 #
@@ -272,7 +215,7 @@ X
 # Spectrochempy also comes with the definition of a second default directory path where
 # to look at the data: the `datadir` directory. It is defined in the variable `preferences.datadir` which
 # is imported at the same time as spectrochempy. By default, `datadir` points in the
-# '$HOME/.spectrochempy/tesdata' directory.:
+# `$HOME/.spectrochempy/testdata` directory.
 
 # %%
 DATADIR = scp.preferences.datadir
@@ -288,13 +231,11 @@ scp.read_omnic(DATADIR / "wodger.spg")
 # It can be set to another pathname *permanently* (i.e., even after computer restart)
 # by a new assignment:
 #
-# ```python
-# scp.preferences.datadir = 'C:/users/Brian/s/Life'
-# ```
+#     scp.preferences.datadir = 'C:/users/Brian/s/Life'
 #
 # This will change the default value in the SCPy preference file located in the hidden
 # folder
-# ` .spectrochempy/` at the root of the user home directory.
+# `.spectrochempy/` at the root of the user home directory.
 #
 # Finally, by default, the import functions used in Spectrochempy will search the data
 # files using this order of
@@ -309,28 +250,35 @@ scp.read_omnic(DATADIR / "wodger.spg")
 # ## Reading directories
 
 # %% [markdown]
-# The `read_dir` function is designed to read an entire directory, create NDDatasets for each file, and finally merge all compatible datasets. Let's see an example:
+# The `read_dir` function is designed to read an entire directory, create
+# NDDatasets for each file, and finally merge all compatible datasets. Let's
+# see an example:
 
 # %% [markdown]
-# - Here is a list of the files presents in `DATADIR/irdata/subdir/`
+# - Here is a list of the files present in `DATADIR/irdata/subdir/`.
 
 # %%
 folder = DATADIR / "irdata" / "subdir"
 [str(item.relative_to(DATADIR)) for item in folder.glob("*.*")]
 
 # %% [markdown]
-# - Now read all files in the `DATADIR/irdata/subdir/` directory  (*i.e.,*, four `.spa` files and one `.srs` file). Any file in unknown format will be ignored silently:
+# - Now read all files in the `DATADIR/irdata/subdir/` directory (*i.e.*, four
+#   `.spa` files and one `.srs` file). Any file in an unknown format will be
+#   ignored silently:
 
 # %%
 scp.read_dir(folder)
 # %% [markdown]
-# The above command have read all files in the `DATADIR/irdata/subdir/` directory and merged them into two groups of compatible NDDatasets:
+# The above command reads all files in the `DATADIR/irdata/subdir/`
+# directory and merges them into two groups of compatible NDDatasets:
 #
 # * a first `NDDataset` object (id: 0, shape [335,1868]) comes from the single `.srs` file.
 # * a second `NDDataset` object (id: 1, shape [335,1868]) comes from the merging of four `.spa` files.
 
 # %% [markdown]
-# Merging  compatible NDDataset is the default behavior of `read_dir`  (or  equivalently `read`). If you want to read the files separately, you can use the `merge=False` keyword:
+# Merging compatible NDDatasets is the default behavior of `read_dir`
+# (or, equivalently, `read`). If you want to read the files separately, you
+# can use the `merge=False` keyword:
 # %%
 scp.read_dir(folder, merge=False)
 
@@ -343,8 +291,10 @@ scp.read_dir(folder, merge=False)
 # %% [markdown]
 # The `read_dir`/`read` function has additional options to control the behavior of the reading process:
 #
-# - `recursive`: if `True`, the function will scan the directory recursively and read all supported files in all subdirectories.
-# - `pattern`: a string or a list of strings that can be used to filter the files to be read. Only files whose name matches the pattern will be read.
+# - `recursive`: if `True`, the function scans the directory recursively and
+#   reads all supported files in all subdirectories.
+# - `pattern`: a string or a list of strings that can be used to filter the
+#   files to be read. Only files whose name matches the pattern will be read.
 
 # %% [markdown]
 # Let's see an example with the `recursive` option:
@@ -355,7 +305,8 @@ scp.read_dir(folder, merge=False)
 [str(item.relative_to(DATADIR)) for item in folder.glob("**/*.*")]
 
 # %% [markdown]
-# the ìrdata/subdir/` directory contains two subdirectory `1-20` and `20-50` with two additional `.spa` files.
+# The `irdata/subdir/` directory contains two subdirectories, `1-20` and
+# `20-50`, with additional `.spa` files.
 #
 # Now we read all files (a total of 9) in the `DATADIR/irdata/subdir/` directory and its subdirectories:
 # %%
@@ -368,7 +319,7 @@ scp.read_dir(folder, recursive=True)
 # As the 8 `.spa` files are compatible, they are merged into a single `NDDataset` object. The `.srs` file is read separately.
 
 # %% [markdown]
-# Specific reader can equivalently read folder recursively:
+# A specific reader can equivalently read the folder recursively:
 # %%
 scp.read_omnic(folder, recursive=True)
 
@@ -380,7 +331,8 @@ scp.read_omnic(folder, recursive=True)
 scp.read_dir(folder, recursive=True, pattern="*4*")
 
 # %% [markdown]
-# The above pattern "\*4\*" match only two files which are then merged and returned as a single `NDDataset` object.
+# The above pattern `*4*` matches only two files, which are then merged and
+# returned as a single `NDDataset` object.
 
 # %% [markdown]
 # This `pattern` option is obviously interesting to select only a type of extension:
@@ -401,9 +353,10 @@ scp.read_omnic(folder, recursive=True, pattern="*4.spa")  # equivalent
 # ## Reading files from a ZIP archive
 
 # %% [markdown]
-# The `read_zip` function is designed to read files from a ZIP archive. It can be used to read a single file
-# or all files in the archive. As usual, by default all files are merged. The `merge` keyword can be used to
-# read the files separately.
+# The `read_zip` function is designed to read files from a ZIP archive. It can
+# be used to read a single file or all files in the archive. As usual, by
+# default all files are merged. The `merge` keyword can be used to read the
+# files separately.
 
 # %%
 scp.read(

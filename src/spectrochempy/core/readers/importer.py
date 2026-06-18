@@ -273,7 +273,7 @@ def read(*paths, **kwargs):
         - e.g., ( [filename1, filename2, ...], kwargs )
 
         The returned datasets are merged to form a single dataset,
-        except if ``merge`` is set to `False`.
+        except if ``merge`` is set to ``False``.
     **kwargs : keyword parameters, optional
         See Other Parameters.
 
@@ -343,7 +343,7 @@ def read(*paths, **kwargs):
     read_opus : Read OPUS spectra.
     read_labspec : Read Raman LABSPEC spectra (:file:`.txt`).
     read_omnic : Read Omnic spectra (:file:`.spa`, :file:`.spg`, :file:`.srs`).
-    read_soc : Read Surface Optics Corps. files (:file:`.ddr` , :file:`.hdr` or :file:`.sdr`).
+    read_soc : Read Surface Optics Corp. files (:file:`.ddr`, :file:`.hdr`, or :file:`.sdr`).
     read_galactic : Read Galactic files (:file:`.spc`).
     read_quadera : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
     read_csv : Read CSV files (:file:`.csv`).
