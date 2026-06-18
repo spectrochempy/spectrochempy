@@ -11,3 +11,12 @@ What's New in Revision 0.10.1.dev
 
 These are the changes in SpectroChemPy-0.10.1.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
+
+Developer
+~~~~~~~~~
+
+- MAINT: introduce ``ResultBase``, ``AnalysisResult``, and ``FitResult`` result
+  object infrastructure as defined in the Result Object Contract RFC. A PCA-only
+  prototype exposes ``pca.result`` as an ``AnalysisResult`` with named outputs
+  (scores, loadings, components) and diagnostics (explained variance metrics)
+  while preserving all existing public API and behavior. (:pr:`1208`)

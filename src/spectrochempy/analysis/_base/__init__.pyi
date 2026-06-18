@@ -8,6 +8,8 @@
 
 __all__ = [
     "_analysisbase",
+    "_result",
 ]
 
 from . import _analysisbase
+from . import _result
