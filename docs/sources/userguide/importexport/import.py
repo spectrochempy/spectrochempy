@@ -116,11 +116,20 @@ X
 #     # Newly written native file:
 #     # ds = scp.read("new.scp")
 #
+#     # Portable NetCDF prototype for NDDataset only:
+#     # ds.to_netcdf("new.nc")
+#     # ds2 = scp.NDDataset.from_netcdf("new.nc")
+#
 #     # Historical trusted legacy file only:
 #     # ds = scp.read("old.scp", allow_unsafe_legacy=True)
 #
 # Only enable ``allow_unsafe_legacy=True`` for files from known and trusted
 # sources.
+#
+# NetCDF is a portable persistence path built on the canonical
+# ``NDDataset ↔ xarray.Dataset`` mapping. It currently covers `NDDataset`
+# only; full `CoordSet` fidelity and `Project` round-trips are not guaranteed
+# by this first prototype.
 #
 # Other reader functions return either a single `NDDataset` or multiple `NDDataset`
 # objects, depending on the file type and content.

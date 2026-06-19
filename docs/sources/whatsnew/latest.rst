@@ -15,6 +15,12 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 New Features
 ~~~~~~~~~~~~
 
+- Added a first xarray-backed NetCDF prototype for `NDDataset` portable
+  persistence. The prototype builds strictly on the canonical
+  `NDDataset ↔ xarray.Dataset` mapping and covers numerical data, default
+  coordinates, units, explicit masks, JSON-compatible metadata, and complex
+  datasets through a split real/imag NetCDF convention.
+
 - Added a first ``NDDataset`` ↔ ``xarray`` prototype focused on portable
   dataset exchange. Native ``xarray`` round-trips now cover numerical arrays,
   dimension names/order, default coordinates, units, explicit masks,

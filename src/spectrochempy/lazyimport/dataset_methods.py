@@ -33,6 +33,7 @@ _LAZY_DATASETS_IMPORTS = {
     "transpose": "spectrochempy.core.dataset.nddataset",
     "reshape": "spectrochempy.core.dataset.nddataset",
     "to_array": "spectrochempy.core.dataset.nddataset",
+    "to_netcdf": "spectrochempy.core.dataset.nddataset",
     "to_xarray": "spectrochempy.core.dataset.nddataset",
     "take": "spectrochempy.core.dataset.nddataset",
     "set_complex": "spectrochempy.core.dataset.nddataset",
