@@ -239,6 +239,27 @@ as safety nets after the storage switch.
 
 Do not remove them without proving that they are unreachable or redundant.
 
+## Audit Trail
+
+For detailed campaign history and representative checkpoints, see:
+
+- `audit/~storage-pr1 - tests de contrat public.md`
+- `audit/~coordset-lookup-audit.md`
+- `audit/~coordset-storage-pr12-notes.md`
+- `audit/~coordset-storage-pr13-notes.md`
+- `audit/~coordset-storage-pr14-notes.md`
+- `audit/~coordset-storage-pr15-notes.md`
+- `audit/~coordset-storage-pr16-notes.md`
+- `audit/~coordset-storage-pr17-notes.md`
+- `audit/~coordset-storage-pr18-notes.md`
+- `audit/~coordset-storage-pr19-notes.md`
+- `audit/~coordset-storage-pr20-notes.md`
+- `audit/~coordset-storage-pr21-audit.md`
+- `audit/~coordset-storage-pr22-audit.md`
+- `audit/~coordset-storage-pr23-audit.md`
+- `audit/~coordset-storage-pr24-preparation.md`
+- `audit/~coordset-storage-pr25-independent-audit.md`
+
 ### Broader Traitlets Audit
 
 The main issue was not Traitlets itself, but business logic hidden inside
