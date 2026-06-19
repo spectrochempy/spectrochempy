@@ -27,6 +27,7 @@ __dataset_methods__ = [  # Methods that can be called as API functions
 ]
 
 
+import json
 import textwrap
 
 # Lazy import to avoid triggering matplotlib at module load time
@@ -64,6 +65,22 @@ from spectrochempy.utils.print import _render_sections
 from spectrochempy.utils.print import colored_output
 from spectrochempy.utils.system import get_user_and_node
 from spectrochempy.utils.typeutils import is_sequence
+
+
+def _normalize_json_compatible(value: Any) -> Any:
+    """Return a JSON-compatible copy of *value* or raise ``TypeError``."""
+    if isinstance(value, np.generic):
+        return value.item()
+    if value is None or isinstance(value, (str, int, float, bool)):
+        return value
+    if isinstance(value, dict):
+        return {
+            str(key): _normalize_json_compatible(item) for key, item in value.items()
+        }
+    if isinstance(value, (list, tuple)):
+        return [_normalize_json_compatible(item) for item in value]
+
+    raise TypeError(f"Value of type {type(value).__name__} is not JSON-compatible")
 
 
 # ======================================================================================
@@ -1354,86 +1371,161 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
 
     def to_xarray(self):
         """
-        Convert a NDDataset instance to an `~xarray.DataArray` object.
+        Convert a NDDataset instance to an `~xarray.Dataset` object.
 
         Warning: the xarray library must be available.
 
         Returns
         -------
         object
-            A axrray.DataArray object.
+            An xarray.Dataset object.
 
         """
-        # Information about DataArray from the DataArray docstring
-        #
-        # Attributes
-        # ----------
-        # dims: tuple
-        #     Dimension names associated with this array.
-        # values: np.ndarray
-        #     Access or modify DataArray values as a numpy array.
-        # coords: dict-like
-        #     Dictionary of DataArray objects that label values along each dimension.
-        # name: str or None
-        #     Name of this array.
-        # attrs: OrderedDict
-        #     Dictionary for holding arbitrary metadata.
-        # Init docstring
-        #
-        # Parameters
-        # ----------
-        # data: array_like
-        #     Values for this array. Must be an `numpy.ndarray` , ndarray like,
-        #     or castable to an `~numpy.ndarray` .
-        # coords: sequence or dict of array_like objects, optional
-        #     Coordinates (tick labels) to use for indexing along each dimension.
-        #     If dict-like, should be a mapping from dimension names to the
-        #     corresponding coordinates. If sequence-like, should be a sequence
-        #     of tuples where the first element is the dimension name and the
-        #     second element is the corresponding coordinate array_like object.
-        # dims: str or sequence of str, optional
-        #     Name(s) of the data dimension(s). Must be either a string (only
-        #     for 1D data) or a sequence of strings with length equal to the
-        #     number of dimensions. If this argument is omitted, dimension names
-        #     are taken from `coords` (if possible) and otherwise default to
-        #     `['dim_0', ... 'dim_n']` .
-        # name: str or None, optional
-        #     Name of this array.
-        # attrs: dict_like or None, optional
-        #     Attributes to assign to the new instance. By default, an empty
-        #     attribute dictionary is initialized.
-        # encoding: dict_like or None, optional
-        #     Dictionary specifying how to encode this array's data into a
-        #     serialized format like netCDF4. Currently used keys (for netCDF)
-        #     include '_FillValue', 'scale_factor', 'add_offset', 'dtype',
-        #     'units' and 'calendar' (the later two only for datetime arrays).
-        #     Unrecognized keys are ignored.
-
         xr = import_optional_dependency("xarray")
         if xr is None:
             return None
 
-        x, y = self.x, self.y
-        tx = x.title
-        if y:
-            ty = y.title
-            da = xr.DataArray(
-                np.array(self.data, dtype=np.float64),
-                coords=[(ty, y.data), (tx, x.data)],
+        dims = tuple(self.dims)
+        primary_name = self._name if self._name else "data"
+
+        coords = {}
+        for dim in dims:
+            coord = self.coord(dim)
+            if coord is None or coord.is_empty:
+                continue
+
+            coord_attrs = {"scpy_coord_role": "default"}
+            if coord.units is not None:
+                coord_attrs["units"] = str(coord.units)
+            if coord.title != "<untitled>":
+                coord_attrs["scpy_title"] = coord.title
+
+            coords[dim] = xr.DataArray(
+                np.asarray(coord.data),
+                dims=(dim,),
+                attrs=coord_attrs,
             )
 
-            da.attrs["units"] = self.units
-        else:
-            da = xr.DataArray(
-                np.array(self.data, dtype=np.float64),
-                coords=[(tx, x.data)],
+        meta = {}
+        skipped_meta_keys = []
+        for key, value in self.meta.items():
+            try:
+                meta[key] = _normalize_json_compatible(value)
+            except TypeError:
+                skipped_meta_keys.append(key)
+
+        if skipped_meta_keys:
+            warning_(
+                "Skipping non-JSON-compatible metadata for xarray export: "
+                f"{', '.join(sorted(skipped_meta_keys))}",
             )
 
-            da.attrs["units"] = self.units
+        data_attrs = {}
+        if self.units is not None:
+            data_attrs["units"] = str(self.units)
 
-        da.attrs["title"] = self.title
+        dataset_attrs = {
+            "scpy_format": "nddataset-xarray",
+            "scpy_version": 1,
+            "scpy_primary_variable": primary_name,
+            "scpy_name": self.name,
+            "scpy_title": self.title,
+        }
+        if meta:
+            dataset_attrs["scpy_meta"] = json.loads(json.dumps(meta))
+        if skipped_meta_keys:
+            dataset_attrs["scpy_skipped_meta_keys"] = sorted(skipped_meta_keys)
 
-        return da
+        xds = xr.Dataset(
+            data_vars={
+                primary_name: xr.DataArray(
+                    np.asarray(self.data),
+                    dims=dims,
+                    coords=coords,
+                    attrs=data_attrs,
+                )
+            },
+            attrs=dataset_attrs,
+        )
+
+        if self.is_masked:
+            mask_name = f"{primary_name}__mask"
+            xds[mask_name] = xr.DataArray(
+                np.asarray(self.mask, dtype=bool),
+                dims=dims,
+                coords=coords,
+                attrs={"scpy_role": "mask"},
+            )
+            xds.attrs["scpy_mask_variable"] = mask_name
+
+        return xds
+
+    @classmethod
+    def from_xarray(cls, dataset):
+        """
+        Build a minimal `NDDataset` instance from an `xarray.Dataset`.
+
+        This prototype covers numerical data, default coordinates, units, masks,
+        JSON-compatible metadata, title, and name. Rich CoordSet semantics and
+        backend-specific persistence are intentionally out of scope here.
+        """
+        xr = import_optional_dependency("xarray")
+        if xr is None:
+            return None
+
+        if not isinstance(dataset, xr.Dataset):
+            raise SpectroChemPyError("from_xarray() expects an xarray.Dataset.")
+
+        primary_name = dataset.attrs.get("scpy_primary_variable")
+        if primary_name is None:
+            data_vars = list(dataset.data_vars)
+            if len(data_vars) == 1:
+                primary_name = data_vars[0]
+            else:
+                raise SpectroChemPyError(
+                    "Cannot determine the primary xarray variable for NDDataset reconstruction."
+                )
+
+        if primary_name not in dataset.data_vars:
+            raise SpectroChemPyError(
+                f"Primary xarray variable `{primary_name}` is missing from the dataset."
+            )
+
+        data_var = dataset[primary_name]
+        dims = tuple(data_var.dims)
+
+        coordset = []
+        for dim in dims:
+            if dim in data_var.coords:
+                xr_coord = data_var.coords[dim]
+                kwargs = {"name": dim}
+                units = xr_coord.attrs.get("units")
+                if units is not None:
+                    kwargs["units"] = units
+                title = xr_coord.attrs.get("scpy_title")
+                if title is not None:
+                    kwargs["title"] = title
+                coordset.append(Coord(np.asarray(xr_coord.data), **kwargs))
+            else:
+                coordset.append(None)
+
+        kwargs = {
+            "dims": list(dims),
+            "coordset": coordset,
+            "name": dataset.attrs.get("scpy_name", primary_name),
+            "title": dataset.attrs.get("scpy_title"),
+            "meta": dataset.attrs.get("scpy_meta"),
+        }
+
+        units = data_var.attrs.get("units")
+        if units is not None:
+            kwargs["units"] = units
+
+        mask_name = dataset.attrs.get("scpy_mask_variable")
+        if mask_name in dataset.data_vars:
+            kwargs["mask"] = np.asarray(dataset[mask_name].data, dtype=bool)
+
+        return cls(np.asarray(data_var.data), **kwargs)
 
     def transpose(self, *dims, inplace=False):
         """

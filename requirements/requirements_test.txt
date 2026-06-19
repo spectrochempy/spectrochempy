@@ -31,3 +31,4 @@ pytest-ruff
 pytest-mock
 pytest-xdist
 numpydoc
+xarray
