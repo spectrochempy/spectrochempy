@@ -1046,7 +1046,7 @@ def test_issue417():
             x = X - X[-1]
 
             f = X.write("X.scp")
-            X_r = scp.read("X.scp")
+            X_r = scp.read("X.scp", allow_unsafe_legacy=True)
             f.unlink()
 
             assert_array_equal(X.data, X_r.data)

@@ -584,4 +584,3 @@ SpectroChemPy must make explicit what SCP/PSCP formats are and what they promise
 5. **Sequenced follow-up RFCs** to address security, portable formats, Result persistence, Project membership, and plugin governance.
 
 The goal is not to redesign persistence immediately, but to clarify the foundation so that future decisions can be coherent, well-informed, and aligned with SpectroChemPy's commitment to scientific reproducibility, safety, and long-term compatibility.
-

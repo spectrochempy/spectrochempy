@@ -13,6 +13,7 @@ from spectrochempy.application.preferences import preferences
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.project.project import Project
 from spectrochempy.utils.constants import INPLACE
+from spectrochempy.utils.exceptions import SpectroChemPyError
 
 prefs = preferences
 
@@ -82,7 +83,7 @@ def test_save_and_load_project(ds1, ds2):
     myp.add_datasets(ds1, ds2)
 
     fn = myp.save()
-    proj = Project.load(fn)
+    proj = Project.load(fn, allow_unsafe_legacy=True)
 
     assert str(proj["toto"]) == "NDDataset: [float64] a.u. (shape: (z:10, y:100, x:3))"
 
@@ -514,7 +515,7 @@ class TestSerializationRoundtrip:
         proj.add_project(sub)
 
         filename = proj.save()
-        loaded = Project.load(filename)
+        loaded = Project.load(filename, allow_unsafe_legacy=True)
 
         assert "subproject" in loaded.projects_names
         assert "data" in loaded.subproject.datasets_names
@@ -548,11 +549,27 @@ class TestSerializationRoundtrip:
         with zipfile.ZipFile(filename, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
             zipf.writestr(member, json.dumps(js, indent=2))
 
-        loaded = Project.load(filename)
+        loaded = Project.load(filename, allow_unsafe_legacy=True)
 
         assert not hasattr(loaded.data, "roi")
         assert not hasattr(loaded.data, "modeldata")
         assert not hasattr(loaded, "_others")
+
+    def test_project_load_requires_explicit_opt_in(self, ds1):
+        proj = Project(name="legacy_project")
+        ds1.name = "data"
+        proj.add_dataset(ds1)
+
+        filename = proj.save()
+
+        with pytest.raises(
+            SpectroChemPyError,
+            match="trusted legacy loading",
+        ):
+            Project.load(filename)
+
+        loaded = Project.load(filename, allow_unsafe_legacy=True)
+        assert "data" in loaded.datasets_names
 
 
 class TestArgNamesEdgeCases:

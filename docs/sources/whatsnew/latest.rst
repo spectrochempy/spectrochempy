@@ -15,6 +15,11 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 Bug Fixes
 ~~~~~~~~~
 
+- FIX: application startup now removes invalid JSON preference files only
+  after closing them first, avoiding a Windows ``PermissionError`` during
+  configuration initialisation when a stale file such as ``CP.json`` is
+  encountered.
+
 - FIX: ``FastICA.whitening`` now returns ``None`` (instead of crashing) when
   ``whiten=False``. (:pr:`1219`)
 
@@ -48,6 +53,14 @@ Bug Fixes
   ≥2 comments were shown); SPA history content is now checked via the
   variable instead of a literal string; and invalid ``return_ifg`` values
   now produce a clear warning. (PR by @gaoflow)
+
+Breaking Changes
+~~~~~~~~~~~~~~~~
+
+- Loading native ``.scp`` and ``.pscp`` files is now safe by default.
+  Historical archives that require pickle-based native persistence must be
+  reloaded explicitly with ``allow_unsafe_legacy=True``, and only from known
+  and trusted sources.
 
 Developer
 ~~~~~~~~~

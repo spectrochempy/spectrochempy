@@ -26,6 +26,11 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- FIX: application startup now removes invalid JSON preference files only
+  after closing them first, avoiding a Windows ``PermissionError`` during
+  configuration initialisation when a stale file such as ``CP.json`` is
+  encountered.
+
 - FIX: ``FastICA.whitening`` now returns ``None`` (instead of crashing) when
   ``whiten=False``. (:pr:`1219`)
 
@@ -72,6 +77,11 @@ Dependency Updates
 Breaking Changes
 ~~~~~~~~~~~~~~~~
 .. Add here new breaking changes (do not delete this comment)
+
+- Loading native ``.scp`` and ``.pscp`` files is now safe by default.
+  Historical archives that require pickle-based native persistence must be
+  reloaded explicitly with ``allow_unsafe_legacy=True``, and only from known
+  and trusted sources.
 
 
 .. section

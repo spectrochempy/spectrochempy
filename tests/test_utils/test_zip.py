@@ -3,6 +3,7 @@ import zipfile
 import numpy as np
 import pytest
 
+from spectrochempy.utils.exceptions import SpectroChemPyError
 from spectrochempy.utils.zip import ScpFile
 from spectrochempy.utils.zip import make_zipfile
 
@@ -50,6 +51,44 @@ def test_scpfile_nonexistent_key(tmp_path):
     # Test ScpFile
     with ScpFile(test_file) as scp, pytest.raises(KeyError):
         _ = scp["nonexistent.npy"]
+
+
+def test_scpfile_rejects_object_array_without_opt_in(tmp_path, monkeypatch):
+    test_file = tmp_path / "legacy_object_array.scp"
+    payload = np.array([{"safe": "payload"}], dtype=object)
+
+    with make_zipfile(test_file, mode="w") as zf, zf.open("legacy.npy", "w") as f:
+        np.save(f, payload, allow_pickle=True)
+
+    def fail_read_array(*args, **kwargs):
+        if kwargs.get("allow_pickle"):
+            raise AssertionError("allow_pickle=True must not be used in safe mode")
+        return np.array([0])
+
+    monkeypatch.setattr("spectrochempy.utils.zip.read_array", fail_read_array)
+
+    with ScpFile(test_file) as scp:
+        assert np.array_equal(scp["legacy.npy"], np.array([0]))
+
+
+def test_scpfile_object_array_requires_explicit_opt_in(tmp_path):
+    test_file = tmp_path / "legacy_object_array.scp"
+    payload = np.array([{"safe": "payload"}], dtype=object)
+
+    with make_zipfile(test_file, mode="w") as zf, zf.open("legacy.npy", "w") as f:
+        np.save(f, payload, allow_pickle=True)
+
+    with ScpFile(test_file) as scp, pytest.raises(
+        SpectroChemPyError,
+        match="trusted legacy loading",
+    ):
+        _ = scp["legacy.npy"]
+
+    with ScpFile(test_file, allow_unsafe_legacy=True) as scp:
+        loaded = scp["legacy.npy"]
+
+    assert loaded.dtype == object
+    assert loaded[0]["safe"] == "payload"
 
 
 if __name__ == "__main__":

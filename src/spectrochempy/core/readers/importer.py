@@ -27,6 +27,7 @@ from spectrochempy.utils._logging import debug_
 from spectrochempy.utils._logging import info_
 from spectrochempy.utils._logging import warning_
 from spectrochempy.utils.exceptions import ProtocolError
+from spectrochempy.utils.exceptions import SpectroChemPyError
 from spectrochempy.utils.file import check_filename_to_open
 from spectrochempy.utils.file import get_directory_name
 from spectrochempy.utils.file import get_filenames
@@ -223,6 +224,8 @@ class Importer(HasTraits):
                     warning_(str(e))
 
             except Exception as e:
+                if isinstance(e, SpectroChemPyError):
+                    raise
                 warning_(str(e))
 
             if dataset is not None:

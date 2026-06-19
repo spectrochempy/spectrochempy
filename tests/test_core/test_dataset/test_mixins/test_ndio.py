@@ -11,10 +11,12 @@ import json
 import zipfile
 
 import pytest
+import spectrochempy as scp
 
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.utils.exceptions import SpectroChemPyError
 from spectrochempy.utils.testing import assert_array_equal, assert_dataset_equal
 
 # Basic
@@ -32,7 +34,7 @@ def test_ndio_generic(ndataset_1d, tmp_path, monkeypatch):
     assert ir.directory == tmp_path
 
     # load back this  file : the full path f is given so no dialog is opened
-    nd = NDDataset.load(f)
+    nd = NDDataset.load(f, allow_unsafe_legacy=True)
     assert_dataset_equal(nd, ir)
 
     # as it has been already saved,
@@ -58,7 +60,7 @@ def test_ndio_generic(ndataset_1d, tmp_path, monkeypatch):
     f = ir.save_as(tmp_path / "essai")
 
     # try to load without extension specification (will first assume it is scp)
-    dl = NDDataset.load("essai")
+    dl = NDDataset.load("essai", allow_unsafe_legacy=True)
     # assert dl.directory == cwd
     assert_array_equal(dl.data, ir.data)
     f.unlink()
@@ -72,7 +74,7 @@ def test_ndio_2D(ndataset_2d, tmp_path):
     assert ir2.directory == tmp_path
     with pytest.raises(FileNotFoundError):
         NDDataset.load("essai2D")
-    nd = NDDataset.load(tmp_path / "essai2D")
+    nd = NDDataset.load(tmp_path / "essai2D", allow_unsafe_legacy=True)
     assert nd.directory == tmp_path
     f.unlink()
 
@@ -84,7 +86,7 @@ def test_ndio_roundtrip_preserves_selected_non_first_default(tmp_path):
     selected_data = ds.x.data.copy()
     filename = ds.save_as(tmp_path / "multicoord_default", confirm=False)
 
-    loaded = NDDataset.load(filename)
+    loaded = NDDataset.load(filename, allow_unsafe_legacy=True)
 
     assert loaded.x.default == loaded.x["_2"]
     assert_array_equal(loaded.x.default.data, selected_data)
@@ -96,7 +98,7 @@ def test_ndio_roundtrip_preserves_reference_lookup(tmp_path):
     ds = NDDataset([1.0, 2.0, 3.0], coordset=CoordSet(x=c, y="x"))
     filename = ds.save_as(tmp_path / "reference_coords", confirm=False)
 
-    loaded = NDDataset.load(filename)
+    loaded = NDDataset.load(filename, allow_unsafe_legacy=True)
 
     assert loaded.coordset.references == ds.coordset.references
     assert loaded.coordset["y"] == "x"
@@ -120,7 +122,7 @@ def test_ndio_load_without_default_field_keeps_legacy_behavior(tmp_path):
     with zipfile.ZipFile(filename, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
         zipf.writestr(member, json.dumps(js, indent=2))
 
-    loaded = NDDataset.load(filename)
+    loaded = NDDataset.load(filename, allow_unsafe_legacy=True)
 
     assert loaded.x.default == loaded.x["_1"]
     assert_array_equal(loaded.x.data, legacy_default_data)
@@ -140,7 +142,7 @@ def test_ndio_load_ignores_legacy_roi_fields(tmp_path):
     with zipfile.ZipFile(filename, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
         zipf.writestr(member, json.dumps(js, indent=2))
 
-    loaded = NDDataset.load(filename)
+    loaded = NDDataset.load(filename, allow_unsafe_legacy=True)
 
     assert not hasattr(loaded, "roi")
     assert not hasattr(loaded.x, "roi")
@@ -159,7 +161,62 @@ def test_ndio_load_ignores_legacy_modeldata_field(tmp_path):
     with zipfile.ZipFile(filename, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
         zipf.writestr(member, json.dumps(js, indent=2))
 
-    loaded = NDDataset.load(filename)
+    loaded = NDDataset.load(filename, allow_unsafe_legacy=True)
+
+
+def test_ndio_load_requires_explicit_opt_in_for_legacy_scp(tmp_path, monkeypatch):
+    ds = NDDataset([0.0, 1.0, 2.0], name="legacy_dataset")
+    filename = ds.save_as(tmp_path / "legacy_dataset", confirm=False)
+
+    def fail_pickle_loads(*args, **kwargs):
+        raise AssertionError("pickle.loads must not run in safe mode")
+
+    with monkeypatch.context() as m:
+        m.setattr("spectrochempy.utils.jsonutils.pickle.loads", fail_pickle_loads)
+
+        with pytest.raises(
+            SpectroChemPyError,
+            match="trusted legacy loading",
+        ):
+            NDDataset.load(filename)
+
+    loaded = NDDataset.load(filename, allow_unsafe_legacy=True)
+    assert_dataset_equal(loaded, ds)
+
+
+def test_ndio_load_content_requires_explicit_opt_in(tmp_path):
+    ds = NDDataset([0.0, 1.0, 2.0], name="legacy_content")
+    filename = ds.save_as(tmp_path / "legacy_content", confirm=False)
+    content = filename.read_bytes()
+
+    with pytest.raises(
+        SpectroChemPyError,
+        match="allow_unsafe_legacy=True",
+    ):
+        NDDataset.load("legacy_content.scp", content=content)
+
+    loaded = NDDataset.load(
+        "legacy_content.scp",
+        content=content,
+        allow_unsafe_legacy=True,
+    )
+    assert_dataset_equal(loaded, ds)
+
+
+@pytest.mark.parametrize("loader_name", ["load", "read"])
+def test_native_load_aliases_require_explicit_opt_in(tmp_path, loader_name):
+    ds = NDDataset([0.0, 1.0, 2.0], name="legacy_alias")
+    filename = ds.save_as(tmp_path / "legacy_alias", confirm=False)
+    loader = getattr(scp, loader_name)
+
+    with pytest.raises(
+        SpectroChemPyError,
+        match="trusted legacy loading",
+    ):
+        loader(filename)
+
+    loaded = loader(filename, allow_unsafe_legacy=True)
+    assert_dataset_equal(loaded, ds)
 
     assert not hasattr(loaded, "modeldata")
 

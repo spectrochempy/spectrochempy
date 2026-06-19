@@ -9,6 +9,7 @@ import logging
 import pytest
 from pathlib import Path
 import spectrochempy as scp
+from spectrochempy.application.application import SpectroChemPy
 from spectrochempy.application.application import app
 from unittest.mock import patch
 import subprocess
@@ -81,6 +82,19 @@ def test_datadir():
     assert DATADIR.exists()
     assert DATADIR.is_dir()
     assert DATADIR.name == "testdata"
+
+
+def test_invalid_json_config_is_removed_after_close(tmp_path):
+    """Invalid JSON config files should be removed without blocking startup."""
+    invalid = tmp_path / "CP.json"
+    invalid.write_text("{not valid json", encoding="utf-8")
+
+    app = SpectroChemPy(config_dir=tmp_path, log_level=logging.WARNING)
+    app._init_all_preferences()
+
+    assert not invalid.exists()
+    assert app.general_preferences is not None
+    assert app.plot_preferences is not None
 
 
 @pytest.mark.parametrize(

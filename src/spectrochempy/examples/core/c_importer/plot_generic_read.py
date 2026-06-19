@@ -14,23 +14,28 @@ either from local or remote files.
 
 # %%
 # First we need to import the spectrochempy API package
+import os
+from pathlib import Path
+
 import spectrochempy as scp
+
+TEST_FILE = Path(os.environ.get("TEST_FILE", "irdata/nh4y-activation.spg"))
+TEST_FOLDER = Path(os.environ.get("TEST_FOLDER", "irdata"))
 
 # %%
 # Import dataset from local files
 # -------------------------------
 # Read a IR data recorded in Omnic format (``.spg`` extension).
 # We just pass the file name as parameter.
-dataset = scp.read("irdata/nh4y-activation.spg")
+dataset = scp.read(TEST_FILE)
 print(dataset)
 
 # %%
-_ = dataset.plot(style="paper")
+if dataset is not None:
+    _ = dataset.plot(style="paper")
 # %%
 # When using `read`, we can pass filename as a `str` or a `~pathlib.Path` object.
-from pathlib import Path
-
-filename = Path("irdata/nh4y-activation.spg")
+filename = TEST_FILE
 dataset = scp.read(filename)
 
 # %%
@@ -44,8 +49,9 @@ print(datadir)
 # By default, the different files will be merged along the first dimension (y).
 # However, for this to work, the second dimension (x) must be compatible (same size)
 # or else a WARNING appears. To avoid the warning and get individual spectra, you can
-# set ``merge`` to `False` .
-dataset_list = scp.read("irdata", merge=False)
+# set ``merge`` to `False` . This test-data directory may also contain historical
+# trusted native `.scp` archives, which require explicit legacy opt-in.
+dataset_list = scp.read(TEST_FOLDER, merge=False, allow_unsafe_legacy=True)
 print(dataset_list)
 
 # %%
