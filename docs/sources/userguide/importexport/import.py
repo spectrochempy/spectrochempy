@@ -110,6 +110,15 @@ X
 #
 #     scp.read("example.scp", allow_unsafe_legacy=True)
 #
+# For a short transition period, the contrast with newly written native files
+# is worth keeping explicit:
+#
+#     # Newly written native file:
+#     # ds = scp.read("new.scp")
+#
+#     # Historical trusted legacy file only:
+#     # ds = scp.read("old.scp", allow_unsafe_legacy=True)
+#
 # Only enable ``allow_unsafe_legacy=True`` for files from known and trusted
 # sources.
 #

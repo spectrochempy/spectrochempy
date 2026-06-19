@@ -62,6 +62,12 @@ Breaking Changes
   reloaded explicitly with ``allow_unsafe_legacy=True``, and only from known
   and trusted sources.
 
+- Writing native ``.scp`` and ``.pscp`` files is now safe by default. Newly
+  saved archives no longer use pickle-backed payloads for dataset arrays or
+  complex scalars, so normal save/load round-trips work without
+  ``allow_unsafe_legacy=True`` while historical trusted archives remain
+  available through the explicit legacy opt-in.
+
 Developer
 ~~~~~~~~~
 

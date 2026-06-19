@@ -35,11 +35,11 @@ def test_write(mock_cwd, ndataset_1d):
     filename = nd.write("essai.scp", overwrite=True)
 
     # Read the file and compare
-    nd2 = NDDataset.load(filename, allow_unsafe_legacy=True)
+    nd2 = NDDataset.load(filename)
     testing.assert_dataset_equal(nd2, nd)
 
     # we can also use the read method to read it
-    nd3 = scp.read(filename, allow_unsafe_legacy=True)
+    nd3 = scp.read(filename)
     testing.assert_dataset_equal(nd3, nd)
 
     filename.unlink()
