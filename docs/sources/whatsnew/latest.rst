@@ -49,6 +49,14 @@ Bug Fixes
   variable instead of a literal string; and invalid ``return_ifg`` values
   now produce a clear warning. (PR by @gaoflow)
 
+Breaking Changes
+~~~~~~~~~~~~~~~~
+
+- Loading native ``.scp`` and ``.pscp`` files is now safe by default.
+  Historical archives that require pickle-based native persistence must be
+  reloaded explicitly with ``allow_unsafe_legacy=True``, and only from known
+  and trusted sources.
+
 Developer
 ~~~~~~~~~
 

@@ -45,7 +45,7 @@ def test_nddataset_bug_462():
     A = scp.random((10, 100))
     A.x = scp.Coord(np.arange(0.0, 100.0, 1), title="coord1")
     af = A.write("A.scp", overwrite=True)
-    B = scp.read("A.scp")
+    B = scp.read("A.scp", allow_unsafe_legacy=True)
     assert B.x == A.x
 
     C = scp.random((10, 100))
@@ -54,7 +54,7 @@ def test_nddataset_bug_462():
         scp.Coord(np.arange(0.0, 1000.0, 10), title="coord2"),
     ]
     cf = C.write("C.scp", overwrite=True)
-    D = scp.read("C.scp")
+    D = scp.read("C.scp", allow_unsafe_legacy=True)
     assert len(D.x) == 2, "incorrect encoding/decoding"
 
     af.unlink()

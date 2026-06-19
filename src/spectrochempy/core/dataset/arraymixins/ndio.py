@@ -279,6 +279,10 @@ class NDIO(tr.HasTraits):
         ----------------
         content : str, optional
              The optional content of the file(s) to be loaded as a binary string.
+        allow_unsafe_legacy : bool, optional, default=False
+             Allow loading legacy SCP/PSCP payloads that require pickle-based
+             native persistence. Enable this only for files from known and
+             trusted sources.
 
         See Also
         --------
@@ -295,17 +299,19 @@ class NDIO(tr.HasTraits):
         >>> f = nd1.save()
         >>> f.name
         'nh4y-activation.scp'
-        >>> nd2 = scp.load(f)
+        >>> nd2 = scp.load(f, allow_unsafe_legacy=True)
 
         Alternatively, this method can be called as a class method of NDDataset or Project object:
 
         >>> from spectrochempy import *
-        >>> nd2 = NDDataset.load(f)
+        >>> nd2 = NDDataset.load(f, allow_unsafe_legacy=True)
 
         """
         content = kwargs.get("content")
+        allow_unsafe_legacy = kwargs.get("allow_unsafe_legacy", False)
+        resolved_filename = None
 
-        if content:
+        if content is not None:
             fid = io.BytesIO(content)
         else:
             # be sure to convert filename to a pathlib object with the
@@ -319,10 +325,11 @@ class NDIO(tr.HasTraits):
                 raise FileNotFoundError(f"No file with name {filename} could be found.")
                 # filename = check_filenames(filename, **kwargs)[0]
             fid = open(filename, "rb")  # noqa: SIM115
+            resolved_filename = filename
 
         # get zip file
         try:
-            obj = ScpFile(fid)
+            obj = ScpFile(fid, allow_unsafe_legacy=allow_unsafe_legacy)
         except FileNotFoundError as e:
             raise exceptions.SpectroChemPyError(
                 f"File {filename} doesn't exist!",
@@ -334,18 +341,16 @@ class NDIO(tr.HasTraits):
                 ) from e
             raise exceptions.SpectroChemPyError("Undefined error!") from e
 
-        js = obj[obj.files[0]]
+        with obj:
+            js = obj[obj.files[0]]
         if kwargs.get("json", False):
             return js
 
         new = cls.loads(js)
 
-        fid.close()
-
-        if filename:
-            filename = pathclean(filename)
-            new._filename = filename
-            new.name = filename.stem
+        if resolved_filename is not None:
+            new._filename = resolved_filename
+            new.name = resolved_filename.stem
 
         return new
 
@@ -511,4 +516,14 @@ class NDIO(tr.HasTraits):
         return filename
 
 
-load = NDIO.load  # make load accessible directly from the scp API
+def load(filename: str | pathlib.Path | BinaryIO, **kwargs: Any) -> Any:
+    """Load a native SpectroChemPy dataset or project from a `.scp` / `.pscp` file."""
+    from spectrochempy.core.dataset.nddataset import NDDataset
+    from spectrochempy.core.project.project import Project
+
+    if isinstance(filename, str | pathlib.Path):
+        suffix = pathclean(filename).suffix.lower()
+        if suffix == ".pscp":
+            return Project.load(filename, **kwargs)
+
+    return NDDataset.load(filename, **kwargs)

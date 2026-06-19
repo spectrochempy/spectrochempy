@@ -73,6 +73,11 @@ Breaking Changes
 ~~~~~~~~~~~~~~~~
 .. Add here new breaking changes (do not delete this comment)
 
+- Loading native ``.scp`` and ``.pscp`` files is now safe by default.
+  Historical archives that require pickle-based native persistence must be
+  reloaded explicitly with ``allow_unsafe_legacy=True``, and only from known
+  and trusted sources.
+
 
 .. section
 

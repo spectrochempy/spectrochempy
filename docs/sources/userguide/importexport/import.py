@@ -104,6 +104,15 @@ X
 # The `read_dir` function scans a directory and reads all supported files,
 # returning a list of `NDDataset` objects.
 #
+# Historical ``.scp`` and ``.pscp`` files are trusted native persistence
+# archives. If such a file requires legacy pickle-based decoding, load it
+# explicitly with:
+#
+#     scp.read("example.scp", allow_unsafe_legacy=True)
+#
+# Only enable ``allow_unsafe_legacy=True`` for files from known and trusted
+# sources.
+#
 # Other reader functions return either a single `NDDataset` or multiple `NDDataset`
 # objects, depending on the file type and content.
 #

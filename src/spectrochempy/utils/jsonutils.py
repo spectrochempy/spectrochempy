@@ -7,10 +7,18 @@
 
 import base64
 import datetime
+import json
 import pathlib
 import pickle
+from functools import partial
 
 import numpy as np
+
+UNSAFE_LEGACY_LOADING_MESSAGE = (
+    "This SCP/PSCP file requires trusted legacy loading because it uses "
+    "pickle-based native persistence. Reload with allow_unsafe_legacy=True only "
+    "if the file comes from a known and trusted source."
+)
 
 
 def fromisoformat(s):
@@ -24,7 +32,13 @@ def fromisoformat(s):
 # ======================================================================================
 # JSON UTILITIES
 # ======================================================================================
-def json_decoder(dic):
+def _raise_unsafe_legacy_loading_error():
+    from spectrochempy.utils.exceptions import SpectroChemPyError
+
+    raise SpectroChemPyError(UNSAFE_LEGACY_LOADING_MESSAGE)
+
+
+def json_decoder(dic, allow_unsafe_legacy=False):
     """Decode a serialized json object."""
     from spectrochempy.core.units import Quantity
     from spectrochempy.core.units import Unit
@@ -38,6 +52,8 @@ def json_decoder(dic):
             return np.datetime64(dic["isoformat"])
         if klass == "NUMPY_ARRAY":
             if "base64" in dic:
+                if not allow_unsafe_legacy:
+                    _raise_unsafe_legacy_loading_error()
                 return pickle.loads(base64.b64decode(dic["base64"]))  # noqa: S301
             if "tolist" in dic:
                 return np.array(dic["tolist"], dtype=dic["dtype"])
@@ -49,6 +65,8 @@ def json_decoder(dic):
             return Unit(dic["str"])
         elif klass == "COMPLEX":
             if "base64" in dic:
+                if not allow_unsafe_legacy:
+                    _raise_unsafe_legacy_loading_error()
                 return pickle.loads(base64.b64decode(dic["base64"]))  # noqa: S301
             if "tolist" in dic:
                 if dic["dtype"] == "complex":
@@ -65,9 +83,20 @@ def json_decoder(dic):
             meta.readonly = dic.get("readonly", False)
             return meta
 
-        raise TypeError(dic["__class__"])
+        raise TypeError(klass)
 
     return dic
+
+
+def json_loads(content, *, allow_unsafe_legacy=False):
+    """Load JSON content with explicit legacy unsafe decoding control."""
+    return json.loads(
+        content,
+        object_hook=partial(
+            json_decoder,
+            allow_unsafe_legacy=allow_unsafe_legacy,
+        ),
+    )
 
 
 def json_encoder(byte_obj, encoding=None):
