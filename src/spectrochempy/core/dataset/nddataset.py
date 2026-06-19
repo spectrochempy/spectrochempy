@@ -13,6 +13,7 @@ __dataset_methods__ = [  # Methods that can be called as API functions
     "transpose",
     "reshape",
     "to_array",
+    "to_netcdf",
     "to_xarray",
     "take",
     "set_complex",
@@ -81,6 +82,102 @@ def _normalize_json_compatible(value: Any) -> Any:
         return [_normalize_json_compatible(item) for item in value]
 
     raise TypeError(f"Value of type {type(value).__name__} is not JSON-compatible")
+
+
+def _prepare_xarray_dataset_for_netcdf(dataset):
+    """Convert a canonical xarray Dataset into a NetCDF-safe representation."""
+    xds = dataset.copy(deep=True)
+
+    for attr_name in ("scpy_meta", "scpy_skipped_meta_keys"):
+        if attr_name in xds.attrs:
+            xds.attrs[attr_name] = json.dumps(xds.attrs[attr_name], sort_keys=True)
+
+    primary_name = xds.attrs.get("scpy_primary_variable")
+    mask_name = xds.attrs.get("scpy_mask_variable")
+    if mask_name in xds.data_vars:
+        mask_var = xds[mask_name]
+        mask_attrs = dict(mask_var.attrs)
+        mask_attrs["scpy_mask_encoding"] = "bool-as-int8"
+        xds[mask_name] = xds[mask_name].astype(np.int8)
+        xds[mask_name].attrs = mask_attrs
+
+    if primary_name in xds.data_vars and np.iscomplexobj(xds[primary_name].data):
+        xr = import_optional_dependency("xarray")
+        data_var = xds[primary_name]
+        real_name = f"{primary_name}__real"
+        imag_name = f"{primary_name}__imag"
+
+        real_attrs = dict(data_var.attrs)
+        imag_attrs = dict(data_var.attrs)
+        real_attrs["scpy_complex_component"] = "real"
+        imag_attrs["scpy_complex_component"] = "imag"
+
+        xds[real_name] = xr.DataArray(
+            np.asarray(data_var.data).real,
+            dims=data_var.dims,
+            coords=data_var.coords,
+            attrs=real_attrs,
+        )
+        xds[imag_name] = xr.DataArray(
+            np.asarray(data_var.data).imag,
+            dims=data_var.dims,
+            coords=data_var.coords,
+            attrs=imag_attrs,
+        )
+        xds = xds.drop_vars(primary_name)
+        xds.attrs["scpy_complex_representation"] = "split-real-imag"
+        xds.attrs["scpy_complex_real"] = real_name
+        xds.attrs["scpy_complex_imag"] = imag_name
+
+    return xds
+
+
+def _restore_xarray_dataset_from_netcdf(dataset):
+    """Restore the canonical xarray Dataset representation from NetCDF content."""
+    xds = dataset.copy(deep=True)
+
+    for attr_name in ("scpy_meta", "scpy_skipped_meta_keys"):
+        if attr_name in xds.attrs and isinstance(xds.attrs[attr_name], str):
+            xds.attrs[attr_name] = json.loads(xds.attrs[attr_name])
+
+    complex_repr = xds.attrs.get("scpy_complex_representation")
+    primary_name = xds.attrs.get("scpy_primary_variable")
+    if complex_repr == "split-real-imag":
+        xr = import_optional_dependency("xarray")
+        real_name = xds.attrs.get("scpy_complex_real")
+        imag_name = xds.attrs.get("scpy_complex_imag")
+        if real_name in xds.data_vars and imag_name in xds.data_vars:
+            real_var = xds[real_name]
+            imag_var = xds[imag_name]
+            attrs = dict(real_var.attrs)
+            attrs.pop("scpy_complex_component", None)
+            xds[primary_name] = xr.DataArray(
+                np.asarray(real_var.data) + 1j * np.asarray(imag_var.data),
+                dims=real_var.dims,
+                coords=real_var.coords,
+                attrs=attrs,
+            )
+            xds = xds.drop_vars([real_name, imag_name])
+
+    mask_name = xds.attrs.get("scpy_mask_variable")
+    if mask_name in xds.data_vars:
+        xds[mask_name] = xds[mask_name].astype(bool)
+        xds[mask_name].attrs.pop("scpy_mask_encoding", None)
+
+    return xds
+
+
+def _handle_xarray_netcdf_backend_error(exc: Exception):
+    message = str(exc)
+    if (
+        "did not find a match in any of xarray's currently installed IO backends"
+        in message
+    ):
+        raise SpectroChemPyError(
+            "NetCDF I/O requires xarray plus an available NetCDF backend. "
+            "Install xarray and use the scipy backend or another xarray-compatible backend.",
+        ) from exc
+    raise exc
 
 
 # ======================================================================================
@@ -1460,6 +1557,39 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
 
         return xds
 
+    def to_netcdf(self, filename=None, **kwargs):
+        """
+        Persist this dataset to NetCDF using the canonical xarray mapping.
+
+        The NetCDF prototype is intentionally narrow:
+
+        - one `NDDataset`;
+        - default coordinates only;
+        - explicit mask variable support;
+        - JSON-compatible metadata only;
+        - complex data persisted through a split real/imag convention.
+
+        Parameters
+        ----------
+        filename : path-like or file-like, optional
+            Destination path or writable file-like object. If omitted, return
+            the serialized NetCDF bytes produced by xarray.
+        **kwargs
+            Additional keyword arguments forwarded to
+            `xarray.Dataset.to_netcdf()`. The default engine is `scipy`.
+
+        Returns
+        -------
+        object
+            The return value from `xarray.Dataset.to_netcdf()`.
+        """
+        kwargs.setdefault("engine", "scipy")
+        xds = _prepare_xarray_dataset_for_netcdf(self.to_xarray())
+        try:
+            return xds.to_netcdf(path=filename, **kwargs)
+        except Exception as exc:  # pragma: no cover - backend-dependent
+            _handle_xarray_netcdf_backend_error(exc)
+
     @classmethod
     def from_xarray(cls, dataset):
         """
@@ -1526,6 +1656,36 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             kwargs["mask"] = np.asarray(dataset[mask_name].data, dtype=bool)
 
         return cls(np.asarray(data_var.data), **kwargs)
+
+    @classmethod
+    def from_netcdf(cls, filename, **kwargs):
+        """
+        Reconstruct an `NDDataset` from the xarray-backed NetCDF prototype.
+
+        Parameters
+        ----------
+        filename : path-like or file-like
+            Source NetCDF file.
+        **kwargs
+            Additional keyword arguments forwarded to `xarray.open_dataset()`.
+            The default engine is `scipy`.
+
+        Returns
+        -------
+        NDDataset
+            Reconstructed dataset.
+        """
+        xr = import_optional_dependency("xarray")
+        kwargs.setdefault("engine", "scipy")
+
+        try:
+            with xr.open_dataset(filename, **kwargs) as xds:
+                xds.load()
+                restored = _restore_xarray_dataset_from_netcdf(xds)
+        except Exception as exc:  # pragma: no cover - backend-dependent
+            _handle_xarray_netcdf_backend_error(exc)
+
+        return cls.from_xarray(restored)
 
     def transpose(self, *dims, inplace=False):
         """

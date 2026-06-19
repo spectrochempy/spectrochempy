@@ -192,6 +192,8 @@ Import a NDataset from external source
     read_spc
     read_spg
     read_srs
+    NDDataset.from_xarray
+    NDDataset.from_netcdf
     load_iris
     download_nist_ir
 
@@ -212,6 +214,7 @@ Export a NDDataset
     write_matlab
     write_xls
     to_array
+    to_netcdf
     to_xarray
 
 
