@@ -11,6 +11,7 @@ __dataset_methods__ = ["simps", "trapz", "simpson", "trapezoid"]
 
 import functools
 
+import numpy as np
 import scipy.integrate
 
 from spectrochempy.utils.decorators import deprecated
@@ -29,7 +30,11 @@ def _integrate_method(method):
         if kwargs.get("dim"):
             kwargs.pop("dim")
 
-        data = method(dataset.data, x=dataset.coord(dim).data, axis=axis, **kwargs)
+        # SciPy integration routines expect a plain ndarray-like coordinate.
+        # Some NumPy/SciPy combinations are stricter with ndarray subclasses or
+        # view semantics, so normalize the integration axis coordinate here.
+        x = np.asarray(dataset.coord(dim).data)
+        data = method(dataset.data, x=x, axis=axis, **kwargs)
 
         if dataset.coord(dim).reversed:
             data *= -1

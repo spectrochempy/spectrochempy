@@ -8,6 +8,7 @@
 """Tests integration"""
 
 import numpy as np
+import scipy.integrate
 from numpy.testing import assert_allclose
 
 import spectrochempy as scp
@@ -112,3 +113,28 @@ def test_integrate_preserves_remaining_coord_units():
     assert area.y.title == "temperature"
     assert area.units == dataset.units * x.units
     assert_allclose(area.data, [2.0, 2.0])
+
+
+def test_integrate_passes_plain_ndarray_coordinate(monkeypatch):
+    dataset = scp.NDDataset(
+        [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]],
+        coordset=[
+            scp.Coord([0.0, 1.0], title="sample", units="s"),
+            scp.Coord([0.1, 0.2, 0.3], title="x", units="cm^-1"),
+        ],
+        units="absorbance",
+    )
+
+    seen = {}
+    original = scipy.integrate.simpson
+
+    def capture(data, **kwargs):
+        seen["x_type"] = type(kwargs["x"])
+        seen["x_is_ndarray"] = isinstance(kwargs["x"], np.ndarray)
+        return original(data, **kwargs)
+
+    monkeypatch.setattr("scipy.integrate.simpson", capture)
+
+    dataset.simpson(dim="x")
+
+    assert seen["x_is_ndarray"] is True
