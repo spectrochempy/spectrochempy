@@ -9,6 +9,8 @@ import numpy as np
 import traitlets as tr
 
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
+from spectrochempy.analysis._base._analysisbase import NotFittedError
+from spectrochempy.analysis._base._result import AnalysisResult
 from spectrochempy.application.application import info_
 from spectrochempy.utils.decorators import _wrap_ndarray_output_to_nddataset
 from spectrochempy.utils.decorators import signature_has_configurable_traits
@@ -240,3 +242,48 @@ class EFA(DecompositionAnalysis):
         if self.cutoff is not None:
             b = np.max((b, np.ones_like(b) * self.cutoff), axis=0)
         return b
+
+    # ----------------------------------------------------------------------------------
+    # Result property
+    # ----------------------------------------------------------------------------------
+    @property
+    def result(self):
+        """
+        ``AnalysisResult`` object wrapping the fitted EFA estimator.
+
+        Returns
+        -------
+        AnalysisResult
+            Container with ``parameters``, ``outputs``, and ``diagnostics``
+            derived from the fitted estimator.
+
+        Raises
+        ------
+        NotFittedError
+            If the estimator has not been fitted yet.
+        """
+        if not self._fitted:
+            raise NotFittedError(
+                f"This {type(self).__name__} instance is not fitted yet. "
+                "Call 'fit' with appropriate arguments before using this estimator."
+            )
+
+        parameters = {
+            "cutoff": self.cutoff,
+            "n_components": self.n_components,
+        }
+
+        outputs = {
+            "f_ev": self.f_ev,
+            "b_ev": self.b_ev,
+            "components": self.components,
+        }
+
+        diagnostics = {}
+
+        return AnalysisResult(
+            estimator="EFA",
+            parameters=parameters,
+            outputs=outputs,
+            diagnostics=diagnostics,
+        )

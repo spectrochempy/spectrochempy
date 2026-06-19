@@ -10,17 +10,21 @@
 
 ## 1. Validated state
 
-Three prototypes have been implemented and merged:
+Eight estimators now implement the Result Object contract:
 
-| PR | Estimator | Result type | Commit |
+| PR | Estimator | Result type | Status |
 |---|---|---|---|
-| PR1 (#1208) | PCA | `AnalysisResult` | `a9157d1aa7` |
-| PR2 (#1209) | SVD | `AnalysisResult` | `9aa59cf088` |
-| PR3 | Optimize | `FitResult` | `6872bbed56` |
+| PR1 (#1208) | PCA | `AnalysisResult` | Merged |
+| PR2 (#1209) | SVD | `AnalysisResult` | Merged |
+| PR3 (#1211) | Optimize | `FitResult` | Merged |
+| PR4 (#1213) | NMF | `AnalysisResult` | Merged |
+| PR5 (#1215) | MCRALS | `AnalysisResult` | Merged |
+| PR6 (#1217) | SIMPLISMA | `AnalysisResult` | Merged |
+| PR7 (#1218) | EFA | `AnalysisResult` | Merged |
 
 `ResultBase`, `AnalysisResult`, and `FitResult` are defined in
 `src/spectrochempy/analysis/_base/_result.py` (98 lines total). All three
-classes were used without subclass adaptation — the base classes sufficed.
+classes were used without subclass adaptation — **zero changes since PR1**.
 
 Infrastructure validated:
 
@@ -28,17 +32,17 @@ Infrastructure validated:
   `diagnostics` as named dict-valued parameters.
 - `ResultBase.__repr__` displays estimator name, parameters, output names
   with shapes, and diagnostic names with shapes.
-- No subclass of `AnalysisResult` or `FitResult` was needed for PCA, SVD, or
-  Optimize.
+- No subclass of `AnalysisResult` or `FitResult` was needed for any estimator,
+  including the most complex candidate (MCRALS, 10-element `_outfit`).
 
-Common pattern across all three prototypes:
+Common pattern across all seven estimators:
 
 ```python
 @property
 def result(self):
     if not self._fitted:
         raise NotFittedError(...)
-    return SomeResult(
+    return AnalysisResult(
         estimator="Name",
         parameters={...},
         outputs={...},
@@ -48,8 +52,8 @@ def result(self):
 
 Cache approach (deliberately deferred):
 
-- All three create a new result object on every access.
-- `pca.result is not pca.result` — documented as intentional for PR phase.
+- All estimators create a new result object on every access.
+- `estimator.result is not estimator.result` — documented as intentional.
 - See Open Questions below.
 
 ---
@@ -262,22 +266,23 @@ PR3: Optimize FitResult         ✅ Merged (#1211)
 PR4: NMF AnalysisResult         ✅ Merged (#1213)
 PR5: MCRALS AnalysisResult      ✅ Merged (#1215)
 PR6: SIMPLISMA AnalysisResult   ✅ Merged (#1217)
+PR7: EFA AnalysisResult         ✅ Merged (#1218)
 ```
 
-Seven estimators now implement the Result Object contract:
-- 6 decomposition estimators → `AnalysisResult` (PCA, SVD, NMF, MCRALS, SIMPLISMA)
+Eight estimators now implement the Result Object contract:
+- 7 decomposition estimators → `AnalysisResult` (PCA, SVD, NMF, MCRALS, SIMPLISMA, EFA)
 - 1 curve-fitting estimator → `FitResult` (Optimize)
 
-Key outcomes after 6 PRs:
+Key outcomes after 7 PRs:
 - **Zero** changes to `_result.py` since PR1 — `ResultBase`, `AnalysisResult`, `FitResult` unchanged.
 - **`_fit_meta`** pattern established (PR3) and reused (PR5, PR6) for diagnostic capture.
 - No subclass of `AnalysisResult` or `FitResult` was needed.
+- EFA is the first estimator with an empty `diagnostics` dict — acceptable per contract.
 
 ### Remaining candidates
 
 | Order | Estimator | Complexity | Notes |
 |---|---|---|---|
-| PR7 | EFA | Low | Simple `_outfit` (2-element tuple), but outputs are eigenvalue trajectories |
 | PR8 | FastICA | Medium | Many decorated properties, sklearn backend |
 | PR9 | PLSRegression | High | No `_outfit` — 10+ private attrs stored directly |
 | Later | Baseline | Medium | Processor, not decomposition — different architectural role |

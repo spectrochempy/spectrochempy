@@ -53,3 +53,5 @@ Developer
   (:pr:`1208`, :pr:`1209`, :pr:`1211`, :pr:`1213`, :pr:`1215`, :pr:`1217`)
 
 - MAINT: extend Result Object support to SIMPLISMA. (:pr:`1217`)
+
+- MAINT: extend Result Object support to EFA. (:pr:`1218`)
