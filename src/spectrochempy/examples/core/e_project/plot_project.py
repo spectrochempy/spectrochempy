@@ -63,5 +63,5 @@ proj.save()
 # %%
 # RELOAD the project from disk as newproj
 
-newproj = scp.Project.load("project_1")
+newproj = scp.Project.load("project_1", allow_unsafe_legacy=True)
 newproj
