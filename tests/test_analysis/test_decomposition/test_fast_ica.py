@@ -153,3 +153,10 @@ def test_fastica_3d_raises():
 
     with pytest.raises(ValueError, match="Found array with dim 3"):
         scp_ICA(n_components=2).fit(ds_3d)
+
+
+def test_whitening_returns_none_when_whiten_false(fastica_dataset):
+    """Regression: whitening property should return None when whiten=False."""
+    ica = scp_ICA(n_components=4, random_state=123, whiten=False)
+    ica.fit(fastica_dataset)
+    assert ica.whitening is None

@@ -26,6 +26,8 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- FIX: ``FastICA.whitening`` now returns ``None`` (instead of crashing) when
+  ``whiten=False``. (:pr:`1219`)
 - FIX: handle SVD ``compute_uv=False`` outputs consistently. The private
   ``_outfit`` attribute is now always a ``(U, s, VT)`` tuple, fixing wrong
   values and crashes for all properties when ``compute_uv=False``.
@@ -83,10 +85,7 @@ Developer
   (:pr:`1208`)
 
 - MAINT: extend Result Object support to PCA, SVD, NMF, Optimize,
-  MCRALS, and SIMPLISMA, providing unified access to analysis and
-  fitting outputs while preserving backward compatibility.
-  (:pr:`1208`, :pr:`1209`, :pr:`1211`, :pr:`1213`, :pr:`1215`, :pr:`1217`)
-
-- MAINT: extend Result Object support to SIMPLISMA. (:pr:`1217`)
-
-- MAINT: extend Result Object support to EFA. (:pr:`1218`)
+  MCRALS, SIMPLISMA, EFA, and FastICA, providing unified access to
+  analysis and fitting outputs while preserving backward compatibility.
+  (:pr:`1208`, :pr:`1209`, :pr:`1211`, :pr:`1213`, :pr:`1215`,
+  :pr:`1217`, :pr:`1218`, :pr:`1219`)
