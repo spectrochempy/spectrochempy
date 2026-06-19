@@ -108,24 +108,23 @@ def autosub(
     ranges = tuple(np.array(ranges, dtype=float))
     # must be float to be considered as frequency for instance
 
-    coords = new.coordset[dim]
+    coords = new.coordset[-1]
     xrange = trim_ranges(*ranges, reversed=coords.reversed)
 
     s = []
     r = []
 
-    # TODO: this do not work obviously for axis != -1 - correct this
     for xpair in xrange:
         # determine the slices
 
         sl = slice(*xpair)
-        s.append(dataset[..., sl].data)
+        s.append(new[..., sl].data)
         r.append(ref[..., sl].data)
 
     X_r = np.concatenate((*s,), axis=-1)
     ref_r = np.concatenate((*r,), axis=-1).squeeze()
 
-    indices, _ = list(zip(*np.ndenumerate(X_r[..., 0]), strict=False))  # .squeeze())))
+    indices = list(np.ndindex(X_r.shape[:-1]))
 
     # two methods
     # @jit
@@ -153,7 +152,10 @@ def autosub(
 
     x = _minim()
 
-    new._data -= np.dot(x.reshape(-1, 1), ref.data.reshape(1, -1))
+    ref_data = np.asarray(ref.data).reshape(-1)
+    coef_shape = new.shape[:-1] + (1,)
+    ref_shape = (1,) * (new.ndim - 1) + (ref_data.size,)
+    new._data -= x.reshape(coef_shape) * ref_data.reshape(ref_shape)
 
     if swapped:
         new = new.swapdims(axis, -1)

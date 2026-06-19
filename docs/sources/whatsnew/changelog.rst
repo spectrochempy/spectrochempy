@@ -51,6 +51,10 @@ Bug Fixes
 
 - FIX: ``PLSRegression.intercept`` no longer crashes when the target
   dataset ``Y`` has no coordinate labels. (:pr:`1220`)
+- FIX: ``autosub()`` now supports subtraction along non-last dimensions
+  consistently with its ``dim`` parameter, and the regression tests now
+  cover both last-axis and non-last-axis synthetic cases. (`#1079
+  <https://github.com/spectrochempy/spectrochempy/issues/1079>`_)
 - FIX: handle SVD ``compute_uv=False`` outputs consistently. The private
   ``_outfit`` attribute is now always a ``(U, s, VT)`` tuple, fixing wrong
   values and crashes for all properties when ``compute_uv=False``.
