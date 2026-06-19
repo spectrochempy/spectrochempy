@@ -15,6 +15,11 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 Bug Fixes
 ~~~~~~~~~
 
+- FIX: application startup now removes invalid JSON preference files only
+  after closing them first, avoiding a Windows ``PermissionError`` during
+  configuration initialisation when a stale file such as ``CP.json`` is
+  encountered.
+
 - FIX: ``FastICA.whitening`` now returns ``None`` (instead of crashing) when
   ``whiten=False``. (:pr:`1219`)
 
