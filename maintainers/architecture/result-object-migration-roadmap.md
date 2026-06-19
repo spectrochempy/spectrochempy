@@ -253,43 +253,35 @@ PR3 noted no stable public surface for residuals. If one emerges, should
 
 ---
 
-## 5. Proposed sequence
+## 5. Completed migration sequence
 
 ```
-PR4: NMF AnalysisResult
-  └─ low risk, quick win, validates PCA pattern for a second decomposition
-
-PR5: Provenance enrichment (optional — see §4.2)
-  └─ add structured provenance to ResultBase if deemed necessary before MCRALS
-
-PR6: MCRALS audit + AnalysisResult
-  └─ explicit audit before any code changes
-  └─ highest risk migration, requires careful planning
-
-PR7+: FitResult improvements
-  └─ residuals, FitParameters integration, richer solver diagnostics
-
-Later:
-  └─ Serialization round-trip for result objects
-  └─ Project integration
-  └─ DisplaySection / HTML integration
-  └─ Cache strategy
+PR1: PCA AnalysisResult         ✅ Merged (#1208)
+PR2: SVD AnalysisResult         ✅ Merged (#1209)
+PR3: Optimize FitResult         ✅ Merged (#1211)
+PR4: NMF AnalysisResult         ✅ Merged (#1213)
+PR5: MCRALS AnalysisResult      ✅ Merged (#1215)
+PR6: SIMPLISMA AnalysisResult   ✅ Merged (#1217)
 ```
 
-### Rationale
+Seven estimators now implement the Result Object contract:
+- 6 decomposition estimators → `AnalysisResult` (PCA, SVD, NMF, MCRALS, SIMPLISMA)
+- 1 curve-fitting estimator → `FitResult` (Optimize)
 
-- NMF is the natural next step: same module (`decomposition`), same base
-  class (`DecompositionAnalysis`), same sklearn backend pattern. Low risk,
-  high confidence.
-- MCRALS is deferred because its complexity would slow progress if tackled
-  before NMF. An explicit audit (PR6) must precede any MCRALS code changes.
-- Provenance enrichment could either precede MCRALS (so MCRALS result gets
-  provenance from the start) or wait until after all initial migrations.
-  Decision deferred to maintainers.
-- FitResult improvements are post-MCRALS because `FitResult` is already
-  stable and Optimize is the only consumer.
-- Serialization, Project integration, and DisplaySection are deferred to a
-  later phase when all result-producing estimators implement the contract.
+Key outcomes after 6 PRs:
+- **Zero** changes to `_result.py` since PR1 — `ResultBase`, `AnalysisResult`, `FitResult` unchanged.
+- **`_fit_meta`** pattern established (PR3) and reused (PR5, PR6) for diagnostic capture.
+- No subclass of `AnalysisResult` or `FitResult` was needed.
+
+### Remaining candidates
+
+| Order | Estimator | Complexity | Notes |
+|---|---|---|---|
+| PR7 | EFA | Low | Simple `_outfit` (2-element tuple), but outputs are eigenvalue trajectories |
+| PR8 | FastICA | Medium | Many decorated properties, sklearn backend |
+| PR9 | PLSRegression | High | No `_outfit` — 10+ private attrs stored directly |
+| Later | Baseline | Medium | Processor, not decomposition — different architectural role |
+| Later | LSTSQ / NNLS | Low | Thin sklearn wrappers — `FitResult`?
 
 ---
 

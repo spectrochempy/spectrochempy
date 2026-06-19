@@ -48,6 +48,8 @@ Developer
   (:pr:`1208`)
 
 - MAINT: extend Result Object support to PCA, SVD, NMF, Optimize,
-  and MCRALS, providing unified access to analysis and fitting outputs
-  while preserving backward compatibility. (:pr:`1208`, :pr:`1209`,
-  :pr:`1211`, :pr:`1213`, :pr:`1215`)
+  MCRALS, and SIMPLISMA, providing unified access to analysis and
+  fitting outputs while preserving backward compatibility.
+  (:pr:`1208`, :pr:`1209`, :pr:`1211`, :pr:`1213`, :pr:`1215`, :pr:`1217`)
+
+- MAINT: extend Result Object support to SIMPLISMA. (:pr:`1217`)
