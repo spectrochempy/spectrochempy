@@ -11,6 +11,7 @@ __dataset_methods__ = ["simps", "trapz", "simpson", "trapezoid"]
 
 import functools
 
+import numpy as np
 import scipy.integrate
 
 from spectrochempy.utils.decorators import deprecated
@@ -29,7 +30,22 @@ def _integrate_method(method):
         if kwargs.get("dim"):
             kwargs.pop("dim")
 
-        data = method(dataset.data, x=dataset.coord(dim).data, axis=axis, **kwargs)
+        # SciPy integration routines expect a plain ndarray-like coordinate.
+        # Some NumPy/SciPy combinations are stricter with ndarray subclasses or
+        # view semantics, so normalize the integration axis coordinate here.
+        x = np.asarray(dataset.coord(dim).data)
+        y = dataset.data
+        try:
+            data = method(y, x=x, axis=axis, **kwargs)
+        except NotImplementedError as exc:
+            if "multi-dimensional sub-views are not implemented" not in str(exc):
+                raise
+            data = method(
+                np.ascontiguousarray(y),
+                x=np.ascontiguousarray(x),
+                axis=axis,
+                **kwargs,
+            )
 
         if dataset.coord(dim).reversed:
             data *= -1
@@ -106,7 +122,7 @@ def trapezoid(dataset, **kwargs):
     NDDataset: [float64] a.u..cm^-1 (size: 55)
 
     """
-    return scipy.integrate.trapezoid(dataset.data, **kwargs)
+    return scipy.integrate.trapezoid(np.asarray(dataset), **kwargs)
 
 
 @deprecated(replace="Trapezoid", removed="0.11.0")
@@ -173,7 +189,7 @@ def simpson(dataset, *args, **kwargs):
     NDDataset: [float64] a.u..cm^-1 (size: 55)
 
     """
-    return scipy.integrate.simpson(dataset.data, **kwargs)
+    return scipy.integrate.simpson(np.asarray(dataset), **kwargs)
 
 
 @deprecated(replace="simpson")

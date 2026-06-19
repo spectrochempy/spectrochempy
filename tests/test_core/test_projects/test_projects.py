@@ -2,11 +2,12 @@
 # Copyright (©) 2014-2026 Laboratoire Catalyse et Spectrochimie (LCS), Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
-# ======================================================================================
-
+import base64
 import json
+import pickle
 import zipfile
 
+import numpy as np
 import pytest
 
 from spectrochempy.application.preferences import preferences
@@ -16,6 +17,26 @@ from spectrochempy.utils.constants import INPLACE
 from spectrochempy.utils.exceptions import SpectroChemPyError
 
 prefs = preferences
+
+
+def _rewrite_project_dataset_payload_as_legacy_pickle(filename):
+    current = Project.load(filename)
+
+    with zipfile.ZipFile(filename, "r") as zipf:
+        member = zipf.namelist()[0]
+        js = json.loads(zipf.read(member).decode("utf-8"))
+
+    js.pop("__format__", None)
+    js.pop("__version__", None)
+    js["datasets"][0]["data"] = {
+        "__class__": "NUMPY_ARRAY",
+        "base64": base64.b64encode(
+            pickle.dumps(np.array(current.datasets[0].data)),
+        ).decode(),
+    }
+
+    with zipfile.ZipFile(filename, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
+        zipf.writestr(member, json.dumps(js, indent=2))
 
 
 # =============================================================================
@@ -83,7 +104,7 @@ def test_save_and_load_project(ds1, ds2):
     myp.add_datasets(ds1, ds2)
 
     fn = myp.save()
-    proj = Project.load(fn, allow_unsafe_legacy=True)
+    proj = Project.load(fn)
 
     assert str(proj["toto"]) == "NDDataset: [float64] a.u. (shape: (z:10, y:100, x:3))"
 
@@ -515,7 +536,7 @@ class TestSerializationRoundtrip:
         proj.add_project(sub)
 
         filename = proj.save()
-        loaded = Project.load(filename, allow_unsafe_legacy=True)
+        loaded = Project.load(filename)
 
         assert "subproject" in loaded.projects_names
         assert "data" in loaded.subproject.datasets_names
@@ -549,7 +570,7 @@ class TestSerializationRoundtrip:
         with zipfile.ZipFile(filename, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
             zipf.writestr(member, json.dumps(js, indent=2))
 
-        loaded = Project.load(filename, allow_unsafe_legacy=True)
+        loaded = Project.load(filename)
 
         assert not hasattr(loaded.data, "roi")
         assert not hasattr(loaded.data, "modeldata")
@@ -561,6 +582,7 @@ class TestSerializationRoundtrip:
         proj.add_dataset(ds1)
 
         filename = proj.save()
+        _rewrite_project_dataset_payload_as_legacy_pickle(filename)
 
         with pytest.raises(
             SpectroChemPyError,

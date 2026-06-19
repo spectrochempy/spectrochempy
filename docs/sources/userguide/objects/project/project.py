@@ -156,17 +156,26 @@ proj.save_as("NMR")
 # %% [markdown]
 # #### Loading
 #
-# Historical ``.pscp`` archives may require trusted legacy loading because they
-# currently rely on pickle-based native persistence for embedded datasets. In
+# Newly written ``.pscp`` archives now reload safely by default:
+#
+#     proj2 = scp.Project.load("NMR")
+#
+# Historical ``.pscp`` archives may still require trusted legacy loading. In
 # that case, reload explicitly with:
 #
 #     proj2 = scp.Project.load("NMR", allow_unsafe_legacy=True)
+#
+# For a short transition period it is useful to keep this commented example
+# close to the normal round-trip:
+#
+#     # Legacy trusted archive only:
+#     # proj2 = scp.Project.load("NMR", allow_unsafe_legacy=True)
 #
 # Only enable ``allow_unsafe_legacy=True`` for files from known and trusted
 # sources.
 
 # %%
-proj2 = scp.Project.load("NMR", allow_unsafe_legacy=True)
+proj2 = scp.Project.load("NMR")
 
 # %%
 proj2

@@ -8,6 +8,7 @@
 """Tests integration"""
 
 import numpy as np
+import scipy.integrate
 from numpy.testing import assert_allclose
 
 import spectrochempy as scp
@@ -112,3 +113,60 @@ def test_integrate_preserves_remaining_coord_units():
     assert area.y.title == "temperature"
     assert area.units == dataset.units * x.units
     assert_allclose(area.data, [2.0, 2.0])
+
+
+def test_integrate_passes_plain_ndarray_coordinate(monkeypatch):
+    dataset = scp.NDDataset(
+        [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]],
+        coordset=[
+            scp.Coord([0.0, 1.0], title="sample", units="s"),
+            scp.Coord([0.1, 0.2, 0.3], title="x", units="cm^-1"),
+        ],
+        units="absorbance",
+    )
+
+    seen = {}
+    original = scipy.integrate.simpson
+
+    def capture(data, **kwargs):
+        seen["x_type"] = type(kwargs["x"])
+        seen["x_is_ndarray"] = isinstance(kwargs["x"], np.ndarray)
+        return original(data, **kwargs)
+
+    monkeypatch.setattr("scipy.integrate.simpson", capture)
+
+    dataset.simpson(dim="x")
+
+    assert seen["x_is_ndarray"] is True
+
+
+def test_simpson_retries_with_contiguous_numpy_arrays(monkeypatch):
+    dataset = scp.NDDataset(
+        [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]],
+        coordset=[
+            scp.Coord([0.0, 1.0], title="sample", units="s"),
+            scp.Coord([0.1, 0.2, 0.3], title="x", units="cm^-1"),
+        ],
+        units="absorbance",
+    )
+
+    original = scipy.integrate.simpson
+    calls = {"count": 0}
+
+    def flaky(data, **kwargs):
+        calls["count"] += 1
+        if calls["count"] == 1:
+            raise NotImplementedError("multi-dimensional sub-views are not implemented")
+        arr = np.asarray(data)
+        assert isinstance(arr, np.ndarray)
+        assert arr.flags.c_contiguous
+        assert isinstance(kwargs["x"], np.ndarray)
+        assert kwargs["x"].flags.c_contiguous
+        return original(arr, **kwargs)
+
+    monkeypatch.setattr("scipy.integrate.simpson", flaky)
+
+    result = dataset.simpson(dim="x")
+
+    assert calls["count"] == 2
+    assert result.shape == (2,)
