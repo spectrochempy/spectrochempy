@@ -299,12 +299,12 @@ class NDIO(tr.HasTraits):
         >>> f = nd1.save()
         >>> f.name
         'nh4y-activation.scp'
-        >>> nd2 = scp.load(f, allow_unsafe_legacy=True)
+        >>> nd2 = scp.load(f)
 
         Alternatively, this method can be called as a class method of NDDataset or Project object:
 
         >>> from spectrochempy import *
-        >>> nd2 = NDDataset.load(f, allow_unsafe_legacy=True)
+        >>> nd2 = NDDataset.load(f)
 
         """
         content = kwargs.get("content")
@@ -401,6 +401,8 @@ class NDIO(tr.HasTraits):
                 "_modeldata",
                 "_scripts",
                 "_others",
+                "__format__",
+                "__version__",
             }
             for key, val in dic.items():
                 try:

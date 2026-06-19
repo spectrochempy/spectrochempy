@@ -7,9 +7,12 @@
 
 """Tests for the ndplugin module"""
 
+import base64
 import json
+import pickle
 import zipfile
 
+import numpy as np
 import pytest
 import spectrochempy as scp
 
@@ -23,6 +26,24 @@ from spectrochempy.utils.testing import assert_array_equal, assert_dataset_equal
 # --------------------------------------------------------------------------------------
 
 
+def _rewrite_dataset_data_payload_as_legacy_pickle(filename):
+    current = NDDataset.load(filename)
+
+    with zipfile.ZipFile(filename, "r") as zipf:
+        member = zipf.namelist()[0]
+        js = json.loads(zipf.read(member).decode("utf-8"))
+
+    js.pop("__format__", None)
+    js.pop("__version__", None)
+    js["data"] = {
+        "__class__": "NUMPY_ARRAY",
+        "base64": base64.b64encode(pickle.dumps(current.data)).decode(),
+    }
+
+    with zipfile.ZipFile(filename, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
+        zipf.writestr(member, json.dumps(js, indent=2))
+
+
 def test_ndio_generic(ndataset_1d, tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     ir = ndataset_1d
@@ -34,7 +55,7 @@ def test_ndio_generic(ndataset_1d, tmp_path, monkeypatch):
     assert ir.directory == tmp_path
 
     # load back this  file : the full path f is given so no dialog is opened
-    nd = NDDataset.load(f, allow_unsafe_legacy=True)
+    nd = NDDataset.load(f)
     assert_dataset_equal(nd, ir)
 
     # as it has been already saved,
@@ -60,7 +81,7 @@ def test_ndio_generic(ndataset_1d, tmp_path, monkeypatch):
     f = ir.save_as(tmp_path / "essai")
 
     # try to load without extension specification (will first assume it is scp)
-    dl = NDDataset.load("essai", allow_unsafe_legacy=True)
+    dl = NDDataset.load("essai")
     # assert dl.directory == cwd
     assert_array_equal(dl.data, ir.data)
     f.unlink()
@@ -74,7 +95,7 @@ def test_ndio_2D(ndataset_2d, tmp_path):
     assert ir2.directory == tmp_path
     with pytest.raises(FileNotFoundError):
         NDDataset.load("essai2D")
-    nd = NDDataset.load(tmp_path / "essai2D", allow_unsafe_legacy=True)
+    nd = NDDataset.load(tmp_path / "essai2D")
     assert nd.directory == tmp_path
     f.unlink()
 
@@ -86,7 +107,7 @@ def test_ndio_roundtrip_preserves_selected_non_first_default(tmp_path):
     selected_data = ds.x.data.copy()
     filename = ds.save_as(tmp_path / "multicoord_default", confirm=False)
 
-    loaded = NDDataset.load(filename, allow_unsafe_legacy=True)
+    loaded = NDDataset.load(filename)
 
     assert loaded.x.default == loaded.x["_2"]
     assert_array_equal(loaded.x.default.data, selected_data)
@@ -98,7 +119,7 @@ def test_ndio_roundtrip_preserves_reference_lookup(tmp_path):
     ds = NDDataset([1.0, 2.0, 3.0], coordset=CoordSet(x=c, y="x"))
     filename = ds.save_as(tmp_path / "reference_coords", confirm=False)
 
-    loaded = NDDataset.load(filename, allow_unsafe_legacy=True)
+    loaded = NDDataset.load(filename)
 
     assert loaded.coordset.references == ds.coordset.references
     assert loaded.coordset["y"] == "x"
@@ -122,7 +143,7 @@ def test_ndio_load_without_default_field_keeps_legacy_behavior(tmp_path):
     with zipfile.ZipFile(filename, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
         zipf.writestr(member, json.dumps(js, indent=2))
 
-    loaded = NDDataset.load(filename, allow_unsafe_legacy=True)
+    loaded = NDDataset.load(filename)
 
     assert loaded.x.default == loaded.x["_1"]
     assert_array_equal(loaded.x.data, legacy_default_data)
@@ -142,7 +163,7 @@ def test_ndio_load_ignores_legacy_roi_fields(tmp_path):
     with zipfile.ZipFile(filename, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
         zipf.writestr(member, json.dumps(js, indent=2))
 
-    loaded = NDDataset.load(filename, allow_unsafe_legacy=True)
+    loaded = NDDataset.load(filename)
 
     assert not hasattr(loaded, "roi")
     assert not hasattr(loaded.x, "roi")
@@ -161,12 +182,13 @@ def test_ndio_load_ignores_legacy_modeldata_field(tmp_path):
     with zipfile.ZipFile(filename, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
         zipf.writestr(member, json.dumps(js, indent=2))
 
-    loaded = NDDataset.load(filename, allow_unsafe_legacy=True)
+    loaded = NDDataset.load(filename)
 
 
 def test_ndio_load_requires_explicit_opt_in_for_legacy_scp(tmp_path, monkeypatch):
     ds = NDDataset([0.0, 1.0, 2.0], name="legacy_dataset")
     filename = ds.save_as(tmp_path / "legacy_dataset", confirm=False)
+    _rewrite_dataset_data_payload_as_legacy_pickle(filename)
 
     def fail_pickle_loads(*args, **kwargs):
         raise AssertionError("pickle.loads must not run in safe mode")
@@ -187,6 +209,7 @@ def test_ndio_load_requires_explicit_opt_in_for_legacy_scp(tmp_path, monkeypatch
 def test_ndio_load_content_requires_explicit_opt_in(tmp_path):
     ds = NDDataset([0.0, 1.0, 2.0], name="legacy_content")
     filename = ds.save_as(tmp_path / "legacy_content", confirm=False)
+    _rewrite_dataset_data_payload_as_legacy_pickle(filename)
     content = filename.read_bytes()
 
     with pytest.raises(
@@ -207,6 +230,7 @@ def test_ndio_load_content_requires_explicit_opt_in(tmp_path):
 def test_native_load_aliases_require_explicit_opt_in(tmp_path, loader_name):
     ds = NDDataset([0.0, 1.0, 2.0], name="legacy_alias")
     filename = ds.save_as(tmp_path / "legacy_alias", confirm=False)
+    _rewrite_dataset_data_payload_as_legacy_pickle(filename)
     loader = getattr(scp, loader_name)
 
     with pytest.raises(
@@ -219,6 +243,22 @@ def test_native_load_aliases_require_explicit_opt_in(tmp_path, loader_name):
     assert_dataset_equal(loaded, ds)
 
     assert not hasattr(loaded, "modeldata")
+
+
+def test_ndio_safe_roundtrip_uses_versioned_payload(tmp_path):
+    ds = NDDataset(np.array([1.0, 2.0, 3.0]), name="safe_dataset")
+    filename = ds.save_as(tmp_path / "safe_dataset", confirm=False)
+
+    with zipfile.ZipFile(filename, "r") as zipf:
+        member = zipf.namelist()[0]
+        js = json.loads(zipf.read(member).decode("utf-8"))
+
+    assert js["__format__"] == "scp"
+    assert js["__version__"] == 2
+    assert js["data"]["encoding"] == "raw-base64"
+
+    loaded = NDDataset.load(filename)
+    assert_dataset_equal(loaded, ds)
 
 
 if __name__ == "__main__":
