@@ -14,6 +14,8 @@ import numpy as np
 import traitlets as tr
 
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
+from spectrochempy.analysis._base._analysisbase import NotFittedError
+from spectrochempy.analysis._base._result import AnalysisResult
 from spectrochempy.application.application import info_
 from spectrochempy.utils import exceptions
 from spectrochempy.utils.decorators import signature_has_configurable_traits
@@ -116,6 +118,8 @@ class SIMPLISMA(DecompositionAnalysis):
             warm_start=warm_start,
             **kwargs,
         )
+
+        self._fit_meta = None
 
     # ----------------------------------------------------------------------------------
     # Private validation methods and default getter
@@ -253,6 +257,10 @@ class SIMPLISMA(DecompositionAnalysis):
         # Determine the purest variables
         j = 0
         finished = False
+
+        # capture for _fit_meta
+        r_squared = 0.0
+        residual_std = 0.0
         while not finished:
             # compute first purest variable and weights
             if j == 0:
@@ -266,6 +274,8 @@ class SIMPLISMA(DecompositionAnalysis):
 
                 # compute figures of merit
                 rsquare0, stdev_res0 = self._figures_of_merit(X, maxPIndex, C, St, j)
+                r_squared = rsquare0
+                residual_std = stdev_res0
 
                 # add summary to log
                 llog = self._str_iter_summary(
@@ -359,6 +369,8 @@ class SIMPLISMA(DecompositionAnalysis):
 
                 # compute figures of merit
                 rsquarej, stdev_resj = self._figures_of_merit(X, maxPIndex, C, St, j)
+                r_squared = rsquarej
+                residual_std = stdev_resj
                 diff = 100 * (stdev_resj - prev_stdev_res) / prev_stdev_res
                 prev_stdev_res = stdev_resj
 
@@ -486,6 +498,13 @@ class SIMPLISMA(DecompositionAnalysis):
         # found components
         self._n_components = Pt.shape[0]
 
+        # capture fit metadata for the result property
+        self._fit_meta = {
+            "r_squared": r_squared,
+            "residual_std": residual_std,
+            "n_components_selected": self._n_components,
+        }
+
         # results
         return (C, St, Pt, s)
 
@@ -560,3 +579,53 @@ class SIMPLISMA(DecompositionAnalysis):
         s.name = "Standard deviation spectra"
         s.description = "Standard deviation spectra matrix from SIMPLISMA:"  # + logs
         return s
+
+    # ----------------------------------------------------------------------------------
+    # Result property
+    # ----------------------------------------------------------------------------------
+    @property
+    def result(self):
+        """
+        ``AnalysisResult`` object wrapping the fitted SIMPLISMA estimator.
+
+        Returns
+        -------
+        AnalysisResult
+            Container with ``parameters``, ``outputs``, and ``diagnostics``
+            derived from the fitted estimator.
+
+        Raises
+        ------
+        NotFittedError
+            If the estimator has not been fitted yet.
+        """
+        if not self._fitted:
+            raise NotFittedError(
+                f"This {type(self).__name__} instance is not fitted yet. "
+                "Call 'fit' with appropriate arguments before using this estimator."
+            )
+
+        parameters = {
+            "interactive": self.interactive,
+            "n_components": self.n_components,
+            "tol": self.tol,
+            "noise": self.noise,
+        }
+
+        outputs = {
+            "C": self.C,
+            "components": self.components,
+            "Pt": self.Pt,
+            "s": self.s,
+        }
+
+        diagnostics = {}
+        if self._fit_meta is not None:
+            diagnostics = {k: v for k, v in self._fit_meta.items() if v is not None}
+
+        return AnalysisResult(
+            estimator="SIMPLISMA",
+            parameters=parameters,
+            outputs=outputs,
+            diagnostics=diagnostics,
+        )
