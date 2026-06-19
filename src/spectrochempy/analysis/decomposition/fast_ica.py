@@ -10,7 +10,9 @@ from numpy.random import RandomState
 from sklearn import decomposition
 
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
+from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis._base._analysisbase import _wrap_ndarray_output_to_nddataset
+from spectrochempy.analysis._base._result import AnalysisResult
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.traits import NDDatasetType
 
@@ -335,18 +337,82 @@ array of values drawn from a normal distribution is used."""
         """
         Number of iterations.
 
-        If the algorithm is “deflation”, n_iter is the maximum number of iterations run
+        If the algorithm is "deflation", n_iter is the maximum number of iterations run
         across all components. Else they are just the number of iterations taken to
         converge.
         """
         return self._fast_ica.n_iter_
 
+    # ----------------------------------------------------------------------------------
+    # Result property
+    # ----------------------------------------------------------------------------------
     @property
+    def result(self):
+        """
+        ``AnalysisResult`` object wrapping the fitted FastICA estimator.
+
+        Returns
+        -------
+        AnalysisResult
+            Container with ``parameters``, ``outputs``, and ``diagnostics``
+            derived from the fitted estimator.
+
+        Raises
+        ------
+        NotFittedError
+            If the estimator has not been fitted yet.
+        """
+        if not self._fitted:
+            raise NotFittedError(
+                f"This {type(self).__name__} instance is not fitted yet. "
+                "Call 'fit' with appropriate arguments before using this estimator."
+            )
+
+        parameters = {
+            "n_components": self.n_components,
+            "algorithm": self.algorithm,
+            "whiten": self.whiten,
+            "fun": ("<callable>" if callable(self.fun) else self.fun),
+            "fun_args": self.fun_args,
+            "tol": self.tol,
+            "max_iter": self.max_iter,
+            "w_init": (
+                f"<NDDataset shape={self.w_init.shape}>"
+                if hasattr(self.w_init, "shape")
+                else self.w_init
+            ),
+            "whiten_solver": self.whiten_solver,
+            "random_state": self.random_state,
+        }
+
+        outputs = {
+            "components": self.components,
+            "mixing": self.mixing,
+            "St": self.St,
+            "A": self.A,
+        }
+
+        diagnostics = {
+            "n_iter": self.n_iter,
+        }
+
+        return AnalysisResult(
+            estimator="FastICA",
+            parameters=parameters,
+            outputs=outputs,
+            diagnostics=diagnostics,
+        )
+
     @_wrap_ndarray_output_to_nddataset(
         units=None,
         title=None,
         typey="components",
     )
+    def _whitening_wrapped(self):
+        """Return the whitening matrix as an NDDataset (decorated)."""
+        return self._fast_ica.whitening_
+
+    @property
     def whitening(self):
         """
         NDDataset of shape (n_components, n_features).
@@ -354,6 +420,6 @@ array of values drawn from a normal distribution is used."""
         Only set if whiten is not None. This is the pre-whitening matrix that projects
         data onto the first n_components principal components.
         """
-        if self.whiten:
-            return self._fast_ica.whitening_
-        return None
+        if not self.whiten:
+            return None
+        return self._whitening_wrapped()
