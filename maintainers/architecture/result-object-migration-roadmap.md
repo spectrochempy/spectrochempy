@@ -268,23 +268,24 @@ PR5: MCRALS AnalysisResult      ✅ Merged (#1215)
 PR6: SIMPLISMA AnalysisResult   ✅ Merged (#1217)
 PR7: EFA AnalysisResult         ✅ Merged (#1218)
 PR8: FastICA AnalysisResult     ✅ Merged (#1219)
+PR9: PLSRegression AnalysisResult ✅ Merged (#1220)
 ```
 
-Nine estimators now implement the Result Object contract:
-- 8 decomposition estimators → `AnalysisResult` (PCA, SVD, NMF, MCRALS, SIMPLISMA, EFA, FastICA)
+Ten estimators now implement the Result Object contract:
+- 9 decomposition/cross-decomposition estimators → `AnalysisResult` (PCA, SVD, NMF, MCRALS, SIMPLISMA, EFA, FastICA, PLSRegression)
 - 1 curve-fitting estimator → `FitResult` (Optimize)
 
-Key outcomes after 8 PRs:
+Key outcomes after 9 PRs:
 - **Zero** changes to `_result.py` since PR1 — `ResultBase`, `AnalysisResult`, `FitResult` unchanged.
 - **`_fit_meta`** pattern established (PR3) and reused (PR5, PR6) for diagnostic capture.
 - No subclass of `AnalysisResult` or `FitResult` was needed.
-- No estimator has required any change to the base contract.
+- No estimator has required any change to the base contract, including
+  the first `_outfit`-free estimator (PLSRegression).
 
 ### Remaining candidates
 
 | Order | Estimator | Complexity | Notes |
 |---|---|---|---|
-| PR9 | PLSRegression | High | No `_outfit` — 10+ private attrs stored directly |
 | Later | Baseline | Medium | Processor, not decomposition — different architectural role |
 | Later | LSTSQ / NNLS | Low | Thin sklearn wrappers — `FitResult`?
 
