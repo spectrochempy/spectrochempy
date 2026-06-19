@@ -111,7 +111,9 @@ def test_netcdf_file_is_readable_by_xarray_open_dataset(tmp_path):
 
 
 def test_netcdf_methods_raise_clear_error_when_xarray_is_missing(monkeypatch, tmp_path):
-    missing = ImportError("Missing optional dependency 'xarray'. Use conda or pip to install xarray.")
+    missing = ImportError(
+        "Missing optional dependency 'xarray'. Use conda or pip to install xarray."
+    )
     original_import_optional_dependency = ndmodule.import_optional_dependency
 
     def fail_import(name, *args, **kwargs):
