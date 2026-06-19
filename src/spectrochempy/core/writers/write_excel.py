@@ -52,4 +52,4 @@ write_xls.__doc__ = "This method is an alias of `write_excel` ."
 
 @exportermethod
 def _write_excel(*args, **kwargs):
-    raise NotImplementedError
+    raise NotImplementedError("Excel export is not yet implemented")
