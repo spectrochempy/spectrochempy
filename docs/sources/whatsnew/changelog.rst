@@ -37,6 +37,11 @@ Bug Fixes
   during sklearn initialisation, so the default solver was always used
   regardless of the configured value. (:pr:`1212`)
 
+- FIX: correct ``PLSRegression.n_iter`` property attribute name. Previously,
+  the property referenced ``self._n_iter_`` instead of the actual stored
+  attribute ``self._n_iter``, causing an ``AttributeError`` after a
+  successful fit. (:pr:`1216`)
+
 - Fixed several inconsistencies in the OMNIC SPA/SPG reader (`#1144
   <https://github.com/spectrochempy/spectrochempy/issues/1144>`_):
   ``read_spg()`` no longer advertises the ``spa`` protocol; swapped error
