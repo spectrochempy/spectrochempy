@@ -34,7 +34,18 @@ def _integrate_method(method):
         # Some NumPy/SciPy combinations are stricter with ndarray subclasses or
         # view semantics, so normalize the integration axis coordinate here.
         x = np.asarray(dataset.coord(dim).data)
-        data = method(dataset.data, x=x, axis=axis, **kwargs)
+        y = dataset.data
+        try:
+            data = method(y, x=x, axis=axis, **kwargs)
+        except NotImplementedError as exc:
+            if "multi-dimensional sub-views are not implemented" not in str(exc):
+                raise
+            data = method(
+                np.ascontiguousarray(y),
+                x=np.ascontiguousarray(x),
+                axis=axis,
+                **kwargs,
+            )
 
         if dataset.coord(dim).reversed:
             data *= -1
@@ -111,7 +122,7 @@ def trapezoid(dataset, **kwargs):
     NDDataset: [float64] a.u..cm^-1 (size: 55)
 
     """
-    return scipy.integrate.trapezoid(dataset.data, **kwargs)
+    return scipy.integrate.trapezoid(np.asarray(dataset), **kwargs)
 
 
 @deprecated(replace="Trapezoid", removed="0.11.0")
@@ -178,7 +189,7 @@ def simpson(dataset, *args, **kwargs):
     NDDataset: [float64] a.u..cm^-1 (size: 55)
 
     """
-    return scipy.integrate.simpson(dataset.data, **kwargs)
+    return scipy.integrate.simpson(np.asarray(dataset), **kwargs)
 
 
 @deprecated(replace="simpson")
