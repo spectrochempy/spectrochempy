@@ -35,7 +35,7 @@ Bug Fixes
   ``sklearn.decomposition.NMF`` object. Previously the parameter was
   accepted by the SpectroChemPy ``NMF`` estimator but silently ignored
   during sklearn initialisation, so the default solver was always used
-  regardless of the configured value. (:pr:`TODO`)
+  regardless of the configured value. (:pr:`1212`)
 
 - Fixed several inconsistencies in the OMNIC SPA/SPG reader (`#1144
   <https://github.com/spectrochempy/spectrochempy/issues/1144>`_):
@@ -73,25 +73,11 @@ Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
 
-- MAINT: introduce ``ResultBase``, ``AnalysisResult``, and ``FitResult`` result
-  object infrastructure as defined in the Result Object Contract RFC. A PCA-only
-  prototype exposes ``pca.result`` as an ``AnalysisResult`` with named outputs
-  (scores, loadings, components) and diagnostics (explained variance metrics)
-  while preserving all existing public API and behavior. (:pr:`1208`)
+- MAINT: introduce the new Result Object architecture (``ResultBase``,
+  ``AnalysisResult``, ``FitResult``) for analysis and fitting workflows.
+  (:pr:`1208`)
 
-- MAINT: extend ``AnalysisResult`` support to the SVD estimator. The new
-  ``svd.result`` property exposes raw outputs (``U``, ``s``, ``VT``) and
-  diagnostics (``singular_values``, ``explained_variance``,
-  ``explained_variance_ratio``) while preserving all existing public API
-  and backward compatibility. (:pr:`1211`)
-
-- MAINT: introduce ``FitResult`` prototype for the ``Optimize`` estimator.
-  The new ``opt.result`` property exposes fitted model outputs
-  (``fitted``, ``components``) and solver diagnostics (``cost``,
-  ``niter``, ``ncalls``) while preserving all existing public API and
-  backward compatibility. (:pr:`1211`)
-
-- MAINT: extend ``AnalysisResult`` support to the NMF estimator. The new
-  ``nmf.result`` property exposes outputs (``components``, ``W``) and
-  diagnostics (``reconstruction_error``, ``n_iter``) while preserving
-  all existing public API and backward compatibility. (:pr:`TODO`)
+- MAINT: extend Result Object support to PCA, SVD, NMF, and Optimize,
+  providing unified access to analysis and fitting outputs while
+  preserving backward compatibility. (:pr:`1208`, :pr:`1209`, :pr:`1211`,
+  :pr:`1213`)
