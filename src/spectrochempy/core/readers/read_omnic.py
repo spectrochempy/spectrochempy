@@ -333,7 +333,7 @@ def read_spg(*paths, **kwargs):
 
     """
     kwargs["filetypes"] = ["OMNIC files (*.spg)"]
-    kwargs["protocol"] = ["spg", "spa"]
+    kwargs["protocol"] = ["spg"]
     importer = Importer()
     return importer(*paths, **kwargs)
 
@@ -687,11 +687,11 @@ def _read_spg(*args, **kwargs):
         )
     if len(set(xunits)) != 1:  # pragma: no cover
         raise ValueError(
-            "Error : Inconsistent data set - data units should be identical",
+            "Error : Inconsistent data set - x axis units should be identical",
         )
     if len(set(units)) != 1:  # pragma: no cover
         raise ValueError(
-            "Error : Inconsistent data set - x axis units should be identical",
+            "Error : Inconsistent data set - data units should be identical",
         )
     data = np.ndarray((nspec, nx[0]), dtype="float32")
 
@@ -808,6 +808,11 @@ def _read_spa(*args, **kwargs):
     fid, kwargs = _openfid(filename, **kwargs)
 
     return_ifg = kwargs.get("return_ifg", None)
+    if return_ifg not in (None, "sample", "background"):
+        raise ValueError(
+            f"Invalid return_ifg value: {return_ifg!r}. "
+            "Expected None, 'sample', or 'background'."
+        )
 
     # Read name:
     # The name  starts at position hex 1e = decimal 30. Its max length
@@ -977,14 +982,14 @@ def _read_spa(*args, **kwargs):
     # Omnic spg file don't have specific "origin" field stating the oirigin of the data
 
     dataset.description = kwargs.get("description", default_description) + "\n"
-    if len(spa_comments) > 1:
+    if spa_comments:
         dataset.description += "# Comments from Omnic:\n"
         for comment in spa_comments:
             dataset.description += comment + "\n---------------------\n"
 
     dataset.history = "Imported from spa file(s)"
 
-    if "spa_history" in locals() and len("spa_history".strip(" ")) > 0:
+    if "spa_history" in locals() and len(spa_history.strip()) > 0:
         dataset.history = (
             "Data processing history from Omnic :\n------------------------------------\n"
             + spa_history
