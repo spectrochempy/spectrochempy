@@ -274,7 +274,7 @@ class PLSRegression(CrossDecompositionAnalysis):
 
     @property
     def n_iter(self):
-        return self._n_iter_
+        return self._n_iter
 
 
 if __name__ == "__main__":

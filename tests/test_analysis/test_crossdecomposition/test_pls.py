@@ -148,6 +148,14 @@ class TestPLSUnivariate:
         assert np.all(np.isfinite(pls.x_scores.data))
         assert np.all(np.isfinite(pls.y_scores.data))
 
+    def test_n_iter_available(self):
+        pls = self.pls
+        skl = self.skl
+        n_iter = pls.n_iter
+        assert n_iter is not None
+        assert len(n_iter) == pls.n_components
+        assert_allclose(n_iter, skl.n_iter_)
+
     def test_fit_against_sklearn(self):
         pls = self.pls
         skl = self.skl
@@ -260,6 +268,14 @@ class TestPLSMultivariate:
         assert pls.y_scores.shape == (d["n_cal"], d["n_components"])
         assert np.all(np.isfinite(pls.x_loadings.data))
         assert np.all(np.isfinite(pls.y_loadings.data))
+
+    def test_n_iter_available(self):
+        pls = self.pls
+        skl = self.skl
+        n_iter = pls.n_iter
+        assert n_iter is not None
+        assert len(n_iter) == pls.n_components
+        assert_allclose(n_iter, skl.n_iter_)
 
     def test_fit_against_sklearn(self):
         pls = self.pls
