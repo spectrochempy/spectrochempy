@@ -82,7 +82,7 @@ Developer
   ``AnalysisResult``, ``FitResult``) for analysis and fitting workflows.
   (:pr:`1208`)
 
-- MAINT: extend Result Object support to PCA, SVD, NMF, and Optimize,
-  providing unified access to analysis and fitting outputs while
-  preserving backward compatibility. (:pr:`1208`, :pr:`1209`, :pr:`1211`,
-  :pr:`1213`)
+- MAINT: extend Result Object support to PCA, SVD, NMF, Optimize,
+  and MCRALS, providing unified access to analysis and fitting outputs
+  while preserving backward compatibility. (:pr:`1208`, :pr:`1209`,
+  :pr:`1211`, :pr:`1213`, :pr:`1215`)
