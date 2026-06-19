@@ -338,9 +338,11 @@ def json_encoder(byte_obj, encoding=None, *, _root=True):
             if byte_obj._implements("Meta"):
                 dic["__class__"] = "META"
         if _root and encoding == "base64":
-            doc_format = "pscp" if byte_obj._implements("Project") else "scp"
-            dic["__format__"] = doc_format
-            dic["__version__"] = SAFE_SCP_DOCUMENT_VERSION
+            implements = byte_obj._implements()
+            if implements in {"NDDataset", "Project"}:
+                doc_format = "pscp" if implements == "Project" else "scp"
+                dic["__format__"] = doc_format
+                dic["__version__"] = SAFE_SCP_DOCUMENT_VERSION
         return dic
 
     if isinstance(byte_obj, str | int | float | bool):
