@@ -29,13 +29,16 @@ This document should evolve as the project evolves.
 
 ### Analysis and Fit Result Architecture Audit
 
-- Decision: audit completed; RFC drafted.
+- Decision: audit completed; conceptual RFC drafted; Result Object campaign now completed.
 - Main conclusion: current result representation is object-owned but
   semantically fragmented.
-- No immediate implementation decision.
-- Future work should clarify result-surface conventions and decide whether
-  fit workflows justify a dedicated result object.
+- The Result Object contract has since been implemented for the core campaign.
+- Remaining work is no longer per-estimator migration work; it is limited to
+  deferred infrastructure questions such as serialization, Project
+  integration, provenance enrichment, display integration, and caching.
 - Reference: `maintainers/rfcs/analysis-fit-result-architecture.md`
+- Implementation reference: `maintainers/architecture/result-object-contract-rfc.md`
+- Campaign summary: `maintainers/architecture/result-object-migration-roadmap.md`
 - Audit reference: `audit/~analysis-fit-result-architecture-audit.md`
 
 ### Units and Dimensional Semantics Audit
@@ -361,24 +364,31 @@ characterization.
 
 ## Analysis and Fit Result Architecture
 
-Status: Audited; Draft RFC
+Status: Audited; conceptual RFC plus implemented contract
 
 Reference:
 [`maintainers/rfcs/analysis-fit-result-architecture.md`](analysis-fit-result-architecture.md)
+
+Implementation reference:
+[`maintainers/architecture/result-object-contract-rfc.md`](../architecture/result-object-contract-rfc.md)
+
+Campaign summary:
+[`maintainers/architecture/result-object-migration-roadmap.md`](../architecture/result-object-migration-roadmap.md)
 
 Purpose:
 
 * documents the current result-surface model across decomposition, analysis,
   and fit workflows;
 * explains the current object-owned but semantically fragmented result model;
-* frames the remaining decision space around result conventions versus a
-  dedicated result object.
+* preserves the broader conceptual context around the now-implemented Result
+  object contract.
 
 Current recommendation:
 
-Do not implement a result-object redesign yet. First decide whether fit
-workflows need a dedicated result object or whether clarified result-surface
-conventions are sufficient.
+Treat the Result Object campaign as complete for the core estimators. Future
+work in this area should focus on deferred infrastructure questions or on
+broader conceptual follow-up, not on reopening the completed migration
+campaign by default.
 
 ---
 
@@ -472,7 +482,7 @@ clearer.
 
 ## Result Assembly Architecture
 
-Status: Audited; RFC drafted.
+Status: Audited; RFC drafted; partial implementation completed.
 
 Motivation:
 
@@ -482,15 +492,17 @@ Current state:
 
 - Analysis and Fit Result Architecture audit completed (`audit/~analysis-fit-result-architecture-audit.md`).
 - RFC drafted (`maintainers/rfcs/analysis-fit-result-architecture.md`).
-- Conclusion: current result representation is functionally workable but
-  semantically fragmented.
-
-Current evidence does not justify immediate implementation work.
+- Result Object contract implemented and documented in
+  `maintainers/architecture/result-object-contract-rfc.md`.
+- Campaign summary documented in
+  `maintainers/architecture/result-object-migration-roadmap.md`.
 
 Future work should clarify:
-- result-surface conventions across analysis and fit classes
-- whether fit workflows justify a dedicated result object
-- whether multi-output objects need a collection abstraction
+- deferred infrastructure work around serialization, Project integration,
+  provenance, display, and caching
+- whether broader result-surface conventions beyond the current contract need
+  further consolidation
+- whether multi-output objects ever need a richer collection abstraction
 
 ---
 

@@ -1,16 +1,29 @@
 # Result Object Migration Roadmap
 
-**Status:** Active roadmap note
+**Status:** Campaign complete for core estimators
 
 **Related RFC:** `result-object-contract-rfc.md`
 
-**Audit trail:** `audit/~result-object-migration-roadmap-notes.md`
+**Campaign review:** `audit/~result-object-campaign-closure-review.md`
 
 ---
 
-## 1. Validated state
+This roadmap is now a post-campaign maintainer summary. It preserves the
+contract, migration outcome, architectural lessons, and explicit boundaries for
+future work. Detailed PR-by-PR history remains in the audit trail.
 
-Eight estimators now implement the Result Object contract:
+## 1. Campaign Outcome
+
+The Result Object Contract campaign is complete for core estimators.
+
+Initial objectives preserved by the completed campaign:
+
+- introduce a stable public Result contract for analysis and fit outputs
+- preserve existing estimator APIs and behavior
+- keep estimator storage as an internal implementation detail
+- validate the contract across heterogeneous estimator implementations
+
+Nine migrations were completed:
 
 | PR | Estimator | Result type | Status |
 |---|---|---|---|
@@ -21,47 +34,30 @@ Eight estimators now implement the Result Object contract:
 | PR5 (#1215) | MCRALS | `AnalysisResult` | Merged |
 | PR6 (#1217) | SIMPLISMA | `AnalysisResult` | Merged |
 | PR7 (#1218) | EFA | `AnalysisResult` | Merged |
+| PR8 (#1219) | FastICA | `AnalysisResult` | Merged |
+| PR9 (#1220) | PLSRegression | `AnalysisResult` | Merged |
 
 `ResultBase`, `AnalysisResult`, and `FitResult` are defined in
 `src/spectrochempy/analysis/_base/_result.py` (98 lines total). All three
-classes were used without subclass adaptation — **zero changes since PR1**.
+classes were used without subclass adaptation.
 
-Infrastructure validated:
+Campaign summary:
 
-- `ResultBase.__init__` accepts `estimator`, `parameters`, `outputs`,
-  `diagnostics` as named dict-valued parameters.
-- `ResultBase.__repr__` displays estimator name, parameters, output names
-  with shapes, and diagnostic names with shapes.
-- No subclass of `AnalysisResult` or `FitResult` was needed for any estimator,
-  including the most complex candidate (MCRALS, 10-element `_outfit`).
+- 9 migrations completed
+- 0 modifications to `ResultBase` since PR1
+- 0 specialized `AnalysisResult` or `FitResult` subclasses introduced
+- contract validated across multiple storage strategies
 
-Common pattern across all seven estimators:
+Validated storage strategies:
 
-```python
-@property
-def result(self):
-    if not self._fitted:
-        raise NotFittedError(...)
-    return AnalysisResult(
-        estimator="Name",
-        parameters={...},
-        outputs={...},
-        diagnostics={...},
-    )
-```
+- sklearn object stored in `_outfit`
+- tuple stored in `_outfit`
+- private estimator attributes
+- `_outfit = None`
 
-Cache approach (deliberately deferred):
+## 2. Final contract
 
-- All estimators create a new result object on every access.
-- `estimator.result is not estimator.result` — documented as intentional.
-- See Open Questions below.
-
----
-
-## 2. Stabilised contract
-
-The following contract is now stable (changing it would break three
-estimators):
+The following contract is now stable and documented for maintainers:
 
 ### `ResultBase`
 
@@ -71,233 +67,145 @@ estimators):
 | `parameters` | `dict` | Optional, defaults to `{}` |
 | `outputs` | `dict` | Optional, defaults to `{}` |
 | `diagnostics` | `dict` | Optional, defaults to `{}` |
-| `__repr__` | `str` | Multi-line compact summary |
+| `__repr__` | `str` | Compact multi-line summary |
 
-### `AnalysisResult` (`ResultBase`)
+### `AnalysisResult`
 
-- No additional fields.
-- Used for decomposition / projection estimators.
-- Three prototype estimators show no pressure to extend.
+- Empty subclass of `ResultBase`
+- Used unchanged across decomposition and cross-decomposition migrations
 
-### `FitResult` (`ResultBase`)
+### `FitResult`
 
-- No additional fields.
-- Used for optimisation / curve-fitting estimators.
-- One prototype shows no pressure to extend.
+- Empty subclass of `ResultBase`
+- Used unchanged for fitting and optimization
 
-### Output value types
+### Common estimator pattern
+
+```python
+@property
+def result(self):
+    if not self._fitted:
+        raise NotFittedError(...)
+    return ResultType(
+        estimator="Name",
+        parameters={...},
+        outputs={...},
+        diagnostics={...},
+    )
+```
+
+### Output and parameter conventions
 
 Values in `outputs` and `diagnostics` may be:
 
-- `NDDataset` (preferred for scientific arrays)
-- raw `ndarray` (acceptable — SVD `U`, `s`, `VT`)
-- scalar `float` / `int` (acceptable — Optimize `cost`, `niter`, `ncalls`)
+- `NDDataset`
+- raw `ndarray`
+- simple scalar values such as `float`, `int`, `str`, `bool`
 
-### Parameter value types
+Values in `parameters` should remain JSON-compatible or Traitlets-native
+configuration values.
 
-Values in `parameters` must be JSON-compatible or Traitlets-native types:
+## 3. Key Architectural Findings
 
-- `str`, `int`, `float`, `bool`, `None`
-- No live objects, no callables, no large arrays in `parameters`
+### Contract vs Storage
 
----
+Result objects are public API.
+Internal estimator storage remains an implementation detail.
 
-## 3. Remaining migration candidates
+The campaign validated the same Result contract against multiple storage
+patterns, including:
 
-### 3.1 NMF (low risk)
+- sklearn object in `_outfit`
+- tuple in `_outfit`
+- private attributes
+- `_outfit = None`
 
-**File:** `src/spectrochempy/analysis/decomposition/nmf.py`
+Public semantics now live in the `result` contract, not in the storage shape.
 
-**`_outfit` structure:** The sklearn `NMF` fitted object (one element).
+### No `ResultBase` evolution required
 
-**Current public surface:**
+Across all migrations:
 
-- `components` (via `_get_components()` → `self._nmf.components_`)
-- `transform()` → `self._nmf.transform(X)`
-- `inverse_transform()` → `self._nmf.inverse_transform(X_transform)`
-- No `scores` property, no `loadings` property (unlike PCA)
+- `ResultBase` remained unchanged
+- `AnalysisResult` remained unchanged
+- `FitResult` remained unchanged
 
-**Outputs for `result`:**
+This remained true even for the most structurally different estimators and for
+the first `_outfit`-free migration.
 
-| Key | Source | Type |
+### `_fit_meta` pattern
+
+The `_fit_meta` convention emerged as the lightweight solution for
+estimator-local diagnostics that `_fit()` would otherwise discard.
+
+The pattern is:
+
+- optional
+- estimator-local
+- used only when diagnostics would otherwise be discarded
+
+This pattern was sufficient without any base-class change.
+
+## 4. Migration summary
+
+Each migration validated the same contract against a distinct architectural
+scenario:
+
+| Estimator | Storage pattern | What it validated |
 |---|---|---|
-| `components` | `self._nmf.components_` | ndarray |
-| `W` | `self._nmf.fit_transform(X)` or `transform()` | ndarray |
-| `H` | alias for `components` | ndarray |
+| PCA | sklearn object in `_outfit` | first prototype of the property pattern |
+| SVD | tuple in `_outfit` | raw ndarray outputs plus NDDataset diagnostics |
+| Optimize | tuple in `_outfit` | first `FitResult` use and `_fit_meta` capture |
+| NMF | sklearn object in `_outfit` | repeatability on another sklearn-backed estimator |
+| MCRALS | large tuple in `_outfit` | contract stability under the most complex internal layout |
+| SIMPLISMA | tuple in `_outfit` | iterative diagnostics captured via `_fit_meta` |
+| EFA | tuple in `_outfit` | sparse diagnostics and dynamic component computation |
+| FastICA | sklearn object in `_outfit` | callable parameter handling and whitening edge cases |
+| PLSRegression | private attributes on `self` | first `_outfit`-free migration |
 
-**Diagnostics:**
+## 5. Deferred Infrastructure Work
 
-- `reconstruction_err_` from sklearn `NMF` object
-- `n_iter_` from sklearn `NMF` object
+The following topics do not belong to the completed Result campaign.
+They belong to separate architecture efforts:
 
-**Parameters:** `n_components`, `init`, `solver`, `beta_loss`, `tol`,
-`max_iter`, `random_state`, `alpha_W`, `alpha_H`, `l1_ratio`, `shuffle`
+- serialization
+- Project integration
+- provenance enrichment
+- HTML / display integration
+- caching
 
-**Risk:** Low. Structure is closer to PCA than to MCRALS. The sklearn object
-stores everything. `_outfit` is already a single sklearn object, not a
-positional tuple.
+These are cross-cutting infrastructure concerns, not remaining per-estimator
+Result migrations.
 
-### 3.2 MCRALS (high risk)
+## 6. Known limits and optional follow-up
 
-**File:** `src/spectrochempy/analysis/decomposition/mcrals.py`
+Known deliberate limits of the completed campaign:
 
-**`_outfit` structure** (returned by `_fit`):
+- no caching; `result` creates a fresh object on each access
+- no serialization support in `ResultBase`
+- no Project integration
+- no provenance enrichment beyond current estimator-facing data
+- no HTML or display integration beyond `__repr__`
 
-```python
-return (
-    C,                      # [0] ndarray — final concentrations
-    St,                     # [1] ndarray — final spectra (also `_components`)
-    C_constrained,          # [2] ndarray — last constrained C
-    St_ls,                  # [3] ndarray — last unconstrained St
-    extraOutputGetConc,     # [4] list — external function extras
-    extraOutputGetSpec,     # [5] list — external function extras
-    C_constrained_list,     # [6] list — iteration history (if storeIterations)
-    C_ls_list,              # [7] list — iteration history
-    St_constrained_list,    # [8] list — iteration history
-    St_ls_list,             # [9] list — iteration history
-)
-```
+Optional follow-up candidates that do not change campaign completion status:
 
-**Current public surface:**
-
-| Property | Source |
-|---|---|
-| `C` | `transform()` → `_outfit[0]` |
-| `St` / `components` | `_outfit[1]` (via `_get_components`) |
-| `C_constrained` | `_outfit[2]` (wrapped via decorator) |
-| `St_ls` | `_outfit[3]` (wrapped via decorator) |
-| `extraOutputGetConc` | `_outfit[4]` |
-| `extraOutputGetSpec` | `_outfit[5]` |
-| iteration lists | `_outfit[6..9]` |
-
-**Unique challenges:**
-
-1. **External callables** (`getConc`, `getSpec`) — serialized via `dill` +
-   `base64`. Result object must not require live callables.
-2. **Iteration history** — lists of arrays over ALS steps. Large, optional
-   (controlled by `storeIterations`). May need deferred or conditional
-   inclusion in result.
-3. **Constraint parameters** — ~30 Traitlets config params. Many are lists,
-   enums, or callables. The `parameters` dict needs careful curation.
-4. **Wrapped outputs** — `C_constrained` and `St_ls` use
-   `_wrap_ndarray_output_to_nddataset` decorator. Result object would need
-   access to the estimator's `_C_2_NDDataset` / `_St_2_NDDataset` methods or
-   replicate the wrapping.
-
-**Outputs for `result`:**
-
-| Key | Source | Risk |
+| Estimator | Classification | Rationale |
 |---|---|---|
-| `C` | `_outfit[0]` → wrapped | Low |
-| `St` | `_outfit[1]` → wrapped | Low |
-| `C_constrained` | `_outfit[2]` → wrapped | Low |
-| `St_ls` | `_outfit[3]` → wrapped | Low |
-| `extraOutputGetConc` | `_outfit[4]` | Medium — arbitrary content |
-| `extraOutputGetSpec` | `_outfit[5]` | Medium — arbitrary content |
+| Baseline | Optional | Processor-specific, outside the main `analysis/` migration set |
+| LSTSQ | Optional | Thin wrapper, low architectural risk |
+| NNLS | Optional | Same profile as LSTSQ |
 
-**Diagnostics:**
+## 7. Audit Trail
 
-- Convergence info: `tol`, `max_iter`, `maxdiv` parameters + `niter` from ALS
-  loop
-- Residual norm change at convergence
-- PCA comparison reconstruction error
+Detailed implementation history remains in the audit files:
 
-**Risk:** High. This is the most complex `_outfit` in the codebase. Requires
-an explicit audit before migration.
-
----
-
-## 4. Open questions
-
-### 4.1 Cache strategy
-
-All three prototypes create new result objects on every access. Decisions
-needed:
-
-- Add a `_result` attribute with invalidation on re-fit?
-- Keep lazy creation but memoize within a fit session?
-- Profile first — does repeated creation have measurable cost?
-
-### 4.2 Provenance enrichment
-
-The RFC defines structured provenance (version, timestamp, input summary).
-No prototype implements it. Should provenance be added as a PR5 or deferred
-entirely (post-MCRALS)?
-
-### 4.3 DisplaySection / HTML
-
-No prototype implements `DisplayItem` / `DisplaySection` integration. The
-RFC defines minimum HTML representation. Should this be a separate PR or
-folded into each migration PR?
-
-### 4.4 Serialization
-
-No prototype implements `__getstate__` / `__setstate__` or Project save/load
-for result objects. The RFC defines serialization boundaries but defers
-full round-trip.
-
-Recommended approach: deferred until after all AnalysisResult migrations
-(PR4–PR6), then add serialization in a single pass.
-
-### 4.5 Project integration
-
-Should result objects become a third typed Project member? Deferred by
-RFC. Recommend re-evaluating after serialization exists.
-
-### 4.6 FitParameters for Optimize
-
-Optimize has a rich `FitParameters` object. PR3 explicitly excluded it from
-`result.parameters`. Should a future PR integrate `FitParameters` into
-`FitResult.parameters`?
-
-### 4.7 Residuals in FitResult
-
-PR3 noted no stable public surface for residuals. If one emerges, should
-`residuals` be added to `FitResult.outputs`?
-
----
-
-## 5. Completed migration sequence
-
-```
-PR1: PCA AnalysisResult         ✅ Merged (#1208)
-PR2: SVD AnalysisResult         ✅ Merged (#1209)
-PR3: Optimize FitResult         ✅ Merged (#1211)
-PR4: NMF AnalysisResult         ✅ Merged (#1213)
-PR5: MCRALS AnalysisResult      ✅ Merged (#1215)
-PR6: SIMPLISMA AnalysisResult   ✅ Merged (#1217)
-PR7: EFA AnalysisResult         ✅ Merged (#1218)
-PR8: FastICA AnalysisResult     ✅ Merged (#1219)
-PR9: PLSRegression AnalysisResult ✅ Merged (#1220)
-```
-
-Ten estimators now implement the Result Object contract:
-- 9 decomposition/cross-decomposition estimators → `AnalysisResult` (PCA, SVD, NMF, MCRALS, SIMPLISMA, EFA, FastICA, PLSRegression)
-- 1 curve-fitting estimator → `FitResult` (Optimize)
-
-Key outcomes after 9 PRs:
-- **Zero** changes to `_result.py` since PR1 — `ResultBase`, `AnalysisResult`, `FitResult` unchanged.
-- **`_fit_meta`** pattern established (PR3) and reused (PR5, PR6) for diagnostic capture.
-- No subclass of `AnalysisResult` or `FitResult` was needed.
-- No estimator has required any change to the base contract, including
-  the first `_outfit`-free estimator (PLSRegression).
-
-### Remaining candidates
-
-| Order | Estimator | Complexity | Notes |
-|---|---|---|---|
-| Later | Baseline | Medium | Processor, not decomposition — different architectural role |
-| Later | LSTSQ / NNLS | Low | Thin sklearn wrappers — `FitResult`?
-
----
-
-## 6. Non-goals (for this roadmap)
-
-- No redesign of `_outfit` — remains as internal implementation detail
-- No redesign of `AnalysisConfigurable._fit()` signature
-- No change to `fit()` return value (continues to return `self`)
-- No change to existing public properties (backward compatible)
-- No full serialization round-trip
-- No Project integration
-- No DisplaySection / HTML migration
-- No caching — deferred until profiling data exists
+- `audit/~result-object-campaign-closure-review.md`
+- `audit/~result-object-contract-pr1-audit.md`
+- `audit/~result-object-contract-pr2-audit.md`
+- `audit/~result-object-contract-pr3-audit.md`
+- `audit/~result-object-contract-pr4-audit.md`
+- `audit/~result-object-contract-pr5-audit.md`
+- `audit/~result-object-contract-pr6-audit.md`
+- `audit/~result-object-contract-pr7-audit.md`
+- `audit/~result-object-contract-pr8-audit.md`
+- `audit/~result-object-contract-pr9-audit.md`

@@ -20,7 +20,7 @@ For active maintainer contracts and RFCs, also see [`../rfcs/`](../rfcs/).
 |---|---|---|
 | [`array-class-responsibility.md`](array-class-responsibility.md) | Draft RFC | Maps responsibilities across `NDArray`, `NDComplexArray`, `Coord`, `NDDataset`, `NDMath`, and `NDIO` before any hierarchy cleanup. |
 | [`mathematical-semantics-and-metadata-propagation.md`](mathematical-semantics-and-metadata-propagation.md) | Draft RFC / characterization largely complete | Characterizes operation behavior, result assembly, scientific object identity, provenance, and metadata propagation before `NDMath` or class hierarchy changes. |
-| [`result-object-contract-rfc.md`](result-object-contract-rfc.md) | Draft RFC | Defines the proposed contract, ownership, provenance, serialization boundary, display contract, and staged migration plan for future analysis and fit result objects. |
+| [`result-object-contract-rfc.md`](result-object-contract-rfc.md) | Implemented RFC | Defines the Result object contract, ownership, provenance boundary, serialization boundary, and display scope now validated by the completed campaign. |
 
 ## Reference Architecture Notes
 
@@ -28,6 +28,7 @@ For active maintainer contracts and RFCs, also see [`../rfcs/`](../rfcs/).
 |---|---|---|
 | [`coordset-storage-architecture.md`](coordset-storage-architecture.md) | Completed note | Captures final `CoordSet` storage invariants after the storage redesign. |
 | [`display-architecture.md`](display-architecture.md) | Completed note | Documents the final post-migration display architecture and semantic HTML path. |
+| [`result-object-migration-roadmap.md`](result-object-migration-roadmap.md) | Completed campaign summary | Summarizes the final Result Object campaign outcome, stable contract, architectural findings, deferred infrastructure work, and audit trail. |
 | [`tensor-plugin-migration.md`](tensor-plugin-migration.md) | Completed note | Records the core/plugin boundary after CP/PARAFAC decomposition moved to the tensor plugin. |
 
 ## Completed Audits
@@ -47,7 +48,7 @@ For active maintainer contracts and RFCs, also see [`../rfcs/`](../rfcs/).
 | Document | Status | Purpose |
 |---|---|---|
 | [`../rfcs/architecture-roadmap.md`](../rfcs/architecture-roadmap.md) | Roadmap | Summarizes completed, active, and deferred architecture topics. |
-| [`../rfcs/analysis-fit-result-architecture.md`](../rfcs/analysis-fit-result-architecture.md) | Draft RFC | Frames current analysis / fit result surfaces and the remaining result-object decision space. |
+| [`../rfcs/analysis-fit-result-architecture.md`](../rfcs/analysis-fit-result-architecture.md) | Draft conceptual RFC | Preserves the broader conceptual analysis of result surfaces and ownership around the implemented Result contract. |
 | [`../rfcs/coordinate-arithmetic-semantics.md`](../rfcs/coordinate-arithmetic-semantics.md) | Draft RFC | Maintainer position on coordinate arithmetic semantics. |
 | [`../rfcs/metadata-contract.md`](../rfcs/metadata-contract.md) | Draft RFC | Normative direction for `NDDataset` metadata preservation, recomputation, override, merge, and drop behavior. |
 | [`../rfcs/modeldata-semantic-contract.md`](../rfcs/modeldata-semantic-contract.md) | Accepted decision record | Audit and removal decision for orphaned `NDDataset.modeldata`. |

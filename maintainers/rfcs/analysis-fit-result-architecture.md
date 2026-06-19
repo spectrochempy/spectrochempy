@@ -1,12 +1,18 @@
 # RFC: Analysis and Fit Result Architecture
 
-**Status:** Draft
+**Status:** Draft conceptual RFC
 
 **Audit reference:**
 [`audit/~analysis-fit-result-architecture-audit.md`](../audit/~analysis-fit-result-architecture-audit.md)
 
 **PR9 output semantics reference:**
 [`audit/~pr9-analysis-output-semantics-report.md`](../audit/~pr9-analysis-output-semantics-report.md)
+
+**Implementation reference:**
+[`maintainers/architecture/result-object-contract-rfc.md`](../architecture/result-object-contract-rfc.md)
+
+**Campaign summary:**
+[`maintainers/architecture/result-object-migration-roadmap.md`](../architecture/result-object-migration-roadmap.md)
 
 ---
 
@@ -25,6 +31,10 @@ It does not propose API changes, implementation work, or a migration plan.
 
 It formalizes vocabulary and architectural findings so that future maintainer
 discussions can proceed from a shared understanding.
+
+The Result Object contract has since been implemented for the core campaign.
+This RFC therefore remains useful as broader conceptual background, not as the
+current implementation plan.
 
 ---
 
@@ -465,7 +475,8 @@ collection, so scope is clearer.
 
 ## Maintainer Assessment
 
-No immediate implementation work is recommended.
+No additional implementation work is recommended on the basis of this document
+alone.
 
 The audit justifies a shared vocabulary and a future design discussion, but does
 not identify an urgent maintenance problem or user-facing limitation.
@@ -485,7 +496,8 @@ Future work should focus on:
    abstraction
 
 Any of these decisions should be deferred until a concrete maintenance problem
-or user-facing limitation motivates the work.
+or user-facing limitation motivates the work, and should be evaluated relative
+to the implemented Result contract rather than the pre-campaign codebase.
 
 **Core question to revisit when the time comes:**
 

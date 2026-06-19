@@ -1,6 +1,6 @@
 # RFC: Result Object Contract
 
-**Status:** Draft
+**Status:** Implemented
 
 **Related RFC:** `maintainers/rfcs/analysis-fit-result-architecture.md`
 
@@ -16,8 +16,10 @@ scores, loadings, components, fitted curves, residuals, parameters, diagnostic
 vectors, solver metadata, and reconstructed data. Today these outputs are
 available, but they are not represented through a common result contract.
 
-This RFC defines the future contract for result objects. It does not implement
-that contract.
+This RFC defines the contract for result objects. The contract has now been
+implemented across the completed Result Object campaign; this document remains
+the architectural reference for that contract rather than a change log of the
+campaign.
 
 ## Non-goals
 
