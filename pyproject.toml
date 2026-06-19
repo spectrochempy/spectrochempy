@@ -107,6 +107,7 @@ test = [
   "pytest-mock",
   "pytest-xdist",
   "numpydoc",
+  "xarray",
 ]
 
 [project.urls]

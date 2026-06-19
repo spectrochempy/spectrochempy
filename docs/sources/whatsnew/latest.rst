@@ -12,6 +12,15 @@ What's New in Revision 0.10.1.dev
 These are the changes in SpectroChemPy-0.10.1.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
 
+New Features
+~~~~~~~~~~~~
+
+- Added a first ``NDDataset`` ↔ ``xarray`` prototype focused on portable
+  dataset exchange. Native ``xarray`` round-trips now cover numerical arrays,
+  dimension names/order, default coordinates, units, explicit masks,
+  ``name``/``title``, and JSON-compatible metadata, while richer ``CoordSet``
+  semantics remain outside this first implementation.
+
 Bug Fixes
 ~~~~~~~~~
 
@@ -56,6 +65,10 @@ Bug Fixes
 
 Breaking Changes
 ~~~~~~~~~~~~~~~~
+
+- ``NDDataset.to_xarray()`` now returns a canonical ``xarray.Dataset`` instead
+  of a bare ``xarray.DataArray``, aligning the API with the new portable
+  mapping RFC and the future NetCDF/Zarr-oriented interchange model.
 
 - Loading native ``.scp`` and ``.pscp`` files is now safe by default.
   Historical archives that require pickle-based native persistence must be

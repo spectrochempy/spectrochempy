@@ -53,3 +53,4 @@ dependencies:
     - pytest-mock
     - pytest-xdist
     - numpydoc
+    - xarray
