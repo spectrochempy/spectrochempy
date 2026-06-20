@@ -73,6 +73,7 @@ sys.path.insert(0, str(CONFDIR / "sphinxext"))
 
 extensions = [
     "sphinx_copybutton",
+    "sphinx.ext.extlinks",
     "sphinx.ext.mathjax",
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
@@ -624,6 +625,11 @@ if not single_doc_or_dir:
         "min_reported_time": 0,
         "show_signature": False,  # Disable the signature if it's causing issues
     }
+
+# External links configuration -----------------------------------------------
+extlinks = {
+    "pr": ("https://github.com/spectrochempy/spectrochempy/pull/%s", "PR #%s"),
+}
 
 suppress_warnings = [
     "sphinx_gallery",
