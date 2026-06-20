@@ -484,3 +484,21 @@ class TestCoordIndexing:
         c = Coord([10, 20, 30], name="x")
         sliced = c[0:2]
         assert sliced.name == "x"
+
+
+class TestCoordCopyLabels:
+    """Label preservation across Coord copy operations."""
+
+    def test_coord_copy_preserves_labels(self):
+        c = Coord([1, 2, 3], name="x")
+        c.labels = ["a", "b", "c"]
+        c2 = c.copy()
+        assert list(c2.labels) == ["a", "b", "c"]
+
+    def test_coord_copy_labels_independent(self):
+        c = Coord([1, 2, 3], name="x")
+        c.labels = ["a", "b", "c"]
+        c2 = c.copy()
+        c2.labels[0] = "modified"
+        assert c.labels[0] == "a"
+        assert c2.labels[0] == "modified"

@@ -236,6 +236,10 @@ class NDArray(tr.HasTraits):
         if self._labels_allowed:
             self.labels = kwargs.pop("labels", None)
 
+        # Propagate labels from source data when no explicit labels passed.
+        if self._labels is None and isinstance(data, NDArray) and data.is_labeled:
+            self._labels = data._labels.copy() if self._copy else data._labels
+
         self.title = kwargs.pop("title", self.title)
 
         mask = kwargs.pop("mask", NOMASK)
