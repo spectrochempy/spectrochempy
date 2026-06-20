@@ -96,3 +96,50 @@ class TestFilterEdgeCases:
             dataset_2d_single_row
         )
         assert result.title == "IR spectrum", "Title should be preserved"
+
+
+class TestSavgolDerivativeMetadata:
+    """
+    Metadata contract for ``savgol(..., deriv=n)`` (issue #1095).
+
+    The Savitzky-Golay path is index-based and does not validate even spacing,
+    so the derivative output keeps the original units (no physically
+    transformed units are claimed), preserves the coordinate metadata, and its
+    title is annotated to make the derivative explicit.
+    """
+
+    @pytest.fixture
+    def dataset_2d_with_meta(self):
+        ds = NDDataset(np.random.rand(3, 100), title="intensity", units="absorbance")
+        ds.set_coordset(
+            x=scp.Coord(np.linspace(4000, 800, 100), title="wavenumber"),
+            y=scp.Coord([0, 1, 2], title="spectrum"),
+        )
+        return ds
+
+    @pytest.mark.parametrize("deriv, label", [(1, "1st"), (2, "2nd"), (3, "3rd")])
+    def test_deriv_title_is_explicit(self, dataset_2d_with_meta, deriv, label):
+        result = scp.savgol(dataset_2d_with_meta, size=7, order=3, deriv=deriv)
+        assert result.title == f"intensity ({label} derivative)", result.title
+
+    def test_deriv_higher_order_title(self, dataset_2d_with_meta):
+        result = scp.savgol(dataset_2d_with_meta, size=11, order=5, deriv=4)
+        assert result.title == "intensity (4th derivative)", result.title
+
+    def test_deriv_zero_keeps_title_unannotated(self, dataset_2d_with_meta):
+        result = scp.savgol(dataset_2d_with_meta, size=7, order=3, deriv=0)
+        assert result.title == "intensity", result.title
+
+    def test_deriv_preserves_coordinates(self, dataset_2d_with_meta):
+        result = scp.savgol(dataset_2d_with_meta, size=7, order=3, deriv=1)
+        assert result.coordset is not None
+        assert result.dims == ["y", "x"]
+        np.testing.assert_array_equal(
+            result.coord("x").data, dataset_2d_with_meta.coord("x").data
+        )
+
+    def test_deriv_keeps_original_units(self, dataset_2d_with_meta):
+        # Conservative: index-based derivative scaling is not tied to a
+        # validated physical spacing, so units are unchanged.
+        result = scp.savgol(dataset_2d_with_meta, size=7, order=3, deriv=1)
+        assert result.units == "absorbance", result.units
