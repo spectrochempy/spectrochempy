@@ -103,7 +103,10 @@ audit/~project-pr13-notes.md
 
 Detailed implementation history belongs in audits, not changelog entries.
 
-Agents should update relevant audit notes before considering a multi-PR task complete.
+Agents must produce or update an audit note after each work session,
+documenting what was done, key decisions, test results, risks, and next
+steps.  For multi-PR projects, maintain dedicated audit files and update
+them before considering a task complete.
 
 ---
 
@@ -215,13 +218,14 @@ When possible:
 
 # Pre-commit Policy
 
-Do not run:
+Pre-commit validation must be run before creating a pull request or pushing
+to ``upstream/master``.  It must not be run during normal development.
+
+Command:
 
 ```bash id="4qukx8"
 pre-commit run --all-files
 ```
-
-unless explicitly requested.
 
 When not delegated:
 
@@ -274,7 +278,7 @@ Unless explicitly requested, do not:
 * create releases;
 * publish packages;
 * run broad test suites;
-* run pre-commit.
+* run pre-commit during normal development (see Pre-commit Policy).
 
 ---
 
@@ -286,7 +290,7 @@ Unless explicitly requested otherwise:
 * do not commit changes;
 * do not push changes;
 * do not open pull requests;
-* do not run pre-commit;
+* do not run pre-commit during normal development (see Pre-commit Policy);
 * do not run broad test suites.
 
 Prefer producing:
