@@ -45,7 +45,14 @@ Bug Fixes
   derived quantity is clearly identified. Units are kept as-is and
   coordinates are preserved, consistent with the index-based
   Savitzky-Golay path that does not validate even spacing.
-  (`#1095 <https://github.com/spectrochempy/spectrochempy/issues/1095>`_)
+   (`#1095 <https://github.com/spectrochempy/spectrochempy/issues/1095>`_)
+
+
+- FIX: ``Coord`` labels are no longer silently dropped when a labeled
+  ``Coord`` is copied into a ``CoordSet`` (e.g.
+  ``CoordSet(labeled_coord)``). The ``CoordSet`` constructor creates a copy
+  via ``Coord(coord, copy=True)``, which now propagates labels from the
+  source coordinate. (:pr:`1229`)
 
 
 - FIX: application startup now removes invalid JSON preference files only
