@@ -1470,6 +1470,11 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         """
         Convert a NDDataset instance to an `~xarray.Dataset` object.
 
+        Same-dimension ``CoordSet`` coordinates (multiple numeric coordinates
+        sharing a dimension) are exported as a dimension coordinate for the
+        default coordinate and non-dimension coordinates for auxiliary
+        coordinates, with ``scpy_coord_role`` and ``scpy_owner_dim`` markers.
+
         Warning: the xarray library must be available.
 
         Returns
@@ -1486,22 +1491,58 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         primary_name = self._name if self._name else "data"
 
         coords = {}
+        aux_vars = []
         for dim in dims:
             coord = self.coord(dim)
             if coord is None or coord.is_empty:
                 continue
 
-            coord_attrs = {"scpy_coord_role": "default"}
-            if coord.units is not None:
-                coord_attrs["units"] = str(coord.units)
-            if coord.title != "<untitled>":
-                coord_attrs["scpy_title"] = coord.title
+            if isinstance(coord, CoordSet) and coord.is_same_dim:
+                default_coord = coord.default
+                coord_attrs = {"scpy_coord_role": "default", "scpy_default": dim}
+                if default_coord.units is not None:
+                    coord_attrs["units"] = str(default_coord.units)
+                if default_coord.title != "<untitled>":
+                    coord_attrs["scpy_title"] = default_coord.title
 
-            coords[dim] = xr.DataArray(
-                np.asarray(coord.data),
-                dims=(dim,),
-                attrs=coord_attrs,
-            )
+                coords[dim] = xr.DataArray(
+                    np.asarray(default_coord.data),
+                    dims=(dim,),
+                    attrs=coord_attrs,
+                )
+
+                for i, c in enumerate(coord.coords):
+                    if i == coord.default_index:
+                        continue
+                    aux_var = f"{dim}_aux_{i:04d}"
+                    aux_attrs = {
+                        "scpy_coord_role": "auxiliary",
+                        "scpy_owner_dim": dim,
+                    }
+                    if c.units is not None:
+                        aux_attrs["units"] = str(c.units)
+                    if c.title != "<untitled>":
+                        aux_attrs["scpy_title"] = c.title
+                    aux_vars.append(
+                        (
+                            aux_var,
+                            dim,
+                            np.asarray(c.data),
+                            aux_attrs,
+                        )
+                    )
+            else:
+                coord_attrs = {"scpy_coord_role": "default", "scpy_default": dim}
+                if coord.units is not None:
+                    coord_attrs["units"] = str(coord.units)
+                if coord.title != "<untitled>":
+                    coord_attrs["scpy_title"] = coord.title
+
+                coords[dim] = xr.DataArray(
+                    np.asarray(coord.data),
+                    dims=(dim,),
+                    attrs=coord_attrs,
+                )
 
         meta = {}
         skipped_meta_keys = []
@@ -1545,6 +1586,13 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             attrs=dataset_attrs,
         )
 
+        for var_name, var_dim, var_data, var_attrs in aux_vars:
+            xds.coords[var_name] = xr.DataArray(
+                var_data,
+                dims=(var_dim,),
+                attrs=var_attrs,
+            )
+
         if self.is_masked:
             mask_name = f"{primary_name}__mask"
             xds[mask_name] = xr.DataArray(
@@ -1561,10 +1609,15 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         """
         Persist this dataset to NetCDF using the canonical xarray mapping.
 
+        Auxiliary same-dimension coordinates are persisted automatically
+        through the underlying ``to_xarray()`` output.
+
         The NetCDF prototype is intentionally narrow:
 
         - one `NDDataset`;
         - default coordinates only;
+        - auxiliary same-dimension coordinates (``CoordSet`` sharing a
+          dimension);
         - explicit mask variable support;
         - JSON-compatible metadata only;
         - complex data persisted through a split real/imag convention.
@@ -1595,9 +1648,16 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         """
         Build a minimal `NDDataset` instance from an `xarray.Dataset`.
 
-        This prototype covers numerical data, default coordinates, units, masks,
-        JSON-compatible metadata, title, and name. Rich CoordSet semantics and
-        backend-specific persistence are intentionally out of scope here.
+        This prototype covers numerical data, default coordinates, auxiliary
+        same-dimension coordinates, units, masks, JSON-compatible metadata,
+        title, and name.
+
+        Auxiliary coordinates are detected by ``scpy_coord_role`` and
+        ``scpy_owner_dim`` attributes and reassembled into a same-dimension
+        ``CoordSet`` with the dimension coordinate as the default.
+
+        Rich CoordSet semantics and backend-specific persistence are
+        intentionally out of scope here.
         """
         xr = import_optional_dependency("xarray")
         if xr is None:
@@ -1625,6 +1685,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         dims = tuple(data_var.dims)
 
         coordset = []
+        aux_dims = set()
         for dim in dims:
             if dim in data_var.coords:
                 xr_coord = data_var.coords[dim]
@@ -1635,7 +1696,32 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
                 title = xr_coord.attrs.get("scpy_title")
                 if title is not None:
                     kwargs["title"] = title
-                coordset.append(Coord(np.asarray(xr_coord.data), **kwargs))
+                dim_coord = Coord(np.asarray(xr_coord.data), **kwargs)
+
+                aux_coords = []
+                for aux_name in sorted(dataset.coords):
+                    if aux_name == dim:
+                        continue
+                    var = dataset.coords[aux_name]
+                    if (
+                        var.attrs.get("scpy_coord_role") == "auxiliary"
+                        and var.attrs.get("scpy_owner_dim") == dim
+                    ):
+                        kwargs_aux = {"name": aux_name}
+                        units_aux = var.attrs.get("units")
+                        if units_aux is not None:
+                            kwargs_aux["units"] = units_aux
+                        title_aux = var.attrs.get("scpy_title")
+                        if title_aux is not None:
+                            kwargs_aux["title"] = title_aux
+                        aux_coords.append(Coord(np.asarray(var.data), **kwargs_aux))
+
+                if aux_coords:
+                    aux_dims.add(dim)
+                    inner = CoordSet(dim_coord, *aux_coords, sorted=False)
+                    coordset.append(inner)
+                else:
+                    coordset.append(dim_coord)
             else:
                 coordset.append(None)
 
@@ -1655,12 +1741,27 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         if mask_name in dataset.data_vars:
             kwargs["mask"] = np.asarray(dataset[mask_name].data, dtype=bool)
 
-        return cls(np.asarray(data_var.data), **kwargs)
+        result = cls(np.asarray(data_var.data), **kwargs)
+
+        # Identify the default coordinate explicitly for each same-dim CoordSet.
+        for dim in aux_dims:
+            inner = result._coordset.coords[result._coordset.names.index(dim)]
+            dim_data = np.asarray(data_var.coords[dim].data)
+            for j, c in enumerate(inner.coords):
+                if np.array_equal(np.asarray(c.data), dim_data):
+                    if j != inner._default:
+                        inner._default = j
+                    break
+
+        return result
 
     @classmethod
     def from_netcdf(cls, filename, **kwargs):
         """
         Reconstruct an `NDDataset` from the xarray-backed NetCDF prototype.
+
+        Same-dimension ``CoordSet`` auxiliary coordinates are restored
+        automatically from the xarray coordinate attributes.
 
         Parameters
         ----------

@@ -19,17 +19,14 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
-- Added a first xarray-backed NetCDF prototype for `NDDataset` portable
-  persistence. The prototype builds strictly on the canonical
-  `NDDataset ↔ xarray.Dataset` mapping and covers numerical data, default
-  coordinates, units, explicit masks, JSON-compatible metadata, and complex
-  datasets through a split real/imag NetCDF convention.
-
-- Added a first ``NDDataset`` ↔ ``xarray`` prototype focused on portable
-  dataset exchange. Native ``xarray`` round-trips now cover numerical arrays,
-  dimension names/order, default coordinates, units, explicit masks,
-  ``name``/``title``, and JSON-compatible metadata, while richer ``CoordSet``
-  semantics remain outside this first implementation.
+- Added portable ``NDDataset`` ↔ xarray/NetCDF round-trip support for
+  numerical data, default coordinates, units, explicit masks,
+  JSON-compatible metadata, complex data (split real/imag convention),
+  ``name``/``title``, and auxiliary same-dimension ``CoordSet`` coordinates
+  (multiple numeric coordinates sharing a dimension). Auxiliary coordinates
+  are exported as non-dimension coordinates with ``scpy_coord_role`` and
+  ``scpy_owner_dim`` markers and restored on import with the dimension
+  coordinate as default.
 
 .. section
 
