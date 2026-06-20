@@ -18,11 +18,17 @@ New Features
 - Added portable ``NDDataset`` ↔ xarray/NetCDF round-trip support for
   numerical data, default coordinates, units, explicit masks,
   JSON-compatible metadata, complex data (split real/imag convention),
-  ``name``/``title``, and auxiliary same-dimension ``CoordSet`` coordinates
-  (multiple numeric coordinates sharing a dimension). Auxiliary coordinates
-  are exported as non-dimension coordinates with ``scpy_coord_role`` and
-  ``scpy_owner_dim`` markers and restored on import with the dimension
-  coordinate as default.
+  ``name``/``title``, auxiliary same-dimension ``CoordSet`` coordinates
+  (multiple numeric coordinates sharing a dimension), and portable string
+  labels on coordinates (1D string-only, ``None`` preserved via metadata
+  marker). Auxiliary coordinates are exported as non-dimension coordinates with
+  ``scpy_coord_role`` and ``scpy_owner_dim`` markers and restored on import
+  with the dimension coordinate as default. Portable string labels are
+  exported as non-dimension coordinate variables with
+  ``scpy_coord_role="label"`` and restored on import. Non-exportable labels
+  (mixed types, datetime, multi-row) trigger an explicit
+  :class:`~spectrochempy.utils._logging.warning_` instead of silent
+  omission. (:issue:`1227`)
 
 Bug Fixes
 ~~~~~~~~~

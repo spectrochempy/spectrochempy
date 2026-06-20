@@ -84,6 +84,41 @@ def _normalize_json_compatible(value: Any) -> Any:
     raise TypeError(f"Value of type {type(value).__name__} is not JSON-compatible")
 
 
+def _is_portable_labels(labels):
+    """Return True if labels are exportable as portable string labels."""
+    if labels is None or labels.ndim != 1 or len(labels) == 0:
+        return False
+    return all(isinstance(v, str) or v is None for v in labels)
+
+
+def _export_labels(coord, dim, aux_vars):
+    """Append label export variables to *aux_vars* or emit a warning."""
+    labels = coord.labels
+    if labels is None or not coord.is_labeled:
+        return
+    if _is_portable_labels(labels):
+        safe = np.array(["" if v is None else v for v in labels])
+        attrs = {"scpy_coord_role": "label", "scpy_owner_dim": dim}
+        none_mask = np.array([v is None for v in labels])
+        if np.any(none_mask):
+            attrs["scpy_label_none_mask"] = json.dumps(
+                none_mask.tolist(), sort_keys=True
+            )
+        aux_vars.append(
+            (
+                f"{dim}_labels",
+                dim,
+                np.asarray(safe, dtype=str),
+                attrs,
+            )
+        )
+    else:
+        warning_(
+            f"Labels on dimension '{dim}' were not exported because they are "
+            "not part of the supported portable label subset.",
+        )
+
+
 def _prepare_xarray_dataset_for_netcdf(dataset):
     """Convert a canonical xarray Dataset into a NetCDF-safe representation."""
     xds = dataset.copy(deep=True)
@@ -1475,6 +1510,11 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         default coordinate and non-dimension coordinates for auxiliary
         coordinates, with ``scpy_coord_role`` and ``scpy_owner_dim`` markers.
 
+        Portable string labels on coordinates (1D string-only labels with no
+        mixed types) are exported as non-dimension coordinate variables with
+        ``scpy_coord_role="label"``. Non-exportable labels trigger a warning.
+
+
         Warning: the xarray library must be available.
 
         Returns
@@ -1531,6 +1571,8 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
                             aux_attrs,
                         )
                     )
+
+                _export_labels(default_coord, dim, aux_vars)
             else:
                 coord_attrs = {"scpy_coord_role": "default", "scpy_default": dim}
                 if coord.units is not None:
@@ -1543,6 +1585,8 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
                     dims=(dim,),
                     attrs=coord_attrs,
                 )
+
+                _export_labels(coord, dim, aux_vars)
 
         meta = {}
         skipped_meta_keys = []
@@ -1650,11 +1694,16 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
 
         This prototype covers numerical data, default coordinates, auxiliary
         same-dimension coordinates, units, masks, JSON-compatible metadata,
-        title, and name.
+        title, name, and portable string labels.
 
         Auxiliary coordinates are detected by ``scpy_coord_role`` and
         ``scpy_owner_dim`` attributes and reassembled into a same-dimension
         ``CoordSet`` with the dimension coordinate as the default.
+
+        Portable string labels are restored from non-dimension coordinates with
+        ``scpy_coord_role="label"`` and associated with the owning dimension's
+        coordinate via ``scpy_owner_dim``.
+
 
         Rich CoordSet semantics and backend-specific persistence are
         intentionally out of scope here.
@@ -1752,6 +1801,30 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
                     if j != inner._default:
                         inner._default = j
                     break
+
+        # Restore portable string labels.
+        for label_name in sorted(dataset.coords):
+            var = dataset.coords[label_name]
+            if var.attrs.get("scpy_coord_role") != "label":
+                continue
+            owner_dim = var.attrs.get("scpy_owner_dim")
+            if owner_dim is None:
+                continue
+            try:
+                idx = result._coordset.names.index(owner_dim)
+            except (ValueError, AttributeError):
+                continue
+            target = result._coordset.coords[idx]
+            if isinstance(target, CoordSet) and target.is_same_dim:
+                target = target.default
+            label_data = np.asarray(var.data, dtype=object)
+            none_mask = var.attrs.get("scpy_label_none_mask")
+            if none_mask is not None:
+                mask = json.loads(none_mask)
+                for i, is_none in enumerate(mask):
+                    if is_none:
+                        label_data[i] = None
+            target.labels = label_data
 
         return result
 

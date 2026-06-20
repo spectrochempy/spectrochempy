@@ -295,3 +295,208 @@ class TestSameDimCoordRoundtrip:
             new_default = rebuilt.coord("x").default
             assert new_default.title == orig_default.title
             assert np.allclose(new_default.data, orig_default.data)
+
+
+def _make_labeled_dataset(labels=None, same_dim=False):
+    """Create a dataset with string labels on the x coord."""
+    if labels is None:
+        labels = ["peak_a", "peak_b", "peak_c", "peak_d", "peak_e"]
+
+    data = np.random.default_rng(42).random((3, 5))
+    coord_y = Coord([10.0, 20.0, 30.0], name="y", title="time", units="s")
+
+    if same_dim:
+        coord_x = Coord(
+            [1000.0, 1100.0, 1200.0, 1300.0, 1400.0],
+            name="x",
+            title="wavenumber",
+            units="cm^-1",
+        )
+        coord_x2 = Coord(
+            [1.0, 1.25, 1.5, 1.75, 2.0], name="x2", title="wavelength", units="µm"
+        )
+        inner_x = CoordSet(coord_x, coord_x2, sorted=False)
+        ds = NDDataset(
+            data, dims=["y", "x"], coordset=[coord_y, inner_x], name="spectra"
+        )
+        ds.coord("x").default.labels = labels
+        return ds
+
+    coord_x = Coord(
+        [1000.0, 1100.0, 1200.0, 1300.0, 1400.0],
+        name="x",
+        title="wavenumber",
+        units="cm^-1",
+    )
+    ds = NDDataset(data, dims=["y", "x"], coordset=[coord_y, coord_x], name="spectra")
+    ds.coord("x").labels = labels
+    return ds
+
+
+@pytest.mark.skipif(xr is None, reason="xarray is not installed")
+class TestLabelExportImport:
+    def test_string_labels_exported_as_coord_variable(self):
+        ds = _make_labeled_dataset()
+        xds = ds.to_xarray()
+        assert "x_labels" in xds.coords
+        assert xds.coords["x_labels"].attrs["scpy_coord_role"] == "label"
+        assert xds.coords["x_labels"].attrs["scpy_owner_dim"] == "x"
+        assert list(xds.coords["x_labels"].values) == [
+            "peak_a",
+            "peak_b",
+            "peak_c",
+            "peak_d",
+            "peak_e",
+        ]
+
+    def test_string_labels_xarray_roundtrip(self):
+        ds = _make_labeled_dataset()
+        xds = ds.to_xarray()
+        rebuilt = NDDataset.from_xarray(xds)
+        assert list(rebuilt.coord("x").labels) == [
+            "peak_a",
+            "peak_b",
+            "peak_c",
+            "peak_d",
+            "peak_e",
+        ]
+
+    def test_string_labels_with_none_xarray_roundtrip(self):
+        labels = ["A", None, "C", None, "E"]
+        ds = _make_labeled_dataset(labels=labels)
+        xds = ds.to_xarray()
+        rebuilt = NDDataset.from_xarray(xds)
+        exported = list(xds.coords["x_labels"].values)
+        assert exported == ["A", "", "C", "", "E"]
+        imported = list(rebuilt.coord("x").labels)
+        assert imported == ["A", None, "C", None, "E"]
+
+    def test_no_labels_unchanged(self):
+        ds = _make_dataset()
+        xds = ds.to_xarray()
+        label_vars = [
+            n
+            for n in xds.coords
+            if xds.coords[n].attrs.get("scpy_coord_role") == "label"
+        ]
+        assert label_vars == []
+
+    def test_mixed_type_labels_emit_warning(self):
+        labels = np.array(["A", 42, "C", "D", "E"], dtype=object)
+        ds = _make_labeled_dataset(labels=labels)
+        import warnings
+
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            xds = ds.to_xarray()
+            label_vars = [
+                n
+                for n in xds.coords
+                if xds.coords[n].attrs.get("scpy_coord_role") == "label"
+            ]
+            assert label_vars == []
+            assert any("not exported" in str(msg.message) for msg in w)
+
+    def test_datetime_labels_emit_warning(self):
+        labels = np.array(
+            [
+                np.datetime64("2024-01-01"),
+                np.datetime64("2024-06-15"),
+                np.datetime64("2024-07-04"),
+                np.datetime64("2024-10-31"),
+                np.datetime64("2025-01-01"),
+            ],
+            dtype=object,
+        )
+        ds = _make_labeled_dataset(labels=labels)
+        import warnings
+
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            xds = ds.to_xarray()
+            label_vars = [
+                n
+                for n in xds.coords
+                if xds.coords[n].attrs.get("scpy_coord_role") == "label"
+            ]
+            assert label_vars == []
+            assert any("not exported" in str(msg.message) for msg in w)
+
+    def test_multi_row_labels_emit_warning(self):
+        ds = NDDataset(
+            np.array([1.0, 2.0, 3.0]),
+            dims=["x"],
+            coordset=[Coord([10.0, 20.0, 30.0], name="x")],
+        )
+        labels = np.array([["A", "B"], ["C", "D"], ["E", "F"]], dtype=object)
+        ds.coord("x").labels = labels
+        import warnings
+
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            xds = ds.to_xarray()
+            label_vars = [
+                n
+                for n in xds.coords
+                if xds.coords[n].attrs.get("scpy_coord_role") == "label"
+            ]
+            assert label_vars == []
+            assert any("not exported" in str(msg.message) for msg in w)
+
+    def test_labels_on_same_dim_default_coord_roundtrip(self):
+        ds = _make_labeled_dataset(same_dim=True)
+        xds = ds.to_xarray()
+        rebuilt = NDDataset.from_xarray(xds)
+        assert list(rebuilt.coord("x").default.labels) == [
+            "peak_a",
+            "peak_b",
+            "peak_c",
+            "peak_d",
+            "peak_e",
+        ]
+
+    def test_labels_on_same_dim_exported_with_scpy_markers(self):
+        ds = _make_labeled_dataset(same_dim=True)
+        xds = ds.to_xarray()
+        assert "x_labels" in xds.coords
+        assert xds.coords["x_labels"].attrs["scpy_coord_role"] == "label"
+        assert xds.coords["x_labels"].attrs["scpy_owner_dim"] == "x"
+
+    def test_netcdf_roundtrip_preserves_string_labels(self, tmp_path):
+        ds = _make_labeled_dataset()
+        filename = tmp_path / "labels.nc"
+        ds.to_netcdf(filename)
+        rebuilt = NDDataset.from_netcdf(filename)
+        assert list(rebuilt.coord("x").labels) == [
+            "peak_a",
+            "peak_b",
+            "peak_c",
+            "peak_d",
+            "peak_e",
+        ]
+
+    def test_netcdf_roundtrip_preserves_labels_with_none(self, tmp_path):
+        labels = ["X", None, "Z"]
+        ds = NDDataset(
+            np.array([1.0, 2.0, 3.0]),
+            dims=["x"],
+            coordset=[Coord([10.0, 20.0, 30.0], name="x")],
+        )
+        ds.coord("x").labels = labels
+        filename = tmp_path / "labels_none.nc"
+        ds.to_netcdf(filename)
+        rebuilt = NDDataset.from_netcdf(filename)
+        assert list(rebuilt.coord("x").labels) == ["X", None, "Z"]
+
+    def test_labels_exported_only_for_labeled_dims(self):
+        coord_x = Coord([1.0, 2.0, 3.0], name="x")
+        coord_y = Coord([10.0, 20.0], name="y")
+        ds = NDDataset(
+            np.ones((2, 3)),
+            dims=["y", "x"],
+            coordset=[coord_y, coord_x],
+        )
+        ds.coord("x").labels = ["A", "B", "C"]
+        xds = ds.to_xarray()
+        assert "x_labels" in xds.coords
+        assert "y_labels" not in xds.coords
