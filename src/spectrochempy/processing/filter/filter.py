@@ -179,6 +179,11 @@ and ‘nearest’.
             "cval": self.cval,
         }
 
+        # Reset the output-title annotation: only the Savitzky-Golay derivative
+        # path sets it, so every other method (and deriv=0) leaves the title as
+        # that of the input data.
+        self._output_title_suffix = None
+
         # smooth with moving average
         # --------------------------
         if self.method == "avg":
@@ -217,6 +222,17 @@ and ‘nearest’.
             # Change derived data sign if we have reversed coordinate axis
             if self._reversed and self.deriv:
                 data = data * (-1) ** self.deriv
+
+            # Annotate the output title so a derivative quantity is clearly
+            # identified. Units are intentionally kept as-is (the Savitzky-Golay
+            # path is index-based and does not validate even spacing, so we do
+            # not claim physically transformed units) and coordinates are
+            # preserved by the output wrapping.
+            if self.deriv:
+                ordinal = {1: "1st", 2: "2nd", 3: "3rd"}.get(
+                    self.deriv, f"{self.deriv}th"
+                )
+                self._output_title_suffix = f"({ordinal} derivative)"
 
         # Whittaker-Eilers filter
         # -----------------------

@@ -30,6 +30,14 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- FIX: ``savgol(..., deriv=n)`` now annotates the output ``title`` with
+  the derivative order (e.g. ``"intensity (1st derivative)"``) so a
+  derived quantity is clearly identified. Units are kept as-is and
+  coordinates are preserved, consistent with the index-based
+  Savitzky-Golay path that does not validate even spacing.
+  (`#1095 <https://github.com/spectrochempy/spectrochempy/issues/1095>`_)
+
+
 - FIX: application startup now removes invalid JSON preference files only
   after closing them first, avoiding a Windows ``PermissionError`` during
   configuration initialisation when a stale file such as ``CP.json`` is

@@ -487,6 +487,12 @@ class _set_output:
                     X_transf.title = X.title
                 else:
                     X_transf.title = self.title
+                # Allow a processing method to annotate the output title (e.g. to
+                # flag a derived quantity) by exposing ``_output_title_suffix``
+                # on the instance, without having to override this decorator.
+                suffix = getattr(obj, "_output_title_suffix", None)
+                if suffix and X_transf.title:
+                    X_transf.title = f"{X_transf.title} {suffix}"
             # make coordset
             M, N = X.shape
 
