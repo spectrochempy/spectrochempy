@@ -11,6 +11,7 @@ import pytest
 
 import spectrochempy.core.dataset.nddataset as ndmodule
 from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 
 if importlib.util.find_spec("xarray") is not None:
@@ -108,6 +109,72 @@ def test_netcdf_file_is_readable_by_xarray_open_dataset(tmp_path):
         assert opened.attrs["scpy_mask_variable"] == "spectra__mask"
         assert opened["spectra"].dims == ("y", "x")
         assert opened["spectra__mask"].dims == ("y", "x")
+
+
+def _make_same_dim_netcdf_dataset():
+    coord_y = Coord([10.0, 20.0, 30.0], name="y", title="time", units="s")
+    coord_x = Coord(
+        [1000.0, 1100.0, 1200.0, 1300.0, 1400.0],
+        name="x",
+        title="wavenumber",
+        units="cm^-1",
+    )
+    coord_x2 = Coord(
+        [1.0, 1.25, 1.5, 1.75, 2.0], name="x2", title="wavelength", units="µm"
+    )
+    inner_x = CoordSet(coord_x, coord_x2, sorted=False)
+    return NDDataset(
+        np.random.default_rng(42).random((3, 5)),
+        dims=["y", "x"],
+        coordset=[coord_y, inner_x],
+        name="spectra",
+    )
+
+
+@pytest.mark.skipif(xr is None, reason="xarray is not installed")
+def test_netcdf_roundtrip_preserves_same_dim_structure(tmp_path):
+    ds = _make_same_dim_netcdf_dataset()
+    filename = tmp_path / "same_dim.nc"
+
+    ds.to_netcdf(filename)
+    rebuilt = NDDataset.from_netcdf(filename)
+
+    inner = rebuilt.coord("x")
+    assert inner.is_same_dim
+    assert len(inner.coords) == 2
+
+
+@pytest.mark.skipif(xr is None, reason="xarray is not installed")
+def test_netcdf_roundtrip_preserves_auxiliary_coord_values(tmp_path):
+    ds = _make_same_dim_netcdf_dataset()
+    filename = tmp_path / "same_dim.nc"
+    orig_inner = ds.coord("x")
+    orig_aux_data = [c.data for c in orig_inner.coords if c is not orig_inner.default][
+        0
+    ]
+
+    ds.to_netcdf(filename)
+    rebuilt = NDDataset.from_netcdf(filename)
+
+    new_inner = rebuilt.coord("x")
+    new_aux_data = [c.data for c in new_inner.coords if c is not new_inner.default][0]
+    assert np.allclose(new_aux_data, orig_aux_data)
+
+
+@pytest.mark.skipif(xr is None, reason="xarray is not installed")
+def test_netcdf_same_dim_roundtrip_preserves_default_coordinate(tmp_path):
+    ds = _make_same_dim_netcdf_dataset()
+    filename = tmp_path / "same_dim.nc"
+    orig_inner = ds.coord("x")
+    orig_default = orig_inner.default
+
+    ds.to_netcdf(filename)
+    rebuilt = NDDataset.from_netcdf(filename)
+
+    new_inner = rebuilt.coord("x")
+    assert new_inner.default is not None
+    assert new_inner.default.title == orig_default.title
+    assert np.allclose(new_inner.default.data, orig_default.data)
 
 
 def test_netcdf_methods_raise_clear_error_when_xarray_is_missing(monkeypatch, tmp_path):
