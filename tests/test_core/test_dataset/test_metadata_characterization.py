@@ -17,6 +17,13 @@ from tests.test_core.test_dataset._semantic_dataset_helpers import (
 from tests.test_core.test_dataset._semantic_dataset_helpers import (
     assert_coordset_matches,
 )
+from tests.test_core.test_dataset._semantic_dataset_helpers import assert_dims_equal
+from tests.test_core.test_dataset._semantic_dataset_helpers import (
+    assert_history_appended,
+)
+from tests.test_core.test_dataset._semantic_dataset_helpers import (
+    assert_units_preserved,
+)
 from tests.test_core.test_dataset._semantic_dataset_helpers import (
     make_semantic_2d_dataset,
 )
@@ -77,12 +84,10 @@ def test_copy_based_add_preserves_metadata(metadata_dataset):
         check_filename=True,
         meta_keys=("project", "instrument"),
     )
-    assert result.units == metadata_dataset.units
-    assert result.dims == ["y", "x"]
+    assert_units_preserved(result, metadata_dataset)
+    assert_dims_equal(result, ["y", "x"])
     assert_coordset_matches(result, metadata_dataset)
-    assert len(result.history) == 2
-    assert "Initial history marker" in result.history[0]
-    assert "Binary operation add" in result.history[1]
+    assert_history_appended(result, metadata_dataset, "Binary operation add")
 
 
 def test_copy_based_multiply_preserves_metadata(metadata_dataset):
@@ -94,12 +99,10 @@ def test_copy_based_multiply_preserves_metadata(metadata_dataset):
         check_filename=True,
         meta_keys=("project", "instrument"),
     )
-    assert result.units == metadata_dataset.units
-    assert result.dims == ["y", "x"]
+    assert_units_preserved(result, metadata_dataset)
+    assert_dims_equal(result, ["y", "x"])
     assert_coordset_matches(result, metadata_dataset)
-    assert len(result.history) == 2
-    assert "Initial history marker" in result.history[0]
-    assert "Binary operation mul" in result.history[1]
+    assert_history_appended(result, metadata_dataset, "Binary operation mul")
 
 
 def test_copy_based_abs_preserves_metadata(metadata_dataset):
@@ -111,12 +114,10 @@ def test_copy_based_abs_preserves_metadata(metadata_dataset):
         check_filename=True,
         meta_keys=("project", "instrument"),
     )
-    assert result.units == metadata_dataset.units
-    assert result.dims == ["y", "x"]
+    assert_units_preserved(result, metadata_dataset)
+    assert_dims_equal(result, ["y", "x"])
     assert_coordset_matches(result, metadata_dataset)
-    assert len(result.history) == 2
-    assert "Initial history marker" in result.history[0]
-    assert "Unary operation abs" in result.history[1]
+    assert_history_appended(result, metadata_dataset, "Unary operation abs")
 
 
 def test_mean_without_dimension_returns_quantity_without_dataset_metadata(
@@ -124,7 +125,7 @@ def test_mean_without_dimension_returns_quantity_without_dataset_metadata(
 ):
     result = metadata_dataset.mean()
 
-    assert result.units == metadata_dataset.units
+    assert_units_preserved(result, metadata_dataset)
     assert not hasattr(result, "name")
     assert not hasattr(result, "title")
     assert not hasattr(result, "meta")
@@ -147,8 +148,8 @@ def test_mean_along_dimension_preserves_metadata_and_drops_reduced_coord(
         check_filename=True,
         meta_keys=("project", "instrument"),
     )
-    assert result.units == metadata_dataset.units
-    assert result.dims == ["y"]
+    assert_units_preserved(result, metadata_dataset)
+    assert_dims_equal(result, ["y"])
     assert_coordset_matches(result, metadata_dataset, dims=("y",))
     assert "Initial history marker" in result.history[0]
 
@@ -176,8 +177,8 @@ def test_wrapper_based_filter_preserves_scientific_context_metadata(
         check_filename=True,
         meta_keys=("project", "instrument"),
     )
-    assert result.units == metadata_dataset.units
-    assert result.dims == ["y", "x"]
+    assert_units_preserved(result, metadata_dataset)
+    assert_dims_equal(result, ["y", "x"])
     assert_coordset_matches(result, metadata_dataset)
     assert len(result.history) == 1
     assert "Created using method Filter.transform" in result.history[0]
@@ -195,7 +196,7 @@ def test_integrate_preserves_metadata_with_operation_overrides(metadata_dataset)
     assert result.origin == metadata_dataset.origin
     assert result.filename == metadata_dataset.filename
     assert result.units == metadata_dataset.units * metadata_dataset.x.units
-    assert result.dims == ["y"]
+    assert_dims_equal(result, ["y"])
     assert result.coordset is not None
     np.testing.assert_allclose(result.y.data, metadata_dataset.y.data)
     assert len(result.history) == 1
@@ -217,15 +218,14 @@ def test_interpolate_preserves_metadata_and_replaces_interpolated_coord(
         check_filename=True,
         meta_keys=("project", "instrument"),
     )
-    assert result.units == metadata_dataset.units
-    assert result.dims == ["y", "x"]
+    assert_units_preserved(result, metadata_dataset)
+    assert_dims_equal(result, ["y", "x"])
     assert_coordset_matches(result, metadata_dataset, dims=("y",))
     np.testing.assert_allclose(result.x.data, new_x)
-    assert len(result.history) == 2
-    assert "Initial history marker" in result.history[0]
-    assert (
-        "Interpolated along dims ['x'] to 4 points using linear method"
-        in (result.history[1])
+    assert_history_appended(
+        result,
+        metadata_dataset,
+        "Interpolated along dims ['x'] to 4 points using linear method",
     )
 
 
@@ -247,7 +247,7 @@ def test_dot_drops_meta_and_source_provenance(metadata_dataset):
     assert result.filename != metadata_dataset.filename
     assert result.filename.suffix == ".scp"
     assert result.units == metadata_dataset.units * right.units
-    assert result.dims == ["y", "x"]
+    assert_dims_equal(result, ["y", "x"])
     assert result.coordset is not None
     np.testing.assert_allclose(result.y.data, metadata_dataset.y.data)
     np.testing.assert_allclose(result.x.data, metadata_dataset.y.data)
@@ -270,7 +270,7 @@ def test_find_peaks_preserves_metadata_with_name_and_history_overrides(
     assert result.origin == metadata_peak_dataset.origin
     assert result.filename == metadata_peak_dataset.filename
     assert result.units == metadata_peak_dataset.units
-    assert result.dims == ["x"]
+    assert_dims_equal(result, ["x"])
     assert result.coordset is not None
     np.testing.assert_allclose(result.x.data, [0.5, 1.5, 2.5, 3.5])
     assert len(result.history) == 4  # initial + squeezed + slice + find_peaks

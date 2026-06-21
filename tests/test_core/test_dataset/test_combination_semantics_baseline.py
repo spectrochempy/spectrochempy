@@ -24,6 +24,8 @@ from spectrochempy.processing.transformation.concatenate import concatenate
 from spectrochempy.processing.transformation.concatenate import stack
 from spectrochempy.utils.exceptions import DimensionsCompatibilityError
 from spectrochempy.utils.exceptions import UnitsCompatibilityError
+from tests.test_core.test_dataset._semantic_dataset_helpers import assert_dims_equal
+from tests.test_core.test_dataset._semantic_dataset_helpers import assert_masked_values
 from tests.test_core.test_dataset._semantic_dataset_helpers import (
     make_semantic_2d_dataset,
 )
@@ -148,17 +150,17 @@ class TestConcatenateData:
     def test_concat_along_x_shape_and_dims(self, dataset_x, dataset_y):
         c = concatenate(dataset_x, dataset_y, dims="x")
         assert c.shape == (5, 14)
-        assert c.dims == ["y", "x"]
+        assert_dims_equal(c, ["y", "x"])
 
     def test_concat_along_y_shape_and_dims(self, dataset_x, dataset_y):
         c = concatenate(dataset_x, dataset_y, dims="y")
         assert c.shape == (10, 7)
-        assert c.dims == ["y", "x"]
+        assert_dims_equal(c, ["y", "x"])
 
     def test_concat_default_dim_is_last(self, dataset_x, dataset_y):
         c = concatenate(dataset_x, dataset_y)
         assert c.shape == (5, 14)
-        assert c.dims == ["y", "x"]
+        assert_dims_equal(c, ["y", "x"])
 
     def test_concat_data_ordering_first_then_second(self, dataset_x, dataset_y):
         c = concatenate(dataset_x, dataset_y, dims="x")
@@ -335,9 +337,9 @@ class TestConcatenateMasks:
 
     def test_masks_concatenated(self, masked_dataset_x, masked_dataset_y):
         c = concatenate(masked_dataset_x, masked_dataset_y, dims="x")
-        assert c.mask[0, 0]  # masked from first dataset
+        assert_masked_values(c, (0, 0))
         assert not c.mask[0, 7]  # second dataset col 0 not masked
-        assert c.mask[1, 8]  # second dataset row 1 col 1 masked at offset 7
+        assert_masked_values(c, (1, 8))
 
     def test_combined_mask_shape(self, masked_dataset_x, masked_dataset_y):
         c = concatenate(masked_dataset_x, masked_dataset_y, dims="x")

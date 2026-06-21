@@ -35,6 +35,14 @@ from tests.test_core.test_dataset._semantic_dataset_helpers import (
 from tests.test_core.test_dataset._semantic_dataset_helpers import (
     assert_coordset_matches,
 )
+from tests.test_core.test_dataset._semantic_dataset_helpers import assert_dims_equal
+from tests.test_core.test_dataset._semantic_dataset_helpers import (
+    assert_history_appended,
+)
+from tests.test_core.test_dataset._semantic_dataset_helpers import assert_masked_values
+from tests.test_core.test_dataset._semantic_dataset_helpers import (
+    assert_units_preserved,
+)
 from tests.test_core.test_dataset._semantic_dataset_helpers import (
     make_semantic_2d_dataset,
 )
@@ -200,16 +208,16 @@ class TestDatasetScalarArithmetic:
     # ---- units ----
 
     def test_add_units(self, rich_dataset):
-        assert (rich_dataset + 2.0).units == Unit("absorbance")
+        assert_units_preserved(rich_dataset + 2.0, rich_dataset)
 
     def test_sub_units(self, rich_dataset):
-        assert (rich_dataset - 2.0).units == Unit("absorbance")
+        assert_units_preserved(rich_dataset - 2.0, rich_dataset)
 
     def test_mul_units(self, rich_dataset):
-        assert (rich_dataset * 2.0).units == Unit("absorbance")
+        assert_units_preserved(rich_dataset * 2.0, rich_dataset)
 
     def test_truediv_units(self, rich_dataset):
-        assert (rich_dataset / 2.0).units == Unit("absorbance")
+        assert_units_preserved(rich_dataset / 2.0, rich_dataset)
 
     # ---- CoordSet ----
 
@@ -228,32 +236,30 @@ class TestDatasetScalarArithmetic:
     # ---- dims ----
 
     def test_add_dims(self, rich_dataset):
-        assert (rich_dataset + 2.0).dims == ["y", "x"]
+        assert_dims_equal(rich_dataset + 2.0, ["y", "x"])
 
     def test_sub_dims(self, rich_dataset):
-        assert (rich_dataset - 2.0).dims == ["y", "x"]
+        assert_dims_equal(rich_dataset - 2.0, ["y", "x"])
 
     def test_mul_dims(self, rich_dataset):
-        assert (rich_dataset * 2.0).dims == ["y", "x"]
+        assert_dims_equal(rich_dataset * 2.0, ["y", "x"])
 
     def test_truediv_dims(self, rich_dataset):
-        assert (rich_dataset / 2.0).dims == ["y", "x"]
+        assert_dims_equal(rich_dataset / 2.0, ["y", "x"])
 
     # ---- mask ----
 
     def test_add_mask(self, rich_dataset):
-        result = rich_dataset + 2.0
-        assert result.is_masked
-        assert bool(result.mask[0, 0])
+        assert_masked_values(rich_dataset + 2.0, (0, 0))
 
     def test_sub_mask(self, rich_dataset):
-        assert (rich_dataset - 2.0).is_masked
+        assert_masked_values(rich_dataset - 2.0, (0, 0))
 
     def test_mul_mask(self, rich_dataset):
-        assert (rich_dataset * 2.0).is_masked
+        assert_masked_values(rich_dataset * 2.0, (0, 0))
 
     def test_truediv_mask(self, rich_dataset):
-        assert (rich_dataset / 2.0).is_masked
+        assert_masked_values(rich_dataset / 2.0, (0, 0))
 
     # ---- title behavior ----
     # Current: ALL Python operators (+, -, *, /) preserve the title.
@@ -288,25 +294,18 @@ class TestDatasetScalarArithmetic:
     # ---- history behavior ----
 
     def test_add_history(self, rich_dataset):
-        result = rich_dataset + 2.0
-        assert len(result.history) == 2
-        assert "Initial creation" in str(result.history[0])
-        assert "Binary operation add" in str(result.history[1])
+        assert_history_appended(rich_dataset + 2.0, rich_dataset, "Binary operation add")
 
     def test_sub_history(self, rich_dataset):
-        result = rich_dataset - 2.0
-        assert len(result.history) == 2
-        assert "Binary operation sub" in str(result.history[1])
+        assert_history_appended(rich_dataset - 2.0, rich_dataset, "Binary operation sub")
 
     def test_mul_history(self, rich_dataset):
-        result = rich_dataset * 2.0
-        assert len(result.history) == 2
-        assert "Binary operation mul" in str(result.history[1])
+        assert_history_appended(rich_dataset * 2.0, rich_dataset, "Binary operation mul")
 
     def test_truediv_history(self, rich_dataset):
-        result = rich_dataset / 2.0
-        assert len(result.history) == 2
-        assert "Binary operation truediv" in str(result.history[1])
+        assert_history_appended(
+            rich_dataset / 2.0, rich_dataset, "Binary operation truediv"
+        )
 
     # ---- metadata preservation ----
 
@@ -391,10 +390,10 @@ class TestDatasetDatasetArithmetic:
         assert isinstance(rich_dataset - compatible_dataset, NDDataset)
 
     def test_add_units(self, rich_dataset, compatible_dataset):
-        assert (rich_dataset + compatible_dataset).units == Unit("absorbance")
+        assert_units_preserved(rich_dataset + compatible_dataset, rich_dataset)
 
     def test_sub_units(self, rich_dataset, compatible_dataset):
-        assert (rich_dataset - compatible_dataset).units == Unit("absorbance")
+        assert_units_preserved(rich_dataset - compatible_dataset, rich_dataset)
 
     def test_add_coordset_preserved(self, rich_dataset, compatible_dataset):
         assert_coordset_matches(rich_dataset + compatible_dataset, rich_dataset)
@@ -405,10 +404,10 @@ class TestDatasetDatasetArithmetic:
         )
 
     def test_add_dims(self, rich_dataset, compatible_dataset):
-        assert (rich_dataset + compatible_dataset).dims == ["y", "x"]
+        assert_dims_equal(rich_dataset + compatible_dataset, ["y", "x"])
 
     def test_sub_dims(self, rich_dataset, compatible_dataset):
-        assert (rich_dataset - compatible_dataset).dims == ["y", "x"]
+        assert_dims_equal(rich_dataset - compatible_dataset, ["y", "x"])
 
     def test_add_title(self, rich_dataset, compatible_dataset):
         assert (rich_dataset + compatible_dataset).title == "reference spectrum"
@@ -423,13 +422,14 @@ class TestDatasetDatasetArithmetic:
         assert (rich_dataset - compatible_dataset).name == "rich_dataset"
 
     def test_add_history(self, rich_dataset, compatible_dataset):
-        result = rich_dataset + compatible_dataset
-        assert len(result.history) == 2
-        assert "Initial creation" in str(result.history[0])
+        assert_history_appended(
+            rich_dataset + compatible_dataset, rich_dataset, "Binary operation add"
+        )
 
     def test_sub_history(self, rich_dataset, compatible_dataset):
-        result = rich_dataset - compatible_dataset
-        assert len(result.history) == 2
+        assert_history_appended(
+            rich_dataset - compatible_dataset, rich_dataset, "Binary operation sub"
+        )
 
     # ---- metadata from first operand ----
 
@@ -460,9 +460,7 @@ class TestDatasetDatasetArithmetic:
     # ---- mask: union of both masks ----
 
     def test_add_mask_union(self, rich_dataset, compatible_dataset):
-        result = rich_dataset + compatible_dataset
-        assert result.is_masked
-        assert bool(result.mask[0, 0])
+        assert_masked_values(rich_dataset + compatible_dataset, (0, 0))
 
     # ---- reverse order (scalar on right, unmasked) ----
 
@@ -503,7 +501,7 @@ class TestUfuncCharacterization:
         assert isinstance(abs(rich_dataset), NDDataset)
 
     def test_abs_units(self, rich_dataset):
-        assert abs(rich_dataset).units == Unit("absorbance")
+        assert_units_preserved(abs(rich_dataset), rich_dataset)
 
     def test_abs_title(self, rich_dataset):
         assert abs(rich_dataset).title == "reference spectrum"
@@ -512,21 +510,16 @@ class TestUfuncCharacterization:
         assert abs(rich_dataset).name == "rich_dataset"
 
     def test_abs_coordset(self, rich_dataset):
-        assert abs(rich_dataset).coordset is not None
+        assert_coordset_matches(abs(rich_dataset), rich_dataset)
 
     def test_abs_dims(self, rich_dataset):
-        assert abs(rich_dataset).dims == ["y", "x"]
+        assert_dims_equal(abs(rich_dataset), ["y", "x"])
 
     def test_abs_mask(self, rich_dataset):
-        result = abs(rich_dataset)
-        assert result.is_masked
-        assert bool(result.mask[0, 0])
+        assert_masked_values(abs(rich_dataset), (0, 0))
 
     def test_abs_history(self, rich_dataset):
-        result = abs(rich_dataset)
-        assert len(result.history) == 2
-        # Note: history message uses "abs", not "absolute"
-        assert "Unary operation abs" in str(result.history[1])
+        assert_history_appended(abs(rich_dataset), rich_dataset, "Unary operation abs")
 
     def test_abs_meta(self, rich_dataset):
         assert abs(rich_dataset).meta.project == "semantic_characterization"
@@ -626,9 +619,7 @@ class TestHistoryBehavior:
             assert ">" in entry
 
     def test_history_copied_in_arithmetic(self, rich_dataset):
-        result = rich_dataset + 2.0
-        assert len(result.history) == 2
-        assert str(result.history[0]) == str(rich_dataset.history[0])
+        assert_history_appended(rich_dataset + 2.0, rich_dataset, "Binary operation add")
 
     def test_history_appended_not_replaced(self, rich_dataset):
         result = rich_dataset * 2.0
@@ -708,21 +699,13 @@ class TestCoordSetPreservation:
         assert result.x.title == rich_dataset.x.title
 
     def test_coord_values_unchanged_abs(self, rich_dataset):
-        result = abs(rich_dataset)
-        np.testing.assert_allclose(result.y.data, rich_dataset.y.data)
-        np.testing.assert_allclose(result.x.data, rich_dataset.x.data)
+        assert_coordset_matches(abs(rich_dataset), rich_dataset)
 
     def test_coordset_after_mul(self, rich_dataset):
-        result = rich_dataset * 2.0
-        assert result.coordset is not None
-        np.testing.assert_allclose(result.y.data, rich_dataset.y.data)
-        np.testing.assert_allclose(result.x.data, rich_dataset.x.data)
+        assert_coordset_matches(rich_dataset * 2.0, rich_dataset)
 
     def test_coordset_after_dataset_dataset_add(self, rich_dataset, compatible_dataset):
-        result = rich_dataset + compatible_dataset
-        assert result.coordset is not None
-        np.testing.assert_allclose(result.y.data, rich_dataset.y.data)
-        np.testing.assert_allclose(result.x.data, rich_dataset.x.data)
+        assert_coordset_matches(rich_dataset + compatible_dataset, rich_dataset)
 
     def test_double_coordset_preserved(self):
         y = Coord(np.arange(4.0), title="rows")

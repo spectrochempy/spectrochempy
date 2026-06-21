@@ -26,6 +26,13 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from tests.test_core.test_dataset._semantic_dataset_helpers import (
     assert_basic_metadata_preserved,
 )
+from tests.test_core.test_dataset._semantic_dataset_helpers import assert_dims_equal
+from tests.test_core.test_dataset._semantic_dataset_helpers import (
+    assert_history_appended,
+)
+from tests.test_core.test_dataset._semantic_dataset_helpers import (
+    assert_units_preserved,
+)
 from tests.test_core.test_dataset._semantic_dataset_helpers import (
     make_semantic_2d_dataset,
 )
@@ -78,7 +85,7 @@ class TestSumCharacterization:
         s = reduction_dataset.sum(dim="x")
         assert isinstance(s, NDDataset)
         assert s.shape == (5,)
-        assert s.dims == ["y"]
+        assert_dims_equal(s, ["y"])
 
     def test_sum_removes_reduced_coord(self, reduction_dataset):
         s = reduction_dataset.sum(dim="x")
@@ -104,7 +111,7 @@ class TestSumCharacterization:
     def test_sum_keepdims_preserves_dim(self, reduction_dataset):
         s = reduction_dataset.sum(dim="x", keepdims=True)
         assert s.shape == (5, 1)
-        assert s.dims == ["y", "x"]
+        assert_dims_equal(s, ["y", "x"])
         assert s.coordset is not None
 
     def test_sum_keepdims_coord_is_singleton(self, reduction_dataset):
@@ -116,8 +123,7 @@ class TestSumCharacterization:
         assert s.units is None
 
     def test_sum_with_units(self, unitful_dataset):
-        s = unitful_dataset.sum(dim="x")
-        assert s.units == unitful_dataset.units
+        assert_units_preserved(unitful_dataset.sum(dim="x"), unitful_dataset)
 
     def test_sum_preserves_title(self, reduction_dataset):
         s = reduction_dataset.sum(dim="x")
@@ -132,10 +138,11 @@ class TestSumCharacterization:
         assert_basic_metadata_preserved(s, reduction_dataset)
 
     def test_sum_appends_history(self, reduction_dataset):
-        s = reduction_dataset.sum(dim="x")
-        assert len(s.history) == 2
-        assert "original entry" in s.history[0].lower()
-        assert "Dataset resulting from application" in s.history[1]
+        assert_history_appended(
+            reduction_dataset.sum(dim="x"),
+            reduction_dataset,
+            "Dataset resulting from application",
+        )
 
     def test_sum_history_message_format(self, reduction_dataset):
         s = reduction_dataset.sum(dim="x")
@@ -165,7 +172,7 @@ class TestMeanCharacterization:
         m = reduction_dataset.mean(dim="x")
         assert isinstance(m, NDDataset)
         assert m.shape == (5,)
-        assert m.dims == ["y"]
+        assert_dims_equal(m, ["y"])
 
     def mean_expected_values(self):
         data = np.arange(35.0).reshape(5, 7)
@@ -190,9 +197,9 @@ class TestMeanCharacterization:
         assert m.title == "reduction_dataset"
 
     def test_mean_appends_history(self, reduction_dataset):
-        m = reduction_dataset.mean(dim="x")
-        assert len(m.history) == 2
-        assert "`mean`" in m.history[1]
+        assert_history_appended(
+            reduction_dataset.mean(dim="x"), reduction_dataset, "`mean`"
+        )
 
     def test_mean_coordset_reduced(self, reduction_dataset):
         m = reduction_dataset.mean(dim="x")
@@ -202,7 +209,7 @@ class TestMeanCharacterization:
     def test_mean_keepdims(self, reduction_dataset):
         m = reduction_dataset.mean(dim="x", keepdims=True)
         assert m.shape == (5, 1)
-        assert m.dims == ["y", "x"]
+        assert_dims_equal(m, ["y", "x"])
 
     def test_mean_masked(self):
         arr = np.ma.MaskedArray(
@@ -227,7 +234,7 @@ class TestStdCharacterization:
         s = reduction_dataset.std(dim="x")
         assert isinstance(s, NDDataset)
         assert s.shape == (5,)
-        assert s.dims == ["y"]
+        assert_dims_equal(s, ["y"])
 
     def test_std_numerical(self, reduction_dataset):
         s = reduction_dataset.std(dim="x")
@@ -239,8 +246,7 @@ class TestStdCharacterization:
         assert not isinstance(s, NDDataset)
 
     def test_std_appends_history(self, reduction_dataset):
-        s = reduction_dataset.std(dim="x")
-        assert "`std`" in s.history[1]
+        assert_history_appended(reduction_dataset.std(dim="x"), reduction_dataset, "`std`")
 
     def test_std_keepdims(self, reduction_dataset):
         s = reduction_dataset.std(dim="x", keepdims=True)
