@@ -37,16 +37,13 @@ Bug Fixes
   the derivative order (e.g. ``"intensity (1st derivative)"``) so a
   derived quantity is clearly identified. Units are kept as-is and
   coordinates are preserved, consistent with the index-based
-  Savitzky-Golay path that does not validate even spacing.
-   (`#1095 <https://github.com/spectrochempy/spectrochempy/issues/1095>`_)
-
+  Savitzky-Golay path that does not validate even spacing. (:issue:`1095`)
 
 - ``Coord`` labels are no longer silently dropped when a labeled
   ``Coord`` is copied into a ``CoordSet`` (e.g.
   ``CoordSet(labeled_coord)``). The ``CoordSet`` constructor creates a copy
   via ``Coord(coord, copy=True)``, which now propagates labels from the
   source coordinate. (:pr:`1229`)
-
 
 - application startup now removes invalid JSON preference files only
   after closing them first, avoiding a Windows ``PermissionError`` during
@@ -62,10 +59,11 @@ Bug Fixes
 
 - ``PLSRegression.intercept`` no longer crashes when the target
   dataset ``Y`` has no coordinate labels. (:pr:`1220`)
+
 - ``autosub()`` now supports subtraction along non-last dimensions
   consistently with its ``dim`` parameter, and the regression tests now
-  cover both last-axis and non-last-axis synthetic cases. (`#1079
-  <https://github.com/spectrochempy/spectrochempy/issues/1079>`_)
+  cover both last-axis and non-last-axis synthetic cases. (:issue:`1079`)
+
 - handle SVD ``compute_uv=False`` outputs consistently. The private
   ``_outfit`` attribute is now always a ``(U, s, VT)`` tuple, fixing wrong
   values and crashes for all properties when ``compute_uv=False``.
@@ -116,14 +114,13 @@ Bug Fixes
   RFC even though this is stronger than Python's usual shallow-copy
   convention.
 
-- Fixed several inconsistencies in the OMNIC SPA/SPG reader (`#1144
-  <https://github.com/spectrochempy/spectrochempy/issues/1144>`_):
+- Fixed several inconsistencies in the OMNIC SPA/SPG reader:
   ``read_spg()`` no longer advertises the ``spa`` protocol; swapped error
   messages in SPG unit-consistency checks now name the correct quantity;
   a single SPA comment is now included in the description (previously only
   ≥2 comments were shown); SPA history content is now checked via the
   variable instead of a literal string; and invalid ``return_ifg`` values
-  now produce a clear warning. (PR by @gaoflow)
+  now produce a clear warning. (:issue:`1144`) (PR by @gaoflow)
 
 Breaking Changes
 ~~~~~~~~~~~~~~~~

@@ -628,6 +628,8 @@ if not single_doc_or_dir:
 
 # External links configuration -----------------------------------------------
 extlinks = {
+    "issue": ("https://github.com/spectrochempy/spectrochempy/issues/%s", "#%s"),
+    "issues": ("https://github.com/spectrochempy/spectrochempy/issues/%s", "#%s"),
     "pr": ("https://github.com/spectrochempy/spectrochempy/pull/%s", "PR #%s"),
 }
 
