@@ -23,6 +23,10 @@ pytestmark = pytest.mark.skipif(xr is None, reason="xarray is not installed")
 
 
 def _make_portable_metadata_dataset():
+    # Kept local instead of reusing the broader semantic dataset helpers because
+    # these characterization tests need a compact portable-specific fixture with
+    # explicit provenance fields, acquisition_date, mask state, and nested
+    # reader/vendor Meta payloads for xarray and NetCDF round-trips.
     ds = NDDataset(
         np.array([[1.0, 2.0], [3.0, 4.0]]),
         dims=["y", "x"],
@@ -51,6 +55,9 @@ def _make_portable_metadata_dataset():
 
 
 def _make_same_dim_dataset():
+    # Kept local because same-dimension auxiliary-coordinate naming is itself
+    # part of the portable characterization target and is clearer when the
+    # fixture is declared inline next to the assertions that depend on it.
     coord_y = Coord([10.0, 20.0, 30.0], name="y", title="time", units="s")
     coord_x = Coord(
         [1000.0, 1100.0, 1200.0, 1300.0],
