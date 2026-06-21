@@ -119,6 +119,26 @@ def _export_labels(coord, dim, aux_vars):
         )
 
 
+def _serialize_portable_datetime(value: datetime | None) -> str | None:
+    """Return a stable textual form for portable datetime attrs."""
+    if value is None:
+        return None
+    if not isinstance(value, datetime):
+        raise TypeError(f"Value of type {type(value).__name__} is not a datetime")
+    return value.isoformat(sep=" ", timespec="seconds")
+
+
+def _restore_portable_datetime(value):
+    """Return a datetime restored from a portable attr or ``None``."""
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        raise TypeError(
+            f"Portable datetime attr must be a string, got {type(value).__name__}"
+        )
+    return datetime.fromisoformat(value)
+
+
 def _prepare_xarray_dataset_for_netcdf(dataset):
     """Convert a canonical xarray Dataset into a NetCDF-safe representation."""
     xds = dataset.copy(deep=True)
@@ -1616,6 +1636,14 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             "scpy_author": self.author,
             "scpy_origin": self.origin,
         }
+        for dataset_attr, value in (
+            ("scpy_created", self._created),
+            ("scpy_modified", self._modified),
+            ("scpy_acquisition_date", self._acquisition_date),
+        ):
+            serialized = _serialize_portable_datetime(value)
+            if serialized is not None:
+                dataset_attrs[dataset_attr] = serialized
         if meta:
             dataset_attrs["scpy_meta"] = json.loads(json.dumps(meta))
         if skipped_meta_keys:
@@ -1697,7 +1725,8 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
 
         This prototype covers numerical data, default coordinates, auxiliary
         same-dimension coordinates, units, masks, JSON-compatible metadata,
-        title, name, description, author, origin, and portable string labels.
+        title, name, description, author, origin, created, modified,
+        acquisition_date, and portable string labels.
 
         Auxiliary coordinates are detected by ``scpy_coord_role`` and
         ``scpy_owner_dim`` attributes and reassembled into a same-dimension
@@ -1801,6 +1830,20 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             kwargs["mask"] = np.asarray(dataset[mask_name].data, dtype=bool)
 
         result = cls(np.asarray(data_var.data), **kwargs)
+
+        for dataset_attr, internal_attr in (
+            ("scpy_created", "_created"),
+            ("scpy_acquisition_date", "_acquisition_date"),
+            ("scpy_modified", "_modified"),
+        ):
+            if dataset_attr not in dataset.attrs:
+                continue
+            with suppress(TypeError, ValueError):
+                setattr(
+                    result,
+                    internal_attr,
+                    _restore_portable_datetime(dataset.attrs[dataset_attr]),
+                )
 
         # Identify the default coordinate explicitly for each same-dim CoordSet.
         for dim in aux_dims:

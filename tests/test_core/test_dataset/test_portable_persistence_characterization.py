@@ -22,6 +22,12 @@ else:  # pragma: no cover - depends on optional dependency availability
 pytestmark = pytest.mark.skipif(xr is None, reason="xarray is not installed")
 
 
+def _portable_attr_datetime(value):
+    if value is None:
+        return None
+    return value.isoformat(sep=" ", timespec="seconds")
+
+
 def _make_portable_metadata_dataset():
     # Kept local instead of reusing the broader semantic dataset helpers because
     # these characterization tests need a compact portable-specific fixture with
@@ -51,6 +57,8 @@ def _make_portable_metadata_dataset():
         history="imported from vendor file",
     )
     ds.acquisition_date = datetime(2024, 1, 2, 3, 4, 5, tzinfo=UTC)
+    ds._created = datetime(2024, 1, 2, 6, 7, 8, tzinfo=UTC)
+    ds._modified = datetime(2024, 1, 2, 9, 10, 11, tzinfo=UTC)
     return ds
 
 
@@ -90,6 +98,11 @@ def test_to_xarray_currently_exports_aligned_identity_and_selected_provenance():
     assert xds.attrs["scpy_description"] == ds.description
     assert xds.attrs["scpy_author"] == ds.author
     assert xds.attrs["scpy_origin"] == ds.origin
+    assert xds.attrs["scpy_created"] == _portable_attr_datetime(ds._created)
+    assert xds.attrs["scpy_modified"] == _portable_attr_datetime(ds._modified)
+    assert xds.attrs["scpy_acquisition_date"] == _portable_attr_datetime(
+        ds._acquisition_date
+    )
     assert xds.attrs["scpy_meta"] == {
         "nested": {"labels": ["a", "b"], "temperature": 298.15},
         "reader_metadata": {"reader": "omnic", "scan_count": 4},
@@ -97,9 +110,6 @@ def test_to_xarray_currently_exports_aligned_identity_and_selected_provenance():
         "vendor_metadata": {"firmware": "1.2.3", "serial": "abc"},
     }
     assert "scpy_filename" not in xds.attrs
-    assert "scpy_created" not in xds.attrs
-    assert "scpy_modified" not in xds.attrs
-    assert "scpy_acquisition_date" not in xds.attrs
     assert "scpy_history" not in xds.attrs
 
 
@@ -116,8 +126,10 @@ def test_from_xarray_currently_preserves_aligned_provenance_and_still_loses_othe
     assert rebuilt.description == ds.description
     assert rebuilt.origin == ds.origin
     assert rebuilt.author == ds.author
+    assert rebuilt.created == ds.created
+    assert rebuilt.modified == ds.modified
+    assert rebuilt.acquisition_date == ds.acquisition_date
     assert rebuilt.filename == Path("portable_demo.scp")
-    assert rebuilt.acquisition_date is None
     assert rebuilt.history == []
     assert rebuilt.meta["nested"] == ds.meta["nested"]
     assert rebuilt.meta["reader_metadata"] == ds.meta["reader_metadata"]
@@ -204,8 +216,10 @@ def test_to_netcdf_and_from_netcdf_currently_preserve_aligned_provenance_and_sti
     assert rebuilt.description == ds.description
     assert rebuilt.origin == ds.origin
     assert rebuilt.author == ds.author
+    assert rebuilt.created == ds.created
+    assert rebuilt.modified == ds.modified
+    assert rebuilt.acquisition_date == ds.acquisition_date
     assert rebuilt.filename == Path("portable_demo.scp")
-    assert rebuilt.acquisition_date is None
     assert rebuilt.history == []
     assert rebuilt.meta["nested"] == ds.meta["nested"]
     assert rebuilt.meta["reader_metadata"] == ds.meta["reader_metadata"]
@@ -224,10 +238,12 @@ def test_netcdf_currently_omits_only_remaining_unaligned_provenance_attrs(tmp_pa
         assert opened.attrs["scpy_description"] == ds.description
         assert opened.attrs["scpy_author"] == ds.author
         assert opened.attrs["scpy_origin"] == ds.origin
+        assert opened.attrs["scpy_created"] == _portable_attr_datetime(ds._created)
+        assert opened.attrs["scpy_modified"] == _portable_attr_datetime(ds._modified)
+        assert opened.attrs["scpy_acquisition_date"] == _portable_attr_datetime(
+            ds._acquisition_date
+        )
         assert "scpy_filename" not in opened.attrs
-        assert "scpy_created" not in opened.attrs
-        assert "scpy_modified" not in opened.attrs
-        assert "scpy_acquisition_date" not in opened.attrs
         assert "scpy_history" not in opened.attrs
 
 
