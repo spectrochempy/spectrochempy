@@ -20,6 +20,11 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from tests.test_core.test_dataset._semantic_dataset_helpers import (
     assert_basic_metadata_preserved,
 )
+from tests.test_core.test_dataset._semantic_dataset_helpers import assert_dims_equal
+from tests.test_core.test_dataset._semantic_dataset_helpers import (
+    assert_history_appended,
+)
+from tests.test_core.test_dataset._semantic_dataset_helpers import assert_masked_values
 from tests.test_core.test_dataset._semantic_dataset_helpers import (
     make_semantic_2d_dataset,
 )
@@ -149,17 +154,17 @@ class TestShapeAndDims:
     def test_single_index_preserves_dims_with_singleton(self, ds):
         r = ds[0]
         assert r.shape == (1, 7)
-        assert r.dims == ["y", "x"]
+        assert_dims_equal(r, ["y", "x"])
 
     def test_last_index_preserves_dims_with_singleton(self, ds):
         r = ds[-1]
         assert r.shape == (1, 7)
-        assert r.dims == ["y", "x"]
+        assert_dims_equal(r, ["y", "x"])
 
     def test_column_selection_preserves_dims_with_singleton(self, ds):
         r = ds[:, 0]
         assert r.shape == (5, 1)
-        assert r.dims == ["y", "x"]
+        assert_dims_equal(r, ["y", "x"])
 
     def test_row_range(self, ds):
         r = ds[1:3]
@@ -179,7 +184,7 @@ class TestShapeAndDims:
     def test_scalar_like_singleton(self, ds):
         r = ds[0, 0]
         assert r.shape == (1, 1)
-        assert r.dims == ["y", "x"]
+        assert_dims_equal(r, ["y", "x"])
 
     def test_ellipsis_first(self, ds):
         r = ds[..., 0]
@@ -346,15 +351,15 @@ class TestMasks:
 
     def test_mask_sliced_with_data(self, ds_masked):
         r = ds_masked[0]
-        assert r.mask[0, 0]
+        assert_masked_values(r, (0, 0))
 
     def test_mask_on_column_index(self, ds_masked):
         r = ds_masked[:, 0]
-        assert r.mask[0, 0]
+        assert_masked_values(r, (0, 0))
 
     def test_scalar_like_mask_preserved(self, ds_masked):
         r = ds_masked[0, 0]
-        assert r.mask[0, 0]
+        assert_masked_values(r, (0, 0))
 
     def test_mask_absent_after_slice_without_masked(self, ds_masked):
         r = ds_masked[1:3, 2:5]
@@ -371,7 +376,7 @@ class TestMasks:
     def test_bool_fancy_mask_preserved(self, ds_masked):
         mask = np.array([True, False, True, False, True])
         r = ds_masked[mask]
-        assert r.mask[0, 0]
+        assert_masked_values(r, (0, 0))
 
 
 # ======================================================================================
@@ -446,39 +451,36 @@ class TestHistory:
 
     def test_history_appended_on_single_index(self, ds):
         r = ds[0]
-        assert len(r.history) == 2
-        assert "Original entry" in r.history[0]
-        assert "Slice extracted" in r.history[1]
+        assert_history_appended(r, ds, "Slice extracted")
 
     def test_history_appended_on_slice(self, ds):
         r = ds[1:3]
-        assert len(r.history) == 2
-        assert "Slice extracted" in r.history[1]
+        assert_history_appended(r, ds, "Slice extracted")
 
     def test_history_appended_on_double_slice(self, ds):
         r = ds[1:4, 2:5]
-        assert len(r.history) == 2
+        assert_history_appended(r, ds, "Slice extracted")
 
     def test_history_appended_on_scalar_like(self, ds):
         r = ds[0, 0]
-        assert len(r.history) == 2
+        assert_history_appended(r, ds, "Slice extracted")
 
     def test_history_appended_on_fancy_bool(self, ds):
         mask = np.array([True, False, True, False, True])
         r = ds[mask]
-        assert len(r.history) == 2
+        assert_history_appended(r, ds, "Slice extracted")
 
     def test_history_appended_on_fancy_list(self, ds):
         r = ds[[0, 2, 4]]
-        assert len(r.history) == 2
+        assert_history_appended(r, ds, "Slice extracted")
 
     def test_history_appended_on_label_slice(self, ds):
         r = ds[:, "a":"d"]
-        assert len(r.history) == 2
+        assert_history_appended(r, ds, "Slice extracted")
 
     def test_history_appended_on_step_slice(self, ds):
         r = ds[::2, :]
-        assert len(r.history) == 2
+        assert_history_appended(r, ds, "Slice extracted")
 
     def test_original_history_preserved(self, ds):
         r = ds[0]

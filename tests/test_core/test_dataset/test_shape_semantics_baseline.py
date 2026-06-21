@@ -23,6 +23,16 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from tests.test_core.test_dataset._semantic_dataset_helpers import (
     assert_basic_metadata_preserved,
 )
+from tests.test_core.test_dataset._semantic_dataset_helpers import assert_dims_equal
+from tests.test_core.test_dataset._semantic_dataset_helpers import (
+    assert_distinct_object,
+)
+from tests.test_core.test_dataset._semantic_dataset_helpers import (
+    assert_history_appended,
+)
+from tests.test_core.test_dataset._semantic_dataset_helpers import (
+    assert_history_preserved,
+)
 from tests.test_core.test_dataset._semantic_dataset_helpers import (
     make_semantic_2d_dataset,
 )
@@ -110,12 +120,12 @@ class TestTransposeCharacterization:
 
     def test_transpose_reverses_dims(self, shape_dataset):
         t = shape_dataset.transpose()
-        assert t.dims == ["x", "y"]
+        assert_dims_equal(t, ["x", "y"])
         assert t.shape == (7, 5)
 
     def test_transpose_explicit_dims(self, shape_dataset):
         t = shape_dataset.transpose("y", "x")
-        assert t.dims == ["y", "x"]
+        assert_dims_equal(t, ["y", "x"])
         assert t.shape == (5, 7)
 
     def test_transpose_dim_type_is_numpy_string(self, shape_dataset):
@@ -157,9 +167,9 @@ class TestTransposeCharacterization:
         assert_basic_metadata_preserved(t, shape_dataset)
 
     def test_transpose_appends_history(self, shape_dataset):
-        t = shape_dataset.transpose()
-        assert len(t.history) == 2
-        assert "Data transposed" in t.history[-1]
+        assert_history_appended(
+            shape_dataset.transpose(), shape_dataset, "Data transposed"
+        )
 
     def test_transpose_appends_history_with_dims(self, shape_dataset):
         t = shape_dataset.transpose("y", "x")
@@ -167,12 +177,11 @@ class TestTransposeCharacterization:
         assert "y" in t.history[-1] and "x" in t.history[-1]
 
     def test_transpose_returns_new_object(self, shape_dataset):
-        t = shape_dataset.transpose()
-        assert t is not shape_dataset
+        assert_distinct_object(shape_dataset.transpose(), shape_dataset)
 
     def test_transpose_noop_for_1d(self, shape_dataset_1d):
         t = shape_dataset_1d.transpose()
-        assert t.dims == shape_dataset_1d.dims
+        assert_dims_equal(t, shape_dataset_1d.dims)
         assert t.shape == shape_dataset_1d.shape
 
     def test_T_property_equals_transpose(self, shape_dataset):
@@ -198,7 +207,7 @@ class TestSwapdimsCharacterization:
 
     def test_swapdims_swaps_two_dims(self, shape_dataset):
         s = shape_dataset.swapdims("y", "x")
-        assert s.dims == ["x", "y"]
+        assert_dims_equal(s, ["x", "y"])
         assert s.shape == (7, 5)
 
     def test_swapdims_dim_type_is_plain_string(self, shape_dataset):
@@ -230,13 +239,14 @@ class TestSwapdimsCharacterization:
         assert_basic_metadata_preserved(s, shape_dataset)
 
     def test_swapdims_appends_history(self, shape_dataset):
-        s = shape_dataset.swapdims("y", "x")
-        assert len(s.history) == 2
-        assert "Data swapped between dims y and x" in s.history[-1]
+        assert_history_appended(
+            shape_dataset.swapdims("y", "x"),
+            shape_dataset,
+            "Data swapped between dims y and x",
+        )
 
     def test_swapdims_returns_new_object(self, shape_dataset):
-        s = shape_dataset.swapdims("y", "x")
-        assert s is not shape_dataset
+        assert_distinct_object(shape_dataset.swapdims("y", "x"), shape_dataset)
 
     def test_swapdims_inplace_returns_same(self, shape_dataset):
         s = shape_dataset.swapdims("y", "x", inplace=True)
@@ -245,9 +255,9 @@ class TestSwapdimsCharacterization:
     def test_swapdims_noop_on_1d(self, shape_dataset_1d):
         """SURPRISE: swapdims on 1D returns a copy without error (no-op)."""
         s = shape_dataset_1d.swapdims("x", "y")
-        assert s.dims == shape_dataset_1d.dims
+        assert_dims_equal(s, shape_dataset_1d.dims)
         assert s.shape == shape_dataset_1d.shape
-        assert s is not shape_dataset_1d
+        assert_distinct_object(s, shape_dataset_1d)
 
     def test_swapdims_semantic_pattern(self, shape_dataset):
         """CoordSet semantics: Preserve (dim names swap, coords follow by name)."""
@@ -266,13 +276,13 @@ class TestSqueezeCharacterization:
 
     def test_squeeze_noop_when_no_singleton(self, shape_dataset):
         sq = shape_dataset.squeeze()
-        assert sq.dims == shape_dataset.dims
+        assert_dims_equal(sq, shape_dataset.dims)
         assert sq.shape == shape_dataset.shape
         assert sq.coordset is not None
 
     def test_squeeze_removes_singleton_dim(self, singleton_dataset):
         sq = singleton_dataset.squeeze()
-        assert sq.dims == ["x"]
+        assert_dims_equal(sq, ["x"])
         assert sq.shape == (4,)
 
     def test_squeeze_removes_singleton_coord(self, singleton_dataset):
@@ -304,21 +314,19 @@ class TestSqueezeCharacterization:
 
     def test_squeeze_preserves_multicoord(self, multicoord_dataset):
         sq = multicoord_dataset.squeeze()
-        assert sq.dims == ["y", "x"]
+        assert_dims_equal(sq, ["y", "x"])
         assert sq.shape == (2, 2)
         assert sq.coordset is not None
         assert sq.coordset["y"].is_same_dim
 
     def test_squeeze_records_history(self, singleton_dataset):
         """Squeeze now appends a history entry (consistent with other shape ops)."""
-        sq = singleton_dataset.squeeze()
-        assert len(sq.history) == 2
-        assert sq.history[0] == singleton_dataset.history[0]
-        assert "Data squeezed" in sq.history[-1]
+        assert_history_appended(
+            singleton_dataset.squeeze(), singleton_dataset, "Data squeezed"
+        )
 
     def test_squeeze_returns_new_object(self, singleton_dataset):
-        sq = singleton_dataset.squeeze()
-        assert sq is not singleton_dataset
+        assert_distinct_object(singleton_dataset.squeeze(), singleton_dataset)
 
     def test_squeeze_inplace_returns_same(self):
         ds = NDDataset(np.ones((1, 4)))
@@ -353,7 +361,7 @@ class TestReshapeCharacterization:
 
     def test_reshape_noop_preserves_everything(self, shape_dataset):
         r = shape_dataset.reshape((5, 7))
-        assert r.dims == shape_dataset.dims
+        assert_dims_equal(r, shape_dataset.dims)
         assert r.shape == (5, 7)
         assert r.coordset is not None
         assert r.title == "shape_dataset"
@@ -361,7 +369,7 @@ class TestReshapeCharacterization:
 
     def test_reshape_with_explicit_dims(self, shape_dataset):
         r = shape_dataset.reshape((7, 5), dims=("x", "y"))
-        assert r.dims == ["x", "y"]
+        assert_dims_equal(r, ["x", "y"])
         assert r.shape == (7, 5)
         assert r.coordset is not None
 
@@ -383,9 +391,11 @@ class TestReshapeCharacterization:
         assert_basic_metadata_preserved(r, shape_dataset)
 
     def test_reshape_appends_history(self, shape_dataset):
-        r = shape_dataset.reshape((7, 5), dims=("x", "y"))
-        assert len(r.history) == 2
-        assert "Data reshaped from" in r.history[-1]
+        assert_history_appended(
+            shape_dataset.reshape((7, 5), dims=("x", "y")),
+            shape_dataset,
+            "Data reshaped from",
+        )
 
     def test_reshape_drop_policy_clears_coordset(self, shape_dataset):
         r = shape_dataset.reshape((35,), coord_policy="drop")
@@ -402,8 +412,9 @@ class TestReshapeCharacterization:
         assert r.coordset is None
 
     def test_reshape_returns_new_object(self, shape_dataset):
-        r = shape_dataset.reshape((7, 5), dims=("x", "y"))
-        assert r is not shape_dataset
+        assert_distinct_object(
+            shape_dataset.reshape((7, 5), dims=("x", "y")), shape_dataset
+        )
 
     def test_reshape_with_explicit_coords(self, shape_dataset):
         c = Coord(np.linspace(0.0, 60.0, 7), title="new_time", units="s")
@@ -438,7 +449,7 @@ class TestAtleast2dCharacterization:
         a = shape_dataset_1d.atleast_2d()
         assert a.ndim == 2
         assert a.shape == (1, 10)
-        assert a.dims == ["u", "x"]
+        assert_dims_equal(a, ["u", "x"])
 
     def test_atleast_2d_1d_preserves_original_coord(self, shape_dataset_1d):
         a = shape_dataset_1d.atleast_2d()
@@ -451,13 +462,13 @@ class TestAtleast2dCharacterization:
         a = zero_dim_dataset.atleast_2d()
         assert a.ndim == 2
         assert a.shape == (1, 1)
-        assert a.dims == ["v", "u"]
+        assert_dims_equal(a, ["v", "u"])
         assert a.coordset is None
 
     def test_atleast_2d_2d_returns_new_object(self, shape_dataset):
         """SURPRISE: atleast_2d on 2D returns a copy, not self."""
         a = shape_dataset.atleast_2d()
-        assert a is not shape_dataset
+        assert_distinct_object(a, shape_dataset)
         assert a.shape == shape_dataset.shape
 
     def test_atleast_2d_preserves_title(self, shape_dataset_1d):
@@ -572,33 +583,30 @@ class TestShapeOperationHistory:
 
     def test_transpose_appends_history(self, shape_dataset):
         t = shape_dataset.transpose()
-        assert len(t.history) == 2
+        assert_history_appended(t, shape_dataset, "Data transposed")
         assert isinstance(t.history[-1], str)
-        assert "Data transposed" in t.history[-1]
 
     def test_swapdims_appends_history(self, shape_dataset):
         s = shape_dataset.swapdims("y", "x")
-        assert len(s.history) == 2
+        assert_history_appended(s, shape_dataset, "Data swapped")
         assert isinstance(s.history[-1], str)
-        assert "Data swapped" in s.history[-1]
 
     def test_squeeze_appends_history(self, singleton_dataset):
         """Squeeze now appends history (consistent with other shape ops)."""
-        sq = singleton_dataset.squeeze()
-        assert len(sq.history) == 2
-        assert sq.history[0] == singleton_dataset.history[0]
-        assert "Data squeezed" in sq.history[-1]
+        assert_history_appended(
+            singleton_dataset.squeeze(), singleton_dataset, "Data squeezed"
+        )
 
     def test_reshape_appends_history(self, shape_dataset):
-        r = shape_dataset.reshape((7, 5), dims=("x", "y"))
-        assert len(r.history) == 2
-        assert "Data reshaped" in r.history[-1]
+        assert_history_appended(
+            shape_dataset.reshape((7, 5), dims=("x", "y")),
+            shape_dataset,
+            "Data reshaped",
+        )
 
     def test_atleast_2d_does_not_append_history(self, shape_dataset_1d):
         """SURPRISE: atleast_2d does NOT record history."""
-        a = shape_dataset_1d.atleast_2d()
-        assert len(a.history) == 1
-        assert a.history[0] == shape_dataset_1d.history[0]
+        assert_history_preserved(shape_dataset_1d.atleast_2d(), shape_dataset_1d)
 
     def test_history_preserves_original_entry(self, shape_dataset):
         """Original history entry is preserved, not replaced."""

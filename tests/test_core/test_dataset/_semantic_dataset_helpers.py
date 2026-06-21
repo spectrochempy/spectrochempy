@@ -89,6 +89,23 @@ def assert_basic_metadata_preserved(
         assert result.filename == source.filename
 
 
+def assert_dims_equal(result, expected_dims):
+    """Assert the dataset dimensions exactly match the expected sequence."""
+    assert result.dims == list(expected_dims)
+
+
+def assert_units_preserved(result, source):
+    """Assert the result kept the same units as the source object."""
+    assert result.units == source.units
+
+
+def assert_masked_values(result, *indices):
+    """Assert the result is masked and selected entries remain masked."""
+    assert result.is_masked
+    for index in indices:
+        assert bool(result.mask[index])
+
+
 def assert_coordset_matches(
     result,
     source,
@@ -105,3 +122,20 @@ def assert_coordset_matches(
             assert result[dim].title == source[dim].title
         if check_units:
             assert str(result[dim].units) == str(source[dim].units)
+
+
+def assert_history_appended(result, source, appended_message):
+    """Assert result preserved source history and appended one message."""
+    assert len(result.history) == len(source.history) + 1
+    assert list(result.history[: len(source.history)]) == list(source.history)
+    assert appended_message in result.history[-1]
+
+
+def assert_history_preserved(result, source):
+    """Assert result preserved history exactly with no appended entries."""
+    assert list(result.history) == list(source.history)
+
+
+def assert_distinct_object(result, source):
+    """Assert the operation returned a new object rather than the source."""
+    assert result is not source
