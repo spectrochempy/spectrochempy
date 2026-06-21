@@ -47,6 +47,9 @@ def _make_dataset(data=None, *, complex_data=False, unsupported_meta=False):
         mask=np.array([[False, True], [False, False]]),
         title="IR spectra",
         name="spectra",
+        description="portable description",
+        author="portable author",
+        origin="portable origin",
         meta=meta,
     )
 
@@ -58,6 +61,9 @@ def test_to_xarray_returns_dataset():
 
     assert isinstance(xds, xr.Dataset)
     assert xds.attrs["scpy_primary_variable"] == "spectra"
+    assert xds.attrs["scpy_description"] == ds.description
+    assert xds.attrs["scpy_author"] == ds.author
+    assert xds.attrs["scpy_origin"] == ds.origin
 
 
 def test_xarray_roundtrip_preserves_numerical_data_dims_and_coordinates():
@@ -72,7 +78,7 @@ def test_xarray_roundtrip_preserves_numerical_data_dims_and_coordinates():
     assert np.array_equal(rebuilt.coord("y").data, ds.coord("y").data)
 
 
-def test_xarray_roundtrip_preserves_units_mask_title_and_name():
+def test_xarray_roundtrip_preserves_units_identity_and_selected_provenance():
     ds = _make_dataset()
 
     xds = ds.to_xarray()
@@ -82,6 +88,9 @@ def test_xarray_roundtrip_preserves_units_mask_title_and_name():
     assert np.array_equal(rebuilt.mask, ds.mask)
     assert rebuilt.title == ds.title
     assert rebuilt.name == ds.name
+    assert rebuilt.description == ds.description
+    assert rebuilt.author == ds.author
+    assert rebuilt.origin == ds.origin
     assert str(rebuilt.coord("x").units) == str(ds.coord("x").units)
     assert rebuilt.coord("x").title == ds.coord("x").title
 

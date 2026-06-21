@@ -38,6 +38,9 @@ def _make_dataset(data=None, *, complex_data=False):
         mask=np.array([[False, True], [False, False]]),
         title="IR spectra",
         name="spectra",
+        description="portable description",
+        author="portable author",
+        origin="portable origin",
         meta={
             "sample": "demo",
             "nested": {"temperature": 298.15, "labels": ["a", "b"]},
@@ -59,7 +62,9 @@ def test_netcdf_roundtrip_preserves_simple_float_dataset(tmp_path):
 
 
 @pytest.mark.skipif(xr is None, reason="xarray is not installed")
-def test_netcdf_roundtrip_preserves_coordinates_units_mask_and_metadata(tmp_path):
+def test_netcdf_roundtrip_preserves_coordinates_identity_provenance_and_metadata(
+    tmp_path,
+):
     ds = _make_dataset()
     filename = tmp_path / "dataset.nc"
 
@@ -75,6 +80,9 @@ def test_netcdf_roundtrip_preserves_coordinates_units_mask_and_metadata(tmp_path
     assert rebuilt.meta["nested"]["temperature"] == 298.15
     assert rebuilt.name == ds.name
     assert rebuilt.title == ds.title
+    assert rebuilt.description == ds.description
+    assert rebuilt.author == ds.author
+    assert rebuilt.origin == ds.origin
 
 
 @pytest.mark.skipif(xr is None, reason="xarray is not installed")
@@ -107,6 +115,9 @@ def test_netcdf_file_is_readable_by_xarray_open_dataset(tmp_path):
     with xr.open_dataset(filename, engine="scipy") as opened:
         assert opened.attrs["scpy_primary_variable"] == "spectra"
         assert opened.attrs["scpy_mask_variable"] == "spectra__mask"
+        assert opened.attrs["scpy_description"] == ds.description
+        assert opened.attrs["scpy_author"] == ds.author
+        assert opened.attrs["scpy_origin"] == ds.origin
         assert opened["spectra"].dims == ("y", "x")
         assert opened["spectra__mask"].dims == ("y", "x")
 
