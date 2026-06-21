@@ -17,6 +17,12 @@ import pytest
 
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
+from tests.test_core.test_dataset._semantic_dataset_helpers import (
+    assert_basic_metadata_preserved,
+)
+from tests.test_core.test_dataset._semantic_dataset_helpers import (
+    make_semantic_2d_dataset,
+)
 
 # ======================================================================================
 # FIXTURES
@@ -32,25 +38,13 @@ def ds():
     - CoordSet with titles, units, labels
     - Full metadata
     """
-    y = Coord(np.linspace(0.0, 60.0, 5), title="time", units="s")
-    x = Coord(
-        np.linspace(4000.0, 1000.0, 7),
-        title="wavenumber",
-        units="cm^-1",
-        labels=["a", "b", "c", "d", "e", "f", "g"],
-    )
-    ds = NDDataset(
-        np.arange(35.0, dtype="float64").reshape(5, 7),
-        coordset=[y, x],
+    return make_semantic_2d_dataset(
         title="ds_title",
         name="ds_name",
+        x_labels=["a", "b", "c", "d", "e", "f", "g"],
+        description="test description",
+        history=["original entry"],
     )
-    ds.author = "test_author"
-    ds.description = "test description"
-    ds.origin = "test_origin"
-    ds.meta.project = "test_project"
-    ds.history = ["original entry"]
-    return ds
 
 
 @pytest.fixture
@@ -404,19 +398,19 @@ class TestMetadata:
 
     def test_author_preserved(self, ds):
         r = ds[0]
-        assert r.author == "test_author"
+        assert_basic_metadata_preserved(r, ds, check_name=False, check_title=False)
 
     def test_description_preserved(self, ds):
         r = ds[0]
-        assert r.description == "test description"
+        assert_basic_metadata_preserved(r, ds, check_name=False, check_title=False)
 
     def test_origin_preserved(self, ds):
         r = ds[0]
-        assert r.origin == "test_origin"
+        assert_basic_metadata_preserved(r, ds, check_name=False, check_title=False)
 
     def test_meta_project_preserved(self, ds):
         r = ds[0]
-        assert r.meta.project == "test_project"
+        assert_basic_metadata_preserved(r, ds, check_name=False, check_title=False)
 
     def test_meta_deep_copied(self, ds):
         r = ds[0]

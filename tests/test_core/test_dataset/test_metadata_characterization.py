@@ -11,39 +11,47 @@ import numpy as np
 import pytest
 
 import spectrochempy as scp
+from tests.test_core.test_dataset._semantic_dataset_helpers import (
+    assert_basic_metadata_preserved,
+)
+from tests.test_core.test_dataset._semantic_dataset_helpers import (
+    assert_coordset_matches,
+)
+from tests.test_core.test_dataset._semantic_dataset_helpers import (
+    make_semantic_2d_dataset,
+)
 
 
 @pytest.fixture
 def metadata_dataset():
-    y = scp.Coord(np.arange(4.0), title="sample", units="s")
-    x = scp.Coord(np.linspace(0.0, 4.0, 9), title="wavelength", units="cm^-1")
-    xx, yy = np.meshgrid(x.data, y.data)
-    dataset = scp.NDDataset(
-        xx**2 + 2.0 * yy,
-        coordset=[y, x],
+    x_values = np.linspace(0.0, 4.0, 9)
+    y_values = np.arange(4.0)
+    xx, yy = np.meshgrid(x_values, y_values)
+    return make_semantic_2d_dataset(
+        data=xx**2 + 2.0 * yy,
         units="absorbance",
         title="test_title",
+        name="sample_001",
+        author="test_author",
+        description="test_description",
+        origin="test_origin",
+        meta_project="metadata_contract",
+        meta_instrument="test_instrument",
+        meta_processing=["source"],
+        filename=Path("test_filename.spc"),
+        history="initial history marker",
+        x_values=x_values,
+        y_values=y_values,
     )
-
-    dataset.name = "sample_001"
-    dataset.meta.project = "metadata_contract"
-    dataset.meta.instrument = "test_instrument"
-    dataset.meta.processing = ["source"]
-    dataset.author = "test_author"
-    dataset.description = "test_description"
-    dataset.origin = "test_origin"
-    dataset.filename = Path("test_filename.spc")
-    dataset.history = "initial history marker"
-
-    return dataset
 
 
 @pytest.fixture
 def metadata_peak_dataset():
-    x = scp.Coord(np.linspace(0.0, 4.0, 9), title="wavelength", units="cm^-1")
     dataset = scp.NDDataset(
         np.array([0.0, 1.0, 0.0, 2.0, 0.0, 3.0, 0.0, 1.0, 0.0]),
-        coordset=[x],
+        coordset=[
+            scp.Coord(np.linspace(0.0, 4.0, 9), title="wavelength", units="cm^-1")
+        ],
         units="absorbance",
         title="test_title",
     )
@@ -63,19 +71,15 @@ def metadata_peak_dataset():
 def test_copy_based_add_preserves_metadata(metadata_dataset):
     result = metadata_dataset + 1
 
-    assert result.name == metadata_dataset.name
-    assert result.title == metadata_dataset.title
-    assert result.meta.project == metadata_dataset.meta.project
-    assert result.meta.instrument == metadata_dataset.meta.instrument
-    assert result.author == metadata_dataset.author
-    assert result.description == metadata_dataset.description
-    assert result.origin == metadata_dataset.origin
-    assert result.filename == metadata_dataset.filename
+    assert_basic_metadata_preserved(
+        result,
+        metadata_dataset,
+        check_filename=True,
+        meta_keys=("project", "instrument"),
+    )
     assert result.units == metadata_dataset.units
     assert result.dims == ["y", "x"]
-    assert result.coordset is not None
-    np.testing.assert_allclose(result.y.data, metadata_dataset.y.data)
-    np.testing.assert_allclose(result.x.data, metadata_dataset.x.data)
+    assert_coordset_matches(result, metadata_dataset)
     assert len(result.history) == 2
     assert "Initial history marker" in result.history[0]
     assert "Binary operation add" in result.history[1]
@@ -84,19 +88,15 @@ def test_copy_based_add_preserves_metadata(metadata_dataset):
 def test_copy_based_multiply_preserves_metadata(metadata_dataset):
     result = metadata_dataset * 2
 
-    assert result.name == metadata_dataset.name
-    assert result.title == metadata_dataset.title
-    assert result.meta.project == metadata_dataset.meta.project
-    assert result.meta.instrument == metadata_dataset.meta.instrument
-    assert result.author == metadata_dataset.author
-    assert result.description == metadata_dataset.description
-    assert result.origin == metadata_dataset.origin
-    assert result.filename == metadata_dataset.filename
+    assert_basic_metadata_preserved(
+        result,
+        metadata_dataset,
+        check_filename=True,
+        meta_keys=("project", "instrument"),
+    )
     assert result.units == metadata_dataset.units
     assert result.dims == ["y", "x"]
-    assert result.coordset is not None
-    np.testing.assert_allclose(result.y.data, metadata_dataset.y.data)
-    np.testing.assert_allclose(result.x.data, metadata_dataset.x.data)
+    assert_coordset_matches(result, metadata_dataset)
     assert len(result.history) == 2
     assert "Initial history marker" in result.history[0]
     assert "Binary operation mul" in result.history[1]
@@ -105,19 +105,15 @@ def test_copy_based_multiply_preserves_metadata(metadata_dataset):
 def test_copy_based_abs_preserves_metadata(metadata_dataset):
     result = abs(metadata_dataset)
 
-    assert result.name == metadata_dataset.name
-    assert result.title == metadata_dataset.title
-    assert result.meta.project == metadata_dataset.meta.project
-    assert result.meta.instrument == metadata_dataset.meta.instrument
-    assert result.author == metadata_dataset.author
-    assert result.description == metadata_dataset.description
-    assert result.origin == metadata_dataset.origin
-    assert result.filename == metadata_dataset.filename
+    assert_basic_metadata_preserved(
+        result,
+        metadata_dataset,
+        check_filename=True,
+        meta_keys=("project", "instrument"),
+    )
     assert result.units == metadata_dataset.units
     assert result.dims == ["y", "x"]
-    assert result.coordset is not None
-    np.testing.assert_allclose(result.y.data, metadata_dataset.y.data)
-    np.testing.assert_allclose(result.x.data, metadata_dataset.x.data)
+    assert_coordset_matches(result, metadata_dataset)
     assert len(result.history) == 2
     assert "Initial history marker" in result.history[0]
     assert "Unary operation abs" in result.history[1]
@@ -145,18 +141,15 @@ def test_mean_along_dimension_preserves_metadata_and_drops_reduced_coord(
 ):
     result = metadata_dataset.mean(dim="x")
 
-    assert result.name == metadata_dataset.name
-    assert result.title == metadata_dataset.title
-    assert result.meta.project == metadata_dataset.meta.project
-    assert result.meta.instrument == metadata_dataset.meta.instrument
-    assert result.author == metadata_dataset.author
-    assert result.description == metadata_dataset.description
-    assert result.origin == metadata_dataset.origin
-    assert result.filename == metadata_dataset.filename
+    assert_basic_metadata_preserved(
+        result,
+        metadata_dataset,
+        check_filename=True,
+        meta_keys=("project", "instrument"),
+    )
     assert result.units == metadata_dataset.units
     assert result.dims == ["y"]
-    assert result.coordset is not None
-    np.testing.assert_allclose(result.y.data, metadata_dataset.y.data)
+    assert_coordset_matches(result, metadata_dataset, dims=("y",))
     assert "Initial history marker" in result.history[0]
 
 
@@ -175,15 +168,17 @@ def test_wrapper_based_filter_preserves_scientific_context_metadata(
     assert result.meta.processing is not metadata_dataset.meta.processing
     result.meta.processing.append("result")
     assert metadata_dataset.meta.processing == ["source"]
-    assert result.author == metadata_dataset.author
-    assert result.description == metadata_dataset.description
-    assert result.origin == metadata_dataset.origin
-    assert result.filename == metadata_dataset.filename
+    assert_basic_metadata_preserved(
+        result,
+        metadata_dataset,
+        check_name=False,
+        check_title=False,
+        check_filename=True,
+        meta_keys=("project", "instrument"),
+    )
     assert result.units == metadata_dataset.units
     assert result.dims == ["y", "x"]
-    assert result.coordset is not None
-    np.testing.assert_allclose(result.y.data, metadata_dataset.y.data)
-    np.testing.assert_allclose(result.x.data, metadata_dataset.x.data)
+    assert_coordset_matches(result, metadata_dataset)
     assert len(result.history) == 1
     assert "Created using method Filter.transform" in result.history[0]
 
@@ -216,18 +211,15 @@ def test_interpolate_preserves_metadata_and_replaces_interpolated_coord(
 
     result = metadata_dataset.interpolate(dim="x", coord=new_x)
 
-    assert result.name == metadata_dataset.name
-    assert result.title == metadata_dataset.title
-    assert result.meta.project == metadata_dataset.meta.project
-    assert result.meta.instrument == metadata_dataset.meta.instrument
-    assert result.author == metadata_dataset.author
-    assert result.description == metadata_dataset.description
-    assert result.origin == metadata_dataset.origin
-    assert result.filename == metadata_dataset.filename
+    assert_basic_metadata_preserved(
+        result,
+        metadata_dataset,
+        check_filename=True,
+        meta_keys=("project", "instrument"),
+    )
     assert result.units == metadata_dataset.units
     assert result.dims == ["y", "x"]
-    assert result.coordset is not None
-    np.testing.assert_allclose(result.y.data, metadata_dataset.y.data)
+    assert_coordset_matches(result, metadata_dataset, dims=("y",))
     np.testing.assert_allclose(result.x.data, new_x)
     assert len(result.history) == 2
     assert "Initial history marker" in result.history[0]

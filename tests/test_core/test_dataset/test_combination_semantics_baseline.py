@@ -24,6 +24,9 @@ from spectrochempy.processing.transformation.concatenate import concatenate
 from spectrochempy.processing.transformation.concatenate import stack
 from spectrochempy.utils.exceptions import DimensionsCompatibilityError
 from spectrochempy.utils.exceptions import UnitsCompatibilityError
+from tests.test_core.test_dataset._semantic_dataset_helpers import (
+    make_semantic_2d_dataset,
+)
 
 # ======================================================================================
 # FIXTURES
@@ -39,20 +42,15 @@ def dataset_x():
     - CoordSet with titles, units
     - full metadata
     """
-    y = Coord(np.linspace(0.0, 60.0, 5), title="time", units="s")
-    x = Coord(np.linspace(4000.0, 1000.0, 7), title="wavenumber", units="cm^-1")
-    ds = NDDataset(
-        np.arange(35.0, dtype="float64").reshape(5, 7),
-        coordset=[y, x],
+    return make_semantic_2d_dataset(
         title="dataset_x",
         name="dataset_x_name",
+        author="author_x",
+        description="description_x",
+        origin="origin_x",
+        meta_project="project_x",
+        history=["original_x"],
     )
-    ds.author = "author_x"
-    ds.description = "description_x"
-    ds.origin = "origin_x"
-    ds.meta.project = "project_x"
-    ds.history = ["original_x"]
-    return ds
 
 
 @pytest.fixture
@@ -63,20 +61,16 @@ def dataset_y():
     Same shape as dataset_x along non-concatenated dimensions.
     Different metadata values for propagation characterization.
     """
-    y = Coord(np.linspace(0.0, 60.0, 5), title="time", units="s")
-    x = Coord(np.linspace(4000.0, 1000.0, 7), title="wavenumber", units="cm^-1")
-    ds = NDDataset(
-        np.full((5, 7), 99.0, dtype="float64"),
-        coordset=[y, x],
+    return make_semantic_2d_dataset(
+        data=np.full((5, 7), 99.0, dtype="float64"),
         title="dataset_y",
         name="dataset_y_name",
+        author="author_y",
+        description="description_y",
+        origin="origin_y",
+        meta_project="project_y",
+        history=["original_y"],
     )
-    ds.author = "author_y"
-    ds.description = "description_y"
-    ds.origin = "origin_y"
-    ds.meta.project = "project_y"
-    ds.history = ["original_y"]
-    return ds
 
 
 @pytest.fixture
