@@ -80,22 +80,22 @@ def _make_same_dim_dataset():
     )
 
 
-def test_to_xarray_currently_exports_only_the_mapped_portable_subset():
+def test_to_xarray_currently_exports_aligned_identity_and_selected_provenance():
     ds = _make_portable_metadata_dataset()
 
     xds = ds.to_xarray()
 
     assert xds.attrs["scpy_name"] == ds.name
     assert xds.attrs["scpy_title"] == ds.title
+    assert xds.attrs["scpy_description"] == ds.description
+    assert xds.attrs["scpy_author"] == ds.author
+    assert xds.attrs["scpy_origin"] == ds.origin
     assert xds.attrs["scpy_meta"] == {
         "nested": {"labels": ["a", "b"], "temperature": 298.15},
         "reader_metadata": {"reader": "omnic", "scan_count": 4},
         "sample": "demo",
         "vendor_metadata": {"firmware": "1.2.3", "serial": "abc"},
     }
-    assert "scpy_description" not in xds.attrs
-    assert "scpy_author" not in xds.attrs
-    assert "scpy_origin" not in xds.attrs
     assert "scpy_filename" not in xds.attrs
     assert "scpy_created" not in xds.attrs
     assert "scpy_modified" not in xds.attrs
@@ -103,7 +103,7 @@ def test_to_xarray_currently_exports_only_the_mapped_portable_subset():
     assert "scpy_history" not in xds.attrs
 
 
-def test_from_xarray_currently_preserves_portable_subset_and_loses_provenance():
+def test_from_xarray_currently_preserves_aligned_provenance_and_still_loses_other_fields():
     ds = _make_portable_metadata_dataset()
 
     rebuilt = NDDataset.from_xarray(ds.to_xarray())
@@ -113,9 +113,9 @@ def test_from_xarray_currently_preserves_portable_subset_and_loses_provenance():
     assert np.array_equal(rebuilt.mask, ds.mask)
     assert rebuilt.name == ds.name
     assert rebuilt.title == ds.title
-    assert rebuilt.description == ""
-    assert rebuilt.origin == ""
-    assert rebuilt.author != ds.author
+    assert rebuilt.description == ds.description
+    assert rebuilt.origin == ds.origin
+    assert rebuilt.author == ds.author
     assert rebuilt.filename == Path("portable_demo.scp")
     assert rebuilt.acquisition_date is None
     assert rebuilt.history == []
@@ -187,7 +187,9 @@ def test_from_xarray_currently_preserves_nullable_text_labels():
     assert list(rebuilt.coord("x").labels) == ["A", None, "C"]
 
 
-def test_to_netcdf_and_from_netcdf_currently_preserve_portable_subset(tmp_path):
+def test_to_netcdf_and_from_netcdf_currently_preserve_aligned_provenance_and_still_lose_other_fields(
+    tmp_path,
+):
     ds = _make_portable_metadata_dataset()
     filename = tmp_path / "portable_demo.nc"
 
@@ -199,9 +201,9 @@ def test_to_netcdf_and_from_netcdf_currently_preserve_portable_subset(tmp_path):
     assert np.array_equal(rebuilt.mask, ds.mask)
     assert rebuilt.name == ds.name
     assert rebuilt.title == ds.title
-    assert rebuilt.description == ""
-    assert rebuilt.origin == ""
-    assert rebuilt.author != ds.author
+    assert rebuilt.description == ds.description
+    assert rebuilt.origin == ds.origin
+    assert rebuilt.author == ds.author
     assert rebuilt.filename == Path("portable_demo.scp")
     assert rebuilt.acquisition_date is None
     assert rebuilt.history == []
@@ -210,7 +212,7 @@ def test_to_netcdf_and_from_netcdf_currently_preserve_portable_subset(tmp_path):
     assert rebuilt.meta["vendor_metadata"] == ds.meta["vendor_metadata"]
 
 
-def test_netcdf_currently_omits_description_and_provenance_attrs(tmp_path):
+def test_netcdf_currently_omits_only_remaining_unaligned_provenance_attrs(tmp_path):
     ds = _make_portable_metadata_dataset()
     filename = tmp_path / "portable_demo.nc"
 
@@ -219,9 +221,9 @@ def test_netcdf_currently_omits_description_and_provenance_attrs(tmp_path):
     with xr.open_dataset(filename, engine="scipy") as opened:
         assert opened.attrs["scpy_name"] == ds.name
         assert opened.attrs["scpy_title"] == ds.title
-        assert "scpy_description" not in opened.attrs
-        assert "scpy_author" not in opened.attrs
-        assert "scpy_origin" not in opened.attrs
+        assert opened.attrs["scpy_description"] == ds.description
+        assert opened.attrs["scpy_author"] == ds.author
+        assert opened.attrs["scpy_origin"] == ds.origin
         assert "scpy_filename" not in opened.attrs
         assert "scpy_created" not in opened.attrs
         assert "scpy_modified" not in opened.attrs

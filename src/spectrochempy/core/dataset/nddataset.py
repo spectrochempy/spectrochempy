@@ -1612,6 +1612,9 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             "scpy_primary_variable": primary_name,
             "scpy_name": self.name,
             "scpy_title": self.title,
+            "scpy_description": self.description,
+            "scpy_author": self.author,
+            "scpy_origin": self.origin,
         }
         if meta:
             dataset_attrs["scpy_meta"] = json.loads(json.dumps(meta))
@@ -1694,7 +1697,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
 
         This prototype covers numerical data, default coordinates, auxiliary
         same-dimension coordinates, units, masks, JSON-compatible metadata,
-        title, name, and portable string labels.
+        title, name, description, author, origin, and portable string labels.
 
         Auxiliary coordinates are detected by ``scpy_coord_role`` and
         ``scpy_owner_dim`` attributes and reassembled into a same-dimension
@@ -1781,6 +1784,13 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             "title": dataset.attrs.get("scpy_title"),
             "meta": dataset.attrs.get("scpy_meta"),
         }
+        for dataset_attr, kwarg_name in (
+            ("scpy_description", "description"),
+            ("scpy_author", "author"),
+            ("scpy_origin", "origin"),
+        ):
+            if dataset_attr in dataset.attrs:
+                kwargs[kwarg_name] = dataset.attrs[dataset_attr]
 
         units = data_var.attrs.get("units")
         if units is not None:
