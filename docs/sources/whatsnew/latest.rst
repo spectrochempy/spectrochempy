@@ -97,7 +97,7 @@ Bug Fixes
   a cycle in the project hierarchy (self-insertion, direct cycle, or
   indirect cycle). The ``parent`` setter checks for cycles before any
   mutation, protecting all paths including ``add_project`` and ``parent``
-   reassignment. (:pr:`1233`)
+  reassignment. (:pr:`1233`)
 
 - ``Project.__setitem__`` replacement now enforces key/name identity:
   after ``project["x"] = new_value``, ``project["x"].name == "x"``
@@ -150,9 +150,8 @@ Developer
 - MAINT: extend Result Object support to PCA, SVD, NMF, Optimize,
   MCRALS, SIMPLISMA, EFA, FastICA, and PLSRegression, providing
   unified access to analysis and fitting outputs while preserving
-  backward compatibility.
-  (:pr:`1208`, :pr:`1209`, :pr:`1211`, :pr:`1213`, :pr:`1215`,
-   :pr:`1217`, :pr:`1218`, :pr:`1219`, :pr:`1220`)
+  backward compatibility. (:pr:`1208`, :pr:`1209`, :pr:`1211`, :pr:`1213`, :pr:`1215`,
+  :pr:`1217`, :pr:`1218`, :pr:`1219`, :pr:`1220`)
 
 - MAINT: Update Project docstrings and RFC status to reflect implemented
   invariants (single-parent ownership, acyclic hierarchy, duplicate rejection,
