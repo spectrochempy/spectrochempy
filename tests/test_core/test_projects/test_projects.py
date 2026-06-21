@@ -324,54 +324,79 @@ class TestCopy:
         assert "data" in copied.datasets_names
 
 
-class TestDuplicateNames:
-    """Tests for duplicate name handling."""
+class TestDuplicateNamesRFC:
+    """RFC-compliant duplicate name handling."""
 
-    @pytest.mark.parametrize(
-        "count,expected_name",
-        [
-            (1, "data"),
-            (2, "data-1"),
-            (3, "data-2"),
-        ],
-    )
-    def test_add_dataset_duplicate_names(self, ds1, count, expected_name):
-        proj = Project(name="test")
-        ds1.name = "data"
-        proj.add_dataset(ds1)
-
-        for i in range(1, count):
-            ds = NDDataset([i], name="data")
-            proj.add_dataset(ds)
-
-        assert "data" in proj.datasets_names
-        assert expected_name in proj.datasets_names
-
-    def test_add_dataset_duplicate_names_preserves_parent_membership_reciprocity(self):
+    def test_add_dataset_duplicate_raises_valueerror(self):
         proj = Project(name="test")
         first = NDDataset([1], name="data")
-        second = NDDataset([2], name="data")
-
         proj.add_dataset(first)
-        proj.add_dataset(second)
 
-        _assert_dataset_membership(proj, first, "data", present=True)
-        _assert_dataset_membership(proj, second, "data-1", present=True)
-        assert first.parent is proj
-        assert second.parent is proj
+        second = NDDataset([2], name="data")
+        with pytest.raises(ValueError, match="already exists"):
+            proj.add_dataset(second)
 
-    def test_add_project_duplicate_names_overwrites_and_leaves_stale_parent(self):
+    def test_add_project_duplicate_raises_valueerror(self):
         proj = Project(name="root")
         first = Project(name="child")
-        second = Project(name="child")
-
         proj.add_project(first)
-        proj.add_project(second)
 
-        _assert_project_membership(proj, second, "child", present=True)
-        assert proj["child"] is not first
-        assert first not in proj.projects
-        assert second.parent is proj
+        second = Project(name="child")
+        with pytest.raises(ValueError, match="already exists"):
+            proj.add_project(second)
+
+    def test_duplicate_dataset_dataset(self):
+        proj = Project(name="test")
+        proj.add_dataset(NDDataset([1], name="data"))
+        with pytest.raises(ValueError, match="already exists"):
+            proj.add_dataset(NDDataset([2], name="data"))
+
+    def test_duplicate_project_project(self):
+        proj = Project(name="test")
+        proj.add_project(Project(name="sub"))
+        with pytest.raises(ValueError, match="already exists"):
+            proj.add_project(Project(name="sub"))
+
+    def test_duplicate_dataset_project_collision(self):
+        proj = Project(name="test")
+        proj.add_dataset(NDDataset([1], name="shared"))
+        with pytest.raises(ValueError, match="already exists"):
+            proj.add_project(Project(name="shared"))
+
+    def test_duplicate_project_dataset_collision(self):
+        proj = Project(name="test")
+        proj.add_project(Project(name="shared"))
+        with pytest.raises(ValueError, match="already exists"):
+            proj.add_dataset(NDDataset([1], name="shared"))
+
+    def test_constructor_duplicate_raises_valueerror(self):
+        ds1 = NDDataset([1], name="data")
+        ds2 = NDDataset([2], name="data")
+        with pytest.raises(ValueError, match="already exists"):
+            Project(ds1, ds2)
+
+    def test_duplicate_does_not_modify_ownership_on_failure(self):
+        proj = Project(name="test")
+        ds = NDDataset([1], name="data")
+        proj.add_dataset(ds)
+
+        original_parent = ds.parent
+        with pytest.raises(ValueError):
+            proj.add_dataset(NDDataset([2], name="data"))
+
+        assert ds.parent is original_parent
+        assert ds.name == "data"
+        _assert_dataset_membership(proj, ds, "data", present=True)
+
+    def test_duplicate_does_not_partially_modify_parent_on_failure(self):
+        proj = Project(name="test")
+        first = NDDataset([1], name="data")
+        proj.add_dataset(first)
+
+        with pytest.raises(ValueError):
+            proj.add_dataset(NDDataset([2], name="data"))
+
+        assert len(proj.datasets) == 1
         assert first.parent is proj
 
 
