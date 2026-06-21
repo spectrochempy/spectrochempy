@@ -390,17 +390,29 @@ implementation work.
 
 ## Metadata Contract
 
-Status: Active contract
+Status: Conceptual phase completed; implementation alignment remains future work
 
 Major outcomes:
 
 * metadata propagation semantics documented;
 * preservation and recomputation rules clarified;
 * architectural direction established.
+* conceptual RFC cluster completed for dimensions, coordinates, `CoordSet`,
+  metadata taxonomy, labels, reader normalization, and provenance/history;
+* stable architecture references promoted under
+  `maintainers/architecture/metadata-and-support-model.md` and
+  `maintainers/architecture/reader-normalization-architecture.md`.
 
-Current priority: Low.
-This remains an active documentation contract rather than a completed
-implementation campaign.
+Current priority: Low for conceptual design; future work is now mostly
+implementation-alignment and follow-up RFC work rather than baseline contract
+definition.
+
+Remaining follow-up work:
+
+* result provenance;
+* portable metadata subset clarification;
+* reader cleanup/alignment;
+* metadata implementation alignment with the accepted contracts.
 
 ---
 

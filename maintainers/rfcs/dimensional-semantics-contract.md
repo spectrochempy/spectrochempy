@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed Maintainer RFC.
+Accepted Maintainer RFC.
 
 This document is conceptual and normative in intent.
 

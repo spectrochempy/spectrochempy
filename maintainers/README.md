@@ -35,6 +35,12 @@ En pratique :
 - puis lire la roadmap ;
 - puis consulter l'index RFC ou l'index architecture selon que la question est
   normative ou surtout technique ;
+- pour les questions sur dimensions, coordonnées, `CoordSet`, métadonnées,
+  labels, provenance, commencer par
+  [`architecture/metadata-and-support-model.md`](architecture/metadata-and-support-model.md) ;
+- pour les questions sur l'import et la normalisation des readers, commencer
+  par
+  [`architecture/reader-normalization-architecture.md`](architecture/reader-normalization-architecture.md) ;
 - utiliser les audits locaux seulement pour retrouver le contexte de campagne
   et l'historique d'implémentation.
 
@@ -84,15 +90,15 @@ Pour un nouveau mainteneur, l'ordre de lecture recommandé est :
 4. [`rfcs/project-invariants-rfc.md`](rfcs/project-invariants-rfc.md)
 5. [`rfcs/project-copy-semantics-rfc.md`](rfcs/project-copy-semantics-rfc.md)
 6. [`architecture/coordset-storage-architecture.md`](architecture/coordset-storage-architecture.md)
-7. [`architecture/display-architecture.md`](architecture/display-architecture.md)
-8. [`architecture/result-object-contract-rfc.md`](architecture/result-object-contract-rfc.md)
-9. [`architecture/result-object-migration-roadmap.md`](architecture/result-object-migration-roadmap.md)
-10. [`rfcs/metadata-contract.md`](rfcs/metadata-contract.md)
-11. [`architecture/mathematical-semantics-and-metadata-propagation.md`](architecture/mathematical-semantics-and-metadata-propagation.md)
-12. [`architecture/array-class-responsibility.md`](architecture/array-class-responsibility.md)
-13. [`rfcs/coordinate-arithmetic-semantics.md`](rfcs/coordinate-arithmetic-semantics.md)
-14. [`rfcs/trusted-and-portable-persistence.md`](rfcs/trusted-and-portable-persistence.md)
-15. [`rfcs/nddataset-xarray-mapping-specification.md`](rfcs/nddataset-xarray-mapping-specification.md)
+7. [`architecture/metadata-and-support-model.md`](architecture/metadata-and-support-model.md)
+8. [`architecture/reader-normalization-architecture.md`](architecture/reader-normalization-architecture.md)
+9. [`architecture/display-architecture.md`](architecture/display-architecture.md)
+10. [`architecture/result-object-contract-rfc.md`](architecture/result-object-contract-rfc.md)
+11. [`architecture/result-object-migration-roadmap.md`](architecture/result-object-migration-roadmap.md)
+12. [`architecture/mathematical-semantics-and-metadata-propagation.md`](architecture/mathematical-semantics-and-metadata-propagation.md)
+13. [`architecture/array-class-responsibility.md`](architecture/array-class-responsibility.md)
+14. [`rfcs/coordinate-arithmetic-semantics.md`](rfcs/coordinate-arithmetic-semantics.md)
+15. [`rfcs/trusted-and-portable-persistence.md`](rfcs/trusted-and-portable-persistence.md)
 
 ## Key Documents
 
@@ -101,6 +107,8 @@ Pour un nouveau mainteneur, l'ordre de lecture recommandé est :
 | [`rfcs/INDEX.md`](rfcs/INDEX.md) | Index des RFCs mainteneur, de leur statut, et de leur rôle |
 | [`architecture/INDEX.md`](architecture/INDEX.md) | Point d'entrée organisé vers les notes d'architecture suivies |
 | [`rfcs/architecture-roadmap.md`](rfcs/architecture-roadmap.md) | Feuille de route légère des sujets d'architecture récents, terminés ou différés |
+| [`architecture/metadata-and-support-model.md`](architecture/metadata-and-support-model.md) | Référence d'architecture principale pour dimensions, coordonnées, `CoordSet`, labels, métadonnées et provenance |
+| [`architecture/reader-normalization-architecture.md`](architecture/reader-normalization-architecture.md) | Référence d'architecture principale pour la normalisation des readers |
 | [`rfcs/project-invariants-rfc.md`](rfcs/project-invariants-rfc.md) | Invariants « Project » : ownership, cycle, doublons, identité clé/nom (implémenté) |
 | [`rfcs/project-copy-semantics-rfc.md`](rfcs/project-copy-semantics-rfc.md) | Contrat de copie `Project` et sémantique deep/shallow maintenue |
 | [`rfcs/metadata-contract.md`](rfcs/metadata-contract.md) | Contrat mainteneur pour les métadonnées `NDDataset` |

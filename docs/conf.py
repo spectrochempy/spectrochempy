@@ -229,14 +229,14 @@ with open(os.path.join(SRC, "index.rst"), "w", encoding="utf-8") as f:
 def _format_zenodo_person(person):
     name = person.get("name", "").strip()
     if "," in name:
-        last, first = [part.strip() for part in name.split(",", 1)]
+        last, first = (part.strip() for part in name.split(",", 1))
         display_name = f"{first} {last}".strip()
     else:
         display_name = name
 
     orcid = str(person.get("orcid", "")).strip()
     if orcid:
-        return f'{display_name} (ORCID: `{orcid} <https://orcid.org/{orcid}>`_)'
+        return f"{display_name} (ORCID: `{orcid} <https://orcid.org/{orcid}>`_)"
     return display_name
 
 
@@ -255,7 +255,9 @@ def _load_zenodo_contributors():
         ]
 
     contributors = data.get("contributors", [])
-    return [_format_zenodo_person(person) for person in contributors if person.get("name")]
+    return [
+        _format_zenodo_person(person) for person in contributors if person.get("name")
+    ]
 
 
 with open(os.path.join(SRC, "credits", "credits.rst.tmpl"), encoding="utf-8") as f:

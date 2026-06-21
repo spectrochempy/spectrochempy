@@ -82,6 +82,7 @@ def _get_contributors_from_zenodo():
 
     return "; ".join(names) if names else fallback
 
+
 class SCPInfo(tr.HasTraits):
     version = tr.Unicode(help="Version string of this package")
     release = tr.Unicode(help="Release version string of this package")
