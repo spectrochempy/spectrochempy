@@ -2,11 +2,8 @@
 
 **Status:** Draft conceptual RFC
 
-**Audit reference:**
-[`audit/~analysis-fit-result-architecture-audit.md`](../audit/~analysis-fit-result-architecture-audit.md)
-
-**PR9 output semantics reference:**
-[`audit/~pr9-analysis-output-semantics-report.md`](../audit/~pr9-analysis-output-semantics-report.md)
+**Background:** Maintainer analysis and campaign-local audit work informed this
+conceptual RFC.
 
 **Implementation reference:**
 [`maintainers/architecture/result-object-contract-rfc.md`](../architecture/result-object-contract-rfc.md)

@@ -84,8 +84,8 @@ For campaign ordering and architecture priorities, see
 
 ## Notes
 
-- Status assignments above follow the documentation consolidation audit in
-  [`audit/~documentation-consolidation-audit-2026-06-21.md`](../../audit/~documentation-consolidation-audit-2026-06-21.md).
+- Status assignments above reflect the current maintainer documentation review
+  and roadmap synchronization work.
 - Several `PROPOSED` RFCs already describe behavior that is partially
   reflected in current code. They remain `PROPOSED` here because the relevant
   contract is not yet fully adopted or reclassified.

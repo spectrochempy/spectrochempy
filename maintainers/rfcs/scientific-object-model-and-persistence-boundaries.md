@@ -15,7 +15,7 @@ through separately approved work.
 - `maintainers/architecture/result-object-migration-roadmap.md`
 - `maintainers/rfcs/analysis-fit-result-architecture.md`
 - `maintainers/rfcs/metadata-contract.md`
-- `audit/~project-and-serialization-architecture-review.md`
+- recent maintainer review of `Project` and serialization boundaries
 
 ## Motivation
 

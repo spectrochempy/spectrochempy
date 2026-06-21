@@ -4,7 +4,9 @@
 
 **Related RFC:** `result-object-contract-rfc.md`
 
-**Campaign review:** `audit/~result-object-campaign-closure-review.md`
+**Campaign review context:** This roadmap preserves the tracked maintainer
+summary for the completed campaign; detailed implementation history remains in
+the local audit trail.
 
 ---
 
@@ -197,15 +199,6 @@ Optional follow-up candidates that do not change campaign completion status:
 
 ## 7. Audit Trail
 
-Detailed implementation history remains in the audit files:
-
-- `audit/~result-object-campaign-closure-review.md`
-- `audit/~result-object-contract-pr1-audit.md`
-- `audit/~result-object-contract-pr2-audit.md`
-- `audit/~result-object-contract-pr3-audit.md`
-- `audit/~result-object-contract-pr4-audit.md`
-- `audit/~result-object-contract-pr5-audit.md`
-- `audit/~result-object-contract-pr6-audit.md`
-- `audit/~result-object-contract-pr7-audit.md`
-- `audit/~result-object-contract-pr8-audit.md`
-- `audit/~result-object-contract-pr9-audit.md`
+Detailed implementation history remains in the local audit trail. The tracked
+maintainer references for this completed campaign are this roadmap and
+[`result-object-contract-rfc.md`](result-object-contract-rfc.md).

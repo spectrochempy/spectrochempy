@@ -13,8 +13,8 @@ mechanics.
 
 - `maintainers/rfcs/scientific-object-model-and-persistence-boundaries.md`
 - `maintainers/rfcs/trusted-and-portable-persistence.md`
-- `audit/~portable-xarray-netcdf-format-architecture-audit.md`
-- `audit/~csdm-native-persistence-candidate-audit.md`
+- the recent portable xarray / NetCDF architecture review
+- the recent CSDM native-persistence candidate review
 
 The key words MUST, SHOULD, and MAY express the intended future contract. They
 do not change current behavior until separately implemented.
@@ -505,7 +505,8 @@ However, based on the CSDM audit:
   whole at this stage;
 - it should not replace the xarray-centered mapping model defined here.
 
-See `audit/~csdm-native-persistence-candidate-audit.md`.
+See the related CSDM position statement and the portable-persistence RFCs for
+the tracked maintainer direction.
 
 ## Recommendations
 

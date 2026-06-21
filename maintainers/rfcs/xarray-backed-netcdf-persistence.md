@@ -12,8 +12,7 @@ persistence, Zarr-specific policy, implementation, migration, or API work.
 
 - `maintainers/rfcs/nddataset-xarray-mapping-specification.md`
 - `maintainers/rfcs/trusted-and-portable-persistence.md`
-- `audit/~xarray-prototype-implementation-notes.md`
-- `audit/~portable-xarray-netcdf-format-architecture-audit.md`
+- the earlier xarray / NetCDF prototype and architecture reviews
 
 The key words MUST, SHOULD, and MAY express the intended future contract. They
 do not change current behavior until separately implemented.

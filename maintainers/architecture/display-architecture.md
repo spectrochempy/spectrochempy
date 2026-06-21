@@ -200,12 +200,6 @@ items.
 
 ## Audit Trail
 
-For retained detailed notes around the completed display campaign and later
-follow-up work, see:
-
-- `audit/~display-architecture-audit.md`
-- `audit/~project-semantic-display-migration.md`
-- `audit/~project-display-navigation-review.md`
-- `audit/~hypercomplex-display-audit.md`
-- `audit/~hypercomplex-display-regression-check.md`
-- `audit/~hypercomplex-display-restoration.md`
+Detailed campaign notes and follow-up investigations remain part of the local
+maintainer audit trail. The tracked references for maintainers are this
+document and [`display-architecture-audit.md`](display-architecture-audit.md).
