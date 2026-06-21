@@ -1,6 +1,6 @@
 # Project Invariants and Ownership Semantics
 
-**Status:** Proposed maintainer decision record
+**Status:** Implemented
 
 **Related issue:** `#1164`
 
@@ -158,6 +158,16 @@ Recommended follow-up PR sequence
    insert, replace, move, and load paths.
 6. Revisit deferred topics (`copy()`, root-name semantics) in separate, narrow
    follow-up RFCs or PRs if still needed.
+
+All core invariants (items 1–5) have been implemented.
+
+### Implemented by
+
+* `#1230` — characterization tests
+* `#1231` — stale parent fix
+* `#1232` — duplicate policy alignment
+* `#1233` — cycle protection
+* `#1234` — key/name identity
 
 ## Conclusion
 

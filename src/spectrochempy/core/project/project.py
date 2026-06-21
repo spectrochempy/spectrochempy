@@ -36,20 +36,32 @@ from spectrochempy.utils.traits import NDDatasetType
 @tr.signature_has_traits
 class Project(AbstractProject, NDIO):
     """
-    A manager for projects and datasets.
+    Lightweight hierarchical container for datasets and subprojects.
 
-    It can handle multiple datasets and subprojects in a main
-    project.
+    ``Project`` owns child objects (``NDDataset`` and nested ``Project``
+    instances) with strict single-parent ownership. It enforces:
+
+    * **Single-parent ownership** — a child has at most one parent, and
+      moving a child between projects is an ownership transfer.
+    * **Acyclic hierarchy** — self-insertion and ancestor insertion are
+      rejected with ``ValueError``.
+    * **Explicit duplicate rejection** — adding a child whose name already
+      exists in the project raises ``ValueError``.
+    * **Key/name identity** — after insertion or replacement,
+      ``project[key].name == key``.
+
+    ``Project`` is a dataset container, not a workspace, workflow engine,
+    provenance graph, or generic object store.
 
     Parameters
     ----------
     *args : Series of objects, optional
         Argument type will be interpreted correctly if they are of type
-        `NDDataset` or `Project` .
+        ``NDDataset`` or ``Project``.
         This is optional, as they can be added later.
     argnames : list, optional
         If not None, this list gives the names associated to each
-        object passed as args. It MUST be the same length that the
+        object passed as args. It MUST be the same length as the
         number of args, or an error will be raised.
         If None, the internal name of each object will be used instead.
     name : str, optional
@@ -258,6 +270,39 @@ class Project(AbstractProject, NDIO):
         raise KeyError(f"{key}: This object name does not exist in this project.")
 
     def __setitem__(self, key, value):
+        """
+        Set ``project[key] = value``, inserting or replacing a child.
+
+        When *key* already exists, the existing child is replaced: its
+        parent is cleared, the new child is attached, and the new child's
+        ``.name`` is set to *key* (enforcing key/name identity).  The
+        old child is detached and its parent becomes ``None``.
+
+        When *key* does not exist, the operation delegates to
+        :meth:`add_dataset` or :meth:`add_project` depending on the value
+        type, with *key* as the entry name.
+
+        Type mismatch between the existing entry and the new value raises
+        ``ValueError``.
+
+        Parameters
+        ----------
+        key : str
+            Project entry key.
+        value : `NDDataset` or `Project`
+            Child object to insert or replace.
+
+        Raises
+        ------
+        KeyError
+            If *key* is not a string.
+        ValueError
+            If *key* exists but for a different type of object.
+        ValueError
+            If replacing would create a cycle (when *value* is a
+            ``Project`` that is an ancestor of this project).
+
+        """
         if not isinstance(key, str):
             raise KeyError("The key must be a string.")
 
@@ -379,7 +424,7 @@ class Project(AbstractProject, NDIO):
 
     @property
     def parent(self):
-        """Instance of the Project which is the parent (if any) of the current project (project)."""
+        """Parent project of this subproject, or ``None`` when this is a root project (project)."""
         return self._parent
 
     @parent.setter
@@ -493,12 +538,20 @@ class Project(AbstractProject, NDIO):
         """
         Add several datasets to the current project.
 
+        Each dataset is added via :meth:`add_dataset`.  If any dataset
+        name collides with an existing entry, a ``ValueError`` is raised
+        and no datasets are added (the first duplicate raises).
+
         Parameters
         ----------
         *datasets : series of `NDDataset`
             Datasets to add to the current project.
-            The name of the entries in the project will be identical to the
-            names of the datasets.
+            Entry keys are the datasets' current names.
+
+        Raises
+        ------
+        ValueError
+            If any dataset name already exists in this project.
 
         See Also
         --------
@@ -521,14 +574,25 @@ class Project(AbstractProject, NDIO):
         """
         Add a single dataset to the current project.
 
+        The dataset is attached to this project as its parent, and its
+        ``.name`` is set to the entry key (matching the key/name identity
+        invariant).  If a child with the same name already exists in the
+        project (datasets and subprojects share a single namespace),
+        a ``ValueError`` is raised.
+
         Parameters
         ----------
         dataset : `NDDataset`
-            Datasets to add.
-            The name of the entry will be the name of the dataset, except
-            if parameter `name` is defined.
+            Dataset to add.
         name : str, optional
-            If provided the name will be used to name the entry in the project.
+            Entry key in the project.  If not provided, defaults to
+            ``dataset.name``.  When provided, ``dataset.name`` is
+            overwritten to match this value.
+
+        Raises
+        ------
+        ValueError
+            If a child named ``name`` already exists in this project.
 
         See Also
         --------
@@ -605,12 +669,26 @@ class Project(AbstractProject, NDIO):
     # ----------------------------------------------------------------------------------
     def add_projects(self, *projects):
         """
-        Add one or a series of projects to the current project.
+        Add one or more subprojects to the current project.
+
+        Each subproject is added via :meth:`add_project`.  If any
+        subproject name collides with an existing entry, a
+        ``ValueError`` is raised.
 
         Parameters
         ----------
-        projects : project instances
-            The projects to add to the current ones.
+        *projects : series of `Project`
+            The subprojects to add.
+            Entry keys are the subprojects' current names.
+
+        Raises
+        ------
+        ValueError
+            If any subproject name already exists in this project.
+
+        See Also
+        --------
+        add_project : Add a single subproject.
 
         """
         for proj in projects:
@@ -618,12 +696,35 @@ class Project(AbstractProject, NDIO):
 
     def add_project(self, proj, name=None):
         """
-        Add one project to the current project.
+        Add a subproject to the current project.
+
+        The subproject is attached to this project as its parent.  Its
+        ``.name`` is set to the entry key when ``name`` differs from the
+        subproject's current name.  If a child with the same name already
+        exists in the project (datasets and subprojects share a single
+        namespace), a ``ValueError`` is raised.
+
+        Self-insertion and ancestor insertion are rejected with
+        ``ValueError`` (cycles are not allowed in the project hierarchy).
 
         Parameters
         ----------
-        proj : a project instance
-            A project to add to the current one.
+        proj : `Project`
+            Subproject to add.
+        name : str, optional
+            Entry key in the project.  If not provided, defaults to
+            ``proj.name``.  When provided (and different from the
+            current name), ``proj.name`` is overwritten to match.
+
+        Raises
+        ------
+        ValueError
+            If a child named ``name`` already exists in this project, or
+            if adding the subproject would create a cycle.
+
+        See Also
+        --------
+        add_projects : Add several subprojects at once.
 
         """
         if name is None:
