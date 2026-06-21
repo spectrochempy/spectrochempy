@@ -16,7 +16,7 @@ For campaign ordering and priorities, see
 |---|---|
 | `../rfcs/` | Normative or near-normative behavior contracts and roadmap documents |
 | this directory | Durable audits, implementation maps, design baselines, and draft architecture analyses |
-| `audit/~*.md` | Local working notes that should not be versioned by default |
+| local notes under `audit/` | Local working notes that should not be versioned by default |
 
 ## Reading Guidance
 
@@ -66,7 +66,7 @@ The curated grouping of those documents lives in [`INDEX.md`](INDEX.md).
 |---|---|---|
 | [`../rfcs/architecture-roadmap.md`](../rfcs/architecture-roadmap.md) | Roadmap | Summarizes completed, active, and deferred architecture topics. |
 | [`../rfcs/analysis-fit-result-architecture.md`](../rfcs/analysis-fit-result-architecture.md) | Draft conceptual RFC | Preserves the broader conceptual analysis of result surfaces and ownership around the implemented Result contract. |
-| [`../rfcs/coordinate-arithmetic-semantics.md`](../rfcs/coordinate-arithmetic-semantics.md) | Draft RFC | Maintainer position on coordinate arithmetic semantics. |
+| [`../rfcs/coordinate-arithmetic-semantics.md`](../rfcs/coordinate-arithmetic-semantics.md) | Accepted RFC | Maintainer position on coordinate arithmetic semantics. |
 | [`../rfcs/metadata-contract.md`](../rfcs/metadata-contract.md) | Draft RFC | Normative direction for `NDDataset` metadata preservation, recomputation, override, merge, and drop behavior. |
 | [`../rfcs/modeldata-semantic-contract.md`](../rfcs/modeldata-semantic-contract.md) | Accepted decision record | Audit and removal decision for orphaned `NDDataset.modeldata`. |
 | [`../rfcs/roi-semantic-contract.md`](../rfcs/roi-semantic-contract.md) | Accepted decision record | Audit and removal decision for orphaned `NDDataset.roi`. |

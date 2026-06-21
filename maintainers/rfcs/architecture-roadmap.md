@@ -39,7 +39,6 @@ This document should evolve as the project evolves.
 - Reference: `maintainers/rfcs/analysis-fit-result-architecture.md`
 - Implementation reference: `maintainers/architecture/result-object-contract-rfc.md`
 - Campaign summary: `maintainers/architecture/result-object-migration-roadmap.md`
-- Audit reference: `audit/~analysis-fit-result-architecture-audit.md`
 
 ### Units and Dimensional Semantics Audit
 
@@ -54,7 +53,6 @@ This document should evolve as the project evolves.
 - Minor inconsistency: `PLSRegression.coef` is unitless while
   `LinearRegressionAnalysis.coef` computes explicit `Y/X` unit ratios.
 - No immediate redesign recommended.
-- Audit reference: `audit/~units-and-dimensional-semantics-audit.md`
 
 ### History and Provenance Semantics Characterization
 
@@ -591,11 +589,11 @@ Status: Audited; RFC drafted; partial implementation completed.
 
 Motivation:
 
-Several audits revealed multiple result-construction paths throughout the codebase.
+Several maintainer reviews revealed multiple result-construction paths
+throughout the codebase.
 
 Current state:
 
-- Analysis and Fit Result Architecture audit completed (`audit/~analysis-fit-result-architecture-audit.md`).
 - RFC drafted (`maintainers/rfcs/analysis-fit-result-architecture.md`).
 - Result Object contract implemented and documented in
   `maintainers/architecture/result-object-contract-rfc.md`.

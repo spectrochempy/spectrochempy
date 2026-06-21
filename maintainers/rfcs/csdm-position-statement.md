@@ -8,8 +8,8 @@ SpectroChemPy.
 **Related issue:**
 [#1153](https://github.com/spectrochempy/spectrochempy/issues/1153)
 
-**Supporting audit:**
-`audit/~csdm-interoperability-and-native-persistence-evaluation.md`
+**Supporting context:** This position is informed by the recent maintainer
+evaluation of CSDM interoperability and native-persistence candidates.
 
 ## Decision
 
