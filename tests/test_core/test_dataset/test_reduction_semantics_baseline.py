@@ -246,7 +246,9 @@ class TestStdCharacterization:
         assert not isinstance(s, NDDataset)
 
     def test_std_appends_history(self, reduction_dataset):
-        assert_history_appended(reduction_dataset.std(dim="x"), reduction_dataset, "`std`")
+        assert_history_appended(
+            reduction_dataset.std(dim="x"), reduction_dataset, "`std`"
+        )
 
     def test_std_keepdims(self, reduction_dataset):
         s = reduction_dataset.std(dim="x", keepdims=True)

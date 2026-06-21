@@ -294,13 +294,19 @@ class TestDatasetScalarArithmetic:
     # ---- history behavior ----
 
     def test_add_history(self, rich_dataset):
-        assert_history_appended(rich_dataset + 2.0, rich_dataset, "Binary operation add")
+        assert_history_appended(
+            rich_dataset + 2.0, rich_dataset, "Binary operation add"
+        )
 
     def test_sub_history(self, rich_dataset):
-        assert_history_appended(rich_dataset - 2.0, rich_dataset, "Binary operation sub")
+        assert_history_appended(
+            rich_dataset - 2.0, rich_dataset, "Binary operation sub"
+        )
 
     def test_mul_history(self, rich_dataset):
-        assert_history_appended(rich_dataset * 2.0, rich_dataset, "Binary operation mul")
+        assert_history_appended(
+            rich_dataset * 2.0, rich_dataset, "Binary operation mul"
+        )
 
     def test_truediv_history(self, rich_dataset):
         assert_history_appended(
@@ -619,7 +625,9 @@ class TestHistoryBehavior:
             assert ">" in entry
 
     def test_history_copied_in_arithmetic(self, rich_dataset):
-        assert_history_appended(rich_dataset + 2.0, rich_dataset, "Binary operation add")
+        assert_history_appended(
+            rich_dataset + 2.0, rich_dataset, "Binary operation add"
+        )
 
     def test_history_appended_not_replaced(self, rich_dataset):
         result = rich_dataset * 2.0

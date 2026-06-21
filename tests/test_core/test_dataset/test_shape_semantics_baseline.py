@@ -167,7 +167,9 @@ class TestTransposeCharacterization:
         assert_basic_metadata_preserved(t, shape_dataset)
 
     def test_transpose_appends_history(self, shape_dataset):
-        assert_history_appended(shape_dataset.transpose(), shape_dataset, "Data transposed")
+        assert_history_appended(
+            shape_dataset.transpose(), shape_dataset, "Data transposed"
+        )
 
     def test_transpose_appends_history_with_dims(self, shape_dataset):
         t = shape_dataset.transpose("y", "x")
@@ -319,7 +321,9 @@ class TestSqueezeCharacterization:
 
     def test_squeeze_records_history(self, singleton_dataset):
         """Squeeze now appends a history entry (consistent with other shape ops)."""
-        assert_history_appended(singleton_dataset.squeeze(), singleton_dataset, "Data squeezed")
+        assert_history_appended(
+            singleton_dataset.squeeze(), singleton_dataset, "Data squeezed"
+        )
 
     def test_squeeze_returns_new_object(self, singleton_dataset):
         assert_distinct_object(singleton_dataset.squeeze(), singleton_dataset)
@@ -589,7 +593,9 @@ class TestShapeOperationHistory:
 
     def test_squeeze_appends_history(self, singleton_dataset):
         """Squeeze now appends history (consistent with other shape ops)."""
-        assert_history_appended(singleton_dataset.squeeze(), singleton_dataset, "Data squeezed")
+        assert_history_appended(
+            singleton_dataset.squeeze(), singleton_dataset, "Data squeezed"
+        )
 
     def test_reshape_appends_history(self, shape_dataset):
         assert_history_appended(
