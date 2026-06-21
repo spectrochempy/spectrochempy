@@ -99,7 +99,12 @@ Bug Fixes
   a cycle in the project hierarchy (self-insertion, direct cycle, or
   indirect cycle). The ``parent`` setter checks for cycles before any
   mutation, protecting all paths including ``add_project`` and ``parent``
-  reassignment. (:pr:`1233`)
+   reassignment. (:pr:`1233`)
+
+- ``Project.__setitem__`` replacement now enforces key/name identity:
+  after ``project["x"] = new_value``, ``project["x"].name == "x"``
+  holds for both datasets and subprojects. This closes the last gap in
+  the Project Invariants RFC contract. (:pr:`1234`)
 
 - Fixed several inconsistencies in the OMNIC SPA/SPG reader (`#1144
   <https://github.com/spectrochempy/spectrochempy/issues/1144>`_):

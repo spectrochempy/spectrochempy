@@ -272,11 +272,13 @@ class Project(AbstractProject, NDIO):
             value.parent = self
             self._datasets[key] = value
             old._parent = None
+            value.name = key
         elif key in self.projects_names:
             old = self._projects[key]
             value.parent = self
             self._projects[key] = value
             old._parent = None
+            value.name = key
         else:
             # the key does not exist
             self._set_from_type(value, name=key)
