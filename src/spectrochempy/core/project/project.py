@@ -379,13 +379,57 @@ class Project(AbstractProject, NDIO):
             "projects",
         ]
 
-    def __copy__(self):
+    def _copy(self, deep=True, memo=None):
+        """
+        Create a copy of this project.
+
+        Parameters
+        ----------
+        deep : bool
+            If True, recursively copy all children (deep / detached copy).
+            If False, create a new container with shared children (shallow copy).
+        memo : dict or None
+            Memo dictionary for ``deepcopy`` support.
+
+        Returns
+        -------
+        Project
+        """
         new = Project()
-        for item in self._attributes_():
-            item = "_" + item
-            data = getattr(self, item)
-            setattr(new, item, cpy.copy(data))
+
+        if memo is not None:
+            memo[id(self)] = new
+
+        new._name = self._name
+        new._explicit_name = self._explicit_name
+        new._meta = cpy.deepcopy(self._meta, memo=memo)
+
+        if deep:
+            for name, ds in self._datasets.items():
+                new.add_dataset(cpy.deepcopy(ds, memo=memo), name=name)
+            for name, sub in self._projects.items():
+                new.add_project(cpy.deepcopy(sub, memo=memo), name=name)
+        else:
+            new._datasets = cpy.copy(self._datasets)
+            new._projects = cpy.copy(self._projects)
+
         return new
+
+    def __copy__(self):
+        """
+        Return a fully independent copy (recursive detached).
+
+        .. note::
+
+            Unlike Python's default shallow ``copy.copy``, this method
+            produces a deep copy identical to ``copy.deepcopy``.  See
+            :meth:`copy` for details.
+        """
+        return self._copy(deep=True)
+
+    def __deepcopy__(self, memo):
+        """Return a fully independent copy with deepcopy memo support."""
+        return self._copy(deep=True, memo=memo)
 
     # ----------------------------------------------------------------------------------
     # properties
@@ -527,9 +571,38 @@ class Project(AbstractProject, NDIO):
             return "Project"
         return name == "Project"
 
-    def copy(self):
-        """Make an exact copy of the current project."""
-        return self.__copy__()
+    def copy(self, deep=True):
+        """
+        Make a copy of the current project.
+
+        This method produces a recursive detached copy (every child is a new
+        independent object) when called without arguments (``deep=True``).
+        In that mode, copied children are re-attached inside the copied tree,
+        so nested datasets and subprojects point to their copied parent.
+        With ``deep=False`` it creates a new container whose children are
+        shared references to the original — the children's ``parent`` pointers
+        remain unchanged.
+
+        .. note::
+
+            ``copy.copy(project)`` and ``copy.deepcopy(project)`` both
+            produce a deep copy, matching the default ``copy(deep=True)``
+            behavior.  This is intentional per the project copy semantics
+            RFC (``maintainers/rfcs/project-copy-semantics-rfc.md``) and
+            differs from Python's default shallow ``copy.copy`` semantics.
+
+        Parameters
+        ----------
+        deep : bool, optional
+            If True (default), a recursive detached copy is made
+            where every child is a new independent object.
+            If False, a new container is created with shared children.
+
+        Returns
+        -------
+        Project
+        """
+        return self._copy(deep=deep)
 
     # ----------------------------------------------------------------------------------
     # dataset items
