@@ -243,9 +243,11 @@ class TestSetItem:
         # Create initial items
         if item_type == "dataset":
             proj.add_dataset(NDDataset([1, 2, 3], name="item"))
+            old = proj["item"]
             initial = NDDataset([4, 5, 6], name="item")
         else:
             proj.add_project(Project(name="item"))
+            old = proj["item"]
             initial = Project(name="item")
 
         # Update
@@ -253,6 +255,7 @@ class TestSetItem:
 
         assert proj["item"] is initial
         assert initial.parent == proj
+        assert old.parent is None
 
 
 class TestGetAttr:
@@ -537,7 +540,7 @@ class TestProjectOwnershipCharacterization:
 class TestProjectReplacementCharacterization:
     """Characterization tests for current replacement semantics."""
 
-    def test_replace_dataset_keeps_new_parent_and_leaves_old_parent_stale(self):
+    def test_replace_dataset_detaches_old_child_parent(self):
         proj = Project(name="root")
         old = NDDataset([1, 2, 3], name="item")
         new = NDDataset([4, 5, 6], name="replacement")
@@ -549,11 +552,11 @@ class TestProjectReplacementCharacterization:
         assert proj["item"] is not old
         assert old not in proj.datasets
         assert new.parent is proj
-        assert old.parent is proj
+        assert old.parent is None
         assert new.name == "replacement"
         assert proj["item"].name != "item"
 
-    def test_replace_subproject_keeps_new_parent_and_leaves_old_parent_stale(self):
+    def test_replace_subproject_detaches_old_child_parent(self):
         proj = Project(name="root")
         old = Project(name="item")
         new = Project(name="replacement")
@@ -565,9 +568,63 @@ class TestProjectReplacementCharacterization:
         assert proj["item"] is not old
         assert old not in proj.projects
         assert new.parent is proj
-        assert old.parent is proj
+        assert old.parent is None
         assert new.name == "replacement"
         assert proj["item"].name != "item"
+
+    def test_replace_dataset_old_child_detached_even_with_prior_parent(self):
+        proj = Project(name="root")
+        other = Project(name="other")
+        old = NDDataset([1, 2, 3], name="item")
+        new = NDDataset([4, 5, 6], name="replacement")
+
+        other.add_dataset(old)
+        proj.add_dataset(new)
+        proj["item"] = old
+        proj["item"] = new
+
+        assert new.parent is proj
+        assert old.parent is None
+
+    def test_replace_subproject_old_child_detached_even_with_prior_parent(self):
+        proj = Project(name="root")
+        other = Project(name="other")
+        old = Project(name="item")
+        new = Project(name="replacement")
+
+        other.add_project(old)
+        proj.add_project(new)
+        proj["item"] = old
+        proj["item"] = new
+
+        assert new.parent is proj
+        assert old.parent is None
+
+    def test_replace_dataset_does_not_affect_unrelated_children(self):
+        proj = Project(name="root")
+        old = NDDataset([1, 2, 3], name="item")
+        unrelated = NDDataset([7, 8, 9], name="other")
+        new = NDDataset([4, 5, 6], name="replacement")
+
+        proj.add_dataset(old)
+        proj.add_dataset(unrelated)
+        proj["item"] = new
+
+        assert old.parent is None
+        assert unrelated.parent is proj
+
+    def test_replace_subproject_does_not_affect_unrelated_children(self):
+        proj = Project(name="root")
+        old = Project(name="item")
+        unrelated = Project(name="other")
+        new = Project(name="replacement")
+
+        proj.add_project(old)
+        proj.add_project(unrelated)
+        proj["item"] = new
+
+        assert old.parent is None
+        assert unrelated.parent is proj
 
 
 class TestProjectNameMutationCharacterization:
