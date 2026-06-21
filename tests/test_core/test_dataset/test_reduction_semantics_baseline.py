@@ -23,6 +23,12 @@ import pytest
 
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
+from tests.test_core.test_dataset._semantic_dataset_helpers import (
+    assert_basic_metadata_preserved,
+)
+from tests.test_core.test_dataset._semantic_dataset_helpers import (
+    make_semantic_2d_dataset,
+)
 
 # ======================================================================================
 # FIXTURES
@@ -38,16 +44,12 @@ def reduction_dataset():
     - CoordSet with titles, units
     - title, name, metadata, history
     """
-    y = Coord(np.linspace(0.0, 60.0, 5), title="time", units="s")
-    x = Coord(np.linspace(4000.0, 1000.0, 7), title="wavenumber", units="cm^-1")
-    data = np.arange(35.0, dtype="float64").reshape(5, 7)
-    ds = NDDataset(data, coordset=[y, x], title="reduction_dataset", name="red_name")
-    ds.author = "test_author"
-    ds.description = "test description"
-    ds.origin = "test_origin"
-    ds.meta.project = "test_project"
-    ds.history = ["original entry"]
-    return ds
+    return make_semantic_2d_dataset(
+        title="reduction_dataset",
+        name="red_name",
+        description="test description",
+        history=["original entry"],
+    )
 
 
 @pytest.fixture
@@ -127,10 +129,7 @@ class TestSumCharacterization:
 
     def test_sum_preserves_metadata(self, reduction_dataset):
         s = reduction_dataset.sum(dim="x")
-        assert s.author == "test_author"
-        assert s.description == "test description"
-        assert s.origin == "test_origin"
-        assert s.meta.project == "test_project"
+        assert_basic_metadata_preserved(s, reduction_dataset)
 
     def test_sum_appends_history(self, reduction_dataset):
         s = reduction_dataset.sum(dim="x")

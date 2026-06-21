@@ -20,6 +20,12 @@ import pytest
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
+from tests.test_core.test_dataset._semantic_dataset_helpers import (
+    assert_basic_metadata_preserved,
+)
+from tests.test_core.test_dataset._semantic_dataset_helpers import (
+    make_semantic_2d_dataset,
+)
 
 # ======================================================================================
 # FIXTURES
@@ -35,16 +41,12 @@ def shape_dataset():
     - CoordSet with titles, units
     - title, name, metadata, history
     """
-    y = Coord(np.linspace(0.0, 60.0, 5), title="time", units="s")
-    x = Coord(np.linspace(4000.0, 1000.0, 7), title="wavenumber", units="cm^-1")
-    data = np.arange(35.0, dtype="float64").reshape(5, 7)
-    ds = NDDataset(data, coordset=[y, x], title="shape_dataset", name="shape_name")
-    ds.author = "test_author"
-    ds.description = "test description"
-    ds.origin = "test_origin"
-    ds.meta.project = "test_project"
-    ds.history = ["original entry"]
-    return ds
+    return make_semantic_2d_dataset(
+        title="shape_dataset",
+        name="shape_name",
+        description="test description",
+        history=["original entry"],
+    )
 
 
 @pytest.fixture
@@ -152,10 +154,7 @@ class TestTransposeCharacterization:
 
     def test_transpose_preserves_metadata(self, shape_dataset):
         t = shape_dataset.transpose()
-        assert t.author == "test_author"
-        assert t.description == "test description"
-        assert t.origin == "test_origin"
-        assert t.meta.project == "test_project"
+        assert_basic_metadata_preserved(t, shape_dataset)
 
     def test_transpose_appends_history(self, shape_dataset):
         t = shape_dataset.transpose()
@@ -228,8 +227,7 @@ class TestSwapdimsCharacterization:
 
     def test_swapdims_preserves_metadata(self, shape_dataset):
         s = shape_dataset.swapdims("y", "x")
-        assert s.author == "test_author"
-        assert s.meta.project == "test_project"
+        assert_basic_metadata_preserved(s, shape_dataset)
 
     def test_swapdims_appends_history(self, shape_dataset):
         s = shape_dataset.swapdims("y", "x")
@@ -382,8 +380,7 @@ class TestReshapeCharacterization:
 
     def test_reshape_preserves_metadata(self, shape_dataset):
         r = shape_dataset.reshape((35,))
-        assert r.author == "test_author"
-        assert r.meta.project == "test_project"
+        assert_basic_metadata_preserved(r, shape_dataset)
 
     def test_reshape_appends_history(self, shape_dataset):
         r = shape_dataset.reshape((7, 5), dims=("x", "y"))

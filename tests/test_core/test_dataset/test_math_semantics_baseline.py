@@ -28,8 +28,17 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.units import Unit
-from spectrochempy.utils.constants import MASKED
 from spectrochempy.utils.testing import assert_array_equal
+from tests.test_core.test_dataset._semantic_dataset_helpers import (
+    assert_basic_metadata_preserved,
+)
+from tests.test_core.test_dataset._semantic_dataset_helpers import (
+    assert_coordset_matches,
+)
+from tests.test_core.test_dataset._semantic_dataset_helpers import (
+    make_semantic_2d_dataset,
+)
+from tests.test_core.test_dataset._semantic_dataset_helpers import mask_dataset_points
 
 # ======================================================================================
 # FIXTURES
@@ -55,58 +64,34 @@ def rich_dataset():
         mask             -- some invalid values
         history          -- initial provenance marker
     """
-    # Coordinates: y = time, x = wavenumber
-    y = Coord(
-        np.linspace(0.0, 60.0, 5),
-        title="time",
-        units="s",
-    )
-    x = Coord(
-        np.linspace(4000.0, 1000.0, 7),
-        title="wavenumber",
-        units="cm^-1",
-    )
-    data = np.arange(35.0, dtype="float64").reshape(5, 7)
-
-    ds = NDDataset(
-        data,
-        coordset=[y, x],
+    ds = make_semantic_2d_dataset(
         units="absorbance",
         title="reference spectrum",
+        name="rich_dataset",
+        description="Synthetic dataset for semantic characterization",
+        meta_project="semantic_characterization",
+        meta_instrument="test_instrument",
+        history="Initial creation for semantic baseline",
     )
-    ds.name = "rich_dataset"
-    ds.author = "test_author"
-    ds.description = "Synthetic dataset for semantic characterization"
-    ds.origin = "test_origin"
-    ds.meta.project = "semantic_characterization"
-    ds.meta.instrument = "test_instrument"
-    ds.history = "Initial creation for semantic baseline"
 
     # Mask a few values.
     # NOTE: setting MASKED on a 2D NDDataset masks the entire row AND column
     # intersecting at the given index.  This differs from numpy's per-element
     # masked array behavior and is the current spectroscopy-oriented policy.
-    ds[0, 0] = MASKED
-    ds[2, 3] = MASKED
-    ds[4, 6] = MASKED
-
-    return ds
+    return mask_dataset_points(ds, (0, 0), (2, 3), (4, 6))
 
 
 @pytest.fixture
 def unmasked_dataset():
     """Minimal dataset without mask for numerical correctness checks."""
-    y = Coord(np.linspace(0.0, 60.0, 5), title="time", units="s")
-    x = Coord(np.linspace(4000.0, 1000.0, 7), title="wavenumber", units="cm^-1")
-    data = np.arange(35.0, dtype="float64").reshape(5, 7)
-    ds = NDDataset(data, coordset=[y, x], units="absorbance", title="unmasked")
-    ds.name = "unmasked_dataset"
-    ds.author = "test_author"
-    ds.description = "Unmasked dataset for numerical checks"
-    ds.origin = "test_origin"
-    ds.meta.project = "numeric_checks"
-    ds.history = "Unmasked dataset creation"
-    return ds
+    return make_semantic_2d_dataset(
+        title="unmasked",
+        name="unmasked_dataset",
+        units="absorbance",
+        description="Unmasked dataset for numerical checks",
+        meta_project="numeric_checks",
+        history="Unmasked dataset creation",
+    )
 
 
 @pytest.fixture
@@ -116,32 +101,17 @@ def compatible_dataset():
 
     Same shape, same coordinate values -- compatible for arithmetic.
     """
-    y = Coord(
-        np.linspace(0.0, 60.0, 5),
-        title="time",
-        units="s",
-    )
-    x = Coord(
-        np.linspace(4000.0, 1000.0, 7),
-        title="wavenumber",
-        units="cm^-1",
-    )
-    data = np.ones((5, 7), dtype="float64") * 10.0
-
-    ds = NDDataset(
-        data,
-        coordset=[y, x],
+    return make_semantic_2d_dataset(
+        data=np.ones((5, 7), dtype="float64") * 10.0,
         units="absorbance",
         title="compatible spectrum",
+        name="compatible_dataset",
+        author="compat_author",
+        description="Compatible dataset for binary arithmetic",
+        origin="compat_origin",
+        meta_project="compat_project",
+        history="Compatible dataset creation",
     )
-    ds.name = "compatible_dataset"
-    ds.author = "compat_author"
-    ds.description = "Compatible dataset for binary arithmetic"
-    ds.origin = "compat_origin"
-    ds.meta.project = "compat_project"
-    ds.history = "Compatible dataset creation"
-
-    return ds
 
 
 # ======================================================================================
@@ -244,28 +214,16 @@ class TestDatasetScalarArithmetic:
     # ---- CoordSet ----
 
     def test_add_coordset(self, rich_dataset):
-        result = rich_dataset + 2.0
-        assert result.coordset is not None
-        np.testing.assert_allclose(result.y.data, rich_dataset.y.data)
-        np.testing.assert_allclose(result.x.data, rich_dataset.x.data)
+        assert_coordset_matches(rich_dataset + 2.0, rich_dataset)
 
     def test_sub_coordset(self, rich_dataset):
-        result = rich_dataset - 2.0
-        assert result.coordset is not None
-        np.testing.assert_allclose(result.y.data, rich_dataset.y.data)
-        np.testing.assert_allclose(result.x.data, rich_dataset.x.data)
+        assert_coordset_matches(rich_dataset - 2.0, rich_dataset)
 
     def test_mul_coordset(self, rich_dataset):
-        result = rich_dataset * 2.0
-        assert result.coordset is not None
-        np.testing.assert_allclose(result.y.data, rich_dataset.y.data)
-        np.testing.assert_allclose(result.x.data, rich_dataset.x.data)
+        assert_coordset_matches(rich_dataset * 2.0, rich_dataset)
 
     def test_truediv_coordset(self, rich_dataset):
-        result = rich_dataset / 2.0
-        assert result.coordset is not None
-        np.testing.assert_allclose(result.y.data, rich_dataset.y.data)
-        np.testing.assert_allclose(result.x.data, rich_dataset.x.data)
+        assert_coordset_matches(rich_dataset / 2.0, rich_dataset)
 
     # ---- dims ----
 
@@ -354,24 +312,39 @@ class TestDatasetScalarArithmetic:
 
     @pytest.mark.parametrize("op", ["add", "sub", "mul", "truediv"])
     def test_author_preserved(self, rich_dataset, op):
-        result = getattr(rich_dataset, f"__{op}__")(2.0)
-        assert result.author == "test_author"
+        assert_basic_metadata_preserved(
+            getattr(rich_dataset, f"__{op}__")(2.0),
+            rich_dataset,
+            check_filename=False,
+            meta_keys=("project", "instrument"),
+        )
 
     @pytest.mark.parametrize("op", ["add", "sub", "mul", "truediv"])
     def test_description_preserved(self, rich_dataset, op):
-        result = getattr(rich_dataset, f"__{op}__")(2.0)
-        assert result.description == ("Synthetic dataset for semantic characterization")
+        assert_basic_metadata_preserved(
+            getattr(rich_dataset, f"__{op}__")(2.0),
+            rich_dataset,
+            check_filename=False,
+            meta_keys=("project", "instrument"),
+        )
 
     @pytest.mark.parametrize("op", ["add", "sub", "mul", "truediv"])
     def test_origin_preserved(self, rich_dataset, op):
-        result = getattr(rich_dataset, f"__{op}__")(2.0)
-        assert result.origin == "test_origin"
+        assert_basic_metadata_preserved(
+            getattr(rich_dataset, f"__{op}__")(2.0),
+            rich_dataset,
+            check_filename=False,
+            meta_keys=("project", "instrument"),
+        )
 
     @pytest.mark.parametrize("op", ["add", "sub", "mul", "truediv"])
     def test_meta_preserved(self, rich_dataset, op):
-        result = getattr(rich_dataset, f"__{op}__")(2.0)
-        assert result.meta.project == "semantic_characterization"
-        assert result.meta.instrument == "test_instrument"
+        assert_basic_metadata_preserved(
+            getattr(rich_dataset, f"__{op}__")(2.0),
+            rich_dataset,
+            check_filename=False,
+            meta_keys=("project", "instrument"),
+        )
 
     # ---- numerical correctness (unmasked dataset) ----
 
@@ -424,15 +397,12 @@ class TestDatasetDatasetArithmetic:
         assert (rich_dataset - compatible_dataset).units == Unit("absorbance")
 
     def test_add_coordset_preserved(self, rich_dataset, compatible_dataset):
-        result = rich_dataset + compatible_dataset
-        assert result.coordset is not None
-        np.testing.assert_allclose(result.y.data, rich_dataset.y.data)
-        np.testing.assert_allclose(result.x.data, rich_dataset.x.data)
+        assert_coordset_matches(rich_dataset + compatible_dataset, rich_dataset)
 
     def test_sub_coordset_preserved(self, rich_dataset, compatible_dataset):
-        result = rich_dataset - compatible_dataset
-        assert result.coordset is not None
-        np.testing.assert_allclose(result.y.data, rich_dataset.y.data)
+        assert_coordset_matches(
+            rich_dataset - compatible_dataset, rich_dataset, dims=("y",)
+        )
 
     def test_add_dims(self, rich_dataset, compatible_dataset):
         assert (rich_dataset + compatible_dataset).dims == ["y", "x"]
