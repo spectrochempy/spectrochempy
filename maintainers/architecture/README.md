@@ -5,6 +5,10 @@ preserve decisions, invariants, risks, and technical context that should remain
 available after local audit notes are discarded.
 
 For active maintainer contracts and RFCs, also see [`../rfcs/`](../rfcs/).
+For the curated architecture entry point, see [`INDEX.md`](INDEX.md).
+For the RFC inventory, see [`../rfcs/INDEX.md`](../rfcs/INDEX.md).
+For campaign ordering and priorities, see
+[`../rfcs/architecture-roadmap.md`](../rfcs/architecture-roadmap.md).
 
 ## Placement Guide
 
@@ -13,6 +17,19 @@ For active maintainer contracts and RFCs, also see [`../rfcs/`](../rfcs/).
 | `../rfcs/` | Normative or near-normative behavior contracts and roadmap documents |
 | this directory | Durable audits, implementation maps, design baselines, and draft architecture analyses |
 | `audit/~*.md` | Local working notes that should not be versioned by default |
+
+## Reading Guidance
+
+Within this tracked directory:
+
+- **current** material is the first place to look for maintained technical
+  behavior or durable architecture boundaries;
+- **reference** material provides supporting risk maps, design-space analysis,
+  or implementation context;
+- **historical** material remains useful for migration context but is no longer
+  the primary authority.
+
+The curated grouping of those documents lives in [`INDEX.md`](INDEX.md).
 
 ## Active Draft Architecture Analyses
 

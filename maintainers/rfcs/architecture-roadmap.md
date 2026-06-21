@@ -155,6 +155,8 @@ Decision:
 
 Future work is limited to maintenance and follow-up improvements.
 
+Campaign status: Completed.
+
 ---
 
 ### Metadata Propagation
@@ -168,6 +170,9 @@ Decision:
 No immediate redesign work is planned.
 
 Future work should be driven by concrete metadata issues.
+
+Campaign status: Active contract-consolidation topic, not an open migration
+campaign.
 
 ---
 
@@ -209,6 +214,8 @@ Decision:
 
 Future display work should preserve this plugin/core separation.
 
+Campaign status: Completed.
+
 ---
 
 ### NDMath
@@ -223,9 +230,11 @@ Future work should focus on maintainability rather than semantics.
 
 NDMath refactoring is deferred until a concrete maintenance problem appears.
 
+Campaign status: Deferred / future candidate.
+
 ---
 
-# Recently Completed Topics
+# Completed Campaigns
 
 ## CoordSet Storage Redesign
 
@@ -238,20 +247,6 @@ Major outcomes:
 * removal of legacy storage assumptions;
 * stabilization of same-dim behavior;
 * improved architectural consistency.
-
----
-
-## Metadata Contract
-
-Status: Drafted
-
-Major outcomes:
-
-* metadata propagation semantics documented;
-* preservation and recomputation rules clarified;
-* architectural direction established.
-
-Current priority: Low.
 
 ---
 
@@ -309,6 +304,105 @@ for the final architecture.
 Key outcomes: Coord, CoordSet, NDDataset, and Project now use the
 semantic HTML path (`_repr_sections()` → `_render_sections()`). The
 authoritative reference is `display-architecture.md`.
+
+---
+
+## Result Object Architecture
+
+Status: Completed for core estimators
+
+Refer to
+[`maintainers/architecture/result-object-contract-rfc.md`](../architecture/result-object-contract-rfc.md)
+and
+[`maintainers/architecture/result-object-migration-roadmap.md`](../architecture/result-object-migration-roadmap.md)
+for the implemented contract and campaign summary.
+
+Major outcomes:
+
+* stable Result object contract implemented;
+* core estimator migration completed;
+* ownership, provenance boundary, serialization boundary, and display scope
+  clarified.
+
+Current priority: Deferred infrastructure follow-up only.
+
+---
+
+## Project Invariants
+
+Status: Completed
+
+Major outcomes:
+
+* single-parent ownership clarified and enforced;
+* cycle protection clarified;
+* duplicate rejection clarified;
+* key/name identity clarified.
+
+Current priority: Closed except for future broader `Project` role questions.
+
+---
+
+## Project Copy Semantics
+
+Status: Completed
+
+Major outcomes:
+
+* `Project.copy()` contract documented and implemented;
+* detached recursive copy model clarified;
+* stale-parent behavior removed from the maintained contract.
+
+Current priority: Closed.
+
+---
+
+## Portable xarray / NetCDF Persistence
+
+Status: Active partial implementation
+
+Major outcomes:
+
+* canonical RFCs drafted for xarray mapping and NetCDF persistence;
+* portable same-dimension coordinates support merged;
+* portable string-label subset support merged;
+* a substantial subset of the xarray / NetCDF round-trip path now exists.
+
+Current priority: Active follow-up and contract synchronization.
+
+---
+
+## Security / Trusted Persistence
+
+Status: Completed security hardening; active contract clarification
+
+Major outcomes:
+
+* native persistence security hardening completed;
+* safe-writer and trust-boundary work merged;
+* trusted-versus-portable persistence framing documented as the current
+  architectural direction.
+
+Current priority: Documentation and boundary clarification rather than urgent
+implementation work.
+
+---
+
+# Active Documentation and Contract Topics
+
+## Metadata Contract
+
+Status: Active contract
+
+Major outcomes:
+
+* metadata propagation semantics documented;
+* preservation and recomputation rules clarified;
+* architectural direction established.
+
+Current priority: Low.
+This remains an active documentation contract rather than a completed
+implementation campaign.
 
 ---
 
@@ -392,7 +486,7 @@ campaign by default.
 
 ---
 
-# Near-Term Architectural Candidates
+# Active and Near-Term Candidates
 
 The following topics appear to offer the highest architectural value relative to their expected complexity.
 
@@ -414,6 +508,8 @@ Questions include:
 * result assembly consistency across core, processing, analysis, and plugins.
 
 This topic should be addressed before any class hierarchy split.
+
+Status: Active.
 
 ---
 
@@ -438,6 +534,8 @@ Questions that remain open:
 
 Deferred topics documented in the RFC: copy semantics, root-name semantics.
 
+Status: Future candidate.
+
 ---
 
 ## User-Facing Improvements
@@ -454,6 +552,8 @@ Examples include:
 * documentation improvements.
 
 User-facing improvements should generally take precedence when they provide immediate value.
+
+Status: Ongoing parallel priority, not a single architecture campaign.
 
 ---
 
