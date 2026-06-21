@@ -2,7 +2,7 @@
 
 ## Status
 
-Draft Maintainer RFC.
+Accepted Maintainer RFC.
 
 This document records the current maintainer position on coordinate arithmetic
 semantics in SpectroChemPy.
