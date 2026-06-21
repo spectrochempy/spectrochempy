@@ -316,12 +316,78 @@ class TestCopy:
         del copied._datasets["data"]
         assert "data" in proj.datasets_names
 
-    def test_copy_method(self, ds1):
+    def test_copy_method_default_is_deep(self, ds1):
         ds1.name = "data"
         proj = Project(ds1, name="original")
         copied = proj.copy()
         assert copied.name == "original"
         assert "data" in copied.datasets_names
+        assert copied["data"] is not ds1
+
+    def test_copy_deep(self, ds1):
+        ds1.name = "data"
+        sub = Project(name="sub")
+        sub.add_dataset(ds1)
+        proj = Project(name="root")
+        proj.add_project(sub)
+
+        copied = proj.copy(deep=True)
+
+        assert copied.name == "root"
+        assert "sub" in copied.projects_names
+        assert copied["sub"] is not sub
+        assert copied["sub"]["data"] is not ds1
+        assert copied.parent is None
+        assert copied["sub"].parent is copied
+        assert copied["sub"]["data"].parent is copied["sub"]
+
+    def test_copy_shallow(self, ds1):
+        ds1.name = "data"
+        sub = Project(name="sub")
+        sub.add_dataset(ds1)
+        proj = Project(name="root")
+        proj.add_project(sub)
+
+        copied = proj.copy(deep=False)
+
+        assert copied is not proj
+        assert copied.name == "root"
+        assert copied["sub"] is sub
+        assert copied["sub"]["data"] is ds1
+        # shallow copy parent is also detached
+        assert copied.parent is None
+        # original parent is preserved on original children
+        assert copied["sub"].parent is proj
+
+    def test_copy_empty(self):
+        proj = Project(name="empty")
+        copied = proj.copy()
+        assert copied.name == "empty"
+        assert copied.datasets_names == []
+        assert copied.projects_names == []
+
+    def test_copy_preserves_meta(self):
+        proj = Project(name="with_meta")
+        proj.meta["key"] = "value"
+        copied = proj.copy()
+        assert copied.meta["key"] == "value"
+
+    def test_copy_module(self, ds1):
+        import copy as cpy
+
+        ds1.name = "data"
+        proj = Project(ds1, name="original")
+
+        # Per RFC: copy(proj) == deepcopy(proj) — fully independent
+        shallow = cpy.copy(proj)
+        deep = cpy.deepcopy(proj)
+
+        for copied in (shallow, deep):
+            assert copied.name == "original"
+            assert "data" in copied.datasets_names
+            assert copied["data"] is not ds1
+            assert copied["data"].parent is copied
+            assert copied.parent is None
 
 
 class TestDuplicateNamesRFC:
@@ -879,30 +945,80 @@ class TestProjectKeyNameIdentityCharacterization:
         assert loaded["sub/nested"].name == "nested"
 
 
-class TestProjectCopyCharacterization:
-    """Characterization tests for current shallow-copy semantics."""
+class TestProjectCopyRFC:
+    """RFC-compliant copy semantics (per project-copy-semantics-rfc.md)."""
 
-    def test_copy_duplicates_dataset_child_and_resets_parent_pointer(self):
+    def test_copy_default_is_recursive_detached(self):
+        proj = Project(name="root")
+        ds = NDDataset([1, 2, 3], name="data")
+        sub = Project(name="child")
+        sub.add_dataset(ds)
+        proj.add_project(sub)
+
+        copied = proj.copy()
+
+        # All children are new independent objects
+        assert copied["child"] is not sub
+        assert copied["child"]["data"] is not ds
+        # Root is detached, nested copies are re-parented inside the copy
+        assert copied.parent is None
+        assert copied["child"].parent is copied
+        assert copied["child"]["data"].parent is copied["child"]
+
+    def test_copy_shallow_shares_children(self):
+        proj = Project(name="root")
+        ds = NDDataset([1, 2, 3], name="data")
+        sub = Project(name="child")
+        sub.add_dataset(ds)
+        proj.add_project(sub)
+
+        copied = proj.copy(deep=False)
+
+        assert copied["child"] is sub
+        assert copied["child"]["data"] is ds
+        # Container parent is None
+        assert copied.parent is None
+        # Original parent references preserved on shared children
+        assert copied["child"].parent is proj
+        assert copied["child"]["data"].parent is sub
+
+    def test_copy_and_deepcopy_equivalence(self):
+        import copy as cpy
+
         proj = Project(name="root")
         ds = NDDataset([1, 2, 3], name="data")
         proj.add_dataset(ds)
 
-        copied = proj.copy()
+        shallow = cpy.copy(proj)
+        deep = cpy.deepcopy(proj)
 
-        assert copied["data"] is not ds
-        assert copied["data"].name == ds.name
-        assert copied["data"].parent is None
+        # Both produce fully independent results (RFC: copy == deepcopy)
+        assert shallow["data"] is not deep["data"]
+        assert shallow["data"].parent is shallow
+        assert deep["data"].parent is deep
+        assert shallow.name == deep.name
 
-    def test_copy_shares_subprojects_and_keeps_parent_on_original(self):
+    def test_deep_copy_preserves_nested_structure(self):
         proj = Project(name="root")
-        child = Project(name="child")
-        proj.add_project(child)
+        inner = Project(name="inner")
+        deep_inner = Project(name="deep_inner")
+        ds = NDDataset([1], name="data")
+        deep_inner.add_dataset(ds)
+        inner.add_project(deep_inner)
+        proj.add_project(inner)
 
-        copied = proj.copy()
+        copied = proj.copy(deep=True)
 
-        assert copied["child"] is child
-        assert copied["child"].parent is proj
-        assert copied["child"].parent is not copied
+        assert copied.name == "root"
+        assert copied["inner"] is not inner
+        assert copied["inner"]["deep_inner"] is not deep_inner
+        assert copied["inner"]["deep_inner"]["data"] is not ds
+        assert copied["inner"].parent is copied
+        assert copied["inner"]["deep_inner"].parent is copied["inner"]
+        assert (
+            copied["inner"]["deep_inner"]["data"].parent
+            is copied["inner"]["deep_inner"]
+        )
 
 
 class TestImplements:

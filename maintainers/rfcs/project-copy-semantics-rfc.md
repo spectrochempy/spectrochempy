@@ -1,6 +1,6 @@
 # Project Copy Semantics
 
-**Status:** Proposed maintainer decision record
+**Status:** Implemented
 
 **Related issue:** `#1164`
 

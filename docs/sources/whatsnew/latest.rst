@@ -106,6 +106,16 @@ Bug Fixes
   holds for both datasets and subprojects. This closes the last gap in
   the Project Invariants RFC contract. (:pr:`1234`)
 
+- ``Project.copy()`` now exposes an explicit ``deep`` parameter in the
+  public API. ``project.copy()`` and ``project.copy(deep=True)`` produce a
+  fully detached recursive copy with parent links rebuilt inside the copied
+  tree, while ``project.copy(deep=False)`` creates a new container that
+  shares children without changing their existing ``parent`` pointers.
+  ``copy.copy(project)`` and ``copy.deepcopy(project)`` intentionally follow
+  the recursive detached model as well, matching the Project copy semantics
+  RFC even though this is stronger than Python's usual shallow-copy
+  convention.
+
 - Fixed several inconsistencies in the OMNIC SPA/SPG reader (`#1144
   <https://github.com/spectrochempy/spectrochempy/issues/1144>`_):
   ``read_spg()`` no longer advertises the ``spa`` protocol; swapped error
