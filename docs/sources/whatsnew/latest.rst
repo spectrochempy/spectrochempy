@@ -33,7 +33,7 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
-- FIX: ``savgol(..., deriv=n)`` now annotates the output ``title`` with
+- ``savgol(..., deriv=n)`` now annotates the output ``title`` with
   the derivative order (e.g. ``"intensity (1st derivative)"``) so a
   derived quantity is clearly identified. Units are kept as-is and
   coordinates are preserved, consistent with the index-based
@@ -41,52 +41,59 @@ Bug Fixes
    (`#1095 <https://github.com/spectrochempy/spectrochempy/issues/1095>`_)
 
 
-- FIX: ``Coord`` labels are no longer silently dropped when a labeled
+- ``Coord`` labels are no longer silently dropped when a labeled
   ``Coord`` is copied into a ``CoordSet`` (e.g.
   ``CoordSet(labeled_coord)``). The ``CoordSet`` constructor creates a copy
   via ``Coord(coord, copy=True)``, which now propagates labels from the
   source coordinate. (:pr:`1229`)
 
 
-- FIX: application startup now removes invalid JSON preference files only
+- application startup now removes invalid JSON preference files only
   after closing them first, avoiding a Windows ``PermissionError`` during
   configuration initialisation when a stale file such as ``CP.json`` is
   encountered.
 
-- FIX: ``FastICA.whitening`` now returns ``None`` (instead of crashing) when
+- ``FastICA.whitening`` now returns ``None`` (instead of crashing) when
   ``whiten=False``. (:pr:`1219`)
 
-- FIX: ``PLSRegression.components`` now raises a clear ``AttributeError``
+- ``PLSRegression.components`` now raises a clear ``AttributeError``
   explaining that PLS has no single ``components`` matrix, instead of an
   unhelpful ``NotImplementedError``. (:pr:`1220`)
 
-- FIX: ``PLSRegression.intercept`` no longer crashes when the target
+- ``PLSRegression.intercept`` no longer crashes when the target
   dataset ``Y`` has no coordinate labels. (:pr:`1220`)
-- FIX: ``autosub()`` now supports subtraction along non-last dimensions
+- ``autosub()`` now supports subtraction along non-last dimensions
   consistently with its ``dim`` parameter, and the regression tests now
   cover both last-axis and non-last-axis synthetic cases. (`#1079
   <https://github.com/spectrochempy/spectrochempy/issues/1079>`_)
-- FIX: handle SVD ``compute_uv=False`` outputs consistently. The private
+- handle SVD ``compute_uv=False`` outputs consistently. The private
   ``_outfit`` attribute is now always a ``(U, s, VT)`` tuple, fixing wrong
   values and crashes for all properties when ``compute_uv=False``.
   (:pr:`1210`)
 
-- FIX: pass the ``solver`` configuration parameter to the underlying
+- pass the ``solver`` configuration parameter to the underlying
   ``sklearn.decomposition.NMF`` object. Previously the parameter was
   accepted by the SpectroChemPy ``NMF`` estimator but silently ignored
   during sklearn initialisation, so the default solver was always used
   regardless of the configured value. (:pr:`1212`)
 
-- FIX: correct ``PLSRegression.n_iter`` property attribute name. Previously,
+- correct ``PLSRegression.n_iter`` property attribute name. Previously,
   the property referenced ``self._n_iter_`` instead of the actual stored
   attribute ``self._n_iter``, causing an ``AttributeError`` after a
   successful fit. (:pr:`1216`)
 
-- FIX: ``Project.__setitem__`` no longer leaves a stale ``parent``
+- ``Project.__setitem__`` no longer leaves a stale ``parent``
   reference on the displaced child after replacement. Replacing a dataset
   or subproject via ``project["x"] = new_value`` now correctly sets
   ``old_value.parent = None``, matching the ownership invariant
   established by the Project Invariants RFC. (:pr:`1230`, :pr:`1231`)
+
+- ``Project`` now raises ``ValueError`` when adding a dataset or
+  subproject whose name already exists in the project, instead of
+  auto-renaming datasets or silently overwriting subprojects. Both
+  child types now follow the same explicit-failure duplicate policy
+  defined by the Project Invariants RFC. Collisions between datasets
+  and subprojects are also caught. (:pr:`1232`)
 
 - Fixed several inconsistencies in the OMNIC SPA/SPG reader (`#1144
   <https://github.com/spectrochempy/spectrochempy/issues/1144>`_):

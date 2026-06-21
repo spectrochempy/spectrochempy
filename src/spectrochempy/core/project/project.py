@@ -519,16 +519,15 @@ class Project(AbstractProject, NDIO):
         >>> proj.add_dataset(ds1, name='Toto')
 
         """
-        dataset.parent = self
         if name is None:
             name = dataset.name
 
-        n = 1
-        while name in self.allnames:
-            # this name already exists
-            name = f"{dataset.name}-{n}"
-            n += 1
+        if name in self.allnames:
+            raise ValueError(
+                f"An object named '{name}' already exists in this project."
+            )
 
+        dataset.parent = self
         dataset.name = name
         self._datasets[name] = dataset
 
@@ -604,10 +603,16 @@ class Project(AbstractProject, NDIO):
             A project to add to the current one.
 
         """
-        proj.parent = self
         if name is None:
             name = proj.name
-        else:
+
+        if name in self.allnames:
+            raise ValueError(
+                f"An object named '{name}' already exists in this project."
+            )
+
+        proj.parent = self
+        if name != proj.name:
             proj.name = name
         self._projects[name] = proj
 
