@@ -124,6 +124,26 @@ class Project(AbstractProject, NDIO):
     def _get_from_type(self, name):
         pass  # TODO: ???
 
+    def _check_cycle(self, new_parent):
+        """
+        Raise ValueError if setting parent to new_parent would create a cycle.
+
+        A cycle exists when new_parent is reachable from self by following
+        the parent chain upward. This means new_parent is already a descendant
+        of self in the project tree, and making it the parent of self would
+        create a loop.
+        """
+        if new_parent is None:
+            return
+        current = new_parent
+        while current is not None:
+            if current is self:
+                raise ValueError(
+                    "Setting this parent would create a cycle in the "
+                    "Project hierarchy."
+                )
+            current = current._parent
+
     def _repr_html_(self):
         sections = self._repr_sections()
         body = _render_sections(sections)
@@ -362,6 +382,7 @@ class Project(AbstractProject, NDIO):
 
     @parent.setter
     def parent(self, value):
+        self._check_cycle(value)
         if self._parent is not None:
             # A parent project already exists for this subproject but the
             # entered values gives a different parent. This is not allowed,
