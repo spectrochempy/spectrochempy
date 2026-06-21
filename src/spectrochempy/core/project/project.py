@@ -620,12 +620,16 @@ class Project(AbstractProject, NDIO):
 
     def remove_dataset(self, name):
         """
-        Remove a dataset from the project.
+        Remove a dataset from the project and reset its parent to ``None``.
 
         Parameters
         ----------
         name : str
             Name of the dataset to remove.
+
+        See Also
+        --------
+        remove_project : Remove a subproject.
 
         """
         self._datasets[name]._parent = None  # remove the parent info
@@ -742,12 +746,16 @@ class Project(AbstractProject, NDIO):
 
     def remove_project(self, name):
         """
-        Remove one project from the current project.
+        Remove a subproject from the current project and reset its parent to ``None``.
 
         Parameters
         ----------
         name : str
             Name of the project to remove.
+
+        See Also
+        --------
+        remove_dataset : Remove a dataset.
 
         """
         self._projects[name]._parent = None

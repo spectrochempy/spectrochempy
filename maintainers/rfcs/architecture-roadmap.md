@@ -421,17 +421,22 @@ This topic should be addressed before any class hierarchy split.
 
 Motivation:
 
-The long-term role of `Project` remains less clearly defined than other core objects.
+The core ownership invariants of `Project` have been characterized and implemented
+via a dedicated RFC (see
+[`project-invariants-rfc.md`](./project-invariants-rfc.md), status: Implemented).
 
-Questions include:
+The long-term role of `Project` remains less clearly defined than other core
+objects, but the invariants (single-parent ownership, acyclic hierarchy,
+explicit duplicate rejection, key/name identity) are now enforced.
 
-* object responsibilities;
-* persistence model;
-* relationship with datasets;
+Questions that remain open:
+
+* persistence model (typed-members constraints);
 * relationship with workflows;
-* interaction with future ecosystem developments.
+* interaction with future ecosystem developments (e.g., Result object
+  integration).
 
-This topic likely requires an architectural audit before any implementation work.
+Deferred topics documented in the RFC: copy semantics, root-name semantics.
 
 ---
 

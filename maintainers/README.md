@@ -23,6 +23,7 @@ contrats RFC, et notes d'architecture durables.
 | Document | Description |
 |---|---|
 | [`rfcs/architecture-roadmap.md`](rfcs/architecture-roadmap.md) | Feuille de route légère des sujets d'architecture récents, terminés ou différés |
+| [`rfcs/project-invariants-rfc.md`](rfcs/project-invariants-rfc.md) | Invariants « Project » : ownership, cycle, doublons, identité clé/nom (implémenté) |
 | [`rfcs/metadata-contract.md`](rfcs/metadata-contract.md) | Contrat mainteneur pour les métadonnées `NDDataset` |
 | [`rfcs/analysis-fit-result-architecture.md`](rfcs/analysis-fit-result-architecture.md) | RFC draft sur l'architecture actuelle des résultats d'analyse et de fit |
 | [`rfcs/modeldata-semantic-contract.md`](rfcs/modeldata-semantic-contract.md) | Audit et décision sur la suppression de `NDDataset.modeldata` |

@@ -53,7 +53,7 @@ tree model and invalidate display, traversal, and persistence assumptions.
 
 ## Duplicate Policy
 
-Current behavior is inconsistent:
+Historical behavior was inconsistent:
 
 * datasets auto-rename;
 * subprojects silently overwrite.
