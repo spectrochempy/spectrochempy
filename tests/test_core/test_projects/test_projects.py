@@ -578,8 +578,8 @@ class TestProjectReplacementCharacterization:
         assert old not in proj.datasets
         assert new.parent is proj
         assert old.parent is None
-        assert new.name == "replacement"
-        assert proj["item"].name != "item"
+        assert new.name == "item"
+        assert proj["item"].name == "item"
 
     def test_replace_subproject_detaches_old_child_parent(self):
         proj = Project(name="root")
@@ -594,8 +594,8 @@ class TestProjectReplacementCharacterization:
         assert old not in proj.projects
         assert new.parent is proj
         assert old.parent is None
-        assert new.name == "replacement"
-        assert proj["item"].name != "item"
+        assert new.name == "item"
+        assert proj["item"].name == "item"
 
     def test_replace_dataset_old_child_detached_even_with_prior_parent(self):
         proj = Project(name="root")
@@ -760,6 +760,85 @@ class TestProjectCycleRejection:
         child.parent = None
         assert child.parent is None
         assert "child" not in proj.projects_names
+
+
+class TestProjectKeyNameIdentityRFC:
+    """RFC-compliant key/name identity tests."""
+
+    def test_setitem_replacement_enforces_key_name_identity_for_dataset(self):
+        proj = Project(name="test")
+        ds = NDDataset([1, 2, 3], name="original")
+        proj.add_dataset(NDDataset([0], name="existing"))
+        proj["existing"] = ds
+        assert proj["existing"].name == "existing"
+        assert ds.name == "existing"
+
+    def test_setitem_replacement_enforces_key_name_identity_for_project(self):
+        proj = Project(name="test")
+        sub = Project(name="original")
+        proj.add_project(Project(name="existing"))
+        proj["existing"] = sub
+        assert proj["existing"].name == "existing"
+        assert sub.name == "existing"
+
+    def test_setitem_new_key_enforces_identity_via_add_dataset(self):
+        proj = Project(name="test")
+        ds = NDDataset([1, 2, 3], name="original")
+        proj["renamed"] = ds
+        assert proj["renamed"].name == "renamed"
+        assert ds.name == "renamed"
+
+    def test_setitem_new_key_enforces_identity_via_add_project(self):
+        proj = Project(name="test")
+        sub = Project(name="original")
+        proj["renamed"] = sub
+        assert proj["renamed"].name == "renamed"
+        assert sub.name == "renamed"
+
+    def test_move_between_projects_via_add_dataset_preserves_identity(self):
+        source = Project(name="source")
+        dest = Project(name="dest")
+        ds = NDDataset([1, 2, 3], name="data")
+        source.add_dataset(ds)
+        dest.add_dataset(ds)
+        assert dest["data"].name == "data"
+
+    def test_move_between_projects_via_add_project_preserves_identity(self):
+        source = Project(name="source")
+        dest = Project(name="dest")
+        sub = Project(name="child")
+        source.add_project(sub)
+        dest.add_project(sub)
+        assert dest["child"].name == "child"
+
+    def test_constructor_with_argnames_enforces_identity(self):
+        ds = NDDataset([1, 2, 3], name="original")
+        proj = Project(ds, argnames=["renamed"])
+        assert proj["renamed"].name == "renamed"
+        assert ds.name == "renamed"
+
+    def test_parent_setter_moves_child_and_add_project_restores_identity(self):
+        source = Project(name="source")
+        dest = Project(name="dest")
+        sub = Project(name="child")
+        source.add_project(sub)
+        sub.parent = None
+        dest.add_project(sub)
+        assert dest["child"].name == "child"
+
+    def test_ownership_and_duplicate_and_cycle_still_work(self):
+        """Verify prior invariants are not broken by key/name identity changes."""
+        proj = Project(name="root")
+        ds = NDDataset([1], name="data")
+        proj.add_dataset(ds)
+        assert ds.parent is proj
+        assert proj["data"] is ds
+
+        with pytest.raises(ValueError, match="already exists"):
+            proj.add_dataset(NDDataset([2], name="data"))
+
+        with pytest.raises(ValueError, match="cycle"):
+            proj.add_project(proj)
 
 
 class TestProjectKeyNameIdentityCharacterization:
