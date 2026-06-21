@@ -5,7 +5,7 @@
 Completed architecture note.
 
 This document preserves the durable decisions from the former
-`audit/tensor-plugin-migration.md` note.
+local tensor-plugin migration note.
 
 ## Scope
 

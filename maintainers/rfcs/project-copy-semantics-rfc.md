@@ -8,7 +8,8 @@
 (PRs #1230–#1234). Copy semantics was explicitly deferred there and is the
 subject of this RFC.
 
-**Prerequisite audit:** `audit/~project-copy-semantics-audit.md`
+**Prerequisite analysis:** This RFC follows the completed maintainer review of
+`Project` copy behavior and ownership invariants.
 
 ## Motivation
 
@@ -22,7 +23,7 @@ because:
 3. It was unclear whether `copy()` should be shallow, deep, or something in
    between.
 
-The audit (`audit/~project-copy-semantics-audit.md`) found that:
+The prerequisite review found that:
 
 - The current behavior is **not the result of an explicit design decision**.
   It is a side effect of how Traitlets type validators interact with

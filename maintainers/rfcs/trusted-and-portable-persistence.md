@@ -9,7 +9,7 @@
 **Related documents:**
 
 - `maintainers/rfcs/scientific-object-model-and-persistence-boundaries.md`
-- `audit/~serialization-security-and-trust-boundary-audit.md`
+- recent maintainer security and trust-boundary review work
 
 ---
 

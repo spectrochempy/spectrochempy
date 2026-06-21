@@ -73,7 +73,10 @@ Prefer incremental migration.
 
 # Audit Policy
 
-Audit files are the authoritative implementation history.
+Audit files are the authoritative implementation history for a campaign, but
+they are not the authoritative source for the current maintained architecture
+or behavior contract unless that content has been promoted into tracked
+maintainer documentation.
 
 Use audit notes for:
 
@@ -107,6 +110,115 @@ Agents must produce or update an audit note after each work session,
 documenting what was done, key decisions, test results, risks, and next
 steps.  For multi-PR projects, maintain dedicated audit files and update
 them before considering a task complete.
+
+---
+
+# Architecture Documentation Lifecycle
+
+Architecture work should normally progress through the following lifecycle:
+
+```text
+Audit
+  ↓
+RFC (optional)
+  ↓
+Implementation
+  ↓
+Architecture Note / Maintainer Reference
+```
+
+The goal is to ensure that durable architectural knowledge does not remain
+exclusively in local audit notes after a campaign is completed.
+
+## Audit
+
+Use audits for:
+
+* exploration;
+* characterization;
+* investigation;
+* design discussion.
+
+Audits are working documents.
+
+Audits are not authoritative by default for current maintained contracts.
+
+## RFC
+
+Use RFCs to:
+
+* define a proposed contract;
+* record decisions;
+* guide implementation.
+
+RFCs may be:
+
+* proposed;
+* accepted;
+* implemented;
+* superseded.
+
+## Architecture Notes
+
+Use architecture notes to:
+
+* describe current architecture;
+* capture stable contracts;
+* document important design decisions;
+* serve as maintainer references.
+
+Architecture notes become the authoritative source once a design stabilizes.
+
+## Promotion Requirement
+
+When a campaign results in:
+
+* an accepted RFC;
+* significant architectural change;
+* multiple implementation PRs;
+* a long-term contract;
+
+the maintainer should evaluate whether part of the audit material must be
+promoted into:
+
+* `maintainers/architecture/`; or
+* `maintainers/rfcs/`
+
+before the campaign is considered complete.
+
+Architectural reasoning should not remain exclusively in audit documents.
+
+## Audit Deliverables
+
+Major architecture audits should end with a final section named:
+
+```text
+Promotion Candidates
+```
+
+That section should identify:
+
+* content suitable for RFCs;
+* content suitable for architecture notes;
+* content that should remain historical only.
+
+Where possible, suggest target filenames.
+
+This requirement applies to major architecture audits, not to minor bug
+investigations or narrow implementation notes.
+
+## Campaign Closure Checklist
+
+Before closing a major architecture campaign, verify:
+
+* RFC status updated;
+* roadmap updated;
+* relevant architecture notes updated or created;
+* promotion candidates reviewed;
+* authoritative documentation synchronized.
+
+This checklist is meant to keep durable knowledge discoverable, not to add
+heavy process.
 
 ---
 

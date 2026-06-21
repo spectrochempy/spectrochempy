@@ -14,8 +14,8 @@ model.
 
 - `maintainers/rfcs/nddataset-xarray-mapping-specification.md`
 - `maintainers/rfcs/xarray-backed-netcdf-persistence.md`
-- `audit/~portable-coordset-enrichment-audit.md`
-- `audit/~portable-same-dim-coords-progress.md`
+- the recent portable `CoordSet` enrichment work and same-dimension coordinate
+  progress reviews
 
 ---
 
@@ -34,7 +34,8 @@ A clear portable semantics decision is needed before implementing, because:
 - several readers (OPUS, JCAMP, Omnic, SPC, CSV) populate labels with
   acquisition metadata that users may expect to survive round-trip;
 - the xarray mapping RFC explicitly lists labels as an open question;
-- the enrichment audit recommends deferring labels to a dedicated RFC.
+- earlier portable-persistence review recommended deferring labels to a
+  dedicated RFC.
 
 This RFC resolves that open question by classifying label usages and defining
 which subset is portable.

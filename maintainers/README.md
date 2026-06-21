@@ -26,7 +26,7 @@ Utiliser ces couches documentaires dans cet ordre :
 |---|---|---|
 | RFCs | Contrats mainteneur, positions, décisions acceptées, et contrats implémentés | [`rfcs/INDEX.md`](rfcs/INDEX.md) |
 | Architecture Notes | Références d'architecture durables, cartes d'implémentation, et contexte technique maintenu | [`architecture/INDEX.md`](architecture/INDEX.md) |
-| Audits | Notes de travail, historique d'implémentation, investigations, et campagnes locales non versionnées par défaut | `audit/~*.md` |
+| Audits | Notes de travail, historique d'implémentation, investigations, et campagnes locales non versionnées par défaut | notes locales sous `audit/`, lorsqu'elles existent |
 | Roadmap | Priorités, sujets terminés, actifs, ou différés | [`rfcs/architecture-roadmap.md`](rfcs/architecture-roadmap.md) |
 
 En pratique :
