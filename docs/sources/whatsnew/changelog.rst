@@ -89,6 +89,12 @@ Bug Fixes
   attribute ``self._n_iter``, causing an ``AttributeError`` after a
   successful fit. (:pr:`1216`)
 
+- FIX: ``Project.__setitem__`` no longer leaves a stale ``parent``
+  reference on the displaced child after replacement. Replacing a dataset
+  or subproject via ``project["x"] = new_value`` now correctly sets
+  ``old_value.parent = None``, matching the ownership invariant
+  established by the Project Invariants RFC. (:pr:`1230`, :pr:`1231`)
+
 - Fixed several inconsistencies in the OMNIC SPA/SPG reader (`#1144
   <https://github.com/spectrochempy/spectrochempy/issues/1144>`_):
   ``read_spg()`` no longer advertises the ``spa`` protocol; swapped error
