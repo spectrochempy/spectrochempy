@@ -158,7 +158,9 @@ def test_to_xarray_currently_rejects_label_only_coordinates():
         name="label_only_demo",
     )
 
-    with pytest.raises(ValueError, match="different number of dimensions on data and dims"):
+    with pytest.raises(
+        ValueError, match="different number of dimensions on data and dims"
+    ):
         ds.to_xarray()
 
 
