@@ -95,6 +95,12 @@ Bug Fixes
   defined by the Project Invariants RFC. Collisions between datasets
   and subprojects are also caught. (:pr:`1232`)
 
+- ``Project`` now raises ``ValueError`` when an operation would create
+  a cycle in the project hierarchy (self-insertion, direct cycle, or
+  indirect cycle). The ``parent`` setter checks for cycles before any
+  mutation, protecting all paths including ``add_project`` and ``parent``
+  reassignment. (:pr:`1233`)
+
 - Fixed several inconsistencies in the OMNIC SPA/SPG reader (`#1144
   <https://github.com/spectrochempy/spectrochempy/issues/1144>`_):
   ``read_spg()`` no longer advertises the ``spa`` protocol; swapped error

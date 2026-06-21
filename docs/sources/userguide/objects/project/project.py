@@ -94,7 +94,7 @@ proj.add_datasets(nd1)
 # or `add_datasets` for several datasets.
 
 # %%
-proj.add_datasets(nd1, nd2)
+proj.add_datasets(nd2)
 
 # %% [markdown]
 # Display its structure
@@ -110,6 +110,7 @@ proj
 
 # %%
 proj.remove_dataset("NMR_1D")
+proj.remove_dataset("NMR_1D_copy")
 proj
 
 # %% [markdown]

@@ -672,28 +672,94 @@ class TestProjectNameMutationCharacterization:
         assert ds.name == "mutated"
 
 
-class TestProjectCycleCharacterization:
-    """Characterization tests for current cycle behavior."""
+class TestProjectCycleRejection:
+    """Cycle rejection tests per Project Invariants RFC."""
 
-    def test_add_project_allows_self_insertion_without_current_protection(self):
+    def test_self_insertion_raises_valueerror(self):
         proj = Project(name="self")
+        with pytest.raises(ValueError, match="cycle"):
+            proj.add_project(proj)
 
-        proj.add_project(proj)
-
-        _assert_project_membership(proj, proj, "self", present=True)
-        assert proj.parent is proj
-
-    def test_add_project_allows_ancestor_insertion_without_current_protection(self):
+    def test_direct_cycle_raises_valueerror(self):
         parent = Project(name="parent")
         child = Project(name="child")
-
         parent.add_project(child)
-        child.add_project(parent)
+        with pytest.raises(ValueError, match="cycle"):
+            child.add_project(parent)
 
-        _assert_project_membership(parent, child, "child", present=True)
-        _assert_project_membership(child, parent, "parent", present=True)
-        assert parent.parent is child
+    def test_indirect_cycle_raises_valueerror(self):
+        a = Project(name="a")
+        b = Project(name="b")
+        c = Project(name="c")
+        a.add_project(b)
+        b.add_project(c)
+        with pytest.raises(ValueError, match="cycle"):
+            c.add_project(a)
+
+    def test_parent_setter_self_cycle_raises_valueerror(self):
+        proj = Project(name="self")
+        with pytest.raises(ValueError, match="cycle"):
+            proj.parent = proj
+
+    def test_parent_setter_direct_cycle_raises_valueerror(self):
+        parent = Project(name="parent")
+        child = Project(name="child")
+        parent.add_project(child)
+        with pytest.raises(ValueError, match="cycle"):
+            parent.parent = child
+
+    def test_parent_setter_indirect_cycle_raises_valueerror(self):
+        a = Project(name="a")
+        b = Project(name="b")
+        c = Project(name="c")
+        a.add_project(b)
+        b.add_project(c)
+        with pytest.raises(ValueError, match="cycle"):
+            a.parent = c
+
+    def test_state_unchanged_after_self_insertion_failure(self):
+        proj = Project(name="self")
+        with pytest.raises(ValueError):
+            proj.add_project(proj)
+        assert proj.parent is None
+        assert "self" not in proj.projects_names
+
+    def test_state_unchanged_after_direct_cycle_failure(self):
+        parent = Project(name="parent")
+        child = Project(name="child")
+        parent.add_project(child)
+        with pytest.raises(ValueError):
+            child.add_project(parent)
         assert child.parent is parent
+        assert parent.parent is None
+        _assert_project_membership(parent, child, "child", present=True)
+
+    def test_state_unchanged_after_indirect_cycle_failure(self):
+        a = Project(name="a")
+        b = Project(name="b")
+        c = Project(name="c")
+        a.add_project(b)
+        b.add_project(c)
+        with pytest.raises(ValueError):
+            c.add_project(a)
+        assert c.parent is b
+        assert b.parent is a
+        assert a.parent is None
+
+    def test_normal_tree_structure_not_affected_by_cycle_protection(self):
+        parent = Project(name="parent")
+        child = Project(name="child")
+        parent.add_project(child)
+        assert child.parent is parent
+        _assert_project_membership(parent, child, "child", present=True)
+
+    def test_normal_parent_setter_not_affected_by_cycle_protection(self):
+        proj = Project(name="root")
+        child = Project(name="child")
+        proj.add_project(child)
+        child.parent = None
+        assert child.parent is None
+        assert "child" not in proj.projects_names
 
 
 class TestProjectKeyNameIdentityCharacterization:
