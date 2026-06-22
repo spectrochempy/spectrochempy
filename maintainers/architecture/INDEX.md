@@ -31,6 +31,7 @@ contracts.
 | [`display-architecture.md`](display-architecture.md) | Final post-migration display architecture and semantic HTML model. |
 | [`mathematical-semantics-and-metadata-propagation.md`](mathematical-semantics-and-metadata-propagation.md) | Active maintainer-facing contract draft for operation behavior, result assembly, provenance, and metadata propagation. |
 | [`metadata-and-support-model.md`](metadata-and-support-model.md) | Primary architecture reference for dimensions, coordinates, `CoordSet`, labels, metadata, provenance, ownership, and persistence boundaries. |
+| [`portable-persistence-model.md`](portable-persistence-model.md) | Primary architecture reference for the currently implemented portable xarray / NetCDF persistence surface, including portable identity, structure, labels, provenance, and `Meta` payloads. |
 | [`reader-normalization-architecture.md`](reader-normalization-architecture.md) | Primary architecture reference for normalizing imported reader information into typed fields, coordinates, labels, provenance, `Meta`, and parser-only state. |
 | [`result-object-contract-rfc.md`](result-object-contract-rfc.md) | Implemented tracked contract for result objects, ownership, serialization boundary, and display scope. |
 | [`result-object-migration-roadmap.md`](result-object-migration-roadmap.md) | Final campaign summary for the completed Result Object migration. |
@@ -64,10 +65,11 @@ For a quick orientation path, start with:
 1. [`../README.md`](../README.md)
 2. [`../rfcs/architecture-roadmap.md`](../rfcs/architecture-roadmap.md)
 3. [`../rfcs/INDEX.md`](../rfcs/INDEX.md)
-4. [`coordset-storage-architecture.md`](coordset-storage-architecture.md)
+4. [`portable-persistence-model.md`](portable-persistence-model.md)
 5. [`metadata-and-support-model.md`](metadata-and-support-model.md)
 6. [`reader-normalization-architecture.md`](reader-normalization-architecture.md)
-7. [`display-architecture.md`](display-architecture.md)
-8. [`result-object-contract-rfc.md`](result-object-contract-rfc.md)
-9. [`mathematical-semantics-and-metadata-propagation.md`](mathematical-semantics-and-metadata-propagation.md)
-10. [`array-class-responsibility.md`](array-class-responsibility.md)
+7. [`coordset-storage-architecture.md`](coordset-storage-architecture.md)
+8. [`display-architecture.md`](display-architecture.md)
+9. [`result-object-contract-rfc.md`](result-object-contract-rfc.md)
+10. [`mathematical-semantics-and-metadata-propagation.md`](mathematical-semantics-and-metadata-propagation.md)
+11. [`array-class-responsibility.md`](array-class-responsibility.md)

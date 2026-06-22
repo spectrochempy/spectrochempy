@@ -38,6 +38,7 @@ The curated grouping of those documents lives in [`INDEX.md`](INDEX.md).
 | [`array-class-responsibility.md`](array-class-responsibility.md) | Draft RFC | Maps responsibilities across `NDArray`, `NDComplexArray`, `Coord`, `NDDataset`, `NDMath`, and `NDIO` before any hierarchy cleanup. |
 | [`mathematical-semantics-and-metadata-propagation.md`](mathematical-semantics-and-metadata-propagation.md) | Draft RFC / characterization largely complete | Characterizes operation behavior, result assembly, scientific object identity, provenance, and metadata propagation before `NDMath` or class hierarchy changes. |
 | [`metadata-and-support-model.md`](metadata-and-support-model.md) | Authoritative architecture note | Primary maintained reference for dimensions, coordinates, `CoordSet`, metadata, labels, provenance, ownership, and persistence boundaries. |
+| [`portable-persistence-model.md`](portable-persistence-model.md) | Authoritative architecture note | Primary maintained reference for the currently implemented portable xarray / NetCDF persistence surface. |
 | [`reader-normalization-architecture.md`](reader-normalization-architecture.md) | Authoritative architecture note | Primary maintained reference for how readers should normalize imported information into the runtime model. |
 | [`result-object-contract-rfc.md`](result-object-contract-rfc.md) | Implemented RFC | Defines the Result object contract, ownership, provenance boundary, serialization boundary, and display scope now validated by the completed campaign. |
 

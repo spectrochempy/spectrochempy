@@ -38,6 +38,9 @@ En pratique :
 - pour les questions sur dimensions, coordonnées, `CoordSet`, métadonnées,
   labels, provenance, commencer par
   [`architecture/metadata-and-support-model.md`](architecture/metadata-and-support-model.md) ;
+- pour les questions sur ce qui survit actuellement aux round-trips portables
+  xarray / NetCDF, commencer par
+  [`architecture/portable-persistence-model.md`](architecture/portable-persistence-model.md) ;
 - pour les questions sur l'import et la normalisation des readers, commencer
   par
   [`architecture/reader-normalization-architecture.md`](architecture/reader-normalization-architecture.md) ;
@@ -89,16 +92,17 @@ Pour un nouveau mainteneur, l'ordre de lecture recommandé est :
 3. [`architecture/INDEX.md`](architecture/INDEX.md)
 4. [`rfcs/project-invariants-rfc.md`](rfcs/project-invariants-rfc.md)
 5. [`rfcs/project-copy-semantics-rfc.md`](rfcs/project-copy-semantics-rfc.md)
-6. [`architecture/coordset-storage-architecture.md`](architecture/coordset-storage-architecture.md)
-7. [`architecture/metadata-and-support-model.md`](architecture/metadata-and-support-model.md)
-8. [`architecture/reader-normalization-architecture.md`](architecture/reader-normalization-architecture.md)
-9. [`architecture/display-architecture.md`](architecture/display-architecture.md)
-10. [`architecture/result-object-contract-rfc.md`](architecture/result-object-contract-rfc.md)
-11. [`architecture/result-object-migration-roadmap.md`](architecture/result-object-migration-roadmap.md)
-12. [`architecture/mathematical-semantics-and-metadata-propagation.md`](architecture/mathematical-semantics-and-metadata-propagation.md)
-13. [`architecture/array-class-responsibility.md`](architecture/array-class-responsibility.md)
-14. [`rfcs/coordinate-arithmetic-semantics.md`](rfcs/coordinate-arithmetic-semantics.md)
-15. [`rfcs/trusted-and-portable-persistence.md`](rfcs/trusted-and-portable-persistence.md)
+6. [`architecture/portable-persistence-model.md`](architecture/portable-persistence-model.md)
+7. [`architecture/coordset-storage-architecture.md`](architecture/coordset-storage-architecture.md)
+8. [`architecture/metadata-and-support-model.md`](architecture/metadata-and-support-model.md)
+9. [`architecture/reader-normalization-architecture.md`](architecture/reader-normalization-architecture.md)
+10. [`architecture/display-architecture.md`](architecture/display-architecture.md)
+11. [`architecture/result-object-contract-rfc.md`](architecture/result-object-contract-rfc.md)
+12. [`architecture/result-object-migration-roadmap.md`](architecture/result-object-migration-roadmap.md)
+13. [`architecture/mathematical-semantics-and-metadata-propagation.md`](architecture/mathematical-semantics-and-metadata-propagation.md)
+14. [`architecture/array-class-responsibility.md`](architecture/array-class-responsibility.md)
+15. [`rfcs/coordinate-arithmetic-semantics.md`](rfcs/coordinate-arithmetic-semantics.md)
+16. [`rfcs/trusted-and-portable-persistence.md`](rfcs/trusted-and-portable-persistence.md)
 
 ## Key Documents
 
@@ -107,6 +111,7 @@ Pour un nouveau mainteneur, l'ordre de lecture recommandé est :
 | [`rfcs/INDEX.md`](rfcs/INDEX.md) | Index des RFCs mainteneur, de leur statut, et de leur rôle |
 | [`architecture/INDEX.md`](architecture/INDEX.md) | Point d'entrée organisé vers les notes d'architecture suivies |
 | [`rfcs/architecture-roadmap.md`](rfcs/architecture-roadmap.md) | Feuille de route légère des sujets d'architecture récents, terminés ou différés |
+| [`architecture/portable-persistence-model.md`](architecture/portable-persistence-model.md) | Référence d'architecture principale pour la surface de persistance portable xarray / NetCDF actuellement implémentée |
 | [`architecture/metadata-and-support-model.md`](architecture/metadata-and-support-model.md) | Référence d'architecture principale pour dimensions, coordonnées, `CoordSet`, labels, métadonnées et provenance |
 | [`architecture/reader-normalization-architecture.md`](architecture/reader-normalization-architecture.md) | Référence d'architecture principale pour la normalisation des readers |
 | [`rfcs/project-invariants-rfc.md`](rfcs/project-invariants-rfc.md) | Invariants « Project » : ownership, cycle, doublons, identité clé/nom (implémenté) |

@@ -25,6 +25,9 @@ Labels remain a distinct support-local semantic surface.
 This note describes the current maintained model. It does not reproduce RFC
 discussion history or rejected alternatives.
 
+For the currently implemented portable xarray / NetCDF persistence surface,
+read [`portable-persistence-model.md`](portable-persistence-model.md) first.
+
 ## Dimensions
 
 In SpectroChemPy, a dimension is:

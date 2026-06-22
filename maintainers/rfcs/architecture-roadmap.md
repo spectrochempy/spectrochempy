@@ -357,16 +357,23 @@ Current priority: Closed.
 
 ## Portable xarray / NetCDF Persistence
 
-Status: Active partial implementation
+Status: Implemented core portable subset; follow-up extensions remain optional
 
 Major outcomes:
 
 * canonical RFCs drafted for xarray mapping and NetCDF persistence;
 * portable same-dimension coordinates support merged;
 * portable string-label subset support merged;
-* a substantial subset of the xarray / NetCDF round-trip path now exists.
+* portable scientific identity fields now preserved, including `name`, `title`,
+  and `description`;
+* portable provenance fields now preserved, including `author`, `origin`,
+  `created`, `modified`, `acquisition_date`, and textual `history`;
+* a tracked maintainer reference now exists under
+  `maintainers/architecture/portable-persistence-model.md`.
 
-Current priority: Active follow-up and contract synchronization.
+Current priority: Closed as a baseline implementation campaign; future work is
+limited to optional portable extensions and broader xarray/NetCDF RFC
+synchronization.
 
 ---
 
@@ -410,9 +417,11 @@ definition.
 Remaining follow-up work:
 
 * result provenance;
-* portable metadata subset clarification;
 * reader cleanup/alignment;
-* metadata implementation alignment with the accepted contracts.
+* metadata implementation alignment outside the now-implemented portable
+  subset baseline;
+* optional portable extensions such as `filename` or label-only coordinates
+  only if maintainers decide they are worth standardizing.
 
 ---
 

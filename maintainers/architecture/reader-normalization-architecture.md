@@ -18,6 +18,10 @@ convenience and not by format-specific habit.
 Future reader contributors should consult this note first, then the underlying
 RFCs if they need decision history.
 
+For what the current portable xarray / NetCDF layer actually preserves after
+runtime normalization, see
+[`portable-persistence-model.md`](portable-persistence-model.md).
+
 ## Normalization Targets
 
 Imported information has a small set of valid destinations:

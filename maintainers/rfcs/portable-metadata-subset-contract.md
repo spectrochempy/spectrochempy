@@ -2,9 +2,26 @@
 
 ## Status
 
-Proposed Maintainer RFC.
+Implemented Maintainer RFC.
 
-This document is conceptual and normative in intent.
+This document remains normative in intent.
+
+The primary maintainer reference for the currently implemented portable
+surface is now:
+
+- [`../architecture/portable-persistence-model.md`](../architecture/portable-persistence-model.md)
+
+The contract is implemented for the maintained portable subset adopted in the
+xarray / NetCDF path.
+
+Remaining optional or future-extension topics are:
+
+- `filename` (`MAY preserve`);
+- label-only coordinates (`MAY preserve`);
+- stable auxiliary coordinate naming beyond the current narrow carrier model;
+- richer `CoordSet` topology/reference identity (`RUNTIME ONLY`);
+- richer label forms beyond the current textual subset;
+- result-object persistence.
 
 It defines the maintainer-level contract for one question:
 
@@ -89,7 +106,7 @@ Outside scope:
 
 ## 2. Part 1 — Current Portable Surface
 
-This section describes current behavior, not intended behavior.
+This section describes the current implemented behavior.
 
 ### 2.1 Preserved today
 
@@ -100,8 +117,16 @@ Current xarray / NetCDF round-trips preserve:
 - same-dimension auxiliary coordinates in the current narrow carrier model;
 - data units;
 - coordinate units;
+- coordinate titles;
 - dataset `name`;
 - dataset `title`;
+- dataset `description`;
+- dataset `author`;
+- dataset `origin`;
+- dataset `created`;
+- dataset `modified`;
+- dataset `acquisition_date`;
+- dataset `history`;
 - masks;
 - JSON-compatible `Meta`;
 - a narrow string-label subset on coordinates;
@@ -122,20 +147,17 @@ Current portable persistence partially preserves:
 - metadata:
   - only JSON-compatible `Meta` payloads survive;
   - non-JSON-compatible payloads are skipped rather than normalized.
+- reader/vendor/plugin metadata:
+  - survives when already carried as JSON-compatible `Meta`;
+  - has no dedicated typed portable mapping beyond that channel.
 
 ### 2.3 Not preserved today
 
 Current portable persistence does not preserve, as a maintained round-trip
 contract:
 
-- `description`;
-- `author`;
-- `origin`;
 - `filename`;
-- `created`;
-- `modified`;
-- `acquisition_date`;
-- `history`;
+- label-only coordinates;
 - multi-row labels;
 - non-string labels;
 - richer `CoordSet.references` semantics;
@@ -144,14 +166,11 @@ contract:
 
 ### 2.4 Current diagnosis
 
-The current portable surface is coherent but narrower than the current
-maintainer architecture.
+The current portable surface is now broadly aligned with this contract.
 
-This RFC does not treat that narrowness as a bug by itself.
-
-The architectural problem is not that portable persistence is narrow. The
-problem is that the boundary is not yet stated precisely enough to guide
-future implementation and review.
+The remaining open items are mostly optional (`MAY preserve`) extensions or
+deliberate runtime-only boundaries rather than missing core portable
+requirements.
 
 ## 3. Part 2 — Portability Principles
 
@@ -781,8 +800,9 @@ This RFC does not prescribe an implementation sequence.
 
 ### Documentation only
 
-- Update architecture notes once the portable subset is implemented and
-  stabilized.
+- Maintain
+  [`../architecture/portable-persistence-model.md`](../architecture/portable-persistence-model.md)
+  as the tracked reference for the implemented portable surface.
 - Synchronize the xarray and NetCDF RFCs with any final naming or status
   changes that follow acceptance of this contract.
 
@@ -795,10 +815,12 @@ This RFC does not prescribe an implementation sequence.
 
 ### Small implementation alignment
 
-- Extend xarray export/import to preserve the accepted typed metadata subset.
-- Extend NetCDF mapping to preserve the accepted textual provenance subset.
-- Align portable warnings and skips with the accepted subset rather than the
-  current ad hoc behavior.
+- Consider whether `filename` should remain intentionally out of scope or gain
+  an optional portable mapping.
+- Consider whether label-only coordinates should be promoted from optional
+  extension to implemented portable support.
+- Consider whether any stable auxiliary-coordinate naming guarantee is worth
+  elevating into the maintained portable contract.
 
 ### Future RFCs
 
@@ -813,9 +835,10 @@ This RFC does not prescribe an implementation sequence.
 
 ### Future architecture notes
 
-- Portable persistence profile for metadata and provenance.
-- Maintainer guidance on how to classify runtime-only versus portable
-  metadata during reader or persistence work.
+- Historical note: this promotion has now been completed through
+  [`../architecture/portable-persistence-model.md`](../architecture/portable-persistence-model.md).
+- Further notes are only needed if portable scope expands beyond the current
+  implemented subset.
 
 ### Future implementation campaigns
 
