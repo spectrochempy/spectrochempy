@@ -452,6 +452,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         self._created = utcnow()
         self.description = kwargs.pop("description", "")
         self.author = kwargs.pop("author", get_user_and_node())
+        self.origin = kwargs.pop("origin", "")
 
         history = kwargs.pop("history", None)
         if history is not None:
