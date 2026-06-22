@@ -35,9 +35,7 @@ New Features
   (mixed types, datetime, multi-row) trigger an explicit
   :class:`~spectrochempy.utils._logging.warning_` instead of silent
   omission. Portable history is persisted as a stable human-readable textual
-  event trail through the same xarray-backed NetCDF path. Non-empty ``origin``
-  values are honored by the ``NDDataset`` constructor and restored by both
-  portable import paths. (:issue:`1227`)
+  event trail through the same xarray-backed NetCDF path. (:issue:`1227`)
 
 .. section
 
@@ -50,6 +48,11 @@ Bug Fixes
   derived quantity is clearly identified. Units are kept as-is and
   coordinates are preserved, consistent with the index-based
   Savitzky-Golay path that does not validate even spacing. (:issue:`1095`)
+
+- Fixed ``NDDataset`` ``origin`` preservation. Non-empty ``origin`` values are
+  now honored by the constructor, preserved when constructing a dataset from an
+  existing dataset, and restored through the portable xarray/NetCDF import
+  paths. (:issue:`1227`)
 
 - ``Coord`` labels are no longer silently dropped when a labeled
   ``Coord`` is copied into a ``CoordSet`` (e.g.
