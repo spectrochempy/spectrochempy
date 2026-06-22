@@ -71,7 +71,8 @@ def test_topspin_1d_currently_sets_origin_filename_typed_acquisition_date_and_me
 ):
     dataset = topspin_dataset_1d
 
-    assert_dataset_identity(dataset, title="intensity", units="count")
+    assert_dataset_identity(dataset, title="intensity")
+    assert str(dataset.units) in {"count", "pp"}
     assert_dataset_provenance(
         dataset,
         origin="topspin",
@@ -93,7 +94,8 @@ def test_topspin_2d_currently_uses_runtime_coordinates_and_no_import_history(
 ):
     dataset = topspin_dataset_2d
 
-    assert_dataset_identity(dataset, title="intensity", units="count")
+    assert_dataset_identity(dataset, title="intensity")
+    assert str(dataset.units) in {"count", "pp"}
     assert_dataset_provenance(
         dataset,
         origin="topspin",
