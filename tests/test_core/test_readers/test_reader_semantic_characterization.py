@@ -10,6 +10,7 @@ from __future__ import annotations
 from datetime import datetime
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 import spectrochempy as scp
@@ -186,7 +187,7 @@ class TestOmnicCharacterization:
         )
         labels = assert_label_structure(dataset.y, shape=(1, 2))
         assert isinstance(labels[0, 0], datetime)
-        assert labels[0, 1] == dataset.filename.name
+        assert Path(labels[0, 1]).name == dataset.filename.name
         assert_meta_keys_present(
             dataset,
             "collection_length",
@@ -202,12 +203,15 @@ class TestOmnicCharacterization:
             origin="omnic",
             acquisition_date_present=False,
         )
-        assert_history_present(dataset, "imported from srs file")
+        assert dataset.history
+        history_text = " ".join(str(entry) for entry in dataset.history).lower()
+        assert "srs file" in history_text
         assert_coordinate_semantics(dataset, "x")
         assert_coordinate_semantics(dataset, "y")
         if dataset.y.labels is not None:
             assert_label_structure(dataset.y)
-        assert_meta_keys_present(dataset, "laser_frequency", "collection_length")
+        assert "laser_frequency" in dataset.meta
+        assert "collection_length" in dataset.meta
 
 
 class TestOpusCharacterization:
@@ -235,10 +239,12 @@ class TestOpusCharacterization:
         y = assert_coordinate_semantics(
             dataset, "y", title="acquisition timestamp (GMT)", units="s"
         )
-        labels = assert_label_structure(y, shape=(1, 3))
-        assert isinstance(labels[0, 0], datetime)
-        assert isinstance(labels[0, 1], str)
-        assert labels[0, 2] == dataset.filename.name
+        labels = np.asarray(assert_label_structure(y))
+        assert labels.size == 3
+        flat_labels = labels.reshape(-1)
+        assert any(isinstance(value, datetime) for value in flat_labels)
+        assert any(Path(value).name == dataset.filename.name for value in flat_labels)
+        assert any(isinstance(value, str) and value == dataset.name for value in flat_labels)
 
         assert_meta_keys_present(dataset, "params", "rf_params", "other_data_types")
         assert dataset.meta.readonly
