@@ -139,11 +139,51 @@ def _restore_portable_datetime(value):
     return datetime.fromisoformat(value)
 
 
+def _serialize_portable_history(history) -> list[str] | None:
+    """Return a portable textual history payload or ``None`` for empty history."""
+    if not history:
+        return None
+    if not isinstance(history, list):
+        raise TypeError(
+            f"Portable history must be exported as a list, got {type(history).__name__}"
+        )
+    for entry in history:
+        if not isinstance(entry, str):
+            raise TypeError(
+                "Portable history entries must be strings, "
+                f"got {type(entry).__name__}"
+            )
+    return list(history)
+
+
+def _restore_portable_history(value):
+    """Return internal history tuples restored from portable textual content."""
+    if value is None:
+        return None
+    if not isinstance(value, list):
+        raise TypeError(
+            f"Portable history attr must be a list, got {type(value).__name__}"
+        )
+
+    restored = []
+    for entry in value:
+        if not isinstance(entry, str):
+            raise TypeError(
+                "Portable history entries must be strings, "
+                f"got {type(entry).__name__}"
+            )
+        date_text, separator, message = entry.partition("> ")
+        if separator != "> " or not message:
+            raise ValueError("Portable history entry must use '<timestamp> <text>'")
+        restored.append((datetime.fromisoformat(date_text), message))
+    return restored
+
+
 def _prepare_xarray_dataset_for_netcdf(dataset):
     """Convert a canonical xarray Dataset into a NetCDF-safe representation."""
     xds = dataset.copy(deep=True)
 
-    for attr_name in ("scpy_meta", "scpy_skipped_meta_keys"):
+    for attr_name in ("scpy_meta", "scpy_skipped_meta_keys", "scpy_history"):
         if attr_name in xds.attrs:
             xds.attrs[attr_name] = json.dumps(xds.attrs[attr_name], sort_keys=True)
 
@@ -191,7 +231,7 @@ def _restore_xarray_dataset_from_netcdf(dataset):
     """Restore the canonical xarray Dataset representation from NetCDF content."""
     xds = dataset.copy(deep=True)
 
-    for attr_name in ("scpy_meta", "scpy_skipped_meta_keys"):
+    for attr_name in ("scpy_meta", "scpy_skipped_meta_keys", "scpy_history"):
         if attr_name in xds.attrs and isinstance(xds.attrs[attr_name], str):
             xds.attrs[attr_name] = json.loads(xds.attrs[attr_name])
 
@@ -1644,6 +1684,9 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             serialized = _serialize_portable_datetime(value)
             if serialized is not None:
                 dataset_attrs[dataset_attr] = serialized
+        serialized_history = _serialize_portable_history(self.history)
+        if serialized_history is not None:
+            dataset_attrs["scpy_history"] = serialized_history
         if meta:
             dataset_attrs["scpy_meta"] = json.loads(json.dumps(meta))
         if skipped_meta_keys:
@@ -1830,6 +1873,12 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             kwargs["mask"] = np.asarray(dataset[mask_name].data, dtype=bool)
 
         result = cls(np.asarray(data_var.data), **kwargs)
+
+        if "scpy_history" in dataset.attrs:
+            with suppress(TypeError, ValueError):
+                result._history = _restore_portable_history(
+                    dataset.attrs["scpy_history"]
+                )
 
         for dataset_attr, internal_attr in (
             ("scpy_created", "_created"),

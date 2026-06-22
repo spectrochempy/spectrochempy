@@ -23,7 +23,7 @@ New Features
   numerical data, default coordinates, units, explicit masks,
   JSON-compatible metadata, complex data (split real/imag convention),
   ``name``/``title``, dataset-level
-  ``description``/``author``/``origin``/``created``/``modified``/``acquisition_date``,
+  ``description``/``author``/``origin``/``created``/``modified``/``acquisition_date``/``history``,
   auxiliary same-dimension ``CoordSet`` coordinates (multiple numeric
   coordinates sharing a dimension), and portable string labels on coordinates
   (1D string-only, ``None`` preserved via metadata marker). Auxiliary
@@ -34,7 +34,8 @@ New Features
   ``scpy_coord_role="label"`` and restored on import. Non-exportable labels
   (mixed types, datetime, multi-row) trigger an explicit
   :class:`~spectrochempy.utils._logging.warning_` instead of silent
-  omission. (:issue:`1227`)
+  omission. Portable history is persisted as a stable human-readable textual
+  event trail through the same xarray-backed NetCDF path. (:issue:`1227`)
 
 .. section
 

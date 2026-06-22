@@ -29,6 +29,13 @@ def _portable_attr_datetime(value):
     return value.isoformat(sep=" ", timespec="seconds")
 
 
+def _make_history_entries():
+    return [
+        (datetime(2024, 1, 1, 8, 0, 0, tzinfo=UTC), "Imported from instrument"),
+        (datetime(2024, 1, 1, 8, 30, 0, tzinfo=UTC), "Baseline corrected"),
+    ]
+
+
 def _make_dataset(
     data=None,
     *,
@@ -87,6 +94,16 @@ def test_to_xarray_returns_dataset():
     assert xds.attrs["scpy_modified"] == _portable_attr_datetime(ds._modified)
 
 
+def test_to_xarray_exports_history_as_portable_text_list():
+    ds = _make_dataset()
+    ds._history = _make_history_entries()
+    ds._modified = datetime(2024, 1, 2, 6, 7, 8, tzinfo=UTC)
+
+    xds = ds.to_xarray()
+
+    assert xds.attrs["scpy_history"] == ds.history
+
+
 def test_xarray_roundtrip_preserves_numerical_data_dims_and_coordinates():
     ds = _make_dataset()
 
@@ -101,6 +118,8 @@ def test_xarray_roundtrip_preserves_numerical_data_dims_and_coordinates():
 
 def test_xarray_roundtrip_preserves_units_identity_and_selected_provenance():
     ds = _make_dataset(acquisition_date=datetime(2024, 1, 3, 9, 10, 11, tzinfo=UTC))
+    ds._history = _make_history_entries()
+    ds._modified = datetime(2024, 1, 2, 6, 7, 8, tzinfo=UTC)
 
     xds = ds.to_xarray()
     rebuilt = NDDataset.from_xarray(xds)
@@ -115,8 +134,39 @@ def test_xarray_roundtrip_preserves_units_identity_and_selected_provenance():
     assert rebuilt.created == ds.created
     assert rebuilt.modified == ds.modified
     assert rebuilt.acquisition_date == ds.acquisition_date
+    assert rebuilt.history == ds.history
     assert str(rebuilt.coord("x").units) == str(ds.coord("x").units)
     assert rebuilt.coord("x").title == ds.coord("x").title
+
+
+def test_xarray_roundtrip_preserves_empty_history_without_emitting_attr():
+    ds = _make_dataset()
+
+    xds = ds.to_xarray()
+    rebuilt = NDDataset.from_xarray(xds)
+
+    assert "scpy_history" not in xds.attrs
+    assert rebuilt.history == []
+
+
+def test_xarray_roundtrip_preserves_single_history_entry():
+    ds = _make_dataset()
+    ds._history = _make_history_entries()[:1]
+    ds._modified = datetime(2024, 1, 2, 6, 7, 8, tzinfo=UTC)
+
+    rebuilt = NDDataset.from_xarray(ds.to_xarray())
+
+    assert rebuilt.history == ds.history
+
+
+def test_xarray_roundtrip_preserves_multi_entry_history():
+    ds = _make_dataset()
+    ds._history = _make_history_entries()
+    ds._modified = datetime(2024, 1, 2, 6, 7, 8, tzinfo=UTC)
+
+    rebuilt = NDDataset.from_xarray(ds.to_xarray())
+
+    assert rebuilt.history == ds.history
 
 
 def test_xarray_roundtrip_preserves_naive_acquisition_date():
@@ -131,14 +181,17 @@ def test_xarray_roundtrip_preserves_naive_acquisition_date():
 
 def test_from_xarray_restores_modified_after_acquisition_date_side_effect():
     ds = _make_dataset(acquisition_date=datetime(2024, 1, 3, 9, 10, 11, tzinfo=UTC))
+    ds._history = _make_history_entries()
+    ds._modified = datetime(2024, 1, 2, 6, 7, 8, tzinfo=UTC)
 
     xds = ds.to_xarray()
     rebuilt = NDDataset.from_xarray(xds)
 
-    # Restoring acquisition_date can touch _modified through trait observation,
-    # so the portable importer must restore modified last.
+    # Restoring acquisition_date and history can touch _modified through trait
+    # observation, so the portable importer must restore modified last.
     assert rebuilt.modified == ds.modified
     assert rebuilt.acquisition_date == ds.acquisition_date
+    assert rebuilt.history == ds.history
 
 
 def test_from_xarray_missing_timestamp_attrs_keeps_existing_fallback_behavior():
@@ -153,6 +206,18 @@ def test_from_xarray_missing_timestamp_attrs_keeps_existing_fallback_behavior():
     assert rebuilt.created != ds.created
     assert rebuilt.modified != ds.modified
     assert rebuilt.acquisition_date is None
+
+
+def test_from_xarray_missing_history_attr_keeps_existing_fallback_behavior():
+    ds = _make_dataset()
+    ds._history = _make_history_entries()
+    ds._modified = datetime(2024, 1, 2, 6, 7, 8, tzinfo=UTC)
+
+    xds = ds.to_xarray()
+    xds.attrs.pop("scpy_history")
+    rebuilt = NDDataset.from_xarray(xds)
+
+    assert rebuilt.history == []
 
 
 def test_xarray_roundtrip_preserves_json_compatible_metadata():
