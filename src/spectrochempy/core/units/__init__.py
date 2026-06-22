@@ -243,7 +243,7 @@ if globals().get("ur", None) is None:
     ur.define(
         "__wrapped__ = 1",
     )  # <- hack to avoid an error with pytest (doctest activated)
-    ur.define("@alias point = count")
+    ur.define("@alias count = point")
     ur.define("transmittance = 1. / 100. = %")
     ur.define("absolute_transmittance = 1.")
     ur.define("absorbance = 1. = a.u.")
