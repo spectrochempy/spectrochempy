@@ -133,7 +133,7 @@ jobs:
 
       - name: Checkout spectrochempy repository
         if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
