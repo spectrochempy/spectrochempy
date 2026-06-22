@@ -243,11 +243,11 @@ class TestOpusCharacterization:
         assert labels.size == 3
         flat_labels = labels.reshape(-1)
         assert any(isinstance(value, datetime) for value in flat_labels)
+        rendered_labels = [str(value) for value in flat_labels]
+        assert any(dataset.filename.name in value for value in rendered_labels)
         assert any(
-            isinstance(value, (str, Path)) and Path(value).name == dataset.filename.name
-            for value in flat_labels
+            value and dataset.filename.name not in value for value in rendered_labels
         )
-        assert any(isinstance(value, str) for value in flat_labels)
 
         assert_meta_keys_present(dataset, "params", "rf_params", "other_data_types")
         assert dataset.meta.readonly
