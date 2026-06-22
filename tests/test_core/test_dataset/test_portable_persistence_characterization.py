@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from datetime import UTC
 from datetime import datetime
 from pathlib import Path
@@ -110,10 +111,10 @@ def test_to_xarray_currently_exports_aligned_identity_and_selected_provenance():
         "vendor_metadata": {"firmware": "1.2.3", "serial": "abc"},
     }
     assert "scpy_filename" not in xds.attrs
-    assert "scpy_history" not in xds.attrs
+    assert xds.attrs["scpy_history"] == ds.history
 
 
-def test_from_xarray_currently_preserves_aligned_provenance_and_still_loses_other_fields():
+def test_from_xarray_currently_preserves_aligned_provenance_and_only_still_loses_filename():
     ds = _make_portable_metadata_dataset()
 
     rebuilt = NDDataset.from_xarray(ds.to_xarray())
@@ -130,7 +131,7 @@ def test_from_xarray_currently_preserves_aligned_provenance_and_still_loses_othe
     assert rebuilt.modified == ds.modified
     assert rebuilt.acquisition_date == ds.acquisition_date
     assert rebuilt.filename == Path("portable_demo.scp")
-    assert rebuilt.history == []
+    assert rebuilt.history == ds.history
     assert rebuilt.meta["nested"] == ds.meta["nested"]
     assert rebuilt.meta["reader_metadata"] == ds.meta["reader_metadata"]
     assert rebuilt.meta["vendor_metadata"] == ds.meta["vendor_metadata"]
@@ -199,7 +200,7 @@ def test_from_xarray_currently_preserves_nullable_text_labels():
     assert list(rebuilt.coord("x").labels) == ["A", None, "C"]
 
 
-def test_to_netcdf_and_from_netcdf_currently_preserve_aligned_provenance_and_still_lose_other_fields(
+def test_to_netcdf_and_from_netcdf_currently_preserve_aligned_provenance_and_only_still_lose_filename(
     tmp_path,
 ):
     ds = _make_portable_metadata_dataset()
@@ -220,13 +221,13 @@ def test_to_netcdf_and_from_netcdf_currently_preserve_aligned_provenance_and_sti
     assert rebuilt.modified == ds.modified
     assert rebuilt.acquisition_date == ds.acquisition_date
     assert rebuilt.filename == Path("portable_demo.scp")
-    assert rebuilt.history == []
+    assert rebuilt.history == ds.history
     assert rebuilt.meta["nested"] == ds.meta["nested"]
     assert rebuilt.meta["reader_metadata"] == ds.meta["reader_metadata"]
     assert rebuilt.meta["vendor_metadata"] == ds.meta["vendor_metadata"]
 
 
-def test_netcdf_currently_omits_only_remaining_unaligned_provenance_attrs(tmp_path):
+def test_netcdf_currently_omits_only_remaining_unaligned_filename_attr(tmp_path):
     ds = _make_portable_metadata_dataset()
     filename = tmp_path / "portable_demo.nc"
 
@@ -243,8 +244,8 @@ def test_netcdf_currently_omits_only_remaining_unaligned_provenance_attrs(tmp_pa
         assert opened.attrs["scpy_acquisition_date"] == _portable_attr_datetime(
             ds._acquisition_date
         )
+        assert opened.attrs["scpy_history"] == json.dumps(ds.history, sort_keys=True)
         assert "scpy_filename" not in opened.attrs
-        assert "scpy_history" not in opened.attrs
 
 
 def test_from_netcdf_currently_transforms_same_dim_auxiliary_coordinate_names(tmp_path):

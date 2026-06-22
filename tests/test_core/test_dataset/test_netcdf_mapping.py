@@ -5,6 +5,7 @@
 # ======================================================================================
 
 import importlib.util
+import json
 from datetime import UTC
 from datetime import datetime
 
@@ -26,6 +27,13 @@ def _portable_attr_datetime(value):
     if value is None:
         return None
     return value.isoformat(sep=" ", timespec="seconds")
+
+
+def _make_history_entries():
+    return [
+        (datetime(2024, 1, 1, 8, 0, 0, tzinfo=UTC), "Imported from instrument"),
+        (datetime(2024, 1, 1, 8, 30, 0, tzinfo=UTC), "Baseline corrected"),
+    ]
 
 
 def _make_dataset(data=None, *, complex_data=False, acquisition_date=None):
@@ -79,6 +87,8 @@ def test_netcdf_roundtrip_preserves_coordinates_identity_provenance_and_metadata
     tmp_path,
 ):
     ds = _make_dataset(acquisition_date=datetime(2024, 1, 3, 9, 10, 11, tzinfo=UTC))
+    ds._history = _make_history_entries()
+    ds._modified = datetime(2024, 1, 2, 6, 7, 8, tzinfo=UTC)
     filename = tmp_path / "dataset.nc"
 
     ds.to_netcdf(filename)
@@ -99,6 +109,47 @@ def test_netcdf_roundtrip_preserves_coordinates_identity_provenance_and_metadata
     assert rebuilt.created == ds.created
     assert rebuilt.modified == ds.modified
     assert rebuilt.acquisition_date == ds.acquisition_date
+    assert rebuilt.history == ds.history
+
+
+@pytest.mark.skipif(xr is None, reason="xarray is not installed")
+def test_netcdf_roundtrip_preserves_empty_history_without_emitting_attr(tmp_path):
+    ds = _make_dataset()
+    filename = tmp_path / "dataset_empty_history.nc"
+
+    ds.to_netcdf(filename)
+    rebuilt = NDDataset.from_netcdf(filename)
+
+    with xr.open_dataset(filename, engine="scipy") as opened:
+        assert "scpy_history" not in opened.attrs
+
+    assert rebuilt.history == []
+
+
+@pytest.mark.skipif(xr is None, reason="xarray is not installed")
+def test_netcdf_roundtrip_preserves_single_history_entry(tmp_path):
+    ds = _make_dataset()
+    ds._history = _make_history_entries()[:1]
+    ds._modified = datetime(2024, 1, 2, 6, 7, 8, tzinfo=UTC)
+    filename = tmp_path / "dataset_single_history.nc"
+
+    ds.to_netcdf(filename)
+    rebuilt = NDDataset.from_netcdf(filename)
+
+    assert rebuilt.history == ds.history
+
+
+@pytest.mark.skipif(xr is None, reason="xarray is not installed")
+def test_netcdf_roundtrip_preserves_multi_entry_history(tmp_path):
+    ds = _make_dataset()
+    ds._history = _make_history_entries()
+    ds._modified = datetime(2024, 1, 2, 6, 7, 8, tzinfo=UTC)
+    filename = tmp_path / "dataset_multi_history.nc"
+
+    ds.to_netcdf(filename)
+    rebuilt = NDDataset.from_netcdf(filename)
+
+    assert rebuilt.history == ds.history
 
 
 @pytest.mark.skipif(xr is None, reason="xarray is not installed")
@@ -124,6 +175,8 @@ def test_netcdf_complex_roundtrip_uses_split_real_imag_convention(tmp_path):
 @pytest.mark.skipif(xr is None, reason="xarray is not installed")
 def test_netcdf_file_is_readable_by_xarray_open_dataset(tmp_path):
     ds = _make_dataset(acquisition_date=datetime(2024, 1, 3, 9, 10, 11, tzinfo=UTC))
+    ds._history = _make_history_entries()
+    ds._modified = datetime(2024, 1, 2, 6, 7, 8, tzinfo=UTC)
     filename = tmp_path / "dataset.nc"
 
     ds.to_netcdf(filename)
@@ -139,6 +192,7 @@ def test_netcdf_file_is_readable_by_xarray_open_dataset(tmp_path):
         assert opened.attrs["scpy_acquisition_date"] == _portable_attr_datetime(
             ds._acquisition_date
         )
+        assert opened.attrs["scpy_history"] == json.dumps(ds.history, sort_keys=True)
         assert opened["spectra"].dims == ("y", "x")
         assert opened["spectra__mask"].dims == ("y", "x")
 
@@ -173,6 +227,22 @@ def test_from_netcdf_missing_timestamp_attrs_keeps_existing_fallback_behavior(tm
     assert rebuilt.created != ds.created
     assert rebuilt.modified != ds.modified
     assert rebuilt.acquisition_date is None
+
+
+@pytest.mark.skipif(xr is None, reason="xarray is not installed")
+def test_from_netcdf_missing_history_attr_keeps_existing_fallback_behavior(tmp_path):
+    ds = _make_dataset()
+    ds._history = _make_history_entries()
+    ds._modified = datetime(2024, 1, 2, 6, 7, 8, tzinfo=UTC)
+    filename = tmp_path / "dataset_without_history_attr.nc"
+
+    xds = ds.to_xarray()
+    xds.attrs.pop("scpy_history")
+    ndmodule._prepare_xarray_dataset_for_netcdf(xds).to_netcdf(filename, engine="scipy")
+
+    rebuilt = NDDataset.from_netcdf(filename)
+
+    assert rebuilt.history == []
 
 
 def _make_same_dim_netcdf_dataset():
