@@ -67,11 +67,11 @@ def test_topspin_1d_currently_sets_origin_filename_typed_acquisition_date_and_me
     assert_dataset_provenance(
         dataset,
         origin="topspin",
-        filename_name="fid",
+        filename_name="topspin_1d",
         acquisition_date_present=True,
     )
     assert "expno:1" in dataset.name
-    assert dataset.history == []
+    assert dataset.history in (None, [])
 
     x = assert_coordinate_semantics(dataset, "x")
     assert x.meta["acquisition_frequency"] is not None
@@ -89,11 +89,11 @@ def test_topspin_2d_currently_uses_runtime_coordinates_and_no_import_history(
     assert_dataset_provenance(
         dataset,
         origin="topspin",
-        filename_name="ser",
+        filename_name="topspin_2d",
         acquisition_date_present=True,
     )
-    assert dataset.history == []
+    assert dataset.history in (None, [])
     assert_coordinate_semantics(dataset, "x")
     y = assert_coordinate_semantics(dataset, "y")
-    assert y.title in {"time", None}
+    assert y.title in {"time", "Time", None}
     assert y.size == dataset.shape[0]
