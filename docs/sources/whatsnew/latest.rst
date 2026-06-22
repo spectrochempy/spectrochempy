@@ -142,6 +142,15 @@ Bug Fixes
   variable instead of a literal string; and invalid ``return_ifg`` values
   now produce a clear warning. (:issue:`1144`) (PR by @gaoflow)
 
+- The TopSpin NMR reader now records an explicit ``Imported from TopSpin
+  dataset`` history event on successful import, aligning with other
+  high-value readers that already emit import-history entries.
+
+- JCAMP ``sortbydate`` now reorders spectra by acquisition timestamp
+  (``dim="y"``) instead of sorting wavenumbers (``dim="x"``), matching the
+  intended ``"Sorted by date"`` history message and the OMNIC SPG reference
+  pattern.
+
 Breaking Changes
 ~~~~~~~~~~~~~~~~
 

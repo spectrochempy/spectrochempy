@@ -20,6 +20,7 @@ from tests.test_core.test_readers._reader_semantic_helpers import (
 from tests.test_core.test_readers._reader_semantic_helpers import (
     assert_dataset_provenance,
 )
+from tests.test_core.test_readers._reader_semantic_helpers import assert_history_present
 from tests.test_core.test_readers._reader_semantic_helpers import (
     assert_meta_keys_present,
 )
@@ -80,7 +81,7 @@ def test_topspin_1d_currently_sets_origin_filename_typed_acquisition_date_and_me
     )
     _assert_topspin_time_provenance(dataset)
     assert "expno:1" in dataset.name
-    assert dataset.history in (None, [])
+    assert_history_present(dataset, "Imported from TopSpin dataset")
 
     x = assert_coordinate_semantics(dataset, "x")
     assert x.meta["acquisition_frequency"] is not None
@@ -89,7 +90,7 @@ def test_topspin_1d_currently_sets_origin_filename_typed_acquisition_date_and_me
 
 
 @pytest.mark.data
-def test_topspin_2d_currently_uses_runtime_coordinates_and_no_import_history(
+def test_topspin_2d_currently_sets_import_history(
     topspin_dataset_2d,
 ):
     dataset = topspin_dataset_2d
@@ -102,7 +103,7 @@ def test_topspin_2d_currently_uses_runtime_coordinates_and_no_import_history(
         filename_name="topspin_2d",
     )
     _assert_topspin_time_provenance(dataset)
-    assert dataset.history in (None, [])
+    assert_history_present(dataset, "Imported from TopSpin dataset")
     assert_coordinate_semantics(dataset, "x")
     y = assert_coordinate_semantics(dataset, "y")
     assert y.title in {"time", "Time", "F1 acquisition time", None}

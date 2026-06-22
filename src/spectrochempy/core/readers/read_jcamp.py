@@ -383,7 +383,7 @@ def _read_jdx(*args, **kwargs):
     dataset.history = "Imported from jdx file"
 
     if sortbydate and nspec > 1:
-        dataset.sort(dim="x", inplace=True)
+        dataset.sort(dim="y", inplace=True)
         dataset.history = "Sorted by date"
     # Todo: make sure that the lowest index correspond to the largest wavenumber
     #  for compatibility with dataset created by read_omnic:
