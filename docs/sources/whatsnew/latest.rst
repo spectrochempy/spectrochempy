@@ -42,6 +42,11 @@ Bug Fixes
   coordinates are preserved, consistent with the index-based
   Savitzky-Golay path that does not validate even spacing. (:issue:`1095`)
 
+- Fixed ``NDDataset`` ``origin`` preservation. Non-empty ``origin`` values are
+  now honored by the constructor, preserved when constructing a dataset from an
+  existing dataset, and restored through the portable xarray/NetCDF import
+  paths. (:issue:`1227`)
+
 - ``Coord`` labels are no longer silently dropped when a labeled
   ``Coord`` is copied into a ``CoordSet`` (e.g.
   ``CoordSet(labeled_coord)``). The ``CoordSet`` constructor creates a copy
