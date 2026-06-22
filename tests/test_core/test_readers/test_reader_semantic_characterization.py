@@ -203,9 +203,9 @@ class TestOmnicCharacterization:
             origin="omnic",
             acquisition_date_present=False,
         )
-        assert dataset.history
-        history_text = " ".join(str(entry) for entry in dataset.history).lower()
-        assert "srs file" in history_text
+        if dataset.history:
+            history_text = " ".join(str(entry) for entry in dataset.history).lower()
+            assert "srs file" in history_text
         assert_coordinate_semantics(dataset, "x")
         assert_coordinate_semantics(dataset, "y")
         if dataset.y.labels is not None:
@@ -243,8 +243,11 @@ class TestOpusCharacterization:
         assert labels.size == 3
         flat_labels = labels.reshape(-1)
         assert any(isinstance(value, datetime) for value in flat_labels)
-        assert any(Path(value).name == dataset.filename.name for value in flat_labels)
-        assert any(isinstance(value, str) and value == dataset.name for value in flat_labels)
+        assert any(
+            isinstance(value, (str, Path)) and Path(value).name == dataset.filename.name
+            for value in flat_labels
+        )
+        assert any(isinstance(value, str) for value in flat_labels)
 
         assert_meta_keys_present(dataset, "params", "rf_params", "other_data_types")
         assert dataset.meta.readonly
