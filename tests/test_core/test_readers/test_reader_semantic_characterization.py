@@ -17,6 +17,7 @@ import spectrochempy as scp
 from spectrochempy.application.preferences import preferences as prefs
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.readers.read_labspec import _read_txt
+from spectrochempy.utils.datetimeutils import UTC
 from tests.test_core.test_readers._reader_semantic_helpers import (
     assert_coordinate_semantics,
 )
@@ -107,6 +108,25 @@ def jcamp_single_with_owner():
 
 
 @pytest.fixture
+def jcamp_single_without_date():
+    content = """##TITLE=single_no_date
+##JCAMP-DX=5.01
+##DATA TYPE=INFRARED SPECTRUM
+##XUNITS=1/CM
+##YUNITS=ABSORBANCE
+##FIRSTX=4000.0
+##LASTX=3997.0
+##XFACTOR=1.0
+##YFACTOR=1.0
+##NPOINTS=4
+##XYDATA=(X++(Y..Y))
+4000.0 1.0 0.9 0.8 0.7
+##END
+"""
+    return scp.read_jcamp({"single_no_date.jdx": content.encode("utf8")})
+
+
+@pytest.fixture
 def csv_omnic_dataset():
     content = "4000.0,0.5\n4001.0,0.6\n4002.0,0.7\n"
     return scp.read_csv(
@@ -160,7 +180,7 @@ class TestOmnicCharacterization:
             filename_name="wodger.spg",
             origin="",
             description_contains="Omnic title: wodger.spg",
-            acquisition_date_present=False,
+            acquisition_date_present=True,
         )
         assert_history_present(dataset, "Imported from spg file", "Sorted by date")
 
@@ -179,7 +199,7 @@ class TestOmnicCharacterization:
         assert_dataset_provenance(
             dataset,
             origin="",
-            acquisition_date_present=False,
+            acquisition_date_present=True,
         )
         assert_history_present(dataset, "Imported from spa file")
         assert_coordinate_semantics(
@@ -231,7 +251,7 @@ class TestOpusCharacterization:
             filename_name="test.0000",
             origin="opus-AB",
             description_contains="opus files",
-            acquisition_date_present=False,
+            acquisition_date_present=True,
         )
         assert_history_present(dataset, "import from opus files")
 
@@ -254,7 +274,7 @@ class TestOpusCharacterization:
         assert_dataset_provenance(
             dataset,
             origin="opus-AB",
-            acquisition_date_present=False,
+            acquisition_date_present=True,
         )
         assert_history_present(dataset, "import from opus files")
         assert_coordinate_semantics(dataset, "x", title="wavenumber", units="cm⁻¹")
@@ -281,8 +301,9 @@ class TestJcampCharacterization:
             filename_name="semantic_linked.jdx",
             origin="omnic",
             description_contains="Dataset from jdx file: 'IR_2D'",
-            acquisition_date_present=False,
+            acquisition_date_present=True,
         )
+        assert dataset._acquisition_date == datetime(2016, 7, 6, 19, 3, 14, tzinfo=UTC)
         assert_history_present(dataset, "Imported from jdx file", "Sorted by date")
         assert_coordinate_semantics(dataset, "x", title="wavenumbers", units="cm⁻¹")
         y = assert_coordinate_semantics(
@@ -308,11 +329,26 @@ class TestJcampCharacterization:
             filename_name="single_semantic.jdx",
             origin="",
             description_contains="Dataset from jdx file: 'single_semantic'",
-            acquisition_date_present=False,
+            acquisition_date_present=True,
         )
+        assert dataset._acquisition_date == datetime(2016, 7, 6, 19, 3, 14, tzinfo=UTC)
         assert dataset.author != "reader-owner"
         assert dataset.y.is_empty
         assert_history_present(dataset, "Imported from jdx file")
+
+    def test_single_jcamp_without_date_keeps_acquisition_date_empty(
+        self, jcamp_single_without_date
+    ):
+        dataset = jcamp_single_without_date
+
+        assert_dataset_provenance(
+            dataset,
+            filename_name="single_no_date.jdx",
+            origin="",
+            description_contains="Dataset from jdx file: 'single_no_date'",
+            acquisition_date_present=False,
+        )
+        assert dataset.y.is_empty
 
 
 class TestCsvCharacterization:
@@ -384,8 +420,9 @@ class TestLabSpecCharacterization:
             filename_name="latin_labspec.txt",
             origin="",
             description_contains="Spectrum acquisition : 2024-01-01 00:00:00",
-            acquisition_date_present=False,
+            acquisition_date_present=True,
         )
+        assert dataset._acquisition_date == datetime(2024, 1, 1, 0, 0, 0)
         assert_history_present(dataset, "Imported from LabSpec6 text file")
 
         assert_coordinate_semantics(dataset, "x", title="Raman shift", units="cm⁻¹")
@@ -401,7 +438,7 @@ class TestLabSpecCharacterization:
         assert_dataset_provenance(
             dataset,
             origin="",
-            acquisition_date_present=False,
+            acquisition_date_present=True,
         )
         assert_history_present(dataset, "Imported from LabSpec6 text file")
         assert_coordinate_semantics(dataset, "x", title="Raman shift", units="cm⁻¹")

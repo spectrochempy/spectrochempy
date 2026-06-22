@@ -122,6 +122,11 @@ class TestOpusMetadata:
         assert acquisition["AQM"].name == "Acquisition Mode"
         assert acquisition["DEL"].value == 0
 
+    def test_single_file_sets_acquisition_date_without_removing_timestamp_axis(self):
+        assert self.dataset.acquisition_date is not None
+        assert self.dataset.y.title == "acquisition timestamp (GMT)"
+        assert str(self.dataset.y.units) == "s"
+
 
 class TestOpusMerging:
     """Test OPUS file merging behavior."""
@@ -196,6 +201,7 @@ class TestOpusAssembledTimeResolved:
         assert dataset.x.title == "wavenumber"
         assert str(dataset.x.units) == "cm^-1"
         assert dataset.units == "absorbance"
+        assert dataset.acquisition_date is not None
 
     def test_sm_series(self):
         """Reading SM type should return sample spectra series."""

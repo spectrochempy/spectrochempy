@@ -209,6 +209,7 @@ def _read_txt(*args, **kwargs):
     dataset.name = filename.stem
     dataset.filename = filename
     dataset.meta = meta
+    dataset.acquisition_date = date_acq
 
     # date_acq is Acquisition date at start (first moment of acquisition)
     dataset.description = "Spectrum acquisition : " + str(date_acq)

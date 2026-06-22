@@ -367,6 +367,9 @@ def _read_jdx(*args, **kwargs):
     else:
         _y = Coord()
     dataset.set_coordset(y=_y, x=_x)
+    valid_dates = [date for date in alldates if date is not None]
+    if valid_dates:
+        dataset.acquisition_date = min(valid_dates)
 
     # Set origin, description and history
     if nspec > 1:

@@ -463,6 +463,12 @@ def _read_opus(*args, **kwargs):
 
     # set dataset's Coordset
     dataset.set_coordset(y=yaxis, x=xaxis)
+    try:
+        dt, _ = _get_timestamp_from(d.params)
+    except (AttributeError, TypeError, ValueError):
+        dt = None
+    if dt is not None:
+        dataset.acquisition_date = dt
 
     # Set name, origin, description and history
     dataset.name = filename.stem
