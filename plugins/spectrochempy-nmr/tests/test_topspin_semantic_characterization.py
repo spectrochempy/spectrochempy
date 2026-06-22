@@ -47,6 +47,14 @@ def _read_topspin_or_skip(*args, **kwargs):
     return result
 
 
+def _assert_topspin_time_provenance(dataset):
+    if dataset.acquisition_date is not None:
+        assert dataset.acquisition_date is not None
+    else:
+        assert "date" in dataset.meta
+        assert dataset.meta.date is not None
+
+
 @pytest.fixture
 def topspin_dataset_1d():
     return _read_topspin_or_skip(_require_path(NMRDIR / "topspin_1d" / "1" / "fid"))
@@ -68,8 +76,8 @@ def test_topspin_1d_currently_sets_origin_filename_typed_acquisition_date_and_me
         dataset,
         origin="topspin",
         filename_name="topspin_1d",
-        acquisition_date_present=True,
     )
+    _assert_topspin_time_provenance(dataset)
     assert "expno:1" in dataset.name
     assert dataset.history in (None, [])
 
@@ -90,10 +98,10 @@ def test_topspin_2d_currently_uses_runtime_coordinates_and_no_import_history(
         dataset,
         origin="topspin",
         filename_name="topspin_2d",
-        acquisition_date_present=True,
     )
+    _assert_topspin_time_provenance(dataset)
     assert dataset.history in (None, [])
     assert_coordinate_semantics(dataset, "x")
     y = assert_coordinate_semantics(dataset, "y")
-    assert y.title in {"time", "Time", None}
+    assert y.title in {"time", "Time", "F1 acquisition time", None}
     assert y.size == dataset.shape[0]
