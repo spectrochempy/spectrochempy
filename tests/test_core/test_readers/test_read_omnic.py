@@ -39,6 +39,7 @@ def test_read_omnic_local_wodger():
         content = fil.read()
     nd2 = scp.read_omnic({filename_wodger: content})
     assert nd1 == nd2
+    assert nd1.origin == "omnic"
     assert nd1.acquisition_date is not None
     assert nd1.y.title == "acquisition timestamp (GMT)"
     assert str(nd1.y.units) == "s"
@@ -69,6 +70,7 @@ def test_read_omnic():
 
     nd = scp.read_spa(IRDATA / "subdir" / "20-50" / "7_CZ0-100_Pd_21.SPA")
     assert str(nd) == "NDDataset: [float64] a.u. (shape: (y:1, x:5549))"
+    assert nd.origin == "omnic"
 
     nd2 = scp.read_omnic(IRDATA / "subdir" / "20-50" / "7_CZ0-100_Pd_21.SPA")
     assert nd2 == nd

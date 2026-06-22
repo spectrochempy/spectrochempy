@@ -127,6 +127,44 @@ def jcamp_single_without_date():
 
 
 @pytest.fixture
+def jcamp_linked_multi_origin_dataset():
+    content = """##TITLE=IR_multi_origin
+##JCAMP-DX=5.01
+##DATA TYPE=LINK
+##BLOCKS=2
+##TITLE=spec_1
+##ORIGIN=omnic
+##LONGDATE=2016/07/06
+##TIME=19:03:14
+##XUNITS=1/CM
+##YUNITS=ABSORBANCE
+##FIRSTX=4000.0
+##LASTX=3997.0
+##XFACTOR=1.0
+##YFACTOR=1.0
+##NPOINTS=4
+##XYDATA=(X++(Y..Y))
+4000.0 1.0 0.9 0.8 0.7
+##END=
+##TITLE=spec_2
+##ORIGIN=labspec
+##LONGDATE=2016/07/06
+##TIME=19:04:14
+##XUNITS=1/CM
+##YUNITS=ABSORBANCE
+##FIRSTX=4000.0
+##LASTX=3997.0
+##XFACTOR=1.0
+##YFACTOR=1.0
+##NPOINTS=4
+##XYDATA=(X++(Y..Y))
+4000.0 0.7 0.6 0.5 0.4
+##END=
+"""
+    return scp.read_jcamp({"linked_multi_origin.jdx": content.encode("utf8")})
+
+
+@pytest.fixture
 def csv_omnic_dataset():
     content = "4000.0,0.5\n4001.0,0.6\n4002.0,0.7\n"
     return scp.read_csv(
@@ -178,7 +216,7 @@ class TestOmnicCharacterization:
         assert_dataset_provenance(
             dataset,
             filename_name="wodger.spg",
-            origin="",
+            origin="omnic",
             description_contains="Omnic title: wodger.spg",
             acquisition_date_present=True,
         )
@@ -193,12 +231,12 @@ class TestOmnicCharacterization:
         assert isinstance(labels[1, 0], datetime)
         assert x.labels is None
 
-    def test_spa_currently_uses_empty_origin_and_label_rows(self, omnic_spa_dataset):
+    def test_spa_uses_omnic_origin_and_label_rows(self, omnic_spa_dataset):
         dataset = omnic_spa_dataset
 
         assert_dataset_provenance(
             dataset,
-            origin="",
+            origin="omnic",
             acquisition_date_present=True,
         )
         assert_history_present(dataset, "Imported from spa file")
@@ -313,7 +351,7 @@ class TestJcampCharacterization:
         assert isinstance(labels[0, 0], datetime)
         assert isinstance(labels[0, 1], str)
 
-    def test_single_jcamp_currently_ignores_owner_and_does_not_set_origin(
+    def test_single_jcamp_preserves_origin_and_keeps_owner_unmapped(
         self, jcamp_single_with_owner
     ):
         dataset = jcamp_single_with_owner
@@ -327,7 +365,7 @@ class TestJcampCharacterization:
         assert_dataset_provenance(
             dataset,
             filename_name="single_semantic.jdx",
-            origin="",
+            origin="omnic",
             description_contains="Dataset from jdx file: 'single_semantic'",
             acquisition_date_present=True,
         )
@@ -335,6 +373,20 @@ class TestJcampCharacterization:
         assert dataset.author != "reader-owner"
         assert dataset.y.is_empty
         assert_history_present(dataset, "Imported from jdx file")
+
+    def test_linked_jcamp_multi_origin_uses_deterministic_join(
+        self, jcamp_linked_multi_origin_dataset
+    ):
+        dataset = jcamp_linked_multi_origin_dataset
+
+        assert_dataset_provenance(
+            dataset,
+            filename_name="linked_multi_origin.jdx",
+            origin="labspec; omnic",
+            description_contains="Dataset from jdx file: 'IR_multi_origin'",
+            acquisition_date_present=True,
+        )
+        assert_history_present(dataset, "Imported from jdx file", "Sorted by date")
 
     def test_single_jcamp_without_date_keeps_acquisition_date_empty(
         self, jcamp_single_without_date
@@ -404,7 +456,7 @@ class TestCsvCharacterization:
 class TestLabSpecCharacterization:
     """Characterize current LabSpec semantic placement."""
 
-    def test_synthetic_labspec_currently_uses_description_for_start_date_and_meta(
+    def test_synthetic_labspec_uses_labspec_origin_description_and_meta(
         self, labspec_synthetic_dataset
     ):
         dataset = labspec_synthetic_dataset
@@ -418,7 +470,7 @@ class TestLabSpecCharacterization:
         assert_dataset_provenance(
             dataset,
             filename_name="latin_labspec.txt",
-            origin="",
+            origin="labspec",
             description_contains="Spectrum acquisition : 2024-01-01 00:00:00",
             acquisition_date_present=True,
         )
@@ -430,14 +482,14 @@ class TestLabSpecCharacterization:
         assert y.labels is None
         assert_meta_keys_present(dataset, "Comment", "Acquired", "Accumulations")
 
-    def test_real_labspec_series_currently_uses_datetime_label_rows(
+    def test_real_labspec_series_uses_labspec_origin_and_datetime_label_rows(
         self, labspec_real_dataset
     ):
         dataset = labspec_real_dataset
 
         assert_dataset_provenance(
             dataset,
-            origin="",
+            origin="labspec",
             acquisition_date_present=True,
         )
         assert_history_present(dataset, "Imported from LabSpec6 text file")

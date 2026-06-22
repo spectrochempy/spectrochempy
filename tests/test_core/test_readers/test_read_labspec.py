@@ -60,6 +60,7 @@ def test_read_labspec_latin1_content():
 
     assert nd.shape == (1, 2)
     assert nd.meta["Comment"] == "20°C"
+    assert nd.origin == "labspec"
     assert nd._acquisition_date == datetime(2024, 1, 1, 0, 0, 0)
     assert nd.y.title == "Time"
     assert str(nd.y.units) == "s"
