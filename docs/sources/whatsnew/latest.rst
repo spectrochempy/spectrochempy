@@ -18,7 +18,8 @@ New Features
 - Added portable ``NDDataset`` ↔ xarray/NetCDF round-trip support for
   numerical data, default coordinates, units, explicit masks,
   JSON-compatible metadata, complex data (split real/imag convention),
-  ``name``/``title``, dataset-level ``description``/``author``/``origin``,
+  ``name``/``title``, dataset-level
+  ``description``/``author``/``origin``/``created``/``modified``/``acquisition_date``,
   auxiliary same-dimension ``CoordSet`` coordinates (multiple numeric
   coordinates sharing a dimension), and portable string labels on coordinates
   (1D string-only, ``None`` preserved via metadata marker). Auxiliary
