@@ -5,9 +5,12 @@
 # ======================================================================================
 # ruff: noqa
 
+from datetime import datetime
+
 import numpy as np
 
 from spectrochempy import read_jcamp, read, Coord, NDDataset
+from spectrochempy.utils.datetimeutils import UTC
 
 
 def test_read_jcamp(JDX_2D):
@@ -15,6 +18,7 @@ def test_read_jcamp(JDX_2D):
     Y = read_jcamp({"some2Dspectra.jdx": JDX_2D.encode("utf8")})
     assert str(Y.coordset) == "CoordSet: [x:wavenumbers, y:acquisition timestamp (GMT)]"
     assert Y.shape == (3, 20)
+    assert Y._acquisition_date == datetime(2016, 7, 6, 19, 3, 14, tzinfo=UTC)
 
     f = Y.write_jcamp("2D.jdx", confirm=False)
     Y = read(f)
@@ -23,6 +27,47 @@ def test_read_jcamp(JDX_2D):
     assert Y.name == "IR_2D"
 
     f.unlink()
+
+
+def test_read_jcamp_single_spectrum_sets_acquisition_date():
+    jdx = """##TITLE=single_semantic
+##JCAMP-DX=5.01
+##DATA TYPE=INFRARED SPECTRUM
+##LONGDATE=2016/07/06
+##TIME=19:03:14
+##XUNITS=1/CM
+##YUNITS=ABSORBANCE
+##FIRSTX=4000.0
+##LASTX=3997.0
+##XFACTOR=1.0
+##YFACTOR=1.0
+##NPOINTS=4
+##XYDATA=(X++(Y..Y))
+    4000.0 1.0 0.9 0.8 0.7
+##END
+"""
+    ds = read_jcamp({"single_semantic.jdx": jdx.encode("utf8")})
+    assert ds._acquisition_date == datetime(2016, 7, 6, 19, 3, 14, tzinfo=UTC)
+    assert ds.y.is_empty
+
+
+def test_read_jcamp_without_date_keeps_acquisition_date_empty():
+    jdx = """##TITLE=no_date
+##JCAMP-DX=5.01
+##DATA TYPE=INFRARED SPECTRUM
+##XUNITS=1/CM
+##YUNITS=ABSORBANCE
+##FIRSTX=4000.0
+##LASTX=3997.0
+##XFACTOR=1.0
+##YFACTOR=1.0
+##NPOINTS=4
+##XYDATA=(X++(Y..Y))
+4000.0 1.0 0.9 0.8 0.7
+##END
+"""
+    ds = read_jcamp({"no_date.jdx": jdx.encode("utf8")})
+    assert ds.acquisition_date is None
 
 
 def test_read_jcamp_transmittance_units():

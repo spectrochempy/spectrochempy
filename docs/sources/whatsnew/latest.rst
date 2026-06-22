@@ -47,6 +47,11 @@ Bug Fixes
   existing dataset, and restored through the portable xarray/NetCDF import
   paths. (:issue:`1227`)
 
+- OMNIC, OPUS, JCAMP, and LabSpec readers now populate dataset-level
+  ``acquisition_date`` when reliable acquisition timestamps are already
+  available from the source data, while preserving the existing
+  coordinate-based time representations.
+
 - TopSpin/NMR datasets whose reader assigns intensity units as ``count`` now
   render that canonical unit consistently in dataset summaries and related
   displays, instead of unexpectedly showing ``pp``.

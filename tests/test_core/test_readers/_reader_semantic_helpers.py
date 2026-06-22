@@ -37,7 +37,8 @@ def assert_dataset_provenance(
     if description_contains is not None:
         assert description_contains in dataset.description
     if acquisition_date_present is True:
-        assert isinstance(dataset.acquisition_date, datetime)
+        assert dataset.acquisition_date is not None
+        assert isinstance(datetime.fromisoformat(dataset.acquisition_date), datetime)
     elif acquisition_date_present is False:
         assert dataset.acquisition_date is None
 

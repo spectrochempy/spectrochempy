@@ -39,6 +39,9 @@ def test_read_omnic_local_wodger():
         content = fil.read()
     nd2 = scp.read_omnic({filename_wodger: content})
     assert nd1 == nd2
+    assert nd1.acquisition_date is not None
+    assert nd1.y.title == "acquisition timestamp (GMT)"
+    assert str(nd1.y.units) == "s"
 
 
 @pytest.mark.usefixtures("_skip_if_no_testdata")
