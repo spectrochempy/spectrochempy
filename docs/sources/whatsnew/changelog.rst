@@ -54,6 +54,10 @@ Bug Fixes
   existing dataset, and restored through the portable xarray/NetCDF import
   paths. (:issue:`1227`)
 
+- TopSpin/NMR datasets whose reader assigns intensity units as ``count`` now
+  render that canonical unit consistently in dataset summaries and related
+  displays, instead of unexpectedly showing ``pp``.
+
 - ``Coord`` labels are no longer silently dropped when a labeled
   ``Coord`` is copied into a ``CoordSet`` (e.g.
   ``CoordSet(labeled_coord)``). The ``CoordSet`` constructor creates a copy

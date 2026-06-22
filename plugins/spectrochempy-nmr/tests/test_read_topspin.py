@@ -44,23 +44,23 @@ def _has_readdir_nmr_data():
 @pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
 def test_read_topspin():
     nd = _read_topspin_or_skip(_require_path(nmrdir / "exam2d_HC/3/pdata/1/2rr"))
-    assert str(nd) == "NDDataset: [quaternion] pp (shape: (y:1024, x:1024))"
+    assert str(nd) == "NDDataset: [quaternion] count (shape: (y:1024, x:1024))"
     assert nd.y.size == 1024
     assert nd.x.size == 1024
 
     nd = _read_topspin_or_skip(_require_path(nmrdir / "topspin_1d/1/fid"))
-    assert str(nd) == "NDDataset: [complex128] pp (size: 12411)"
+    assert str(nd) == "NDDataset: [complex128] count (size: 12411)"
     assert nd.x.size == 12411
 
     nd = _read_topspin_or_skip(_require_path(nmrdir / "topspin_1d/1/pdata/1/1r"))
-    assert str(nd) == "NDDataset: [complex128] pp (size: 16384)"
+    assert str(nd) == "NDDataset: [complex128] count (size: 16384)"
     assert nd.x.size == 16384
 
     nd = _read_topspin_or_skip(_require_path(nmrdir / "topspin_2d/1/ser"))
-    assert str(nd) == "NDDataset: [quaternion] pp (shape: (y:96, x:474))"
+    assert str(nd) == "NDDataset: [quaternion] count (shape: (y:96, x:474))"
 
     nd = _read_topspin_or_skip(_require_path(nmrdir / "topspin_2d/1/pdata/1/2rr"))
-    assert str(nd) == "NDDataset: [quaternion] pp (shape: (y:1024, x:2048))"
+    assert str(nd) == "NDDataset: [quaternion] count (shape: (y:1024, x:2048))"
 
     nd1 = _read_topspin_or_skip(_require_path(nmrdir / "topspin_2d"), expno=1, procno=1)
     assert nd1 == nd
@@ -70,8 +70,8 @@ def test_read_topspin():
 
     nd = _read_topspin_or_skip(_require_path(nmrdir), glob="topspin*/*/pdata/*/*")
     assert isinstance(nd, list)
-    assert str(nd[0]) == "NDDataset: [complex128] pp (shape: (y:1, x:16384))"
-    assert str(nd[1]) == "NDDataset: [quaternion] pp (shape: (y:1024, x:2048))"
+    assert str(nd[0]) == "NDDataset: [complex128] count (shape: (y:1, x:16384))"
+    assert str(nd[1]) == "NDDataset: [quaternion] count (shape: (y:1024, x:2048))"
 
 
 @pytest.mark.data

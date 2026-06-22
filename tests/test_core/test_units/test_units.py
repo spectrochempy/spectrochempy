@@ -32,6 +32,12 @@ def test_units():
     assert x.dimensionless
 
 
+def test_count_is_canonical_and_point_remains_an_alias():
+    assert str(ur.Unit("count")) == "count"
+    assert str(ur.Unit("point")) == "count"
+    assert ur.Unit("count") == ur.Unit("point")
+
+
 def test_repr_html():
     a = Quantity(10, "s/km")
     assert "{}".format(a) == "10 s⋅km⁻¹"
