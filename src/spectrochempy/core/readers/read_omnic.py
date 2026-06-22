@@ -782,6 +782,7 @@ def _read_spg(*args, **kwargs):
     dataset.set_coordset(y=_y, x=_x)
     if acquisitiondates:
         dataset.acquisition_date = min(acquisitiondates)
+    dataset.origin = "omnic"
 
     # Set description, date and history
     # Omnic spg file don't have specific "origin" field stating the oirigin of the data
@@ -981,6 +982,7 @@ def _read_spa(*args, **kwargs):
     dataset.filename = filename
     if return_ifg != "background":
         dataset.acquisition_date = acquisitiondate
+    dataset.origin = "omnic"
 
     # Set origin, description, history, date
     # Omnic spg file don't have specific "origin" field stating the oirigin of the data

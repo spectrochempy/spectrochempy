@@ -47,8 +47,67 @@ def test_read_jcamp_single_spectrum_sets_acquisition_date():
 ##END
 """
     ds = read_jcamp({"single_semantic.jdx": jdx.encode("utf8")})
+    assert ds.origin == ""
     assert ds._acquisition_date == datetime(2016, 7, 6, 19, 3, 14, tzinfo=UTC)
     assert ds.y.is_empty
+
+
+def test_read_jcamp_single_spectrum_preserves_origin():
+    jdx = """##TITLE=single_origin
+##JCAMP-DX=5.01
+##DATA TYPE=INFRARED SPECTRUM
+##ORIGIN=omnic
+##XUNITS=1/CM
+##YUNITS=ABSORBANCE
+##FIRSTX=4000.0
+##LASTX=3997.0
+##XFACTOR=1.0
+##YFACTOR=1.0
+##NPOINTS=4
+##XYDATA=(X++(Y..Y))
+4000.0 1.0 0.9 0.8 0.7
+##END
+"""
+    ds = read_jcamp({"single_origin.jdx": jdx.encode("utf8")})
+    assert ds.origin == "omnic"
+
+
+def test_read_jcamp_linked_multi_origin_is_deterministic():
+    jdx = """##TITLE=linked_origin
+##JCAMP-DX=5.01
+##DATA TYPE=LINK
+##BLOCKS=2
+##TITLE=spec_1
+##ORIGIN=omnic
+##LONGDATE=2016/07/06
+##TIME=19:03:14
+##XUNITS=1/CM
+##YUNITS=ABSORBANCE
+##FIRSTX=4000.0
+##LASTX=3997.0
+##XFACTOR=1.0
+##YFACTOR=1.0
+##NPOINTS=4
+##XYDATA=(X++(Y..Y))
+4000.0 1.0 0.9 0.8 0.7
+##END=
+##TITLE=spec_2
+##ORIGIN=labspec
+##LONGDATE=2016/07/06
+##TIME=19:04:14
+##XUNITS=1/CM
+##YUNITS=ABSORBANCE
+##FIRSTX=4000.0
+##LASTX=3997.0
+##XFACTOR=1.0
+##YFACTOR=1.0
+##NPOINTS=4
+##XYDATA=(X++(Y..Y))
+4000.0 0.7 0.6 0.5 0.4
+##END=
+"""
+    ds = read_jcamp({"linked_origin.jdx": jdx.encode("utf8")})
+    assert ds.origin == "labspec; omnic"
 
 
 def test_read_jcamp_without_date_keeps_acquisition_date_empty():

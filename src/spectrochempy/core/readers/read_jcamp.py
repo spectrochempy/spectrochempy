@@ -372,14 +372,11 @@ def _read_jdx(*args, **kwargs):
         dataset.acquisition_date = min(valid_dates)
 
     # Set origin, description and history
-    if nspec > 1:
-        origins = set(allorigins)
-        if len(origins) == 0:
-            pass
-        elif len(origins) == 1:
-            dataset.origin = allorigins[0]
-        else:
-            dataset.origin = [(origin + "; ") for origin in set(allorigins)][0][:-2]
+    origins = sorted({origin for origin in allorigins if origin})
+    if len(origins) == 1:
+        dataset.origin = origins[0]
+    elif len(origins) > 1:
+        dataset.origin = "; ".join(origins)
 
     dataset.description = f"Dataset from jdx file: '{jdx_title}'"
 

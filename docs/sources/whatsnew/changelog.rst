@@ -57,7 +57,10 @@ Bug Fixes
 - OMNIC, OPUS, JCAMP, and LabSpec readers now populate dataset-level
   ``acquisition_date`` when reliable acquisition timestamps are already
   available from the source data, while preserving the existing
-  coordinate-based time representations.
+  coordinate-based time representations. OMNIC imports now expose a stable
+  ``origin="omnic"`` across SPA/SPG/SRS variants, LabSpec imports now use
+  ``origin="labspec"``, and JCAMP imports now preserve deterministic source
+  origin information when provided.
 
 - TopSpin/NMR datasets whose reader assigns intensity units as ``count`` now
   render that canonical unit consistently in dataset summaries and related

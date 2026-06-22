@@ -208,6 +208,7 @@ def _read_txt(*args, **kwargs):
     dataset.units = None
     dataset.name = filename.stem
     dataset.filename = filename
+    dataset.origin = "labspec"
     dataset.meta = meta
     dataset.acquisition_date = date_acq
 
