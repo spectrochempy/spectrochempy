@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from datetime import datetime
 
+from spectrochempy.core.units import ur
+
 
 def assert_dataset_identity(
     dataset,
@@ -18,7 +20,7 @@ def assert_dataset_identity(
     if title is not None:
         assert dataset.title == title
     if units is not None:
-        assert dataset.units == units
+        assert dataset.units == ur.Unit(units)
 
 
 def assert_dataset_provenance(
