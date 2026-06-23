@@ -37,6 +37,8 @@ DATADIR = prefs.datadir
 IRDATA = DATADIR / "irdata"
 OPUSDATA = DATADIR / "irdata" / "OPUS"
 RAMANDIR = DATADIR / "ramandata" / "labspec"
+WIREDIR = DATADIR / "ramandata" / "wire"
+QUADERADIR = DATADIR / "msdata"
 WODGER = Path(__file__).parent / "ressources" / "omnic" / "wodger.spg"
 
 pytestmark = pytest.mark.data
@@ -177,6 +179,43 @@ def csv_omnic_dataset():
 def csv_generic_dataset():
     content = "1.0,10.0\n2.0,20.0\n3.0,30.0\n"
     return scp.read_csv({"generic.csv": content.encode("utf-8")})
+
+
+@pytest.fixture
+def wire_single_dataset():
+    path = WIREDIR / "sp.wdf"
+    if not path.exists():
+        pytest.skip("WiRE single characterization data not available")
+    return scp.read_wire(path)
+
+
+@pytest.fixture
+def wire_depth_dataset():
+    path = WIREDIR / "depth.wdf"
+    if not path.exists():
+        pytest.skip("WiRE depth series characterization data not available")
+    return scp.read_wire(path)
+
+
+@pytest.fixture
+def quadera_synthetic_dataset():
+    content = (
+        "End Time\n"
+        "\n"
+        "\tChannel 1\tChannel 2\n"
+        "Time\tTime Relative [s]\tIon Current [A]\tTime\tTime Relative [s]\tIon Current [A]\n"
+        "01/01/2024 00:00:00.000\t0.000\t1.0e-10\t01/01/2024 00:00:00.000\t0.000\t2.0e-10\n"
+        "01/01/2024 00:00:01.000\t1.000\t1.1e-10\t01/01/2024 00:00:01.000\t1.000\t2.1e-10\n"
+    )
+    return scp.read_quadera({"test_quadera.asc": content.encode("utf-8")})
+
+
+@pytest.fixture
+def quadera_real_dataset():
+    path = QUADERADIR / "ion_currents.asc"
+    if not path.exists():
+        pytest.skip("Quadera characterization data not available")
+    return scp.read_quadera(path)
 
 
 @pytest.fixture
@@ -497,3 +536,98 @@ class TestLabSpecCharacterization:
         y = assert_coordinate_semantics(dataset, "y", title="Time", units="s")
         labels = assert_label_structure(y)
         assert isinstance(labels[0], datetime)
+
+
+class TestWireCharacterization:
+    """Characterize current WiRE semantic placement."""
+
+    def test_single_spectrum_identity_provenance_coordinates_and_author(
+        self, wire_single_dataset
+    ):
+        dataset = wire_single_dataset
+
+        assert_dataset_identity(dataset, title="count", units="counts")
+        assert_dataset_provenance(
+            dataset,
+            filename_name="sp.wdf",
+            description_contains="",
+            acquisition_date_present=True,
+        )
+        assert "WiRE" in dataset.origin
+        assert dataset.author
+        assert_history_present(dataset, "Imported from sp.wdf")
+
+        assert_coordinate_semantics(dataset, "x")
+        y = assert_coordinate_semantics(dataset, "y")
+        assert y.labels is None
+        assert_meta_keys_present(
+            dataset,
+            "username",
+            "acquisition_time",
+            "laser_frequency",
+            "measurement_type",
+            "scan_type",
+        )
+
+    def test_depth_series_provenance_and_meta(self, wire_depth_dataset):
+        dataset = wire_depth_dataset
+
+        assert_dataset_provenance(
+            dataset,
+            acquisition_date_present=True,
+        )
+        assert "WiRE" in dataset.origin
+        assert dataset.author
+        assert_history_present(dataset, "Imported from depth.wdf")
+
+        assert_coordinate_semantics(dataset, "x")
+        assert_coordinate_semantics(dataset, "y")
+        assert_meta_keys_present(
+            dataset,
+            "acquisition_time",
+            "laser_frequency",
+            "point_per_spectrum",
+        )
+
+
+class TestQuaderaCharacterization:
+    """Characterize current Quadera semantic placement."""
+
+    CURRENT_DESCRIPTION = "Imported from Quadera asc file"
+
+    def test_synthetic_identity_provenance_coordinates_and_labels(
+        self, quadera_synthetic_dataset
+    ):
+        dataset = quadera_synthetic_dataset
+
+        assert_dataset_identity(
+            dataset,
+            name="test_quadera",
+            title="ion current",
+            units="amp",
+        )
+        assert_dataset_provenance(
+            dataset,
+            filename_name="test_quadera.asc",
+            origin="quadera",
+            acquisition_date_present=True,
+        )
+        assert_history_present(dataset, self.CURRENT_DESCRIPTION)
+        assert_coordinate_semantics(
+            dataset, "y", title="acquisition timestamp (UTC)", units="s"
+        )
+        x = assert_coordinate_semantics(dataset, "x", size=2)
+        labels = assert_label_structure(x, shape=(2,))
+        assert list(labels) == ["Channel 1", "Channel 2"]
+
+    def test_real_data_provenance(self, quadera_real_dataset):
+        dataset = quadera_real_dataset
+
+        assert_dataset_provenance(
+            dataset,
+            origin="quadera",
+            acquisition_date_present=True,
+        )
+        assert_history_present(dataset, self.CURRENT_DESCRIPTION)
+        assert_coordinate_semantics(dataset, "y")
+        assert_coordinate_semantics(dataset, "x")
