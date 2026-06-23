@@ -62,7 +62,8 @@ Bug Fixes
   ``origin="labspec"``, and JCAMP imports now preserve deterministic source
   origin information when provided.
 
-- Reader provenance alignment for second-wave formats (WiRE, Quadera, SOC).
+- Reader provenance alignment for second-wave formats (WiRE, Quadera, SOC,
+  MATLAB/DSO).
   WiRE: populates ``dataset.author`` from the file username field,
   ``dataset.acquisition_date`` from the first ORGN timestamp, and uses a clean
   history message without redundant inline timestamps.
@@ -71,6 +72,11 @@ Bug Fixes
   SOC: sets ``dataset.origin = "soc"`` (replaces inherited ``"omnic"``) and
   appends an SOC-specific import-history entry instead of mutating the last
   OMNIC history entry, preserving all inherited provenance.
+  MATLAB/DSO: sets ``dataset.origin = "matlab"`` for generic MAT imports and
+  ``"dso"`` for DSO struct imports; fixes DSO vendor-history preservation
+  (17 entries were collapsed by incorrect numpy indexing — now all are
+  correctly extracted); replaces ad-hoc ``dataset.date`` with
+  ``dataset.acquisition_date`` for serialization compatibility.
 
 - TopSpin/NMR datasets whose reader assigns intensity units as ``count`` now
   render that canonical unit consistently in dataset summaries and related

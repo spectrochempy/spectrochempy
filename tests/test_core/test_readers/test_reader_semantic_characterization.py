@@ -13,6 +13,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 import requests
+from scipy.io import savemat
 
 import spectrochempy as scp
 from spectrochempy.application.preferences import preferences as prefs
@@ -764,3 +765,86 @@ class TestSocCharacterization:
 
     def test_sdr_variant_history_message(self, soc_sdr_dataset):
         assert_history_present(soc_sdr_dataset, "Imported from SOC SDR file")
+
+
+MATLABDATA = prefs.datadir / "matlabdata"
+
+
+@pytest.fixture
+def matlabdata():
+    if not MATLABDATA.exists():
+        pytest.skip("test data not available (set SCP_TEST_DATA_DOWNLOAD=1)")
+    return MATLABDATA
+
+
+class TestMatlabCharacterization:
+    """Characterize current MATLAB/DSO semantic placement."""
+
+    CURRENT_HISTORY = "Imported from .mat file"
+
+    @pytest.fixture
+    def matlab_generic_dataset(self, tmp_path):
+        path = tmp_path / "generic.mat"
+        savemat(path, {"data": np.linspace(0.0, 1.0, 5).reshape(1, 5)})
+        result = scp.read_matlab(path)
+        if isinstance(result, list):
+            return result[0]
+        return result
+
+    def test_generic_mat_identity_and_provenance(self, matlab_generic_dataset):
+        dataset = matlab_generic_dataset
+
+        assert_dataset_identity(dataset, name="data")
+        assert_dataset_provenance(
+            dataset,
+            filename_name="generic.mat",
+            origin="matlab",
+            acquisition_date_present=False,
+        )
+        assert_history_present(dataset, self.CURRENT_HISTORY)
+        assert dataset.shape == (1, 5)
+
+    @pytest.mark.data
+    def test_dso_provenance_and_date(self, matlabdata):
+        dataset = scp.read_matlab(matlabdata / "dso.mat")
+
+        assert_dataset_identity(
+            dataset,
+            name="Group sust_base line withoutEQU.SPG",
+        )
+        assert_dataset_provenance(
+            dataset,
+            origin="dso",
+            acquisition_date_present=True,
+        )
+        assert dataset.author == "traverta@DESKTOP-98Q6FCE"
+        assert not hasattr(dataset, "date")
+        assert_history_present(
+            dataset,
+            "Created by traverta@DESKTOP-98Q6FCE",
+            "Imported by spectrochempy",
+        )
+
+    @pytest.mark.data
+    def test_dso_coordinates_and_labels(self, matlabdata):
+        dataset = scp.read_matlab(matlabdata / "dso.mat")
+
+        assert_coordinate_semantics(dataset, "x", size=426)
+        assert_coordinate_semantics(dataset, "y", size=20)
+
+        # Only y-coordinate has labels (spectrum identifiers); x-coordinate labels are None
+        y_labels = assert_label_structure(dataset.y)
+        assert y_labels.shape[0] == 20
+        assert all(isinstance(lbl, str) for lbl in y_labels)
+
+    @pytest.mark.data
+    def test_dso_history_preserves_vendor_entries(self, matlabdata):
+        dataset = scp.read_matlab(matlabdata / "dso.mat")
+
+        assert_history_present(
+            dataset,
+            "Created by traverta@DESKTOP-98Q6FCE",
+            "spgreadr",
+            "Delsamps",
+            "Imported by spectrochempy",
+        )
