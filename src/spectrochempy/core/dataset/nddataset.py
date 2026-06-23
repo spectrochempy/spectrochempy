@@ -1732,7 +1732,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         Auxiliary same-dimension coordinates are persisted automatically
         through the underlying ``to_xarray()`` output.
 
-        The NetCDF prototype is intentionally narrow:
+        The current NetCDF portable subset is intentionally narrow:
 
         - one `NDDataset`;
         - default coordinates only;
@@ -1935,7 +1935,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
     @classmethod
     def from_netcdf(cls, filename, **kwargs):
         """
-        Reconstruct an `NDDataset` from the xarray-backed NetCDF prototype.
+        Reconstruct an `NDDataset` from the xarray-backed NetCDF portable subset.
 
         Same-dimension ``CoordSet`` auxiliary coordinates are restored
         automatically from the xarray coordinate attributes.

@@ -3,7 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""Plugin module to extend NDDataset with a JCAMP-DX export method."""
+"""Internal unsupported Excel-writer compatibility stub."""
 # import os as os
 
 from spectrochempy.core.writers.exporter import Exporter
@@ -15,29 +15,24 @@ __dataset_methods__ = __all__
 
 def write_excel(*args, **kwargs):
     """
-    Write a dataset in XLS format.
+    Unsupported internal compatibility stub for XLS export.
 
     Parameters
     ----------
     filename: str or pathlib object, optional
         If not provided, a dialog is opened to select a file for writing
-    protocol : {'scp', 'matlab', 'jcamp', 'csv', 'excel'}, optional
-        Protocol used for writing. If not provided, the correct protocol
-        is inferred (whnever it is possible) from the file name extension.
-    directory : str, optional
-        Where to write the specified `filename` . If not specified, write in the current directory.
-    description: str, optional
-        A Custom description.
+    **kwargs
+        Ignored compatibility arguments.
 
     Returns
     -------
-    out : `pathlib` object
-        path of the saved file.
+    object
+        This function always raises when called through the exporter path.
 
-    Examples
-    --------
-    The extension will be added automatically
-    >>> X.write_xls('myfile')
+    Notes
+    -----
+    Excel export is not part of the supported SpectroChemPy core API.
+    Public `write_excel()` / `write_xls()` entry points were removed.
 
     """
     exporter = Exporter()
