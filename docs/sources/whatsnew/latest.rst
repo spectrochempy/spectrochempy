@@ -65,6 +65,10 @@ Bug Fixes
   inside a single top-level directory. Existing filtering of ``__MACOSX`` and
   ``.DS_Store`` entries is preserved. (:issue:`1139`)
 
+- ``read_zip()`` now emits a single warning summarizing unsupported files that
+  were ignored during ZIP import, making mixed archives easier to troubleshoot
+  without changing import behavior for supported files. (:issue:`1140`)
+
 - OMNIC, OPUS, JCAMP, and LabSpec readers now populate dataset-level
   ``acquisition_date`` when reliable acquisition timestamps are already
   available from the source data, while preserving the existing

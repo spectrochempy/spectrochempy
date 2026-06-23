@@ -12,6 +12,7 @@ from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.core.readers.importer import _openfid
 from spectrochempy.core.readers.importer import read
+from spectrochempy.utils._logging import warning_
 
 
 # ======================================================================================
@@ -147,15 +148,14 @@ def _read_zip(*args, **kwargs):
         only = kwargs.pop("only", len(filelist))
 
         datasets = []
+        ignored_files = []
+        supported_extensions = set(
+            list(zip(*(registry.aliases + registry.filetypes), strict=False))[0]
+        )
 
         def extract(children, **kwargs):
             extension = children.name.split(".")[-1]
-            if (
-                extension.lower()
-                not in list(
-                    zip(*(registry.aliases + registry.filetypes), strict=False)
-                )[0]
-            ):
+            if extension.lower() not in supported_extensions:
                 return None
             origin = kwargs.get("origin", "")
             return read(
@@ -175,6 +175,15 @@ def _read_zip(*args, **kwargs):
             if d is not None:
                 datasets.append(d)
                 count += 1
+            else:
+                ignored_files.append(zipinfo.filename)
+
+        if ignored_files:
+            ignored_list = "\n".join(f"- {name}" for name in ignored_files)
+            warning_(
+                f"Some files in {filename} were ignored because no reader is available:\n"
+                f"{ignored_list}"
+            )
 
         if len(datasets) == 1:
             return datasets[0]

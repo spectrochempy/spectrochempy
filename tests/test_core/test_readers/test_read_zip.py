@@ -6,6 +6,7 @@
 # ruff: noqa
 
 import io
+import warnings
 import zipfile
 
 import pytest
@@ -177,3 +178,55 @@ def test_read_zip_nested_identical_basenames_keep_current_naming_behavior():
     assert isinstance(datasets, ScpObjectList)
     assert len(datasets) == 2
     assert [ds.name for ds in datasets] == ["sample", "sample"]
+
+
+def test_read_zip_reports_ignored_unsupported_files_in_mixed_archive():
+    content = _make_synthetic_zip(
+        {
+            "sample1.csv": "1,10\n2,20\n",
+            "sample2.csv": "1,11\n2,21\n",
+            "notes.txt": "notes",
+            "calibration.dat": "binary-ish",
+        }
+    )
+
+    with pytest.warns(UserWarning, match="ignored because no reader is available"):
+        datasets = read_zip({"mixed_ignored.zip": content}, merge=False)
+
+    assert isinstance(datasets, ScpObjectList)
+    assert len(datasets) == 2
+    assert sorted(ds.name for ds in datasets) == ["sample1", "sample2"]
+
+
+def test_read_zip_no_warning_when_all_files_are_supported():
+    content = _make_synthetic_zip(
+        {
+            "sample1.csv": "1,10\n2,20\n",
+            "sample2.csv": "1,11\n2,21\n",
+        }
+    )
+
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        datasets = read_zip({"all_supported.zip": content}, merge=False)
+
+    assert isinstance(datasets, ScpObjectList)
+    assert len(datasets) == 2
+    assert [
+        w for w in caught if "ignored because no reader is available" in str(w.message)
+    ] == []
+
+
+def test_read_zip_reports_ignored_files_in_nested_archives():
+    content = _make_synthetic_zip(
+        {
+            "experiment/sample1.csv": "1,10\n2,20\n",
+            "experiment/notes.txt": "notes",
+            "calibration.dat": "binary-ish",
+        }
+    )
+
+    with pytest.warns(UserWarning, match="notes.txt"):
+        datasets = read_zip({"nested_ignored.zip": content}, merge=False)
+
+    assert datasets.name == "sample1"
