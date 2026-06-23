@@ -12,6 +12,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+import requests
 
 import spectrochempy as scp
 from spectrochempy.application.preferences import preferences as prefs
@@ -40,6 +41,7 @@ RAMANDIR = DATADIR / "ramandata" / "labspec"
 WIREDIR = DATADIR / "ramandata" / "wire"
 QUADERADIR = DATADIR / "msdata"
 WODGER = Path(__file__).parent / "ressources" / "omnic" / "wodger.spg"
+SOC_BASEURL = "https://github.com/chet-j-ski/SOC100_example_data/raw/main/"
 
 pytestmark = pytest.mark.data
 
@@ -216,6 +218,54 @@ def quadera_real_dataset():
     if not path.exists():
         pytest.skip("Quadera characterization data not available")
     return scp.read_quadera(path)
+
+
+@pytest.fixture
+def soc_ddr_dataset():
+    url = SOC_BASEURL + "Fused%20Silica0004.DDR"
+    fname = Path("Fused%20Silica0004.DDR")
+    try:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+    except requests.exceptions.RequestException:
+        pytest.skip("SOC DDR test data not available")
+    fname.write_bytes(response.content)
+    try:
+        return scp.read_ddr(fname)
+    finally:
+        fname.unlink(missing_ok=True)
+
+
+@pytest.fixture
+def soc_hdr_dataset():
+    url = SOC_BASEURL + "Fused%20Silica0004.HDR"
+    fname = Path("Fused%20Silica0004.HDR")
+    try:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+    except requests.exceptions.RequestException:
+        pytest.skip("SOC HDR test data not available")
+    fname.write_bytes(response.content)
+    try:
+        return scp.read_hdr(fname)
+    finally:
+        fname.unlink(missing_ok=True)
+
+
+@pytest.fixture
+def soc_sdr_dataset():
+    url = SOC_BASEURL + "Fused%20Silica0004.SDR"
+    fname = Path("Fused%20Silica0004.SDR")
+    try:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+    except requests.exceptions.RequestException:
+        pytest.skip("SOC SDR test data not available")
+    fname.write_bytes(response.content)
+    try:
+        return scp.read_sdr(fname)
+    finally:
+        fname.unlink(missing_ok=True)
 
 
 @pytest.fixture
@@ -631,3 +681,86 @@ class TestQuaderaCharacterization:
         assert_history_present(dataset, self.CURRENT_DESCRIPTION)
         assert_coordinate_semantics(dataset, "y")
         assert_coordinate_semantics(dataset, "x")
+
+
+@pytest.mark.network
+class TestSocCharacterization:
+    """Characterize SOC semantic placement and verify provenance alignment."""
+
+    def test_ddr_origin_history_and_inherited_provenance(self, soc_ddr_dataset):
+        dataset = soc_ddr_dataset
+
+        assert_dataset_identity(
+            dataset,
+            title="reflectance",
+        )
+        assert_dataset_provenance(
+            dataset,
+            origin="soc",
+            acquisition_date_present=True,
+        )
+        assert_history_present(
+            dataset,
+            "Imported from spa file",
+            "Imported from SOC DDR file",
+        )
+
+        assert_coordinate_semantics(dataset, "x", title="wavenumbers", units="cm⁻¹")
+        y = assert_coordinate_semantics(
+            dataset, "y", title="acquisition timestamp (GMT)", units="s"
+        )
+        assert y.labels is not None
+
+        assert_meta_keys_present(
+            dataset,
+            "collection_length",
+            "optical_velocity",
+            "laser_frequency",
+        )
+
+    def test_ddr_history_contains_omnic_and_soc(self, soc_ddr_dataset):
+        dataset = soc_ddr_dataset
+        assert_history_present(
+            dataset, "Imported from spa file", "Imported from SOC DDR file"
+        )
+
+    def test_all_variants_set_soc_origin(
+        self, soc_ddr_dataset, soc_hdr_dataset, soc_sdr_dataset
+    ):
+        assert soc_ddr_dataset.origin == "soc"
+        assert soc_hdr_dataset.origin == "soc"
+        assert soc_sdr_dataset.origin == "soc"
+
+    def test_all_variants_preserve_acquisition_date(
+        self, soc_ddr_dataset, soc_hdr_dataset, soc_sdr_dataset
+    ):
+        assert soc_ddr_dataset.acquisition_date is not None
+        assert soc_hdr_dataset.acquisition_date is not None
+        assert soc_sdr_dataset.acquisition_date is not None
+
+    def test_all_variants_preserve_inherited_coordinates(
+        self, soc_ddr_dataset, soc_hdr_dataset, soc_sdr_dataset
+    ):
+        for ds in [soc_ddr_dataset, soc_hdr_dataset, soc_sdr_dataset]:
+            assert_coordinate_semantics(ds, "x", title="wavenumbers", units="cm⁻¹")
+            y = assert_coordinate_semantics(
+                ds, "y", title="acquisition timestamp (GMT)", units="s"
+            )
+            assert y.labels is not None
+
+    def test_all_variants_preserve_inherited_meta(
+        self, soc_ddr_dataset, soc_hdr_dataset, soc_sdr_dataset
+    ):
+        for ds in [soc_ddr_dataset, soc_hdr_dataset, soc_sdr_dataset]:
+            assert_meta_keys_present(
+                ds, "collection_length", "optical_velocity", "laser_frequency"
+            )
+
+    def test_ddr_variant_history_message(self, soc_ddr_dataset):
+        assert_history_present(soc_ddr_dataset, "Imported from SOC DDR file")
+
+    def test_hdr_variant_history_message(self, soc_hdr_dataset):
+        assert_history_present(soc_hdr_dataset, "Imported from SOC HDR file")
+
+    def test_sdr_variant_history_message(self, soc_sdr_dataset):
+        assert_history_present(soc_sdr_dataset, "Imported from SOC SDR file")
