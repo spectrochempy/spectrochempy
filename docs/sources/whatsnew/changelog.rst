@@ -19,23 +19,6 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
-- Added portable ``NDDataset`` ↔ xarray/NetCDF round-trip support for
-  numerical data, default coordinates, units, explicit masks,
-  JSON-compatible metadata, complex data (split real/imag convention),
-  ``name``/``title``, dataset-level
-  ``description``/``author``/``origin``/``created``/``modified``/``acquisition_date``/``history``,
-  auxiliary same-dimension ``CoordSet`` coordinates (multiple numeric
-  coordinates sharing a dimension), and portable string labels on coordinates
-  (1D string-only, ``None`` preserved via metadata marker). Auxiliary
-  coordinates are exported as non-dimension coordinates with
-  ``scpy_coord_role`` and ``scpy_owner_dim`` markers and restored on import
-  with the dimension coordinate as default. Portable string labels are
-  exported as non-dimension coordinate variables with
-  ``scpy_coord_role="label"`` and restored on import. Non-exportable labels
-  (mixed types, datetime, multi-row) trigger an explicit
-  :class:`~spectrochempy.utils._logging.warning_` instead of silent
-  omission. Portable history is persisted as a stable human-readable textual
-  event trail through the same xarray-backed NetCDF path. (:issue:`1227`)
 
 .. section
 
@@ -43,161 +26,6 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
-- ``savgol(..., deriv=n)`` now annotates the output ``title`` with
-  the derivative order (e.g. ``"intensity (1st derivative)"``) so a
-  derived quantity is clearly identified. Units are kept as-is and
-  coordinates are preserved, consistent with the index-based
-  Savitzky-Golay path that does not validate even spacing. (:issue:`1095`)
-
-- Fixed ``NDDataset`` ``origin`` preservation. Non-empty ``origin`` values are
-  now honored by the constructor, preserved when constructing a dataset from an
-  existing dataset, and restored through the portable xarray/NetCDF import
-  paths. (:issue:`1227`)
-
-- ``read_csv()`` now restores the simple metadata header already emitted by
-  ``write_csv()`` for SpectroChemPy-generated 1D CSV files, preserving dataset
-  ``title``/``units`` and x-coordinate ``title``/``units`` in basic
-  write→read round-trips. Generic external CSV files keep the existing
-  fallback behavior. (:issue:`1136`)
-
-- ``read_csv()`` now tolerates a narrow set of common external scientific CSV
-  patterns: leading ``#``/``;`` comment lines, blank lines before the tabular
-  section, simple non-numeric first-row headers such as ``x,y`` or
-  ``time,intensity``, and basic delimiter auto-detection across comma,
-  semicolon, and tab. The reader remains intentionally limited to simple
-  numeric tabular files. (:issue:`1137`)
-
-- ``read_zip()`` now discovers readable files recursively inside nested ZIP
-  directory structures instead of assuming files are only at archive root or
-  inside a single top-level directory. Existing filtering of ``__MACOSX`` and
-  ``.DS_Store`` entries is preserved. (:issue:`1139`)
-
-- ``read_zip()`` now emits a single warning summarizing unsupported files that
-  were ignored during ZIP import, making mixed archives easier to troubleshoot
-  without changing import behavior for supported files. (:issue:`1140`)
-
-- OMNIC, OPUS, JCAMP, and LabSpec readers now populate dataset-level
-  ``acquisition_date`` when reliable acquisition timestamps are already
-  available from the source data, while preserving the existing
-  coordinate-based time representations. OMNIC imports now expose a stable
-  ``origin="omnic"`` across SPA/SPG/SRS variants, LabSpec imports now use
-  ``origin="labspec"``, and JCAMP imports now preserve deterministic source
-  origin information when provided.
-
-- Reader provenance alignment for second-wave formats (WiRE, Quadera, SOC,
-  MATLAB/DSO, SPC).
-  WiRE: populates ``dataset.author`` from the file username field,
-  ``dataset.acquisition_date`` from the first ORGN timestamp, and uses a clean
-  history message without redundant inline timestamps.
-  Quadera: sets ``dataset.origin = "quadera"`` and populates
-  ``dataset.acquisition_date`` from the first acquisition timestamp.
-  SOC: sets ``dataset.origin = "soc"`` (replaces inherited ``"omnic"``) and
-  appends an SOC-specific import-history entry instead of mutating the last
-  OMNIC history entry, preserving all inherited provenance.
-  MATLAB/DSO: sets ``dataset.origin = "matlab"`` for generic MAT imports and
-  ``"dso"`` for DSO struct imports; fixes DSO vendor-history preservation
-  (17 entries were collapsed by incorrect numpy indexing — now all are
-  correctly extracted); replaces ad-hoc ``dataset.date`` with
-  ``dataset.acquisition_date`` for serialization compatibility.
-  SPC: promotes the parsed session/header acquisition timestamp to
-  ``dataset.acquisition_date`` while preserving the existing coordinate-local
-  timing semantics for single- and multi-subfile datasets.
-
-- TopSpin/NMR datasets whose reader assigns intensity units as ``count`` now
-  render that canonical unit consistently in dataset summaries and related
-  displays, instead of unexpectedly showing ``pp``.
-
-- ``Coord`` labels are no longer silently dropped when a labeled
-  ``Coord`` is copied into a ``CoordSet`` (e.g.
-  ``CoordSet(labeled_coord)``). The ``CoordSet`` constructor creates a copy
-  via ``Coord(coord, copy=True)``, which now propagates labels from the
-  source coordinate. (:pr:`1229`)
-
-- application startup now removes invalid JSON preference files only
-  after closing them first, avoiding a Windows ``PermissionError`` during
-  configuration initialisation when a stale file such as ``CP.json`` is
-  encountered.
-
-- ``FastICA.whitening`` now returns ``None`` (instead of crashing) when
-  ``whiten=False``. (:pr:`1219`)
-
-- ``PLSRegression.components`` now raises a clear ``AttributeError``
-  explaining that PLS has no single ``components`` matrix, instead of an
-  unhelpful ``NotImplementedError``. (:pr:`1220`)
-
-- ``PLSRegression.intercept`` no longer crashes when the target
-  dataset ``Y`` has no coordinate labels. (:pr:`1220`)
-
-- ``autosub()`` now supports subtraction along non-last dimensions
-  consistently with its ``dim`` parameter, and the regression tests now
-  cover both last-axis and non-last-axis synthetic cases. (:issue:`1079`)
-
-- handle SVD ``compute_uv=False`` outputs consistently. The private
-  ``_outfit`` attribute is now always a ``(U, s, VT)`` tuple, fixing wrong
-  values and crashes for all properties when ``compute_uv=False``.
-  (:pr:`1210`)
-
-- pass the ``solver`` configuration parameter to the underlying
-  ``sklearn.decomposition.NMF`` object. Previously the parameter was
-  accepted by the SpectroChemPy ``NMF`` estimator but silently ignored
-  during sklearn initialisation, so the default solver was always used
-  regardless of the configured value. (:pr:`1212`)
-
-- correct ``PLSRegression.n_iter`` property attribute name. Previously,
-  the property referenced ``self._n_iter_`` instead of the actual stored
-  attribute ``self._n_iter``, causing an ``AttributeError`` after a
-  successful fit. (:pr:`1216`)
-
-- ``Project.__setitem__`` no longer leaves a stale ``parent``
-  reference on the displaced child after replacement. Replacing a dataset
-  or subproject via ``project["x"] = new_value`` now correctly sets
-  ``old_value.parent = None``, matching the ownership invariant
-  established by the Project Invariants RFC. (:pr:`1230`, :pr:`1231`)
-
-- ``Project`` now raises ``ValueError`` when adding a dataset or
-  subproject whose name already exists in the project, instead of
-  auto-renaming datasets or silently overwriting subprojects. Both
-  child types now follow the same explicit-failure duplicate policy
-  defined by the Project Invariants RFC. Collisions between datasets
-  and subprojects are also caught. (:pr:`1232`)
-
-- ``Project`` now raises ``ValueError`` when an operation would create
-  a cycle in the project hierarchy (self-insertion, direct cycle, or
-  indirect cycle). The ``parent`` setter checks for cycles before any
-  mutation, protecting all paths including ``add_project`` and ``parent``
-  reassignment. (:pr:`1233`)
-
-- ``Project.__setitem__`` replacement now enforces key/name identity:
-  after ``project["x"] = new_value``, ``project["x"].name == "x"``
-  holds for both datasets and subprojects. This closes the last gap in
-  the Project Invariants RFC contract. (:pr:`1234`)
-
-- ``Project.copy()`` now exposes an explicit ``deep`` parameter in the
-  public API. ``project.copy()`` and ``project.copy(deep=True)`` produce a
-  fully detached recursive copy with parent links rebuilt inside the copied
-  tree, while ``project.copy(deep=False)`` creates a new container that
-  shares children without changing their existing ``parent`` pointers.
-  ``copy.copy(project)`` and ``copy.deepcopy(project)`` intentionally follow
-  the recursive detached model as well, matching the Project copy semantics
-  RFC even though this is stronger than Python's usual shallow-copy
-  convention.
-
-- Fixed several inconsistencies in the OMNIC SPA/SPG reader:
-  ``read_spg()`` no longer advertises the ``spa`` protocol; swapped error
-  messages in SPG unit-consistency checks now name the correct quantity;
-  a single SPA comment is now included in the description (previously only
-  ≥2 comments were shown); SPA history content is now checked via the
-  variable instead of a literal string; and invalid ``return_ifg`` values
-  now produce a clear warning. (:issue:`1144`) (PR by @gaoflow)
-
-- The TopSpin NMR reader now records an explicit ``Imported from TopSpin
-  dataset`` history event on successful import, aligning with other
-  high-value readers that already emit import-history entries.
-
-- JCAMP ``sortbydate`` now reorders spectra by acquisition timestamp
-  (``dim="y"``) instead of sorting wavenumbers (``dim="x"``), matching the
-  intended ``"Sorted by date"`` history message and the OMNIC SPG reference
-  pattern.
 
 .. section
 
@@ -212,26 +40,6 @@ Breaking Changes
 ~~~~~~~~~~~~~~~~
 .. Add here new breaking changes (do not delete this comment)
 
-- Removed the unsupported public Excel writer entry points
-  ``write_excel()`` and ``write_xls()``. ``.xls`` export attempts now fail
-  through the standard unsupported-format path instead of exposing a public
-  API that was never implemented. (:issue:`1260`)
-
-- ``NDDataset.to_xarray()`` now returns a canonical ``xarray.Dataset`` instead
-  of a bare ``xarray.DataArray``, aligning the API with the new portable
-  mapping RFC and the future NetCDF/Zarr-oriented interchange model.
-
-- Loading native ``.scp`` and ``.pscp`` files is now safe by default.
-  Historical archives that require pickle-based native persistence must be
-  reloaded explicitly with ``allow_unsafe_legacy=True``, and only from known
-  and trusted sources.
-
-- Writing native ``.scp`` and ``.pscp`` files is now safe by default. Newly
-  saved archives no longer use pickle-backed payloads for dataset arrays or
-  complex scalars, so normal save/load round-trips work without
-  ``allow_unsafe_legacy=True`` while historical trusted archives remain
-  available through the explicit legacy opt-in.
-
 
 .. section
 
@@ -245,17 +53,3 @@ Deprecations
 Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
-
-- MAINT: introduce the new Result Object architecture (``ResultBase``,
-  ``AnalysisResult``, ``FitResult``) for analysis and fitting workflows.
-  (:pr:`1208`)
-
-- MAINT: extend Result Object support to PCA, SVD, NMF, Optimize,
-  MCRALS, SIMPLISMA, EFA, FastICA, and PLSRegression, providing
-  unified access to analysis and fitting outputs while preserving
-  backward compatibility. (:pr:`1208`, :pr:`1209`, :pr:`1211`, :pr:`1213`, :pr:`1215`,
-  :pr:`1217`, :pr:`1218`, :pr:`1219`, :pr:`1220`)
-
-- MAINT: Update Project docstrings and RFC status to reflect implemented
-  invariants (single-parent ownership, acyclic hierarchy, duplicate rejection,
-  key/name identity).  Close the Project Invariants RFC. (:pr:`1235`)
