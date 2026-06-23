@@ -355,25 +355,57 @@ Current priority: Closed.
 
 ---
 
-## Portable xarray / NetCDF Persistence
+## Portable Metadata Subset / Portable xarray / NetCDF Persistence
 
-Status: Implemented core portable subset; follow-up extensions remain optional
+Status: COMPLETED
 
 Major outcomes:
 
 * canonical RFCs drafted for xarray mapping and NetCDF persistence;
 * portable same-dimension coordinates support merged;
 * portable string-label subset support merged;
-* portable scientific identity fields now preserved, including `name`, `title`,
-  and `description`;
-* portable provenance fields now preserved, including `author`, `origin`,
-  `created`, `modified`, `acquisition_date`, and textual `history`;
+* portable `description`, `author`, `origin` aligned in PR1;
+* portable `created`, `modified`, `acquisition_date` aligned in PR2;
+* portable `history` aligned in PR3;
+* full provenance/identity surface now portable through `scpy_*` carrier attrs;
 * a tracked maintainer reference now exists under
   `maintainers/architecture/portable-persistence-model.md`.
 
 Current priority: Closed as a baseline implementation campaign; future work is
-limited to optional portable extensions and broader xarray/NetCDF RFC
-synchronization.
+limited to optional portable extensions such as `filename`, label-only
+coordinates, and broader xarray/NetCDF RFC synchronization.
+
+---
+
+## Reader Alignment / Provenance Normalization
+
+Status: COMPLETED FOR HIGH-VALUE READERS
+
+Refer to:
+* [`maintainers/architecture/reader-normalization-architecture.md`](../architecture/reader-normalization-architecture.md)
+  for the maintained normalization contract and campaign outcomes.
+* [`maintainers/architecture/metadata-and-support-model.md`](../architecture/metadata-and-support-model.md)
+  for the taxonomy and ownership model.
+
+Major outcomes:
+
+* semantic characterization baselines established for OMNIC, OPUS, JCAMP,
+  LabSpec, CSV, and TopSpin (PR1);
+* `acquisition_date` normalized across OMNIC, OPUS, JCAMP, and LabSpec while
+  retaining pointwise time coordinates (PR2);
+* `origin` consistency established for OMNIC (all variants), JCAMP (deterministic
+  multi-origin), and LabSpec; canonical origin vocabulary documented (PR3);
+* history policy established: import events required, vendor processing history
+  preserved where available, reorder events explicitly recorded (PR4);
+* TopSpin gained import-history event; JCAMP sort dimension corrected (PR4);
+* dual-time rule (`acquisition_date` + time coordinates) documented in both
+  the developer guide and architecture notes;
+* portable-persistence alignment for all typed provenance fields completed
+  across PR1–PR3 of the parallel portable-persistence campaign.
+
+Current priority: Closed for high-value readers. Second-wave readers (WiRE,
+SPC, Quadera, MATLAB/DSO, Carroucell, SOC) and vendor-history extraction for
+OMNIC SPG remain future candidates.
 
 ---
 
@@ -397,27 +429,29 @@ implementation work.
 
 ## Metadata Contract
 
-Status: Conceptual phase completed; implementation alignment remains future work
+Status: COMPLETED for conceptual contract phase and reader-alignment
+implementation; future work is follow-up topics only
 
 Major outcomes:
 
 * metadata propagation semantics documented;
 * preservation and recomputation rules clarified;
-* architectural direction established.
+* architectural direction established;
 * conceptual RFC cluster completed for dimensions, coordinates, `CoordSet`,
   metadata taxonomy, labels, reader normalization, and provenance/history;
 * stable architecture references promoted under
   `maintainers/architecture/metadata-and-support-model.md` and
-  `maintainers/architecture/reader-normalization-architecture.md`.
+  `maintainers/architecture/reader-normalization-architecture.md`;
+* portable persistence alignment completed for all typed provenance fields;
+* reader-normalization alignment completed for OMNIC, OPUS, JCAMP, LabSpec,
+  CSV, and TopSpin.
 
-Current priority: Low for conceptual design; future work is now mostly
-implementation-alignment and follow-up RFC work rather than baseline contract
-definition.
+Current priority: Low for conceptual design; future work is limited to
+follow-up topics listed below.
 
 Remaining follow-up work:
 
 * result provenance;
-* reader cleanup/alignment;
 * metadata implementation alignment outside the now-implemented portable
   subset baseline;
 * optional portable extensions such as `filename` or label-only coordinates

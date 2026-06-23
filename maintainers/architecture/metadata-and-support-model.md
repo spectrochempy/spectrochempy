@@ -1,5 +1,11 @@
 # Metadata and Support Model
 
+## Status
+
+IMPLEMENTED — The model described here reflects the current maintained
+architecture after the CoordSet storage redesign, metadata taxonomy adoption,
+portable metadata subset implementation, and reader normalization alignment.
+
 ## Overview
 
 This note is the primary maintainer reference for the current SpectroChemPy
@@ -364,5 +370,30 @@ it into an interchange-oriented schema.
   identity, structure, provenance, presentation, or extension/private payloads.
 - Keep provenance and history distinct: provenance is lineage context; history
   is the explicit event trail.
+- Apply the dual-time rule: `acquisition_date` records session/lineage
+  provenance; timestamp coordinates record observation-level support geometry.
+  One source may legitimately supply both, and they should coexist in the
+  normalized runtime model.
 - Read this note first for support/metadata architecture questions, then use
   the underlying RFCs for decision history and finer contract boundaries.
+
+## Reader Alignment Status
+
+Reader normalization alignment is COMPLETED FOR HIGH-VALUE READERS:
+
+| Reader | acquisition_date | origin | history | Status |
+| ------ | --------------- | ------ | ------- | ------ |
+| OMNIC SPG/SPA/SRS | Set from parsed timestamps | `omnic` for all variants | Import event + vendor history when available | ALIGNED |
+| OPUS | Set from parameter timestamp | `opus-<type>` (e.g. `opus-AB`) | Import event | ALIGNED |
+| JCAMP-DX | Set from earliest LONGDATE/TIME | Preserved `##ORIGIN`; deterministic multi-origin join | Import event + sort event | ALIGNED |
+| LabSpec TXT | Set from parsed acquisition start | `labspec` | Import event | ALIGNED |
+| CSV (generic + OMNIC) | OMNIC CSV parses date from filename | Caller-specified or OMNIC-flavored | Import event | ALIGNED |
+| TopSpin (plugin) | Set from vendor DATE | `topspin` | Import event | ALIGNED |
+
+Semantic characterization baselines and provenance assertions exist for all
+six high-value readers listed above. Second-wave readers (WiRE, SPC, Quadera,
+MATLAB/DSO, Carroucell, SOC) retain their existing normalization but have not
+been through the same targeted alignment campaign.
+
+For the complete reader normalization contract and per-reader destination rules,
+see [`reader-normalization-architecture.md`](reader-normalization-architecture.md).

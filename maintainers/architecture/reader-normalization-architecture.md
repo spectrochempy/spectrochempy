@@ -1,5 +1,11 @@
 # Reader Normalization Architecture
 
+## Status
+
+IMPLEMENTED — This architecture is authoritative for the maintained reader
+normalization contract. Reader alignment is COMPLETED FOR HIGH-VALUE READERS
+(OMNIC, OPUS, JCAMP, LabSpec, CSV, TopSpin).
+
 ## Overview
 
 This note is the primary maintainer reference for how imported reader
@@ -244,3 +250,70 @@ the primary driver of normalization decisions.
 - Discard runtime-only parser state.
 - When in doubt, preserve useful reader-specific richness in `Meta` rather than
   inventing a new typed field.
+
+## Canonical Origin Vocabulary
+
+The maintained origin values for high-value readers are:
+
+| Reader | `origin` value |
+| ------ | -------------- |
+| OMNIC | `omnic` |
+| OPUS | `opus-<type>` (e.g. `opus-AB`, `opus-SM`) |
+| JCAMP-DX | Preserved `##ORIGIN`; deterministic sorted `"; "` join for multi-origin |
+| LabSpec | `labspec` |
+| TopSpin | `topspin` |
+| CSV generic | caller-specified |
+| CSV OMNIC | `omnic` |
+| SPC | `thermo galactic` |
+| WiRE | application/version per reader convention |
+
+## Dual-Time Rule
+
+Imported time has two distinct roles that must be preserved separately:
+
+- **Provenance time** (`acquisition_date`): records the acquisition session,
+  dataset creation, or source lineage event at the dataset level.
+- **Support time** (coordinate values): locates individual observations along
+  the support axis.
+
+Both may coexist in the same imported dataset. The reader must not collapse
+one into the other. Removing or overwriting time coordinates when setting
+`acquisition_date` is a normalization error.
+
+Example:
+- `dataset.acquisition_date` = `2024-01-02 09:00:00` (session start)
+- `dataset.y.coord` = `[0.0, 2.5, 5.0, ...]` seconds (elapsed observation time)
+
+## History Policy
+
+The maintained history policy for reader normalization is:
+
+1. **Import events**: every reader SHOULD add one explicit import event when it
+   successfully constructs a dataset from an external source.
+2. **Vendor processing history**: if the source provides meaningful processing
+   history and the reader can extract it safely, it SHOULD be preserved in
+   `history` without overwriting the import event.
+3. **Reader-driven reordering**: if the reader explicitly reorders observations
+   (e.g. sorting by acquisition date), it SHOULD append a distinct history
+   entry describing the reorder.
+4. **Merge/stack events**: when the importer combines multiple datasets, it
+   SHOULD append a merge or stack event.
+5. **Wording**: no global wording standard is required. Meaningful event content
+   is the requirement, not identical text.
+
+## Reader Alignment Status
+
+Reader normalization alignment is COMPLETED FOR HIGH-VALUE READERS:
+
+| Reader | `acquisition_date` | `origin` | `history` | Semantic tests |
+| ------ | ------------------ | -------- | --------- | -------------- |
+| OMNIC | Set from parsed timestamps | `omnic` for all variants | Import + vendor history | CHARACTERIZED |
+| OPUS | Set from parameter timestamp | `opus-<type>` | Import event | CHARACTERIZED |
+| JCAMP | Set from earliest LONGDATE/TIME | Preserved `##ORIGIN`; deterministic multi-origin | Import + sort event | CHARACTERIZED |
+| LabSpec | Set from acquisition start | `labspec` | Import event | CHARACTERIZED |
+| CSV | OMNIC date from filename | caller-specified or `omnic` | Import event | CHARACTERIZED |
+| TopSpin | Set from vendor DATE | `topspin` | Import event | CHARACTERIZED |
+
+Second-wave readers (WiRE, SPC, Quadera, MATLAB/DSO, Carroucell, SOC) have
+existing normalization but have not been through the targeted provenance
+alignment campaign. They remain active normalization candidates.

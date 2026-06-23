@@ -1,5 +1,11 @@
 # Portable Persistence Model
 
+## Status
+
+IMPLEMENTED — The portable surface described here reflects the currently
+implemented xarray / NetCDF persistence for `NDDataset`. The Portable Metadata
+Subset Contract is fully implemented for the maintained core subset.
+
 ## Overview
 
 This note is the primary maintainer reference for the currently implemented
