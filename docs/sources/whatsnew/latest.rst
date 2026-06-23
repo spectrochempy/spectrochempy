@@ -53,6 +53,13 @@ Bug Fixes
   write→read round-trips. Generic external CSV files keep the existing
   fallback behavior. (:issue:`1136`)
 
+- ``read_csv()`` now tolerates a narrow set of common external scientific CSV
+  patterns: leading ``#``/``;`` comment lines, blank lines before the tabular
+  section, simple non-numeric first-row headers such as ``x,y`` or
+  ``time,intensity``, and basic delimiter auto-detection across comma,
+  semicolon, and tab. The reader remains intentionally limited to simple
+  numeric tabular files. (:issue:`1137`)
+
 - OMNIC, OPUS, JCAMP, and LabSpec readers now populate dataset-level
   ``acquisition_date`` when reliable acquisition timestamps are already
   available from the source data, while preserving the existing
