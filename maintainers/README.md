@@ -29,6 +29,37 @@ Utiliser ces couches documentaires dans cet ordre :
 | Audits | Notes de travail, historique d'implémentation, investigations, et campagnes locales non versionnées par défaut | notes locales sous `audit/`, lorsqu'elles existent |
 | Roadmap | Priorités, sujets terminés, actifs, ou différés | [`rfcs/architecture-roadmap.md`](rfcs/architecture-roadmap.md) |
 
+### Current Maintainer Entry Points
+
+Après les campagnes récentes de normalisation des readers, de persistance
+portable, et de consolidation des Result Objects, les points d'entrée
+mainteneur les plus utiles sont généralement :
+
+- [`rfcs/architecture-roadmap.md`](rfcs/architecture-roadmap.md) pour l'état
+  global des campagnes et futurs candidats ;
+- [`architecture/metadata-and-support-model.md`](architecture/metadata-and-support-model.md)
+  pour le modèle runtime central ;
+- [`architecture/reader-normalization-architecture.md`](architecture/reader-normalization-architecture.md)
+  pour la normalisation des imports readers ;
+- [`architecture/portable-persistence-model.md`](architecture/portable-persistence-model.md)
+  pour la surface portable xarray / NetCDF effectivement implémentée ;
+- [`architecture/result-object-contract-rfc.md`](architecture/result-object-contract-rfc.md)
+  pour le contrat Result Object maintenant stabilisé.
+
+### Important Distinction: tracked architecture docs vs local audits
+
+Le nom de certains fichiers suivis sous `maintainers/architecture/` contient le
+mot `audit`, mais cela ne veut pas dire qu'ils sont équivalents aux notes
+locales sous `audit/`.
+
+- les fichiers suivis dans `maintainers/architecture/` sont des références
+  mainteneur versionnées, indexées, et conservées pour le long terme ;
+- les fichiers sous `audit/` restent par défaut des notes de campagne,
+  d'investigation, de migration, ou d'historique d'implémentation.
+
+En pratique : commencer par `maintainers/`, puis consulter `audit/` seulement
+si le contexte historique détaillé est réellement nécessaire.
+
 En pratique :
 
 - commencer par ce fichier ;

@@ -16,6 +16,24 @@ has stabilized. Local audits, implementation notes, campaign logs, and
 characterization reports remain useful context, but they are not the first
 place to look for the maintained project contract.
 
+## Start Here by Topic
+
+Use this shorter routing table before scanning the full inventory:
+
+| Topic | First document |
+|---|---|
+| Runtime model for dimensions, coordinates, labels, metadata, provenance | [`metadata-and-support-model.md`](metadata-and-support-model.md) |
+| Reader import normalization | [`reader-normalization-architecture.md`](reader-normalization-architecture.md) |
+| Portable xarray / NetCDF persistence | [`portable-persistence-model.md`](portable-persistence-model.md) |
+| Result objects and result-surface ownership | [`result-object-contract-rfc.md`](result-object-contract-rfc.md) |
+| CoordSet storage and lifecycle | [`coordset-storage-architecture.md`](coordset-storage-architecture.md) |
+| Display architecture | [`display-architecture.md`](display-architecture.md) |
+| Future operation semantics work | [`mathematical-semantics-and-metadata-propagation.md`](mathematical-semantics-and-metadata-propagation.md) |
+
+Tracked files in this directory that contain `audit` in their filename are
+still part of the maintained documentation set. They are different from local
+working notes stored under the repository-level `audit/` directory.
+
 ## Core Architecture
 
 These documents are the primary tracked references for current maintained
@@ -64,10 +82,10 @@ For a quick orientation path, start with:
 
 1. [`../README.md`](../README.md)
 2. [`../rfcs/architecture-roadmap.md`](../rfcs/architecture-roadmap.md)
-3. [`../rfcs/INDEX.md`](../rfcs/INDEX.md)
-4. [`portable-persistence-model.md`](portable-persistence-model.md)
-5. [`metadata-and-support-model.md`](metadata-and-support-model.md)
-6. [`reader-normalization-architecture.md`](reader-normalization-architecture.md)
+3. [`metadata-and-support-model.md`](metadata-and-support-model.md)
+4. [`reader-normalization-architecture.md`](reader-normalization-architecture.md)
+5. [`portable-persistence-model.md`](portable-persistence-model.md)
+6. [`../rfcs/INDEX.md`](../rfcs/INDEX.md)
 7. [`coordset-storage-architecture.md`](coordset-storage-architecture.md)
 8. [`display-architecture.md`](display-architecture.md)
 9. [`result-object-contract-rfc.md`](result-object-contract-rfc.md)

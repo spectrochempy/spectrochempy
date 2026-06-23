@@ -658,12 +658,19 @@ Examples include:
 * OPUS improvements;
 * SPG support;
 * PerkinElmer support;
+* CSV interoperability follow-up such as simple 2D export;
 * plugin ecosystem improvements;
 * documentation improvements.
 
 Examples of possible future interoperability work:
 
 * CSDM integration.
+
+Explicit non-candidate:
+
+* Excel reader/writer support in core is not planned; CSV remains the intended
+  lightweight tabular interchange path and richer structured interchange
+  should continue to prefer NetCDF/xarray or other scientific formats.
 
 User-facing improvements should generally take precedence when they provide immediate value.
 

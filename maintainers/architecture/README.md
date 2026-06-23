@@ -10,6 +10,23 @@ For the RFC inventory, see [`../rfcs/INDEX.md`](../rfcs/INDEX.md).
 For campaign ordering and priorities, see
 [`../rfcs/architecture-roadmap.md`](../rfcs/architecture-roadmap.md).
 
+## Current High-Value References
+
+For most current maintainer questions, start with:
+
+- [`metadata-and-support-model.md`](metadata-and-support-model.md) for the
+  central runtime model around dimensions, coordinates, `CoordSet`, labels,
+  metadata, and provenance;
+- [`reader-normalization-architecture.md`](reader-normalization-architecture.md)
+  for reader semantic destinations and the completed Reader Alignment outcome;
+- [`portable-persistence-model.md`](portable-persistence-model.md) for the
+  implemented portable xarray / NetCDF persistence surface;
+- [`result-object-contract-rfc.md`](result-object-contract-rfc.md) for the
+  implemented Result Object contract.
+
+These should usually answer current-state questions before any local audit
+notes are needed.
+
 ## Placement Guide
 
 | Location | Use for |
@@ -17,6 +34,11 @@ For campaign ordering and priorities, see
 | `../rfcs/` | Normative or near-normative behavior contracts and roadmap documents |
 | this directory | Durable audits, implementation maps, design baselines, and draft architecture analyses |
 | local notes under `audit/` | Local working notes that should not be versioned by default |
+
+Tracked files in this directory may still contain `audit` in the filename.
+That naming reflects document history, not authority level. If a file is
+indexed here, it is part of the maintained documentation set and is distinct
+from local campaign notes under the repository-level `audit/` directory.
 
 ## Reading Guidance
 
