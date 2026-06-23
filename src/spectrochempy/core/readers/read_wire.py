@@ -47,7 +47,6 @@ https://sourceforge.net/p/gwyddion/code/HEAD/tree/trunk/gwyddion/modules/file/re
 
 __all__ = ["read_wdf", "read_wire"]
 
-import datetime
 import io
 import struct
 from enum import Enum
@@ -159,9 +158,15 @@ class _wdfReader:
 
         # Parse individual blocks
         self._parse_header()  # File header -> metadata
+        username = self._meta.username.replace("\x00", "").strip()
+        if username:
+            self._dataset.author = username
         coord_x = self._parse_dimension("X")
         coord_meta = self._parse_dimension("Y")
         other_dimensions = self._parse_others()
+        acq = getattr(self._meta, "acquisition_time", None)
+        if acq is not None:
+            self._dataset.acquisition_date = acq.item()
         data = self._parse_data()
         # self._parse_img()
 
@@ -922,5 +927,5 @@ def _read_wdf(*args, **kwargs):
         return None
     dataset.name = filename.stem
     dataset.filename = filename
-    dataset.history = f"Imported from {filename} on {datetime.datetime.now()}"
+    dataset.history = f"Imported from {filename}"
     return dataset

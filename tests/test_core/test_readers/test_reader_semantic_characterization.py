@@ -37,6 +37,7 @@ DATADIR = prefs.datadir
 IRDATA = DATADIR / "irdata"
 OPUSDATA = DATADIR / "irdata" / "OPUS"
 RAMANDIR = DATADIR / "ramandata" / "labspec"
+WIREDIR = DATADIR / "ramandata" / "wire"
 WODGER = Path(__file__).parent / "ressources" / "omnic" / "wodger.spg"
 
 pytestmark = pytest.mark.data
@@ -177,6 +178,22 @@ def csv_omnic_dataset():
 def csv_generic_dataset():
     content = "1.0,10.0\n2.0,20.0\n3.0,30.0\n"
     return scp.read_csv({"generic.csv": content.encode("utf-8")})
+
+
+@pytest.fixture
+def wire_single_dataset():
+    path = WIREDIR / "sp.wdf"
+    if not path.exists():
+        pytest.skip("WiRE single characterization data not available")
+    return scp.read_wire(path)
+
+
+@pytest.fixture
+def wire_depth_dataset():
+    path = WIREDIR / "depth.wdf"
+    if not path.exists():
+        pytest.skip("WiRE depth series characterization data not available")
+    return scp.read_wire(path)
 
 
 @pytest.fixture
@@ -497,3 +514,55 @@ class TestLabSpecCharacterization:
         y = assert_coordinate_semantics(dataset, "y", title="Time", units="s")
         labels = assert_label_structure(y)
         assert isinstance(labels[0], datetime)
+
+
+class TestWireCharacterization:
+    """Characterize current WiRE semantic placement."""
+
+    def test_single_spectrum_identity_provenance_coordinates_and_author(
+        self, wire_single_dataset
+    ):
+        dataset = wire_single_dataset
+
+        assert_dataset_identity(dataset, title="count", units="counts")
+        assert_dataset_provenance(
+            dataset,
+            filename_name="sp.wdf",
+            description_contains="",
+            acquisition_date_present=True,
+        )
+        assert "WiRE" in dataset.origin
+        assert dataset.author
+        assert_history_present(dataset, "Imported from sp.wdf")
+
+        assert_coordinate_semantics(dataset, "x")
+        y = assert_coordinate_semantics(dataset, "y")
+        assert y.labels is None
+        assert_meta_keys_present(
+            dataset,
+            "username",
+            "acquisition_time",
+            "laser_frequency",
+            "measurement_type",
+            "scan_type",
+        )
+
+    def test_depth_series_provenance_and_meta(self, wire_depth_dataset):
+        dataset = wire_depth_dataset
+
+        assert_dataset_provenance(
+            dataset,
+            acquisition_date_present=True,
+        )
+        assert "WiRE" in dataset.origin
+        assert dataset.author
+        assert_history_present(dataset, "Imported from depth.wdf")
+
+        assert_coordinate_semantics(dataset, "x")
+        assert_coordinate_semantics(dataset, "y")
+        assert_meta_keys_present(
+            dataset,
+            "acquisition_time",
+            "laser_frequency",
+            "point_per_spectrum",
+        )
