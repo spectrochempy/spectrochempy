@@ -76,6 +76,51 @@ def _parse_spectrochempy_csv_header(row):
     return {}
 
 
+def _iter_meaningful_csv_lines(text):
+    """
+    Yield non-empty, non-comment CSV lines.
+
+    Only the narrow comment prefixes requested for simple external CSV support
+    are recognized here: ``#`` and ``;``.
+    """
+
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if stripped.startswith("#") or stripped.startswith(";"):
+            continue
+        yield line
+
+
+def _detect_csv_delimiter(lines, fallback):
+    """
+    Detect a simple delimiter among comma, semicolon, and tab.
+
+    The heuristic intentionally stays conservative and only looks for a stable
+    repeated separator in the first few meaningful lines.
+    """
+
+    candidates = [",", ";", "\t"]
+    sample = list(lines[:5])
+    best = fallback
+    best_score = 0
+
+    for candidate in candidates:
+        counts = [line.count(candidate) for line in sample]
+        positive = [count for count in counts if count > 0]
+        if not positive:
+            continue
+        if len(set(positive)) != 1:
+            continue
+        score = positive[0]
+        if score > best_score:
+            best = candidate
+            best_score = score
+
+    return best
+
+
 try:
     locale.setlocale(locale.LC_ALL, "en_US")  # to avoid problems with date format
 except Exception:  # pragma: no cover
@@ -215,14 +260,14 @@ def _read_csv(*args, **kwargs):
     txt = fid.read()
     fid.close()
 
-    # We assume this csv file contains only numbers # TODO: write a more general reader
-    if ";" in txt:
-        # look like the delimiter is ;
-        # if comma is also present, it could be that french writer was used.
-        txt = txt.replace(",", ".")
-        delimiter = ";"
+    lines = list(_iter_meaningful_csv_lines(txt))
+    delimiter = _detect_csv_delimiter(lines, delimiter)
 
-    d = list(csv.reader(txt.splitlines(), delimiter=delimiter))
+    # Semicolon-delimited scientific exports often also use decimal commas.
+    if delimiter == ";":
+        lines = [line.replace(",", ".") for line in lines]
+
+    d = list(csv.reader(lines, delimiter=delimiter))
     header_metadata = {}
 
     # Skip header row if present (non-numeric first row from write_csv)

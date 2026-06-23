@@ -60,3 +60,41 @@ def test_read_csv():
         {"test_omnic.csv": omnic_csv_content.encode("utf-8")}, origin="opus"
     )
     assert not D
+
+
+def test_read_csv_skips_leading_comments_and_blank_lines():
+    content = (
+        "# collected by external script\n"
+        "; exported manually\n"
+        "\n"
+        "time,intensity\n"
+        "1,10\n"
+        "2,20\n"
+        "3,30\n"
+    )
+
+    dataset = scp.read_csv({"commented.csv": content.encode("utf-8")})
+
+    assert dataset.shape == (1, 3)
+    assert list(dataset.x.data) == [1.0, 2.0, 3.0]
+    assert list(dataset.data.squeeze()) == [10.0, 20.0, 30.0]
+
+
+def test_read_csv_accepts_simple_external_header():
+    content = "wavenumber,absorbance\n4000,0.1\n3990,0.2\n3980,0.3\n"
+
+    dataset = scp.read_csv({"header.csv": content.encode("utf-8")})
+
+    assert dataset.shape == (1, 3)
+    assert list(dataset.x.data) == [4000.0, 3990.0, 3980.0]
+    assert list(dataset.data.squeeze()) == [0.1, 0.2, 0.3]
+
+
+def test_read_csv_autodetects_tab_delimiter_for_simple_numeric_table():
+    content = "x\tintensity\n1\t10\n2\t20\n3\t30\n"
+
+    dataset = scp.read_csv({"tabbed.csv": content.encode("utf-8")})
+
+    assert dataset.shape == (1, 3)
+    assert list(dataset.x.data) == [1.0, 2.0, 3.0]
+    assert list(dataset.data.squeeze()) == [10.0, 20.0, 30.0]
