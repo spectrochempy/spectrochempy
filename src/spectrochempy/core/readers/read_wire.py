@@ -927,5 +927,5 @@ def _read_wdf(*args, **kwargs):
         return None
     dataset.name = filename.stem
     dataset.filename = filename
-    dataset.history = f"Imported from {filename}"
+    dataset.history = f"Imported from {filename.name}"
     return dataset

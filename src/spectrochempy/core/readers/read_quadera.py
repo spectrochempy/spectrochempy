@@ -8,6 +8,7 @@
 __all__ = ["read_quadera"]
 
 import re
+from datetime import UTC
 from datetime import datetime
 from warnings import warn
 
@@ -218,7 +219,9 @@ def _read_asc(*args, **kwargs):
     _x = Coord(labels=channels)
     dataset.set_coordset(y=_y, x=_x)
 
-    # Set origin, description and history
+    # Set origin, acquisition date, description and history
+    dataset.origin = "quadera"
+    dataset.acquisition_date = datetime.fromtimestamp(min(times[:, 0]), tz=UTC)
     dataset.history = f"Imported from Quadera asc file {filename}"
 
     # reset modification date to cretion date

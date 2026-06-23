@@ -55,6 +55,15 @@ Bug Fixes
   ``origin="labspec"``, and JCAMP imports now preserve deterministic source
   origin information when provided.
 
+- The WiRE reader now populates ``dataset.author`` from the file's username
+  field, ``dataset.acquisition_date`` from the first ORGN time-stamp, and
+   records a clean ``Imported from {filename.name}`` history entry without a
+   redundant inline timestamp (the setter auto-prepends one).
+
+- The Quadera reader now sets ``dataset.origin = "quadera"`` and populates
+  ``dataset.acquisition_date`` from the first acquisition timestamp. Channel
+  labels and y-coordinate timestamps are preserved unchanged.
+
 - TopSpin/NMR datasets whose reader assigns intensity units as ``count`` now
   render that canonical unit consistently in dataset summaries and related
   displays, instead of unexpectedly showing ``pp``.
