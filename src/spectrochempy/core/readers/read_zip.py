@@ -80,6 +80,11 @@ def read_zip(*paths, **kwargs):
         A pattern to filter the files to read.
 
         .. versionadded:: 0.7.2
+    only : `int`, optional
+        Limit ZIP import to the first readable files discovered in the archive.
+        This is mainly useful for sampling large archives or for tests. The
+        limit is applied according to archive discovery order after filtering
+        ignored entries such as ``__MACOSX`` and ``.DS_Store``.
     protocol : `str`, optional
         ``Protocol`` used for reading, for example ``'scp'``, ``'omnic'``,
         ``'opus'``, ``'matlab'``, ``'jcamp'``, ``'csv'``, or ``'excel'``.
