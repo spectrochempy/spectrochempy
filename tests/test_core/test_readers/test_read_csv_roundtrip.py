@@ -70,3 +70,41 @@ def test_read_csv_roundtrip_with_units(tmp_path):
     assert loaded.squeeze().shape == ds.shape
     assert np.allclose(loaded.data.squeeze(), ds.data)
     assert np.allclose(loaded.x.data, ds.x.data)
+
+
+def test_read_csv_roundtrip_preserves_simple_scp_metadata_header(tmp_path):
+    coord = scp.Coord(np.linspace(100, 500, 5), title="wavelength", units="nm")
+    ds = scp.NDDataset(
+        np.array([0.1, 0.2, 0.3, 0.4, 0.5]),
+        coordset=[coord],
+        title="absorbance",
+        units="absorbance",
+    )
+    filepath = tmp_path / "test_metadata_roundtrip.csv"
+    ds.write_csv(filepath)
+
+    loaded = scp.read_csv(filepath)
+
+    assert loaded.title == "absorbance"
+    assert loaded.units == ds.units
+    assert loaded.x.title == "wavelength"
+    assert loaded.x.units == ds.x.units
+    assert np.allclose(loaded.x.data, ds.x.data)
+    assert np.allclose(loaded.data.squeeze(), ds.data)
+
+
+def test_read_csv_external_header_without_scp_metadata_keeps_current_semantics(
+    tmp_path,
+):
+    filepath = tmp_path / "external.csv"
+    filepath.write_text("x,y\n1,10\n2,20\n3,30\n")
+
+    loaded = scp.read_csv(filepath)
+
+    assert loaded.name == "external"
+    assert loaded.title == "<untitled>"
+    assert loaded.units is None
+    assert loaded.x.title == "<untitled>"
+    assert loaded.x.units is None
+    assert np.allclose(loaded.x.data, np.array([1.0, 2.0, 3.0]))
+    assert np.allclose(loaded.data.squeeze(), np.array([10.0, 20.0, 30.0]))

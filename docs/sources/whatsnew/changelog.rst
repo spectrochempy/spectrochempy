@@ -54,6 +54,12 @@ Bug Fixes
   existing dataset, and restored through the portable xarray/NetCDF import
   paths. (:issue:`1227`)
 
+- ``read_csv()`` now restores the simple metadata header already emitted by
+  ``write_csv()`` for SpectroChemPy-generated 1D CSV files, preserving dataset
+  ``title``/``units`` and x-coordinate ``title``/``units`` in basic
+  write→read round-trips. Generic external CSV files keep the existing
+  fallback behavior. (:issue:`1136`)
+
 - OMNIC, OPUS, JCAMP, and LabSpec readers now populate dataset-level
   ``acquisition_date`` when reliable acquisition timestamps are already
   available from the source data, while preserving the existing

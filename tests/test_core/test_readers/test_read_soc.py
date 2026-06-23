@@ -16,7 +16,7 @@ from spectrochempy.utils.objects import ScpObjectList
 pytestmark = pytest.mark.network
 
 
-def test_read_soc_merge_behavior():
+def test_read_soc_merge_behavior(tmp_path):
     """Test that read_soc respects merge parameter.
 
     This test downloads sample files and verifies:
@@ -36,9 +36,10 @@ def test_read_soc_merge_behavior():
         try:
             response = requests.get(baseurl + fname, timeout=10)
             if response.status_code == 200:
-                with open(fname, "wb") as f:
+                local_path = tmp_path / Path(fname).name
+                with local_path.open("wb") as f:
                     f.write(response.content)
-                downloaded_files[Path(fname).suffix.upper()] = fname
+                downloaded_files[Path(fname).suffix.upper()] = local_path
         except requests.exceptions.RequestException:
             # Network error, skip this file
             continue
@@ -94,13 +95,13 @@ def test_read_soc_merge_behavior():
         # Cleanup downloaded files
         for fname in downloaded_files.values():
             if int(platform.python_version_tuple()[1]) > 7:
-                Path(fname).unlink(missing_ok=True)
+                fname.unlink(missing_ok=True)
             else:
-                if Path(fname).exists():
-                    Path(fname).unlink()
+                if fname.exists():
+                    fname.unlink()
 
 
-def test_read_SOC():
+def test_read_SOC(tmp_path):
     """upload and read surface oftics exemple"""
 
     # the following does not work
@@ -122,25 +123,26 @@ def test_read_SOC():
             continue
 
         downloaded_any = True
-        with open(fname, "wb") as f:
+        local_path = tmp_path / Path(fname).name
+        with local_path.open("wb") as f:
             f.write(response.content)
 
         try:
-            ds = scp.read_soc(fname)
+            ds = scp.read_soc(local_path)
             assert str(ds) == "NDDataset: [float64] unitless (shape: (y:1, x:599))"
             assert ds.title == "reflectance"
             if i == 0:
-                ds_ = scp.read_ddr(fname)
+                ds_ = scp.read_ddr(local_path)
             elif i == 1:
-                ds_ = scp.read_hdr(fname)
+                ds_ = scp.read_hdr(local_path)
             else:
-                ds_ = scp.read_sdr(fname)
+                ds_ = scp.read_sdr(local_path)
             assert ds_.name == ds.name
         finally:
             if int(platform.python_version_tuple()[1]) > 7:
-                Path(fname).unlink(missing_ok=True)
+                local_path.unlink(missing_ok=True)
             else:
-                Path(fname).unlink()
+                local_path.unlink()
 
     if not downloaded_any:
         pytest.skip("Could not download SOC test data from GitHub")
