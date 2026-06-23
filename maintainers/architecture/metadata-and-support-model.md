@@ -379,7 +379,9 @@ it into an interchange-oriented schema.
 
 ## Reader Alignment Status
 
-Reader normalization alignment is COMPLETED FOR HIGH-VALUE READERS:
+Reader normalization alignment is COMPLETED for the maintained campaign scope.
+
+### Wave 1
 
 | Reader | acquisition_date | origin | history | Status |
 | ------ | --------------- | ------ | ------- | ------ |
@@ -390,10 +392,25 @@ Reader normalization alignment is COMPLETED FOR HIGH-VALUE READERS:
 | CSV (generic + OMNIC) | OMNIC CSV parses date from filename | Caller-specified or OMNIC-flavored | Import event | ALIGNED |
 | TopSpin (plugin) | Set from vendor DATE | `topspin` | Import event | ALIGNED |
 
-Semantic characterization baselines and provenance assertions exist for all
-six high-value readers listed above. Second-wave readers (WiRE, SPC, Quadera,
-MATLAB/DSO, Carroucell, SOC) retain their existing normalization but have not
-been through the same targeted alignment campaign.
+### Wave 2
+
+| Reader | acquisition_date | origin | history | Status |
+| ------ | --------------- | ------ | ------- | ------ |
+| WiRE | Set from first session timestamp | application/version per reader convention | Import event | ALIGNED |
+| Quadera | Set from first acquisition timestamp | `quadera` | Import event | ALIGNED |
+| SOC | Inherited OMNIC-style acquisition provenance | `soc` | SOC-specific import event appended while preserving inherited provenance | ALIGNED |
+| MATLAB/DSO | DSO acquisition provenance promoted when available | `matlab` / `dso` | Import event; DSO vendor history preserved | ALIGNED |
+| SPC | Set from parsed header/session timestamp | `thermo galactic` | Import event | ALIGNED |
+
+Semantic characterization baselines and provenance assertions now exist for the
+targeted wave-1 and wave-2 readers listed above.
+
+Topics intentionally left outside this completed campaign include:
+
+- Carroucell temperature semantics;
+- vendor-log classification refinements such as SPC `LOGSTC`;
+- wording harmonization of history messages;
+- additional vendor-specific metadata promotion work.
 
 For the complete reader normalization contract and per-reader destination rules,
 see [`reader-normalization-architecture.md`](reader-normalization-architecture.md).

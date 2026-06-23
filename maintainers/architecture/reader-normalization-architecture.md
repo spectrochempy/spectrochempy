@@ -3,8 +3,9 @@
 ## Status
 
 IMPLEMENTED — This architecture is authoritative for the maintained reader
-normalization contract. Reader alignment is COMPLETED FOR HIGH-VALUE READERS
-(OMNIC, OPUS, JCAMP, LabSpec, CSV, TopSpin).
+normalization contract. The Reader Alignment campaign is COMPLETED for the
+maintained wave-1 and wave-2 core readers: OMNIC, OPUS, JCAMP, LabSpec, CSV,
+TopSpin, WiRE, Quadera, SOC, MATLAB/DSO, and SPC.
 
 ## Overview
 
@@ -251,9 +252,36 @@ the primary driver of normalization decisions.
 - When in doubt, preserve useful reader-specific richness in `Meta` rather than
   inventing a new typed field.
 
+## Normalized Reader Model
+
+The implemented reader model now uses the following maintained semantic
+destinations:
+
+- `description`: object-level descriptive text, sample notes, and free-form
+  descriptive comments when they are not clearly support-local or
+  event-oriented.
+- `author`: source/operator identity when the reader can recover a meaningful
+  person or user value.
+- `origin`: reader or source-format identity using the maintained vocabulary or
+  preserved source value where the contract explicitly allows it.
+- `acquisition_date`: dataset/session provenance time when a reliable source
+  timestamp is available.
+- `history`: explicit import events, reader-driven reorder events, and vendor
+  processing history when the source clearly provides an event-like trail that
+  can be extracted safely.
+- coordinates: support geometry, axis-local titles/units, elapsed time, and
+  timestamp axes that locate observations structurally.
+- labels: pointwise identifiers, acquisition names, channel names, and other
+  support-local annotations or categories.
+- `Meta`: useful vendor-specific technical payloads and reader-specific
+  information that does not belong to a normalized typed field.
+
+This is the maintained “semantic destination” model for contributors adding or
+updating readers.
+
 ## Canonical Origin Vocabulary
 
-The maintained origin values for high-value readers are:
+The maintained origin values for the covered readers are:
 
 | Reader | `origin` value |
 | ------ | -------------- |
@@ -264,8 +292,12 @@ The maintained origin values for high-value readers are:
 | TopSpin | `topspin` |
 | CSV generic | caller-specified |
 | CSV OMNIC | `omnic` |
-| SPC | `thermo galactic` |
 | WiRE | application/version per reader convention |
+| Quadera | `quadera` |
+| SOC | `soc` |
+| MATLAB generic | `matlab` |
+| DSO | `dso` |
+| SPC | `thermo galactic` |
 
 ## Dual-Time Rule
 
@@ -303,7 +335,10 @@ The maintained history policy for reader normalization is:
 
 ## Reader Alignment Status
 
-Reader normalization alignment is COMPLETED FOR HIGH-VALUE READERS:
+Reader normalization alignment is COMPLETED for the maintained reader-alignment
+campaign scope.
+
+### Wave 1
 
 | Reader | `acquisition_date` | `origin` | `history` | Semantic tests |
 | ------ | ------------------ | -------- | --------- | -------------- |
@@ -314,6 +349,32 @@ Reader normalization alignment is COMPLETED FOR HIGH-VALUE READERS:
 | CSV | OMNIC date from filename | caller-specified or `omnic` | Import event | CHARACTERIZED |
 | TopSpin | Set from vendor DATE | `topspin` | Import event | CHARACTERIZED |
 
-Second-wave readers (WiRE, SPC, Quadera, MATLAB/DSO, Carroucell, SOC) have
-existing normalization but have not been through the targeted provenance
-alignment campaign. They remain active normalization candidates.
+### Wave 2
+
+| Reader | `acquisition_date` | `origin` | `history` | Semantic tests |
+| ------ | ------------------ | -------- | --------- | -------------- |
+| WiRE | Set from first ORGN/session timestamp | application/version per reader convention | Import event | CHARACTERIZED |
+| Quadera | Set from first acquisition timestamp | `quadera` | Import event | CHARACTERIZED |
+| SOC | Inherited OMNIC-style acquisition provenance | `soc` | SOC-specific import event appended without losing inherited provenance | CHARACTERIZED |
+| MATLAB/DSO | DSO acquisition provenance promoted when available | `matlab` / `dso` | Import event; DSO vendor history preserved | CHARACTERIZED |
+| SPC | Set from parsed header/session timestamp | `thermo galactic` | Import event | CHARACTERIZED |
+
+### Campaign outcome
+
+Major outcomes of the completed campaign:
+
+- semantic characterization baselines now exist for the targeted readers;
+- `acquisition_date` is normalized across both campaign waves where reliable
+  source/session timestamps exist;
+- `origin` normalization and canonical vocabulary are documented and
+  implemented for the covered readers;
+- history consistency is established around explicit import events, with vendor
+  processing history preserved where the source clearly exposes it;
+- author normalization is implemented where meaningful source/operator identity
+  is available;
+- the contributor guide for adding readers now documents the maintained
+  semantic destinations and the dual-time rule.
+
+Carroucell remains intentionally outside the completed reader-alignment
+campaign scope. Its temperature representation and related plugin semantics are
+future enhancement topics, not unfinished core reader-alignment work.

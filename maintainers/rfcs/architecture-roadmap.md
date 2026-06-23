@@ -379,7 +379,7 @@ coordinates, and broader xarray/NetCDF RFC synchronization.
 
 ## Reader Alignment / Provenance Normalization
 
-Status: COMPLETED FOR HIGH-VALUE READERS
+Status: COMPLETED
 
 Refer to:
 * [`maintainers/architecture/reader-normalization-architecture.md`](../architecture/reader-normalization-architecture.md)
@@ -390,22 +390,25 @@ Refer to:
 Major outcomes:
 
 * semantic characterization baselines established for OMNIC, OPUS, JCAMP,
-  LabSpec, CSV, and TopSpin (PR1);
-* `acquisition_date` normalized across OMNIC, OPUS, JCAMP, and LabSpec while
-  retaining pointwise time coordinates (PR2);
-* `origin` consistency established for OMNIC (all variants), JCAMP (deterministic
-  multi-origin), and LabSpec; canonical origin vocabulary documented (PR3);
+  LabSpec, CSV, TopSpin, WiRE, Quadera, SOC, MATLAB/DSO, and SPC;
+* `acquisition_date` normalized across both campaign waves while retaining
+  pointwise time coordinates where they already existed;
+* `origin` consistency established and canonical origin vocabulary documented
+  for the covered readers;
 * history policy established: import events required, vendor processing history
-  preserved where available, reorder events explicitly recorded (PR4);
-* TopSpin gained import-history event; JCAMP sort dimension corrected (PR4);
+  preserved where available, reorder events explicitly recorded;
+* TopSpin gained import-history event; JCAMP sort dimension corrected;
+* WiRE, Quadera, SOC, MATLAB/DSO, and SPC provenance normalization completed
+  in the second-wave follow-up work;
 * dual-time rule (`acquisition_date` + time coordinates) documented in both
   the developer guide and architecture notes;
 * portable-persistence alignment for all typed provenance fields completed
   across PR1–PR3 of the parallel portable-persistence campaign.
 
-Current priority: Closed for high-value readers. Second-wave readers (WiRE,
-SPC, Quadera, MATLAB/DSO, Carroucell, SOC) and vendor-history extraction for
-OMNIC SPG remain future candidates.
+Current priority: Closed as an alignment campaign. Remaining related items are
+future enhancements rather than unfinished alignment work, including
+Carroucell temperature semantics, optional vendor-log classification/refinement
+policies, and cosmetic history-message harmonization.
 
 ---
 
