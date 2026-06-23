@@ -67,6 +67,11 @@ Bug Fixes
   semicolon, and tab. The reader remains intentionally limited to simple
   numeric tabular files. (:issue:`1137`)
 
+- ``read_zip()`` now discovers readable files recursively inside nested ZIP
+  directory structures instead of assuming files are only at archive root or
+  inside a single top-level directory. Existing filtering of ``__MACOSX`` and
+  ``.DS_Store`` entries is preserved. (:issue:`1139`)
+
 - OMNIC, OPUS, JCAMP, and LabSpec readers now populate dataset-level
   ``acquisition_date`` when reliable acquisition timestamps are already
   available from the source data, while preserving the existing
