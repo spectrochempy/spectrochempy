@@ -85,7 +85,9 @@ def test_read_matlab_single_1d_array_currently_uses_row_shape_and_no_coordset(tm
     assert any("Imported from .mat file" in str(entry) for entry in dataset.history)
 
 
-def test_read_matlab_single_2d_array_preserves_values_without_materialized_coords(tmp_path):
+def test_read_matlab_single_2d_array_preserves_values_without_materialized_coords(
+    tmp_path,
+):
     path = tmp_path / "single_2d.mat"
     values = np.arange(6).reshape(2, 3)
     savemat(path, {"image": values})
