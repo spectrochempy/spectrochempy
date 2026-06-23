@@ -68,6 +68,43 @@ def test_read_matlab_multiple_variables(tmp_path):
     assert not any(ds.name.startswith("__") for ds in datasets)
 
 
+def test_read_matlab_single_1d_array_currently_uses_row_shape_and_no_coordset(tmp_path):
+    path = tmp_path / "single_1d.mat"
+    savemat(path, {"trace": np.arange(5)})
+
+    dataset = read_matlab(path)
+
+    assert isinstance(dataset, NDDataset)
+    assert dataset.name == "trace"
+    assert dataset.shape == (1, 5)
+    assert np.array_equal(dataset.data, np.arange(5).reshape(1, 5))
+    assert dataset.origin == "matlab"
+    assert dataset.coordset is None
+    assert dataset.x is None
+    assert dataset.y is None
+    assert any("Imported from .mat file" in str(entry) for entry in dataset.history)
+
+
+def test_read_matlab_single_2d_array_preserves_values_without_materialized_coords(
+    tmp_path,
+):
+    path = tmp_path / "single_2d.mat"
+    values = np.arange(6).reshape(2, 3)
+    savemat(path, {"image": values})
+
+    dataset = read_matlab(path)
+
+    assert isinstance(dataset, NDDataset)
+    assert dataset.name == "image"
+    assert dataset.shape == (2, 3)
+    assert np.array_equal(dataset.data, values)
+    assert dataset.origin == "matlab"
+    assert dataset.coordset is None
+    assert dataset.x is None
+    assert dataset.y is None
+    assert any("Imported from .mat file" in str(entry) for entry in dataset.history)
+
+
 def test_read_matlab_same_shape_arrays_are_stacked(tmp_path):
     # same-shape numeric arrays are stacked by the importer into a single
     # NDDataset (the documented merge behaviour), so two (1, n) arrays come
@@ -85,3 +122,18 @@ def test_read_matlab_same_shape_arrays_are_stacked(tmp_path):
 
     assert isinstance(result, NDDataset)
     assert result.shape == (2, 5)
+
+
+def test_read_matlab_three_dimensional_array_preserves_shape_and_values(tmp_path):
+    path = tmp_path / "cube.mat"
+    values = np.arange(24).reshape((2, 3, 4), order="F")
+    savemat(path, {"cube": values})
+
+    dataset = read_matlab(path)
+
+    assert isinstance(dataset, NDDataset)
+    assert dataset.name == "cube"
+    assert dataset.shape == (2, 3, 4)
+    assert np.array_equal(dataset.data, values)
+    assert dataset.origin == "matlab"
+    assert dataset.coordset is None
