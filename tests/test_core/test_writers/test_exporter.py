@@ -52,4 +52,20 @@ def test_write(mock_cwd, ndataset_1d):
     filename.unlink()
 
 
+def test_excel_writer_entry_points_are_not_public(ndataset_1d):
+    nd = ndataset_1d.copy()
+
+    assert not hasattr(scp, "write_excel")
+    assert not hasattr(scp, "write_xls")
+    assert not hasattr(nd, "write_excel")
+    assert not hasattr(nd, "write_xls")
+
+
+def test_write_xls_uses_unsupported_format_path(ndataset_1d):
+    nd = ndataset_1d.copy()
+
+    with pytest.raises(ValueError, match=r"Unsupported export format `\.xls`"):
+        nd.write("unsupported.xls", overwrite=True)
+
+
 # EOF

@@ -195,6 +195,11 @@ Bug Fixes
 Breaking Changes
 ~~~~~~~~~~~~~~~~
 
+- Removed the unsupported public Excel writer entry points
+  ``write_excel()`` and ``write_xls()``. ``.xls`` export attempts now fail
+  through the standard unsupported-format path instead of exposing a public
+  API that was never implemented. (:issue:`1260`)
+
 - ``NDDataset.to_xarray()`` now returns a canonical ``xarray.Dataset`` instead
   of a bare ``xarray.DataArray``, aligning the API with the new portable
   mapping RFC and the future NetCDF/Zarr-oriented interchange model.

@@ -37,13 +37,26 @@ class Exporter(HasTraits):
             if "filetypes" not in kwargs:
                 kwargs["filetypes"] = list(self.filetypes.values())
                 if args and args[0] is not None:  # filename
-                    protocol = self.protocols[pathclean(args[0]).suffix]
-                    kwargs["filetypes"] = [self.filetypes[protocol]]
+                    suffix = pathclean(args[0]).suffix
+                    if suffix in self.protocols:
+                        protocol = self.protocols[suffix]
+                        kwargs["filetypes"] = [self.filetypes[protocol]]
             filename = check_filename_to_save(self.object, *args, **kwargs)
             if filename is None:
                 return None
             if kwargs.get("suffix", ""):
                 filename = filename.with_suffix(kwargs.get("suffix", ""))
+            if filename.suffix not in self.protocols:
+                supported = ", ".join(
+                    sorted(
+                        suffix if suffix.startswith(".") else f".{suffix}"
+                        for suffix in self.protocols
+                    )
+                )
+                raise ValueError(
+                    f"Unsupported export format `{filename.suffix}`. "
+                    f"Supported suffixes are: {supported}."
+                )
             protocol = self.protocols[filename.suffix]
             write_ = getattr(self, f"_write_{protocol}")
             write_(self.object, filename, **kwargs)
@@ -101,7 +114,7 @@ def write(dataset, filename=None, **kwargs):
 
     Other Parameters
     ----------------
-    protocol : {'scp', 'matlab', 'jcamp', 'csv', 'excel'}, optional
+    protocol : {'scp', 'matlab', 'jcamp', 'csv'}, optional
         Protocol used for writing. If not provided, the correct protocol
         is inferred (whnever it is possible) from the file name extension.
     directory : str, optional

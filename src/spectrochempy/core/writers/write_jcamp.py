@@ -28,7 +28,7 @@ def write_jcamp(*args, **kwargs):
     ----------
     filename: str or pathlib object, optional
         If not provided, a dialog is opened to select a file for writing.
-    protocol : {'scp', 'matlab', 'jcamp', 'csv', 'excel'}, optional
+    protocol : {'scp', 'matlab', 'jcamp', 'csv'}, optional
         Protocol used for writing. If not provided, the correct protocol
         is inferred (whnever it is possible) from the file name extension.
     directory : str, optional

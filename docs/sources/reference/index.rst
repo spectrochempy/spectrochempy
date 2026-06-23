@@ -208,11 +208,9 @@ Export a NDDataset
     NDDataset.save_as
     write
     write_csv
-    write_excel
     write_jcamp
     write_mat
     write_matlab
-    write_xls
     to_array
     to_netcdf
     to_xarray

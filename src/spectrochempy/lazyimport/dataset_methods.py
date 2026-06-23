@@ -63,8 +63,6 @@ _LAZY_DATASETS_IMPORTS = {
     "plot_waterfall": "spectrochempy.plotting.plot3d",
     "write": "spectrochempy.core.writers.exporter",
     "write_csv": "spectrochempy.core.writers.write_csv",
-    "write_excel": "spectrochempy.core.writers.write_excel",
-    "write_xls": "spectrochempy.core.writers.write_excel",
     "write_jcamp": "spectrochempy.core.writers.write_jcamp",
     "write_matlab": "spectrochempy.core.writers.write_matlab",
     "write_mat": "spectrochempy.core.writers.write_matlab",
