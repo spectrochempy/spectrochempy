@@ -447,7 +447,7 @@ Major outcomes:
   `maintainers/architecture/reader-normalization-architecture.md`;
 * portable persistence alignment completed for all typed provenance fields;
 * reader-normalization alignment completed for OMNIC, OPUS, JCAMP, LabSpec,
-  CSV, and TopSpin.
+  CSV, TopSpin, WiRE, Quadera, SOC, MATLAB/DSO, and SPC.
 
 Current priority: Low for conceptual design; future work is limited to
 follow-up topics listed below.
@@ -565,7 +565,7 @@ Questions include:
 
 This topic should be addressed before any class hierarchy split.
 
-Status: Active.
+Status: Maintained contract; future targeted reviews only.
 
 ---
 
@@ -603,9 +603,12 @@ Examples include:
 * OPUS improvements;
 * SPG support;
 * PerkinElmer support;
-* CSDM integration;
 * plugin ecosystem improvements;
 * documentation improvements.
+
+Examples of possible future interoperability work:
+
+* CSDM integration.
 
 User-facing improvements should generally take precedence when they provide immediate value.
 
@@ -643,7 +646,7 @@ clearer.
 
 ## Result Assembly Architecture
 
-Status: Audited; RFC drafted; partial implementation completed.
+Status: Largely subsumed by Result Object contract.
 
 Motivation:
 
@@ -657,6 +660,8 @@ Current state:
   `maintainers/architecture/result-object-contract-rfc.md`.
 - Campaign summary documented in
   `maintainers/architecture/result-object-migration-roadmap.md`.
+- This topic is now largely subsumed by the implemented Result Object
+  contract.
 
 Future work should clarify:
 - deferred infrastructure work around serialization, Project integration,
@@ -664,6 +669,66 @@ Future work should clarify:
 - whether broader result-surface conventions beyond the current contract need
   further consolidation
 - whether multi-output objects ever need a richer collection abstraction
+
+---
+
+## Result Object Infrastructure Follow-Up
+
+Status: Future candidate.
+
+Current assessment:
+
+The core Result Object campaign is complete, but a small set of follow-up
+infrastructure topics is now clearly scoped.
+
+Examples include:
+
+* serialization;
+* `Project` integration;
+* provenance enrichment;
+* display integration;
+* caching.
+
+This topic should be treated as follow-up infrastructure work, not as a
+reopening of the completed core Result Object migration campaign.
+
+---
+
+## Display / Plotting Ecosystem
+
+Status: Future candidate.
+
+Current assessment:
+
+The core display architecture is implemented, but broader plotting ecosystem
+questions remain visible as future design work rather than active campaign
+items.
+
+Examples include:
+
+* backend abstraction boundaries;
+* Matplotlib coupling;
+* plugin-owned plotting extensions and formatting hooks.
+
+This topic is distinct from the completed core display-architecture campaign.
+
+---
+
+## Carroucell Support Semantics
+
+Status: Future candidate.
+
+Current assessment:
+
+Carroucell was explicitly left outside the completed Reader Alignment campaign.
+Its remaining questions are support/label semantics questions rather than
+unfinished core reader-alignment work.
+
+Examples include:
+
+* temperature representation;
+* label-vs-auxiliary-coordinate placement;
+* plugin-specific support semantics cleanup.
 
 ---
 
