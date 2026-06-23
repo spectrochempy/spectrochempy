@@ -14,22 +14,34 @@ SpectroChemPy
 
 ## What is SpectroChemPy?
 
-SpectroChemPy (SCPy) is a framework for processing, analyzing and modeling spectroscopic data for chemistry with Python. It is cross-platform (Linux, Windows, macOS) and features a lightweight core with optional plugins for domain-specific workflows.
+SpectroChemPy (SCPy) is a framework for processing, analyzing, and modeling
+spectroscopic data for chemistry with Python. It is cross-platform (Linux,
+Windows, macOS) and combines a lightweight scientific core with optional
+plugins for domain-specific workflows.
+
+Its central object, `NDDataset`, provides numerical data together with
+coordinates, units, masks, labels, provenance, and metadata, making it easier
+to build reproducible spectroscopy workflows in Python.
 
 ## Key Features
 
-* **Core Data Structure**: `NDDataset` object with labeled axes and metadata
-* **Project Management**: Work with multiple `NDDataset` objects simultaneously
+* **Core Data Structure**: `NDDataset` with coordinates, units, masks, labels,
+  provenance, and metadata
+* **Project Management**: Organize and manipulate multiple datasets within a
+  `Project`
 * **Data Processing**:
-  * Physical units support
-  * Mathematical operations, baseline correction, automatic subtraction
-  * Generic FFT with plugin-specific post-processing
+  * Unit-aware mathematical operations
+  * Baseline correction, automatic subtraction, interpolation, FFT workflows
+  * Core processing with plugin-specific extensions where appropriate
 * **Analysis Tools**:
-  * SVD, PCA, MCR-ALS, EFA, PLS, fitting …
-* **I/O Support**:
-  * Import from various experiment formats
-  * Export to CSV, JCAMP-DX, MATLAB …
-  * Plugin-based readers (NMR TopSpin, Carroucell …)
+  * SVD, PCA, MCR-ALS, EFA, PLS, fitting, and related result objects
+* **I/O and Interoperability**:
+  * Import from major spectroscopy and scientific data formats
+  * Export to lightweight interchange formats such as CSV and JCAMP-DX
+  * Portable `NDDataset ↔ xarray.Dataset ↔ NetCDF` round-trips for the
+    maintained portable subset
+  * Safe native `.scp` / `.pscp` persistence by default, with explicit legacy
+    opt-in only for historical trusted archives
 * **Plugin System**:
   * Automatic discovery of optional plugins
   * Namespaced APIs: `scp.nmr.read_topspin(...)`, `scp.iris.IRIS()`
@@ -76,10 +88,16 @@ manually::
 * 📝 [How to Cite](https://www.spectrochempy.fr/credits/citing.html)
 * 💻 [Source Code](https://github.com/spectrochempy/spectrochempy)
 
-## For maintainers
+## For contributors
 
-Internal documentation for project maintainers (release procedures, incident
-recovery) is available in the [`maintainers/`](maintainers/) directory.
+If you want to contribute, start with:
+
+* [`CONTRIBUTING.md`](CONTRIBUTING.md)
+* the developer guide under [`docs/sources/devguide/`](docs/sources/devguide/)
+* the [issue tracker](https://github.com/spectrochempy/spectrochempy/issues)
+
+Maintainer-specific release and architecture notes live in
+[`maintainers/`](maintainers/).
 
 ## License
 
