@@ -126,7 +126,9 @@ def test_read_spc(galacticdata):
     S = scp.read_spc("galacticdata/SPECTRUM_WITH_BAD_BASELINE.SPC")
     # no acquisition time
     if S is None:
-        pytest.skip("SPECTRUM_WITH_BAD_BASELINE.SPC is not readable in this test environment")
+        pytest.skip(
+            "SPECTRUM_WITH_BAD_BASELINE.SPC is not readable in this test environment"
+        )
     assert S.shape == (1, 1400)
 
     T = scp.read_spc("galacticdata/TOLUENE.SPC")
@@ -169,7 +171,9 @@ def test_read_spc_without_collection_time_keeps_acquisition_date_empty(galacticd
     dataset = scp.read_spc("galacticdata/SPECTRUM_WITH_BAD_BASELINE.SPC")
 
     if dataset is None:
-        pytest.skip("SPECTRUM_WITH_BAD_BASELINE.SPC is not readable in this test environment")
+        pytest.skip(
+            "SPECTRUM_WITH_BAD_BASELINE.SPC is not readable in this test environment"
+        )
     assert dataset.acquisition_date is None
     assert dataset._acquisition_date is None
     assert dataset.y.title == "acquisition timestamp (GMT)"
