@@ -767,7 +767,15 @@ class TestSocCharacterization:
         assert_history_present(soc_sdr_dataset, "Imported from SOC SDR file")
 
 
+GALACTICDATA = prefs.datadir / "galacticdata"
 MATLABDATA = prefs.datadir / "matlabdata"
+
+
+@pytest.fixture
+def galacticdata():
+    if not GALACTICDATA.exists():
+        pytest.skip("test data not available (set SCP_TEST_DATA_DOWNLOAD=1)")
+    return GALACTICDATA
 
 
 @pytest.fixture
@@ -775,6 +783,76 @@ def matlabdata():
     if not MATLABDATA.exists():
         pytest.skip("test data not available (set SCP_TEST_DATA_DOWNLOAD=1)")
     return MATLABDATA
+
+
+class TestSpcCharacterization:
+    """Characterize current SPC semantic placement."""
+
+    def test_single_subfile_identity_provenance_coordinates_and_labels(
+        self, galacticdata
+    ):
+        dataset = scp.read_spc(galacticdata / "BENZENE.SPC")
+
+        assert_dataset_identity(
+            dataset,
+            title="Absorbance",
+            units="absorbance",
+        )
+        assert_dataset_provenance(
+            dataset,
+            filename_name="BENZENE.SPC",
+            origin="thermo galactic",
+            description_contains="Dataset from spc file.",
+            acquisition_date_present=True,
+        )
+        assert dataset._acquisition_date.year == 1997
+        assert_history_present(dataset, "Imported from spc file")
+
+        x_coord = assert_coordinate_semantics(dataset, "x", title="Wavenumbers")
+        assert str(x_coord.units) in {"cm^-1", "cm⁻¹"}
+        y = assert_coordinate_semantics(
+            dataset, "y", title="acquisition timestamp (GMT)", units="s"
+        )
+        labels = assert_label_structure(y, shape=(1,))
+        assert isinstance(labels[0], datetime)
+        assert x_coord.labels is None
+
+    def test_multi_subfile_common_x_provenance_and_coordinates(self, galacticdata):
+        dataset = scp.read_spc(galacticdata / "CONTOUR.SPC")
+
+        assert dataset.shape == (19, 179)
+        assert_dataset_provenance(
+            dataset,
+            origin="thermo galactic",
+            acquisition_date_present=True,
+        )
+        assert dataset._acquisition_date == datetime(1997, 3, 9, 8, 46, 0)
+        assert_history_present(dataset, "Imported from spc file")
+
+        assert_coordinate_semantics(dataset, "x", size=179)
+        assert_coordinate_semantics(dataset, "y", title="axis title", size=19)
+
+    def test_single_subfile_no_acquisition_time(self, galacticdata):
+        dataset = scp.read_spc(galacticdata / "SPECTRUM_WITH_BAD_BASELINE.SPC")
+
+        if dataset is None:
+            pytest.skip(
+                "SPECTRUM_WITH_BAD_BASELINE.SPC is not readable in this test environment"
+            )
+        assert_dataset_provenance(
+            dataset,
+            acquisition_date_present=False,
+        )
+
+    def test_meta_fields(self, galacticdata):
+        dataset = scp.read_spc(galacticdata / "BENZENE.SPC")
+
+        assert_meta_keys_present(
+            dataset,
+            "technique",
+            "fileformat",
+            "scpversion",
+        )
 
 
 class TestMatlabCharacterization:

@@ -63,7 +63,7 @@ Bug Fixes
   origin information when provided.
 
 - Reader provenance alignment for second-wave formats (WiRE, Quadera, SOC,
-  MATLAB/DSO).
+  MATLAB/DSO, SPC).
   WiRE: populates ``dataset.author`` from the file username field,
   ``dataset.acquisition_date`` from the first ORGN timestamp, and uses a clean
   history message without redundant inline timestamps.
@@ -77,6 +77,9 @@ Bug Fixes
   (17 entries were collapsed by incorrect numpy indexing — now all are
   correctly extracted); replaces ad-hoc ``dataset.date`` with
   ``dataset.acquisition_date`` for serialization compatibility.
+  SPC: promotes the parsed session/header acquisition timestamp to
+  ``dataset.acquisition_date`` while preserving the existing coordinate-local
+  timing semantics for single- and multi-subfile datasets.
 
 - TopSpin/NMR datasets whose reader assigns intensity units as ``count`` now
   render that canonical unit consistently in dataset summaries and related
