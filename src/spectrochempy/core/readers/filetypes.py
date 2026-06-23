@@ -49,7 +49,6 @@ class FileTypeRegistry:
             ("dso", "Data Set Object files (*.dso)"),
             ("jcamp", "JCAMP-DX files (*.jdx *dx)"),
             ("csv", "CSV files (*.csv)"),
-            ("excel", "Microsoft Excel files (*.xls)"),
         ]
 
     def register_filetype(
