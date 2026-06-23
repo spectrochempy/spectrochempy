@@ -1059,6 +1059,9 @@ def _read_spc(*args, **kwargs):
 
         dataset.history = f"Imported from spc file {filename}."
 
+        if spcf.acqdate.timestamp() > 0:
+            dataset.acquisition_date = spcf.acqdate
+
         if spcf.y_units == "Interferogram":
             # interferogram
             dataset.meta.interferogram = True

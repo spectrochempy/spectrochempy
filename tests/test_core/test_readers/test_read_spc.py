@@ -5,6 +5,8 @@
 # ======================================================================================
 # ruff: noqa
 
+from datetime import datetime
+
 import numpy as np
 import pytest
 
@@ -136,6 +138,38 @@ def test_read_spc(galacticdata):
 
     W = scp.read_spc("galacticdata/XYTRACE.SPC")
     assert W.shape == (1, 3469)
+
+
+@pytest.mark.data
+def test_read_spc_single_subfile_sets_acquisition_date_without_changing_timestamp_axis(
+    galacticdata,
+):
+    dataset = scp.read_spc("galacticdata/BENZENE.SPC")
+
+    assert dataset._acquisition_date == datetime(1997, 3, 9, 8, 46, 0)
+    assert dataset.y.title == "acquisition timestamp (GMT)"
+    assert str(dataset.y.units) == "s"
+
+
+@pytest.mark.data
+def test_read_spc_multi_subfile_sets_acquisition_date_without_changing_existing_support_time(
+    galacticdata,
+):
+    dataset = scp.read_spc("galacticdata/CONTOUR.SPC")
+
+    assert dataset._acquisition_date == datetime(1997, 3, 9, 8, 46, 0)
+    assert dataset.y.title == "axis title"
+    assert dataset.y.units is None
+
+
+@pytest.mark.data
+def test_read_spc_without_collection_time_keeps_acquisition_date_empty(galacticdata):
+    dataset = scp.read_spc("galacticdata/SPECTRUM_WITH_BAD_BASELINE.SPC")
+
+    assert dataset.acquisition_date is None
+    assert dataset._acquisition_date is None
+    assert dataset.y.title == "acquisition timestamp (GMT)"
+    assert str(dataset.y.units) == "s"
 
 
 def test_extract_x_data_reads_from_head_size_not_offset():
