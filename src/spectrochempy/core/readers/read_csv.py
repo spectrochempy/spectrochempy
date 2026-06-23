@@ -22,6 +22,60 @@ from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.core.readers.importer import _openfid
 
+
+def _parse_spectrochempy_csv_header(row):
+    """
+    Parse the simple metadata header emitted by ``write_csv()``.
+
+    The current writer emits either:
+
+    * ``[dataset_title / dataset_units]`` for data-only 1D exports; or
+    * ``[coord_title / coord_units, dataset_title / dataset_units]`` for 1D
+      exports with coordinates.
+
+    Metadata reconstruction is intentionally conservative: cells must contain
+    the explicit ``" / "`` separator used by the writer. Any parse failure
+    falls back to ``None`` metadata so generic external CSV files keep the
+    current semantics.
+    """
+
+    def _split_title_and_unit(cell):
+        if not isinstance(cell, str) or " / " not in cell:
+            return None, None
+        title, unit = cell.rsplit(" / ", 1)
+        title = title.strip()
+        unit = unit.strip()
+        if not title or not unit:
+            return None, None
+        return title, unit
+
+    if not row:
+        return {}
+
+    if len(row) == 1:
+        dataset_title, dataset_units = _split_title_and_unit(row[0])
+        if dataset_title is None:
+            return {}
+        return {
+            "dataset_title": dataset_title,
+            "dataset_units": dataset_units,
+        }
+
+    if len(row) == 2:
+        coord_title, coord_units = _split_title_and_unit(row[0])
+        dataset_title, dataset_units = _split_title_and_unit(row[1])
+        if coord_title is None or dataset_title is None:
+            return {}
+        return {
+            "coord_title": coord_title,
+            "coord_units": coord_units,
+            "dataset_title": dataset_title,
+            "dataset_units": dataset_units,
+        }
+
+    return {}
+
+
 try:
     locale.setlocale(locale.LC_ALL, "en_US")  # to avoid problems with date format
 except Exception:  # pragma: no cover
@@ -169,6 +223,7 @@ def _read_csv(*args, **kwargs):
         delimiter = ";"
 
     d = list(csv.reader(txt.splitlines(), delimiter=delimiter))
+    header_metadata = {}
 
     # Skip header row if present (non-numeric first row from write_csv)
     def _is_numeric_row(row):
@@ -181,6 +236,7 @@ def _read_csv(*args, **kwargs):
         return True
 
     if d and not _is_numeric_row(d[0]):
+        header_metadata = _parse_spectrochempy_csv_header(d[0])
         d = d[1:]
 
     d = np.array(d, dtype=float).T
@@ -244,6 +300,15 @@ def _read_csv(*args, **kwargs):
     dataset.units = kwargs.get("units", None)
     dataset.description = kwargs.get("description", '"name" ' + "read from .csv file")
     dataset.history = "Read from .csv file"
+
+    if kwargs.get("title", None) is None and "dataset_title" in header_metadata:
+        dataset.title = header_metadata["dataset_title"]
+    if kwargs.get("units", None) is None and "dataset_units" in header_metadata:
+        dataset.units = header_metadata["dataset_units"]
+    if "coord_title" in header_metadata:
+        dataset.x.title = header_metadata["coord_title"]
+    if "coord_units" in header_metadata:
+        dataset.x.units = header_metadata["coord_units"]
 
     # here we can check some particular format
     origin = kwargs.get("origin", "")
