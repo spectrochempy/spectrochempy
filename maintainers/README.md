@@ -60,6 +60,19 @@ locales sous `audit/`.
 En pratique : commencer par `maintainers/`, puis consulter `audit/` seulement
 si le contexte historique détaillé est réellement nécessaire.
 
+## Local audit notes
+
+Audit files whose names start with `~` or `~~` are working notes. They may be
+local-only and should not be treated as authoritative maintainer
+documentation.
+
+Before closing a campaign, maintainers should check whether local audit notes
+contain architectural decisions, compatibility constraints, known
+limitations, or roadmap decisions that future maintainers will need.
+
+If so, summarize those conclusions in tracked `maintainers/` documentation or
+in a compact campaign summary before considering the campaign complete.
+
 En pratique :
 
 - commencer par ce fichier ;

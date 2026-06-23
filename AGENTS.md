@@ -93,6 +93,16 @@ Architecture and migration audit files are maintainer working notes and should
 be ignored by git by default. Name new audit files with a leading tilde so they
 match the repository ignore rule, for example `audit/~project-architecture-audit.md`.
 
+Local audit files (`~*.md`) are working notes and may not be shared with other
+maintainers.
+
+Before closing a campaign, verify whether the audit contains any
+architectural, maintenance, compatibility, or roadmap knowledge that future
+maintainers will need.
+
+If so, summarize that information in `maintainers/` before considering the
+campaign complete.
+
 Only create a tracked audit file when the maintainer explicitly asks for a
 versioned audit artifact.
 
