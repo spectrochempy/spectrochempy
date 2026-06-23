@@ -594,6 +594,61 @@ Status: Future candidate.
 
 ---
 
+## I/O Architecture Modernization (`#1105`)
+
+Status: Future candidate.
+
+Motivation:
+
+Reader Alignment normalized reader semantics and stabilized the maintained
+destinations for identity, provenance, labels, coordinates, history, and
+`Meta`, but it did not modernize the structural I/O architecture itself.
+
+The remaining architecture topic is about reducing structural duplication
+across readers while preserving format-specific parsing logic.
+
+Future work in this area should focus on:
+
+* clearer separation between file parsing and `NDDataset` construction;
+* shared reader assembly helpers where they improve consistency and
+  maintainability;
+* common normalization/assembly patterns for coordinates, units, history,
+  provenance, and metadata;
+* reducing duplicated object-assembly logic across maintained readers;
+* keeping format-specific parsing isolated from common SpectroChemPy object
+  assembly responsibilities.
+
+This remains a roadmap-level future candidate, not an active implementation
+campaign.
+
+---
+
+## Core / Plugin Boundary Review (`#1172`)
+
+Status: Future candidate.
+
+Motivation:
+
+The Result Object campaign is complete for core estimators, but the broader
+question of what belongs in core versus official plugins remains open across
+multiple areas of the codebase.
+
+This topic is broader than Result Objects alone and should be treated as a
+future architecture review rather than as residual migration work.
+
+Future work in this area should focus on:
+
+* core versus plugin ownership for analysis modules and advanced algorithms;
+* plotting/display extension boundaries;
+* specialized vendor readers and other format-specific integrations;
+* Result-object-related extensions that may not belong in core;
+* plugin registration surfaces and stable API boundaries.
+
+This remains a roadmap-level future candidate, not an active implementation
+campaign.
+
+---
+
 ## User-Facing Improvements
 
 Architectural work should not prevent progress on user-facing capabilities.
