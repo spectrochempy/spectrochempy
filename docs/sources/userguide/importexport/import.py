@@ -116,7 +116,7 @@ X
 #     # Newly written native file:
 #     # ds = scp.read("new.scp")
 #
-#     # Portable NetCDF prototype for NDDataset only:
+#     # Portable NetCDF round-trip for NDDataset:
 #     # ds.to_netcdf("new.nc")
 #     # ds2 = scp.NDDataset.from_netcdf("new.nc")
 #
@@ -129,7 +129,7 @@ X
 # NetCDF is a portable persistence path built on the canonical
 # ``NDDataset ↔ xarray.Dataset`` mapping. It currently covers `NDDataset`
 # only; full `CoordSet` fidelity and `Project` round-trips are not guaranteed
-# by this first prototype.
+# by the current portable subset.
 #
 # Other reader functions return either a single `NDDataset` or multiple `NDDataset`
 # objects, depending on the file type and content.

@@ -543,4 +543,9 @@ This RFC recommends the following:
 - Should a later RFC define a separate portable mapping for `Project`, or keep
   portable persistence dataset-only?
 
-Recommended next step: implement prototype `to_xarray()` / `from_xarray()`.
+Implementation note:
+
+- a substantial `to_xarray()` / `from_xarray()` subset now exists in the
+  current codebase;
+- remaining work is contract refinement and any future optional extension,
+  not first-time prototype implementation.
