@@ -5,6 +5,8 @@
 # ======================================================================================
 __all__ = ["read_zip"]
 
+import zipfile
+
 from spectrochempy.core.readers.filetypes import registry
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
@@ -78,6 +80,11 @@ def read_zip(*paths, **kwargs):
         A pattern to filter the files to read.
 
         .. versionadded:: 0.7.2
+    only : `int`, optional
+        Limit ZIP import to the first readable files discovered in the archive.
+        This is mainly useful for sampling large archives or for tests. The
+        limit is applied according to archive discovery order after filtering
+        ignored entries such as ``__MACOSX`` and ``.DS_Store``.
     protocol : `str`, optional
         ``Protocol`` used for reading, for example ``'scp'``, ``'omnic'``,
         ``'opus'``, ``'matlab'``, ``'jcamp'``, ``'csv'``, or ``'excel'``.
@@ -130,9 +137,6 @@ def read_zip(*paths, **kwargs):
 # ======================================================================================
 @_importer_method
 def _read_zip(*args, **kwargs):
-    # Below we assume that files to read are in a unique directory
-    import zipfile
-
     # read zip file
     _, filename = args
 
@@ -143,23 +147,6 @@ def _read_zip(*args, **kwargs):
         only = kwargs.pop("only", len(filelist))
 
         datasets = []
-
-        files = []
-        dirs = []
-
-        for file in filelist:
-            if "__MACOSX" in file.filename:
-                continue  # bypass non-data files
-            if ".DS_Store" in file.filename:
-                continue
-
-            # make a pathlib object (python > 3.7)
-            file = zipfile.Path(zf, at=file.filename)
-            # seek the parent directory containing the files to read
-            if not file.is_dir():
-                files.append(file)
-            else:
-                dirs.append(file)
 
         def extract(children, **kwargs):
             extension = children.name.split(".")[-1]
@@ -175,29 +162,19 @@ def _read_zip(*args, **kwargs):
                 children.name, content=children.read_bytes(), origin=origin, merge=False
             )
 
-        # We assume that we have only a single dir with not subdir
-        if dirs:
-            # a single directory
-            count = 0
-            for children in dirs[0].iterdir():
-                if count == only:
-                    # limits to only this number of files
-                    break
-                if "__MACOSX" in str(children.name):
-                    continue  # bypass non-data files
-                if ".DS_Store" in str(children.name):
-                    continue
-                # print(count, children)
-                # TODO: why this pose problem in pycharm-debug?????
-                d = extract(children, **kwargs)
-                if d is not None:
-                    datasets.append(d)
-                    count += 1
-        else:
-            for file in files:
-                d = extract(file, **kwargs)
-                if d is not None:
-                    datasets.append(d)
+        count = 0
+        for zipinfo in filelist:
+            if count == only:
+                break
+            if "__MACOSX" in zipinfo.filename or ".DS_Store" in zipinfo.filename:
+                continue
+            file = zipfile.Path(zf, at=zipinfo.filename)
+            if file.is_dir():
+                continue
+            d = extract(file, **kwargs)
+            if d is not None:
+                datasets.append(d)
+                count += 1
 
         if len(datasets) == 1:
             return datasets[0]
