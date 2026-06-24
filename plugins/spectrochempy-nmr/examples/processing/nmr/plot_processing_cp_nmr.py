@@ -189,7 +189,7 @@ fitter.script = """
 	$ tis:  800, 1, 10000
 """
 
-fitter.fit(s)
+_ = fitter.fit(s)
 
 spred = fitter.predict()
 
@@ -213,7 +213,7 @@ fitter.script = """
 	$ tis:  800, 1, 10000
 """
 
-fitter.fit(s)
+_ = fitter.fit(s)
 
 spred = fitter.predict()
 
@@ -237,7 +237,7 @@ fitter.script = """
 	$ tis:  800, 1, 10000
 """
 
-fitter.fit(s)
+_ = fitter.fit(s)
 
 spred = fitter.predict()
 

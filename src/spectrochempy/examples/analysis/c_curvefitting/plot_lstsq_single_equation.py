@@ -33,7 +33,7 @@ distance = [-1, 0.2, 0.9, 2.1]
 # We would like v and d0 such as
 #    distance = v.time + d0
 lstsq = scp.LSTSQ()
-lstsq.fit(time, distance)
+_ = lstsq.fit(time, distance)
 v = lstsq.coef
 d0 = lstsq.intercept
 rsquare = lstsq.score()
@@ -64,7 +64,7 @@ distance = scp.NDDataset([-1, 0.2, 0.9, 2.1], title="distance", units="kilometer
 # %%
 # we fit it using the new defined time and distance NDDatasets
 lstsq = scp.LSTSQ()
-lstsq.fit(time, distance)
+_ = lstsq.fit(time, distance)
 
 # The results are the same as previously (but with units information)
 v = lstsq.coef
@@ -95,7 +95,7 @@ distance = scp.NDDataset(
 # but here we just need to pass the distance dataset as argument.
 # The time information being the x coordinates.
 lstsq = scp.LSTSQ()
-lstsq.fit(distance)
+_ = lstsq.fit(distance)
 
 # The results are the same as previously.
 v = lstsq.coef

@@ -50,7 +50,7 @@ model = scp.NMF(n_components=4, log_level="INFO")
 # %%
 # Fit the model
 # -------------
-model.fit(dataset)
+_ = model.fit(dataset)
 # Get the results
 # ---------------
 #

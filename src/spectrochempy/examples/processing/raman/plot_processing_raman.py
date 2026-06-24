@@ -27,11 +27,11 @@ A = scp.read_labspec("SMC1-Initial_RT.txt", directory=ramandir)
 
 # %%
 # Plot the spectrum
-A.plot()
+_ = A.plot()
 # %%
 # Crop the spectrum to a useful region
 B = A[60.0:]
-B.plot()
+_ = B.plot()
 # %%
 # Baseline correction
 # -------------------
@@ -60,7 +60,7 @@ blc.order = "linear"
 
 # %%
 # Now we can fit the model to the data
-blc.fit(B)
+_ = blc.fit(B)
 # %%
 # The baseline is now stored in the `baseline` attribute of the processor
 corr = blc.transform()
@@ -86,7 +86,7 @@ plot_result(B, corr, baseline)
 # %%
 # Let's try with a polynomial detrend of order 2
 blc.order = 2  # quadratic detrending
-blc.fit(B)
+_ = blc.fit(B)
 corr = blc.transform()
 baseline = blc.baseline
 plot_result(B, corr, baseline)
@@ -113,7 +113,7 @@ blc.asymmetry = 0.01
 
 # %%
 # Now we can fit the model to the data
-blc.fit(Bd)
+_ = blc.fit(Bd)
 corr = blc.transform()
 baseline = blc.baseline
 plot_result(Bd, corr, baseline)
@@ -125,7 +125,7 @@ plot_result(Bd, corr, baseline)
 blc.model = "snip"
 blc.snip_width = 55  # estimated FWHM of the peaks (expressed in point. TODO: alternatively use true coordinates)
 Bs = A[55.0:]
-blc.fit(Bs)
+_ = blc.fit(Bs)
 corr = blc.transform()
 baseline = blc.baseline
 plot_result(Bs, corr, baseline)
@@ -137,7 +137,7 @@ plot_result(Bs, corr, baseline)
 
 C = scp.read_labspec("Activation.txt", directory=ramandir)
 # C = C[20:]  # discard the first 20 spectra
-C.plot()
+_ = C.plot()
 # %%
 # Now we apply the AsLS method on the series of spectra
 #
@@ -150,14 +150,14 @@ blc.model = "asls"
 blc.log_level = (
     "WARNING"  # supress output of asls (to long for the moment:  TODO optimize this)
 )
-blc.fit(C[::10])
+_ = blc.fit(C[::10])
 corr = blc.transform()
 baseline = blc.baseline
-corr.plot()
+_ = corr.plot()
 # %%
 # or the `snip` method (which is much faster)
 blc.model = "snip"
-blc.fit(C)
+_ = blc.fit(C)
 corr = blc.transform()
 baseline = blc.baseline
 corr[::10].plot()

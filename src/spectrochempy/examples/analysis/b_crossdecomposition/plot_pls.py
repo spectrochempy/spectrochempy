@@ -60,7 +60,7 @@ if ds_list is not None:
     # %%
     # Then we create a PLSRegression object and fit the train datasets:
     pls = scp.PLSRegression(n_components=5)
-    pls.fit(X_train, y_train)
+    _ = pls.fit(X_train, y_train)
     # %%
     # Finally we generate a parity plot comparing the predicted and actual values, for
     # both train set and test set.

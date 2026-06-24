@@ -48,7 +48,7 @@ for size, smoothed_region in smoothed.items():
 # shape preservation.
 
 sg = scp.Filter(method="savgol", size=7, order=2)(region)
-scp.plot_compare(region, sg, title="Savitzky-Golay smoothing (size=7, order=2)")
+_ = scp.plot_compare(region, sg, title="Savitzky-Golay smoothing (size=7, order=2)")
 
 # %%
 # This ends the example. Uncomment the next line to display the figures when

@@ -29,7 +29,7 @@ dataset = scp.load_iris()
 pca = scp.PCA(n_components="mle")
 # %%
 # Fit dataset with the PCA model
-pca.fit(dataset)
+_ = pca.fit(dataset)
 # %%
 # The number of components found is 3:
 pca.n_components
@@ -41,7 +41,7 @@ pca.cumulative_explained_variance[-1].value
 # are needed (a number between 0 and 1 for n_components is required to do this).
 # we found 4 components in this case
 pca = scp.PCA(n_components=0.999)
-pca.fit(dataset)
+_ = pca.fit(dataset)
 pca.n_components
 # %%
 # the 4 components found are in the `components` attribute of pca. These components are

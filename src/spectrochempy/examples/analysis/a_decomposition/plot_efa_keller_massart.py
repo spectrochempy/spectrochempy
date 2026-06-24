@@ -58,14 +58,14 @@ _ = dataset.plot(title="calculated dataset")
 # 4) evolving factor analysis (EFA)
 # *********************************
 efa = scp.EFA()
-efa.fit(dataset)
+_ = efa.fit(dataset)
 
 # %%
 # Plots of the log(EV) for the forward and backward analysis
 #
-efa.f_ev.T.plot(yscale="log", legend=efa.f_ev.k.labels)
+_ = efa.f_ev.T.plot(yscale="log", legend=efa.f_ev.k.labels)
 # %%
-efa.b_ev.T.plot(yscale="log", legend=efa.b_ev.k.labels)
+_ = efa.b_ev.T.plot(yscale="log", legend=efa.b_ev.k.labels)
 # %%
 # Looking at these EFA curves, it is quite obvious that only two components
 # are really significant, and this corresponds to the data that we have in

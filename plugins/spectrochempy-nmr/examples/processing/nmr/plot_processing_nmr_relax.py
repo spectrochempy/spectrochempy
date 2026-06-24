@@ -42,11 +42,11 @@ dataset
 ds = dataset.em(lb=15 * U.Hz)
 ds = ds.fft()
 ds = ds.pk(phc0=-10 * U.deg, phc1=0 * U.deg)
-ds.plot(xlim=(-60, -140))
+_ = ds.plot(xlim=(-60, -140))
 # %%
 # Integrate a region
 dsint = ds[:, -90.0:-115.0].simpson()
-dsint.plot(marker="^", ls=":")
+_ = dsint.plot(marker="^", ls=":")
 dsint.real
 
 # %%
@@ -83,14 +83,14 @@ shape: T1_model
 
 # %%
 # Performs the fit
-fitter.fit(dsint)
+_ = fitter.fit(dsint)
 
 # %%
 som = fitter.predict()
 som
 
 # %%
-fitter.plotmerit(dsint, som, method="scatter", title="T1 relaxation fitting")
+_ = fitter.plotmerit(dsint, som, method="scatter", title="T1 relaxation fitting")
 
 # %%
 # This ends the example ! The following line can be removed or commented
