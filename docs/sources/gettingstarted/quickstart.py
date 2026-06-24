@@ -253,7 +253,7 @@ blc.n_components = 5
 # Apply correction
 
 # %%
-blc.fit(smoothed)
+_ = blc.fit(smoothed)
 _ = blc.corrected.plot()
 
 # %% [markdown]

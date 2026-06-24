@@ -115,8 +115,13 @@ pls = scp.PLSRegression(n_components=5)
 _ = pls.fit(X_train, y_train)
 
 # %% [markdown]
-# The scores and loading matrices are stored in the `x_scores`,`x_loadings`, `y_scores` and `y_loadings`
-# attributes. Let's for instance, plot the $S_X$ matrix:
+# Grouped fitted outputs are also available from `pls.result`, for example
+# `pls.result.x_loadings` and `pls.result.coef`.
+#
+# In this example we keep using the direct estimator surface, which remains
+# supported in this release. In particular, `score()` stays an estimator method
+# because it depends on the evaluation data. Let's for instance plot the
+# $S_X$ matrix:
 
 # %%
 _ = pls.x_loadings.plot()

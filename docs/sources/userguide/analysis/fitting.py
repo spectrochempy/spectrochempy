@@ -71,7 +71,7 @@ d = scp.fromfunction(
 # %%
 prefs = scp.preferences
 prefs.figure.figsize = (7, 3)
-d.plot_scatter(markersize=7, mfc="red", label="Original data")
+_ = d.plot_scatter(markersize=7, mfc="red", label="Original data")
 
 # %% [markdown]
 # We want to fit a line through these data-points of equation
@@ -85,13 +85,13 @@ d.plot_scatter(markersize=7, mfc="red", label="Original data")
 
 # %%
 lst = scp.LSTSQ()
-lst.fit(time, d)
+_ = lst.fit(time, d)
 
 v, d0 = lst.coef, lst.intercept
 print(f"speed : {v:.3f},  distance at time 0 : {d0:.3f}")
 
 dfit = lst.predict()
-dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="best")
+_ = dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="best")
 
 
 # %% [markdown]
@@ -105,14 +105,14 @@ dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="best")
 
 # %%
 lst = scp.LSTSQ()
-lst.fit(d)
+_ = lst.fit(d)
 v, d0 = lst.coef, lst.intercept
 
 # %% [markdown]
 # and the final plot
 
 # %%
-d.plot_scatter(
+_ = d.plot_scatter(
     markersize=7,
     mfc="red",
     mec="black",
@@ -120,7 +120,7 @@ d.plot_scatter(
     title=f"Linear regression, $r^2={lst.score(): .3f} ",
 )
 dfit = lst.predict()
-dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="best")
+_ = dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="best")
 
 
 # %% [markdown]
@@ -147,7 +147,7 @@ d2 = scp.NDDataset.fromfunction(
     title="distance travelled",
 )
 
-d2.plot_scatter(markersize=7, mfc="red")
+_ = d2.plot_scatter(markersize=7, mfc="red")
 
 # %% [markdown]
 # Now we must use the first syntax LSTQ(X, Y) as the variation is not proportional
@@ -156,13 +156,13 @@ d2.plot_scatter(markersize=7, mfc="red")
 # %%
 X = time**2
 lst = scp.LSTSQ()
-lst.fit(X, d2)
+_ = lst.fit(X, d2)
 
 v, d0 = lst.coef, lst.intercept
 print(f"acceleration : {v:.3f},  distance at time 0 : {d0:.3f}")
 
 # %%
-d2.plot_scatter(
+_ = d2.plot_scatter(
     markersize=7,
     mfc="red",
     mec="black",
@@ -171,7 +171,7 @@ d2.plot_scatter(
 )
 dfit = lst.predict()
 
-dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="best")
+_ = dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="best")
 
 # %% [markdown]
 # ## Least square with non-negativity constraint (NNLS)
@@ -186,13 +186,13 @@ dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="best")
 # %%
 X = time**2
 nls = scp.NNLS()
-nls.fit(X, d2)
+_ = nls.fit(X, d2)
 
 v, d0 = lst.coef, lst.intercept
 print(f"acceleration : {v: .3f},  distance at time 0 : {d0: .3f}")
 
 # %%
-d2.plot_scatter(
+_ = d2.plot_scatter(
     markersize=7,
     mfc="red",
     mec="black",
@@ -201,7 +201,7 @@ d2.plot_scatter(
 )
 dfit = lst.predict()
 
-dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="best")
+_ = dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="best")
 
 # %% [markdown]
 # ## NDDataset modelling using non-linear optimisation method
@@ -440,16 +440,25 @@ f1 = scp.Optimize(log_level="INFO")
 f1.script = script
 f1.max_iter = 2000
 # f1.autobase = True
-f1.fit(ndOHcorr)
+_ = f1.fit(ndOHcorr)
+
+# %%
+fitted = f1.result.fitted
+components = f1.result.components
+
+# %% [markdown]
+# `f1.result` groups fitted outputs and diagnostics without removing the
+# existing direct estimator surface. Direct access such as `f1.components`,
+# `f1.predict()`, and plotting helpers remains supported.
 
 # Show the result
 _ = ndOHcorr.plot()
-ax = (f1.components[:]).plot(clear=False)
+ax = (components[:]).plot(clear=False)
 ax.autoscale(enable=True, axis="y")
 
 # plotmerit
-som = f1.inverse_transform()
-f1.plotmerit(offset=0, kind="scatter")
+som = fitted
+_ = f1.plotmerit(offset=0, kind="scatter")
 
 
 # %% [markdown]
