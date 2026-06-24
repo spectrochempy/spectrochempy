@@ -47,6 +47,38 @@ class ResultBase:
         """Named diagnostic values produced by the operation."""
         return self._diagnostics
 
+    def __getattr__(self, name):
+        """
+        Return a named output or diagnostic using attribute-style access.
+
+        Normal attributes and methods are resolved before this fallback.
+        Named outputs take precedence over diagnostics when both mappings use
+        the same key. Parameters remain available through :attr:`parameters`.
+        """
+        outputs = self.__dict__.get("_outputs", {})
+        if name in outputs:
+            return outputs[name]
+
+        diagnostics = self.__dict__.get("_diagnostics", {})
+        if name in diagnostics:
+            return diagnostics[name]
+
+        raise AttributeError(
+            f"{type(self).__name__!s} object has no attribute {name!r}"
+        )
+
+    def __dir__(self):
+        """Include named outputs and diagnostics in attribute discovery."""
+        names = set(super().__dir__())
+        for mapping_name in ("_outputs", "_diagnostics"):
+            mapping = self.__dict__.get(mapping_name, {})
+            names.update(
+                name
+                for name in mapping
+                if isinstance(name, str) and name.isidentifier()
+            )
+        return sorted(names)
+
     # ----------------------------------------------------------------------------------
     # Representation
     # ----------------------------------------------------------------------------------

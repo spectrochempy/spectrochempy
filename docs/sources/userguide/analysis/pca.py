@@ -124,6 +124,20 @@ pca = scp.PCA(n_components=8)
 pca.fit(X)
 
 # %% [markdown]
+# The grouped PCA outputs are available from `pca.result`. Named outputs and
+# diagnostics use direct attribute access in normal user code:
+# %%
+scores = pca.result.scores
+loadings = pca.result.loadings
+variance = pca.result.explained_variance
+
+# %% [markdown]
+# The mapping form, such as `pca.result.outputs["scores"]`, remains available
+# for introspection and programmatic access. Historical direct estimator
+# accessors such as `pca.scores`, `pca.loadings`, and `pca.transform()` also
+# remain supported.
+
+# %% [markdown]
 # The choice of the optimum number of components to describe a dataset is always a delicate matter. It can be based on:
 # - examination of the explained variance
 # - examination of the scores and loadings
