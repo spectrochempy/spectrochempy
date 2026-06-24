@@ -3,7 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""Plugin module to extend NDDataset with a JCAMP-DX export method."""
+"""Plugin module to extend NDDataset with a CSV export method."""
 
 # import os as os
 import csv
@@ -29,9 +29,6 @@ def write_csv(*args, **kwargs):
     ----------
     filename: str or pathlib object, optional
         If not provided, a dialog is opened to select a file for writing.
-    protocol : {'scp', 'matlab', 'jcamp', 'csv'}, optional
-        Protocol used for writing. If not provided, the correct protocol
-        is inferred (whnever it is possible) from the file name extension.
     directory : str, optional
         Where to write the specified `filename` . If not specified, write in the current directory.
     description: str, optional
@@ -39,6 +36,9 @@ def write_csv(*args, **kwargs):
     delimiter : str, optional
         Set the column delimiter in CSV file.
         By default it is ',' or the one set in SpectroChemPy `Preferences` .
+    **kwargs
+        Additional keyword arguments accepted by the generic writer API.
+        This specialized writer always exports CSV files.
 
     Returns
     -------

@@ -19,6 +19,9 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- Added a minimal MATLAB `.mat` writer for simple numeric `NDDataset`
+  exchange using `scipy.io.savemat`. This is an exchange format, not
+  native SpectroChemPy persistence.
 
 .. section
 
@@ -26,6 +29,9 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Clarified specialized writer docstrings so format-specific APIs such as
+  `write_csv()`, `write_jcamp()`, and `write_matlab()` no longer advertise the
+  generic multi-protocol export options documented on `write()`.
 
 .. section
 
