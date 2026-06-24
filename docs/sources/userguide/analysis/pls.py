@@ -115,18 +115,16 @@ pls = scp.PLSRegression(n_components=5)
 _ = pls.fit(X_train, y_train)
 
 # %% [markdown]
-# Grouped fitted outputs are also available from `pls.result`:
-# %%
-x_loadings = pls.result.x_loadings
-_ = pls.result.coef
-
-# %% [markdown]
-# Historical direct estimator attributes such as `pls.x_loadings` and
-# `pls.coef` remain supported, and `score()` stays an estimator method because
-# it depends on the evaluation data. Let's for instance plot the $S_X$ matrix:
+# Grouped fitted outputs are also available from `pls.result`, for example
+# `pls.result.x_loadings` and `pls.result.coef`.
+#
+# In this example we keep using the direct estimator surface, which remains
+# supported in this release. In particular, `score()` stays an estimator method
+# because it depends on the evaluation data. Let's for instance plot the
+# $S_X$ matrix:
 
 # %%
-_ = x_loadings.plot()
+_ = pls.x_loadings.plot()
 
 # %% [markdown]
 # Once fitted, the PLS model can be used to predict the property values of another dataset, for instance:
