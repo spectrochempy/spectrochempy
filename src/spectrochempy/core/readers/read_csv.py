@@ -21,6 +21,7 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.core.readers.importer import _openfid
+from spectrochempy.utils.exceptions import UnsupportedOriginError
 
 
 def _parse_spectrochempy_csv_header(row):
@@ -357,17 +358,18 @@ def _read_csv(*args, **kwargs):
 
     # here we can check some particular format
     origin = kwargs.get("origin", "")
-    if "omnic" in origin:
+    if origin == "omnic":
         # this will be treated as csv export from omnic (IR data)
         dataset = _add_omnic_info(dataset, **kwargs)
-    elif "tga" in origin:
+    elif origin == "tga":
         # this will be treated as csv export from tga analysis
         dataset = _add_tga_info(dataset, **kwargs)
     elif origin:
-        raise NotImplementedError(
-            f"Sorry, but reading a csv file with '{origin}' origin is not implemented. "
-            "Please, remove or set the keyword 'origin'\n "
-            "(Up to now implemented csv files are: `omnic` , `tga` )",
+        raise UnsupportedOriginError(
+            filename=filename,
+            protocol="csv",
+            origin=origin,
+            supported_origins=("omnic", "tga"),
         )
 
     # reset modification date to cretion date

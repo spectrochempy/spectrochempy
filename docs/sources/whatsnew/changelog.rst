@@ -29,6 +29,10 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Standardized unsupported reader errors so invalid protocols, unrecognized
+  file types, and unsupported CSV origins report the affected filename,
+  requested or detected value, and supported alternatives. (#1143)
+
 - Clarified specialized writer docstrings so format-specific APIs such as
   `write_csv()`, `write_jcamp()`, and `write_matlab()` no longer advertise the
   generic multi-protocol export options documented on `write()`.
