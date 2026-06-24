@@ -33,8 +33,8 @@ This document should evolve as the project evolves.
   boundary, and the dataset-persistence boundary are clarified.
 - Result alignment remaining: public Result exports, Baseline, LSTSQ, NNLS,
   compatibility review, and documentation alignment.
-- Plugin alignment: IRIS now exposes `.result`; TENSOR/CP alignment, 0.11
-  compatibility testing, and compatible plugin releases remain.
+- Plugin alignment: IRIS and TENSOR/CP now expose `.result`; 0.11
+  compatibility testing and compatible plugin releases remain.
 - Lifecycle decision: the implementation is currently a live view. Retaining
   it, caching it, or adopting a fit-time snapshot remain open alternatives; no
   direction is currently preferred.
