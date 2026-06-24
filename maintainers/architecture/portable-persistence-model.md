@@ -265,6 +265,56 @@ These are not all architectural defects.
 Some are intentionally out of scope for portable persistence, while others are
 possible future extensions rather than current contract failures.
 
+## Result Export and Persistence Boundary
+
+`ResultBase`, `AnalysisResult`, and `FitResult` are not part of the implemented
+portable persistence surface.
+
+For the 0.11 architecture, the supported bridge is dataset export:
+
+```text
+Result
+  -> named NDDataset outputs
+  -> xarray / NetCDF or dataset-only Project persistence
+```
+
+This is an export, not Result round-trip persistence. Loading the exported
+datasets does not reconstruct the original Result type, parameter record, or
+diagnostic grouping.
+
+If a future portable Result format is proposed, it would require its own
+versioned manifest because Result outputs may:
+
+- have unrelated dimensions;
+- mix datasets, arrays, and scalar diagnostics;
+- be produced by optional plugins;
+- include output datasets whose dtype has narrower portability guarantees than
+  ordinary core numerical arrays.
+
+No structured Result persistence work is currently committed. If it is pursued,
+the design would first need decisions about:
+
+- live-view, cached-view, or fit-time snapshot semantics;
+- a restricted parameter and diagnostic value domain;
+- stable Result type identifiers and schema versions;
+- provenance and input-summary rules;
+- unknown-plugin/provider behavior.
+
+Typed Project membership remains deferred independently. The current
+architecture does not require either structured Result persistence or broader
+Project membership.
+
+### Native persistence clarification
+
+Current version-2 `.scp` and `.pscp` writes use safe raw-base64 numerical
+payloads and explicit format/version markers. Default loading rejects
+pickle-backed historical payloads unless the user explicitly opts into trusted
+legacy loading with `allow_unsafe_legacy=True`.
+
+Older architecture discussion that classifies every SCP/PSCP write as
+pickle-backed trusted persistence describes the historical format, not the
+current safe-by-default writer and loader.
+
 ## Current Limitations
 
 The main current limitations of the portable implementation are:

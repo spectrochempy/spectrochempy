@@ -27,15 +27,34 @@ This document should evolve as the project evolves.
 
 ## 2026-06
 
+### Global Result / Project / Persistence Audit
+
+- Completed: the core runtime Result contract, the intentionally narrow Project
+  boundary, and the dataset-persistence boundary are clarified.
+- Result alignment remaining: public Result exports, Baseline, LSTSQ, NNLS,
+  compatibility review, and documentation alignment.
+- Plugin alignment remaining: IRIS and TENSOR/CP must expose `.result`, be
+  tested against 0.11, and be released with compatible dependency bounds.
+- Lifecycle decision: the implementation is currently a live view. Retaining
+  it, caching it, or adopting a fit-time snapshot remain open alternatives; no
+  direction is currently preferred.
+- Project decision: keep `Project` limited to `NDDataset` and nested `Project`.
+  Dataset export is the supported bridge for saved Result outputs.
+- Persistence decision: established dataset persistence remains
+  `NDDataset <-> xarray.Dataset <-> NetCDF`. Structured Result persistence and
+  typed Project membership are deferred optional directions.
+- Reference: local audit
+  `audit/~result-project-persistence-global-audit.md`.
+
 ### Analysis and Fit Result Architecture Audit
 
 - Decision: audit completed; conceptual RFC drafted; Result Object campaign now completed.
 - Main conclusion: current result representation is object-owned but
   semantically fragmented.
 - The Result Object contract has since been implemented for the core campaign.
-- Remaining work is no longer per-estimator migration work; it is limited to
-  deferred infrastructure questions such as serialization, Project
-  integration, provenance enrichment, display integration, and caching.
+- Remaining work is Result alignment, plugin alignment, documentation
+  alignment, and compatibility review. Structured Result persistence and typed
+  Project membership remain deferred optional directions.
 - Reference: `maintainers/rfcs/analysis-fit-result-architecture.md`
 - Implementation reference: `maintainers/architecture/result-object-contract-rfc.md`
 - Campaign summary: `maintainers/architecture/result-object-migration-roadmap.md`
@@ -322,7 +341,9 @@ Major outcomes:
 * ownership, provenance boundary, serialization boundary, and display scope
   clarified.
 
-Current priority: Deferred infrastructure follow-up only.
+Current priority: Result alignment, plugin alignment, and documentation
+alignment. Structured Result persistence and typed Project membership remain
+deferred.
 
 ---
 
@@ -535,10 +556,9 @@ Purpose:
 
 Current recommendation:
 
-Treat the Result Object campaign as complete for the core estimators. Future
-work in this area should focus on deferred infrastructure questions or on
-broader conceptual follow-up, not on reopening the completed migration
-campaign by default.
+Treat the Result Object campaign as complete for the core estimators. Remaining
+work is Result alignment, plugin alignment, documentation alignment, and
+compatibility review, not a reopening of the completed architecture campaign.
 
 ---
 
@@ -726,33 +746,37 @@ Current state:
   contract.
 
 Future work should clarify:
-- deferred infrastructure work around serialization, Project integration,
-  provenance, display, and caching
+- Result alignment and plugin alignment around the implemented runtime Result
+  contract
+- optional infrastructure work around structured Result persistence, typed
+  Project membership, provenance, display, and caching
 - whether broader result-surface conventions beyond the current contract need
   further consolidation
 - whether multi-output objects ever need a richer collection abstraction
 
 ---
 
-## Result Object Infrastructure Follow-Up
+## Result Alignment and Optional Infrastructure
 
-Status: Future candidate.
+Status: Alignment work; optional infrastructure deferred.
 
 Current assessment:
 
-The core Result Object campaign is complete, but a small set of follow-up
-infrastructure topics is now clearly scoped.
+The core Result Object campaign is complete. Near-term work is limited to
+Result alignment, plugin alignment, documentation alignment, and compatibility
+review.
 
-Examples include:
+Deferred optional topics include:
 
-* serialization;
-* `Project` integration;
+* structured Result persistence;
+* typed Project membership;
 * provenance enrichment;
 * display integration;
 * caching.
 
-This topic should be treated as follow-up infrastructure work, not as a
-reopening of the completed core Result Object migration campaign.
+Dataset persistence is already established. These optional topics should not be
+treated as required follow-up or as a reopening of the completed core Result
+Object migration campaign.
 
 ---
 

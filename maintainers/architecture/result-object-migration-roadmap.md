@@ -165,19 +165,20 @@ scenario:
 | FastICA | sklearn object in `_outfit` | callable parameter handling and whitening edge cases |
 | PLSRegression | private attributes on `self` | first `_outfit`-free migration |
 
-## 5. Deferred Infrastructure Work
+## 5. Deferred Optional Infrastructure
 
-The following topics do not belong to the completed Result campaign.
-They belong to separate architecture efforts:
+The following topics do not belong to the completed Result campaign. They are
+optional or deferred concerns rather than unfinished Result architecture:
 
-- serialization
-- Project integration
+- structured Result persistence
+- typed Project membership
 - provenance enrichment
 - HTML / display integration
 - caching
 
-These are cross-cutting infrastructure concerns, not remaining per-estimator
-Result migrations.
+These are not remaining per-estimator Result migrations. Dataset persistence is
+already established; structured Result persistence and typed Project membership
+remain deferred.
 
 ## 6. Known limits and optional follow-up
 
@@ -202,3 +203,43 @@ Optional follow-up candidates that do not change campaign completion status:
 Detailed implementation history remains in the local audit trail. The tracked
 maintainer references for this completed campaign are this roadmap and
 [`result-object-contract-rfc.md`](result-object-contract-rfc.md).
+
+## 8. 0.11 Result Alignment
+
+The Result Object campaign is complete for core estimators. The remaining work
+before `.result` is described as the canonical grouped-output API is alignment
+and completion work around the implemented runtime Result contract.
+
+Before `.result` is described as the canonical grouped-output API for 0.11, the
+following alignment tasks should be completed:
+
+- publish `ResultBase`, `AnalysisResult`, and `FitResult` through a documented
+  public import path rather than only the private `_base._result` module;
+- document the current live-view behavior and decide whether it should remain
+  live, become cached, or become a fit-time snapshot; no direction is currently
+  preferred;
+- define the minimum scientifically complete `FitResult` payload;
+- align the remaining maintained stateful core candidates (`Baseline`,
+  `LSTSQ`, and `NNLS`) or document them as explicit exceptions;
+- complete IRIS plugin alignment;
+- complete TENSOR/CP plugin alignment;
+- update analysis and official-plugin documentation to teach `.result`;
+- coordinate compatible IRIS and TENSOR releases before the core 0.11 release,
+  because both plugins currently declare an upper core bound below 0.11.
+
+The recommended 0.11 scope is completion of the canonical **runtime Result
+contract** across core and official plugins. Structured Result persistence and
+typed Project membership remain deferred optional directions. Dataset export
+and dataset persistence are sufficient for 0.11.
+
+### Recommended sequence
+
+1. Document the selected live, cached, or fit-time snapshot lifecycle semantics
+   and publish the public Result type path.
+2. Complete Baseline, LSTSQ, and NNLS alignment.
+3. Complete IRIS and TENSOR/CP plugin alignment and release compatible plugins.
+4. Update user documentation and remove only confirmed deprecated aliases.
+5. Keep Results runtime-only in 0.11, using dataset export and established
+   dataset persistence when saved outputs are needed.
+6. Keep structured Result persistence and typed Project membership deferred
+   unless future use cases justify them.

@@ -35,6 +35,36 @@ This RFC:
 This RFC only defines a stable ownership, representation, and lifecycle
 contract for analysis and fit outputs.
 
+## Current Runtime Boundary
+
+The implemented Result classes are currently runtime grouping objects, not
+durable records.
+
+In particular:
+
+- estimator `.result` properties construct a new Result on every access;
+- parameters and outputs are read from the estimator's current state;
+- no fit-generation identifier or parameter snapshot is retained;
+- the returned dictionaries are mutable;
+- the classes have no stable public import path outside the private
+  `analysis._base._result` module;
+- there is no schema version, persistence hook, Project ownership contract, or
+  semantic HTML display.
+
+The current implementation is therefore a live view suitable for grouped
+runtime output discovery. No architectural decision has been made to replace
+it.
+
+Possible future lifecycle directions are:
+
+1. retain the current live view;
+2. use a cached view with invalidation on re-fit;
+3. create a fit-time snapshot.
+
+The choice is an open maintainer decision. It becomes necessary only if a
+feature such as structured Result persistence or automatic stale-result
+tracking requires stronger run identity.
+
 ## Current state
 
 The current analysis base class stores post-fit state in
@@ -57,7 +87,7 @@ but it means semantic assembly currently lives partly in properties and
 decorators rather than in a named result object.
 
 There is no common serialization contract for analysis or fit result state.
-There is no Project integration for result objects. Text and HTML
+There is no typed Project membership for result objects. Text and HTML
 representations are class-specific or absent.
 
 ## Problems with `_outfit`
@@ -167,10 +197,12 @@ Architectural responsibility remains separated:
 - result objects own analysis and fit outputs
 - `Project` owns organization and grouping
 
-Recommended ownership rules:
+The original RFC proposed the following ownership rules. They remain relevant
+to a possible snapshot-style Result, but the current live-view implementation
+does not adopt them as lifecycle requirements:
 
-- Output datasets stored in a result should be independent objects, not views
-  that silently track future estimator or input mutation.
+- Under a snapshot model, output datasets could be independent objects rather
+  than views that silently track future estimator or input mutation.
 - The result may keep a lightweight input summary, but should not copy the full
   input dataset by default.
 - The result may optionally keep a weak or private reference to the fitted
@@ -182,8 +214,8 @@ Recommended ownership rules:
 - A result should never be stored inside `NDDataset` metadata or hidden array
   attributes. That would recreate the removed `modeldata` ownership problem.
 
-Input summary should be enough to identify what was fitted without duplicating
-the input:
+If structured provenance or structured Result persistence is later pursued, an
+input summary could identify what was fitted without duplicating the input:
 
 - input class
 - shape
@@ -196,7 +228,7 @@ the input:
 
 Human-readable history and structured provenance should be distinct.
 
-The structured provenance stored by `ResultBase` should include:
+If structured provenance is added, candidate fields include:
 
 - estimator class name, for example `PCA` or `Optimize`
 - estimator display name if present
@@ -215,12 +247,12 @@ The initial contract should avoid over-promising complete reproducibility.
 Structured provenance identifies and explains a result; it is not yet a full
 workflow replay system.
 
-## Serialization boundary
+## Historical serialization boundary
 
-PR1 should define serialization boundaries even if full round-trip support is
-deferred.
+The original RFC proposed the following serialization boundary. It was not
+implemented, and structured Result persistence remains undecided and deferred.
 
-Serializable in PR1:
+Candidate serializable fields were:
 
 - result type name
 - schema version
@@ -232,7 +264,7 @@ Serializable in PR1:
 - simple diagnostics: scalars, strings, lists, arrays, and `NDDataset`
   diagnostics
 
-Deferred beyond PR1:
+Candidate exclusions were:
 
 - full estimator object serialization
 - live sklearn object serialization
@@ -255,13 +287,17 @@ Possible internal representation:
 }
 ```
 
-This representation is a boundary, not a required public API.
+This representation is preserved as design history, not as a required public
+API or a commitment to structured Result persistence.
 
-## Immutability
+## Historical immutability proposal
 
-Result objects should be treated as logically immutable records.
+The original RFC proposed logically immutable Result records. The implemented
+runtime Result contract instead provides a live view assembled on access.
+Live-view, cached-view, and fit-time snapshot semantics remain open maintainer
+alternatives.
 
-Recommended PR1 behavior:
+If a snapshot model is later selected, the original recommendations were:
 
 - Result fields are assigned at construction time.
 - Users should treat result outputs as read-only.
@@ -271,8 +307,8 @@ Recommended PR1 behavior:
 - Structured provenance should not be mutated by normal user operations.
 - Recalculation belongs to the estimator, not the result object.
 
-This keeps the result object from becoming a second estimator. It also avoids
-subtle drift between the result, estimator parameters, and source input.
+These recommendations explain the original snapshot-oriented design direction;
+they do not select that direction for future work.
 
 ## Display contract
 
@@ -303,14 +339,15 @@ Large arrays should not be fully printed in the result representation. They
 should be discoverable by name and inspected through the underlying
 `NDDataset`.
 
-## Project integration
+## Project boundary
 
-Project integration should be deferred until the result contract exists.
+The original RFC deferred Project integration while the Result contract was
+being established.
 
 Current `Project` intentionally accepts only `NDDataset` and nested `Project`
 instances. A result object should not be added to Project in PR1.
 
-Later integration options:
+Historical integration options considered:
 
 - allow `ResultBase` as a third typed Project member
 - store result outputs as a nested Project with a result manifest
@@ -319,6 +356,15 @@ Later integration options:
 
 The key constraint is that Project must remain typed and explicit. Reintroducing
 a generic `_others` bucket would conflict with the 0.10.0 cleanup.
+
+The current maintained decision is stricter: Result objects remain
+runtime-only and are not Project members. `Project` remains intentionally
+restricted to `NDDataset` and nested `Project`.
+
+When saved outputs are needed, the supported direction is dataset export to
+named `NDDataset` objects or a nested dataset-only `Project`, using established
+dataset persistence. Structured Result persistence and typed Project membership
+are separate deferred possibilities, not required future steps.
 
 ## Migration plan
 
@@ -369,7 +415,10 @@ Likely first fields:
 This PR should not attempt full covariance, uncertainty, or optimizer replay
 unless those already have stable internal surfaces.
 
-### Later work
+### Historical later-work candidates
+
+The original RFC listed these candidates. They are preserved as historical
+context, not as commitments:
 
 - serialization round-trip for result objects
 - Project integration
