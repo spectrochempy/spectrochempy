@@ -68,6 +68,78 @@ class TestResultBase:
         assert "b" in result.outputs
         assert "d" in result.diagnostics
 
+    def test_output_attribute_access(self):
+        scores = np.ones((2, 3))
+        concentrations = object()
+        spectra = object()
+        result = ResultBase(
+            estimator="Test",
+            outputs={"scores": scores, "C": concentrations, "St": spectra},
+        )
+        assert result.scores is result.outputs["scores"]
+        assert result.C is result.outputs["C"]
+        assert result.St is result.outputs["St"]
+
+    def test_diagnostic_attribute_access(self):
+        variance = np.array([2.0, 1.0])
+        result = ResultBase(
+            estimator="Test",
+            diagnostics={"explained_variance": variance},
+        )
+        assert result.explained_variance is result.diagnostics["explained_variance"]
+
+    def test_missing_attribute_raises_attribute_error(self):
+        result = ResultBase(estimator="Test")
+        with pytest.raises(
+            AttributeError,
+            match="ResultBase object has no attribute 'missing'",
+        ):
+            _ = result.missing
+
+    def test_existing_attributes_are_not_shadowed(self):
+        result = ResultBase(
+            estimator="Test",
+            parameters={"alpha": 1},
+            outputs={
+                "outputs": "shadowed outputs",
+                "diagnostics": "shadowed diagnostics",
+                "parameters": "shadowed parameters",
+                "estimator": "shadowed estimator",
+            },
+        )
+        assert result.outputs["outputs"] == "shadowed outputs"
+        assert result.diagnostics == {}
+        assert result.parameters == {"alpha": 1}
+        assert result.estimator == "Test"
+
+    def test_output_wins_over_diagnostic(self):
+        output = object()
+        diagnostic = object()
+        result = ResultBase(
+            estimator="Test",
+            outputs={"shared": output},
+            diagnostics={"shared": diagnostic},
+        )
+        assert result.shared is output
+
+    def test_parameters_are_not_exposed_as_attributes(self):
+        result = ResultBase(estimator="Test", parameters={"alpha": 1})
+        with pytest.raises(AttributeError):
+            _ = result.alpha
+
+    def test_dir_includes_outputs_and_diagnostics_but_not_parameters(self):
+        result = ResultBase(
+            estimator="Test",
+            parameters={"alpha": 1},
+            outputs={"scores": object(), "not-valid": object()},
+            diagnostics={"explained_variance": object()},
+        )
+        names = dir(result)
+        assert "scores" in names
+        assert "explained_variance" in names
+        assert "alpha" not in names
+        assert "not-valid" not in names
+
     def test_repr(self):
         result = ResultBase(
             estimator="Test",
@@ -104,6 +176,11 @@ class TestFitResult:
         result = FitResult(estimator="Optimize")
         assert isinstance(result, FitResult)
         assert isinstance(result, ResultBase)
+
+    def test_inherits_attribute_access(self):
+        fitted = object()
+        result = FitResult(estimator="Optimize", outputs={"fitted": fitted})
+        assert result.fitted is fitted
 
 
 # ======================================================================================
@@ -164,6 +241,17 @@ class TestPCAResult:
             result.diagnostics["explained_variance_ratio"].data,
             pca.explained_variance_ratio.data,
         )
+
+    def test_result_attribute_access(self, low_rank_dataset):
+        pca = PCA(n_components=2).fit(low_rank_dataset)
+        result = pca.result
+        assert result.scores is result.outputs["scores"]
+        assert result.loadings is result.outputs["loadings"]
+        assert (
+            result.explained_variance
+            is result.diagnostics["explained_variance"]
+        )
+        assert {"scores", "loadings", "explained_variance"} <= set(dir(result))
 
     def test_repr_contains_expected_fields(self, low_rank_dataset):
         pca = PCA()
