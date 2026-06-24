@@ -9,71 +9,14 @@ Tests for the Optimize FitResult prototype.
 """
 
 import numpy as np
-import pytest
 
 import spectrochempy as scp
 from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis._base._result import FitResult
 from spectrochempy.analysis._base._result import ResultBase
-from spectrochempy.analysis.curvefitting._models import asymmetricvoigtmodel
-
-
-# ======================================================================================
-# Fixtures (same as test_optimize.py)
-# ======================================================================================
-@pytest.fixture()
-def script():
-    return """
-
-    #-----------------------------------------------------------
-    # syntax for parameters definition :
-    # name : value, low_bound,  high_bound
-    #  * for fixed parameters
-    #  $ for variable parameters
-    #  > for reference to a parameter in the COMMON block
-    #    (> is forbidden in the COMMON block)
-    # common block parameters should not have a _ in their names
-    #-----------------------------------------------------------
-    #
-    COMMON:
-    # common parameters ex.
-    # $ gwidth: 1.0, 0.0, none
-    $ gratio: 0.1, 0.0, 1.0
-
-    MODEL: LINE_1
-    shape: asymmetricvoigtmodel
-        * ampl:  1.0, 0.0, none
-        $ pos:   3620, 3400.0, 3700.0
-        $ ratio: 0.0147, 0.0, 1.0
-        $ asym: 0.1, 0, 1
-        $ width: 200, 0, 1000
-
-    MODEL: LINE_2
-    shape: asymmetricvoigtmodel
-        $ ampl:  0.2, 0.0, none
-        $ pos:   3520, 3400.0, 3700.0
-        > ratio: gratio
-        $ asym: 0.1, 0, 1
-        $ width: 200, 0, 1000
-    """
-
-
-@pytest.fixture()
-def synthetic_two_peak_dataset():
-    x = scp.Coord(np.linspace(3700.0, 3400.0, 301), title="wavenumber", units="cm^-1")
-    model = asymmetricvoigtmodel()
-    y = (
-        model.f(x.data, ampl=1.0, pos=3620.0, width=200.0, ratio=0.0147, asym=0.1)
-        + model.f(x.data, ampl=0.2, pos=3520.0, width=200.0, ratio=0.1, asym=0.1)
-        + 0.0002 * x.data
-        - 0.5
-    )
-    return scp.NDDataset(
-        y,
-        coordset=[x],
-        units="absorbance",
-        title="synthetic optimize spectrum",
-    )
+from tests.test_analysis.result_test_helpers import assert_fit_returns_self
+from tests.test_analysis.result_test_helpers import assert_result_basics
+from tests.test_analysis.result_test_helpers import assert_result_raises_before_fit
 
 
 # ======================================================================================
@@ -83,48 +26,30 @@ class TestOptimizeResult:
     # ----------------------------------------------------------------------------------
     # Identity and type
     # ----------------------------------------------------------------------------------
-    def test_result_is_fit_result(self, synthetic_two_peak_dataset, script):
+    def test_result_is_fit_result(self, synthetic_two_peak_dataset, optimize_script):
         opt = scp.Optimize()
-        opt.script = script
+        opt.script = optimize_script
         opt.autobase = True
         opt.max_iter = 10
         opt.fit(synthetic_two_peak_dataset)
-        result = opt.result
-        assert isinstance(result, FitResult)
+        assert_result_basics(opt, FitResult, "Optimize")
 
-    def test_result_is_instance_of_base(self, synthetic_two_peak_dataset, script):
+    def test_result_is_instance_of_base(
+        self, synthetic_two_peak_dataset, optimize_script
+    ):
         opt = scp.Optimize()
-        opt.script = script
+        opt.script = optimize_script
         opt.autobase = True
         opt.max_iter = 10
         opt.fit(synthetic_two_peak_dataset)
         assert isinstance(opt.result, ResultBase)
 
-    def test_estimator_name(self, synthetic_two_peak_dataset, script):
-        opt = scp.Optimize()
-        opt.script = script
-        opt.autobase = True
-        opt.max_iter = 10
-        opt.fit(synthetic_two_peak_dataset)
-        assert opt.result.estimator == "Optimize"
-
-    def test_result_is_not_cached(self, synthetic_two_peak_dataset, script):
-        opt = scp.Optimize()
-        opt.script = script
-        opt.autobase = True
-        opt.max_iter = 10
-        opt.fit(synthetic_two_peak_dataset)
-        assert opt.result is not opt.result, (
-            "FitResult is recreated on every access; "
-            "change this assertion if caching is added later"
-        )
-
     # ----------------------------------------------------------------------------------
     # Outputs
     # ----------------------------------------------------------------------------------
-    def test_outputs_contain_keys(self, synthetic_two_peak_dataset, script):
+    def test_outputs_contain_keys(self, synthetic_two_peak_dataset, optimize_script):
         opt = scp.Optimize()
-        opt.script = script
+        opt.script = optimize_script
         opt.autobase = True
         opt.max_iter = 10
         opt.fit(synthetic_two_peak_dataset)
@@ -132,9 +57,11 @@ class TestOptimizeResult:
         for name in ("fitted", "components"):
             assert name in result.outputs, f"{name} missing from result.outputs"
 
-    def test_output_values_match_properties(self, synthetic_two_peak_dataset, script):
+    def test_output_values_match_properties(
+        self, synthetic_two_peak_dataset, optimize_script
+    ):
         opt = scp.Optimize()
-        opt.script = script
+        opt.script = optimize_script
         opt.autobase = True
         opt.max_iter = 10
         opt.fit(synthetic_two_peak_dataset)
@@ -148,9 +75,9 @@ class TestOptimizeResult:
             opt.components.data,
         )
 
-    def test_output_fitted_shape(self, synthetic_two_peak_dataset, script):
+    def test_output_fitted_shape(self, synthetic_two_peak_dataset, optimize_script):
         opt = scp.Optimize()
-        opt.script = script
+        opt.script = optimize_script
         opt.autobase = True
         opt.max_iter = 10
         opt.fit(synthetic_two_peak_dataset)
@@ -162,9 +89,11 @@ class TestOptimizeResult:
     # ----------------------------------------------------------------------------------
     # Parameters
     # ----------------------------------------------------------------------------------
-    def test_parameters_contain_expected_keys(self, synthetic_two_peak_dataset, script):
+    def test_parameters_contain_expected_keys(
+        self, synthetic_two_peak_dataset, optimize_script
+    ):
         opt = scp.Optimize()
-        opt.script = script
+        opt.script = optimize_script
         opt.autobase = True
         opt.max_iter = 10
         opt.fit(synthetic_two_peak_dataset)
@@ -178,9 +107,11 @@ class TestOptimizeResult:
         ):
             assert name in params, f"{name} missing from result.parameters"
 
-    def test_parameters_values_default(self, synthetic_two_peak_dataset, script):
+    def test_parameters_values_default(
+        self, synthetic_two_peak_dataset, optimize_script
+    ):
         opt = scp.Optimize()
-        opt.script = script
+        opt.script = optimize_script
         opt.autobase = True
         opt.max_iter = 10
         opt.fit(synthetic_two_peak_dataset)
@@ -191,10 +122,10 @@ class TestOptimizeResult:
         assert params["amplitude_mode"] == "height"
 
     def test_parameters_match_estimator_config(
-        self, synthetic_two_peak_dataset, script
+        self, synthetic_two_peak_dataset, optimize_script
     ):
         opt = scp.Optimize()
-        opt.script = script
+        opt.script = optimize_script
         opt.autobase = True
         opt.max_iter = 20
         opt.method = "simplex"
@@ -208,9 +139,11 @@ class TestOptimizeResult:
     # ----------------------------------------------------------------------------------
     # Diagnostics
     # ----------------------------------------------------------------------------------
-    def test_diagnostics_contain_keys(self, synthetic_two_peak_dataset, script):
+    def test_diagnostics_contain_keys(
+        self, synthetic_two_peak_dataset, optimize_script
+    ):
         opt = scp.Optimize()
-        opt.script = script
+        opt.script = optimize_script
         opt.autobase = True
         opt.max_iter = 10
         opt.fit(synthetic_two_peak_dataset)
@@ -218,9 +151,9 @@ class TestOptimizeResult:
         for name in ("cost", "niter", "ncalls"):
             assert name in diag, f"{name} missing from result.diagnostics"
 
-    def test_diagnostics_are_scalars(self, synthetic_two_peak_dataset, script):
+    def test_diagnostics_are_scalars(self, synthetic_two_peak_dataset, optimize_script):
         opt = scp.Optimize()
-        opt.script = script
+        opt.script = optimize_script
         opt.autobase = True
         opt.max_iter = 10
         opt.fit(synthetic_two_peak_dataset)
@@ -229,9 +162,11 @@ class TestOptimizeResult:
         assert isinstance(diag["niter"], int)
         assert isinstance(diag["ncalls"], int)
 
-    def test_diagnostics_meaningful_values(self, synthetic_two_peak_dataset, script):
+    def test_diagnostics_meaningful_values(
+        self, synthetic_two_peak_dataset, optimize_script
+    ):
         opt = scp.Optimize()
-        opt.script = script
+        opt.script = optimize_script
         opt.autobase = True
         opt.max_iter = 10
         opt.fit(synthetic_two_peak_dataset)
@@ -245,9 +180,11 @@ class TestOptimizeResult:
     # ----------------------------------------------------------------------------------
     # Representation
     # ----------------------------------------------------------------------------------
-    def test_repr_contains_expected_fields(self, synthetic_two_peak_dataset, script):
+    def test_repr_contains_expected_fields(
+        self, synthetic_two_peak_dataset, optimize_script
+    ):
         opt = scp.Optimize()
-        opt.script = script
+        opt.script = optimize_script
         opt.autobase = True
         opt.max_iter = 10
         opt.fit(synthetic_two_peak_dataset)
@@ -258,9 +195,9 @@ class TestOptimizeResult:
         assert "components" in text
         assert "cost" in text
 
-    def test_repr_does_not_crash(self, synthetic_two_peak_dataset, script):
+    def test_repr_does_not_crash(self, synthetic_two_peak_dataset, optimize_script):
         opt = scp.Optimize()
-        opt.script = script
+        opt.script = optimize_script
         opt.autobase = True
         opt.max_iter = 10
         opt.fit(synthetic_two_peak_dataset)
@@ -269,26 +206,26 @@ class TestOptimizeResult:
     # ----------------------------------------------------------------------------------
     # Pre-fit guard
     # ----------------------------------------------------------------------------------
-    def test_raises_before_fit(self, script):
+    def test_raises_before_fit(self, optimize_script):
         opt = scp.Optimize()
-        opt.script = script
-        with pytest.raises(NotFittedError):
-            _ = opt.result
+        opt.script = optimize_script
+        assert_result_raises_before_fit(opt, NotFittedError)
 
     # ----------------------------------------------------------------------------------
     # Existing behaviour preserved
     # ----------------------------------------------------------------------------------
-    def test_fit_still_returns_self(self, synthetic_two_peak_dataset, script):
+    def test_fit_still_returns_self(self, synthetic_two_peak_dataset, optimize_script):
         opt = scp.Optimize()
-        opt.script = script
+        opt.script = optimize_script
         opt.autobase = True
         opt.max_iter = 10
-        ret = opt.fit(synthetic_two_peak_dataset)
-        assert ret is opt
+        assert_fit_returns_self(opt, synthetic_two_peak_dataset)
 
-    def test_existing_properties_unchanged(self, synthetic_two_peak_dataset, script):
+    def test_existing_properties_unchanged(
+        self, synthetic_two_peak_dataset, optimize_script
+    ):
         opt = scp.Optimize()
-        opt.script = script
+        opt.script = optimize_script
         opt.autobase = True
         opt.max_iter = 10
         opt.fit(synthetic_two_peak_dataset)

@@ -33,36 +33,6 @@ def test_PCA_docstrings():
     )
 
 
-@pytest.fixture()
-def low_rank_pca_dataset():
-    u1 = np.array([1.0, 1.0, 1.0, -1.0, -1.0, -1.0]) / np.sqrt(6.0)
-    u2 = np.array([1.0, -1.0, 0.0, 1.0, -1.0, 0.0]) / 2.0
-    u3 = np.array([1.0, 1.0, -2.0, 1.0, 1.0, -2.0]) / np.sqrt(12.0)
-    data = np.column_stack(
-        [
-            6.0 * u1,
-            3.0 * u2,
-            u3,
-            np.zeros(6),
-            np.zeros(6),
-        ]
-    )
-    return scp.NDDataset(
-        data,
-        coordset=[
-            scp.Coord.arange(6, title="sample"),
-            scp.Coord.arange(5, title="feature"),
-        ],
-        units="absorbance",
-        title="synthetic PCA matrix",
-    )
-
-
-@pytest.fixture()
-def expected_variance_ratio():
-    return 100.0 * np.array([36.0, 9.0, 1.0, 0.0, 0.0]) / 46.0
-
-
 def test_pca_prefit_n_components():
     pca = PCA(n_components=5)
     assert pca.n_components == 5
