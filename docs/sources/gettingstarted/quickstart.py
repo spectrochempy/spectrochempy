@@ -107,6 +107,12 @@ print(f"y-axis unit: {ds.y.units}")  # Show time units
 # [Import tutorial](../userguide/importexport/import.ipynb) section.
 #
 # The `read` function returns an `NDDataset` object.
+#
+# SpectroChemPy can also write lightweight exchange files such as CSV,
+# JCAMP-DX, and minimal MATLAB `.mat` files for simple numeric datasets.
+# For structured SpectroChemPy storage and portable round-trips, prefer the
+# native `.scp` format or the `NDDataset ↔ xarray ↔ NetCDF` path described in
+# the import/export guide.
 
 # %% [markdown]
 # ## Exploring the Data

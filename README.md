@@ -37,7 +37,8 @@ to build reproducible spectroscopy workflows in Python.
   * SVD, PCA, MCR-ALS, EFA, PLS, fitting, and related result objects
 * **I/O and Interoperability**:
   * Import from major spectroscopy and scientific data formats
-  * Export to lightweight interchange formats such as CSV and JCAMP-DX
+  * Export to lightweight interchange formats such as CSV, JCAMP-DX, and
+    minimal MATLAB `.mat` exchange files
   * Portable `NDDataset ↔ xarray.Dataset ↔ NetCDF` round-trips for the
     maintained portable subset
   * Safe native `.scp` / `.pscp` persistence by default, with explicit legacy
