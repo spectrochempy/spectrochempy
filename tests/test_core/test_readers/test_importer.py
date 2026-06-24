@@ -6,6 +6,7 @@
 
 import os
 import pathlib
+import re
 
 import pytest
 
@@ -192,7 +193,7 @@ class TestBasicImporter:
         with pytest.raises(
             spectrochempy.utils.exceptions.WrongFileFormatError,
             match=(
-                rf"Cannot read '{filename}'"
+                rf"Cannot read '{re.escape(str(filename))}'"
                 r": detected file type '\.unsupported' is unsupported\.\n"
                 r"Supported protocols are:"
             ),
@@ -208,7 +209,8 @@ class TestBasicImporter:
         with pytest.raises(
             spectrochempy.utils.exceptions.ProtocolError,
             match=(
-                rf"Cannot read '{filename}' with protocol='omnic'\.\n"
+                rf"Cannot read '{re.escape(str(filename))}' "
+                r"with protocol='omnic'\.\n"
                 r"The filename indicates protocol='csv'\.\n"
                 r"Choose protocol='csv' or omit the protocol argument\."
             ),
