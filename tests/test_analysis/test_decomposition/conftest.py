@@ -12,6 +12,66 @@ import spectrochempy as scp
 
 
 @pytest.fixture()
+def low_rank_pca_dataset():
+    u1 = np.array([1.0, 1.0, 1.0, -1.0, -1.0, -1.0]) / np.sqrt(6.0)
+    u2 = np.array([1.0, -1.0, 0.0, 1.0, -1.0, 0.0]) / 2.0
+    u3 = np.array([1.0, 1.0, -2.0, 1.0, 1.0, -2.0]) / np.sqrt(12.0)
+    data = np.column_stack(
+        [
+            6.0 * u1,
+            3.0 * u2,
+            u3,
+            np.zeros(6),
+            np.zeros(6),
+        ]
+    )
+    return scp.NDDataset(
+        data,
+        coordset=[
+            scp.Coord.arange(6, title="sample"),
+            scp.Coord.arange(5, title="feature"),
+        ],
+        units="absorbance",
+        title="synthetic PCA matrix",
+    )
+
+
+@pytest.fixture()
+def expected_variance_ratio():
+    return 100.0 * np.array([36.0, 9.0, 1.0, 0.0, 0.0]) / 46.0
+
+
+@pytest.fixture()
+def efa_dataset():
+    time = np.linspace(0.0, 1.0, 48)
+    features = np.linspace(400.0, 700.0, 12)
+
+    concentrations = np.column_stack(
+        [
+            np.exp(-0.5 * ((time - 0.35) / 0.12) ** 2),
+            0.8 * np.exp(-0.5 * ((time - 0.68) / 0.14) ** 2),
+        ]
+    )
+    spectra = np.vstack(
+        [
+            1.0 + 0.3 * np.cos(np.linspace(0.0, np.pi, features.size)),
+            0.7 + 0.4 * np.sin(np.linspace(0.0, np.pi, features.size)),
+        ]
+    )
+    data = concentrations @ spectra
+
+    return scp.NDDataset(
+        data=data,
+        coordset=[
+            scp.Coord(time, units="minutes", title="time"),
+            scp.Coord(features, units="nm", title="wavelength"),
+        ],
+        title="synthetic EFA mixture",
+        units="absorbance",
+    )
+
+
+@pytest.fixture()
 def simplisma_dataset():
     n_observations = 20
     n_variables = 100

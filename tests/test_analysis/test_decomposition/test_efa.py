@@ -16,36 +16,6 @@ from spectrochempy.utils import testing
 from spectrochempy.utils.constants import MASKED
 
 
-@pytest.fixture()
-def efa_dataset():
-    time = np.linspace(0.0, 1.0, 48)
-    features = np.linspace(400.0, 700.0, 12)
-
-    concentrations = np.column_stack(
-        [
-            np.exp(-0.5 * ((time - 0.35) / 0.12) ** 2),
-            0.8 * np.exp(-0.5 * ((time - 0.68) / 0.14) ** 2),
-        ]
-    )
-    spectra = np.vstack(
-        [
-            1.0 + 0.3 * np.cos(np.linspace(0.0, np.pi, features.size)),
-            0.7 + 0.4 * np.sin(np.linspace(0.0, np.pi, features.size)),
-        ]
-    )
-    data = concentrations @ spectra
-
-    return scp.NDDataset(
-        data=data,
-        coordset=[
-            scp.Coord(time, units="minutes", title="time"),
-            scp.Coord(features, units="nm", title="wavelength"),
-        ],
-        title="synthetic EFA mixture",
-        units="absorbance",
-    )
-
-
 # test docstring
 # but this is not intended to work with the debugger - use run instead of debug!
 @pytest.mark.skipif(

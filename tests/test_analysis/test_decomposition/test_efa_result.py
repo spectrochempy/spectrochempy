@@ -15,45 +15,9 @@ from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis._base._result import AnalysisResult
 from spectrochempy.analysis._base._result import ResultBase
 from spectrochempy.analysis.decomposition.efa import EFA
-
-
-# ======================================================================================
-# Fixtures
-# ======================================================================================
-@pytest.fixture()
-def efa_dataset():
-    """Small synthetic dataset for EFA testing."""
-    n_observations = 48
-    n_variables = 12
-
-    time = np.linspace(0.0, 1.0, n_observations)
-    features = np.linspace(400.0, 700.0, n_variables)
-
-    concentrations = np.column_stack(
-        [
-            np.exp(-0.5 * ((time - 0.35) / 0.12) ** 2),
-            0.8 * np.exp(-0.5 * ((time - 0.68) / 0.14) ** 2),
-        ]
-    )
-    spectra = np.vstack(
-        [
-            1.0 + 0.3 * np.cos(np.linspace(0.0, np.pi, n_variables)),
-            0.7 + 0.4 * np.sin(np.linspace(0.0, np.pi, n_variables)),
-        ]
-    )
-    data = concentrations @ spectra
-
-    import spectrochempy as scp
-
-    return scp.NDDataset(
-        data=data,
-        coordset=[
-            scp.Coord(time, units="minutes", title="time"),
-            scp.Coord(features, units="nm", title="wavelength"),
-        ],
-        title="synthetic EFA mixture",
-        units="absorbance",
-    )
+from tests.test_analysis.result_test_helpers import assert_fit_returns_self
+from tests.test_analysis.result_test_helpers import assert_result_basics
+from tests.test_analysis.result_test_helpers import assert_result_raises_before_fit
 
 
 # ======================================================================================
@@ -63,14 +27,8 @@ class TestEFAResult:
     def test_result_is_analysis_result(self, efa_dataset):
         efa = EFA()
         efa.fit(efa_dataset)
-        result = efa.result
-        assert isinstance(result, AnalysisResult)
+        result = assert_result_basics(efa, AnalysisResult, "EFA")
         assert isinstance(result, ResultBase)
-
-    def test_estimator_name(self, efa_dataset):
-        efa = EFA()
-        efa.fit(efa_dataset)
-        assert efa.result.estimator == "EFA"
 
     def test_outputs_contain_keys(self, efa_dataset):
         efa = EFA()
@@ -111,14 +69,6 @@ class TestEFAResult:
         assert "b_ev" in text
         assert "components" in text
 
-    def test_result_is_not_cached(self, efa_dataset):
-        efa = EFA()
-        efa.fit(efa_dataset)
-        assert efa.result is not efa.result, (
-            "AnalysisResult is recreated on every access; "
-            "change this assertion if caching is added later"
-        )
-
     def test_parameters_contain_expected_keys(self, efa_dataset):
         efa = EFA()
         efa.fit(efa_dataset)
@@ -150,13 +100,11 @@ class TestEFAResult:
 
     def test_raises_before_fit(self):
         efa = EFA()
-        with pytest.raises(NotFittedError):
-            _ = efa.result
+        assert_result_raises_before_fit(efa, NotFittedError)
 
     def test_fit_still_returns_self(self, efa_dataset):
         efa = EFA()
-        ret = efa.fit(efa_dataset)
-        assert ret is efa
+        assert_fit_returns_self(efa, efa_dataset)
 
     def test_existing_properties_unchanged(self, efa_dataset):
         efa = EFA()
