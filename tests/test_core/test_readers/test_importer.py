@@ -173,8 +173,47 @@ class TestBasicImporter:
     def test_invalid_protocol(self, fs):
         """Test behavior with invalid protocol."""
         self.setup_method()
-        with pytest.raises(spectrochempy.utils.exceptions.ProtocolError):
+        with pytest.raises(
+            spectrochempy.utils.exceptions.ProtocolError,
+            match=(
+                r"Cannot read '.+test\.opus\.fk' with protocol='wrongfake'\.\n"
+                r"The requested protocol is unknown or not implemented\."
+            ),
+        ):
             read(self.test_file, protocol="wrongfake", local_only=True)
+
+    def test_unsupported_filetype_reports_filename_and_supported_protocols(
+        self, tmp_path
+    ):
+        """An unregistered extension should produce an actionable error."""
+        filename = tmp_path / "sample.unsupported"
+        filename.write_text("not a supported format")
+
+        with pytest.raises(
+            spectrochempy.utils.exceptions.WrongFileFormatError,
+            match=(
+                rf"Cannot read '{filename}'"
+                r": detected file type '\.unsupported' is unsupported\.\n"
+                r"Supported protocols are:"
+            ),
+        ) as exc_info:
+            read(filename, local_only=True)
+        assert isinstance(exc_info.value, TypeError)
+
+    def test_protocol_mismatch_reports_requested_and_detected_protocols(self, tmp_path):
+        """A protocol conflicting with the extension should be explicit."""
+        filename = tmp_path / "sample.csv"
+        filename.write_text("x,y\n1,2\n")
+
+        with pytest.raises(
+            spectrochempy.utils.exceptions.ProtocolError,
+            match=(
+                rf"Cannot read '{filename}' with protocol='omnic'\.\n"
+                r"The filename indicates protocol='csv'\.\n"
+                r"Choose protocol='csv' or omit the protocol argument\."
+            ),
+        ):
+            read(filename, protocol="omnic", local_only=True)
 
     def test_single_file_read(self, fs, monkeypatch):
         """Test reading a single file."""

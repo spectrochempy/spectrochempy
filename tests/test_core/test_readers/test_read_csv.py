@@ -9,6 +9,7 @@ import pytest
 
 import spectrochempy as scp
 from spectrochempy.application.preferences import preferences as prefs
+from spectrochempy.utils.exceptions import UnsupportedOriginError
 
 
 def test_read_csv():
@@ -55,11 +56,26 @@ def test_read_csv():
     C = scp.read_csv({"somename.csv": omnic_csv_content.encode("utf-8")})
     assert C.shape == (1, 5)
 
-    # wrong origin parameters - should return None
-    D = scp.read_csv(
-        {"test_omnic.csv": omnic_csv_content.encode("utf-8")}, origin="opus"
-    )
-    assert not D
+    # An unsupported origin should produce an actionable reader error.
+    with pytest.raises(
+        UnsupportedOriginError,
+        match=(
+            r"Cannot read CSV file 'test_omnic\.csv' with origin='opus'\.\n"
+            r"Supported CSV origins are: 'omnic', 'tga'\.\n"
+            r"Remove the origin argument or choose a supported origin\."
+        ),
+    ) as exc_info:
+        scp.read_csv(
+            {"test_omnic.csv": omnic_csv_content.encode("utf-8")},
+            origin="opus",
+        )
+    assert isinstance(exc_info.value, NotImplementedError)
+
+    with pytest.raises(UnsupportedOriginError, match="origin='vendor_omnic'"):
+        scp.read_csv(
+            {"test_omnic.csv": omnic_csv_content.encode("utf-8")},
+            origin="vendor_omnic",
+        )
 
 
 def test_read_csv_skips_leading_comments_and_blank_lines():
