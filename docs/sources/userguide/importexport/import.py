@@ -131,6 +131,12 @@ X
 # only; full `CoordSet` fidelity and `Project` round-trips are not guaranteed
 # by the current portable subset.
 #
+# MATLAB export is available as a minimal exchange writer through
+# ``write_matlab()`` / ``write_mat()`` for simple numeric `NDDataset` objects.
+# It is not SpectroChemPy native persistence and does not aim at full
+# round-trip fidelity. For structured SpectroChemPy storage, prefer native safe
+# persistence or the portable xarray / NetCDF path.
+#
 # Other reader functions return either a single `NDDataset` or multiple `NDDataset`
 # objects, depending on the file type and content.
 #

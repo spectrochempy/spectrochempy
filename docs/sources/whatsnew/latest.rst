@@ -11,3 +11,17 @@ What's New in Revision 0.10.2.dev
 
 These are the changes in SpectroChemPy-0.10.2.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
+
+New Features
+~~~~~~~~~~~~
+
+- Added a minimal MATLAB `.mat` writer for simple numeric `NDDataset`
+  exchange using `scipy.io.savemat`. This is an exchange format, not
+  native SpectroChemPy persistence.
+
+Bug Fixes
+~~~~~~~~~
+
+- Clarified specialized writer docstrings so format-specific APIs such as
+  `write_csv()`, `write_jcamp()`, and `write_matlab()` no longer advertise the
+  generic multi-protocol export options documented on `write()`.
