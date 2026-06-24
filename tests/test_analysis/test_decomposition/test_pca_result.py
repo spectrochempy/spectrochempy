@@ -247,10 +247,7 @@ class TestPCAResult:
         result = pca.result
         assert result.scores is result.outputs["scores"]
         assert result.loadings is result.outputs["loadings"]
-        assert (
-            result.explained_variance
-            is result.diagnostics["explained_variance"]
-        )
+        assert result.explained_variance is result.diagnostics["explained_variance"]
         assert {"scores", "loadings", "explained_variance"} <= set(dir(result))
 
     def test_repr_contains_expected_fields(self, low_rank_dataset):
