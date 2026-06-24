@@ -15,6 +15,9 @@ from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis._base._result import AnalysisResult
 from spectrochempy.analysis._base._result import ResultBase
 from spectrochempy.analysis.decomposition.fast_ica import FastICA
+from tests.test_analysis.result_test_helpers import assert_fit_returns_self
+from tests.test_analysis.result_test_helpers import assert_result_basics
+from tests.test_analysis.result_test_helpers import assert_result_raises_before_fit
 
 
 # ======================================================================================
@@ -24,14 +27,8 @@ class TestFastICAResult:
     def test_result_is_analysis_result(self, fastica_dataset):
         ica = FastICA(n_components=4, random_state=123, whiten="unit-variance")
         ica.fit(fastica_dataset)
-        result = ica.result
-        assert isinstance(result, AnalysisResult)
+        result = assert_result_basics(ica, AnalysisResult, "FastICA")
         assert isinstance(result, ResultBase)
-
-    def test_estimator_name(self, fastica_dataset):
-        ica = FastICA(n_components=4, random_state=123, whiten="unit-variance")
-        ica.fit(fastica_dataset)
-        assert ica.result.estimator == "FastICA"
 
     def test_outputs_contain_keys(self, fastica_dataset):
         ica = FastICA(n_components=4, random_state=123, whiten="unit-variance")
@@ -85,14 +82,6 @@ class TestFastICAResult:
         assert "components" in text
         assert "mixing" in text
         assert "n_iter" in text
-
-    def test_result_is_not_cached(self, fastica_dataset):
-        ica = FastICA(n_components=4, random_state=123, whiten="unit-variance")
-        ica.fit(fastica_dataset)
-        assert ica.result is not ica.result, (
-            "AnalysisResult is recreated on every access; "
-            "change this assertion if caching is added later"
-        )
 
     def test_parameters_contain_expected_keys(self, fastica_dataset):
         ica = FastICA(n_components=4, random_state=123, whiten="unit-variance")
@@ -153,14 +142,11 @@ class TestFastICAResult:
         assert "whiten" in text
 
     def test_raises_before_fit(self):
-        ica = FastICA()
-        with pytest.raises(NotFittedError):
-            _ = ica.result
+        assert_result_raises_before_fit(FastICA(), NotFittedError)
 
     def test_fit_still_returns_self(self, fastica_dataset):
         ica = FastICA(n_components=4, random_state=123, whiten="unit-variance")
-        ret = ica.fit(fastica_dataset)
-        assert ret is ica
+        assert_fit_returns_self(ica, fastica_dataset)
 
     def test_existing_properties_unchanged(self, fastica_dataset):
         ica = FastICA(n_components=4, random_state=123, whiten="unit-variance")

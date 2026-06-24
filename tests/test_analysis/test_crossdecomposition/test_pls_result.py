@@ -13,6 +13,9 @@ from numpy.testing import assert_allclose
 from spectrochempy.analysis._base._result import AnalysisResult
 from spectrochempy.analysis.crossdecomposition.pls import PLSRegression
 from spectrochempy.utils.exceptions import NotFittedError
+from tests.test_analysis.result_test_helpers import assert_fit_returns_self
+from tests.test_analysis.result_test_helpers import assert_result_basics
+from tests.test_analysis.result_test_helpers import assert_result_raises_before_fit
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -50,11 +53,7 @@ class TestPLSRegressionResult:
     """Tests for PLSRegression.result returning AnalysisResult."""
 
     def test_result_is_analysis_result(self, pls_fitted):
-        result = pls_fitted.result
-        assert isinstance(result, AnalysisResult)
-
-    def test_estimator_name(self, pls_fitted):
-        assert pls_fitted.result.estimator == "PLSRegression"
+        assert_result_basics(pls_fitted, AnalysisResult, "PLSRegression")
 
     def test_outputs_contain_keys(self, pls_fitted):
         outputs = pls_fitted.result.outputs
@@ -148,13 +147,8 @@ class TestPLSRegressionResult:
         assert "parameters:" in text
         assert "n_components" in text
 
-    def test_result_is_not_cached(self, pls_fitted):
-        assert pls_fitted.result is not pls_fitted.result
-
     def test_raises_before_fit(self):
-        pls = PLSRegression(n_components=3)
-        with pytest.raises(NotFittedError):
-            _ = pls.result
+        assert_result_raises_before_fit(PLSRegression(n_components=3), NotFittedError)
 
     def test_fit_still_returns_self(self, pls_fitted):
         rng = np.random.default_rng(42)
@@ -163,8 +157,7 @@ class TestPLSRegressionResult:
         import spectrochempy as scp
 
         pls = PLSRegression(n_components=3)
-        ret = pls.fit(scp.NDDataset(X), scp.NDDataset(Y))
-        assert ret is pls
+        assert_fit_returns_self(pls, scp.NDDataset(X), scp.NDDataset(Y))
 
     def test_existing_properties_unchanged(self, pls_fitted):
         pls = pls_fitted

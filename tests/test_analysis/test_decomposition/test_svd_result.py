@@ -16,6 +16,9 @@ from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis._base._result import AnalysisResult
 from spectrochempy.analysis._base._result import ResultBase
 from spectrochempy.analysis.decomposition.svd import SVD
+from tests.test_analysis.result_test_helpers import assert_fit_returns_self
+from tests.test_analysis.result_test_helpers import assert_result_basics
+from tests.test_analysis.result_test_helpers import assert_result_raises_before_fit
 
 
 # ======================================================================================
@@ -43,26 +46,8 @@ class TestSVDResult:
     def test_result_is_analysis_result(self, low_rank_dataset):
         svd = SVD()
         svd.fit(low_rank_dataset)
-        result = svd.result
-        assert isinstance(result, AnalysisResult)
-
-    def test_result_is_instance_of_base(self, low_rank_dataset):
-        svd = SVD()
-        svd.fit(low_rank_dataset)
-        assert isinstance(svd.result, ResultBase)
-
-    def test_estimator_name(self, low_rank_dataset):
-        svd = SVD()
-        svd.fit(low_rank_dataset)
-        assert svd.result.estimator == "SVD"
-
-    def test_result_is_not_cached(self, low_rank_dataset):
-        svd = SVD()
-        svd.fit(low_rank_dataset)
-        assert svd.result is not svd.result, (
-            "AnalysisResult is recreated on every access; "
-            "change this assertion if caching is added later"
-        )
+        result = assert_result_basics(svd, AnalysisResult, "SVD")
+        assert isinstance(result, ResultBase)
 
     # ----------------------------------------------------------------------------------
     # Outputs
@@ -169,26 +154,17 @@ class TestSVDResult:
         assert "explained_variance" in text
         assert "full_matrices" in text
 
-    def test_repr_does_not_crash(self, low_rank_dataset):
-        svd = SVD()
-        svd.fit(low_rank_dataset)
-        _ = repr(svd.result)
-
     # ----------------------------------------------------------------------------------
     # Pre-fit guard
     # ----------------------------------------------------------------------------------
     def test_raises_before_fit(self):
-        svd = SVD()
-        with pytest.raises(NotFittedError):
-            _ = svd.result
+        assert_result_raises_before_fit(SVD(), NotFittedError)
 
     # ----------------------------------------------------------------------------------
     # Existing behaviour preserved
     # ----------------------------------------------------------------------------------
     def test_fit_still_returns_self(self, low_rank_dataset):
-        svd = SVD()
-        ret = svd.fit(low_rank_dataset)
-        assert ret is svd
+        assert_fit_returns_self(SVD(), low_rank_dataset)
 
     def test_existing_properties_unchanged(self, low_rank_dataset):
         svd = SVD()
