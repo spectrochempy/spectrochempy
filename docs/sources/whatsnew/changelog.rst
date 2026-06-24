@@ -21,8 +21,8 @@ New Features
 
 - Result objects now provide attribute-style access to named outputs and
   diagnostics, for example `pca.result.scores`, `pca.result.loadings`, and
-  `pca.result.explained_variance`. The IRIS plugin now follows the same
-  contract through `iris.result`.
+  `pca.result.explained_variance`. The IRIS and TENSOR/CP plugins now follow
+  the same contract through `iris.result` and `cp.result`.
 
 - Added a minimal MATLAB `.mat` writer for simple numeric `NDDataset`
   exchange using `scipy.io.savemat`. This is an exchange format, not
