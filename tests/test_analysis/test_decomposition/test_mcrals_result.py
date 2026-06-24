@@ -15,6 +15,9 @@ from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis._base._result import AnalysisResult
 from spectrochempy.analysis._base._result import ResultBase
 from spectrochempy.analysis.decomposition.mcrals import MCRALS
+from tests.test_analysis.result_test_helpers import assert_fit_returns_self
+from tests.test_analysis.result_test_helpers import assert_result_basics
+from tests.test_analysis.result_test_helpers import assert_result_raises_before_fit
 
 
 # ======================================================================================
@@ -45,12 +48,8 @@ def fitted_mcrals(mcrals_dataset):
 # ======================================================================================
 class TestMCRALSResult:
     def test_result_is_analysis_result(self, fitted_mcrals):
-        result = fitted_mcrals.result
-        assert isinstance(result, AnalysisResult)
+        result = assert_result_basics(fitted_mcrals, AnalysisResult, "MCRALS")
         assert isinstance(result, ResultBase)
-
-    def test_estimator_name(self, fitted_mcrals):
-        assert fitted_mcrals.result.estimator == "MCRALS"
 
     def test_outputs_contain_keys(self, fitted_mcrals):
         result = fitted_mcrals.result
@@ -90,12 +89,6 @@ class TestMCRALSResult:
         assert "components" in text
         assert "n_iter" in text
         assert "converged" in text
-
-    def test_result_is_not_cached(self, fitted_mcrals):
-        assert fitted_mcrals.result is not fitted_mcrals.result, (
-            "AnalysisResult is recreated on every access; "
-            "change this assertion if caching is added later"
-        )
 
     def test_parameters_contain_expected_keys(self, fitted_mcrals):
         params = fitted_mcrals.result.parameters
@@ -187,15 +180,12 @@ class TestMCRALSResult:
         assert "max_iter" in text
 
     def test_raises_before_fit(self):
-        mcr = MCRALS()
-        with pytest.raises(NotFittedError):
-            _ = mcr.result
+        assert_result_raises_before_fit(MCRALS(), NotFittedError)
 
     def test_fit_still_returns_self(self, mcrals_dataset):
         X, C0 = mcrals_dataset
         mcr = MCRALS()
-        ret = mcr.fit(X, C0)
-        assert ret is mcr
+        assert_fit_returns_self(mcr, X, C0)
 
     def test_existing_properties_unchanged(self, fitted_mcrals):
         assert fitted_mcrals.components.shape == (2, 6)

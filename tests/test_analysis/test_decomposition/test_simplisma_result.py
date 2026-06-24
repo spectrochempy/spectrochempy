@@ -15,6 +15,9 @@ from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis._base._result import AnalysisResult
 from spectrochempy.analysis._base._result import ResultBase
 from spectrochempy.analysis.decomposition.simplisma import SIMPLISMA
+from tests.test_analysis.result_test_helpers import assert_fit_returns_self
+from tests.test_analysis.result_test_helpers import assert_result_basics
+from tests.test_analysis.result_test_helpers import assert_result_raises_before_fit
 
 
 # ======================================================================================
@@ -24,14 +27,8 @@ class TestSIMPLISMAResult:
     def test_result_is_analysis_result(self, simplisma_dataset):
         sma = SIMPLISMA(n_components=2, log_level="WARNING")
         sma.fit(simplisma_dataset)
-        result = sma.result
-        assert isinstance(result, AnalysisResult)
+        result = assert_result_basics(sma, AnalysisResult, "SIMPLISMA")
         assert isinstance(result, ResultBase)
-
-    def test_estimator_name(self, simplisma_dataset):
-        sma = SIMPLISMA(n_components=2, log_level="WARNING")
-        sma.fit(simplisma_dataset)
-        assert sma.result.estimator == "SIMPLISMA"
 
     def test_outputs_contain_keys(self, simplisma_dataset):
         sma = SIMPLISMA(n_components=2, log_level="WARNING")
@@ -92,14 +89,6 @@ class TestSIMPLISMAResult:
         assert "residual_std" in text
         assert "n_components_selected" in text
 
-    def test_result_is_not_cached(self, simplisma_dataset):
-        sma = SIMPLISMA(n_components=2, log_level="WARNING")
-        sma.fit(simplisma_dataset)
-        assert sma.result is not sma.result, (
-            "AnalysisResult is recreated on every access; "
-            "change this assertion if caching is added later"
-        )
-
     def test_parameters_contain_expected_keys(self, simplisma_dataset):
         sma = SIMPLISMA(n_components=2, log_level="WARNING")
         sma.fit(simplisma_dataset)
@@ -134,14 +123,11 @@ class TestSIMPLISMAResult:
         assert "noise" in text
 
     def test_raises_before_fit(self):
-        sma = SIMPLISMA()
-        with pytest.raises(NotFittedError):
-            _ = sma.result
+        assert_result_raises_before_fit(SIMPLISMA(), NotFittedError)
 
     def test_fit_still_returns_self(self, simplisma_dataset):
         sma = SIMPLISMA(n_components=2, log_level="WARNING")
-        ret = sma.fit(simplisma_dataset)
-        assert ret is sma
+        assert_fit_returns_self(sma, simplisma_dataset)
 
     def test_existing_properties_unchanged(self, simplisma_dataset):
         sma = SIMPLISMA(n_components=2, log_level="WARNING")

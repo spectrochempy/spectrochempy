@@ -15,6 +15,9 @@ from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis._base._result import AnalysisResult
 from spectrochempy.analysis._base._result import ResultBase
 from spectrochempy.analysis.decomposition.nmf import NMF
+from tests.test_analysis.result_test_helpers import assert_fit_returns_self
+from tests.test_analysis.result_test_helpers import assert_result_basics
+from tests.test_analysis.result_test_helpers import assert_result_raises_before_fit
 
 
 # ======================================================================================
@@ -42,12 +45,8 @@ def fitted_nmf(nmf_dataset):
 # ======================================================================================
 class TestNMFResult:
     def test_result_is_analysis_result(self, fitted_nmf):
-        result = fitted_nmf.result
-        assert isinstance(result, AnalysisResult)
+        result = assert_result_basics(fitted_nmf, AnalysisResult, "NMF")
         assert isinstance(result, ResultBase)
-
-    def test_estimator_name(self, fitted_nmf):
-        assert fitted_nmf.result.estimator == "NMF"
 
     def test_outputs_contain_keys(self, fitted_nmf):
         result = fitted_nmf.result
@@ -86,12 +85,6 @@ class TestNMFResult:
         assert "W" in text
         assert "reconstruction_error" in text
         assert "n_iter" in text
-
-    def test_result_is_not_cached(self, fitted_nmf):
-        assert fitted_nmf.result is not fitted_nmf.result, (
-            "AnalysisResult is recreated on every access; "
-            "change this assertion if caching is added later"
-        )
 
     def test_parameters_contain_expected_keys(self, fitted_nmf):
         params = fitted_nmf.result.parameters
@@ -141,16 +134,13 @@ class TestNMFResult:
         assert "solver" in text
 
     def test_raises_before_fit(self):
-        nmf = NMF()
-        with pytest.raises(NotFittedError):
-            _ = nmf.result
+        assert_result_raises_before_fit(NMF(), NotFittedError)
 
     def test_fit_still_returns_self(self, nmf_dataset):
         nmf = NMF(
             n_components=3, init="random", max_iter=500, random_state=42, tol=1e-8
         )
-        ret = nmf.fit(nmf_dataset)
-        assert ret is nmf
+        assert_fit_returns_self(nmf, nmf_dataset)
 
     def test_existing_properties_unchanged(self, fitted_nmf):
         assert fitted_nmf.components.shape == (3, 6)
