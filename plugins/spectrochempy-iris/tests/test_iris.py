@@ -16,10 +16,12 @@ from spectrochempy_iris import iris_analysis_report
 from spectrochempy_iris import plot_distribution_grid
 from spectrochempy_iris import plot_kernel_comparison
 
+from spectrochempy.analysis._base._result import AnalysisResult
 from spectrochempy.api.plugins import PluginCapability
 from spectrochempy.api.plugins import PluginState
 from spectrochempy.api.plugins import check_plugin_compatibility
 from spectrochempy.testing.plugins import PluginTestHarness
+from spectrochempy.utils.exceptions import NotFittedError
 
 # ------------------------------------------------------------------
 # Test data helpers
@@ -48,6 +50,19 @@ def _make_test_dataset(n_spectra: int = 19, n_channels: int = 50) -> object:
         x=scp.Coord(wavenumbers, title="Wavenumber"),
     )
     return ds
+
+
+@pytest.fixture()
+def fitted_iris():
+    """Return a fitted IRIS estimator using a small synthetic dataset."""
+    from spectrochempy_iris import IRIS
+    from spectrochempy_iris import IrisKernel
+
+    ds = _make_test_dataset(n_spectra=8, n_channels=15)
+    kernel = IrisKernel(ds, "langmuir", q=[-6, 1, 6])
+    iris = IRIS()
+    iris.fit(ds, kernel)
+    return iris
 
 
 # ------------------------------------------------------------------
@@ -295,6 +310,56 @@ def test_iris_analysis_report():
     assert report["n_channels"] == ds.data.shape[-1]
 
 
+class TestIRISResult:
+    """IRIS follows the core runtime Result contract."""
+
+    def test_result_is_analysis_result(self, fitted_iris):
+        assert isinstance(fitted_iris.result, AnalysisResult)
+        assert fitted_iris.result.estimator == "IRIS"
+
+    def test_outputs_match_direct_accessors(self, fitted_iris):
+        result = fitted_iris.result
+        np.testing.assert_allclose(result.f.data, fitted_iris.f.data)
+        assert result.K is fitted_iris.K
+
+    def test_diagnostics_match_direct_accessors(self, fitted_iris):
+        result = fitted_iris.result
+        assert result.RSS is fitted_iris.RSS
+        assert result.SM is fitted_iris.SM
+        assert result.lambdas is fitted_iris.lambdas
+
+    def test_attribute_access_and_discovery(self, fitted_iris):
+        result = fitted_iris.result
+        assert set(result.outputs) == {"f", "K"}
+        assert set(result.diagnostics) == {"RSS", "SM", "lambdas"}
+        assert result.f is result.outputs["f"]
+        assert result.RSS is result.diagnostics["RSS"]
+        assert {"f", "K", "RSS", "SM", "lambdas"} <= set(dir(result))
+
+    def test_parameters_describe_solver_and_regularization(self, fitted_iris):
+        parameters = fitted_iris.result.parameters
+        assert parameters == {
+            "qpsolver": "osqp",
+            "reg_par": None,
+            "warm_start": False,
+            "regularization": False,
+            "search_reg": False,
+        }
+
+    def test_result_raises_before_fit(self):
+        from spectrochempy_iris import IRIS
+
+        with pytest.raises(NotFittedError):
+            _ = IRIS().result
+
+    def test_existing_direct_accessors_remain_available(self, fitted_iris):
+        assert fitted_iris.f.shape == (1, 6, 15)
+        assert fitted_iris.K.shape == (8, 6)
+        assert fitted_iris.q.size == 6
+        assert fitted_iris.RSS.shape == (1,)
+        assert fitted_iris.SM.shape == (1,)
+
+
 def test_batch_iris_analysis():
     """batch_iris_analysis runs IRIS on multiple datasets."""
     ds1 = _make_test_dataset(n_spectra=10, n_channels=20)
@@ -311,9 +376,13 @@ def test_batch_iris_analysis():
     assert results[1]["label"] == "high_pressure"
     for r in results:
         assert "iris" in r
+        assert "result" in r
         assert "f" in r
         assert "RSS" in r
         assert "SM" in r
+        assert r["f"] is r["result"].f
+        assert r["RSS"] is r["result"].RSS
+        assert r["SM"] is r["result"].SM
 
 
 def test_batch_iris_list_input():
@@ -340,6 +409,8 @@ def test_compare_kernel_models():
     assert results[1]["kernel"] == "ca"
     for r in results:
         assert "iris" in r
+        assert "result" in r
+        assert isinstance(r["result"], AnalysisResult)
         assert r["iris"]._fitted
 
 

@@ -221,7 +221,7 @@ following alignment tasks should be completed:
 - define the minimum scientifically complete `FitResult` payload;
 - align the remaining maintained stateful core candidates (`Baseline`,
   `LSTSQ`, and `NNLS`) or document them as explicit exceptions;
-- complete IRIS plugin alignment;
+- keep the completed IRIS plugin alignment covered by compatibility tests;
 - complete TENSOR/CP plugin alignment;
 - update analysis and official-plugin documentation to teach `.result`;
 - coordinate compatible IRIS and TENSOR releases before the core 0.11 release,
@@ -237,7 +237,8 @@ and dataset persistence are sufficient for 0.11.
 1. Document the selected live, cached, or fit-time snapshot lifecycle semantics
    and publish the public Result type path.
 2. Complete Baseline, LSTSQ, and NNLS alignment.
-3. Complete IRIS and TENSOR/CP plugin alignment and release compatible plugins.
+3. Complete TENSOR/CP plugin alignment and release compatible official plugins;
+   IRIS Result alignment is implemented.
 4. Update user documentation and remove only confirmed deprecated aliases.
 5. Keep Results runtime-only in 0.11, using dataset export and established
    dataset persistence when saved outputs are needed.
