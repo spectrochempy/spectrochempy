@@ -1,6 +1,6 @@
 # Result Object Migration Roadmap
 
-**Status:** Campaign complete for core estimators
+**Status:** Campaign complete
 
 **Related RFC:** `result-object-contract-rfc.md`
 
@@ -11,12 +11,13 @@ the local audit trail.
 ---
 
 This roadmap is now a post-campaign maintainer summary. It preserves the
-contract, migration outcome, architectural lessons, and explicit boundaries for
-future work. Detailed PR-by-PR history remains in the audit trail.
+runtime Result contract, migration outcome, architectural lessons, and
+explicit boundaries for future work. Detailed PR-by-PR history remains in the
+audit trail.
 
 ## 1. Campaign Outcome
 
-The Result Object Contract campaign is complete for core estimators.
+The Result Alignment campaign is complete.
 
 Initial objectives preserved by the completed campaign:
 
@@ -24,6 +25,16 @@ Initial objectives preserved by the completed campaign:
 - preserve existing estimator APIs and behavior
 - keep estimator storage as an internal implementation detail
 - validate the contract across heterogeneous estimator implementations
+
+Completion summary:
+
+- core estimator-style objects are aligned
+- official estimator-style plugins are aligned
+- `.result` is now the canonical grouped-output API for estimator-style
+  objects that expose multiple scientific outputs and/or diagnostics
+- `AnalysisResult` and `FitResult` proved sufficient
+- no specialized Result subclasses were required
+- not every fitted object requires a Result
 
 Nine migrations were completed:
 
@@ -190,13 +201,13 @@ Known deliberate limits of the completed campaign:
 - no provenance enrichment beyond current estimator-facing data
 - no HTML or display integration beyond `__repr__`
 
-Optional follow-up candidates that do not change campaign completion status:
+Objects reviewed after alignment that do not currently justify `.result`:
 
 | Estimator | Classification | Rationale |
 |---|---|---|
-| Baseline | Optional | Processor-specific, outside the main `analysis/` migration set |
-| LSTSQ | Optional | Thin wrapper, low architectural risk |
-| NNLS | Optional | Same profile as LSTSQ |
+| Baseline | Explicit exception | Processor-oriented API; little grouped-result value beyond `baseline` and `corrected` |
+| LSTSQ | Explicit exception | Thin wrapper; stable fit outputs are mainly `coef` and `intercept` |
+| NNLS | Explicit exception | Same profile as `LSTSQ`; little grouped-result value |
 
 ## 7. Audit Trail
 
@@ -204,14 +215,24 @@ Detailed implementation history remains in the local audit trail. The tracked
 maintainer references for this completed campaign are this roadmap and
 [`result-object-contract-rfc.md`](result-object-contract-rfc.md).
 
-## 8. 0.11 Result Alignment
+## 8. Canonical Result Position
 
-The Result Object campaign is complete for core estimators. The remaining work
-before `.result` is described as the canonical grouped-output API is alignment
-and completion work around the implemented runtime Result contract.
+The Result Alignment campaign is complete. The implemented **runtime Result
+contract** is the canonical grouped-output API for estimator-style objects
+that expose multiple scientific outputs and/or diagnostics.
 
-Before `.result` is described as the canonical grouped-output API for 0.11, the
-following alignment tasks should be completed:
+This position is intentionally scoped:
+
+- estimator-style objects with meaningful grouped scientific outputs should use
+  `.result`
+- objects with sparse or processor-oriented surfaces do not require `.result`
+- the absence of `.result` on an object such as `Baseline`, `LSTSQ`, or
+  `NNLS` reflects limited grouped-result value, not unfinished migration work
+
+## 9. Remaining Follow-up
+
+The remaining work for 0.11 is alignment and packaging follow-up around the
+completed runtime Result contract:
 
 - publish `ResultBase`, `AnalysisResult`, and `FitResult` through a documented
   public import path rather than only the private `_base._result` module;
@@ -219,28 +240,25 @@ following alignment tasks should be completed:
   live, become cached, or become a fit-time snapshot; no direction is currently
   preferred;
 - define the minimum scientifically complete `FitResult` payload;
-- align the remaining maintained stateful core candidates (`Baseline`,
-  `LSTSQ`, and `NNLS`) or document them as explicit exceptions;
 - keep the completed IRIS plugin alignment covered by compatibility tests;
 - keep the completed TENSOR/CP plugin alignment covered by compatibility tests;
 - update analysis and official-plugin documentation to teach `.result`;
 - coordinate compatible IRIS and TENSOR releases before the core 0.11 release,
   because both plugins currently declare an upper core bound below 0.11.
 
-The recommended 0.11 scope is completion of the canonical **runtime Result
-contract** across core and official plugins. Structured Result persistence and
-typed Project membership remain deferred optional directions. Dataset export
-and dataset persistence are sufficient for 0.11.
+The recommended 0.11 scope is packaging and documenting the completed
+**runtime Result contract** across core and official plugins. Structured
+Result persistence and typed Project membership remain deferred optional
+directions. Dataset export and dataset persistence are sufficient for 0.11.
 
 ### Recommended sequence
 
-1. Document the selected live, cached, or fit-time snapshot lifecycle semantics
-   and publish the public Result type path.
-2. Complete Baseline, LSTSQ, and NNLS alignment.
-3. Keep IRIS and TENSOR/CP plugin alignment covered by compatibility tests and
+1. Publish the public Result type path and document the selected live, cached,
+   or fit-time snapshot lifecycle semantics.
+2. Keep IRIS and TENSOR/CP plugin alignment covered by compatibility tests and
    release compatible official plugins.
-4. Update user documentation and remove only confirmed deprecated aliases.
-5. Keep Results runtime-only in 0.11, using dataset export and established
+3. Update user documentation and remove only confirmed deprecated aliases.
+4. Keep Results runtime-only in 0.11, using dataset export and established
    dataset persistence when saved outputs are needed.
-6. Keep structured Result persistence and typed Project membership deferred
+5. Keep structured Result persistence and typed Project membership deferred
    unless future use cases justify them.

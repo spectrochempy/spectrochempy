@@ -31,8 +31,16 @@ This document should evolve as the project evolves.
 
 - Completed: the core runtime Result contract, the intentionally narrow Project
   boundary, and the dataset-persistence boundary are clarified.
-- Result alignment remaining: public Result exports, Baseline, LSTSQ, NNLS,
-  compatibility review, and documentation alignment.
+- Completed: Result alignment for maintained core estimator-style objects and
+  official estimator-style plugins (`IRIS`, `CP` / TENSOR).
+- Canonical API position: `.result` is the canonical grouped-output API for
+  estimator-style objects that expose multiple scientific outputs and/or
+  diagnostics.
+- Explicit non-candidates: `Baseline`, `LSTSQ`, and `NNLS` do not currently
+  justify `.result`; this reflects limited grouped-result value, not unfinished
+  migration work.
+- Remaining follow-up: public Result exports, compatibility review, and
+  documentation alignment.
 - Plugin alignment: IRIS and TENSOR/CP now expose `.result`; 0.11
   compatibility testing and compatible plugin releases remain.
 - Lifecycle decision: the implementation is currently a live view. Retaining
@@ -341,7 +349,8 @@ Major outcomes:
 * ownership, provenance boundary, serialization boundary, and display scope
   clarified.
 
-Current priority: Result alignment, plugin alignment, and documentation
+Current priority: Closed as an alignment campaign. Remaining follow-up is
+limited to public Result exports, compatibility review, and documentation
 alignment. Structured Result persistence and typed Project membership remain
 deferred.
 
@@ -758,13 +767,19 @@ Future work should clarify:
 
 ## Result Alignment and Optional Infrastructure
 
-Status: Alignment work; optional infrastructure deferred.
+Status: Campaign complete; optional infrastructure deferred.
 
 Current assessment:
 
-The core Result Object campaign is complete. Near-term work is limited to
-Result alignment, plugin alignment, documentation alignment, and compatibility
-review.
+The core Result Object campaign is complete. The maintained estimator-style
+scope is aligned in core and in official estimator-style plugins. Near-term
+work is limited to compatibility review, public Result exports, and
+documentation alignment.
+
+The post-alignment audit concluded that not every fitted or stateful object
+should receive `.result`. In particular, `Baseline`, `LSTSQ`, and `NNLS` do
+not currently justify Result alignment because they offer limited grouped
+scientific value relative to their existing APIs.
 
 Deferred optional topics include:
 

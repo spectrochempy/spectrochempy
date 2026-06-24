@@ -291,7 +291,8 @@ versioned manifest because Result outputs may:
 - include output datasets whose dtype has narrower portability guarantees than
   ordinary core numerical arrays.
 
-No structured Result persistence work is currently committed. If it is pursued,
+Results are currently runtime objects. No structured Result persistence work is
+currently committed. If it is pursued,
 the design would first need decisions about:
 
 - live-view, cached-view, or fit-time snapshot semantics;
@@ -302,7 +303,8 @@ the design would first need decisions about:
 
 Typed Project membership remains deferred independently. The current
 architecture does not require either structured Result persistence or broader
-Project membership.
+Project membership. Dataset persistence remains the established persistence
+model.
 
 ### Native persistence clarification
 

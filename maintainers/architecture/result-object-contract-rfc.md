@@ -35,6 +35,9 @@ This RFC:
 This RFC only defines a stable ownership, representation, and lifecycle
 contract for analysis and fit outputs.
 
+The contract is now implemented and the Result Alignment campaign is complete
+for the maintained estimator-style scope.
+
 ## Current Runtime Boundary
 
 The implemented Result classes are currently runtime grouping objects, not
@@ -54,6 +57,10 @@ In particular:
 The current implementation is therefore a live view suitable for grouped
 runtime output discovery. No architectural decision has been made to replace
 it.
+
+Within that runtime boundary, `.result` is now the canonical grouped-output
+API for estimator-style objects that expose multiple scientific outputs and/or
+diagnostics.
 
 Possible future lifecycle directions are:
 
@@ -185,6 +192,10 @@ Typical fields include `parameters`, `fitted`, `components`, `residuals`,
 
 This hierarchy is intentionally small. It should not introduce separate classes
 for every method in PR1.
+
+The implemented campaign validated that this minimal hierarchy was sufficient
+across the maintained estimator-style scope. No specialized Result subclasses
+were required in core or aligned official plugins.
 
 ## Ownership model
 
@@ -365,6 +376,11 @@ When saved outputs are needed, the supported direction is dataset export to
 named `NDDataset` objects or a nested dataset-only `Project`, using established
 dataset persistence. Structured Result persistence and typed Project membership
 are separate deferred possibilities, not required future steps.
+
+Not every fitted or stateful object requires a Result. The completed campaign
+established `.result` as the canonical grouped-output API only where it adds
+meaningful grouped scientific value. Objects with sparse or processor-oriented
+surfaces may remain without `.result`.
 
 ## Migration plan
 
