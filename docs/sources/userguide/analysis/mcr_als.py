@@ -159,7 +159,7 @@ mcr = scp.MCRALS(log_level="INFO")
 # so we have a summary of the ALS iterations
 
 # %%
-mcr.fit(X, St0)
+_ = mcr.fit(X, St0)
 
 # %% [markdown]
 # The optimization has converged within few iterations. The figures reported for each
@@ -184,7 +184,7 @@ mcr.fit(X, St0)
 
 # %%
 mcr.tol = 0.01
-mcr.fit(X, St0)
+_ = mcr.fit(X, St0)
 
 # %% [markdown]
 # As could be expected more iterations have been necessary to reach this stricter
@@ -200,7 +200,7 @@ mcr.fit(X, St0)
 
 # %%
 mcr.tol = 0.001
-mcr.fit(X, St0)
+_ = mcr.fit(X, St0)
 
 # %% [markdown]
 # #### More information about the MCRALS estimator
@@ -257,7 +257,16 @@ _ = mcr1.St.plot(clear=False, cmap=None, color="blue")
 
 # %%
 mcr1 = scp.MCRALS()
-mcr1.fit(X, St0)
+_ = mcr1.fit(X, St0)
+
+# %%
+C = mcr1.result.C
+St = mcr1.result.components
+
+# %% [markdown]
+# The grouped `.result` view is convenient when the fitted outputs are consumed
+# together. Historical direct access through `mcr1.C` and `mcr1.St` remains
+# available in this release.
 
 # %% [markdown]
 # As the dimensions of C are such that the rows' direction (C.y) corresponds to the
@@ -267,13 +276,13 @@ mcr1.fit(X, St0)
 # to plot the concentration vs. the elution time.
 
 # %%
-_ = mcr1.C.T.plot()
+_ = C.T.plot()
 
 # %% [markdown]
 # On the other hand, the spectra of the pure species can be plotted directly:
 
 # %%
-_ = mcr1.St.plot()
+_ = St.plot()
 
 # %% [markdown]
 # #### A basic illustration of the rotational ambiguity
@@ -295,10 +304,10 @@ _ = mcr1.St.plot()
 
 # %%
 mcr2 = scp.MCRALS(normSpec="euclid")
-mcr2.fit(X, St0)
+_ = mcr2.fit(X, St0)
 
 mcr3 = scp.MCRALS(normSpec="max")
-mcr3.fit(X, St0)
+_ = mcr3.fit(X, St0)
 
 _ = mcr1.St.plot()
 _ = mcr2.St.plot()
@@ -334,7 +343,7 @@ _ = mcr3.C.T.plot()
 
 # %%
 pca = scp.PCA(n_components=8)
-pca.fit(X)
+_ = pca.fit(X)
 pca.printev()
 _ = pca.screeplot()
 
@@ -363,7 +372,7 @@ _ = scores.T.plot()
 
 # %%
 efa = scp.EFA()
-efa.fit(X)
+_ = efa.fit(X)
 efa.n_components = 4
 C0 = efa.transform()
 _ = C0.T.plot()
@@ -373,7 +382,7 @@ _ = C0.T.plot()
 
 # %%
 mcr4 = scp.MCRALS(max_iter=100, normSpec="euclid")
-mcr4.fit(X, C0)
+_ = mcr4.fit(X, C0)
 
 # %%
 _ = mcr4.C.T.plot()
@@ -402,7 +411,7 @@ _ = X2.plot(method="map")
 
 # %%
 mcr5 = scp.MCRALS(unimodConc=[])
-mcr5.fit(X2, St0)
+_ = mcr5.fit(X2, St0)
 
 # %%
 _ = mcr5.C.T.plot()

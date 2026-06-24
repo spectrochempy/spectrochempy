@@ -181,8 +181,8 @@ class CP(DecompositionAnalysis):
     >>> X = np.random.rand(6, 8, 10)
     >>> ds = scp.NDDataset(X)
     >>> cp = scp.tensor.CP(n_components=2)
-    >>> cp.fit(ds)
-    >>> A, B, C = cp.loadings
+    >>> _ = cp.fit(ds)
+    >>> A, B, C = cp.result.factors
     >>> Xr = cp.inverse_transform()
     """
 

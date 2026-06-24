@@ -113,11 +113,18 @@ kernel
 
 # %%
 # Now we fit the model - we can pass either the Kernel object or the kernel NDDataset
-iris1.fit(X_, K)
+_ = iris1.fit(X_, K)
+
+# %%
+# Grouped fitted outputs are also available from `iris1.result`. Historical
+# direct access such as `iris1.f`, `iris1.K`, `iris1.RSS`, and `iris1.SM`
+# remains supported.
+f = iris1.result.f
+_ = iris1.result.K
 
 # %%
 # Plots the results
-_ = iris1.f.plot_contour()
+_ = f.plot_contour()
 
 # %%
 _ = iris1.plotmerit()
@@ -129,7 +136,7 @@ iris2 = IRIS(reg_par=[-10, 1, 12])
 
 # %%
 # We keep the same kernel object as previously - performs the fit.
-iris2.fit(X_, K)
+_ = iris2.fit(X_, K)
 _ = iris2.plotlcurve(title="L curve, manual search")
 # %%
 # Visually, the best regularization parameter is at index ~ -6, corresponding to lambda = 1e-4
@@ -143,7 +150,7 @@ _ = iris2.plotmerit(-6)
 # Now try an automatic search of the regularization parameter around the best value found manually:
 
 iris3 = IRIS(log_level="INFO", reg_par=[-6, -2])
-iris3.fit(X_, K)
+_ = iris3.fit(X_, K)
 _ = iris3.plotlcurve(title="L curve, automated search")
 # %%
 # The data corresponding to the largest curvature of the L-curve
