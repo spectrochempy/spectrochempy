@@ -4,7 +4,8 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 
-"""Small shared helpers for Result-related tests.
+"""
+Small shared helpers for Result-related tests.
 
 These helpers intentionally stay lightweight. They cover only the repeated
 runtime Result contract checks that are common across many estimator test
