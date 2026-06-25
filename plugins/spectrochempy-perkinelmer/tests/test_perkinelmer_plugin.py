@@ -233,6 +233,142 @@ def test_read_perkinelmer_content_kwarg() -> None:
 
 
 # ------------------------------------------------------------------------------
+# Metadata enrichment tests
+# ------------------------------------------------------------------------------
+
+
+def test_read_perkinelmer_extra_meta_fields(monkeypatch) -> None:
+    """New metadata fields are copied when present in the parser output."""
+    from spectrochempy_perkinelmer.read_perkinelmer import _read_sp
+
+    class FakeSpFile:
+        spectrum = np.array([1.0, 2.0, 3.0])
+        wavelength = np.array([4000.0, 3500.0, 3000.0])
+        meta = {
+            "analyst": "Test Analyst",
+            "date": "Mon Jan 01 00:00:00 2024",
+            "instrument_model": "Spectrum Two",
+            "detector": "MCT",
+            "source": "MIR",
+            "accumulations": 16,
+            "spectrum_type": "Spectrum",
+            "instrument_serial_number": "12345",
+            "instrument_software_version": "v1.0",
+            "ir_accessory": "Universal ATR",
+            "image_name": "Sample 001",
+        }
+
+    monkeypatch.setattr(
+        "spectrochempy_perkinelmer.read_perkinelmer._SpFile",
+        lambda content: FakeSpFile(),
+    )
+
+    ds = scp.NDDataset()
+    result = _read_sp(ds, "dummy.sp", content=b"PEPE")
+
+    assert result.meta.instrument_serial_number == "12345"
+    assert result.meta.instrument_software_version == "v1.0"
+    assert result.meta.ir_accessory == "Universal ATR"
+    assert result.meta.image_name == "Sample 001"
+    # Core fields should still be present
+    assert result.meta.analyst == "Test Analyst"
+    assert result.meta.instrument_model == "Spectrum Two"
+
+
+def test_read_perkinelmer_image_name_fallback_description(monkeypatch) -> None:
+    """image_name is used as dataset.description when description is empty."""
+    from spectrochempy_perkinelmer.read_perkinelmer import _read_sp
+
+    class FakeSpFile:
+        spectrum = np.array([1.0, 2.0, 3.0])
+        wavelength = np.array([4000.0, 3500.0, 3000.0])
+        meta = {
+            "analyst": "",
+            "date": "",
+            "instrument_model": "",
+            "detector": "",
+            "source": "",
+            "accumulations": "",
+            "spectrum_type": "",
+            "image_name": "Sample 001 By Analyst Date Monday",
+        }
+
+    monkeypatch.setattr(
+        "spectrochempy_perkinelmer.read_perkinelmer._SpFile",
+        lambda content: FakeSpFile(),
+    )
+
+    ds = scp.NDDataset()
+    result = _read_sp(ds, "dummy.sp", content=b"PEPE")
+    assert result.description == "Sample 001 By Analyst Date Monday"
+
+
+def test_read_perkinelmer_description_not_overwritten(monkeypatch) -> None:
+    """image_name does NOT overwrite an existing description."""
+    from spectrochempy_perkinelmer.read_perkinelmer import _read_sp
+
+    class FakeSpFile:
+        spectrum = np.array([1.0, 2.0, 3.0])
+        wavelength = np.array([4000.0, 3500.0, 3000.0])
+        meta = {
+            "analyst": "",
+            "date": "",
+            "instrument_model": "",
+            "detector": "",
+            "source": "",
+            "accumulations": "",
+            "spectrum_type": "",
+            "image_name": "Sample 001",
+        }
+
+    monkeypatch.setattr(
+        "spectrochempy_perkinelmer.read_perkinelmer._SpFile",
+        lambda content: FakeSpFile(),
+    )
+
+    ds = scp.NDDataset()
+    ds.description = "Existing description"
+    result = _read_sp(ds, "dummy.sp", content=b"PEPE")
+    assert result.description == "Existing description"
+
+
+def test_read_perkinelmer_empty_extra_fields_ignored(monkeypatch) -> None:
+    """Empty or missing extra metadata values are not attached."""
+    from spectrochempy_perkinelmer.read_perkinelmer import _read_sp
+
+    class FakeSpFile:
+        spectrum = np.array([1.0, 2.0, 3.0])
+        wavelength = np.array([4000.0, 3500.0, 3000.0])
+        meta = {
+            "analyst": "Analyst",
+            "date": "Mon Jan 01 00:00:00 2024",
+            "instrument_model": "Spectrum Two",
+            "detector": "MCT",
+            "source": "MIR",
+            "accumulations": 16,
+            "spectrum_type": "Spectrum",
+            "instrument_serial_number": "",
+            "instrument_software_version": None,
+            # ir_accessory and image_name deliberately absent
+        }
+
+    monkeypatch.setattr(
+        "spectrochempy_perkinelmer.read_perkinelmer._SpFile",
+        lambda content: FakeSpFile(),
+    )
+
+    ds = scp.NDDataset()
+    result = _read_sp(ds, "dummy.sp", content=b"PEPE")
+
+    assert getattr(result.meta, "instrument_serial_number", None) in (None, "")
+    assert getattr(result.meta, "instrument_software_version", None) in (None, "")
+    assert getattr(result.meta, "ir_accessory", None) in (None, "")
+    assert getattr(result.meta, "image_name", None) in (None, "")
+    # Core fields should still be present
+    assert result.meta.analyst == "Analyst"
+
+
+# ------------------------------------------------------------------------------
 # Namespace exposure tests
 # ------------------------------------------------------------------------------
 

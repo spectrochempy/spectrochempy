@@ -411,7 +411,7 @@ def _read_sp(*args, **kwargs):
     dataset.set_coordset(y=y, x=x)
 
     # Metadata — keep only well-defined, useful fields.
-    for key in [
+    _CORE_META_KEYS = (
         "analyst",
         "date",
         "instrument_model",
@@ -419,10 +419,22 @@ def _read_sp(*args, **kwargs):
         "source",
         "accumulations",
         "spectrum_type",
-    ]:
+    )
+    _EXTRA_META_KEYS = (
+        "instrument_serial_number",
+        "instrument_software_version",
+        "ir_accessory",
+        "image_name",
+    )
+    for key in _CORE_META_KEYS + _EXTRA_META_KEYS:
         value = spf.meta.get(key)
         if value not in (None, ""):
             setattr(dataset.meta, key, value)
+
+    # Use the vendor image_name as a fallback description when none is provided.
+    image_name = spf.meta.get("image_name")
+    if image_name and not dataset.description:
+        dataset.description = str(image_name)
 
     dataset.meta.readonly = True
 
