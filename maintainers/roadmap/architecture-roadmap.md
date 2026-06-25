@@ -27,32 +27,37 @@ This document should evolve as the project evolves.
 
 ## 2026-06
 
-### Global Result / Project / Persistence Audit
+### [✔] Global Result / Project / Persistence Audit — Closed 2026-06-26
 
-- Completed: the core runtime Result contract, the intentionally narrow Project
-  boundary, and the dataset-persistence boundary are clarified.
-- Completed: Result alignment for maintained core estimator-style objects and
-  official estimator-style plugins (`IRIS`, `CP` / TENSOR).
+- Result Object campaign closed after 9 core migration PRs, 2 plugin
+  alignments, and post-alignment stabilisation.
+- Core runtime Result contract completed: PCA, SVD, NMF, MCRALS, SIMPLISMA,
+  EFA, FastICA, PLSRegression, Optimize all expose `.result`.
 - Canonical API position: `.result` is the canonical grouped-output API for
   estimator-style objects that expose multiple scientific outputs and/or
   diagnostics.
 - Explicit non-candidates: `Baseline`, `LSTSQ`, and `NNLS` do not currently
   justify `.result`; this reflects limited grouped-result value, not unfinished
   migration work.
-- Remaining follow-up: public Result exports, compatibility review, and
-  documentation alignment.
-- Plugin alignment: IRIS and TENSOR/CP now expose `.result`; 0.11
-  compatibility testing and compatible plugin releases remain.
+- Closure assessment: no subclass of `ResultBase` was required. The concrete
+  class (`AnalysisResult`, `FitResult`) is an implementation detail — `.result`
+  IS the public API. Maintaining a separate public import path is not justified.
+- Plugin alignment: completed for IRIS and TENSOR/CP. 0.11 compatibility is
+  deferred to the release cycle.
+- Project boundary: keep `Project` limited to `NDDataset` and nested `Project`.
+  Dataset export is the supported bridge for saved Result outputs.
+- Persistence boundary: established
+  `NDDataset <-> xarray.Dataset <-> NetCDF` remains the dataset persistence
+  path. Structured Result persistence is deferred per-RFC design choice.
 - Lifecycle decision: the implementation is currently a live view. Retaining
   it, caching it, or adopting a fit-time snapshot remain open alternatives; no
-  direction is currently preferred.
-- Project decision: keep `Project` limited to `NDDataset` and nested `Project`.
-  Dataset export is the supported bridge for saved Result outputs.
-- Persistence decision: established dataset persistence remains
-  `NDDataset <-> xarray.Dataset <-> NetCDF`. Structured Result persistence and
-  typed Project membership are deferred optional directions.
-- Reference: local audit
-  `audit/~result-project-persistence-global-audit.md`.
+  direction is currently preferred. This deferred decision does not block
+  campaign closure.
+- Non-blocking cosmetic follow-up: gallery examples that show estimator output
+  could add `result = pca.result` (one extra line per example). This is
+  documented in the closure audit and can be adopted gradually.
+- Reference: `audit/~result-project-persistence-global-audit.md` and
+  `audit/~result-object-final-audit.md`.
 
 ### Analysis and Fit Result Architecture Audit
 
@@ -334,7 +339,7 @@ authoritative reference is `display-architecture.md`.
 
 ## Result Object Architecture
 
-Status: Completed for core estimators
+Status: Completed (2026-06-26)
 
 Refer to
 [`maintainers/architecture/result-object-contract-rfc.md`](../architecture/result-object-contract-rfc.md)

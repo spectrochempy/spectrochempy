@@ -2,6 +2,8 @@
 
 **Status:** Implemented
 
+**Campaign closed:** 2026-06-26
+
 **Related RFC:** `maintainers/rfcs/analysis-fit-result-architecture.md`
 
 ## Motivation
