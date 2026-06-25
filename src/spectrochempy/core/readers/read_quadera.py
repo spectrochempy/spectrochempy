@@ -127,6 +127,11 @@ def read_quadera(*paths, **kwargs):
     >>> scp.read_quadera('irdata/quadera.QD')
     NDDataset: [float64] a.u. (shape: (y:1, x:16384))
 
+    Using the explicit namespace API
+
+    >>> scp.quadera.read('irdata/quadera.QD')
+    NDDataset: [float64] a.u. (shape: (y:1, x:16384))
+
     """
     kwargs["filetypes"] = ["QUADERA files (*.QD)"]
     kwargs["protocol"] = ["quadera"]

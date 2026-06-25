@@ -124,6 +124,11 @@ def read_labspec(*paths, **kwargs):
     >>> scp.read_labspec('irdata/labspec.txt')
     NDDataset: [float64] a.u. (shape: (y:1, x:1024))
 
+    Using the explicit namespace API
+
+    >>> scp.labspec.read('irdata/labspec.txt')
+    NDDataset: [float64] a.u. (shape: (y:1, x:1024))
+
     """
     kwargs["filetypes"] = ["Labspec files (*.txt)"]
     kwargs["protocol"] = ["labspec"]

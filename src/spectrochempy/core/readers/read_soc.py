@@ -102,6 +102,16 @@ def read_soc(*paths, **kwargs):
     --------
     read : Generic read function.
 
+    Examples
+    --------
+    Using the explicit namespace API
+
+    >>> scp.soc.read('irdata/soc/sample.hdr')
+
+    Using the legacy top-level alias
+
+    >>> scp.read_soc('irdata/soc/sample.hdr')
+
     """
     kwargs["filetypes"] = ["Surface Optics Corp. (*.ddr *.hdr *.sdr)"]
     kwargs["protocol"] = ["soc", "ddr", "hdr", "sdr"]

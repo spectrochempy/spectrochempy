@@ -53,6 +53,10 @@ def write_csv(*args, **kwargs):
     >>> ds = scp.read('irdata/nh4y-activation.spg')
     >>> f2 = ds[0].write_csv('single_spectrum.csv')
 
+    Using the explicit namespace API
+    >>> ds = scp.NDDataset([1, 2, 3])
+    >>> f3 = ds.csv.write('myfile')
+
     """
     exporter = Exporter()
     kwargs["filetypes"] = ["CSV files (*.csv)"]

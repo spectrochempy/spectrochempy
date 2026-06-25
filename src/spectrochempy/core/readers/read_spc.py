@@ -129,6 +129,11 @@ def read_spc(*paths, **kwargs):
     >>> scp.read_spc('irdata/galactic/galactic.spe')
     NDDataset: [float64] a.u. (shape: (y:1, x:6144))
 
+    Using the explicit namespace API
+
+    >>> scp.spc.read('irdata/galactic/galactic.spe')
+    NDDataset: [float64] a.u. (shape: (y:1, x:6144))
+
     """
     kwargs["filetypes"] = ["Galactic files (*.spc)"]
     kwargs["protocol"] = ["spc"]

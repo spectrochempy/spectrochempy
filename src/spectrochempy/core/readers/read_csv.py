@@ -240,6 +240,11 @@ def read_csv(*paths, **kwargs):
     >>> scp.read_csv('irdata/csv/iris.csv')
     NDDataset: [float64] a.u. (shape: (y:150, x:4))
 
+    Using the explicit namespace API
+
+    >>> scp.csv.read('irdata/csv/iris.csv')
+    NDDataset: [float64] a.u. (shape: (y:150, x:4))
+
     """
     kwargs["filetypes"] = ["CSV files (*.csv)"]
     kwargs["protocol"] = ["csv"]

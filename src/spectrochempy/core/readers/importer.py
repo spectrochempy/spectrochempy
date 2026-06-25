@@ -285,6 +285,10 @@ def read(*paths, **kwargs):
     Read data from various file formats.
 
     This method is generally able to load experimental files based on extensions.
+    It acts as a dispatcher: after detecting the format it delegates to the
+    corresponding namespace reader (e.g. ``scp.omnic.read(...)``,
+    ``scp.opus.read(...)``, ``scp.jcamp.read(...)``).
+    You can bypass detection by passing the ``protocol`` keyword explicitly.
 
     Parameters
     ----------

@@ -138,6 +138,11 @@ def read_matlab(*paths, **kwargs):
     >>> scp.read_matlab('irdata/matlab/matlabdata.mat')
     NDDataset: [float64] a.u. (shape: (y:1, x:3))
 
+    Using the explicit namespace API
+
+    >>> scp.matlab.read('irdata/matlab/matlabdata.mat')
+    NDDataset: [float64] a.u. (shape: (y:1, x:3))
+
     """
     kwargs["filetypes"] = ["Matlab files (*.mat *.dso)"]
     kwargs["protocol"] = ["matlab"]

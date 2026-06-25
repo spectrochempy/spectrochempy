@@ -117,10 +117,19 @@ def read_jcamp(*paths, **kwargs):
     read_soc : Read Surface Optics Corps. files (:file:`.ddr` , :file:`.hdr` or :file:`.sdr`).
     read_galactic : Read Galactic files (:file:`.spc`).
     read_quadera : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
-
     read_csv : Read CSV files (:file:`.csv`).
     read_matlab : Read Matlab files (:file:`.mat`, :file:`.dso`).
     read_wire : Read Renishaw Wire files (:file:`.wdf`).
+
+    Examples
+    --------
+    Using the explicit namespace API
+
+    >>> scp.jcamp.read('irdata/jcamp/nh4y-activation.jdx')
+
+    Using the legacy top-level alias
+
+    >>> scp.read_jcamp('irdata/jcamp/nh4y-activation.jdx')
 
     """
 

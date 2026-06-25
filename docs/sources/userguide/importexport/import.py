@@ -70,6 +70,39 @@ X
 # OPUS, JCAMP-DX, CSV, MATLAB, TOPSPIN, etc. or even a directory.
 
 # %% [markdown]
+# ## How the generic reader works
+
+# %% [markdown]
+# Under the hood, `scp.read(...)` acts as a **dispatcher** that inspects the
+# file extension (or the optional `protocol=` keyword) and delegates the actual
+# reading to the appropriate format-specific implementation:
+#
+#     scp.read(path)
+#             │
+#             ▼
+#     format detection
+#             │
+#             ▼
+#     appropriate namespace reader
+#             │
+#             ▼
+#     scp.omnic.read(path)
+#     scp.opus.read(path)
+#     scp.jcamp.read(path)
+#     ...
+#
+# The generic reader is convenient because you do not need to remember which
+# namespace or alias to use.  However, the namespace API (`scp.omnic.read`,
+# `scp.opus.read`, `scp.jcamp.read`, …) is useful when you want to make the
+# format explicit in your code, or when the automatic detection is ambiguous.
+#
+# You can also force a protocol manually:
+
+# %%
+X = scp.read("wodger.spg", protocol="omnic")
+X
+
+# %% [markdown]
 # ## Using a specific reader
 
 # %% [markdown]
@@ -143,6 +176,23 @@ X
 #
 # Further details on specific cases are provided below, especially in the
 # section on reading directories.
+
+# %% [markdown]
+# ## Using namespace APIs
+
+# %% [markdown]
+# Core I/O domains also expose a namespace-style API for explicit
+# domain-qualified access:
+#
+#     scp.omnic.read("wodger.spg")
+#     scp.opus.read("irdata/OPUS/test.0000")
+#     scp.csv.read("irdata/csv/iris.csv")
+#     scp.jcamp.read("irdata/jcamp/nh4y-activation.jdx")
+#
+# These are equivalent to their top-level aliases (`read_omnic`, `read_opus`,
+# `read_csv`, `read_jcamp`, etc.) and are provided for API clarity and
+# future-proofing.  The generic `scp.read(...)` entry point remains the
+# recommended default.
 
 # %% [markdown]
 # ## Using relative or absolute pathnames
