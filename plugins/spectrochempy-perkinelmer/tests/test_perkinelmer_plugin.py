@@ -2,7 +2,6 @@
 
 """Tests for the spectrochempy-perkinelmer plugin."""
 
-from pathlib import Path
 
 import numpy as np
 import pytest
@@ -26,15 +25,17 @@ from spectrochempy.testing.plugins import PluginTestHarness
 DATADIR_SP = scp.preferences.datadir / "irdata" / "perkinelmer" / "spectra.sp"
 
 # ------------------------------------------------------------------------------
-# Parser unit tests
+# Parser unit tests (require spectrochempy_data)
 # ------------------------------------------------------------------------------
-
-TEST_SP = Path(__file__).parent / "data" / "spectra.sp"
 
 
 @pytest.fixture
 def sp_content() -> bytes:
-    return TEST_SP.read_bytes()
+    if not DATADIR_SP.exists():
+        pytest.skip(
+            "PerkinElmer testdata not available (set SCP_TEST_DATA_DOWNLOAD=1)"
+        )
+    return DATADIR_SP.read_bytes()
 
 
 def test_sp_parser_signature(sp_content: bytes) -> None:
@@ -165,23 +166,23 @@ def test_lifecycle_state() -> None:
 # ------------------------------------------------------------------------------
 
 
-@pytest.mark.skipif(not TEST_SP.exists(), reason="test .sp file not available")
+@pytest.mark.skipif(not DATADIR_SP.exists(), reason="test .sp file not available")
 def test_read_perkinelmer_returns_nddataset() -> None:
-    ds = read_perkinelmer(TEST_SP)
+    ds = read_perkinelmer(DATADIR_SP)
     assert hasattr(ds, "_implements")
     assert ds._implements() == "NDDataset"
 
 
-@pytest.mark.skipif(not TEST_SP.exists(), reason="test .sp file not available")
+@pytest.mark.skipif(not DATADIR_SP.exists(), reason="test .sp file not available")
 def test_read_perkinelmer_dimensions() -> None:
-    ds = read_perkinelmer(TEST_SP)
+    ds = read_perkinelmer(DATADIR_SP)
     assert ds.ndim == 2
     assert ds.shape == (1, 3301)
 
 
-@pytest.mark.skipif(not TEST_SP.exists(), reason="test .sp file not available")
+@pytest.mark.skipif(not DATADIR_SP.exists(), reason="test .sp file not available")
 def test_read_perkinelmer_coordinates() -> None:
-    ds = read_perkinelmer(TEST_SP)
+    ds = read_perkinelmer(DATADIR_SP)
     x = ds.x
     assert x.size == 3301
     assert x.data[0] == 4000.0
@@ -189,15 +190,15 @@ def test_read_perkinelmer_coordinates() -> None:
     assert str(x.units) == "nm"
 
 
-@pytest.mark.skipif(not TEST_SP.exists(), reason="test .sp file not available")
+@pytest.mark.skipif(not DATADIR_SP.exists(), reason="test .sp file not available")
 def test_read_perkinelmer_metadata() -> None:
-    ds = read_perkinelmer(TEST_SP)
+    ds = read_perkinelmer(DATADIR_SP)
     assert ds.origin == "perkinelmer"
     assert ds.meta.instrument_model == "Spectrum One"
     assert ds.meta.date == "Thu Mar 09 09:17:56 2006"
 
 
-@pytest.mark.skipif(not TEST_SP.exists(), reason="test .sp file not available")
+@pytest.mark.skipif(not DATADIR_SP.exists(), reason="test .sp file not available")
 def test_read_perkinelmer_invalid_file(tmp_path) -> None:
     bad = tmp_path / "bad.sp"
     bad.write_bytes(b"NOT_PEPE" + b"\x00" * 100)
@@ -211,24 +212,24 @@ def test_sp_parser_invalid_signature_direct() -> None:
         _SpFile(b"NOT_PEPE" + b"\x00" * 100)
 
 
-@pytest.mark.skipif(not TEST_SP.exists(), reason="test .sp file not available")
+@pytest.mark.skipif(not DATADIR_SP.exists(), reason="test .sp file not available")
 def test_read_sp_alias() -> None:
-    ds = read_perkinelmer(TEST_SP)
-    ds_alias = scp.read_sp(TEST_SP)
+    ds = read_perkinelmer(DATADIR_SP)
+    ds_alias = scp.read_sp(DATADIR_SP)
     assert ds_alias is not None
     assert ds_alias.shape == ds.shape
 
 
-@pytest.mark.skipif(not TEST_SP.exists(), reason="test .sp file not available")
+@pytest.mark.skipif(not DATADIR_SP.exists(), reason="test .sp file not available")
 def test_namespace_read_alias() -> None:
-    ds = scp.perkinelmer.read(TEST_SP)
+    ds = scp.perkinelmer.read(DATADIR_SP)
     assert ds is not None
     assert ds.shape == (1, 3301)
 
 
-@pytest.mark.skipif(not TEST_SP.exists(), reason="test .sp file not available")
+@pytest.mark.skipif(not DATADIR_SP.exists(), reason="test .sp file not available")
 def test_read_perkinelmer_content_kwarg() -> None:
-    content = TEST_SP.read_bytes()
+    content = DATADIR_SP.read_bytes()
     ds = read_perkinelmer("dummy.sp", content=content)
     assert ds.shape == (1, 3301)
 
