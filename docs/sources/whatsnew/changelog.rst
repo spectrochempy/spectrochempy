@@ -19,6 +19,11 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- ``read_omnic`` and ``read_spg`` can now read OMNIC SPG files containing
+  spectra with non-identical x-axis definitions using
+  ``allow_inconsistent_x=True``. Incompatible spectra are returned as a list
+  of ``NDDataset`` objects instead of raising an error (#863).
+
 - Result objects now provide attribute-style access to named outputs and
   diagnostics, for example `pca.result.scores`, `pca.result.loadings`, and
   `pca.result.explained_variance`. The IRIS and TENSOR/CP plugins now follow

@@ -137,3 +137,14 @@ def test_return_ifg_validation(tmp_path):
     assert result is None
     assert len(w) >= 1
     assert any("Invalid return_ifg value" in str(warning.message) for warning in w)
+
+
+def test_allow_inconsistent_x_parameter_documented():
+    assert "allow_inconsistent_x" in scp.read_spg.__doc__
+    assert "allow_inconsistent_x" in scp.read_omnic.__doc__
+    assert "allow_inconsistent_x=True" in scp.read_omnic.__doc__
+
+
+@pytest.mark.skip(reason="Requires an SPG file with inconsistent x-axes (#863)")
+def test_allow_inconsistent_x_with_real_file():
+    """Exercise both return paths once a representative sample is available."""

@@ -50,8 +50,9 @@ def read_omnic(*paths, **kwargs):
     - spectra history (but only incorporated in the NDDataset if a single
     spa is read)
 
-    An error is generated if attempt is made to inconsistent datasets: units
-    of spectra and xaxis, limits and number of points of the xaxis.
+    An error is generated when an SPG file contains spectra with inconsistent
+    x-axis definitions, unless ``allow_inconsistent_x=True`` is specified. In
+    that case, a list containing one `NDDataset` per spectrum is returned.
 
     Parameters
     ----------
@@ -128,6 +129,10 @@ def read_omnic(*paths, **kwargs):
         so not downloaded.
     sortbydate : `bool`, optional, default: `True`
         Sort multiple filename by acquisition date.
+    allow_inconsistent_x : `bool`, optional, default: `False`
+        Allow SPG files whose spectra have different x-axis definitions. When
+        enabled, return one `NDDataset` per spectrum instead of merging the
+        spectra. This option has no effect on SPA or SRS files.
 
     See Also
     --------
@@ -301,6 +306,9 @@ def read_spg(*paths, **kwargs):
     so not downloaded.
     sortbydate : `bool`, optional, default: `True`
     Sort multiple filename by acquisition date.
+    allow_inconsistent_x : `bool`, optional, default: `False`
+    Allow spectra with different x-axis definitions and return one `NDDataset`
+    per spectrum instead of a merged dataset.
 
     See Also
     --------
@@ -670,54 +678,18 @@ def _read_spg(*args, **kwargs):
         units.append(info["units"])
         titles.append(info["title"])
 
-    # check the consistency of xaxis and data units
-    if np.ptp(nx) != 0:  # pragma: no cover
-        raise ValueError(
-            "Error : Inconsistent data set -"
-            " number of wavenumber per spectrum should be "
-            "identical",
-        )
-    if np.ptp(firstx) != 0:  # pragma: no cover
-        raise ValueError(
-            "Error : Inconsistent data set - the x axis should start at same value",
-        )
-    if np.ptp(lastx) != 0:  # pragma: no cover
-        raise ValueError(
-            "Error : Inconsistent data set - the x axis should end at same value",
-        )
-    if len(set(xunits)) != 1:  # pragma: no cover
-        raise ValueError(
-            "Error : Inconsistent data set - x axis units should be identical",
-        )
-    if len(set(units)) != 1:  # pragma: no cover
-        raise ValueError(
-            "Error : Inconsistent data set - data units should be identical",
-        )
-    data = np.ndarray((nspec, nx[0]), dtype="float32")
-
-    # Now the intensity data
-
-    # Extracts positions of '03' keys
+    # Extract positions of intensity and spectrum metadata blocks before
+    # checking consistency because they are needed by both return paths.
     key_is_03 = keys == 3
     indices03 = np.nonzero(key_is_03)
     position03 = 304 * np.ones(len(indices03[0]), dtype="int") + 16 * indices03[0]
 
-    # Read number of spectral intensities
-    for i in range(nspec):
-        data[i, :] = _getintensities(fid, position03[i])
-
-    # Get spectra titles & acquisition dates:
-    # container to hold values
-    spectitles, acquisitiondates, timestamps = [], [], []
-
-    # Extract positions of '6B' keys (spectra titles & acquisition dates)
     key_is_6B = keys == 107
     indices6B = np.nonzero(key_is_6B)
     position6B = 304 * np.ones(len(indices6B[0]), dtype="int") + 16 * indices6B[0]
 
-    # Read spectra titles and acquisition date
+    spectitles, acquisitiondates, timestamps = [], [], []
     for i in range(nspec):
-        # determines the position of informatioon
         fid.seek(position6B[i] + 2)  # go to line and skip 2 bytes
         spa_title_pos = fromfile(fid, "uint32", 1)
 
@@ -733,12 +705,7 @@ def _read_spg(*args, **kwargs):
             seconds=int(timestamp),
         )
         acquisitiondates.append(acqdate)
-        timestamp = acqdate.timestamp()
-        # Transform back to timestamp for storage in the Coord object
-        # use datetime.fromtimestamp(d, timezone.utc))
-        # to transform back to datetime object
-
-        timestamps.append(timestamp)
+        timestamps.append(acqdate.timestamp())
 
         # Not used at present
         # -------------------
@@ -753,6 +720,77 @@ def _read_spg(*args, **kwargs):
         #        history_pos = fromfile(f,  'uint32', 1)
         #        history =  _readbtext(f, history_pos[0])
         #        allhistories.append(history)
+
+    xaxis_consistent = (
+        np.ptp(nx) == 0
+        and np.ptp(firstx) == 0
+        and np.ptp(lastx) == 0
+        and len(set(xunits)) == 1
+        and len(set(units)) == 1
+    )
+
+    if not xaxis_consistent:
+        if kwargs.get("allow_inconsistent_x", False):
+            datasets = []
+            for i in range(nspec):
+                single = dataset.__class__(
+                    np.expand_dims(_getintensities(fid, position03[i]), axis=0)
+                )
+                single.units = units[i]
+                single.title = titles[i]
+                single.name = f"{filename.stem}_spectrum_{i}"
+                single.filename = filename
+                single.set_coordset(
+                    y=Coord(
+                        [timestamps[i]],
+                        title="acquisition timestamp (GMT)",
+                        units="s",
+                        labels=([acquisitiondates[i]], [spectitles[i]]),
+                    ),
+                    x=Coord.linspace(
+                        firstx[i],
+                        lastx[i],
+                        nx[i],
+                        title=xtitles[i],
+                        units=xunits[i],
+                    ),
+                )
+                single.acquisition_date = acquisitiondates[i]
+                single.origin = "omnic"
+                single.description = kwargs.get(
+                    "description",
+                    f"Omnic title: {spg_title}\nOmnic filename: {filename}",
+                )
+                single._date = utcnow()
+                single.history = f"Imported from spg file {filename} (spectrum {i})."
+                datasets.append(single)
+
+            fid.close()
+            return datasets
+
+        inconsistencies = []
+        if np.ptp(nx) != 0:
+            inconsistencies.append(
+                f"number of wavenumbers per spectrum varies: {nx.tolist()}"
+            )
+        if np.ptp(firstx) != 0:
+            inconsistencies.append(f"x-axis start values differ: {firstx.tolist()}")
+        if np.ptp(lastx) != 0:
+            inconsistencies.append(f"x-axis end values differ: {lastx.tolist()}")
+        if len(set(xunits)) != 1:
+            inconsistencies.append(f"x-axis units differ: {list(set(xunits))}")
+        if len(set(units)) != 1:
+            inconsistencies.append(f"spectra units differ: {list(set(units))}")
+        fid.close()
+        raise ValueError(
+            "Error: Inconsistent data set - "
+            f"{', '.join(inconsistencies)}. "
+            "Use allow_inconsistent_x=True to return one NDDataset per spectrum."
+        )
+
+    data = np.ndarray((nspec, nx[0]), dtype="float32")
+    for i in range(nspec):
+        data[i, :] = _getintensities(fid, position03[i])
 
     fid.close()
 
