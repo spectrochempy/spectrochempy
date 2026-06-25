@@ -20,6 +20,12 @@ from spectrochempy.plugins.registry import PluginRegistry
 from spectrochempy.testing.plugins import PluginTestHarness
 
 # ------------------------------------------------------------------------------
+# Datadir path (for CI integration with spectrochempy_data)
+# ------------------------------------------------------------------------------
+
+DATADIR_SP = scp.preferences.datadir / "irdata" / "perkinelmer" / "spectra.sp"
+
+# ------------------------------------------------------------------------------
 # Parser unit tests
 # ------------------------------------------------------------------------------
 
@@ -275,3 +281,27 @@ def test_top_level_stub_without_plugin(monkeypatch) -> None:
         stub("missing")
 
     assert "spectrochempy-perkinelmer" in str(excinfo.value)
+
+
+# ------------------------------------------------------------------------------
+# Datadir integration test (uses spectrochempy_data in CI)
+# ------------------------------------------------------------------------------
+
+
+@pytest.mark.data
+def test_read_perkinelmer_from_datadir() -> None:
+    """Read the sample file through the standard datadir path.
+
+    This test verifies that the file published in the spectrochempy_data
+    repository is accessible and readable by the plugin.  It is skipped when
+    the datadir is not available locally; in CI it runs when
+    spectrochempy_data is installed or when SCP_TEST_DATA_DOWNLOAD=1.
+    """
+    if not DATADIR_SP.exists():
+        pytest.skip(
+            "PerkinElmer testdata not available (set SCP_TEST_DATA_DOWNLOAD=1)"
+        )
+    ds = read_perkinelmer(DATADIR_SP)
+    assert ds is not None
+    assert ds.shape == (1, 3301)
+    assert ds.origin == "perkinelmer"
