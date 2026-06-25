@@ -74,6 +74,12 @@ Top-level aliases such as `scp.read_jcamp(...)` and `scp.write_jcamp(...)`
 remain as compatibility shims.  They may stay indefinitely; deprecation is
 optional and unlikely.
 
+### 7. Reserved namespaces
+
+A set of public namespaces is reserved by the project.  See the RFC for the
+authoritative list:
+[`maintainers/rfcs/namespace-api-convention.md#reserved-public-namespaces`](../rfcs/namespace-api-convention.md#reserved-public-namespaces).
+
 ## Summary
 
 ```python

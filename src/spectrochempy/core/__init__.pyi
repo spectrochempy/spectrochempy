@@ -9,6 +9,7 @@
 
 __all__ = [
     "dataset",
+    "io_namespaces",
     "plotters",
     "project",
     "readers",
@@ -17,6 +18,7 @@ __all__ = [
 ]
 
 from . import dataset
+from . import io_namespaces
 from . import plotters
 from . import project
 from . import readers

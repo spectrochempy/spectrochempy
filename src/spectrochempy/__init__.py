@@ -102,6 +102,7 @@ def __dir__():
     names = set(original_dir()) if callable(original_dir) else set()
     names.update(_PLOT_PROFILE_FUNCTIONS)
     names.update(_namespace_names())
+    names.update(_io_namespace_names())
     # Include already-discovered plugin readers and extensions
     # without triggering entry-point scanning (dir() should be side-effect free).
     names.update(_reader_names())
@@ -118,6 +119,12 @@ def _namespace_names():
     from spectrochempy.plugins.features import EXPERIMENTAL_PLUGIN_NAMESPACES
 
     return set(KNOWN_PLUGIN_NAMESPACES) | set(EXPERIMENTAL_PLUGIN_NAMESPACES)
+
+
+def _io_namespace_names():
+    from spectrochempy.core.io_namespaces import _CORE_IO_NAMESPACES
+
+    return set(_CORE_IO_NAMESPACES)
 
 
 def _extension_names():
@@ -204,6 +211,13 @@ def __getattr__(name):
             sys.modules[module_key], PluginNamespaceModule
         ):
             return sys.modules[module_key]
+
+    # Handle core I/O namespaces (e.g., scp.jcamp, scp.csv)
+    from spectrochempy.core.io_namespaces import _IONamespace
+    from spectrochempy.core.io_namespaces import _is_io_namespace
+
+    if _is_io_namespace(name):
+        return _IONamespace(name)
 
     # Ensure external plugins are discovered (before lazy imports so
     # plugin-provided functions take precedence over core stubs)
