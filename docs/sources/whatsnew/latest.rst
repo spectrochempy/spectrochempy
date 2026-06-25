@@ -15,6 +15,13 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 New Features
 ~~~~~~~~~~~~
 
+- Added optional ``spectrochempy-perkinelmer`` plugin providing basic
+  ``read_perkinelmer`` support for PerkinElmer ``.sp`` binary files.
+  The reader returns an ``NDDataset`` with wavelength coordinates and
+  preserves available metadata (instrument model, detector, source,
+  date, etc.). The parsing logic is adapted from the BSD-3-Clause
+  licensed specio project. (#897)
+
 - ``read_omnic`` and ``read_spg`` can now read OMNIC SPG files containing
   spectra with non-identical x-axis definitions using
   ``allow_inconsistent_x=True``. Incompatible spectra are returned as a list

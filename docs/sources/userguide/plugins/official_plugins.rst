@@ -43,6 +43,10 @@ Current official plugins
      - ``spectrochempy-carroucell``
      - ``scp.carroucell``
      - Carroucell experiment reader for spectroscopic data.
+   * - PerkinElmer
+     - ``spectrochempy-perkinelmer``
+     - ``scp.perkinelmer``
+     - PerkinElmer ``.sp`` IR file reader.
 
 Install commands
 ================
@@ -55,6 +59,7 @@ Official plugins can be installed through SpectroChemPy extras:
     pip install spectrochempy[nmr]
     pip install spectrochempy[tensor]
     pip install spectrochempy[nmr,hypercomplex]  # NMR with 2D hypercomplex support
+    pip install spectrochempy[perkinelmer]
 
 or directly:
 
@@ -65,6 +70,7 @@ or directly:
     pip install spectrochempy-tensor
     pip install spectrochempy-hypercomplex
     pip install spectrochempy-carroucell
+    pip install spectrochempy-perkinelmer
 
 Once installed, plugins are discovered automatically. No explicit plugin
 loading call is required in user code.
@@ -131,6 +137,7 @@ provide the user-facing details:
 * :doc:`nmr` for TopSpin reading and NMR-specific processing workflows
 * :doc:`tensor` for TensorLy-backed tensor decompositions such as CP/PARAFAC
 * :doc:`hypercomplex` for quaternion support used in phase-sensitive 2D NMR
+* ``scp.perkinelmer.read_perkinelmer`` for PerkinElmer ``.sp`` IR files
 
 The Carroucell reader is currently part of the official plugin set but does not
 yet have a separate user page. Use ``scp.carroucell.read_carroucell(...)`` once
