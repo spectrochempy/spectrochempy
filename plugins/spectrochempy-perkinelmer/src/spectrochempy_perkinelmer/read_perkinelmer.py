@@ -247,7 +247,8 @@ class _SpFile:
             self.wavelength = np.array([])
 
     def _parse_blocks(self, content: bytes) -> None:
-        """Walk nested blocks using a hybrid strategy.
+        """
+        Walk nested blocks using a hybrid strategy.
 
         The specio stack algorithm correctly navigates the nested hierarchy
         to find block 122/5104 (metadata strings), but it can terminate
