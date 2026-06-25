@@ -321,6 +321,13 @@ class TestOmnicCharacterization:
         assert isinstance(labels[1, 0], datetime)
         assert x.labels is None
 
+        assert_meta_keys_present(
+            dataset,
+            "collection_length",
+            "optical_velocity",
+            "laser_frequency",
+        )
+
     def test_spa_uses_omnic_origin_and_label_rows(self, omnic_spa_dataset):
         dataset = omnic_spa_dataset
 
@@ -360,6 +367,7 @@ class TestOmnicCharacterization:
             assert_label_structure(dataset.y)
         assert "laser_frequency" in dataset.meta
         assert "collection_length" in dataset.meta
+        assert "optical_velocity" in dataset.meta
 
 
 class TestOpusCharacterization:

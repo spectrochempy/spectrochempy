@@ -77,7 +77,13 @@ Bug Fixes
   ``ir_accessory``, and ``image_name``.
   When ``image_name`` is present and ``dataset.description`` is empty,
   ``image_name`` is used as the dataset description.
-  All existing metadata fields remain unchanged.
+   All existing metadata fields remain unchanged.
+
+- Harmonized acquisition metadata attachment across OMNIC SPG and SRS readers.
+  ``collection_length``, ``optical_velocity``, and ``laser_frequency``
+  are now consistently exposed in ``dataset.meta`` for all three OMNIC
+  formats (SPA, SPG, SRS).  Previously, SPG attached none of these fields
+  and SRS omitted ``optical_velocity``.
 
 .. section
 
