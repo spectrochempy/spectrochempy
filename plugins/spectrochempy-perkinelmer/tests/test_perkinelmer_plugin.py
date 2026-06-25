@@ -258,6 +258,7 @@ def test_package_namespace_exposes_reader(monkeypatch) -> None:
 
 
 def test_top_level_stub_without_plugin(monkeypatch) -> None:
+    """Without the plugin registered, scp.read_perkinelmer raises AttributeError."""
     registry = PluginRegistry()
     pm = PluginManager(registry=registry)
     monkeypatch.setattr(
@@ -268,9 +269,6 @@ def test_top_level_stub_without_plugin(monkeypatch) -> None:
     monkeypatch.setattr(scp, "plugin_manager", pm)
     monkeypatch.setattr(scp, "registry", registry)
 
-    stub = scp.read_perkinelmer
-    assert callable(stub)
-    with pytest.raises(scp.plugins.deps.MissingPluginError) as excinfo:
-        stub("missing")
-
-    assert "spectrochempy-perkinelmer" in str(excinfo.value)
+    # Without the core features.py entry, this is a plain AttributeError.
+    with pytest.raises(AttributeError):
+        _ = scp.read_perkinelmer

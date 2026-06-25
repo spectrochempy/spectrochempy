@@ -247,7 +247,15 @@ class _SpFile:
             self.wavelength = np.array([])
 
     def _parse_blocks(self, content: bytes) -> None:
-        """Walk nested blocks using the specio stack algorithm."""
+        """Walk nested blocks using a hybrid strategy.
+
+        The specio stack algorithm correctly navigates the nested hierarchy
+        to find block 122/5104 (metadata strings), but it can terminate
+        early and miss the flat numeric blocks (35698, 35700, 35701, 35708)
+        that follow block 122 in the same outer container.  We therefore
+        combine the stack traversal for metadata with a linear scan for
+        the remaining data blocks.
+        """
         start_byte = 44  # after signature + description
         n_bytes = 6
 
@@ -401,25 +409,15 @@ def _read_sp(*args, **kwargs):
     y = Coord([0.0], title="spectrum index")
     dataset.set_coordset(y=y, x=x)
 
-    # Metadata
+    # Metadata — keep only well-defined, useful fields.
     for key in [
         "analyst",
         "date",
         "instrument_model",
-        "instrument_serial_number",
-        "instrument_software_version",
         "detector",
         "source",
-        "beam_splitter",
-        "apodization",
-        "spectrum_type",
-        "beam_type",
-        "phase_correction",
-        "ir_accessory",
-        "igram_type",
-        "scan_direction",
-        "background_scans",
         "accumulations",
+        "spectrum_type",
     ]:
         value = spf.meta.get(key)
         if value not in (None, ""):
