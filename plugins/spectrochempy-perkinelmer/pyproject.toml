@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "spectrochempy-perkinelmer"
+version = "0.1.0"
+description = "PerkinElmer file reader plugin for SpectroChemPy"
+requires-python = ">=3.11"
+readme = "README.md"
+dependencies = [
+    "spectrochempy>=0.9,<0.11",
+    "numpy",
+]
+
+[project.entry-points."spectrochempy.plugins"]
+perkinelmer = "spectrochempy_perkinelmer:PerkinElmerPlugin"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

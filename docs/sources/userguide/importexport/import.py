@@ -96,6 +96,7 @@ X
 # | read_soc,<br/>read_ddr,<br/>read_hdr,<br/>read_sdr     | Surface Optics Corporation files               | .ddr, .hdr, .sdr |
 # | read_galactic | Galactic spectral files                        | .spc           |
 # | read_quadera  | Pfeiffer Vacuum QUADERA mass spectrometer files | .txt           |
+# | read_perkinelmer | PerkinElmer SP files   (requires spectrochempy-perkinelmer plugin) | .sp |
 # | read          | Generic reader (automatically detects format)  | -              |
 # | read_dir      | Reads all supported files in a directory       | -              |
 # | read_zip      | Reads files from a ZIP archive                 | .zip           |
