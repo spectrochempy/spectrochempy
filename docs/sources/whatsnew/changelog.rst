@@ -85,6 +85,14 @@ Bug Fixes
   formats (SPA, SPG, SRS).  Previously, SPG attached none of these fields
   and SRS omitted ``optical_velocity``.
 
+- Decoded OMNIC Experiment Information blocks (block-directory key 0x82,
+  subtype 0x79) in SPA and SPG readers.  The reader now extracts the
+  experiment file path and short name, accessory/compartment name, and
+  experiment description from the binary block and stores them in
+  ``dataset.meta`` as ``omnic_experiment_path``, ``omnic_experiment_file``,
+  ``omnic_accessory``, and ``omnic_experiment_title`` (respectively).
+  Malformed or missing blocks are handled defensively.
+
 .. section
 
 Dependency Updates

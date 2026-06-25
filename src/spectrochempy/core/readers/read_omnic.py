@@ -643,6 +643,24 @@ def _read_spg(*args, **kwargs):
         keys[i] = fromfile(fid, dtype="uint8", count=1)
         pos += 16
 
+    # Extract experiment info blocks (key 0x82, subtype 0x79).
+    experiment_infos = []
+    key_is_82 = keys == 130
+    for idx in np.nonzero(key_is_82)[0]:
+        entry_pos = 304 + 16 * idx
+        fid.seek(entry_pos + 2)
+        blk_pos = fromfile(fid, "uint32", 1)
+        fid.seek(entry_pos + 6)
+        blk_len = fromfile(fid, "uint32", 1)
+        if blk_len >= 50:
+            cur = fid.tell()
+            fid.seek(blk_pos)
+            blk_data = fid.read(blk_len)
+            fid.seek(cur)
+            exp = _decode_experiment_info_block(blk_data)
+            if exp:
+                experiment_infos.append(exp)
+
     # the number of occurrences of the key '02' is number of spectra
     nspec = np.count_nonzero(keys == 2)
 
@@ -847,6 +865,16 @@ def _read_spg(*args, **kwargs):
     dataset.meta.optical_velocity = info["optical_velocity"]
     dataset.meta.laser_frequency = info["reference_frequency"] * ur("cm^-1")
 
+    # Attach experiment info if available.
+    # If all decoded 0x79 blocks are identical, attach once; if different,
+    # attach the first set only (conservative).
+    if experiment_infos:
+        first = experiment_infos[0]
+        for meta_key, val in first.items():
+            setattr(dataset.meta, f"omnic_{meta_key}", val)
+        if not dataset.description.strip() and first.get("experiment_title"):
+            dataset.description = first["experiment_title"]
+
     if kwargs.pop("sortbydate", True):
         dataset.sort(dim="y", inplace=True)
         dataset.history = "Sorted by date"
@@ -922,6 +950,7 @@ def _read_spa(*args, **kwargs):
     # scan "key values"
     pos = 304
     spa_comments = []  # several custom comments can be present
+    _exp_info = None
     while "continue":
         fid.seek(pos)
         key = fromfile(fid, dtype="uint8", count=1)
@@ -957,6 +986,18 @@ def _read_spa(*args, **kwargs):
 
         elif key == 103 and return_ifg == "background":
             b_ifg_intensities = _getintensities(fid, pos)
+
+        elif key == 130 and _exp_info is None:
+            fid.seek(pos + 2)
+            blk_pos = fromfile(fid, "uint32", 1)
+            fid.seek(pos + 6)
+            blk_len = fromfile(fid, "uint32", 1)
+            if blk_len >= 50:
+                cur = fid.tell()
+                fid.seek(blk_pos)
+                blk_data = fid.read(blk_len)
+                fid.seek(cur)
+                _exp_info = _decode_experiment_info_block(blk_data)
 
         elif key == 00 or key == 1:
             break
@@ -1058,6 +1099,12 @@ def _read_spa(*args, **kwargs):
     dataset.meta.collection_length = info["collection_length"] / 100 * ur("s")
     dataset.meta.optical_velocity = info["optical_velocity"]
     dataset.meta.laser_frequency = info["reference_frequency"] * ur("cm^-1")
+
+    if _exp_info is not None:
+        for meta_key, val in _exp_info.items():
+            setattr(dataset.meta, f"omnic_{meta_key}", val)
+        if not dataset.description.strip() and _exp_info.get("experiment_title"):
+            dataset.description = _exp_info["experiment_title"]
 
     if dataset.x.units is None and dataset.x.title == "data points":
         # interferogram
@@ -1723,3 +1770,53 @@ def _getintensities(fid, pos):
     # Read and return spectral intensities
     fid.seek(intensity_pos)
     return fromfile(fid, "float32", int(nintensities))
+
+
+def _decode_experiment_info_block(data: bytes) -> dict | None:
+    """
+    Decode an OMNIC Experiment Information block (key 0x82, subtype 0x79).
+
+    Parameters
+    ----------
+    data : bytes
+        Raw block data read from the file.
+
+    Returns
+    -------
+    dict or None
+        Dictionary with keys ``experiment_path``, ``experiment_file``,
+        ``accessory_name``, and/or ``experiment_title``, or None if the
+        block is not a valid subtype 0x79 block.
+    """
+    if len(data) < 50 or data[0] != 0x79:
+        return None
+
+    # Payload starts at byte 10 (10-byte header).
+    # Null-terminated fields appear sequentially:
+    #   [0] experiment_path   — full Windows path
+    #   [1] experiment_file   — experiment file name stored in the 0x79 block
+    #   [2] accessory_name    — accessory / compartment name
+    #   [3] experiment_title  — experiment description
+    payload = data[10:]
+    raw = payload.split(b"\x00")
+
+    decoded = [
+        f.decode("utf-8", errors="replace").strip("\x00").strip() for f in raw if f
+    ]
+
+    if not decoded:
+        return None
+
+    _FIELD_NAMES = [
+        "experiment_path",
+        "experiment_file",
+        "accessory_name",
+        "experiment_title",
+    ]
+
+    result: dict[str, str] = {}
+    for i in range(min(len(decoded), len(_FIELD_NAMES))):
+        if decoded[i]:
+            result[_FIELD_NAMES[i]] = decoded[i]
+
+    return result
