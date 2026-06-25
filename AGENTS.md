@@ -73,20 +73,12 @@ Prefer incremental migration.
 
 # Audit Policy
 
+## Local working notes
+
 All implementation reports, investigations, reviews and working notes must be
 written under `audit/`.
 
 Files in `audit/` are intentionally untracked and must never be committed.
-
-If an audit leads to a durable architectural decision, that decision must be
-promoted into the appropriate document under `maintainers/` (RFC, architecture
-note, roadmap, conventions, etc.).  The audit itself remains a transient working
-document and is not the authoritative reference.
-
-Audit files are the authoritative implementation history for a campaign, but
-they are not the authoritative source for the current maintained architecture
-or behavior contract unless that content has been promoted into tracked
-maintainer documentation.
 
 Use audit notes for:
 
@@ -99,29 +91,69 @@ Use audit notes for:
 
 For multi-PR projects, maintain dedicated audit files.
 
-Architecture and migration audit files are maintainer working notes and should
-be ignored by git by default. Name new audit files with a leading tilde so they
-match the repository ignore rule, for example `audit/~project-architecture-audit.md`.
+Name new audit files with a leading tilde so they match the repository ignore
+rule, for example `audit/~project-architecture-audit.md`.
 
 Local audit files (`~*.md`) are working notes and may not be shared with other
 maintainers.
+
+## Promotion destinations
+
+If an audit leads to a durable architectural decision, promote that knowledge
+into the appropriate tracked document:
+
+| Destination | Use for |
+|---|---|
+| `maintainers/rfcs/` | Normative behavior contracts and accepted decisions |
+| `maintainers/architecture/` | Durable architecture notes and current reference |
+| `maintainers/roadmap/` | Migration roadmaps and campaign ordering |
+| `maintainers/conventions.md` | Lightweight conventions and quick-reference |
+
+The original audit remains a transient working document and is not the
+authoritative reference.
+
+## Promoted historical audits
+
+Some audits retain long-term value as historical context even though they are
+no longer primary authority.  These may be promoted to `maintainers/audits/`.
+
+`maintainers/audits/` contains **tracked** historical audits that preserve
+decision-space analysis, migration baselines, and risk maps for future
+maintainers.  They are distinct from:
+
+- `audit/` — local untracked working notes;
+- `maintainers/architecture/` — current durable architecture reference;
+- `maintainers/rfcs/` — normative behavior contracts.
+
+Only promote an audit to `maintainers/audits/` when it preserves knowledge
+that future maintainers will need for context, not for authority.
+
+## Campaign closure
 
 Before closing a campaign, verify whether the audit contains any
 architectural, maintenance, compatibility, or roadmap knowledge that future
 maintainers will need.
 
-If so, summarize that information in `maintainers/` before considering the
-campaign complete.
+If so, summarize that information in the appropriate `maintainers/` destination
+before considering the campaign complete.
 
-Only create a tracked audit file when the maintainer explicitly asks for a
-versioned audit artifact.
-
-Examples:
+## Examples
 
 ```text id="llqkmn"
+# Local working note (untracked)
 audit/~project-architecture-audit.md
-audit/~project-pr12-notes.md
-audit/~project-pr13-notes.md
+
+# Promoted historical audit (tracked)
+maintainers/audits/display-architecture-audit.md
+
+# Accepted RFC (tracked, normative)
+maintainers/rfcs/namespace-api-convention.md
+
+# Durable architecture note (tracked, current reference)
+maintainers/architecture/reader-normalization-architecture.md
+
+# Roadmap (tracked)
+maintainers/roadmap/vendor-io-migration.md
 ```
 
 Detailed implementation history belongs in audits, not changelog entries.
@@ -199,10 +231,13 @@ When a campaign results in:
 * a long-term contract;
 
 the maintainer should evaluate whether part of the audit material must be
-promoted into:
+promoted into the appropriate `maintainers/` destination:
 
-* `maintainers/architecture/`; or
-* `maintainers/rfcs/`
+* `maintainers/rfcs/` — for normative contracts and decisions;
+* `maintainers/architecture/` — for durable current architecture reference;
+* `maintainers/roadmap/` — for migration ordering and campaign planning;
+* `maintainers/audits/` — for historical context that future maintainers
+  will need (non-authoritative).
 
 before the campaign is considered complete.
 
