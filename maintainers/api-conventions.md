@@ -74,6 +74,14 @@ Top-level aliases such as `scp.read_jcamp(...)` and `scp.write_jcamp(...)`
 remain as compatibility shims.  They may stay indefinitely; deprecation is
 optional and unlikely.
 
+### 7. Core namespace reservation
+
+Core I/O namespaces (`jcamp`, `csv`, `omnic`, `opus`, `matlab`, `spc`,
+`soc`, `wire`, `quadera`, `labspec`) are reserved.  Official plugins must
+not use these names as plugin namespaces.  This prevents shadowing and
+ensures that `scp.<domain>` always resolves to a single, unambiguous API
+surface.
+
 ## Summary
 
 ```python

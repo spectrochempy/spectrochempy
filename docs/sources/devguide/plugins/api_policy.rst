@@ -70,6 +70,11 @@ represent the scientific or technical domain exposed to users, for example
 Avoid creating a second namespace
 for the same domain unless there is a clear migration plan.
 
+Core I/O namespaces such as ``jcamp``, ``csv``, ``omnic``, ``opus``,
+``matlab``, ``spc``, ``soc``, ``wire``, ``quadera``, and ``labspec``
+are reserved.  Plugins must not claim these names, to prevent shadowing
+and keep ``scp.<domain>`` unambiguous.
+
 Documentation and examples should prefer namespace APIs, such as
 ``scp.iris.IRIS()``, over root-level compatibility
 aliases such as ``scp.IRIS``. Compatibility aliases may remain in
