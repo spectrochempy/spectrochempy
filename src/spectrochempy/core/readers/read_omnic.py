@@ -762,9 +762,7 @@ def _read_spg(*args, **kwargs):
                     f"Omnic title: {spg_title}\nOmnic filename: {filename}",
                 )
                 single._date = utcnow()
-                single.history = (
-                    f"Imported from spg file {filename} (spectrum {i})."
-                )
+                single.history = f"Imported from spg file {filename} (spectrum {i})."
                 datasets.append(single)
 
             fid.close()

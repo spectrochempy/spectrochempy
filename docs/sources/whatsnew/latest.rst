@@ -6,14 +6,19 @@
 
 :orphan:
 
-What's New in Revision 0.10.2.dev
+What's New in Revision 0.9.4.dev
 ---------------------------------------------------------------------------------------
 
-These are the changes in SpectroChemPy-0.10.2.dev.
+These are the changes in SpectroChemPy-0.9.4.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
 
 New Features
 ~~~~~~~~~~~~
+
+- ``read_omnic`` and ``read_spg`` can now read OMNIC SPG files containing
+  spectra with non-identical x-axis definitions using
+  ``allow_inconsistent_x=True``. Incompatible spectra are returned as a list
+  of ``NDDataset`` objects instead of raising an error (#863).
 
 - Result objects now provide attribute-style access to named outputs and
   diagnostics, for example `pca.result.scores`, `pca.result.loadings`, and
