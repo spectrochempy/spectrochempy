@@ -290,7 +290,8 @@ def test_top_level_stub_without_plugin(monkeypatch) -> None:
 
 @pytest.mark.data
 def test_read_perkinelmer_from_datadir() -> None:
-    """Read the sample file through the standard datadir path.
+    """
+    Read the sample file through the standard datadir path.
 
     This test verifies that the file published in the spectrochempy_data
     repository is accessible and readable by the plugin.  It is skipped when
@@ -298,9 +299,7 @@ def test_read_perkinelmer_from_datadir() -> None:
     spectrochempy_data is installed or when SCP_TEST_DATA_DOWNLOAD=1.
     """
     if not DATADIR_SP.exists():
-        pytest.skip(
-            "PerkinElmer testdata not available (set SCP_TEST_DATA_DOWNLOAD=1)"
-        )
+        pytest.skip("PerkinElmer testdata not available (set SCP_TEST_DATA_DOWNLOAD=1)")
     ds = read_perkinelmer(DATADIR_SP)
     assert ds is not None
     assert ds.shape == (1, 3301)
