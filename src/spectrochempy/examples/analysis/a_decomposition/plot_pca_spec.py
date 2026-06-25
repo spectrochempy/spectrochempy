@@ -20,12 +20,12 @@ import spectrochempy as scp
 # Load a dataset
 dataset = scp.read_omnic("irdata/nh4y-activation.spg")[::5]
 print(dataset)
-dataset.plot()
+_ = dataset.plot()
 # %%
 # Create a PCA object and fit the dataset so that the explained variance is greater or
 # equal to 99.9%
 pca = scp.PCA(n_components=0.999)
-pca.fit(dataset)
+_ = pca.fit(dataset)
 
 # %%
 # The number of fitted components is given by the n_components attribute
@@ -54,7 +54,7 @@ prefs.lines.markersize = 10
 _ = pca.plot_score()
 # %%
 # Score Plot for 3 PC's in 3D
-pca.plot_score(components=(1, 2, 3))
+_ = pca.plot_score(components=(1, 2, 3))
 # %%
 # Displays 4 loadings
 pca.loadings[:4].plot(legend=True)
@@ -67,7 +67,7 @@ _ = dataset.plot()
 # %%
 # Apply the PCA model
 pca = scp.PCA(n_components=0.999)
-pca.fit(dataset)
+_ = pca.fit(dataset)
 pca.n_components
 
 # %%

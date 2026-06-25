@@ -33,7 +33,7 @@ ndp = nd[:, 1291.0:5999.0]
 
 # %%
 # Plot the dataset
-ndp.plot()
+_ = ndp.plot()
 # %%
 # Remove a basic linear baseline using `basc`:
 ndp = ndp.basc()
@@ -42,7 +42,7 @@ ndp = ndp.basc()
 # Make it positive
 offset = ndp.min()
 ndp -= offset
-ndp.plot()
+_ = ndp.plot()
 # %%
 # Define the Baseline object for a multivariate baseline correction model.
 # The `n_components` parameter is the number of components to use for the
@@ -71,7 +71,7 @@ blc.ranges = [
 
 # %%
 # We can now fit the baseline correction model to the data:
-blc.fit(ndp)
+_ = blc.fit(ndp)
 # %%
 # The baseline is now stored in the `baseline` attribute of the processor:
 # (note that the baseline is a NDDataset too).
@@ -82,7 +82,7 @@ corrected = blc.corrected
 
 # %%
 # Plot the result of the correction
-corrected.plot()
+_ = corrected.plot()
 # %%
 # We can have a more detailed representation using plot
 ax = blc.plot(nb_traces=2, offset=50)
@@ -92,13 +92,13 @@ blc.show_regions(ax)
 # We can also plot the baseline and the corrected dataset together:
 # for some individual spectra to, for example, check the quality of the
 # correction:
-corrected[0].plot()
-baseline[0].plot(clear=False, color="red", ls="-")
-ndp[0].plot(clear=False, color="green", ls="--")
+_ = corrected[0].plot()
+_ = baseline[0].plot(clear=False, color="red", ls="-")
+_ = ndp[0].plot(clear=False, color="green", ls="--")
 # %%
-corrected[10].plot()
-baseline[10].plot(clear=False, color="red", ls="-")
-ndp[10].plot(clear=False, color="green", ls="--")
+_ = corrected[10].plot()
+_ = baseline[10].plot(clear=False, color="red", ls="-")
+_ = ndp[10].plot(clear=False, color="green", ls="--")
 # %%
 # The baseline correction looks ok in some part of the spectra
 # but not in others where the variation seems a little to rigid.
@@ -114,20 +114,20 @@ blc.order = 5  # use a 5th degree polynomial
 
 # %%
 # and fit again the baseline correction model to the data:
-blc.fit(ndp)
+_ = blc.fit(ndp)
 
 baseline = blc.baseline
 corrected = blc.corrected
 
-corrected[0].plot()
-baseline[0].plot(clear=False, color="red", ls="-")
-ndp[0].plot(clear=False, color="green", ls="--")
+_ = corrected[0].plot()
+_ = baseline[0].plot(clear=False, color="red", ls="-")
+_ = ndp[0].plot(clear=False, color="green", ls="--")
 # %%
-corrected[10].plot()
-baseline[10].plot(clear=False, color="red", ls="-")
-ndp[10].plot(clear=False, color="green", ls="--")
+_ = corrected[10].plot()
+_ = baseline[10].plot(clear=False, color="red", ls="-")
+_ = ndp[10].plot(clear=False, color="green", ls="--")
 # %%
-corrected.plot()
+_ = corrected.plot()
 # %%
 # This looks better and smoother. But not perfect.
 
@@ -145,41 +145,41 @@ blc.multivariate = False  # use a sequential approach
 blc.model = "asls"
 blc.mu = 10**9
 blc.asymmetry = 0.002
-blc.fit(ndp)
+_ = blc.fit(ndp)
 # %%
 baseline = blc.baseline
 corrected = blc.corrected
 
 # %%
-corrected[0].plot()
-baseline[0].plot(clear=False, color="red", ls="-")
-ndp[0].plot(clear=False, color="green", ls="--")
+_ = corrected[0].plot()
+_ = baseline[0].plot(clear=False, color="red", ls="-")
+_ = ndp[0].plot(clear=False, color="green", ls="--")
 # %%
 corrected[-1].plot()
 baseline[-1].plot(clear=False, color="red", ls="-")
 ndp[-1].plot(clear=False, color="green", ls="--")
 # %%
-corrected.plot()
+_ = corrected.plot()
 # %%
 # Finally, we will use the snip model
 blc.multivariate = False  # use a sequential approach
 blc.model = "snip"
 blc.snip_width = 200
-blc.fit(ndp)
+_ = blc.fit(ndp)
 # %%
 baseline = blc.baseline
 corrected = blc.corrected
 
 # %%
-corrected[0].plot()
-baseline[0].plot(clear=False, color="red", ls="-")
-ndp[0].plot(clear=False, color="green", ls="--")
+_ = corrected[0].plot()
+_ = baseline[0].plot(clear=False, color="red", ls="-")
+_ = ndp[0].plot(clear=False, color="green", ls="--")
 # %%
 corrected[-1].plot()
 baseline[-1].plot(clear=False, color="red", ls="-")
 ndp[-1].plot(clear=False, color="green", ls="--")
 # %%
-corrected.plot()
+_ = corrected.plot()
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

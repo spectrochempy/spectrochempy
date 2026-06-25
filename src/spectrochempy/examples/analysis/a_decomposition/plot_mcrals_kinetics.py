@@ -48,7 +48,7 @@ _ = D.plot()
 # A first estimate of the concentrations can be obtained by EFA:
 print("compute EFA...")
 efa = scp.EFA()
-efa.fit(D[:, 300.0:500.0])
+_ = efa.fit(D[:, 300.0:500.0])
 efa.n_components = 3
 C0 = efa.transform()
 C0 = C0 / C0.max(dim="y") * 5.0
@@ -57,7 +57,7 @@ _ = C0.T.plot()
 # We can get a better estimate of the concentration (C) and pure spectra profiles (St)
 # by soft MCR-ALS:
 mcr_1 = scp.MCRALS(log_level="INFO")
-mcr_1.fit(D, C0)
+_ = mcr_1.fit(D, C0)
 _ = mcr_1.C.T.plot()
 _ = mcr_1.St.plot()
 # %%
@@ -85,7 +85,7 @@ mcr_2.getConc = kin.fit_to_concentrations
 mcr_2.argsGetConc = ([0, 1, 2], [0, 1, 2], param_to_optimize)
 mcr_2.kwargsGetConc = {"ivp_solver_kwargs": {"return_NDDataset": False}}
 
-mcr_2.fit(X, Ckin)
+_ = mcr_2.fit(X, Ckin)
 
 # %%
 # Now, let's compare the concentration profile of MCR-ALS

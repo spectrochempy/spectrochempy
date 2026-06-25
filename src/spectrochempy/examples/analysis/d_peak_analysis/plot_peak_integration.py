@@ -38,7 +38,7 @@ blc.ranges = (
     [1550.0, 1570.0],
     [1250.0, 1300.0],
 )
-blc.fit(band)
+_ = blc.fit(band)
 
 corrected = blc.corrected
 _ = corrected.plot()
