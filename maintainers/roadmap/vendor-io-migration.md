@@ -1,9 +1,9 @@
-# Vendor Readers Migration Roadmap
+# Vendor I/O Migration Roadmap
 
 ## Goal
 
-Progressively move vendor-specific file readers from the SpectroChemPy core
-package into optional official plugins, keeping the core lightweight and
+Progressively move vendor-specific file I/O operations from the SpectroChemPy
+core package into optional official plugins, keeping the core lightweight and
 domain-neutral.
 
 ## Status
@@ -25,7 +25,7 @@ domain-neutral.
 ## Reference model
 
 The `spectrochempy-perkinelmer` plugin should serve as the reference
-implementation for all future vendor-reader migrations:
+implementation for all future vendor I/O migrations:
 
 - Standalone package with its own `pyproject.toml`
 - Entry-point registration via `spectrochempy.plugins`
@@ -35,6 +35,8 @@ implementation for all future vendor-reader migrations:
 - Tests using `PluginTestHarness`
 - Core `features.py` entries for missing-plugin stubs (following existing
   convention until dynamic discovery is implemented)
+- Public API follows the **Namespace API Convention**
+  ([`maintainers/rfcs/namespace-api-convention.md`](../rfcs/namespace-api-convention.md))
 
 ## Blockers / prerequisites
 

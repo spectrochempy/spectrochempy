@@ -505,9 +505,9 @@ though the legacy aliases remain available.
    widely used, and their maintenance cost is near zero; indefinite retention
    is a valid and likely option.
 
-6. **How does this interact with the vendor-readers migration roadmap?**
+6. **How does this interact with the vendor I/O migration roadmap?**
 
-   The vendor-readers migration (`maintainers/roadmap/vendor-readers-migration.md`)
+   The vendor I/O migration (`maintainers/roadmap/vendor-io-migration.md`)
    moves implementation from core to plugin.  This RFC ensures that such
    migrations do not change the public API.  The two efforts are complementary.
 
@@ -528,7 +528,7 @@ though the legacy aliases remain available.
 
 ## Relationship to Existing Work
 
-- **`maintainers/roadmap/vendor-readers-migration.md`** — the migration moves
+- **`maintainers/roadmap/vendor-io-migration.md`** — the migration moves
   implementation; this RFC stabilizes the public API across that boundary.
 - **`maintainers/rfcs/reader-metadata-normalization-contract.md`** — defines
   what readers produce and how metadata is normalized; this RFC defines how
@@ -570,4 +570,4 @@ full backward compatibility.
 
 *Drafted: 2026-06-25*
 *Related issue: #897 (PerkinElmer plugin)*
-*Related roadmap: vendor-readers-migration*
+*Related roadmap: vendor-io-migration*
