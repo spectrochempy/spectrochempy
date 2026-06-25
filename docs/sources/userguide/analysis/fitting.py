@@ -254,7 +254,7 @@ peaks.x.values
 # %%
 ax = ndOHcorr.plot_pen()  # output the spectrum on ax. ax will receive next plot too
 pks = peaks + 0.01  # add a small offset on the y position of the markers
-pks.plot_scatter(
+_ = pks.plot_scatter(
     ax=ax,
     marker="v",
     color="black",

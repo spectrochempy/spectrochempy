@@ -220,7 +220,7 @@ _ = out.plot(figsize=(6, 2.5))
 out = np.sqrt(
     dataset
 )  # as they are some negative elements, return dataset has complex dtype.
-out.plot_1D(show_complex=True, figsize=(6, 2.5))
+_ = out.plot_1D(show_complex=True, figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### square

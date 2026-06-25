@@ -291,6 +291,8 @@ class PreferencesSet(Meta):
                 "interactive",
                 "savefig.directory",
                 "timezone",
+                "text.hinting_factor",
+                "text.kerning_factor",
                 "tk.window_focus",
                 "toolbar",
                 "webagg.address",

@@ -28,10 +28,12 @@ A = scp.read_labspec("SMC1-Initial_RT.txt", directory=ramandir)
 # %%
 # Plot the spectrum
 _ = A.plot()
+
 # %%
 # Crop the spectrum to a useful region
 B = A[60.0:]
 _ = B.plot()
+
 # %%
 # Baseline correction
 # -------------------
@@ -61,6 +63,7 @@ blc.order = "linear"
 # %%
 # Now we can fit the model to the data
 _ = blc.fit(B)
+
 # %%
 # The baseline is now stored in the `baseline` attribute of the processor
 corr = blc.transform()
@@ -76,9 +79,9 @@ def plot_result(X, Xc, bas):
     Xcm = Xc.min()
     Xcp = Xc.ptp()
     offset = Xcm + Xcp
-    (Xc - Xcm).plot()
-    (X + offset).plot(clear=False, color="g", linestyle="-")
-    (bas + offset).plot(clear=False, color="r", linestyle="--")
+    _ = (Xc - Xcm).plot()
+    _ = (X + offset).plot(clear=False, color="g", linestyle="-")
+    _ = (bas + offset).plot(clear=False, color="r", linestyle="--")
 
 
 plot_result(B, corr, baseline)
@@ -138,6 +141,7 @@ plot_result(Bs, corr, baseline)
 C = scp.read_labspec("Activation.txt", directory=ramandir)
 # C = C[20:]  # discard the first 20 spectra
 _ = C.plot()
+
 # %%
 # Now we apply the AsLS method on the series of spectra
 #
@@ -154,20 +158,22 @@ _ = blc.fit(C[::10])
 corr = blc.transform()
 baseline = blc.baseline
 _ = corr.plot()
+
 # %%
 # or the `snip` method (which is much faster)
 blc.model = "snip"
 _ = blc.fit(C)
 corr = blc.transform()
 baseline = blc.baseline
-corr[::10].plot()
+_ = corr[::10].plot()
+
 # %%
 # Denoising
 # ---------
 D = corr.copy()
 G = scp.denoise(D, ratio=98)
 
-G[::10].plot()
+_ = G[::10].plot()
 
 # %%
 # This ends the example ! The following line can be removed or commented

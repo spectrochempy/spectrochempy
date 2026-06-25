@@ -85,7 +85,7 @@ blc.model = "rubberband"
 # model can also be passed as a parameter
 blc = scp.Baseline(model="rubberband")
 # fit the model on the first spectra in X (index:0)
-blc.fit(X[0])
+_ = blc.fit(X[0])
 # get the new dataset with the baseline subtracted
 X1 = blc.transform()
 # plot X, X1 and the baseline using the processor plot method
@@ -103,7 +103,7 @@ X1 = blc.corrected
 
 # %%
 # fit the model on the full X series
-blc.fit(X)
+_ = blc.fit(X)
 # get the new dataset with the baseline subtracted
 X2 = blc.transform()
 # plot the baseline corrected series of spectra
@@ -122,7 +122,7 @@ _ = X.plot()
 # the computed baseline and the corrected dataset.
 
 # %%
-blc.fit(X)
+_ = blc.fit(X)
 X3 = blc.transform()
 _ = blc.plot()
 
@@ -185,7 +185,7 @@ blc.order = 7
 # set the ranges
 blc.ranges = ranges
 # fit the model on the first spectra X[0]
-blc.fit(X[0])
+_ = blc.fit(X[0])
 # get and plot the corrected dataset with regions displayed
 X4 = blc.transform()
 _ = blc.plot(show_regions=True)
@@ -208,7 +208,7 @@ blc.used_ranges
 # set the polynomial order to 'pchip'
 blc.order = "pchip"
 # fit the model on the first spectra X[0]
-blc.fit(X[0])
+_ = blc.fit(X[0])
 # get and plot the corrected dataset
 X5 = blc.transform()
 _ = blc.plot()
@@ -222,7 +222,7 @@ _ = blc.plot()
 blc.model = "asls"
 blc.lamb = 10**9
 blc.asymmetry = 0.002
-blc.fit(X)
+_ = blc.fit(X)
 X6 = blc.transform()
 _ = X6.plot()
 
@@ -234,7 +234,7 @@ _ = X6.plot()
 # %%
 blc.model = "snip"
 blc.snip_width = 200
-blc.fit(X)
+_ = blc.fit(X)
 X7 = blc.transform()
 _ = X7.plot()
 
@@ -277,7 +277,7 @@ blc.order = 10
 # Set the number of components
 blc.n_components = 3
 # Fit the model on X
-blc.fit(X)
+_ = blc.fit(X)
 # get the corrected dataset
 X8 = blc.transform()
 # plot the result

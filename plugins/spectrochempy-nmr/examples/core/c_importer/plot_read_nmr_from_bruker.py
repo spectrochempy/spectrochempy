@@ -34,6 +34,7 @@ ndd = scp.nmr.read_topspin(path, expno=1, remove_digital_filter=True)
 # view it...
 
 _ = ndd.plot()
+
 # %%
 # Now load a 2D  dataset
 

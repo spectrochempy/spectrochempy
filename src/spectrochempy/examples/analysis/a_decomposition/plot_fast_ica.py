@@ -35,6 +35,7 @@ X.y.title = "elution time"
 X.y.units = "min"
 X.x.title = "wavelength"
 _ = X.plot()
+
 # %%
 # Create and fit a FastICA object
 # -------------------------------
@@ -44,6 +45,7 @@ _ = X.plot()
 
 ica = scp.FastICA(n_components=4, log_level="INFO")
 _ = ica.fit(X)
+
 # %%
 # Get the mixing system and source spectral profiles
 # --------------------------------------------------
@@ -62,6 +64,7 @@ St = ica.St  # or model.mixing.T
 
 _ = A.T.plot(title="Mixing System", colormap=None)
 _ = St.plot(title="Sources spectral profiles", colormap=None)
+
 # %%
 # Reconstruct the dataset
 # -----------------------
@@ -70,10 +73,12 @@ _ = St.plot(title="Sources spectral profiles", colormap=None)
 
 X_hat_a = scp.dot(A, St) + X.mean(dim=0).data
 _ = X_hat_a.plot(title=r"$\hat{X} = \bar{X} + A S^t$")
+
 # %%
 # Or using the transform() method:
 X_hat_b = ica.inverse_transform()
 _ = X_hat_b.plot(title=r"$\hat{X} =$ ica.inverse_transform()")
+
 # %%
 # Finally, the quality of the reconstriction can be checked by `plotmerit()`
 _ = ica.plotmerit(nb_traces=15)

@@ -73,3 +73,12 @@
     margin-left: 0px;
     font-size: 10pt;
 }
+
+/*
+ * Hide execution prompts in notebooks rendered by nbsphinx.
+ * These selectors do not match Sphinx-Gallery code or output blocks.
+ */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    display: none;
+}

@@ -272,8 +272,6 @@ svg.image_inline                         : True
 text.antialiased                         : True
 text.color                               : black
 text.hinting                             : force_autohint
-text.hinting_factor                      : 8
-text.kerning_factor                      : 0
 text.latex.preamble                      :
 text.parse_math                          : True
 text.usetex                              : False

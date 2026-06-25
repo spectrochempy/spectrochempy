@@ -60,6 +60,7 @@ guess = datasets[3]
 # Plot of X and of the guess:
 _ = X.plot()
 _ = guess.plot()
+
 # %%
 # Create a MCR-ALS object
 # -----------------------
@@ -77,6 +78,7 @@ mcr = scp.MCRALS(log_level="INFO")
 # Then we execute the optimization process using the `fit` method with
 # the ``X`` and ``guess`` dataset as input arguments.
 _ = mcr.fit(X, guess)
+
 # %%
 # Plotting the results
 # --------------------
@@ -86,6 +88,7 @@ _ = mcr.fit(X, guess)
 
 _ = mcr.C.T.plot()
 _ = mcr.St.plot()
+
 # %%
 # Finally, plots the reconstructed dataset (:math:`\hat{X} = C.S^T`)
 # *vs.* original dataset

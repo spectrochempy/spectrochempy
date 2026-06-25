@@ -33,6 +33,7 @@ print(dataset)
 # %%
 if dataset is not None:
     _ = dataset.plot(style="paper")
+
 # %%
 # When using `read`, we can pass filename as a `str` or a `~pathlib.Path` object.
 filename = TEST_FILE
@@ -86,10 +87,10 @@ else:
 
     # %%
     # Plot each of the datasets
-    dataset_list[-1].plot()
-    dataset_list[-2].plot()
-    dataset_list[-3].plot()
-    dataset_list[-4].plot()
+    _ = dataset_list[-1].plot()
+    _ = dataset_list[-2].plot()
+    _ = dataset_list[-3].plot()
+    _ = dataset_list[-4].plot()
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

@@ -43,6 +43,7 @@ ds = dataset.em(lb=15 * U.Hz)
 ds = ds.fft()
 ds = ds.pk(phc0=-10 * U.deg, phc1=0 * U.deg)
 _ = ds.plot(xlim=(-60, -140))
+
 # %%
 # Integrate a region
 dsint = ds[:, -90.0:-115.0].simpson()

@@ -97,6 +97,7 @@ X.y
 
 _ = X.plot(colorbar=True)
 _ = X.plot_map(colorbar=True)
+
 # %%
 # To seamlessly work with the second coordinates (pressures),
 # we can change the default coordinate:
@@ -107,9 +108,12 @@ X.y.default
 # %%
 # Let's now plot the spectral range of interest. The default coordinate is now used:
 X_ = X[:, 2250.0:1950.0]
-print(X_.y.default)
+X_.y.default
+
+# %%
 _ = X_.plot()
 _ = X_.plot_map()
+
 # %%
 # The same can be done for the x coordinates.
 #
@@ -123,7 +127,12 @@ _ = row10.coordset
 
 c_wavenumber = row10.x.copy()
 c_wavelength = row10.x.to("nanometer")
-print(c_wavenumber, c_wavelength)
+c_wavenumber
+
+# %%
+c_wavelength
+
+# %%
 row10.x = [c_wavenumber, c_wavelength]
 row10.x.select(2)
 _ = row10.plot()

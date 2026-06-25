@@ -49,7 +49,7 @@ _ = corrected.plot()
 trapz_area = corrected.trapezoid(dim="x")
 simpson_area = corrected.simpson(dim="x")
 
-scp.plot_multiple(
+_ = scp.plot_multiple(
     method="scatter",
     ms=5,
     datasets=[trapz_area, simpson_area],

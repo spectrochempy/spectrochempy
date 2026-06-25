@@ -49,6 +49,7 @@ ur = scp.ur
 
 ds = scp.read("wodger.spg")[0]
 _ = ds.plot()
+
 # %%
 # * `wavenumbers` (`x` ) coordinates are here expressed in $cm^{-1}$
 # * and `data` are in absorbance ($a.u.$) units.
@@ -83,6 +84,7 @@ except Exception as e:
 
 ds.x.ito("terahertz")
 _ = ds.plot()
+
 # %%
 # We can also change wavenumber or frequency units to energy or wavelength,
 # as SpectroChemPy, thanks to [pint](https://pint.readthedocs.io), knows how
@@ -90,6 +92,7 @@ _ = ds.plot()
 
 ds.x.ito("eV")
 _ = ds.plot()
+
 # %%
 try:
     ds.x.ito("nanometer")
@@ -101,11 +104,13 @@ ds.x
 
 # %%
 _ = ds.plot()
+
 # %%
 # `absorbance` units (the units of the data)
 # can also be transformed into `transmittance`
 ds.ito("transmittance")
 _ = ds.plot()
+
 # %%
 # Back to `absorbance`.
 ds.ito("absorbance")
