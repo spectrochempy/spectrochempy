@@ -42,7 +42,7 @@ def write_matlab(*args, **kwargs):
     >>> X.write_matlab('myfile')
 
     Using the explicit namespace API
-    >>> X.matlab.write('myfile')
+    >>> scp.matlab.write(X, 'myfile')
 
     """
     exporter = Exporter()

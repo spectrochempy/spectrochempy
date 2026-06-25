@@ -55,7 +55,7 @@ S0.write_jcamp("CO@Mo_Al2O3_0.jdx", confirm=False)
 # The namespace API is also available for writing:
 
 # %%
-S0.jcamp.write("CO@Mo_Al2O3_0.jdx", confirm=False)
+scp.jcamp.write(S0, "CO@Mo_Al2O3_0.jdx", confirm=False)
 
 # %% [markdown]
 # Then used (and maybe changed) by a 3rd party software, and re-imported in

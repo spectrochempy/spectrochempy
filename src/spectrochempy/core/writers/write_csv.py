@@ -54,8 +54,7 @@ def write_csv(*args, **kwargs):
     >>> f2 = ds[0].write_csv('single_spectrum.csv')
 
     Using the explicit namespace API
-    >>> ds = scp.NDDataset([1, 2, 3])
-    >>> f3 = ds.csv.write('myfile')
+    >>> f3 = scp.csv.write(ds, 'myfile')
 
     """
     exporter = Exporter()
