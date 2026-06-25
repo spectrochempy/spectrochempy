@@ -32,9 +32,7 @@ DATADIR_SP = scp.preferences.datadir / "irdata" / "perkinelmer" / "spectra.sp"
 @pytest.fixture
 def sp_content() -> bytes:
     if not DATADIR_SP.exists():
-        pytest.skip(
-            "PerkinElmer testdata not available (set SCP_TEST_DATA_DOWNLOAD=1)"
-        )
+        pytest.skip("PerkinElmer testdata not available (set SCP_TEST_DATA_DOWNLOAD=1)")
     return DATADIR_SP.read_bytes()
 
 
