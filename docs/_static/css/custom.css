@@ -76,7 +76,7 @@
 
 /*
  * Hide execution prompts in notebooks rendered by nbsphinx.
- * These selectors do not match Sphinx-Gallery code or output blocks.
+ * Sphinx-Gallery uses different markup and is not affected.
  */
 div.nbinput.container div.prompt,
 div.nboutput.container div.prompt {
