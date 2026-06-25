@@ -36,6 +36,7 @@ data[1, 5:11] = [1, 3, 5, 3, 1, 0.5]  # compound 2
 
 dsc = scp.NDDataset(data=data, coords=[c, t])
 _ = dsc.plot(title="concentration")
+
 # %%
 # 2) absorption spectra
 # **********************
@@ -45,6 +46,7 @@ w = scp.Coord(np.arange(1, 5, 1), units="nm", title="wavelength")
 
 dss = scp.NDDataset(data=spec, coords=[c, w])
 _ = dss.plot(title="spectra")
+
 # %%
 # 3) simulated data matrix
 # ************************
@@ -54,6 +56,7 @@ dataset.data = np.random.normal(dataset.data, 0.1)
 dataset.title = "intensity"
 
 _ = dataset.plot(title="calculated dataset")
+
 # %%
 # 4) evolving factor analysis (EFA)
 # *********************************
@@ -64,8 +67,10 @@ _ = efa.fit(dataset)
 # Plots of the log(EV) for the forward and backward analysis
 #
 _ = efa.f_ev.T.plot(yscale="log", legend=efa.f_ev.k.labels)
+
 # %%
 _ = efa.b_ev.T.plot(yscale="log", legend=efa.b_ev.k.labels)
+
 # %%
 # Looking at these EFA curves, it is quite obvious that only two components
 # are really significant, and this corresponds to the data that we have in
@@ -79,9 +84,11 @@ f2 = efa.f_ev[:, :n_pc]
 b2 = efa.b_ev[:, :n_pc]
 
 # %%
-# we concatenate the datasets to plot them in a single figure
-both = scp.concatenate(f2, b2)
-_ = both.T.plot(yscale="log")
+# plot forward and backward EFA curves together without concatenating datasets,
+# which would emit a coordinate warning here.
+_ = f2.T.plot(yscale="log")
+_ = b2.T.plot(yscale="log", clear=False)
+
 # %%
 # Get the abstract concentration profile based on the FIFO EFA analysis
 #

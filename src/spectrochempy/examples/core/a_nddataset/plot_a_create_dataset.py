@@ -114,6 +114,7 @@ _ = new[:, 0:20].plot(cmap="tab20")
 # But it is possible to display image plot instead (note that the x-axis is in wavenumber and
 # the y-axis is in time-on-stream)
 _ = new.plot_image()
+
 # %%
 # or contour plot  (note that
 _ = new.plot_map()

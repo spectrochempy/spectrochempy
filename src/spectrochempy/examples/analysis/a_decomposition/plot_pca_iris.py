@@ -27,15 +27,19 @@ dataset = scp.load_iris()
 # using `n_components="mle"`\. Warning: `mle` cannot be used when
 # n_observations < n_features.
 pca = scp.PCA(n_components="mle")
+
 # %%
 # Fit dataset with the PCA model
 _ = pca.fit(dataset)
+
 # %%
 # The number of components found is 3:
 pca.n_components
+
 # %%
 # It explains 99.5% of the variance
 pca.cumulative_explained_variance[-1].value
+
 # %%
 # We can also specify the amount of explained variance to compute how much components
 # are needed (a number between 0 and 1 for n_components is required to do this).
@@ -43,40 +47,48 @@ pca.cumulative_explained_variance[-1].value
 pca = scp.PCA(n_components=0.999)
 _ = pca.fit(dataset)
 pca.n_components
+
 # %%
 # the 4 components found are in the `components` attribute of pca. These components are
 # often called loadings in PCA analysis.
 loadings = pca.components
 loadings
+
 # %%
 # Note: it is equivalently possible to use the `loadings` attribute of pca, which
 # produces the same results.
 pca.loadings
+
 # %%
 # To Reduce the data to a lower dimensionality using these three components, we use the
 # transform methods. The results is often called `scores` for PCA analysis.
 scores = pca.transform()
 scores
+
 # %%
 # Again, we can also use the `scores` attribute to get these results.
 scores = pca.scores
 scores
+
 # %%
 # The figures of merit (explained and cumulative variance) confirm that
 # these 4 PC's explain 100% of the variance:
 #
 pca.printev()
+
 # %%
 # These figures of merit can also be displayed graphically
 #
 # The ScreePlot
 _ = pca.plot_scree()
+
 # %%
 # The score plots can be used for classification purposes. The first one - in 2D for the
 # 2 first PC's - shows that the first PC allows distinguishing Iris-setosa (score of
 # PC#1 < -1) from other species (score of PC#1 > -1), while more PC's are required
 # to distinguish versicolor from virginica.
 _ = pca.plot_score(color_mapping="labels")
+
 # %%
 # The second one, in 3D for the first 3 PCs, indicates that a third PC will not
 # better distinguish versicolor from virginica.

@@ -26,6 +26,7 @@ B1 = scp.read("ramandata/labspec/serie190214-1.txt")
 # available matplotlib colormap. The second parameter `lw` is used to set the line
 # width. In addition, we fix the figsize to have a better view of the spectra.
 _ = B1.plot(cmap=None, lw=1)
+
 # %%
 # We will limit the x range to the region of interest
 # note the float number to specify that we use coordinates and not indices
@@ -35,6 +36,7 @@ B2 = B1[:, 60.0:]
 # As there is obviously a drift in these spectra, we will use detrend to remove it.
 B3 = scp.detrend(B2)
 _ = B3.plot(cmap=None)
+
 # %%
 # To demonstrate the use of `plot_multiple` we will take only a few spectra.
 # For instance the 5 first spectra:
@@ -43,6 +45,7 @@ B4 = B3[:5]
 # %%
 # plot it to see what we have selected
 _ = B4.plot(cmap=None)
+
 # %%
 # Now we will use `plot_multiple` to plot all the spectra of the dataset B4.
 # we need to use `offset` to separate the traces and we set some labels to identify

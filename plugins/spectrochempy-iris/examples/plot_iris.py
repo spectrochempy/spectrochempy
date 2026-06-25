@@ -67,7 +67,7 @@ c_pressures = scp.Coord(pressures, title="pressure", units="torr")
 
 c_times = X.y.copy()  # the original coordinate
 X.y = [c_times, c_pressures]
-print(X.y)
+X.y
 
 # %%
 # To get a detailed
@@ -82,6 +82,7 @@ X.coordset
 
 _ = X.plot(colorbar=True)
 _ = X.plot_contourf(colorbar=True)
+
 # %%
 # To seamlessly work with the second coordinates (pressures), we can change the default
 # coordinate:
@@ -92,9 +93,12 @@ X.y.default
 # %%
 # Let's now plot the spectral range of interest. The default coordinate is now used:
 X_ = X[:, 2250.0:1950.0]
-print(X_.y.default)
+X_.y.default
+
+# %%
 _ = X_.plot()
 _ = X_.plot_contourf()
+
 # %%
 # IRIS analysis without regularization
 # ------------------------------------
@@ -128,6 +132,7 @@ _ = f.plot_contour()
 
 # %%
 _ = iris1.plotmerit()
+
 # %%
 # With regularization and a manual search
 # ---------------------------------------
@@ -138,20 +143,24 @@ iris2 = IRIS(reg_par=[-10, 1, 12])
 # We keep the same kernel object as previously - performs the fit.
 _ = iris2.fit(X_, K)
 _ = iris2.plotlcurve(title="L curve, manual search")
+
 # %%
 # Visually, the best regularization parameter is at index ~ -6, corresponding to lambda = 1e-4
 
 _ = iris2.f[-6].plot_contour()
 _ = iris2.plotmerit(-6)
+
 # %%
 # Automatic search
 # ----------------
+
 # %%
 # Now try an automatic search of the regularization parameter around the best value found manually:
 
 iris3 = IRIS(log_level="INFO", reg_par=[-6, -2])
 _ = iris3.fit(X_, K)
 _ = iris3.plotlcurve(title="L curve, automated search")
+
 # %%
 # The data corresponding to the largest curvature of the L-curve
 # are at index 5 of the output data.

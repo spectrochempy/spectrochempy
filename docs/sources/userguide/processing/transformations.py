@@ -72,7 +72,7 @@ dataset[:, 1290.0:890.0] = MASKED
 # Here is a display the figure with the new mask
 
 # %%
-dataset.plot_stack()
+_ = dataset.plot_stack()
 
 # %% [markdown]
 # Now the max function return the  maximum in the unmasked region, which is exactly what we wanted.

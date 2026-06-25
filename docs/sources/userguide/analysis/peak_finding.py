@@ -183,7 +183,7 @@ peakslist = [s.find_peaks(distance=5)[0] for s in reg]
 # %%
 ax = reg.plot()
 for peaks in peakslist:
-    peaks.plot_scatter(
+    _ = peaks.plot_scatter(
         ax=ax,
         marker="v",
         ms=3,
@@ -275,7 +275,7 @@ s = reg[-1].squeeze()
 
 peaks, properties = s.find_peaks()
 ax = s.plot_pen(color="black")
-peaks.plot_scatter(
+_ = peaks.plot_scatter(
     ax=ax,
     label="default",
     marker="v",
@@ -293,8 +293,8 @@ peaks, properties = s.find_peaks(height=0.05)
 color = "blue"
 label = "0.05<height"
 offset = 0.05
-(s + offset).plot_pen(color=color, clear=False)
-(peaks + offset).plot_scatter(
+_ = (s + offset).plot_pen(color=color, clear=False)
+_ = (peaks + offset).plot_scatter(
     ax=ax, label=label, m="v", mfc=color, mec=color, ms=5, clear=False, data_only=True
 )
 
@@ -304,8 +304,8 @@ peaks, properties = s.find_peaks(height=(0.05, 0.2))
 color = "green"
 label = "0.05<height<0.2"
 offset = 0.1
-(s + offset).plot_pen(color=color, clear=False)
-(peaks + offset).plot_scatter(
+_ = (s + offset).plot_pen(color=color, clear=False)
+_ = (peaks + offset).plot_scatter(
     ax=ax, label=label, m="v", mfc=color, mec=color, ms=5, clear=False, data_only=True
 )
 
@@ -315,8 +315,8 @@ peaks, properties = s.find_peaks(prominence=0.05)
 color = "purple"
 label = "prominence=0.05"
 offset = 0.15
-(s + offset).plot_pen(color=color, clear=False)
-(peaks + offset).plot_scatter(
+_ = (s + offset).plot_pen(color=color, clear=False)
+_ = (peaks + offset).plot_scatter(
     ax=ax, label=label, m="v", mfc=color, mec=color, ms=5, clear=False, data_only=True
 )
 
@@ -327,8 +327,8 @@ peaks, properties = s.find_peaks(distance=10)
 color = "red"
 label = "distance>10"
 offset = 0.20
-(s + offset).plot_pen(color=color, clear=False)
-(peaks + offset).plot_scatter(
+_ = (s + offset).plot_pen(color=color, clear=False)
+_ = (peaks + offset).plot_scatter(
     ax=ax, label=label, m="v", mfc=color, mec=color, ms=5, clear=False, data_only=True
 )
 
@@ -336,14 +336,15 @@ offset = 0.20
 peaks_units, _ = s.find_peaks(distance="10 cm^-1")
 peaks_units.x.values
 
+# %%
 # find peaks with width >= 10 (none of the two maxima at ~ 2075 is detected)
 
 peaks, properties = s.find_peaks(width=10)
 color = "grey"
 label = "width>10"
 offset = 0.25
-(s + offset).plot_pen(color=color, clear=False)
-(peaks + offset).plot_scatter(
+_ = (s + offset).plot_pen(color=color, clear=False)
+_ = (peaks + offset).plot_scatter(
     ax=ax, label=label, m="v", mfc=color, mec=color, ms=5, clear=False, data_only=True
 )
 
@@ -562,7 +563,7 @@ for key in properties:
     print(f"{title: >26}: {table_property}")
 
 ax = s.plot()
-peaks.plot_scatter(
+_ = peaks.plot_scatter(
     ax=ax, marker="v", mfc="green", mec="green", data_only=True, clear=False
 )
 

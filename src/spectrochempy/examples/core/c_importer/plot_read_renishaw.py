@@ -25,6 +25,7 @@ import spectrochempy as scp
 # First read a single spectrum (measurement type : single)
 dataset = scp.read_wire("ramandata/wire/sp.wdf")  # or read_wdf (or read)
 _ = dataset.plot()
+
 # %%
 # Now read a series of spectra (measurement type : series) from a Z-depth scan.
 dataset = scp.read_wdf("ramandata/wire/depth.wdf")
@@ -57,10 +58,12 @@ import numpy as np
 keep_rows = np.where(dataset.data.mean(axis=1) > 0)[0]
 dataset = dataset[keep_rows]
 _ = dataset.plot_image()
+
 # %%
 # extract a line scan data from a StreamLine HR measurement
 dataset = scp.read("ramandata/wire/line.wdf")
 _ = dataset.plot_image()
+
 # %%
 # finally extract grid scan data from a StreamLine HR measurement
 dataset = scp.read_wdf("ramandata/wire/mapping.wdf")
