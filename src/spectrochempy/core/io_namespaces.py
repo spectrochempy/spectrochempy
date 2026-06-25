@@ -1,4 +1,5 @@
-"""Core I/O namespace wrappers for the namespace-based API.
+"""
+Core I/O namespace wrappers for the namespace-based API.
 
 This module provides lightweight namespace objects that expose
 ``scp.<domain>.read(...)`` and ``scp.<domain>.write(...)`` for core
@@ -8,7 +9,6 @@ I/O operations.
 from __future__ import annotations
 
 from typing import Any
-
 
 # Single source of truth for core I/O namespace configuration.
 #
@@ -40,7 +40,8 @@ def _resolve_func(func_name: str) -> Any:
 
 
 class _IONamespace:
-    """Lightweight namespace for core I/O operations.
+    """
+    Lightweight namespace for core I/O operations.
 
     Instances are returned for names such as ``scp.jcamp`` and delegate
     ``read()`` / ``write()`` to the existing public ``read_*`` / ``write_*``
@@ -62,9 +63,7 @@ class _IONamespace:
             return _resolve_func(self._read_name)
         if name == "write" and self._write_name:
             return _resolve_func(self._write_name)
-        raise AttributeError(
-            f"namespace '{self._name}' has no attribute '{name}'"
-        )
+        raise AttributeError(f"namespace '{self._name}' has no attribute '{name}'")
 
     def __repr__(self) -> str:
         ops = []

@@ -213,8 +213,8 @@ def __getattr__(name):
             return sys.modules[module_key]
 
     # Handle core I/O namespaces (e.g., scp.jcamp, scp.csv)
-    from spectrochempy.core.io_namespaces import _is_io_namespace
     from spectrochempy.core.io_namespaces import _IONamespace
+    from spectrochempy.core.io_namespaces import _is_io_namespace
 
     if _is_io_namespace(name):
         return _IONamespace(name)
@@ -290,5 +290,3 @@ def __getattr__(name):
 from spectrochempy.plugins.namespace import register_namespace_modules
 
 register_namespace_modules()
-
-

@@ -36,6 +36,15 @@ New Features
   exchange using `scipy.io.savemat`. This is an exchange format, not
   native SpectroChemPy persistence.
 
+- Added namespace-based I/O API for core readers and writers.
+  Domains such as ``jcamp``, ``csv``, ``matlab``, ``omnic``, ``opus``,
+  ``quadera``, ``soc``, ``spc``, ``wire``, and ``labspec``
+  now expose ``scp.<domain>.read(...)``.  Domains with existing writers
+  (``jcamp``, ``csv``, ``matlab``) also expose ``scp.<domain>.write(...)``.
+  These namespaces delegate to the existing public ``read_*`` and ``write_*``
+  functions; no behavior has changed.  This is the first phase of the
+  Namespace API Convention (see ``maintainers/rfcs/namespace-api-convention.md``).
+
 Bug Fixes
 ~~~~~~~~~
 
