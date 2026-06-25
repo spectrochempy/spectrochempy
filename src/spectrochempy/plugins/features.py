@@ -19,6 +19,16 @@ from spectrochempy.plugins.deps import MissingPluginError
 
 KNOWN_PLUGIN_READERS = {
     "topspin": ("nmr", "spectrochempy-nmr", "spectrochempy[nmr]"),
+    "perkinelmer": (
+        "perkinelmer",
+        "spectrochempy-perkinelmer",
+        "spectrochempy-perkinelmer",
+    ),
+    "sp": (
+        "perkinelmer",
+        "spectrochempy-perkinelmer",
+        "spectrochempy-perkinelmer",
+    ),
 }
 
 KNOWN_PLUGIN_NAMESPACES = {
@@ -26,6 +36,7 @@ KNOWN_PLUGIN_NAMESPACES = {
     "iris": ("spectrochempy-iris", "spectrochempy[iris]"),
     "tensor": ("spectrochempy-tensor", "spectrochempy[tensor]"),
     "carroucell": ("spectrochempy-carroucell", "spectrochempy-carroucell"),
+    "perkinelmer": ("spectrochempy-perkinelmer", "spectrochempy-perkinelmer"),
 }
 
 EXPERIMENTAL_PLUGIN_NAMESPACES = {
