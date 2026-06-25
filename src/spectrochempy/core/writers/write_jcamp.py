@@ -47,7 +47,7 @@ def write_jcamp(*args, **kwargs):
     >>> X.write_jcamp('myfile')
 
     Using the explicit namespace API
-    >>> X.jcamp.write('myfile')
+    >>> scp.jcamp.write(X, 'myfile')
 
     """
     exporter = Exporter()
