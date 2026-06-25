@@ -770,9 +770,15 @@ The following questions remain intentionally open:
 
 ### Suitable for architecture notes
 
-- `maintainers/architecture/coordinate-and-coordset-semantics-reference.md`
-  Stable reference note once lifecycle and persistence rules have been adopted
-  and no longer primarily belong in RFC space.
+Implemented as:
+
+- [`maintainers/architecture/coordset-storage-architecture.md`](../architecture/coordset-storage-architecture.md)
+  documents the final `CoordSet` storage design.
+- [`maintainers/architecture/metadata-and-support-model.md`](../architecture/metadata-and-support-model.md)
+  documents the metadata taxonomy adopted from this RFC family.
+
+The RFC itself remains the primary reference for coordinate and CoordSet
+semantic contracts.
 
 ### Suitable for dimensional-semantics follow-up
 

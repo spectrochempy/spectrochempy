@@ -752,9 +752,13 @@ The following questions remain intentionally open.
 
 ### Suitable for architecture notes
 
-- `maintainers/architecture/dimensional-semantics-reference.md`
-  Stable reference note once operation-family behavior and portable guarantees
-  are implemented and no longer mainly RFC material.
+Implemented as:
+
+- [`maintainers/architecture/metadata-and-support-model.md`](../architecture/metadata-and-support-model.md)
+  documents the dimensional semantics adopted from this RFC family.
+
+The RFC itself remains the primary reference for dimensional semantic
+contracts.
 
 ### Suitable for Coordinate & CoordSet RFC work
 
