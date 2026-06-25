@@ -51,6 +51,13 @@ import spectrochempy as scp
 Z = scp.read_opus("irdata/OPUS/test.0002")
 Z
 
+# %% [markdown]
+# The namespace API is equivalent:
+
+# %% {"editable": true, "slideshow": {"slide_type": ""}}
+Z = scp.opus.read("irdata/OPUS/test.0002")
+Z
+
 # %% [markdown] {"editable": true, "slideshow": {"slide_type": ""}}
 # <div class='alert alert-info'>
 # <b>Note:</b><br/>

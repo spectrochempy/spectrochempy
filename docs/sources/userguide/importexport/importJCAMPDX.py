@@ -52,11 +52,24 @@ S0
 S0.write_jcamp("CO@Mo_Al2O3_0.jdx", confirm=False)
 
 # %% [markdown]
+# The namespace API is also available for writing:
+
+# %%
+S0.jcamp.write("CO@Mo_Al2O3_0.jdx", confirm=False)
+
+# %% [markdown]
 # Then used (and maybe changed) by a 3rd party software, and re-imported in
 # spectrochempy:
 
 # %%
 newS0 = scp.read_jcamp("CO@Mo_Al2O3_0.jdx")
+newS0
+
+# %% [markdown]
+# The namespace API works identically:
+
+# %%
+newS0 = scp.jcamp.read("CO@Mo_Al2O3_0.jdx")
 newS0
 
 # %% [markdown]

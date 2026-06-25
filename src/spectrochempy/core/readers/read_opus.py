@@ -171,6 +171,11 @@ def read_opus(*paths, **kwargs):
     >>> scp.read_opus(p)
     NDDataset: [float64] a.u. (shape: (y:1, x:2567))
 
+    Using the explicit namespace API
+
+    >>> scp.opus.read('irdata/OPUS/test.0000')
+    NDDataset: [float64] a.u. (shape: (y:1, x:2567))
+
     Multiple files not merged (return a list of datasets). Note that a directory is
     specified
 

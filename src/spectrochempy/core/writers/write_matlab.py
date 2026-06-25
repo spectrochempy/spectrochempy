@@ -41,6 +41,9 @@ def write_matlab(*args, **kwargs):
     The extension will be added automatically
     >>> X.write_matlab('myfile')
 
+    Using the explicit namespace API
+    >>> X.matlab.write('myfile')
+
     """
     exporter = Exporter()
     kwargs["filetypes"] = ["MATLAB files (*.mat)"]

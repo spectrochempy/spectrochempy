@@ -169,6 +169,11 @@ def read_omnic(*paths, **kwargs):
     >>> scp.read_omnic('irdata/nh4y-activation.spg')
     NDDataset: [float64] a.u. (shape: (y:55, x:5549))
 
+    Using the explicit namespace API
+
+    >>> scp.omnic.read('irdata/nh4y-activation.spg')
+    NDDataset: [float64] a.u. (shape: (y:55, x:5549))
+
     Single file specified with pathlib.Path object
 
     >>> from pathlib import Path

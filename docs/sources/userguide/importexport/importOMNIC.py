@@ -56,6 +56,13 @@ X = scp.read_omnic("irdata/CO@Mo_Al2O3.SPG")
 X
 
 # %% [markdown]
+# The same result is obtained with the namespace API:
+
+# %%
+X = scp.omnic.read("irdata/CO@Mo_Al2O3.SPG")
+X
+
+# %% [markdown]
 # The displayed attributes are detailed in the following:
 #
 # - `name` is the name of the group of spectra as it appears in the .spg file. OMNIC

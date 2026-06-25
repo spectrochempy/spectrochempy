@@ -46,6 +46,9 @@ def write_jcamp(*args, **kwargs):
     The extension will be added automatically
     >>> X.write_jcamp('myfile')
 
+    Using the explicit namespace API
+    >>> X.jcamp.write('myfile')
+
     """
     exporter = Exporter()
     kwargs["filetypes"] = ["JCAMP-DX files (*.jdx)"]

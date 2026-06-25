@@ -899,6 +899,11 @@ def read_wire(*paths, **kwargs):
     >>> scp.read_wire('irdata/wire/white_light.wdf')
     NDDataset: [float64] a.u. (shape: (y:1, x:261))
 
+    Using the explicit namespace API
+
+    >>> scp.wire.read('irdata/wire/white_light.wdf')
+    NDDataset: [float64] a.u. (shape: (y:1, x:261))
+
     """
     kwargs["filetypes"] = ["Renishaw Wire files (*.wdf)"]
     kwargs["protocol"] = ["wire"]
