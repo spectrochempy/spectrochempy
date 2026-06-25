@@ -73,6 +73,16 @@ Prefer incremental migration.
 
 # Audit Policy
 
+All implementation reports, investigations, reviews and working notes must be
+written under `audit/`.
+
+Files in `audit/` are intentionally untracked and must never be committed.
+
+If an audit leads to a durable architectural decision, that decision must be
+promoted into the appropriate document under `maintainers/` (RFC, architecture
+note, roadmap, conventions, etc.).  The audit itself remains a transient working
+document and is not the authoritative reference.
+
 Audit files are the authoritative implementation history for a campaign, but
 they are not the authoritative source for the current maintained architecture
 or behavior contract unless that content has been promoted into tracked

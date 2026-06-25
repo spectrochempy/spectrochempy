@@ -87,6 +87,7 @@ For campaign ordering and architecture priorities, see
 | [`roi-semantic-contract.md`](roi-semantic-contract.md) | roi — Semantic Contract RFC | `ACCEPTED` | Decision record for removal of orphaned `NDDataset.roi` runtime state while keeping legacy files readable. | — |
 | [`scientific-object-model-and-persistence-boundaries.md`](scientific-object-model-and-persistence-boundaries.md) | Scientific Object Model and Persistence Boundaries | `PROPOSED` | Defines the proposed object-role and persistence-boundary vocabulary for datasets, Projects, results, and extensions. | — |
 | [`trusted-and-portable-persistence.md`](trusted-and-portable-persistence.md) | Trusted and Portable Persistence | `PROPOSED` | Defines the conceptual distinction between trusted native persistence and portable scientific persistence; parts of this framing already guide the current security posture. | — |
+| [`namespace-api-convention.md`](namespace-api-convention.md) | Namespace API Convention | `ACCEPTED` | Defines the uniform namespace-based public API for I/O and domain-specific operations across core and plugins. | — |
 | [`xarray-backed-netcdf-persistence.md`](xarray-backed-netcdf-persistence.md) | xarray-Backed NetCDF Persistence | `PROPOSED` | Defines the proposed NetCDF contract for the xarray-backed portable persistence layer; parts of the portable round-trip path are already implemented. | — |
 
 ## Notes
