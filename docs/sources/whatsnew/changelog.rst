@@ -71,6 +71,14 @@ Bug Fixes
   `write_csv()`, `write_jcamp()`, and `write_matlab()` no longer advertise the
   generic multi-protocol export options documented on `write()`.
 
+- Enriched PerkinElmer `.sp` reader metadata.
+  The reader now preserves additional acquisition metadata fields:
+  ``instrument_serial_number``, ``instrument_software_version``,
+  ``ir_accessory``, and ``image_name``.
+  When ``image_name`` is present and ``dataset.description`` is empty,
+  ``image_name`` is used as the dataset description.
+  All existing metadata fields remain unchanged.
+
 .. section
 
 Dependency Updates
