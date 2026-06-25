@@ -16,7 +16,9 @@ contrats RFC, et notes d'architecture durables.
 | [`release-process.md`](release-process.md) | Procédure complète de publication |
 | [`emergency-recovery.md`](emergency-recovery.md) | Incidents connus et récupération |
 | [`rfcs/`](rfcs/) | RFC mainteneur et contrats de comportement |
-| [`architecture/`](architecture/) | Audits, notes d'architecture, et cartes de risques durables |
+| [`architecture/`](architecture/) | Notes d'architecture durables et cartes de risques |
+| [`audits/`](audits/) | Audits historiques promus (contexte, pas autorité) |
+| [`roadmap/`](roadmap/) | Feuilles de route et roadmaps de migration |
 
 ## Documentation Structure
 
@@ -26,7 +28,8 @@ Utiliser ces couches documentaires dans cet ordre :
 |---|---|---|
 | RFCs | Contrats mainteneur, positions, décisions acceptées, et contrats implémentés | [`rfcs/INDEX.md`](rfcs/INDEX.md) |
 | Architecture Notes | Références d'architecture durables, cartes d'implémentation, et contexte technique maintenu | [`architecture/INDEX.md`](architecture/INDEX.md) |
-| Audits | Notes de travail, historique d'implémentation, investigations, et campagnes locales non versionnées par défaut | notes locales sous `audit/`, lorsqu'elles existent |
+| Promoted Audits | Audits historiques promus pour contexte durable (non autoritaires) | [`audits/INDEX.md`](audits/INDEX.md) |
+| Local Audits | Notes de travail, historique d'implémentation, investigations, et campagnes locales non versionnées par défaut | notes locales sous `audit/`, lorsqu'elles existent |
 | Roadmap | Priorités, sujets terminés, actifs, ou différés | [`roadmap/architecture-roadmap.md`](roadmap/architecture-roadmap.md) |
 
 ### Current Maintainer Entry Points

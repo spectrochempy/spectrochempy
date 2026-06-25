@@ -195,7 +195,7 @@ items.
 
 | Document | Purpose |
 |----------|---------|
-| [`architecture/display-architecture-audit.md`](architecture/display-architecture-audit.md) | Original fragmentation analysis (archived) |
+| [`../audits/display-architecture-audit.md`](../audits/display-architecture-audit.md) | Original fragmentation analysis (archived) |
 | [`src/spectrochempy/utils/print.py`](../src/spectrochempy/utils/print.py) | `DisplayItem`, `DisplaySection`, `_render_sections()`, `_html_heading()` |
 
 ## Audit Trail

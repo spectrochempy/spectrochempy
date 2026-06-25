@@ -7,6 +7,7 @@ available after local audit notes are discarded.
 For active maintainer contracts and RFCs, also see [`../rfcs/`](../rfcs/).
 For the curated architecture entry point, see [`INDEX.md`](INDEX.md).
 For the RFC inventory, see [`../rfcs/INDEX.md`](../rfcs/INDEX.md).
+For promoted historical audits, see [`../audits/`](../audits/).
 For campaign ordering and priorities, see
 [`../roadmap/architecture-roadmap.md`](../roadmap/architecture-roadmap.md).
 
@@ -31,8 +32,10 @@ notes are needed.
 
 | Location | Use for |
 |---|---|
-| `../rfcs/` | Normative or near-normative behavior contracts and roadmap documents |
-| this directory | Durable audits, implementation maps, design baselines, and draft architecture analyses |
+| `../rfcs/` | Normative or near-normative behavior contracts |
+| `../roadmap/` | Active and completed migration roadmaps |
+| `../audits/` | Promoted historical audits and decision-space analyses |
+| this directory | Durable architecture notes, implementation maps, and design baselines |
 | local notes under `audit/` | Local working notes that should not be versioned by default |
 
 Tracked files in this directory may still contain `audit` in the filename.
@@ -72,18 +75,6 @@ The curated grouping of those documents lives in [`INDEX.md`](INDEX.md).
 | [`display-architecture.md`](display-architecture.md) | Completed note | Documents the final post-migration display architecture and semantic HTML path. |
 | [`result-object-migration-roadmap.md`](result-object-migration-roadmap.md) | Completed campaign summary | Summarizes the final Result Object campaign outcome, stable contract, architectural findings, deferred infrastructure work, and audit trail. |
 | [`tensor-plugin-migration.md`](tensor-plugin-migration.md) | Completed note | Records the core/plugin boundary after CP/PARAFAC decomposition moved to the tensor plugin. |
-
-## Completed Audits
-
-| Document | Status | Purpose |
-|---|---|---|
-| [`coordinate-arithmetic-audit.md`](coordinate-arithmetic-audit.md) | Completed audit | Technical map for coordinate compatibility in arithmetic. |
-| [`coordinate-arithmetic-decision-audit.md`](coordinate-arithmetic-decision-audit.md) | Decision-space audit | Tradeoff analysis for possible future coordinate arithmetic models. |
-| [`dataset-vs-coord-arithmetic-audit.md`](dataset-vs-coord-arithmetic-audit.md) | Completed audit | Explains why `Coord` is an axis/support object rather than a signal operand. |
-| [`display-architecture-audit.md`](display-architecture-audit.md) | Completed audit | Historical context for the display architecture migration. |
-| [`ndmath-maintainability-audit.md`](ndmath-maintainability-audit.md) | Deferred reference | Maps risks concentrated in `NDMath`. |
-| [`plotting-audit.md`](plotting-audit.md) | Completed audit | Baseline for plotting backend extensibility and Matplotlib coupling. |
-| [`units-audit.md`](units-audit.md) | Completed audit | Baseline for unit handling, quantity propagation, and unit semantics. |
 
 ## Related RFCs
 
