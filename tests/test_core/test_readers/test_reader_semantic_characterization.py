@@ -331,13 +331,13 @@ class TestOmnicCharacterization:
         # most real-world OMNIC files.  If the fixture lacks this block
         # the assertions below raise, and the new keys should be removed
         # from the expected list.
-        if hasattr(dataset.meta, "omnic_experiment_path"):
+        if dataset.meta.omnic_experiment_path is not None:
             assert isinstance(dataset.meta.omnic_experiment_path, str)
-        if hasattr(dataset.meta, "omnic_experiment_file"):
+        if dataset.meta.omnic_experiment_file is not None:
             assert isinstance(dataset.meta.omnic_experiment_file, str)
-        if hasattr(dataset.meta, "omnic_accessory"):
+        if dataset.meta.omnic_accessory is not None:
             assert isinstance(dataset.meta.omnic_accessory, str)
-        if hasattr(dataset.meta, "omnic_experiment_title"):
+        if dataset.meta.omnic_experiment_title is not None:
             assert isinstance(dataset.meta.omnic_experiment_title, str)
 
     def test_spa_uses_omnic_origin_and_label_rows(self, omnic_spa_dataset):
@@ -361,13 +361,13 @@ class TestOmnicCharacterization:
             "optical_velocity",
             "laser_frequency",
         )
-        if hasattr(dataset.meta, "omnic_experiment_path"):
+        if dataset.meta.omnic_experiment_path is not None:
             assert isinstance(dataset.meta.omnic_experiment_path, str)
-        if hasattr(dataset.meta, "omnic_experiment_file"):
+        if dataset.meta.omnic_experiment_file is not None:
             assert isinstance(dataset.meta.omnic_experiment_file, str)
-        if hasattr(dataset.meta, "omnic_accessory"):
+        if dataset.meta.omnic_accessory is not None:
             assert isinstance(dataset.meta.omnic_accessory, str)
-        if hasattr(dataset.meta, "omnic_experiment_title"):
+        if dataset.meta.omnic_experiment_title is not None:
             assert isinstance(dataset.meta.omnic_experiment_title, str)
 
     def test_srs_currently_sets_origin_and_history(self, omnic_srs_dataset):
