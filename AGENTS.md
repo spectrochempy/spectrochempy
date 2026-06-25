@@ -393,14 +393,24 @@ When possible:
 
 # Pre-commit Policy
 
-Pre-commit validation must be run before creating a pull request or pushing
-to ``upstream/master``.  It must not be run during normal development.
+Pre-commit validation must be run **once** before creating a pull request or
+pushing to ``upstream/master``.  It must not be run during normal development.
 
 Command:
 
 ```bash id="4qukx8"
 pre-commit run --all-files
 ```
+
+Rationale:
+
+- Running pre-commit repeatedly during development wastes CI quota and agent
+  time.
+- A single final run before push is sufficient because pre-commit hooks are
+  deterministic.
+- Between commits, ensure code passes ``ruff`` and ``ruff-format`` manually
+  (e.g. via editor integration or a targeted command) so that the final
+  pre-commit run succeeds quickly.
 
 When not delegated:
 
