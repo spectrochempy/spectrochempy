@@ -73,7 +73,7 @@ class CarroucellPlugin(SpectroChemPyPlugin):
 
 
 def __getattr__(name: str):
-    if name == "read_carroucell":
+    if name in ("read_carroucell", "read"):
         from .read_carroucell import read_carroucell  # noqa: PLC0415
 
         return read_carroucell
@@ -82,4 +82,4 @@ def __getattr__(name: str):
 
 
 def __dir__() -> list[str]:
-    return ["CarroucellPlugin", "read_carroucell"]
+    return ["CarroucellPlugin", "read", "read_carroucell"]

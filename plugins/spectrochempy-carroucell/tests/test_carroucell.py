@@ -115,6 +115,17 @@ def test_namespace_exposes_reader():
     assert callable(scp.carroucell.read_carroucell)
 
 
+def test_namespace_exposes_short_read_alias():
+    """scp.carroucell.read is a short alias for scp.carroucell.read_carroucell."""
+    assert hasattr(scp, "carroucell")
+    assert callable(scp.carroucell.read)
+    # Both names must resolve to the same underlying reader.  They may be
+    # different objects (module attribute vs registry proxy) so we check
+    # functional equivalence rather than identity.
+    assert scp.carroucell.read.__name__ == scp.carroucell.read_carroucell.__name__
+    assert scp.carroucell.read.__name__ == "read_carroucell"
+
+
 # ------------------------------------------------------------------
 # Error behaviour when data is unavailable
 # ------------------------------------------------------------------

@@ -154,6 +154,23 @@ def test_package_namespace_exposes_topspin_reader(monkeypatch):
     assert top_level_reader.__module__.startswith("spectrochempy_nmr")
 
 
+def test_package_namespace_exposes_short_read_alias(monkeypatch):
+    """scp.nmr.read is a short alias for scp.nmr.read_topspin."""
+    _require_reader_dependencies()
+
+    pm, _registry = _isolate_scp_plugins(monkeypatch, scp)
+    pm.register(NMRPlugin())
+
+    short_reader = scp.nmr.read
+    long_reader = scp.nmr.read_topspin
+
+    assert callable(short_reader)
+    # Both names must resolve to the same underlying reader.  They may be
+    # different objects (module attribute vs registry proxy) so we check
+    # functional equivalence rather than identity.
+    assert short_reader.__name__ == long_reader.__name__ == "read_topspin"
+
+
 def test_top_level_stub_is_actionable_without_registered_nmr(monkeypatch):
     """scp.read_topspin is a callable MissingPluginError stub without NMR."""
     _isolate_scp_plugins(monkeypatch, scp)
