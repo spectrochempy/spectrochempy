@@ -145,6 +145,72 @@ def test_allow_inconsistent_x_parameter_documented():
     assert "allow_inconsistent_x=True" in scp.read_omnic.__doc__
 
 
+def test_decode_experiment_info_block():
+    """_decode_experiment_info_block correctly decodes 0x79 blocks."""
+    from spectrochempy.core.readers.read_omnic import _decode_experiment_info_block
+
+    # Helper to build a 0x79 block
+    def _build_block(*fields):
+        payload = b"\x00".join(f.encode("utf-8") for f in fields) + b"\x00"
+        header = bytes([0x79, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00])
+        block = header + payload
+        if len(block) < 60:
+            block += b"\x00" * (60 - len(block))
+        return block
+
+    # Normal 4-field block
+    block = _build_block(
+        r"C:\MYDOCU~1\omnic\Param\CARROU~2.EXP",
+        "CARROU~2.EXP",
+        "iS50 Main Sample",
+        "Default experiment for iS50 Main Sample Compartment",
+    )
+    result = _decode_experiment_info_block(block)
+    assert result is not None
+    assert result["experiment_path"] == r"C:\MYDOCU~1\omnic\Param\CARROU~2.EXP"
+    assert result["experiment_file"] == "CARROU~2.EXP"
+    assert result["accessory_name"] == "iS50 Main Sample"
+    assert (
+        result["experiment_title"]
+        == "Default experiment for iS50 Main Sample Compartment"
+    )
+
+    # Subtype 0x9e (System Status) -> None
+    bad = bytearray(block)
+    bad[0] = 0x9E
+    assert _decode_experiment_info_block(bytes(bad)) is None
+
+    # Too short -> None
+    assert _decode_experiment_info_block(b"\x00" * 40) is None
+
+    # Single field -> experiment_path only
+    block = _build_block(r"C:\path\to\file.spa")
+    result = _decode_experiment_info_block(block)
+    assert result is not None
+    assert result["experiment_path"] == r"C:\path\to\file.spa"
+    assert "experiment_file" not in result
+    assert "accessory_name" not in result
+    assert "experiment_title" not in result
+
+    # Three fields without title
+    block = _build_block(r"C:\ATR\crystal.exp", "crystal.exp", "ATR Crystal")
+    result = _decode_experiment_info_block(block)
+    assert result is not None
+    assert result["experiment_path"] == r"C:\ATR\crystal.exp"
+    assert result["experiment_file"] == "crystal.exp"
+    assert result["accessory_name"] == "ATR Crystal"
+    assert "experiment_title" not in result
+
+    # Unix-style path in field 0
+    block = _build_block("/home/omnic/param/test.exp", "test.exp", "iS50 Sample")
+    result = _decode_experiment_info_block(block)
+    assert result is not None
+    assert result["experiment_path"] == "/home/omnic/param/test.exp"
+    assert result["experiment_file"] == "test.exp"
+    assert result["accessory_name"] == "iS50 Sample"
+    assert "experiment_title" not in result
+
+
 @pytest.mark.skip(reason="Requires an SPG file with inconsistent x-axes (#863)")
 def test_allow_inconsistent_x_with_real_file():
     """Exercise both return paths once a representative sample is available."""
