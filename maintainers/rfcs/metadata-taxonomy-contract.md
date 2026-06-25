@@ -676,9 +676,13 @@ Reason:
 
 ### Suitable for architecture notes
 
-- `maintainers/architecture/metadata-taxonomy-reference.md`
-  Stable reference note once metadata taxonomy decisions are adopted beyond RFC
-  discussion.
+Implemented as:
+
+- [`maintainers/architecture/metadata-and-support-model.md`](../architecture/metadata-and-support-model.md)
+  documents the metadata taxonomy adopted from this RFC family.
+
+Remaining future work:
+
 - `maintainers/architecture/provenance-and-history-semantics.md`
   Durable reference note once provenance/history boundaries are better
   characterized.

@@ -598,9 +598,14 @@ Maintainers SHOULD apply the following rules when normalizing reader metadata:
 
 ### Future architecture notes
 
-- A maintainer architecture note on imported provenance, identity, and support
-  normalization once reader policy stabilizes across the main spectroscopy
+Implemented as:
+
+- [`maintainers/architecture/reader-normalization-architecture.md`](../architecture/reader-normalization-architecture.md)
+  documents the reader normalization contract across the maintained spectroscopy
   formats.
+
+Remaining future work:
+
 - A focused architecture note on reader-to-runtime mapping patterns for common
   vendor ecosystems.
 
