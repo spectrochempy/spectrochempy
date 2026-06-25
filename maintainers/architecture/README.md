@@ -8,7 +8,7 @@ For active maintainer contracts and RFCs, also see [`../rfcs/`](../rfcs/).
 For the curated architecture entry point, see [`INDEX.md`](INDEX.md).
 For the RFC inventory, see [`../rfcs/INDEX.md`](../rfcs/INDEX.md).
 For campaign ordering and priorities, see
-[`../rfcs/architecture-roadmap.md`](../rfcs/architecture-roadmap.md).
+[`../roadmap/architecture-roadmap.md`](../roadmap/architecture-roadmap.md).
 
 ## Current High-Value References
 
@@ -89,7 +89,7 @@ The curated grouping of those documents lives in [`INDEX.md`](INDEX.md).
 
 | Document | Status | Purpose |
 |---|---|---|
-| [`../rfcs/architecture-roadmap.md`](../rfcs/architecture-roadmap.md) | Roadmap | Summarizes completed, active, and deferred architecture topics. |
+| [`../roadmap/architecture-roadmap.md`](../roadmap/architecture-roadmap.md) | Roadmap | Summarizes completed, active, and deferred architecture topics. |
 | [`../rfcs/analysis-fit-result-architecture.md`](../rfcs/analysis-fit-result-architecture.md) | Draft conceptual RFC | Preserves the broader conceptual analysis of result surfaces and ownership around the implemented Result contract. |
 | [`../rfcs/coordinate-arithmetic-semantics.md`](../rfcs/coordinate-arithmetic-semantics.md) | Accepted RFC | Maintainer position on coordinate arithmetic semantics. |
 | [`../rfcs/metadata-contract.md`](../rfcs/metadata-contract.md) | Draft RFC | Normative direction for `NDDataset` metadata preservation, recomputation, override, merge, and drop behavior. |

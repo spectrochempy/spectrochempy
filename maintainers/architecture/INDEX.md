@@ -9,7 +9,7 @@ valuable mainly as historical context.
 
 For normative maintainer contracts and position statements, also see the
 [`../rfcs/INDEX.md`](../rfcs/INDEX.md) and the
-[`../rfcs/architecture-roadmap.md`](../rfcs/architecture-roadmap.md).
+[`../roadmap/architecture-roadmap.md`](../roadmap/architecture-roadmap.md).
 
 These tracked architecture notes are authoritative once a design or campaign
 has stabilized. Local audits, implementation notes, campaign logs, and
@@ -81,7 +81,7 @@ the first place to look for the current maintained contract.
 For a quick orientation path, start with:
 
 1. [`../README.md`](../README.md)
-2. [`../rfcs/architecture-roadmap.md`](../rfcs/architecture-roadmap.md)
+2. [`../roadmap/architecture-roadmap.md`](../roadmap/architecture-roadmap.md)
 3. [`metadata-and-support-model.md`](metadata-and-support-model.md)
 4. [`reader-normalization-architecture.md`](reader-normalization-architecture.md)
 5. [`portable-persistence-model.md`](portable-persistence-model.md)

@@ -61,7 +61,7 @@ authoritative reference.
 ## Related Roadmap
 
 For campaign ordering and architecture priorities, see
-[`architecture-roadmap.md`](architecture-roadmap.md).
+[`../roadmap/architecture-roadmap.md`](../roadmap/architecture-roadmap.md).
 
 ## RFC Inventory
 

@@ -27,7 +27,7 @@ Utiliser ces couches documentaires dans cet ordre :
 | RFCs | Contrats mainteneur, positions, décisions acceptées, et contrats implémentés | [`rfcs/INDEX.md`](rfcs/INDEX.md) |
 | Architecture Notes | Références d'architecture durables, cartes d'implémentation, et contexte technique maintenu | [`architecture/INDEX.md`](architecture/INDEX.md) |
 | Audits | Notes de travail, historique d'implémentation, investigations, et campagnes locales non versionnées par défaut | notes locales sous `audit/`, lorsqu'elles existent |
-| Roadmap | Priorités, sujets terminés, actifs, ou différés | [`rfcs/architecture-roadmap.md`](rfcs/architecture-roadmap.md) |
+| Roadmap | Priorités, sujets terminés, actifs, ou différés | [`roadmap/architecture-roadmap.md`](roadmap/architecture-roadmap.md) |
 
 ### Current Maintainer Entry Points
 
@@ -35,7 +35,7 @@ Après les campagnes récentes de normalisation des readers, de persistance
 portable, et de consolidation des Result Objects, les points d'entrée
 mainteneur les plus utiles sont généralement :
 
-- [`rfcs/architecture-roadmap.md`](rfcs/architecture-roadmap.md) pour l'état
+- [`roadmap/architecture-roadmap.md`](roadmap/architecture-roadmap.md) pour l'état
   global des campagnes et futurs candidats ;
 - [`architecture/metadata-and-support-model.md`](architecture/metadata-and-support-model.md)
   pour le modèle runtime central ;
@@ -131,7 +131,7 @@ architecture.
 
 Pour un nouveau mainteneur, l'ordre de lecture recommandé est :
 
-1. [`rfcs/architecture-roadmap.md`](rfcs/architecture-roadmap.md)
+1. [`roadmap/architecture-roadmap.md`](roadmap/architecture-roadmap.md)
 2. [`rfcs/INDEX.md`](rfcs/INDEX.md)
 3. [`architecture/INDEX.md`](architecture/INDEX.md)
 4. [`rfcs/project-invariants-rfc.md`](rfcs/project-invariants-rfc.md)
@@ -154,7 +154,7 @@ Pour un nouveau mainteneur, l'ordre de lecture recommandé est :
 |---|---|
 | [`rfcs/INDEX.md`](rfcs/INDEX.md) | Index des RFCs mainteneur, de leur statut, et de leur rôle |
 | [`architecture/INDEX.md`](architecture/INDEX.md) | Point d'entrée organisé vers les notes d'architecture suivies |
-| [`rfcs/architecture-roadmap.md`](rfcs/architecture-roadmap.md) | Feuille de route légère des sujets d'architecture récents, terminés ou différés |
+| [`roadmap/architecture-roadmap.md`](roadmap/architecture-roadmap.md) | Feuille de route légère des sujets d'architecture récents, terminés ou différés |
 | [`architecture/portable-persistence-model.md`](architecture/portable-persistence-model.md) | Référence d'architecture principale pour la surface de persistance portable xarray / NetCDF actuellement implémentée |
 | [`architecture/metadata-and-support-model.md`](architecture/metadata-and-support-model.md) | Référence d'architecture principale pour dimensions, coordonnées, `CoordSet`, labels, métadonnées et provenance |
 | [`architecture/reader-normalization-architecture.md`](architecture/reader-normalization-architecture.md) | Référence d'architecture principale pour la normalisation des readers |
