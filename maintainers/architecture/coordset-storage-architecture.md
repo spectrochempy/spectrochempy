@@ -5,9 +5,8 @@
 Completed architecture note.
 
 This document summarizes the final state of the `CoordSet` storage redesign.
-It replaces the earlier tracked completion note that lived under
-`maintainers/completed/`; the current maintained location is
-`maintainers/architecture/coordset-storage-architecture.md`.
+It replaces the earlier tracked completion note.  The current maintained
+location is `maintainers/architecture/coordset-storage-architecture.md`.
 
 ## Context
 
