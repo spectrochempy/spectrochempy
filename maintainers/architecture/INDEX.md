@@ -32,7 +32,7 @@ Use this shorter routing table before scanning the full inventory:
 | Display architecture | [`display-architecture.md`](display-architecture.md) |
 | Future operation semantics work | [`mathematical-semantics-and-metadata-propagation.md`](mathematical-semantics-and-metadata-propagation.md) |
 
-## Core Architecture
+## Core Maintained Architecture
 
 These documents are the primary tracked references for current maintained
 behavior, durable architecture boundaries, or active maintainer-facing
@@ -46,17 +46,22 @@ contracts.
 | [`mathematical-semantics-and-metadata-propagation.md`](mathematical-semantics-and-metadata-propagation.md) | Active maintainer-facing contract draft for operation behavior, result assembly, provenance, and metadata propagation. |
 | [`metadata-and-support-model.md`](metadata-and-support-model.md) | Primary architecture reference for dimensions, coordinates, `CoordSet`, labels, metadata, provenance, ownership, and persistence boundaries. |
 | [`portable-persistence-model.md`](portable-persistence-model.md) | Primary architecture reference for the currently implemented portable xarray / NetCDF persistence surface, including portable identity, structure, labels, provenance, and `Meta` payloads. |
-| [`reader-normalization-architecture.md`](reader-normalization-architecture.md) | Primary architecture reference for normalizing imported reader information into typed fields, coordinates, labels, provenance, `Meta`, and parser-only state. |
 | [`result-object-contract-rfc.md`](result-object-contract-rfc.md) | Implemented tracked contract for result objects, ownership, serialization boundary, and display scope. |
-| [`result-object-migration-roadmap.md`](result-object-migration-roadmap.md) | Final campaign summary for the completed Result Object migration. |
 
-## Reference Architecture
-
-These documents are useful supporting references, decision-space analyses, or
-durable risk maps that maintainers may still rely on.
+## Reader Architecture
 
 | File | Description |
 |---|---|
+| [`reader-normalization-architecture.md`](reader-normalization-architecture.md) | Primary architecture reference for normalizing imported reader information into typed fields, coordinates, labels, provenance, `Meta`, and parser-only state. |
+
+## Historical Migrations
+
+These documents preserve campaign summaries and durable risk maps from
+completed migrations. They are not current normative references.
+
+| File | Description |
+|---|---|
+| [`result-object-migration-roadmap.md`](result-object-migration-roadmap.md) | Final campaign summary for the completed Result Object migration. |
 | [`tensor-plugin-migration.md`](tensor-plugin-migration.md) | Durable note on the core/plugin boundary after the tensor migration. |
 
 ## Reading Order
