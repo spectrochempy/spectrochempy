@@ -7,7 +7,7 @@ SpectroChemPy.  It is intended as a quick reference for maintainers, contributor
 and plugin authors.
 
 For the full specification, see the tracked RFC
-[`maintainers/rfcs/namespace-api-convention.md`](../maintainers/rfcs/namespace-api-convention.md).
+[`maintainers/rfcs/namespace-api-convention.md`](rfcs/namespace-api-convention.md).
 
 ## Core Principles
 
@@ -78,7 +78,7 @@ optional and unlikely.
 
 A set of public namespaces is reserved by the project.  See the RFC for the
 authoritative list:
-[`maintainers/rfcs/namespace-api-convention.md#reserved-public-namespaces`](../rfcs/namespace-api-convention.md#reserved-public-namespaces).
+[`maintainers/rfcs/namespace-api-convention.md#reserved-public-namespaces`](rfcs/namespace-api-convention.md#reserved-public-namespaces).
 
 ## Summary
 
