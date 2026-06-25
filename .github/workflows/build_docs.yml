@@ -226,7 +226,7 @@ jobs:
             build/branch_preview/~doctrees
             docs/sources/gettingstarted/examples/gallery
           key: >-
-            ${{ runner.os }}-docs-${{ steps.preview.outputs.preview_path }}-${{ hashFiles('pyproject.toml', 'docs/conf.py', 'docs/make.py', 'docs/sources/**/*.rst', 'docs/sources/**/*.py', 'docs/sources/**/*.ipynb', 'src/spectrochempy/examples/**/*.py', 'src/spectrochempy/core/dataset/*.py', 'src/spectrochempy/utils/print.py', 'plugins/**/examples/**/*.py', 'plugins/**/examples/gallery.toml') }}
+            ${{ runner.os }}-docs-${{ steps.preview.outputs.preview_path }}-${{ hashFiles('pyproject.toml', 'docs/conf.py', 'docs/make.py', 'docs/_static/**', 'docs/sources/**/*.rst', 'docs/sources/**/*.py', 'docs/sources/**/*.ipynb', 'src/spectrochempy/data/css/*.css', 'src/spectrochempy/examples/**/*.py', 'src/spectrochempy/core/dataset/*.py', 'src/spectrochempy/utils/print.py', 'plugins/**/examples/**/*.py', 'plugins/**/examples/gallery.toml') }}
           restore-keys: |
             ${{ runner.os }}-docs-${{ steps.preview.outputs.preview_path }}-
             ${{ runner.os }}-docs-
