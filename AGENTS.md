@@ -100,7 +100,14 @@ maintainers.
 ## Promotion destinations
 
 If an audit leads to a durable architectural decision, promote that knowledge
-into the appropriate tracked document:
+into the appropriate tracked document.
+
+**Promotion never consists of simply moving or copying the local audit file.**
+The maintainer document must be a **rewritten, maintained document** that
+extracts the durable knowledge from the audit.  The original local audit may
+remain as an untracked working note, be deleted, or—when it has long-term
+historical value—be rewritten and committed separately under
+`maintainers/audits/`.
 
 | Destination | Use for |
 |---|---|
@@ -117,9 +124,10 @@ authoritative reference.
 Some audits retain long-term value as historical context even though they are
 no longer primary authority.  These may be promoted to `maintainers/audits/`.
 
-`maintainers/audits/` contains **tracked** historical audits that preserve
-decision-space analysis, migration baselines, and risk maps for future
-maintainers.  They are distinct from:
+`maintainers/audits/` contains **tracked, curated, and rewritten** historical
+audits that preserve decision-space analysis, migration baselines, and risk
+maps for future maintainers.  They are **not committed copies** of the local
+working notes.  They are distinct from:
 
 - `audit/` — local untracked working notes;
 - `maintainers/architecture/` — current durable architecture reference;
