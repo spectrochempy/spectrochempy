@@ -23,6 +23,16 @@ durable architecture notes, see [`../architecture/`](../architecture/).
 - Current architecture notes or RFCs — those live in `../architecture/` or
   `../rfcs/`.
 
+## Convention
+
+Seuls les audits promus (réécrits et commités) doivent se trouver ici.
+
+Ne jamais copier directement une note de travail locale depuis `audit/`.
+Un audit promu est **réécrit, pas déplacé**. La note locale originale peut
+rester dans `audit/`, être supprimée, ou être réécrite et commitée sous un nom
+distinct. Dans tous les cas, le fichier commité ici doit être un document
+autonome et révisé, pas une copie brute d'une note de travail.
+
 ## Reading guidance
 
 Consult these files when you need:

@@ -11,14 +11,14 @@ contrats RFC, et notes d'architecture durables.
 
 ## Structure
 
-| Path | Purpose |
-|---|---|
-| [`release-process.md`](release-process.md) | Procédure complète de publication |
-| [`emergency-recovery.md`](emergency-recovery.md) | Incidents connus et récupération |
-| [`rfcs/`](rfcs/) | RFC mainteneur et contrats de comportement |
-| [`architecture/`](architecture/) | Notes d'architecture durables et cartes de risques |
-| [`audits/`](audits/) | Audits historiques promus (contexte, pas autorité) |
-| [`roadmap/`](roadmap/) | Feuilles de route et roadmaps de migration |
+| Path | Role | Purpose |
+|---|---|---|---|
+| [`release-process.md`](release-process.md) | How | Procédure complète de publication |
+| [`emergency-recovery.md`](emergency-recovery.md) | How | Incidents connus et récupération |
+| [`rfcs/`](rfcs/) | **What** | RFC mainteneur et contrats de comportement |
+| [`architecture/`](architecture/) | **How** | Notes d'architecture durables et cartes de risques |
+| [`audits/`](audits/) | **Why** | Audits historiques promus (contexte, pas autorité) |
+| [`roadmap/`](roadmap/) | **When** | Feuilles de route et roadmaps de migration |
 
 ## Documentation Structure
 
@@ -94,22 +94,48 @@ En pratique :
 - utiliser les audits locaux seulement pour retrouver le contexte de campagne
   et l'historique d'implémentation.
 
+### Document Role Framework
+
+Chaque document dans `maintainers/` répond à une question fondamentale :
+
+| Role | Question | Type de document |
+|---|---|---|
+| **What** | Qu'est-ce qui est contractuel ? | RFC |
+| **How** | Comment le système est-il organisé ? | Architecture note |
+| **When** | Dans quel ordre les changements arrivent-ils ? | Roadmap |
+| **Why** | Pourquoi cette décision a-t-elle été prise ? | Audit |
+
+Cette distinction aide à placer un nouveau contenu au bon endroit : un auteur
+qui hésite entre RFC et architecture note peut se demander s'il définit un
+contrat (What) ou décrit une implémentation (How).
+
 ### Architecture-Document Lifecycle
 
 Le cycle documentaire typique est :
 
 ```text
-Audit
-  ↓
-RFC
-  ↓
-Architecture Note
+Local audit (working notes)
+      │
+      ▼
+RFC (if needed — defines contracts)
+      │
+      ▼
+Implementation
+      │
+      ▼
+Architecture note (durable reference)
+      │
+      ▼
+Promoted historical audit (long-term context)
 ```
 
-- les audits sont des analyses de travail et des notes de campagne ;
-- les RFCs portent des contrats proposés, acceptés, ou implémentés ;
-- les notes d'architecture deviennent la référence suivie lorsqu'un design ou
-  une campagne s'est stabilisé.
+- les **audits locaux** sont des notes de travail et des analyses de campagne ;
+- les **RFCs** portent des contrats proposés, acceptés, ou implémentés ;
+- l'**implémentation** transforme le contrat en comportement mergé ;
+- les **notes d'architecture** deviennent la référence suivie lorsqu'un design
+  se stabilise ;
+- les **audits promus** conservent le contexte historique durable qui ne fait
+  plus autorité.
 
 ### Authority Guide
 
