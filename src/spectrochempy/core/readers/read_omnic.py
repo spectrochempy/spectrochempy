@@ -838,6 +838,15 @@ def _read_spg(*args, **kwargs):
 
     dataset.history = f"Imported from spg file {filename}."
 
+    # Attach acquisition metadata from the header.
+    # Acquisition parameters (collection_length, reference_frequency,
+    # optical_velocity) are global to the SPG file — the header at
+    # position02 stores them once, not per spectrum.  Reusing the last
+    # parsed header is therefore intentional.
+    dataset.meta.collection_length = info["collection_length"] / 100 * ur("s")
+    dataset.meta.optical_velocity = info["optical_velocity"]
+    dataset.meta.laser_frequency = info["reference_frequency"] * ur("cm^-1")
+
     if kwargs.pop("sortbydate", True):
         dataset.sort(dim="y", inplace=True)
         dataset.history = "Sorted by date"
@@ -1411,6 +1420,7 @@ def _read_srs(*args, **kwargs):
 
     dataset.meta.laser_frequency = info["reference_frequency"] * ur("cm^-1")
     dataset.meta.collection_length = info["collection_length"] * ur("s")
+    dataset.meta.optical_velocity = info["optical_velocity"]
 
     if dataset.x.units is None and dataset.x.title == "data points":
         # interferogram
