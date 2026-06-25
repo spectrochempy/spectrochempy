@@ -2,6 +2,13 @@
 
 **Status:** Campaign complete
 
+**Campaign closed:** 2026-06-26
+
+**Closure basis:** Successful validation on all targeted core estimators (PCA,
+SVD, NMF, MCRALS, SIMPLISMA, EFA, FastICA, PLSRegression, Optimize) and both
+official analysis plugins (IRIS, CP). `ResultBase` remained unchanged
+throughout all 9 migration PRs. No subclass was required.
+
 **Related RFC:** `result-object-contract-rfc.md`
 
 **Campaign review context:** This roadmap preserves the tracked maintainer
