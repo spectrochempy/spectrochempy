@@ -45,6 +45,14 @@ New Features
   functions; no behavior has changed.  This is the first phase of the
   Namespace API Convention (see ``maintainers/rfcs/namespace-api-convention.md``).
 
+- Aligned official plugins with the namespace API convention.
+  The ``nmr`` and ``carroucell`` plugins now expose the short canonical
+  ``scp.nmr.read(...)`` and ``scp.carroucell.read(...)`` aliases,
+  in addition to the existing ``scp.nmr.read_topspin(...)`` and
+  ``scp.carroucell.read_carroucell(...)`` names.  The ``perkinelmer``
+  plugin already exposed ``scp.perkinelmer.read(...)`` and is unchanged.
+  All legacy names remain supported.
+
 Bug Fixes
 ~~~~~~~~~
 

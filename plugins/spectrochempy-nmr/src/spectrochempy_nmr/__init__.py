@@ -254,7 +254,7 @@ class NMRPlugin(SpectroChemPyPlugin):
 
 
 def __getattr__(name: str):
-    if name == "read_topspin":
+    if name in ("read_topspin", "read"):
         from .read_topspin import read_topspin  # noqa: PLC0415
 
         return read_topspin
@@ -267,4 +267,4 @@ def __getattr__(name: str):
 
 
 def __dir__() -> list[str]:
-    return ["NMRPlugin", "read_topspin", "set_nmr_context"]
+    return ["NMRPlugin", "read", "read_topspin", "set_nmr_context"]
