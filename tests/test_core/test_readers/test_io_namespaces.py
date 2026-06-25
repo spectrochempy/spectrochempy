@@ -1,4 +1,5 @@
-"""Tests for the namespace-based I/O API.
+"""
+Tests for the namespace-based I/O API.
 
 These tests verify that ``scp.<namespace>.read(...)`` and
 ``scp.<namespace>.write(...)`` delegate correctly to the existing
@@ -95,7 +96,7 @@ class TestIONamespaceReadOnly:
     def test_read_only_namespace_no_write(self, ns):
         namespace = getattr(scp, ns)
         with pytest.raises(AttributeError):
-            namespace.write
+            _ = namespace.write
 
 
 class TestExistingAPIUnchanged:

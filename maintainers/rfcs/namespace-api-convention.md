@@ -279,6 +279,22 @@ scp.xyz.write("file.xyz", dataset)
 The plugin MAY also request top-level aliases (`scp.read_xyz`, `scp.write_xyz`)
 for consistency, but the namespace form is the canonical API.
 
+## Reserved Public Namespaces
+
+The following namespaces are part of SpectroChemPy's public API and are
+reserved:
+
+```text
+csv, jcamp, matlab, omnic, opus, quadera, soc, spc, wire, labspec
+```
+
+They may be implemented either by the core package or by an official
+SpectroChemPy plugin when a namespace is migrated out of the core.
+
+Third-party plugins, and official plugins unrelated to that namespace, must not
+claim these names.  Doing so would shadow the public API and create ambiguity
+for users.
+
 ## Migration Strategy
 
 The migration is split into four phases.  No public code is broken during any
