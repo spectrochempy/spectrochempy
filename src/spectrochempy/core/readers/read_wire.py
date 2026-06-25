@@ -47,7 +47,6 @@ https://sourceforge.net/p/gwyddion/code/HEAD/tree/trunk/gwyddion/modules/file/re
 
 __all__ = ["read_wdf", "read_wire"]
 
-import datetime
 import io
 import struct
 from enum import Enum
@@ -159,9 +158,15 @@ class _wdfReader:
 
         # Parse individual blocks
         self._parse_header()  # File header -> metadata
+        username = self._meta.username.replace("\x00", "").strip()
+        if username:
+            self._dataset.author = username
         coord_x = self._parse_dimension("X")
         coord_meta = self._parse_dimension("Y")
         other_dimensions = self._parse_others()
+        acq = getattr(self._meta, "acquisition_time", None)
+        if acq is not None:
+            self._dataset.acquisition_date = acq.item()
         data = self._parse_data()
         # self._parse_img()
 
@@ -808,7 +813,7 @@ def read_wire(*paths, **kwargs):
         - e.g., ( [filename1, filename2, ...], kwargs )
 
         The returned datasets are merged to form a single dataset,
-        except if ``merge`` is set to `False`.
+        except if ``merge`` is set to ``False``.
     **kwargs : keyword parameters, optional
         See Other Parameters.
 
@@ -828,7 +833,7 @@ def read_wire(*paths, **kwargs):
     csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
         Set the column delimiter in CSV file.
     description : `str`, optional
-        A Custom description.
+        A custom description.
     directory : `~pathlib.Path` object objects or valid urls, optional
         From where to read the files.
     download_only: `bool`, optional, default: `False`
@@ -844,8 +849,8 @@ def read_wire(*paths, **kwargs):
         or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
         automatically, but can be set manually.
 
-        It is used for instance whn reading directory with different types of files, for merging
-        the datasets with compatible dimensions and different origin into different groups.
+        It is used, for instance, when reading a directory with different types of
+        files and merging compatible datasets into separate groups by origin.
 
         It is also used when reading with the CSV protocol. In order to properly interpret CSV file
         it can be necessary to set the origin of the spectra. Up to now only ``'omnic'`` and ``'tga'``
@@ -855,10 +860,10 @@ def read_wire(*paths, **kwargs):
 
         .. versionadded:: 0.7.2
     protocol : `str`, optional
-        ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
-        ``'opus'``, ````, ``'matlab'``, ``'jcamp'``,
-        ``'csv'``, ``'excel'``}. If not provided, the correct protocol
-        is inferred (whenever it is possible) from the filename extension.
+        ``Protocol`` used for reading, for example ``'scp'``, ``'omnic'``,
+        ``'opus'``, ``'matlab'``, ``'jcamp'``, ``'csv'``, or ``'excel'``.
+        If not provided, the correct protocol is inferred whenever possible
+        from the filename extension.
     read_only: `bool`, optional, default: `True`
         Used only when url are specified.  If True, saving of the
         files is performed in the current directory, or in the directory specified by
@@ -922,5 +927,5 @@ def _read_wdf(*args, **kwargs):
         return None
     dataset.name = filename.stem
     dataset.filename = filename
-    dataset.history = f"Imported from {filename} on {datetime.datetime.now()}"
+    dataset.history = f"Imported from {filename.name}"
     return dataset

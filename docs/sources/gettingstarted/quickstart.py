@@ -107,6 +107,12 @@ print(f"y-axis unit: {ds.y.units}")  # Show time units
 # [Import tutorial](../userguide/importexport/import.ipynb) section.
 #
 # The `read` function returns an `NDDataset` object.
+#
+# SpectroChemPy can also write lightweight exchange files such as CSV,
+# JCAMP-DX, and minimal MATLAB `.mat` files for simple numeric datasets.
+# For structured SpectroChemPy storage and portable round-trips, prefer the
+# native `.scp` format or the `NDDataset ↔ xarray ↔ NetCDF` path described in
+# the import/export guide.
 
 # %% [markdown]
 # ## Exploring the Data
@@ -228,8 +234,9 @@ _ = smoothed.plot(colormap="magma")
 # %% [markdown]
 # ### Baseline Correction
 #
-# Various algorithms are available for baseline correction, including polynomial fitting, rubberband, and more. Here an
-# example of multivariate polynomial baseline correction using PCHIP interpolation is shown:
+# Various algorithms are available for baseline correction, including polynomial
+# fitting, rubberband, and more. Here is an example of multivariate polynomial
+# baseline correction using PCHIP interpolation:
 
 # %% [markdown]
 # Configure baseline correction
@@ -246,7 +253,7 @@ blc.n_components = 5
 # Apply correction
 
 # %%
-blc.fit(smoothed)
+_ = blc.fit(smoothed)
 _ = blc.corrected.plot()
 
 # %% [markdown]

@@ -1,3 +1,4 @@
+.. _examples-gallery:
 .. _examples-index:
 
 =================

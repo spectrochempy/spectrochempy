@@ -48,7 +48,7 @@ def read_opus(*paths, **kwargs):
         - e.g., ( [filename1, filename2, ...], kwargs )
 
         The returned datasets are merged to form a single dataset,
-        except if ``merge`` is set to `False`.
+        except if ``merge`` is set to ``False``.
     **kwargs : keyword parameters, optional
         See Other Parameters.
     type : str, optional
@@ -91,7 +91,7 @@ def read_opus(*paths, **kwargs):
     csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
         Set the column delimiter in CSV file.
     description : `str`, optional
-        A Custom description.
+        A custom description.
     directory : `~pathlib.Path` object objects or valid urls, optional
         From where to read the files.
     download_only: `bool`, optional, default: `False`
@@ -107,8 +107,8 @@ def read_opus(*paths, **kwargs):
         or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
         automatically, but can be set manually.
 
-        It is used for instance whn reading directory with different types of files, for merging
-        the datasets with compatible dimensions and different origin into different groups.
+        It is used, for instance, when reading a directory with different types of
+        files and merging compatible datasets into separate groups by origin.
 
         It is also used when reading with the CSV protocol. In order to properly interpret CSV file
         it can be necessary to set the origin of the spectra. Up to now only ``'omnic'`` and ``'tga'``
@@ -118,10 +118,10 @@ def read_opus(*paths, **kwargs):
 
         .. versionadded:: 0.7.2
     protocol : `str`, optional
-        ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
-        ``'opus'``, ````, ``'matlab'``, ``'jcamp'``, ``'csv'``,
-        ``'excel'``}. If not provided, the correct protocol
-        is inferred (whenever it is possible) from the filename extension.
+        ``Protocol`` used for reading, for example ``'scp'``, ``'omnic'``,
+        ``'opus'``, ``'matlab'``, ``'jcamp'``, ``'csv'``, or ``'excel'``.
+        If not provided, the correct protocol is inferred whenever possible
+        from the filename extension.
     read_only: `bool`, optional, default: `True`
         Used only when url are specified.  If True, saving of the
         files is performed in the current directory, or in the directory specified by
@@ -141,7 +141,7 @@ def read_opus(*paths, **kwargs):
     read_dir : Read an entire directory.
     read_labspec : Read Raman LABSPEC spectra (:file:`.txt`).
     read_omnic : Read Omnic spectra (:file:`.spa`, :file:`.spg`, :file:`.srs`).
-    read_soc : Read Surface Optics Corps. files (:file:`.ddr` , :file:`.hdr` or :file:`.sdr`).
+    read_soc : Read Surface Optics Corp. files (:file:`.ddr`, :file:`.hdr`, or :file:`.sdr`).
     read_galactic : Read Galactic files (:file:`.spc`).
     read_quadera : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
 
@@ -463,6 +463,12 @@ def _read_opus(*args, **kwargs):
 
     # set dataset's Coordset
     dataset.set_coordset(y=yaxis, x=xaxis)
+    try:
+        dt, _ = _get_timestamp_from(d.params)
+    except (AttributeError, TypeError, ValueError):
+        dt = None
+    if dt is not None:
+        dataset.acquisition_date = dt
 
     # Set name, origin, description and history
     dataset.name = filename.stem

@@ -5,11 +5,14 @@
 # ======================================================================================
 __all__ = ["read_zip"]
 
+import zipfile
+
 from spectrochempy.core.readers.filetypes import registry
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.core.readers.importer import _openfid
 from spectrochempy.core.readers.importer import read
+from spectrochempy.utils._logging import warning_
 
 
 # ======================================================================================
@@ -32,7 +35,7 @@ def read_zip(*paths, **kwargs):
         - e.g., ( [filename1, filename2, ...], kwargs )
 
         The returned datasets are merged to form a single dataset,
-        except if ``merge`` is set to `False`.
+        except if ``merge`` is set to ``False``.
     **kwargs : keyword parameters, optional
         See Other Parameters.
 
@@ -52,7 +55,7 @@ def read_zip(*paths, **kwargs):
     csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
         Set the column delimiter in CSV file.
     description : `str`, optional
-        A Custom description.
+        A custom description.
     directory : `~pathlib.Path` object objects or valid urls, optional
         From where to read the files.
     download_only: `bool`, optional, default: `False`
@@ -68,8 +71,8 @@ def read_zip(*paths, **kwargs):
         or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
         automatically, but can be set manually.
 
-        It is used for instance whn reading directory with different types of files, for merging
-        the datasets with compatible dimensions and different origin into different groups.
+        It is used, for instance, when reading a directory with different types of
+        files and merging compatible datasets into separate groups by origin.
 
         It is also used when reading with the CSV protocol. In order to properly interpret CSV file
         it can be necessary to set the origin of the spectra. Up to now only ``'omnic'`` and ``'tga'``
@@ -78,11 +81,16 @@ def read_zip(*paths, **kwargs):
         A pattern to filter the files to read.
 
         .. versionadded:: 0.7.2
+    only : `int`, optional
+        Limit ZIP import to the first readable files discovered in the archive.
+        This is mainly useful for sampling large archives or for tests. The
+        limit is applied according to archive discovery order after filtering
+        ignored entries such as ``__MACOSX`` and ``.DS_Store``.
     protocol : `str`, optional
-        ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
-        ``'opus'``, ````, ``'matlab'``, ``'jcamp'``,
-        ``'csv'``, ``'excel'``}. If not provided, the correct protocol
-        is inferred (whenever it is possible) from the filename extension.
+        ``Protocol`` used for reading, for example ``'scp'``, ``'omnic'``,
+        ``'opus'``, ``'matlab'``, ``'jcamp'``, ``'csv'``, or ``'excel'``.
+        If not provided, the correct protocol is inferred whenever possible
+        from the filename extension.
     read_only: `bool`, optional, default: `True`
         Used only when url are specified.  If True, saving of the
         files is performed in the current directory, or in the directory specified by
@@ -130,9 +138,6 @@ def read_zip(*paths, **kwargs):
 # ======================================================================================
 @_importer_method
 def _read_zip(*args, **kwargs):
-    # Below we assume that files to read are in a unique directory
-    import zipfile
-
     # read zip file
     _, filename = args
 
@@ -143,61 +148,42 @@ def _read_zip(*args, **kwargs):
         only = kwargs.pop("only", len(filelist))
 
         datasets = []
-
-        files = []
-        dirs = []
-
-        for file in filelist:
-            if "__MACOSX" in file.filename:
-                continue  # bypass non-data files
-            if ".DS_Store" in file.filename:
-                continue
-
-            # make a pathlib object (python > 3.7)
-            file = zipfile.Path(zf, at=file.filename)
-            # seek the parent directory containing the files to read
-            if not file.is_dir():
-                files.append(file)
-            else:
-                dirs.append(file)
+        ignored_files = []
+        supported_extensions = set(
+            list(zip(*(registry.aliases + registry.filetypes), strict=False))[0]
+        )
 
         def extract(children, **kwargs):
             extension = children.name.split(".")[-1]
-            if (
-                extension.lower()
-                not in list(
-                    zip(*(registry.aliases + registry.filetypes), strict=False)
-                )[0]
-            ):
+            if extension.lower() not in supported_extensions:
                 return None
             origin = kwargs.get("origin", "")
             return read(
                 children.name, content=children.read_bytes(), origin=origin, merge=False
             )
 
-        # We assume that we have only a single dir with not subdir
-        if dirs:
-            # a single directory
-            count = 0
-            for children in dirs[0].iterdir():
-                if count == only:
-                    # limits to only this number of files
-                    break
-                if "__MACOSX" in str(children.name):
-                    continue  # bypass non-data files
-                if ".DS_Store" in str(children.name):
-                    continue
-                # print(count, children)
-                # TODO: why this pose problem in pycharm-debug?????
-                d = extract(children, **kwargs)
-                if d is not None:
-                    datasets.append(d)
-                    count += 1
-        else:
-            for file in files:
-                d = extract(file, **kwargs)
-                if d is not None:
-                    datasets.append(d)
+        count = 0
+        for zipinfo in filelist:
+            if count == only:
+                break
+            if "__MACOSX" in zipinfo.filename or ".DS_Store" in zipinfo.filename:
+                continue
+            file = zipfile.Path(zf, at=zipinfo.filename)
+            if file.is_dir():
+                continue
+            d = extract(file, **kwargs)
+            if d is not None:
+                datasets.append(d)
+                count += 1
+            else:
+                ignored_files.append(zipinfo.filename)
+
+        if ignored_files:
+            ignored_list = "\n".join(f"- {name}" for name in ignored_files)
+            warning_(
+                f"Some files in {filename} were ignored because no reader is available:\n"
+                f"{ignored_list}"
+            )
 
         if len(datasets) == 1:
             return datasets[0]

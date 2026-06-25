@@ -126,6 +126,7 @@ tests/figures/
 # Project Specific          #
 ###############################
 /extdata/
+/audit/
 /git_hooks/
 /installed.txt
 thumb.png

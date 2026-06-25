@@ -13,11 +13,28 @@ Tests for the ndplugin module.
 import numpy as np
 import pytest
 
+from spectrochempy import Coord
+from spectrochempy import NDDataset
 from spectrochempy.processing.transformation.autosub import autosub
 from spectrochempy.utils.mplutils import show
 
 # autosub
 # ------
+
+
+def _make_synthetic_autosub_dataset():
+    x = Coord(np.linspace(0.0, 5.0, 6), title="x")
+    y = Coord(np.linspace(0.0, 3.0, 4), title="y")
+
+    ref_x = np.array([0.5, -1.0, 2.0, 1.5, -0.25, 0.75])
+    coef_y = np.array([1.0, 2.0, -0.5, 0.25])
+    data = np.outer(coef_y, ref_x)
+
+    dataset = NDDataset(data, coordset=[y, x])
+    ref_last = NDDataset(ref_x, coordset=[x])
+    ref_first = NDDataset(coef_y, coordset=[y])
+
+    return dataset, ref_last, ref_first
 
 
 @pytest.mark.data
@@ -68,3 +85,36 @@ def test_autosub(IR_dataset_2D):
     # s6.plot()
 
     show()
+
+
+def test_autosub_synthetic_last_dimension():
+    dataset, ref_x, _ = _make_synthetic_autosub_dataset()
+
+    result = dataset.autosub(
+        ref_x,
+        [0.0, 2.0],
+        [3.0, 5.0],
+        dim="x",
+        method="ssdiff",
+        inplace=False,
+    )
+
+    np.testing.assert_allclose(
+        dataset.data, np.outer([1.0, 2.0, -0.5, 0.25], ref_x.data)
+    )
+    np.testing.assert_allclose(result.data, 0.0, atol=1.0e-10)
+
+
+def test_autosub_synthetic_non_last_dimension():
+    dataset, _, ref_y = _make_synthetic_autosub_dataset()
+
+    result = dataset.autosub(
+        ref_y,
+        [0.0, 1.0],
+        [2.0, 3.0],
+        dim="y",
+        method="ssdiff",
+        inplace=False,
+    )
+
+    np.testing.assert_allclose(result.data, 0.0, atol=1.0e-10)

@@ -145,6 +145,21 @@ def test_nddataset_title():
     assert ndd2.title == "zzzz"
 
 
+def test_nddataset_origin_from_constructor():
+    ndd = scp.NDDataset([1.0, 2.0, 3.0], origin="synthetic example")
+
+    assert ndd.origin == "synthetic example"
+
+
+def test_nddataset_origin_preserved_when_constructed_from_dataset():
+    source = scp.NDDataset([1.0, 2.0, 3.0])
+    source.origin = "synthetic example"
+
+    clone = scp.NDDataset(source)
+
+    assert clone.origin == "synthetic example"
+
+
 def test_dataset_filename():
     from pathlib import Path
 

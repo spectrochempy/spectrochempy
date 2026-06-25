@@ -15,6 +15,7 @@ from sklearn import decomposition
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis._base._analysisbase import _wrap_ndarray_output_to_nddataset
+from spectrochempy.analysis._base._result import AnalysisResult
 from spectrochempy.application.application import info_
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 
@@ -327,6 +328,49 @@ for reproducible results across multiple function calls.""",
         return self.transform(self.X)
 
     @property
+    def result(self):
+        """
+        Return the PCA result object.
+
+        Returns
+        -------
+        AnalysisResult
+            Result object containing outputs (scores, loadings, components)
+            and diagnostics (explained_variance, explained_variance_ratio).
+        """
+        if not self._fitted:
+            raise NotFittedError(
+                "The fit method must be used before accessing the result",
+            )
+
+        # NOTE: a new AnalysisResult is created on every access.
+        # Caching is deliberately deferred to PR1 to keep the implementation
+        # simple and easy to review. This means repeated calls to `result`
+        # will re-fetch outputs from the estimator's live properties.
+        # A caching strategy (e.g., lazy creation with cache invalidation
+        # on re-fit) may be introduced in a follow-up PR if profiling shows
+        # a measurable cost.
+        return AnalysisResult(
+            estimator="PCA",
+            parameters={
+                "n_components": self.n_components,
+                "standardized": self.standardized,
+                "scaled": self.scaled,
+                "whiten": self.whiten,
+                "svd_solver": self.svd_solver,
+            },
+            outputs={
+                "scores": self.scores,
+                "loadings": self.loadings,
+                "components": self.components,
+            },
+            diagnostics={
+                "explained_variance": self.explained_variance,
+                "explained_variance_ratio": self.explained_variance_ratio,
+            },
+        )
+
+    @property
     @_wrap_ndarray_output_to_nddataset(
         units=None,
         title="explained variance",
@@ -465,7 +509,7 @@ for reproducible results across multiple function calls.""",
 
         .. deprecated:: 0.7.4
             Use :meth:`plot_scree` instead.
-            Will be removed in version 0.10.0.
+            Will be removed in version 0.11.0.
 
         Parameters
         ----------
@@ -480,7 +524,7 @@ for reproducible results across multiple function calls.""",
             The primary axes.
         """
         warnings.warn(
-            "PCA.screeplot() is deprecated and will be removed in 0.10.0; "
+            "PCA.screeplot() is deprecated and will be removed in 0.11.0; "
             "use PCA.plot_scree() instead.",
             DeprecationWarning,
             stacklevel=2,
@@ -573,7 +617,7 @@ for reproducible results across multiple function calls.""",
 
         .. deprecated:: 0.7.4
             Use :meth:`plot_score` instead.
-            Will be removed in version 0.10.0.
+            Will be removed in version 0.11.0.
 
         Parameters
         ----------
@@ -590,7 +634,7 @@ for reproducible results across multiple function calls.""",
             The matplotlib axes.
         """
         warnings.warn(
-            "PCA.scoreplot() is deprecated and will be removed in 0.10.0; "
+            "PCA.scoreplot() is deprecated and will be removed in 0.11.0; "
             "use PCA.plot_score() instead.",
             DeprecationWarning,
             stacklevel=2,

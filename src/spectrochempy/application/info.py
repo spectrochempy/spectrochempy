@@ -58,6 +58,31 @@ def _get_version():
     return "0+unknown"
 
 
+def _get_contributors_from_zenodo():
+    import json
+    from pathlib import Path
+
+    fallback = "A. Ait Blal, W. Guérin, M. Mailänder, S. Rejman, V. Gao"
+
+    path = Path(__file__).resolve().parents[3] / "zenodo.json"
+
+    try:
+        with path.open(encoding="utf-8") as f:
+            data = json.load(f)
+    except Exception:
+        return fallback
+
+    contributors = data.get("contributors", [])
+    names = []
+
+    for item in contributors:
+        name = item.get("name")
+        if name:
+            names.append(name)
+
+    return "; ".join(names) if names else fallback
+
+
 class SCPInfo(tr.HasTraits):
     version = tr.Unicode(help="Version string of this package")
     release = tr.Unicode(help="Release version string of this package")
@@ -71,11 +96,8 @@ class SCPInfo(tr.HasTraits):
     authors = tr.Unicode(
         "C. Fernandez & A. Travert", help="Initial authors of this package"
     )
-    contributors = tr.Unicode(
-        "A. Ait Blal, W. Guérin, M. Mailänder, S. Rejman",
-        help="contributor(s) to this package",
-    )
-    # TODO: retrieve this automatically from a file
+    contributors = tr.Unicode(help="contributor(s) to this package")
+
     license = tr.Unicode("CeCILL-B license", help="License of this package")
     cite = tr.Unicode(help="How to cite this package")
     description = tr.Unicode(
@@ -94,6 +116,10 @@ class SCPInfo(tr.HasTraits):
         except Exception:  # pragma: no cover
             release = "--not set--"
         return release
+
+    @tr.default("contributors")
+    def _contributors_default(self):
+        return _get_contributors_from_zenodo()
 
     @tr.default("version")
     def _version_default(self):

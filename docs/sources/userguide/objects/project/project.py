@@ -94,7 +94,7 @@ proj.add_datasets(nd1)
 # or `add_datasets` for several datasets.
 
 # %%
-proj.add_datasets(nd1, nd2)
+proj.add_datasets(nd2)
 
 # %% [markdown]
 # Display its structure
@@ -110,6 +110,7 @@ proj
 
 # %%
 proj.remove_dataset("NMR_1D")
+proj.remove_dataset("NMR_1D_copy")
 proj
 
 # %% [markdown]
@@ -155,6 +156,24 @@ proj.save_as("NMR")
 
 # %% [markdown]
 # #### Loading
+#
+# Newly written ``.pscp`` archives now reload safely by default:
+#
+#     proj2 = scp.Project.load("NMR")
+#
+# Historical ``.pscp`` archives may still require trusted legacy loading. In
+# that case, reload explicitly with:
+#
+#     proj2 = scp.Project.load("NMR", allow_unsafe_legacy=True)
+#
+# For a short transition period it is useful to keep this commented example
+# close to the normal round-trip:
+#
+#     # Legacy trusted archive only:
+#     # proj2 = scp.Project.load("NMR", allow_unsafe_legacy=True)
+#
+# Only enable ``allow_unsafe_legacy=True`` for files from known and trusted
+# sources.
 
 # %%
 proj2 = scp.Project.load("NMR")

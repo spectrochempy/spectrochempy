@@ -43,7 +43,7 @@ def read_jcamp(*paths, **kwargs):
         - e.g., ( [filename1, filename2, ...], kwargs )
 
         The returned datasets are merged to form a single dataset,
-        except if ``merge`` is set to `False`.
+        except if ``merge`` is set to ``False``.
     **kwargs : keyword parameters, optional
         See Other Parameters.
 
@@ -63,7 +63,7 @@ def read_jcamp(*paths, **kwargs):
     csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
         Set the column delimiter in CSV file.
     description : `str`, optional
-        A Custom description.
+        A custom description.
     directory : `~pathlib.Path` object objects or valid urls, optional
         From where to read the files.
     download_only: `bool`, optional, default: `False`
@@ -79,8 +79,8 @@ def read_jcamp(*paths, **kwargs):
         or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
         automatically, but can be set manually.
 
-        It is used for instance whn reading directory with different types of files, for merging
-        the datasets with compatible dimensions and different origin into different groups.
+        It is used, for instance, when reading a directory with different types of
+        files and merging compatible datasets into separate groups by origin.
 
         It is also used when reading with the CSV protocol. In order to properly interpret CSV file
         it can be necessary to set the origin of the spectra. Up to now only ``'omnic'`` and ``'tga'``
@@ -90,10 +90,10 @@ def read_jcamp(*paths, **kwargs):
 
         .. versionadded:: 0.7.2
     protocol : `str`, optional
-        ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
-        ``'opus'``, ````, ``'matlab'``, ``'jcamp'``, ``'csv'``,
-        ``'excel'``}. If not provided, the correct protocol
-        is inferred (whenever it is possible) from the filename extension.
+        ``Protocol`` used for reading, for example ``'scp'``, ``'omnic'``,
+        ``'opus'``, ``'matlab'``, ``'jcamp'``, ``'csv'``, or ``'excel'``.
+        If not provided, the correct protocol is inferred whenever possible
+        from the filename extension.
     read_only: `bool`, optional, default: `True`
         Used only when url are specified.  If True, saving of the
         files is performed in the current directory, or in the directory specified by
@@ -130,12 +130,12 @@ def read_jcamp(*paths, **kwargs):
     return importer(*paths, **kwargs)
 
 
-@deprecated(replace="read_jcamp", removed="0.10.0")
+@deprecated(replace="read_jcamp", removed="0.11.0")
 def read_jdx(*args, **kwargs):
     return read_jcamp(*args, **kwargs)
 
 
-@deprecated(replace="read_jcamp", removed="0.10.0")
+@deprecated(replace="read_jcamp", removed="0.11.0")
 def read_dx(*args, **kwargs):  # pragma: no cover
     return read_jcamp(*args, **kwargs)
 
@@ -367,23 +367,23 @@ def _read_jdx(*args, **kwargs):
     else:
         _y = Coord()
     dataset.set_coordset(y=_y, x=_x)
+    valid_dates = [date for date in alldates if date is not None]
+    if valid_dates:
+        dataset.acquisition_date = min(valid_dates)
 
     # Set origin, description and history
-    if nspec > 1:
-        origins = set(allorigins)
-        if len(origins) == 0:
-            pass
-        elif len(origins) == 1:
-            dataset.origin = allorigins[0]
-        else:
-            dataset.origin = [(origin + "; ") for origin in set(allorigins)][0][:-2]
+    origins = sorted({origin for origin in allorigins if origin})
+    if len(origins) == 1:
+        dataset.origin = origins[0]
+    elif len(origins) > 1:
+        dataset.origin = "; ".join(origins)
 
     dataset.description = f"Dataset from jdx file: '{jdx_title}'"
 
     dataset.history = "Imported from jdx file"
 
     if sortbydate and nspec > 1:
-        dataset.sort(dim="x", inplace=True)
+        dataset.sort(dim="y", inplace=True)
         dataset.history = "Sorted by date"
     # Todo: make sure that the lowest index correspond to the largest wavenumber
     #  for compatibility with dataset created by read_omnic:

@@ -2,7 +2,7 @@
 # Documentation is built using Sphinx and published to GitHub Pages
 #
 # Branch preview deployment:
-# - Development branches (non-master, non-docs/*, non-release) publish
+# - Development branches (non-master, non-release), including docs/* branches, publish
 #   preview docs under /<branch-name>/ on GitHub Pages.
 # - Branch names are sanitised: "/" becomes "-".
 # - Example: branch "feature/new-nmr" → /feature-new-nmr/
@@ -40,7 +40,9 @@ jobs:
   build_and_publish_documentation:
     # Only run scheduled jobs on main repository.
     # For pull_request events, skip if the PR is from the same repository
-    # (push events on the branch already trigger the workflow).
+    # (push events on the branch already trigger the workflow), except for
+    # documentation branches where the PR itself should still exercise the
+    # docs build and preview path.
     if: >
       github.event_name == 'workflow_dispatch' ||
       (
@@ -49,7 +51,8 @@ jobs:
           (github.event_name == 'schedule') ||
           (github.event_name != 'schedule' &&
            (github.event_name != 'pull_request' ||
-            github.event.pull_request.head.repo.full_name != github.repository))
+            github.event.pull_request.head.repo.full_name != github.repository ||
+            startsWith(github.event.pull_request.head.ref, 'docs/')))
         )
       )
 
@@ -64,7 +67,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: ${{ github.repository }}
           ref: ${{ github.ref }}
@@ -174,14 +177,18 @@ jobs:
           . .venv/bin/activate
           python3 .github/workflows/scripts/set_env_var.py
 
+      - name: Configure local Jupyter transport for docs execution
+        run: |
+          echo "JUPYTER_CONFIG_DIR=$GITHUB_WORKSPACE/.github/jupyter" >> "$GITHUB_ENV"
+
       # ---------- preview / stable branch detection ----------
       - name: Determine preview parameters
         id: preview
         run: |
           BRANCH="${{ github.ref_name }}"
           EVENT="${{ github.event_name }}"
-          # Stable builds: master, docs/* branches, and release events
-          if [[ "$BRANCH" == "master" || "$BRANCH" == docs/* || "$EVENT" == "release" ]]; then
+          # Stable builds: master and release events
+          if [[ "$BRANCH" == "master" || "$EVENT" == "release" ]]; then
             echo "is_preview=false" >> "$GITHUB_OUTPUT"
             echo "preview_path=" >> "$GITHUB_OUTPUT"
             echo "build_subdir=" >> "$GITHUB_OUTPUT"
@@ -192,9 +199,27 @@ jobs:
             echo "build_subdir=build/branch_preview" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Determine documentation execution mode
+        id: docs_mode
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            BRANCH="${{ github.head_ref }}"
+          else
+            BRANCH="${{ github.ref_name }}"
+          fi
+
+          if [[ "$BRANCH" == docs/* || "$BRANCH" == codex/doc-* ]]; then
+            echo "fresh_docs=true" >> "$GITHUB_OUTPUT"
+            echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+            echo "Documentation fresh-run mode enabled for branch: $BRANCH"
+          else
+            echo "fresh_docs=false" >> "$GITHUB_OUTPUT"
+            echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+          fi
+
       # ---------- restore reusable Sphinx/Sphinx-Gallery outputs for previews ----------
       - name: Restore documentation build cache
-        if: steps.preview.outputs.is_preview == 'true'
+        if: steps.preview.outputs.is_preview == 'true' && steps.docs_mode.outputs.fresh_docs != 'true'
         uses: actions/cache@v5
         with:
           path: |
@@ -205,6 +230,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-docs-${{ steps.preview.outputs.preview_path }}-
             ${{ runner.os }}-docs-
+
+      - name: Clear documentation caches for fresh-run branches
+        if: steps.docs_mode.outputs.fresh_docs == 'true'
+        run: |
+          rm -rf \
+            build/branch_preview/~doctrees \
+            docs/sources/gettingstarted/examples/gallery
+          echo "Cleared reusable documentation caches for fresh-run mode"
 
       # ---------- clone gh-pages (preserve existing content) ----------
       - name: Clone gh-pages branch
@@ -219,7 +252,12 @@ jobs:
           set -e
           . .venv/bin/activate
           start=$SECONDS
-          if [[ "${{ github.event_name }}" == "pull_request" && "${{ steps.preview.outputs.is_preview }}" == "true" ]]; then
+          if [[ "${{ github.event_name }}" == "pull_request" && "${{ steps.preview.outputs.is_preview }}" == "true" && "${{ steps.docs_mode.outputs.fresh_docs }}" == "true" ]]; then
+            SCPY_BUILDDIR=${{ steps.preview.outputs.build_subdir }} \
+              python3 docs/make.py -j auto html
+          elif [[ "${{ github.event_name }}" == "pull_request" && "${{ steps.docs_mode.outputs.fresh_docs }}" == "true" ]]; then
+            python3 docs/make.py -j auto html
+          elif [[ "${{ github.event_name }}" == "pull_request" && "${{ steps.preview.outputs.is_preview }}" == "true" ]]; then
             SCPY_BUILDDIR=${{ steps.preview.outputs.build_subdir }} \
               python3 docs/make.py --no-exec -j auto html
           elif [[ "${{ github.event_name }}" == "pull_request" ]]; then

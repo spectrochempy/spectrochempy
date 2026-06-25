@@ -16,7 +16,8 @@ What "experimental" means
 * Installation is manual.
 * Support is limited; they are provided mainly for developers and early testers.
 * Some experimental plugins may eventually become official, but there is no
-defined timeline.
+  defined timeline.
+
 
 Installing experimental plugins
 ===============================

@@ -87,6 +87,25 @@ class TestInterpolateBasic:
 
         assert result.shape == (4,)
 
+    def test_interpolate_incompatible_coord_units_message(self):
+        """Interpolation should identify the operation and incompatible units."""
+        ds = NDDataset(
+            np.array([0.0, 2.0, 4.0]),
+            coordset=[
+                Coord(np.array([4000.0, 3000.0, 2000.0]), title="x", units="cm^-1")
+            ],
+        )
+        target = Coord(np.array([1.0, 2.0, 3.0]), title="x", units="s")
+
+        with pytest.raises(ValueError) as exc:
+            ds.interpolate(dim="x", coord=target)
+        message = str(exc.value)
+        assert "Cannot interpolate coordinates" in message
+        assert "dimension 'x'" in message
+        assert "s" in message
+        assert "cm" in message
+        assert "Convert the coordinates to compatible units before retrying." in message
+
 
 class TestInterpolateDecreasingCoord:
     """Interpolation must honour the target order even for decreasing axes (#1100)."""

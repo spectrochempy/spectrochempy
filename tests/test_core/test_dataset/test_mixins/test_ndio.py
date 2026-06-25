@@ -7,18 +7,41 @@
 
 """Tests for the ndplugin module"""
 
+import base64
 import json
+import pickle
 import zipfile
 
+import numpy as np
 import pytest
+import spectrochempy as scp
 
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.utils.exceptions import SpectroChemPyError
 from spectrochempy.utils.testing import assert_array_equal, assert_dataset_equal
 
 # Basic
 # --------------------------------------------------------------------------------------
+
+
+def _rewrite_dataset_data_payload_as_legacy_pickle(filename):
+    current = NDDataset.load(filename)
+
+    with zipfile.ZipFile(filename, "r") as zipf:
+        member = zipf.namelist()[0]
+        js = json.loads(zipf.read(member).decode("utf-8"))
+
+    js.pop("__format__", None)
+    js.pop("__version__", None)
+    js["data"] = {
+        "__class__": "NUMPY_ARRAY",
+        "base64": base64.b64encode(pickle.dumps(current.data)).decode(),
+    }
+
+    with zipfile.ZipFile(filename, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
+        zipf.writestr(member, json.dumps(js, indent=2))
 
 
 def test_ndio_generic(ndataset_1d, tmp_path, monkeypatch):
@@ -161,7 +184,81 @@ def test_ndio_load_ignores_legacy_modeldata_field(tmp_path):
 
     loaded = NDDataset.load(filename)
 
+
+def test_ndio_load_requires_explicit_opt_in_for_legacy_scp(tmp_path, monkeypatch):
+    ds = NDDataset([0.0, 1.0, 2.0], name="legacy_dataset")
+    filename = ds.save_as(tmp_path / "legacy_dataset", confirm=False)
+    _rewrite_dataset_data_payload_as_legacy_pickle(filename)
+
+    def fail_pickle_loads(*args, **kwargs):
+        raise AssertionError("pickle.loads must not run in safe mode")
+
+    with monkeypatch.context() as m:
+        m.setattr("spectrochempy.utils.jsonutils.pickle.loads", fail_pickle_loads)
+
+        with pytest.raises(
+            SpectroChemPyError,
+            match="trusted legacy loading",
+        ):
+            NDDataset.load(filename)
+
+    loaded = NDDataset.load(filename, allow_unsafe_legacy=True)
+    assert_dataset_equal(loaded, ds)
+
+
+def test_ndio_load_content_requires_explicit_opt_in(tmp_path):
+    ds = NDDataset([0.0, 1.0, 2.0], name="legacy_content")
+    filename = ds.save_as(tmp_path / "legacy_content", confirm=False)
+    _rewrite_dataset_data_payload_as_legacy_pickle(filename)
+    content = filename.read_bytes()
+
+    with pytest.raises(
+        SpectroChemPyError,
+        match="allow_unsafe_legacy=True",
+    ):
+        NDDataset.load("legacy_content.scp", content=content)
+
+    loaded = NDDataset.load(
+        "legacy_content.scp",
+        content=content,
+        allow_unsafe_legacy=True,
+    )
+    assert_dataset_equal(loaded, ds)
+
+
+@pytest.mark.parametrize("loader_name", ["load", "read"])
+def test_native_load_aliases_require_explicit_opt_in(tmp_path, loader_name):
+    ds = NDDataset([0.0, 1.0, 2.0], name="legacy_alias")
+    filename = ds.save_as(tmp_path / "legacy_alias", confirm=False)
+    _rewrite_dataset_data_payload_as_legacy_pickle(filename)
+    loader = getattr(scp, loader_name)
+
+    with pytest.raises(
+        SpectroChemPyError,
+        match="trusted legacy loading",
+    ):
+        loader(filename)
+
+    loaded = loader(filename, allow_unsafe_legacy=True)
+    assert_dataset_equal(loaded, ds)
+
     assert not hasattr(loaded, "modeldata")
+
+
+def test_ndio_safe_roundtrip_uses_versioned_payload(tmp_path):
+    ds = NDDataset(np.array([1.0, 2.0, 3.0]), name="safe_dataset")
+    filename = ds.save_as(tmp_path / "safe_dataset", confirm=False)
+
+    with zipfile.ZipFile(filename, "r") as zipf:
+        member = zipf.namelist()[0]
+        js = json.loads(zipf.read(member).decode("utf-8"))
+
+    assert js["__format__"] == "scp"
+    assert js["__version__"] == 2
+    assert js["data"]["encoding"] == "raw-base64"
+
+    loaded = NDDataset.load(filename)
+    assert_dataset_equal(loaded, ds)
 
 
 if __name__ == "__main__":

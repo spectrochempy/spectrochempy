@@ -10,9 +10,12 @@ from sklearn import cross_decomposition
 
 from spectrochempy.analysis._base._analysisbase import CrossDecompositionAnalysis
 from spectrochempy.analysis._base._analysisbase import _wrap_ndarray_output_to_nddataset
+from spectrochempy.analysis._base._result import AnalysisResult
 from spectrochempy.application.application import warning_
+from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils.decorators import signature_has_configurable_traits
+from spectrochempy.utils.exceptions import NotFittedError
 
 __all__ = ["PLSRegression"]
 __configurables__ = ["PLSRegression"]
@@ -265,16 +268,69 @@ class PLSRegression(CrossDecompositionAnalysis):
         return coef
 
     @property
-    @_wrap_ndarray_output_to_nddataset(
-        meta_from="_Y",
-        typesingle="targets",
-    )
     def intercept(self):
-        return self._intercept
+        intercept = NDDataset(self._intercept)
+        try:
+            coord = self._Y.coordset[0]
+            if coord is not None:
+                if coord.labels is not None:
+                    labels = coord.labels
+                else:
+                    labels = [f"#{i + 1}" for i in range(self._Y.shape[-1])]
+                intercept.dims = ["j"]
+                intercept.set_coordset(
+                    j=Coord(None, labels=labels, title="targets"),
+                )
+        except (TypeError, IndexError, AttributeError):
+            pass
+        return intercept
 
     @property
     def n_iter(self):
-        return self._n_iter_
+        return self._n_iter
+
+    # ----------------------------------------------------------------------------------
+    # Result object
+    # ----------------------------------------------------------------------------------
+    def _get_components(self):
+        raise AttributeError(
+            "PLSRegression has no single 'components' matrix. "
+            "Use the 'x_loadings', 'x_weights', or 'x_rotations' "
+            "property depending on the analysis context."
+        )
+
+    @property
+    def result(self):
+        if not self._fitted:
+            raise NotFittedError(
+                "This PLSRegression instance is not fitted yet. "
+                "Call 'fit' with appropriate arguments before using this property."
+            )
+        return AnalysisResult(
+            estimator="PLSRegression",
+            parameters={
+                "n_components": self.n_components,
+                "scale": self.scale,
+                "max_iter": self.max_iter,
+                "tol": self.tol,
+            },
+            outputs={
+                "x_scores": self.x_scores,
+                "x_loadings": self.x_loadings,
+                "x_weights": self.x_weights,
+                "x_rotations": self.x_rotations,
+                "y_scores": self.y_scores,
+                "y_loadings": self.y_loadings,
+                "y_weights": self.y_weights,
+                "y_rotations": self.y_rotations,
+                "coef": self.coef,
+                "intercept": self.intercept,
+            },
+            diagnostics={
+                "n_iter": self._n_iter,
+                "n_features_in": self._n_feature_in,
+            },
+        )
 
 
 if __name__ == "__main__":

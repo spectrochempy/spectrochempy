@@ -22,6 +22,13 @@ Use package-level classes from ``scp.iris`` and dataset-bound helpers from
 
     analysis = scp.iris.IRIS()
     kernel = dataset.iris.kernel_matrix(kernel_type="langmuir")
+    analysis.fit(dataset, kernel)
+
+    distribution = analysis.result.f
+    residual_sum_squares = analysis.result.RSS
+
+The existing direct accessors, such as ``analysis.f``, ``analysis.K``,
+``analysis.RSS``, and ``analysis.SM``, remain supported.
 
 New code should prefer the namespaced API. Compatibility aliases may be
 available for older scripts during the transition.

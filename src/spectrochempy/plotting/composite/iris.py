@@ -22,7 +22,7 @@ __all__ = ["plot_iris_lcurve", "plot_iris_distribution", "plot_iris_merit"]  # n
 
 _IRIS_DEPRECATION_MSG = (
     "Importing {name!r} from spectrochempy.plotting.composite.iris "
-    "is deprecated since SpectroChemPy 0.9.0 and will be removed in 0.10.0. "
+    "is deprecated since SpectroChemPy 0.9.0 and will be removed in 0.11.0. "
     "Use scp.iris.{name} instead."
 )
 

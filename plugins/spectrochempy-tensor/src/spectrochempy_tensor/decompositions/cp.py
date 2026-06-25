@@ -181,8 +181,8 @@ class CP(DecompositionAnalysis):
     >>> X = np.random.rand(6, 8, 10)
     >>> ds = scp.NDDataset(X)
     >>> cp = scp.tensor.CP(n_components=2)
-    >>> cp.fit(ds)
-    >>> A, B, C = cp.loadings
+    >>> _ = cp.fit(ds)
+    >>> A, B, C = cp.result.factors
     >>> Xr = cp.inverse_transform()
     """
 
@@ -701,6 +701,68 @@ class CP(DecompositionAnalysis):
         X_hat.history = "Created by SpectroChemPy CP"
 
         return X_hat
+
+    @property
+    def result(self):
+        """
+        Return the CP analysis result.
+
+        Returns
+        -------
+        AnalysisResult
+            Result containing the primary CP outputs and fit diagnostics.
+
+        Raises
+        ------
+        NotFittedError
+            If the estimator has not been fitted yet.
+        """
+        if not self._fitted:
+            raise NotFittedError(
+                "The fit method must be used before accessing the result"
+            )
+
+        from spectrochempy.analysis._base._result import AnalysisResult  # noqa: PLC0415
+
+        return AnalysisResult(
+            estimator="CP",
+            parameters={
+                "n_components": self.n_components,
+                "n_iter_max": self.n_iter_max,
+                "n_iter_max_inner": self.n_iter_max_inner,
+                "init": self.init,
+                "svd": self.svd,
+                "tol_outer": self.tol_outer,
+                "tol_inner": self.tol_inner,
+                "random_state": self.random_state,
+                "verbose": self.verbose,
+                "return_errors": self.return_errors,
+                "non_negative": self.non_negative,
+                "l1_reg": self.l1_reg,
+                "l2_reg": self.l2_reg,
+                "l2_square_reg": self.l2_square_reg,
+                "unimodality": self.unimodality,
+                "normalize": self.normalize,
+                "simplex": self.simplex,
+                "normalized_sparsity": self.normalized_sparsity,
+                "soft_sparsity": self.soft_sparsity,
+                "smoothness": self.smoothness,
+                "monotonicity": self.monotonicity,
+                "hard_sparsity": self.hard_sparsity,
+                "cvg_criterion": self.cvg_criterion,
+                "fixed_modes": self.fixed_modes,
+            },
+            outputs={
+                "factors": self.loadings,
+                "weights": self.weights,
+            },
+            diagnostics={
+                "errors": self.errors,
+                "SSE": self.SSE,
+                "explained_variance": self.explained_variance,
+                "core_consistency": self.core_consistency,
+            },
+        )
 
     # ----------------------------------------------------------------------------------
     # Public properties

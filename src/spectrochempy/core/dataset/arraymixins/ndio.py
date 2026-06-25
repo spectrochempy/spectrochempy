@@ -279,6 +279,10 @@ class NDIO(tr.HasTraits):
         ----------------
         content : str, optional
              The optional content of the file(s) to be loaded as a binary string.
+        allow_unsafe_legacy : bool, optional, default=False
+             Allow loading legacy SCP/PSCP payloads that require pickle-based
+             native persistence. Enable this only for files from known and
+             trusted sources.
 
         See Also
         --------
@@ -304,8 +308,10 @@ class NDIO(tr.HasTraits):
 
         """
         content = kwargs.get("content")
+        allow_unsafe_legacy = kwargs.get("allow_unsafe_legacy", False)
+        resolved_filename = None
 
-        if content:
+        if content is not None:
             fid = io.BytesIO(content)
         else:
             # be sure to convert filename to a pathlib object with the
@@ -319,10 +325,11 @@ class NDIO(tr.HasTraits):
                 raise FileNotFoundError(f"No file with name {filename} could be found.")
                 # filename = check_filenames(filename, **kwargs)[0]
             fid = open(filename, "rb")  # noqa: SIM115
+            resolved_filename = filename
 
         # get zip file
         try:
-            obj = ScpFile(fid)
+            obj = ScpFile(fid, allow_unsafe_legacy=allow_unsafe_legacy)
         except FileNotFoundError as e:
             raise exceptions.SpectroChemPyError(
                 f"File {filename} doesn't exist!",
@@ -334,18 +341,16 @@ class NDIO(tr.HasTraits):
                 ) from e
             raise exceptions.SpectroChemPyError("Undefined error!") from e
 
-        js = obj[obj.files[0]]
+        with obj:
+            js = obj[obj.files[0]]
         if kwargs.get("json", False):
             return js
 
         new = cls.loads(js)
 
-        fid.close()
-
-        if filename:
-            filename = pathclean(filename)
-            new._filename = filename
-            new.name = filename.stem
+        if resolved_filename is not None:
+            new._filename = resolved_filename
+            new.name = resolved_filename.stem
 
         return new
 
@@ -377,7 +382,6 @@ class NDIO(tr.HasTraits):
         from spectrochempy.core.dataset.coordset import CoordSet
         from spectrochempy.core.dataset.nddataset import NDDataset
         from spectrochempy.core.project.project import Project
-        from spectrochempy.core.script import Script
 
         # .........................
         def restore_coordset_state(coordset: CoordSet, val: dict[str, Any]) -> CoordSet:
@@ -390,7 +394,16 @@ class NDIO(tr.HasTraits):
             return coordset
 
         def item_to_attr(obj: Any, dic: dict[str, Any]) -> Any:
-            legacy_ignored_fields = {"roi", "_roi", "modeldata", "_modeldata"}
+            legacy_ignored_fields = {
+                "roi",
+                "_roi",
+                "modeldata",
+                "_modeldata",
+                "_scripts",
+                "_others",
+                "__format__",
+                "__version__",
+            }
             for key, val in dic.items():
                 try:
                     if key in legacy_ignored_fields:
@@ -443,10 +456,6 @@ class NDIO(tr.HasTraits):
                     elif key in ["_projects"]:
                         projects = [item_to_attr(Project(), js) for js in val]
                         obj.projects = projects
-
-                    elif key in ["_scripts"]:
-                        scripts = [item_to_attr(Script(), js) for js in val]
-                        obj.scripts = scripts
 
                     elif key in ["_parent"]:
                         # automatically set
@@ -509,4 +518,14 @@ class NDIO(tr.HasTraits):
         return filename
 
 
-load = NDIO.load  # make load accessible directly from the scp API
+def load(filename: str | pathlib.Path | BinaryIO, **kwargs: Any) -> Any:
+    """Load a native SpectroChemPy dataset or project from a `.scp` / `.pscp` file."""
+    from spectrochempy.core.dataset.nddataset import NDDataset
+    from spectrochempy.core.project.project import Project
+
+    if isinstance(filename, str | pathlib.Path):
+        suffix = pathclean(filename).suffix.lower()
+        if suffix == ".pscp":
+            return Project.load(filename, **kwargs)
+
+    return NDDataset.load(filename, **kwargs)

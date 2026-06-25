@@ -49,7 +49,7 @@ class BaseConfigurable(MetaConfigurable):
     _masked_rc = tr.Tuple(allow_none=True, help="List of masked rows and columns")
     _X = NDDatasetType(allow_none=True, help="Data to fit a model")
     _X_mask = Array(allow_none=True, help="Mask information of the input X data")
-    _X_preprocessed = Array(help="Preprocessed inital input X data")
+    _X_preprocessed = Array(help="Preprocessed initial input X data")
     _X_shape = tr.Tuple(
         help="Original shape of the input X data, before any transformation",
     )

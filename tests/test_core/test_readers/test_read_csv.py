@@ -9,6 +9,7 @@ import pytest
 
 import spectrochempy as scp
 from spectrochempy.application.preferences import preferences as prefs
+from spectrochempy.utils.exceptions import UnsupportedOriginError
 
 
 def test_read_csv():
@@ -55,8 +56,61 @@ def test_read_csv():
     C = scp.read_csv({"somename.csv": omnic_csv_content.encode("utf-8")})
     assert C.shape == (1, 5)
 
-    # wrong origin parameters - should return None
-    D = scp.read_csv(
-        {"test_omnic.csv": omnic_csv_content.encode("utf-8")}, origin="opus"
+    # An unsupported origin should produce an actionable reader error.
+    with pytest.raises(
+        UnsupportedOriginError,
+        match=(
+            r"Cannot read CSV file 'test_omnic\.csv' with origin='opus'\.\n"
+            r"Supported CSV origins are: 'omnic', 'tga'\.\n"
+            r"Remove the origin argument or choose a supported origin\."
+        ),
+    ) as exc_info:
+        scp.read_csv(
+            {"test_omnic.csv": omnic_csv_content.encode("utf-8")},
+            origin="opus",
+        )
+    assert isinstance(exc_info.value, NotImplementedError)
+
+    with pytest.raises(UnsupportedOriginError, match="origin='vendor_omnic'"):
+        scp.read_csv(
+            {"test_omnic.csv": omnic_csv_content.encode("utf-8")},
+            origin="vendor_omnic",
+        )
+
+
+def test_read_csv_skips_leading_comments_and_blank_lines():
+    content = (
+        "# collected by external script\n"
+        "; exported manually\n"
+        "\n"
+        "time,intensity\n"
+        "1,10\n"
+        "2,20\n"
+        "3,30\n"
     )
-    assert not D
+
+    dataset = scp.read_csv({"commented.csv": content.encode("utf-8")})
+
+    assert dataset.shape == (1, 3)
+    assert list(dataset.x.data) == [1.0, 2.0, 3.0]
+    assert list(dataset.data.squeeze()) == [10.0, 20.0, 30.0]
+
+
+def test_read_csv_accepts_simple_external_header():
+    content = "wavenumber,absorbance\n4000,0.1\n3990,0.2\n3980,0.3\n"
+
+    dataset = scp.read_csv({"header.csv": content.encode("utf-8")})
+
+    assert dataset.shape == (1, 3)
+    assert list(dataset.x.data) == [4000.0, 3990.0, 3980.0]
+    assert list(dataset.data.squeeze()) == [0.1, 0.2, 0.3]
+
+
+def test_read_csv_autodetects_tab_delimiter_for_simple_numeric_table():
+    content = "x\tintensity\n1\t10\n2\t20\n3\t30\n"
+
+    dataset = scp.read_csv({"tabbed.csv": content.encode("utf-8")})
+
+    assert dataset.shape == (1, 3)
+    assert list(dataset.x.data) == [1.0, 2.0, 3.0]
+    assert list(dataset.data.squeeze()) == [10.0, 20.0, 30.0]

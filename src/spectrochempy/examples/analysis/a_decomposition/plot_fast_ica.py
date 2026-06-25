@@ -34,7 +34,7 @@ X.set_coordset(
 X.y.title = "elution time"
 X.y.units = "min"
 X.x.title = "wavelength"
-X.plot()
+_ = X.plot()
 # %%
 # Create and fit a FastICA object
 # -------------------------------
@@ -43,7 +43,7 @@ X.plot()
 # obtain verbose output during fit, and we set the number of component to use at 4.
 
 ica = scp.FastICA(n_components=4, log_level="INFO")
-ica.fit(X)
+_ = ica.fit(X)
 # %%
 # Get the mixing system and source spectral profiles
 # --------------------------------------------------

@@ -22,9 +22,6 @@ on:
     - cron: "0 0 * * 0"  # At 00:00 on Sunday
 
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-
   workflow_dispatch:  # Manual trigger
 
 # Prevent multiple simultaneous runs
@@ -71,7 +68,7 @@ jobs:
             docs_examples: false
             plugins: false
             core_only: true
-            test_targets: tests/test_core/test_dataset tests/test_core/test_units tests/test_core/test_projects tests/test_core/test_scripts tests/test_core/test_plotters
+            test_targets: tests/test_core/test_dataset tests/test_core/test_units tests/test_core/test_projects tests/test_core/test_plotters
             validation: core-only
             check_name: Test core-only using ubuntu-latest and python 3.14
           - os: ubuntu-latest
@@ -133,7 +130,7 @@ jobs:
 
       - name: Checkout spectrochempy repository
         if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 

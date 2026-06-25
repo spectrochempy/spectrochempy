@@ -1070,9 +1070,12 @@ class CoordSet(HasTraits):
             or coord.units.dimensionality != base.units.dimensionality
         ):
             raise exceptions.UnitsCompatibilityError(
-                f"Coordinates of the '{dim}' dimension have incompatible units "
-                f"({coord.units} and {base.units}). The datasets can't be "
-                "concatenated.",
+                exceptions.format_incompatible_units_message(
+                    "concatenate datasets",
+                    coord.units,
+                    base.units,
+                    dim=dim,
+                ),
             )
         converted = coord.copy()
         converted.ito(base.units)

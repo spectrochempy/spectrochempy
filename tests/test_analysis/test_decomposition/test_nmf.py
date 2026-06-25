@@ -174,3 +174,20 @@ def test_nmf_masked_data_uses_synthetic_dataset(nmf_dataset):
     assert scores.shape == (nmf_dataset.shape[0], 3)
     assert np.all(np.isfinite(scores.data))
     assert np.all(scores.data >= -NMF_NONNEGATIVE_TOL)
+
+
+def test_nmf_solver_parameter_is_passed_to_sklearn():
+    rng = np.random.RandomState(42)
+    data = rng.rand(10, 6)
+
+    nmf = NMF(
+        n_components=2,
+        solver="mu",
+        beta_loss="kullback-leibler",
+        max_iter=200,
+        random_state=42,
+        tol=1e-8,
+    )
+    nmf.fit(data)
+    assert nmf._nmf.solver == "mu"
+    assert nmf._nmf.beta_loss == "kullback-leibler"

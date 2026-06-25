@@ -13,6 +13,7 @@ __dataset_methods__ = [  # Methods that can be called as API functions
     "transpose",
     "reshape",
     "to_array",
+    "to_netcdf",
     "to_xarray",
     "take",
     "set_complex",
@@ -27,6 +28,7 @@ __dataset_methods__ = [  # Methods that can be called as API functions
 ]
 
 
+import json
 import textwrap
 
 # Lazy import to avoid triggering matplotlib at module load time
@@ -64,6 +66,213 @@ from spectrochempy.utils.print import _render_sections
 from spectrochempy.utils.print import colored_output
 from spectrochempy.utils.system import get_user_and_node
 from spectrochempy.utils.typeutils import is_sequence
+
+
+def _normalize_json_compatible(value: Any) -> Any:
+    """Return a JSON-compatible copy of *value* or raise ``TypeError``."""
+    if isinstance(value, np.generic):
+        return value.item()
+    if value is None or isinstance(value, (str, int, float, bool)):
+        return value
+    if isinstance(value, dict):
+        return {
+            str(key): _normalize_json_compatible(item) for key, item in value.items()
+        }
+    if isinstance(value, (list, tuple)):
+        return [_normalize_json_compatible(item) for item in value]
+
+    raise TypeError(f"Value of type {type(value).__name__} is not JSON-compatible")
+
+
+def _is_portable_labels(labels):
+    """Return True if labels are exportable as portable string labels."""
+    if labels is None or labels.ndim != 1 or len(labels) == 0:
+        return False
+    return all(isinstance(v, str) or v is None for v in labels)
+
+
+def _export_labels(coord, dim, aux_vars):
+    """Append label export variables to *aux_vars* or emit a warning."""
+    labels = coord.labels
+    if labels is None or not coord.is_labeled:
+        return
+    if _is_portable_labels(labels):
+        safe = np.array(["" if v is None else v for v in labels])
+        attrs = {"scpy_coord_role": "label", "scpy_owner_dim": dim}
+        none_mask = np.array([v is None for v in labels])
+        if np.any(none_mask):
+            attrs["scpy_label_none_mask"] = json.dumps(
+                none_mask.tolist(), sort_keys=True
+            )
+        aux_vars.append(
+            (
+                f"{dim}_labels",
+                dim,
+                np.asarray(safe, dtype=str),
+                attrs,
+            )
+        )
+    else:
+        warning_(
+            f"Labels on dimension '{dim}' were not exported because they are "
+            "not part of the supported portable label subset.",
+        )
+
+
+def _serialize_portable_datetime(value: datetime | None) -> str | None:
+    """Return a stable textual form for portable datetime attrs."""
+    if value is None:
+        return None
+    if not isinstance(value, datetime):
+        raise TypeError(f"Value of type {type(value).__name__} is not a datetime")
+    return value.isoformat(sep=" ", timespec="seconds")
+
+
+def _restore_portable_datetime(value):
+    """Return a datetime restored from a portable attr or ``None``."""
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        raise TypeError(
+            f"Portable datetime attr must be a string, got {type(value).__name__}"
+        )
+    return datetime.fromisoformat(value)
+
+
+def _serialize_portable_history(history) -> list[str] | None:
+    """Return a portable textual history payload or ``None`` for empty history."""
+    if not history:
+        return None
+    if not isinstance(history, list):
+        raise TypeError(
+            f"Portable history must be exported as a list, got {type(history).__name__}"
+        )
+    for entry in history:
+        if not isinstance(entry, str):
+            raise TypeError(
+                "Portable history entries must be strings, "
+                f"got {type(entry).__name__}"
+            )
+    return list(history)
+
+
+def _restore_portable_history(value):
+    """Return internal history tuples restored from portable textual content."""
+    if value is None:
+        return None
+    if not isinstance(value, list):
+        raise TypeError(
+            f"Portable history attr must be a list, got {type(value).__name__}"
+        )
+
+    restored = []
+    for entry in value:
+        if not isinstance(entry, str):
+            raise TypeError(
+                "Portable history entries must be strings, "
+                f"got {type(entry).__name__}"
+            )
+        date_text, separator, message = entry.partition("> ")
+        if separator != "> " or not message:
+            raise ValueError("Portable history entry must use '<timestamp> <text>'")
+        restored.append((datetime.fromisoformat(date_text), message))
+    return restored
+
+
+def _prepare_xarray_dataset_for_netcdf(dataset):
+    """Convert a canonical xarray Dataset into a NetCDF-safe representation."""
+    xds = dataset.copy(deep=True)
+
+    for attr_name in ("scpy_meta", "scpy_skipped_meta_keys", "scpy_history"):
+        if attr_name in xds.attrs:
+            xds.attrs[attr_name] = json.dumps(xds.attrs[attr_name], sort_keys=True)
+
+    primary_name = xds.attrs.get("scpy_primary_variable")
+    mask_name = xds.attrs.get("scpy_mask_variable")
+    if mask_name in xds.data_vars:
+        mask_var = xds[mask_name]
+        mask_attrs = dict(mask_var.attrs)
+        mask_attrs["scpy_mask_encoding"] = "bool-as-int8"
+        xds[mask_name] = xds[mask_name].astype(np.int8)
+        xds[mask_name].attrs = mask_attrs
+
+    if primary_name in xds.data_vars and np.iscomplexobj(xds[primary_name].data):
+        xr = import_optional_dependency("xarray")
+        data_var = xds[primary_name]
+        real_name = f"{primary_name}__real"
+        imag_name = f"{primary_name}__imag"
+
+        real_attrs = dict(data_var.attrs)
+        imag_attrs = dict(data_var.attrs)
+        real_attrs["scpy_complex_component"] = "real"
+        imag_attrs["scpy_complex_component"] = "imag"
+
+        xds[real_name] = xr.DataArray(
+            np.asarray(data_var.data).real,
+            dims=data_var.dims,
+            coords=data_var.coords,
+            attrs=real_attrs,
+        )
+        xds[imag_name] = xr.DataArray(
+            np.asarray(data_var.data).imag,
+            dims=data_var.dims,
+            coords=data_var.coords,
+            attrs=imag_attrs,
+        )
+        xds = xds.drop_vars(primary_name)
+        xds.attrs["scpy_complex_representation"] = "split-real-imag"
+        xds.attrs["scpy_complex_real"] = real_name
+        xds.attrs["scpy_complex_imag"] = imag_name
+
+    return xds
+
+
+def _restore_xarray_dataset_from_netcdf(dataset):
+    """Restore the canonical xarray Dataset representation from NetCDF content."""
+    xds = dataset.copy(deep=True)
+
+    for attr_name in ("scpy_meta", "scpy_skipped_meta_keys", "scpy_history"):
+        if attr_name in xds.attrs and isinstance(xds.attrs[attr_name], str):
+            xds.attrs[attr_name] = json.loads(xds.attrs[attr_name])
+
+    complex_repr = xds.attrs.get("scpy_complex_representation")
+    primary_name = xds.attrs.get("scpy_primary_variable")
+    if complex_repr == "split-real-imag":
+        xr = import_optional_dependency("xarray")
+        real_name = xds.attrs.get("scpy_complex_real")
+        imag_name = xds.attrs.get("scpy_complex_imag")
+        if real_name in xds.data_vars and imag_name in xds.data_vars:
+            real_var = xds[real_name]
+            imag_var = xds[imag_name]
+            attrs = dict(real_var.attrs)
+            attrs.pop("scpy_complex_component", None)
+            xds[primary_name] = xr.DataArray(
+                np.asarray(real_var.data) + 1j * np.asarray(imag_var.data),
+                dims=real_var.dims,
+                coords=real_var.coords,
+                attrs=attrs,
+            )
+            xds = xds.drop_vars([real_name, imag_name])
+
+    mask_name = xds.attrs.get("scpy_mask_variable")
+    if mask_name in xds.data_vars:
+        xds[mask_name] = xds[mask_name].astype(bool)
+        xds[mask_name].attrs.pop("scpy_mask_encoding", None)
+
+    return xds
+
+
+def _handle_xarray_netcdf_backend_error(exc: Exception):
+    message = str(exc)
+    if (
+        "did not find a match in any of xarray's currently installed IO backends"
+        in message
+    ):
+        raise SpectroChemPyError(
+            "NetCDF I/O requires xarray plus an available NetCDF backend. "
+            "Install xarray and use the scipy backend or another xarray-compatible backend.",
+        ) from exc
+    raise exc
 
 
 # ======================================================================================
@@ -243,6 +452,8 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         self._created = utcnow()
         self.description = kwargs.pop("description", "")
         self.author = kwargs.pop("author", get_user_and_node())
+        source_origin = data.origin if isinstance(data, NDDataset) else ""
+        self.origin = kwargs.pop("origin", source_origin)
 
         history = kwargs.pop("history", None)
         if history is not None:
@@ -1194,6 +1405,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
                 missing="ignore",
             )
 
+        new.history = "Data squeezed"
         return new
 
     def atleast_2d(self, inplace=False):
@@ -1353,86 +1565,405 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
 
     def to_xarray(self):
         """
-        Convert a NDDataset instance to an `~xarray.DataArray` object.
+        Convert a NDDataset instance to an `~xarray.Dataset` object.
+
+        Same-dimension ``CoordSet`` coordinates (multiple numeric coordinates
+        sharing a dimension) are exported as a dimension coordinate for the
+        default coordinate and non-dimension coordinates for auxiliary
+        coordinates, with ``scpy_coord_role`` and ``scpy_owner_dim`` markers.
+
+        Portable string labels on coordinates (1D string-only labels with no
+        mixed types) are exported as non-dimension coordinate variables with
+        ``scpy_coord_role="label"``. Non-exportable labels trigger a warning.
+
 
         Warning: the xarray library must be available.
 
         Returns
         -------
         object
-            A axrray.DataArray object.
+            An xarray.Dataset object.
 
         """
-        # Information about DataArray from the DataArray docstring
-        #
-        # Attributes
-        # ----------
-        # dims: tuple
-        #     Dimension names associated with this array.
-        # values: np.ndarray
-        #     Access or modify DataArray values as a numpy array.
-        # coords: dict-like
-        #     Dictionary of DataArray objects that label values along each dimension.
-        # name: str or None
-        #     Name of this array.
-        # attrs: OrderedDict
-        #     Dictionary for holding arbitrary metadata.
-        # Init docstring
-        #
-        # Parameters
-        # ----------
-        # data: array_like
-        #     Values for this array. Must be an `numpy.ndarray` , ndarray like,
-        #     or castable to an `~numpy.ndarray` .
-        # coords: sequence or dict of array_like objects, optional
-        #     Coordinates (tick labels) to use for indexing along each dimension.
-        #     If dict-like, should be a mapping from dimension names to the
-        #     corresponding coordinates. If sequence-like, should be a sequence
-        #     of tuples where the first element is the dimension name and the
-        #     second element is the corresponding coordinate array_like object.
-        # dims: str or sequence of str, optional
-        #     Name(s) of the data dimension(s). Must be either a string (only
-        #     for 1D data) or a sequence of strings with length equal to the
-        #     number of dimensions. If this argument is omitted, dimension names
-        #     are taken from `coords` (if possible) and otherwise default to
-        #     `['dim_0', ... 'dim_n']` .
-        # name: str or None, optional
-        #     Name of this array.
-        # attrs: dict_like or None, optional
-        #     Attributes to assign to the new instance. By default, an empty
-        #     attribute dictionary is initialized.
-        # encoding: dict_like or None, optional
-        #     Dictionary specifying how to encode this array's data into a
-        #     serialized format like netCDF4. Currently used keys (for netCDF)
-        #     include '_FillValue', 'scale_factor', 'add_offset', 'dtype',
-        #     'units' and 'calendar' (the later two only for datetime arrays).
-        #     Unrecognized keys are ignored.
-
         xr = import_optional_dependency("xarray")
         if xr is None:
             return None
 
-        x, y = self.x, self.y
-        tx = x.title
-        if y:
-            ty = y.title
-            da = xr.DataArray(
-                np.array(self.data, dtype=np.float64),
-                coords=[(ty, y.data), (tx, x.data)],
+        dims = tuple(self.dims)
+        primary_name = self._name if self._name else "data"
+
+        coords = {}
+        aux_vars = []
+        for dim in dims:
+            coord = self.coord(dim)
+            if coord is None or coord.is_empty:
+                continue
+
+            if isinstance(coord, CoordSet) and coord.is_same_dim:
+                default_coord = coord.default
+                coord_attrs = {"scpy_coord_role": "default", "scpy_default": dim}
+                if default_coord.units is not None:
+                    coord_attrs["units"] = str(default_coord.units)
+                if default_coord.title != "<untitled>":
+                    coord_attrs["scpy_title"] = default_coord.title
+
+                coords[dim] = xr.DataArray(
+                    np.asarray(default_coord.data),
+                    dims=(dim,),
+                    attrs=coord_attrs,
+                )
+
+                for i, c in enumerate(coord.coords):
+                    if i == coord.default_index:
+                        continue
+                    aux_var = f"{dim}_aux_{i:04d}"
+                    aux_attrs = {
+                        "scpy_coord_role": "auxiliary",
+                        "scpy_owner_dim": dim,
+                    }
+                    if c.units is not None:
+                        aux_attrs["units"] = str(c.units)
+                    if c.title != "<untitled>":
+                        aux_attrs["scpy_title"] = c.title
+                    aux_vars.append(
+                        (
+                            aux_var,
+                            dim,
+                            np.asarray(c.data),
+                            aux_attrs,
+                        )
+                    )
+
+                _export_labels(default_coord, dim, aux_vars)
+            else:
+                coord_attrs = {"scpy_coord_role": "default", "scpy_default": dim}
+                if coord.units is not None:
+                    coord_attrs["units"] = str(coord.units)
+                if coord.title != "<untitled>":
+                    coord_attrs["scpy_title"] = coord.title
+
+                coords[dim] = xr.DataArray(
+                    np.asarray(coord.data),
+                    dims=(dim,),
+                    attrs=coord_attrs,
+                )
+
+                _export_labels(coord, dim, aux_vars)
+
+        meta = {}
+        skipped_meta_keys = []
+        for key, value in self.meta.items():
+            try:
+                meta[key] = _normalize_json_compatible(value)
+            except TypeError:
+                skipped_meta_keys.append(key)
+
+        if skipped_meta_keys:
+            warning_(
+                "Skipping non-JSON-compatible metadata for xarray export: "
+                f"{', '.join(sorted(skipped_meta_keys))}",
             )
 
-            da.attrs["units"] = self.units
-        else:
-            da = xr.DataArray(
-                np.array(self.data, dtype=np.float64),
-                coords=[(tx, x.data)],
+        data_attrs = {}
+        if self.units is not None:
+            data_attrs["units"] = str(self.units)
+
+        dataset_attrs = {
+            "scpy_format": "nddataset-xarray",
+            "scpy_version": 1,
+            "scpy_primary_variable": primary_name,
+            "scpy_name": self.name,
+            "scpy_title": self.title,
+            "scpy_description": self.description,
+            "scpy_author": self.author,
+            "scpy_origin": self.origin,
+        }
+        for dataset_attr, value in (
+            ("scpy_created", self._created),
+            ("scpy_modified", self._modified),
+            ("scpy_acquisition_date", self._acquisition_date),
+        ):
+            serialized = _serialize_portable_datetime(value)
+            if serialized is not None:
+                dataset_attrs[dataset_attr] = serialized
+        serialized_history = _serialize_portable_history(self.history)
+        if serialized_history is not None:
+            dataset_attrs["scpy_history"] = serialized_history
+        if meta:
+            dataset_attrs["scpy_meta"] = json.loads(json.dumps(meta))
+        if skipped_meta_keys:
+            dataset_attrs["scpy_skipped_meta_keys"] = sorted(skipped_meta_keys)
+
+        xds = xr.Dataset(
+            data_vars={
+                primary_name: xr.DataArray(
+                    np.asarray(self.data),
+                    dims=dims,
+                    coords=coords,
+                    attrs=data_attrs,
+                )
+            },
+            attrs=dataset_attrs,
+        )
+
+        for var_name, var_dim, var_data, var_attrs in aux_vars:
+            xds.coords[var_name] = xr.DataArray(
+                var_data,
+                dims=(var_dim,),
+                attrs=var_attrs,
             )
 
-            da.attrs["units"] = self.units
+        if self.is_masked:
+            mask_name = f"{primary_name}__mask"
+            xds[mask_name] = xr.DataArray(
+                np.asarray(self.mask, dtype=bool),
+                dims=dims,
+                coords=coords,
+                attrs={"scpy_role": "mask"},
+            )
+            xds.attrs["scpy_mask_variable"] = mask_name
 
-        da.attrs["title"] = self.title
+        return xds
 
-        return da
+    def to_netcdf(self, filename=None, **kwargs):
+        """
+        Persist this dataset to NetCDF using the canonical xarray mapping.
+
+        Auxiliary same-dimension coordinates are persisted automatically
+        through the underlying ``to_xarray()`` output.
+
+        The current NetCDF portable subset is intentionally narrow:
+
+        - one `NDDataset`;
+        - default coordinates only;
+        - auxiliary same-dimension coordinates (``CoordSet`` sharing a
+          dimension);
+        - explicit mask variable support;
+        - JSON-compatible metadata only;
+        - complex data persisted through a split real/imag convention.
+
+        Parameters
+        ----------
+        filename : path-like or file-like, optional
+            Destination path or writable file-like object. If omitted, return
+            the serialized NetCDF bytes produced by xarray.
+        **kwargs
+            Additional keyword arguments forwarded to
+            `xarray.Dataset.to_netcdf()`. The default engine is `scipy`.
+
+        Returns
+        -------
+        object
+            The return value from `xarray.Dataset.to_netcdf()`.
+        """
+        kwargs.setdefault("engine", "scipy")
+        xds = _prepare_xarray_dataset_for_netcdf(self.to_xarray())
+        try:
+            return xds.to_netcdf(path=filename, **kwargs)
+        except Exception as exc:  # pragma: no cover - backend-dependent
+            _handle_xarray_netcdf_backend_error(exc)
+
+    @classmethod
+    def from_xarray(cls, dataset):
+        """
+        Build a minimal `NDDataset` instance from an `xarray.Dataset`.
+
+        This prototype covers numerical data, default coordinates, auxiliary
+        same-dimension coordinates, units, masks, JSON-compatible metadata,
+        title, name, description, author, origin, created, modified,
+        acquisition_date, and portable string labels.
+
+        Auxiliary coordinates are detected by ``scpy_coord_role`` and
+        ``scpy_owner_dim`` attributes and reassembled into a same-dimension
+        ``CoordSet`` with the dimension coordinate as the default.
+
+        Portable string labels are restored from non-dimension coordinates with
+        ``scpy_coord_role="label"`` and associated with the owning dimension's
+        coordinate via ``scpy_owner_dim``.
+
+
+        Rich CoordSet semantics and backend-specific persistence are
+        intentionally out of scope here.
+        """
+        xr = import_optional_dependency("xarray")
+        if xr is None:
+            return None
+
+        if not isinstance(dataset, xr.Dataset):
+            raise SpectroChemPyError("from_xarray() expects an xarray.Dataset.")
+
+        primary_name = dataset.attrs.get("scpy_primary_variable")
+        if primary_name is None:
+            data_vars = list(dataset.data_vars)
+            if len(data_vars) == 1:
+                primary_name = data_vars[0]
+            else:
+                raise SpectroChemPyError(
+                    "Cannot determine the primary xarray variable for NDDataset reconstruction."
+                )
+
+        if primary_name not in dataset.data_vars:
+            raise SpectroChemPyError(
+                f"Primary xarray variable `{primary_name}` is missing from the dataset."
+            )
+
+        data_var = dataset[primary_name]
+        dims = tuple(data_var.dims)
+
+        coordset = []
+        aux_dims = set()
+        for dim in dims:
+            if dim in data_var.coords:
+                xr_coord = data_var.coords[dim]
+                kwargs = {"name": dim}
+                units = xr_coord.attrs.get("units")
+                if units is not None:
+                    kwargs["units"] = units
+                title = xr_coord.attrs.get("scpy_title")
+                if title is not None:
+                    kwargs["title"] = title
+                dim_coord = Coord(np.asarray(xr_coord.data), **kwargs)
+
+                aux_coords = []
+                for aux_name in sorted(dataset.coords):
+                    if aux_name == dim:
+                        continue
+                    var = dataset.coords[aux_name]
+                    if (
+                        var.attrs.get("scpy_coord_role") == "auxiliary"
+                        and var.attrs.get("scpy_owner_dim") == dim
+                    ):
+                        kwargs_aux = {"name": aux_name}
+                        units_aux = var.attrs.get("units")
+                        if units_aux is not None:
+                            kwargs_aux["units"] = units_aux
+                        title_aux = var.attrs.get("scpy_title")
+                        if title_aux is not None:
+                            kwargs_aux["title"] = title_aux
+                        aux_coords.append(Coord(np.asarray(var.data), **kwargs_aux))
+
+                if aux_coords:
+                    aux_dims.add(dim)
+                    inner = CoordSet(dim_coord, *aux_coords, sorted=False)
+                    coordset.append(inner)
+                else:
+                    coordset.append(dim_coord)
+            else:
+                coordset.append(None)
+
+        kwargs = {
+            "dims": list(dims),
+            "coordset": coordset,
+            "name": dataset.attrs.get("scpy_name", primary_name),
+            "title": dataset.attrs.get("scpy_title"),
+            "meta": dataset.attrs.get("scpy_meta"),
+        }
+        for dataset_attr, kwarg_name in (
+            ("scpy_description", "description"),
+            ("scpy_author", "author"),
+            ("scpy_origin", "origin"),
+        ):
+            if dataset_attr in dataset.attrs:
+                kwargs[kwarg_name] = dataset.attrs[dataset_attr]
+
+        units = data_var.attrs.get("units")
+        if units is not None:
+            kwargs["units"] = units
+
+        mask_name = dataset.attrs.get("scpy_mask_variable")
+        if mask_name in dataset.data_vars:
+            kwargs["mask"] = np.asarray(dataset[mask_name].data, dtype=bool)
+
+        result = cls(np.asarray(data_var.data), **kwargs)
+
+        if "scpy_history" in dataset.attrs:
+            with suppress(TypeError, ValueError):
+                result._history = _restore_portable_history(
+                    dataset.attrs["scpy_history"]
+                )
+
+        for dataset_attr, internal_attr in (
+            ("scpy_created", "_created"),
+            ("scpy_acquisition_date", "_acquisition_date"),
+            ("scpy_modified", "_modified"),
+        ):
+            if dataset_attr not in dataset.attrs:
+                continue
+            with suppress(TypeError, ValueError):
+                setattr(
+                    result,
+                    internal_attr,
+                    _restore_portable_datetime(dataset.attrs[dataset_attr]),
+                )
+
+        # Identify the default coordinate explicitly for each same-dim CoordSet.
+        for dim in aux_dims:
+            inner = result._coordset.coords[result._coordset.names.index(dim)]
+            dim_data = np.asarray(data_var.coords[dim].data)
+            for j, c in enumerate(inner.coords):
+                if np.array_equal(np.asarray(c.data), dim_data):
+                    if j != inner._default:
+                        inner._default = j
+                    break
+
+        # Restore portable string labels.
+        for label_name in sorted(dataset.coords):
+            var = dataset.coords[label_name]
+            if var.attrs.get("scpy_coord_role") != "label":
+                continue
+            owner_dim = var.attrs.get("scpy_owner_dim")
+            if owner_dim is None:
+                continue
+            try:
+                idx = result._coordset.names.index(owner_dim)
+            except (ValueError, AttributeError):
+                continue
+            target = result._coordset.coords[idx]
+            if isinstance(target, CoordSet) and target.is_same_dim:
+                target = target.default
+            label_data = np.asarray(var.data, dtype=object)
+            none_mask = var.attrs.get("scpy_label_none_mask")
+            if none_mask is not None:
+                mask = json.loads(none_mask)
+                for i, is_none in enumerate(mask):
+                    if is_none:
+                        label_data[i] = None
+            target.labels = label_data
+
+        return result
+
+    @classmethod
+    def from_netcdf(cls, filename, **kwargs):
+        """
+        Reconstruct an `NDDataset` from the xarray-backed NetCDF portable subset.
+
+        Same-dimension ``CoordSet`` auxiliary coordinates are restored
+        automatically from the xarray coordinate attributes.
+
+        Parameters
+        ----------
+        filename : path-like or file-like
+            Source NetCDF file.
+        **kwargs
+            Additional keyword arguments forwarded to `xarray.open_dataset()`.
+            The default engine is `scipy`.
+
+        Returns
+        -------
+        NDDataset
+            Reconstructed dataset.
+        """
+        xr = import_optional_dependency("xarray")
+        kwargs.setdefault("engine", "scipy")
+
+        try:
+            with xr.open_dataset(filename, **kwargs) as xds:
+                xds.load()
+                restored = _restore_xarray_dataset_from_netcdf(xds)
+        except Exception as exc:  # pragma: no cover - backend-dependent
+            _handle_xarray_netcdf_backend_error(exc)
+
+        return cls.from_xarray(restored)
 
     def transpose(self, *dims, inplace=False):
         """
@@ -1656,37 +2187,13 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         **kwargs
             Additional arguments passed to the plotting function.
 
-            For method="stack", the following specific kwargs are supported:
-            - palette : str or list, optional
-                Color palette. If None, auto-detect based on dataset.
-                If "continuous": use continuous colormap (viridis).
-                If "categorical": use matplotlib default color cycle.
-                If colormap name: use that colormap.
-                If list/tuple of colors: use as explicit categorical colors.
+            For ``method="stack"``, ``palette`` controls categorical or continuous
+            color selection. It accepts ``None``, a colormap name, or an explicit
+            list of colors.
 
-            For method="image", "map", "surface" (2D plots), the following kwargs are supported:
-            - cmap : str, optional
-                Colormap name. If None, auto-detected based on data.
-                Defaults to "viridis" (sequential) or "RdBu_r" (diverging).
-            - cmap_mode : str, optional, default: "auto"
-                Colormap mode for 2D plots. Possible values:
-                "auto" - automatically choose sequential or diverging based on data
-                "sequential" - force sequential colormap (viridis)
-                "diverging" - force diverging colormap (RdBu_r)
-            - center : numeric or str, optional
-                Center value for diverging colormaps. Possible values:
-                None - use 0 for diverging mode
-                "auto" - auto-detect center (0 if data crosses zero, else midpoint)
-                numeric - use this value as center
-            - norm : matplotlib.colors.Normalize, optional
-                Explicit normalization object. If provided, overrides cmap and center.
-            - contrast_safe : bool, optional, default: True
-                If True, trim colormap ends to ensure minimum contrast with background.
-                Prevents low-luminance colors (e.g., yellow in viridis) from blending
-                with white backgrounds.
-            - min_contrast : float, optional, default: 2.5
-                Minimum WCAG contrast ratio for contrast-safe colormaps.
-                2.5 = AA large text, 3.0 = AA normal text, 4.5 = AAA.
+            For ``method="image"``, ``"map"``, or ``"surface"``, common
+            2D-specific kwargs include ``cmap``, ``cmap_mode``, ``center``,
+            ``norm``, ``contrast_safe``, and ``min_contrast``.
 
         Returns
         -------

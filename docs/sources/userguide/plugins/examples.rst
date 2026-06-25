@@ -32,3 +32,6 @@ these manifests in :ref:`plugin-examples-list`.
 
 This convention keeps the beginner path uncluttered while still making
 specialized workflows easy to find.
+
+For the list of official plugin packages and their main namespaces, see
+:doc:`official_plugins`.

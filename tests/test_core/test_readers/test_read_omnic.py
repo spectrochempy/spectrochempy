@@ -6,16 +6,12 @@
 # ruff: noqa
 
 from pathlib import Path
-from unittest.mock import patch, MagicMock
-import io
 
-import numpy as np
 import pytest
 
 import spectrochempy as scp
 from spectrochempy.application.preferences import preferences as prefs
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.utils.testing import assert_dataset_equal
 
 DATADIR = prefs.datadir
@@ -43,6 +39,10 @@ def test_read_omnic_local_wodger():
         content = fil.read()
     nd2 = scp.read_omnic({filename_wodger: content})
     assert nd1 == nd2
+    assert nd1.origin == "omnic"
+    assert nd1.acquisition_date is not None
+    assert nd1.y.title == "acquisition timestamp (GMT)"
+    assert str(nd1.y.units) == "s"
 
 
 @pytest.mark.usefixtures("_skip_if_no_testdata")
@@ -70,10 +70,9 @@ def test_read_omnic():
 
     nd = scp.read_spa(IRDATA / "subdir" / "20-50" / "7_CZ0-100_Pd_21.SPA")
     assert str(nd) == "NDDataset: [float64] a.u. (shape: (y:1, x:5549))"
+    assert nd.origin == "omnic"
 
-    nd2 = scp.read_spg(
-        IRDATA / "subdir" / "20-50" / "7_CZ0-100_Pd_21.SPA"
-    )  # wrong protocol but acceptable
+    nd2 = scp.read_omnic(IRDATA / "subdir" / "20-50" / "7_CZ0-100_Pd_21.SPA")
     assert nd2 == nd
 
     # test import sample IFG
@@ -113,33 +112,39 @@ def test_read_omnic():
     assert str(a) == "NDDataset: [float64] unitless (shape: (y:1, x:13898))"
 
 
-# Tests for allow_inconsistent_x parameter (issue #863)
-# ================================================================================
+def test_read_spg_history_appended():
+    """Regression test for #1144: sort history should be appended, not overwrite
+    the import history. The history setter appends string values — both entries
+    are preserved."""
+    nd = scp.read_spg(WODGER, sortbydate=True)
+    # History is a list of timestamp-prefixed strings
+    history_text = " ".join(nd.history)
+    assert "Imported from spg file" in history_text
+    assert "Sorted by date" in history_text
 
 
-class TestAllowInconsistentX:
-    """Tests for the allow_inconsistent_x parameter in read_omnic/read_spg."""
+def test_return_ifg_validation(tmp_path):
+    """Regression test for #1144: invalid return_ifg values must warn clearly.
+    The Importer catches exceptions and re-emits them as warnings, so we check
+    for the warning."""
+    import warnings
 
-    def test_allow_inconsistent_x_parameter_documented(self):
-        """Test that allow_inconsistent_x parameter is documented."""
-        assert "allow_inconsistent_x" in scp.read_spg.__doc__
-        assert "allow_inconsistent_x" in scp.read_omnic.__doc__
+    spa_file = tmp_path / "dummy.spa"
+    spa_file.write_bytes(b"\x00" * 1024)
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        result = scp.read_spa(spa_file, return_ifg="invalid")
+    assert result is None
+    assert len(w) >= 1
+    assert any("Invalid return_ifg value" in str(warning.message) for warning in w)
 
-    def test_error_message_suggests_parameter(self):
-        """Test that error message for inconsistent x-axes suggests allow_inconsistent_x."""
-        # The parameter should be mentioned in the docstring
-        assert "allow_inconsistent_x=True" in scp.read_omnic.__doc__
+
+def test_allow_inconsistent_x_parameter_documented():
+    assert "allow_inconsistent_x" in scp.read_spg.__doc__
+    assert "allow_inconsistent_x" in scp.read_omnic.__doc__
+    assert "allow_inconsistent_x=True" in scp.read_omnic.__doc__
 
 
-@pytest.mark.skip(reason="Requires SPG file with inconsistent x-axes. See issue #863")
+@pytest.mark.skip(reason="Requires an SPG file with inconsistent x-axes (#863)")
 def test_allow_inconsistent_x_with_real_file():
-    """
-    Test reading SPG file with inconsistent x-axes using allow_inconsistent_x=True.
-
-    This test is skipped until a representative sample file is available.
-    Once available, this test should:
-    1. Read file without allow_inconsistent_x -> ValueError with helpful message
-    2. Read file with allow_inconsistent_x=True -> list[NDDataset]
-    3. Verify each dataset in list has correct x-axis
-    """
-    pass
+    """Exercise both return paths once a representative sample is available."""

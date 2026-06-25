@@ -6,177 +6,31 @@
 
 :orphan:
 
-What's New in Revision 0.9.4.dev
+What's New in Revision 0.10.2.dev
 ---------------------------------------------------------------------------------------
 
-These are the changes in SpectroChemPy-0.9.4.dev.
+These are the changes in SpectroChemPy-0.10.2.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
 
 New Features
 ~~~~~~~~~~~~
-- ``read_omnic`` and ``read_spg`` can now read OMNIC SPG files containing
-  spectra with non-identical x-axis definitions using
-  ``allow_inconsistent_x=True``. Incompatible spectra are returned as a list
-  of ``NDDataset`` objects instead of raising an error (#863).
 
-- Added the official ``spectrochempy-tensor`` plugin for TensorLy-backed tensor
-  decompositions, exposing CP/PARAFAC as ``scp.tensor.CP``.
+- Result objects now provide attribute-style access to named outputs and
+  diagnostics, for example `pca.result.scores`, `pca.result.loadings`, and
+  `pca.result.explained_variance`. The IRIS and TENSOR/CP plugins now follow
+  the same contract through `iris.result` and `cp.result`.
+
+- Added a minimal MATLAB `.mat` writer for simple numeric `NDDataset`
+  exchange using `scipy.io.savemat`. This is an exchange format, not
+  native SpectroChemPy persistence.
 
 Bug Fixes
 ~~~~~~~~~
 
-- Fixed ``interpolate`` `dim` argument resolution when ``dims=None`` is in
-  scope.  Calling ``interpolate(dim=0, ...)`` or ``interpolate(dim="y", ...)``
-  previously defaulted to the last axis instead of honouring the requested
-  dimension, because ``_get_dims_from_args`` pops the ``dims`` key first and
-  could not distinguish an explicit ``None`` from an absent argument.
+- Standardized unsupported reader errors so invalid protocols, unrecognized
+  file types, and unsupported CSV origins report the affected filename,
+  requested or detected value, and supported alternatives. (#1143)
 
-- Restored historical hypercomplex/quaternion dataset display (#1147).  Detailed
-  terminal and HTML representations once again show explicit ``RR``/``RI``/``IR``/``II``
-  component blocks and preserve complex-dimension shape annotations, instead of
-  falling back to raw quaternion scalar dumps.
-
-- JCAMP-DX I/O is more robust (#1080, #1132, #1150).  ``read_jcamp`` now
-  handles ``##YUNITS=TRANSMITTANCE`` as the ``transmittance`` unit, accepts
-  header values containing ``=``, reports invalid axis metadata with a clear
-  formatted error, and keeps the deprecated ``read_jdx`` alias pointed at
-  ``read_jcamp``.  ``write_jcamp`` now exports masked samples as JCAMP-DX
-  missing values (``?``), excludes them from ``##MAXY``/``##MINY``, and
-  preserves masking on round-trip instead of leaking stale values.
-
-- ``interpolate`` now preserves coordinate metadata and target semantics
-  (#1093, #1094, #1098, #1100).  Bare-array targets keep the source
-  coordinate's units and title; PCHIP interpolation honours ``fill_value``;
-  output follows the requested target order even when the source coordinate is
-  decreasing; masks and secondary coordinates stay aligned; and labels are
-  carried to target points that exactly match original coordinate values while
-  genuinely resampled points remain unlabelled.
-
-- ``write_csv`` now exports masked samples as missing values (``NaN``) instead
-  of writing their underlying data (#1135).  The writer previously iterated over
-  ``dataset.data`` directly, leaking the stored values of points the user had
-  explicitly masked; masked samples are now filled with ``NaN`` (mirroring the
-  ``write_jcamp`` fix), so they round-trip back as ``NaN`` through ``read_csv``
-  and unmasked datasets are unaffected.
-
-- Fixed ``Project.__str__()`` tree formatting when a project contains both
-  sub-projects and sibling datasets or scripts at the same level.  The
-  recursive ``_listproj`` helper previously used ``s.strip("\\n")`` which
-  stripped the trailing newline from the entire accumulated string, causing
-  sibling entries to appear on the same line as the last child of the
-  preceding sub-project.
-
-- ``concatenate`` now handles coordinate metadata more consistently (#1101).
-  Coordinate values expressed in compatible but different units are converted
-  to the units of the first dataset, incompatible coordinate units raise a
-  ``UnitsCompatibilityError``, and mixed labeled/unlabeled coordinates no
-  longer crash during concatenation.
-
-- ``read_opus`` now supports more assembled and time-resolved OPUS files
-  (#1035, #1036): data series blocks such as ``a``, ``sm``, ``igsm``,
-  ``phsm``, and ``tr`` are read, the ``TRACE``, ``GCIG``, and ``GCSC`` type
-  selectors are exposed, and malformed acquisition sub-second fields fall back
-  to whole-second precision instead of returning ``None``.
-
-- Fixed parsing of the ``a.u.`` (absorbance) and ``K.M.`` (Kubelka-Munk) unit
-  symbols from strings, which previously failed because the dots were read as a
-  multiplication.
-
-- ``CoordSet`` and same-dimension coordinate handling are more stable.  Native
-  save/load now preserves selected non-first default coordinates and restores
-  reference-based coordinates, while copying ``CoordSet`` and ``NDDataset``
-  objects keeps reference-based coordinates intact.  Same-dimension
-  ``CoordSet`` replacement by name, numeric index, title, or synthetic child
-  alias no longer double-wraps inner coordinates, which also improves
-  concatenation of multi-coordinate datasets.  Empty ``CoordSet`` objects now
-  have consistent empty-state properties instead of raising ``TypeError`` or
-  ``IndexError``.
-
-- Stabilized 1D CSV round-trip support: ``read_csv`` now tolerates header rows
-  (e.g., column titles) written by ``write_csv``, and correctly handles both
-  single-column (data-only) and multi-column (coordinate + data) CSV files.
-  Synthetic tests for CSV reading/writing have been added, removing the dependency
-  on external test data for these functionalities (#1077).
-
-- Preserved scientific-context metadata (``meta``, ``author``,
-  ``description``, ``origin``, and ``filename``) in wrapper-based processing
-  and analysis outputs such as ``Filter(...).transform(...)`` (#1103).
-
-Dependency Updates
-~~~~~~~~~~~~~~~~~~
-
-- pint >= 0.24 is now required
-
-Breaking Changes
-~~~~~~~~~~~~~~~~
-
-- Mixed arithmetic between ``NDDataset`` and ``Coord`` is now rejected
-  (e.g. ``dataset + coord`` or ``coord * dataset``).  ``Coord`` is treated as
-  axis support, not as a signal-bearing operand.  Workflows needing correction
-  vectors, weighting profiles, response curves, or other signal-like 1D
-  operands should represent them as 1D ``NDDataset`` objects instead.  This
-   clarifies the math semantics under the broader ``#1103`` arithmetic and
-   metadata characterization work.
-
-- Removed the orphaned ``roi`` and ``NDDataset.modeldata`` attributes from the
-  public data model (#1168).  ``roi`` no longer had active production use, and
-  ``NDDataset.modeldata`` no longer had a reliable semantic contract.  Fit/model
-  outputs should be stored and plotted as explicit ``NDDataset`` objects or
-  dedicated fit-result objects rather than hidden structural state on
-  ``NDDataset``.  Legacy serialized ``roi`` and ``modeldata`` fields in native
-  SpectroChemPy files remain load-compatible and are ignored during loading.
-
-Deprecations
-~~~~~~~~~~~~
-
-- ``scp.CP`` and ``spectrochempy.analysis.decomposition.cp.CP`` are now
-  deprecated compatibility paths for ``scp.tensor.CP``.
-
-Developer
-~~~~~~~~~
-
-- MAINT: Continued the Display / Representation Architecture work (#843).
-  The semantic ``DisplayItem`` / ``DisplaySection`` representation layer now
-  drives HTML rendering across ``Coord``, ``CoordSet``, ``NDDataset``, and
-  ``Project``.  This consolidates notebook and HTML display on a shared
-  section-based model, produces cleaner inline summary metadata and collapsible
-  content sections, removes exposure of internal UUIDs from headings, and keeps
-  project hierarchies and same-dimension coordinate groups readable through the
-  unified semantic rendering path.  The docs cache key was also updated so
-  sphinx-gallery invalidates cached output when display source files change.
-
-- TEST: Added synthetic, offline tests for multi-variable Matlab (``.mat``)
-  import and documented the behavior in the ``read_matlab`` docstring: numeric
-  variables are converted to ``NDDataset`` objects and then grouped by the
-  importer when shapes are compatible (same-shape arrays are stacked into one
-  dataset, incompatible ones returned separately), while non-numeric and
-  Matlab-internal (``__header__``, ``__version__``, ``__globals__``) variables
-  are skipped (#1142).
-
-- MAINT: Moved CP/PARAFAC implementation and TensorLy dependency ownership into
-  the new tensor plugin, keeping the core package tensor-agnostic.
-
-- MAINT: Completed the internal ``CoordSet`` storage migration.  Mutation
-  paths now resolve through the group-backed
-  projection-resolution-reconstruction pipeline, lookup and serializer adapters
-  share transient group metadata, and runtime storage uses a plain
-  ``_storage`` list instead of the legacy trait-based ``_coords`` validator.
-  Nested ``CoordSet`` setup, sorting, copying, and name validation are handled
-  explicitly in lifecycle and mutation paths while preserving public behavior,
-  serialization, alias invariants, ``default_id`` semantics, label metadata,
-  reference pass-through, and coordinate metadata.
-
-- MAINT: Removed stale commented ``docrep`` residue and the unused commented
-  ``numpydoc`` pre-commit hook block.
-
-- TEST: Added a project-wide source-docstring guard to detect stale
-  ``docrep``-style placeholders in ``spectrochempy`` source docstrings.
-
-- MAINT: Harmonized plugin release workflows and maintainer documentation:
-  the ``release_plugin.yml`` workflow now gracefully handles first plugin
-  releases (where the version is already committed) by skipping the commit
-  and push steps instead of failing, and automatically unsets the GitHub
-  "Latest" flag on plugin releases so the core release remains the primary
-  release on the repository front page.  The maintainer documentation now
-  describes the role of ``plugin_version_status.py``, the first-release
-  workflow, and the "Latest" flag policy (#1082).
+- Clarified specialized writer docstrings so format-specific APIs such as
+  `write_csv()`, `write_jcamp()`, and `write_matlab()` no longer advertise the
+  generic multi-protocol export options documented on `write()`.

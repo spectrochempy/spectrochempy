@@ -50,9 +50,9 @@ def read_omnic(*paths, **kwargs):
     - spectra history (but only incorporated in the NDDataset if a single
     spa is read)
 
-    An error is generated if attempt is made to read inconsistent datasets (e.g.,
-    spectra with different x-axis parameters) unless ``allow_inconsistent_x=True``
-    is specified, in which case a list of `NDDataset` objects (one per spectrum) is returned.
+    An error is generated when an SPG file contains spectra with inconsistent
+    x-axis definitions, unless ``allow_inconsistent_x=True`` is specified. In
+    that case, a list containing one `NDDataset` per spectrum is returned.
 
     Parameters
     ----------
@@ -67,7 +67,7 @@ def read_omnic(*paths, **kwargs):
         - e.g., ( [filename1, filename2, ...], kwargs )
 
         The returned datasets are merged to form a single dataset,
-        except if ``merge`` is set to `False`.
+        except if ``merge`` is set to ``False``.
     **kwargs : keyword parameters, optional
         See Other Parameters.
 
@@ -87,7 +87,7 @@ def read_omnic(*paths, **kwargs):
     csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
         Set the column delimiter in CSV file.
     description : `str`, optional
-        A Custom description.
+        A custom description.
     directory : `~pathlib.Path` object objects or valid urls, optional
         From where to read the files.
     download_only: `bool`, optional, default: `False`
@@ -103,8 +103,8 @@ def read_omnic(*paths, **kwargs):
         or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
         automatically, but can be set manually.
 
-        It is used for instance whn reading directory with different types of files, for merging
-        the datasets with compatible dimensions and different origin into different groups.
+        It is used, for instance, when reading a directory with different types of
+        files and merging compatible datasets into separate groups by origin.
 
         It is also used when reading with the CSV protocol. In order to properly interpret CSV file
         it can be necessary to set the origin of the spectra. Up to now only ``'omnic'`` and ``'tga'``
@@ -114,10 +114,10 @@ def read_omnic(*paths, **kwargs):
 
         .. versionadded:: 0.7.2
     protocol : `str`, optional
-        ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
-        ``'opus'``, ````, ``'matlab'``, ``'jcamp'``, ``'csv'``,
-        ``'excel'``}. If not provided, the correct protocol
-        is inferred (whenever it is possible) from the filename extension.
+        ``Protocol`` used for reading, for example ``'scp'``, ``'omnic'``,
+        ``'opus'``, ``'matlab'``, ``'jcamp'``, ``'csv'``, or ``'excel'``.
+        If not provided, the correct protocol is inferred whenever possible
+        from the filename extension.
     read_only: `bool`, optional, default: `True`
         Used only when url are specified.  If True, saving of the
         files is performed in the current directory, or in the directory specified by
@@ -130,14 +130,9 @@ def read_omnic(*paths, **kwargs):
     sortbydate : `bool`, optional, default: `True`
         Sort multiple filename by acquisition date.
     allow_inconsistent_x : `bool`, optional, default: `False`
-        If `True`, allows reading SPG files where spectra have different x-axis
-        parameters (different number of points, start/end values, or units).
-        In this case, a list of `NDDataset` objects (one per spectrum) is returned
-        instead of a single merged dataset. If `False` (default), a `ValueError` is
-        raised for inconsistent x-axes. Note: this parameter is specific to SPG files
-        and has no effect on SPA or SRS files.
-
-        .. versionadded:: 0.9.4
+        Allow SPG files whose spectra have different x-axis definitions. When
+        enabled, return one `NDDataset` per spectrum instead of merging the
+        spectra. This option has no effect on SPA or SRS files.
 
     See Also
     --------
@@ -147,7 +142,7 @@ def read_omnic(*paths, **kwargs):
     read_opus : Read OPUS spectra.
     read_labspec : Read Raman LABSPEC spectra (:file:`.txt`).
     read_omnic : Read Omnic spectra (:file:`.spa`, :file:`.spg`, :file:`.srs`).
-    read_soc : Read Surface Optics Corps. files (:file:`.ddr` , :file:`.hdr` or :file:`.sdr`).
+    read_soc : Read Surface Optics Corp. files (:file:`.ddr`, :file:`.hdr`, or :file:`.sdr`).
     read_galactic : Read Galactic files (:file:`.spc`).
     read_quadera : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
 
@@ -239,8 +234,8 @@ def read_spg(*paths, **kwargs):
     Parameters
     ----------
     *paths : `str`, `~pathlib.Path` object objects or valid urls, optional
-        The data source(s) can be specified by the name or a list of name for the
-        file(s) to be loaded:
+    The data source(s) can be specified by the name or a list of name for the
+    file(s) to be loaded:
 
         - e.g., ( filename1, filename2, ...,  kwargs )
 
@@ -249,74 +244,71 @@ def read_spg(*paths, **kwargs):
         - e.g., ( [filename1, filename2, ...], kwargs )
 
         The returned datasets are merged to form a single dataset,
-        except if ``merge`` is set to `False`.
+        except if ``merge`` is set to ``False``.
     **kwargs : keyword parameters, optional
         See Other Parameters.
 
     Returns
     -------
     object : `NDDataset` or list of `NDDataset`
-        The returned dataset(s).
+    The returned dataset(s).
 
     Other Parameters
     ----------------
     content : `bytes` object, optional
-        Instead of passing a filename for further reading, a bytes content can be
-        directly provided as bytes objects.
-        The most convenient way is to use a dictionary. This feature is particularly
-        useful for a GUI Dash application to handle drag and drop of files into a
-        Browser.
+    Instead of passing a filename for further reading, a bytes content can be
+    directly provided as bytes objects.
+    The most convenient way is to use a dictionary. This feature is particularly
+    useful for a GUI Dash application to handle drag and drop of files into a
+    Browser.
     csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
-        Set the column delimiter in CSV file.
+    Set the column delimiter in CSV file.
     description : `str`, optional
-        A Custom description.
+    A custom description.
     directory : `~pathlib.Path` object objects or valid urls, optional
-        From where to read the files.
+    From where to read the files.
     download_only: `bool`, optional, default: `False`
-        Used only when url are specified.  If True, only downloading and saving of the
-        files is performed, with no attempt to read their content.
+    Used only when url are specified.  If True, only downloading and saving of the
+    files is performed, with no attempt to read their content.
     merge : `bool`, optional, default: `False`
-        If `True` and several filenames or a ``directory`` have been provided as
-        arguments, then a single `NDDataset` with merged dataset (stacked along the first
-        dimension) is returned. In the case not all datasets have compatible dimensions or types/origins,
-        then several NDDatasets can be returned for different groups of compatible datasets.
+    If `True` and several filenames or a ``directory`` have been provided as
+    arguments, then a single `NDDataset` with merged dataset (stacked along the first
+    dimension) is returned. In the case not all datasets have compatible dimensions or types/origins,
+    then several NDDatasets can be returned for different groups of compatible datasets.
     origin : str, optional
-        If provided it may be used to define the type of experiment: e.g., 'ir', 'raman',..
-        or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
-        automatically, but can be set manually.
+    If provided it may be used to define the type of experiment: e.g., 'ir', 'raman',..
+    or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
+    automatically, but can be set manually.
 
-        It is used for instance whn reading directory with different types of files, for merging
-        the datasets with compatible dimensions and different origin into different groups.
+    It is used, for instance, when reading a directory with different types of
+    files and merging compatible datasets into separate groups by origin.
 
-        It is also used when reading with the CSV protocol. In order to properly interpret CSV file
-        it can be necessary to set the origin of the spectra. Up to now only ``'omnic'`` and ``'tga'``
-        have been implemented.
+    It is also used when reading with the CSV protocol. In order to properly interpret CSV file
+    it can be necessary to set the origin of the spectra. Up to now only ``'omnic'`` and ``'tga'``
+    have been implemented.
     pattern : `str`, optional
-        A pattern to filter the files to read.
+    A pattern to filter the files to read.
 
-        .. versionadded:: 0.7.2
+    .. versionadded:: 0.7.2
     protocol : `str`, optional
-        ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
-        ``'opus'``, ````, ``'matlab'``, ``'jcamp'``,
-        ``'csv'``, ``'excel'``}. If not provided, the correct protocol
-        is inferred (whenever it is possible) from the filename extension.
+    ``Protocol`` used for reading, for example ``'scp'``, ``'omnic'``,
+    ``'opus'``, ``'matlab'``, ``'jcamp'``, ``'csv'``, or ``'excel'``.
+    If not provided, the correct protocol is inferred whenever possible
+    from the filename extension.
     read_only: `bool`, optional, default: `True`
-        Used only when url are specified.  If True, saving of the
-        files is performed in the current directory, or in the directory specified by
-        the directory parameter.
+    Used only when url are specified.  If True, saving of the
+    files is performed in the current directory, or in the directory specified by
+    the directory parameter.
     recursive : `bool`, optional, default: `False`
-        Read also in subfolders.
+    Read also in subfolders.
     replace_existing: `bool`, optional, default: `False`
-        Used only when url are specified. By default, existing files are not replaced
-        so not downloaded.
+    Used only when url are specified. By default, existing files are not replaced
+    so not downloaded.
     sortbydate : `bool`, optional, default: `True`
-        Sort multiple filename by acquisition date.
+    Sort multiple filename by acquisition date.
     allow_inconsistent_x : `bool`, optional, default: `False`
-        If `True`, allows reading SPG files where spectra have different x-axis
-        parameters. A list of `NDDataset` objects (one per spectrum) is returned.
-        If `False` (default), a `ValueError` is raised for inconsistent x-axes.
-
-        .. versionadded:: 0.9.4
+    Allow spectra with different x-axis definitions and return one `NDDataset`
+    per spectrum instead of a merged dataset.
 
     See Also
     --------
@@ -329,7 +321,7 @@ def read_spg(*paths, **kwargs):
     read_opus : Read OPUS spectra.
     read_labspec : Read Raman LABSPEC spectra (:file:`.txt`).
     read_omnic : Read Omnic spectra (:file:`.spa`, :file:`.spg`, :file:`.srs`).
-    read_soc : Read Surface Optics Corps. files (:file:`.ddr` , :file:`.hdr` or :file:`.sdr`).
+    read_soc : Read Surface Optics Corp. files (:file:`.ddr`, :file:`.hdr`, or :file:`.sdr`).
     read_galactic : Read Galactic files (:file:`.spc`).
     read_quadera : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
 
@@ -349,7 +341,7 @@ def read_spg(*paths, **kwargs):
 
     """
     kwargs["filetypes"] = ["OMNIC files (*.spg)"]
-    kwargs["protocol"] = ["spg", "spa"]
+    kwargs["protocol"] = ["spg"]
     importer = Importer()
     return importer(*paths, **kwargs)
 
@@ -361,8 +353,8 @@ def read_spa(*paths, **kwargs):
     Parameters
     ----------
     *paths : `str`, `~pathlib.Path` object objects or valid urls, optional
-        The data source(s) can be specified by the name or a list of name for the
-        file(s) to be loaded:
+    The data source(s) can be specified by the name or a list of name for the
+    file(s) to be loaded:
 
         - e.g., ( filename1, filename2, ...,  kwargs )
 
@@ -371,68 +363,68 @@ def read_spa(*paths, **kwargs):
         - e.g., ( [filename1, filename2, ...], kwargs )
 
         The returned datasets are merged to form a single dataset,
-        except if ``merge`` is set to `False`.
+        except if ``merge`` is set to ``False``.
     **kwargs : keyword parameters, optional
         See Other Parameters.
 
     Returns
     -------
     object : `NDDataset` or list of `NDDataset`
-        The returned dataset(s).
+    The returned dataset(s).
 
     Other Parameters
     ----------------
     content : `bytes` object, optional
-        Instead of passing a filename for further reading, a bytes content can be
-        directly provided as bytes objects.
-        The most convenient way is to use a dictionary. This feature is particularly
-        useful for a GUI Dash application to handle drag and drop of files into a
-        Browser.
+    Instead of passing a filename for further reading, a bytes content can be
+    directly provided as bytes objects.
+    The most convenient way is to use a dictionary. This feature is particularly
+    useful for a GUI Dash application to handle drag and drop of files into a
+    Browser.
     csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
-        Set the column delimiter in CSV file.
+    Set the column delimiter in CSV file.
     description : `str`, optional
-        A Custom description.
+    A custom description.
     directory : `~pathlib.Path` object objects or valid urls, optional
-        From where to read the files.
+    From where to read the files.
     download_only: `bool`, optional, default: `False`
-        Used only when url are specified.  If True, only downloading and saving of the
-        files is performed, with no attempt to read their content.
+    Used only when url are specified.  If True, only downloading and saving of the
+    files is performed, with no attempt to read their content.
     merge : `bool`, optional, default: `False`
-        If `True` and several filenames or a ``directory`` have been provided as
-        arguments, then a single `NDDataset` with merged dataset (stacked along the first
-        dimension) is returned. In the case not all datasets have compatible dimensions or types/origins,
-        then several NDDatasets can be returned for different groups of compatible datasets.
+    If `True` and several filenames or a ``directory`` have been provided as
+    arguments, then a single `NDDataset` with merged dataset (stacked along the first
+    dimension) is returned. In the case not all datasets have compatible dimensions or types/origins,
+    then several NDDatasets can be returned for different groups of compatible datasets.
     origin : str, optional
-        If provided it may be used to define the type of experiment: e.g., 'ir', 'raman',..
-        or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
-        automatically, but can be set manually.
+    If provided it may be used to define the type of experiment: e.g., 'ir', 'raman',..
+    or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
+    automatically, but can be set manually.
 
-        It is used for instance whn reading directory with different types of files, for merging
-        the datasets with compatible dimensions and different origin into different groups.
+    It is used, for instance, when reading a directory with different types of
+    files and merging compatible datasets into separate groups by origin.
 
-        It is also used when reading with the CSV protocol. In order to properly interpret CSV file
-        it can be necessary to set the origin of the spectra. Up to now only ``'omnic'`` and ``'tga'``
-        have been implemented.
+    It is also used when reading with the CSV protocol. In order to properly interpret CSV file
+    it can be necessary to set the origin of the spectra. Up to now only ``'omnic'`` and ``'tga'``
+    have been implemented.
     pattern : `str`, optional
-        A pattern to filter the files to read.
+    A pattern to filter the files to read.
 
-        .. versionadded:: 0.7.2
+    .. versionadded:: 0.7.2
     protocol : `str`, optional
-        ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
-        ``'opus'``, ````, ``'matlab'``, ``'jcamp'``,
-        ``'csv'``, ``'excel'``}. If not provided, the correct protocol
-        is inferred (whenever it is possible) from the filename extension.
+    ``Protocol`` used for reading, for example ``'scp'``, ``'omnic'``,
+    ``'opus'``, ``'matlab'``, ``'jcamp'``, ``'csv'``, or ``'excel'``.
+    If not provided, the correct protocol is inferred whenever possible
+    from the filename extension.
     read_only: `bool`, optional, default: `True`
-        Used only when url are specified.  If True, saving of the
-        files is performed in the current directory, or in the directory specified by
-        the directory parameter.
+    Used only when url are specified.  If True, saving of the
+    files is performed in the current directory, or in the directory specified by
+    the directory parameter.
     recursive : `bool`, optional, default: `False`
-        Read also in subfolders.
+    Read also in subfolders.
     replace_existing: `bool`, optional, default: `False`
-        Used only when url are specified. By default, existing files are not replaced
-        so not downloaded.
+    Used only when url are specified. By default, existing files are not replaced
+    so not downloaded.
     sortbydate : `bool`, optional, default: `True`
-        Sort multiple filename by acquisition date.
+    Sort multiple filename by acquisition date.
 
     See Also
     --------
@@ -442,7 +434,7 @@ def read_spa(*paths, **kwargs):
     read_opus : Read OPUS spectra.
     read_labspec : Read Raman LABSPEC spectra (:file:`.txt`).
     read_omnic : Read Omnic spectra (:file:`.spa`, :file:`.spg`, :file:`.srs`).
-    read_soc : Read Surface Optics Corps. files (:file:`.ddr` , :file:`.hdr` or :file:`.sdr`).
+    read_soc : Read Surface Optics Corp. files (:file:`.ddr`, :file:`.hdr`, or :file:`.sdr`).
     read_galactic : Read Galactic files (:file:`.spc`).
     read_quadera : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
 
@@ -476,8 +468,8 @@ def read_srs(*paths, **kwargs):
     Parameters
     ----------
     *paths : `str`, `~pathlib.Path` object objects or valid urls, optional
-        The data source(s) can be specified by the name or a list of name for the
-        file(s) to be loaded:
+    The data source(s) can be specified by the name or a list of name for the
+    file(s) to be loaded:
 
         - e.g., ( filename1, filename2, ...,  kwargs )
 
@@ -486,14 +478,14 @@ def read_srs(*paths, **kwargs):
         - e.g., ( [filename1, filename2, ...], kwargs )
 
         The returned datasets are merged to form a single dataset,
-        except if ``merge`` is set to `False`.
+        except if ``merge`` is set to ``False``.
     **kwargs : keyword parameters, optional
         See Other Parameters.
 
     Returns
     -------
     object : `NDDataset` or list of `NDDataset`
-        The returned dataset(s).
+    The returned dataset(s).
         When return_bg is set to 'True', the series background is returned.
 
     Other Parameters
@@ -506,56 +498,56 @@ def read_srs(*paths, **kwargs):
         wavenumbers. However, in some cases the data maybe stored in low to high order.
         If your data appear reversed, set 'reverse_x=True'.
     content : `bytes` object, optional
-        Instead of passing a filename for further reading, a bytes content can be
-        directly provided as bytes objects.
-        The most convenient way is to use a dictionary. This feature is particularly
-        useful for a GUI Dash application to handle drag and drop of files into a
-        Browser.
+    Instead of passing a filename for further reading, a bytes content can be
+    directly provided as bytes objects.
+    The most convenient way is to use a dictionary. This feature is particularly
+    useful for a GUI Dash application to handle drag and drop of files into a
+    Browser.
     csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
-        Set the column delimiter in CSV file.
+    Set the column delimiter in CSV file.
     description : `str`, optional
-        A Custom description.
+    A custom description.
     directory : `~pathlib.Path` object objects or valid urls, optional
-        From where to read the files.
+    From where to read the files.
     download_only: `bool`, optional, default: `False`
-        Used only when url are specified.  If True, only downloading and saving of the
-        files is performed, with no attempt to read their content.
+    Used only when url are specified.  If True, only downloading and saving of the
+    files is performed, with no attempt to read their content.
     merge : `bool`, optional, default: `False`
-        If `True` and several filenames or a ``directory`` have been provided as
-        arguments, then a single `NDDataset` with merged dataset (stacked along the first
-        dimension) is returned. In the case not all datasets have compatible dimensions or types/origins,
-        then several NDDatasets can be returned for different groups of compatible datasets.
+    If `True` and several filenames or a ``directory`` have been provided as
+    arguments, then a single `NDDataset` with merged dataset (stacked along the first
+    dimension) is returned. In the case not all datasets have compatible dimensions or types/origins,
+    then several NDDatasets can be returned for different groups of compatible datasets.
     origin : str, optional
-        If provided it may be used to define the type of experiment: e.g., 'ir', 'raman',..
-        or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
-        automatically, but can be set manually.
+    If provided it may be used to define the type of experiment: e.g., 'ir', 'raman',..
+    or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
+    automatically, but can be set manually.
 
-        It is used for instance whn reading directory with different types of files, for merging
-        the datasets with compatible dimensions and different origin into different groups.
+    It is used, for instance, when reading a directory with different types of
+    files and merging compatible datasets into separate groups by origin.
 
-        It is also used when reading with the CSV protocol. In order to properly interpret CSV file
-        it can be necessary to set the origin of the spectra. Up to now only ``'omnic'`` and ``'tga'``
-        have been implemented.
+    It is also used when reading with the CSV protocol. In order to properly interpret CSV file
+    it can be necessary to set the origin of the spectra. Up to now only ``'omnic'`` and ``'tga'``
+    have been implemented.
     pattern : `str`, optional
-        A pattern to filter the files to read.
+    A pattern to filter the files to read.
 
-        .. versionadded:: 0.7.2
+    .. versionadded:: 0.7.2
     protocol : `str`, optional
-        ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
-        ``'opus'``, ````, ``'matlab'``, ``'jcamp'``,
-        ``'csv'``, ``'excel'``}. If not provided, the correct protocol
-        is inferred (whenever it is possible) from the filename extension.
+    ``Protocol`` used for reading, for example ``'scp'``, ``'omnic'``,
+    ``'opus'``, ``'matlab'``, ``'jcamp'``, ``'csv'``, or ``'excel'``.
+    If not provided, the correct protocol is inferred whenever possible
+    from the filename extension.
     read_only: `bool`, optional, default: `True`
-        Used only when url are specified.  If True, saving of the
-        files is performed in the current directory, or in the directory specified by
-        the directory parameter.
+    Used only when url are specified.  If True, saving of the
+    files is performed in the current directory, or in the directory specified by
+    the directory parameter.
     recursive : `bool`, optional, default: `False`
-        Read also in subfolders.
+    Read also in subfolders.
     replace_existing: `bool`, optional, default: `False`
-        Used only when url are specified. By default, existing files are not replaced
-        so not downloaded.
+    Used only when url are specified. By default, existing files are not replaced
+    so not downloaded.
     sortbydate : `bool`, optional, default: `True`
-        Sort multiple filename by acquisition date.
+    Sort multiple filename by acquisition date.
 
     See Also
     --------
@@ -565,7 +557,7 @@ def read_srs(*paths, **kwargs):
     read_opus : Read OPUS spectra.
     read_labspec : Read Raman LABSPEC spectra (:file:`.txt`).
     read_omnic : Read Omnic spectra (:file:`.spa`, :file:`.spg`, :file:`.srs`).
-    read_soc : Read Surface Optics Corps. files (:file:`.ddr` , :file:`.hdr` or :file:`.sdr`).
+    read_soc : Read Surface Optics Corp. files (:file:`.ddr`, :file:`.hdr`, or :file:`.sdr`).
     read_galactic : Read Galactic files (:file:`.spc`).
     read_quadera : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
 
@@ -686,33 +678,49 @@ def _read_spg(*args, **kwargs):
         units.append(info["units"])
         titles.append(info["title"])
 
-    # Pre-compute positions needed for both consistent and inconsistent cases
+    # Extract positions of intensity and spectrum metadata blocks before
+    # checking consistency because they are needed by both return paths.
     key_is_03 = keys == 3
     indices03 = np.nonzero(key_is_03)
     position03 = 304 * np.ones(len(indices03[0]), dtype="int") + 16 * indices03[0]
 
-    # Pre-read spectra titles and acquisition dates (needed if allow_inconsistent_x=True)
     key_is_6B = keys == 107
     indices6B = np.nonzero(key_is_6B)
     position6B = 304 * np.ones(len(indices6B[0]), dtype="int") + 16 * indices6B[0]
+
     spectitles, acquisitiondates, timestamps = [], [], []
     for i in range(nspec):
-        fid.seek(position6B[i] + 2)
+        fid.seek(position6B[i] + 2)  # go to line and skip 2 bytes
         spa_title_pos = fromfile(fid, "uint32", 1)
+
+        # read omnic filename
         spa_title = _readbtext(fid, spa_title_pos, 256)
         spectitles.append(spa_title)
+
+        # and the acquisition date
         fid.seek(spa_title_pos + 256)
         timestamp = fromfile(fid, dtype="uint32", count=1)
+        # since 31/12/1899, 00:00
         acqdate = datetime(1899, 12, 31, 0, 0, tzinfo=UTC) + timedelta(
             seconds=int(timestamp),
         )
         acquisitiondates.append(acqdate)
         timestamps.append(acqdate.timestamp())
 
-    # check the consistency of xaxis and data units
-    allow_inconsistent_x = kwargs.get("allow_inconsistent_x", False)
+        # Not used at present
+        # -------------------
+        # extract positions of '1B' codes (history text), sometimes absent,
+        # e.g. peakresolve)
+        #  key_is_1B = (keys == 27)
+        #  indices1B =  # np.nonzero(key_is_1B)
+        #  position1B = 304 * np.ones(len(indices1B[0]), dtype='int') + 16 * indices6B[0]
+        #  if len(position1B) != 0:  # read history texts
+        #     for j in range(nspec):  determine the position of information
+        #        f.seek(position1B[j] + 2)  #
+        #        history_pos = fromfile(f,  'uint32', 1)
+        #        history =  _readbtext(f, history_pos[0])
+        #        allhistories.append(history)
 
-    # Check if all spectra have consistent x-axis parameters
     xaxis_consistent = (
         np.ptp(nx) == 0
         and np.ptp(firstx) == 0
@@ -722,52 +730,46 @@ def _read_spg(*args, **kwargs):
     )
 
     if not xaxis_consistent:
-        if allow_inconsistent_x:
-            # Return list of individual datasets for each spectrum
-            dataset_list = []
+        if kwargs.get("allow_inconsistent_x", False):
+            datasets = []
             for i in range(nspec):
-                # Read intensity data for this spectrum
-                single_data = _getintensities(fid, position03[i])
-
-                # Create individual dataset
-                single_dataset = dataset.__class__(np.expand_dims(single_data, axis=0))
-                single_dataset.units = units[i]
-                single_dataset.title = titles[i]
-                single_dataset.name = f"{filename.stem}_spectrum_{i}"
-                single_dataset.filename = filename
-
-                # Create coordinates for this spectrum
-                _x = Coord.linspace(
-                    firstx[i],
-                    lastx[i],
-                    nx[i],
-                    title=xtitles[i] if i < len(xtitles) else xtitles[0],
-                    units=xunits[i] if i < len(xunits) else xunits[0],
+                single = dataset.__class__(
+                    np.expand_dims(_getintensities(fid, position03[i]), axis=0)
                 )
-
-                _y = Coord(
-                    [timestamps[i]],
-                    title="acquisition timestamp (GMT)",
-                    units="s",
-                    labels=([acquisitiondates[i]], [spectitles[i]]),
+                single.units = units[i]
+                single.title = titles[i]
+                single.name = f"{filename.stem}_spectrum_{i}"
+                single.filename = filename
+                single.set_coordset(
+                    y=Coord(
+                        [timestamps[i]],
+                        title="acquisition timestamp (GMT)",
+                        units="s",
+                        labels=([acquisitiondates[i]], [spectitles[i]]),
+                    ),
+                    x=Coord.linspace(
+                        firstx[i],
+                        lastx[i],
+                        nx[i],
+                        title=xtitles[i],
+                        units=xunits[i],
+                    ),
                 )
-
-                single_dataset.set_coordset(y=_y, x=_x)
-                single_dataset.description = kwargs.get(
+                single.acquisition_date = acquisitiondates[i]
+                single.origin = "omnic"
+                single.description = kwargs.get(
                     "description",
                     f"Omnic title: {spg_title}\nOmnic filename: {filename}",
                 )
-                single_dataset._date = utcnow()
-                single_dataset.history = (
+                single._date = utcnow()
+                single.history = (
                     f"Imported from spg file {filename} (spectrum {i})."
                 )
-
-                dataset_list.append(single_dataset)
+                datasets.append(single)
 
             fid.close()
-            return dataset_list
+            return datasets
 
-        # Default behavior: raise error with helpful message
         inconsistencies = []
         if np.ptp(nx) != 0:
             inconsistencies.append(
@@ -781,39 +783,16 @@ def _read_spg(*args, **kwargs):
             inconsistencies.append(f"x-axis units differ: {list(set(xunits))}")
         if len(set(units)) != 1:
             inconsistencies.append(f"spectra units differ: {list(set(units))}")
-
+        fid.close()
         raise ValueError(
             "Error: Inconsistent data set - "
             f"{', '.join(inconsistencies)}. "
-            "To read files with inconsistent x-axes, use allow_inconsistent_x=True. "
-            "This will return a list of NDDataset objects (one per spectrum)."
+            "Use allow_inconsistent_x=True to return one NDDataset per spectrum."
         )
 
-    # All spectra have consistent x-axis - create single merged dataset
     data = np.ndarray((nspec, nx[0]), dtype="float32")
-
-    # Now the intensity data (position03 already computed above)
-
-    # Read number of spectral intensities
     for i in range(nspec):
         data[i, :] = _getintensities(fid, position03[i])
-
-    # Spectra titles and acquisition dates already read above (before consistency check)
-    # No need to re-read them here
-
-    # Not used at present
-    # -------------------
-    # extract positions of '1B' codes (history text), sometimes absent,
-    # e.g. peakresolve)
-    #  key_is_1B = (keys == 27)
-    #  indices1B =  # np.nonzero(key_is_1B)
-    #  position1B = 304 * np.ones(len(indices1B[0]), dtype='int') + 16 * indices6B[0]
-    #  if len(position1B) != 0:  # read history texts
-    #     for j in range(nspec):  determine the position of information
-    #        f.seek(position1B[j] + 2)  #
-    #        history_pos = fromfile(f,  'uint32', 1)
-    #        history =  _readbtext(f, history_pos[0])
-    #        allhistories.append(history)
 
     fid.close()
 
@@ -841,6 +820,9 @@ def _read_spg(*args, **kwargs):
     )
 
     dataset.set_coordset(y=_y, x=_x)
+    if acquisitiondates:
+        dataset.acquisition_date = min(acquisitiondates)
+    dataset.origin = "omnic"
 
     # Set description, date and history
     # Omnic spg file don't have specific "origin" field stating the oirigin of the data
@@ -869,6 +851,11 @@ def _read_spa(*args, **kwargs):
     fid, kwargs = _openfid(filename, **kwargs)
 
     return_ifg = kwargs.get("return_ifg", None)
+    if return_ifg not in (None, "sample", "background"):
+        raise ValueError(
+            f"Invalid return_ifg value: {return_ifg!r}. "
+            "Expected None, 'sample', or 'background'."
+        )
 
     # Read name:
     # The name  starts at position hex 1e = decimal 30. Its max length
@@ -1033,19 +1020,22 @@ def _read_spa(*args, **kwargs):
     dataset.set_coordset(y=_y, x=_x)
     dataset.name = spa_name  # to be consistent with omnic behaviour
     dataset.filename = filename
+    if return_ifg != "background":
+        dataset.acquisition_date = acquisitiondate
+    dataset.origin = "omnic"
 
     # Set origin, description, history, date
     # Omnic spg file don't have specific "origin" field stating the oirigin of the data
 
     dataset.description = kwargs.get("description", default_description) + "\n"
-    if len(spa_comments) > 1:
+    if spa_comments:
         dataset.description += "# Comments from Omnic:\n"
         for comment in spa_comments:
             dataset.description += comment + "\n---------------------\n"
 
     dataset.history = "Imported from spa file(s)"
 
-    if "spa_history" in locals() and len("spa_history".strip(" ")) > 0:
+    if "spa_history" in locals() and len(spa_history.strip()) > 0:
         dataset.history = (
             "Data processing history from Omnic :\n------------------------------------\n"
             + spa_history

@@ -12,6 +12,8 @@ from numpy.random import RandomState
 from sklearn import decomposition
 
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
+from spectrochempy.analysis._base._analysisbase import NotFittedError
+from spectrochempy.analysis._base._result import AnalysisResult
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 
 __all__ = ["NMF"]
@@ -193,6 +195,7 @@ class NMF(DecompositionAnalysis):
         self._nmf = decomposition.NMF(
             n_components=self.n_components,
             init=self.init,
+            solver=self.solver,
             beta_loss=self.beta_loss,
             tol=self.tol,
             max_iter=self.max_iter,
@@ -237,6 +240,54 @@ class NMF(DecompositionAnalysis):
     def _get_components(self):
         self._components = self._nmf.components_
         return self._components
+
+    # ----------------------------------------------------------------------------------
+    # Result object
+    # ----------------------------------------------------------------------------------
+    @property
+    def result(self):
+        """
+        Return the NMF result object.
+
+        Returns
+        -------
+        AnalysisResult
+            Result object containing outputs (components, W)
+            and diagnostics (reconstruction_error, n_iter).
+        """
+        if not self._fitted:
+            raise NotFittedError(
+                "The fit method must be used before accessing the result",
+            )
+
+        # NOTE: a new AnalysisResult is created on every access.
+        # Caching is deliberately deferred to keep the implementation
+        # simple and aligned with PCA / SVD result behaviour.
+
+        return AnalysisResult(
+            estimator="NMF",
+            parameters={
+                "n_components": self.n_components,
+                "init": self.init,
+                "solver": self.solver,
+                "beta_loss": self.beta_loss,
+                "tol": self.tol,
+                "max_iter": self.max_iter,
+                "random_state": self.random_state,
+                "alpha_W": self.alpha_W,
+                "alpha_H": self.alpha_H,
+                "l1_ratio": self.l1_ratio,
+                "shuffle": self.shuffle,
+            },
+            outputs={
+                "components": self.components,
+                "W": self.transform(),
+            },
+            diagnostics={
+                "reconstruction_error": self._nmf.reconstruction_err_,
+                "n_iter": self._nmf.n_iter_,
+            },
+        )
 
     def fit(self, X):
         """

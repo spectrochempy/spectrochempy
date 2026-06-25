@@ -27,6 +27,8 @@ from spectrochempy.utils._logging import debug_
 from spectrochempy.utils._logging import info_
 from spectrochempy.utils._logging import warning_
 from spectrochempy.utils.exceptions import ProtocolError
+from spectrochempy.utils.exceptions import SpectroChemPyError
+from spectrochempy.utils.exceptions import WrongFileFormatError
 from spectrochempy.utils.file import check_filename_to_open
 from spectrochempy.utils.file import get_directory_name
 from spectrochempy.utils.file import get_filenames
@@ -102,7 +104,23 @@ class Importer(HasTraits):
                 not in list(zip(*registry.filetypes, strict=False))[0]
                 + list(zip(*registry.aliases, strict=False))[0]
             ):
-                raise TypeError(f"Filetype `{key}` is unknown in spectrochempy")
+                filename = self.files[key][0]
+                requested_protocol = kwargs.get("protocol")
+                if requested_protocol == "ALL":
+                    requested_protocol = None
+                requested = (
+                    f" with protocol='{requested_protocol}'"
+                    if requested_protocol is not None
+                    else ""
+                )
+                available = ", ".join(
+                    f"'{item}'" for item in sorted(set(self.protocols.values()))
+                )
+                raise WrongFileFormatError(
+                    f"Cannot read '{filename}'{requested}: detected file type "
+                    f"'{key}' is unsupported.\n"
+                    f"Supported protocols are: {available}."
+                )
             else:
                 # here files are read / or remotely from the disk using filenames
                 self._switch_protocol(key, self.files, **kwargs)
@@ -170,8 +188,14 @@ class Importer(HasTraits):
         if protocol is not None and protocol != "ALL":
             if not isinstance(protocol, list):
                 protocol = [protocol]
-            if key and key[1:] not in protocol and self.alias[key[1:]] not in protocol:
-                return
+            detected_protocol = self.alias.get(key[1:], key[1:])
+            if key and key[1:] not in protocol and detected_protocol not in protocol:
+                raise ProtocolError(
+                    protocol[0] if len(protocol) == 1 else protocol,
+                    list(self.protocols.values()),
+                    filename=files[key][0],
+                    detected_protocol=detected_protocol,
+                )
 
         datasets = []
         files[key] = sorted(files[key])  # sort the files according their names
@@ -223,6 +247,8 @@ class Importer(HasTraits):
                     warning_(str(e))
 
             except Exception as e:
+                if isinstance(e, SpectroChemPyError):
+                    raise
                 warning_(str(e))
 
             if dataset is not None:
@@ -273,7 +299,7 @@ def read(*paths, **kwargs):
         - e.g., ( [filename1, filename2, ...], kwargs )
 
         The returned datasets are merged to form a single dataset,
-        except if ``merge`` is set to `False`.
+        except if ``merge`` is set to ``False``.
     **kwargs : keyword parameters, optional
         See Other Parameters.
 
@@ -293,7 +319,7 @@ def read(*paths, **kwargs):
     csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
         Set the column delimiter in CSV file.
     description : `str`, optional
-        A Custom description.
+        A custom description.
     directory : `~pathlib.Path` object objects or valid urls, optional
         From where to read the files.
     download_only: `bool`, optional, default: `False`
@@ -309,8 +335,8 @@ def read(*paths, **kwargs):
         or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
         automatically, but can be set manually.
 
-        It is used for instance whn reading directory with different types of files, for merging
-        the datasets with compatible dimensions and different origin into different groups.
+        It is used, for instance, when reading a directory with different types of
+        files and merging compatible datasets into separate groups by origin.
 
         It is also used when reading with the CSV protocol. In order to properly interpret CSV file
         it can be necessary to set the origin of the spectra. Up to now only ``'omnic'`` and ``'tga'``
@@ -343,7 +369,7 @@ def read(*paths, **kwargs):
     read_opus : Read OPUS spectra.
     read_labspec : Read Raman LABSPEC spectra (:file:`.txt`).
     read_omnic : Read Omnic spectra (:file:`.spa`, :file:`.spg`, :file:`.srs`).
-    read_soc : Read Surface Optics Corps. files (:file:`.ddr` , :file:`.hdr` or :file:`.sdr`).
+    read_soc : Read Surface Optics Corp. files (:file:`.ddr`, :file:`.hdr`, or :file:`.sdr`).
     read_galactic : Read Galactic files (:file:`.spc`).
     read_quadera : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
     read_csv : Read CSV files (:file:`.csv`).
@@ -433,9 +459,13 @@ def read(*paths, **kwargs):
         try:
             kwargs["filetypes"] = [importer.filetypes[protocol]]
         except KeyError as e:
+            filename = paths[0] if paths else None
+            if isinstance(filename, dict) and filename:
+                filename = next(iter(filename))
             raise ProtocolError(
                 protocol,
                 list(importer.protocols.values()),
+                filename=filename,
             ) from e
 
     return importer(*paths, **kwargs)

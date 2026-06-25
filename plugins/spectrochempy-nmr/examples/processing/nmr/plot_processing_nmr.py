@@ -39,36 +39,36 @@ dataset
 
 # %%
 # Plot the dataset
-dataset.plot_map()
+_ = dataset.plot_map()
 # %%
 # Extract slices along x
 s = dataset[-27.6, :]
-s.plot()
+_ = s.plot()
 # %%
 # Baseline correction of this slice
 # Note that only the real part is corrected
 sa = s.snip(snip_width=100)
-sa.plot()
+_ = sa.plot()
 # %%
 # apply this correction to the whole dataset
 sb = dataset.snip(snip_width=100)
-sb.plot_map()
+_ = sb.plot_map()
 # %%
 # Select a region of interest
 sc = sb[
     -40.0:-15.0, 55.0:20.0
 ]  # note the use of float to make selection using coordinates (not point indexes)
-sc.plot_map()
+_ = sc.plot_map()
 # %%
 # Extract slices along x
 s1 = sc[-27.6, :]
-s1.plot()
+_ = s1.plot()
 # %%
 s2 = sc[-25.7, :]
-s2.plot()
+_ = s2.plot()
 # %%
 # plot two slices on the same figure
-s1.plot()
+_ = s1.plot()
 s2.plot(
     clear=False,
     color="red",
@@ -91,8 +91,8 @@ s4 = s4.squeeze()
 
 # %%
 # plot the two slices on the same figure
-s3.plot(color="violet", ls="-", lw="2")
-s4.plot(clear=False, color="green", ls="-", lw="2")
+_ = s3.plot(color="violet", ls="-", lw="2")
+_ = s4.plot(clear=False, color="green", ls="-", lw="2")
 # %%
 # Peak picking
 # ------------
@@ -214,17 +214,17 @@ f1.max_iter = 5000
 
 # %%
 # Fit the slice s4p
-f1.fit(s4p)
+_ = f1.fit(s4p)
 
 # %%
 # Show the result
-s4p.plot()
+_ = s4p.plot()
 ax = (f1.components[:]).plot(clear=False)
 ax.autoscale(enable=True, axis="y")
 
 # Plotmerit
 som = f1.inverse_transform()
-f1.plotmerit(offset=2)
+_ = f1.plotmerit(offset=2)
 
 # %%
 # This ends the example ! The following line can be removed or commented

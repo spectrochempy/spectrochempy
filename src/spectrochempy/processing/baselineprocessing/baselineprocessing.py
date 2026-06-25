@@ -667,6 +667,7 @@ baseline/trends for different segments of the data.
             self._X.sort(inplace=True, descend=True)
 
         if self.model == "asls":  # restore the mask
+            baseline = np.ma.array(baseline, mask=self.Xmasked.mask, copy=False)
             self._X._mask = self.Xmasked.mask
 
         self._outfit = (baseline, bplist)  # store the result
@@ -742,7 +743,7 @@ baseline/trends for different segments of the data.
 
         .. deprecated:: 0.8
             Use `Baseline.plot(show_regions=True)` instead.
-            Will be removed in version 0.10.0.
+            Will be removed in version 0.11.0.
 
         Parameters
         ----------
@@ -752,11 +753,11 @@ baseline/trends for different segments of the data.
         Warns
         -----
         DeprecationWarning
-            This method is deprecated and will be removed in 0.10.0.
+            This method is deprecated and will be removed in 0.11.0.
             Use `plot(show_regions=True)` instead.
         """
         warnings.warn(
-            "Baseline.show_regions() is deprecated and will be removed in 0.10.0. "
+            "Baseline.show_regions() is deprecated and will be removed in 0.11.0. "
             "Use Baseline.plot(show_regions=True) instead.",
             DeprecationWarning,
             stacklevel=2,
@@ -857,6 +858,8 @@ def get_baseline(dataset, *ranges, **kwargs):
     For more flexibility and functionality, it is advised to use the Baseline class
     processor instead.
 
+    Masked input regions are preserved on the returned baseline.
+
     """
     blc = Baseline()
     # by default, model is 'polynomial' and order is 1.
@@ -869,7 +872,7 @@ def get_baseline(dataset, *ranges, **kwargs):
     if blc.model == "polynomial":
         if not ranges and blc.order != 1:
             warning_(
-                f"As no ranges was provided, baseline() uses the features limit "
+                f"As no ranges were provided, baseline() uses the feature limits "
                 f"with order='linear'. Provided order={blc.order} is ignored",
             )
             blc.order = "linear"
@@ -893,8 +896,8 @@ def basc(dataset, *ranges, **kwargs):
     *ranges : a variable number of pair-tuples
         The regions taken into account for the manual baseline correction.
     **kwargs
-        Optional keyword parameters (see `Baseline` Parameters for a detailed
-        information).
+        Optional keyword parameters (see `Baseline` Parameters for more
+        detailed information).
 
     Returns
     -------
@@ -917,6 +920,8 @@ def basc(dataset, *ranges, **kwargs):
     For more flexibility and functionality, it is advised to use the Baseline class
     processor instead.
 
+    Masked input regions are preserved on the returned corrected dataset.
+
     """
     return dataset - get_baseline(dataset, *ranges, **kwargs)
 
@@ -925,8 +930,9 @@ def detrend(dataset, order="linear", breakpoints=None, **kwargs):
     r"""
     Remove polynomial trend along a dimension from dataset.
 
-    Depending on the ``order`` parameter, `detrend` removes the best-fit polynomial line
-    (in the least squares sense) from the data and returns the remaining data.
+    Depending on the ``order`` parameter, `detrend` removes the best-fit
+    polynomial line (in the least-squares sense) from the data and returns the
+    remaining data.
 
     Parameters
     ----------
@@ -935,11 +941,11 @@ def detrend(dataset, order="linear", breakpoints=None, **kwargs):
     order : non-negative `int` or `str` among ['constant', 'linear', 'quadratic', 'cubic'], optional, default:'linear'
         The order of the polynomial trend.
 
-        * If ``order=0`` or ``'constant'`` , the mean of data is subtracted to remove
+        * If ``order=0`` or ``'constant'``, the mean of the data is subtracted to remove
           a shift trend.
         * If ``order=1`` or ``'linear'`` (default), the best straight-fit line is
           subtracted from data to remove a linear trend (drift).
-        * If order=2 or ``order=quadratic`` ,  the best fitted nth-degree polynomial
+        * If ``order=2`` or ``order='quadratic'``, the best-fit nth-degree polynomial
           line is subtracted from data to remove a quadratic polynomial trend.
         * ``order=n`` can also be used to remove any nth-degree polynomial trend.
 
@@ -990,19 +996,23 @@ def asls(dataset, lamb=1e5, asymmetry=0.05, tol=1e-3, max_iter=50):
         The input data.
     lamb : `float`, optional, default:1e5
         The smoothness parameter for the AsLS method. Larger values make the
-        baseline stiffer. Values should be in the range (0, 1e9)
-    asymmetry : `float`, optional, default:0.05,
+        baseline stiffer. Values should be in the range `(0, 1e9)`.
+    asymmetry : `float`, optional, default:0.05
         The asymmetry parameter for the AsLS method. It is typically between 0.001
         and 0.1. 0.001 gives almost the same fit as the unconstrained least squares.
-    tol = `float`, optional, default:1e-3
-        The tolerance parameter for the AsLS method. Smaller values make the fitting better but potentially increases the number of iterations and the running time. Values should be in the range (0, 1).
-    max_iter = `int`, optional, default:50
-        Maximum number of :term:`AsLS` iteration.
+    tol : `float`, optional, default:1e-3
+        The tolerance parameter for the AsLS method. Smaller values improve the
+        fit but may increase the number of iterations and the runtime. Values
+        should be in the range `(0, 1)`.
+    max_iter : `int`, optional, default:50
+        Maximum number of :term:`AsLS` iterations.
 
     Returns
     -------
     `NDDataset`
         The baseline corrected dataset.
+
+        Masked input regions are preserved in the returned dataset.
 
     See Also
     --------
@@ -1029,9 +1039,9 @@ def asls(dataset, lamb=1e5, asymmetry=0.05, tol=1e-3, max_iter=50):
 
 def snip(dataset, snip_width=50):
     """
-    Perform Simple Non-Iterative Peak (SNIP) detection algorithm.
+    Perform the Simple Non-Iterative Peak (SNIP) detection algorithm.
 
-    See :cite:t:`ryan:1988` .
+    See :cite:t:`ryan:1988`.
 
     Parameters
     ----------
@@ -1044,6 +1054,8 @@ def snip(dataset, snip_width=50):
     -------
     `NDDataset`
         The baseline corrected dataset.
+
+        Masked input regions are preserved in the returned dataset.
 
     See Also
     --------
@@ -1081,6 +1093,8 @@ def rubberband(dataset):
     -------
     `NDDataset`
         The baseline corrected dataset.
+
+        Masked input regions are preserved in the returned dataset.
 
     See Also
     --------

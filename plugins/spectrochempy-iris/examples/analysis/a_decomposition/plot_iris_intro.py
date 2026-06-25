@@ -56,8 +56,13 @@ print(f"Loaded dataset: {ds}")
 
 K = ds.iris.kernel_matrix(kernel_type="langmuir", q=[-7, -1, 50])
 iris_analysis = scp.iris.IRIS(reg_par=[-10, 1, 12])
-iris_analysis.fit(ds, K)
+_ = iris_analysis.fit(ds, K)
 
-_ = iris_analysis.f[-7].plot_contour(colorbar=True)
+# %%
+# Grouped fitted outputs are also available from `iris_analysis.result`, while
+# direct access such as `iris_analysis.f` remains supported.
+f = iris_analysis.result.f
+
+_ = f[-7].plot_contour(colorbar=True)
 
 # scp.show()

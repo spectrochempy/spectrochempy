@@ -27,6 +27,7 @@ from sklearn import decomposition
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis._base._analysisbase import _wrap_ndarray_output_to_nddataset
+from spectrochempy.analysis._base._result import AnalysisResult
 from spectrochempy.application.application import info_
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.decorators import deprecated
@@ -523,6 +524,9 @@ and `St`.
             self.getConc = dill.loads(base64.b64decode(self.getConc))  # noqa: S301
         if self.getSpec is not None and isinstance(self.getSpec, str):
             self.getSpec = dill.loads(base64.b64decode(self.getSpec))  # noqa: S301
+
+        # storage for ALS diagnostics captured during _fit
+        self._fit_meta = None
 
     # ----------------------------------------------------------------------------------
     # Private methods
@@ -1055,6 +1059,14 @@ and `St`.
                 )
                 info_("Stop ALS optimization.")
 
+        # capture ALS diagnostics for the result property
+        self._fit_meta = {
+            "n_iter": niter,
+            "change": change,
+            "residual_std": stdev,
+            "converged": change < self.tol,
+        }
+
         # return _fit results
         self._components = St
         return (
@@ -1189,13 +1201,13 @@ and `St`.
 
     @property
     @property
-    @deprecated(replace="St_ls", removed="0.10.0")
+    @deprecated(replace="St_ls", removed="0.11.0")
     def St_unconstrained(self):
         """Deprecated. Equivalent to `St_ls`."""
         return self.St_ls
 
     @property
-    @deprecated(replace="St_ls", removed="0.10.0")
+    @deprecated(replace="St_ls", removed="0.11.0")
     def S_soft(self):
         """Deprecated. Equivalent to `St_ls`."""
         return self.St_ls
@@ -1245,6 +1257,80 @@ and `St`.
         Requires `MCRALS.storeIterations` set to True.
         """
         return self._outfit[9]
+
+    # ----------------------------------------------------------------------------------
+    # Result property
+    # ----------------------------------------------------------------------------------
+
+    @property
+    def result(self):
+        """
+        ``AnalysisResult`` object wrapping the fitted MCRALS estimator.
+
+        Returns
+        -------
+        AnalysisResult
+            Container with ``parameters``, ``outputs``, and ``diagnostics``
+            derived from the fitted estimator.
+
+        Raises
+        ------
+        NotFittedError
+            If the estimator has not been fitted yet.
+        """
+        if not self._fitted:
+            raise NotFittedError(
+                f"This {type(self).__name__} instance is not fitted yet. "
+                "Call 'fit' with appropriate arguments before using this estimator."
+            )
+
+        parameters = {
+            "n_components": self.n_components,
+            "max_iter": self.max_iter,
+            "tol": self.tol,
+            "maxdiv": self.maxdiv,
+            "solverConc": self.solverConc,
+            "solverSpec": self.solverSpec,
+            "nonnegConc": self.nonnegConc,
+            "nonnegSpec": self.nonnegSpec,
+            "unimodConc": self.unimodConc,
+            "unimodSpec": self.unimodSpec,
+            "unimodConcMod": self.unimodConcMod,
+            "unimodSpecMod": self.unimodSpecMod,
+            "unimodConcTol": self.unimodConcTol,
+            "unimodSpecTol": self.unimodSpecTol,
+            "closureConc": self.closureConc,
+            "closureTarget": (
+                f"<array shape={self.closureTarget.shape}>"
+                if isinstance(self.closureTarget, np.ndarray)
+                else self.closureTarget
+            ),
+            "closureMethod": self.closureMethod,
+            "monoDecConc": self.monoDecConc,
+            "monoDecTol": self.monoDecTol,
+            "monoIncConc": self.monoIncConc,
+            "monoIncTol": self.monoIncTol,
+            "hardConc": self.hardConc,
+            "hardSpec": self.hardSpec,
+            "normSpec": self.normSpec,
+            "storeIterations": self.storeIterations,
+        }
+
+        outputs = {
+            "C": self.C,
+            "components": self.components,
+        }
+
+        diagnostics = {}
+        if self._fit_meta is not None:
+            diagnostics = {k: v for k, v in self._fit_meta.items() if v is not None}
+
+        return AnalysisResult(
+            estimator="MCRALS",
+            parameters=parameters,
+            outputs=outputs,
+            diagnostics=diagnostics,
+        )
 
 
 # --------------------------------------------------------------------------------------

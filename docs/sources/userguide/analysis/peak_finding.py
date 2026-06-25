@@ -27,15 +27,14 @@
 # %% [markdown]
 # # Peak Maxima Finding
 #
-# This tutorial shows how to find peaks and determine peak maxima with spectrochempy.
-# As prerequisite, the user is
-# expected to have read the [Import](../importexport/import.rst),
+# This tutorial shows how to find peaks and determine peak maxima with SpectroChemPy.
+# As a prerequisite, the user is expected to have read the [Import](../importexport/import.rst),
 # [Import IR](../importexport/importIR.rst),
-# [slicing](../processing/slicing.rst) tutorials.
+# and [Slicing](../processing/slicing.rst) tutorials.
 #
 
 # %% [markdown]
-# Fist, as usual, we need to load the API.
+# First, as usual, we need to load the API.
 
 # %%
 import spectrochempy as scp
@@ -44,18 +43,18 @@ import spectrochempy as scp
 # ## Loading an experimental dataset
 
 # %% [markdown]
-# A typical IR dataset (CO adsorption on supported CoMo catalyst
-# in the 2300-1900 cm-1 region) will be used throughout.
+# A typical IR dataset (CO adsorption on a supported CoMo catalyst in the
+# 2300-1900 cm$^{-1}$ region) will be used throughout.
 
 # %% [markdown]
-# We load the data using the generic API method  `read` (the type of data is inferred
-# from the extension)
+# We load the data using the generic API method `read` (the data type is inferred
+# from the extension).
 
 # %%
 ds = scp.read("irdata/CO@Mo_Al2O3.SPG")
 
 # %%
-ds.y -= ds.y.data[0]  # start time a 0 for the  first spectrum
+ds.y -= ds.y.data[0]  # start time at 0 for the first spectrum
 ds.y.title = "time"
 ds.y = ds.y.to("minutes")
 
@@ -76,30 +75,31 @@ _ = reg.plot()
 
 # %% [markdown]
 # ## Find maxima by manual inspection of the plot
-# Once a given maximum has been approximately located manually with the mouse, it is
-# possible to obtain [markdown]
-# For instance, after zooming on the highest peak of the last spectrum,
+# Once a given maximum has been approximately located manually with the mouse,
+# it is possible to obtain its exact position.
+#
+# For instance, after zooming in on the highest peak of the last spectrum,
 # one finds that it is located at ~ 2115.5 cm$^{-1}$. The exact x-coordinate value can
 # be obtained using the
 # following code
-# (see the [slicing tutorial](../processing/slicing.rst) for more info):
+# (see the [Slicing tutorial](../processing/slicing.rst) for more information):
 
 # %%
 pos = reg.x[2115.5].values
 pos
 
 # %% [markdown]
-# We can easily get the list of all individual maximas at this position
+# We can easily get the list of all individual maxima at this position.
 
 # %%
-maximas = reg[:, pos].squeeze()
-_ = maximas.plot(marker="s", ls="--", color="blue")
+maxima = reg[:, pos].squeeze()
+_ = maxima.plot(marker="s", ls="--", color="blue")
 
 # %%
 ax = reg.plot()
 
 x = pos.max()
-y = maximas.max()
+y = maxima.max()
 
 ax.set_ylim(-0.01, 0.3)
 _ = ax.annotate(
@@ -113,24 +113,22 @@ _ = ax.annotate(
 
 # %% [markdown]
 # ## Find maxima with an automated method: `find_peaks()`
-# Exploring the spectra manually is useful, but cannot be made systematically in large
-# datasets with many - possibly
-# shifting peaks. The maxima of a given spectrum can be found automatically by the
-# find_peaks() method which is based
-# on [scpy.signal.find_peaks()](
+# Exploring the spectra manually is useful, but it cannot be done systematically
+# for large datasets with many, possibly shifting, peaks. The maxima of a given
+# spectrum can be found automatically by the `find_peaks()` method, which is based
+# on [scipy.signal.find_peaks()](
 # https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.find_peaks.html).
-# It returns two outputs: `peaks` a NDDataset grouping the peak maxima (wavenumbers and
-# absorbance) and `properties`
-# a dictionary containing properties of the returned peaks (it is empty
-# if no particular option is selected,
-# `see below<#options>`_ for more information).
+# It returns two outputs: `peaks`, an NDDataset grouping the peak maxima
+# (wavenumbers and absorbance), and `properties`, a dictionary containing
+# properties of the returned peaks. The dictionary is empty if no particular
+# option is selected; see below for more information.
 
 # %% [markdown]
-# ###  Default behaviour
+# ### Default behavior
 
 # %% [markdown]
-# Applying this method on the last spectrum without any option will yield 7 peaks. But
-# some peaks are very close so we use the option `distance` to avoid this.
+# Applying this method to the last spectrum without any option yields 7 peaks.
+# However, some peaks are very close, so we use the `distance` option to avoid this.
 
 # %%
 last = reg[-1]
@@ -138,7 +136,16 @@ peaks, _ = last.find_peaks(distance=5.0)
 # we do not catch the second output (properties) as it is void in this case
 
 # %% [markdown]
-# `peaks` is a NDDataset. Its `x` attribute gives the peak position:
+# On spectra with linear coordinates, spacing-related constraints can also be
+# expressed with physical units. For example, the following call is equivalent
+# to the previous one:
+
+# %%
+peaks_units, _ = last.find_peaks(distance="5 cm^-1")
+peaks_units.x.values
+
+# %% [markdown]
+# `peaks` is an NDDataset. Its `x` attribute gives the peak position:
 
 # %%
 peaks.x.values
@@ -147,14 +154,14 @@ peaks.x.values
 # The code below shows how the peaks found by this method can be marked on the plot:
 
 # %%
-ax = last.plot_pen()  # output the spectrum on ax. ax will receive next plot too
-pks = peaks + 0.02  # add a small offset on the y position of the markers
+ax = last.plot_pen()  # output the spectrum on ax; ax will receive the next plot too
+pks = peaks + 0.02  # add a small offset to the y position of the markers
 _ = pks.plot_scatter(
     ax=ax,
     marker="v",
     color="black",
     clear=False,  # we need to keep the previous output on ax
-    data_only=True,  # we don't need to redraw all things like labels, etc...
+    data_only=True,  # we do not need to redraw labels and similar elements
     ylim=(-0.01, 0.35),
 )
 
@@ -168,7 +175,7 @@ for p in pks:
         textcoords="offset points",
     )
 # %% [markdown]
-# Now we will do a peak-finding for the whole dataset:
+# Now we will perform peak finding for the whole dataset:
 
 # %%
 peakslist = [s.find_peaks(distance=5)[0] for s in reg]
@@ -187,13 +194,11 @@ for peaks in peakslist:
     )
 
 # %% [markdown]
-# It should be noted that this method finds only true maxima, not shoulders (!).
-# For the detection of such underlying
-# peaks, the use of methods based on derivatives or advanced detection methods -
-# which will be treated in separate
-# tutorial - are required. Once their maxima of a given peak have been found,
-# it is possible, for instance,
-# to plot its evolution with, e.g. the time. For instance for the peaks located
+# It should be noted that this method finds only true maxima, not shoulders.
+# Detecting such underlying peaks requires methods based on derivatives or more
+# advanced detection techniques, which will be treated in a separate tutorial.
+# Once the maxima of a given peak have been found, it is possible, for instance,
+# to plot their evolution with time. This is illustrated below for peaks located
 # at 2220-2180 cm$^{-1}$:
 
 # %%
@@ -204,14 +209,14 @@ positions = [s.find_peaks(distance=5)[0].x.values for s in reg[:, 2220.0:2180.0]
 evol = scp.NDDataset(positions, title="wavenumber at the maximum")
 evol.x = scp.Coord(
     reg.y, title="acquisition time"
-)  # the x coordinate is st to the acquisition time for each spectra
+)  # the x coordinate is set to the acquisition time for each spectrum
 
 # plot it
 _ = evol.plot(ls=":")
 
 # %% [markdown]
-# ###  Options of `find_peaks()` <a id='options'></a>
-# The default behaviour of find_peaks() will return *all* the detected maxima.
+# ### Options of `find_peaks()` <a id='options'></a>
+# The default behavior of `find_peaks()` is to return *all* detected maxima.
 # The user can choose various options to
 # select among these peaks:
 #
@@ -220,7 +225,7 @@ _ = evol.plot(ls=":")
 # and maximal heights
 # (sequence of two numbers)
 # - `prominence` : minimal prominence of the peak to be detected
-# (single number) or minimal and maximal prominence (sequence of 2 numbers). In brief
+# (single number) or minimal and maximal prominence (sequence of 2 numbers). In brief,
 # the "prominence" of a peak
 # measures how much a peak stands out from its surrounding and is the vertical distance
 # between the peak and its
@@ -229,7 +234,7 @@ _ = evol.plot(ls=":")
 # prominence when surrounded by other peaks (see below for an illustration).
 #     - in addition to the prominence, the user can define `wlen` , the width (in points)
 #     of the window used to look
-#     at neighboring minima, the peak maximum being is at the center of the window.
+#     at neighboring minima, with the peak maximum at the center of the window.
 # - `threshold` : a single number (the minimal required threshold) or a sequence of two
 # numbers (minimal and maximal).
 # The thresholds are the difference of height of the
@@ -237,28 +242,33 @@ _ = evol.plot(ls=":")
 #
 # **Parameters relative to "peak spacing":**
 # - `distance` : the required minimal horizontal distance between neighbouring peaks.
-# Smaller peaks are removed first.
-# - `width` : Required minimal width of peaks in samples (single number) or minimal and
-# maximal width. The width is
+# Smaller peaks are removed first. On a linear coordinate axis it can be given either
+# in points or in coordinate units, e.g. ``distance="10 cm^-1"``.
+# - `width` : Required minimal width of peaks or minimal and maximal width. The width is
 # assessed from the peak height,
-# prominence and neighboring signal. - In addition the user can define `rel_height`
-# (a float between 0. and 1.) used
+# prominence and neighboring signal. On a linear coordinate axis, `width` can be
+# passed either in points or in coordinate units, e.g. ``width=5 * ur("cm^-1")``.
+# - In addition the user can define `rel_height` (a float between 0. and 1.) used
 # to compute the width - see the [scipy documentation](
 # https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.peak_widths.html)
 # for further details.
-# - Finally, we mention en passant a last parameter, `plateau_size()` used for
-# selecting peaks having truly flat tops (
-# as in e.g. square-boxed signals).
+# - Finally, we mention one last parameter, `plateau_size()`, used for
+# selecting peaks with truly flat tops (as in square-shaped signals, for example).
+# As for `distance` and `width`, `wlen` and `plateau_size` can also be expressed
+# in coordinate units when the axis is linear.
+#
+# Coordinate-aware spacing constraints currently assume a linear axis. On strongly
+# non-linear coordinates, use plain point counts by setting `use_coord=False`.
 #
 # The use of some of these options for the last spectrum of the dataset is
-# exemplified in the following:
+# illustrated below:
 
 # %%
 s = reg[-1].squeeze()
 
 # %% [markdown]
-# we use squeeze it because one of the dimensions for this dataset of shape (1, N)
-# is useless
+# We use `squeeze()` because one of the dimensions of this dataset, which has
+# shape `(1, N)`, is unnecessary.
 
 # %%
 # default settings
@@ -321,6 +331,10 @@ offset = 0.20
 (peaks + offset).plot_scatter(
     ax=ax, label=label, m="v", mfc=color, mec=color, ms=5, clear=False, data_only=True
 )
+
+# The same constraint can be written with explicit coordinate units.
+peaks_units, _ = s.find_peaks(distance="10 cm^-1")
+peaks_units.x.values
 
 # find peaks with width >= 10 (none of the two maxima at ~ 2075 is detected)
 

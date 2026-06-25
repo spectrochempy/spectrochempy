@@ -119,7 +119,7 @@ Save as `activate-scpy.bat` and create a shortcut named "Mamba prompt (scpy)".
 Next Steps
 ----------
 
-Proceed to the :ref:`userguide` to start using SpectroChemPy.
+Proceed to the :ref:`user_guide` to start using SpectroChemPy.
 
 .. note::
    If you encounter any issues, see :doc:`../getting_help` for support options.

@@ -1046,7 +1046,7 @@ def test_issue417():
             x = X - X[-1]
 
             f = X.write("X.scp")
-            X_r = scp.read("X.scp")
+            X_r = scp.read("X.scp", allow_unsafe_legacy=True)
             f.unlink()
 
             assert_array_equal(X.data, X_r.data)
@@ -1786,6 +1786,8 @@ def test_var_with_units():
     r = ds.var()
     # var of data with units returns a Quantity
     assert isinstance(r, Quantity)
+    # Units must be squared
+    assert r.units == ur.Unit("m") ** 2
     # Numerical validation against NumPy
     ref = np.var(np.array([1.0, 2.0, 3.0]))
     assert abs(r.magnitude - ref) < 1e-10
@@ -1805,6 +1807,15 @@ def test_var_dim():
     ds = NDDataset(np.array([[1.0, 2.0], [3.0, 4.0]]))
     r = ds.var(dim="x")
     ref = np.var(ds.data, axis=1)
+    assert_array_equal(r.data, ref)
+
+
+def test_var_dim_with_units():
+    """Var along a dimension with units."""
+    ds = NDDataset(np.array([[1.0, 2.0], [3.0, 4.0]]), units="m")
+    r = ds.var(dim="y")
+    assert r.units == ur.Unit("m") ** 2
+    ref = np.var(ds.data, axis=0)
     assert_array_equal(r.data, ref)
 
 

@@ -33,25 +33,25 @@ nd = dataset[:, 60.0:]
 # %%
 # Basic plot
 
-nd.plot(title="original data")
+_ = nd.plot(title="original data")
 # %%
 # Detrend the data (for a easier comparison)
 
 nd1 = nd.detrend(title="detrended data")
-nd1.plot()
+_ = nd1.plot()
 # %%
 # Denoise the data using the `denoise` method with the default parameters
 # i.e., ratio=99.8
 nd2 = nd1.denoise()
-nd2.plot(title="denoised data")
+_ = nd2.plot(title="denoised data")
 # %%
 # Denoise the data using a different ratio
 nd3 = nd1.denoise(ratio=95)
-nd3.plot(title="denoised data")
+_ = nd3.plot(title="denoised data")
 # sphinx_gallery_thumbnail_number = 5
 
 nd4 = nd1.denoise(ratio=90)
-nd4.plot(title="denoised data")
+_ = nd4.plot(title="denoised data")
 
 # %%
 # This example shows that denoising can be used effectively on such spectra to increase the signal-to-noise ratio.

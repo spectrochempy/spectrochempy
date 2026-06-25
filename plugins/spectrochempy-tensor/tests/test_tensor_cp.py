@@ -11,6 +11,7 @@ import numpy as np
 import pytest
 
 from spectrochempy.analysis._base._analysisbase import NotFittedError
+from spectrochempy.analysis._base._result import AnalysisResult
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy_tensor import CP
@@ -249,6 +250,103 @@ class TestCP:
         # Need to compare .data since components returns NDDataset
         np.testing.assert_array_equal(cp.components.data, cp.B.data)
 
+    def test_cp_result_is_analysis_result(self):
+        """Test result property returns an AnalysisResult."""
+        ds = _make_synthetic_3d()
+        cp = CP(n_components=2)
+        cp.fit(ds)
+
+        result = cp.result
+
+        assert isinstance(result, AnalysisResult)
+        assert result.estimator == "CP"
+
+    def test_cp_result_outputs_match_properties(self):
+        """Test result outputs use the same public accessors as CP properties."""
+        ds = _make_synthetic_3d()
+        cp = CP(n_components=2)
+        cp.fit(ds)
+
+        result = cp.result
+
+        assert result.factors == cp.loadings
+        assert result.weights is cp.weights
+        assert result.factors[0] is cp.A
+        assert result.factors[1] is cp.B
+        assert result.factors[2] is cp.C
+
+    def test_cp_result_diagnostics_match_properties(self):
+        """Test result diagnostics expose the current CP metrics."""
+        ds = _make_synthetic_3d()
+        cp = CP(n_components=2, return_errors=True)
+        cp.fit(ds)
+
+        result = cp.result
+
+        assert result.errors is cp.errors
+        assert result.SSE == cp.SSE
+        assert result.explained_variance == cp.explained_variance
+        assert result.core_consistency == cp.core_consistency
+
+    def test_cp_result_attribute_access_and_dir(self):
+        """Test attribute-style result access and discovery."""
+        ds = _make_synthetic_3d()
+        cp = CP(n_components=2)
+        cp.fit(ds)
+
+        result = cp.result
+
+        assert result.factors == result.outputs["factors"]
+        assert result.weights is result.outputs["weights"]
+        assert result.SSE == result.diagnostics["SSE"]
+        assert result.explained_variance == result.diagnostics["explained_variance"]
+        names = dir(result)
+        assert "factors" in names
+        assert "weights" in names
+        assert "SSE" in names
+        assert "explained_variance" in names
+
+    def test_cp_result_parameters(self):
+        """Test result parameters expose the main CP configuration."""
+        cp = CP(
+            n_components=2,
+            init="random",
+            svd="randomized_svd",
+            tol_outer=1.0e-6,
+            tol_inner=1.0e-5,
+            cvg_criterion="rec_error",
+            fixed_modes=[0],
+            return_errors=True,
+        )
+        cp.fit(_make_synthetic_3d())
+
+        assert cp.result.parameters == {
+            "n_components": 2,
+            "n_iter_max": 100,
+            "n_iter_max_inner": 10,
+            "init": "random",
+            "svd": "randomized_svd",
+            "tol_outer": 1.0e-6,
+            "tol_inner": 1.0e-5,
+            "random_state": None,
+            "verbose": 0,
+            "return_errors": True,
+            "non_negative": False,
+            "l1_reg": None,
+            "l2_reg": None,
+            "l2_square_reg": None,
+            "unimodality": None,
+            "normalize": None,
+            "simplex": None,
+            "normalized_sparsity": None,
+            "soft_sparsity": None,
+            "smoothness": None,
+            "monotonicity": None,
+            "hard_sparsity": None,
+            "cvg_criterion": "rec_error",
+            "fixed_modes": [0],
+        }
+
     def test_cp_not_fitted_error(self):
         """Test that properties raise NotFittedError when not fitted."""
         cp = CP(n_components=2)
@@ -265,6 +363,8 @@ class TestCP:
             _ = cp.explained_variance
         with pytest.raises(NotFittedError):
             _ = cp.core_consistency
+        with pytest.raises(NotFittedError):
+            _ = cp.result
 
     def test_cp_svd_options(self):
         """Test different svd options."""

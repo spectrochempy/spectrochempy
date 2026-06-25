@@ -299,12 +299,15 @@ class SpectroChemPy(Application):
                         jsonname.unlink()
                     else:
                         # check integrity of the file
+                        invalid_json = False
                         with jsonname.open() as f:
                             try:
                                 json.load(f)
                             except json.JSONDecodeError:
-                                jsonname.unlink()
-                                continue
+                                invalid_json = True
+                        if invalid_json:
+                            jsonname.unlink()
+                            continue
                         configfiles.append(jsonname)
 
             for cfgname in configfiles:

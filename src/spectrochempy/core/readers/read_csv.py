@@ -21,6 +21,106 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.core.readers.importer import _openfid
+from spectrochempy.utils.exceptions import UnsupportedOriginError
+
+
+def _parse_spectrochempy_csv_header(row):
+    """
+    Parse the simple metadata header emitted by ``write_csv()``.
+
+    The current writer emits either:
+
+    * ``[dataset_title / dataset_units]`` for data-only 1D exports; or
+    * ``[coord_title / coord_units, dataset_title / dataset_units]`` for 1D
+      exports with coordinates.
+
+    Metadata reconstruction is intentionally conservative: cells must contain
+    the explicit ``" / "`` separator used by the writer. Any parse failure
+    falls back to ``None`` metadata so generic external CSV files keep the
+    current semantics.
+    """
+
+    def _split_title_and_unit(cell):
+        if not isinstance(cell, str) or " / " not in cell:
+            return None, None
+        title, unit = cell.rsplit(" / ", 1)
+        title = title.strip()
+        unit = unit.strip()
+        if not title or not unit:
+            return None, None
+        return title, unit
+
+    if not row:
+        return {}
+
+    if len(row) == 1:
+        dataset_title, dataset_units = _split_title_and_unit(row[0])
+        if dataset_title is None:
+            return {}
+        return {
+            "dataset_title": dataset_title,
+            "dataset_units": dataset_units,
+        }
+
+    if len(row) == 2:
+        coord_title, coord_units = _split_title_and_unit(row[0])
+        dataset_title, dataset_units = _split_title_and_unit(row[1])
+        if coord_title is None or dataset_title is None:
+            return {}
+        return {
+            "coord_title": coord_title,
+            "coord_units": coord_units,
+            "dataset_title": dataset_title,
+            "dataset_units": dataset_units,
+        }
+
+    return {}
+
+
+def _iter_meaningful_csv_lines(text):
+    """
+    Yield non-empty, non-comment CSV lines.
+
+    Only the narrow comment prefixes requested for simple external CSV support
+    are recognized here: ``#`` and ``;``.
+    """
+
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if stripped.startswith("#") or stripped.startswith(";"):
+            continue
+        yield line
+
+
+def _detect_csv_delimiter(lines, fallback):
+    """
+    Detect a simple delimiter among comma, semicolon, and tab.
+
+    The heuristic intentionally stays conservative and only looks for a stable
+    repeated separator in the first few meaningful lines.
+    """
+
+    candidates = [",", ";", "\t"]
+    sample = list(lines[:5])
+    best = fallback
+    best_score = 0
+
+    for candidate in candidates:
+        counts = [line.count(candidate) for line in sample]
+        positive = [count for count in counts if count > 0]
+        if not positive:
+            continue
+        if len(set(positive)) != 1:
+            continue
+        score = positive[0]
+        if score > best_score:
+            best = candidate
+            best_score = score
+
+    return best
+
 
 try:
     locale.setlocale(locale.LC_ALL, "en_US")  # to avoid problems with date format
@@ -54,7 +154,7 @@ def read_csv(*paths, **kwargs):
         - e.g., ( [filename1, filename2, ...], kwargs )
 
         The returned datasets are merged to form a single dataset,
-        except if ``merge`` is set to `False`.
+        except if ``merge`` is set to ``False``.
     **kwargs : keyword parameters, optional
         See Other Parameters.
 
@@ -74,7 +174,7 @@ def read_csv(*paths, **kwargs):
     csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
         Set the column delimiter in CSV file.
     description : `str`, optional
-        A Custom description.
+        A custom description.
     directory : `~pathlib.Path` object objects or valid urls, optional
         From where to read the files.
     download_only: `bool`, optional, default: `False`
@@ -90,8 +190,8 @@ def read_csv(*paths, **kwargs):
         or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
         automatically, but can be set manually.
 
-        It is used for instance whn reading directory with different types of files, for merging
-        the datasets with compatible dimensions and different origin into different groups.
+        It is used, for instance, when reading a directory with different types of
+        files and merging compatible datasets into separate groups by origin.
 
         It is also used when reading with the CSV protocol. In order to properly interpret CSV file
         it can be necessary to set the origin of the spectra. Up to now only ``'omnic'`` and ``'tga'``
@@ -101,10 +201,10 @@ def read_csv(*paths, **kwargs):
 
         .. versionadded:: 0.7.2
     protocol : `str`, optional
-        ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
-        ``'opus'``, ``'matlab'``, ``'jcamp'``,
-        ``'csv'``, ``'excel'``}. If not provided, the correct protocol
-        is inferred (whenever it is possible) from the filename extension.
+        ``Protocol`` used for reading, for example ``'scp'``, ``'omnic'``,
+        ``'opus'``, ``'matlab'``, ``'jcamp'``, ``'csv'``, or ``'excel'``.
+        If not provided, the correct protocol is inferred whenever possible
+        from the filename extension.
     read_only: `bool`, optional, default: `True`
         Used only when url are specified.  If True, saving of the
         files is performed in the current directory, or in the directory specified by
@@ -161,14 +261,15 @@ def _read_csv(*args, **kwargs):
     txt = fid.read()
     fid.close()
 
-    # We assume this csv file contains only numbers # TODO: write a more general reader
-    if ";" in txt:
-        # look like the delimiter is ;
-        # if comma is also present, it could be that french writer was used.
-        txt = txt.replace(",", ".")
-        delimiter = ";"
+    lines = list(_iter_meaningful_csv_lines(txt))
+    delimiter = _detect_csv_delimiter(lines, delimiter)
 
-    d = list(csv.reader(txt.splitlines(), delimiter=delimiter))
+    # Semicolon-delimited scientific exports often also use decimal commas.
+    if delimiter == ";":
+        lines = [line.replace(",", ".") for line in lines]
+
+    d = list(csv.reader(lines, delimiter=delimiter))
+    header_metadata = {}
 
     # Skip header row if present (non-numeric first row from write_csv)
     def _is_numeric_row(row):
@@ -181,6 +282,7 @@ def _read_csv(*args, **kwargs):
         return True
 
     if d and not _is_numeric_row(d[0]):
+        header_metadata = _parse_spectrochempy_csv_header(d[0])
         d = d[1:]
 
     d = np.array(d, dtype=float).T
@@ -245,19 +347,29 @@ def _read_csv(*args, **kwargs):
     dataset.description = kwargs.get("description", '"name" ' + "read from .csv file")
     dataset.history = "Read from .csv file"
 
+    if kwargs.get("title", None) is None and "dataset_title" in header_metadata:
+        dataset.title = header_metadata["dataset_title"]
+    if kwargs.get("units", None) is None and "dataset_units" in header_metadata:
+        dataset.units = header_metadata["dataset_units"]
+    if "coord_title" in header_metadata:
+        dataset.x.title = header_metadata["coord_title"]
+    if "coord_units" in header_metadata:
+        dataset.x.units = header_metadata["coord_units"]
+
     # here we can check some particular format
     origin = kwargs.get("origin", "")
-    if "omnic" in origin:
+    if origin == "omnic":
         # this will be treated as csv export from omnic (IR data)
         dataset = _add_omnic_info(dataset, **kwargs)
-    elif "tga" in origin:
+    elif origin == "tga":
         # this will be treated as csv export from tga analysis
         dataset = _add_tga_info(dataset, **kwargs)
     elif origin:
-        raise NotImplementedError(
-            f"Sorry, but reading a csv file with '{origin}' origin is not implemented. "
-            "Please, remove or set the keyword 'origin'\n "
-            "(Up to now implemented csv files are: `omnic` , `tga` )",
+        raise UnsupportedOriginError(
+            filename=filename,
+            protocol="csv",
+            origin=origin,
+            supported_origins=("omnic", "tga"),
         )
 
     # reset modification date to cretion date

@@ -101,7 +101,7 @@ surf = X.plot_surface(linewidth=0.0)
 # First, we create a PCA object with default parameters and we compute the components with the fit() method:
 # %%
 pca = scp.PCA()
-pca.fit(X)
+_ = pca.fit(X)
 
 # %% [markdown]
 # The default number of components is given by min(X.shape). As often in spectroscopy
@@ -115,13 +115,28 @@ pca.n_components
 # This can be done by either reseting the number of components of an existing object:
 # %%
 pca.n_components = 8
-pca.fit(X)
+_ = pca.fit(X)
 
 # %% [markdown]
 # Or directly by creating a PCA instance with the desired number of components:
 # %%
 pca = scp.PCA(n_components=8)
-pca.fit(X)
+_ = pca.fit(X)
+
+# %% [markdown]
+# The grouped PCA outputs are available from `pca.result`. This is the most
+# convenient grouped API when you want related fitted outputs together:
+# %%
+scores = pca.result.scores
+loadings = pca.result.loadings
+variance = pca.result.explained_variance
+
+# %% [markdown]
+# The mapping form, such as `pca.result.outputs["scores"]`, remains available
+# for introspection and programmatic access. Historical direct estimator
+# accessors such as `pca.scores`, `pca.loadings`, and `pca.transform()` also
+# remain supported in this release, so `.result` is promoted without being
+# mandatory.
 
 # %% [markdown]
 # The choice of the optimum number of components to describe a dataset is always a delicate matter. It can be based on:
@@ -163,8 +178,8 @@ _ = pca.loadings.plot()
 # the `plotmerit()` method which plots both $X$, $\hat{X}$ (in orange) and the residuals (in grey):
 # %%
 pca = scp.PCA(n_components=4)
-pca.fit(X)
-pca.plot_merit()
+_ = pca.fit(X)
+_ = pca.plot_merit()
 
 
 # %% [markdown]

@@ -110,4 +110,5 @@ If your plugin has optional dependencies, test both paths:
 
 .. seealso::
 
-    :ref:`plugin-architecture` for a complete guide to writing plugins.
+    :ref:`plugin-architecture` for the runtime architecture overview and
+    :ref:`plugin-author-guide` for the plugin author guide.

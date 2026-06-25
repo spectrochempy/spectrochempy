@@ -61,7 +61,7 @@ Why NOT SpectroChemPy ?
 
 You might **NOT** want to use `SpectroChemPy` if:
 
-- You are averse to command line code (Python) or scripting. Since   `SpectroChemPy` is essentially an Application Programming Interface (API), it   requires writing commands and small scripts. Its documentation and resources contain fully documented   examples (see :ref:`examples-index`) and tutorials (see :ref:`userguide`),   which should be easy to translate into   your own data. In particular, the use of Jupyter notebooks mixing texts, code blocks and figures, so that basic   procedures (data import, basic processing and analysis, etc.) do not require much programming knowledge.
+- You are averse to command line code (Python) or scripting. Since `SpectroChemPy` is essentially an Application Programming Interface (API), it requires writing commands and small scripts. Its documentation and resources contain fully documented examples (see :ref:`examples-index`) and tutorials (see :ref:`user_guide`), which should be easy to translate into your own data. In particular, the use of Jupyter notebooks mixing text, code blocks, and figures means that basic procedures (data import, basic processing, analysis, etc.) do not require much programming knowledge.
 
 - you are working on spectroscopic data that are difficult to process with `SpectroChemPy` (currently mainly   focused on optical spectroscopy and NMR) because some components or tools (e.g., importing your raw data, ...) are   missing: please suggest new features that should be added (:ref:`contributing.bugs_report`). We will take into   consideration all suggestions to make `SpectroChemPy` more widely and easily usable.
 

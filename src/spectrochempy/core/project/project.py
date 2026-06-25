@@ -10,14 +10,12 @@ import pathlib
 import textwrap
 import uuid
 import warnings
-from functools import wraps
 
 import dill  # noqa: F401
 import traitlets as tr
 
 from spectrochempy.core.dataset.nddataset import NDIO
 from spectrochempy.core.project.abstractproject import AbstractProject
-from spectrochempy.core.script import Script
 from spectrochempy.utils.meta import Meta
 from spectrochempy.utils.print import DisplayItem
 from spectrochempy.utils.print import DisplaySection
@@ -38,20 +36,32 @@ from spectrochempy.utils.traits import NDDatasetType
 @tr.signature_has_traits
 class Project(AbstractProject, NDIO):
     """
-    A manager for projects, datasets and scripts.
+    Lightweight hierarchical container for datasets and subprojects.
 
-    It can handle multiple datasets, subprojects, and scripts in a main
-    project.
+    ``Project`` owns child objects (``NDDataset`` and nested ``Project``
+    instances) with strict single-parent ownership. It enforces:
+
+    * **Single-parent ownership** — a child has at most one parent, and
+      moving a child between projects is an ownership transfer.
+    * **Acyclic hierarchy** — self-insertion and ancestor insertion are
+      rejected with ``ValueError``.
+    * **Explicit duplicate rejection** — adding a child whose name already
+      exists in the project raises ``ValueError``.
+    * **Key/name identity** — after insertion or replacement,
+      ``project[key].name == key``.
+
+    ``Project`` is a dataset container, not a workspace, workflow engine,
+    provenance graph, or generic object store.
 
     Parameters
     ----------
     *args : Series of objects, optional
         Argument type will be interpreted correctly if they are of type
-        `NDDataset` ,  `Project` , or other objects such as `Script` .
+        ``NDDataset`` or ``Project``.
         This is optional, as they can be added later.
     argnames : list, optional
         If not None, this list gives the names associated to each
-        object passed as args. It MUST be the same length that the
+        object passed as args. It MUST be the same length as the
         number of args, or an error will be raised.
         If None, the internal name of each object will be used instead.
     name : str, optional
@@ -63,7 +73,6 @@ class Project(AbstractProject, NDIO):
     See Also
     --------
     NDDataset : The main object containing arrays.
-    Script : Executables scripts container.
 
     Examples
     --------
@@ -84,8 +93,6 @@ class Project(AbstractProject, NDIO):
     _parent = tr.This()
     _projects = tr.Dict(tr.This())
     _datasets = tr.Dict(NDDatasetType())
-    _scripts = tr.Dict(tr.Instance(Script))
-    _others = tr.Dict()
     _meta = tr.Instance(Meta)
 
     _filename = tr.Instance(pathlib.Path, allow_none=True)
@@ -112,29 +119,42 @@ class Project(AbstractProject, NDIO):
     # ----------------------------------------------------------------------------------
     def _set_from_type(self, obj, name=None):
         from spectrochempy.core.dataset.nddataset import NDDataset
-        from spectrochempy.core.script import Script
 
         if isinstance(obj, NDDataset):
             # add it to the _datasets dictionary
             self.add_dataset(obj, name)
 
-        elif isinstance(obj, type(self)):  # can not use Project here!
+        elif isinstance(obj, type(self)):
             self.add_project(obj, name)
 
-        elif isinstance(obj, Script):
-            self.add_script(obj, name)
-
-        elif hasattr(obj, "name"):
-            self._others[obj.name] = obj
-
         else:
-            raise ValueError(
-                f"objects of type {type(obj).__name__} has no name and so "
-                "cannot be appended to the project ",
+            raise TypeError(
+                f"Project does not accept objects of type {type(obj).__name__}. "
+                "Only NDDataset and Project instances are supported."
             )
 
     def _get_from_type(self, name):
         pass  # TODO: ???
+
+    def _check_cycle(self, new_parent):
+        """
+        Raise ValueError if setting parent to new_parent would create a cycle.
+
+        A cycle exists when new_parent is reachable from self by following
+        the parent chain upward. This means new_parent is already a descendant
+        of self in the project tree, and making it the parent of self would
+        create a loop.
+        """
+        if new_parent is None:
+            return
+        current = new_parent
+        while current is not None:
+            if current is self:
+                raise ValueError(
+                    "Setting this parent would create a cycle in the "
+                    "Project hierarchy."
+                )
+            current = current._parent
 
     def _repr_html_(self):
         sections = self._repr_sections()
@@ -238,20 +258,51 @@ class Project(AbstractProject, NDIO):
         if "/" in key:
             # Case of composed name (we assume not more than one level subproject
             parent, child = key.split("/")[0], key.split("/")[1]
-            if parent in self.projects_names:
-                if child in self._projects[parent].datasets_names:
-                    return self._projects[parent]._datasets[child]
-                if child in self._projects[parent].scripts_names:
-                    return self._projects[parent]._scripts[child]
+            if (
+                parent in self.projects_names
+                and child in self._projects[parent].datasets_names
+            ):
+                return self._projects[parent]._datasets[child]
         if key in self.datasets_names:
             return self._datasets[key]
         if key in self.projects_names:
             return self._projects[key]
-        if key in self.scripts_names:
-            return self._scripts[key]
         raise KeyError(f"{key}: This object name does not exist in this project.")
 
     def __setitem__(self, key, value):
+        """
+        Set ``project[key] = value``, inserting or replacing a child.
+
+        When *key* already exists, the existing child is replaced: its
+        parent is cleared, the new child is attached, and the new child's
+        ``.name`` is set to *key* (enforcing key/name identity).  The
+        old child is detached and its parent becomes ``None``.
+
+        When *key* does not exist, the operation delegates to
+        :meth:`add_dataset` or :meth:`add_project` depending on the value
+        type, with *key* as the entry name.
+
+        Type mismatch between the existing entry and the new value raises
+        ``ValueError``.
+
+        Parameters
+        ----------
+        key : str
+            Project entry key.
+        value : `NDDataset` or `Project`
+            Child object to insert or replace.
+
+        Raises
+        ------
+        KeyError
+            If *key* is not a string.
+        ValueError
+            If *key* exists but for a different type of object.
+        ValueError
+            If replacing would create a cycle (when *value* is a
+            ``Project`` that is an ancestor of this project).
+
+        """
         if not isinstance(key, str):
             raise KeyError("The key must be a string.")
 
@@ -262,14 +313,17 @@ class Project(AbstractProject, NDIO):
             )
 
         if key in self.datasets_names:
+            old = self._datasets[key]
             value.parent = self
             self._datasets[key] = value
+            old._parent = None
+            value.name = key
         elif key in self.projects_names:
+            old = self._projects[key]
             value.parent = self
             self._projects[key] = value
-        elif key in self.scripts_names:
-            value.parent = self
-            self._scripts[key] = value
+            old._parent = None
+            value.name = key
         else:
             # the key does not exist
             self._set_from_type(value, name=key)
@@ -308,9 +362,6 @@ class Project(AbstractProject, NDIO):
             for k, _v in project._datasets.items():
                 s += f"{sep} ⤷ {k} (dataset)\n"
 
-            for k, _v in project._scripts.items():
-                s += f"{sep} ⤷ {k} (script)\n"
-
             if len(s) == lens:
                 # nothing has been found in the project
                 s += f"{sep} (empty project)\n"
@@ -326,16 +377,59 @@ class Project(AbstractProject, NDIO):
             "parent",
             "datasets",
             "projects",
-            "scripts",
         ]
 
-    def __copy__(self):
+    def _copy(self, deep=True, memo=None):
+        """
+        Create a copy of this project.
+
+        Parameters
+        ----------
+        deep : bool
+            If True, recursively copy all children (deep / detached copy).
+            If False, create a new container with shared children (shallow copy).
+        memo : dict or None
+            Memo dictionary for ``deepcopy`` support.
+
+        Returns
+        -------
+        Project
+        """
         new = Project()
-        for item in self._attributes_():
-            item = "_" + item
-            data = getattr(self, item)
-            setattr(new, item, cpy.copy(data))
+
+        if memo is not None:
+            memo[id(self)] = new
+
+        new._name = self._name
+        new._explicit_name = self._explicit_name
+        new._meta = cpy.deepcopy(self._meta, memo=memo)
+
+        if deep:
+            for name, ds in self._datasets.items():
+                new.add_dataset(cpy.deepcopy(ds, memo=memo), name=name)
+            for name, sub in self._projects.items():
+                new.add_project(cpy.deepcopy(sub, memo=memo), name=name)
+        else:
+            new._datasets = cpy.copy(self._datasets)
+            new._projects = cpy.copy(self._projects)
+
         return new
+
+    def __copy__(self):
+        """
+        Return a fully independent copy (recursive detached).
+
+        .. note::
+
+            Unlike Python's default shallow ``copy.copy``, this method
+            produces a deep copy identical to ``copy.deepcopy``.  See
+            :meth:`copy` for details.
+        """
+        return self._copy(deep=True)
+
+    def __deepcopy__(self, memo):
+        """Return a fully independent copy with deepcopy memo support."""
+        return self._copy(deep=True, memo=memo)
 
     # ----------------------------------------------------------------------------------
     # properties
@@ -374,11 +468,12 @@ class Project(AbstractProject, NDIO):
 
     @property
     def parent(self):
-        """Instance of the Project which is the parent (if any) of the current project (project)."""
+        """Parent project of this subproject, or ``None`` when this is a root project (project)."""
         return self._parent
 
     @parent.setter
     def parent(self, value):
+        self._check_cycle(value)
         if self._parent is not None:
             # A parent project already exists for this subproject but the
             # entered values gives a different parent. This is not allowed,
@@ -452,35 +547,14 @@ class Project(AbstractProject, NDIO):
         self.add_projects(*projects)
 
     @property
-    def scripts_names(self):
-        """Names of all scripts included in this project (list)."""
-        return list(self._scripts.keys())
-
-    @property
-    def scripts(self):
-        """Scripts included in this project (list)."""
-        s = []
-        for name in self.scripts_names:
-            s.append(self._scripts[name])
-        return s
-
-    @scripts.setter
-    def scripts(self, scripts):
-        self.add_scripts(*scripts)
-
-    @property
     def allnames(self):
         """Names of all objects contained in this project (list)."""
-        return self.datasets_names + self.projects_names + self.scripts_names
+        return self.datasets_names + self.projects_names
 
     @property
     def allitems(self):
         """All items contained in this project (list)."""
-        return (
-            list(self._datasets.items())
-            + list(self._projects.items())
-            + list(self._scripts.items())
-        )
+        return list(self._datasets.items()) + list(self._projects.items())
 
     # ----------------------------------------------------------------------------------
     # Public methods
@@ -497,9 +571,38 @@ class Project(AbstractProject, NDIO):
             return "Project"
         return name == "Project"
 
-    def copy(self):
-        """Make an exact copy of the current project."""
-        return self.__copy__()
+    def copy(self, deep=True):
+        """
+        Make a copy of the current project.
+
+        This method produces a recursive detached copy (every child is a new
+        independent object) when called without arguments (``deep=True``).
+        In that mode, copied children are re-attached inside the copied tree,
+        so nested datasets and subprojects point to their copied parent.
+        With ``deep=False`` it creates a new container whose children are
+        shared references to the original — the children's ``parent`` pointers
+        remain unchanged.
+
+        .. note::
+
+            ``copy.copy(project)`` and ``copy.deepcopy(project)`` both
+            produce a deep copy, matching the default ``copy(deep=True)``
+            behavior.  This is intentional per the project copy semantics
+            RFC (``maintainers/rfcs/project-copy-semantics-rfc.md``) and
+            differs from Python's default shallow ``copy.copy`` semantics.
+
+        Parameters
+        ----------
+        deep : bool, optional
+            If True (default), a recursive detached copy is made
+            where every child is a new independent object.
+            If False, a new container is created with shared children.
+
+        Returns
+        -------
+        Project
+        """
+        return self._copy(deep=deep)
 
     # ----------------------------------------------------------------------------------
     # dataset items
@@ -508,12 +611,20 @@ class Project(AbstractProject, NDIO):
         """
         Add several datasets to the current project.
 
+        Each dataset is added via :meth:`add_dataset`.  If any dataset
+        name collides with an existing entry, a ``ValueError`` is raised
+        and no datasets are added (the first duplicate raises).
+
         Parameters
         ----------
         *datasets : series of `NDDataset`
             Datasets to add to the current project.
-            The name of the entries in the project will be identical to the
-            names of the datasets.
+            Entry keys are the datasets' current names.
+
+        Raises
+        ------
+        ValueError
+            If any dataset name already exists in this project.
 
         See Also
         --------
@@ -536,14 +647,25 @@ class Project(AbstractProject, NDIO):
         """
         Add a single dataset to the current project.
 
+        The dataset is attached to this project as its parent, and its
+        ``.name`` is set to the entry key (matching the key/name identity
+        invariant).  If a child with the same name already exists in the
+        project (datasets and subprojects share a single namespace),
+        a ``ValueError`` is raised.
+
         Parameters
         ----------
         dataset : `NDDataset`
-            Datasets to add.
-            The name of the entry will be the name of the dataset, except
-            if parameter `name` is defined.
+            Dataset to add.
         name : str, optional
-            If provided the name will be used to name the entry in the project.
+            Entry key in the project.  If not provided, defaults to
+            ``dataset.name``.  When provided, ``dataset.name`` is
+            overwritten to match this value.
+
+        Raises
+        ------
+        ValueError
+            If a child named ``name`` already exists in this project.
 
         See Also
         --------
@@ -557,27 +679,30 @@ class Project(AbstractProject, NDIO):
         >>> proj.add_dataset(ds1, name='Toto')
 
         """
-        dataset.parent = self
         if name is None:
             name = dataset.name
 
-        n = 1
-        while name in self.allnames:
-            # this name already exists
-            name = f"{dataset.name}-{n}"
-            n += 1
+        if name in self.allnames:
+            raise ValueError(
+                f"An object named '{name}' already exists in this project."
+            )
 
+        dataset.parent = self
         dataset.name = name
         self._datasets[name] = dataset
 
     def remove_dataset(self, name):
         """
-        Remove a dataset from the project.
+        Remove a dataset from the project and reset its parent to ``None``.
 
         Parameters
         ----------
         name : str
             Name of the dataset to remove.
+
+        See Also
+        --------
+        remove_project : Remove a subproject.
 
         """
         self._datasets[name]._parent = None  # remove the parent info
@@ -602,14 +727,14 @@ class Project(AbstractProject, NDIO):
 
         .. deprecated::
             Use :meth:`clear_datasets` instead.
-            Will be removed in version 0.10.0.
+            Will be removed in version 0.11.0.
 
         See Also
         --------
         clear_datasets : Remove all datasets.
         """
         warnings.warn(
-            "remove_all_dataset() is deprecated and will be removed in 0.10.0; "
+            "remove_all_dataset() is deprecated and will be removed in 0.11.0; "
             "use clear_datasets() instead.",
             DeprecationWarning,
             stacklevel=2,
@@ -621,12 +746,26 @@ class Project(AbstractProject, NDIO):
     # ----------------------------------------------------------------------------------
     def add_projects(self, *projects):
         """
-        Add one or a series of projects to the current project.
+        Add one or more subprojects to the current project.
+
+        Each subproject is added via :meth:`add_project`.  If any
+        subproject name collides with an existing entry, a
+        ``ValueError`` is raised.
 
         Parameters
         ----------
-        projects : project instances
-            The projects to add to the current ones.
+        *projects : series of `Project`
+            The subprojects to add.
+            Entry keys are the subprojects' current names.
+
+        Raises
+        ------
+        ValueError
+            If any subproject name already exists in this project.
+
+        See Also
+        --------
+        add_project : Add a single subproject.
 
         """
         for proj in projects:
@@ -634,29 +773,62 @@ class Project(AbstractProject, NDIO):
 
     def add_project(self, proj, name=None):
         """
-        Add one project to the current project.
+        Add a subproject to the current project.
+
+        The subproject is attached to this project as its parent.  Its
+        ``.name`` is set to the entry key when ``name`` differs from the
+        subproject's current name.  If a child with the same name already
+        exists in the project (datasets and subprojects share a single
+        namespace), a ``ValueError`` is raised.
+
+        Self-insertion and ancestor insertion are rejected with
+        ``ValueError`` (cycles are not allowed in the project hierarchy).
 
         Parameters
         ----------
-        proj : a project instance
-            A project to add to the current one.
+        proj : `Project`
+            Subproject to add.
+        name : str, optional
+            Entry key in the project.  If not provided, defaults to
+            ``proj.name``.  When provided (and different from the
+            current name), ``proj.name`` is overwritten to match.
+
+        Raises
+        ------
+        ValueError
+            If a child named ``name`` already exists in this project, or
+            if adding the subproject would create a cycle.
+
+        See Also
+        --------
+        add_projects : Add several subprojects at once.
 
         """
-        proj.parent = self
         if name is None:
             name = proj.name
-        else:
+
+        if name in self.allnames:
+            raise ValueError(
+                f"An object named '{name}' already exists in this project."
+            )
+
+        proj.parent = self
+        if name != proj.name:
             proj.name = name
         self._projects[name] = proj
 
     def remove_project(self, name):
         """
-        Remove one project from the current project.
+        Remove a subproject from the current project and reset its parent to ``None``.
 
         Parameters
         ----------
         name : str
             Name of the project to remove.
+
+        See Also
+        --------
+        remove_dataset : Remove a dataset.
 
         """
         self._projects[name]._parent = None
@@ -681,99 +853,16 @@ class Project(AbstractProject, NDIO):
 
         .. deprecated::
             Use :meth:`clear_projects` instead.
-            Will be removed in version 0.10.0.
+            Will be removed in version 0.11.0.
 
         See Also
         --------
         clear_projects : Remove all subprojects.
         """
         warnings.warn(
-            "remove_all_project() is deprecated and will be removed in 0.10.0; "
+            "remove_all_project() is deprecated and will be removed in 0.11.0; "
             "use clear_projects() instead.",
             DeprecationWarning,
             stacklevel=2,
         )
         self.clear_projects()
-
-    # ----------------------------------------------------------------------------------
-    # script items
-    # ----------------------------------------------------------------------------------
-    def add_scripts(self, *scripts):
-        """
-        Add one or a series of scripts to the current project.
-
-        Parameters
-        ----------
-        scripts : `Script` instances
-
-        """
-        for sc in scripts:
-            self.add_script(sc)
-
-    def add_script(self, script, name=None):
-        """
-        Add one script to the current project.
-
-        Parameters
-        ----------
-        script : a `Script` instance
-        name : str
-
-        """
-        script.parent = self
-        if name is None:
-            name = script.name
-        else:
-            script.name = name
-        self._scripts[name] = script
-
-    def remove_script(self, name):
-        self._scripts[name]._parent = None
-        del self._scripts[name]
-
-    def clear_scripts(self):
-        """
-        Remove all scripts from the project.
-
-        See Also
-        --------
-        remove_script : Remove a single script.
-        add_script : Add a script.
-        """
-        for v in self._scripts.values():
-            v._parent = None
-        self._scripts = {}
-
-    def remove_all_script(self):
-        """
-        Remove all scripts from the project.
-
-        .. deprecated::
-            Use :meth:`clear_scripts` instead.
-            Will be removed in version 0.10.0.
-
-        See Also
-        --------
-        clear_scripts : Remove all scripts.
-        """
-        warnings.warn(
-            "remove_all_script() is deprecated and will be removed in 0.10.0; "
-            "use clear_scripts() instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        self.clear_scripts()
-
-
-def makescript(priority=50):
-    def decorator(func):
-        # ss = dill.dumps(func)
-        # print(ss)
-
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            return func(*args, **kwargs)
-
-        return wrapper
-
-    return decorator

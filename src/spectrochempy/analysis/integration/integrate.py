@@ -11,6 +11,7 @@ __dataset_methods__ = ["simps", "trapz", "simpson", "trapezoid"]
 
 import functools
 
+import numpy as np
 import scipy.integrate
 
 from spectrochempy.utils.decorators import deprecated
@@ -29,7 +30,22 @@ def _integrate_method(method):
         if kwargs.get("dim"):
             kwargs.pop("dim")
 
-        data = method(dataset.data, x=dataset.coord(dim).data, axis=axis, **kwargs)
+        # SciPy integration routines expect a plain ndarray-like coordinate.
+        # Some NumPy/SciPy combinations are stricter with ndarray subclasses or
+        # view semantics, so normalize the integration axis coordinate here.
+        x = np.asarray(dataset.coord(dim).data)
+        y = dataset.data
+        try:
+            data = method(y, x=x, axis=axis, **kwargs)
+        except NotImplementedError as exc:
+            if "multi-dimensional sub-views are not implemented" not in str(exc):
+                raise
+            data = method(
+                np.ascontiguousarray(y),
+                x=np.ascontiguousarray(x),
+                axis=axis,
+                **kwargs,
+            )
 
         if dataset.coord(dim).reversed:
             data *= -1
@@ -71,7 +87,7 @@ def trapezoid(dataset, **kwargs):
     r"""
     Integrate using the composite trapezoidal rule.
 
-    Wrapper of `scpy.integrate.trapezoid`.
+    Wrapper of ``scipy.integrate.trapezoid``.
 
     Performs the integration along the last or given dimension.
 
@@ -92,11 +108,11 @@ def trapezoid(dataset, **kwargs):
     dim : `int` or `str`, optional, default: ``"x"``
         Dimension along which to integrate.
         If an integer is provided, it is equivalent to the numpy axis
-        parameter for `~numpy.ndarray`s.
+        parameter for ``numpy.ndarray``.
 
     See Also
     --------
-    trapz : An alias of `trapezoid`.
+    trapz : An alias of ``trapezoid``.
     simpson : Integrate using the composite simpson rule.
 
     Example
@@ -106,16 +122,16 @@ def trapezoid(dataset, **kwargs):
     NDDataset: [float64] a.u..cm^-1 (size: 55)
 
     """
-    return scipy.integrate.trapezoid(dataset.data, **kwargs)
+    return scipy.integrate.trapezoid(np.asarray(dataset), **kwargs)
 
 
-@deprecated(replace="Trapezoid", removed="0.10.0")
+@deprecated(replace="Trapezoid", removed="0.11.0")
 def trapz(dataset, **kwargs):
     return trapezoid(dataset, **kwargs)
 
 
 trapz.__doc__ = f"""
-    An alias of `trapezoid` kept for backwards compatibility.
+    An alias of ``trapezoid`` kept for backwards compatibility.
 {trapezoid.__doc__}"""
 
 
@@ -124,7 +140,7 @@ def simpson(dataset, *args, **kwargs):
     r"""
     Integrate using the composite Simpson's rule.
 
-    Wrapper of `scpy.integrate.simpson`.
+    Wrapper of ``scipy.integrate.simpson``.
 
     Performs the integration along the last or given dimension.
 
@@ -148,9 +164,9 @@ def simpson(dataset, *args, **kwargs):
     ----------------
     dim : `int` or `str`, optional, default: ``"x"``
         Dimension along which to integrate.
-        If an integer is provided, it is equivalent to the `numpy.axis` parameter
-        for `~numpy.ndarray`s.
-    even : any of [``'avg'``, ``'first'``, ``'last'``\ }, optional, default: ``'avg'``
+        If an integer is provided, it is equivalent to the ``numpy.axis`` parameter
+        for ``numpy.ndarray``.
+    even : {``'avg'``, ``'first'``, ``'last'``}, optional, default: ``'avg'``
 
         * ``'avg'`` : Average two results: 1) use the first N-2 intervals with
           a trapezoidal rule on the last interval and 2) use the last
@@ -162,7 +178,7 @@ def simpson(dataset, *args, **kwargs):
 
     See Also
     --------
-    simps : An alias of simpson (Deprecated).
+    simps : An alias of ``simpson`` (deprecated).
     trapezoid : Integrate using the composite simpson rule.
 
     Example
@@ -173,7 +189,7 @@ def simpson(dataset, *args, **kwargs):
     NDDataset: [float64] a.u..cm^-1 (size: 55)
 
     """
-    return scipy.integrate.simpson(dataset.data, **kwargs)
+    return scipy.integrate.simpson(np.asarray(dataset), **kwargs)
 
 
 @deprecated(replace="simpson")
@@ -182,5 +198,5 @@ def simps(dataset, **kwargs):
 
 
 simps.__doc__ = f"""
-    An alias of `simpson` kept for backwards compatibility.
+    An alias of ``simpson`` kept for backwards compatibility.
 {trapezoid.__doc__}"""

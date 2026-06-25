@@ -8,11 +8,13 @@ import base64
 import json
 import pickle
 from datetime import datetime
+from functools import partial
 
 import numpy as np
 import pytest
 
 from spectrochempy.utils.jsonutils import json_decoder, json_encoder
+from spectrochempy.utils.exceptions import SpectroChemPyError
 
 
 @pytest.mark.data
@@ -26,7 +28,10 @@ def test_json_encoder_decoder_no_encoding(IR_dataset_2D):
     print("no encoding", len(js_string))
 
     # load json from string
-    jsd = json.loads(js_string, object_hook=json_decoder)
+    jsd = json.loads(
+        js_string,
+        object_hook=partial(json_decoder, allow_unsafe_legacy=True),
+    )
 
     assert np.all(np.array(js["data"]["tolist"]) == jsd["data"])
 
@@ -38,13 +43,19 @@ def test_json_encoder_decoder_base64(IR_dataset_2D):
 
     # encoding base 64
     js = json_encoder(nd, encoding="base64")
+    assert js["__format__"] == "scp"
+    assert js["__version__"] == 2
+    assert js["data"]["encoding"] == "raw-base64"
     js_string = json.dumps(js, indent=2)
     print("base64", len(js_string))
 
     # load json from string
-    jsd = json.loads(js_string, object_hook=json_decoder)
+    jsd = json.loads(
+        js_string,
+        object_hook=json_decoder,
+    )
 
-    assert np.all(pickle.loads(base64.b64decode(js["data"]["base64"])) == jsd["data"])
+    assert np.array_equal(jsd["data"], nd.data)
 
 
 def test_simple_python_types():
@@ -64,7 +75,10 @@ def test_simple_python_types():
     js_string = json.dumps(js)
 
     # Decode back
-    decoded = json.loads(js_string, object_hook=json_decoder)
+    decoded = json.loads(
+        js_string,
+        object_hook=partial(json_decoder, allow_unsafe_legacy=True),
+    )
 
     # Verify all values match
     for key, value in test_data.items():
@@ -91,6 +105,7 @@ def test_numpy_arrays():
 
         # Test with base64 encoding
         js_base64 = json_encoder(array, encoding="base64")
+        assert js_base64["encoding"] == "raw-base64"
         js_string = json.dumps(js_base64)
         decoded_base64 = json.loads(js_string, object_hook=json_decoder)
         assert np.array_equal(
@@ -105,6 +120,7 @@ def test_complex_numbers():
 
     # Using base64 encoding avoids the tolist() operation that causes the error
     js = json_encoder(complex_array, encoding="base64")
+    assert js["encoding"] == "raw-base64"
     js_string = json.dumps(js)
     decoded = json.loads(js_string, object_hook=json_decoder)
     assert np.array_equal(decoded, complex_array)
@@ -113,9 +129,27 @@ def test_complex_numbers():
     complex_scalar = np.complex128(1 + 2j)
 
     js = json_encoder(complex_scalar, encoding="base64")
+    assert js["encoding"] == "pair"
     js_string = json.dumps(js)
     decoded = json.loads(js_string, object_hook=json_decoder)
     assert decoded == complex_scalar
+
+
+def test_complex_base64_requires_explicit_opt_in(monkeypatch):
+    payload = json.dumps(
+        {
+            "__class__": "COMPLEX",
+            "base64": base64.b64encode(pickle.dumps(np.complex128(1 + 2j))).decode(),
+        }
+    )
+
+    def fail_pickle_loads(*args, **kwargs):
+        raise AssertionError("pickle.loads must not run in safe mode")
+
+    monkeypatch.setattr("spectrochempy.utils.jsonutils.pickle.loads", fail_pickle_loads)
+
+    with pytest.raises(SpectroChemPyError, match="trusted legacy loading"):
+        json.loads(payload, object_hook=json_decoder)
 
 
 def test_python_complex():
@@ -125,7 +159,10 @@ def test_python_complex():
 
     js = json_encoder(complex_scalar)
     js_string = json.dumps(js)
-    decoded = json.loads(js_string, object_hook=json_decoder)
+    decoded = json.loads(
+        js_string,
+        object_hook=partial(json_decoder, allow_unsafe_legacy=True),
+    )
     assert decoded == complex_scalar
 
     # Test another complex number
@@ -175,7 +212,10 @@ def test_roundtrip_preservation(IR_dataset_2D):
     for encoding in [None, "base64"]:
         js = json_encoder(nd, encoding=encoding)
         js_string = json.dumps(js)
-        decoded = json.loads(js_string, object_hook=json_decoder)
+        decoded = json.loads(
+            js_string,
+            object_hook=partial(json_decoder, allow_unsafe_legacy=False),
+        )
 
         # Verify key attributes were preserved
         assert isinstance(decoded, dict)
@@ -185,3 +225,65 @@ def test_roundtrip_preservation(IR_dataset_2D):
         # If metadata was encoded, verify it's preserved
         if "meta" in js:
             assert "meta" in decoded
+
+
+def test_json_decoder_rejects_base64_pickle_without_opt_in(monkeypatch):
+    payload = json.dumps(
+        {
+            "__class__": "NUMPY_ARRAY",
+            "base64": base64.b64encode(pickle.dumps(np.array([1, 2, 3]))).decode(),
+        }
+    )
+
+    def fail_pickle_loads(*args, **kwargs):
+        raise AssertionError("pickle.loads must not run in safe mode")
+
+    monkeypatch.setattr("spectrochempy.utils.jsonutils.pickle.loads", fail_pickle_loads)
+
+    with pytest.raises(SpectroChemPyError, match="trusted legacy loading"):
+        json.loads(payload, object_hook=json_decoder)
+
+
+def test_json_loads_rejects_legacy_payload_inside_safe_document():
+    payload = json.dumps(
+        {
+            "__format__": "scp",
+            "__version__": 2,
+            "data": {
+                "__class__": "NUMPY_ARRAY",
+                "base64": base64.b64encode(pickle.dumps(np.array([1, 2, 3]))).decode(),
+            },
+        }
+    )
+
+    with pytest.raises(SpectroChemPyError, match="Malformed safe SCP/PSCP document"):
+        from spectrochempy.utils.jsonutils import json_loads
+
+        json_loads(payload, allow_unsafe_legacy=True)
+
+
+def test_json_loads_rejects_object_dtype_safe_array():
+    payload = json.dumps(
+        {
+            "__format__": "scp",
+            "__version__": 2,
+            "data": {
+                "__class__": "NUMPY_ARRAY",
+                "encoding": "raw-base64",
+                "dtype": "object",
+                "shape": [1],
+                "order": "C",
+                "base64": base64.b64encode(b"x").decode(),
+            },
+        }
+    )
+
+    with pytest.raises(SpectroChemPyError, match="object dtype is not supported"):
+        from spectrochempy.utils.jsonutils import json_loads
+
+        json_loads(payload)
+
+
+def test_json_encoder_rejects_object_dtype_array_for_safe_write():
+    with pytest.raises(SpectroChemPyError, match="object-dtype arrays"):
+        json_encoder(np.array([{"unsafe": True}], dtype=object), encoding="base64")

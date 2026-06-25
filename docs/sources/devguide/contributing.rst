@@ -148,9 +148,8 @@ Tips for Success
 Maintainer and Release Notes
 ============================
 
-Some project-maintenance procedures are documented separately in the
-``maintainers/`` directory. These notes cover operational topics such as release
-publishing, PyPI/TestPyPI behavior, conda builds, Zenodo issues, and emergency
-recovery procedures.
+Some project-maintenance procedures are documented separately in the repository's
+maintainer notes. These operational procedures cover topics such as release
+publishing, packaging, and recovery workflows.
 
-See the `maintainers/ <https://github.com/spectrochempy/spectrochempy/tree/master/maintainers>`__ directory for details.
+They are intentionally kept outside this published contributor guide.

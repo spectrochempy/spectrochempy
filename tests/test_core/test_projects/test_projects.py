@@ -2,22 +2,61 @@
 # Copyright (©) 2014-2026 Laboratoire Catalyse et Spectrochimie (LCS), Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
-# ======================================================================================
-
+import base64
 import json
+import pickle
 import zipfile
 
+import numpy as np
 import pytest
 
 from spectrochempy.application.preferences import preferences
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.project.project import Project
-from spectrochempy.core.project.project import makescript
-from spectrochempy.core.script import Script
-from spectrochempy.core.script import run_script
 from spectrochempy.utils.constants import INPLACE
+from spectrochempy.utils.exceptions import SpectroChemPyError
 
 prefs = preferences
+
+
+def _rewrite_project_dataset_payload_as_legacy_pickle(filename):
+    current = Project.load(filename)
+
+    with zipfile.ZipFile(filename, "r") as zipf:
+        member = zipf.namelist()[0]
+        js = json.loads(zipf.read(member).decode("utf-8"))
+
+    js.pop("__format__", None)
+    js.pop("__version__", None)
+    js["datasets"][0]["data"] = {
+        "__class__": "NUMPY_ARRAY",
+        "base64": base64.b64encode(
+            pickle.dumps(np.array(current.datasets[0].data)),
+        ).decode(),
+    }
+
+    with zipfile.ZipFile(filename, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
+        zipf.writestr(member, json.dumps(js, indent=2))
+
+
+def _assert_dataset_membership(project, dataset, key, *, present):
+    if present:
+        assert key in project.datasets_names
+        assert project[key] is dataset
+        assert dataset in project.datasets
+    else:
+        assert key not in project.datasets_names
+        assert dataset not in project.datasets
+
+
+def _assert_project_membership(project, child, key, *, present):
+    if present:
+        assert key in project.projects_names
+        assert project[key] is child
+        assert child in project.projects
+    else:
+        assert key not in project.projects_names
+        assert child not in project.projects
 
 
 # =============================================================================
@@ -76,55 +115,6 @@ def test_empty_project():
     assert str(proj).strip() == "Project XXX:\n    (empty project)"
 
 
-def test_project_with_script():
-    proj = Project(
-        Project(name="P350", label=r"$\mathrm{M_P}\,(623\,K)$"),
-        Project(name="A350", label=r"$\mathrm{M_A}\,(623\,K)$"),
-        Project(name="B350", label=r"$\mathrm{M_B}\,(623\,K)$"),
-        name="HIZECOKE_TEST",
-    )
-
-    assert proj.projects_names == ["P350", "A350", "B350"]
-
-    # add a dataset to a subproject
-    ir = NDDataset([1, 2, 3])
-    tg = NDDataset([1, 3, 4])
-    proj.A350["IR"] = ir
-    proj["TG"] = tg
-
-    print(proj.A350)
-    print(proj)
-    print(proj.A350.label)
-
-    f = proj.save()
-
-    newproj = Project.load("HIZECOKE_TEST")
-    assert str(newproj) == str(proj)
-    assert newproj.A350.label == proj.A350.label
-
-    script_source = (
-        "set_loglevel(INFO)\n"
-        'info_("samples contained in the project are : '
-        '%s"%proj.projects_names)'
-    )
-
-    proj["print_info"] = Script("print_info", script_source)
-
-    # save but do not change the original data
-    proj.save_as("HIZECOKE_TEST", overwrite_data=False)
-
-    newproj = Project.load("HIZECOKE_TEST")
-
-    # execute
-    run_script(newproj.print_info, locals())
-    newproj.print_info.execute(locals())
-    newproj.print_info(locals())
-    newproj.print_info()
-
-    proj.save_as("HIZECOKE_TEST")
-    newproj = Project.load("HIZECOKE_TEST")
-
-
 def test_save_and_load_project(ds1, ds2):
     myp = Project(name="process")
 
@@ -170,26 +160,14 @@ class TestProjectInit:
 class TestSetFromType:
     """Tests for _set_from_type method."""
 
-    def test_set_from_type_with_other_object_having_name(self):
+    def test_set_from_type_rejects_unsupported_type(self):
         proj = Project(name="test")
 
-        class NamedObject:
-            name = "custom_object"
+        with pytest.raises(TypeError, match="does not accept"):
+            proj._set_from_type(42)
 
-        obj = NamedObject()
-        proj._set_from_type(obj)
-        assert "custom_object" in proj._others
-        assert proj._others["custom_object"] is obj
-
-    def test_set_from_type_invalid_object(self):
-        proj = Project(name="test")
-
-        class UnnamedObject:
-            pass
-
-        obj = UnnamedObject()
-        with pytest.raises(ValueError, match="has no name"):
-            proj._set_from_type(obj)
+        with pytest.raises(TypeError, match="does not accept"):
+            proj._set_from_type("not a supported object")
 
 
 class TestGetItem:
@@ -214,17 +192,6 @@ class TestGetItem:
         proj.add_project(Project(name="sub"))
         with pytest.raises(KeyError):
             proj["sub/nonexistent"]
-
-    def test_getitem_composed_key_subproject_script(self):
-        proj = Project(name="main")
-        sub = Project(name="sub")
-        script = Script("myscript", "x = 1")
-        sub.add_script(script)
-        proj.add_project(sub)
-
-        result = proj["sub/myscript"]
-        assert result is script
-        assert result.content == "x = 1"
 
     def test_getitem_composed_key_subproject_dataset(self):
         proj = Project(name="main")
@@ -262,19 +229,13 @@ class TestSetItem:
         assert "data" in proj.datasets_names
         assert ds.parent == proj
 
-        # script
-        script = Script("script", "x = 1")
-        proj["script"] = script
-        assert "script" in proj.scripts_names
-        assert script.parent == proj
-
         # project
         sub = Project(name="sub")
         proj["sub"] = sub
         assert "sub" in proj.projects_names
         assert sub.parent == proj
 
-    @pytest.mark.parametrize("item_type", ["dataset", "script", "project"])
+    @pytest.mark.parametrize("item_type", ["dataset", "project"])
     def test_setitem_update_existing(self, item_type):
         """Test updating existing items via __setitem__."""
         proj = Project(name="test")
@@ -282,12 +243,11 @@ class TestSetItem:
         # Create initial items
         if item_type == "dataset":
             proj.add_dataset(NDDataset([1, 2, 3], name="item"))
+            old = proj["item"]
             initial = NDDataset([4, 5, 6], name="item")
-        elif item_type == "script":
-            proj.add_script(Script("item", "x = 1"))
-            initial = Script("item", "y = 2")
         else:
             proj.add_project(Project(name="item"))
+            old = proj["item"]
             initial = Project(name="item")
 
         # Update
@@ -295,6 +255,7 @@ class TestSetItem:
 
         assert proj["item"] is initial
         assert initial.parent == proj
+        assert old.parent is None
 
 
 class TestGetAttr:
@@ -313,11 +274,9 @@ class TestGetAttr:
         proj = Project(name="test")
         proj.add_dataset(NDDataset([1, 2, 3], name="data"))
         proj.add_project(Project(name="sub"))
-        proj.add_script(Script("script", "x = 1"))
 
         assert proj.data.name == "data"
         assert proj.sub.name == "sub"
-        assert proj.script.name == "script"
 
 
 class TestRepr:
@@ -343,17 +302,6 @@ class TestRepr:
         assert "sub2" in output
         assert "(sub-project)" in output
 
-    def test_str_with_scripts(self):
-        proj = Project(name="scripts_only")
-        proj.add_scripts(
-            Script("first", "x = 1"),
-            Script("second", "y = 2"),
-        )
-        output = str(proj)
-        assert "first" in output
-        assert "second" in output
-        assert "(script)" in output
-
 
 class TestCopy:
     """Tests for copy functionality."""
@@ -368,36 +316,154 @@ class TestCopy:
         del copied._datasets["data"]
         assert "data" in proj.datasets_names
 
-    def test_copy_method(self, ds1):
+    def test_copy_method_default_is_deep(self, ds1):
         ds1.name = "data"
         proj = Project(ds1, name="original")
         copied = proj.copy()
         assert copied.name == "original"
         assert "data" in copied.datasets_names
+        assert copied["data"] is not ds1
 
-
-class TestDuplicateNames:
-    """Tests for duplicate name handling."""
-
-    @pytest.mark.parametrize(
-        "count,expected_name",
-        [
-            (1, "data"),
-            (2, "data-1"),
-            (3, "data-2"),
-        ],
-    )
-    def test_add_dataset_duplicate_names(self, ds1, count, expected_name):
-        proj = Project(name="test")
+    def test_copy_deep(self, ds1):
         ds1.name = "data"
-        proj.add_dataset(ds1)
+        sub = Project(name="sub")
+        sub.add_dataset(ds1)
+        proj = Project(name="root")
+        proj.add_project(sub)
 
-        for i in range(1, count):
-            ds = NDDataset([i], name="data")
-            proj.add_dataset(ds)
+        copied = proj.copy(deep=True)
 
-        assert "data" in proj.datasets_names
-        assert expected_name in proj.datasets_names
+        assert copied.name == "root"
+        assert "sub" in copied.projects_names
+        assert copied["sub"] is not sub
+        assert copied["sub"]["data"] is not ds1
+        assert copied.parent is None
+        assert copied["sub"].parent is copied
+        assert copied["sub"]["data"].parent is copied["sub"]
+
+    def test_copy_shallow(self, ds1):
+        ds1.name = "data"
+        sub = Project(name="sub")
+        sub.add_dataset(ds1)
+        proj = Project(name="root")
+        proj.add_project(sub)
+
+        copied = proj.copy(deep=False)
+
+        assert copied is not proj
+        assert copied.name == "root"
+        assert copied["sub"] is sub
+        assert copied["sub"]["data"] is ds1
+        # shallow copy parent is also detached
+        assert copied.parent is None
+        # original parent is preserved on original children
+        assert copied["sub"].parent is proj
+
+    def test_copy_empty(self):
+        proj = Project(name="empty")
+        copied = proj.copy()
+        assert copied.name == "empty"
+        assert copied.datasets_names == []
+        assert copied.projects_names == []
+
+    def test_copy_preserves_meta(self):
+        proj = Project(name="with_meta")
+        proj.meta["key"] = "value"
+        copied = proj.copy()
+        assert copied.meta["key"] == "value"
+
+    def test_copy_module(self, ds1):
+        import copy as cpy
+
+        ds1.name = "data"
+        proj = Project(ds1, name="original")
+
+        # Per RFC: copy(proj) == deepcopy(proj) — fully independent
+        shallow = cpy.copy(proj)
+        deep = cpy.deepcopy(proj)
+
+        for copied in (shallow, deep):
+            assert copied.name == "original"
+            assert "data" in copied.datasets_names
+            assert copied["data"] is not ds1
+            assert copied["data"].parent is copied
+            assert copied.parent is None
+
+
+class TestDuplicateNamesRFC:
+    """RFC-compliant duplicate name handling."""
+
+    def test_add_dataset_duplicate_raises_valueerror(self):
+        proj = Project(name="test")
+        first = NDDataset([1], name="data")
+        proj.add_dataset(first)
+
+        second = NDDataset([2], name="data")
+        with pytest.raises(ValueError, match="already exists"):
+            proj.add_dataset(second)
+
+    def test_add_project_duplicate_raises_valueerror(self):
+        proj = Project(name="root")
+        first = Project(name="child")
+        proj.add_project(first)
+
+        second = Project(name="child")
+        with pytest.raises(ValueError, match="already exists"):
+            proj.add_project(second)
+
+    def test_duplicate_dataset_dataset(self):
+        proj = Project(name="test")
+        proj.add_dataset(NDDataset([1], name="data"))
+        with pytest.raises(ValueError, match="already exists"):
+            proj.add_dataset(NDDataset([2], name="data"))
+
+    def test_duplicate_project_project(self):
+        proj = Project(name="test")
+        proj.add_project(Project(name="sub"))
+        with pytest.raises(ValueError, match="already exists"):
+            proj.add_project(Project(name="sub"))
+
+    def test_duplicate_dataset_project_collision(self):
+        proj = Project(name="test")
+        proj.add_dataset(NDDataset([1], name="shared"))
+        with pytest.raises(ValueError, match="already exists"):
+            proj.add_project(Project(name="shared"))
+
+    def test_duplicate_project_dataset_collision(self):
+        proj = Project(name="test")
+        proj.add_project(Project(name="shared"))
+        with pytest.raises(ValueError, match="already exists"):
+            proj.add_dataset(NDDataset([1], name="shared"))
+
+    def test_constructor_duplicate_raises_valueerror(self):
+        ds1 = NDDataset([1], name="data")
+        ds2 = NDDataset([2], name="data")
+        with pytest.raises(ValueError, match="already exists"):
+            Project(ds1, ds2)
+
+    def test_duplicate_does_not_modify_ownership_on_failure(self):
+        proj = Project(name="test")
+        ds = NDDataset([1], name="data")
+        proj.add_dataset(ds)
+
+        original_parent = ds.parent
+        with pytest.raises(ValueError):
+            proj.add_dataset(NDDataset([2], name="data"))
+
+        assert ds.parent is original_parent
+        assert ds.name == "data"
+        _assert_dataset_membership(proj, ds, "data", present=True)
+
+    def test_duplicate_does_not_partially_modify_parent_on_failure(self):
+        proj = Project(name="test")
+        first = NDDataset([1], name="data")
+        proj.add_dataset(first)
+
+        with pytest.raises(ValueError):
+            proj.add_dataset(NDDataset([2], name="data"))
+
+        assert len(proj.datasets) == 1
+        assert first.parent is proj
 
 
 class TestRemoveMethods:
@@ -420,15 +486,6 @@ class TestRemoveMethods:
         proj.remove_project("sub")
         assert "sub" not in proj.projects_names
         assert sub.parent is None
-
-    def test_remove_script(self):
-        proj = Project(name="test")
-        script = Script("myscript", "x = 1")
-        proj.add_script(script)
-        assert "myscript" in proj.scripts_names
-        proj.remove_script("myscript")
-        assert "myscript" not in proj.scripts_names
-        assert script.parent is None
 
     def test_clear_datasets(self, ds1, ds2):
         proj = Project(name="test")
@@ -454,19 +511,6 @@ class TestRemoveMethods:
         assert sub1.parent is None
         assert sub2.parent is None
 
-    def test_clear_scripts(self):
-        proj = Project(name="test")
-        script1 = Script("script1", "x = 1")
-        script2 = Script("script2", "y = 2")
-        proj.add_scripts(script1, script2)
-        assert len(proj.scripts_names) == 2
-        assert script1.parent == proj
-        assert script2.parent == proj
-        proj.clear_scripts()
-        assert len(proj.scripts_names) == 0
-        assert script1.parent is None
-        assert script2.parent is None
-
     def test_remove_all_dataset_deprecated(self, ds1, ds2):
         proj = Project(name="test")
         proj.add_datasets(ds1, ds2)
@@ -482,17 +526,6 @@ class TestRemoveMethods:
         with pytest.warns(DeprecationWarning, match="remove_all_project.*deprecated"):
             proj.remove_all_project()
         assert len(proj.projects_names) == 0
-
-    def test_remove_all_script_deprecated(self):
-        proj = Project(name="test")
-        proj.add_scripts(
-            Script("script1", "x = 1"),
-            Script("script2", "y = 2"),
-        )
-        assert len(proj.scripts_names) == 2
-        with pytest.warns(DeprecationWarning, match="remove_all_script.*deprecated"):
-            proj.remove_all_script()
-        assert len(proj.scripts_names) == 0
 
 
 class TestAddProject:
@@ -529,6 +562,465 @@ class TestParentAssignment:
         assert "child" in proj2.projects_names
 
 
+class TestProjectOwnershipCharacterization:
+    """Characterization tests for current ownership semantics."""
+
+    def test_add_dataset_sets_bidirectional_membership(self):
+        proj = Project(name="root")
+        ds = NDDataset([1, 2, 3], name="data")
+
+        proj.add_dataset(ds)
+
+        _assert_dataset_membership(proj, ds, "data", present=True)
+        assert ds.parent is proj
+
+    def test_add_subproject_sets_bidirectional_membership(self):
+        proj = Project(name="root")
+        child = Project(name="child")
+
+        proj.add_project(child)
+
+        _assert_project_membership(proj, child, "child", present=True)
+        assert child.parent is proj
+
+    def test_move_dataset_between_projects_updates_membership_in_both_projects(self):
+        source = Project(name="source")
+        destination = Project(name="destination")
+        ds = NDDataset([1, 2, 3], name="data")
+
+        source.add_dataset(ds)
+        destination.add_dataset(ds)
+
+        _assert_dataset_membership(source, ds, "data", present=False)
+        _assert_dataset_membership(destination, ds, "data", present=True)
+        assert ds.parent is destination
+
+    def test_move_subproject_between_projects_updates_membership_in_both_projects(self):
+        source = Project(name="source")
+        destination = Project(name="destination")
+        child = Project(name="child")
+
+        source.add_project(child)
+        destination.add_project(child)
+
+        _assert_project_membership(source, child, "child", present=False)
+        _assert_project_membership(destination, child, "child", present=True)
+        assert child.parent is destination
+
+    def test_remove_dataset_breaks_bidirectional_membership(self):
+        proj = Project(name="root")
+        ds = NDDataset([1, 2, 3], name="data")
+
+        proj.add_dataset(ds)
+        proj.remove_dataset("data")
+
+        _assert_dataset_membership(proj, ds, "data", present=False)
+        assert ds.parent is None
+
+    def test_remove_subproject_breaks_bidirectional_membership(self):
+        proj = Project(name="root")
+        child = Project(name="child")
+
+        proj.add_project(child)
+        proj.remove_project("child")
+
+        _assert_project_membership(proj, child, "child", present=False)
+        assert child.parent is None
+
+
+class TestProjectReplacementCharacterization:
+    """Characterization tests for current replacement semantics."""
+
+    def test_replace_dataset_detaches_old_child_parent(self):
+        proj = Project(name="root")
+        old = NDDataset([1, 2, 3], name="item")
+        new = NDDataset([4, 5, 6], name="replacement")
+
+        proj.add_dataset(old)
+        proj["item"] = new
+
+        _assert_dataset_membership(proj, new, "item", present=True)
+        assert proj["item"] is not old
+        assert old not in proj.datasets
+        assert new.parent is proj
+        assert old.parent is None
+        assert new.name == "item"
+        assert proj["item"].name == "item"
+
+    def test_replace_subproject_detaches_old_child_parent(self):
+        proj = Project(name="root")
+        old = Project(name="item")
+        new = Project(name="replacement")
+
+        proj.add_project(old)
+        proj["item"] = new
+
+        _assert_project_membership(proj, new, "item", present=True)
+        assert proj["item"] is not old
+        assert old not in proj.projects
+        assert new.parent is proj
+        assert old.parent is None
+        assert new.name == "item"
+        assert proj["item"].name == "item"
+
+    def test_replace_dataset_old_child_detached_even_with_prior_parent(self):
+        proj = Project(name="root")
+        other = Project(name="other")
+        old = NDDataset([1, 2, 3], name="item")
+        new = NDDataset([4, 5, 6], name="replacement")
+
+        other.add_dataset(old)
+        proj.add_dataset(new)
+        proj["item"] = old
+        proj["item"] = new
+
+        assert new.parent is proj
+        assert old.parent is None
+
+    def test_replace_subproject_old_child_detached_even_with_prior_parent(self):
+        proj = Project(name="root")
+        other = Project(name="other")
+        old = Project(name="item")
+        new = Project(name="replacement")
+
+        other.add_project(old)
+        proj.add_project(new)
+        proj["item"] = old
+        proj["item"] = new
+
+        assert new.parent is proj
+        assert old.parent is None
+
+    def test_replace_dataset_does_not_affect_unrelated_children(self):
+        proj = Project(name="root")
+        old = NDDataset([1, 2, 3], name="item")
+        unrelated = NDDataset([7, 8, 9], name="other")
+        new = NDDataset([4, 5, 6], name="replacement")
+
+        proj.add_dataset(old)
+        proj.add_dataset(unrelated)
+        proj["item"] = new
+
+        assert old.parent is None
+        assert unrelated.parent is proj
+
+    def test_replace_subproject_does_not_affect_unrelated_children(self):
+        proj = Project(name="root")
+        old = Project(name="item")
+        unrelated = Project(name="other")
+        new = Project(name="replacement")
+
+        proj.add_project(old)
+        proj.add_project(unrelated)
+        proj["item"] = new
+
+        assert old.parent is None
+        assert unrelated.parent is proj
+
+
+class TestProjectNameMutationCharacterization:
+    """Characterization tests for child name mutation after insertion."""
+
+    def test_dataset_name_mutation_breaks_reparenting_by_current_name_lookup(self):
+        source = Project(name="source")
+        destination = Project(name="destination")
+        ds = NDDataset([1, 2, 3], name="original")
+
+        source.add_dataset(ds)
+        ds.name = "mutated"
+
+        with pytest.raises(KeyError, match="mutated"):
+            destination.add_dataset(ds)
+
+        _assert_dataset_membership(source, ds, "original", present=True)
+        _assert_dataset_membership(destination, ds, "original", present=False)
+        assert ds.parent is source
+        assert ds.name == "mutated"
+
+
+class TestProjectCycleRejection:
+    """Cycle rejection tests per Project Invariants RFC."""
+
+    def test_self_insertion_raises_valueerror(self):
+        proj = Project(name="self")
+        with pytest.raises(ValueError, match="cycle"):
+            proj.add_project(proj)
+
+    def test_direct_cycle_raises_valueerror(self):
+        parent = Project(name="parent")
+        child = Project(name="child")
+        parent.add_project(child)
+        with pytest.raises(ValueError, match="cycle"):
+            child.add_project(parent)
+
+    def test_indirect_cycle_raises_valueerror(self):
+        a = Project(name="a")
+        b = Project(name="b")
+        c = Project(name="c")
+        a.add_project(b)
+        b.add_project(c)
+        with pytest.raises(ValueError, match="cycle"):
+            c.add_project(a)
+
+    def test_parent_setter_self_cycle_raises_valueerror(self):
+        proj = Project(name="self")
+        with pytest.raises(ValueError, match="cycle"):
+            proj.parent = proj
+
+    def test_parent_setter_direct_cycle_raises_valueerror(self):
+        parent = Project(name="parent")
+        child = Project(name="child")
+        parent.add_project(child)
+        with pytest.raises(ValueError, match="cycle"):
+            parent.parent = child
+
+    def test_parent_setter_indirect_cycle_raises_valueerror(self):
+        a = Project(name="a")
+        b = Project(name="b")
+        c = Project(name="c")
+        a.add_project(b)
+        b.add_project(c)
+        with pytest.raises(ValueError, match="cycle"):
+            a.parent = c
+
+    def test_state_unchanged_after_self_insertion_failure(self):
+        proj = Project(name="self")
+        with pytest.raises(ValueError):
+            proj.add_project(proj)
+        assert proj.parent is None
+        assert "self" not in proj.projects_names
+
+    def test_state_unchanged_after_direct_cycle_failure(self):
+        parent = Project(name="parent")
+        child = Project(name="child")
+        parent.add_project(child)
+        with pytest.raises(ValueError):
+            child.add_project(parent)
+        assert child.parent is parent
+        assert parent.parent is None
+        _assert_project_membership(parent, child, "child", present=True)
+
+    def test_state_unchanged_after_indirect_cycle_failure(self):
+        a = Project(name="a")
+        b = Project(name="b")
+        c = Project(name="c")
+        a.add_project(b)
+        b.add_project(c)
+        with pytest.raises(ValueError):
+            c.add_project(a)
+        assert c.parent is b
+        assert b.parent is a
+        assert a.parent is None
+
+    def test_normal_tree_structure_not_affected_by_cycle_protection(self):
+        parent = Project(name="parent")
+        child = Project(name="child")
+        parent.add_project(child)
+        assert child.parent is parent
+        _assert_project_membership(parent, child, "child", present=True)
+
+    def test_normal_parent_setter_not_affected_by_cycle_protection(self):
+        proj = Project(name="root")
+        child = Project(name="child")
+        proj.add_project(child)
+        child.parent = None
+        assert child.parent is None
+        assert "child" not in proj.projects_names
+
+
+class TestProjectKeyNameIdentityRFC:
+    """RFC-compliant key/name identity tests."""
+
+    def test_setitem_replacement_enforces_key_name_identity_for_dataset(self):
+        proj = Project(name="test")
+        ds = NDDataset([1, 2, 3], name="original")
+        proj.add_dataset(NDDataset([0], name="existing"))
+        proj["existing"] = ds
+        assert proj["existing"].name == "existing"
+        assert ds.name == "existing"
+
+    def test_setitem_replacement_enforces_key_name_identity_for_project(self):
+        proj = Project(name="test")
+        sub = Project(name="original")
+        proj.add_project(Project(name="existing"))
+        proj["existing"] = sub
+        assert proj["existing"].name == "existing"
+        assert sub.name == "existing"
+
+    def test_setitem_new_key_enforces_identity_via_add_dataset(self):
+        proj = Project(name="test")
+        ds = NDDataset([1, 2, 3], name="original")
+        proj["renamed"] = ds
+        assert proj["renamed"].name == "renamed"
+        assert ds.name == "renamed"
+
+    def test_setitem_new_key_enforces_identity_via_add_project(self):
+        proj = Project(name="test")
+        sub = Project(name="original")
+        proj["renamed"] = sub
+        assert proj["renamed"].name == "renamed"
+        assert sub.name == "renamed"
+
+    def test_move_between_projects_via_add_dataset_preserves_identity(self):
+        source = Project(name="source")
+        dest = Project(name="dest")
+        ds = NDDataset([1, 2, 3], name="data")
+        source.add_dataset(ds)
+        dest.add_dataset(ds)
+        assert dest["data"].name == "data"
+
+    def test_move_between_projects_via_add_project_preserves_identity(self):
+        source = Project(name="source")
+        dest = Project(name="dest")
+        sub = Project(name="child")
+        source.add_project(sub)
+        dest.add_project(sub)
+        assert dest["child"].name == "child"
+
+    def test_constructor_with_argnames_enforces_identity(self):
+        ds = NDDataset([1, 2, 3], name="original")
+        proj = Project(ds, argnames=["renamed"])
+        assert proj["renamed"].name == "renamed"
+        assert ds.name == "renamed"
+
+    def test_parent_setter_moves_child_and_add_project_restores_identity(self):
+        source = Project(name="source")
+        dest = Project(name="dest")
+        sub = Project(name="child")
+        source.add_project(sub)
+        sub.parent = None
+        dest.add_project(sub)
+        assert dest["child"].name == "child"
+
+    def test_ownership_and_duplicate_and_cycle_still_work(self):
+        """Verify prior invariants are not broken by key/name identity changes."""
+        proj = Project(name="root")
+        ds = NDDataset([1], name="data")
+        proj.add_dataset(ds)
+        assert ds.parent is proj
+        assert proj["data"] is ds
+
+        with pytest.raises(ValueError, match="already exists"):
+            proj.add_dataset(NDDataset([2], name="data"))
+
+        with pytest.raises(ValueError, match="cycle"):
+            proj.add_project(proj)
+
+
+class TestProjectKeyNameIdentityCharacterization:
+    """Characterization tests for current key/name identity rules."""
+
+    def test_dataset_insertion_without_rename_keeps_key_equal_to_name(self):
+        proj = Project(name="root")
+        ds = NDDataset([1, 2, 3], name="data")
+
+        proj.add_dataset(ds)
+
+        assert proj["data"].name == "data"
+
+    def test_dataset_insertion_with_explicit_name_mutates_child_name(self):
+        proj = Project(name="root")
+        ds = NDDataset([1, 2, 3], name="original")
+
+        proj.add_dataset(ds, name="renamed")
+
+        assert "renamed" in proj.datasets_names
+        assert proj["renamed"].name == "renamed"
+        assert ds.name == "renamed"
+
+    def test_save_load_restores_child_key_name_identity(self):
+        proj = Project(name="root")
+        ds = NDDataset([1, 2, 3], name="data")
+        sub = Project(name="sub")
+        nested = NDDataset([4, 5, 6], name="nested")
+        sub.add_dataset(nested)
+        proj.add_dataset(ds)
+        proj.add_project(sub)
+
+        filename = proj.save_as("project-key-name-roundtrip")
+        loaded = Project.load(filename)
+
+        assert loaded["data"].name == "data"
+        assert loaded["sub"].name == "sub"
+        assert loaded["sub/nested"].name == "nested"
+
+
+class TestProjectCopyRFC:
+    """RFC-compliant copy semantics (per project-copy-semantics-rfc.md)."""
+
+    def test_copy_default_is_recursive_detached(self):
+        proj = Project(name="root")
+        ds = NDDataset([1, 2, 3], name="data")
+        sub = Project(name="child")
+        sub.add_dataset(ds)
+        proj.add_project(sub)
+
+        copied = proj.copy()
+
+        # All children are new independent objects
+        assert copied["child"] is not sub
+        assert copied["child"]["data"] is not ds
+        # Root is detached, nested copies are re-parented inside the copy
+        assert copied.parent is None
+        assert copied["child"].parent is copied
+        assert copied["child"]["data"].parent is copied["child"]
+
+    def test_copy_shallow_shares_children(self):
+        proj = Project(name="root")
+        ds = NDDataset([1, 2, 3], name="data")
+        sub = Project(name="child")
+        sub.add_dataset(ds)
+        proj.add_project(sub)
+
+        copied = proj.copy(deep=False)
+
+        assert copied["child"] is sub
+        assert copied["child"]["data"] is ds
+        # Container parent is None
+        assert copied.parent is None
+        # Original parent references preserved on shared children
+        assert copied["child"].parent is proj
+        assert copied["child"]["data"].parent is sub
+
+    def test_copy_and_deepcopy_equivalence(self):
+        import copy as cpy
+
+        proj = Project(name="root")
+        ds = NDDataset([1, 2, 3], name="data")
+        proj.add_dataset(ds)
+
+        shallow = cpy.copy(proj)
+        deep = cpy.deepcopy(proj)
+
+        # Both produce fully independent results (RFC: copy == deepcopy)
+        assert shallow["data"] is not deep["data"]
+        assert shallow["data"].parent is shallow
+        assert deep["data"].parent is deep
+        assert shallow.name == deep.name
+
+    def test_deep_copy_preserves_nested_structure(self):
+        proj = Project(name="root")
+        inner = Project(name="inner")
+        deep_inner = Project(name="deep_inner")
+        ds = NDDataset([1], name="data")
+        deep_inner.add_dataset(ds)
+        inner.add_project(deep_inner)
+        proj.add_project(inner)
+
+        copied = proj.copy(deep=True)
+
+        assert copied.name == "root"
+        assert copied["inner"] is not inner
+        assert copied["inner"]["deep_inner"] is not deep_inner
+        assert copied["inner"]["deep_inner"]["data"] is not ds
+        assert copied["inner"].parent is copied
+        assert copied["inner"]["deep_inner"].parent is copied["inner"]
+        assert (
+            copied["inner"]["deep_inner"]["data"].parent
+            is copied["inner"]["deep_inner"]
+        )
+
+
 class TestImplements:
     """Tests for _implements static method."""
 
@@ -544,27 +1036,13 @@ class TestImplements:
         assert Project._implements(name) == expected
 
 
-class TestMakescriptDecorator:
-    """Tests for makescript decorator."""
-
-    @pytest.mark.parametrize("priority", [None, 75])
-    def test_makescript_decorator(self, priority):
-        kwargs = {"priority": priority} if priority else {}
-
-        @makescript(**kwargs)
-        def test_func():
-            return 42
-
-        assert test_func() == 42
-
-
 class TestAttributes:
     """Tests for _attributes_ method."""
 
     def test_attributes_returns_expected_list(self):
         proj = Project(name="test")
         attrs = proj._attributes_()
-        expected = ["name", "meta", "parent", "datasets", "projects", "scripts"]
+        expected = ["name", "meta", "parent", "datasets", "projects"]
         assert attrs == expected
 
 
@@ -583,18 +1061,15 @@ class TestProjectProperties:
         proj = Project(name="test")
         proj.add_dataset(NDDataset([1, 2, 3], name="data"))
         proj.add_project(Project(name="sub"))
-        proj.add_script(Script("script", "x = 1"))
 
         all_names = proj.allnames
         assert "data" in all_names
         assert "sub" in all_names
-        assert "script" in all_names
 
         items = proj.allitems
         item_names = [item[0] for item in items]
         assert "data" in item_names
         assert "sub" in item_names
-        assert "script" in item_names
 
     def test_readonly_id_property(self):
         proj = Project(name="test")
@@ -604,21 +1079,6 @@ class TestProjectProperties:
     def test_directory_property(self):
         proj = Project(name="test")
         assert proj.directory is None
-
-
-class TestOthersDict:
-    """Tests for _others dictionary functionality."""
-
-    def test_others_dict_populated(self):
-        proj = Project(name="test")
-
-        class CustomObject:
-            name = "custom"
-
-        obj = CustomObject()
-        proj._set_from_type(obj)
-        assert "custom" in proj._others
-        assert proj._others["custom"] is obj
 
 
 class TestEdgeCases:
@@ -634,15 +1094,6 @@ class TestEdgeCases:
         ds.name = ""
         proj.add_dataset(ds)
         assert len(proj.datasets_names) == 1
-
-    def test_multiple_scripts(self):
-        proj = Project(name="test")
-        proj.add_scripts(
-            Script("script1", "x = 1"),
-            Script("script2", "y = 2"),
-            Script("script3", "z = 3"),
-        )
-        assert len(proj.scripts_names) == 3
 
     def test_nested_subprojects(self):
         proj = Project(name="root")
@@ -690,15 +1141,15 @@ class TestSerializationRoundtrip:
         assert "subproject" in loaded.projects_names
         assert "data" in loaded.subproject.datasets_names
 
-    def test_save_load_with_scripts(self):
-        proj = Project(name="script_test")
-        proj.add_script(Script("test_script", "x = 42"))
+    def test_save_load_overwrites_root_name_from_filename(self):
+        proj = Project(name="logical_name", description="saved metadata")
+        proj.add_dataset(NDDataset([1, 2, 3], name="data"))
 
-        filename = proj.save()
+        filename = proj.save_as("filename_name_wins")
         loaded = Project.load(filename)
 
-        assert "test_script" in loaded.scripts_names
-        assert loaded.test_script.content == "x = 42"
+        assert loaded.name == "filename_name_wins"
+        assert loaded.meta.description == "saved metadata"
 
     def test_save_as_creates_new_file(self, ds1):
         proj = Project(name="overwrite_test")
@@ -711,7 +1162,7 @@ class TestSerializationRoundtrip:
         assert filename2.exists()
         assert filename1 != filename2
 
-    def test_save_load_ignores_legacy_roi_and_modeldata_fields(self, ds1):
+    def test_save_load_ignores_legacy_fields(self, ds1):
         proj = Project(name="legacy_fields_test")
         ds1.name = "data"
         proj.add_dataset(ds1)
@@ -724,6 +1175,7 @@ class TestSerializationRoundtrip:
 
         js["datasets"][0]["roi"] = [0.0, 1.0]
         js["datasets"][0]["modeldata"] = [42.0]
+        js["_others"] = {"unused": "should be ignored"}
 
         with zipfile.ZipFile(filename, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
             zipf.writestr(member, json.dumps(js, indent=2))
@@ -732,6 +1184,24 @@ class TestSerializationRoundtrip:
 
         assert not hasattr(loaded.data, "roi")
         assert not hasattr(loaded.data, "modeldata")
+        assert not hasattr(loaded, "_others")
+
+    def test_project_load_requires_explicit_opt_in(self, ds1):
+        proj = Project(name="legacy_project")
+        ds1.name = "data"
+        proj.add_dataset(ds1)
+
+        filename = proj.save()
+        _rewrite_project_dataset_payload_as_legacy_pickle(filename)
+
+        with pytest.raises(
+            SpectroChemPyError,
+            match="trusted legacy loading",
+        ):
+            Project.load(filename)
+
+        loaded = Project.load(filename, allow_unsafe_legacy=True)
+        assert "data" in loaded.datasets_names
 
 
 class TestArgNamesEdgeCases:

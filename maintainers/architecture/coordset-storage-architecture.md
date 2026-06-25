@@ -239,6 +239,12 @@ as safety nets after the storage switch.
 
 Do not remove them without proving that they are unreachable or redundant.
 
+## Audit Trail
+
+Detailed campaign history and intermediate checkpoints remain in the local
+maintainer audit trail. The tracked references for maintainers are this final
+architecture note and the curated architecture indexes under `maintainers/`.
+
 ### Broader Traitlets Audit
 
 The main issue was not Traitlets itself, but business logic hidden inside

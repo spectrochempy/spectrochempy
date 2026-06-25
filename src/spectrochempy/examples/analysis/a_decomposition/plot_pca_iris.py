@@ -14,7 +14,7 @@ dataset (Ronald A. Fisher.
 """
 
 # %%
-# First we laod the spectrochempy API package
+# First we load the SpectroChemPy API package
 import spectrochempy as scp
 
 # %%
@@ -23,25 +23,25 @@ dataset = scp.load_iris()
 
 # %%
 # Create a PCA object
-# Here, the number of components  wich is used by the model is automatically determined
+# Here, the number of components used by the model is automatically determined
 # using `n_components="mle"`\. Warning: `mle` cannot be used when
 # n_observations < n_features.
 pca = scp.PCA(n_components="mle")
 # %%
 # Fit dataset with the PCA model
-pca.fit(dataset)
+_ = pca.fit(dataset)
 # %%
 # The number of components found is 3:
 pca.n_components
 # %%
-# It explain 99.5 % of the variance
+# It explains 99.5% of the variance
 pca.cumulative_explained_variance[-1].value
 # %%
 # We can also specify the amount of explained variance to compute how much components
 # are needed (a number between 0 and 1 for n_components is required to do this).
 # we found 4 components in this case
 pca = scp.PCA(n_components=0.999)
-pca.fit(dataset)
+_ = pca.fit(dataset)
 pca.n_components
 # %%
 # the 4 components found are in the `components` attribute of pca. These components are
@@ -50,7 +50,7 @@ loadings = pca.components
 loadings
 # %%
 # Note: it is equivalently possible to use the `loadings` attribute of pca, which
-# produce the same results.
+# produces the same results.
 pca.loadings
 # %%
 # To Reduce the data to a lower dimensionality using these three components, we use the
@@ -58,7 +58,7 @@ pca.loadings
 scores = pca.transform()
 scores
 # %%
-# Again, we can also use the `scores` attribute to get this results
+# Again, we can also use the `scores` attribute to get these results.
 scores = pca.scores
 scores
 # %%
@@ -75,11 +75,11 @@ _ = pca.plot_scree()
 # The score plots can be used for classification purposes. The first one - in 2D for the
 # 2 first PC's - shows that the first PC allows distinguishing Iris-setosa (score of
 # PC#1 < -1) from other species (score of PC#1 > -1), while more PC's are required
-# to distinguish versicolor from viginica.
+# to distinguish versicolor from virginica.
 _ = pca.plot_score(color_mapping="labels")
 # %%
-# The second one - in 3D for the 3 first PC's - indicates that a thid PC won't allow
-# better distinguishing versicolor from viginica.
+# The second one, in 3D for the first 3 PCs, indicates that a third PC will not
+# better distinguish versicolor from virginica.
 ax = pca.plot_score(components=(1, 2, 3), color_mapping="labels")
 ax.view_init(10, 75)
 

@@ -432,17 +432,17 @@ class DecompositionAnalysis(AnalysisConfigurable):
     def reduce(self, X=None, **kwargs):
         # deprecated decorator do not preserve signature, so
         # i use a workaround
-        return deprecated(replace="transform", removed="0.10.0")(self.transform)(
+        return deprecated(replace="transform", removed="0.11.0")(self.transform)(
             X, **kwargs
         )
 
     reduce.__doc__ = (
         transform.__doc__
-        + "\nNotes\n-----\nDeprecated in version 0.6, will be removed in 0.10.0.\n"
+        + "\nNotes\n-----\nDeprecated in version 0.6, will be removed in 0.11.0.\n"
     )
 
     def reconstruct(self, X_transform=None, **kwargs):
-        return deprecated(replace="inverse_transform", removed="0.10.0")(
+        return deprecated(replace="inverse_transform", removed="0.11.0")(
             self.inverse_transform
         )(
             X_transform,
@@ -451,7 +451,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
     reconstruct.__doc__ = (
         inverse_transform.__doc__
-        + "\nNotes\n-----\nDeprecated in version 0.6, will be removed in 0.10.0.\n"
+        + "\nNotes\n-----\nDeprecated in version 0.6, will be removed in 0.11.0.\n"
     )
 
     @_wrap_ndarray_output_to_nddataset(units=None, title=None, typey="components")

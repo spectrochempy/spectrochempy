@@ -807,6 +807,49 @@ class IRIS(DecompositionAnalysis):
     def SM(self):
         return self._outfit[2]
 
+    @property
+    def result(self):
+        """
+        Return the IRIS analysis result.
+
+        Returns
+        -------
+        AnalysisResult
+            Result containing the distribution, kernel, and regularization
+            diagnostics.
+
+        Raises
+        ------
+        NotFittedError
+            If the estimator has not been fitted yet.
+        """
+        if not self._fitted:
+            raise NotFittedError(
+                "The fit method must be used before accessing the result"
+            )
+
+        from spectrochempy.analysis._base._result import AnalysisResult
+
+        return AnalysisResult(
+            estimator="IRIS",
+            parameters={
+                "qpsolver": self.qpsolver,
+                "reg_par": self.reg_par,
+                "warm_start": self._warm_start,
+                "regularization": self._regularization,
+                "search_reg": self._search_reg,
+            },
+            outputs={
+                "f": self.f,
+                "K": self.K,
+            },
+            diagnostics={
+                "RSS": self.RSS,
+                "SM": self.SM,
+                "lambdas": self.lambdas,
+            },
+        )
+
     def inverse_transform(self):  # override the decomposition method
         r"""
         Transform data back to the original space.

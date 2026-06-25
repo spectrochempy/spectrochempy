@@ -31,9 +31,13 @@ Use
 
     model = scp.tensor.CP(n_components=2)
     model.fit(dataset)
+    factors = model.result.factors
+    weights = model.result.weights
 
 The historical ``scp.CP`` alias is kept as a deprecated compatibility path.
 New code should use ``scp.tensor.CP``.
+Direct accessors such as ``model.A``, ``model.B``, ``model.C``, and
+``model.weights`` remain available.
 
 Extensibility
 =============

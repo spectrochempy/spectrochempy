@@ -79,7 +79,7 @@ class IrisPlugin(SpectroChemPyPlugin):
     """
 
     name = "iris"
-    version = "0.1.3"
+    version = "0.1.4"
     description = "Extended IRIS analysis: custom kernels, batch analysis, model comparison, enhanced plots"
     spectrochempy_min_version = "0.9.0"
     PLUGIN_API_VERSION = CORE_PLUGIN_API_VERSION
@@ -232,7 +232,8 @@ def batch_iris_analysis(
     Returns
     -------
     list[dict]
-        Each dict contains ``label``, ``iris``, ``f``, ``RSS``, ``SM``.
+        Each dict contains ``label``, ``iris``, ``result``, ``f``, ``RSS``,
+        ``SM``.
     """
     from ._core import IRIS as _IRIS  # noqa: PLC0415
     from ._core import IrisKernel as _IrisKernel  # noqa: PLC0415
@@ -254,14 +255,16 @@ def batch_iris_analysis(
         kernel = _IrisKernel(ds, kernel_fn, q=q)
         iris = _IRIS(reg_par=reg_par)
         iris.fit(ds, kernel)
+        result = iris.result
 
         results.append(
             {
                 "label": label,
                 "iris": iris,
-                "f": iris.f,
-                "RSS": iris.RSS,
-                "SM": iris.SM,
+                "result": result,
+                "f": result.f,
+                "RSS": result.RSS,
+                "SM": result.SM,
             }
         )
 
@@ -291,7 +294,8 @@ def compare_kernel_models(
     Returns
     -------
     list[dict]
-        Each dict contains ``kernel``, ``iris``, ``RSS``, ``SM``, ``n_components``.
+        Each dict contains ``kernel``, ``iris``, ``result``, ``RSS``, ``SM``,
+        ``n_components``.
     """
     from ._core import IRIS as _IRIS  # noqa: PLC0415
     from ._core import IrisKernel as _IrisKernel  # noqa: PLC0415
@@ -311,14 +315,16 @@ def compare_kernel_models(
         kernel = _IrisKernel(dataset, kernel_fn, q=q)
         iris = _IRIS(reg_par=reg_par)
         iris.fit(dataset, kernel)
+        result = iris.result
 
         results.append(
             {
                 "kernel": name,
                 "iris": iris,
-                "RSS": iris.RSS,
-                "SM": iris.SM,
-                "n_components": iris.f.shape[0],
+                "result": result,
+                "RSS": result.RSS,
+                "SM": result.SM,
+                "n_components": result.f.shape[0],
             }
         )
 

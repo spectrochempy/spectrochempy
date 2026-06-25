@@ -739,6 +739,22 @@ class TestCoordSetEdgeCases:
         # labels are returned as list of arrays
         assert len(cs.labels[0]) == 3
 
+    def test_labels_preserved_when_coord_passed_to_coordset(self):
+        """Labels set after Coord construction survive CoordSet copy."""
+        c = Coord([1, 2, 3], name="x")
+        c.labels = ["a", "b", "c"]
+        cs = CoordSet(c)
+        assert cs.is_labeled
+        assert list(cs.labels[0]) == ["a", "b", "c"]
+
+    def test_labels_preserved_in_same_dim_coordset(self):
+        """Labels on a coord in a same-dim CoordSet survive."""
+        c1 = Coord([1, 2, 3], name="a", labels=["x", "y", "z"])
+        c2 = Coord([4, 5, 6], name="b")
+        cs = CoordSet([c1, c2])
+        # After _finalize_child_coordset the default is _1 (sorted)
+        assert cs["x"].is_labeled
+
     def test_select_changes_default(self):
         c1 = Coord([1, 2, 3], name="x")
         c2 = Coord([10, 20], name="y")

@@ -85,3 +85,36 @@ def test_svd(low_rank_dataset):
     assert svd.U.shape == (3, 3)
     assert svd.VT.shape == (4, 4)
     assert_allclose(svd.s, [5.0, 3.0, 0.0])
+
+
+def test_svd_compute_uv_false(low_rank_dataset):
+    dataset = low_rank_dataset
+    svd = SVD(compute_uv=False)
+    result = svd.fit(dataset)
+
+    assert result is svd
+    # _outfit is always a (U, s, VT) tuple after _fit normalisation
+    assert isinstance(svd._outfit, tuple)
+    assert len(svd._outfit) == 3
+    # U and VT are None when compute_uv=False
+    assert svd.U is None
+    assert svd.VT is None
+    # Singular values are correct
+    assert_allclose(svd.s, [5.0, 3.0, 0.0, 0.0])
+    assert svd.sv.shape == (4,)
+    assert svd.sv.title == "Singular values"
+    # Diagnostics work correctly
+    assert svd.ev.shape == (4,)
+    assert svd.ev_ratio.shape == (4,)
+    assert svd.ev_cum.shape == (4,)
+    assert_allclose(svd.ev_ratio.data, [2500.0 / 34.0, 900.0 / 34.0, 0.0, 0.0])
+    assert_allclose(svd.ev_cum.data, [2500.0 / 34.0, 100.0, 100.0, 100.0])
+    # repr shows U and VT not computed
+    assert "U and VT not computed" in repr(svd)
+
+    # full_matrices=True + compute_uv=False
+    svd2 = SVD(full_matrices=True, compute_uv=False)
+    svd2.fit(dataset)
+    assert svd2.U is None
+    assert svd2.VT is None
+    assert_allclose(svd2.s, [5.0, 3.0, 0.0, 0.0])

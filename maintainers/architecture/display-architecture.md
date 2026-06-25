@@ -197,3 +197,9 @@ items.
 |----------|---------|
 | [`architecture/display-architecture-audit.md`](architecture/display-architecture-audit.md) | Original fragmentation analysis (archived) |
 | [`src/spectrochempy/utils/print.py`](../src/spectrochempy/utils/print.py) | `DisplayItem`, `DisplaySection`, `_render_sections()`, `_html_heading()` |
+
+## Audit Trail
+
+Detailed campaign notes and follow-up investigations remain part of the local
+maintainer audit trail. The tracked references for maintainers are this
+document and [`display-architecture-audit.md`](display-architecture-audit.md).

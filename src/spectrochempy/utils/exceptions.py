@@ -167,6 +167,27 @@ class InvalidUnitsError(SpectroChemPyError):
     """Exception raised when units is not valid."""
 
 
+def format_incompatible_units_message(operation, left_units, right_units, dim=None):
+    """
+    Build a clear error message for incompatible units in coordinate-aware operations.
+
+    Parameters
+    ----------
+    operation : str
+        Short operation description, e.g. ``"align datasets"``.
+    left_units, right_units : any
+        Units involved in the failed operation.
+    dim : str, optional
+        Dimension name, when available.
+    """
+    location = f" along dimension '{dim}'" if dim is not None else ""
+    return (
+        f"Cannot {operation}{location}: incompatible coordinate units "
+        f"({left_units} and {right_units}). "
+        "Convert the coordinates to compatible units before retrying."
+    )
+
+
 class InvalidReferenceError(SpectroChemPyError):
     """Exception raised when a reference to another coordinate is not valid."""
 
@@ -227,7 +248,7 @@ class InvalidCoordSetSizeError(SpectroChemPyError):
 
 class ProtocolError(SpectroChemPyError):
     """
-    Exception raised when a wrong protocol is secified to the spectrochempy importer.
+    Exception raised when an unsupported protocol is specified to the importer.
 
     Parameters
     ----------
@@ -235,18 +256,55 @@ class ProtocolError(SpectroChemPyError):
         The protocol string that was at the origin of the exception.
     available_protocols : list of str
         The available (implemented) protocols.
+    filename : str or path-like, optional
+        The file that could not be read.
+    detected_protocol : str, optional
+        The protocol inferred from the filename when it conflicts with ``protocol``.
     """
 
-    def __init__(self, protocol, available_protocols):
-        self.message = (
-            f"IO - The `{protocol}` protocol is unknown or not yet implemented.\n"
-            f"It is expected to be one of {tuple(available_protocols)}"
+    def __init__(
+        self,
+        protocol,
+        available_protocols,
+        filename=None,
+        detected_protocol=None,
+    ):
+        supported = ", ".join(f"'{item}'" for item in sorted(set(available_protocols)))
+        location = (
+            f"Cannot read '{filename}'" if filename is not None else "Cannot read"
         )
+
+        if detected_protocol is not None:
+            self.message = (
+                f"{location} with protocol='{protocol}'.\n"
+                f"The filename indicates protocol='{detected_protocol}'.\n"
+                f"Choose protocol='{detected_protocol}' or omit the protocol argument."
+            )
+        else:
+            self.message = (
+                f"{location} with protocol='{protocol}'.\n"
+                "The requested protocol is unknown or not implemented.\n"
+                f"Supported protocols are: {supported}."
+            )
 
         super().__init__(self.message)
 
 
-class WrongFileFormatError(SpectroChemPyError):
+class UnsupportedOriginError(SpectroChemPyError, NotImplementedError):
+    """Exception raised when a reader does not support a requested origin."""
+
+    def __init__(self, filename, protocol, origin, supported_origins):
+        supported = ", ".join(f"'{item}'" for item in supported_origins)
+        protocol_name = protocol.upper()
+        message = (
+            f"Cannot read {protocol_name} file '{filename}' with origin='{origin}'.\n"
+            f"Supported {protocol_name} origins are: {supported}.\n"
+            "Remove the origin argument or choose a supported origin."
+        )
+        super().__init__(message)
+
+
+class WrongFileFormatError(SpectroChemPyError, TypeError):
     """Exception raised when the file format is incorrect or not supported."""
 
 

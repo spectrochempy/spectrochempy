@@ -218,7 +218,12 @@ def align(dataset, *others, **kwargs):
             if not coord.is_units_compatible(ref_coord):
                 # not compatible, stop everything
                 raise exceptions.UnitsCompatibilityError(
-                    "NDataset to align must have compatible units!",
+                    exceptions.format_incompatible_units_message(
+                        "align datasets",
+                        coord.units,
+                        ref_coord.units,
+                        dim=dim,
+                    ),
                 )
 
             # do units transform if necesssary so coords can be compared

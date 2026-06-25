@@ -1341,6 +1341,8 @@ def _read_topspin(*args, **kwargs):
     if dataset.meta.date is not None:
         dataset.acquisition_date = datetime.fromtimestamp(dataset.meta.date[-1])
 
+    dataset.history = "Imported from TopSpin dataset"
+
     return dataset
 
     # list_meta.append(meta)  # list_coords.append(coords)  # list_data.append(data)

@@ -3,7 +3,6 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-import json
 import os
 from collections.abc import Mapping
 
@@ -69,11 +68,12 @@ class ScpFile(Mapping):  # lgtm[py/missing-equals]
 
     """
 
-    def __init__(self, fid):
+    def __init__(self, fid, *, allow_unsafe_legacy=False):
         _zip = make_zipfile(fid)
 
         self.files = _zip.namelist()
         self.zip = _zip
+        self.allow_unsafe_legacy = allow_unsafe_legacy
 
         if hasattr(fid, "close"):
             self.fid = fid
@@ -111,7 +111,9 @@ class ScpFile(Mapping):  # lgtm[py/missing-equals]
         return len(self.files)
 
     def __getitem__(self, key):
-        from spectrochempy.utils.jsonutils import json_decoder
+        from spectrochempy.utils.exceptions import SpectroChemPyError
+        from spectrochempy.utils.jsonutils import UNSAFE_LEGACY_LOADING_MESSAGE
+        from spectrochempy.utils.jsonutils import json_loads
 
         member = False
         ext = None
@@ -122,18 +124,32 @@ class ScpFile(Mapping):  # lgtm[py/missing-equals]
 
         if member and ext in [".npy"]:
             f = self.zip.open(key)
-            return read_array(f, allow_pickle=True)
+            try:
+                return read_array(f, allow_pickle=self.allow_unsafe_legacy)
+            except ValueError as exc:
+                if not self.allow_unsafe_legacy and "allow_pickle=False" in str(exc):
+                    raise SpectroChemPyError(
+                        UNSAFE_LEGACY_LOADING_MESSAGE,
+                    ) from exc
+                raise
 
         if member and ext in [".scp"]:
             from spectrochempy.core.dataset.nddataset import NDDataset
 
             # f = io.BytesIO(self.zip.read(key))
             content = self.zip.read(key)
-            return NDDataset.load(key, content=content)
+            return NDDataset.load(
+                key,
+                content=content,
+                allow_unsafe_legacy=self.allow_unsafe_legacy,
+            )
 
         if member and ext in [".json"]:
             content = self.zip.read(key)
-            return json.loads(content, object_hook=json_decoder)
+            return json_loads(
+                content,
+                allow_unsafe_legacy=self.allow_unsafe_legacy,
+            )
 
         if member:
             return self.zip.read(key)

@@ -25,7 +25,7 @@ import spectrochempy as scp
 dataset = scp.read_omnic("irdata/nh4y-activation.spg")
 
 # %%
-# Mask some columns (features) wich correspond to saturated part of the spectra.
+# Mask some columns (features) which correspond to saturated parts of the spectra.
 # Note taht we use float number for defining the limits for masking as coordinates
 # (integer numbers would mean point index and s would lead t incorrect results)
 dataset[:, 882.0:1280.0] = scp.MASKED
@@ -50,7 +50,7 @@ model = scp.NMF(n_components=4, log_level="INFO")
 # %%
 # Fit the model
 # -------------
-model.fit(dataset)
+_ = model.fit(dataset)
 # Get the results
 # ---------------
 #

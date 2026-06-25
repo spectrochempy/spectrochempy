@@ -20,10 +20,12 @@ Usage:
 import json
 import re
 import sys
+from collections import defaultdict
 from datetime import date
 from pathlib import Path
 
 import yaml
+from packaging.version import Version
 
 try:
     NO_CFFCONVERT = False
@@ -377,26 +379,36 @@ def _generate_release_index(revision):
         Current version being processed
 
     """
-    # Collect and sort version files
-    files = WN.glob("v*.rst")
-    names = sorted([f.name for f in files], reverse=True)
+    # Collect and sort version files using semantic version ordering so
+    # releases such as 0.10.x sort after 0.9.x.
+    release_files = []
+    for path in WN.glob("v*.rst"):
+        match = re.fullmatch(r"v(\d+\.\d+\.\d+)\.rst", path.name)
+        if not match:
+            continue
+        version_str = match.group(1)
+        release_files.append((Version(version_str), f"v{version_str}"))
 
-    # Organize versions
-    dicvers = {}
-    for name in names:
-        arr = name.split(".")
-        base = ".".join(arr[:3])
-        v = f"{arr[0][1]}.{arr[1]}"
-        if v in dicvers:
-            dicvers[v].append(base)
-        else:
-            dicvers[v] = [base]
+    release_files.sort(key=lambda item: item[0], reverse=True)
+
+    # Group by major.minor while preserving semantic version ordering inside
+    # each family.
+    grouped_versions = defaultdict(list)
+    for parsed_version, base_name in release_files:
+        family = f"{parsed_version.major}.{parsed_version.minor}"
+        grouped_versions[family].append((parsed_version, base_name))
 
     # Generate index content
     with open(WN / "index.rst", "w") as f:
         f.write(_get_index_header())
 
-        for i, vers in enumerate(dicvers):
+        families = sorted(
+            grouped_versions,
+            key=lambda family: Version(f"{family}.0"),
+            reverse=True,
+        )
+
+        for i, vers in enumerate(families):
             latest = "\n    latest" if i == 0 and ".dev" in revision else ""
             f.write(
                 f"""
@@ -408,10 +420,7 @@ Version {vers}
 {latest}
 """,
             )
-            # Sort and write version entries
-            li = sorted(dicvers[vers], key=lambda x: int(str.split(x, ".")[2]))
-            li.reverse()
-            for rev in li:
+            for _, rev in grouped_versions[vers]:
                 f.write(f"    {rev}\n")
 
 

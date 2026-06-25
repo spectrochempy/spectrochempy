@@ -22,9 +22,6 @@ on:
       - 'docs/**'
 
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-
   release:
     types: [published]
 
@@ -40,11 +37,61 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  classify-pr-scope:
+    name: Classify PR scope
+    runs-on: ubuntu-latest
+    outputs:
+      docs_only: ${{ steps.classify.outputs.docs_only }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Classify changed files
+        id: classify
+        run: |
+          python - <<'PY'
+          import os
+          import subprocess
+          from pathlib import Path
+
+          if "${{ github.event_name }}" != "pull_request":
+              with Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as stream:
+                  stream.write("docs_only=false\n")
+              print("docs_only=False (non-pull_request event)")
+              raise SystemExit(0)
+
+          base = "${{ github.event.pull_request.base.sha }}"
+          head = "${{ github.sha }}"
+          result = subprocess.run(
+              ["git", "diff", "--name-only", f"{base}...{head}"],
+              check=True,
+              text=True,
+              capture_output=True,
+          )
+          files = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+          print("Changed files:")
+          for path in files:
+              print(f"  - {path}")
+          docs_only_prefixes = ("docs/", "audit/", "maintainers/")
+          docs_only = bool(files) and all(
+              path.startswith(docs_only_prefixes) for path in files
+          )
+          with Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as stream:
+              stream.write(f"docs_only={'true' if docs_only else 'false'}\n")
+          print(f"docs_only={docs_only}")
+          PY
+
   build-and-publish_pypi:
     name: Build and publish distribution to PyPI
+    needs: classify-pr-scope
     if: >
-      github.repository == 'spectrochempy/spectrochempy' ||
-      github.event_name == 'workflow_dispatch'
+      (github.repository == 'spectrochempy/spectrochempy' ||
+      github.event_name == 'workflow_dispatch') &&
+      (github.event_name != 'pull_request' ||
+      needs.classify-pr-scope.outputs.docs_only != 'true')
     runs-on: ubuntu-latest
 
     defaults:
@@ -53,7 +100,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -115,9 +162,12 @@ jobs:
 
   build_and_publish_conda_package:
     name: Build and publish conda package to Anaconda.org
+    needs: classify-pr-scope
     if: >
-      github.repository == 'spectrochempy/spectrochempy' ||
-      github.event_name == 'workflow_dispatch'
+      (github.repository == 'spectrochempy/spectrochempy' ||
+      github.event_name == 'workflow_dispatch') &&
+      (github.event_name != 'pull_request' ||
+      needs.classify-pr-scope.outputs.docs_only != 'true')
     runs-on: ubuntu-latest
 
     defaults:
@@ -126,7 +176,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -233,14 +283,17 @@ jobs:
   discover-conda-plugins:
     name: Discover plugins with conda recipes
     runs-on: ubuntu-latest
-    needs: build_and_publish_conda_package
-    if: github.repository == 'spectrochempy/spectrochempy'
+    needs: [classify-pr-scope, build_and_publish_conda_package]
+    if: >
+      github.repository == 'spectrochempy/spectrochempy' &&
+      (github.event_name != 'pull_request' ||
+      needs.classify-pr-scope.outputs.docs_only != 'true')
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -282,9 +335,11 @@ jobs:
   build_and_publish_conda_plugins:
     name: Build and publish conda plugin packages to Anaconda.org
     runs-on: ubuntu-latest
-    needs: discover-conda-plugins
+    needs: [classify-pr-scope, discover-conda-plugins]
     if: |
       github.repository == 'spectrochempy/spectrochempy' &&
+      (github.event_name != 'pull_request' ||
+      needs.classify-pr-scope.outputs.docs_only != 'true') &&
       needs.discover-conda-plugins.outputs.matrix != '{}' &&
       needs.discover-conda-plugins.outputs.matrix != ''
 
@@ -298,7 +353,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 

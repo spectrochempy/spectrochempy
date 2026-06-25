@@ -24,6 +24,7 @@ import scipy
 
 from spectrochempy.application.application import error_
 from spectrochempy.application.application import warning_
+from spectrochempy.core.units import DimensionalityError
 from spectrochempy.core.units import Quantity
 
 # Todo:
@@ -31,6 +32,87 @@ from spectrochempy.core.units import Quantity
 # argrelmin(data[, axis, order, mode]) 	Calculate the relative minima of data.
 # argrelmax(data[, axis, order, mode]) 	Calculate the relative maxima of data.
 # argrelextrema(data, comparator[, axis, ...]) 	Calculate the relative extrema of data.
+
+
+def _as_peakfinding_quantity(value):
+    if isinstance(value, str):
+        return Quantity(value)
+    if isinstance(value, Quantity):
+        return value
+    return None
+
+
+def _format_peakfinding_units_error(name, supplied_units, coord_units, dim):
+    return (
+        f"Cannot use peak-finding parameter `{name}` along dimension '{dim}': "
+        f"incompatible coordinate units ({supplied_units} and {coord_units}). "
+        "Convert the parameter to coordinate units before retrying."
+    )
+
+
+def _convert_peak_parameter_to_points(name, value, step, xunits, use_coord, dim):
+    """
+    Convert coordinate-aware peak-finding constraints to sample-point counts.
+
+    ``scipy.signal.find_peaks()`` expects values such as ``distance`` and
+    ``width`` in sample points. When SpectroChemPy is working in coordinate
+    space, we accept physical-unit inputs and convert them to the nearest
+    integer point count using the current coordinate spacing.
+    """
+    if value is None:
+        return None
+
+    quantity = _as_peakfinding_quantity(value)
+    if quantity is not None:
+        if not use_coord:
+            raise ValueError(
+                f"Parameter `{name}` with physical units requires coordinate-aware "
+                "peak finding. Provide a plain numeric value or keep `use_coord=True`."
+            )
+        try:
+            value = quantity.to(xunits).magnitude
+        except DimensionalityError as exc:
+            raise ValueError(
+                _format_peakfinding_units_error(
+                    name,
+                    quantity.units,
+                    xunits,
+                    dim,
+                )
+            ) from exc
+
+    if isinstance(value, tuple):
+        return tuple(
+            _convert_peak_parameter_to_points(name, item, step, xunits, use_coord, dim)
+            if item is not None
+            else None
+            for item in value
+        )
+
+    if use_coord:
+        points = int(round(value / step))
+        if value > 0 and points <= 0:
+            raise ValueError(
+                f"Parameter `{name}`={value} along dimension '{dim}' is smaller "
+                f"than the coordinate sampling interval ({step}). Increase the "
+                "value or use a plain point count with `use_coord=False`."
+            )
+        return points
+    return value
+
+
+def _normalize_interpolation_window(window_length):
+    """
+    Normalize the quadratic-interpolation window.
+
+    Quadratic interpolation needs at least three samples and is symmetric only
+    for odd window lengths. Values smaller than 3 disable interpolation.
+    """
+    if window_length is None or window_length < 3:
+        return 0
+    if window_length % 2 == 0:
+        return window_length - 1
+    return window_length
 
 
 def find_peaks(
@@ -103,21 +185,18 @@ def find_peaks(
 
     Examples
     --------
-    Basic peak finding with height threshold:
-    >>> dataset = scp.read("irdata/nh4y-activation.spg")
-    >>> X = dataset[0, 1800.0:1300.0]
-    >>> peaks, props = X.find_peaks(height=1.5)
+    Basic peak finding with a synthetic spectrum:
+    >>> x = np.linspace(0.0, 10.0, 501)
+    >>> y = np.exp(-((x - 3.0) ** 2) / 0.08) + 0.8 * np.exp(-((x - 7.0) ** 2) / 0.12)
+    >>> ds = scp.NDDataset(y, coordset=[scp.Coord(x, title="x", units="cm^-1")])
+    >>> peaks, props = ds.find_peaks(height=0.5)
+    >>> len(peaks)
+    2
 
-    Find well-separated peaks with minimum width:
-    >>> peaks, props = X.find_peaks(distance=50.0, width=10.0)
-
-    Complex filtering with multiple criteria:
-    >>> peaks, props = X.find_peaks(
-    ...     height=1.5,
-    ...     distance=50.0,
-    ...     prominence=0.5,
-    ...     width=20.0
-    ... )
+    Physical-unit spacing constraints are accepted when coordinates carry units:
+    >>> peaks, props = ds.find_peaks(distance="1 cm^-1", width=0.2)
+    >>> len(peaks)
+    2
 
     """
     # get the dataset
@@ -148,11 +227,20 @@ def find_peaks(
         xunits = lastcoord.units if lastcoord.units is not None else 1
         dunits = X.units if X.units is not None else 1
 
-        # assume linear x coordinates
-        # TODO: what if the coordinates are not linear?
         if not lastcoord.linear:
+            if any(
+                parameter is not None
+                for parameter in (distance, width, wlen, plateau_size)
+            ):
+                raise ValueError(
+                    "Coordinate-aware `distance`, `width`, `wlen`, and "
+                    "`plateau_size` require a linear coordinate axis. "
+                    "Use plain point counts with `use_coord=False` for non-linear "
+                    "coordinates."
+                )
             warning_(
-                "The x coordinates are not linear. The peak finding might be wrong.",
+                "The x coordinates are not linear. Peak detection still runs, "
+                "but quadratic refinement and reported widths remain approximate.",
             )
             spacing = np.mean(lastcoord.spacing)
         else:
@@ -161,12 +249,18 @@ def find_peaks(
             spacing = spacing.magnitude
         step = np.abs(spacing)
 
-    # transform coord (if exists) to index
-    # TODO: allow units for distance, width, wlen, plateau_size
-    distance = int(round(distance / step)) if distance is not None else None
-    width = int(round(width / step)) if width is not None else None
-    wlen = int(round(wlen / step)) if wlen is not None else None
-    plateau_size = int(round(plateau_size / step)) if plateau_size is not None else None
+    # transform coordinate-aware constraints to sample-point counts
+    dim = X.dims[-1]
+    distance = _convert_peak_parameter_to_points(
+        "distance", distance, step, xunits, use_coord, dim
+    )
+    width = _convert_peak_parameter_to_points(
+        "width", width, step, xunits, use_coord, dim
+    )
+    wlen = _convert_peak_parameter_to_points("wlen", wlen, step, xunits, use_coord, dim)
+    plateau_size = _convert_peak_parameter_to_points(
+        "plateau_size", plateau_size, step, xunits, use_coord, dim
+    )
 
     # now the distance, width ... parameters are given in data points
     peaks, properties = scipy.signal.find_peaks(
@@ -194,17 +288,22 @@ def find_peaks(
     if not use_coord:
         out.coordset = None  # remove the coordinates
 
-    # quadratic interpolation to find the maximum
-    window_length = window_length if window_length % 2 == 0 else window_length - 1
+    # quadratic interpolation to refine the peak maximum
+    window_length = _normalize_interpolation_window(window_length)
     x_pos = []
     if window_length > 1:
+        half_window = window_length // 2
         for i, peak in enumerate(peaks):
-            start = peak - window_length // 2
-            end = peak + window_length // 2 + 1
+            start = max(0, peak - half_window)
+            end = min(X.shape[-1], peak + half_window + 1)
             sle = slice(start, end)
 
             y = X.data[sle]
-            x = lastcoord.data[sle] if use_coord else range(start, end)
+            if y.size < 3:
+                # Too close to the border for a quadratic fit: keep the discrete peak.
+                continue
+
+            x = lastcoord.data[sle] if use_coord else np.arange(start, end)
 
             coef = np.polyfit(x, y, 2)
 

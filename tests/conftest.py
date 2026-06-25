@@ -299,7 +299,6 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.project.project import Project
-from spectrochempy.core.script import Script
 from spectrochempy.utils.file import pathclean
 from spectrochempy.utils.testing import RandomSeedContext
 
@@ -699,12 +698,6 @@ def simple_project():
     tg = NDDataset([1, 3, 4], coordset=[[1, 2, 3]])
     proj.A350["IR"] = ir
     proj.A350["TG"] = tg
-    script_source = (
-        "set_loglevel(INFO)\n"
-        'info_(f"samples contained in the project are {proj.projects_names}")'
-    )
-
-    proj["print_info"] = Script("print_info", script_source)
     return proj
 
 

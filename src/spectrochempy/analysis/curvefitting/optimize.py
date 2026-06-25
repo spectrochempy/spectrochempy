@@ -16,6 +16,8 @@ from IPython import display
 from scipy import optimize
 
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
+from spectrochempy.analysis._base._analysisbase import NotFittedError
+from spectrochempy.analysis._base._result import FitResult
 from spectrochempy.analysis.curvefitting import _models as models_
 from spectrochempy.analysis.curvefitting._parameters import FitParameters
 from spectrochempy.application.application import info_
@@ -271,6 +273,7 @@ class Optimize(DecompositionAnalysis):
             else fun_residuals
         )
 
+        fopt = None
         if not self.dry:
             fp, fopt = _optimize(
                 func,
@@ -282,6 +285,14 @@ class Optimize(DecompositionAnalysis):
                 constraints=self.constraints,
                 callback=callback,
             )
+
+        # Store solver metadata for the result object.
+        # Created on every _fit call so it always reflects the last fit.
+        self._fit_meta = {
+            "cost": float(fopt) if fopt is not None else None,
+            "niter": niter,
+            "ncalls": ncalls,
+        }
 
         # replace the previous script with new fp parameters
         self.script = str(fp)
@@ -955,6 +966,45 @@ class Optimize(DecompositionAnalysis):
 
         """
         return super().fit(X, Y=None)
+
+    # ----------------------------------------------------------------------------------
+    # Result object
+    # ----------------------------------------------------------------------------------
+    @property
+    def result(self):
+        """
+        Return the Optimize fit result object.
+
+        Returns
+        -------
+        FitResult
+            Result object containing fitted model outputs,
+            solver diagnostics, and estimator parameters.
+        """
+        if not self._fitted:
+            raise NotFittedError(
+                "The fit method must be used before accessing the result",
+            )
+
+        # NOTE: a new FitResult is created on every access.
+        # Caching is deliberately deferred to keep the implementation
+        # simple and aligned with the PCA / SVD result behaviour.
+
+        return FitResult(
+            estimator="Optimize",
+            parameters={
+                "method": self.method,
+                "max_iter": self.max_iter,
+                "max_fun_calls": self.max_fun_calls,
+                "autobase": self.autobase,
+                "amplitude_mode": self.amplitude_mode,
+            },
+            outputs={
+                "fitted": self.predict(),
+                "components": self.components,
+            },
+            diagnostics=dict(getattr(self, "_fit_meta", {})),
+        )
 
 
 # ======================================================================================

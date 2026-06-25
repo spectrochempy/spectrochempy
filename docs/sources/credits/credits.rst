@@ -1,5 +1,7 @@
 .. _detailed_credits:
 
+.. This file is generated from ``credits.rst.tmpl`` and ``zenodo.json`` during documentation builds.
+
 Contributors
 ============
 
@@ -13,12 +15,21 @@ The main contributors are:
 
 Other contributions have been made by:
 
+
 * Guillaume Clet (ORCID: `0000-0001-5999-5880 <https://orcid.org/0000-0001-5999-5880>`_)
+
 * Abdelhafid Ait Blal (ORCID: `0000-0002-1825-0097 <https://orcid.org/0000-0002-1825-0097>`_)
+
 * William Guerin
+
 * Matthias Mailänder
 
-We thanks all the users who have reported bugs, suggested improvements,
+* Sebastian Rejman (ORCID: `0000-0001-7976-6372 <https://orcid.org/0000-0001-7976-6372>`_)
+
+* Vincent Gao
+
+
+We thank all the users who have reported bugs, suggested improvements,
 and contributed to improve the documentation.
 
 Third-party Licenses

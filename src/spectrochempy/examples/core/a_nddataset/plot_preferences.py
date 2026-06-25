@@ -83,19 +83,20 @@ new = mydataset["hot"]
 # As the section NDDataset is 2D, a stack plot is displayed by default. As you can see, the x-axis is in wavenumber
 # and the ordinate axis is in absorbance units (au). The y dimension of the dataset is the time-on-stream (in minutes).
 # Because the time-on-stream values are floats, this triggers the default sequential colormap ('viridis'). The
-# corresponding values can be seen if `colorbar' is passed as `True`:
+# corresponding values can be seen if `colorbar` is passed as `True`:
 _ = new.plot(colorbar=True)
 
 # %%
 # It is also possible to display this dataset as an image (actually a filled contour plot).
 # The x is the same as before, but the ordinates are now the time-on-stream values. The color of the pixels is now
 # related to the value of the absorbance. As the dataset contains both negative and positive values, the default
-# colormap is diverging (`RdBu').
+# colormap is diverging (`RdBu`).
 #
 # sphinx_gallery_thumbnail_number = 2
 _ = new.plot(method="image", colorbar=True)
 # %%
-# If a dataset contains only positive values, the default colormap is sequential (`:
+# If a dataset contains only positive values, the default colormap is
+# sequential (`viridis`):
 
 _ = np.abs(new).plot(method="image", colorbar=True)
 

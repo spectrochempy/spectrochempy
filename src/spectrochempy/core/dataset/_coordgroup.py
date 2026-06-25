@@ -206,7 +206,9 @@ def _coord_from_legacy_state(state: dict) -> Coord:
         if key == "__class__":
             continue
         decoded = (
-            json_decoder(cpy.deepcopy(value)) if isinstance(value, dict) else value
+            json_decoder(cpy.deepcopy(value), allow_unsafe_legacy=True)
+            if isinstance(value, dict)
+            else value
         )
         setattr(coord, key if key == "name" else f"_{key}", decoded)
     return coord

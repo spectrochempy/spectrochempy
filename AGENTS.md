@@ -73,7 +73,10 @@ Prefer incremental migration.
 
 # Audit Policy
 
-Audit files are the authoritative implementation history.
+Audit files are the authoritative implementation history for a campaign, but
+they are not the authoritative source for the current maintained architecture
+or behavior contract unless that content has been promoted into tracked
+maintainer documentation.
 
 Use audit notes for:
 
@@ -90,6 +93,16 @@ Architecture and migration audit files are maintainer working notes and should
 be ignored by git by default. Name new audit files with a leading tilde so they
 match the repository ignore rule, for example `audit/~project-architecture-audit.md`.
 
+Local audit files (`~*.md`) are working notes and may not be shared with other
+maintainers.
+
+Before closing a campaign, verify whether the audit contains any
+architectural, maintenance, compatibility, or roadmap knowledge that future
+maintainers will need.
+
+If so, summarize that information in `maintainers/` before considering the
+campaign complete.
+
 Only create a tracked audit file when the maintainer explicitly asks for a
 versioned audit artifact.
 
@@ -103,7 +116,119 @@ audit/~project-pr13-notes.md
 
 Detailed implementation history belongs in audits, not changelog entries.
 
-Agents should update relevant audit notes before considering a multi-PR task complete.
+Agents must produce or update an audit note after each work session,
+documenting what was done, key decisions, test results, risks, and next
+steps.  For multi-PR projects, maintain dedicated audit files and update
+them before considering a task complete.
+
+---
+
+# Architecture Documentation Lifecycle
+
+Architecture work should normally progress through the following lifecycle:
+
+```text
+Audit
+  ↓
+RFC (optional)
+  ↓
+Implementation
+  ↓
+Architecture Note / Maintainer Reference
+```
+
+The goal is to ensure that durable architectural knowledge does not remain
+exclusively in local audit notes after a campaign is completed.
+
+## Audit
+
+Use audits for:
+
+* exploration;
+* characterization;
+* investigation;
+* design discussion.
+
+Audits are working documents.
+
+Audits are not authoritative by default for current maintained contracts.
+
+## RFC
+
+Use RFCs to:
+
+* define a proposed contract;
+* record decisions;
+* guide implementation.
+
+RFCs may be:
+
+* proposed;
+* accepted;
+* implemented;
+* superseded.
+
+## Architecture Notes
+
+Use architecture notes to:
+
+* describe current architecture;
+* capture stable contracts;
+* document important design decisions;
+* serve as maintainer references.
+
+Architecture notes become the authoritative source once a design stabilizes.
+
+## Promotion Requirement
+
+When a campaign results in:
+
+* an accepted RFC;
+* significant architectural change;
+* multiple implementation PRs;
+* a long-term contract;
+
+the maintainer should evaluate whether part of the audit material must be
+promoted into:
+
+* `maintainers/architecture/`; or
+* `maintainers/rfcs/`
+
+before the campaign is considered complete.
+
+Architectural reasoning should not remain exclusively in audit documents.
+
+## Audit Deliverables
+
+Major architecture audits should end with a final section named:
+
+```text
+Promotion Candidates
+```
+
+That section should identify:
+
+* content suitable for RFCs;
+* content suitable for architecture notes;
+* content that should remain historical only.
+
+Where possible, suggest target filenames.
+
+This requirement applies to major architecture audits, not to minor bug
+investigations or narrow implementation notes.
+
+## Campaign Closure Checklist
+
+Before closing a major architecture campaign, verify:
+
+* RFC status updated;
+* roadmap updated;
+* relevant architecture notes updated or created;
+* promotion candidates reviewed;
+* authoritative documentation synchronized.
+
+This checklist is meant to keep durable knowledge discoverable, not to add
+heavy process.
 
 ---
 
@@ -215,13 +340,14 @@ When possible:
 
 # Pre-commit Policy
 
-Do not run:
+Pre-commit validation must be run before creating a pull request or pushing
+to ``upstream/master``.  It must not be run during normal development.
+
+Command:
 
 ```bash id="4qukx8"
 pre-commit run --all-files
 ```
-
-unless explicitly requested.
 
 When not delegated:
 
@@ -274,7 +400,7 @@ Unless explicitly requested, do not:
 * create releases;
 * publish packages;
 * run broad test suites;
-* run pre-commit.
+* run pre-commit during normal development (see Pre-commit Policy).
 
 ---
 
@@ -286,7 +412,7 @@ Unless explicitly requested otherwise:
 * do not commit changes;
 * do not push changes;
 * do not open pull requests;
-* do not run pre-commit;
+* do not run pre-commit during normal development (see Pre-commit Policy);
 * do not run broad test suites.
 
 Prefer producing:

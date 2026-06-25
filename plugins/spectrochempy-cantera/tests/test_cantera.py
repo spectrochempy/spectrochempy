@@ -185,7 +185,7 @@ def test_pfr_root_compatibility_alias_warns_once():
     assert len(captured) == 1
     assert captured[0].category is DeprecationWarning
     assert "scp.PFR is deprecated since SpectroChemPy 0.9.0" in str(captured[0].message)
-    assert "will be removed in 0.10.0" in str(captured[0].message)
+    assert "will be removed in 0.11.0" in str(captured[0].message)
     assert "scp.cantera.PFR" in str(captured[0].message)
 
 

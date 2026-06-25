@@ -76,6 +76,7 @@ docs = [
   "sphinx-gallery == 0.19.0",
   "sphinx-rtd-theme == 3.0.2",
   "sphinxcontrib-bibtex == 2.6.3",
+  "xarray",
   "json5 == 0.10.0",
 ]
 interactive = [
@@ -107,6 +108,7 @@ test = [
   "pytest-mock",
   "pytest-xdist",
   "numpydoc",
+  "xarray",
 ]
 
 [project.urls]

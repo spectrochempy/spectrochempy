@@ -8,15 +8,15 @@
 MCR-ALS with kinetic constraints
 ================================
 
-In this example, we perform the MCR ALS optimization of the UV-vis of spectra resulting
-from a three-component reaction `A` -> `B` -> `C` which was investigated by UV–Vis
-spectroscopy. Full details on the reaction and data acquisition conditions can be found
-in :cite:t:`bijlsma:2001` .
-The data can be downloded from the author website `Biosystems Data Analysis group
-University of Amsterdam
-<http://www.bdagroup.nl/content/Downloads/datasets/datasets.php>`__
-(Copyright 2005 Biosystems Data Analysis Group ; Universiteit van Amsterdam ). For the user convenience,
-# this dataset is present in the 'datadir' of spectrochempy in 'matlabdata/METING9.MAT'.
+In this example, we perform MCR-ALS optimization on UV-Vis spectra from a
+three-component reaction ``A -> B -> C`` investigated by UV-Vis spectroscopy.
+Full details on the reaction and data acquisition conditions can be found in
+:cite:t:`bijlsma:2001`.
+
+The data can be downloaded from the `Biosystems Data Analysis Group, University
+of Amsterdam <http://www.bdagroup.nl/content/Downloads/datasets/datasets.php>`__.
+For convenience, this dataset is also available in the SpectroChemPy test-data
+directory as ``matlabdata/METING9.MAT``.
 """
 
 import numpy as np
@@ -48,7 +48,7 @@ _ = D.plot()
 # A first estimate of the concentrations can be obtained by EFA:
 print("compute EFA...")
 efa = scp.EFA()
-efa.fit(D[:, 300.0:500.0])
+_ = efa.fit(D[:, 300.0:500.0])
 efa.n_components = 3
 C0 = efa.transform()
 C0 = C0 / C0.max(dim="y") * 5.0
@@ -57,7 +57,7 @@ _ = C0.T.plot()
 # We can get a better estimate of the concentration (C) and pure spectra profiles (St)
 # by soft MCR-ALS:
 mcr_1 = scp.MCRALS(log_level="INFO")
-mcr_1.fit(D, C0)
+_ = mcr_1.fit(D, C0)
 _ = mcr_1.C.T.plot()
 _ = mcr_1.St.plot()
 # %%
@@ -85,7 +85,7 @@ mcr_2.getConc = kin.fit_to_concentrations
 mcr_2.argsGetConc = ([0, 1, 2], [0, 1, 2], param_to_optimize)
 mcr_2.kwargsGetConc = {"ivp_solver_kwargs": {"return_NDDataset": False}}
 
-mcr_2.fit(X, Ckin)
+_ = mcr_2.fit(X, Ckin)
 
 # %%
 # Now, let's compare the concentration profile of MCR-ALS

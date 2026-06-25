@@ -84,7 +84,7 @@ f1.script = script
 # reset dry and continue to show starting model
 f1.dry = True
 f1.autobase = True
-f1.fit(ndOH)
+_ = f1.fit(ndOH)
 
 # get some information
 scp.info_(f"numbers of components: {f1.n_components}")
@@ -95,7 +95,7 @@ ax.autoscale(enable=True, axis="y")
 # %%
 # Now perform a fit with maximum 1000 iterations
 f1.max_iter = 1000
-f1.fit(ndOH)
+_ = f1.fit(ndOH)
 # %%
 # Show the result
 _ = ndOH.plot()
@@ -105,7 +105,7 @@ ax.autoscale(enable=True, axis="y")
 # %%
 # plotmerit
 som = f1.inverse_transform()
-f1.plotmerit(ndOH, som, method="scatter", markevery=5, markersize=2, lw=2)
+_ = f1.plotmerit(ndOH, som, method="scatter", markevery=5, markersize=2, lw=2)
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

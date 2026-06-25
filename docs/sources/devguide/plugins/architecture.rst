@@ -1,10 +1,14 @@
 .. _plugin-architecture:
 
-=====================
-Writing a Plugin
-=====================
+===================
+Plugin architecture
+===================
 
-This document explains how to write a plugin for SpectroChemPy.
+This document explains the plugin architecture used by SpectroChemPy and the
+main runtime concepts plugin authors interact with.
+
+If you want a quick author-facing starting point, begin with
+:ref:`plugin-author-guide`.
 
 .. contents:: :local:
 
