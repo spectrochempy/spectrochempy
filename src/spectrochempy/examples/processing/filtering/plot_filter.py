@@ -23,6 +23,7 @@ X = scp.read("ramandata/labspec/SMC1-Initial_RT.txt")
 prefs = scp.preferences
 prefs.figure.figsize = (8, 4)
 _ = X.plot()
+
 # %%
 # here `Filter` processor is used to apply a Savitzky-Golay filter to the
 # spectrum.

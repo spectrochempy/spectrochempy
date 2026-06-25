@@ -34,16 +34,19 @@ nd = dataset[:, 60.0:]
 # Basic plot
 
 _ = nd.plot(title="original data")
+
 # %%
 # Detrend the data (for a easier comparison)
 
 nd1 = nd.detrend(title="detrended data")
 _ = nd1.plot()
+
 # %%
 # Denoise the data using the `denoise` method with the default parameters
 # i.e., ratio=99.8
 nd2 = nd1.denoise()
 _ = nd2.plot(title="denoised data")
+
 # %%
 # Denoise the data using a different ratio
 nd3 = nd1.denoise(ratio=95)

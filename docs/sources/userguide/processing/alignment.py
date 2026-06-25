@@ -54,7 +54,7 @@ prefs = scp.preferences
 prefs.reset()
 prefs.figure.figsize = (7, 3)
 prefs.figure.dpi = 100
-dataset.plot_map(colormap="viridis", colorbar=True)
+_ = dataset.plot_map(colormap="viridis", colorbar=True)
 print("shape:", dataset.shape)
 
 # %%

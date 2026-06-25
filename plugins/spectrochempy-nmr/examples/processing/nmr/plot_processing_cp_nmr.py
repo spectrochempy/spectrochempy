@@ -68,6 +68,7 @@ nd3 = scp.pk(nd2, phc0=-118)
 # %%
 # plot
 _ = nd3.plot()
+
 # %%
 # ## Baseline correction
 # Here we use the snip algorithm
@@ -98,7 +99,7 @@ for key in properties:
 # plot with peak markers and the left/right-bases indicators
 ax = nd4.plot()  # output the spectrum on ax. ax will receive next plot too;
 pks = peaks + 0.5  # add a small offset on the y position of the markers
-pks.plot_scatter(
+_ = pks.plot_scatter(
     ax=ax,
     marker="v",
     color="black",

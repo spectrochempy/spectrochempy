@@ -39,6 +39,7 @@ dataset -= dataset.min()
 # %%
 # Plot it for a visual check
 _ = dataset.plot()
+
 # %%
 # Create a NMF object
 # -------------------
@@ -64,6 +65,7 @@ St = model.components
 # Plot results
 # ------------
 _ = C.T.plot(title="Concentration", colormap=None, legend=C.k.labels)
+
 # %%
 #
 m = St.ptp()

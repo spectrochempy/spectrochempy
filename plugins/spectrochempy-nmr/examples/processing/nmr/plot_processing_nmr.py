@@ -40,40 +40,48 @@ dataset
 # %%
 # Plot the dataset
 _ = dataset.plot_map()
+
 # %%
 # Extract slices along x
 s = dataset[-27.6, :]
 _ = s.plot()
+
 # %%
 # Baseline correction of this slice
 # Note that only the real part is corrected
 sa = s.snip(snip_width=100)
 _ = sa.plot()
+
 # %%
 # apply this correction to the whole dataset
 sb = dataset.snip(snip_width=100)
 _ = sb.plot_map()
+
 # %%
 # Select a region of interest
 sc = sb[
     -40.0:-15.0, 55.0:20.0
 ]  # note the use of float to make selection using coordinates (not point indexes)
 _ = sc.plot_map()
+
 # %%
 # Extract slices along x
 s1 = sc[-27.6, :]
 _ = s1.plot()
+
 # %%
 s2 = sc[-25.7, :]
 _ = s2.plot()
+
 # %%
 # plot two slices on the same figure
 _ = s1.plot()
-s2.plot(
+_ = s2.plot(
     clear=False,
     color="red",
     linestyle="-",
 )
+
 # %%
 # Now slice along y
 s3 = sc[:, 40.0]
@@ -93,6 +101,7 @@ s4 = s4.squeeze()
 # plot the two slices on the same figure
 _ = s3.plot(color="violet", ls="-", lw="2")
 _ = s4.plot(clear=False, color="green", ls="-", lw="2")
+
 # %%
 # Peak picking
 # ------------
@@ -107,7 +116,7 @@ peaks, _ = s2.find_peaks()
 def plot_with_pp(s, peaks):
     ax = s.plot()  # output the spectrum on ax. ax will receive next plot too;
     pks = peaks + 0.2  # add a small offset on the y position of the markers
-    pks.plot_scatter(
+    _ = pks.plot_scatter(
         ax=ax,
         marker="v",
         color="black",

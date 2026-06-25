@@ -5,6 +5,8 @@
 # ======================================================================================
 # ruff: noqa
 
+from pathlib import Path
+
 import spectrochempy as scp
 
 
@@ -51,3 +53,18 @@ def test_plotpreferences(IR_dataset_2D):
     finally:
         # Always restore original style to prevent pollution
         prefs.style = original_style
+
+
+def test_makestyle_skips_deprecated_matplotlib_rcparams(monkeypatch, tmp_path):
+    prefs = scp.preferences
+    monkeypatch.setattr(prefs, "stylesheets", str(tmp_path))
+
+    stylename = prefs.makestyle("tmpstyle")
+
+    assert stylename == "tmpstyle"
+
+    stylesheet = Path(tmp_path) / "tmpstyle.mplstyle"
+    text = stylesheet.read_text()
+
+    assert "text.hinting_factor" not in text
+    assert "text.kerning_factor" not in text

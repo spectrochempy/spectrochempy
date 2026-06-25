@@ -31,6 +31,7 @@ ndOH = nd[54, 3800.0:3300.0]
 # masking
 ndOH[:, 3505.0:3500.0] = scp.MASKED
 _ = ndOH.plot()
+
 # %%
 # Perform a Fit
 # Fit parameters are defined in a script (a single text as below)
@@ -96,6 +97,7 @@ ax.autoscale(enable=True, axis="y")
 # Now perform a fit with maximum 1000 iterations
 f1.max_iter = 1000
 _ = f1.fit(ndOH)
+
 # %%
 # Show the result
 _ = ndOH.plot()

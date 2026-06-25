@@ -27,6 +27,7 @@ ex1
 ex2 = scp.read_spc("galacticdata/CONTOUR.SPC")
 _ = ex2.plot()
 ex2
+
 # %%
 # Reading SPC file with multiple subfiles with different x coordinates (they are not merged)
 ex3 = scp.read_spc("galacticdata/DRUG_SAMPLE_PEAKS.SPC")

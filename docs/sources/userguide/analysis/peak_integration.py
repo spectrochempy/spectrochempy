@@ -78,7 +78,7 @@ blc.ranges = (
 blc.model = "polynomial"
 blc.order = 3
 
-blc.fit(X)  # fit the baseline
+_ = blc.fit(X)  # fit the baseline
 
 Xcorr = blc.corrected  # get the corrected dataset
 _ = Xcorr.plot()
@@ -95,7 +95,7 @@ intsimps = Xcorr.simpson(dim="x")
 # As you can see, both methods give almost the same results in this case.
 
 # %%
-scp.plot_multiple(
+_ = scp.plot_multiple(
     method="scatter",
     ms=5,
     datasets=[inttrapz, intsimps],

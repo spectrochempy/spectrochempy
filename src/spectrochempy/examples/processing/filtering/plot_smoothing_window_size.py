@@ -37,7 +37,7 @@ smoothed = {size: region.smooth(size) for size in (3, 7, 11)}
 # narrow features.
 
 for size, smoothed_region in smoothed.items():
-    scp.plot_compare(
+    _ = scp.plot_compare(
         region,
         smoothed_region,
         title=f"Moving-average smoothing (size={size})",

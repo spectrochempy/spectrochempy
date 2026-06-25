@@ -94,6 +94,7 @@ _ = new.plot(colorbar=True)
 #
 # sphinx_gallery_thumbnail_number = 2
 _ = new.plot(method="image", colorbar=True)
+
 # %%
 # If a dataset contains only positive values, the default colormap is
 # sequential (`viridis`):
@@ -103,6 +104,7 @@ _ = np.abs(new).plot(method="image", colorbar=True)
 # %% Contour plots are also available, with the same default colormap as for the image method:
 _ = new.plot(method="map")
 _ = np.abs(new).plot(method="map")
+
 # %%
 # Note that the scp allows one to use this syntax too:
 _ = scp.plot_map(new)
