@@ -3,7 +3,6 @@
 Curated entry point for tracked maintainer architecture documents.
 
 For normative contracts (RFCs), see [`../rfcs/INDEX.md`](../rfcs/INDEX.md).
-For promoted historical audits, see [`../audits/INDEX.md`](../audits/INDEX.md).
 For campaign ordering, see
 [`../roadmap/current-roadmap.md`](../roadmap/current-roadmap.md).
 

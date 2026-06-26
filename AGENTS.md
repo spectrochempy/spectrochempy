@@ -125,7 +125,7 @@ Some audits retain long-term value as historical context even though they are
 no longer primary authority.  When that occurs, rewrite the audit as a
 curated governance note in the **SpectroChemPy Maintainer Repository**
 (`spectrochempy-maintainer/archive/` or `spectrochempy-maintainer/notes/`)
-and retire it from the public `maintainers/audits/` directory.
+and retire it from the public `maintainers/` directory.
 
 These governance notes preserve decision-space analysis, migration baselines,
 and risk maps for future maintainers.  They are **not committed copies** of

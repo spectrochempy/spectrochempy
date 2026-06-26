@@ -7,6 +7,5 @@ For the curated entry point with reading guidance and document classification,
 see [`INDEX.md`](INDEX.md).
 
 For RFCs (normative contracts), see [`../rfcs/`](../rfcs/).
-For promoted historical audits, see [`../audits/`](../audits/).
 For campaign ordering and priorities, see
 [`../roadmap/current-roadmap.md`](../roadmap/current-roadmap.md).
