@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-"""Install SpectroChemPy plugins from the local source tree.
+"""
+Install SpectroChemPy plugins from the local source tree.
 
 Usage::
 
