@@ -241,7 +241,13 @@ Each plugin:
 
 * has its own `pyproject.toml`;
 * registers through
-  `[project.entry-points."spectrochempy.plugins"]`.
+  `[project.entry-points."spectrochempy.plugins"]`;
+* if it is an **official plugin** (published and maintained by the
+  SpectroChemPy team), must add
+  ``Framework :: SpectroChemPy :: Official Plugin`` to the
+  ``classifiers`` list in ``pyproject.toml`` — this classifier is the
+  sole registration point for CI workflows (publishing, testing, docs
+  builds, release validation).
 
 See:
 

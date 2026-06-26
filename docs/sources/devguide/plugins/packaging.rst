@@ -60,11 +60,18 @@ Key points:
 * The **entry point name** (``myplugin``) must match your plugin's
   ``name`` attribute.
 * ``spectrochempy`` must be listed as a dependency with a compatibility
-   range, e.g. ``spectrochempy>=0.9,<0.10``.
+   range, e.g. ``spectrochempy>=0.10,<0.11``.
 * Use ``requires-python = ">=3.11"`` to match SpectroChemPy's minimum.
 * Official plugins in the monorepo use a static ``version`` field.
   ``setuptools_scm`` is not used because plugin and core tags share the
   same Git repository, which would cause version collisions.
+* Official plugins must add the Trove classifier
+  ``Framework :: SpectroChemPy :: Official Plugin`` in their
+  ``pyproject.toml`` classifiers list.  This classifier is the single
+  source of truth for CI workflows (publishing, testing, documentation,
+  release validation) — any plugin with this classifier is automatically
+  picked up by all CI pipelines.  Adding a new official plugin requires
+  **no edits** to any workflow file.
 
 Local editable development
 ==========================
@@ -76,10 +83,8 @@ used by PyPI wheels:
 .. code-block:: bash
 
     pip install -e .
-    pip install -e plugins/spectrochempy-nmr
-    pip install -e plugins/spectrochempy-iris
-    pip install -e plugins/spectrochempy-tensor
-    pip install -e plugins/spectrochempy-cantera
+    python -m spectrochempy.ci.install_plugins --editable all
+    pip install -e plugins/spectrochempy-cantera  # experimental, not auto-discovered
 
 The bundled plugins can also be installed with the helper:
 

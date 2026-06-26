@@ -21,6 +21,8 @@ New Features
   preserves available metadata (instrument model, detector, source,
   date, etc.). The parsing logic is adapted from the BSD-3-Clause
   licensed specio project. (#897)
+  Includes a dedicated documentation page, a gallery example, and an
+  entry in the official plugins table.
 
 - ``read_omnic`` and ``read_spg`` can now read OMNIC SPG files containing
   spectra with non-identical x-axis definitions using
@@ -85,3 +87,13 @@ Bug Fixes
   ``dataset.meta`` as ``omnic_experiment_path``, ``omnic_experiment_file``,
   ``omnic_accessory``, and ``omnic_experiment_title`` (respectively).
   Malformed or missing blocks are handled defensively.
+
+Developer
+~~~~~~~~~
+
+- Official plugins now use the ``Framework :: SpectroChemPy :: Official Plugin``
+  Trove classifier in ``pyproject.toml`` as the single source of truth for CI
+  auto-discovery.  Adding a new official plugin no longer requires editing
+  workflow files.  Documented in ``CONTRIBUTING.md`` and the plugin packaging
+  guide.  The plugin template (``plugins/plugin-template/pyproject.toml``)
+  includes a comment explaining the requirement.
