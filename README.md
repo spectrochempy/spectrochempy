@@ -58,6 +58,7 @@ Extend SpectroChemPy with official plugins (installed separately):
 | `spectrochempy-hypercomplex` | `pip install spectrochempy-hypercomplex` | Quaternion / hypercomplex support |
 | `spectrochempy-iris` | `pip install spectrochempy-iris` | 2D-IRIS analysis tools |
 | `spectrochempy-nmr` | `pip install spectrochempy-nmr` | Bruker TopSpin reader, NMR-specific processing |
+| `spectrochempy-perkinelmer` | `pip install spectrochempy-perkinelmer` | PerkinElmer ``.sp`` IR file reader |
 | `spectrochempy-tensor` | `pip install spectrochempy-tensor` | Tensor learning tools |
 
 

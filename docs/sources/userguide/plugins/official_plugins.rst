@@ -137,7 +137,7 @@ provide the user-facing details:
 * :doc:`nmr` for TopSpin reading and NMR-specific processing workflows
 * :doc:`tensor` for TensorLy-backed tensor decompositions such as CP/PARAFAC
 * :doc:`hypercomplex` for quaternion support used in phase-sensitive 2D NMR
-* ``scp.perkinelmer.read_perkinelmer`` for PerkinElmer ``.sp`` IR files
+* :doc:`perkinelmer` for PerkinElmer ``.sp`` IR file reading
 
 The Carroucell reader is currently part of the official plugin set but does not
 yet have a separate user page. Use ``scp.carroucell.read_carroucell(...)`` once
