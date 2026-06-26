@@ -1,5 +1,7 @@
 [Maintainers](../README.md)
 
+[Maintainers](../README.md) · [Architecture Index](INDEX.md)
+
 # Architecture Documents
 
 This directory contains durable public architecture references for

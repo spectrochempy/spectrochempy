@@ -1,4 +1,4 @@
-[Maintainers](../README.md) · [Roadmap](current-roadmap.md)
+[Maintainers](../README.md) · [Roadmap](INDEX.md)
 
 # Vendor I/O Migration Roadmap
 

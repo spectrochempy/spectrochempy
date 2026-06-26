@@ -1,4 +1,4 @@
-[Maintainers](../README.md) · [Roadmap](current-roadmap.md)
+[Maintainers](../README.md) · [Roadmap](INDEX.md)
 
 # SpectroChemPy — Completed Architecture Campaigns
 
