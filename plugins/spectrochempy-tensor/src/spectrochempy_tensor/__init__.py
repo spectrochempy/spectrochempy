@@ -20,7 +20,7 @@ class TensorPlugin(SpectroChemPyPlugin):
     """TensorLy-backed tensor decomposition plugin."""
 
     name = "tensor"
-    version = "0.1.1"
+    version = "0.1.2"
     description = "TensorLy-backed tensor decompositions for SpectroChemPy"
     spectrochempy_min_version = "0.9.0"
     PLUGIN_API_VERSION = CORE_PLUGIN_API_VERSION
