@@ -14,13 +14,34 @@ from dataclasses import asdict
 from dataclasses import dataclass
 from pathlib import Path
 
-OFFICIAL_PLUGINS = (
-    "spectrochempy-nmr",
-    "spectrochempy-iris",
-    "spectrochempy-tensor",
-    "spectrochempy-hypercomplex",
-    "spectrochempy-carroucell",
-)
+OFFICIAL_CLASSIFIER = "Framework :: SpectroChemPy :: Official Plugin"
+
+
+def _discover_official_plugins() -> tuple[str, ...]:
+    """Return official plugin directory names by checking classifier in pyproject.toml."""
+    plugins_dir = Path("plugins")
+    if not plugins_dir.is_dir():
+        return ()
+
+    results: list[str] = []
+    try:
+        import tomllib
+    except ImportError:
+        import tomli as tomllib  # type: ignore[no-redef]
+
+    for pyproject in sorted(plugins_dir.glob("spectrochempy-*/pyproject.toml")):
+        try:
+            data = tomllib.loads(pyproject.read_text())
+            classifiers = data.get("project", {}).get("classifiers", [])
+            if OFFICIAL_CLASSIFIER in classifiers:
+                results.append(pyproject.parent.name)
+        except Exception as exc:
+            print(f"Warning: could not read {pyproject}: {exc}", file=sys.stderr)
+            continue
+    return tuple(results)
+
+
+OFFICIAL_PLUGINS = _discover_official_plugins()
 
 TAG_RE = re.compile(
     r"^(?P<plugin>spectrochempy-[a-z0-9-]+)-v" r"(?P<version>\d+\.\d+\.\d+)$"

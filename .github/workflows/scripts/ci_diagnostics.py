@@ -29,13 +29,34 @@ OPTIONAL_DEPENDENCIES = [
     "traitlets",
 ]
 
-OFFICIAL_PLUGIN_DISTRIBUTIONS = [
-    "spectrochempy-iris",
-    "spectrochempy-nmr",
-    "spectrochempy-tensor",
-    "spectrochempy-hypercomplex",
-    "spectrochempy-carroucell",
-]
+OFFICIAL_CLASSIFIER = "Framework :: SpectroChemPy :: Official Plugin"
+
+
+def _discover_official_plugins() -> list[str]:
+    """Return official plugin distribution names by checking classifiers."""
+    plugins_dir = Path("plugins")
+    if not plugins_dir.is_dir():
+        return []
+
+    results: list[str] = []
+    try:
+        import tomllib
+    except ImportError:
+        import tomli as tomllib  # type: ignore[no-redef]
+
+    for pyproject in sorted(plugins_dir.glob("spectrochempy-*/pyproject.toml")):
+        try:
+            data = tomllib.loads(pyproject.read_text())
+            classifiers = data.get("project", {}).get("classifiers", [])
+            if OFFICIAL_CLASSIFIER in classifiers:
+                results.append(pyproject.parent.name)
+        except Exception as exc:
+            print(f"Warning: could not read {pyproject}: {exc}", file=sys.stderr)
+            continue
+    return results
+
+
+OFFICIAL_PLUGIN_DISTRIBUTIONS = _discover_official_plugins()
 
 PYTEST_STATUSES = [
     "passed",

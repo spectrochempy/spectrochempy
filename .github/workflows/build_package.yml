@@ -300,10 +300,6 @@ jobs:
       - name: Set plugin matrix
         id: set-matrix
         run: |
-          # Official plugins are explicitly listed. Experimental plugins may live in
-          # the repository but are NOT auto-published by this workflow.
-          OFFICIAL_PLUGINS="spectrochempy-nmr spectrochempy-iris spectrochempy-tensor spectrochempy-hypercomplex spectrochempy-carroucell"
-
           plugins=()
           for dir in plugins/*/; do
             name=$(basename "$dir")
@@ -311,8 +307,9 @@ jobs:
               echo "Skipping $name (developer template, not publishable)"
               continue
             fi
-            if ! echo "$OFFICIAL_PLUGINS" | grep -qw "$name"; then
-              echo "Skipping $name (not in official plugin allowlist)"
+            # Check for the Official Plugin classifier.
+            if ! grep -q 'Framework :: SpectroChemPy :: Official Plugin' "${dir}pyproject.toml" 2>/dev/null; then
+              echo "Skipping $name (no Official Plugin classifier)"
               continue
             fi
             if [ -f "${dir}recipe.yaml" ] || [ -f "${dir}meta.yaml" ]; then

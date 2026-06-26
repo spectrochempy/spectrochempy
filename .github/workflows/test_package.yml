@@ -191,11 +191,7 @@ jobs:
         run: |
           set -e
           start=$SECONDS
-          python -m pip install -e plugins/spectrochempy-hypercomplex
-          python -m pip install -e plugins/spectrochempy-nmr
-          python -m pip install -e plugins/spectrochempy-iris
-          python -m pip install -e plugins/spectrochempy-tensor
-          python -m pip install -e plugins/spectrochempy-carroucell
+          python -m spectrochempy.ci.install_plugins --editable all
           duration=$((SECONDS - start))
           echo "plugin installation: ${duration}s" | tee -a "$CI_TIMING_FILE"
 
@@ -210,21 +206,25 @@ jobs:
           python - <<'PY'
           from importlib import metadata
           from importlib.util import find_spec
+          from pathlib import Path
+          import tomllib
 
-          official_plugins = [
-              "spectrochempy-hypercomplex",
-              "spectrochempy-nmr",
-              "spectrochempy-iris",
-              "spectrochempy-tensor",
-              "spectrochempy-carroucell",
-          ]
-          import_names = {
-              "spectrochempy-hypercomplex": "spectrochempy_hypercomplex",
-              "spectrochempy-nmr": "spectrochempy_nmr",
-              "spectrochempy-iris": "spectrochempy_iris",
-              "spectrochempy-tensor": "spectrochempy_tensor",
-              "spectrochempy-carroucell": "spectrochempy_carroucell",
-          }
+          OFFICIAL = "Framework :: SpectroChemPy :: Official Plugin"
+
+          official_plugins = []
+          import_names = {}
+          for d in sorted(Path("plugins").glob("spectrochempy-*/")):
+              pyproject = d / "pyproject.toml"
+              if not pyproject.is_file():
+                  continue
+              try:
+                  data = tomllib.loads(pyproject.read_text())
+                  if OFFICIAL not in data.get("project", {}).get("classifiers", []):
+                      continue
+              except Exception:
+                  continue
+              official_plugins.append(d.name)
+              import_names[d.name] = d.name.replace("-", "_")
 
           installed = []
           importable = []

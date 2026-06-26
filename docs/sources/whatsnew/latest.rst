@@ -103,3 +103,13 @@ Developer
   ``Framework :: SpectroChemPy :: Official Plugin`` classifier to each
   official plugin's ``pyproject.toml``.  Added ``spectrochempy-perkinelmer``
   to the core ``[plugins]`` extra and related requirement files.
+
+- Refactored CI auto-discovery for official plugins.  ``publish_plugins.yml``,
+  ``release_plugin.yml``, ``build_package.yml``, ``test_package.yml``,
+  ``build_docs.yml``, and ``install_on_colab.yml`` now discover plugins
+  dynamically via the classifier instead of hardcoded allowlists.
+  ``select_test_targets.py``, ``ci_diagnostics.py``, and
+  ``plugin_version_status.py`` use the same mechanism.  Added
+  ``src/spectrochempy/ci/install_plugins.py`` helper with
+  ``--editable``, ``--list-names``, and pip flags for CI and local
+  development.
