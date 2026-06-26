@@ -1,3 +1,5 @@
+[Maintainers](../../README.md) · [RFCs](../INDEX.md)
+
 # Scientific Object Model and Persistence Boundaries
 
 **Status:** Proposed Maintainer RFC

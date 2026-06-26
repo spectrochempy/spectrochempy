@@ -1,3 +1,5 @@
+[Maintainers](../../README.md) · [RFCs](../INDEX.md)
+
 # Project Copy Semantics
 
 **Status:** Implemented

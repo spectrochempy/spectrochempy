@@ -1,3 +1,5 @@
+[Maintainers](../../README.md) · [RFCs](../INDEX.md)
+
 # Trusted and Portable Persistence
 
 **Status:** Proposed Maintainer RFC

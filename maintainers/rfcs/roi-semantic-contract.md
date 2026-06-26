@@ -1,3 +1,5 @@
+[Maintainers](../../README.md) · [RFCs](../INDEX.md)
+
 # roi — Semantic Contract RFC
 
 **Status:** Accepted maintainer decision record

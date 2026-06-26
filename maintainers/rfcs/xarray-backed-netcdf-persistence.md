@@ -1,3 +1,5 @@
+[Maintainers](../../README.md) · [RFCs](../INDEX.md)
+
 # xarray-backed NetCDF Persistence
 
 **Status:** Proposed Maintainer RFC

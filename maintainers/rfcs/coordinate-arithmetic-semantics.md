@@ -1,3 +1,5 @@
+[Maintainers](../../README.md) · [RFCs](../INDEX.md)
+
 # Coordinate Arithmetic Semantics RFC
 
 ## Status

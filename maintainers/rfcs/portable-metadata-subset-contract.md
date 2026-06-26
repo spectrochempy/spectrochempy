@@ -1,3 +1,5 @@
+[Maintainers](../../README.md) · [RFCs](../INDEX.md)
+
 # Portable Metadata Subset Contract
 
 ## Status

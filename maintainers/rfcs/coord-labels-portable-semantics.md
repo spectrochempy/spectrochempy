@@ -1,3 +1,5 @@
+[Maintainers](../../README.md) · [RFCs](../INDEX.md)
+
 # Coord Labels Portable Semantics
 
 **Status:** Proposed Maintainer RFC

@@ -1,3 +1,5 @@
+[Maintainers](../../README.md) · [RFCs](../INDEX.md)
+
 # Project Invariants and Ownership Semantics
 
 **Status:** Implemented

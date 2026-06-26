@@ -1,3 +1,5 @@
+[Maintainers](../../README.md) · [RFCs](../INDEX.md)
+
 # Current Position on CSDM
 
 **Status:** Accepted maintainer position

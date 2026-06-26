@@ -1,3 +1,5 @@
+[Maintainers](../../README.md) · [Architecture](../INDEX.md)
+
 # Array Class Responsibility
 
 Status: Draft RFC

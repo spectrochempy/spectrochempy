@@ -1,3 +1,5 @@
+[Maintainers](README.md)
+
 # Procédure de publication
 
 ## Prérequis

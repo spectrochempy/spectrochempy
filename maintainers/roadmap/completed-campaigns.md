@@ -1,3 +1,5 @@
+[Maintainers](../README.md) · [Roadmap](current-roadmap.md)
+
 # SpectroChemPy — Completed Architecture Campaigns
 
 **Status:** Public record of completed campaigns

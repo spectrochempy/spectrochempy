@@ -1,3 +1,5 @@
+[Maintainers](../../README.md) · [Architecture](../INDEX.md)
+
 # Mathematical Semantics and Metadata Propagation
 
 Status: Draft RFC / characterization largely complete

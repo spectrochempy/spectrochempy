@@ -1,3 +1,5 @@
+[Maintainers](../../README.md) · [Architecture](../INDEX.md)
+
 # Reader Normalization Architecture
 
 ## Status

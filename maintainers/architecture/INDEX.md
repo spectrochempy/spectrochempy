@@ -1,3 +1,5 @@
+[Maintainers](../README.md)
+
 # Architecture Index
 
 Curated entry point for tracked maintainer architecture documents.

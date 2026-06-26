@@ -1,3 +1,5 @@
+[Maintainers](../README.md)
+
 # RFC Index
 
 SpectroChemPy RFCs record maintainer-level behavior contracts, position

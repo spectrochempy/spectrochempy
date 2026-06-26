@@ -1,3 +1,5 @@
+[Maintainers](../../README.md) · [RFCs](../INDEX.md)
+
 # Display / Representation Model RFC
 
 **Status:** Completed — superseded by [`maintainers/architecture/display-architecture.md`](../architecture/display-architecture.md)

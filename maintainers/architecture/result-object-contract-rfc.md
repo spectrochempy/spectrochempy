@@ -1,3 +1,5 @@
+[Maintainers](../../README.md) · [Architecture](../INDEX.md)
+
 # RFC: Result Object Contract
 
 **Status:** Implemented
