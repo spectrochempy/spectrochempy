@@ -10,10 +10,10 @@ maintained contract, see [`../rfcs/INDEX.md`](../rfcs/INDEX.md) and
 
 | File | Description |
 |---|---|
-| [`coordinate-arithmetic-audit.md`](coordinate-arithmetic-audit.md) | Technical map for coordinate compatibility in arithmetic. |
-| [`coordinate-arithmetic-decision-audit.md`](coordinate-arithmetic-decision-audit.md) | Decision-space audit for possible future coordinate arithmetic models. |
-| [`dataset-vs-coord-arithmetic-audit.md`](dataset-vs-coord-arithmetic-audit.md) | Explains why `Coord` is an axis/support object rather than a signal operand. |
+| ~~`coordinate-arithmetic-audit.md`~~ | *Retired — rewritten in `spectrochempy-maintainer/archive/`. See [`../rfcs/coordinate-arithmetic-semantics.md`](../rfcs/coordinate-arithmetic-semantics.md).* |
+| ~~`coordinate-arithmetic-decision-audit.md`~~ | *Retired — rewritten in `spectrochempy-maintainer/archive/`. See [`../rfcs/coordinate-arithmetic-semantics.md`](../rfcs/coordinate-arithmetic-semantics.md).* |
+| ~~`dataset-vs-coord-arithmetic-audit.md`~~ | *Retired — rewritten in `spectrochempy-maintainer/archive/`. See [`../rfcs/coordinate-and-coordset-semantics.md`](../rfcs/coordinate-and-coordset-semantics.md).* |
 | ~~`display-architecture-audit.md`~~ | *Removed — content fully covered by [`../architecture/display-architecture.md`](../architecture/display-architecture.md).* |
-| [`ndmath-maintainability-audit.md`](ndmath-maintainability-audit.md) | Risk map for the responsibility concentration inside `NDMath`. |
-| [`plotting-audit.md`](plotting-audit.md) | Baseline for plotting backend extensibility and Matplotlib coupling. |
-| [`units-audit.md`](units-audit.md) | Baseline for unit handling, quantity propagation, and unit semantics. |
+| ~~`ndmath-maintainability-audit.md`~~ | *Retired — rewritten in `spectrochempy-maintainer/archive/`. See [`../architecture/mathematical-semantics-and-metadata-propagation.md`](../architecture/mathematical-semantics-and-metadata-propagation.md).* |
+| ~~`plotting-audit.md`~~ | *Retired — rewritten in `spectrochempy-maintainer/notes/`. See [`../architecture/display-architecture.md`](../architecture/display-architecture.md).* |
+| ~~`units-audit.md`~~ | *Retired — rewritten as proposal in `spectrochempy-maintainer/proposals/`. See the [SpectroChemPy Maintainer Repository](https://github.com/spectrochempy/spectrochempy-maintainer).* |

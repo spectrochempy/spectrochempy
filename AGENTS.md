@@ -106,8 +106,8 @@ into the appropriate tracked document.
 The maintainer document must be a **rewritten, maintained document** that
 extracts the durable knowledge from the audit.  The original local audit may
 remain as an untracked working note, be deleted, or—when it has long-term
-historical value—be rewritten and committed separately under
-`maintainers/audits/`.
+historical value—be rewritten and committed into the
+**SpectroChemPy Maintainer Repository** as a curated governance note.
 
 | Destination | Use for |
 |---|---|
@@ -119,22 +119,24 @@ historical value—be rewritten and committed separately under
 The original audit remains a transient working document and is not the
 authoritative reference.
 
-## Promoted historical audits
+## Curated governance notes in the maintainer repository
 
 Some audits retain long-term value as historical context even though they are
-no longer primary authority.  These may be promoted to `maintainers/audits/`.
+no longer primary authority.  When that occurs, rewrite the audit as a
+curated governance note in the **SpectroChemPy Maintainer Repository**
+(`spectrochempy-maintainer/archive/` or `spectrochempy-maintainer/notes/`)
+and retire it from the public `maintainers/audits/` directory.
 
-`maintainers/audits/` contains **tracked, curated, and rewritten** historical
-audits that preserve decision-space analysis, migration baselines, and risk
-maps for future maintainers.  They are **not committed copies** of the local
-working notes.  They are distinct from:
+These governance notes preserve decision-space analysis, migration baselines,
+and risk maps for future maintainers.  They are **not committed copies** of
+the local working notes.  They are distinct from:
 
 - `audit/` — local untracked working notes;
 - `maintainers/architecture/` — current durable architecture reference;
 - `maintainers/rfcs/` — normative behavior contracts.
 
-Only promote an audit to `maintainers/audits/` when it preserves knowledge
-that future maintainers will need for context, not for authority.
+Only preserve an audit as a governance note when it records knowledge that
+future maintainers will need for context, not for authority.
 
 ## Campaign closure
 
@@ -151,8 +153,8 @@ before considering the campaign complete.
 # Local working note (untracked)
 audit/~project-architecture-audit.md
 
-# Promoted historical audit (tracked)
-maintainers/audits/coordinate-arithmetic-audit.md
+# Curated governance note (promoted to spectrochempy-maintainer)
+spectrochempy-maintainer/archive/coordinate-arithmetic-audit.md
 
 # Accepted RFC (tracked, normative)
 maintainers/rfcs/namespace-api-convention.md
@@ -244,8 +246,9 @@ promoted into the appropriate `maintainers/` destination:
 * `maintainers/rfcs/` — for normative contracts and decisions;
 * `maintainers/architecture/` — for durable current architecture reference;
 * `maintainers/roadmap/` — for migration ordering and campaign planning;
-* `maintainers/audits/` — for historical context that future maintainers
-  will need (non-authoritative).
+* `spectrochempy-maintainer/archive/` or `spectrochempy-maintainer/notes/` —
+  for historical context that future maintainers will need (non-authoritative),
+  curated and rewritten.
 
 before the campaign is considered complete.
 

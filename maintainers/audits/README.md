@@ -1,11 +1,8 @@
 # Maintainer Audits
 
-This directory contains **promoted historical audits** — tracked documents
-originally written as local `audit/` notes and promoted because they retain
-long-term value as decision-space context, migration baselines, or risk maps.
+This directory previously contained promoted historical audits, now retired to
+the [SpectroChemPy Maintainer Repository](https://github.com/spectrochempy/spectrochempy-maintainer)
+as rewritten governance notes.
 
-They are **not the primary authority** for current behavior. For current
-contracts, see [`../rfcs/`](../rfcs/). For durable architecture notes, see
-[`../architecture/`](../architecture/).
-
-See [`INDEX.md`](INDEX.md) for the curated list.
+See [`INDEX.md`](INDEX.md) for the list of retired documents with pointers to
+their authoritative replacements and governance locations.

@@ -2,8 +2,7 @@
 
 This directory contains **public authoritative maintainer references** for
 SpectroChemPy: accepted and proposed RFCs, durable architecture notes,
-public roadmaps, promoted historical audits, and operational release and
-recovery procedures.
+public roadmaps, and operational release and recovery procedures.
 
 For governance discussion, proposal incubation, exploratory research, and
 long-form strategic conversation, see the separate **SpectroChemPy Maintainer
@@ -20,7 +19,7 @@ This is **not user-facing documentation**. User documentation is at
 | [`rfcs/INDEX.md`](rfcs/INDEX.md) | What — contracts | RFC inventory with status and authority |
 | [`architecture/INDEX.md`](architecture/INDEX.md) | How — organisation | Curated architecture references |
 | [`roadmap/architecture-roadmap.md`](roadmap/architecture-roadmap.md) | When — ordering | Campaign priorities and decision log |
-| [`audits/INDEX.md`](audits/INDEX.md) | Why — context | Promoted historical audits (non-authoritative) |
+| [`audits/INDEX.md`](audits/INDEX.md) | Why — context | Retired audits with pointers to governance location |
 | [`release-process.md`](release-process.md) | How — release | Release procedure |
 | [`emergency-recovery.md`](emergency-recovery.md) | How — recovery | Incident recovery |
 | [`api-conventions.md`](api-conventions.md) | What — API | Namespace API quick reference |
