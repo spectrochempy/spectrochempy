@@ -18,7 +18,7 @@ This is **not user-facing documentation**. User documentation is at
 |---|---|---|
 | [`rfcs/INDEX.md`](rfcs/INDEX.md) | What — contracts | RFC inventory with status and authority |
 | [`architecture/INDEX.md`](architecture/INDEX.md) | How — organisation | Curated architecture references |
-| [`roadmap/architecture-roadmap.md`](roadmap/architecture-roadmap.md) | When — ordering | Campaign priorities and decision log |
+| [`roadmap/current-roadmap.md`](roadmap/current-roadmap.md) | When — ordering | Current priorities and active candidates |
 | [`audits/INDEX.md`](audits/INDEX.md) | Why — context | Retired audits with pointers to governance location |
 | [`release-process.md`](release-process.md) | How — release | Release procedure |
 | [`emergency-recovery.md`](emergency-recovery.md) | How — recovery | Incident recovery |
@@ -28,7 +28,7 @@ This is **not user-facing documentation**. User documentation is at
 
 For maintainer orientation, start with the roadmap, then the indexes:
 
-1. [`roadmap/architecture-roadmap.md`](roadmap/architecture-roadmap.md)
+1. [`roadmap/current-roadmap.md`](roadmap/current-roadmap.md)
 2. [`rfcs/INDEX.md`](rfcs/INDEX.md)
 3. [`architecture/INDEX.md`](architecture/INDEX.md)
 

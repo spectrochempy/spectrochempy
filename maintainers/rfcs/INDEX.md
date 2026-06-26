@@ -20,7 +20,7 @@ PROPOSED -> ACCEPTED -> IMPLEMENTED
 | `SUPERSEDED` | Historical; another document is now the primary reference. |
 
 For campaign ordering and architecture priorities, see
-[`../roadmap/architecture-roadmap.md`](../roadmap/architecture-roadmap.md).
+[`../roadmap/current-roadmap.md`](../roadmap/current-roadmap.md).
 
 ## RFC Inventory
 

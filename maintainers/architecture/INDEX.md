@@ -5,7 +5,7 @@ Curated entry point for tracked maintainer architecture documents.
 For normative contracts (RFCs), see [`../rfcs/INDEX.md`](../rfcs/INDEX.md).
 For promoted historical audits, see [`../audits/INDEX.md`](../audits/INDEX.md).
 For campaign ordering, see
-[`../roadmap/architecture-roadmap.md`](../roadmap/architecture-roadmap.md).
+[`../roadmap/current-roadmap.md`](../roadmap/current-roadmap.md).
 
 ## Start Here by Topic
 
@@ -58,7 +58,7 @@ completed migrations. They are not current normative references.
 For a quick orientation path, start with:
 
 1. [`../README.md`](../README.md)
-2. [`../roadmap/architecture-roadmap.md`](../roadmap/architecture-roadmap.md)
+2. [`../roadmap/current-roadmap.md`](../roadmap/current-roadmap.md)
 3. [`metadata-and-support-model.md`](metadata-and-support-model.md)
 4. [`reader-normalization-architecture.md`](reader-normalization-architecture.md)
 5. [`portable-persistence-model.md`](portable-persistence-model.md)
