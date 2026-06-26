@@ -152,7 +152,7 @@ before considering the campaign complete.
 audit/~project-architecture-audit.md
 
 # Promoted historical audit (tracked)
-maintainers/audits/display-architecture-audit.md
+maintainers/audits/coordinate-arithmetic-audit.md
 
 # Accepted RFC (tracked, normative)
 maintainers/rfcs/namespace-api-convention.md
