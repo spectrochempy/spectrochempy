@@ -97,7 +97,7 @@ jobs:
                       continue
               except Exception:
                   continue
-              plugins.append({'name': name, 'path': f'{name}/'})
+              plugins.append({'name': name, 'path': f'plugins/{name}'})
 
           if not plugins:
               print('::error::No official plugins discovered in plugins/')
