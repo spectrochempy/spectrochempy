@@ -19,45 +19,73 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
-- Added optional ``spectrochempy-perkinelmer`` plugin providing basic
-  ``read_perkinelmer`` support for PerkinElmer ``.sp`` binary files.
-  The reader returns an ``NDDataset`` with wavelength coordinates and
-  preserves available metadata (instrument model, detector, source,
-  date, etc.). The parsing logic is adapted from the BSD-3-Clause
-  licensed specio project. (#897)
-  Includes a dedicated documentation page, a gallery example, and an
-  entry in the official plugins table.
+- **New official PerkinElmer reader plugin.**  SpectroChemPy now provides
+  ``spectrochempy-perkinelmer``, an official plugin for reading PerkinElmer
+  ``.sp`` binary files.  The reader returns an ``NDDataset`` with wavelength
+  coordinates and preserves acquisition metadata (instrument model, detector,
+  source, date, serial number, software version, accessory, and image name).
+  The parsing logic is adapted from the BSD-3-Clause licensed specio project.
+  Includes a dedicated documentation page and a gallery example. (#897)
 
 - ``read_omnic`` and ``read_spg`` can now read OMNIC SPG files containing
   spectra with non-identical x-axis definitions using
   ``allow_inconsistent_x=True``. Incompatible spectra are returned as a list
   of ``NDDataset`` objects instead of raising an error (#863).
 
-- Result objects now provide attribute-style access to named outputs and
-  diagnostics, for example `pca.result.scores`, `pca.result.loadings`, and
-  `pca.result.explained_variance`. The IRIS and TENSOR/CP plugins now follow
-  the same contract through `iris.result` and `cp.result`.
-
-- Added a minimal MATLAB `.mat` writer for simple numeric `NDDataset`
-  exchange using `scipy.io.savemat`. This is an exchange format, not
+- Added a minimal MATLAB ``.mat`` writer for simple numeric ``NDDataset``
+  exchange using ``scipy.io.savemat``. This is an exchange format, not
   native SpectroChemPy persistence.
 
-- Added namespace-based I/O API for core readers and writers.
-  Domains such as ``jcamp``, ``csv``, ``matlab``, ``omnic``, ``opus``,
-  ``quadera``, ``soc``, ``spc``, ``wire``, and ``labspec``
-  now expose ``scp.<domain>.read(...)``.  Domains with existing writers
-  (``jcamp``, ``csv``, ``matlab``) also expose ``scp.<domain>.write(...)``.
-  These namespaces delegate to the existing public ``read_*`` and ``write_*``
-  functions; no behavior has changed.  This is the first phase of the
-  Namespace API Convention (see ``maintainers/rfcs/namespace-api-convention.md``).
+.. section
 
-- Aligned official plugins with the namespace API convention.
-  The ``nmr`` and ``carroucell`` plugins now expose the short canonical
-  ``scp.nmr.read(...)`` and ``scp.carroucell.read(...)`` aliases,
-  in addition to the existing ``scp.nmr.read_topspin(...)`` and
-  ``scp.carroucell.read_carroucell(...)`` names.  The ``perkinelmer``
-  plugin already exposed ``scp.perkinelmer.read(...)`` and is unchanged.
-  All legacy names remain supported.
+Improvements
+~~~~~~~~~~~~
+.. Add here improvements (do not delete this comment)
+
+- **Result objects** now provide attribute-style access to named outputs and
+  diagnostics, for example ``pca.result.scores``, ``pca.result.loadings``, and
+  ``pca.result.explained_variance``. The IRIS and TENSOR/CP plugins now follow
+  the same contract through ``iris.result`` and ``cp.result``.
+
+- **Stabilised official plugin ecosystem.** All six official plugins
+  (hypercomplex, iris, tensor, nmr, carroucell, perkinelmer) now follow the
+  same architecture, namespace API convention, and Result object contract.
+
+- **Namespace-based I/O API (Phase 1).** Core domains such as ``jcamp``,
+  ``csv``, ``matlab``, ``omnic``, ``opus``, ``quadera``, ``soc``, ``spc``,
+  ``wire``, and ``labspec`` now expose ``scp.<domain>.read(...)``. Domains
+  with existing writers (``jcamp``, ``csv``, ``matlab``) also expose
+  ``scp.<domain>.write(...)``. These namespaces delegate to the existing
+  public ``read_*`` and ``write_*`` functions; no behaviour has changed.
+  Legacy names remain supported.
+
+- **PerkinElmer ``.sp`` reader** enriched with additional metadata fields
+  (``instrument_serial_number``, ``instrument_software_version``,
+  ``ir_accessory``, ``image_name``). When ``image_name`` is present and
+  ``dataset.description`` is empty, ``image_name`` is used as the dataset
+  description.
+
+- **OMNIC acquisition metadata** harmonized across SPG and SRS readers.
+  ``collection_length``, ``optical_velocity``, and ``laser_frequency`` are
+  now consistently exposed in ``dataset.meta`` for all three OMNIC formats
+  (SPA, SPG, SRS). Previously, SPG attached none of these fields and SRS
+  omitted ``optical_velocity``.
+
+- **OMNIC Experiment Information blocks** decoded (block-directory key 0x82,
+  subtype 0x79) in SPA and SPG readers. The reader now extracts the
+  experiment file path and short name, accessory/compartment name, and
+  experiment description from the binary block and stores them in
+  ``dataset.meta`` as ``omnic_experiment_path``, ``omnic_experiment_file``,
+  ``omnic_accessory``, and ``omnic_experiment_title``. Malformed or missing
+  blocks are handled defensively.
+
+- Clarified specialized writer docstrings so format-specific APIs such as
+  ``write_csv()``, ``write_jcamp()``, and ``write_matlab()`` no longer
+  advertise the generic multi-protocol export options documented on
+  ``write()``.
+
+- Notebook prompts hidden in generated tutorials; gallery example repr noise
+  reduced.
 
 .. section
 
@@ -68,32 +96,6 @@ Bug Fixes
 - Standardized unsupported reader errors so invalid protocols, unrecognized
   file types, and unsupported CSV origins report the affected filename,
   requested or detected value, and supported alternatives. (#1143)
-
-- Clarified specialized writer docstrings so format-specific APIs such as
-  `write_csv()`, `write_jcamp()`, and `write_matlab()` no longer advertise the
-  generic multi-protocol export options documented on `write()`.
-
-- Enriched PerkinElmer `.sp` reader metadata.
-  The reader now preserves additional acquisition metadata fields:
-  ``instrument_serial_number``, ``instrument_software_version``,
-  ``ir_accessory``, and ``image_name``.
-  When ``image_name`` is present and ``dataset.description`` is empty,
-  ``image_name`` is used as the dataset description.
-   All existing metadata fields remain unchanged.
-
-- Harmonized acquisition metadata attachment across OMNIC SPG and SRS readers.
-  ``collection_length``, ``optical_velocity``, and ``laser_frequency``
-  are now consistently exposed in ``dataset.meta`` for all three OMNIC
-  formats (SPA, SPG, SRS).  Previously, SPG attached none of these fields
-  and SRS omitted ``optical_velocity``.
-
-- Decoded OMNIC Experiment Information blocks (block-directory key 0x82,
-  subtype 0x79) in SPA and SPG readers.  The reader now extracts the
-  experiment file path and short name, accessory/compartment name, and
-  experiment description from the binary block and stores them in
-  ``dataset.meta`` as ``omnic_experiment_path``, ``omnic_experiment_file``,
-  ``omnic_accessory``, and ``omnic_experiment_title`` (respectively).
-  Malformed or missing blocks are handled defensively.
 
 .. section
 
