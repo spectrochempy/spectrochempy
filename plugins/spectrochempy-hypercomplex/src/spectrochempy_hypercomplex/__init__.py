@@ -349,7 +349,7 @@ class HyperComplexPlugin(SpectroChemPyPlugin):
     """Hypercomplex / quaternion support for SpectroChemPy."""
 
     name = "hypercomplex"
-    version = "0.1.4"
+    version = "0.1.5"
     description = "Hypercomplex / quaternion data support"
     spectrochempy_min_version = "0.9.0"
     PLUGIN_API_VERSION = CORE_PLUGIN_API_VERSION
