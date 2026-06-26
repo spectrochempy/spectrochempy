@@ -128,3 +128,9 @@ Developer
   workflow files.  Documented in ``CONTRIBUTING.md`` and the plugin packaging
   guide.  The plugin template (``plugins/plugin-template/pyproject.toml``)
   includes a comment explaining the requirement.
+
+- Raised all plugin lower bounds from ``>=0.9`` to ``>=0.10`` across
+  ``pyproject.toml`` and ``recipe.yaml`` files.  Added the
+  ``Framework :: SpectroChemPy :: Official Plugin`` classifier to each
+  official plugin's ``pyproject.toml``.  Added ``spectrochempy-perkinelmer``
+  to the core ``[plugins]`` extra and related requirement files.
