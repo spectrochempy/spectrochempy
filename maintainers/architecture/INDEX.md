@@ -1,22 +1,11 @@
 # Architecture Index
 
-This index is the curated entry point for tracked maintainer architecture
-documents.
+Curated entry point for tracked maintainer architecture documents.
 
-Use this file when you want to understand which documents define current
-behavior, which ones provide durable technical reference, and which ones remain
-valuable mainly as historical context.
-
-For normative maintainer contracts and position statements, also see the
-[`../rfcs/INDEX.md`](../rfcs/INDEX.md) and the
-[`../roadmap/architecture-roadmap.md`](../roadmap/architecture-roadmap.md).
-
+For normative contracts (RFCs), see [`../rfcs/INDEX.md`](../rfcs/INDEX.md).
 For promoted historical audits, see [`../audits/INDEX.md`](../audits/INDEX.md).
-
-These tracked architecture notes are authoritative once a design or campaign
-has stabilized. Local audits, implementation notes, campaign logs, and
-characterization reports remain useful context, but they are not the first
-place to look for the maintained project contract.
+For campaign ordering, see
+[`../roadmap/architecture-roadmap.md`](../roadmap/architecture-roadmap.md).
 
 ## Start Here by Topic
 
