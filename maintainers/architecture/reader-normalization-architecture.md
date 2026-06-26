@@ -378,3 +378,63 @@ Major outcomes of the completed campaign:
 Carroucell remains intentionally outside the completed reader-alignment
 campaign scope. Its temperature representation and related plugin semantics are
 future enhancement topics, not unfinished core reader-alignment work.
+
+---
+
+## Vendor-Reader Implementation Strategy
+
+### Principle
+
+SpectroChemPy prefers self-contained official readers over runtime dependencies
+on external vendor-reader libraries that are slowly maintained, lag behind
+modern Python or NumPy compatibility, or expose APIs that do not align with the
+project's object model.
+
+### Approach
+
+1. External BSD-compatible implementations — mature parser code from the
+   scientific Python ecosystem — may be **studied and selectively ported** into
+   an official plugin.
+2. Original authors and licenses must always be acknowledged. License files
+   (e.g. `LICENSE_*.rst`) are included in the plugin source tree.
+3. Ported code is **modernized during integration**: adapted to current Python
+   and NumPy, aligned with SpectroChemPy coding standards, and exercised through
+   the plugin's test suite.
+4. Runtime dependencies on slowly maintained vendor-reader libraries should be
+   avoided when the parser can reasonably be maintained inside the official
+   plugin.
+
+### Rationale
+
+The goal is long-term maintainability:
+
+- **Release cadence**: SpectroChemPy controls its own release cycle and
+  compatibility policy.
+- **Modern compatibility**: integrated code is updated together with the
+  project's Python, NumPy, and dependency stack.
+- **Reviewability**: format-specific parsing evolves under the same review
+  standards as the rest of the project.
+- **Consistency**: normalisation and object-assembly patterns are applied
+  uniformly across all readers.
+
+### Precedents
+
+The following readers are successful examples of this philosophy:
+
+- **WiRE** – developed by studying the upstream reference implementation and
+  selectively porting format-specific parsing logic into a self-contained
+  SpectroChemPy reader, with full provenance and metadata normalisation.
+- **PerkinElmer** – the reference vendor-migration plugin. Implements `.sp`
+  parsing in a standalone package, using the upstream reference for format
+  knowledge while maintaining a fully independent implementation.
+- **OMNIC** – implemented from format documentation and reference
+  implementations without introducing a runtime dependency on external
+  Thermo-specific libraries.
+
+### Collaboration
+
+Upstream projects remain valuable technical references. SpectroChemPy
+contributors are encouraged to collaborate with upstream maintainers and to
+contribute improvements back whenever practical. The preference for
+self-contained readers is a maintainability strategy, not a judgement about
+external projects.

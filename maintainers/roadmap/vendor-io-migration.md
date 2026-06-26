@@ -52,6 +52,32 @@ implementation for all future vendor I/O migrations:
 3. **Maintainer bandwidth**
    Each migration is a focused PR but requires review and documentation updates.
 
+## NMR reader strategy
+
+The official NMR plugin (`spectrochempy-nmr`) currently provides only a
+TopSpin/Bruker reader.  The audit
+([`audit/~nmr-plugin-architecture-audit.md`](../audit/~nmr-plugin-architecture-audit.md))
+identifies Varian/Agilent, JEOL, and NMRPipe as the priority candidates for
+future readers.
+
+The preferred implementation strategy for these formats follows the general
+vendor-reader approach documented in
+[`maintainers/architecture/reader-normalization-architecture.md`](../architecture/reader-normalization-architecture.md#vendor-reader-implementation-strategy):
+
+- **nmrglue** remains an excellent technical reference. Its BSD license allows
+  selective reuse of mature parser code with attribution.
+- Future NMR readers should be implemented through **selective porting** of
+  format-specific parser code into the official NMR plugin, rather than
+  introducing a mandatory runtime dependency on the upstream nmrglue project.
+- SpectroChemPy will maintain the integrated code according to its own release
+  cadence and compatibility policy.
+- The existing vendored nmrglue subset (`nmrglue.py` in the plugin tree) may
+  serve as a reference for the porting pattern, including the license notice
+  convention (`NMRGLUE_LICENSE.rst`).
+
+This approach avoids coupling the NMR plugin's release cycle to nmrglue's
+while still benefiting from its format knowledge.
+
 ## Open questions
 
 - Should JCAMP-DX (domain-neutral, text-based) stay in core or move to a plugin?
