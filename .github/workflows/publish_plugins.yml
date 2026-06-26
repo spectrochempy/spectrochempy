@@ -84,7 +84,7 @@ jobs:
           for d in sorted(Path('plugins').glob('*/')):
               name = d.name
               if name == 'plugin-template':
-                  print(f'Skipping {name} (developer template, not publishable)')
+                  print(f'Skipping {name} (developer template, not publishable)', file=sys.stderr)
                   continue
               pyproject = d / 'pyproject.toml'
               if not pyproject.is_file():
@@ -93,7 +93,7 @@ jobs:
                   data = tomllib.loads(pyproject.read_text())
                   classifiers = data.get('project', {}).get('classifiers', [])
                   if OFFICIAL not in classifiers:
-                      print(f'Skipping {name} (no Official Plugin classifier)')
+                      print(f'Skipping {name} (no Official Plugin classifier)', file=sys.stderr)
                       continue
               except Exception:
                   continue
@@ -105,7 +105,7 @@ jobs:
 
           j = json.dumps({'plugin': plugins})
           print(f'matrix={j}')
-          print(f'Discovered official plugins: {j}')
+          print(f'Discovered official plugins: {j}', file=sys.stderr)
           " >> "$GITHUB_OUTPUT"
 
   build-and-publish_plugins:
