@@ -23,6 +23,37 @@ This document should evolve as the project evolves.
 
 ---
 
+## Current priorities (2026-07)
+
+### 1. Metadata Contract — gap analysis → acceptance
+
+Analyse runtime behaviour against the PROPOSED Metadata Contract v1 matrix,
+identify divergences, and advance the RFC towards ACCEPTED.
+
+Expected next step:
+    Gap audit across operation families using existing PR1-PR9 baselines.
+
+### 2. Processing assembly — Group A/B policy decision
+
+Resolve whether the Filter (Group A) and Baseline (Group B) metadata & history
+divergence is intentional or accidental, then align.
+
+Expected next step:
+    Policy decision based on existing PR6 characterisation.
+
+### 3. Writers — baseline characterisation
+
+No writer normalisation exists.  Characterise current writer behaviour before
+designing a normalisation contract.
+
+Expected next step:
+    Behavioural audit of all writer modules (analogous to reader PR1-PR9).
+
+Release-driven exception — Plugin Ecosystem 0.11 preparation may temporarily
+preempt the architecture priorities above when release coordination requires it.
+
+---
+
 # Decision Log
 
 ## 2026-06
@@ -582,75 +613,170 @@ The following topics appear to offer the highest architectural value relative to
 
 ---
 
-## Mathematical Semantics Clarification
+## Metadata Contract — Implementation Sequence
 
-Motivation:
+Status: Active campaign.  Conceptual phase complete; RFC still PROPOSED.
 
-The current math layer is usable, but operation semantics are still partly
-implicit and path-dependent.
+Implementation sequence:
 
-Questions include:
+PR1 — Gap analysis
+:    Map current runtime behaviour against the Metadata Contract v1 matrix
+     (preserve, recompute, override, drop per operation family).  Leverage
+     existing PR1-PR9 baselines.
 
-* metadata propagation by operation category;
-* direct labels versus coordinate labels;
-* coordinate compatibility policy;
-* mask behavior for geometry-changing operations;
-* result assembly consistency across core, processing, analysis, and plugins.
+PR2 — Behaviour alignment
+:    Fix divergences that are clearly accidental (low-effort, high-confidence
+     changes).
 
-This topic should be addressed before any class hierarchy split.
+PR3 — RFC acceptance
+:    Update Metadata Contract RFC status from PROPOSED to ACCEPTED after
+     gap analysis and alignment.
 
-Status: Maintained contract; future targeted reviews only.
+PR4 — Processing alignment
+:    Resolve Group A/B processing assembly split to conform to contract.
 
 ---
 
-## Project Object Review
+## Processing Wrapper Assembly
+
+Status: Active debt.  Group A vs Group B divergence characterised in PR6.
+
+The Filter subclass family (Group A: smooth, savgol, whittaker, denoise) rewrites
+history and appends method suffixes.  The Baseline subclass family (Group B:
+basc, detrend, asls) preserves name and appends history.  This divergence is
+visible to users and blocks Metadata Contract alignment.
+
+Implementation sequence:
+
+PR1 — Policy decision
+:    Determine whether the split is intentional (derived vs same-object
+     transformation) or accidental (inheritance from Filter vs Baseline).
+
+PR2 — Alignment
+:    Unify towards the chosen model, or document as deliberate policy.
+
+---
+
+## Writers Architecture
+
+Status: Active debt.  No characterisation exists.
+
+Writers were not included in any reader normalisation campaign.  Current
+behaviour is undocumented.
+
+Implementation sequence:
+
+PR1 — Behavioural characterisation
+:    Audit all writer modules (CSV, Excel, JCAMP, MATLAB) for provenance,
+     metadata, coordinate, and label handling — analogous to reader PR1-PR9.
+
+PR2 — Normalisation contract
+:    Semantic destination map and writer-side normalisation policy.
+
+PR3 — Alignment
+:    Fix divergences and align writer behaviour with the normalisation contract.
+
+---
+
+## Analysis Output Semantics Formalisation
+
+Status: Active.  Characterisation complete (PR9); formalisation pending.
+
+Three output families were identified: latent derived, diagnostic/model-summary,
+and reconstructed source-space.  SVD remains an outlier.
+
+Implementation sequence:
+
+PR1 — Family formalisation
+:    Document the three families and the `_set_output()` / `_wrap_ndarray_output_to_nddataset()` assembly pattern.
+
+PR2 — SVD resolution
+:    Align SVD or document its exception from the standard contract.
+
+---
+
+## Plugin Ecosystem — 0.11 Preparation
+
+Status: Active.  7 official plugins; version bounds and compatibility policy
+need attention before coordinated release.
+
+Implementation sequence:
+
+PR1 — Version bounds and classifier
+:    Decide `<0.11` vs `<0.12` upper bound.  Resolve Cantera missing-classifier
+     status (official or experimental).
+
+PR2 — Compatibility policy
+:    Document plugin version compatibility policy (aligned or independent
+     cadence).
+
+PR3 — Coordinated release plan
+:    Determine which plugins release with 0.11 and in what order.
+
+---
+
+## Result Post-Campaign
+
+Status: Optional cleanup.  Core Result Object campaign is complete; remaining
+packaging and documentation can be done opportunistically.
+
+Implementation sequence:
+
+PR1 — Public imports
+:    Make `ResultBase`, `AnalysisResult`, `FitResult` publicly importable.
+
+PR2 — Gallery updates
+:    Add `.result = pca.result` to estimator examples.
+
+PR3 — Display integration
+:    Semantic HTML display for Result objects (optional, may defer).
+
+---
+
+## Dynamic Plugin Discovery
+
+Status: Future candidate.  Depends on no unresolved blocker but needs design
+review before implementation.
 
 Motivation:
 
-The core ownership invariants of `Project` have been characterized and implemented
-via a dedicated RFC (see
-[`project-invariants-rfc.md`](./project-invariants-rfc.md), status: Implemented).
+Replace static `KNOWN_PLUGIN_READERS` / `KNOWN_PLUGIN_NAMESPACES` with
+entry-point-driven discovery, removing the need for core edits when adding
+official plugins.
 
-The long-term role of `Project` remains less clearly defined than other core
-objects, but the invariants (single-parent ownership, acyclic hierarchy,
-explicit duplicate rejection, key/name identity) are now enforced.
+Implementation sequence:
 
-Questions that remain open:
+PR1 — Design
+:    Entry-point replacement for static plugin lists; review import-time
+     performance and graceful degradation for missing plugins.
 
-* persistence model (typed-members constraints);
-* relationship with workflows;
-* interaction with future ecosystem developments (e.g., Result object
-  integration).
+PR2 — Implementation
+:    Add dynamic path alongside static lists, with feature flag.
 
-Deferred topics documented in the RFC: copy semantics, root-name semantics.
+PR3 — Cleanup
+:    Remove static lists after one release cycle.
 
-Status: Future candidate.
+---
+
+## Mathematical Semantics Clarification
+
+Status: Maintained contract; future targeted reviews only.
+
+The current math layer is usable; operation semantics are now largely
+characterised (PR1-PR9).  No active campaign planned.  Targeted reviews
+may occur when the Metadata Contract or class hierarchy work reaches this
+area.
 
 ---
 
 ## I/O Architecture Modernization (`#1105`)
 
-Status: Future candidate.
+Status: WAITING — depends on Dynamic Plugin Discovery and Metadata Contract.
 
-Motivation:
-
-Reader Alignment normalized reader semantics and stabilized the maintained
-destinations for identity, provenance, labels, coordinates, history, and
-`Meta`, but it did not modernize the structural I/O architecture itself.
-
-The remaining architecture topic is about reducing structural duplication
-across readers while preserving format-specific parsing logic.
-
-Future work in this area should focus on:
-
-* clearer separation between file parsing and `NDDataset` construction;
-* shared reader assembly helpers where they improve consistency and
-  maintainability;
-* common normalization/assembly patterns for coordinates, units, history,
-  provenance, and metadata;
-* reducing duplicated object-assembly logic across maintained readers;
-* keeping format-specific parsing isolated from common SpectroChemPy object
-  assembly responsibilities.
+The reader normalisation campaign stabilised semantic destinations but did not
+modernise the structural I/O architecture.  This topic cannot proceed until
+dynamic plugin discovery and the Metadata Contract provide the foundation for
+shared reader assembly helpers and format-parsing separation.
 
 This remains a roadmap-level future candidate, not an active implementation
 campaign.
@@ -659,27 +785,25 @@ campaign.
 
 ## Core / Plugin Boundary Review (`#1172`)
 
-Status: Future candidate.
+Status: WAITING — depends on Dynamic Plugin Discovery and Plugin Ecosystem
+stabilisation.
 
-Motivation:
-
-The Result Object campaign is complete for core estimators, but the broader
-question of what belongs in core versus official plugins remains open across
-multiple areas of the codebase.
-
-This topic is broader than Result Objects alone and should be treated as a
-future architecture review rather than as residual migration work.
-
-Future work in this area should focus on:
-
-* core versus plugin ownership for analysis modules and advanced algorithms;
-* plotting/display extension boundaries;
-* specialized vendor readers and other format-specific integrations;
-* Result-object-related extensions that may not belong in core;
-* plugin registration surfaces and stable API boundaries.
+The broader question of what belongs in core versus official plugins is
+deferred until the dynamic discovery mechanism and plugin compatibility policy
+are established.
 
 This remains a roadmap-level future candidate, not an active implementation
 campaign.
+
+---
+
+## Project Object Review
+
+Status: Future candidate.
+
+The core ownership invariants are implemented.  Open questions around typed
+persistence, workflow integration, and Result object interaction remain but
+require no immediate action.
 
 ---
 
