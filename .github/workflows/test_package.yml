@@ -165,7 +165,7 @@ jobs:
       - name: Install spectrochempy
         if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
         env:
-          SETUPTOOLS_SCM_PRETEND_VERSION: 0.9.1.dev0
+          SETUPTOOLS_SCM_PRETEND_VERSION: 0.10.1.dev0
         run: |
           set -e
           start=$SECONDS
