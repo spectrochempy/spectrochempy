@@ -11,22 +11,47 @@ import subprocess
 import sys
 from pathlib import Path
 
-# Official plugins with stable lifecycle tests (import, metadata,
-# compatibility, registration, state transitions, reader/accessor checks).
-# Cantera stays excluded: experimental, heavy external dependency, no
-# lifecycle tests yet.
-PLUGIN_TESTS = {
-    "spectrochempy-cantera": "plugins/spectrochempy-cantera/tests",
-    "spectrochempy-carroucell": "plugins/spectrochempy-carroucell/tests",
-    "spectrochempy-hypercomplex": "plugins/spectrochempy-hypercomplex/tests",
-    "spectrochempy-iris": "plugins/spectrochempy-iris/tests",
-    "spectrochempy-nmr": "plugins/spectrochempy-nmr/tests",
-    "spectrochempy-tensor": "plugins/spectrochempy-tensor/tests",
-}
+OFFICIAL_CLASSIFIER = "Framework :: SpectroChemPy :: Official Plugin"
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
+
+def _read_classifiers(plugin_dir: Path) -> list[str]:
+    """Return classifiers from a plugin's pyproject.toml, or empty list."""
+    pyproject = plugin_dir / "pyproject.toml"
+    if not pyproject.is_file():
+        return []
+    try:
+        import tomllib
+    except ImportError:
+        import tomli as tomllib  # type: ignore[no-redef]
+
+    try:
+        data = tomllib.loads(pyproject.read_text())
+        return data.get("project", {}).get("classifiers", [])
+    except Exception:
+        return []
+
+
+def _discover_plugins() -> dict[str, str]:
+    """Build {package_name: test_path} for all plugins that have a tests/ dir."""
+    mapping: dict[str, str] = {}
+    for p in sorted((REPO_ROOT / "plugins").glob("spectrochempy-*/")):
+        test_dir = p / "tests"
+        if test_dir.is_dir():
+            mapping[p.name] = str(test_dir.relative_to(REPO_ROOT))
+    return mapping
+
+
+def _is_official(plugin_name: str) -> bool:
+    classifiers = _read_classifiers(REPO_ROOT / "plugins" / plugin_name)
+    return OFFICIAL_CLASSIFIER in classifiers
+
+
+# Build mappings dynamically.
+PLUGIN_TESTS = _discover_plugins()
 FULL_PLUGIN_TARGETS = [
-    target
-    for plugin, target in PLUGIN_TESTS.items()
-    if plugin not in {"spectrochempy-cantera"}  # cantera = experimental
+    target for plugin, target in PLUGIN_TESTS.items() if _is_official(plugin)
 ]
 ALL_PLUGIN_TARGETS = list(PLUGIN_TESTS.values())
 FULL_TARGETS = ["tests", *FULL_PLUGIN_TARGETS]

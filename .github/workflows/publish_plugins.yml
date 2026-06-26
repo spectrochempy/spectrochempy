@@ -2,10 +2,10 @@
 # - TestPyPI on pushes to test branches
 # - PyPI on published releases
 #
-# Official plugins are explicitly listed in the allowlist below.
-# Experimental plugins (e.g. spectrochempy-cantera) live in the repository
-# but are NOT auto-published by this workflow — they must be published
-# manually or through a separate publish workflow.
+# Official plugins are identified by the "Framework :: SpectroChemPy :: Official Plugin"
+# classifier in their pyproject.toml. Experimental plugins (e.g. spectrochempy-cantera)
+# live in the repository but are NOT auto-published by this workflow — they must be
+# published manually or through a separate publish workflow.
 #
 # Release policy:
 #   - Official plugins are released independently from the core package.
@@ -75,35 +75,38 @@ jobs:
       - name: Set plugin matrix
         id: set-matrix
         run: |
-          # Official plugins are explicitly listed. Experimental plugins may live in
-          # the repository but are NOT auto-published by this workflow.
-          OFFICIAL_PLUGINS="spectrochempy-nmr spectrochempy-iris spectrochempy-tensor spectrochempy-hypercomplex spectrochempy-carroucell"
+          python3 -c "
+          import json, tomllib, sys
+          from pathlib import Path
 
-          plugins=()
-          for dir in plugins/*/; do
-            name=$(basename "$dir")
-            if [ "$name" = "plugin-template" ]; then
-              echo "Skipping $name (developer template, not publishable)"
-              continue
-            fi
-            if ! echo "$OFFICIAL_PLUGINS" | grep -qw "$name"; then
-              echo "Skipping $name (not in official plugin allowlist)"
-              continue
-            fi
-            if [ -f "${dir}pyproject.toml" ]; then
-              plugins+=("{\"name\":\"$name\",\"path\":\"$dir\"}")
-            fi
-          done
+          OFFICIAL = 'Framework :: SpectroChemPy :: Official Plugin'
+          plugins = []
+          for d in sorted(Path('plugins').glob('*/')):
+              name = d.name
+              if name == 'plugin-template':
+                  print(f'Skipping {name} (developer template, not publishable)', file=sys.stderr)
+                  continue
+              pyproject = d / 'pyproject.toml'
+              if not pyproject.is_file():
+                  continue
+              try:
+                  data = tomllib.loads(pyproject.read_text())
+                  classifiers = data.get('project', {}).get('classifiers', [])
+                  if OFFICIAL not in classifiers:
+                      print(f'Skipping {name} (no Official Plugin classifier)', file=sys.stderr)
+                      continue
+              except Exception:
+                  continue
+              plugins.append({'name': name, 'path': f'plugins/{name}'})
 
-          if [ ${#plugins[@]} -eq 0 ]; then
-            echo "::error::No official plugins discovered in plugins/"
-            exit 1
-          fi
+          if not plugins:
+              print('::error::No official plugins discovered in plugins/')
+              sys.exit(1)
 
-          # Join with commas and wrap in JSON array
-          joined=$(IFS=,; echo "${plugins[*]}")
-          echo "matrix={\"plugin\":[$joined]}" >> "$GITHUB_OUTPUT"
-          echo "Discovered official plugins: $joined"
+          j = json.dumps({'plugin': plugins})
+          print(f'matrix={j}')
+          print(f'Discovered official plugins: {j}', file=sys.stderr)
+          " >> "$GITHUB_OUTPUT"
 
   build-and-publish_plugins:
     name: Build and publish plugin distributions

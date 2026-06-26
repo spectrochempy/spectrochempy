@@ -89,14 +89,8 @@ jobs:
 
       - name: Validate plugin name
         run: |
-          # Official plugins are explicitly listed. Experimental plugins should be
-          # released manually and are not handled by this workflow.
-          OFFICIAL_PLUGINS="spectrochempy-nmr spectrochempy-iris spectrochempy-tensor spectrochempy-hypercomplex spectrochempy-carroucell"
-          if ! echo "$OFFICIAL_PLUGINS" | grep -qw "${{ inputs.plugin_name }}"; then
-            echo "::error::${{ inputs.plugin_name }} is not in the official plugin allowlist. Experimental plugins must be released manually."
-            exit 1
-          fi
-          plugin_dir="plugins/${{ inputs.plugin_name }}"
+          plugin_name="${{ inputs.plugin_name }}"
+          plugin_dir="plugins/$plugin_name"
           if [ ! -d "$plugin_dir" ]; then
             echo "::error::Plugin directory $plugin_dir does not exist"
             exit 1
@@ -105,6 +99,19 @@ jobs:
             echo "::error::$plugin_dir/pyproject.toml not found"
             exit 1
           fi
+          # Verify the plugin has the Official Plugin classifier.
+          if ! python3 -c "
+          import sys, tomllib
+          data = tomllib.load(open('$plugin_dir/pyproject.toml', 'rb'))
+          cls = data.get('project', {}).get('classifiers', [])
+          if 'Framework :: SpectroChemPy :: Official Plugin' not in cls:
+              sys.exit(1)
+          "; then
+            echo "::error::$plugin_name is not an official plugin (missing Official Plugin classifier)."
+            echo "::error::Experimental plugins must be released manually."
+            exit 1
+          fi
+          echo "Plugin $plugin_name validated as official."
 
       - name: Bump version in pyproject.toml
         run: |
