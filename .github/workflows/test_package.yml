@@ -162,10 +162,21 @@ jobs:
             ${{ runner.os }}-py${{ matrix.pythonVersion }}-test-runtime-
             ${{ runner.os }}-test-runtime-
 
+      - name: Derive pretend version from latest git tag
+        if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
+        run: |
+          LATEST_TAG=$(git tag --list 'spectrochempy-v*' --sort=-v:refname | head -1)
+          if [ -z "$LATEST_TAG" ]; then
+            echo "No core version tag found, using 0.10.1.dev0 as fallback"
+            echo "SETUPTOOLS_SCM_PRETEND_VERSION=0.10.1.dev0" >> "$GITHUB_ENV"
+          else
+            VERSION="${LATEST_TAG#spectrochempy-v}"
+            IFS=. read -r MAJOR MINOR PATCH <<< "$VERSION"
+            echo "SETUPTOOLS_SCM_PRETEND_VERSION=${MAJOR}.${MINOR}.$((PATCH + 1)).dev0" >> "$GITHUB_ENV"
+          fi
+
       - name: Install spectrochempy
         if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
-        env:
-          SETUPTOOLS_SCM_PRETEND_VERSION: 0.10.1.dev0
         run: |
           set -e
           start=$SECONDS
