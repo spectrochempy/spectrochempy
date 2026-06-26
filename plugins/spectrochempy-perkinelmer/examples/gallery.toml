@@ -1,0 +1,7 @@
+[plugin]
+name = "spectrochempy-perkinelmer"
+title = "PerkinElmer plugin"
+
+[[examples]]
+path = "plot_read_perkinelmer.py"
+section = "Import/export"

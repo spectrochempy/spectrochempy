@@ -123,6 +123,8 @@ jobs:
           uv pip install --no-deps -e plugins/spectrochempy-iris
           uv pip install --no-deps -e plugins/spectrochempy-tensor
           uv pip install --no-deps -e plugins/spectrochempy-hypercomplex
+          uv pip install --no-deps -e plugins/spectrochempy-carroucell
+          uv pip install --no-deps -e plugins/spectrochempy-perkinelmer
           # Install plugin runtime dependencies that --no-deps skips
           uv pip install osqp scipy numpy-quaternion tensorly
           duration=$((SECONDS - start))

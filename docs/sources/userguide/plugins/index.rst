@@ -24,6 +24,7 @@ Plugin APIs are usually exposed through namespaces:
     import spectrochempy as scp
 
     dataset = scp.nmr.read_topspin("path/to/fid")
+    dataset = scp.perkinelmer.read("path/to/file.sp")
     analysis = scp.iris.IRIS()
     model = scp.tensor.CP(n_components=2)
 
@@ -80,6 +81,7 @@ Plugin pages
    tensor
    hypercomplex
    iris
+   perkinelmer
    experimental_plugins
    examples
    roadmap
