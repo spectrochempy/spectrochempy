@@ -96,6 +96,7 @@ plugins = [
     "spectrochempy[tensor]",
     "spectrochempy-hypercomplex>=0.1,<0.2",
     "spectrochempy-carroucell>=0.1,<0.2",
+    "spectrochempy-perkinelmer>=0.1,<0.2",
 ]
 test = [
   "coverage",
