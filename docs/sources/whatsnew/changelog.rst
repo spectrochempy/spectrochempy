@@ -19,73 +19,6 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
-- **New official PerkinElmer reader plugin.**  SpectroChemPy now provides
-  ``spectrochempy-perkinelmer``, an official plugin for reading PerkinElmer
-  ``.sp`` binary files.  The reader returns an ``NDDataset`` with wavelength
-  coordinates and preserves acquisition metadata (instrument model, detector,
-  source, date, serial number, software version, accessory, and image name).
-  The parsing logic is adapted from the BSD-3-Clause licensed specio project.
-  Includes a dedicated documentation page and a gallery example. (#897)
-
-- ``read_omnic`` and ``read_spg`` can now read OMNIC SPG files containing
-  spectra with non-identical x-axis definitions using
-  ``allow_inconsistent_x=True``. Incompatible spectra are returned as a list
-  of ``NDDataset`` objects instead of raising an error (#863).
-
-- Added a minimal MATLAB ``.mat`` writer for simple numeric ``NDDataset``
-  exchange using ``scipy.io.savemat``. This is an exchange format, not
-  native SpectroChemPy persistence.
-
-.. section
-
-Improvements
-~~~~~~~~~~~~
-.. Add here improvements (do not delete this comment)
-
-- **Result objects** now provide attribute-style access to named outputs and
-  diagnostics, for example ``pca.result.scores``, ``pca.result.loadings``, and
-  ``pca.result.explained_variance``. The IRIS and TENSOR/CP plugins now follow
-  the same contract through ``iris.result`` and ``cp.result``.
-
-- **Stabilised official plugin ecosystem.** All six official plugins
-  (hypercomplex, iris, tensor, nmr, carroucell, perkinelmer) now follow the
-  same architecture, namespace API convention, and Result object contract.
-
-- **Namespace-based I/O API (Phase 1).** Core domains such as ``jcamp``,
-  ``csv``, ``matlab``, ``omnic``, ``opus``, ``quadera``, ``soc``, ``spc``,
-  ``wire``, and ``labspec`` now expose ``scp.<domain>.read(...)``. Domains
-  with existing writers (``jcamp``, ``csv``, ``matlab``) also expose
-  ``scp.<domain>.write(...)``. These namespaces delegate to the existing
-  public ``read_*`` and ``write_*`` functions; no behaviour has changed.
-  Legacy names remain supported.
-
-- **PerkinElmer ``.sp`` reader** enriched with additional metadata fields
-  (``instrument_serial_number``, ``instrument_software_version``,
-  ``ir_accessory``, ``image_name``). When ``image_name`` is present and
-  ``dataset.description`` is empty, ``image_name`` is used as the dataset
-  description.
-
-- **OMNIC acquisition metadata** harmonized across SPG and SRS readers.
-  ``collection_length``, ``optical_velocity``, and ``laser_frequency`` are
-  now consistently exposed in ``dataset.meta`` for all three OMNIC formats
-  (SPA, SPG, SRS). Previously, SPG attached none of these fields and SRS
-  omitted ``optical_velocity``.
-
-- **OMNIC Experiment Information blocks** decoded (block-directory key 0x82,
-  subtype 0x79) in SPA and SPG readers. The reader now extracts the
-  experiment file path and short name, accessory/compartment name, and
-  experiment description from the binary block and stores them in
-  ``dataset.meta`` as ``omnic_experiment_path``, ``omnic_experiment_file``,
-  ``omnic_accessory``, and ``omnic_experiment_title``. Malformed or missing
-  blocks are handled defensively.
-
-- Clarified specialized writer docstrings so format-specific APIs such as
-  ``write_csv()``, ``write_jcamp()``, and ``write_matlab()`` no longer
-  advertise the generic multi-protocol export options documented on
-  ``write()``.
-
-- Notebook prompts hidden in generated tutorials; gallery example repr noise
-  reduced.
 
 .. section
 
@@ -93,9 +26,6 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
-- Standardized unsupported reader errors so invalid protocols, unrecognized
-  file types, and unsupported CSV origins report the affected filename,
-  requested or detected value, and supported alternatives. (#1143)
 
 .. section
 
@@ -123,26 +53,3 @@ Deprecations
 Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
-
-- Official plugins now use the ``Framework :: SpectroChemPy :: Official Plugin``
-  Trove classifier in ``pyproject.toml`` as the single source of truth for CI
-  auto-discovery.  Adding a new official plugin no longer requires editing
-  workflow files.  Documented in ``CONTRIBUTING.md`` and the plugin packaging
-  guide.  The plugin template (``plugins/plugin-template/pyproject.toml``)
-  includes a comment explaining the requirement.
-
-- Raised all plugin lower bounds from ``>=0.9`` to ``>=0.10`` across
-  ``pyproject.toml`` and ``recipe.yaml`` files.  Added the
-  ``Framework :: SpectroChemPy :: Official Plugin`` classifier to each
-  official plugin's ``pyproject.toml``.  Added ``spectrochempy-perkinelmer``
-  to the core ``[plugins]`` extra and related requirement files.
-
-- Refactored CI auto-discovery for official plugins.  ``publish_plugins.yml``,
-  ``release_plugin.yml``, ``build_package.yml``, ``test_package.yml``,
-  ``build_docs.yml``, and ``install_on_colab.yml`` now discover plugins
-  dynamically via the classifier instead of hardcoded allowlists.
-  ``select_test_targets.py``, ``ci_diagnostics.py``, and
-  ``plugin_version_status.py`` use the same mechanism.  Added
-  ``src/spectrochempy/ci/install_plugins.py`` helper with
-  ``--editable``, ``--list-names``, and pip flags for CI and local
-  development.
