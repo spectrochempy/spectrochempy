@@ -1,64 +1,23 @@
 # RFC Index
 
-This index provides a maintainer-facing entry point to the RFC documents stored
-in this directory.
-
-## Purpose
-
-In SpectroChemPy, RFCs record maintainer-level behavior contracts, position
+SpectroChemPy RFCs record maintainer-level behavior contracts, position
 statements, and proposed architectural boundaries.
 
-They are different from the other documentation layers:
-
-- RFCs define or propose maintainer-facing contracts and decisions.
-- Architecture notes preserve durable implementation maps, risk analyses, and
-  reference context.
-- Audits are working documents and implementation-history notes that may later
-  become outdated, superseded, or purely historical.
-
-Authoritative maintainer references usually live in:
-
-- the roadmap;
-- accepted RFCs;
-- implemented RFCs;
-- tracked architecture notes once a design has stabilized.
-
-Audits, implementation notes, campaign logs, and characterization reports are
-not authoritative by default.
-
-The usual RFC lifecycle is:
+The usual lifecycle:
 
 ```text
 PROPOSED -> ACCEPTED -> IMPLEMENTED
                  \-> SUPERSEDED
 ```
 
-Not every document passes through every stage. Some RFCs are accepted position
-statements or decision records rather than implementation plans.
-
 ## Status Definitions
 
-### `PROPOSED`
-
-The document records a proposed maintainer contract or architecture direction.
-It is useful for guidance, but the behavior is not yet fully adopted.
-
-### `ACCEPTED`
-
-The document records an accepted maintainer position or decision. It is
-authoritative even if it is not primarily an implementation roadmap.
-
-### `IMPLEMENTED`
-
-The documented contract has been adopted in merged behavior and should be
-treated as the current maintained reference.
-
-### `SUPERSEDED`
-
-The RFC remains useful for history, but another document is now the primary
-authoritative reference.
-
-## Related Roadmap
+| Status | Meaning |
+|---|---|
+| `PROPOSED` | Proposed contract or direction; behavior not yet fully adopted. |
+| `ACCEPTED` | Accepted position or decision; authoritative even without full implementation. |
+| `IMPLEMENTED` | Contract adopted in merged behavior; current maintained reference. |
+| `SUPERSEDED` | Historical; another document is now the primary reference. |
 
 For campaign ordering and architecture priorities, see
 [`../roadmap/architecture-roadmap.md`](../roadmap/architecture-roadmap.md).
