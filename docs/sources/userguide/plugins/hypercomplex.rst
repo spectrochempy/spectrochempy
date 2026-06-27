@@ -128,7 +128,7 @@ both the NMR and hypercomplex plugins are installed):
     import spectrochempy as scp
 
     # Requires spectrochempy-nmr and spectrochempy-hypercomplex
-    dataset = scp.nmr.read_topspin("path/to/ser", expno=1)
+    dataset = scp.nmr.read("path/to/ser", expno=1)
 
     # The NMR reader may already have called set_quaternion;
     # if not, you can do it explicitly:

@@ -17,7 +17,7 @@ example and use the recommended namespaced API:
     import spectrochempy as scp
 
     analysis = scp.iris.IRIS()
-    dataset = scp.nmr.read_topspin("path/to/fid")
+    dataset = scp.nmr.read("path/to/fid")
 
 Plugin-dependent examples should use short, consistent notes such as:
 

@@ -28,7 +28,7 @@ Use the recommended namespaced API:
 
     import spectrochempy as scp
 
-    dataset = scp.nmr.read_topspin("path/to/fid")
+    dataset = scp.nmr.read("path/to/fid")
 
 The NMR plugin owns Bruker/TopSpin conventions such as experiment directory
 resolution, processed-data defaults, acquisition metadata, and NMR unit
@@ -42,10 +42,15 @@ The plugin-owned TopSpin reader is documented here rather than in the core API
 reference because it is provided by ``spectrochempy-nmr``, not by the core
 package itself.
 
-Compatibility alias:
+Compatibility aliases:
 
-``scp.read_topspin(...)`` remains available when the plugin is installed, but
-new documentation and examples should prefer ``scp.nmr.read_topspin(...)``.
+- ``scp.nmr.read_topspin(...)`` remains available as the explicit historical
+  namespaced form.
+- ``scp.read_topspin(...)`` remains available as the root-level compatibility
+  alias when the plugin is installed.
+
+New documentation and examples should prefer the shorter
+``scp.nmr.read(...)`` form.
 
 API Reference
 =============
@@ -54,7 +59,7 @@ API Reference
     :nosignatures:
     :toctree: generated/
 
-    spectrochempy.read_topspin
+    spectrochempy.nmr.read
 
 Examples
 ========

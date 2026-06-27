@@ -115,7 +115,7 @@ The recommended form is namespaced:
 
     analysis = scp.iris.IRIS()
     model = scp.tensor.CP(n_components=2)
-    dataset = scp.nmr.read_topspin("path/to/fid")
+    dataset = scp.nmr.read("path/to/fid")
 
 Dataset accessors are reserved for operations that act on an existing dataset:
 

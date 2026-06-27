@@ -37,6 +37,7 @@ Compatibility aliases are also available for older scripts:
 
 .. code-block:: python
 
+    dataset = scp.perkinelmer.read_perkinelmer("path/to/file.sp")
     dataset = scp.read_perkinelmer("path/to/file.sp")
     dataset = scp.read_sp("path/to/file.sp")
 
@@ -47,7 +48,7 @@ API Reference
     :nosignatures:
     :toctree: generated/
 
-    spectrochempy.read_perkinelmer
+    spectrochempy.perkinelmer.read
 
 Examples
 ========
