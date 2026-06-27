@@ -81,6 +81,7 @@ Plugin pages
    tensor
    hypercomplex
    iris
+   carroucell
    perkinelmer
    experimental_plugins
    examples

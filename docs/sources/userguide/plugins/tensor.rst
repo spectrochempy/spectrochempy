@@ -4,13 +4,16 @@
 Tensor plugin
 =============
 
+Introduction
+============
+
 The ``spectrochempy-tensor`` plugin provides tensor decomposition classes backed
 by TensorLy. Keeping these algorithms in a plugin lets the core package remain
 independent from tensor-specific dependencies while preserving integrated access
 when the plugin is installed.
 
-Install
-=======
+Installation
+============
 
 .. code-block:: bash
 
@@ -22,8 +25,8 @@ or directly:
 
     pip install spectrochempy-tensor
 
-Use
-===
+Recommended API
+===============
 
 .. code-block:: python
 
@@ -34,16 +37,33 @@ Use
     factors = model.result.factors
     weights = model.result.weights
 
-The historical ``scp.CP`` alias is kept as a deprecated compatibility path.
-New code should use ``scp.tensor.CP``.
+Compatibility aliases
+=====================
+
+The historical ``scp.CP`` alias is kept as a deprecated compatibility path, but
+new documentation and examples should use ``scp.tensor.CP``.
+
 Direct accessors such as ``model.A``, ``model.B``, ``model.C``, and
 ``model.weights`` remain available.
 
-Extensibility
+API Reference
 =============
 
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    spectrochempy.tensor.CP
+
+Examples
+========
+
+Use the package-level ``scp.tensor.CP(...)`` estimator shown above for
+TensorLy-backed CP/PARAFAC workflows on existing datasets.
+
+Limitations
+===========
+
 Tensor decomposition implementations live under
-``spectrochempy_tensor.decompositions``. Shared bridges between TensorLy objects
-and SpectroChemPy datasets should live under ``spectrochempy_tensor.adapters``
-so future classes such as Tucker or TensorTrain can reuse them without adding
-tensor concepts back to the core package.
+``spectrochempy_tensor.decompositions``. This page currently focuses on the
+main CP/PARAFAC workflow exposed through ``scp.tensor.CP(...)``.

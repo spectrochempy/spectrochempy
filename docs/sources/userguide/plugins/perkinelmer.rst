@@ -4,8 +4,14 @@
 PerkinElmer plugin
 ==================
 
+Introduction
+============
+
 The ``spectrochempy-perkinelmer`` plugin provides a reader for PerkinElmer
 ``.sp`` binary IR files.
+
+Installation
+============
 
 Install it with:
 
@@ -13,7 +19,10 @@ Install it with:
 
     pip install spectrochempy[perkinelmer]
 
-Use the namespaced API ``scp.perkinelmer``:
+Recommended API
+===============
+
+Use the recommended namespaced API:
 
 .. code-block:: python
 
@@ -21,12 +30,30 @@ Use the namespaced API ``scp.perkinelmer``:
 
     dataset = scp.perkinelmer.read("path/to/file.sp")
 
-Compatibility aliases are also available:
+Compatibility aliases
+=====================
+
+Compatibility aliases are also available for older scripts:
 
 .. code-block:: python
 
     dataset = scp.read_perkinelmer("path/to/file.sp")
     dataset = scp.read_sp("path/to/file.sp")
+
+API Reference
+=============
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    spectrochempy.read_perkinelmer
+
+Examples
+========
+
+Use the same namespaced reader shown above for ordinary PerkinElmer ``.sp``
+import workflows.
 
 Limitations
 ===========
