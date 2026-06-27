@@ -51,7 +51,7 @@ The `NDDataset` is the main object use by `SpectroChemPy` .
 
 Like `numpy.ndarray`s, `NDDataset` have the capability to be sliced, sorted and subject to mathematical operations.
 
-But, in addition, `NDDataset` may have units, can be masked and each dimension can also have coordinated with units.
+But, in addition, `NDDataset` may have units, can be masked and each dimension can also have coordinates with units.
 This make `NDDataset` aware of unit compatibility, *e.g.,*, for binary operation such as additions or subtraction or
 during the application of mathematical operations. In addition or in replacement of numerical data for coordinates,
 NDDataset can also have labeled coordinates where labels can be different kinds of objects (strings, datetime, numpy
@@ -104,7 +104,7 @@ The above code in `SpectroChemPy` can be simplified using the `random` creation 
 
 (see the :ref:`user_guide` for a large set of examples on how to use this constructor.)
 
-Many SpectroChemPy methods mimics `numpy` equivalent, but output a `NDDataset` object.
+Many SpectroChemPy methods mimic `numpy` equivalent, but output a `NDDataset` object.
 
 
 Basic creation methods
@@ -164,7 +164,7 @@ Select data in a NDDataset
 Import/export
 *************
 
-Import a NDataset from external source
+Import a NDDataset from external source
 ======================================
 .. autosummary::
     :nosignatures:
@@ -643,7 +643,7 @@ Multivariate Curve Resolution - Alternating Least Squares
 
     MCRALS
 
-Independant Component Analysis
+Independent Component Analysis
 ==============================
 
 .. autosummary::
