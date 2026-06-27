@@ -21,6 +21,19 @@ Use the NMR namespace:
 
     dataset = scp.nmr.read_topspin("path/to/fid")
 
+The plugin-owned TopSpin reader is documented here rather than in the core API
+reference because it is provided by ``spectrochempy-nmr``, not by the core
+package itself. The recommended public entry point is
+``scp.nmr.read_topspin(...)``. The legacy compatibility alias
+``scp.read_topspin(...)`` is still available when the plugin is installed, but
+new documentation and examples should prefer the namespaced API.
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    spectrochempy.read_topspin
+
 For phase-sensitive 2D NMR workflows, install hypercomplex support as well:
 
 .. code-block:: bash

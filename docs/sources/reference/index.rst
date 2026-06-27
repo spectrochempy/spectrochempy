@@ -172,7 +172,6 @@ Import a NDataset from external source
 
     load
     read
-    read_topspin
     read_csv
     read_ddr
     read_dir
@@ -771,10 +770,3 @@ File
     :toctree: generated/
 
     pathclean
-
-.. rst-class:: small
-
-.. note::
-
-   ``read_topspin`` requires the official ``spectrochempy[nmr]`` plugin
-   (i.e. ``pip install spectrochempy[nmr]``).
