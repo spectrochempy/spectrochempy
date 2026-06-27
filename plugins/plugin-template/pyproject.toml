@@ -17,8 +17,9 @@ dependencies = [
     "spectrochempy>=0.9,<0.11",
 ]
 
-[project.entry-points."spectrochempy.plugins"]
-myplugin = "plugin_name:MyPlugin"
+# Uncomment and adjust when scaffolding a new plugin:
+# [project.entry-points."spectrochempy.plugins"]
+# myplugin = "plugin_name:MyPlugin"
 
 [tool.setuptools.packages.find]
 where = ["src"]
