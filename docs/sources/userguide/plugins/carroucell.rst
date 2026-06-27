@@ -28,14 +28,14 @@ Use the recommended namespaced API:
 
     import spectrochempy as scp
 
-    dataset = scp.carroucell.read_carroucell("path/to/carroucell-directory")
+    dataset = scp.carroucell.read("path/to/carroucell-directory")
 
 Compatibility aliases
 =====================
 
-The short namespaced alias ``scp.carroucell.read(...)`` is also available, but
-the explicit ``scp.carroucell.read_carroucell(...)`` form is clearer in
-documentation and examples.
+The explicit historical alias ``scp.carroucell.read_carroucell(...)`` remains
+available, but new documentation and examples should prefer the shorter
+``scp.carroucell.read(...)`` form.
 
 API Reference
 =============
@@ -44,7 +44,7 @@ API Reference
     :nosignatures:
     :toctree: generated/
 
-    spectrochempy.carroucell.read_carroucell
+    spectrochempy.carroucell.read
 
 Examples
 ========
