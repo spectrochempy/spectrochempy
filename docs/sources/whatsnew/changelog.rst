@@ -19,6 +19,12 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- SpectroChemPy now exposes direct top-level helpers for the built-in 1D line
+  shapes: ``scp.gaussian(...)``, ``scp.lorentzian(...)``, ``scp.voigt(...)``,
+  ``scp.asymmetricvoigt(...)``, and ``scp.sigmoid(...)``. This makes it easier
+  to build synthetic profiles directly from the public API, including in
+  gallery and notebook workflows. (#1301)
+
 - ``scp.concatenate(..., axis=1)`` now supports promoting 1D datasets into
   column-wise 2D `NDDataset` results. This makes it easier to assemble profile
   or concentration matrices directly within the SpectroChemPy API.
