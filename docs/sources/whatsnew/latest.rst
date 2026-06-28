@@ -12,6 +12,24 @@ What's New in Revision 0.10.3.dev
 These are the changes in SpectroChemPy-0.10.3.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
 
+New Features
+~~~~~~~~~~~~
+
+- Reading multi-object files (MATLAB ``.mat``, multi-subfile SPC, ZIP
+  archives) now returns a list with convenience methods for selecting
+  the dataset you need. After ``datasets = scp.read(...)``:
+
+  - ``datasets.select_largest(ndim=2)`` picks the biggest 2D dataset.
+  - ``datasets.select_by_name("spectra")`` picks the first dataset whose
+    name contains the given word.
+  - ``datasets.filter_by_ndim(2)`` keeps only 2D datasets.
+  - ``datasets.filter_by_shape((80, 700))`` keeps only datasets of that
+    exact shape.
+  - ``datasets.names`` lists all dataset names at a glance.
+
+  This makes it much easier to work with files that contain multiple
+  variables or spectra. (#1306)
+
 Bug Fixes
 ~~~~~~~~~
 
