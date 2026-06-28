@@ -19,6 +19,10 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- ``scp.concatenate(..., axis=1)`` now supports promoting 1D datasets into
+  column-wise 2D `NDDataset` results. This makes it easier to assemble profile
+  or concentration matrices directly within the SpectroChemPy API.
+
 - ``scp.stack(..., axis=1)`` now supports stacking 1D datasets as columns
   into a 2D `NDDataset`. This makes it easier to build workflow-style
   concentration or profile matrices without falling back to

@@ -54,6 +54,9 @@ def concatenate(*datasets, **kwargs):
     axis : int, optional
         The axis along which the operation is applied.
 
+        For 1D datasets, ``axis=1`` promotes inputs to a 2D dataset and
+        concatenates them as columns.
+
     See Also
     --------
     stack : Stack of `NDDataset` objects along a new dimension.
@@ -84,6 +87,9 @@ def concatenate(*datasets, **kwargs):
 
     # get a copy of input datasets in order that input data are not modified
     datasets = _get_copy(datasets)
+
+    if _should_promote_1d_column_concatenation(datasets, kwargs):
+        return _stack_1d_profiles_as_columns(datasets)
 
     # get axis from arguments
     axis, dim = datasets[0].get_axis(**kwargs)
@@ -308,6 +314,23 @@ def _stack_1d_profiles_as_columns(datasets):
         promoted.append(dataset)
 
     return concatenate(*promoted, dims=newdim)
+
+
+def _should_promote_1d_column_concatenation(datasets, kwargs):
+    if not datasets:
+        return False
+    if any(ds.ndim != 1 for ds in datasets):
+        return False
+
+    axis = kwargs.get("axis")
+    dims = kwargs.get("dims")
+    dim = kwargs.get("dim")
+
+    if axis in (1, -1):
+        return True
+    if dims == 1 or dim == 1:
+        return True
+    return False
 
 
 # utility functions
