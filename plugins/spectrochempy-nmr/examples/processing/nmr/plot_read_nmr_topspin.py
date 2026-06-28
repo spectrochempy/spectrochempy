@@ -20,10 +20,11 @@ Install with: ``pip install spectrochempy[nmr]``.
 import spectrochempy as scp
 
 # %%
-# ``read_topspin`` is registered under the ``scp.nmr`` plugin namespace.
-# The top-level ``scp.read_topspin`` alias is kept for compatibility.
+# The recommended public reader lives under the ``scp.nmr`` plugin namespace.
+# The longer ``scp.nmr.read_topspin`` and top-level ``scp.read_topspin`` forms
+# remain available for compatibility.
 
-ds = scp.nmr.read_topspin(
+ds = scp.nmr.read(
     scp.preferences.datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_1d",
     expno=1,
     remove_digital_filter=True,

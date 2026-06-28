@@ -361,7 +361,7 @@ def read_perkinelmer(*paths, **kwargs):
 
     Examples
     --------
-    >>> ds = scp.read_perkinelmer("irdata/perkinelmer/spectra.sp")
+    >>> ds = scp.perkinelmer.read("irdata/perkinelmer/spectra.sp")
     NDDataset: [float64] a.u. (shape: (y:1, x:3301))
 
     """

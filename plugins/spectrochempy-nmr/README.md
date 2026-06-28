@@ -4,7 +4,7 @@ NMR plugin for SpectroChemPy.
 
 This package is the home for NMR-specific readers and tools that are useful in
 SpectroChemPy but should not live in the core package. It currently contributes
-the Bruker TopSpin reader, exposed as `scp.nmr.read_topspin(...)` and registered
+the Bruker TopSpin reader, exposed through `scp.nmr.read(...)` and registered
 under the reader name `topspin`.
 
 Future NMR readers or processing helpers can be added here without creating a
@@ -28,9 +28,9 @@ pip install -e plugins/spectrochempy-nmr
 ```python
 import spectrochempy as scp
 
-dataset = scp.nmr.read_topspin("path/to/1/fid")
-dataset = scp.nmr.read_topspin("path/to/2rr")
-dataset = scp.nmr.read_topspin("path/to/experiment", expno=1, procno=1)
+dataset = scp.nmr.read("path/to/1/fid")
+dataset = scp.nmr.read("path/to/2rr")
+dataset = scp.nmr.read("path/to/experiment", expno=1, procno=1)
 ```
 
 The NMR ppm/frequency unit context is also provided by this plugin:
@@ -41,8 +41,9 @@ from spectrochempy_nmr.units import set_nmr_context
 set_nmr_context(104.3 * scp.ur.MHz)
 ```
 
-The legacy alias `scp.read_topspin(...)` is kept for compatibility. TopSpin is
-a reader, so it is not exposed as `dataset.read_topspin(...)` or
+The compatibility aliases `scp.nmr.read_topspin(...)` and
+`scp.read_topspin(...)` are kept for historical usage. TopSpin is a reader, so
+it is not exposed as `dataset.read_topspin(...)` or
 `dataset.nmr.read_topspin(...)`.
 
 ## Development

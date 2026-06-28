@@ -73,7 +73,7 @@ def read_carroucell(directory=None, **kwargs):
 
     Examples
     --------
-    >>> scp.carroucell.read_carroucell("irdata/carroucell_samp")
+    >>> scp.carroucell.read("irdata/carroucell_samp")
     no temperature file
     [NDDataset: [float64] a.u. (shape: (y:6, x:11098)), NDDataset: ...
 

@@ -137,21 +137,20 @@ def read_omnic(*paths, **kwargs):
     See Also
     --------
     read : Generic reader inferring protocol from the filename extension.
-    read_zip : Read Zip archives (containing spectrochempy readable files)
-    read_dir : Read an entire directory.
-    read_opus : Read OPUS spectra.
-    read_labspec : Read Raman LABSPEC spectra (:file:`.txt`).
-    read_omnic : Read Omnic spectra (:file:`.spa`, :file:`.spg`, :file:`.srs`).
-    read_soc : Read Surface Optics Corp. files (:file:`.ddr`, :file:`.hdr`, or :file:`.sdr`).
-    read_galactic : Read Galactic files (:file:`.spc`).
-    read_quadera : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
-
-    read_csv : Read CSV files (:file:`.csv`).
-    read_matlab : Read Matlab files (:file:`.mat`, :file:`.dso`).
-    read_wire : Read Renishaw Wire files (:file:`.wdf`).
-    read_spg : Alias of `read_omnic`.
-    read_spa : Alias of `read_omnic`.
-    read_srs : Alias of `read_omnic`.
+    :func:`spectrochempy.read_zip` : Read Zip archives (containing spectrochempy readable files)
+    :func:`spectrochempy.read_dir` : Read an entire directory.
+    :func:`spectrochempy.read_opus` : Read OPUS spectra.
+    :func:`spectrochempy.read_labspec` : Read Raman LABSPEC spectra (:file:`.txt`).
+    :func:`spectrochempy.read_omnic` : Read Omnic spectra (:file:`.spa`, :file:`.spg`, :file:`.srs`).
+    :func:`spectrochempy.read_soc` : Read Surface Optics Corp. files (:file:`.ddr`, :file:`.hdr`, or :file:`.sdr`).
+    :func:`spectrochempy.read_spc` : Read Galactic files (:file:`.spc`).
+    :func:`spectrochempy.read_quadera` : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
+    :func:`spectrochempy.read_csv` : Read CSV files (:file:`.csv`).
+    :func:`spectrochempy.read_matlab` : Read Matlab files (:file:`.mat`, :file:`.dso`).
+    :func:`spectrochempy.read_wire` : Read Renishaw Wire files (:file:`.wdf`).
+    :func:`spectrochempy.read_spg` : Alias of `read_omnic`.
+    :func:`spectrochempy.read_spa` : Alias of `read_omnic`.
+    :func:`spectrochempy.read_srs` : Alias of `read_omnic`.
 
     Examples
     --------
@@ -321,18 +320,17 @@ def read_spg(*paths, **kwargs):
     read_spa : Read single Omnic spectra.
     read_srs : Read series Omnic spectra.
     read : Generic reader inferring protocol from the filename extension.
-    read_zip : Read Zip archives (containing spectrochempy readable files)
-    read_dir : Read an entire directory.
-    read_opus : Read OPUS spectra.
-    read_labspec : Read Raman LABSPEC spectra (:file:`.txt`).
-    read_omnic : Read Omnic spectra (:file:`.spa`, :file:`.spg`, :file:`.srs`).
-    read_soc : Read Surface Optics Corp. files (:file:`.ddr`, :file:`.hdr`, or :file:`.sdr`).
-    read_galactic : Read Galactic files (:file:`.spc`).
-    read_quadera : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
-
-    read_csv : Read CSV files (:file:`.csv`).
-    read_matlab : Read Matlab files (:file:`.mat`, :file:`.dso`).
-    read_wire : Read Renishaw Wire files (:file:`.wdf`).
+    :func:`spectrochempy.read_zip` : Read Zip archives (containing spectrochempy readable files)
+    :func:`spectrochempy.read_dir` : Read an entire directory.
+    :func:`spectrochempy.read_opus` : Read OPUS spectra.
+    :func:`spectrochempy.read_labspec` : Read Raman LABSPEC spectra (:file:`.txt`).
+    :func:`spectrochempy.read_omnic` : Read Omnic spectra (:file:`.spa`, :file:`.spg`, :file:`.srs`).
+    :func:`spectrochempy.read_soc` : Read Surface Optics Corp. files (:file:`.ddr`, :file:`.hdr`, or :file:`.sdr`).
+    :func:`spectrochempy.read_spc` : Read Galactic files (:file:`.spc`).
+    :func:`spectrochempy.read_quadera` : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
+    :func:`spectrochempy.read_csv` : Read CSV files (:file:`.csv`).
+    :func:`spectrochempy.read_matlab` : Read Matlab files (:file:`.mat`, :file:`.dso`).
+    :func:`spectrochempy.read_wire` : Read Renishaw Wire files (:file:`.wdf`).
 
     Notes
     -----
@@ -434,18 +432,17 @@ def read_spa(*paths, **kwargs):
     See Also
     --------
     read : Generic reader inferring protocol from the filename extension.
-    read_zip : Read Zip archives (containing spectrochempy readable files)
-    read_dir : Read an entire directory.
-    read_opus : Read OPUS spectra.
-    read_labspec : Read Raman LABSPEC spectra (:file:`.txt`).
-    read_omnic : Read Omnic spectra (:file:`.spa`, :file:`.spg`, :file:`.srs`).
-    read_soc : Read Surface Optics Corp. files (:file:`.ddr`, :file:`.hdr`, or :file:`.sdr`).
-    read_galactic : Read Galactic files (:file:`.spc`).
-    read_quadera : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
-
-    read_csv : Read CSV files (:file:`.csv`).
-    read_matlab : Read Matlab files (:file:`.mat`, :file:`.dso`).
-    read_wire : Read Renishaw Wire files (:file:`.wdf`).
+    :func:`spectrochempy.read_zip` : Read Zip archives (containing spectrochempy readable files)
+    :func:`spectrochempy.read_dir` : Read an entire directory.
+    :func:`spectrochempy.read_opus` : Read OPUS spectra.
+    :func:`spectrochempy.read_labspec` : Read Raman LABSPEC spectra (:file:`.txt`).
+    :func:`spectrochempy.read_omnic` : Read Omnic spectra (:file:`.spa`, :file:`.spg`, :file:`.srs`).
+    :func:`spectrochempy.read_soc` : Read Surface Optics Corp. files (:file:`.ddr`, :file:`.hdr`, or :file:`.sdr`).
+    :func:`spectrochempy.read_spc` : Read Galactic files (:file:`.spc`).
+    :func:`spectrochempy.read_quadera` : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
+    :func:`spectrochempy.read_csv` : Read CSV files (:file:`.csv`).
+    :func:`spectrochempy.read_matlab` : Read Matlab files (:file:`.mat`, :file:`.dso`).
+    :func:`spectrochempy.read_wire` : Read Renishaw Wire files (:file:`.wdf`).
 
     Notes
     -----
@@ -557,18 +554,17 @@ def read_srs(*paths, **kwargs):
     See Also
     --------
     read : Generic reader inferring protocol from the filename extension.
-    read_zip : Read Zip archives (containing spectrochempy readable files)
-    read_dir : Read an entire directory.
-    read_opus : Read OPUS spectra.
-    read_labspec : Read Raman LABSPEC spectra (:file:`.txt`).
-    read_omnic : Read Omnic spectra (:file:`.spa`, :file:`.spg`, :file:`.srs`).
-    read_soc : Read Surface Optics Corp. files (:file:`.ddr`, :file:`.hdr`, or :file:`.sdr`).
-    read_galactic : Read Galactic files (:file:`.spc`).
-    read_quadera : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
-
-    read_csv : Read CSV files (:file:`.csv`).
-    read_matlab : Read Matlab files (:file:`.mat`, :file:`.dso`).
-    read_wire : Read Renishaw Wire files (:file:`.wdf`).
+    :func:`spectrochempy.read_zip` : Read Zip archives (containing spectrochempy readable files)
+    :func:`spectrochempy.read_dir` : Read an entire directory.
+    :func:`spectrochempy.read_opus` : Read OPUS spectra.
+    :func:`spectrochempy.read_labspec` : Read Raman LABSPEC spectra (:file:`.txt`).
+    :func:`spectrochempy.read_omnic` : Read Omnic spectra (:file:`.spa`, :file:`.spg`, :file:`.srs`).
+    :func:`spectrochempy.read_soc` : Read Surface Optics Corp. files (:file:`.ddr`, :file:`.hdr`, or :file:`.sdr`).
+    :func:`spectrochempy.read_spc` : Read Galactic files (:file:`.spc`).
+    :func:`spectrochempy.read_quadera` : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
+    :func:`spectrochempy.read_csv` : Read CSV files (:file:`.csv`).
+    :func:`spectrochempy.read_matlab` : Read Matlab files (:file:`.mat`, :file:`.dso`).
+    :func:`spectrochempy.read_wire` : Read Renishaw Wire files (:file:`.wdf`).
 
     Notes
     -----

@@ -28,7 +28,7 @@ path = datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_1d"
 # %%
 # load the data in a new dataset
 
-ndd = scp.nmr.read_topspin(path, expno=1, remove_digital_filter=True)
+ndd = scp.nmr.read(path, expno=1, remove_digital_filter=True)
 
 # %%
 # view it...
@@ -39,7 +39,7 @@ _ = ndd.plot()
 # Now load a 2D  dataset
 
 path = datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_2d"
-ndd = scp.nmr.read_topspin(path, expno=1, remove_digital_filter=True)
+ndd = scp.nmr.read(path, expno=1, remove_digital_filter=True)
 _ = ndd.plot()
 
 # %%

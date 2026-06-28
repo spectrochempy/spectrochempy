@@ -3,7 +3,7 @@
 Carroucell experiment reader for SpectroChemPy.
 
 Provides a reader for Carroucell multi-experiment data files generated
-by the LCS laboratory instrument, exposed under the `scp` namespace.
+by the LCS laboratory instrument, exposed under the `scp.carroucell` namespace.
 
 ## Installation
 
@@ -16,10 +16,11 @@ pip install spectrochempy[carroucell]
 ```python
 import spectrochempy as scp
 
-dataset = scp.read_carroucell("path/to/data.carroucell")
+dataset = scp.carroucell.read("path/to/data.carroucell")
 ```
 
-This plugin requires SpectroChemPy.
+The compatibility alias `scp.read_carroucell(...)` is kept for historical
+usage.
 
 ## Development
 

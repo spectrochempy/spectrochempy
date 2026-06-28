@@ -26,7 +26,7 @@ import spectrochempy as scp
 datadir = scp.preferences.datadir
 nmrdir = datadir / "nmrdata"
 
-dataset = scp.nmr.read_topspin(
+dataset = scp.nmr.read(
     nmrdir / "bruker" / "tests" / "nmr" / "topspin_2d" / "1" / "pdata" / "1" / "2rr"
 )
 
