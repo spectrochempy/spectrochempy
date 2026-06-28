@@ -1,5 +1,4 @@
 import numpy as np
-import pytest
 
 import spectrochempy as scp
 from spectrochempy.core.dataset.nddataset import NDDataset
@@ -22,8 +21,8 @@ class TestWorkflowMathBaseline:
     - unary NumPy ufuncs like ``np.exp`` dispatch to ``NDDataset``;
     - SpectroChemPy does not expose a matching top-level ``scp.exp`` alias;
     - a native ``scp.stack(..., axis=1)`` path now exists for 1D profiles;
-    - ``scp.concatenate(..., axis=1)`` still does not provide the same
-      promotion behavior.
+    - ``scp.concatenate(..., axis=1)`` now provides the same narrow promotion
+      behavior for 1D profiles.
     """
 
     def test_numpy_exp_dispatches_to_nddataset(self):
@@ -60,8 +59,13 @@ class TestWorkflowMathBaseline:
         assert result.y.labels is not None
         assert len(result.y.labels) == 3
 
-    def test_concatenate_1d_profiles_axis_1_raises_index_error(self):
+    def test_concatenate_1d_profiles_axis_1_returns_2d_dataset(self):
         _, profiles = _gaussian_profiles()
 
-        with pytest.raises(IndexError, match="list index out of range"):
-            scp.concatenate(*profiles, axis=1)
+        result = scp.concatenate(*profiles, axis=1)
+
+        assert isinstance(result, NDDataset)
+        assert result.shape == (5, 3)
+        assert result.dims == ["x", "y"]
+        assert result.y.labels is not None
+        assert len(result.y.labels) == 3
