@@ -378,6 +378,11 @@ class ScpObjectList(list):
         ------
         ValueError
             If the list is empty or no matching dataset is found.
+
+        Examples
+        --------
+        >>> datasets = scp.read_matlab("data.mat", merge=False)
+        >>> X = datasets.select_largest(ndim=2)  # biggest 2D dataset
         """
         if not self:
             raise ValueError("ScpObjectList is empty")
@@ -406,6 +411,11 @@ class ScpObjectList(list):
         ------
         ValueError
             If no matching dataset is found.
+
+        Examples
+        --------
+        >>> datasets = scp.read_matlab("data.mat", merge=False)
+        >>> C = datasets.select_by_name("conc")  # concentration profile
         """
         name_lower = name.lower()
         for ds in self:

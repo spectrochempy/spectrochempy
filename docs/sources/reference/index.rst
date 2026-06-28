@@ -762,6 +762,15 @@ Misc
 
     show_versions
 
+Multi-object files
+==================
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    ScpObjectList
+
 File
 ====
 
