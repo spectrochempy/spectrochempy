@@ -45,9 +45,9 @@ _ = profiles.plot(legend=profiles.y.labels, colormap=None)
 # that reads more naturally for the problem at hand.
 profiles_gaussian = scp.stack(
     [
-        scp.gaussian(time, ampl=1.0, pos=0.25, width=0.235),
-        scp.gaussian(time, ampl=0.8, pos=0.55, width=0.282),
-        scp.gaussian(time, ampl=0.6, pos=0.82, width=0.188),
+        scp.gaussian(time, ampl=1.0, pos=0.25, width=0.235, normalized=False),
+        scp.gaussian(time, ampl=0.8, pos=0.55, width=0.282, normalized=False),
+        scp.gaussian(time, ampl=0.6, pos=0.82, width=0.188, normalized=False),
     ],
     axis=1,
 )

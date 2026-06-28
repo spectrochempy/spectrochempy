@@ -15,6 +15,15 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 New Features
 ~~~~~~~~~~~~
 
+- The top-level line-shape helpers ``scp.gaussian(...)``,
+  ``scp.lorentzian(...)``, ``scp.voigt(...)``, and
+  ``scp.asymmetricvoigt(...)`` now accept a ``normalized`` keyword
+  argument.  ``normalized=True`` (default) preserves the existing
+  area-normalized behaviour.  ``normalized=False`` returns a profile
+  whose peak amplitude is exactly *ampl*, matching the intuitive
+  ``scp.exp(...)`` workflow for building synthetic profiles.
+  ``scp.sigmoid(...)`` is unaffected. (#1313)
+
 - SpectroChemPy now exposes direct top-level helpers for the built-in 1D line
   shapes: ``scp.gaussian(...)``, ``scp.lorentzian(...)``, ``scp.voigt(...)``,
   ``scp.asymmetricvoigt(...)``, and ``scp.sigmoid(...)``. This makes it easier
