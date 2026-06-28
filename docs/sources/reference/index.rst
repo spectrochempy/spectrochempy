@@ -706,10 +706,15 @@ Lineshape models
     :nosignatures:
     :toctree: generated/
 
+    gaussian
     gaussianmodel
+    lorentzian
     lorentzianmodel
+    voigt
     voigtmodel
+    asymmetricvoigt
     asymmetricvoigtmodel
+    sigmoid
     sigmoidmodel
     polynomialbaseline
 

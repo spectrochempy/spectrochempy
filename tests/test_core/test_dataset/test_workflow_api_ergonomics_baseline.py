@@ -7,7 +7,9 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 def _gaussian_profiles():
     time = scp.linspace(0.0, 1.0, 5)
     centers = (0.2, 0.5, 0.8)
-    profiles = [np.exp(-((time - center) ** 2) / 0.05) for center in centers]
+    profiles = [
+        scp.gaussian(time, ampl=1.0, pos=center, width=0.18) for center in centers
+    ]
     return time, profiles
 
 
@@ -20,6 +22,8 @@ class TestWorkflowMathBaseline:
 
     - unary NumPy ufuncs like ``np.exp`` dispatch to ``NDDataset``;
     - SpectroChemPy does not expose a matching top-level ``scp.exp`` alias;
+    - SpectroChemPy now exposes top-level line-shape helpers like
+      ``scp.gaussian`` for common synthetic profiles;
     - a native ``scp.stack(..., axis=1)`` path now exists for 1D profiles;
     - ``scp.concatenate(..., axis=1)`` now provides the same narrow promotion
       behavior for 1D profiles.
@@ -39,6 +43,16 @@ class TestWorkflowMathBaseline:
 
     def test_top_level_scp_exp_is_not_exposed(self):
         assert not hasattr(scp, "exp")
+
+    def test_top_level_scp_gaussian_returns_nddataset(self):
+        time = scp.linspace(0.0, 1.0, 5)
+
+        result = scp.gaussian(time, ampl=1.0, pos=0.5, width=0.18)
+
+        assert isinstance(result, NDDataset)
+        assert result.shape == (5,)
+        assert result.dims == ["x"]
+        assert result.name == "gaussian"
 
     def test_numpy_column_stack_returns_plain_ndarray(self):
         _, profiles = _gaussian_profiles()

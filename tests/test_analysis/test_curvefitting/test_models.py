@@ -50,6 +50,20 @@ _MODELS = [
     pytest.param("sigmoidmodel", ["ampl", "pos", "asym"], 50, id="sigmoid"),
 ]
 
+_HELPERS = [
+    pytest.param("gaussian", dict(ampl=1.0, pos=0.5, width=0.1), id="gaussian"),
+    pytest.param("lorentzian", dict(ampl=1.0, pos=0.5, width=0.1), id="lorentzian"),
+    pytest.param(
+        "voigt", dict(ampl=1.0, pos=0.5, width=0.1, ratio=0.5), id="voigt"
+    ),
+    pytest.param(
+        "asymmetricvoigt",
+        dict(ampl=1.0, pos=0.5, width=0.1, ratio=0.5, asym=0.2),
+        id="asymmetric_voigt",
+    ),
+    pytest.param("sigmoid", dict(ampl=1.0, pos=0.5, asym=2.0), id="sigmoid"),
+]
+
 
 def _full_kwargs():
     """Return the kwargs dict used for centre-value regression tests."""
@@ -237,3 +251,31 @@ class TestNumericalValues:
         result = model.f(x, **kwargs)
         actual = result[0.5].value * 100
         assert_approx_equal(actual.m, expected, significant=4)
+
+
+class TestConvenienceHelpers:
+    """Top-level shape helpers should expose the built-in 1D models."""
+
+    @pytest.mark.parametrize("name, kwargs", _HELPERS)
+    def test_helper_returns_nddataset_for_coord(self, name, kwargs):
+        x = scp.Coord.linspace(0, 1, 100, units="m")
+
+        result = getattr(scp, name)(x, **kwargs)
+
+        assert isinstance(result, scp.NDDataset)
+        assert result.shape == (100,)
+        assert result.dims == ["x"]
+        assert result.name == name
+        assert result.title == "intensity"
+        assert result.x.units == ur("m")
+        assert np.all(np.isfinite(result.data))
+
+    @pytest.mark.parametrize("name, kwargs", _HELPERS)
+    def test_helper_returns_ndarray_for_numpy_input(self, name, kwargs):
+        x = np.linspace(0, 1, 100)
+
+        result = getattr(scp, name)(x, **kwargs)
+
+        assert isinstance(result, np.ndarray)
+        assert result.shape == (100,)
+        assert np.all(np.isfinite(result))
