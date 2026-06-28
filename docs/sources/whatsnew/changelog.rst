@@ -19,6 +19,11 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- ``scp.stack(..., axis=1)`` now supports stacking 1D datasets as columns
+  into a 2D `NDDataset`. This makes it easier to build workflow-style
+  concentration or profile matrices without falling back to
+  ``np.column_stack(...)`` followed by a manual `NDDataset` wrapper.
+
 - Reading multi-object files (MATLAB ``.mat``, multi-subfile SPC, ZIP
   archives) now returns a list with convenience methods for selecting
   the dataset you need. After ``datasets = scp.read(...)``:

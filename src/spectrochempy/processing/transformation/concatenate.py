@@ -188,7 +188,7 @@ def concatenate(*datasets, **kwargs):
     return out
 
 
-def stack(*datasets):
+def stack(*datasets, **kwargs):
     """
     Stack of `NDDataset` objects along a new dimension.
 
@@ -203,6 +203,18 @@ def stack(*datasets):
     ----------
     *datasets : a series of `NDDataset`
         The dataset to be stacked to the current dataset.
+    **kwargs
+        Optional keyword parameters.
+
+    Other Parameters
+    ----------------
+    axis : int, optional, default=0
+        Stacking axis.
+
+        - ``axis=0`` preserves the historical behavior and stacks datasets
+          along a new leading dimension.
+        - ``axis=1`` is supported for 1D datasets and promotes them to a 2D
+          dataset with profiles stacked as columns.
 
     Returns
     -------
@@ -221,8 +233,25 @@ def stack(*datasets):
     >>> print(C)
     NDDataset: [float64] a.u. (shape: (z:2, y:55, x:5549))
 
+    Stack 1D profiles as columns in a 2D dataset
+
+    >>> t = scp.linspace(0, 1, 5)
+    >>> profiles = [np.exp(-((t - c) ** 2) / 0.05) for c in (0.2, 0.5)]
+    >>> C = scp.stack(profiles, axis=1)
+    >>> C.shape
+    (5, 2)
+
     """
     datasets = _get_copy(datasets)
+    axis = kwargs.pop("axis", 0)
+    if kwargs:
+        unexpected = ", ".join(sorted(kwargs))
+        raise TypeError(f"stack() got unexpected keyword argument(s): {unexpected}")
+
+    if axis in (1, -1):
+        return _stack_1d_profiles_as_columns(datasets)
+    if axis not in (0, None):
+        raise NotImplementedError("stack() currently supports only axis=0 or axis=1")
 
     shapes = {ds.shape for ds in datasets}
     if len(shapes) != 1:
@@ -240,6 +269,45 @@ def stack(*datasets):
         dataset.dims = [newcoord.name] + dataset.dims
 
     return concatenate(*datasets, dims=0)
+
+
+def _stack_1d_profiles_as_columns(datasets):
+    if not datasets:
+        raise ValueError("stack() requires at least one dataset")
+
+    shapes = {ds.shape for ds in datasets}
+    if len(shapes) != 1:
+        raise exceptions.DimensionsCompatibilityError(
+            "all input arrays must have the same shape",
+        )
+
+    ndim = {ds.ndim for ds in datasets}
+    if ndim != {1}:
+        raise NotImplementedError(
+            "stack(axis=1) is currently implemented only for 1D datasets",
+        )
+
+    source_dims = {ds.dims[0] for ds in datasets}
+    if len(source_dims) != 1:
+        raise exceptions.DimensionsCompatibilityError(
+            "all input 1D datasets must use the same dimension name",
+        )
+
+    promoted = []
+    source_dim = datasets[0].dims[0]
+    for i, dataset in enumerate(datasets):
+        xcoord = dataset.coord(source_dim)
+        newdim = (OrderedSet(DEFAULT_DIM_NAME) - dataset._dims).pop()
+        masked = dataset.masked_data
+        dataset._data = np.asarray(masked)[:, np.newaxis]
+        dataset._mask = np.ma.getmaskarray(masked)[:, np.newaxis]
+        dataset.dims = [source_dim, newdim]
+        column_coord = Coord([i], labels=[dataset.name])
+        column_coord.name = newdim
+        dataset.set_coordset({source_dim: xcoord, newdim: column_coord})
+        promoted.append(dataset)
+
+    return concatenate(*promoted, dims=newdim)
 
 
 # utility functions
