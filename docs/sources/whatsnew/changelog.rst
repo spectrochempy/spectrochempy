@@ -28,6 +28,15 @@ New Features
   ``scp.exp(...)``, ``scp.log(...)``, ``scp.log10(...)``, ``scp.sin(...)``,
   and ``scp.cos(...)``. (#1301)
 
+- The top-level line-shape helpers ``scp.gaussian(...)``,
+  ``scp.lorentzian(...)``, ``scp.voigt(...)``, and
+  ``scp.asymmetricvoigt(...)`` now accept a ``normalized`` keyword
+  argument.  ``normalized=True`` (default) preserves the existing
+  area-normalized behaviour.  ``normalized=False`` returns a profile
+  whose peak amplitude is exactly *ampl*, matching the intuitive
+  ``scp.exp(...)`` workflow for building synthetic profiles.
+  ``scp.sigmoid(...)`` is unaffected. (#1314)
+
 - ``scp.concatenate(..., axis=1)`` now supports promoting 1D datasets into
   column-wise 2D `NDDataset` results. This makes it easier to assemble profile
   or concentration matrices directly within the SpectroChemPy API.

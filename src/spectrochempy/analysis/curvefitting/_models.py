@@ -73,7 +73,8 @@ def make_units_compatibility(func):
             ampl_units = newargs[0].units
             newargs[0] = newargs[0].m
 
-        _data = func(cls, x, *newargs)
+        extra_kwargs = {k: v for k, v in kwargs.items() if k not in cls.args}
+        _data = func(cls, x, *newargs, **extra_kwargs)
 
         if returntype == "NDDataset":
             res = NDDataset(_data, units=ampl_units)
@@ -105,15 +106,64 @@ def _evaluate_model(model, x, name=None, **kwargs):
     return result
 
 
-def gaussian(x, ampl=1.0, pos=0.0, width=1.0, **kwargs):
-    """Return a normalized Gaussian profile."""
+def gaussian(x, ampl=1.0, pos=0.0, width=1.0, normalized=True, **kwargs):
+    """
+    Return a Gaussian profile.
+
+    Parameters
+    ----------
+    x : array-like or Coord
+        Abscissa values.
+    ampl : float, optional
+        Amplitude. When *normalized* is ``True`` (default) this scales the
+        area under the curve. When *normalized* is ``False`` this is the peak
+        height.
+    pos : float, optional
+        Position of the peak centre.
+    width : float, optional
+        Full width at half maximum (FWHM).
+    normalized : bool, optional
+        If ``True`` (default) the profile is normalized so that its integral
+        is approximately *ampl*. If ``False`` the peak value is exactly
+        *ampl*.
+    **kwargs
+        Additional keyword arguments forwarded to the model evaluator.
+    """
     return _evaluate_model(
-        gaussianmodel, x, name="gaussian", ampl=ampl, pos=pos, width=width, **kwargs
+        gaussianmodel,
+        x,
+        name="gaussian",
+        ampl=ampl,
+        pos=pos,
+        width=width,
+        normalized=normalized,
+        **kwargs,
     )
 
 
-def lorentzian(x, ampl=1.0, pos=0.0, width=1.0, **kwargs):
-    """Return a Lorentzian profile."""
+def lorentzian(x, ampl=1.0, pos=0.0, width=1.0, normalized=True, **kwargs):
+    """
+    Return a Lorentzian profile.
+
+    Parameters
+    ----------
+    x : array-like or Coord
+        Abscissa values.
+    ampl : float, optional
+        Amplitude. When *normalized* is ``True`` (default) this scales the
+        area under the curve. When *normalized* is ``False`` this is the peak
+        height.
+    pos : float, optional
+        Position of the peak centre.
+    width : float, optional
+        Full width at half maximum (FWHM).
+    normalized : bool, optional
+        If ``True`` (default) the profile is normalized so that its integral
+        is approximately *ampl*. If ``False`` the peak value is exactly
+        *ampl*.
+    **kwargs
+        Additional keyword arguments forwarded to the model evaluator.
+    """
     return _evaluate_model(
         lorentzianmodel,
         x,
@@ -121,12 +171,37 @@ def lorentzian(x, ampl=1.0, pos=0.0, width=1.0, **kwargs):
         ampl=ampl,
         pos=pos,
         width=width,
+        normalized=normalized,
         **kwargs,
     )
 
 
-def voigt(x, ampl=1.0, pos=0.0, width=1.0, ratio=0.5, **kwargs):
-    """Return a Voigt profile."""
+def voigt(x, ampl=1.0, pos=0.0, width=1.0, ratio=0.5, normalized=True, **kwargs):
+    """
+    Return a Voigt profile.
+
+    Parameters
+    ----------
+    x : array-like or Coord
+        Abscissa values.
+    ampl : float, optional
+        Amplitude. When *normalized* is ``True`` (default) this scales the
+        area under the curve. When *normalized* is ``False`` this is the peak
+        height.
+    pos : float, optional
+        Position of the peak centre.
+    width : float, optional
+        Full width at half maximum (FWHM).
+    ratio : float, optional
+        Ratio of Gaussian to Lorentzian character (0 = pure Lorentzian,
+        1 = pure Gaussian).
+    normalized : bool, optional
+        If ``True`` (default) the profile is normalized so that its integral
+        is approximately *ampl*. If ``False`` the peak value is exactly
+        *ampl*.
+    **kwargs
+        Additional keyword arguments forwarded to the model evaluator.
+    """
     return _evaluate_model(
         voigtmodel,
         x,
@@ -135,12 +210,40 @@ def voigt(x, ampl=1.0, pos=0.0, width=1.0, ratio=0.5, **kwargs):
         pos=pos,
         width=width,
         ratio=ratio,
+        normalized=normalized,
         **kwargs,
     )
 
 
-def asymmetricvoigt(x, ampl=1.0, pos=0.0, width=1.0, ratio=0.5, asym=0.0, **kwargs):
-    """Return an asymmetric Voigt profile."""
+def asymmetricvoigt(
+    x, ampl=1.0, pos=0.0, width=1.0, ratio=0.5, asym=0.0, normalized=True, **kwargs
+):
+    """
+    Return an asymmetric Voigt profile.
+
+    Parameters
+    ----------
+    x : array-like or Coord
+        Abscissa values.
+    ampl : float, optional
+        Amplitude. When *normalized* is ``True`` (default) this scales the
+        area under the curve. When *normalized* is ``False`` this is the peak
+        height.
+    pos : float, optional
+        Position of the peak centre.
+    width : float, optional
+        Full width at half maximum (FWHM).
+    ratio : float, optional
+        Ratio of Gaussian to Lorentzian character.
+    asym : float, optional
+        Asymmetry parameter.
+    normalized : bool, optional
+        If ``True`` (default) the profile is normalized so that its integral
+        is approximately *ampl*. If ``False`` the peak value is exactly
+        *ampl*.
+    **kwargs
+        Additional keyword arguments forwarded to the model evaluator.
+    """
     return _evaluate_model(
         asymmetricvoigtmodel,
         x,
@@ -150,6 +253,7 @@ def asymmetricvoigt(x, ampl=1.0, pos=0.0, width=1.0, ratio=0.5, asym=0.0, **kwar
         width=width,
         ratio=ratio,
         asym=asym,
+        normalized=normalized,
         **kwargs,
     )
 
@@ -232,12 +336,18 @@ class polynomialbaseline:
 # ======================================================================================
 class gaussianmodel:
     r"""
-    Normalized 1D gaussian function.
+    1D Gaussian function.
+
+    When *normalized* is ``True`` (default) the function returns a normalized
+    profile whose integral is approximately *ampl*:
 
     .. math::
         f(x) = \frac{ampl}{\sqrt{2 \pi \sigma^2} } \exp({\frac{-(x-pos)^2}{2 \sigma^2}})
 
     where :math:`\sigma = \frac{width}{2.3548}` .
+
+    When *normalized* is ``False`` the peak height is exactly *ampl* and the
+    normalization factor is omitted.
     """
 
     type = "1D"
@@ -254,8 +364,12 @@ class gaussianmodel:
     def f(self, x, ampl, pos, width, **kwargs):
         gb = width / 2.3548
         tsq = (x - pos) * 2**-0.5 / gb
-        w = np.exp(-tsq * tsq) * (2 * np.pi) ** -0.5 / gb
-        w = w * abs(x[1] - x[0])
+        normalized = kwargs.get("normalized", True)
+        if normalized:
+            w = np.exp(-tsq * tsq) * (2 * np.pi) ** -0.5 / gb
+            w = w * abs(x[1] - x[0])
+        else:
+            w = np.exp(-tsq * tsq)
         return ampl * w
 
 
@@ -266,10 +380,16 @@ class lorentzianmodel:
     r"""
     A standard Lorentzian function (also known as the Cauchy distribution).
 
+    When *normalized* is ``True`` (default) the function returns a normalized
+    profile whose integral is approximately *ampl*:
+
     .. math::
         f(x) = \frac{ampl * \lambda}{\pi [(x-pos)^2+ \lambda^2]}
 
     where :math:`\lambda = \frac{width}{2}` .
+
+    When *normalized* is ``False`` the peak height is exactly *ampl* and the
+    normalization factor is omitted.
     """
 
     type = "1D"
@@ -286,7 +406,8 @@ class lorentzianmodel:
     def f(self, x, ampl, pos, width, **kargs):
         lb = width / 2.0
         w = lb / np.pi / (x * x - 2 * x * pos + pos * pos + lb * lb)
-        w = w * abs(x[1] - x[0])
+        normalized = kargs.get("normalized", True)
+        w = w * abs(x[1] - x[0]) if normalized else w * np.pi * lb
         return ampl * w
 
 
@@ -327,7 +448,7 @@ class voigtmodel:
 
     @staticmethod
     def f(x, ampl, pos, width, ratio, **kargs):
-        return asymmetricvoigtmodel().f(x, ampl, pos, width, ratio, asym=0.0)
+        return asymmetricvoigtmodel().f(x, ampl, pos, width, ratio, asym=0.0, **kargs)
 
 
 # ======================================================================================
@@ -338,6 +459,11 @@ class asymmetricvoigtmodel:
     An asymmetric Voigt model.
 
     A. L. Stancik and E. B. Brauns, Vibrational Spectroscopy, 2008, 47, 66-69.
+
+    When *normalized* is ``True`` (default) the function returns a normalized
+    profile whose integral is approximately *ampl*. When *normalized* is
+    ``False`` the peak height is exactly *ampl* and the normalization factor
+    is omitted.
     """
 
     type = "1D"
@@ -366,7 +492,13 @@ class asymmetricvoigtmodel:
             return lorentzianmodel().f(x, ampl, pos, lb * 2.0, **kargs)
         w = wofz(((x - pos) + 1.0j * lb) * 2**-0.5 / gb)
         w = w.real * (2.0 * np.pi) ** -0.5 / gb
-        w = w * abs(x[1] - x[0])
+        normalized = kargs.get("normalized", True)
+        if normalized:
+            w = w * abs(x[1] - x[0])
+        else:
+            peak = np.max(w)
+            if peak > 0:
+                w = w / peak
         return ampl * w
 
 

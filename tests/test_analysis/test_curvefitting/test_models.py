@@ -277,3 +277,66 @@ class TestConvenienceHelpers:
         assert isinstance(result, np.ndarray)
         assert result.shape == (100,)
         assert np.all(np.isfinite(result))
+
+
+class TestNormalizedFalse:
+    """normalized=False should make the peak amplitude equal to *ampl*."""
+
+    @pytest.mark.parametrize(
+        "helper,extra_kw",
+        [
+            pytest.param("gaussian", {}, id="gaussian"),
+            pytest.param("lorentzian", {}, id="lorentzian"),
+            pytest.param("voigt", {"ratio": 0.5}, id="voigt"),
+        ],
+    )
+    def test_peak_equals_ampl(self, helper, extra_kw):
+        x = np.linspace(-5, 5, 2000)
+        result = getattr(scp, helper)(
+            x, ampl=3.0, pos=0.0, width=1.0, normalized=False, **extra_kw
+        )
+        assert np.isclose(result.max(), 3.0, rtol=1e-2)
+
+    @pytest.mark.parametrize(
+        "helper,extra_kw",
+        [
+            pytest.param("gaussian", {}, id="gaussian"),
+            pytest.param("lorentzian", {}, id="lorentzian"),
+            pytest.param("voigt", {"ratio": 0.5}, id="voigt"),
+        ],
+    )
+    def test_peak_at_pos(self, helper, extra_kw):
+        x = np.linspace(-5, 5, 2000)
+        result = getattr(scp, helper)(
+            x, ampl=2.0, pos=1.5, width=1.0, normalized=False, **extra_kw
+        )
+        idx = np.argmin(np.abs(x - 1.5))
+        assert np.isclose(result[idx], 2.0, rtol=1e-2)
+
+    @pytest.mark.parametrize(
+        "helper,extra_kw",
+        [
+            pytest.param("gaussian", {}, id="gaussian"),
+            pytest.param("lorentzian", {}, id="lorentzian"),
+            pytest.param("voigt", {"ratio": 0.5}, id="voigt"),
+        ],
+    )
+    def test_normalized_true_is_default(self, helper, extra_kw):
+        x = np.linspace(-5, 5, 1000)
+        default = getattr(scp, helper)(x, ampl=1.0, pos=0.0, width=1.0, **extra_kw)
+        explicit = getattr(scp, helper)(
+            x, ampl=1.0, pos=0.0, width=1.0, normalized=True, **extra_kw
+        )
+        np.testing.assert_allclose(default, explicit, rtol=1e-12)
+
+    def test_normalized_false_coord_input(self):
+        x = scp.Coord.linspace(-5, 5, 1000, units="m")
+        result = scp.gaussian(x, ampl=1.0, pos=0.0, width=1.0, normalized=False)
+        assert isinstance(result, scp.NDDataset)
+        assert np.isclose(result.data.max(), 1.0, rtol=1e-3)
+
+    def test_normalized_false_amplitude_linearity(self):
+        x = np.linspace(-5, 5, 1000)
+        r1 = scp.gaussian(x, ampl=1.0, pos=0.0, width=1.0, normalized=False)
+        r2 = scp.gaussian(x, ampl=2.5, pos=0.0, width=1.0, normalized=False)
+        np.testing.assert_allclose(r2, 2.5 * r1, rtol=1e-12)
