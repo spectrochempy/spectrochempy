@@ -354,6 +354,111 @@ class ScpObjectList(list):
         html += "</details></div>"
         return html
 
+    @property
+    def names(self):
+        """Return a list of dataset names."""
+        return [
+            ds.name if hasattr(ds, "name") else str(ds)
+            for ds in self
+        ]
+
+    def select_largest(self, ndim=None):
+        """
+        Select the dataset with the largest number of elements.
+
+        Parameters
+        ----------
+        ndim : int, optional
+            If given, restrict selection to datasets with this number of
+            dimensions.
+
+        Returns
+        -------
+        object
+            The largest matching dataset.
+
+        Raises
+        ------
+        ValueError
+            If the list is empty or no matching dataset is found.
+        """
+        if not self:
+            raise ValueError("ScpObjectList is empty")
+        candidates = self
+        if ndim is not None:
+            candidates = [ds for ds in self if hasattr(ds, "ndim") and ds.ndim == ndim]
+        if not candidates:
+            raise ValueError(f"No dataset with ndim={ndim} found")
+        return max(candidates, key=lambda ds: ds.size if hasattr(ds, "size") else 0)
+
+    def select_by_name(self, name):
+        """
+        Select the first dataset whose name contains *name* (case-insensitive).
+
+        Parameters
+        ----------
+        name : str
+            Substring to match against dataset names.
+
+        Returns
+        -------
+        object
+            The first matching dataset.
+
+        Raises
+        ------
+        ValueError
+            If no matching dataset is found.
+        """
+        name_lower = name.lower()
+        for ds in self:
+            ds_name = getattr(ds, "name", "")
+            if ds_name and name_lower in ds_name.lower():
+                return ds
+        raise ValueError(f"No dataset with name containing '{name}' found")
+
+    def filter_by_ndim(self, ndim):
+        """
+        Return a new ScpObjectList containing only datasets with *ndim*
+        dimensions.
+
+        Parameters
+        ----------
+        ndim : int
+            Number of dimensions to filter by.
+
+        Returns
+        -------
+        ScpObjectList
+            A new list with matching datasets.
+        """
+        return ScpObjectList(
+            [ds for ds in self if hasattr(ds, "ndim") and ds.ndim == ndim]
+        )
+
+    def filter_by_shape(self, shape):
+        """
+        Return a new ScpObjectList containing only datasets whose shape
+        equals *shape*.
+
+        Parameters
+        ----------
+        shape : tuple
+            Shape to match exactly.
+
+        Returns
+        -------
+        ScpObjectList
+            A new list with matching datasets.
+        """
+        return ScpObjectList(
+            [
+                ds
+                for ds in self
+                if hasattr(ds, "shape") and tuple(ds.shape) == tuple(shape)
+            ]
+        )
+
 
 class OrderedSet(collections.abc.MutableSet):
     # https://code.activestate.com/recipes/576694/
