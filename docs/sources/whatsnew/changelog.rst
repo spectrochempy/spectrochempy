@@ -37,6 +37,11 @@ New Features
   concentration or profile matrices without falling back to
   ``np.column_stack(...)`` followed by a manual `NDDataset` wrapper.
 
+- ``scp.stack(..., axis=1)`` now accepts ``Coord`` inputs and
+  automatically promotes them to ``NDDataset`` before stacking.
+  This makes it easier to build profile matrices directly from
+  coordinate objects. (#1313)
+
 - Reading multi-object files (MATLAB ``.mat``, multi-subfile SPC, ZIP
   archives) now returns a list with convenience methods for selecting
   the dataset you need. After ``datasets = scp.read(...)``:
