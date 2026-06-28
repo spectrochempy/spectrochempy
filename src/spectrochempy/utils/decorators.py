@@ -470,6 +470,26 @@ class _set_output:
                 original_X if meta_from == "_X" and original_X is not None else X
             )
 
+            # Promote 1D metadata source (e.g., _Y with 1D y) to 2D for
+            # coordinate assignment so that dims[1], coord(1), shape[1] etc.
+            # are valid.  The wrapped method always returns 2D outputs.
+            if X.ndim == 1:
+                import numpy as np
+
+                dim0 = X.dims[0]
+                coord0 = (
+                    X.coordset[0].copy()
+                    if X.coordset is not None and X.coordset[0] is not None
+                    else None
+                )
+                X_new = NDDataset(np.empty((X.shape[0], 1)))
+                X_new.dims = [dim0, "v"]
+                X_new.set_coordset({dim0: coord0, "v": None})
+                X_new.units = X.units
+                X_new.title = X.title
+                X_new.name = X.name
+                X = X_new
+
             X_transf.meta = copy.deepcopy(metadata_source.meta)
             X_transf.author = copy.copy(metadata_source.author)
             X_transf.description = copy.copy(metadata_source.description)
