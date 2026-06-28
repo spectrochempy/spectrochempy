@@ -39,8 +39,9 @@ def read_soc(*paths, **kwargs):
 
     Returns
     -------
-    `NDDataset` or list of `NDDataset`
-        The returned dataset(s).
+    `NDDataset` or `ScpObjectList` of `NDDataset`
+        The returned dataset(s). When several datasets are returned, the
+        result is a list-like `ScpObjectList`.
 
     Other Parameters
     ----------------
@@ -146,8 +147,9 @@ def read_ddr(*paths, **kwargs):
 
     Returns
     -------
-    `NDDataset` or list of `NDDataset`
-        The returned dataset(s).
+    `NDDataset` or `ScpObjectList` of `NDDataset`
+        The returned dataset(s). When several datasets are returned, the
+        result is a list-like `ScpObjectList`.
 
     Other Parameters
     ----------------
@@ -243,8 +245,9 @@ def read_hdr(*paths, **kwargs):
 
     Returns
     -------
-    `NDDataset` or list of `NDDataset`
-        The returned dataset(s).
+    `NDDataset` or `ScpObjectList` of `NDDataset`
+        The returned dataset(s). When several datasets are returned, the
+        result is a list-like `ScpObjectList`.
 
     Other Parameters
     ----------------
@@ -340,8 +343,9 @@ def read_sdr(*paths, **kwargs):
 
     Returns
     -------
-    `NDDataset` or list of `NDDataset`
-        The returned dataset(s).
+    `NDDataset` or `ScpObjectList` of `NDDataset`
+        The returned dataset(s). When several datasets are returned, the
+        result is a list-like `ScpObjectList`.
 
     Other Parameters
     ----------------

@@ -160,8 +160,9 @@ def read_csv(*paths, **kwargs):
 
     Returns
     -------
-    object : `NDDataset` or list of `NDDataset`
-        The returned dataset(s).
+    object : `NDDataset` or `ScpObjectList` of `NDDataset`
+        The returned dataset(s). When several datasets are returned, the
+        result is a list-like `ScpObjectList`.
 
     Other Parameters
     ----------------

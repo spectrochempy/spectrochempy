@@ -73,8 +73,10 @@ def read_omnic(*paths, **kwargs):
 
     Returns
     -------
-    object : `NDDataset` or list of `NDDataset`
-        The returned dataset(s).
+    object : `NDDataset` or `ScpObjectList` of `NDDataset`
+        The returned dataset(s). When several datasets are returned, the
+        result is a list-like `ScpObjectList` with helper attributes such as
+        ``.names`` and ``.select_largest()``.
 
     Other Parameters
     ----------------
@@ -181,7 +183,7 @@ def read_omnic(*paths, **kwargs):
     >>> scp.read_omnic(p)
     NDDataset: [float64] a.u. (shape: (y:55, x:5549))
 
-    Multiple files not merged (return a list of datasets).
+    Multiple files not merged (return a list-like multi-dataset result).
     Note that a directory is specified
 
     >>> le = scp.read_omnic('irdata/nh4y-activation.spg', 'wodger.spg')
@@ -206,6 +208,7 @@ def read_omnic(*paths, **kwargs):
     >>> l2 = scp.read_omnic(['irdata/nh4y-activation.spg', 'wodger.spg'], merge=False)
     >>> len(l2)
     2
+    >>> l2.names
 
     Read without a filename. This has the effect of opening a dialog for file(s)
     selection
@@ -254,8 +257,9 @@ def read_spg(*paths, **kwargs):
 
     Returns
     -------
-    object : `NDDataset` or list of `NDDataset`
-    The returned dataset(s).
+    object : `NDDataset` or `ScpObjectList` of `NDDataset`
+    The returned dataset(s). When several datasets are returned, the
+    result is a list-like `ScpObjectList`.
 
     Other Parameters
     ----------------
@@ -372,8 +376,9 @@ def read_spa(*paths, **kwargs):
 
     Returns
     -------
-    object : `NDDataset` or list of `NDDataset`
-    The returned dataset(s).
+    object : `NDDataset` or `ScpObjectList` of `NDDataset`
+    The returned dataset(s). When several datasets are returned, the
+    result is a list-like `ScpObjectList`.
 
     Other Parameters
     ----------------
@@ -486,8 +491,9 @@ def read_srs(*paths, **kwargs):
 
     Returns
     -------
-    object : `NDDataset` or list of `NDDataset`
-    The returned dataset(s).
+    object : `NDDataset` or `ScpObjectList` of `NDDataset`
+    The returned dataset(s). When several datasets are returned, the
+    result is a list-like `ScpObjectList`.
         When return_bg is set to 'True', the series background is returned.
 
     Other Parameters

@@ -41,8 +41,9 @@ def read_zip(*paths, **kwargs):
 
     Returns
     -------
-    object : `NDDataset` or list of `NDDataset`
-        The returned dataset(s).
+    object : `NDDataset` or `ScpObjectList` of `NDDataset`
+        The returned dataset(s). When several datasets are returned, the
+        result is a list-like `ScpObjectList`.
 
     Other Parameters
     ----------------
@@ -124,6 +125,15 @@ def read_zip(*paths, **kwargs):
 
     >>> scp.read_zip('irdata/zip/zipfile.zip')
     NDDataset: [float64] a.u. (shape: (y:2, x:5549))
+
+    Keeping separate datasets from an archive
+
+    >>> datasets = scp.read_zip('irdata/zip/agirdata.zip', merge=False)
+    >>> count = len(datasets)
+    >>> names = datasets.names
+    >>> _ = len(names)
+    >>> largest = datasets.select_largest()
+    >>> _ = largest.ndim
 
     """
     kwargs["filetypes"] = ["Zip archives (*.zip)"]

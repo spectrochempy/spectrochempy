@@ -46,8 +46,8 @@ def read_carroucell(directory=None, **kwargs):
 
     Returns
     -------
-    list of `NDDataset`
-        List of datasets read from the carroucell files.
+    `ScpObjectList` of `NDDataset`
+        A list-like multi-dataset result containing the imported datasets.
 
     Other Parameters
     ----------------
