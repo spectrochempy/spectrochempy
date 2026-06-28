@@ -435,6 +435,10 @@ shape: asymmetricvoigtmodel
 #   $ asym: val, 0.0, 1.0
 #   ```
 
+# For quick synthetic profiles outside the fitting workflow, SpectroChemPy also
+# exposes direct helpers at the top level: `scp.gaussian`, `scp.lorentzian`,
+# `scp.voigt`, `scp.asymmetricvoigt`, and `scp.sigmoid`.
+
 # %%
 f1 = scp.Optimize(log_level="INFO")
 f1.script = script

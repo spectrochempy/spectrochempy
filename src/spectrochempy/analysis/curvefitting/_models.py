@@ -15,10 +15,15 @@ from spectrochempy.core.units import Quantity
 
 __all__ = [
     "polynomialbaseline",
+    "gaussian",
     "gaussianmodel",
+    "lorentzian",
     "lorentzianmodel",
+    "voigt",
     "voigtmodel",
+    "asymmetricvoigt",
     "asymmetricvoigtmodel",
+    "sigmoid",
     "sigmoidmodel",
 ]
 
@@ -84,6 +89,76 @@ def make_units_compatibility(func):
         return res
 
     return wrapper
+
+
+def _evaluate_model(model, x, name=None, **kwargs):
+    """Evaluate a 1D model with ergonomic top-level helpers."""
+    if isinstance(x, NDDataset):
+        if x.ndim != 1:
+            raise ValueError("Shape helpers expect a 1D abscissa")
+        coord = getattr(x, x.dims[0], None)
+        x = coord.copy() if coord is not None else Coord(x.data, units=x.units)
+
+    result = model().f(x, **kwargs)
+    if isinstance(result, NDDataset) and name is not None:
+        result.name = name
+    return result
+
+
+def gaussian(x, ampl=1.0, pos=0.0, width=1.0, **kwargs):
+    """Return a normalized Gaussian profile."""
+    return _evaluate_model(
+        gaussianmodel, x, name="gaussian", ampl=ampl, pos=pos, width=width, **kwargs
+    )
+
+
+def lorentzian(x, ampl=1.0, pos=0.0, width=1.0, **kwargs):
+    """Return a Lorentzian profile."""
+    return _evaluate_model(
+        lorentzianmodel,
+        x,
+        name="lorentzian",
+        ampl=ampl,
+        pos=pos,
+        width=width,
+        **kwargs,
+    )
+
+
+def voigt(x, ampl=1.0, pos=0.0, width=1.0, ratio=0.5, **kwargs):
+    """Return a Voigt profile."""
+    return _evaluate_model(
+        voigtmodel,
+        x,
+        name="voigt",
+        ampl=ampl,
+        pos=pos,
+        width=width,
+        ratio=ratio,
+        **kwargs,
+    )
+
+
+def asymmetricvoigt(x, ampl=1.0, pos=0.0, width=1.0, ratio=0.5, asym=0.0, **kwargs):
+    """Return an asymmetric Voigt profile."""
+    return _evaluate_model(
+        asymmetricvoigtmodel,
+        x,
+        name="asymmetricvoigt",
+        ampl=ampl,
+        pos=pos,
+        width=width,
+        ratio=ratio,
+        asym=asym,
+        **kwargs,
+    )
+
+
+def sigmoid(x, ampl=1.0, pos=0.0, asym=1.0, **kwargs):
+    """Return a sigmoid profile."""
+    return _evaluate_model(
+        sigmoidmodel, x, name="sigmoid", ampl=ampl, pos=pos, asym=asym, **kwargs
+    )
 
 
 ############
