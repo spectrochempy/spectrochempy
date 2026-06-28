@@ -77,8 +77,10 @@ def read_opus(*paths, **kwargs):
 
     Returns
     -------
-    object : `NDDataset` or list of `NDDataset`
-        The returned dataset(s).
+    object : `NDDataset` or `ScpObjectList` of `NDDataset`
+        The returned dataset(s). When several datasets are returned, the
+        result is a list-like `ScpObjectList` with helper attributes such as
+        ``.names`` and ``.select_largest()``.
 
     Other Parameters
     ----------------
@@ -175,7 +177,7 @@ def read_opus(*paths, **kwargs):
     >>> scp.opus.read('irdata/OPUS/test.0000')
     NDDataset: [float64] a.u. (shape: (y:1, x:2567))
 
-    Multiple files not merged (return a list of datasets). Note that a directory is
+    Multiple files not merged (return a list-like multi-dataset result). Note that a directory is
     specified
 
     >>> le = scp.read_opus('test.0000', 'test.0001', 'test.0002',
@@ -204,6 +206,7 @@ def read_opus(*paths, **kwargs):
     >>>                    directory='irdata/OPUS', merge=False)
     >>> len(le)
     3
+    >>> le.names
 
     Read without a filename. This has the effect of opening a dialog for file(s)
     selection

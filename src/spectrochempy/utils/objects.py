@@ -310,7 +310,31 @@ class ReadOnlyDict(dict):
 
 
 class ScpObjectList(list):
-    """A list subclass that allows html representation of the list of spectrochempy objects."""
+    """
+    A list subclass for groups of SpectroChemPy objects returned by public APIs.
+
+    `ScpObjectList` behaves like a regular Python list while exposing a few
+    helpers that are especially useful when a reader returns several datasets
+    instead of a single merged `NDDataset`.
+
+    Available helpers include:
+
+    - `names`: list the dataset names when available.
+    - `select_largest()`: pick the largest dataset, optionally for a given
+      number of dimensions.
+    - `select_by_name()`: pick the first dataset whose name matches a
+      substring.
+    - `filter_by_ndim()`: keep only datasets with a given number of
+      dimensions.
+    - `filter_by_shape()`: keep only datasets with an exact shape.
+
+    Examples
+    --------
+    >>> datasets = scp.read_matlab("data.mat", merge=False)
+    >>> datasets.names
+    >>> X = datasets.select_largest(ndim=2)
+    >>> C = datasets.select_by_name("conc")
+    """
 
     def _repr_html_(self):
         """

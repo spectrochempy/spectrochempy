@@ -48,8 +48,10 @@ def read_matlab(*paths, **kwargs):
 
     Returns
     -------
-    object : `NDDataset` or list of `NDDataset`
-        The returned dataset(s).
+    object : `NDDataset` or `ScpObjectList` of `NDDataset`
+        The returned dataset(s). When several datasets are returned, the
+        result is a list-like `ScpObjectList` with helper attributes such as
+        ``.names``, ``.select_largest()``, and ``.select_by_name()``.
 
     Other Parameters
     ----------------
@@ -130,6 +132,10 @@ def read_matlab(*paths, **kwargs):
     (``__header__``, ``__version__``, ``__globals__``) are skipped.  When a file
     holds a single numeric variable a lone `NDDataset` is returned.
 
+    When several datasets are returned, the result keeps the Matlab variable
+    names and can be queried directly, for example with ``.names``,
+    ``.select_largest()``, or ``.select_by_name()``.
+
     Examples
     --------
     Reading a single Matlab file
@@ -141,6 +147,18 @@ def read_matlab(*paths, **kwargs):
 
     >>> scp.matlab.read('irdata/matlab/matlabdata.mat')
     NDDataset: [float64] a.u. (shape: (y:1, x:3))
+
+    Selecting datasets from a multi-variable Matlab file
+
+    >>> datasets = scp.read_matlab('irdata/matlab/matlabdata.mat', merge=False)
+    >>> names = datasets.names
+    >>> len(names)
+    1
+    >>> largest = datasets.select_largest()
+    >>> largest.ndim
+    2
+    >>> datasets.select_by_name('data').name
+    'data'
 
     """
     kwargs["filetypes"] = ["Matlab files (*.mat *.dso)"]

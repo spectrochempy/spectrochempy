@@ -309,8 +309,9 @@ def read(*paths, **kwargs):
 
     Returns
     -------
-    object : `NDDataset` or list of `NDDataset`
-        The returned dataset(s).
+    object : `NDDataset` or `ScpObjectList` of `NDDataset`
+        The returned dataset(s). When several datasets are returned without
+        merging, the result is a list-like `ScpObjectList`.
 
     Other Parameters
     ----------------
@@ -409,6 +410,9 @@ def read(*paths, **kwargs):
     >>> le = scp.read('test.0000', 'test.0001', 'test.0002', directory='irdata/OPUS')
     >>> len(le)
     3
+    >>> names = le.names
+    >>> len(names)
+    3
     >>> le[0]
     NDDataset: [float64] a.u. (shape: (y:1, x:2567))
 
@@ -438,6 +442,9 @@ def read(*paths, **kwargs):
 
     >>> le = scp.read(directory='irdata/OPUS')
     >>> len(le)
+    2
+    >>> largest = le.select_largest()
+    >>> largest.ndim
     2
 
     Again we can use merge to stack all 4 spectra if they have compatible dimensions.
@@ -500,8 +507,9 @@ def read_dir(directory=None, **kwargs):
 
     Returns
     -------
-    object : `NDDataset` or list of `NDDataset`
-        The returned dataset(s).
+    object : `NDDataset` or `ScpObjectList` of `NDDataset`
+        The returned dataset(s). When several datasets are returned without
+        merging, the result is a list-like `ScpObjectList`.
         Depending on the python version, the order of the datasets in the list
         may change.
 
@@ -525,6 +533,12 @@ def read_dir(directory=None, **kwargs):
     >>> A = scp.read_dir('irdata')
     >>> len(A)
     4
+    >>> names = A.names
+    >>> len(names)
+    4
+    >>> largest = A.select_largest()
+    >>> largest.ndim
+    2
 
     >>> B = scp.read_dir()
 
