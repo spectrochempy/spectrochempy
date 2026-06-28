@@ -284,11 +284,24 @@ def read(*paths, **kwargs):
     r"""
     Read data from various file formats.
 
-    This method is generally able to load experimental files based on extensions.
-    It acts as a dispatcher: after detecting the format it delegates to the
-    corresponding namespace reader (e.g. ``scp.omnic.read(...)``,
-    ``scp.opus.read(...)``, ``scp.jcamp.read(...)``).
-    You can bypass detection by passing the ``protocol`` keyword explicitly.
+    This is the central user-facing entry point for SpectroChemPy file import.
+    In the current API convention, ``read()`` is the generic dispatcher while
+    namespace readers such as ``scp.omnic.read(...)``, ``scp.opus.read(...)``,
+    ``scp.matlab.read(...)``, or plugin readers provide the explicit
+    format-specific forms. Use ``read()`` when automatic format detection is
+    desired and use a namespace reader when the data source is already known.
+
+    `read()` generally detects the file format from the filename extension and
+    then delegates to the corresponding public reader implementation. You can
+    bypass detection by passing the ``protocol`` keyword explicitly.
+
+    Depending on the input, `read()` may return either a single `NDDataset` or
+    a list-like `ScpObjectList`. The latter occurs when several datasets are
+    discovered and not merged into one result. In that case, helper features
+    such as ``.names``, ``.select_largest()``, ``.select_by_name()``,
+    ``.filter_by_ndim()``, and ``.filter_by_shape()`` provide an idiomatic
+    public way to inspect and select the desired dataset without dropping down
+    to ad hoc list-handling code.
 
     Parameters
     ----------
@@ -311,7 +324,10 @@ def read(*paths, **kwargs):
     -------
     object : `NDDataset` or `ScpObjectList` of `NDDataset`
         The returned dataset(s). When several datasets are returned without
-        merging, the result is a list-like `ScpObjectList`.
+        merging, the result is a list-like `ScpObjectList` with convenience
+        helpers such as ``.names``, ``.select_largest()``,
+        ``.select_by_name()``, ``.filter_by_ndim()``, and
+        ``.filter_by_shape()``.
 
     Other Parameters
     ----------------
@@ -404,7 +420,7 @@ def read(*paths, **kwargs):
     >>> scp.read(p)
     NDDataset: [float64] a.u. (shape: (y:1, x:2567))
 
-    Multiple files not merged (return a list of datasets).
+    Multiple files not merged (return a list-like multi-dataset result).
     Note that a directory is specified
 
     >>> le = scp.read('test.0000', 'test.0001', 'test.0002', directory='irdata/OPUS')
@@ -431,6 +447,9 @@ def read(*paths, **kwargs):
     >>> le = scp.read(['test.0000', 'test.0001', 'test.0002'], directory='irdata/OPUS', merge=False)
     >>> len(le)
     3
+    >>> largest = le.select_largest()
+    >>> largest.shape
+    (1, 2567)
 
     Read without a filename. This has the effect of opening a dialog for file(s)
     selection
@@ -509,7 +528,10 @@ def read_dir(directory=None, **kwargs):
     -------
     object : `NDDataset` or `ScpObjectList` of `NDDataset`
         The returned dataset(s). When several datasets are returned without
-        merging, the result is a list-like `ScpObjectList`.
+        merging, the result is a list-like `ScpObjectList` with convenience
+        helpers such as ``.names``, ``.select_largest()``,
+        ``.select_by_name()``, ``.filter_by_ndim()``, and
+        ``.filter_by_shape()``.
         Depending on the python version, the order of the datasets in the list
         may change.
 

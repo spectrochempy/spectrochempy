@@ -30,6 +30,11 @@ New Features
   This makes it much easier to work with files that contain multiple
   variables or spectra. (#1306)
 
+- The generic ``scp.read(...)`` API and the main explicit reader entry points
+  now document the namespace-based import convention more clearly, including
+  when readers may return a list-like ``ScpObjectList`` and which helper
+  methods are available to select datasets from multi-object imports.
+
 Bug Fixes
 ~~~~~~~~~
 

@@ -28,6 +28,16 @@ def read_jcamp(*paths, **kwargs):
     r"""
     Open Infrared ``JCAMP-DX`` files with extension :file:`.jdx` or :file:`.dx`.
 
+    This is the explicit JCAMP reader in the public import API. Use
+    :func:`spectrochempy.read` for generic format autodetection and
+    ``scp.jcamp.read(...)`` or :func:`spectrochempy.read_jcamp` when the JCAMP
+    format is already known.
+
+    Non-merged multi-file reads may return a list-like `ScpObjectList`
+    exposing helper methods for dataset selection. See
+    :func:`spectrochempy.read` for the complete description of the generic
+    import convention and multi-object return behavior.
+
     Limited to AFFN encoding (see :cite:t:`mcdonald:1988`)
 
     Parameters
@@ -51,7 +61,9 @@ def read_jcamp(*paths, **kwargs):
     -------
     object : `NDDataset` or `ScpObjectList` of `NDDataset`
         The returned dataset(s). When several datasets are returned, the
-        result is a list-like `ScpObjectList`.
+        result is a list-like `ScpObjectList` with helper attributes such as
+        ``.names``, ``.select_largest()``, ``.select_by_name()``,
+        ``.filter_by_ndim()``, and ``.filter_by_shape()``.
 
     Other Parameters
     ----------------

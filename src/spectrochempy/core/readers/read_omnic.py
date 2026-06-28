@@ -37,6 +37,11 @@ def read_omnic(*paths, **kwargs):
     r"""
     Open a Thermo Nicolet OMNIC file.
 
+    This is the explicit OMNIC reader in the public import API. Use
+    :func:`spectrochempy.read` for generic format autodetection and
+    ``scp.omnic.read(...)`` or :func:`spectrochempy.read_omnic` when the OMNIC
+    format is already known.
+
     Open Omnic file or a list of :file:`.spg`, :file:`.spa` or
     :file:`.srs` files and set data/metadata in the current dataset.
 
@@ -53,6 +58,11 @@ def read_omnic(*paths, **kwargs):
     An error is generated when an SPG file contains spectra with inconsistent
     x-axis definitions, unless ``allow_inconsistent_x=True`` is specified. In
     that case, a list containing one `NDDataset` per spectrum is returned.
+
+    Non-merged multi-file reads may also return a list-like `ScpObjectList`
+    exposing helper methods for dataset selection. See
+    :func:`spectrochempy.read` for the complete description of the generic
+    import convention and multi-object return behavior.
 
     Parameters
     ----------
@@ -76,7 +86,8 @@ def read_omnic(*paths, **kwargs):
     object : `NDDataset` or `ScpObjectList` of `NDDataset`
         The returned dataset(s). When several datasets are returned, the
         result is a list-like `ScpObjectList` with helper attributes such as
-        ``.names`` and ``.select_largest()``.
+        ``.names``, ``.select_largest()``, ``.select_by_name()``,
+        ``.filter_by_ndim()``, and ``.filter_by_shape()``.
 
     Other Parameters
     ----------------
@@ -208,7 +219,12 @@ def read_omnic(*paths, **kwargs):
     >>> l2 = scp.read_omnic(['irdata/nh4y-activation.spg', 'wodger.spg'], merge=False)
     >>> len(l2)
     2
-    >>> l2.names
+    >>> names = l2.names
+    >>> len(names)
+    2
+    >>> largest = l2.select_largest()
+    >>> largest.ndim
+    2
 
     Read without a filename. This has the effect of opening a dialog for file(s)
     selection

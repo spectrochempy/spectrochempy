@@ -166,6 +166,13 @@ Import/export
 
 Import a NDDataset from external source
 ======================================
+
+Reader functions may return either a single ``NDDataset`` or a list-like
+``ScpObjectList`` when several datasets are discovered and not merged. In that
+case, helper methods such as ``datasets.names``,
+``datasets.select_largest(ndim=2)``, and ``datasets.select_by_name("spectra")``
+make it easier to pick the dataset you want while staying in the public API.
+
 .. autosummary::
     :nosignatures:
     :toctree: generated/

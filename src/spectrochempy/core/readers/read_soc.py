@@ -20,6 +20,16 @@ def read_soc(*paths, **kwargs):
     r"""
     Read a Surface Optics Corp. file or a list of files with extension :file:`.ddr`, :file:`.hdr` or :file:`.sdr`.
 
+    This is the explicit SOC reader in the public import API. Use
+    :func:`spectrochempy.read` for generic format autodetection and
+    ``scp.soc.read(...)`` or :func:`spectrochempy.read_soc` when the SOC format
+    is already known.
+
+    Non-merged multi-file reads may return a list-like `ScpObjectList`
+    exposing helper methods for dataset selection. See
+    :func:`spectrochempy.read` for the complete description of the generic
+    import convention and multi-object return behavior.
+
     Parameters
     ----------
     *paths : `str`, `~pathlib.Path` object or valid urls, optional
@@ -41,7 +51,9 @@ def read_soc(*paths, **kwargs):
     -------
     `NDDataset` or `ScpObjectList` of `NDDataset`
         The returned dataset(s). When several datasets are returned, the
-        result is a list-like `ScpObjectList`.
+        result is a list-like `ScpObjectList` with helper attributes such as
+        ``.names``, ``.select_largest()``, ``.select_by_name()``,
+        ``.filter_by_ndim()``, and ``.filter_by_shape()``.
 
     Other Parameters
     ----------------
@@ -128,6 +140,16 @@ def read_ddr(*paths, **kwargs):
     r"""
     Open a Surface Optics Corp. file or a list of files with extension :file:`.ddr`.
 
+    This is the explicit DDR reader in the public SOC import API. Use
+    :func:`spectrochempy.read` for generic format autodetection and
+    :func:`spectrochempy.read_soc` or ``scp.soc.read(...)`` for the broader SOC
+    entry point.
+
+    Non-merged multi-file reads may return a list-like `ScpObjectList`
+    exposing helper methods for dataset selection. See
+    :func:`spectrochempy.read` for the complete description of the generic
+    import convention and multi-object return behavior.
+
     Parameters
     ----------
     *paths : `str`, `~pathlib.Path` object or valid urls, optional
@@ -149,7 +171,9 @@ def read_ddr(*paths, **kwargs):
     -------
     `NDDataset` or `ScpObjectList` of `NDDataset`
         The returned dataset(s). When several datasets are returned, the
-        result is a list-like `ScpObjectList`.
+        result is a list-like `ScpObjectList` with helper attributes such as
+        ``.names``, ``.select_largest()``, ``.select_by_name()``,
+        ``.filter_by_ndim()``, and ``.filter_by_shape()``.
 
     Other Parameters
     ----------------
@@ -226,6 +250,16 @@ def read_hdr(*paths, **kwargs):
     r"""
     Open a Surface Optics Corp. file or a list of files with extension :file:`.hdr`.
 
+    This is the explicit HDR reader in the public SOC import API. Use
+    :func:`spectrochempy.read` for generic format autodetection and
+    :func:`spectrochempy.read_soc` or ``scp.soc.read(...)`` for the broader SOC
+    entry point.
+
+    Non-merged multi-file reads may return a list-like `ScpObjectList`
+    exposing helper methods for dataset selection. See
+    :func:`spectrochempy.read` for the complete description of the generic
+    import convention and multi-object return behavior.
+
     Parameters
     ----------
     *paths : `str`, `~pathlib.Path` object or valid urls, optional
@@ -247,7 +281,9 @@ def read_hdr(*paths, **kwargs):
     -------
     `NDDataset` or `ScpObjectList` of `NDDataset`
         The returned dataset(s). When several datasets are returned, the
-        result is a list-like `ScpObjectList`.
+        result is a list-like `ScpObjectList` with helper attributes such as
+        ``.names``, ``.select_largest()``, ``.select_by_name()``,
+        ``.filter_by_ndim()``, and ``.filter_by_shape()``.
 
     Other Parameters
     ----------------
@@ -324,6 +360,16 @@ def read_sdr(*paths, **kwargs):
     r"""
     Open a Surface Optics Corp. file or a list of files with extension :file:`.sdr`.
 
+    This is the explicit SDR reader in the public SOC import API. Use
+    :func:`spectrochempy.read` for generic format autodetection and
+    :func:`spectrochempy.read_soc` or ``scp.soc.read(...)`` for the broader SOC
+    entry point.
+
+    Non-merged multi-file reads may return a list-like `ScpObjectList`
+    exposing helper methods for dataset selection. See
+    :func:`spectrochempy.read` for the complete description of the generic
+    import convention and multi-object return behavior.
+
     Parameters
     ----------
     *paths : `str`, `~pathlib.Path` object or valid urls, optional
@@ -345,7 +391,9 @@ def read_sdr(*paths, **kwargs):
     -------
     `NDDataset` or `ScpObjectList` of `NDDataset`
         The returned dataset(s). When several datasets are returned, the
-        result is a list-like `ScpObjectList`.
+        result is a list-like `ScpObjectList` with helper attributes such as
+        ``.names``, ``.select_largest()``, ``.select_by_name()``,
+        ``.filter_by_ndim()``, and ``.filter_by_shape()``.
 
     Other Parameters
     ----------------

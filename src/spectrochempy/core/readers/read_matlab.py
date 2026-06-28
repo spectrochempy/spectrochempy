@@ -29,6 +29,18 @@ def read_matlab(*paths, **kwargs):
     r"""
     Open Matlab files.
 
+    This is the explicit Matlab reader in the public import API. Use
+    :func:`spectrochempy.read` for generic format autodetection and
+    ``scp.matlab.read(...)`` or :func:`spectrochempy.read_matlab` when the
+    Matlab format is already known.
+
+    A Matlab file may contain one or several numeric variables. Compatible
+    variables can be grouped into a single dataset, while non-merged multi-file
+    or multi-variable reads may return a list-like `ScpObjectList` with helper
+    methods for dataset selection. See :func:`spectrochempy.read` for the
+    complete description of the generic import convention and multi-object
+    return behavior.
+
     Parameters
     ----------
     *paths : `str`, `~pathlib.Path` object objects or valid urls, optional
@@ -51,7 +63,8 @@ def read_matlab(*paths, **kwargs):
     object : `NDDataset` or `ScpObjectList` of `NDDataset`
         The returned dataset(s). When several datasets are returned, the
         result is a list-like `ScpObjectList` with helper attributes such as
-        ``.names``, ``.select_largest()``, and ``.select_by_name()``.
+        ``.names``, ``.select_largest()``, ``.select_by_name()``,
+        ``.filter_by_ndim()``, and ``.filter_by_shape()``.
 
     Other Parameters
     ----------------
@@ -134,7 +147,8 @@ def read_matlab(*paths, **kwargs):
 
     When several datasets are returned, the result keeps the Matlab variable
     names and can be queried directly, for example with ``.names``,
-    ``.select_largest()``, or ``.select_by_name()``.
+    ``.select_largest()``, ``.select_by_name()``, ``.filter_by_ndim()``, or
+    ``.filter_by_shape()``.
 
     Examples
     --------
@@ -157,6 +171,9 @@ def read_matlab(*paths, **kwargs):
     >>> largest = datasets.select_largest()
     >>> largest.ndim
     2
+    >>> filtered = datasets.filter_by_ndim(2)
+    >>> len(filtered)
+    1
     >>> datasets.select_by_name('data').name
     'data'
 
