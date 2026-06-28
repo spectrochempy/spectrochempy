@@ -94,25 +94,8 @@ quaternion arrays.
 API Reference
 =============
 
-All hypercomplex operations are accessed through ``dataset.hyper``:
-
-.. list-table::
-   :header-rows: 1
-
-   * - Operation
-     - Example
-   * - Convert to quaternion
-     - ``dataset.hyper.set_quaternion(inplace=True)``
-   * - Check type
-     - ``dataset.hyper.is_quaternion``
-   * - Extract RR component
-     - ``dataset.hyper.RR``
-   * - Extract RI component
-     - ``dataset.hyper.component("RI")``
-   * - Extract IR component
-     - ``dataset.hyper.IR``
-   * - Extract II component
-     - ``dataset.hyper.II``
+The public API reference for the hypercomplex plugin is listed in
+:doc:`/reference/plugins`.
 
 .. _hypercomplex-nmr-example:
 

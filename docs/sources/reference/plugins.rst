@@ -30,11 +30,14 @@ PerkinElmer plugin
 Carroucell plugin
 =================
 
+Recommended public entry point:
+:func:`spectrochempy.carroucell.read`.
+
 .. autosummary::
     :nosignatures:
     :toctree: generated/
 
-    spectrochempy.carroucell.read
+    spectrochempy.carroucell.read_carroucell
 
 IRIS plugin
 ===========
@@ -57,6 +60,27 @@ Tensor plugin
 Hypercomplex plugin
 ===================
 
-The hypercomplex plugin currently exposes its public user API primarily through
-the ``dataset.hyper`` accessor documented in
+The recommended public API is the ``dataset.hyper`` accessor.
+
+All hypercomplex operations are accessed through ``dataset.hyper``:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Operation
+     - Example
+   * - Convert to quaternion
+     - ``dataset.hyper.set_quaternion(inplace=True)``
+   * - Check type
+     - ``dataset.hyper.is_quaternion``
+   * - Extract RR component
+     - ``dataset.hyper.RR``
+   * - Extract RI component
+     - ``dataset.hyper.component("RI")``
+   * - Extract IR component
+     - ``dataset.hyper.IR``
+   * - Extract II component
+     - ``dataset.hyper.II``
+
+For workflow-oriented explanations and examples, see
 :doc:`/userguide/plugins/hypercomplex`.
