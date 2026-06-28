@@ -115,7 +115,7 @@ The recommended form is namespaced:
 
     analysis = scp.iris.IRIS()
     model = scp.tensor.CP(n_components=2)
-    dataset = scp.nmr.read_topspin("path/to/fid")
+    dataset = scp.nmr.read("path/to/fid")
 
 Dataset accessors are reserved for operations that act on an existing dataset:
 
@@ -127,6 +127,9 @@ Some official plugins may expose limited root-level compatibility aliases, such
 as ``scp.IRIS``. New examples should prefer the namespaced form,
 ``scp.iris.IRIS`` or ``scp.tensor.CP``.
 
+Generated plugin-owned public API pages are collected in
+:doc:`/reference/plugins`.
+
 Plugin summaries
 ================
 
@@ -137,11 +140,8 @@ provide the user-facing details:
 * :doc:`nmr` for TopSpin reading and NMR-specific processing workflows
 * :doc:`tensor` for TensorLy-backed tensor decompositions such as CP/PARAFAC
 * :doc:`hypercomplex` for quaternion support used in phase-sensitive 2D NMR
+* :doc:`carroucell` for carroucell experiment directory imports
 * :doc:`perkinelmer` for PerkinElmer ``.sp`` IR file reading
-
-The Carroucell reader is currently part of the official plugin set but does not
-yet have a separate user page. Use ``scp.carroucell.read_carroucell(...)`` once
-the plugin is installed.
 
 Examples and gallery convention
 ===============================

@@ -51,6 +51,10 @@ print(f"Accumulations:   {dataset.meta.accumulations}")
 _ = dataset.plot()
 
 # %%
+# Use the plotted spectrum as the gallery thumbnail.
+# sphinx_gallery_thumbnail_number = 1
+
+# %%
 # This ends the example ! The following line can be removed or commented
 # when the example is run as a notebook (`.ipynb`).
 

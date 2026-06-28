@@ -172,7 +172,6 @@ Import a NDDataset from external source
 
     load
     read
-    read_topspin
     read_csv
     read_ddr
     read_dir
@@ -772,9 +771,14 @@ File
 
     pathclean
 
-.. rst-class:: small
+*******************
+Official plugins
+*******************
 
-.. note::
+Plugin-owned public API pages are documented separately from the User Guide on
+the dedicated reference page below.
 
-   ``read_topspin`` requires the official ``spectrochempy[nmr]`` plugin
-   (i.e. ``pip install spectrochempy[nmr]``).
+.. toctree::
+   :maxdepth: 1
+
+   plugins

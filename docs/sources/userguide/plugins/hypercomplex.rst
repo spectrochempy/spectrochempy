@@ -4,6 +4,9 @@
 Hypercomplex (quaternion) plugin
 ================================
 
+Introduction
+============
+
 The ``spectrochempy-hypercomplex`` plugin extends SpectroChemPy with
 quaternion/hypercomplex data support. It is designed for scientific
 domains that need complex numbers in more than one dimension, most
@@ -32,7 +35,7 @@ By extracting hypercomplex support into an official plugin:
 .. _hypercomplex-install:
 
 Installation
-==============
+============
 
 Install the plugin directly or through the NMR extra:
 
@@ -45,6 +48,17 @@ Install the plugin directly or through the NMR extra:
 
 The plugin is discovered automatically once installed. No explicit loading
 step is required.
+
+Recommended API
+===============
+
+The recommended public API is the ``dataset.hyper`` accessor:
+
+.. code-block:: python
+
+    dataset.hyper.set_quaternion(inplace=True)
+    rr = dataset.hyper.RR
+    ri = dataset.hyper.component("RI")
 
 .. _hypercomplex-concepts:
 
@@ -77,33 +91,16 @@ quaternion arrays.
 
 .. _hypercomplex-api:
 
-API overview
-============
+API Reference
+=============
 
-All hypercomplex operations are accessed through ``dataset.hyper``:
-
-.. list-table::
-   :header-rows: 1
-
-   * - Operation
-     - Example
-   * - Convert to quaternion
-     - ``dataset.hyper.set_quaternion(inplace=True)``
-   * - Check type
-     - ``dataset.hyper.is_quaternion``
-   * - Extract RR component
-     - ``dataset.hyper.RR``
-   * - Extract RI component
-     - ``dataset.hyper.component("RI")``
-   * - Extract IR component
-     - ``dataset.hyper.IR``
-   * - Extract II component
-     - ``dataset.hyper.II``
+The public API reference for the hypercomplex plugin is listed in
+:doc:`/reference/plugins`.
 
 .. _hypercomplex-nmr-example:
 
-2D NMR example
-==============
+Examples
+========
 
 After reading a 2D TopSpin dataset, the NMR plugin can optionally
 convert the data to hypercomplex form (this happens automatically when
@@ -114,7 +111,7 @@ both the NMR and hypercomplex plugins are installed):
     import spectrochempy as scp
 
     # Requires spectrochempy-nmr and spectrochempy-hypercomplex
-    dataset = scp.nmr.read_topspin("path/to/ser", expno=1)
+    dataset = scp.nmr.read("path/to/ser", expno=1)
 
     # The NMR reader may already have called set_quaternion;
     # if not, you can do it explicitly:
@@ -130,18 +127,11 @@ both the NMR and hypercomplex plugins are installed):
 
 .. _hypercomplex-future:
 
-Future directions
-=================
+Limitations and scope
+=====================
 
 The hypercomplex plugin is intentionally narrow at this stage:
 
 * it supports quaternion data in ``NDDataset``;
 * it provides the numeric hooks needed by the core math framework;
 * it enables 2D NMR phase-sensitive workflows.
-
-Possible future extensions (not yet planned):
-
-* octonion or other Clifford-algebra types for higher-dimensional data;
-* non-NMR uses of hypercomplex arrays (e.g. certain radar or optics
-  signal-processing workflows);
-* additional component-extraction convenience methods.
