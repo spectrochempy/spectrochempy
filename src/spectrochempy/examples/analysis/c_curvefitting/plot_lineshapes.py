@@ -4,6 +4,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
+# ruff: noqa
 """
 Built-in line-shape helpers
 ---------------------------
@@ -30,7 +31,9 @@ profiles = [
 # %%
 # Stack them as columns to compare the available shapes side by side.
 shapes = scp.stack(profiles, axis=1)
-shapes.y = scp.Coord(labels=["gaussian", "lorentzian", "voigt", "asym. voigt", "sigmoid"])
+shapes.y = scp.Coord(
+    labels=["gaussian", "lorentzian", "voigt", "asym. voigt", "sigmoid"]
+)
 
 # %%
 _ = shapes.plot(legend=shapes.y.labels, colormap=None)

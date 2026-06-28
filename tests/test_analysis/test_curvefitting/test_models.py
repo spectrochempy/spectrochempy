@@ -53,9 +53,7 @@ _MODELS = [
 _HELPERS = [
     pytest.param("gaussian", dict(ampl=1.0, pos=0.5, width=0.1), id="gaussian"),
     pytest.param("lorentzian", dict(ampl=1.0, pos=0.5, width=0.1), id="lorentzian"),
-    pytest.param(
-        "voigt", dict(ampl=1.0, pos=0.5, width=0.1, ratio=0.5), id="voigt"
-    ),
+    pytest.param("voigt", dict(ampl=1.0, pos=0.5, width=0.1, ratio=0.5), id="voigt"),
     pytest.param(
         "asymmetricvoigt",
         dict(ampl=1.0, pos=0.5, width=0.1, ratio=0.5, asym=0.2),
