@@ -3328,3 +3328,32 @@ api_funcs = _update_api_funclist(NDMath)
 for funcname in api_funcs:
     setattr(thismodule, funcname, getattr(NDMath, funcname))
     thismodule.__all__.append(funcname)
+
+
+def exp(x, *args, **kwargs):
+    """Calculate the exponential of all elements in the input array."""
+    return np.exp(x, *args, **kwargs)
+
+
+def log(x, *args, **kwargs):
+    """Calculate the natural logarithm element-wise."""
+    return np.log(x, *args, **kwargs)
+
+
+def log10(x, *args, **kwargs):
+    """Return the base-10 logarithm of the input array element-wise."""
+    return np.log10(x, *args, **kwargs)
+
+
+def sin(x, *args, **kwargs):
+    """Calculate the trigonometric sine element-wise."""
+    return np.sin(x, *args, **kwargs)
+
+
+def cos(x, *args, **kwargs):
+    """Calculate the trigonometric cosine element-wise."""
+    return np.cos(x, *args, **kwargs)
+
+
+for funcname in ["exp", "log", "log10", "sin", "cos"]:
+    thismodule.__all__.append(funcname)

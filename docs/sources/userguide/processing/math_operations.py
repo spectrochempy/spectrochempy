@@ -248,6 +248,10 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # #### Functions that require no units or dimensionless units for inputs. Returns dimensionless objects.
+#
+# For the most common notebook-style workflows, SpectroChemPy also exposes a
+# small curated set of top-level aliases mirroring these ufuncs directly on the
+# public API: `scp.exp`, `scp.log`, `scp.log10`, `scp.sin`, and `scp.cos`.
 
 # %% [markdown]
 # ##### exp
@@ -255,6 +259,10 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 out = np.exp(dataset)
+_ = out.plot(figsize=(6, 2.5))
+
+# %%
+out = scp.exp(dataset)
 _ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
@@ -294,6 +302,10 @@ out = np.log(dataset)
 ax = out.plot(figsize=(6, 2.5), show_mask=True)
 
 # %%
+out = scp.log(dataset)
+ax = out.plot(figsize=(6, 2.5), show_mask=True)
+
+# %%
 out = np.log(dataset - dataset.min())
 _ = out.plot(figsize=(6, 2.5))
 
@@ -311,6 +323,10 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 out = np.log10(dataset)
+_ = out.plot(figsize=(6, 2.5))
+
+# %%
+out = scp.log10(dataset)
 _ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
@@ -378,12 +394,20 @@ np.signbit(dataset)
 out = np.sin(dataset)
 _ = out.plot(figsize=(6, 2.5))
 
+# %%
+out = scp.sin(dataset)
+_ = out.plot(figsize=(6, 2.5))
+
 # %% [markdown]
 # ##### cos
 # Trigonometric cosine element-wise.
 
 # %%
 out = np.cos(dataset)
+_ = out.plot(figsize=(6, 2.5))
+
+# %%
+out = scp.cos(dataset)
 _ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]

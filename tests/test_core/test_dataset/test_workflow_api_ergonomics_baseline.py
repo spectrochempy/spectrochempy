@@ -21,7 +21,9 @@ class TestWorkflowMathBaseline:
     notebook generation:
 
     - unary NumPy ufuncs like ``np.exp`` dispatch to ``NDDataset``;
-    - SpectroChemPy does not expose a matching top-level ``scp.exp`` alias;
+    - SpectroChemPy now exposes a small matching set of top-level math aliases
+      for common notebook workflows: ``scp.exp``, ``scp.log``, ``scp.log10``,
+      ``scp.sin``, and ``scp.cos``;
     - SpectroChemPy now exposes top-level line-shape helpers like
       ``scp.gaussian`` for common synthetic profiles;
     - a native ``scp.stack(..., axis=1)`` path now exists for 1D profiles;
@@ -41,8 +43,19 @@ class TestWorkflowMathBaseline:
             np.exp(-((time.data - 0.5) ** 2) / 0.05),
         )
 
-    def test_top_level_scp_exp_is_not_exposed(self):
-        assert not hasattr(scp, "exp")
+    def test_top_level_scp_exp_matches_numpy_dispatch(self):
+        time = scp.linspace(0.0, 1.0, 5)
+
+        result = scp.exp(-((time - 0.5) ** 2) / 0.05)
+        expected = np.exp(-((time - 0.5) ** 2) / 0.05)
+
+        assert isinstance(result, NDDataset)
+        assert result.shape == (5,)
+        np.testing.assert_allclose(result.data, expected.data)
+
+    def test_curated_math_aliases_are_exposed(self):
+        for name in ("exp", "log", "log10", "sin", "cos"):
+            assert hasattr(scp, name)
 
     def test_top_level_scp_gaussian_returns_nddataset(self):
         time = scp.linspace(0.0, 1.0, 5)
