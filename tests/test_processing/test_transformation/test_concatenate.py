@@ -161,6 +161,17 @@ def test_bug_243():
     assert D12.x.data[-1] == D2.x.data[-1]
 
 
+def test_stack_axis_1_for_1d_profiles():
+    t = scp.linspace(0.0, 1.0, 5)
+    profiles = [np.exp(-((t - c) ** 2) / 0.05) for c in (0.2, 0.5, 0.8)]
+
+    result = stack(profiles, axis=1)
+
+    assert result.shape == (5, 3)
+    assert result.dims == ["x", "y"]
+    assert result.y.labels is not None
+
+
 # ==============================================================================
 # CoordSet lifecycle — concatenate dimension coordinate propagation
 # ==============================================================================
