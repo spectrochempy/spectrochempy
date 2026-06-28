@@ -32,7 +32,18 @@ def read_opus(*paths, **kwargs):
     r"""
     Open Bruker OPUS file(s).
 
-    Eventually group them in a single dataset. Returns an error if dimensions are incompatibles.
+    This is the explicit OPUS reader in the public import API. Use
+    :func:`spectrochempy.read` for generic format autodetection and
+    ``scp.opus.read(...)`` or :func:`spectrochempy.read_opus` when the OPUS
+    format is already known.
+
+    Eventually group them in a single dataset. Returns an error if dimensions
+    are incompatibles.
+
+    Non-merged multi-file reads may return a list-like `ScpObjectList`
+    exposing helper methods for dataset selection. See
+    :func:`spectrochempy.read` for the complete description of the generic
+    import convention and multi-object return behavior.
 
 
     Parameters
@@ -80,7 +91,8 @@ def read_opus(*paths, **kwargs):
     object : `NDDataset` or `ScpObjectList` of `NDDataset`
         The returned dataset(s). When several datasets are returned, the
         result is a list-like `ScpObjectList` with helper attributes such as
-        ``.names`` and ``.select_largest()``.
+        ``.names``, ``.select_largest()``, ``.select_by_name()``,
+        ``.filter_by_ndim()``, and ``.filter_by_shape()``.
 
     Other Parameters
     ----------------
@@ -206,7 +218,12 @@ def read_opus(*paths, **kwargs):
     >>>                    directory='irdata/OPUS', merge=False)
     >>> len(le)
     3
-    >>> le.names
+    >>> names = le.names
+    >>> len(names)
+    3
+    >>> largest = le.select_largest()
+    >>> largest.ndim
+    2
 
     Read without a filename. This has the effect of opening a dialog for file(s)
     selection

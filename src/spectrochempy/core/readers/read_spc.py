@@ -29,6 +29,16 @@ def read_spc(*paths, **kwargs):
     r"""
     Open Galactic files.
 
+    This is the explicit SPC reader in the public import API. Use
+    :func:`spectrochempy.read` for generic format autodetection and
+    ``scp.spc.read(...)`` or :func:`spectrochempy.read_spc` when the SPC format
+    is already known.
+
+    Non-merged multi-file reads may return a list-like `ScpObjectList`
+    exposing helper methods for dataset selection. See
+    :func:`spectrochempy.read` for the complete description of the generic
+    import convention and multi-object return behavior.
+
     Parameters
     ----------
     *paths : `str`, `~pathlib.Path` object objects or valid urls, optional
@@ -50,7 +60,9 @@ def read_spc(*paths, **kwargs):
     -------
     object : `NDDataset` or `ScpObjectList` of `NDDataset`
         The returned dataset(s). When several datasets are returned, the
-        result is a list-like `ScpObjectList`.
+        result is a list-like `ScpObjectList` with helper attributes such as
+        ``.names``, ``.select_largest()``, ``.select_by_name()``,
+        ``.filter_by_ndim()``, and ``.filter_by_shape()``.
 
     Other Parameters
     ----------------
