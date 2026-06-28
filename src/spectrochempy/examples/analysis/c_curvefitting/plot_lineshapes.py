@@ -25,15 +25,16 @@ profiles = [
     scp.lorentzian(x, ampl=1.0, pos=0.0, width=0.8),
     scp.voigt(x, ampl=1.0, pos=1.5, width=1.0, ratio=0.5),
     scp.asymmetricvoigt(x, ampl=1.0, pos=2.5, width=1.2, ratio=0.4, asym=0.25),
-    scp.sigmoid(x, ampl=1.0, pos=-0.5, asym=6.0),
 ]
 
 # %%
 # Stack them as columns to compare the available shapes side by side.
 shapes = scp.stack(profiles, axis=1)
-shapes.y = scp.Coord(
-    labels=["gaussian", "lorentzian", "voigt", "asym. voigt", "sigmoid"]
-)
+shapes.x.title = "time"
+shapes.y = scp.Coord(labels=["gaussian", "lorentzian", "voigt", "asym. voigt"])
 
 # %%
-_ = shapes.plot(legend=shapes.y.labels, colormap=None)
+ax = shapes.T.plot()
+_ = ax.legend(shapes.y.labels)
+
+# %%

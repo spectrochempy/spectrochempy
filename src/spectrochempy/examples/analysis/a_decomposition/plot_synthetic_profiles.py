@@ -33,27 +33,31 @@ c3 = 0.6 * scp.exp(-0.5 * ((time - 0.82) / 0.08) ** 2)
 # %%
 # Assemble the 1D profiles as columns of a concentration matrix.
 profiles = scp.stack([c1, c2, c3], axis=1)
-profiles.y = scp.Coord(labels=["A", "B", "C"], title="species")
+profiles.x.title = "time"
+profiles.y = scp.Coord(labels=["c1", "c2", "c3"], title="species")
 profiles.name = "concentrations"
 profiles.title = "relative concentration"
 
 # %%
-_ = profiles.plot(legend=profiles.y.labels, colormap=None)
+ax = profiles.T.plot()
+_ = ax.legend(profiles.y.labels)
 
 # %%
 # The same workflow can also use the built-in Gaussian line-shape helper when
 # that reads more naturally for the problem at hand.
 profiles_gaussian = scp.stack(
     [
-        scp.gaussian(time, ampl=1.0, pos=0.25, width=0.235),
-        scp.gaussian(time, ampl=0.8, pos=0.55, width=0.282),
-        scp.gaussian(time, ampl=0.6, pos=0.82, width=0.188),
+        scp.gaussian(time, ampl=1.0, pos=0.25, width=0.235, normalized=False),
+        scp.gaussian(time, ampl=0.8, pos=0.55, width=0.282, normalized=False),
+        scp.gaussian(time, ampl=0.6, pos=0.82, width=0.188, normalized=False),
     ],
     axis=1,
 )
+profiles_gaussian.x.title = "time"
 profiles_gaussian.y = scp.Coord(labels=["A", "B", "C"], title="species")
 profiles_gaussian.name = "concentrations_gaussian"
 profiles_gaussian.title = "relative concentration"
 
 # %%
-_ = profiles_gaussian.plot(legend=profiles_gaussian.y.labels, colormap=None)
+ax = profiles_gaussian.T.plot()
+_ = ax.legend(profiles_gaussian.y.labels)
