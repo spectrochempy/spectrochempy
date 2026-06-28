@@ -321,7 +321,7 @@ class ScpObjectList(list):
         str
             The html representation of the list of spectrochempy objects.
         """
-        from spectrochempy.utils.print import convert_to_html
+        from spectrochempy.utils.print import convert_to_html  # noqa: PLC0415
 
         # Handle empty list
         if not self:
@@ -357,10 +357,7 @@ class ScpObjectList(list):
     @property
     def names(self):
         """Return a list of dataset names."""
-        return [
-            ds.name if hasattr(ds, "name") else str(ds)
-            for ds in self
-        ]
+        return [ds.name if hasattr(ds, "name") else str(ds) for ds in self]
 
     def select_largest(self, ndim=None):
         """
@@ -419,8 +416,10 @@ class ScpObjectList(list):
 
     def filter_by_ndim(self, ndim):
         """
-        Return a new ScpObjectList containing only datasets with *ndim*
-        dimensions.
+        Return a new ScpObjectList containing only datasets with *ndim* dimensions.
+
+        Filters the list to include only datasets that have the specified
+        number of dimensions.
 
         Parameters
         ----------
@@ -438,8 +437,10 @@ class ScpObjectList(list):
 
     def filter_by_shape(self, shape):
         """
-        Return a new ScpObjectList containing only datasets whose shape
-        equals *shape*.
+        Return a new ScpObjectList containing only datasets with a given shape.
+
+        Filters the list to include only datasets whose shape exactly
+        matches the provided tuple.
 
         Parameters
         ----------

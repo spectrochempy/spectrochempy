@@ -196,6 +196,7 @@ class TestScpObjectList:
 
     def test_names_property(self):
         """Test extracting names from a list of objects."""
+
         class MockDS:
             def __init__(self, name, ndim=2, shape=(10, 20), size=200):
                 self.name = name
@@ -208,6 +209,7 @@ class TestScpObjectList:
 
     def test_select_largest(self):
         """Test selecting the largest dataset."""
+
         class MockDS:
             def __init__(self, name, ndim=2, shape=(10, 20), size=200):
                 self.name = name
@@ -215,13 +217,12 @@ class TestScpObjectList:
                 self.shape = shape
                 self.size = size
 
-        datasets = ScpObjectList(
-            [MockDS("small", size=50), MockDS("large", size=500)]
-        )
+        datasets = ScpObjectList([MockDS("small", size=50), MockDS("large", size=500)])
         assert datasets.select_largest().name == "large"
 
     def test_select_largest_with_ndim(self):
         """Test selecting the largest dataset with a specific ndim."""
+
         class MockDS:
             def __init__(self, name, ndim=2, shape=(10, 20), size=200):
                 self.name = name
@@ -246,6 +247,7 @@ class TestScpObjectList:
 
     def test_select_largest_no_match_raises(self):
         """Test that select_largest raises when no dataset matches ndim."""
+
         class MockDS:
             def __init__(self):
                 self.ndim = 2
@@ -256,6 +258,7 @@ class TestScpObjectList:
 
     def test_select_by_name(self):
         """Test selecting a dataset by name substring."""
+
         class MockDS:
             def __init__(self, name):
                 self.name = name
@@ -268,6 +271,7 @@ class TestScpObjectList:
 
     def test_select_by_name_no_match_raises(self):
         """Test that select_by_name raises when no name matches."""
+
         class MockDS:
             def __init__(self, name):
                 self.name = name
@@ -277,6 +281,7 @@ class TestScpObjectList:
 
     def test_filter_by_ndim(self):
         """Test filtering datasets by dimensionality."""
+
         class MockDS:
             def __init__(self, name, ndim=2):
                 self.name = name
@@ -296,6 +301,7 @@ class TestScpObjectList:
 
     def test_filter_by_shape(self):
         """Test filtering datasets by exact shape."""
+
         class MockDS:
             def __init__(self, name, shape):
                 self.name = name
