@@ -19,7 +19,10 @@ New Features
   shapes: ``scp.gaussian(...)``, ``scp.lorentzian(...)``, ``scp.voigt(...)``,
   ``scp.asymmetricvoigt(...)``, and ``scp.sigmoid(...)``. This makes it easier
   to build synthetic profiles directly from the public API, including in
-  gallery and notebook workflows. (#1301)
+  gallery and notebook workflows. A small curated set of top-level math aliases
+  is also now available for the same workflow-oriented use cases:
+  ``scp.exp(...)``, ``scp.log(...)``, ``scp.log10(...)``, ``scp.sin(...)``,
+  and ``scp.cos(...)``. (#1301)
 
 - ``scp.concatenate(..., axis=1)`` now supports promoting 1D datasets into
   column-wise 2D `NDDataset` results. This makes it easier to assemble profile
