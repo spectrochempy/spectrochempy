@@ -51,7 +51,7 @@ import spectrochempy as scp
 
 # %%
 path = scp.preferences.datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_1d"
-fid = scp.nmr.read_topspin(path)
+fid = scp.nmr.read(path)
 fid
 
 # %% [markdown]

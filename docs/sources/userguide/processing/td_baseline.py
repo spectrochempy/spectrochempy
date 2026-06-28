@@ -49,7 +49,7 @@ import spectrochempy as scp
 
 # %%
 path = scp.preferences.datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "h3po4"
-fid = scp.nmr.read_topspin(path, expno=4)
+fid = scp.nmr.read(path, expno=4)
 prefs = scp.preferences
 prefs.figure.figsize = (7, 3)
 _ = fid.plot(show_complex=True)
@@ -71,7 +71,7 @@ _ = spec.plot(xlim=(5, -5))
 
 # %%
 path = scp.preferences.datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "cadmium"
-fid2 = scp.nmr.read_topspin(path, expno=100)
+fid2 = scp.nmr.read(path, expno=100)
 _ = fid2.plot(show_complex=True)
 
 # %%

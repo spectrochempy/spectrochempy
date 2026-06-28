@@ -14,7 +14,6 @@ import warnings
 
 import numpy as np
 import scipy.interpolate
-import xlrd
 
 import spectrochempy as scp
 from spectrochempy.core.dataset.coord import Coord
@@ -25,6 +24,7 @@ from spectrochempy.utils._logging import info_
 from spectrochempy.utils.datetimeutils import UTC
 from spectrochempy.utils.file import get_directory_name
 from spectrochempy.utils.file import get_filenames
+from spectrochempy.utils.optional import import_optional_dependency
 
 
 def read_carroucell(directory=None, **kwargs):
@@ -163,6 +163,13 @@ def _read_carroucell(*args, **kwargs):
     else:
         Tfile = Tfile[0]
         if Tfile[-4:].lower() == ".xls":
+            xlrd = import_optional_dependency(
+                "xlrd",
+                extra=(
+                    "Temperature metadata from Carroucell '.xls' files requires "
+                    "the optional xlrd dependency."
+                ),
+            )
             book = xlrd.open_workbook(os.path.join(directory, Tfile))
 
             # determine experiment start and end time (thermocouple clock)
