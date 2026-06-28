@@ -38,10 +38,6 @@ plotting, and ordinary FFT operations.
 Compatibility aliases
 =====================
 
-The plugin-owned TopSpin reader is documented here rather than in the core API
-reference because it is provided by ``spectrochempy-nmr``, not by the core
-package itself.
-
 Compatibility aliases:
 
 - ``scp.nmr.read_topspin(...)`` remains available as the explicit historical
