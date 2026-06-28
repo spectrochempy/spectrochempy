@@ -26,6 +26,14 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- ``PLSRegression`` now works with a 1D ``NDDataset`` as the response variable
+  ``y`` (shape ``(n_obs,)``). Previously, the ``_set_output`` coordinate wrapping
+  decorator assumed the metadata source was always 2D, causing a ``ValueError``
+  on ``predict()``, ``y_scores``, ``y_loadings``, ``y_weights``, ``y_rotations``
+  and ``result`` when fitting with a 1D target.  Fixes the ``coef`` property
+  coordinate assignment which incorrectly used ``self._Y.x`` instead of
+  ``self._Y.y`` for the target dimension. (#1305)
+
 
 .. section
 
