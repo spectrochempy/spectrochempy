@@ -40,11 +40,8 @@ available, but new documentation and examples should prefer the shorter
 API Reference
 =============
 
-.. autosummary::
-    :nosignatures:
-    :toctree: generated/
-
-    spectrochempy.carroucell.read
+The generated public API page for the Carroucell plugin is listed in
+:doc:`/reference/plugins`. See :func:`spectrochempy.carroucell.read`.
 
 Examples
 ========

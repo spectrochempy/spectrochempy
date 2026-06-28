@@ -49,11 +49,8 @@ Direct accessors such as ``model.A``, ``model.B``, ``model.C``, and
 API Reference
 =============
 
-.. autosummary::
-    :nosignatures:
-    :toctree: generated/
-
-    spectrochempy.tensor.CP
+The generated public API page for the Tensor plugin is listed in
+:doc:`/reference/plugins`. See :class:`spectrochempy.tensor.CP`.
 
 Examples
 ========

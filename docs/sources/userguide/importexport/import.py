@@ -122,18 +122,18 @@ X
 # | read_csv      | Comma-Separated Values (CSV) files             | .csv           |
 # | read_jcamp, <br/>read_dx| JCAMP-DX spectral data files                   | .dx, .jdx      |
 # | read_matlab,<br/>read_mat   | MATLAB files                                   | .mat, .dso     |
-# | read_topspin  | Bruker TopSpin NMR files   (requires spectrochempy-nmr plugin)  | fid, ser, 1r, 1i, 2rr... |
+# | scp.nmr.read  | Bruker TopSpin NMR files   (requires spectrochempy-nmr plugin)  | fid, ser, 1r, 1i, 2rr... |
 # | read_labspec  | LABSPEC6 spectral data files                   | .txt           |
 # | read_wire,<br/>read_wdf | Renishaw Wire files                     | .wdf           |
 # | read_scp      | SpectroChemPy-specific files                   | .scp           |
 # | read_soc,<br/>read_ddr,<br/>read_hdr,<br/>read_sdr     | Surface Optics Corporation files               | .ddr, .hdr, .sdr |
 # | read_galactic | Galactic spectral files                        | .spc           |
 # | read_quadera  | Pfeiffer Vacuum QUADERA mass spectrometer files | .txt           |
-# | read_perkinelmer | PerkinElmer SP files   (requires spectrochempy-perkinelmer plugin) | .sp |
+# | scp.perkinelmer.read | PerkinElmer SP files   (requires spectrochempy-perkinelmer plugin) | .sp |
 # | read          | Generic reader (automatically detects format)  | -              |
 # | read_dir      | Reads all supported files in a directory       | -              |
 # | read_zip      | Reads files from a ZIP archive                 | .zip           |
-# | read_carroucell | Reads files from a carroucell experiment directory | -          | (requires spectrochempy-carroucell plugin)
+# | scp.carroucell.read | Reads files from a carroucell experiment directory | -          | (requires spectrochempy-carroucell plugin)
 #
 # The `read_dir` function scans a directory and reads all supported files,
 # returning a list of `NDDataset` objects.

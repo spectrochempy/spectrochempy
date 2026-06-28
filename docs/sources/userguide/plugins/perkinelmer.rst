@@ -44,11 +44,8 @@ Compatibility aliases are also available for older scripts:
 API Reference
 =============
 
-.. autosummary::
-    :nosignatures:
-    :toctree: generated/
-
-    spectrochempy.perkinelmer.read
+The generated public API page for the PerkinElmer plugin is listed in
+:doc:`/reference/plugins`. See :func:`spectrochempy.perkinelmer.read`.
 
 Examples
 ========

@@ -48,11 +48,8 @@ The existing direct accessors, such as ``analysis.f``, ``analysis.K``,
 API Reference
 =============
 
-.. autosummary::
-    :nosignatures:
-    :toctree: generated/
-
-    spectrochempy.iris.IRIS
+The generated public API page for the IRIS plugin is listed in
+:doc:`/reference/plugins`. See :class:`spectrochempy.iris.IRIS`.
 
 Examples
 ========

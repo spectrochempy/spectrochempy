@@ -51,11 +51,8 @@ New documentation and examples should prefer the shorter
 API Reference
 =============
 
-.. autosummary::
-    :nosignatures:
-    :toctree: generated/
-
-    spectrochempy.nmr.read
+The generated public API page for the NMR plugin is listed in
+:doc:`/reference/plugins`. See :func:`spectrochempy.nmr.read`.
 
 Examples
 ========

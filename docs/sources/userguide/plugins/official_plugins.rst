@@ -127,6 +127,9 @@ Some official plugins may expose limited root-level compatibility aliases, such
 as ``scp.IRIS``. New examples should prefer the namespaced form,
 ``scp.iris.IRIS`` or ``scp.tensor.CP``.
 
+Generated plugin-owned public API pages are collected in
+:doc:`/reference/plugins`.
+
 Plugin summaries
 ================
 

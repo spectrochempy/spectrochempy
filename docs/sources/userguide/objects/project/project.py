@@ -77,7 +77,7 @@ proj
 datadir = scp.pathclean(scp.preferences.datadir)
 path = datadir / "nmrdata" / "bruker" / "tests" / "nmr"
 
-nd1 = scp.nmr.read_topspin(
+nd1 = scp.nmr.read(
     path / "topspin_1d", expno=1, remove_digital_filter=True, name="NMR_1D"
 )
 # Use the same dataset twice for the example (real projects would use different data)

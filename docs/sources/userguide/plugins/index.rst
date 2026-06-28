@@ -40,6 +40,8 @@ Some former top-level names remain as compatibility aliases. New code should
 prefer namespaced APIs such as ``scp.nmr.read``, ``scp.iris.IRIS``,
 and ``scp.tensor.CP``.
 
+Generated plugin API pages are collected in :doc:`/reference/plugins`.
+
 Install and inspect plugins
 ===========================
 

@@ -770,3 +770,15 @@ File
     :toctree: generated/
 
     pathclean
+
+*******************
+Official plugins
+*******************
+
+Plugin-owned public API pages are documented separately from the User Guide on
+the dedicated reference page below.
+
+.. toctree::
+   :maxdepth: 1
+
+   plugins
