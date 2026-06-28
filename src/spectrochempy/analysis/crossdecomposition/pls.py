@@ -261,8 +261,13 @@ class PLSRegression(CrossDecompositionAnalysis):
     @property
     def coef(self):
         coef = NDDataset(self._coef)
+        coef.dims = ["x", "y"]
+        try:
+            y_coord = self._Y.y
+        except (AttributeError, IndexError, TypeError):
+            y_coord = None
         coef.set_coordset(
-            y=self._Y.x,
+            y=y_coord,
             x=self._X.x,
         )
         return coef
