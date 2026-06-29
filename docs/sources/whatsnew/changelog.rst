@@ -21,21 +21,22 @@ New Features
 
 - SpectroChemPy now exposes direct top-level helpers for the built-in 1D line
   shapes: ``scp.gaussian(...)``, ``scp.lorentzian(...)``, ``scp.voigt(...)``,
-  ``scp.asymmetricvoigt(...)``, and ``scp.sigmoid(...)``. This makes it easier
-  to build synthetic profiles directly from the public API, including in
-  gallery and notebook workflows. A small curated set of top-level math aliases
-  is also now available for the same workflow-oriented use cases:
-  ``scp.exp(...)``, ``scp.log(...)``, ``scp.log10(...)``, ``scp.sin(...)``,
-  and ``scp.cos(...)``. (#1301)
+  ``scp.asymmetricvoigt(...)``, and ``scp.sigmoid(...)``. All four
+  line-shape helpers (except ``scp.sigmoid``) also accept a ``normalized``
+  keyword argument: ``normalized=True`` (default) preserves the existing
+  area-normalised behaviour, while ``normalized=False`` returns a profile
+  whose peak amplitude is exactly *ampl*, matching the intuitive
+  ``scp.exp(...)`` workflow for building synthetic profiles.  A small
+  curated set of top-level math aliases is also now available for the
+  same workflow-oriented use cases: ``scp.exp(...)``, ``scp.log(...)``,
+  ``scp.log10(...)``, ``scp.sin(...)``, and ``scp.cos(...)``. (#1301)
 
-- ``scp.concatenate(..., axis=1)`` now supports promoting 1D datasets into
-  column-wise 2D `NDDataset` results. This makes it easier to assemble profile
-  or concentration matrices directly within the SpectroChemPy API.
-
-- ``scp.stack(..., axis=1)`` now supports stacking 1D datasets as columns
-  into a 2D `NDDataset`. This makes it easier to build workflow-style
-  concentration or profile matrices without falling back to
-  ``np.column_stack(...)`` followed by a manual `NDDataset` wrapper.
+- ``scp.concatenate`` and ``scp.stack`` now accept ``Coord`` inputs
+  (automatically promoted to 1D `NDDataset`), and ``stack(..., axis=1)``
+  is supported for stacking 1D profiles as columns into a 2D dataset.
+  These changes make the workflow for building synthetic concentration
+  or profile matrices fully native within the SpectroChemPy API, without
+  falling back to ``np.column_stack(...)`` or manual `NDDataset` wrapping.
 
 - Reading multi-object files (MATLAB ``.mat``, multi-subfile SPC, ZIP
   archives) now returns a list with convenience methods for selecting
