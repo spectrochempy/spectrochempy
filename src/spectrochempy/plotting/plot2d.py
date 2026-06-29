@@ -1802,7 +1802,10 @@ def plot_2D(dataset, method=None, **kwargs):
                     line_colors.append(colors[i % len(colors)])
                 else:
                     line_colors.append(None)
-                line_labels.append(fmt.format(ydata[i]))
+                if y is not None and y.is_labeled and i < len(y.labels):
+                    line_labels.append(str(y.labels[i]))
+                else:
+                    line_labels.append(fmt.format(ydata[i]))
 
             # Use render_lines for drawing
             new_lines = render_lines(
@@ -1819,6 +1822,14 @@ def plot_2D(dataset, method=None, **kwargs):
                 reverse=True,
                 picker=True,
             )
+
+            # render_lines adds lines to ax.lines in reverse z-order (last line first),
+            # so legend entries appear reversed. Re-order ax.lines to natural order
+            # without affecting per-line zorder (set explicitly above).
+            for line in new_lines:
+                line.remove()
+            for line in reversed(new_lines):
+                ax.add_line(line)
 
             # store the full set of lines (render_lines already added them to ax)
             new._ax_lines = existing_lines + new_lines
