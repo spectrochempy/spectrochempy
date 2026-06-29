@@ -212,6 +212,9 @@ def plot_1D(dataset, method=None, **kwargs):
         # with the imaginary component
         show_complex = kwargs.pop("show_complex", False)
 
+        if kwargs.pop("scatter", False) and "scatter" not in (method or ""):
+            method = "scatter"
+
         # Resolve line/marker styles using centralized L1 function
         style_kwargs = resolve_line_style(
             dataset=new,
@@ -1024,7 +1027,15 @@ def plot_multiple(
     """
     if not is_sequence(datasets):
         # we need a sequence. Else it is a single plot.
-        return datasets.plot(**kwargs)
+        return datasets.plot(
+            method=method,
+            pen=pen,
+            marker=marker,
+            color=color,
+            ls=ls,
+            lw=lw,
+            **kwargs,
+        )
 
     def _valid(x, desc):
         if is_sequence(x) and len(x) != len(datasets):

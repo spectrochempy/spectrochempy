@@ -56,6 +56,12 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- Fixed plotting regressions introduced after 0.8.2 where
+  ``plot_multiple(..., method="scatter")`` could render as plain line plots
+  without markers, the single-dataset ``plot_multiple`` fallback dropped the
+  requested plotting method, and the documented ``plot(scatter=True)``
+  compatibility flag was accepted but ignored.
+
 - ``PLSRegression`` now works with a 1D ``NDDataset`` as the response variable
   ``y`` (shape ``(n_obs,)``). Previously, the ``_set_output`` coordinate wrapping
   decorator assumed the metadata source was always 2D, causing a ``ValueError``

@@ -141,3 +141,64 @@ def test_plot_multiple_single_axes():
     assert len(ax.lines) == 3, f"Expected 3 lines, got {len(ax.lines)}"
 
     plt.close("all")
+
+
+def test_plot_multiple_scatter_uses_markers():
+    """plot_multiple(method='scatter') should not silently become a plain line plot."""
+    import matplotlib.pyplot as plt
+    from spectrochempy import NDDataset
+    from spectrochempy.plotting.plot1d import plot_multiple
+
+    datasets = [
+        NDDataset([1, 2, 3], name="A"),
+        NDDataset([2, 3, 4], name="B"),
+    ]
+
+    ax = plot_multiple(datasets, method="scatter", show=False)
+
+    assert len(ax.lines) == 2
+    assert len(ax.collections) == 0
+    for line in ax.lines:
+        assert line.get_marker() not in (None, "None", "")
+
+    plt.close("all")
+
+
+def test_plot_multiple_scatter_pen_false_has_no_connecting_lines():
+    """pen=False should keep plot_multiple scatter traces as marker-only lines."""
+    import matplotlib.pyplot as plt
+    from spectrochempy import NDDataset
+    from spectrochempy.plotting.plot1d import plot_multiple
+
+    datasets = [
+        NDDataset([1, 2, 3], name="A"),
+        NDDataset([2, 3, 4], name="B"),
+    ]
+
+    ax = plot_multiple(datasets, method="scatter", pen=False, show=False)
+
+    assert len(ax.lines) == 2
+    for line in ax.lines:
+        assert line.get_marker() not in (None, "None", "")
+        assert line.get_linestyle() == "None"
+
+    plt.close("all")
+
+
+def test_plot_multiple_single_dataset_forwards_method():
+    """The single-dataset fallback should keep the requested plotting method."""
+    import matplotlib.pyplot as plt
+    from spectrochempy import NDDataset
+    from spectrochempy.plotting.plot1d import plot_multiple
+
+    dataset = NDDataset([1, 2, 3], name="A")
+
+    ax = plot_multiple(dataset, method="scatter", pen=False, show=False)
+
+    assert len(ax.lines) >= 1
+    assert len(ax.collections) == 0
+    for line in ax.lines:
+        assert line.get_marker() not in (None, "None", "")
+        assert line.get_linestyle() == "None"
+
+    plt.close("all")

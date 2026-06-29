@@ -175,6 +175,23 @@ class TestScatterMarkerBehavior:
 
         assert_dataset_state_unchanged(ds_before, sample_1d_dataset)
 
+    def test_scatter_boolean_kwarg_selects_scatter(self, sample_1d_dataset):
+        """Test the documented scatter=True compatibility flag."""
+        ds_before = sample_1d_dataset.__dict__.copy()
+
+        ax = sample_1d_dataset.plot(scatter=True)
+
+        assert len(ax.lines) > 0, "Scatter plot should have line objects"
+        line = ax.lines[0]
+        assert line.get_marker() not in (
+            None,
+            "None",
+            "",
+        ), "scatter=True should enable markers"
+        assert line.get_linestyle() == "None", "scatter=True should disable the line"
+
+        assert_dataset_state_unchanged(ds_before, sample_1d_dataset)
+
     def test_scatter_pen_has_line_and_marker(self, sample_1d_dataset):
         """Test that plot_scatter_pen shows both line and marker."""
         ds_before = sample_1d_dataset.__dict__.copy()
