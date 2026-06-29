@@ -33,6 +33,11 @@ New Features
   SpectroChemPy API, without falling back to ``np.column_stack(...)``
   or manual `NDDataset` wrapping.
 
+- 2D ``plot(method="lines"/"stack")`` now automatically uses coordinate labels
+  as matplotlib line labels, so that ``ax.legend()`` shows meaningful names
+  without needing to pass labels explicitly.  Legend entries are displayed
+  in natural (first-to-last) order. (#1320)
+
 - Reading multi-object files such as MATLAB ``.mat`` files, multi-subfile SPC
   files, and ZIP archives now returns a list-like result with helper methods
   for selecting datasets by size, name, dimensionality, or shape. (#1306)
