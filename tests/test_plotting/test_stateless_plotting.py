@@ -263,3 +263,73 @@ class TestColorbarParameter:
 
         # Verify dataset unchanged
         assert_dataset_state_unchanged(ds_before, sample_2d_dataset)
+
+
+class TestPlotParameterPropagation:
+    """Test propagation of public plotting kwargs."""
+
+    def test_line_alpha_is_applied(self, sample_1d_dataset):
+        ax = sample_1d_dataset.plot(alpha=0.25, show=False)
+
+        assert len(ax.lines) > 0
+        assert ax.lines[0].get_alpha() == pytest.approx(0.25)
+
+    def test_bar_alpha_is_applied(self):
+        from spectrochempy import NDDataset
+
+        ax = NDDataset([1, 2, 3]).plot_bar(alpha=0.4, show=False)
+
+        assert len(ax.patches) == 3
+        assert ax.patches[0].get_alpha() == pytest.approx(0.4)
+
+    def test_markeredgewidth_is_applied(self, sample_1d_dataset):
+        ax = sample_1d_dataset.plot_scatter(markeredgewidth=3.5, show=False)
+
+        assert len(ax.lines) > 0
+        assert ax.lines[0].get_markeredgewidth() == pytest.approx(3.5)
+
+    def test_mew_alias_is_applied(self, sample_1d_dataset):
+        ax = sample_1d_dataset.plot_scatter(mew=2.0, show=False)
+
+        assert len(ax.lines) > 0
+        assert ax.lines[0].get_markeredgewidth() == pytest.approx(2.0)
+
+
+class TestDimensionalFallbacks:
+    """Test dimensional fallback behavior for direct plot_1D/plot_2D calls."""
+
+    def test_plot_1d_forwards_valid_2d_method(self, sample_2d_dataset):
+        ax = sample_2d_dataset.plot_1D(method="contour", show=False)
+
+        assert len(ax.collections) > 0
+
+    def test_plot_1d_rejects_incompatible_method(self, sample_2d_dataset):
+        with pytest.raises(ValueError, match="incompatible"):
+            sample_2d_dataset.plot_1D(method="scatter", show=False)
+
+    def test_plot_2d_forwards_valid_1d_method(self, sample_1d_dataset):
+        ax = sample_1d_dataset.plot_2D(method="scatter", show=False)
+
+        assert len(ax.lines) > 0
+        assert ax.lines[0].get_marker() not in (None, "None", "")
+        assert ax.lines[0].get_linestyle() == "None"
+
+    def test_plot_2d_rejects_incompatible_method(self, sample_1d_dataset):
+        with pytest.raises(ValueError, match="incompatible"):
+            sample_1d_dataset.plot_2D(method="contour", show=False)
+
+
+class TestPlotlyCompatibility:
+    """Test explicit Plotly compatibility failure mode."""
+
+    def test_plotly_request_fails_clearly_for_1d(self, sample_1d_dataset):
+        with pytest.raises(
+            NotImplementedError, match="Plotly plotting is not currently available"
+        ):
+            sample_1d_dataset.plot(use_plotly=True, show=False)
+
+    def test_plotly_request_fails_clearly_for_2d(self, sample_2d_dataset):
+        with pytest.raises(
+            NotImplementedError, match="Plotly plotting is not currently available"
+        ):
+            sample_2d_dataset.plot(use_plotly=True, show=False)

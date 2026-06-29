@@ -31,6 +31,26 @@ from spectrochempy.plotting._style import resolve_line_style
 from spectrochempy.plotting._style import resolve_stack_colors
 from spectrochempy.utils.mplutils import make_label
 
+_VALID_1D_METHODS = {"pen", "bar", "scatter", "scatter_pen", "scatter+pen"}
+_VALID_2D_PLUS_METHODS = {
+    "lines",
+    "stack",
+    "contour",
+    "map",
+    "contourf",
+    "image",
+    "surface",
+    "waterfall",
+}
+
+
+def _raise_incompatible_method(method, source, target):
+    raise ValueError(
+        f"method={method!r} is incompatible with {source}; "
+        f"use a {target} plotting method or call dataset.plot() for automatic dispatch."
+    )
+
+
 # ======================================================================================
 # Helper functions for aspect ratio control
 # ======================================================================================
@@ -1210,6 +1230,8 @@ def plot_2D(dataset, method=None, **kwargs):
     # Get preferences
     # ----------------------------------------------------------------------------------
     prefs = preferences
+    requested_alpha = kwargs.get("calpha", kwargs.get("alpha"))
+    requested_levels = kwargs.get("levels")
 
     # Resolve plotting style(s) locally (no global rcParams / no prefs.style mutation)
     style = kwargs.pop("style", None)
@@ -1266,11 +1288,17 @@ def plot_2D(dataset, method=None, **kwargs):
         # ----------------------------------------------------------------------------------
         # should we redirect the plotting to another method
         if dataset._squeeze_ndim < 2:
-            return dataset.plot_1D(**kwargs)
+            if method is None:
+                return dataset.plot_1D(**kwargs)
+            if method in _VALID_1D_METHODS:
+                return dataset.plot_1D(method=method, **kwargs)
+            _raise_incompatible_method(method, "plot_2D() with 1D data", "1D")
 
         # if plotly execute plotly routine not this one
         if kwargs.get("use_plotly", prefs.use_plotly):
-            return dataset.plotly(**kwargs)
+            raise NotImplementedError(
+                "Plotly plotting is not currently available. Use the default Matplotlib backend."
+            )
 
         # do not display colorbar if it's not a surface plot
         # except if we have asked to d so
@@ -1358,7 +1386,7 @@ def plot_2D(dataset, method=None, **kwargs):
             marker = None
         markersize = style_kwargs["markersize"]
 
-        alpha = kwargs.get("calpha", prefs.contour_alpha)
+        alpha = requested_alpha if requested_alpha is not None else prefs.contour_alpha
 
         number_x_labels = kwargs.get("n_x_labels", prefs.number_of_x_labels)
         number_y_labels = kwargs.get("n_y_labels", prefs.number_of_y_labels)
@@ -1483,6 +1511,8 @@ def plot_2D(dataset, method=None, **kwargs):
             zdata = new.real.masked_data
         else:
             zdata = new.imag.masked_data
+
+        levels = requested_levels
 
         zlim = kwargs.get("zlim", (np.ma.min(zdata), np.ma.max(zdata)))
 
@@ -1628,10 +1658,13 @@ def plot_2D(dataset, method=None, **kwargs):
                 method = "map"
 
             else:
-                kwargs["nlevels"] = 500
-                if not hasattr(new, "clevels") or new.clevels is None:
-                    new.clevels = _get_clevels(zdata, prefs, **kwargs)
-                mappable = ax.contourf(xdata, ydata, zdata, new.clevels, alpha=alpha)
+                contour_levels = levels
+                if contour_levels is None:
+                    kwargs["nlevels"] = 500
+                    if not hasattr(new, "clevels") or new.clevels is None:
+                        new.clevels = _get_clevels(zdata, prefs, **kwargs)
+                    contour_levels = new.clevels
+                mappable = ax.contourf(xdata, ydata, zdata, contour_levels, alpha=alpha)
                 mappable.set_cmap(cmap)
                 mappable.set_norm(norm)
 
@@ -1657,11 +1690,14 @@ def plot_2D(dataset, method=None, **kwargs):
             else:
                 # contour plot
                 # -------------
-                if not hasattr(new, "clevels") or new.clevels is None:
-                    new.clevels = _get_clevels(zdata, prefs, **kwargs)
+                contour_levels = levels
+                if contour_levels is None:
+                    if not hasattr(new, "clevels") or new.clevels is None:
+                        new.clevels = _get_clevels(zdata, prefs, **kwargs)
+                    contour_levels = new.clevels
 
                 mappable = ax.contour(
-                    xdata, ydata, zdata, new.clevels, linewidths=lw, alpha=alpha
+                    xdata, ydata, zdata, contour_levels, linewidths=lw, alpha=alpha
                 )
                 mappable.set_cmap(cmap)
                 mappable.set_norm(norm)

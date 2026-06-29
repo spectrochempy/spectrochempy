@@ -49,6 +49,13 @@ Bug Fixes
   single-dataset ``plot_multiple`` calls preserve the requested plotting method,
   and ``plot(scatter=True)`` once again selects scatter-style plotting.
 
+- Fixed several plotting API inconsistencies: ``multiplot()`` now preserves the
+  requested plotting method for single datasets and accepts ``nrows`` /
+  ``ncols`` aliases; 1D artists now honor ``alpha``, ``markeredgewidth``, and
+  ``mew``; 2D contour-style plots accept ``alpha`` and ``levels`` consistently;
+  and ``use_plotly=True`` now fails with a clear error when Plotly support is
+  unavailable.
+
 - ``PLSRegression`` now works with a 1D ``NDDataset`` as the response variable
   ``y``. This fixes failures in ``predict()``, ``y_scores``, ``y_loadings``,
   ``y_weights``, ``y_rotations``, ``result``, and ``coef`` when fitting with a
