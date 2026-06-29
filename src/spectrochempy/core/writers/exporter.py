@@ -58,6 +58,10 @@ class Exporter(HasTraits):
                     f"Supported suffixes are: {supported}."
                 )
             protocol = self.protocols[filename.suffix]
+            if not hasattr(self, f"_write_{protocol}"):
+                import importlib  # noqa: PLC0415
+
+                importlib.import_module(f".write_{protocol}", __package__)
             write_ = getattr(self, f"_write_{protocol}")
             write_(self.object, filename, **kwargs)
             return filename
