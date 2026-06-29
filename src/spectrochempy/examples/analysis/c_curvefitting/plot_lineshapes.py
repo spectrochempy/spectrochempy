@@ -35,6 +35,4 @@ shapes.y = scp.Coord(labels=["gaussian", "lorentzian", "voigt", "asym. voigt"])
 
 # %%
 ax = shapes.T.plot()
-_ = ax.legend(shapes.y.labels)
-
-# %%
+_ = ax.legend()
