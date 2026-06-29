@@ -421,7 +421,11 @@ def resolve_line_style(
     result["marker"] = kwargs.get("marker", kwargs.get("m", "auto"))
 
     # Deterministic fallback for scatter methods
-    if result["marker"] == "auto" and method in ("scatter", "scatter_pen"):
+    if (
+        isinstance(result["marker"], str)
+        and result["marker"].lower() == "auto"
+        and method in ("scatter", "scatter_pen")
+    ):
         result["marker"] = getattr(prefs, "scatter_marker", "o")
 
     # For 2D plotting (stack), marker should default to None, not "auto"
