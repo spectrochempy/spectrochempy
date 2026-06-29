@@ -87,8 +87,8 @@ def concatenate(*datasets, **kwargs):
 
     # get a copy of input datasets in order that input data are not modified
     datasets = _get_copy(datasets)
-    # Promote Coord inputs to 1D NDDataset
-    datasets = [_coord_to_nddataset(d) for d in datasets]
+    # Reject Coord inputs — Coord must be explicitly wrapped in NDDataset
+    datasets = [_reject_coord_input(d) for d in datasets]
 
     if _should_promote_1d_column_concatenation(datasets, kwargs):
         return _stack_1d_profiles_as_columns(datasets)
@@ -249,19 +249,21 @@ def stack(*datasets, **kwargs):
     >>> C.shape
     (5, 2)
 
-    ``Coord`` inputs are automatically promoted to 1D datasets.
+    Create 1D datasets from a coordinate and stack them as columns:
 
-    >>> time = scp.Coord.linspace(0, 1, 200)
-    >>> c1 = scp.exp(-0.5 * ((time - 0.25) / 0.10) ** 2)
-    >>> c2 = 0.8 * scp.exp(-0.5 * ((time - 0.55) / 0.12) ** 2)
+    >>> time = scp.Coord.linspace(0, 1, 200, title="time")
+    >>> data1 = scp.exp(-0.5 * ((time.data - 0.25) / 0.10) ** 2)
+    >>> data2 = 0.8 * scp.exp(-0.5 * ((time.data - 0.55) / 0.12) ** 2)
+    >>> c1 = scp.NDDataset(data1, coordset=[time], title="C1")
+    >>> c2 = scp.NDDataset(data2, coordset=[time], title="C2")
     >>> profiles = scp.stack([c1, c2], axis=1)
     >>> profiles.shape
     (200, 2)
 
     """
     datasets = _get_copy(datasets)
-    # Promote Coord inputs to 1D NDDataset
-    datasets = [_coord_to_nddataset(d) for d in datasets]
+    # Reject Coord inputs — Coord must be explicitly wrapped in NDDataset
+    datasets = [_reject_coord_input(d) for d in datasets]
     axis = kwargs.pop("axis", 0)
     if kwargs:
         unexpected = ", ".join(sorted(kwargs))
@@ -294,8 +296,8 @@ def _stack_1d_profiles_as_columns(datasets):
     if not datasets:
         raise ValueError("stack() requires at least one dataset")
 
-    # Promote Coord inputs to 1D NDDataset
-    datasets = [_coord_to_nddataset(d) for d in datasets]
+    # Reject Coord inputs — Coord must be explicitly wrapped in NDDataset
+    datasets = [_reject_coord_input(d) for d in datasets]
 
     shapes = {ds.shape for ds in datasets}
     if len(shapes) != 1:
@@ -351,24 +353,22 @@ def _should_promote_1d_column_concatenation(datasets, kwargs):
 
 # utility functions
 # --------------------
-def _coord_to_nddataset(obj):
+def _reject_coord_input(obj):
     """
-    Promote a Coord to a 1D NDDataset.
+    Reject Coord inputs in stack/concatenate.
 
     Parameters
     ----------
     obj : object
-        If a Coord, it is converted to a 1D NDDataset whose data are
-        the coordinate values and whose x-coordinate is the Coord itself.
+        If a Coord, raises TypeError with an explicit message.
         Otherwise the object is returned unchanged.
     """
-    if not isinstance(obj, Coord):
-        return obj
-    from spectrochempy.core.dataset.nddataset import NDDataset  # noqa: PLC0415
-
-    ds = NDDataset(obj.data)
-    ds.set_coordset(obj)
-    return ds
+    if isinstance(obj, Coord):
+        raise TypeError(
+            "Coord inputs are ambiguous in stack/concatenate. "
+            "Convert them explicitly to NDDataset with the intended coordinate axis.",
+        )
+    return obj
 
 
 def _get_copy(datasets):

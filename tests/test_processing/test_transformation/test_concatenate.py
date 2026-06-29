@@ -337,6 +337,26 @@ def test_concatenate_rejects_incompatible_coord_units():
     assert "Convert the coordinates to compatible units before retrying." in message
 
 
+def test_stack_rejects_coord_input():
+    """stack should raise TypeError when Coord is passed directly."""
+    c = Coord.linspace(0.0, 1.0, 5)
+    with pytest.raises(TypeError, match="Coord inputs are ambiguous"):
+        stack(c, c)
+
+    with pytest.raises(TypeError, match="Coord inputs are ambiguous"):
+        stack([c, c], axis=1)
+
+
+def test_concatenate_rejects_coord_input():
+    """concatenate should raise TypeError when Coord is passed directly."""
+    c = Coord.linspace(0.0, 1.0, 5)
+    with pytest.raises(TypeError, match="Coord inputs are ambiguous"):
+        concatenate(c, c)
+
+    with pytest.raises(TypeError, match="Coord inputs are ambiguous"):
+        concatenate(c, c, axis=1)
+
+
 def test_stack_regression():
     """Stack creates prepended dimension and delegates to concatenate."""
     y = scp.Coord(np.arange(2.0), title="rows")

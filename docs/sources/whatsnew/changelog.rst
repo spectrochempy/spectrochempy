@@ -31,12 +31,11 @@ New Features
   same workflow-oriented use cases: ``scp.exp(...)``, ``scp.log(...)``,
   ``scp.log10(...)``, ``scp.sin(...)``, and ``scp.cos(...)``. (#1301)
 
-- ``scp.concatenate`` and ``scp.stack`` now accept ``Coord`` inputs
-  (automatically promoted to 1D `NDDataset`), and ``stack(..., axis=1)``
-  is supported for stacking 1D profiles as columns into a 2D dataset.
-  These changes make the workflow for building synthetic concentration
-  or profile matrices fully native within the SpectroChemPy API, without
-  falling back to ``np.column_stack(...)`` or manual `NDDataset` wrapping.
+- ``stack(..., axis=1)`` is now supported for stacking 1D profiles as
+  columns into a 2D dataset.  This makes the workflow for building
+  synthetic concentration or profile matrices fully native within the
+  SpectroChemPy API, without falling back to ``np.column_stack(...)``
+  or manual `NDDataset` wrapping.
 
 - Reading multi-object files (MATLAB ``.mat``, multi-subfile SPC, ZIP
   archives) now returns a list with convenience methods for selecting
