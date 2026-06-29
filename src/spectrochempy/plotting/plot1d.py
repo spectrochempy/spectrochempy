@@ -24,6 +24,26 @@ from spectrochempy.plotting._style import resolve_line_style
 from spectrochempy.utils.mplutils import make_label
 from spectrochempy.utils.typeutils import is_sequence
 
+_VALID_1D_METHODS = {"pen", "bar", "scatter", "scatter_pen", "scatter+pen"}
+_VALID_2D_PLUS_METHODS = {
+    "lines",
+    "stack",
+    "contour",
+    "map",
+    "contourf",
+    "image",
+    "surface",
+    "waterfall",
+}
+
+
+def _raise_incompatible_method(method, source, target):
+    raise ValueError(
+        f"method={method!r} is incompatible with {source}; "
+        f"use a {target} plotting method or call dataset.plot() for automatic dispatch."
+    )
+
+
 # --------------------------------------------------------------------------------------
 # plot_1D
 # --------------------------------------------------------------------------------------
@@ -188,11 +208,17 @@ def plot_1D(dataset, method=None, **kwargs):
         # ------------------------------------------------------------------------
         # should we redirect the plotting to another method
         if dataset._squeeze_ndim > 1:
-            return dataset.plot_2D(**kwargs)
+            if method is None:
+                return dataset.plot_2D(**kwargs)
+            if method in _VALID_2D_PLUS_METHODS:
+                return dataset.plot_2D(method=method, **kwargs)
+            _raise_incompatible_method(method, "plot_1D() with non-1D data", "2D/3D")
 
         # if plotly execute plotly routine not this one
         if kwargs.get("use_plotly", prefs.use_plotly):
-            return dataset.plotly(**kwargs)
+            raise NotImplementedError(
+                "Plotly plotting is not currently available. Use the default Matplotlib backend."
+            )
 
         # often we do need to plot only data
         # when plotting on top of a previous plot
@@ -231,6 +257,8 @@ def plot_1D(dataset, method=None, **kwargs):
         markersize = style_kwargs["markersize"]
         markerfacecolor = style_kwargs["markerfacecolor"]
         markeredgecolor = style_kwargs["markeredgecolor"]
+        alpha = style_kwargs["alpha"]
+        markeredgewidth = kwargs.get("markeredgewidth", kwargs.get("mew", 1.0))
 
         markevery = kwargs.get("markevery", kwargs.get("me", 1))
 
@@ -354,9 +382,13 @@ def plot_1D(dataset, method=None, **kwargs):
                 xdata,
                 zdata.squeeze(),
                 edgecolor="k",
+                color=None
+                if isinstance(color, str) and color.upper() == "AUTO"
+                else color,
                 align="center",
                 label=label,
                 width=kwargs.get("width", 0.1),
+                alpha=alpha,
             )
         else:
             # Unified Line2D path for pen, scatter, and scatter_pen
@@ -366,11 +398,12 @@ def plot_1D(dataset, method=None, **kwargs):
                 linestyle=effective_linestyle,
                 marker=effective_marker,
                 markersize=markersize,
-                markeredgewidth=1.0,
+                markeredgewidth=markeredgewidth,
                 markerfacecolor=markerfacecolor,
                 markeredgecolor=markeredgecolor,
                 markevery=markevery,
                 label=label,
+                alpha=alpha,
             )
 
             # Set color and linewidth if not auto

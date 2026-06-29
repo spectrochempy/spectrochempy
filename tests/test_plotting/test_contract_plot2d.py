@@ -102,3 +102,22 @@ def test_plot2d_interpolation(synthetic_2d):
     """Test plot2d with interpolation."""
     ax = synthetic_2d.plot(interpolation="bilinear", show=False)
     assert ax is not None
+
+
+def test_plot2d_alpha_alias_applies_to_contour_artists(synthetic_2d):
+    """Test alpha= behaves like calpha= for contour-like plots."""
+    ax = synthetic_2d.plot(method="contour", alpha=0.3, show=False)
+
+    contour_sets = [child for child in ax.get_children() if hasattr(child, "levels")]
+    assert contour_sets
+    assert contour_sets[0].get_alpha() == pytest.approx(0.3)
+
+
+def test_plot2d_levels_parameter_controls_contour_levels(synthetic_2d):
+    """Test levels= is propagated to contour plots."""
+    levels = [0.2, 0.4, 0.6]
+    ax = synthetic_2d.plot(method="contour", levels=levels, show=False)
+
+    contour_sets = [child for child in ax.get_children() if hasattr(child, "levels")]
+    assert contour_sets
+    assert list(contour_sets[0].levels) == pytest.approx(levels)

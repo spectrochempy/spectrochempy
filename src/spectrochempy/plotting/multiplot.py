@@ -201,6 +201,13 @@ def plot_with_transposed(dataset, **kwargs):
 multiplot_with_transposed = plot_with_transposed
 
 
+def _normalize_multiplot_method_for_dataset(method, dataset):
+    """Normalize multiplot's generic method vocabulary per dataset dimensionality."""
+    if method == "lines" and getattr(dataset, "ndim", None) == 1:
+        return "pen"
+    return method
+
+
 def multiplot(
     datasets=None,
     labels=None,
@@ -305,6 +312,21 @@ def multiplot(
         from matplotlib._tight_layout import get_subplotspec_list
         from matplotlib._tight_layout import get_tight_layout_figure
 
+        nrows = kwargs.pop("nrows", None)
+        ncols = kwargs.pop("ncols", None)
+        if nrows is not None:
+            if nrow not in (1, nrows):
+                raise ValueError(
+                    "Specify either nrow or nrows, not conflicting values."
+                )
+            nrow = nrows
+        if ncols is not None:
+            if ncol not in (1, ncols):
+                raise ValueError(
+                    "Specify either ncol or ncols, not conflicting values."
+                )
+            ncol = ncols
+
         # some basic checking
         # ------------------------------------------------------------------------
         if labels is None:
@@ -346,7 +368,10 @@ def multiplot(
 
         if nrow == ncol and nrow == 1 and not show_transposed and single:
             # obviously a single plot, return it
-            return datasets[0].plot(**kwargs)
+            current_method = _normalize_multiplot_method_for_dataset(
+                method, datasets[0]
+            )
+            return datasets[0].plot(method=current_method, **kwargs)
         if nrow * ncol < len(datasets):
             nrow = ncol = len(datasets) // 2
             if nrow * ncol < len(datasets):
@@ -445,6 +470,9 @@ def multiplot(
 
                 # Determine method for this dataset
                 current_method = method[idx] if method_is_list else method
+                current_method = _normalize_multiplot_method_for_dataset(
+                    current_method, dataset
+                )
                 try:
                     label = labels[idx]
                 except Exception:

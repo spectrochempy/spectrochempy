@@ -89,6 +89,27 @@ class TestMultiplotStateless:
         # Verify dataset unchanged
         assert_dataset_state_unchanged(ds_before, sample_1d_dataset)
 
+    def test_multiplot_single_dataset_preserves_requested_method(
+        self, sample_1d_dataset
+    ):
+        """Single-dataset multiplot should preserve an explicit method."""
+        ax = multiplot(sample_1d_dataset, method="scatter", nrow=1, ncol=1, show=False)
+
+        assert isinstance(ax, plt.Axes)
+        assert len(ax.lines) > 0
+        line = ax.lines[0]
+        assert line.get_marker() not in (None, "None", "")
+        assert line.get_linestyle() == "None"
+
+    def test_multiplot_supports_nrows_ncols_aliases(self, sample_1d_dataset):
+        """nrows/ncols aliases should behave like nrow/ncol."""
+        datasets = [sample_1d_dataset, sample_1d_dataset]
+
+        axes = multiplot(datasets, nrows=1, ncols=2, show=False)
+
+        assert isinstance(axes, np.ndarray)
+        assert axes.shape == (2,)
+
     def test_multiplot_method_selection(self, sample_1d_dataset):
         """Test 12: Multiplot with mixed method selection."""
         # Use two 1D datasets with different methods
