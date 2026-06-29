@@ -219,7 +219,7 @@ jobs:
       # ---------- restore reusable Sphinx/Sphinx-Gallery outputs for previews ----------
       - name: Restore documentation build cache
         if: steps.preview.outputs.is_preview == 'true' && steps.docs_mode.outputs.fresh_docs != 'true'
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             build/branch_preview/~doctrees
