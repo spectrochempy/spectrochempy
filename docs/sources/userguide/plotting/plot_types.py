@@ -21,14 +21,49 @@
 # automatically, but explicit methods give you control.
 
 # %% [markdown]
+# `ds.plot()` uses the default geometry for the dataset dimensionality. Use the
+# explicit helpers below when you want the intended rendering to be obvious from
+# the code itself.
+
+# %% [markdown]
 # ## Line Plot
 #
 # For spectra and time-series:
 
 # %%
+from os import environ
+
+import numpy as np
+
 import spectrochempy as scp
 
-ds = scp.read("irdata/nh4y-activation.spg")
+
+def _load_demo_dataset():
+    test_file = environ.get("TEST_FILE")
+    if test_file:
+        dataset = scp.read(test_file)
+        if dataset is not None:
+            return dataset
+
+    dataset = scp.read("irdata/nh4y-activation.spg")
+    if dataset is not None:
+        return dataset
+
+    x = scp.Coord(
+        np.linspace(4000.0, 650.0, 256),
+        title="wavenumber",
+        units="cm^-1",
+    )
+    y = scp.Coord(np.linspace(0.0, 5.0, 16), title="time on stream", units="hour")
+    xv = np.linspace(-1.0, 1.0, 256)
+    yv = np.linspace(0.0, 1.0, 16)[:, None]
+    data = np.exp(-(((xv + 0.35) / 0.12) ** 2)) * (1.0 + 0.5 * yv) + 0.7 * np.exp(
+        -(((xv - 0.10) / 0.18) ** 2)
+    ) * (1.2 - 0.4 * yv)
+    return scp.NDDataset(data, coordset=[y, x], units="a.u.", title="absorbance")
+
+
+ds = _load_demo_dataset()
 ds = ds[:, 4000.0:650.0]  # We keep only the region that we want to display
 ds.y -= ds.y[0]  # Set y coordinates as relative time  for better visualization
 ds.y.ito("hour")
@@ -38,6 +73,25 @@ ds1 = ds[0]  # Single spectrum
 
 # %%
 _ = ds1.plot()
+
+# %% [markdown]
+# The explicit 1D helpers are:
+#
+# - `plot_pen()` for line plots,
+# - `plot_scatter()` for marker-based plots,
+# - `plot_bar()` for bar charts.
+#
+# `scatter=True` is still accepted for compatibility, but `plot_scatter()` or
+# `method="scatter"` is clearer in new code.
+#
+# %%
+_ = ds1.plot_pen()
+
+# %%
+_ = ds1.plot_scatter(ms=5)
+
+# %%
+_ = ds1[:20].plot_bar()
 
 # %% [markdown]
 # Or using `plot_lines()` explicitly (canonical form):
@@ -54,7 +108,7 @@ _ = ds.plot_lines()
 _ = ds.plot_image()
 
 # %% [markdown]
-# Image plots automatically include a colorbar:
+# Request a colorbar when you want the intensity scale to be explicit:
 
 # %%
 _ = ds.plot_image(colorbar=True)
@@ -80,13 +134,23 @@ _ = ds.plot_contour()
 _ = ds.plot_contour(colorbar=True)
 
 # %% [markdown]
+# ## Filled Contour / Image-like Plot
+#
+# For image-like filled rendering, use `plot_contourf()` or `plot_image()`:
+
+# %%
+_ = ds.plot_contourf(colorbar=True)
+
+# %% [markdown]
 # ## Decision Guide
 #
 # | Method | Use When |
 # |--------|----------|
 # | `plot()` / `plot_lines()` | Showing spectra, time series, or stacked traces |
+# | `plot_pen()` / `plot_scatter()` / `plot_bar()` | Explicit 1D line, marker, or bar rendering |
 # | `plot_image()` | 2D field with spatial x/y axes |
 # | `plot_contour()` | Smooth visualization of continuous 2D data |
+# | `plot_contourf()` | Filled, image-like contour rendering |
 # | `plot_surface()` | 3D perspective view of 2D data |
 # | `plot_waterfall()` | 3D-style waterfall representation |
 
@@ -107,6 +171,31 @@ _ = ds.plot_surface(y_reverse=True, linewidth=0)
 _ = ds.plot_waterfall(y_reverse=True, figsize=(6, 5))
 
 # %% [markdown]
+# ## Overlay Several Datasets on One Axes
+#
+# `plot_multiple()` overlays several 1D datasets on the same Matplotlib axes.
+# Use it when you want one shared set of axes and one combined legend.
+
+# %%
+datasets = [ds[0], ds[5], ds[10]]
+_ = scp.plot_multiple(
+    datasets,
+    method="scatter",
+    labels=["t0", "t5", "t10"],
+    legend="best",
+    ms=4,
+)
+
+# %% [markdown]
+# ## Arrange Several Datasets on a Grid
+#
+# `multiplot()` creates a grid of axes. Use it when each dataset should keep its
+# own panel rather than being overlaid.
+
+# %%
+_ = scp.multiplot([ds[0], ds[5], ds[10], ds[15]], nrows=2, ncols=2, method="pen")
+
+# %% [markdown]
 # ## Combining with Options
 #
 # All plot methods accept the same customization options:
@@ -125,12 +214,15 @@ _ = ds.plot_image(
 # %% [markdown]
 # ## Deprecated Method Names
 #
-# The following method names are deprecated but still work:
+# The following legacy names still work, but the canonical names are preferred
+# for new code:
 #
-# | Deprecated | Current (Canonical) |
-# |------------|---------------------|
-# | `plot_stack()` | `plot_lines()` |
-# | `plot_map()` | `plot_contour()` |
-# | `plot(method="image")` | `plot_image()` or `plot_contourf()` |
+# | Legacy name | Preferred name |
+# |-------------|----------------|
+# | `plot_stack()` or `method="stack"` | `plot_lines()` or `method="lines"` |
+# | `plot_map()` or `method="map"` | `plot_contour()` or `method="contour"` |
+# | `plot_image()` or `method="image"` | `plot_contourf()` when you want the canonical geometry name |
 #
-# Using the canonical names is recommended for new code.
+# `plot_image()` remains a supported explicit helper for image-style plotting, so
+# choose between `plot_image()` and `plot_contourf()` based on which name makes
+# your intent clearer.

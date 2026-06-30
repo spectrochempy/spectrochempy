@@ -27,9 +27,39 @@
 # For 1D and 2D datasets, you can adjust how lines appear:
 
 # %%
+from os import environ
+
+import numpy as np
+
 import spectrochempy as scp
 
-ds = scp.read("irdata/nh4y-activation.spg")
+
+def _load_demo_dataset():
+    test_file = environ.get("TEST_FILE")
+    if test_file:
+        dataset = scp.read(test_file)
+        if dataset is not None:
+            return dataset
+
+    dataset = scp.read("irdata/nh4y-activation.spg")
+    if dataset is not None:
+        return dataset
+
+    x = scp.Coord(
+        np.linspace(4000.0, 650.0, 256),
+        title="wavenumber",
+        units="cm^-1",
+    )
+    y = scp.Coord(np.linspace(0.0, 5.0, 16), title="time on stream", units="hour")
+    xv = np.linspace(-1.0, 1.0, 256)
+    yv = np.linspace(0.0, 1.0, 16)[:, None]
+    data = np.exp(-(((xv + 0.35) / 0.12) ** 2)) * (1.0 + 0.5 * yv) + 0.7 * np.exp(
+        -(((xv - 0.10) / 0.18) ** 2)
+    ) * (1.2 - 0.4 * yv)
+    return scp.NDDataset(data, coordset=[y, x], units="a.u.", title="absorbance")
+
+
+ds = _load_demo_dataset()
 
 # %% [markdown]
 # ### Color
@@ -44,16 +74,35 @@ _ = ds.plot(color="red")
 _ = ds.plot(linewidth=2)
 
 # %% [markdown]
+# The short alias `lw=...` is accepted as well:
+
+# %%
+_ = ds.plot(lw=2)
+
+# %% [markdown]
 # ### Line Style
 
 # %%
 _ = ds.plot(linestyle="--")
 
 # %% [markdown]
+# The corresponding short alias is `ls=...`:
+
+# %%
+_ = ds.plot(ls="--")
+
+# %% [markdown]
 # ### Marker
 
 # %%
 _ = ds.plot(marker="o")
+
+# %% [markdown]
+# Marker-related aliases such as `ms` (marker size) and `mew`
+# (marker edge width) are normalized automatically:
+
+# %%
+_ = ds.plot(marker="o", ms=5, mew=1.5)
 
 
 # %% [markdown]
@@ -102,6 +151,16 @@ _ = ds.plot(grid=True)
 
 # %%
 _ = ds.plot(cmap="viridis")
+
+# %% [markdown]
+# The aliases `c=...` for line color and `colormap=...` for `cmap=...` are also
+# accepted:
+
+# %%
+_ = ds[0].plot(c="darkred")
+
+# %%
+_ = ds.plot_image(colormap="plasma")
 
 # %% [markdown]
 # ### Categorical Colors (cmap=None)

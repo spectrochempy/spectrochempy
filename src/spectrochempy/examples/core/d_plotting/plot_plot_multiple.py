@@ -8,23 +8,55 @@
 Using `plot_multiple` to plot several datasets on the same figure
 =================================================================
 In this example, we will display several Raman datasets on the same figure
-using the `plot_multiple` method. Several options are available to customize
-the display.
+using the `plot_multiple` helper. Unlike `multiplot`, which creates a grid of
+panels, `plot_multiple` overlays several datasets on one shared axes. Several
+options are available to customize that overlay.
 """
 
 # %%
 # Import spectrochempy as usual
+from os import environ
+
+import numpy as np
 import spectrochempy as scp
 
 # %%
 # Load the data (here 2D spectrum made from a list of 1D spectra):
-B1 = scp.read("ramandata/labspec/serie190214-1.txt")
+
+
+def _load_demo_dataset():
+    test_file = environ.get("TEST_FILE")
+    if test_file:
+        dataset = scp.read(test_file)
+        if dataset is not None:
+            return dataset
+
+    dataset = scp.read("ramandata/labspec/serie190214-1.txt")
+    if dataset is not None:
+        return dataset
+
+    x = scp.Coord(
+        np.linspace(50.0, 1800.0, 256),
+        title="raman shift",
+        units="cm^-1",
+    )
+    y = scp.Coord(np.arange(10), title="sample")
+    xv = np.linspace(-1.0, 1.0, 256)
+    yv = np.linspace(0.0, 1.0, 10)[:, None]
+    data = (
+        np.exp(-(((xv + 0.20) / 0.10) ** 2)) * (1.0 + 0.5 * yv)
+        + 0.5 * np.exp(-(((xv - 0.25) / 0.15) ** 2)) * (1.2 - 0.4 * yv)
+        + 0.05 * yv
+    )
+    return scp.NDDataset(data, coordset=[y, x], units="a.u.", title="intensity")
+
+
+B1 = _load_demo_dataset()
 
 # %%
-# First we show the basic plot (note here the use of the `cmap=None` option to
-# display the spectra with rotating colors. cmap can be of course set to any other
-# available matplotlib colormap. The second parameter `lw` is used to set the line
-# width. In addition, we fix the figsize to have a better view of the spectra.
+# First we show the basic plot. Here `cmap=None` uses categorical rotating
+# colors for a line-based plot, and `lw` is the short alias for `linewidth`.
+# We also enlarge the figure for readability.
 _ = B1.plot(cmap=None, lw=1)
 
 # %%
@@ -47,11 +79,9 @@ B4 = B3[:5]
 _ = B4.plot(cmap=None)
 
 # %%
-# Now we will use `plot_multiple` to plot all the spectra of the dataset B4.
-# we need to use `offset` to separate the traces and we set some labels to identify
-# these traces on the final plot. different colors and line width are also used.
-# Note that we can use the `legend` option to place the legend at the best location.
-# We can also use the `shift` option to shift the traces vertically.
+# Now use `plot_multiple` to overlay the selected spectra on one axes.  We use
+# `method="pen"` for line rendering, set labels for the combined legend, and
+# apply `shift` so the traces remain visually separated.
 datasets = list(B4)
 _ = scp.plot_multiple(
     datasets,

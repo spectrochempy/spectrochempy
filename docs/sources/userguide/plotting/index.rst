@@ -52,6 +52,25 @@ Each plotting function returns a Matplotlib ``Axes`` object,
 so advanced users retain full control over figure customization
 and integration into complex layouts.
 
+Current Plotting Contract
+-------------------------
+
+For day-to-day use, the plotting contract is:
+
+- ``dataset.plot(method=...)`` selects the plotting geometry.
+- Explicit helpers such as ``plot_pen()``, ``plot_scatter()``, ``plot_bar()``,
+  ``plot_lines()``, ``plot_contour()``, ``plot_contourf()``, and
+  ``plot_image()`` make that intent explicit.
+- Common keyword aliases such as ``lw``, ``ls``, ``ms``, ``mew``, ``c``, and
+  ``colormap`` are normalized internally to their canonical Matplotlib names.
+- Style interpretation depends on the plotting geometry: the same ``cmap`` or
+  ``marker`` input can mean different things for lines, scatter plots, contour
+  plots, and image-like plots.
+- ``ax``, ``clear``, and ``show`` control figure lifecycle for ordinary dataset
+  plots. Composite plotters can have narrower or specialized lifecycle rules.
+- ``plot_multiple()`` overlays several datasets on one axes, while
+  ``multiplot()`` creates a grid of axes.
+
 
 Designed for Scientific Workflows
 ---------------------------------

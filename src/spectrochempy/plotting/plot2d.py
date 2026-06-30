@@ -797,7 +797,11 @@ def plot_stack(dataset, **kwargs):
 
 def plot_map(dataset, **kwargs):
     """
-    Plot a 2D dataset as a contoured map.
+    Plot a 2D dataset as a contour map.
+
+    This compatibility helper is equivalent to
+    ``dataset.plot(method="map", ...)`` and currently renders through the same
+    contour geometry as :func:`plot_contour`.
 
     Parameters
     ----------
@@ -806,13 +810,6 @@ def plot_map(dataset, **kwargs):
     method : str, optional, default: auto-detected from data dimensionality
         Name of plotting method to use. If None, method is chosen based on data
         dimensionality.
-
-        1D plotting methods:
-
-        - `pen` : Solid line plot
-        - `bar` : Bar graph
-        - `scatter` : Scatter plot
-        - `scatter+pen` : Scatter plot with solid line
 
         2D plotting methods:
 
@@ -932,7 +929,12 @@ def plot_map(dataset, **kwargs):
 
 def plot_image(dataset, **kwargs):
     """
-    Plot a 2D dataset as an image plot.
+    Plot a 2D dataset with image-like filled rendering.
+
+    This helper is equivalent to ``dataset.plot(method="image", ...)``.  It is
+    retained as a descriptive public alias for image-oriented code, while the
+    canonical geometry name for the same filled rendering is
+    :func:`plot_contourf`.
 
     Parameters
     ----------
@@ -941,13 +943,6 @@ def plot_image(dataset, **kwargs):
     method : str, optional, default: auto-detected from data dimensionality
         Name of plotting method to use. If None, method is chosen based on data
         dimensionality.
-
-        1D plotting methods:
-
-        - `pen` : Solid line plot
-        - `bar` : Bar graph
-        - `scatter` : Scatter plot
-        - `scatter+pen` : Scatter plot with solid line
 
         2D plotting methods:
 
