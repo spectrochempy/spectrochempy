@@ -35,6 +35,9 @@ _VALID_2D_PLUS_METHODS = {
     "surface",
     "waterfall",
 }
+_FALLBACK_1D_TO_2D_METHOD_ALIASES = {
+    "pen": "lines",
+}
 
 
 def _raise_incompatible_method(method, source, target):
@@ -210,6 +213,7 @@ def plot_1D(dataset, method=None, **kwargs):
         if dataset._squeeze_ndim > 1:
             if method is None:
                 return dataset.plot_2D(**kwargs)
+            method = _FALLBACK_1D_TO_2D_METHOD_ALIASES.get(method, method)
             if method in _VALID_2D_PLUS_METHODS:
                 return dataset.plot_2D(method=method, **kwargs)
             _raise_incompatible_method(method, "plot_1D() with non-1D data", "2D/3D")
