@@ -17,46 +17,19 @@ This short gallery example shows three common ideas:
 
 # %%
 
-from os import environ
-
 import numpy as np
 import spectrochempy as scp
+from _demo import load_ir_demo_dataset
 
 # %%
 # The location of the spectrochempy_data can be found in preferences.
 
 datadir = scp.preferences.datadir
 
-
-def _load_demo_dataset():
-    test_file = environ.get("TEST_FILE")
-    if test_file:
-        dataset = scp.read(test_file)
-        if dataset is not None:
-            return dataset
-
-    dataset = scp.read_omnic(datadir / "irdata" / "nh4y-activation.spg")
-    if dataset is not None:
-        return dataset
-
-    x = scp.Coord(
-        np.linspace(4000.0, 650.0, 256),
-        title="wavenumber",
-        units="cm^-1",
-    )
-    y = scp.Coord(np.linspace(0.0, 5.0, 16), title="time on stream", units="hour")
-    xv = np.linspace(-1.0, 1.0, 256)
-    yv = np.linspace(0.0, 1.0, 16)[:, None]
-    data = np.exp(-(((xv + 0.35) / 0.12) ** 2)) * (1.0 + 0.5 * yv) + 0.7 * np.exp(
-        -(((xv - 0.10) / 0.18) ** 2)
-    ) * (1.2 - 0.4 * yv)
-    return scp.NDDataset(data, coordset=[y, x], units="a.u.", title="absorbance")
-
-
 # %%
 # Let's read one dataset (in ``.spg`` OMNIC format).
 
-dataset = _load_demo_dataset()
+dataset = load_ir_demo_dataset(datadir=datadir)
 
 # %%
 # First use the default plotting entry point and default style.

@@ -15,43 +15,13 @@ options are available to customize that overlay.
 
 # %%
 # Import spectrochempy as usual
-from os import environ
-
-import numpy as np
 import spectrochempy as scp
+from _demo import load_raman_demo_dataset
 
 # %%
 # Load the data (here 2D spectrum made from a list of 1D spectra):
 
-
-def _load_demo_dataset():
-    test_file = environ.get("TEST_FILE")
-    if test_file:
-        dataset = scp.read(test_file)
-        if dataset is not None:
-            return dataset
-
-    dataset = scp.read("ramandata/labspec/serie190214-1.txt")
-    if dataset is not None:
-        return dataset
-
-    x = scp.Coord(
-        np.linspace(50.0, 1800.0, 256),
-        title="raman shift",
-        units="cm^-1",
-    )
-    y = scp.Coord(np.arange(10), title="sample")
-    xv = np.linspace(-1.0, 1.0, 256)
-    yv = np.linspace(0.0, 1.0, 10)[:, None]
-    data = (
-        np.exp(-(((xv + 0.20) / 0.10) ** 2)) * (1.0 + 0.5 * yv)
-        + 0.5 * np.exp(-(((xv - 0.25) / 0.15) ** 2)) * (1.2 - 0.4 * yv)
-        + 0.05 * yv
-    )
-    return scp.NDDataset(data, coordset=[y, x], units="a.u.", title="intensity")
-
-
-B1 = _load_demo_dataset()
+B1 = load_raman_demo_dataset()
 
 # %%
 # First we show the basic plot. Here `cmap=None` uses categorical rotating
