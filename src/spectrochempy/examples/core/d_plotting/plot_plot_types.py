@@ -17,6 +17,7 @@ from _demo import load_ir_demo_dataset
 
 # %%
 # Load a 2D IR dataset and prepare a cleaner spectral window for display.
+# In a real workflow this would normally be a direct ``scp.read(...)`` call.
 
 dataset = load_ir_demo_dataset()
 dataset = dataset[:, 4000.0:650.0]

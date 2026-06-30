@@ -28,6 +28,7 @@ datadir = scp.preferences.datadir
 
 # %%
 # Let's read one dataset (in ``.spg`` OMNIC format).
+# In a real workflow this would normally be a direct ``scp.read(...)`` call.
 
 dataset = load_ir_demo_dataset(datadir=datadir)
 

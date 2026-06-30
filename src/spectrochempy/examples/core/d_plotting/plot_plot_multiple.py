@@ -20,6 +20,7 @@ from _demo import load_raman_demo_dataset
 
 # %%
 # Load the data (here 2D spectrum made from a list of 1D spectra):
+# In a real workflow this would normally be a direct ``scp.read(...)`` call.
 
 B1 = load_raman_demo_dataset()
 

@@ -34,6 +34,8 @@
 # %%
 from _demo import load_demo_dataset
 
+# In normal code you would usually start from ``ds = scp.read(...)``.  This
+# helper keeps the example runnable in the docs test/offline environment.
 ds = load_demo_dataset()
 _ = ds.plot()
 

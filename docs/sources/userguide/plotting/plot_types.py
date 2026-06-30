@@ -35,6 +35,8 @@ from _demo import load_demo_dataset
 
 import spectrochempy as scp
 
+# In normal code you would usually start from ``ds = scp.read(...)``.  This
+# helper keeps the example runnable in the docs test/offline environment.
 ds = load_demo_dataset()
 ds = ds[:, 4000.0:650.0]  # We keep only the region that we want to display
 ds.y -= ds.y[0]  # Set y coordinates as relative time  for better visualization
