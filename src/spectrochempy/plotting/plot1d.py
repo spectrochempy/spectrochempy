@@ -3,7 +3,13 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""Module containing 1D plotting function(s)."""
+"""
+Module containing 1D plotting functions.
+
+This module consumes normalized plotting methods/kwargs and focuses on artist
+creation plus 1D axis policy. Backend dispatch and final display ownership live
+above this layer.
+"""
 
 __all__ = [
     "plot_1D",
@@ -250,34 +256,26 @@ def plot_1D(dataset, method=None, **kwargs):
 
         # Figure setup
         # ------------------------------------------------------------------------
-        _figure_result = new._figure_setup(
+        method, fig, ndaxes = new._figure_setup(
             ndim=1,
             method=method,
             style=style,
             **kwargs,
         )
-        # Handle both old (method string) and new (method, fig, ndaxes) return values
-        if isinstance(_figure_result, tuple):
-            method, fig, ndaxes = _figure_result
-        else:
-            # Fallback for any code that still uses old behavior
-            method = _figure_result
-            ndaxes = {}
 
         pen = "pen" in (method or "") or kwargs.pop("pen", False)
         scatter = "scatter" in method or marker != "auto"
         bar = "bar" in method
 
-        # Use ndaxes from figure_setup if available, otherwise try to get from figure
+        # Use the axes mapping from _figure_setup(). The fallback only covers
+        # defensive recovery if a future change returns an incomplete mapping.
         if "main" in ndaxes:
             ax = ndaxes["main"]
         else:
-            # Try to get axes from the figure
             if fig.get_axes():
                 ax = fig.get_axes()[0]
                 ax.name = "main"
             else:
-                # This shouldn't happen if _figure_setup worked correctly
                 ax = fig.add_subplot(1, 1, 1)
                 ax.name = "main"
 
@@ -481,7 +479,6 @@ def plot_1D(dataset, method=None, **kwargs):
         if data_only:
             # if data only (we will not set axes and labels
             # it was probably done already in a previous plot
-            new._plot_resume(dataset, **kwargs)
             return ax
 
         # ------------------------------------------------------------------------
@@ -535,8 +532,6 @@ def plot_1D(dataset, method=None, **kwargs):
             ax.set_title(title)
         elif kwargs.get("plottitle", False):
             ax.set_title(new.name)
-
-        new._plot_resume(dataset, **kwargs)
 
         # masks
         if kwargs.get("show_mask", False):
@@ -1084,9 +1079,7 @@ def plot_multiple(
     # do not save during this plots, nor apply any commands
     # we will make this when all plots will be done
 
-    output = kwargs.get("output")
     kwargs["output"] = None
-    commands = kwargs.get("commands", [])
     kwargs["commands"] = []
     legend = kwargs.pop(
         "legend",
@@ -1153,9 +1146,5 @@ def plot_multiple(
             frameon=True,
             fontsize="small",
         )
-
-    # now we can output the final figure
-    kw = {"output": output, "commands": commands, "show": user_show}
-    datasets[0]._plot_resume(datasets[-1], **kw)
 
     return ax
