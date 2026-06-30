@@ -58,8 +58,9 @@ Bug Fixes
   requested plotting method for single datasets and accepts ``nrows`` /
   ``ncols`` aliases; 1D artists now honor ``alpha``, ``markeredgewidth``, and
   ``mew``; 2D contour-style plots accept ``alpha`` and ``levels`` consistently;
-  and ``use_plotly=True`` now fails with a clear error when Plotly support is
-  unavailable.
+  ``use_plotly=True`` now fails with a clear error when Plotly support is
+  unavailable; and legacy ``lines`` / ``pen`` aliases continue to work across
+  dimensional fallbacks.
 
 - ``PLSRegression`` now works with a 1D ``NDDataset`` as the response variable
   ``y``. This fixes failures in ``predict()``, ``y_scores``, ``y_loadings``,
