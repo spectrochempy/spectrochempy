@@ -20,6 +20,8 @@ import numpy as np
 
 from spectrochempy.application.preferences import preferences
 from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.plotting._kwargs import normalize_plot_kwargs
+from spectrochempy.plotting._kwargs import normalize_style_argument
 from spectrochempy.plotting._methods import validate_method_for_target_dimension
 from spectrochempy.plotting._style import resolve_line_style
 from spectrochempy.utils.mplutils import make_label
@@ -162,13 +164,13 @@ def plot_1D(dataset, method=None, **kwargs):
     # Get preferences
     # ----------------------------------------------------------------------------------
     prefs = preferences
+    kwargs = normalize_plot_kwargs(kwargs)
 
     # Resolve plotting style(s) locally (no global rcParams / no prefs.style mutation)
-    style = kwargs.pop("style", None)
-    if style is None:
-        style = getattr(prefs, "style", None) or ["scpy"]
-    if isinstance(style, str):
-        style = [style]
+    style = normalize_style_argument(
+        kwargs.pop("style", None),
+        default=getattr(prefs, "style", None) or ["scpy"],
+    )
 
     # Build font rc overrides from prefs (L1 helper - no mutation)
     from spectrochempy.plotting._style import build_font_rc_overrides
@@ -242,7 +244,7 @@ def plot_1D(dataset, method=None, **kwargs):
         markerfacecolor = style_kwargs["markerfacecolor"]
         markeredgecolor = style_kwargs["markeredgecolor"]
         alpha = style_kwargs["alpha"]
-        markeredgewidth = kwargs.get("markeredgewidth", kwargs.get("mew", 1.0))
+        markeredgewidth = kwargs.get("markeredgewidth", 1.0)
 
         markevery = kwargs.get("markevery", kwargs.get("me", 1))
 
@@ -1042,6 +1044,8 @@ def plot_multiple(
         Other parameters that will be passed to the plot1D function.
 
     """
+    kwargs = normalize_plot_kwargs(kwargs)
+
     if not is_sequence(datasets):
         # we need a sequence. Else it is a single plot.
         return datasets.plot(

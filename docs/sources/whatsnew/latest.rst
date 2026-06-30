@@ -62,6 +62,10 @@ Bug Fixes
 Developer
 ~~~~~~~~~
 
+- Centralized internal plotting kwargs normalization in a private helper
+  module to reduce duplication across plotting entry points while preserving
+  public plotting aliases and rendering behavior.
+
 - Centralized internal plotting method normalization in a private helper
   module to reduce duplication across backend dispatch, multiplot handling,
   and 1D/2D fallback validation, without changing the public plotting API.

@@ -36,6 +36,8 @@ __all__ = [
 import matplotlib as mpl
 import numpy as np
 
+from spectrochempy.plotting._kwargs import normalize_plot_kwargs
+
 _MPL_DEFAULT_IMAGE_CMAP = mpl.rcParamsDefault["image.cmap"]
 
 # ======================================================================================
@@ -404,6 +406,7 @@ def resolve_line_style(
     """
     if kwargs is None:
         kwargs = {}
+    kwargs = normalize_plot_kwargs(kwargs)
 
     if prefs is None:
         from spectrochempy.application.preferences import preferences
@@ -412,13 +415,13 @@ def resolve_line_style(
 
     result = {}
 
-    result["color"] = kwargs.get("color", kwargs.get("c", "auto"))
+    result["color"] = kwargs.get("color", "auto")
 
-    result["linewidth"] = kwargs.get("linewidth", kwargs.get("lw", "auto"))
+    result["linewidth"] = kwargs.get("linewidth", "auto")
 
-    result["linestyle"] = kwargs.get("linestyle", kwargs.get("ls", "auto"))
+    result["linestyle"] = kwargs.get("linestyle", "auto")
 
-    result["marker"] = kwargs.get("marker", kwargs.get("m", "auto"))
+    result["marker"] = kwargs.get("marker", "auto")
 
     # Deterministic fallback for scatter methods
     if (
@@ -432,13 +435,11 @@ def resolve_line_style(
     # The caller (plot2d.py) will handle None appropriately
     # For 1D plotting, "auto" is used to detect scatter vs pen
 
-    result["markersize"] = kwargs.get(
-        "markersize", kwargs.get("ms", prefs.lines_markersize)
-    )
+    result["markersize"] = kwargs.get("markersize", prefs.lines_markersize)
 
-    result["markerfacecolor"] = kwargs.get("markerfacecolor", kwargs.get("mfc", "auto"))
+    result["markerfacecolor"] = kwargs.get("markerfacecolor", "auto")
 
-    result["markeredgecolor"] = kwargs.get("markeredgecolor", kwargs.get("mec", "k"))
+    result["markeredgecolor"] = kwargs.get("markeredgecolor", "k")
 
     result["alpha"] = kwargs.get("alpha")
 
