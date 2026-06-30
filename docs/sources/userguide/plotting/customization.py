@@ -27,11 +27,14 @@
 # For 1D and 2D datasets, you can adjust how lines appear:
 
 # %%
-from _demo import load_demo_dataset
+import os
+from pathlib import Path
 
-# In normal code you would usually start from ``ds = scp.read(...)``.  This
-# helper keeps the example runnable in the docs test/offline environment.
-ds = load_demo_dataset()
+import spectrochempy as scp
+
+TEST_FILE = Path(os.environ.get("TEST_FILE", "irdata/nh4y-activation.spg"))
+
+ds = scp.read(TEST_FILE)
 
 # %% [markdown]
 # ### Color

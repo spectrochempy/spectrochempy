@@ -663,7 +663,7 @@ if not single_doc_or_dir:
             _get_default_image_scraper(),
         ),  # Use the function getter instead of direct function reference
         "filename_pattern": "/plot",
-        "ignore_pattern": "__init__.py|_demo.py",
+        "ignore_pattern": "__init__.py",
         "min_reported_time": 0,
         "show_signature": False,  # Disable the signature if it's causing issues
     }

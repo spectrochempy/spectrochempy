@@ -17,20 +17,24 @@ This short gallery example shows three common ideas:
 
 # %%
 
+import os
+from pathlib import Path
+
 import numpy as np
 import spectrochempy as scp
-from _demo import load_ir_demo_dataset
 
 # %%
 # The location of the spectrochempy_data can be found in preferences.
 
 datadir = scp.preferences.datadir
+TEST_FILE = Path(
+    os.environ.get("TEST_FILE", datadir / "irdata" / "nh4y-activation.spg")
+)
 
 # %%
 # Let's read one dataset (in ``.spg`` OMNIC format).
-# In a real workflow this would normally be a direct ``scp.read(...)`` call.
 
-dataset = load_ir_demo_dataset(datadir=datadir)
+dataset = scp.read(TEST_FILE)
 
 # %%
 # First use the default plotting entry point and default style.

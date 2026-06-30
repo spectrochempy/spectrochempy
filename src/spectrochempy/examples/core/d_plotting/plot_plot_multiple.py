@@ -15,14 +15,16 @@ options are available to customize that overlay.
 
 # %%
 # Import spectrochempy as usual
+import os
+from pathlib import Path
+
 import spectrochempy as scp
-from _demo import load_raman_demo_dataset
 
 # %%
 # Load the data (here 2D spectrum made from a list of 1D spectra):
-# In a real workflow this would normally be a direct ``scp.read(...)`` call.
 
-B1 = load_raman_demo_dataset()
+TEST_FILE = Path(os.environ.get("TEST_FILE", "ramandata/labspec/serie190214-1.txt"))
+B1 = scp.read(TEST_FILE)
 
 # %%
 # First we show the basic plot. Here `cmap=None` uses categorical rotating
