@@ -3,7 +3,13 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""Plotters."""
+"""
+2D plotting functions.
+
+This module consumes normalized plotting methods/kwargs and focuses on artist
+creation, colorbar policy, and 2D/3D axis policy for the dataset plotting
+path. Backend dispatch and final display ownership live above this layer.
+"""
 
 __all__ = [
     "plot_2D",
@@ -1319,30 +1325,22 @@ def plot_2D(dataset, method=None, **kwargs):
 
         # Figure setup
         # ------------------------------------------------------------------------
-        _figure_result = new._figure_setup(
+        method, fig, ndaxes = new._figure_setup(
             ndim=2,
             method=method,
             style=style,
             **kwargs,
         )
-        # Handle both old (method string) and new (method, fig, ndaxes) return values
-        if isinstance(_figure_result, tuple):
-            method, fig, ndaxes = _figure_result
-        else:
-            # Fallback for any code that still uses old behavior
-            method = _figure_result
-            ndaxes = {}
 
-        # Use ndaxes from figure_setup if available, otherwise try to get from figure
+        # Use the axes mapping from _figure_setup(). The fallback only covers
+        # defensive recovery if a future change returns an incomplete mapping.
         if "main" in ndaxes:
             ax = ndaxes["main"]
         else:
-            # Try to get axes from the figure
             if fig.get_axes():
                 ax = fig.get_axes()[0]
                 ax.name = "main"
             else:
-                # This shouldn't happen if _figure_setup worked correctly
                 ax = fig.add_subplot(1, 1, 1)
                 ax.name = "main"
 
@@ -1854,7 +1852,6 @@ def plot_2D(dataset, method=None, **kwargs):
         if data_only:
             # if data only (we will not set axes and labels
             # it was probably done already in a previous plot
-            new._plot_resume(dataset, **kwargs)
             return ax
 
         # display a title
@@ -2016,8 +2013,6 @@ def plot_2D(dataset, method=None, **kwargs):
             ax.set_xlim(user_xlim)
         if user_ylim is not None:
             ax.set_ylim(user_ylim)
-
-        new._plot_resume(dataset, **kwargs)
 
         return ax
 
