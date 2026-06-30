@@ -58,6 +58,28 @@ Read that flow as a sequence of responsibilities, not as a promise that every
 function literally calls each helper in exactly that textual order for every
 plot family.
 
+A simplified architecture sketch is:
+
+.. code-block:: text
+
+    User API
+        |
+        v
+    Dispatcher
+        |
+        v
+    Backend
+        |
+        +-- _methods.py   (semantic normalization)
+        +-- _kwargs.py    (parameter normalization)
+        +-- _style.py     (style interpretation)
+                  |
+                  v
+            plot1d / plot2d / plot3d
+                  |
+                  v
+          Matplotlib artists
+
 Responsibility Boundaries
 -------------------------
 
@@ -173,6 +195,24 @@ Keep semantics separate from rendering
 Plotting semantics, normalization, style interpretation, and artist creation
 are related, but they are not the same responsibility.  The current structure
 exists to keep those concerns legible.
+
+Architecture Rules
+------------------
+
+The following rules are intended to help future contributors preserve the
+current structure:
+
+1. Public plotting methods must not duplicate method normalization.
+   Use ``_methods.py``.
+2. Public plotting methods must not duplicate kwargs alias handling.
+   Use ``_kwargs.py``.
+3. Style decisions belong in ``_style.py``.
+4. Plotter modules create artists; they do not normalize public API aliases.
+5. Specialized plotters such as ``multiplot()``, composite plotters, and
+   plugin plotters may orchestrate figures, but they should reuse the common
+   normalization layers.
+6. New plotting methods should fit into the existing responsibility split
+   rather than introducing new local normalization logic.
 
 What Was Intentionally Not Centralized
 --------------------------------------
