@@ -298,6 +298,17 @@ class TestPlotParameterPropagation:
 class TestDimensionalFallbacks:
     """Test dimensional fallback behavior for direct plot_1D/plot_2D calls."""
 
+    def test_plot_lines_alias_still_works_for_1d_dataset(self, sample_1d_dataset):
+        ax = sample_1d_dataset.plot(method="lines", show=False)
+
+        assert len(ax.lines) > 0
+        assert ax.lines[0].get_linestyle() not in (None, "None", "")
+
+    def test_plot_pen_alias_still_works_for_2d_dataset(self, sample_2d_dataset):
+        ax = sample_2d_dataset.plot(method="pen", show=False)
+
+        assert len(ax.lines) > 0
+
     def test_plot_1d_forwards_valid_2d_method(self, sample_2d_dataset):
         ax = sample_2d_dataset.plot_1D(method="contour", show=False)
 
