@@ -25,6 +25,7 @@ import warnings
 
 import numpy as np
 
+from spectrochempy.plotting._methods import normalize_multiplot_method
 from spectrochempy.utils.mplutils import _Axes
 from spectrochempy.utils.typeutils import is_sequence
 
@@ -201,13 +202,6 @@ def plot_with_transposed(dataset, **kwargs):
 multiplot_with_transposed = plot_with_transposed
 
 
-def _normalize_multiplot_method_for_dataset(method, dataset):
-    """Normalize multiplot's generic method vocabulary per dataset dimensionality."""
-    if method == "lines" and getattr(dataset, "ndim", None) == 1:
-        return "pen"
-    return method
-
-
 def multiplot(
     datasets=None,
     labels=None,
@@ -368,8 +362,8 @@ def multiplot(
 
         if nrow == ncol and nrow == 1 and not show_transposed and single:
             # obviously a single plot, return it
-            current_method = _normalize_multiplot_method_for_dataset(
-                method, datasets[0]
+            current_method = normalize_multiplot_method(
+                method, getattr(datasets[0], "ndim", None)
             )
             return datasets[0].plot(method=current_method, **kwargs)
         if nrow * ncol < len(datasets):
@@ -470,8 +464,8 @@ def multiplot(
 
                 # Determine method for this dataset
                 current_method = method[idx] if method_is_list else method
-                current_method = _normalize_multiplot_method_for_dataset(
-                    current_method, dataset
+                current_method = normalize_multiplot_method(
+                    current_method, getattr(dataset, "ndim", None)
                 )
                 try:
                     label = labels[idx]

@@ -10,55 +10,17 @@ This module provides the matplotlib implementation of plotting functions,
 wrapping the plotting functions from the spectrochempy.plotting module.
 """
 
-import warnings
 from typing import Any
 
+from spectrochempy.plotting._methods import get_default_method_for_ndim
+from spectrochempy.plotting._methods import get_dispatch_method_key
+from spectrochempy.plotting._methods import normalize_backend_method
 from spectrochempy.plotting.plot_setup import lazy_ensure_mpl_config
 from spectrochempy.plotting.profile import ensure_plot_profile_loaded
 from spectrochempy.utils.mplutils import show as mpl_show
 
-# Method aliases for backward compatibility
-# Legacy names are normalized to canonical geometry-based names
-# Note: "image" is a semantic alias and does NOT emit deprecation warning
-_METHOD_ALIASES = {
-    "stack": "lines",
-    "map": "contour",
-}
-
 # Track which aliases we've warned about (warn once per session)
 _WARNED_ALIASES = set()
-
-
-def _normalize_method(method: str | None) -> str | None:
-    """
-    Normalize method name from legacy to canonical.
-
-    Emits a DeprecationWarning once per session for each deprecated method name.
-    Semantic aliases (like "image") are normalized without warning.
-    """
-    global _WARNED_ALIASES
-
-    if method is None:
-        return None
-
-    # Semantic aliases - normalize without warning
-    if method == "image":
-        return "contourf"
-
-    # Deprecated aliases - normalize with warning
-    if method in _METHOD_ALIASES:
-        canonical = _METHOD_ALIASES[method]
-        if method not in _WARNED_ALIASES:
-            _WARNED_ALIASES.add(method)
-            warnings.warn(
-                f'method="{method}" is deprecated and will be removed in 0.11.0. '
-                f'Use method="{canonical}" instead.',
-                DeprecationWarning,
-                stacklevel=3,
-            )
-        return canonical
-
-    return method
 
 
 # Mapping of method names to standalone plot functions
@@ -92,12 +54,10 @@ def _get_plot_function(method: str):
                 # 3D methods
                 "surface": plot3d.plot_surface,
                 "waterfall": plot3d.plot_waterfall,
-                # Handle '+' in method names by replacing with '_'
-                "scatter_pen".replace("+", "_"): plot1d.plot_scatter_pen,
             }
         )
 
-    return _PLOT_FUNCTIONS.get(method.replace("+", "_") if method else method)
+    return _PLOT_FUNCTIONS.get(get_dispatch_method_key(method))
 
 
 def plot_dataset_impl(
@@ -131,15 +91,10 @@ def plot_dataset_impl(
 
     # Determine default method based on dimensionality
     if method is None:
-        if dataset._squeeze_ndim == 1:
-            method = "pen"
-        elif dataset._squeeze_ndim == 2:
-            method = "lines"  # Canonical default for 2D
-        elif dataset._squeeze_ndim == 3:
-            method = "surface"
+        method = get_default_method_for_ndim(dataset._squeeze_ndim)
 
     # NORMALIZE METHOD - Convert legacy names to canonical BEFORE dispatch
-    method = _normalize_method(method)
+    method = normalize_backend_method(method, warned_aliases=_WARNED_ALIASES)
 
     # Get the standalone plot function
     plot_func = _get_plot_function(method) if method else None
