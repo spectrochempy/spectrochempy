@@ -3,77 +3,210 @@
 Plotting Architecture
 =====================
 
-This note summarizes the current plotting architecture for contributors.  It is
-descriptive, not normative: it explains where responsibilities live today so
-that small plotting changes stay focused.
+This note describes the plotting architecture that exists today after the
+recent cleanup work.  Its purpose is to explain the current responsibility
+boundaries so that future plotting changes remain focused and consistent.
 
-Public Entry Points
--------------------
+It is not a feature guide and it is not an RFC.
 
-The main public plotting entry points are:
+Motivation
+----------
 
-* ``NDDataset.plot()`` for automatic dispatch based on dimensionality;
+The plotting cleanup was driven by accumulated maintenance problems:
+
+* public plotting regressions caused by duplicated dispatch and wrapper logic;
+* inconsistent handling of method aliases and plotting kwargs;
+* normalization rules spread across several modules;
+* wrappers partially re-implementing backend behavior.
+
+The resulting architecture intentionally separates:
+
+* plotting vocabulary;
+* kwargs normalization;
+* style interpretation;
+* artist creation;
+* specialized orchestration.
+
+Current Architecture
+--------------------
+
+The main public plotting surface includes:
+
+* ``NDDataset.plot()`` for dimension-aware default dispatch;
 * explicit helpers such as ``plot_pen()``, ``plot_scatter()``,
   ``plot_bar()``, ``plot_lines()``, ``plot_contour()``,
   ``plot_contourf()``, ``plot_image()``, ``plot_surface()``, and
   ``plot_waterfall()``;
 * orchestration helpers such as ``plot_multiple()`` and ``multiplot()``;
-* composite plotters (for example PCA score/scree plots), which have their own
-  specialized contracts.
+* composite plotters and plugin plotters, which build on the shared plotting
+  layer but may own additional specialized behavior.
 
-Core Dispatch Path
-------------------
-
-The standard dataset plotting path is:
+The normal dataset plotting path is:
 
 .. code-block:: text
 
     NDDataset.plot()
         -> plotting.dispatcher.plot_dataset()
         -> plotting.backends.matplotlib_backend.plot_dataset_impl()
+        -> plotting._methods
+        -> plotting._kwargs
+        -> plotting._style
         -> plot1d.py / plot2d.py / plot3d.py
+        -> Matplotlib artists
 
-The dispatcher selects the plotting backend.  The Matplotlib backend owns the
-main dataset plotting dispatch and the final ``show`` step for that path.
+Read that flow as a sequence of responsibilities, not as a promise that every
+function literally calls each helper in exactly that textual order for every
+plot family.
 
-Responsibility Split
---------------------
+Responsibility Boundaries
+-------------------------
 
-The current split is intentionally simple:
+``plotting._methods``
+~~~~~~~~~~~~~~~~~~~~~
 
-* ``plotting._methods``:
-  normalize plotting vocabulary and compatibility aliases such as
-  ``stack -> lines`` and ``map -> contour``.
-* ``plotting._kwargs``:
-  normalize plotting keyword aliases such as ``lw -> linewidth``,
-  ``ls -> linestyle``, ``ms -> markersize``, ``mew -> markeredgewidth``,
-  ``c -> color``, and ``colormap -> cmap``.
-* ``plotting._style``:
-  interpret normalized style inputs in a geometry-aware way
-  (markers, line styles, palettes, colormaps, alpha, etc.).
-* ``plot1d.py`` / ``plot2d.py`` / ``plot3d.py``:
-  create Matplotlib artists and apply axis-level policy for the relevant
-  plotting family.
-* ``plot_multiple()``:
-  overlay several datasets on one axes.
-* ``multiplot()``:
-  create a grid of axes and delegate per-panel rendering to the regular
-  dataset plotting path.
+This module owns plotting vocabulary normalization:
+
+* canonical method names;
+* compatibility aliases such as ``lines <-> pen`` where appropriate;
+* dimensional aliases such as ``stack -> lines`` and ``map -> contour``;
+* validation of supported method names for the relevant plotting family.
+
+This module does not decide styling or create artists.
+
+``plotting._kwargs``
+~~~~~~~~~~~~~~~~~~~~
+
+This module owns plotting kwargs normalization:
+
+* alias renaming such as ``lw -> linewidth`` and ``ls -> linestyle``;
+* marker-related aliases such as ``ms -> markersize`` and
+  ``mew -> markeredgewidth``;
+* color aliases such as ``c -> color`` and ``colormap -> cmap``;
+* production of canonical kwargs for downstream plotting code.
+
+This module does not interpret what those values should mean visually.
+
+``plotting._style``
+~~~~~~~~~~~~~~~~~~~
+
+This module owns style interpretation after normalization:
+
+* geometry-dependent marker defaults;
+* line defaults and palette decisions;
+* colormap and alpha interpretation;
+* conversion of normalized plotting inputs into concrete style choices.
+
+This is the layer that answers questions such as "what marker should a scatter
+plot use by default?" rather than "what is the canonical spelling of this
+kwarg?".
+
+``plot1d.py`` / ``plot2d.py`` / ``plot3d.py``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+These plotter modules own rendering work:
+
+* creation of Matplotlib artists;
+* geometry-specific axis policy;
+* application of normalized methods, kwargs, and interpreted style to concrete
+  artists.
+
+This is where rendering happens.  These modules should not duplicate
+normalization logic that belongs in ``_methods.py`` or ``_kwargs.py``.
+
+Dispatcher and Backend
+~~~~~~~~~~~~~~~~~~~~~~
+
+The dispatcher selects the active plotting backend.  The Matplotlib backend
+owns the standard dataset plotting dispatch for that backend and the top-level
+``show`` handling for that path.
+
+This layer is responsible for sending an already-understood plotting request to
+the correct rendering family.  It is not the place to redefine plotting
+vocabulary or kwargs aliases.
+
+Specialized Orchestration
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Some plotting entry points are intentionally more specialized:
+
+* ``plot_multiple()`` overlays several datasets on one axes;
+* ``multiplot()`` builds grids of axes and delegates panel rendering;
+* composite plotters may combine several visuals with their own layout logic;
+* plugin plotting entry points may adapt plugin-specific objects or workflows
+  before delegating to the shared plotting layer.
+
+These helpers are orchestration code.  They should reuse the shared
+normalization and rendering layers rather than re-implement them.
+
+Design Principles
+-----------------
+
+The cleanup adopted a small set of explicit design principles:
+
+Normalize first
+~~~~~~~~~~~~~~~
+
+Method aliases and kwargs aliases should be normalized before downstream code
+interprets or renders them.
+
+Interpret later
+~~~~~~~~~~~~~~~
+
+Style decisions belong after normalization, when the plotting geometry and
+canonical parameters are already known.
+
+Render last
+~~~~~~~~~~~
+
+Artist creation should be the final step.  Rendering code should receive
+already-normalized, already-interpreted inputs whenever possible.
+
+Avoid duplicated normalization
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When a method alias or kwargs alias needs to change, contributors should update
+the central helper module rather than patching several wrappers independently.
+
+Keep semantics separate from rendering
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Plotting semantics, normalization, style interpretation, and artist creation
+are related, but they are not the same responsibility.  The current structure
+exists to keep those concerns legible.
+
+What Was Intentionally Not Centralized
+--------------------------------------
+
+Not every plotting responsibility should live in one helper layer.
+
+The following remain intentionally local or specialized:
+
+* subplot layout and panel orchestration in ``multiplot()``;
+* overlay-specific behavior in ``plot_multiple()``;
+* composite visualizations that combine several plot types or analysis results;
+* plugin-specific plotting entry points and adapters;
+* parts of the figure/axes lifecycle that are inherently tied to specialized
+  orchestration.
+
+Centralizing these behaviors prematurely would blur the distinction between
+shared plotting semantics and higher-level composition logic.
 
 Figure and Axes Lifecycle
 -------------------------
 
-Figure and axes ownership is partly centralized and partly specialized:
+Figure and axes ownership remains partly centralized and partly specialized:
 
-* the main 1D/2D dataset plotting path uses ``NDDataset._figure_setup()`` to
-  decide whether to create a new figure, reuse the current figure, or reuse an
-  explicitly provided ``ax``;
-* ``ax``, ``clear``, and ``show`` are the main lifecycle controls for ordinary
-  dataset plots;
-* ``plot_multiple()`` and ``multiplot()`` orchestrate figures and axes
-  themselves because they compose several plot calls;
-* composite plots may own their figure lifecycle directly rather than going
-  through the standard dataset path.
+* the main dataset plotting path uses ``NDDataset._figure_setup()`` to decide
+  whether to create a figure, reuse the current figure, or use an explicit
+  ``ax``;
+* ``ax``, ``clear``, and ``show`` remain the main lifecycle controls for
+  ordinary dataset plots;
+* orchestration helpers such as ``plot_multiple()`` and ``multiplot()`` manage
+  figure composition more directly because they coordinate several plot calls;
+* composite plots may own their lifecycle outright.
+
+This boundary is documented here because it affects contributor expectations,
+but it was intentionally not folded into the normalization helpers.
 
 Practical Contributor Guidance
 ------------------------------
@@ -82,8 +215,23 @@ When changing plotting code:
 
 * put method vocabulary changes in ``_methods.py``;
 * put kwargs alias changes in ``_kwargs.py``;
-* keep style decisions in ``_style.py``;
+* keep style interpretation in ``_style.py``;
 * keep artist creation in the plotter modules;
-* avoid re-implementing normalization logic in wrappers;
-* be careful with ``ax``, ``clear``, and ``show`` because composite plots and
-  orchestration helpers can have narrower contracts than ``dataset.plot()``.
+* avoid re-implementing normalization in wrappers or composite helpers;
+* treat ``plot_multiple()`` and ``multiplot()`` as orchestration layers, not
+  as places to invent alternate plotting semantics.
+
+Future Evolution
+----------------
+
+The current architecture is stable, but a few areas may deserve future
+attention:
+
+* a clearer figure/axes lifecycle contract across ordinary and composite plots;
+* possible convergence of plugin-side helper patterns where duplication
+  reappears;
+* future rendering abstractions only if they solve a demonstrated maintenance
+  problem.
+
+Any future evolution should preserve the current responsibility split unless a
+clear replacement architecture is intentionally adopted.
