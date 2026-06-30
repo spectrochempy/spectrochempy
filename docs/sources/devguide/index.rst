@@ -27,4 +27,5 @@ repository and are intentionally kept outside this published guide.
     contributing_codespecifics
     contributing_documentation
     contributing_plotting
+    plotting_architecture
     plugins/index

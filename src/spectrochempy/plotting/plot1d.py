@@ -549,9 +549,11 @@ def plot_1D(dataset, method=None, **kwargs):
 
 def plot_scatter(dataset, **kwargs):
     """
-    Plot a 1D dataset as a scatter plot (points can be added on lines).
+    Plot a 1D dataset with marker-based scatter rendering.
 
-    Alias of plot (with `method` argument set to `scatter` .
+    This is equivalent to ``dataset.plot(method="scatter", ...)``. Use it when
+    the visual intent should be explicit in the code. The compatibility flag
+    ``scatter=True`` is still accepted by ``plot()`` for existing user code.
 
     Parameters
     ----------
@@ -643,8 +645,8 @@ def plot_scatter(dataset, **kwargs):
 
     Returns
     -------
-    Matplolib Axes or None
-        The matplotlib axes containing the plot if successful, None otherwise.
+    matplotlib.axes.Axes
+        The matplotlib axes containing the scatter plot.
 
     See Also
     --------
@@ -661,9 +663,10 @@ def plot_scatter(dataset, **kwargs):
 
 def plot_pen(dataset, **kwargs):
     """
-    Plot a 1D dataset with solid pen by default.
+    Plot a 1D dataset with line rendering.
 
-    Alias of plot (with `method` argument set to `pen`.
+    This is equivalent to ``dataset.plot(method="pen", ...)`` and is the
+    default geometry for ordinary 1D dataset plotting.
 
     Parameters
     ----------
@@ -755,8 +758,8 @@ def plot_pen(dataset, **kwargs):
 
     Returns
     -------
-    Matplolib Axes or None
-        The matplotlib axes containing the plot if successful, None otherwise.
+    matplotlib.axes.Axes
+        The matplotlib axes containing the line plot.
 
     See Also
     --------
@@ -885,9 +888,9 @@ def plot_scatter_pen(dataset, **kwargs):
 
 def plot_bar(dataset, **kwargs):
     """
-    Plot a 1D dataset with bars.
+    Plot a 1D dataset as a bar chart.
 
-    Alias of plot (with `method` argument set to `bar`.
+    This is equivalent to ``dataset.plot(method="bar", ...)``.
 
     Parameters
     ----------
@@ -979,8 +982,8 @@ def plot_bar(dataset, **kwargs):
 
     Returns
     -------
-    Matplolib Axes or None
-        The matplotlib axes containing the plot if successful, None otherwise.
+    matplotlib.axes.Axes
+        The matplotlib axes containing the bar plot.
 
     See Also
     --------
@@ -1008,19 +1011,21 @@ def plot_multiple(
     **kwargs,
 ):
     """
-    Plot a series of 1D datasets as a scatter plot with optional lines between markers.
+    Overlay several 1D datasets on a single Matplotlib axes.
 
     Parameters
     ----------
     datasets : `list` of 1D `NDDataset`
-        NDdatasets to plot.
+        Datasets to plot. If a single dataset is passed, ``plot_multiple()``
+        falls back to the regular ``dataset.plot()`` path and preserves the
+        requested method.
     method : `str` among [scatter, pen]
-        Method to use for plotting.
+        Geometry to use for each overlaid dataset. ``"scatter"`` produces
+        marker-based rendering; ``"pen"`` produces line rendering.
     pen : bool, optional, default: True
-        If method is scatter, this flag tells to draw also the lines
-        between the marks.
+        If ``method="scatter"``, also draw connecting lines between markers.
     labels : a `list` of `str`, optional
-        Labels used for the legend. The length of the list must be equal to the number
+        Labels used for the legend. The length of the list must match the number
         of datasets to plot.
     marker : `str`, list` os `str` or `AUTO`, optional, default: 'AUTO'
         Marker type for scatter plot. If marker is not provided then the scatter type
@@ -1036,7 +1041,20 @@ def plot_multiple(
     shift: `float`, `list`of  `floats`, optional, default: 0.0
         Vertical shift of the lines.
     **kwargs
-        Other parameters that will be passed to the plot1D function.
+        Other parameters passed to the underlying 1D plotting calls. Common
+        aliases such as ``lw``, ``ls``, ``ms``, ``mew``, and ``c`` are
+        normalized internally before rendering.
+
+    Returns
+    -------
+    matplotlib.axes.Axes
+        The shared axes containing the overlaid datasets.
+
+    See Also
+    --------
+    plot_pen
+    plot_scatter
+    multiplot
 
     """
     kwargs = normalize_plot_kwargs(kwargs)
@@ -1133,10 +1151,10 @@ def plot_multiple(
         )
         sh += shift[i]
 
-    # Restore user's show preference for final display
+    # Restore the caller's preference for any later code using kwargs.
     kwargs["show"] = user_show
 
-    # scale all plots
+    # Build a combined legend on the shared axes when requested.
     if legend is not None:
         _ = ax.legend(
             ax.lines,

@@ -27,9 +27,14 @@
 # For 1D and 2D datasets, you can adjust how lines appear:
 
 # %%
+import os
+from pathlib import Path
+
 import spectrochempy as scp
 
-ds = scp.read("irdata/nh4y-activation.spg")
+TEST_FILE = Path(os.environ.get("TEST_FILE", "irdata/nh4y-activation.spg"))
+
+ds = scp.read(TEST_FILE)
 
 # %% [markdown]
 # ### Color
@@ -44,16 +49,35 @@ _ = ds.plot(color="red")
 _ = ds.plot(linewidth=2)
 
 # %% [markdown]
+# The short alias `lw=...` is accepted as well:
+
+# %%
+_ = ds.plot(lw=2)
+
+# %% [markdown]
 # ### Line Style
 
 # %%
 _ = ds.plot(linestyle="--")
 
 # %% [markdown]
+# The corresponding short alias is `ls=...`:
+
+# %%
+_ = ds.plot(ls="--")
+
+# %% [markdown]
 # ### Marker
 
 # %%
 _ = ds.plot(marker="o")
+
+# %% [markdown]
+# Marker-related aliases such as `ms` (marker size) and `mew`
+# (marker edge width) are normalized automatically:
+
+# %%
+_ = ds.plot(marker="o", ms=5, mew=1.5)
 
 
 # %% [markdown]
@@ -102,6 +126,16 @@ _ = ds.plot(grid=True)
 
 # %%
 _ = ds.plot(cmap="viridis")
+
+# %% [markdown]
+# The aliases `c=...` for line color and `colormap=...` for `cmap=...` are also
+# accepted:
+
+# %%
+_ = ds[0].plot(c="darkred")
+
+# %%
+_ = ds.plot_image(colormap="plasma")
 
 # %% [markdown]
 # ### Categorical Colors (cmap=None)

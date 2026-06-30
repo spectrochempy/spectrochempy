@@ -12,12 +12,16 @@ This example compares a few explicit plotting methods available for the same
 infrared dataset.
 """
 
+import os
+from pathlib import Path
+
 import spectrochempy as scp
 
 # %%
 # Load a 2D IR dataset and prepare a cleaner spectral window for display.
 
-dataset = scp.read("irdata/nh4y-activation.spg")
+TEST_FILE = Path(os.environ.get("TEST_FILE", "irdata/nh4y-activation.spg"))
+dataset = scp.read(TEST_FILE)
 dataset = dataset[:, 4000.0:650.0]
 dataset.y -= dataset.y[0]
 dataset.y.ito("hour")

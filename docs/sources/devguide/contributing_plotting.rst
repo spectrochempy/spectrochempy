@@ -7,6 +7,9 @@ This page summarizes the contributor-facing rules for working on plotting code.
 It is intentionally practical. Deep implementation history and internal
 architecture notes do not belong in the public developer guide.
 
+For a concise map of the current implementation layers, see
+:doc:`plotting_architecture`.
+
 Scope
 -----
 

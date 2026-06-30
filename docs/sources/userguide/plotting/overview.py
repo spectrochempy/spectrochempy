@@ -32,9 +32,14 @@
 # Once a dataset is loaded, simply call the `plot()` method:
 
 # %%
+import os
+from pathlib import Path
+
 import spectrochempy as scp
 
-ds = scp.read("irdata/nh4y-activation.spg")
+TEST_FILE = Path(os.environ.get("TEST_FILE", "irdata/nh4y-activation.spg"))
+
+ds = scp.read(TEST_FILE)
 _ = ds.plot()
 
 # %% [markdown]
@@ -42,8 +47,8 @@ _ = ds.plot()
 #
 # Here SpectroChemPy automatically:
 #
-# - Detects the dataset is 2D and chooses an appropriate plot type (stacked lines in this case).
-# - Selects a suitable colormap (sequential because the y-dimension is a time axis)
+# - Detects that the dataset is 2D and chooses the default stacked-lines geometry.
+# - Selects a suitable color mapping for that geometry.
 # - Adds axis labels from dataset metadata.
 # - Adjusts layout and scaling.
 #
@@ -54,12 +59,14 @@ _ = ds.plot()
 #
 # The `plot()` method adapts to the dimensionality of your dataset:
 #
-# | Dataset type | Default plot |
-# |--------------|--------------|
-# | 1D / 2D      | Line(s) plot |
-# | 2D field     | Image / contour (depending on method) |
+# | Dataset type | Default geometry |
+# |--------------|------------------|
+# | 1D dataset | `pen` |
+# | 2D dataset | `lines` |
+# | 3D dataset | `surface` |
 #
-# But you can also explicitly choose another plotting method:
+# You can still choose the geometry explicitly when you want your code to be more
+# descriptive:
 
 # %%
 _ = ds.plot_contour()
@@ -67,6 +74,10 @@ _ = ds.plot_contour()
 
 # %%
 _ = ds.plot_image()
+
+# %% [markdown]
+# For 1D data, the equivalent explicit helpers are `plot_pen()`,
+# `plot_scatter()`, and `plot_bar()`.
 
 # %% [markdown]
 # ## Automatic Color Selection
@@ -117,8 +128,10 @@ _ = ds.plot_lines(palette="categorical")
 # %% [markdown]
 # ## Colorbars
 #
-# By default SpectroChemPy never print a colorbar.  But using the option `colorbar=auto` will make it print  whenever
-# a sequential or diverging colormap is used/
+# By default, line plots do not show a colorbar, and image-like plots only show
+# one when you ask for it. Use `colorbar=True` to force a colorbar or
+# `colorbar="auto"` when you want SpectroChemPy to add one only when a
+# continuous color mapping is meaningful.
 
 # %%
 _ = ds.plot_contour(colorbar="auto")  # shows colorbar whenever applicable
@@ -156,9 +169,10 @@ _ = ds.plot(cmap="plasma")  # note that palette="plasma" would also work for lin
 _ = ds.plot(style="grayscale")
 
 # %% [markdown]
-# Styles can affect fonts, grid appearance, backgrounds, and (in auto mode) colormap defaults. When passes in a
-# `plot()` function the change is on a ped-plot basis. You can also set a style globally and persistently using
-# `scp.preferences.style`, which will affect all subsequent plots.
+# Styles can affect fonts, grid appearance, backgrounds, and (in auto mode)
+# colormap defaults. When passed to a `plot()` call, a style applies only to
+# that plot. You can also set a style globally and persistently using
+# `scp.preferences.style`, which affects subsequent plots.
 
 # %% [markdown]
 # ## The Mental Model
@@ -166,9 +180,12 @@ _ = ds.plot(style="grayscale")
 # In practice:
 #
 # - `ds.plot()` just works.
+# - `method=` selects the geometry when the default is not what you want.
 # - `cmap=` (or `palette=` for lines) changes colors.
 # - `colorbar=` controls the colorbar.
 # - `style=` changes the overall appearance.
+# - `plot_multiple()` overlays several datasets, while `multiplot()` builds a
+#   grid of axes.
 # - `scp.preferences` changes defaults persistently.
 #
 # Everything else is optional.

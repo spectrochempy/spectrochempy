@@ -5,58 +5,71 @@
 # ======================================================================================
 # ruff: noqa
 """
-Introduction to the plotting librairie
-=======================================
+Introduction to the plotting library
+====================================
 
+This short gallery example shows three common ideas:
 
+- the default ``dataset.plot()`` entry point;
+- per-call style changes that do not mutate later plots;
+- ``plot_multiple()`` overlaying several 1D datasets on one shared axes.
 """
 
 # %%
 
+import os
+from pathlib import Path
+
+import numpy as np
 import spectrochempy as scp
 
 # %%
-# The location of the spectrochempy_data can be found in preferences
+# The location of the spectrochempy_data can be found in preferences.
 
 datadir = scp.preferences.datadir
+TEST_FILE = Path(
+    os.environ.get("TEST_FILE", datadir / "irdata" / "nh4y-activation.spg")
+)
 
 # %%
-# Let's read on of the dataset (in `spg` Omnnic format)
+# Let's read one dataset (in ``.spg`` OMNIC format).
 
-dataset = scp.read_omnic(datadir / "irdata" / "nh4y-activation.spg")
+dataset = scp.read(TEST_FILE)
 
 # %%
-# First we do a generic plot (with the default style):
+# First use the default plotting entry point and default style.
 
 ax = dataset[0].plot()
 
 # %%
-# plot generic style
+# Apply a different style to this single plot only.
 
 ax = dataset[0].plot(style="classic")
 
 # %%
-# check that style reinit to default
-# should be identical to the first one
+# Style selection is local to the previous call, so the default style is used
+# again here.
 ax = dataset[0].plot()
 
 # %%
-# Multiple plots
+# ``plot_multiple()`` overlays several 1D datasets on one shared axes.
 dataset = dataset[:, ::100]
 
-datasets = [dataset[0], dataset[10], dataset[20], dataset[50], dataset[53]]
-labels = ["sample {}".format(label) for label in ["S1", "S10", "S20", "S50", "S53"]]
+sample_indices = np.linspace(0, dataset.shape[0] - 1, 5, dtype=int)
+datasets = [dataset[index] for index in sample_indices]
+labels = [f"sample {index}" for index in sample_indices]
 
+# Use ``method="scatter"`` when the visual intent is marker-based.
 _ = scp.plot_multiple(method="scatter", datasets=datasets, labels=labels, legend="best")
 
 # %%
-# plot multiple with style
+# As above, the style change applies only to this call.
 _ = scp.plot_multiple(
     method="scatter", style="sans", datasets=datasets, labels=labels, legend="best"
 )
 
 # %%
-# check that style reinit to default
+# The default style is used again on the next call.
 _ = scp.plot_multiple(method="scatter", datasets=datasets, labels=labels, legend="best")
 
 # %%

@@ -221,17 +221,23 @@ def multiplot(
     **kwargs,
 ):
     """
-    Generate a figure with multiple axes arranged in array (n rows, n columns).
+    Arrange datasets on a grid of Matplotlib axes.
+
+    Unlike ``plot_multiple()``, which overlays several datasets on one shared
+    axes, ``multiplot()`` creates one panel per dataset (unless the call
+    degenerates to a single 1x1 plot).
 
     Parameters
     ----------
     datasets : nddataset or list of nddataset
-        Datasets to plot.
+        Dataset or datasets to plot.
     labels : list of str
         The labels that will be used as title of each axes.
-    method : str, default to `map` for 2D and `lines` for 1D data
-        Type of plot to draw in all axes (`lines` , `scatter` , `stack` , `map`
-        ,`image` or `with_transposed` ).
+    method : str, default to ``"lines"``
+        Plot geometry to use in every panel. Common values are ``"pen"``,
+        ``"scatter"``, ``"lines"``, ``"contour"``, ``"contourf"``,
+        ``"image"``, and ``"with_transposed"``. Compatibility aliases such as
+        ``"stack"`` and ``"map"`` are normalized internally.
     nrows, ncols : int, default=1
         Number of rows/cols of the subplot grid. ncol*nrow must be equal
         to the number of datasets to plot.
@@ -282,6 +288,12 @@ def multiplot(
         Title of the figure to display on top.
     suptitle_color : color
         Color of the subtitles
+
+    Returns
+    -------
+    matplotlib.axes.Axes or numpy.ndarray or dict
+        A single axes for the 1x1 case, otherwise the subplot collection. Use
+        ``return_dict=True`` to keep the internal axes naming.
 
     """
 
