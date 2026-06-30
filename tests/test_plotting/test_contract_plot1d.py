@@ -83,3 +83,24 @@ def test_plot1d_with_ylim(synthetic_1d):
     """Test plot1d with y-axis limits."""
     ax = synthetic_1d.plot(ylim=(0, 1), show=False)
     assert ax is not None
+
+
+def test_plot1d_alias_kwargs_normalize_to_canonical_artists(synthetic_1d):
+    """Legacy line-style aliases should still drive the final Line2D artist."""
+    ax = synthetic_1d.plot(
+        c="red",
+        lw=2.5,
+        ls="--",
+        marker="o",
+        ms=7,
+        mew=1.5,
+        show=False,
+    )
+
+    line = ax.lines[0]
+    assert line.get_color() == "red"
+    assert line.get_linewidth() == pytest.approx(2.5)
+    assert line.get_linestyle() == "--"
+    assert line.get_marker() == "o"
+    assert line.get_markersize() == pytest.approx(7)
+    assert line.get_markeredgewidth() == pytest.approx(1.5)

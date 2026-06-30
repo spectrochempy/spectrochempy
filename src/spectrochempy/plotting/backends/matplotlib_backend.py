@@ -12,6 +12,7 @@ wrapping the plotting functions from the spectrochempy.plotting module.
 
 from typing import Any
 
+from spectrochempy.plotting._kwargs import normalize_plot_kwargs
 from spectrochempy.plotting._methods import get_default_method_for_ndim
 from spectrochempy.plotting._methods import get_dispatch_method_key
 from spectrochempy.plotting._methods import normalize_backend_method
@@ -85,6 +86,7 @@ def plot_dataset_impl(
     """
     # Initialize matplotlib lazily
     lazy_ensure_mpl_config()
+    kwargs = normalize_plot_kwargs(kwargs)
 
     # Initialize plot profile lazily (loads defaults into PlotPreferences)
     ensure_plot_profile_loaded()

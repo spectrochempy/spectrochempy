@@ -25,6 +25,8 @@ from spectrochempy.application.application import info_
 from spectrochempy.application.preferences import preferences
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.plotting._colorbar_utils import _apply_colorbar_tick_policy
+from spectrochempy.plotting._kwargs import normalize_plot_kwargs
+from spectrochempy.plotting._kwargs import normalize_style_argument
 from spectrochempy.plotting._methods import validate_method_for_target_dimension
 from spectrochempy.plotting._render import render_lines
 from spectrochempy.plotting._style import resolve_2d_colormap
@@ -1211,15 +1213,15 @@ def plot_2D(dataset, method=None, **kwargs):
     # Get preferences
     # ----------------------------------------------------------------------------------
     prefs = preferences
-    requested_alpha = kwargs.get("calpha", kwargs.get("alpha"))
+    kwargs = normalize_plot_kwargs(kwargs)
+    requested_alpha = kwargs.get("alpha")
     requested_levels = kwargs.get("levels")
 
     # Resolve plotting style(s) locally (no global rcParams / no prefs.style mutation)
-    style = kwargs.pop("style", None)
-    if style is None:
-        style = getattr(prefs, "style", None) or ["scpy"]
-    if isinstance(style, str):
-        style = [style]
+    style = normalize_style_argument(
+        kwargs.pop("style", None),
+        default=getattr(prefs, "style", None) or ["scpy"],
+    )
 
     # Resolve rc_overrides for font settings (will be applied in the style context)
     rc_overrides = prefs.set_latex_font(prefs.font.family)
@@ -1663,7 +1665,7 @@ def plot_2D(dataset, method=None, **kwargs):
                 mappable = scalarMap
 
                 # marker = kwargs.get('marker', kwargs.get('m', None))
-                markersize = kwargs.get("markersize", kwargs.get("ms", 5.0))
+                markersize = kwargs.get("markersize", 5.0)
                 # markevery = kwargs.get('markevery', kwargs.get('me', 1))
 
                 for i in ydata:
@@ -1727,7 +1729,7 @@ def plot_2D(dataset, method=None, **kwargs):
 
             # Check if user explicitly provided color or cmap (backward compatibility)
             explicit_color = kwargs.get("color")
-            explicit_cmap = kwargs.get("colormap") or kwargs.get("cmap")
+            explicit_cmap = kwargs.get("cmap")
 
             if explicit_color is not None:
                 # User explicitly passed color - could be a single color or a list
@@ -2290,12 +2292,13 @@ def _plot_waterfall_3d(new, prefs, **kwargs):
 # ======================================================================================
 def _get_clevels(data, prefs, **kwargs):
     # Utility function to determine contours levels
+    kwargs = normalize_plot_kwargs(kwargs)
 
     # contours
     maximum = data.max()
     minimum = data.min()
 
-    nlevels = kwargs.get("nlevels", kwargs.get("nc", prefs.number_of_contours))
+    nlevels = kwargs.get("nlevels", prefs.number_of_contours)
     start = kwargs.get("start", prefs.contour_start) * maximum
     negative = kwargs.get("negative", True)
     if negative < 0:

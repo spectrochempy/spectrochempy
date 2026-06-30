@@ -121,3 +121,29 @@ def test_plot2d_levels_parameter_controls_contour_levels(synthetic_2d):
     contour_sets = [child for child in ax.get_children() if hasattr(child, "levels")]
     assert contour_sets
     assert list(contour_sets[0].levels) == pytest.approx(levels)
+
+
+def test_plot2d_colormap_alias_still_sets_cmap(synthetic_2d):
+    """Legacy colormap= should normalize to cmap= without changing the artist."""
+    ax = synthetic_2d.plot(method="image", colormap="plasma", show=False)
+
+    contour_sets = [child for child in ax.get_children() if hasattr(child, "get_cmap")]
+    assert contour_sets
+    assert contour_sets[0].get_cmap().name == "plasma"
+
+
+def test_plot2d_nc_and_calpha_aliases_still_work():
+    """Legacy contour aliases should normalize before rendering."""
+    import spectrochempy as scp
+
+    x = np.linspace(0, 1, 4)
+    y = np.linspace(0, 1, 3)
+    data = np.arange(1, 13, dtype=float).reshape(3, 4)
+    dataset = scp.NDDataset(data, coords=[y, x], units="dimensionless")
+
+    ax = dataset.plot(method="contour", nc=4, calpha=0.25, show=False)
+
+    contour_sets = [child for child in ax.get_children() if hasattr(child, "levels")]
+    assert contour_sets
+    assert len(contour_sets[0].levels) == 4
+    assert contour_sets[0].get_alpha() == pytest.approx(0.25)

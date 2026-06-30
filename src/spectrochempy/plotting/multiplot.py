@@ -25,6 +25,8 @@ import warnings
 
 import numpy as np
 
+from spectrochempy.plotting._kwargs import normalize_plot_kwargs
+from spectrochempy.plotting._kwargs import normalize_style_argument
 from spectrochempy.plotting._methods import normalize_multiplot_method
 from spectrochempy.utils.mplutils import _Axes
 from spectrochempy.utils.typeutils import is_sequence
@@ -294,12 +296,10 @@ def multiplot(
     from spectrochempy.application.preferences import preferences as prefs
     from spectrochempy.utils.mplutils import get_figure
 
+    kwargs = normalize_plot_kwargs(kwargs)
+
     # Resolve plotting style(s) locally (do not mutate global rcParams)
-    style = kwargs.pop("style", None)
-    if style is None:
-        style = ["scpy"]
-    if isinstance(style, str):
-        style = [style]
+    style = normalize_style_argument(kwargs.pop("style", None), default=["scpy"])
 
     with plt.style.context(style):
         # todo:_tight_layout deprecated
