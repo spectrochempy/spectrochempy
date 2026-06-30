@@ -8,6 +8,7 @@
 
 __all__ = [
     "_colorbar_utils",
+    "_methods",
     "_mpl_assets",
     "_render",
     "_style",
@@ -22,6 +23,7 @@ __all__ = [
 ]
 
 from . import _colorbar_utils
+from . import _methods
 from . import _mpl_assets
 from . import _render
 from . import _style

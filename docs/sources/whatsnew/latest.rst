@@ -58,3 +58,10 @@ Bug Fixes
   ``y``. This fixes failures in ``predict()``, ``y_scores``, ``y_loadings``,
   ``y_weights``, ``y_rotations``, ``result``, and ``coef`` when fitting with a
   1D target. (#1305)
+
+Developer
+~~~~~~~~~
+
+- Centralized internal plotting method normalization in a private helper
+  module to reduce duplication across backend dispatch, multiplot handling,
+  and 1D/2D fallback validation, without changing the public plotting API.

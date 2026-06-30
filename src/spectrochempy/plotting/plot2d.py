@@ -25,34 +25,12 @@ from spectrochempy.application.application import info_
 from spectrochempy.application.preferences import preferences
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.plotting._colorbar_utils import _apply_colorbar_tick_policy
+from spectrochempy.plotting._methods import validate_method_for_target_dimension
 from spectrochempy.plotting._render import render_lines
 from spectrochempy.plotting._style import resolve_2d_colormap
 from spectrochempy.plotting._style import resolve_line_style
 from spectrochempy.plotting._style import resolve_stack_colors
 from spectrochempy.utils.mplutils import make_label
-
-_VALID_1D_METHODS = {"pen", "bar", "scatter", "scatter_pen", "scatter+pen"}
-_VALID_2D_PLUS_METHODS = {
-    "lines",
-    "stack",
-    "contour",
-    "map",
-    "contourf",
-    "image",
-    "surface",
-    "waterfall",
-}
-_FALLBACK_2D_TO_1D_METHOD_ALIASES = {
-    "lines": "pen",
-}
-
-
-def _raise_incompatible_method(method, source, target):
-    raise ValueError(
-        f"method={method!r} is incompatible with {source}; "
-        f"use a {target} plotting method or call dataset.plot() for automatic dispatch."
-    )
-
 
 # ======================================================================================
 # Helper functions for aspect ratio control
@@ -1293,10 +1271,12 @@ def plot_2D(dataset, method=None, **kwargs):
         if dataset._squeeze_ndim < 2:
             if method is None:
                 return dataset.plot_1D(**kwargs)
-            method = _FALLBACK_2D_TO_1D_METHOD_ALIASES.get(method, method)
-            if method in _VALID_1D_METHODS:
-                return dataset.plot_1D(method=method, **kwargs)
-            _raise_incompatible_method(method, "plot_2D() with 1D data", "1D")
+            method = validate_method_for_target_dimension(
+                method,
+                target="1d",
+                source="plot_2D() with 1D data",
+            )
+            return dataset.plot_1D(method=method, **kwargs)
 
         # if plotly execute plotly routine not this one
         if kwargs.get("use_plotly", prefs.use_plotly):
