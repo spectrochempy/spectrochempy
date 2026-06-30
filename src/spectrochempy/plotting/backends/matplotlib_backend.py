@@ -6,8 +6,13 @@
 """
 Matplotlib backend for SpectroChemPy.
 
-This module provides the matplotlib implementation of plotting functions,
-wrapping the plotting functions from the spectrochempy.plotting module.
+Current responsibility split:
+
+- `_methods.py` normalizes plotting vocabulary;
+- `_kwargs.py` normalizes plotting keyword arguments;
+- this backend selects the plotter and owns the final `show` step for the
+  main dataset plotting path;
+- `plot1d.py`, `plot2d.py`, and `plot3d.py` create matplotlib artists.
 """
 
 from typing import Any
@@ -24,7 +29,7 @@ from spectrochempy.utils.mplutils import show as mpl_show
 _WARNED_ALIASES = set()
 
 
-# Mapping of method names to standalone plot functions
+# Mapping of canonical dispatch keys to standalone plot functions.
 _PLOT_FUNCTIONS = {}
 
 

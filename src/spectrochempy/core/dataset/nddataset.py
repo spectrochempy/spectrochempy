@@ -2211,17 +2211,22 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         return plot_dataset(self, method=method, **kwargs)
 
     # ======================================================================================
-    # Deprecated plot-related stubs (no-op for backward compatibility)
+    # Plot lifecycle helpers and compatibility stubs
     # ======================================================================================
-    # These stubs exist for backward compatibility but do NOT store any state on the dataset.
-    # The plotting functions in spectrochempy.plotting now use local variables instead.
+    # Dataset plotting is stateless: figures and axes are not stored on the dataset.
+    # The backend and plotter layers own rendering, while this helper centralizes the
+    # figure / axes setup policy used by the core dataset plotting path.
 
     def _figure_setup(self, ndim=1, method=None, **kwargs):
         """
-        Set up figure and axes (deprecated; now handled by spectrochempy.plotting functions).
+        Set up figure and axes for the core dataset plotting path.
 
-        This method exists for backward compatibility.
-        For internal use by plot functions only - creates figure and returns axes.
+        This internal helper does not store state on the dataset. It applies the
+        current axes ownership policy used by the 1D and 2D plotters:
+
+        - explicit ``ax`` reuses the caller-provided axes;
+        - ``clear=False`` reuses the current figure when possible;
+        - ``clear=True`` creates a new figure.
         """
         from spectrochempy.application.preferences import preferences as prefs
         from spectrochempy.plotting.plot_setup import lazy_ensure_mpl_config
@@ -2295,23 +2300,17 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             ax.name = "main"
             ndaxes["main"] = ax
 
-        # Return method string and the created axes for use by plot functions
+        # Return the resolved method string together with the figure/axes mapping
+        # used by the core plotters.
         return method or "", fig, ndaxes
-
-    def _plot_resume(self, origin: Any, **kwargs: Any) -> None:
-        """
-        Resume plot cleanup (deprecated; now handled by spectrochempy.plotting functions).
-
-        This method exists for backward compatibility but does nothing.
-        The plot functions now handle cleanup internally.
-        """
-        pass
 
     def close_figure(self):
         """
-        Close figure (deprecated; now handled by spectrochempy.plotting functions).
+        Provide a deprecated plotting compatibility stub.
 
-        This method exists for backward compatibility but does nothing.
+        Figure ownership is no longer stored on the dataset, so this method has
+        no managed figure to close. Callers should close matplotlib figures via
+        the returned axes or figure object instead.
         """
         pass
 
