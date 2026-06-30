@@ -7,6 +7,9 @@ Papers citing `SpectroChemPy`
 2026
 ====
 
+- Isobutanol Dehydration to Linear Butenes on Ferrierite: Mechanistic Insights from operando FTIR, Chemometrics and Kinetic Modelling
+  :cite:t:`vottero:2026`, `DOI: 10.26434/chemrxiv.15005433/v1 <https://chemrxiv.org/doi/abs/10.26434/chemrxiv.15005433/v1>`__.
+
 - Machine Learning for Biomedical Raman Spectroscopy: From Spectral Acquisition to Clinical Translation
   :cite:t:`oancea:2026`, `DOI: 10.48550/arXiv.2606.14169 <https://doi.org/10.48550/arXiv.2606.14169>`__.
 
