@@ -7,6 +7,21 @@ Papers citing `SpectroChemPy`
 2026
 ====
 
+- Machine Learning for Biomedical Raman Spectroscopy: From Spectral Acquisition to Clinical Translation
+  :cite:t:`oancea:2026`, `DOI: 10.48550/arXiv.2606.14169 <https://doi.org/10.48550/arXiv.2606.14169>`__.
+
+- Automatic computational assessment of bone mineral properties through Fourier transform infrared spectroscopy analysis
+  :cite:t:`raimondi:2026`, `DOI: 10.1016/j.saa.2026.128123 <https://doi.org/10.1016/j.saa.2026.128123>`__.
+
+- Silanol Networks Control Methanol Reactivity in Nano-and Micron-sized Silicalite-1
+  :cite:t:`dalena:2026`, `DOI: 10.1002/smll.73802 <https://doi.org/10.1002/smll.73802>`__.
+
+- Machine Learning--Integrated Raman Spectroscopy Identifies Race-Associated Biochemical Signatures in Prostate Cancer,
+  :cite:t:`iftesum:2026`, `DOI: 10.1002/jbio.70293 <https://doi.org/10.1002/jbio.70293>`__.
+
+- Ba-exchanged gismondine for CO 2 direct air capture (DAC),
+  :cite:t:`al_atrach:2026`, `DOI: 10.1039/D6TA03011D <https://doi.org/10.1039/D6TA03011D>`__.
+
 - Speciation of silanol groups on commercial precipitated silicas via IR spectroscopy,
   :cite:t:`debs:2026`, `DOI: 10.26434/chemrxiv.15002422/v1 <https://chemrxiv.org/doi/abs/10.26434/chemrxiv.15002422/v1>`__.
 
