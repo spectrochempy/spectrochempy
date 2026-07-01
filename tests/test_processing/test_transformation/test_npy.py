@@ -51,3 +51,7 @@ def test_npy(ds1):
     # if no dataset then is it equivalent to np.dot
     x = dot(a.data.T, b.data)
     assert isinstance(x, np.ndarray)
+
+    # isinstance typo regression: first arg numpy, second arg NDDataset
+    x = dot(a.data.T, b)
+    assert x.shape == (a.x.size, b.x.size)

@@ -98,7 +98,12 @@ def _apodize_method(**units):
                 # now call the method with unitless parameters
                 if is_ir:
                     # we must apodize at the top of the interferogram.
-                    zpd = int(np.argmax(new.data, -1).item())
+                    # For multidimensional data, compute a single representative
+                    # ZPD from the median of per-row argmax positions.  The
+                    # median is robust against outlier rows with spurious
+                    # intensity and preserves correct behavior for 1D data
+                    # (median of a single value = that value).
+                    zpd = int(np.median(np.argmax(new.data, -1)))
                     dist2end = x.size - zpd
                     apod_arr = method(np.empty(2 * dist2end), **kwargs)
                     apod_arr = apod_arr[-x.size :]

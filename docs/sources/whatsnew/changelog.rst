@@ -62,6 +62,8 @@ Bug Fixes
   unavailable; and legacy ``lines`` / ``pen`` aliases continue to work across
   dimensional fallbacks.
 
+- Fixed several processing subpackage bugs: multi-dimensional ZPD detection in interferogram apodization now uses the median of per-row argmax positions; ``rs()``, ``ls()``, and ``roll()`` now pass ``axis=-1`` to ``np.roll`` for proper multi-dimensional shifting; ``denoise()`` guard now checks ``ndim != 2`` instead of the incorrect combined condition, and the ratio display factor is corrected; and ``npy.dot()`` ``isinstance`` check now tests ``b`` instead of ``a`` twice. (#xxx)
+
 - ``PLSRegression`` now works with a 1D ``NDDataset`` as the response variable
   ``y``. This fixes failures in ``predict()``, ``y_scores``, ``y_loadings``,
   ``y_weights``, ``y_rotations``, ``result``, and ``coef`` when fitting with a
