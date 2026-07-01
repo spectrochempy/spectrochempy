@@ -64,7 +64,7 @@ def rs(dataset, pts=0.0, **kwargs):
     roll : shift without zero filling.
 
     """
-    data = np.roll(dataset, int(pts))
+    data = np.roll(dataset, int(pts), axis=-1)
     data[..., : int(pts)] = 0
     return data
 
@@ -102,7 +102,7 @@ def ls(dataset, pts=0.0, **kwargs):
     roll : shift without zero filling.
 
     """
-    data = np.roll(dataset, -int(pts))
+    data = np.roll(dataset, -int(pts), axis=-1)
     data[..., -int(pts) :] = 0
     return data
 
@@ -180,7 +180,7 @@ def roll(dataset, pts=0.0, neg=False, **kwargs):
     ls, rs, cs, fsh, fsh2
 
     """
-    data = np.roll(dataset, int(pts))
+    data = np.roll(dataset, int(pts), axis=-1)
     if neg:
         if pts > 0:
             data[..., : int(pts)] = -data[..., : int(pts)]

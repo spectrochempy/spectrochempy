@@ -60,7 +60,7 @@ def dot(a, b, strict=True, out=None):
     # TODO: may be we can be less strict, and allow dot products with
     #      different kind of objects, as far they are numpy-like arrays
 
-    if not isinstance(a, NDDataset) and not isinstance(a, NDDataset):
+    if not isinstance(a, NDDataset) and not isinstance(b, NDDataset):
         # must be between numpy object or something non valid. Let numpy
         # deal with this
         return np.dot(a, b)

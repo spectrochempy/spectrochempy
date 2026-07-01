@@ -43,7 +43,7 @@ def denoise(dataset, ratio=99.8, **kwargs):
     """
     from spectrochempy.analysis.decomposition.pca import PCA
 
-    if dataset.ndim != 2 and dataset.shape[0] > 1:
+    if dataset.ndim != 2:
         error_("Only 2D dataset are supported")
         return dataset
 
@@ -65,7 +65,7 @@ def denoise(dataset, ratio=99.8, **kwargs):
     pca.fit(dataset)
     info_(
         f"Number of components selected for reconstruction: {pca.n_components} "
-        f"[n_observations={dataset.shape[0]}, ratio={ratio * 10: .2f}%]",
+        f"[n_observations={dataset.shape[0]}, ratio={ratio * 100: .2f}%]",
     )
     if pca.n_components < 3:
         warning_(

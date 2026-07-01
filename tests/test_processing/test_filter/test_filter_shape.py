@@ -9,6 +9,7 @@ import pytest
 
 import spectrochempy as scp
 from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.processing.filter.denoise import denoise
 
 
 @pytest.fixture
@@ -143,3 +144,19 @@ class TestSavgolDerivativeMetadata:
         # validated physical spacing, so units are unchanged.
         result = scp.savgol(dataset_2d_with_meta, size=7, order=3, deriv=1)
         assert result.units == "absorbance", result.units
+
+
+class TestDenoiseGuard:
+    """Regression: denoise dimensionality guard (fix #xxx)."""
+
+    def test_denoise_1d_does_not_crash(self):
+        """1D input returns early without error."""
+        ds = NDDataset(np.random.rand(100))
+        result = denoise(ds)
+        assert result is ds  # returned unchanged
+
+    def test_denoise_2d_works(self, dataset_2d):
+        """2D input runs PCA denoising."""
+        result = denoise(dataset_2d, ratio=99.0)
+        assert result is not dataset_2d
+        assert result.shape == dataset_2d.shape

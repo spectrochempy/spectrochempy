@@ -153,7 +153,7 @@ def concatenate(*datasets, **kwargs):
     if coords is not None and not coords[dim].is_empty:
         coords = coords._concatenate_dim(dim, [ds.coordset for ds in datasets])
 
-    out = dataset.copy()
+    out = datasets[0].copy()
     out._data = data
     if coords is not None:
         out._coordset[dim] = coords[dim]

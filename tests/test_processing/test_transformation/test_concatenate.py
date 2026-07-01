@@ -368,3 +368,20 @@ def test_stack_regression():
     assert result.shape == (2, 2, 3)
     # The new leading dimension coordinate should have two labels
     assert len(result.dims) == 3
+
+
+def test_concatenate_uses_first_dataset_as_template():
+    """Regression: template dataset must be ``datasets[0]``, not loop variable.
+
+    The old code used ``dataset.copy()`` where ``dataset`` was the last
+    element of the ``datasets[1:]`` iteration, losing metadata from the
+    first dataset that is not explicitly overwritten.
+    """
+    ds1 = scp.NDDataset(np.ones((2, 3)))
+    ds2 = scp.NDDataset(np.ones((2, 3)))
+    ds1.author = "author_from_first"
+    ds2.author = "author_from_second"
+    result = concatenate(ds1, ds2, dims="x")
+    # author should mention the 1st dataset's author
+    assert "author_from_first" in result.author
+    assert "author_from_second" in result.author
