@@ -92,6 +92,16 @@ def plot_dataset_impl(
     Any
         The matplotlib axes.
     """
+    # Ensure environment is set up BEFORE importing matplotlib.
+    # In notebooks/nbsphinx, setup_environment() activates %matplotlib inline
+    # which switches the backend.  If we import matplotlib first with the
+    # default backend (Agg) and *then* switch, the existing figures are
+    # closed by plt.switch_backend() -> plt.close('all'), and we lose the
+    # plot.  See note in envsetup.py for details.
+    from spectrochempy.application.application import _get_environment
+
+    _get_environment()
+
     # Initialize matplotlib lazily
     lazy_ensure_mpl_config()
     kwargs = normalize_plot_kwargs(kwargs)

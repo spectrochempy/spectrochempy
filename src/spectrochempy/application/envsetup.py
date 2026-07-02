@@ -3,7 +3,6 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-import importlib.util
 import sys
 from os import environ
 
@@ -67,13 +66,11 @@ def setup_environment():
                 output = import_item("google.colab").output
                 output.enable_custom_widget_manager()
 
-            elif importlib.util.find_spec("ipympl") is not None:
-                IP.run_line_magic("matplotlib", "widget")
-
-            elif importlib.util.find_spec("PyQt6") is not None:
-                IP.run_line_magic("matplotlib", "qt")
-
             else:
+                # Keep notebook rendering inline by default.
+                # Interactive backends such as widget/qt should be an explicit
+                # user choice, otherwise merely having extra GUI packages
+                # installed can move figures out of the notebook.
                 IP.run_line_magic("matplotlib", "inline")
         except Exception:
             IP.run_line_magic("matplotlib", "inline")
