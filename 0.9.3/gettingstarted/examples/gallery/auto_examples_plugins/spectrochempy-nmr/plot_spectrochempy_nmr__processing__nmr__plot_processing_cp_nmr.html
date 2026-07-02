@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analysis CP NMR spectra &mdash; SpectroChemPy v0.9.3 0.9.3 documentation</title>
+      <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../../_static/css/spectrochempy.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../../_static/sphinx-design.5ea377869091fd0449014c60fc090103.min.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../../_static/css/spectrochempy.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../../_static/css/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../../../_static/scpy.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
+        <script src="../../../../../_static/jquery.js"></script>
+        <script src="../../../../../_static/underscore.js"></script>
+        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../../../_static/doctools.js"></script>
+        <script src="../../../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../../../_static/clipboard.min.js"></script>
+        <script src="../../../../../_static/copybutton.js"></script>
+        <script src="../../../../../_static/design-tabs.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+    <link rel="next" title="Processing NMR spectra (slicing, baseline correction, peak picking, peak fitting)" href="plot_spectrochempy_nmr__processing__nmr__plot_processing_nmr.html" />
+    <link rel="prev" title="Sine bell and squared Sine bell window multiplication" href="plot_spectrochempy_nmr__processing__apodization__plot_proc_sp.html" />
+ 
+<style>
+    .popup-warning {
+        display: none;
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
+        background: #d8d7d5;
+        border: 1px solid #2c2c2b;
+        border-radius: 4px;
+        padding: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        animation: slideIn 0.5s ease-out;
+        font-size: smaller;
+    }
+
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+        }
+
+        to {
+            transform: translateX(0);
+        }
+    }
+
+    .popup-warning .close-btn {
+        float: right;
+        cursor: pointer;
+        margin-left: 10px;
+    }
+</style>
+<html data-versions="0.9.3,0.9.2,0.9.1,0.9.0,0.8.4,0.8.3,0.8.2,0.8.1,0.8.0,0.7.2,0.7.1,0.7.0,0.6.10">
+<script src="../../../../../_static/js/versions.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+
+
+<a href="../../../../../index.html">
+    
+    <img src="../../../../../_static/scpy.png" class="logo" alt="Logo" />
+</a>
+
+<div class="switch-menus">
+    <select id="versions-dropdown"></select>
+</div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../whatsnew/latest.html">What’s New in Revision 0.9.3</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart.html">5-minute quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../install/index.html">Installation guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../install/install_win.html">Installation Guide for Windows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../install/install_mac_linux.html">Installation Guide for Mac OSX and Linux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../install/install_colab.html">Install in Google Colaboratory (Colab)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../install/install_adds.html">Optional Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../install/install_sources.html">Installation from Sources</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../index.html">Example's gallery</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../auto_examples_core/index.html">Core functionalities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../auto_examples_core/a_nddataset/index.html">How to use NDDataset</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_core/a_nddataset/plot_a_create_dataset.html">NDDataset creation and plotting example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_core/a_nddataset/plot_b_coordinates.html">NDDataset coordinates example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_core/a_nddataset/plot_c_units.html">Units manipulation examples</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_core/a_nddataset/plot_preferences.html">NDDataset creation and plotting example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../auto_examples_core/c_importer/index.html">Import / Export</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_core/c_importer/plot_generic_read.html">Reading datasets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_core/c_importer/plot_read_IR_from_omnic.html">Loading an IR (omnic SPG) experimental file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_core/c_importer/plot_read_IR_from_opus.html">Loading Bruker OPUS files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_core/c_importer/plot_read_nmr_from_bruker.html">Loading of experimental NMR data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_core/c_importer/plot_read_raman_from_labspec.html">Loading RAMAN experimental file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_core/c_importer/plot_read_renishaw.html">Reading Renishaw WiRE files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_core/c_importer/plot_read_spc.html">Reading SPC format files</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../auto_examples_core/d_plotting/index.html">Plotting datasets</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_core/d_plotting/plot_plot_multiple.html">Using <code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_multiple</span></code> to plot several datasets on the same figure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_core/d_plotting/plot_plotting.html">Introduction to the plotting librairie</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../auto_examples_core/e_project/index.html">Project Management</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_core/e_project/plot_project.html">Project creation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../auto_examples_analysis/index.html">Analysis NDDataset</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../auto_examples_analysis/a_decomposition/index.html">Decomposition</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_analysis/a_decomposition/plot_efa.html">EFA example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_analysis/a_decomposition/plot_efa_keller_massart.html">EFA (Keller and Massart original example)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_analysis/a_decomposition/plot_fast_ica.html">FastICA example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_analysis/a_decomposition/plot_iris_intro.html">IRIS: 2D-IRIS analysis (plugin)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_analysis/a_decomposition/plot_mcrals_chrom1.html">MCR-ALS example (adapted from Jaumot et al. 2005)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_analysis/a_decomposition/plot_mcrals_kinetics.html">MCR-ALS with kinetic constraints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_analysis/a_decomposition/plot_nmf.html">NMF analysis example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_analysis/a_decomposition/plot_pca_iris.html">PCA example (iris dataset)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_analysis/a_decomposition/plot_pca_spec.html">PCA analysis example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_analysis/a_decomposition/plot_simplisma.html">SIMPLISMA example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../auto_examples_analysis/b_crossdecomposition/index.html">Cross-decomposition</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_analysis/b_crossdecomposition/plot_pls.html">PLS regression example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../auto_examples_analysis/c_curvefitting/index.html">Curvefitting</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_analysis/c_curvefitting/plot_fit.html">Fitting 1D dataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_analysis/c_curvefitting/plot_lstsq_single_equation.html">Solve a linear equation using LSTSQ</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../auto_examples_processing/index.html">Processing NDDataset</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../auto_examples_processing/apodization/index.html">Apodization</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_processing/apodization/plot_proc_em.html">Exponential window multiplication</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_processing/apodization/plot_proc_sp.html">Sine bell and squared Sine bell window multiplication</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../auto_examples_processing/baseline/index.html">Baseline</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_processing/baseline/plot_baseline_correction.html">NDDataset baseline correction</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../auto_examples_processing/denoising/index.html">Denoising</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_processing/denoising/plot_denoising.html">Denoising a 2D Raman spectrum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_processing/denoising/plot_despike.html">Removing cosmic ray spikes from a Raman spectrum</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../auto_examples_processing/filtering/index.html">filtering</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_processing/filtering/plot_filter.html">Savitky-Golay and Whittaker-Eilers smoothing of a Raman spectrum</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../auto_examples_processing/nmr/index.html">NMR processing (plugin-based)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_processing/nmr/plot_processing_cp_nmr.html">Analysis CP NMR spectra</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_processing/nmr/plot_processing_nmr.html">Processing NMR spectra (slicing, baseline correction, peak picking, peak fitting)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_processing/nmr/plot_processing_nmr_relax.html">Processing Relaxation measurement</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_processing/nmr/plot_read_nmr_topspin.html">NMR: reading TopSpin files (plugin)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../auto_examples_processing/raman/index.html">Processing Raman datasets</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../auto_examples_processing/raman/plot_processing_raman.html">Processing RAMAN spectra</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Plugin-dependent functionality</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../spectrochempy-iris/index.html">IRIS plugin</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../spectrochempy-iris/plot_spectrochempy_iris__analysis__a_decomposition__plot_iris_intro.html">IRIS: 2D-IRIS analysis (plugin)</a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">NMR plugin</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="plot_spectrochempy_nmr__core__c_importer__plot_read_nmr_from_bruker.html">Loading of experimental NMR data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_spectrochempy_nmr__processing__apodization__plot_proc_em.html">Exponential window multiplication</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_spectrochempy_nmr__processing__apodization__plot_proc_sp.html">Sine bell and squared Sine bell window multiplication</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Analysis CP NMR spectra</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_spectrochempy_nmr__processing__nmr__plot_processing_nmr.html">Processing NMR spectra (slicing, baseline correction, peak picking, peak fitting)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_spectrochempy_nmr__processing__nmr__plot_processing_nmr_relax.html">Processing Relaxation measurement</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_spectrochempy_nmr__processing__nmr__plot_read_nmr_topspin.html">NMR: reading TopSpin files (plugin)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_help.html">Getting help</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 User's Guide &amp; Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../userguide/introduction/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../userguide/importexport/index.html">Import &amp; Export</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/importexport/import.html">Import Data in SpectroChemPy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/importexport/importIR.html">Import IR Data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../userguide/importexport/importOMNIC.html">Import of OMNIC files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../userguide/importexport/importOPUS.html">Import of Bruker OPUS files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../userguide/importexport/importJCAMPDX.html">Import/Export of JCAMP-DX files</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../userguide/plotting/index.html">Plotting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/plotting/overview.html">Plotting Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/plotting/customization.html">Customizing a Plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/plotting/preferences.html">Plotting Preferences</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/plotting/plot_types.html">Plot Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/plotting/styles.html">Styles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/plotting/advanced.html">Advanced Matplotlib Integration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../userguide/processing/index.html">Processing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/processing/slicing.html">Slicing NDDatasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/processing/transformations.html">Basic transformations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/processing/math_operations.html">Mathematical operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/processing/smoothing.html">Filtering, Smoothing and Denoising</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/processing/baseline.html">Baseline corrections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/processing/denoising.html">Denoising</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/processing/apodization.html">Apodization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/processing/td_baseline.html">Time domain baseline correction (NMR)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/processing/fourier.html">One-dimensional (1D) Fourier transformation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/processing/fourier.html#Real-Fourier-transform">Real Fourier transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/processing/interferogram.html">FTIR interferogram processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/processing/alignment.html">Alignment of datasets</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../userguide/analysis/index.html">Analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/analysis/peak_finding.html">Peak Maxima Finding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/analysis/peak_integration.html">Peak Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/analysis/fitting.html">Fitting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/analysis/pca.html">Principal Component Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/analysis/pls.html">Partial Least Squares Regression (PLSRegression)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/analysis/mcr_als.html">MCR ALS</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../userguide/plugins/index.html">Plugins</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/plugins/official_plugins.html">Official plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/plugins/nmr.html">NMR plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/plugins/hypercomplex.html">Hypercomplex (quaternion) plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/plugins/iris.html">IRIS plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/plugins/experimental_plugins.html">Experimental plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/plugins/examples.html">Plugin-dependent Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/plugins/roadmap.html">Plugin roadmap</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../userguide/api/api.html">API Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../userguide/objects/index.html">Core objects</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/objects/dataset/dataset.html">The NDDataset object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/objects/dataset/dataset.html#More-insight-on-coordinates">More insight on coordinates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/objects/dataset/dataset.html#Methods-to-create-NDDataset">Methods to create NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../userguide/objects/project/project.html">Project management</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🔍 Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reference/index.html">Public API reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.NDDataset.html">spectrochempy.NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.Coord.html">spectrochempy.Coord</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.CoordSet.html">spectrochempy.CoordSet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.empty.html">spectrochempy.empty</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.zeros.html">spectrochempy.zeros</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.ones.html">spectrochempy.ones</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.full.html">spectrochempy.full</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.empty_like.html">spectrochempy.empty_like</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.zeros_like.html">spectrochempy.zeros_like</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.ones_like.html">spectrochempy.ones_like</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.full_like.html">spectrochempy.full_like</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.eye.html">spectrochempy.eye</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.identity.html">spectrochempy.identity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.random.html">spectrochempy.random</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.diag.html">spectrochempy.diag</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.fromfunction.html">spectrochempy.fromfunction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.fromiter.html">spectrochempy.fromiter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.arange.html">spectrochempy.arange</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.linspace.html">spectrochempy.linspace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.logspace.html">spectrochempy.logspace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.geomspace.html">spectrochempy.geomspace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.take.html">spectrochempy.take</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.load.html">spectrochempy.load</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.read.html">spectrochempy.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.read_topspin.html">spectrochempy.read_topspin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.read_csv.html">spectrochempy.read_csv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.read_ddr.html">spectrochempy.read_ddr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.read_dir.html">spectrochempy.read_dir</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.read_hdr.html">spectrochempy.read_hdr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.read_jcamp.html">spectrochempy.read_jcamp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.read_labspec.html">spectrochempy.read_labspec</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.read_wire.html">spectrochempy.read_wire</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.read_wdf.html">spectrochempy.read_wdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.read_mat.html">spectrochempy.read_mat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.read_matlab.html">spectrochempy.read_matlab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.read_omnic.html">spectrochempy.read_omnic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.read_opus.html">spectrochempy.read_opus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.read_quadera.html">spectrochempy.read_quadera</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.read_sdr.html">spectrochempy.read_sdr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.read_soc.html">spectrochempy.read_soc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.read_spa.html">spectrochempy.read_spa</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.read_spc.html">spectrochempy.read_spc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.read_spg.html">spectrochempy.read_spg</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.read_srs.html">spectrochempy.read_srs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.load_iris.html">spectrochempy.load_iris</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.download_nist_ir.html">spectrochempy.download_nist_ir</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.NDDataset.save.html">spectrochempy.NDDataset.save</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.NDDataset.save_as.html">spectrochempy.NDDataset.save_as</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.write.html">spectrochempy.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.write_csv.html">spectrochempy.write_csv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.write_excel.html">spectrochempy.write_excel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.write_jcamp.html">spectrochempy.write_jcamp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.write_mat.html">spectrochempy.write_mat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.write_matlab.html">spectrochempy.write_matlab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.write_xls.html">spectrochempy.write_xls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.to_array.html">spectrochempy.to_array</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.to_xarray.html">spectrochempy.to_xarray</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.plot.html">spectrochempy.plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.plot_1D.html">spectrochempy.plot_1D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.plot_pen.html">spectrochempy.plot_pen</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.plot_scatter.html">spectrochempy.plot_scatter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.plot_scatter_pen.html">spectrochempy.plot_scatter_pen</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.plot_with_transposed.html">spectrochempy.plot_with_transposed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.plot_bar.html">spectrochempy.plot_bar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.plot_2D.html">spectrochempy.plot_2D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.plot_contour.html">spectrochempy.plot_contour</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.plot_contourf.html">spectrochempy.plot_contourf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.plot_image.html">spectrochempy.plot_image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.plot_lines.html">spectrochempy.plot_lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.plot_map.html">spectrochempy.plot_map</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.plot_stack.html">spectrochempy.plot_stack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.plot_3D.html">spectrochempy.plot_3D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.plot_surface.html">spectrochempy.plot_surface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.plot_waterfall.html">spectrochempy.plot_waterfall</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.plot_multiple.html">spectrochempy.plot_multiple</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.multiplot.html">spectrochempy.multiplot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.multiplot_contour.html">spectrochempy.multiplot_contour</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.multiplot_contourf.html">spectrochempy.multiplot_contourf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.multiplot_image.html">spectrochempy.multiplot_image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.multiplot_lines.html">spectrochempy.multiplot_lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.multiplot_map.html">spectrochempy.multiplot_map</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.multiplot_scatter.html">spectrochempy.multiplot_scatter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.multiplot_stack.html">spectrochempy.multiplot_stack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.multiplot_with_transposed.html">spectrochempy.multiplot_with_transposed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.show.html">spectrochempy.show</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.transpose.html">spectrochempy.transpose</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.swapdims.html">spectrochempy.swapdims</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.squeeze.html">spectrochempy.squeeze</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.set_complex.html">spectrochempy.set_complex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.concatenate.html">spectrochempy.concatenate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.stack.html">spectrochempy.stack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.diag.html">spectrochempy.diag</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.diagonal.html">spectrochempy.diagonal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.take.html">spectrochempy.take</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.sort.html">spectrochempy.sort</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.argmin.html">spectrochempy.argmin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.argmax.html">spectrochempy.argmax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.coordmin.html">spectrochempy.coordmin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.coordmax.html">spectrochempy.coordmax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.amin.html">spectrochempy.amin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.amax.html">spectrochempy.amax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.min.html">spectrochempy.min</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.max.html">spectrochempy.max</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.ptp.html">spectrochempy.ptp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.clip.html">spectrochempy.clip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.around.html">spectrochempy.around</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.round.html">spectrochempy.round</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.dot.html">spectrochempy.dot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.SVD.html">spectrochempy.SVD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.LSTSQ.html">spectrochempy.LSTSQ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.NNLS.html">spectrochempy.NNLS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.all.html">spectrochempy.all</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.any.html">spectrochempy.any</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.sum.html">spectrochempy.sum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.cumsum.html">spectrochempy.cumsum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.trapezoid.html">spectrochempy.trapezoid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.simpson.html">spectrochempy.simpson</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.conj.html">spectrochempy.conj</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.conjugate.html">spectrochempy.conjugate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.abs.html">spectrochempy.abs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.absolute.html">spectrochempy.absolute</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.remove_masks.html">spectrochempy.remove_masks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.Unit.html">spectrochempy.Unit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.Quantity.html">spectrochempy.Quantity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.to.html">spectrochempy.to</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.to_base_units.html">spectrochempy.to_base_units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.to_reduced_units.html">spectrochempy.to_reduced_units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.ito.html">spectrochempy.ito</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.ito_base_units.html">spectrochempy.ito_base_units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.ito_reduced_units.html">spectrochempy.ito_reduced_units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.is_units_compatible.html">spectrochempy.is_units_compatible</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.mc.html">spectrochempy.mc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.ps.html">spectrochempy.ps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.mean.html">spectrochempy.mean</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.average.html">spectrochempy.average</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.std.html">spectrochempy.std</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.sum.html">spectrochempy.sum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.var.html">spectrochempy.var</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.Baseline.html">spectrochempy.Baseline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.autosub.html">spectrochempy.autosub</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.get_baseline.html">spectrochempy.get_baseline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.basc.html">spectrochempy.basc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.detrend.html">spectrochempy.detrend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.asls.html">spectrochempy.asls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.snip.html">spectrochempy.snip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.fft.html">spectrochempy.fft</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.ifft.html">spectrochempy.ifft</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.ht.html">spectrochempy.ht</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.fsh.html">spectrochempy.fsh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.fsh2.html">spectrochempy.fsh2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.pk.html">spectrochempy.pk</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.pk_exp.html">spectrochempy.pk_exp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.dc.html">spectrochempy.dc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.zf.html">spectrochempy.zf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.zf_auto.html">spectrochempy.zf_auto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.zf_double.html">spectrochempy.zf_double</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.zf_size.html">spectrochempy.zf_size</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.cs.html">spectrochempy.cs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.ls.html">spectrochempy.ls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.roll.html">spectrochempy.roll</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.rs.html">spectrochempy.rs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.bartlett.html">spectrochempy.bartlett</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.blackmanharris.html">spectrochempy.blackmanharris</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.hamming.html">spectrochempy.hamming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.general_hamming.html">spectrochempy.general_hamming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.hann.html">spectrochempy.hann</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.triang.html">spectrochempy.triang</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.em.html">spectrochempy.em</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.gm.html">spectrochempy.gm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.sp.html">spectrochempy.sp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.sine.html">spectrochempy.sine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.qsin.html">spectrochempy.qsin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.sinm.html">spectrochempy.sinm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.Filter.html">spectrochempy.Filter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.savgol.html">spectrochempy.savgol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.smooth.html">spectrochempy.smooth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.whittaker.html">spectrochempy.whittaker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.denoise.html">spectrochempy.denoise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.despike.html">spectrochempy.despike</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.align.html">spectrochempy.align</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.interpolate.html">spectrochempy.interpolate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.pipe.html">spectrochempy.pipe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.LSTSQ.html">spectrochempy.LSTSQ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.NNLS.html">spectrochempy.NNLS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.Optimize.html">spectrochempy.Optimize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.PLSRegression.html">spectrochempy.PLSRegression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.EFA.html">spectrochempy.EFA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.MCRALS.html">spectrochempy.MCRALS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.FastICA.html">spectrochempy.FastICA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.NMF.html">spectrochempy.NMF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.PCA.html">spectrochempy.PCA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.SVD.html">spectrochempy.SVD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.SIMPLISMA.html">spectrochempy.SIMPLISMA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.CP.html">spectrochempy.CP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.PSD.html">spectrochempy.PSD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.gaussianmodel.html">spectrochempy.gaussianmodel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.lorentzianmodel.html">spectrochempy.lorentzianmodel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.voigtmodel.html">spectrochempy.voigtmodel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.asymmetricvoigtmodel.html">spectrochempy.asymmetricvoigtmodel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.sigmoidmodel.html">spectrochempy.sigmoidmodel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.polynomialbaseline.html">spectrochempy.polynomialbaseline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.find_peaks.html">spectrochempy.find_peaks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.ActionMassKinetics.html">spectrochempy.ActionMassKinetics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.PFR.html">spectrochempy.PFR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.Project.html">spectrochempy.Project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.Script.html">spectrochempy.Script</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.run_script.html">spectrochempy.run_script</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.run_all_scripts.html">spectrochempy.run_all_scripts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.set_loglevel.html">spectrochempy.set_loglevel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.get_loglevel.html">spectrochempy.get_loglevel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.debug_.html">spectrochempy.debug_</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.info_.html">spectrochempy.info_</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.warning_.html">spectrochempy.warning_</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.error_.html">spectrochempy.error_</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.show_versions.html">spectrochempy.show_versions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../reference/generated/spectrochempy.pathclean.html">spectrochempy.pathclean</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reference/glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reference/bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reference/papers.html">Papers citing <code class="xref py py-obj docutils literal notranslate"><span class="pre">SpectroChemPy</span></code></a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🛠️ Contribute</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../devguide/issues.html">Bug reports &amp; feature request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../devguide/examples.html">Sharing examples &amp; tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../devguide/index.html">Developer’s Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../devguide/contributing.html">Contributing to SpectroChemPy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../devguide/contributing_codebase.html">Contributing to the code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../devguide/contributing_codespecifics.html">Contributing to specific parts of the code</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../devguide/codespec_adding_reader.html">Adding a Reader</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../devguide/contributing_documentation.html">Contributing to Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../devguide/contributing_plotting.html">Plotting Architecture and Lazy Matplotlib Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../devguide/plugins/index.html">Plugin developer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../devguide/plugins/writing_plugins.html">Plugin author guide</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../devguide/plugins/architecture.html">Writing a Plugin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../devguide/plugins/accessors.html">Plugin accessors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../devguide/plugins/numeric_backends.html">Numeric backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../devguide/plugins/unit_contexts.html">Unit contexts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../devguide/plugins/packaging.html">Packaging a Plugin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../devguide/plugins/testing.html">Testing a Plugin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../devguide/plugins/api_policy.html">Plugin API Policy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../devguide/plugins/domain_architecture.html">Official plugin architecture notes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../devguide/plugins/roadmap.html">Plugin architecture map</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">✨ Credits</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../credits/credits.html">Contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../credits/credits.html#third-party-licenses">Third-party Licenses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../credits/citing.html">Citing SpectroChemPy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../credits/license.html">SpectroChempy License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../credits/license.html#other-licenses">Other Licenses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../credits/seealso.html">See also</a></li>
+</ul>
+
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">SpectroChemPy v0.9.3</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Example’s gallery</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Plugin-dependent functionality</a></li>
+          <li class="breadcrumb-item"><a href="index.html">NMR plugin</a></li>
+      <li class="breadcrumb-item active">Analysis CP NMR spectra</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="plot_spectrochempy_nmr__processing__apodization__plot_proc_sp.html" class="btn btn-neutral float-left" title="Sine bell and squared Sine bell window multiplication" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plot_spectrochempy_nmr__processing__nmr__plot_processing_nmr.html" class="btn btn-neutral float-right" title="Processing NMR spectra (slicing, baseline correction, peak picking, peak fitting)" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-gettingstarted-examples-gallery-auto-examples-plugins-spectrochempy-nmr-plot-spectrochempy-nmr-processing-nmr-plot-processing-cp-nmr-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="analysis-cp-nmr-spectra">
+<span id="sphx-glr-gettingstarted-examples-gallery-auto-examples-plugins-spectrochempy-nmr-plot-spectrochempy-nmr-processing-nmr-plot-processing-cp-nmr-py"></span><h1>Analysis CP NMR spectra<a class="headerlink" href="#analysis-cp-nmr-spectra" title="Permalink to this heading"></a></h1>
+<p>Example with handling of a series of CP NMR spectra.</p>
+<p>Requires the official <code class="docutils literal notranslate"><span class="pre">spectrochempy-nmr</span></code> plugin.
+Install with: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">spectrochempy[nmr]</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<section id="import-api">
+<h2>Import API<a class="headerlink" href="#import-api" title="Permalink to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">spectrochempy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">scp</span>
+</pre></div>
+</div>
+</section>
+<section id="import-nmr-spectra">
+<h2>Import NMR spectra<a class="headerlink" href="#import-nmr-spectra" title="Permalink to this heading"></a></h2>
+<p>Define the folder where are the spectra</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">datadir</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">scp</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">datadir</span></a>
+<a href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">nmrdir</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">datadir</span></a> <span class="o">/</span> <span class="s2">&quot;nmrdata&quot;</span> <span class="o">/</span> <span class="s2">&quot;bruker&quot;</span> <span class="o">/</span> <span class="s2">&quot;tests&quot;</span> <span class="o">/</span> <span class="s2">&quot;nmr&quot;</span> <span class="o">/</span> <span class="s2">&quot;CP&quot;</span>
+</pre></div>
+</div>
+<p>Set the <a class="reference external" href="https://docs.python.org/3/library/glob.html#module-glob" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">glob</span></code></a> pattern in order to load a series of spectra of given type
+in the given directory (here we read fid, but we could also read “1r” files
+when available)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">dataset</span></a> <span class="o">=</span> <a href="../../../../../reference/generated/spectrochempy.read_topspin.html#spectrochempy.read_topspin" title="spectrochempy.read_topspin" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-data"><span class="n">scp</span><span class="o">.</span><span class="n">nmr</span><span class="o">.</span><span class="n">read_topspin</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">nmrdir</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/glob.html#module-glob" title="builtins.glob" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-module"><span class="n">glob</span></a><span class="o">=</span><span class="s2">&quot;**/fid&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>15 fids have been read and merged into a single dataset</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">dataset</span></a>
+</pre></div>
+</div>
+<div class="output_subarea output_html rendered_html output_result">
+<div class='scp-output'><details><summary>NDDataset: [complex128] pp (shape: (y:15, x:1947))[CP expno:94 procno:1 (FID)]</summary><div class="scp-output section"><details><summary>Summary</summary>
+<div class="scp-output section"><div class="attr-name">         name</div><div>:</div><div class="attr-value"> CP expno:94 procno:1 (FID)</div></div>
+<div class="scp-output section"><div class="attr-name">       author</div><div>:</div><div class="attr-value"> runner@runnervm3jyl0</div></div>
+<div class="scp-output section"><div class="attr-name">      created</div><div>:</div><div class="attr-value"> 2026-06-05 15:43:01+00:00</div></div>
+<div class="scp-output section"><div class="attr-name">  description</div><div>:</div><div class="attr-value"> <div>Concatenation of 15  datasets:<br/>               ( CP expno:80 procno:1 (FID), CP expno:81 procno:1 (FID), CP expno:82 procno:1 (FID), CP expno:83 procno:1 (FID), CP expno:84 procno:1 (FID), CP expno:85 procno:1 (FID), CP expno:86 procno:1 (FID), CP expno:87 procno:1 (FID), CP expno:88 procno:1 (FID), CP expno:89 procno:1 (FID), CP expno:90 procno:1 (FID), CP expno:91 procno:1 (FID), CP expno:92 procno:1 (FID), CP expno:93 procno:1 (FID), CP expno:94 procno:1 (FID) )</div></div></div>
+<div class="scp-output section"><div class="attr-name">      history</div><div>:</div><div class="attr-value"> <div>2026-06-05 15:43:01+00:00> Created by concatenate<br/>               2026-06-05 15:43:01+00:00> Stacked from several files</div></div></div></details></div>
+<div class="scp-output section"><details><summary>          Data </summary>
+<div class="scp-output section"><div class="attr-name">        title</div><div>:</div><div class="attr-value"> intensity</div></div>
+<div class="scp-output section"><div class="attr-name">       values</div><div>:</div><div class="attr-value"> ... </div></div>
+<div class='numeric'>         R[[-0.05957  -0.3873 ... -0.003637 -0.00117]<br/>           [-0.08434  -0.5342 ... -0.004302 0.003153]<br/>           ...<br/>           [-0.04476  -0.2129 ... 0.002508 0.007919]<br/>           [-0.01885  -0.1031 ... 0.001875 -0.005607]] pp<br/>         I[[0.0007904  0.02556 ... -0.003612 -0.007104]<br/>           [-0.006849  0.01868 ... -0.002714 0.004092]<br/>           ...<br/>           [0.006191  0.02719 ... -0.008843 -0.009201]<br/>           [0.004219  0.02111 ... 0.003521 0.002012]] pp</div>
+<div class="scp-output section"><div class="attr-name">        shape</div><div>:</div><div class="attr-value"> (y:15, x:1947(complex))</div></div></details></div>
+<div class="scp-output section"><details><summary>     Dimension `x`</summary>
+<div class="scp-output section"><div class="attr-name">         size</div><div>:</div><div class="attr-value"> 1947</div></div>
+<div class="scp-output section"><div class="attr-name">        title</div><div>:</div><div class="attr-value"> F1 acquisition time</div></div>
+<div class="scp-output section"><div class="attr-name">  coordinates</div><div>:</div><div class="attr-value"> <div class='numeric'>[       0     24.8 ... 4.824e+04 4.826e+04] µs</div></div></div></details></div>
+<div class="scp-output section"><details><summary>     Dimension `y`</summary>
+<div class="scp-output section"><div class="attr-name">         size</div><div>:</div><div class="attr-value"> 15</div></div>
+<span>          (_1)</span>
+<div class="scp-output section"><div class="attr-name">        title</div><div>:</div><div class="attr-value"> timestamp</div></div>
+<div class="scp-output section"><div class="attr-name">  coordinates</div><div>:</div><div class="attr-value"> <div class='numeric'>[1359924945 1359949976 ... 1360100375 1360112954]</div></div></div>
+<span>          (_2)</span>
+<div class="scp-output section"><div class="attr-name">        title</div><div>:</div><div class="attr-value"> expno</div></div>
+<div class="scp-output section"><div class="attr-name">  coordinates</div><div>:</div><div class="attr-value"> <div class='numeric'>[      80       81 ...       93       94]</div></div></div>
+<span>          (_3)</span>
+<div class="scp-output section"><div class="attr-name">        title</div><div>:</div><div class="attr-value"> p15</div></div>
+<div class="scp-output section"><div class="attr-name">  coordinates</div><div>:</div><div class="attr-value"> <div class='numeric'>[     100      200 ...    1e+04  1.5e+04] µs</div></div></div></details></div></details></div>
+</div>
+<br />
+<br /><p>The new dimension (y) have several coordinates corresponding to all metadata that change from fid to fid.</p>
+<p>In the present case, the relevant coordinates is given by the <code class="xref py py-obj docutils literal notranslate"><span class="pre">p15</span></code> array which is the array of CP contact times.</p>
+<p>To have y using this coordinates, we need to select it</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../../../../reference/generated/spectrochempy.CoordSet.html#spectrochempy.CoordSet.select" title="spectrochempy.CoordSet.select" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">dataset</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">select</span></a><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>plot the dataset (zoom on the begining of the fid)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">prefs</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">preferences</span>
+<a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">prefs</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">figsize</span></a> <span class="o">=</span> <span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="matplotlib.axes.Axes" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ax</span></a> <span class="o">=</span> <a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset.plot" title="spectrochempy.NDDataset.plot" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">dataset</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_xlim.html#matplotlib.axes.Axes.set_xlim" title="matplotlib.axes.Axes.set_xlim" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5000</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../../../_images/sphx_glr_plot_spectrochempy_nmr__processing__nmr__plot_processing_cp_nmr_001.png" srcset="../../../../../_images/sphx_glr_plot_spectrochempy_nmr__processing__nmr__plot_processing_cp_nmr_001.png" alt="plot spectrochempy nmr  processing  nmr  plot processing cp nmr" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(0.0, 5000.0)
+</pre></div>
+</div>
+<p>Process a fourier transform along the x dimension</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># exponential multiplication</span>
+<a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">nd1</span></a> <span class="o">=</span> <a href="../../../../../reference/generated/spectrochempy.em.html#spectrochempy.em" title="spectrochempy.em" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-function"><span class="n">scp</span><span class="o">.</span><span class="n">em</span></a><span class="p">(</span><a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">dataset</span></a><span class="p">,</span> <a href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute"><span class="n">lb</span></a><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>fourier transform</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">nd2</span></a> <span class="o">=</span> <a href="../../../../../reference/generated/spectrochempy.fft.html#spectrochempy.fft" title="spectrochempy.fft" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-function"><span class="n">scp</span><span class="o">.</span><span class="n">fft</span></a><span class="p">(</span><a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">nd1</span></a><span class="p">,</span> <span class="n">si</span><span class="o">=</span><span class="mi">4096</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/spectrochempy/tempdirs/scp_xnzy8k_7/src/spectrochempy/utils/numutils.py:29: RuntimeWarning: divide by zero encountered in log10
+  n_decimals = sigdigits - int(np.floor(np.log10(abs(n)))) - 1
+/home/runner/work/spectrochempy/tempdirs/scp_xnzy8k_7/src/spectrochempy/core/dataset/coord.py:840: RuntimeWarning: divide by zero encountered in scalar divide
+  (np.max(spacing) - np.min(spacing))
+</pre></div>
+</div>
+<p>perform a phase correction of order 0 (need to be tuned carefully)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">nd3</span></a> <span class="o">=</span> <a href="../../../../../reference/generated/spectrochempy.pk.html#spectrochempy.pk" title="spectrochempy.pk" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-function"><span class="n">scp</span><span class="o">.</span><span class="n">pk</span></a><span class="p">(</span><a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">nd2</span></a><span class="p">,</span> <span class="n">phc0</span><span class="o">=-</span><span class="mi">118</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>plot</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="matplotlib.axes.Axes" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">_</span></a> <span class="o">=</span> <a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset.plot" title="spectrochempy.NDDataset.plot" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">nd3</span><span class="o">.</span><span class="n">plot</span></a><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../../../../../_images/sphx_glr_plot_spectrochempy_nmr__processing__nmr__plot_processing_cp_nmr_002.png" srcset="../../../../../_images/sphx_glr_plot_spectrochempy_nmr__processing__nmr__plot_processing_cp_nmr_002.png" alt="plot spectrochempy nmr  processing  nmr  plot processing cp nmr" class = "sphx-glr-single-img"/><p>## Baseline correction
+Here we use the snip algorithm</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">nd4</span></a> <span class="o">=</span> <a href="../../../../../reference/generated/spectrochempy.snip.html#spectrochempy.snip" title="spectrochempy.snip" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-function"><span class="n">scp</span><span class="o">.</span><span class="n">snip</span></a><span class="p">(</span><a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">nd3</span></a><span class="p">,</span> <span class="n">snip_width</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="matplotlib.axes.Axes" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ax</span></a> <span class="o">=</span> <a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset.plot" title="spectrochempy.NDDataset.plot" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">nd4</span><span class="o">.</span><span class="n">plot</span></a><span class="p">()</span>
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_xlim.html#matplotlib.axes.Axes.set_xlim" title="matplotlib.axes.Axes.set_xlim" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span></a><span class="p">(</span><span class="mi">225</span><span class="p">,</span> <span class="mi">25</span><span class="p">)</span>
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_ylim.html#matplotlib.axes.Axes.set_ylim" title="matplotlib.axes.Axes.set_ylim" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span></a><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../../../_images/sphx_glr_plot_spectrochempy_nmr__processing__nmr__plot_processing_cp_nmr_003.png" srcset="../../../../../_images/sphx_glr_plot_spectrochempy_nmr__processing__nmr__plot_processing_cp_nmr_003.png" alt="plot spectrochempy nmr  processing  nmr  plot processing cp nmr" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(-1.0, 10.0)
+</pre></div>
+</div>
+<p>## Peak peaking
+we will use here the max of each spectra</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">peaks</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">properties</span></a> <span class="o">=</span> <a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">nd4</span></a><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">find_peaks</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">wlen</span><span class="o">=</span><span class="mf">33.0</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;position of the peaks : </span><span class="si">{</span><a href="../../../../../reference/generated/spectrochempy.Coord.html#spectrochempy.Coord.data" title="spectrochempy.Coord.data" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-attribute"><span class="n">peaks</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">data</span></a><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>position of the peaks : [   174.2    99.38    70.46]
+</pre></div>
+</div>
+<p>properties of the peaks</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">table_pos</span></a> <span class="o">=</span> <span class="s2">&quot;  &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">peaks</span></a><span class="p">[</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">i</span></a><span class="p">]</span><span class="o">.</span><a href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute"><span class="n">x</span></a><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">m</span><span class="si">:</span><span class="s2">&gt;10.3f</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">i</span></a> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">peaks</span></a><span class="p">))])</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;peak_position (cm⁻¹)&#39;</span><span class="si">:</span><span class="s2">&gt;26</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">table_pos</span></a><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">for</span> <a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">key</span></a> <span class="ow">in</span> <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">properties</span></a><span class="p">:</span>
+    <a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">table_property</span></a> <span class="o">=</span> <span class="s2">&quot;  &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">properties</span></a><span class="p">[</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">key</span></a><span class="p">][</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">i</span></a><span class="p">]</span><span class="o">.</span><span class="n">m</span><span class="si">:</span><span class="s2">&gt;10.3f</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">i</span></a> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">peaks</span></a><span class="p">))]</span>
+    <span class="p">)</span>
+    <a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">title</span></a> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">key</span></a><span class="si">:</span><span class="s2">&gt;.16</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">properties</span></a><span class="p">[</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">key</span></a><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">u</span><span class="si">:</span><span class="s2">~P</span><span class="si">}</span><span class="s2">)&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">title</span></a><span class="si">:</span><span class="s2">&gt;26</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">table_property</span></a><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>peak_position (cm⁻¹):    174.243      99.379      70.458
+   peak_heights (pp):      2.579       3.516       9.606
+    prominences (pp):      2.242       3.069       9.028
+    left_bases (ppm):    186.765     110.857      86.891
+   right_bases (ppm):    162.408      88.945      56.763
+        widths (ppm):      5.575       8.569      11.783
+  width_heights (pp):      1.458       1.982       5.092
+      left_ips (ppm):    177.015     103.010      76.346
+     right_ips (ppm):    171.440      94.441      64.562
+</pre></div>
+</div>
+<p>plot with peak markers and the left/right-bases indicators</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="matplotlib.axes.Axes" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ax</span></a> <span class="o">=</span> <a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset.plot" title="spectrochempy.NDDataset.plot" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">nd4</span><span class="o">.</span><span class="n">plot</span></a><span class="p">()</span>  <span class="c1"># output the spectrum on ax. ax will receive next plot too;</span>
+<a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pks</span></a> <span class="o">=</span> <a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">peaks</span></a> <span class="o">+</span> <span class="mf">0.5</span>  <span class="c1"># add a small offset on the y position of the markers</span>
+<a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pks</span></a><span class="o">.</span><span class="n">plot_scatter</span><span class="p">(</span>
+    <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="matplotlib.axes.Axes" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ax</span></a><span class="o">=</span><a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="matplotlib.axes.Axes" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ax</span></a><span class="p">,</span>
+    <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;v&quot;</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+    <span class="n">clear</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># we need to keep the previous output on ax</span>
+    <span class="n">data_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># we don&#39;t need to redraw all things like labels, etc...</span>
+    <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">13</span><span class="p">),</span>
+    <span class="n">xlim</span><span class="o">=</span><span class="p">(</span><span class="mi">225</span><span class="p">,</span> <span class="mi">25</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="k">for</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">i</span></a><span class="p">,</span> <a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">p</span></a> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pks</span></a><span class="p">):</span>
+    <a href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute"><span class="n">x</span></a><span class="p">,</span> <a href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute"><span class="n">y</span></a> <span class="o">=</span> <a href="../../../../../reference/generated/spectrochempy.Coord.html#spectrochempy.Coord.values" title="spectrochempy.Coord.values" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-attribute"><span class="n">p</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">m</span></a><span class="p">,</span> <span class="p">(</span><a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">p</span></a> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">m</span>
+    <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.annotate.html#matplotlib.axes.Axes.annotate" title="matplotlib.axes.Axes.annotate" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">annotate</span></a><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><a href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute"><span class="n">x</span></a><span class="si">:</span><span class="s2">0.1f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">xy</span><span class="o">=</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute"><span class="n">x</span></a><span class="p">,</span> <a href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute"><span class="n">y</span></a><span class="p">),</span>
+        <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+        <span class="n">rotation</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span>
+        <span class="n">textcoords</span><span class="o">=</span><span class="s2">&quot;offset points&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">properties</span></a><span class="p">[</span><span class="s2">&quot;left_bases&quot;</span><span class="p">][</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">i</span></a><span class="p">],</span> <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">properties</span></a><span class="p">[</span><span class="s2">&quot;right_bases&quot;</span><span class="p">][</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">i</span></a><span class="p">]):</span>
+        <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.axvline.html#matplotlib.axes.Axes.axvline" title="matplotlib.axes.Axes.axvline" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">axvline</span></a><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">m</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;green&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">properties</span></a><span class="p">[</span><span class="s2">&quot;left_ips&quot;</span><span class="p">][</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">i</span></a><span class="p">],</span> <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">properties</span></a><span class="p">[</span><span class="s2">&quot;right_ips&quot;</span><span class="p">][</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">i</span></a><span class="p">]):</span>
+        <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.axvline.html#matplotlib.axes.Axes.axvline" title="matplotlib.axes.Axes.axvline" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">axvline</span></a><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">m</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../../../_images/sphx_glr_plot_spectrochempy_nmr__processing__nmr__plot_processing_cp_nmr_004.png" srcset="../../../../../_images/sphx_glr_plot_spectrochempy_nmr__processing__nmr__plot_processing_cp_nmr_004.png" alt="plot spectrochempy nmr  processing  nmr  plot processing cp nmr" class = "sphx-glr-single-img"/><p>Get the section at once using fancy indexing</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sections</span></a> <span class="o">=</span> <a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">nd4</span></a><span class="p">[:,</span> <a href="../../../../../reference/generated/spectrochempy.Coord.html#spectrochempy.Coord.data" title="spectrochempy.Coord.data" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-attribute"><span class="n">peaks</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">data</span></a><span class="p">]</span>
+
+<span class="c1"># The array sections has a shape (15, 3).</span>
+<span class="c1"># We must transpose it to plot the three sections has a function of contact time</span>
+<a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sections</span></a> <span class="o">=</span> <a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset.T" title="spectrochempy.NDDataset.T" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-attribute"><span class="n">sections</span><span class="o">.</span><span class="n">T</span></a>
+
+<span class="c1"># now plot it</span>
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="matplotlib.axes.Axes" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ax</span></a> <span class="o">=</span> <a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset.plot" title="spectrochempy.NDDataset.plot" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">sections</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">marker</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">,</span> <span class="n">colormap</span><span class="o">=</span><span class="s2">&quot;jet&quot;</span><span class="p">)</span>
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_xlim.html#matplotlib.axes.Axes.set_xlim" title="matplotlib.axes.Axes.set_xlim" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">16000</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../../../_images/sphx_glr_plot_spectrochempy_nmr__processing__nmr__plot_processing_cp_nmr_005.png" srcset="../../../../../_images/sphx_glr_plot_spectrochempy_nmr__processing__nmr__plot_processing_cp_nmr_005.png" alt="plot spectrochempy nmr  processing  nmr  plot processing cp nmr" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(0.0, 16000.0)
+</pre></div>
+</div>
+<p>The sections we have taken here represent the maximum heigths of the peaks.
+However it could may be interesting to have the area of the peak instead.
+Let’s use the left and right bases to perform the integration of the peaks.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">area</span></a> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">i</span></a> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">peaks</span></a><span class="p">)):</span>
+    <a href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute"><span class="n">lb</span></a><span class="p">,</span> <a href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute"><span class="n">ub</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">properties</span></a><span class="p">[</span><span class="s2">&quot;left_bases&quot;</span><span class="p">][</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">i</span></a><span class="p">]</span><span class="o">.</span><span class="n">m</span><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">properties</span></a><span class="p">[</span><span class="s2">&quot;right_bases&quot;</span><span class="p">][</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">i</span></a><span class="p">]</span><span class="o">.</span><span class="n">m</span>
+    <a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">a</span></a> <span class="o">=</span> <a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">nd4</span></a><span class="p">[:,</span> <a href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute"><span class="n">lb</span></a><span class="p">:</span><a href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute"><span class="n">ub</span></a><span class="p">]</span><span class="o">.</span><span class="n">simpson</span><span class="p">()</span>
+    <a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">area</span><span class="o">.</span><span class="n">append</span></a><span class="p">(</span><a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">a</span></a><span class="p">)</span>
+
+<a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">area</span></a> <span class="o">=</span> <a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class"><span class="n">scp</span><span class="o">.</span><span class="n">NDDataset</span></a><span class="p">(</span>
+    <a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">area</span></a><span class="p">,</span>
+    <span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">],</span>
+    <span class="n">coordset</span><span class="o">=</span><a href="../../../../../reference/generated/spectrochempy.CoordSet.html#spectrochempy.CoordSet" title="spectrochempy.CoordSet" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class"><span class="n">scp</span><span class="o">.</span><span class="n">CoordSet</span></a><span class="p">({</span><span class="s2">&quot;y&quot;</span><span class="p">:</span> <a href="../../../../../reference/generated/spectrochempy.Coord.html#spectrochempy.Coord.copy" title="spectrochempy.Coord.copy" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">peaks</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">copy</span></a><span class="p">(),</span> <span class="s2">&quot;x&quot;</span><span class="p">:</span> <a href="../../../../../reference/generated/spectrochempy.CoordSet.html#spectrochempy.CoordSet.default" title="spectrochempy.CoordSet.default" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-attribute"><span class="n">nd4</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">default</span><span class="o">.</span><span class="n">copy</span></a><span class="p">()}),</span>
+    <span class="n">units</span><span class="o">=</span><a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset.units" title="spectrochempy.NDDataset.units" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-attribute"><span class="n">a</span><span class="o">.</span><span class="n">units</span></a><span class="p">,</span>
+    <a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">title</span></a><span class="o">=</span><span class="s2">&quot;area&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="matplotlib.axes.Axes" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">_</span></a> <span class="o">=</span> <a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset.plot" title="spectrochempy.NDDataset.plot" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">area</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">marker</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">,</span> <span class="n">colormap</span><span class="o">=</span><span class="s2">&quot;jet&quot;</span><span class="p">)</span>
+<a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">area</span></a>
+</pre></div>
+</div>
+<img src="../../../../../_images/sphx_glr_plot_spectrochempy_nmr__processing__nmr__plot_processing_cp_nmr_006.png" srcset="../../../../../_images/sphx_glr_plot_spectrochempy_nmr__processing__nmr__plot_processing_cp_nmr_006.png" alt="plot spectrochempy nmr  processing  nmr  plot processing cp nmr" class = "sphx-glr-single-img"/><div class="output_subarea output_html rendered_html output_result">
+<div class='scp-output'><details><summary>NDDataset: [float64] pp⋅ppm (shape: (y:3, x:15))[NDDataset_3cd1c17d]</summary><div class="scp-output section"><details><summary>Summary</summary>
+<div class="scp-output section"><div class="attr-name">         name</div><div>:</div><div class="attr-value"> NDDataset_3cd1c17d</div></div>
+<div class="scp-output section"><div class="attr-name">       author</div><div>:</div><div class="attr-value"> runner@runnervm3jyl0</div></div>
+<div class="scp-output section"><div class="attr-name">      created</div><div>:</div><div class="attr-value"> 2026-06-05 15:43:03+00:00</div></div></details></div>
+<div class="scp-output section"><details><summary>          Data </summary>
+<div class="scp-output section"><div class="attr-name">        title</div><div>:</div><div class="attr-value"> area</div></div>
+<div class="scp-output section"><div class="attr-name">       values</div><div>:</div><div class="attr-value"> ... </div></div>
+<div class='numeric'>         [[   5.345    6.433 ...    14.57    10.45]<br/>          [   19.07     25.3 ...    14.14    9.299]<br/>          [   70.81       92 ...    47.23    25.29]] pp⋅ppm</div>
+<div class="scp-output section"><div class="attr-name">        shape</div><div>:</div><div class="attr-value"> (y:3, x:15)</div></div></details></div>
+<div class="scp-output section"><details><summary>     Dimension `x`</summary>
+<div class="scp-output section"><div class="attr-name">         size</div><div>:</div><div class="attr-value"> 15</div></div>
+<div class="scp-output section"><div class="attr-name">        title</div><div>:</div><div class="attr-value"> p15</div></div>
+<div class="scp-output section"><div class="attr-name">  coordinates</div><div>:</div><div class="attr-value"> <div class='numeric'>[     100      200 ...    1e+04  1.5e+04] µs</div></div></div></details></div>
+<div class="scp-output section"><details><summary>     Dimension `y`</summary>
+<div class="scp-output section"><div class="attr-name">         size</div><div>:</div><div class="attr-value"> 3</div></div>
+<div class="scp-output section"><div class="attr-name">        title</div><div>:</div><div class="attr-value"> $\delta\ ^{13}C$</div></div>
+<div class="scp-output section"><div class="attr-name">  coordinates</div><div>:</div><div class="attr-value"> <div class='numeric'>[   174.2    99.38    70.46] ppm</div></div></div></details></div></details></div>
+</div>
+<br />
+<br /><p>Fitting a model to these data</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="c1"># create an Optimize object using a simple leastsq method</span>
+<a href="../../../../../reference/generated/spectrochempy.Optimize.html#spectrochempy.Optimize" title="spectrochempy.Optimize" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fitter</span></a> <span class="o">=</span> <a href="../../../../../reference/generated/spectrochempy.Optimize.html#spectrochempy.Optimize" title="spectrochempy.Optimize" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class"><span class="n">scp</span><span class="o">.</span><span class="n">Optimize</span></a><span class="p">(</span><span class="n">log_level</span><span class="o">=</span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;leastsq&quot;</span><span class="p">)</span>
+
+
+<span class="c1"># define a model</span>
+<span class="c1"># Note: This is only for sake of demonstration,</span>
+<span class="c1"># as the model is probably not sufficient to fit the data correctly.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cp_model</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">i0</span><span class="p">,</span> <span class="n">tis</span><span class="p">,</span> <span class="n">t1irho</span><span class="p">):</span>  <span class="c1"># warning: no underscore in variable names</span>
+    <span class="n">I</span> <span class="o">=</span> <span class="n">i0</span> <span class="o">*</span> <span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ufunc.html#numpy.ufunc" title="numpy.ufunc" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">np</span><span class="o">.</span><span class="n">exp</span></a><span class="p">(</span><span class="o">-</span><span class="n">t</span> <span class="o">/</span> <span class="n">t1irho</span><span class="p">)</span> <span class="o">-</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ufunc.html#numpy.ufunc" title="numpy.ufunc" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">np</span><span class="o">.</span><span class="n">exp</span></a><span class="p">(</span><span class="o">-</span><span class="n">t</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">tis</span><span class="p">)))</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">tis</span> <span class="o">/</span> <span class="n">t1irho</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">I</span>
+
+
+<span class="c1"># Add the model to the fitter usermodels as it it not a built-in model</span>
+<a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fitter</span><span class="o">.</span><span class="n">usermodels</span></a> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;CP_model&quot;</span><span class="p">:</span> <span class="n">cp_model</span><span class="p">}</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">index</span></a> <span class="o">=</span> <span class="mi">0</span>
+<a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">s</span></a> <span class="o">=</span> <a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">area</span></a><span class="p">[</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">index</span></a><span class="p">]</span>
+
+<span class="c1"># Define the parameter variables using a script</span>
+<span class="c1"># (parameter: value, low_bound,  high_bound)</span>
+<span class="c1"># - no underscore in parameters names.</span>
+<span class="c1"># - times are in the units of the data time coordinates (here `s`)</span>
+<span class="c1"># - initially we assume relaxation (T1rho) time constant vey large</span>
+<a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fitter</span><span class="o">.</span><span class="n">script</span></a> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2"> MODEL: cp</span>
+<span class="s2"> shape: cp_model</span>
+<span class="s2">    $ i0:     25, 0.1, none</span>
+<span class="s2">    $ t1irho: 1e4, 1, none</span>
+<span class="s2">    $ tis:  800, 1, 10000</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+<a href="../../../../../reference/generated/spectrochempy.Optimize.html#spectrochempy.Optimize.fit" title="spectrochempy.Optimize.fit" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">fitter</span><span class="o">.</span><span class="n">fit</span></a><span class="p">(</span><a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">s</span></a><span class="p">)</span>
+
+<a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">spred</span></a> <span class="o">=</span> <a href="../../../../../reference/generated/spectrochempy.Optimize.html#spectrochempy.Optimize.predict" title="spectrochempy.Optimize.predict" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">fitter</span><span class="o">.</span><span class="n">predict</span></a><span class="p">()</span>
+
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="matplotlib.axes.Axes" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ax</span></a> <span class="o">=</span> <a href="../../../../../reference/generated/spectrochempy.Optimize.html#spectrochempy.Optimize.plotmerit" title="spectrochempy.Optimize.plotmerit" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">fitter</span><span class="o">.</span><span class="n">plotmerit</span></a><span class="p">(</span>
+    <a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">s</span></a><span class="p">,</span>
+    <a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">spred</span></a><span class="p">,</span>
+    <span class="n">method</span><span class="o">=</span><span class="s2">&quot;scatter&quot;</span><span class="p">,</span>
+    <span class="n">show_yaxis</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">title</span></a><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;fitting CP dynamic (peaks at </span><span class="si">{</span><a href="../../../../../reference/generated/spectrochempy.Coord.html#spectrochempy.Coord" title="spectrochempy.Coord" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">peaks</span><span class="o">.</span><span class="n">x</span></a><span class="p">[</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">index</span></a><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_xlim.html#matplotlib.axes.Axes.set_xlim" title="matplotlib.axes.Axes.set_xlim" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">16000</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../../../_images/sphx_glr_plot_spectrochempy_nmr__processing__nmr__plot_processing_cp_nmr_007.png" srcset="../../../../../_images/sphx_glr_plot_spectrochempy_nmr__processing__nmr__plot_processing_cp_nmr_007.png" alt="fitting CP dynamic (peaks at 174.243 ppm)" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span> **************************************************
+ Result:
+ **************************************************
+
+
+ MODEL: cp
+ shape: cp_model
+        $ i0:    19.2907, 0.1, none
+        $ t1irho: 23482.1121, 1, none
+        $ tis:   796.2717, 1, 10000
+
+
+(0.0, 16000.0)
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">index</span></a> <span class="o">=</span> <span class="mi">1</span>
+<a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">s</span></a> <span class="o">=</span> <a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">area</span></a><span class="p">[</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">index</span></a><span class="p">]</span>
+<a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fitter</span><span class="o">.</span><span class="n">script</span></a> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2"> MODEL: cp</span>
+<span class="s2"> shape: cp_model</span>
+<span class="s2">    $ i0:     35, 0.1, none</span>
+<span class="s2">    $ t1irho: 1e4, 1, none</span>
+<span class="s2">    $ tis:  800, 1, 10000</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+<a href="../../../../../reference/generated/spectrochempy.Optimize.html#spectrochempy.Optimize.fit" title="spectrochempy.Optimize.fit" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">fitter</span><span class="o">.</span><span class="n">fit</span></a><span class="p">(</span><a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">s</span></a><span class="p">)</span>
+
+<a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">spred</span></a> <span class="o">=</span> <a href="../../../../../reference/generated/spectrochempy.Optimize.html#spectrochempy.Optimize.predict" title="spectrochempy.Optimize.predict" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">fitter</span><span class="o">.</span><span class="n">predict</span></a><span class="p">()</span>
+
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="matplotlib.axes.Axes" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ax</span></a> <span class="o">=</span> <a href="../../../../../reference/generated/spectrochempy.Optimize.html#spectrochempy.Optimize.plotmerit" title="spectrochempy.Optimize.plotmerit" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">fitter</span><span class="o">.</span><span class="n">plotmerit</span></a><span class="p">(</span>
+    <a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">s</span></a><span class="p">,</span>
+    <a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">spred</span></a><span class="p">,</span>
+    <span class="n">method</span><span class="o">=</span><span class="s2">&quot;scatter&quot;</span><span class="p">,</span>
+    <span class="n">show_yaxis</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">title</span></a><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;fitting CP dynamic (peaks at </span><span class="si">{</span><a href="../../../../../reference/generated/spectrochempy.Coord.html#spectrochempy.Coord" title="spectrochempy.Coord" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">peaks</span><span class="o">.</span><span class="n">x</span></a><span class="p">[</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">index</span></a><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_xlim.html#matplotlib.axes.Axes.set_xlim" title="matplotlib.axes.Axes.set_xlim" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">16000</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../../../_images/sphx_glr_plot_spectrochempy_nmr__processing__nmr__plot_processing_cp_nmr_008.png" srcset="../../../../../_images/sphx_glr_plot_spectrochempy_nmr__processing__nmr__plot_processing_cp_nmr_008.png" alt="fitting CP dynamic (peaks at 99.379 ppm)" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span> **************************************************
+ Result:
+ **************************************************
+
+
+ MODEL: cp
+ shape: cp_model
+        $ i0:    34.7742, 0.1, none
+        $ t1irho: 11463.4264, 1, none
+        $ tis:   174.4446, 1, 10000
+
+
+(0.0, 16000.0)
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">index</span></a> <span class="o">=</span> <span class="mi">2</span>
+<a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">s</span></a> <span class="o">=</span> <a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">area</span></a><span class="p">[</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">index</span></a><span class="p">]</span>
+<a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fitter</span><span class="o">.</span><span class="n">script</span></a> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2"> MODEL: cp</span>
+<span class="s2"> shape: cp_model</span>
+<span class="s2">    $ i0:     125, 0.1, none</span>
+<span class="s2">    $ t1irho: 1e4, 1, none</span>
+<span class="s2">    $ tis:  800, 1, 10000</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+<a href="../../../../../reference/generated/spectrochempy.Optimize.html#spectrochempy.Optimize.fit" title="spectrochempy.Optimize.fit" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">fitter</span><span class="o">.</span><span class="n">fit</span></a><span class="p">(</span><a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">s</span></a><span class="p">)</span>
+
+<a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">spred</span></a> <span class="o">=</span> <a href="../../../../../reference/generated/spectrochempy.Optimize.html#spectrochempy.Optimize.predict" title="spectrochempy.Optimize.predict" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">fitter</span><span class="o">.</span><span class="n">predict</span></a><span class="p">()</span>
+
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="matplotlib.axes.Axes" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ax</span></a> <span class="o">=</span> <a href="../../../../../reference/generated/spectrochempy.Optimize.html#spectrochempy.Optimize.plotmerit" title="spectrochempy.Optimize.plotmerit" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">fitter</span><span class="o">.</span><span class="n">plotmerit</span></a><span class="p">(</span>
+    <a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">s</span></a><span class="p">,</span>
+    <a href="../../../../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">spred</span></a><span class="p">,</span>
+    <span class="n">method</span><span class="o">=</span><span class="s2">&quot;scatter&quot;</span><span class="p">,</span>
+    <span class="n">show_yaxis</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">title</span></a><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;fitting CP dynamic (peaks at </span><span class="si">{</span><a href="../../../../../reference/generated/spectrochempy.Coord.html#spectrochempy.Coord" title="spectrochempy.Coord" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">peaks</span><span class="o">.</span><span class="n">x</span></a><span class="p">[</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">index</span></a><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_xlim.html#matplotlib.axes.Axes.set_xlim" title="matplotlib.axes.Axes.set_xlim" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">16000</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../../../_images/sphx_glr_plot_spectrochempy_nmr__processing__nmr__plot_processing_cp_nmr_009.png" srcset="../../../../../_images/sphx_glr_plot_spectrochempy_nmr__processing__nmr__plot_processing_cp_nmr_009.png" alt="fitting CP dynamic (peaks at 70.458 ppm)" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span> **************************************************
+ Result:
+ **************************************************
+
+
+ MODEL: cp
+ shape: cp_model
+        $ i0:   129.5282, 0.1, none
+        $ t1irho: 10031.3642, 1, none
+        $ tis:   196.1622, 1, 10000
+
+
+(0.0, 16000.0)
+</pre></div>
+</div>
+<p>The model looks good for the peak at 174 ppm. This peak appears to be composed of a single species,
+which is not the case for the other peaks at 99 and 70 ppm.
+Deconvolution of these two peaks is therefore probably necessary for a better analysis.</p>
+<p>This ends the example ! The following line can be removed or commented
+when the example is run as a notebook (<code class="xref py py-obj docutils literal notranslate"><span class="pre">ipynb</span></code>).</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># scp.show()</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  2.311 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-gettingstarted-examples-gallery-auto-examples-plugins-spectrochempy-nmr-plot-spectrochempy-nmr-processing-nmr-plot-processing-cp-nmr-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../../../../_downloads/b0597507583a04ace6c7563cb71cf5b5/plot_spectrochempy_nmr__processing__nmr__plot_processing_cp_nmr.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_spectrochempy_nmr__processing__nmr__plot_processing_cp_nmr.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../../../../_downloads/9aa93e07af2582e7b938e5a1f5ccfe70/plot_spectrochempy_nmr__processing__nmr__plot_processing_cp_nmr.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_spectrochempy_nmr__processing__nmr__plot_processing_cp_nmr.ipynb</span></code></a></p>
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="plot_spectrochempy_nmr__processing__apodization__plot_proc_sp.html" class="btn btn-neutral float-left" title="Sine bell and squared Sine bell window multiplication" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plot_spectrochempy_nmr__processing__nmr__plot_processing_nmr.html" class="btn btn-neutral float-right" title="Processing NMR spectra (slicing, baseline correction, peak picking, peak fitting)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2014-2026 Laboratoire Catalyse et Spectrochimie (LCS) — CeCILL-B license.
+      <span class="lastupdated">Last updated on Jun 05, 2026.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

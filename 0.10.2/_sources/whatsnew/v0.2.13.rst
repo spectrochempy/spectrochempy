@@ -1,0 +1,11 @@
+What's new in revision 0.2.13 [2021-02-23]
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-0.2.13. See :ref:`release` for a full changelog
+including other versions of SpectroChemPy.
+
+Bug fixes
+~~~~~~~~~
+
+-  Solved the problem that reading of experimental datasets was too slow
+   in v.0.2.12.

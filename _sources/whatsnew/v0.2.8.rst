@@ -1,0 +1,20 @@
+What's new in revision 0.2.8
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-0.2.8. See :ref:`release` for a full changelog
+including other versions of SpectroChemPy.
+
+New features
+~~~~~~~~~~~~
+
+-  Added write_csv() dir 1D datasets
+-  Added read_quadera() for Pfeiffer Vacuum’s QUADERA® MS files
+-  Added test for trapz(), simps(), readquadera()
+-  Improved displaying of Interferograms
+
+
+Bug fixes
+~~~~~~~~~
+
+-  Problem with trapz(), simps()
+-  interferogram x scaling
