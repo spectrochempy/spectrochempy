@@ -83,6 +83,9 @@ def plot_dataset_impl(
         If None, method is chosen based on data dimensionality.
     **kwargs
         Additional arguments passed to the plotting function.
+        ``show`` controls whether SpectroChemPy performs its explicit display
+        step after plotting. In notebook environments, figures may still
+        render inline without that explicit call.
 
     Returns
     -------

@@ -2187,6 +2187,11 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         **kwargs
             Additional arguments passed to the plotting function.
 
+            Common lifecycle kwargs include ``ax``, ``clear``, and ``show``.
+            Here, ``show`` controls whether SpectroChemPy performs its
+            explicit display step after plotting. In notebook environments,
+            figures may still render inline without that explicit call.
+
             For ``method="stack"``, ``palette`` controls categorical or continuous
             color selection. It accepts ``None``, a colormap name, or an explicit
             list of colors.

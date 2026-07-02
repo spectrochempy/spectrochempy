@@ -168,3 +168,29 @@ class TestMultiplot:
         # The key validation: if we got here without transform errors,
         # the bug fix worked
         assert True  # If this assertion passes, the bug is fixed
+
+    def test_multiplot_show_true_calls_display_helper(
+        self,
+        sample_1d_dataset,
+        mocker,
+        clean_figures,
+    ):
+        """multiplot(show=True) should own one final explicit display step."""
+        display = mocker.patch("spectrochempy.utils.mplutils.show")
+
+        _ = multiplot([sample_1d_dataset, sample_1d_dataset], show=True)
+
+        display.assert_called_once()
+
+    def test_multiplot_show_false_skips_display_helper(
+        self,
+        sample_1d_dataset,
+        mocker,
+        clean_figures,
+    ):
+        """multiplot(show=False) should suppress the explicit display step."""
+        display = mocker.patch("spectrochempy.utils.mplutils.show")
+
+        _ = multiplot([sample_1d_dataset, sample_1d_dataset], show=False)
+
+        display.assert_not_called()
