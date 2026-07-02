@@ -78,7 +78,7 @@ Prefer incremental migration.
 
 All implementation reports, investigations, reviews and working notes that are
 useful beyond a single session must be written in the
-**SpectroChemPy Maintainer Repository** (`spectrochempy-maintainer`), under the
+**SpectroChemPy Maintainer Repository** (`spectrochempy_maintainer`), under the
 appropriate subdirectory:
 
 * `notes/audits/` — active investigations, campaign logs, risk analysis, test
@@ -89,7 +89,7 @@ appropriate subdirectory:
 * `roadmap/` — maintainer-facing planning and campaign sequencing;
 * `governance/` — cross-cutting process and philosophy documents.
 
-Use audit notes (in `spectrochempy-maintainer/notes/audits/`) for:
+Use audit notes (in `spectrochempy_maintainer/notes/audits/`) for:
 
 * migration details;
 * architectural decisions;
@@ -99,7 +99,7 @@ Use audit notes (in `spectrochempy-maintainer/notes/audits/`) for:
 * test results.
 
 For multi-PR projects, maintain dedicated audit files in
-`spectrochempy-maintainer/notes/audits/`.
+`spectrochempy_maintainer/notes/audits/`.
 
 Local scratch notes (truly temporary, single session) may remain locally
 unversioned. They must not be introduced into the public `spectrochempy/`
@@ -112,7 +112,7 @@ files should be created there.
 
 All design contracts, architecture notes, roadmaps, and API conventions have
 been moved to the **SpectroChemPy Maintainer Repository**
-(`spectrochempy-maintainer`).  The public repository only retains release and
+(`spectrochempy_maintainer`).  The public repository only retains release and
 emergency recovery procedures under `maintainers/`.
 
 When an audit leads to a durable architectural decision, promote that knowledge
@@ -120,9 +120,9 @@ into the appropriate destination within the maintainer repository:
 
 | Destination | Use for |
 |---|---|
-| `spectrochempy-maintainer/rfcs/` | Normative behavior contracts and accepted decisions |
-| `spectrochempy-maintainer/architecture/` | Durable architecture notes and current reference |
-| `spectrochempy-maintainer/roadmap/` | Migration roadmaps and campaign ordering |
+| `spectrochempy_maintainer/rfcs/` | Normative behavior contracts and accepted decisions |
+| `spectrochempy_maintainer/architecture/` | Durable architecture notes and current reference |
+| `spectrochempy_maintainer/roadmap/` | Migration roadmaps and campaign ordering |
 
 **Promotion never consists of simply moving or copying the audit file.**
 The maintainer document must be a **rewritten, maintained document** that
@@ -137,15 +137,15 @@ reference.
 Some audits retain long-term value as historical context even though they are
 no longer primary authority.  They remain in the SpectroChemPy Maintainer
 Repository as curated governance notes
-(`spectrochempy-maintainer/archive/` or `spectrochempy-maintainer/notes/`).
+(`spectrochempy_maintainer/archive/` or `spectrochempy_maintainer/notes/`).
 
 These governance notes preserve decision-space analysis, migration baselines,
 and risk maps for future maintainers.  They are **not copies** of local working
 notes.  They are distinct from:
 
-- `spectrochempy-maintainer/notes/audits/` — active working notes;
-- `spectrochempy-maintainer/architecture/` — current durable architecture reference;
-- `spectrochempy-maintainer/rfcs/` — normative behavior contracts.
+- `spectrochempy_maintainer/notes/audits/` — active working notes;
+- `spectrochempy_maintainer/architecture/` — current durable architecture reference;
+- `spectrochempy_maintainer/rfcs/` — normative behavior contracts.
 
 Only preserve a note as a governance note when it records knowledge that
 future maintainers will need for context, not for authority.
@@ -157,7 +157,7 @@ architectural, maintenance, compatibility, or roadmap knowledge that future
 maintainers will need.
 
 If so, summarize that information in the appropriate
-`spectrochempy-maintainer/` destination before considering the campaign
+`spectrochempy_maintainer/` destination before considering the campaign
 complete.
 
 ## Examples
@@ -167,19 +167,19 @@ complete.
 /tmp/my-scratch-notes.md
 
 # Working note (shared in maintainer repository)
-spectrochempy-maintainer/notes/audits/campaign-architecture-audit.md
+spectrochempy_maintainer/notes/audits/campaign-architecture-audit.md
 
-# Curated governance note (promoted to spectrochempy-maintainer)
-spectrochempy-maintainer/archive/coordinate-arithmetic-audit.md
+# Curated governance note (promoted to spectrochempy_maintainer)
+spectrochempy_maintainer/archive/coordinate-arithmetic-audit.md
 
 # Accepted RFC (tracked, normative)
-spectrochempy-maintainer/rfcs/namespace-api-convention.md
+spectrochempy_maintainer/rfcs/namespace-api-convention.md
 
 # Durable architecture note (tracked, current reference)
-spectrochempy-maintainer/architecture/reader-normalization-architecture.md
+spectrochempy_maintainer/architecture/reader-normalization-architecture.md
 
 # Roadmap (tracked)
-spectrochempy-maintainer/roadmap/vendor-io-migration.md
+spectrochempy_maintainer/roadmap/vendor-io-migration.md
 ```
 
 Detailed implementation history belongs in working notes in the maintainer
@@ -188,7 +188,7 @@ repository, not changelog entries.
 Agents must produce or update a note in the SpectroChemPy Maintainer Repository
 after each work session, documenting what was done, key decisions, test results,
 risks, and next steps.  For multi-PR projects, maintain dedicated files in
-`spectrochempy-maintainer/notes/audits/` and update them before considering a
+`spectrochempy_maintainer/notes/audits/` and update them before considering a
 task complete.
 
 ---
@@ -261,10 +261,10 @@ When a campaign results in:
 the maintainer should evaluate whether part of the audit material must be
 promoted into the appropriate destination within the maintainer repository:
 
-* `spectrochempy-maintainer/rfcs/` — for normative contracts and decisions;
-* `spectrochempy-maintainer/architecture/` — for durable current architecture reference;
-* `spectrochempy-maintainer/roadmap/` — for migration ordering and campaign planning;
-* `spectrochempy-maintainer/archive/` or `spectrochempy-maintainer/notes/` —
+* `spectrochempy_maintainer/rfcs/` — for normative contracts and decisions;
+* `spectrochempy_maintainer/architecture/` — for durable current architecture reference;
+* `spectrochempy_maintainer/roadmap/` — for migration ordering and campaign planning;
+* `spectrochempy_maintainer/archive/` or `spectrochempy_maintainer/notes/` —
   for historical context that future maintainers will need (non-authoritative),
   curated and rewritten.
 
