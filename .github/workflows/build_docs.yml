@@ -2,10 +2,10 @@
 # Documentation is built using Sphinx and published to GitHub Pages
 #
 # Branch preview deployment:
-# - Development branches (non-master, non-release), including docs/* branches, publish
-#   preview docs under /<branch-name>/ on GitHub Pages.
+# - Documentation branches (doc/*, docs/*, codex/doc-*) publish preview docs under
+#   /<branch-name>/ on GitHub Pages.
 # - Branch names are sanitised: "/" becomes "-".
-# - Example: branch "feature/new-nmr" → /feature-new-nmr/
+# - Example: branch "docs/plotting-pass" → /docs-plotting-pass/
 # - Stable docs at root level remain untouched.
 # - Preview docs are automatically removed when the branch is deleted
 #   via the cleanup workflow (cleanup_branch_docs.yml).
@@ -48,11 +48,12 @@ jobs:
       (
         github.repository == 'spectrochempy/spectrochempy' &&
         (
-          (github.event_name == 'schedule') ||
-          (github.event_name != 'schedule' &&
-           (github.event_name != 'pull_request' ||
-            github.event.pull_request.head.repo.full_name != github.repository ||
-            startsWith(github.event.pull_request.head.ref, 'docs/')))
+          github.event_name == 'schedule' ||
+          github.event_name != 'pull_request' ||
+          github.event.pull_request.head.repo.full_name != github.repository ||
+          startsWith(github.event.pull_request.head.ref, 'docs/') ||
+          startsWith(github.event.pull_request.head.ref, 'doc/') ||
+          startsWith(github.event.pull_request.head.ref, 'codex/doc-')
         )
       )
 
@@ -181,21 +182,37 @@ jobs:
           echo "JUPYTER_CONFIG_DIR=$GITHUB_WORKSPACE/.github/jupyter" >> "$GITHUB_ENV"
 
       # ---------- preview / stable branch detection ----------
-      - name: Determine preview parameters
-        id: preview
+      - name: Determine publication parameters
+        id: publish
         run: |
-          BRANCH="${{ github.ref_name }}"
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            BRANCH="${{ github.head_ref }}"
+          else
+            BRANCH="${{ github.ref_name }}"
+          fi
           EVENT="${{ github.event_name }}"
-          # Stable builds: master and release events
+
+          # Stable builds publish the root documentation.
           if [[ "$BRANCH" == "master" || "$EVENT" == "release" ]]; then
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+            echo "mode=stable" >> "$GITHUB_OUTPUT"
             echo "is_preview=false" >> "$GITHUB_OUTPUT"
             echo "preview_path=" >> "$GITHUB_OUTPUT"
             echo "build_subdir=" >> "$GITHUB_OUTPUT"
-          else
+          # Preview publishing is reserved for documentation-focused branches.
+          elif [[ "$BRANCH" == docs/* || "$BRANCH" == doc/* || "$BRANCH" == codex/doc-* ]]; then
             SANITIZED=$(echo "$BRANCH" | tr '/' '-')
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+            echo "mode=preview" >> "$GITHUB_OUTPUT"
             echo "is_preview=true" >> "$GITHUB_OUTPUT"
             echo "preview_path=$SANITIZED" >> "$GITHUB_OUTPUT"
             echo "build_subdir=build/branch_preview" >> "$GITHUB_OUTPUT"
+          else
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            echo "mode=none" >> "$GITHUB_OUTPUT"
+            echo "is_preview=false" >> "$GITHUB_OUTPUT"
+            echo "preview_path=" >> "$GITHUB_OUTPUT"
+            echo "build_subdir=" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Determine documentation execution mode
@@ -207,7 +224,7 @@ jobs:
             BRANCH="${{ github.ref_name }}"
           fi
 
-          if [[ "$BRANCH" == docs/* || "$BRANCH" == codex/doc-* ]]; then
+          if [[ "$BRANCH" == docs/* || "$BRANCH" == doc/* || "$BRANCH" == codex/doc-* ]]; then
             echo "fresh_docs=true" >> "$GITHUB_OUTPUT"
             echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
             echo "Documentation fresh-run mode enabled for branch: $BRANCH"
@@ -218,16 +235,16 @@ jobs:
 
       # ---------- restore reusable Sphinx/Sphinx-Gallery outputs for previews ----------
       - name: Restore documentation build cache
-        if: steps.preview.outputs.is_preview == 'true' && steps.docs_mode.outputs.fresh_docs != 'true'
+        if: steps.publish.outputs.is_preview == 'true' && steps.docs_mode.outputs.fresh_docs != 'true'
         uses: actions/cache@v6
         with:
           path: |
             build/branch_preview/~doctrees
             docs/sources/gettingstarted/examples/gallery
           key: >-
-            ${{ runner.os }}-docs-${{ steps.preview.outputs.preview_path }}-${{ hashFiles('pyproject.toml', 'docs/conf.py', 'docs/make.py', 'docs/_static/**', 'docs/sources/**/*.rst', 'docs/sources/**/*.py', 'docs/sources/**/*.ipynb', 'src/spectrochempy/data/css/*.css', 'src/spectrochempy/examples/**/*.py', 'src/spectrochempy/core/dataset/*.py', 'src/spectrochempy/utils/print.py', 'plugins/**/examples/**/*.py', 'plugins/**/examples/gallery.toml') }}
+            ${{ runner.os }}-docs-${{ steps.publish.outputs.preview_path }}-${{ hashFiles('pyproject.toml', 'docs/conf.py', 'docs/make.py', 'docs/_static/**', 'docs/sources/**/*.rst', 'docs/sources/**/*.py', 'docs/sources/**/*.ipynb', 'src/spectrochempy/data/css/*.css', 'src/spectrochempy/examples/**/*.py', 'src/spectrochempy/core/dataset/*.py', 'src/spectrochempy/utils/print.py', 'plugins/**/examples/**/*.py', 'plugins/**/examples/gallery.toml') }}
           restore-keys: |
-            ${{ runner.os }}-docs-${{ steps.preview.outputs.preview_path }}-
+            ${{ runner.os }}-docs-${{ steps.publish.outputs.preview_path }}-
             ${{ runner.os }}-docs-
 
       - name: Clear documentation caches for fresh-run branches
@@ -240,6 +257,7 @@ jobs:
 
       # ---------- clone gh-pages (preserve existing content) ----------
       - name: Clone gh-pages branch
+        if: steps.publish.outputs.publish == 'true'
         run: |
           mkdir -p build
           git clone --branch=gh-pages --single-branch \
@@ -251,18 +269,18 @@ jobs:
           set -e
           . .venv/bin/activate
           start=$SECONDS
-          if [[ "${{ github.event_name }}" == "pull_request" && "${{ steps.preview.outputs.is_preview }}" == "true" && "${{ steps.docs_mode.outputs.fresh_docs }}" == "true" ]]; then
-            SCPY_BUILDDIR=${{ steps.preview.outputs.build_subdir }} \
+          if [[ "${{ github.event_name }}" == "pull_request" && "${{ steps.publish.outputs.is_preview }}" == "true" && "${{ steps.docs_mode.outputs.fresh_docs }}" == "true" ]]; then
+            SCPY_BUILDDIR=${{ steps.publish.outputs.build_subdir }} \
               python3 docs/make.py -j auto html
           elif [[ "${{ github.event_name }}" == "pull_request" && "${{ steps.docs_mode.outputs.fresh_docs }}" == "true" ]]; then
             python3 docs/make.py -j auto html
-          elif [[ "${{ github.event_name }}" == "pull_request" && "${{ steps.preview.outputs.is_preview }}" == "true" ]]; then
-            SCPY_BUILDDIR=${{ steps.preview.outputs.build_subdir }} \
+          elif [[ "${{ github.event_name }}" == "pull_request" && "${{ steps.publish.outputs.is_preview }}" == "true" ]]; then
+            SCPY_BUILDDIR=${{ steps.publish.outputs.build_subdir }} \
               python3 docs/make.py --no-exec -j auto html
           elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
             python3 docs/make.py --no-exec -j auto html
-          elif [[ "${{ steps.preview.outputs.is_preview }}" == "true" ]]; then
-            SCPY_BUILDDIR=${{ steps.preview.outputs.build_subdir }} \
+          elif [[ "${{ steps.publish.outputs.is_preview }}" == "true" ]]; then
+            SCPY_BUILDDIR=${{ steps.publish.outputs.build_subdir }} \
               python3 docs/make.py -j auto html
           else
             python3 docs/make.py -j auto html
@@ -281,7 +299,7 @@ jobs:
 
       # ---------- build oldest version (stable only) ----------
       - name: Build oldest version of the documentation
-        if: steps.preview.outputs.is_preview != 'true'
+        if: steps.publish.outputs.mode == 'stable'
         run: |
           . .venv/bin/activate
           if [ ! -d build/html/0.6.10 ]; then
@@ -291,12 +309,18 @@ jobs:
 
       # ---------- build missing stable versions for dropdown ----------
       - name: Build missing stable versions
-        if: steps.preview.outputs.is_preview != 'true'
+        if: steps.publish.outputs.mode == 'stable'
         run: |
           . .venv/bin/activate
-          # Iterate over all core release tags (spectrochempy-vX.Y.Z),
-          # excluding plugin tags (spectrochempy-*-vX.Y.Z).
-          for tag in $(git tag --list 'spectrochempy-v*' | sort -V); do
+          mapfile -t tags < <(git tag --list 'spectrochempy-v*' | sort -V)
+          keep_count=4
+          start_index=0
+          if (( ${#tags[@]} > keep_count )); then
+            start_index=$((${#tags[@]} - keep_count))
+          fi
+
+          for ((i=start_index; i<${#tags[@]}; i++)); do
+            tag="${tags[i]}"
             version="${tag#spectrochempy-v}"
             # Build docs for this version if not already present
             if [ ! -d "build/html/$version" ]; then
@@ -305,11 +329,87 @@ jobs:
             fi
           done
 
+      - name: Prune legacy preview documentation
+        if: steps.publish.outputs.mode == 'stable'
+        run: |
+          declare -A allowed_preview_dirs=()
+          declare -A root_doc_dirs=(
+            [_downloads]=1
+            [_images]=1
+            [_modules]=1
+            [_sources]=1
+            [_sphinx_design_static]=1
+            [_static]=1
+            [_templates]=1
+            [api]=1
+            [credits]=1
+            [devguide]=1
+            [gettingstarted]=1
+            [install]=1
+            [latest]=1
+            [reference]=1
+            [singlehtml]=1
+            [userguide]=1
+            [whatsnew]=1
+          )
+
+          while IFS=$'\t' read -r _ ref; do
+            branch="${ref#refs/heads/}"
+            if [[ "$branch" == docs/* || "$branch" == doc/* || "$branch" == codex/doc-* ]]; then
+              allowed_preview_dirs["${branch//\//-}"]=1
+            fi
+          done < <(git ls-remote --heads origin)
+
+          while IFS= read -r name; do
+            if [[ ! "$name" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] &&
+               [[ -z "${root_doc_dirs[$name]:-}" ]] &&
+               [[ -z "${allowed_preview_dirs[$name]:-}" ]]; then
+              rm -rf "build/html/$name"
+              echo "Removed stale preview docs: $name"
+            fi
+          done < <(find build/html -mindepth 1 -maxdepth 1 -type d -printf '%f\n')
+
+      - name: Prune stable version retention set
+        if: steps.publish.outputs.mode == 'stable'
+        run: |
+          keep_count=4
+          oldest_supported="0.6.10"
+
+          mapfile -t versions < <(
+            find build/html -mindepth 1 -maxdepth 1 -type d -printf '%f\n' |
+              grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' |
+              sort -V
+          )
+
+          declare -A keep_versions=()
+
+          if (( ${#versions[@]} > 0 )); then
+            start_index=0
+            if (( ${#versions[@]} > keep_count )); then
+              start_index=$((${#versions[@]} - keep_count))
+            fi
+
+            for ((i=start_index; i<${#versions[@]}; i++)); do
+              keep_versions["${versions[i]}"]=1
+            done
+          fi
+
+          if [[ -d "build/html/$oldest_supported" ]]; then
+            keep_versions["$oldest_supported"]=1
+          fi
+
+          for version in "${versions[@]}"; do
+            if [[ -z "${keep_versions[$version]:-}" ]]; then
+              rm -rf "build/html/$version"
+              echo "Removed archived docs version: $version"
+            fi
+          done
+
       # ---------- install branch preview into gh-pages clone ----------
       - name: Install branch preview into gh-pages
-        if: steps.preview.outputs.is_preview == 'true'
+        if: steps.publish.outputs.is_preview == 'true'
         run: |
-          PREVIEW_PATH="${{ steps.preview.outputs.preview_path }}"
+          PREVIEW_PATH="${{ steps.publish.outputs.preview_path }}"
           # The preview build output is in build_subdir/html/ after make.py post-build
           rm -rf "build/html/$PREVIEW_PATH"
           mkdir -p "build/html/$PREVIEW_PATH"
@@ -320,8 +420,8 @@ jobs:
       - name: Determine artifact name
         id: artifact
         run: |
-          if [[ "${{ steps.preview.outputs.is_preview }}" == "true" ]]; then
-            echo "name=docs-preview-${{ steps.preview.outputs.preview_path }}" >> "$GITHUB_OUTPUT"
+          if [[ "${{ steps.publish.outputs.is_preview }}" == "true" ]]; then
+            echo "name=docs-preview-${{ steps.publish.outputs.preview_path }}" >> "$GITHUB_OUTPUT"
             echo "path=build/branch_preview/html/" >> "$GITHUB_OUTPUT"
             echo "retention=3" >> "$GITHUB_OUTPUT"
           else
@@ -331,6 +431,7 @@ jobs:
           fi
 
       - name: Upload build artifacts
+        if: steps.publish.outputs.publish == 'true'
         uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.artifact.outputs.name }}
@@ -339,7 +440,7 @@ jobs:
 
       # ---------- deploy to gh-pages ----------
       - name: Deployment
-        if: (github.event_name != 'pull_request' && !github.event.act)
+        if: steps.publish.outputs.publish == 'true' && (github.event_name != 'pull_request' && !github.event.act)
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
