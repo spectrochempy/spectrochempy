@@ -262,5 +262,5 @@ for details.
 ## Additional references
 
 * Full developer guide: `docs/sources/devguide/`
-* Maintainer documentation: `maintainers/`
+* Maintainer documentation: `maintainers/` (release and recovery procedures)
 * AGENTS.md: concise guidance for AI-assisted development

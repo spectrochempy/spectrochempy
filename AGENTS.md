@@ -6,7 +6,8 @@ This document supplements:
 
 * CONTRIBUTING.md
 * docs/sources/devguide/
-* maintainers/
+* maintainers/ (release procedures only — all other maintainer docs have moved
+  to the private SpectroChemPy Maintainer Repository)
 
 Agents must follow all project contribution rules defined there.
 
@@ -73,14 +74,22 @@ Prefer incremental migration.
 
 # Audit Policy
 
-## Local working notes
+## Working notes
 
-All implementation reports, investigations, reviews and working notes must be
-written under `audit/`.
+All implementation reports, investigations, reviews and working notes that are
+useful beyond a single session must be written in the
+**SpectroChemPy Maintainer Repository** (`spectrochempy-maintainer`), under the
+appropriate subdirectory:
 
-Files in `audit/` are intentionally untracked and must never be committed.
+* `notes/audits/` — active investigations, campaign logs, risk analysis, test
+  results, architecture audits;
+* `notes/` — general maintainer notes, migration records, research summaries;
+* `archive/audits/` — historical PR-by-PR notes and completed campaign logs;
+* `proposals/` — incubating design proposals;
+* `roadmap/` — maintainer-facing planning and campaign sequencing;
+* `governance/` — cross-cutting process and philosophy documents.
 
-Use audit notes for:
+Use audit notes (in `spectrochempy-maintainer/notes/audits/`) for:
 
 * migration details;
 * architectural decisions;
@@ -89,89 +98,98 @@ Use audit notes for:
 * risk analysis;
 * test results.
 
-For multi-PR projects, maintain dedicated audit files.
+For multi-PR projects, maintain dedicated audit files in
+`spectrochempy-maintainer/notes/audits/`.
 
-Name new audit files with a leading tilde so they match the repository ignore
-rule, for example `audit/~project-architecture-audit.md`.
+Local scratch notes (truly temporary, single session) may remain locally
+unversioned. They must not be introduced into the public `spectrochempy/`
+repository.
 
-Local audit files (`~*.md`) are working notes and may not be shared with other
-maintainers.
+The old `audit/` directory in the public repository has been removed. No new
+files should be created there.
 
 ## Promotion destinations
 
-If an audit leads to a durable architectural decision, promote that knowledge
-into the appropriate tracked document.
+All design contracts, architecture notes, roadmaps, and API conventions have
+been moved to the **SpectroChemPy Maintainer Repository**
+(`spectrochempy-maintainer`).  The public repository only retains release and
+emergency recovery procedures under `maintainers/`.
 
-**Promotion never consists of simply moving or copying the local audit file.**
-The maintainer document must be a **rewritten, maintained document** that
-extracts the durable knowledge from the audit.  The original local audit may
-remain as an untracked working note, be deleted, or—when it has long-term
-historical value—be rewritten and committed into the
-**SpectroChemPy Maintainer Repository** as a curated governance note.
+When an audit leads to a durable architectural decision, promote that knowledge
+into the appropriate destination within the maintainer repository:
 
 | Destination | Use for |
 |---|---|
-| `maintainers/rfcs/` | Normative behavior contracts and accepted decisions |
-| `maintainers/architecture/` | Durable architecture notes and current reference |
-| `maintainers/roadmap/` | Migration roadmaps and campaign ordering |
-| `maintainers/conventions.md` | Lightweight conventions and quick-reference |
+| `spectrochempy-maintainer/rfcs/` | Normative behavior contracts and accepted decisions |
+| `spectrochempy-maintainer/architecture/` | Durable architecture notes and current reference |
+| `spectrochempy-maintainer/roadmap/` | Migration roadmaps and campaign ordering |
 
-The original audit remains a transient working document and is not the
-authoritative reference.
+**Promotion never consists of simply moving or copying the audit file.**
+The maintainer document must be a **rewritten, maintained document** that
+extracts the durable knowledge from the audit.  The original audit remains in
+the SpectroChemPy Maintainer Repository as historical context.
+
+The original working note is a transient document and is not the authoritative
+reference.
 
 ## Curated governance notes in the maintainer repository
 
 Some audits retain long-term value as historical context even though they are
-no longer primary authority.  When that occurs, rewrite the audit as a
-curated governance note in the **SpectroChemPy Maintainer Repository**
-(`spectrochempy-maintainer/archive/` or `spectrochempy-maintainer/notes/`)
-and retire it from the public `maintainers/` directory.
+no longer primary authority.  They remain in the SpectroChemPy Maintainer
+Repository as curated governance notes
+(`spectrochempy-maintainer/archive/` or `spectrochempy-maintainer/notes/`).
 
 These governance notes preserve decision-space analysis, migration baselines,
-and risk maps for future maintainers.  They are **not committed copies** of
-the local working notes.  They are distinct from:
+and risk maps for future maintainers.  They are **not copies** of local working
+notes.  They are distinct from:
 
-- `audit/` — local untracked working notes;
-- `maintainers/architecture/` — current durable architecture reference;
-- `maintainers/rfcs/` — normative behavior contracts.
+- `spectrochempy-maintainer/notes/audits/` — active working notes;
+- `spectrochempy-maintainer/architecture/` — current durable architecture reference;
+- `spectrochempy-maintainer/rfcs/` — normative behavior contracts.
 
-Only preserve an audit as a governance note when it records knowledge that
+Only preserve a note as a governance note when it records knowledge that
 future maintainers will need for context, not for authority.
 
 ## Campaign closure
 
-Before closing a campaign, verify whether the audit contains any
+Before closing a campaign, verify whether the working notes contain any
 architectural, maintenance, compatibility, or roadmap knowledge that future
 maintainers will need.
 
-If so, summarize that information in the appropriate `maintainers/` destination
-before considering the campaign complete.
+If so, summarize that information in the appropriate
+`spectrochempy-maintainer/` destination before considering the campaign
+complete.
 
 ## Examples
 
-```text id="llqkmn"
-# Local working note (untracked)
-audit/~project-architecture-audit.md
+```text
+# Local scratch note (disposable, never versioned)
+/tmp/my-scratch-notes.md
+
+# Working note (shared in maintainer repository)
+spectrochempy-maintainer/notes/audits/campaign-architecture-audit.md
 
 # Curated governance note (promoted to spectrochempy-maintainer)
 spectrochempy-maintainer/archive/coordinate-arithmetic-audit.md
 
 # Accepted RFC (tracked, normative)
-maintainers/rfcs/namespace-api-convention.md
+spectrochempy-maintainer/rfcs/namespace-api-convention.md
 
 # Durable architecture note (tracked, current reference)
-maintainers/architecture/reader-normalization-architecture.md
+spectrochempy-maintainer/architecture/reader-normalization-architecture.md
 
 # Roadmap (tracked)
-maintainers/roadmap/vendor-io-migration.md
+spectrochempy-maintainer/roadmap/vendor-io-migration.md
 ```
 
-Detailed implementation history belongs in audits, not changelog entries.
+Detailed implementation history belongs in working notes in the maintainer
+repository, not changelog entries.
 
-Agents must produce or update an audit note after each work session,
-documenting what was done, key decisions, test results, risks, and next
-steps.  For multi-PR projects, maintain dedicated audit files and update
-them before considering a task complete.
+Agents must produce or update a note in the SpectroChemPy Maintainer Repository
+after each work session, documenting what was done, key decisions, test results,
+risks, and next steps.  For multi-PR projects, maintain dedicated files in
+`spectrochempy-maintainer/notes/audits/` and update them before considering a
+task complete.
 
 ---
 
@@ -241,11 +259,11 @@ When a campaign results in:
 * a long-term contract;
 
 the maintainer should evaluate whether part of the audit material must be
-promoted into the appropriate `maintainers/` destination:
+promoted into the appropriate destination within the maintainer repository:
 
-* `maintainers/rfcs/` — for normative contracts and decisions;
-* `maintainers/architecture/` — for durable current architecture reference;
-* `maintainers/roadmap/` — for migration ordering and campaign planning;
+* `spectrochempy-maintainer/rfcs/` — for normative contracts and decisions;
+* `spectrochempy-maintainer/architecture/` — for durable current architecture reference;
+* `spectrochempy-maintainer/roadmap/` — for migration ordering and campaign planning;
 * `spectrochempy-maintainer/archive/` or `spectrochempy-maintainer/notes/` —
   for historical context that future maintainers will need (non-authoritative),
   curated and rewritten.
@@ -301,7 +319,7 @@ Do not use the changelog as a PR-by-PR implementation journal.
 
 For multi-PR projects:
 
-* keep detailed history in audit notes;
+* keep detailed history in research notes in the maintainer repository;
 * consolidate related work into meaningful release-level entries;
 * prefer updating an existing entry over creating many near-duplicate entries.
 

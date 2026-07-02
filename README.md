@@ -98,8 +98,9 @@ If you want to contribute, start with:
 * the developer guide under [`docs/sources/devguide/`](docs/sources/devguide/)
 * the [issue tracker](https://github.com/spectrochempy/spectrochempy/issues)
 
-Maintainer-specific release and architecture notes live in
-[`maintainers/`](maintainers/).
+Maintainer release procedures live in [`maintainers/`](maintainers/).
+Architecture, RFCs, and roadmap discussions are maintained in the
+**SpectroChemPy Maintainer Repository**.
 
 ## License
 

@@ -588,7 +588,7 @@ class Project(AbstractProject, NDIO):
             ``copy.copy(project)`` and ``copy.deepcopy(project)`` both
             produce a deep copy, matching the default ``copy(deep=True)``
             behavior.  This is intentional per the project copy semantics
-            RFC (``maintainers/rfcs/project-copy-semantics-rfc.md``) and
+            project copy semantics contract (maintainer repository) and
             differs from Python's default shallow ``copy.copy`` semantics.
 
         Parameters

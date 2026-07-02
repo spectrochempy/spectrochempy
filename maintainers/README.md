@@ -1,41 +1,17 @@
 # Maintainer Documentation
 
-This directory contains **public authoritative maintainer references** for
-SpectroChemPy: accepted and proposed RFCs, durable architecture notes,
-public roadmaps, and operational release and recovery procedures.
+This directory contains operational procedures for SpectroChemPy releases and
+recovery. These are the only maintainer documents remaining in this repository.
 
-For governance discussion, proposal incubation, exploratory research, and
-long-form strategic conversation, see the separate **SpectroChemPy Maintainer
-Repository**. Accepted decisions from that repository are promoted here when
-stable.
+Design contracts, architecture notes, roadmaps, and API conventions have been
+moved to the **SpectroChemPy Maintainer Repository**.
 
-This is **not user-facing documentation**. User documentation is at
-[spectrochempy.fr](https://www.spectrochempy.fr) and in [`docs/`](../docs/).
+For contributors and plugin authors, see the developer documentation in
+[`docs/sources/devguide/`](../docs/sources/devguide/).
 
-## Structure
+## Remaining Documents
 
-| Path | Role | Purpose |
-|---|---|---|
-| [`rfcs/INDEX.md`](rfcs/INDEX.md) | What — contracts | RFC inventory with status and authority |
-| [`architecture/INDEX.md`](architecture/INDEX.md) | How — organisation | Curated architecture references |
-| [`roadmap/current-roadmap.md`](roadmap/current-roadmap.md) | When — ordering | Current priorities and active candidates |
-| [`release-process.md`](release-process.md) | How — release | Release procedure |
-| [`emergency-recovery.md`](emergency-recovery.md) | How — recovery | Incident recovery |
-| [`api-conventions.md`](api-conventions.md) | What — API | Namespace API quick reference |
-
-## Reading Path
-
-For maintainer orientation, start with the roadmap, then the indexes:
-
-1. [`roadmap/current-roadmap.md`](roadmap/current-roadmap.md)
-2. [`rfcs/INDEX.md`](rfcs/INDEX.md)
-3. [`architecture/INDEX.md`](architecture/INDEX.md)
-
-For contributors and plugin authors, see [`api-conventions.md`](api-conventions.md).
-
-## Local Audit Notes
-
-The repository-level `audit/` directory (untracked) contains local working
-notes, implementation logs, and campaign investigations. These are not
-authoritative. See the SpectroChemPy Maintainer Repository for shared
-maintainer notes and proposal incubation.
+| File | Purpose |
+|---|---|
+| [`release-process.md`](release-process.md) | Release publishing procedure |
+| [`emergency-recovery.md`](emergency-recovery.md) | Incident recovery workflows |
