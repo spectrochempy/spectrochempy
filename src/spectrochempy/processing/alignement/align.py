@@ -347,6 +347,13 @@ def align(dataset, *others, **kwargs):
 
         for _index, object in _objects.items():
             obj = object["obj"]
+            # NOTE: NaN is deliberately replaced with a sentinel value
+            # rather than MASKED (np.ma.masked).  The mask is already set
+            # correctly above, so .masked_data is accurate.  However,
+            # __eq__ compares raw .data directly (IEEE 754 NaN != NaN),
+            # and ~30 processing sites access .data instead of
+            # .masked_data.  A sentinel avoids silent breakage in both
+            # cases.  See audit/~align-sentinel-investigation.md.
             # obj[np.where(np.isnan(obj))] = MASKED  # mask NaN values
             obj[
                 np.where(np.isnan(obj))
