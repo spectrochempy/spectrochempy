@@ -48,13 +48,12 @@ jobs:
       (
         github.repository == 'spectrochempy/spectrochempy' &&
         (
-          (github.event_name == 'schedule') ||
-          (github.event_name != 'schedule' &&
-           (github.event_name != 'pull_request' ||
-            github.event.pull_request.head.repo.full_name != github.repository ||
-            startsWith(github.event.pull_request.head.ref, 'docs/') ||
-            startsWith(github.event.pull_request.head.ref, 'doc/') ||
-            startsWith(github.event.pull_request.head.ref, 'codex/doc-'))))
+          github.event_name == 'schedule' ||
+          github.event_name != 'pull_request' ||
+          github.event.pull_request.head.repo.full_name != github.repository ||
+          startsWith(github.event.pull_request.head.ref, 'docs/') ||
+          startsWith(github.event.pull_request.head.ref, 'doc/') ||
+          startsWith(github.event.pull_request.head.ref, 'codex/doc-')
         )
       )
 
