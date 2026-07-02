@@ -112,6 +112,10 @@ def plot_1D(dataset, method=None, **kwargs):
     show_complex : bool, optional, default: False
         Show both real and imaginary component for complex data.
         By default only the real component is displayed.
+    show : bool, optional, default: True
+        Whether SpectroChemPy should perform its explicit display step after
+        plotting. In notebook environments, figures may still render inline
+        without this explicit call.
     show_mask: bool, optional
         Should we display the mask using colored area.
     show_z : bool, optional, default: True
@@ -1118,6 +1122,7 @@ def plot_multiple(
     lazy_ensure_mpl_config()
 
     from spectrochempy.utils.mplutils import get_figure
+    from spectrochempy.utils.mplutils import show as mpl_show
 
     fig = get_figure(
         preferences=kwargs.get("preferences"),
@@ -1164,5 +1169,8 @@ def plot_multiple(
             frameon=True,
             fontsize="small",
         )
+
+    if user_show:
+        mpl_show()
 
     return ax

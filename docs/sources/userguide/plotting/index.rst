@@ -67,7 +67,10 @@ For day-to-day use, the plotting contract is:
   ``marker`` input can mean different things for lines, scatter plots, contour
   plots, and image-like plots.
 - ``ax``, ``clear``, and ``show`` control figure lifecycle for ordinary dataset
-  plots. Composite plotters can have narrower or specialized lifecycle rules.
+  plots. Here ``show`` means "perform SpectroChemPy's explicit display step
+  after plotting", not "guarantee figure visibility". In notebook environments,
+  figures can still render inline without that explicit call. Composite
+  plotters can have narrower or specialized lifecycle rules.
 - ``plot_multiple()`` overlays several datasets on one axes, while
   ``multiplot()`` creates a grid of axes.
 

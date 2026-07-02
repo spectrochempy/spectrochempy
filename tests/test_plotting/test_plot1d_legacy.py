@@ -202,3 +202,39 @@ def test_plot_multiple_single_dataset_forwards_method():
         assert line.get_linestyle() == "None"
 
     plt.close("all")
+
+
+def test_plot_multiple_show_true_calls_display_helper(mocker):
+    """plot_multiple(show=True) should own one final explicit display step."""
+    import matplotlib.pyplot as plt
+    from spectrochempy import NDDataset
+    from spectrochempy.plotting.plot1d import plot_multiple
+
+    display = mocker.patch("spectrochempy.utils.mplutils.show")
+    datasets = [
+        NDDataset([1, 2, 3], name="A"),
+        NDDataset([2, 3, 4], name="B"),
+    ]
+
+    _ = plot_multiple(datasets, method="scatter", show=True)
+
+    display.assert_called_once()
+    plt.close("all")
+
+
+def test_plot_multiple_show_false_skips_display_helper(mocker):
+    """plot_multiple(show=False) should suppress the explicit display step."""
+    import matplotlib.pyplot as plt
+    from spectrochempy import NDDataset
+    from spectrochempy.plotting.plot1d import plot_multiple
+
+    display = mocker.patch("spectrochempy.utils.mplutils.show")
+    datasets = [
+        NDDataset([1, 2, 3], name="A"),
+        NDDataset([2, 3, 4], name="B"),
+    ]
+
+    _ = plot_multiple(datasets, method="scatter", show=False)
+
+    display.assert_not_called()
+    plt.close("all")

@@ -288,6 +288,10 @@ def multiplot(
         Title of the figure to display on top.
     suptitle_color : color
         Color of the subtitles
+    show : bool, optional, default: True
+        Whether SpectroChemPy should perform its explicit display step after
+        plotting. In notebook environments, figures may still render inline
+        without this explicit call.
 
     Returns
     -------
@@ -317,8 +321,10 @@ def multiplot(
 
     from spectrochempy.application.preferences import preferences as prefs
     from spectrochempy.utils.mplutils import get_figure
+    from spectrochempy.utils.mplutils import show as mpl_show
 
     kwargs = normalize_plot_kwargs(kwargs)
+    user_show = kwargs.pop("show", True)
 
     # Resolve plotting style(s) locally (do not mutate global rcParams)
     style = normalize_style_argument(kwargs.pop("style", None), default=["scpy"])
@@ -658,6 +664,9 @@ def multiplot(
             fig.canvas.mpl_connect("axes_leave_event", _onenter)
             fig.canvas.mpl_connect("figure_enter_event", _onenter)
             fig.canvas.mpl_connect("figure_leave_event", _onenter)
+
+        if user_show:
+            mpl_show()
 
         # Return based on contract
         if return_dict:

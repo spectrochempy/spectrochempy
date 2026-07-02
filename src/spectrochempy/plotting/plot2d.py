@@ -340,6 +340,10 @@ def plot_lines(dataset, **kwargs):
     show_complex : bool, optional, default: False
         Show both real and imaginary component for complex data.
         By default only the real component is displayed.
+    show : bool, optional, default: True
+        Whether SpectroChemPy should perform its explicit display step after
+        plotting. In notebook environments, figures may still render inline
+        without this explicit call.
     show_mask: bool, optional
         Should we display the mask using colored area.
     show_z : bool, optional, default: True
