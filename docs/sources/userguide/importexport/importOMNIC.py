@@ -407,7 +407,7 @@ X_corrected = X - X[0]  # Subtract first spectrum as baseline
 # - Normalization
 
 # %%
-X_normalized = X / X.max()
+X_normalized = X.normalize(method="max", dim="x")
 
 # %%
 print("Original data shape:", X.shape)

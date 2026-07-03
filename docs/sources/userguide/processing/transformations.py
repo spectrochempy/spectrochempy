@@ -215,5 +215,24 @@ nd = ds.msc()
 _ = nd.plot(title="MSC corrected")
 
 # %% [markdown]
+# ## Using transformers for machine-learning workflows
+#
+# For train/test splits or cross-validation, the procedural API above
+# recalculates statistics on every call.  To reuse statistics learned from
+# a training set, use the transformer classes instead:
+#
+# ```python
+# scaler = scp.AutoscaleTransformer(dim="y")
+# X_train_scaled = scaler.fit_transform(X_train)
+# X_test_scaled  = scaler.transform(X_test)   # uses train mean/std
+# ```
+#
+# All nine operations have a matching transformer (e.g.
+# `CenterTransformer`, `NormalizeTransformer`, `MSCTransformer`, …).
+# They implement the familiar `fit()` / `transform()` / `fit_transform()` /
+# `inverse_transform()` lifecycle and expose `get_params()` / `set_params()`
+# for scikit-learn-compatible cloning.
+
+# %% [markdown]
 # All operations support `inplace=True` and can be called as either top-level
 # functions (``scp.normalize(...)``) or dataset methods (``dataset.normalize(...)``).
