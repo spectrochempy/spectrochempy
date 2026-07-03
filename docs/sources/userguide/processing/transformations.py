@@ -150,3 +150,70 @@ _ = dataset.plot()
 
 # %% [markdown]
 # See [Units](../objects/dataset/dataset.ipynb#Units) for more details on these units operations
+
+# %% [markdown]
+# # Chemometric preprocessing
+#
+# SpectroChemPy provides standard preprocessing operations commonly used in
+# chemometrics and spectroscopic data analysis.  They operate along a chosen
+# dimension and respect masks, units, coordinates, and metadata.
+
+# %%
+# Load a dataset and focus on a small region for clarity
+ds = scp.read_omnic("irdata/nh4y-activation.spg")
+ds = ds[:, 2200.0:1800.0]
+
+# %% [markdown]
+# ## Normalization
+#
+# `normalize` scales data along a dimension.  The default method is ``'max'``.
+
+# %%
+nd = ds.normalize(method="max", dim="x")
+_ = nd.plot(title="Max-normalized spectra")
+
+# %% [markdown]
+# Other methods include ``'sum'``, ``'vector'`` (L2 norm), and ``'minmax'``.
+
+# %%
+nd = ds.normalize(method="minmax", dim="x")
+_ = nd.plot(title="Min-max scaled to [0, 1]")
+
+# %% [markdown]
+# ## Mean-centering and autoscaling
+#
+# `center` subtracts the mean.  `autoscale` mean-centres and divides by the
+# standard deviation (z-score).  By default these operate per variable
+# (``dim='y'``), which is the convention before PCA or PLS.
+
+# %%
+nd = ds.center(dim="y")
+_ = nd.plot(title="Mean-centered (per wavenumber)")
+
+# %%
+nd = ds.autoscale(dim="y")
+_ = nd.plot(title="Autoscaled (z-score per wavenumber)")
+
+# %% [markdown]
+# ## Standard Normal Variate (SNV)
+#
+# SNV is equivalent to autoscaling each spectrum individually (``dim='x'``).
+# It is a classic NIR preprocessing step.
+
+# %%
+nd = ds.snv()
+_ = nd.plot(title="SNV corrected")
+
+# %% [markdown]
+# ## Multiplicative Scatter Correction (MSC)
+#
+# MSC corrects for multiplicative and additive scattering effects by linearly
+# regressing each spectrum against a reference (the mean spectrum by default).
+
+# %%
+nd = ds.msc()
+_ = nd.plot(title="MSC corrected")
+
+# %% [markdown]
+# All operations support `inplace=True` and can be called as either top-level
+# functions (``scp.normalize(...)``) or dataset methods (``dataset.normalize(...)``).

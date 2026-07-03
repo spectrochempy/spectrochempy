@@ -33,6 +33,12 @@ New Features
   SpectroChemPy API, without falling back to ``np.column_stack(...)``
   or manual `NDDataset` wrapping.
 
+- New preprocessing operations in `spectrochempy.processing.transformation`:
+  ``normalize()``, ``center()``, ``autoscale()``, ``snv()``, and ``msc()``.
+  These implement standard chemometric scaling and scatter-correction steps
+  as first-class NDDataset methods, removing the need for manual NumPy
+  arithmetic in notebooks.
+
 - 2D ``plot(method="lines"/"stack")`` now automatically uses coordinate labels
   as matplotlib line labels, so that ``ax.legend()`` shows meaningful names
   without needing to pass labels explicitly.  Legend entries are displayed

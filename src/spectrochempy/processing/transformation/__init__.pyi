@@ -10,8 +10,10 @@ __all__ = [
     "autosub",
     "concatenate",
     "npy",
+    "preprocessing",
 ]
 
 from . import autosub
 from . import concatenate
 from . import npy
+from . import preprocessing
