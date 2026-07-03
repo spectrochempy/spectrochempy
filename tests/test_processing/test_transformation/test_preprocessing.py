@@ -64,7 +64,10 @@ class TestNormalize:
         nd = normalize(simple_2d, method="max", dim="x")
         expected = simple_2d.data[0] / 6.0
         assert np.allclose(nd.data[0], expected)
-        assert "normalize (max) applied on dimension x" in nd.history[-1].lower()
+        assert (
+            "normalizetransformer (max) applied on dimension x"
+            in nd.history[-1].lower()
+        )
 
     def test_sum(self, simple_2d):
         nd = normalize(simple_2d, method="sum", dim="x")
@@ -117,7 +120,7 @@ class TestCenter:
         nd = center(simple_2d)
         expected = simple_2d.data[:, 0] - np.mean(simple_2d.data[:, 0])
         assert np.allclose(nd.data[:, 0], expected)
-        assert "center applied on dimension y" in nd.history[-1].lower()
+        assert "centertransformer applied on dimension y" in nd.history[-1].lower()
 
     def test_dim_x(self, simple_2d):
         nd = center(simple_2d, dim="x")
@@ -141,7 +144,7 @@ class TestAutoscale:
         col = simple_2d.data[:, 0]
         expected = (col - np.mean(col)) / np.std(col)
         assert np.allclose(nd.data[:, 0], expected)
-        assert "autoscale applied on dimension y" in nd.history[-1].lower()
+        assert "autoscaletransformer applied on dimension y" in nd.history[-1].lower()
 
     def test_dim_x(self, simple_2d):
         nd = autoscale(simple_2d, dim="x")
@@ -395,7 +398,7 @@ class TestLogTransform:
         assert np.allclose(nd.data, np.log(1e-10))
 
     def test_unknown_method(self, simple_2d):
-        with pytest.raises(SpectroChemPyError, match="Unknown log_transform method"):
+        with pytest.raises(SpectroChemPyError, match="Unknown LogTransformer method"):
             log_transform(simple_2d, method="unknown")
 
 
