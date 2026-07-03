@@ -2,7 +2,7 @@ name: PR Compliance
 
 on:
   pull_request:
-    types: [opened, edited, synchronize, reopened]
+    types: [opened, edited, synchronize, reopened, labeled, unlabeled]
 
 permissions:
   contents: read
@@ -48,9 +48,8 @@ jobs:
       - name: Check changelog updated
         if: "!contains(github.event.pull_request.labels.*.name, 'no-changelog')"
         run: |
-          BASE="origin/${{ github.base_ref }}"
-          git fetch origin ${{ github.base_ref }} --depth=1
-          CHANGED=$(git diff --name-only "$BASE"...HEAD)
+          # fetch-depth:0 in checkout already has full history; no shallow fetch needed
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}..HEAD)
           if echo "$CHANGED" | grep -q "docs/sources/whatsnew/changelog.rst"; then
             echo "Changelog updated."
           else
