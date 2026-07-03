@@ -207,23 +207,9 @@ Correction is applied only if: ``C[i,j] > C[i-1,j] * monoDecTol`` .""",
 
     monoIncTol = tr.Float(
         default_value=1.1,
-        help=r"""Tolerance parameter for monotonic decrease.
+        help=r"""Tolerance parameter for monotonic increase.
 
 Correction is applied only if ``C[i,j] < C[i-1,j] * monoIncTol`` along profile ``#j``.""",
-    ).tag(config=True)
-
-    unimodConc = tr.Union(
-        (tr.Enum(["all"]), tr.List()),
-        default_value="all",
-        help=(
-            r"""Unimodality constraint on concentrations.
-
-- ``'all'``\ : all concentrations profiles are considered unimodal.
-- `list` of indexes: the corresponding profiles are considered unimodal, not the others.
-  For instance ``[0, 2]`` indicates that profile ``#0`` and ``#2`` are unimodal while
-  profile ``#1`` *can* be multimodal.
-- ``[]``\ : all profiles can be multimodal."""
-        ),
     ).tag(config=True)
 
     closureConc = tr.Union(
@@ -767,9 +753,10 @@ and `St`.
             return getSt_to_St_idx
         if getSt_to_St_idx == "default":
             getSt_to_St_idx = np.arange(self._n_components).tolist()
-        elif (
-            len(getSt_to_St_idx) > self._n_components
-            or max(getSt_to_St_idx) + 1 > self._n_components
+        elif len(getSt_to_St_idx) > self._n_components or (
+            max(i for i in getSt_to_St_idx if i is not None) + 1 > self._n_components
+            if any(i is not None for i in getSt_to_St_idx)
+            else False
         ):
             raise ValueError(
                 f"The profile has only {self._n_components} species, please check "
@@ -904,12 +891,14 @@ and `St`.
 
             # Closure
             # ------------------------------------------
-            if self.closureConc is not None:
+            if self.closureConc:
                 if self.closureMethod == "scaling":
                     Q = _lstsq(C[:, self.closureConc], self.closureTarget.T)
                     C[:, self.closureConc] = np.dot(C[:, self.closureConc], np.diag(Q))
                 elif self.closureMethod == "constantSum":
                     totalConc = np.sum(C[:, self.closureConc], axis=1)
+                    # guard against zero total concentration to avoid nan/inf
+                    totalConc = np.where(totalConc == 0, 1.0, totalConc)
                     C[:, self.closureConc] = (
                         C[:, self.closureConc]
                         * self.closureTarget[:, None]
@@ -938,7 +927,7 @@ and `St`.
                 else:
                     fixedC = output
 
-                C[:, self.hardConc] = fixedC[:, self.getC_to_C_idx]
+                C[:, self.hardConc] = _profile_asarray(fixedC)[:, self.getC_to_C_idx]
 
             # stores C
             # ---------------------------
@@ -980,23 +969,23 @@ and `St`.
                 if self.kwargsGetSpec != {} and self.argsGetSpec != ():
                     output = self.getSpec(_St, *self.argsGetSpec, **self.kwargsGetSpec)
                 elif self.kwargsGetSpec == {} and self.argsGetSpec != ():
-                    output = self.getSpec(_St, *self.argsGetSpecc)
+                    output = self.getSpec(_St, *self.argsGetSpec)
                 elif self.kwargsGetSpec != {} and self.argsGetSpec == ():
                     output = self.getSpec(_St, **self.kwargsGetSpec)
                 else:
                     output = self.getSpec(_St)
 
                 if isinstance(output, tuple):
-                    fixedSt = output[0].data
+                    fixedSt = output[0]
                     self.argsGetSpec = output[1]
                     if len(output) == 3:
                         extraOutputGetSpec.append(output[2])
-                    else:
-                        fixedSt = output.data
                 else:
-                    fixedSt = output.data
+                    fixedSt = output
 
-                St[self.hardSpec, :] = fixedSt[self.getSt_to_St_idx, :]
+                St[self.hardSpec, :] = _profile_asarray(fixedSt)[
+                    self.getSt_to_St_idx, :
+                ]
 
             # recompute C
             # -----------
@@ -1006,10 +995,14 @@ and `St`.
             # ------------------------------------------
             if self.normSpec == "max":
                 alpha = np.max(St, axis=1).reshape(self._n_components, 1)
+                # guard against zero-norm spectra to avoid nan/inf
+                alpha = np.where(alpha == 0, 1.0, alpha)
                 St = St / alpha
                 C = C * alpha.T
             elif self.normSpec == "euclid":
                 alpha = np.linalg.norm(St, axis=1).reshape(self._n_components, 1)
+                # guard against zero-norm spectra to avoid nan/inf
+                alpha = np.where(alpha == 0, 1.0, alpha)
                 St = St / alpha
                 C = C * alpha.T
 
@@ -1338,6 +1331,20 @@ and `St`.
 # --------------------------------------------------------------------------------------
 
 
+def _profile_asarray(profile):
+    # Return an ndarray view of a hard-constraint profile returned by an
+    # external generator (`getConc`/`getSpec`).
+    #
+    # NDDataset (and subclasses) expose the raw ndarray through `.data`;
+    # for plain ndarrays we fall back to `np.asarray`. This avoids producing
+    # object arrays and preserves the historical `.data` extraction semantics
+    # without relying on `__array__`.
+    data = getattr(profile, "data", None)
+    if data is not None:
+        return np.asarray(data)
+    return np.asarray(profile)
+
+
 # LS solvers for W in the linear matrix equation X @ W = Y
 def _lstsq(X, Y, rcond=None):
     # Least-squares solution to a linear matrix equation X @ W = Y
@@ -1412,7 +1419,7 @@ def _unimodal_2D(a, axis, idxes, tol, mod):
     return a
 
 
-def _unimodal_1D(a: np.ndarray, tol: str, mod: str) -> np.ndarray:
+def _unimodal_1D(a: np.ndarray, tol: float, mod: str) -> np.ndarray:
     # force unimodal concentration
     #
     # makes a vector unimodal
@@ -1429,15 +1436,24 @@ def _unimodal_1D(a: np.ndarray, tol: str, mod: str) -> np.ndarray:
     #
     # tol: float
     #     Tolerance parameter for unimodality. Correction is applied only if:
-    #     `a[i] > a[i-1] * tol`  on a decreasing branch of profile,
-    #     `a[i] < a[i-1] * tol`  on an increasing branch of profile.
+    #     `a[i] > a[i-1] * unimodTol`  on a decreasing branch of profile,
+    #     `a[i] < a[i-1] * unimodTol`  on an increasing branch of profile.
+
+    # Safety bound on the number of iterations per sweep. The documented
+    # regime is `tol >= 1` (default 1.1), where the algorithm terminates in
+    # O(len(a)) steps; this cap is never reached there. It only guards against
+    # the out-of-bounds reads and infinite loops that occur for pathological
+    # `tol < 1` settings (B6), without changing the result for `tol >= 1`.
+    max_iter = 100 * len(a) + 10
 
     maxid = np.argmax(a)
     curmax = max(a)
     curid = maxid
 
+    n = 0
     while curid > 0:
         # run backward
+        n += 1
         curid -= 1
         if a[curid] > curmax * tol:
             if mod == "strict":
@@ -1445,12 +1461,24 @@ def _unimodal_1D(a: np.ndarray, tol: str, mod: str) -> np.ndarray:
             if mod == "smooth":
                 a[curid] = (a[curid] + a[curid + 1]) / 2
                 a[curid + 1] = a[curid]
+                # advance past the merged point (historical semantics).
+                # For `tol >= 1` this stays within bounds and is identical to
+                # the original. For `tol < 1`, stop at the boundary to avoid
+                # out-of-bounds reads (B6).
                 curid = curid + 2
+                if curid > len(a) - 1:
+                    curid = len(a) - 1
+                    curmax = a[curid]
+                    break
         curmax = a[curid]
+        if n >= max_iter:
+            break
 
     curid = maxid
     curmax = a[maxid]
+    n = 0
     while curid < len(a) - 1:
+        n += 1
         curid += 1
         if a[curid] > curmax * tol:
             if mod == "strict":
@@ -1458,6 +1486,14 @@ def _unimodal_1D(a: np.ndarray, tol: str, mod: str) -> np.ndarray:
             if mod == "smooth":
                 a[curid] = (a[curid] + a[curid - 1]) / 2
                 a[curid - 1] = a[curid]
+                # go back past the merged point (historical semantics).
+                # Symmetric to the backward sweep (B6).
                 curid = curid - 2
+                if curid < 0:
+                    curid = 0
+                    curmax = a[curid]
+                    break
         curmax = a[curid]
+        if n >= max_iter:
+            break
     return a

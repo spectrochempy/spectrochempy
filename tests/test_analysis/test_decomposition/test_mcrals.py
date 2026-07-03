@@ -70,6 +70,49 @@ def get_St(St):
     return St
 
 
+# --- generators for the hard-constraint dispatch branches (PR1 regression) ---
+
+
+def get_St_a(St, a):
+    # args-only path
+    return St / a
+
+
+def get_St_kb(St, b=1):
+    # kwargs-only path
+    return St * b
+
+
+def get_St_akb(St, a, b=1):
+    # args + kwargs path
+    return St * b / a
+
+
+def get_St_tuple(St):
+    # 2-tuple return: (profiles, new_args)
+    return St, ()
+
+
+def get_St_tuple_extra(St):
+    # 3-tuple return: (profiles, new_args, extra)
+    return St, (), {"extra": "spec"}
+
+
+def get_St_zero(St):
+    # returns a profile with a zero row (to exercise normSpec zero guard)
+    St = St.copy()
+    St[0] = 0
+    return St
+
+
+def get_C_tuple(C):
+    return C, ()
+
+
+def get_C_tuple_extra(C):
+    return C, (), {"extra": "conc"}
+
+
 @pytest.fixture()
 def model():
     class Model(object):
@@ -399,3 +442,350 @@ def test_MCRALS_errors(model, data):
     with pytest.raises(ValueError) as e:
         mcr.nonnegSpec = [0, 1, 1]
     assert "please check the" in e.value.args[0]
+
+
+# --------------------------------------------------------------------------------------
+# PR1 regression tests
+# --------------------------------------------------------------------------------------
+
+
+def test_MCRALS_pr1_getspec_with_args(model, data):
+    """B1: `argsGetSpecc` typo used to raise AttributeError here."""
+    D = data
+    C0 = model.C0
+
+    mcr = MCRALS()
+    mcr.hardSpec = [0, 1]
+    mcr.getSpec = get_St_a
+    mcr.argsGetSpec = (1.0,)
+    mcr.tol = 30.0
+    mcr.fit(D, C0)
+    assert "converged !" in mcr.log[-15:]
+    _assert_mcrals_shapes(mcr, D)
+    assert np.all(np.isfinite(mcr.C.data))
+    assert np.all(np.isfinite(mcr.St.data))
+
+
+def test_MCRALS_pr1_getspec_with_kwargs(model, data):
+    """Dispatch branch: kwargs-only path for getSpec."""
+    D = data
+    C0 = model.C0
+
+    mcr = MCRALS()
+    mcr.hardSpec = [0, 1]
+    mcr.getSpec = get_St_kb
+    mcr.kwargsGetSpec = {"b": 1.0}
+    mcr.tol = 30.0
+    mcr.fit(D, C0)
+    assert "converged !" in mcr.log[-15:]
+    assert np.all(np.isfinite(mcr.St.data))
+
+
+def test_MCRALS_pr1_getspec_with_args_and_kwargs(model, data):
+    """Dispatch branch: args + kwargs path for getSpec."""
+    D = data
+    C0 = model.C0
+
+    mcr = MCRALS()
+    mcr.hardSpec = [0, 1]
+    mcr.getSpec = get_St_akb
+    mcr.argsGetSpec = (1.0,)
+    mcr.kwargsGetSpec = {"b": 1.0}
+    mcr.tol = 30.0
+    mcr.fit(D, C0)
+    assert "converged !" in mcr.log[-15:]
+    assert np.all(np.isfinite(mcr.St.data))
+
+
+def test_MCRALS_pr1_getspec_tuple_return(model, data):
+    """B2: a 2-tuple return from getSpec used to crash (`.data` on a tuple)."""
+    D = data
+    C0 = model.C0
+
+    mcr = MCRALS()
+    mcr.hardSpec = [0, 1]
+    mcr.getSpec = get_St_tuple
+    mcr.tol = 30.0
+    mcr.fit(D, C0)
+    assert "converged !" in mcr.log[-15:]
+    _assert_mcrals_shapes(mcr, D)
+    assert np.all(np.isfinite(mcr.St.data))
+
+
+def test_MCRALS_pr1_getspec_tuple_with_extra(model, data):
+    """B2: a 3-tuple return from getSpec must populate extraOutputGetSpec."""
+    D = data
+    C0 = model.C0
+
+    mcr = MCRALS()
+    mcr.hardSpec = [0, 1]
+    mcr.getSpec = get_St_tuple_extra
+    mcr.tol = 30.0
+    mcr.fit(D, C0)
+    assert "converged !" in mcr.log[-15:]
+    # the extra output is a list with one dict per iteration
+    assert mcr.extraOutputGetSpec != []
+    assert mcr.extraOutputGetSpec[0] == {"extra": "spec"}
+
+
+def test_MCRALS_pr1_getspec_tuple_extra_with_args(model, data):
+    """B1+B2 combined: 3-tuple return with non-empty argsGetSpec."""
+    D = data
+    C0 = model.C0
+
+    def _gen(St, a):
+        return St / a, (a,), {"extra": "spec"}
+
+    mcr = MCRALS()
+    mcr.hardSpec = [0, 1]
+    mcr.getSpec = _gen
+    mcr.argsGetSpec = (1.0,)
+    mcr.tol = 30.0
+    mcr.fit(D, C0)
+    assert "converged !" in mcr.log[-15:]
+    assert mcr.extraOutputGetSpec[0] == {"extra": "spec"}
+
+
+def test_MCRALS_pr1_getconc_tuple_return(model, data):
+    """getConc 2-tuple return branch (previously untested)."""
+    D = data
+    C0 = model.C0
+
+    mcr = MCRALS()
+    mcr.hardConc = [0, 1]
+    mcr.getConc = get_C_tuple
+    mcr.tol = 30.0
+    mcr.fit(D, C0)
+    assert "converged !" in mcr.log[-15:]
+    _assert_mcrals_shapes(mcr, D)
+    assert np.all(np.isfinite(mcr.C.data))
+
+
+def test_MCRALS_pr1_getconc_tuple_with_extra(model, data):
+    """getConc 3-tuple return must populate extraOutputGetConc."""
+    D = data
+    C0 = model.C0
+
+    mcr = MCRALS()
+    mcr.hardConc = [0, 1]
+    mcr.getConc = get_C_tuple_extra
+    mcr.tol = 30.0
+    mcr.fit(D, C0)
+    assert "converged !" in mcr.log[-15:]
+    assert mcr.extraOutputGetConc != []
+    assert mcr.extraOutputGetConc[0] == {"extra": "conc"}
+
+
+def test_MCRALS_pr1_getconc_with_args(model, data):
+    """getConc args-only dispatch branch (previously untested)."""
+    D = data
+    C0 = model.C0
+
+    mcr = MCRALS()
+    mcr.hardConc = [0, 1]
+    mcr.getConc = get_C_a
+    mcr.argsGetConc = (1.0,)
+    mcr.tol = 30.0
+    mcr.fit(D, C0)
+    assert "converged !" in mcr.log[-15:]
+    assert np.all(np.isfinite(mcr.C.data))
+
+
+def test_MCRALS_pr1_getconc_with_args_and_kwargs(model, data):
+    """getConc args+kwargs dispatch branch (previously untested)."""
+    D = data
+    C0 = model.C0
+
+    mcr = MCRALS()
+    mcr.hardConc = [0, 1]
+    mcr.getConc = get_C_akb
+    mcr.argsGetConc = (1.0,)
+    mcr.kwargsGetConc = {"b": 1.0}
+    mcr.tol = 30.0
+    mcr.fit(D, C0)
+    assert "converged !" in mcr.log[-15:]
+    assert np.all(np.isfinite(mcr.C.data))
+
+
+def test_MCRALS_pr1_getst_to_st_idx_none_entries(model, data):
+    """B5: `getSt_to_St_idx` with `None` entries used to crash in `max()`."""
+    D = data
+    C0 = model.C0
+
+    mcr = MCRALS()
+    mcr.fit(D, C0)
+    # assigning a list with a None entry must not raise (validator must skip None)
+    mcr.getSt_to_St_idx = [0, None]
+    assert mcr.getSt_to_St_idx == [0, None]
+
+    # still rejects an out-of-range non-None index
+    with pytest.raises(ValueError) as e:
+        mcr.getSt_to_St_idx = [0, 5]
+    assert "please check the" in e.value.args[0]
+
+
+def test_MCRALS_pr1_closure_empty_list_is_noop(model, data):
+    """B4: with the default `closureConc=[]`, closure must not run."""
+    D = data
+    C0 = model.C0
+
+    # constantSum with an empty closure list used to run a wasteful / risky
+    # block; it must now be a no-op and produce finite profiles.
+    mcr = MCRALS()
+    mcr.closureMethod = "constantSum"
+    mcr.closureConc = []
+    mcr.tol = 30.0
+    mcr.fit(D, C0)
+    assert np.all(np.isfinite(mcr.C.data))
+
+    # result must match a run where closure is fully disabled
+    mcr_ref = MCRALS()
+    mcr_ref.tol = 30.0
+    mcr_ref.fit(D, C0)
+    assert np.allclose(mcr.C.data, mcr_ref.C.data, atol=1e-12)
+
+
+def test_MCRALS_pr1_closure_constantsum_smoke(model, data):
+    """B4/B9: constantSum closure must run without producing nan/inf."""
+    D = data
+    C0 = model.C0
+
+    mcr = MCRALS()
+    mcr.closureConc = [0, 1]
+    mcr.closureMethod = "constantSum"
+    mcr.max_iter = 2
+    mcr.tol = 30.0
+    mcr.fit(D, C0)
+    assert np.all(np.isfinite(mcr.C.data))
+    # the closure target (default -> ones) must be respected approximately
+    assert np.allclose(
+        np.sum(mcr.C_constrained.data[:, [0, 1]], axis=1),
+        np.ones(D.shape[0]),
+        atol=1e-6,
+    )
+
+
+def test_MCRALS_pr1_closure_single_component_is_active(model, data):
+    """B4 regression: `closureConc=[0]` must activate closure on component 0.
+
+    The earlier `np.any(self.closureConc)` guard evaluated `np.any([0]) == False`
+    and silently disabled closure for a single selected component. The
+    truthiness guard (`if self.closureConc:`) must keep it active.
+    """
+    D = data
+    C0 = model.C0
+
+    mcr = MCRALS()
+    mcr.closureConc = [0]
+    mcr.closureMethod = "constantSum"
+    mcr.max_iter = 2
+    mcr.tol = 30.0
+    mcr.fit(D, C0)
+    assert np.all(np.isfinite(mcr.C.data))
+    # component 0 must be closed to the default target (ones)
+    assert np.allclose(
+        mcr.C_constrained.data[:, 0],
+        np.ones(D.shape[0]),
+        atol=1e-6,
+    )
+
+
+def test_MCRALS_pr1_normspec_max_zero_guard(model, data):
+    """B9: `normSpec='max'` with a zero spectrum row must not produce nan."""
+    D = data
+    C0 = model.C0
+
+    mcr = MCRALS()
+    mcr.hardSpec = [0, 1]
+    mcr.getSpec = get_St_zero
+    mcr.normSpec = "max"
+    mcr.max_iter = 2
+    mcr.tol = 30.0
+    mcr.fit(D, C0)
+    assert np.all(np.isfinite(mcr.St.data))
+    assert np.all(np.isfinite(mcr.C.data))
+
+
+def test_MCRALS_pr1_normspec_euclid_zero_guard(model, data):
+    """B9: `normSpec='euclid'` with a zero spectrum row must not produce nan."""
+    D = data
+    C0 = model.C0
+
+    mcr = MCRALS()
+    mcr.hardSpec = [0, 1]
+    mcr.getSpec = get_St_zero
+    mcr.normSpec = "euclid"
+    mcr.max_iter = 2
+    mcr.tol = 30.0
+    mcr.fit(D, C0)
+    assert np.all(np.isfinite(mcr.St.data))
+    assert np.all(np.isfinite(mcr.C.data))
+
+
+def test_MCRALS_pr1_unimodconc_not_duplicated(model, data):
+    """B3: `unimodConc` is defined only once; setting it must behave normally."""
+    D = data
+    C0 = model.C0
+
+    mcr = MCRALS()
+    mcr.unimodConc = "all"
+    mcr.unimodConcMod = "strict"
+    mcr.unimodConcTol = 1.1
+    mcr.tol = 30.0
+    mcr.fit(D, C0)
+    assert "converged !" in mcr.log[-15:]
+    _assert_mcrals_shapes(mcr, D)
+    # the trait must be a single, functional trait
+    assert mcr.unimodConc == list(range(mcr._n_components))
+
+
+def test_MCRALS_pr1_unimodal_smooth_bounds():
+    """B6: smooth unimodality must terminate, stay finite and in-bounds.
+
+    The original `_unimodal_1D` could index out of bounds or infinite-loop
+    for pathological tolerances (including ``tol == 1.0`` and ``tol < 1``).
+    The fix keeps byte-identical results for the documented regime
+    (``tol >= 1.1``) and only guarantees safety (termination + finite +
+    correct shape) for the pathological cases.
+    """
+    from spectrochempy.analysis.decomposition.mcrals import _unimodal_1D
+
+    cases = (
+        np.array([6.0, 10.0]),
+        np.array([10.0, 6.0]),
+        np.array([0.0, 5.0, 1.0, 3.0, 10.0]),
+        np.array([10.0, 1.0, 5.0, 0.0, 0.0]),
+        np.array([1.0, 2.0, 10.0, 1.0, 5.0, 1.0]),
+        np.array([0.0, 4.0, 1.0, 3.0, 0.0, 2.0, 1.0]),
+    )
+
+    # documented regime (tol >= 1.1): finite, shape-preserving, both modes
+    for a0 in cases:
+        for mod in ("smooth", "strict"):
+            a = _unimodal_1D(a0.copy(), tol=1.1, mod=mod)
+            assert a.shape == a0.shape
+            assert np.all(np.isfinite(a))
+
+    # pathological tolerances that used to IndexError / infinite-loop
+    # (including tol == 1.0): must terminate, stay in bounds and stay finite.
+    for tol in (0.1, 0.3, 0.5, 0.9, 1.0):
+        for a0 in cases:
+            a = _unimodal_1D(a0.copy(), tol=tol, mod="smooth")
+            assert a.shape == a0.shape
+            assert np.all(np.isfinite(a))
+
+
+def test_MCRALS_pr1_monotonic_tol_docstrings():
+    """B7/B8: docstring/annotation sanity for the monotonic tolerances."""
+    from spectrochempy.analysis.decomposition.mcrals import MCRALS as _M
+    from spectrochempy.analysis.decomposition.mcrals import _unimodal_1D
+
+    assert "monotonic increase" in _M.monoIncTol.help
+    assert "monoIncTol" in _M.monoIncTol.help
+    assert "monotonic decrease" in _M.monoDecTol.help
+    assert "monoDecTol" in _M.monoDecTol.help
+    # the type annotation of tol must be float, not str
+    import inspect
+
+    sig = inspect.signature(_unimodal_1D)
+    assert sig.parameters["tol"].annotation is float
