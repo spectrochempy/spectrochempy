@@ -93,7 +93,7 @@ _ = Y.T.plot(cmap=None, legend=Y.x.labels)
 # Standardization of the values allows better visualization:
 
 # %%
-Y_std = (Y - Y.mean(dim=0)) / Y.std(dim=0)
+Y_std = Y.autoscale(dim="y")
 _ = Y_std.T.plot(cmap=None, legend=Y.x.labels)
 
 # %% [markdown]
