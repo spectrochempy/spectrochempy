@@ -16,8 +16,12 @@ from spectrochempy import MASKED
 from spectrochempy.processing.transformation.preprocessing import (
     autoscale,
     center,
+    log_transform,
     msc,
     normalize,
+    pareto_scale,
+    range_scale,
+    robust_scale,
     snv,
 )
 from spectrochempy.utils.exceptions import SpectroChemPyError
@@ -262,3 +266,123 @@ class TestMasks:
         ds[:, 2] = MASKED
         nd = msc(ds)
         assert nd.mask[:, 2].all()
+
+    def test_mask_preserved_pareto(self, simple_2d):
+        ds = simple_2d.copy()
+        ds[:, 2] = MASKED
+        nd = pareto_scale(ds, dim="y")
+        assert nd.mask[:, 2].all()
+
+    def test_mask_preserved_range(self, simple_2d):
+        ds = simple_2d.copy()
+        ds[:, 2] = MASKED
+        nd = range_scale(ds, dim="y")
+        assert nd.mask[:, 2].all()
+
+    def test_mask_preserved_robust(self, simple_2d):
+        ds = simple_2d.copy()
+        ds[:, 2] = MASKED
+        nd = robust_scale(ds, dim="y")
+        assert nd.mask[:, 2].all()
+
+    def test_mask_preserved_log(self, simple_2d):
+        ds = simple_2d.copy()
+        ds[:, 2] = MASKED
+        nd = log_transform(ds, method="log1p")
+        assert nd.mask[:, 2].all()
+
+
+# ---------------------------------------------------------------------------
+# pareto_scale
+# ---------------------------------------------------------------------------
+
+
+class TestParetoScale:
+    def test_basic(self, simple_2d):
+        nd = pareto_scale(simple_2d, dim="y")
+        col = simple_2d.data[:, 0]
+        expected = (col - np.mean(col)) / np.sqrt(np.std(col))
+        assert np.allclose(nd.data[:, 0], expected)
+
+    def test_dim_x(self, simple_2d):
+        nd = pareto_scale(simple_2d, dim="x")
+        row = simple_2d.data[0]
+        expected = (row - np.mean(row)) / np.sqrt(np.std(row))
+        assert np.allclose(nd.data[0], expected)
+
+    def test_zero_std(self, simple_2d):
+        const_data = np.ones((4, 6))
+        const_ds = NDDataset(const_data, coordset=simple_2d.coordset)
+        nd = pareto_scale(const_ds, dim="y")
+        assert np.allclose(nd.data, 0.0)
+
+
+# ---------------------------------------------------------------------------
+# range_scale
+# ---------------------------------------------------------------------------
+
+
+class TestRangeScale:
+    def test_basic(self, simple_2d):
+        nd = range_scale(simple_2d, dim="y")
+        col = simple_2d.data[:, 0]
+        rng = np.max(col) - np.min(col)
+        assert np.allclose(nd.data[:, 0], col / rng)
+
+    def test_zero_range(self, simple_2d):
+        const_data = np.ones((4, 6))
+        const_ds = NDDataset(const_data, coordset=simple_2d.coordset)
+        nd = range_scale(const_ds, dim="y")
+        assert np.allclose(nd.data, 1.0)
+
+
+# ---------------------------------------------------------------------------
+# robust_scale
+# ---------------------------------------------------------------------------
+
+
+class TestRobustScale:
+    def test_basic(self, simple_2d):
+        nd = robust_scale(simple_2d, dim="y")
+        col = simple_2d.data[:, 0]
+        median = np.median(col)
+        mad = np.median(np.abs(col - median)) * 1.4826
+        expected = (col - median) / mad
+        assert np.allclose(nd.data[:, 0], expected)
+
+    def test_zero_mad(self, simple_2d):
+        const_data = np.ones((4, 6))
+        const_ds = NDDataset(const_data, coordset=simple_2d.coordset)
+        nd = robust_scale(const_ds, dim="y")
+        assert np.allclose(nd.data, 0.0)
+
+
+# ---------------------------------------------------------------------------
+# log_transform
+# ---------------------------------------------------------------------------
+
+
+class TestLogTransform:
+    def test_log1p(self, simple_2d):
+        nd = log_transform(simple_2d, method="log1p")
+        expected = np.log1p(simple_2d.data)
+        assert np.allclose(nd.data, expected)
+
+    def test_log_positive(self, simple_2d):
+        # Ensure all values are positive for plain log
+        ds = simple_2d.copy()
+        ds._data = ds.data + 10.0  # shift to positive
+        nd = log_transform(ds, method="log")
+        expected = np.log(ds.data)
+        assert np.allclose(nd.data, expected)
+
+    def test_log_with_offset(self, simple_2d):
+        # Contains zeros, should auto-shift
+        ds = simple_2d.copy()
+        ds._data = np.zeros_like(ds.data)
+        nd = log_transform(ds, method="log")
+        assert np.allclose(nd.data, np.log(1e-10))
+
+    def test_unknown_method(self, simple_2d):
+        with pytest.raises(SpectroChemPyError, match="Unknown log_transform method"):
+            log_transform(simple_2d, method="unknown")

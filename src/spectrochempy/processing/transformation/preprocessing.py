@@ -27,6 +27,10 @@ __all__ = [
     "autoscale",
     "snv",
     "msc",
+    "pareto_scale",
+    "range_scale",
+    "robust_scale",
+    "log_transform",
 ]
 
 __dataset_methods__ = __all__
@@ -330,4 +334,201 @@ def msc(dataset, reference=None, dim="y", inplace=False):
     b_safe = np.where(b == 0, 1, b)
     new._data = (data - a) / b_safe
     new.history = f"msc applied on dimension {dim_name}"
+    return new
+
+
+def pareto_scale(dataset, dim="y", inplace=False):
+    r"""
+    Apply Pareto scaling along a dimension.
+
+    Pareto scaling is a compromise between mean-centering and autoscaling:
+    the data are centered and divided by the square-root of the standard
+    deviation.
+
+    .. math::
+
+       x_{ij}^\prime = \frac{x_{ij} - \bar{x}_j}{\sqrt{s_j}}
+
+    Parameters
+    ----------
+    dataset : `NDDataset`
+        The input data.
+    dim : `str` or `int`, optional, default:'y'
+        Dimension along which the statistics are computed.
+    inplace : `bool`, optional, default:`False`
+        If `True`, scaling is performed in place.
+
+    Returns
+    -------
+    `NDDataset`
+        The Pareto-scaled dataset.
+
+    Examples
+    --------
+    >>> dataset = scp.read("irdata/nh4y-activation.spg")
+    >>> nd = dataset.pareto_scale(dim="y")
+
+    """
+    new = dataset.copy() if not inplace else dataset
+    axis, dim_name = new.get_axis(dim)
+
+    data = new.masked_data
+    mean = np.ma.mean(data, axis=axis, keepdims=True)
+    std = np.ma.std(data, axis=axis, keepdims=True)
+
+    std_safe = np.where(std == 0, 1, std)
+    new._data = (data - mean) / np.sqrt(std_safe)
+    new.history = f"pareto_scale applied on dimension {dim_name}"
+    return new
+
+
+def range_scale(dataset, dim="y", inplace=False):
+    r"""
+    Scale data by the range along a dimension.
+
+    Each variable (or observation) is divided by its range
+    (``max - min``).  This is sometimes called *min-max scaling* or
+    *range normalisation* in the chemometric literature.
+
+    .. math::
+
+       x_{ij}^\prime = \frac{x_{ij}}{\max(x_j) - \min(x_j)}
+
+    Parameters
+    ----------
+    dataset : `NDDataset`
+        The input data.
+    dim : `str` or `int`, optional, default:'y'
+        Dimension along which the range is computed.
+    inplace : `bool`, optional, default:`False`
+        If `True`, scaling is performed in place.
+
+    Returns
+    -------
+    `NDDataset`
+        The range-scaled dataset.
+
+    Examples
+    --------
+    >>> dataset = scp.read("irdata/nh4y-activation.spg")
+    >>> nd = dataset.range_scale(dim="y")
+
+    See Also
+    --------
+    normalize : General normalisation (includes min-max to [0, 1]).
+
+    """
+    new = dataset.copy() if not inplace else dataset
+    axis, dim_name = new.get_axis(dim)
+
+    data = new.masked_data
+    dmin = np.ma.min(data, axis=axis, keepdims=True)
+    dmax = np.ma.max(data, axis=axis, keepdims=True)
+    rng = dmax - dmin
+
+    rng_safe = np.where(rng == 0, 1, rng)
+    new._data = data / rng_safe
+    new.history = f"range_scale applied on dimension {dim_name}"
+    return new
+
+
+def robust_scale(dataset, dim="y", inplace=False):
+    r"""
+    Apply robust scaling along a dimension.
+
+    The data are centered on the median and scaled by the
+    median absolute deviation (MAD).  This makes the scaling resistant
+    to outliers.
+
+    .. math::
+
+       x_{ij}^\prime = \frac{x_{ij} - \mathrm{median}(x_j)}{\mathrm{MAD}(x_j)}
+
+    where :math:`\mathrm{MAD} = \mathrm{median}(|x - \mathrm{median}|)`
+    and the result is multiplied by 1.4826 so that the MAD estimates
+    the standard deviation of a normal distribution.
+
+    Parameters
+    ----------
+    dataset : `NDDataset`
+        The input data.
+    dim : `str` or `int`, optional, default:'y'
+        Dimension along which the median and MAD are computed.
+    inplace : `bool`, optional, default:`False`
+        If `True`, scaling is performed in place.
+
+    Returns
+    -------
+    `NDDataset`
+        The robustly-scaled dataset.
+
+    Examples
+    --------
+    >>> dataset = scp.read("irdata/nh4y-activation.spg")
+    >>> nd = dataset.robust_scale(dim="y")
+
+    """
+    new = dataset.copy() if not inplace else dataset
+    axis, dim_name = new.get_axis(dim)
+
+    data = new.masked_data
+    median = np.ma.median(data, axis=axis, keepdims=True)
+    mad = np.ma.median(np.ma.abs(data - median), axis=axis, keepdims=True)
+
+    # Scale MAD to be a consistent estimator of std for normal distributions
+    mad = mad * 1.4826
+    mad_safe = np.where(mad == 0, 1, mad)
+    new._data = (data - median) / mad_safe
+    new.history = f"robust_scale applied on dimension {dim_name}"
+    return new
+
+
+def log_transform(dataset, method="log1p", eps=1e-10, inplace=False):
+    r"""
+    Apply a logarithmic transform.
+
+    Parameters
+    ----------
+    dataset : `NDDataset`
+        The input data.
+    method : `str`, optional, default:'log1p'
+        Transform to apply:
+
+        * ``'log1p'`` — compute ``log(1 + x)`` (stable for small or zero values).
+        * ``'log'``   — compute ``log(x)``.  If the data contain values
+          :math:`\le 0`, a small offset ``eps`` is added automatically.
+
+    eps : `float`, optional, default:1e-10
+        Offset added when ``method='log'`` and non-positive values are present.
+    inplace : `bool`, optional, default:`False`
+        If `True`, the transform is performed in place.
+
+    Returns
+    -------
+    `NDDataset`
+        The log-transformed dataset.
+
+    Examples
+    --------
+    >>> dataset = scp.read("irdata/nh4y-activation.spg")
+    >>> nd = dataset.log_transform(method="log1p")
+
+    """
+    new = dataset.copy() if not inplace else dataset
+    data = new.masked_data
+
+    if method == "log1p":
+        new._data = np.log1p(data)
+        new.history = "log_transform (log1p) applied"
+    elif method == "log":
+        if np.any(data <= 0):
+            data = data + eps
+        new._data = np.log(data)
+        new.history = "log_transform (log) applied"
+    else:
+        raise SpectroChemPyError(
+            f"Unknown log_transform method '{method}'. "
+            f"Choose from 'log1p' or 'log'."
+        )
+
     return new
