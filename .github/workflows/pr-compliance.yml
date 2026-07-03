@@ -1,0 +1,60 @@
+name: PR Compliance
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  check-prefix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract allowed prefixes from CONTRIBUTING.md
+        id: prefixes
+        run: |
+          PREFIXES=$(grep -E '^\| `\w+:`' CONTRIBUTING.md | sed -E "s/.*\| \`([^\`]+)\`\|.*/\1/" | tr '\n' '|' | sed 's/|$//')
+          echo "regex=^(${PREFIXES})" >> "$GITHUB_OUTPUT"
+          echo "Allowed prefixes: ${PREFIXES}"
+
+      - name: Check PR title prefix
+        if: "!contains(github.event.pull_request.labels.*.name, 'non-standard-prefix')"
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+          PREFIX_REGEX: ${{ steps.prefixes.outputs.regex }}
+        run: |
+          if [[ ! "$TITLE" =~ $PREFIX_REGEX ]]; then
+            echo "::error::PR title must start with a valid prefix defined in CONTRIBUTING.md."
+            echo "::error::Current title: '$TITLE'"
+            echo "::error::If this PR intentionally uses a non-standard prefix, add the label 'non-standard-prefix' to bypass this check."
+            exit 1
+          fi
+          echo "Title prefix OK."
+
+  check-changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check changelog updated
+        if: "!contains(github.event.pull_request.labels.*.name, 'no-changelog')"
+        run: |
+          BASE="origin/${{ github.base_ref }}"
+          git fetch origin ${{ github.base_ref }} --depth=1
+          CHANGED=$(git diff --name-only "$BASE"...HEAD)
+          if echo "$CHANGED" | grep -q "docs/sources/whatsnew/changelog.rst"; then
+            echo "Changelog updated."
+          else
+            echo "::error::changelog.rst was not updated."
+            echo "::error::If this PR does not need a changelog entry, add the label 'no-changelog' to bypass this check."
+            exit 1
+          fi

@@ -52,6 +52,17 @@ CI: simplify core-only validation workflow
 Avoid introducing alternative prefixes unless there is a clear project-wide
 need.
 
+### Automated checks
+
+A GitHub Actions workflow (`pr-compliance.yml`) reads the prefix table above
+from this file and enforces it on every pull-request title.  If a PR
+intentionally needs a non-standard prefix, add the label
+**`non-standard-prefix`** to bypass the check.
+
+The same workflow verifies that `docs/sources/whatsnew/changelog.rst` has
+been modified.  If the PR genuinely does not need a changelog entry (e.g.
+pure CI or internal tooling change), add the label **`no-changelog`**.
+
 See `docs/sources/devguide/contributing.rst` for the full PR workflow.
 
 The PR description should begin with:

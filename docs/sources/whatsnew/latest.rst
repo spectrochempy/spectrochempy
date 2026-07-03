@@ -87,3 +87,17 @@ Developer
 - Centralized internal plotting method normalization in a private helper
   module to reduce duplication across backend dispatch, multiplot handling,
   and 1D/2D fallback validation, without changing the public plotting API.
+
+- CI: Added a PR compliance workflow (`pr-compliance.yml`) that automatically
+  checks:
+  (1) the PR title starts with a valid prefix listed in `CONTRIBUTING.md`
+  (read dynamically so the list stays single-source),
+  (2) `docs/sources/whatsnew/changelog.rst` has been updated.
+  Both checks can be bypassed via the labels `non-standard-prefix` and
+  `no-changelog` respectively.
+
+- DEV: Added a `commit-msg` pre-commit hook (`check_commit_prefix`) that
+  reads the allowed prefixes directly from `CONTRIBUTING.md` and rejects
+  any commit whose subject line does not start with one of them.
+  Merge commits and reverts are automatically exempt.
+  Use `git commit --no-verify` to bypass locally if necessary.
