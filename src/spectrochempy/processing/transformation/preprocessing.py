@@ -35,9 +35,33 @@ __all__ = [
 
 __dataset_methods__ = __all__
 
-import numpy as np
-
-from spectrochempy.utils.exceptions import SpectroChemPyError
+from spectrochempy.processing.transformation.preprocessing_transformers import (
+    AutoscaleTransformer,
+)
+from spectrochempy.processing.transformation.preprocessing_transformers import (
+    CenterTransformer,
+)
+from spectrochempy.processing.transformation.preprocessing_transformers import (
+    LogTransformer,
+)
+from spectrochempy.processing.transformation.preprocessing_transformers import (
+    MSCTransformer,
+)
+from spectrochempy.processing.transformation.preprocessing_transformers import (
+    NormalizeTransformer,
+)
+from spectrochempy.processing.transformation.preprocessing_transformers import (
+    ParetoScaleTransformer,
+)
+from spectrochempy.processing.transformation.preprocessing_transformers import (
+    RangeScaleTransformer,
+)
+from spectrochempy.processing.transformation.preprocessing_transformers import (
+    RobustScaleTransformer,
+)
+from spectrochempy.processing.transformation.preprocessing_transformers import (
+    SNVTransformer,
+)
 
 
 def normalize(dataset, method="max", dim="x", inplace=False):
@@ -72,44 +96,12 @@ def normalize(dataset, method="max", dim="x", inplace=False):
     >>> nd = dataset.normalize(method="max", dim="x")
 
     """
-    new = dataset.copy() if not inplace else dataset
-    axis, dim_name = new.get_axis(dim)
-
-    data = new.masked_data
-
-    if method == "max":
-        norm = np.ma.max(np.ma.abs(data), axis=axis, keepdims=True)
-        norm = np.where(norm == 0, 1, norm)
-        new._data = data / norm
-        new.history = f"normalize (max) applied on dimension {dim_name}"
-
-    elif method == "sum":
-        norm = np.ma.sum(np.ma.abs(data), axis=axis, keepdims=True)
-        norm = np.where(norm == 0, 1, norm)
-        new._data = data / norm
-        new.history = f"normalize (sum) applied on dimension {dim_name}"
-
-    elif method == "vector":
-        norm = np.sqrt(np.ma.sum(data**2, axis=axis, keepdims=True))
-        norm = np.where(norm == 0, 1, norm)
-        new._data = data / norm
-        new.history = f"normalize (vector) applied on dimension {dim_name}"
-
-    elif method == "minmax":
-        dmin = np.ma.min(data, axis=axis, keepdims=True)
-        dmax = np.ma.max(data, axis=axis, keepdims=True)
-        rng = dmax - dmin
-        rng = np.where(rng == 0, 1, rng)
-        new._data = (data - dmin) / rng
-        new.history = f"normalize (minmax) applied on dimension {dim_name}"
-
-    else:
-        raise SpectroChemPyError(
-            f"Unknown normalization method '{method}'. "
-            f"Choose from 'max', 'sum', 'vector', 'minmax'."
-        )
-
-    return new
+    result = NormalizeTransformer(method=method, dim=dim).fit_transform(dataset)
+    if inplace:
+        dataset._data = result._data
+        dataset.history = result.history
+        return dataset
+    return result
 
 
 def center(dataset, dim="y", inplace=False):
@@ -136,13 +128,12 @@ def center(dataset, dim="y", inplace=False):
     >>> nd = dataset.center(dim="x")
 
     """
-    new = dataset.copy() if not inplace else dataset
-    axis, dim_name = new.get_axis(dim)
-
-    mean = np.ma.mean(new.masked_data, axis=axis, keepdims=True)
-    new._data = new.masked_data - mean
-    new.history = f"center applied on dimension {dim_name}"
-    return new
+    result = CenterTransformer(dim=dim).fit_transform(dataset)
+    if inplace:
+        dataset._data = result._data
+        dataset.history = result.history
+        return dataset
+    return result
 
 
 def autoscale(dataset, dim="y", inplace=False):
@@ -179,18 +170,12 @@ def autoscale(dataset, dim="y", inplace=False):
     >>> nd = dataset.autoscale(dim="x")
 
     """
-    new = dataset.copy() if not inplace else dataset
-    axis, dim_name = new.get_axis(dim)
-
-    data = new.masked_data
-    mean = np.ma.mean(data, axis=axis, keepdims=True)
-    std = np.ma.std(data, axis=axis, keepdims=True)
-
-    # Avoid division by zero: where std == 0 the centred data is already 0
-    std_safe = np.where(std == 0, 1, std)
-    new._data = (data - mean) / std_safe
-    new.history = f"autoscale applied on dimension {dim_name}"
-    return new
+    result = AutoscaleTransformer(dim=dim).fit_transform(dataset)
+    if inplace:
+        dataset._data = result._data
+        dataset.history = result.history
+        return dataset
+    return result
 
 
 def snv(dataset, inplace=False):
@@ -227,10 +212,13 @@ def snv(dataset, inplace=False):
     autoscale : General mean-center and unit-variance scaling.
 
     """
-    # SNV is conventionally applied per spectrum (dim='x')
-    new = autoscale(dataset, dim="x", inplace=inplace)
-    new.history = "snv applied"
-    return new
+    result = SNVTransformer().fit_transform(dataset)
+    if inplace:
+        dataset._data = result._data
+        dataset.history = "snv applied"
+        return dataset
+    result.history = "snv applied"
+    return result
 
 
 def msc(dataset, reference=None, dim="y", inplace=False):
@@ -275,66 +263,12 @@ def msc(dataset, reference=None, dim="y", inplace=False):
     autoscale : General mean-center and unit-variance scaling.
 
     """
-    new = dataset.copy() if not inplace else dataset
-    axis, dim_name = new.get_axis(dim)
-
-    data = new.masked_data
-
-    if data.ndim != 2:
-        raise SpectroChemPyError(
-            "msc currently supports only 2-D datasets (observations × features)."
-        )
-
-    spectral_axis = 1 if axis == 0 else 0
-
-    # Reference spectrum
-    if reference is None:
-        ref = np.ma.mean(data, axis=axis)
-        ref = np.asarray(ref)  # ensure plain ndarray
-    else:
-        if hasattr(reference, "masked_data"):
-            ref = reference.masked_data
-        else:
-            ref = np.ma.masked_invalid(np.asarray(reference))
-        if ref.ndim != 1:
-            raise SpectroChemPyError("msc reference must be a 1-D spectrum.")
-        if ref.size != data.shape[spectral_axis]:
-            raise SpectroChemPyError(
-                f"msc reference size ({ref.size}) does not match "
-                f"dataset spectral size ({data.shape[spectral_axis]})."
-            )
-
-    # Expand reference for broadcasting: singleton on the observation axis,
-    # full size on the spectral axis.
-    ref_shape = [1, 1]
-    ref_shape[spectral_axis] = -1
-    ref_b = ref.reshape(ref_shape)
-
-    # Closed-form least-squares:  x = a + b * ref
-    #   b = (n*sum(x*ref) - sum(x)*sum(ref)) / (n*sum(ref^2) - sum(ref)^2)
-    #   a = (sum(x) - b*sum(ref)) / n
-    n = ref.size
-    sum_ref = np.ma.sum(ref)
-    sum_ref2 = np.ma.sum(ref**2)
-    den = n * sum_ref2 - sum_ref**2
-
-    if den == 0:
-        raise SpectroChemPyError(
-            "msc denominator is zero; reference spectrum is constant."
-        )
-
-    # Per-observation sums over the spectral axis
-    sum_x = np.ma.sum(data, axis=spectral_axis, keepdims=True)
-    sum_xref = np.ma.sum(data * ref_b, axis=spectral_axis, keepdims=True)
-
-    b = (n * sum_xref - sum_ref * sum_x) / den
-    a = (sum_x - b * sum_ref) / n
-
-    # Avoid division by zero on slopes
-    b_safe = np.where(b == 0, 1, b)
-    new._data = (data - a) / b_safe
-    new.history = f"msc applied on dimension {dim_name}"
-    return new
+    result = MSCTransformer(reference=reference, dim=dim).fit_transform(dataset)
+    if inplace:
+        dataset._data = result._data
+        dataset.history = result.history
+        return dataset
+    return result
 
 
 def pareto_scale(dataset, dim="y", inplace=False):
@@ -369,17 +303,12 @@ def pareto_scale(dataset, dim="y", inplace=False):
     >>> nd = dataset.pareto_scale(dim="y")
 
     """
-    new = dataset.copy() if not inplace else dataset
-    axis, dim_name = new.get_axis(dim)
-
-    data = new.masked_data
-    mean = np.ma.mean(data, axis=axis, keepdims=True)
-    std = np.ma.std(data, axis=axis, keepdims=True)
-
-    std_safe = np.where(std == 0, 1, std)
-    new._data = (data - mean) / np.sqrt(std_safe)
-    new.history = f"pareto_scale applied on dimension {dim_name}"
-    return new
+    result = ParetoScaleTransformer(dim=dim).fit_transform(dataset)
+    if inplace:
+        dataset._data = result._data
+        dataset.history = result.history
+        return dataset
+    return result
 
 
 def range_scale(dataset, dim="y", inplace=False):
@@ -418,18 +347,12 @@ def range_scale(dataset, dim="y", inplace=False):
     normalize : General normalisation (includes min-max to [0, 1]).
 
     """
-    new = dataset.copy() if not inplace else dataset
-    axis, dim_name = new.get_axis(dim)
-
-    data = new.masked_data
-    dmin = np.ma.min(data, axis=axis, keepdims=True)
-    dmax = np.ma.max(data, axis=axis, keepdims=True)
-    rng = dmax - dmin
-
-    rng_safe = np.where(rng == 0, 1, rng)
-    new._data = data / rng_safe
-    new.history = f"range_scale applied on dimension {dim_name}"
-    return new
+    result = RangeScaleTransformer(dim=dim).fit_transform(dataset)
+    if inplace:
+        dataset._data = result._data
+        dataset.history = result.history
+        return dataset
+    return result
 
 
 def robust_scale(dataset, dim="y", inplace=False):
@@ -468,19 +391,12 @@ def robust_scale(dataset, dim="y", inplace=False):
     >>> nd = dataset.robust_scale(dim="y")
 
     """
-    new = dataset.copy() if not inplace else dataset
-    axis, dim_name = new.get_axis(dim)
-
-    data = new.masked_data
-    median = np.ma.median(data, axis=axis, keepdims=True)
-    mad = np.ma.median(np.ma.abs(data - median), axis=axis, keepdims=True)
-
-    # Scale MAD to be a consistent estimator of std for normal distributions
-    mad = mad * 1.4826
-    mad_safe = np.where(mad == 0, 1, mad)
-    new._data = (data - median) / mad_safe
-    new.history = f"robust_scale applied on dimension {dim_name}"
-    return new
+    result = RobustScaleTransformer(dim=dim).fit_transform(dataset)
+    if inplace:
+        dataset._data = result._data
+        dataset.history = result.history
+        return dataset
+    return result
 
 
 def log_transform(dataset, method="log1p", eps=1e-10, inplace=False):
@@ -514,21 +430,9 @@ def log_transform(dataset, method="log1p", eps=1e-10, inplace=False):
     >>> nd = dataset.log_transform(method="log1p")
 
     """
-    new = dataset.copy() if not inplace else dataset
-    data = new.masked_data
-
-    if method == "log1p":
-        new._data = np.log1p(data)
-        new.history = "log_transform (log1p) applied"
-    elif method == "log":
-        if np.any(data <= 0):
-            data = data + eps
-        new._data = np.log(data)
-        new.history = "log_transform (log) applied"
-    else:
-        raise SpectroChemPyError(
-            f"Unknown log_transform method '{method}'. "
-            f"Choose from 'log1p' or 'log'."
-        )
-
-    return new
+    result = LogTransformer(method=method, eps=eps).fit_transform(dataset)
+    if inplace:
+        dataset._data = result._data
+        dataset.history = result.history
+        return dataset
+    return result

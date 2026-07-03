@@ -104,3 +104,11 @@ Developer
   any commit whose subject line does not start with one of them.
   Merge commits and reverts are automatically exempt.
   Use `git commit --no-verify` to bypass locally if necessary.
+
+- MAINT: Refactored all nine procedural preprocessing functions
+  (`normalize`, `center`, `autoscale`, `snv`, `msc`, `pareto_scale`,
+  `range_scale`, `robust_scale`, `log_transform`) to internally
+  delegate to their transformer counterparts.  This eliminates code
+  duplication between the procedural and transformer APIs while
+  preserving full backward compatibility, including `inplace` behaviour
+  and history messages.
