@@ -322,6 +322,9 @@ Chemometric preprocessing
     range_scale
     robust_scale
     log_transform
+    CenterTransformer
+    AutoscaleTransformer
+    SNVTransformer
 
 
 Indexing
