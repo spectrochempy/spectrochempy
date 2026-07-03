@@ -318,6 +318,10 @@ Chemometric preprocessing
     autoscale
     snv
     msc
+    pareto_scale
+    range_scale
+    robust_scale
+    log_transform
 
 
 Indexing
