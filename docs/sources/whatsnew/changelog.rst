@@ -34,7 +34,9 @@ New Features
   or manual `NDDataset` wrapping.
 
 - New preprocessing operations in `spectrochempy.processing.transformation`:
-  ``normalize()``, ``center()``, ``autoscale()``, ``snv()``, and ``msc()``.
+  ``normalize()``, ``center()``, ``autoscale()``, ``snv()``, ``msc()``,
+  ``pareto_scale()``, ``range_scale()``, ``robust_scale()``, and
+  ``log_transform()``.
   These implement standard chemometric scaling and scatter-correction steps
   as first-class NDDataset methods, removing the need for manual NumPy
   arithmetic in notebooks.
