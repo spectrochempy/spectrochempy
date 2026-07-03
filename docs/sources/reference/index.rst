@@ -325,6 +325,12 @@ Chemometric preprocessing
     CenterTransformer
     AutoscaleTransformer
     SNVTransformer
+    NormalizeTransformer
+    MSCTransformer
+    ParetoScaleTransformer
+    RangeScaleTransformer
+    RobustScaleTransformer
+    LogTransformer
 
 
 Indexing

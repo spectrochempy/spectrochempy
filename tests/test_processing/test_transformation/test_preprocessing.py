@@ -27,6 +27,12 @@ from spectrochempy.processing.transformation.preprocessing import (
 from spectrochempy.processing.transformation.preprocessing_transformers import (
     AutoscaleTransformer,
     CenterTransformer,
+    LogTransformer,
+    MSCTransformer,
+    NormalizeTransformer,
+    ParetoScaleTransformer,
+    RangeScaleTransformer,
+    RobustScaleTransformer,
     SNVTransformer,
 )
 from spectrochempy.utils.exceptions import SpectroChemPyError
@@ -520,3 +526,235 @@ class TestSNVTransformer:
         train_std_safe = np.where(train_std == 0, 1, train_std)
         expected = (test.data - train_mean) / train_std_safe
         assert np.allclose(test_snv.data, expected)
+
+
+class TestNormalizeTransformer:
+    def test_max(self, simple_2d):
+        expected = normalize(simple_2d, method="max", dim="x")
+        scaler = NormalizeTransformer(method="max", dim="x")
+        nd = scaler.fit_transform(simple_2d)
+        assert np.allclose(nd.data, expected.data)
+        assert "NormalizeTransformer (max) applied" in nd.history[-1]
+
+    def test_sum(self, simple_2d):
+        expected = normalize(simple_2d, method="sum", dim="x")
+        scaler = NormalizeTransformer(method="sum", dim="x")
+        nd = scaler.fit_transform(simple_2d)
+        assert np.allclose(nd.data, expected.data)
+
+    def test_vector(self, simple_2d):
+        expected = normalize(simple_2d, method="vector", dim="x")
+        scaler = NormalizeTransformer(method="vector", dim="x")
+        nd = scaler.fit_transform(simple_2d)
+        assert np.allclose(nd.data, expected.data)
+
+    def test_minmax(self, simple_2d):
+        expected = normalize(simple_2d, method="minmax", dim="x")
+        scaler = NormalizeTransformer(method="minmax", dim="x")
+        nd = scaler.fit_transform(simple_2d)
+        assert np.allclose(nd.data, expected.data)
+
+    def test_inverse_transform_restores_data(self, simple_2d):
+        for method in ("max", "sum", "vector", "minmax"):
+            scaler = NormalizeTransformer(method=method, dim="x")
+            scaled = scaler.fit_transform(simple_2d)
+            restored = scaler.inverse_transform(scaled)
+            assert np.allclose(restored.data, simple_2d.data)
+
+    def test_unknown_method(self, simple_2d):
+        with pytest.raises(SpectroChemPyError, match="Unknown normalization method"):
+            NormalizeTransformer(method="unknown")._fit(simple_2d)
+
+    def test_train_test_reuse(self, simple_2d):
+        train = simple_2d[:2]
+        test = simple_2d[2:]
+        scaler = NormalizeTransformer(method="max", dim="x")
+        scaler.fit(train)
+        test_norm = scaler.transform(test)
+        train_norm = np.max(np.abs(train.data), axis=1, keepdims=True)
+        expected = test.data / train_norm
+        assert np.allclose(test_norm.data, expected)
+
+
+class TestMSCTransformer:
+    def test_fit_transform_agrees_with_msc(self, simple_2d):
+        expected = msc(simple_2d, dim="y")
+        scaler = MSCTransformer(dim="y")
+        nd = scaler.fit_transform(simple_2d)
+        assert np.allclose(nd.data, expected.data)
+        assert "MSCTransformer applied" in nd.history[-1]
+
+    def test_transform_without_fit_raises(self, simple_2d):
+        scaler = MSCTransformer(dim="y")
+        with pytest.raises(SpectroChemPyError, match="not fitted yet"):
+            scaler.transform(simple_2d)
+
+    def test_inverse_transform_restores_data(self, simple_2d):
+        scaler = MSCTransformer(dim="y")
+        scaled = scaler.fit_transform(simple_2d)
+        restored = scaler.inverse_transform(scaled)
+        assert np.allclose(restored.data, simple_2d.data)
+        assert "MSCTransformer inverse applied" in restored.history[-1]
+
+    def test_train_test_reuse(self, simple_2d):
+        train = simple_2d[:2]
+        test = simple_2d[2:]
+        scaler = MSCTransformer(dim="y")
+        scaler.fit(train)
+        test_msc = scaler.transform(test)
+        # Reference learned from train mean; a and b recalculated per observation
+        ref = np.mean(train.data, axis=0)
+        n = ref.size
+        sum_ref = np.sum(ref)
+        sum_ref2 = np.sum(ref**2)
+        den = n * sum_ref2 - sum_ref**2
+        sum_x = np.sum(test.data, axis=1, keepdims=True)
+        sum_xref = np.sum(test.data * ref, axis=1, keepdims=True)
+        b = (n * sum_xref - sum_ref * sum_x) / den
+        a = (sum_x - b * sum_ref) / n
+        b_safe = np.where(b == 0, 1, b)
+        expected = (test.data - a) / b_safe
+        assert np.allclose(test_msc.data, expected)
+
+    def test_transform_1d_raises(self):
+        # SpectroChemPy keeps 2-D shape on scalar index, so use a true 1-D array
+        ds1d = NDDataset(np.array([1.0, 2.0, 3.0]))
+        scaler = MSCTransformer(dim="y")
+        # Fit on a dummy 2-D dataset so the transformer is marked fitted
+        dummy = NDDataset(np.array([[1.0, 2.0, 3.0]]))
+        scaler.fit(dummy)
+        with pytest.raises(SpectroChemPyError, match="only 2-D"):
+            scaler.transform(ds1d)
+
+
+class TestParetoScaleTransformer:
+    def test_fit_transform_agrees_with_pareto_scale(self, simple_2d):
+        expected = pareto_scale(simple_2d, dim="y")
+        scaler = ParetoScaleTransformer(dim="y")
+        nd = scaler.fit_transform(simple_2d)
+        assert np.allclose(nd.data, expected.data)
+        assert "ParetoScaleTransformer applied" in nd.history[-1]
+
+    def test_transform_without_fit_raises(self, simple_2d):
+        scaler = ParetoScaleTransformer(dim="y")
+        with pytest.raises(SpectroChemPyError, match="not fitted yet"):
+            scaler.transform(simple_2d)
+
+    def test_inverse_transform_restores_data(self, simple_2d):
+        scaler = ParetoScaleTransformer(dim="y")
+        scaled = scaler.fit_transform(simple_2d)
+        restored = scaler.inverse_transform(scaled)
+        assert np.allclose(restored.data, simple_2d.data)
+        assert "ParetoScaleTransformer inverse applied" in restored.history[-1]
+
+    def test_train_test_reuse(self, simple_2d):
+        train = simple_2d[:2]
+        test = simple_2d[2:]
+        scaler = ParetoScaleTransformer(dim="y")
+        scaler.fit(train)
+        test_scaled = scaler.transform(test)
+        train_mean = np.mean(train.data, axis=0, keepdims=True)
+        train_std = np.std(train.data, axis=0, keepdims=True)
+        train_std_safe = np.where(train_std == 0, 1, train_std)
+        expected = (test.data - train_mean) / np.sqrt(train_std_safe)
+        assert np.allclose(test_scaled.data, expected)
+
+
+class TestRangeScaleTransformer:
+    def test_fit_transform_agrees_with_range_scale(self, simple_2d):
+        expected = range_scale(simple_2d, dim="y")
+        scaler = RangeScaleTransformer(dim="y")
+        nd = scaler.fit_transform(simple_2d)
+        assert np.allclose(nd.data, expected.data)
+        assert "RangeScaleTransformer applied" in nd.history[-1]
+
+    def test_transform_without_fit_raises(self, simple_2d):
+        scaler = RangeScaleTransformer(dim="y")
+        with pytest.raises(SpectroChemPyError, match="not fitted yet"):
+            scaler.transform(simple_2d)
+
+    def test_inverse_transform_restores_data(self, simple_2d):
+        scaler = RangeScaleTransformer(dim="y")
+        scaled = scaler.fit_transform(simple_2d)
+        restored = scaler.inverse_transform(scaled)
+        assert np.allclose(restored.data, simple_2d.data)
+        assert "RangeScaleTransformer inverse applied" in restored.history[-1]
+
+    def test_train_test_reuse(self, simple_2d):
+        train = simple_2d[:2]
+        test = simple_2d[2:]
+        scaler = RangeScaleTransformer(dim="y")
+        scaler.fit(train)
+        test_scaled = scaler.transform(test)
+        train_min = np.min(train.data, axis=0, keepdims=True)
+        train_max = np.max(train.data, axis=0, keepdims=True)
+        rng = train_max - train_min
+        rng_safe = np.where(rng == 0, 1, rng)
+        expected = test.data / rng_safe
+        assert np.allclose(test_scaled.data, expected)
+
+
+class TestRobustScaleTransformer:
+    def test_fit_transform_agrees_with_robust_scale(self, simple_2d):
+        expected = robust_scale(simple_2d, dim="y")
+        scaler = RobustScaleTransformer(dim="y")
+        nd = scaler.fit_transform(simple_2d)
+        assert np.allclose(nd.data, expected.data)
+        assert "RobustScaleTransformer applied" in nd.history[-1]
+
+    def test_transform_without_fit_raises(self, simple_2d):
+        scaler = RobustScaleTransformer(dim="y")
+        with pytest.raises(SpectroChemPyError, match="not fitted yet"):
+            scaler.transform(simple_2d)
+
+    def test_inverse_transform_restores_data(self, simple_2d):
+        scaler = RobustScaleTransformer(dim="y")
+        scaled = scaler.fit_transform(simple_2d)
+        restored = scaler.inverse_transform(scaled)
+        assert np.allclose(restored.data, simple_2d.data)
+        assert "RobustScaleTransformer inverse applied" in restored.history[-1]
+
+    def test_train_test_reuse(self, simple_2d):
+        train = simple_2d[:2]
+        test = simple_2d[2:]
+        scaler = RobustScaleTransformer(dim="y")
+        scaler.fit(train)
+        test_scaled = scaler.transform(test)
+        median = np.median(train.data, axis=0, keepdims=True)
+        mad = np.median(np.abs(train.data - median), axis=0, keepdims=True) * 1.4826
+        mad_safe = np.where(mad == 0, 1, mad)
+        expected = (test.data - median) / mad_safe
+        assert np.allclose(test_scaled.data, expected)
+
+
+class TestLogTransformer:
+    def test_fit_transform_agrees_with_log_transform(self, simple_2d):
+        expected = log_transform(simple_2d, method="log1p")
+        transformer = LogTransformer(method="log1p")
+        nd = transformer.fit_transform(simple_2d)
+        assert np.allclose(nd.data, expected.data)
+        assert "LogTransformer (log1p) applied" in nd.history[-1]
+
+    def test_log(self, simple_2d):
+        ds = simple_2d.copy()
+        ds._data = ds.data + 10.0
+        expected = log_transform(ds, method="log")
+        transformer = LogTransformer(method="log")
+        nd = transformer.fit_transform(ds)
+        assert np.allclose(nd.data, expected.data)
+
+    def test_inverse_log1p(self, simple_2d):
+        transformer = LogTransformer(method="log1p")
+        transformed = transformer.fit_transform(simple_2d)
+        restored = transformer.inverse_transform(transformed)
+        assert np.allclose(restored.data, simple_2d.data)
+        assert "LogTransformer (log1p) inverse applied" in restored.history[-1]
+
+    def test_unknown_method(self, simple_2d):
+        with pytest.raises(SpectroChemPyError, match="Unknown LogTransformer method"):
+            LogTransformer(method="unknown")._transform(simple_2d)
+
+    def test_transform_without_fit_raises(self, simple_2d):
+        transformer = LogTransformer(method="log1p")
+        with pytest.raises(SpectroChemPyError, match="not fitted yet"):
+            transformer.transform(simple_2d)
