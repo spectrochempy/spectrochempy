@@ -306,6 +306,20 @@ Joining or splitting datasets
     stack
 
 
+Chemometric preprocessing
+=========================
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    normalize
+    center
+    autoscale
+    snv
+    msc
+
+
 Indexing
 ========
 
