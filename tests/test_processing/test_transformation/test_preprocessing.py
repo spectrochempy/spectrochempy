@@ -761,3 +761,95 @@ class TestLogTransformer:
         transformer = LogTransformer(method="log1p")
         with pytest.raises(SpectroChemPyError, match="not fitted yet"):
             transformer.transform(simple_2d)
+
+
+# ---------------------------------------------------------------------------
+# sklearn-compatible API (get_params, set_params, __repr__, clone)
+# ---------------------------------------------------------------------------
+
+
+class TestSklearnCompatibility:
+    def test_get_params_autoscale(self):
+        scaler = AutoscaleTransformer(dim="y")
+        params = scaler.get_params()
+        assert params == {"dim": "y"}
+
+    def test_get_params_normalize(self):
+        scaler = NormalizeTransformer(method="sum", dim="x")
+        params = scaler.get_params()
+        assert params == {"method": "sum", "dim": "x"}
+
+    def test_get_params_msc(self):
+        ref = np.array([1.0, 2.0, 3.0])
+        scaler = MSCTransformer(reference=ref, dim="y")
+        params = scaler.get_params()
+        assert params["dim"] == "y"
+        assert np.allclose(params["reference"], ref)
+
+    def test_get_params_log(self):
+        transformer = LogTransformer(method="log", eps=1e-5)
+        params = transformer.get_params()
+        assert params == {"method": "log", "eps": 1e-5}
+
+    def test_get_params_returns_current_values(self):
+        scaler = AutoscaleTransformer(dim="y")
+        scaler.dim = "x"
+        params = scaler.get_params()
+        assert params["dim"] == "x"
+
+    def test_set_params_updates_value(self):
+        scaler = AutoscaleTransformer(dim="y")
+        result = scaler.set_params(dim="x")
+        assert result is scaler
+        assert scaler.dim == "x"
+
+    def test_set_params_chaining(self):
+        scaler = AutoscaleTransformer(dim="y")
+        scaler.set_params(dim="x").fit_transform(
+            NDDataset(np.array([[1.0, 2.0], [3.0, 4.0]]))
+        )
+        assert scaler.dim == "x"
+
+    def test_set_params_invalid_raises(self):
+        scaler = AutoscaleTransformer(dim="y")
+        with pytest.raises(SpectroChemPyError, match="Invalid parameter"):
+            scaler.set_params(invalid_param=42)
+
+    def test_repr_autoscale(self):
+        scaler = AutoscaleTransformer(dim="y")
+        assert repr(scaler) == "AutoscaleTransformer(dim='y')"
+
+    def test_repr_normalize(self):
+        scaler = NormalizeTransformer(method="sum", dim="x")
+        assert repr(scaler) == "NormalizeTransformer(method='sum', dim='x')"
+
+    def test_repr_log(self):
+        transformer = LogTransformer(method="log", eps=1e-5)
+        assert repr(transformer) == "LogTransformer(method='log', eps=1e-05)"
+
+    def test_repr_snv(self):
+        scaler = SNVTransformer()
+        assert "SNVTransformer" in repr(scaler)
+
+    def test_sklearn_clone_when_available(self):
+        try:
+            from sklearn.base import clone
+        except ImportError:
+            pytest.skip("scikit-learn not installed")
+
+        scaler = AutoscaleTransformer(dim="y")
+        scaler.fit(NDDataset(np.array([[1.0, 2.0], [3.0, 4.0]])))
+        cloned = clone(scaler)
+        assert cloned is not scaler
+        assert cloned.get_params() == scaler.get_params()
+        assert not cloned._fitted
+
+    def test_sklearn_clone_logtransformer(self):
+        try:
+            from sklearn.base import clone
+        except ImportError:
+            pytest.skip("scikit-learn not installed")
+
+        transformer = LogTransformer(method="log", eps=1e-5)
+        cloned = clone(transformer)
+        assert cloned.get_params() == transformer.get_params()
