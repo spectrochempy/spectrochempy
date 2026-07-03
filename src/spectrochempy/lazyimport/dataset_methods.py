@@ -128,4 +128,10 @@ _LAZY_DATASETS_IMPORTS = {
     "CenterTransformer": "spectrochempy.processing.transformation.preprocessing_transformers",
     "AutoscaleTransformer": "spectrochempy.processing.transformation.preprocessing_transformers",
     "SNVTransformer": "spectrochempy.processing.transformation.preprocessing_transformers",
+    "NormalizeTransformer": "spectrochempy.processing.transformation.preprocessing_transformers",
+    "MSCTransformer": "spectrochempy.processing.transformation.preprocessing_transformers",
+    "ParetoScaleTransformer": "spectrochempy.processing.transformation.preprocessing_transformers",
+    "RangeScaleTransformer": "spectrochempy.processing.transformation.preprocessing_transformers",
+    "RobustScaleTransformer": "spectrochempy.processing.transformation.preprocessing_transformers",
+    "LogTransformer": "spectrochempy.processing.transformation.preprocessing_transformers",
 }
