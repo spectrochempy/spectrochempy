@@ -21,6 +21,7 @@ from spectrochempy.utils.baseconfigurable import BaseConfigurable
 from spectrochempy.utils.decorators import _wrap_ndarray_output_to_nddataset
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.exceptions import NotFittedError
+from spectrochempy.utils.exceptions import SpectroChemPyError
 from spectrochempy.utils.traits import NDDatasetType
 
 
@@ -187,6 +188,63 @@ class AnalysisConfigurable(BaseConfigurable):
         if self._is_dataset or self._output_type == "NDDataset":
             return X
         return np.asarray(X)
+
+    def get_params(self, deep=True):
+        r"""
+        Get the configuration parameters of this estimator.
+
+        Parameters
+        ----------
+        deep : `bool`, optional, default:`True`
+            Ignored.  Present for compatibility with scikit-learn conventions.
+
+        Returns
+        -------
+        `dict`
+            Mapping of parameter name -> current value.
+
+        """
+        return dict(self.params())
+
+    def set_params(self, **params):
+        r"""
+        Set configuration parameters on this estimator.
+
+        Returns `self` so that calls can be chained.
+
+        Parameters
+        ----------
+        **params
+            Parameter names and values to update.
+
+        Returns
+        -------
+        self
+            The estimator instance.
+
+        Raises
+        ------
+        SpectroChemPyError
+            If a parameter name does not correspond to a configurable trait.
+
+        """
+        for key, value in params.items():
+            if not hasattr(self, key):
+                raise SpectroChemPyError(
+                    f"Invalid parameter '{key}' for {self.__class__.__name__}."
+                )
+            setattr(self, key, value)
+        return self
+
+    def __repr__(self):
+        cls = self.__class__.__name__
+        params = self.get_params()
+        # Show a concise subset for readability
+        display = {k: v for k, v in params.items() if not k.startswith("_")}
+        if not display:
+            return f"{cls}()"
+        items = ", ".join(f"{k}={v!r}" for k, v in display.items())
+        return f"{cls}({items})"
 
 
 # ======================================================================================

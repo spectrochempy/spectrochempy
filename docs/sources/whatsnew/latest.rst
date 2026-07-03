@@ -119,3 +119,12 @@ Developer
   duplication between the procedural and transformer APIs while
   preserving full backward compatibility, including `inplace` behaviour
   and history messages.
+
+- All analysis estimators (PCA, PLSRegression, Baseline, MCRALS, NMF,
+  etc.) now expose ``get_params()`` and ``set_params(**params)``
+  following scikit-learn conventions, plus a clear ``__repr__``.
+  This enables parameter inspection and grid exploration for any
+  ``AnalysisConfigurable`` subclass without adding new dependencies.
+  Full ``sklearn.base.clone()`` compatibility is best-effort because
+  complex traitlets traits (e.g., lists) may fail sklearn's strict
+  identity check.
