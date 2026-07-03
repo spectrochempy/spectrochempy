@@ -115,4 +115,9 @@ _LAZY_DATASETS_IMPORTS = {
     "autosub": "spectrochempy.processing.transformation.autosub",
     "concatenate": "spectrochempy.processing.transformation.concatenate",
     "stack": "spectrochempy.processing.transformation.concatenate",
+    "normalize": "spectrochempy.processing.transformation.preprocessing",
+    "center": "spectrochempy.processing.transformation.preprocessing",
+    "autoscale": "spectrochempy.processing.transformation.preprocessing",
+    "snv": "spectrochempy.processing.transformation.preprocessing",
+    "msc": "spectrochempy.processing.transformation.preprocessing",
 }
