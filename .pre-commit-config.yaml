@@ -33,6 +33,13 @@ repos:
         language: python
         additional_dependencies: [pyyaml, cffconvert, setuptools_scm]
         pass_filenames: false
+      - id: check_commit_prefix
+        name: check commit message prefix
+        description: Validate that the commit subject starts with a prefix from CONTRIBUTING.md
+        entry: python .github/workflows/scripts/check_commit_prefix.py
+        language: python
+        stages: [commit-msg]
+        pass_filenames: true
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0

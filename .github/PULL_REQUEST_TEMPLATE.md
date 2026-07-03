@@ -9,6 +9,8 @@
 - [ ] User-visible changes have been documented in the appropriate section of `docs/sources/whatsnew/changelog.rst`.
 - [ ] Developer changes (tests, CI, refactoring, tooling) have been documented in the ``Developer`` section of `docs/sources/whatsnew/changelog.rst`.
 - [ ] The new API methods have been included in a section of `docs/sources/reference/index.rst`.
+- [ ] Title follows the prefix convention defined in `CONTRIBUTING.md` (or label `non-standard-prefix` is applied).
+- [ ] Changelog entry is present (or label `no-changelog` is applied).
 - [ ] If you are a new contributor, you have added your name (affiliation and ORCID
       if you have one) in the `zenodo.json` in the field contributors field. _Be careful
       not to break the json format (check the content of the file with the

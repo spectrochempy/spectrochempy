@@ -204,6 +204,7 @@ exclude = ["~*"] # Exclude files and directories. "tests/**"
 ] # accept "useless expression", "print", "mixed-case variables" in *.ipynb or py:percent files.
 "src/spectrochempy/extern/brukeropus/**/*" = ["T201", "D"]
 "src/spectrochempy/ci/install_plugins.py" = ["T201", "S603", "PLC0415", "S112"]
+".github/workflows/scripts/check_commit_prefix.py" = ["T201"] # CLI script that prints validation messages
 "tests/**/*" = [
   "S101", # Use of assert detected. The enclosed code will be executed only when the assertion fails.
   "S603", # subprocess call with shell=True identified, security issue.
