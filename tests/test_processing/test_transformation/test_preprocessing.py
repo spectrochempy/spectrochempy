@@ -24,6 +24,11 @@ from spectrochempy.processing.transformation.preprocessing import (
     robust_scale,
     snv,
 )
+from spectrochempy.processing.transformation.preprocessing_transformers import (
+    AutoscaleTransformer,
+    CenterTransformer,
+    SNVTransformer,
+)
 from spectrochempy.utils.exceptions import SpectroChemPyError
 
 
@@ -386,3 +391,132 @@ class TestLogTransform:
     def test_unknown_method(self, simple_2d):
         with pytest.raises(SpectroChemPyError, match="Unknown log_transform method"):
             log_transform(simple_2d, method="unknown")
+
+
+# ---------------------------------------------------------------------------
+# preprocessing transformers
+# ---------------------------------------------------------------------------
+
+
+class TestCenterTransformer:
+    def test_fit_transform_agrees_with_center(self, simple_2d):
+        expected = center(simple_2d, dim="y")
+        scaler = CenterTransformer(dim="y")
+        nd = scaler.fit_transform(simple_2d)
+        assert np.allclose(nd.data, expected.data)
+        assert "CenterTransformer applied on dimension y" in nd.history[-1]
+
+    def test_transform_without_fit_raises(self, simple_2d):
+        scaler = CenterTransformer(dim="y")
+        with pytest.raises(SpectroChemPyError, match="not fitted yet"):
+            scaler.transform(simple_2d)
+
+    def test_inverse_transform_restores_data(self, simple_2d):
+        scaler = CenterTransformer(dim="y")
+        centered = scaler.fit_transform(simple_2d)
+        restored = scaler.inverse_transform(centered)
+        assert np.allclose(restored.data, simple_2d.data)
+        assert "CenterTransformer inverse applied" in restored.history[-1]
+
+    def test_train_test_reuse(self, simple_2d):
+        train = simple_2d[:2]
+        test = simple_2d[2:]
+        scaler = CenterTransformer(dim="y")
+        scaler.fit(train)
+        test_centered = scaler.transform(test)
+        # Mean must be the one learned from train, not test
+        train_mean = np.mean(train.data, axis=0, keepdims=True)
+        expected = test.data - train_mean
+        assert np.allclose(test_centered.data, expected)
+
+    def test_mask_and_metadata_preserved(self, simple_2d):
+        ds = simple_2d.copy()
+        ds._mask = np.zeros_like(ds.data, dtype=bool)
+        ds._mask[0, 0] = True
+        ds.meta.foo = "bar"
+        scaler = CenterTransformer(dim="y")
+        nd = scaler.fit_transform(ds)
+        assert nd.meta.foo == "bar"
+        assert nd.mask[0, 0]
+        assert nd.coordset == ds.coordset
+
+
+class TestAutoscaleTransformer:
+    def test_fit_transform_agrees_with_autoscale(self, simple_2d):
+        expected = autoscale(simple_2d, dim="y")
+        scaler = AutoscaleTransformer(dim="y")
+        nd = scaler.fit_transform(simple_2d)
+        assert np.allclose(nd.data, expected.data)
+        assert "AutoscaleTransformer applied on dimension y" in nd.history[-1]
+
+    def test_transform_without_fit_raises(self, simple_2d):
+        scaler = AutoscaleTransformer(dim="y")
+        with pytest.raises(SpectroChemPyError, match="not fitted yet"):
+            scaler.transform(simple_2d)
+
+    def test_inverse_transform_restores_data(self, simple_2d):
+        scaler = AutoscaleTransformer(dim="y")
+        scaled = scaler.fit_transform(simple_2d)
+        restored = scaler.inverse_transform(scaled)
+        assert np.allclose(restored.data, simple_2d.data)
+        assert "AutoscaleTransformer inverse applied" in restored.history[-1]
+
+    def test_train_test_reuse(self, simple_2d):
+        train = simple_2d[:2]
+        test = simple_2d[2:]
+        scaler = AutoscaleTransformer(dim="y")
+        scaler.fit(train)
+        test_scaled = scaler.transform(test)
+        train_mean = np.mean(train.data, axis=0, keepdims=True)
+        train_std = np.std(train.data, axis=0, keepdims=True)
+        train_std_safe = np.where(train_std == 0, 1, train_std)
+        expected = (test.data - train_mean) / train_std_safe
+        assert np.allclose(test_scaled.data, expected)
+
+    def test_zero_std_column(self, simple_2d):
+        # Row 3 of simple_2d is constant; along dim=y its std is 0 for some columns
+        scaler = AutoscaleTransformer(dim="y")
+        nd = scaler.fit_transform(simple_2d)
+        # Should not produce NaN
+        assert not np.any(np.isnan(nd.data))
+        restored = scaler.inverse_transform(nd)
+        assert np.allclose(restored.data, simple_2d.data)
+
+
+class TestSNVTransformer:
+    def test_fit_transform_agrees_with_snv(self, simple_2d):
+        expected = snv(simple_2d)
+        scaler = SNVTransformer()
+        nd = scaler.fit_transform(simple_2d)
+        assert np.allclose(nd.data, expected.data)
+        assert "SNVTransformer applied" in nd.history[-1]
+
+    def test_transform_without_fit_raises(self, simple_2d):
+        scaler = SNVTransformer()
+        with pytest.raises(SpectroChemPyError, match="not fitted yet"):
+            scaler.transform(simple_2d)
+
+    def test_inverse_transform_restores_data(self, simple_2d):
+        scaler = SNVTransformer()
+        scaled = scaler.fit_transform(simple_2d)
+        restored = scaler.inverse_transform(scaled)
+        assert np.allclose(restored.data, simple_2d.data)
+        assert "SNVTransformer inverse applied" in restored.history[-1]
+
+    def test_dim_is_x(self, simple_2d):
+        scaler = SNVTransformer()
+        scaler.fit(simple_2d)
+        assert scaler.dim == "x"
+
+    def test_train_test_reuse(self, simple_2d):
+        train = simple_2d[:2]
+        test = simple_2d[2:]
+        scaler = SNVTransformer()
+        scaler.fit(train)
+        test_snv = scaler.transform(test)
+        # Stats computed per spectrum (dim=x)
+        train_mean = np.mean(train.data, axis=1, keepdims=True)
+        train_std = np.std(train.data, axis=1, keepdims=True)
+        train_std_safe = np.where(train_std == 0, 1, train_std)
+        expected = (test.data - train_mean) / train_std_safe
+        assert np.allclose(test_snv.data, expected)

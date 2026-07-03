@@ -124,4 +124,8 @@ _LAZY_DATASETS_IMPORTS = {
     "range_scale": "spectrochempy.processing.transformation.preprocessing",
     "robust_scale": "spectrochempy.processing.transformation.preprocessing",
     "log_transform": "spectrochempy.processing.transformation.preprocessing",
+    "BasePreprocessor": "spectrochempy.processing.transformation.preprocessing_transformers",
+    "CenterTransformer": "spectrochempy.processing.transformation.preprocessing_transformers",
+    "AutoscaleTransformer": "spectrochempy.processing.transformation.preprocessing_transformers",
+    "SNVTransformer": "spectrochempy.processing.transformation.preprocessing_transformers",
 }

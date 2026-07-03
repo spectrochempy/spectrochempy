@@ -11,9 +11,11 @@ __all__ = [
     "concatenate",
     "npy",
     "preprocessing",
+    "preprocessing_transformers",
 ]
 
 from . import autosub
 from . import concatenate
 from . import npy
 from . import preprocessing
+from . import preprocessing_transformers

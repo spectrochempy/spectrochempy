@@ -37,6 +37,14 @@ New Features
   as first-class NDDataset methods, removing the need for manual NumPy
   arithmetic in notebooks.
 
+- Added stateful transformer classes for ML workflows:
+  ``CenterTransformer``, ``AutoscaleTransformer``, and ``SNVTransformer``.
+  Each implements ``fit()``, ``transform()``, ``fit_transform()``, and
+  ``inverse_transform()``, allowing learned statistics (e.g., mean and std
+  from a training set) to be reused safely on test data or new batches.
+  They complement the existing procedural API and are registered as
+  top-level API objects and NDDataset methods.
+
 - 2D ``plot(method="lines"/"stack")`` now automatically uses coordinate labels
   as matplotlib line labels, so that ``ax.legend()`` shows meaningful names
   without needing to pass labels explicitly.  Legend entries are displayed
