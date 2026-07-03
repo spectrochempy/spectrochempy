@@ -10,6 +10,10 @@ These classes implement a scikit-learn-style ``fit()`` / ``transform()`` /
 ``fit_transform()`` / ``inverse_transform()`` API for preprocessing
 operations that learn parameters from data.
 
+They also provide ``get_params()`` and ``set_params()`` so that they can
+be cloned and composed in pipeline-like workflows that follow
+scikit-learn conventions (scikit-learn itself is **not** a dependency).
+
 They complement the procedural functions in
 :mod:`spectrochempy.processing.transformation.preprocessing` and are
 intended for machine-learning workflows (train/test splits,
@@ -42,6 +46,8 @@ __dataset_methods__ = [
     "RobustScaleTransformer",
     "LogTransformer",
 ]
+
+import inspect
 
 import numpy as np
 
@@ -171,6 +177,86 @@ class BasePreprocessor:
                 "Call 'fit' with appropriate arguments before using this method."
             )
         return self._inverse_transform(dataset)
+
+    def get_params(self, deep=True):
+        r"""
+        Get the constructor parameters of this transformer.
+
+        Parameters
+        ----------
+        deep : `bool`, optional, default:`True`
+            Ignored.  Present for compatibility with scikit-learn conventions.
+
+        Returns
+        -------
+        `dict`
+            Mapping of parameter name -> current value.
+
+        Examples
+        --------
+        >>> scaler = scp.AutoscaleTransformer(dim="y")
+        >>> scaler.get_params()
+        {'dim': 'y'}
+
+        """
+        sig = inspect.signature(self.__init__)
+        params = {}
+        for name, param in sig.parameters.items():
+            if param.kind in (
+                inspect.Parameter.VAR_POSITIONAL,
+                inspect.Parameter.VAR_KEYWORD,
+            ):
+                continue
+            if hasattr(self, name):
+                params[name] = getattr(self, name)
+            elif param.default is not inspect.Parameter.empty:
+                params[name] = param.default
+        return params
+
+    def set_params(self, **params):
+        r"""
+        Set constructor parameters on this transformer.
+
+        Returns `self` so that calls can be chained.
+
+        Parameters
+        ----------
+        **params
+            Parameter names and values to update.
+
+        Returns
+        -------
+        self
+
+        Raises
+        ------
+        SpectroChemPyError
+            If a parameter name does not correspond to a constructor argument.
+
+        Examples
+        --------
+        >>> scaler = scp.AutoscaleTransformer(dim="y")
+        >>> scaler.set_params(dim="x")
+        AutoscaleTransformer(dim='x')
+
+        """
+        valid = self.get_params().keys()
+        for key, value in params.items():
+            if key not in valid:
+                raise SpectroChemPyError(
+                    f"Invalid parameter '{key}' for {self.__class__.__name__}. "
+                    f"Valid parameters: {', '.join(sorted(valid))}."
+                )
+            setattr(self, key, value)
+        return self
+
+    def __repr__(self):
+        cls = self.__class__.__name__
+        params = self.get_params()
+        if not params:
+            return f"{cls}()"
+        items = ", ".join(f"{k}={v!r}" for k, v in params.items())
+        return f"{cls}({items})"
 
     def _fit(self, dataset):
         raise NotImplementedError("Subclasses must implement _fit().")

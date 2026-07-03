@@ -52,6 +52,13 @@ New Features
   procedural API and are registered as top-level API objects and NDDataset
   methods.
 
+- All preprocessing transformers now expose ``get_params()`` and
+  ``set_params(**params)`` following scikit-learn estimator conventions,
+  plus a clear ``__repr__``.  This enables cloning and parameter-grid
+  exploration without adding scikit-learn as a dependency.  When
+  scikit-learn is installed, ``sklearn.base.clone()`` works out of the
+  box.
+
 - 2D ``plot(method="lines"/"stack")`` now automatically uses coordinate labels
   as matplotlib line labels, so that ``ax.legend()`` shows meaningful names
   without needing to pass labels explicitly.  Legend entries are displayed
