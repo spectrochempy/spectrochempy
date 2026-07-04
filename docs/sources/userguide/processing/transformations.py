@@ -161,7 +161,7 @@ _ = dataset.plot()
 # %%
 # Load a dataset and focus on a small region for clarity
 ds = scp.read_omnic("irdata/nh4y-activation.spg")
-ds = ds[:, 2200.0:1800.0]
+ds = ds[:, 4000.0:2000.0]
 
 # %% [markdown]
 # ## Normalization
