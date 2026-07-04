@@ -439,8 +439,26 @@ shape: asymmetricvoigtmodel
 # exposes direct helpers at the top level: `scp.gaussian`, `scp.lorentzian`,
 # `scp.voigt`, `scp.asymmetricvoigt`, and `scp.sigmoid`.
 
+# %% [markdown]
+# #### Validate the script before fitting
+#
+# You do not have to wait for the fit to discover errors in the script.
+# Call :meth:`~spectrochempy.analysis.curvefitting.optimize.Optimize.validate_script`
+# to check the script before launching the optimisation:
+
 # %%
 f1 = scp.Optimize(log_level="INFO")
+errors = f1.validate_script(script)
+errors  # should be an empty list if the script is valid
+
+# %% [markdown]
+# If the script contains an error, `errors` will contain
+# :class:`~spectrochempy.analysis.curvefitting.optimize.ScriptError` objects
+# with the line number, the offending line, and a human-readable explanation.
+# An empty list means the script is syntactically correct and all model
+# references are recognised.
+
+# %%
 f1.script = script
 f1.max_iter = 2000
 # f1.autobase = True

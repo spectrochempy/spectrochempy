@@ -19,6 +19,14 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- ``Optimize.validate_script(script=None)`` — new public method that validates a
+  curve-fitting script before launching the optimisation.  Returns a list of
+  ``ScriptError`` objects with the line number, offending line, and a
+  human-readable explanation, or an empty list when the script is valid.
+  The existing trait-validator behaviour (``ValueError`` on invalid assignment)
+  is fully preserved.  New ``ScriptError`` class provides structured access to
+  validation diagnostics. (#1351)
+
 - SpectroChemPy now exposes top-level helpers for common 1D line shapes:
   ``scp.gaussian(...)``, ``scp.lorentzian(...)``, ``scp.voigt(...)``,
   ``scp.asymmetricvoigt(...)``, and ``scp.sigmoid(...)``. The line-shape

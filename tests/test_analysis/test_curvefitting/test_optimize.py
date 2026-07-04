@@ -5,11 +5,184 @@
 # ======================================================================================
 # ruff: noqa
 
+import pytest
 from numpy.testing import assert_allclose
 
 import spectrochempy as scp
+from spectrochempy.analysis.curvefitting.optimize import ScriptError
 
 
+# -----------------------------------------------------------------------------------
+# validate_script
+# -----------------------------------------------------------------------------------
+VALID_SCRIPT = """
+COMMON:
+  $ gratio: 0.1, 0.0, 1.0
+
+MODEL: LINE_1
+shape: asymmetricvoigtmodel
+    * ampl:  1.0, 0.0, none
+    $ pos:   3620, 3400.0, 3700.0
+    $ ratio: 0.0147, 0.0, 1.0
+    $ asym: 0.1, 0, 1
+    $ width: 200, 0, 1000
+"""
+
+
+class TestValidateScript:
+    """Tests for Optimize.validate_script()."""
+
+    def test_valid_script_returns_empty_list(self):
+        opt = scp.Optimize()
+        errors = opt.validate_script(VALID_SCRIPT)
+        assert errors == []
+
+    def test_valid_script_can_be_assigned_after_validation(self):
+        opt = scp.Optimize()
+        errors = opt.validate_script(VALID_SCRIPT)
+        assert errors == []
+        opt.script = VALID_SCRIPT
+        # Assigning a valid script must not raise
+        assert opt.fp is not None
+
+    def test_syntax_error_missing_colon(self):
+        opt = scp.Optimize()
+        script = "MODEL: X\nshape gaussianmodel\n"
+        errors = opt.validate_script(script)
+        assert len(errors) == 1
+        assert errors[0].line == 2
+        assert "semi-column" in errors[0].message
+
+    def test_unknown_model(self):
+        opt = scp.Optimize()
+        script = "MODEL: X\nshape: unknownmodel\n"
+        errors = opt.validate_script(script)
+        assert len(errors) == 1
+        assert "unknownmodel" in errors[0].message
+        assert "not found" in errors[0].message
+
+    def test_invalid_parameter_prefix(self):
+        opt = scp.Optimize()
+        script = "MODEL: X\nshape: gaussianmodel\n% ampl: 1.0, 0.0, none\n"
+        errors = opt.validate_script(script)
+        assert len(errors) == 1
+        assert "*,$ or >" in errors[0].message
+
+    def test_missing_model_label(self):
+        opt = scp.Optimize()
+        script = "$ ampl: 1.0, 0.0, none\n"
+        errors = opt.validate_script(script)
+        assert len(errors) == 1
+        assert "first definition" in errors[0].message
+
+    def test_malformed_bounds_too_many_items(self):
+        opt = scp.Optimize()
+        script = "MODEL: X\nshape: gaussianmodel\n" "$ ampl: 1.0, 0.0, none, extra\n"
+        errors = opt.validate_script(script)
+        assert len(errors) == 1
+        assert "min, max" in errors[0].message
+
+    def test_malformed_bounds_two_items(self):
+        opt = scp.Optimize()
+        script = "MODEL: X\nshape: gaussianmodel\n" "$ ampl: 1.0, 0.0\n"
+        errors = opt.validate_script(script)
+        assert len(errors) == 1
+        assert "two" in errors[0].message.lower()
+
+    def test_duplicated_model_name(self):
+        opt = scp.Optimize()
+        script = (
+            "MODEL: X\nshape: gaussianmodel\n"
+            "    $ ampl: 1.0, 0.0, none\n"
+            "MODEL: X\nshape: lorentzianmodel\n"
+            "    $ ampl: 0.5, 0.0, none\n"
+        )
+        errors = opt.validate_script(script)
+        # Duplicate model name is not an error (models are appended),
+        # so this should be valid
+        assert errors == []
+
+    def test_empty_script(self):
+        opt = scp.Optimize()
+        errors = opt.validate_script("")
+        assert errors == []
+
+    def test_comment_only_script(self):
+        opt = scp.Optimize()
+        errors = opt.validate_script("# just a comment\n# another comment\n")
+        assert errors == []
+
+    def test_validate_current_script(self):
+        opt = scp.Optimize()
+        opt.script = VALID_SCRIPT
+        errors = opt.validate_script()
+        assert errors == []
+
+    def test_validate_none_uses_current_script(self):
+        opt = scp.Optimize()
+        opt.script = VALID_SCRIPT
+        errors = opt.validate_script(None)
+        assert errors == []
+
+    def test_trait_validator_still_raises_on_invalid(self):
+        opt = scp.Optimize()
+        with pytest.raises(ValueError, match="semi-column"):
+            opt.script = "MODEL: X\nshape gaussianmodel\n"
+
+    def test_script_error_attributes(self):
+        err = ScriptError(line=3, text="bad line", message="something wrong")
+        assert err.line == 3
+        assert err.text == "bad line"
+        assert err.message == "something wrong"
+
+    def test_script_error_repr(self):
+        err = ScriptError(line=1, text="bad", message="error")
+        r = repr(err)
+        assert "ScriptError" in r
+        assert "line=1" in r
+
+    def test_script_error_str(self):
+        err = ScriptError(line=5, text="bad line", message="error msg")
+        s = str(err)
+        assert "Line 5" in s
+        assert "error msg" in s
+        assert "bad line" in s
+
+    def test_unknown_model_reported_with_line(self):
+        opt = scp.Optimize()
+        script = (
+            "COMMON:\n"
+            "  $ gratio: 0.5, 0.0, 1.0\n"
+            "MODEL: PEAK\n"
+            "shape: nonexistent_shape\n"
+        )
+        errors = opt.validate_script(script)
+        assert len(errors) == 1
+        assert errors[0].line == 4
+        assert "nonexistent_shape" in errors[0].message
+
+    def test_cannot_evaluate_value(self):
+        opt = scp.Optimize()
+        script = (
+            "MODEL: X\n" "shape: gaussianmodel\n" "  $ ampl: not_a_number, 0.0, none\n"
+        )
+        errors = opt.validate_script(script)
+        assert len(errors) == 1
+        assert "Cannot evaluate" in errors[0].message
+        assert "not_a_number" in errors[0].message
+
+    def test_validate_after_script_assignment_does_not_alter_fp(self):
+        opt = scp.Optimize()
+        opt.script = VALID_SCRIPT
+        fp_before = opt.fp
+        _ = opt.validate_script()
+        # validate_script must not mutate self.fp
+        assert opt.fp is fp_before
+
+
+# -----------------------------------------------------------------------------------
+# fit behaviour (unchanged)
+# -----------------------------------------------------------------------------------
 def test_fit_single_dataset(synthetic_two_peak_dataset, optimize_script):
     dataset = synthetic_two_peak_dataset
 
