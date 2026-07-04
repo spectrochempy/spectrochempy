@@ -258,6 +258,10 @@ class BasePreprocessor:
         items = ", ".join(f"{k}={v!r}" for k, v in params.items())
         return f"{cls}({items})"
 
+    def _set_data(self, new, data):
+        r"""Assign transformed data, coercing MaskedArray → plain ndarray."""
+        new._data = np.asarray(data)
+
     def _fit(self, dataset):
         raise NotImplementedError("Subclasses must implement _fit().")
 
@@ -304,13 +308,13 @@ class CenterTransformer(BasePreprocessor):
 
     def _transform(self, dataset):
         new = dataset.copy()
-        new._data = dataset.masked_data - self.mean_
+        self._set_data(new, dataset.masked_data - self.mean_)
         new.history = f"CenterTransformer applied on dimension {self._dim_name}"
         return new
 
     def _inverse_transform(self, dataset):
         new = dataset.copy()
-        new._data = dataset.masked_data + self.mean_
+        self._set_data(new, dataset.masked_data + self.mean_)
         new.history = f"CenterTransformer inverse applied on dimension {self._dim_name}"
         return new
 
@@ -357,7 +361,7 @@ class AutoscaleTransformer(BasePreprocessor):
         new = dataset.copy()
         data = dataset.masked_data
         std_safe = np.where(self.std_ == 0, 1, self.std_)
-        new._data = (data - self.mean_) / std_safe
+        self._set_data(new, (data - self.mean_) / std_safe)
         new.history = f"AutoscaleTransformer applied on dimension {self._dim_name}"
         return new
 
@@ -365,7 +369,7 @@ class AutoscaleTransformer(BasePreprocessor):
         new = dataset.copy()
         data = dataset.masked_data
         std_safe = np.where(self.std_ == 0, 1, self.std_)
-        new._data = data * std_safe + self.mean_
+        self._set_data(new, data * std_safe + self.mean_)
         new.history = (
             f"AutoscaleTransformer inverse applied on dimension {self._dim_name}"
         )
@@ -490,9 +494,9 @@ class NormalizeTransformer(BasePreprocessor):
         data = dataset.masked_data
 
         if self.method in ("max", "sum", "vector"):
-            new._data = data / self.norm_
+            self._set_data(new, data / self.norm_)
         elif self.method == "minmax":
-            new._data = (data - self.dmin_) / self.range_
+            self._set_data(new, (data - self.dmin_) / self.range_)
 
         new.history = (
             f"NormalizeTransformer ({self.method}) applied on dimension "
@@ -505,9 +509,9 @@ class NormalizeTransformer(BasePreprocessor):
         data = dataset.masked_data
 
         if self.method in ("max", "sum", "vector"):
-            new._data = data * self.norm_
+            self._set_data(new, data * self.norm_)
         elif self.method == "minmax":
-            new._data = data * self.range_ + self.dmin_
+            self._set_data(new, data * self.range_ + self.dmin_)
 
         new.history = (
             f"NormalizeTransformer ({self.method}) inverse applied on dimension "
@@ -634,7 +638,7 @@ class MSCTransformer(BasePreprocessor):
         a = (sum_x - b * sum_ref) / n
 
         b_safe = np.where(b == 0, 1, b)
-        new._data = (data - a) / b_safe
+        self._set_data(new, (data - a) / b_safe)
         new.history = f"MSCTransformer applied on dimension {self._dim_name}"
         return new
 
@@ -642,7 +646,7 @@ class MSCTransformer(BasePreprocessor):
         new = dataset.copy()
         data = dataset.masked_data
 
-        new._data = data * self.b_ + self.a_
+        self._set_data(new, data * self.b_ + self.a_)
         new.history = f"MSCTransformer inverse applied on dimension {self._dim_name}"
         return new
 
@@ -693,7 +697,7 @@ class ParetoScaleTransformer(BasePreprocessor):
         data = dataset.masked_data
 
         std_safe = np.where(self.std_ == 0, 1, self.std_)
-        new._data = (data - self.mean_) / np.sqrt(std_safe)
+        self._set_data(new, (data - self.mean_) / np.sqrt(std_safe))
         new.history = f"ParetoScaleTransformer applied on dimension {self._dim_name}"
         return new
 
@@ -702,7 +706,7 @@ class ParetoScaleTransformer(BasePreprocessor):
         data = dataset.masked_data
 
         std_safe = np.where(self.std_ == 0, 1, self.std_)
-        new._data = data * np.sqrt(std_safe) + self.mean_
+        self._set_data(new, data * np.sqrt(std_safe) + self.mean_)
         new.history = (
             f"ParetoScaleTransformer inverse applied on dimension " f"{self._dim_name}"
         )
@@ -758,7 +762,7 @@ class RangeScaleTransformer(BasePreprocessor):
         new = dataset.copy()
         data = dataset.masked_data
 
-        new._data = data / self.range_
+        self._set_data(new, data / self.range_)
         new.history = f"RangeScaleTransformer applied on dimension {self._dim_name}"
         return new
 
@@ -766,7 +770,7 @@ class RangeScaleTransformer(BasePreprocessor):
         new = dataset.copy()
         data = dataset.masked_data
 
-        new._data = data * self.range_
+        self._set_data(new, data * self.range_)
         new.history = (
             f"RangeScaleTransformer inverse applied on dimension " f"{self._dim_name}"
         )
@@ -821,7 +825,7 @@ class RobustScaleTransformer(BasePreprocessor):
         new = dataset.copy()
         data = dataset.masked_data
 
-        new._data = (data - self.median_) / self.mad_
+        self._set_data(new, (data - self.median_) / self.mad_)
         new.history = f"RobustScaleTransformer applied on dimension {self._dim_name}"
         return new
 
@@ -829,7 +833,7 @@ class RobustScaleTransformer(BasePreprocessor):
         new = dataset.copy()
         data = dataset.masked_data
 
-        new._data = data * self.mad_ + self.median_
+        self._set_data(new, data * self.mad_ + self.median_)
         new.history = (
             f"RobustScaleTransformer inverse applied on dimension " f"{self._dim_name}"
         )
@@ -882,12 +886,12 @@ class LogTransformer(BasePreprocessor):
         data = dataset.masked_data
 
         if self.method == "log1p":
-            new._data = np.log1p(data)
+            self._set_data(new, np.log1p(data))
             new.history = "LogTransformer (log1p) applied"
         elif self.method == "log":
             if np.any(data <= 0):
                 data = data + self.eps
-            new._data = np.log(data)
+            self._set_data(new, np.log(data))
             new.history = "LogTransformer (log) applied"
         else:
             raise SpectroChemPyError(
@@ -901,10 +905,10 @@ class LogTransformer(BasePreprocessor):
         data = dataset.masked_data
 
         if self.method == "log1p":
-            new._data = np.expm1(data)
+            self._set_data(new, np.expm1(data))
             new.history = "LogTransformer (log1p) inverse applied"
         elif self.method == "log":
-            new._data = np.exp(data)
+            self._set_data(new, np.exp(data))
             new.history = "LogTransformer (log) inverse applied"
         else:
             raise SpectroChemPyError(
