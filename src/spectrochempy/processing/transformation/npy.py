@@ -12,7 +12,7 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils.objects import make_new_object
 
 
-def dot(a, b, strict=True, out=None):
+def dot(a, b, strict=False, out=None):
     """
     Return the dot product of two NDDatasets.
 
@@ -73,7 +73,7 @@ def dot(a, b, strict=True, out=None):
         # try to cast to NDDataset
         b = NDDataset(b)
 
-    data = np.ma.dot(a.masked_data, b.masked_data)
+    data = np.ma.dot(a.masked_data, b.masked_data, strict=strict)
     mask = data.mask
     data = data.data
 
