@@ -27,6 +27,225 @@ from spectrochempy.utils.decorators import signature_has_configurable_traits
 
 
 # ======================================================================================
+# Public data types
+# ======================================================================================
+class ScriptError:
+    """
+    Structured error returned by :meth:`Optimize.validate_script`.
+
+    Attributes
+    ----------
+    line : int
+        1-indexed line number where the error was found.
+    text : str
+        The offending line content.
+    message : str
+        Human-readable explanation of the error.
+    """
+
+    __slots__ = ("line", "text", "message")
+
+    def __init__(self, line, text, message):
+        self.line = line
+        self.text = text
+        self.message = message
+
+    def __repr__(self):
+        return f"ScriptError(line={self.line}, text={self.text!r}, message={self.message!r})"
+
+    def __str__(self):
+        return f"Line {self.line}: {self.message}\n  {self.text}"
+
+
+# ======================================================================================
+# Module-level helpers
+# ======================================================================================
+def _validate_script_content(script, usermodels=None):
+    """
+    Parse and validate a curve-fitting script without running an optimisation.
+
+    Parameters
+    ----------
+    script : str
+        The script to validate.
+    usermodels : dict or None
+        Optional user-defined model registry (same format as
+        :attr:`Optimize.usermodels`).
+
+    Returns
+    -------
+    fp : FitParameters or None
+        Parsed parameters on success, or ``None`` when *errors* is non-empty.
+    errors : list of ScriptError
+        Empty list when the script is valid.
+    """
+    fp = FitParameters()
+    errors = []
+
+    modlabel = None
+    common = False
+    fixed = False
+    reference = False
+
+    lines = script.split("\n")
+    lc = 0
+
+    for item in lines:
+        lc += 1
+        line = item.strip()
+        if line == "" or line.startswith("#"):
+            continue
+
+        s = line.split(":")
+        if len(s) != 2:
+            errors.append(
+                ScriptError(
+                    lc,
+                    line,
+                    "Cannot interpret line: A semi-column is missing?",
+                ),
+            )
+            continue
+
+        key, values = s
+        key = key.strip().lower()
+
+        if key.startswith("model"):
+            modlabel = values.lower().strip()
+            if modlabel not in fp.models:
+                fp.models.append(modlabel)
+            common = False
+            continue
+
+        if key.startswith("common") or key.startswith("vars"):
+            common = True
+            modlabel = "common"
+            continue
+
+        if key.startswith("shape"):
+            shape = values.lower().strip()
+            if not shape:
+                errors.append(
+                    ScriptError(
+                        lc,
+                        line,
+                        "Shape of this model was not specified or is not implemented",
+                    ),
+                )
+                continue
+            model_ok = hasattr(models_, shape) or (
+                usermodels is not None and shape in usermodels
+            )
+            if not model_ok:
+                errors.append(
+                    ScriptError(
+                        lc,
+                        line,
+                        f"Model {shape} not found in spectrochempy"
+                        f" nor in usermodels.",
+                    ),
+                )
+                continue
+            fp.model[modlabel] = shape
+            common = False
+            continue
+
+        if modlabel is None and not common:
+            errors.append(
+                ScriptError(
+                    lc,
+                    line,
+                    "The first definition should be a label for a model"
+                    " or a block of variables or constants.",
+                ),
+            )
+            continue
+
+        # parameter prefix --------------------------------------------------
+        if key.startswith("*"):
+            fixed = True
+            reference = False
+            key = key[1:].strip()
+        elif key.startswith("$"):
+            fixed = False
+            reference = False
+            key = key[1:].strip()
+        elif key.startswith(">"):
+            fixed = True
+            reference = True
+            key = key[1:].strip()
+        else:
+            errors.append(
+                ScriptError(
+                    lc,
+                    line,
+                    "Cannot interpret line: A parameter definition must start"
+                    " with *,$ or >",
+                ),
+            )
+            continue
+
+        # value / bounds ----------------------------------------------------
+        s = values.split(",")
+        s = [ss.strip() for ss in s]
+        if len(s) > 1 and ("[" in s[0]) and ("]" in s[1]):
+            s[0] = f"{s[0]}, {s[1]}"
+            if len(s) > 2:
+                s[1:] = s[2:]
+        if len(s) > 3:
+            errors.append(
+                ScriptError(
+                    lc,
+                    line,
+                    "value, min, max should be defined in this order",
+                ),
+            )
+            continue
+        if len(s) == 2:
+            errors.append(
+                ScriptError(
+                    lc,
+                    line,
+                    "only two items;"
+                    " value, min, max (or value only) should be defined",
+                ),
+            )
+            continue
+        if len(s) == 1:
+            s.extend(["none", "none"])
+        value, mini, maxi = s
+        if mini.strip().lower() in ["none", ""]:
+            mini = str(-1.0 / sys.float_info.epsilon)
+        if maxi.strip().lower() in ["none", ""]:
+            maxi = str(+1.0 / sys.float_info.epsilon)
+        if modlabel != "common":
+            ks = f"{key}_{modlabel}"
+            fp.common[key] = False
+        else:
+            ks = f"{key}"
+            fp.common[key] = True
+        fp.reference[ks] = reference
+        if not reference:
+            val = value.strip()
+            try:
+                val = eval(str(val))  # noqa: S307
+            except Exception as exc:
+                errors.append(
+                    ScriptError(
+                        lc,
+                        line,
+                        f"Cannot evaluate value for '{ks}': {exc}",
+                    ),
+                )
+                continue
+            fp[ks] = val, mini.strip(), maxi.strip(), fixed
+        else:
+            fp[ks] = value.strip()
+
+    return fp, errors
+
+
+# ======================================================================================
 @signature_has_configurable_traits
 class Optimize(DecompositionAnalysis):
     """
@@ -352,133 +571,46 @@ class Optimize(DecompositionAnalysis):
 
     @tr.validate("script")
     def _script_validate(self, proposal):
-        script = proposal.value
-
-        # init some flags
-        modlabel = None
-        common = False
-        fixed = False
-        reference = False
-
-        # create a new FitParameters instance
-        fp = FitParameters()
-
-        # start interpreting -----------------------------------------------------------
-        lines = script.split("\n")
-        lc = 0
-
-        for item in lines:
-            lc += 1  # -------------- count the lines
-            line = item.strip()
-            if line == "" or line.startswith("#"):
-                # this is a blank or comment line, go to next line
-                continue
-            # split around the semi-column
-            s = line.split(":")
-            if len(s) != 2:
-                raise ValueError(
-                    f"Cannot interpret line {lc}: A semi-column is missing?",
-                )
-
-            key, values = s
-            key = key.strip().lower()
-            if key.startswith("model"):
-                modlabel = values.lower().strip()
-                if modlabel not in fp.models:
-                    fp.models.append(modlabel)
-                common = False
-                continue
-            if key.startswith("common") or key.startswith("vars"):
-                common = True
-                modlabel = "common"
-                continue
-            if key.startswith("shape"):
-                shape = values.lower().strip()
-                if shape is None:  # or (shape not in self._list_of_models and shape not
-                    # in self._list_of_baselines):
-                    raise ValueError(
-                        f"Shape of this model `{shape}` was not specified"
-                        f" or is not implemented",
-                    )
-                fp.model[modlabel] = shape
-                common = False
-                continue
-            # elif key.startswith("experiment"):  # must be in common
-            #     if not common:
-            #         raise ValueError(
-            #             "'experiment_...' specification was found outside the common
-            #             block."
-            #         )
-            #     if "variables" in key:
-            #         expvars = values.lower().strip()
-            #         expvars = expvars.replace(",", " ").replace(";", " ")
-            #         expvars = expvars.split()
-            #         fp.expvars.extend(expvars)
-            #     continue
-            if modlabel is None and not common:
-                raise ValueError(
-                    "The first definition should be a label for a model or a block "
-                    "of variables or constants.",
-                )
-            # get the parameters
-            if key.startswith("*"):
-                fixed = True
-                reference = False
-                key = key[1:].strip()
-            elif key.startswith("$"):
-                fixed = False
-                reference = False
-                key = key[1:].strip()
-            elif key.startswith(">"):
-                fixed = True
-                reference = True
-                key = key[1:].strip()
-            else:
-                raise ValueError(
-                    f"Cannot interpret line {lc}: A parameter definition must start"
-                    f" with *,$ or >",
-                )
-
-            # store this parameter
-            s = values.split(",")
-            s = [ss.strip() for ss in s]
-            if len(s) > 1 and ("[" in s[0]) and ("]" in s[1]):  # list
-                s[0] = f"{s[0]}, {s[1]}"
-                if len(s) > 2:
-                    s[1:] = s[2:]
-            if len(s) > 3:
-                raise ValueError(
-                    f"line {lc}: value, min, max should be defined in this order",
-                )
-            if len(s) == 2:
-                raise ValueError(f"only two items in line {lc}")
-                # s.append('none')
-            if len(s) == 1:
-                s.extend(["none", "none"])
-            value, mini, maxi = s
-            if mini.strip().lower() in ["none", ""]:
-                mini = str(-1.0 / sys.float_info.epsilon)
-            if maxi.strip().lower() in ["none", ""]:
-                maxi = str(+1.0 / sys.float_info.epsilon)
-            if modlabel != "common":
-                ks = f"{key}_{modlabel}"
-                fp.common[key] = False
-            else:
-                ks = f"{key}"
-                fp.common[key] = True
-            fp.reference[ks] = reference
-            if not reference:
-                val = value.strip()
-                val = eval(str(val))  # noqa: S307
-                fp[ks] = val, mini.strip(), maxi.strip(), fixed
-            else:
-                fp[ks] = value.strip()
-
-        # update global fp
+        fp, errors = _validate_script_content(proposal.value, self.usermodels)
+        if errors:
+            err = errors[0]
+            raise ValueError(str(err))
         self.fp = fp
+        return proposal.value
 
-        # return validated script
-        return script
+    # ----------------------------------------------------------------------------------
+    # Public API
+    # ----------------------------------------------------------------------------------
+    def validate_script(self, script=None):
+        """
+        Validate a fitting script without running an optimisation.
+
+        Returns a list of :class:`ScriptError` objects describing every problem
+        found in the script.  An empty list means the script is valid.
+
+        Parameters
+        ----------
+        script : str, optional
+            The script to validate.  If ``None`` (default), validates the
+            currently assigned script.
+
+        Returns
+        -------
+        list of :class:`ScriptError`
+            Empty list when the script is valid.
+
+        Examples
+        --------
+        >>> opt = scp.Optimize()
+        >>> errors = opt.validate_script(script)
+        >>> if errors:
+        ...     for err in errors:
+        ...         print(err)
+        """
+        if script is None:
+            script = self.script
+        _, errors = _validate_script_content(script, self.usermodels)
+        return errors
 
     # ----------------------------------------------------------------------------------
     # Private methods
