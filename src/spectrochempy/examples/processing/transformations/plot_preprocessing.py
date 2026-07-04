@@ -20,7 +20,7 @@ import spectrochempy as scp
 # Load a stacked IR dataset and select a single spectral region.
 
 dataset = scp.read_omnic("irdata/nh4y-activation.spg")
-region = dataset[:, 2200.0:1800.0]
+region = dataset[:, 4000.0:2000.0]
 
 # %%
 # **Normalization** scales each spectrum.  The default is ``method='max'``.
