@@ -1,0 +1,163 @@
+# Nightly/weekly rebuild of archived stable documentation versions.
+# This workflow is separated from the main docs build to avoid bloating
+# the post-merge artifact that gets deployed to GitHub Pages.
+#
+# It rebuilds the oldest supported docs and the recent stable version
+# retention set, then deploys them to gh-pages independently.
+
+name: Docs archived versions 📚
+
+on:
+  schedule:
+    - cron: "0 2 * * 0"  # Sunday at 02:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: docs-archived-versions
+  cancel-in-progress: true
+
+jobs:
+  build_and_publish_archived_docs:
+    name: Build and publish archived documentation versions
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      TZ: "Etc/UTC"
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Create virtual environment
+        run: |
+          set -e
+          python -m venv .venv
+          echo "VIRTUAL_ENV=$GITHUB_WORKSPACE/.venv" >> $GITHUB_ENV
+          echo "$GITHUB_WORKSPACE/.venv/bin" >> $GITHUB_PATH
+
+      - name: Install uv and dependencies
+        run: |
+          set -e
+          . .venv/bin/activate
+          python -m pip install --upgrade pip uv
+          uv pip install -e ".[docs]"
+
+      - name: Install SpectroChemPy plugins
+        run: |
+          set -e
+          . .venv/bin/activate
+          for name in $(python -m spectrochempy.ci.install_plugins --list-names); do
+            uv pip install --no-deps -e "plugins/$name"
+          done
+          uv pip install osqp scipy numpy-quaternion tensorly
+
+      - name: Install Pandoc
+        run: |
+          set -e
+          sudo apt-get update
+          sudo apt-get install -y pandoc
+
+      - name: Setup Jupyter kernel
+        run: |
+          set -e
+          . .venv/bin/activate
+          uv pip install ipykernel
+          python3 -m ipykernel install --user --name python3 --display-name "Python 3"
+
+      - name: Clone gh-pages branch
+        run: |
+          mkdir -p build
+          git clone --branch=gh-pages --single-branch \
+            https://github.com/${{ github.repository }}.git build/html
+
+      - name: Build oldest version of the documentation
+        run: |
+          . .venv/bin/activate
+          if [ ! -d build/html/0.6.10 ]; then
+            echo "Recreating oldest docs"
+            python3 docs/make.py -j1 html -T 0.6.10
+          fi
+
+      - name: Build missing stable versions
+        run: |
+          . .venv/bin/activate
+          mapfile -t tags < <(git tag --list 'spectrochempy-v*' | sort -V)
+          keep_count=4
+          start_index=0
+          if (( ${#tags[@]} > keep_count )); then
+            start_index=$((${#tags[@]} - keep_count))
+          fi
+
+          for ((i=start_index; i<${#tags[@]}; i++)); do
+            tag="${tags[i]}"
+            version="${tag#spectrochempy-v}"
+            if [ ! -d "build/html/$version" ]; then
+              echo "Building v$version docs"
+              python3 docs/make.py -j1 html -T "$tag"
+            fi
+          done
+
+      - name: Prune stable version retention set
+        run: |
+          keep_count=4
+          oldest_supported="0.6.10"
+
+          mapfile -t versions < <(
+            find build/html -mindepth 1 -maxdepth 1 -type d -printf '%f\n' |
+              grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' |
+              sort -V
+          )
+
+          declare -A keep_versions=()
+
+          if (( ${#versions[@]} > 0 )); then
+            start_index=0
+            if (( ${#versions[@]} > keep_count )); then
+              start_index=$((${#versions[@]} - keep_count))
+            fi
+
+            for ((i=start_index; i<${#versions[@]}; i++)); do
+              keep_versions["${versions[i]}"]=1
+            done
+          fi
+
+          if [[ -d "build/html/$oldest_supported" ]]; then
+            keep_versions["$oldest_supported"]=1
+          fi
+
+          for version in "${versions[@]}"; do
+            if [[ -z "${keep_versions[$version]:-}" ]]; then
+              rm -rf "build/html/$version"
+              echo "Removed archived docs version: $version"
+            fi
+          done
+
+      - name: Upload archived docs artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: docs-archived-versions
+          path: build/html/
+          retention-days: 5
+
+      - name: Deploy archived versions to gh-pages
+        if: ${{ !github.event.act }}
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: build/html/
+          single-commit: true
+          repository-name: ${{ github.repository }}
