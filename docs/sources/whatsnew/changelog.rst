@@ -161,3 +161,13 @@ Developer
   Full ``sklearn.base.clone()`` compatibility is best-effort because
   complex traitlets traits (e.g., lists) may fail sklearn's strict
   identity check.
+
+- CI: Moved archived stable docs builds (oldest supported + recent
+  versions) out of the per-push ``build_docs.yml`` workflow into a
+  dedicated weekly ``build_docs_archived_versions.yml`` workflow.  This
+  shrinks the main deployment artifact (~382 MB previously) and avoids
+  GitHub Pages ``syncing_files`` timeouts caused by oversized bundles.
+  The main workflow now builds only the current version (plus preview
+  docs for documentation branches).  Added ``timeout-minutes: 360`` to
+  both workflows and ``continue-on-error: true`` on archived-version
+  steps so a single failing old-tag build does not block the rest.

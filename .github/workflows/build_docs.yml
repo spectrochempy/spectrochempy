@@ -59,6 +59,7 @@ jobs:
 
     name: Build and publish documentation
     runs-on: ubuntu-latest
+    timeout-minutes: 360
     env:
       TZ: "Etc/UTC"
 
@@ -297,37 +298,9 @@ jobs:
           python .github/workflows/scripts/ci_diagnostics.py summary \
             --timings "${CI_TIMING_FILE:-}"
 
-      # ---------- build oldest version (stable only) ----------
-      - name: Build oldest version of the documentation
-        if: steps.publish.outputs.mode == 'stable'
-        run: |
-          . .venv/bin/activate
-          if [ ! -d build/html/0.6.10 ]; then
-            echo "Recreating oldest docs"
-            python3 docs/make.py -j1 html -T 0.6.10
-          fi
-
-      # ---------- build missing stable versions for dropdown ----------
-      - name: Build missing stable versions
-        if: steps.publish.outputs.mode == 'stable'
-        run: |
-          . .venv/bin/activate
-          mapfile -t tags < <(git tag --list 'spectrochempy-v*' | sort -V)
-          keep_count=4
-          start_index=0
-          if (( ${#tags[@]} > keep_count )); then
-            start_index=$((${#tags[@]} - keep_count))
-          fi
-
-          for ((i=start_index; i<${#tags[@]}; i++)); do
-            tag="${tags[i]}"
-            version="${tag#spectrochempy-v}"
-            # Build docs for this version if not already present
-            if [ ! -d "build/html/$version" ]; then
-              echo "Building v$version docs"
-              python3 docs/make.py -j1 html -T "$tag"
-            fi
-          done
+      # Archived stable versions are built separately by
+      # build_docs_archived_versions.yml (weekly) to avoid bloating the
+      # post-merge artifact deployed to GitHub Pages.
 
       - name: Prune legacy preview documentation
         if: steps.publish.outputs.mode == 'stable'
