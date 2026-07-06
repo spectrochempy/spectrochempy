@@ -181,12 +181,17 @@ class _wdfReader:
         dataset.data = data
         dataset.title = "count"
 
+        # Store YLST metadata (per-spectrum metadata, not a coordinate axis)
+        dataset.meta.ylst_data = coord_meta.data
+        dataset.meta.ylst_title = coord_meta.title
+        dataset.meta.ylst_units = coord_meta.units
+
         # Fill the dataset with the coordinates
         odim = list(other_dimensions.values())
         if self._meta.measurement_type == MeasurementType.Single:
-            dataset.set_coordset(x=coord_x, y=odim[0], m=coord_meta)
+            dataset.set_coordset(x=coord_x, y=odim[0])
         elif self._meta.measurement_type == MeasurementType.Series:
-            dataset.set_coordset(x=coord_x, y=odim[::-1], m=coord_meta)
+            dataset.set_coordset(x=coord_x, y=odim[::-1])
         elif self._meta.measurement_type == MeasurementType.Mapping:
             if self._meta.map_area_type == MapAreaType.Unspecified:
                 self._meta.map_area_type = MapAreaType.ColumnMajor
@@ -202,7 +207,7 @@ class _wdfReader:
                 dist = dist - dist[0]
                 distance = Coord(dist, units=X.units, title="distance")
                 coord_y = CoordSet(distance, Time, Y, X)
-                dataset.set_coordset(x=coord_x, y=coord_y, m=coord_meta)
+                dataset.set_coordset(x=coord_x, y=coord_y)
 
             # xy column major scan
             elif self._meta.map_area_type == MapAreaType.ColumnMajor:
@@ -211,7 +216,7 @@ class _wdfReader:
                 if np.all(np.array(map_shape) > 1):
                     X.data = X.data.reshape(map_shape[::-1])[0]
                     Y.data = Y.data.reshape(map_shape[::-1])[:, 0]
-                dataset.set_coordset(x=coord_x, y=X, m=coord_meta, z=Y)
+                dataset.set_coordset(x=coord_x, y=X, z=Y)
 
             # not implemented yet
             else:

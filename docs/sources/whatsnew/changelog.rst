@@ -89,6 +89,11 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- WiRE (``.wdf``) reader no longer attaches YLST data as a confusing auxiliary ``m``
+  coordinate in ``coordset``. The YLST data is now stored on ``dataset.meta`` (as
+  ``ylst_data``, ``ylst_title``, ``ylst_units``) where it belongs as per-spectrum
+  metadata. (#1332)
+
 - ``MCRALS`` correctness fixes: empty ``closureConc`` no longer runs a
   wasteful closure block (PR1 B4); single-component closure targets
   (``closureConc=[0]``, ``closureConc="all"``) are now honoured instead of
