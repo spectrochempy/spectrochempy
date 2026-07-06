@@ -30,6 +30,7 @@ class ItemKind(str):
     DATA = "data"
     LABEL = "label"
     BLOCK = "block"
+    HTML = "html"
 
 
 class DisplayItem:
@@ -147,6 +148,8 @@ def _render_sections(sections: list[DisplaySection]) -> str:
                     items_html.append(f'<div class="label">{v}</div>')
             elif item.kind == "block":
                 items_html.append(f"<div>{v}</div>")
+            elif item.kind == "html":
+                items_html.append(v)
 
         body = "\n".join(items_html)
 
@@ -251,6 +254,10 @@ def _html_heading(obj):
                         parts.append(name)
         if parts:
             extras = " — " + ", ".join(parts)
+
+    # ResultBase / AnalysisResult / FitResult: show estimator name
+    elif hasattr(obj, "_estimator"):
+        extras = f" — {obj._estimator}"
 
     return f"{type_name}{name_part}{extras}"
 

@@ -15,6 +15,12 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 New Features
 ~~~~~~~~~~~~
 
+- ``AnalysisResult`` (PCA, NMF, PLS, MCR‑ALS, …) and ``FitResult`` now have a
+  rich ``_repr_html_`` for Jupyter notebooks, with collapsible Parameters,
+  Outputs, and Diagnostics sections and recursive rendering of embedded
+  NDDataset objects using their native HTML representation.  The text
+  ``__repr__`` and the public API are unchanged. (#1299)
+
 - ``find_peaks(..., as_result=True)`` now returns a lightweight
   ``PeakFindingResult`` object with ``peaks``, ``properties``, a ``table``
   view, ``to_dict()``, and ``to_csv()`` helpers. The default return value
