@@ -25,19 +25,15 @@ New Features
   NDDataset objects using their native HTML representation.  The text
   ``__repr__`` and the public API are unchanged. (#1299)
 
-- ``find_peaks(..., as_result=True)`` now returns a lightweight
+- Peak analysis workflows are now easier to inspect and validate:
+  ``find_peaks(..., as_result=True)`` returns a lightweight
   ``PeakFindingResult`` object with ``peaks``, ``properties``, a ``table``
-  view, ``to_dict()``, and ``to_csv()`` helpers. The default return value
+  view, ``to_dict()``, and ``to_csv()`` helpers, while
+  ``Optimize.validate_script(script=None)`` can validate a curve-fitting
+  script before launching the optimisation and returns structured
+  ``ScriptError`` diagnostics.  The default ``find_peaks()`` return value
   remains the historical ``(peaks, properties)`` tuple, and the new helpers do
-  not add a pandas dependency.
-
-- ``Optimize.validate_script(script=None)`` — new public method that validates a
-  curve-fitting script before launching the optimisation.  Returns a list of
-  ``ScriptError`` objects with the line number, offending line, and a
-  human-readable explanation, or an empty list when the script is valid.
-  The existing trait-validator behaviour (``ValueError`` on invalid assignment)
-  is fully preserved.  New ``ScriptError`` class provides structured access to
-  validation diagnostics. (#1351)
+  not add a pandas dependency. (#1351)
 
 - SpectroChemPy now exposes top-level helpers for common 1D line shapes:
   ``scp.gaussian(...)``, ``scp.lorentzian(...)``, ``scp.voigt(...)``,
@@ -53,31 +49,18 @@ New Features
   SpectroChemPy API, without falling back to ``np.column_stack(...)``
   or manual `NDDataset` wrapping.
 
-- New preprocessing operations in `spectrochempy.processing.transformation`:
-  ``normalize()``, ``center()``, ``autoscale()``, ``snv()``, ``msc()``,
-  ``pareto_scale()``, ``range_scale()``, ``robust_scale()``, and
-  ``log_transform()``.
-  These implement standard chemometric scaling and scatter-correction steps
-  as first-class NDDataset methods, removing the need for manual NumPy
-  arithmetic in notebooks.
-
-- Added stateful transformer classes for ML workflows:
-  ``CenterTransformer``, ``AutoscaleTransformer``, ``SNVTransformer``,
+- SpectroChemPy now has a fuller preprocessing API for chemometric workflows:
+  standard operations such as ``normalize()``, ``center()``, ``autoscale()``,
+  ``snv()``, ``msc()``, ``pareto_scale()``, ``range_scale()``,
+  ``robust_scale()``, and ``log_transform()`` are available as first-class
+  `NDDataset` methods, and matching stateful transformer classes
+  (``CenterTransformer``, ``AutoscaleTransformer``, ``SNVTransformer``,
   ``NormalizeTransformer``, ``MSCTransformer``, ``ParetoScaleTransformer``,
-  ``RangeScaleTransformer``, ``RobustScaleTransformer``, and ``LogTransformer``.
-  Each implements ``fit()``, ``transform()``, ``fit_transform()``, and
-  ``inverse_transform()`` (where applicable), allowing learned statistics
-  (e.g., mean, std, reference spectrum, or norm from a training set) to be
-  reused safely on test data or new batches.  They complement the existing
-  procedural API and are registered as top-level API objects and NDDataset
-  methods.
-
-- All preprocessing transformers now expose ``get_params()`` and
-  ``set_params(**params)`` following scikit-learn estimator conventions,
-  plus a clear ``__repr__``.  This enables cloning and parameter-grid
-  exploration without adding scikit-learn as a dependency.  When
-  scikit-learn is installed, ``sklearn.base.clone()`` works out of the
-  box.
+  ``RangeScaleTransformer``, ``RobustScaleTransformer``, ``LogTransformer``)
+  support ``fit()``, ``transform()``, ``fit_transform()``, and
+  ``inverse_transform()`` where applicable.  The transformers also expose
+  ``get_params()`` / ``set_params(**params)`` and a clear ``__repr__``,
+  enabling safer reuse on new data and easier parameter inspection or cloning.
 
 - 2D ``plot(method="lines"/"stack")`` now automatically uses coordinate labels
   as matplotlib line labels, so that ``ax.legend()`` shows meaningful names
@@ -100,36 +83,25 @@ Bug Fixes
   ``ylst_data``, ``ylst_title``, ``ylst_units``) where it belongs as per-spectrum
   metadata. (#1332)
 
-- ``MCRALS`` correctness fixes: empty ``closureConc`` no longer runs a
-  wasteful closure block (PR1 B4); single-component closure targets
-  (``closureConc=[0]``, ``closureConc="all"``) are now honoured instead of
-  being silently disabled by ``np.any`` (issue #911); ``normSpec='max'`` /
-  ``'euclid'`` with a zero-norm spectrum no longer produces ``nan``/``inf``
-  (PR1 B9); ``getConc`` / ``getSpec`` dispatch now correctly uses
-  ``argsGetSpec`` / ``kwargsGetSpec`` instead of the ``argsGetSpecc`` typo
-  (PR1 B1) and accepts bare-profile, 2-tuple ``(profiles, new_args)``, and
-  3-tuple ``(profiles, new_args, extra)`` returns (PR1 B2);
-  ``getSt_to_St_idx`` with ``None`` entries no longer crashes in the
-  validator's ``max()`` call (PR1 B5); ``_unimodal_1D`` no longer
-  infinite-loops or indexes out of bounds for pathological tolerances
-  (``tol < 1``, including ``tol == 1.0``) while remaining byte-identical
-  in the documented regime (``tol >= 1.1``) (PR1 B6); ``monoIncTol`` and
-  ``monoDecTol`` are now documented as ``Float`` traits (PR1 B7/B8).
+- ``MCRALS`` is now more robust in constrained and hard-model workflows:
+  closure constraints are applied correctly for empty and single-component
+  selections, zero-norm spectral normalization no longer produces
+  ``nan``/``inf``, ``getConc`` / ``getSpec`` argument handling is fixed, and
+  pathological unimodality settings no longer trigger crashes or infinite
+  loops. Validation around ``getSt_to_St_idx`` is also safer. (issue #911)
 
-- Fixed scatter plotting regressions introduced after 0.8.2:
-  ``plot_multiple(..., method="scatter")`` now shows markers again,
-  single-dataset ``plot_multiple`` calls preserve the requested plotting method,
-  and ``plot(scatter=True)`` once again selects scatter-style plotting.
-
-- Fixed several plotting API inconsistencies: ``multiplot()`` now preserves the
-  requested plotting method for single datasets and accepts ``nrows`` /
-  ``ncols`` aliases; 1D artists now honor ``alpha``, ``markeredgewidth``, and
-  ``mew``; 2D contour-style plots accept ``alpha`` and ``levels`` consistently;
-  ``use_plotly=True`` now fails with a clear error when Plotly support is
-  unavailable; and legacy ``lines`` / ``pen`` aliases continue to work across
+- Plotting behavior is more consistent again: scatter plots now show markers as
+  expected, single-dataset ``plot_multiple()`` / ``multiplot()`` calls preserve
+  the requested plotting method, 1D and 2D artists honor more style keywords
+  consistently, ``use_plotly=True`` fails with a clear error when Plotly is not
+  available, and legacy ``lines`` / ``pen`` aliases continue to work across
   dimensional fallbacks.
 
-- Fixed several processing subpackage bugs: multi-dimensional ZPD detection in interferogram apodization now uses the median of per-row argmax positions; ``rs()``, ``ls()``, and ``roll()`` now pass ``axis=-1`` to ``np.roll`` for proper multi-dimensional shifting; ``denoise()`` guard now checks ``ndim != 2`` instead of the incorrect combined condition, and the ratio display factor is corrected; and ``npy.dot()`` ``isinstance`` check now tests ``b`` instead of ``a`` twice. (#xxx)
+- Fixed several processing regressions and edge cases: multi-dimensional ZPD
+  detection in interferogram apodization is more reliable, ``rs()``, ``ls()``,
+  and ``roll()`` now shift multi-dimensional data along the correct axis,
+  ``denoise()`` validates its 2D input correctly, and ``npy.dot()`` no longer
+  checks the wrong operand type.
 
 - ``PLSRegression`` now works with a 1D ``NDDataset`` as the response variable
   ``y``. This fixes failures in ``predict()``, ``y_scores``, ``y_loadings``,
