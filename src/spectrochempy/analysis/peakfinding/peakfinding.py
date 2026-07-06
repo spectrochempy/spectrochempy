@@ -15,7 +15,7 @@ specific to spectroscopic analysis, including:
 - Peak interpolation for improved accuracy
 """
 
-__all__ = ["PeakFindingResult", "find_peaks"]
+__all__ = ["PeakFindingResult", "PeakTable", "find_peaks"]
 
 __dataset_methods__ = ["find_peaks"]
 
@@ -64,6 +64,153 @@ def _stringify_csv_value(value):
     return str(value)
 
 
+_BASE_PEAK_COLUMNS = ("index", "position", "height")
+_PROPERTY_COLUMN_NAMES = {
+    "peak_heights": "peak_height",
+    "prominences": "prominence",
+    "widths": "width",
+    "width_heights": "width_height",
+    "left_bases": "left_base",
+    "right_bases": "right_base",
+    "left_ips": "left_ip",
+    "right_ips": "right_ip",
+    "plateau_sizes": "plateau_size",
+    "left_edges": "left_edge",
+    "right_edges": "right_edge",
+}
+
+
+def _peak_rows(peaks, properties, *, raw_property_names=False):
+    """Build row dictionaries from peak positions, heights, and properties."""
+    if peaks is None:
+        return []
+
+    n_peaks = len(peaks)
+    positions = _peak_positions(peaks)
+    heights = np.ravel(peaks.data)
+    if peaks.units is not None:
+        heights = heights * peaks.units
+    rows = []
+
+    per_peak_properties = {}
+    for key, values in properties.items():
+        try:
+            if len(values) == n_peaks:
+                per_peak_properties[key] = values
+        except TypeError:
+            continue
+
+    for index in range(n_peaks):
+        row = {
+            "index": index,
+            "position": _sequence_item(positions, index),
+            "height": _sequence_item(heights, index),
+        }
+        for key, values in per_peak_properties.items():
+            column = key if raw_property_names else _PROPERTY_COLUMN_NAMES.get(key, key)
+            row[column] = _sequence_item(values, index)
+        rows.append(row)
+
+    return rows
+
+
+def _peak_positions(peaks):
+    """Return peak positions from coordinates or point indexes."""
+    if peaks.coordset is None:
+        return np.arange(len(peaks))
+    coord = peaks.coordset[peaks.dims[-1]]
+    return coord.values
+
+
+def _fieldnames(rows, *, columns=_BASE_PEAK_COLUMNS):
+    """Return stable field names from base columns plus row-specific columns."""
+    fieldnames = list(columns)
+    for row in rows:
+        for key in row:
+            if key not in fieldnames:
+                fieldnames.append(key)
+    return fieldnames
+
+
+class PeakTable:
+    """
+    Dependency-light tabular view of detected peaks.
+
+    Parameters
+    ----------
+    peaks : NDDataset or None
+        Dataset containing identified peak positions and heights.
+    properties : dict or None
+        Peak properties returned by :func:`scipy.signal.find_peaks`.
+
+    Notes
+    -----
+    ``PeakTable`` uses user-facing singular column names such as
+    ``peak_height``, ``prominence`` and ``width``. The raw SciPy property
+    dictionary remains available on :class:`PeakFindingResult`.
+    """
+
+    __slots__ = ("peaks", "properties")
+
+    def __init__(self, peaks, properties=None):
+        self.peaks = peaks
+        self.properties = dict(properties or {})
+
+    def __len__(self):
+        return 0 if self.peaks is None else len(self.peaks)
+
+    def __iter__(self):
+        return iter(self.to_dict())
+
+    def __repr__(self):
+        return f"PeakTable(n_peaks={len(self)})"
+
+    @property
+    def columns(self):
+        """Return stable base columns plus currently available optional columns."""
+        return tuple(_fieldnames(self.to_dict()))
+
+    def to_dict(self):
+        """
+        Return peak information as a list of dictionaries.
+
+        Each dictionary contains ``index``, ``position``, ``height`` and any
+        available per-peak properties. Values keep their native units when they
+        are unit-bearing quantities.
+        """
+        return _peak_rows(self.peaks, self.properties)
+
+    def to_csv(self, path, *, delimiter=","):
+        """
+        Write peak information to a CSV file.
+
+        Parameters
+        ----------
+        path : str or pathlib.Path
+            Destination path.
+        delimiter : str, default=','
+            CSV delimiter.
+
+        Returns
+        -------
+        pathlib.Path
+            The written path.
+        """
+        path = Path(path)
+        rows = self.to_dict()
+        fieldnames = _fieldnames(rows)
+
+        with path.open("w", newline="", encoding="utf-8") as fid:
+            writer = csv.DictWriter(fid, fieldnames=fieldnames, delimiter=delimiter)
+            writer.writeheader()
+            for row in rows:
+                writer.writerow(
+                    {key: _stringify_csv_value(row.get(key, "")) for key in fieldnames}
+                )
+
+        return path
+
+
 class PeakFindingResult:
     """
     Structured result returned by :func:`find_peaks`.
@@ -98,6 +245,11 @@ class PeakFindingResult:
     def __repr__(self):
         return f"PeakFindingResult(n_peaks={len(self)})"
 
+    @property
+    def table(self):
+        """Return a dependency-light tabular view of the detected peaks."""
+        return PeakTable(self.peaks, self.properties)
+
     def to_dict(self):
         """
         Return peak information as a list of dictionaries.
@@ -106,35 +258,7 @@ class PeakFindingResult:
         per-peak properties whose length matches the number of detected peaks.
         Values keep their native units when they are unit-bearing quantities.
         """
-        if self.peaks is None:
-            return []
-
-        n_peaks = len(self)
-        positions = self._positions()
-        heights = np.ravel(self.peaks.data)
-        if self.peaks.units is not None:
-            heights = heights * self.peaks.units
-        rows = []
-
-        per_peak_properties = {}
-        for key, values in self.properties.items():
-            try:
-                if len(values) == n_peaks:
-                    per_peak_properties[key] = values
-            except TypeError:
-                continue
-
-        for index in range(n_peaks):
-            row = {
-                "index": index,
-                "position": _sequence_item(positions, index),
-                "height": _sequence_item(heights, index),
-            }
-            for key, values in per_peak_properties.items():
-                row[key] = _sequence_item(values, index)
-            rows.append(row)
-
-        return rows
+        return _peak_rows(self.peaks, self.properties, raw_property_names=True)
 
     def to_csv(self, path, *, delimiter=","):
         """
@@ -154,11 +278,7 @@ class PeakFindingResult:
         """
         path = Path(path)
         rows = self.to_dict()
-        fieldnames = ["index", "position", "height"]
-        for row in rows:
-            for key in row:
-                if key not in fieldnames:
-                    fieldnames.append(key)
+        fieldnames = _fieldnames(rows)
 
         with path.open("w", newline="", encoding="utf-8") as fid:
             writer = csv.DictWriter(fid, fieldnames=fieldnames, delimiter=delimiter)
@@ -169,12 +289,6 @@ class PeakFindingResult:
                 )
 
         return path
-
-    def _positions(self):
-        if self.peaks.coordset is None:
-            return np.arange(len(self.peaks))
-        coord = self.peaks.coordset[self.peaks.dims[-1]]
-        return coord.values
 
 
 def _as_peakfinding_quantity(value):

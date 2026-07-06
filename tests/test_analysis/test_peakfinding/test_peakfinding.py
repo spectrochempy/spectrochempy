@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 
 from spectrochempy.analysis.peakfinding.peakfinding import PeakFindingResult
+from spectrochempy.analysis.peakfinding.peakfinding import PeakTable
 from spectrochempy.analysis.peakfinding.peakfinding import find_peaks
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
@@ -125,6 +126,10 @@ def test_no_peaks_result_case():
     assert result.peaks is None
     assert result.properties == {}
     assert result.to_dict() == []
+    assert isinstance(result.table, PeakTable)
+    assert len(result.table) == 0
+    assert result.table.columns == ("index", "position", "height")
+    assert result.table.to_dict() == []
 
 
 def test_three_point_peak():
@@ -194,6 +199,28 @@ def test_peak_finding_result_to_dict(simple_peaks_dataset):
     assert "widths" in rows[0]
 
 
+def test_peak_table_exposes_singular_column_names(simple_peaks_dataset):
+    """PeakTable provides user-facing singular names while properties stay raw."""
+    result = find_peaks(simple_peaks_dataset, height=0.5, width=0.1, as_result=True)
+
+    table = result.table
+    rows = table.to_dict()
+
+    assert isinstance(table, PeakTable)
+    assert repr(table) == "PeakTable(n_peaks=3)"
+    assert len(table) == 3
+    assert list(table) == rows
+    assert "peak_height" in table.columns
+    assert "width" in table.columns
+    assert "peak_heights" not in table.columns
+    assert "widths" not in table.columns
+    assert rows[0]["position"].units == ur("cm^-1")
+    assert rows[0]["height"].units == ur.absorbance
+    assert rows[0]["peak_height"].units == ur.absorbance
+    assert rows[0]["width"].units == ur("cm^-1")
+    assert "peak_heights" in result.properties
+
+
 def test_peak_finding_result_to_dict_single_peak(simple_peaks_dataset):
     """Single-peak coordinate values can be scalar quantities."""
     result = find_peaks(
@@ -219,6 +246,33 @@ def test_peak_finding_result_to_csv(simple_peaks_dataset, tmp_path):
     assert text.startswith("index,position,height")
     assert "peak_heights" in text
     assert "widths" in text
+
+
+def test_peak_table_to_csv(simple_peaks_dataset, tmp_path):
+    """PeakTable writes singular user-facing column names."""
+    result = find_peaks(simple_peaks_dataset, height=0.5, width=0.1, as_result=True)
+    path = tmp_path / "peak-table.csv"
+
+    written = result.table.to_csv(path)
+
+    assert written == path
+    text = path.read_text(encoding="utf-8")
+    assert text.startswith("index,position,height")
+    assert "peak_height" in text
+    assert "width" in text
+    assert "peak_heights" not in text
+    assert "widths" not in text
+
+
+def test_peak_table_no_peak_csv_header(tmp_path):
+    """Empty PeakTable writes a stable header-only CSV for batch workflows."""
+    table = PeakTable(None, None)
+    path = tmp_path / "empty-peak-table.csv"
+
+    written = table.to_csv(path)
+
+    assert written == path
+    assert path.read_text(encoding="utf-8") == "index,position,height\n"
 
 
 def test_single_points_peak():
