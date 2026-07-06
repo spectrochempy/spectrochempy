@@ -345,6 +345,13 @@ should not be edited manually.
 Agents should update `changelog.rst` only and leave generation of derived files
 to the normal project workflow.
 
+When `docs/sources/whatsnew/changelog.rst` is modified, agents must run the
+normal generation workflow (for example the relevant pre-commit hook or the
+documentation build tooling) so `docs/sources/whatsnew/latest.rst` is
+regenerated. The generated `latest.rst` diff must be included in the final
+commit; omitting it causes CI failures. The prohibition is against hand-editing
+generated files, not against committing tool-generated updates.
+
 ---
 
 # Cost-Aware Development
