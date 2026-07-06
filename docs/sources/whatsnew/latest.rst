@@ -145,7 +145,10 @@ Developer
   (read dynamically so the list stays single-source),
   (2) `docs/sources/whatsnew/changelog.rst` has been updated.
   Both checks can be bypassed via the labels `non-standard-prefix` and
-  `no-changelog` respectively.
+  `no-changelog` respectively. The PR-title prefix extraction now tolerates
+  Markdown table spacing in `CONTRIBUTING.md`, and Dependabot PRs are exempt
+  from both the prefix and changelog checks so automated dependency updates do
+  not require manual title edits or labels.
 
 - DEV: Added a `commit-msg` pre-commit hook (`check_commit_prefix`) that
   reads the allowed prefixes directly from `CONTRIBUTING.md` and rejects

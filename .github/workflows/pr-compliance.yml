@@ -19,12 +19,16 @@ jobs:
       - name: Extract allowed prefixes from CONTRIBUTING.md
         id: prefixes
         run: |
-          PREFIXES=$(grep -E '^\| `\w+:`' CONTRIBUTING.md | sed -E "s/.*\| \`([^\`]+)\`\|.*/\1/" | tr '\n' '|' | sed 's/|$//')
+          PREFIXES=$(awk -F'`' '/^\| `[A-Z]+:`[[:space:]]*\|/ { print $2 }' CONTRIBUTING.md | tr '\n' '|' | sed 's/|$//')
+          if [[ -z "$PREFIXES" ]]; then
+            echo "::error::No PR title prefixes could be extracted from CONTRIBUTING.md."
+            exit 1
+          fi
           echo "regex=^(${PREFIXES})" >> "$GITHUB_OUTPUT"
           echo "Allowed prefixes: ${PREFIXES}"
 
       - name: Check PR title prefix
-        if: "!contains(github.event.pull_request.labels.*.name, 'non-standard-prefix')"
+        if: ${{ github.event.pull_request.user.login != 'dependabot[bot]' && !contains(github.event.pull_request.labels.*.name, 'non-standard-prefix') }}
         env:
           TITLE: ${{ github.event.pull_request.title }}
           PREFIX_REGEX: ${{ steps.prefixes.outputs.regex }}
@@ -46,7 +50,7 @@ jobs:
           fetch-depth: 0
 
       - name: Check changelog updated
-        if: "!contains(github.event.pull_request.labels.*.name, 'no-changelog')"
+        if: ${{ github.event.pull_request.user.login != 'dependabot[bot]' && !contains(github.event.pull_request.labels.*.name, 'no-changelog') }}
         run: |
           # fetch-depth:0 in checkout already has full history; no shallow fetch needed
           CHANGED=$(git diff --name-only origin/${{ github.base_ref }}..HEAD)
