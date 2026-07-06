@@ -361,6 +361,15 @@ _ = ax.legend(fontsize=6)
 # of the detected peaks in the
 # `properties` dictionary.
 #
+# If a tabular representation is needed for reporting or export, use
+# `as_result=True`. This keeps the default tuple return unchanged, but returns a
+# lightweight result object with dictionary rows and CSV export helpers.
+
+# %%
+result = s.find_peaks(height=(0.15, 0.22), prominence=0, as_result=True)
+result.to_dict()
+
+# %% [markdown]
 # #### Prominence
 #
 # The prominence of a peak can be defined as the vertical distance from the peak’s
