@@ -5,6 +5,11 @@
 # ======================================================================================
 """Result object infrastructure for analysis and fit outputs."""
 
+from spectrochempy.utils.print import DisplayItem
+from spectrochempy.utils.print import DisplaySection
+from spectrochempy.utils.print import _html_heading
+from spectrochempy.utils.print import _render_sections
+
 __all__ = ["ResultBase", "AnalysisResult", "FitResult"]
 
 
@@ -78,6 +83,66 @@ class ResultBase:
                 if isinstance(name, str) and name.isidentifier()
             )
         return sorted(names)
+
+    # ----------------------------------------------------------------------------------
+    # HTML representation (Jupyter notebooks)
+    # ----------------------------------------------------------------------------------
+    def _repr_sections(self):
+        sections: list[DisplaySection] = []
+
+        # --- Summary : estimator ---
+        sections.append(
+            DisplaySection(
+                "summary", "", [DisplayItem("field", self._estimator, "estimator")]
+            )
+        )
+
+        # --- Parameters ---
+        if self._parameters:
+            params = [
+                DisplayItem("field", str(v), k) for k, v in self._parameters.items()
+            ]
+            sections.append(
+                DisplaySection("data", f"Parameters ({len(params)})", params)
+            )
+
+        # --- Outputs ---
+        if self._outputs:
+            outputs = []
+            for name, obj in self._outputs.items():
+                if hasattr(obj, "_repr_html_"):
+                    outputs.append(DisplayItem("html", obj._repr_html_(), name))
+                else:
+                    shape = getattr(obj, "shape", None)
+                    label = str(shape) if shape is not None else type(obj).__name__
+                    outputs.append(DisplayItem("field", label, name))
+            sections.append(
+                DisplaySection("data", f"Outputs ({len(outputs)})", outputs)
+            )
+
+        # --- Diagnostics ---
+        if self._diagnostics:
+            diags = []
+            for name, obj in self._diagnostics.items():
+                if hasattr(obj, "_repr_html_"):
+                    diags.append(DisplayItem("html", obj._repr_html_(), name))
+                else:
+                    diags.append(DisplayItem("field", str(obj), name))
+            sections.append(
+                DisplaySection("data", f"Diagnostics ({len(diags)})", diags)
+            )
+
+        return sections
+
+    def _repr_html_(self):
+        sections = self._repr_sections()
+        body = _render_sections(sections)
+        heading = _html_heading(self)
+        return (
+            '<div class="scp-output">'
+            f"<details open><summary>{heading}</summary>\n{body}\n"
+            "</details></div>"
+        )
 
     # ----------------------------------------------------------------------------------
     # Representation

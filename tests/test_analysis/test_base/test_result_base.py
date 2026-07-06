@@ -147,3 +147,79 @@ class TestFitResult:
         fitted = object()
         result = FitResult(estimator="Optimize", outputs={"fitted": fitted})
         assert result.fitted is fitted
+
+
+class TestResultBaseHTMLRepr:
+    """Behavioral tests for the HTML representation of ResultBase."""
+
+    def test_repr_html_returns_valid_html(self):
+        result = ResultBase(estimator="PCA")
+        html = result._repr_html_()
+        assert html.startswith('<div class="scp-output">')
+        assert "PCA" in html
+
+    def test_repr_html_has_collapsible_sections(self):
+        result = ResultBase(
+            estimator="Test",
+            parameters={"n_components": 5, "tol": 1e-6},
+            outputs={"scores": np.ones((10, 5))},
+            diagnostics={"explained_variance": np.array([0.9, 0.1])},
+        )
+        html = result._repr_html_()
+        assert "<details" in html
+        assert "Parameters (2)" in html
+        assert "Outputs" in html
+        assert "Diagnostics" in html
+        assert "tol" in html
+        assert "scores" in html
+
+    def test_repr_html_empty_sections_omitted(self):
+        result = ResultBase(estimator="Test")
+        html = result._repr_html_()
+        assert "Parameters" not in html
+        assert "Outputs" not in html
+        assert "Diagnostics" not in html
+
+    def test_repr_html_embeds_nddataset_repr(self):
+        from spectrochempy import NDDataset
+
+        scores = NDDataset(np.ones((10, 5)))
+        result = ResultBase(
+            estimator="PCA",
+            outputs={"scores": scores},
+        )
+        html = result._repr_html_()
+        assert "NDDataset" in html
+        assert "float64" in html
+
+    def test_repr_html_heading_shows_estimator(self):
+        result = ResultBase(estimator="MyEstimator")
+        heading = result._repr_html_()
+        assert "MyEstimator" in heading
+
+    def test_repr_html_analysis_result(self):
+        result = AnalysisResult(
+            estimator="PCA",
+            parameters={"n_components": 3},
+            outputs={"scores": np.ones((10, 3))},
+        )
+        html = result._repr_html_()
+        assert "PCA" in html
+        assert "AnalysisResult" in html
+
+    def test_repr_html_fit_result(self):
+        result = FitResult(
+            estimator="Optimize",
+            outputs={"fitted": np.ones((10,))},
+        )
+        html = result._repr_html_()
+        assert "Optimize" in html
+        assert "FitResult" in html
+
+    def test_repr_html_output_count_in_header(self):
+        result = ResultBase(
+            estimator="Test",
+            outputs={"a": np.ones(3), "b": np.ones((2, 3)), "c": np.ones(5)},
+        )
+        html = result._repr_html_()
+        assert "Outputs (3)" in html
