@@ -16,10 +16,10 @@ New Features
 ~~~~~~~~~~~~
 
 - ``find_peaks(..., as_result=True)`` now returns a lightweight
-  ``PeakFindingResult`` object with ``peaks``, ``properties``, ``to_dict()``,
-  and ``to_csv()`` helpers. The default return value remains the historical
-  ``(peaks, properties)`` tuple, and the new helpers do not add a pandas
-  dependency.
+  ``PeakFindingResult`` object with ``peaks``, ``properties``, a ``table``
+  view, ``to_dict()``, and ``to_csv()`` helpers. The default return value
+  remains the historical ``(peaks, properties)`` tuple, and the new helpers do
+  not add a pandas dependency.
 
 - ``Optimize.validate_script(script=None)`` — new public method that validates a
   curve-fitting script before launching the optimisation.  Returns a list of
