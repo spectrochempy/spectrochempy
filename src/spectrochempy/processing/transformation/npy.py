@@ -62,7 +62,11 @@ def dot(a, b, strict=False, out=None):
 
     if not isinstance(a, NDDataset) and not isinstance(b, NDDataset):
         # must be between numpy object or something non valid. Let numpy
-        # deal with this
+        # deal with this. Route masked-array inputs through numpy.ma.dot so
+        # the ``strict`` argument is honoured (plain np.dot would silently
+        # ignore it); otherwise fall back to the regular np.dot.
+        if isinstance(a, np.ma.MaskedArray) or isinstance(b, np.ma.MaskedArray):
+            return np.ma.dot(a, b, strict=strict)
         return np.dot(a, b)
 
     if not isinstance(a, NDDataset):
