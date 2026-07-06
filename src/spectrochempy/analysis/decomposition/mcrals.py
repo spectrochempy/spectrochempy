@@ -17,6 +17,8 @@ __configurables__ = ["MCRALS"]
 import base64
 import logging
 import warnings
+from dataclasses import dataclass
+from dataclasses import field
 
 import dill
 import numpy as np
@@ -32,6 +34,48 @@ from spectrochempy.application.application import info_
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.decorators import signature_has_configurable_traits
+
+# --------------------------------------------------------------------------------------
+# Internal iteration state
+# --------------------------------------------------------------------------------------
+
+
+@dataclass
+class _ALSState:
+    """
+    Internal iteration state for the MCRALS ALS loop.
+
+    This is a private, purely transient container used by ``MCRALS._fit`` to
+    pass arrays and counters between the iteration helpers. It is never
+    exposed outside the estimator and carries no behavior of its own. The
+    public API still returns plain tuples; this object does not leak.
+    """
+
+    # mandatory inputs / counters, set once at initialization
+    X: np.ndarray
+    C: np.ndarray
+    St: np.ndarray
+    n_components: int
+    Xpca: np.ndarray
+    stdev: float
+    change: float
+    niter: int
+    ndiv: int
+
+    # per-iteration snapshots, refreshed at every ALS step
+    C_constrained: np.ndarray | None = None
+    St_ls: np.ndarray | None = None
+
+    # per-iteration extra outputs returned by external generators
+    extra_output_conc: list = field(default_factory=list)
+    extra_output_spec: list = field(default_factory=list)
+
+    # optional history of per-iteration profiles (only used when
+    # ``storeIterations`` is True)
+    C_constrained_list: list = field(default_factory=list)
+    C_ls_list: list = field(default_factory=list)
+    St_constrained_list: list = field(default_factory=list)
+    St_ls_list: list = field(default_factory=list)
 
 
 # DEVNOTE:
@@ -825,25 +869,72 @@ and `St`.
         # (with mask removed to fit the size of the _X data)
         self._Y_preprocessed = (C, St)
 
+    # ----------------------------------------------------------------------------------
+    # ALS iteration helpers
+    #
+    # The historical ``_fit`` body performed every step of the ALS loop inline.
+    # The helpers below factor the responsibility of each step into a single
+    # place so that ``_fit`` reads as a high level sequence of operations.
+    # They are all private, do not change the public API and do not change the
+    # numerical behavior: the order of operations and the in-place vs.
+    # copy semantics are preserved exactly.
+    # ----------------------------------------------------------------------------------
+
     def _fit(self, X, Y):
-        # this method is called by the abstract class fit.
-        # Input X is a np.ndarray
-        # Y is a tuple of guessed profiles (each of them being np.ndarray)
-        # So every computation below implies only numpy arrays, not NDDataset
-        # as in previous versions
+        """
+        Run the MCR-ALS optimization.
 
+        This method is called by the abstract ``fit``. ``X`` is a raw
+        ``np.ndarray``; ``Y`` is a tuple of guessed profiles (each a
+        ``np.ndarray``). All computation below operates on plain numpy arrays,
+        never on ``NDDataset`` instances.
+        """
+        state = self._init_als_state(X, Y)
+        ny = X.shape[0]
+
+        while (
+            state.change >= self.tol
+            and state.niter < self.max_iter
+            and state.ndiv < self.maxdiv
+        ):
+            state.niter += 1
+
+            # 1. Concentrations: apply soft + hard constraints, then snapshot
+            #    the constrained C for storage / St resolution.
+            state.C = self._apply_conc_soft_constraints(state.C, ny)
+            state.extra_output_conc = self._apply_conc_hard_constraints(state.C)
+            state.C_constrained = state.C.copy()
+
+            # 2. Spectra: solve St from constrained C, snapshot the least-squares
+            #    St, then apply soft + hard spectral constraints.
+            state.St = self._solve_St(state.C)
+            state.St_ls = state.St.copy()
+            state.St = self._apply_spec_soft_constraints(state.St)
+            state.extra_output_spec = self._apply_spec_hard_constraints(state.St)
+
+            # 3. Concentrations again: solve C from constrained St, then
+            #    optionally normalize spectra / concentrations.
+            state.C = self._solve_C(state.St)
+            self._apply_normalization(state)
+
+            # 4. History & convergence: record iteration profiles and update
+            #    the convergence counters / log.
+            self._store_iteration(state)
+            self._update_convergence(state)
+
+        self._finalize_fit(state)
+        return self._build_fit_result(state)
+
+    def _init_als_state(self, X, Y):
+        """
+        Build the transient ``_ALSState`` for a fit and emit the log header.
+
+        Computes the PCA reference reconstruction used for the ``RSE / PCA``
+        log column and pre-positions the convergence counters so the first
+        iteration is executed.
+        """
         C, St = Y
-        ny, _ = X.shape
         n_components = self._n_components
-        change = self.tol + 1
-        stdev = X.std()
-        niter = 0
-        ndiv = 0
-
-        C_constrained_list = []
-        C_ls_list = []
-        St_constrained_list = []
-        St_ls_list = []
 
         info_("***           ALS optimisation log            ***")
         info_("#iter     RSE / PCA        RSE / Exp      %change")
@@ -854,225 +945,331 @@ and `St`.
         Xtransf = pca.fit_transform(X)
         Xpca = pca.inverse_transform(Xtransf)
 
-        while change >= self.tol and niter < self.max_iter and ndiv < self.maxdiv:
-            niter += 1
+        return _ALSState(
+            X=X,
+            C=C,
+            St=St,
+            n_components=n_components,
+            Xpca=Xpca,
+            stdev=X.std(),
+            change=self.tol + 1,
+            niter=0,
+            ndiv=0,
+        )
 
-            # Force non-negative concentration
-            # ------------------------------------------
-            if np.any(self.nonnegConc):
-                C[:, self.nonnegConc] = C[:, self.nonnegConc].clip(min=0)
+    # -- soft constraints ------------------------------------------------------
 
-            # Force unimodal concentration
-            # ------------------------------------------
-            if np.any(self.unimodConc):
-                C = _unimodal_2D(
-                    C,
-                    idxes=self.unimodConc,
-                    axis=0,
-                    tol=self.unimodConcTol,
-                    mod=self.unimodConcMod,
-                )
+    def _apply_conc_soft_constraints(self, C, ny):
+        """
+        Apply all soft constraints on the concentration profiles ``C``.
 
-            # Force monotonic increase
-            # ------------------------------------------
-            if np.any(self.monoIncConc):
-                for s in self.monoIncConc:
-                    for curid in np.arange(ny - 1):
-                        if C[curid + 1, s] < C[curid, s] / self.monoIncTol:
-                            C[curid + 1, s] = C[curid, s]
+        The historical order is: non-negativity → unimodality → monotonic
+        increase → monotonic decrease → closure. This order is preserved
+        verbatim so that the numerical result is byte-identical to the
+        original implementation.
+        """
+        self._apply_nonneg_conc(C)
+        C = self._apply_unimod_conc(C)
+        self._apply_monoinc_conc(C, ny)
+        self._apply_monodec_conc(C, ny)
+        self._apply_closure_conc(C)
+        return C
 
-            # Force monotonic decrease
-            # ------------------------------------------
-            if np.any(self.monoDecConc):
-                for s in self.monoDecConc:
-                    for curid in np.arange(ny - 1):
-                        if C[curid + 1, s] > C[curid, s] * self.monoDecTol:
-                            C[curid + 1, s] = C[curid, s]
+    def _apply_spec_soft_constraints(self, St):
+        """
+        Apply all soft constraints on the spectral profiles ``St``.
 
-            # Closure
-            # ------------------------------------------
-            if self.closureConc:
-                if self.closureMethod == "scaling":
-                    Q = _lstsq(C[:, self.closureConc], self.closureTarget.T)
-                    C[:, self.closureConc] = np.dot(C[:, self.closureConc], np.diag(Q))
-                elif self.closureMethod == "constantSum":
-                    totalConc = np.sum(C[:, self.closureConc], axis=1)
-                    # guard against zero total concentration to avoid nan/inf
-                    totalConc = np.where(totalConc == 0, 1.0, totalConc)
-                    C[:, self.closureConc] = (
-                        C[:, self.closureConc]
-                        * self.closureTarget[:, None]
-                        / totalConc[:, None]
-                    )
+        Spectral soft constraints are limited to non-negativity and
+        unimodality, applied in that historical order.
+        """
+        self._apply_nonneg_spec(St)
+        return self._apply_unimod_spec(St)
 
-            # external concentration profiles
-            # ------------------------------------------
-            extraOutputGetConc = []
-            if np.any(self.hardConc):
-                _C = self._C_2_NDDataset(C)
-                if self.kwargsGetConc != {} and self.argsGetConc != ():
-                    output = self.getConc(_C, *self.argsGetConc, **self.kwargsGetConc)
-                elif self.kwargsGetConc == {} and self.argsGetConc != ():
-                    output = self.getConc(_C, *self.argsGetConc)
-                elif self.kwargsGetConc != {} and self.argsGetConc == ():
-                    output = self.getConc(_C, **self.kwargsGetConc)
-                else:
-                    output = self.getConc(_C)
+    def _apply_nonneg_conc(self, C):
+        """Soft constraint: clip selected concentration profiles to ``>= 0``."""
+        if np.any(self.nonnegConc):
+            C[:, self.nonnegConc] = C[:, self.nonnegConc].clip(min=0)
 
-                if isinstance(output, tuple):
-                    fixedC = output[0]
-                    self.argsGetConc = output[1]
-                    if len(output) == 3:
-                        extraOutputGetConc.append(output[2])
-                else:
-                    fixedC = output
+    def _apply_nonneg_spec(self, St):
+        """Soft constraint: clip selected spectral profiles to ``>= 0``."""
+        if np.any(self.nonnegSpec):
+            St[self.nonnegSpec, :] = St[self.nonnegSpec, :].clip(min=0)
 
-                C[:, self.hardConc] = _profile_asarray(fixedC)[:, self.getC_to_C_idx]
+    def _apply_unimod_conc(self, C):
+        """
+        Soft constraint: enforce unimodality on selected C columns.
 
-            # stores C
-            # ---------------------------
-            C_constrained = C.copy()
-            if self.storeIterations:
-                C_constrained_list.append(C_constrained)
-
-            # Compute St
-            # -----------
-            St = self._solve_St(C)
-            St_ls = St.copy()
-
-            # stores St in St_ls_list
-            # -----------------------------
-            if self.storeIterations:
-                St_ls_list.append(St.copy())
-
-            # Force non-negative spectra
-            # ------------------------------------------
-            if np.any(self.nonnegSpec):
-                St[self.nonnegSpec, :] = St[self.nonnegSpec, :].clip(min=0)
-
-            # Force unimodal spectra
-            # ------------------------------------------
-            if np.any(self.unimodSpec):
-                St = _unimodal_2D(
-                    St,
-                    idxes=self.unimodSpec,
-                    axis=1,
-                    tol=self.unimodSpecTol,
-                    mod=self.unimodSpecMod,
-                )
-
-            # External spectral profile
-            # ------------------------------------------
-            extraOutputGetSpec = []
-            if np.any(self.hardSpec):
-                _St = self._St_2_NDDataset(St)
-                if self.kwargsGetSpec != {} and self.argsGetSpec != ():
-                    output = self.getSpec(_St, *self.argsGetSpec, **self.kwargsGetSpec)
-                elif self.kwargsGetSpec == {} and self.argsGetSpec != ():
-                    output = self.getSpec(_St, *self.argsGetSpec)
-                elif self.kwargsGetSpec != {} and self.argsGetSpec == ():
-                    output = self.getSpec(_St, **self.kwargsGetSpec)
-                else:
-                    output = self.getSpec(_St)
-
-                if isinstance(output, tuple):
-                    fixedSt = output[0]
-                    self.argsGetSpec = output[1]
-                    if len(output) == 3:
-                        extraOutputGetSpec.append(output[2])
-                else:
-                    fixedSt = output
-
-                St[self.hardSpec, :] = _profile_asarray(fixedSt)[
-                    self.getSt_to_St_idx, :
-                ]
-
-            # recompute C
-            # -----------
-            C = self._solve_C(St)
-
-            # rescale spectra and concentrations
-            # ------------------------------------------
-            if self.normSpec == "max":
-                alpha = np.max(St, axis=1).reshape(self._n_components, 1)
-                # guard against zero-norm spectra to avoid nan/inf
-                alpha = np.where(alpha == 0, 1.0, alpha)
-                St = St / alpha
-                C = C * alpha.T
-            elif self.normSpec == "euclid":
-                alpha = np.linalg.norm(St, axis=1).reshape(self._n_components, 1)
-                # guard against zero-norm spectra to avoid nan/inf
-                alpha = np.where(alpha == 0, 1.0, alpha)
-                St = St / alpha
-                C = C * alpha.T
-
-            # store profiles
-            # --------------
-
-            if self.storeIterations:
-                C_ls_list.append(C)
-                St_constrained_list.append(St)
-
-            # compute residuals
-            # ------------------------------------------
-            Xhat = C @ St
-            stdev2 = np.std(Xhat - X)
-            change = 100 * (stdev2 - stdev) / stdev
-            stdev = stdev2
-
-            stdev_PCA = np.std(Xhat - Xpca)
-            info_(
-                f"{niter: 3d}{' ' * 6}{stdev_PCA: 10f}{' ' * 6}"
-                f"{stdev2: 10f}{' ' * 6}{change: 10f}",
+        ``_unimodal_2D`` may rebind its input to a transposed view; we
+        therefore return the (possibly reassigned) array so the caller keeps
+        the constrained reference.
+        """
+        if np.any(self.unimodConc):
+            return _unimodal_2D(
+                C,
+                idxes=self.unimodConc,
+                axis=0,
+                tol=self.unimodConcTol,
+                mod=self.unimodConcMod,
             )
+        return C
 
-            # check convergence
-            # -----------------
+    def _apply_unimod_spec(self, St):
+        """Soft constraint: enforce unimodality on selected St rows."""
+        if np.any(self.unimodSpec):
+            return _unimodal_2D(
+                St,
+                idxes=self.unimodSpec,
+                axis=1,
+                tol=self.unimodSpecTol,
+                mod=self.unimodSpecMod,
+            )
+        return St
 
-            if change > 0:
-                ndiv += 1
-            else:
-                ndiv = 0
-                change = -change
+    def _apply_monoinc_conc(self, C, ny):
+        """Soft constraint: force monotonic increase on selected C columns."""
+        if np.any(self.monoIncConc):
+            for s in self.monoIncConc:
+                for curid in np.arange(ny - 1):
+                    if C[curid + 1, s] < C[curid, s] / self.monoIncTol:
+                        C[curid + 1, s] = C[curid, s]
 
-            if change < self.tol:
-                info_("converged !")
+    def _apply_monodec_conc(self, C, ny):
+        """Soft constraint: force monotonic decrease on selected C columns."""
+        if np.any(self.monoDecConc):
+            for s in self.monoDecConc:
+                for curid in np.arange(ny - 1):
+                    if C[curid + 1, s] > C[curid, s] * self.monoDecTol:
+                        C[curid + 1, s] = C[curid, s]
 
-            if ndiv == self.maxdiv:
-                info_(
-                    f"Optimization not improved after {self.maxdiv} iterations"
-                    f"... unconverged or 'tol' set too small ?",
+    def _apply_closure_conc(self, C):
+        """
+        Soft constraint: enforce closure on selected C columns.
+
+        Uses a truthiness check on ``self.closureConc`` so that a single
+        selected component (e.g. ``[0]``) is honoured, matching the PR1 fix
+        for issue #911 / ``closureConc="all"``.
+        """
+        if self.closureConc:
+            if self.closureMethod == "scaling":
+                Q = _lstsq(C[:, self.closureConc], self.closureTarget.T)
+                C[:, self.closureConc] = np.dot(C[:, self.closureConc], np.diag(Q))
+            elif self.closureMethod == "constantSum":
+                totalConc = np.sum(C[:, self.closureConc], axis=1)
+                # guard against zero total concentration to avoid nan/inf
+                totalConc = np.where(totalConc == 0, 1.0, totalConc)
+                C[:, self.closureConc] = (
+                    C[:, self.closureConc]
+                    * self.closureTarget[:, None]
+                    / totalConc[:, None]
                 )
-                info_("Stop ALS optimization.")
 
-            if niter == self.max_iter:
-                info_(
-                    f"Convergence criterion ('tol') not reached after "
-                    f"{self.max_iter: d} iterations.",
-                )
-                info_("Stop ALS optimization.")
+    # -- hard / generated profiles --------------------------------------------
 
+    def _apply_conc_hard_constraints(self, C):
+        """
+        Inject concentration profiles returned by the external ``getConc``.
+
+        ``getConc`` may return either a bare profile or a 2-/3-tuple. The
+        2-tuple form updates ``argsGetConc`` for the next iteration; the
+        3-tuple form additionally stashes the third element in the returned
+        ``extra_output`` list (mirrored on the public ``extraOutputGetConc``).
+        """
+        extra_output = []
+        if np.any(self.hardConc):
+            _C = self._C_2_NDDataset(C)
+            output = self._call_external_generator(
+                self.getConc,
+                _C,
+                self.argsGetConc,
+                self.kwargsGetConc,
+            )
+            profiles, new_args, extra_output = self._unpack_generator_output(output)
+            if new_args is not _UNCHANGED:
+                self.argsGetConc = new_args
+            C[:, self.hardConc] = _profile_asarray(profiles)[:, self.getC_to_C_idx]
+        return extra_output
+
+    def _apply_spec_hard_constraints(self, St):
+        """
+        Inject spectral profiles returned by the external ``getSpec``.
+
+        Symmetric to ``_apply_conc_hard_constraints`` but for the spectral
+        branch: it updates ``argsGetSpec`` and returns the per-iteration
+        ``extra_output`` list exposed as ``extraOutputGetSpec``.
+        """
+        extra_output = []
+        if np.any(self.hardSpec):
+            _St = self._St_2_NDDataset(St)
+            output = self._call_external_generator(
+                self.getSpec,
+                _St,
+                self.argsGetSpec,
+                self.kwargsGetSpec,
+            )
+            profiles, new_args, extra_output = self._unpack_generator_output(output)
+            if new_args is not _UNCHANGED:
+                self.argsGetSpec = new_args
+            St[self.hardSpec, :] = _profile_asarray(profiles)[self.getSt_to_St_idx, :]
+        return extra_output
+
+    def _call_external_generator(self, func, current, args, kwargs):
+        """
+        Dispatch a ``getConc`` / ``getSpec`` external generator.
+
+        The historical dispatch chooses one of four call signatures
+        depending on whether positional / keyword arguments are non-empty.
+        Empty tuples / dicts trigger the bare call path; this preserves the
+        exact behavior of the original inline ``if/elif/else`` chain.
+        """
+        has_args = args != ()
+        has_kwargs = kwargs != {}
+        if has_args and has_kwargs:
+            return func(current, *args, **kwargs)
+        if has_args and not has_kwargs:
+            return func(current, *args)
+        if not has_args and has_kwargs:
+            return func(current, **kwargs)
+        return func(current)
+
+    def _unpack_generator_output(self, output):
+        """
+        Normalize the return value of an external generator.
+
+        Returns ``(profiles, new_args, extra_output)`` where ``new_args`` is
+        the second tuple element when present, or the ``_UNCHANGED`` sentinel
+        when the generator returned a bare profile (so the caller leaves the
+        previous args untouched). ``extra_output`` is a list containing the
+        third tuple element if present, else an empty list.
+        """
+        extra_output = []
+        if isinstance(output, tuple):
+            profiles = output[0]
+            new_args = output[1]
+            if len(output) == 3:
+                extra_output.append(output[2])
+        else:
+            profiles = output
+            new_args = _UNCHANGED
+        return profiles, new_args, extra_output
+
+    # -- normalization ---------------------------------------------------------
+
+    def _apply_normalization(self, state):
+        """
+        Rescale spectra / concentrations when ``normSpec`` is set.
+
+        Spectra and concentrations are rescaled jointly so that ``C @ St`` is
+        preserved: a per-row scale ``alpha`` is divided out of ``St`` and
+        folded back into ``C``. A zero-norm guard avoids emitting nan/inf.
+        """
+        if self.normSpec == "max":
+            alpha = np.max(state.St, axis=1).reshape(self._n_components, 1)
+            # guard against zero-norm spectra to avoid nan/inf
+            alpha = np.where(alpha == 0, 1.0, alpha)
+            state.St = state.St / alpha
+            state.C = state.C * alpha.T
+        elif self.normSpec == "euclid":
+            alpha = np.linalg.norm(state.St, axis=1).reshape(self._n_components, 1)
+            # guard against zero-norm spectra to avoid nan/inf
+            alpha = np.where(alpha == 0, 1.0, alpha)
+            state.St = state.St / alpha
+            state.C = state.C * alpha.T
+
+    # -- history / diagnostics -------------------------------------------------
+
+    def _store_iteration(self, state):
+        """
+        Append the per-iteration profiles to the history lists.
+
+        Only runs when ``storeIterations`` is True. The four lists are filled
+        in the historical order so that index ``i`` of each list refers to the
+        same iteration.
+        """
+        if self.storeIterations:
+            state.C_constrained_list.append(state.C_constrained)
+            state.St_ls_list.append(state.St_ls.copy())
+            state.C_ls_list.append(state.C)
+            state.St_constrained_list.append(state.St)
+
+    def _update_convergence(self, state):
+        """
+        Update the residual-based convergence counters and emit the log line.
+
+        Computes the percent change of the residuals standard deviation, logs
+        the iteration row (RSE vs PCA and vs the data), updates the
+        non-improvement counter ``ndiv`` and folds the signed change into its
+        absolute value for the loop test. The convergence diagnostics text
+        ("converged !", "Stop ALS optimization.", ...) is emitted here so it
+        keeps the historical ordering with respect to the log row.
+        """
+        Xhat = state.C @ state.St
+        stdev2 = np.std(Xhat - state.X)
+        change = 100 * (stdev2 - state.stdev) / state.stdev
+        state.stdev = stdev2
+
+        stdev_PCA = np.std(Xhat - state.Xpca)
+        info_(
+            f"{state.niter: 3d}{' ' * 6}{stdev_PCA: 10f}{' ' * 6}"
+            f"{stdev2: 10f}{' ' * 6}{change: 10f}",
+        )
+
+        # check convergence
+        if change > 0:
+            state.ndiv += 1
+        else:
+            state.ndiv = 0
+            change = -change
+        state.change = change
+
+        if change < self.tol:
+            info_("converged !")
+
+        if state.ndiv == self.maxdiv:
+            info_(
+                f"Optimization not improved after {self.maxdiv} iterations"
+                f"... unconverged or 'tol' set too small ?",
+            )
+            info_("Stop ALS optimization.")
+
+        if state.niter == self.max_iter:
+            info_(
+                f"Convergence criterion ('tol') not reached after "
+                f"{self.max_iter: d} iterations.",
+            )
+            info_("Stop ALS optimization.")
+
+    # -- finalization ----------------------------------------------------------
+
+    def _finalize_fit(self, state):
+        """Persist ALS diagnostics and set the fitted spectral components."""
         # capture ALS diagnostics for the result property
         self._fit_meta = {
-            "n_iter": niter,
-            "change": change,
-            "residual_std": stdev,
-            "converged": change < self.tol,
+            "n_iter": state.niter,
+            "change": state.change,
+            "residual_std": state.stdev,
+            "converged": state.change < self.tol,
         }
+        self._components = state.St
 
-        # return _fit results
-        self._components = St
+    def _build_fit_result(self, state):
+        """
+        Assemble the tuple returned to the abstract ``fit`` / ``_outfit``.
+
+        The shape and order of this tuple are part of the public contract
+        (indices are referenced by the ``C_constrained``, ``St_ls``,
+        ``extraOutputGetConc`` ... properties) and must not change.
+        """
         return (
-            C,
-            St,
-            C_constrained,
-            St_ls,
-            extraOutputGetConc,
-            extraOutputGetSpec,
-            C_constrained_list,
-            C_ls_list,
-            St_constrained_list,
-            St_ls_list,
+            state.C,
+            state.St,
+            state.C_constrained,
+            state.St_ls,
+            state.extra_output_conc,
+            state.extra_output_spec,
+            state.C_constrained_list,
+            state.C_ls_list,
+            state.St_constrained_list,
+            state.St_ls_list,
         )
 
     def _transform(self, X=None):
@@ -1329,6 +1526,12 @@ and `St`.
 # --------------------------------------------------------------------------------------
 # Utilities
 # --------------------------------------------------------------------------------------
+
+# Sentinel returned by ``_unpack_generator_output`` when the external
+# generator (``getConc`` / ``getSpec``) returned a bare profile and did not
+# update the args for the next iteration. Using a private sentinel (rather
+# than ``None``) keeps ``None`` usable as a legitimate "no args" value.
+_UNCHANGED = object()
 
 
 def _profile_asarray(profile):
