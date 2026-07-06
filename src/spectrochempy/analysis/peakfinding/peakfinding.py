@@ -15,15 +15,19 @@ specific to spectroscopic analysis, including:
 - Peak interpolation for improved accuracy
 """
 
-__all__ = ["find_peaks"]
+__all__ = ["PeakFindingResult", "find_peaks"]
 
 __dataset_methods__ = ["find_peaks"]
+
+import csv
+from pathlib import Path
 
 import numpy as np
 import scipy
 
 from spectrochempy.application.application import error_
 from spectrochempy.application.application import warning_
+from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.units import DimensionalityError
 from spectrochempy.core.units import Quantity
 
@@ -32,6 +36,145 @@ from spectrochempy.core.units import Quantity
 # argrelmin(data[, axis, order, mode]) 	Calculate the relative minima of data.
 # argrelmax(data[, axis, order, mode]) 	Calculate the relative maxima of data.
 # argrelextrema(data, comparator[, axis, ...]) 	Calculate the relative extrema of data.
+
+
+def _as_scalar(value):
+    """Return a plain scalar when *value* is a one-item numpy-like object."""
+    if hasattr(value, "item"):
+        try:
+            return value.item()
+        except (ValueError, TypeError):
+            pass
+    return value
+
+
+def _sequence_item(values, index):
+    """Return item *index* from numpy arrays, quantities, or Python sequences."""
+    try:
+        return _as_scalar(values[index])
+    except (TypeError, IndexError):
+        return _as_scalar(values)
+
+
+def _stringify_csv_value(value):
+    """Serialize peak table values without adding optional dependencies."""
+    value = _as_scalar(value)
+    if isinstance(value, np.generic):
+        return value.item()
+    return str(value)
+
+
+class PeakFindingResult:
+    """
+    Structured result returned by :func:`find_peaks`.
+
+    Parameters
+    ----------
+    peaks : NDDataset or None
+        Dataset containing identified peak positions and heights.
+    properties : dict or None
+        Peak properties returned by :func:`scipy.signal.find_peaks`.
+
+    Notes
+    -----
+    The object is intentionally dependency-light. It exposes Python-native
+    table helpers and does not require pandas.
+    """
+
+    __slots__ = ("peaks", "properties")
+
+    def __init__(self, peaks, properties=None):
+        self.peaks = peaks
+        self.properties = dict(properties or {})
+
+    def __len__(self):
+        return 0 if self.peaks is None else len(self.peaks)
+
+    def __iter__(self):
+        """Allow ``peaks, properties = result`` for easy migration."""
+        yield self.peaks
+        yield self.properties
+
+    def __repr__(self):
+        return f"PeakFindingResult(n_peaks={len(self)})"
+
+    def to_dict(self):
+        """
+        Return peak information as a list of dictionaries.
+
+        Each dictionary contains ``index``, ``position``, ``height``, and any
+        per-peak properties whose length matches the number of detected peaks.
+        Values keep their native units when they are unit-bearing quantities.
+        """
+        if self.peaks is None:
+            return []
+
+        n_peaks = len(self)
+        positions = self._positions()
+        heights = np.ravel(self.peaks.data)
+        if self.peaks.units is not None:
+            heights = heights * self.peaks.units
+        rows = []
+
+        per_peak_properties = {}
+        for key, values in self.properties.items():
+            try:
+                if len(values) == n_peaks:
+                    per_peak_properties[key] = values
+            except TypeError:
+                continue
+
+        for index in range(n_peaks):
+            row = {
+                "index": index,
+                "position": _sequence_item(positions, index),
+                "height": _sequence_item(heights, index),
+            }
+            for key, values in per_peak_properties.items():
+                row[key] = _sequence_item(values, index)
+            rows.append(row)
+
+        return rows
+
+    def to_csv(self, path, *, delimiter=","):
+        """
+        Write peak information to a CSV file.
+
+        Parameters
+        ----------
+        path : str or pathlib.Path
+            Destination path.
+        delimiter : str, default=','
+            CSV delimiter.
+
+        Returns
+        -------
+        pathlib.Path
+            The written path.
+        """
+        path = Path(path)
+        rows = self.to_dict()
+        fieldnames = ["index", "position", "height"]
+        for row in rows:
+            for key in row:
+                if key not in fieldnames:
+                    fieldnames.append(key)
+
+        with path.open("w", newline="", encoding="utf-8") as fid:
+            writer = csv.DictWriter(fid, fieldnames=fieldnames, delimiter=delimiter)
+            writer.writeheader()
+            for row in rows:
+                writer.writerow(
+                    {key: _stringify_csv_value(row.get(key, "")) for key in fieldnames}
+                )
+
+        return path
+
+    def _positions(self):
+        if self.peaks.coordset is None:
+            return np.arange(len(self.peaks))
+        coord = self.peaks.coordset[self.peaks.dims[-1]]
+        return coord.values
 
 
 def _as_peakfinding_quantity(value):
@@ -127,6 +270,7 @@ def find_peaks(
     rel_height=0.5,
     plateau_size=None,
     use_coord=True,
+    as_result=False,
 ):
     """
     Find and analyze peaks in spectroscopic data with advanced filtering options.
@@ -168,14 +312,21 @@ def find_peaks(
         Required size of peak plateau (flat top).
     use_coord : bool, default: True
         Whether to use coordinate system units instead of array indices.
+    as_result : bool, default: False
+        If True, return a :class:`PeakFindingResult` object. If False, preserve
+        the historical ``(peaks, properties)`` tuple return.
 
     Returns
     -------
-    peaks : NDDataset
-        Dataset containing identified peaks with interpolated positions and heights.
-    properties : dict
+    peaks : NDDataset or None
+        Dataset containing identified peaks with interpolated positions and
+        heights. Returned when ``as_result=False``.
+    properties : dict or None
         Peak properties including heights, widths, prominences, and more.
-        All values use appropriate units when use_coord=True.
+        All values use appropriate units when use_coord=True. Returned when
+        ``as_result=False``.
+    result : PeakFindingResult
+        Structured peak finding result. Returned when ``as_result=True``.
 
     Notes
     -----
@@ -196,6 +347,12 @@ def find_peaks(
     Physical-unit spacing constraints are accepted when coordinates carry units:
     >>> peaks, props = ds.find_peaks(distance="1 cm^-1", width=0.2)
     >>> len(peaks)
+    2
+
+    Return a structured result when a tabular/export representation is useful:
+    >>> result = ds.find_peaks(height=0.5, as_result=True)
+    >>> rows = result.to_dict()
+    >>> len(rows)
     2
 
     """
@@ -278,6 +435,8 @@ def find_peaks(
     # Check if any peaks were found
     if len(peaks) == 0:
         error_("No peaks found")
+        if as_result:
+            return PeakFindingResult(None, None)
         return None, None
 
     # Ensure properties is a dictionary even if empty
@@ -316,8 +475,6 @@ def find_peaks(
             else:
                 out.coordset(out.dims[-1])[i] = x_at_max
     if x_pos and not use_coord:
-        from spectrochempy.core.dataset.coord import Coord
-
         out.coordset = Coord(x_pos)
 
     # transform back index to coord
@@ -361,5 +518,8 @@ def find_peaks(
 
     out.name = "peaks of " + X.name
     out.history = f"find_peaks(): {len(peaks)} peak(s) found"
+
+    if as_result:
+        return PeakFindingResult(out, properties)
 
     return out, properties

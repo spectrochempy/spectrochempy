@@ -3,6 +3,7 @@ import os
 import numpy as np
 import pytest
 
+from spectrochempy.analysis.peakfinding.peakfinding import PeakFindingResult
 from spectrochempy.analysis.peakfinding.peakfinding import find_peaks
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
@@ -111,6 +112,21 @@ def test_no_peaks_case():
     assert properties is None
 
 
+def test_no_peaks_result_case():
+    """Structured result preserves the no-peak outcome without raising."""
+    x = np.linspace(0, 10, 100)
+    y = np.zeros_like(x)
+    dataset = NDDataset(y, coordset=[Coord(x, title="x")])
+
+    result = find_peaks(dataset, height=0.1, as_result=True)
+
+    assert isinstance(result, PeakFindingResult)
+    assert len(result) == 0
+    assert result.peaks is None
+    assert result.properties == {}
+    assert result.to_dict() == []
+
+
 def test_three_point_peak():
     """Test detection of three-point peaks with explicit properties request."""
     x = np.linspace(0, 10, 100)
@@ -148,6 +164,61 @@ def test_minimal_peak_properties():
     # Properties should be empty but not None
     assert isinstance(properties, dict)
     assert len(properties) == 0
+
+
+def test_as_result_keeps_peak_data_and_allows_unpacking(simple_peaks_dataset):
+    """Opt-in structured result keeps the historical tuple data available."""
+    result = find_peaks(simple_peaks_dataset, height=0.5, as_result=True)
+
+    assert isinstance(result, PeakFindingResult)
+    assert len(result) == 3
+
+    peaks, properties = result
+    assert peaks is result.peaks
+    assert properties is result.properties
+    assert np.allclose(peaks.x.values, [2, 5, 8] * ur("cm^-1"), atol=0.1)
+    assert "peak_heights" in properties
+
+
+def test_peak_finding_result_to_dict(simple_peaks_dataset):
+    """Structured result exposes dependency-light row dictionaries."""
+    result = find_peaks(simple_peaks_dataset, height=0.5, width=0.1, as_result=True)
+
+    rows = result.to_dict()
+
+    assert len(rows) == 3
+    assert rows[0]["index"] == 0
+    assert rows[0]["position"].units == ur("cm^-1")
+    assert rows[0]["height"].units == ur.absorbance
+    assert "peak_heights" in rows[0]
+    assert "widths" in rows[0]
+
+
+def test_peak_finding_result_to_dict_single_peak(simple_peaks_dataset):
+    """Single-peak coordinate values can be scalar quantities."""
+    result = find_peaks(
+        simple_peaks_dataset, height=(1.8, 2.2), prominence=0, as_result=True
+    )
+
+    rows = result.to_dict()
+
+    assert len(rows) == 1
+    assert rows[0]["position"].units == ur("cm^-1")
+    assert rows[0]["height"].units == ur.absorbance
+
+
+def test_peak_finding_result_to_csv(simple_peaks_dataset, tmp_path):
+    """Structured result can be exported without pandas."""
+    result = find_peaks(simple_peaks_dataset, height=0.5, width=0.1, as_result=True)
+    path = tmp_path / "peaks.csv"
+
+    written = result.to_csv(path)
+
+    assert written == path
+    text = path.read_text(encoding="utf-8")
+    assert text.startswith("index,position,height")
+    assert "peak_heights" in text
+    assert "widths" in text
 
 
 def test_single_points_peak():
