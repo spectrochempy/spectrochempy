@@ -75,6 +75,22 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- ``MCRALS`` correctness fixes: empty ``closureConc`` no longer runs a
+  wasteful closure block (PR1 B4); single-component closure targets
+  (``closureConc=[0]``, ``closureConc="all"``) are now honoured instead of
+  being silently disabled by ``np.any`` (issue #911); ``normSpec='max'`` /
+  ``'euclid'`` with a zero-norm spectrum no longer produces ``nan``/``inf``
+  (PR1 B9); ``getConc`` / ``getSpec`` dispatch now correctly uses
+  ``argsGetSpec`` / ``kwargsGetSpec`` instead of the ``argsGetSpecc`` typo
+  (PR1 B1) and accepts bare-profile, 2-tuple ``(profiles, new_args)``, and
+  3-tuple ``(profiles, new_args, extra)`` returns (PR1 B2);
+  ``getSt_to_St_idx`` with ``None`` entries no longer crashes in the
+  validator's ``max()`` call (PR1 B5); ``_unimodal_1D`` no longer
+  infinite-loops or indexes out of bounds for pathological tolerances
+  (``tol < 1``, including ``tol == 1.0``) while remaining byte-identical
+  in the documented regime (``tol >= 1.1``) (PR1 B6); ``monoIncTol`` and
+  ``monoDecTol`` are now documented as ``Float`` traits (PR1 B7/B8).
+
 - Fixed scatter plotting regressions introduced after 0.8.2:
   ``plot_multiple(..., method="scatter")`` now shows markers again,
   single-dataset ``plot_multiple`` calls preserve the requested plotting method,
@@ -97,6 +113,23 @@ Bug Fixes
 
 Developer
 ~~~~~~~~~
+
+- ``MCRALS``: internal architecture overhaul, no public API or numerical
+  behavior change. ``MCRALS._fit`` is now structured around an internal
+  constraint engine: the public traitlets (``nonnegConc``, ``unimodConc``,
+  ``monoIncConc``/``monoDecConc``, ``closureConc``, ``normSpec``,
+  ``hardConc``/``hardSpec`` and their spectral counterparts) are translated
+  once per fit into a private, ordered list of ``_Constraint`` objects, and
+  the ALS loop iterates over them rather than calling each constraint by
+  name. All constraint classes are private (``_``-prefixed) and not
+  exported in ``__all__``; the constraint order, the in-place vs. copy
+  semantics, the traitlets, the ``fit`` / ``transform`` / ``fit_transform``
+  / ``inverse_transform`` signatures, the ``_outfit`` return tuple, and
+  the ``getConc`` / ``getSpec`` external-generator contract are preserved
+  byte-for-byte. This refactoring reduces ``_fit`` from a ~230-line
+  monolith to a high-level loop over constraint pipelines and prepares
+  the ground for future work (constraint pipelines, generated-profile
+  abstraction, multi-criteria convergence, scikit-learn compatibility).
 
 - Centralized internal plotting kwargs normalization in a private helper
   module to reduce duplication across plotting entry points while preserving

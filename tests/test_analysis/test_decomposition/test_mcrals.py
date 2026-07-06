@@ -775,6 +775,140 @@ def test_MCRALS_pr1_unimodal_smooth_bounds():
             assert np.all(np.isfinite(a))
 
 
+# --------------------------------------------------------------------------------------
+# PR3 — internal constraint engine
+#
+# These tests assert properties of the *internal* constraint abstraction
+# introduced by PR3. The constraint classes are private (``_``-prefixed) and
+# must never leak into the public API; the tests here only guard against
+# accidental regressions of the internal contract (privacy, builder wiring,
+# byte-equivalence of constraint application vs. the historical helpers).
+# They are intentionally small and do not re-test the numerical behavior
+# already covered by the end-to-end MCRALS regression suite.
+# --------------------------------------------------------------------------------------
+
+
+def test_MCRALS_pr3_constraint_classes_are_private():
+    """Internal constraint classes must not be exported in ``__all__``."""
+    import spectrochempy.analysis.decomposition.mcrals as mod
+
+    assert mod.__all__ == ["MCRALS"]
+    expected_classes = (
+        "_Constraint",
+        "_NonNegativeConstraint",
+        "_UnimodalConstraint",
+        "_MonotonicIncreaseConstraint",
+        "_MonotonicDecreaseConstraint",
+        "_ClosureConstraint",
+        "_NormalizationConstraint",
+        "_HardProfileConstraint",
+    )
+    for name in expected_classes:
+        cls = getattr(mod, name, None)
+        assert cls is not None, f"{name} missing from module"
+        assert name.startswith("_"), f"{name} must remain private"
+
+
+def test_MCRALS_pr3_constraint_apply_is_virtual():
+    """The base ``_Constraint.apply`` must raise NotImplementedError."""
+    from spectrochempy.analysis.decomposition.mcrals import _Constraint
+
+    c = _Constraint()
+    raised = False
+    try:
+        c.apply(None, None)
+    except NotImplementedError:
+        raised = True
+    assert raised
+
+
+def test_MCRALS_pr3_builders_translate_traitlets():
+    """``_build_*`` constraints must reflect the active traitlets one-to-one.
+
+    Inactive soft constraints are still emitted (they no-op internally via
+    the ``np.any(indices)`` guard), while the hard-profile wrapper is always
+    appended so that the per-iteration extra-output buffer is reset on
+    inactive ``hardConc`` / ``hardSpec``.
+    """
+    import numpy as np
+
+    from spectrochempy.analysis.decomposition.mcrals import (
+        _ClosureConstraint,
+        _HardProfileConstraint,
+        _MonotonicDecreaseConstraint,
+        _MonotonicIncreaseConstraint,
+        _NonNegativeConstraint,
+        _NormalizationConstraint,
+        _UnimodalConstraint,
+        MCRALS,
+    )
+
+    mcr = MCRALS()
+    mcr.fit(np.zeros((4, 3)), np.ones((4, 2)))
+    conc = mcr._build_concentration_constraints()
+    spec = mcr._build_spectral_constraints()
+    norm = mcr._build_normalization()
+
+    assert isinstance(conc[0], _NonNegativeConstraint)
+    assert isinstance(conc[1], _UnimodalConstraint)
+    assert isinstance(conc[2], _MonotonicIncreaseConstraint)
+    assert isinstance(conc[3], _MonotonicDecreaseConstraint)
+    # closure is off by default (closureConc == [])
+    assert not any(isinstance(c, _ClosureConstraint) for c in conc)
+    # hard-profile wrapper always present
+    assert isinstance(conc[-1], _HardProfileConstraint)
+    assert isinstance(spec[0], _NonNegativeConstraint)
+    assert isinstance(spec[1], _UnimodalConstraint)
+    assert isinstance(spec[-1], _HardProfileConstraint)
+    # normSpec is None by default -> no normalization constraint
+    assert norm is None
+
+
+def test_MCRALS_pr3_closure_built_only_when_truthy():
+    """``closureConc=[0]`` (PR1 #911 single-component case) must build closure."""
+    import numpy as np
+
+    from spectrochempy.analysis.decomposition.mcrals import (
+        _ClosureConstraint,
+        MCRALS,
+    )
+
+    mcr = MCRALS()
+    mcr.closureConc = "all"
+    mcr.fit(np.zeros((4, 3)), np.ones((4, 2)))
+    conc = mcr._build_concentration_constraints()
+    assert any(isinstance(c, _ClosureConstraint) for c in conc)
+
+    mcr2 = MCRALS()
+    mcr2.closureConc = [0]
+    mcr2.fit(np.zeros((4, 3)), np.ones((4, 2)))
+    conc2 = mcr2._build_concentration_constraints()
+    assert any(isinstance(c, _ClosureConstraint) for c in conc2)
+
+
+def test_MCRALS_pr3_normalization_built_only_when_set():
+    """``normSpec`` must drive normalization constraint construction."""
+    import numpy as np
+
+    from spectrochempy.analysis.decomposition.mcrals import (
+        _NormalizationConstraint,
+        MCRALS,
+    )
+
+    mcr = MCRALS(normSpec="max")
+    mcr.fit(np.zeros((4, 3)), np.ones((4, 2)))
+    norm = mcr._build_normalization()
+    assert isinstance(norm, _NormalizationConstraint)
+
+    mcr2 = MCRALS(normSpec="euclid")
+    mcr2.fit(np.zeros((4, 3)), np.ones((4, 2)))
+    assert isinstance(mcr2._build_normalization(), _NormalizationConstraint)
+
+    mcr3 = MCRALS(normSpec=None)
+    mcr3.fit(np.zeros((4, 3)), np.ones((4, 2)))
+    assert mcr3._build_normalization() is None
+
+
 def test_MCRALS_pr1_monotonic_tol_docstrings():
     """B7/B8: docstring/annotation sanity for the monotonic tolerances."""
     from spectrochempy.analysis.decomposition.mcrals import MCRALS as _M
