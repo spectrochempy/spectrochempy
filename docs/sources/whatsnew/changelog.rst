@@ -36,6 +36,11 @@ New Features
   remains the historical ``(peaks, properties)`` tuple, and the new helpers do
   not add a pandas dependency. (#1351)
 
+- The analysis user guide now includes a reference peak-analysis workflow
+  tutorial connecting peak detection, ``PeakFindingResult``, ``PeakTable``,
+  CSV export, manual script writing, script validation, and ``Optimize.fit()``
+  in one end-to-end example.
+
 - SpectroChemPy now exposes top-level helpers for common 1D line shapes:
   ``scp.polynomial(...)``, ``scp.gaussian(...)``,
   ``scp.lorentzian(...)``,

@@ -17,6 +17,7 @@ in the gallery (:ref:`examples-index`).
    :maxdepth: 2
 
    peak_finding
+   peak_analysis_workflow
    peak_integration
    fitting
    pca
