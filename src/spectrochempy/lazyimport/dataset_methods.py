@@ -66,7 +66,7 @@ _LAZY_DATASETS_IMPORTS = {
     "write_jcamp": "spectrochempy.core.writers.write_jcamp",
     "write_matlab": "spectrochempy.core.writers.write_matlab",
     "write_mat": "spectrochempy.core.writers.write_matlab",
-    "align": "spectrochempy.processing.alignement.align",
+    "align": "spectrochempy.processing.alignment.align",
     "ab": "spectrochempy.processing.baselineprocessing.baseline_deprecated",
     "abc": "spectrochempy.processing.baselineprocessing.baseline_deprecated",
     "get_baseline": "spectrochempy.processing.baselineprocessing.baselineprocessing",

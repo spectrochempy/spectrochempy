@@ -7,14 +7,26 @@
 
 """Tests for the interpolate module"""
 
+import importlib
+import sys
+
 import pytest
 
 import spectrochempy as scp
-from spectrochempy.processing.alignement.align import align
+from spectrochempy.processing.alignment.align import align
 from spectrochempy.utils.exceptions import UnitsCompatibilityError
 
 # align
 # -------
+
+
+def test_legacy_align_import_is_deprecated():
+    sys.modules.pop("spectrochempy.processing.alignement.align", None)
+    with pytest.deprecated_call(match="processing.alignement.align"):
+        legacy_module = importlib.import_module(
+            "spectrochempy.processing.alignement.align"
+        )
+    assert legacy_module.align is align
 
 
 def test_align(ds1, ds2):
@@ -32,6 +44,9 @@ def test_align(ds1, ds2):
     assert dss2 == dss
     assert dss2[0] == dss[0]
     ds5, ds6 = dss2
+
+    dss_root = scp.align(ds1, ds2, dim="x")
+    assert dss_root == dss
 
     # align another dim
     dss3 = align(ds1, ds2, dim="z")  # by default it would be the 'x' dim
