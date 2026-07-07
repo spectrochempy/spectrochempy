@@ -21,7 +21,7 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.10.11
+#     version: 3.14.6
 # ---
 
 # %% [markdown]
@@ -217,9 +217,19 @@ fit_result
 # remains available, but `opt.result` is the stable result object for inspection.
 
 # %%
-fitted = fit_result.fitted
 components = fit_result.components
 
+{
+    "r_squared": fit_result.diagnostics["r_squared"],
+    "rmse": fit_result.diagnostics["rmse"],
+    "success": fit_result.diagnostics["success"],
+}
+
+# %% [markdown]
+# The fitted components remain regular datasets, so they can be plotted
+# directly against the corrected spectrum.
+
+# %%
 _ = nd_oh_corr.plot()
 ax = components[:].plot(clear=False)
 ax.autoscale(enable=True, axis="y")

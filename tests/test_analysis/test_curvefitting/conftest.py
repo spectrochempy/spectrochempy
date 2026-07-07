@@ -64,3 +64,15 @@ def synthetic_two_peak_dataset():
         units="absorbance",
         title="synthetic optimize spectrum",
     )
+
+
+@pytest.fixture()
+def constant_optimize_dataset():
+    x = scp.Coord(np.linspace(3700.0, 3400.0, 301), title="wavenumber", units="cm^-1")
+    y = np.full_like(x.data, 0.5, dtype=np.float64)
+    return scp.NDDataset(
+        y,
+        coordset=[x],
+        units="absorbance",
+        title="constant optimize spectrum",
+    )

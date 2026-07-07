@@ -41,6 +41,13 @@ New Features
   CSV export, manual script writing, script validation, and ``Optimize.fit()``
   in one end-to-end example.
 
+- ``FitResult`` from ``Optimize.result`` now exposes a residual dataset as
+  ``result.outputs["residuals"]`` / ``result.residuals`` and basic fit-quality
+  diagnostics under ``result.diagnostics``: ``rss`` / ``sse``, ``rmse``,
+  ``r_squared``, plus normalized solver ``success``, ``status``, and
+  ``message`` fields. Existing ``result.fitted`` and ``result.components``
+  behavior is preserved.
+
 - SpectroChemPy now exposes top-level helpers for common 1D line shapes:
   ``scp.polynomial(...)``, ``scp.gaussian(...)``,
   ``scp.lorentzian(...)``,
