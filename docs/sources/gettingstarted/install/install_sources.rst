@@ -40,12 +40,25 @@ Installation Methods
 
 .. tabs::
 
-    .. tab:: mamba (recommended)
+    .. tab:: uv (Recommended)
 
         .. code-block:: bash
 
-            # Install Mambaforge
-            # Get it from: https://github.com/conda-forge/miniforge#mambaforge
+            # Create environment
+            uv venv --python 3.13
+            source .venv/bin/activate  # Linux/macOS
+            # or
+            .venv\Scripts\activate     # Windows
+
+            # Install package in editable mode
+            uv pip install -e ".[dev]"
+
+    .. tab:: mamba
+
+        .. code-block:: bash
+
+            # Install Miniforge
+            # Get it from: https://github.com/conda-forge/miniforge
 
             # Create environment
             mamba env create -n scpy -f environments/environment.yml

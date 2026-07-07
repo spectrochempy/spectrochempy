@@ -6,6 +6,17 @@ Full developer guide: [`docs/sources/devguide/`](docs/sources/devguide/)
 
 ## Quick start
 
+### Using uv (Recommended)
+
+```bash
+git clone https://github.com/your-user-name/spectrochempy.git
+cd spectrochempy
+uv venv --python 3.13 && source .venv/bin/activate
+uv pip install -e ".[dev]"
+```
+
+### Using pip
+
 ```bash
 git clone https://github.com/your-user-name/spectrochempy.git
 cd spectrochempy

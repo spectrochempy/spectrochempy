@@ -21,7 +21,13 @@ Installation options:
 
 .. tabs::
 
-   .. tab:: Using mamba (recommended)
+   .. tab:: Using uv (Recommended)
+
+      .. code-block:: bash
+
+         uv pip install spectrochempy_data
+
+   .. tab:: Using mamba
 
       .. code-block:: bash
 
@@ -45,7 +51,16 @@ for specific domains. Install them as needed:
 
 .. tabs::
 
-    .. tab:: Using pip (recommended)
+    .. tab:: Using uv (Recommended)
+
+       .. code-block:: bash
+
+          uv pip install "spectrochempy[iris]"      # 2D-IRIS analysis
+          uv pip install "spectrochempy[nmr]"       # Bruker TopSpin reader & NMR processing
+          uv pip install "spectrochempy[tensor]"    # TensorLy-backed tensor decompositions
+          uv pip install spectrochempy-carroucell   # Carroucell experiment reader
+
+    .. tab:: Using pip
 
        .. code-block:: bash
 
@@ -54,7 +69,7 @@ for specific domains. Install them as needed:
           pip install spectrochempy[tensor]    # TensorLy-backed tensor decompositions
           pip install spectrochempy-carroucell  # Carroucell experiment reader
 
-    .. tab:: Using mamba (recommended)
+    .. tab:: Using mamba
 
        .. code-block:: bash
 
@@ -107,7 +122,13 @@ it can be installed separately:
 
 .. tabs::
 
-   .. tab:: Using mamba (recommended)
+   .. tab:: Using uv (Recommended)
+
+      .. code-block:: bash
+
+         uv pip install cantera
+
+   .. tab:: Using mamba
 
       .. code-block:: bash
 
@@ -128,7 +149,13 @@ For interactive matplotlib plots:
 
 .. tabs::
 
-   .. tab:: Using mamba (recommended)
+   .. tab:: Using uv (Recommended)
+
+      .. code-block:: bash
+
+         uv pip install "pyqt5>=5.15.0"
+
+   .. tab:: Using mamba
 
       .. code-block:: bash
 

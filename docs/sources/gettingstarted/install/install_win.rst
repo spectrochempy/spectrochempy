@@ -24,16 +24,37 @@ Environment Setup
 
 .. tabs::
 
-   .. tab:: Mamba (Recommended)
+   .. tab:: Using uv (Recommended)
 
-      1. Install Mambaforge:
+      1. Install uv:
 
-         * Download `Mambaforge <https://github.com/conda-forge/miniforge#mambaforge>`_
+         .. code-block:: powershell
+
+            powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+         Restart your terminal after installation.
+
+      2. Create environment:
+
+         .. code-block:: bat
+
+            uv venv scpy --python 3.13
+            scpy\Scripts\activate
+
+   .. tab:: Using conda / mamba
+
+      1. Install Miniforge:
+
+         * Download `Miniforge <https://github.com/conda-forge/miniforge>`_
          * Run the installer
          * Open cmd prompt
 
+      2. Add required channels:
 
+         .. code-block:: bat
 
+            mamba config --add channels conda-forge
+            mamba config --add channels spectrocat
 
       3. Create environment:
 
@@ -59,11 +80,26 @@ Environment Setup
             python -m pip install --upgrade pip
 
 Installing SpectroChemPy
-------------------------
+-----------------------
 
 .. tabs::
 
-   .. tab:: Using Mamba (Recommended)
+   .. tab:: Using uv (Recommended)
+
+      .. code-block:: bat
+
+         uv pip install spectrochempy
+
+         :: or with interactive extras
+         uv pip install "spectrochempy[interactive]"
+
+      Development version:
+
+      .. code-block:: bat
+
+         uv pip install spectrochempy --pre
+
+   .. tab:: Using conda / mamba
 
       .. code-block:: bat
 
@@ -75,14 +111,13 @@ Installing SpectroChemPy
 
          mamba install -c spectrocat/label/dev spectrochempy
 
-   .. tab:: Using Pip
+   .. tab:: Using pip
 
       .. code-block:: bat
 
-         # Install SpectroChemPy
          python -m pip install spectrochempy
 
-         # or if you want to install interactive version (including jupyter)
+         :: or if you want to install interactive version (including jupyter)
          python -m pip install "spectrochempy[interactive]"
 
 Verifying Installation
@@ -112,9 +147,9 @@ Create a batch file (`.bat`) with:
 
     @REM launch cmd in scpy environment
     @CALL CD C:\<yourWorkingFolder>
-    @CALL CMD /K C:\<yourMambaForgeFolder>\Scripts\activate.bat scpy
+    @CALL CMD /K C:\<yourMiniforgeFolder>\Scripts\activate.bat scpy
 
-Save as `activate-scpy.bat` and create a shortcut named "Mamba prompt (scpy)".
+Save as `activate-scpy.bat` and create a shortcut named "Miniforge prompt (scpy)".
 
 Next Steps
 ----------
