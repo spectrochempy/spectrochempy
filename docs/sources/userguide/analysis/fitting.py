@@ -475,8 +475,11 @@ components = f1.result.components
 #
 # Raw solver artifacts stay on the estimator. Least-squares-backed methods keep
 # the retained Jacobian on `f1.jacobian`, while `simplex`, `basinhopping`, and
-# dry fits return `None`. This is preparatory infrastructure for future
-# uncertainty estimation and is intentionally not exposed through `FitResult`.
+# dry fits return `None`. `f1.result.covariance` is the first scientific
+# interpretation built on top of that Jacobian: it is an approximate local
+# least-squares covariance matrix, scaled by the residual variance and degrees
+# of freedom. It is only available when a backend provides a stable Jacobian and
+# should not be confused with confidence intervals or a full uncertainty report.
 
 # Show the result
 _ = ndOHcorr.plot()

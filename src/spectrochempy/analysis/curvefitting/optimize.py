@@ -76,6 +76,15 @@ def _freeze_jacobian_artifact(jacobian):
     return array
 
 
+def _freeze_covariance_matrix(covariance):
+    """Return an immutable ndarray snapshot of a computed covariance matrix."""
+    if covariance is None:
+        return None
+    array = np.array(covariance, copy=True, dtype=np.float64)
+    array.flags.writeable = False
+    return array
+
+
 def _count_varying_parameters(fp):
     """Count free parameters using the same rule as the optimizer internals."""
     if fp is None:
@@ -151,6 +160,69 @@ def _compute_fit_diagnostics(observed, fitted, solver_meta=None, fit_parameters=
     }
     diagnostics.update(dict(solver_meta or {}))
     return residuals, diagnostics
+
+
+def _compute_covariance_matrix(observed, fitted, jacobian, diagnostics):
+    """
+    Compute an approximate parameter covariance matrix from the retained Jacobian.
+
+    The approximation follows the local linear least-squares convention:
+
+        covariance = sigma^2 * pinv(J.T @ J)
+
+    where ``sigma^2`` is the residual variance estimate based on the reduced
+    chi-square (equivalently ``rss / degrees_of_freedom``).
+
+    Returns
+    -------
+    ndarray or None
+        Immutable covariance matrix when available, otherwise ``None``.
+    """
+    if jacobian is None:
+        return None
+
+    if observed is None or fitted is None:
+        return None
+
+    degrees_of_freedom = int(diagnostics.get("degrees_of_freedom", 0))
+    sigma2 = diagnostics.get("reduced_chi_square", np.nan)
+    n_varying_parameters = int(diagnostics.get("n_varying_parameters", 0))
+
+    if degrees_of_freedom <= 0 or n_varying_parameters <= 0:
+        return None
+
+    sigma2 = float(sigma2)
+    if not np.isfinite(sigma2):
+        return None
+
+    jacobian_array = np.asarray(jacobian, dtype=np.float64)
+    if jacobian_array.ndim != 2:
+        return None
+
+    residual_data = np.ma.masked_invalid(
+        np.ma.asarray((observed - fitted).real.masked_data)
+    )
+    valid_mask = ~np.ma.getmaskarray(residual_data)
+    valid_mask &= np.isfinite(np.ma.getdata(residual_data))
+    valid_rows = valid_mask.reshape(-1)
+
+    if jacobian_array.shape[1] != n_varying_parameters:
+        return None
+
+    if jacobian_array.shape[0] == valid_rows.size:
+        jacobian_used = jacobian_array[valid_rows]
+    elif jacobian_array.shape[0] == int(diagnostics.get("n_observations", 0)):
+        jacobian_used = jacobian_array
+    else:
+        return None
+
+    if jacobian_used.shape[0] <= 0:
+        return None
+
+    information = jacobian_used.T @ jacobian_used
+    covariance = sigma2 * np.linalg.pinv(information, hermitian=True)
+    covariance = 0.5 * (covariance + covariance.T)
+    return _freeze_covariance_matrix(covariance)
 
 
 def _normalize_solver_meta(method, result, warnmess=None):
@@ -317,8 +389,7 @@ def _validate_script_content(script, usermodels=None):
                     ScriptError(
                         lc,
                         line,
-                        f"Model {shape} not found in spectrochempy"
-                        f" nor in usermodels.",
+                        f"Model {shape} not found in spectrochempy nor in usermodels.",
                     ),
                 )
                 continue
@@ -382,8 +453,7 @@ def _validate_script_content(script, usermodels=None):
                 ScriptError(
                     lc,
                     line,
-                    "only two items;"
-                    " value, min, max (or value only) should be defined",
+                    "only two items; value, min, max (or value only) should be defined",
                 ),
             )
             continue
@@ -1335,6 +1405,12 @@ class Optimize(DecompositionAnalysis):
             getattr(self, "_fit_meta", {}),
             self.fp,
         )
+        covariance = _compute_covariance_matrix(
+            self._X,
+            fitted,
+            self.jacobian,
+            fit_diagnostics,
+        )
 
         return FitResult(
             estimator="Optimize",
@@ -1351,6 +1427,7 @@ class Optimize(DecompositionAnalysis):
                 "residuals": residuals,
             },
             diagnostics=fit_diagnostics,
+            covariance=covariance,
         )
 
 

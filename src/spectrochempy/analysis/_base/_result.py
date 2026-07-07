@@ -192,4 +192,33 @@ class FitResult(ResultBase):
     Typical diagnostics include convergence and goodness-of-fit metrics.
     """
 
-    pass
+    def __init__(
+        self,
+        *,
+        estimator,
+        parameters=None,
+        outputs=None,
+        diagnostics=None,
+        covariance=None,
+    ):
+        super().__init__(
+            estimator=estimator,
+            parameters=parameters,
+            outputs=outputs,
+            diagnostics=diagnostics,
+        )
+        self._covariance = covariance
+
+    @property
+    def covariance(self):
+        """
+        Approximate covariance matrix of the fitted varying parameters.
+
+        Returns
+        -------
+        ndarray or None
+            Approximate covariance matrix computed from the retained least-squares
+            Jacobian when available and mathematically meaningful. Returns ``None``
+            when covariance is unavailable.
+        """
+        return self._covariance
