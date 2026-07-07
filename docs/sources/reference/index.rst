@@ -125,6 +125,7 @@ Basic creation methods
     eye
     identity
     random
+    normal
     diag
 
 

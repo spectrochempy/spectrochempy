@@ -119,6 +119,7 @@ _LAZY_IMPORTS = {
     "min": "spectrochempy.core.dataset.arraymixins.ndmath",
     "ones": "spectrochempy.core.dataset.arraymixins.ndmath",
     "ones_like": "spectrochempy.core.dataset.arraymixins.ndmath",
+    "normal": "spectrochempy.core.dataset.arraymixins.ndmath",
     "pipe": "spectrochempy.core.dataset.arraymixins.ndmath",
     "ptp": "spectrochempy.core.dataset.arraymixins.ndmath",
     "random": "spectrochempy.core.dataset.arraymixins.ndmath",

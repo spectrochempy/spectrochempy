@@ -43,7 +43,9 @@ New Features
   ``normalized=False`` to return a profile whose peak amplitude is exactly
   ``ampl``. Common mathematical helpers are also available at top level:
   ``scp.exp(...)``, ``scp.log(...)``, ``scp.log10(...)``, ``scp.sin(...)``,
-  and ``scp.cos(...)``. (#1301)
+  and ``scp.cos(...)``. Synthetic profile creation also gains
+  ``scp.normal(...)`` for native Gaussian noise generation without dropping to
+  NumPy. (#1301)
 
 - ``stack(..., axis=1)`` is now supported for stacking 1D profiles as
   columns into a 2D dataset.  This makes the workflow for building
