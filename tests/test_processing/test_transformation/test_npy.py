@@ -8,6 +8,7 @@
 import numpy as np
 import pytest
 
+from spectrochempy import NDDataset
 from spectrochempy import diag
 from spectrochempy.processing.transformation.npy import dot
 
@@ -55,3 +56,75 @@ def test_npy(ds1):
     # isinstance typo regression: first arg numpy, second arg NDDataset
     x = dot(a.data.T, b)
     assert x.shape == (a.x.size, b.x.size)
+
+
+def test_dot_strict_mask_propagation():
+    # `strict` must be honoured and forwarded to numpy.ma.dot.
+    # With a masked entry in row 0 of `a`, strict propagation masks the whole
+    # corresponding row of the result; non-strict treats masked values as 0.
+    a = np.ma.array([[1.0, 2.0], [3.0, 4.0]], mask=[[0, 1], [0, 0]])
+    b = np.ma.array([[5.0, 6.0], [7.0, 8.0]], mask=[[0, 0], [0, 0]])
+    da = NDDataset(a)
+    db = NDDataset(b)
+
+    # numpy reference behaviour
+    ref_loose = np.ma.dot(a, b, strict=False)
+    ref_strict = np.ma.dot(a, b, strict=True)
+    assert not np.ma.getmaskarray(ref_loose).any()
+    assert np.array_equal(
+        np.ma.getmaskarray(ref_strict), [[True, True], [False, False]]
+    )
+
+    # strict=True must mask the whole result row impacted by the masked value
+    r_strict = dot(da, db, strict=True)
+    assert np.array_equal(
+        np.ma.getmaskarray(np.ma.array(r_strict.data, mask=r_strict.mask)),
+        [[True, True], [False, False]],
+    )
+
+    # strict=False keeps every entry unmasked and matches numpy
+    r_loose = dot(da, db, strict=False)
+    assert not np.ma.getmaskarray(np.ma.array(r_loose.data, mask=r_loose.mask)).any()
+    np.testing.assert_allclose(r_loose.data, ref_loose.data)
+
+    # strict actually changes the outcome, so the two must differ
+    assert not np.array_equal(
+        np.ma.getmaskarray(np.ma.array(r_strict.data, mask=r_strict.mask)),
+        np.ma.getmaskarray(np.ma.array(r_loose.data, mask=r_loose.mask)),
+    )
+
+    # default must preserve the historical (non-strict) behaviour
+    r_default = dot(da, db)
+    assert np.array_equal(
+        np.ma.getmaskarray(np.ma.array(r_default.data, mask=r_default.mask)),
+        np.ma.getmaskarray(np.ma.array(r_loose.data, mask=r_loose.mask)),
+    )
+
+
+def test_dot_strict_direct_masked_arrays():
+    # When neither input is an NDDataset but both are numpy masked arrays,
+    # `strict` must still be forwarded to numpy.ma.dot rather than dropped by
+    # a plain np.dot. The result is a numpy masked array (no NDDataset wrapping).
+    a = np.ma.array([[1.0, 2.0], [3.0, 4.0]], mask=[[0, 1], [0, 0]])
+    b = np.ma.array([[5.0, 6.0], [7.0, 8.0]], mask=[[0, 0], [0, 0]])
+
+    ref_loose = np.ma.dot(a, b, strict=False)
+    ref_strict = np.ma.dot(a, b, strict=True)
+
+    r_strict = dot(a, b, strict=True)
+    assert isinstance(r_strict, np.ma.MaskedArray)
+    assert np.array_equal(np.ma.getmaskarray(r_strict), np.ma.getmaskarray(ref_strict))
+    assert np.array_equal(np.ma.getmaskarray(r_strict), [[True, True], [False, False]])
+
+    r_loose = dot(a, b, strict=False)
+    assert not np.ma.getmaskarray(r_loose).any()
+    np.testing.assert_allclose(r_loose.data, ref_loose.data)
+
+    # default keeps the historical non-strict behaviour
+    r_default = dot(a, b)
+    assert not np.ma.getmaskarray(np.ma.asarray(r_default)).any()
+
+    # a plain (non-masked) pair must still go through np.dot unchanged
+    r_plain = dot(a.data, b.data)
+    assert not isinstance(r_plain, np.ma.MaskedArray)
+    np.testing.assert_allclose(r_plain, np.dot(a.data, b.data))

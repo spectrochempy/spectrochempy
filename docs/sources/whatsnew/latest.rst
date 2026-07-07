@@ -79,6 +79,12 @@ Bug Fixes
   ``ylst_data``, ``ylst_title``, ``ylst_units``) where it belongs as per-spectrum
   metadata. (#1332)
 
+- ``scp.dot()`` now honours its ``strict`` argument, forwarding it to
+  ``numpy.ma.dot`` so masked values are propagated (``strict=True``) or treated
+  as zero (``strict=False``) as documented. The signature default now matches
+  the documentation and NumPy (``strict=False``), which preserves the previous
+  behaviour for existing callers (``strict`` was silently ignored before).
+
 - ``MCRALS`` is now more robust in constrained and hard-model workflows:
   closure constraints are applied correctly for empty and single-component
   selections, zero-norm spectral normalization no longer produces
