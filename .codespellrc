@@ -1,7 +1,7 @@
 [codespell]
 # Skip generated, third-party, binary-like, or data-heavy files where
 # spell-check noise is expected to outweigh value.
-skip = .git,.pytest_cache,.ruff_cache,./LICENSE,./LICENSES/*,./maintainers/*,./docs/_static/license_CeCILL.html,./docs/_static/versions.json,./docs/_templates/layout.html,./docs/sources/reference/bibliography.bib,./docs/sources/reference/papers.rst,./docs/sources/whatsnew/latest.rst,./src/spectrochempy.egg-info/*,./src/spectrochempy/extern/*,./src/spectrochempy/data/databases/isotopes.csv,*.ipynb,*.mat,*.npy,*.npz,*.spg,*.wdf
+skip = .git,.pytest_cache,.ruff_cache,LICENSE,./LICENSE,LICENSES/*,./LICENSES/*,maintainers/*,./maintainers/*,docs/_static/license_CeCILL.html,./docs/_static/license_CeCILL.html,docs/_static/versions.json,./docs/_static/versions.json,docs/_templates/layout.html,./docs/_templates/layout.html,docs/sources/reference/bibliography.bib,./docs/sources/reference/bibliography.bib,docs/sources/reference/papers.rst,./docs/sources/reference/papers.rst,docs/sources/whatsnew/latest.rst,./docs/sources/whatsnew/latest.rst,src/spectrochempy.egg-info/*,./src/spectrochempy.egg-info/*,src/spectrochempy/extern/*,./src/spectrochempy/extern/*,src/spectrochempy/data/databases/isotopes.csv,./src/spectrochempy/data/databases/isotopes.csv,*.ipynb,*.mat,*.npy,*.npz,*.spg,*.wdf
 
 # Domain-specific short names that are intentional in SpectroChemPy and would
 # otherwise be reported as false positives.
