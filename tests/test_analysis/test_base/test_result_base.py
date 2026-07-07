@@ -148,6 +148,11 @@ class TestFitResult:
         result = FitResult(estimator="Optimize", outputs={"fitted": fitted})
         assert result.fitted is fitted
 
+    def test_covariance_property(self):
+        covariance = np.eye(2)
+        result = FitResult(estimator="Optimize", covariance=covariance)
+        np.testing.assert_array_equal(result.covariance, covariance)
+
 
 class TestResultBaseHTMLRepr:
     """Behavioral tests for the HTML representation of ResultBase."""

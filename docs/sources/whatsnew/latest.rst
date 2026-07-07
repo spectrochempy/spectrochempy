@@ -45,7 +45,11 @@ New Features
   ``adjusted_r_squared``, plus normalized solver ``success``, ``status``,
   and ``message`` fields. ``Optimize`` also retains the raw least-squares
   Jacobian on ``opt.jacobian`` when a backend naturally provides one, while
-  methods without a native Jacobian expose ``None``. Existing
+  methods without a native Jacobian expose ``None``. ``FitResult.covariance``
+  now exposes the first uncertainty-oriented scientific interpretation built
+  from that Jacobian: an approximate local least-squares covariance matrix for
+  the fitted varying parameters, available only when the backend provides a
+  stable Jacobian and the residual degrees of freedom are positive. Existing
   ``result.fitted`` and ``result.components`` behavior is preserved.
 
 - SpectroChemPy now exposes top-level helpers for common 1D line shapes:

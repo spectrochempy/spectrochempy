@@ -17,6 +17,7 @@ from spectrochempy.analysis._base._result import FitResult
 from spectrochempy.analysis._base._result import ResultBase
 from spectrochempy.analysis.curvefitting._parameters import FitParameters
 from spectrochempy.analysis.curvefitting import optimize as optimize_module
+from spectrochempy.analysis.curvefitting.optimize import _compute_covariance_matrix
 from spectrochempy.analysis.curvefitting.optimize import _compute_fit_diagnostics
 from tests.test_analysis.result_test_helpers import assert_fit_returns_self
 from tests.test_analysis.result_test_helpers import assert_result_basics
@@ -242,6 +243,28 @@ class TestOptimizeResult:
         assert np.isfinite(diag["adjusted_r_squared"])
         assert diag["adjusted_r_squared"] <= diag["r_squared"]
         assert isinstance(diag["status"], int | type(None))
+        assert opt.result.covariance is not None
+
+    def test_covariance_available_for_least_squares_fit(
+        self, synthetic_two_peak_dataset, optimize_script
+    ):
+        opt = scp.Optimize()
+        opt.script = optimize_script
+        opt.autobase = True
+        opt.max_iter = 10
+        opt.fit(synthetic_two_peak_dataset)
+
+        covariance = opt.result.covariance
+
+        assert covariance is not None
+        assert covariance.flags.writeable is False
+        assert covariance.shape == (
+            opt.result.diagnostics["n_varying_parameters"],
+            opt.result.diagnostics["n_varying_parameters"],
+        )
+        np.testing.assert_allclose(covariance, covariance.T)
+        assert np.all(np.isfinite(np.diag(covariance)))
+        assert np.all(np.diag(covariance) >= 0.0)
 
     def test_rss_matches_residual_sum_of_squares(
         self, synthetic_two_peak_dataset, optimize_script
@@ -318,6 +341,10 @@ class TestOptimizeResult:
         assert np.isnan(diagnostics["reduced_chi_square"])
         assert np.isnan(diagnostics["adjusted_r_squared"])
 
+        jacobian = np.eye(3)
+        covariance = _compute_covariance_matrix(observed, fitted, jacobian, diagnostics)
+        assert covariance is None
+
     def test_dry_fit_exposes_conservative_solver_status(
         self, synthetic_two_peak_dataset, optimize_script
     ):
@@ -336,6 +363,7 @@ class TestOptimizeResult:
         assert diag["degrees_of_freedom"] == (
             diag["n_observations"] - diag["n_varying_parameters"]
         )
+        assert opt.result.covariance is None
 
     # ----------------------------------------------------------------------------------
     # Solver artifacts
@@ -394,6 +422,7 @@ class TestOptimizeResult:
         opt.fit(synthetic_two_peak_dataset)
 
         assert opt.jacobian is None
+        assert opt.result.covariance is None
 
     def test_jacobian_absent_for_basinhopping_backend(
         self, synthetic_two_peak_dataset, optimize_script, monkeypatch
@@ -426,6 +455,7 @@ class TestOptimizeResult:
         opt.fit(synthetic_two_peak_dataset)
 
         assert opt.jacobian is None
+        assert opt.result.covariance is None
 
     def test_jacobian_absent_for_dry_fit(
         self, synthetic_two_peak_dataset, optimize_script
@@ -437,6 +467,7 @@ class TestOptimizeResult:
         opt.fit(synthetic_two_peak_dataset)
 
         assert opt.jacobian is None
+        assert opt.result.covariance is None
 
     def test_fit_result_does_not_expose_jacobian(
         self, synthetic_two_peak_dataset, optimize_script
@@ -451,6 +482,24 @@ class TestOptimizeResult:
         assert "jacobian" not in opt.result.diagnostics
         with pytest.raises(AttributeError):
             _ = opt.result.jacobian
+
+    def test_covariance_available_for_leastsq_alias(
+        self, synthetic_two_peak_dataset, optimize_script
+    ):
+        opt = scp.Optimize()
+        opt.script = optimize_script
+        opt.method = "leastsq"
+        opt.autobase = True
+        opt.max_iter = 10
+        opt.fit(synthetic_two_peak_dataset)
+
+        covariance = opt.result.covariance
+
+        assert covariance is not None
+        assert covariance.shape == (
+            opt.result.diagnostics["n_varying_parameters"],
+            opt.result.diagnostics["n_varying_parameters"],
+        )
 
     # ----------------------------------------------------------------------------------
     # Representation
