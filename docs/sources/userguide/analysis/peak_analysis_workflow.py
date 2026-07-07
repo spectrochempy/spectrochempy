@@ -221,7 +221,10 @@ components = fit_result.components
 
 {
     "r_squared": fit_result.diagnostics["r_squared"],
+    "adjusted_r_squared": fit_result.diagnostics["adjusted_r_squared"],
     "rmse": fit_result.diagnostics["rmse"],
+    "degrees_of_freedom": fit_result.diagnostics["degrees_of_freedom"],
+    "reduced_chi_square": fit_result.diagnostics["reduced_chi_square"],
     "success": fit_result.diagnostics["success"],
 }
 

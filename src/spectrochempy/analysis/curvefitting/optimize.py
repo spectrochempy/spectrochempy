@@ -67,23 +67,44 @@ def _scalar_from_masked(value, *, default=np.nan):
     return float(value)
 
 
-def _compute_fit_diagnostics(observed, fitted, solver_meta=None):
+def _count_varying_parameters(fp):
+    """Count free parameters using the same rule as the optimizer internals."""
+    if fp is None:
+        return 0
+
+    n_varying = 0
+    for key in sorted(fp.keys()):
+        if fp.fixed[key]:
+            continue
+        key_prefix = key.split("_")[0]
+        if key_prefix in fp.expvars:
+            n_varying += fp.expnumber
+        else:
+            n_varying += 1
+    return int(n_varying)
+
+
+def _compute_fit_diagnostics(observed, fitted, solver_meta=None, fit_parameters=None):
     """Compute residual output and basic fit-quality diagnostics."""
     if getattr(observed, "size", None) == 0 or getattr(fitted, "size", None) == 0:
         residuals = observed.copy()
     else:
         residuals = observed - fitted
 
-    residual_data = np.ma.asarray(residuals.real.masked_data)
-    observed_data = np.ma.asarray(observed.real.masked_data)
+    residual_data = np.ma.masked_invalid(np.ma.asarray(residuals.real.masked_data))
+    observed_data = np.ma.masked_invalid(np.ma.asarray(observed.real.masked_data))
 
     count = int(residual_data.count())
+    n_varying_parameters = _count_varying_parameters(fit_parameters)
+    degrees_of_freedom = count - n_varying_parameters
+
     sse = _scalar_from_masked(np.ma.sum(np.ma.abs(residual_data) ** 2), default=0.0)
     rss = sse
 
     if count == 0:
         rmse = float("nan")
         r_squared = float("nan")
+        adjusted_r_squared = float("nan")
     else:
         rmse = float(np.sqrt(sse / count))
         observed_mean = np.ma.mean(observed_data)
@@ -96,11 +117,28 @@ def _compute_fit_diagnostics(observed, fitted, solver_meta=None):
         else:
             r_squared = float(1.0 - (sse / tss))
 
+        if degrees_of_freedom > 0 and count > 1 and np.isfinite(r_squared):
+            adjusted_r_squared = float(
+                1.0 - ((1.0 - r_squared) * (count - 1) / degrees_of_freedom),
+            )
+        else:
+            adjusted_r_squared = float("nan")
+
+    if degrees_of_freedom > 0:
+        reduced_chi_square = float(rss / degrees_of_freedom)
+    else:
+        reduced_chi_square = float("nan")
+
     diagnostics = {
+        "n_observations": count,
+        "n_varying_parameters": n_varying_parameters,
+        "degrees_of_freedom": int(degrees_of_freedom),
         "sse": sse,
         "rss": rss,
         "rmse": rmse,
         "r_squared": r_squared,
+        "reduced_chi_square": reduced_chi_square,
+        "adjusted_r_squared": adjusted_r_squared,
     }
     diagnostics.update(dict(solver_meta or {}))
     return residuals, diagnostics
@@ -1246,6 +1284,7 @@ class Optimize(DecompositionAnalysis):
             self._X,
             fitted,
             getattr(self, "_fit_meta", {}),
+            self.fp,
         )
 
         return FitResult(

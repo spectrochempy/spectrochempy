@@ -15,6 +15,7 @@ import spectrochempy as scp
 from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis._base._result import FitResult
 from spectrochempy.analysis._base._result import ResultBase
+from spectrochempy.analysis.curvefitting._parameters import FitParameters
 from spectrochempy.analysis.curvefitting.optimize import _compute_fit_diagnostics
 from tests.test_analysis.result_test_helpers import assert_fit_returns_self
 from tests.test_analysis.result_test_helpers import assert_result_basics
@@ -172,10 +173,15 @@ class TestOptimizeResult:
             "cost",
             "niter",
             "ncalls",
+            "n_observations",
+            "n_varying_parameters",
+            "degrees_of_freedom",
             "rss",
             "sse",
             "rmse",
             "r_squared",
+            "reduced_chi_square",
+            "adjusted_r_squared",
             "success",
             "status",
             "message",
@@ -192,10 +198,15 @@ class TestOptimizeResult:
         assert isinstance(diag["cost"], float) or diag["cost"] is None
         assert isinstance(diag["niter"], int)
         assert isinstance(diag["ncalls"], int)
+        assert isinstance(diag["n_observations"], int)
+        assert isinstance(diag["n_varying_parameters"], int)
+        assert isinstance(diag["degrees_of_freedom"], int)
         assert isinstance(diag["rss"], float)
         assert isinstance(diag["sse"], float)
         assert isinstance(diag["rmse"], float)
         assert isinstance(diag["r_squared"], float)
+        assert isinstance(diag["reduced_chi_square"], float)
+        assert isinstance(diag["adjusted_r_squared"], float)
         assert isinstance(diag["success"], bool)
         assert isinstance(diag["message"], str)
 
@@ -213,11 +224,22 @@ class TestOptimizeResult:
         # at least one iteration and function call should have occurred
         assert diag["niter"] >= 0
         assert diag["ncalls"] >= 0
+        assert diag["n_observations"] == synthetic_two_peak_dataset.size
+        assert diag["n_varying_parameters"] == 9
+        assert diag["degrees_of_freedom"] == (
+            diag["n_observations"] - diag["n_varying_parameters"]
+        )
         assert diag["rss"] == pytest.approx(diag["sse"])
         assert np.isfinite(diag["rmse"])
         assert diag["rmse"] >= 0.0
         assert np.isfinite(diag["r_squared"])
         assert diag["r_squared"] > 0.99
+        assert np.isfinite(diag["reduced_chi_square"])
+        assert diag["reduced_chi_square"] == pytest.approx(
+            diag["rss"] / diag["degrees_of_freedom"]
+        )
+        assert np.isfinite(diag["adjusted_r_squared"])
+        assert diag["adjusted_r_squared"] <= diag["r_squared"]
         assert isinstance(diag["status"], int | type(None))
 
     def test_rss_matches_residual_sum_of_squares(
@@ -246,18 +268,54 @@ class TestOptimizeResult:
         diag = opt.result.diagnostics
 
         assert np.isnan(diag["r_squared"])
+        assert np.isnan(diag["adjusted_r_squared"])
         assert diag["rmse"] >= 0.0 or np.isnan(diag["rmse"])
         assert diag["rss"] == pytest.approx(diag["sse"])
+        assert diag["degrees_of_freedom"] == (
+            diag["n_observations"] - diag["n_varying_parameters"]
+        )
+
+    def test_fixed_parameters_are_not_counted_as_varying(
+        self, synthetic_two_peak_dataset, optimize_script
+    ):
+        opt = scp.Optimize()
+        opt.script = optimize_script
+        opt.autobase = True
+        opt.max_iter = 10
+        opt.fit(synthetic_two_peak_dataset)
+
+        assert opt.result.diagnostics["n_varying_parameters"] == 9
 
     def test_empty_diagnostics_are_stable(self):
         empty = scp.NDDataset(np.array([], dtype=np.float64))
-        residuals, diagnostics = _compute_fit_diagnostics(empty, empty, {})
+        residuals, diagnostics = _compute_fit_diagnostics(empty, empty, {}, None)
 
         assert residuals.size == 0
+        assert diagnostics["n_observations"] == 0
+        assert diagnostics["n_varying_parameters"] == 0
+        assert diagnostics["degrees_of_freedom"] == 0
         assert diagnostics["rss"] == pytest.approx(0.0)
         assert diagnostics["sse"] == pytest.approx(0.0)
         assert np.isnan(diagnostics["rmse"])
         assert np.isnan(diagnostics["r_squared"])
+        assert np.isnan(diagnostics["reduced_chi_square"])
+        assert np.isnan(diagnostics["adjusted_r_squared"])
+
+    def test_non_positive_degrees_of_freedom_are_stable(self):
+        observed = scp.NDDataset(np.array([1.0, 2.0, 3.0], dtype=np.float64))
+        fitted = observed.copy()
+        fit_parameters = FitParameters()
+        fit_parameters["a"] = (1.0, None, None, False)
+        fit_parameters["b"] = (1.0, None, None, False)
+        fit_parameters["c"] = (1.0, None, None, False)
+
+        _, diagnostics = _compute_fit_diagnostics(observed, fitted, {}, fit_parameters)
+
+        assert diagnostics["n_observations"] == 3
+        assert diagnostics["n_varying_parameters"] == 3
+        assert diagnostics["degrees_of_freedom"] == 0
+        assert np.isnan(diagnostics["reduced_chi_square"])
+        assert np.isnan(diagnostics["adjusted_r_squared"])
 
     def test_dry_fit_exposes_conservative_solver_status(
         self, synthetic_two_peak_dataset, optimize_script
@@ -273,6 +331,10 @@ class TestOptimizeResult:
         assert diag["success"] is False
         assert diag["status"] is None
         assert diag["message"] == ""
+        assert diag["n_varying_parameters"] == 9
+        assert diag["degrees_of_freedom"] == (
+            diag["n_observations"] - diag["n_varying_parameters"]
+        )
 
     # ----------------------------------------------------------------------------------
     # Representation
