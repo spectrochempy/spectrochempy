@@ -36,12 +36,16 @@ New Features
   not add a pandas dependency. (#1351)
 
 - SpectroChemPy now exposes top-level helpers for common 1D line shapes:
-  ``scp.gaussian(...)``, ``scp.lorentzian(...)``, ``scp.voigt(...)``,
-  ``scp.asymmetricvoigt(...)``, and ``scp.sigmoid(...)``. The line-shape
-  helpers except ``scp.sigmoid`` also accept ``normalized=False`` to return a
-  profile whose peak amplitude is exactly ``ampl``. Common mathematical
-  helpers are also available at top level: ``scp.exp(...)``, ``scp.log(...)``,
-  ``scp.log10(...)``, ``scp.sin(...)``, and ``scp.cos(...)``. (#1301)
+  ``scp.polynomial(...)``, ``scp.gaussian(...)``,
+  ``scp.lorentzian(...)``,
+  ``scp.voigt(...)``, ``scp.asymmetricvoigt(...)``, and ``scp.sigmoid(...)``.
+  The line-shape helpers except ``scp.sigmoid`` also accept
+  ``normalized=False`` to return a profile whose peak amplitude is exactly
+  ``ampl``. Common mathematical helpers are also available at top level:
+  ``scp.exp(...)``, ``scp.log(...)``, ``scp.log10(...)``, ``scp.sin(...)``,
+  and ``scp.cos(...)``. Synthetic profile creation also gains
+  ``scp.normal(...)`` for native Gaussian noise generation without dropping to
+  NumPy. (#1301)
 
 - ``stack(..., axis=1)`` is now supported for stacking 1D profiles as
   columns into a 2D dataset.  This makes the workflow for building

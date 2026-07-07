@@ -1214,6 +1214,25 @@ def test_random():
     assert ds.x.size == 200
 
 
+def test_normal():
+    """Test normal creation function."""
+    ds = scp.normal(loc=2.0, scale=0.5, size=(3, 3), units="km")
+    assert ds.shape == (3, 3)
+    assert ds.units == Unit("km")
+
+    c1 = Coord.linspace(1, 20, 200, units="m", name="axe_x")
+    ds = scp.normal(
+        loc=1.5,
+        scale=0.2,
+        size=(200,),
+        units="km",
+        coordset=scp.CoordSet(x=c1),
+    )
+    assert ds.shape == (200,)
+    assert ds.x.size == 200
+    assert abs(ds.mean().m - 1.5) < 0.1
+
+
 def test_diagonal():
     """Test diagonal extraction."""
     # Extract diagonal

@@ -71,6 +71,11 @@ The PR description should begin with:
 2. what is intentionally out of scope;
 3. references to related issues and PRs when applicable.
 
+If a pull request adds or exposes a new public API symbol at top level
+(``spectrochempy.<name>`` / ``scp.<name>``), update
+`docs/sources/reference/index.rst` in the appropriate section so the symbol
+appears in the public API reference.
+
 ---
 
 ## Changelog entries

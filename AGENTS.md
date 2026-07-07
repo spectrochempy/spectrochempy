@@ -46,6 +46,11 @@ Unless explicitly requested otherwise:
 
 Internal refactoring should not introduce user-visible behavior changes.
 
+When adding or exposing a new public top-level API symbol
+(``spectrochempy.<name>`` / ``scp.<name>``), also update
+`docs/sources/reference/index.rst` in the appropriate section of the public API
+reference.
+
 ---
 
 # Architecture Strategy

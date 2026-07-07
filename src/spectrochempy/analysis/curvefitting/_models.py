@@ -14,6 +14,7 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.units import Quantity
 
 __all__ = [
+    "polynomial",
     "polynomialbaseline",
     "gaussian",
     "gaussianmodel",
@@ -104,6 +105,57 @@ def _evaluate_model(model, x, name=None, **kwargs):
     if isinstance(result, NDDataset) and name is not None:
         result.name = name
     return result
+
+
+def polynomial(x, offset=0.0, slope=0.0, ampl=1.0, **kwargs):
+    """
+    Return a 1D polynomial profile.
+
+    This helper evaluates a centered polynomial using the same parameterization
+    as the ``polynomialbaseline`` fitting shape, while also allowing an
+    optional constant offset and linear slope for convenient signal
+    construction.
+
+    Parameters
+    ----------
+    x : array-like, Coord or NDDataset
+        Abscissa values.
+    offset : float, optional
+        Constant offset added to the profile.
+    slope : float, optional
+        Linear slope applied around the centre of *x*.
+    ampl : float, optional
+        Global scaling factor applied to the polynomial terms.
+    **kwargs
+        Polynomial coefficients such as ``c_2=...``, ``c_3=...``, etc.
+    """
+    result = _evaluate_model(
+        polynomialbaseline,
+        x,
+        name="polynomial",
+        ampl=ampl,
+        **kwargs,
+    )
+
+    if offset == 0.0 and slope == 0.0:
+        return result
+
+    xcoord = x
+    if isinstance(xcoord, NDDataset):
+        if xcoord.ndim != 1:
+            raise ValueError("Shape helpers expect a 1D abscissa")
+        coord = getattr(xcoord, xcoord.dims[0], None)
+        xcoord = (
+            coord.copy()
+            if coord is not None
+            else Coord(xcoord.data, units=xcoord.units)
+        )
+
+    xvalues = xcoord.data if isinstance(xcoord, Coord) else np.asarray(xcoord)
+
+    xcentered = xvalues - xvalues[int(len(xvalues) / 2)]
+    linear = offset + slope * xcentered
+    return result + linear
 
 
 def gaussian(x, ampl=1.0, pos=0.0, width=1.0, normalized=True, **kwargs):
