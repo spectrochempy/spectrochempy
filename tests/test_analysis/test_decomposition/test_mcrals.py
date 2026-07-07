@@ -923,3 +923,1071 @@ def test_MCRALS_pr1_monotonic_tol_docstrings():
 
     sig = inspect.signature(_unimodal_1D)
     assert sig.parameters["tol"].annotation is float
+
+
+# --------------------------------------------------------------------------------------
+# PR4 — behavioral characterization matrix
+#
+# These tests freeze the *current* numerical behavior of MCRALS across the
+# documented constraint / solver / initialization space, before the next
+# structural refactoring. They use a tiny deterministic synthetic dataset
+# (8 observations x 12 wavelengths, 2 components) whose unconstrained
+# least-squares solution already satisfies the soft constraints — so several
+# constraint configurations reduce to no-ops. The no-op behavior itself is
+# part of the characterization (a future regression would change it).
+#
+# Discovered bug (analogous to issue #911): the ``np.any(indices)`` guard
+# used by ``_NonNegativeConstraint`` / ``_MonotonicIncreaseConstraint`` /
+# ``_MonotonicDecreaseConstraint`` evaluates to ``False`` for ``[0]`` (a
+# single zero), so selecting only component 0 silently disables the
+# constraint. The working characterization below therefore uses indices
+# ``[1]`` or ``[0, 1]``; the ``[0]`` selection silently no-op'd.
+# This PR fixes the guard family (truthiness check, mirroring the PR1
+# ``_ClosureConstraint`` fix for issue #911), so the former ``xfail``
+# diagnostics are now permanent passing regression tests (see the
+# "component-0 guard family" block below).
+# --------------------------------------------------------------------------------------
+
+
+def _pr4_make_data():
+    """Deterministic (X, C0, St0) for the PR4 characterization matrix."""
+    rng = np.random.RandomState(0)
+    _n_obs, _n_wl, _n_comp = 8, 12, 2
+    C_true = np.zeros((_n_obs, _n_comp))
+    C_true[:, 0] = np.array([0.1, 0.3, 0.8, 1.0, 0.7, 0.3, 0.1, 0.05])
+    C_true[:, 1] = np.array([0.05, 0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 0.9])
+    St_true = np.zeros((_n_comp, _n_wl))
+    St_true[0] = np.array(
+        [0.1, 0.3, 0.9, 1.0, 0.8, 0.4, 0.2, 0.1, 0.05, 0.03, 0.02, 0.01]
+    )
+    St_true[1] = np.array(
+        [0.02, 0.05, 0.1, 0.2, 0.4, 0.7, 0.9, 1.0, 0.8, 0.5, 0.2, 0.05]
+    )
+    X = C_true @ St_true + 1.0e-6 * rng.randn(_n_obs, _n_wl)
+    C0 = np.abs(C_true + 0.05 * np.array([[1.0, -0.5]] * _n_obs))
+    St0 = np.abs(St_true + 0.05 * rng.randn(_n_comp, _n_wl))
+    return X, C0, St0
+
+
+_PR4_X, _PR4_C0, _PR4_St0 = _pr4_make_data()
+_PR4_RTOL = 1.0e-7
+_PR4_ATOL = 1.0e-10
+
+# Baseline (no constraint active) reference values.
+_PR4_BASE_C = np.array(
+    [
+        [0.1068653836, 0.0465680540],
+        [0.3183345404, 0.0908325178],
+        [0.8458804735, 0.1770601895],
+        [1.0641205340, 0.3679394708],
+        [0.7593293601, 0.5703353606],
+        [0.3499313687, 0.7750337689],
+        [0.1497472154, 0.9751260820],
+        [0.0929305874, 0.8785355335],
+    ]
+)
+_PR4_BASE_ST = np.array(
+    [
+        [
+            0.0959501102,
+            0.2876228217,
+            0.8617432217,
+            0.9594936673,
+            0.7729962939,
+            0.3977491435,
+            0.2112514051,
+            0.1180037060,
+            0.0657518587,
+            0.0399004442,
+            0.0235996660,
+            0.0106755570,
+        ],
+        [
+            0.0160308846,
+            0.0378714425,
+            0.0625115383,
+            0.1603051033,
+            0.3735362700,
+            0.6977946952,
+            0.9110254785,
+            1.0176422473,
+            0.8154361736,
+            0.5097041496,
+            0.2035290395,
+            0.0506610918,
+        ],
+    ]
+)
+
+
+def _pr4_fit(**kwargs):
+    """Helper: fit a fresh MCRALS on the PR4 dataset and return it."""
+    guess = kwargs.pop("guess", "C")
+    mcr = MCRALS(**kwargs)
+    if guess == "C":
+        mcr.fit(_PR4_X, _PR4_C0)
+    else:
+        mcr.fit(_PR4_X, _PR4_St0)
+    return mcr
+
+
+# --- generators for the hard-profile return-form matrix --------------------------
+
+
+def _pr4_getconc_bare(C):
+    return np.full((C.shape[0], C.shape[1]), 0.5)
+
+
+def _pr4_getconc_args(C, a):
+    return np.full((C.shape[0], C.shape[1]), 0.5), (a * 2,)
+
+
+def _pr4_getconc_extra(C, a):
+    return np.full((C.shape[0], C.shape[1]), 0.5), (a,), {"marker": "conc"}
+
+
+def _pr4_getspec_bare(St):
+    return np.full((St.shape[0], St.shape[1]), 0.3)
+
+
+def _pr4_getspec_args(St, a):
+    return np.full((St.shape[0], St.shape[1]), 0.3), (a * 3,)
+
+
+def _pr4_getspec_extra(St, a):
+    return np.full((St.shape[0], St.shape[1]), 0.3), (a,), {"marker": "spec"}
+
+
+# === 1. Baseline behavior ========================================================
+
+
+def test_pr4_baseline_no_constraints_freezes_numerics():
+    """No constraints active: deterministic C / St / metadata freeze."""
+    mcr = _pr4_fit(nonnegConc=[], nonnegSpec=[], unimodConc=[], tol=1.0e-9, max_iter=50)
+    assert mcr._fit_meta["n_iter"] == 3
+    assert bool(mcr._fit_meta["converged"])
+    np.testing.assert_allclose(
+        np.asarray(mcr.C.data), _PR4_BASE_C, rtol=_PR4_RTOL, atol=_PR4_ATOL
+    )
+    np.testing.assert_allclose(
+        np.asarray(mcr.St.data), _PR4_BASE_ST, rtol=_PR4_RTOL, atol=_PR4_ATOL
+    )
+    # In this regime C == C_constrained and St == St_ls.
+    np.testing.assert_allclose(
+        np.asarray(mcr.C_constrained.data),
+        np.asarray(mcr.C.data),
+        rtol=_PR4_RTOL,
+        atol=_PR4_ATOL,
+    )
+    np.testing.assert_allclose(
+        np.asarray(mcr.St_ls.data), np.asarray(mcr.St.data), rtol=1.0e-12
+    )
+    # extra outputs are empty when hard constraints are inactive
+    assert mcr.extraOutputGetConc == []
+    assert mcr.extraOutputGetSpec == []
+
+
+# === 2. Non-negativity ===========================================================
+
+
+def test_pr4_nonneg_conc_only_matches_baseline_noop():
+    """For this non-negative LS solution, conc non-negativity is a no-op."""
+    mcr = _pr4_fit(
+        nonnegConc="all", nonnegSpec=[], unimodConc=[], tol=1.0e-9, max_iter=50
+    )
+    np.testing.assert_allclose(
+        np.asarray(mcr.C.data), _PR4_BASE_C, rtol=_PR4_RTOL, atol=_PR4_ATOL
+    )
+    np.testing.assert_allclose(
+        np.asarray(mcr.St.data), _PR4_BASE_ST, rtol=_PR4_RTOL, atol=_PR4_ATOL
+    )
+    assert np.min(np.asarray(mcr.C_constrained.data)) >= -_PR4_ATOL
+
+
+def test_pr4_nonneg_spec_only_matches_baseline_noop():
+    mcr = _pr4_fit(
+        nonnegConc=[], nonnegSpec="all", unimodConc=[], tol=1.0e-9, max_iter=50
+    )
+    np.testing.assert_allclose(
+        np.asarray(mcr.C.data), _PR4_BASE_C, rtol=_PR4_RTOL, atol=_PR4_ATOL
+    )
+    np.testing.assert_allclose(
+        np.asarray(mcr.St.data), _PR4_BASE_ST, rtol=_PR4_RTOL, atol=_PR4_ATOL
+    )
+    assert np.min(np.asarray(mcr.St.data)) >= -_PR4_ATOL
+
+
+def test_pr4_nonneg_both_matches_baseline_noop():
+    mcr = _pr4_fit(
+        nonnegConc="all", nonnegSpec="all", unimodConc=[], tol=1.0e-9, max_iter=50
+    )
+    np.testing.assert_allclose(
+        np.asarray(mcr.C.data), _PR4_BASE_C, rtol=_PR4_RTOL, atol=_PR4_ATOL
+    )
+    np.testing.assert_allclose(
+        np.asarray(mcr.St.data), _PR4_BASE_ST, rtol=_PR4_RTOL, atol=_PR4_ATOL
+    )
+
+
+def test_pr4_nonneg_conc_selected_component_stays_nonneg():
+    """Selecting component 1 only keeps column 1 non-negative, leaves co. 0 free."""
+    mcr = _pr4_fit(
+        nonnegConc=[1], nonnegSpec=[], unimodConc=[], tol=1.0e-9, max_iter=50
+    )
+    Cc = np.asarray(mcr.C_constrained.data)
+    assert Cc[:, 1].min() >= -_PR4_ATOL
+
+
+def test_pr4_nonneg_conc_component_zero_is_enforced():
+    """Regression: selecting only component 0 with ``nonnegConc=[0]`` must
+    activate (not silently disable) the non-negativity constraint.
+
+    Previously the ``np.any([0])`` activation guard evaluated to ``False``
+    and skipped the constraint (same bug family as issue #911, fixed for
+    closure in PR1). The guard now uses an explicit truthiness test, so a
+    guess whose LS column 0 would otherwise go negative is clipped to 0.
+    """
+    X = _PR4_X.copy()
+    # A guess whose first column is negative so that the LS column 0 dips
+    # below zero and the non-negativity constraint actually has work to do.
+    C0 = _PR4_C0.copy()
+    C0[:, 0] = -np.abs(C0[:, 0])
+    mcr = MCRALS(nonnegConc=[0], nonnegSpec=[], unimodConc=[], tol=1.0e-9, max_iter=50)
+    mcr.fit(X, C0)
+    Cc = np.asarray(mcr.C_constrained.data)
+    # column 0 must be clipped to >= 0
+    assert Cc[:, 0].min() >= -_PR4_ATOL
+    # column 1 is *not* selected -> it is left free (the LS value, which here
+    # stays positive but is not clipped by this constraint).
+    np.testing.assert_allclose(
+        Cc[:, 1], np.asarray(mcr.C_constrained.data)[:, 1], atol=1.0e-12
+    )
+
+
+# === 3. Unimodality ==============================================================
+
+
+def test_pr4_unimod_strict_conc_noop_for_unimodal_data():
+    """Concentration profiles are already unimodal — strict mode is a no-op."""
+    mcr = _pr4_fit(
+        nonnegConc=[],
+        nonnegSpec=[],
+        unimodConc="all",
+        unimodConcMod="strict",
+        tol=1.0e-9,
+        max_iter=50,
+    )
+    np.testing.assert_allclose(
+        np.asarray(mcr.C.data), _PR4_BASE_C, rtol=_PR4_RTOL, atol=_PR4_ATOL
+    )
+    np.testing.assert_allclose(
+        np.asarray(mcr.St.data), _PR4_BASE_ST, rtol=_PR4_RTOL, atol=_PR4_ATOL
+    )
+
+
+def test_pr4_unimod_smooth_conc_noop_for_unimodal_data():
+    mcr = _pr4_fit(
+        nonnegConc=[],
+        nonnegSpec=[],
+        unimodConc="all",
+        unimodConcMod="smooth",
+        tol=1.0e-9,
+        max_iter=50,
+    )
+    np.testing.assert_allclose(
+        np.asarray(mcr.C.data), _PR4_BASE_C, rtol=_PR4_RTOL, atol=_PR4_ATOL
+    )
+
+
+def test_pr4_unimod_strict_spec_noop():
+    mcr = _pr4_fit(
+        nonnegConc=[],
+        nonnegSpec=[],
+        unimodConc=[],
+        unimodSpec="all",
+        unimodSpecMod="strict",
+        tol=1.0e-9,
+        max_iter=50,
+    )
+    np.testing.assert_allclose(
+        np.asarray(mcr.St.data), _PR4_BASE_ST, rtol=_PR4_RTOL, atol=_PR4_ATOL
+    )
+
+
+def test_pr4_unimod_smooth_spec_noop():
+    mcr = _pr4_fit(
+        nonnegConc=[],
+        nonnegSpec=[],
+        unimodConc=[],
+        unimodSpec="all",
+        unimodSpecMod="smooth",
+        tol=1.0e-9,
+        max_iter=50,
+    )
+    np.testing.assert_allclose(
+        np.asarray(mcr.St.data), _PR4_BASE_ST, rtol=_PR4_RTOL, atol=_PR4_ATOL
+    )
+
+
+# === 4. Monotonicity =============================================================
+
+
+def test_pr4_monoinc_component_one_bites_and_does_not_converge():
+    """monoIncConc=[1] on a profile whose column 1 decreases after the peak
+    forces monotonic increase; the loop does not converge within max_iter."""
+    mcr = _pr4_fit(
+        nonnegConc=[],
+        nonnegSpec=[],
+        unimodConc=[],
+        monoIncConc=[1],
+        tol=1.0e-9,
+        max_iter=50,
+    )
+    assert mcr._fit_meta["n_iter"] == 50
+    assert not bool(mcr._fit_meta["converged"])
+    # exact characterization: the snapshot is byte-identical across runs.
+    expected_Cc = np.array(
+        [
+            [0.1068607777, 0.0694915185],
+            [0.3183043917, 0.0836691966],
+            [0.8457783027, 0.0836691966],
+            [1.0640418155, 0.4453149426],
+            [0.7593787799, 1.1104865602],
+            [0.3501298637, 1.8309706953],
+            [0.1500529111, 2.4408269741],
+            [0.0932140885, 2.4408269741],
+        ]
+    )
+    np.testing.assert_allclose(
+        np.asarray(mcr.C_constrained.data),
+        expected_Cc,
+        rtol=_PR4_RTOL,
+        atol=_PR4_ATOL,
+    )
+
+
+def test_pr4_monodec_component_one_clamps_to_constant():
+    """monoDecConc=[1] forces column 1 to be non-increasing; for this data the
+    clamp collapses it to a near-constant slope."""
+    mcr = _pr4_fit(
+        nonnegConc=[],
+        nonnegSpec=[],
+        unimodConc=[],
+        monoDecConc=[1],
+        tol=1.0e-9,
+        max_iter=50,
+    )
+    assert mcr._fit_meta["n_iter"] == 3
+    assert bool(mcr._fit_meta["converged"])
+    # exact characterization: column 1 collapses to a constant; column 0 is
+    # left at the iter-2 LS snapshot.
+    expected_Cc = np.array(
+        [
+            [0.1063994986, 0.0003912912],
+            [0.3152850464, 0.0003912912],
+            [0.8355460436, 0.0003912912],
+            [1.0561582792, 0.0003912912],
+            [0.7643280946, 0.0003912912],
+            [0.3700088385, 0.0003912912],
+            [0.1806678877, 0.0003912912],
+            [0.1216063114, 0.0003912912],
+        ]
+    )
+    np.testing.assert_allclose(
+        np.asarray(mcr.C_constrained.data),
+        expected_Cc,
+        rtol=_PR4_RTOL,
+        atol=_PR4_ATOL,
+    )
+
+
+def test_pr4_monoinc_both_components():
+    """monoIncConc=[0, 1] applies to both columns and converges (different
+    initial / dynamic regime than the single-column case)."""
+    mcr = _pr4_fit(
+        nonnegConc=[],
+        nonnegSpec=[],
+        unimodConc=[],
+        monoIncConc=[0, 1],
+        tol=1.0e-9,
+        max_iter=50,
+    )
+    # n_iter is intentionally not asserted: it varies across BLAS/LAPACK
+    # platforms and is an incidental implementation detail, not behavior.
+    # ``monoIncTol`` (default 1.1) lets the constraint accept small local
+    # decreases, so a strict ``diff >= 0`` invariant would be wrong; the
+    # meaningful invariants here are convergence, finiteness, shape, and a
+    # bounded reconstruction error.
+    assert bool(mcr._fit_meta["converged"])
+    Cc = np.asarray(mcr.C_constrained.data)
+    assert Cc.shape == (8, 2)
+    assert np.all(np.isfinite(Cc))
+    recon = np.asarray(mcr.C.data) @ np.asarray(mcr.St.data)
+    np.testing.assert_allclose(recon, _PR4_X, atol=1.0e-5)
+
+
+def test_pr4_monodec_both_components():
+    mcr = _pr4_fit(
+        nonnegConc=[],
+        nonnegSpec=[],
+        unimodConc=[],
+        monoDecConc=[0, 1],
+        tol=1.0e-9,
+        max_iter=50,
+    )
+    assert mcr._fit_meta["n_iter"] == 3
+    assert bool(mcr._fit_meta["converged"])
+    # exact characterization: the snapshot collapses to a 2-row constant matrix.
+    expected_Cc = np.tile(
+        np.array([[0.0042114898, 0.0006334337]]),
+        (8, 1),
+    )
+    np.testing.assert_allclose(
+        np.asarray(mcr.C_constrained.data),
+        expected_Cc,
+        rtol=_PR4_RTOL,
+        atol=_PR4_ATOL,
+    )
+
+
+def test_pr4_monodec_component_zero_is_enforced():
+    """Regression: selecting only component 0 with ``monoDecConc=[0]`` must
+    activate (not silently disable) the monotonic-decrease constraint.
+
+    Previously the ``np.any([0])`` activation guard evaluated to ``False``
+    and skipped the constraint (same bug family as issue #911, fixed for
+    closure in PR1). With the truthiness guard, column 0 is forced
+    non-increasing, which for this dataset collapses it to a near-constant
+    value across all observations.
+    """
+    mcr = _pr4_fit(
+        nonnegConc=[],
+        nonnegSpec=[],
+        unimodConc=[],
+        monoDecConc=[0],
+        tol=1.0e-9,
+        max_iter=50,
+    )
+    assert mcr._fit_meta["n_iter"] == 3
+    assert bool(mcr._fit_meta["converged"])
+    # exact characterization: column 0 collapses to a constant; column 1 is
+    # left at the iter-2 LS snapshot (constraint not selected).
+    expected_Cc = np.array(
+        [
+            [0.0058355844, 0.0451421296],
+            [0.0058355844, 0.0861401689],
+            [0.0058355844, 0.1639944460],
+            [0.0058355844, 0.3528512717],
+            [0.0058355844, 0.5624274097],
+            [0.0058355844, 0.7761466096],
+            [0.0058355844, 0.9815786143],
+            [0.0058355844, 0.8850790254],
+        ]
+    )
+    np.testing.assert_allclose(
+        np.asarray(mcr.C_constrained.data),
+        expected_Cc,
+        rtol=_PR4_RTOL,
+        atol=_PR4_ATOL,
+    )
+
+
+# --- component-0 guard family: regression tests for the fixed activation -----
+#
+# The two preceding tests cover the originally reported members of the
+# ``np.any([0])`` bug family (non-negativity and monotonic decrease). The
+# same anti-pattern was also present in ``_UnimodalConstraint``,
+# ``_MonotonicIncreaseConstraint`` and the two ``_HardProfileConstraint``
+# branches; each is exercised below with the component-0 selection that
+# used to silently disable it.
+
+
+def test_pr4_monoinc_component_zero_is_enforced():
+    """Regression: ``monoIncConc=[0]`` must activate (not silently disable)."""
+    mcr = _pr4_fit(
+        nonnegConc=[],
+        nonnegSpec=[],
+        unimodConc=[],
+        monoIncConc=[0],
+        tol=1.0e-9,
+        max_iter=50,
+    )
+    # column 0 of the snapshot is forced non-decreasing.
+    Cc = np.asarray(mcr.C_constrained.data)
+    assert np.diff(Cc[:, 0]).min() >= -1.0e-9
+    # exact characterization: last clamped value
+    np.testing.assert_allclose(Cc[-1, 0], 1.3506874817, rtol=_PR4_RTOL, atol=_PR4_ATOL)
+
+
+def test_pr4_unimod_conc_component_zero_is_enforced():
+    """Regression: ``unimodConc=[0]`` must activate (not silently disable).
+
+    For this already-unimodal dataset the constraint is a no-op on the
+    numerics, so the regression value is that it runs at all and produces
+    the baseline solution (the pre-fix behaviour matched baseline because
+    the guard was skipped; with the fix the constraint runs and still
+    matches baseline because there is nothing to correct).
+    """
+    mcr = _pr4_fit(
+        nonnegConc=[],
+        nonnegSpec=[],
+        unimodConc=[0],
+        unimodConcMod="strict",
+        tol=1.0e-9,
+        max_iter=50,
+    )
+    np.testing.assert_allclose(
+        np.asarray(mcr.C.data), _PR4_BASE_C, rtol=_PR4_RTOL, atol=_PR4_ATOL
+    )
+
+
+def test_pr4_nonneg_spec_component_zero_is_enforced():
+    """Regression: ``nonnegSpec=[0]`` must clip St row 0 to >= 0."""
+    # Use a guess whose St row 0 is negative so the constraint bites.
+    St0 = _PR4_St0.copy()
+    St0[0] = -np.abs(St0[0])
+    mcr = MCRALS(nonnegConc=[], nonnegSpec=[0], unimodConc=[], tol=1.0e-9, max_iter=50)
+    mcr.fit(_PR4_X, St0)
+    assert np.asarray(mcr.St.data)[0].min() >= -_PR4_ATOL
+
+
+def test_pr4_unimod_spec_component_zero_is_enforced():
+    """Regression: ``unimodSpec=[0]`` must run (baseline-equivalent here)."""
+    mcr = _pr4_fit(
+        nonnegConc=[],
+        nonnegSpec=[],
+        unimodConc=[],
+        unimodSpec=[0],
+        unimodSpecMod="strict",
+        tol=1.0e-9,
+        max_iter=50,
+    )
+    np.testing.assert_allclose(
+        np.asarray(mcr.St.data), _PR4_BASE_ST, rtol=_PR4_RTOL, atol=_PR4_ATOL
+    )
+
+
+def test_pr4_hard_conc_component_zero_is_enforced():
+    """Regression: ``hardConc=[0]`` must inject the generated column 0.
+
+    Previously ``np.any([0])`` skipped the hard-profile injection. The
+    generator returns shape ``(n_obs, len(hardConc))`` = ``(8, 1)`` per the
+    documented contract, with ``getC_to_C_idx=[0]`` mapping it to C column 0.
+    """
+
+    def _gen_col0(C):
+        return np.full((C.shape[0], 1), 0.5)
+
+    mcr = _pr4_fit(
+        nonnegConc=[],
+        nonnegSpec=[],
+        unimodConc=[],
+        hardConc=[0],
+        getConc=_gen_col0,
+        getC_to_C_idx=[0],
+        tol=1.0e-9,
+        max_iter=50,
+    )
+    # column 0 must be the injected constant 0.5
+    np.testing.assert_allclose(
+        np.asarray(mcr.C_constrained.data)[:, 0],
+        np.full(8, 0.5),
+        atol=1.0e-12,
+    )
+
+
+def test_pr4_hard_spec_component_zero_is_enforced():
+    """Regression: ``hardSpec=[0]`` must inject the generated St row 0.
+
+    The generator returns shape ``(len(hardSpec), n_wl)`` = ``(1, 12)``
+    per the documented contract, with ``getSt_to_St_idx=[0]``.
+    """
+
+    def _gen_row0(St):
+        return np.full((1, St.shape[1]), 0.3)
+
+    mcr = _pr4_fit(
+        nonnegConc=[],
+        nonnegSpec=[],
+        unimodConc=[],
+        hardSpec=[0],
+        getSpec=_gen_row0,
+        getSt_to_St_idx=[0],
+        tol=1.0e-9,
+        max_iter=50,
+    )
+    # row 0 must be the injected constant 0.3
+    np.testing.assert_allclose(
+        np.asarray(mcr.St.data)[0], np.full(12, 0.3), atol=1.0e-12
+    )
+
+
+# === 5. Closure =================================================================
+
+
+def test_pr4_closure_empty_list_is_noop_vs_baseline():
+    """closureConc=[] matches baseline exactly (closure never runs)."""
+    mcr = _pr4_fit(
+        nonnegConc=[],
+        nonnegSpec=[],
+        unimodConc=[],
+        closureConc=[],
+        closureMethod="scaling",
+        tol=1.0e-9,
+        max_iter=50,
+    )
+    np.testing.assert_allclose(
+        np.asarray(mcr.C.data), _PR4_BASE_C, rtol=_PR4_RTOL, atol=_PR4_ATOL
+    )
+    np.testing.assert_allclose(
+        np.asarray(mcr.St.data), _PR4_BASE_ST, rtol=_PR4_RTOL, atol=_PR4_ATOL
+    )
+
+
+def test_pr4_closure_scaling_all_rescales_columns():
+    mcr = _pr4_fit(
+        nonnegConc=[],
+        nonnegSpec=[],
+        unimodConc=[],
+        closureConc="all",
+        closureMethod="scaling",
+        tol=1.0e-9,
+        max_iter=50,
+    )
+    assert mcr._fit_meta["n_iter"] == 3
+    expected_C = np.array(
+        [
+            [0.0915791433, 0.0426800234],
+            [0.2727993249, 0.0832487866],
+            [0.7248840224, 0.1622771920],
+            [0.9119065838, 0.3372197010],
+            [0.6507133550, 0.5227172810],
+            [0.2998764791, 0.7103251391],
+            [0.1283270713, 0.8937114712],
+            [0.0796376085, 0.8051853997],
+        ]
+    )
+    np.testing.assert_allclose(
+        np.asarray(mcr.C.data), expected_C, rtol=_PR4_RTOL, atol=_PR4_ATOL
+    )
+
+
+def test_pr4_closure_constantsum_all_enforces_unit_row_sum():
+    mcr = _pr4_fit(
+        nonnegConc=[],
+        nonnegSpec=[],
+        unimodConc=[],
+        closureConc="all",
+        closureMethod="constantSum",
+        tol=1.0e-9,
+        max_iter=50,
+    )
+    # n_iter is intentionally not asserted: it varies across BLAS/LAPACK
+    # platforms and is an incidental implementation detail, not behavior.
+    assert bool(mcr._fit_meta["converged"])
+    Cc = np.asarray(mcr.C_constrained.data)
+    assert np.all(np.isfinite(Cc))
+    # meaningful invariant: every constrained row sums to the default
+    # target (ones) — i.e. the constantSum closure is actually enforced.
+    np.testing.assert_allclose(np.sum(Cc, axis=1), np.ones(8), atol=1.0e-6)
+
+
+def test_pr4_closure_single_component_zero_is_active():
+    """closureConc=[0] must activate closure on component 0 (PR1 #911 fix)."""
+    mcr = _pr4_fit(
+        nonnegConc=[],
+        nonnegSpec=[],
+        unimodConc=[],
+        closureConc=[0],
+        closureMethod="constantSum",
+        tol=1.0e-9,
+        max_iter=50,
+    )
+    assert mcr._fit_meta["n_iter"] == 3
+    # component 0 must be closed to the default target (ones)
+    np.testing.assert_allclose(
+        np.asarray(mcr.C_constrained.data)[:, 0],
+        np.ones(8),
+        atol=1.0e-6,
+    )
+
+
+def test_pr4_closure_method_scaling_vs_constantsum_differ():
+    """The two closure methods produce numerically distinct solutions."""
+    mcr_scaling = _pr4_fit(
+        nonnegConc=[],
+        nonnegSpec=[],
+        unimodConc=[],
+        closureConc="all",
+        closureMethod="scaling",
+        tol=1.0e-9,
+        max_iter=50,
+    )
+    mcr_sum = _pr4_fit(
+        nonnegConc=[],
+        nonnegSpec=[],
+        unimodConc=[],
+        closureConc="all",
+        closureMethod="constantSum",
+        tol=1.0e-9,
+        max_iter=50,
+    )
+    assert not np.allclose(
+        np.asarray(mcr_scaling.C.data),
+        np.asarray(mcr_sum.C.data),
+        atol=1.0e-6,
+    )
+
+
+# === 6. Spectral normalization ==================================================
+
+
+def test_pr4_normspec_max_makes_each_spectrum_max_one():
+    mcr = _pr4_fit(
+        nonnegConc=[],
+        nonnegSpec=[],
+        unimodConc=[],
+        normSpec="max",
+        tol=1.0e-9,
+        max_iter=50,
+    )
+    assert mcr._fit_meta["n_iter"] == 3
+    St = np.asarray(mcr.St.data)
+    np.testing.assert_allclose(np.max(St, axis=1), [1.0, 1.0], atol=1.0e-6)
+    expected_St = np.array(
+        [
+            [
+                0.1000007748,
+                0.2997652111,
+                0.8981228861,
+                1.0,
+                0.8056293858,
+                0.4145406656,
+                0.2201696710,
+                0.1229853933,
+                0.0685276630,
+                0.0415848958,
+                0.0245959580,
+                0.0111262402,
+            ],
+            [
+                0.0157529668,
+                0.0372148882,
+                0.0614278136,
+                0.1575259908,
+                0.3670604979,
+                0.6856974512,
+                0.8952315816,
+                1.0,
+                0.8012994505,
+                0.5008677175,
+                0.2000005798,
+                0.0497828111,
+            ],
+        ]
+    )
+    np.testing.assert_allclose(St, expected_St, rtol=_PR4_RTOL, atol=_PR4_ATOL)
+
+
+def test_pr4_normspec_euclid_makes_each_spectrum_unit_norm():
+    mcr = _pr4_fit(
+        nonnegConc=[],
+        nonnegSpec=[],
+        unimodConc=[],
+        normSpec="euclid",
+        tol=1.0e-9,
+        max_iter=50,
+    )
+    # n_iter is intentionally not asserted: it varies across BLAS/LAPACK
+    # platforms and is an incidental implementation detail, not behavior.
+    assert bool(mcr._fit_meta["converged"])
+    St = np.asarray(mcr.St.data)
+    assert np.all(np.isfinite(St))
+    # meaningful invariant: each spectral row has unit Euclidean norm.
+    np.testing.assert_allclose(np.linalg.norm(St, axis=1), [1.0, 1.0], atol=1.0e-6)
+
+
+def test_pr4_normspec_preserves_reconstruction():
+    """normSpec rescales St/C jointly so C @ St is invariant."""
+    mcr = MCRALS(
+        nonnegConc=[],
+        nonnegSpec=[],
+        unimodConc=[],
+        normSpec="max",
+        tol=1.0e-9,
+        max_iter=50,
+    )
+    mcr.fit(_PR4_X, _PR4_C0)
+    recon = np.asarray(mcr.C.data) @ np.asarray(mcr.St.data)
+    np.testing.assert_allclose(recon, _PR4_X, atol=1.0e-5)
+
+
+# === 7. Hard / generated concentration profiles ==================================
+
+
+def test_pr4_getconc_bare_profile_replaces_columns():
+    mcr = _pr4_fit(
+        nonnegConc=[],
+        nonnegSpec=[],
+        unimodConc=[],
+        hardConc=[0, 1],
+        getConc=_pr4_getconc_bare,
+        tol=1.0e-9,
+        max_iter=50,
+    )
+    assert mcr._fit_meta["n_iter"] == 2
+    np.testing.assert_allclose(
+        np.asarray(mcr.C_constrained.data), np.full((8, 2), 0.5), atol=1.0e-12
+    )
+    assert mcr.argsGetConc == ()
+    assert mcr.extraOutputGetConc == []
+
+
+def test_pr4_getconc_with_args_updates_args():
+    mcr = _pr4_fit(
+        nonnegConc=[],
+        nonnegSpec=[],
+        unimodConc=[],
+        hardConc=[0, 1],
+        getConc=_pr4_getconc_args,
+        argsGetConc=(1.0,),
+        tol=1.0e-9,
+        max_iter=50,
+    )
+    assert mcr._fit_meta["n_iter"] == 2
+    np.testing.assert_allclose(
+        np.asarray(mcr.C_constrained.data), np.full((8, 2), 0.5), atol=1.0e-12
+    )
+    # iter 1: a=1.0 -> 2.0 ; iter 2: a=2.0 -> 4.0
+    assert mcr.argsGetConc == (4.0,)
+    assert mcr.extraOutputGetConc == []
+
+
+def test_pr4_getconc_with_extra_populates_extra_output():
+    mcr = _pr4_fit(
+        nonnegConc=[],
+        nonnegSpec=[],
+        unimodConc=[],
+        hardConc=[0, 1],
+        getConc=_pr4_getconc_extra,
+        argsGetConc=(1.0,),
+        tol=1.0e-9,
+        max_iter=50,
+    )
+    assert mcr._fit_meta["n_iter"] == 2
+    np.testing.assert_allclose(
+        np.asarray(mcr.C_constrained.data), np.full((8, 2), 0.5), atol=1.0e-12
+    )
+    # generator always returns (a,) -> args stay (1.0,)
+    assert mcr.argsGetConc == (1.0,)
+    # extra-output buffer only keeps the last iteration's extra
+    assert mcr.extraOutputGetConc == [{"marker": "conc"}]
+
+
+# === 8. Hard / generated spectral profiles =======================================
+
+
+def test_pr4_getspec_bare_profile_replaces_rows():
+    mcr = _pr4_fit(
+        nonnegConc=[],
+        nonnegSpec=[],
+        unimodConc=[],
+        hardSpec=[0, 1],
+        getSpec=_pr4_getspec_bare,
+        tol=1.0e-9,
+        max_iter=50,
+    )
+    assert mcr._fit_meta["n_iter"] == 2
+    np.testing.assert_allclose(
+        np.asarray(mcr.St.data), np.full((2, 12), 0.3), atol=1.0e-12
+    )
+    assert mcr.argsGetSpec == ()
+    assert mcr.extraOutputGetSpec == []
+
+
+def test_pr4_getspec_with_args_updates_args():
+    mcr = _pr4_fit(
+        nonnegConc=[],
+        nonnegSpec=[],
+        unimodConc=[],
+        hardSpec=[0, 1],
+        getSpec=_pr4_getspec_args,
+        argsGetSpec=(1.0,),
+        tol=1.0e-9,
+        max_iter=50,
+    )
+    assert mcr._fit_meta["n_iter"] == 2
+    np.testing.assert_allclose(
+        np.asarray(mcr.St.data), np.full((2, 12), 0.3), atol=1.0e-12
+    )
+    # iter 1: a=1.0 -> 3.0 ; iter 2: a=3.0 -> 9.0
+    assert mcr.argsGetSpec == (9.0,)
+    assert mcr.extraOutputGetSpec == []
+
+
+def test_pr4_getspec_with_extra_populates_extra_output():
+    mcr = _pr4_fit(
+        nonnegConc=[],
+        nonnegSpec=[],
+        unimodConc=[],
+        hardSpec=[0, 1],
+        getSpec=_pr4_getspec_extra,
+        argsGetSpec=(1.0,),
+        tol=1.0e-9,
+        max_iter=50,
+    )
+    assert mcr._fit_meta["n_iter"] == 2
+    np.testing.assert_allclose(
+        np.asarray(mcr.St.data), np.full((2, 12), 0.3), atol=1.0e-12
+    )
+    assert mcr.argsGetSpec == (1.0,)
+    assert mcr.extraOutputGetSpec == [{"marker": "spec"}]
+
+
+# === 9. Combined case ===========================================================
+
+
+def test_pr4_combined_closure_hardconc_normspec():
+    """closure + hardConc + normSpec: ordering must produce a max-normalized St
+    on top of the closure-respecting hard concentration profile."""
+    mcr = _pr4_fit(
+        nonnegConc=[],
+        nonnegSpec=[],
+        unimodConc=[],
+        closureConc="all",
+        closureMethod="constantSum",
+        hardConc=[0, 1],
+        getConc=_pr4_getconc_bare,
+        normSpec="max",
+        tol=1.0e-9,
+        max_iter=50,
+    )
+    assert mcr._fit_meta["n_iter"] == 2
+    # hardConc sets both columns to 0.5 (which already sums to 1.0, so the
+    # closure constraint is a no-op on the snapshot)
+    np.testing.assert_allclose(
+        np.asarray(mcr.C_constrained.data), np.full((8, 2), 0.5), atol=1.0e-12
+    )
+    np.testing.assert_allclose(
+        np.sum(np.asarray(mcr.C_constrained.data), axis=1), np.ones(8), atol=1.0e-12
+    )
+    # normalization runs after the second C solve -> each St row max == 1
+    St = np.asarray(mcr.St.data)
+    np.testing.assert_allclose(np.max(St, axis=1), [1.0, 1.0], atol=1.0e-6)
+
+
+# === 10. Solver / initialization combinations ====================================
+
+
+def test_pr4_solver_nnls_matches_baseline():
+    """NNLS gives the same solution as lstsq when the LS solution is already
+    non-negative for this dataset."""
+    mcr = _pr4_fit(
+        nonnegConc=[],
+        nonnegSpec=[],
+        unimodConc=[],
+        solverConc="nnls",
+        solverSpec="nnls",
+        tol=1.0e-9,
+        max_iter=50,
+    )
+    assert mcr._fit_meta["n_iter"] == 3
+    np.testing.assert_allclose(
+        np.asarray(mcr.C.data), _PR4_BASE_C, rtol=_PR4_RTOL, atol=_PR4_ATOL
+    )
+    np.testing.assert_allclose(
+        np.asarray(mcr.St.data), _PR4_BASE_ST, rtol=_PR4_RTOL, atol=_PR4_ATOL
+    )
+    assert np.min(np.asarray(mcr.C.data)) >= -_PR4_ATOL
+    assert np.min(np.asarray(mcr.St.data)) >= -_PR4_ATOL
+
+
+def test_pr4_solver_pnnls_partial_nonneg_matches_baseline():
+    mcr = _pr4_fit(
+        nonnegConc=[0],
+        nonnegSpec=[0],
+        unimodConc=[],
+        solverConc="pnnls",
+        solverSpec="pnnls",
+        tol=1.0e-9,
+        max_iter=50,
+    )
+    # n_iter is intentionally not asserted: it varies across BLAS/LAPACK
+    # platforms and is an incidental implementation detail, not behavior.
+    assert bool(mcr._fit_meta["converged"])
+    # pnnls with partial non-negativity must reach the same fix-point as
+    # the unconstrained baseline for this already-non-negative dataset.
+    np.testing.assert_allclose(
+        np.asarray(mcr.C.data), _PR4_BASE_C, rtol=_PR4_RTOL, atol=_PR4_ATOL
+    )
+    np.testing.assert_allclose(
+        np.asarray(mcr.St.data), _PR4_BASE_ST, rtol=_PR4_RTOL, atol=_PR4_ATOL
+    )
+    Cc = np.asarray(mcr.C_constrained.data)
+    # meaningful invariant: the partially-non-negative column 0 stays >= 0.
+    assert Cc[:, 0].min() >= -1.0e-9
+
+
+def test_pr4_initial_guess_as_spectra_freezes_numerics():
+    """Initial guess given as St (instead of C) yields a different but stable
+    solution."""
+    mcr = _pr4_fit(
+        nonnegConc=[],
+        nonnegSpec=[],
+        unimodConc=[],
+        tol=1.0e-9,
+        max_iter=50,
+        guess="St",
+    )
+    assert mcr._fit_meta["n_iter"] == 3
+    assert bool(mcr._fit_meta["converged"])
+    expected_C = np.array(
+        [
+            [0.0926110570, 0.0502498710],
+            [0.2797999706, 0.1024956728],
+            [0.7487589333, 0.2089856642],
+            [0.9300348905, 0.4059926058],
+            [0.6384105147, 0.5930180667],
+            [0.2522056233, 0.7780464168],
+            [0.0551620331, 0.9670679540],
+            [0.0118142777, 0.8695633848],
+        ]
+    )
+    expected_St = np.array(
+        [
+            [
+                0.1052030020,
+                0.3158248380,
+                0.9485671042,
+                1.0520219833,
+                0.8363734190,
+                0.4072592789,
+                0.1916103291,
+                0.0837870833,
+                0.0353364698,
+                0.0207639367,
+                0.0167562026,
+                0.0094717890,
+            ],
+            [
+                0.0250211827,
+                0.0647096282,
+                0.1423637177,
+                0.2502073610,
+                0.4486374943,
+                0.7419689392,
+                0.9403986514,
+                1.0396150072,
+                0.8303966685,
+                0.5189453417,
+                0.2079234991,
+                0.0521960257,
+            ],
+        ]
+    )
+    np.testing.assert_allclose(
+        np.asarray(mcr.C.data), expected_C, rtol=_PR4_RTOL, atol=_PR4_ATOL
+    )
+    np.testing.assert_allclose(
+        np.asarray(mcr.St.data), expected_St, rtol=_PR4_RTOL, atol=_PR4_ATOL
+    )

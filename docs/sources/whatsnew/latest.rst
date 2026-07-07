@@ -80,18 +80,29 @@ Bug Fixes
   ``ylst_data``, ``ylst_title``, ``ylst_units``) where it belongs as per-spectrum
   metadata. (#1332)
 
-- ``scp.dot()`` now honours its ``strict`` argument, forwarding it to
-  ``numpy.ma.dot`` so masked values are propagated (``strict=True``) or treated
-  as zero (``strict=False``) as documented. The signature default now matches
-  the documentation and NumPy (``strict=False``), which preserves the previous
-  behaviour for existing callers (``strict`` was silently ignored before).
-
-- ``MCRALS`` is now more robust in constrained and hard-model workflows:
-  closure constraints are applied correctly for empty and single-component
-  selections, zero-norm spectral normalization no longer produces
-  ``nan``/``inf``, ``getConc`` / ``getSpec`` argument handling is fixed, and
-  pathological unimodality settings no longer trigger crashes or infinite
-  loops. Validation around ``getSt_to_St_idx`` is also safer. (issue #911)
+- ``MCRALS`` correctness fixes: empty ``closureConc`` no longer runs a
+  wasteful closure block (PR1 B4); single-component closure targets
+  (``closureConc=[0]``, ``closureConc="all"``) are now honoured instead of
+  being silently disabled by ``np.any`` (issue #911); ``normSpec='max'`` /
+  ``'euclid'`` with a zero-norm spectrum no longer produces ``nan``/``inf``
+  (PR1 B9); ``getConc`` / ``getSpec`` dispatch now correctly uses
+  ``argsGetSpec`` / ``kwargsGetSpec`` instead of the ``argsGetSpecc`` typo
+  (PR1 B1) and accepts bare-profile, 2-tuple ``(profiles, new_args)``, and
+  3-tuple ``(profiles, new_args, extra)`` returns (PR1 B2);
+  ``getSt_to_St_idx`` with ``None`` entries no longer crashes in the
+  validator's ``max()`` call (PR1 B5); ``_unimodal_1D`` no longer
+  infinite-loops or indexes out of bounds for pathological tolerances
+  (``tol < 1``, including ``tol == 1.0``) while remaining byte-identical
+  in the documented regime (``tol >= 1.1``) (PR1 B6); ``monoIncTol`` and
+  ``monoDecTol`` are now documented as ``Float`` traits (PR1 B7/B8).
+  The same ``np.any`` component-selection anti-pattern that caused
+  issue #911 in ``_ClosureConstraint`` has now been fixed across the
+  remaining constraint activation guards: selecting only component 0
+  with ``nonnegConc=[0]``, ``nonnegSpec=[0]``, ``unimodConc=[0]``,
+  ``unimodSpec=[0]``, ``monoIncConc=[0]``, ``monoDecConc=[0]``,
+  ``hardConc=[0]`` or ``hardSpec=[0]`` no longer silently disables the
+  constraint (the guards now use an explicit truthiness test instead of
+  ``np.any(...)``, since ``np.any([0])`` evaluates to ``False``).
 
 - Plotting behavior is more consistent again: scatter plots now show markers as
   expected, single-dataset ``plot_multiple()`` / ``multiplot()`` calls preserve
@@ -113,6 +124,22 @@ Bug Fixes
 
 Developer
 ~~~~~~~~~
+
+- ``MCRALS``: added a behavioral characterization test matrix
+  (``tests/test_analysis/test_decomposition/test_mcrals.py``) freezing the
+  current numerical output of ``MCRALS`` across the documented constraint
+  (non-negativity, unimodality, monotonicity, closure, spectral
+  normalization, hard-generated profiles), solver (``lstsq``, ``nnls``,
+  ``pnnls``) and initialization (``C`` vs. ``St``) space, ahead of the next
+  structural refactoring. The tests use a tiny deterministic synthetic
+  dataset and compare against fixed expected arrays. The matrix initially
+  exposed the same ``np.any([0])`` component-selection anti-pattern that
+  affected issue #911 in ``_ClosureConstraint`` (selecting only component 0
+  with ``nonnegConc=[0]`` / ``monoIncConc=[0]`` / ``monoDecConc=[0]`` /
+  ``hardConc=[0]`` / ``hardSpec=[0]`` silently disabled the constraint);
+  these are now fixed (see the Bug Fixes section above) and frozen as
+  passing regression tests. See ``MCRALS_PR4_BEHAVIOR_TESTS.md`` for the
+  characterization report.
 
 - ``MCRALS``: internal architecture overhaul, no public API or numerical
   behavior change. ``MCRALS._fit`` is now structured around an internal
