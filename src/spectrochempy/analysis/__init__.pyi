@@ -8,6 +8,7 @@
 
 __all__ = [
     "_base",
+    "constraints",
     "crossdecomposition",
     "curvefitting",
     "decomposition",
@@ -17,6 +18,7 @@ __all__ = [
 ]
 
 from . import _base
+from . import constraints
 from . import crossdecomposition
 from . import curvefitting
 from . import decomposition
