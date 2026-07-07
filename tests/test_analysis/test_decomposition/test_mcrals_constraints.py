@@ -17,23 +17,19 @@ are not connected to the internal ALS engine (see
 import numpy as np
 import pytest
 
-import spectrochempy as scp
-from spectrochempy.analysis.decomposition.mcrals_constraints import Constraint
-from spectrochempy.analysis.decomposition.mcrals_constraints import Closure
-from spectrochempy.analysis.decomposition.mcrals_constraints import FixedValues
-from spectrochempy.analysis.decomposition.mcrals_constraints import (
-    Monotonic,
-)
-from spectrochempy.analysis.decomposition.mcrals_constraints import NonNegative
-from spectrochempy.analysis.decomposition.mcrals_constraints import (
+from spectrochempy.analysis import constraints
+from spectrochempy.analysis.constraints import (
+    Closure,
+    Constraint,
+    FixedValues,
     ModelProfile,
-)
-from spectrochempy.analysis.decomposition.mcrals_constraints import (
+    Monotonic,
+    NonNegative,
     ReferenceProfile,
+    Selectivity,
+    Unimodal,
+    ZeroRegion,
 )
-from spectrochempy.analysis.decomposition.mcrals_constraints import Selectivity
-from spectrochempy.analysis.decomposition.mcrals_constraints import Unimodal
-from spectrochempy.analysis.decomposition.mcrals_constraints import ZeroRegion
 
 
 # --------------------------------------------------------------------------------------
@@ -41,33 +37,41 @@ from spectrochempy.analysis.decomposition.mcrals_constraints import ZeroRegion
 # --------------------------------------------------------------------------------------
 
 PUBLIC_NAMES = [
-    "Constraint",
-    "NonNegative",
     "Closure",
-    "Unimodal",
-    "Monotonic",
-    "ZeroRegion",
-    "Selectivity",
+    "Constraint",
     "FixedValues",
-    "ReferenceProfile",
     "ModelProfile",
+    "Monotonic",
+    "NonNegative",
+    "ReferenceProfile",
+    "Selectivity",
+    "Unimodal",
+    "ZeroRegion",
 ]
 
 
 @pytest.mark.parametrize("name", PUBLIC_NAMES)
-def test_public_symbol_exposed_at_top_level(name):
-    """Each public class must be importable as ``scp.<name>``."""
-    assert hasattr(scp, name), f"scp.{name} is not exposed"
-    cls = getattr(scp, name)
+def test_public_symbol_exposed_via_constraints_namespace(name):
+    """Each public class must be accessible as ``constraints.<name>``."""
+    assert hasattr(constraints, name), f"constraints.{name} is not exposed"
+    cls = getattr(constraints, name)
     assert isinstance(cls, type)
     assert cls.__module__ == "spectrochempy.analysis.decomposition.mcrals_constraints"
 
 
-def test_public_names_listed_in_module_all():
-    """The module ``__all__`` exposes exactly the public constraint set."""
-    from spectrochempy.analysis.decomposition import mcrals_constraints as m
+def test_public_names_listed_in_constraints_all():
+    """The ``constraints.__all__`` includes the public constraint set."""
+    for name in PUBLIC_NAMES:
+        assert name in constraints.__all__, f"{name} missing from constraints.__all__"
 
-    assert set(m.__all__) == set(PUBLIC_NAMES)
+
+def test_constraints_namespace_is_discoverable():
+    """The ``constraints`` submodule is importable from ``spectrochempy.analysis``."""
+    from spectrochempy.analysis import constraints as cs
+
+    assert cs is constraints
+    assert hasattr(cs, "NonNegative")
+    assert hasattr(cs, "ReferenceProfile")
 
 
 # --------------------------------------------------------------------------------------

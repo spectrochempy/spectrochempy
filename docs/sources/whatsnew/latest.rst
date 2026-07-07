@@ -129,13 +129,14 @@ Developer
   (``spectrochempy.analysis.decomposition.mcrals_constraints``). The new
   public classes ``Constraint`` (abstract base), ``NonNegative``,
   ``Closure``, ``Unimodal``, ``Monotonic``, ``ZeroRegion``,
-  ``Selectivity``, ``FixedValues``,   ``ReferenceProfile`` and
+  ``Selectivity``, ``FixedValues``, ``ReferenceProfile`` and
   ``ModelProfile`` describe scientific prior knowledge about the
   concentration (``"C"``) or spectral (``"St"``) profiles of ``MCRALS``
-  as declarative, first-class objects. All ten classes are exposed at the
-  top level (``scp.NonNegative``, …), registered in the public API
-  reference, and covered by dedicated construction / validation /
-  equality / repr / model / tolerance tests
+   as declarative, first-class objects. All ten classes are importable
+   from the ``spectrochempy.analysis.constraints`` submodule
+   (``from spectrochempy.analysis import constraints``), registered in the
+   public API reference, and covered by dedicated construction / validation
+  / equality / repr / model / tolerance tests
   (``tests/test_analysis/test_decomposition/test_mcrals_constraints.py``).
   This PR introduces the vocabulary and public surface **only**: the
   classes are data containers and validators, they are **not yet

@@ -688,20 +688,28 @@ API for ``MCRALS`` and are currently declarative containers and
 validators only — they are not yet connected to the internal ALS
 constraint engine. See the project RFC for the planned migration path.
 
+Import them from the :mod:`spectrochempy.analysis.constraints` submodule::
+
+    from spectrochempy.analysis import constraints
+
+    constraints.NonNegative("C")
+    constraints.Closure("C")
+    constraints.ReferenceProfile("St", component=0, data=reference)
+
 .. autosummary::
     :nosignatures:
     :toctree: generated/
 
-    Constraint
-    Closure
-    FixedValues
-    Monotonic
-    NonNegative
-    ModelProfile
-    ReferenceProfile
-    Selectivity
-    Unimodal
-    ZeroRegion
+    analysis.constraints.Constraint
+    analysis.constraints.Closure
+    analysis.constraints.FixedValues
+    analysis.constraints.Monotonic
+    analysis.constraints.NonNegative
+    analysis.constraints.ModelProfile
+    analysis.constraints.ReferenceProfile
+    analysis.constraints.Selectivity
+    analysis.constraints.Unimodal
+    analysis.constraints.ZeroRegion
 
 Independent Component Analysis
 ==============================
