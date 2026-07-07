@@ -7,23 +7,7 @@
 # ruff: noqa
 
 __all__ = [
-    "_base",
-    "alignement",
-    "alignment",
-    "baselineprocessing",
-    "fft",
-    "filter",
-    "interpolation",
-    "psd",
-    "transformation",
+    "align",
 ]
 
-from . import _base
-from . import alignement
-from . import alignment
-from . import baselineprocessing
-from . import fft
-from . import filter
-from . import interpolation
-from . import psd
-from . import transformation
+from . import align

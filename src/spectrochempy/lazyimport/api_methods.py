@@ -199,7 +199,7 @@ _LAZY_IMPORTS = {
     "write_matlab": "spectrochempy.core.writers.write_matlab",
     "write_mat": "spectrochempy.core.writers.write_matlab",
     "SpectroChemPyMagics": "spectrochempy.ipython.magics",
-    "align": "spectrochempy.processing.alignement.align",
+    "align": "spectrochempy.processing.alignment.align",
     "BaselineCorrection": "spectrochempy.processing.baselineprocessing.baseline_deprecated",
     "ab": "spectrochempy.processing.baselineprocessing.baseline_deprecated",
     "abc": "spectrochempy.processing.baselineprocessing.baseline_deprecated",

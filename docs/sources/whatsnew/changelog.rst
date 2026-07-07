@@ -70,6 +70,13 @@ New Features
   SpectroChemPy API, without falling back to ``np.column_stack(...)``
   or manual `NDDataset` wrapping.
 
+- The historical internal import path
+  ``spectrochempy.processing.alignement`` is now superseded by the canonical
+  ``spectrochempy.processing.alignment`` namespace. The public
+  ``scp.align(...)`` and ``dataset.align(...)`` APIs are unchanged. The old
+  path remains available as a deprecated compatibility alias and is scheduled
+  for removal in ``0.11.0``.
+
 - SpectroChemPy now has a fuller preprocessing API for chemometric workflows:
   standard operations such as ``normalize()``, ``center()``, ``autoscale()``,
   ``snv()``, ``msc()``, ``pareto_scale()``, ``range_scale()``,
