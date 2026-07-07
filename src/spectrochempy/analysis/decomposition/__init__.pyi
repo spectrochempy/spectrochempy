@@ -12,6 +12,7 @@ __all__ = [
     "fast_ica",
     "iris",
     "mcrals",
+    "mcrals_constraints",
     "nmf",
     "pca",
     "simplisma",
@@ -23,6 +24,7 @@ from . import efa
 from . import fast_ica
 from . import iris
 from . import mcrals
+from . import mcrals_constraints
 from . import nmf
 from . import pca
 from . import simplisma
