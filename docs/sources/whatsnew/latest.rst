@@ -24,7 +24,8 @@ New Features
 - Peak analysis workflows are now easier to inspect and validate:
   ``find_peaks(..., as_result=True)`` returns a lightweight
   ``PeakFindingResult`` object with ``peaks``, ``properties``, a ``table``
-  view, ``to_dict()``, and ``to_csv()`` helpers, while
+  view, ``to_dict()``, ``to_csv()``, ``sort_by()``, ``head()``, ``top()``,
+  and ``column()`` helpers, while
   ``Optimize.validate_script(script=None)`` can validate a curve-fitting
   script before launching the optimisation and returns structured
   ``ScriptError`` diagnostics.  The default ``find_peaks()`` return value

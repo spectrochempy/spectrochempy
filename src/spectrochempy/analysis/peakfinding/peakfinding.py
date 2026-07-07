@@ -64,6 +64,16 @@ def _stringify_csv_value(value):
     return str(value)
 
 
+def _column_value(value, *, unit=None, as_float=False):
+    """Normalize a table value for sorting or export-oriented column access."""
+    value = _as_scalar(value)
+    if unit is not None and hasattr(value, "to"):
+        value = value.to(unit)
+    if as_float:
+        return float(getattr(value, "magnitude", value))
+    return value
+
+
 _BASE_PEAK_COLUMNS = ("index", "position", "height")
 _PROPERTY_COLUMN_NAMES = {
     "peak_heights": "peak_height",
@@ -150,13 +160,16 @@ class PeakTable:
     dictionary remains available on :class:`PeakFindingResult`.
     """
 
-    __slots__ = ("peaks", "properties")
+    __slots__ = ("peaks", "properties", "_rows")
 
-    def __init__(self, peaks, properties=None):
+    def __init__(self, peaks, properties=None, rows=None):
         self.peaks = peaks
         self.properties = dict(properties or {})
+        self._rows = None if rows is None else [dict(row) for row in rows]
 
     def __len__(self):
+        if self._rows is not None:
+            return len(self._rows)
         return 0 if self.peaks is None else len(self.peaks)
 
     def __iter__(self):
@@ -178,7 +191,79 @@ class PeakTable:
         available per-peak properties. Values keep their native units when they
         are unit-bearing quantities.
         """
+        if self._rows is not None:
+            return [dict(row) for row in self._rows]
         return _peak_rows(self.peaks, self.properties)
+
+    def head(self, n):
+        """
+        Return the first *n* rows as a new ``PeakTable``.
+
+        Parameters
+        ----------
+        n : int
+            Number of rows to keep.
+        """
+        return PeakTable(None, None, rows=self.to_dict()[:n])
+
+    def column(self, name, *, unit=None, as_float=False):
+        """
+        Return a column as a list of values.
+
+        Parameters
+        ----------
+        name : str
+            Column name.
+        unit : str or Quantity, optional
+            Target unit for unit-aware values.
+        as_float : bool, default=False
+            If True, return plain floats.
+        """
+        if name not in self.columns:
+            raise KeyError(f"Unknown peak-table column: {name!r}")
+        return [
+            _column_value(row[name], unit=unit, as_float=as_float)
+            for row in self.to_dict()
+        ]
+
+    def sort_by(self, name, *, reverse=False, unit=None):
+        """
+        Return a new ``PeakTable`` sorted by the given column.
+
+        Parameters
+        ----------
+        name : str
+            Column name used as sorting key.
+        reverse : bool, default=False
+            If True, sort in descending order.
+        unit : str or Quantity, optional
+            Target unit for unit-aware values before comparison.
+        """
+        if name not in self.columns:
+            raise KeyError(f"Unknown peak-table column: {name!r}")
+        rows = self.to_dict()
+        rows.sort(
+            key=lambda row: _column_value(row[name], unit=unit, as_float=True),
+            reverse=reverse,
+        )
+        return PeakTable(None, None, rows=rows)
+
+    def top(self, n, *, by, reverse=True, unit=None):
+        """
+        Return the top *n* rows according to a given column.
+
+        Parameters
+        ----------
+        n : int
+            Number of rows to keep.
+        by : str
+            Column name used as ranking key.
+        reverse : bool, default=True
+            If True, keep the largest values first.
+        unit : str or Quantity, optional
+            Target unit for unit-aware values before comparison.
+        """
+        return self.sort_by(by, reverse=reverse, unit=unit).head(n)
 
     def to_csv(self, path, *, delimiter=","):
         """
