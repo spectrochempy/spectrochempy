@@ -47,8 +47,10 @@ New Features
   ``r_squared``, ``n_observations``, ``n_varying_parameters``,
   ``degrees_of_freedom``, ``reduced_chi_square``, and
   ``adjusted_r_squared``, plus normalized solver ``success``, ``status``,
-  and ``message`` fields. Existing ``result.fitted`` and
-  ``result.components`` behavior is preserved.
+  and ``message`` fields. ``Optimize`` also retains the raw least-squares
+  Jacobian on ``opt.jacobian`` when a backend naturally provides one, while
+  methods without a native Jacobian expose ``None``. Existing
+  ``result.fitted`` and ``result.components`` behavior is preserved.
 
 - SpectroChemPy now exposes top-level helpers for common 1D line shapes:
   ``scp.polynomial(...)``, ``scp.gaussian(...)``,
