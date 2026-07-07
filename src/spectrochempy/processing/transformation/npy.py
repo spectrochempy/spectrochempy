@@ -12,7 +12,7 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils.objects import make_new_object
 
 
-def dot(a, b, strict=True, out=None):
+def dot(a, b, strict=False, out=None):
     """
     Return the dot product of two NDDatasets.
 
@@ -62,7 +62,11 @@ def dot(a, b, strict=True, out=None):
 
     if not isinstance(a, NDDataset) and not isinstance(b, NDDataset):
         # must be between numpy object or something non valid. Let numpy
-        # deal with this
+        # deal with this. Route masked-array inputs through numpy.ma.dot so
+        # the ``strict`` argument is honoured (plain np.dot would silently
+        # ignore it); otherwise fall back to the regular np.dot.
+        if isinstance(a, np.ma.MaskedArray) or isinstance(b, np.ma.MaskedArray):
+            return np.ma.dot(a, b, strict=strict)
         return np.dot(a, b)
 
     if not isinstance(a, NDDataset):
@@ -73,7 +77,7 @@ def dot(a, b, strict=True, out=None):
         # try to cast to NDDataset
         b = NDDataset(b)
 
-    data = np.ma.dot(a.masked_data, b.masked_data)
+    data = np.ma.dot(a.masked_data, b.masked_data, strict=strict)
     mask = data.mask
     data = data.data
 
