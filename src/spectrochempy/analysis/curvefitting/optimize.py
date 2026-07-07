@@ -60,6 +60,157 @@ class ScriptError:
 # ======================================================================================
 # Module-level helpers
 # ======================================================================================
+def _scalar_from_masked(value, *, default=np.nan):
+    """Return a Python float from a masked scalar-like value."""
+    if np.ma.is_masked(value):
+        return float(default)
+    return float(value)
+
+
+def _count_varying_parameters(fp):
+    """Count free parameters using the same rule as the optimizer internals."""
+    if fp is None:
+        return 0
+
+    n_varying = 0
+    for key in sorted(fp.keys()):
+        if fp.fixed[key]:
+            continue
+        key_prefix = key.split("_")[0]
+        if key_prefix in fp.expvars:
+            n_varying += fp.expnumber
+        else:
+            n_varying += 1
+    return int(n_varying)
+
+
+def _compute_fit_diagnostics(observed, fitted, solver_meta=None, fit_parameters=None):
+    """Compute residual output and basic fit-quality diagnostics."""
+    if getattr(observed, "size", None) == 0 or getattr(fitted, "size", None) == 0:
+        residuals = observed.copy()
+    else:
+        residuals = observed - fitted
+
+    residual_data = np.ma.masked_invalid(np.ma.asarray(residuals.real.masked_data))
+    observed_data = np.ma.masked_invalid(np.ma.asarray(observed.real.masked_data))
+
+    count = int(residual_data.count())
+    n_varying_parameters = _count_varying_parameters(fit_parameters)
+    degrees_of_freedom = count - n_varying_parameters
+
+    sse = _scalar_from_masked(np.ma.sum(np.ma.abs(residual_data) ** 2), default=0.0)
+    rss = sse
+
+    if count == 0:
+        rmse = float("nan")
+        r_squared = float("nan")
+        adjusted_r_squared = float("nan")
+    else:
+        rmse = float(np.sqrt(sse / count))
+        observed_mean = np.ma.mean(observed_data)
+        tss = _scalar_from_masked(
+            np.ma.sum((observed_data - observed_mean) ** 2),
+            default=np.nan,
+        )
+        if not np.isfinite(tss) or np.isclose(tss, 0.0):
+            r_squared = float("nan")
+        else:
+            r_squared = float(1.0 - (sse / tss))
+
+        if degrees_of_freedom > 0 and count > 1 and np.isfinite(r_squared):
+            adjusted_r_squared = float(
+                1.0 - ((1.0 - r_squared) * (count - 1) / degrees_of_freedom),
+            )
+        else:
+            adjusted_r_squared = float("nan")
+
+    if degrees_of_freedom > 0:
+        reduced_chi_square = float(rss / degrees_of_freedom)
+    else:
+        reduced_chi_square = float("nan")
+
+    diagnostics = {
+        "n_observations": count,
+        "n_varying_parameters": n_varying_parameters,
+        "degrees_of_freedom": int(degrees_of_freedom),
+        "sse": sse,
+        "rss": rss,
+        "rmse": rmse,
+        "r_squared": r_squared,
+        "reduced_chi_square": reduced_chi_square,
+        "adjusted_r_squared": adjusted_r_squared,
+    }
+    diagnostics.update(dict(solver_meta or {}))
+    return residuals, diagnostics
+
+
+def _normalize_solver_meta(method, result, warnmess=None):
+    """Normalize backend-specific solver information into stable diagnostics."""
+    message = getattr(result, "message", warnmess)
+    if isinstance(message, (list, tuple)):
+        message = " ".join(str(item) for item in message)
+    elif message is None:
+        message = ""
+    else:
+        message = str(message)
+
+    method_lower = method.lower()
+    if method_lower in ["lm", "trf"]:
+        return {
+            "success": bool(getattr(result, "success", False)),
+            "status": getattr(result, "status", None),
+            "message": message,
+        }
+
+    if method_lower == "simplex":
+        status = int(warnmess) if warnmess is not None else None
+        if status == 0:
+            success = True
+            message = message or "Optimization terminated successfully."
+        elif status == 1:
+            success = False
+            message = message or "Maximum number of function evaluations made."
+        elif status == 2:
+            success = False
+            message = message or "Maximum number of iterations reached."
+        else:
+            success = False
+            message = message or "Simplex optimization ended with an unknown status."
+        return {
+            "success": success,
+            "status": status,
+            "message": message,
+        }
+
+    if method_lower == "basinhopping":
+        lowest = getattr(result, "lowest_optimization_result", None)
+        success = getattr(result, "success", None)
+        status = getattr(result, "status", None)
+        if lowest is not None:
+            if success is None:
+                success = getattr(lowest, "success", None)
+            if status is None:
+                status = getattr(lowest, "status", None)
+            if not message:
+                lowest_message = getattr(lowest, "message", "")
+                if isinstance(lowest_message, (list, tuple)):
+                    lowest_message = " ".join(str(item) for item in lowest_message)
+                message = str(lowest_message)
+        if success is None:
+            success = bool(status in (0, 1, True)) if status is not None else False
+        return {
+            "success": bool(success),
+            "status": status,
+            "message": message,
+        }
+
+    return {
+        "success": False,
+        "status": None,
+        "message": message,
+    }
+
+
 def _validate_script_content(script, usermodels=None):
     """
     Parse and validate a curve-fitting script without running an optimisation.
@@ -493,8 +644,13 @@ class Optimize(DecompositionAnalysis):
         )
 
         fopt = None
+        solver_meta = {
+            "success": False,
+            "status": None,
+            "message": "",
+        }
         if not self.dry:
-            fp, fopt = _optimize(
+            fp, fopt, solver_meta = _optimize(
                 func,
                 fp,
                 args=(X,),
@@ -511,6 +667,7 @@ class Optimize(DecompositionAnalysis):
             "cost": float(fopt) if fopt is not None else None,
             "niter": niter,
             "ncalls": ncalls,
+            **solver_meta,
         }
 
         # replace the previous script with new fp parameters
@@ -1122,6 +1279,14 @@ class Optimize(DecompositionAnalysis):
         # Caching is deliberately deferred to keep the implementation
         # simple and aligned with the PCA / SVD result behaviour.
 
+        fitted = self.predict()
+        residuals, fit_diagnostics = _compute_fit_diagnostics(
+            self._X,
+            fitted,
+            getattr(self, "_fit_meta", {}),
+            self.fp,
+        )
+
         return FitResult(
             estimator="Optimize",
             parameters={
@@ -1132,10 +1297,11 @@ class Optimize(DecompositionAnalysis):
                 "amplitude_mode": self.amplitude_mode,
             },
             outputs={
-                "fitted": self.predict(),
+                "fitted": fitted,
                 "components": self.components,
+                "residuals": residuals,
             },
-            diagnostics=dict(getattr(self, "_fit_meta", {})),
+            diagnostics=fit_diagnostics,
         )
 
 
@@ -1226,6 +1392,7 @@ def _optimize(
             method=method.lower(),
         )
         res, fopt, warnmess = result.x, result.cost, result.message
+        solver_meta = _normalize_solver_meta(method, result, warnmess)
 
     elif method.lower() == "simplex":
         result = optimize.fmin(
@@ -1241,6 +1408,7 @@ def _optimize(
             callback=internal_callback,
         )
         res, fopt, _, _, warnmess = result
+        solver_meta = _normalize_solver_meta(method, None, warnmess)
 
     elif method.upper() == "basinhopping":
         result = optimize.basinhopping(
@@ -1261,6 +1429,7 @@ def _optimize(
         # fmin(func, par, args=args, maxfun=maxfun, maxiter=maxiter, ftol=ftol, xtol=xtol,
         #                                                full_output=True, disp=False, callback=callback)
         res, fopt, warnmess = result.x, result.fun, result.message
+        solver_meta = _normalize_solver_meta(method, result, warnmess)
 
     elif method == "XXXX":
         raise NotImplementedError(f"method: {method}")
@@ -1278,7 +1447,7 @@ def _optimize(
     if warnmess == 2:
         warning_("Maximum number of iterations reached.")
 
-    return fpe, fopt
+    return fpe, fopt, solver_meta
 
 
 # ======================================================================================

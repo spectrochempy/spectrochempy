@@ -24,18 +24,37 @@ Environment Setup
 
 .. tabs::
 
-    .. tab:: Using conda/mamba (recommended)
+    .. tab:: Using uv (Recommended)
 
-        We strongly recommend using mamba as it's significantly faster at resolving dependencies.
+        `uv <https://docs.astral.sh/uv/>`_ is the recommended tool for most users.
+        Install uv if you do not have it yet:
 
-        1. Install Mambaforge
+        .. code-block:: bash
 
-        Download and install `Mambaforge <https://github.com/conda-forge/miniforge#mambaforge>`_
+            curl -LsSf https://astral.sh/uv/install.sh | sh
+
+        Then create a virtual environment:
+
+        .. code-block:: bash
+
+            # Create environment with Python 3.13
+            uv venv scpy-env --python 3.13
+
+            # Activate it
+            source scpy-env/bin/activate
+
+    .. tab:: Using conda / mamba
+
+        Mamba offers faster dependency resolution than conda.
+
+        1. Install Miniforge
+
+        Download and install `Miniforge <https://github.com/conda-forge/miniforge>`_
 
 
         2. Add required channels:
 
-        .. code-block:: bat
+        .. code-block:: bash
 
             mamba config --add channels conda-forge
             mamba config --add channels spectrocat
@@ -69,7 +88,22 @@ Install SpectroChemPy
 
 .. tabs::
 
-    .. tab:: Using conda/mamba
+    .. tab:: Using uv (Recommended)
+
+        .. code-block:: bash
+
+            uv pip install spectrochempy
+
+            # or if you want to install interactive version (including jupyter)
+            uv pip install "spectrochempy[interactive]"
+
+        Development version:
+
+        .. code-block:: bash
+
+            uv pip install spectrochempy --pre
+
+    .. tab:: Using conda / mamba
 
         Stable version
 

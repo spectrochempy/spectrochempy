@@ -13,33 +13,85 @@ Prerequisites
 `SpectroChemPy` requires Python 3.11 or higher (tested up to 3.14). Python is a widely-adopted
 scientific programming language, particularly suited for data analysis and scientific computing.
 
+Choosing an Installation Method
+-------------------------------
+
+The best installation method depends on your workflow and experience level:
+
+.. list-table::
+   :header-rows: 1
+   :stub-columns: 1
+
+   * - Situation
+     - Recommended method
+   * - New to Python
+     - ``uv`` — simple, fast, single-command setup
+   * - Existing conda environment
+     - ``mamba`` / ``conda`` (Miniforge) — integrates with existing environments
+   * - Scientific workflow (Jupyter, Spyder)
+     - ``mamba`` / ``conda`` (Miniforge) — full scientific distribution
+   * - HPC / CI / containers
+     - ``uv`` — fast, reproducible, minimal footprint
+   * - Installing from source / contributing
+     - ``uv`` — matches the project's own development tooling
+   * - Any environment / maximum compatibility
+     - ``pip`` — universal fallback
+
+.. note::
+
+   **uv** is a modern, fast Python package and project manager. It is the recommended
+   choice for most users. The SpectroChemPy development team uses ``uv`` daily.
+
+   **conda** / **mamba** (via `Miniforge <https://github.com/conda-forge/miniforge>`_)
+   is the recommended choice if you already rely on conda-based scientific environments.
+
+   **pip** works everywhere and is documented as a universal fallback.
+
 Installing Python
 -----------------
 
-Conda Package Managers (Recommended)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+``uv`` (Recommended)
+~~~~~~~~~~~~~~~~~~~~~
 
-We recommend using one of these package managers for installing Python and managing dependencies:
+`uv <https://docs.astral.sh/uv/>`_ manages Python installations automatically.
+Install uv, then let it download and manage the required Python version:
 
-* `Anaconda <https://www.anaconda.com/distribution/>`_ - Full scientific distribution (~3GB)
-* `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`_ - Minimal distribution (~400MB)
-* `Mamba <https://mamba.readthedocs.io/en/latest/installation.html>`_ - Fast alternative to conda
-* `Micromamba <https://mamba.readthedocs.io/en/latest/installation.html#micromamba>`_ - Minimal mamba
+.. code-block:: bash
 
-Installation Steps
-~~~~~~~~~~~~~~~~~~
+   # Install uv (macOS/Linux)
+   curl -LsSf https://astral.sh/uv/install.sh | sh
 
-1. Download your chosen package manager
-2. Run the installer for your platform
-3. Open a terminal/command prompt
-4. Verify the installation:
+   # Install uv (Windows)
+   # powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+   # Install Python
+   uv python install 3.13
+
+See `uv's installation guide <https://docs.astral.sh/uv/getting-started/installation/>`_
+for alternatives (``pipx``, ``brew``, ``winget``, etc.).
+
+``Miniforge`` (conda / mamba)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Miniforge provides Python along with the ``conda`` and ``mamba`` package managers:
+
+* Download `Miniforge <https://github.com/conda-forge/miniforge>`_
+* Run the installer for your platform
+* Verify the installation:
 
 .. code-block:: bash
 
    conda --version  # or mamba --version
 
-Alternative Installation Methods
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+For users who prefer a full distribution:
+
+* `Anaconda <https://www.anaconda.com/distribution/>`_ - Full scientific distribution (~3GB)
+* `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`_ - Minimal distribution (~400MB)
+
+System package manager
+~~~~~~~~~~~~~~~~~~~~~~
+
+If you prefer a standalone Python installation, use your platform's method:
 
 .. tabs::
 
@@ -49,13 +101,8 @@ Alternative Installation Methods
 
       .. code-block:: bash
 
-         # Install Homebrew
          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-         # Install Python
          brew install python
-
-         # Verify installation
          python3 --version
 
       **Using Official Installer:**
@@ -96,41 +143,60 @@ Alternative Installation Methods
          sudo dnf install python3.13
 
 Installing SpectroChemPy
-------------------------
+-----------------------
 
 Create Environment
 ~~~~~~~~~~~~~~~~~~
 
 First, create and activate a dedicated environment:
 
-.. code-block:: bash
+.. tabs::
 
-   # Using conda/mamba
-   mamba create -n scpy python=3.13
-   mamba activate scpy
+   .. tab:: Using uv (Recommended)
 
-   # OR using venv (if not using conda/mamba)
-   python -m venv scpy
-   source scpy/bin/activate  # On Windows: scpy\Scripts\activate
+      .. code-block:: bash
+
+         uv venv scpy --python 3.13
+         source scpy/bin/activate  # On Windows: scpy\Scripts\activate
+
+   .. tab:: Using conda / mamba
+
+      .. code-block:: bash
+
+         mamba create -n scpy python=3.13
+         mamba activate scpy
+
+   .. tab:: Using pip / venv
+
+      .. code-block:: bash
+
+         python -m venv scpy
+         source scpy/bin/activate  # On Windows: scpy\Scripts\activate
 
 Install Package
 ~~~~~~~~~~~~~~~
 
 .. tabs::
 
-   .. tab:: Using Mamba (Recommended)
+   .. tab:: Using uv (Recommended)
+
+      .. code-block:: bash
+
+         uv pip install spectrochempy
+
+   .. tab:: Using mamba
 
       .. code-block:: bash
 
          mamba install -c spectrocat spectrochempy
 
-   .. tab:: Using Conda
+   .. tab:: Using conda
 
       .. code-block:: bash
 
          conda install -c spectrocat spectrochempy
 
-   .. tab:: Using Pip
+   .. tab:: Using pip
 
       .. code-block:: bash
 

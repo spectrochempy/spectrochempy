@@ -36,6 +36,20 @@ New Features
   remains the historical ``(peaks, properties)`` tuple, and the new helpers do
   not add a pandas dependency. (#1351)
 
+- The analysis user guide now includes a reference peak-analysis workflow
+  tutorial connecting peak detection, ``PeakFindingResult``, ``PeakTable``,
+  CSV export, manual script writing, script validation, and ``Optimize.fit()``
+  in one end-to-end example.
+
+- ``FitResult`` from ``Optimize.result`` now exposes a residual dataset as
+  ``result.outputs["residuals"]`` / ``result.residuals`` and basic fit-quality
+  diagnostics under ``result.diagnostics``: ``rss`` / ``sse``, ``rmse``,
+  ``r_squared``, ``n_observations``, ``n_varying_parameters``,
+  ``degrees_of_freedom``, ``reduced_chi_square``, and
+  ``adjusted_r_squared``, plus normalized solver ``success``, ``status``,
+  and ``message`` fields. Existing ``result.fitted`` and
+  ``result.components`` behavior is preserved.
+
 - SpectroChemPy now exposes top-level helpers for common 1D line shapes:
   ``scp.polynomial(...)``, ``scp.gaussian(...)``,
   ``scp.lorentzian(...)``,
@@ -264,3 +278,11 @@ Developer
   docs for documentation branches).  Added ``timeout-minutes: 360`` to
   both workflows and ``continue-on-error: true`` on archived-version
   steps so a single failing old-tag build does not block the rest.
+
+- DOC: Refreshed the installation guide across all platforms:
+  added ``uv`` as the recommended installation method, created a
+  "Choosing an installation method" decision table, replaced
+  deprecated Mambaforge references with Miniforge, and updated
+  contributor setup instructions to match the project's own
+  ``uv``-based development toolchain.  Conda/mamba and pip remain
+  documented as alternatives.  (#1366)
