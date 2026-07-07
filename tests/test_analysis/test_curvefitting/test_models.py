@@ -45,12 +45,17 @@ _MODELS = [
         "polynomialbaseline",
         ["ampl"] + [f"c_{i}" for i in range(2, 11)],
         0.0,
-        id="polynomial_baseline",
+        id="polynomialbaseline",
     ),
     pytest.param("sigmoidmodel", ["ampl", "pos", "asym"], 50, id="sigmoid"),
 ]
 
 _HELPERS = [
+    pytest.param(
+        "polynomial",
+        dict(offset=1.0, slope=0.1, ampl=0.5, c_2=0.2),
+        id="polynomial",
+    ),
     pytest.param("gaussian", dict(ampl=1.0, pos=0.5, width=0.1), id="gaussian"),
     pytest.param("lorentzian", dict(ampl=1.0, pos=0.5, width=0.1), id="lorentzian"),
     pytest.param("voigt", dict(ampl=1.0, pos=0.5, width=0.1, ratio=0.5), id="voigt"),
@@ -340,3 +345,23 @@ class TestNormalizedFalse:
         r1 = scp.gaussian(x, ampl=1.0, pos=0.0, width=1.0, normalized=False)
         r2 = scp.gaussian(x, ampl=2.5, pos=0.0, width=1.0, normalized=False)
         np.testing.assert_allclose(r2, 2.5 * r1, rtol=1e-12)
+
+
+class TestBaselineHelper:
+    """The baseline helper should provide ergonomic synthetic baselines."""
+
+    def test_baseline_helper_matches_polynomial_model_without_linear_terms(self):
+        x = scp.Coord.linspace(0, 1, 100, units="m")
+
+        helper = scp.polynomial(x, ampl=2.0, c_2=0.5)
+        model = scp.polynomialbaseline().f(x, ampl=2.0, c_2=0.5)
+
+        np.testing.assert_allclose(helper.data, model.data, rtol=1e-12)
+
+    def test_baseline_helper_adds_offset_and_slope(self):
+        x = np.linspace(-1, 1, 101)
+
+        baseline = scp.polynomial(x, offset=2.0, slope=3.0)
+
+        assert np.isclose(baseline[50], 2.0, rtol=1e-12)
+        assert baseline[-1] > baseline[0]

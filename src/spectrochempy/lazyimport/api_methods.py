@@ -20,6 +20,7 @@ SpectroChemPy API.
 
 _LAZY_IMPORTS = {
     "PLSRegression": "spectrochempy.analysis.crossdecomposition.pls",
+    "polynomial": "spectrochempy.analysis.curvefitting._models",
     "polynomialbaseline": "spectrochempy.analysis.curvefitting._models",
     "gaussian": "spectrochempy.analysis.curvefitting._models",
     "gaussianmodel": "spectrochempy.analysis.curvefitting._models",
@@ -118,6 +119,7 @@ _LAZY_IMPORTS = {
     "min": "spectrochempy.core.dataset.arraymixins.ndmath",
     "ones": "spectrochempy.core.dataset.arraymixins.ndmath",
     "ones_like": "spectrochempy.core.dataset.arraymixins.ndmath",
+    "normal": "spectrochempy.core.dataset.arraymixins.ndmath",
     "pipe": "spectrochempy.core.dataset.arraymixins.ndmath",
     "ptp": "spectrochempy.core.dataset.arraymixins.ndmath",
     "random": "spectrochempy.core.dataset.arraymixins.ndmath",

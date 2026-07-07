@@ -125,6 +125,7 @@ Basic creation methods
     eye
     identity
     random
+    normal
     diag
 
 
@@ -733,6 +734,7 @@ Lineshape models
     :nosignatures:
     :toctree: generated/
 
+    polynomial
     gaussian
     gaussianmodel
     lorentzian

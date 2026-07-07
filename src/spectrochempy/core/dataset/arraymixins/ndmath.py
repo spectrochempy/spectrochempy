@@ -2283,6 +2283,40 @@ class NDMath:
 
         return cls(rng.random(size, dtype), **kwargs)
 
+    @_from_numpy_method
+    def normal(cls, loc=0.0, scale=1.0, size=None, dtype=None, **kwargs):
+        r"""
+        Return samples from a normal (Gaussian) distribution.
+
+        Parameters
+        ----------
+        loc : float, optional
+            Mean of the distribution.
+        scale : float, optional
+            Standard deviation of the distribution. Must be non-negative.
+        size : int or tuple of ints, optional
+            Output shape. Default is None, in which case a single value is returned.
+        dtype : dtype, optional
+            Desired dtype of the result. The default is ``np.float64``.
+        **kwargs
+            Keyword arguments used when creating the returned object, such as units,
+            name, title, etc.
+
+        Returns
+        -------
+        normal
+            Samples drawn from the normal distribution.
+        """
+        from numpy.random import default_rng
+
+        rng = default_rng()
+        data = rng.normal(loc=loc, scale=scale, size=size)
+
+        if dtype is not None:
+            data = np.asarray(data, dtype=dtype)
+
+        return cls(data, **kwargs)
+
     @_reduce_method
     @_from_numpy_method
     def std(cls, dataset, dim=None, dtype=None, ddof=0, keepdims=False):
