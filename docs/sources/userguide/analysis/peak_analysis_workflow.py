@@ -50,8 +50,9 @@ import spectrochempy as scp
 # ## Load and prepare a spectrum
 #
 # We build a small synthetic spectrum with two broad OH-like peaks on top of a
-# gentle baseline. This keeps the tutorial self-contained while still showing
-# the full workflow.
+# gentle baseline and a little Gaussian noise. This keeps the tutorial
+# self-contained while still showing the full workflow on a slightly more
+# realistic profile.
 
 # %%
 prefs = scp.preferences
@@ -67,9 +68,10 @@ baseline = scp.polynomial(
 )
 peak_1 = scp.gaussian(x, ampl=0.95, pos=3624.0, width=42.39, normalized=False)
 peak_2 = scp.gaussian(x, ampl=0.32, pos=3542.0, width=51.81, normalized=False)
+noise = scp.normal(loc=0.0, scale=0.007, size=x.size)
 
 nd_oh = scp.NDDataset(
-    baseline.data + peak_1.data + peak_2.data,
+    baseline.data + peak_1.data + peak_2.data + noise.data,
     coordset=[x],
     units="absorbance",
     title="Synthetic OH region",
