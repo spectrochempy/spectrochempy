@@ -31,7 +31,7 @@ generic: a profile is either a concentration or a spectrum, and each
 constraint class is the same regardless of which side it targets — the
 ``profile`` argument alone identifies the constrained object. There is
 therefore a single :class:`ReferenceProfile` for both concentration and
-spectral references, and a single :class:`ProfileModel` for both
+spectral references, and a single :class:`ModelProfile` for both
 concentration and spectral model-based (profile-generator) constraints.
 
 Example::
@@ -46,7 +46,7 @@ Example::
             component=0,
             data=reference_spectrum,
         ),
-        ProfileModel(
+        ModelProfile(
             "C",
             components=[0, 1],
             model=my_model,
@@ -72,7 +72,7 @@ __all__ = [
     "Selectivity",
     "FixedValues",
     "ReferenceProfile",
-    "ProfileModel",
+    "ModelProfile",
 ]
 
 import numpy as np
@@ -1057,7 +1057,7 @@ class ReferenceProfile(Constraint):
 # --------------------------------------------------------------------------------------
 
 
-class ProfileModel(Constraint):
+class ModelProfile(Constraint):
     """
     Profile generator constraint.
 
@@ -1085,10 +1085,10 @@ class ProfileModel(Constraint):
     >>> from spectrochempy import ProfileModel
     >>> def my_model(C):
     ...     return C
-    >>> ProfileModel("C", components=[0, 1], model=my_model)
-    ProfileModel(profile='C', components=[0, 1], model=<function my_model at ...>)
-    >>> ProfileModel("St", components=[0], model=my_model)
-    ProfileModel(profile='St', components=[0], model=<function my_model at ...>)
+    >>> ModelProfile("C", components=[0, 1], model=my_model)
+    ModelProfile(profile='C', components=[0, 1], model=<function my_model at ...>)
+    >>> ModelProfile("St", components=[0], model=my_model)
+    ModelProfile(profile='St', components=[0], model=<function my_model at ...>)
     """
 
     def __init__(self, profile, components=None, model=None):

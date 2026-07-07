@@ -26,7 +26,7 @@ from spectrochempy.analysis.decomposition.mcrals_constraints import (
 )
 from spectrochempy.analysis.decomposition.mcrals_constraints import NonNegative
 from spectrochempy.analysis.decomposition.mcrals_constraints import (
-    ProfileModel,
+    ModelProfile,
 )
 from spectrochempy.analysis.decomposition.mcrals_constraints import (
     ReferenceProfile,
@@ -50,7 +50,7 @@ PUBLIC_NAMES = [
     "Selectivity",
     "FixedValues",
     "ReferenceProfile",
-    "ProfileModel",
+    "ModelProfile",
 ]
 
 
@@ -179,22 +179,22 @@ def _identity(C):
     return C
 
 
-def test_profile_model_construction_concentration():
-    c = ProfileModel("C", components=[0, 1], model=_identity)
+def test_model_profile_construction_concentration():
+    c = ModelProfile("C", components=[0, 1], model=_identity)
     assert c.profile == "C"
     assert c.components == [0, 1]
     assert c.model is _identity
 
 
-def test_profile_model_construction_spectrum():
-    c = ProfileModel("St", components=[0], model=_identity)
+def test_model_profile_construction_spectrum():
+    c = ModelProfile("St", components=[0], model=_identity)
     assert c.profile == "St"
     assert c.components == [0]
     assert c.model is _identity
 
 
-def test_profile_model_default_components():
-    c = ProfileModel("C", model=_identity)
+def test_model_profile_default_components():
+    c = ModelProfile("C", model=_identity)
     assert c.profile == "C"
     assert c.components is None
 
@@ -353,9 +353,9 @@ def test_fixed_values_none_rejected():
 
 def test_model_must_be_callable():
     with pytest.raises(TypeError, match="model must be callable"):
-        ProfileModel("C", components=[0], model=42)
+        ModelProfile("C", components=[0], model=42)
     with pytest.raises(TypeError, match="model must be callable"):
-        ProfileModel("St", components=[0], model="not callable")
+        ModelProfile("St", components=[0], model="not callable")
 
 
 # --------------------------------------------------------------------------------------
@@ -417,26 +417,26 @@ def test_mod_equal_and_unequal():
 
 
 def test_models_equal_same_callback():
-    assert ProfileModel("C", components=[0], model=_identity) == ProfileModel(
+    assert ModelProfile("C", components=[0], model=_identity) == ModelProfile(
         "C", components=[0], model=_identity
     )
-    assert ProfileModel("St", model=_identity) == ProfileModel("St", model=_identity)
+    assert ModelProfile("St", model=_identity) == ModelProfile("St", model=_identity)
 
 
 def test_models_unequal_different_components():
-    assert ProfileModel("C", components=[0], model=_identity) != ProfileModel(
+    assert ModelProfile("C", components=[0], model=_identity) != ModelProfile(
         "C", components=[1], model=_identity
     )
 
 
 def test_models_unequal_different_callback():
-    assert ProfileModel("C", components=[0], model=_identity) != ProfileModel(
+    assert ModelProfile("C", components=[0], model=_identity) != ModelProfile(
         "C", components=[0], model=lambda C: C
     )
 
 
 def test_profile_model_differs_by_profile():
-    assert ProfileModel("C", components=[0], model=_identity) != ProfileModel(
+    assert ModelProfile("C", components=[0], model=_identity) != ModelProfile(
         "St", components=[0], model=_identity
     )
 
@@ -471,17 +471,17 @@ def test_repr_monotonic():
     )
 
 
-def test_repr_profile_model_shows_profile():
-    r = repr(ProfileModel("C", components=[0, 1], model=_identity))
-    assert "ProfileModel(" in r
+def test_repr_model_profile_shows_profile():
+    r = repr(ModelProfile("C", components=[0, 1], model=_identity))
+    assert "ModelProfile(" in r
     assert "profile='C'" in r
     assert "components=[0, 1]" in r
     assert "model=" in r
 
 
-def test_repr_profile_model_with_spectrum():
-    r = repr(ProfileModel("St", components=[0], model=_identity))
-    assert "ProfileModel(" in r
+def test_repr_model_profile_with_spectrum():
+    r = repr(ModelProfile("St", components=[0], model=_identity))
+    assert "ModelProfile(" in r
     assert "profile='St'" in r
     assert "components=[0]" in r
     assert "model=" in r
@@ -499,8 +499,8 @@ def test_repr_is_readable_for_all_classes():
         (Selectivity, ("C",), {"region": (0, 5), "component": 0}),
         (FixedValues, ("St",), {"values": [0.1, 0.2]}),
         (ReferenceProfile, ("C",), {"component": 0, "data": [0.1, 0.2]}),
-        (ProfileModel, ("C",), {"components": [0], "model": _identity}),
-        (ProfileModel, ("St",), {"components": [0], "model": _identity}),
+        (ModelProfile, ("C",), {"components": [0], "model": _identity}),
+        (ModelProfile, ("St",), {"components": [0], "model": _identity}),
     ]:
         c = cls(*args, **kwargs)
         r = repr(c)
@@ -530,7 +530,7 @@ def test_base_constraint_repr_uses_repr_params():
 
 def test_constraint_name_property_returns_class_name():
     assert NonNegative("C").name == "NonNegative"
-    assert ProfileModel("C", model=_identity).name == "ProfileModel"
+    assert ModelProfile("C", model=_identity).name == "ModelProfile"
 
 
 def test_constraint_equality_uses_public_state():
@@ -574,7 +574,7 @@ def test_constraints_do_not_affect_mcrals_fit_smoke():
     # Constructing public constraints should have no effect on the fit.
     _ = NonNegative("C")
     _ = Closure("St", target=1.0)
-    _ = ProfileModel("C", components=[0], model=_identity)
+    _ = ModelProfile("C", components=[0], model=_identity)
 
     mcr2 = MCRALS()
     mcr2.fit(X, C0)

@@ -162,8 +162,8 @@ Developer
   (``spectrochempy.analysis.decomposition.mcrals_constraints``). The new
   public classes ``Constraint`` (abstract base), ``NonNegative``,
   ``Closure``, ``Unimodal``, ``Monotonic``, ``ZeroRegion``,
-  ``Selectivity``, ``FixedValues``, ``ReferenceProfile`` and
-  ``ProfileModel`` describe scientific prior knowledge about the
+  ``Selectivity``, ``FixedValues``,   ``ReferenceProfile`` and
+  ``ModelProfile`` describe scientific prior knowledge about the
   concentration (``"C"``) or spectral (``"St"``) profiles of ``MCRALS``
   as declarative, first-class objects. All ten classes are exposed at the
   top level (``scp.NonNegative``, …), registered in the public API

@@ -47,7 +47,7 @@ _LAZY_IMPORTS = {
     "Selectivity": "spectrochempy.analysis.decomposition.mcrals_constraints",
     "FixedValues": "spectrochempy.analysis.decomposition.mcrals_constraints",
     "ReferenceProfile": "spectrochempy.analysis.decomposition.mcrals_constraints",
-    "ProfileModel": "spectrochempy.analysis.decomposition.mcrals_constraints",
+    "ModelProfile": "spectrochempy.analysis.decomposition.mcrals_constraints",
     "NMF": "spectrochempy.analysis.decomposition.nmf",
     "PCA": "spectrochempy.analysis.decomposition.pca",
     "SIMPLISMA": "spectrochempy.analysis.decomposition.simplisma",

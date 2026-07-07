@@ -697,7 +697,7 @@ constraint engine. See the project RFC for the planned migration path.
     FixedValues
     Monotonic
     NonNegative
-    ProfileModel
+    ModelProfile
     ReferenceProfile
     Selectivity
     Unimodal
