@@ -221,6 +221,37 @@ def test_peak_table_exposes_singular_column_names(simple_peaks_dataset):
     assert "peak_heights" in result.properties
 
 
+def test_peak_table_sort_head_and_column_helpers(simple_peaks_dataset):
+    """PeakTable offers notebook-friendly selection helpers."""
+    result = find_peaks(simple_peaks_dataset, height=0.5, width=0.1, as_result=True)
+
+    selected = result.table.top(2, by="height").sort_by(
+        "position", reverse=True, unit="cm^-1"
+    )
+
+    assert isinstance(selected, PeakTable)
+    assert len(selected) == 2
+    positions = selected.column("position", unit="cm^-1", as_float=True)
+    heights = selected.column("height", as_float=True)
+
+    assert positions == sorted(positions, reverse=True)
+    assert heights[0] >= 0.0
+    assert heights[1] >= 0.0
+    assert all(isinstance(value, float) for value in positions)
+    assert all(isinstance(value, float) for value in heights)
+
+
+def test_peak_table_helper_unknown_column(simple_peaks_dataset):
+    """PeakTable helper methods fail clearly on unknown columns."""
+    result = find_peaks(simple_peaks_dataset, height=0.5, width=0.1, as_result=True)
+
+    with pytest.raises(KeyError, match="Unknown peak-table column"):
+        result.table.sort_by("missing")
+
+    with pytest.raises(KeyError, match="Unknown peak-table column"):
+        result.table.column("missing")
+
+
 def test_peak_finding_result_to_dict_single_peak(simple_peaks_dataset):
     """Single-peak coordinate values can be scalar quantities."""
     result = find_peaks(
