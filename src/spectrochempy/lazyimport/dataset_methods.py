@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 # ======================================================================================
-# Copyright (©) 2015-2023 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+# Copyright (C) 2015-2023 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 #
-# This file was generated for SpectroChemPy version: 0.7.3.dev10+g6b5d0168b.d20250313
+# This file was generated for SpectroChemPy version: 0.10.3.dev66
 #
 #    ###################################################################################
 #    #           DO NOT MODIFY THIS FILE BECAUSE IT IS CREATED AUTOMATICALLY.          #
@@ -45,6 +45,14 @@ _LAZY_DATASETS_IMPORTS = {
     "ito_reduced_units": "spectrochempy.core.dataset.nddataset",
     "is_units_compatible": "spectrochempy.core.dataset.nddataset",
     "remove_masks": "spectrochempy.core.dataset.nddataset",
+    "multiplot": "spectrochempy.core.plotters.multiplot",
+    "multiplot_map": "spectrochempy.core.plotters.multiplot",
+    "multiplot_stack": "spectrochempy.core.plotters.multiplot",
+    "multiplot_image": "spectrochempy.core.plotters.multiplot",
+    "multiplot_lines": "spectrochempy.core.plotters.multiplot",
+    "multiplot_scatter": "spectrochempy.core.plotters.multiplot",
+    "multiplot_with_transposed": "spectrochempy.core.plotters.multiplot",
+    "plot_with_transposed": "spectrochempy.core.plotters.multiplot",
     "plot_1D": "spectrochempy.plotting.plot1d",
     "plot_pen": "spectrochempy.plotting.plot1d",
     "plot_scatter": "spectrochempy.plotting.plot1d",
@@ -63,12 +71,12 @@ _LAZY_DATASETS_IMPORTS = {
     "plot_waterfall": "spectrochempy.plotting.plot3d",
     "write": "spectrochempy.core.writers.exporter",
     "write_csv": "spectrochempy.core.writers.write_csv",
+    "write_excel": "spectrochempy.core.writers.write_excel",
+    "write_xls": "spectrochempy.core.writers.write_excel",
     "write_jcamp": "spectrochempy.core.writers.write_jcamp",
     "write_matlab": "spectrochempy.core.writers.write_matlab",
     "write_mat": "spectrochempy.core.writers.write_matlab",
     "align": "spectrochempy.processing.alignement.align",
-    "ab": "spectrochempy.processing.baselineprocessing.baseline_deprecated",
-    "abc": "spectrochempy.processing.baselineprocessing.baseline_deprecated",
     "get_baseline": "spectrochempy.processing.baselineprocessing.baselineprocessing",
     "basc": "spectrochempy.processing.baselineprocessing.baselineprocessing",
     "detrend": "spectrochempy.processing.baselineprocessing.baselineprocessing",
@@ -124,7 +132,6 @@ _LAZY_DATASETS_IMPORTS = {
     "range_scale": "spectrochempy.processing.transformation.preprocessing",
     "robust_scale": "spectrochempy.processing.transformation.preprocessing",
     "log_transform": "spectrochempy.processing.transformation.preprocessing",
-    "BasePreprocessor": "spectrochempy.processing.transformation.preprocessing_transformers",
     "CenterTransformer": "spectrochempy.processing.transformation.preprocessing_transformers",
     "AutoscaleTransformer": "spectrochempy.processing.transformation.preprocessing_transformers",
     "SNVTransformer": "spectrochempy.processing.transformation.preprocessing_transformers",
