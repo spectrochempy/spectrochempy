@@ -147,6 +147,12 @@ class _NonNegativeConstraint(_Constraint):
     helpers. The selection is a list of profile indexes; ``axis`` selects
     which dimension the indexes address (``0`` for C columns, ``1`` for
     St rows), matching the historical helpers.
+
+    The activation guard uses an explicit truthiness test on the
+    selection list rather than ``np.any(...)``, so that selecting only
+    component 0 (``[0]``) is honoured — ``np.any([0])`` evaluates to
+    ``False`` and would silently disable the constraint. This mirrors the
+    PR1 fix for issue #911 applied to ``_ClosureConstraint``.
     """
 
     name = "non-negative"
@@ -156,7 +162,7 @@ class _NonNegativeConstraint(_Constraint):
         self._axis = axis
 
     def apply(self, values, state):
-        if not np.any(self._indices):
+        if not self._indices:
             return values
         if self._axis == 0:
             values[:, self._indices] = values[:, self._indices].clip(min=0)
@@ -172,6 +178,10 @@ class _UnimodalConstraint(_Constraint):
     Wraps the historical ``_apply_unimod_conc`` / ``_apply_unimod_spec``
     helpers. ``_unimodal_2D`` may rebind its input to a transposed view,
     which is why ``apply`` returns the (possibly reassigned) array.
+
+    The activation guard uses an explicit truthiness test on the
+    selection list rather than ``np.any(...)``, so that selecting only
+    component 0 (``[0]``) is honoured. Same fix family as PR1 #911.
     """
 
     name = "unimodal"
@@ -183,7 +193,7 @@ class _UnimodalConstraint(_Constraint):
         self._mod = mod
 
     def apply(self, values, state):
-        if not np.any(self._indices):
+        if not self._indices:
             return values
         return _unimodal_2D(
             values,
@@ -201,6 +211,10 @@ class _MonotonicIncreaseConstraint(_Constraint):
     Wraps the historical ``_apply_monoinc_conc`` helper. Operates along
     the observation axis (axis 0 of ``C``); requires the number of
     observations ``ny`` carried on ``state.X.shape[0]``.
+
+    The activation guard uses an explicit truthiness test on the
+    selection list rather than ``np.any(...)``, so that selecting only
+    component 0 (``[0]``) is honoured. Same fix family as PR1 #911.
     """
 
     name = "monotonic-increase"
@@ -210,7 +224,7 @@ class _MonotonicIncreaseConstraint(_Constraint):
         self._tol = tol
 
     def apply(self, values, state):
-        if not np.any(self._indices):
+        if not self._indices:
             return values
         ny = state.X.shape[0]
         for s in self._indices:
@@ -226,6 +240,10 @@ class _MonotonicDecreaseConstraint(_Constraint):
 
     Wraps the historical ``_apply_monodec_conc`` helper. Symmetric to
     ``_MonotonicIncreaseConstraint``.
+
+    The activation guard uses an explicit truthiness test on the
+    selection list rather than ``np.any(...)``, so that selecting only
+    component 0 (``[0]``) is honoured. Same fix family as PR1 #911.
     """
 
     name = "monotonic-decrease"
@@ -235,7 +253,7 @@ class _MonotonicDecreaseConstraint(_Constraint):
         self._tol = tol
 
     def apply(self, values, state):
-        if not np.any(self._indices):
+        if not self._indices:
             return values
         ny = state.X.shape[0]
         for s in self._indices:
@@ -250,7 +268,7 @@ class _ClosureConstraint(_Constraint):
     Enforce closure on selected C columns.
 
     Wraps the historical ``_apply_closure_conc`` helper. Preserves the
-    PR1 truthiness guard on ``self.closureConc`` so that a single
+    PR1 truthiness guard on the selection list so that a single
     selected component (e.g. ``[0]``) is honoured — matching the fix
     for issue #911 / ``closureConc="all"``. The builder only emits a
     ``_ClosureConstraint`` when ``closureConc`` is truthy, so the guard
@@ -344,7 +362,13 @@ class _HardProfileConstraint(_Constraint):
     def apply(self, values, state):
         est = self._estimator
         if self._side == "conc":
-            if not np.any(est.hardConc):
+            # Activation guard: use an explicit truthiness test on the
+            # selection list rather than ``np.any(...)``, so that selecting
+            # only component 0 (``hardConc=[0]``) is honoured —
+            # ``np.any([0])`` evaluates to ``False`` and would silently
+            # disable the hard-profile injection. Same fix family as PR1
+            # #911 applied to ``_ClosureConstraint``.
+            if not est.hardConc:
                 state.extra_output_conc = []
                 return values
             current = est._C_2_NDDataset(values)
@@ -361,7 +385,7 @@ class _HardProfileConstraint(_Constraint):
             state.extra_output_conc = extra_output
             return values
         # _side == "spec"
-        if not np.any(est.hardSpec):
+        if not est.hardSpec:
             state.extra_output_spec = []
             return values
         current = est._St_2_NDDataset(values)
