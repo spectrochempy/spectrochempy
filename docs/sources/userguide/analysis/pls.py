@@ -34,7 +34,7 @@ import spectrochempy as scp
 # ## Introduction
 #
 # PLSRegression (standing for Partial Least Squares regression ) is a statistical method to estimate
-# $n \times l$ dependant or predicted variables $Y$ from $n \times m$ explanatory or observed
+# $n \times l$ dependent or predicted variables $Y$ from $n \times m$ explanatory or observed
 # variables $X$ by projecting both of them on new spaces spanned by $k$ latent variables,
 # according to the master equations :
 # $$ X = S_X L_X^T + E_X $$
@@ -69,7 +69,7 @@ for a in A:
 # In this tutorial, we are first interested in the dataset named `'m5spec'`, corresponding to the 80 spectra
 # on one of the instruments and `'propvals'` giving the property values of the 80 corn samples.
 #
-# Let's name the specta NDDataset `X` , add few informations about the x-scale and plot it, before and
+# Let's name the spectra NDDataset `X`, add a few pieces of information about the x-scale and plot it, before and
 # after detrend:
 
 # %%

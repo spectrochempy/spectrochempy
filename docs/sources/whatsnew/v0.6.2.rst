@@ -12,7 +12,7 @@ New features
 * `~spectrochempy.PLSRegression` (Partial Least Squares regression) method added.
 
 * `read` method now handle any url pointing
-  to a spectrochempy readeable file. An url to a compressed (zip) files are also accepted.
+  to a SpectroChemPy readable file. A URL to compressed (zip) files is also accepted.
 
   Example:
 

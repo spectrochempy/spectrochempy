@@ -75,7 +75,7 @@ Z1
 # <div class='alert alert-info'>
 # <b>Note:</b><br/>
 #     By default all files in the given directory are merged as a single dataset if they are compatibles (*i.e.*, same shape, same type of experiment...).<br/>
-#     If they cannot be merged due to imcompatible shape or type, separate datasets are returned with dataset merged in different groups.
+#     If they cannot be merged due to incompatible shape or type, separate datasets are returned with dataset merged in different groups.
 
 # %% [markdown] {"editable": true, "slideshow": {"slide_type": ""}}
 # For instance in the following, two dataset will be returned:
@@ -94,7 +94,7 @@ LZ = scp.read_opus("irdata/OPUS")
 LZ
 
 # %% [markdown] {"editable": true, "slideshow": {"slide_type": ""}}
-# As previously two datasets are returned due to the imcompatible types and shapes of the experiments.
+# As previously two datasets are returned due to the incompatible types and shapes of the experiments.
 #
 # If one desire to load of files into separate datasets, then set the **merge** attribute to False.
 
@@ -144,7 +144,7 @@ ZSM
 # %% [markdown] {"editable": true, "slideshow": {"slide_type": ""}}
 # ### Reading OPUS file Metadata
 #
-# As just seen above, more informations can be obtained on the experiment and spectrometer parameters using the dataset metadata (**meta** attribute).
+# As just seen above, more information can be obtained on the experiment and spectrometer parameters using the dataset metadata (**meta** attribute).
 #
 # For instance, to get a display of all metadata:
 #
@@ -182,7 +182,7 @@ except ValueError:
     scp.error_("meta data dictionary is read only!")
 
 # %% [markdown] {"editable": true, "slideshow": {"slide_type": ""}}
-# To add a new value (or to modifify/delete an existing value), the `readonly` flag must be unset before the operation:
+# To add a new value (or to modify/delete an existing value), the `readonly` flag must be unset before the operation:
 
 # %% {"editable": true, "slideshow": {"slide_type": ""}}
 Z.meta.readonly = False

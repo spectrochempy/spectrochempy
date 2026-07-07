@@ -245,6 +245,7 @@ pre-commit run --all-files
 Hooks currently include:
 
 * Ruff linting and formatting;
+* codespell repository spelling checks (configured by `.codespellrc`);
 * requirements regeneration;
 * lazy stub regeneration;
 * version and release-note updates.

@@ -1575,7 +1575,7 @@ class NDArray(tr.HasTraits):
 
         if self.ndim > 1:
             warnings.warn(
-                "We cannot set the labels for multidimentional data - Thus, these "
+                "We cannot set the labels for multidimensional data - Thus, these "
                 "labels are ignored",
                 stacklevel=2,
             )

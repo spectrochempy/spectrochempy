@@ -303,7 +303,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
     @property
     def _Y_is_missing(self):
-        # check wether or not Y has been already defined
+        # check whether or not Y has been already defined
         try:
             if self._Y is None:
                 return True
@@ -329,15 +329,15 @@ class DecompositionAnalysis(AnalysisConfigurable):
         self._Y_preprocessed = Y.data
 
     def _transform(self, *args, **kwargs):  # pragma:  no cover
-        # to be overriden in subclass such as PCA, MCRALS, ...
+        # to be overridden in subclass such as PCA, MCRALS, ...
         raise NotImplementedError("transform has not yet been implemented")
 
     def _inverse_transform(self, *args, **kwargs):  # pragma:  no cover
-        # to be overriden in subclass such as PCA, MCRALS, ...
+        # to be overridden in subclass such as PCA, MCRALS, ...
         raise NotImplementedError("inverse_transform has not yet been implemented")
 
     def _get_components(self, n_components=None):  # pragma:  no cover
-        # to be overriden in subclass such as PCA, MCRALS, ...
+        # to be overridden in subclass such as PCA, MCRALS, ...
         raise NotImplementedError("get_components has not yet been implemented")
 
     # ----------------------------------------------------------------------------------
@@ -669,7 +669,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
     # Private methods that should be most of the time overloaded in subclass
     # ----------------------------------------------------------------------------------
     def _predict(self, *args, **kwargs):  # pragma:  no cover
-        # to be overriden in subclass such as PLSRegression, ...
+        # to be overridden in subclass such as PLSRegression, ...
         raise NotImplementedError("predict has not yet been implemented")
 
     # ----------------------------------------------------------------------------------
@@ -1145,7 +1145,7 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
 
     @property
     def _Y_is_missing(self):
-        # check wether or not Y has been already defined
+        # check whether or not Y has been already defined
         try:
             if self._Y is None:
                 return True
@@ -1237,7 +1237,7 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
         # model for example.
         self._outfit = self._fit(newX, newY, sample_weight=sample_weight)
 
-        # if the process was succesful,_fitted is set to True so that other method which
+        # if the process was successful,_fitted is set to True so that other method which
         # needs fit will be possibly used.
         self._fitted = True
         return self

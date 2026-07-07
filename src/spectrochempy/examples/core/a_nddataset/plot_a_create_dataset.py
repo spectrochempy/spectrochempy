@@ -98,14 +98,14 @@ _ = new.plot()
 
 # %%
 # Note also that a colormap ('viridis') has been automatically set for the lines. This is because the y-dimension of the
-# dataset has float coordinates (they correspond to a time). In such a case tt is easy to add a colorbar expliciting the
-# colors <-> time value correspondance:
+# dataset has float coordinates (they correspond to a time). In such a case it is easy to add a colorbar explaining the
+# colors <-> time value correspondence:
 
 _ = new.plot(colorbar=True)
 
 # %%
 # If the y-dimension had no coordinates or consecutive integer coordinates starting by `0`or `1`, a categorical
-# color map would have been chosen. The default behavior can be overriden by explictly passing a colomap. For instance,
+# color map would have been chosen. The default behavior can be overridden by explicitly passing a colormap. For instance,
 # if we want to use a categorical colormap instead of a sequential one, we can do:
 
 _ = new[:, 0:20].plot(cmap="tab20")

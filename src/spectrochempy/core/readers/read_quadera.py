@@ -193,7 +193,7 @@ def _read_asc(*args, **kwargs):
         )
     if nchannels > 1 and colnames[3] != "Time":  # pragma: no cover
         warn(
-            "The number of columms per channel is not that expected: the reading of your .asc file  could yield "
+            "The number of columns per channel is not that expected: the reading of your .asc file  could yield "
             "please notify this to the developers of spectrochempy",
             stacklevel=2,
         )

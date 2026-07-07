@@ -112,7 +112,7 @@ pca.n_components
 
 # %% [markdown]
 # As the main purpose of PCA is dimensionality reduction, we generally limit the PCA to a limited number of components.
-# This can be done by either reseting the number of components of an existing object:
+# This can be done by either resetting the number of components of an existing object:
 # %%
 pca.n_components = 8
 _ = pca.fit(X)

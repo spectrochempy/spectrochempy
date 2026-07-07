@@ -67,7 +67,7 @@ _ = guess.plot()
 #
 # We first create a MCR-ALS object named here ``mcr``.
 #
-# The `log_level` option can be set to ``"INFO"`` to get verbose ouput of
+# The `log_level` option can be set to ``"INFO"`` to get verbose output of
 # the MCR-ALS optimization steps.
 mcr = scp.MCRALS(log_level="INFO")
 

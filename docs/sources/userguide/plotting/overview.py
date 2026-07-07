@@ -107,7 +107,7 @@ _ = ds.plot_lines(palette="categorical")
 # ds_neg.plot_image(colorbar=True)
 
 # %% [markdown]
-# As expected,the default diverging colormap has been chosen . But this can be overriden using:
+# As expected,the default diverging colormap has been chosen . But this can be overridden using:
 #
 # ds_neg.plot_image(cmap_mode='sequential')   # forces sequential colormap even for data with negative values
 

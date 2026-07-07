@@ -145,11 +145,11 @@ _ = corrected.plot()
 # instead. This model is based on the work of Eilers and Boelens (2005)
 # and performs a baseline correction by iteratively fitting asymmetrically
 # weighted least squares regression curves to the data.
-# The `asls` model has two parameters: `mu` and `assymetry`.
+# The `asls` model has two parameters: `mu` and `asymmetry`.
 # The `mu` parameter is a regularisation parameters which control
 # the smoothness of the baseline. The larger `mu` is, the smoother
-# the baseline will be. The `assymetry` parameter is a parameter
-# which control the assymetry if the AsLS algorithm.
+# the baseline will be. The `asymmetry` parameter is a parameter
+# which controls the asymmetry of the AsLS algorithm.
 blc.multivariate = False  # use a sequential approach
 blc.model = "asls"
 blc.mu = 10**9

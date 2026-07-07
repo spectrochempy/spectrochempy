@@ -969,7 +969,7 @@ and `St`.
     def _C_2_NDDataset(self, C):
         # getconc takes the C NDDataset as first argument (to take advantage
         # of useful metadata). But the current C in fit method is a ndarray (without
-        # the masked rows and colums, nor the coord information: this
+        # the masked rows and columns, nor the coord information: this
         # function will create the corresponding dataset
         return C
 
@@ -1135,11 +1135,11 @@ and `St`.
 
     @tr.observe("_n_components")
     def _n_components_change(self, change):
-        # tiggered in _guess_profile
+        # triggered in _guess_profile
         if self._n_components > 0:
             # perform a validation of default configuration parameters
             # Indeed, if not forced here these parameters are validated only when they
-            # are set explicitely.
+            # are set explicitly.
             # Here is an ugly trick to force this validation. # TODO: better way?
             with warnings.catch_warnings():
                 warnings.simplefilter(action="ignore", category=FutureWarning)
@@ -1884,7 +1884,7 @@ def _pnnls(X, Y, nonneg=None, withres=False):
 
 
 def _unimodal_2D(a, axis, idxes, tol, mod):
-    # Force unimodality on given lines or columnns od a 2D ndarray
+    # Force unimodality on given lines or columns of a 2D ndarray
     #
     # a: ndarray
     #

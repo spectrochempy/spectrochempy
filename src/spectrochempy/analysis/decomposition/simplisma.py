@@ -109,7 +109,7 @@ class SIMPLISMA(DecompositionAnalysis):
             raise ValueError(
                 "Passing arguments such as SIMPLISMA(X) is now deprecated. "
                 "Instead, use SIMPLISMA() followed by SIMPLISMA.fit(X). "
-                "See the documentation and exemples",
+                "See the documentation and examples",
             )
 
         # call the super class for initialisation
@@ -245,7 +245,7 @@ class SIMPLISMA(DecompositionAnalysis):
         sigma = np.std(X, axis=0)
         mu = np.mean(X, axis=0)
         alpha = (noise / 100) * np.max(mu)
-        lamda = np.sqrt(mu**2 + sigma**2)
+        lambda_ = np.sqrt(mu**2 + sigma**2)
         p = sigma / (mu + alpha)
 
         # scale dataset
@@ -264,7 +264,7 @@ class SIMPLISMA(DecompositionAnalysis):
         while not finished:
             # compute first purest variable and weights
             if j == 0:
-                w[j, :] = lamda**2 / (mu**2 + (sigma + alpha) ** 2)
+                w[j, :] = lambda_**2 / (mu**2 + (sigma + alpha) ** 2)
                 s[j, :] = sigma * w[j, :]
                 Pt[j, :] = p * w[j, :]
 

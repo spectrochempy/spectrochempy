@@ -217,7 +217,7 @@ X
 #   string literals, `\\` represents a literal backslash, e.g.
 #   `r'C:\\users\\Brian'`.
 # - In python, the slash `/` is used as the path separator in all systems (Windows, Linux, OSX, ...).
-#   So it can be used in all cases. For exemple:
+#   So it can be used in all cases. For example:
 #
 #       X = scp.read('C:/users/Brian/s/Life/wodger.spg')
 #

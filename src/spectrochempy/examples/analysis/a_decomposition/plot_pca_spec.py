@@ -105,7 +105,7 @@ scores.y.labels = labels  # Note this does not replace previous labels,
 # but adds a column.
 
 # %%
-# now display thse
+# now display these
 _ = pca.plot_score(scores=scores, show_labels=True, labels_column=2)
 
 # %%

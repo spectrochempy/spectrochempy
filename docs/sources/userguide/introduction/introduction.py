@@ -122,7 +122,7 @@ nd
 #
 # * [Core objects](../objects/index.rst) : This is really the starting point for understanding how SpectroChemPy works. In fact, virtually all the functions offered by the API use one of these objects: `NDDataset` (the most important!) or `Project`.
 #
-# * [Import & export](../importexport/index.rst) : This part shows how to import spectroscopic data and transform it into an NDDataset, the object on which processsing and analysis procedures will then be applied.
+# * [Import & export](../importexport/index.rst) : This part shows how to import spectroscopic data and transform it into an NDDataset, the object on which processing and analysis procedures will then be applied.
 #
 # * [Processing](../processing/index.rst) : This section explains how to prepare datasets for future analysis. By processing, we mean methods which generally return the same dataset transformed by mathematical operations (for example, this may be a `sqrt` or `log` operation, or a `fft` operation or many others), or part of a dataset transformed by a slicing or concatenation operation.
 #

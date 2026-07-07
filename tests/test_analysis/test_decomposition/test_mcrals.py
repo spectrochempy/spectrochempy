@@ -368,11 +368,11 @@ def test_MCRALS_errors(model, data):
     C0 = model.C0
     mcr = MCRALS()
 
-    # inexistant keyword parameters
+    # nonexistent keyword parameters
     try:
-        _ = MCRALS(max_iter=25, inexistant=0, log_level="DEBUG")
+        _ = MCRALS(max_iter=25, nonexistent=0, log_level="DEBUG")
     except KeyError as exc:
-        assert "'inexistant' is not a valid" in exc.args[0]
+        assert "'nonexistent' is not a valid" in exc.args[0]
 
     # guess with wrong size of dimensions
     try:
@@ -396,7 +396,7 @@ def test_MCRALS_errors(model, data):
     assert "please check the" in e.value.args[0]
 
     with pytest.raises(tr.TraitError):
-        mcr.unimodSpec = "alls"
+        mcr.unimodSpec = "everything"
 
     with pytest.raises(tr.TraitError):
         mcr.unimodConc = None

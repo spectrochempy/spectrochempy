@@ -26,12 +26,12 @@ dataset = scp.read_omnic("irdata/nh4y-activation.spg")
 
 # %%
 # Mask some columns (features) which correspond to saturated parts of the spectra.
-# Note taht we use float number for defining the limits for masking as coordinates
+# Note that we use float number for defining the limits for masking as coordinates
 # (integer numbers would mean point index and s would lead t incorrect results)
 dataset[:, 882.0:1280.0] = scp.MASKED
 
 # %%
-# Make sure all data are positive. For this we use the math fonctionalities of NDDataset
+# Make sure all data are positive. For this we use the math functionalities of NDDataset
 # objects (:meth:`min` function to find the minimum value of the dataset
 # and the `-` operator for subtrating this value to all spectra of the dataset.
 dataset -= dataset.min()

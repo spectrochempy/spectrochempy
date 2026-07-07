@@ -183,7 +183,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
     # Select the last coordinates
     x = new.coordset[dim]
 
-    # Performs some dimentionality checking
+    # Performs some dimensionality checking
     error = False
     if (
         not inv

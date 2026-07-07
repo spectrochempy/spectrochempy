@@ -119,7 +119,7 @@ def download_nist_ir(CAS, index="all"):
 
     out = []
     for i in index:
-        # sample adress (water, spectrum 1)
+        # sample address (water, spectrum 1)
         # https://webbook.nist.gov/cgi/cbook.cgi?JCAMP=C7732185&Index=1&Type=IR
         url = f"https://webbook.nist.gov/cgi/cbook.cgi?JCAMP=C{CAS}&Index={i}&Type=IR"
         try:
@@ -154,7 +154,7 @@ def download_nist_ir(CAS, index="all"):
 
         except Exception:
             raise OSError(
-                "Can't read this JCAMP file: please report the issue to Spectrochempy developpers",
+                "Can't read this JCAMP file: please report the issue to SpectroChemPy developers",
             ) from None
 
     if len(out) == 1:

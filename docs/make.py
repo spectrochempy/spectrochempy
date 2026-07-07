@@ -755,7 +755,7 @@ class BuildDocumentation:
         # Create the directories required for building the documentation
         self._make_dirs()
 
-        # Get previous versions and save them in a json file to b use by the versions.js scipt
+        # Get previous versions and save them in a json file to be used by the versions.js script
         previous_versions = self._get_previous_versions()
 
         # Eventually clean the build target directory

@@ -33,7 +33,7 @@ else:
 # values for each of the samples is also included.
 # The 5th dataset named `'m5spec'`, contains the NIR spectra of 80 corn samples recorded
 # on the same instrument. Let's assign this NDDataset specta to `X`, add few
-# informations and plot it:
+# information and plot it:
 
 # %%
 if ds_list is not None:

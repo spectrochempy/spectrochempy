@@ -468,7 +468,7 @@ def read_spa(*paths, **kwargs):
     Notes
     -----
     This method is an alias of `read_omnic`, except that the type of file
-    is contrain to ``.spa``.
+    is constrained to ``.spa``.
 
     Examples
     --------
@@ -1202,7 +1202,7 @@ def _read_srs(*args, **kwargs):
     sub_hs = b"\x02\x00\x00\x00\x18\x00\x00\x00\x00\x00\x48\x43\x00\xc8\xaf\x47"
     sub_tg = b"\x02\x00\x00\x00\x18\x00\x00\x00\x00\x00"
 
-    # find the first occurence and determine whether the srs is rapidscan or high
+    # find the first occurrence and determine whether the srs is rapidscan or high
     # speed real time
     fid.seek(0)
     bytestring = fid.read()
@@ -1415,7 +1415,7 @@ def _read_srs(*args, **kwargs):
             info = _read_header(fid, pos_info_data)
             names, data = _read_srs_spectra(fid, pos_data, info["ny"], info["nx"])
             # Note: info["history"] is empty in TG IR or GC series
-            # the position of the history is indiated at pos 856 or 878 depending on the
+            # the position of the history is indicated at pos 856 or 878 depending on the
             # file.
 
         # read the background if the user asked for it.
@@ -1503,7 +1503,7 @@ def _read_srs(*args, **kwargs):
 
 
 def _readbtext(fid, pos, size):
-    # Read some text in binary file of given size. If size is None, the etxt is read
+    # Read some text in binary file of given size. If size is None, the text is read
     # until b\0\ is encountered.
     # Returns utf-8 string
     fid.seek(pos)

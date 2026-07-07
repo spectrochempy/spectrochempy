@@ -99,7 +99,7 @@ if not single_doc_or_dir:
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["../_templates", "_templates"]
-# for some reason, the templates are not taken into account without specifiying
+# for some reason, the templates are not taken into account without specifying
 # twe two locations (it looks like sphinx is looking for the templates relative to the source
 # directory instead of the conf.py dir.
 

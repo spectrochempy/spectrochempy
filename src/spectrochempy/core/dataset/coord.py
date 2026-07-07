@@ -927,7 +927,7 @@ class Coord(NDMath, NDArray):
         -----
         The number of significant digits is used when linearizing the coordinates. It is
         also used when setting the coordinates values at the Coord initialization
-        or everytime the data array is changed.
+        or every time the data array is changed.
 
         """
         return self._sigdigits

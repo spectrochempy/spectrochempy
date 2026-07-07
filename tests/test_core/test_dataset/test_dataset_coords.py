@@ -49,15 +49,15 @@ def test_nddataset_coordset():
     cadd = scp.Coord(labels=["d%d" % i for i in range(6)])
     coordtitles = ["wavelength", "time-on-stream", "temperature"]
     coordunits = ["cm^-1", "s", None]
-    daa = scp.NDDataset(
+    data = scp.NDDataset(
         dx,
         coordset=[coord0, coord1, coord2, cadd, coord2.copy()],
         title="absorbance",
         coordtitles=coordtitles,
         coordunits=coordunits,
     )
-    assert daa.coordset.titles == coordtitles[::-1]
-    assert daa.dims == ["z", "y", "x"]
+    assert data.coordset.titles == coordtitles[::-1]
+    assert data.dims == ["z", "y", "x"]
     # with a CoordSet
     c0, c1 = (
         scp.Coord(labels=["d%d" % i for i in range(6)]),
@@ -251,7 +251,7 @@ def test_nddataset_sorting(ds1):  # ds1 is defined in conftest
     dataset.sort(inplace=True, dim="z")
     labels = np.array(list("abc"))
     assert_array_equal(dataset.coordset["z"].labels, labels)
-    # nochange because the  axis is naturally iversed to force it
+    # no change because the axis is naturally inverted to force it
     # we need to specify descend
     dataset.sort(
         inplace=True, descend=False, dim="z"

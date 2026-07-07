@@ -120,7 +120,7 @@ def write(dataset, filename=None, **kwargs):
     ----------------
     protocol : {'scp', 'matlab', 'jcamp', 'csv'}, optional
         Protocol used for writing. If not provided, the correct protocol
-        is inferred (whnever it is possible) from the file name extension.
+        is inferred (whenever it is possible) from the file name extension.
     directory : str, optional
         Where to write the specified `filename` . If not specified, write in the current directory.
     description: str, optional
