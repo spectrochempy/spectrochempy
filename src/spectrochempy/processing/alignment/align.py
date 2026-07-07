@@ -355,9 +355,9 @@ def align(dataset, *others, **kwargs):
             # .masked_data.  A sentinel avoids silent breakage in both
             # cases.  See audit/~align-sentinel-investigation.md.
             # obj[np.where(np.isnan(obj))] = MASKED  # mask NaN values
-            obj[np.where(np.isnan(obj))] = (
-                99999999999999.0  # replace NaN values (to simplify
-            )
+            obj[
+                np.where(np.isnan(obj))
+            ] = 99999999999999.0  # replace NaN values (to simplify
             # comparisons)
             idx = int(object["idx"])
             objects[idx] = obj
