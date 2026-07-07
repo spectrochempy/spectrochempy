@@ -16,6 +16,7 @@ from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis._base._result import FitResult
 from spectrochempy.analysis._base._result import ResultBase
 from spectrochempy.analysis.curvefitting._parameters import FitParameters
+from spectrochempy.analysis.curvefitting import optimize as optimize_module
 from spectrochempy.analysis.curvefitting.optimize import _compute_fit_diagnostics
 from tests.test_analysis.result_test_helpers import assert_fit_returns_self
 from tests.test_analysis.result_test_helpers import assert_result_basics
@@ -335,6 +336,121 @@ class TestOptimizeResult:
         assert diag["degrees_of_freedom"] == (
             diag["n_observations"] - diag["n_varying_parameters"]
         )
+
+    # ----------------------------------------------------------------------------------
+    # Solver artifacts
+    # ----------------------------------------------------------------------------------
+    def test_jacobian_raises_before_fit(self, optimize_script):
+        opt = scp.Optimize()
+        opt.script = optimize_script
+        with pytest.raises(NotFittedError):
+            _ = opt.jacobian
+
+    def test_jacobian_available_for_least_squares_backend(
+        self, synthetic_two_peak_dataset, optimize_script
+    ):
+        opt = scp.Optimize()
+        opt.script = optimize_script
+        opt.autobase = True
+        opt.max_iter = 10
+        opt.fit(synthetic_two_peak_dataset)
+
+        jacobian = opt.jacobian
+
+        assert jacobian is not None
+        assert jacobian.flags.writeable is False
+        assert jacobian.shape == (
+            opt.result.diagnostics["n_observations"],
+            opt.result.diagnostics["n_varying_parameters"],
+        )
+
+    def test_jacobian_available_for_leastsq_alias(
+        self, synthetic_two_peak_dataset, optimize_script
+    ):
+        opt = scp.Optimize()
+        opt.script = optimize_script
+        opt.method = "leastsq"
+        opt.autobase = True
+        opt.max_iter = 10
+        opt.fit(synthetic_two_peak_dataset)
+
+        jacobian = opt.jacobian
+
+        assert jacobian is not None
+        assert jacobian.flags.writeable is False
+        assert jacobian.shape == (
+            opt.result.diagnostics["n_observations"],
+            opt.result.diagnostics["n_varying_parameters"],
+        )
+
+    def test_jacobian_absent_for_simplex_backend(
+        self, synthetic_two_peak_dataset, optimize_script
+    ):
+        opt = scp.Optimize()
+        opt.script = optimize_script
+        opt.method = "simplex"
+        opt.autobase = True
+        opt.max_iter = 10
+        opt.fit(synthetic_two_peak_dataset)
+
+        assert opt.jacobian is None
+
+    def test_jacobian_absent_for_basinhopping_backend(
+        self, synthetic_two_peak_dataset, optimize_script, monkeypatch
+    ):
+        class _FakeLocalResult:
+            success = True
+            status = 0
+            message = "ok"
+            jac = np.ones((synthetic_two_peak_dataset.size, 9))
+
+        class _FakeBasinhoppingResult:
+            x = np.zeros(9, dtype=np.float64)
+            fun = 0.0
+            message = "ok"
+            success = True
+            status = 0
+            lowest_optimization_result = _FakeLocalResult()
+
+        monkeypatch.setattr(
+            optimize_module.optimize,
+            "basinhopping",
+            lambda *args, **kwargs: _FakeBasinhoppingResult(),
+        )
+
+        opt = scp.Optimize()
+        opt.script = optimize_script
+        opt.method = "basinhopping"
+        opt.autobase = True
+        opt.max_iter = 10
+        opt.fit(synthetic_two_peak_dataset)
+
+        assert opt.jacobian is None
+
+    def test_jacobian_absent_for_dry_fit(
+        self, synthetic_two_peak_dataset, optimize_script
+    ):
+        opt = scp.Optimize()
+        opt.script = optimize_script
+        opt.autobase = True
+        opt.dry = True
+        opt.fit(synthetic_two_peak_dataset)
+
+        assert opt.jacobian is None
+
+    def test_fit_result_does_not_expose_jacobian(
+        self, synthetic_two_peak_dataset, optimize_script
+    ):
+        opt = scp.Optimize()
+        opt.script = optimize_script
+        opt.autobase = True
+        opt.max_iter = 10
+        opt.fit(synthetic_two_peak_dataset)
+
+        assert "jacobian" not in opt.result.outputs
+        assert "jacobian" not in opt.result.diagnostics
+        with pytest.raises(AttributeError):
+            _ = opt.result.jacobian
 
     # ----------------------------------------------------------------------------------
     # Representation

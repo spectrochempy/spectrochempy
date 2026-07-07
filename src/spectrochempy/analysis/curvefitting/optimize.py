@@ -67,6 +67,15 @@ def _scalar_from_masked(value, *, default=np.nan):
     return float(value)
 
 
+def _freeze_jacobian_artifact(jacobian):
+    """Return an immutable ndarray snapshot of a solver-provided Jacobian."""
+    if jacobian is None:
+        return None
+    array = np.array(jacobian, copy=True)
+    array.flags.writeable = False
+    return array
+
+
 def _count_varying_parameters(fp):
     """Count free parameters using the same rule as the optimizer internals."""
     if fp is None:
@@ -208,6 +217,22 @@ def _normalize_solver_meta(method, result, warnmess=None):
         "success": False,
         "status": None,
         "message": message,
+    }
+
+
+def _extract_solver_artifacts(method, result):
+    """Retain backend artifacts needed for future uncertainty features."""
+    method_lower = method.lower()
+
+    if method_lower in ["lm", "trf"]:
+        return {
+            "jacobian": _freeze_jacobian_artifact(getattr(result, "jac", None)),
+            "jacobian_backend": method_lower,
+        }
+
+    return {
+        "jacobian": None,
+        "jacobian_backend": method_lower,
     }
 
 
@@ -649,8 +674,12 @@ class Optimize(DecompositionAnalysis):
             "status": None,
             "message": "",
         }
+        solver_artifacts = {
+            "jacobian": None,
+            "jacobian_backend": None,
+        }
         if not self.dry:
-            fp, fopt, solver_meta = _optimize(
+            fp, fopt, solver_meta, solver_artifacts = _optimize(
                 func,
                 fp,
                 args=(X,),
@@ -669,6 +698,7 @@ class Optimize(DecompositionAnalysis):
             "ncalls": ncalls,
             **solver_meta,
         }
+        self._solver_artifacts = solver_artifacts
 
         # replace the previous script with new fp parameters
         self.script = str(fp)
@@ -1256,6 +1286,25 @@ class Optimize(DecompositionAnalysis):
         """
         return super().fit(X, Y=None)
 
+    @property
+    def jacobian(self):
+        """
+        Return the retained raw solver Jacobian when the backend provides one.
+
+        Returns
+        -------
+        ndarray or None
+            Immutable Jacobian matrix for least-squares-backed methods.
+            Returns ``None`` for backends that do not naturally expose a
+            Jacobian, and for dry fits.
+        """
+        if not self._fitted:
+            raise NotFittedError(
+                "The fit method must be used before accessing the jacobian",
+            )
+
+        return getattr(self, "_solver_artifacts", {}).get("jacobian")
+
     # ----------------------------------------------------------------------------------
     # Result object
     # ----------------------------------------------------------------------------------
@@ -1393,6 +1442,7 @@ def _optimize(
         )
         res, fopt, warnmess = result.x, result.cost, result.message
         solver_meta = _normalize_solver_meta(method, result, warnmess)
+        solver_artifacts = _extract_solver_artifacts(method, result)
 
     elif method.lower() == "simplex":
         result = optimize.fmin(
@@ -1409,8 +1459,9 @@ def _optimize(
         )
         res, fopt, _, _, warnmess = result
         solver_meta = _normalize_solver_meta(method, None, warnmess)
+        solver_artifacts = _extract_solver_artifacts(method, None)
 
-    elif method.upper() == "basinhopping":
+    elif method.lower() == "basinhopping":
         result = optimize.basinhopping(
             internal_func,
             par,
@@ -1430,6 +1481,7 @@ def _optimize(
         #                                                full_output=True, disp=False, callback=callback)
         res, fopt, warnmess = result.x, result.fun, result.message
         solver_meta = _normalize_solver_meta(method, result, warnmess)
+        solver_artifacts = _extract_solver_artifacts(method, result)
 
     elif method == "XXXX":
         raise NotImplementedError(f"method: {method}")
@@ -1447,7 +1499,7 @@ def _optimize(
     if warnmess == 2:
         warning_("Maximum number of iterations reached.")
 
-    return fpe, fopt, solver_meta
+    return fpe, fopt, solver_meta, solver_artifacts
 
 
 # ======================================================================================

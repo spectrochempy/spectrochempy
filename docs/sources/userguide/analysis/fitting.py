@@ -472,6 +472,11 @@ components = f1.result.components
 # `f1.result` groups fitted outputs and diagnostics without removing the
 # existing direct estimator surface. Direct access such as `f1.components`,
 # `f1.predict()`, and plotting helpers remains supported.
+#
+# Raw solver artifacts stay on the estimator. Least-squares-backed methods keep
+# the retained Jacobian on `f1.jacobian`, while `simplex`, `basinhopping`, and
+# dry fits return `None`. This is preparatory infrastructure for future
+# uncertainty estimation and is intentionally not exposed through `FitResult`.
 
 # Show the result
 _ = ndOHcorr.plot()
