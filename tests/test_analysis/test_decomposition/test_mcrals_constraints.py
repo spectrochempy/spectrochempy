@@ -1,0 +1,581 @@
+# ======================================================================================
+# Copyright (©) 2014-2026 Laboratoire Catalyse et Spectrochimie (LCS), Caen, France.
+# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
+# See full LICENSE agreement in the root directory.
+# ======================================================================================
+# ruff: noqa
+
+"""Tests for the public MCRALS constraint API skeleton.
+
+These tests cover construction, validation, equality, repr, and the
+public import surface. They intentionally do NOT test any numerical
+behaviour: the public constraint classes are declarative containers and
+are not connected to the internal ALS engine (see
+``MCRALS_PR6_PUBLIC_CONSTRAINT_API.md``).
+"""
+
+import numpy as np
+import pytest
+
+import spectrochempy as scp
+from spectrochempy.analysis.decomposition.mcrals_constraints import Constraint
+from spectrochempy.analysis.decomposition.mcrals_constraints import Closure
+from spectrochempy.analysis.decomposition.mcrals_constraints import FixedValues
+from spectrochempy.analysis.decomposition.mcrals_constraints import (
+    Monotonic,
+)
+from spectrochempy.analysis.decomposition.mcrals_constraints import NonNegative
+from spectrochempy.analysis.decomposition.mcrals_constraints import (
+    ProfileModel,
+)
+from spectrochempy.analysis.decomposition.mcrals_constraints import (
+    ReferenceProfile,
+)
+from spectrochempy.analysis.decomposition.mcrals_constraints import Selectivity
+from spectrochempy.analysis.decomposition.mcrals_constraints import Unimodal
+from spectrochempy.analysis.decomposition.mcrals_constraints import ZeroRegion
+
+
+# --------------------------------------------------------------------------------------
+# Public API surface
+# --------------------------------------------------------------------------------------
+
+PUBLIC_NAMES = [
+    "Constraint",
+    "NonNegative",
+    "Closure",
+    "Unimodal",
+    "Monotonic",
+    "ZeroRegion",
+    "Selectivity",
+    "FixedValues",
+    "ReferenceProfile",
+    "ProfileModel",
+]
+
+
+@pytest.mark.parametrize("name", PUBLIC_NAMES)
+def test_public_symbol_exposed_at_top_level(name):
+    """Each public class must be importable as ``scp.<name>``."""
+    assert hasattr(scp, name), f"scp.{name} is not exposed"
+    cls = getattr(scp, name)
+    assert isinstance(cls, type)
+    assert cls.__module__ == "spectrochempy.analysis.decomposition.mcrals_constraints"
+
+
+def test_public_names_listed_in_module_all():
+    """The module ``__all__`` exposes exactly the public constraint set."""
+    from spectrochempy.analysis.decomposition import mcrals_constraints as m
+
+    assert set(m.__all__) == set(PUBLIC_NAMES)
+
+
+# --------------------------------------------------------------------------------------
+# Construction
+# --------------------------------------------------------------------------------------
+
+
+def test_non_negative_construction_default_components():
+    c = NonNegative("C")
+    assert c.profile == "C"
+    assert c.components is None
+
+
+def test_non_negative_construction_with_components():
+    c = NonNegative("St", components=[0, 2])
+    assert c.profile == "St"
+    assert c.components == [0, 2]
+
+
+def test_closure_default_target_is_one():
+    c = Closure("C")
+    assert c.target == 1.0
+    assert c.components is None
+
+
+def test_closure_custom_target_and_components():
+    c = Closure("C", components=[0, 1], target=100.0)
+    assert c.components == [0, 1]
+    assert c.target == 100.0
+
+
+def test_unimodal_default_mod_is_strict():
+    c = Unimodal("C")
+    assert c.mod == "strict"
+    assert c.components is None
+
+
+def test_unimodal_smooth_mod():
+    c = Unimodal("St", components=[0], mod="smooth")
+    assert c.mod == "smooth"
+    assert c.components == [0]
+
+
+def test_monotonic_direction_required():
+    c = Monotonic("C", "increasing")
+    assert c.direction == "increasing"
+    assert c.tolerance == 1.1  # default
+
+
+def test_monotonic_decreasing_with_tolerance():
+    c = Monotonic("C", "decreasing", components=[1], tolerance=1.0)
+    assert c.direction == "decreasing"
+    assert c.components == [1]
+    assert c.tolerance == 1.0
+
+
+def test_zero_region_construction():
+    c = ZeroRegion("C", region=(0, 5))
+    assert c.region == (0, 5)
+    assert c.components is None
+
+
+def test_zero_region_with_components():
+    c = ZeroRegion("St", region=(40, 60), components=[1])
+    assert c.region == (40, 60)
+    assert c.components == [1]
+
+
+def test_selectivity_construction():
+    c = Selectivity("C", region=(0, 5), component=0)
+    assert c.region == (0, 5)
+    assert c.component == 0
+
+
+def test_fixed_values_construction_list():
+    c = FixedValues("St", values=[[0.1, 0.2], [0.3, 0.4]])
+    assert c.values == [[0.1, 0.2], [0.3, 0.4]]
+    assert c.components is None
+
+
+def test_fixed_values_construction_array():
+    arr = np.array([[0.1, 0.2], [0.3, 0.4]])
+    c = FixedValues("St", values=arr, components=[0])
+    assert isinstance(c.values, np.ndarray)
+    assert c.components == [0]
+
+
+def test_reference_profile_construction():
+    data = [0.1, 0.2, 0.7, 0.5]
+    c = ReferenceProfile("C", component=0, data=data)
+    assert c.component == 0
+    assert c.data == data
+
+
+def test_reference_profile_with_spectrum_side():
+    data = [0.1, 0.9, 0.5, 0.2]
+    c = ReferenceProfile("St", component=0, data=data)
+    assert c.component == 0
+    assert c.data == data
+    assert c.profile == "St"
+
+
+# --------------------------------------------------------------------------------------
+# Models
+# --------------------------------------------------------------------------------------
+
+
+def _identity(C):
+    return C
+
+
+def test_profile_model_construction_concentration():
+    c = ProfileModel("C", components=[0, 1], model=_identity)
+    assert c.profile == "C"
+    assert c.components == [0, 1]
+    assert c.model is _identity
+
+
+def test_profile_model_construction_spectrum():
+    c = ProfileModel("St", components=[0], model=_identity)
+    assert c.profile == "St"
+    assert c.components == [0]
+    assert c.model is _identity
+
+
+def test_profile_model_default_components():
+    c = ProfileModel("C", model=_identity)
+    assert c.profile == "C"
+    assert c.components is None
+
+
+# --------------------------------------------------------------------------------------
+# Tolerance validation
+# --------------------------------------------------------------------------------------
+
+
+def test_monotonic_tolerance_stored_and_validated():
+    c = Monotonic("C", "increasing", tolerance=1.05)
+    assert c.tolerance == 1.05
+
+
+@pytest.mark.parametrize("bad_tol", [0.9, 0.0, -1.0, 0.9999999])
+def test_monotonic_tolerance_below_one_rejected(bad_tol):
+    with pytest.raises(ValueError, match="tolerance must be >= 1.0"):
+        Monotonic("C", "increasing", tolerance=bad_tol)
+
+
+@pytest.mark.parametrize("bad_tol", ["1.1", None, [1.1]])
+def test_monotonic_tolerance_type_rejected(bad_tol):
+    with pytest.raises(TypeError, match="tolerance must be a real number"):
+        Monotonic("C", "increasing", tolerance=bad_tol)
+
+
+def test_monotonic_tolerance_one_is_valid():
+    # Boundary: 1.0 is the strict case and must be accepted.
+    c = Monotonic("C", "increasing", tolerance=1.0)
+    assert c.tolerance == 1.0
+
+
+# --------------------------------------------------------------------------------------
+# Validation: profile identifier
+# --------------------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("profile", ["C", "St"])
+def test_valid_profile_accepted(profile):
+    c = NonNegative(profile)
+    assert c.profile == profile
+
+
+@pytest.mark.parametrize(
+    "bad_profile", ["X", "c", "st", "C ", " St", "Concentration", "", "All"]
+)
+def test_invalid_profile_rejected(bad_profile):
+    with pytest.raises((ValueError, TypeError)):
+        NonNegative(bad_profile)
+
+
+def test_non_string_profile_rejected():
+    with pytest.raises(TypeError):
+        NonNegative(None)
+    with pytest.raises(TypeError):
+        NonNegative(0)
+    with pytest.raises(TypeError):
+        NonNegative(["C"])
+
+
+# --------------------------------------------------------------------------------------
+# Validation: components
+# --------------------------------------------------------------------------------------
+
+
+def test_components_single_int_rejected_with_hint():
+    # Catch the common mistake of passing a single int instead of a list.
+    with pytest.raises(TypeError, match="single int"):
+        NonNegative("C", components=0)
+
+
+def test_components_nested_list_rejected():
+    with pytest.raises(TypeError):
+        NonNegative("C", components=[[0, 1]])
+
+
+def test_components_empty_list_rejected():
+    with pytest.raises(ValueError, match="must not be empty"):
+        NonNegative("C", components=[])
+
+
+def test_components_negative_index_rejected():
+    with pytest.raises(ValueError, match="non-negative"):
+        NonNegative("C", components=[-1])
+
+
+def test_components_bool_rejected():
+    # bool is a subclass of int but is not a valid component index.
+    with pytest.raises(TypeError):
+        NonNegative("C", components=[True])
+
+
+def test_components_tuple_accepted():
+    # Tuples should be accepted as well as lists for ergonomic usage.
+    c = NonNegative("C", components=(0, 1))
+    assert c.components == [0, 1]
+
+
+# --------------------------------------------------------------------------------------
+# Validation: incompatible argument combinations
+# --------------------------------------------------------------------------------------
+
+
+def test_reference_profile_invalid_profile_rejected():
+    with pytest.raises(ValueError):
+        ReferenceProfile("X", component=0, data=[0.1, 0.2])
+
+
+def test_closure_target_must_be_positive():
+    with pytest.raises(ValueError, match="strictly positive"):
+        Closure("C", target=0.0)
+    with pytest.raises(ValueError, match="strictly positive"):
+        Closure("C", target=-1.0)
+
+
+def test_zero_region_requires_two_entries():
+    with pytest.raises(ValueError, match="exactly two"):
+        ZeroRegion("C", region=(0,))
+    with pytest.raises(ValueError, match="exactly two"):
+        ZeroRegion("C", region=(0, 5, 10))
+
+
+def test_zero_region_stop_after_start():
+    with pytest.raises(ValueError, match="greater than start"):
+        ZeroRegion("C", region=(5, 5))
+    with pytest.raises(ValueError, match="greater than start"):
+        ZeroRegion("C", region=(5, 0))
+
+
+def test_zero_region_negative_rejected():
+    with pytest.raises(ValueError, match="non-negative"):
+        ZeroRegion("C", region=(-1, 5))
+
+
+def test_monotonic_invalid_direction_rejected():
+    with pytest.raises(ValueError, match="direction must be one of"):
+        Monotonic("C", "up")
+    with pytest.raises(ValueError, match="direction must be one of"):
+        Monotonic("C", "Increasing")  # case-sensitive
+
+
+def test_unimodal_invalid_mod_rejected():
+    with pytest.raises(ValueError, match="mod must be one of"):
+        Unimodal("C", mod="loose")
+
+
+def test_fixed_values_scalar_rejected():
+    with pytest.raises(TypeError, match="array-like"):
+        FixedValues("St", values=0.5)
+
+
+def test_fixed_values_none_rejected():
+    with pytest.raises(TypeError, match="None"):
+        FixedValues("St", values=None)
+
+
+def test_model_must_be_callable():
+    with pytest.raises(TypeError, match="model must be callable"):
+        ProfileModel("C", components=[0], model=42)
+    with pytest.raises(TypeError, match="model must be callable"):
+        ProfileModel("St", components=[0], model="not callable")
+
+
+# --------------------------------------------------------------------------------------
+# Equality
+# --------------------------------------------------------------------------------------
+
+
+def test_equal_constraints_same_params():
+    assert NonNegative("C") == NonNegative("C")
+    assert NonNegative("St", components=[0, 2]) == NonNegative("St", components=[0, 2])
+
+
+def test_unequal_constraints_different_profile():
+    assert NonNegative("C") != NonNegative("St")
+
+
+def test_unequal_constraints_different_components():
+    assert NonNegative("C", components=[0]) != NonNegative("C", components=[1])
+
+
+def test_unequal_constraints_different_target():
+    assert Closure("C", target=1.0) != Closure("C", target=2.0)
+
+
+def test_unequal_constraints_different_direction():
+    assert Monotonic("C", "increasing") != Monotonic("C", "decreasing")
+
+
+def test_unequal_constraints_different_tolerance():
+    assert Monotonic("C", "increasing", tolerance=1.1) != Monotonic(
+        "C", "increasing", tolerance=1.2
+    )
+
+
+def test_unequal_constraints_different_class():
+    # Different constraint classes must never compare equal even if they
+    # share parameters, to prevent silent confusion.
+    nn = NonNegative("C")
+    cl = Closure("C", components=None, target=1.0)
+    assert nn != cl
+    assert cl != nn
+
+
+def test_constraint_not_equal_to_other_object():
+    c = NonNegative("C")
+    assert c != "NonNegative(profile='C')"
+    assert c != 42
+    assert c is not None
+
+
+def test_constraint_equal_to_itself():
+    c = NonNegative("C", components=[0, 1])
+    assert c == c
+
+
+def test_mod_equal_and_unequal():
+    assert Unimodal("C") == Unimodal("C")
+    assert Unimodal("C", mod="strict") != Unimodal("C", mod="smooth")
+
+
+def test_models_equal_same_callback():
+    assert ProfileModel("C", components=[0], model=_identity) == ProfileModel(
+        "C", components=[0], model=_identity
+    )
+    assert ProfileModel("St", model=_identity) == ProfileModel("St", model=_identity)
+
+
+def test_models_unequal_different_components():
+    assert ProfileModel("C", components=[0], model=_identity) != ProfileModel(
+        "C", components=[1], model=_identity
+    )
+
+
+def test_models_unequal_different_callback():
+    assert ProfileModel("C", components=[0], model=_identity) != ProfileModel(
+        "C", components=[0], model=lambda C: C
+    )
+
+
+def test_profile_model_differs_by_profile():
+    assert ProfileModel("C", components=[0], model=_identity) != ProfileModel(
+        "St", components=[0], model=_identity
+    )
+
+
+# --------------------------------------------------------------------------------------
+# repr
+# --------------------------------------------------------------------------------------
+
+
+def test_repr_nonnegative_default():
+    assert repr(NonNegative("C")) == "NonNegative(profile='C', components=None)"
+
+
+def test_repr_nonnegative_with_components():
+    assert (
+        repr(NonNegative("St", components=[0, 2]))
+        == "NonNegative(profile='St', components=[0, 2])"
+    )
+
+
+def test_repr_closure():
+    assert (
+        repr(Closure("C", components=[0, 1], target=100.0))
+        == "Closure(profile='C', components=[0, 1], target=100.0)"
+    )
+
+
+def test_repr_monotonic():
+    assert (
+        repr(Monotonic("C", "decreasing", components=[0], tolerance=1.0))
+        == "Monotonic(profile='C', direction='decreasing', components=[0], tolerance=1.0)"
+    )
+
+
+def test_repr_profile_model_shows_profile():
+    r = repr(ProfileModel("C", components=[0, 1], model=_identity))
+    assert "ProfileModel(" in r
+    assert "profile='C'" in r
+    assert "components=[0, 1]" in r
+    assert "model=" in r
+
+
+def test_repr_profile_model_with_spectrum():
+    r = repr(ProfileModel("St", components=[0], model=_identity))
+    assert "ProfileModel(" in r
+    assert "profile='St'" in r
+    assert "components=[0]" in r
+    assert "model=" in r
+
+
+def test_repr_is_readable_for_all_classes():
+    # Smoke test: every constraint class produces a non-empty,
+    # ClassName-prefixed repr that starts with the class name.
+    for cls, args, kwargs in [
+        (NonNegative, ("C",), {}),
+        (Closure, ("C",), {"target": 1.0}),
+        (Unimodal, ("C",), {}),
+        (Monotonic, ("C",), {"direction": "increasing"}),
+        (ZeroRegion, ("C",), {"region": (0, 5)}),
+        (Selectivity, ("C",), {"region": (0, 5), "component": 0}),
+        (FixedValues, ("St",), {"values": [0.1, 0.2]}),
+        (ReferenceProfile, ("C",), {"component": 0, "data": [0.1, 0.2]}),
+        (ProfileModel, ("C",), {"components": [0], "model": _identity}),
+        (ProfileModel, ("St",), {"components": [0], "model": _identity}),
+    ]:
+        c = cls(*args, **kwargs)
+        r = repr(c)
+        assert r.startswith(f"{cls.__name__}(")
+        assert r.endswith(")")
+        assert len(r) > len(cls.__name__) + 2
+
+
+# --------------------------------------------------------------------------------------
+# Base-class behaviour
+# --------------------------------------------------------------------------------------
+
+
+def test_base_constraint_is_not_sealed_but_not_meant_to_be_used_directly():
+    # The base class accepts ``profile`` (so subclasses can reuse it),
+    # but it carries no scientific meaning and is not part of the public
+    # vocabulary. We just check that it can be instantiated via the
+    # normal path and that its name property works.
+    base = Constraint("C")
+    assert base.profile == "C"
+    assert base.name == "Constraint"
+
+
+def test_base_constraint_repr_uses_repr_params():
+    assert repr(Constraint("C")) == "Constraint(profile='C')"
+
+
+def test_constraint_name_property_returns_class_name():
+    assert NonNegative("C").name == "NonNegative"
+    assert ProfileModel("C", model=_identity).name == "ProfileModel"
+
+
+def test_constraint_equality_uses_public_state():
+    # Equality is by type + public params, not by identity.
+    a = NonNegative("C")
+    b = NonNegative("C")
+    assert a is not b
+    assert a == b
+
+
+# --------------------------------------------------------------------------------------
+# No connection to the internal ALS engine
+# --------------------------------------------------------------------------------------
+
+
+def test_constraints_do_not_affect_mcrals_fit_smoke():
+    """Creating a constraint object must not change the behaviour of
+    ``MCRALS.fit``. This is a smoke test that the public skeleton is
+    decoupled from the internal engine.
+
+    (See the main ``test_mcrals.py`` for the full behavioural
+    characterisation.)
+    """
+    from spectrochempy.analysis.decomposition.mcrals import MCRALS
+    from spectrochempy.core.dataset.nddataset import Coord, NDDataset
+
+    # Tiny self-contained synthetic dataset (no fixture dependency).
+    rng = np.random.RandomState(42)
+    n_t, n_wl, n_comp = 8, 12, 2
+    t = Coord(np.arange(n_t), title="time")
+    wl = Coord(np.arange(n_wl), title="wavelength")
+    C_true = rng.rand(n_t, n_comp)
+    St_true = np.abs(rng.rand(n_comp, n_wl))
+    X = NDDataset(C_true @ St_true, coordset=(t, wl), units="absorbance")
+    C0 = NDDataset(np.abs(C_true + 0.05 * rng.randn(n_t, n_comp)), coordset=(t, None))
+
+    mcr = MCRALS()
+    mcr.fit(X, C0)
+    baseline_C = np.asarray(mcr.C.data).copy()
+
+    # Constructing public constraints should have no effect on the fit.
+    _ = NonNegative("C")
+    _ = Closure("St", target=1.0)
+    _ = ProfileModel("C", components=[0], model=_identity)
+
+    mcr2 = MCRALS()
+    mcr2.fit(X, C0)
+    np.testing.assert_array_equal(np.asarray(mcr2.C.data), baseline_C)

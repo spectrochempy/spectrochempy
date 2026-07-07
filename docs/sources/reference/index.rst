@@ -678,6 +678,31 @@ Multivariate Curve Resolution - Alternating Least Squares
 
     MCRALS
 
+MCRALS Constraints
+==================
+
+These public classes describe scientific prior knowledge about the
+concentration (``"C"``) or spectral (``"St"``) profiles estimated by
+:class:`MCRALS`. They form the foundation of the future constraint-based
+API for ``MCRALS`` and are currently declarative containers and
+validators only — they are not yet connected to the internal ALS
+constraint engine. See the project RFC for the planned migration path.
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    Constraint
+    Closure
+    FixedValues
+    Monotonic
+    NonNegative
+    ProfileModel
+    ReferenceProfile
+    Selectivity
+    Unimodal
+    ZeroRegion
+
 Independent Component Analysis
 ==============================
 
