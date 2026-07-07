@@ -73,7 +73,7 @@ class MetaConfigurable(Configurable):
         return d
 
     def trait_defaults(self, *names, **metadata):
-        # override traitlets trait default to take into accound changes in the config
+        # override traitlets trait default to take into account changes in the config
         # file
         defaults = super().trait_defaults(*names, **metadata)
         # modify with the loaded external config

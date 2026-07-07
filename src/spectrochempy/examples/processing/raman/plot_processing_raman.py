@@ -152,7 +152,7 @@ _ = C.plot()
 
 blc.model = "asls"
 blc.log_level = (
-    "WARNING"  # supress output of asls (to long for the moment:  TODO optimize this)
+    "WARNING"  # suppress output of asls (too long for the moment: TODO optimize this)
 )
 _ = blc.fit(C[::10])
 corr = blc.transform()

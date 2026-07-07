@@ -226,7 +226,7 @@ def align(dataset, *others, **kwargs):
                     ),
                 )
 
-            # do units transform if necesssary so coords can be compared
+            # do units transform if necessary so coords can be compared
             if coord.units != ref_coord.units:
                 coord.ito(ref_coord)
 

@@ -23,7 +23,7 @@ JCAMP-DX ``read_jcamp()`` Standard IR exchange format
 ======== ================ ==============================
 
 
-Detailled Tutorials
+Detailed Tutorials
 -------------------
 
 .. toctree::

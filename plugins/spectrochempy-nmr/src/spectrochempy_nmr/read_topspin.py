@@ -934,7 +934,7 @@ def read_topspin(*paths, **kwargs):
         or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
         automatically, but can be set manually.
 
-        It is used for instance whn reading directory with different types of files, for merging
+        It is used for instance when reading directory with different types of files, for merging
         the datasets with compatible dimensions and different origin into different groups.
 
         It is also used when reading with the CSV protocol. In order to properly interpret CSV file

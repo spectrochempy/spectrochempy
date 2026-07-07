@@ -414,7 +414,7 @@ _ = ax.set_ylim([-0.3, 0.8])
 #
 # When the baseline to remove is a simple linear correction, one can use `basc` without
 # entering any parameter. This performs an automatic linear baseline correction.
-# This is close to detrend(oreder=1), exceot that the linear baseline is fitted on the
+# This is close to detrend(order=1), except that the linear baseline is fitted on the
 # the spectra limit to fit the baseline. This is useful when the spectra limits are
 # signal free.
 
@@ -423,7 +423,7 @@ Aa = A.basc()
 _ = Aa.plot()  # range are automatically set to the start and end of the spectra, model='polynomial', order='linear'
 
 # %% [markdown]
-# All parameters of `Baseline` can be used in basc. It is thus probably quite conveninent if one wants to write shorter code.
+# All parameters of `Baseline` can be used in basc. It is thus probably quite convenient if one wants to write shorter code.
 
 # %% [markdown]
 # ### Rubberband

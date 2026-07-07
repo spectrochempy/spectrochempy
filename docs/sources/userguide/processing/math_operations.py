@@ -295,7 +295,7 @@ _ = out.plot(figsize=(6, 2.5))
 # ##### log
 # Natural logarithm, element-wise.
 #
-# This doesn't generate un error for negative numbrs, but the output is masked for those values
+# This doesn't generate an error for negative numbers, but the output is masked for those values
 
 # %%
 out = np.log(dataset)

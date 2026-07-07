@@ -164,7 +164,7 @@ class _SpcFile:
     # File header (see: Galactic Universal Data Format Specification 9/4/97)
     # http://ensembles-eu.metoffice.gov.uk/met-res/aries/technical/GSPC_UDF.PDF
 
-    # Define some dicionaries for the SPC file format
+    # Define some dictionaries for the SPC file format
     xz_info = {
         0: ("axis title", None),
         1: ("Wavenumbers", "cm^-1"),
@@ -614,8 +614,8 @@ class _SpcFile:
         # } LOGSTC;
         offset = self._Flogoff
         logstc_format = s + "iiiii44s"
-        siz = struct.calcsize(logstc_format)
-        sel = content[offset : offset + siz]
+        size = struct.calcsize(logstc_format)
+        sel = content[offset : offset + size]
         (
             Logsizd,
             Logsizm,
@@ -632,7 +632,7 @@ class _SpcFile:
 
     def _extract_subfile_header(self, content, s):
         # **************************************************************************
-        # * This structure defines the subfile headers that preceed each trace in a
+        # * This structure defines the subfile headers that precede each trace in a
         # * multi-type file. Note that for evenly-spaced files, subtime and subnext are
         # * optional (and ignored) for all but the first subfile. The (subnext-subtime)
         # * for the first subfile determines the Z spacing for all evenly-spaced subfiles.
@@ -708,13 +708,13 @@ class _SpcFile:
         # * Another X,Y mode allows for separate X arrays and differing numbers of
         # * points for each subfile. This mode is normally used for Mass Spec Data.
         # * If the TXYXYS flag is set along with TXVALS, then each subfile has a
-        # * separate X array which follows the subfile header and preceeds the Y array.
+        # * separate X array which follows the subfile header and precedes the Y array.
         # * An additional subnpts subfile header entry gives the number of X,Y values
         # * for the subfile (rather than the fnpts entry in the main header). Under
         # * this mode, there may be a directory subfile pointers whose offset is
         # * stored in the fnpts main header entry. This directory consists of an
         # * array of ssfstc structures, one for each of the subfiles. Each ssfstc
-        # * gives the byte file offset of the begining of the subfile (that is, of
+        # * gives the byte file offset of the beginning of the subfile (that is, of
         # * its subfile header) and also gives the Z value (subtime) for the subfile
         # * and is byte size. This directory is normally saved at the end of the
         # * file after the last subfile. If the fnpts entry is zero, then no directory
@@ -767,7 +767,7 @@ class _SpcFile:
         # * overridden with null-terminated strings at the end of fcmnt. If the
         # * TALABS bit is set in ftflgs (or Z=ZTEXTL in old format), then the labels
         # * come from the fcatxt offset of the header. The X, Y, and Z labels
-        # * must each be zero-byte terminated and must occure in the stated (X,Y,Z)
+        # * must each be zero-byte terminated and must occur in the stated (X,Y,Z)
         # * order. If a label is only the terminating zero byte then the fxtype,
         # * fytype, or fztype (or Arbitrary Z) type label is used instead. The
         # * labels may not exceed 20 characters each and all three must fit in 30 bytes.
@@ -966,7 +966,7 @@ class _SpcFile:
         if self._txyxys:
             debug_("each subfile has own x's")
         if self._txvals:
-            debug_("floating x-value array preceeds y's")
+            debug_("floating x-value array precedes y's")
 
         # subfiles
         try:

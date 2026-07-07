@@ -45,7 +45,7 @@ dataset
 dataset.y.select(3)
 
 # %%
-# plot the dataset (zoom on the begining of the fid)
+# plot the dataset (zoom on the beginning of the fid)
 prefs = scp.preferences
 prefs.figure.figsize = (9, 4)
 ax = dataset.plot(colorbar=True)
@@ -135,7 +135,7 @@ ax = sections.plot(marker="o", lw="1", ls=":", legend="best", colormap="jet")
 ax.set_xlim(0, 16000)
 
 # %%
-# The sections we have taken here represent the maximum heigths of the peaks.
+# The sections we have taken here represent the maximum heights of the peaks.
 # However it could may be interesting to have the area of the peak instead.
 # Let's use the left and right bases to perform the integration of the peaks.
 area = []
@@ -192,11 +192,11 @@ fitter.script = """
 
 _ = fitter.fit(s)
 
-spred = fitter.predict()
+prediction = fitter.predict()
 
 ax = fitter.plotmerit(
     s,
-    spred,
+    prediction,
     method="scatter",
     show_yaxis=True,
     title=f"fitting CP dynamic (peaks at {peaks.x[index].values})",
@@ -216,11 +216,11 @@ fitter.script = """
 
 _ = fitter.fit(s)
 
-spred = fitter.predict()
+prediction = fitter.predict()
 
 ax = fitter.plotmerit(
     s,
-    spred,
+    prediction,
     method="scatter",
     show_yaxis=True,
     title=f"fitting CP dynamic (peaks at {peaks.x[index].values})",
@@ -240,11 +240,11 @@ fitter.script = """
 
 _ = fitter.fit(s)
 
-spred = fitter.predict()
+prediction = fitter.predict()
 
 ax = fitter.plotmerit(
     s,
-    spred,
+    prediction,
     method="scatter",
     show_yaxis=True,
     title=f"fitting CP dynamic (peaks at {peaks.x[index].values})",

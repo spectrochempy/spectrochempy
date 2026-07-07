@@ -226,9 +226,9 @@ class PreferencesSet(Meta):
         trait = app.plot_preferences.traits()[key]
         default = trait.default_value
         thelp = trait.help.replace("\n", " ").replace("\t", " ")
-        sav = ""
-        while thelp != sav:
-            sav = thelp
+        previous = ""
+        while thelp != previous:
+            previous = thelp
             thelp = thelp.replace("  ", " ")
         help = "\n".join(
             textwrap.wrap(
@@ -306,9 +306,9 @@ class PreferencesSet(Meta):
             if val.startswith("CapStyle") or val.startswith("JoinStyle"):
                 val = val.split(".")[-1]
 
-            sav = ""
-            while val != sav:
-                sav = val
+            previous = ""
+            while val != previous:
+                previous = val
                 val = val.replace("  ", " ")
             line = f"{key:40s} : {val}\n"
             if line[0] != sline:

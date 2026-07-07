@@ -1100,7 +1100,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         if name in self._coordset.names:
             idx = self._coordset.names.index(name)
             return self._coordset[idx]
-        error_(f"could not find this dimenson name: `{name}`")
+        error_(f"could not find this dimension name: `{name}`")
         return None
 
     @property
@@ -1465,7 +1465,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         Returns
         -------
         `NDDataset`
-            Swaped dataset.
+            Swapped dataset.
 
         See Also
         --------

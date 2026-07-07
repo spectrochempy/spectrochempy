@@ -220,7 +220,7 @@ def compare_ndarrays(this, other, approx=False, decimal=6, data_only=False):
 
 
 def compare_coords(this, other, approx=False, decimal=3, data_only=False):
-    # TODO: compare base on signficant digit for coordinate instead of decimals
+    # TODO: compare based on significant digit for coordinate instead of decimals
     #  (that may not work for very small coordinates numbers)
     from spectrochempy.core.units import ur
 

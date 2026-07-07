@@ -51,7 +51,7 @@ _ = f.T.plot(yscale="log", legend=f.k.labels)
 
 # %%
 # Note the use of coordinate 'k' (component axis) in the expression above.
-# Remember taht to find the actul names of the coordinates, the `dims`
+# Remember that to find the actual names of the coordinates, the `dims`
 # attribute can be used as in the following:
 f.dims
 

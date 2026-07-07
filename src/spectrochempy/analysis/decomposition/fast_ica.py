@@ -299,7 +299,7 @@ array of values drawn from a normal distribution is used."""
     )
     def St(self):
         r"""
-        The spectral profiles of the independant sources.
+        The spectral profiles of the independent sources.
 
         NDDataset of size (`n_components`, `n_features`). It is the transpose of the
         ``mixing_`` matrix returned by Scikit-Learn.

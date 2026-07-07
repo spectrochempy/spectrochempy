@@ -560,7 +560,7 @@ class IRIS(DecompositionAnalysis):
                 b = np.zeros(M)
 
             # --------------------------------------------------------------------------
-            def solve_for_lambda(X, K, P0, lamda, S):
+            def solve_for_lambda(X, K, P0, lambda_, S):
                 """
                 QP optimization.
 
@@ -569,7 +569,7 @@ class IRIS(DecompositionAnalysis):
                 X: NDDataset of experimental spectra
                 K: NDDataset, kernel dataset
                 P0: the lambda independent part of P
-                lamda: regularization parameter
+                lambda_: regularization parameter
                 S: penalty function (sharpness)
                 verbose: print info
 
@@ -584,7 +584,7 @@ class IRIS(DecompositionAnalysis):
 
                 if self.qpsolver == "osqp":
                     for j in range(len(channels.data)):
-                        P = sparse.csc_matrix(P0 + 2 * lamda * S)
+                        P = sparse.csc_matrix(P0 + 2 * lambda_ * S)
                         qprob = osqp.OSQP()
                         if osqp.__version__ < "1.0.0":
                             qprob.setup(
@@ -605,18 +605,18 @@ class IRIS(DecompositionAnalysis):
                 else:  # quadprog solver
                     for j, channel in enumerate(channels.data):
                         try:
-                            P = P0 + 2 * lamda * S
+                            P = P0 + 2 * lambda_ * S
                             fi[:, j] = _quadprog.solve_qp(P, q[j].squeeze(), A, b)[0]
 
                         except ValueError:  # pragma: no cover
                             msg = (
                                 f"Warning:P is not positive definite for log10(lambda)="
-                                f"{np.log10(lamda):.2f} at {channel:.2f} "
+                                f"{np.log10(lambda_):.2f} at {channel:.2f} "
                                 f"{channels.units}, find nearest PD matrix"
                             )
                             warning_(msg)
                             try:
-                                P = _nearestPD(P0 + 2 * lamda * S, 0)
+                                P = _nearestPD(P0 + 2 * lambda_ * S, 0)
                                 fi[:, j] = _quadprog.solve_qp(P, q[j].squeeze(), A, b)[
                                     0
                                 ]
@@ -627,7 +627,7 @@ class IRIS(DecompositionAnalysis):
                                     "try with a small shift of diagonal elements..."
                                 )
                                 warning_(msg)
-                                P = _nearestPD(P0 + 2 * lamda * S, 1e-3)
+                                P = _nearestPD(P0 + 2 * lambda_ * S, 1e-3)
                                 fi[:, j] = _quadprog.solve_qp(P, q[j].squeeze(), A, b)[
                                     0
                                 ]
@@ -637,7 +637,7 @@ class IRIS(DecompositionAnalysis):
                 SMi = np.linalg.norm(np.dot(np.dot(np.transpose(fi), S), fi))
 
                 msg = (
-                    f"log10(lambda)={np.log10(lamda):.3f} -->  "
+                    f"log10(lambda)={np.log10(lambda_):.3f} -->  "
                     f"residuals = {RSSi:.3e}    "
                     f"regularization constraint  = {SMi:.3e}"
                 )
@@ -654,8 +654,14 @@ class IRIS(DecompositionAnalysis):
                 )
                 info_(msg)
 
-                for i, lamda_ in enumerate(lambdas):
-                    f[i], RSS[i], SM[i] = solve_for_lambda(X, K, P0, lamda_, S)
+                for i, lambda_value in enumerate(lambdas):
+                    f[i], RSS[i], SM[i] = solve_for_lambda(
+                        X,
+                        K,
+                        P0,
+                        lambda_value,
+                        S,
+                    )
 
             else:
                 msg = (
@@ -758,7 +764,7 @@ class IRIS(DecompositionAnalysis):
                 )
                 info_(msg)
 
-            # sort by lamba values
+            # sort by lambda values
             argsort = np.argsort(lambdas)
             lambdas = lambdas[argsort]
             RSS = RSS[argsort]
@@ -961,7 +967,7 @@ def _menger(x, y):
     if abs(numerator) <= EPSILON:
         return 0.0
 
-    # euclidian distances
+    # Euclidean distances
     r01 = (x[1] - x[0]) ** 2 + (y[1] - y[0]) ** 2
     r12 = (x[2] - x[1]) ** 2 + (y[2] - y[1]) ** 2
     r02 = (x[2] - x[0]) ** 2 + (y[2] - y[0]) ** 2

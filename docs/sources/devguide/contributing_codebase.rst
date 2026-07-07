@@ -34,7 +34,8 @@ Pre-commit
 ----------
 
 We encourage you to use `pre-commit hooks <https://pre-commit.com/>`__
-to automatically run ``ruff check`` and ``ruff format`` when you make a git commit.
+to automatically run checks such as ``ruff`` and ``codespell`` when you make a
+git commit.
 This can be done by installing ``pre-commit``:
 
     .. code-block:: bash

@@ -80,7 +80,7 @@ def concatenate(*datasets, **kwargs):
     ((55, 5549), (55, 5549), (55, 11098))
 
     """
-    # check uise
+    # check use
     if "force_stack" in kwargs:
         deprecated("force_stack", replace="method stack()", removed="0.11.0")
         return stack(datasets)

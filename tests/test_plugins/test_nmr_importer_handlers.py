@@ -21,7 +21,7 @@ from spectrochempy_nmr import _topspin_remote_download_target
 
 
 def _norm(path: str) -> str:
-    """Normalise un chemin retourné par les handlers pour comparaison portable."""
+    """Normalize a path returned by handlers for portable comparison."""
     return path.rstrip("/\\").replace("\\", "/")
 
 

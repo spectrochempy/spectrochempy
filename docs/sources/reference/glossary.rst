@@ -47,7 +47,7 @@ Glossary
         and :cite:`maeder:2009` for more recent references.
 
     ICA
-        ``Independant Component Analysis``.
+        ``Independent Component Analysis``.
         ICA is a method for separating a multivariate signal into additive subcomponents.
 
     loading
@@ -107,7 +107,7 @@ Glossary
 
     PLS
         ``Partial Least Squares`` regression (or Projection on Latent Structures) is a statistical method to
-        estimate :math:`n \times l` dependant or predicted variables :math:`Y` from :math:`n \times m`
+        estimate :math:`n \times l` dependent or predicted variables :math:`Y` from :math:`n \times m`
         explanatory or observed variables :math:`X` by projecting both of them on new spaces spanned by
         :math:`k` latent variables according to the master equations :
 
@@ -145,7 +145,7 @@ Glossary
 
         where :math:`\mathbf{U}(n,k)` and :math:`\mathbf{V}^t(k,m)` are matrices regrouping so-called left
         and right singular vectors of size :math:`k \leq \min(n,m)`. The factorization is exact (null
-        error :math:`E`) whan :math:`k = \min(n,m)`. Among other properties, left and right singular
+        error :math:`E`) when :math:`k = \min(n,m)`. Among other properties, left and right singular
         vectors form two orthonormal basis of :math:`k`-dimensional spaces.
         Hence, for :math:`\mathbf{U}`:
 
@@ -153,7 +153,7 @@ Glossary
 
         :math:`\Sigma` is a diagonal :math:`k\times k` matrix which diagonal elements :math:`\sigma_i`
         are called the  *singular values* of the matrix :math:`X`. The number :math:`r` of non-negligible
-        (formally non-null) sigular values is called the :term:`rank` of :math:`X` and determines the
+        (formally non-null) singular values is called the :term:`rank` of :math:`X` and determines the
         number of linear independent lines or columns of :math:`X`.
 
         The singular values :math:`\sigma_i` are generally chosen in descending order, so that the first

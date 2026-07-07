@@ -75,7 +75,7 @@ def _interpret_equation(eq, species):
             coef = int(coef)
         except ValueError:
             raise ValueError(
-                f"Stoichiometric coeffcients must be integers. Could not "
+                f"Stoichiometric coefficients must be integers. Could not "
                 f"convert {coef} in int",
             ) from None
         if is_reactant:
@@ -354,7 +354,7 @@ class ActionMassKinetics(tr.HasTraits):
         for line in (self._B - self._A).T:
             prod_rate = ""
             if not line.any():
-                # only zeors => spectator species
+                # only zeros => spectator species
                 prod_rate = "0"
             else:
                 for j, n in enumerate(line):
@@ -758,7 +758,7 @@ class ActionMassKinetics(tr.HasTraits):
 
         Parameters
         ----------
-        Cexp : `NDDataset` or `list` ot `tuple` of NDDatasets
+        Cexp : `NDDataset` or `list` or `tuple` of NDDatasets
             Experimental concentration profiles on which to fit the model.
             each set of concentrations can contain more concentration profiles than those to fit.
         iexp : `int`

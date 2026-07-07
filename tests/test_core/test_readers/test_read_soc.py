@@ -102,7 +102,7 @@ def test_read_soc_merge_behavior(tmp_path):
 
 
 def test_read_SOC(tmp_path):
-    """upload and read surface oftics exemple"""
+    """Upload and read a Surface Optics example."""
 
     # the following does not work
     baseurl = "https://github.com/chet-j-ski/SOC100_example_data/raw/main/"

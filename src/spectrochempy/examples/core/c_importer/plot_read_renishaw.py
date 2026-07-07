@@ -67,7 +67,7 @@ _ = dataset.plot_image()
 # %%
 # finally extract grid scan data from a StreamLine HR measurement
 dataset = scp.read_wdf("ramandata/wire/mapping.wdf")
-# plot the dataset as an image (summming all wavenumbers)
+# plot the dataset as an image (summing all wavenumbers)
 _ = dataset.sum(dim=2).plot_image(equal_aspect=True)
 # plot the image taken at 1529cm-1
 _ = dataset[..., 1529.0].plot_image(equal_aspect=True)
