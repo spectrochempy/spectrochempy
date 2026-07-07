@@ -70,15 +70,19 @@ peak_1 = scp.gaussian(x, ampl=0.95, pos=3624.0, width=42.39, normalized=False)
 peak_2 = scp.gaussian(x, ampl=0.32, pos=3542.0, width=51.81, normalized=False)
 noise = scp.normal(loc=0.0, scale=0.007, size=x.size)
 
-nd_oh = scp.NDDataset(
-    baseline.data + peak_1.data + peak_2.data + noise.data,
-    coordset=[x],
-    units="absorbance",
-    title="Synthetic OH region",
+nd_oh = baseline + peak_1 + peak_2 + noise
+nd_oh.title = "Synthetic OH region"
+
+nd_oh_corr = scp.basc(
+    nd_oh,
+    [3700.0, 3670.0],
+    [3490.0, 3300.0],
+    model="polynomial",
+    order=2,
 )
-nd_oh_corr = scp.basc(nd_oh)
-_ = nd_oh.plot()
-_ = nd_oh_corr.plot(clear=False)
+ax = nd_oh.plot(label="Synthetic spectrum")
+_ = nd_oh_corr.plot(clear=False, label="Baseline-corrected spectrum")
+ax.legend()
 
 # %% [markdown]
 # ## Detect peaks and inspect the structured result
@@ -88,7 +92,13 @@ _ = nd_oh_corr.plot(clear=False)
 # dataset and exposes a stable tabular view through `result.table`.
 
 # %%
-result = nd_oh_corr.find_peaks(height=0.05, distance="20 cm^-1", as_result=True)
+result = nd_oh_corr.find_peaks(
+    height=0.05,
+    distance="20 cm^-1",
+    prominence=0.1,
+    width="10 cm^-1",
+    as_result=True,
+)
 result
 
 # %%
@@ -134,25 +144,22 @@ print(preview)
 # as initial guesses in a manually written fitting script.
 
 # %%
-selected_rows = sorted(
-    rows,
-    key=lambda row: float(row["height"].magnitude),
+selected_table = table.top(2, by="height").sort_by(
+    "position",
     reverse=True,
-)[:2]
-selected_rows = sorted(
-    selected_rows,
-    key=lambda row: float(row["position"].to("cm^-1").magnitude),
-    reverse=True,
+    unit="cm^-1",
 )
+positions = selected_table.column("position", unit="cm^-1", as_float=True)
+heights = selected_table.column("height", as_float=True)
+widths = selected_table.column("width", unit="cm^-1", as_float=True)
 
-for row in selected_rows:
+for position, height, width in zip(positions, heights, widths, strict=False):
     print(
-        f"candidate peak at {row['position']:~0.2fP} with height {row['height']:~0.3fP}"
+        f"candidate peak at {position:.2f} cm^-1 "
+        f"with height {height:.3f} and width {width:.2f} cm^-1"
     )
 
 # %%
-positions = [float(row["position"].to("cm^-1").magnitude) for row in selected_rows]
-
 script = f"""
 COMMON:
 $ gratio: 0.1, 0.0, 1.0
@@ -161,18 +168,18 @@ $ gasym: 0.1, 0.0, 1.0
 MODEL: LINE_1
 shape: asymmetricvoigtmodel
     $ ampl:  1.0, 0.0, none
-    $ pos:   {positions[0]:.2f}, 3610.0, 3640.0
+    $ pos:   {positions[0]:.2f}, {positions[0] - widths[0]:.2f}, {positions[0] + widths[0]:.2f}
     > ratio: gratio
     > asym: gasym
-    $ width: 200, 0, 1000
+    $ width: {widths[0]:.2f}, {0.5 * widths[0]:.2f}, {2.0 * widths[0]:.2f}
 
 MODEL: LINE_2
 shape: asymmetricvoigtmodel
     $ ampl:  0.2, 0.0, none
-    $ pos:   {positions[1]:.2f}, 3520.0, 3560.0
+    $ pos:   {positions[1]:.2f}, {positions[1] - widths[1]:.2f}, {positions[1] + widths[1]:.2f}
     > ratio: gratio
     > asym: gasym
-    $ width: 200, 0, 1000
+    $ width: {widths[1]:.2f}, {0.5 * widths[1]:.2f}, {2.0 * widths[1]:.2f}
 """
 
 print(script)
@@ -197,7 +204,7 @@ errors
 
 # %%
 opt.script = script
-opt.max_iter = 2000
+opt.max_iter = 20000
 _ = opt.fit(nd_oh_corr)
 
 # %%
