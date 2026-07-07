@@ -259,6 +259,21 @@ class TestOptimizeResult:
         assert np.isnan(diagnostics["rmse"])
         assert np.isnan(diagnostics["r_squared"])
 
+    def test_dry_fit_exposes_conservative_solver_status(
+        self, synthetic_two_peak_dataset, optimize_script
+    ):
+        opt = scp.Optimize()
+        opt.script = optimize_script
+        opt.autobase = True
+        opt.dry = True
+
+        opt.fit(synthetic_two_peak_dataset)
+        diag = opt.result.diagnostics
+
+        assert diag["success"] is False
+        assert diag["status"] is None
+        assert diag["message"] == ""
+
     # ----------------------------------------------------------------------------------
     # Representation
     # ----------------------------------------------------------------------------------

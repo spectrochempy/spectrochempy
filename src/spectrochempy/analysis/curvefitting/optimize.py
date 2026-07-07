@@ -606,6 +606,11 @@ class Optimize(DecompositionAnalysis):
         )
 
         fopt = None
+        solver_meta = {
+            "success": False,
+            "status": None,
+            "message": "",
+        }
         if not self.dry:
             fp, fopt, solver_meta = _optimize(
                 func,
