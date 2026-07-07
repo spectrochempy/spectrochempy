@@ -55,7 +55,12 @@
 # > * Basic knowledge of Python
 # > * Jupyter notebook environment
 #
-# You can install SpectroChemPy using either pip or mamba:
+# You can install SpectroChemPy using uv, pip, or mamba:
+#
+# **Using uv (recommended):**
+# ```bash
+# uv pip install spectrochempy
+# ```
 #
 # **Using pip:**
 # ```bash

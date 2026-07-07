@@ -54,14 +54,25 @@ Setting Up Your Development Environment
 
    .. tabs::
 
-    .. tab:: MacOS/Linux
+    .. tab:: Using uv (Recommended)
+
+       uv is the recommended tool for development. It matches the project's own CI tooling.
+
+       .. sourcecode:: bash
+
+          uv venv --python 3.13
+          source .venv/bin/activate  # Linux/macOS
+          # or
+          .venv\Scripts\activate     # Windows
+
+    .. tab:: MacOS/Linux (venv)
 
        .. sourcecode:: bash
 
           python3 -m venv .venv
           source .venv/bin/activate
 
-    .. tab:: Windows
+    .. tab:: Windows (venv)
 
        .. sourcecode:: bash
 
@@ -70,12 +81,24 @@ Setting Up Your Development Environment
 
 4. Install SpectroChemPy in development mode:
 
-   .. sourcecode:: bash
+   .. tabs::
 
-       python -m pip install --upgrade pip
-       python -m pip install -e ".[dev]"  # Installs development and test dependencies
-       # or
-       python -m pip install -e ".[dev, docs]"  # Installs development, test and documentation dependencies
+    .. tab:: Using uv (Recommended)
+
+       .. sourcecode:: bash
+
+          uv pip install -e ".[dev]"  # Installs development and test dependencies
+          # or
+          uv pip install -e ".[dev, docs]"  # Installs development, test and documentation dependencies
+
+    .. tab:: Using pip
+
+       .. sourcecode:: bash
+
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"  # Installs development and test dependencies
+          # or
+          python -m pip install -e ".[dev, docs]"  # Installs development, test and documentation dependencies
 
 Making Changes
 --------------
