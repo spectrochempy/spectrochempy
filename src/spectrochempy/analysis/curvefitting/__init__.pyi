@@ -8,12 +8,14 @@
 
 __all__ = [
     "_models",
+    "_modelspec",
     "_parameters",
     "linearregression",
     "optimize",
 ]
 
 from . import _models
+from . import _modelspec
 from . import _parameters
 from . import linearregression
 from . import optimize
