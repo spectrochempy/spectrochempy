@@ -48,7 +48,11 @@ New Features
 - The analysis user guide now includes a reference peak-analysis workflow
   tutorial connecting peak detection, ``PeakFindingResult``, ``PeakTable``,
   CSV export, manual script writing, script validation, and ``Optimize.fit()``
-  in one end-to-end example.
+  in one end-to-end example. The `Optimize` user-facing documentation now also
+  clarifies method selection (`least_squares`, `leastsq`, `simplex`,
+  `basinhopping`), the meaning of ``FitResult.parameters`` as run
+  configuration, and the lightweight ``validate_constraints()`` /
+  ``constraints`` normalization surface for constraint validation before fit.
 
 - ``FitResult`` from ``Optimize.result`` now exposes a residual dataset as
   ``result.outputs["residuals"]`` / ``result.residuals`` and basic fit-quality

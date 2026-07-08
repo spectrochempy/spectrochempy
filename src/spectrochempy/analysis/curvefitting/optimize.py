@@ -57,6 +57,38 @@ class ScriptError:
         return f"Line {self.line}: {self.message}\n  {self.text}"
 
 
+class ConstraintError:
+    """
+    Structured error returned by :meth:`Optimize.validate_constraints`.
+
+    Attributes
+    ----------
+    index : int
+        0-indexed index of the offending constraint specification.
+    constraint : any
+        The offending constraint object as provided by the user.
+    message : str
+        Human-readable explanation of the error.
+    """
+
+    __slots__ = ("index", "constraint", "message")
+
+    def __init__(self, index, constraint, message):
+        self.index = index
+        self.constraint = constraint
+        self.message = message
+
+    def __repr__(self):
+        return (
+            "ConstraintError("
+            f"index={self.index}, constraint={self.constraint!r}, "
+            f"message={self.message!r})"
+        )
+
+    def __str__(self):
+        return f"Constraint {self.index}: {self.message}\n  {self.constraint!r}"
+
+
 # ======================================================================================
 # Module-level helpers
 # ======================================================================================
@@ -530,15 +562,213 @@ def _validate_script_content(script, usermodels=None):
     return fp, errors
 
 
+def _normalize_constraint_spec(constraint):
+    """Normalize accepted constraint spellings to a common dict form."""
+    if isinstance(constraint, dict) and "max_connections" in constraint:
+        extra_keys = set(constraint) - {"max_connections", "parameters"}
+        if extra_keys:
+            return (
+                None,
+                f"Unsupported keys for max_connections constraint: {sorted(extra_keys)!r}",
+            )
+        return {
+            "type": "max_connections",
+            "limit": constraint["max_connections"],
+            "parameters": constraint.get("parameters"),
+        }, None
+
+    if isinstance(constraint, dict):
+        return dict(constraint), None
+
+    return None, "Each constraint must be a dict specification."
+
+
+def _validate_constraints_content(constraints, fit_parameters=None):
+    r"""
+    Validate lightweight constraint specifications without running a fit.
+
+    Supported minimal schemas currently include:
+
+    - ``{\"max_connections\": <positive int>}``
+    - ``{\"type\": \"max_connections\", \"limit\": <positive int>, \"parameters\": [...]}``
+
+    Validation is limited to structure and parameter-name references. It does
+    not guarantee that the current optimization backend will enforce every
+    accepted constraint semantically.
+    """
+    if constraints in (None, {}, []):
+        return []
+
+    if isinstance(constraints, dict):
+        constraints_list = [constraints]
+    elif isinstance(constraints, (list, tuple)):
+        constraints_list = list(constraints)
+    else:
+        return [
+            ConstraintError(
+                0,
+                constraints,
+                "Constraints must be a dict or a list/tuple of dicts.",
+            ),
+        ]
+
+    known_parameters = (
+        set(fit_parameters.keys()) if fit_parameters is not None else set()
+    )
+    errors = []
+
+    for index, raw_constraint in enumerate(constraints_list):
+        constraint, normalization_error = _normalize_constraint_spec(raw_constraint)
+        if normalization_error is not None:
+            errors.append(
+                ConstraintError(index, raw_constraint, normalization_error),
+            )
+            continue
+
+        constraint_type = str(constraint.get("type", "")).strip().lower()
+        if constraint_type != "max_connections":
+            errors.append(
+                ConstraintError(
+                    index,
+                    raw_constraint,
+                    "Unsupported constraint type. Currently only 'max_connections' "
+                    "is recognized by validate_constraints().",
+                ),
+            )
+            continue
+
+        limit = constraint.get("limit")
+        try:
+            limit_int = int(limit)
+        except Exception:
+            errors.append(
+                ConstraintError(
+                    index,
+                    raw_constraint,
+                    "Constraint 'limit' must be an integer.",
+                ),
+            )
+            continue
+
+        if limit_int <= 0:
+            errors.append(
+                ConstraintError(
+                    index,
+                    raw_constraint,
+                    "Constraint 'limit' must be a positive integer.",
+                ),
+            )
+
+        parameters = constraint.get("parameters")
+        if parameters is None:
+            continue
+
+        if not isinstance(parameters, (list, tuple)) or not parameters:
+            errors.append(
+                ConstraintError(
+                    index,
+                    raw_constraint,
+                    "Constraint 'parameters' must be a non-empty list or tuple of parameter names.",
+                ),
+            )
+            continue
+
+        invalid_names = [
+            name for name in parameters if not isinstance(name, str) or not name
+        ]
+        if invalid_names:
+            errors.append(
+                ConstraintError(
+                    index,
+                    raw_constraint,
+                    "Constraint 'parameters' entries must be non-empty strings.",
+                ),
+            )
+            continue
+
+        if known_parameters:
+            missing = [name for name in parameters if name not in known_parameters]
+            if missing:
+                errors.append(
+                    ConstraintError(
+                        index,
+                        raw_constraint,
+                        f"Unknown parameter name(s) referenced by constraint: {missing!r}",
+                    ),
+                )
+
+    return errors
+
+
+def _canonicalize_constraints(constraints):
+    """Return a normalized constraints payload for estimator storage."""
+    if constraints in (None, {}, []):
+        return None
+
+    if isinstance(constraints, dict):
+        constraint, _ = _normalize_constraint_spec(constraints)
+        return constraint
+
+    canonical_constraints = []
+    for constraint in constraints:
+        normalized, _ = _normalize_constraint_spec(constraint)
+        canonical_constraints.append(normalized)
+    return canonical_constraints
+
+
 # ======================================================================================
 @signature_has_configurable_traits
 class Optimize(DecompositionAnalysis):
     """
-    Non-linear Least-Square Optimization and Curve-Fitting.
+    Non-linear curve fitting driven by the SpectroChemPy fitting DSL.
 
-    Works on a 1D or 2D dataset.
+    `Optimize` combines:
 
-    # TODO: complete this description
+    - script-based model definition through :attr:`script`;
+    - pre-fit validation through :meth:`validate_script`;
+    - multiple public optimization-method families through :attr:`method`;
+    - estimator-level access to raw solver artifacts such as :attr:`jacobian`;
+    - grouped scientific outputs and diagnostics through :attr:`result`.
+
+    The current public `method` values are:
+
+    - ``"least_squares"``
+    - ``"leastsq"``
+    - ``"simplex"``
+    - ``"basinhopping"``
+
+    In current SpectroChemPy releases, ``"least_squares"`` is the clearest
+    recommended entrypoint for ordinary local least-squares fitting.
+    ``"leastsq"`` is still accepted as a public compatibility alias, but it
+    currently uses the same least-squares backend family rather than defining a
+    separate maintained fitting strategy of its own.
+
+    Least-squares-backed methods are the only ones that currently expose the
+    retained Jacobian and the resulting uncertainty path on
+    :class:`~spectrochempy.analysis._base._result.FitResult`
+    (covariance, standard errors, correlation, and confidence intervals).
+
+    Method selection
+    ----------------
+    In current SpectroChemPy releases, the practical guidance is:
+
+    - use ``"least_squares"`` as the default choice for ordinary local
+      least-squares fitting;
+    - treat ``"leastsq"`` mainly as a compatibility alias rather than as a
+      separate maintained strategy;
+    - use ``"simplex"`` when you explicitly want a derivative-free local
+      search and can accept losing the least-squares uncertainty path;
+    - reserve ``"basinhopping"`` for harder landscapes where a slower
+      exploratory global-style search is justified.
+
+    The low-level SciPy least-squares backend variant (currently ``lm`` or
+    ``trf``) is still selected internally; users choose the high-level
+    SpectroChemPy `method`, not the backend variant directly.
+
+    Notes
+    -----
+    The current implementation supports only 1D fitting. Multi-dimensional
+    datasets are not yet handled by :meth:`fit`.
 
     Parameters
     ----------
@@ -546,13 +776,11 @@ class Optimize(DecompositionAnalysis):
         The log level at startup. It can be changed later on using the
         `set_log_level` method or by changing the ``log_level`` attribute.
     warm_start : `bool`, optional, default: `False`
-        When fitting repeatedly on the same dataset, but for multiple
-        parameter values (such as to find the value maximizing performance),
-        reuse the solution of the previous call to fit and add more components
-        (if available) in a sequential manner.
-
-        When `warm_start` is `True`, the existing fitted model attributes is used to
-        initialize the new model in a subsequent call to `fit`.
+        Preserve the current estimator configuration instead of forcing a full
+        reset to default configuration values during estimator reinitialization.
+        This is a general estimator-state option shared with other
+        SpectroChemPy analysis classes; it should not be interpreted as a
+        dedicated `Optimize` solver-backend feature.
 
     """
 
@@ -579,7 +807,13 @@ class Optimize(DecompositionAnalysis):
     method = tr.CaselessStrEnum(
         ["least_squares", "leastsq", "simplex", "basinhopping"],
         default_value="least_squares",
-        help="Optimization method (see scipy.optimize docs for details).",
+        help=(
+            "High-level optimization-method selector. "
+            "'least_squares' is the preferred local least-squares entrypoint; "
+            "'leastsq' is a compatibility alias using the same backend family; "
+            "'simplex' uses a derivative-free local search; "
+            "'basinhopping' uses a global-style exploratory search."
+        ),
     ).tag(config=True)
 
     script = tr.Unicode(help="Script defining models and parameters for fitting.").tag(
@@ -592,24 +826,23 @@ class Optimize(DecompositionAnalysis):
 
     dry = tr.Bool(
         default_value=False,
-        help="If True perform a dry run. "
-        "Mainly used to check the validity of the input parameters.",
+        help="If True, assemble the starting model without running the optimizer.",
     ).tag(config=True)
 
     autobase = tr.Bool(
         default_value=False,
-        help="Whether to apply an automatic baseline correction.",
+        help="Whether to estimate and apply a linear baseline correction automatically.",
     ).tag(config=True)
 
     autoampl = tr.Bool(
         default_value=False,
-        help="Whether to apply an automatic amplitude correction.",
+        help="Whether to estimate initial amplitudes automatically during setup.",
     ).tag(config=True)
 
     amplitude_mode = tr.CaselessStrEnum(
         ["area", "height"],
         default_value="height",
-        help="Initial amplitude setting mode.",
+        help="How line-shape amplitudes are interpreted during initialisation.",
     ).tag(config=True)
 
     # ----------------------------------------------------------------------------------
@@ -637,7 +870,9 @@ class Optimize(DecompositionAnalysis):
         log_level : str, optional
             Logging level, by default "WARNING".
         warm_start : bool, optional
-            If True, use warm start, by default False.
+            Preserve the current estimator configuration rather than resetting
+            it to defaults during estimator reinitialization. This does not
+            add any dedicated `Optimize` backend-specific warm-start strategy.
         **kwargs : dict
             Additional keyword arguments.
         """
@@ -787,6 +1022,16 @@ class Optimize(DecompositionAnalysis):
             "jacobian": None,
             "jacobian_backend": None,
         }
+        fit_config = {
+            "method": self.method,
+            "max_iter": self.max_iter,
+            "max_fun_calls": self.max_fun_calls,
+            "dry": self.dry,
+            "autobase": self.autobase,
+            "autoampl": self.autoampl,
+            "amplitude_mode": self.amplitude_mode,
+            "constraints": self.constraints,
+        }
         if not self.dry:
             fp, fopt, solver_meta, solver_artifacts = _optimize(
                 func,
@@ -807,6 +1052,7 @@ class Optimize(DecompositionAnalysis):
             "ncalls": ncalls,
             **solver_meta,
         }
+        self._fit_config = fit_config
         self._solver_artifacts = solver_artifacts
 
         # replace the previous script with new fp parameters
@@ -874,6 +1120,19 @@ class Optimize(DecompositionAnalysis):
         self.fp = fp
         return proposal.value
 
+    @tr.validate("constraints")
+    def _constraints_validate(self, proposal):
+        constraints = proposal.value
+        if constraints in (None, {}, []):
+            return None
+
+        fit_parameters = self.fp
+        errors = _validate_constraints_content(constraints, fit_parameters)
+        if errors:
+            raise ValueError(str(errors[0]))
+
+        return _canonicalize_constraints(constraints)
+
     # ----------------------------------------------------------------------------------
     # Public API
     # ----------------------------------------------------------------------------------
@@ -907,6 +1166,55 @@ class Optimize(DecompositionAnalysis):
             script = self.script
         _, errors = _validate_script_content(script, self.usermodels)
         return errors
+
+    def validate_constraints(self, constraints=None, script=None):
+        """
+        Validate lightweight constraint specifications without running a fit.
+
+        This method currently validates:
+
+        - the overall constraints container shape;
+        - recognized constraint keys / types;
+        - references to parameter names defined by the fitting script.
+
+        It does not guarantee that every accepted constraint is fully enforced
+        by the current optimization backend. The present goal is to provide a
+        stable validation surface before broader constraint execution semantics
+        are expanded.
+
+        Parameters
+        ----------
+        constraints : dict or sequence of dict, optional
+            Constraint specification(s) to validate. If ``None`` (default),
+            validates :attr:`constraints`.
+        script : str, optional
+            Script used to resolve parameter names. If ``None`` (default), uses
+            the currently assigned :attr:`script`.
+
+        Returns
+        -------
+        list of :class:`ConstraintError`
+            Empty list when the constraint specification is valid.
+        """
+        if constraints is None:
+            constraints = self.constraints
+        if script is None:
+            script = self.script
+
+        fit_parameters, script_errors = _validate_script_content(
+            script, self.usermodels
+        )
+        if script_errors:
+            return [
+                ConstraintError(
+                    0,
+                    constraints,
+                    "Cannot validate constraints because the fitting script is invalid. "
+                    f"First script error: {script_errors[0].message}",
+                ),
+            ]
+
+        return _validate_constraints_content(constraints, fit_parameters)
 
     # ----------------------------------------------------------------------------------
     # Private methods
@@ -1451,16 +1759,24 @@ class Optimize(DecompositionAnalysis):
             fit_diagnostics,
         )
         parameter_values = _extract_varying_parameter_values(self.fp)
-
-        return FitResult(
-            estimator="Optimize",
-            parameters={
+        fit_config = getattr(
+            self,
+            "_fit_config",
+            {
                 "method": self.method,
                 "max_iter": self.max_iter,
                 "max_fun_calls": self.max_fun_calls,
+                "dry": self.dry,
                 "autobase": self.autobase,
+                "autoampl": self.autoampl,
                 "amplitude_mode": self.amplitude_mode,
+                "constraints": self.constraints,
             },
+        )
+
+        return FitResult(
+            estimator="Optimize",
+            parameters=fit_config.copy(),
             outputs={
                 "fitted": fitted,
                 "components": self.components,
@@ -1512,7 +1828,7 @@ def _optimize(
 
     def internal_func(p, dat, fp, keys, *args):
         fp = restore_external(fp, p, keys)
-        return func(fp, dat, *args)
+        return func(fp, dat)
 
     def internal_callback(*args):
         if callback is None:

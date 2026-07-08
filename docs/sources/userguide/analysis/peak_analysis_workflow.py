@@ -215,11 +215,27 @@ fit_result
 # `FitResult` groups fitted outputs and diagnostics.  The existing estimator
 # surface (`opt.predict()`, `opt.components`, plotting helpers, and so on)
 # remains available, but `opt.result` is the stable result object for inspection.
+#
+# `fit_result.parameters` stores the configuration snapshot of the completed
+# run, not a solved parameter table. It records how the fit was executed
+# (`method`, `dry`, `autobase`, `autoampl`, and related settings), while the
+# diagnostics and uncertainty surfaces describe the result of that run.
 
 # %%
 components = fit_result.components
 
 {
+    "run_parameters": {
+        key: fit_result.parameters[key]
+        for key in (
+            "method",
+            "max_iter",
+            "dry",
+            "autobase",
+            "autoampl",
+            "amplitude_mode",
+        )
+    },
     "r_squared": fit_result.diagnostics["r_squared"],
     "adjusted_r_squared": fit_result.diagnostics["adjusted_r_squared"],
     "rmse": fit_result.diagnostics["rmse"],
