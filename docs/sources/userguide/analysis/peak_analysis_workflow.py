@@ -225,6 +225,8 @@ components = fit_result.components
     "rmse": fit_result.diagnostics["rmse"],
     "degrees_of_freedom": fit_result.diagnostics["degrees_of_freedom"],
     "reduced_chi_square": fit_result.diagnostics["reduced_chi_square"],
+    "aic": fit_result.diagnostics["aic"],
+    "bic": fit_result.diagnostics["bic"],
     "success": fit_result.diagnostics["success"],
     "stderr_shape": None if fit_result.stderr is None else fit_result.stderr.shape,
     "correlation_shape": None

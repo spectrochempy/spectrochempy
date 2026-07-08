@@ -58,7 +58,10 @@ New Features
   ``FitResult.confidence_intervals`` now exposes approximate two-sided 95%
   confidence intervals for the fitted varying parameters, derived from the
   fitted values, standard errors, and Student-t critical values using the
-  residual degrees of freedom. Existing
+  residual degrees of freedom. ``FitResult.diagnostics`` now also exposes
+  Gaussian-residual model-comparison criteria ``aic`` and ``bic`` derived from
+  the residual sum of squares, observation count, and effective varying-
+  parameter count. Existing
   ``result.fitted`` and ``result.components`` behavior is preserved.
 
 - SpectroChemPy now exposes top-level helpers for common 1D line shapes:
