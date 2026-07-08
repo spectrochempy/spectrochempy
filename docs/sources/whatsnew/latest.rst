@@ -54,7 +54,11 @@ New Features
   diagonal and the corresponding approximate parameter standard errors through
   the same availability rules. ``FitResult.correlation`` now exposes the
   corresponding approximate parameter-correlation matrix, normalized from the
-  covariance and standard errors with the same availability rules. Existing
+  covariance and standard errors with the same availability rules.
+  ``FitResult.confidence_intervals`` now exposes approximate two-sided 95%
+  confidence intervals for the fitted varying parameters, derived from the
+  fitted values, standard errors, and Student-t critical values using the
+  residual degrees of freedom. Existing
   ``result.fitted`` and ``result.components`` behavior is preserved.
 
 - SpectroChemPy now exposes top-level helpers for common 1D line shapes:

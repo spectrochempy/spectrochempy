@@ -230,6 +230,9 @@ components = fit_result.components
     "correlation_shape": None
     if fit_result.correlation is None
     else fit_result.correlation.shape,
+    "confidence_intervals_shape": None
+    if fit_result.confidence_intervals is None
+    else fit_result.confidence_intervals.shape,
     "covariance_shape": None
     if fit_result.covariance is None
     else fit_result.covariance.shape,

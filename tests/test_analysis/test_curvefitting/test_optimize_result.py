@@ -18,6 +18,9 @@ from spectrochempy.analysis._base._result import ResultBase
 from spectrochempy.analysis.curvefitting._parameters import FitParameters
 from spectrochempy.analysis.curvefitting import optimize as optimize_module
 from spectrochempy.analysis.curvefitting.optimize import _compute_covariance_matrix
+from spectrochempy.analysis.curvefitting.optimize import (
+    _extract_varying_parameter_values,
+)
 from spectrochempy.analysis.curvefitting.optimize import _compute_fit_diagnostics
 from tests.test_analysis.result_test_helpers import assert_fit_returns_self
 from tests.test_analysis.result_test_helpers import assert_result_basics
@@ -278,6 +281,17 @@ class TestOptimizeResult:
         assert np.all(
             np.abs(correlation[np.triu_indices_from(correlation, k=1)]) <= 1.0 + 1e-12
         )
+        confidence_intervals = opt.result.confidence_intervals
+        values = _extract_varying_parameter_values(opt.fp)
+        assert confidence_intervals is not None
+        assert confidence_intervals.flags.writeable is False
+        assert confidence_intervals.shape == (
+            opt.result.diagnostics["n_varying_parameters"],
+            2,
+        )
+        assert opt.result.confidence_level == pytest.approx(0.95)
+        assert np.all(confidence_intervals[:, 0] <= values)
+        assert np.all(values <= confidence_intervals[:, 1])
 
     def test_rss_matches_residual_sum_of_squares(
         self, synthetic_two_peak_dataset, optimize_script
@@ -380,6 +394,7 @@ class TestOptimizeResult:
         assert opt.result.variance is None
         assert opt.result.stderr is None
         assert opt.result.correlation is None
+        assert opt.result.confidence_intervals is None
 
     # ----------------------------------------------------------------------------------
     # Solver artifacts
@@ -442,6 +457,7 @@ class TestOptimizeResult:
         assert opt.result.variance is None
         assert opt.result.stderr is None
         assert opt.result.correlation is None
+        assert opt.result.confidence_intervals is None
 
     def test_jacobian_absent_for_basinhopping_backend(
         self, synthetic_two_peak_dataset, optimize_script, monkeypatch
@@ -478,6 +494,7 @@ class TestOptimizeResult:
         assert opt.result.variance is None
         assert opt.result.stderr is None
         assert opt.result.correlation is None
+        assert opt.result.confidence_intervals is None
 
     def test_jacobian_absent_for_dry_fit(
         self, synthetic_two_peak_dataset, optimize_script
@@ -493,6 +510,7 @@ class TestOptimizeResult:
         assert opt.result.variance is None
         assert opt.result.stderr is None
         assert opt.result.correlation is None
+        assert opt.result.confidence_intervals is None
 
     def test_fit_result_does_not_expose_jacobian(
         self, synthetic_two_peak_dataset, optimize_script
@@ -532,6 +550,10 @@ class TestOptimizeResult:
             opt.result.diagnostics["n_varying_parameters"],
         )
         assert opt.result.correlation.shape == covariance.shape
+        assert opt.result.confidence_intervals.shape == (
+            opt.result.diagnostics["n_varying_parameters"],
+            2,
+        )
 
     # ----------------------------------------------------------------------------------
     # Representation
