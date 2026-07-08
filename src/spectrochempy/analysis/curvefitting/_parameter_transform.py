@@ -70,7 +70,7 @@ def _to_internal(value, lob, upb):
         The transformed value in unbounded optimizer space.
     """
     is_lob = lob is not None and lob > _LOB_THRESHOLD
-    is_upb = lob is not None and upb < _UPB_THRESHOLD
+    is_upb = upb is not None and upb < _UPB_THRESHOLD
 
     if is_lob and is_upb:
         lob_adj = min(value, lob)
@@ -109,7 +109,7 @@ def _to_external(pi, lob, upb):
         is a multi-element list.
     """
     is_lob = lob is not None and lob > _LOB_THRESHOLD
-    is_upb = lob is not None and upb < _UPB_THRESHOLD
+    is_upb = upb is not None and upb < _UPB_THRESHOLD
 
     if not isinstance(pi, list):
         pi = [pi]
@@ -123,7 +123,7 @@ def _to_external(pi, lob, upb):
         elif is_lob:
             pei = lob - 1.0 + np.sqrt(item**2 + 1.0)
         else:
-            pei = pi
+            pei = item
         pe.append(pei)
 
     if len(pe) == 1:

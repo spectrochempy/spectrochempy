@@ -114,9 +114,14 @@ class TestToInternal:
         pe = _to_internal(200.0, 0.0, 100.0)
         assert np.isfinite(pe)
 
-    def test_value_equals_none_upb_raises_typeerror(self):
-        with pytest.raises(TypeError):
-            _to_internal(50.0, 0.0, None)
+    def test_lob_finite_upb_none_applies_upper_as_unbounded(self):
+        pe = _to_internal(50.0, 0.0, None)
+        assert np.isfinite(pe)
+        assert pe > 0.0
+
+    def test_lob_none_upb_finite_applies_upper_only(self):
+        pe = _to_internal(50.0, None, 100.0)
+        assert np.isfinite(pe)
 
 
 # ======================================================================================
@@ -143,15 +148,15 @@ class TestToExternal:
 
     # -- open bounds (no bounds) --------------------------------------------
 
-    def test_open_bounds_sentinel_returns_list(self):
+    def test_open_bounds_sentinel_returns_scalar(self):
         pe = _to_external(42.0, _SENTINEL_LOB, _SENTINEL_UPB)
-        assert isinstance(pe, list)
-        assert pe == [42.0]
+        assert isinstance(pe, float)
+        assert pe == pytest.approx(42.0)
 
-    def test_open_bounds_none_returns_list(self):
+    def test_open_bounds_none_returns_scalar(self):
         pe = _to_external(42.0, None, None)
-        assert isinstance(pe, list)
-        assert pe == [42.0]
+        assert isinstance(pe, float)
+        assert pe == pytest.approx(42.0)
 
     # -- lower-only bounds ---------------------------------------------------
 
@@ -180,11 +185,12 @@ class TestToExternal:
         pe = _to_external([1.0, 2.0], _SENTINEL_LOB, _SENTINEL_UPB)
         assert isinstance(pe, list)
         assert len(pe) == 2
+        assert pe == [1.0, 2.0]
 
-    def test_list_single_element_open_bounds_returns_single_element_list(self):
+    def test_list_single_element_open_bounds_returns_scalar(self):
         pe = _to_external([42.0], _SENTINEL_LOB, _SENTINEL_UPB)
-        assert isinstance(pe, list)
-        assert pe == [42.0]
+        assert isinstance(pe, float)
+        assert pe == pytest.approx(42.0)
 
     # -- edge cases ----------------------------------------------------------
 
@@ -192,9 +198,10 @@ class TestToExternal:
         pe = _to_external([0.0], 0.0, 100.0)
         assert not isinstance(pe, list)
 
-    def test_lob_none_with_finite_upb_returns_list(self):
+    def test_lob_none_with_finite_upb_applies_upper_only(self):
         pe = _to_external(0.0, None, 100.0)
-        assert isinstance(pe, list)
+        assert isinstance(pe, float)
+        assert pe == pytest.approx(100.0, abs=1e-10)
 
 
 # ======================================================================================
@@ -212,14 +219,6 @@ class TestRoundTrip:
         pe = _to_internal(value, lob, upb)
         recovered = _to_external(pe, lob, upb)
         assert recovered == pytest.approx(value, rel=self.RTOL, abs=self.ATOL)
-
-    def check_round_trip_list(self, value, lob, upb):
-        """Check round-trip for open bounds where _to_external returns a list."""
-        pe = _to_internal(value, lob, upb)
-        recovered = _to_external(pe, lob, upb)
-        assert isinstance(recovered, list)
-        assert len(recovered) == 1
-        assert recovered[0] == pytest.approx(value, rel=self.RTOL, abs=self.ATOL)
 
     # -- finite bounds -------------------------------------------------------
 
@@ -241,16 +240,16 @@ class TestRoundTrip:
     # -- open bounds ---------------------------------------------------------
 
     def test_open_bounds_sentinel(self):
-        self.check_round_trip_list(42.0, _SENTINEL_LOB, _SENTINEL_UPB)
+        self.check_round_trip(42.0, _SENTINEL_LOB, _SENTINEL_UPB)
 
     def test_open_bounds_none(self):
-        self.check_round_trip_list(42.0, None, None)
+        self.check_round_trip(42.0, None, None)
 
     def test_open_bounds_negative(self):
-        self.check_round_trip_list(-10.0, _SENTINEL_LOB, _SENTINEL_UPB)
+        self.check_round_trip(-10.0, _SENTINEL_LOB, _SENTINEL_UPB)
 
     def test_open_bounds_zero(self):
-        self.check_round_trip_list(0.0, _SENTINEL_LOB, _SENTINEL_UPB)
+        self.check_round_trip(0.0, _SENTINEL_LOB, _SENTINEL_UPB)
 
     # -- lower-only bounds ---------------------------------------------------
 
