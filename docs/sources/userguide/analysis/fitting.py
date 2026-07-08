@@ -478,8 +478,14 @@ components = f1.result.components
 # dry fits return `None`. `f1.result.covariance` is the first scientific
 # interpretation built on top of that Jacobian: it is an approximate local
 # least-squares covariance matrix, scaled by the residual variance and degrees
-# of freedom. It is only available when a backend provides a stable Jacobian and
-# should not be confused with confidence intervals or a full uncertainty report.
+# of freedom. `f1.result.variance` and `f1.result.stderr` expose the diagonal
+# terms and standard errors derived from that covariance, and
+# `f1.result.correlation` exposes the normalized parameter-correlation matrix.
+# `f1.result.confidence_intervals` now exposes approximate two-sided 95%
+# confidence intervals derived from the fitted values, standard errors, and a
+# Student-t critical value based on the residual degrees of freedom. These
+# quantities are only available when a backend provides a stable Jacobian and
+# should not be confused with a full uncertainty report.
 
 # Show the result
 _ = ndOHcorr.plot()
@@ -488,7 +494,7 @@ ax.autoscale(enable=True, axis="y")
 
 # plotmerit
 som = fitted
-_ = f1.plotmerit(offset=0, kind="scatter")
+_ = f1.plotmerit(offset=15)
 
 
 # %% [markdown]

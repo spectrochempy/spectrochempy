@@ -5,6 +5,9 @@
 # ======================================================================================
 """Result object infrastructure for analysis and fit outputs."""
 
+import numpy as np
+from scipy import stats
+
 from spectrochempy.utils.print import DisplayItem
 from spectrochempy.utils.print import DisplaySection
 from spectrochempy.utils.print import _html_heading
@@ -200,6 +203,12 @@ class FitResult(ResultBase):
         outputs=None,
         diagnostics=None,
         covariance=None,
+        variance=None,
+        stderr=None,
+        correlation=None,
+        parameter_values=None,
+        confidence_intervals=None,
+        confidence_level=0.95,
     ):
         super().__init__(
             estimator=estimator,
@@ -208,6 +217,12 @@ class FitResult(ResultBase):
             diagnostics=diagnostics,
         )
         self._covariance = covariance
+        self._variance = variance
+        self._stderr = stderr
+        self._correlation = correlation
+        self._parameter_values = parameter_values
+        self._confidence_intervals = confidence_intervals
+        self._confidence_level = confidence_level
 
     @property
     def covariance(self):
@@ -222,3 +237,121 @@ class FitResult(ResultBase):
             when covariance is unavailable.
         """
         return self._covariance
+
+    @property
+    def variance(self):
+        """
+        Approximate per-parameter variances derived from the covariance matrix.
+
+        Returns
+        -------
+        ndarray or None
+            Immutable 1D array containing the diagonal of
+            :attr:`covariance`. Returns ``None`` when covariance is unavailable.
+        """
+        if self._variance is None and self._covariance is not None:
+            variance = np.array(np.diag(self._covariance), copy=True, dtype=np.float64)
+            tiny_negative = (variance < 0.0) & np.isclose(variance, 0.0)
+            variance[tiny_negative] = 0.0
+            variance.flags.writeable = False
+            self._variance = variance
+        return self._variance
+
+    @property
+    def stderr(self):
+        """
+        Approximate per-parameter standard errors derived from covariance.
+
+        Returns
+        -------
+        ndarray or None
+            Immutable 1D array containing the square root of
+            :attr:`variance` when available. Returns ``None`` when covariance is
+            unavailable.
+        """
+        variance = self.variance
+        if self._stderr is None and variance is not None:
+            stderr = np.full_like(variance, np.nan, dtype=np.float64)
+            valid = np.isfinite(variance) & (variance >= 0.0)
+            stderr[valid] = np.sqrt(variance[valid])
+            stderr.flags.writeable = False
+            self._stderr = stderr
+        return self._stderr
+
+    @property
+    def correlation(self):
+        """
+        Approximate parameter correlation matrix derived from covariance.
+
+        Returns
+        -------
+        ndarray or None
+            Immutable correlation matrix computed from :attr:`covariance` and
+            :attr:`stderr`. Returns ``None`` when covariance is unavailable.
+            Entries whose normalization is undefined remain ``nan``.
+        """
+        covariance = self.covariance
+        stderr = self.stderr
+        if self._correlation is None and covariance is not None and stderr is not None:
+            denom = np.outer(stderr, stderr)
+            correlation = np.full_like(covariance, np.nan, dtype=np.float64)
+            valid = np.isfinite(covariance) & np.isfinite(denom) & (denom > 0.0)
+            correlation[valid] = covariance[valid] / denom[valid]
+
+            zero_std = np.isfinite(stderr) & np.isclose(stderr, 0.0)
+            for index, is_zero in enumerate(zero_std):
+                if is_zero:
+                    correlation[index, index] = 1.0
+
+            nonzero = np.isfinite(stderr) & (stderr > 0.0)
+            diag_idx = np.where(nonzero)[0]
+            correlation[diag_idx, diag_idx] = 1.0
+
+            correlation = 0.5 * (correlation + correlation.T)
+            correlation.flags.writeable = False
+            self._correlation = correlation
+        return self._correlation
+
+    @property
+    def confidence_level(self):
+        """Confidence level used for :attr:`confidence_intervals`."""
+        return self._confidence_level
+
+    @property
+    def confidence_intervals(self):
+        """
+        Approximate two-sided confidence intervals for varying parameters.
+
+        Returns
+        -------
+        ndarray or None
+            Immutable array of shape ``(n_parameters, 2)`` containing lower and
+            upper bounds for approximate 95% confidence intervals derived from
+            the fitted parameter values, standard errors, and Student-t critical
+            value based on the residual degrees of freedom. Returns ``None``
+            when the required uncertainty information is unavailable.
+        """
+        stderr = self.stderr
+        values = self._parameter_values
+        degrees_of_freedom = int(self.diagnostics.get("degrees_of_freedom", 0))
+
+        if (
+            self._confidence_intervals is None
+            and stderr is not None
+            and values is not None
+            and degrees_of_freedom > 0
+        ):
+            values = np.asarray(values, dtype=np.float64)
+            if values.shape != stderr.shape:
+                return None
+
+            alpha = 1.0 - float(self._confidence_level)
+            t_value = stats.t.ppf(1.0 - (alpha / 2.0), degrees_of_freedom)
+            if not np.isfinite(t_value):
+                return None
+
+            delta = t_value * stderr
+            intervals = np.column_stack((values - delta, values + delta))
+            intervals.flags.writeable = False
+            self._confidence_intervals = intervals
+        return self._confidence_intervals

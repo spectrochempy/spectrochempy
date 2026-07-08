@@ -49,7 +49,16 @@ New Features
   now exposes the first uncertainty-oriented scientific interpretation built
   from that Jacobian: an approximate local least-squares covariance matrix for
   the fitted varying parameters, available only when the backend provides a
-  stable Jacobian and the residual degrees of freedom are positive. Existing
+  stable Jacobian and the residual degrees of freedom are positive.
+  ``FitResult.variance`` and ``FitResult.stderr`` now expose the covariance
+  diagonal and the corresponding approximate parameter standard errors through
+  the same availability rules. ``FitResult.correlation`` now exposes the
+  corresponding approximate parameter-correlation matrix, normalized from the
+  covariance and standard errors with the same availability rules.
+  ``FitResult.confidence_intervals`` now exposes approximate two-sided 95%
+  confidence intervals for the fitted varying parameters, derived from the
+  fitted values, standard errors, and Student-t critical values using the
+  residual degrees of freedom. Existing
   ``result.fitted`` and ``result.components`` behavior is preserved.
 
 - SpectroChemPy now exposes top-level helpers for common 1D line shapes:
@@ -137,6 +146,13 @@ Bug Fixes
   consistently, ``use_plotly=True`` fails with a clear error when Plotly is not
   available, and legacy ``lines`` / ``pen`` aliases continue to work across
   dimensional fallbacks.
+
+- ``plotmerit()`` / ``plot_compare()`` are now clearer for fit inspection:
+  the reconstructed trace remains visible even for near-perfect overlaps, the
+  historical ``kind="scatter"`` / ``method="scatter"`` options now produce
+  real marker-based rendering, ``nb_traces`` is honored in the current plotting
+  path, and ``offset`` once again separates the residual trace from the main
+  signal to improve notebook readability.
 
 - Fixed several processing regressions and edge cases: multi-dimensional ZPD
   detection in interferogram apodization is more reliable, ``rs()``, ``ls()``,

@@ -39,6 +39,20 @@ def plot_compare(
     title=None,
     show_yaxis=True,
     show=True,
+    exp_c=None,
+    calc_c=None,
+    resid_c=None,
+    exp_linestyle="-",
+    calc_linestyle="--",
+    resid_linestyle="-",
+    exp_linewidth=1.0,
+    calc_linewidth=1.6,
+    resid_linewidth=1.0,
+    kind=None,
+    method=None,
+    offset=None,
+    nb_traces="all",
+    **kwargs,
 ):
     """
     Compare two datasets (X vs X_ref) with optional residual.
@@ -77,6 +91,16 @@ def plot_compare(
 
     n_traces, n_points = X.shape
 
+    if nb_traces != "all":
+        nb_traces = int(nb_traces)
+        if nb_traces <= 0:
+            raise ValueError("nb_traces must be a positive integer or 'all'.")
+        if nb_traces < n_traces:
+            indices = np.linspace(0, n_traces - 1, nb_traces, dtype=int)
+            X = X[indices]
+            X_ref = X_ref[indices]
+            n_traces = nb_traces
+
     # ----------------------------
     # Compute data arrays
     # ----------------------------
@@ -84,6 +108,18 @@ def plot_compare(
     ref_data = np.asarray(X_ref.masked_data)
 
     res_data = np.asarray((X - X_ref).masked_data) if residual else None
+
+    plot_orig_data = orig_data.copy()
+    plot_ref_data = ref_data.copy()
+    plot_res_data = res_data.copy() if residual else None
+
+    if residual and offset not in (None, 0):
+        signal_min = min(np.nanmin(orig_data), np.nanmin(ref_data))
+        signal_max = max(np.nanmax(orig_data), np.nanmax(ref_data))
+        signal_range = signal_max - signal_min
+        offset_scale = signal_range if signal_range > 0 else 1.0
+        residual_offset = (float(offset) / 100.0) * offset_scale
+        plot_res_data = plot_res_data - residual_offset
 
     # ----------------------------
     # X coordinate extraction
@@ -104,22 +140,45 @@ def plot_compare(
     xdata = np.asarray(xdata)
 
     # ----------------------------
-    # Semantic colors (fixed)
+    # Semantic styles (fixed)
     # ----------------------------
-    orig_color = ["tab:blue"]
-    ref_color = ["tab:orange"]
-    resid_color = ["0.6"]
+    orig_color = ["tab:blue" if exp_c is None else exp_c]
+    ref_color = ["tab:orange" if calc_c is None else calc_c]
+    resid_color = ["0.6" if resid_c is None else resid_c]
+    orig_linestyle = [exp_linestyle] * n_traces
+    ref_linestyle = [calc_linestyle] * n_traces
+    resid_linestyle = [resid_linestyle] * n_traces
+
+    plot_kind = (kind or method or "line").lower()
+    marker_kwargs = {}
+    if plot_kind == "scatter":
+        orig_linestyle = ["None"] * n_traces
+        ref_linestyle = ["None"] * n_traces
+        resid_linestyle = ["None"] * n_traces
+        marker_kwargs = {
+            "markers": [kwargs.pop("marker", "o")] * n_traces,
+            "markersizes": [kwargs.pop("markersize", 3)] * n_traces,
+        }
+        kwargs.pop("lw", None)
+        kwargs.pop("linewidth", None)
+    elif plot_kind != "line":
+        raise ValueError("kind/method must be 'line' or 'scatter'.")
+
+    if "lw" in kwargs:
+        exp_linewidth = calc_linewidth = resid_linewidth = kwargs.pop("lw")
+    if "linewidth" in kwargs:
+        exp_linewidth = calc_linewidth = resid_linewidth = kwargs.pop("linewidth")
 
     # ----------------------------
     # Z-order policy
-    # residual < reconstructed < experimental
+    # residual < experimental < reconstructed
+    #
+    # Keeping the reconstructed profile on top makes near-perfect fits visible
+    # instead of hiding the orange line entirely under the experimental trace.
     # ----------------------------
     resid_z = [0] * n_traces
-    ref_z = [1] * n_traces
-    orig_z = [2] * n_traces
-
-    linewidth = 1.0
-
+    orig_z = [1] * n_traces
+    ref_z = [2] * n_traces
     # ----------------------------
     # Render residual first
     # ----------------------------
@@ -127,27 +186,15 @@ def plot_compare(
         render_lines(
             ax,
             xdata,
-            res_data,
+            plot_res_data,
             colors=resid_color,
-            linestyles=["-"] * n_traces,
-            linewidths=[linewidth] * n_traces,
+            linestyles=resid_linestyle,
+            linewidths=[resid_linewidth] * n_traces,
             zorders=resid_z,
             reverse=False,
+            **marker_kwargs,
+            **kwargs,
         )
-
-    # ----------------------------
-    # Render reconstructed
-    # ----------------------------
-    render_lines(
-        ax,
-        xdata,
-        ref_data,
-        colors=ref_color,
-        linestyles=["-"] * n_traces,
-        linewidths=[linewidth] * n_traces,
-        zorders=ref_z,
-        reverse=False,
-    )
 
     # ----------------------------
     # Render experimental
@@ -155,12 +202,31 @@ def plot_compare(
     render_lines(
         ax,
         xdata,
-        orig_data,
+        plot_orig_data,
         colors=orig_color,
-        linestyles=["-"] * n_traces,
-        linewidths=[linewidth] * n_traces,
+        linestyles=orig_linestyle,
+        linewidths=[exp_linewidth] * n_traces,
+        alpha=0.85,
         zorders=orig_z,
         reverse=False,
+        **marker_kwargs,
+        **kwargs,
+    )
+
+    # ----------------------------
+    # Render reconstructed
+    # ----------------------------
+    render_lines(
+        ax,
+        xdata,
+        plot_ref_data,
+        colors=ref_color,
+        linestyles=ref_linestyle,
+        linewidths=[calc_linewidth] * n_traces,
+        zorders=ref_z,
+        reverse=False,
+        **marker_kwargs,
+        **kwargs,
     )
 
     # ----------------------------
@@ -168,12 +234,12 @@ def plot_compare(
     # ----------------------------
     ax.set_xlim(xdata.min(), xdata.max())
 
+    plotted_arrays = [plot_orig_data, plot_ref_data]
     if residual:
-        y_min = np.nanmin(res_data)
-    else:
-        y_min = min(np.nanmin(orig_data), np.nanmin(ref_data))
+        plotted_arrays.append(plot_res_data)
 
-    y_max = max(np.nanmax(orig_data), np.nanmax(ref_data))
+    y_min = min(np.nanmin(arr) for arr in plotted_arrays)
+    y_max = max(np.nanmax(arr) for arr in plotted_arrays)
 
     data_range = y_max - y_min
     pad = 0.02 * data_range if data_range > 0 else 0.02
@@ -199,12 +265,35 @@ def plot_compare(
     # Legend
     # ----------------------------
     handles = [
-        Line2D([0], [0], color="tab:blue", label=X.name),
-        Line2D([0], [0], color="tab:orange", label=X_ref.name),
+        Line2D(
+            [0],
+            [0],
+            color=orig_color[0],
+            linestyle=orig_linestyle[0],
+            marker=marker_kwargs.get("markers", [None])[0],
+            label=X.name,
+        ),
+        Line2D(
+            [0],
+            [0],
+            color=ref_color[0],
+            linestyle=ref_linestyle[0],
+            marker=marker_kwargs.get("markers", [None])[0],
+            label=X_ref.name,
+        ),
     ]
 
     if residual:
-        handles.append(Line2D([0], [0], color="0.6", label="difference"))
+        handles.append(
+            Line2D(
+                [0],
+                [0],
+                color=resid_color[0],
+                linestyle=resid_linestyle[0],
+                marker=marker_kwargs.get("markers", [None])[0],
+                label="difference",
+            ),
+        )
 
     ax.legend(handles=handles, loc="best")
 
@@ -310,6 +399,7 @@ def plot_merit(
                 title=title,
                 show_yaxis=show_yaxis,
                 show=show,
+                **kwargs,
             )
 
         # Iterable of indices
@@ -327,6 +417,7 @@ def plot_merit(
                 title=title,
                 show_yaxis=show_yaxis,
                 show=show,
+                **kwargs,
             )
             axes_list.append(ax_i)
 
@@ -345,6 +436,7 @@ def plot_merit(
             title=title,
             show_yaxis=show_yaxis,
             show=show,
+            **kwargs,
         )
 
     raise ValueError(

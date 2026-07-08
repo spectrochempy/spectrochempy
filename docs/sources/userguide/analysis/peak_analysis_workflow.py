@@ -226,6 +226,13 @@ components = fit_result.components
     "degrees_of_freedom": fit_result.diagnostics["degrees_of_freedom"],
     "reduced_chi_square": fit_result.diagnostics["reduced_chi_square"],
     "success": fit_result.diagnostics["success"],
+    "stderr_shape": None if fit_result.stderr is None else fit_result.stderr.shape,
+    "correlation_shape": None
+    if fit_result.correlation is None
+    else fit_result.correlation.shape,
+    "confidence_intervals_shape": None
+    if fit_result.confidence_intervals is None
+    else fit_result.confidence_intervals.shape,
     "covariance_shape": None
     if fit_result.covariance is None
     else fit_result.covariance.shape,
@@ -241,7 +248,7 @@ ax = components[:].plot(clear=False)
 ax.autoscale(enable=True, axis="y")
 
 # %%
-_ = opt.plotmerit(offset=0, kind="scatter")
+_ = opt.plotmerit(offset=15)
 
 # %% [markdown]
 # ## Summary

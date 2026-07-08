@@ -153,6 +153,41 @@ class TestFitResult:
         result = FitResult(estimator="Optimize", covariance=covariance)
         np.testing.assert_array_equal(result.covariance, covariance)
 
+    def test_variance_property_derived_from_covariance(self):
+        covariance = np.array([[4.0, 1.0], [1.0, 9.0]])
+        result = FitResult(estimator="Optimize", covariance=covariance)
+        np.testing.assert_array_equal(result.variance, np.array([4.0, 9.0]))
+        assert result.variance.flags.writeable is False
+
+    def test_stderr_property_derived_from_variance(self):
+        covariance = np.array([[4.0, 1.0], [1.0, 9.0]])
+        result = FitResult(estimator="Optimize", covariance=covariance)
+        np.testing.assert_array_equal(result.stderr, np.array([2.0, 3.0]))
+        assert result.stderr.flags.writeable is False
+
+    def test_correlation_property_derived_from_covariance(self):
+        covariance = np.array([[4.0, 1.0], [1.0, 9.0]])
+        result = FitResult(estimator="Optimize", covariance=covariance)
+        expected = np.array([[1.0, 1.0 / 6.0], [1.0 / 6.0, 1.0]])
+        np.testing.assert_allclose(result.correlation, expected)
+        assert result.correlation.flags.writeable is False
+
+    def test_confidence_intervals_property(self):
+        covariance = np.array([[4.0, 1.0], [1.0, 9.0]])
+        values = np.array([10.0, 20.0])
+        result = FitResult(
+            estimator="Optimize",
+            covariance=covariance,
+            parameter_values=values,
+            diagnostics={"degrees_of_freedom": 10},
+        )
+        intervals = result.confidence_intervals
+        assert intervals is not None
+        assert intervals.shape == (2, 2)
+        assert intervals.flags.writeable is False
+        assert np.all(intervals[:, 0] <= values)
+        assert np.all(values <= intervals[:, 1])
+
 
 class TestResultBaseHTMLRepr:
     """Behavioral tests for the HTML representation of ResultBase."""
