@@ -19,6 +19,8 @@ from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis._base._result import FitResult
 from spectrochempy.analysis.curvefitting import _models as models_
+from spectrochempy.analysis.curvefitting._parameter_transform import _to_external
+from spectrochempy.analysis.curvefitting._parameter_transform import _to_internal
 from spectrochempy.analysis.curvefitting._parameters import FitParameters
 from spectrochempy.application.application import info_
 from spectrochempy.application.application import warning_
@@ -1850,12 +1852,20 @@ def _optimize(
                     k = keys.index(ks)
                     ps.append(p[k])
                 if ps:
-                    fp.to_external(key, ps)
+                    fp.data[key] = _to_external(
+                        ps,
+                        fp.lob[key],
+                        fp.upb[key],
+                    )
             else:
                 if key not in keys:
                     continue
                 k = keys.index(key)
-                fp.to_external(key, p[k])
+                fp.data[key] = _to_external(
+                    p[k],
+                    fp.lob[key],
+                    fp.upb[key],
+                )
         return fp
 
     def internal_func(p, dat, fp, keys, *args):
@@ -1881,10 +1891,22 @@ def _optimize(
             keysp = key.split("_")[0]
             if keysp in fp0.expvars:
                 for i in range(fp0.expnumber):
-                    par.append(fp0.to_internal(key, i))
+                    par.append(
+                        _to_internal(
+                            fp0.data[key][i],
+                            fp0.lob[key],
+                            fp0.upb[key],
+                        ),
+                    )
                     keys.append(f"{key}_exp{i}")
             else:
-                par.append(fp0.to_internal(key))
+                par.append(
+                    _to_internal(
+                        fp0.data[key],
+                        fp0.lob[key],
+                        fp0.upb[key],
+                    ),
+                )
                 keys.append(key)
 
     args = list(args)
