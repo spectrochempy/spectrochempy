@@ -203,6 +203,54 @@ def test_model_profile_default_components():
     assert c.components is None
 
 
+def test_model_profile_model_args_default_empty():
+    c = ModelProfile("C", model=_identity)
+    assert c.model_args == ()
+
+
+def test_model_profile_model_kwargs_default_empty():
+    c = ModelProfile("C", model=_identity)
+    assert c.model_kwargs == {}
+
+
+def test_model_profile_with_args_and_kwargs():
+    c = ModelProfile(
+        "C",
+        components=[0, 1],
+        model=_identity,
+        model_args=("a", 42),
+        model_kwargs={"verbose": True},
+    )
+    assert c.model_args == ("a", 42)
+    assert c.model_kwargs == {"verbose": True}
+    assert c.model is _identity
+
+
+def test_model_profile_args_list_converted_to_tuple():
+    c = ModelProfile("C", model=_identity, model_args=[1, 2, 3])
+    assert c.model_args == (1, 2, 3)
+
+
+def test_model_profile_kwargs_none_becomes_empty_dict():
+    c = ModelProfile("C", model=_identity, model_kwargs=None)
+    assert c.model_kwargs == {}
+
+
+# --------------------------------------------------------------------------------------
+# ModelProfile validation
+# --------------------------------------------------------------------------------------
+
+
+def test_model_args_must_be_sequence():
+    with pytest.raises(TypeError, match="model_args must be a tuple or list"):
+        ModelProfile("C", model=_identity, model_args=42)
+
+
+def test_model_kwargs_must_be_dict():
+    with pytest.raises(TypeError, match="model_kwargs must be a dict or None"):
+        ModelProfile("C", model=_identity, model_kwargs="not_a_dict")
+
+
 # --------------------------------------------------------------------------------------
 # Tolerance validation
 # --------------------------------------------------------------------------------------
@@ -493,6 +541,12 @@ def test_models_equal_same_callback():
     assert ModelProfile("St", model=_identity) == ModelProfile("St", model=_identity)
 
 
+def test_models_equal_with_args_and_kwargs():
+    assert ModelProfile(
+        "C", model=_identity, model_args=(1,), model_kwargs={"a": 2}
+    ) == ModelProfile("C", model=_identity, model_args=(1,), model_kwargs={"a": 2})
+
+
 def test_models_unequal_different_components():
     assert ModelProfile("C", components=[0], model=_identity) != ModelProfile(
         "C", components=[1], model=_identity
@@ -502,6 +556,18 @@ def test_models_unequal_different_components():
 def test_models_unequal_different_callback():
     assert ModelProfile("C", components=[0], model=_identity) != ModelProfile(
         "C", components=[0], model=lambda C: C
+    )
+
+
+def test_models_unequal_different_args():
+    assert ModelProfile("C", model=_identity, model_args=(1,)) != ModelProfile(
+        "C", model=_identity, model_args=(2,)
+    )
+
+
+def test_models_unequal_different_kwargs():
+    assert ModelProfile("C", model=_identity, model_kwargs={"a": 1}) != ModelProfile(
+        "C", model=_identity, model_kwargs={"a": 2}
     )
 
 
@@ -547,6 +613,22 @@ def test_repr_model_profile_shows_profile():
     assert "profile='C'" in r
     assert "components=[0, 1]" in r
     assert "model=" in r
+
+
+def test_repr_model_profile_with_args():
+    r = repr(ModelProfile("C", model=_identity, model_args=(1, 2)))
+    assert "model_args=(1, 2)" in r
+
+
+def test_repr_model_profile_with_kwargs():
+    r = repr(ModelProfile("C", model=_identity, model_kwargs={"a": 1}))
+    assert "model_kwargs={'a': 1}" in r
+
+
+def test_repr_model_profile_omits_empty_args_and_kwargs():
+    r = repr(ModelProfile("C", model=_identity))
+    assert "model_args" not in r
+    assert "model_kwargs" not in r
 
 
 def test_repr_model_profile_with_spectrum():

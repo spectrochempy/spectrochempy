@@ -15,6 +15,15 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 New Features
 ~~~~~~~~~~~~
 
+- ``MCRALS``: added the ``constraints=`` parameter that accepts a list of
+  public ``Constraint`` objects (``NonNegative``, ``Unimodal``, ``Closure``,
+  ``Monotonic``, ``ModelProfile``, …).  Both the new ``constraints=`` API and
+  the legacy traitlet-based parameters now route through the same internal
+  pipeline: the public ``Constraint`` objects have become the canonical
+  intermediate representation.  Mixed usage (legacy traitlets + ``constraints=``
+  at the same time) raises a clear ``ValueError``.  The legacy traitlet-based
+  API remains fully supported for backward compatibility.  (#1380)
+
 - ``AnalysisResult`` (PCA, NMF, PLS, MCR‑ALS, …) and ``FitResult`` now have a
   rich ``_repr_html_`` for Jupyter notebooks, with collapsible Parameters,
   Outputs, and Diagnostics sections and recursive rendering of embedded

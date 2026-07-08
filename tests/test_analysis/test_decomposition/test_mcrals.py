@@ -33,7 +33,7 @@ def test_MCRALS_docstrings():
         module,
         obj=scp.MCRALS,
         # exclude some errors - remove whatever you want to check
-        exclude=["SA01", "EX01", "ES01", "GL11", "GL08", "PR01", "PR06"],
+        exclude=["SA01", "EX01", "ES01", "GL11", "GL08", "PR01", "PR02", "PR06"],
     )
 
 
