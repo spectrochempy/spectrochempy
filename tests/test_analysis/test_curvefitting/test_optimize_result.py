@@ -253,10 +253,9 @@ class TestOptimizeResult:
             diag["n_observations"] * np.log(diag["rss"] / diag["n_observations"])
             + 2 * diag["n_varying_parameters"]
         )
-        expected_bic = (
-            diag["n_observations"] * np.log(diag["rss"] / diag["n_observations"])
-            + diag["n_varying_parameters"] * np.log(diag["n_observations"])
-        )
+        expected_bic = diag["n_observations"] * np.log(
+            diag["rss"] / diag["n_observations"]
+        ) + diag["n_varying_parameters"] * np.log(diag["n_observations"])
         assert diag["aic"] == pytest.approx(expected_aic)
         assert diag["bic"] == pytest.approx(expected_bic)
         assert diag["bic"] >= diag["aic"]
