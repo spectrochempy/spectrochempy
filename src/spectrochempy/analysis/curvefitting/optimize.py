@@ -393,8 +393,8 @@ def _validate_script_content(script, usermodels=None):
 
     Returns
     -------
-    fp : FitParameters or None
-        Parsed parameters on success, or ``None`` when *errors* is non-empty.
+    fp : FitParameters
+        Parsed parameters (always returned, even when *errors* is non-empty).
     errors : list of ScriptError
         Empty list when the script is valid.
     """
@@ -405,6 +405,7 @@ def _validate_script_content(script, usermodels=None):
     common = False
     fixed = False
     reference = False
+    models_missing_shape = set()
 
     lines = script.split("\n")
     lc = 0
@@ -433,6 +434,16 @@ def _validate_script_content(script, usermodels=None):
             modlabel = values.lower().strip()
             if modlabel not in fp.models:
                 fp.models.append(modlabel)
+                if modlabel:
+                    models_missing_shape.add(modlabel)
+            else:
+                errors.append(
+                    ScriptError(
+                        lc,
+                        line,
+                        f"Duplicate model label: '{modlabel}'",
+                    ),
+                )
             common = False
             continue
 
@@ -442,6 +453,16 @@ def _validate_script_content(script, usermodels=None):
             continue
 
         if key.startswith("shape"):
+            if modlabel is None or modlabel == "common":
+                errors.append(
+                    ScriptError(
+                        lc,
+                        line,
+                        "shape: must appear after a MODEL: declaration",
+                    ),
+                )
+                continue
+            models_missing_shape.discard(modlabel)
             shape = values.lower().strip()
             if not shape:
                 errors.append(
@@ -558,6 +579,17 @@ def _validate_script_content(script, usermodels=None):
             fp[ks] = val, mini.strip(), maxi.strip(), fixed
         else:
             fp[ks] = value.strip()
+
+    # Post-parse: check that every model has a shape definition
+    for label in list(models_missing_shape):
+        if label not in fp.model:
+            errors.append(
+                ScriptError(
+                    0,
+                    "",
+                    f"Model '{label}' has no shape definition",
+                ),
+            )
 
     return fp, errors
 
