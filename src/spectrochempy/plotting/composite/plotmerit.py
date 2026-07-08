@@ -16,12 +16,11 @@ plotmerit:
 
 __all__ = ["plot_merit", "plot_compare"]
 
-import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.lines import Line2D
 
-from spectrochempy.application.preferences import preferences as prefs
 from spectrochempy.plotting._render import render_lines
+from spectrochempy.utils.mplutils import get_figure
 from spectrochempy.utils.mplutils import make_label
 from spectrochempy.utils.mplutils import show as mpl_show
 
@@ -31,10 +30,9 @@ from spectrochempy.utils.mplutils import show as mpl_show
 
 
 def _make_default_axes():
-    """Create an axes using the current SpectroChemPy figure-size preference."""
-    figsize = tuple(prefs.figure.figsize)
-    _, ax = plt.subplots(figsize=figsize)
-    return ax
+    """Create an axes using the standard SpectroChemPy figure factory."""
+    fig = get_figure()
+    return fig.add_subplot(1, 1, 1)
 
 
 def plot_compare(
@@ -56,6 +54,10 @@ def plot_compare(
     exp_linewidth=1.0,
     calc_linewidth=1.6,
     resid_linewidth=1.0,
+    exp_label=None,
+    calc_label=None,
+    resid_label="difference",
+    legend_loc="best",
     kind=None,
     method=None,
     offset=None,
@@ -279,7 +281,7 @@ def plot_compare(
             color=orig_color[0],
             linestyle=orig_linestyle[0],
             marker=marker_kwargs.get("markers", [None])[0],
-            label=X.name,
+            label=exp_label or X.name,
         ),
         Line2D(
             [0],
@@ -287,7 +289,7 @@ def plot_compare(
             color=ref_color[0],
             linestyle=ref_linestyle[0],
             marker=marker_kwargs.get("markers", [None])[0],
-            label=X_ref.name,
+            label=calc_label or X_ref.name,
         ),
     ]
 
@@ -299,11 +301,11 @@ def plot_compare(
                 color=resid_color[0],
                 linestyle=resid_linestyle[0],
                 marker=marker_kwargs.get("markers", [None])[0],
-                label="difference",
+                label=resid_label,
             ),
         )
 
-    ax.legend(handles=handles, loc="best")
+    ax.legend(handles=handles, loc=legend_loc)
 
     # ----------------------------
     # Title
