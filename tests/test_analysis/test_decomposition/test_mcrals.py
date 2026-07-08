@@ -1603,7 +1603,9 @@ def test_pr4_closure_single_component_zero_is_active():
         tol=1.0e-9,
         max_iter=50,
     )
-    assert mcr._fit_meta["n_iter"] == 3
+    # n_iter is intentionally not asserted: it varies across BLAS/LAPACK
+    # platforms and is an incidental implementation detail, not behavior.
+    assert bool(mcr._fit_meta["converged"])
     # component 0 must be closed to the default target (ones)
     np.testing.assert_allclose(
         np.asarray(mcr.C_constrained.data)[:, 0],

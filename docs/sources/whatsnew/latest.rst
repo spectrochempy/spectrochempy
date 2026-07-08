@@ -52,7 +52,9 @@ New Features
   stable Jacobian and the residual degrees of freedom are positive.
   ``FitResult.variance`` and ``FitResult.stderr`` now expose the covariance
   diagonal and the corresponding approximate parameter standard errors through
-  the same availability rules. Existing
+  the same availability rules. ``FitResult.correlation`` now exposes the
+  corresponding approximate parameter-correlation matrix, normalized from the
+  covariance and standard errors with the same availability rules. Existing
   ``result.fitted`` and ``result.components`` behavior is preserved.
 
 - SpectroChemPy now exposes top-level helpers for common 1D line shapes:

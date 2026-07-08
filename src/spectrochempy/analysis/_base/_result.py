@@ -204,6 +204,7 @@ class FitResult(ResultBase):
         covariance=None,
         variance=None,
         stderr=None,
+        correlation=None,
     ):
         super().__init__(
             estimator=estimator,
@@ -214,6 +215,7 @@ class FitResult(ResultBase):
         self._covariance = covariance
         self._variance = variance
         self._stderr = stderr
+        self._correlation = correlation
 
     @property
     def covariance(self):
@@ -268,3 +270,37 @@ class FitResult(ResultBase):
             stderr.flags.writeable = False
             self._stderr = stderr
         return self._stderr
+
+    @property
+    def correlation(self):
+        """
+        Approximate parameter correlation matrix derived from covariance.
+
+        Returns
+        -------
+        ndarray or None
+            Immutable correlation matrix computed from :attr:`covariance` and
+            :attr:`stderr`. Returns ``None`` when covariance is unavailable.
+            Entries whose normalization is undefined remain ``nan``.
+        """
+        covariance = self.covariance
+        stderr = self.stderr
+        if self._correlation is None and covariance is not None and stderr is not None:
+            denom = np.outer(stderr, stderr)
+            correlation = np.full_like(covariance, np.nan, dtype=np.float64)
+            valid = np.isfinite(covariance) & np.isfinite(denom) & (denom > 0.0)
+            correlation[valid] = covariance[valid] / denom[valid]
+
+            zero_std = np.isfinite(stderr) & np.isclose(stderr, 0.0)
+            for index, is_zero in enumerate(zero_std):
+                if is_zero:
+                    correlation[index, index] = 1.0
+
+            nonzero = np.isfinite(stderr) & (stderr > 0.0)
+            diag_idx = np.where(nonzero)[0]
+            correlation[diag_idx, diag_idx] = 1.0
+
+            correlation = 0.5 * (correlation + correlation.T)
+            correlation.flags.writeable = False
+            self._correlation = correlation
+        return self._correlation

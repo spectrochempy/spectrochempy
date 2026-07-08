@@ -227,6 +227,9 @@ components = fit_result.components
     "reduced_chi_square": fit_result.diagnostics["reduced_chi_square"],
     "success": fit_result.diagnostics["success"],
     "stderr_shape": None if fit_result.stderr is None else fit_result.stderr.shape,
+    "correlation_shape": None
+    if fit_result.correlation is None
+    else fit_result.correlation.shape,
     "covariance_shape": None
     if fit_result.covariance is None
     else fit_result.covariance.shape,

@@ -165,6 +165,13 @@ class TestFitResult:
         np.testing.assert_array_equal(result.stderr, np.array([2.0, 3.0]))
         assert result.stderr.flags.writeable is False
 
+    def test_correlation_property_derived_from_covariance(self):
+        covariance = np.array([[4.0, 1.0], [1.0, 9.0]])
+        result = FitResult(estimator="Optimize", covariance=covariance)
+        expected = np.array([[1.0, 1.0 / 6.0], [1.0 / 6.0, 1.0]])
+        np.testing.assert_allclose(result.correlation, expected)
+        assert result.correlation.flags.writeable is False
+
 
 class TestResultBaseHTMLRepr:
     """Behavioral tests for the HTML representation of ResultBase."""

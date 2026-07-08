@@ -479,9 +479,11 @@ components = f1.result.components
 # interpretation built on top of that Jacobian: it is an approximate local
 # least-squares covariance matrix, scaled by the residual variance and degrees
 # of freedom. `f1.result.variance` and `f1.result.stderr` expose the diagonal
-# terms and standard errors derived from that covariance. These quantities are
-# only available when a backend provides a stable Jacobian and should not be
-# confused with confidence intervals or a full uncertainty report.
+# terms and standard errors derived from that covariance, and
+# `f1.result.correlation` exposes the normalized parameter-correlation matrix.
+# These quantities are only available when a backend provides a stable Jacobian
+# and should not be confused with confidence intervals or a full uncertainty
+# report.
 
 # Show the result
 _ = ndOHcorr.plot()
