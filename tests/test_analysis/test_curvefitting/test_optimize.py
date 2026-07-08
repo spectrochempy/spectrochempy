@@ -50,9 +50,9 @@ class TestValidateScript:
         opt = scp.Optimize()
         script = "MODEL: X\nshape gaussianmodel\n"
         errors = opt.validate_script(script)
-        assert len(errors) == 1
-        assert errors[0].line == 2
-        assert "semi-column" in errors[0].message
+        messages = [e.message for e in errors]
+        assert any("semi-column" in m for m in messages)
+        assert any("no shape" in m for m in messages)
 
     def test_unknown_model(self):
         opt = scp.Optimize()
@@ -90,7 +90,7 @@ class TestValidateScript:
         assert len(errors) == 1
         assert "two" in errors[0].message.lower()
 
-    def test_duplicated_model_name(self):
+    def test_duplicated_model_name_is_error(self):
         opt = scp.Optimize()
         script = (
             "MODEL: X\nshape: gaussianmodel\n"
@@ -99,9 +99,8 @@ class TestValidateScript:
             "    $ ampl: 0.5, 0.0, none\n"
         )
         errors = opt.validate_script(script)
-        # Duplicate model name is not an error (models are appended),
-        # so this should be valid
-        assert errors == []
+        assert len(errors) == 1
+        assert "Duplicate model label" in errors[0].message
 
     def test_empty_script(self):
         opt = scp.Optimize()

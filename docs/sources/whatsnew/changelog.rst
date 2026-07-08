@@ -135,6 +135,14 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- FIX: The ``Optimize`` script parser now rejects three categories of
+  previously-silent misconfiguration: ``MODEL:`` blocks without a ``shape:``
+  definition, ``shape:`` lines that appear before any ``MODEL:`` declaration,
+  and duplicate ``MODEL:`` labels (which historically overwrote the first
+  model's parameters).  These scripts could never produce valid fit results,
+  and the parser now reports them as explicit errors instead of silently
+  accepting them.
+
 - WiRE (``.wdf``) reader no longer attaches YLST data as a confusing auxiliary ``m``
   coordinate in ``coordset``. The YLST data is now stored on ``dataset.meta`` (as
   ``ylst_data``, ``ylst_title``, ``ylst_units``) where it belongs as per-spectrum
