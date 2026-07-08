@@ -1127,6 +1127,54 @@ class ReferenceProfile(Constraint):
 # --------------------------------------------------------------------------------------
 
 
+def _validate_model_args(args, *, name="model_args"):
+    """
+    Validate that an object is a tuple or list of positional arguments.
+
+    Parameters
+    ----------
+    args : tuple or list or None
+        Positional arguments for the model.
+    name : str, optional
+        Argument name used in error messages.
+
+    Raises
+    ------
+    TypeError
+        If ``args`` is not a tuple or list.
+    """
+    if args is None:
+        return ()
+    if not isinstance(args, (tuple, list)):
+        raise TypeError(f"{name} must be a tuple or list, got {type(args).__name__!r}.")
+    return tuple(args)
+
+
+def _validate_model_kwargs(kwargs, *, name="model_kwargs"):
+    """
+    Validate that an object is a mapping (dict-like) or ``None``.
+
+    Parameters
+    ----------
+    kwargs : dict or None
+        Keyword arguments for the model.
+    name : str, optional
+        Argument name used in error messages.
+
+    Raises
+    ------
+    TypeError
+        If ``kwargs`` is not a mapping and not ``None``.
+    """
+    if kwargs is None:
+        return {}
+    if not isinstance(kwargs, dict):
+        raise TypeError(
+            f"{name} must be a dict or None, got {type(kwargs).__name__!r}."
+        )
+    return kwargs
+
+
 class ModelProfile(Constraint):
     """
     Profile generator constraint.
@@ -1149,6 +1197,11 @@ class ModelProfile(Constraint):
         side (``"C"`` or ``"St"``), returns the model-constrained profile.
         Validation is limited to checking that it is callable; signature
         enforcement is deferred to the enforcement engine.
+    model_args : tuple or list, optional
+        Extra positional arguments passed to the model after the current
+        ALS profile.  Defaults to ``()``.
+    model_kwargs : dict or None, optional
+        Extra keyword arguments passed to the model.  Defaults to ``None``.
 
     Examples
     --------
@@ -1161,17 +1214,33 @@ class ModelProfile(Constraint):
     ModelProfile(profile='St', components=[0], model=<function my_model at ...>)
     """
 
-    def __init__(self, profile, components=None, model=None):
+    def __init__(
+        self,
+        profile,
+        components=None,
+        model=None,
+        model_args=None,
+        model_kwargs=None,
+    ):
         super().__init__(profile)
         self._components = _validate_components(components)
         self._model = _validate_callable(model)
+        self._model_args = _validate_model_args(model_args)
+        self._model_kwargs = _validate_model_kwargs(model_kwargs)
 
     def _repr_params(self):
-        return [
+        params = [
             ("profile", self._profile),
             ("components", self._components),
             ("model", self._model),
         ]
+        # Only include model_args / model_kwargs in repr when they differ
+        # from the default so the repr stays concise for simple cases.
+        if self._model_args:
+            params.append(("model_args", self._model_args))
+        if self._model_kwargs:
+            params.append(("model_kwargs", self._model_kwargs))
+        return params
 
     @property
     def components(self):
@@ -1182,3 +1251,13 @@ class ModelProfile(Constraint):
     def model(self):
         """callable: Model callable used to regenerate the constrained profile."""
         return self._model
+
+    @property
+    def model_args(self):
+        """tuple: Extra positional arguments for the model."""
+        return self._model_args
+
+    @property
+    def model_kwargs(self):
+        """dict: Extra keyword arguments for the model."""
+        return self._model_kwargs

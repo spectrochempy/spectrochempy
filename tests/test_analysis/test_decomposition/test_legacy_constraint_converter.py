@@ -237,6 +237,29 @@ class TestLegacyToConstraints:
         assert len(mp) == 1
         assert mp[0].components == [0, 1]
         assert mp[0].model is _fake_model
+        assert mp[0].model_args == ()
+        assert mp[0].model_kwargs == {}
+
+    def test_hard_conc_with_args_and_kwargs(self):
+        def _fake_model(C, a, b, **kwargs):
+            return C
+
+        est = _FakeEstimator(
+            hardConc=[0, 1],
+            getConc=_fake_model,
+            argsGetConc=("x", 42),
+            kwargsGetConc={"verbose": True},
+        )
+        constraints = legacy_to_constraints(est)
+
+        mp = [
+            c for c in constraints if isinstance(c, ModelProfile) and c.profile == "C"
+        ]
+        assert len(mp) == 1
+        assert mp[0].components == [0, 1]
+        assert mp[0].model is _fake_model
+        assert mp[0].model_args == ("x", 42)
+        assert mp[0].model_kwargs == {"verbose": True}
 
     def test_hard_conc_disabled(self):
         est = _FakeEstimator(hardConc=[])
@@ -318,6 +341,29 @@ class TestLegacyToConstraints:
         assert len(mp) == 1
         assert mp[0].components == [2]
         assert mp[0].model is _fake_model
+        assert mp[0].model_args == ()
+        assert mp[0].model_kwargs == {}
+
+    def test_hard_spec_with_args_and_kwargs(self):
+        def _fake_model(St, tol, **kw):
+            return St
+
+        est = _FakeEstimator(
+            hardSpec=[0],
+            getSpec=_fake_model,
+            argsGetSpec=(0.5,),
+            kwargsGetSpec={"max_iter": 10},
+        )
+        constraints = legacy_to_constraints(est)
+
+        mp = [
+            c for c in constraints if isinstance(c, ModelProfile) and c.profile == "St"
+        ]
+        assert len(mp) == 1
+        assert mp[0].components == [0]
+        assert mp[0].model is _fake_model
+        assert mp[0].model_args == (0.5,)
+        assert mp[0].model_kwargs == {"max_iter": 10}
 
     def test_hard_spec_disabled(self):
         est = _FakeEstimator(hardSpec=[])
@@ -331,7 +377,7 @@ class TestLegacyToConstraints:
     def test_all_conc_constraints_active(self):
         """All concentration-side constraints active simultaneously."""
 
-        def _fake_model(C):
+        def _fake_model(C, scale, **kw):
             return C
 
         est = _FakeEstimator(
@@ -344,8 +390,18 @@ class TestLegacyToConstraints:
             closureTarget="default",
             hardConc=[2],
             getConc=_fake_model,
+            argsGetConc=(1.0,),
+            kwargsGetConc={"clip": True},
         )
         constraints = legacy_to_constraints(est)
+
+        # Check the ModelProfile carries args/kwargs
+        mp = [c for c in constraints if isinstance(c, ModelProfile)]
+        assert len(mp) >= 1
+        conc_mp = [c for c in mp if c.profile == "C"]
+        assert len(conc_mp) == 1
+        assert conc_mp[0].model_args == (1.0,)
+        assert conc_mp[0].model_kwargs == {"clip": True}
 
         # Count by type on the conc side
         conc_types = [
