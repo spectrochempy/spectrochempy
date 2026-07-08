@@ -248,7 +248,7 @@ ax = components[:].plot(clear=False)
 ax.autoscale(enable=True, axis="y")
 
 # %%
-_ = opt.plotmerit(offset=0, kind="scatter")
+_ = opt.plotmerit(offset=15)
 
 # %% [markdown]
 # ## Summary

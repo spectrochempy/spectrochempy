@@ -155,6 +155,13 @@ Bug Fixes
   available, and legacy ``lines`` / ``pen`` aliases continue to work across
   dimensional fallbacks.
 
+- ``plotmerit()`` / ``plot_compare()`` are now clearer for fit inspection:
+  the reconstructed trace remains visible even for near-perfect overlaps, the
+  historical ``kind="scatter"`` / ``method="scatter"`` options now produce
+  real marker-based rendering, ``nb_traces`` is honored in the current plotting
+  path, and ``offset`` once again separates the residual trace from the main
+  signal to improve notebook readability.
+
 - Fixed several processing regressions and edge cases: multi-dimensional ZPD
   detection in interferogram apodization is more reliable, ``rs()``, ``ls()``,
   and ``roll()`` now shift multi-dimensional data along the correct axis,
