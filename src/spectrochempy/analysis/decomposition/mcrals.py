@@ -30,10 +30,46 @@ from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis._base._analysisbase import _wrap_ndarray_output_to_nddataset
 from spectrochempy.analysis._base._result import AnalysisResult
+from spectrochempy.analysis.decomposition.mcrals_constraints import Constraint
 from spectrochempy.application.application import info_
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.decorators import signature_has_configurable_traits
+
+# --------------------------------------------------------------------------------------
+# Names of legacy traitlet-based constraint parameters.
+# Used to detect mixed-API usage (legacy traitlets + new constraints= parameter).
+# --------------------------------------------------------------------------------------
+_LEGACY_CONSTRAINT_TRAITS = frozenset(
+    {
+        "nonnegConc",
+        "unimodConc",
+        "unimodConcMod",
+        "unimodConcTol",
+        "monoDecConc",
+        "monoDecTol",
+        "monoIncConc",
+        "monoIncTol",
+        "closureConc",
+        "closureTarget",
+        "closureMethod",
+        "hardConc",
+        "getConc",
+        "argsGetConc",
+        "kwargsGetConc",
+        "getC_to_C_idx",
+        "nonnegSpec",
+        "normSpec",
+        "unimodSpec",
+        "unimodSpecMod",
+        "unimodSpecTol",
+        "hardSpec",
+        "getSpec",
+        "argsGetSpec",
+        "kwargsGetSpec",
+        "getSt_to_St_idx",
+    }
+)
 
 # --------------------------------------------------------------------------------------
 # Internal iteration state
@@ -424,6 +460,27 @@ class MCRALS(DecompositionAnalysis):
 
     Parameters
     ----------
+    constraints : list of `Constraint`, optional, default: ``None``
+        Public constraint objects describing scientific prior knowledge about
+        the concentration (``"C"``) or spectral (``"St"``) profiles. When
+        provided, each element must be an instance of a public constraint
+        class (e.g., ``NonNegative``, ``Unimodal``, ``Closure``,
+        ``Monotonic``, ``ModelProfile``).  This parameter cannot be combined
+        with the legacy traitlet-based constraint parameters (``nonnegConc``,
+        ``unimodConc``, ``closureConc``, etc.) — choose one API.
+
+        Example::
+
+            from spectrochempy.analysis import constraints as mc
+
+            mcr = MCRALS(
+                constraints=[
+                    mc.NonNegative("C"),
+                    mc.Closure("C"),
+                ]
+            )
+
+        .. versionadded:: 0.7.0
     log_level : any of [``"INFO"``, ``"DEBUG"``, ``"WARNING"``, ``"ERROR"``], optional, default: ``"WARNING"``
         The log level at startup. It can be changed later on using the
         `set_log_level` method or by changing the ``log_level`` attribute.
@@ -867,6 +924,32 @@ and `St`.
                 "See the documentation and examples",
             )
 
+        # Extract and validate the new constraints= parameter (not a traitlet).
+        constraints = kwargs.pop("constraints", None)
+
+        if constraints is not None:
+            # Detect mixed API: legacy constraint traitlets + constraints=.
+            mixed = _LEGACY_CONSTRAINT_TRAITS & set(kwargs)
+            if mixed:
+                raise ValueError(
+                    "The legacy constraint parameters and the constraints "
+                    "parameter cannot be used together. Please choose one API."
+                )
+            # Validate that every element is a Constraint instance.
+            if not isinstance(constraints, (list, tuple)):
+                raise TypeError(
+                    f"constraints must be a list or tuple, got {type(constraints).__name__}"
+                )
+            for idx, c in enumerate(constraints):
+                if not isinstance(c, Constraint):
+                    raise TypeError(
+                        f"constraints[{idx}] must be a Constraint instance, "
+                        f"got {type(c).__name__}"
+                    )
+            self._constraints = list(constraints)
+        else:
+            self._constraints = None
+
         # call the super class for initialisation
         super().__init__(
             log_level=log_level,
@@ -1216,12 +1299,21 @@ and `St`.
         """
         state = self._init_als_state(X, Y)
 
-        # Translate the public traitlets into private constraint objects
-        # once per fit. The constraint order is fixed by the builders and
-        # matches the historical PR2 sequence exactly.
-        conc_constraints = self._build_concentration_constraints()
-        spec_constraints = self._build_spectral_constraints()
-        normalization = self._build_normalization()
+        # Build the constraint pipelines. When ``constraints=`` was provided
+        # at construction time, translate the public Constraint objects into
+        # the internal ``_Constraint`` pipeline directly. Otherwise, fall
+        # back to the legacy traitlet-based builders. Both paths produce the
+        # same internal constraint objects before entering the ALS loop.
+        if self._constraints is not None:
+            (
+                conc_constraints,
+                spec_constraints,
+                normalization,
+            ) = self._build_from_public_constraints(X)
+        else:
+            conc_constraints = self._build_concentration_constraints()
+            spec_constraints = self._build_spectral_constraints()
+            normalization = self._build_normalization()
 
         while (
             state.change >= self.tol
@@ -1404,6 +1496,154 @@ and `St`.
             method=self.normSpec,
             n_components=self._n_components,
         )
+
+    def _build_from_public_constraints(self, X):
+        """
+        Build constraint pipelines from public ``Constraint`` objects.
+
+        This is the single entry point used when the user passes
+        ``constraints=`` to ``MCRALS``.  It converts each public
+        ``Constraint`` to the corresponding private ``_Constraint``
+        (or configures the estimator traitlets for ``ModelProfile``,
+        which is picked up by ``_HardProfileConstraint``), splits by
+        profile side, and returns the three pipeline components expected
+        by ``_fit``.
+
+        Parameters
+        ----------
+        X : np.ndarray
+            Preprocessed data array (the same ``X`` that was passed to
+            ``_fit``). Used to expand scalar closure targets to the
+            correct size.
+
+        Returns
+        -------
+        conc_constraints : list[_Constraint]
+            Concentration-side constraint pipeline.
+        spec_constraints : list[_Constraint]
+            Spectral-side constraint pipeline.
+        normalization : _NormalizationConstraint or None
+            Normalization constraint, or ``None`` if disabled.
+        """
+        # Reset model-profile traitlets to their defaults so that
+        # _HardProfileConstraint is a no-op unless a ModelProfile is present.
+        self.hardConc = []
+        self.getConc = None
+        self.hardSpec = []
+        self.getSpec = None
+
+        conc = []
+        spec = []
+
+        for c in self._constraints:
+            internal = self._public_to_internal(c)
+            if internal is not None:
+                if c.profile == "C":
+                    conc.append(internal)
+                else:
+                    spec.append(internal)
+
+        # Always append the hard-profile constraint.  If no ModelProfile
+        # was provided, the traitlets above remain at defaults and the
+        # constraint is a no-op (it simply resets the extra-output buffer).
+        conc.append(_HardProfileConstraint(self, side="conc"))
+        spec.append(_HardProfileConstraint(self, side="spec"))
+
+        normalization = self._build_normalization()
+
+        return conc, spec, normalization
+
+    def _resolve_components(self, components):
+        """
+        Resolve a public constraint's component selection to a list of indices.
+
+        ``None`` (meaning "all components") is expanded to
+        ``list(range(self._n_components))``. A concrete list is passed through.
+
+        This mirrors what the legacy traitlet validators do when they
+        convert ``"all"`` to ``np.arange(self._n_components).tolist()``.
+        """
+        if components is None:
+            return list(range(self._n_components))
+        return components
+
+    def _public_to_internal(self, constraint):
+        """
+        Convert a single public ``Constraint`` to a private ``_Constraint``.
+
+        Parameters
+        ----------
+        constraint : Constraint
+            Public constraint object.
+
+        Returns
+        -------
+        _Constraint or None
+            Internal constraint, or ``None`` if the public type has no
+            internal counterpart yet (e.g. ``ReferenceProfile``).
+        """
+        from spectrochempy.analysis.decomposition.mcrals_constraints import Closure
+        from spectrochempy.analysis.decomposition.mcrals_constraints import ModelProfile
+        from spectrochempy.analysis.decomposition.mcrals_constraints import Monotonic
+        from spectrochempy.analysis.decomposition.mcrals_constraints import NonNegative
+        from spectrochempy.analysis.decomposition.mcrals_constraints import Unimodal
+
+        if isinstance(constraint, NonNegative):
+            indices = self._resolve_components(constraint.components)
+            axis = 0 if constraint.profile == "C" else 1
+            return _NonNegativeConstraint(indices, axis)
+
+        if isinstance(constraint, Unimodal):
+            indices = self._resolve_components(constraint.components)
+            axis = 0 if constraint.profile == "C" else 1
+            return _UnimodalConstraint(
+                indices,
+                axis=axis,
+                tol=1.1,
+                mod=constraint.mod,
+            )
+
+        if isinstance(constraint, Monotonic):
+            indices = self._resolve_components(constraint.components)
+            tol = constraint.tolerance
+            if constraint.direction == "increasing":
+                return _MonotonicIncreaseConstraint(indices, tol=tol)
+            return _MonotonicDecreaseConstraint(indices, tol=tol)
+
+        if isinstance(constraint, Closure):
+            indices = self._resolve_components(constraint.components)
+            # Expand a scalar target to a 1-D array (matching the shape of
+            # the constrained axis), mirroring the legacy trait validator.
+            target = constraint.target
+            if np.ndim(target) == 0:
+                target = np.full(self._X.shape[0], target)
+            return _ClosureConstraint(
+                indices,
+                method="scaling",
+                target=target,
+            )
+
+        if isinstance(constraint, ModelProfile):
+            # ModelProfile is handled by configuring the estimator traitlets
+            # that _HardProfileConstraint reads at each iteration.
+            comps = self._resolve_components(constraint.components)
+            if constraint.profile == "C":
+                self.hardConc = comps
+                self.getConc = constraint.model
+                self.argsGetConc = constraint.model_args
+                self.kwargsGetConc = constraint.model_kwargs
+            else:
+                self.hardSpec = comps
+                self.getSpec = constraint.model
+                self.argsGetSpec = constraint.model_args
+                self.kwargsGetSpec = constraint.model_kwargs
+            # No _Constraint produced here; _HardProfileConstraint (always
+            # appended in _build_from_public_constraints) handles it.
+            return None
+
+        # Remaining public types (ReferenceProfile, FixedValues, ZeroRegion,
+        # Selectivity) have no internal counterpart yet.
+        return None
 
     @staticmethod
     def _apply_constraint_pipeline(profile, constraints, state):

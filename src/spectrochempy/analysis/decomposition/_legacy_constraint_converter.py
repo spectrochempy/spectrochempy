@@ -144,12 +144,17 @@ def _conc_constraints(estimator):
             Closure("C", components=cc, target=_extract_closure_target(estimator))
         )
 
-    # hardConc + getConc -> ModelProfile("C", ...)
+    # hardConc + getConc + argsGetConc + kwargsGetConc -> ModelProfile("C", ...)
     hc = _to_components(estimator.hardConc)
-    if hc is _ALL and callable(estimator.getConc):
-        result.append(ModelProfile("C", model=estimator.getConc))
-    elif hc is not None and callable(estimator.getConc):
-        result.append(ModelProfile("C", components=hc, model=estimator.getConc))
+    if hc is not None and callable(estimator.getConc):
+        mp_kw = {
+            "model": estimator.getConc,
+            "model_args": estimator.argsGetConc,
+            "model_kwargs": estimator.kwargsGetConc,
+        }
+        if hc is not _ALL:
+            mp_kw["components"] = hc
+        result.append(ModelProfile("C", **mp_kw))
 
     return result
 
@@ -185,12 +190,17 @@ def _spec_constraints(estimator):
             )
         )
 
-    # hardSpec + getSpec -> ModelProfile("St", ...)
+    # hardSpec + getSpec + argsGetSpec + kwargsGetSpec -> ModelProfile("St", ...)
     hs = _to_components(estimator.hardSpec)
-    if hs is _ALL and callable(estimator.getSpec):
-        result.append(ModelProfile("St", model=estimator.getSpec))
-    elif hs is not None and callable(estimator.getSpec):
-        result.append(ModelProfile("St", components=hs, model=estimator.getSpec))
+    if hs is not None and callable(estimator.getSpec):
+        mp_kw = {
+            "model": estimator.getSpec,
+            "model_args": estimator.argsGetSpec,
+            "model_kwargs": estimator.kwargsGetSpec,
+        }
+        if hs is not _ALL:
+            mp_kw["components"] = hs
+        result.append(ModelProfile("St", **mp_kw))
 
     return result
 
