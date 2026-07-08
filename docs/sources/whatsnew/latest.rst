@@ -49,7 +49,10 @@ New Features
   now exposes the first uncertainty-oriented scientific interpretation built
   from that Jacobian: an approximate local least-squares covariance matrix for
   the fitted varying parameters, available only when the backend provides a
-  stable Jacobian and the residual degrees of freedom are positive. Existing
+  stable Jacobian and the residual degrees of freedom are positive.
+  ``FitResult.variance`` and ``FitResult.stderr`` now expose the covariance
+  diagonal and the corresponding approximate parameter standard errors through
+  the same availability rules. Existing
   ``result.fitted`` and ``result.components`` behavior is preserved.
 
 - SpectroChemPy now exposes top-level helpers for common 1D line shapes:
