@@ -18,6 +18,8 @@ from dataclasses import dataclass
 from dataclasses import field
 from typing import Any
 
+import numpy as np
+
 # Sentinel bound thresholds (same as FitParameters.__str__)
 _STR_NEG_THRESH = -0.1 / sys.float_info.epsilon
 _STR_POS_THRESH = +0.1 / sys.float_info.epsilon
@@ -38,7 +40,7 @@ class _ParamSpec:
     """Parameter definition with value, bounds, and flags."""
 
     name: str
-    value: float = 0.0
+    value: float | list[float] = 0.0
     vary: bool = True
     bounds: tuple[float | None, float | None] = (None, None)
     reference: str | None = None  # name of referenced COMMON param, or None
@@ -73,10 +75,14 @@ class _FitModelSpec:
         components: list[_ComponentSpec] | None = None,
         common_params: dict[str, _ParamSpec] | None = None,
         constraints: Any = None,
+        expvars: list[str] | None = None,
+        expnumber: int = 1,
     ):
         self.components = list(components or [])
         self.common_params = dict(common_params or {})
         self.constraints = constraints  # reserved, not yet used
+        self.expvars = list(expvars or [])
+        self.expnumber = expnumber
 
     # ------------------------------------------------------------------
     @classmethod
@@ -107,9 +113,13 @@ class _FitModelSpec:
                     reference=str(fp[raw_name]),
                 )
             else:
+                if raw_name in fp.expvars:
+                    value = list(fp[raw_name])
+                else:
+                    value = float(fp[raw_name])
                 common_params[raw_name] = _ParamSpec(
                     name=raw_name,
-                    value=float(fp[raw_name]),
+                    value=value,
                     vary=not fp.fixed.get(raw_name, False),
                     bounds=(
                         _unbound(fp.lob.get(raw_name)),
@@ -144,9 +154,13 @@ class _FitModelSpec:
                         reference=str(fp[full_key]),
                     )
                 else:
+                    if param_raw in fp.expvars:
+                        value = list(fp[full_key])
+                    else:
+                        value = float(fp[full_key])
                     model_params[param_raw] = _ParamSpec(
                         name=param_raw,
-                        value=float(fp[full_key]),
+                        value=value,
                         vary=not fp.fixed.get(full_key, False),
                         bounds=(
                             _unbound(fp.lob.get(full_key)),
@@ -162,7 +176,12 @@ class _FitModelSpec:
                 )
             )
 
-        return cls(components=components, common_params=common_params)
+        return cls(
+            components=components,
+            common_params=common_params,
+            expvars=list(fp.expvars),
+            expnumber=fp.expnumber,
+        )
 
     # ------------------------------------------------------------------
     def to_script(self) -> str:
@@ -209,6 +228,73 @@ class _FitModelSpec:
         if result:
             result += "\n"
         return result
+
+    # ------------------------------------------------------------------
+    def _iter_varying(self):
+        """
+        Yield ``(sorted_key, param_spec)`` for varying parameters.
+
+        Iteration order matches ``sorted(fp.keys())`` from
+        ``FitParameters`` for consistent behavior.
+        """
+        items: list[tuple[str, _ParamSpec]] = []
+
+        for name, ps in self.common_params.items():
+            items.append((name, ps))
+
+        for comp in self.components:
+            for name, ps in comp.params.items():
+                key = f"{name}_{comp.label}"
+                items.append((key, ps))
+
+        items.sort(key=lambda x: x[0])
+
+        for key, ps in items:
+            if not ps.vary:
+                continue
+            yield key, ps
+
+    # ------------------------------------------------------------------
+    def count_varying(self) -> int:
+        """
+        Count free parameters using the same rule as the optimizer.
+
+        Returns
+        -------
+        int
+            Number of varying parameters.
+        """
+        n_varying = 0
+        for _key, ps in self._iter_varying():
+            if ps.name in self.expvars:
+                n_varying += self.expnumber
+            else:
+                n_varying += 1
+        return n_varying
+
+    # ------------------------------------------------------------------
+    def extract_varying_values(self):
+        """
+        Return fitted varying-parameter values in optimizer order.
+
+        Returns
+        -------
+        ndarray or None
+            Frozen 1-D array of varying parameter values, or ``None``
+            when the model has no varying parameters.
+        """
+        values: list[float] = []
+        for _key, ps in self._iter_varying():
+            if ps.name in self.expvars:
+                values.extend(
+                    np.asarray(ps.value, dtype=np.float64).reshape(-1).tolist(),
+                )
+            else:
+                values.append(float(ps.value))
+
+        array = np.array(values, dtype=np.float64)
+        array.flags.writeable = False
+        return array
 
 
 def _format_bound(val: float | None) -> str:
