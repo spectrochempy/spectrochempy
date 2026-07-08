@@ -90,6 +90,24 @@ class TestPlotMeritImports:
         np.testing.assert_allclose(ax.lines[1].get_ydata(), X.data)
         np.testing.assert_allclose(ax.lines[2].get_ydata(), X_ref.data)
 
+    def test_plot_compare_uses_scpy_figure_size_preference(self, sample_1d_dataset):
+        """Standalone comparison figures should follow the current SCPy figure size."""
+        from spectrochempy import preferences
+        from spectrochempy.plotting.composite.plotmerit import plot_compare
+
+        X = sample_1d_dataset
+        X_ref = X.copy()
+        X_ref.name = "fit"
+
+        original_figsize = tuple(preferences.figure.figsize)
+        preferences.figure.figsize = (7.0, 3.0)
+        try:
+            ax = plot_compare(X, X_ref, show=False)
+            width, height = ax.figure.get_size_inches()
+            np.testing.assert_allclose((width, height), (7.0, 3.0))
+        finally:
+            preferences.figure.figsize = original_figsize
+
 
 class TestMultiplotImports:
     """Test that multiplot module can be imported."""
