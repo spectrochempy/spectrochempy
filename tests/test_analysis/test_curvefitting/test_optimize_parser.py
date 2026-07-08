@@ -479,16 +479,14 @@ class TestInvalidScripts:
         assert any("no shape" in m for m in messages)
 
     def test_unknown_model_name(self):
-        fp, errors = _validate_script_content(
-            "MODEL: X\nshape: nonexistent_shape\n"
-        )
+        fp, errors = _validate_script_content("MODEL: X\nshape: nonexistent_shape\n")
         assert len(errors) == 1
         assert "not found" in errors[0].message
         assert "nonexistent_shape" in errors[0].message
 
     def test_invalid_parameter_prefix(self):
         fp, errors = _validate_script_content(
-            'MODEL: X\nshape: gaussianmodel\n% ampl: 1.0, 0.0, none\n'
+            "MODEL: X\nshape: gaussianmodel\n% ampl: 1.0, 0.0, none\n"
         )
         assert len(errors) == 1
         assert "*,$ or >" in errors[0].message
@@ -540,8 +538,7 @@ class TestInvalidScripts:
 
     def test_error_has_line_number(self):
         fp, errors = _validate_script_content(
-            "COMMON:\n  $ gratio: 0.5, 0.0, 1.0\n"
-            'MODEL: PEAK\nshape: nonexistent\n'
+            "COMMON:\n  $ gratio: 0.5, 0.0, 1.0\n" "MODEL: PEAK\nshape: nonexistent\n"
         )
         assert len(errors) == 1
         assert errors[0].line == 4
@@ -837,7 +834,5 @@ class TestReturnContract:
         assert isinstance(fp, FitParameters)
 
     def test_error_list_contains_script_error_instances(self):
-        fp, errors = _validate_script_content(
-            "MODEL: X\nshape: unknown_model\n"
-        )
+        fp, errors = _validate_script_content("MODEL: X\nshape: unknown_model\n")
         assert all(isinstance(e, ScriptError) for e in errors)
