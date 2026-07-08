@@ -82,12 +82,13 @@ _ = Ckin.T.plot(clear=False, cmap=None)
 # %%
 # Even though very approximate, the same values can be used to run a hard-soft MCR-ALS,
 # using the public ``ModelProfile`` constraint:
+import spectrochempy.analysis.constraints as ct
 
 X = D[:, 300.0:500.0]
 param_to_optimize = {"k[0]": 0.5, "k[1]": 0.05}
 mcr_2 = scp.MCRALS(
     constraints=[
-        scp.ModelProfile(
+        ct.ModelProfile(
             "C",
             components=[0, 1, 2],
             model=kin.fit_to_concentrations,
