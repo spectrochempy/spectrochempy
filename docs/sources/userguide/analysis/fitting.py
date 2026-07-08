@@ -458,6 +458,65 @@ errors  # should be an empty list if the script is valid
 # An empty list means the script is syntactically correct and all model
 # references are recognised.
 
+# %% [markdown]
+# #### Choosing a fitting method
+#
+# `Optimize` currently exposes four public values for `method`:
+#
+# - `least_squares`
+# - `leastsq`
+# - `simplex`
+# - `basinhopping`
+#
+# In practice, these fall into three families:
+#
+# | Public method | Type of search | Current internal path | Jacobian / covariance path |
+# | --- | --- | --- | --- |
+# | `least_squares` | local least-squares fit | SciPy `least_squares()` | yes, when available |
+# | `leastsq` | local least-squares fit | same SciPy `least_squares()` path | yes, when available |
+# | `simplex` | local derivative-free search | SciPy simplex (`fmin`) path | no |
+# | `basinhopping` | global-style exploratory search | SciPy `basinhopping()` | no |
+#
+# A practical rule of thumb is:
+#
+# - start with `least_squares` for ordinary peak fitting and most well-initialized models;
+# - try `simplex` when you want a derivative-free local search;
+# - try `basinhopping` only when the landscape is difficult enough to justify a slower global-style exploration.
+#
+# The current implementation automatically chooses between the least-squares
+# backend variants `lm` and `trf` depending on the size of the varying-parameter
+# problem. This choice is internal: users select the high-level `method`, not
+# the low-level SciPy backend directly.
+
+# %% [markdown]
+# #### Other useful fitting modes
+#
+# Several public options affect how a fit is prepared:
+#
+# - `dry=True` validates the script and assembles the starting model without
+#   running the optimizer;
+# - `autobase=True` adds an automatic baseline correction step before fitting;
+# - `autoampl=True` adjusts initial amplitudes automatically;
+# - `amplitude_mode="height"` or `"area"` controls how line-shape amplitudes
+#   are initialized;
+# - `warm_start=True` reuses the previous fitted state when fitting repeatedly
+#   on related problems.
+#
+# These options do not all answer the same question:
+#
+# - `method` chooses **how** the numerical search is run;
+# - `dry`, `autobase`, `autoampl`, and `amplitude_mode` help define **how the fit starts**;
+# - `warm_start` helps when you repeat fits in a sequence rather than solving a
+#   single isolated problem.
+
+# %% [markdown]
+# The availability of advanced post-fit quantities depends on the chosen method.
+# Least-squares-backed methods can expose a retained Jacobian and therefore the
+# uncertainty path (`covariance`, `stderr`, `correlation`,
+# `confidence_intervals`). `simplex` and `basinhopping` still produce fitted
+# curves and residual diagnostics, but they do not currently expose the same
+# uncertainty information.
+
 # %%
 f1.script = script
 f1.max_iter = 2000
