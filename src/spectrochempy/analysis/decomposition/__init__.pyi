@@ -7,6 +7,7 @@
 # ruff: noqa
 
 __all__ = [
+    "_legacy_constraint_converter",
     "cp",
     "efa",
     "fast_ica",
@@ -19,6 +20,7 @@ __all__ = [
     "svd",
 ]
 
+from . import _legacy_constraint_converter
 from . import cp
 from . import efa
 from . import fast_ica
