@@ -314,6 +314,46 @@ def test_closure_target_must_be_positive():
         Closure("C", target=-1.0)
 
 
+def test_closure_array_target_list():
+    target = [1.0, 2.0, 3.0]
+    c = Closure("C", target=target)
+    assert c.target is target
+    assert c.target == [1.0, 2.0, 3.0]
+
+
+def test_closure_array_target_tuple():
+    target = (1.0, 2.0)
+    c = Closure("C", target=target)
+    assert c.target is target
+
+
+def test_closure_array_target_numpy():
+    target = np.array([1.0, 1.0, 1.0])
+    c = Closure("C", target=target)
+    assert c.target is target
+
+
+def test_closure_array_target_list_with_components():
+    c = Closure("C", components=[0, 1], target=[2.0, 2.0])
+    assert c.components == [0, 1]
+    assert c.target == [2.0, 2.0]
+
+
+def test_closure_bool_target_rejected():
+    with pytest.raises(TypeError, match="bool"):
+        Closure("C", target=True)
+
+
+def test_closure_string_target_rejected():
+    with pytest.raises(TypeError, match="string|str"):
+        Closure("C", target="default")
+
+
+def test_closure_none_target_rejected():
+    with pytest.raises(TypeError, match="None"):
+        Closure("C", target=None)
+
+
 def test_zero_region_requires_two_entries():
     with pytest.raises(ValueError, match="exactly two"):
         ZeroRegion("C", region=(0,))
@@ -382,6 +422,32 @@ def test_unequal_constraints_different_components():
 
 def test_unequal_constraints_different_target():
     assert Closure("C", target=1.0) != Closure("C", target=2.0)
+
+
+def test_closure_equal_with_array_target():
+    assert Closure("C", target=[1.0, 2.0]) == Closure("C", target=[1.0, 2.0])
+
+
+def test_closure_equal_with_numpy_array_target():
+    assert Closure("C", target=np.array([1.0, 2.0])) == Closure(
+        "C", target=np.array([1.0, 2.0])
+    )
+
+
+def test_closure_unequal_array_target():
+    assert Closure("C", target=[1.0, 2.0]) != Closure("C", target=[3.0, 4.0])
+
+
+def test_closure_unequal_scalar_vs_array():
+    assert Closure("C", target=1.0) != Closure("C", target=[1.0, 1.0])
+    assert Closure("C", target=[1.0, 1.0]) != Closure("C", target=1.0)
+
+
+def test_closure_equal_reference_vs_copy():
+    target = np.array([1.0, 2.0, 3.0])
+    c1 = Closure("C", target=target)
+    c2 = Closure("C", target=target.copy())
+    assert c1 == c2
 
 
 def test_unequal_constraints_different_direction():
