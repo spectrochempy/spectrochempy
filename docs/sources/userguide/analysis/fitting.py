@@ -499,15 +499,16 @@ errors  # should be an empty list if the script is valid
 # - `autoampl=True` adjusts initial amplitudes automatically;
 # - `amplitude_mode="height"` or `"area"` controls how line-shape amplitudes
 #   are initialized;
-# - `warm_start=True` reuses the previous fitted state when fitting repeatedly
-#   on related problems.
+# - `warm_start=True` preserves the current estimator configuration instead of
+#   forcing a full reset to default configuration values during estimator
+#   reinitialization.
 #
 # These options do not all answer the same question:
 #
 # - `method` chooses **how** the numerical search is run;
 # - `dry`, `autobase`, `autoampl`, and `amplitude_mode` help define **how the fit starts**;
-# - `warm_start` helps when you repeat fits in a sequence rather than solving a
-#   single isolated problem.
+# - `warm_start` is a broader estimator-state option and should not be read as
+#   a dedicated `Optimize` solver warm-start backend.
 
 # %% [markdown]
 # The availability of advanced post-fit quantities depends on the chosen method.
@@ -560,11 +561,18 @@ ax.autoscale(enable=True, axis="y")
 # %% [markdown]
 # `plotmerit()` overlays the experimental spectrum, the fitted profile, and the
 # residuals. Here we use a small residual offset to keep the three traces easy
-# to inspect in a notebook.
+# to inspect in a notebook. Short legend labels and an explicit legend position
+# keep the annotation clear on the compact tutorial figure.
 
 # %%
 som = fitted
-_ = f1.plotmerit(offset=15)
+_ = f1.plotmerit(
+    offset=15,
+    exp_label="exp",
+    calc_label="fit",
+    resid_label="res",
+    legend_loc="upper left",
+)
 
 
 # %% [markdown]

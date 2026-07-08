@@ -105,8 +105,34 @@ class TestPlotMeritImports:
             ax = plot_compare(X, X_ref, show=False)
             width, height = ax.figure.get_size_inches()
             np.testing.assert_allclose((width, height), (7.0, 3.0))
+            assert ax.figure.get_tight_layout() is True
         finally:
             preferences.figure.figsize = original_figsize
+
+    def test_plot_compare_accepts_short_legend_labels_and_position(
+        self,
+        sample_1d_dataset,
+    ):
+        """Legend labels and location should be customizable for compact figures."""
+        from spectrochempy.plotting.composite.plotmerit import plot_compare
+
+        X = sample_1d_dataset
+        X_ref = X.copy()
+        X_ref.name = "fit"
+
+        ax = plot_compare(
+            X,
+            X_ref,
+            exp_label="exp",
+            calc_label="fit",
+            resid_label="res",
+            legend_loc="upper left",
+            show=False,
+        )
+
+        legend = ax.get_legend()
+        assert legend is not None
+        assert [text.get_text() for text in legend.get_texts()] == ["exp", "fit", "res"]
 
 
 class TestMultiplotImports:
