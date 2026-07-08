@@ -249,6 +249,11 @@ _ = nd_oh_corr.plot()
 ax = components[:].plot(clear=False)
 ax.autoscale(enable=True, axis="y")
 
+# %% [markdown]
+# `plotmerit()` overlays the corrected spectrum, the fitted profile, and the
+# residuals. As in the fitting tutorial, we use a small residual offset to keep
+# the comparison readable in a notebook.
+
 # %%
 _ = opt.plotmerit(offset=15)
 
