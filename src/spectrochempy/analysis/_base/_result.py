@@ -5,6 +5,8 @@
 # ======================================================================================
 """Result object infrastructure for analysis and fit outputs."""
 
+import numpy as np
+
 from spectrochempy.utils.print import DisplayItem
 from spectrochempy.utils.print import DisplaySection
 from spectrochempy.utils.print import _html_heading
@@ -200,6 +202,8 @@ class FitResult(ResultBase):
         outputs=None,
         diagnostics=None,
         covariance=None,
+        variance=None,
+        stderr=None,
     ):
         super().__init__(
             estimator=estimator,
@@ -208,6 +212,8 @@ class FitResult(ResultBase):
             diagnostics=diagnostics,
         )
         self._covariance = covariance
+        self._variance = variance
+        self._stderr = stderr
 
     @property
     def covariance(self):
@@ -222,3 +228,43 @@ class FitResult(ResultBase):
             when covariance is unavailable.
         """
         return self._covariance
+
+    @property
+    def variance(self):
+        """
+        Approximate per-parameter variances derived from the covariance matrix.
+
+        Returns
+        -------
+        ndarray or None
+            Immutable 1D array containing the diagonal of
+            :attr:`covariance`. Returns ``None`` when covariance is unavailable.
+        """
+        if self._variance is None and self._covariance is not None:
+            variance = np.array(np.diag(self._covariance), copy=True, dtype=np.float64)
+            tiny_negative = (variance < 0.0) & np.isclose(variance, 0.0)
+            variance[tiny_negative] = 0.0
+            variance.flags.writeable = False
+            self._variance = variance
+        return self._variance
+
+    @property
+    def stderr(self):
+        """
+        Approximate per-parameter standard errors derived from covariance.
+
+        Returns
+        -------
+        ndarray or None
+            Immutable 1D array containing the square root of
+            :attr:`variance` when available. Returns ``None`` when covariance is
+            unavailable.
+        """
+        variance = self.variance
+        if self._stderr is None and variance is not None:
+            stderr = np.full_like(variance, np.nan, dtype=np.float64)
+            valid = np.isfinite(variance) & (variance >= 0.0)
+            stderr[valid] = np.sqrt(variance[valid])
+            stderr.flags.writeable = False
+            self._stderr = stderr
+        return self._stderr

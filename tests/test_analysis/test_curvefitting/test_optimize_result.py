@@ -265,6 +265,10 @@ class TestOptimizeResult:
         np.testing.assert_allclose(covariance, covariance.T)
         assert np.all(np.isfinite(np.diag(covariance)))
         assert np.all(np.diag(covariance) >= 0.0)
+        np.testing.assert_allclose(opt.result.variance, np.diag(covariance))
+        np.testing.assert_allclose(opt.result.stderr**2, opt.result.variance)
+        assert np.all(np.isfinite(opt.result.stderr))
+        assert np.all(opt.result.stderr >= 0.0)
 
     def test_rss_matches_residual_sum_of_squares(
         self, synthetic_two_peak_dataset, optimize_script
@@ -364,6 +368,8 @@ class TestOptimizeResult:
             diag["n_observations"] - diag["n_varying_parameters"]
         )
         assert opt.result.covariance is None
+        assert opt.result.variance is None
+        assert opt.result.stderr is None
 
     # ----------------------------------------------------------------------------------
     # Solver artifacts
@@ -423,6 +429,8 @@ class TestOptimizeResult:
 
         assert opt.jacobian is None
         assert opt.result.covariance is None
+        assert opt.result.variance is None
+        assert opt.result.stderr is None
 
     def test_jacobian_absent_for_basinhopping_backend(
         self, synthetic_two_peak_dataset, optimize_script, monkeypatch
@@ -456,6 +464,8 @@ class TestOptimizeResult:
 
         assert opt.jacobian is None
         assert opt.result.covariance is None
+        assert opt.result.variance is None
+        assert opt.result.stderr is None
 
     def test_jacobian_absent_for_dry_fit(
         self, synthetic_two_peak_dataset, optimize_script
@@ -468,6 +478,8 @@ class TestOptimizeResult:
 
         assert opt.jacobian is None
         assert opt.result.covariance is None
+        assert opt.result.variance is None
+        assert opt.result.stderr is None
 
     def test_fit_result_does_not_expose_jacobian(
         self, synthetic_two_peak_dataset, optimize_script
@@ -498,6 +510,12 @@ class TestOptimizeResult:
         assert covariance is not None
         assert covariance.shape == (
             opt.result.diagnostics["n_varying_parameters"],
+            opt.result.diagnostics["n_varying_parameters"],
+        )
+        assert opt.result.variance.shape == (
+            opt.result.diagnostics["n_varying_parameters"],
+        )
+        assert opt.result.stderr.shape == (
             opt.result.diagnostics["n_varying_parameters"],
         )
 
