@@ -107,7 +107,7 @@ ax.autoscale(enable=True, axis="y")
 # %%
 # plotmerit
 som = f1.inverse_transform()
-_ = f1.plotmerit(ndOH, som, method="scatter", markevery=5, markersize=2, lw=2)
+_ = f1.plotmerit(ndOH, som, offset=15)
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

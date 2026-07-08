@@ -494,7 +494,7 @@ ax.autoscale(enable=True, axis="y")
 
 # plotmerit
 som = fitted
-_ = f1.plotmerit(offset=0, kind="scatter")
+_ = f1.plotmerit(offset=15)
 
 
 # %% [markdown]
