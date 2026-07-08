@@ -548,12 +548,21 @@ components = f1.result.components
 # diagnostics are also available in `f1.result.diagnostics`, including
 # `aic` and `bic`.
 
-# Show the result
+# %% [markdown]
+# The fitted components remain regular datasets, so they can be plotted
+# directly against the corrected spectrum.
+
+# %%
 _ = ndOHcorr.plot()
 ax = (components[:]).plot(clear=False)
 ax.autoscale(enable=True, axis="y")
 
-# plotmerit
+# %% [markdown]
+# `plotmerit()` overlays the experimental spectrum, the fitted profile, and the
+# residuals. Here we use a small residual offset to keep the three traces easy
+# to inspect in a notebook.
+
+# %%
 som = fitted
 _ = f1.plotmerit(offset=15)
 
