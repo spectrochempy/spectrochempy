@@ -20,6 +20,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.lines import Line2D
 
+from spectrochempy.application.preferences import preferences as prefs
 from spectrochempy.plotting._render import render_lines
 from spectrochempy.utils.mplutils import make_label
 from spectrochempy.utils.mplutils import show as mpl_show
@@ -27,6 +28,13 @@ from spectrochempy.utils.mplutils import show as mpl_show
 # ======================================================================================
 # Generic comparison function
 # ======================================================================================
+
+
+def _make_default_axes():
+    """Create an axes using the current SpectroChemPy figure-size preference."""
+    figsize = tuple(prefs.figure.figsize)
+    _, ax = plt.subplots(figsize=figsize)
+    return ax
 
 
 def plot_compare(
@@ -71,7 +79,7 @@ def plot_compare(
     # Figure management (L3 only)
     # ----------------------------
     if ax is None:
-        _, ax = plt.subplots()
+        ax = _make_default_axes()
 
     if clear:
         ax.cla()
@@ -362,7 +370,7 @@ def plot_merit(
         # Plot all regularizations on same axes
         if index is None:
             if ax is None:
-                _, ax = plt.subplots()
+                ax = _make_default_axes()
 
             if clear:
                 ax.cla()
