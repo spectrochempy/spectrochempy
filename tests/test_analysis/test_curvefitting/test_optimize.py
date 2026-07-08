@@ -9,6 +9,7 @@ import pytest
 from numpy.testing import assert_allclose
 
 import spectrochempy as scp
+from spectrochempy.analysis.curvefitting.optimize import ConstraintError
 from spectrochempy.analysis.curvefitting.optimize import ScriptError
 
 
@@ -178,6 +179,132 @@ class TestValidateScript:
         _ = opt.validate_script()
         # validate_script must not mutate self.fp
         assert opt.fp is fp_before
+
+
+class TestValidateConstraints:
+    """Tests for Optimize.validate_constraints()."""
+
+    def test_empty_constraints_are_valid(self):
+        opt = scp.Optimize()
+        opt.script = VALID_SCRIPT
+        assert opt.validate_constraints(None) == []
+        assert opt.validate_constraints({}) == []
+        assert opt.validate_constraints([]) == []
+
+    def test_max_connections_short_form_is_valid(self):
+        opt = scp.Optimize()
+        opt.script = VALID_SCRIPT
+        errors = opt.validate_constraints({"max_connections": 2})
+        assert errors == []
+
+    def test_max_connections_long_form_with_parameters_is_valid(self):
+        opt = scp.Optimize()
+        opt.script = VALID_SCRIPT
+        errors = opt.validate_constraints(
+            {
+                "type": "max_connections",
+                "limit": 2,
+                "parameters": ["pos_line_1", "width_line_1"],
+            }
+        )
+        assert errors == []
+
+    def test_constraints_must_be_mapping_or_sequence_of_mappings(self):
+        opt = scp.Optimize()
+        opt.script = VALID_SCRIPT
+        errors = opt.validate_constraints("bad")
+        assert len(errors) == 1
+        assert "dict or a list/tuple" in errors[0].message
+
+    def test_unknown_constraint_type_is_reported(self):
+        opt = scp.Optimize()
+        opt.script = VALID_SCRIPT
+        errors = opt.validate_constraints(
+            {"type": "order", "parameters": ["pos_line_1"]}
+        )
+        assert len(errors) == 1
+        assert "Unsupported constraint type" in errors[0].message
+
+    def test_unknown_parameter_name_is_reported(self):
+        opt = scp.Optimize()
+        opt.script = VALID_SCRIPT
+        errors = opt.validate_constraints(
+            {
+                "type": "max_connections",
+                "limit": 1,
+                "parameters": ["pos_line_1", "missing_parameter"],
+            }
+        )
+        assert len(errors) == 1
+        assert "Unknown parameter name" in errors[0].message
+        assert "missing_parameter" in errors[0].message
+
+    def test_invalid_limit_is_reported(self):
+        opt = scp.Optimize()
+        opt.script = VALID_SCRIPT
+        errors = opt.validate_constraints({"max_connections": 0})
+        assert len(errors) == 1
+        assert "positive integer" in errors[0].message
+
+    def test_invalid_script_blocks_constraint_validation(self):
+        opt = scp.Optimize()
+        errors = opt.validate_constraints(
+            {"max_connections": 1},
+            script="MODEL: X\nshape gaussianmodel\n",
+        )
+        assert len(errors) == 1
+        assert "fitting script is invalid" in errors[0].message
+
+    def test_constraint_error_attributes(self):
+        err = ConstraintError(index=1, constraint={"max_connections": 2}, message="bad")
+        assert err.index == 1
+        assert err.constraint == {"max_connections": 2}
+        assert err.message == "bad"
+
+    def test_constraint_error_repr_and_str(self):
+        err = ConstraintError(index=1, constraint={"max_connections": 2}, message="bad")
+        assert "ConstraintError" in repr(err)
+        assert "Constraint 1" in str(err)
+
+    def test_constraints_trait_normalizes_short_form(self):
+        opt = scp.Optimize()
+        opt.script = VALID_SCRIPT
+        opt.constraints = {"max_connections": 2}
+        assert opt.constraints == {
+            "type": "max_connections",
+            "limit": 2,
+            "parameters": None,
+        }
+
+    def test_constraints_trait_normalizes_sequence(self):
+        opt = scp.Optimize()
+        opt.script = VALID_SCRIPT
+        opt.constraints = [{"max_connections": 2}]
+        assert opt.constraints == [
+            {"type": "max_connections", "limit": 2, "parameters": None}
+        ]
+
+    def test_constraints_trait_rejects_unknown_parameter(self):
+        opt = scp.Optimize()
+        opt.script = VALID_SCRIPT
+        with pytest.raises(ValueError, match="Unknown parameter name"):
+            opt.constraints = {
+                "type": "max_connections",
+                "limit": 1,
+                "parameters": ["missing_parameter"],
+            }
+
+    def test_fit_does_not_crash_when_constraints_are_present(
+        self, synthetic_two_peak_dataset, optimize_script
+    ):
+        opt = scp.Optimize()
+        opt.script = optimize_script
+        opt.autobase = True
+        opt.constraints = {"max_connections": 2}
+
+        result = opt.fit(synthetic_two_peak_dataset)
+
+        assert result is opt
 
 
 # -----------------------------------------------------------------------------------

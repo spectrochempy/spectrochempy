@@ -128,8 +128,11 @@ class TestOptimizeResult:
             "method",
             "max_iter",
             "max_fun_calls",
+            "dry",
             "autobase",
+            "autoampl",
             "amplitude_mode",
+            "constraints",
         ):
             assert name in params, f"{name} missing from result.parameters"
 
@@ -144,8 +147,11 @@ class TestOptimizeResult:
         params = opt.result.parameters
         assert params["method"] == "least_squares"
         assert params["max_iter"] == 10
+        assert params["dry"] is False
         assert params["autobase"] is True
+        assert params["autoampl"] is False
         assert params["amplitude_mode"] == "height"
+        assert params["constraints"] is None
 
     def test_parameters_match_estimator_config(
         self, synthetic_two_peak_dataset, optimize_script
@@ -153,14 +159,58 @@ class TestOptimizeResult:
         opt = scp.Optimize()
         opt.script = optimize_script
         opt.autobase = True
+        opt.autoampl = True
         opt.max_iter = 20
         opt.method = "simplex"
         opt.amplitude_mode = "area"
+        opt.constraints = {"max_connections": 2}
         opt.fit(synthetic_two_peak_dataset)
         params = opt.result.parameters
         assert params["method"] == "simplex"
         assert params["max_iter"] == 20
+        assert params["autoampl"] is True
         assert params["amplitude_mode"] == "area"
+        assert params["constraints"] == {
+            "type": "max_connections",
+            "limit": 2,
+            "parameters": None,
+        }
+
+    def test_parameters_capture_dry_mode(
+        self, synthetic_two_peak_dataset, optimize_script
+    ):
+        opt = scp.Optimize()
+        opt.script = optimize_script
+        opt.autobase = True
+        opt.dry = True
+
+        opt.fit(synthetic_two_peak_dataset)
+
+        params = opt.result.parameters
+        assert params["dry"] is True
+
+    def test_parameters_are_a_snapshot_of_fit_config(
+        self, synthetic_two_peak_dataset, optimize_script
+    ):
+        opt = scp.Optimize()
+        opt.script = optimize_script
+        opt.autobase = True
+        opt.autoampl = True
+        opt.max_iter = 20
+        opt.method = "simplex"
+
+        opt.fit(synthetic_two_peak_dataset)
+
+        opt.method = "least_squares"
+        opt.autoampl = False
+        opt.max_iter = 5
+        opt.constraints = {"max_connections": 1}
+
+        params = opt.result.parameters
+        assert params["method"] == "simplex"
+        assert params["autoampl"] is True
+        assert params["max_iter"] == 20
+        assert params["constraints"] is None
 
     # ----------------------------------------------------------------------------------
     # Diagnostics

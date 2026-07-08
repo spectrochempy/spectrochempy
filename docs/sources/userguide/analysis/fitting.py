@@ -459,6 +459,32 @@ errors  # should be an empty list if the script is valid
 # references are recognised.
 
 # %% [markdown]
+# `Optimize` also exposes `validate_constraints()` for lightweight validation of
+# constraint specifications before fitting. At the moment this is deliberately a
+# narrow surface: it validates the structure of recognized constraint specs and
+# any referenced parameter names from the script, but it should not yet be read
+# as a complete guarantee of backend-level constraint enforcement.
+#
+# The currently supported minimal schema is intentionally small. For example,
+# the following constraint specification is accepted and normalized:
+#
+# %%
+constraint_spec = {"max_connections": 2}
+f1.validate_constraints(constraint_spec)
+f1.constraints = constraint_spec
+f1.constraints
+
+# %% [markdown]
+# This currently demonstrates **validation and normalization of the public
+# constraint surface**. It should not yet be read as a promise of rich
+# constraint semantics during optimization. The short form shown above is
+# normalized to the canonical stored form:
+#
+# - short form: `{"max_connections": 2}`
+# - canonical form:
+#   `{"type": "max_connections", "limit": 2, "parameters": None}`
+
+# %% [markdown]
 # #### Choosing a fitting method
 #
 # `Optimize` currently exposes four public values for `method`:
@@ -468,25 +494,35 @@ errors  # should be an empty list if the script is valid
 # - `simplex`
 # - `basinhopping`
 #
-# In practice, these fall into three families:
+# In practice, these fall into three maintained families:
 #
-# | Public method | Type of search | Current internal path | Jacobian / covariance path |
-# | --- | --- | --- | --- |
-# | `least_squares` | local least-squares fit | SciPy `least_squares()` | yes, when available |
-# | `leastsq` | local least-squares fit | same SciPy `least_squares()` path | yes, when available |
-# | `simplex` | local derivative-free search | SciPy simplex (`fmin`) path | no |
-# | `basinhopping` | global-style exploratory search | SciPy `basinhopping()` | no |
+# | Public method | Current role | Type of search | Current internal path | Jacobian / covariance path |
+# | --- | --- | --- | --- | --- |
+# | `least_squares` | recommended local least-squares entrypoint | local least-squares fit | SciPy `least_squares()` | yes, when available |
+# | `leastsq` | compatibility alias | local least-squares fit | same SciPy `least_squares()` path | yes, when available |
+# | `simplex` | derivative-free local fallback | local derivative-free search | SciPy simplex (`fmin`) path | no |
+# | `basinhopping` | exploratory global-style option | global-style exploratory search | SciPy `basinhopping()` | no |
 #
-# A practical rule of thumb is:
+# The main user-facing guidance is:
 #
 # - start with `least_squares` for ordinary peak fitting and most well-initialized models;
-# - try `simplex` when you want a derivative-free local search;
-# - try `basinhopping` only when the landscape is difficult enough to justify a slower global-style exploration.
+# - treat `leastsq` mainly as a backwards-compatible spelling, not as a distinct maintained strategy;
+# - try `simplex` when you want a derivative-free local search and can accept losing the least-squares uncertainty path;
+# - try `basinhopping` only when the landscape is difficult enough to justify a slower exploratory search.
 #
 # The current implementation automatically chooses between the least-squares
 # backend variants `lm` and `trf` depending on the size of the varying-parameter
 # problem. This choice is internal: users select the high-level `method`, not
 # the low-level SciPy backend directly.
+
+# %%
+method_summary = {
+    "recommended_default": "least_squares",
+    "compatibility_alias": "leastsq",
+    "derivative_free_local": "simplex",
+    "exploratory_global": "basinhopping",
+}
+method_summary
 
 # %% [markdown]
 # #### Other useful fitting modes
@@ -533,6 +569,27 @@ components = f1.result.components
 # existing direct estimator surface. Direct access such as `f1.components`,
 # `f1.predict()`, and plotting helpers remains supported.
 #
+# `f1.result.parameters` stores the configuration snapshot of the completed
+# run: method choice, iteration limits, and fit-preparation options such as
+# `dry`, `autobase`, `autoampl`, `amplitude_mode`, and normalized
+# `constraints`. It should be read as **run configuration**, not as a table of
+# solved scientific parameter values.
+#
+# %%
+{
+    key: f1.result.parameters[key]
+    for key in (
+        "method",
+        "max_iter",
+        "dry",
+        "autobase",
+        "autoampl",
+        "amplitude_mode",
+        "constraints",
+    )
+}
+
+# %% [markdown]
 # Raw solver artifacts stay on the estimator. Least-squares-backed methods keep
 # the retained Jacobian on `f1.jacobian`, while `simplex`, `basinhopping`, and
 # dry fits return `None`. `f1.result.covariance` is the first scientific
