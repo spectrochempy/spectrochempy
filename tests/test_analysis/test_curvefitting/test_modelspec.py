@@ -7,6 +7,7 @@
 
 import sys
 
+import numpy as np
 import pytest
 
 from spectrochempy.analysis.curvefitting._modelspec import _ComponentSpec
@@ -14,6 +15,10 @@ from spectrochempy.analysis.curvefitting._modelspec import _FitModelSpec
 from spectrochempy.analysis.curvefitting._modelspec import _ParamSpec
 from spectrochempy.analysis.curvefitting._modelspec import _unbound
 from spectrochempy.analysis.curvefitting._parameters import FitParameters
+from spectrochempy.analysis.curvefitting.optimize import _count_varying_parameters
+from spectrochempy.analysis.curvefitting.optimize import (
+    _extract_varying_parameter_values,
+)
 from spectrochempy.analysis.curvefitting.optimize import _validate_script_content
 
 # ======================================================================================
@@ -703,3 +708,272 @@ class TestConstraintReserved:
     def test_constraints_is_stored(self):
         spec = _FitModelSpec(constraints={"dummy": True})
         assert spec.constraints == {"dummy": True}
+
+
+# ======================================================================================
+# Tests for count_varying
+# ======================================================================================
+
+
+class TestCountVarying:
+    """Test _FitModelSpec.count_varying()."""
+
+    SCRIPT = """
+MODEL: PEAK_A
+shape: gaussianmodel
+    $ ampl:  1.5, 0.0, none
+    $ pos:   100.0, 0.0, 200.0
+    $ width: 10.0, 0.0, none
+"""
+
+    def test_all_varying(self):
+        fp, _ = _validate_script_content(self.SCRIPT)
+        spec = _FitModelSpec.from_fitparameters(fp)
+        assert spec.count_varying() == 3
+
+    def test_one_fixed(self):
+        fp, _ = _validate_script_content(
+            "MODEL: X\nshape: gaussianmodel\n"
+            "    * ampl: 1.0, 0.0, none\n"
+            "    $ pos:  100.0, 0.0, 200.0\n"
+        )
+        spec = _FitModelSpec.from_fitparameters(fp)
+        assert spec.count_varying() == 1
+
+    def test_all_fixed(self):
+        fp, _ = _validate_script_content(
+            "MODEL: X\nshape: gaussianmodel\n"
+            "    * ampl: 1.0, 0.0, none\n"
+            "    * pos:  100.0, 0.0, 200.0\n"
+        )
+        spec = _FitModelSpec.from_fitparameters(fp)
+        assert spec.count_varying() == 0
+
+    def test_with_common(self):
+        script = """
+COMMON:
+    $ gratio: 0.1, 0.0, 1.0
+
+MODEL: X
+shape: gaussianmodel
+    $ ampl:  1.0, 0.0, none
+    $ pos:   100.0, 0.0, 200.0
+"""
+        fp, _ = _validate_script_content(script)
+        spec = _FitModelSpec.from_fitparameters(fp)
+        assert spec.count_varying() == 3
+
+    def test_with_reference(self):
+        script = """
+COMMON:
+    $ gratio: 0.1, 0.0, 1.0
+
+MODEL: X
+shape: gaussianmodel
+    $ ampl:  1.0, 0.0, none
+    > ratio: gratio
+"""
+        fp, _ = _validate_script_content(script)
+        spec = _FitModelSpec.from_fitparameters(fp)
+        # gratio varies, ampl varies, ratio is reference (fixed) → 2
+        assert spec.count_varying() == 2
+
+    def test_multiple_components(self):
+        script = """
+MODEL: A
+shape: gaussianmodel
+    $ ampl: 1.0, 0.0, none
+    $ pos:  100.0, 0.0, 200.0
+
+MODEL: B
+shape: lorentzianmodel
+    $ ampl: 0.5, 0.0, none
+    $ pos:  150.0, 0.0, 300.0
+    $ width: 10.0, 0.0, none
+"""
+        fp, _ = _validate_script_content(script)
+        spec = _FitModelSpec.from_fitparameters(fp)
+        assert spec.count_varying() == 5
+
+    def test_empty_spec(self):
+        spec = _FitModelSpec()
+        assert spec.count_varying() == 0
+
+    def test_none_fp(self):
+        assert _count_varying_parameters(None) == 0
+
+    def test_equivalence_with_fp_helper(self):
+        """Numerical equivalence with the existing FitParameters-based helper."""
+        fp, _ = _validate_script_content(self.SCRIPT)
+        spec = _FitModelSpec.from_fitparameters(fp)
+        assert spec.count_varying() == _count_varying_parameters(fp)
+
+    def test_equivalence_with_common(self):
+        script = """
+COMMON:
+    $ gratio: 0.1, 0.0, 1.0
+    * fixed_c: 5.0, 0.0, 10.0
+
+MODEL: X
+shape: gaussianmodel
+    $ ampl:  1.0, 0.0, none
+    * pos:   100.0, 0.0, 200.0
+    $ width: 10.0, 0.0, none
+"""
+        fp, _ = _validate_script_content(script)
+        spec = _FitModelSpec.from_fitparameters(fp)
+        assert spec.count_varying() == _count_varying_parameters(fp)
+        # gratio varies, ampl varies, width varies → 3
+        assert spec.count_varying() == 3
+
+
+# ======================================================================================
+# Tests for extract_varying_values
+# ======================================================================================
+
+
+class TestExtractVaryingValues:
+    """Test _FitModelSpec.extract_varying_values()."""
+
+    def test_single_component(self):
+        script = """
+MODEL: PEAK
+shape: gaussianmodel
+    $ ampl: 1.5, 0.0, none
+    $ pos:  100.0, 0.0, 200.0
+"""
+        fp, _ = _validate_script_content(script)
+        spec = _FitModelSpec.from_fitparameters(fp)
+        values = spec.extract_varying_values()
+        assert isinstance(values, np.ndarray)
+        assert values.shape == (2,)
+        assert values[0] == 1.5  # ampl_peak
+        assert values[1] == 100.0  # pos_peak
+
+    def test_fixed_param_excluded(self):
+        script = """
+MODEL: X
+shape: gaussianmodel
+    * ampl: 1.0, 0.0, none
+    $ pos:  100.0, 0.0, 200.0
+"""
+        fp, _ = _validate_script_content(script)
+        spec = _FitModelSpec.from_fitparameters(fp)
+        values = spec.extract_varying_values()
+        assert values.shape == (1,)
+        assert values[0] == 100.0
+
+    def test_all_fixed_returns_array(self):
+        script = """
+MODEL: X
+shape: gaussianmodel
+    * ampl: 1.0, 0.0, none
+    * pos:  100.0, 0.0, 200.0
+"""
+        fp, _ = _validate_script_content(script)
+        spec = _FitModelSpec.from_fitparameters(fp)
+        values = spec.extract_varying_values()
+        assert isinstance(values, np.ndarray)
+        assert values.shape == (0,)
+
+    def test_with_common(self):
+        script = """
+COMMON:
+    $ gratio: 0.1, 0.0, 1.0
+
+MODEL: X
+shape: gaussianmodel
+    $ ampl:  1.0, 0.0, none
+"""
+        fp, _ = _validate_script_content(script)
+        spec = _FitModelSpec.from_fitparameters(fp)
+        values = spec.extract_varying_values()
+        assert values.shape == (2,)
+        # Sorted key order: ampl_x < gratio
+        assert values[0] == 1.0  # ampl_x
+        assert values[1] == 0.1  # gratio
+
+    def test_reference_excluded(self):
+        script = """
+COMMON:
+    $ gratio: 0.1, 0.0, 1.0
+
+MODEL: X
+shape: gaussianmodel
+    $ ampl:  1.0, 0.0, none
+    > ratio: gratio
+"""
+        fp, _ = _validate_script_content(script)
+        spec = _FitModelSpec.from_fitparameters(fp)
+        values = spec.extract_varying_values()
+        assert values.shape == (2,)
+        # Sorted key order: ampl_x < gratio
+        assert values[0] == 1.0  # ampl_x
+        assert values[1] == 0.1  # gratio
+
+    def test_empty_spec_returns_empty_array(self):
+        spec = _FitModelSpec()
+        values = spec.extract_varying_values()
+        assert isinstance(values, np.ndarray)
+        assert values.shape == (0,)
+
+    def test_none_fp(self):
+        assert _extract_varying_parameter_values(None) is None
+
+    def test_deterministic_ordering(self):
+        """Parameter ordering is deterministic across multiple calls."""
+        script = """
+COMMON:
+    $ zed:   99.0, 0.0, 200.0
+    $ alpha: 0.5, 0.0, 1.0
+
+MODEL: B
+shape: lorentzianmodel
+    $ width: 20.0, 0.0, none
+
+MODEL: A
+shape: gaussianmodel
+    $ ampl: 1.0, 0.0, none
+    $ pos:  100.0, 0.0, 200.0
+"""
+        fp, _ = _validate_script_content(script)
+        spec = _FitModelSpec.from_fitparameters(fp)
+        v1 = spec.extract_varying_values().tolist()
+        v2 = spec.extract_varying_values().tolist()
+        assert v1 == v2
+
+    def test_equivalence_with_fp_helper(self):
+        """Numerical equivalence with the existing FitParameters-based helper."""
+        script = """
+COMMON:
+    $ gratio: 0.1, 0.0, 1.0
+
+MODEL: X
+shape: gaussianmodel
+    $ ampl:  1.5, 0.0, none
+    $ pos:   100.0, 0.0, 200.0
+"""
+        fp, _ = _validate_script_content(script)
+        spec = _FitModelSpec.from_fitparameters(fp)
+        spec_values = spec.extract_varying_values()
+        fp_values = _extract_varying_parameter_values(fp)
+        assert spec_values.shape == fp_values.shape
+        np.testing.assert_array_almost_equal(spec_values, fp_values)
+
+    def test_equivalence_multi_component(self):
+        script = """
+MODEL: A
+shape: gaussianmodel
+    $ ampl: 1.0, 0.0, none
+    $ pos:  100.0, 0.0, 200.0
+
+MODEL: B
+shape: lorentzianmodel
+    * ampl: 0.5, 0.0, none
+    $ pos:  150.0, 0.0, 300.0
+"""
+        fp, _ = _validate_script_content(script)
+        spec = _FitModelSpec.from_fitparameters(fp)
+        spec_values = spec.extract_varying_values()
+        fp_values = _extract_varying_parameter_values(fp)
+        np.testing.assert_array_almost_equal(spec_values, fp_values)
