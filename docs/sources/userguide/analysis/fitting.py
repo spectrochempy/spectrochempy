@@ -485,7 +485,9 @@ components = f1.result.components
 # confidence intervals derived from the fitted values, standard errors, and a
 # Student-t critical value based on the residual degrees of freedom. These
 # quantities are only available when a backend provides a stable Jacobian and
-# should not be confused with a full uncertainty report.
+# should not be confused with a full uncertainty report. Model-comparison
+# diagnostics are also available in `f1.result.diagnostics`, including
+# `aic` and `bic`.
 
 # Show the result
 _ = ndOHcorr.plot()

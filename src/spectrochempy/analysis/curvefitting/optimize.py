@@ -168,6 +168,22 @@ def _compute_fit_diagnostics(observed, fitted, solver_meta=None, fit_parameters=
     else:
         reduced_chi_square = float("nan")
 
+    if count > 0:
+        mean_squared_residual = rss / count
+        if mean_squared_residual < 0.0 or not np.isfinite(mean_squared_residual):
+            aic = float("nan")
+            bic = float("nan")
+        elif mean_squared_residual == 0.0:
+            aic = float("-inf")
+            bic = float("-inf")
+        else:
+            log_likelihood_term = float(count * np.log(mean_squared_residual))
+            aic = float(log_likelihood_term + (2.0 * n_varying_parameters))
+            bic = float(log_likelihood_term + (n_varying_parameters * np.log(count)))
+    else:
+        aic = float("nan")
+        bic = float("nan")
+
     diagnostics = {
         "n_observations": count,
         "n_varying_parameters": n_varying_parameters,
@@ -178,6 +194,8 @@ def _compute_fit_diagnostics(observed, fitted, solver_meta=None, fit_parameters=
         "r_squared": r_squared,
         "reduced_chi_square": reduced_chi_square,
         "adjusted_r_squared": adjusted_r_squared,
+        "aic": aic,
+        "bic": bic,
     }
     diagnostics.update(dict(solver_meta or {}))
     return residuals, diagnostics

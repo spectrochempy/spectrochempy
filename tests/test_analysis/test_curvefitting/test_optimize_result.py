@@ -187,6 +187,8 @@ class TestOptimizeResult:
             "r_squared",
             "reduced_chi_square",
             "adjusted_r_squared",
+            "aic",
+            "bic",
             "success",
             "status",
             "message",
@@ -212,6 +214,8 @@ class TestOptimizeResult:
         assert isinstance(diag["r_squared"], float)
         assert isinstance(diag["reduced_chi_square"], float)
         assert isinstance(diag["adjusted_r_squared"], float)
+        assert isinstance(diag["aic"], float)
+        assert isinstance(diag["bic"], float)
         assert isinstance(diag["success"], bool)
         assert isinstance(diag["message"], str)
 
@@ -245,6 +249,17 @@ class TestOptimizeResult:
         )
         assert np.isfinite(diag["adjusted_r_squared"])
         assert diag["adjusted_r_squared"] <= diag["r_squared"]
+        expected_aic = (
+            diag["n_observations"] * np.log(diag["rss"] / diag["n_observations"])
+            + 2 * diag["n_varying_parameters"]
+        )
+        expected_bic = (
+            diag["n_observations"] * np.log(diag["rss"] / diag["n_observations"])
+            + diag["n_varying_parameters"] * np.log(diag["n_observations"])
+        )
+        assert diag["aic"] == pytest.approx(expected_aic)
+        assert diag["bic"] == pytest.approx(expected_bic)
+        assert diag["bic"] >= diag["aic"]
         assert isinstance(diag["status"], int | type(None))
         assert opt.result.covariance is not None
 
@@ -351,6 +366,8 @@ class TestOptimizeResult:
         assert np.isnan(diagnostics["r_squared"])
         assert np.isnan(diagnostics["reduced_chi_square"])
         assert np.isnan(diagnostics["adjusted_r_squared"])
+        assert np.isnan(diagnostics["aic"])
+        assert np.isnan(diagnostics["bic"])
 
     def test_non_positive_degrees_of_freedom_are_stable(self):
         observed = scp.NDDataset(np.array([1.0, 2.0, 3.0], dtype=np.float64))
@@ -367,6 +384,8 @@ class TestOptimizeResult:
         assert diagnostics["degrees_of_freedom"] == 0
         assert np.isnan(diagnostics["reduced_chi_square"])
         assert np.isnan(diagnostics["adjusted_r_squared"])
+        assert diagnostics["aic"] == float("-inf")
+        assert diagnostics["bic"] == float("-inf")
 
         jacobian = np.eye(3)
         covariance = _compute_covariance_matrix(observed, fitted, jacobian, diagnostics)
@@ -390,6 +409,8 @@ class TestOptimizeResult:
         assert diag["degrees_of_freedom"] == (
             diag["n_observations"] - diag["n_varying_parameters"]
         )
+        assert np.isfinite(diag["aic"]) or np.isneginf(diag["aic"])
+        assert np.isfinite(diag["bic"]) or np.isneginf(diag["bic"])
         assert opt.result.covariance is None
         assert opt.result.variance is None
         assert opt.result.stderr is None
