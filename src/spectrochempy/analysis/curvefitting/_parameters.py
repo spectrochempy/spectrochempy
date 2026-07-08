@@ -10,7 +10,8 @@ import sys
 from collections import UserDict
 from contextlib import suppress
 
-import numpy as np
+from ._parameter_transform import _to_external
+from ._parameter_transform import _to_internal
 
 
 # =============================================================================
@@ -182,32 +183,7 @@ class FitParameters(UserDict):
             raise KeyError(f"parameter `{key}` is not found")
 
         pe = self.data[key][expi] if expi is not None else self.data[key]
-        lob = self.lob[key]
-        upb = self.upb[key]
-
-        is_lob = (
-            lob is not None and lob > -0.1 / sys.float_info.epsilon
-        )  # lob is not None
-        is_upb = (
-            lob is not None and upb < +0.1 / sys.float_info.epsilon
-        )  # upb is not None
-
-        if is_lob and is_upb:
-            lob = min(pe, lob)
-            upb = max(pe, upb)
-            # With min and max bounds defined
-            pi = np.arcsin((2 * (pe - lob) / (upb - lob)) - 1.0)
-        elif is_upb:
-            upb = max(pe, upb)
-            # With only max defined
-            pi = np.sqrt((upb - pe + 1.0) ** 2 - 1.0)
-        elif is_lob:
-            lob = min(pe, lob)
-            # With only min defined
-            pi = np.sqrt((pe - lob + 1.0) ** 2 - 1.0)
-        else:
-            pi = pe
-        return pi
+        return _to_internal(pe, self.lob[key], self.upb[key])
 
     # ----------------------------------------------------------------------------------
     def to_external(self, key, pi):
@@ -215,41 +191,8 @@ class FitParameters(UserDict):
         if key not in self.data:
             raise KeyError(f"parameter `{key}` is not found")
 
-        lob = self.lob[key]
-        upb = self.upb[key]
-
-        is_lob = (
-            lob is not None and lob > -0.1 / sys.float_info.epsilon
-        )  # lob is not None
-        is_upb = (
-            lob is not None and upb < +0.1 / sys.float_info.epsilon
-        )  # upb is not None
-
-        if not isinstance(pi, list):
-            pi = [
-                pi,
-            ]  # make a list
-
-        pe = []
-        for item in pi:
-            if is_lob and is_upb:
-                #  With min and max bounds defined
-                pei = lob + ((upb - lob) / 2.0) * (np.sin(item) + 1.0)
-            elif is_upb:
-                # With only max defined
-                pei = upb + 1.0 - np.sqrt(item**2 + 1.0)
-            elif is_lob:
-                # With only min defined
-                pei = lob - 1.0 + np.sqrt(item**2 + 1.0)
-            else:
-                pei = pi
-            pe.append(pei)
-
-        if len(pe) == 1:
-            pe = pe[0]
-
+        pe = _to_external(pi, self.lob[key], self.upb[key])
         self.data[key] = pe
-
         return pe
 
     def copy(self):
