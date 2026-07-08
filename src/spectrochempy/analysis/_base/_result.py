@@ -6,6 +6,7 @@
 """Result object infrastructure for analysis and fit outputs."""
 
 import numpy as np
+from scipy import stats
 
 from spectrochempy.utils.print import DisplayItem
 from spectrochempy.utils.print import DisplaySection
@@ -205,6 +206,9 @@ class FitResult(ResultBase):
         variance=None,
         stderr=None,
         correlation=None,
+        parameter_values=None,
+        confidence_intervals=None,
+        confidence_level=0.95,
     ):
         super().__init__(
             estimator=estimator,
@@ -216,6 +220,9 @@ class FitResult(ResultBase):
         self._variance = variance
         self._stderr = stderr
         self._correlation = correlation
+        self._parameter_values = parameter_values
+        self._confidence_intervals = confidence_intervals
+        self._confidence_level = confidence_level
 
     @property
     def covariance(self):
@@ -304,3 +311,47 @@ class FitResult(ResultBase):
             correlation.flags.writeable = False
             self._correlation = correlation
         return self._correlation
+
+    @property
+    def confidence_level(self):
+        """Confidence level used for :attr:`confidence_intervals`."""
+        return self._confidence_level
+
+    @property
+    def confidence_intervals(self):
+        """
+        Approximate two-sided confidence intervals for varying parameters.
+
+        Returns
+        -------
+        ndarray or None
+            Immutable array of shape ``(n_parameters, 2)`` containing lower and
+            upper bounds for approximate 95% confidence intervals derived from
+            the fitted parameter values, standard errors, and Student-t critical
+            value based on the residual degrees of freedom. Returns ``None``
+            when the required uncertainty information is unavailable.
+        """
+        stderr = self.stderr
+        values = self._parameter_values
+        degrees_of_freedom = int(self.diagnostics.get("degrees_of_freedom", 0))
+
+        if (
+            self._confidence_intervals is None
+            and stderr is not None
+            and values is not None
+            and degrees_of_freedom > 0
+        ):
+            values = np.asarray(values, dtype=np.float64)
+            if values.shape != stderr.shape:
+                return None
+
+            alpha = 1.0 - float(self._confidence_level)
+            t_value = stats.t.ppf(1.0 - (alpha / 2.0), degrees_of_freedom)
+            if not np.isfinite(t_value):
+                return None
+
+            delta = t_value * stderr
+            intervals = np.column_stack((values - delta, values + delta))
+            intervals.flags.writeable = False
+            self._confidence_intervals = intervals
+        return self._confidence_intervals

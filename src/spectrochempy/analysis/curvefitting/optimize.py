@@ -102,6 +102,27 @@ def _count_varying_parameters(fp):
     return int(n_varying)
 
 
+def _extract_varying_parameter_values(fp):
+    """Return fitted varying-parameter values in optimizer order."""
+    if fp is None:
+        return None
+
+    values = []
+    for key in sorted(fp.keys()):
+        if fp.fixed[key]:
+            continue
+        key_prefix = key.split("_")[0]
+        value = fp[key]
+        if key_prefix in fp.expvars:
+            values.extend(np.asarray(value, dtype=np.float64).reshape(-1).tolist())
+        else:
+            values.append(float(value))
+
+    array = np.array(values, dtype=np.float64)
+    array.flags.writeable = False
+    return array
+
+
 def _compute_fit_diagnostics(observed, fitted, solver_meta=None, fit_parameters=None):
     """Compute residual output and basic fit-quality diagnostics."""
     if getattr(observed, "size", None) == 0 or getattr(fitted, "size", None) == 0:
@@ -1411,6 +1432,7 @@ class Optimize(DecompositionAnalysis):
             self.jacobian,
             fit_diagnostics,
         )
+        parameter_values = _extract_varying_parameter_values(self.fp)
 
         return FitResult(
             estimator="Optimize",
@@ -1428,6 +1450,7 @@ class Optimize(DecompositionAnalysis):
             },
             diagnostics=fit_diagnostics,
             covariance=covariance,
+            parameter_values=parameter_values,
         )
 
 
