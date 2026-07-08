@@ -534,11 +534,32 @@ def _validate_script_content(script, usermodels=None):
 @signature_has_configurable_traits
 class Optimize(DecompositionAnalysis):
     """
-    Non-linear Least-Square Optimization and Curve-Fitting.
+    Non-linear curve fitting driven by the SpectroChemPy fitting DSL.
 
-    Works on a 1D or 2D dataset.
+    `Optimize` combines:
 
-    # TODO: complete this description
+    - script-based model definition through :attr:`script`;
+    - pre-fit validation through :meth:`validate_script`;
+    - multiple public optimization-method families through :attr:`method`;
+    - estimator-level access to raw solver artifacts such as :attr:`jacobian`;
+    - grouped scientific outputs and diagnostics through :attr:`result`.
+
+    The current public `method` values are:
+
+    - ``"least_squares"``
+    - ``"leastsq"``
+    - ``"simplex"``
+    - ``"basinhopping"``
+
+    Least-squares-backed methods are the only ones that currently expose the
+    retained Jacobian and the resulting uncertainty path on
+    :class:`~spectrochempy.analysis._base._result.FitResult`
+    (covariance, standard errors, correlation, and confidence intervals).
+
+    Notes
+    -----
+    The current implementation supports only 1D fitting. Multi-dimensional
+    datasets are not yet handled by :meth:`fit`.
 
     Parameters
     ----------
@@ -546,13 +567,11 @@ class Optimize(DecompositionAnalysis):
         The log level at startup. It can be changed later on using the
         `set_log_level` method or by changing the ``log_level`` attribute.
     warm_start : `bool`, optional, default: `False`
-        When fitting repeatedly on the same dataset, but for multiple
-        parameter values (such as to find the value maximizing performance),
-        reuse the solution of the previous call to fit and add more components
-        (if available) in a sequential manner.
-
-        When `warm_start` is `True`, the existing fitted model attributes is used to
-        initialize the new model in a subsequent call to `fit`.
+        Preserve the current estimator configuration instead of forcing a full
+        reset to default configuration values during estimator reinitialization.
+        This is a general estimator-state option shared with other
+        SpectroChemPy analysis classes; it should not be interpreted as a
+        dedicated `Optimize` solver-backend feature.
 
     """
 
@@ -579,7 +598,12 @@ class Optimize(DecompositionAnalysis):
     method = tr.CaselessStrEnum(
         ["least_squares", "leastsq", "simplex", "basinhopping"],
         default_value="least_squares",
-        help="Optimization method (see scipy.optimize docs for details).",
+        help=(
+            "High-level optimization-method selector. "
+            "'least_squares' and 'leastsq' use the least-squares backend path; "
+            "'simplex' uses a derivative-free local search; "
+            "'basinhopping' uses a global-style exploratory search."
+        ),
     ).tag(config=True)
 
     script = tr.Unicode(help="Script defining models and parameters for fitting.").tag(
@@ -592,24 +616,23 @@ class Optimize(DecompositionAnalysis):
 
     dry = tr.Bool(
         default_value=False,
-        help="If True perform a dry run. "
-        "Mainly used to check the validity of the input parameters.",
+        help="If True, assemble the starting model without running the optimizer.",
     ).tag(config=True)
 
     autobase = tr.Bool(
         default_value=False,
-        help="Whether to apply an automatic baseline correction.",
+        help="Whether to estimate and apply a linear baseline correction automatically.",
     ).tag(config=True)
 
     autoampl = tr.Bool(
         default_value=False,
-        help="Whether to apply an automatic amplitude correction.",
+        help="Whether to estimate initial amplitudes automatically during setup.",
     ).tag(config=True)
 
     amplitude_mode = tr.CaselessStrEnum(
         ["area", "height"],
         default_value="height",
-        help="Initial amplitude setting mode.",
+        help="How line-shape amplitudes are interpreted during initialisation.",
     ).tag(config=True)
 
     # ----------------------------------------------------------------------------------
@@ -637,7 +660,9 @@ class Optimize(DecompositionAnalysis):
         log_level : str, optional
             Logging level, by default "WARNING".
         warm_start : bool, optional
-            If True, use warm start, by default False.
+            Preserve the current estimator configuration rather than resetting
+            it to defaults during estimator reinitialization. This does not
+            add any dedicated `Optimize` backend-specific warm-start strategy.
         **kwargs : dict
             Additional keyword arguments.
         """
