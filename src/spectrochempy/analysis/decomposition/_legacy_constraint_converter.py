@@ -1,0 +1,281 @@
+# ======================================================================================
+# Copyright (©) 2014-2026 Laboratoire Catalalyse et Spectrochimie (LCS), Caen, France.
+# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
+# See full LICENSE agreement in the root directory.
+# ======================================================================================
+"""
+Private converter from legacy MCRALS traitlet configuration to public Constraint objects.
+
+This module translates the existing (traitlet-based) estimator parameters of
+:class:`~spectrochempy.analysis.decomposition.mcrals.MCRALS` into instances
+of the public constraint classes defined in
+:mod:`spectrochempy.analysis.decomposition.mcrals_constraints`.
+
+The converter is purely declarative: it reads the current traitlet values and
+produces the corresponding public constraint objects.  It does **not** modify
+the estimator, does **not** change any numerical behaviour, and is **not**
+connected to the internal ALS constraint engine.
+
+Typical usage::
+
+    from spectrochempy.analysis.decomposition._legacy_constraint_converter import (
+        legacy_to_constraints,
+    )
+
+    mcr = MCRALS(...)
+    constraints = legacy_to_constraints(mcr)
+
+Use ``constraints`` as the ``constraints=`` keyword argument to ``MCRALS``
+once the public API is connected to the engine (future PR).
+"""
+
+__all__ = ["legacy_to_constraints"]
+
+from spectrochempy.analysis.decomposition.mcrals_constraints import Closure
+from spectrochempy.analysis.decomposition.mcrals_constraints import ModelProfile
+from spectrochempy.analysis.decomposition.mcrals_constraints import Monotonic
+from spectrochempy.analysis.decomposition.mcrals_constraints import NonNegative
+from spectrochempy.analysis.decomposition.mcrals_constraints import Unimodal
+
+# ---------------------------------------------------------------------------------------
+# Sentinel used to indicate "all components".
+# ---------------------------------------------------------------------------------------
+_ALL = object()
+
+
+def legacy_to_constraints(estimator):
+    """
+    Convert legacy MCRALS traitlets to public Constraint objects.
+
+    Parameters
+    ----------
+    estimator : MCRALS
+        The MCRALS estimator instance whose traitlets will be read.
+
+    Returns
+    -------
+    list[Constraint]
+        List of public constraint objects representing the current
+        estimator configuration.
+
+    Notes
+    -----
+    The returned list is ordered by profile side (concentration first,
+    then spectral).  Within each side the order matches the historical
+    constraint application order used in the internal engine:
+    non-negativity → unimodality → monotonicity → closure → model-based
+    (hard-profile) constraints.
+
+    Normalization (``normSpec``) is a joint operation on both ``C`` and
+    ``St`` and has no corresponding public constraint class at this time;
+    it is not emitted by this converter.
+    """
+    constraints = []
+    constraints.extend(_conc_constraints(estimator))
+    constraints.extend(_spec_constraints(estimator))
+    return constraints
+
+
+# ---------------------------------------------------------------------------------------
+# Concentration-side converters
+# ---------------------------------------------------------------------------------------
+
+
+def _conc_constraints(estimator):
+    """Build the list of public constraints for the concentration side."""
+    result = []
+
+    # nonnegConc -> NonNegative("C", ...)
+    nn = _to_components(estimator.nonnegConc)
+    if nn is _ALL:
+        result.append(NonNegative("C"))
+    elif nn is not None:
+        result.append(NonNegative("C", components=nn))
+
+    # unimodConc -> Unimodal("C", ...)
+    um = _to_components(estimator.unimodConc)
+    if um is _ALL:
+        result.append(
+            Unimodal("C", mod=_str_or_default(estimator.unimodConcMod, "strict"))
+        )
+    elif um is not None:
+        result.append(
+            Unimodal(
+                "C",
+                components=um,
+                mod=_str_or_default(estimator.unimodConcMod, "strict"),
+            )
+        )
+
+    # monoIncConc -> Monotonic("C", "increasing", ...)
+    mi = _to_components(estimator.monoIncConc)
+    if mi is _ALL:
+        result.append(Monotonic("C", "increasing", tolerance=estimator.monoIncTol))
+    elif mi is not None:
+        result.append(
+            Monotonic(
+                "C",
+                "increasing",
+                components=mi,
+                tolerance=estimator.monoIncTol,
+            )
+        )
+
+    # monoDecConc -> Monotonic("C", "decreasing", ...)
+    md = _to_components(estimator.monoDecConc)
+    if md is _ALL:
+        result.append(Monotonic("C", "decreasing", tolerance=estimator.monoDecTol))
+    elif md is not None:
+        result.append(
+            Monotonic(
+                "C",
+                "decreasing",
+                components=md,
+                tolerance=estimator.monoDecTol,
+            )
+        )
+
+    # closureConc -> Closure("C", ...)
+    cc = _to_components(estimator.closureConc)
+    if cc is _ALL:
+        result.append(Closure("C", target=_extract_closure_target(estimator)))
+    elif cc is not None:
+        result.append(
+            Closure("C", components=cc, target=_extract_closure_target(estimator))
+        )
+
+    # hardConc + getConc -> ModelProfile("C", ...)
+    hc = _to_components(estimator.hardConc)
+    if hc is _ALL and callable(estimator.getConc):
+        result.append(ModelProfile("C", model=estimator.getConc))
+    elif hc is not None and callable(estimator.getConc):
+        result.append(ModelProfile("C", components=hc, model=estimator.getConc))
+
+    return result
+
+
+# ---------------------------------------------------------------------------------------
+# Spectral-side converters
+# ---------------------------------------------------------------------------------------
+
+
+def _spec_constraints(estimator):
+    """Build the list of public constraints for the spectral side."""
+    result = []
+
+    # nonnegSpec -> NonNegative("St", ...)
+    nn = _to_components(estimator.nonnegSpec)
+    if nn is _ALL:
+        result.append(NonNegative("St"))
+    elif nn is not None:
+        result.append(NonNegative("St", components=nn))
+
+    # unimodSpec -> Unimodal("St", ...)
+    um = _to_components(estimator.unimodSpec)
+    if um is _ALL:
+        result.append(
+            Unimodal("St", mod=_str_or_default(estimator.unimodSpecMod, "strict"))
+        )
+    elif um is not None:
+        result.append(
+            Unimodal(
+                "St",
+                components=um,
+                mod=_str_or_default(estimator.unimodSpecMod, "strict"),
+            )
+        )
+
+    # hardSpec + getSpec -> ModelProfile("St", ...)
+    hs = _to_components(estimator.hardSpec)
+    if hs is _ALL and callable(estimator.getSpec):
+        result.append(ModelProfile("St", model=estimator.getSpec))
+    elif hs is not None and callable(estimator.getSpec):
+        result.append(ModelProfile("St", components=hs, model=estimator.getSpec))
+
+    return result
+
+
+# ---------------------------------------------------------------------------------------
+# Conversion helpers
+# ---------------------------------------------------------------------------------------
+
+
+def _to_components(value):
+    """
+    Normalise a legacy traitlet value.
+
+    Parameters
+    ----------
+    value : str or list or ndarray or None
+        The raw traitlet value.
+
+    Returns
+    -------
+    _ALL, list[int], or None
+        * ``_ALL`` means "the constraint applies to all components"
+          (call the public constructor without ``components``).
+        * ``list[int]`` means "the constraint applies to the listed components".
+        * ``None`` means the constraint is inactive and should not be emitted.
+    """
+    if value is None:
+        return None
+    if isinstance(value, str):
+        return _ALL if value == "all" else None
+    # list, tuple, or ndarray
+    try:
+        lst = list(value)
+    except TypeError:
+        return None
+    if not lst:
+        return None
+    return [int(i) for i in lst]
+
+
+def _extract_closure_target(estimator):
+    """
+    Extract the closure target from the legacy ``closureTarget`` traitlet.
+
+    The legacy ``closureTarget`` is either the string ``"default"`` (which
+    resolves to an array of ones at fit time) or an array of per-observation
+    target values.  The public :class:`Closure` constraint accepts both
+    scalars and array-like targets, so this helper passes array-like values
+    through directly.
+
+    Parameters
+    ----------
+    estimator : MCRALS
+        The estimator instance.
+
+    Returns
+    -------
+    float or array-like
+        The closure target.  ``"default"`` is mapped to the scalar ``1.0``.
+    """
+    target = estimator.closureTarget
+    if isinstance(target, str):
+        return 1.0  # "default"
+    return target
+
+
+def _str_or_default(value, default):
+    """
+    Return ``value`` if it is a string, otherwise ``default``.
+
+    Some traitlet validators (e.g. ``unimodConcMod``) are enums that are
+    always a string.  This helper handles the general case where the
+    value might be a non-string before the validator has run.
+
+    Parameters
+    ----------
+    value : object
+        The traitlet value.
+    default : str
+        Default to return if ``value`` is not a string.
+
+    Returns
+    -------
+    str
+    """
+    if isinstance(value, str):
+        return value
+    return default

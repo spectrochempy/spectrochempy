@@ -251,38 +251,82 @@ def _validate_target(target, *, name="target"):
     """
     Validate a closure target.
 
-    The target is a positive number that the selected components should
-    sum to (e.g. ``1.0`` for unit-sum closure). A zero target would
-    imply all selected components are identically zero, which is not a
-    meaningful closure and is rejected.
+    The target is either:
+
+    * a positive scalar number that the selected components should sum to
+      at every row (e.g. ``1.0`` for unit-sum closure), or
+    * an array-like of per-row target values.
+
+    A zero scalar target would imply all selected components are
+    identically zero, which is not a meaningful closure and is rejected.
+    Array-like targets are validated only for being an admissible
+    array-like — shape and positivity checks are deferred to the
+    enforcement engine.
 
     Parameters
     ----------
-    target : float
-        Closure target.
+    target : float or array-like
+        Closure target.  A scalar must be strictly positive.  An
+        array-like is passed through without copying or shape validation.
     name : str, optional
         Argument name used in error messages.
 
     Raises
     ------
     TypeError
-        If ``target`` is not a real number.
+        If ``target`` is a boolean, a string, ``None``, or another
+        non-numeric, non-iterable object.
     ValueError
-        If ``target`` is not strictly positive.
+        If ``target`` is a scalar that is not strictly positive.
 
     Returns
     -------
-    float
-        The validated target as a float.
+    float or object
+        The validated target.  Scalars are returned as ``float``;
+        array-likes are returned unchanged (no copy).
     """
-    if isinstance(target, bool) or not isinstance(target, (int, float)):
-        raise TypeError(
-            f"{name} must be a positive real number, got {type(target).__name__!r}."
-        )
-    t = float(target)
-    if t <= 0.0:
-        raise ValueError(f"{name} must be strictly positive, got {t!r}.")
-    return t
+    if isinstance(target, bool):
+        raise TypeError(f"{name} must be a numeric scalar or array-like, got bool.")
+    # Scalar case: must be a positive number.
+    if isinstance(target, (int, float)):
+        t = float(target)
+        if t <= 0.0:
+            raise ValueError(f"{name} must be strictly positive, got {t!r}.")
+        return t
+    # Array-like case: delegate to the generic array-like validator.
+    # None, strings, and scalars are already rejected above.
+    return _validate_array_like(target, name=name)
+
+
+def _targets_equal(a, b):
+    """
+    Compare two closure-target values, handling array-likes correctly.
+
+    Scalars are compared with ``==``.  Array-likes are compared via
+    :func:`numpy.array_equal` so that element-wise comparison yields a
+    single boolean (rather than a per-element array that would confuse
+    tuple comparison in the base-class ``__eq__``).
+
+    Parameters
+    ----------
+    a : float or array-like
+    b : float or array-like
+
+    Returns
+    -------
+    bool
+    """
+    a_is_scalar = isinstance(a, (int, float))
+    b_is_scalar = isinstance(b, (int, float))
+    if a_is_scalar and b_is_scalar:
+        return a == b
+    if a_is_scalar != b_is_scalar:
+        return False
+    # Both are array-like.
+    try:
+        return bool(np.array_equal(a, b))
+    except Exception:  # noqa: BLE001
+        return False
 
 
 def _validate_region(region, *, name="region"):
@@ -686,8 +730,10 @@ class Closure(Constraint):
     components : list[int], optional
         Component indices included in the closure. ``None`` (default)
         means "all components".
-    target : float, optional
-        Target sum for the selected components. Default is ``1.0``.
+    target : float or array-like, optional
+        Target sum for the selected components.  A scalar is applied
+        to every row; an array-like supplies one target per row.
+        Default is ``1.0``.
 
     Examples
     --------
@@ -696,6 +742,9 @@ class Closure(Constraint):
     Closure(profile='C', components=None, target=1.0)
     >>> Closure("C", components=[0, 1], target=100.0)
     Closure(profile='C', components=[0, 1], target=100.0)
+    >>> import numpy as np
+    >>> Closure("C", target=np.array([1.0, 1.0, 1.0]))
+    Closure(profile='C', components=None, target=array([1., 1., 1.]))
     """
 
     def __init__(self, profile, components=None, target=1.0):
@@ -717,8 +766,29 @@ class Closure(Constraint):
 
     @property
     def target(self):
-        """float: Target sum for the selected components."""
+        """Float or array-like: Target sum for the selected components."""
         return self._target
+
+    # -- equality --------------------------------------------------------
+    # Override base-class ``__eq__`` so that array-valued targets are
+    # compared element-wise via ``np.array_equal`` rather than through
+    # the default tuple-element comparison (which would fail when one
+    # element is a numpy array).
+
+    def __eq__(self, other):
+        if type(self) is not type(other):
+            return NotImplemented
+        if self._profile != other._profile:
+            return False
+        if self._components != other._components:
+            return False
+        return _targets_equal(self._target, other._target)
+
+    def __ne__(self, other):
+        result = self.__eq__(other)
+        if result is NotImplemented:
+            return result
+        return not result
 
 
 class Unimodal(Constraint):
