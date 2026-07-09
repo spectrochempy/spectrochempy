@@ -296,6 +296,27 @@ class _FitModelSpec:
         array.flags.writeable = False
         return array
 
+    # ------------------------------------------------------------------
+    def component_view(self, label: str):
+        """
+        Return a ``_ComponentParamsView`` for the component identified by *label*.
+
+        Parameters
+        ----------
+        label : str
+            Component label to look up.
+
+        Returns
+        -------
+        _ComponentParamsView
+            Lightweight view providing ``.model`` dict and ``__getitem__``
+            compatible with :func:`getmodel`.
+        """
+        for comp in self.components:
+            if comp.label == label:
+                return _ComponentParamsView(comp, self.common_params)
+        raise KeyError(f"Component '{label}' not found in spec")
+
 
 def _format_bound(val: float | None) -> str:
     """Format a bound value for script output."""
@@ -305,3 +326,54 @@ def _format_bound(val: float | None) -> str:
     if val == int(val):
         return f"{int(val)}"
     return f"{val:.4f}"
+
+
+# ======================================================================================
+class _ComponentParamsView:
+    """
+    Lightweight parameter-view for a single component.
+
+    Provides the two operations that :func:`getmodel` needs from its
+    ``par`` argument:
+
+    * ``.model[component_label]`` → model shape name
+    * ``par[f"{param}_{label}"]`` → parameter value
+
+    This allows :func:`getmodel` to operate on structured model data
+    without depending on the ``{param}_{label}`` parser convention.
+    """
+
+    def __init__(
+        self,
+        component: _ComponentSpec,
+        common_params: dict[str, _ParamSpec] | None = None,
+    ):
+        self._component = component
+        self._common = dict(common_params or {})
+
+        # .model dict for getmodel: {label: model_name}
+        self.model = {component.label: component.model_name}
+
+    # ------------------------------------------------------------------
+    def __getitem__(self, key: str):
+        # Key is f"{param}_{label}" — strip the known label suffix
+        suffix = f"_{self._component.label}"
+        raw_name = key[: -len(suffix)] if key.endswith(suffix) else key
+
+        # Look up in component params first
+        if raw_name in self._component.params:
+            return float(self._component.params[raw_name].value)
+
+        # Fall back to common params
+        if raw_name in self._common:
+            return float(self._common[raw_name].value)
+
+        raise KeyError(key)
+
+    # ------------------------------------------------------------------
+    def __contains__(self, key):
+        try:
+            self[key]
+            return True
+        except KeyError:
+            return False

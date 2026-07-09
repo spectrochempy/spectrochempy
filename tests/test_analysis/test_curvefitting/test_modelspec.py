@@ -20,6 +20,7 @@ from spectrochempy.analysis.curvefitting.optimize import (
     _extract_varying_parameter_values,
 )
 from spectrochempy.analysis.curvefitting.optimize import _validate_script_content
+from spectrochempy.analysis.curvefitting.optimize import getmodel
 
 # ======================================================================================
 # Constants
@@ -977,3 +978,199 @@ shape: lorentzianmodel
         spec_values = spec.extract_varying_values()
         fp_values = _extract_varying_parameter_values(fp)
         np.testing.assert_array_almost_equal(spec_values, fp_values)
+
+
+# ======================================================================================
+# Tests for _ComponentParamsView
+# ======================================================================================
+
+
+class TestComponentParamsView:
+    """Test the _ComponentParamsView adapter."""
+
+    def test_model_dict(self):
+        spec = _FitModelSpec(
+            components=[
+                _ComponentSpec(
+                    label="peak_a",
+                    model_name="gaussianmodel",
+                    params={
+                        "ampl": _ParamSpec(name="ampl", value=1.5),
+                    },
+                )
+            ]
+        )
+        view = spec.component_view("peak_a")
+        assert view.model == {"peak_a": "gaussianmodel"}
+
+    def test_getitem_by_param_name(self):
+        spec = _FitModelSpec(
+            components=[
+                _ComponentSpec(
+                    label="peak_a",
+                    model_name="gaussianmodel",
+                    params={
+                        "ampl": _ParamSpec(name="ampl", value=1.5),
+                        "pos": _ParamSpec(name="pos", value=100.0),
+                    },
+                )
+            ]
+        )
+        view = spec.component_view("peak_a")
+        assert view["ampl_peak_a"] == 1.5
+        assert view["pos_peak_a"] == 100.0
+
+    def test_getitem_fallback_to_common(self):
+        spec = _FitModelSpec(
+            components=[
+                _ComponentSpec(
+                    label="x",
+                    model_name="gaussianmodel",
+                    params={
+                        "ampl": _ParamSpec(name="ampl", value=1.0),
+                    },
+                )
+            ],
+            common_params={
+                "gratio": _ParamSpec(name="gratio", value=0.1),
+            },
+        )
+        view = spec.component_view("x")
+        # Common params accessible by bare name
+        assert view["gratio"] == 0.1
+
+    def test_getitem_raises_keyerror_for_unknown(self):
+        spec = _FitModelSpec(
+            components=[
+                _ComponentSpec(
+                    label="x",
+                    model_name="gaussianmodel",
+                    params={
+                        "ampl": _ParamSpec(name="ampl", value=1.0),
+                    },
+                )
+            ]
+        )
+        view = spec.component_view("x")
+        with pytest.raises(KeyError):
+            view["nonexistent_x"]
+
+    def test_contains(self):
+        spec = _FitModelSpec(
+            components=[
+                _ComponentSpec(
+                    label="x",
+                    model_name="gaussianmodel",
+                    params={
+                        "ampl": _ParamSpec(name="ampl", value=1.0),
+                    },
+                )
+            ]
+        )
+        view = spec.component_view("x")
+        assert "ampl_x" in view
+        assert "nonexistent_x" not in view
+
+    def test_component_view_raises_for_missing_label(self):
+        spec = _FitModelSpec()
+        with pytest.raises(KeyError, match="not found in spec"):
+            spec.component_view("nonexistent")
+
+
+class TestGetModelEquivalence:
+    """Test that getmodel produces identical results with _ComponentParamsView."""
+
+    SCRIPT = """
+MODEL: PEAK
+shape: gaussianmodel
+    $ ampl: 1.5, 0.0, none
+    $ pos:  100.0, 0.0, 200.0
+    $ width: 10.0, 0.0, none
+"""
+
+    def _build_view(self, script, component_label):
+        """Parse script, return (fp, view) for equivalence testing."""
+        fp, errors = _validate_script_content(script)
+        assert errors == []
+        spec = _FitModelSpec.from_fitparameters(fp)
+        view = spec.component_view(component_label)
+        return fp, view
+
+    def test_model_dict_matches_fp(self):
+        """The view's .model dict matches fp.model for the same label."""
+        fp, _ = _validate_script_content(self.SCRIPT)
+        spec = _FitModelSpec.from_fitparameters(fp)
+        view = spec.component_view("peak")
+        # fp.model maps label → shape name
+        assert view.model["peak"] == fp.model["peak"]
+
+    def test_parameter_values_match(self):
+        """Parameter values from the view match those from FitParameters."""
+        fp, _ = _validate_script_content(self.SCRIPT)
+        spec = _FitModelSpec.from_fitparameters(fp)
+        view = spec.component_view("peak")
+
+        for raw_name in spec.components[0].params:
+            fp_key = f"{raw_name}_peak"
+            assert view[fp_key] == float(fp[fp_key])
+
+    def test_getmodel_equivalence_single_component(self):
+        """Getmodel output is identical with _ComponentParamsView vs FitParameters."""
+        fp, view = self._build_view(self.SCRIPT, "peak")
+        x = np.linspace(-50, 50, 201, dtype=np.float64)
+
+        result_fp = getmodel(x, modelname="peak", par=fp)
+        result_view = getmodel(x, modelname="peak", par=view)
+
+        np.testing.assert_array_almost_equal(result_fp, result_view)
+
+    def test_getmodel_equivalence_multiple_components(self):
+        """Getmodel equivalence for every component."""
+        script = """
+MODEL: A
+shape: gaussianmodel
+    $ ampl: 1.0, 0.0, none
+    $ pos:  100.0, 0.0, 200.0
+    $ width: 10.0, 0.0, none
+
+MODEL: B
+shape: lorentzianmodel
+    $ ampl: 0.5, 0.0, none
+    $ pos:  150.0, 0.0, 300.0
+    $ width: 20.0, 0.0, none
+"""
+        fp, _ = _validate_script_content(script)
+        spec = _FitModelSpec.from_fitparameters(fp)
+        x = np.linspace(-50, 50, 201, dtype=np.float64)
+
+        for comp in spec.components:
+            view = spec.component_view(comp.label)
+            result_fp = getmodel(x, modelname=comp.label, par=fp)
+            result_view = getmodel(x, modelname=comp.label, par=view)
+            np.testing.assert_array_almost_equal(result_fp, result_view)
+
+    def test_view_with_common_params(self):
+        """Getmodel with a view that includes common params (no references)."""
+        # Script without references — all param values are direct floats
+        script = """
+COMMON:
+    $ gratio: 0.3, 0.0, 1.0
+
+MODEL: X
+shape: gaussianmodel
+    $ ampl:  1.0, 0.0, none
+    $ pos:   100.0, 0.0, 200.0
+    $ width: 10.0, 0.0, none
+"""
+        fp, _ = _validate_script_content(script)
+        spec = _FitModelSpec.from_fitparameters(fp)
+        x = np.linspace(50, 150, 201, dtype=np.float64)
+
+        # fp-based getmodel: par[f"ampl_x"], etc. — all exist directly
+        result_fp = getmodel(x, modelname="x", par=fp)
+
+        # view-based getmodel: view["ampl_x"], etc. — component params + common fallback
+        view = spec.component_view("x")
+        result_view = getmodel(x, modelname="x", par=view)
+
+        np.testing.assert_array_almost_equal(result_fp, result_view)
