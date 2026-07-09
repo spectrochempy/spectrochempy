@@ -60,7 +60,7 @@ Key points:
 * The **entry point name** (``myplugin``) must match your plugin's
   ``name`` attribute.
 * ``spectrochempy`` must be listed as a dependency with a compatibility
-   range, e.g. ``spectrochempy>=0.10,<0.11``.
+   range, e.g. ``spectrochempy>=0.10,<0.12``.
 * Use ``requires-python = ">=3.11"`` to match SpectroChemPy's minimum.
 * Official plugins in the monorepo use a static ``version`` field.
   ``setuptools_scm`` is not used because plugin and core tags share the
