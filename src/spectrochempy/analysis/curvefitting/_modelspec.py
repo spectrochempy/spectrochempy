@@ -22,6 +22,8 @@ from typing import Any
 
 import numpy as np
 
+from spectrochempy.analysis.curvefitting._parameters import FitParameters
+
 # Sentinel bound thresholds (same as FitParameters.__str__)
 _STR_NEG_THRESH = -0.1 / sys.float_info.epsilon
 _STR_POS_THRESH = +0.1 / sys.float_info.epsilon
@@ -33,6 +35,13 @@ def _unbound(val):
         return None
     if val <= _STR_NEG_THRESH or val >= _STR_POS_THRESH:
         return None
+    return val
+
+
+def _bound_to_legacy_sentinel(val, *, lower):
+    """Convert canonical ``None`` bounds to the historical FitParameters sentinel."""
+    if val is None:
+        return -1.0 / sys.float_info.epsilon if lower else +1.0 / sys.float_info.epsilon
     return val
 
 
@@ -230,6 +239,50 @@ class _FitModelSpec:
         if result:
             result += "\n"
         return result
+
+    # ------------------------------------------------------------------
+    def to_fitparameters(self):
+        """
+        Build a legacy ``FitParameters`` compatibility view from this model spec.
+
+        This keeps the parser target architecture canonical while preserving
+        historical ``Optimize.fp`` and ``_validate_script_content()`` behavior.
+        """
+        fp = FitParameters()
+        fp.expvars = list(self.expvars)
+        fp.expnumber = self.expnumber
+
+        for name, ps in self.common_params.items():
+            fp.common[name] = True
+            fp.reference[name] = ps.reference is not None
+            if ps.reference is not None:
+                fp[name] = ps.reference
+                continue
+            fp[name] = (
+                ps.value,
+                _bound_to_legacy_sentinel(ps.bounds[0], lower=True),
+                _bound_to_legacy_sentinel(ps.bounds[1], lower=False),
+                not ps.vary,
+            )
+
+        for comp in self.components:
+            fp.models.append(comp.label)
+            fp.model[comp.label] = comp.model_name
+            for name, ps in comp.params.items():
+                fp.common[name] = False
+                key = f"{name}_{comp.label}"
+                fp.reference[key] = ps.reference is not None
+                if ps.reference is not None:
+                    fp[key] = ps.reference
+                    continue
+                fp[key] = (
+                    ps.value,
+                    _bound_to_legacy_sentinel(ps.bounds[0], lower=True),
+                    _bound_to_legacy_sentinel(ps.bounds[1], lower=False),
+                    not ps.vary,
+                )
+
+        return fp
 
     # ------------------------------------------------------------------
     def _iter_varying(self):

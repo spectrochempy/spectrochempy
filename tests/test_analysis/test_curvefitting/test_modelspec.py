@@ -20,6 +20,7 @@ from spectrochempy.analysis.curvefitting.optimize import _count_varying_paramete
 from spectrochempy.analysis.curvefitting.optimize import (
     _extract_varying_parameter_values,
 )
+from spectrochempy.analysis.curvefitting.optimize import _parse_script_to_modelspec
 from spectrochempy.analysis.curvefitting.optimize import _validate_script_content
 from spectrochempy.analysis.curvefitting.optimize import getmodel
 
@@ -698,6 +699,55 @@ class TestSpecRoundTripDirect:
         assert spec2.components[0].params["ampl"].value == pytest.approx(1.5)
         assert spec2.components[0].params["ampl"].bounds[0] == 0.0
         assert spec2.components[0].params["ampl"].bounds[1] is None
+
+
+class TestCanonicalParserOutput:
+    """Canonical parser output remains equivalent to the compatibility adapter."""
+
+    SCRIPT = """
+COMMON:
+    $ gratio: 0.3, 0.0, 1.0
+
+MODEL: PEAK_A
+shape: gaussianmodel
+    * ampl:  1.5, 0.0, none
+    $ pos:   100.0, 0.0, 200.0
+    > ratio: gratio
+    $ width: 10.0, none, none
+"""
+
+    @staticmethod
+    def _assert_fitparameters_equivalent(left, right):
+        assert left.models == right.models
+        assert left.model == right.model
+        assert set(left.keys()) == set(right.keys())
+        assert left.common == right.common
+        assert left.reference == right.reference
+        assert left.fixed == right.fixed
+        for key in left:
+            assert left[key] == right[key]
+            assert left.lob.get(key) == right.lob.get(key)
+            assert left.upb.get(key) == right.upb.get(key)
+
+    def test_direct_parser_matches_fitparameters_adapter(self):
+        direct_spec, direct_errors = _parse_script_to_modelspec(self.SCRIPT)
+        compat_fp, compat_errors = _validate_script_content(self.SCRIPT)
+
+        assert direct_errors == []
+        assert compat_errors == []
+
+        compat_spec = _FitModelSpec.from_fitparameters(compat_fp)
+        assert direct_spec.to_script() == compat_spec.to_script()
+
+    def test_to_fitparameters_preserves_historical_parser_semantics(self):
+        direct_spec, errors = _parse_script_to_modelspec(self.SCRIPT)
+        compat_fp, compat_errors = _validate_script_content(self.SCRIPT)
+
+        assert errors == []
+        assert compat_errors == []
+
+        adapted_fp = direct_spec.to_fitparameters()
+        self._assert_fitparameters_equivalent(adapted_fp, compat_fp)
 
 
 class TestConstraintReserved:
