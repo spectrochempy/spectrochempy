@@ -48,21 +48,47 @@ to build reproducible spectroscopy workflows in Python.
   * Namespaced APIs: `scp.nmr.read_topspin(...)`, `scp.iris.IRIS()`
   * Dataset accessors for plugin-bound operations
 
+## Installation
+
+The recommended way to install SpectroChemPy is with `uv`:
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh   # if uv is not installed
+uv venv scpy --python 3.13
+source scpy/bin/activate
+uv pip install spectrochempy
+```
+
+Alternatively, with `mamba` / `conda`:
+
+```bash
+mamba install -c spectrocat -c conda-forge spectrochempy
+```
+
+Or with `pip`:
+
+```bash
+pip install spectrochempy
+```
+
+See the [full installation guide](https://www.spectrochempy.fr/gettingstarted/install/index.html) for platform-specific instructions, optional dependencies, and development setup.
+
 ## Official Plugins
 
 Extend SpectroChemPy with official plugins (installed separately):
 
 | Plugin | Install | What it provides |
 |--------|---------|------------------|
-| `spectrochempy-carroucell` | `pip install spectrochempy-carroucell` | Carroucell experiment reader |
-| `spectrochempy-hypercomplex` | `pip install spectrochempy-hypercomplex` | Quaternion / hypercomplex support |
-| `spectrochempy-iris` | `pip install spectrochempy-iris` | 2D-IRIS analysis tools |
-| `spectrochempy-nmr` | `pip install spectrochempy-nmr` | Bruker TopSpin reader, NMR-specific processing |
-| `spectrochempy-perkinelmer` | `pip install spectrochempy-perkinelmer` | PerkinElmer ``.sp`` IR file reader |
-| `spectrochempy-tensor` | `pip install spectrochempy-tensor` | Tensor learning tools |
+| `spectrochempy-carroucell` | `uv pip install spectrochempy-carroucell` | Carroucell experiment reader |
+| `spectrochempy-hypercomplex` | `uv pip install spectrochempy-hypercomplex` | Quaternion / hypercomplex support |
+| `spectrochempy-iris` | `uv pip install spectrochempy-iris` | 2D-IRIS analysis tools |
+| `spectrochempy-nmr` | `uv pip install spectrochempy-nmr` | Bruker TopSpin reader, NMR-specific processing |
+| `spectrochempy-perkinelmer` | `uv pip install spectrochempy-perkinelmer` | PerkinElmer ``.sp`` IR file reader |
+| `spectrochempy-tensor` | `uv pip install spectrochempy-tensor` | Tensor learning tools |
 
+`pip install` works as well if you are not using `uv`.
 
-Or via conda from the `spectrocat` channel (`conda-forge` provides the dependencies):
+Plugins are also available via conda from the `spectrocat` channel:
 
 ```bash
 mamba install -c spectrocat -c conda-forge spectrochempy-nmr
@@ -77,8 +103,6 @@ officially supported, not included in aggregate extras, and must be installed
 manually::
 
     pip install spectrochempy-cantera
-
-> **⚠️ WARNING**: SpectroChemPy is under active development. The current design may undergo major changes. Please report any issues to our [Issue Tracker](https://github.com/spectrochempy/spectrochempy/issues).
 
 ## Quick Links
 

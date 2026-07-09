@@ -9,7 +9,7 @@ description = "Cantera-based thermodynamics and reactive chemistry for SpectroCh
 requires-python = ">=3.11"
 readme = "README.md"
 dependencies = [
-    "spectrochempy>=0.10,<0.11",
+    "spectrochempy>=0.10,<0.12",
     "cantera>=3.0",
     "numpy",
     "scipy",

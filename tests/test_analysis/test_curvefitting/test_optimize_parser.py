@@ -20,6 +20,11 @@ import sys
 import pytest
 
 from spectrochempy.analysis.curvefitting._parameters import FitParameters
+
+# ======================================================================================
+# Helper to access the static _parsing method
+# ======================================================================================
+from spectrochempy.analysis.curvefitting.optimize import Optimize
 from spectrochempy.analysis.curvefitting.optimize import ScriptError
 from spectrochempy.analysis.curvefitting.optimize import _validate_script_content
 
@@ -836,3 +841,48 @@ class TestReturnContract:
     def test_error_list_contains_script_error_instances(self):
         fp, errors = _validate_script_content("MODEL: X\nshape: unknown_model\n")
         assert all(isinstance(e, ScriptError) for e in errors)
+
+
+class TestParsing:
+    """Direct tests for Optimize._parsing static method."""
+
+    def test_pi_infinite_loop(self):
+        """Pi is replaced with np.pi, but np.pi must not be re-processed."""
+        param = {}
+        result = Optimize._parsing("2*pi + 1", param)
+        assert result == "2*np.pi + 1"
+        # Second call must be idempotent — no np.np.pi
+        result2 = Optimize._parsing(result, param)
+        assert result2 == result
+
+    def test_numpy_function_expansion(self):
+        """Known numpy functions get np. prefix."""
+        param = {}
+        result = Optimize._parsing("sin(x) + cos(y)", param)
+        assert result == "np.sin(x) + np.cos(y)"
+        result2 = Optimize._parsing(result, param)
+        assert result2 == result
+
+    def test_param_substitution(self):
+        """Param values replace matching keywords."""
+        param = {"a": "2.0", "b": "3.0"}
+        result = Optimize._parsing("a + b", param)
+        assert result == "2.0 + 3.0"
+
+    def test_mixed_param_and_numpy(self):
+        """Param substitution before numpy expansion (two-pass via while loop)."""
+        param = {"offset": "pi"}
+        result = Optimize._parsing("sin(x) + offset", param)
+        # First pass: offset → pi, sin → np.sin; pi not yet prefixed
+        assert result == "np.sin(x) + pi"
+        # Second pass (as in the _prepare while loop): pi → np.pi, idempotent
+        result2 = Optimize._parsing(result, param)
+        assert result2 == "np.sin(x) + np.pi"
+        result3 = Optimize._parsing(result2, param)
+        assert result3 == result2
+
+    def test_unknown_keyword_preserved(self):
+        """Unknown keywords are left unchanged."""
+        param = {}
+        result = Optimize._parsing("foo + bar", param)
+        assert result == "foo + bar"
