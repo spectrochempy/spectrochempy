@@ -17,7 +17,6 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.utils.datetimeutils import UTC
-from spectrochempy.utils.decorators import deprecated
 
 # ======================================================================================
 # Public functions

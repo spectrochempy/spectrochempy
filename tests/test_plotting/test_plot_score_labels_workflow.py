@@ -7,7 +7,6 @@
 
 import matplotlib
 import numpy as np
-import pytest
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt

@@ -89,8 +89,7 @@ _ = corrected.plot()
 
 # %%
 # We can have a more detailed representation using plot
-ax = blc.plot(nb_traces=2, offset=50)
-blc.show_regions(ax)
+ax = blc.plot(nb_traces=2, offset=50, show_regions=True)
 
 # %%
 # We can also plot the baseline and the corrected dataset together:

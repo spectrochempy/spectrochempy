@@ -252,11 +252,8 @@ Plotting
     multiplot
     multiplot_contour
     multiplot_contourf
-    multiplot_image
     multiplot_lines
-    multiplot_map
     multiplot_scatter
-    multiplot_stack
     multiplot_with_transposed
     show
 

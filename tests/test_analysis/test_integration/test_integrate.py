@@ -26,7 +26,7 @@ def test_integrate():
     )
 
     # default dim='x'
-    area_trap = dataset.trapz()
+    area_trap = dataset.trapezoid()
     area_simp = dataset.simps()
 
     assert area_trap.shape == (4,)
@@ -40,10 +40,10 @@ def test_integrate():
     assert_allclose(area_simp.data, expected_simp_x)
     assert_allclose(area_simp.data, -(64.0 / 3.0 + 8.0 * area_simp.y.data))
 
-    area_trap_x = dataset.trapz(dim="x")
+    area_trap_x = dataset.trapezoid(dim="x")
     assert_allclose(area_trap_x.data, area_trap.data)
 
-    area_trap_y = dataset.trapz(dim="y")
+    area_trap_y = dataset.trapezoid(dim="y")
     assert area_trap_y.shape == (9,)
     assert area_trap_y.dims == ["x"]
     assert area_trap_y.x.title == "wavelength"

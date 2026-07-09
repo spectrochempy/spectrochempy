@@ -9,19 +9,14 @@ __all__ = [
     "multiplot",
     "multiplot_contour",
     "multiplot_contourf",
-    "multiplot_image",
     "multiplot_lines",
-    "multiplot_map",
     "multiplot_scatter",
-    "multiplot_stack",
     "multiplot_with_transposed",
     "plot_with_transposed",
 ]
 
 __dataset_methods__ = []
 
-
-import warnings
 
 import numpy as np
 
@@ -58,7 +53,7 @@ def multiplot_contour(datasets, **kwargs):
     """
     Plot a multiplot with 2D contour type plots.
 
-    This is the canonical geometry-based name for multiplot_map.
+    This is the canonical geometry-based name for multiplot_map (deprecated).
 
     Parameters
     ----------
@@ -80,7 +75,7 @@ def multiplot_contourf(datasets, **kwargs):
     """
     Plot a multiplot with 2D filled contour (image-like) type plots.
 
-    This is the canonical geometry-based name for multiplot_image.
+    This is the canonical geometry-based name for multiplot_image (deprecated).
 
     Parameters
     ----------
@@ -94,96 +89,6 @@ def multiplot_contourf(datasets, **kwargs):
     Any
         The matplotlib figure.
     """
-    kwargs["method"] = "contourf"
-    return multiplot(datasets, **kwargs)
-
-
-def multiplot_stack(datasets, **kwargs):
-    """
-    Plot a multiplot with 2D stack type plots.
-
-    .. deprecated::
-        Use :func:`multiplot_lines` instead.
-        Will be removed in version 0.11.0.
-
-    Parameters
-    ----------
-    datasets : list of NDDataset
-        Source of data to plot.
-    **kwargs
-        Additional keyword arguments passed to multiplot.
-
-    Returns
-    -------
-    Any
-        The matplotlib figure.
-    """
-    warnings.warn(
-        "multiplot_stack is deprecated and will be removed in 0.11.0. "
-        "Use multiplot_lines instead.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    kwargs["method"] = "lines"
-    return multiplot(datasets, **kwargs)
-
-
-def multiplot_map(datasets, **kwargs):
-    """
-    Plot a multiplot with 2D map type plots.
-
-    .. deprecated::
-        Use :func:`multiplot_contour` instead.
-        Will be removed in version 0.11.0.
-
-    Parameters
-    ----------
-    datasets : list of NDDataset
-        Source of data to plot.
-    **kwargs
-        Additional keyword arguments passed to multiplot.
-
-    Returns
-    -------
-    Any
-        The matplotlib figure.
-    """
-    warnings.warn(
-        "multiplot_map is deprecated and will be removed in 0.11.0. "
-        "Use multiplot_contour instead.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    kwargs["method"] = "contour"
-    return multiplot(datasets, **kwargs)
-
-
-def multiplot_image(datasets, **kwargs):
-    """
-    Plot a multiplot with 2D image type plots.
-
-    .. deprecated::
-        Use :func:`multiplot_contourf` instead.
-        Will be removed in version 0.11.0.
-
-    Parameters
-    ----------
-    datasets : list of NDDataset
-        Source of data to plot.
-    **kwargs
-        Additional keyword arguments passed to multiplot.
-
-    Returns
-    -------
-    Any
-        The matplotlib figure.
-    """
-    warnings.warn(
-        "multiplot_image is deprecated and will be removed in 0.11.0. "
-        "Use multiplot_contourf instead.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
     kwargs["method"] = "contourf"
     return multiplot(datasets, **kwargs)
 

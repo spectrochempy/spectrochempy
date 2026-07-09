@@ -33,7 +33,6 @@ from spectrochempy.analysis._base._result import AnalysisResult
 from spectrochempy.analysis.decomposition.mcrals_constraints import Constraint
 from spectrochempy.application.application import info_
 from spectrochempy.extern.traittypes import Array
-from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 
 # --------------------------------------------------------------------------------------

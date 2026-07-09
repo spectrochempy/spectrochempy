@@ -115,6 +115,3 @@ def ensure_spectrochempy_plot_style() -> None:
     This ensures existing code that calls this function continues to work.
     """
     lazy_ensure_mpl_config()
-
-
-

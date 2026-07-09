@@ -318,18 +318,6 @@ class TestBaselinePlotWithRegions:
 
         plt.close()
 
-    def test_show_regions_deprecated_warning(self):
-        """show_regions() emits DeprecationWarning."""
-        orig = _make_synthetic_dataset_1d()
-        bl = scp.Baseline()
-        bl.fit(orig)
-        axes = bl.plot(show=False)
-
-        with pytest.warns(DeprecationWarning, match="deprecated"):
-            bl.show_regions(axes)
-
-        plt.close()
-
 
 class TestPlotClearFalseReusesAxis:
     """Tests for clear=False behavior - axes reuse."""

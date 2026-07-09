@@ -576,5 +576,3 @@ for reproducible results across multiple function calls.""",
             components=components,
             **kwargs,
         )
-
-
