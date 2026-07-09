@@ -14,6 +14,11 @@ on:
         required: true
         type: boolean
         default: false
+      bypass_plugin_check:
+        description: "Bypass the official plugin version constraint check (not recommended)"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -49,6 +54,17 @@ jobs:
           python3 -m pip install json5 pyyaml
           python3 -m pip install "cffconvert @ git+https://github.com/citation-file-format/cffconvert@b6045d7"
           python3 -m pip install setuptools_scm
+
+      - name: Check plugin version constraints compatibility
+        run: |
+          BYPASS=${{ inputs.bypass_plugin_check }}
+          if [ "$BYPASS" = "true" ]; then
+            python .github/workflows/scripts/check_plugin_core_compatibility.py \
+              ${{ github.event.inputs.versionString }} --bypass
+          else
+            python .github/workflows/scripts/check_plugin_core_compatibility.py \
+              ${{ github.event.inputs.versionString }}
+          fi
 
       - name: Create release branch
         run: git checkout -b release/${{ github.event.inputs.versionString }}
