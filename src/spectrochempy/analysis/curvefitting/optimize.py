@@ -1492,15 +1492,15 @@ class Optimize(DecompositionAnalysis):
 
     @staticmethod
     def _parsing(expr, param):
-        keyword = r"\b([a-z]+[0-9]*)\b"  # match a whole word
-        pat = re.compile(keyword)
-        mo = pat.findall(str(expr))
-        for kw in mo:
+        def _replace(m):
+            kw = m.group(1)
             if kw in param:
-                expr = expr.replace(kw, str(param[kw]))
-            elif kw in np.__dict__:  # check if it is a recognized math function
-                expr = expr.replace(kw, f"np.{kw}")
-        return expr
+                return str(param[kw])
+            if kw in np.__dict__:
+                return f"np.{kw}"
+            return m.group(0)
+
+        return re.sub(r"\b(?<!np\.)([a-z]+[0-9]*)\b", _replace, str(expr))
 
     def _prepare(self, param, exp_idx=1):
         # This function is needed for the script related to modelfunction

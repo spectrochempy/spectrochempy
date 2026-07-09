@@ -207,9 +207,14 @@ Bug Fixes
 
 - ``PLSRegression`` now works with a 1D ``NDDataset`` as the response variable
   ``y``. This fixes failures in ``predict()``, ``y_scores``, ``y_loadings``,
-  ``y_weights``, ``y_rotations``, ``result``, and ``coef`` when fitting with a
-  1D target. (:pr:`1305`)
+   ``y_weights``, ``y_rotations``, ``result``, and ``coef`` when fitting with a
+   1D target. (:pr:`1305`)
 
+- ``Optimize._parsing`` no longer infinite-loops when a numpy name (e.g. ``pi``,
+  ``sin``, ``cos``) appears in a reference expression.  The old ``str.replace``
+  re-matched the token inside the ``np.``-prefixed replacement, causing
+  ``pi → np.pi → np.np.pi → …``.  Fixed by using ``re.sub`` with a
+  negative lookbehind assertion. (:pr:`1397`)
 
 .. section
 
