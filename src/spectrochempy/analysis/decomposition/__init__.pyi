@@ -8,10 +8,8 @@
 
 __all__ = [
     "_legacy_constraint_converter",
-    "cp",
     "efa",
     "fast_ica",
-    "iris",
     "mcrals",
     "mcrals_constraints",
     "nmf",
@@ -21,10 +19,8 @@ __all__ = [
 ]
 
 from . import _legacy_constraint_converter
-from . import cp
 from . import efa
 from . import fast_ica
-from . import iris
 from . import mcrals
 from . import mcrals_constraints
 from . import nmf

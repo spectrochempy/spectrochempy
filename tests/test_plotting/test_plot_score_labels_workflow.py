@@ -138,23 +138,6 @@ class TestPlotScoreLabelsWorkflow:
         assert len(ax.collections) == 1
         plt.close()
 
-    def test_scoreplot_backward_compat_with_scores(self):
-        """Test backward compatibility: scoreplot(scores, 1, 2) still works."""
-        import spectrochempy as scp
-
-        dataset = _pca_dataset()
-
-        pca = scp.PCA(n_components=5)
-        pca.fit(dataset)
-
-        scores = pca.transform()
-
-        with pytest.warns(DeprecationWarning):
-            ax = pca.scoreplot(scores, 1, 2, show=False)
-
-        assert ax is not None
-        plt.close()
-
     def test_plot_score_components_as_positional(self):
         """Test that passing components as first positional still works."""
         import spectrochempy as scp

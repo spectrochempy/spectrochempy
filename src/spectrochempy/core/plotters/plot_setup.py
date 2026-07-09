@@ -117,40 +117,4 @@ def ensure_spectrochempy_plot_style() -> None:
     lazy_ensure_mpl_config()
 
 
-def restore_rcparams() -> None:
-    """
-    Restore matplotlib rcParams to the user's original state.
 
-    DEPRECATED: This is now a no-op since SpectroChemPy no longer modifies
-    global matplotlib rcParams. The function is kept for backward compatibility.
-    Will be removed in version 0.11.0.
-    """
-    import warnings
-
-    warnings.warn(
-        "restore_rcparams() is deprecated and will be removed in 0.11.0. "
-        "It has no effect since SpectroChemPy no longer modifies global matplotlib rcParams.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    # No-op - no longer needed in stateless mode
-    pass
-
-
-def get_import_time_rcparams():
-    """
-    Return a copy of the import-time matplotlib rcParams snapshot.
-
-    DEPRECATED: This now returns None since SpectroChemPy no longer modifies
-    global matplotlib rcParams and therefore doesn't need to snapshot them.
-    Will be removed in version 0.11.0.
-    """
-    import warnings
-
-    warnings.warn(
-        "get_import_time_rcparams() is deprecated and will be removed in 0.11.0. "
-        "It now returns None since SpectroChemPy no longer modifies global matplotlib rcParams.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return

@@ -1923,19 +1923,6 @@ and `St`.
         return self._outfit[3]
 
     @property
-    @property
-    @deprecated(replace="St_ls", removed="0.11.0")
-    def St_unconstrained(self):
-        """Deprecated. Equivalent to `St_ls`."""
-        return self.St_ls
-
-    @property
-    @deprecated(replace="St_ls", removed="0.11.0")
-    def S_soft(self):
-        """Deprecated. Equivalent to `St_ls`."""
-        return self.St_ls
-
-    @property
     def extraOutputGetConc(self):
         """The extra outputs of the external function used to get concentrations."""
         return self._outfit[4]
