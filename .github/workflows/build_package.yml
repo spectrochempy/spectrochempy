@@ -395,6 +395,7 @@ jobs:
             --json
 
       - name: Build conda plugin package
+        continue-on-error: ${{ !(github.event_name == 'release' && startsWith(github.ref_name, matrix.plugin.name)) }}
         uses: prefix-dev/rattler-build-action@v0.2.38
         env:
           CONDA_BLD_PATH: ../output
