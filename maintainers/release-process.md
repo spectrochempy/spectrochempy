@@ -622,6 +622,22 @@ entrées sont incorrectes car :
 - [ ] Répéter pour chaque plugin (nmr → iris → tensor → hypercomplex → carroucell)
 - [ ] Réactiver l'intégration GitHub → Zenodo (avant la prochaine release core)
 
+### Conda plugin builds
+
+- [ ] Pendant une release core (`spectrochempy-vX.Y.Z`), le workflow
+      `build_package.yml` construit également les plugins conda comme
+      **vérification de compatibilité** (les packages sont uploadés sur le
+      label `dev` d'Anaconda.org, pas sur `main`)
+- [ ] L'échec de ces builds plugins n'est **pas bloquant** pour la release
+      core — le build step utilise `continue-on-error: true` pour les
+      événements qui ne sont pas des releases plugins
+- [ ] Causes possibles d'échec non-bloquant :
+      - Contrainte de version du core dans `recipe.yaml` pas encore mise à
+        jour (ex: `>=0.10,<0.11` alors que le core est maintenant `0.11.0`)
+      - Problème de résolution de dépendances conda avec le nouveau core
+- [ ] Si l'échec est bloquant pour une **release plugin** (tag
+      `spectrochempy-XXX-vX.Y.Z`), corriger `recipe.yaml` avant de publier
+
 ### TestPyPI cleanup
 
 - [ ] Les pushes sur `master` publient automatiquement le core sur TestPyPI
