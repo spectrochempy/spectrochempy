@@ -192,6 +192,19 @@ Bug Fixes
 Developer
 ~~~~~~~~~
 
+- MAINT: Extracted parameter-space transforms from ``FitParameters`` into
+  standalone ``_to_internal`` / ``_to_external`` utilities
+  (``_parameter_transform.py``).  Two historical bugs fixed: ``lob is not
+  None`` → ``upb is not None``, ``pei = pi`` → ``pei = item``.  (#1388, #1389)
+
+- MAINT: Added private ``_FitModelSpec`` structured model-definition object
+  with ``from_fitparameters(fp)`` constructor, ``to_script()`` serializer, and
+  ``count_varying()`` / ``extract_varying_values()`` inspection methods.
+  ``_ComponentParamsView`` adapter decouples ``getmodel()`` from the
+  ``{param}_{label}`` parser convention by duck-typing.  Strategy B of the
+  Optimize convergence plan — three phases delivered: parameter transform
+  extraction, structured model spec, component-params adapter.  (#1387, #1390)
+
 - ``MCRALS``: introduced the public constraint API skeleton
   (``spectrochempy.analysis.decomposition.mcrals_constraints``). The new
   public classes ``Constraint`` (abstract base), ``NonNegative``,
