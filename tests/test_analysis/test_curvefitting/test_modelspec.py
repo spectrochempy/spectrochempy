@@ -14,6 +14,7 @@ from spectrochempy.analysis.curvefitting._modelspec import _ComponentSpec
 from spectrochempy.analysis.curvefitting._modelspec import _FitModelSpec
 from spectrochempy.analysis.curvefitting._modelspec import _ParamSpec
 from spectrochempy.analysis.curvefitting._modelspec import _unbound
+from spectrochempy.analysis.curvefitting._modelspec import prepare_model
 from spectrochempy.analysis.curvefitting._parameters import FitParameters
 from spectrochempy.analysis.curvefitting.optimize import _count_varying_parameters
 from spectrochempy.analysis.curvefitting.optimize import (
@@ -1174,3 +1175,281 @@ shape: gaussianmodel
         result_view = getmodel(x, modelname="x", par=view)
 
         np.testing.assert_array_almost_equal(result_fp, result_view)
+
+
+# ======================================================================================
+# Tests for prepare_model
+# ======================================================================================
+
+
+class TestPrepareModel:
+    """Test the prepare_model reference-resolution function."""
+
+    def test_no_references_returns_same_values(self):
+        """Without references, prepare_model returns a spec with identical values."""
+        spec = _FitModelSpec(
+            components=[
+                _ComponentSpec(
+                    label="peak",
+                    model_name="gaussianmodel",
+                    params={
+                        "ampl": _ParamSpec(name="ampl", value=1.5),
+                        "pos": _ParamSpec(name="pos", value=100.0),
+                    },
+                )
+            ]
+        )
+        prepared = prepare_model(spec)
+        assert prepared.components[0].params["ampl"].value == 1.5
+        assert prepared.components[0].params["pos"].value == 100.0
+
+    def test_original_spec_not_mutated(self):
+        """prepare_model does not modify the input spec."""
+        spec = _FitModelSpec(
+            components=[
+                _ComponentSpec(
+                    label="peak",
+                    model_name="gaussianmodel",
+                    params={
+                        "ampl": _ParamSpec(
+                            name="ampl",
+                            value=0.0,
+                            vary=False,
+                            reference="gratio",
+                        ),
+                    },
+                )
+            ],
+            common_params={
+                "gratio": _ParamSpec(name="gratio", value=0.3),
+            },
+        )
+        prepared = prepare_model(spec)
+        assert prepared.components[0].params["ampl"].value == 0.3
+        assert spec.components[0].params["ampl"].reference == "gratio"
+        assert spec.components[0].params["ampl"].value == 0.0
+
+    def test_resolve_common_reference(self):
+        """COMMON param reference resolves to the referenced param's value."""
+        spec = _FitModelSpec(
+            common_params={
+                "gratio": _ParamSpec(
+                    name="gratio",
+                    value=0.0,
+                    vary=False,
+                    reference="2*offset",
+                ),
+                "offset": _ParamSpec(name="offset", value=0.15),
+            },
+        )
+        prepared = prepare_model(spec)
+        assert prepared.common_params["gratio"].value == 0.3
+        assert prepared.common_params["gratio"].reference is None
+        assert prepared.common_params["gratio"].vary is False
+
+    def test_resolve_component_reference_to_common(self):
+        """Component param referencing a COMMON param resolves correctly."""
+        spec = _FitModelSpec(
+            components=[
+                _ComponentSpec(
+                    label="x",
+                    model_name="gaussianmodel",
+                    params={
+                        "ampl": _ParamSpec(
+                            name="ampl",
+                            value=0.0,
+                            vary=False,
+                            reference="gratio",
+                        ),
+                    },
+                )
+            ],
+            common_params={
+                "gratio": _ParamSpec(name="gratio", value=0.3),
+            },
+        )
+        prepared = prepare_model(spec)
+        assert prepared.components[0].params["ampl"].value == 0.3
+        assert prepared.components[0].params["ampl"].reference is None
+        assert prepared.components[0].params["ampl"].vary is False
+
+    def test_multiple_components_same_common(self):
+        """All components referencing the same COMMON get the correct value."""
+        spec = _FitModelSpec(
+            components=[
+                _ComponentSpec(
+                    label="a",
+                    model_name="gaussianmodel",
+                    params={
+                        "ampl": _ParamSpec(
+                            name="ampl",
+                            value=0.0,
+                            vary=False,
+                            reference="gratio",
+                        ),
+                    },
+                ),
+                _ComponentSpec(
+                    label="b",
+                    model_name="lorentzianmodel",
+                    params={
+                        "ampl": _ParamSpec(
+                            name="ampl",
+                            value=0.0,
+                            vary=False,
+                            reference="gratio",
+                        ),
+                    },
+                ),
+            ],
+            common_params={
+                "gratio": _ParamSpec(name="gratio", value=0.5),
+            },
+        )
+        prepared = prepare_model(spec)
+        assert prepared.components[0].params["ampl"].value == 0.5
+        assert prepared.components[1].params["ampl"].value == 0.5
+
+    def test_direct_numeric_reference(self):
+        """A reference to a plain numeric expression is resolved."""
+        spec = _FitModelSpec(
+            common_params={
+                "two": _ParamSpec(
+                    name="two",
+                    value=0.0,
+                    vary=False,
+                    reference="1+1",
+                ),
+            },
+        )
+        prepared = prepare_model(spec)
+        assert prepared.common_params["two"].value == 2.0
+
+    def test_reference_to_another_common(self):
+        """A reference pointing to a plain COMMON param resolves correctly."""
+        spec = _FitModelSpec(
+            common_params={
+                "a": _ParamSpec(
+                    name="a",
+                    value=0.0,
+                    vary=False,
+                    reference="b",
+                ),
+                "b": _ParamSpec(name="b", value=5.0),
+            },
+        )
+        prepared = prepare_model(spec)
+        assert prepared.common_params["a"].value == 5.0
+
+    def test_chained_references(self):
+        """Chained references (a→b→value) are resolved through the fixpoint."""
+        spec = _FitModelSpec(
+            common_params={
+                "a": _ParamSpec(
+                    name="a",
+                    value=0.0,
+                    vary=False,
+                    reference="b",
+                ),
+                "b": _ParamSpec(
+                    name="b",
+                    value=0.0,
+                    vary=False,
+                    reference="c",
+                ),
+                "c": _ParamSpec(name="c", value=42.0),
+            },
+        )
+        prepared = prepare_model(spec)
+        assert prepared.common_params["a"].value == 42.0
+        assert prepared.common_params["b"].value == 42.0
+        assert prepared.common_params["c"].value == 42.0
+
+    def test_deterministic_ordering(self):
+        """prepare_model produces the same result regardless of input order."""
+        # Build two specs with different insertion order
+        ps_a = _ParamSpec(name="a", value=0.0, vary=False, reference="x")
+        ps_b = _ParamSpec(name="b", value=0.0, vary=False, reference="x")
+        ps_x = _ParamSpec(name="x", value=10.0)
+
+        spec1 = _FitModelSpec(
+            common_params={"a": ps_a, "b": ps_b, "x": ps_x},
+        )
+        spec2 = _FitModelSpec(
+            common_params={"b": ps_b, "x": ps_x, "a": ps_a},
+        )
+        p1 = prepare_model(spec1)
+        p2 = prepare_model(spec2)
+        assert p1.common_params["a"].value == p2.common_params["a"].value
+        assert p1.common_params["b"].value == p2.common_params["b"].value
+
+    def test_equivalence_with_optimize_prepare(self):
+        """prepare_model(spec) matches Optimize._prepare(fp) for the same script."""
+        script = """
+COMMON:
+    $ gratio: 0.3, 0.0, 1.0
+
+MODEL: peak
+shape: gaussianmodel
+    $ ampl: 1.5, 0.0, none
+    $ pos:  100.0, 0.0, 200.0
+    $ width: 10.0, 0.0, none
+    > fwhm: gratio
+"""
+        fp, errors = _validate_script_content(script)
+        assert errors == []
+
+        # Resolve via Optimize._prepare
+        from spectrochempy.analysis.curvefitting.optimize import Optimize
+
+        opt = Optimize()
+        opt.fp = fp
+        resolved_fp = opt._prepare(fp)
+
+        # Resolve via prepare_model
+        spec = _FitModelSpec.from_fitparameters(fp)
+        resolved_spec = prepare_model(spec)
+
+        # Check: resolved COMMON unchanged
+        assert resolved_spec.common_params["gratio"].value == float(
+            resolved_fp["gratio"],
+        )
+
+        # Check: resolved component reference
+        assert resolved_spec.components[0].params["fwhm"].value == float(
+            resolved_fp["fwhm_peak"],
+        )
+        assert resolved_spec.components[0].params["fwhm"].reference is None
+
+    def test_equivalence_with_reference_in_common(self):
+        """COMMON reference resolution matches Optimize._prepare behavior."""
+        script = """
+COMMON:
+    $ gratio: 0.3, 0.0, 1.0
+    > half: gratio/2
+
+MODEL: x
+shape: gaussianmodel
+    $ ampl: 1.0, 0.0, none
+    $ pos:  100.0, 0.0, 200.0
+    $ width: 10.0, 0.0, none
+"""
+        fp, errors = _validate_script_content(script)
+        assert errors == []
+
+        from spectrochempy.analysis.curvefitting.optimize import Optimize
+
+        opt = Optimize()
+        opt.fp = fp
+        resolved_fp = opt._prepare(fp)
+
+        spec = _FitModelSpec.from_fitparameters(fp)
+        resolved_spec = prepare_model(spec)
+
+        assert resolved_spec.common_params["half"].value == float(
+            resolved_fp["half"],
+        )
+        assert np.isclose(
+            resolved_spec.common_params["half"].value,
+            0.3 / 2,
+        )
