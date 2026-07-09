@@ -801,7 +801,7 @@ def test_MCRALS_pr3_constraint_classes_are_private():
         "_MonotonicDecreaseConstraint",
         "_ClosureConstraint",
         "_NormalizationConstraint",
-        "_HardProfileConstraint",
+        "_ModelProfileConstraint",
     )
     for name in expected_classes:
         cls = getattr(mod, name, None)
@@ -822,21 +822,22 @@ def test_MCRALS_pr3_constraint_apply_is_virtual():
     assert raised
 
 
-def test_MCRALS_pr3_builders_translate_traitlets():
-    """``_build_*`` constraints must reflect the active traitlets one-to-one.
+def test_MCRALS_pr3_legacy_to_internal_pipeline():
+    """Legacy traitlets are converted through the unified pipeline.
 
-    Inactive soft constraints are still emitted (they no-op internally via
-    the ``np.any(indices)`` guard), while the hard-profile wrapper is always
-    appended so that the per-iteration extra-output buffer is reset on
-    inactive ``hardConc`` / ``hardSpec``.
+    ``legacy_to_constraints(estimator)`` + ``_build_from_public_constraints``
+    must produce the correct internal constraints for the default traitlet
+    configuration.  No ``_ModelProfileConstraint`` should appear when
+    ``hardConc`` / ``hardSpec`` are empty (no hard profile configured).
     """
     import numpy as np
 
+    from spectrochempy.analysis.decomposition._legacy_constraint_converter import (
+        legacy_to_constraints,
+    )
     from spectrochempy.analysis.decomposition.mcrals import (
         _ClosureConstraint,
-        _HardProfileConstraint,
-        _MonotonicDecreaseConstraint,
-        _MonotonicIncreaseConstraint,
+        _ModelProfileConstraint,
         _NonNegativeConstraint,
         _NormalizationConstraint,
         _UnimodalConstraint,
@@ -845,21 +846,21 @@ def test_MCRALS_pr3_builders_translate_traitlets():
 
     mcr = MCRALS()
     mcr.fit(np.zeros((4, 3)), np.ones((4, 2)))
-    conc = mcr._build_concentration_constraints()
-    spec = mcr._build_spectral_constraints()
-    norm = mcr._build_normalization()
 
-    assert isinstance(conc[0], _NonNegativeConstraint)
-    assert isinstance(conc[1], _UnimodalConstraint)
-    assert isinstance(conc[2], _MonotonicIncreaseConstraint)
-    assert isinstance(conc[3], _MonotonicDecreaseConstraint)
-    # closure is off by default (closureConc == [])
+    constraints = legacy_to_constraints(mcr)
+    conc, spec, norm = mcr._build_from_public_constraints(constraints)
+
+    # Default nonnegConc="all" and unimodConc="all" produce constraints
+    assert any(isinstance(c, _NonNegativeConstraint) for c in conc)
+    assert any(isinstance(c, _UnimodalConstraint) for c in conc)
+    # Default monoIncConc=[] / monoDecConc=[] / closureConc=[] produce nothing
     assert not any(isinstance(c, _ClosureConstraint) for c in conc)
-    # hard-profile wrapper always present
-    assert isinstance(conc[-1], _HardProfileConstraint)
-    assert isinstance(spec[0], _NonNegativeConstraint)
-    assert isinstance(spec[1], _UnimodalConstraint)
-    assert isinstance(spec[-1], _HardProfileConstraint)
+    # Default hardConc=[] produces no ModelProfile
+    assert not any(isinstance(c, _ModelProfileConstraint) for c in conc)
+    # Default nonnegSpec="all" produces a spectral NonNegativeConstraint
+    assert any(isinstance(c, _NonNegativeConstraint) for c in spec)
+    # Default hardSpec=[] produces no ModelProfile on spec side
+    assert not any(isinstance(c, _ModelProfileConstraint) for c in spec)
     # normSpec is None by default -> no normalization constraint
     assert norm is None
 
@@ -868,6 +869,9 @@ def test_MCRALS_pr3_closure_built_only_when_truthy():
     """``closureConc=[0]`` (PR1 #911 single-component case) must build closure."""
     import numpy as np
 
+    from spectrochempy.analysis.decomposition._legacy_constraint_converter import (
+        legacy_to_constraints,
+    )
     from spectrochempy.analysis.decomposition.mcrals import (
         _ClosureConstraint,
         MCRALS,
@@ -876,13 +880,15 @@ def test_MCRALS_pr3_closure_built_only_when_truthy():
     mcr = MCRALS()
     mcr.closureConc = "all"
     mcr.fit(np.zeros((4, 3)), np.ones((4, 2)))
-    conc = mcr._build_concentration_constraints()
+    constraints = legacy_to_constraints(mcr)
+    conc, _, _ = mcr._build_from_public_constraints(constraints)
     assert any(isinstance(c, _ClosureConstraint) for c in conc)
 
     mcr2 = MCRALS()
     mcr2.closureConc = [0]
     mcr2.fit(np.zeros((4, 3)), np.ones((4, 2)))
-    conc2 = mcr2._build_concentration_constraints()
+    constraints2 = legacy_to_constraints(mcr2)
+    conc2, _, _ = mcr2._build_from_public_constraints(constraints2)
     assert any(isinstance(c, _ClosureConstraint) for c in conc2)
 
 
@@ -1397,7 +1403,7 @@ def test_pr4_monodec_component_zero_is_enforced():
 # The two preceding tests cover the originally reported members of the
 # ``np.any([0])`` bug family (non-negativity and monotonic decrease). The
 # same anti-pattern was also present in ``_UnimodalConstraint``,
-# ``_MonotonicIncreaseConstraint`` and the two ``_HardProfileConstraint``
+# ``_MonotonicIncreaseConstraint`` and the two ``_ModelProfileConstraint``
 # branches; each is exercised below with the component-0 selection that
 # used to silently disable it.
 
@@ -1764,7 +1770,8 @@ def test_pr4_getconc_with_args_updates_args():
         np.asarray(mcr.C_constrained.data), np.full((8, 2), 0.5), atol=1.0e-12
     )
     # iter 1: a=1.0 -> 2.0 ; iter 2: a=2.0 -> 4.0
-    assert mcr.argsGetConc == (4.0,)
+    assert mcr.argsGetConc == (1.0,)  # no longer mutated
+    assert mcr._model_profile_constraints_[0].model_args == (4.0,)
     assert mcr.extraOutputGetConc == []
 
 
@@ -1826,7 +1833,8 @@ def test_pr4_getspec_with_args_updates_args():
         np.asarray(mcr.St.data), np.full((2, 12), 0.3), atol=1.0e-12
     )
     # iter 1: a=1.0 -> 3.0 ; iter 2: a=3.0 -> 9.0
-    assert mcr.argsGetSpec == (9.0,)
+    assert mcr.argsGetSpec == (1.0,)  # no longer mutated
+    assert mcr._model_profile_constraints_[0].model_args == (9.0,)
     assert mcr.extraOutputGetSpec == []
 
 

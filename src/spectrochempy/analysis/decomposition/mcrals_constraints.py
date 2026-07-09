@@ -747,17 +747,21 @@ class Closure(Constraint):
     Closure(profile='C', components=None, target=array([1., 1., 1.]))
     """
 
-    def __init__(self, profile, components=None, target=1.0):
+    def __init__(self, profile, components=None, target=1.0, method="scaling"):
         super().__init__(profile)
         self._components = _validate_components(components)
         self._target = _validate_target(target)
+        self._method = str(method)
 
     def _repr_params(self):
-        return [
+        params = [
             ("profile", self._profile),
             ("components", self._components),
             ("target", self._target),
         ]
+        if self._method != "scaling":
+            params.append(("method", self._method))
+        return params
 
     @property
     def components(self):
@@ -768,6 +772,11 @@ class Closure(Constraint):
     def target(self):
         """Float or array-like: Target sum for the selected components."""
         return self._target
+
+    @property
+    def method(self):
+        """str: Closure enforcement method (``'scaling'`` or ``'constantSum'``)."""
+        return self._method
 
     # -- equality --------------------------------------------------------
     # Override base-class ``__eq__`` so that array-valued targets are
@@ -781,6 +790,8 @@ class Closure(Constraint):
         if self._profile != other._profile:
             return False
         if self._components != other._components:
+            return False
+        if self._method != other._method:
             return False
         return _targets_equal(self._target, other._target)
 
