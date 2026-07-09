@@ -19,6 +19,8 @@ from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis._base._result import FitResult
 from spectrochempy.analysis.curvefitting import _models as models_
+from spectrochempy.analysis.curvefitting._modelspec import _FitModelSpec
+from spectrochempy.analysis.curvefitting._modelspec import prepare_model
 from spectrochempy.analysis.curvefitting._parameter_transform import _to_external
 from spectrochempy.analysis.curvefitting._parameter_transform import _to_internal
 from spectrochempy.analysis.curvefitting._parameters import FitParameters
@@ -124,6 +126,9 @@ def _count_varying_parameters(fp):
     if fp is None:
         return 0
 
+    if isinstance(fp, _FitModelSpec):
+        return int(fp.count_varying())
+
     n_varying = 0
     for key in sorted(fp.keys()):
         if fp.fixed[key]:
@@ -140,6 +145,9 @@ def _extract_varying_parameter_values(fp):
     """Return fitted varying-parameter values in optimizer order."""
     if fp is None:
         return None
+
+    if isinstance(fp, _FitModelSpec):
+        return fp.extract_varying_values()
 
     values = []
     for key in sorted(fp.keys()):
@@ -233,6 +241,66 @@ def _compute_fit_diagnostics(observed, fitted, solver_meta=None, fit_parameters=
     }
     diagnostics.update(dict(solver_meta or {}))
     return residuals, diagnostics
+
+
+def _modelspec_parameter_count(spec):
+    """Return the FitParameters-compatible total parameter count for a spec."""
+    return len(spec.common_params) + sum(len(comp.params) for comp in spec.components)
+
+
+def _restore_modelspec_external(spec, values, keys):
+    """Restore external parameter values in a model spec from optimizer values."""
+    key_index = {key: idx for idx, key in enumerate(keys)}
+    for key, ps in spec._iter_varying():
+        lob, upb = ps.bounds
+        if ps.name in spec.expvars:
+            restored = []
+            for i in range(spec.expnumber):
+                exp_key = f"{key}_exp{i}"
+                if exp_key not in key_index:
+                    break
+                restored.append(_to_external(values[key_index[exp_key]], lob, upb))
+            if restored:
+                ps.value = restored
+        else:
+            if key not in key_index:
+                continue
+            ps.value = _to_external(values[key_index[key]], lob, upb)
+    return spec
+
+
+def _modelspec_internal_vector(spec):
+    """Return internal optimizer values and keys for varying spec parameters."""
+    values = []
+    keys = []
+    for key, ps in spec._iter_varying():
+        lob, upb = ps.bounds
+        if ps.name in spec.expvars:
+            for i in range(spec.expnumber):
+                values.append(_to_internal(ps.value[i], lob, upb))
+                keys.append(f"{key}_exp{i}")
+        else:
+            values.append(_to_internal(ps.value, lob, upb))
+            keys.append(key)
+    return values, keys
+
+
+def _sync_fitparameters_from_modelspec(fp, spec):
+    """Update a FitParameters object with values from a model spec."""
+    for name, ps in spec.common_params.items():
+        if ps.reference is not None:
+            continue
+        if name in fp:
+            fp.data[name] = ps.value
+
+    for comp in spec.components:
+        for name, ps in comp.params.items():
+            if ps.reference is not None:
+                continue
+            key = f"{name}_{comp.label}"
+            if key in fp:
+                fp.data[key] = ps.value
+    return fp
 
 
 def _compute_covariance_matrix(observed, fitted, jacobian, diagnostics):
@@ -932,6 +1000,8 @@ class Optimize(DecompositionAnalysis):
         if X.ndim > 1 and all(np.array(X.shape) > 1):
             raise NotImplementedError("Only 1D data are supported for now")
 
+        self._model_spec = _FitModelSpec.from_fitparameters(self.fp)
+
         # create model data
         modeldata, modelnames, model_A, model_a, model_b = self._get_modeldata(X)
 
@@ -1003,7 +1073,7 @@ class Optimize(DecompositionAnalysis):
             ncalls += 1
 
             # model
-            modeldata = self._get_modeldata(X)[0]
+            modeldata = self._get_modeldata(X, model_spec=params)[0]
 
             # baseline is already summed with modeldata[-1]
             mdata = modeldata[-1]  # modelsum
@@ -1038,7 +1108,7 @@ class Optimize(DecompositionAnalysis):
 
         # ------------------------------------------------------------------------------
 
-        fp = self.fp  # starting parameters
+        model_spec = self._model_spec  # starting canonical model representation
 
         func = (
             fun_chi2
@@ -1067,9 +1137,9 @@ class Optimize(DecompositionAnalysis):
             "constraints": self.constraints,
         }
         if not self.dry:
-            fp, fopt, solver_meta, solver_artifacts = _optimize(
+            model_spec, fopt, solver_meta, solver_artifacts = _optimize(
                 func,
-                fp,
+                model_spec,
                 args=(X,),
                 maxfun=self.max_fun_calls,
                 maxiter=self.max_iter,
@@ -1077,6 +1147,9 @@ class Optimize(DecompositionAnalysis):
                 constraints=self.constraints,
                 callback=callback,
             )
+            self._model_spec = model_spec
+
+        fp = _sync_fitparameters_from_modelspec(self.fp, model_spec)
 
         # Store solver metadata for the result object.
         # Created on every _fit call so it always reflects the last fit.
@@ -1091,6 +1164,7 @@ class Optimize(DecompositionAnalysis):
 
         # replace the previous script with new fp parameters
         self.script = str(fp)
+        self._model_spec = _FitModelSpec.from_fitparameters(self.fp)
 
         # log.info the results
         display.clear_output(wait=True)
@@ -1288,15 +1362,20 @@ class Optimize(DecompositionAnalysis):
     #     else:
     #         return self.message
 
-    def _get_modeldata(self, X, exp_idx=1):
+    def _get_modeldata(self, X, exp_idx=1, model_spec=None):
         # exp_idx is not used for the moment, but will be necessary for multidataset
         # fitting
 
-        # Prepare parameters
-        parameters = self._prepare(self.fp, exp_idx)
+        if model_spec is None:
+            model_spec = getattr(self, "_model_spec", None)
+        if model_spec is None:
+            model_spec = _FitModelSpec.from_fitparameters(self.fp)
+
+        # Prepare canonical model representation.
+        prepared_spec = prepare_model(model_spec)
 
         # Get the list of models
-        models = self.fp.models
+        models = [comp.label for comp in prepared_spec.components]
         self._n_components = nbmodels = len(models)
 
         # Make an array 'modeldata' with the size of the dataset of data
@@ -1335,7 +1414,7 @@ class Optimize(DecompositionAnalysis):
             calc = getmodel(
                 x,
                 modelname=model,
-                par=parameters,
+                par=prepared_spec.component_view(model),
                 amplitude_mode=self.amplitude_mode,
                 usermodels=self.usermodels,
             )
@@ -1784,7 +1863,7 @@ class Optimize(DecompositionAnalysis):
             self._X,
             fitted,
             getattr(self, "_fit_meta", {}),
-            self.fp,
+            getattr(self, "_model_spec", None),
         )
         covariance = _compute_covariance_matrix(
             self._X,
@@ -1792,7 +1871,9 @@ class Optimize(DecompositionAnalysis):
             self.jacobian,
             fit_diagnostics,
         )
-        parameter_values = _extract_varying_parameter_values(self.fp)
+        parameter_values = _extract_varying_parameter_values(
+            getattr(self, "_model_spec", None),
+        )
         fit_config = getattr(
             self,
             "_fit_config",
@@ -1838,9 +1919,13 @@ def _optimize(
     if constraints is None:
         constraints = {}
     global keys
+    use_model_spec = isinstance(fp0, _FitModelSpec)
 
     def restore_external(fp, p, keys):
         # restore external parameters
+        if isinstance(fp, _FitModelSpec):
+            return _restore_modelspec_external(fp, p, keys)
+
         for key in list(fp.keys()):
             keysp = key.split("_")
             if keysp[0] in fp.expvars:
@@ -1877,37 +1962,40 @@ def _optimize(
             return None
         return callback(*args)
 
-    if not isinstance(fp0, FitParameters):
-        raise TypeError("fp0 is not of FitParameter type")
+    if not isinstance(fp0, FitParameters | _FitModelSpec):
+        raise TypeError("fp0 is not of FitParameter or _FitModelSpec type")
 
     # make internal parameters
-    par = []
-    keys = []
+    if use_model_spec:
+        par, keys = _modelspec_internal_vector(fp0)
+    else:
+        par = []
+        keys = []
 
-    for key in sorted(fp0.keys()):
-        if not fp0.fixed[key]:
-            # we make internal parameters in case of bounding
-            # We also take care of the multiple experiments
-            keysp = key.split("_")[0]
-            if keysp in fp0.expvars:
-                for i in range(fp0.expnumber):
+        for key in sorted(fp0.keys()):
+            if not fp0.fixed[key]:
+                # we make internal parameters in case of bounding
+                # We also take care of the multiple experiments
+                keysp = key.split("_")[0]
+                if keysp in fp0.expvars:
+                    for i in range(fp0.expnumber):
+                        par.append(
+                            _to_internal(
+                                fp0.data[key][i],
+                                fp0.lob[key],
+                                fp0.upb[key],
+                            ),
+                        )
+                        keys.append(f"{key}_exp{i}")
+                else:
                     par.append(
                         _to_internal(
-                            fp0.data[key][i],
+                            fp0.data[key],
                             fp0.lob[key],
                             fp0.upb[key],
                         ),
                     )
-                    keys.append(f"{key}_exp{i}")
-            else:
-                par.append(
-                    _to_internal(
-                        fp0.data[key],
-                        fp0.lob[key],
-                        fp0.upb[key],
-                    ),
-                )
-                keys.append(key)
+                    keys.append(key)
 
     args = list(args)
     args.append(fp0)
@@ -1919,7 +2007,8 @@ def _optimize(
         maxfun = 4 * maxiter
 
     if method in ["leastsq", "least_squares"]:
-        method = "lm" if len(fp0) < 10 else "trf"
+        n_parameters = _modelspec_parameter_count(fp0) if use_model_spec else len(fp0)
+        method = "lm" if n_parameters < 10 else "trf"
 
     if method.lower() in ["lm", "trf"]:
         result = optimize.least_squares(

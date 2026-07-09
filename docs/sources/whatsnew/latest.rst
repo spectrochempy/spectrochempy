@@ -192,6 +192,13 @@ Bug Fixes
 Developer
 ~~~~~~~~~
 
+- MAINT: Moved the Optimize backend onto the canonical ``_FitModelSpec``
+  representation for model preparation, solver vectorization/restoration,
+  diagnostics, and result parameter extraction while keeping
+  ``FitParameters`` as a compatibility layer. The preferred execution path
+  now resolves references through ``prepare_model()`` before numerical
+  optimization, preserving the existing fit behaviour and public API.
+
 - MAINT: Extracted parameter-space transforms from ``FitParameters`` into
   standalone ``_to_internal`` / ``_to_external`` utilities
   (``_parameter_transform.py``).  Two historical bugs fixed: ``lob is not
