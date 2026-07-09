@@ -50,6 +50,8 @@ _LAZY_IMPORTS = {
     "ActionMassKinetics": "spectrochempy.analysis.kinetic.kineticutilities",
     "PFR": "spectrochempy.analysis.kinetic.kineticutilities",
     "find_peaks": "spectrochempy.analysis.peakfinding.peakfinding",
+    "PeakFindingResult": "spectrochempy.analysis.peakfinding.peakfinding",
+    "PeakTable": "spectrochempy.analysis.peakfinding.peakfinding",
     "DEBUG": "spectrochempy.application.application",
     "INFO": "spectrochempy.application.application",
     "WARNING": "spectrochempy.application.application",

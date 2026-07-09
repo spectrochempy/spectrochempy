@@ -785,6 +785,8 @@ Find peaks
     :toctree: generated/
 
     find_peaks
+    PeakFindingResult
+    PeakTable
 
 Kinetics
 --------
