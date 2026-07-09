@@ -23,7 +23,6 @@ NDDataset methods from API.
 # --------------------------------------------------------------------------------------
 _LAZY_DATASETS_IMPORTS = {
     "simps": "spectrochempy.analysis.integration.integrate",
-    "trapz": "spectrochempy.analysis.integration.integrate",
     "simpson": "spectrochempy.analysis.integration.integrate",
     "trapezoid": "spectrochempy.analysis.integration.integrate",
     "find_peaks": "spectrochempy.analysis.peakfinding.peakfinding",

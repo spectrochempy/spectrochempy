@@ -8,7 +8,7 @@ authors = [
   {name = "Christian Fernandez", email = "christian.fernandez@ensicaen.fr"},
 ]
 classifiers = [
-  "Development Status :: 3 - Alpha",
+  "Development Status :: 4 - Beta",
   "Topic :: Utilities",
   "Topic :: Scientific/Engineering",
   "Topic :: Software Development :: Libraries",

@@ -345,7 +345,7 @@ _ = mcr3.C.T.plot()
 pca = scp.PCA(n_components=8)
 _ = pca.fit(X)
 pca.printev()
-_ = pca.screeplot()
+_ = pca.plot_scree()
 
 # %% [markdown]
 # The number of significant PC's is clearly larger or equal to 2. It is, however,

@@ -19,7 +19,9 @@ from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis._base._result import FitResult
 from spectrochempy.analysis.curvefitting import _models as models_
+from spectrochempy.analysis.curvefitting._modelspec import _ComponentSpec
 from spectrochempy.analysis.curvefitting._modelspec import _FitModelSpec
+from spectrochempy.analysis.curvefitting._modelspec import _ParamSpec
 from spectrochempy.analysis.curvefitting._modelspec import prepare_model
 from spectrochempy.analysis.curvefitting._parameter_transform import _to_external
 from spectrochempy.analysis.curvefitting._parameter_transform import _to_internal
@@ -303,6 +305,15 @@ def _sync_fitparameters_from_modelspec(fp, spec):
     return fp
 
 
+def _modelspec_parameter_names(spec):
+    """Return flat historical parameter names for a canonical model spec."""
+    names = set(spec.common_params)
+    for comp in spec.components:
+        for name in comp.params:
+            names.add(f"{name}_{comp.label}")
+    return names
+
+
 def _compute_covariance_matrix(observed, fitted, jacobian, diagnostics):
     """
     Compute an approximate parameter covariance matrix from the retained Jacobian.
@@ -449,32 +460,19 @@ def _extract_solver_artifacts(method, result):
     }
 
 
-def _validate_script_content(script, usermodels=None):
+def _parse_script_to_modelspec(script, usermodels=None):
     """
-    Parse and validate a curve-fitting script without running an optimisation.
+    Parse and validate a curve-fitting script into the canonical model spec.
 
-    Parameters
-    ----------
-    script : str
-        The script to validate.
-    usermodels : dict or None
-        Optional user-defined model registry (same format as
-        :attr:`Optimize.usermodels`).
-
-    Returns
-    -------
-    fp : FitParameters
-        Parsed parameters (always returned, even when *errors* is non-empty).
-    errors : list of ScriptError
-        Empty list when the script is valid.
+    Returns the canonical fitting model plus the historical list of parser
+    errors. This is the architectural parser entry point; compatibility helpers
+    may derive ``FitParameters`` from the returned model spec when needed.
     """
-    fp = FitParameters()
+    spec = _FitModelSpec()
     errors = []
 
-    modlabel = None
-    common = False
-    fixed = False
-    reference = False
+    current_component = None
+    in_common_block = False
     models_missing_shape = set()
 
     lines = script.split("\n")
@@ -502,11 +500,7 @@ def _validate_script_content(script, usermodels=None):
 
         if key.startswith("model"):
             modlabel = values.lower().strip()
-            if modlabel not in fp.models:
-                fp.models.append(modlabel)
-                if modlabel:
-                    models_missing_shape.add(modlabel)
-            else:
+            if any(comp.label == modlabel for comp in spec.components):
                 errors.append(
                     ScriptError(
                         lc,
@@ -514,16 +508,21 @@ def _validate_script_content(script, usermodels=None):
                         f"Duplicate model label: '{modlabel}'",
                     ),
                 )
-            common = False
+            else:
+                current_component = _ComponentSpec(label=modlabel)
+                spec.components.append(current_component)
+                if modlabel:
+                    models_missing_shape.add(modlabel)
+            in_common_block = False
             continue
 
         if key.startswith("common") or key.startswith("vars"):
-            common = True
-            modlabel = "common"
+            current_component = None
+            in_common_block = True
             continue
 
         if key.startswith("shape"):
-            if modlabel is None or modlabel == "common":
+            if current_component is None or in_common_block:
                 errors.append(
                     ScriptError(
                         lc,
@@ -532,7 +531,7 @@ def _validate_script_content(script, usermodels=None):
                     ),
                 )
                 continue
-            models_missing_shape.discard(modlabel)
+            models_missing_shape.discard(current_component.label)
             shape = values.lower().strip()
             if not shape:
                 errors.append(
@@ -555,11 +554,11 @@ def _validate_script_content(script, usermodels=None):
                     ),
                 )
                 continue
-            fp.model[modlabel] = shape
-            common = False
+            current_component.model_name = shape
+            in_common_block = False
             continue
 
-        if modlabel is None and not common:
+        if current_component is None and not in_common_block:
             errors.append(
                 ScriptError(
                     lc,
@@ -570,17 +569,16 @@ def _validate_script_content(script, usermodels=None):
             )
             continue
 
-        # parameter prefix --------------------------------------------------
         if key.startswith("*"):
-            fixed = True
+            vary = False
             reference = False
             key = key[1:].strip()
         elif key.startswith("$"):
-            fixed = False
+            vary = True
             reference = False
             key = key[1:].strip()
         elif key.startswith(">"):
-            fixed = True
+            vary = False
             reference = True
             key = key[1:].strip()
         else:
@@ -594,7 +592,6 @@ def _validate_script_content(script, usermodels=None):
             )
             continue
 
-        # value / bounds ----------------------------------------------------
         s = values.split(",")
         s = [ss.strip() for ss in s]
         if len(s) > 1 and ("[" in s[0]) and ("]" in s[1]):
@@ -622,46 +619,79 @@ def _validate_script_content(script, usermodels=None):
         if len(s) == 1:
             s.extend(["none", "none"])
         value, mini, maxi = s
-        if mini.strip().lower() in ["none", ""]:
-            mini = str(-1.0 / sys.float_info.epsilon)
-        if maxi.strip().lower() in ["none", ""]:
-            maxi = str(+1.0 / sys.float_info.epsilon)
-        if modlabel != "common":
-            ks = f"{key}_{modlabel}"
-            fp.common[key] = False
+
+        if reference:
+            param_spec = _ParamSpec(
+                name=key, value=0.0, vary=False, reference=value.strip()
+            )
         else:
-            ks = f"{key}"
-            fp.common[key] = True
-        fp.reference[ks] = reference
-        if not reference:
             val = value.strip()
             try:
                 val = eval(str(val))  # noqa: S307
             except Exception as exc:
+                flat_key = (
+                    key if in_common_block else f"{key}_{current_component.label}"
+                )
                 errors.append(
                     ScriptError(
                         lc,
                         line,
-                        f"Cannot evaluate value for '{ks}': {exc}",
+                        f"Cannot evaluate value for '{flat_key}': {exc}",
                     ),
                 )
                 continue
-            fp[ks] = val, mini.strip(), maxi.strip(), fixed
-        else:
-            fp[ks] = value.strip()
 
-    # Post-parse: check that every model has a shape definition
-    for label in list(models_missing_shape):
-        if label not in fp.model:
-            errors.append(
-                ScriptError(
-                    0,
-                    "",
-                    f"Model '{label}' has no shape definition",
-                ),
+            min_bound = (
+                None if mini.strip().lower() in ["none", ""] else float(mini.strip())
+            )
+            max_bound = (
+                None if maxi.strip().lower() in ["none", ""] else float(maxi.strip())
+            )
+            param_spec = _ParamSpec(
+                name=key,
+                value=val,
+                vary=vary,
+                bounds=(min_bound, max_bound),
             )
 
-    return fp, errors
+        if in_common_block:
+            spec.common_params[key] = param_spec
+        else:
+            current_component.params[key] = param_spec
+
+    for label in list(models_missing_shape):
+        errors.append(
+            ScriptError(
+                0,
+                "",
+                f"Model '{label}' has no shape definition",
+            ),
+        )
+
+    return spec, errors
+
+
+def _validate_script_content(script, usermodels=None):
+    """
+    Parse and validate a curve-fitting script without running an optimisation.
+
+    Parameters
+    ----------
+    script : str
+        The script to validate.
+    usermodels : dict or None
+        Optional user-defined model registry (same format as
+        :attr:`Optimize.usermodels`).
+
+    Returns
+    -------
+    fp : FitParameters
+        Parsed parameters (always returned, even when *errors* is non-empty).
+    errors : list of ScriptError
+        Empty list when the script is valid.
+    """
+    spec, errors = _parse_script_to_modelspec(script, usermodels=usermodels)
+    return spec.to_fitparameters(), errors
 
 
 def _normalize_constraint_spec(constraint):
@@ -714,9 +744,12 @@ def _validate_constraints_content(constraints, fit_parameters=None):
             ),
         ]
 
-    known_parameters = (
-        set(fit_parameters.keys()) if fit_parameters is not None else set()
-    )
+    if isinstance(fit_parameters, _FitModelSpec):
+        known_parameters = _modelspec_parameter_names(fit_parameters)
+    else:
+        known_parameters = (
+            set(fit_parameters.keys()) if fit_parameters is not None else set()
+        )
     errors = []
 
     for index, raw_constraint in enumerate(constraints_list):
@@ -1000,7 +1033,9 @@ class Optimize(DecompositionAnalysis):
         if X.ndim > 1 and all(np.array(X.shape) > 1):
             raise NotImplementedError("Only 1D data are supported for now")
 
-        self._model_spec = _FitModelSpec.from_fitparameters(self.fp)
+        self._model_spec = getattr(self, "_model_spec", None)
+        if self._model_spec is None:
+            self._model_spec = _FitModelSpec.from_fitparameters(self.fp)
 
         # create model data
         modeldata, modelnames, model_A, model_a, model_b = self._get_modeldata(X)
@@ -1221,11 +1256,12 @@ class Optimize(DecompositionAnalysis):
 
     @tr.validate("script")
     def _script_validate(self, proposal):
-        fp, errors = _validate_script_content(proposal.value, self.usermodels)
+        spec, errors = _parse_script_to_modelspec(proposal.value, self.usermodels)
         if errors:
             err = errors[0]
             raise ValueError(str(err))
-        self.fp = fp
+        self._model_spec = spec
+        self.fp = spec.to_fitparameters()
         return proposal.value
 
     @tr.validate("constraints")
@@ -1272,7 +1308,7 @@ class Optimize(DecompositionAnalysis):
         """
         if script is None:
             script = self.script
-        _, errors = _validate_script_content(script, self.usermodels)
+        _, errors = _parse_script_to_modelspec(script, self.usermodels)
         return errors
 
     def validate_constraints(self, constraints=None, script=None):
@@ -1309,9 +1345,7 @@ class Optimize(DecompositionAnalysis):
         if script is None:
             script = self.script
 
-        fit_parameters, script_errors = _validate_script_content(
-            script, self.usermodels
-        )
+        model_spec, script_errors = _parse_script_to_modelspec(script, self.usermodels)
         if script_errors:
             return [
                 ConstraintError(
@@ -1322,7 +1356,7 @@ class Optimize(DecompositionAnalysis):
                 ),
             ]
 
-        return _validate_constraints_content(constraints, fit_parameters)
+        return _validate_constraints_content(constraints, model_spec)
 
     # ----------------------------------------------------------------------------------
     # Private methods

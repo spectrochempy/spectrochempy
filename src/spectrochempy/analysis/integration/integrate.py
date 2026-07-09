@@ -5,9 +5,9 @@
 # ======================================================================================
 """Integration methods."""
 
-__all__ = ["simps", "trapz", "simpson", "trapezoid"]
+__all__ = ["simps", "simpson", "trapezoid"]
 
-__dataset_methods__ = ["simps", "trapz", "simpson", "trapezoid"]
+__dataset_methods__ = ["simps", "simpson", "trapezoid"]
 
 import functools
 
@@ -112,7 +112,6 @@ def trapezoid(dataset, **kwargs):
 
     See Also
     --------
-    trapz : An alias of ``trapezoid``.
     simpson : Integrate using the composite simpson rule.
 
     Example
@@ -123,16 +122,6 @@ def trapezoid(dataset, **kwargs):
 
     """
     return scipy.integrate.trapezoid(np.asarray(dataset), **kwargs)
-
-
-@deprecated(replace="Trapezoid", removed="0.11.0")
-def trapz(dataset, **kwargs):
-    return trapezoid(dataset, **kwargs)
-
-
-trapz.__doc__ = f"""
-    An alias of ``trapezoid`` kept for backwards compatibility.
-{trapezoid.__doc__}"""
 
 
 @_integrate_method

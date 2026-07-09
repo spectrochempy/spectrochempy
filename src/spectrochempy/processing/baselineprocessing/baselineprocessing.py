@@ -5,8 +5,6 @@
 # ======================================================================================
 """Module implementing the `Baseline` class for baseline corrections and related methods."""
 
-import warnings
-
 import numpy as np
 import scipy.interpolate
 import scipy.signal
@@ -736,44 +734,6 @@ baseline/trends for different segments of the data.
         # if not self._fitted:
         #    raise NotFittedError
         return self._ranges
-
-    def show_regions(self, ax):
-        """
-        Display the regions used for baseline fitting.
-
-        .. deprecated:: 0.8
-            Use `Baseline.plot(show_regions=True)` instead.
-            Will be removed in version 0.11.0.
-
-        Parameters
-        ----------
-        ax : matplotlib.axes.Axes or tuple
-            Axes to display regions on. Can be a single Axes or tuple from plot().
-
-        Warns
-        -----
-        DeprecationWarning
-            This method is deprecated and will be removed in 0.11.0.
-            Use `plot(show_regions=True)` instead.
-        """
-        warnings.warn(
-            "Baseline.show_regions() is deprecated and will be removed in 0.11.0. "
-            "Use Baseline.plot(show_regions=True) instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
-        if isinstance(ax, (tuple, list)):
-            if len(ax) == 0:
-                raise ValueError("Empty axes container passed to show_regions().")
-            ax = ax[0]
-        if hasattr(self, "_sps") and self._sps:
-            for sp in self._sps:
-                sp.remove()
-        for range in self._ranges:
-            x0, x1 = range
-            xmin, xmax = sorted([x0, x1])
-            sp = ax.axvspan(xmin, xmax, facecolor="#2ca02c", alpha=0.5, zorder=0)
 
     # ----------------------------------------------------------------------------------
     # Plot methods

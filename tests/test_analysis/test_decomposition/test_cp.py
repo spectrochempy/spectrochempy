@@ -13,7 +13,6 @@ import importlib
 import importlib.metadata as im
 import importlib.util
 import sys
-import warnings
 
 import pytest
 
@@ -63,24 +62,3 @@ def test_missing_cp_root_symbol_has_install_hint(monkeypatch):
     assert "module 'spectrochempy' has no attribute 'CP'" in message
     assert "scp.tensor.CP" in message
     assert "spectrochempy-tensor" in message
-
-
-@pytest.mark.skipif(not _TENSOR_PLUGIN_INSTALLED, reason="tensor plugin not installed")
-def test_legacy_cp_module_import_warns():
-    """Legacy decomposition import path delegates to the tensor plugin."""
-    module = importlib.import_module("spectrochempy.analysis.decomposition.cp")
-
-    with warnings.catch_warnings(record=True) as captured:
-        warnings.simplefilter("always", DeprecationWarning)
-        CP = module.CP
-
-    assert CP.__name__ == "CP"
-
-    legacy_warnings = [
-        warning
-        for warning in captured
-        if "spectrochempy.analysis.decomposition.cp" in str(warning.message)
-    ]
-
-    assert len(legacy_warnings) == 1
-    assert "scp.tensor.CP" in str(legacy_warnings[0].message)

@@ -5,8 +5,6 @@
 # ======================================================================================
 """Tests for plot_score composite function."""
 
-import warnings
-
 import matplotlib
 import numpy as np
 import pytest
@@ -98,28 +96,6 @@ class TestPlotScore:
         pca.fit(X)
 
         ax = pca.plot_score((1, 2), show=False)
-
-        assert ax is not None
-
-        plt.close()
-
-    def test_pca_scoreplot_deprecated(self):
-        """Test PCA.scoreplot() emits DeprecationWarning."""
-        import spectrochempy as scp
-
-        X = _pca_dataset()
-        pca = scp.PCA(n_components=5)
-        pca.fit(X)
-
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            ax = pca.scoreplot(1, 2, show=False)
-
-            deprecation_warnings = [
-                item for item in w if issubclass(item.category, DeprecationWarning)
-            ]
-            assert len(deprecation_warnings) == 1
-            assert "deprecated" in str(deprecation_warnings[0].message).lower()
 
         assert ax is not None
 

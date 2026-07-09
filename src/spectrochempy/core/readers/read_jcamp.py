@@ -17,7 +17,6 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.utils.datetimeutils import UTC
-from spectrochempy.utils.decorators import deprecated
 
 # ======================================================================================
 # Public functions
@@ -150,16 +149,6 @@ def read_jcamp(*paths, **kwargs):
     kwargs["protocol"] = ["jcamp"]
     importer = Importer()
     return importer(*paths, **kwargs)
-
-
-@deprecated(replace="read_jcamp", removed="0.11.0")
-def read_jdx(*args, **kwargs):
-    return read_jcamp(*args, **kwargs)
-
-
-@deprecated(replace="read_jcamp", removed="0.11.0")
-def read_dx(*args, **kwargs):  # pragma: no cover
-    return read_jcamp(*args, **kwargs)
 
 
 # ======================================================================================

@@ -15,7 +15,7 @@ __getattr__, __dir__, __all__ = _lazy_loader.attach_stub(__name__, __file__)
 
 warnings.warn(
     "Importing from `spectrochempy.processing.alignement` is deprecated and "
-    "will be removed in 0.11.0. Use `spectrochempy.processing.alignment` instead.",
+    "will be removed in 0.12.0. Use `spectrochempy.processing.alignment` instead.",
     DeprecationWarning,
     stacklevel=2,
 )
