@@ -15,8 +15,10 @@ import spectrochempy as scp
 from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis._base._result import FitResult
 from spectrochempy.analysis._base._result import ResultBase
-from spectrochempy.analysis.curvefitting._parameters import FitParameters
 from spectrochempy.analysis.curvefitting import optimize as optimize_module
+from spectrochempy.analysis.curvefitting._modelspec import _FitModelSpec
+from spectrochempy.analysis.curvefitting._modelspec import _ParamSpec
+from spectrochempy.analysis.curvefitting._parameters import FitParameters
 from spectrochempy.analysis.curvefitting.optimize import _compute_covariance_matrix
 from spectrochempy.analysis.curvefitting.optimize import (
     _extract_varying_parameter_values,
@@ -400,6 +402,85 @@ class TestOptimizeResult:
         opt.fit(synthetic_two_peak_dataset)
 
         assert opt.result.diagnostics["n_varying_parameters"] == 9
+
+    def test_fit_stores_modelspec_synced_with_fitparameters(
+        self, synthetic_two_peak_dataset, optimize_script
+    ):
+        opt = scp.Optimize()
+        opt.script = optimize_script
+        opt.autobase = True
+        opt.max_iter = 10
+        opt.fit(synthetic_two_peak_dataset)
+
+        assert isinstance(opt._model_spec, _FitModelSpec)
+        np.testing.assert_allclose(
+            opt._model_spec.extract_varying_values(),
+            _extract_varying_parameter_values(opt.fp),
+        )
+
+        opt.autobase = False
+        modeldata_from_spec = opt._get_modeldata(
+            opt._X,
+            model_spec=opt._model_spec,
+        )[0]
+        assert modeldata_from_spec.shape[0] == opt.n_components + 2
+        assert np.all(np.isfinite(modeldata_from_spec[-1]))
+
+    def test_direct_optimize_modelspec_matches_fitparameters(self, optimize_script):
+        fp, errors = optimize_module._validate_script_content(optimize_script)
+        assert errors == []
+        spec = _FitModelSpec.from_fitparameters(fp)
+        target = _extract_varying_parameter_values(fp) + np.linspace(
+            -0.01,
+            0.01,
+            _extract_varying_parameter_values(fp).size,
+        )
+
+        def residuals(params, _unused):
+            return _extract_varying_parameter_values(params) - target
+
+        fp_result, fp_cost, fp_meta, _ = optimize_module._optimize(
+            residuals,
+            fp.copy(),
+            args=(None,),
+            method="least_squares",
+            maxiter=20,
+        )
+        spec_result, spec_cost, spec_meta, _ = optimize_module._optimize(
+            residuals,
+            spec,
+            args=(None,),
+            method="least_squares",
+            maxiter=20,
+        )
+
+        np.testing.assert_allclose(
+            spec_result.extract_varying_values(),
+            _extract_varying_parameter_values(fp_result),
+            rtol=1e-12,
+            atol=1e-12,
+        )
+        assert spec_cost == pytest.approx(fp_cost)
+        assert spec_meta["success"] == fp_meta["success"]
+        assert spec_meta["status"] == fp_meta["status"]
+
+    def test_diagnostics_accept_modelspec(self, synthetic_two_peak_dataset):
+        spec = _FitModelSpec(
+            common_params={
+                "a": _ParamSpec("a", 1.0),
+                "b": _ParamSpec("b", 2.0),
+            },
+        )
+
+        _, diagnostics = _compute_fit_diagnostics(
+            synthetic_two_peak_dataset,
+            synthetic_two_peak_dataset.copy(),
+            {},
+            spec,
+        )
+
+        assert diagnostics["n_varying_parameters"] == 2
+        assert diagnostics["degrees_of_freedom"] == (diagnostics["n_observations"] - 2)
 
     def test_empty_diagnostics_are_stable(self):
         empty = scp.NDDataset(np.array([], dtype=np.float64))
