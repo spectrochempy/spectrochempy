@@ -750,6 +750,209 @@ shape: gaussianmodel
         self._assert_fitparameters_equivalent(adapted_fp, compat_fp)
 
 
+class TestDSLSerializerCharacterization:
+    """Characterize canonical vs historical DSL serialization semantics."""
+
+    SINGLE = """
+MODEL: PEAK_A
+shape: gaussianmodel
+    $ ampl:  1.5, 0.0, none
+    $ pos:   100.0, 0.0, 200.0
+    $ width: 10.0, 0.0, none
+"""
+
+    MULTI = """
+MODEL: PEAK_1
+shape: gaussianmodel
+    $ ampl: 1.0, 0.0, none
+    $ pos:  100.0, 0.0, 200.0
+    $ width: 10.0, 0.0, none
+
+MODEL: PEAK_2
+shape: lorentzianmodel
+    $ ampl: 0.5, 0.0, none
+    $ pos:  150.0, -50.0, 300.0
+    $ width: 20.0, 0.0, none
+"""
+
+    COMMON = """
+COMMON:
+    $ zeta: 4.0, 0.0, none
+    $ alpha: 1.0, none, 10.0
+
+MODEL: X
+shape: gaussianmodel
+    $ ampl:  1.0, 0.0, none
+    $ pos:   100.0, 0.0, 200.0
+"""
+
+    REFERENCE = """
+COMMON:
+    $ gratio: 0.3, 0.0, 1.0
+
+MODEL: X
+shape: gaussianmodel
+    * ampl:  1.0, 0.0, none
+    > ratio: gratio
+    $ width: 10.0, none, none
+"""
+
+    COMMENTED = """
+# file-level comment
+COMMON:
+    # common comment
+    $ gratio: 0.3, 0.0, 1.0
+
+MODEL: X
+shape: gaussianmodel
+    # component comment
+    $ ampl:  1.0, 0.0, none
+    > ratio: gratio
+"""
+
+    @staticmethod
+    def _assert_specs_equivalent(left, right):
+        assert [comp.label for comp in left.components] == [
+            comp.label for comp in right.components
+        ]
+        assert [comp.model_name for comp in left.components] == [
+            comp.model_name for comp in right.components
+        ]
+        assert set(left.common_params) == set(right.common_params)
+        assert left.expvars == right.expvars
+        assert left.expnumber == right.expnumber
+
+        for name, left_param in left.common_params.items():
+            right_param = right.common_params[name]
+            assert left_param.name == right_param.name
+            assert left_param.vary == right_param.vary
+            assert left_param.reference == right_param.reference
+            assert left_param.bounds == right_param.bounds
+            if isinstance(left_param.value, float):
+                assert left_param.value == pytest.approx(right_param.value)
+            else:
+                assert left_param.value == right_param.value
+
+        for left_comp, right_comp in zip(
+            left.components, right.components, strict=True
+        ):
+            assert set(left_comp.params) == set(right_comp.params)
+            for name, left_param in left_comp.params.items():
+                right_param = right_comp.params[name]
+                assert left_param.name == right_param.name
+                assert left_param.vary == right_param.vary
+                assert left_param.reference == right_param.reference
+                assert left_param.bounds == right_param.bounds
+                if isinstance(left_param.value, float):
+                    assert left_param.value == pytest.approx(right_param.value)
+                else:
+                    assert left_param.value == right_param.value
+
+    @classmethod
+    def _serialize_both(cls, script):
+        source_spec, source_errors = _parse_script_to_modelspec(script)
+        source_fp, fp_errors = _validate_script_content(script)
+        assert source_errors == []
+        assert fp_errors == []
+
+        canonical_script = source_spec.to_script()
+        historical_script = str(source_fp)
+
+        reparsed_canonical, canonical_errors = _parse_script_to_modelspec(
+            canonical_script
+        )
+        reparsed_historical, historical_errors = _parse_script_to_modelspec(
+            historical_script
+        )
+        assert canonical_errors == []
+        assert historical_errors == []
+
+        return (
+            source_spec,
+            canonical_script,
+            historical_script,
+            reparsed_canonical,
+            reparsed_historical,
+        )
+
+    @pytest.mark.parametrize("script", [SINGLE, MULTI, COMMON, REFERENCE])
+    def test_canonical_and_historical_serializers_preserve_spec_semantics(self, script):
+        (
+            source_spec,
+            _canonical_script,
+            _historical_script,
+            reparsed_canonical,
+            reparsed_historical,
+        ) = self._serialize_both(script)
+
+        self._assert_specs_equivalent(source_spec, reparsed_canonical)
+        self._assert_specs_equivalent(source_spec, reparsed_historical)
+        self._assert_specs_equivalent(reparsed_canonical, reparsed_historical)
+
+    def test_comments_are_dropped_by_both_serializers(self):
+        (
+            source_spec,
+            canonical_script,
+            historical_script,
+            reparsed_canonical,
+            reparsed_historical,
+        ) = self._serialize_both(self.COMMENTED)
+
+        assert "#" not in canonical_script
+        assert "#" not in historical_script
+        self._assert_specs_equivalent(source_spec, reparsed_canonical)
+        self._assert_specs_equivalent(source_spec, reparsed_historical)
+
+    def test_canonical_and_historical_outputs_need_not_be_byte_identical(self):
+        (
+            _,
+            canonical_script,
+            historical_script,
+            reparsed_canonical,
+            reparsed_historical,
+        ) = self._serialize_both(self.SINGLE)
+
+        assert canonical_script != historical_script
+        assert canonical_script.startswith("MODEL: peak_a\nshape: gaussianmodel\n")
+        assert historical_script.startswith("\n MODEL: peak_a\n shape: gaussianmodel\n")
+        self._assert_specs_equivalent(reparsed_canonical, reparsed_historical)
+
+    def test_common_parameter_order_differs_but_semantics_match(self):
+        (
+            _,
+            canonical_script,
+            historical_script,
+            reparsed_canonical,
+            reparsed_historical,
+        ) = self._serialize_both(self.COMMON)
+
+        assert canonical_script.index("$ alpha:") < canonical_script.index("$ zeta:")
+        assert historical_script.index("$ zeta:") < historical_script.index("$ alpha:")
+        self._assert_specs_equivalent(reparsed_canonical, reparsed_historical)
+
+    def test_both_serializers_normalize_numeric_formatting(self):
+        (
+            _,
+            canonical_script,
+            historical_script,
+            reparsed_canonical,
+            reparsed_historical,
+        ) = self._serialize_both(
+            """
+MODEL: X
+shape: gaussianmodel
+    $ ampl: 1, 0, none
+    $ pos:  100, 0, 200
+"""
+        )
+
+        assert "1.0000" in canonical_script
+        assert "100.0000" in canonical_script
+        assert "1.0000" in historical_script
+        assert "100.0000" in historical_script
+        self._assert_specs_equivalent(reparsed_canonical, reparsed_historical)
+
+
 class TestConstraintReserved:
     """The constraints field is reserved; it should not affect parsing."""
 
