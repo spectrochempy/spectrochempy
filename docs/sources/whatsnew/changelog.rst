@@ -231,6 +231,9 @@ Developer
   ``FitParameters`` as a compatibility layer. The preferred execution path
   now resolves references through ``prepare_model()`` before numerical
   optimization, preserving the existing fit behaviour and public API.
+  The parser now also produces the canonical model representation first and
+  only derives ``FitParameters`` for legacy compatibility surfaces such as
+  ``Optimize.fp`` and the historical parser return value.
 
 - MAINT: Extracted parameter-space transforms from ``FitParameters`` into
   standalone ``_to_internal`` / ``_to_external`` utilities
