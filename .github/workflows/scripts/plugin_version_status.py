@@ -181,7 +181,8 @@ def update_file(path: Path, pattern: str, replacement: str) -> bool:
 
 
 def strip_official_classifier(text: str) -> tuple[str, bool]:
-    """Remove the OFFICIAL_CLASSIFIER line from pyproject.toml content.
+    """
+    Remove the OFFICIAL_CLASSIFIER line from pyproject.toml content.
 
     Also cleans up the now-empty classifier list and extra blank lines.
     """
