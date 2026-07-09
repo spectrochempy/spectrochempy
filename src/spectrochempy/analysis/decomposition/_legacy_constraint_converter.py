@@ -137,11 +137,21 @@ def _conc_constraints(estimator):
 
     # closureConc -> Closure("C", ...)
     cc = _to_components(estimator.closureConc)
+    closure_method = getattr(estimator, "closureMethod", "scaling")
     if cc is _ALL:
-        result.append(Closure("C", target=_extract_closure_target(estimator)))
+        result.append(
+            Closure(
+                "C", target=_extract_closure_target(estimator), method=closure_method
+            )
+        )
     elif cc is not None:
         result.append(
-            Closure("C", components=cc, target=_extract_closure_target(estimator))
+            Closure(
+                "C",
+                components=cc,
+                target=_extract_closure_target(estimator),
+                method=closure_method,
+            )
         )
 
     # hardConc + getConc + argsGetConc + kwargsGetConc -> ModelProfile("C", ...)
