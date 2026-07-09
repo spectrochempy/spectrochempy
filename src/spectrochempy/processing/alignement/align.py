@@ -15,7 +15,7 @@ __dataset_methods__ = ["align"]
 
 warnings.warn(
     "Importing from `spectrochempy.processing.alignement.align` is deprecated "
-    "and will be removed in 0.11.0. Use "
+    "and will be removed in 0.12.0. Use "
     "`spectrochempy.processing.alignment.align` instead.",
     DeprecationWarning,
     stacklevel=2,

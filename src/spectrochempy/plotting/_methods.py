@@ -97,7 +97,7 @@ def normalize_backend_method(
         if warned_aliases is not None and method not in warned_aliases:
             warned_aliases.add(method)
             warnings.warn(
-                f'method="{method}" is deprecated and will be removed in 0.11.0. '
+                f'method="{method}" is deprecated and will be removed in 0.12.0. '
                 f'Use method="{canonical}" instead.',
                 DeprecationWarning,
                 stacklevel=stacklevel,

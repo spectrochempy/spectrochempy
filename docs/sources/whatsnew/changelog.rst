@@ -99,12 +99,11 @@ New Features
   SpectroChemPy API, without falling back to ``np.column_stack(...)``
   or manual `NDDataset` wrapping.
 
-- The historical internal import path
-  ``spectrochempy.processing.alignement`` is now superseded by the canonical
-  ``spectrochempy.processing.alignment`` namespace. The public
-  ``scp.align(...)`` and ``dataset.align(...)`` APIs are unchanged. The old
-  path remains available as a deprecated compatibility alias and is scheduled
-  for removal in ``0.11.0``.
+- Reading multi-object files such as MATLAB ``.mat`` files, multi-subfile SPC
+  files, and ZIP archives now returns a ``ScpObjectList`` result with helper
+  methods for selecting datasets by size, name, dimensionality, or shape.
+  The list-like ``__getitem__``/``__len__`` interface is unchanged, and the
+  new helpers do not add new dependencies. (#1306)
 
 - SpectroChemPy now has a fuller preprocessing API for chemometric workflows:
   standard operations such as ``normalize()``, ``center()``, ``autoscale()``,
@@ -123,10 +122,6 @@ New Features
   as matplotlib line labels, so that ``ax.legend()`` shows meaningful names
   without needing to pass labels explicitly.  Legend entries are displayed
   in natural (first-to-last) order. (#1320)
-
-- Reading multi-object files such as MATLAB ``.mat`` files, multi-subfile SPC
-  files, and ZIP archives now returns a list-like result with helper methods
-  for selecting datasets by size, name, dimensionality, or shape. (#1306)
 
 
 .. section
@@ -190,7 +185,12 @@ Bug Fixes
   detection in interferogram apodization is more reliable, ``rs()``, ``ls()``,
   and ``roll()`` now shift multi-dimensional data along the correct axis,
   ``denoise()`` validates its 2D input correctly, and ``npy.dot()`` no longer
-  checks the wrong operand type.
+  checks the wrong operand type and honours the ``strict`` argument. (#1352)
+
+- Preprocessing transformers no longer emit a traitlets dtype warning when
+  operating on ``MaskedArray`` inputs — the internal cast now uses
+  ``np.asarray()`` instead of ``np.array()`` to preserve the plain-ndarray
+  contract while silencing the warning. (#1348)
 
 - ``PLSRegression`` now works with a 1D ``NDDataset`` as the response variable
   ``y``. This fixes failures in ``predict()``, ``y_scores``, ``y_loadings``,
@@ -203,6 +203,9 @@ Bug Fixes
 Dependency Updates
 ~~~~~~~~~~~~~~~~~~
 .. Add here new dependency updates (do not delete this comment)
+
+- Bumped ``actions/cache`` from 5 to 6 (CI only). (#1316)
+- Bumped ``actions/checkout`` from 4 to 7 (CI only). (#1353)
 
 
 .. section
@@ -217,6 +220,21 @@ Breaking Changes
 Deprecations
 ~~~~~~~~~~~~
 .. Add here new deprecations (do not delete this comment)
+
+- The historical internal import path
+  ``spectrochempy.processing.alignement`` is superseded by the canonical
+  ``spectrochempy.processing.alignment`` namespace. The public
+  ``scp.align(...)`` and ``dataset.align(...)`` APIs are unchanged. The old
+  path remains available as a deprecated compatibility alias, scheduled for
+  removal in ``0.12.0``.
+
+- Plotting ``method="stack"`` and ``method="map"`` aliases are deprecated.
+  Use the canonical ``method="lines"`` (for 1D) or let the dispatcher choose
+  automatically.  The aliases will be removed in ``0.12.0``.
+
+- The ``force_stack`` keyword argument in concatenation functions is
+  deprecated in favour of the unqualified ``method="stack"`` call. It will
+  be removed in ``0.12.0``.
 
 
 .. section
