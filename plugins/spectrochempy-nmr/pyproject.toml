@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "spectrochempy-nmr"
-version = "0.1.6"
+version = "0.1.7"
 description = "NMR readers and tools plugin for SpectroChemPy"
 requires-python = ">=3.11"
 readme = "README.md"
