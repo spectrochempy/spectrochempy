@@ -13,6 +13,8 @@ parameter definitions, and parameter values.
 This module is **private**.  It is not a public API.
 """
 
+import copy
+import re
 import sys
 from dataclasses import dataclass
 from dataclasses import field
@@ -326,6 +328,97 @@ def _format_bound(val: float | None) -> str:
     if val == int(val):
         return f"{int(val)}"
     return f"{val:.4f}"
+
+
+# ------------------------------------------------------------------
+def _build_flat_lookup(spec: _FitModelSpec) -> dict[str, Any]:
+    """
+    Build a flat name-to-value-or-expression lookup dict from a spec.
+
+    For resolved parameters the dict holds the float value; for unresolved
+    reference parameters it holds the reference expression string.
+    """
+    lookup = {}
+    for name, ps in spec.common_params.items():
+        lookup[name] = ps.reference if ps.reference is not None else float(ps.value)
+    for comp in spec.components:
+        for name, ps in comp.params.items():
+            key = f"{name}_{comp.label}"
+            lookup[key] = ps.reference if ps.reference is not None else float(ps.value)
+    return lookup
+
+
+_RE_KEYWORD = re.compile(r"\b([a-z]+[0-9]*)\b")
+
+
+def _resolve_expression(expr: str, lookup: dict[str, Any]) -> float:
+    """
+    Resolve a reference expression against a name-to-value lookup.
+
+    Iteratively substitutes recognised tokens (parameter names or numpy
+    identifiers) until the expression stabilises, then evaluates it.
+    """
+    current = str(expr)
+    while True:
+        tokens = _RE_KEYWORD.findall(current)
+        if not tokens:
+            break
+        resolved = current
+        for kw in tokens:
+            if kw in lookup:
+                resolved = resolved.replace(kw, str(lookup[kw]))
+            elif kw in np.__dict__:
+                resolved = resolved.replace(kw, f"np.{kw}")
+        if resolved == current:
+            break
+        current = resolved
+    return float(eval(str(current)))  # noqa: S307
+
+
+def prepare_model(spec: _FitModelSpec) -> _FitModelSpec:
+    """
+    Resolve all reference parameters in a ``_FitModelSpec``.
+
+    Returns a new spec in which every parameter that was defined as a
+    reference (``_ParamSpec.reference`` is not ``None``) has been replaced
+    by its resolved numeric value and marked as fixed (``vary=False``).
+    The original spec is **not** modified.
+
+    Parameters
+    ----------
+    spec : _FitModelSpec
+        The model spec to prepare.
+
+    Returns
+    -------
+    _FitModelSpec
+        A fully resolved copy of the input spec.
+    """
+    result = copy.deepcopy(spec)
+    lookup = _build_flat_lookup(result)
+
+    # Resolve COMMON references first so component references can
+    # depend on them.
+    for name, ps in result.common_params.items():
+        if ps.reference is not None:
+            value = _resolve_expression(ps.reference, lookup)
+            ps.value = value
+            ps.reference = None
+            ps.vary = False
+            lookup[name] = value
+
+    # Resolve component references.
+    for comp in result.components:
+        for name, ps in comp.params.items():
+            if ps.reference is not None:
+                value = _resolve_expression(ps.reference, lookup)
+                ps.value = value
+                ps.reference = None
+                ps.vary = False
+                key = f"{name}_{comp.label}"
+                lookup[key] = value
+
+    return result
 
 
 # ======================================================================================
