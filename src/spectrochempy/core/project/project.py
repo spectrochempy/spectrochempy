@@ -9,7 +9,6 @@ import copy as cpy
 import pathlib
 import textwrap
 import uuid
-import warnings
 
 import dill  # noqa: F401
 import traitlets as tr
@@ -721,26 +720,6 @@ class Project(AbstractProject, NDIO):
             v._parent = None
         self._datasets = {}
 
-    def remove_all_dataset(self):
-        """
-        Remove all datasets from the project.
-
-        .. deprecated::
-            Use :meth:`clear_datasets` instead.
-            Will be removed in version 0.11.0.
-
-        See Also
-        --------
-        clear_datasets : Remove all datasets.
-        """
-        warnings.warn(
-            "remove_all_dataset() is deprecated and will be removed in 0.11.0; "
-            "use clear_datasets() instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        self.clear_datasets()
-
     # ----------------------------------------------------------------------------------
     # project items
     # ----------------------------------------------------------------------------------
@@ -846,23 +825,3 @@ class Project(AbstractProject, NDIO):
         for v in self._projects.values():
             v._parent = None
         self._projects = {}
-
-    def remove_all_project(self):
-        """
-        Remove all subprojects from the current project.
-
-        .. deprecated::
-            Use :meth:`clear_projects` instead.
-            Will be removed in version 0.11.0.
-
-        See Also
-        --------
-        clear_projects : Remove all subprojects.
-        """
-        warnings.warn(
-            "remove_all_project() is deprecated and will be removed in 0.11.0; "
-            "use clear_projects() instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        self.clear_projects()

@@ -7,8 +7,8 @@
 
 from spectrochempy.core.plotters.multiplot import (
     multiplot,
-    multiplot_map,
-    multiplot_stack,
+    multiplot_contour,
+    multiplot_lines,
 )
 from spectrochempy.utils.mplutils import show
 
@@ -52,7 +52,7 @@ def test_multiplot(sample_2d_dataset):
         dataset * 1.3,
     ]
     labels = ["sample {}".format(label) for label in ["1", "2", "3", "4", "5", "6"]]
-    multiplot_map(
+    multiplot_contour(
         datasets=datasets,
         labels=labels,
         nrow=2,
@@ -63,7 +63,7 @@ def test_multiplot(sample_2d_dataset):
         sharez=True,
     )
 
-    multiplot_map(
+    multiplot_contour(
         datasets=datasets,
         labels=labels,
         nrow=2,
@@ -80,7 +80,7 @@ def test_multiplot(sample_2d_dataset):
         dataset,
     ]
     labels = ["sample {}".format(label) for label in ["1", "2", "3"]]
-    multiplot_stack(
+    multiplot_lines(
         datasets=datasets,
         labels=labels,
         nrow=1,
@@ -91,7 +91,7 @@ def test_multiplot(sample_2d_dataset):
         sharez=True,
     )
 
-    multiplot_stack(
+    multiplot_lines(
         datasets=datasets,
         labels=labels,
         nrow=3,

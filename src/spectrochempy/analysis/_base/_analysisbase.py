@@ -19,7 +19,6 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.baseconfigurable import BaseConfigurable
 from spectrochempy.utils.decorators import _wrap_ndarray_output_to_nddataset
-from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.exceptions import NotFittedError
 from spectrochempy.utils.exceptions import SpectroChemPyError
 from spectrochempy.utils.traits import NDDatasetType
@@ -486,31 +485,6 @@ class DecompositionAnalysis(AnalysisConfigurable):
             # the current model does not use Y
             self.fit(X)
         return self.transform(X, **kwargs)
-
-    def reduce(self, X=None, **kwargs):
-        # deprecated decorator do not preserve signature, so
-        # i use a workaround
-        return deprecated(replace="transform", removed="0.11.0")(self.transform)(
-            X, **kwargs
-        )
-
-    reduce.__doc__ = (
-        transform.__doc__
-        + "\nNotes\n-----\nDeprecated in version 0.6, will be removed in 0.11.0.\n"
-    )
-
-    def reconstruct(self, X_transform=None, **kwargs):
-        return deprecated(replace="inverse_transform", removed="0.11.0")(
-            self.inverse_transform
-        )(
-            X_transform,
-            **kwargs,
-        )
-
-    reconstruct.__doc__ = (
-        inverse_transform.__doc__
-        + "\nNotes\n-----\nDeprecated in version 0.6, will be removed in 0.11.0.\n"
-    )
 
     @_wrap_ndarray_output_to_nddataset(units=None, title=None, typey="components")
     def get_components(self, n_components=None):

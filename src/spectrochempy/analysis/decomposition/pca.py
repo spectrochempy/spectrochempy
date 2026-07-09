@@ -5,8 +5,6 @@
 # ======================================================================================
 """Implementation of Principal Component Analysis (using scikit-learn library)."""
 
-import warnings
-
 import numpy as np
 import traitlets as tr
 from numpy.random import RandomState
@@ -503,34 +501,6 @@ for reproducible results across multiple function calls.""",
             **kwargs,
         )
 
-    def screeplot(self, n_components=None, **kwargs):
-        """
-        Scree plot of explained variance + cumulative variance by PCA.
-
-        .. deprecated:: 0.7.4
-            Use :meth:`plot_scree` instead.
-            Will be removed in version 0.11.0.
-
-        Parameters
-        ----------
-        n_components : int, optional
-            Number of components to plot.
-        **kwargs
-            Additional keyword arguments (ignored, for backward compatibility).
-
-        Returns
-        -------
-        matplotlib.axes.Axes
-            The primary axes.
-        """
-        warnings.warn(
-            "PCA.screeplot() is deprecated and will be removed in 0.11.0; "
-            "use PCA.plot_scree() instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.plot_scree(n_components=n_components, **kwargs)
-
     def plot_score(self, scores=None, components=(1, 2), **kwargs):
         """
         2D or 3D score plot of observations.
@@ -606,63 +576,3 @@ for reproducible results across multiple function calls.""",
             components=components,
             **kwargs,
         )
-
-    def scoreplot(
-        self,
-        *args,
-        **kwargs,
-    ):
-        """
-        2D or 3D scoreplot of observations.
-
-        .. deprecated:: 0.7.4
-            Use :meth:`plot_score` instead.
-            Will be removed in version 0.11.0.
-
-        Parameters
-        ----------
-        *args
-            Positional arguments. Accepts:
-            - (i, j) or (i, j, k): component indices (1-based)
-            - (scores, i, j): NDDataset and component indices
-        **kwargs
-            Additional keyword arguments passed to :meth:`plot_score`.
-
-        Returns
-        -------
-        matplotlib.axes.Axes
-            The matplotlib axes.
-        """
-        warnings.warn(
-            "PCA.scoreplot() is deprecated and will be removed in 0.11.0; "
-            "use PCA.plot_score() instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
-        scores = None
-        components = (1, 2)
-
-        if len(args) == 0:
-            pass
-        elif len(args) == 1:
-            if isinstance(args[0], (tuple, list)):
-                components = tuple(args[0])
-            elif hasattr(args[0], "_implements") and args[0]._implements("NDDataset"):
-                scores = args[0]
-        elif len(args) == 2:
-            if hasattr(args[0], "_implements") and args[0]._implements("NDDataset"):
-                scores = args[0]
-                components = (args[1],)
-            else:
-                components = (args[0], args[1])
-        elif len(args) >= 3:
-            if hasattr(args[0], "_implements") and args[0]._implements("NDDataset"):
-                scores = args[0]
-                components = (args[1], args[2])
-                if len(args) > 3:
-                    components = (args[1], args[2], args[3])
-            else:
-                components = tuple(args[:3])
-
-        return self.plot_score(scores=scores, components=components, **kwargs)

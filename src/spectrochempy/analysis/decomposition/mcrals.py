@@ -33,7 +33,6 @@ from spectrochempy.analysis._base._result import AnalysisResult
 from spectrochempy.analysis.decomposition.mcrals_constraints import Constraint
 from spectrochempy.application.application import info_
 from spectrochempy.extern.traittypes import Array
-from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 
 # --------------------------------------------------------------------------------------
@@ -1921,19 +1920,6 @@ and `St`.
         for :math:`St`.
         """
         return self._outfit[3]
-
-    @property
-    @property
-    @deprecated(replace="St_ls", removed="0.11.0")
-    def St_unconstrained(self):
-        """Deprecated. Equivalent to `St_ls`."""
-        return self.St_ls
-
-    @property
-    @deprecated(replace="St_ls", removed="0.11.0")
-    def S_soft(self):
-        """Deprecated. Equivalent to `St_ls`."""
-        return self.St_ls
 
     @property
     def extraOutputGetConc(self):

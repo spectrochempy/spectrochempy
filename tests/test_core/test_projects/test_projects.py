@@ -511,22 +511,6 @@ class TestRemoveMethods:
         assert sub1.parent is None
         assert sub2.parent is None
 
-    def test_remove_all_dataset_deprecated(self, ds1, ds2):
-        proj = Project(name="test")
-        proj.add_datasets(ds1, ds2)
-        assert len(proj.datasets_names) == 2
-        with pytest.warns(DeprecationWarning, match="remove_all_dataset.*deprecated"):
-            proj.remove_all_dataset()
-        assert len(proj.datasets_names) == 0
-
-    def test_remove_all_project_deprecated(self):
-        proj = Project(name="test")
-        proj.add_projects(Project(name="sub1"), Project(name="sub2"))
-        assert len(proj.projects_names) == 2
-        with pytest.warns(DeprecationWarning, match="remove_all_project.*deprecated"):
-            proj.remove_all_project()
-        assert len(proj.projects_names) == 0
-
 
 class TestAddProject:
     """Tests for add_project method."""
