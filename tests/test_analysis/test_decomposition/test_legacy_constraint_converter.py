@@ -463,17 +463,19 @@ class TestEdgeCases:
         default_est = _FakeEstimator()
         assert len(constraints) == len(legacy_to_constraints(default_est))
 
-    def test_closure_method_not_translated(self):
-        """``closureMethod`` is an enforcement detail, not a constraint parameter."""
+    def test_closure_method_translated(self):
+        """``closureMethod`` is now translated into the ``method`` parameter."""
         est_scaling = _FakeEstimator(closureConc="all", closureMethod="scaling")
         est_constsum = _FakeEstimator(closureConc="all", closureMethod="constantSum")
         c1 = legacy_to_constraints(est_scaling)
         c2 = legacy_to_constraints(est_constsum)
-        # Both produce the same Closure object (method is not a parameter)
         closure1 = [c for c in c1 if isinstance(c, Closure)]
         closure2 = [c for c in c2 if isinstance(c, Closure)]
         assert len(closure1) == 1
-        assert closure1 == closure2
+        assert len(closure2) == 1
+        assert closure1[0].method == "scaling"
+        assert closure2[0].method == "constantSum"
+        assert closure1 != closure2
 
     def test_unimod_tol_not_translated(self):
         """
