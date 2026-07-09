@@ -157,7 +157,7 @@ Bug Fixes
 - ``MCRALS`` correctness fixes (:pr:`1340`, :pr:`1363`): empty ``closureConc`` no longer runs a
   wasteful closure block (PR1 B4); single-component closure targets
   (``closureConc=[0]``, ``closureConc="all"``) are now honoured instead of
-  being silently disabled by ``np.any`` (issue #911); ``normSpec='max'`` /
+  being silently disabled by ``np.any`` (:issue:`#911`); ``normSpec='max'`` /
   ``'euclid'`` with a zero-norm spectrum no longer produces ``nan``/``inf``
   (PR1 B9); ``getConc`` / ``getSpec`` dispatch now correctly uses
   ``argsGetSpec`` / ``kwargsGetSpec`` instead of the ``argsGetSpecc`` typo
@@ -170,7 +170,7 @@ Bug Fixes
   in the documented regime (``tol >= 1.1``) (PR1 B6); ``monoIncTol`` and
   ``monoDecTol`` are now documented as ``Float`` traits (PR1 B7/B8).
   The same ``np.any`` component-selection anti-pattern that caused
-  issue #911 in ``_ClosureConstraint`` has now been fixed across the
+  :issue:`#911` in ``_ClosureConstraint`` has now been fixed across the
   remaining constraint activation guards: selecting only component 0
   with ``nonnegConc=[0]``, ``nonnegSpec=[0]``, ``unimodConc=[0]``,
   ``unimodSpec=[0]``, ``monoIncConc=[0]``, ``monoDecConc=[0]``,

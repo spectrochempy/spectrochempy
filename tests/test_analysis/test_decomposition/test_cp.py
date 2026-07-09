@@ -62,6 +62,3 @@ def test_missing_cp_root_symbol_has_install_hint(monkeypatch):
     assert "module 'spectrochempy' has no attribute 'CP'" in message
     assert "scp.tensor.CP" in message
     assert "spectrochempy-tensor" in message
-
-
-
