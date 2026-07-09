@@ -180,6 +180,25 @@ def update_file(path: Path, pattern: str, replacement: str) -> bool:
     return True
 
 
+def strip_official_classifier(text: str) -> tuple[str, bool]:
+    """Remove the OFFICIAL_CLASSIFIER line from pyproject.toml content.
+
+    Also cleans up the now-empty classifier list and extra blank lines.
+    """
+    count = 0
+    text, n = re.subn(
+        rf'^[ \t]*"{re.escape(OFFICIAL_CLASSIFIER)}"[ \t]*,?[ \t]*\n?',
+        "",
+        text,
+        flags=re.MULTILINE,
+    )
+    count += n
+    text, n = re.subn(r"^classifiers = \[\s*\]\s*\n?", "", text, flags=re.MULTILINE)
+    count += n
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return text, count > 0
+
+
 def apply_dev_version(status: PluginVersionStatus) -> list[str]:
     plugin_dir = Path(status.plugin_dir)
     package_dir = status.plugin.replace("-", "_")
@@ -189,6 +208,15 @@ def apply_dev_version(status: PluginVersionStatus) -> list[str]:
     pyproject = plugin_dir / "pyproject.toml"
     if update_file(pyproject, r'^(version\s*=\s*)"[^"]+"', rf'\g<1>"{version}"'):
         changed.append(pyproject.as_posix())
+
+    # Strip the official classifier for dev versions so TestPyPI doesn't
+    # reject it (the classifier is only registered on production PyPI).
+    text = pyproject.read_text()
+    stripped_text, did_strip = strip_official_classifier(text)
+    if did_strip:
+        pyproject.write_text(stripped_text)
+        if pyproject.as_posix() not in changed:
+            changed.append(pyproject.as_posix())
 
     recipe = plugin_dir / "recipe.yaml"
     if update_file(
