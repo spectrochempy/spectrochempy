@@ -196,6 +196,46 @@ def get_figure(**kwargs):
     return fig
 
 
+def _setup_axes(ax=None, *, clear=True, projection=None):
+    """
+    Create or prepare a Matplotlib Axes for plotting.
+
+    This helper centralises the common figure/axes lifecycle used by
+    composite plot functions.  It avoids duplicating the *ax=None* /
+    *clear* pattern across ``plot_score``, ``plot_scree``,
+    ``plot_compare``, ``plot_merit``, and ``plot_baseline``.
+
+    Parameters
+    ----------
+    ax : Axes or None
+        If *None*, a new figure and subplot are created.
+        If provided, the axes may be cleared depending on *clear*.
+    clear : bool
+        Only meaningful when *ax* is provided.
+        If *True* (default), clear the axes (``ax.clear()``).
+        If *False*, leave existing artists untouched.
+    projection : str or None
+        Matplotlib projection type passed to ``add_subplot`` when
+        creating new axes (e.g. ``"3d"``).
+
+    Returns
+    -------
+    Axes
+    """
+    if ax is None:
+        fig = get_figure()
+        ax = fig.add_subplot(111, projection=projection)
+    elif clear:
+        ax.clear()
+    return ax
+
+
+def _maybe_show(do_show=True):
+    """Display the current figure if *do_show* is *True*."""
+    if do_show:
+        show()
+
+
 def _apply_window_position(fig, prefs):
     """Apply window position preference for TkAgg backend."""
     import matplotlib

@@ -15,8 +15,8 @@ __all__ = ["plot_score"]
 import numpy as np
 from matplotlib.lines import Line2D
 
-from spectrochempy.utils.mplutils import get_figure
-from spectrochempy.utils.mplutils import show as mpl_show
+from spectrochempy.utils.mplutils import _maybe_show
+from spectrochempy.utils.mplutils import _setup_axes
 
 
 def plot_score(
@@ -207,11 +207,7 @@ def plot_score(
             )
 
     if n_dims == 2:
-        if ax is None:
-            fig = get_figure()
-            ax = fig.add_subplot(111)
-        elif clear:
-            ax.clear()
+        ax = _setup_axes(ax, clear=clear)
 
         x = data[:, pcs[0]]
         y = data[:, pcs[1]]
@@ -253,11 +249,7 @@ def plot_score(
                     t.set_position((x[i] + x_off, y[i] + y_off))
 
     elif n_dims == 3:
-        if ax is None:
-            fig = get_figure()
-            ax = fig.add_subplot(111, projection="3d")
-        elif clear:
-            ax.clear()
+        ax = _setup_axes(ax, clear=clear, projection="3d")
 
         x = data[:, pcs[0]]
         y = data[:, pcs[1]]
@@ -303,7 +295,6 @@ def plot_score(
                     fontsize=8,
                 )
 
-    if show:
-        mpl_show()
+    _maybe_show(show)
 
     return ax
