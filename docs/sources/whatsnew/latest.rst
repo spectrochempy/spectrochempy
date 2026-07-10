@@ -12,6 +12,14 @@ What's New in Revision 0.11.1.dev
 These are the changes in SpectroChemPy-0.11.1.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
 
+Bug Fixes
+~~~~~~~~~
+
+- Display legend in 2D lines/stack plots when ``legend=True`` is passed as a
+  plotting keyword argument. Previously the ``legend`` kwarg was silently
+  ignored by the 2D plot backend, so lines rendered with auto-populated labels
+  from coordinate metadata never showed a legend. (#1404)
+
 Breaking Changes
 ~~~~~~~~~~~~~~~~
 
