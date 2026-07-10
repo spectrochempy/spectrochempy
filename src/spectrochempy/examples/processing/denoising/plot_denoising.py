@@ -15,40 +15,38 @@ spectrum.
 
 # %%
 # Import spectrochempy
-
 import spectrochempy as scp
 
-scp.set_loglevel("INFO")  # to see information
+scp.set_loglevel("INFO")
 
 # %%
-# Load the data (should be a 2D spectrum or a list of datasets that can be merged):
-
+# Load and prepare the data
+# --------------------------
 dataset = scp.read("ramandata/labspec/serie190214-1.txt")
 
 # %%
-# select the useful region
-
+# Select the useful spectral region:
 nd = dataset[:, 60.0:]
 
 # %%
-# Basic plot
-
+# Plot the original data:
 _ = nd.plot(title="original data")
 
 # %%
-# Detrend the data (for a easier comparison)
-
+# Detrend for easier comparison:
 nd1 = nd.detrend(title="detrended data")
 _ = nd1.plot()
 
 # %%
-# Denoise the data using the `denoise` method with the default parameters
-# i.e., ratio=99.8
+# Denoise with default parameters
+# --------------------------------
+# The default ``ratio`` is 99.8:
 nd2 = nd1.denoise()
 _ = nd2.plot(title="denoised data")
 
 # %%
-# Denoise the data using a different ratio
+# Denoise with different ratios
+# ------------------------------
 nd3 = nd1.denoise(ratio=95)
 _ = nd3.plot(title="denoised data")
 # sphinx_gallery_thumbnail_number = 5
@@ -57,9 +55,8 @@ nd4 = nd1.denoise(ratio=90)
 _ = nd4.plot(title="denoised data")
 
 # %%
-# This example shows that denoising can be used effectively on such spectra to increase the signal-to-noise ratio.
-# However, it apparently has a poor effect on eliminating cosmic ray peaks.
-# For the latter, it may be useful to use `despike` methods as seen in another example.
+# Denoising increases the signal-to-noise ratio effectively but has limited
+# effect on cosmic ray spikes.  Consider using ``despike`` methods for those.
 
 # %%
 # This ends the basic example of denoising a 2D Raman spectrum.

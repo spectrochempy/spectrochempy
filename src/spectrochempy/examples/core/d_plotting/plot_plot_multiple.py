@@ -21,40 +21,39 @@ from pathlib import Path
 import spectrochempy as scp
 
 # %%
-# Load the data (here 2D spectrum made from a list of 1D spectra):
-
+# Load and inspect the data
+# --------------------------
 TEST_FILE = Path(os.environ.get("TEST_FILE", "ramandata/labspec/serie190214-1.txt"))
 B1 = scp.read(TEST_FILE)
 
 # %%
-# First we show the basic plot. Here `cmap=None` uses categorical rotating
-# colors for a line-based plot, and `lw` is the short alias for `linewidth`.
-# We also enlarge the figure for readability.
+# Basic plot with categorical colors (``cmap=None``):
 _ = B1.plot(cmap=None, lw=1)
 
 # %%
-# We will limit the x range to the region of interest
-# note the float number to specify that we use coordinates and not indices
+# Preprocess: restrict and detrend
+# ---------------------------------
+# Restrict the region of interest (use floats for coordinate slicing):
 B2 = B1[:, 60.0:]
 
 # %%
-# As there is obviously a drift in these spectra, we will use detrend to remove it.
+# Remove the drift with ``detrend``:
 B3 = scp.detrend(B2)
 _ = B3.plot(cmap=None)
 
 # %%
-# To demonstrate the use of `plot_multiple` we will take only a few spectra.
-# For instance the 5 first spectra:
+# Select a subset of spectra for the overlay:
 B4 = B3[:5]
 
 # %%
-# plot it to see what we have selected
 _ = B4.plot(cmap=None)
 
 # %%
-# Now use `plot_multiple` to overlay the selected spectra on one axes.  We use
-# `method="pen"` for line rendering, set labels for the combined legend, and
-# apply `shift` so the traces remain visually separated.
+# Overlay spectra with ``plot_multiple``
+# ---------------------------------------
+# Unlike ``multiplot`` (which creates a grid of panels), ``plot_multiple``
+# overlays several 1D datasets on a shared axes.  Here we use line rendering
+# with a vertical shift for visual separation:
 datasets = list(B4)
 _ = scp.plot_multiple(
     datasets,
@@ -62,9 +61,9 @@ _ = scp.plot_multiple(
     legend="best",
     labels=["A", "B", "C", "D", "E"],
     color=["black", "red", "green", "blue", "violet"],
-    lw=[1, 2.5, 1, 1, 1],  # line width (we use here different values)
-    ls="-",  # solid line style
-    shift=1000,  # vertical shift
+    lw=[1, 2.5, 1, 1, 1],
+    ls="-",
+    shift=1000,
 )
 
 # %%
