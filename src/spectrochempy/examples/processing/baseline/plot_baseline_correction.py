@@ -16,51 +16,49 @@ For comparison, we also use the `asls`and `snip` models.
 """
 
 # %%
-# As usual we start by importing the useful library, and at least the
-# spectrochempy library.
+# Import the library
 import spectrochempy as scp
 
 # %%
-# Load data
+# Load and prepare the dataset
+# ----------------------------
 datadir = scp.preferences.datadir
 nd = scp.read_omnic(datadir / "irdata" / "nh4y-activation.spg")
 
 # %%
-# Do some slicing to keep only the interesting region
+# Keep only the spectral region of interest
+# (use floats for coordinate-based slicing)
 ndp = nd[:, 1291.0:5999.0]
-# Important:  notice that we use floating point number
-# integer would mean points, not wavenumbers!
 
 # %%
-# Plot the dataset
+# Plot the raw dataset
 _ = ndp.plot()
 
 # %%
-# Remove a basic linear baseline using `basc`:
+# Quick linear baseline removal with ``basc``:
 ndp = ndp.basc()
 
 # %%
-# Make it positive
+# Shift to positive values
 offset = ndp.min()
 ndp -= offset
 _ = ndp.plot()
 
 # %%
-# Define the Baseline object for a multivariate baseline correction model.
-# The `n_components` parameter is the number of components to use for the
-# multivariate baseline correction. The `model` parameter is the baseline
-# correction model to use, here a `pchip` interpolation (piecewise cubic
-# Hermite interpolation).
+# Multivariate baseline correction with pchip interpolation
+# -----------------------------------------------------------
+# Create a ``Baseline`` object using a multivariate approach with pchip
+# (piecewise cubic Hermite) interpolation:
 blc = scp.Baseline(
     log_level="WARNING",
-    multivariate=True,  # use a multivariate baseline correction approach
-    model="polynomial",  # use a polynomial model
-    order="pchip",  # with a pchip interpolation method
+    multivariate=True,
+    model="polynomial",
+    order="pchip",
     n_components=5,
 )
 
 # %%
-# Now we select the regions ( `ranges` ) to use for the baseline correction.
+# Define the reference regions for the baseline:
 blc.ranges = [
     [1556.30, 1568.26],
     [1795.00, 1956.75],
@@ -70,31 +68,25 @@ blc.ranges = [
     [5437.52, 5994.70],
 ]
 
-
 # %%
-# We can now fit the baseline correction model to the data:
+# Fit the model:
 _ = blc.fit(ndp)
 
 # %%
-# The baseline is now stored in the `baseline` attribute of the processor:
-# (note that the baseline is a NDDataset too).
-# The corrected dataset (the dataset after the baseline subtraction) is
-# stored in the `corrected` attribute of the processor:
+# The baseline and corrected datasets are stored in the processor:
 baseline = blc.baseline
 corrected = blc.corrected
 
 # %%
-# Plot the result of the correction
+# Plot the corrected dataset:
 _ = corrected.plot()
 
 # %%
-# We can have a more detailed representation using plot
+# A detailed view with region annotations:
 ax = blc.plot(nb_traces=2, offset=50, show_regions=True)
 
 # %%
-# We can also plot the baseline and the corrected dataset together:
-# for some individual spectra to, for example, check the quality of the
-# correction:
+# Compare individual spectra (corrected, baseline, original):
 _ = corrected[0].plot()
 _ = baseline[0].plot(clear=False, color="red", ls="-")
 _ = ndp[0].plot(clear=False, color="green", ls="--")
@@ -105,20 +97,15 @@ _ = baseline[10].plot(clear=False, color="red", ls="-")
 _ = ndp[10].plot(clear=False, color="green", ls="--")
 
 # %%
-# The baseline correction looks ok in some part of the spectra
-# but not in others where the variation seems a little to rigid.
-# This is may be due to the fact that the `pchip` interpolation
-# is perhaps not the best choice for this dataset. We can try to use a
-# n-th degree `polynomial` model instead:
-#
-#
-# We don't need to redefine a new Baseline object, we can just change
-# the model and the order of the polynomial:
+# Switch to a polynomial model
+# -----------------------------
+# The pchip interpolation seems too rigid in some regions.
+# We can change the model without redefining the ``Baseline`` object:
 blc.model = "polynomial"
-blc.order = 5  # use a 5th degree polynomial
+blc.order = 5
 
 # %%
-# and fit again the baseline correction model to the data:
+# Refit and compare:
 _ = blc.fit(ndp)
 
 baseline = blc.baseline
@@ -137,19 +124,12 @@ _ = ndp[10].plot(clear=False, color="green", ls="--")
 _ = corrected.plot()
 
 # %%
-# This looks better and smoother. But not perfect.
-
-# %%
-# We can also try to use a `asls` (Asymmetric Least Squares) model
-# instead. This model is based on the work of Eilers and Boelens (2005)
-# and performs a baseline correction by iteratively fitting asymmetrically
-# weighted least squares regression curves to the data.
-# The `asls` model has two parameters: `mu` and `asymmetry`.
-# The `mu` parameter is a regularisation parameters which control
-# the smoothness of the baseline. The larger `mu` is, the smoother
-# the baseline will be. The `asymmetry` parameter is a parameter
-# which controls the asymmetry of the AsLS algorithm.
-blc.multivariate = False  # use a sequential approach
+# Try the AsLS model
+# -------------------
+# The Asymmetric Least Squares model (Eilers and Boelens, 2005) offers
+# a different trade-off. The ``mu`` parameter controls smoothness and
+# ``asymmetry`` controls the weighting.
+blc.multivariate = False
 blc.model = "asls"
 blc.mu = 10**9
 blc.asymmetry = 0.002
@@ -173,8 +153,10 @@ _ = ndp[-1].plot(clear=False, color="green", ls="--")
 _ = corrected.plot()
 
 # %%
-# Finally, we will use the snip model
-blc.multivariate = False  # use a sequential approach
+# Try the SNIP model
+# -------------------
+# The Statistics-sensitive Non-linear Iterative Peak-clipping method:
+blc.multivariate = False
 blc.model = "snip"
 blc.snip_width = 200
 _ = blc.fit(ndp)

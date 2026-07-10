@@ -15,55 +15,43 @@ spectrum.
 import spectrochempy as scp
 
 # %%
-# Load the data
-
+# Load and prepare the data
+# --------------------------
 dataset = scp.read("ramandata/labspec/serie190214-1.txt")
 
 # %%
-# Keep only one spectrum in this series
-# and select the useful region
-
+# Keep one spectrum and select the useful region:
 X = dataset[0, 70.0:]
 
 # %%
-# Baseline correction the data using the fast ~spectrochempy.snip` algorithm
-
+# Apply a fast SNIP baseline correction:
 X1 = X.snip()
 
 # %%
-# Plot the data
-
 prefs = scp.preferences
 prefs.figure.figsize = (8, 4)
 _ = X1.plot()
 
 # %%
-# Now let's use the `~spectrochempy.despike` method.
-# Only two parameters needs to be tuned: the `size` of the filter
-# (actually a Savitsky-Golay filter of order 2), and `delta`, the threshold for the
-# detection of spikes (outliers).
-# A spike is detected if its value is greater than `delta` times the standard deviation
-# of the difference between the original and the smoothed data.
-
+# Despike with the default method
+# --------------------------------
+# The ``despike`` method has two key parameters: ``size`` (Savitzky-Golay filter
+# width) and ``delta`` (detection threshold in standard deviation units):
 X2 = scp.despike(X1, size=11, delta=5)
 _ = X1.plot()
 _ = X2.plot(clear=False, ls="-", c="r")
 
 # %%
-# Another method, 'whitaker', is also available (see the documentation for details):
-
-# %%
+# Despike with the Whitaker method
+# ---------------------------------
 X3 = scp.despike(X1, size=11, delta=5, method="whitaker")
 _ = X1.plot()
 _ = X3.plot(clear=False, ls="-", c="r")
 
 # %%
-# Getting the desired results require the tuning of size and delta parameters.
-# And sometimes may need to repeat the procedure on a previously filtered spectra.
-#
-# For example, if size or delta are badly chosen, valid peaks could be removed.
-# So careful inspection of the results is crucial.
-
+# The importance of parameter tuning
+# -----------------------------------
+# Poorly chosen parameters may remove valid peaks:
 X4 = scp.despike(X1, size=21, delta=2)
 _ = X1.plot()
 _ = X4.plot(clear=False, ls="-", c="r")

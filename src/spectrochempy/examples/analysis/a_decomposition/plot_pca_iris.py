@@ -14,22 +14,20 @@ dataset (Ronald A. Fisher.
 """
 
 # %%
-# First we load the SpectroChemPy API package
+# Load the SpectroChemPy API package
 import spectrochempy as scp
 
 # %%
-# load a dataset from scikit-learn
+# Load the Iris dataset
+# ---------------------
 dataset = scp.load_iris()
 
 # %%
-# Create a PCA object
-# Here, the number of components used by the model is automatically determined
-# using `n_components="mle"`\. Warning: `mle` cannot be used when
-# n_observations < n_features.
+# Fit a PCA model with automatic component selection
+# ---------------------------------------------------
+# Using ``n_components="mle"``, the optimal number of components is determined
+# automatically. Note: `"mle"` cannot be used when n_observations < n_features.
 pca = scp.PCA(n_components="mle")
-
-# %%
-# Fit dataset with the PCA model
 _ = pca.fit(dataset)
 
 # %%
@@ -37,61 +35,58 @@ _ = pca.fit(dataset)
 pca.n_components
 
 # %%
-# It explains 99.5% of the variance
+# It explains 99.5% of the variance:
 pca.cumulative_explained_variance[-1].value
 
 # %%
-# We can also specify the amount of explained variance to compute how much components
-# are needed (a number between 0 and 1 for n_components is required to do this).
-# we found 4 components in this case
+# Fit a PCA model with a variance threshold
+# -------------------------------------------
+# We can also specify the amount of explained variance directly:
 pca = scp.PCA(n_components=0.999)
 _ = pca.fit(dataset)
+
+# %%
+# This time 4 components are found:
 pca.n_components
 
 # %%
-# the 4 components found are in the `components` attribute of pca. These components are
-# often called loadings in PCA analysis.
+# Inspect the loadings and scores
+# --------------------------------
+# The 4 components (loadings) are accessible via ``pca.components``:
 loadings = pca.components
 loadings
 
 # %%
-# Note: it is equivalently possible to use the `loadings` attribute of pca, which
-# produces the same results.
+# or equivalently via ``pca.loadings``:
 pca.loadings
 
 # %%
-# To Reduce the data to a lower dimensionality using these three components, we use the
-# transform methods. The results is often called `scores` for PCA analysis.
+# To reduce the data to a lower dimensionality, use ``transform``:
 scores = pca.transform()
 scores
 
 # %%
-# Again, we can also use the `scores` attribute to get these results.
+# The scores are also available directly via ``pca.scores``:
 scores = pca.scores
 scores
 
 # %%
-# The figures of merit (explained and cumulative variance) confirm that
-# these 4 PC's explain 100% of the variance:
-#
+# The explained and cumulative variance can be printed:
 pca.printev()
 
 # %%
-# These figures of merit can also be displayed graphically
-#
-# The ScreePlot
+# Visualize the results
+# ----------------------
+# The scree plot shows the explained variance per component:
 _ = pca.plot_scree()
 
 # %%
-# The score plots can be used for classification purposes. The first one - in 2D for the
-# 2 first PC's - shows that the first PC allows distinguishing Iris-setosa (score of
-# PC#1 < -1) from other species (score of PC#1 > -1), while more PC's are required
-# to distinguish versicolor from virginica.
+# The 2D score plot (first 2 PCs) separates Iris-setosa from the other species:
 _ = pca.plot_score(color_mapping="labels")
 
 # %%
-# The second one, in 3D for the first 3 PCs, indicates that a third PC will not
-# better distinguish versicolor from virginica.
+# The 3D score plot (first 3 PCs) shows that a third PC does not further
+# distinguish versicolor from virginica:
 ax = pca.plot_score(components=(1, 2, 3), color_mapping="labels")
 ax.view_init(10, 75)
 

@@ -13,11 +13,13 @@ from their NIR spectra.
 """
 
 # %%
-# Import the spectrochempy API package
+# Import the package
 import spectrochempy as scp
 
 # %%
-# The data set is available to download from the Eigenvector Archive:
+# Load the corn NIR dataset
+# --------------------------
+# The data is available from the Eigenvector archive:
 try:
     ds_list = scp.read("http://www.eigenvector.com/data/Corn/corn.mat", merge=False)
 except FileNotFoundError:
@@ -28,45 +30,46 @@ else:
     print(ds_list_names)
 
 # %%
-# This data set, originally taken at Cargil,  consists of 80 samples of corn measured on
-# 3 different NIR spectrometers together with the moisture, oil, protein and starch
-# values for each of the samples is also included.
-# The 5th dataset named `'m5spec'`, contains the NIR spectra of 80 corn samples recorded
-# on the same instrument. Let's assign this NDDataset specta to `X`, add few
-# information and plot it:
-
-# %%
 if ds_list is not None:
+    # %%
+    # Inspect the spectra
+    # ^^^^^^^^^^^^^^^^^^^^
+    # The 5th dataset ``m5spec`` contains NIR spectra from 80 corn samples
+    # recorded on the same instrument:
     X = ds_list[4]
     X.title = "reflectance"
     X.x.title = "Wavelength"
     X.x.units = "nm"
     _ = X.plot(cmap=None)
+
     # %%
-    # The values of the properties we want to predict are in the 4th dattaset named `'propval'` dataset:
+    # The properties to predict are in the ``propval`` dataset:
     Y = ds_list[3]
     _ = Y.T.plot(cmap=None, legend=Y.x.labels)
+
     # %%
-    # We are interested to predict the moisture content:
+    # Predict moisture content
+    # ^^^^^^^^^^^^^^^^^^^^^^^^
     y = Y[:, "Moisture"]
 
     # %%
-    # First we select 57 first samples (2/3 of the total) to train/calibrate the model and the remaining ones
-    # to test/validate the model:
+    # Split into training and test sets
+    # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    # Use 57 samples (2/3) for calibration and the rest for validation:
     X_train = X[:57]
     X_test = X[57:]
     y_train = y[:57]
     y_test = y[57:]
 
     # %%
-    # Then we create a PLSRegression object and fit the train datasets:
+    # Fit the PLS model
+    # ^^^^^^^^^^^^^^^^^^
     pls = scp.PLSRegression(n_components=5)
     _ = pls.fit(X_train, y_train)
-    # %%
-    # Finally we generate a parity plot comparing the predicted and actual values, for
-    # both train set and test set.
 
-    # sphinx_gallery_thumbnail_number = 3
+    # %%
+    # Validate with a parity plot
+    # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     ax = pls.parityplot(label="calibration", s=150)
     _ = pls.parityplot(
         y_test, pls.predict(X_test), s=150, c="red", label="validation", clear=False

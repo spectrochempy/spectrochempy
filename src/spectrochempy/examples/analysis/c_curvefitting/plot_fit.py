@@ -21,20 +21,20 @@ import os
 import spectrochempy as scp
 
 # %%
-#  Let's take an IR spectrum
-
+# Load and prepare an IR spectrum
+# --------------------------------
 nd = scp.read_omnic(os.path.join("irdata", "nh4y-activation.spg"))
 
 # %%
-# and select only the OH region:
+# Select the OH region and mask a noisy interval:
 ndOH = nd[54, 3800.0:3300.0]
-# masking
 ndOH[:, 3505.0:3500.0] = scp.MASKED
 _ = ndOH.plot()
 
 # %%
-# Perform a Fit
-# Fit parameters are defined in a script (a single text as below)
+# Define the fitting model
+# -------------------------
+# Fit parameters are defined in a script with the following syntax:
 script = """
 #-----------------------------------------------------------
 # syntax for parameters definition:
@@ -73,28 +73,24 @@ shape: asymmetricvoigtmodel
 """
 
 # %%
-# create an Optimize object
+# Create the optimizer and inspect the starting model
+# ----------------------------------------------------
 f1 = scp.Optimize(log_level="INFO")
-
-# %%
-# Show plot and the starting model using the dry parameters (of course it is advisable
-# to be as close as possible of a good expectation
 f1.script = script
 
-# set dry and continue to show starting model
-# reset dry and continue to show starting model
+# Use dry mode to preview the starting parameters
 f1.dry = True
 f1.autobase = True
 _ = f1.fit(ndOH)
 
-# get some information
 scp.info_(f"numbers of components: {f1.n_components}")
 _ = ndOH.plot()
 ax = (f1.components[:]).plot(clear=False)
 ax.autoscale(enable=True, axis="y")
 
 # %%
-# Now perform a fit with maximum 1000 iterations
+# Fit the model
+# --------------
 f1.max_iter = 1000
 _ = f1.fit(ndOH)
 
@@ -105,7 +101,7 @@ ax = (f1.components[:]).plot(clear=False)
 ax.autoscale(enable=True, axis="y")
 
 # %%
-# plotmerit
+# Evaluate the fit quality
 som = f1.inverse_transform()
 _ = f1.plotmerit(ndOH, som, offset=15)
 

@@ -18,20 +18,16 @@ equation.
 import spectrochempy as scp
 
 # %%
-# Let's take a similar example to the one given in the `numpy.linalg`
-# documentation
-#
-# We have some noisy data that represent the distance `d` traveled by some
-# objects versus time `t`:
-
+# Prepare example data
+# --------------------
+# Noisy distance-vs-time measurements:
 time = [0, 1, 2, 3]
 distance = [-1, 0.2, 0.9, 2.1]
 
 # %%
-# ### 1) Using arrays (or list) inputs
-#
-# We would like v and d0 such as
-#    distance = v.time + d0
+# Using plain arrays (or lists)
+# ------------------------------
+# Fit a linear model ``distance = v * time + d0``:
 lstsq = scp.LSTSQ()
 _ = lstsq.fit(time, distance)
 v = lstsq.coef
@@ -40,8 +36,7 @@ rsquare = lstsq.score()
 v, d0, rsquare
 
 # %%
-# Plot
-# (we need to import the matplotlib library)
+# Plot the result:
 import matplotlib.pyplot as plt
 
 _ = plt.plot(time, distance, "o", label="Original data", markersize=5)
@@ -53,58 +48,50 @@ plt.title(f"Linear regression, $R^2={rsquare:.3f}$")
 plt.legend()
 
 # %%
-# ### 2) Using NDDataset as input for X and Y
-#
-# Using NDDataset as input offer the straightforward possibility to use metadata
-# such as units in the calculation and coordset
-#
+# Using NDDatasets as input (X and Y)
+# ------------------------------------
+# NDDatasets carry metadata such as units:
 time = scp.NDDataset([0, 1, 2, 3], title="time", units="hour")
 distance = scp.NDDataset([-1, 0.2, 0.9, 2.1], title="distance", units="kilometer")
 
 # %%
-# we fit it using the new defined time and distance NDDatasets
+# Fit and inspect the results (now with units):
 lstsq = scp.LSTSQ()
 _ = lstsq.fit(time, distance)
 
-# The results are the same as previously (but with units information)
 v = lstsq.coef
 d0 = lstsq.intercept
 rsquare = lstsq.score()
 print(f"speed : {v: .2f},  d0 : {d0: .2f},  r^2={rsquare: .3f}")
 
 # %%
-# Predict return a NDDataset since the inputs were NDDatasets
+# Prediction returns an NDDataset when inputs are NDDatasets:
 distance_fitted2 = lstsq.predict()
 print(distance_fitted2)
 
 assert (distance_fitted == distance_fitted2.data).all()
 
 # %%
-# ### 3) Using a single NDDataset with X coordinates as input
-#
-# Using NDDataset as input offer the straightforward possibility to use the X coordinate
-# directly, ie., we use lstsq.fit(Y) with Y.x = X, instead of lstsq.fit(X, Y)
-#
+# Using a single NDDataset with x-coordinates
+# -------------------------------------------
+# The x-coordinate of the NDDataset is used as the predictor:
 time = scp.Coord([0, 1, 2, 3], title="time", units="hour")
 distance = scp.NDDataset(
     data=[-1, 0.2, 0.9, 2.1], coordset=[time], title="distance", units="kilometer"
 )
 
 # %%
-# Now we fit the model,
-# but here we just need to pass the distance dataset as argument.
-# The time information being the x coordinates.
+# Fit using only the NDDataset (the x-coordinate provides the time axis):
 lstsq = scp.LSTSQ()
 _ = lstsq.fit(distance)
 
-# The results are the same as previously.
 v = lstsq.coef
 d0 = lstsq.intercept
 rsquare = lstsq.score()
 print(f"speed : {v:.2f~C},  d0 : {d0:.2f~C},  r^2={rsquare:.3f}")
 
 # %%
-# Final plot
+# Final plot using the dataset's own plot methods:
 _ = distance.plot_scatter(
     markersize=10,
     mfc="red",
