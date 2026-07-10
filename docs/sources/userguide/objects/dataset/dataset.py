@@ -226,11 +226,7 @@ d1D.dims
 # instance constructor
 
 # %%
-a = np.random.rand(2, 4, 6)
-a
-
-# %%
-d3D = NDDataset(a)
+d3D = NDDataset.random((2, 4, 6))
 d3D.title = "energy"
 d3D.author = "Someone"
 d3D.name = "3D dataset creation"
@@ -243,8 +239,8 @@ d3D
 # We can also add all information in a single statement
 
 # %%
-d3D = NDDataset(
-    a,
+d3D = NDDataset.random(
+    (2, 4, 6),
     dims=["u", "v", "t"],
     title="Energy",
     author="Someone",

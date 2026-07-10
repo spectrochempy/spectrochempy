@@ -147,9 +147,8 @@ class PSD(BaseConfigurable):
     Examples
     --------
     >>> import spectrochempy as scp
-    >>> import numpy as np
     >>> # Raw 2D input (120 spectra, 1000 channels)
-    >>> X = scp.NDDataset(np.random.rand(120, 1000))
+    >>> X = scp.random(size=(120, 1000))
     >>> psd = scp.PSD(n_spectra_per_cycle=60, demodulation='matrix')
     >>> result = psd.transform(X)
     >>> result.in_phase
