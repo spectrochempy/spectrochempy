@@ -39,6 +39,8 @@ from spectrochempy.utils.decorators import signature_has_configurable_traits
 # Names of legacy traitlet-based constraint parameters.
 # Used to detect mixed-API usage (legacy traitlets + new constraints= parameter).
 # --------------------------------------------------------------------------------------
+_UNSET = object()
+
 _LEGACY_CONSTRAINT_TRAITS = frozenset(
     {
         "nonnegConc",
@@ -69,6 +71,7 @@ _LEGACY_CONSTRAINT_TRAITS = frozenset(
         "getSt_to_St_idx",
     }
 )
+
 
 # --------------------------------------------------------------------------------------
 # Internal iteration state
@@ -124,12 +127,26 @@ class _ALSState:
 # ordered list of constraint objects instead of hardcoding each constraint
 # application by name.
 #
-# The public traitlets (``nonnegConc``, ``unimodConc``, ...) remain the single
-# user-facing configuration surface. They are translated into private
-# constraint objects once, at the start of ``_fit``, by the builder methods
-# ``_build_concentration_constraints`` and ``_build_spectral_constraints``.
-# Inactive constraints are not created, so the runtime cost of an absent
-# constraint is a missing list entry rather than a guarded no-op call.
+# The architecture is:
+#
+#   user input (``constraints= [...]`` or legacy traitlets)
+#       |
+#       v
+#   public ``Constraint`` objects
+#       |  (``legacy_to_constraints()`` for the legacy path)
+#       v
+#   ``_public_to_internal()``
+#       |
+#       v
+#   private ``_Constraint`` objects
+#       |  (split by profile side in ``_build_from_public_constraints``)
+#       v
+#   ALS loop
+#
+# ``constraints=`` is the canonical public API. Legacy traitlets are
+# converted to public ``Constraint`` objects by ``legacy_to_constraints``
+# before they reach ``_public_to_internal``.  Internally, both paths produce
+# identical ``_Constraint`` pipelines.
 #
 # ``apply`` returns the (possibly rebound) profile array so that callers can
 # keep the constrained reference — this mirrors the historical semantics of
@@ -384,7 +401,8 @@ class _ModelProfileConstraint(_Constraint):
     The estimator back-reference is used only for helper methods such
     as ``_C_2_NDDataset``, ``_St_2_NDDataset``,
     ``_call_external_generator`` and ``_unpack_generator_output``.
-    The constraint never reads legacy estimator traitlets.
+    The constraint never reads legacy estimator traitlets directly — all
+    configuration reaches it through the public ``Constraint`` API.
     """
 
     name = "model-profile"
@@ -431,9 +449,18 @@ class _ModelProfileConstraint(_Constraint):
             if new_args is not _UNCHANGED:
                 self.model_args = new_args
             if self._profile_mapping is not None:
-                values[:, self._components] = _profile_asarray(profiles)[
-                    :, self._profile_mapping
-                ]
+                profiles_arr = _profile_asarray(profiles)
+                n_outputs = profiles_arr.shape[1]
+                for i, comp in enumerate(self._components):
+                    col = self._profile_mapping[i]
+                    if col is not None:
+                        if col >= n_outputs:
+                            raise IndexError(
+                                f"mapping[{i}] = {col} is out of range for "
+                                f"the model output which has {n_outputs} "
+                                f"column{'s' if n_outputs != 1 else ''}."
+                            )
+                        values[:, comp] = profiles_arr[:, col]
             else:
                 values[:, self._components] = _profile_asarray(profiles)
             state.extra_output_conc = extra
@@ -449,14 +476,23 @@ class _ModelProfileConstraint(_Constraint):
             if new_args is not _UNCHANGED:
                 self.model_args = new_args
             if self._profile_mapping is not None:
-                values[self._components, :] = _profile_asarray(profiles)[
-                    self._profile_mapping, :
-                ]
+                profiles_arr = _profile_asarray(profiles)
+                n_outputs = profiles_arr.shape[0]
+                for i, comp in enumerate(self._components):
+                    row = self._profile_mapping[i]
+                    if row is not None:
+                        if row >= n_outputs:
+                            raise IndexError(
+                                f"mapping[{i}] = {row} is out of range for "
+                                f"the model output which has {n_outputs} "
+                                f"row{'s' if n_outputs != 1 else ''}."
+                            )
+                        values[comp, :] = profiles_arr[row, :]
             else:
                 values[self._components, :] = _profile_asarray(profiles)
             state.extra_output_spec = extra
 
-        self.extra_outputs.append(extra if extra else [])
+        self.extra_outputs.append(extra if extra is not None else [])
         self.last_generated_profile = profiles
         self.history.append((self.model_args, extra, profiles))
         return values
@@ -492,18 +528,25 @@ class MCRALS(DecompositionAnalysis):
         with the legacy traitlet-based constraint parameters (``nonnegConc``,
         ``unimodConc``, ``closureConc``, etc.) — choose one API.
 
-        Example::
+        ``constraints`` can be passed at construction time or assigned before
+        calling ``fit``::
 
             from spectrochempy.analysis import constraints as mc
 
-            mcr = MCRALS(
-                constraints=[
-                    mc.NonNegative("C"),
-                    mc.Closure("C"),
-                ]
-            )
+            mcr = MCRALS()
+            mcr.constraints = [
+                mc.NonNegative("C"),
+                mc.Closure("C"),
+            ]
+            mcr.fit(X, guess)
 
         .. versionadded:: 0.7.0
+    solver_C : ``'lstsq'`` | ``'nnls'`` | ``'pnnls'``, optional, default: ``'lstsq'``
+        Solver used to estimate concentration profiles ``C`` from ``X`` and
+        ``St``. The deprecated alias ``solverConc`` is still accepted.
+    solver_St : ``'lstsq'`` | ``'nnls'`` | ``'pnnls'``, optional, default: ``'lstsq'``
+        Solver used to estimate spectral profiles ``St`` from ``X`` and ``C``.
+        The deprecated alias ``solverSpec`` is still accepted.
     log_level : any of [``"INFO"``, ``"DEBUG"``, ``"WARNING"``, ``"ERROR"``], optional, default: ``"WARNING"``
         The log level at startup. It can be changed later on using the
         `set_log_level` method or by changing the ``log_level`` attribute.
@@ -929,6 +972,39 @@ and `St`.
         help=(r"""Whether to store the C and St generated at each iteration."""),
     ).tag(config=True)
 
+    constraints = tr.Any(
+        default_value=None,
+        allow_none=True,
+        help=(
+            "Public constraint objects for MCR-ALS. "
+            "``None`` uses the legacy traitlet-based constraint configuration. "
+            "Otherwise, a list or tuple of ``Constraint`` instances defining "
+            "the scientific constraints for the fit. "
+            "Cannot be combined with legacy constraint parameters."
+        ),
+    )
+
+    # ----------------------------------------------------------------------------------
+    # Public property wrappers for deprecated solver traitlet names
+    # ----------------------------------------------------------------------------------
+    @property
+    def solver_C(self):
+        """Solver used to get `C` from `X` and `St`."""
+        return self.solverConc
+
+    @solver_C.setter
+    def solver_C(self, value):
+        self.solverConc = value
+
+    @property
+    def solver_St(self):
+        """Solver used to get `St` from `X` and `C`."""
+        return self.solverSpec
+
+    @solver_St.setter
+    def solver_St(self, value):
+        self.solverSpec = value
+
     # ----------------------------------------------------------------------------------
     # Initialization
     # ----------------------------------------------------------------------------------
@@ -939,6 +1015,10 @@ and `St`.
         warm_start=False,
         **kwargs,
     ):
+        # Mark instance as not yet fully initialized so that __setattr__
+        # does not emit deprecation warnings for trait defaults.
+        object.__setattr__(self, "_init_done", False)
+
         if len(args) > 0:
             raise ValueError(
                 "Passing arguments such as MCRALS(X, profile) "
@@ -947,31 +1027,56 @@ and `St`.
                 "See the documentation and examples",
             )
 
-        # Extract and validate the new constraints= parameter (not a traitlet).
-        constraints = kwargs.pop("constraints", None)
+        # Detect deprecated solver kwarg names and warn.
+        if "solverConc" in kwargs:
+            warnings.warn(
+                "`solverConc` is deprecated; use `solver_C` instead.",
+                FutureWarning,
+                stacklevel=2,
+            )
+            if "solver_C" in kwargs:
+                raise ValueError("Cannot specify both `solverConc` and `solver_C`.")
+            kwargs["solver_C"] = kwargs.pop("solverConc")
+        if "solverSpec" in kwargs:
+            warnings.warn(
+                "`solverSpec` is deprecated; use `solver_St` instead.",
+                FutureWarning,
+                stacklevel=2,
+            )
+            if "solver_St" in kwargs:
+                raise ValueError("Cannot specify both `solverSpec` and `solver_St`.")
+            kwargs["solver_St"] = kwargs.pop("solverSpec")
 
-        if constraints is not None:
-            # Detect mixed API: legacy constraint traitlets + constraints=.
-            mixed = _LEGACY_CONSTRAINT_TRAITS & set(kwargs)
-            if mixed:
-                raise ValueError(
-                    "The legacy constraint parameters and the constraints "
-                    "parameter cannot be used together. Please choose one API."
-                )
-            # Validate that every element is a Constraint instance.
-            if not isinstance(constraints, (list, tuple)):
-                raise TypeError(
-                    f"constraints must be a list or tuple, got {type(constraints).__name__}"
-                )
-            for idx, c in enumerate(constraints):
-                if not isinstance(c, Constraint):
-                    raise TypeError(
-                        f"constraints[{idx}] must be a Constraint instance, "
-                        f"got {type(c).__name__}"
-                    )
-            self._constraints = list(constraints)
-        else:
-            self._constraints = None
+        # Detect legacy constraint traitlet kwargs and warn.
+        _legacy_in_kwargs = _LEGACY_CONSTRAINT_TRAITS & set(kwargs)
+        if _legacy_in_kwargs:
+            warnings.warn(
+                "Legacy MCR-ALS constraint parameters are deprecated; "
+                "use the `constraints` API instead.",
+                FutureWarning,
+                stacklevel=2,
+            )
+
+        # Handle constraints= parameter (now a validated traitlet).
+        constraints_value = kwargs.pop("constraints", _UNSET)
+        constraints_passed = constraints_value is not _UNSET
+
+        # Mixed API detection at constructor time:
+        # only raise when constraints is non-None AND legacy traits present.
+        if constraints_passed and constraints_value is not None and _legacy_in_kwargs:
+            raise ValueError(
+                "Legacy constraint parameters and `constraints` "
+                "cannot be used together."
+            )
+
+        # Track which legacy traits were explicitly set (mutable set).
+        object.__setattr__(self, "_explicit_legacy_traits", set(_legacy_in_kwargs))
+        object.__setattr__(self, "_validating_legacy", False)
+
+        # Re-inject constraints so the traitlet system handles validation
+        # and observes during super().__init__().
+        if constraints_passed:
+            kwargs["constraints"] = constraints_value
 
         # call the super class for initialisation
         super().__init__(
@@ -989,26 +1094,88 @@ and `St`.
         # storage for ALS diagnostics captured during _fit
         self._fit_meta = None
 
+        # Instance is now fully initialized.
+        object.__setattr__(self, "_init_done", True)
+
+    def __setattr__(self, name, value):
+        # Emit deprecation warnings and mixed-API detection when legacy
+        # parameters are assigned on an already-initialized instance.
+        init_done = getattr(self, "_init_done", False)
+        if name in ("solverConc", "solverSpec") and init_done:
+            replacement = "solver_C" if name == "solverConc" else "solver_St"
+            warnings.warn(
+                f"`{name}` is deprecated; use `{replacement}` instead.",
+                FutureWarning,
+                stacklevel=2,
+            )
+        elif name in _LEGACY_CONSTRAINT_TRAITS and init_done:
+            # Skip mixed-API checks and deprecation warnings during internal
+            # re-validation (_n_components_change).
+            if getattr(self, "_validating_legacy", False):
+                super().__setattr__(name, value)
+                return
+            # Detect mixed API: if constraints is non-None, reject.
+            constraints = self.constraints
+            if constraints is not None:
+                raise ValueError(
+                    "Legacy constraint parameters and `constraints` "
+                    "cannot be used together."
+                )
+            object.__getattribute__(self, "_explicit_legacy_traits").add(name)
+            warnings.warn(
+                f"Legacy MCR-ALS constraint parameter `{name}` is deprecated; "
+                "use the `constraints` API instead.",
+                FutureWarning,
+                stacklevel=2,
+            )
+        super().__setattr__(name, value)
+
     # ----------------------------------------------------------------------------------
     # Private methods
     # ----------------------------------------------------------------------------------
 
+    def _nonneg_indices(self, side):
+        """
+        Return non-negative component indices for the pnnls solver.
+
+        When the new ``constraints`` API is active, indices are derived
+        from ``NonNegative`` constraints.  Otherwise falls back to the
+        legacy traitlet (``nonnegConc`` / ``nonnegSpec``).
+        """
+        if self.constraints is None:
+            return self.nonnegConc if side == "C" else self.nonnegSpec
+        from spectrochempy.analysis.decomposition.mcrals_constraints import (
+            NonNegative,  # noqa: PLC0415
+        )
+
+        indices = set()
+        any_all = False
+        for c in self.constraints:
+            if isinstance(c, NonNegative) and c.profile == side:
+                if c.components is None:
+                    any_all = True
+                else:
+                    indices.update(c.components)
+        if any_all:
+            return list(range(self._n_components)) if self._n_components else []
+        return sorted(indices) if indices else []
+
     def _solve_C(self, St):
-        if self.solverConc == "lstsq":
+        if self.solver_C == "lstsq":
             return _lstsq(St.T, self._X.data.T).T
-        if self.solverConc == "nnls":
+        if self.solver_C == "nnls":
             return _nnls(St.T, self._X.data.T).T
-        if self.solverConc == "pnnls":
-            return _pnnls(St.T, self._X.data.T, nonneg=self.nonnegConc).T
+        if self.solver_C == "pnnls":
+            return _pnnls(St.T, self._X.data.T, nonneg=self._nonneg_indices("C")).T
         return None
 
     def _solve_St(self, C):
-        if self.solverSpec == "lstsq":
+        if self.solver_St == "lstsq":
             return _lstsq(C, self._X.data)
-        if self.solverSpec == "nnls":
+        if self.solver_St == "nnls":
             return _nnls(C, self._X.data)
-        if self.solverSpec == "pnnls":
-            return _pnnls(C, self._X.data, nonneg=self.nonnegSpec)
+        if self.solver_St == "pnnls":
+            return _pnnls(C, self._X.data, nonneg=self._nonneg_indices("St"))
         return None
 
     def _guess_profile(self, profile):
@@ -1247,16 +1414,56 @@ and `St`.
             # Indeed, if not forced here these parameters are validated only when they
             # are set explicitly.
             # Here is an ugly trick to force this validation. # TODO: better way?
-            with warnings.catch_warnings():
-                warnings.simplefilter(action="ignore", category=FutureWarning)
-                self.closureTarget = self.closureTarget
-                self.getC_to_C_idx = self.getC_to_C_idx
-                self.getSt_to_St_idx = self.getSt_to_St_idx
-                self.nonnegConc = self.nonnegConc
-                self.nonnegSpec = self.nonnegSpec
-                self.unimodConc = self.unimodConc
-                self.unimodSpec = self.unimodSpec
-                self.closureConc = self.closureConc
+            # DEVNOTE: _validating_legacy flag prevents __setattr__ from
+            # tracking these internal re-assignments as explicit user assignments.
+            # The try/finally ensures the flag is reset even if validation raises.
+            self._validating_legacy = True
+            try:
+                with warnings.catch_warnings():
+                    warnings.simplefilter(action="ignore", category=FutureWarning)
+                    self.closureTarget = self.closureTarget
+                    self.getC_to_C_idx = self.getC_to_C_idx
+                    self.getSt_to_St_idx = self.getSt_to_St_idx
+                    self.nonnegConc = self.nonnegConc
+                    self.nonnegSpec = self.nonnegSpec
+                    self.unimodConc = self.unimodConc
+                    self.unimodSpec = self.unimodSpec
+                    self.closureConc = self.closureConc
+            finally:
+                self._validating_legacy = False
+
+    # ----------------------------------------------------------------------------------
+    # Constraints traitlet — validated, observes fitted state
+    # ----------------------------------------------------------------------------------
+    @tr.validate("constraints")
+    def _validate_constraints(self, proposal):
+        value = proposal.value
+        if value is None:
+            return None
+        if isinstance(value, tuple):
+            value = list(value)
+        if not isinstance(value, list):
+            raise TypeError(
+                "constraints must be None, a list, or a tuple, "
+                f"got {type(value).__name__}"
+            )
+        for i, c in enumerate(value):
+            if not isinstance(c, Constraint):
+                raise TypeError(
+                    f"constraints[{i}] must be a Constraint instance, "
+                    f"got {type(c).__name__}"
+                )
+        if getattr(self, "_explicit_legacy_traits", None):
+            raise ValueError(
+                "Legacy constraint parameters and `constraints` "
+                "cannot be used together."
+            )
+        return list(value)
+
+    @tr.observe("constraints")
+    def _on_constraints_changed(self, change):
+        if self._init_done:
+            self._fitted = False
 
     @tr.default("_components")
     def _components_default(self):
@@ -1323,11 +1530,11 @@ and `St`.
         state = self._init_als_state(X, Y)
 
         # Build the constraint pipelines from public ``Constraint`` objects.
-        # When ``constraints=`` was provided at construction, use those;
-        # otherwise convert legacy traitlets through ``legacy_to_constraints``.
-        # Both paths produce the same internal ``_Constraint`` pipeline.
-        if self._constraints is not None:
-            public_constraints = self._constraints
+        # When ``constraints=`` was provided, use those directly; otherwise
+        # convert legacy traitlets through ``legacy_to_constraints``.
+        # Both paths converge to the same internal ``_Constraint`` pipeline.
+        if self.constraints is not None:
+            public_constraints = self.constraints
         else:
             from spectrochempy.analysis.decomposition._legacy_constraint_converter import (
                 legacy_to_constraints,
@@ -1441,7 +1648,8 @@ and `St`.
     #
     # Both the ``constraints=`` API and the legacy traitlet API converge
     # here: legacy traitlets are first converted to public ``Constraint``
-    # objects by ``legacy_to_constraints``, then processed identically.
+    # objects by ``legacy_to_constraints``, then processed identically
+    # through the same ``_public_to_internal`` conversion path.
 
     def _build_normalization(self):
         """
@@ -1487,11 +1695,10 @@ and `St`.
 
         for c in constraints:
             internal = self._public_to_internal(c)
-            if internal is not None:
-                if c.profile == "C":
-                    conc.append(internal)
-                else:
-                    spec.append(internal)
+            if c.profile == "C":
+                conc.append(internal)
+            else:
+                spec.append(internal)
 
         normalization = self._build_normalization()
 
@@ -1522,9 +1729,13 @@ and `St`.
 
         Returns
         -------
-        _Constraint or None
-            Internal constraint, or ``None`` if the public type has no
-            internal counterpart yet (e.g. ``ReferenceProfile``).
+        _Constraint
+            Internal constraint.
+
+        Raises
+        ------
+        NotImplementedError
+            If the public constraint type has no internal counterpart yet.
         """
         from spectrochempy.analysis.decomposition.mcrals_constraints import Closure
         from spectrochempy.analysis.decomposition.mcrals_constraints import ModelProfile
@@ -1543,7 +1754,7 @@ and `St`.
             return _UnimodalConstraint(
                 indices,
                 axis=axis,
-                tol=1.1,
+                tol=constraint.tolerance,
                 mod=constraint.mod,
             )
 
@@ -1570,7 +1781,6 @@ and `St`.
         if isinstance(constraint, ModelProfile):
             comps = self._resolve_components(constraint.components)
             side = "conc" if constraint.profile == "C" else "spec"
-            profile_mapping = None
             return _ModelProfileConstraint(
                 self,
                 side=side,
@@ -1578,12 +1788,12 @@ and `St`.
                 components=comps,
                 model_args=constraint.model_args,
                 model_kwargs=constraint.model_kwargs,
-                profile_mapping=profile_mapping,
+                profile_mapping=constraint.mapping,
             )
 
-        # Remaining public types (ReferenceProfile, FixedValues, ZeroRegion,
-        # Selectivity) have no internal counterpart yet.
-        return None
+        raise NotImplementedError(
+            f"{type(constraint).__name__} is not yet implemented in MCRALS."
+        )
 
     @staticmethod
     def _apply_constraint_pipeline(profile, constraints, state):
@@ -1938,6 +2148,8 @@ and `St`.
             "max_iter": self.max_iter,
             "tol": self.tol,
             "maxdiv": self.maxdiv,
+            "solver_C": self.solver_C,
+            "solver_St": self.solver_St,
             "solverConc": self.solverConc,
             "solverSpec": self.solverSpec,
             "nonnegConc": self.nonnegConc,

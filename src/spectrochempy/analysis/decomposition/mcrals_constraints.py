@@ -817,6 +817,13 @@ class Unimodal(Constraint):
     components : list[int], optional
         Component indices to which the constraint applies. ``None``
         (default) means "all components".
+    tolerance : float, optional
+        Admissibility tolerance for the unimodality constraint.
+        Must be ``>= 1.0``.  ``1.0`` makes the constraint strict (every
+        decrease after the global maximum is a violation).  Values above
+        ``1.0`` allow small local reversals before enforcing a strict
+        decrease (mirrors the historical ``unimodConcTol`` /
+        ``unimodSpecTol`` legacy parameters).  Default is ``1.1``.
     mod : str, optional
         Unimodal modality: ``"strict"`` (single maximum, default) or
         ``"smooth"`` (allow a flat-topped region).
@@ -828,24 +835,35 @@ class Unimodal(Constraint):
     Unimodal(profile='C', components=None, mod='strict')
     >>> Unimodal("St", components=[0], mod="smooth")
     Unimodal(profile='St', components=[0], mod='smooth')
+    >>> Unimodal("C", tolerance=1.0)
+    Unimodal(profile='C', components=None, mod='strict')
     """
 
-    def __init__(self, profile, components=None, mod="strict"):
+    def __init__(self, profile, components=None, tolerance=1.1, mod="strict"):
         super().__init__(profile)
         self._components = _validate_components(components)
+        self._tolerance = _validate_tolerance(tolerance)
         self._mod = _validate_unimodal_mod(mod)
 
     def _repr_params(self):
-        return [
+        params = [
             ("profile", self._profile),
             ("components", self._components),
             ("mod", self._mod),
         ]
+        if self._tolerance != 1.1:
+            params.insert(2, ("tolerance", self._tolerance))
+        return params
 
     @property
     def components(self):
         """list[int] or None: Component selection (``None`` means "all")."""
         return self._components
+
+    @property
+    def tolerance(self):
+        """float: Admissibility tolerance (``>= 1.0``, default ``1.1``)."""
+        return self._tolerance
 
     @property
     def mod(self):
@@ -1186,6 +1204,76 @@ def _validate_model_kwargs(kwargs, *, name="model_kwargs"):
     return kwargs
 
 
+def _validate_mapping(mapping, *, name="mapping", components=None):
+    """
+    Validate a profile-mapping argument.
+
+    A mapping is either ``None`` (meaning identity: model output columns
+    or rows correspond in order to the selected components) or a sequence
+    with one entry per component.  Each entry is either ``None``
+    (meaning the component keeps its ALS estimate and is not replaced by
+    any model output) or a non-negative integer index into the model output.
+
+    The mapping is expressed *from ALS components to model outputs*:
+    ``mapping[i]`` selects which model output column/row is assigned to
+    the ALS component at ``components[i]``.
+
+    Duplicate indices are allowed: multiple ALS components may reference
+    the same model output column/row.  This mirrors the legacy
+    ``getC_to_C_idx`` / ``getSt_to_St_idx`` behaviour.
+
+    Parameters
+    ----------
+    mapping : None, list, or tuple
+        The mapping to validate.  ``None`` means identity.
+    name : str, optional
+        Argument name used in error messages.
+    components : list or None, optional
+        The component list for length validation.  When provided and
+        ``mapping`` is not ``None``, the lengths must match.
+
+    Raises
+    ------
+    TypeError
+        If ``mapping`` is not ``None``, a list, or a tuple.
+    ValueError
+        If any entry is negative, if the sequence is empty, or if
+        ``components`` is provided and the lengths differ.
+
+    Returns
+    -------
+    list or None
+        The validated mapping as a list with integer-or-``None`` entries.
+    """
+    if mapping is None:
+        return None
+    if not isinstance(mapping, (list, tuple)):
+        raise TypeError(
+            f"{name} must be a list or None, got {type(mapping).__name__!r}."
+        )
+    if not mapping:
+        raise ValueError(f"{name} must not be empty.")
+    if components is not None and len(mapping) != len(components):
+        raise ValueError(
+            f"{name} has length {len(mapping)} but got {len(components)} "
+            f"components. The lengths must match."
+        )
+    out = []
+    for i, entry in enumerate(mapping):
+        if entry is not None:
+            if isinstance(entry, bool) or not isinstance(entry, int):
+                raise TypeError(
+                    f"{name}[{i}] must be an integer or None, got "
+                    f"{type(entry).__name__!r} ({entry!r})."
+                )
+            if entry < 0:
+                raise ValueError(f"{name}[{i}] must be non-negative, got {entry!r}.")
+            out.append(entry)
+        else:
+            out.append(None)
+    return out
+
+
 class ModelProfile(Constraint):
     """
     Profile generator constraint.
@@ -1195,6 +1283,34 @@ class ModelProfile(Constraint):
     iteration on the current least-squares profile and used to regenerate
     the constrained profile. This generalises the historical ``getConc``
     and ``getSpec`` mechanisms of :class:`MCRALS`.
+
+    .. rubric:: Mapping semantics
+
+    The optional ``mapping`` parameter controls how model output
+    columns (for ``profile="C"``) or rows (for ``profile="St"``) are
+    assigned to ALS components.
+
+    The direction is **from ALS components to model outputs**:
+
+        components=[c0, c1, c2]
+          mapping=[m0,  m1,  m2]
+
+    means::
+
+        ALS component c0  <-  model output m0
+        ALS component c1  <-  model output m1
+        ALS component c2  <-  model output m2
+
+    A ``None`` entry leaves the component unchanged (the ALS estimate
+    is kept).  If ``mapping`` is ``None`` (the default), model outputs
+    are assigned in order: component ``c_i`` receives model output ``i``.
+
+    The ``mapping`` parameter is primarily intended for models whose
+    output ordering differs from the ALS component ordering, or when
+    only a subset of ALS components is generated by the model.
+
+    Duplicate indices are allowed — multiple components can reference
+    the same model output column/row.
 
     Parameters
     ----------
@@ -1213,16 +1329,50 @@ class ModelProfile(Constraint):
         ALS profile.  Defaults to ``()``.
     model_kwargs : dict or None, optional
         Extra keyword arguments passed to the model.  Defaults to ``None``.
+    mapping : list or None, optional
+        Mapping from ALS components to model output columns/rows.
+        ``mapping[i]`` selects which column (for ``profile="C"``) or
+        row (for ``profile="St"``) of the model output is assigned to
+        ``components[i]``.  ``None`` entries keep the ALS estimate.
+        ``None`` (the default) means identity: components receive model
+        outputs in order.  Duplicate indices are allowed.
+
+        This is the public equivalent of the legacy
+        ``getC_to_C_idx`` / ``getSt_to_St_idx`` traitlets.
 
     Examples
     --------
-    >>> from spectrochempy import ProfileModel
+    >>> from spectrochempy import ModelProfile
     >>> def my_model(C):
     ...     return C
     >>> ModelProfile("C", components=[0, 1], model=my_model)
     ModelProfile(profile='C', components=[0, 1], model=<function my_model at ...>)
     >>> ModelProfile("St", components=[0], model=my_model)
     ModelProfile(profile='St', components=[0], model=<function my_model at ...>)
+
+    With a swap mapping::
+
+        # Model returns [col_for_1, col_for_0]; swap them back.
+        ModelProfile(
+            "C",
+            components=[0, 1],
+            mapping=[1, 0],
+            model=my_model,
+        )
+        # ALS component 0  <-  model output 1
+        # ALS component 1  <-  model output 0
+
+    With ``None`` entries::
+
+        ModelProfile(
+            "C",
+            components=[0, 1, 2],
+            mapping=[2, None, 0],
+            model=my_model,
+        )
+        # ALS component 0  <-  model output 2
+        # ALS component 1  <-  unchanged (keeps ALS estimate)
+        # ALS component 2  <-  model output 0
     """
 
     def __init__(
@@ -1232,12 +1382,14 @@ class ModelProfile(Constraint):
         model=None,
         model_args=None,
         model_kwargs=None,
+        mapping=None,
     ):
         super().__init__(profile)
         self._components = _validate_components(components)
         self._model = _validate_callable(model)
         self._model_args = _validate_model_args(model_args)
         self._model_kwargs = _validate_model_kwargs(model_kwargs)
+        self._mapping = _validate_mapping(mapping, components=self._components)
 
     def _repr_params(self):
         params = [
@@ -1251,6 +1403,8 @@ class ModelProfile(Constraint):
             params.append(("model_args", self._model_args))
         if self._model_kwargs:
             params.append(("model_kwargs", self._model_kwargs))
+        if self._mapping is not None:
+            params.append(("mapping", self._mapping))
         return params
 
     @property
@@ -1272,3 +1426,8 @@ class ModelProfile(Constraint):
     def model_kwargs(self):
         """dict: Extra keyword arguments for the model."""
         return self._model_kwargs
+
+    @property
+    def mapping(self):
+        """List or None: Profile mapping from ALS components to model output columns/rows."""
+        return self._mapping
