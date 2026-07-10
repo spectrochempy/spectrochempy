@@ -126,7 +126,7 @@ class ActionMassKinetics(tr.HasTraits):
     # A simple A → B → C:
     >>> reactions = ("A -> B", "B -> C")
     >>> species_concentrations = {"A": 1.0, "B": 0.0, "C": 0.0}
-    >>> time = np.arange(0, 10)
+    >>> time = scp.arange(0, 10)
     >>> k_exp = np.array(((1.0e8, 52.0e3), (1.0e8, 50.0e3)))
     >>> kin_exp = scp.ActionMassKinetics(reactions, species_concentrations, k_exp, T=298.0)
     >>> C_exp = kin_exp.integrate(time)
@@ -137,7 +137,7 @@ class ActionMassKinetics(tr.HasTraits):
     # are set using lists or tuples of the same length, even if only one is changed:
     >>> species_concentrations = ({"A": 1.0, "B": 0.0, "C": 0.0}, {"A": 1.0, "B": 0.0, "C": 0.0})
     >>> T = (298.0, 308.0)
-    >>> time = (np.arange(0, 10), np.arange(0, 5))
+    >>> time = (scp.arange(0, 10), scp.arange(0, 5))
     >>> kin_exp = scp.ActionMassKinetics(reactions, species_concentrations, k_exp, T=T)
     >>> C_exp = kin_exp.integrate(time)
     >>> info_(f"Concentrations at {T[0]}K, t = 4 : {C_exp[0][4.].data}")

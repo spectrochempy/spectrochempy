@@ -269,7 +269,7 @@ _ = out.plot(figsize=(6, 2.5))
 # Obviously numpy exponential functions applies only to dimensionless array. Else an error is generated.
 
 # %%
-x = scp.NDDataset(np.arange(5), units="m")
+x = scp.arange(5, units="m")
 try:
     np.exp(x)  # A dimensionality error will be generated
 except DimensionalityError as e:
@@ -602,7 +602,7 @@ da
 # row)
 
 # %%
-da = scp.NDDataset(np.arange(40).reshape(10, 4))
+da = scp.arange(40).reshape((10, 4))
 da
 
 # %%

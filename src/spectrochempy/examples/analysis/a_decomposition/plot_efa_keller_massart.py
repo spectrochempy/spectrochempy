@@ -27,14 +27,13 @@ import spectrochempy as scp
 # 1) simulated chromatogram
 # *************************
 
-t = scp.Coord(np.arange(15), units="minutes", title="time")  # time coordinates
+t = scp.Coord.arange(15, units="minutes", title="time")  # time coordinates
 c = scp.Coord(range(2), title="components")  # component coordinates
 
-data = np.zeros((2, 15), dtype=np.float64)
-data[0, 3:8] = [1, 3, 6, 3, 1]  # compound 1
-data[1, 5:11] = [1, 3, 5, 3, 1, 0.5]  # compound 2
+dsc = scp.zeros((2, 15), dtype=np.float64, coords=[c, t])
+dsc[0, 3:8] = [1, 3, 6, 3, 1]  # compound 1
+dsc[1, 5:11] = [1, 3, 5, 3, 1, 0.5]  # compound 2
 
-dsc = scp.NDDataset(data=data, coords=[c, t])
 _ = dsc.plot(title="concentration")
 
 # %%
@@ -42,7 +41,7 @@ _ = dsc.plot(title="concentration")
 # **********************
 
 spec = np.array([[2.0, 3.0, 4.0, 2.0], [3.0, 4.0, 2.0, 1.0]])
-w = scp.Coord(np.arange(1, 5, 1), units="nm", title="wavelength")
+w = scp.Coord.arange(1, 5, 1, units="nm", title="wavelength")
 
 dss = scp.NDDataset(data=spec, coords=[c, w])
 _ = dss.plot(title="spectra")
@@ -52,7 +51,7 @@ _ = dss.plot(title="spectra")
 # ************************
 
 dataset = scp.dot(dsc.T, dss)
-dataset.data = np.random.normal(dataset.data, 0.1)
+dataset += scp.normal(scale=0.1, size=dataset.shape)
 dataset.title = "intensity"
 
 _ = dataset.plot(title="calculated dataset")
@@ -79,7 +78,7 @@ _ = efa.b_ev.T.plot(yscale="log", legend=efa.b_ev.k.labels)
 # and so we can use it to set a cut of values
 n_pc = efa.n_components = 2
 
-efa.cutoff = np.max(efa.f_ev[:, n_pc].data)
+efa.cutoff = efa.f_ev[:, n_pc].max()
 f2 = efa.f_ev[:, :n_pc]
 b2 = efa.b_ev[:, :n_pc]
 
