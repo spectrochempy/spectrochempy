@@ -63,7 +63,7 @@ def legacy_to_constraints(estimator):
     then spectral).  Within each side the order matches the historical
     constraint application order used in the internal engine:
     non-negativity → unimodality → monotonicity → closure → model-based
-    (hard-profile) constraints.
+    (model-profile) constraints.
 
     Normalization (``normSpec``) is a joint operation on both ``C`` and
     ``St`` and has no corresponding public constraint class at this time;

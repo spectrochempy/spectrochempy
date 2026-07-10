@@ -1464,6 +1464,8 @@ and `St`.
     def _on_constraints_changed(self, change):
         if self._init_done:
             self._fitted = False
+            self._model_profile_constraints_ = []
+            self._fit_meta = None
 
     @tr.default("_components")
     def _components_default(self):
@@ -1563,7 +1565,7 @@ and `St`.
         ):
             state.niter += 1
 
-            # 1. Concentrations: apply soft + hard constraints, then snapshot
+            # 1. Concentrations: apply all constraints, then snapshot
             #    the constrained C for storage / St resolution.
             state.C = self._apply_constraint_pipeline(
                 state.C,
@@ -1759,6 +1761,11 @@ and `St`.
             )
 
         if isinstance(constraint, Monotonic):
+            if constraint.profile != "C":
+                raise NotImplementedError(
+                    f"Monotonic({constraint.profile!r}) is not implemented. "
+                    f"Only profile='C' is supported."
+                )
             indices = self._resolve_components(constraint.components)
             tol = constraint.tolerance
             if constraint.direction == "increasing":
@@ -1766,6 +1773,11 @@ and `St`.
             return _MonotonicDecreaseConstraint(indices, tol=tol)
 
         if isinstance(constraint, Closure):
+            if constraint.profile != "C":
+                raise NotImplementedError(
+                    f"Closure({constraint.profile!r}) is not implemented. "
+                    f"Only profile='C' is supported."
+                )
             indices = self._resolve_components(constraint.components)
             # Expand a scalar target to a 1-D array (matching the shape of
             # the constrained axis), mirroring the legacy trait validator.
@@ -1780,6 +1792,12 @@ and `St`.
 
         if isinstance(constraint, ModelProfile):
             comps = self._resolve_components(constraint.components)
+            if constraint.mapping is not None and len(constraint.mapping) != len(comps):
+                raise ValueError(
+                    f"mapping has length {len(constraint.mapping)} but "
+                    f"components resolved to {len(comps)} components "
+                    f"({comps!r}). The lengths must match."
+                )
             side = "conc" if constraint.profile == "C" else "spec"
             return _ModelProfileConstraint(
                 self,

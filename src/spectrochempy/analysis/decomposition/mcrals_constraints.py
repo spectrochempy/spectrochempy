@@ -6,46 +6,40 @@
 """
 Public MCRALS constraint classes.
 
-This module introduces the **public constraint API** for ``MCRALS``.
+This module defines the **public constraint API** for :class:`MCRALS`.
 
 Each class represents a single piece of scientific prior knowledge about
 the concentration (``"C"``) or spectral (``"St"``) profiles that
-``MCRALS`` estimates. The classes are deliberately *declarative*: they
-describe **what is known**, not **how** the knowledge is incorporated
-into the ALS optimisation.
+``MCRALS`` estimates. The classes are *declarative*: they describe
+**what is known**, not **how** the knowledge is incorporated into the
+ALS optimisation.  The enforcement engine is the internal constraint
+pipeline in :mod:`spectrochempy.analysis.decomposition.mcrals`.
 
-.. important::
+The conversion pipeline is::
 
-    This is a **skeleton** API. The classes in this module are data
-    containers and validators only. They are **not yet connected** to
-    the internal constraint engine used by :class:`MCRALS`, and using
-    them does not change the behaviour of ``MCRALS.fit``. Connecting
-    the public API to the internal engine, the legacy traitlet
-    converter, and the actual enforcement implementations are the
-    subject of subsequent PRs.
+    public Constraint objects
+            |
+            v
+    legacy_to_constraints()      (legacy traitlet API only)
+            |
+            v
+    _public_to_internal()        (in MCRALS)
+            |
+            v
+    internal _Constraint objects  (enforced during ALS iterations)
 
-The canonical profile identifiers are the strings ``"C"`` (concentrations)
-and ``"St"`` (spectra). Every constraint validates its ``profile``
-argument against this set. The public vocabulary is deliberately
-generic: a profile is either a concentration or a spectrum, and each
-constraint class is the same regardless of which side it targets — the
-``profile`` argument alone identifies the constrained object. There is
-therefore a single :class:`ReferenceProfile` for both concentration and
-spectral references, and a single :class:`ModelProfile` for both
-concentration and spectral model-based (profile-generator) constraints.
+The canonical profile identifiers are ``"C"`` (concentrations) and
+``"St"`` (spectra).  Each constraint validates its ``profile`` argument
+against this set.
 
 Example::
 
-    from spectrochempy import NonNegative, Closure, ReferenceProfile, ProfileModel
+    from spectrochempy import NonNegative, Closure, Monotonic, ModelProfile
 
     constraints = [
         NonNegative("C"),
         Closure("C"),
-        ReferenceProfile(
-            "St",
-            component=0,
-            data=reference_spectrum,
-        ),
+        Monotonic("C", "increasing", components=[0]),
         ModelProfile(
             "C",
             components=[0, 1],
@@ -53,8 +47,19 @@ Example::
         ),
     ]
 
-See the project RFC (``spectrochempy_maintainer/rfcs/``) for the full
-design rationale and the planned migration path.
+Not all constraints are connected to the engine yet.  The following are
+enforced during :meth:`MCRALS.fit`:
+
+- :class:`NonNegative` — ``"C"`` and ``"St"``
+- :class:`Closure` — ``"C"`` only
+- :class:`Unimodal` — ``"C"`` and ``"St"``
+- :class:`Monotonic` — ``"C"`` only
+- :class:`ModelProfile` — ``"C"`` and ``"St"``
+
+The remaining constraint classes (:class:`ZeroRegion`, :class:`Selectivity`,
+:class:`FixedValues`, :class:`ReferenceProfile`) are validated at
+construction time but raise :class:`NotImplementedError` if passed to
+:meth:`MCRALS.fit`.
 """
 
 # DEVNOTE:
@@ -247,6 +252,37 @@ def _validate_tolerance(tolerance, *, name="tolerance"):
     return tol
 
 
+def _validate_closure_method(method, *, name="method"):
+    """
+    Validate a closure enforcement method.
+
+    Parameters
+    ----------
+    method : str
+        Either ``"scaling"`` or ``"constantSum"``.
+    name : str, optional
+        Argument name used in error messages.
+
+    Raises
+    ------
+    TypeError
+        If ``method`` is not a string.
+    ValueError
+        If ``method`` is not one of the admissible values.
+
+    Returns
+    -------
+    str
+        The validated method.
+    """
+    if not isinstance(method, str):
+        raise TypeError(f"{name} must be a string, got {type(method).__name__!r}.")
+    _CLOSURE_METHODS = ("scaling", "constantSum")
+    if method not in _CLOSURE_METHODS:
+        raise ValueError(f"{name} must be one of {_CLOSURE_METHODS!r}, got {method!r}.")
+    return method
+
+
 def _validate_target(target, *, name="target"):
     """
     Validate a closure target.
@@ -296,6 +332,33 @@ def _validate_target(target, *, name="target"):
     # Array-like case: delegate to the generic array-like validator.
     # None, strings, and scalars are already rejected above.
     return _validate_array_like(target, name=name)
+
+
+def _values_equal(a, b, *, name="value"):
+    """
+    Compare two array-like values, handling numpy arrays correctly.
+
+    Scalars and plain Python lists/tuples are compared with ``==``.
+    Numpy arrays are compared via :func:`numpy.array_equal`.
+
+    Parameters
+    ----------
+    a : object
+    b : object
+    name : str, optional
+        Name used only for consistency with the signature convention.
+
+    Returns
+    -------
+    bool
+    """
+    a_is_ndarray = isinstance(a, np.ndarray)
+    b_is_ndarray = isinstance(b, np.ndarray)
+    if a_is_ndarray and b_is_ndarray:
+        return bool(np.array_equal(a, b))
+    if a_is_ndarray != b_is_ndarray:
+        return False
+    return a == b
 
 
 def _targets_equal(a, b):
@@ -734,6 +797,12 @@ class Closure(Constraint):
         Target sum for the selected components.  A scalar is applied
         to every row; an array-like supplies one target per row.
         Default is ``1.0``.
+    method : str, optional
+        Closure enforcement method.  Must be ``"scaling"`` (rescale the
+        selected components to sum to the target while preserving their
+        relative proportions) or ``"constantSum"`` (add a constant offset
+        to each selected component so that the sum equals the target).
+        Default is ``"scaling"``.
 
     Examples
     --------
@@ -751,7 +820,7 @@ class Closure(Constraint):
         super().__init__(profile)
         self._components = _validate_components(components)
         self._target = _validate_target(target)
-        self._method = str(method)
+        self._method = _validate_closure_method(method)
 
     def _repr_params(self):
         params = [
@@ -836,7 +905,7 @@ class Unimodal(Constraint):
     >>> Unimodal("St", components=[0], mod="smooth")
     Unimodal(profile='St', components=[0], mod='smooth')
     >>> Unimodal("C", tolerance=1.0)
-    Unimodal(profile='C', components=None, mod='strict')
+    Unimodal(profile='C', components=None, tolerance=1.0, mod='strict')
     """
 
     def __init__(self, profile, components=None, tolerance=1.1, mod="strict"):
@@ -1099,6 +1168,24 @@ class FixedValues(Constraint):
         """list[int] or None: Component selection (``None`` means "all")."""
         return self._components
 
+    # -- equality --------------------------------------------------------
+    def __eq__(self, other):
+        if type(self) is not type(other):
+            return NotImplemented
+        if self._profile != other._profile:
+            return False
+        if self._components != other._components:
+            return False
+        if not _values_equal(self._values, other._values, name="values"):
+            return False
+        return True
+
+    def __ne__(self, other):
+        result = self.__eq__(other)
+        if result is NotImplemented:
+            return result
+        return not result
+
 
 class ReferenceProfile(Constraint):
     """
@@ -1149,6 +1236,24 @@ class ReferenceProfile(Constraint):
     def data(self):
         """array-like: The reference profile (1-D)."""
         return self._data
+
+    # -- equality --------------------------------------------------------
+    def __eq__(self, other):
+        if type(self) is not type(other):
+            return NotImplemented
+        if self._profile != other._profile:
+            return False
+        if self._component != other._component:
+            return False
+        if not _values_equal(self._data, other._data, name="data"):
+            return False
+        return True
+
+    def __ne__(self, other):
+        result = self.__eq__(other)
+        if result is NotImplemented:
+            return result
+        return not result
 
 
 # --------------------------------------------------------------------------------------

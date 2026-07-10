@@ -963,6 +963,48 @@ class TestUnsupportedConstraints:
         ):
             mcr.fit(X, C0)
 
+    def test_closure_spec_raises(self, pr4_data):
+        X, C0 = pr4_data
+        mcr = MCRALS(
+            constraints=[Closure("St")],
+            **self._fit_kw,
+        )
+        with pytest.raises(
+            NotImplementedError,
+            match=r"Closure\('St'\) is not implemented",
+        ):
+            mcr.fit(X, C0)
+
+    def test_monotonic_spec_raises(self, pr4_data):
+        X, C0 = pr4_data
+        mcr = MCRALS(
+            constraints=[Monotonic("St", "increasing")],
+            **self._fit_kw,
+        )
+        with pytest.raises(
+            NotImplementedError,
+            match=r"Monotonic\('St'\) is not implemented",
+        ):
+            mcr.fit(X, C0)
+
+    def test_model_profile_mapping_length_mismatch_at_fit(self, pr4_data):
+        """When components is None, mismatch is caught after resolution."""
+        X, C0 = pr4_data
+
+        def my_model(C):
+            return C
+
+        # components=None + mapping with wrong length → caught at fit time
+        mcr = MCRALS(
+            constraints=[ModelProfile("C", model=my_model, mapping=[0, 1, 2])],
+            **self._fit_kw,
+        )
+        with pytest.raises(
+            ValueError,
+            match="mapping has length 3 but components resolved to 2",
+        ):
+            mcr.fit(X, C0)
+
     def test_unsupported_in_list_with_supported_raises(self, pr4_data):
         X, C0 = pr4_data
         mcr = MCRALS(

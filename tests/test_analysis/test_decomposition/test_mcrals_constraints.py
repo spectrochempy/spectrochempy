@@ -557,6 +557,26 @@ def test_closure_unequal_scalar_vs_array():
     assert Closure("C", target=[1.0, 1.0]) != Closure("C", target=1.0)
 
 
+def test_closure_method_scaling_default():
+    c = Closure("C")
+    assert c.method == "scaling"
+
+
+def test_closure_method_constant_sum():
+    c = Closure("C", method="constantSum")
+    assert c.method == "constantSum"
+
+
+def test_closure_method_rejects_non_string():
+    with pytest.raises(TypeError, match="method must be a string"):
+        Closure("C", method=42)
+
+
+def test_closure_method_rejects_invalid():
+    with pytest.raises(ValueError, match="method must be one of"):
+        Closure("C", method="invalid_method")
+
+
 def test_closure_equal_reference_vs_copy():
     target = np.array([1.0, 2.0, 3.0])
     c1 = Closure("C", target=target)
@@ -631,6 +651,34 @@ def test_unimodal_tolerance_repr_omitted_when_default():
 def test_unimodal_tolerance_repr_shown_when_nondefault():
     r = repr(Unimodal("C", tolerance=2.0))
     assert "tolerance=2.0" in r
+
+
+def test_fixed_values_equal_with_numpy_array():
+    arr1 = np.array([1.0, 2.0, 3.0])
+    arr2 = np.array([1.0, 2.0, 3.0])
+    assert FixedValues("St", values=arr1) == FixedValues("St", values=arr2)
+
+
+def test_fixed_values_unequal_with_numpy_array():
+    arr1 = np.array([1.0, 2.0, 3.0])
+    arr2 = np.array([4.0, 5.0, 6.0])
+    assert FixedValues("St", values=arr1) != FixedValues("St", values=arr2)
+
+
+def test_reference_profile_equal_with_numpy_array():
+    arr1 = np.array([1.0, 2.0, 3.0, 4.0])
+    arr2 = np.array([1.0, 2.0, 3.0, 4.0])
+    assert ReferenceProfile("C", component=0, data=arr1) == ReferenceProfile(
+        "C", component=0, data=arr2
+    )
+
+
+def test_reference_profile_unequal_with_numpy_array():
+    arr1 = np.array([1.0, 2.0, 3.0, 4.0])
+    arr2 = np.array([5.0, 6.0, 7.0, 8.0])
+    assert ReferenceProfile("C", component=0, data=arr1) != ReferenceProfile(
+        "C", component=0, data=arr2
+    )
 
 
 def test_models_equal_same_callback():
