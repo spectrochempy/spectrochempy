@@ -15,8 +15,8 @@ trapezoidal and Simpson integration on a sequence of IR spectra.
 import spectrochempy as scp
 
 # %%
-# Load a stacked IR dataset and restrict the analysis to the band of interest.
-
+# Load and prepare the dataset
+# -----------------------------
 dataset = scp.read_omnic("irdata/nh4y-activation.spg")
 band = dataset[:20, 1250.0:1800.0]
 band.y -= band.y[0]
@@ -30,8 +30,8 @@ prefs.colorbar = True
 _ = band.plot()
 
 # %%
-# Fit a polynomial baseline on three reference regions.
-
+# Fit a polynomial baseline
+# --------------------------
 blc = scp.Baseline(model="polynomial", order=3)
 blc.ranges = (
     [1740.0, 1800.0],
@@ -44,8 +44,8 @@ corrected = blc.corrected
 _ = corrected.plot()
 
 # %%
-# Integrate each spectrum over the full selected region.
-
+# Compare integration methods
+# ----------------------------
 trapz_area = corrected.trapezoid(dim="x")
 simpson_area = corrected.simpson(dim="x")
 
@@ -58,8 +58,7 @@ _ = scp.plot_multiple(
 )
 
 # %%
-# For this dataset both numerical methods are very close.
-
+# For this dataset both numerical methods are very close:
 relative_difference = (trapz_area - simpson_area) * 100.0 / simpson_area
 relative_difference.title = "relative difference"
 relative_difference.units = "percent"

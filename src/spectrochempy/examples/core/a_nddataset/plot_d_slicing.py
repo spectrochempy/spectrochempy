@@ -15,8 +15,8 @@ coordinate-aware slicing on an infrared time series.
 import spectrochempy as scp
 
 # %%
-# Load an IR dataset and express the acquisition axis in minutes.
-
+# Load and inspect the dataset
+# -----------------------------
 dataset = scp.read_omnic(
     "irdata/CO@Mo_Al2O3.SPG",
     description="CO adsorption, difference spectra",
@@ -25,15 +25,14 @@ dataset.y = (dataset.y - dataset[0].y).to("minute")
 print(dataset)
 
 # %%
-# Plot the full dataset once for context.
-
 prefs = scp.preferences
 prefs.figure.figsize = (7, 4)
 _ = dataset.plot()
 
 # %%
-# Standard integer slices work as expected on both dimensions.
-
+# Integer-based slicing
+# ----------------------
+# Standard integer slices work as expected on both dimensions:
 first_four = dataset[:4]
 every_other_point = dataset[:, ::2]
 
@@ -41,21 +40,21 @@ print(first_four.shape)
 print(every_other_point.shape)
 
 # %%
-# Coordinate-aware slicing is often more convenient for spectroscopy work.
-# Using floats slices directly on axis coordinates instead of integer indices.
-
+# Coordinate-aware slicing
+# -------------------------
+# Using floats slices directly on axis coordinates instead of integer indices:
 carbonyl_region = dataset[:, 2300.0:1900.0]
 _ = carbonyl_region.plot()
 
 # %%
-# The same applies to the time axis.
-
+# The same applies to the time axis:
 window = dataset[80.0:180.0, 2300.0:1900.0]
 _ = window.plot()
 
 # %%
-# A single float selects the closest spectrum on that axis.
-
+# Selecting the closest spectrum
+# -------------------------------
+# A single float selects the nearest spectrum on that axis:
 selected = dataset[60.0]
 selected.y
 

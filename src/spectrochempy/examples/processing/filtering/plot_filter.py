@@ -14,25 +14,18 @@ In this example, we use the `Filter` processor to smooth a Raman spectrum.
 import spectrochempy as scp
 
 # %%
-# First, we import a sample raman spectrum and plot it:
-
-# use the generic read function.
-# Note that read_labspec would be equivalent for this file format.
-
+# Load and plot the spectrum
+# ---------------------------
 X = scp.read("ramandata/labspec/SMC1-Initial_RT.txt")
 prefs = scp.preferences
 prefs.figure.figsize = (8, 4)
 _ = X.plot()
 
 # %%
-# here `Filter` processor is used to apply a Savitzky-Golay filter to the
-# spectrum.
+# Savitzky-Golay filtering
+# -------------------------
+filter = scp.Filter(method="savgol", size=5, order=0)
 
-filter = scp.Filter(
-    method="savgol", size=5, order=0
-)  # default is size=5, order=2, deriv=0
-
-# plot the result
 Xm = filter(X)
 _ = X.plot(color="b", label="original")
 ax = Xm.plot(clear=False, color="r", ls="-", lw=1.5, label="SG filter")
@@ -43,12 +36,9 @@ ax.legend(loc="best", fontsize=10)
 ax.set_title("Savitzky-Golay filter (size=7, order=2)")
 
 # %%
-# As good alternative to the Savitzky-Golay filter want can choose to use the
-# Whittaker-Eilers smoother
-
+# Whittaker-Eilers smoothing
+# ---------------------------
 filter = scp.Filter(method="whittaker", order=2, lamb=1.5)
-Xm = filter(X)
-# plot the result
 Xm = filter(X)
 _ = X.plot(color="b", label="original")
 ax = Xm.plot(clear=False, color="r", ls="-", lw=1.5, label="WE filter")

@@ -11,21 +11,20 @@ Here we load experimental LABSPEC spectra and plot them.
 import spectrochempy as scp
 
 # %%
-# Define the folder where are the spectra:
+# Read and plot a single file
+# ----------------------------
 datadir = scp.preferences.datadir
 ramandir = datadir / "ramandata/labspec"
-
-# %%
-# Read some data:
 A = scp.read_labspec("Activation.txt", directory=ramandir)
 A
 
 # %%
-# Now plot them:
 _ = A.plot()
 
 # %%
-# As it is a 2D dataset, we can plot it as an image:
+# Explore with different plot types
+# ----------------------------------
+# As a 2D dataset, we can display it as an image:
 _ = A.plot_image()
 
 # %%
@@ -33,7 +32,8 @@ _ = A.plot_image()
 _ = A.plot_map()
 
 # %%
-# We can also read the content of a folder, and merge all spectra:
+# Read and merge multiple files
+# ------------------------------
 B = scp.read_labspec(ramandir / "subdir")
 _ = B.plot()
 

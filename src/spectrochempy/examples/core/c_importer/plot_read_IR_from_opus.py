@@ -13,7 +13,8 @@ Here we load an experimental Bruker OPUS files and plot it.
 """
 
 # %%
-
+# Read and display OPUS files
+# ----------------------------
 import spectrochempy as scp
 
 Z = scp.read_opus(
@@ -22,8 +23,6 @@ Z = scp.read_opus(
 Z
 
 # %%
-# plot it
-
 _ = Z.plot()
 
 # %%

@@ -16,15 +16,15 @@ Here we load an experimental SPG file (OMNIC) and plot it.
 import spectrochempy as scp
 
 # %%
-# Loading and stacked plot of the original
-
+# Load and display the dataset
+# -----------------------------
 datadir = scp.preferences.datadir
 dataset = scp.read_omnic(datadir / "irdata" / "nh4y-activation.spg")
 _ = dataset.plot_stack(style="paper")
 
 # %%
-# change the unit of y-axis, the y origin as well as the title of the axis
-
+# Adjust axis metadata
+# ---------------------
 dataset.y.to("hour")
 dataset.y -= dataset.y[0]
 dataset.y.title = "acquisition time"

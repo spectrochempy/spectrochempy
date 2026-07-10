@@ -31,15 +31,12 @@ def _tracked_peak_position(spec):
 
 
 # %%
-# Load a time-resolved IR dataset and express the acquisition axis in minutes.
-
+# Load and focus on the carbonyl region
+# ---------------------------------------
 dataset = scp.read("irdata/CO@Mo_Al2O3.SPG")
 dataset.y -= dataset.y.data[0]
 dataset.y.title = "time"
 dataset.y = dataset.y.to("minutes")
-
-# %%
-# Focus on the carbonyl region.
 
 region = dataset[:, 2300.0:1900.0]
 prefs = scp.preferences
@@ -49,16 +46,15 @@ prefs.colorbar = True
 _ = region.plot()
 
 # %%
-# Peak finding can use spacing constraints directly in coordinate units when
-# the spectral axis is linear.
-
+# Find peaks with coordinate-aware constraints
+# ---------------------------------------------
 last = region[-1]
 peaks, properties = last.find_peaks(distance="5 cm^-1", prominence=0.02)
 peaks.x.values
 
 # %%
-# Plot the detected maxima on top of the last spectrum.
-
+# Visualize detected peaks
+# ^^^^^^^^^^^^^^^^^^^^^^^^^
 ax = last.plot_pen()
 markers = peaks + 0.015
 _ = markers.plot_scatter(
@@ -83,16 +79,13 @@ for x, y in zip(
     )
 
 # %%
-# The optional properties dictionary can be useful to inspect how the peaks
-# were selected.
-
+# Inspect the properties dictionary:
 sorted(properties)
 
 # %%
-# The same logic can be applied to each spectrum of the time series. Here we
-# follow one band in a restricted region so each spectrum contributes one peak
-# position.
-
+# Track a band across the time series
+# ------------------------------------
+# Follow one band in a restricted region:
 tracked_region = region[:, 2220.0:2180.0]
 positions = [_tracked_peak_position(spec) for spec in tracked_region]
 

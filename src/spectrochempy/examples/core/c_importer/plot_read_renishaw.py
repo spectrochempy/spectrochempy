@@ -13,46 +13,35 @@ See https://github.com/alchem0x2A/py-wdf-reader/blob/master/examples
 """
 
 # %%
-# First we need to import the spectrochempy API package
+# Import the package
 import spectrochempy as scp
 
 # %%
-# **Import dataset from local files**
-# Read Raman data recorded in WiRe format (``.wdf`` extension).
-# We just pass the file name as parameter.
-
-# %%
-# First read a single spectrum (measurement type : single)
-dataset = scp.read_wire("ramandata/wire/sp.wdf")  # or read_wdf (or read)
+# Read a single spectrum
+# ----------------------
+dataset = scp.read_wire("ramandata/wire/sp.wdf")
 _ = dataset.plot()
 
 # %%
-# Now read a series of spectra (measurement type : series) from a Z-depth scan.
+# Read a depth series
+# --------------------
 dataset = scp.read_wdf("ramandata/wire/depth.wdf")
 _ = dataset.plot(method="image")
 
 # %%
-# In this example, the diverging colormap is triggered because the dataset
-# contains a few negative values. If the smaller lobe is larger than
-# `diverging_margin` (default 5%) of the total range, i.e. if the following
-# condition is satisfied:
-# `min(abs(vmin), abs(vmax)) / (vmax - vmin) > margin`
-# then a diverging colormap is used.
-#
-# To avoid this behavior, you can explicitly enforce a sequential colormap,
-# for example "viridis":
-
+# Handle diverging colormaps
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^
+# A diverging colormap is triggered when negative values are present.
+# Enforce a sequential colormap explicitly:
 _ = dataset.plot_image(cmap="cividis")
 
 # %%
-# Alternatively, you can increase the `diverging_margin` that determines when the
-# diverging colormap is applied. Then the default sequential colormap
-# (`viridis`) will be used:
-
+# Alternatively, adjust ``diverging_margin`` to keep the default colormap:
 _ = dataset.plot(method="image", diverging_margin=0.1)
 
 # %%
-# filter blank spectra
+# Filter blank spectra
+# --------------------
 import numpy as np
 
 keep_rows = np.where(dataset.data.mean(axis=1) > 0)[0]
@@ -60,16 +49,16 @@ dataset = dataset[keep_rows]
 _ = dataset.plot_image()
 
 # %%
-# extract a line scan data from a StreamLine HR measurement
+# Read line scan and grid scan data
+# ----------------------------------
+# Line scan from a StreamLine HR measurement:
 dataset = scp.read("ramandata/wire/line.wdf")
 _ = dataset.plot_image()
 
 # %%
-# finally extract grid scan data from a StreamLine HR measurement
+# Grid scan data:
 dataset = scp.read_wdf("ramandata/wire/mapping.wdf")
-# plot the dataset as an image (summing all wavenumbers)
 _ = dataset.sum(dim=2).plot_image(equal_aspect=True)
-# plot the image taken at 1529cm-1
 _ = dataset[..., 1529.0].plot_image(equal_aspect=True)
 
 
