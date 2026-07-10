@@ -17,7 +17,8 @@ dataset
 import spectrochempy as scp
 
 # %%
-# Load a dataset
+# Load and inspect the dataset
+# ----------------------------
 dataset = scp.read_omnic("irdata/nh4y-activation.spg")[::5]
 dataset
 
@@ -25,8 +26,11 @@ dataset
 _ = dataset.plot()
 
 # %%
-# Create a PCA object and fit the dataset so that the explained variance is greater or
-# equal to 99.9%
+# PCA on the full spectral range
+# -------------------------------
+#
+# Create a PCA object and fit the dataset so that the explained variance is
+# greater or equal to 99.9%
 pca = scp.PCA(n_components=0.999)
 _ = pca.fit(dataset)
 
@@ -41,9 +45,10 @@ scores = pca.transform()
 scores
 
 # %%
-# Finally, display the results graphically
-
-# first we can set some preferences for the plot
+# Display the results graphically
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#
+# First we can set some preferences for the plot
 prefs = scp.preferences
 prefs.lines.markersize = 7
 
@@ -66,6 +71,9 @@ _ = pca.plot_score(components=(1, 2, 3))
 _ = pca.loadings[:4].plot(legend=True)
 
 # %%
+# Mask the saturated region and refit
+# ------------------------------------
+#
 # Here we do a masking of the saturated region between 882 and 1280 cm^-1
 dataset[
     :, 882.0:1280.0
@@ -93,9 +101,11 @@ scores = pca.transform()
 _ = pca.plot_score((1, 2))
 
 # %%
-# Labeling scoreplot with spectra labels
-# Our dataset has already two columns of labels for the spectra but there are little
-# too long for display on plots.
+# Label the score plot with custom labels
+# ----------------------------------------
+#
+# Our dataset has already two columns of labels for the spectra but there are a
+# bit too long for display on plots.
 scores.y.labels
 
 # %%
@@ -105,10 +115,13 @@ scores.y.labels = labels  # Note this does not replace previous labels,
 # but adds a column.
 
 # %%
-# now display these
-# Labels are placed automatically via ``adjustText`` (collision avoidance).
-# Install it with ``pip install adjustText`` for best results; without it,
-# labels are still shown with a simple offset from the marker position.
+# Display the labeled score plot
+# -------------------------------
+#
+# Labels are now placed automatically using the ``adjustText`` library,
+# which provides collision avoidance between labels and markers.
+# Install ``adjustText`` with ``pip install adjustText`` for best results;
+# without it, labels are still shown with a simple offset from markers.
 _ = pca.plot_score(scores=scores, show_labels=True, labels_column=2)
 
 # %%
