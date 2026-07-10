@@ -1306,6 +1306,9 @@ def plot_2D(dataset, method=None, **kwargs):
         if method == "waterfall":
             kwargs["colorbar"] = colorbar
 
+        # Extract legend kwarg - only used for lines/stack methods
+        legend = kwargs.pop("legend", None)
+
         # Get the data to plot
         # ---------------------------------------------------------------
         # if we want to plot the transposed dataset
@@ -2017,6 +2020,22 @@ def plot_2D(dataset, method=None, **kwargs):
             ax.set_xlim(user_xlim)
         if user_ylim is not None:
             ax.set_ylim(user_ylim)
+
+        # Display legend for lines/stack methods when requested
+        # legend can be:
+        #   - True: show with auto-populated labels
+        #   - str: show at given location
+        #   - list/ndarray: use as explicit labels
+        #   - False / None: no legend
+        if method in ("lines", "stack") and legend is not None:
+            if isinstance(legend, str):
+                _ = ax.legend(loc=legend)
+            elif legend is True:
+                _ = ax.legend()
+            elif isinstance(legend, bool):
+                pass  # legend=False — do nothing
+            else:
+                _ = ax.legend(labels=list(legend))
 
         return ax
 

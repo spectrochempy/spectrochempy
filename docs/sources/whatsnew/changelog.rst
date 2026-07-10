@@ -26,6 +26,11 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Display legend in 2D lines/stack plots when ``legend=True`` is passed as a
+  plotting keyword argument. Previously the ``legend`` kwarg was silently
+  ignored by the 2D plot backend, so lines rendered with auto-populated labels
+  from coordinate metadata never showed a legend. (#1404)
+
 
 .. section
 
