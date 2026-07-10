@@ -520,13 +520,20 @@ class _set_output:
                 X_transf.dims = X.dims
                 X_transf.set_coordset({X.dims[0]: X.coord(0), X.dims[1]: X.coord(1)})
             else:
+                # Resolve component labels — defer to analysis subclasses
+                # (e.g. PCA → PC1, PC2, …).
+                def _component_labels(n):
+                    if hasattr(obj, "_get_component_labels"):
+                        return obj._get_component_labels(n)
+                    return [f"#{i}" for i in range(n)]
+
                 if self.typesingle == "components":
                     # occurs when the data are 1D such as ev_ratio...
                     X_transf.dims = ["k"]
                     X_transf.set_coordset(
                         k=Coord(
                             None,
-                            labels=[f"#{i}" for i in range(X_transf.shape[-1])],
+                            labels=_component_labels(X_transf.shape[-1]),
                             title="components",
                         ),
                     )
@@ -554,7 +561,7 @@ class _set_output:
                             ),
                             "k": Coord(
                                 None,
-                                labels=[f"#{i}" for i in range(X_transf.shape[-1])],
+                                labels=_component_labels(X_transf.shape[-1]),
                                 title="components",
                             ),
                         },
@@ -565,7 +572,7 @@ class _set_output:
                         {
                             "k": Coord(
                                 None,
-                                labels=[f"#{i}" for i in range(X_transf.shape[0])],
+                                labels=_component_labels(X_transf.shape[0]),
                                 title="components",
                             ),
                             X.dims[1]: (
@@ -583,7 +590,7 @@ class _set_output:
                             # cannot use X.y in case of transposed X
                             "k": Coord(
                                 None,
-                                labels=[f"#{i}" for i in range(X_transf.shape[-1])],
+                                labels=_component_labels(X_transf.shape[-1]),
                                 title="components",
                             ),
                         },

@@ -290,6 +290,9 @@ for reproducible results across multiple function calls.""",
         self._components = self._pca.components_
         return self._components
 
+    def _get_component_labels(self, n):
+        return [f"PC{i + 1}" for i in range(n)]
+
     # ----------------------------------------------------------------------------------
     # Public methods and properties specific to PCA
     # ----------------------------------------------------------------------------------

@@ -12,6 +12,13 @@ What's New in Revision 0.11.1.dev
 These are the changes in SpectroChemPy-0.11.1.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
 
+New Features
+~~~~~~~~~~~~
+
+- PCA component labels now display as ``PC1``, ``PC2``, ... instead of ``#0``,
+  ``#1``, ... in legends and coordinate display. Other analysis methods
+  retain the default ``#0``, ``#1``, ... labels. (#1404)
+
 Bug Fixes
 ~~~~~~~~~
 

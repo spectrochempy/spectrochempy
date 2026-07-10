@@ -529,6 +529,15 @@ class DecompositionAnalysis(AnalysisConfigurable):
             return self._n_components
         raise NotFittedError("n_components")
 
+    def _get_component_labels(self, n):
+        """
+        Return default labels for *n* components.
+
+        Subclasses may override this to provide domain-specific labels
+        (e.g. ``PC1``, ``PC2``, ... for PCA).
+        """
+        return [f"#{i}" for i in range(n)]
+
     # ----------------------------------------------------------------------------------
     # Plot methods
     # ----------------------------------------------------------------------------------

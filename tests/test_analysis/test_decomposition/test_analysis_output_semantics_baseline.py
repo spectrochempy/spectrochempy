@@ -134,7 +134,7 @@ class TestLatentOutputs:
         assert scores.y.title == semantic_dataset.y.title
         assert scores.y.units == semantic_dataset.y.units
         assert scores.k.title == "components"
-        assert list(scores.k.labels) == ["#0", "#1"]
+        assert list(scores.k.labels) == ["PC1", "PC2"]
 
     def test_pca_components_preserve_feature_axis_and_synthesize_k(
         self, semantic_dataset

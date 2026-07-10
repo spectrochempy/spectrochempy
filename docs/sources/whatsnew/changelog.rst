@@ -19,6 +19,10 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- PCA component labels now display as ``PC1``, ``PC2``, ... instead of ``#0``,
+  ``#1``, ... in legends and coordinate display. Other analysis methods
+  retain the default ``#0``, ``#1``, ... labels. (#1404)
+
 
 .. section
 
