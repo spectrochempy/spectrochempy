@@ -14,8 +14,8 @@ __all__ = ["plot_scree"]
 
 import numpy as np
 
-from spectrochempy.utils.mplutils import get_figure
-from spectrochempy.utils.mplutils import show as mpl_show
+from spectrochempy.utils.mplutils import _maybe_show
+from spectrochempy.utils.mplutils import _setup_axes
 
 
 def plot_scree(
@@ -76,11 +76,7 @@ def plot_scree(
     n = len(explained)
     x = np.arange(1, n + 1)
 
-    if ax is None:
-        fig = get_figure()
-        ax = fig.add_subplot(111)
-    elif clear:
-        ax.clear()
+    ax = _setup_axes(ax, clear=clear)
 
     ax.bar(x, explained, color=bar_color, align="center")
     ax.set_xlim(0.5, n + 0.5)
@@ -112,7 +108,6 @@ def plot_scree(
     if title is not None:
         ax.set_title(title)
 
-    if show:
-        mpl_show()
+    _maybe_show(show)
 
     return ax

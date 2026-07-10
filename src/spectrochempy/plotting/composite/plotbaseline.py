@@ -20,8 +20,8 @@ import numpy as np
 
 from spectrochempy.plotting._render import render_lines
 from spectrochempy.plotting._style import resolve_stack_colors
+from spectrochempy.utils.mplutils import _maybe_show
 from spectrochempy.utils.mplutils import make_label
-from spectrochempy.utils.mplutils import show as mpl_show
 
 
 def plot_baseline(
@@ -281,7 +281,6 @@ def plot_baseline(
         if reversed_flag:
             ax1.invert_xaxis()
 
-    if show:
-        mpl_show()
+    _maybe_show(show)
 
     return (ax1, ax2)

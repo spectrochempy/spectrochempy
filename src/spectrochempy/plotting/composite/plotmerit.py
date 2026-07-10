@@ -20,19 +20,13 @@ import numpy as np
 from matplotlib.lines import Line2D
 
 from spectrochempy.plotting._render import render_lines
-from spectrochempy.utils.mplutils import get_figure
+from spectrochempy.utils.mplutils import _maybe_show
+from spectrochempy.utils.mplutils import _setup_axes
 from spectrochempy.utils.mplutils import make_label
-from spectrochempy.utils.mplutils import show as mpl_show
 
 # ======================================================================================
 # Generic comparison function
 # ======================================================================================
-
-
-def _make_default_axes():
-    """Create an axes using the standard SpectroChemPy figure factory."""
-    fig = get_figure()
-    return fig.add_subplot(1, 1, 1)
 
 
 def plot_compare(
@@ -80,11 +74,7 @@ def plot_compare(
     # ----------------------------
     # Figure management (L3 only)
     # ----------------------------
-    if ax is None:
-        ax = _make_default_axes()
-
-    if clear:
-        ax.cla()
+    ax = _setup_axes(ax, clear=clear)
 
     # ----------------------------
     # Shape validation
@@ -315,8 +305,7 @@ def plot_compare(
 
     ax.yaxis.set_visible(show_yaxis)
 
-    if show:
-        mpl_show()
+    _maybe_show(show)
 
     return ax
 
@@ -371,11 +360,7 @@ def plot_merit(
 
         # Plot all regularizations on same axes
         if index is None:
-            if ax is None:
-                ax = _make_default_axes()
-
-            if clear:
-                ax.cla()
+            ax = _setup_axes(ax, clear=clear)
 
             for i in range(n_params):
                 X_hat_i = X_hat[i].squeeze()
@@ -392,8 +377,7 @@ def plot_merit(
             if title is not None:
                 ax.set_title(title)
 
-            if show:
-                mpl_show()
+            _maybe_show(show)
 
             return ax
 

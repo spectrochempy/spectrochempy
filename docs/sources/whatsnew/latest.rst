@@ -67,3 +67,10 @@ Developer
    Also updated API docstring examples to use ``scp.gaussian``,
    ``Coord.linspace``, ``scp.arange``, and ``NDDataset.random``
    instead of raw NumPy equivalents. (#1370)
+
+- MAINT: Mutualized the duplicated figure/axes/show lifecycle across
+  the five composite plot functions (``plot_score``, ``plot_scree``,
+  ``plot_compare``, ``plot_merit``, ``plot_baseline``) into shared
+  ``_setup_axes`` and ``_maybe_show`` helpers in ``mplutils.py``.
+  Added 38 structural contract tests verifying the lifecycle behavior.
+  No public API change. (#1408)
