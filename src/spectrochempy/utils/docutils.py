@@ -134,7 +134,7 @@ class _DocstringValidator(Validator):
 
         flags = doctest.NORMALIZE_WHITESPACE | doctest.IGNORE_EXCEPTION_DETAIL
         finder = doctest.DocTestFinder()
-        runner = doctest.DocTestRunner(optionflags=flags)
+        runner = doctest.DocTestRunner(verbose=False, optionflags=flags)
         context = {"np": numpy, "scp": spectrochempy}
         error_msgs = ""
         current_dir = set(os.listdir())

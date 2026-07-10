@@ -91,9 +91,9 @@ def plot_score(
 
     Examples
     --------
-    >>> import numpy as np
+    >>> import spectrochempy as scp
     >>> from spectrochempy import plot_score
-    >>> scores = np.random.randn(50, 5)
+    >>> scores = scp.random(size=(50, 5))
     >>> ax = plot_score(scores, components=(1, 2), show=False)
 
     With label-based coloring:

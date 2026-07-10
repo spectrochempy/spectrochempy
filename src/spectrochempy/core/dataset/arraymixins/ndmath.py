@@ -1054,7 +1054,7 @@ class NDMath:
         NDDataset: [float64] a.u. (size: 5549)
         >>> m.x
         Coord: [float64] cm⁻¹ (size: 5549)
-        >>> m = scp.average(nd, dim='y', weights=np.arange(55))
+        >>> m = scp.average(nd, dim='y', weights=scp.arange(55))
         >>> m.data
         array([   1.789,    1.789, ...,    1.222,     1.22])
 
@@ -1751,13 +1751,13 @@ class NDMath:
 
         1) from the API
 
-        >>> x = np.arange(6, dtype=int)
+        >>> x = scp.arange(6, dtype=int)
         >>> scp.full_like(x, 1)
         NDDataset: [float64] unitless (size: 6)
 
         2) as a classmethod
 
-        >>> x = np.arange(6, dtype=int)
+        >>> x = scp.arange(6, dtype=int)
         >>> scp.NDDataset.full_like(x, 1)
         NDDataset: [float64] unitless (size: 6)
 
@@ -2151,7 +2151,7 @@ class NDMath:
 
         Examples
         --------
-        >>> x = np.arange(6)
+        >>> x = scp.arange(6)
         >>> x = x.reshape((2, 3))
         >>> x = scp.NDDataset(x, units='s')
         >>> x
@@ -2665,7 +2665,7 @@ class NDMath:
 
         Examples
         --------
-        >>> x = np.arange(6)
+        >>> x = scp.arange(6)
         >>> x = x.reshape((2, 3))
         >>> nd = scp.NDDataset(x, units='s')
         >>> nd

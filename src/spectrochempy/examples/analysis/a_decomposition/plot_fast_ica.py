@@ -13,7 +13,6 @@ FastICA example
 # %%
 # Import the spectrochempy API package
 import spectrochempy as scp
-import numpy as np
 
 # %%
 # Independent component analysis (ICA) is a computational method for separating a multivariate signal such as spectra
@@ -28,10 +27,9 @@ X = scp.read("matlabdata/als2004dataset.MAT")[-1]
 
 X.title = "absorbance"
 X.units = "absorbance"
-X.set_coordset(
-    np.arange(X.shape[0], dtype="float"), None
-)  # y coordinates as floats to trigger sequential colormap
-X.y.title = "elution time"
+X.y = scp.Coord.arange(
+    X.shape[0], dtype="float", title="elution time"
+)  # floats to trigger sequential colormap
 X.y.units = "min"
 X.x.title = "wavelength"
 _ = X.plot()

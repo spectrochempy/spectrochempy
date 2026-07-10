@@ -536,19 +536,31 @@ def find_peaks(
     Examples
     --------
     Basic peak finding with a synthetic spectrum:
-    >>> x = np.linspace(0.0, 10.0, 501)
-    >>> y = np.exp(-((x - 3.0) ** 2) / 0.08) + 0.8 * np.exp(-((x - 7.0) ** 2) / 0.12)
-    >>> ds = scp.NDDataset(y, coordset=[scp.Coord(x, title="x", units="cm^-1")])
+
+    >>> x = scp.Coord.linspace(0.0, 10.0, 501, title="x", units="cm^-1")
+    >>> y = (scp.gaussian(x, ampl=1.0, pos=3.0, width=0.5, normalized=False)
+    ...    + scp.gaussian(x, ampl=0.8, pos=7.0, width=0.6, normalized=False))
+    >>> ds = scp.NDDataset(y, coordset=[x])
     >>> peaks, props = ds.find_peaks(height=0.5)
     >>> len(peaks)
     2
 
     Physical-unit spacing constraints are accepted when coordinates carry units:
+
+    >>> x = scp.Coord.linspace(0.0, 10.0, 501, title="x", units="cm^-1")
+    >>> y = (scp.gaussian(x, ampl=1.0, pos=3.0, width=0.5, normalized=False)
+    ...    + scp.gaussian(x, ampl=0.8, pos=7.0, width=0.6, normalized=False))
+    >>> ds = scp.NDDataset(y, coordset=[x])
     >>> peaks, props = ds.find_peaks(distance="1 cm^-1", width=0.2)
     >>> len(peaks)
     2
 
     Return a structured result when a tabular/export representation is useful:
+
+    >>> x = scp.Coord.linspace(0.0, 10.0, 501, title="x", units="cm^-1")
+    >>> y = (scp.gaussian(x, ampl=1.0, pos=3.0, width=0.5, normalized=False)
+    ...    + scp.gaussian(x, ampl=0.8, pos=7.0, width=0.6, normalized=False))
+    >>> ds = scp.NDDataset(y, coordset=[x])
     >>> result = ds.find_peaks(height=0.5, as_result=True)
     >>> rows = result.to_dict()
     >>> len(rows)

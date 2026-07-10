@@ -11,3 +11,17 @@ What's New in Revision 0.11.1.dev
 
 These are the changes in SpectroChemPy-0.11.1.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
+
+Developer
+~~~~~~~~~
+
+- DOC: Improved example gallery to showcase SpectroChemPy-native idioms
+  (``Coord.linspace``, ``Coord.arange``, ``scp.abs``) for coordinate creation
+   and dataset operations, replacing redundant ``np.linspace`` + ``Coord``
+   wrapping patterns, ``np.abs`` usage, list-comprehension synthetic data
+   generators (``scp.fromfunction``), ``np.random.normal`` on datasets
+   (``scp.normal``), ``np.arange`` wrapped in NDDataset (``scp.arange``),
+   and ``np.random.rand`` + NDDataset constructor (``NDDataset.random``).
+   Also updated API docstring examples to use ``scp.gaussian``,
+   ``Coord.linspace``, ``scp.arange``, and ``NDDataset.random``
+   instead of raw NumPy equivalents. (#1370)
