@@ -65,6 +65,8 @@ def plot_score(
 
     show_labels : bool, optional
         If True, annotate each point with its label from scores.y.labels.
+        Labels are placed intelligently using ``adjustText`` if available,
+        otherwise shifted slightly from the marker position to avoid overlap.
         Default: False.
     labels_column : int, optional
         Column index in scores.y.labels to use (0-based).
@@ -236,8 +238,19 @@ def plot_score(
             ax.legend(handles=handles, loc="best")
 
         if labels is not None:
-            for i in range(n_samples):
-                ax.text(x[i], y[i], labels[i], fontsize=8, ha="left", va="bottom")
+            texts = [
+                ax.text(x[i], y[i], labels[i], fontsize=8) for i in range(n_samples)
+            ]
+            try:
+                from adjustText import adjust_text
+
+                adjust_text(texts, ax=ax)
+            except ImportError:
+                # Fallback: offset labels slightly from markers
+                x_off = (x.max() - x.min()) * 0.01
+                y_off = (y.max() - y.min()) * 0.01
+                for t, i in zip(texts, range(n_samples), strict=False):
+                    t.set_position((x[i] + x_off, y[i] + y_off))
 
     elif n_dims == 3:
         if ax is None:
@@ -279,8 +292,16 @@ def plot_score(
             ax.legend(handles=handles, loc="best")
 
         if labels is not None:
+            x_off = (x.max() - x.min()) * 0.01
+            y_off = (y.max() - y.min()) * 0.01
             for i in range(n_samples):
-                ax.text(x[i], y[i], z[i], labels[i], fontsize=8)
+                ax.text(
+                    x[i] + x_off,
+                    y[i] + y_off,
+                    z[i],
+                    labels[i],
+                    fontsize=8,
+                )
 
     if show:
         mpl_show()
