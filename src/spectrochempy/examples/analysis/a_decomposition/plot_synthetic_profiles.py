@@ -22,8 +22,8 @@ directly with the SpectroChemPy API:
 import spectrochempy as scp
 
 # %%
-# Build a shared time axis and three simple concentration profiles with
-# ``scp.exp(...)``.
+# Build profiles with analytical expressions
+# -------------------------------------------
 time = scp.linspace(0.0, 1.0, 200)
 
 c1 = scp.exp(-0.5 * ((time - 0.25) / 0.10) ** 2)
@@ -31,7 +31,7 @@ c2 = 0.8 * scp.exp(-0.5 * ((time - 0.55) / 0.12) ** 2)
 c3 = 0.6 * scp.exp(-0.5 * ((time - 0.82) / 0.08) ** 2)
 
 # %%
-# Assemble the 1D profiles as columns of a concentration matrix.
+# Assemble as columns of a concentration matrix:
 profiles = scp.stack([c1, c2, c3], axis=1)
 profiles.x.title = "time"
 profiles.y = scp.Coord(labels=["c1", "c2", "c3"], title="species")
@@ -43,8 +43,8 @@ ax = profiles.T.plot()
 ax.legend()
 
 # %%
-# The same workflow can also use the built-in Gaussian line-shape helper when
-# that reads more naturally for the problem at hand.
+# Use built-in Gaussian line-shape helper
+# -----------------------------------------
 profiles_gaussian = scp.stack(
     [
         scp.gaussian(time, ampl=1.0, pos=0.25, width=0.235, normalized=False),

@@ -17,8 +17,8 @@ from pathlib import Path
 import spectrochempy as scp
 
 # %%
-# Load an IR dataset and inspect the available styles.
-
+# Inspect available styles
+# -------------------------
 dataset = scp.read("irdata/nh4y-activation.spg")[0]
 
 styles_dir = Path(scp.preferences.stylesheets)
@@ -26,18 +26,18 @@ available_styles = sorted(f.stem for f in styles_dir.glob("*.mplstyle"))
 print(available_styles[:8])
 
 # %%
-# Apply a style to one plot only.
-
+# Apply a style to one plot only
+# -------------------------------
 _ = dataset.plot(style="grayscale")
 
 # %%
-# Styles combine naturally with ordinary plot options.
-
+# Combine style with plot options
+# --------------------------------
 _ = dataset.plot(style="grayscale", xlim=(1800, 1500), grid=True)
 
 # %%
-# Session-level defaults can also be changed through preferences.
-
+# Change defaults via preferences
+# --------------------------------
 original_style = scp.preferences.style
 scp.preferences.style = "ggplot"
 _ = dataset.plot()

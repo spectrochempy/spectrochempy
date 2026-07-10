@@ -15,9 +15,8 @@ noise reduction and signal distortion on a Raman spectrum.
 import spectrochempy as scp
 
 # %%
-# Load a Raman spectrum, focus on the low-wavenumber region, and add synthetic
-# noise to make the smoothing effect easier to see.
-
+# Prepare a noisy spectrum
+# -------------------------
 dataset = scp.read("ramandata/labspec/SMC1-Initial_RT.txt")
 region = dataset[:, :400.0]
 region += 200 * scp.random(region.shape)
@@ -28,14 +27,13 @@ prefs.figure.figsize = (8, 4)
 _ = region.plot()
 
 # %%
-# Apply the default moving-average smoothing with several window sizes.
-
+# Moving-average smoothing
+# -------------------------
 smoothed = {size: region.smooth(size) for size in (3, 7, 11)}
 
 # %%
 # Compare the results. Larger windows remove more noise but can also flatten
-# narrow features.
-
+# narrow features:
 for size, smoothed_region in smoothed.items():
     _ = scp.plot_compare(
         region,
@@ -44,9 +42,8 @@ for size, smoothed_region in smoothed.items():
     )
 
 # %%
-# Savitzky-Golay smoothing offers another trade-off between denoising and peak
-# shape preservation.
-
+# Savitzky-Golay smoothing
+# -------------------------
 sg = scp.Filter(method="savgol", size=7, order=2)(region)
 _ = scp.plot_compare(region, sg, title="Savitzky-Golay smoothing (size=7, order=2)")
 

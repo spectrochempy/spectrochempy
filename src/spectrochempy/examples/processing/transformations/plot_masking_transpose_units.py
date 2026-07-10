@@ -15,8 +15,8 @@ masking a saturated region, transposing the dataset, and converting axis units.
 import spectrochempy as scp
 
 # %%
-# Load a stacked IR dataset and convert the acquisition axis to hours.
-
+# Load and inspect the dataset
+# -----------------------------
 dataset = scp.read_omnic("irdata/nh4y-activation.spg")
 dataset.y -= dataset.y[0]
 dataset.y.title = "time"
@@ -28,25 +28,25 @@ prefs.colorbar = True
 _ = dataset.plot()
 
 # %%
-# Mask the saturated region around 1100 cm^-1.
-
+# Mask a saturated region
+# ------------------------
 dataset[:, 1290.0:890.0] = scp.MASKED
 _ = dataset.plot_stack()
 
 # %%
-# The mask is then respected by subsequent operations such as reductions.
-
+# The mask is respected by subsequent operations such as reductions:
 dataset.max()
 
 # %%
-# Transposition exchanges the dataset axes while preserving the data and mask.
-
+# Transpose the dataset
+# ----------------------
+# Transposition exchanges axes while preserving data and mask:
 transposed = dataset.T
 _ = transposed.plot()
 
 # %%
-# Compatible unit conversions can be applied to coordinates in place.
-
+# Convert coordinate units
+# -------------------------
 dataset.y.ito("hours")
 _ = dataset.plot()
 

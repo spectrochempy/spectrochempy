@@ -18,8 +18,8 @@ from pathlib import Path
 import spectrochempy as scp
 
 # %%
-# Load a 2D IR dataset and prepare a cleaner spectral window for display.
-
+# Load and prepare the dataset
+# -----------------------------
 TEST_FILE = Path(os.environ.get("TEST_FILE", "irdata/nh4y-activation.spg"))
 dataset = scp.read(TEST_FILE)
 dataset = dataset[:, 4000.0:650.0]
@@ -32,22 +32,22 @@ prefs = scp.preferences
 prefs.figure.figsize = (7, 4)
 
 # %%
-# A single spectrum is naturally shown as a line plot.
-
+# Single-spectrum line plot
+# --------------------------
 single = dataset[0]
 _ = single.plot()
 
 # %%
-# For the full 2D dataset, explicit methods make the intended representation
-# very clear.
-
+# 2D dataset plots
+# -----------------
+# Explicit methods make the intended representation clear:
 _ = dataset.plot_lines()
 _ = dataset.plot_image(colorbar=True)
 _ = dataset.plot_contour(colorbar=True)
 
 # %%
-# Plot-specific options still apply in the same way.
-
+# Customize plot options
+# -----------------------
 _ = dataset.plot_image(
     cmap="plasma",
     xlim=(2000, 1300),
