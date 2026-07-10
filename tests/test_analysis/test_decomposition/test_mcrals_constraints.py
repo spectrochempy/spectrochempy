@@ -451,6 +451,72 @@ def test_model_must_be_callable():
 
 
 # --------------------------------------------------------------------------------------
+# ModelProfile mapping validation
+# --------------------------------------------------------------------------------------
+
+
+def test_model_profile_mapping_default_is_none():
+    c = ModelProfile("C", model=_identity)
+    assert c.mapping is None
+
+
+def test_model_profile_mapping_with_integers():
+    c = ModelProfile("C", components=[0, 1], model=_identity, mapping=[1, 0])
+    assert c.mapping == [1, 0]
+
+
+def test_model_profile_mapping_with_none_entries():
+    c = ModelProfile("St", components=[0, 1], model=_identity, mapping=[0, None])
+    assert c.mapping == [0, None]
+
+
+def test_model_profile_mapping_tuple_converted_to_list():
+    c = ModelProfile("C", components=[0, 1], model=_identity, mapping=(1, 0))
+    assert c.mapping == [1, 0]
+
+
+def test_model_profile_mapping_rejects_non_list():
+    with pytest.raises(TypeError, match="mapping must be a list or None"):
+        ModelProfile("C", model=_identity, mapping="invalid")
+
+
+def test_model_profile_mapping_rejects_non_integer():
+    with pytest.raises(TypeError, match="mapping\\[0\\] must be an integer or None"):
+        ModelProfile("C", components=[0], model=_identity, mapping=["x"])
+
+
+def test_model_profile_mapping_rejects_negative():
+    with pytest.raises(ValueError, match="mapping\\[0\\] must be non-negative"):
+        ModelProfile("C", components=[0], model=_identity, mapping=[-1])
+
+
+def test_model_profile_mapping_rejects_empty():
+    with pytest.raises(ValueError, match="mapping must not be empty"):
+        ModelProfile("C", model=_identity, mapping=[])
+
+
+def test_model_profile_mapping_rejects_length_mismatch():
+    with pytest.raises(ValueError, match="mapping has length 1 but got 2 components"):
+        ModelProfile("C", components=[0, 1], model=_identity, mapping=[0])
+
+
+def test_model_profile_mapping_allows_duplicates():
+    c = ModelProfile("C", components=[0, 1, 2], model=_identity, mapping=[0, 0, 1])
+    assert c.mapping == [0, 0, 1]
+
+
+def test_model_profile_mapping_all_none_is_valid():
+    c = ModelProfile("C", components=[0, 1], model=_identity, mapping=[None, None])
+    assert c.mapping == [None, None]
+
+
+def test_model_profile_mapping_length_ok_when_components_none():
+    """When ``components=None``, mapping length is not validated."""
+    c = ModelProfile("C", model=_identity, mapping=[0, 1])
+    assert c.mapping == [0, 1]
+
+
+# --------------------------------------------------------------------------------------
 # Equality
 # --------------------------------------------------------------------------------------
 
@@ -489,6 +555,26 @@ def test_closure_unequal_array_target():
 def test_closure_unequal_scalar_vs_array():
     assert Closure("C", target=1.0) != Closure("C", target=[1.0, 1.0])
     assert Closure("C", target=[1.0, 1.0]) != Closure("C", target=1.0)
+
+
+def test_closure_method_scaling_default():
+    c = Closure("C")
+    assert c.method == "scaling"
+
+
+def test_closure_method_constant_sum():
+    c = Closure("C", method="constantSum")
+    assert c.method == "constantSum"
+
+
+def test_closure_method_rejects_non_string():
+    with pytest.raises(TypeError, match="method must be a string"):
+        Closure("C", method=42)
+
+
+def test_closure_method_rejects_invalid():
+    with pytest.raises(ValueError, match="method must be one of"):
+        Closure("C", method="invalid_method")
 
 
 def test_closure_equal_reference_vs_copy():
@@ -534,6 +620,67 @@ def test_mod_equal_and_unequal():
     assert Unimodal("C", mod="strict") != Unimodal("C", mod="smooth")
 
 
+def test_unimodal_tolerance_default():
+    c = Unimodal("C")
+    assert c.tolerance == 1.1
+
+
+def test_unimodal_tolerance_set():
+    c = Unimodal("C", components=[0], tolerance=1.0)
+    assert c.tolerance == 1.0
+
+
+def test_unimodal_tolerance_strict():
+    c = Unimodal("C", tolerance=1.0)
+    assert c.tolerance == 1.0
+
+
+def test_unimodal_unequal_tolerance():
+    assert Unimodal("C", tolerance=1.0) != Unimodal("C", tolerance=2.0)
+
+
+def test_unimodal_equal_tolerance():
+    assert Unimodal("C", tolerance=2.0) == Unimodal("C", tolerance=2.0)
+
+
+def test_unimodal_tolerance_repr_omitted_when_default():
+    r = repr(Unimodal("C", tolerance=1.1))
+    assert "tolerance" not in r
+
+
+def test_unimodal_tolerance_repr_shown_when_nondefault():
+    r = repr(Unimodal("C", tolerance=2.0))
+    assert "tolerance=2.0" in r
+
+
+def test_fixed_values_equal_with_numpy_array():
+    arr1 = np.array([1.0, 2.0, 3.0])
+    arr2 = np.array([1.0, 2.0, 3.0])
+    assert FixedValues("St", values=arr1) == FixedValues("St", values=arr2)
+
+
+def test_fixed_values_unequal_with_numpy_array():
+    arr1 = np.array([1.0, 2.0, 3.0])
+    arr2 = np.array([4.0, 5.0, 6.0])
+    assert FixedValues("St", values=arr1) != FixedValues("St", values=arr2)
+
+
+def test_reference_profile_equal_with_numpy_array():
+    arr1 = np.array([1.0, 2.0, 3.0, 4.0])
+    arr2 = np.array([1.0, 2.0, 3.0, 4.0])
+    assert ReferenceProfile("C", component=0, data=arr1) == ReferenceProfile(
+        "C", component=0, data=arr2
+    )
+
+
+def test_reference_profile_unequal_with_numpy_array():
+    arr1 = np.array([1.0, 2.0, 3.0, 4.0])
+    arr2 = np.array([5.0, 6.0, 7.0, 8.0])
+    assert ReferenceProfile("C", component=0, data=arr1) != ReferenceProfile(
+        "C", component=0, data=arr2
+    )
+
+
 def test_models_equal_same_callback():
     assert ModelProfile("C", components=[0], model=_identity) == ModelProfile(
         "C", components=[0], model=_identity
@@ -575,6 +722,24 @@ def test_profile_model_differs_by_profile():
     assert ModelProfile("C", components=[0], model=_identity) != ModelProfile(
         "St", components=[0], model=_identity
     )
+
+
+def test_model_profile_equal_with_same_mapping():
+    assert ModelProfile(
+        "C", components=[0, 1], model=_identity, mapping=[1, 0]
+    ) == ModelProfile("C", components=[0, 1], model=_identity, mapping=[1, 0])
+
+
+def test_model_profile_unequal_different_mapping():
+    assert ModelProfile(
+        "C", components=[0, 1], model=_identity, mapping=[1, 0]
+    ) != ModelProfile("C", components=[0, 1], model=_identity, mapping=[0, 1])
+
+
+def test_model_profile_equal_mapping_none_vs_identity():
+    assert ModelProfile(
+        "C", components=[0, 1], model=_identity, mapping=None
+    ) != ModelProfile("C", components=[0, 1], model=_identity, mapping=[0, 1])
 
 
 # --------------------------------------------------------------------------------------
@@ -637,6 +802,16 @@ def test_repr_model_profile_with_spectrum():
     assert "profile='St'" in r
     assert "components=[0]" in r
     assert "model=" in r
+
+
+def test_repr_model_profile_shows_mapping():
+    r = repr(ModelProfile("C", components=[0, 1], model=_identity, mapping=[1, 0]))
+    assert "mapping=[1, 0]" in r
+
+
+def test_repr_model_profile_omits_mapping_when_none():
+    r = repr(ModelProfile("C", model=_identity))
+    assert "mapping" not in r
 
 
 def test_repr_is_readable_for_all_classes():

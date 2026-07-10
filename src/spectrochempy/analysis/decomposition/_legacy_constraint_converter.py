@@ -11,10 +11,12 @@ This module translates the existing (traitlet-based) estimator parameters of
 of the public constraint classes defined in
 :mod:`spectrochempy.analysis.decomposition.mcrals_constraints`.
 
-The converter is purely declarative: it reads the current traitlet values and
-produces the corresponding public constraint objects.  It does **not** modify
-the estimator, does **not** change any numerical behaviour, and is **not**
-connected to the internal ALS constraint engine.
+The converter is the bridge between the old traitlet-based API and the new
+``constraints=`` API.  It is called automatically by ``MCRALS._fit`` when
+``self.constraints is None`` (i.e. the user has not provided explicit
+constraint objects).  The resulting public constraint list is then processed
+identically to a user-provided list through ``_public_to_internal``, so all
+internal code paths are the same regardless of which API the user chose.
 
 Typical usage::
 
@@ -24,9 +26,6 @@ Typical usage::
 
     mcr = MCRALS(...)
     constraints = legacy_to_constraints(mcr)
-
-Use ``constraints`` as the ``constraints=`` keyword argument to ``MCRALS``
-once the public API is connected to the engine (future PR).
 """
 
 __all__ = ["legacy_to_constraints"]
@@ -64,7 +63,7 @@ def legacy_to_constraints(estimator):
     then spectral).  Within each side the order matches the historical
     constraint application order used in the internal engine:
     non-negativity → unimodality → monotonicity → closure → model-based
-    (hard-profile) constraints.
+    (model-profile) constraints.
 
     Normalization (``normSpec``) is a joint operation on both ``C`` and
     ``St`` and has no corresponding public constraint class at this time;
@@ -92,11 +91,15 @@ def _conc_constraints(estimator):
     elif nn is not None:
         result.append(NonNegative("C", components=nn))
 
-    # unimodConc -> Unimodal("C", ...)
+    # unimodConc + unimodConcMod + unimodConcTol -> Unimodal("C", ...)
     um = _to_components(estimator.unimodConc)
     if um is _ALL:
         result.append(
-            Unimodal("C", mod=_str_or_default(estimator.unimodConcMod, "strict"))
+            Unimodal(
+                "C",
+                mod=_str_or_default(estimator.unimodConcMod, "strict"),
+                tolerance=estimator.unimodConcTol,
+            )
         )
     elif um is not None:
         result.append(
@@ -104,6 +107,7 @@ def _conc_constraints(estimator):
                 "C",
                 components=um,
                 mod=_str_or_default(estimator.unimodConcMod, "strict"),
+                tolerance=estimator.unimodConcTol,
             )
         )
 
@@ -164,6 +168,17 @@ def _conc_constraints(estimator):
         }
         if hc is not _ALL:
             mp_kw["components"] = hc
+            comps_for_mapping = hc
+        else:
+            # hardConc=="all": infer component range from legacy mapping length
+            legacy_map = estimator.getC_to_C_idx
+            if legacy_map != "default" and legacy_map is not None:
+                comps_for_mapping = list(range(len(legacy_map)))
+            else:
+                comps_for_mapping = []
+        mp_kw["mapping"] = _convert_legacy_mapping(
+            estimator.getC_to_C_idx, comps_for_mapping
+        )
         result.append(ModelProfile("C", **mp_kw))
 
     return result
@@ -185,11 +200,15 @@ def _spec_constraints(estimator):
     elif nn is not None:
         result.append(NonNegative("St", components=nn))
 
-    # unimodSpec -> Unimodal("St", ...)
+    # unimodSpec + unimodSpecMod + unimodSpecTol -> Unimodal("St", ...)
     um = _to_components(estimator.unimodSpec)
     if um is _ALL:
         result.append(
-            Unimodal("St", mod=_str_or_default(estimator.unimodSpecMod, "strict"))
+            Unimodal(
+                "St",
+                mod=_str_or_default(estimator.unimodSpecMod, "strict"),
+                tolerance=estimator.unimodSpecTol,
+            )
         )
     elif um is not None:
         result.append(
@@ -197,6 +216,7 @@ def _spec_constraints(estimator):
                 "St",
                 components=um,
                 mod=_str_or_default(estimator.unimodSpecMod, "strict"),
+                tolerance=estimator.unimodSpecTol,
             )
         )
 
@@ -210,6 +230,16 @@ def _spec_constraints(estimator):
         }
         if hs is not _ALL:
             mp_kw["components"] = hs
+            comps_for_mapping = hs
+        else:
+            legacy_map = estimator.getSt_to_St_idx
+            if legacy_map != "default" and legacy_map is not None:
+                comps_for_mapping = list(range(len(legacy_map)))
+            else:
+                comps_for_mapping = []
+        mp_kw["mapping"] = _convert_legacy_mapping(
+            estimator.getSt_to_St_idx, comps_for_mapping
+        )
         result.append(ModelProfile("St", **mp_kw))
 
     return result
@@ -275,6 +305,49 @@ def _extract_closure_target(estimator):
     if isinstance(target, str):
         return 1.0  # "default"
     return target
+
+
+def _convert_legacy_mapping(legacy_mapping, components):
+    """
+    Convert legacy ``getC_to_C_idx`` / ``getSt_to_St_idx`` to public mapping.
+
+    Legacy format:
+      ``legacy_mapping[i]`` → ALS component index that model output
+      column/row *i* maps to, or ``None`` (model output is ignored).
+
+    Public format:
+      ``mapping[j]`` → model output column/row index assigned to ALS
+      component ``components[j]``, or ``None`` (component keeps ALS
+      estimate and is not replaced).
+
+    Parameters
+    ----------
+    legacy_mapping : str or list or None
+        ``"default"`` (identity), ``None`` (identity), or a list of
+        int-or-``None`` entries.
+    components : list[int]
+        The resolved list of ALS component indices that the hard
+        constraint applies to.
+
+    Returns
+    -------
+    list or None
+        Mapping in the public format, or ``None`` for identity.
+    """
+    if legacy_mapping == "default" or legacy_mapping is None:
+        return None
+    if not components:
+        return None
+    mapping = [None] * len(components)
+    for model_col, als_idx in enumerate(legacy_mapping):
+        if als_idx is not None and als_idx in components:
+            j = components.index(als_idx)
+            mapping[j] = model_col
+    if all(m is None for m in mapping):
+        return None
+    if mapping == list(range(len(components))):
+        return None
+    return mapping
 
 
 def _str_or_default(value, default):

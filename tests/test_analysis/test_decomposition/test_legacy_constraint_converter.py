@@ -130,6 +130,16 @@ class TestLegacyToConstraints:
         um = [c for c in constraints if isinstance(c, Unimodal) and c.profile == "C"]
         assert len(um) == 0
 
+    def test_unimod_conc_all_with_tolerance(self):
+        """``unimodConc="all"`` with custom tolerance propagates correctly."""
+        est = _FakeEstimator(unimodConc="all", unimodConcTol=2.0)
+        constraints = legacy_to_constraints(est)
+
+        um = [c for c in constraints if isinstance(c, Unimodal) and c.profile == "C"]
+        assert len(um) == 1
+        assert um[0].tolerance == 2.0
+        assert um[0].components is None
+
     def test_unimod_conc_smooth_mod(self):
         est = _FakeEstimator(unimodConc=[0], unimodConcMod="smooth")
         constraints = legacy_to_constraints(est)
@@ -146,6 +156,30 @@ class TestLegacyToConstraints:
         um = [c for c in constraints if isinstance(c, Unimodal) and c.profile == "C"]
         assert len(um) == 1
         assert um[0].mod == "strict"
+
+    def test_unimod_conc_tolerance_default(self):
+        est = _FakeEstimator(unimodConc=[0])
+        constraints = legacy_to_constraints(est)
+
+        um = [c for c in constraints if isinstance(c, Unimodal) and c.profile == "C"]
+        assert len(um) == 1
+        assert um[0].tolerance == 1.1
+
+    def test_unimod_conc_tolerance_custom(self):
+        est = _FakeEstimator(unimodConc=[0], unimodConcTol=3.0)
+        constraints = legacy_to_constraints(est)
+
+        um = [c for c in constraints if isinstance(c, Unimodal) and c.profile == "C"]
+        assert len(um) == 1
+        assert um[0].tolerance == 3.0
+
+    def test_unimod_spec_tolerance_custom(self):
+        est = _FakeEstimator(unimodSpec=[1], unimodSpecTol=2.5)
+        constraints = legacy_to_constraints(est)
+
+        um = [c for c in constraints if isinstance(c, Unimodal) and c.profile == "St"]
+        assert len(um) == 1
+        assert um[0].tolerance == 2.5
 
     def test_mono_inc_conc(self):
         est = _FakeEstimator(monoIncConc=[1], monoIncTol=1.5)
@@ -293,6 +327,64 @@ class TestLegacyToConstraints:
         ]
         assert len(mp) == 0
 
+    def test_hard_conc_mapping_default_is_none(self):
+        def _fake_model(C):
+            return C
+
+        est = _FakeEstimator(
+            hardConc=[0, 1], getConc=_fake_model, getC_to_C_idx="default"
+        )
+        constraints = legacy_to_constraints(est)
+
+        mp = [
+            c for c in constraints if isinstance(c, ModelProfile) and c.profile == "C"
+        ]
+        assert len(mp) == 1
+        assert mp[0].mapping is None
+
+    def test_hard_conc_mapping_identity_is_none(self):
+        def _fake_model(C):
+            return C
+
+        est = _FakeEstimator(hardConc=[0, 1], getConc=_fake_model, getC_to_C_idx=[0, 1])
+        constraints = legacy_to_constraints(est)
+
+        mp = [
+            c for c in constraints if isinstance(c, ModelProfile) and c.profile == "C"
+        ]
+        assert len(mp) == 1
+        assert mp[0].mapping is None
+
+    def test_hard_conc_mapping_swap(self):
+        def _fake_model(C):
+            return C
+
+        est = _FakeEstimator(hardConc=[0, 1], getConc=_fake_model, getC_to_C_idx=[1, 0])
+        constraints = legacy_to_constraints(est)
+
+        mp = [
+            c for c in constraints if isinstance(c, ModelProfile) and c.profile == "C"
+        ]
+        assert len(mp) == 1
+        assert mp[0].mapping == [1, 0]
+
+    def test_hard_conc_mapping_with_none_entries(self):
+        def _fake_model(C):
+            return C
+
+        est = _FakeEstimator(
+            hardConc=[0, 1, 2], getConc=_fake_model, getC_to_C_idx=[2, None, 0]
+        )
+        constraints = legacy_to_constraints(est)
+
+        mp = [
+            c for c in constraints if isinstance(c, ModelProfile) and c.profile == "C"
+        ]
+        assert len(mp) == 1
+        # legacy mapping: col 0->comp 2, col 1->None, col 2->comp 0
+        # new mapping: comp 0<-col 2, comp 1<-None, comp 2<-col 0
+        assert mp[0].mapping == [2, None, 0]
+
     def test_nonneg_spec_components(self):
         est = _FakeEstimator(nonnegSpec=[0, 1])
         constraints = legacy_to_constraints(est)
@@ -373,6 +465,36 @@ class TestLegacyToConstraints:
             c for c in constraints if isinstance(c, ModelProfile) and c.profile == "St"
         ]
         assert len(mp) == 0
+
+    def test_hard_spec_mapping_default_is_none(self):
+        def _fake_model(St):
+            return St
+
+        est = _FakeEstimator(
+            hardSpec=[0, 1], getSpec=_fake_model, getSt_to_St_idx="default"
+        )
+        constraints = legacy_to_constraints(est)
+
+        mp = [
+            c for c in constraints if isinstance(c, ModelProfile) and c.profile == "St"
+        ]
+        assert len(mp) == 1
+        assert mp[0].mapping is None
+
+    def test_hard_spec_mapping_swap(self):
+        def _fake_model(St):
+            return St
+
+        est = _FakeEstimator(
+            hardSpec=[0, 1], getSpec=_fake_model, getSt_to_St_idx=[1, 0]
+        )
+        constraints = legacy_to_constraints(est)
+
+        mp = [
+            c for c in constraints if isinstance(c, ModelProfile) and c.profile == "St"
+        ]
+        assert len(mp) == 1
+        assert mp[0].mapping == [1, 0]
 
     def test_all_conc_constraints_active(self):
         """All concentration-side constraints active simultaneously."""
@@ -477,15 +599,16 @@ class TestEdgeCases:
         assert closure2[0].method == "constantSum"
         assert closure1 != closure2
 
-    def test_unimod_tol_not_translated(self):
+    def test_unimod_tol_translated(self):
         """
-        ``unimodConcTol`` is an enforcement detail, not a parameter of public
-        ``Unimodal``.
+        ``unimodConcTol`` is now translated into the ``tolerance`` parameter
+        of public ``Unimodal``.
         """
         est = _FakeEstimator(unimodConc="all", unimodConcTol=2.0)
         constraints = legacy_to_constraints(est)
         um = [c for c in constraints if isinstance(c, Unimodal)]
         assert len(um) == 1
+        assert um[0].tolerance == 2.0
         assert um[0].mod == "strict"
 
     def test_hard_conc_empty_ignores_get_conc(self):
