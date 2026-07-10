@@ -533,7 +533,9 @@ for reproducible results across multiple function calls.""",
             - ``cmap`` : Colormap for coloring points.
             - ``color`` : Fixed color or color values for each point.
             - ``color_mapping`` : "index" (default) or "labels" - how to map colors.
-            - ``show_labels`` : If True, annotate points with labels.
+            - ``show_labels`` : If True, annotate points with labels. Labels are
+              placed intelligently with ``adjustText`` if available (otherwise
+              shifted slightly to avoid overlap with markers).
             - ``labels_column`` : Column index in scores.y.labels (0-based).
             - ``ax`` : Axes to plot on.
             - ``show`` : Whether to display the figure.

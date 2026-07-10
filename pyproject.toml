@@ -78,6 +78,7 @@ docs = [
   "sphinxcontrib-bibtex == 2.6.3",
   "xarray",
   "json5 == 0.10.0",
+  "adjustText",
 ]
 interactive = [
   "jupyter",
