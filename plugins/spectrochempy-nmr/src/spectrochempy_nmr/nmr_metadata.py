@@ -1,4 +1,5 @@
-"""Canonical NMR metadata extraction.
+"""
+Canonical NMR metadata extraction.
 
 Centralises all vendor-specific metadata interpretation behind a single
 layer.  Each reader plugin provides a ``extract_nmr_metadata`` function
@@ -11,7 +12,7 @@ Bruker-specific field names (``nuc1``, ``pulprog``, ``FnMODE``,
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -25,7 +26,8 @@ if TYPE_CHECKING:
 
 @dataclass(frozen=True)
 class NMRMetadata:
-    """Vendor-neutral NMR metadata.
+    """
+    Vendor-neutral NMR metadata.
 
     All fields use plain Python types (str, int, float, tuple, None)
     so that the dataclass remains free of pint Quantity or any
@@ -85,7 +87,8 @@ def infer_source_kind(
     domains: tuple[str, ...],
     datatype: str | None = None,
 ) -> str:
-    """Derive the source-kind string from canonical fields.
+    """
+    Derive the source-kind string from canonical fields.
 
     This function is vendor-neutral — it uses only ``ndim``, ``domains``,
     and the reader-reported ``datatype``.
@@ -152,7 +155,8 @@ def _resolve_encoding(raw_encoding: list) -> tuple[str, ...]:
 
 
 def extract_nmr_metadataBruker(meta) -> NMRMetadata:
-    """Extract :class:`NMRMetadata` from a Bruker/TopSpin metadata object.
+    """
+    Extract :class:`NMRMetadata` from a Bruker/TopSpin metadata object.
 
     Parameters
     ----------
