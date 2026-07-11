@@ -138,8 +138,8 @@ _ = y_test_hat.T.plot(title="predicted moisture for $X_{test}$", marker="o")
 # both train set and test set.
 
 # %%
-ax = pls.parityplot(label="calibration")
-_ = pls.parityplot(y_test, y_test_hat, c="red", label="validation", clear=False)
+ax = pls.plot_parity(label="calibration")
+_ = pls.plot_parity(y_test, y_test_hat, c="red", label="validation", clear=False)
 _ = ax.legend(loc="lower right")
 
 # %% [markdown]

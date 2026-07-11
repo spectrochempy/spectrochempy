@@ -124,7 +124,7 @@ _ = mcr_2.C_constrained.T.plot(clear=False)
 # Finally, let's plot some of the pure spectra profiles St, and the
 #  reconstructed dataset  (X_hat = C St) vs original dataset (X) and residuals.
 _ = mcr_2.St.plot()
-_ = mcr_2.plotmerit(nb_traces=10)
+_ = mcr_2.plot_merit(nb_traces=10)
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

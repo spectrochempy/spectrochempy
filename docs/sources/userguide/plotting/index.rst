@@ -66,11 +66,12 @@ For day-to-day use, the plotting contract is:
 - Style interpretation depends on the plotting geometry: the same ``cmap`` or
   ``marker`` input can mean different things for lines, scatter plots, contour
   plots, and image-like plots.
-- ``ax``, ``clear``, and ``show`` control figure lifecycle for ordinary dataset
-  plots. Here ``show`` means "perform SpectroChemPy's explicit display step
-  after plotting", not "guarantee figure visibility". In notebook environments,
-  figures can still render inline without that explicit call. Composite
-  plotters can have narrower or specialized lifecycle rules.
+- ``ax``, ``clear``, and ``show`` control figure lifecycle for both ordinary
+  dataset plots and   composite plots (``plot_score``, ``plot_scree``,
+  ``plot_compare``, ``plot_merit``, ``plot_baseline``, ``plot_parity``).
+  Here ``show`` means "perform SpectroChemPy's explicit display step after
+  plotting", not "guarantee figure visibility". In notebook environments,
+  figures can still render inline without that explicit call.
 - ``plot_multiple()`` overlays several datasets on one axes, while
   ``multiplot()`` creates a grid of axes.
 

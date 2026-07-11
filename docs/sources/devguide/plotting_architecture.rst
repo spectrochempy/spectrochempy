@@ -146,14 +146,81 @@ This layer is responsible for sending an already-understood plotting request to
 the correct rendering family.  It is not the place to redefine plotting
 vocabulary or kwargs aliases.
 
+Composite Plotters
+~~~~~~~~~~~~~~~~~~
+
+Domain-specific composite functions live in
+``plotting/composite/`` and implement purpose-built visualisations:
+
+* ``plot_score`` — PCA scores scatter (2D or 3D);
+* ``plot_scree`` — explained variance bar + cumulative line;
+* ``plot_merit`` — original vs reconstructed vs residual;
+* ``plot_compare`` — generic two-dataset overlay with residual;
+* ``plot_baseline`` — two-panel baseline correction view;
+* ``plot_parity`` — predicted vs measured scatter.
+
+These functions form a **middle layer** between scientific objects (``PCA``,
+``PLSRegression``, etc.) and the dataset plotting stack below:
+
+.. code-block:: text
+
+    Scientific objects (PCA, PLSRegression, ...)
+        │  thin wrapper with domain-specific defaults
+        ▼
+    Composite plotters (plotting/composite/)
+        │  own figure, axes, rendering; shared lifecycle helpers
+        ▼
+    Dataset plotting (plot1d, plot2d, dispatcher, _style, …)
+        │  generic layered pipeline
+        ▼
+    Matplotlib artists
+
+Key conventions for composite plotters:
+
+* Accept ``ax``, ``clear``, ``show`` and use the shared lifecycle helpers
+  (``_setup_axes`` / ``_maybe_show`` from ``mplutils.py``).
+* Return a single ``Axes`` object (exception: ``plot_baseline`` returns a
+  tuple of two ``Axes`` for its two-panel layout).
+* Own their own rendering — they do NOT go through the dispatcher or
+  ``_render.py`` primitives (though ``plot_compare`` and ``plot_baseline``
+  use ``render_lines`` where appropriate).
+* Style is resolved locally with explicit per-function parameters, not
+  through ``_style.py`` resolvers (except ``plot_baseline`` which uses
+  ``resolve_stack_colors``).
+* Lifecycle contract is identical to dataset plotting: ``ax=None`` creates
+  a new figure, ``ax + clear=True`` clears before plotting, ``ax +
+  clear=False`` appends artists.
+
+These conventions are verified by structural tests
+(``test_composite_lifecycle.py``, ``test_parity.py``).
+
+Style resolution follows a consistent priority chain across all plot types:
+
+.. code-block:: text
+
+    Explicit per-function parameters
+        ↓ (if None)
+    Composite-level defaults / kwargs normalization
+        ↓ (if None)
+    Global preferences (prefs.*)
+        ↓ (if not applicable)
+    Matplotlib rcParams defaults
+
+Existing composite plotters intentionally do not reuse ``_style.py``
+resolvers unless the semantic contract genuinely matches.  For example,
+``resolve_stack_colors`` is appropriate for ``plot_baseline`` (baseline
+stacks are semantically equivalent to dataset stacks), but
+``resolve_line_style`` would not be appropriate for ``plot_compare``
+because composites need three semantically distinct styles (experimental /
+calculated / residual) per category.
+
 Specialized Orchestration
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Some plotting entry points are intentionally more specialized:
+Other specialized entry points include:
 
 * ``plot_multiple()`` overlays several datasets on one axes;
 * ``multiplot()`` builds grids of axes and delegates panel rendering;
-* composite plotters may combine several visuals with their own layout logic;
 * plugin plotting entry points may adapt plugin-specific objects or workflows
   before delegating to the shared plotting layer.
 
@@ -234,19 +301,20 @@ shared plotting semantics and higher-level composition logic.
 Figure and Axes Lifecycle
 -------------------------
 
-Figure and axes ownership remains partly centralized and partly specialized:
+Figure and axes ownership follows a consistent pattern across all plot types:
 
-* the main dataset plotting path uses ``NDDataset._figure_setup()`` to decide
+* The main dataset plotting path uses ``NDDataset._figure_setup()`` to decide
   whether to create a figure, reuse the current figure, or use an explicit
-  ``ax``;
-* ``ax``, ``clear``, and ``show`` remain the main lifecycle controls for
-  ordinary dataset plots;
-* orchestration helpers such as ``plot_multiple()`` and ``multiplot()`` manage
-  figure composition more directly because they coordinate several plot calls;
-* composite plots may own their lifecycle outright.
-
-This boundary is documented here because it affects contributor expectations,
-but it was intentionally not folded into the normalization helpers.
+  ``ax``.
+* Composite plotters use the shared ``_setup_axes`` / ``_maybe_show`` helpers
+  (``mplutils.py``) which implement the same ``ax`` / ``clear`` / ``show``
+  contract.
+* ``ax``, ``clear``, and ``show`` are the universal lifecycle controls across
+all plot types — dataset plots, composite plots, ``plot_multiple``, and
+   ``plot_parity`` all follow the same conventions.
+* The shared helpers keep lifecycle logic in one place and prevent the
+  duplication that previously existed (five near-identical ``if ax is None``
+  + ``clear`` + ``show`` patterns).
 
 Practical Contributor Guidance
 ------------------------------
@@ -264,12 +332,20 @@ When changing plotting code:
 Future Evolution
 ----------------
 
-The current architecture is stable, but a few areas may deserve future
-attention:
+The current architecture is stable. Recent work (2026-07) has:
 
-* a clearer figure/axes lifecycle contract across ordinary and composite plots;
-* possible convergence of plugin-side helper patterns where duplication
-  reappears;
+* unified the figure/axes lifecycle contract across ordinary and composite
+  plots via ``_setup_axes`` / ``_maybe_show``;
+* removed the previously dead ``use_plotly`` code path;
+* added ``marker``/``s``/``alpha`` forwarding and kwargs normalization to
+  key composite functions;
+* aligned ``plot_parity`` and ``plot_multiple`` with the shared lifecycle
+  contract.
+
+Areas that may deserve future attention:
+
+* possible convergence of plugin-side helper patterns (IRIS, NMR, Tensor)
+  where duplication persists;
 * future rendering abstractions only if they solve a demonstrated maintenance
   problem.
 

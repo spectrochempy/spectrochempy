@@ -18,6 +18,7 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.baseconfigurable import BaseConfigurable
 from spectrochempy.utils.decorators import _wrap_ndarray_output_to_nddataset
+from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.exceptions import NotFittedError
 from spectrochempy.utils.exceptions import SpectroChemPyError
 from spectrochempy.utils.traits import NDDatasetType
@@ -603,6 +604,8 @@ class DecompositionAnalysis(AnalysisConfigurable):
             Number of lines to display. Default is ``'all'``.
         **others : Other keywords parameters
             Parameters passed to the internal `plot` method of the `X` dataset.
+            Common options include ``color``, ``linewidth``, ``linestyle``,
+            ``alpha``, and standard Matplotlib kwargs.
 
         """
         from spectrochempy.plotting.composite.plotmerit import plot_merit
@@ -615,7 +618,17 @@ class DecompositionAnalysis(AnalysisConfigurable):
         )
 
     # Backward compatibility alias
-    plotmerit = plot_merit
+    @deprecated(replace="plot_merit", removed="0.12")
+    def plotmerit(self, X=None, X_hat=None, **kwargs):
+        """
+        Backward-compatible alias for :meth:`plot_merit`. Deprecated.
+
+        Returns
+        -------
+        `~matplotlib.axes.Axes`
+            Matplotlib axes containing the plot.
+        """
+        return self.plot_merit(X, X_hat, **kwargs)
 
     @property
     def Y(self):
@@ -870,7 +883,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
             # If transform failed, return None
             return None
 
-    def parityplot(
+    def plot_parity(
         self,
         Y=None,
         Y_hat=None,
@@ -912,6 +925,10 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         -------
         `~matplotlib.axes.Axes`
             Matplotlib axes containing the parity plot.
+
+        See Also
+        --------
+        parityplot : Deprecated alias for this method.
         """
         if Y is None:
             Y = self.Y
@@ -923,9 +940,24 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
                 "must be also provided.",
             )
 
-        from spectrochempy.plotting.composite.parity import parityplot as _parityplot
+        from spectrochempy.plotting.composite.parity import plot_parity as _plot_parity
 
-        return _parityplot(Y, Y_hat, ax=ax, clear=clear, show=show, **kwargs)
+        return _plot_parity(Y, Y_hat, ax=ax, clear=clear, show=show, **kwargs)
+
+    # Backward compatibility alias
+    @deprecated(replace="plot_parity", removed="0.12")
+    def parityplot(
+        self, Y=None, Y_hat=None, *, ax=None, clear=True, show=True, **kwargs
+    ):
+        """
+        Backward-compatible alias for :meth:`plot_parity`. Deprecated.
+
+        Returns
+        -------
+        `~matplotlib.axes.Axes`
+            Matplotlib axes containing the parity plot.
+        """
+        return self.plot_parity(Y, Y_hat, ax=ax, clear=clear, show=show, **kwargs)
 
 
 # ======================================================================================

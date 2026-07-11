@@ -57,7 +57,7 @@ _ = simpl.components.plot(title="Pure profiles")
 
 # %%
 # Merit plot after reconstruction:
-_ = simpl.plotmerit(offset=0, nb_traces=5)
+_ = simpl.plot_merit(offset=0, nb_traces=5)
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

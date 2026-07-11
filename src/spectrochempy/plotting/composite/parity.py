@@ -6,18 +6,20 @@
 """
 Parity plot function.
 
-This module provides a standalone parityplot function for visualizing
-predicted vs measured values.
+This module provides a standalone ``plot_parity`` function for visualizing
+predicted vs measured values.  ``parityplot`` is retained as a deprecated
+backward-compatibility alias.
 """
 
-__all__ = ["parityplot"]
+__all__ = ["plot_parity", "parityplot"]
 
 
+from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.mplutils import _maybe_show
 from spectrochempy.utils.mplutils import _setup_axes
 
 
-def parityplot(
+def plot_parity(
     Y,
     Y_hat,
     *,
@@ -86,6 +88,10 @@ def parityplot(
     -------
     `~matplotlib.axes.Axes`
         The matplotlib axes containing the plot.
+
+    See Also
+    --------
+    parityplot : Deprecated alias for this function.
     """
     ax = _setup_axes(ax=ax, clear=clear)
 
@@ -131,3 +137,27 @@ def parityplot(
 
     _maybe_show(show)
     return ax
+
+
+@deprecated(replace="plot_parity", removed="0.12")
+def parityplot(*args, **kwargs):
+    """
+    Plot predicted vs measured values (parity plot).
+
+    .. deprecated::
+        Use :func:`plot_parity` instead.  This alias will be removed in
+        version 0.12.
+
+    Parameters
+    ----------
+    *args
+        Positional arguments forwarded to :func:`plot_parity`.
+    **kwargs
+        Keyword arguments forwarded to :func:`plot_parity`.
+
+    Returns
+    -------
+    `~matplotlib.axes.Axes`
+        The matplotlib axes containing the plot.
+    """
+    return plot_parity(*args, **kwargs)

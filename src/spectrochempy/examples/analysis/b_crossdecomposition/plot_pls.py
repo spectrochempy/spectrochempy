@@ -70,8 +70,8 @@ if ds_list is not None:
     # %%
     # Validate with a parity plot
     # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    ax = pls.parityplot(label="calibration", s=150)
-    _ = pls.parityplot(
+    ax = pls.plot_parity(label="calibration", s=150)
+    _ = pls.plot_parity(
         y_test, pls.predict(X_test), s=150, c="red", label="validation", clear=False
     )
     ax.legend(loc="lower right")

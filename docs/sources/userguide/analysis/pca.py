@@ -175,7 +175,7 @@ _ = pca.loadings.plot()
 #
 # Another possibility can be a visual comparison of the modeled dataset $\hat{X} = S L^T $,
 # the original dataset $X$ and the residuals $E = X - \hat{X}$. This can be done using
-# the `plotmerit()` method which plots both $X$, $\hat{X}$ (in orange) and the residuals (in grey):
+# the `plot_merit()` method which plots both $X$, $\hat{X}$ (in orange) and the residuals (in grey):
 # %%
 pca = scp.PCA(n_components=4)
 _ = pca.fit(X)
