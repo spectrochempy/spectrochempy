@@ -148,4 +148,14 @@ Developer
   (``for col in Y.shape[1]`` → ``for col in range(Y.shape[1])``).
   ``plot_multiple`` gains ``ax``, ``clear``, and ``show`` parameters and
   uses the shared lifecycle helpers instead of ``get_figure()``.
-  12 structural tests added for ``plot_parity``. (#1414)
+   12 structural tests added for ``plot_parity``. (#1414)
+
+- MAINT: Aligned the IRIS plugin's three composite plotting functions
+  (``plot_iris_lcurve``, ``plot_iris_distribution``, ``plot_iris_merit``)
+  with the shared ``_setup_axes``/``_maybe_show`` lifecycle helpers.
+  Replaced manual ``get_figure()`` + ``add_subplot(111)`` patterns and
+  ``mpl_show()`` calls with the canonical contract.  Multi-index loop
+  behavior preserved using the same ``ax = None`` reset pattern as
+  ``plot_parity``.  No public API change; helpers remain private.
+  Added 19 functional tests covering return type, ax reuse, clear/show
+  control, scale modes, titles, and error handling. (#1416)

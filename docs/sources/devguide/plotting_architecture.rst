@@ -158,9 +158,12 @@ Domain-specific composite functions live in
 * ``plot_compare`` — generic two-dataset overlay with residual;
 * ``plot_baseline`` — two-panel baseline correction view;
 * ``plot_parity`` — predicted vs measured scatter.
+* ``plot_iris_lcurve`` — L-curve scatter for IRIS regularisation;
+* ``plot_iris_distribution`` — 2D contour distribution for IRIS inversions;
+* ``plot_iris_merit`` — original vs reconstructed vs residual for IRIS;
 
 These functions form a **middle layer** between scientific objects (``PCA``,
-``PLSRegression``, etc.) and the dataset plotting stack below:
+``PLSRegression``, ``IRIS``, etc.) and the dataset plotting stack below:
 
 .. code-block:: text
 
@@ -191,8 +194,14 @@ Key conventions for composite plotters:
   a new figure, ``ax + clear=True`` clears before plotting, ``ax +
   clear=False`` appends artists.
 
+Plugin composite functions (``spectrochempy_iris._plotting``) follow the same
+conventions — they accept ``ax``, ``clear``, ``show`` and use the shared
+lifecycle helpers.  This guarantees a consistent user experience between
+core and official plugin plotters.
+
 These conventions are verified by structural tests
-(``test_composite_lifecycle.py``, ``test_parity.py``).
+(``test_composite_lifecycle.py``, ``test_parity.py``,
+``spectrochempy-iris/test_plot_lcurve.py``).
 
 Style resolution follows a consistent priority chain across all plot types:
 
@@ -310,8 +319,9 @@ Figure and axes ownership follows a consistent pattern across all plot types:
   (``mplutils.py``) which implement the same ``ax`` / ``clear`` / ``show``
   contract.
 * ``ax``, ``clear``, and ``show`` are the universal lifecycle controls across
-all plot types — dataset plots, composite plots, ``plot_multiple``, and
-   ``plot_parity`` all follow the same conventions.
+all plot types — dataset plots, composite plots, ``plot_multiple``,
+   ``plot_parity``, and official plugin plotters all follow the same
+   conventions.
 * The shared helpers keep lifecycle logic in one place and prevent the
   duplication that previously existed (five near-identical ``if ax is None``
   + ``clear`` + ``show`` patterns).
@@ -344,8 +354,6 @@ The current architecture is stable. Recent work (2026-07) has:
 
 Areas that may deserve future attention:
 
-* possible convergence of plugin-side helper patterns (IRIS, NMR, Tensor)
-  where duplication persists;
 * future rendering abstractions only if they solve a demonstrated maintenance
   problem.
 

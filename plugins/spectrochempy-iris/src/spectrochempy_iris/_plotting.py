@@ -23,8 +23,8 @@ from spectrochempy.plotting._render import render_scatter
 from spectrochempy.plotting._style import resolve_2d_colormap
 from spectrochempy.plotting._style import resolve_line_style
 from spectrochempy.utils.exceptions import NotFittedError
-from spectrochempy.utils.mplutils import get_figure
-from spectrochempy.utils.mplutils import show as mpl_show
+from spectrochempy.utils.mplutils import _maybe_show
+from spectrochempy.utils.mplutils import _setup_axes
 
 
 def plot_iris_lcurve(
@@ -80,11 +80,7 @@ def plot_iris_lcurve(
     rss = analysis_object.RSS
     sm = analysis_object.SM
 
-    if ax is None:
-        fig = get_figure()
-        ax = fig.add_subplot(111)
-    elif clear:
-        ax.clear()
+    ax = _setup_axes(ax, clear=clear)
 
     style_kwargs = resolve_line_style(
         dataset=None,
@@ -116,8 +112,7 @@ def plot_iris_lcurve(
     if len(scale) >= 2 and scale[1] == "l":
         ax.set_xscale("log")
 
-    if show:
-        mpl_show()
+    _maybe_show(show)
 
     return ax
 
@@ -182,11 +177,7 @@ def plot_iris_distribution(
     for i in index:
         f_i = analysis_object.f[i].squeeze()
 
-        if ax is None or len(index) > 1:
-            fig = get_figure()
-            ax = fig.add_subplot(111)
-        elif clear:
-            ax.clear()
+        current_ax = _setup_axes(ax, clear=clear)
 
         cmap_resolved, norm = resolve_2d_colormap(
             data=f_i.data,
@@ -197,7 +188,7 @@ def plot_iris_distribution(
         )
 
         render_contour(
-            ax,
+            current_ax,
             x=f_i.x,
             y=f_i.y,
             Z=f_i.data,
@@ -208,12 +199,11 @@ def plot_iris_distribution(
 
         if title is None:
             title = rf"2D IRIS distribution, $\lambda$ = {analysis_object._lambdas.data[i]:.2e}"
-        ax.set_title(title)
+        current_ax.set_title(title)
 
-        if show:
-            mpl_show()
+        _maybe_show(show)
 
-        axeslist.append(ax)
+        axeslist.append(current_ax)
 
         if len(index) > 1:
             ax = None
@@ -278,13 +268,7 @@ def plot_iris_merit(
     for i in index:
         X_hat_i = X_hat[i].squeeze() if X_hat.ndim == 3 else X_hat
 
-        if ax is None or len(index) > 1:
-            fig = get_figure()
-            current_ax = fig.add_subplot(111)
-        else:
-            current_ax = ax
-            if clear:
-                current_ax.clear()
+        current_ax = _setup_axes(ax, clear=clear)
 
         plotmerit(
             analysis_object=analysis_object,
@@ -300,8 +284,7 @@ def plot_iris_merit(
             title = rf"2D IRIS merit plot, $\lambda$ = {analysis_object._lambdas.data[i]:.2e}"
         current_ax.set_title(title)
 
-        if show:
-            mpl_show()
+        _maybe_show(show)
 
         axeslist.append(current_ax)
 
