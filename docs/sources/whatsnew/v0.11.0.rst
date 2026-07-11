@@ -167,8 +167,8 @@ Bug Fixes
 - Plotting behavior is more consistent again: scatter plots now show markers as
   expected, single-dataset ``plot_multiple()`` / ``multiplot()`` calls preserve
   the requested plotting method, 1D and 2D artists honor more style keywords
-  consistently, ``use_plotly=True`` fails with a clear error when Plotly is not
-  available, and legacy ``lines`` / ``pen`` aliases continue to work across
+  consistently, the experimental Plotly backend has been removed (``use_plotly``
+  is no longer available), and legacy ``lines`` / ``pen`` aliases continue to work across
   dimensional fallbacks. (:pr:`1381`, :pr:`1384`)
 
 - ``plotmerit()`` / ``plot_compare()`` are now clearer for fit inspection:

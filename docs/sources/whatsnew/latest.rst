@@ -74,3 +74,9 @@ Developer
   ``_setup_axes`` and ``_maybe_show`` helpers in ``mplutils.py``.
   Added 38 structural contract tests verifying the lifecycle behavior.
   No public API change. (#1408)
+
+- MAINT: Removed the experimental Plotly/Dash plotting backend that was
+  never functional.  The ``use_plotly`` preference, kwarg, and commented-out
+  ``core/plotters/plotly.py`` are deleted.  The ``get_plotly_figure`` utility
+  is removed from ``mplutils``.  No external dependency is affected — Plotly
+  was never a declared dependency. (#1413)

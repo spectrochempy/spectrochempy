@@ -1,13 +1,10 @@
-from unittest.mock import MagicMock
 from unittest.mock import patch
 
 import matplotlib.pyplot as plt
-import pytest
 
 from spectrochempy.utils.meta import Meta
 from spectrochempy.utils.mplutils import figure
 from spectrochempy.utils.mplutils import get_figure
-from spectrochempy.utils.mplutils import get_plotly_figure
 from spectrochempy.utils.mplutils import make_label
 from spectrochempy.utils.mplutils import show
 
@@ -115,35 +112,3 @@ class TestMplutils:
             label = make_label(spec, use_mpl=True)
             assert "Ratio" in label
             assert "dimensionless" not in label
-
-    @pytest.mark.parametrize("plotly_available", [True, False])
-    def test_get_plotly_figure(self, plotly_available):
-        """Test get_plotly_figure function."""
-        if not plotly_available:
-            with (
-                patch(
-                    "spectrochempy.utils.optional.import_optional_dependency",
-                    side_effect=ImportError("No module named 'plotly'"),
-                ),
-                pytest.raises(ImportError),
-            ):
-                get_plotly_figure()
-        else:
-            # Mock plotly if available
-            mock_go = MagicMock()
-            mock_figure = MagicMock()
-            mock_go.Figure.return_value = mock_figure
-
-            with patch(
-                "spectrochempy.utils.optional.import_optional_dependency",
-                return_value=mock_go,
-            ):
-                # Test creating new figure
-                fig = get_plotly_figure(clear=True)
-                assert fig == mock_figure
-                mock_go.Figure.assert_called_once()
-
-                # Test with existing figure
-                existing_fig = MagicMock()
-                fig = get_plotly_figure(clear=False, fig=existing_fig)
-                assert fig == existing_fig

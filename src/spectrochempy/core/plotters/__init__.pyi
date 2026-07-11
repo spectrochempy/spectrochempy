@@ -13,7 +13,6 @@ __all__ = [
     "plot2d",
     "plot3d",
     "plot_setup",
-    "plotly",
 ]
 
 from . import _mpl_assets
@@ -22,4 +21,3 @@ from . import plot1d
 from . import plot2d
 from . import plot3d
 from . import plot_setup
-from . import plotly

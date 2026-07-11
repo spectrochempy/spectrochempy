@@ -1285,12 +1285,6 @@ def plot_2D(dataset, method=None, **kwargs):
             )
             return dataset.plot_1D(method=method, **kwargs)
 
-        # if plotly execute plotly routine not this one
-        if kwargs.get("use_plotly", prefs.use_plotly):
-            raise NotImplementedError(
-                "Plotly plotting is not currently available. Use the default Matplotlib backend."
-            )
-
         # do not display colorbar if it's not a surface plot
         # except if we have asked to d so
 

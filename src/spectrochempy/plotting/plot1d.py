@@ -210,12 +210,6 @@ def plot_1D(dataset, method=None, **kwargs):
             )
             return dataset.plot_2D(method=method, **kwargs)
 
-        # if plotly execute plotly routine not this one
-        if kwargs.get("use_plotly", prefs.use_plotly):
-            raise NotImplementedError(
-                "Plotly plotting is not currently available. Use the default Matplotlib backend."
-            )
-
         # often we do need to plot only data
         # when plotting on top of a previous plot
         # data_only = kwargs.get("data_only", False)

@@ -328,19 +328,3 @@ class TestDimensionalFallbacks:
     def test_plot_2d_rejects_incompatible_method(self, sample_1d_dataset):
         with pytest.raises(ValueError, match="incompatible"):
             sample_1d_dataset.plot_2D(method="contour", show=False)
-
-
-class TestPlotlyCompatibility:
-    """Test explicit Plotly compatibility failure mode."""
-
-    def test_plotly_request_fails_clearly_for_1d(self, sample_1d_dataset):
-        with pytest.raises(
-            NotImplementedError, match="Plotly plotting is not currently available"
-        ):
-            sample_1d_dataset.plot(use_plotly=True, show=False)
-
-    def test_plotly_request_fails_clearly_for_2d(self, sample_2d_dataset):
-        with pytest.raises(
-            NotImplementedError, match="Plotly plotting is not currently available"
-        ):
-            sample_2d_dataset.plot(use_plotly=True, show=False)

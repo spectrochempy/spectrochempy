@@ -1090,7 +1090,6 @@ class PlotPreferences(MetaConfigurable):
     # The options below do NOT map to matplotlib.rcParams.
     #
     # They control:
-    # - which plotting backend to use (matplotlib vs plotly)
     # - which plotting *method* to use for datasets (pen, image, stack, etc.)
     # - SpectroChemPy-specific plot behaviors
     #
@@ -1107,12 +1106,6 @@ class PlotPreferences(MetaConfigurable):
         help="Directory where to look for local defined matplotlib styles when they are not in the "
         " standard location",
     ).tag(config=True, type="folder")
-
-    use_plotly = Bool(
-        False,
-        help="Use Plotly instead of MatPlotLib for plotting (mode Matplotlib more suitable for "
-        "printing publication ready figures)",
-    ).tag(config=True)
 
     # - 2d
     # ------
