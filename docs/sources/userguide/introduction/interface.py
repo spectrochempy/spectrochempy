@@ -96,7 +96,7 @@
 #    necessary flexibility for a fast and above all reproducible realization
 #    of the different tasks to be performed on spectroscopic data.
 #
-#    However, we have started to create a simple interface using Dash which
+#    However, we have started to create a simple web interface which
 #    will allow in a future version to work perhaps more simply for those who
 #    do not have the time or the will to learn to master the rudiments of
 #    python or who do not wish to program.

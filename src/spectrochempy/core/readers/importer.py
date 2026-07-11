@@ -335,7 +335,7 @@ def read(*paths, **kwargs):
         Instead of passing a filename for further reading, a bytes content can be
         directly provided as bytes objects.
         The most convenient way is to use a dictionary. This feature is particularly
-        useful for a GUI Dash application to handle drag and drop of files into a
+        useful for a web application to handle drag and drop of files into a
         Browser.
     csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
         Set the column delimiter in CSV file.

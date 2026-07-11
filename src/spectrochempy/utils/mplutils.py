@@ -23,7 +23,6 @@ __all__ = [
     "get_figure",
     "figure",  # backward compatibility
     "make_label",
-    "get_plotly_figure",
 ]
 
 
@@ -332,18 +331,3 @@ def make_label(ss, lab="<no_axe_label>", use_mpl=True):
         label = rf"{label} / {units}"
 
     return label
-
-
-def get_plotly_figure(clear=True, fig=None, **kwargs):
-    """Get a Plotly figure for plotting."""
-    from spectrochempy.utils.optional import import_optional_dependency
-
-    go = import_optional_dependency("plotly.graph_objects", errors="ignore")
-
-    if go is None:
-        raise ImportError("Plotly is not installed. Use pip or conda to install it")
-
-    if clear or fig is None:
-        return go.Figure()
-
-    return fig

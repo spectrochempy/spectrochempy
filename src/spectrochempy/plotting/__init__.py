@@ -6,13 +6,12 @@
 """
 SpectroChemPy Plot Package.
 
-This package provides plotting functionality for SpectroChemPy datasets,
-with support for multiple backends (matplotlib, plotly).
+This package provides plotting functionality for SpectroChemPy datasets.
 
 Modules
 -------
 dispatcher : Main plotting dispatcher with backend routing
-backends : Backend implementations (matplotlib, plotly)
+backends : Matplotlib backend implementation
 plot1d : 1D plotting functions
 plot2d : 2D plotting functions
 plot3d : 3D plotting functions
