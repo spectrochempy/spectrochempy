@@ -32,7 +32,11 @@ def plot_score(
     labels_column=None,
     elev=None,
     azim=None,
+    marker=None,
+    s=None,
+    alpha=None,
     show=True,
+    **kwargs,
 ):
     """
     Plot PCA scores as a 2D or 3D scatter plot.
@@ -52,7 +56,7 @@ def plot_score(
         Whether to clear the axes before plotting. Default: True.
         Only used when ``ax`` is provided.
     cmap : str or Colormap, optional
-        Colormap for coloring points. Default: "viridis".
+        Colormap for coloring points. Default: preferences.colormap_sequential.
     color : color or array-like, optional
         If provided, use this color for all points (single color)
         or as color values for each point. Overrides color_mapping.
@@ -75,8 +79,18 @@ def plot_score(
         Elevation angle (degrees) for 3D plots. If None, uses preferences.axes3d_elev.
     azim : float, optional
         Azimuth angle (degrees) for 3D plots. If None, uses preferences.axes3d_azim.
+    marker : str, optional
+        Marker style for scatter points. Passed to ``ax.scatter``.
+        If None, uses matplotlib default.
+    s : float or array-like, optional
+        Marker size(s) for scatter points. Passed to ``ax.scatter``.
+        If None, uses matplotlib default.
+    alpha : float, optional
+        Transparency (0-1) for scatter points. If None, fully opaque.
     show : bool, optional
         Whether to display the figure. Default: True.
+    **kwargs
+        Additional keyword arguments passed to ``ax.scatter``.
 
     Returns
     -------
@@ -212,7 +226,18 @@ def plot_score(
         x = data[:, pcs[0]]
         y = data[:, pcs[1]]
 
-        scatter = ax.scatter(x, y, c=color_values, cmap=cmap)
+        for key in ("marker", "s", "alpha", "cmap", "c"):
+            kwargs.pop(key, None)
+        scatter_kwargs = {}
+        if marker is not None:
+            scatter_kwargs["marker"] = marker
+        if s is not None:
+            scatter_kwargs["s"] = s
+        if alpha is not None:
+            scatter_kwargs["alpha"] = alpha
+        scatter = ax.scatter(
+            x, y, c=color_values, cmap=cmap, **scatter_kwargs, **kwargs
+        )
         ax.set_xlabel(f"PC{components[0]}")
         ax.set_ylabel(f"PC{components[1]}")
 
@@ -255,7 +280,24 @@ def plot_score(
         y = data[:, pcs[1]]
         z = data[:, pcs[2]]
 
-        scatter = ax.scatter(x, y, z, c=color_values, cmap=cmap)
+        for key in ("marker", "s", "alpha", "cmap", "c"):
+            kwargs.pop(key, None)
+        scatter_kwargs = {}
+        if marker is not None:
+            scatter_kwargs["marker"] = marker
+        if s is not None:
+            scatter_kwargs["s"] = s
+        if alpha is not None:
+            scatter_kwargs["alpha"] = alpha
+        scatter = ax.scatter(
+            x,
+            y,
+            z,
+            c=color_values,
+            cmap=cmap,
+            **scatter_kwargs,
+            **kwargs,
+        )
         ax.set_xlabel(f"PC{components[0]}")
         ax.set_ylabel(f"PC{components[1]}")
         ax.set_zlabel(f"PC{components[2]}")

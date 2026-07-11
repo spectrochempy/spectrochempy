@@ -357,6 +357,29 @@ regenerated. The generated `latest.rst` diff must be included in the final
 commit; omitting it causes CI failures. The prohibition is against hand-editing
 generated files, not against committing tool-generated updates.
 
+## Changelog CI Workflow Bypass
+
+A CI workflow verifies that every PR has a corresponding changelog entry in
+``docs/sources/whatsnew/changelog.rst`` after applying the ``no-changelog``
+label.
+
+Use the ``no-changelog`` label when the PR does not need a changelog entry:
+
+* internal refactoring with no user-visible behavior change;
+* test-only changes (unless they test a new user-facing feature);
+* documentation-only changes (example gallery, docstrings);
+* trivial fixes (typos, comment corrections);
+* multi-PR campaign internal changes where the changelog entry is consolidated
+  in a later PR.
+
+To apply the label on an open PR:
+
+```bash
+gh pr edit <PR_NUMBER> --add-label no-changelog
+```
+
+The label must be applied before the workflow runs, or CI will fail.
+
 ---
 
 # Cost-Aware Development

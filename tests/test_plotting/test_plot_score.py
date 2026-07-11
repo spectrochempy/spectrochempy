@@ -323,3 +323,58 @@ class TestPlotScore:
         assert ax.get_ylabel() == "PC2"
 
         plt.close()
+
+    def test_plot_score_marker_param_2d(self):
+        """Explicit marker param should be forwarded to ax.scatter in 2D."""
+        from spectrochempy.plotting.composite.plotscore import plot_score
+
+        scores = np.random.randn(50, 5)
+        ax = plot_score(scores, components=(1, 2), marker="x", show=False)
+        coll = ax.collections[0]
+        assert coll.get_paths() is not None
+        # Verify marker changed from default "o" by checking path vertices
+        path = coll.get_paths()[0]
+        # "x" marker has few vertices, "o" is a bezier circle with many
+        assert len(path.vertices) <= 5, "Expected 'x' marker (few vertices)"
+
+        plt.close()
+
+    def test_plot_score_marker_param_3d(self):
+        """Explicit marker param should be forwarded to ax.scatter in 3D."""
+        from spectrochempy.plotting.composite.plotscore import plot_score
+
+        scores = np.random.randn(50, 5)
+        ax = plot_score(scores, components=(1, 2, 3), marker="^", show=False)
+        assert ax is not None
+        plt.close()
+
+    def test_plot_score_s_param(self):
+        """Explicit s param should set marker size."""
+        from spectrochempy.plotting.composite.plotscore import plot_score
+
+        scores = np.random.randn(50, 5)
+        ax = plot_score(scores, components=(1, 2), s=100, show=False)
+        coll = ax.collections[0]
+        sizes = coll.get_sizes()
+        assert all(sz == 100 for sz in sizes)
+        plt.close()
+
+    def test_plot_score_alpha_param(self):
+        """Explicit alpha param should be forwarded to ax.scatter."""
+        from spectrochempy.plotting.composite.plotscore import plot_score
+
+        scores = np.random.randn(50, 5)
+        ax = plot_score(scores, components=(1, 2), alpha=0.5, show=False)
+        coll = ax.collections[0]
+        assert coll.get_alpha() == 0.5
+        plt.close()
+
+    def test_plot_score_kwargs_forwarding(self):
+        """Additional kwargs should be forwarded to ax.scatter."""
+        from spectrochempy.plotting.composite.plotscore import plot_score
+
+        scores = np.random.randn(50, 5)
+        ax = plot_score(scores, components=(1, 2), edgecolors="red", show=False)
+        coll = ax.collections[0]
+        assert coll.get_edgecolors() is not None
+        plt.close()
