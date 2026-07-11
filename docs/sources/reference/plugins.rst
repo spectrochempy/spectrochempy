@@ -17,6 +17,7 @@ NMR plugin
     :toctree: generated/
 
     spectrochempy.nmr.read
+    spectrochempy.nmr.Experiment
 
 PerkinElmer plugin
 ==================

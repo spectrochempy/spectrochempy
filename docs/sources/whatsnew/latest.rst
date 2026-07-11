@@ -23,6 +23,15 @@ New Features
   ``#1``, ... in legends and coordinate display. Other analysis methods
   retain the default ``#0``, ``#1``, ... labels. (#1404)
 
+- Introduced ``scp.nmr.Experiment``, an NMR-specific scientific model that
+  wraps an ``NDDataset`` and provides state-aware processing.  The class
+  classifies the current data domain (time, frequency, mixed), identifies
+  source kind (FID, SER, processed 1D/2D), exposes NMR metadata (encoding,
+  nuclei), validates NMR-specific requirements, and orchestrates processing
+  that is appropriate for the current domain — never performing FFT on
+  already-transformed data.  This is the first step toward a simplified NMR
+  processing workflow.
+
 Bug Fixes
 ~~~~~~~~~
 
