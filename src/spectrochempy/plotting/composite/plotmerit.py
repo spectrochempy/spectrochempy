@@ -102,6 +102,46 @@ def plot_compare(
             n_traces = nb_traces
 
     # ----------------------------
+    # Kwargs normalization
+    # Pop kwargs that would conflict with render_lines explicit params.
+    # Priority: per-category params > kwargs defaults > hardcoded defaults.
+    # ----------------------------
+    color_kw = kwargs.pop("color", None)
+    c_kw = kwargs.pop("c", None)
+    if color_kw is not None:
+        if exp_c is None:
+            exp_c = color_kw
+        if calc_c is None:
+            calc_c = color_kw
+        if resid_c is None:
+            resid_c = color_kw
+    elif c_kw is not None:
+        if exp_c is None:
+            exp_c = c_kw
+        if calc_c is None:
+            calc_c = c_kw
+        if resid_c is None:
+            resid_c = c_kw
+
+    linestyle_kw = kwargs.pop("linestyle", None)
+    ls_kw = kwargs.pop("ls", None)
+    if linestyle_kw is not None or ls_kw is not None:
+        default_ls = linestyle_kw if linestyle_kw is not None else ls_kw
+        exp_linestyle = default_ls
+        calc_linestyle = default_ls
+        resid_linestyle = default_ls
+
+    marker_kw = kwargs.pop("marker", None)
+    markersize_kw = kwargs.pop("markersize", None)
+    kwargs.pop("ms", None)
+
+    lw_kw = kwargs.pop("lw", None)
+    linewidth_kw = kwargs.pop("linewidth", None)
+    if lw_kw is not None:
+        exp_linewidth = calc_linewidth = resid_linewidth = lw_kw
+    if linewidth_kw is not None:
+        exp_linewidth = calc_linewidth = resid_linewidth = linewidth_kw
+    # ----------------------------
     # Compute data arrays
     # ----------------------------
     orig_data = np.asarray(X.masked_data)
@@ -156,18 +196,12 @@ def plot_compare(
         ref_linestyle = ["None"] * n_traces
         resid_linestyle = ["None"] * n_traces
         marker_kwargs = {
-            "markers": [kwargs.pop("marker", "o")] * n_traces,
-            "markersizes": [kwargs.pop("markersize", 3)] * n_traces,
+            "markers": [marker_kw if marker_kw is not None else "o"] * n_traces,
+            "markersizes": [markersize_kw if markersize_kw is not None else 3]
+            * n_traces,
         }
-        kwargs.pop("lw", None)
-        kwargs.pop("linewidth", None)
     elif plot_kind != "line":
         raise ValueError("kind/method must be 'line' or 'scatter'.")
-
-    if "lw" in kwargs:
-        exp_linewidth = calc_linewidth = resid_linewidth = kwargs.pop("lw")
-    if "linewidth" in kwargs:
-        exp_linewidth = calc_linewidth = resid_linewidth = kwargs.pop("linewidth")
 
     # ----------------------------
     # Z-order policy

@@ -134,6 +134,57 @@ class TestPlotMeritImports:
         assert legend is not None
         assert [text.get_text() for text in legend.get_texts()] == ["exp", "fit", "res"]
 
+    def test_plot_compare_color_kwarg(self, sample_1d_dataset):
+        """'color' in kwargs should distribute to all three traces."""
+        from spectrochempy.plotting.composite.plotmerit import plot_compare
+
+        X = sample_1d_dataset
+        X_ref = X.copy()
+        ax = plot_compare(X, X_ref, color="red", show=False)
+        assert len(ax.lines) == 3
+        assert ax.lines[0].get_color() == "red"
+        assert ax.lines[1].get_color() == "red"
+        assert ax.lines[2].get_color() == "red"
+
+    def test_plot_compare_linestyle_kwarg(self, sample_1d_dataset):
+        """'linestyle' in kwargs should apply to all three traces."""
+        from spectrochempy.plotting.composite.plotmerit import plot_compare
+
+        X = sample_1d_dataset
+        X_ref = X.copy()
+        ax = plot_compare(X, X_ref, linestyle=":", show=False)
+        assert len(ax.lines) == 3
+        assert ax.lines[0].get_linestyle() == ":"
+        assert ax.lines[1].get_linestyle() == ":"
+        assert ax.lines[2].get_linestyle() == ":"
+
+    def test_plot_compare_per_category_take_precedence_over_kwargs(
+        self, sample_1d_dataset
+    ):
+        """Explicit per-category color params should take precedence over kwargs color."""
+        from spectrochempy.plotting.composite.plotmerit import plot_compare
+
+        X = sample_1d_dataset
+        X_ref = X.copy()
+        ax = plot_compare(
+            X, X_ref, exp_c="blue", calc_c="green", color="red", show=False
+        )
+        assert len(ax.lines) == 3
+        assert ax.lines[1].get_color() == "blue"
+        assert ax.lines[2].get_color() == "green"
+
+    def test_plot_compare_c_alias_from_kwargs(self, sample_1d_dataset):
+        """'c' alias in kwargs should be treated as color."""
+        from spectrochempy.plotting.composite.plotmerit import plot_compare
+
+        X = sample_1d_dataset
+        X_ref = X.copy()
+        ax = plot_compare(X, X_ref, c="purple", show=False)
+        assert len(ax.lines) == 3
+        assert ax.lines[0].get_color() == "purple"
+        assert ax.lines[1].get_color() == "purple"
+        assert ax.lines[2].get_color() == "purple"
+
 
 class TestMultiplotImports:
     """Test that multiplot module can be imported."""
