@@ -103,7 +103,7 @@ ax.autoscale(enable=True, axis="y")
 # %%
 # Evaluate the fit quality
 som = f1.inverse_transform()
-_ = f1.plotmerit(ndOH, som, offset=15)
+_ = f1.plot_merit(ndOH, som, offset=15)
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

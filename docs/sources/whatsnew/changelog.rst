@@ -77,6 +77,15 @@ Deprecations
   ``unimodConc``, ``closureConc``, etc.) are deprecated; use the
   ``constraints`` API instead.
 
+- ``AnalysisBase.plotmerit`` alias is deprecated; use ``plot_merit``
+  instead.  ``plotmerit`` will be removed in version 0.12.
+
+- ``parityplot`` is renamed to ``plot_parity`` for naming consistency with
+  other composite plot functions (``plot_score``, ``plot_scree``, ...).
+  ``parityplot`` (both the standalone function and the
+  ``CrossDecompositionAnalysis`` method) is retained as a deprecated alias
+  that will be removed in version 0.12.
+
 
 .. section
 
@@ -97,10 +106,32 @@ Developer
 
 - MAINT: Mutualized the duplicated figure/axes/show lifecycle across
   the five composite plot functions (``plot_score``, ``plot_scree``,
-  ``plot_compare``, ``plot_merit``, ``plot_baseline``) into shared
+  ``plot_compare``, ``plot_merit``,   ``plot_baseline``) into shared
   ``_setup_axes`` and ``_maybe_show`` helpers in ``mplutils.py``.
   Added 38 structural contract tests verifying the lifecycle behavior.
   No public API change. (#1408)
+
+- DOC: Documented the three-layer plotting architecture (scientific objects →
+  composite plotters → dataset plotting) in the developer guide.  Updated API
+  reference to include composite functions (``plot_score``, ``plot_scree``,
+  ``plot_compare``, ``plot_merit``, ``plot_baseline``, ``plot_parity``) as
+  top-level entries.  Added composite plot customization section to the user
+  guide covering ``marker``/``s``/``alpha`` for ``plot_score``, kwargs
+  normalization for ``plot_compare``/``plot_merit``, scatter parameters for
+  ``plot_parity``, and the ``ax``/``clear``/``show`` lifecycle contract.
+  Exposed ``plot_merit``, ``plot_baseline``, and ``plot_parity`` at top-level
+  ``scp.*``.  Renamed ``parityplot`` → ``plot_parity`` for naming
+  consistency (deprecated alias retained).  Updated analysis wrapper
+  docstrings on ``PCA.plot_score`` and
+  ``DecompositionAnalysis.plot_merit``.  Deprecated
+  ``AnalysisBase.plotmerit`` in favor of ``plot_merit``. (#1415)
+
+- ENH: Integrated style parameters (``marker``, ``s``, ``alpha``) and kwargs
+  normalization (``color``/``c``, ``linestyle``/``ls``, ``linewidth``/``lw``,
+  ``marker`` aliases) into composite plot functions ``plot_score``,
+  ``plot_compare``, and ``plot_merit``.  Composite functions now respect the
+  same style priority chain as dataset plots (explicit params > defaults >
+  preferences > rcParams). (#1412)
 
 - MAINT: Removed the experimental Plotly/Dash plotting backend that was
   never functional.  The ``use_plotly`` preference, kwarg, and commented-out
@@ -108,12 +139,13 @@ Developer
   is removed from ``mplutils``.  No external dependency is affected — Plotly
   was never a declared dependency. (#1413)
 
-- MAINT: Aligned ``parityplot`` and ``plot_multiple`` with the shared
-  plotting lifecycle conventions.  ``parityplot`` is extracted from
-  ``CrossDecompositionAnalysis`` into a standalone function in
-  ``plotting/composite/parity.py`` with ``_setup_axes``/``_maybe_show``,
-  removing all ``plt.*`` global calls and fixing a bug in multi-target
-  iteration (``for col in Y.shape[1]`` → ``for col in range(Y.shape[1])``).
+- MAINT: Aligned ``plot_parity`` (formerly ``parityplot``) and
+  ``plot_multiple`` with the shared plotting lifecycle conventions.
+  ``plot_parity`` is extracted from ``CrossDecompositionAnalysis`` into a
+  standalone function in ``plotting/composite/parity.py`` with
+  ``_setup_axes``/``_maybe_show``, removing all ``plt.*`` global calls and
+  fixing a bug in multi-target iteration
+  (``for col in Y.shape[1]`` → ``for col in range(Y.shape[1])``).
   ``plot_multiple`` gains ``ax``, ``clear``, and ``show`` parameters and
   uses the shared lifecycle helpers instead of ``get_figure()``.
-  12 structural tests added for ``parityplot``. (#1414)
+  12 structural tests added for ``plot_parity``. (#1414)

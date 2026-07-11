@@ -178,6 +178,80 @@ _ = ds.plot(
 )
 
 # %% [markdown]
+# ## Composite Plot Customization
+#
+# Analysis and comparison plots such as `plot_score`, `plot_compare`,
+# `plot_merit`, `plot_baseline`, and `plot_parity` accept keyword arguments
+# for fine-grained control over visual appearance.
+#
+# ### Score Plot: Marker and Transparency
+#
+# The `plot_score` function (accessible via `PCA.plot_score` or standalone
+# `scp.plot_score`) supports `marker`, `s` (marker size), and `alpha`
+# (transparency):
+#
+# %%
+# Load example data and fit PCA
+# (requires an NDDataset - replace with your own data)
+import spectrochempy as scp
+
+# %% [markdown]
+# For a fitted PCA model:
+#
+# ```python
+# pca = scp.PCA(n_components=5).fit(dataset)
+# ax = pca.plot_score(marker="s", s=30, alpha=0.7)
+# ```
+#
+# These parameters are forwarded to `matplotlib.axes.Axes.scatter`.
+#
+# ### Compare / Merit Plot: Line Style Parameters
+#
+# The `plot_compare` function accepts domain-specific keyword aliases
+# for style control:
+#
+# | Parameter | Effect | Default |
+# |---|---|---|
+# | `exp_linestyle`, `calc_linestyle`, `resid_linestyle` | Line style per category | `"-"`, `"--"`, `"-"` |
+# | `exp_linewidth`, `calc_linewidth`, `resid_linewidth` | Line width per category | `1.0`, `1.6`, `1.0` |
+# | `exp_c`, `calc_c`, `resid_c` | Color per category | Semantic defaults |
+# | `offset` | Vertical separation between groups | `None` |
+# | `nb_traces` | Number of traces to display | `"all"` |
+#
+# Example:
+#
+# ```python
+# scp.plot_compare(original, reconstructed,
+#     exp_linestyle="-", calc_linestyle=":",
+#     exp_linewidth=1.5, calc_linewidth=2.0,
+#     offset=0.1)
+# ```
+#
+# ### Parity Plot: Scatter Parameters
+#
+# The `plot_parity` function (accessible via `pls.plot_parity` or standalone
+# `scp.plot_parity`) passes keyword arguments directly to
+# `matplotlib.axes.Axes.scatter`:
+#
+# ```python
+# plot_parity(Y, Y_hat, s=20, marker="o", alpha=0.5, c="tab:blue")
+# ```
+#
+# ### Lifecycle Control for Composites
+#
+# All composite functions accept the same lifecycle parameters:
+#
+# - `ax`: Existing axes to plot on (creates new figure if `None`).
+# - `clear`: Whether to clear the axes before plotting (`True` by default;
+#   set to `False` to overlay on existing axes).
+# - `show`: Whether to display the figure (`True` by default).
+#
+# ```python
+# fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
+# plot_score(scores, ax=ax1, show=False)
+# plot_parity(Y, Y_hat, ax=ax2, show=True)
+# ```
+#
 # ## The Mental Model
 #
 # To summarize:
@@ -185,6 +259,8 @@ _ = ds.plot(
 # - `ds.plot()` gives you a clean default.
 # - Keyword arguments customize a single plot.
 # - The returned Axes object provides full Matplotlib control.
+# - Composite plots (`plot_score`, `plot_compare`, etc.) have their own
+#   domain-specific parameters but follow the same `ax`/`clear`/`show` contract.
 # - Persistent changes across sessions are handled via `scp.preferences` (covered elsewhere).
 #
 # These tools cover most day-to-day plotting needs.

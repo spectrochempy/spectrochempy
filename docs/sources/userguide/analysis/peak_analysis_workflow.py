@@ -266,13 +266,13 @@ ax = components[:].plot(clear=False)
 ax.autoscale(enable=True, axis="y")
 
 # %% [markdown]
-# `plotmerit()` overlays the corrected spectrum, the fitted profile, and the
+# `plot_merit()` overlays the corrected spectrum, the fitted profile, and the
 # residuals. As in the fitting tutorial, we use a small residual offset to keep
 # the comparison readable in a notebook, with short legend labels to avoid
 # crowding the compact tutorial figure.
 
 # %%
-_ = opt.plotmerit(
+_ = opt.plot_merit(
     offset=15,
     exp_label="exp",
     calc_label="fit",

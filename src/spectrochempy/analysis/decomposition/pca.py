@@ -537,6 +537,9 @@ for reproducible results across multiple function calls.""",
               placed intelligently with ``adjustText`` if available (otherwise
               shifted slightly to avoid overlap with markers).
             - ``labels_column`` : Column index in scores.y.labels (0-based).
+            - ``marker`` : Marker style for scatter points.
+            - ``s`` : Marker size(s) for scatter points.
+            - ``alpha`` : Transparency (0-1) for scatter points.
             - ``ax`` : Axes to plot on.
             - ``show`` : Whether to display the figure.
 

@@ -95,7 +95,7 @@ _ = mcr.St.plot()
 # (:math:`X`) as well as the residuals (:math:`E`) for few spectra.
 #
 # The fit is good and comparable to the original paper (:cite:t:`jaumot:2005`).
-_ = mcr.plotmerit(nb_traces=5)
+_ = mcr.plot_merit(nb_traces=5)
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

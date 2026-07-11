@@ -616,14 +616,14 @@ ax = (components[:]).plot(clear=False)
 ax.autoscale(enable=True, axis="y")
 
 # %% [markdown]
-# `plotmerit()` overlays the experimental spectrum, the fitted profile, and the
+# `plot_merit()` overlays the experimental spectrum, the fitted profile, and the
 # residuals. Here we use a small residual offset to keep the three traces easy
 # to inspect in a notebook. Short legend labels and an explicit legend position
 # keep the annotation clear on the compact tutorial figure.
 
 # %%
 som = fitted
-_ = f1.plotmerit(
+_ = f1.plot_merit(
     offset=15,
     exp_label="exp",
     calc_label="fit",

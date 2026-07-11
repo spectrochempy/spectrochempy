@@ -257,6 +257,17 @@ Plotting
     multiplot_with_transposed
     show
 
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    plot_score
+    plot_scree
+    plot_compare
+    plot_merit
+    plot_baseline
+    plot_parity
+
 
 **********
 Processing
