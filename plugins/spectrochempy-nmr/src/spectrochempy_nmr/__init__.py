@@ -262,9 +262,13 @@ def __getattr__(name: str):
         from .units import set_nmr_context  # noqa: PLC0415
 
         return set_nmr_context
+    if name == "Experiment":
+        from .experiment import Experiment  # noqa: PLC0415
+
+        return Experiment
     msg = f"module {__name__!r} has no attribute {name!r}"
     raise AttributeError(msg)
 
 
 def __dir__() -> list[str]:
-    return ["NMRPlugin", "read", "read_topspin", "set_nmr_context"]
+    return ["NMRPlugin", "Experiment", "read", "read_topspin", "set_nmr_context"]
