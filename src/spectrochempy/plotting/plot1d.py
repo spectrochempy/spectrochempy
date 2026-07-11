@@ -1006,6 +1006,10 @@ def plot_multiple(
     ls="AUTO",
     lw=1,
     shift=0,
+    *,
+    ax=None,
+    clear=True,
+    show=True,
     **kwargs,
 ):
     """
@@ -1038,6 +1042,13 @@ def plot_multiple(
         Line width. If lw is not provided then the line width is chosen automatically.
     shift: `float`, `list`of  `floats`, optional, default: 0.0
         Vertical shift of the lines.
+    ax : `~matplotlib.axes.Axes`, optional
+        Axes to plot on. If None, a new figure is created.
+    clear : `bool`, optional
+        Whether to clear the axes before plotting. Default: True.
+        Only used when ``ax`` is provided.
+    show : `bool`, optional
+        Whether to display the figure. Default: True.
     **kwargs
         Other parameters passed to the underlying 1D plotting calls. Common
         aliases such as ``lw``, ``ls``, ``ms``, ``mew``, and ``c`` are
@@ -1058,7 +1069,6 @@ def plot_multiple(
     kwargs = normalize_plot_kwargs(kwargs)
 
     if not is_sequence(datasets):
-        # we need a sequence. Else it is a single plot.
         return datasets.plot(
             method=method,
             pen=pen,
@@ -1066,6 +1076,7 @@ def plot_multiple(
             color=color,
             ls=ls,
             lw=lw,
+            ax=ax,
             **kwargs,
         )
 
@@ -1100,8 +1111,7 @@ def plot_multiple(
     legend = kwargs.pop(
         "legend",
         None,
-    )  # remove 'legend' from kwargs before calling plot
-    # else it will generate a conflict
+    )
 
     marker = _valid(marker, "marker")
     color = _valid(color, "color")
@@ -1109,35 +1119,15 @@ def plot_multiple(
     lw = _valid(lw, "lw")
     shift = _valid(shift, "shift")
 
-    # Explicitly create figure and axes once
-    # This ensures deterministic behavior without relying on clear=False
-    from spectrochempy.plotting.plot_setup import lazy_ensure_mpl_config
+    from spectrochempy.utils.mplutils import _setup_axes
 
-    lazy_ensure_mpl_config()
-
-    from spectrochempy.utils.mplutils import get_figure
-    from spectrochempy.utils.mplutils import show as mpl_show
-
-    fig = get_figure(
-        preferences=kwargs.get("preferences"),
-        style=kwargs.get("style"),
-        figsize=kwargs.get("figsize"),
-        dpi=kwargs.get("dpi"),
-    )
-
-    # Create a single axes for all datasets
-    ax = fig.add_subplot(1, 1, 1)
+    ax = _setup_axes(ax=ax, clear=clear)
     ax.name = "main"
 
-    # Save user's show preference, but suppress during loop
-    user_show = kwargs.get("show", True)
-    kwargs["show"] = False  # Suppress display during loop
+    kwargs["show"] = False
 
-    # Now plot all datasets on the explicit axes
     sh = 0
     for i, s in enumerate(datasets):
-        # Apply shift and plot on explicit axes
-        # Note: ax is explicitly provided, so clear parameter is ignored
         ax = (s + shift[i] + sh).plot(
             method=method,
             pen=pen,
@@ -1145,15 +1135,11 @@ def plot_multiple(
             color=color[i] if color != "AUTO" else color,
             ls=ls[i] if ls != "AUTO" else ls,
             lw=lw[i] if lw != "AUTO" else lw,
-            ax=ax,  # Explicit axes reuse - clear is ignored when ax is provided
+            ax=ax,
             **kwargs,
         )
         sh += shift[i]
 
-    # Restore the caller's preference for any later code using kwargs.
-    kwargs["show"] = user_show
-
-    # Build a combined legend on the shared axes when requested.
     if legend is not None:
         _ = ax.legend(
             ax.lines,
@@ -1164,7 +1150,8 @@ def plot_multiple(
             fontsize="small",
         )
 
-    if user_show:
-        mpl_show()
+    from spectrochempy.utils.mplutils import _maybe_show
+
+    _maybe_show(show)
 
     return ax

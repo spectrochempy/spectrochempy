@@ -107,3 +107,13 @@ Developer
   ``core/plotters/plotly.py`` are deleted.  The ``get_plotly_figure`` utility
   is removed from ``mplutils``.  No external dependency is affected — Plotly
   was never a declared dependency. (#1413)
+
+- MAINT: Aligned ``parityplot`` and ``plot_multiple`` with the shared
+  plotting lifecycle conventions.  ``parityplot`` is extracted from
+  ``CrossDecompositionAnalysis`` into a standalone function in
+  ``plotting/composite/parity.py`` with ``_setup_axes``/``_maybe_show``,
+  removing all ``plt.*`` global calls and fixing a bug in multi-target
+  iteration (``for col in Y.shape[1]`` → ``for col in range(Y.shape[1])``).
+  ``plot_multiple`` gains ``ax``, ``clear``, and ``show`` parameters and
+  uses the shared lifecycle helpers instead of ``get_figure()``.
+  12 structural tests added for ``parityplot``. (#1414)
