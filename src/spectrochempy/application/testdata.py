@@ -11,6 +11,9 @@ from pathlib import Path
 # Testdata
 # --------------------------------------------------------------------------------------
 _TESTDATA_CACHE_MARKER = "spectrochempy-testdata-v1\n"
+_TESTDATA_EXTRA_CACHE_MARKER = "spectrochempy-testdata-extra-v1\n"
+_EXTRA_REPO_URL = "https://github.com/spectrochempy/spectrochempy_data.git"
+_EXTRA_BRANCH = "data-extra"
 
 
 def download_full_testdata_directory(datadir, force=False):
@@ -127,3 +130,67 @@ def download_full_testdata_directory(datadir, force=False):
     # unless force=True is explicitly passed.
     # ------------------------------------------------------------------
     downloaded.write_text(_TESTDATA_CACHE_MARKER, encoding="utf8")
+
+
+def download_extra_testdata(datadir=None, force=False):
+    """
+    Download extra test data from the ``data-extra`` branch.
+
+    Extra datasets (agilent, jeol, bruker_3d, simpson, tecmag) are stored on a
+    separate branch to keep the main download lightweight.
+
+    Parameters
+    ----------
+    datadir : Path or str, optional
+        Target directory.  Defaults to ``~/.spectrochempy/testdata-extra/``.
+    force : bool, optional
+        If True, force re-download even if already downloaded.
+    """
+    import shutil
+    import subprocess
+
+    if datadir is None:
+        datadir = Path.home() / ".spectrochempy" / "testdata-extra"
+    else:
+        datadir = Path(datadir)
+
+    marker = datadir / "__downloaded_extra__"
+    if (
+        marker.exists()
+        and marker.read_text(encoding="utf8") == _TESTDATA_EXTRA_CACHE_MARKER
+        and not force
+    ):
+        return datadir
+
+    # Remove partial clone if marker is missing
+    if not marker.exists() and datadir.exists() and any(datadir.iterdir()):
+        shutil.rmtree(datadir)
+
+    datadir.mkdir(parents=True, exist_ok=True)
+
+    cmd = [
+        "git",
+        "clone",
+        "--branch",
+        _EXTRA_BRANCH,
+        "--depth",
+        "1",
+        "--single-branch",
+        _EXTRA_REPO_URL,
+        str(datadir),
+    ]
+
+    result = subprocess.run(cmd, capture_output=True, text=True)  # noqa: S603
+    if result.returncode != 0:
+        msg = f"git clone failed (exit {result.returncode}):\n{result.stderr}"
+        raise RuntimeError(msg)
+
+    # Remove .git directory — we only need the data files
+    git_dir = datadir / ".git"
+    if git_dir.exists():
+        shutil.rmtree(git_dir)
+
+    # Mark download as completed
+    marker.write_text(_TESTDATA_EXTRA_CACHE_MARKER, encoding="utf8")
+
+    return datadir

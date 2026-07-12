@@ -168,15 +168,15 @@ class Experiment:
         Build a classification dict from canonical NMR metadata.
 
         All vendor-specific extraction happens in
-        :func:`spectrochempy_nmr.nmr_metadata.extract_nmr_metadataBruker`.
+        :func:`spectrochempy_nmr.nmr_metadata.extract_topspin_metadata`.
         This method consumes only the resulting
         :class:`~spectrochempy_nmr.nmr_metadata.NMRMetadata` fields.
         """
         from .nmr_metadata import NMRMetadata  # noqa: PLC0415
-        from .nmr_metadata import extract_nmr_metadataBruker  # noqa: PLC0415
+        from .nmr_metadata import extract_topspin_metadata  # noqa: PLC0415
 
         meta = self._meta()
-        nmr_meta: NMRMetadata = extract_nmr_metadataBruker(meta)
+        nmr_meta: NMRMetadata = extract_topspin_metadata(meta)
 
         # Fallback: when metadata is empty, infer basic shape from the
         # dataset itself.  This handles non-NMR or metadata-less datasets.

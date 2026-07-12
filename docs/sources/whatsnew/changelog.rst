@@ -36,6 +36,11 @@ New Features
   already-transformed data.  This is the first step toward a simplified NMR
   processing workflow.
 
+- Added ``download_extra_testdata()`` to ``spectrochempy.application.testdata``
+  for fetching extra NMR datasets (agilent, jeol, bruker_3d, simpson, tecmag)
+  from the ``data-extra`` branch of the ``spectrochempy_data`` repository.
+  Extra data is cloned into ``~/.spectrochempy/testdata-extra/``. (:pr:`1418`)
+
 
 .. section
 
