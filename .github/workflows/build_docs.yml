@@ -37,23 +37,67 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  classify-pr-bypass:
+    runs-on: ubuntu-latest
+    outputs:
+      skip: ${{ steps.eval.outputs.skip }}
+      reason: ${{ steps.eval.outputs.reason }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Evaluate safe-docs CI bypass
+        id: eval
+        env:
+          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+          LABELS_JSON: ${{ github.event_name == 'pull_request' && toJSON(github.event.pull_request.labels.*.name) || '[]' }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import subprocess
+          import sys
+
+          labels = json.loads(os.environ["LABELS_JSON"])
+          cmd = [
+              sys.executable,
+              ".github/workflows/scripts/evaluate_pr_bypass.py",
+              "--base",
+              os.environ.get("BASE_SHA", ""),
+              "--head",
+              os.environ["HEAD_SHA"],
+          ]
+          for label in labels:
+              cmd.extend(["--label", label])
+          raise SystemExit(subprocess.run(cmd, check=False).returncode)
+          PY
+
   build_and_publish_documentation:
+    needs: [classify-pr-bypass]
     # Only run scheduled jobs on main repository.
     # For pull_request events, skip if the PR is from the same repository
     # (push events on the branch already trigger the workflow), except for
     # documentation branches where the PR itself should still exercise the
     # docs build and preview path.
     if: >
-      github.event_name == 'workflow_dispatch' ||
+      (github.event_name != 'pull_request' || needs.classify-pr-bypass.outputs.skip != 'true') &&
       (
-        github.repository == 'spectrochempy/spectrochempy' &&
+        github.event_name == 'workflow_dispatch' ||
         (
-          github.event_name == 'schedule' ||
-          github.event_name != 'pull_request' ||
-          github.event.pull_request.head.repo.full_name != github.repository ||
-          startsWith(github.event.pull_request.head.ref, 'docs/') ||
-          startsWith(github.event.pull_request.head.ref, 'doc/') ||
-          startsWith(github.event.pull_request.head.ref, 'codex/doc-')
+          github.repository == 'spectrochempy/spectrochempy' &&
+          (
+            github.event_name == 'schedule' ||
+            github.event_name != 'pull_request' ||
+            github.event.pull_request.head.repo.full_name != github.repository ||
+            startsWith(github.event.pull_request.head.ref, 'docs/') ||
+            startsWith(github.event.pull_request.head.ref, 'doc/') ||
+            startsWith(github.event.pull_request.head.ref, 'codex/doc-')
+          )
         )
       )
 

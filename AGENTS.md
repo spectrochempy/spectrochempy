@@ -196,6 +196,66 @@ risks, and next steps.  For multi-PR projects, maintain dedicated files in
 `spectrochempy_maintainer/notes/audits/` and update them before considering a
 task complete.
 
+## Maintainer repository hygiene
+
+When writing into `spectrochempy_maintainer` during work on `spectrochempy`,
+prefer updating an existing active document over creating a new one.
+
+Before creating a new note, verify whether the same topic already has:
+
+* an active audit in `spectrochempy_maintainer/notes/audits/`;
+* a maintained roadmap entry in `spectrochempy_maintainer/roadmap/`;
+* a maintained contract in `spectrochempy_maintainer/rfcs/`;
+* a maintained architecture note in `spectrochempy_maintainer/architecture/`.
+
+Do not create a new document when extending the existing one would preserve
+clarity.
+
+For any active topic, keep a single obvious entry point:
+
+* roadmap for current priority and campaign state;
+* RFC for the normative contract or decision;
+* architecture note for the maintained current model;
+* audit for evidence, implementation notes, and unresolved questions.
+
+Audits in `spectrochempy_maintainer/notes/audits/` must contain only:
+
+* active investigations;
+* ongoing campaign logs;
+* unresolved implementation/design notes.
+
+Move a note to `spectrochempy_maintainer/archive/audits/` once it becomes
+primarily:
+
+* a validation log;
+* a post-merge confirmation;
+* an implementation history record;
+* evidence already absorbed by code and maintained documents.
+
+When promoting knowledge from an audit or proposal into
+`spectrochempy_maintainer/rfcs/`, `architecture/`, or `roadmap/`:
+
+* rewrite the durable content instead of copying it;
+* update the source note with a clear status and link to the maintained
+  destination;
+* archive the source note when it no longer carries an open decision.
+
+Keep `spectrochempy_maintainer/roadmap/current-roadmap.md` short.  It should
+contain only:
+
+* active priorities;
+* near-term follow-up;
+* pointers to deeper documents.
+
+Deferred or backlog material belongs in a separate governance note, not in the
+main current roadmap.
+
+At the end of the session, explicitly decide for every maintainer note touched:
+
+* still active;
+* promoted to maintained reference;
+* archived as historical context.
+
 ---
 
 # Architecture Documentation Lifecycle
@@ -379,6 +439,34 @@ gh pr edit <PR_NUMBER> --add-label no-changelog
 ```
 
 The label must be applied before the workflow runs, or CI will fail.
+
+## Safe-docs CI bypass
+
+For PRs that modify only non-executable maintainer or policy documentation,
+maintainers may apply the label ``safe-docs-no-ci`` to bypass the heavyweight
+test and docs workflows.
+
+This label is intentionally narrow.  It is valid only when the changed files
+are limited to safe documentation/policy paths such as:
+
+* `AGENTS.md`;
+* root-level `*.md`;
+* `maintainers/**/*.md`;
+* `CONTRIBUTING.md`;
+* the PR template and similar non-executable repository-policy documents.
+
+Do **not** use ``safe-docs-no-ci`` for:
+
+* `docs/` changes, even when the files are non-Python;
+* `examples/` changes;
+* gallery/example/tutorial updates;
+* plugin Markdown such as `plugins/**/README.md`;
+* code changes hidden inside a documentation PR;
+* any change that can affect executable documentation, packaging, plugins, or
+  runtime behavior.
+
+The CI bypass is enforced conservatively: the label alone is not sufficient if
+the changed files are outside the approved safe-documentation scope.
 
 ---
 
