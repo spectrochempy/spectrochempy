@@ -38,11 +38,12 @@
 
 
 """
-Functions for reading and writing Bruker files.
+Functions for reading Bruker and Agilent/Varian NMR files.
 
-Among them : binary (ser/fid) files, Bruker
-JCAMP-DX parameter (acqus) files, and Bruker pulse program (pulseprogram)
-files.
+Bruker: binary (ser/fid) files, JCAMP-DX parameter (acqus) files, and
+pulse program files.
+
+Agilent/Varian: binary (fid) files and parameter (procpar) files.
 
 Copied and adapted from NMRGLUE (See NMRGLUE_LICENCES in root folder LICENSES)
 """

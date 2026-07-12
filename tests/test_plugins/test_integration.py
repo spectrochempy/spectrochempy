@@ -161,7 +161,7 @@ class TestLazyLoadingNonRegression:
 
     LAZY_MODULES = [
         "spectrochempy_nmr",
-        "spectrochempy_nmr.read_topspin",
+        "spectrochempy_nmr.readers.read_topspin",
         "spectrochempy_cantera",
         "spectrochempy_cantera._pfr",
         "spectrochempy_iris",
@@ -294,7 +294,7 @@ from spectrochempy.nmr import read_topspin
 # The proxy should be callable but should NOT have loaded the
 # read_topspin sub-module (that only happens on actual resolution).
 assert callable(read_topspin), "read_topspin should be callable"
-if "spectrochempy_nmr.read_topspin" in sys.modules:
+if "spectrochempy_nmr.readers.read_topspin" in sys.modules:
     print("read_topspin sub-module was eagerly resolved")
     raise SystemExit(1)
 raise SystemExit(0)
@@ -494,7 +494,7 @@ for mod in expected:
     if mod not in sys.modules:
         print(f\"Missing: {mod}\")
         raise SystemExit(1)
-unexpected = [\"spectrochempy_cantera._pfr\", \"spectrochempy_nmr.read_topspin\"]
+unexpected = [\"spectrochempy_cantera._pfr\", \"spectrochempy_nmr.readers.read_topspin\"]
 for mod in unexpected:
     if mod in sys.modules:
         print(f\"Unexpected eager: {mod}\")
@@ -1409,7 +1409,7 @@ import sys
 import spectrochempy as scp
 scp.plugin_manager.discover()
 lazy = [
-    "spectrochempy_nmr.read_topspin",
+    "spectrochempy_nmr.readers.read_topspin",
     "spectrochempy_cantera._pfr",
 ]
 for mod in lazy:
@@ -1438,12 +1438,12 @@ scp.plugin_manager.discover()
 before = [k for k in sys.modules if k.startswith("spectrochempy_nmr.")]
 rt = scp.nmr.read_topspin
 after = [k for k in sys.modules if k.startswith("spectrochempy_nmr.")]
-if "spectrochempy_nmr.read_topspin" in after:
+if "spectrochempy_nmr.readers.read_topspin" in after:
     print(f"RESOLVED on proxy creation: {after}")
     raise SystemExit(1)
 _ = rt.__doc__
 resolved = [k for k in sys.modules if k.startswith("spectrochempy_nmr.")]
-if "spectrochempy_nmr.read_topspin" not in resolved:
+if "spectrochempy_nmr.readers.read_topspin" not in resolved:
     print(f"Not resolved after __doc__: {resolved}")
     raise SystemExit(1)
 raise SystemExit(0)

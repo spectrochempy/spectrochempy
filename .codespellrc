@@ -43,6 +43,8 @@ ignore-words-list =
     COO,
     IST,
     SER,
+    Varian,
+    varian,
     alignement,
     ans,
     iif,

@@ -244,3 +244,103 @@ def extract_topspin_metadata(meta) -> NMRMetadata:
         spectral_width_hz=sw_hz,
         spectrometer_freq_mhz=sfo_mhz,
     )
+
+
+# ---------------------------------------------------------------------------
+# Agilent / Varian extraction
+# ---------------------------------------------------------------------------
+
+_AGILENT_ENCODING_MAP = {
+    "QF": "QF",
+    "QSIM": "QSIM",
+    "QSEQ": "QSEQ",
+    "TPPI": "TPPI",
+    "STATES": "STATES",
+    "STATES-TPPI": "STATES-TPPI",
+    "ECHO-ANTIECHO": "ECHO-ANTIECHO",
+}
+
+
+def extract_agilent_metadata(meta) -> NMRMetadata:
+    """
+    Extract :class:`NMRMetadata` from an Agilent/Varian metadata object.
+
+    Parameters
+    ----------
+    meta : Meta or None
+        The ``dataset.meta`` object produced by the Agilent reader.
+
+    Returns
+    -------
+    NMRMetadata
+        Canonical NMR metadata.
+    """
+    if meta is None or len(meta) == 0:
+        return NMRMetadata(ndim=0, domains=())
+
+    # --- dimensionality ---
+    td = getattr(meta, "td", None)
+    ndim = len(td) if td is not None else 0
+
+    # --- domains ---
+    isfreq = getattr(meta, "isfreq", None)
+    if isfreq is not None:
+        domains = tuple("frequency" if f else "time" for f in isfreq)
+    else:
+        domains = tuple("unknown" for _ in range(ndim))
+
+    # --- encoding ---
+    raw_enc = getattr(meta, "encoding", None)
+    encoding = None
+    if raw_enc is not None:
+        encoding = tuple(_AGILENT_ENCODING_MAP.get(str(e), str(e)) for e in raw_enc)
+
+    # --- nuclei ---
+    raw_nuc = getattr(meta, "nucleus", None)
+    nuclei = None
+    if raw_nuc is not None:
+        nuclei = tuple(n if n else None for n in raw_nuc)
+
+    # --- pulse program ---
+    pulse_program = getattr(meta, "pulprog", None)
+
+    # --- datatype ---
+    datatype = getattr(meta, "datatype", None)
+
+    # --- iscomplex ---
+    raw_ic = getattr(meta, "iscomplex", None)
+    iscomplex = tuple(raw_ic) if raw_ic else None
+
+    # --- spectral width (Hz) ---
+    raw_sw = getattr(meta, "sw_h", None)
+    sw_hz = None
+    if raw_sw is not None:
+        sw_hz = tuple(
+            float(v.magnitude) if hasattr(v, "magnitude") else (float(v) if v else None)
+            for v in raw_sw
+        )
+
+    # --- spectrometer frequency (MHz) ---
+    raw_sfo = getattr(meta, "sfrq", None)
+    sfo_mhz = None
+    if raw_sfo is not None:
+        sfo_mhz = tuple(
+            float(v.magnitude) if hasattr(v, "magnitude") else (float(v) if v else None)
+            for v in raw_sfo
+        )
+
+    # --- source kind ---
+    source_kind = infer_source_kind(ndim, domains, datatype)
+
+    return NMRMetadata(
+        ndim=ndim,
+        domains=domains,
+        encoding=encoding,
+        nuclei=nuclei,
+        pulse_program=pulse_program,
+        source_kind=source_kind,
+        datatype=datatype,
+        iscomplex=iscomplex,
+        spectral_width_hz=sw_hz,
+        spectrometer_freq_mhz=sfo_mhz,
+    )
