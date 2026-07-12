@@ -98,3 +98,91 @@ def test_readdir_for_nmr():
 @pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
 def test_use_list():
     scp.read_topspin(nmrdir / "relax" / "100" / "ser", use_list=True)
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_1d_fid_metadata():
+    nd = _read_topspin_or_skip(_require_path(nmrdir / "topspin_1d/1/fid"))
+    assert nd.origin == "topspin"
+    assert nd.units == "count"
+    assert nd.title == "intensity"
+    assert nd.meta.datatype == "FID"
+    assert nd.meta.encoding == ["QSIM"]
+    assert nd.meta.isfreq == [False]
+    assert nd.meta.iscomplex == [True]
+    assert nd.meta.nuc1 == ["1H"]
+    assert nd.x.size == 12411
+    assert nd.x.title == "F1 acquisition time"
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_1d_processed_metadata():
+    nd = _read_topspin_or_skip(_require_path(nmrdir / "topspin_1d/1/pdata/1/1r"))
+    assert nd.meta.datatype == "1D"
+    assert nd.meta.isfreq == [True]
+    assert nd.meta.iscomplex == [False]
+    assert nd.x.units == "ppm"
+    assert nd.x.size == 16384
+    assert "^{1}H" in nd.x.title
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_2d_ser_metadata():
+    """Indirect dimension encoding must come from acqu2s, not acqus."""
+    nd = _read_topspin_or_skip(_require_path(nmrdir / "topspin_2d/1/ser"))
+    assert nd.meta.datatype == "SER"
+    assert nd.meta.encoding == ["STATES-TPPI", "DQD"]
+    assert nd.meta.isfreq == [False, False]
+    assert nd.meta.iscomplex == [True, True]
+    assert nd.meta.nuc1 == ["31P", "27Al"]
+    # FnMODE index 0 = indirect dimension (from acqu2s)
+    assert nd.meta.fnmode[0] == 5  # STATES-TPPI
+    # Direct dimension uses AQ_mod
+    assert nd.meta.aq_mod[1] == 3  # DQD
+    assert nd.shape == (96, 474)
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_2d_processed_metadata():
+    nd = _read_topspin_or_skip(_require_path(nmrdir / "topspin_2d/1/pdata/1/2rr"))
+    assert nd.meta.datatype == "2D"
+    assert nd.meta.isfreq == [True, True]
+    assert nd.meta.iscomplex == [False, False]
+    assert nd.shape == (1024, 2048)
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_remove_digital_filter_flag():
+    nd_filter = _read_topspin_or_skip(
+        _require_path(nmrdir / "topspin_1d/1/fid"),
+        remove_digital_filter=True,
+    )
+    nd_no_filter = _read_topspin_or_skip(
+        _require_path(nmrdir / "topspin_1d/1/fid"),
+        remove_digital_filter=False,
+    )
+    assert nd_filter.x.size != nd_no_filter.x.size
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_use_list_returns_time_axis():
+    relax_ser = nmrdir / "relax" / "100" / "ser"
+    if not relax_ser.exists():
+        pytest.skip("Relaxation test data not available")
+    nd = scp.read_topspin(relax_ser, use_list=True)
+    assert nd.y.title == "time"
+    assert str(nd.y.units) == "s"
+    assert nd.y.size > 0
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_read_topspin_missing_file():
+    with pytest.raises(FileNotFoundError):
+        scp.read_topspin(nmrdir / "nonexistent" / "1" / "fid")
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_topspin_name_and_history():
+    nd = _read_topspin_or_skip(_require_path(nmrdir / "topspin_1d/1/fid"))
+    assert nd.name == "topspin_1d expno:1 procno:1 (FID)"
+    assert any("Imported from TopSpin dataset" in entry for entry in nd.history)
