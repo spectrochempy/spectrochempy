@@ -63,10 +63,6 @@ Bug Fixes
 Breaking Changes
 ~~~~~~~~~~~~~~~~
 
-- ``MCRALS.solverConc`` and ``MCRALS.solverSpec`` are deprecated in favour
-  of ``solver_C`` and ``solver_St``. The old names remain functional but emit
-  :class:`FutureWarning`. (:pr:`XXXX`)
-
 - The TopSpin reader (``scp.nmr.read_topspin``) now supports 1D and 2D data
   only. Reading 3D/4D data raises ``NotImplementedError``. The previous
   "nD" claim was not backed by a suitable hypercomplex representation for
