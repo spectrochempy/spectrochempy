@@ -13,6 +13,7 @@ import spectrochempy.plugins.manager as manager_module
 from spectrochempy.api.plugins import PluginCapability
 from spectrochempy.api.plugins import PluginState
 from spectrochempy.api.plugins import check_plugin_compatibility
+from spectrochempy.core.io_namespaces import _is_io_namespace
 from spectrochempy.plugins.deps import MissingPluginError
 from spectrochempy.plugins.manager import ENTRY_POINT_GROUP
 from spectrochempy.plugins.manager import PluginManager
@@ -155,20 +156,25 @@ def test_package_namespace_exposes_topspin_reader(monkeypatch):
 
 
 def test_package_namespace_exposes_short_read_alias(monkeypatch):
-    """scp.nmr.read is a short alias for scp.nmr.read_topspin."""
+    """scp.nmr.read is a generic dispatcher for all NMR readers."""
     _require_reader_dependencies()
 
     pm, _registry = _isolate_scp_plugins(monkeypatch, scp)
     pm.register(NMRPlugin())
 
-    short_reader = scp.nmr.read
-    long_reader = scp.nmr.read_topspin
+    generic_reader = scp.nmr.read
+    topspin_reader = scp.nmr.read_topspin
+    agilent_reader = scp.nmr.read_agilent
 
-    assert callable(short_reader)
-    # Both names must resolve to the same underlying reader.  They may be
-    # different objects (module attribute vs registry proxy) so we check
-    # functional equivalence rather than identity.
-    assert short_reader.__name__ == long_reader.__name__ == "read_topspin"
+    assert callable(generic_reader)
+    assert generic_reader.__name__ == "read"
+    # The generic dispatcher delegates to the format-specific readers based on
+    # the ``protocol`` keyword or directory contents, so we only verify that
+    # the namespaced format readers remain directly accessible.
+    assert callable(topspin_reader)
+    assert callable(agilent_reader)
+    assert topspin_reader.__name__ == "read_topspin"
+    assert agilent_reader.__name__ == "read_agilent"
 
 
 def test_top_level_stub_is_actionable_without_registered_nmr(monkeypatch):
@@ -185,8 +191,8 @@ def test_top_level_stub_is_actionable_without_registered_nmr(monkeypatch):
     assert "pip install spectrochempy[nmr]" in message
 
 
-def test_read_topspin_no_deprecation_warning():
-    """scp.read_topspin and scp.nmr.read_topspin do not emit DeprecationWarning."""
+def test_read_topspin_root_alias_works():
+    """scp.read_topspin remains a working alias with no DeprecationWarning."""
     _require_reader_dependencies()
 
     with warnings.catch_warnings(record=True) as captured:
@@ -195,13 +201,28 @@ def test_read_topspin_no_deprecation_warning():
         rt_ns = scp.nmr.read_topspin
 
     assert callable(rt)
+    assert callable(rt_ns)
     assert rt is rt_ns
     deprecation_warnings = [
         w for w in captured if issubclass(w.category, DeprecationWarning)
     ]
-    assert (
-        deprecation_warnings == []
-    ), f"Expected no DeprecationWarning from read_topspin, got: {deprecation_warnings}"
+    assert deprecation_warnings == [], deprecation_warnings
+
+
+def test_io_namespace_topspin_and_agilent(monkeypatch):
+    """scp.topspin.read and scp.agilent.read expose the namespaced readers."""
+    _require_reader_dependencies()
+
+    pm, _registry = _isolate_scp_plugins(monkeypatch, scp)
+    pm.register(NMRPlugin())
+
+    assert _is_io_namespace("topspin")
+    assert _is_io_namespace("agilent")
+
+    assert callable(scp.topspin.read)
+    assert callable(scp.agilent.read)
+    assert scp.topspin.read is scp.nmr.read_topspin
+    assert scp.agilent.read is scp.nmr.read_agilent
 
 
 def test_nmr_reader_is_not_dataset_accessor_namespace(monkeypatch):

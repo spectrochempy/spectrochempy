@@ -170,7 +170,7 @@ def _plugin_root_export(name, namespace_cls):
         if export["deprecated"] and name not in _EMITTED_PLUGIN_ROOT_WARNINGS:
             warnings.warn(
                 f"scp.{name} is deprecated since SpectroChemPy 0.9.0 "
-                f"and will be removed in 0.11.0. "
+                f"and will be removed in 0.12.0. "
                 f"Use {export['replacement']} instead.",
                 DeprecationWarning,
                 stacklevel=3,
@@ -212,16 +212,17 @@ def __getattr__(name):
         ):
             return sys.modules[module_key]
 
-    # Handle core I/O namespaces (e.g., scp.jcamp, scp.csv)
+    # Ensure external plugins are discovered before resolving I/O namespaces
+    # or plugin-provided functions so that plugin-contributed namespaces
+    # (e.g. scp.topspin, scp.agilent) are registered alongside core ones.
+    plugin_manager.discover()
+
+    # Handle I/O namespaces (core + plugin-contributed)
     from spectrochempy.core.io_namespaces import _IONamespace
     from spectrochempy.core.io_namespaces import _is_io_namespace
 
     if _is_io_namespace(name):
         return _IONamespace(name)
-
-    # Ensure external plugins are discovered (before lazy imports so
-    # plugin-provided functions take precedence over core stubs)
-    plugin_manager.discover()
 
     from spectrochempy.plugins.namespace import has_namespace
 

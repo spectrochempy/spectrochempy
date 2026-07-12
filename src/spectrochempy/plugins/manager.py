@@ -14,6 +14,7 @@ import pluggy
 
 from spectrochempy.api.plugins.validation import check_plugin_requires
 from spectrochempy.api.plugins.validation import validate_plugin_compatibility
+from spectrochempy.core.io_namespaces import register_io_namespace
 from spectrochempy.plugins.hooks import SpectroChemPyHookSpec
 from spectrochempy.plugins.lifecycle import PluginDescriptor
 from spectrochempy.plugins.lifecycle import PluginState
@@ -154,6 +155,14 @@ class PluginManager:
         self._pm.register(plugin, name)
         self.registry.register_plugin(name, plugin)
         self._plugin_states[name] = PluginState.ACTIVE
+
+        # --- Register plugin-contributed I/O namespaces ---
+        io_namespaces = getattr(plugin, "io_namespaces", None)
+        if io_namespaces:
+            for ns_name, ns_spec in io_namespaces.items():
+                read_path = ns_spec.get("read")
+                write_path = ns_spec.get("write")
+                register_io_namespace(ns_name, read_path, write_path)
 
     # ------------------------------------------------------------------
     # Declarative hook collection

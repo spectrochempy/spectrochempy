@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Callable
+from pathlib import Path
 
 from spectrochempy.api.plugins import CORE_PLUGIN_API_VERSION
 from spectrochempy.api.plugins import PluginCapability
@@ -24,6 +25,44 @@ def _resolve_read_agilent():
     from .readers.read_agilent import read_agilent  # noqa: PLC0415
 
     return read_agilent
+
+
+def _resolve_read():
+    """Lazily import and return a generic NMR reader dispatching by file type."""
+    from .readers.read_agilent import read_agilent  # noqa: PLC0415
+    from .readers.read_topspin import read_topspin  # noqa: PLC0415
+
+    def read(*paths, **kwargs):
+        """Read NMR data, auto-detecting TopSpin vs Agilent/Varian format."""
+        protocol = kwargs.get("protocol")
+        if protocol == "agilent":
+            return read_agilent(*paths, **kwargs)
+        if protocol == "topspin":
+            return read_topspin(*paths, **kwargs)
+
+        # Auto-detect from the first path when no protocol is given.
+        if paths:
+            first = paths[0]
+            try:
+                path = Path(first)
+                if path.is_dir():
+                    # An Agilent directory contains fid + procpar.
+                    if (path / "fid").exists() and (path / "procpar").exists():
+                        return read_agilent(*paths, **kwargs)
+                    return read_topspin(*paths, **kwargs)
+                if (
+                    path.name == "fid"
+                    and path.parent.exists()
+                    and (path.parent / "procpar").exists()
+                ):
+                    return read_agilent(*paths, **kwargs)
+            except (TypeError, ValueError):
+                pass
+
+        # Default to TopSpin for backward compatibility.
+        return read_topspin(*paths, **kwargs)
+
+    return read
 
 
 def _resolve_set_nmr_context():
@@ -253,7 +292,7 @@ def _ensure_topspin_filetype_registered() -> None:
 
 
 class NMRPlugin(SpectroChemPyPlugin):
-    """NMR plugin, currently providing the Bruker TopSpin reader."""
+    """NMR plugin, providing Bruker TopSpin and Agilent/Varian readers."""
 
     name = "nmr"
     version = "0.1.7"
@@ -261,6 +300,10 @@ class NMRPlugin(SpectroChemPyPlugin):
     spectrochempy_min_version = "0.9.0"
     PLUGIN_API_VERSION = CORE_PLUGIN_API_VERSION
     capabilities = [PluginCapability.READER]
+    io_namespaces = {
+        "topspin": {"read": "nmr.read_topspin"},
+        "agilent": {"read": "nmr.read_agilent"},
+    }
 
     def register_readers(self) -> list[dict]:
         """Declare the TopSpin and Agilent file readers."""
@@ -332,7 +375,7 @@ class NMRPlugin(SpectroChemPyPlugin):
 
 
 def __getattr__(name: str):
-    if name in ("read_topspin", "read"):
+    if name == "read_topspin":
         from .readers.read_topspin import read_topspin  # noqa: PLC0415
 
         return read_topspin
@@ -340,6 +383,8 @@ def __getattr__(name: str):
         from .readers.read_agilent import read_agilent  # noqa: PLC0415
 
         return read_agilent
+    if name == "read":
+        return _resolve_read()
     if name == "set_nmr_context":
         from .units import set_nmr_context  # noqa: PLC0415
 

@@ -17,6 +17,8 @@ NMR plugin
     :toctree: generated/
 
     spectrochempy.nmr.read
+    spectrochempy.nmr.read_topspin
+    spectrochempy.nmr.read_agilent
     spectrochempy.nmr.Experiment
 
 PerkinElmer plugin
@@ -27,6 +29,7 @@ PerkinElmer plugin
     :toctree: generated/
 
     spectrochempy.perkinelmer.read
+    spectrochempy.perkinelmer.read_perkinelmer
 
 Carroucell plugin
 =================
