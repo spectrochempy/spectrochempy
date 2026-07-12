@@ -40,7 +40,7 @@ def test_hypercomplex_public_api_is_exported():
 @pytest.mark.skipif(not _NMR_AVAILABLE, reason="spectrochempy-nmr not installed")
 def test_nmr_fft_encodings_use_public_hypercomplex_imports():
     """NMR fft_encodings must not reach into hypercomplex private _quaternion."""
-    from spectrochempy_nmr import fft_encodings
+    from spectrochempy_nmr.processing import fft_encodings
 
     source = inspect.getsource(fft_encodings)
     assert "spectrochempy_hypercomplex._quaternion" not in source
@@ -64,7 +64,7 @@ def test_nmr_read_topspin_uses_public_hypercomplex_imports():
 )
 def test_fft_encodings_graceful_when_hypercomplex_absent(monkeypatch):
     """Hypercomplex encodings raise a clear ImportError when hypercomplex is missing."""
-    from spectrochempy_nmr.fft_encodings import _states_fft
+    from spectrochempy_nmr.processing.fft_encodings import _states_fft
 
     def _raise(*args, **kwargs):
         raise ImportError("simulated hypercomplex absence")
