@@ -74,6 +74,20 @@ The same workflow verifies that `docs/sources/whatsnew/changelog.rst` has
 been modified.  If the PR genuinely does not need a changelog entry (e.g.
 pure CI or internal tooling change), add the label **`no-changelog`**.
 
+For PRs that change only safe maintainer-policy or governance Markdown
+documents (`AGENTS.md`, root `*.md`, `maintainers/**/*.md`, PR templates, and
+similar non-executable repository-policy files), maintainers may add the label
+**`safe-docs-no-ci`** to bypass the heavyweight test and docs workflows.
+
+This label must **not** be used for:
+
+* `docs/` changes, even when the files are non-Python;
+* `examples/` changes;
+* plugin Markdown such as `plugins/**/README.md`;
+* code changes hidden inside a documentation PR;
+* any change that can affect executable documentation, packaging, or runtime
+  behavior.
+
 See `docs/sources/devguide/contributing.rst` for the full PR workflow.
 
 The PR description should begin with:
