@@ -133,7 +133,8 @@ def download_full_testdata_directory(datadir, force=False):
 
 
 def download_extra_testdata(datadir=None, force=False):
-    """Download extra test data from the ``data-extra`` branch.
+    """
+    Download extra test data from the ``data-extra`` branch.
 
     Extra datasets (agilent, jeol, bruker_3d, simpson, tecmag) are stored on a
     separate branch to keep the main download lightweight.
@@ -179,7 +180,7 @@ def download_extra_testdata(datadir=None, force=False):
         str(datadir),
     ]
 
-    result = subprocess.run(cmd, capture_output=True, text=True)
+    result = subprocess.run(cmd, capture_output=True, text=True)  # noqa: S603
     if result.returncode != 0:
         msg = f"git clone failed (exit {result.returncode}):\n{result.stderr}"
         raise RuntimeError(msg)

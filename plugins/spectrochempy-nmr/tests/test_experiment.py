@@ -572,7 +572,7 @@ class TestCanonicalMetadata:
         """Experiment classifies data from a non-TopSpin reader."""
         # The canonical extraction layer can consume metadata that contains
         # no Bruker-specific keys — the mock has only the fields that
-        # extract_nmr_metadataBruker reads via getattr.
+        # extract_topspin_metadata reads via getattr.
         import numpy as np
         from spectrochempy_nmr.nmr_metadata import NMRMetadata
 

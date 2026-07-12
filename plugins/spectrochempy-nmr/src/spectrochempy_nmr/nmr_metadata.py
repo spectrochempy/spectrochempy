@@ -154,9 +154,9 @@ def _resolve_encoding(raw_encoding: list) -> tuple[str, ...]:
     return tuple(resolved)
 
 
-def extract_nmr_metadataBruker(meta) -> NMRMetadata:
+def extract_topspin_metadata(meta) -> NMRMetadata:
     """
-    Extract :class:`NMRMetadata` from a Bruker/TopSpin metadata object.
+    Extract :class:`NMRMetadata` from a TopSpin metadata object.
 
     Parameters
     ----------
