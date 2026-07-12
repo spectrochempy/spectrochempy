@@ -174,24 +174,26 @@ case, helper methods such as ``datasets.names``,
 ``datasets.select_largest(ndim=2)``, and ``datasets.select_by_name("spectra")``
 make it easier to pick the dataset you want while staying in the public API.
 
+The NMR readers ``read_topspin`` and ``read_agilent`` require the
+``spectrochempy-nmr`` plugin to be installed. The PerkinElmer reader
+``read_perkinelmer`` requires the ``spectrochempy-perkinelmer`` plugin.
+
 .. autosummary::
     :nosignatures:
     :toctree: generated/
 
     load
     read
+    read_agilent
     read_csv
     read_ddr
     read_dir
     read_hdr
     read_jcamp
     read_labspec
-    read_wire
-    read_wdf
-    read_mat
-    read_matlab
     read_omnic
     read_opus
+    read_perkinelmer
     read_quadera
     read_sdr
     read_soc
@@ -199,6 +201,11 @@ make it easier to pick the dataset you want while staying in the public API.
     read_spc
     read_spg
     read_srs
+    read_topspin
+    read_wire
+    read_wdf
+    read_mat
+    read_matlab
     NDDataset.from_xarray
     NDDataset.from_netcdf
     load_iris

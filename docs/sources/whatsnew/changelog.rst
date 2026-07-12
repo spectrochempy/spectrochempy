@@ -46,6 +46,14 @@ New Features
   vendored NMRGlue code.  Includes ``extract_agilent_metadata`` for canonical
   metadata extraction.  Registered as a new reader in the NMR plugin.
 
+- Added plugin-contributed I/O namespaces for NMR and PerkinElmer readers.
+  ``scp.topspin.read`` and ``scp.agilent.read`` now expose the format-specific
+  readers with the same short-method namespace API used by core I/O domains.
+  ``scp.nmr.read`` is a generic dispatcher that auto-detects TopSpin and
+  Agilent/Varian formats (or uses ``protocol=``).  Root-level aliases
+  ``scp.read_topspin``, ``scp.read_agilent`` and ``scp.read_perkinelmer``
+  remain available as compatibility shims.
+
 
 .. section
 

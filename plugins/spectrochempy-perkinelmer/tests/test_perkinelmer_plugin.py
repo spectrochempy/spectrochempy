@@ -2,6 +2,7 @@
 
 """Tests for the spectrochempy-perkinelmer plugin."""
 
+import warnings
 
 import numpy as np
 import pytest
@@ -82,7 +83,7 @@ def test_sp_parser_invalid_signature() -> None:
 def test_plugin_metadata() -> None:
     plugin = PerkinElmerPlugin()
     assert plugin.name == "perkinelmer"
-    assert plugin.version == "0.1.0"
+    assert plugin.version == "0.1.2"
     assert plugin.description
     assert PluginCapability.READER in plugin.capabilities
 
@@ -416,6 +417,21 @@ def test_top_level_stub_without_plugin(monkeypatch) -> None:
         stub("missing")
 
     assert "spectrochempy-perkinelmer" in str(excinfo.value)
+
+
+def test_read_perkinelmer_root_alias_works() -> None:
+    """scp.read_perkinelmer remains a working alias with no DeprecationWarning."""
+    with warnings.catch_warnings(record=True) as captured:
+        warnings.simplefilter("always", DeprecationWarning)
+        rt = scp.read_perkinelmer
+        rt_ns = scp.perkinelmer.read_perkinelmer
+
+    assert callable(rt)
+    assert callable(rt_ns)
+    deprecation_warnings = [
+        w for w in captured if issubclass(w.category, DeprecationWarning)
+    ]
+    assert deprecation_warnings == [], deprecation_warnings
 
 
 # ------------------------------------------------------------------------------
