@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Evaluate whether a PR can safely bypass heavyweight CI jobs."""
 
+# ruff: noqa: S603, S607, T201
+
 from __future__ import annotations
 
 import argparse
@@ -18,9 +20,7 @@ SAFE_EXACT = {
     ".github/PULL_REQUEST_TEMPLATE.md",
 }
 
-SAFE_PREFIXES = (
-    "maintainers/",
-)
+SAFE_PREFIXES = ("maintainers/",)
 
 UNSAFE_PREFIXES = (
     "docs/",
