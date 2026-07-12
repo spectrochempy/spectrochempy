@@ -14,14 +14,14 @@ from spectrochempy.plugins.proxies import lazy_proxy
 
 def _resolve_read_topspin():
     """Lazily import and return the real ``read_topspin`` function."""
-    from .read_topspin import read_topspin  # noqa: PLC0415
+    from .readers.read_topspin import read_topspin  # noqa: PLC0415
 
     return read_topspin
 
 
 def _resolve_read_agilent():
     """Lazily import and return the real ``read_agilent`` function."""
-    from .read_agilent import read_agilent  # noqa: PLC0415
+    from .readers.read_agilent import read_agilent  # noqa: PLC0415
 
     return read_agilent
 
@@ -333,11 +333,11 @@ class NMRPlugin(SpectroChemPyPlugin):
 
 def __getattr__(name: str):
     if name in ("read_topspin", "read"):
-        from .read_topspin import read_topspin  # noqa: PLC0415
+        from .readers.read_topspin import read_topspin  # noqa: PLC0415
 
         return read_topspin
     if name == "read_agilent":
-        from .read_agilent import read_agilent  # noqa: PLC0415
+        from .readers.read_agilent import read_agilent  # noqa: PLC0415
 
         return read_agilent
     if name == "set_nmr_context":

@@ -37,8 +37,8 @@ from spectrochempy.core.units import ur
 from spectrochempy.utils._logging import warning_
 from spectrochempy.utils.meta import Meta
 
-from .nmrglue import read_fid
-from .nmrglue import read_pdata
+from spectrochempy_nmr.extern.nmrglue import read_fid
+from spectrochempy_nmr.extern.nmrglue import read_pdata
 
 # ======================================================================================
 # Constants
