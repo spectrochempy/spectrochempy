@@ -18,11 +18,11 @@ from __future__ import annotations
 import numpy as np
 import pytest
 from numpy.testing import assert_allclose
-from spectrochempy_nmr.fft_encodings import _echoanti_fft
-from spectrochempy_nmr.fft_encodings import _fft_encoding_handler
-from spectrochempy_nmr.fft_encodings import _qf_fft
-from spectrochempy_nmr.fft_encodings import _states_fft
-from spectrochempy_nmr.fft_encodings import _tppi_fft
+from spectrochempy_nmr.processing.fft_encodings import _echoanti_fft
+from spectrochempy_nmr.processing.fft_encodings import _fft_encoding_handler
+from spectrochempy_nmr.processing.fft_encodings import _qf_fft
+from spectrochempy_nmr.processing.fft_encodings import _states_fft
+from spectrochempy_nmr.processing.fft_encodings import _tppi_fft
 
 quaternion = pytest.importorskip("quaternion", reason="requires numpy-quaternion")
 as_float_array = quaternion.as_float_array
