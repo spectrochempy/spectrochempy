@@ -71,7 +71,6 @@ the file with nmrglue.
 
 """
 
-import contextlib
 import itertools
 import os
 import string

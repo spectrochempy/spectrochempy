@@ -12,7 +12,9 @@ import struct as _struct
 
 import numpy as np
 
-from ._bruker import _merge_dict
+from ._bruker import index2trace_flat
+from ._bruker import index2trace_opp
+from ._bruker import index2trace_reg
 
 
 def read_varian(

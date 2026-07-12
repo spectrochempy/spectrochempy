@@ -32,7 +32,6 @@ from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.core.units import ur
 from spectrochempy.utils._logging import warning_
 from spectrochempy.utils.meta import Meta
-
 from spectrochempy_nmr.extern.nmrglue import read_varian
 
 # ======================================================================================
