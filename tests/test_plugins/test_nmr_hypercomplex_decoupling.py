@@ -51,9 +51,9 @@ def test_nmr_fft_encodings_use_public_hypercomplex_imports():
 @pytest.mark.skipif(not _NMR_AVAILABLE, reason="spectrochempy-nmr not installed")
 def test_nmr_read_topspin_uses_public_hypercomplex_imports():
     """read_topspin must not import as_quat_array directly from numpy-quaternion."""
-    from spectrochempy_nmr import read_topspin
+    import spectrochempy_nmr.readers.read_topspin as rt_mod
 
-    source = inspect.getsource(read_topspin)
+    source = inspect.getsource(rt_mod)
     assert "from quaternion import as_quat_array" not in source
     assert "from spectrochempy_hypercomplex import as_quat_array" in source
 
