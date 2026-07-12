@@ -58,6 +58,16 @@ Bug Fixes
   ignored by the 2D plot backend, so lines rendered with auto-populated labels
   from coordinate metadata never showed a legend. (#1404)
 
+- Fixed incorrect indirect-dimension encoding metadata for TopSpin 2D SER
+  data. The reader now reads ``FnMODE``/``MC2`` from ``acqu2s`` instead of
+  relying on a mis-indexed ``acqus`` value.
+
+- Fixed a potential crash in the TopSpin reader when parsing unexpected
+  nucleus strings (e.g. ``nuc1``) with the regex used for LaTeX titles.
+
+- Fixed missing error handling when the TopSpin ``use_list`` parameter
+  points to a missing or malformed file.
+
 
 .. section
 
@@ -72,9 +82,10 @@ Breaking Changes
 ~~~~~~~~~~~~~~~~
 .. Add here new breaking changes (do not delete this comment)
 
-- ``MCRALS.solverConc`` and ``MCRALS.solverSpec`` are deprecated in favour
-  of ``solver_C`` and ``solver_St``. The old names remain functional but emit
-  :class:`FutureWarning`. (:pr:`XXXX`)
+- The TopSpin reader (``scp.nmr.read_topspin``) now supports 1D and 2D data
+  only. Reading 3D/4D data raises ``NotImplementedError``. The previous
+  "nD" claim was not backed by a suitable hypercomplex representation for
+  dimensions higher than two.
 
 - ``MCRALS.constraints`` is now a validated traitlet, enabling both constructor
   and post-construction assignment while preserving the distinction between
