@@ -19,6 +19,13 @@ def _resolve_read_topspin():
     return read_topspin
 
 
+def _resolve_read_agilent():
+    """Lazily import and return the real ``read_agilent`` function."""
+    from .read_agilent import read_agilent  # noqa: PLC0415
+
+    return read_agilent
+
+
 def _resolve_set_nmr_context():
     """Lazily import and return the NMR unit-context setup function."""
     from .units import set_nmr_context  # noqa: PLC0415
@@ -102,6 +109,53 @@ def _nmr_concat_postprocess(out, datasets, **kwargs):
 _VALID_TOPSPIN_FILENAMES = {"fid", "ser", "1r", "2rr", "3rrr"}
 
 
+_VALID_AGILENT_FILENAMES = {"fid"}
+
+
+def _is_agilent_protocol(**kwargs) -> bool:
+    protocol = kwargs.get("protocol")
+    if protocol is None:
+        return False
+    if isinstance(protocol, str):
+        protocol = [protocol]
+    return "agilent" in protocol
+
+
+def _resolve_agilent_directory_target(filename, **kwargs):
+    """Resolve an Agilent experiment directory to the fid file."""
+    if not _is_agilent_protocol(**kwargs):
+        return None
+    if filename.name in _VALID_AGILENT_FILENAMES:
+        return None
+
+    fid_path = filename / "fid"
+    procpar_path = filename / "procpar"
+    if fid_path.exists() and procpar_path.exists():
+        return [fid_path]
+    return None
+
+
+def _infer_agilent_filetype_key(filename, **kwargs):
+    """Return the Agilent filetype key for fid/procpar file pairs."""
+    if filename.name == "fid" and filename.parent.exists():
+        procpar = filename.parent / "procpar"
+        if procpar.exists():
+            return ".agilent"
+    return None
+
+
+def _ensure_agilent_filetype_registered() -> None:
+    """Register the plugin-owned Agilent key in the legacy importer registry."""
+    from spectrochempy.core.readers.filetypes import registry  # noqa: PLC0415
+
+    known = {name for name, _description in registry.filetypes}
+    if "agilent" not in known:
+        registry.register_filetype(
+            "agilent",
+            "Agilent/Varian NMR fid and procpar files",
+        )
+
+
 def _is_topspin_protocol(**kwargs) -> bool:
     protocol = kwargs.get("protocol")
     if protocol is None:
@@ -161,6 +215,21 @@ def _infer_topspin_filetype_key(filename, **kwargs):
     return None
 
 
+def _infer_nmr_filetype_key(filename, **kwargs):
+    """Return the filetype key for extensionless NMR data files."""
+    # Check Agilent first: a fid with a sibling procpar is Agilent, not TopSpin.
+    return _infer_agilent_filetype_key(
+        filename, **kwargs
+    ) or _infer_topspin_filetype_key(filename, **kwargs)
+
+
+def _resolve_nmr_directory_target(filename, **kwargs):
+    """Resolve an NMR experiment directory to concrete data files."""
+    return _resolve_topspin_directory_target(
+        filename, **kwargs
+    ) or _resolve_agilent_directory_target(filename, **kwargs)
+
+
 def _topspin_remote_download_target(path, **kwargs):
     """Download the TopSpin experiment directory for component data files."""
     if not _is_topspin_protocol(**kwargs):
@@ -194,8 +263,9 @@ class NMRPlugin(SpectroChemPyPlugin):
     capabilities = [PluginCapability.READER]
 
     def register_readers(self) -> list[dict]:
-        """Declare the TopSpin file reader."""
+        """Declare the TopSpin and Agilent file readers."""
         _ensure_topspin_filetype_registered()
+        _ensure_agilent_filetype_registered()
         return [
             {
                 "name": "topspin",
@@ -213,6 +283,14 @@ class NMRPlugin(SpectroChemPyPlugin):
                     "3rrr",
                     "3rri",
                 ],
+            },
+            {
+                "name": "agilent",
+                "func": lazy_proxy(
+                    _resolve_read_agilent, name="spectrochempy.nmr.read_agilent"
+                ),
+                "description": "Agilent/Varian NMR fid and procpar files",
+                "extensions": ["fid"],
             },
         ]
 
@@ -242,9 +320,9 @@ class NMRPlugin(SpectroChemPyPlugin):
             "concatenate.postprocess": _nmr_concat_postprocess,
             "fft.encoding": _fft_encoding_handler,
             "fft.postprocess_result": _fft_postprocess_result,
-            "importer.infer_filetype_key": _infer_topspin_filetype_key,
+            "importer.infer_filetype_key": _infer_nmr_filetype_key,
             "importer.remote_download_target": _topspin_remote_download_target,
-            "importer.resolve_directory_target": _resolve_topspin_directory_target,
+            "importer.resolve_directory_target": _resolve_nmr_directory_target,
         }
 
 
@@ -258,6 +336,10 @@ def __getattr__(name: str):
         from .read_topspin import read_topspin  # noqa: PLC0415
 
         return read_topspin
+    if name == "read_agilent":
+        from .read_agilent import read_agilent  # noqa: PLC0415
+
+        return read_agilent
     if name == "set_nmr_context":
         from .units import set_nmr_context  # noqa: PLC0415
 
@@ -271,4 +353,11 @@ def __getattr__(name: str):
 
 
 def __dir__() -> list[str]:
-    return ["NMRPlugin", "Experiment", "read", "read_topspin", "set_nmr_context"]
+    return [
+        "NMRPlugin",
+        "Experiment",
+        "read",
+        "read_topspin",
+        "read_agilent",
+        "set_nmr_context",
+    ]

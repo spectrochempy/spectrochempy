@@ -41,6 +41,11 @@ New Features
   from the ``data-extra`` branch of the ``spectrochempy_data`` repository.
   Extra data is cloned into ``~/.spectrochempy/testdata-extra/``. (:pr:`1418`)
 
+- Added Agilent/Varian NMR reader (``scp.nmr.read_agilent``) supporting 1D FID
+  and multidimensional data.  Reads binary ``fid`` and ``procpar`` files using
+  vendored NMRGlue code.  Includes ``extract_agilent_metadata`` for canonical
+  metadata extraction.  Registered as a new reader in the NMR plugin.
+
 
 .. section
 
