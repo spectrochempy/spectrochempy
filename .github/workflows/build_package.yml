@@ -213,7 +213,7 @@ jobs:
           cat recipe/recipe.yaml
 
       - name: Build conda package
-        uses: prefix-dev/rattler-build-action@v0.2.38
+        uses: prefix-dev/rattler-build-action@v0.2.39
         env:
           CONDA_BLD_PATH: ../output
         with:
@@ -396,7 +396,7 @@ jobs:
 
       - name: Build conda plugin package
         continue-on-error: ${{ !(github.event_name == 'release' && startsWith(github.ref_name, matrix.plugin.name)) }}
-        uses: prefix-dev/rattler-build-action@v0.2.38
+        uses: prefix-dev/rattler-build-action@v0.2.39
         env:
           CONDA_BLD_PATH: ../output
         with:
