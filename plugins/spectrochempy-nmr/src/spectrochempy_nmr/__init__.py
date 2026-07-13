@@ -27,24 +27,50 @@ def _resolve_read_agilent():
     return read_agilent
 
 
+def _resolve_read_jeol():
+    """Lazily import and return the real ``read_jeol`` function."""
+    from .readers.read_jeol import read_jeol  # noqa: PLC0415
+
+    return read_jeol
+
+
+def _ensure_jeol_filetype_registered() -> None:
+    """Register the plugin-owned JEOL key in the legacy importer registry."""
+    from spectrochempy.core.readers.filetypes import registry  # noqa: PLC0415
+
+    known = {name for name, _description in registry.filetypes}
+    if "jeol" not in known:
+        registry.register_filetype(
+            "jeol",
+            "JEOL JDF NMR data files",
+            aliases=["jdf"],
+        )
+
+
 def _resolve_read():
     """Lazily import and return a generic NMR reader dispatching by file type."""
     from .readers.read_agilent import read_agilent  # noqa: PLC0415
+    from .readers.read_jeol import read_jeol  # noqa: PLC0415
     from .readers.read_topspin import read_topspin  # noqa: PLC0415
 
     def read(*paths, **kwargs):
-        """Read NMR data, auto-detecting TopSpin vs Agilent/Varian format."""
+        """Read NMR data, auto-detecting TopSpin vs Agilent/Varian vs JEOL format."""
         protocol = kwargs.get("protocol")
         if protocol == "agilent":
             return read_agilent(*paths, **kwargs)
         if protocol == "topspin":
             return read_topspin(*paths, **kwargs)
+        if protocol == "jeol":
+            return read_jeol(*paths, **kwargs)
 
         # Auto-detect from the first path when no protocol is given.
         if paths:
             first = paths[0]
             try:
                 path = Path(first)
+                # JEOL files have .jdf extension
+                if path.suffix.lower() == ".jdf":
+                    return read_jeol(*paths, **kwargs)
                 if path.is_dir():
                     # An Agilent directory contains fid + procpar.
                     if (path / "fid").exists() and (path / "procpar").exists():
@@ -151,6 +177,25 @@ _VALID_TOPSPIN_FILENAMES = {"fid", "ser", "1r", "2rr", "3rrr"}
 _VALID_AGILENT_FILENAMES = {"fid"}
 
 
+_VALID_JEOL_EXTENSIONS = {".jdf"}
+
+
+def _is_jeol_protocol(**kwargs) -> bool:
+    protocol = kwargs.get("protocol")
+    if protocol is None:
+        return False
+    if isinstance(protocol, str):
+        protocol = [protocol]
+    return "jeol" in protocol
+
+
+def _infer_jeol_filetype_key(filename, **kwargs):
+    """Return the JEOL filetype key for .jdf files."""
+    if filename.suffix.lower() == ".jdf":
+        return ".jeol"
+    return None
+
+
 def _is_agilent_protocol(**kwargs) -> bool:
     protocol = kwargs.get("protocol")
     if protocol is None:
@@ -255,7 +300,11 @@ def _infer_topspin_filetype_key(filename, **kwargs):
 
 
 def _infer_nmr_filetype_key(filename, **kwargs):
-    """Return the filetype key for extensionless NMR data files."""
+    """Return the filetype key for NMR data files."""
+    # Check JEOL first: .jdf files are JEOL.
+    jeol_key = _infer_jeol_filetype_key(filename, **kwargs)
+    if jeol_key is not None:
+        return jeol_key
     # Check Agilent first: a fid with a sibling procpar is Agilent, not TopSpin.
     return _infer_agilent_filetype_key(
         filename, **kwargs
@@ -292,7 +341,7 @@ def _ensure_topspin_filetype_registered() -> None:
 
 
 class NMRPlugin(SpectroChemPyPlugin):
-    """NMR plugin, providing Bruker TopSpin and Agilent/Varian readers."""
+    """NMR plugin, providing Bruker TopSpin, Agilent/Varian, and JEOL readers."""
 
     name = "nmr"
     version = "0.1.7"
@@ -303,12 +352,14 @@ class NMRPlugin(SpectroChemPyPlugin):
     io_namespaces = {
         "topspin": {"read": "nmr.read_topspin"},
         "agilent": {"read": "nmr.read_agilent"},
+        "jeol": {"read": "nmr.read_jeol"},
     }
 
     def register_readers(self) -> list[dict]:
-        """Declare the TopSpin and Agilent file readers."""
+        """Declare the TopSpin, Agilent, and JEOL file readers."""
         _ensure_topspin_filetype_registered()
         _ensure_agilent_filetype_registered()
+        _ensure_jeol_filetype_registered()
         return [
             {
                 "name": "topspin",
@@ -334,6 +385,14 @@ class NMRPlugin(SpectroChemPyPlugin):
                 ),
                 "description": "Agilent/Varian NMR fid and procpar files",
                 "extensions": ["fid"],
+            },
+            {
+                "name": "jeol",
+                "func": lazy_proxy(
+                    _resolve_read_jeol, name="spectrochempy.nmr.read_jeol"
+                ),
+                "description": "JEOL JDF NMR data files",
+                "extensions": [".jdf"],
             },
         ]
 
@@ -383,6 +442,10 @@ def __getattr__(name: str):
         from .readers.read_agilent import read_agilent  # noqa: PLC0415
 
         return read_agilent
+    if name == "read_jeol":
+        from .readers.read_jeol import read_jeol  # noqa: PLC0415
+
+        return read_jeol
     if name == "read":
         return _resolve_read()
     if name == "set_nmr_context":
@@ -404,5 +467,6 @@ def __dir__() -> list[str]:
         "read",
         "read_topspin",
         "read_agilent",
+        "read_jeol",
         "set_nmr_context",
     ]

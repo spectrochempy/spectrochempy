@@ -1,10 +1,12 @@
 # ======================================================================================
-# Agilent / Varian file reading
-# ======================================================================================
+# Vendored from nmrglue.fileio.varian (BSD 3-Clause, Jonathan J. Helmus).
 #
-# Adapted from nmrglue.fileio.varian (BSD 3-Clause, Jonathan J. Helbus).
 # Read-only subset: procpar parsing, binary FID reading, shape/order detection.
 # Write functions, low-memory reader, and fid_nd class are omitted.
+#
+# Original: https://github.com/jjhelmus/nmrglue
+# License: see NMRGLUE_LICENSE.rst in this plugin directory.
+# ======================================================================================
 
 import contextlib
 import os
@@ -12,9 +14,9 @@ import struct as _struct
 
 import numpy as np
 
-from ._bruker import index2trace_flat
-from ._bruker import index2trace_opp
-from ._bruker import index2trace_reg
+from ._base import index2trace_flat
+from ._base import index2trace_opp
+from ._base import index2trace_reg
 
 
 def read_varian(

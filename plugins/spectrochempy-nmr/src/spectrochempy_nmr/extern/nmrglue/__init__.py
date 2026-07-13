@@ -6,11 +6,11 @@
 # full nmrglue package.  See individual submodules for attribution.
 # ======================================================================================
 
-from ._bruker import create_blank_udic
+from ._base import create_blank_udic
+from ._base import uc_from_udic
 from ._bruker import guess_udic
 from ._bruker import read_fid
 from ._bruker import read_pdata
-from ._bruker import uc_from_udic
 from ._varian import find_varian_shape
 from ._varian import find_varian_torder
 from ._varian import read_varian
