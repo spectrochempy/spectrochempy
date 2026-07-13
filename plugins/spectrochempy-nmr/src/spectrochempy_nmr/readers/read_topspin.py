@@ -8,10 +8,6 @@ Bruker file (single dimension FID or two-dimensional SER) importers.
 
 This module provides functionality to read Bruker Topspin NMR data files.
 
-Classes
--------
-- TopspinImporter : Main class for importing Bruker Topspin data
-
 Functions
 ---------
 - read_topspin : Main entry point for reading Bruker files
@@ -653,8 +649,7 @@ def _remove_digital_filter(dic, data):
     # fft
     si = data.shape[-1]
     pdata = np.fft.fftshift(np.fft.fft(data, si, axis=-1), -1) / float(si / 2)
-    pdata = (pdata.T - pdata.T[0]).T  # TODO: this allow generally to
-    #   remove Bruker smiles, not so sure actually
+    pdata = (pdata.T - pdata.T[0]).T  # remove Bruker smile
 
     # Phasing
     si = float(pdata.shape[-1])
@@ -804,7 +799,6 @@ def _get_files(path, typ="acqu"):
 @_importer_method
 def _read_topspin(*args, **kwargs):
     dataset, path = args
-    #    content = kwargs.get('content', None)
 
     # is-it a processed dataset file (1r, 2rr ....) ?
     processed = bool(path.match("pdata/*/*"))
@@ -849,18 +843,23 @@ def _read_topspin(*args, **kwargs):
         # of accumulated row was incomplete
         if path.name in ["ser"] and data.ndim == 1:
             # we must reshape using the acqu parameters
-            td1 = dic["acqu2"]["TD"]
-            try:
-                data = data.reshape(td1, -1)
-            except ValueError:
+            _acqu2 = dic.get("acqu2s", dic.get("acqu2", {}))
+            _acqu = dic.get("acqus", dic.get("acqu", {}))
+            td1 = _acqu2.get("TD")
+            if td1 is not None:
                 try:
-                    td = dic["acqu"]["TD"] // 2
-                    data = data.reshape(-1, td)
+                    data = data.reshape(td1, -1)
                 except ValueError:
-                    raise KeyError("Inconsistency between TD's and data size") from None
+                    td = _acqu.get("TD")
+                    if td is not None:
+                        data = data.reshape(-1, td // 2)
+                    else:
+                        raise KeyError(
+                            "Inconsistency between TD's and data size"
+                        ) from None
 
             # reduce to td
-            ntd = dic["acqus"]["TD"] // 2
+            ntd = _acqu.get("TD", dic.get("acqus", {}).get("TD", 0)) // 2
             data = data[..., :ntd]
 
         # Eliminate the digital filter
@@ -954,7 +953,7 @@ def _read_topspin(*args, **kwargs):
                 if key.lower() not in meta:
                     meta[key.lower()] = [None] * data.ndim
 
-                with contextlib.suppress(Exception):
+                with contextlib.suppress(TypeError, IndexError):
                     meta[key.lower()][dim] = value
 
         else:
@@ -1040,13 +1039,18 @@ def _read_topspin(*args, **kwargs):
 
     meta.sw_h = [
         (meta.sw[axis].m * meta.sfo1[axis] * 1e-6).to("Hz")
+        if meta.sw[axis] is not None and meta.sfo1[axis] is not None
+        else None
         for axis in range(parmode + 1)
     ]
 
     if processed:
         meta.si = list(data.shape)
         meta.isfreq = [True] * (parmode + 1)  # at least we assume this
-        meta.phc0 = [0] * data.ndim
+        # phc0 is already populated from procs by the metadata loop above;
+        # only initialise if missing (e.g. no procs file found).
+        if not hasattr(meta, "phc0") or meta.phc0 is None:
+            meta.phc0 = [0] * data.ndim
 
     # Final phase convention adjustment to keep the data coherent with
     # Bruker/TopSpin processing. Combined with the -90° shift above, this
@@ -1066,7 +1070,8 @@ def _read_topspin(*args, **kwargs):
         meta.rg[-1] = 1.0
         meta.nsold = [meta.ns[-1]]  # store the old value of NS
         meta.ns[-1] = 1
-        dat /= fac
+        if fac > 0:
+            dat /= fac
         return dat
 
     data = _norm(data)
@@ -1114,7 +1119,7 @@ def _read_topspin(*args, **kwargs):
             coord = Coord(
                 coordpoints * dw,
                 title=f"F{axis + 1} acquisition time",
-            )  # TODO: use AQSEQ for >2D data
+            )
 
             coord.meta["acquisition_frequency"] = meta.sfo1[axis]
             coords.append(coord)
@@ -1176,7 +1181,8 @@ def _read_topspin(*args, **kwargs):
     dataset.name = f"{f_name.name} expno:{expno} procno:{procno} ({datatype})"
     dataset.filename = f_name
     if dataset.meta.date is not None:
-        dataset.acquisition_date = datetime.fromtimestamp(dataset.meta.date[-1])
+        with contextlib.suppress(ValueError, OSError, TypeError, OverflowError):
+            dataset.acquisition_date = datetime.fromtimestamp(dataset.meta.date[-1])
 
     dataset.history = "Imported from TopSpin dataset"
 
