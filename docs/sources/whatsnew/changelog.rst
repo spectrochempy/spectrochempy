@@ -56,6 +56,12 @@ New Features
   format detection from file extension and protocol-based dispatch.  Registered
   as a new reader in the NMR plugin.
 
+- Added SIMPSON reader (``scp.nmr.read_simpson``) supporting 1D and 2D NMR
+  simulation data.  Reads SIMPSON ``TEXT``, ``XREIM``, ``XYREIM``, ``BINARY``
+  and ``RAWBIN`` formats.  Supports automatic format detection from file
+  content and ``.in`` file metadata parsing.  Registered as a new reader in the
+  NMR plugin.
+
 - Added plugin-contributed I/O namespaces for NMR and PerkinElmer readers.
   ``scp.topspin.read`` and ``scp.agilent.read`` now expose the format-specific
   readers with the same short-method namespace API used by core I/O domains.

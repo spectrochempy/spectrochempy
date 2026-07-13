@@ -11,6 +11,7 @@ from ._base import uc_from_udic
 from ._bruker import guess_udic
 from ._bruker import read_fid
 from ._bruker import read_pdata
+from ._simpson import read as read_simpson
 from ._tecmag import guess_udic as guess_udic_tecmag
 from ._tecmag import read as read_tecmag
 from ._varian import find_varian_shape
@@ -26,6 +27,7 @@ __all__ = [
     "guess_udic_tecmag",
     "read_fid",
     "read_pdata",
+    "read_simpson",
     "read_tecmag",
     "read_varian",
     "read_varian_procpar",
