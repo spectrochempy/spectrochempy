@@ -66,15 +66,17 @@ Bug Fixes
   ignored by the 2D plot backend, so lines rendered with auto-populated labels
   from coordinate metadata never showed a legend. (#1404)
 
-- Fixed incorrect indirect-dimension encoding metadata for TopSpin 2D SER
-  data. The reader now reads ``FnMODE``/``MC2`` from ``acqu2s`` instead of
-  relying on a mis-indexed ``acqus`` value.
-
-- Fixed a potential crash in the TopSpin reader when parsing unexpected
-  nucleus strings (e.g. ``nuc1``) with the regex used for LaTeX titles.
-
-- Fixed missing error handling when the TopSpin ``use_list`` parameter
-  points to a missing or malformed file.
+- Improved TopSpin reader reliability across several areas.  ``FnMODE``/``MC2``
+  is now read from ``acqu2s`` (not mis-indexed ``acqus``) for correct 2D SER
+  indirect-dimension encoding.  The SER reshape fallback uses proper dictionary
+  keys (``acqu2s``/``acqus``) to avoid ``KeyError``.  Processed-data ``phc0``
+  is read from ``procs`` instead of being unconditionally zeroed.
+  Normalisation guards against division by zero when ``ns`` or ``rg`` is zero.
+  ``datetime.fromtimestamp`` is protected against invalid or negative
+  timestamps.  Metadata exception suppression is narrowed from ``Exception``
+  to ``(TypeError, IndexError)``.  ``sw_h`` computation is ``None``-safe.
+  Nucleus-string parsing and missing ``use_list`` files are handled gracefully.
+  Dead comments and uncertain TODOs removed. (#1420, #1424)
 
 
 .. section
