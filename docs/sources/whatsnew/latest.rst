@@ -42,6 +42,11 @@ New Features
   vendored NMRGlue code.  Includes ``extract_agilent_metadata`` for canonical
   metadata extraction.  Registered as a new reader in the NMR plugin.
 
+- Added JEOL JDF reader (``scp.nmr.read_jeol``) supporting 1D and 2D NMR data.
+  Reads ``.jdf`` files using vendored NMRGlue code.  Supports automatic format
+  detection from file extension and protocol-based dispatch.  Registered as a
+  new reader in the NMR plugin.
+
 - Added plugin-contributed I/O namespaces for NMR and PerkinElmer readers.
   ``scp.topspin.read`` and ``scp.agilent.read`` now expose the format-specific
   readers with the same short-method namespace API used by core I/O domains.
@@ -121,6 +126,14 @@ Developer
   the five composite plot functions (``plot_score``, ``plot_scree``,
   ``plot_compare``, ``plot_merit``,   ``plot_baseline``) into shared
   ``_setup_axes`` and ``_maybe_show`` helpers in ``mplutils.py``.
+
+- MAINT: Extracted generic nmrglue utilities (``create_blank_udic``,
+  ``unit_conversion``, ``uc_from_udic``, ``reorder_submatrix``,
+  ``uc_from_freqscale``, ``index2trace_*``, ``trace2index_*``,
+  ``complexify_data``, ``uncomplexify_data``, ND array iterators)
+  from ``_bruker.py`` into a shared ``_base.py`` module.  Updated
+  ``_varian.py`` and ``_jeol.py`` to import from ``_base`` instead
+  of ``_bruker``, eliminating cross-reader coupling.
   Added 38 structural contract tests verifying the lifecycle behavior.
   No public API change. (#1408)
 
