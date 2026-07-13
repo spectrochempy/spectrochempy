@@ -47,6 +47,11 @@ New Features
   detection from file extension and protocol-based dispatch.  Registered as a
   new reader in the NMR plugin.
 
+- Added TecMag TNT reader (``scp.nmr.read_tecmag``) supporting 1D and 2D NMR
+  data.  Reads ``.tnt`` files using vendored NMRGlue code.  Supports automatic
+  format detection from file extension and protocol-based dispatch.  Registered
+  as a new reader in the NMR plugin.
+
 - Added plugin-contributed I/O namespaces for NMR and PerkinElmer readers.
   ``scp.topspin.read`` and ``scp.agilent.read`` now expose the format-specific
   readers with the same short-method namespace API used by core I/O domains.
