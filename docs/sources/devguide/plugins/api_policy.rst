@@ -35,15 +35,26 @@ argument.
 Examples::
 
     dataset.iris.kernel_matrix(...)
-    # future examples:
-    dataset.nmr.phase(...)
-    dataset.nmr.apodize(...)
 
-Avoid dataset accessors for I/O and object creation.  In particular, do not add
-APIs such as::
+Avoid dataset accessors for I/O, object creation, or high-level scientific
+workflows.  In particular, do not add APIs such as::
 
     dataset.read_topspin(...)
     dataset.nmr.read_topspin(...)
+    dataset.nmr.phase(...)
+    dataset.nmr.apodize(...)
+
+For NMR, the high-level scientific API is ``Experiment``::
+
+    dataset = scp.nmr.read(path)
+    experiment = scp.nmr.Experiment(dataset)
+    spectrum = experiment.process(lb=10.0, phase="manual", phc0=45.0)
+
+Low-level NMR operations (apodization, phasing, FFT) already exist as
+``NDDataset`` methods (``dataset.em(...)``, ``dataset.pk(...)``,
+``dataset.fft()``).  The NMR-specific orchestration and scientific
+interpretation belong exclusively to ``Experiment``, avoiding two concurrent
+high-level APIs.
 
 Current implementation note
 ---------------------------
