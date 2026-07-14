@@ -30,7 +30,11 @@ Official plugins
 Official plugins should:
 
 * expose modern APIs through namespaces such as ``scp.nmr`` or ``scp.iris``;
-* keep dataset accessors for operations that use an existing dataset;
+* provide high-level scientific interpretation through dedicated classes
+  (e.g. ``scp.nmr.Experiment``) rather than dataset accessors for complex
+  workflows;
+* keep dataset accessors only for operations that genuinely use an existing
+  dataset as input;
 * avoid importing heavy optional dependencies at ``import spectrochempy`` time;
 * use the public plugin API from ``spectrochempy.api.plugins``;
 * keep examples in the central gallery, clearly marked when a plugin is

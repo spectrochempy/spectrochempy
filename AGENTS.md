@@ -552,9 +552,8 @@ Rationale:
   time.
 - A single final run before push is sufficient because pre-commit hooks are
   deterministic.
-- Between commits, ensure code passes ``ruff`` and ``ruff-format`` manually
-  (e.g. via editor integration or a targeted command) so that the final
-  pre-commit run succeeds quickly.
+- Pre-commit handles all linting and formatting, including ``ruff`` checks,
+  so there is no need to run linting tools manually during development.
 
 When not delegated:
 
