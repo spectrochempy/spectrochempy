@@ -34,12 +34,6 @@ def test_read_matlab(matlabdata):
 
 
 def test_read_matlab_multiple_variables(tmp_path):
-    # read_matlab() imports each numeric variable of a .mat file as its own
-    # NDDataset, named after the MATLAB variable, and skips non-numeric and
-    # MATLAB-internal (``__header__``/``__version__``/``__globals__``)
-    # variables (#1142). Distinct shapes are used so the importer keeps the
-    # arrays as separate datasets rather than stacking same-shape arrays into
-    # a single one.
     path = tmp_path / "multi.mat"
     savemat(
         path,
@@ -62,8 +56,6 @@ def test_read_matlab_multiple_variables(tmp_path):
     assert shapes["alpha"] == (1, 5)
     assert shapes["beta"] == (1, 7)
 
-    # the non-numeric (string) variable and the MATLAB internals are not
-    # returned as datasets
     assert "label" not in names
     assert not any(ds.name.startswith("__") for ds in datasets)
 
@@ -106,9 +98,6 @@ def test_read_matlab_single_2d_array_preserves_values_without_materialized_coord
 
 
 def test_read_matlab_same_shape_arrays_are_stacked(tmp_path):
-    # same-shape numeric arrays are stacked by the importer into a single
-    # NDDataset (the documented merge behaviour), so two (1, n) arrays come
-    # back as one (2, n) dataset (#1142).
     path = tmp_path / "stack.mat"
     savemat(
         path,
