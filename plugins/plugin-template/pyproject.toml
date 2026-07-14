@@ -7,10 +7,15 @@ name = "spectrochempy-myplugin"
 version = "0.1.0"
 description = "A SpectroChemPy plugin"
 requires-python = ">=3.11"
-# Official plugins (published by the SpectroChemPy team) must also list:
-#   "Framework :: SpectroChemPy :: Official Plugin"
-# in the classifiers below.  Adding this classifier is the only registration
-# step needed for all CI workflows to auto-discover the plugin.
+# Official plugins (published by the SpectroChemPy team) must also add
+# the following section:
+#
+#   [tool.spectrochempy]
+#   official-plugin = true
+#
+# This marker is the registration point for all CI workflows (publishing,
+# testing, docs builds, release validation).  Do NOT use a Trove classifier
+# for this — PyPI only accepts registered Trove classifiers.
 classifiers = [
 ]
 dependencies = [

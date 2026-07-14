@@ -307,9 +307,14 @@ jobs:
               echo "Skipping $name (developer template, not publishable)"
               continue
             fi
-            # Check for the Official Plugin classifier.
-            if ! grep -q 'Framework :: SpectroChemPy :: Official Plugin' "${dir}pyproject.toml" 2>/dev/null; then
-              echo "Skipping $name (no Official Plugin classifier)"
+            # Check for the Official Plugin marker.
+            if ! python3 -c "
+            import tomllib, sys
+            data = tomllib.loads(open('${dir}pyproject.toml').read())
+            sc = data.get('tool', {}).get('spectrochempy', {})
+            sys.exit(0 if sc.get('official-plugin') is True else 1)
+            " 2>/dev/null; then
+              echo "Skipping $name (not declared official)"
               continue
             fi
             if [ -f "${dir}recipe.yaml" ] || [ -f "${dir}meta.yaml" ]; then

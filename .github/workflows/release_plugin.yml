@@ -96,29 +96,8 @@ jobs:
 
       - name: Validate plugin name
         run: |
-          plugin_name="${{ inputs.plugin_name }}"
-          plugin_dir="plugins/$plugin_name"
-          if [ ! -d "$plugin_dir" ]; then
-            echo "::error::Plugin directory $plugin_dir does not exist"
-            exit 1
-          fi
-          if [ ! -f "$plugin_dir/pyproject.toml" ]; then
-            echo "::error::$plugin_dir/pyproject.toml not found"
-            exit 1
-          fi
-          # Verify the plugin has the Official Plugin classifier.
-          if ! python3 -c "
-          import sys, tomllib
-          data = tomllib.load(open('$plugin_dir/pyproject.toml', 'rb'))
-          cls = data.get('project', {}).get('classifiers', [])
-          if 'Framework :: SpectroChemPy :: Official Plugin' not in cls:
-              sys.exit(1)
-          "; then
-            echo "::error::$plugin_name is not an official plugin (missing Official Plugin classifier)."
-            echo "::error::Experimental plugins must be released manually."
-            exit 1
-          fi
-          echo "Plugin $plugin_name validated as official."
+          python3 .github/workflows/scripts/validate_official_plugin.py \
+            "plugins/${{ inputs.plugin_name }}"
 
       - name: Bump version in pyproject.toml
         run: |

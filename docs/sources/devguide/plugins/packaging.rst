@@ -65,13 +65,25 @@ Key points:
 * Official plugins in the monorepo use a static ``version`` field.
   ``setuptools_scm`` is not used because plugin and core tags share the
   same Git repository, which would cause version collisions.
-* Official plugins must add the Trove classifier
-  ``Framework :: SpectroChemPy :: Official Plugin`` in their
-  ``pyproject.toml`` classifiers list.  This classifier is the single
-  source of truth for CI workflows (publishing, testing, documentation,
-  release validation) — any plugin with this classifier is automatically
-  picked up by all CI pipelines.  Adding a new official plugin requires
-  **no edits** to any workflow file.
+* Official plugins must declare their status via a private marker in
+  their ``pyproject.toml``:
+
+  .. code-block:: toml
+
+     [tool.spectrochempy]
+     official-plugin = true
+
+  This marker is the single source of truth for CI workflows (publishing,
+  testing, documentation, release validation) — any plugin with this
+  marker is automatically picked up by all CI pipelines.  Adding a new
+  official plugin requires **no edits** to any workflow file.
+
+  .. note::
+
+     Do **not** use a Trove classifier (e.g.
+     ``Framework :: SpectroChemPy :: Official Plugin``) for this purpose.
+     PyPI only accepts registered Trove classifiers, and custom ones
+     will cause a ``400 Bad Request`` error during upload.
 
 Local editable development
 ==========================

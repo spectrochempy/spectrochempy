@@ -90,3 +90,41 @@ def test_apply_dev_version_updates_plugin_metadata(tmp_path, monkeypatch):
     assert 'version = "0.1.4.dev12"' in (plugin_dir / "pyproject.toml").read_text()
     assert 'version: "0.1.4.dev12"' in (plugin_dir / "recipe.yaml").read_text()
     assert 'version = "0.1.4.dev12"' in (init_dir / "__init__.py").read_text()
+
+
+def test_discover_official_plugins_with_marker(tmp_path, monkeypatch):
+    """Verify _discover_official_plugins detects the [tool.spectrochempy] marker."""
+    module = load_module()
+
+    plugins_dir = tmp_path / "plugins"
+    plugins_dir.mkdir()
+
+    # Official plugin: has official-plugin = true
+    official = plugins_dir / "spectrochempy-nmr"
+    official.mkdir()
+    (official / "pyproject.toml").write_text(
+        '[project]\nname = "spectrochempy-nmr"\n'
+        '[tool.spectrochempy]\nofficial-plugin = true\n'
+    )
+
+    # Non-official plugin: no marker
+    non_official = plugins_dir / "spectrochempy-cantera"
+    non_official.mkdir()
+    (non_official / "pyproject.toml").write_text(
+        '[project]\nname = "spectrochempy-cantera"\n'
+    )
+
+    monkeypatch.chdir(tmp_path)
+    result = module._discover_official_plugins()
+
+    assert result == ("spectrochempy-nmr",)
+
+
+def test_discover_official_plugins_empty(tmp_path, monkeypatch):
+    """Verify _discover_official_plugins returns empty tuple when no plugins dir."""
+    module = load_module()
+
+    monkeypatch.chdir(tmp_path)
+    result = module._discover_official_plugins()
+
+    assert result == ()

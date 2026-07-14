@@ -14,11 +14,11 @@ from dataclasses import asdict
 from dataclasses import dataclass
 from pathlib import Path
 
-OFFICIAL_CLASSIFIER = "Framework :: SpectroChemPy :: Official Plugin"
+OFFICIAL_CLASSIFIER = "Framework :: SpectroChemPy :: Official Plugin"  # legacy, kept for strip_official_classifier
 
 
 def _discover_official_plugins() -> tuple[str, ...]:
-    """Return official plugin directory names by checking classifier in pyproject.toml."""
+    """Return official plugin directory names by checking [tool.spectrochempy] in pyproject.toml."""
     plugins_dir = Path("plugins")
     if not plugins_dir.is_dir():
         return ()
@@ -32,8 +32,8 @@ def _discover_official_plugins() -> tuple[str, ...]:
     for pyproject in sorted(plugins_dir.glob("spectrochempy-*/pyproject.toml")):
         try:
             data = tomllib.loads(pyproject.read_text())
-            classifiers = data.get("project", {}).get("classifiers", [])
-            if OFFICIAL_CLASSIFIER in classifiers:
+            tool_sc = data.get("tool", {}).get("spectrochempy", {})
+            if tool_sc.get("official-plugin") is True:
                 results.append(pyproject.parent.name)
         except Exception as exc:
             print(f"Warning: could not read {pyproject}: {exc}", file=sys.stderr)

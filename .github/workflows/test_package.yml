@@ -252,8 +252,6 @@ jobs:
           from pathlib import Path
           import tomllib
 
-          OFFICIAL = "Framework :: SpectroChemPy :: Official Plugin"
-
           official_plugins = []
           import_names = {}
           for d in sorted(Path("plugins").glob("spectrochempy-*/")):
@@ -262,7 +260,8 @@ jobs:
                   continue
               try:
                   data = tomllib.loads(pyproject.read_text())
-                  if OFFICIAL not in data.get("project", {}).get("classifiers", []):
+                  tool_sc = data.get("tool", {}).get("spectrochempy", {})
+                  if tool_sc.get("official-plugin") is not True:
                       continue
               except Exception:
                   continue

@@ -497,8 +497,15 @@ When multiple valid approaches exist, prefer the one requiring:
 # Python Environment
 
 Prefer using an existing Conda environment over creating ad-hoc venvs or
-relying on system paths.  If a Conda environment named ``scpy-core`` exists
+relying on system paths.  If a micromanba, mamba or conda environment named ``scpy-core`` exists
 (the project's test environment), use it for all Python and pytest commands:
+
+```bash
+micromamba run -n scpy-core python ...
+micromamba run -n scpy-core python -m pytest ...
+```
+
+or 
 
 ```bash
 conda run -n scpy-core python ...

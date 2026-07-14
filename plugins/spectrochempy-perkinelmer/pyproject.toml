@@ -9,7 +9,6 @@ description = "PerkinElmer file reader plugin for SpectroChemPy"
 requires-python = ">=3.11"
 readme = "README.md"
 classifiers = [
-    "Framework :: SpectroChemPy :: Official Plugin",
 ]
 dependencies = [
     "spectrochempy>=0.10,<0.12",
@@ -24,3 +23,6 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.spectrochempy]
+official-plugin = true
