@@ -51,11 +51,18 @@ jobs:
     if: github.repository == 'spectrochempy/spectrochempy'
 
     steps:
+      - name: Generate app token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.RELEASER_APP_ID }}
+          private-key: ${{ secrets.RELEASER_APP_PRIVATE_KEY }}
+
       - name: Checkout code
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
-          token: ${{ secrets.BOT_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Ensure running from master
         run: |
@@ -226,7 +233,7 @@ jobs:
             --notes "Release of ${{ inputs.plugin_name }} v${{ inputs.version }}." \
             --verify-tag
         env:
-          GH_TOKEN: ${{ secrets.BOT_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
 
       - name: Unset "Latest" flag for plugin release
         # Reserve the "Latest" badge on the repository front page for core
@@ -240,4 +247,4 @@ jobs:
             --repo "${{ github.repository }}" \
             --latest=false
         env:
-          GH_TOKEN: ${{ secrets.BOT_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}

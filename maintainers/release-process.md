@@ -13,7 +13,11 @@ du dépôt `spectrochempy/spectrochempy` :
 | Secret | Usage |
 |--------|-------|
 | `ANACONDA_API_TOKEN` | Publication sur Anaconda.org (compte `spectrocat`) — core + plugins |
-| `BOT_TOKEN` | PAT personnel utilisé pour contourner la protection de branche lors des releases de plugins (expire tous les 3 mois — penser à le renouveler et mettre à jour le secret) |
+| `RELEASER_APP_PRIVATE_KEY` | Clé privée de la GitHub App `spectrochempy-releaser` (pour contourner la protection de branche lors des releases de plugins) |
+
+| Variable | Usage |
+|----------|-------|
+| `RELEASER_APP_ID` | App ID de la GitHub App `spectrochempy-releaser` |
 
 > **Note PyPI** : le package **core** (`spectrochempy`) et les **plugins**
 > utilisent tous [Trusted Publishing](https://docs.pypi.org/trusted-publishers/)
@@ -434,7 +438,7 @@ confirm_zenodo_disabled: true   # ← doit être coché
      détecte qu'aucun changement n'est nécessaire et **saute les étapes
      de commit et de push** — le tag et la Release sont créés depuis le
      HEAD existant
-   - Pousse le commit sur `master` (via `BOT_TOKEN`) uniquement si un
+   - Pousse le commit sur `master` (via la GitHub App) uniquement si un
      bump de version a eu lieu
    - Crée le tag `spectrochempy-XXX-vX.Y.Z`
    - Crée une Release GitHub
@@ -576,9 +580,9 @@ entrées sont incorrectes car :
 
 ### Avant toute release
 
-- [ ] Vérifier que les secrets GitHub nécessaires sont valides et non expirés :
+- [ ] Vérifier que les secrets GitHub nécessaires sont valides :
       - Core : `ANACONDA_API_TOKEN` (Trusted Publishing PyPI ne nécessite pas de token secret)
-      - Plugins : `ANACONDA_API_TOKEN`, `BOT_TOKEN` (Trusted Publishing PyPI ne nécessite pas de token secret)
+      - Plugins : `ANACONDA_API_TOKEN`, `RELEASER_APP_PRIVATE_KEY` + `RELEASER_APP_ID` (Trusted Publishing PyPI ne nécessite pas de token secret)
 - [ ] Vérifier l'état des services externes (Zenodo, PyPI, Anaconda.org)
 - [ ] Lancer les tests CI sur la branche cible
 - [ ] Vérifier que le Colab smoke test passe (`install_on_colab.yml`)
@@ -605,7 +609,7 @@ entrées sont incorrectes car :
 
 ### Release des plugins
 
-- [ ] Vérifier que `BOT_TOKEN` est valide (expire tous les 3 mois)
+- [ ] Vérifier que la GitHub App `spectrochempy-releaser` est installée sur le repo
 - [ ] Désactiver l'intégration GitHub → Zenodo
 - [ ] Lancer **Release an official plugin** avec `confirm_zenodo_disabled=true`
 - [ ] Vérifier que le workflow termine sans erreur (commit sauté si version déjà à jour)

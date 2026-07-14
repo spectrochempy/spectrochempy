@@ -56,22 +56,18 @@ remote: - Changes must be made through a pull request.
 
 Le `GITHUB_TOKEN` automatique ne peut pas contourner les règles de
 protection de la branche `master`. Le workflow **Release an official plugin** (`release_plugin.yml`)
-   utilise `secrets.BOT_TOKEN` (un PAT personnel) pour le checkout, ce qui
+   utilise la GitHub App `spectrochempy-releaser` pour le checkout, ce qui
 permet de pusher.
 
-Si ce secret est expiré ou a été révoqué, le push est rejeté.
+Si l'app n'est plus installée ou si la clé privée a changé, le push est rejeté.
 
 ### Résolution
 
-1. Créer un nouveau **classic PAT** sur
-   [github.com/settings/tokens](https://github.com/settings/tokens) avec le
-   scope `repo`
-2. Mettre à jour le secret `BOT_TOKEN` dans
-   [Settings → Secrets → Actions](https://github.com/spectrochempy/spectrochempy/settings/secrets/actions)
+1. Vérifier que la GitHub App `spectrochempy-releaser` est toujours installée
+   sur le repo (Settings → GitHub Apps → Installed GitHub Apps)
+2. Vérifier que les secrets `RELEASER_APP_PRIVATE_KEY` et la variable
+   `RELEASER_APP_ID` sont à jour
 3. Relancer le workflow
-
-> **Note** : Les PAT arrivent à expiration après 3 mois. Ajouter un rappel
-> calendaire pour le renouvellement.
 
 ---
 
