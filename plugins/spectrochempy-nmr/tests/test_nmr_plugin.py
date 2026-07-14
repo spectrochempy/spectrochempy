@@ -235,3 +235,221 @@ def test_nmr_reader_is_not_dataset_accessor_namespace(monkeypatch):
     dataset = scp.NDDataset([1, 2, 3])
     assert not hasattr(dataset, "nmr")
     assert not hasattr(dataset, "read_topspin")
+
+
+# ---------------------------------------------------------------------------
+# Cross-vendor metadata extraction
+# ---------------------------------------------------------------------------
+
+
+class _MockMeta:
+    """Minimal metadata mock for testing extractors."""
+
+    def __init__(self, **kwargs):
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+    def __len__(self):
+        return 1
+
+
+class TestExtractJeolMetadata:
+    """Tests for extract_jeol_metadata."""
+
+    def test_1d_dataset(self):
+        from spectrochempy_nmr.nmr_metadata import extract_jeol_metadata
+
+        meta = _MockMeta(
+            td=("1024",),
+            isfreq=(True,),
+            encoding=("QF",),
+            nucleus=("1H",),
+            experiment="EXPERIMENT_1D",
+            datatype="FID",
+            iscomplex=(True,),
+            sw_h=(5000.0,),
+            sfrq=(400.0,),
+        )
+        result = extract_jeol_metadata(meta)
+        assert result.ndim == 1
+        assert result.domains == ("frequency",)
+        assert result.encoding == ("QF",)
+        assert result.nuclei == ("1H",)
+        assert result.pulse_program == "EXPERIMENT_1D"
+        assert result.source_kind == "processed_1d"
+
+    def test_none_meta(self):
+        from spectrochempy_nmr.nmr_metadata import extract_jeol_metadata
+
+        result = extract_jeol_metadata(None)
+        assert result.ndim == 0
+        assert result.domains == ()
+
+    def test_empty_meta(self):
+        from spectrochempy_nmr.nmr_metadata import extract_jeol_metadata
+
+        meta = _MockMeta()
+        result = extract_jeol_metadata(meta)
+        assert result.ndim == 0
+        assert result.domains == ()
+
+
+class TestExtractTecMagMetadata:
+    """Tests for extract_tecmag_metadata."""
+
+    def test_1d_dataset(self):
+        from spectrochempy_nmr.nmr_metadata import extract_tecmag_metadata
+
+        meta = _MockMeta(
+            td=("2048",),
+            isfreq=(False,),
+            encoding=("QSIM",),
+            nucleus=("13C",),
+            experiment="CPMG",
+            iscomplex=(True,),
+            sw_h=(10000.0,),
+            sfrq=(100.0,),
+        )
+        result = extract_tecmag_metadata(meta)
+        assert result.ndim == 1
+        assert result.domains == ("time",)
+        assert result.encoding == ("QSIM",)
+        assert result.nuclei == ("13C",)
+        assert result.pulse_program == "CPMG"
+        assert result.source_kind == "fid"
+
+    def test_none_meta(self):
+        from spectrochempy_nmr.nmr_metadata import extract_tecmag_metadata
+
+        result = extract_tecmag_metadata(None)
+        assert result.ndim == 0
+
+
+class TestExtractSimpsonMetadata:
+    """Tests for extract_simpson_metadata."""
+
+    def test_2d_dataset(self):
+        from spectrochempy_nmr.nmr_metadata import extract_simpson_metadata
+
+        meta = _MockMeta(
+            td=(256, 256),
+            isfreq=(True, True),
+            encoding=("States", "States"),
+            nucleus=("1H", "13C"),
+            iscomplex=(True, True),
+            sw_h=(5000.0, 10000.0),
+            sfrq=(400.0, 100.0),
+        )
+        result = extract_simpson_metadata(meta)
+        assert result.ndim == 2
+        assert result.domains == ("frequency", "frequency")
+        assert result.pulse_program is None
+        assert result.source_kind == "processed_2d"
+
+    def test_none_meta(self):
+        from spectrochempy_nmr.nmr_metadata import extract_simpson_metadata
+
+        result = extract_simpson_metadata(None)
+        assert result.ndim == 0
+
+
+class TestExtractNmrMetadataDispatcher:
+    """Tests for the vendor-neutral extract_nmr_metadata dispatcher."""
+
+    def test_dispatches_to_jeol(self):
+        from spectrochempy_nmr.nmr_metadata import extract_nmr_metadata
+
+        meta = _MockMeta(
+            origin="jeol",
+            td=("1024",),
+            isfreq=(True,),
+            encoding=("QF",),
+            nucleus=("1H",),
+            experiment="EXPERIMENT_1D",
+            datatype="FID",
+            iscomplex=(True,),
+            sw_h=(5000.0,),
+            sfrq=(400.0,),
+        )
+        result = extract_nmr_metadata(meta)
+        assert result.nuclei == ("1H",)
+        assert result.pulse_program == "EXPERIMENT_1D"
+
+    def test_dispatches_to_tecmag(self):
+        from spectrochempy_nmr.nmr_metadata import extract_nmr_metadata
+
+        meta = _MockMeta(
+            origin="tecmag",
+            td=("2048",),
+            isfreq=(False,),
+            encoding=("QSIM",),
+            nucleus=("13C",),
+            experiment="CPMG",
+            iscomplex=(True,),
+            sw_h=(10000.0,),
+            sfrq=(100.0,),
+        )
+        result = extract_nmr_metadata(meta)
+        assert result.nuclei == ("13C",)
+        assert result.pulse_program == "CPMG"
+
+    def test_dispatches_to_simpson(self):
+        from spectrochempy_nmr.nmr_metadata import extract_nmr_metadata
+
+        meta = _MockMeta(
+            origin="simpson",
+            td=(256, 256),
+            isfreq=(True, True),
+            encoding=("States", "States"),
+            nucleus=("1H", "13C"),
+            iscomplex=(True, True),
+            sw_h=(5000.0, 10000.0),
+            sfrq=(400.0, 100.0),
+        )
+        result = extract_nmr_metadata(meta)
+        assert result.pulse_program is None
+        assert result.source_kind == "processed_2d"
+
+    def test_dispatches_to_topspin(self):
+        from spectrochempy_nmr.nmr_metadata import extract_nmr_metadata
+
+        meta = _MockMeta(
+            origin="topspin",
+            ndim=1,
+            isfreq=(True,),
+            encoding=(4,),
+            nuc1=("1H",),
+            pulprog="zg30",
+            datatype="FID",
+            iscomplex=(False,),
+            sw_h=(5000.0,),
+            sfo1=(400.0,),
+        )
+        result = extract_nmr_metadata(meta)
+        assert result.pulse_program == "zg30"
+        assert result.encoding == ("STATES",)
+
+    def test_falls_back_to_topspin_for_unknown_origin(self):
+        from spectrochempy_nmr.nmr_metadata import extract_nmr_metadata
+
+        meta = _MockMeta(
+            origin="unknown_vendor",
+            ndim=1,
+            isfreq=(True,),
+            encoding=(4,),
+            nuc1=("1H",),
+            pulprog="hsqc",
+            iscomplex=(False,),
+            sw_h=(5000.0,),
+            sfo1=(400.0,),
+        )
+        result = extract_nmr_metadata(meta)
+        assert result.nuclei == ("1H",)
+        assert result.pulse_program == "hsqc"
+
+    def test_none_meta(self):
+        from spectrochempy_nmr.nmr_metadata import extract_nmr_metadata
+
+        result = extract_nmr_metadata(None)
+        assert result.ndim == 0
+        assert result.domains == ()

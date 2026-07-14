@@ -94,6 +94,10 @@ Bug Fixes
   Nucleus-string parsing and missing ``use_list`` files are handled gracefully.
   Dead comments and uncertain TODOs removed. (#1420, #1424)
 
+- ``scp.nmr.Experiment`` now correctly classifies non-Bruker datasets
+  (JEOL, TecMag, SIMPSON).  Previously, metadata extraction was hardcoded
+  to Bruker field names, causing silent misclassification of other formats.
+
 
 .. section
 
