@@ -150,6 +150,18 @@ def read_matlab(*paths, **kwargs):
     ``.select_largest()``, ``.select_by_name()``, ``.filter_by_ndim()``, or
     ``.filter_by_shape()``.
 
+    If the file matches the minimal exchange payload written by
+    :func:`spectrochempy.write_matlab` (i.e. it contains exactly the
+    ``data``, ``dims``, ``coords``, ``coord_units``, and ``coord_titles``
+    variables), a single `NDDataset` is reconstructed directly from those
+    fields instead of going through the generic per-variable import: values,
+    dimension names, coordinates (values, units, titles), name, title,
+    units, and description are all restored. Masked values are not
+    reconstructed, since the exchange payload stores them as plain ``NaN``
+    with no separate mask array; they come back unmasked. Any other `.mat`
+    file, including ones that only partially overlap this key set, is read
+    through the generic path described above.
+
     Examples
     --------
     Reading a single Matlab file
@@ -190,6 +202,59 @@ read_mat = read_matlab
 # --------------------------------------------------------------------------------------
 # Private methods
 # --------------------------------------------------------------------------------------
+_SCP_EXCHANGE_SIGNATURE = {"data", "dims", "coords", "coord_units", "coord_titles"}
+
+
+def _unwrap_str(value):
+    """Unwrap a scalar MATLAB char-array/cell entry back to a plain str."""
+    if hasattr(value, "item"):
+        value = value.item()
+    if isinstance(value, bytes):
+        return value.decode("utf-8", "ignore")
+    return str(value)
+
+
+def _read_scp_matlab_exchange(dic, filename):
+    """Reconstruct the NDDataset written by write_matlab()'s minimal exchange payload."""
+    dataset = NDDataset(np.asarray(dic["data"]))
+
+    dims = [_unwrap_str(d) for d in np.asarray(dic["dims"]).ravel()]
+
+    name = _unwrap_str(dic["name"][0]) if "name" in dic else ""
+    title = _unwrap_str(dic["title"][0]) if "title" in dic else ""
+    if name:
+        dataset.name = name
+    if title:
+        dataset.title = title
+    if "units" in dic:
+        dataset.units = _unwrap_str(dic["units"][0])
+    if "description" in dic:
+        dataset.description = _unwrap_str(dic["description"][0])
+
+    coords_struct = dic.get("coords")
+    units_struct = dic.get("coord_units")
+    titles_struct = dic.get("coord_titles")
+    coord_kwargs = {}
+    if coords_struct is not None and coords_struct.dtype.names:
+        for dim in dims:
+            if dim not in coords_struct.dtype.names:
+                continue
+            cdata = np.asarray(coords_struct[dim][0, 0]).ravel()
+            coord = Coord(data=cdata)
+            if units_struct is not None and dim in (units_struct.dtype.names or ()):
+                coord.units = _unwrap_str(units_struct[dim][0, 0])
+            if titles_struct is not None and dim in (titles_struct.dtype.names or ()):
+                coord.title = _unwrap_str(titles_struct[dim][0, 0])
+            coord_kwargs[dim] = coord
+    if coord_kwargs:
+        dataset.set_coordset(**coord_kwargs)
+
+    dataset.filename = filename
+    dataset.origin = "spectrochempy"
+    dataset.history = "Reconstructed from SpectroChemPy MATLAB exchange payload"
+    return dataset
+
+
 @_importer_method
 def _read_mat(*args, **kwargs):
     _, filename = args
@@ -198,6 +263,9 @@ def _read_mat(*args, **kwargs):
 
     dic = sio.loadmat(fid)
 
+    if _SCP_EXCHANGE_SIGNATURE <= dic.keys():
+        return [_read_scp_matlab_exchange(dic, filename)]
+    
     datasets = []
     for name, data in dic.items():
         dataset = NDDataset()
@@ -236,7 +304,7 @@ def _read_mat(*args, **kwargs):
             )
             continue
 
-        elif all(
+       elif data.dtype.names is not None and all(
             name_ in data.dtype.names for name_ in ["moddate", "axisscale", "imagesize"]
         ):
             # this is probably a DSO object
@@ -244,9 +312,12 @@ def _read_mat(*args, **kwargs):
             datasets.append(dataset)
 
         else:
-            warning_(f"unsupported data type : {data.dtype}")
-            # TODO: implement DSO reader
-            datasets.append([name, data])
+            warning_(
+                f"The mat file contains a variable named '{name}' with "
+                f"unsupported data type '{data.dtype}', which will not be "
+                "converted to NDDataset",
+            )
+            continue
 
     return datasets
 
