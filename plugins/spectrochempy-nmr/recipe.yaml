@@ -1,6 +1,6 @@
 context:
   name: spectrochempy-nmr
-  version: "0.1.7"
+  version: "0.11.0"
 
 package:
   name: "${{ name }}"
