@@ -11,16 +11,14 @@ import subprocess
 import sys
 from pathlib import Path
 
-OFFICIAL_CLASSIFIER = "Framework :: SpectroChemPy :: Official Plugin"
-
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
-def _read_classifiers(plugin_dir: Path) -> list[str]:
-    """Return classifiers from a plugin's pyproject.toml, or empty list."""
+def _is_official_plugin(plugin_dir: Path) -> bool:
+    """Check [tool.spectrochempy] official-plugin marker in pyproject.toml."""
     pyproject = plugin_dir / "pyproject.toml"
     if not pyproject.is_file():
-        return []
+        return False
     try:
         import tomllib
     except ImportError:
@@ -28,9 +26,10 @@ def _read_classifiers(plugin_dir: Path) -> list[str]:
 
     try:
         data = tomllib.loads(pyproject.read_text())
-        return data.get("project", {}).get("classifiers", [])
+        tool_sc = data.get("tool", {}).get("spectrochempy", {})
+        return tool_sc.get("official-plugin") is True
     except Exception:
-        return []
+        return False
 
 
 def _discover_plugins() -> dict[str, str]:
@@ -44,8 +43,7 @@ def _discover_plugins() -> dict[str, str]:
 
 
 def _is_official(plugin_name: str) -> bool:
-    classifiers = _read_classifiers(REPO_ROOT / "plugins" / plugin_name)
-    return OFFICIAL_CLASSIFIER in classifiers
+    return _is_official_plugin(REPO_ROOT / "plugins" / plugin_name)
 
 
 # Build mappings dynamically.

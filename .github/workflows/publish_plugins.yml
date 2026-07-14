@@ -2,8 +2,8 @@
 # - TestPyPI on pushes to test branches
 # - PyPI on published releases
 #
-# Official plugins are identified by the "Framework :: SpectroChemPy :: Official Plugin"
-# classifier in their pyproject.toml. Experimental plugins (e.g. spectrochempy-cantera)
+# Official plugins are identified by the [tool.spectrochempy] official-plugin marker
+# in their pyproject.toml. Experimental plugins (e.g. spectrochempy-cantera)
 # live in the repository but are NOT auto-published by this workflow — they must be
 # published manually or through a separate publish workflow.
 #
@@ -80,7 +80,6 @@ jobs:
           import json, tomllib, sys
           from pathlib import Path
 
-          OFFICIAL = 'Framework :: SpectroChemPy :: Official Plugin'
           plugins = []
           for d in sorted(Path('plugins').glob('*/')):
               name = d.name
@@ -92,9 +91,9 @@ jobs:
                   continue
               try:
                   data = tomllib.loads(pyproject.read_text())
-                  classifiers = data.get('project', {}).get('classifiers', [])
-                  if OFFICIAL not in classifiers:
-                      print(f'Skipping {name} (no Official Plugin classifier)', file=sys.stderr)
+                  tool_sc = data.get('tool', {}).get('spectrochempy', {})
+                  if tool_sc.get('official-plugin') is not True:
+                      print(f'Skipping {name} (not declared official)', file=sys.stderr)
                       continue
               except Exception:
                   continue

@@ -285,11 +285,17 @@ Each plugin:
 * registers through
   `[project.entry-points."spectrochempy.plugins"]`;
 * if it is an **official plugin** (published and maintained by the
-  SpectroChemPy team), must add
-  ``Framework :: SpectroChemPy :: Official Plugin`` to the
-  ``classifiers`` list in ``pyproject.toml`` — this classifier is the
-  sole registration point for CI workflows (publishing, testing, docs
-  builds, release validation).
+  SpectroChemPy team), must declare its official status via:
+
+  ```toml
+  [tool.spectrochempy]
+  official-plugin = true
+  ```
+
+  in its ``pyproject.toml`` — this marker is the sole registration point
+  for CI workflows (publishing, testing, docs builds, release validation).
+  Do **not** use a Trove classifier for this, as PyPI only accepts
+  registered classifiers.
 
 See:
 

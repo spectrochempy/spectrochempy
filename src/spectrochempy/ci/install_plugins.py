@@ -18,8 +18,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-OFFICIAL_CLASSIFIER = "Framework :: SpectroChemPy :: Official Plugin"
-
 
 def _find_root() -> Path:
     """Discover repository root by walking up from cwd or script location."""
@@ -34,7 +32,7 @@ def _find_root() -> Path:
 
 
 def _discover_plugins(plugins_dir: Path, *, official_only: bool = False) -> list[str]:
-    """Return sorted list of plugin directory names, optionally filtered by classifier."""
+    """Return sorted list of plugin directory names, optionally filtered by official marker."""
     try:
         import tomllib
     except ImportError:
@@ -46,8 +44,8 @@ def _discover_plugins(plugins_dir: Path, *, official_only: bool = False) -> list
         if official_only:
             try:
                 data = tomllib.loads(p.read_text())
-                classifiers = data.get("project", {}).get("classifiers", [])
-                if OFFICIAL_CLASSIFIER not in classifiers:
+                tool_sc = data.get("tool", {}).get("spectrochempy", {})
+                if tool_sc.get("official-plugin") is not True:
                     continue
             except Exception:
                 continue

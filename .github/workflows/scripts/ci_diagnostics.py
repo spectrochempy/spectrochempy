@@ -29,11 +29,9 @@ OPTIONAL_DEPENDENCIES = [
     "traitlets",
 ]
 
-OFFICIAL_CLASSIFIER = "Framework :: SpectroChemPy :: Official Plugin"
-
 
 def _discover_official_plugins() -> list[str]:
-    """Return official plugin distribution names by checking classifiers."""
+    """Return official plugin distribution names by checking [tool.spectrochempy]."""
     plugins_dir = Path("plugins")
     if not plugins_dir.is_dir():
         return []
@@ -47,8 +45,8 @@ def _discover_official_plugins() -> list[str]:
     for pyproject in sorted(plugins_dir.glob("spectrochempy-*/pyproject.toml")):
         try:
             data = tomllib.loads(pyproject.read_text())
-            classifiers = data.get("project", {}).get("classifiers", [])
-            if OFFICIAL_CLASSIFIER in classifiers:
+            tool_sc = data.get("tool", {}).get("spectrochempy", {})
+            if tool_sc.get("official-plugin") is True:
                 results.append(pyproject.parent.name)
         except Exception as exc:
             print(f"Warning: could not read {pyproject}: {exc}", file=sys.stderr)
