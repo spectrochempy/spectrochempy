@@ -29,6 +29,40 @@ du dépôt `spectrochempy/spectrochempy` :
 > owner `spectrochempy`, repository `spectrochempy`, workflow `publish_plugins.yml`,
 > environment laissé vide.
 
+### Règles de protection GitHub (rulesets) utilisées par les workflows de release
+
+La branche `master` est protégée par un **branch ruleset** au niveau du dépôt.
+
+Les PR ordinaires doivent satisfaire les checks requis configurés et les
+règles de review. La GitHub App `spectrochempy-releaser` est ajoutée à la
+liste de *bypass* du ruleset avec le niveau **Always allow**.
+
+Ce bypass est nécessaire car `release_plugin.yml` crée un commit de bump de
+version et le pousse directement sur `master` avant de créer le tag de
+release.
+
+La création et la suppression de tags sont protégées par des **tag rulesets**
+séparés. La GitHub App `spectrochempy-releaser` doit également figurer dans
+la liste de bypass de ces rulesets.
+
+> **Important** : ne pas conserver simultanément une ancienne **Branch
+> protection rule** (legacy) sur `master`. Les règles de dépôt sont
+> cumulatives, et une legacy rule continuerait de bloquer l'application de
+> release même si celle-ci contourne le branch ruleset.
+
+### Vérification après modification des règles
+
+Avant de lancer une release plugin :
+
+- [ ] Confirmer que le ruleset **Protect master** est actif
+- [ ] Confirmer que `spectrochempy-releaser` a le niveau **Always allow**
+      dans la liste de bypass
+- [ ] Confirmer que le tag ruleset de création permet à
+      `spectrochempy-releaser` de créer des tags
+- [ ] Confirmer qu'aucune legacy branch protection rule ne cible encore
+      `master`
+- [ ] Confirmer que la release est déclenchée depuis `master`
+
 ### Comptes externes
 
 - **Zenodo (core uniquement)** : l'intégration GitHub → Zenodo doit être activée sur le dépôt
@@ -609,6 +643,8 @@ entrées sont incorrectes car :
 
 ### Release des plugins
 
+- [ ] Vérifier le ruleset *Protect master* actif avec bypass `spectrochempy-releaser`
+- [ ] Vérifier qu'aucune legacy branch protection rule ne cible encore `master`
 - [ ] Vérifier que la GitHub App `spectrochempy-releaser` est installée sur le repo
 - [ ] Désactiver l'intégration GitHub → Zenodo
 - [ ] Lancer **Release an official plugin** avec `confirm_zenodo_disabled=true`
