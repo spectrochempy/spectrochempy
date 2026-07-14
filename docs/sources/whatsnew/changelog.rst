@@ -225,5 +225,14 @@ Developer
   ``mpl_show()`` calls with the canonical contract.  Multi-index loop
   behavior preserved using the same ``ax = None`` reset pattern as
   ``plot_parity``.  No public API change; helpers remain private.
-  Added 19 functional tests covering return type, ax reuse, clear/show
-  control, scale modes, titles, and error handling. (#1416)
+   Added 19 functional tests covering return type, ax reuse, clear/show
+   control, scale modes, titles, and error handling. (#1416)
+
+- MAINT: Replaced the invalid Trove classifier ``Framework :: SpectroChemPy
+  :: Official Plugin`` with a private ``[tool.spectrochempy]``
+  ``official-plugin = true`` marker in all official plugin ``pyproject.toml``
+  files and all CI/workflow scripts.  The classifier was never registered
+  with PyPI and caused ``400 Bad Request`` errors on upload.  The new marker
+  is the single registration point for CI (publishing, testing, release
+  validation).  Added ``validate_official_plugin.py`` and 9 structural tests.
+  (:pr:`XXXX`)

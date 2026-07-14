@@ -4,8 +4,6 @@ import importlib.util
 import sys
 from pathlib import Path
 
-import pytest
-
 SCRIPT_PATH = (
     Path(__file__).parents[3]
     / ".github"
@@ -39,9 +37,7 @@ def _write_plugin_pyproject(
     if keep_legacy_classifier:
         classifiers.append("Framework :: SpectroChemPy :: Official Plugin")
 
-    classifiers_str = (
-        ("\nclassifiers = " + repr(classifiers)) if classifiers else ""
-    )
+    classifiers_str = ("\nclassifiers = " + repr(classifiers)) if classifiers else ""
     tool_section = (
         "\n[tool.spectrochempy]\nofficial-plugin = true" if official_marker else ""
     )

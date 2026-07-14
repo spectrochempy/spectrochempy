@@ -29,6 +29,7 @@ OPTIONAL_DEPENDENCIES = [
     "traitlets",
 ]
 
+
 def _discover_official_plugins() -> list[str]:
     """Return official plugin distribution names by checking [tool.spectrochempy]."""
     plugins_dir = Path("plugins")

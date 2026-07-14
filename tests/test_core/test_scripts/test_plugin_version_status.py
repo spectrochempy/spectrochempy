@@ -104,7 +104,7 @@ def test_discover_official_plugins_with_marker(tmp_path, monkeypatch):
     official.mkdir()
     (official / "pyproject.toml").write_text(
         '[project]\nname = "spectrochempy-nmr"\n'
-        '[tool.spectrochempy]\nofficial-plugin = true\n'
+        "[tool.spectrochempy]\nofficial-plugin = true\n"
     )
 
     # Non-official plugin: no marker

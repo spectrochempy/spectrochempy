@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Validate that a plugin directory is declared as an official SpectroChemPy plugin.
+"""
+Validate that a plugin directory is declared as an official SpectroChemPy plugin.
 
 Usage::
 
@@ -12,6 +13,7 @@ Checks that ``pyproject.toml`` contains::
 
 Exits with code 0 on success, 1 on failure.
 """
+# ruff: noqa: T201
 
 from __future__ import annotations
 
