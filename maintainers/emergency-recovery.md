@@ -119,14 +119,12 @@ Le job `build-and-publish_pypi` échoue dans le workflow
 
 ### Vérifications
 
-1. **Trusted Publishing / OIDC** : le package core utilise
+1. **Trusted Publishing / OIDC** : le package core et les plugins utilisent
    [Trusted Publishing](https://docs.pypi.org/trusted-publishers/).
-   Il n'utilise **pas** `PYPI_API_TOKEN` ou `TEST_PYPI_API_TOKEN`.
+   Aucun secret API token n'est requis pour la publication sur PyPI/TestPyPI.
    Vérifier la configuration sur PyPI/TestPyPI :
-   - Aller sur les paramètres du projet `spectrochempy` sur PyPI
-   - Vérifier que le workflow `build_package.yml` du dépôt
-     `spectrochempy/spectrochempy` est bien listé dans Trusted Publishers
-   - L'environment `pypi` doit correspondre à celui du workflow
+   - Core : workflow `build_package.yml`, environment `release`
+   - Plugins : workflow `publish_plugins.yml`, environment vide
 2. **Permissions GitHub** : le workflow nécessite `contents: read`,
    `packages: write` et `id-token: write` dans les permissions du
    workflow
@@ -171,12 +169,12 @@ Le job `build-and-publish_plugins` échoue dans le workflow
 
 ### Vérifications
 
-1. **Token PyPI / TestPyPI** : les plugins utilisent les **API tokens** :
-   - `PYPI_API_TOKEN` pour PyPI
-   - `TEST_PYPI_API_TOKEN` pour TestPyPI
-   Vérifier qu'ils sont définis dans les
-   [secrets du dépôt](https://github.com/spectrochempy/spectrochempy/settings/secrets/actions)
-   et qu'ils n'ont pas expiré ou été révoqués
+1. **Trusted Publishing / OIDC** : les plugins utilisent
+   [Trusted Publishing](https://docs.pypi.org/trusted-publishers/) via
+   `publish_plugins.yml`.  Aucun secret API token n'est requis.
+   Vérifier la configuration sur PyPI/TestPyPI pour chaque plugin :
+   owner `spectrochempy`, repository `spectrochempy`,
+   workflow `publish_plugins.yml`, environment vide.
 2. **Version déjà publiée** : le workflow publie les plugins avec
    `skip-existing: true` sur TestPyPI et PyPI stable. Une version déjà
    publiée est donc ignorée, mais PyPI ne remplace jamais un artefact
