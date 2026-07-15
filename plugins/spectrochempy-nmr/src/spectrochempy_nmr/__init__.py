@@ -442,7 +442,7 @@ class NMRPlugin(SpectroChemPyPlugin):
     """NMR plugin, providing Bruker TopSpin, Agilent/Varian, JEOL, TecMag, and SIMPSON readers."""
 
     name = "nmr"
-    version = "0.11.0"
+    version = "0.1.8"
     description = "NMR readers and tools for SpectroChemPy"
     spectrochempy_min_version = "0.9.0"
     PLUGIN_API_VERSION = CORE_PLUGIN_API_VERSION
