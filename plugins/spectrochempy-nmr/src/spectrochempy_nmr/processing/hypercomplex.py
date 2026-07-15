@@ -1,4 +1,5 @@
-"""Hypercomplex representation adaptation layer for NMR 2D FFT.
+"""
+Hypercomplex representation adaptation layer for NMR 2D FFT.
 
 This module separates the quaternion → complex subspectra adaptation from
 the FFT transform. Each encoding scheme defines its own projection of the
@@ -25,11 +26,10 @@ Architecture:
 
 from __future__ import annotations
 
-import numpy as np
-
 
 def _extract_quaternion_components(data):
-    """Extract the four real components from a quaternion array.
+    """
+    Extract the four real components from a quaternion array.
 
     Parameters
     ----------
@@ -41,13 +41,25 @@ def _extract_quaternion_components(data):
     RR, RI, IR, II : ndarray
         The four real component arrays.
 
+    Raises
+    ------
+    ImportError
+        If spectrochempy-hypercomplex is not installed.
+
     Notes
     -----
     The numpy-quaternion convention is:
         as_float_array(q) → [..., 4] with order [w, x, y, z]
         w = RR, x = RI, y = IR, z = II
     """
-    from spectrochempy_hypercomplex import as_float_array  # noqa: PLC0415
+    try:
+        from spectrochempy_hypercomplex import as_float_array  # noqa: PLC0415
+    except ModuleNotFoundError:
+        msg = (
+            "2D hypercomplex NMR processing requires the spectrochempy-hypercomplex "
+            "plugin. Install it with: pip install spectrochempy-hypercomplex"
+        )
+        raise ImportError(msg) from None
 
     fa = as_float_array(data)
     RR = fa[..., 0]
@@ -58,7 +70,8 @@ def _extract_quaternion_components(data):
 
 
 def _prepare_states(RR, RI, IR, II):
-    """Prepare complex subspectra for STATES encoding.
+    """
+    Prepare complex subspectra for STATES encoding.
 
     Projection:
         sr = (RR - 1j * RI) / 2
@@ -80,7 +93,8 @@ def _prepare_states(RR, RI, IR, II):
 
 
 def _prepare_tppi(RR, RI, IR, II):
-    """Prepare complex subspectra for TPPI encoding.
+    """
+    Prepare complex subspectra for TPPI encoding.
 
     Projection:
         sx = RR + 1j * IR
@@ -102,7 +116,8 @@ def _prepare_tppi(RR, RI, IR, II):
 
 
 def _prepare_echoanti(RR, RI, IR, II):
-    """Prepare complex subspectra for Echo-Antiecho encoding.
+    """
+    Prepare complex subspectra for Echo-Antiecho encoding.
 
     Projection:
         c = (RR + IR) + 1j * (RR - IR)
@@ -124,7 +139,8 @@ def _prepare_echoanti(RR, RI, IR, II):
 
 
 def _rebuild_quaternion(fr, fi):
-    """Rebuild quaternion from two complex subspectra.
+    """
+    Rebuild quaternion from two complex subspectra.
 
     Parameters
     ----------
@@ -135,7 +151,19 @@ def _rebuild_quaternion(fr, fi):
     -------
     quaternion array
         Quaternion with components [fr.real, fr.imag, fi.real, fi.imag].
+
+    Raises
+    ------
+    ImportError
+        If spectrochempy-hypercomplex is not installed.
     """
-    from spectrochempy_hypercomplex import as_quaternion  # noqa: PLC0415
+    try:
+        from spectrochempy_hypercomplex import as_quaternion  # noqa: PLC0415
+    except ModuleNotFoundError:
+        msg = (
+            "2D hypercomplex NMR processing requires the spectrochempy-hypercomplex "
+            "plugin. Install it with: pip install spectrochempy-hypercomplex"
+        )
+        raise ImportError(msg) from None
 
     return as_quaternion(fr, fi)

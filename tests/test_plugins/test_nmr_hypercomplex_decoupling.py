@@ -38,14 +38,26 @@ def test_hypercomplex_public_api_is_exported():
 
 
 @pytest.mark.skipif(not _NMR_AVAILABLE, reason="spectrochempy-nmr not installed")
-def test_nmr_fft_encodings_use_public_hypercomplex_imports():
-    """NMR fft_encodings must not reach into hypercomplex private _quaternion."""
+def test_nmr_hypercomplex_rep_layer_uses_public_imports():
+    """NMR hypercomplex representation layer must not reach into private _quaternion."""
+    from spectrochempy_nmr.processing import hypercomplex
+
+    source = inspect.getsource(hypercomplex)
+    assert "spectrochempy_hypercomplex._quaternion" not in source
+    assert "from quaternion import" not in source
+    assert "from spectrochempy_hypercomplex import" in source
+
+
+@pytest.mark.skipif(not _NMR_AVAILABLE, reason="spectrochempy-nmr not installed")
+def test_nmr_fft_encodings_delegates_to_hypercomplex_rep_layer():
+    """NMR fft_encodings must delegate quaternion handling to hypercomplex rep layer."""
     from spectrochempy_nmr.processing import fft_encodings
 
     source = inspect.getsource(fft_encodings)
     assert "spectrochempy_hypercomplex._quaternion" not in source
     assert "from quaternion import" not in source
-    assert "from spectrochempy_hypercomplex import" in source
+    # fft_encodings now delegates to hypercomplex.py, not directly to spectrochempy_hypercomplex
+    assert "from spectrochempy_nmr.processing.hypercomplex import" in source
 
 
 @pytest.mark.skipif(not _NMR_AVAILABLE, reason="spectrochempy-nmr not installed")

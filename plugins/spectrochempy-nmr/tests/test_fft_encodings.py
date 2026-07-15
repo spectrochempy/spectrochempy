@@ -660,7 +660,9 @@ class TestHypercomplexRepresentation:
 
     def test_extract_quaternion_components(self):
         """_extract_quaternion_components should return (RR, RI, IR, II)."""
-        from spectrochempy_nmr.processing.hypercomplex import _extract_quaternion_components
+        from spectrochempy_nmr.processing.hypercomplex import (
+            _extract_quaternion_components,
+        )
 
         nf1, nf2 = 4, 8
         RR = np.ones((nf1, nf2)) * 1.0
@@ -725,8 +727,8 @@ class TestHypercomplexRepresentation:
         # Manual decomposition + FFT
         from spectrochempy_nmr.processing.hypercomplex import (
             _extract_quaternion_components,
-            _prepare_states,
         )
+        from spectrochempy_nmr.processing.hypercomplex import _prepare_states
 
         RR, RI, IR, II = _extract_quaternion_components(data)
         sr, si = _prepare_states(RR, RI, IR, II)
@@ -749,8 +751,8 @@ class TestHypercomplexRepresentation:
 
         from spectrochempy_nmr.processing.hypercomplex import (
             _extract_quaternion_components,
-            _prepare_tppi,
         )
+        from spectrochempy_nmr.processing.hypercomplex import _prepare_tppi
 
         RR, RI, IR, II = _extract_quaternion_components(data)
         sx, sy = _prepare_tppi(RR, RI, IR, II)
@@ -774,8 +776,8 @@ class TestHypercomplexRepresentation:
 
         from spectrochempy_nmr.processing.hypercomplex import (
             _extract_quaternion_components,
-            _prepare_echoanti,
         )
+        from spectrochempy_nmr.processing.hypercomplex import _prepare_echoanti
 
         RR, RI, IR, II = _extract_quaternion_components(data)
         c, s = _prepare_echoanti(RR, RI, IR, II)

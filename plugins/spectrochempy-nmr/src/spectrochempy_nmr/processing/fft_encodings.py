@@ -1,4 +1,5 @@
-"""NMR-specific 2D FFT encodings (STATES, TPPI, ECHO-ANTIECHO).
+"""
+NMR-specific 2D FFT encodings (STATES, TPPI, ECHO-ANTIECHO).
 
 Each encoding handler receives quaternion data and returns quaternion data.
 The quaternion → complex subspectra adaptation is delegated to the
@@ -17,11 +18,9 @@ import numpy as np
 
 def _states_fft(data, tppi=False):
     """FFT transform according to STATES encoding."""
-    from spectrochempy_nmr.processing.hypercomplex import (
-        _extract_quaternion_components,
-        _prepare_states,
-        _rebuild_quaternion,
-    )
+    from spectrochempy_nmr.processing.hypercomplex import _extract_quaternion_components
+    from spectrochempy_nmr.processing.hypercomplex import _prepare_states
+    from spectrochempy_nmr.processing.hypercomplex import _rebuild_quaternion
 
     RR, RI, IR, II = _extract_quaternion_components(data)
     sr, si = _prepare_states(RR, RI, IR, II)
@@ -38,11 +37,9 @@ def _states_fft(data, tppi=False):
 
 def _echoanti_fft(data):
     """FFT transform according to ECHO-ANTIECHO encoding."""
-    from spectrochempy_nmr.processing.hypercomplex import (
-        _extract_quaternion_components,
-        _prepare_echoanti,
-        _rebuild_quaternion,
-    )
+    from spectrochempy_nmr.processing.hypercomplex import _extract_quaternion_components
+    from spectrochempy_nmr.processing.hypercomplex import _prepare_echoanti
+    from spectrochempy_nmr.processing.hypercomplex import _rebuild_quaternion
 
     RR, RI, IR, II = _extract_quaternion_components(data)
     c, s = _prepare_echoanti(RR, RI, IR, II)
@@ -54,11 +51,9 @@ def _echoanti_fft(data):
 
 def _tppi_fft(data):
     """FFT transform according to TPPI encoding."""
-    from spectrochempy_nmr.processing.hypercomplex import (
-        _extract_quaternion_components,
-        _prepare_tppi,
-        _rebuild_quaternion,
-    )
+    from spectrochempy_nmr.processing.hypercomplex import _extract_quaternion_components
+    from spectrochempy_nmr.processing.hypercomplex import _prepare_tppi
+    from spectrochempy_nmr.processing.hypercomplex import _rebuild_quaternion
 
     RR, RI, IR, II = _extract_quaternion_components(data)
     sx, sy = _prepare_tppi(RR, RI, IR, II)
