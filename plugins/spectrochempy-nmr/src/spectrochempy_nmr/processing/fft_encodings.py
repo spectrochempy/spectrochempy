@@ -1,4 +1,14 @@
-"""NMR-specific 2D FFT encodings (STATES, TPPI, ECHO-ANTIECHO)."""
+"""NMR-specific 2D FFT encodings (STATES, TPPI, ECHO-ANTIECHO).
+
+Each encoding handler receives quaternion data and returns quaternion data.
+The quaternion → complex subspectra adaptation is delegated to the
+hypercomplex representation layer (hypercomplex.py).
+
+The handler only performs:
+    1. Encoding-specific processing (sign alternation)
+    2. Standard complex FFT
+    3. Quaternion reconstruction
+"""
 
 from __future__ import annotations
 
@@ -7,17 +17,14 @@ import numpy as np
 
 def _states_fft(data, tppi=False):
     """FFT transform according to STATES encoding."""
-    from spectrochempy_hypercomplex import as_float_array  # noqa: PLC0415
-    from spectrochempy_hypercomplex import as_quaternion  # noqa: PLC0415
+    from spectrochempy_nmr.processing.hypercomplex import (
+        _extract_quaternion_components,
+        _prepare_states,
+        _rebuild_quaternion,
+    )
 
-    # warning: at this point, data must have been swapped so the last dimension is the one used for FFT
-    wt, yt, xt, zt = as_float_array(
-        data
-    ).T  # x and y are exchanged due to swapping of dims
-    w, y, x, z = wt.T, yt.T, xt.T, zt.T
-
-    sr = (w - 1j * y) / 2.0
-    si = (x - 1j * z) / 2.0
+    RR, RI, IR, II = _extract_quaternion_components(data)
+    sr, si = _prepare_states(RR, RI, IR, II)
 
     if tppi:
         sr[..., 1::2] = -sr[..., 1::2]
@@ -26,44 +33,43 @@ def _states_fft(data, tppi=False):
     fr = np.fft.fftshift(np.fft.fft(sr), -1)
     fi = np.fft.fftshift(np.fft.fft(si), -1)
 
-    # rebuild the quaternion
-    return as_quaternion(fr, fi)
+    return _rebuild_quaternion(fr, fi)
 
 
 def _echoanti_fft(data):
     """FFT transform according to ECHO-ANTIECHO encoding."""
-    from spectrochempy_hypercomplex import as_float_array  # noqa: PLC0415
-    from spectrochempy_hypercomplex import as_quaternion  # noqa: PLC0415
+    from spectrochempy_nmr.processing.hypercomplex import (
+        _extract_quaternion_components,
+        _prepare_echoanti,
+        _rebuild_quaternion,
+    )
 
-    wt, yt, xt, zt = as_float_array(data).T
-    w, y, x, z = wt.T, xt.T, yt.T, zt.T
+    RR, RI, IR, II = _extract_quaternion_components(data)
+    c, s = _prepare_echoanti(RR, RI, IR, II)
 
-    c = (w + y) + 1j * (w - y)
-    s = (x + z) - 1j * (x - z)
     fc = np.fft.fftshift(np.fft.fft(c / 2.0), -1)
     fs = np.fft.fftshift(np.fft.fft(s / 2.0), -1)
-    return as_quaternion(fc, fs)
+    return _rebuild_quaternion(fc, fs)
 
 
 def _tppi_fft(data):
     """FFT transform according to TPPI encoding."""
-    from spectrochempy_hypercomplex import as_float_array  # noqa: PLC0415
-    from spectrochempy_hypercomplex import as_quaternion  # noqa: PLC0415
+    from spectrochempy_nmr.processing.hypercomplex import (
+        _extract_quaternion_components,
+        _prepare_tppi,
+        _rebuild_quaternion,
+    )
 
-    wt, yt, xt, zt = as_float_array(data).T
-    w, y, x, z = wt.T, xt.T, yt.T, zt.T
-
-    sx = w + 1j * y
-    sy = x + 1j * z
+    RR, RI, IR, II = _extract_quaternion_components(data)
+    sx, sy = _prepare_tppi(RR, RI, IR, II)
 
     sx[..., 1::2] = -sx[..., 1::2]
     sy[..., 1::2] = -sy[..., 1::2]
 
-    fx = np.fft.fftshift(np.fft.fft(sx), -1)  # reverse
+    fx = np.fft.fftshift(np.fft.fft(sx), -1)
     fy = np.fft.fftshift(np.fft.fft(sy), -1)
 
-    # rebuild the quaternion
-    return as_quaternion(fx, fy)
+    return _rebuild_quaternion(fx, fy)
 
 
 def _qf_fft(data):

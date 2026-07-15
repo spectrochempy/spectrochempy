@@ -641,3 +641,149 @@ class Test2DPipeline:
             f"Peaks should be symmetric around center {center}: "
             f"STATES-TPPI={peak_tp}, TPPI={peak_tppi}"
         )
+
+
+# ---------------------------------------------------------------------------
+# Hypercomplex representation layer
+# ---------------------------------------------------------------------------
+
+
+class TestHypercomplexRepresentation:
+    """
+    Tests for the hypercomplex representation adaptation layer.
+
+    These tests verify that:
+    - _extract_quaternion_components extracts (RR, RI, IR, II) correctly
+    - _prepare_states, _prepare_tppi, _prepare_echoanti produce correct subspectra
+    - The handlers produce identical results after refactoring
+    """
+
+    def test_extract_quaternion_components(self):
+        """_extract_quaternion_components should return (RR, RI, IR, II)."""
+        from spectrochempy_nmr.processing.hypercomplex import _extract_quaternion_components
+
+        nf1, nf2 = 4, 8
+        RR = np.ones((nf1, nf2)) * 1.0
+        RI = np.ones((nf1, nf2)) * 2.0
+        IR = np.ones((nf1, nf2)) * 3.0
+        II = np.ones((nf1, nf2)) * 4.0
+        data = _make_quat(np.stack([RR, RI, IR, II], axis=-1))
+
+        rr, ri, ir, ii = _extract_quaternion_components(data)
+        assert_allclose(rr, 1.0)
+        assert_allclose(ri, 2.0)
+        assert_allclose(ir, 3.0)
+        assert_allclose(ii, 4.0)
+
+    def test_prepare_states_formula(self):
+        """_prepare_states should compute (RR - 1j*RI)/2 and (IR - 1j*II)/2."""
+        from spectrochempy_nmr.processing.hypercomplex import _prepare_states
+
+        RR = np.array([1.0])
+        RI = np.array([2.0])
+        IR = np.array([3.0])
+        II = np.array([4.0])
+
+        sr, si = _prepare_states(RR, RI, IR, II)
+        assert_allclose(sr, (1.0 - 1j * 2.0) / 2.0)
+        assert_allclose(si, (3.0 - 1j * 4.0) / 2.0)
+
+    def test_prepare_tppi_formula(self):
+        """_prepare_tppi should compute RR + 1j*IR and RI + 1j*II."""
+        from spectrochempy_nmr.processing.hypercomplex import _prepare_tppi
+
+        RR = np.array([1.0])
+        RI = np.array([2.0])
+        IR = np.array([3.0])
+        II = np.array([4.0])
+
+        sx, sy = _prepare_tppi(RR, RI, IR, II)
+        assert_allclose(sx, 1.0 + 1j * 3.0)
+        assert_allclose(sy, 2.0 + 1j * 4.0)
+
+    def test_prepare_echoanti_formula(self):
+        """_prepare_echoanti should compute (RR+IR)+1j*(RR-IR) and (RI+II)-1j*(RI-II)."""
+        from spectrochempy_nmr.processing.hypercomplex import _prepare_echoanti
+
+        RR = np.array([1.0])
+        RI = np.array([2.0])
+        IR = np.array([3.0])
+        II = np.array([4.0])
+
+        c, s = _prepare_echoanti(RR, RI, IR, II)
+        assert_allclose(c, (1.0 + 3.0) + 1j * (1.0 - 3.0))
+        assert_allclose(s, (2.0 + 4.0) - 1j * (2.0 - 4.0))
+
+    def test_handler_matches_manual_decomposition(self):
+        """Handler output should match manual decomposition + FFT."""
+        nf1, nf2 = 8, 16
+        data = _make_states_data(nf1, nf2, 2.0, 5.0)
+
+        # Handler result
+        result = _states_fft(data)
+
+        # Manual decomposition + FFT
+        from spectrochempy_nmr.processing.hypercomplex import (
+            _extract_quaternion_components,
+            _prepare_states,
+        )
+
+        RR, RI, IR, II = _extract_quaternion_components(data)
+        sr, si = _prepare_states(RR, RI, IR, II)
+        fr = np.fft.fftshift(np.fft.fft(sr), -1)
+        fi = np.fft.fftshift(np.fft.fft(si), -1)
+
+        # Compare
+        fa = as_float_array(result)
+        assert_allclose(fa[..., 0], fr.real, atol=1e-10)
+        assert_allclose(fa[..., 1], fr.imag, atol=1e-10)
+        assert_allclose(fa[..., 2], fi.real, atol=1e-10)
+        assert_allclose(fa[..., 3], fi.imag, atol=1e-10)
+
+    def test_handler_tppi_matches_manual(self):
+        """TPPI handler output should match manual decomposition + FFT."""
+        nf1, nf2 = 8, 16
+        data = _make_tppi_data(nf1, nf2, 2.0, 5.0)
+
+        result = _tppi_fft(data)
+
+        from spectrochempy_nmr.processing.hypercomplex import (
+            _extract_quaternion_components,
+            _prepare_tppi,
+        )
+
+        RR, RI, IR, II = _extract_quaternion_components(data)
+        sx, sy = _prepare_tppi(RR, RI, IR, II)
+        sx[..., 1::2] = -sx[..., 1::2]
+        sy[..., 1::2] = -sy[..., 1::2]
+        fx = np.fft.fftshift(np.fft.fft(sx), -1)
+        fy = np.fft.fftshift(np.fft.fft(sy), -1)
+
+        fa = as_float_array(result)
+        assert_allclose(fa[..., 0], fx.real, atol=1e-10)
+        assert_allclose(fa[..., 1], fx.imag, atol=1e-10)
+        assert_allclose(fa[..., 2], fy.real, atol=1e-10)
+        assert_allclose(fa[..., 3], fy.imag, atol=1e-10)
+
+    def test_handler_echoanti_matches_manual(self):
+        """Echo-Antiecho handler output should match manual decomposition + FFT."""
+        nf1, nf2 = 8, 16
+        data = _make_echoanti_data(nf1, nf2, 2.0, 5.0)
+
+        result = _echoanti_fft(data)
+
+        from spectrochempy_nmr.processing.hypercomplex import (
+            _extract_quaternion_components,
+            _prepare_echoanti,
+        )
+
+        RR, RI, IR, II = _extract_quaternion_components(data)
+        c, s = _prepare_echoanti(RR, RI, IR, II)
+        fc = np.fft.fftshift(np.fft.fft(c / 2.0), -1)
+        fs = np.fft.fftshift(np.fft.fft(s / 2.0), -1)
+
+        fa = as_float_array(result)
+        assert_allclose(fa[..., 0], fc.real, atol=1e-10)
+        assert_allclose(fa[..., 1], fc.imag, atol=1e-10)
+        assert_allclose(fa[..., 2], fs.real, atol=1e-10)
+        assert_allclose(fa[..., 3], fs.imag, atol=1e-10)
