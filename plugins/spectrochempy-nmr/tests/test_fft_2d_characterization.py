@@ -1,6 +1,6 @@
 # ruff: noqa: S101
 """
-2D FFT Chain Characterization — PR3
+2D FFT Chain Characterization.
 
 This module traces the complete 2D FFT chain step by step on a synthetic
 SER (Serial Experiment Result) with a single known peak. Each step is
@@ -26,13 +26,9 @@ from __future__ import annotations
 import numpy as np
 import pytest
 from numpy.testing import assert_allclose
-from spectrochempy_nmr.processing.hypercomplex import (
-    _extract_quaternion_components,
-    _prepare_echoanti,
-    _prepare_states,
-    _prepare_tppi,
-    _rebuild_quaternion,
-)
+from spectrochempy_nmr.processing.hypercomplex import _extract_quaternion_components
+from spectrochempy_nmr.processing.hypercomplex import _prepare_states
+from spectrochempy_nmr.processing.hypercomplex import _rebuild_quaternion
 
 quaternion = pytest.importorskip("quaternion", reason="requires numpy-quaternion")
 as_float_array = quaternion.as_float_array
@@ -241,7 +237,7 @@ class TestStep3FFTF2:
 
         # FFT F2
         fr = np.fft.fftshift(np.fft.fft(sr, axis=-1), axes=-1)
-        fi = np.fft.fftshift(np.fft.fft(si, axis=-1), axes=-1)
+        _ = np.fft.fftshift(np.fft.fft(si, axis=-1), axes=-1)
 
         # sr = cos(w1*t1) * exp(-1j*w2*t2) / 2
         # FFT of exp(-1j*w2*t2) gives a delta at frequency -f2
@@ -337,8 +333,12 @@ class TestStep4FFTF1:
         center_f2 = nf2 // 2
 
         for p in peaks:
-            assert abs(p[0] - center_f1) <= nf1 // 4, f"Peak at F1={p[0]} too far from center"
-            assert abs(p[1] - center_f2) <= nf2 // 4, f"Peak at F2={p[1]} too far from center"
+            assert (
+                abs(p[0] - center_f1) <= nf1 // 4
+            ), f"Peak at F1={p[0]} too far from center"
+            assert (
+                abs(p[1] - center_f2) <= nf2 // 4
+            ), f"Peak at F2={p[1]} too far from center"
 
 
 # ---------------------------------------------------------------------------
@@ -377,8 +377,12 @@ class TestStep5FullPipeline:
         expected_f1 = (nf1 // 2 - int(f1_freq)) % nf1
         expected_f2 = (nf2 // 2 - int(f2_freq)) % nf2
 
-        assert abs(peak[0] - expected_f1) <= 1, f"F1 peak at {peak[0]}, expected {expected_f1}"
-        assert abs(peak[1] - expected_f2) <= 1, f"F2 peak at {peak[1]}, expected {expected_f2}"
+        assert (
+            abs(peak[0] - expected_f1) <= 1
+        ), f"F1 peak at {peak[0]}, expected {expected_f1}"
+        assert (
+            abs(peak[1] - expected_f2) <= 1
+        ), f"F2 peak at {peak[1]}, expected {expected_f2}"
 
     def test_full_pipeline_preserves_energy(self):
         """Full pipeline should preserve total energy (Parseval's theorem)."""
@@ -398,7 +402,7 @@ class TestStep5FullPipeline:
         f1_fi = np.fft.fftshift(np.fft.fft(fi, axis=0), axes=0)
 
         # Energy in frequency domain
-        energy_fd = np.sum(np.abs(f1_fr)**2 + np.abs(f1_fi)**2)
+        energy_fd = np.sum(np.abs(f1_fr) ** 2 + np.abs(f1_fi) ** 2)
 
         # Parseval's theorem: energy should be preserved (within numerical precision)
         # Note: the /2 factors in the STATES decomposition affect the scaling
@@ -415,7 +419,8 @@ class TestStep6ComparisonWithManual:
     """Step 6: Verify that the pipeline matches the manual workflow."""
 
     def test_pipeline_matches_manual_workflow(self):
-        """Full pipeline should produce same peak as manual 2D workflow.
+        """
+        Full pipeline should produce same peak as manual 2D workflow.
 
         Both decompositions are valid: the pipeline uses the standard STATES
         convention (sr = (RR - 1j*RI)/2, si = (IR - 1j*II)/2) while the
@@ -464,6 +469,4 @@ class TestStep6ComparisonWithManual:
         ), f"Peak positions differ: pipeline={pipe_peak}, manual={manual_peak}"
 
         # Both should have comparable peak magnitudes
-        assert_allclose(
-            pipe_mag[pipe_peak], manual_mag[manual_peak], rtol=0.1
-        )
+        assert_allclose(pipe_mag[pipe_peak], manual_mag[manual_peak], rtol=0.1)
