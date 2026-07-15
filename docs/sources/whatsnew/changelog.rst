@@ -41,26 +41,11 @@ New Features
   from the ``data-extra`` branch of the ``spectrochempy_data`` repository.
   Extra data is cloned into ``~/.spectrochempy/testdata-extra/``. (:pr:`1418`)
 
-- Added Agilent/Varian NMR reader (``scp.nmr.read_agilent``) supporting 1D FID
-  and multidimensional data.  Reads binary ``fid`` and ``procpar`` files using
-  vendored NMRGlue code.  Includes ``extract_agilent_metadata`` for canonical
-  metadata extraction.  Registered as a new reader in the NMR plugin.
-
-- Added JEOL JDF reader (``scp.nmr.read_jeol``) supporting 1D and 2D NMR data.
-  Reads ``.jdf`` files using vendored NMRGlue code.  Supports automatic format
-  detection from file extension and protocol-based dispatch.  Registered as a
-  new reader in the NMR plugin.
-
-- Added TecMag TNT reader (``scp.nmr.read_tecmag``) supporting 1D and 2D NMR
-  data.  Reads ``.tnt`` files using vendored NMRGlue code.  Supports automatic
-  format detection from file extension and protocol-based dispatch.  Registered
-  as a new reader in the NMR plugin.
-
-- Added SIMPSON reader (``scp.nmr.read_simpson``) supporting 1D and 2D NMR
-  simulation data.  Reads SIMPSON ``TEXT``, ``XREIM``, ``XYREIM``, ``BINARY``
-  and ``RAWBIN`` formats.  Supports automatic format detection from file
-  content and ``.in`` file metadata parsing.  Registered as a new reader in the
-  NMR plugin.
+- Added four new NMR format readers in the NMR plugin: Agilent/Varian
+  (``scp.nmr.read_agilent``, binary ``fid`` + ``procpar``), JEOL JDF
+  (``scp.nmr.read_jeol``), TecMag TNT (``scp.nmr.read_tecmag``), and
+  SIMPSON (``scp.nmr.read_simpson``, ``TEXT``/``BINARY``/``RAWBIN`` formats).
+  All use vendored NMRGlue code and support automatic format detection.
 
 - Added plugin-contributed I/O namespaces for NMR and PerkinElmer readers.
   ``scp.topspin.read`` and ``scp.agilent.read`` now expose the format-specific
@@ -130,12 +115,11 @@ Deprecations
 ~~~~~~~~~~~~
 .. Add here new deprecations (do not delete this comment)
 
-- ``MCRALS.solverConc`` is deprecated; use ``solver_C`` instead.
-- ``MCRALS.solverSpec`` is deprecated; use ``solver_St`` instead.
-
-- Legacy MCR-ALS constraint traitlet parameters (``nonnegConc``,
-  ``unimodConc``, ``closureConc``, etc.) are deprecated; use the
-  ``constraints`` API instead.
+- MCRALS solver and constraint API has been modernized: ``solverConc`` is
+  deprecated in favor of ``solver_C``, ``solverSpec`` in favor of
+  ``solver_St``, and legacy constraint traitlet parameters
+  (``nonnegConc``, ``unimodConc``, ``closureConc``, …) are replaced by
+  the unified ``constraints`` API.
 
 - ``AnalysisBase.plotmerit`` alias is deprecated; use ``plot_merit``
   instead.  ``plotmerit`` will be removed in version 0.12.
@@ -155,78 +139,40 @@ Developer
 
 - DOC: Improved example gallery to showcase SpectroChemPy-native idioms
   (``Coord.linspace``, ``Coord.arange``, ``scp.abs``) for coordinate creation
-   and dataset operations, replacing redundant ``np.linspace`` + ``Coord``
-   wrapping patterns, ``np.abs`` usage, list-comprehension synthetic data
-   generators (``scp.fromfunction``), ``np.random.normal`` on datasets
-   (``scp.normal``), ``np.arange`` wrapped in NDDataset (``scp.arange``),
-   and ``np.random.rand`` + NDDataset constructor (``NDDataset.random``).
-   Also updated API docstring examples to use ``scp.gaussian``,
-   ``Coord.linspace``, ``scp.arange``, and ``NDDataset.random``
-   instead of raw NumPy equivalents. (#1370)
+  and dataset operations, replacing redundant ``np.linspace`` + ``Coord``
+  wrapping patterns, ``np.abs`` usage, list-comprehension synthetic data
+  generators (``scp.fromfunction``), ``np.random.normal`` on datasets
+  (``scp.normal``), ``np.arange`` wrapped in NDDataset (``scp.arange``),
+  and ``np.random.rand`` + NDDataset constructor (``NDDataset.random``).
+  Also updated API docstring examples to use ``scp.gaussian``,
+  ``Coord.linspace``, ``scp.arange``, and ``NDDataset.random``
+  instead of raw NumPy equivalents. (#1370)
 
-- MAINT: Mutualized the duplicated figure/axes/show lifecycle across
-  the five composite plot functions (``plot_score``, ``plot_scree``,
-  ``plot_compare``, ``plot_merit``,   ``plot_baseline``) into shared
-  ``_setup_axes`` and ``_maybe_show`` helpers in ``mplutils.py``.
+- MAINT: Unified the plotting lifecycle across core and plugin composite
+  functions (``plot_score``, ``plot_scree``, ``plot_compare``,
+  ``plot_merit``, ``plot_baseline``, ``plot_parity``, ``plot_multiple``,
+  and IRIS ``plot_iris_*``).  Extracted shared ``_setup_axes``/``_maybe_show``
+  helpers into ``mplutils.py``, replacing duplicated figure/axes/show
+  boilerplate.  Removed all ``plt.*`` global calls.  ``plot_parity``
+  (formerly ``parityplot``) extracted from ``CrossDecompositionAnalysis``
+  into a standalone function; ``plot_multiple`` gains ``ax``, ``clear``,
+  ``show`` parameters.  Style parameters (``marker``, ``s``, ``alpha``)
+  and kwargs normalization (``color``/``c``, ``linestyle``/``ls``, …)
+  integrated into composite plots.  Removed the non-functional Plotly/Dash
+  backend (never a declared dependency).  31 structural and functional
+  tests added. (#1412, #1413, #1414, #1416)
 
 - MAINT: Extracted generic nmrglue utilities (``create_blank_udic``,
   ``unit_conversion``, ``uc_from_udic``, ``reorder_submatrix``,
-  ``uc_from_freqscale``, ``index2trace_*``, ``trace2index_*``,
-  ``complexify_data``, ``uncomplexify_data``, ND array iterators)
-  from ``_bruker.py`` into a shared ``_base.py`` module.  Updated
-  ``_varian.py`` and ``_jeol.py`` to import from ``_base`` instead
-  of ``_bruker``, eliminating cross-reader coupling.
-  Added 38 structural contract tests verifying the lifecycle behavior.
-  No public API change. (#1408)
+  ``complexify_data``, ``uncomplexify_data``, ND array iterators, …)
+  from ``_bruker.py`` into a shared ``_base.py`` module, eliminating
+  cross-reader coupling between Bruker, Varian, and JEOL. (#1408)
 
 - DOC: Documented the three-layer plotting architecture (scientific objects →
   composite plotters → dataset plotting) in the developer guide.  Updated API
-  reference to include composite functions (``plot_score``, ``plot_scree``,
-  ``plot_compare``, ``plot_merit``, ``plot_baseline``, ``plot_parity``) as
-  top-level entries.  Added composite plot customization section to the user
-  guide covering ``marker``/``s``/``alpha`` for ``plot_score``, kwargs
-  normalization for ``plot_compare``/``plot_merit``, scatter parameters for
-  ``plot_parity``, and the ``ax``/``clear``/``show`` lifecycle contract.
-  Exposed ``plot_merit``, ``plot_baseline``, and ``plot_parity`` at top-level
-  ``scp.*``.  Renamed ``parityplot`` → ``plot_parity`` for naming
-  consistency (deprecated alias retained).  Updated analysis wrapper
-  docstrings on ``PCA.plot_score`` and
-  ``DecompositionAnalysis.plot_merit``.  Deprecated
+  reference to include composite functions as top-level entries.  Added
+  composite plot customization section to the user guide.  Deprecated
   ``AnalysisBase.plotmerit`` in favor of ``plot_merit``. (#1415)
-
-- ENH: Integrated style parameters (``marker``, ``s``, ``alpha``) and kwargs
-  normalization (``color``/``c``, ``linestyle``/``ls``, ``linewidth``/``lw``,
-  ``marker`` aliases) into composite plot functions ``plot_score``,
-  ``plot_compare``, and ``plot_merit``.  Composite functions now respect the
-  same style priority chain as dataset plots (explicit params > defaults >
-  preferences > rcParams). (#1412)
-
-- MAINT: Removed the experimental Plotly/Dash plotting backend that was
-  never functional.  The ``use_plotly`` preference, kwarg, and commented-out
-  ``core/plotters/plotly.py`` are deleted.  The ``get_plotly_figure`` utility
-  is removed from ``mplutils``.  No external dependency is affected — Plotly
-  was never a declared dependency. (#1413)
-
-- MAINT: Aligned ``plot_parity`` (formerly ``parityplot``) and
-  ``plot_multiple`` with the shared plotting lifecycle conventions.
-  ``plot_parity`` is extracted from ``CrossDecompositionAnalysis`` into a
-  standalone function in ``plotting/composite/parity.py`` with
-  ``_setup_axes``/``_maybe_show``, removing all ``plt.*`` global calls and
-  fixing a bug in multi-target iteration
-  (``for col in Y.shape[1]`` → ``for col in range(Y.shape[1])``).
-  ``plot_multiple`` gains ``ax``, ``clear``, and ``show`` parameters and
-  uses the shared lifecycle helpers instead of ``get_figure()``.
-   12 structural tests added for ``plot_parity``. (#1414)
-
-- MAINT: Aligned the IRIS plugin's three composite plotting functions
-  (``plot_iris_lcurve``, ``plot_iris_distribution``, ``plot_iris_merit``)
-  with the shared ``_setup_axes``/``_maybe_show`` lifecycle helpers.
-  Replaced manual ``get_figure()`` + ``add_subplot(111)`` patterns and
-  ``mpl_show()`` calls with the canonical contract.  Multi-index loop
-  behavior preserved using the same ``ax = None`` reset pattern as
-  ``plot_parity``.  No public API change; helpers remain private.
-   Added 19 functional tests covering return type, ax reuse, clear/show
-   control, scale modes, titles, and error handling. (#1416)
 
 - MAINT: Replaced the invalid Trove classifier ``Framework :: SpectroChemPy
   :: Official Plugin`` with a private ``[tool.spectrochempy]``

@@ -59,9 +59,15 @@ Avant de lancer une release plugin :
       dans la liste de bypass
 - [ ] Confirmer que le tag ruleset de création permet à
       `spectrochempy-releaser` de créer des tags
+- [ ] Confirmer que le tag ruleset de suppression permet à
+      `spectrochempy-releaser` de supprimer des tags
 - [ ] Confirmer qu'aucune legacy branch protection rule ne cible encore
       `master`
 - [ ] Confirmer que la release est déclenchée depuis `master`
+
+> La configuration ci-dessus a été validée par une release plugin complète
+> réussie (bump sur `master`, création de tag, GitHub Release, publication
+> PyPI).
 
 ### Comptes externes
 
@@ -644,6 +650,7 @@ entrées sont incorrectes car :
 ### Release des plugins
 
 - [ ] Vérifier le ruleset *Protect master* actif avec bypass `spectrochempy-releaser`
+- [ ] Vérifier que `spectrochempy-releaser` a le bypass dans les tag rulesets (création et suppression)
 - [ ] Vérifier qu'aucune legacy branch protection rule ne cible encore `master`
 - [ ] Vérifier que la GitHub App `spectrochempy-releaser` est installée sur le repo
 - [ ] Désactiver l'intégration GitHub → Zenodo
