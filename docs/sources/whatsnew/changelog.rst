@@ -62,6 +62,11 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Fixed ``ZeroDivisionError`` when calling ``em(lb=0)`` or
+  ``em(lb=0.0 * ur.Hz)``.  A zero-width exponential apodization is now
+  treated as a no-op (returns the data unchanged) instead of crashing
+  in the unit-conversion wrapper.
+
 - Display legend in 2D lines/stack plots when ``legend=True`` is passed as a
   plotting keyword argument. Previously the ``legend`` kwarg was silently
   ignored by the 2D plot backend, so lines rendered with auto-populated labels

@@ -58,6 +58,13 @@ def test_nmr_1D_em(NMR_dataset_1D):
     dataset2.em(lb=100.0 * ur.Hz, inplace=True)
     assert not np.array_equal(dataset2.data, original2)
 
+    # em with lb=0 is a no-op (no broadening applied)
+    dataset3 = NMR_dataset_1D.copy()
+    dataset3 /= dataset3.real.data.max()
+    original3 = dataset3.data.copy()
+    arr3 = dataset3.em(lb=0.0 * ur.Hz)
+    assert_array_equal(arr3.data, original3)
+
 
 def test_nmr_1D_gm(NMR_dataset_1D):
     dataset = NMR_dataset_1D.copy()
