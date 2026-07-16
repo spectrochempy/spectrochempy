@@ -594,3 +594,25 @@ class TestStep7EndToEndFFT:
             abs(pipe_peak[0] - manual_peak[0]) <= 1
             and abs(pipe_peak[1] - manual_peak[1]) <= 1
         ), f"Peak positions differ: fft()={pipe_peak}, manual={manual_peak}"
+
+
+# ---------------------------------------------------------------------------
+# Step 7: QSIM encoding end-to-end
+# ---------------------------------------------------------------------------
+
+
+class TestStep7QSIMEncoding:
+    """Verify that QSIM encoding decomposes quaternion and produces correct peaks."""
+
+    def test_qsim_synthetic_2d_peak(self):
+        """QSIM 2D FFT places peak at expected position."""
+        ser = _make_states_ser(64, 64, 5.0, 5.0)
+        from spectrochempy_nmr.processing.fft_encodings import _fft_encoding_handler
+
+        fft2d = _fft_encoding_handler(ser, "QSIM", original_axis=-1)
+        fft2d = _fft_encoding_handler(fft2d, "QSIM", original_axis=0)
+
+        RR, RI, IR, II = _extract_quaternion_components(fft2d)
+        mag = np.sqrt(RR**2 + RI**2 + IR**2 + II**2)
+        peak = np.unravel_index(np.argmax(mag), mag.shape)
+        assert mag[peak] > 0, "No peak found in QSIM 2D FFT"

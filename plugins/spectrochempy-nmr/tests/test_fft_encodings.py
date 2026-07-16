@@ -355,11 +355,14 @@ class TestEncodingHandler:
         result = _fft_encoding_handler(data, "ECHO-ANTIECHO")
         assert result.shape == data.shape
 
-    def test_dispatch_qsim_fails_on_quaternion(self):
-        """QSIM/DQD dispatch should fail on quaternion data (numpy limitation)."""
+    def test_dispatch_qsim_works_on_quaternion(self):
+        """QSIM/DQD dispatch should decompose quaternion and FFT subspectra."""
         data = _make_states_data(8, 16, 1.0, 2.0)
-        with pytest.raises((TypeError, ValueError)):
-            _fft_encoding_handler(data, "DQD")
+        result = _fft_encoding_handler(data, "QSIM")
+        assert result.shape == data.shape
+
+        result_dqd = _fft_encoding_handler(data, "DQD")
+        assert result_dqd.shape == data.shape
 
     def test_dispatch_qseq_not_implemented(self):
         """QSEQ encoding should raise NotImplementedError."""
@@ -522,21 +525,18 @@ class Test2DPipeline:
     - How the two-step 2D FFT is performed by hand
     """
 
-    def test_dqd_handler_fails_on_quaternion(self):
+    def test_dqd_handler_works_on_quaternion(self):
         """
-        DQD handler cannot process quaternion data.
+        DQD handler decomposes quaternion into complex subspectra and FFTs.
 
-        ROOT CAUSE: _fft_encoding_handler for DQD/QSIM does
-        np.fft.fftshift(np.fft.fft(data), -1) but numpy's fft
-        does not support quaternion dtype.
-
-        This is the exact failure encountered in the real 2D pipeline
-        where encoding = ['STATES-TPPI', 'DQD'] and encoding[-1] = 'DQD'.
+        After the fix, DQD/QSIM extract fr = RR + j*RI, fi = IR + j*II,
+        FFT both, and rebuild quaternion.
         """
         data = _make_states_data(8, 16, 1.0, 2.0)
         assert data.dtype == np.quaternion
-        with pytest.raises(TypeError, match="fft"):
-            _fft_encoding_handler(data, "DQD")
+        result = _fft_encoding_handler(data, "DQD")
+        assert result.dtype == np.quaternion
+        assert result.shape == data.shape
 
     def test_states_handler_works_on_quaternion(self):
         """STATES handler correctly processes quaternion F2 dimension."""
