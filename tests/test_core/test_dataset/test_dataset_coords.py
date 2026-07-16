@@ -198,6 +198,18 @@ def test_nddataset_coords_manipulation(dsm):
     coord0 -= coord0[0]  # remove first element
 
 
+def test_nddataset_slice_preserves_empty_coord_metadata():
+    ds = scp.NDDataset(np.zeros((10, 5)))
+    ds.set_coordset(None, None)
+    ds.set_coordtitles(y="time", x="wavelength")
+    ds.set_coordunits(y="s", x="cm^-1")
+
+    sliced = ds[:5]
+
+    assert sliced.coordtitles == ds.coordtitles
+    assert sliced.coordunits == ds.coordunits
+
+
 def test_nddataset_square_dataset_with_identical_coordinates():
     a = np.random.rand(3, 3)
     c = scp.Coord(np.arange(3) * 0.25, title="time", units="us")

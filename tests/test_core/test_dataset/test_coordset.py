@@ -534,7 +534,7 @@ def test_coordset__slice_dims_preserves_reference_and_empty_state():
             title="time",
         ),
         y="x",
-        z=Coord(None),
+        z=Coord(None, title="temperature", units="K"),
     )
 
     sliced = coords._slice_dims(["x", "z"], (1, slice(None)))
@@ -547,6 +547,8 @@ def test_coordset__slice_dims_preserves_reference_and_empty_state():
     assert sliced.x.title == coords.x.title
     assert sliced.z.is_empty
     assert sliced.z.name == "z"
+    assert sliced.z.title == coords.z.title
+    assert sliced.z.units == coords.z.units
     assert sliced["y"] == "x"
 
 
