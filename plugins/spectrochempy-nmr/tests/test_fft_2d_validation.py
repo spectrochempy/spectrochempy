@@ -27,7 +27,9 @@ quaternion = pytest.importorskip("quaternion", reason="requires numpy-quaternion
 EXTRA_DATADIR = scp.preferences.datadir.parent / "testdata-extra"
 EXTRA_NMR = EXTRA_DATADIR / "testdata" / "nmrdata"
 
-TOPSPIN_2D = scp.preferences.datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_2d"
+TOPSPIN_2D = (
+    scp.preferences.datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_2d"
+)
 
 
 def _has_agilent_data():
@@ -75,7 +77,7 @@ class TestFFT2DTopSpin:
         mag = _mag_from_quat_or_complex(fft)
         idx, maxval = _peak_info(mag)
         assert maxval > 0, "No peak found after TopSpin 2D FFT"
-        assert all(0 <= i < s for i, s in zip(idx, fft.shape))
+        assert all(0 <= i < s for i, s in zip(idx, fft.shape, strict=False))
 
     @pytest.mark.skipif(not _has_topspin_2d(), reason="TopSpin 2D data not available")
     def test_topspin_2d_fft_encoding(self):
