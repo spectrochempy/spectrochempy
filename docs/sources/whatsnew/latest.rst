@@ -75,6 +75,17 @@ Bug Fixes
   (JEOL, TecMag, SIMPSON).  Previously, metadata extraction was hardcoded
   to Bruker field names, causing silent misclassification of other formats.
 
+- Fixed 2D NMR FFT chain so ``fft()`` works on quaternion-encoded 2D data
+  (STATES, TPPI, ECHO-ANTIECHO).  The encoding handler dispatch read
+  ``meta.encoding`` after ``swapdims`` had reordered the list, selecting the
+  wrong handler (DQD instead of STATES).  The second FFT pass through the
+  encoding handler also produced conjugated subspectra because the quaternion
+  rebuild/extract cycle is not invertible by the encoding-specific
+  decomposition formula.  Both issues are resolved: encoding is captured
+  before the swap, and the second pass extracts complex subspectra directly
+  from the rebuilt quaternion.  Three end-to-end tests validate the full
+  ``fft(dim=-1)`` then ``fft(dim=0)`` chain on synthetic 2D SER data.
+
 Breaking Changes
 ~~~~~~~~~~~~~~~~
 

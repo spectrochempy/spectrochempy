@@ -173,6 +173,15 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
     inplace = kwargs.pop("inplace", False)
     new = dataset.copy() if not inplace else dataset
 
+    # Capture the encoding for the target axis BEFORE any swap.
+    # swapdims reorders meta.encoding, so encoding[0] would point to the
+    # wrong encoding after a swap.  For quaternion (hypercomplex) data the
+    # encoding at index 0 always describes the indirect dimension and knows
+    # how to decompose quaternion → complex subspectra.
+    encoding = "undefined"
+    if not inv and "encoding" in new.meta:
+        encoding = new.meta.encoding[0]
+
     # The last dimension is always the dimension on which we apply the fourier transform.
     # If needed, we swap the dimensions to be sure to be in this situation
     swapped = False
@@ -263,11 +272,6 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
         if new.is_interleaved:
             iscomplex = True
 
-        # If a plugin-registered encoding is present, delegate the transform to it.
-        encoding = "undefined"
-        if not inv and "encoding" in new.meta:
-            encoding = new.meta.encoding[-1]
-
         zf_size(new, size=size, inplace=True)
 
         # Perform the fft
@@ -287,7 +291,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
                     f"FFT encoding {encoding!r} requires a plugin. "
                     "Install the relevant plugin (e.g. spectrochempy-nmr)."
                 )
-            data = handler(new.data, encoding, **kwargs)
+            data = handler(new.data, encoding, original_axis=axis, **kwargs)
 
         elif iscomplex and inv:
             # We assume no special encoding for inverse complex fft transform

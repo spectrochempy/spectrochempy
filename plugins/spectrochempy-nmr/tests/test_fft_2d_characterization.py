@@ -470,3 +470,127 @@ class TestStep6ComparisonWithManual:
 
         # Both should have comparable peak magnitudes
         assert_allclose(pipe_mag[pipe_peak], manual_mag[manual_peak], rtol=0.1)
+
+
+# ---------------------------------------------------------------------------
+# Step 7: End-to-end fft() on NDDataset with quaternion data
+# ---------------------------------------------------------------------------
+
+
+class TestStep7EndToEndFFT:
+    """Step 7: Verify that the actual fft() function works on 2D quaternion NDDataset."""
+
+    def test_fft_f2_on_2d_quaternion_nddataset(self):
+        """fft(dim=-1) on a 2D quaternion NDDataset should return quaternion with correct peak."""
+        from spectrochempy import Coord
+        from spectrochempy import NDDataset
+
+        nf1, nf2 = 16, 32
+        f1_freq, f2_freq = 2.0, 5.0
+        ser = _make_states_ser(nf1, nf2, f1_freq, f2_freq)
+
+        c_y = Coord.arange(nf1, unit="s")
+        c_x = Coord.arange(nf2, unit="s")
+        ds = NDDataset(ser, coordset=[c_y, c_x])
+        ds.meta.encoding = ["STATES", "DQD"]
+        ds.meta.iscomplex = [True, True]
+        ds.meta.td = [nf1, nf2]
+        ds.meta.si = [nf1, nf2]
+
+        ds_f2 = ds.fft(dim=-1)
+        assert ds_f2.shape == (nf1, nf2)
+        assert "quaternion" in str(ds_f2.data.dtype)
+
+        fa = as_float_array(ds_f2.data)
+        magnitude = np.sqrt(
+            fa[..., 0] ** 2 + fa[..., 1] ** 2 + fa[..., 2] ** 2 + fa[..., 3] ** 2
+        )
+        peak = np.unravel_index(np.argmax(magnitude), magnitude.shape)
+
+        expected_f2_pos = (nf2 // 2 - int(f2_freq)) % nf2
+        expected_f2_neg = (nf2 // 2 + int(f2_freq)) % nf2
+        f2_ok = (
+            abs(peak[1] - expected_f2_pos) <= 1 or abs(peak[1] - expected_f2_neg) <= 1
+        )
+        assert (
+            f2_ok
+        ), f"F2 peak at {peak[1]}, expected near {expected_f2_pos} or {expected_f2_neg}"
+
+    def test_fft_full_2d_chain_on_nddataset(self):
+        """fft(dim=-1) then fft(dim=0) on a 2D quaternion NDDataset should find the 2D peak."""
+        from spectrochempy import Coord
+        from spectrochempy import NDDataset
+
+        nf1, nf2 = 16, 32
+        f1_freq, f2_freq = 2.0, 5.0
+        ser = _make_states_ser(nf1, nf2, f1_freq, f2_freq)
+
+        c_y = Coord.arange(nf1, unit="s")
+        c_x = Coord.arange(nf2, unit="s")
+        ds = NDDataset(ser, coordset=[c_y, c_x])
+        ds.meta.encoding = ["STATES", "DQD"]
+        ds.meta.iscomplex = [True, True]
+        ds.meta.td = [nf1, nf2]
+        ds.meta.si = [nf1, nf2]
+
+        ds_f2 = ds.fft(dim=-1)
+        ds_2d = ds_f2.fft(dim=0)
+
+        assert ds_2d.shape == (nf1, nf2)
+        assert "quaternion" in str(ds_2d.data.dtype)
+
+        fa = as_float_array(ds_2d.data)
+        magnitude = np.sqrt(
+            fa[..., 0] ** 2 + fa[..., 1] ** 2 + fa[..., 2] ** 2 + fa[..., 3] ** 2
+        )
+        peak = np.unravel_index(np.argmax(magnitude), magnitude.shape)
+
+        expected_f1 = (nf1 // 2 - int(f1_freq)) % nf1
+        expected_f2 = (nf2 // 2 - int(f2_freq)) % nf2
+
+        assert (
+            abs(peak[0] - expected_f1) <= 1
+        ), f"F1 peak at {peak[0]}, expected {expected_f1}"
+        assert (
+            abs(peak[1] - expected_f2) <= 1
+        ), f"F2 peak at {peak[1]}, expected {expected_f2}"
+
+    def test_fft_2d_peak_matches_manual_workflow(self):
+        """fft() 2D chain peak position should match the manual numpy workflow."""
+        from spectrochempy import Coord
+        from spectrochempy import NDDataset
+
+        nf1, nf2 = 16, 32
+        f1_freq, f2_freq = 2.0, 5.0
+        ser = _make_states_ser(nf1, nf2, f1_freq, f2_freq)
+
+        # fft() chain
+        c_y = Coord.arange(nf1, unit="s")
+        c_x = Coord.arange(nf2, unit="s")
+        ds = NDDataset(ser, coordset=[c_y, c_x])
+        ds.meta.encoding = ["STATES", "DQD"]
+        ds.meta.iscomplex = [True, True]
+        ds.meta.td = [nf1, nf2]
+        ds.meta.si = [nf1, nf2]
+
+        ds_2d = ds.fft(dim=-1).fft(dim=0)
+        fa = as_float_array(ds_2d.data)
+        pipe_mag = np.sqrt(
+            fa[..., 0] ** 2 + fa[..., 1] ** 2 + fa[..., 2] ** 2 + fa[..., 3] ** 2
+        )
+        pipe_peak = np.unravel_index(np.argmax(pipe_mag), pipe_mag.shape)
+
+        # Manual numpy workflow
+        RR, RI, IR, II = _extract_quaternion_components(ser)
+        sr, si = _prepare_states(RR, RI, IR, II)
+        fr = np.fft.fftshift(np.fft.fft(sr, axis=-1), axes=-1)
+        fi = np.fft.fftshift(np.fft.fft(si, axis=-1), axes=-1)
+        f1_fr = np.fft.fftshift(np.fft.fft(fr, axis=0), axes=0)
+        f1_fi = np.fft.fftshift(np.fft.fft(fi, axis=0), axes=0)
+        manual_mag = np.abs(f1_fr) + np.abs(f1_fi)
+        manual_peak = np.unravel_index(np.argmax(manual_mag), manual_mag.shape)
+
+        assert (
+            abs(pipe_peak[0] - manual_peak[0]) <= 1
+            and abs(pipe_peak[1] - manual_peak[1]) <= 1
+        ), f"Peak positions differ: fft()={pipe_peak}, manual={manual_peak}"

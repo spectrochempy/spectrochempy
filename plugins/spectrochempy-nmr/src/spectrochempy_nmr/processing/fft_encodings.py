@@ -5,10 +5,14 @@ Each encoding handler receives quaternion data and returns quaternion data.
 The quaternion → complex subspectra adaptation is delegated to the
 hypercomplex representation layer (hypercomplex.py).
 
-The handler only performs:
-    1. Encoding-specific processing (sign alternation)
-    2. Standard complex FFT
-    3. Quaternion reconstruction
+For 2D datasets the handler is called twice:
+  1. F2 (direct dimension, original_axis=-1):
+     Decompose quaternion using the encoding formula, FFT along axis=-1,
+     rebuild quaternion from the FFT'd subspectra.
+  2. F1 (indirect dimension, original_axis != -1):
+     The rebuilt quaternion stores [Re(fr), Im(fr), Re(fi), Im(fi)].
+     Extract complex directly (fr = RR + 1j*RI), FFT along axis=-1,
+     rebuild quaternion from the result.
 """
 
 from __future__ import annotations
@@ -73,16 +77,54 @@ def _qf_fft(data):
 
 
 def _fft_encoding_handler(data, encoding, **kwargs):
-    """Dispatch NMR encoding-specific FFT transforms."""
+    """
+    Dispatch NMR encoding-specific FFT transforms.
+
+    Parameters
+    ----------
+    data : ndarray
+        Input data (quaternion for first pass, quaternion rebuilt from
+        previous pass for second pass).
+    encoding : str
+        The encoding identifier (e.g. "STATES", "DQD").
+    **kwargs
+        tppi : bool, optional
+        original_axis : int
+            The axis index *before* any swapdims.  When ``-1`` the handler
+            is processing the direct (F2) dimension; otherwise the indirect
+            (F1) dimension.  On the second pass the quaternion stores
+            ``[Re(fr), Im(fr), Re(fi), Im(fi)]`` and must be decoded with
+            direct extraction rather than the encoding-specific formula.
+    """
     tppi = kwargs.get("tppi", False)
+    original_axis = kwargs.get("original_axis", -1)
+
+    # Second pass (indirect dimension): the quaternion was rebuilt from
+    # [Re(fr), Im(fr), Re(fi), Im(fi)] by the first pass.  Extract the
+    # complex subspectra directly and FFT along axis=-1 (which is F1 after
+    # swapdims).
+    if original_axis != -1:
+        from spectrochempy_nmr.processing.hypercomplex import (
+            _extract_quaternion_components,
+        )
+        from spectrochempy_nmr.processing.hypercomplex import _rebuild_quaternion
+
+        RR, RI, IR, II = _extract_quaternion_components(data)
+        fr = RR + 1j * RI
+        fi = IR + 1j * II
+
+        fr = np.fft.fftshift(np.fft.fft(fr), -1)
+        fi = np.fft.fftshift(np.fft.fft(fi), -1)
+        return _rebuild_quaternion(fr, fi)
+
+    # First pass (direct dimension): use encoding-specific decomposition.
     if encoding in ("QSIM", "DQD"):
-        # Standard complex FFT – core already handles this, but we keep it
-        # here for explicitness when a plugin encoding handler is queried.
         return np.fft.fftshift(np.fft.fft(data), -1)
     if "QF" in encoding:
         return _qf_fft(data)
     if "QSEQ" in encoding:
-        raise NotImplementedError("QSEQ NMR encoding is not yet implemented")
+        msg = "QSEQ NMR encoding is not yet implemented"
+        raise NotImplementedError(msg)
     if "STATES" in encoding:
         return _states_fft(data, tppi=tppi)
     if "TPPI" in encoding and "STATES" not in encoding:
