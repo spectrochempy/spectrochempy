@@ -121,6 +121,17 @@ Deprecations
 Developer
 ~~~~~~~~~
 
+- Reactivated NMR legacy tests in
+  ``tests/test_processing/test_fft/test_nmr.py``. Removed the module-level
+  ``pytestmark = pytest.mark.skip`` and deleted 10 purely visual tests that
+  had zero data assertions. Rewrote the remaining 8 tests with proper
+  numerical assertions: reader string repr, em/gm apodization with inplace
+  and window-value checks, FFT energy preservation, manual phasing invariants,
+  and axis-specific 2D em shape preservation. Rewrote
+  ``plugins/spectrochempy-nmr/tests/test_nmr_smooth.py`` with shape and
+  noise-reduction assertions replacing the visual-only original. Zero
+  regressions across the full NMR + hypercomplex + decoupling suite.
+
 - DOC: Improved example gallery to showcase SpectroChemPy-native idioms
   (``Coord.linspace``, ``Coord.arange``, ``scp.abs``) for coordinate creation
   and dataset operations, replacing redundant ``np.linspace`` + ``Coord``
