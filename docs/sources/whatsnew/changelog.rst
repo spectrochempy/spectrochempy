@@ -99,6 +99,14 @@ Bug Fixes
   from the rebuilt quaternion.  Three end-to-end tests validate the full
   ``fft(dim=-1)`` then ``fft(dim=0)`` chain on synthetic 2D SER data.
 
+- Fixed QSIM and DQD encoding FFT on quaternion data.  Previously, the
+  handler applied ``np.fft.fft()`` directly on quaternion arrays (which numpy
+  cannot handle), causing a ``TypeError`` for any 2D dataset with QSIM or DQD
+  encoding (e.g. Agilent 2D).  The handler now decomposes quaternion into
+  complex subspectra (``fr = RR + j*RI``, ``fi = IR + j*II``) before FFT,
+  matching the second-pass logic.  1D data (already complex) is unaffected.
+  (PR #XXXX)
+
 
 .. section
 

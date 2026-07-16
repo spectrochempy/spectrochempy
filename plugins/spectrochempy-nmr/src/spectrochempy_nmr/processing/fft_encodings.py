@@ -119,6 +119,18 @@ def _fft_encoding_handler(data, encoding, **kwargs):
 
     # First pass (direct dimension): use encoding-specific decomposition.
     if encoding in ("QSIM", "DQD"):
+        if hasattr(data, "dtype") and data.dtype.kind == "V":
+            from spectrochempy_nmr.processing.hypercomplex import (
+                _extract_quaternion_components,
+            )
+            from spectrochempy_nmr.processing.hypercomplex import _rebuild_quaternion
+
+            RR, RI, IR, II = _extract_quaternion_components(data)
+            fr = RR + 1j * RI
+            fi = IR + 1j * II
+            fr = np.fft.fftshift(np.fft.fft(fr), -1)
+            fi = np.fft.fftshift(np.fft.fft(fi), -1)
+            return _rebuild_quaternion(fr, fi)
         return np.fft.fftshift(np.fft.fft(data), -1)
     if "QF" in encoding:
         return _qf_fft(data)
