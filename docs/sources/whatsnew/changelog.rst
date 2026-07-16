@@ -19,41 +19,21 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
-- Score plot labels now use ``adjustText`` for intelligent placement (collision
-  avoidance with markers and other labels). Falls back to a fixed offset if
-  ``adjustText`` is not installed.
+- NMR support has been significantly expanded.  SpectroChemPy now provides
+  ``scp.nmr.Experiment`` as a state-aware NMR scientific model, alongside new
+  official readers for Agilent/Varian, JEOL JDF, TecMag TNT, and SIMPSON
+  datasets.  These readers integrate with the plugin I/O namespaces
+  (``scp.nmr.read(...)``, ``scp.topspin.read(...)``, ``scp.agilent.read(...)``)
+  while preserving the familiar root-level compatibility aliases.
 
-- PCA component labels now display as ``PC1``, ``PC2``, ... instead of ``#0``,
-  ``#1``, ... in legends and coordinate display. Other analysis methods
-  retain the default ``#0``, ``#1``, ... labels. (#1404)
+- Extra NMR validation datasets can now be fetched on demand with
+  ``download_extra_testdata()``, which clones the additional test corpus from
+  ``spectrochempy_data`` into ``~/.spectrochempy/testdata-extra/``.
 
-- Introduced ``scp.nmr.Experiment``, an NMR-specific scientific model that
-  wraps an ``NDDataset`` and provides state-aware processing.  The class
-  classifies the current data domain (time, frequency, mixed), identifies
-  source kind (FID, SER, processed 1D/2D), exposes NMR metadata (encoding,
-  nuclei), validates NMR-specific requirements, and orchestrates processing
-  that is appropriate for the current domain — never performing FFT on
-  already-transformed data.  This is the first step toward a simplified NMR
-  processing workflow.
-
-- Added ``download_extra_testdata()`` to ``spectrochempy.application.testdata``
-  for fetching extra NMR datasets (agilent, jeol, bruker_3d, simpson, tecmag)
-  from the ``data-extra`` branch of the ``spectrochempy_data`` repository.
-  Extra data is cloned into ``~/.spectrochempy/testdata-extra/``. (:pr:`1418`)
-
-- Added four new NMR format readers in the NMR plugin: Agilent/Varian
-  (``scp.nmr.read_agilent``, binary ``fid`` + ``procpar``), JEOL JDF
-  (``scp.nmr.read_jeol``), TecMag TNT (``scp.nmr.read_tecmag``), and
-  SIMPSON (``scp.nmr.read_simpson``, ``TEXT``/``BINARY``/``RAWBIN`` formats).
-  All use vendored NMRGlue code and support automatic format detection.
-
-- Added plugin-contributed I/O namespaces for NMR and PerkinElmer readers.
-  ``scp.topspin.read`` and ``scp.agilent.read`` now expose the format-specific
-  readers with the same short-method namespace API used by core I/O domains.
-  ``scp.nmr.read`` is a generic dispatcher that auto-detects TopSpin and
-  Agilent/Varian formats (or uses ``protocol=``).  Root-level aliases
-  ``scp.read_topspin``, ``scp.read_agilent`` and ``scp.read_perkinelmer``
-  remain available as compatibility shims.
+- Plotting and analysis displays are more informative by default.  Score-plot
+  labels can now use ``adjustText`` for collision-aware placement, and PCA
+  components are displayed with ``PC1``, ``PC2``, ... labels in legends and
+  coordinate displays instead of generic ``#0``, ``#1``, ... identifiers.
 
 
 .. section
@@ -62,50 +42,25 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
-- Fixed ``ZeroDivisionError`` when calling ``em(lb=0)`` or
-  ``em(lb=0.0 * ur.Hz)``.  A zero-width exponential apodization is now
-  treated as a no-op (returns the data unchanged) instead of crashing
-  in the unit-conversion wrapper.
+- NMR reader and processing reliability has improved substantially.  TopSpin
+  metadata handling is more robust, ``scp.nmr.Experiment`` now correctly
+  classifies non-Bruker datasets, and JEOL time-domain coordinates are created
+  with the proper units so operations such as ``em()`` no longer fail on 2D
+  JEOL data.
 
-- Display legend in 2D lines/stack plots when ``legend=True`` is passed as a
-  plotting keyword argument. Previously the ``legend`` kwarg was silently
-  ignored by the 2D plot backend, so lines rendered with auto-populated labels
-  from coordinate metadata never showed a legend. (#1404)
+- The 2D NMR FFT pipeline is now much more reliable for hypercomplex and
+  quaternion-encoded datasets.  FFT dispatch now preserves the correct
+  encoding after dimension reordering, QSIM and DQD encodings are transformed
+  through complex subspectra instead of invalid direct quaternion FFT calls,
+  and phase metadata is initialized consistently for 2D quaternion data.
 
-- Improved TopSpin reader reliability across several areas.  ``FnMODE``/``MC2``
-  is now read from ``acqu2s`` (not mis-indexed ``acqus``) for correct 2D SER
-  indirect-dimension encoding.  The SER reshape fallback uses proper dictionary
-  keys (``acqu2s``/``acqus``) to avoid ``KeyError``.  Processed-data ``phc0``
-  is read from ``procs`` instead of being unconditionally zeroed.
-  Normalisation guards against division by zero when ``ns`` or ``rg`` is zero.
-  ``datetime.fromtimestamp`` is protected against invalid or negative
-  timestamps.  Metadata exception suppression is narrowed from ``Exception``
-  to ``(TypeError, IndexError)``.  ``sw_h`` computation is ``None``-safe.
-  Nucleus-string parsing and missing ``use_list`` files are handled gracefully.
-  Dead comments and uncertain TODOs removed. (#1420, #1424)
+- Plotting behavior has been corrected in a few visible edge cases:
+  ``legend=True`` now works again for 2D lines/stack plots, and labels
+  auto-derived from coordinate metadata are displayed as expected in the
+  resulting legend.
 
-- ``scp.nmr.Experiment`` now correctly classifies non-Bruker datasets
-  (JEOL, TecMag, SIMPSON).  Previously, metadata extraction was hardcoded
-  to Bruker field names, causing silent misclassification of other formats.
-
-- Fixed 2D NMR FFT chain so ``fft()`` works on quaternion-encoded 2D data
-  (STATES, TPPI, ECHO-ANTIECHO).  The encoding handler dispatch read
-  ``meta.encoding`` after ``swapdims`` had reordered the list, selecting the
-  wrong handler (DQD instead of STATES).  The second FFT pass through the
-  encoding handler also produced conjugated subspectra because the quaternion
-  rebuild/extract cycle is not invertible by the encoding-specific
-  decomposition formula.  Both issues are resolved: encoding is captured
-  before the swap, and the second pass extracts complex subspectra directly
-  from the rebuilt quaternion.  Three end-to-end tests validate the full
-  ``fft(dim=-1)`` then ``fft(dim=0)`` chain on synthetic 2D SER data.
-
-- Fixed QSIM and DQD encoding FFT on quaternion data.  Previously, the
-  handler applied ``np.fft.fft()`` directly on quaternion arrays (which numpy
-  cannot handle), causing a ``TypeError`` for any 2D dataset with QSIM or DQD
-  encoding (e.g. Agilent 2D).  The handler now decomposes quaternion into
-  complex subspectra (``fr = RR + j*RI``, ``fi = IR + j*II``) before FFT,
-  matching the second-pass logic.  1D data (already complex) is unaffected.
-  (PR #XXXX)
+- ``em(lb=0)`` and ``em(lb=0.0 * ur.Hz)`` are now treated as valid no-op
+  calls instead of raising a ``ZeroDivisionError``.
 
 
 .. section
@@ -130,7 +85,7 @@ Breaking Changes
   and post-construction assignment while preserving the distinction between
   ``None`` (legacy path) and ``[]`` (explicitly unconstrained new-API fit).
   Assignment of ``constraints`` after fitting invalidates the fitted state.
-  The ``constraints`` parameter is not config-file serializable. (:pr:`XXXX`)
+  The ``constraints`` parameter is not config-file serializable.
 
 
 .. section
@@ -145,14 +100,10 @@ Deprecations
   (``nonnegConc``, ``unimodConc``, ``closureConc``, …) are replaced by
   the unified ``constraints`` API.
 
-- ``AnalysisBase.plotmerit`` alias is deprecated; use ``plot_merit``
-  instead.  ``plotmerit`` will be removed in version 0.12.
-
-- ``parityplot`` is renamed to ``plot_parity`` for naming consistency with
-  other composite plot functions (``plot_score``, ``plot_scree``, ...).
-  ``parityplot`` (both the standalone function and the
-  ``CrossDecompositionAnalysis`` method) is retained as a deprecated alias
-  that will be removed in version 0.12.
+- Plotting names are being regularized: ``AnalysisBase.plotmerit`` is
+  deprecated in favor of ``plot_merit``, and ``parityplot`` is deprecated in
+  favor of ``plot_parity``.  The old aliases remain available for now and are
+  scheduled for removal in version 0.12.
 
 
 .. section
@@ -161,59 +112,20 @@ Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
 
-- Reactivated NMR legacy tests in
-  ``tests/test_processing/test_fft/test_nmr.py``. Removed the module-level
-  ``pytestmark = pytest.mark.skip`` and deleted 10 purely visual tests that
-  had zero data assertions. Rewrote the remaining 8 tests with proper
-  numerical assertions: reader string repr, em/gm apodization with inplace
-  and window-value checks, FFT energy preservation, manual phasing invariants,
-  and axis-specific 2D em shape preservation. Rewrote
-  ``plugins/spectrochempy-nmr/tests/test_nmr_smooth.py`` with shape and
-  noise-reduction assertions replacing the visual-only original. Zero
-  regressions across the full NMR + hypercomplex + decoupling suite.
+- The NMR test suite has been modernized and made substantially more reliable:
+  skipped legacy FFT tests were reactivated, visual-only tests were replaced
+  with numerical assertions, and targeted plugin tests now check observable
+  processing behavior instead of manual inspection only.
 
-- DOC: Improved example gallery to showcase SpectroChemPy-native idioms
-  (``Coord.linspace``, ``Coord.arange``, ``scp.abs``) for coordinate creation
-  and dataset operations, replacing redundant ``np.linspace`` + ``Coord``
-  wrapping patterns, ``np.abs`` usage, list-comprehension synthetic data
-  generators (``scp.fromfunction``), ``np.random.normal`` on datasets
-  (``scp.normal``), ``np.arange`` wrapped in NDDataset (``scp.arange``),
-  and ``np.random.rand`` + NDDataset constructor (``NDDataset.random``).
-  Also updated API docstring examples to use ``scp.gaussian``,
-  ``Coord.linspace``, ``scp.arange``, and ``NDDataset.random``
-  instead of raw NumPy equivalents. (#1370)
+- Plotting internals were consolidated across core and plugin composite
+  functions.  Shared figure/axes lifecycle helpers now reduce duplicated
+  plotting boilerplate, composite plotting APIs are more consistent, and the
+  non-functional Plotly/Dash backend has been removed from the maintained code
+  path.
 
-- MAINT: Unified the plotting lifecycle across core and plugin composite
-  functions (``plot_score``, ``plot_scree``, ``plot_compare``,
-  ``plot_merit``, ``plot_baseline``, ``plot_parity``, ``plot_multiple``,
-  and IRIS ``plot_iris_*``).  Extracted shared ``_setup_axes``/``_maybe_show``
-  helpers into ``mplutils.py``, replacing duplicated figure/axes/show
-  boilerplate.  Removed all ``plt.*`` global calls.  ``plot_parity``
-  (formerly ``parityplot``) extracted from ``CrossDecompositionAnalysis``
-  into a standalone function; ``plot_multiple`` gains ``ax``, ``clear``,
-  ``show`` parameters.  Style parameters (``marker``, ``s``, ``alpha``)
-  and kwargs normalization (``color``/``c``, ``linestyle``/``ls``, …)
-  integrated into composite plots.  Removed the non-functional Plotly/Dash
-  backend (never a declared dependency).  31 structural and functional
-  tests added. (#1412, #1413, #1414, #1416)
-
-- MAINT: Extracted generic nmrglue utilities (``create_blank_udic``,
-  ``unit_conversion``, ``uc_from_udic``, ``reorder_submatrix``,
-  ``complexify_data``, ``uncomplexify_data``, ND array iterators, …)
-  from ``_bruker.py`` into a shared ``_base.py`` module, eliminating
-  cross-reader coupling between Bruker, Varian, and JEOL. (#1408)
-
-- DOC: Documented the three-layer plotting architecture (scientific objects →
-  composite plotters → dataset plotting) in the developer guide.  Updated API
-  reference to include composite functions as top-level entries.  Added
-  composite plot customization section to the user guide.  Deprecated
-  ``AnalysisBase.plotmerit`` in favor of ``plot_merit``. (#1415)
-
-- MAINT: Replaced the invalid Trove classifier ``Framework :: SpectroChemPy
-  :: Official Plugin`` with a private ``[tool.spectrochempy]``
-  ``official-plugin = true`` marker in all official plugin ``pyproject.toml``
-  files and all CI/workflow scripts.  The classifier was never registered
-  with PyPI and caused ``400 Bad Request`` errors on upload.  The new marker
-  is the single registration point for CI (publishing, testing, release
-  validation).  Added ``validate_official_plugin.py`` and 9 structural tests.
-  (:pr:`XXXX`)
+- Developer-facing documentation and infrastructure were also cleaned up:
+  examples now favor SpectroChemPy-native idioms over raw NumPy patterns,
+  generic NMRGlue helpers were factored into a shared base module, and the
+  official plugin marker used by CI and publishing now relies on the private
+  ``[tool.spectrochempy] official-plugin = true`` field instead of an invalid
+  Trove classifier.

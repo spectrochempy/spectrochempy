@@ -379,7 +379,12 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
         new.history = f"{s} applied on dimension {dim}"
 
         # PHASE ?
-        iscomplex = new.is_complex
+        iscomplex = new.is_complex or new.is_interleaved
+        # Quaternion/hypercomplex data from the encoding handler is in the
+        # frequency domain but is_complex is False.  Treat it as phaseable
+        # when the encoding handler ran (encoding != "undefined").
+        if not iscomplex and encoding != "undefined":
+            iscomplex = True
         if iscomplex and not inv:
             # phase frequency domain
 
@@ -401,10 +406,13 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
             if not new.meta.pivot:
                 new.meta.pivot = [0] * new.ndim
 
-            # applied the stored phases
-            new.pk(inplace=True)
+            # Apply auto-phasing only for standard complex data.
+            # Quaternion/hypercomplex data requires plugin-provided phasing
+            # and cannot use the built-in pk() yet.
+            if new.is_complex:
+                new.pk(inplace=True)
+                new.meta.pivot[-1] = abs(new).coordmax(dim=dim)
 
-            new.meta.pivot[-1] = abs(new).coordmax(dim=dim)
             new.meta.readonly = True
 
     # restore original data order if it was swapped

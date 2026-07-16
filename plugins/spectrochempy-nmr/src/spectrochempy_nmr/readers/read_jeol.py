@@ -224,6 +224,18 @@ def _read_jdf(*args, **kwargs):
         nuc = meta.nucleus[axis]
         offset_ppm = meta.offset[axis]
 
+        if not meta.isfreq[axis]:
+            if sw_hz is not None and float(sw_hz.magnitude) > 0:
+                dw = (1.0 / sw_hz).to("us")
+                coordpoints = np.arange(size)
+                coord = Coord(coordpoints * dw, title=f"F{axis + 1} acquisition time")
+            else:
+                coord = Coord(np.arange(size), title=f"F{axis + 1} acquisition time")
+
+            if freq_mhz is not None:
+                coord.meta["acquisition_frequency"] = freq_mhz * ur.MHz
+            return coord
+
         if sw_hz is not None and freq_mhz is not None and size > 1:
             sizem = max(size - 1, 1)
             deltaf = -float(sw_hz.magnitude) / sizem

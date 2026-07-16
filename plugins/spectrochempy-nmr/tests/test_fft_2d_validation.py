@@ -201,3 +201,55 @@ class TestEmFFT2DAgilent:
         mag = _mag_from_quat_or_complex(fft)
         _, maxval = _peak_info(mag)
         assert maxval > 0, "No peak found after Agilent 2D TPPI em + FFT"
+
+
+# ---------------------------------------------------------------------------
+# Phase metadata initialization on quaternion data
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.skipif(not _has_topspin_2d(), reason="TopSpin 2D data not available")
+class TestPhaseMetadata2D:
+    """Verify phase metadata is initialized after 2D FFT on quaternion data."""
+
+    def test_topspin_2d_fft_sets_phased(self):
+        ds = scp.read_topspin(TOPSPIN_2D, expno=1, remove_digital_filter=True)
+        fft = ds.fft()
+        assert fft.meta.phased is not None
+        assert len(fft.meta.phased) == 2
+
+    def test_topspin_2d_fft_sets_phc0(self):
+        ds = scp.read_topspin(TOPSPIN_2D, expno=1, remove_digital_filter=True)
+        fft = ds.fft()
+        assert fft.meta.phc0 is not None
+        assert len(fft.meta.phc0) == 2
+
+
+# ---------------------------------------------------------------------------
+# JEOL em() with time-domain coordinates
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.skipif(not _has_jeol_data(), reason="JEOL test data not available")
+class TestJEOLEmChain:
+    """Verify em() works on JEOL data after coordinate fix."""
+
+    def test_jeol_cosy_em_fft(self):
+        ds = scp.read_jeol(EXTRA_NMR / "jeol" / "COSY.jdf")
+        ds.em(lb=2.0, inplace=True)
+        fft = ds.fft()
+
+        assert fft.ndim == 2
+        mag = _mag_from_quat_or_complex(fft)
+        _, maxval = _peak_info(mag)
+        assert maxval > 0, "No peak found after JEOL COSY em + FFT"
+
+    def test_jeol_hsqc_em_fft(self):
+        ds = scp.read_jeol(EXTRA_NMR / "jeol" / "HSQC.jdf")
+        ds.em(lb=2.0, inplace=True)
+        fft = ds.fft()
+
+        assert fft.ndim == 2
+        mag = _mag_from_quat_or_complex(fft)
+        _, maxval = _peak_info(mag)
+        assert maxval > 0, "No peak found after JEOL HSQC em + FFT"
