@@ -249,7 +249,11 @@ class Coord(NDMath, NDArray):
 
         # check if data is 1D
         if self.has_data and len(self.shape) > 1:
-            raise ValueError("Only one 1D arrays can be used to define coordinates")
+            squeezed = np.squeeze(self._data)
+            if squeezed.ndim == 1:
+                self._data = squeezed
+            else:
+                raise ValueError("Only one 1D arrays can be used to define coordinates")
 
         # linearize the data if possible or at least round it
         # to the number of significant digits

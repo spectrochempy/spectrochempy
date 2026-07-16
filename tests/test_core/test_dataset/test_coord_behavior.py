@@ -12,6 +12,7 @@ import numpy as np
 import pytest
 
 from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.units import DimensionalityError
 from spectrochempy.core.units import ur
 from spectrochempy.utils.testing import assert_array_equal
@@ -34,6 +35,28 @@ class TestCoordConstruction:
         c = Coord(np.array([10.0, 20.0, 30.0]))
         assert c.size == 3
         assert np.issubdtype(c.dtype, np.floating)
+
+    def test_from_singleton_row_array(self):
+        c = Coord(np.array([[1.0, 2.0, 3.0]]))
+        assert c.shape == (3,)
+        assert_array_equal(c.data, np.array([1.0, 2.0, 3.0]))
+
+    def test_from_singleton_column_array(self):
+        c = Coord(np.array([[1.0], [2.0], [3.0]]))
+        assert c.shape == (3,)
+        assert_array_equal(c.data, np.array([1.0, 2.0, 3.0]))
+
+    def test_from_singleton_row_nddataset(self):
+        c = Coord(NDDataset(np.array([[1.0, 2.0, 3.0]])))
+        assert c.shape == (3,)
+        assert_array_equal(c.data, np.array([1.0, 2.0, 3.0]))
+
+    def test_from_true_2d_array_raises(self):
+        with pytest.raises(
+            ValueError,
+            match="Only one 1D arrays can be used to define coordinates",
+        ):
+            Coord(np.array([[1.0, 2.0], [3.0, 4.0]]))
 
     def test_from_linspace(self):
         c = Coord(np.linspace(0, 10, 11))
