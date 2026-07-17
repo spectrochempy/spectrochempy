@@ -56,7 +56,10 @@ Bug Fixes
   quaternion-encoded datasets.  FFT dispatch now preserves the correct
   encoding after dimension reordering, QSIM and DQD encodings are transformed
   through complex subspectra instead of invalid direct quaternion FFT calls,
-  and phase metadata is initialized consistently for 2D quaternion data.
+  phase metadata is initialized consistently for 2D quaternion data, and
+  ``fft()`` now auto-phases quaternion data via a plugin-provided handler
+  that decomposes into complex subspectra, applies the phase correction,
+  and rebuilds the quaternion representation.
 
 - Plotting behavior has been corrected in a few visible edge cases:
   ``legend=True`` now works again for 2D lines/stack plots, and labels

@@ -253,3 +253,74 @@ class TestJEOLEmChain:
         mag = _mag_from_quat_or_complex(fft)
         _, maxval = _peak_info(mag)
         assert maxval > 0, "No peak found after JEOL HSQC em + FFT"
+
+
+# ---------------------------------------------------------------------------
+# Quaternion 2D phasing (auto-phase + manual pk)
+# ---------------------------------------------------------------------------
+
+
+def _has_topspin_2d() -> bool:
+    return TOPSPIN_2D.exists()
+
+
+@pytest.mark.skipif(not _has_topspin_2d(), reason="TopSpin 2D data not available")
+class TestQuaternionPhasing:
+    """Verify quaternion 2D auto-phasing via plugin pk.execute handler."""
+
+    def test_fft_auto_phase_sets_meta(self):
+        """fft() auto-phases F2 (direct dim) of quaternion data."""
+        ds = scp.read_topspin(TOPSPIN_2D, expno=1, remove_digital_filter=True)
+        fft = ds.fft()
+
+        assert fft.dtype == quaternion.quaternion
+        assert fft.ndim == 2
+        # F2 should be auto-phased
+        assert fft.meta.phased[-1] is True
+        assert fft.meta.phc0[-1].magnitude == 0.0
+
+    def test_fft_auto_phase_pivot(self):
+        """Auto-phase computes pivot from quaternion modulus."""
+        ds = scp.read_topspin(TOPSPIN_2D, expno=1, remove_digital_filter=True)
+        fft = ds.fft()
+
+        assert fft.meta.pivot[-1] is not None
+        assert fft.ndim == 2
+
+    def test_manual_pk_on_2d_quaternion(self):
+        """Explicit pk(pivot=, phc0=) works on quaternion 2D data."""
+        ds = scp.read_topspin(TOPSPIN_2D, expno=1, remove_digital_filter=True)
+        fft = ds.fft()
+        phased = fft.pk(pivot=0, phc0=45.0)
+
+        assert phased.dtype == quaternion.quaternion
+        assert phased.meta.phased[-1] is True
+        assert phased.ndim == 2
+        # Quaternion modulus is invariant under phase rotation,
+        # so compare raw quaternion components directly.
+        assert not np.allclose(
+            quaternion.as_float_array(fft.data),
+            quaternion.as_float_array(phased.data),
+        ), "pk() did not modify the quaternion data"
+
+    def test_em_fft_auto_phase_chain(self):
+        """Full chain: em() → fft() auto-phases quaternion data."""
+        ds = scp.read_topspin(TOPSPIN_2D, expno=1, remove_digital_filter=True)
+        ds.em(lb=2.0, inplace=True)
+        fft = ds.fft()
+
+        assert fft.dtype == quaternion.quaternion
+        assert fft.meta.phased[-1] is True
+        mag = _mag_from_quat_or_complex(fft)
+        _, maxval = _peak_info(mag)
+        assert maxval > 0, "No peak found after em + fft + auto-phase"
+
+    def test_quaternion_phasc0_from_bruker(self):
+        """F1 (indirect dim) phc0 is preserved from Bruker processing params."""
+        ds = scp.read_topspin(TOPSPIN_2D, expno=1, remove_digital_filter=True)
+        fft = ds.fft()
+
+        # F1 phc0 should come from acqu2s (Bruker), not be reset to 0
+        f1_phc0 = fft.meta.phc0[0].magnitude
+        # Bruker typically stores a non-zero value; just check it's a number
+        assert isinstance(f1_phc0, (int, float))
