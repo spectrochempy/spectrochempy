@@ -17,6 +17,18 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 
 New Features
 ~~~~~~~~~~~~
+
+- MCRALS now supports three dimensionless stopping tolerances:
+  ``tol_residual_change`` (default ``1e-3``),
+  ``tol_reconstruction_error``, and ``tol_profile_change``. The latter two
+  are disabled by default. The optimisation stops when any enabled criterion
+  is satisfied, and ``result.diagnostics`` reports all three values together
+  with ``convergence_reason``. The INFO log now displays
+  ``reconstruction_error``, ``residual_change``, ``profile_change``, and the
+  residual trend, followed by the exact value and tolerance responsible for
+  convergence. The former ``RSE / PCA``, ``RSE / Exp``, and ``%change``
+  columns have been removed because they did not map clearly to the stopping
+  criteria.
 .. Add here new public features (do not delete this comment)
 
 - NMR support has been significantly expanded.  SpectroChemPy now provides
@@ -83,9 +95,27 @@ Breaking Changes
 
 - ``MCRALS.constraints`` is now a validated traitlet, enabling both constructor
   and post-construction assignment while preserving the distinction between
-  ``None`` (legacy path) and ``[]`` (explicitly unconstrained new-API fit).
+  ``None`` (built-in defaults) and ``[]`` (explicitly unconstrained fit).
   Assignment of ``constraints`` after fitting invalidates the fitted state.
   The ``constraints`` parameter is not config-file serializable.
+
+- MCRALS public outputs ``C``, ``St`` and residuals now correspond to the
+  **constrained** factor pair ``(C_constrained, St_constrained)`` instead of
+  the previous mixed pair ``(C_LS, St_constrained)``.  This matches the
+  semantics of Tauler MATLAB MCR-ALS, pyMCR, and PLS_Toolbox.  Convergence
+  diagnostics also use the constrained pair, which can change convergence
+  speed and iteration counts compared with the old behaviour.  The
+   unconstrained least-squares estimate is still available via the new
+   ``C_ls`` property. (:pr:`XXXX`)
+
+- Refactored the internal ALS iteration loop in ``MCRALS._fit`` to match the
+  standard Tauler formulation: each iteration now performs exactly one C solve
+  followed by one constraint pass, then one St solve followed by one constraint
+  pass (previously the concentration constraint pipeline ran twice per
+  iteration, causing side-effects to double for ``ModelProfile`` generators).
+  This may change iterate counts and numerical results under active
+  constraints, but the publicly documented ``C @ St ≈ X`` reconstruction
+  invariant is preserved. (:pr:`XXXX`)
 
 
 .. section
@@ -94,11 +124,8 @@ Deprecations
 ~~~~~~~~~~~~
 .. Add here new deprecations (do not delete this comment)
 
-- MCRALS solver and constraint API has been modernized: ``solverConc`` is
-  deprecated in favor of ``solver_C``, ``solverSpec`` in favor of
-  ``solver_St``, and legacy constraint traitlet parameters
-  (``nonnegConc``, ``unimodConc``, ``closureConc``, …) are replaced by
-  the unified ``constraints`` API.
+- MCRALS public documentation now exposes only dimensionless convergence
+  tolerances, profile-specific solvers, and the unified ``constraints`` API.
 
 - Plotting names are being regularized: ``AnalysisBase.plotmerit`` is
   deprecated in favor of ``plot_merit``, and ``parityplot`` is deprecated in

@@ -25,399 +25,771 @@
 # ---
 
 # %% [markdown]
-# # MCR ALS
+# # MCR-ALS: Multivariate Curve Resolution with Alternating Least Squares
+#
+# This tutorial covers three progressively complex MCR-ALS workflows:
+#
+# 1. **Classical MCR-ALS** — a single HPLC-DAD experiment;
+# 2. **Constraints** — incorporating prior chemical knowledge;
+# 3. **Augmented datasets** — vertical (multi-experiment) and horizontal
+#    (multi-technique) data fusion.
+#
+# Each part answers a practical question the reader is likely to ask.
+# The goal is to teach the methodology, not to enumerate every API feature.
+
+# %% [markdown]
+# ## Part I — Classical MCR-ALS
+#
+# ### The bilinear model
+#
+# MCR-ALS decomposes an experimental data matrix $X$ into the product of two
+# physically interpretable factor matrices:
+#
+# $$ X = C \, S^T + E $$
+#
+# where:
+# - $C$ contains the **concentration profiles** of the pure species
+#   (rows → observations (time), columns → components (species));
+# - $S^T$ contains the **pure spectra** (rows → components (species),
+#   columns → spectral variables (wavelengths));
+# - $E$ is the residual.
+#
+# The ALS algorithm iteratively estimates $C$ from $S^T$ and $S^T$ from $C$
+# subject to constraints, until the improvement in the fit falls below a
+# tolerance.
+
+# %% [markdown]
+# ### 1. Loading and inspecting the data
+#
+# We use the ALS2004 benchmark dataset from Jaumot et al.,
+# *Chemolab*, 76 (2005) 101–110 and *Chemolab*, 140 (2015) 1–12.
+# It contains HPLC-DAD measurements of a mixture of four co-eluting species.
 
 # %%
 import spectrochempy as scp
 
-# %% [markdown]
-# ## Introduction
-#
-# MCR-ALS (standing for Multivariate Curve Resolution - Alternating Least Squares) is a
-# popular method for resolving a set (or several sets) of spectra $X$ of an evolving
-# mixture (or a set of mixtures) into the spectra $S^t$ of 'pure'
-# species and their concentration profiles $C$. In terms of matrix equation:
-#
-# $$ X = C.S^t + E $$
-#
-# The ALS algorithm allows applying soft or hard constraints (e.g., non negativity,
-# unimodality, equality to a given profile) to the spectra or concentration profiles
-# of pure species. This property makes MCR-ALS an extremely flexible
-# and powerful method.
-#
-# In this tutorial, the application of MCS-ALS as implemented in Scpy to a 'classical'
-# dataset form the literature is presented.
-#
-# ## The (minimal) dataset
-#
-# Here, we perform the MCR ALS optimization of a dataset corresponding to
-# a HPLC-DAD run, from Jaumot et al. Chemolab, 76 (2005),
-# pp. 101-110 and Jaumot et al. Chemolab, 140 (2015) pp. 1-12. This dataset (and others)
-# can be loaded from the
-# "Multivariate Curve Resolution Homepage"
-# at https://mcrals.wordpress.com/download/example-data-sets. For the user convenience,
-# this dataset is present in the
-# 'datadir' of spectrochempy in 'als2004dataset.MAT' and can be read as follows in Scpy:
-
-# %%
-A = scp.read_matlab("matlabdata/als2004dataset.MAT")
+datasets = scp.read("matlabdata/als2004dataset.MAT")
+for d in datasets:
+    print(f"{d.name}: {d.shape}")
 
 # %% [markdown]
-# The .mat file contains 6 matrices which are thus returned in A as a list of 6
-# NDDatasets. We print the names and dimensions of these datasets:
+# We select the first chromatographic run (`m1`, 51 × 96) which contains the experimental data and the published
+# pure-component spectra (`spure`, 4 × 96) which will be used to initialize the MCRALS.
 
 # %%
-for a in A:
-    print(f"{a.name} : {a.shape}")
+X = datasets[-1]
+St0 = datasets[3]
 
-# %% [markdown]
-# In this tutorial, we are first interested in the dataset named ('m1') that contains
-# a singleHPLC-DAD run(s).
-# As usual, the rows correspond to the 'time axis' of the HPLC run(s), and the columns
-# to the 'wavelength' axis
-# of the UV spectra.
-#
-# Let's name it 'X' (as in the matrix equation above), display its content and plot it:
-
-# %%
-X = A[-1]
-X
-
-# %%
-_ = X.plot()
-
-# %% [markdown]
-# The original dataset is the 'm1' matrix and does not contain information as to the
-# actual elution time, wavelength,
-# and data units. Hence, the resulting NDDataset has no coordinates and on the plot,
-# only the matrix line and row
-# indexes are indicated. For the clarity of the tutorial, we add: (i) a proper title
-# to the data, (ii)
-# the default coordinates (index) do the NDDataset and (iii) a proper name for these
-# coordinates:
-
-# %%
 X.title = "absorbance"
 X.set_coordset(None, None)
 X.set_coordtitles(y="elution time", x="wavelength")
-X
+
+_ = X.plot(title="experimental spectra")
+_ = St0.plot(title="pure-component spectra")
 
 # %% [markdown]
-# From now on, these names will be taken into account by Scpy in the plots as well as
-# in the analysis treatments
-# (PCA, EFA, MCR-ALs, ...). For instance to plot X as a surface:
-
-# %%
-surf = X.plot_surface(linewidth=0.0, figsize=(10, 5), autolayout=False)
+# The 51 rows of `X`are elution times; the 96 columns are wavelengths.
+# Overlapping bands cannot be resolved by inspection alone — this is
+# where curve resolution is needed.
 
 # %% [markdown]
-# ## Initial guess and MCR ALS optimization
+# ### 2. How many components? — PCA
 #
-# The ALS optimization of the MCR equation above requires the input of a guess for
-# either the concentration matrix
-# $C_0$ or the spectra matrix $S^t_0$. Given the data matrix $X$, the lacking initial
-# matrix ($S^t_0$ or $C_0$,
-# respectively) is computed by:
-# $$ S^t_0 = \left( C_0^tC_0 \right)^{-1} C_0^t X $$
-#
-# or
-#
-# $$ C_0 = X {S^t_0}^t  \left( S_0^t {S_0^t}^t \right)^{-1} $$
-#
-# ### Case of initial spectral profiles
-# The matrix spure provided in the initial dataset is a guess for the spectral profiles.
-# Let's name it 'St0',
-# and plot it:
-
-# %%
-St0 = A[3]
-_ = St0.plot()
-
-# %% [markdown]
-# Note that, again, no information has been given as to the ordinate and abscissa data.
-# We could add them as previously
-# but this is not very important. The key point is that the 'wavelength' dimension is
-# compatible with the data 'X',
-# which is indeed the case (both have a length of 95). If it was not, an error would be
-# generated in the following.
-#
-# #### ALS Optimization
-# With this guess 'St0' and the dataset 'X' we can create a MCRALS object. At this point
-# of the tutorial, we will use
-# all the default parameters.
-
-# %% [markdown]
-# First, we create an instance of a MCRALS object:
-
-# %%
-mcr = scp.MCRALS(log_level="INFO")
-
-
-# %% [markdown]
-# The `fit` method of `mcr` is now used to start the iteration process.
-# As the log level has been set to  "INFO" at the MCRALS instance creation,
-# so we have a summary of the ALS iterations
-
-# %%
-_ = mcr.fit(X, St0)
-
-# %% [markdown]
-# The optimization has converged within few iterations. The figures reported for each
-# iteration are defined as follows:
-#
-# - 'Error/PCA' is the standard deviation of the residuals with respect to data
-# reconstructed by a PCA with as many
-# components as pure species (4 in this example),
-#
-# - 'Error/exp': is the standard deviation of the residuals with respect to the
-# experimental data X,
-#
-# - '%change': is the percent change of 'Error/exp' between 2 iterations
-#
-# The default is to stop when this %change between two iteration is negative (so that
-# the solution is improving),
-# but with an absolute value lower than 0.1% (so that the improvement is considered
-# negligible). This parameter -
-# as well as several other parameters affecting the ALS optimization can be changed by
-# the setting the 'tol' value.
-# For instance:
-
-# %%
-mcr.tol = 0.01
-_ = mcr.fit(X, St0)
-
-# %% [markdown]
-# As could be expected more iterations have been necessary to reach this stricter
-# convergence criterion.  The other
-# convergence criterion that can be fixed by the user is 'maxdiv', the maximum number
-# of successive diverging
-# iterations. It is set to 5 by default and allows for stopping the ALS algorithm when
-# it is no converging.
-# If for instance the 'tol' is set very low, the optimization will be stopped when
-# either the maximum number
-# of iterations is reached (max_iter, 50 by default) or when no improvement is during 5
-# successive iterations (maxdiv).
-
-# %%
-mcr.tol = 0.001
-_ = mcr.fit(X, St0)
-
-# %% [markdown]
-# #### More information about the MCRALS estimator
-#
-# ##### To get help about the different configuration parameters
-
-# %%
-# help(mcr)
-
-# %%
-# It is possible to chain fit runs, without recomputing everything for example for
-# optimization of some parameters
-
-mcr = scp.MCRALS(tol=0.001, log_level="INFO")
-_ = mcr.fit(X, St0)
-
-# %%
-mcr1 = scp.MCRALS(tol=0.1, log_level="INFO")
-_ = mcr1.fit(X, St0)
-
-# %%
-mcr1.tol = 0.01
-_ = mcr1.fit(
-    X, (mcr1.C.copy(), mcr1.St.copy())
-)  # reuse C and ST computed at the previous run
-print("second run with the output of the first")
-
-# %%
-mcr1.tol = 0.001
-_ = mcr1.fit(X, (mcr1.C, mcr1.St))
-print("third run with the output of the second")
-
-# %% [markdown]
-# Below we compare the outputs of the initial run (red) and final run (blue).
-
-# %%
-_ = mcr.C.T.plot(cmap=None, color="red")
-_ = mcr1.C.T.plot(clear=False, cmap=None, color="blue")
-
-_ = mcr.St.plot(cmap=None, color="red")
-_ = mcr1.St.plot(clear=False, cmap=None, color="blue")
-
-# %% [markdown]
-# #### Solutions
-#
-# The solutions of the MCR ALS optimization are the optimized concentration (C) and pure
-# spectra (St) datasets. They are stored as in the `C` and `St` attribute of the MCRAL object.
-# As MCRALS is derived from to the `DecompositionAnalysis` class, C and St can also be obtained
-# by `MCRALS.transform()` and MCRALS.components, respectively.
-#
-#  Let's generate a MCRALS
-#  object with the default settings, and get the solution datasets C and St. Note that
-#  the default log_level is "WARNING" so we do not see any output here.
-
-# %%
-mcr1 = scp.MCRALS()
-_ = mcr1.fit(X, St0)
-
-# %%
-C = mcr1.result.C
-St = mcr1.result.components
-
-# %% [markdown]
-# The grouped `.result` view is convenient when the fitted outputs are consumed
-# together. Historical direct access through `mcr1.C` and `mcr1.St` remains
-# available in this release.
-
-# %% [markdown]
-# As the dimensions of C are such that the rows' direction (C.y) corresponds to the
-# elution time and the columns'
-# direction (C.x) correspond to the four pure species, it is necessary to transpose
-# it before plotting in order
-# to plot the concentration vs. the elution time.
-
-# %%
-_ = C.T.plot()
-
-# %% [markdown]
-# On the other hand, the spectra of the pure species can be plotted directly:
-
-# %%
-_ = St.plot()
-
-# %% [markdown]
-# #### A basic illustration of the rotational ambiguity
-# We have thus obtained the elution profiles of the four pure species. Note that the
-# 'concentration' values are very
-# low. This results from the fact that the absorbance values in X are on the order of
-# 0-1 while the absorbance of
-# the initial pure spectra are of the order of 10^4. As can be seen above,
-# the absorbance of the final spectra is of
-# the same order of magnitude.
-#
-# It is possible to normalize the intensity of the spectral profiles by setting the
-# 'normSpec' parameter to True.
-# With this option, the spectra are normalized such that their euclidean norm is 1.
-# The other normalization option is
-# normspec = 'max', whereby the maximum intensity of the spectra is 1. Let's look at
-# the effect of
-# both normalizations:
-
-# %%
-mcr2 = scp.MCRALS(normSpec="euclid")
-_ = mcr2.fit(X, St0)
-
-mcr3 = scp.MCRALS(normSpec="max")
-_ = mcr3.fit(X, St0)
-
-_ = mcr1.St.plot()
-_ = mcr2.St.plot()
-_ = mcr3.St.plot()
-
-# %%
-_ = mcr1.C.T.plot()
-_ = mcr2.C.T.plot()
-_ = mcr3.C.T.plot()
-
-# %% [markdown]
-# It is clear that the normalization affects the relative intensity of the spectra and
-# of the concentration.
-# This is a basic example of the well known rotational ambiguity of the MCS ALS
-# solutions.
-
-# %% [markdown]
-# ### Guessing the concentration profile with PCA + EFA
-#
-# Generally, in MCR ALS, the initial guess cannot be obtained independently of the
-# experimental data 'x'.
-# In such a case, one has to rely on 'X' to obtained (i) the number of pure species
-# and (ii) their initial
-# concentrations or spectral profiles. The number of pure species can be assessed by
-# carrying out a PCA on the
-# data while the concentrations or spectral profiles can be estimated using procedures
-# such EFA of SIMPLISMA.
-# The following will illustrate the use of PCA followed by EFA
-#
-# #### Use of PCA to assess the number of pure species
-#
-# Let's first analyse our dataset using PCA and plot a screeplot:
+# Principal Component Analysis (PCA) can be used to estimate the number of components.  In particular a scree plot
+# of the PCA eigenvalues is often used to provide a quick estimate of the
+# effective rank.
 
 # %%
 pca = scp.PCA(n_components=8)
-_ = pca.fit(X)
-pca.printev()
+pca.fit(X)
 _ = pca.plot_scree()
 
 # %% [markdown]
-# The number of significant PC's is clearly larger or equal to 2. It is, however,
-# difficult to determine whether
-# it should be set to 3 or 4...  Let's look at the score and loading matrices:
-#
-
-# %%
-scores = pca.transform()
-_ = pca.loadings.plot()
-_ = scores.T.plot()
+# The scree plot suggests that the effective rank is likely between three and
+# four components. The fourth component explains only a small fraction of the
+# total variance, so PCA alone does not provide an unambiguous choice.
+# The EFA analysis below can give additional information and supports the use of
+# four components for the MCR-ALS model.
 
 # %% [markdown]
-# Examination of the scores and loadings indicate that the 4th component has structured,
-# nonrandom scores and loadings.
-# Hence, we will fix the number of pure species to 4.
-
-# %% [markdown]
-# #### Determination of initial concentrations using EFA
+# ### 3. Where do the components appear? — Evolving Factor Analysis
 #
-# Once the number of components has been determined, the initial concentration matrix
-# is obtained very easily using EFA:
+# PCA estimates the overall rank of the dataset but does not indicate where
+# individual chemical components are present along the elution axis.
+# **Evolving Factor Analysis** (EFA) addresses this question by performing a
+# sequence of singular value decompositions (or equivalently PCA) on
+# progressively larger submatrices of the data.
 #
+# In the forward analysis, the decomposition is performed on submatrices
+# extending from the beginning of the experiment to each observation in turn.
+# In the backward analysis, the same procedure is applied starting from the
+# last observation and extending progressively towards the beginning.
+#
+# The evolution of the significant eigenvalues reflects changes in the local
+# rank of the system. It reveals where chemical components enter and leave the
+# observation window, providing both an estimate of the number of components
+# and approximate bounds for their elution regions.
 
 # %%
 efa = scp.EFA()
-_ = efa.fit(X)
+efa.fit(X)
+
+# Plot forward and backward eigenvalue curves on a log scale
+scp.log10(efa.f_ev.clip(1e-4)).T.plot(color="dodgerblue")
+_ = scp.log10(efa.b_ev.clip(1e-4)).T.plot(clear=False, color="limegreen")
+
+# %% [markdown]
+# Four eigenvalues rise clearly above the noise floor.  The forward curve
+# (blue) for each component marks its emergence; the backward curve (green)
+# marks its decline.  The zone where the $k$-th forward curve separates
+# from the noise is the elution window of component $k$.
+#
+# From these windows, EFA constructs approximate concentration profiles that
+# describe where each component is present along the chromatogram. Although
+# these profiles are only estimates, they provide, in this case, an excellent
+# initialization for MCR-ALS.
+
+# %%
 efa.n_components = 4
 C0 = efa.transform()
+
 _ = C0.T.plot()
 
 # %% [markdown]
-# The MCR ALS can then be launched using this new guess:
-
-# %%
-mcr4 = scp.MCRALS(max_iter=100, normSpec="euclid")
-_ = mcr4.fit(X, C0)
-
-# %%
-_ = mcr4.C.T.plot()
-_ = mcr4.St.plot()
+# EFA provides a physically meaningful initial estimate: each profile
+# naturally respects the elution order and peak shape implied by the data.
+# It is particularly effective for systems that evolve sequentially
+# along the observation axis, such as chromatographic separations where
+# components elute in a first-in, first-out order (it was actually initially
+# developed for this purpose).
 
 # %% [markdown]
-# ## Augmented datasets
+# ### 4. Other initialization methods
+#
+# Several other strategies exist:
+#
+# - **SIMPLISMA** — selects purest variables as initial spectra;
+# - **Known reference spectra** — when pure-component spectra have been
+#   measured independently (e.g. in a spectral library);
+# - **Known concentration profiles** — when the elution or kinetic model is
+#   known a priori.
+#
+# In this tutorial we will use successively the pure spectra `spure` as the initial $S^T$ (stored in `St0`) and the EFA initialization as the initial $C$ (stored in `C0`).
+# and compare the two approaches.
+
 
 # %% [markdown]
-# The 'MATRIX' dataset is a columnwise augmented dataset consisting into 5 successive
-# runs:
+# ### 5. Running the optimisation
+#
+# The default configuration already applies non-negativity to both $C$ and
+# $S^T$, and unimodality to $C$ — sensible defaults for chromatographic
+# data.
+#
+# Let's first run the MCR-ALS algorithm with the pure spectra as initial guess for $S^T$.
 
 # %%
-A[1]
+mcr_s = scp.MCRALS(log_level="INFO")
+_ = mcr_s.fit(X, St0)
 
 # %% [markdown]
-# Let's plot it as a surface and as a map:
+# The optimisation log reports the three dimensionless convergence diagnostics
+# using the same relative convention as their corresponding tolerances:
+#
+# - `reconstruction_error` is the current reconstruction error
+#   $\lVert X-CS^T\rVert_F/\lVert X\rVert_F$;
+# - `residual_change` is the relative change in residual standard deviation
+#   between two successive iterations;
+# - `profile_change` is the relative change of the resolved factor profiles
+#   after removing their arbitrary reciprocal scale and sign.
+#
+# The associated stopping parameters are `tol_reconstruction_error`,
+# `tol_residual_change`, and `tol_profile_change`. A value of `None` disables
+# that criterion, and the optimisation stops as soon as any enabled criterion
+# is satisfied. By default, only `tol_residual_change=1e-3` is active. The final
+# log message states exactly which diagnostic caused the stop, for example::
+#
+#     Converged on residual_change:
+#       residual_change=8.420000e-04 <= tol_residual_change=1.000000e-03
+#
+# The `trend` column indicates whether the residual standard deviation went
+# `down`, `up`, or remained `flat`.
+
+# %% [markdown]
+# ### 6. Inspecting the solution
+#
+# The estimated profiles preserve the coordinate metadata of the input data.
 
 # %%
-X2 = A[1]
+C = mcr_s.C
+St = mcr_s.St
+
+print(f"C: {C.shape}")
+print(f"St: {St.shape}")
+
+_ = C.T.plot(title="Concentration profiles")
+_ = St.plot(title="Pure spectra")
+
+# %% [markdown]
+# The reconstruction quality can be assessed with `plot_merit`:
+
+# %%
+_ = mcr_s.plot_merit(offset=5)
+
+# %% [markdown]
+# Numerical diagnostics confirm convergence:
+
+# %%
+print(f"Residual std: {mcr_s.result.diagnostics['residual_std']:.6f}")
+print(
+    "Reconstruction error: " f"{mcr_s.result.diagnostics['reconstruction_error']:.3e}"
+)
+print(f"Residual change: {mcr_s.result.diagnostics['residual_change']:.3e}")
+print(f"Profile change: {mcr_s.result.diagnostics['profile_change']:.3e}")
+print(f"Stopping criterion: {mcr_s.result.diagnostics['convergence_reason']}")
+print(f"Converged: {mcr_s.result.converged}")
+print(f"Iterations: {mcr_s.result.n_iter}")
+
+# %% [markdown]
+# Now let's run the MCR-ALS algorithm with the EFA initialization for $C$ and the pure spectra as initial guess for $S^T$ and compare the two approaches.
+# %%0
+mcr_c = scp.MCRALS(log_level="INFO")
+_ = mcr_c.fit(X, C0)
+
+import matplotlib.pyplot as plt
+
+fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(8, 6))
+mcr_c.C.T.plot(ax=axes[0, 0], title="C (EFA init)")
+mcr_s.C.T.plot(ax=axes[0, 1], title="C (Pure spectra init)")
+mcr_c.St.plot(ax=axes[1, 0], title="$S^T$ (EFA init)")
+mcr_s.St.plot(ax=axes[1, 1], title="$S^T$ (Pure spectra init)")
+mcr_c.plot_merit(ax=axes[2, 0], offset=5)
+mcr_s.plot_merit(ax=axes[2, 1], offset=5)
+plt.tight_layout()
+plt.show()
+
+# %% [markdown]
+# The EFA initializations converges less rapidly but provides very
+# similar reconstruction, as shown by the comparable residuals in the merit
+# plots. This indicates that the bilinear model describes the experimental
+# data consistently, regardless of whether the initial estimate is supplied
+# for $C$ or for $S^T$.
+#
+# Note, however, that the amplitudes of the resolved profiles differ
+# substantially. This reflects the intrinsic scale ambiguity of MCR-ALS:
+# multiplying one column of $C$ by a constant and dividing the corresponding
+# row of $S^T$ by the same constant leaves the product $CS^T$ unchanged.
+# Consequently, the absolute magnitudes of the concentration and spectral
+# profiles should not be compared directly unless a common normalization
+# convention is imposed.
+#
+# Differences are also observed in the shapes of the resolved profiles.
+# These arise because EFA provides only an approximate initial estimate and
+# because the spectra of several components overlap strongly. Such spectral
+# correlation makes the decomposition less well conditioned, allowing slightly
+# different distributions of variance between components while producing
+# nearly identical reconstructions of the experimental data. This behaviour is
+# typical of bilinear inverse problems and illustrates why chemically
+# meaningful constraints are often essential to obtain a unique and
+# interpretable solution.
+#
+
+# %% [markdown]
+# ## Part II — Constraints
+#
+# The true power of MCR-ALS lies in the ability to inject prior chemical
+# knowledge through constraints.  SpectroChemPy provides a **declarative
+# constraint API**: each constraint is a simple object that describes *what*
+# is known.
+#
+# The most important practical question is: **which constraint should I use
+# for my scientific problem?**
+
+# %% [markdown]
+# ### Quick reference
+#
+# The constraints are imported from `spectrochempy.analysis.constraints`:
+#
+# | Constraint          | Profile | Purpose                                                    |
+# |---------------------|---------|------------------------------------------------------------|
+# | `NonNegative`       | C, St   | Non-negativity of concentrations or spectra                |
+# | `Unimodal`          | C, St   | Single maximum per component (chromatography, kinetics)    |
+# | `Closure`           | C       | Constant sum of selected components (mass balance)         |
+# | `Monotonic`         | C       | Monotonic increase or decrease (kinetic or thermodynamic profiles)          |
+# | `ModelProfile`      | C, St   | Hard model from a user-supplied callable (kinetic model)   |
+# | `ComponentPresence` | C       | Component absent in certain blocks (augmented data)        |
+# | `Trilinear`         | C       | Rank-1 constraint across blocks (augmented data)           |
+#
+# All constraints accept optional `blocks=` (see below) and `components=` parameters to
+# restrict their scope.
+
+# %% [markdown]
+# #### Non-negativity
+#
+# Non-negativity is the most widely used constraint in MCR-ALS because both
+# chemical concentrations and absorbance spectra are inherently non-negative.
+# For this reason, the default MCR-ALS configuration in SpectroChemPy applies
+# this constraint automatically to both concentration and spectral profiles.
+
+# To illustrate its effect, we first remove all constraints and solve the
+# problem using unconstrained least squares
+
+# %%
+mcr_nc = scp.MCRALS(log_level="INFO", constraints=[])
+mcr_nc.fit(X, C0)
+_ = mcr_nc.C.T.plot(title="Non-constrained concentration profiles")
+
+# %% [markdown]
+# The unconstrained least-squares solution contains negative concentrations and
+# oscillatory profiles.
+#
+# ##### How is non-negativity enforced?
+# There are two common strategies for enforcing non-negativity during the ALS
+# iterations.
+#
+# (i) The default configuration follows the classical MCR-ALS strategy introduced
+#  by Tauler and co-workers: each ALS half-step first computes an unconstrained
+#  least-squares solution:
+#
+# $$ C_{LS} = X(S^T)^+ $$
+#
+# after which the `NonNegative` constraint then projects this solution onto the
+# non-negative domain by replacing negative values with zero:
+#
+# $$ C_{constrained} = \max(C_{LS}, 0) $$
+#
+# This approach is computationally inexpensive. Here we demonstrate this
+# for concentrations:
+# %%
+from spectrochempy.analysis import constraints as ct
+
+mcr_nn = scp.MCRALS(log_level="INFO", constraints=[ct.NonNegative("C")])
+mcr_nn.fit(X, C0)
+_ = mcr_nn.C.T.plot(title="Non-negative concentration profiles (projection)")
+
+# %% [markdown]
+#
+# (ii) Alternatively, the least-squares problem itself can be solved under the
+# non-negativity constraint,
+#
+# $$ C_{\mathrm{NNLS}} =
+#    \arg\min_{C \ge 0} \|X-CS^T\|_F^2 $$
+#
+# using a dedicated non-negative least-squares (NNLS) solver. In this case,
+# positivity is enforced during the least-squares optimization rather than by
+# projecting an unconstrained solution afterwards. The resulting estimate is
+# the exact non-negative least-squares solution, at the expense of a higher
+# computational cost.
+#
+# The choice of solver is independent of the constraint definition. The
+# `NonNegative` constraint specifies that the solution must be non-negative,
+# whereas the ALS solver determines whether this constraint is enforced by
+# projection (`lstsq`) or directly during the optimization (`nnls` or
+# `pnnls`).
+#
+# Here we demonstrate the `nnls` solver for concentrations:
+# %%
+from spectrochempy.analysis import constraints as ct
+
+mcr_nnl = scp.MCRALS(log_level="INFO", solver_C="nnls", constraints=[])
+
+mcr_nnl.fit(X, C0)
+_ = mcr_nnl.C.T.plot(title="Non-negative concentration profiles (NNSL solver)")
+
+# %% [markdown]
+#
+# Here we obtain non-negative concentration profiles without projection. Note however that
+# some profiles are not unimodal -- this point will be addressed in a following section.
+#
+# Below we show how to apply non-negativity constraints particular profiles:
+# %%
+
+# All concentration profiles (default)
+_ = ct.NonNegative("C")
+
+# All spectral profiles (default)
+_ = ct.NonNegative("St")
+
+# Selected concentration components
+_ = ct.NonNegative("C", components=[0, 1])
+
+# Selected spectral components
+_ = ct.NonNegative("St", components=[0])
+
+# Selected blocks of an augmented dataset (see below)
+_ = ct.NonNegative("C", blocks=[1, 2])
+_ = ct.NonNegative("St", blocks=[0])  # e.g. UV spectra only
+
+# Combine component and block selections
+_ = ct.NonNegative("C", components=[0], blocks=[2])
+
+# %% [markdown]
+# Constraints are supplied as a list when constructing the MCR-ALS estimator.
+
+# %%
+mcr = scp.MCRALS(
+    constraints=[
+        ct.NonNegative("C"),
+        ct.NonNegative(
+            "St", blocks=[0]
+        ),  # e.g. only the first block has non-negative spectra
+    ],
+    log_level="INFO",
+)
+
+# %% [markdown]
+# #### `Unimodality`
+#
+# In chromatography or kinetics each concentration profile typically has a single maximum.
+
+# %%
+_ = ct.Unimodal("C", mod="strict")  # strict single maximum (default)
+_ = ct.Unimodal("C", mod="smooth")  # allows a flat-topped region
+_ = ct.Unimodal("C", tolerance=1.0)  # no allowance for local violations
+
+# %% [markdown]
+# Here we illustrate
+
+mcr_nnl_u = scp.MCRALS(
+    log_level="INFO", solver_C="nnls", constraints=[ct.Unimodal("C")]
+)
+
+mcr_nnl_u.fit(X, C0)
+_ = mcr_nnl_u.C.T.plot(title="NNSL solver + unimodality")
+
+# %% [markdown]
+# Unimodality can also be applied to spectral profiles when thy consist in a single band:
+
+# %%
+_ = ct.Unimodal("St", components=[1])  # only the second component
+
+# %% [markdown]
+# #### `Closure`
+#
+# Useful when the total concentration of the mixture is known.
+
+# %%
+_ = ct.Closure("C")  # rows sum to 1.0
+_ = ct.Closure("C", target=100.0)  # custom constant sum
+_ = ct.Closure("C", target=[1.0, 0.9, 0.8])  # per-row targets
+
+# %% [markdown]
+# #### `Monotonic`
+#
+# For kinetic profiles that only increase or decrease.
+
+# %%
+_ = ct.Monotonic("C", "increasing", components=[0])
+_ = ct.Monotonic("C", "decreasing", components=[1])
+
+# %% [markdown]
+# #### `ModelProfile`
+#
+# When a profile shape is known from a physical model (kinetic rate law,
+# peak-shape function), the ALS estimate is replaced by the model output
+# at each iteration.
+
+# %%
+# def kinetic_model(C_current):
+#     return C_constrained
+#
+# ct.ModelProfile("C", model=kinetic_model)
+
+# %% [markdown]
+# #### `ComponentPresence`
+#
+# For augmented (multi-block) data: specify which components are present
+# in each concentration block.
+
+# %%
+# ct.ComponentPresence("C", presence=[
+#     [True, True, True, True],
+#     [True, True, True, False],
+# ])
+
+# %% [markdown]
+# #### `Trilinear` — the rank-one assumption
+#
+# Trilinearity is the only constraint we demonstrate in full because it
+# addresses a recurring question in multi-experiment MCR-ALS.
+#
+# When the same mixture is measured repeatedly under identical conditions
+# (e.g. several HPLC injections), each component should have the **same
+# concentration profile shape** across runs, differing only by a
+# per-experiment **amplitude**.  Mathematically, the concentration profiles
+# of each component form a rank‑1 matrix across experiments:
+#
+# $$ \begin{bmatrix} c_1 & c_2 & \dots & c_N \end{bmatrix}
+#    = a \, b^T $$
+#
+# where $a$ is the common shape and $b$ contains the amplitudes.
+# The `Trilinear` constraint enforces this by projecting the
+# per-component, multi-block profiles onto their best rank‑1 approximation
+# at every ALS iteration.
+#
+# Repeated chromatographic runs of the same mixture naturally satisfy this
+# assumption.  The constraint is applied during *vertical augmentation*,
+# which we cover in the next section.
+#
+# A practical note: the default MCR-ALS configuration already applies
+# `NonNegative` and `Unimodal` to the concentration profiles, so explicitly
+# adding these constraints will barely change the ALS2004 solution.  They
+# are the first constraints to consider for any new dataset; the more
+# specialised constraints above become relevant when the default model
+# needs refinement.
+
+# %% [markdown]
+# ## Part III — Augmented datasets
+#
+# MCR-ALS can simultaneously analyse multiple data matrices.
+# SpectroChemPy supports two augmentation modes, each corresponding to a
+# different scientific scenario.
+
+# %% [markdown]
+# ### A. Vertical augmentation — multiple experiments, common spectra
+#
+# In **vertical (column-wise) augmentation** several experiments are stacked
+# row-wise.  Each experiment has its own concentration profiles, but the
+# pure spectra $S^T$ are common to all.
+#
+# $$ \begin{bmatrix} X_1 \\ X_2 \\ \vdots \\ X_N \end{bmatrix}
+#    = \begin{bmatrix} C_1 \\ C_2 \\ \vdots \\ C_N \end{bmatrix}
+#      S^T + E $$
+#
+# The ALS2004 dataset contains the `MATRIX` variable: four successive
+# HPLC-DAD runs concatenated into a single 204 × 96 matrix.
+
+# %%
+X2 = datasets[1]
 X2.title = "absorbance"
 X2.set_coordset(None, None)
 X2.set_coordtitles(y="elution time", x="wavelength")
-surf = X2.plot_surface(linewidth=0.0, ccount=100, figsize=(8, 4), autolayout=False)
-_ = X2.plot(method="map")
 
-# %%
-mcr5 = scp.MCRALS(unimodConc=[])
-_ = mcr5.fit(X2, St0)
-
-# %%
-_ = mcr5.C.T.plot()
-
-# %%
-_ = mcr5.St.plot()
+X_blocks = [X2[i * 51 : (i + 1) * 51].copy() for i in range(4)]
+for i, b in enumerate(X_blocks):
+    b.name = f"run {i + 1}"
+    b.title = "absorbance"
+    print(f"{b.name}: {b.shape}")
 
 # %% [markdown]
-# [To be continued...]
+# The blocks share the same spectral variables (96 wavelengths) but have
+# their own elution-time axes.  When all blocks have identical dimensions
+# (51 × 96), we must specify `augmentation="vertical"` explicitly.
+
+# %%
+mcr_v = scp.MCRALS(log_level="INFO")
+_ = mcr_v.fit(X_blocks, St0, augmentation="vertical")
+
+# %% [markdown]
+# The concentration matrix is the row-wise concatenation of the individual
+# $C_k$ blocks.  The `C_blocks` property restores the per-experiment view:
+
+# %%
+print(f"C (concatenated): {mcr_v.C.shape}")
+print(f"St (common): {mcr_v.St.shape}")
+
+for i, cb in enumerate(mcr_v.C_blocks):
+    print(f"C_blocks[{i}]: {cb.shape}")
+
+# %%
+_ = scp.multiplot(
+    [cb.T for cb in mcr_v.C_blocks],
+    nrow=2,
+    ncol=2,
+    suptitle="Concentration profiles — vertical augmentation",
+)
+
+# %% [markdown]
+# #### Trilinearity in practice
+#
+# Repeated chromatographic runs of the same mixture should produce
+# concentration profiles with identical shapes, differing only in scale.
+# We can enforce this with the `Trilinear` constraint.
+
+# %%
+mcr_vt = scp.MCRALS(
+    constraints=[ct.NonNegative("C"), ct.NonNegative("St"), ct.Trilinear("C")],
+    log_level="INFO",
+)
+_ = mcr_vt.fit(X_blocks, St0, augmentation="vertical")
+
+# %% [markdown]
+# For the ALS2004 benchmark, the four runs are already highly consistent profiles
+# (cross-block correlations > 0.998), so the constraint does not
+# substantially change the fit:
+
+# %%
+print(
+    f"Without trilinearity — residual std: {mcr_v.result.diagnostics['residual_std']:.4f}"
+)
+print(
+    f"With trilinearity    — residual std: {mcr_vt.result.diagnostics['residual_std']:.4f}"
+)
+
+_ = scp.multiplot(
+    [cb.T for cb in mcr_vt.C_blocks],
+    nrow=2,
+    ncol=2,
+    suptitle="Concentration profiles — trilinear constraint",
+)
+
+# %% [markdown]
+# The value of the `Trilinear` constraint becomes apparent with noisier
+# data or when runs exhibit slight instrumental drift.  In those cases,
+# forcing a common shape removes artefactual differences and produces
+# chemically more interpretable profiles.
+
+# %% [markdown]
+# ### B. Horizontal augmentation — common observations, different spectroscopies
+#
+# In **horizontal (row-wise) augmentation** several data matrices share
+# the observation axis (same number of rows) but have different spectral
+# variables.  The concentration profiles $C$ are common, while each
+# technique contributes its own spectral block $S_i^T$.
+#
+# $$ \begin{bmatrix} X_1 & X_2 & \dots & X_N \end{bmatrix}
+#    = C \, \begin{bmatrix} S_1^T & S_2^T & \dots & S_N^T \end{bmatrix}
+#      + E $$
+#
+# This is useful when the same sample is measured with complementary
+# spectroscopic techniques — the joint analysis forces a single
+# concentration profile to explain all techniques simultaneously.
+
+# %% [markdown]
+# #### Loading the DNA thermal denaturation dataset
+#
+# The dataset contains UV absorbance and CD (circular dichroism) spectra
+# recorded during a DNA melting experiment: 24 temperature steps from
+# 21 °C to 90 °C, 101 wavelengths from 230 nm to 330 nm.
+
+# %%
+dna = scp.read_matlab("matlabdata/dna_data.mat", merge=False)
+
+temp_coord = scp.Coord(dna[1].data.flatten(), title="temperature", units="°C")
+wave_coord = scp.Coord(dna[0].data.flatten(), title="wavelength", units="nm")
+
+X_uv = scp.NDDataset(dna[3].data, name="UV", title="absorbance")
+X_uv.add_coordset(x=wave_coord, y=temp_coord)
+
+X_cd = scp.NDDataset(dna[2].data, name="CD", title="ellipticity")
+X_cd.add_coordset(x=wave_coord, y=temp_coord)
+
+print(f"UV: {X_uv.shape}")
+print(f"CD: {X_cd.shape}")
+
+# %%
+
+_ = scp.multiplot(
+    (X_uv, X_cd),
+    nrow=1,
+    ncol=2,
+    labels=("UV spectra", "CD spectra"),
+    suptitle="DNA melting",
+)
+
+# %% [markdown]
+# #### Building a deterministic initial guess
+#
+# We use an EFA-based initialization on the combined UV+CD data.
+
+# %%
+# concatenate the two datasets
+combined = scp.concatenate(
+    X_uv, X_cd
+)  # a warning is raised because we concatenate absorbances and ellipticities
+
+# fit an EFA
+efa = scp.EFA().fit(combined)
+
+# and plot forward and backward curves to deternamlibne
+scp.log10(efa.f_ev.clip(1e-5)).T.plot(color="dodgerblue")
+_ = scp.log10(efa.b_ev.clip(1e-5)).T.plot(clear=False, color="limegreen")
+
+# %% [markdown]
+# Two components are identified
+
+efa.n_components = 2
+C0 = efa.transform()
+C0.T.plot()
+
+# %% [markdown]
+# #### Choosing the right constraints
+#
+# UV absorption spectra are non-negative but CD spectra are **signed** (positive and negative
+# bands), so global non-negativity on $S^T$ would be incorrect.
+#
+# We therefore apply `NonNegative` only to the **UV spectral block**
+# (block 0):
+
+# %%
+mcr_h = scp.MCRALS(
+    constraints=[
+        ct.NonNegative("C"),
+        ct.NonNegative("St", blocks=[0]),
+        ct.Closure("C"),
+    ],
+    log_level="INFO",
+)
+_ = mcr_h.fit([X_uv, X_cd], C0, augmentation="horizontal")
+
+# %% [markdown]
+# The concentration profiles $C$ carry the temperature coordinate.
+# The concatenated spectral matrix $S^T$ is split into technique-specific
+# blocks via `St_blocks`, each preserving its own wavelength coordinate.
+
+# %%
+import matplotlib.pyplot as plt
+
+fig, axes = plt.subplots(1, 3, figsize=(12, 4))
+_ = mcr_h.C.T.plot(ax=axes[0], title="$C$")
+_ = mcr_h.St_blocks[0].plot(ax=axes[1], title="$S^T_1$ (UV)")
+_ = mcr_h.St_blocks[1].plot(ax=axes[2], title="$S^T_2$ (CD)")
+plt.tight_layout()
+
+
+# %% [markdown]
+# The resolved profiles separate native (folded) and denatured (unfolded)
+# DNA.  The UV block shows two distinct absorption spectra; the CD block
+# shows the characteristic signed bands of the folded structure declining
+# as temperature increases.
+
+# %% [markdown]
+# ## Summary — choosing the right workflow
+#
+# The three parts of this tutorial map directly to practical questions:
+#
+# ```
+# One experiment
+#         │
+#         ▼
+#  Classical MCR-ALS
+#  (Part I)
+#
+# Repeated experiments
+# (common spectra)
+#         │
+#         ▼
+# Vertical augmentation
+# (Part III-A)
+#         │
+#         ├── runs are consistent    →  no trilinearity needed
+#         └── runs need shape alignment → add ct.Trilinear("C")
+#
+# Multiple techniques
+# (common concentrations)
+#         │
+#         ▼
+# Horizontal augmentation
+# (Part III-B)
+#         │
+#         └── per-block constraints    →  ct.NonNegative("St", blocks=[...])
+# ```
+#
+# **When should I consider trilinearity?**
+#
+# When your repeated experiments share the same underlying process (same
+# kinetics, same elution order) and you want to enforce a common profile
+# shape per component.  This is especially valuable when individual runs
+# are noisy or when systematic differences between runs are physically
+# meaningless.
+
+# %%
