@@ -86,12 +86,15 @@ def _apodize_method(**units):
                         par *= Quantity(1.0, default_units)
 
                     apod[key] = par
-                    if par.dimensionality == 1 / dunits.dimensionality:
+                    if par.magnitude == 0:
+                        kwargs[key] = 0.0
+                    elif par.dimensionality == 1 / dunits.dimensionality:
                         kwargs[key] = 1.0 / (1.0 / par).to(dunits)
                     else:
                         kwargs[key] = par.to(dunits)
 
-                    kwargs[key] = kwargs[key].magnitude
+                    if hasattr(kwargs[key], "magnitude"):
+                        kwargs[key] = kwargs[key].magnitude
 
                 # Call to the apodize function
                 # ----------------------------

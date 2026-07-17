@@ -762,7 +762,7 @@ class CoordSet(HasTraits):
 
             for entry in group.entries:
                 if entry.coord.is_empty:
-                    coord = Coord(None, name=name)
+                    coord = entry.coord.copy(keepname=True)
                 else:
                     coord = entry.coord[item]
                 entries.append(replace(entry, coord=coord))
