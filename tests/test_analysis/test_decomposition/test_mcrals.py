@@ -2644,9 +2644,16 @@ def test_docstring_modern_params_in_order():
     import re
 
     expected = [
-        p
-        for p in MCRALS.__signature__.parameters
-        if MCRALS.__signature__.parameters[p].kind.name != "VAR_POSITIONAL"
+        "constraints",
+        "solver_C",
+        "solver_St",
+        "max_iter",
+        "tol_residual_change",
+        "tol_reconstruction_error",
+        "tol_profile_change",
+        "maxdiv",
+        "warm_start",
+        "log_level",
     ]
 
     doc = MCRALS.__doc__
