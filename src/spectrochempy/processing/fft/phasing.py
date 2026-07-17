@@ -258,7 +258,9 @@ def pk_exp(dataset, phc0=0.0, pivot=0.0, exptc=0.0, **kwargs):
     return pk(dataset, phc0=phc0, phc1=0, pivot=pivot, exptc=exptc)
 
 
-# # TODO: work on pk (below a copy from MASAI)
+# Reference: MASAI auto-phase algorithms (negmin + entropy minimization).
+# To be reworked into a proper apk() function when needed.
+# See roadmap/current-roadmap.md for status.
 # @_phase_method
 # def _apk(source=None, options='', axis=-1):
 #     """
