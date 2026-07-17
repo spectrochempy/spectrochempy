@@ -30,6 +30,9 @@ from spectrochempy.analysis.decomposition.mcrals_constraints import (  # noqa: F
     Closure,
 )
 from spectrochempy.analysis.decomposition.mcrals_constraints import (  # noqa: F401
+    ComponentPresence,
+)
+from spectrochempy.analysis.decomposition.mcrals_constraints import (  # noqa: F401
     Constraint,
 )
 from spectrochempy.analysis.decomposition.mcrals_constraints import (  # noqa: F401
@@ -51,6 +54,9 @@ from spectrochempy.analysis.decomposition.mcrals_constraints import (  # noqa: F
     Selectivity,
 )
 from spectrochempy.analysis.decomposition.mcrals_constraints import (  # noqa: F401
+    Trilinear,
+)
+from spectrochempy.analysis.decomposition.mcrals_constraints import (  # noqa: F401
     Unimodal,
 )
 from spectrochempy.analysis.decomposition.mcrals_constraints import (  # noqa: F401
@@ -59,6 +65,7 @@ from spectrochempy.analysis.decomposition.mcrals_constraints import (  # noqa: F
 
 __all__ = [
     "Closure",
+    "ComponentPresence",
     "Constraint",
     "FixedValues",
     "ModelProfile",
@@ -66,6 +73,7 @@ __all__ = [
     "NonNegative",
     "ReferenceProfile",
     "Selectivity",
+    "Trilinear",
     "Unimodal",
     "ZeroRegion",
 ]

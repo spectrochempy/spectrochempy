@@ -20,9 +20,6 @@ The conversion pipeline is::
     public Constraint objects
             |
             v
-    legacy_to_constraints()      (legacy traitlet API only)
-            |
-            v
     _public_to_internal()        (in MCRALS)
             |
             v
@@ -54,6 +51,8 @@ enforced during :meth:`MCRALS.fit`:
 - :class:`Closure` — ``"C"`` only
 - :class:`Unimodal` — ``"C"`` and ``"St"``
 - :class:`Monotonic` — ``"C"`` only
+- :class:`ComponentPresence` — ``"C"`` in vertically augmented data
+- :class:`Trilinear` — ``"St"`` in vertically augmented data
 - :class:`ModelProfile` — ``"C"`` and ``"St"``
 
 The remaining constraint classes (:class:`ZeroRegion`, :class:`Selectivity`,
@@ -77,6 +76,8 @@ __all__ = [
     "Selectivity",
     "FixedValues",
     "ReferenceProfile",
+    "ComponentPresence",
+    "Trilinear",
     "ModelProfile",
 ]
 
@@ -93,8 +94,7 @@ _PROFILES = ("C", "St")
 _DIRECTIONS = ("increasing", "decreasing")
 
 #: Admissible unimodal modalities. ``"strict"`` enforces a single
-#: maximum, ``"smooth"`` allows a flat-topped region (mirrors the
-#: historical ``unimodConcMod`` / ``unimodSpecMod`` traitlets).
+#: maximum, while ``"smooth"`` allows a flat-topped region.
 _UNIMODAL_MODS = ("strict", "smooth")
 
 
@@ -512,6 +512,58 @@ def _validate_direction(direction, *, name="direction"):
     return direction
 
 
+def _validate_blocks(blocks, *, name="blocks"):
+    """
+    Validate a block-selection list for augmented data.
+
+    A block selection is either ``None`` (meaning "all blocks", the
+    default) or a list of non-negative integer indices.
+
+    Parameters
+    ----------
+    blocks : None or list[int]
+        Block selection.
+    name : str, optional
+        Argument name used in error messages.
+
+    Raises
+    ------
+    TypeError
+        If the selection is not a list or contains non-integer entries.
+    ValueError
+        If the list is empty or contains negative indices.
+
+    Returns
+    -------
+    list[int] or None
+        The validated selection as a list of ints, or ``None``.
+    """
+    if blocks is None:
+        return None
+    if isinstance(blocks, (int,)):
+        raise TypeError(
+            f"{name} must be a list of integers, got a single int. "
+            f"Use [{blocks}] to select a single block."
+        )
+    if not isinstance(blocks, (list, tuple)):
+        raise TypeError(
+            f"{name} must be a list of integers, got {type(blocks).__name__!r}."
+        )
+    out = []
+    for idx in blocks:
+        if isinstance(idx, bool) or not isinstance(idx, int):
+            raise TypeError(
+                f"{name} entries must be integers, got "
+                f"{type(idx).__name__!r} ({idx!r})."
+            )
+        if idx < 0:
+            raise ValueError(f"{name} entries must be non-negative, got {idx!r}.")
+        out.append(idx)
+    if not out:
+        raise ValueError(f"{name} must not be empty.")
+    return out
+
+
 def _validate_array_like(values, *, name):
     """
     Validate that an object can be interpreted as an array-like.
@@ -673,14 +725,20 @@ class Constraint:
     Monotonic : Monotonicity constraint.
     """
 
-    def __init__(self, profile):
+    def __init__(self, profile, blocks=None):
         self._profile = _validate_profile(profile)
+        self._blocks = _validate_blocks(blocks)
 
     # -- properties ------------------------------------------------------
     @property
     def profile(self):
         """str: Canonical profile identifier (``"C"`` or ``"St"``)."""
         return self._profile
+
+    @property
+    def blocks(self):
+        """list[int] or None: Block indices for augmented data (``None`` means all blocks)."""
+        return self._blocks
 
     # -- representation --------------------------------------------------
     def _repr_params(self):
@@ -691,7 +749,10 @@ class Constraint:
         (never leading underscores). The base implementation exposes
         only ``profile``.
         """
-        return [("profile", self._profile)]
+        params = [("profile", self._profile)]
+        if self._blocks is not None:
+            params.append(("blocks", self._blocks))
+        return params
 
     def __repr__(self):
         params = ", ".join(f"{name}={value!r}" for name, value in self._repr_params())
@@ -765,12 +826,15 @@ class NonNegative(Constraint):
     NonNegative(profile='St', components=[0, 2])
     """
 
-    def __init__(self, profile, components=None):
-        super().__init__(profile)
+    def __init__(self, profile, components=None, blocks=None):
+        super().__init__(profile, blocks=blocks)
         self._components = _validate_components(components)
 
     def _repr_params(self):
-        return [("profile", self._profile), ("components", self._components)]
+        params = [("profile", self._profile), ("components", self._components)]
+        if self._blocks is not None:
+            params.append(("blocks", self._blocks))
+        return params
 
     @property
     def components(self):
@@ -816,8 +880,10 @@ class Closure(Constraint):
     Closure(profile='C', components=None, target=array([1., 1., 1.]))
     """
 
-    def __init__(self, profile, components=None, target=1.0, method="scaling"):
-        super().__init__(profile)
+    def __init__(
+        self, profile, components=None, target=1.0, method="scaling", blocks=None
+    ):
+        super().__init__(profile, blocks=blocks)
         self._components = _validate_components(components)
         self._target = _validate_target(target)
         self._method = _validate_closure_method(method)
@@ -830,6 +896,8 @@ class Closure(Constraint):
         ]
         if self._method != "scaling":
             params.append(("method", self._method))
+        if self._blocks is not None:
+            params.append(("blocks", self._blocks))
         return params
 
     @property
@@ -891,8 +959,7 @@ class Unimodal(Constraint):
         Must be ``>= 1.0``.  ``1.0`` makes the constraint strict (every
         decrease after the global maximum is a violation).  Values above
         ``1.0`` allow small local reversals before enforcing a strict
-        decrease (mirrors the historical ``unimodConcTol`` /
-        ``unimodSpecTol`` legacy parameters).  Default is ``1.1``.
+        decrease. Default is ``1.1``.
     mod : str, optional
         Unimodal modality: ``"strict"`` (single maximum, default) or
         ``"smooth"`` (allow a flat-topped region).
@@ -908,8 +975,10 @@ class Unimodal(Constraint):
     Unimodal(profile='C', components=None, tolerance=1.0, mod='strict')
     """
 
-    def __init__(self, profile, components=None, tolerance=1.1, mod="strict"):
-        super().__init__(profile)
+    def __init__(
+        self, profile, components=None, tolerance=1.1, mod="strict", blocks=None
+    ):
+        super().__init__(profile, blocks=blocks)
         self._components = _validate_components(components)
         self._tolerance = _validate_tolerance(tolerance)
         self._mod = _validate_unimodal_mod(mod)
@@ -922,6 +991,8 @@ class Unimodal(Constraint):
         ]
         if self._tolerance != 1.1:
             params.insert(2, ("tolerance", self._tolerance))
+        if self._blocks is not None:
+            params.append(("blocks", self._blocks))
         return params
 
     @property
@@ -978,19 +1049,23 @@ class Monotonic(Constraint):
         direction,
         components=None,
         tolerance=1.1,
+        blocks=None,
     ):
-        super().__init__(profile)
+        super().__init__(profile, blocks=blocks)
         self._direction = _validate_direction(direction)
         self._components = _validate_components(components)
         self._tolerance = _validate_tolerance(tolerance)
 
     def _repr_params(self):
-        return [
+        params = [
             ("profile", self._profile),
             ("direction", self._direction),
             ("components", self._components),
             ("tolerance", self._tolerance),
         ]
+        if self._blocks is not None:
+            params.append(("blocks", self._blocks))
+        return params
 
     @property
     def direction(self):
@@ -1038,17 +1113,20 @@ class ZeroRegion(Constraint):
     ZeroRegion(profile='St', region=(40, 60), components=[1])
     """
 
-    def __init__(self, profile, region, components=None):
-        super().__init__(profile)
+    def __init__(self, profile, region, components=None, blocks=None):
+        super().__init__(profile, blocks=blocks)
         self._region = _validate_region(region)
         self._components = _validate_components(components)
 
     def _repr_params(self):
-        return [
+        params = [
             ("profile", self._profile),
             ("region", self._region),
             ("components", self._components),
         ]
+        if self._blocks is not None:
+            params.append(("blocks", self._blocks))
+        return params
 
     @property
     def region(self):
@@ -1090,17 +1168,20 @@ class Selectivity(Constraint):
     Selectivity(profile='C', region=(0, 5), component=0)
     """
 
-    def __init__(self, profile, region, component):
-        super().__init__(profile)
+    def __init__(self, profile, region, component, blocks=None):
+        super().__init__(profile, blocks=blocks)
         self._region = _validate_region(region)
         self._component = _validate_component(component)
 
     def _repr_params(self):
-        return [
+        params = [
             ("profile", self._profile),
             ("region", self._region),
             ("component", self._component),
         ]
+        if self._blocks is not None:
+            params.append(("blocks", self._blocks))
+        return params
 
     @property
     def region(self):
@@ -1146,17 +1227,20 @@ class FixedValues(Constraint):
     FixedValues(profile='St', values=[[0.1, 0.2], [0.3, 0.4]], components=None)
     """
 
-    def __init__(self, profile, values, components=None):
-        super().__init__(profile)
+    def __init__(self, profile, values, components=None, blocks=None):
+        super().__init__(profile, blocks=blocks)
         self._values = _validate_array_like(values, name="values")
         self._components = _validate_components(components)
 
     def _repr_params(self):
-        return [
+        params = [
             ("profile", self._profile),
             ("values", self._values),
             ("components", self._components),
         ]
+        if self._blocks is not None:
+            params.append(("blocks", self._blocks))
+        return params
 
     @property
     def values(self):
@@ -1215,17 +1299,20 @@ class ReferenceProfile(Constraint):
     ReferenceProfile(profile='St', component=1, data=[0.1, 0.9, 0.5, 0.2])
     """
 
-    def __init__(self, profile, component, data):
-        super().__init__(profile)
+    def __init__(self, profile, component, data, blocks=None):
+        super().__init__(profile, blocks=blocks)
         self._component = _validate_component(component)
         self._data = _validate_array_like(data, name="data")
 
     def _repr_params(self):
-        return [
+        params = [
             ("profile", self._profile),
             ("component", self._component),
             ("data", self._data),
         ]
+        if self._blocks is not None:
+            params.append(("blocks", self._blocks))
+        return params
 
     @property
     def component(self):
@@ -1254,6 +1341,183 @@ class ReferenceProfile(Constraint):
         if result is NotImplemented:
             return result
         return not result
+
+
+# --------------------------------------------------------------------------------------
+# Augmented data constraints
+# --------------------------------------------------------------------------------------
+
+
+class ComponentPresence(Constraint):
+    """
+    Component presence/absence constraint for augmented (multiset) data.
+
+    Specifies which components are present in each concentration block
+    when fitting vertically augmented datasets. A ``False`` entry forces
+    the corresponding concentration profile to be exactly zero in that
+    block.
+
+    The ``presence`` matrix has shape ``(n_blocks, n_components)`` where
+    ``presence[b, j]`` is ``True`` if component ``j`` is present in
+    block ``b`` and ``False`` if it is absent (forced to zero).
+
+    This constraint requires augmented data and is applied late in the
+    concentration constraint pipeline so that earlier constraints (e.g.
+    non-negativity, unimodality) do not reintroduce values in absent
+    blocks.
+
+    Parameters
+    ----------
+    profile : str
+        Must be ``"C"`` (concentrations). Only concentration profiles
+        are supported.
+    presence : list[list[bool]]
+        Matrix of shape ``(n_blocks, n_components)``. Each entry is
+        ``True`` (component present) or ``False`` (component absent).
+
+    Examples
+    --------
+    >>> from spectrochempy.analysis.constraints import ComponentPresence
+    >>> ComponentPresence("C", presence=[[True, True, False],
+    ...                                  [True, False, True]])
+    ComponentPresence(profile='C', presence=[[True, True, False], [True, False, True]])
+    """
+
+    def __init__(self, profile, presence):
+        super().__init__(profile)
+        if profile != "C":
+            raise ValueError(
+                f"ComponentPresence only supports profile='C', got {profile!r}."
+            )
+        self._validate_presence(presence)
+        self._presence = presence
+
+    def _validate_presence(self, presence):
+        if not isinstance(presence, (list, tuple)):
+            raise TypeError(
+                f"presence must be a list of lists of booleans, "
+                f"got {type(presence).__name__!r}."
+            )
+        if not presence:
+            raise ValueError("presence must not be empty.")
+        n_cols = None
+        for i, row in enumerate(presence):
+            if not isinstance(row, (list, tuple)):
+                raise TypeError(
+                    f"presence[{i}] must be a list or tuple, "
+                    f"got {type(row).__name__!r}."
+                )
+            if n_cols is None:
+                n_cols = len(row)
+            elif len(row) != n_cols:
+                raise ValueError(
+                    f"All rows of presence must have the same length. "
+                    f"Row 0 has {n_cols} entries but row {i} has {len(row)}."
+                )
+            for j, val in enumerate(row):
+                if not isinstance(val, (bool, np.bool_)):
+                    raise TypeError(
+                        f"presence[{i}][{j}] must be a boolean, "
+                        f"got {type(val).__name__!r}."
+                    )
+
+    def _repr_params(self):
+        return [
+            ("profile", self._profile),
+            ("presence", self._presence),
+        ]
+
+    @property
+    def presence(self):
+        """list[list[bool]]: Component presence matrix ``(n_blocks, n_components)``."""
+        return self._presence
+
+
+class Trilinear(Constraint):
+    """
+    Trilinearity constraint for augmented (multiset) data.
+
+    Enforces that selected concentration profiles across blocks share a
+    common shape, up to a per-block amplitude. For each selected component,
+    the profiles from all selected blocks are assembled into a matrix of
+    shape ``(n_points, n_blocks)``, factorised via SVD, and projected onto
+    the best rank-1 reconstruction.
+
+    This constraint operates across blocks (``is_block_local = False``)
+    and handles block selection internally.
+
+    .. note::
+        Currently only ``profile="C"`` and ``synchronization="none"`` are
+        supported.
+
+    Parameters
+    ----------
+    profile : str
+        Must be ``"C"`` (concentrations).
+    components : list[int], optional
+        Component indices to which the constraint applies. ``None``
+        (default) means "all components".
+    blocks : list[int], optional
+        Block indices to include in the trilinear projection. At least
+        two blocks are required. ``None`` (default) means "all blocks".
+    synchronization : str, optional
+        Synchronization method. Only ``"none"`` (default) is currently
+        implemented.
+
+    Examples
+    --------
+    >>> from spectrochempy.analysis.constraints import Trilinear
+    >>> Trilinear("C")
+    Trilinear(profile='C', components=None, blocks=None, synchronization='none')
+    >>> Trilinear("C", components=[0, 1], blocks=[0, 1])
+    Trilinear(profile='C', components=[0, 1], blocks=[0, 1], synchronization='none')
+    """
+
+    def __init__(
+        self,
+        profile,
+        components=None,
+        blocks=None,
+        synchronization="none",
+    ):
+        super().__init__(profile, blocks=blocks)
+        if profile != "C":
+            raise ValueError(f"Trilinear only supports profile='C', got {profile!r}.")
+        self._components = _validate_components(components)
+        self._synchronization = _validate_synchronization(synchronization)
+
+    def _repr_params(self):
+        return [
+            ("profile", self._profile),
+            ("components", self._components),
+            ("blocks", self._blocks),
+            ("synchronization", self._synchronization),
+        ]
+
+    @property
+    def components(self):
+        """list[int] or None: Component selection (``None`` means "all")."""
+        return self._components
+
+    @property
+    def synchronization(self):
+        """str: Synchronization method (currently only ``"none"``)."""
+        return self._synchronization
+
+
+def _validate_synchronization(synchronization, *, name="synchronization"):
+    """Validate the synchronization parameter for Trilinear."""
+    if not isinstance(synchronization, str):
+        raise TypeError(
+            f"{name} must be a string, got {type(synchronization).__name__!r}."
+        )
+    _SYNC_MODES = ("none",)
+    if synchronization not in _SYNC_MODES:
+        raise NotImplementedError(
+            f"synchronization={synchronization!r} is not implemented. "
+            f"Only {_SYNC_MODES!r} is supported."
+        )
+    return synchronization
 
 
 # --------------------------------------------------------------------------------------
@@ -1324,8 +1588,7 @@ def _validate_mapping(mapping, *, name="mapping", components=None):
     the ALS component at ``components[i]``.
 
     Duplicate indices are allowed: multiple ALS components may reference
-    the same model output column/row.  This mirrors the legacy
-    ``getC_to_C_idx`` / ``getSt_to_St_idx`` behaviour.
+    the same model output column/row.
 
     Parameters
     ----------
@@ -1442,9 +1705,6 @@ class ModelProfile(Constraint):
         ``None`` (the default) means identity: components receive model
         outputs in order.  Duplicate indices are allowed.
 
-        This is the public equivalent of the legacy
-        ``getC_to_C_idx`` / ``getSt_to_St_idx`` traitlets.
-
     Examples
     --------
     >>> from spectrochempy import ModelProfile
@@ -1488,8 +1748,9 @@ class ModelProfile(Constraint):
         model_args=None,
         model_kwargs=None,
         mapping=None,
+        blocks=None,
     ):
-        super().__init__(profile)
+        super().__init__(profile, blocks=blocks)
         self._components = _validate_components(components)
         self._model = _validate_callable(model)
         self._model_args = _validate_model_args(model_args)
@@ -1510,6 +1771,8 @@ class ModelProfile(Constraint):
             params.append(("model_kwargs", self._model_kwargs))
         if self._mapping is not None:
             params.append(("mapping", self._mapping))
+        if self._blocks is not None:
+            params.append(("blocks", self._blocks))
         return params
 
     @property
