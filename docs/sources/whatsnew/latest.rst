@@ -27,41 +27,21 @@ New Features
   columns have been removed because they did not map clearly to the stopping
   criteria.
 
-- Score plot labels now use ``adjustText`` for intelligent placement (collision
-  avoidance with markers and other labels). Falls back to a fixed offset if
-  ``adjustText`` is not installed.
+- NMR support has been significantly expanded.  SpectroChemPy now provides
+  ``scp.nmr.Experiment`` as a state-aware NMR scientific model, alongside new
+  official readers for Agilent/Varian, JEOL JDF, TecMag TNT, and SIMPSON
+  datasets.  These readers integrate with the plugin I/O namespaces
+  (``scp.nmr.read(...)``, ``scp.topspin.read(...)``, ``scp.agilent.read(...)``)
+  while preserving the familiar root-level compatibility aliases.
 
-- PCA component labels now display as ``PC1``, ``PC2``, ... instead of ``#0``,
-  ``#1``, ... in legends and coordinate display. Other analysis methods
-  retain the default ``#0``, ``#1``, ... labels. (#1404)
+- Extra NMR validation datasets can now be fetched on demand with
+  ``download_extra_testdata()``, which clones the additional test corpus from
+  ``spectrochempy_data`` into ``~/.spectrochempy/testdata-extra/``.
 
-- Introduced ``scp.nmr.Experiment``, an NMR-specific scientific model that
-  wraps an ``NDDataset`` and provides state-aware processing.  The class
-  classifies the current data domain (time, frequency, mixed), identifies
-  source kind (FID, SER, processed 1D/2D), exposes NMR metadata (encoding,
-  nuclei), validates NMR-specific requirements, and orchestrates processing
-  that is appropriate for the current domain — never performing FFT on
-  already-transformed data.  This is the first step toward a simplified NMR
-  processing workflow.
-
-- Added ``download_extra_testdata()`` to ``spectrochempy.application.testdata``
-  for fetching extra NMR datasets (agilent, jeol, bruker_3d, simpson, tecmag)
-  from the ``data-extra`` branch of the ``spectrochempy_data`` repository.
-  Extra data is cloned into ``~/.spectrochempy/testdata-extra/``. (:pr:`1418`)
-
-- Added four new NMR format readers in the NMR plugin: Agilent/Varian
-  (``scp.nmr.read_agilent``, binary ``fid`` + ``procpar``), JEOL JDF
-  (``scp.nmr.read_jeol``), TecMag TNT (``scp.nmr.read_tecmag``), and
-  SIMPSON (``scp.nmr.read_simpson``, ``TEXT``/``BINARY``/``RAWBIN`` formats).
-  All use vendored NMRGlue code and support automatic format detection.
-
-- Added plugin-contributed I/O namespaces for NMR and PerkinElmer readers.
-  ``scp.topspin.read`` and ``scp.agilent.read`` now expose the format-specific
-  readers with the same short-method namespace API used by core I/O domains.
-  ``scp.nmr.read`` is a generic dispatcher that auto-detects TopSpin and
-  Agilent/Varian formats (or uses ``protocol=``).  Root-level aliases
-  ``scp.read_topspin``, ``scp.read_agilent`` and ``scp.read_perkinelmer``
-  remain available as compatibility shims.
+- Plotting and analysis displays are more informative by default.  Score-plot
+  labels can now use ``adjustText`` for collision-aware placement, and PCA
+  components are displayed with ``PC1``, ``PC2``, ... labels in legends and
+  coordinate displays instead of generic ``#0``, ``#1``, ... identifiers.
 
 Bug Fixes
 ~~~~~~~~~

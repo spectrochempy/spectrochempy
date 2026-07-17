@@ -2641,10 +2641,13 @@ def test_docstring_single_parameters_section():
 
 def test_docstring_modern_params_in_order():
     """Parameters section must list params in the same order as __signature__."""
-    import inspect, re
+    import re
 
-    sig = inspect.signature(MCRALS)
-    expected = [p for p in sig.parameters if p != "args"]
+    expected = [
+        p
+        for p in MCRALS.__signature__.parameters
+        if MCRALS.__signature__.parameters[p].kind.name != "VAR_POSITIONAL"
+    ]
 
     doc = MCRALS.__doc__
     assert doc is not None
