@@ -203,7 +203,15 @@ read_mat = read_matlab
 # --------------------------------------------------------------------------------------
 # Private methods
 # --------------------------------------------------------------------------------------
-_SCP_EXCHANGE_REQUIRED_KEYS = {"data", "dims", "coords", "coord_units", "coord_titles", "name", "title"}
+_SCP_EXCHANGE_REQUIRED_KEYS = {
+    "data",
+    "dims",
+    "coords",
+    "coord_units",
+    "coord_titles",
+    "name",
+    "title",
+}
 
 
 def _unwrap_str(value):
@@ -348,7 +356,8 @@ def _read_mat(*args, **kwargs):
             # and returning a non-NDDataset placeholder here breaks merge_datasets() downstream,
             # so this variable is skipped.
             warning_(
-                f"The mat file contains a variable named '{name}' with unsupported data type '{data.dtype}', which will not be converted to NDDataset")
+                f"The mat file contains a variable named '{name}' with unsupported data type '{data.dtype}', which will not be converted to NDDataset"
+            )
             continue
 
     return datasets
