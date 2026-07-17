@@ -97,7 +97,30 @@ def _phase_method(method):
                 kwargs["phc1"] = -kwargs["phc1"]
 
             apod = method(new.data, **kwargs)
-            new *= apod
+
+            # Check for plugin-provided phasing (e.g. quaternion-aware).
+            # The plugin handler decomposes quaternion into complex subspectra,
+            # applies the phase apodization to each, and rebuilds quaternion.
+            _phased_by_plugin = False
+            if not new.is_complex:
+                try:
+                    from spectrochempy.plugins import (
+                        manager as manager_module,  # noqa: PLC0415
+                    )
+
+                    pk_handler = manager_module.plugin_manager.registry.get_handler(
+                        "pk.execute"
+                    )
+                except Exception:  # noqa: BLE001
+                    pk_handler = None
+                if pk_handler is not None:
+                    result = pk_handler(new, apod=apod, dim=dim, **kwargs)
+                    if result is not None:
+                        new = result
+                        _phased_by_plugin = True
+
+            if not _phased_by_plugin:
+                new *= apod
 
             new.history = f"`{method.__name__}` applied to dimension `{dim}` with parameters: {kwargs}"
 
@@ -105,7 +128,8 @@ def _phase_method(method):
                 new.meta.phased[-1] = True
                 new.meta.phc0[-1] = 0 * ur.degree
                 new.meta.phc1[-1] = 0 * ur.degree
-                new.meta.exptc[-1] = 0 * (1 / dunits)
+                if dunits is not None:
+                    new.meta.exptc[-1] = 0 * (1 / dunits)
             else:
                 if rel:
                     new.meta.phc0[-1] += kwargs["phc0"] * ur.degree
@@ -115,9 +139,11 @@ def _phase_method(method):
                     new.meta.phc1[-1] = kwargs["phc1"] * ur.degree
 
                     # TODO: to do for exptc too!
-                new.meta.exptc[-1] = kwargs["exptc"] * (1 / dunits)
+                if dunits is not None:
+                    new.meta.exptc[-1] = kwargs["exptc"] * (1 / dunits)
 
-            new.meta.pivot[-1] = kwargs["pivot"] * dunits
+            if dunits is not None:
+                new.meta.pivot[-1] = kwargs["pivot"] * dunits
 
         else:  # not (x.unitless or x.dimensionless or x.units.dimensionality != '[time]')
             error_(
@@ -232,7 +258,9 @@ def pk_exp(dataset, phc0=0.0, pivot=0.0, exptc=0.0, **kwargs):
     return pk(dataset, phc0=phc0, phc1=0, pivot=pivot, exptc=exptc)
 
 
-# # TODO: work on pk (below a copy from MASAI)
+# Reference: MASAI auto-phase algorithms (negmin + entropy minimization).
+# To be reworked into a proper apk() function when needed.
+# See roadmap/current-roadmap.md for status.
 # @_phase_method
 # def _apk(source=None, options='', axis=-1):
 #     """
