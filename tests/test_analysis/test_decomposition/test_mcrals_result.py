@@ -59,7 +59,7 @@ class TestMCRALSResult:
 
     def test_diagnostics_contain_keys(self, fitted_mcrals):
         result = fitted_mcrals.result
-        for name in ("n_iter", "change", "residual_std", "converged"):
+        for name in ("n_iter", "residual_change", "residual_std", "converged"):
             assert name in result.diagnostics, f"{name} missing from result.diagnostics"
 
     def test_output_values_match_properties(self, fitted_mcrals):
@@ -77,7 +77,7 @@ class TestMCRALSResult:
         result = fitted_mcrals.result
         assert result.diagnostics["n_iter"] >= 1
         assert isinstance(result.diagnostics["converged"], (bool, np.bool_))
-        assert isinstance(result.diagnostics["change"], float)
+        assert isinstance(result.diagnostics["residual_change"], float)
         assert isinstance(result.diagnostics["residual_std"], float)
         assert result.diagnostics["residual_std"] >= 0.0
 
@@ -92,62 +92,34 @@ class TestMCRALSResult:
 
     def test_parameters_contain_expected_keys(self, fitted_mcrals):
         params = fitted_mcrals.result.parameters
-        for name in (
+        assert set(params) == {
             "n_components",
             "max_iter",
-            "tol",
+            "tol_residual_change",
+            "tol_reconstruction_error",
+            "tol_profile_change",
             "maxdiv",
-            "solverConc",
-            "solverSpec",
-            "nonnegConc",
-            "nonnegSpec",
-            "unimodConc",
-            "unimodSpec",
-            "unimodConcMod",
-            "unimodSpecMod",
-            "unimodConcTol",
-            "unimodSpecTol",
-            "closureConc",
-            "closureTarget",
-            "closureMethod",
-            "monoDecConc",
-            "monoDecTol",
-            "monoIncConc",
-            "monoIncTol",
-            "hardConc",
-            "hardSpec",
-            "normSpec",
-            "storeIterations",
-        ):
-            assert name in params, f"{name} missing from result.parameters"
+            "solver_C",
+            "solver_St",
+            "constraints",
+            "warm_start",
+            "augmentation",
+        }
 
     def test_parameters_values(self, fitted_mcrals):
         params = fitted_mcrals.result.parameters
         assert params["n_components"] == 2
         assert params["max_iter"] == 50
-        assert params["tol"] == 0.1
+        assert params["tol_residual_change"] == 1.0e-3
+        assert params["tol_reconstruction_error"] is None
+        assert params["tol_profile_change"] is None
         assert params["maxdiv"] == 5
-        assert params["solverConc"] == "lstsq"
-        assert params["solverSpec"] == "lstsq"
-        assert params["nonnegConc"] == [0, 1]
-        assert params["nonnegSpec"] == [0, 1]
-        assert params["unimodConc"] == [0, 1]
-        assert params["unimodSpec"] == []
-        assert params["unimodConcMod"] == "strict"
-        assert params["unimodSpecMod"] == "strict"
-        assert params["unimodConcTol"] == 1.1
-        assert params["unimodSpecTol"] == 1.1
-        assert params["closureConc"] == []
-        assert params["closureTarget"].startswith("<array shape=")
-        assert params["closureMethod"] == "scaling"
-        assert params["monoDecConc"] == []
-        assert params["monoDecTol"] == 1.1
-        assert params["monoIncConc"] == []
-        assert params["monoIncTol"] == 1.1
-        assert params["hardConc"] == []
-        assert params["hardSpec"] == []
-        assert params["normSpec"] is None
-        assert params["storeIterations"] is False
+        assert params["solver_C"] == "lstsq"
+        assert params["solver_St"] == "lstsq"
+        assert any("NonNegative" in item for item in params["constraints"])
+        assert any("Unimodal" in item for item in params["constraints"])
+        assert params["warm_start"] is False
+        assert params["augmentation"] is None
 
     def test_parameters_match_estimator_config(self):
         X, C0 = _synthetic_data(rng=np.random.RandomState(0), n_rows=10, n_cols=6)
@@ -165,13 +137,12 @@ class TestMCRALSResult:
         params = mcr.result.parameters
         assert params["n_components"] == 2
         assert params["max_iter"] == 100
-        assert params["tol"] == 1e-4
+        assert params["tol_residual_change"] == 1e-6
         assert params["maxdiv"] == 10
-        assert params["nonnegConc"] == []
-        assert params["unimodSpec"] == [0]
-        assert params["normSpec"] == "max"
-        assert params["closureConc"] == [0, 1]
-        assert params["closureMethod"] == "constantSum"
+        constraints = " ".join(params["constraints"])
+        assert "Unimodal" in constraints
+        assert "Closure" in constraints
+        assert "NonNegative(profile='C'" not in constraints
 
     def test_repr_contains_parameters(self, fitted_mcrals):
         text = repr(fitted_mcrals.result)
