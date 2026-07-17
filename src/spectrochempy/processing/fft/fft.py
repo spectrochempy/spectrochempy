@@ -406,12 +406,21 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
             if not new.meta.pivot:
                 new.meta.pivot = [0] * new.ndim
 
-            # Apply auto-phasing only for standard complex data.
-            # Quaternion/hypercomplex data requires plugin-provided phasing
-            # and cannot use the built-in pk() yet.
+            # Apply auto-phasing for complex and quaternion data.
+            # Quaternion data is handled by the plugin-provided pk.execute
+            # handler which decomposes → phases subspectra → rebuilds.
+            new.pk(inplace=True)
             if new.is_complex:
-                new.pk(inplace=True)
                 new.meta.pivot[-1] = abs(new).coordmax(dim=dim)
+            else:
+                # Quaternion: compute pivot from quaternion modulus
+                import quaternion as _quat  # noqa: PLC0415
+
+                _qarr = _quat.as_float_array(new.data)
+                _mod = np.sqrt(np.sum(_qarr**2, axis=-1))
+                _mod_ds = new.copy()
+                _mod_ds.data = _mod
+                new.meta.pivot[-1] = _mod_ds.coordmax(dim=dim)
 
             new.meta.readonly = True
 
