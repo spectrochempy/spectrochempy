@@ -151,16 +151,17 @@ def read_matlab(*paths, **kwargs):
     ``.filter_by_shape()``.
 
     If the file matches the minimal exchange payload written by
-    :func:`spectrochempy.write_matlab` (i.e. it contains exactly the
-    ``data``, ``dims``, ``coords``, ``coord_units``, and ``coord_titles``
-    variables), a single `NDDataset` is reconstructed directly from those
-    fields instead of going through the generic per-variable import: values,
-    dimension names, coordinates (values, units, titles), name, title,
-    units, and description are all restored. Masked values are not
-    reconstructed, since the exchange payload stores them as plain ``NaN``
-    with no separate mask array; they come back unmasked. Any other `.mat`
-    file, including ones that only partially overlap this key set, is read
-    through the generic path described above.
+    :func:`spectrochempy.write_matlab` (i.e. it contains the ``data``,
+    ``dims``, ``coords``, ``coord_units``, ``coord_titles``, ``name``, and
+    ``title`` variables with the expected shapes and dtypes), a single
+    `NDDataset` is reconstructed directly from those fields instead of going
+    through the generic per-variable import: values, dimension names,
+    coordinates (values, units, titles), name, title, units, and description
+    are all restored. Masked values are not reconstructed, since the
+    exchange payload stores them as plain ``NaN`` with no separate mask
+    array; they come back unmasked. Any other `.mat` file, including ones
+    that only partially match this structure, is read through the generic
+    path described above.
 
     Examples
     --------
@@ -202,11 +203,10 @@ read_mat = read_matlab
 # --------------------------------------------------------------------------------------
 # Private methods
 # --------------------------------------------------------------------------------------
-_SCP_EXCHANGE_SIGNATURE = {"data", "dims", "coords", "coord_units", "coord_titles"}
+_SCP_EXCHANGE_REQUIRED_KEYS = {"data", "dims", "coords", "coord_units", "coord_titles", "name", "title"}
 
 
 def _unwrap_str(value):
-    """Unwrap a scalar MATLAB char-array/cell entry back to a plain str."""
     if hasattr(value, "item"):
         value = value.item()
     if isinstance(value, bytes):
@@ -214,14 +214,47 @@ def _unwrap_str(value):
     return str(value)
 
 
-def _read_scp_matlab_exchange(dic, filename):
-    """Reconstruct the NDDataset written by write_matlab()'s minimal exchange payload."""
-    dataset = NDDataset(np.asarray(dic["data"]))
+def _is_matlab_struct_or_empty(value):
+    if not isinstance(value, np.ndarray):
+        return False
+    if value.dtype.names is not None:
+        return True
+    return value.dtype.kind == "O" and value.size == 1 and value.ravel()[0] is None
 
+
+def _is_scp_matlab_exchange_payload(dic):
+    if not dic.keys() >= _SCP_EXCHANGE_REQUIRED_KEYS:
+        return False
+
+    data = dic.get("data")
+    if not isinstance(data, np.ndarray) or data.dtype.kind not in "biuf":
+        return False
+
+    dims_raw = dic.get("dims")
+    if not isinstance(dims_raw, np.ndarray) or dims_raw.dtype.kind != "O":
+        return False
+    if dims_raw.size != data.ndim:
+        return False
+
+    for key in ("coords", "coord_units", "coord_titles"):
+        if not _is_matlab_struct_or_empty(dic.get(key)):
+            return False
+
+    for key in ("name", "title"):
+        value = dic.get(key)
+        if not isinstance(value, np.ndarray) or value.dtype.kind != "U":
+            return False
+
+    return True
+
+
+def _read_scp_matlab_exchange(dic, filename):
     dims = [_unwrap_str(d) for d in np.asarray(dic["dims"]).ravel()]
 
-    name = _unwrap_str(dic["name"][0]) if "name" in dic else ""
-    title = _unwrap_str(dic["title"][0]) if "title" in dic else ""
+    dataset = NDDataset(np.asarray(dic["data"]), dims=dims)
+
+    name = _unwrap_str(dic["name"][0])
+    title = _unwrap_str(dic["title"][0])
     if name:
         dataset.name = name
     if title:
@@ -231,21 +264,20 @@ def _read_scp_matlab_exchange(dic, filename):
     if "description" in dic:
         dataset.description = _unwrap_str(dic["description"][0])
 
-    coords_struct = dic.get("coords")
-    units_struct = dic.get("coord_units")
-    titles_struct = dic.get("coord_titles")
+    coords_struct = dic["coords"]
+    units_struct = dic["coord_units"]
+    titles_struct = dic["coord_titles"]
     coord_kwargs = {}
-    if coords_struct is not None and coords_struct.dtype.names:
-        for dim in dims:
-            if dim not in coords_struct.dtype.names:
-                continue
-            cdata = np.asarray(coords_struct[dim][0, 0]).ravel()
-            coord = Coord(data=cdata)
-            if units_struct is not None and dim in (units_struct.dtype.names or ()):
-                coord.units = _unwrap_str(units_struct[dim][0, 0])
-            if titles_struct is not None and dim in (titles_struct.dtype.names or ()):
-                coord.title = _unwrap_str(titles_struct[dim][0, 0])
-            coord_kwargs[dim] = coord
+    for dim in dims:
+        if coords_struct.dtype.names is None or dim not in coords_struct.dtype.names:
+            continue
+        cdata = np.asarray(coords_struct[dim][0, 0]).ravel()
+        coord = Coord(data=cdata)
+        if units_struct.dtype.names is not None and dim in units_struct.dtype.names:
+            coord.units = _unwrap_str(units_struct[dim][0, 0])
+        if titles_struct.dtype.names is not None and dim in titles_struct.dtype.names:
+            coord.title = _unwrap_str(titles_struct[dim][0, 0])
+        coord_kwargs[dim] = coord
     if coord_kwargs:
         dataset.set_coordset(**coord_kwargs)
 
@@ -263,9 +295,9 @@ def _read_mat(*args, **kwargs):
 
     dic = sio.loadmat(fid)
 
-    if _SCP_EXCHANGE_SIGNATURE <= dic.keys():
+    if _is_scp_matlab_exchange_payload(dic):
         return [_read_scp_matlab_exchange(dic, filename)]
-    
+
     datasets = []
     for name, data in dic.items():
         dataset = NDDataset()
@@ -304,7 +336,7 @@ def _read_mat(*args, **kwargs):
             )
             continue
 
-       elif data.dtype.names is not None and all(
+        elif data.dtype.names is not None and all(
             name_ in data.dtype.names for name_ in ["moddate", "axisscale", "imagesize"]
         ):
             # this is probably a DSO object
@@ -312,11 +344,11 @@ def _read_mat(*args, **kwargs):
             datasets.append(dataset)
 
         else:
+            # There is no safe generic NDDataset reconstruction for this,
+            # and returning a non-NDDataset placeholder here breaks merge_datasets() downstream,
+            # so this variable is skipped.
             warning_(
-                f"The mat file contains a variable named '{name}' with "
-                f"unsupported data type '{data.dtype}', which will not be "
-                "converted to NDDataset",
-            )
+                f"The mat file contains a variable named '{name}' with unsupported data type '{data.dtype}', which will not be converted to NDDataset")
             continue
 
     return datasets
