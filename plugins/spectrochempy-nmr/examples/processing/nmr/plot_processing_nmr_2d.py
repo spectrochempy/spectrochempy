@@ -114,8 +114,13 @@ _ = slice_f2.plot()
 
 # %%
 # Compare the same slice against the TopSpin ``2rr`` reference.
+# We normalize both traces before overlaying them because the absolute
+# intensity depends on the exact processing chain (window functions,
+# phasing, scaling conventions, etc.).
 reference_slice_f2 = reference[-27.6, :]
-_ = slice_f2.plot(color="black")
-_ = reference_slice_f2.plot(clear=False, color="red", linestyle="--")
+slice_f2_norm = slice_f2.normalize(method="max", dim="x")
+reference_slice_f2_norm = reference_slice_f2.normalize(method="max", dim="x")
+_ = slice_f2_norm.plot(color="black")
+_ = reference_slice_f2_norm.plot(clear=False, color="red", linestyle="--")
 
 # %%
