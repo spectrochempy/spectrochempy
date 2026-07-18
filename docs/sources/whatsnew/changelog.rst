@@ -154,6 +154,12 @@ Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
 
+- Added comprehensive regression coverage for the `write_matlab()` /
+  `read_matlab()` minimal exchange payload: non-default dimension names, a
+  true 1D round trip, an empty-coordinate edge case, and adversarial cases
+  where a file shares the right variable names but the wrong structure.
+  (#1270)
+
 - The NMR test suite has been modernized and made substantially more reliable:
   skipped legacy FFT tests were reactivated, visual-only tests were replaced
   with numerical assertions, and targeted plugin tests now check observable
