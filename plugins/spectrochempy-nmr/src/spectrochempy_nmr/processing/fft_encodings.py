@@ -142,7 +142,9 @@ def _fft_encoding_handler(data, encoding, **kwargs):
         if "STATES" in encoding:
             return _states_second_pass_fft(data, tppi=tppi or "TPPI" in encoding)
 
-        from spectrochempy_nmr.processing.hypercomplex import _extract_quaternion_components
+        from spectrochempy_nmr.processing.hypercomplex import (
+            _extract_quaternion_components,
+        )
         from spectrochempy_nmr.processing.hypercomplex import _rebuild_quaternion
 
         RR, RI, IR, II = _extract_quaternion_components(data)
