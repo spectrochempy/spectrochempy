@@ -150,6 +150,19 @@ def read_matlab(*paths, **kwargs):
     ``.select_largest()``, ``.select_by_name()``, ``.filter_by_ndim()``, or
     ``.filter_by_shape()``.
 
+    If the file matches the minimal exchange payload written by
+    :func:`spectrochempy.write_matlab` (i.e. it contains the ``data``,
+    ``dims``, ``coords``, ``coord_units``, ``coord_titles``, ``name``, and
+    ``title`` variables with the expected shapes and dtypes), a single
+    `NDDataset` is reconstructed directly from those fields instead of going
+    through the generic per-variable import: values, dimension names,
+    coordinates (values, units, titles), name, title, units, and description
+    are all restored. Masked values are not reconstructed, since the
+    exchange payload stores them as plain ``NaN`` with no separate mask
+    array; they come back unmasked. Any other `.mat` file, including ones
+    that only partially match this structure, is read through the generic
+    path described above.
+
     Examples
     --------
     Reading a single Matlab file
@@ -190,6 +203,138 @@ read_mat = read_matlab
 # --------------------------------------------------------------------------------------
 # Private methods
 # --------------------------------------------------------------------------------------
+# The fields write_matlab() always emits, regardless of whether the dataset
+# has units, a description, or any coordinates set. `units` and
+# `description` are conditional on the writer side, so they are
+# deliberately not part of this required set.
+_SCP_EXCHANGE_REQUIRED_KEYS = {
+    "data",
+    "dims",
+    "coords",
+    "coord_units",
+    "coord_titles",
+    "name",
+    "title",
+}
+
+
+def _unwrap_str(value):
+    """Unwrap a scalar MATLAB char-array/cell entry back to a plain str."""
+    if hasattr(value, "item"):
+        value = value.item()
+    if isinstance(value, bytes):
+        return value.decode("utf-8", "ignore")
+    return str(value)
+
+
+def _is_matlab_struct_or_empty(value):
+    """
+    Check that `value` is a MATLAB struct, or the empty-dict placeholder.
+
+    write_matlab() writes `{}` for coords/coord_units/coord_titles when a
+    dataset has no coordinates on a given dimension. scipy round-trips an
+    empty dict as a bare ``array([[None]], dtype=object)`` rather than as a
+    structured array, so that specific shape has to be accepted here too,
+    not just genuine structs with named fields.
+    """
+    if not isinstance(value, np.ndarray):
+        return False
+    if value.dtype.names is not None:
+        return True
+    return value.dtype.kind == "O" and value.size == 1 and value.ravel()[0] is None
+
+
+def _is_scp_matlab_exchange_payload(dic):
+    """
+    Check that `dic` matches the structure written by write_matlab().
+
+    Presence of the always-emitted keys alone is not a safe enough signal:
+    an unrelated third-party `.mat` file could coincidentally define
+    variables with the same names. Each field is also checked against the
+    shape/dtype `write_matlab()` actually produces, so any mismatch falls
+    back to the generic per-variable import path instead of being
+    incorrectly treated as a SpectroChemPy exchange payload.
+    """
+    if not dic.keys() >= _SCP_EXCHANGE_REQUIRED_KEYS:
+        return False
+
+    data = dic.get("data")
+    if not isinstance(data, np.ndarray) or data.dtype.kind not in "biuf":
+        return False
+
+    dims_raw = dic.get("dims")
+    if not isinstance(dims_raw, np.ndarray) or dims_raw.dtype.kind != "O":
+        return False
+    if dims_raw.size != data.ndim and not (
+        dims_raw.size == 1 and data.ndim == 2 and data.shape[0] == 1
+    ):
+        # scipy.io.loadmat() always reads MATLAB arrays back as at least 2D,
+        # so a truly 1D NDDataset (one dimension name, written as a plain
+        # 1D array) comes back as a (1, n) row vector: dims.size == 1 but
+        # data.ndim == 2. That specific shape is a legitimate exchange
+        # payload, not a mismatch, so it is accepted here alongside the
+        # ordinary dims.size == data.ndim case.
+        return False
+
+    for key in ("coords", "coord_units", "coord_titles"):
+        if not _is_matlab_struct_or_empty(dic.get(key)):
+            return False
+
+    for key in ("name", "title"):
+        value = dic.get(key)
+        if not isinstance(value, np.ndarray) or value.dtype.kind != "U":
+            return False
+
+    return True
+
+
+def _read_scp_matlab_exchange(dic, filename):
+    """Reconstruct the NDDataset written by write_matlab()'s minimal exchange payload."""
+    dims = [_unwrap_str(d) for d in np.asarray(dic["dims"]).ravel()]
+
+    data = np.asarray(dic["data"])
+    if len(dims) == 1 and data.ndim == 2 and data.shape[0] == 1:
+        # Undo scipy.io.loadmat()'s forced promotion of a true 1D array to
+        # a (1, n) row vector, so the reconstructed dataset's ndim actually
+        # matches the single dimension name that was written.
+        data = data.reshape(-1)
+
+    dataset = NDDataset(data, dims=dims)
+
+    name = _unwrap_str(dic["name"][0])
+    title = _unwrap_str(dic["title"][0])
+    if name:
+        dataset.name = name
+    if title:
+        dataset.title = title
+    if "units" in dic:
+        dataset.units = _unwrap_str(dic["units"][0])
+    if "description" in dic:
+        dataset.description = _unwrap_str(dic["description"][0])
+
+    coords_struct = dic["coords"]
+    units_struct = dic["coord_units"]
+    titles_struct = dic["coord_titles"]
+    coord_kwargs = {}
+    for dim in dims:
+        if coords_struct.dtype.names is None or dim not in coords_struct.dtype.names:
+            continue
+        cdata = np.asarray(coords_struct[dim][0, 0]).ravel()
+        coord = Coord(data=cdata)
+        if units_struct.dtype.names is not None and dim in units_struct.dtype.names:
+            coord.units = _unwrap_str(units_struct[dim][0, 0])
+        if titles_struct.dtype.names is not None and dim in titles_struct.dtype.names:
+            coord.title = _unwrap_str(titles_struct[dim][0, 0])
+        coord_kwargs[dim] = coord
+    if coord_kwargs:
+        dataset.set_coordset(**coord_kwargs)
+
+    dataset.filename = filename
+    dataset.origin = "spectrochempy"
+    dataset.history = "Reconstructed from SpectroChemPy MATLAB exchange payload"
+    return dataset
+
+
 @_importer_method
 def _read_mat(*args, **kwargs):
     _, filename = args
@@ -197,6 +342,9 @@ def _read_mat(*args, **kwargs):
     fid, kwargs = _openfid(filename, **kwargs)
 
     dic = sio.loadmat(fid)
+
+    if _is_scp_matlab_exchange_payload(dic):
+        return [_read_scp_matlab_exchange(dic, filename)]
 
     datasets = []
     for name, data in dic.items():
@@ -236,7 +384,7 @@ def _read_mat(*args, **kwargs):
             )
             continue
 
-        elif all(
+        elif data.dtype.names is not None and all(
             name_ in data.dtype.names for name_ in ["moddate", "axisscale", "imagesize"]
         ):
             # this is probably a DSO object
@@ -244,9 +392,17 @@ def _read_mat(*args, **kwargs):
             datasets.append(dataset)
 
         else:
-            warning_(f"unsupported data type : {data.dtype}")
-            # TODO: implement DSO reader
-            datasets.append([name, data])
+            # Unrecognized structured/object data (e.g. a plain MATLAB cell
+            # array, or a struct that doesn't match the DSO signature).
+            # There is no safe generic NDDataset reconstruction for this, and
+            # returning a non-NDDataset placeholder here breaks
+            # merge_datasets() downstream, so this variable is skipped.
+            warning_(
+                f"The mat file contains a variable named '{name}' with "
+                f"unsupported data type '{data.dtype}', which will not be "
+                "converted to NDDataset",
+            )
+            continue
 
     return datasets
 
