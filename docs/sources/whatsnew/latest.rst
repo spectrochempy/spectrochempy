@@ -61,6 +61,14 @@ Bug Fixes
   that decomposes into complex subspectra, applies the phase correction,
   and rebuilds the quaternion representation.
 
+- TopSpin 2D SER processing now reconstructs indirect-dimension
+  ``STATES-TPPI`` data correctly.  ``Experiment.process()`` and the explicit
+  F1 processing workflow now produce spectra much closer to the processed
+  TopSpin ``2rr`` reference, without the strong mirror-image artifact that
+  previously remained in F1.  The raw 2D NMR example has also been updated to
+  compare the SpectroChemPy result with the TopSpin reference using a
+  normalized slice overlay.
+
 - Plotting behavior has been corrected in a few visible edge cases:
   ``legend=True`` now works again for 2D lines/stack plots, and labels
   auto-derived from coordinate metadata are displayed as expected in the
