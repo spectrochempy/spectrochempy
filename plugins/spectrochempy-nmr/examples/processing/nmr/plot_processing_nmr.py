@@ -233,7 +233,7 @@ ax.autoscale(enable=True, axis="y")
 
 # Plotmerit
 som = f1.inverse_transform()
-_ = f1.plotmerit(offset=2)
+_ = f1.plot_merit(offset=2)
 
 # %%
 # This ends the example ! The following line can be removed or commented
