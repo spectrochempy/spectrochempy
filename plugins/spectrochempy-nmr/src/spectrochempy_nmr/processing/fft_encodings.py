@@ -191,7 +191,7 @@ def _fft_encoding_handler(data, encoding, **kwargs):
         fi = np.fft.fftshift(np.fft.fft(c2), -1)
         return _rebuild_quaternion(fr, fi)
 
-    if "QF" in encoding or "QSIM" in encoding:
+    if "QF" in encoding or "QSIM" in encoding or "DQD" in encoding:
         return _qf_fft(data)
     if "QSEQ" in encoding:
         msg = "QSEQ NMR encoding is not yet implemented"
