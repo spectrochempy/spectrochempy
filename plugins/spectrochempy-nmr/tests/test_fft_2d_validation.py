@@ -177,6 +177,36 @@ class TestEmFFT2DTopSpin:
         _, maxval = _peak_info(mag)
         assert maxval > 0, "No peak found after em(lb=0) + FFT"
 
+    def test_topspin_2d_two_step_fft_peak_near_reference(self):
+        """Two-step SCP processing should match TopSpin and suppress the F1 image."""
+        ds = scp.read_topspin(TOPSPIN_2D, expno=1, remove_digital_filter=True)
+        ref = scp.read_topspin(TOPSPIN_2D / "1" / "pdata" / "1" / "2rr")
+
+        f2 = ds.em(lb=2.0).fft(size=2048)
+        f1 = f2.zf_size(size=1024, dim="y").em(lb=5.0, dim="y").fft(dim="y")
+
+        mag = _mag_from_quat_or_complex(f1)
+        idx, _ = _peak_info(mag)
+        y_peak = float(f1.y.data[idx[0]])
+        x_peak = float(f1.x.data[idx[1]])
+
+        ref_mag = _mag_from_quat_or_complex(ref)
+        ref_idx, _ = _peak_info(ref_mag)
+        ref_y = float(ref.y.data[ref_idx[0]])
+        ref_x = float(ref.x.data[ref_idx[1]])
+
+        assert abs(y_peak - ref_y) < 1.0
+        assert abs(x_peak - ref_x) < 1.0
+
+        # A bad STATES/STATES-TPPI reconstruction leaves a strong mirror image
+        # around the center of the F1 window.  Keep it well below the main peak.
+        mirror_i = f1.shape[0] - 1 - idx[0]
+        row_slice = slice(max(0, mirror_i - 3), min(f1.shape[0], mirror_i + 4))
+        col_slice = slice(max(0, idx[1] - 3), min(f1.shape[1], idx[1] + 4))
+        mirror_max = float(mag[row_slice, col_slice].max())
+
+        assert mirror_max / float(mag[idx]) < 0.2
+
 
 @pytest.mark.skipif(not _has_agilent_data(), reason="Agilent test data not available")
 class TestEmFFT2DAgilent:

@@ -38,7 +38,7 @@ from spectrochempy_nmr.extern.nmrglue import read_pdata
 # ======================================================================================
 # Constants
 # ======================================================================================
-FnMODE = ["undefined", "QF", "QSEQ", "QSIM", "TPPI", "STATES", "STATES-TPPI", "ECHO-ANTIECHO"]
+FnMODE = ["undefined", "QF", "QSEQ", "TPPI", "STATES", "STATES-TPPI", "ECHO-ANTIECHO"]
 AQ_mod = ["QF", "QSIM", "QSEQ", "DQD"]
 
 nmr_valid_meta = [

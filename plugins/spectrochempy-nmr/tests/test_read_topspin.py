@@ -132,12 +132,12 @@ def test_2d_ser_metadata():
     """Indirect dimension encoding must come from acqu2s, not acqus."""
     nd = _read_topspin_or_skip(_require_path(nmrdir / "topspin_2d/1/ser"))
     assert nd.meta.datatype == "SER"
-    assert nd.meta.encoding == ["STATES", "DQD"]
+    assert nd.meta.encoding == ["STATES-TPPI", "DQD"]
     assert nd.meta.isfreq == [False, False]
     assert nd.meta.iscomplex == [True, True]
     assert nd.meta.nuc1 == ["31P", "27Al"]
     # FnMODE index 0 = indirect dimension (from acqu2s)
-    assert nd.meta.fnmode[0] == 5  # STATES
+    assert nd.meta.fnmode[0] == 5  # STATES-TPPI
     # Direct dimension uses AQ_mod
     assert nd.meta.aq_mod[1] == 3  # DQD
     assert nd.shape == (96, 948)
