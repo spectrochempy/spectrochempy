@@ -141,9 +141,9 @@ def test_nmr_reader_2D():
     )
     ndd = scp.read_topspin(path, expno=1, remove_digital_filter=True)
     assert "count" in ndd.__str__()
-    assert "(shape: (y:96, x:474))" in ndd.__str__()
+    assert "(shape: (y:96, x:948))" in ndd.__str__()
     assert "coordinates" in ndd._repr_html_()
-    assert ndd.shape == (96, 474)
+    assert ndd.shape == (96, 948)
 
 
 # ---------------------------------------------------------------------------
@@ -153,27 +153,27 @@ def test_nmr_reader_2D():
 
 def test_nmr_2D_em_x(NMR_dataset_2D):
     dataset = NMR_dataset_2D.copy()
-    assert dataset.shape == (96, 474)
+    assert dataset.shape == (96, 948)
 
     # em on F2 axis preserves shape
     dataset.em(lb=50.0 * ur.Hz, axis=-1)
-    assert dataset.shape == (96, 474)
+    assert dataset.shape == (96, 948)
 
     # em with dim="x" preserves shape
     dataset2 = NMR_dataset_2D.copy()
     dataset2.em(lb=50.0 * ur.Hz, dim="x")
-    assert dataset2.shape == (96, 474)
+    assert dataset2.shape == (96, 948)
 
 
 def test_nmr_2D_em_y(NMR_dataset_2D):
     dataset = NMR_dataset_2D.copy()
-    assert dataset.shape == (96, 474)
+    assert dataset.shape == (96, 948)
 
     # em on F1 axis preserves shape
     dataset.em(lb=50.0 * ur.Hz, dim=0)
-    assert dataset.shape == (96, 474)
+    assert dataset.shape == (96, 948)
 
     # em with dim="y" preserves shape
     dataset2 = NMR_dataset_2D.copy()
     dataset2.em(lb=50.0 * ur.Hz, dim="y")
-    assert dataset2.shape == (96, 474)
+    assert dataset2.shape == (96, 948)

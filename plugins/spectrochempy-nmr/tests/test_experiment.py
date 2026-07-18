@@ -9,6 +9,7 @@
 
 import numpy as np
 import pytest
+import quaternion
 from spectrochempy_nmr.experiment import Experiment
 from spectrochempy_nmr.experiment import ExperimentValidation
 
@@ -443,21 +444,23 @@ class TestProcessFrequencyDomain:
 
 
 class TestProcess2D:
-    """Test that 2D processing raises clear errors."""
+    """Test 2D time-domain processing through Experiment.process()."""
 
     @pytest.mark.skipif(not _has_topspin_2d(), reason="TopSpin 2D data missing")
-    def test_2d_ser_raises_runtime_error(self):
+    def test_2d_ser_processes_successfully(self):
         ser = _read_or_skip(nmrdir / "topspin_2d/1/ser")
         exp = Experiment(ser)
-        with pytest.raises(RuntimeError, match="not yet supported"):
-            exp.process()
+        result = exp.process()
+        assert result.ndim == 2
+        assert result.dtype == quaternion.quaternion
 
     @pytest.mark.skipif(not _has_topspin_2d(), reason="TopSpin 2D data missing")
-    def test_2d_ser_error_message_contains_encoding(self):
+    def test_2d_ser_with_apodization(self):
         ser = _read_or_skip(nmrdir / "topspin_2d/1/ser")
         exp = Experiment(ser)
-        with pytest.raises(RuntimeError, match="Encoding"):
-            exp.process()
+        result = exp.process(apodization="em", lb=2.0)
+        assert result.ndim == 2
+        assert result.dtype == quaternion.quaternion
 
     @pytest.mark.skipif(not _has_topspin_2d_pdata(), reason="TopSpin 2D pdata missing")
     def test_2d_processed_returns_copy(self):
@@ -623,4 +626,71 @@ class TestCanonicalMetadata:
         exp = Experiment(ds)
         assert exp.domain == "unknown"
         assert exp.source_kind == "unknown"
-        assert not exp.is_processable
+
+
+# ---------------------------------------------------------------------------
+# 2D processing via Experiment.process()
+# ---------------------------------------------------------------------------
+
+
+def _has_topspin_2d():
+    return (nmrdir / "topspin_2d/1/ser").exists()
+
+
+@pytest.mark.skipif(not _has_topspin_2d(), reason="TopSpin 2D data not available")
+class TestExperiment2DProcessing:
+    """Verify Experiment.process() works on 2D time-domain data."""
+
+    def test_process_2d_em_fft(self):
+        """Em + fft + auto-phase on 2D quaternion data."""
+        ds = scp.nmr.read(nmrdir / "topspin_2d", expno=1, remove_digital_filter=True)
+        exp = Experiment(ds)
+        assert exp.is_time_domain
+        assert exp.ndim == 2
+
+        result = exp.process(apodization="em", lb=2.0)
+        assert result.shape == (96, 948)
+        assert result.dtype == quaternion.quaternion
+        assert result.meta.isfreq == [False, True]
+        assert result.x.units == "ppm"
+        assert str(result.y.units) == "µs"
+        # F2 should be auto-phased
+        assert result.meta.phased[-1] is True
+        assert result.meta.phc0[-1].magnitude == 0.0
+
+    def test_process_2d_no_apodization(self):
+        """Fft without apodization on 2D data."""
+        ds = scp.nmr.read(nmrdir / "topspin_2d", expno=1, remove_digital_filter=True)
+        exp = Experiment(ds)
+
+        result = exp.process()
+        assert result.shape == (96, 948)
+        assert result.dtype == quaternion.quaternion
+        assert result.meta.phased[-1] is True
+
+    def test_process_2d_manual_phase(self):
+        """Manual phase correction on 2D data."""
+        ds = scp.nmr.read(nmrdir / "topspin_2d", expno=1, remove_digital_filter=True)
+        exp = Experiment(ds)
+
+        result = exp.process(phase="manual", phc0=45.0)
+        assert result.shape == (96, 948)
+        assert result.dtype == quaternion.quaternion
+
+    def test_process_2d_peak_exists(self):
+        """Processed 2D data has a non-zero peak."""
+        ds = scp.nmr.read(nmrdir / "topspin_2d", expno=1, remove_digital_filter=True)
+        exp = Experiment(ds)
+
+        result = exp.process(apodization="em", lb=2.0)
+        mag = scp.abs(result)
+        maxval = float(np.max(mag.data))
+        assert maxval > 0, "No peak found after 2D processing"
+
+    def test_validate_2d_no_blocker_message(self):
+        """validate() no longer warns about 2D processing being unsupported."""
+        ds = scp.nmr.read(nmrdir / "topspin_2d", expno=1, remove_digital_filter=True)
+        exp = Experiment(ds)
+        report = exp.validate()
+        for msg in report.info + report.warnings + report.errors:
+            assert "not yet supported" not in msg.lower()

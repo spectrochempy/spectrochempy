@@ -114,7 +114,7 @@ def _phase_method(method):
                 except Exception:  # noqa: BLE001
                     pk_handler = None
                 if pk_handler is not None:
-                    result = pk_handler(new, apod=apod, dim=dim, **kwargs)
+                    result = pk_handler(new, apod=apod, **kwargs)
                     if result is not None:
                         new = result
                         _phased_by_plugin = True

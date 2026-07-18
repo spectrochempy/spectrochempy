@@ -58,7 +58,7 @@ def test_read_topspin():
     assert nd.x.size == 16384
 
     nd = _read_topspin_or_skip(_require_path(nmrdir / "topspin_2d/1/ser"))
-    assert str(nd) == "NDDataset: [quaternion] count (shape: (y:96, x:474))"
+    assert str(nd) == "NDDataset: [quaternion] count (shape: (y:96, x:948))"
 
     nd = _read_topspin_or_skip(_require_path(nmrdir / "topspin_2d/1/pdata/1/2rr"))
     assert str(nd) == "NDDataset: [quaternion] count (shape: (y:1024, x:2048))"
@@ -140,7 +140,7 @@ def test_2d_ser_metadata():
     assert nd.meta.fnmode[0] == 5  # STATES-TPPI
     # Direct dimension uses AQ_mod
     assert nd.meta.aq_mod[1] == 3  # DQD
-    assert nd.shape == (96, 474)
+    assert nd.shape == (96, 948)
 
 
 @pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")

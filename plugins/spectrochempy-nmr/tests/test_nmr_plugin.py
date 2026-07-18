@@ -417,7 +417,7 @@ class TestExtractNmrMetadataDispatcher:
             origin="topspin",
             ndim=1,
             isfreq=(True,),
-            encoding=(4,),
+            encoding=(5,),
             nuc1=("1H",),
             pulprog="zg30",
             datatype="FID",
@@ -427,7 +427,7 @@ class TestExtractNmrMetadataDispatcher:
         )
         result = extract_nmr_metadata(meta)
         assert result.pulse_program == "zg30"
-        assert result.encoding == ("STATES",)
+        assert result.encoding == ("STATES-TPPI",)
 
     def test_falls_back_to_topspin_for_unknown_origin(self):
         from spectrochempy_nmr.nmr_metadata import extract_nmr_metadata

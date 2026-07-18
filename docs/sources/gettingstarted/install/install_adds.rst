@@ -176,6 +176,24 @@ Usage in Jupyter:
 .. note::
    Qt backend is recommended for detailed plot manipulation and better interactivity.
 
+Jupyter Kernel
+~~~~~~~~~~~~~~
+
+To use SpectroChemPy in JupyterLab or Jupyter Notebook, register your
+conda/venv environment as a Jupyter kernel:
+
+.. code-block:: bash
+
+   python -m ipykernel install --user --name myenv --display-name "Python (myenv)"
+
+Replace ``myenv`` with your environment name (e.g. ``scpy`` for development,
+``scpy-core`` for testing).  After registration, select the corresponding
+kernel from **Kernel → Change Kernel** in JupyterLab.
+
+.. note::
+   ``ipykernel`` must be installed in the environment first.  It is included
+   in the ``[dev]`` extra: ``pip install -e ".[dev]"``.
+
 Troubleshooting
 ---------------
 If you encounter issues:
