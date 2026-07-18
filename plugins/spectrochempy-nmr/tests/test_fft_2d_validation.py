@@ -324,3 +324,20 @@ class TestQuaternionPhasing:
         f1_phc0 = fft.meta.phc0[0].magnitude
         # Bruker typically stores a non-zero value; just check it's a number
         assert isinstance(f1_phc0, (int, float))
+
+    def test_fft_updates_domain_metadata_and_nuclei(self):
+        """F2 then F1 FFT should update domains and keep axis nucleus mapping."""
+        ds = scp.read_topspin(TOPSPIN_2D, expno=1, remove_digital_filter=True)
+
+        f2 = ds.fft()
+        assert f2.meta.isfreq == [False, True]
+        assert str(f2.x.units) == "ppm"
+        assert str(f2.y.units) == "µs"
+        assert "27" in f2.x.title
+
+        f1 = f2.zf_size(size=256, dim="y").fft(dim="y")
+        assert f1.meta.isfreq == [True, True]
+        assert str(f1.x.units) == "ppm"
+        assert str(f1.y.units) == "ppm"
+        assert "27" in f1.x.title
+        assert "31" in f1.y.title

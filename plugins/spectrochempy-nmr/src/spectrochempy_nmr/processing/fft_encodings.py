@@ -7,8 +7,11 @@ hypercomplex representation layer (hypercomplex.py).
 
 For 2D datasets the handler is called twice:
   1. F2 (direct dimension, original_axis=-1):
-     Decompose quaternion using the encoding formula, FFT along axis=-1,
-     rebuild quaternion from the FFT'd subspectra.
+     The quaternion stores two independent complex channels
+     [RR, RI, IR, II] where c1 = RR+j*RI and c2 = IR+j*II.
+     The direct dimension always receives a standard complex FFT on
+     each channel independently.  AQ_mod / encoding describes the
+     *acquisition* mode, not a special FFT for the direct dimension.
   2. F1 (indirect dimension, original_axis != -1):
      The rebuilt quaternion stores [Re(fr), Im(fr), Re(fi), Im(fi)].
      Extract complex directly (fr = RR + 1j*RI), FFT along axis=-1,
@@ -117,21 +120,38 @@ def _fft_encoding_handler(data, encoding, **kwargs):
         fi = np.fft.fftshift(np.fft.fft(fi), -1)
         return _rebuild_quaternion(fr, fi)
 
-    # First pass (direct dimension): use encoding-specific decomposition.
-    if encoding in ("QSIM", "DQD"):
-        if hasattr(data, "dtype") and data.dtype.kind == "V":
-            from spectrochempy_nmr.processing.hypercomplex import (
-                _extract_quaternion_components,
-            )
-            from spectrochempy_nmr.processing.hypercomplex import _rebuild_quaternion
+    # First pass (direct dimension — F2).
+    #
+    # Per the Bruker manual, AQ_mod describes the *acquisition* mode for the
+    # direct dimension.  The actual Fourier transform is always a standard
+    # complex FFT applied to each complex channel independently.
+    #
+    # The quaternion data stores two independent complex channels:
+    #   c1 = RR + j*RI   (first subspectrum)
+    #   c2 = IR + j*II   (second subspectrum)
+    #
+    # For QF data the quaternion holds a single real FID (no second channel).
+    if hasattr(data, "dtype") and data.dtype.kind == "V":
+        from spectrochempy_nmr.processing.hypercomplex import (
+            _extract_quaternion_components,
+        )
+        from spectrochempy_nmr.processing.hypercomplex import _rebuild_quaternion
 
-            RR, RI, IR, II = _extract_quaternion_components(data)
-            fr = RR + 1j * RI
-            fi = IR + 1j * II
-            fr = np.fft.fftshift(np.fft.fft(fr), -1)
-            fi = np.fft.fftshift(np.fft.fft(fi), -1)
+        RR, RI, IR, II = _extract_quaternion_components(data)
+
+        if "QF" in encoding:
+            c1 = RR + 1j * RI
+            fr = np.fft.fftshift(np.fft.fft(c1), -1)
+            fi = np.zeros_like(fr)
             return _rebuild_quaternion(fr, fi)
-        return np.fft.fftshift(np.fft.fft(data), -1)
+
+        c1 = RR + 1j * RI
+        c2 = IR + 1j * II
+
+        fr = np.fft.fftshift(np.fft.fft(c1), -1)
+        fi = np.fft.fftshift(np.fft.fft(c2), -1)
+        return _rebuild_quaternion(fr, fi)
+
     if "QF" in encoding:
         return _qf_fft(data)
     if "QSEQ" in encoding:

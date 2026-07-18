@@ -38,7 +38,7 @@ from spectrochempy_nmr.extern.nmrglue import read_pdata
 # ======================================================================================
 # Constants
 # ======================================================================================
-FnMODE = ["undefined", "QF", "QSEQ", "TPPI", "STATES", "STATES-TPPI", "ECHO-ANTIECHO"]
+FnMODE = ["undefined", "QF", "QSEQ", "QSIM", "TPPI", "STATES", "STATES-TPPI", "ECHO-ANTIECHO"]
 AQ_mod = ["QF", "QSIM", "QSEQ", "DQD"]
 
 nmr_valid_meta = [
@@ -1022,19 +1022,23 @@ def _read_topspin(*args, **kwargs):
     except ModuleNotFoundError:
         _hypercomplex_available = False
 
+    _needs_ser_quaternion = False
+
     for axis in range(parmode + 1):
         if meta.iscomplex[axis]:
             if axis != parmode and _hypercomplex_available:  # noqa: SIM102
                 meta.td[axis] = meta.td[axis] // 2
-                # Halve data along this axis to match the td adjustment.
-                # For States/States-TPPI each pair of rows (cos, sin) is
-                # combined into a single complex row.
-                slices = [slice(None)] * data.ndim
-                slices[axis] = slice(0, None, 2)
-                data_even = data[tuple(slices)]
-                slices[axis] = slice(1, None, 2)
-                data_odd = data[tuple(slices)]
-                data = data_even + 1j * data_odd
+                if datatype == "SER":
+                    _needs_ser_quaternion = True
+                else:
+                    # Non-TopSpin readers still represent indirect hypercomplex
+                    # pairing as a single complex row before quaternion packing.
+                    slices = [slice(None)] * data.ndim
+                    slices[axis] = slice(0, None, 2)
+                    data_even = data[tuple(slices)]
+                    slices[axis] = slice(1, None, 2)
+                    data_odd = data[tuple(slices)]
+                    data = data_even + 1j * data_odd
             meta.tdeff[axis] = meta.tdeff[axis] // 2
 
     meta.sw_h = [
@@ -1075,6 +1079,15 @@ def _read_topspin(*args, **kwargs):
         return dat
 
     data = _norm(data)
+
+    if _needs_ser_quaternion:
+        from spectrochempy_hypercomplex import as_quaternion  # noqa: PLC0415
+
+        # TopSpin SER is already complex along F2 after read_fid() and digital
+        # filter removal. Build quaternion directly from the paired F1 rows so
+        # the direct dimension keeps its full complex length.
+        data = as_quaternion(data[0::2], data[1::2])
+        meta.td = list(data.shape)
 
     # add some additional information in meta
     meta.expno = [int(expno)]

@@ -114,7 +114,7 @@ def _phase_method(method):
                 except Exception:  # noqa: BLE001
                     pk_handler = None
                 if pk_handler is not None:
-                    result = pk_handler(new, apod=apod, dim=dim, **kwargs)
+                    result = pk_handler(new, apod=apod, **kwargs)
                     if result is not None:
                         new = result
                         _phased_by_plugin = True
@@ -258,7 +258,7 @@ def pk_exp(dataset, phc0=0.0, pivot=0.0, exptc=0.0, **kwargs):
     return pk(dataset, phc0=phc0, phc1=0, pivot=pivot, exptc=exptc)
 
 
-# # TODO: work on pk (below a copy from MASAI)
+# TODO: work on pk (below a copy from MASAI)
 # @_phase_method
 # def _apk(source=None, options='', axis=-1):
 #     """

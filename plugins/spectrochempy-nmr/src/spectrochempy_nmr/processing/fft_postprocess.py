@@ -8,6 +8,14 @@ from spectrochempy.core.dataset.coord import Coord  # noqa: PLC0415
 from spectrochempy.core.units import ur  # noqa: PLC0415
 
 
+def _meta_dim_index(new, dim):
+    """Resolve the metadata index matching the target dataset dimension."""
+    if isinstance(dim, str):
+        return new.dims.index(dim)
+    axis, _ = new.get_axis(dim, negative_axis=False)
+    return axis
+
+
 def _fft_postprocess_result(new, dim=-1, inv=False, **kwargs):
     """
     Apply NMR-specific coordinate creation and unit conversion after FFT.
@@ -22,14 +30,15 @@ def _fft_postprocess_result(new, dim=-1, inv=False, **kwargs):
 
     x = new.coordset[dim]
     size = x.size
+    meta_idx = _meta_dim_index(new, dim)
 
-    sfo1 = new.meta.sfo1[-1]
-    bf1 = new.meta.bf1[-1]
-    sf = new.meta.sf[-1]
-    sw = new.meta.sw_h[-1]
+    sfo1 = new.meta.sfo1[meta_idx]
+    bf1 = new.meta.bf1[meta_idx]
+    sf = new.meta.sf[meta_idx]
+    sw = new.meta.sw_h[meta_idx]
 
     if new.meta.nuc1 is not None:
-        nuc1 = new.meta.nuc1[-1]
+        nuc1 = new.meta.nuc1[meta_idx]
         m = re.match(r"([^a-zA-Z]+)([a-zA-Z]+)", nuc1)
         nucleus = "^{" + m[1] + "}" + m[2] if m is not None else ""
     else:
@@ -69,5 +78,8 @@ def _fft_postprocess_result(new, dim=-1, inv=False, **kwargs):
         newcoord.title = "time"
         newcoord.ito("us")
         new.coordset[dim] = newcoord
+
+    if getattr(new.meta, "isfreq", None) is not None:
+        new.meta.isfreq[meta_idx] = not inv
 
     return new

@@ -376,12 +376,6 @@ class Experiment:
         elif self.source_kind == "partially_processed":
             report.add_info("Partially processed multi-dimensional data detected.")
 
-        if self.ndim >= 2 and self.is_time_domain:
-            report.add_info(
-                "Full 2D NMR transformation is not yet supported by "
-                "Experiment.process()."
-            )
-
         return report
 
     # ------------------------------------------------------------------
@@ -429,8 +423,7 @@ class Experiment:
         Raises
         ------
         RuntimeError
-            If the data domain does not support the requested operations,
-            or if 2D processing is requested (not yet implemented).
+            If the data domain does not support the requested operations.
         """
 
         ds = self._dataset
@@ -470,18 +463,6 @@ class Experiment:
         phc1: float,
     ) -> NDDataset:
         """Process time-domain data: apodize → zero-fill → FFT → phase."""
-        # Block 2D+ time-domain processing — full 2D FFT pipeline is not yet
-        # supported due to quaternion encoding complexity.
-        if self.ndim >= 2:
-            encoding_str = " × ".join(self.encoding) if self.encoding else "unknown"
-            domain_str = " × ".join(self.domains)
-            msg = (
-                f"Full {self.ndim}D NMR transformation is not yet supported "
-                f"by Experiment.process().\n"
-                f"Current state: {domain_str}\n"
-                f"Encoding: {encoding_str}"
-            )
-            raise RuntimeError(msg)
         work = ds.copy()
 
         # 1. Apodization

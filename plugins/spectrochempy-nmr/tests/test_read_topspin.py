@@ -58,7 +58,7 @@ def test_read_topspin():
     assert nd.x.size == 16384
 
     nd = _read_topspin_or_skip(_require_path(nmrdir / "topspin_2d/1/ser"))
-    assert str(nd) == "NDDataset: [quaternion] count (shape: (y:96, x:474))"
+    assert str(nd) == "NDDataset: [quaternion] count (shape: (y:96, x:948))"
 
     nd = _read_topspin_or_skip(_require_path(nmrdir / "topspin_2d/1/pdata/1/2rr"))
     assert str(nd) == "NDDataset: [quaternion] count (shape: (y:1024, x:2048))"
@@ -132,15 +132,15 @@ def test_2d_ser_metadata():
     """Indirect dimension encoding must come from acqu2s, not acqus."""
     nd = _read_topspin_or_skip(_require_path(nmrdir / "topspin_2d/1/ser"))
     assert nd.meta.datatype == "SER"
-    assert nd.meta.encoding == ["STATES-TPPI", "DQD"]
+    assert nd.meta.encoding == ["STATES", "DQD"]
     assert nd.meta.isfreq == [False, False]
     assert nd.meta.iscomplex == [True, True]
     assert nd.meta.nuc1 == ["31P", "27Al"]
     # FnMODE index 0 = indirect dimension (from acqu2s)
-    assert nd.meta.fnmode[0] == 5  # STATES-TPPI
+    assert nd.meta.fnmode[0] == 5  # STATES
     # Direct dimension uses AQ_mod
     assert nd.meta.aq_mod[1] == 3  # DQD
-    assert nd.shape == (96, 474)
+    assert nd.shape == (96, 948)
 
 
 @pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")

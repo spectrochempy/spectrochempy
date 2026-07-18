@@ -180,7 +180,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
     # how to decompose quaternion → complex subspectra.
     encoding = "undefined"
     if not inv and "encoding" in new.meta:
-        encoding = new.meta.encoding[0]
+        encoding = new.meta.encoding[axis]
 
     # The last dimension is always the dimension on which we apply the fourier transform.
     # If needed, we swap the dimensions to be sure to be in this situation
@@ -373,6 +373,10 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
             post_handler = None
         if post_handler is not None:
             new = post_handler(new, dim=dim, inv=inv, **kwargs)
+
+        if getattr(new.meta, "isfreq", None) is not None:
+            meta_dim_index = new.dims.index(dim) if isinstance(dim, str) else axis
+            new.meta.isfreq[meta_dim_index] = not inv
 
         # update history
         s = "ifft" if inv else "fft"
