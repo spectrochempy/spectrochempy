@@ -133,6 +133,7 @@ _FNMODE_TO_CANONICAL: list[str] = [
     "undefined",
     "QF",
     "QSEQ",
+    "QSIM",
     "TPPI",
     "STATES",
     "STATES-TPPI",

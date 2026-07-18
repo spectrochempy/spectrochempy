@@ -417,7 +417,7 @@ class TestExtractNmrMetadataDispatcher:
             origin="topspin",
             ndim=1,
             isfreq=(True,),
-            encoding=(4,),
+            encoding=(5,),
             nuc1=("1H",),
             pulprog="zg30",
             datatype="FID",
