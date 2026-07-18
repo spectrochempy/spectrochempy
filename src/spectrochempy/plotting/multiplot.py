@@ -487,18 +487,16 @@ def multiplot(
 
         # TODO: add a common color bar (set vmin and vmax using zlims)
 
-        amp = np.ptp(np.array(ylims))
-        ylim = [
-            np.min(np.array(ylims) - amp * 0.01),
-            np.max(np.array(ylims)) + amp * 0.01,
-        ]
-        for ax in axes.values():
-            ax.set_ylim(ylim)
-        # if yrev:
-        #    ylim = ylim[::-1]
-        # amp = np.ptp(np.array(xlims))
+        if sharey:
+            amp = np.ptp(np.array(ylims))
+            ylim = [
+                np.min(np.array(ylims) - amp * 0.01),
+                np.max(np.array(ylims)) + amp * 0.01,
+            ]
+            for ax in axes.values():
+                ax.set_ylim(ylim)
 
-        if not show_transposed:
+        if sharex and not show_transposed:
             xlim = [np.min(np.array(xlims)), np.max(np.array(xlims))]
             if xrev:
                 xlim = xlim[::-1]

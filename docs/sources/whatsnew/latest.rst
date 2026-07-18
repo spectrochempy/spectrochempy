@@ -27,6 +27,11 @@ New Features
   columns have been removed because they did not map clearly to the stopping
   criteria.
 
+- `read_matlab()` now reconstructs `NDDataset` objects from the minimal
+  MATLAB exchange payload written by `write_matlab()`, restoring the
+  dataset's name, title, units, description, dimension names, and
+  coordinates (values, units, and titles). (#1270)
+
 - NMR support has been significantly expanded.  SpectroChemPy now provides
   ``scp.nmr.Experiment`` as a state-aware NMR scientific model, alongside new
   official readers for Agilent/Varian, JEOL JDF, TecMag TNT, and SIMPSON
@@ -45,6 +50,13 @@ New Features
 
 Bug Fixes
 ~~~~~~~~~
+
+- `read_matlab()` no longer crashes on `.mat` files containing a plain MATLAB
+  cell-array variable. It previously raised an unguarded `TypeError` (surfaced
+  only as a swallowed `UserWarning`, with the function silently returning
+  `None`), or, for files with other variables alongside the cell array, an
+  `AttributeError` in the dataset-merging step. Such variables are now safely
+  skipped with a warning. (#1270)
 
 - NMR reader and processing reliability has improved substantially.  TopSpin
   metadata handling is more robust, ``scp.nmr.Experiment`` now correctly
@@ -122,6 +134,12 @@ Deprecations
 
 Developer
 ~~~~~~~~~
+
+- Added comprehensive regression coverage for the `write_matlab()` /
+  `read_matlab()` minimal exchange payload: non-default dimension names, a
+  true 1D round trip, an empty-coordinate edge case, and adversarial cases
+  where a file shares the right variable names but the wrong structure.
+  (#1270)
 
 - The NMR test suite has been modernized and made substantially more reliable:
   skipped legacy FFT tests were reactivated, visual-only tests were replaced
