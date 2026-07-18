@@ -203,6 +203,10 @@ read_mat = read_matlab
 # --------------------------------------------------------------------------------------
 # Private methods
 # --------------------------------------------------------------------------------------
+# The fields write_matlab() always emits, regardless of whether the dataset
+# has units, a description, or any coordinates set. `units` and
+# `description` are conditional on the writer side, so they are
+# deliberately not part of this required set.
 _SCP_EXCHANGE_REQUIRED_KEYS = {
     "data",
     "dims",
@@ -215,6 +219,7 @@ _SCP_EXCHANGE_REQUIRED_KEYS = {
 
 
 def _unwrap_str(value):
+    """Unwrap a scalar MATLAB char-array/cell entry back to a plain str."""
     if hasattr(value, "item"):
         value = value.item()
     if isinstance(value, bytes):
@@ -223,6 +228,15 @@ def _unwrap_str(value):
 
 
 def _is_matlab_struct_or_empty(value):
+    """
+    Check that `value` is a MATLAB struct, or the empty-dict placeholder.
+
+    write_matlab() writes `{}` for coords/coord_units/coord_titles when a
+    dataset has no coordinates on a given dimension. scipy round-trips an
+    empty dict as a bare ``array([[None]], dtype=object)`` rather than as a
+    structured array, so that specific shape has to be accepted here too,
+    not just genuine structs with named fields.
+    """
     if not isinstance(value, np.ndarray):
         return False
     if value.dtype.names is not None:
@@ -231,6 +245,16 @@ def _is_matlab_struct_or_empty(value):
 
 
 def _is_scp_matlab_exchange_payload(dic):
+    """
+    Check that `dic` matches the structure written by write_matlab().
+
+    Presence of the always-emitted keys alone is not a safe enough signal:
+    an unrelated third-party `.mat` file could coincidentally define
+    variables with the same names. Each field is also checked against the
+    shape/dtype `write_matlab()` actually produces, so any mismatch falls
+    back to the generic per-variable import path instead of being
+    incorrectly treated as a SpectroChemPy exchange payload.
+    """
     if not dic.keys() >= _SCP_EXCHANGE_REQUIRED_KEYS:
         return False
 
@@ -241,7 +265,15 @@ def _is_scp_matlab_exchange_payload(dic):
     dims_raw = dic.get("dims")
     if not isinstance(dims_raw, np.ndarray) or dims_raw.dtype.kind != "O":
         return False
-    if dims_raw.size != data.ndim:
+    if dims_raw.size != data.ndim and not (
+        dims_raw.size == 1 and data.ndim == 2 and data.shape[0] == 1
+    ):
+        # scipy.io.loadmat() always reads MATLAB arrays back as at least 2D,
+        # so a truly 1D NDDataset (one dimension name, written as a plain
+        # 1D array) comes back as a (1, n) row vector: dims.size == 1 but
+        # data.ndim == 2. That specific shape is a legitimate exchange
+        # payload, not a mismatch, so it is accepted here alongside the
+        # ordinary dims.size == data.ndim case.
         return False
 
     for key in ("coords", "coord_units", "coord_titles"):
@@ -257,9 +289,17 @@ def _is_scp_matlab_exchange_payload(dic):
 
 
 def _read_scp_matlab_exchange(dic, filename):
+    """Reconstruct the NDDataset written by write_matlab()'s minimal exchange payload."""
     dims = [_unwrap_str(d) for d in np.asarray(dic["dims"]).ravel()]
 
-    dataset = NDDataset(np.asarray(dic["data"]), dims=dims)
+    data = np.asarray(dic["data"])
+    if len(dims) == 1 and data.ndim == 2 and data.shape[0] == 1:
+        # Undo scipy.io.loadmat()'s forced promotion of a true 1D array to
+        # a (1, n) row vector, so the reconstructed dataset's ndim actually
+        # matches the single dimension name that was written.
+        data = data.reshape(-1)
+
+    dataset = NDDataset(data, dims=dims)
 
     name = _unwrap_str(dic["name"][0])
     title = _unwrap_str(dic["title"][0])
@@ -352,11 +392,15 @@ def _read_mat(*args, **kwargs):
             datasets.append(dataset)
 
         else:
-            # There is no safe generic NDDataset reconstruction for this,
-            # and returning a non-NDDataset placeholder here breaks merge_datasets() downstream,
-            # so this variable is skipped.
+            # Unrecognized structured/object data (e.g. a plain MATLAB cell
+            # array, or a struct that doesn't match the DSO signature).
+            # There is no safe generic NDDataset reconstruction for this, and
+            # returning a non-NDDataset placeholder here breaks
+            # merge_datasets() downstream, so this variable is skipped.
             warning_(
-                f"The mat file contains a variable named '{name}' with unsupported data type '{data.dtype}', which will not be converted to NDDataset"
+                f"The mat file contains a variable named '{name}' with "
+                f"unsupported data type '{data.dtype}', which will not be "
+                "converted to NDDataset",
             )
             continue
 
