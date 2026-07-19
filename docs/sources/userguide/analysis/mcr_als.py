@@ -192,29 +192,6 @@ mcr_s = scp.MCRALS(log_level="INFO")
 _ = mcr_s.fit(X, St0)
 
 # %% [markdown]
-# The optimisation log reports the three dimensionless convergence diagnostics
-# using the same relative convention as their corresponding tolerances:
-#
-# - `reconstruction_error` is the current reconstruction error
-#   $\lVert X-CS^T\rVert_F/\lVert X\rVert_F$;
-# - `residual_change` is the relative change in residual standard deviation
-#   between two successive iterations;
-# - `profile_change` is the relative change of the resolved factor profiles
-#   after removing their arbitrary reciprocal scale and sign.
-#
-# The associated stopping parameters are `tol_reconstruction_error`,
-# `tol_residual_change`, and `tol_profile_change`. A value of `None` disables
-# that criterion, and the optimisation stops as soon as any enabled criterion
-# is satisfied. By default, only `tol_residual_change=1e-3` is active. The final
-# log message states exactly which diagnostic caused the stop, for example::
-#
-#     Converged on residual_change:
-#       residual_change=8.420000e-04 <= tol_residual_change=1.000000e-03
-#
-# The `trend` column indicates whether the residual standard deviation went
-# `down`, `up`, or remained `flat`.
-
-# %% [markdown]
 # ### 6. Inspecting the solution
 #
 # The estimated profiles preserve the coordinate metadata of the input data.
@@ -240,12 +217,6 @@ _ = mcr_s.plot_merit(offset=5)
 
 # %%
 print(f"Residual std: {mcr_s.result.diagnostics['residual_std']:.6f}")
-print(
-    "Reconstruction error: " f"{mcr_s.result.diagnostics['reconstruction_error']:.3e}"
-)
-print(f"Residual change: {mcr_s.result.diagnostics['residual_change']:.3e}")
-print(f"Profile change: {mcr_s.result.diagnostics['profile_change']:.3e}")
-print(f"Stopping criterion: {mcr_s.result.diagnostics['convergence_reason']}")
 print(f"Converged: {mcr_s.result.converged}")
 print(f"Iterations: {mcr_s.result.n_iter}")
 
@@ -599,7 +570,8 @@ _ = scp.multiplot(
 )
 
 # %% [markdown]
-# #### Trilinearity in practice
+# #### Trilinearity
+#
 #
 # Repeated chromatographic runs of the same mixture should produce
 # concentration profiles with identical shapes, differing only in scale.
@@ -705,11 +677,12 @@ scp.log10(efa.f_ev.clip(1e-5)).T.plot(color="dodgerblue")
 _ = scp.log10(efa.b_ev.clip(1e-5)).T.plot(clear=False, color="limegreen")
 
 # %% [markdown]
-# Two components are identified
+# The plot above show that only two components are identified (the matrix is exactly of rank 2).
 
+# %%
 efa.n_components = 2
 C0 = efa.transform()
-C0.T.plot()
+_ = C0.T.plot()
 
 # %% [markdown]
 # #### Choosing the right constraints
@@ -728,6 +701,7 @@ mcr_h = scp.MCRALS(
         ct.Closure("C"),
     ],
     log_level="INFO",
+    tol_reconstruction_error=1e-3,
 )
 _ = mcr_h.fit([X_uv, X_cd], C0, augmentation="horizontal")
 
@@ -784,12 +758,3 @@ plt.tight_layout()
 #         └── per-block constraints    →  ct.NonNegative("St", blocks=[...])
 # ```
 #
-# **When should I consider trilinearity?**
-#
-# When your repeated experiments share the same underlying process (same
-# kinetics, same elution order) and you want to enforce a common profile
-# shape per component.  This is especially valuable when individual runs
-# are noisy or when systematic differences between runs are physically
-# meaningless.
-
-# %%
