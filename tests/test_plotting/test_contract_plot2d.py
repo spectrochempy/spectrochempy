@@ -147,3 +147,41 @@ def test_plot2d_nc_and_calpha_aliases_still_work():
     assert contour_sets
     assert len(contour_sets[0].levels) == 4
     assert contour_sets[0].get_alpha() == pytest.approx(0.25)
+
+
+def test_plot2d_clear_false_honors_requested_figsize(synthetic_2d):
+    """A reused figure should still adopt an explicit figsize override."""
+    ax1 = synthetic_2d.plot(method="map", show=False, clear=False, figsize=(12, 6))
+    assert tuple(ax1.figure.get_size_inches()) == pytest.approx((12, 6))
+
+    ax2 = synthetic_2d.plot(method="map", show=False, clear=False, figsize=(4, 10))
+    assert ax2.figure is ax1.figure
+    assert tuple(ax2.figure.get_size_inches()) == pytest.approx((4, 10))
+
+
+def test_plot2d_default_equal_aspect_does_not_collapse_extreme_same_unit_ranges():
+    """Implicit equal_aspect should not squash 2D plots with extreme X/Y ratios."""
+    import spectrochempy as scp
+
+    x = scp.Coord(np.linspace(0.0, 74048.0, 446), units="us")
+    y = scp.Coord(np.linspace(0.0, 6096.0, 128), units="us")
+    data = np.random.rand(128, 446)
+    dataset = scp.NDDataset(data, coords=[y, x], units="dimensionless")
+
+    ax = dataset.plot(method="map", show=False, figsize=(10, 10))
+
+    assert ax.get_aspect() == "auto"
+
+
+def test_plot2d_default_equal_aspect_does_not_collapse_moderately_anisotropic_ppm_map():
+    """Implicit equal_aspect should stay readable for anisotropic ppm windows."""
+    import spectrochempy as scp
+
+    x = scp.Coord(np.linspace(-1.3, 10.7, 1024), units="ppm")
+    y = scp.Coord(np.linspace(0.0, 60.0, 372), units="ppm")
+    data = np.random.rand(372, 1024)
+    dataset = scp.NDDataset(data, coords=[y, x], units="dimensionless")
+
+    ax = dataset.plot(method="map", show=False)
+
+    assert ax.get_aspect() == "auto"

@@ -51,6 +51,11 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- 2D ``plot_map()``/``plot()`` now keep a readable layout for datasets whose
+  X and Y axes share units but span very different numeric ranges.  Explicit
+  ``figsize=...`` overrides are also now honored reliably when a plotting call
+  reuses an existing figure with ``clear=False``.
+
 - `read_matlab()` no longer crashes on `.mat` files containing a plain MATLAB
   cell-array variable. It previously raised an unguarded `TypeError` (surfaced
   only as a swallowed `UserWarning`, with the function silently returning

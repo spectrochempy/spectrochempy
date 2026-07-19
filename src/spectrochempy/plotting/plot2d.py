@@ -77,6 +77,42 @@ def _can_enforce_equal_aspect(dataset):
     return units_x == units_y
 
 
+def _has_reasonable_equal_aspect_ratio(dataset, *, min_ratio=0.5, max_ratio=2.0):
+    """
+    Return True when equal aspect is unlikely to collapse the plotting area.
+
+    Datasets can legitimately share the same units on both axes while still
+    spanning very different numeric ranges, for example raw 2D NMR time-domain
+    SER data. For those cases, forcing ``ax.set_aspect('equal')`` shrinks the
+    axes into a thin horizontal or vertical strip. We therefore keep the strict
+    equal-aspect default only when the X/Y numeric ranges are of comparable
+    magnitude.
+    """
+    if dataset is None or len(dataset.dims) < 2:
+        return False
+
+    dimx, dimy = dataset.dims[-1], dataset.dims[-2]
+    coord_x = getattr(dataset, dimx, None)
+    coord_y = getattr(dataset, dimy, None)
+
+    if coord_x is None or coord_y is None:
+        return False
+
+    try:
+        xdata = coord_x.data
+        ydata = coord_y.data
+        x_range = float(np.nanmax(xdata) - np.nanmin(xdata))
+        y_range = float(np.nanmax(ydata) - np.nanmin(ydata))
+    except Exception:
+        return False
+
+    if x_range <= 0 or y_range <= 0:
+        return False
+
+    ratio = y_range / x_range
+    return min_ratio <= ratio <= max_ratio
+
+
 def _apply_x_axis_policy(ax, coord, default_xlim, kwargs):
     """
     Apply X axis policy (limits, reversal) for both 2D and 3D plots.
@@ -1992,11 +2028,18 @@ def plot_2D(dataset, method=None, **kwargs):
 
         # Handle equal_aspect for 2D plots (contour, contourf, image, map)
         # Hierarchy: explicit kwarg > preference > default (False)
+        equal_aspect_explicit = "equal_aspect" in kwargs
         equal_aspect = kwargs.get("equal_aspect", prefs.image_equal_aspect)
 
         if equal_aspect and method in ["contour", "contourf", "image", "map"]:
             if _can_enforce_equal_aspect(new):
-                ax.set_aspect("equal", adjustable="box")
+                if equal_aspect_explicit or _has_reasonable_equal_aspect_ratio(new):
+                    ax.set_aspect("equal", adjustable="box")
+                else:
+                    info_(
+                        "equal_aspect preference ignored: X/Y ranges are too "
+                        "different for a readable default layout."
+                    )
             else:
                 info_(
                     "equal_aspect=True ignored: X and Y units are incompatible or missing."
