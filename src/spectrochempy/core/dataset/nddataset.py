@@ -2265,6 +2265,9 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             if plt.get_fignums():
                 # Existing figures - use the current one
                 fig = plt.gcf()
+                requested_figsize = kwargs.get("figsize")
+                if requested_figsize is not None:
+                    fig.set_size_inches(*requested_figsize)
             else:
                 # No existing figures - create a new one
                 fig = get_figure(
