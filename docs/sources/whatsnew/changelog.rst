@@ -59,6 +59,11 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- `plot()` and `plot_multiple()` no longer crash when `marker=None` or
+  `ls=None` is passed explicitly. Both are matplotlib's own standard
+  values (no marker, default linestyle), so passing them is legitimate,
+  not invalid input. (#1462)
+
 - 2D ``plot_map()``/``plot()`` now keep a readable layout for datasets whose
   X and Y axes share units but span very different numeric ranges.  Explicit
   ``figsize=...`` overrides are also now honored reliably when a plotting call
