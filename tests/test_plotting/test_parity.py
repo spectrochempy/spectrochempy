@@ -127,3 +127,55 @@ class TestParityPlot:
         ax = plot_parity(Y2, Y_hat2, show=False)
         assert isinstance(ax, plt.Axes)
         plt.close("all")
+
+    def test_repeated_clear_false_preserves_artists(self):
+        """
+        Repeated plot_parity calls with ax + clear=False accumulate artists.
+
+        Pins the documented contract (docstring: "clear is only used when ax
+        is provided").  With an explicit ax, each clear=False call must
+        preserve the previously drawn artists and add its own scatter +
+        diagonal, rather than clearing the axes.
+        """
+        fig, ax = plt.subplots()
+        plot_parity(self.Y, self.Y_hat, ax=ax, clear=True, show=False)
+        n_lines_1 = len(ax.lines)
+        n_cols_1 = len(ax.collections)
+
+        plot_parity(self.Y, self.Y_hat, ax=ax, clear=False, show=False)
+        n_lines_2 = len(ax.lines)
+        n_cols_2 = len(ax.collections)
+        assert n_lines_2 > n_lines_1, "second call should add artists, not clear"
+        assert n_cols_2 > n_cols_1, "second call should add a scatter collection"
+
+        # A third call with a different dataset must keep accumulating.
+        rng = np.random.default_rng(7)
+        Y3 = NDDataset(rng.normal(0, 1, 15))
+        Y_hat3 = NDDataset(rng.normal(0, 1, 15))
+        plot_parity(Y3, Y_hat3, ax=ax, clear=False, show=False)
+        n_lines_3 = len(ax.lines)
+        n_cols_3 = len(ax.collections)
+        assert n_lines_3 > n_lines_2
+        assert n_cols_3 > n_cols_2
+
+        # The first scatter must still be present on the axes.
+        assert n_cols_3 >= 3
+        plt.close("all")
+
+    def test_clear_false_without_ax_creates_new_figure(self):
+        """
+        Without an explicit ax, clear=False is a documented no-op.
+
+        Per the lifecycle contract (architecture/plotting-architecture.md),
+        ``ax=None`` always creates a new figure/axes regardless of *clear*;
+        ``clear`` is only meaningful when *ax* is provided.  This test pins
+        that behavior so a future reintroduction of ``plt.gca()`` reliance
+        is caught.
+        """
+        plt.close("all")
+        ax1 = plot_parity(self.Y, self.Y_hat, clear=False, show=False)
+        ax2 = plot_parity(self.Y, self.Y_hat, clear=False, show=False)
+        assert (
+            ax1.figure is not ax2.figure
+        ), "without ax, each call must create a new figure (stateless contract)"
+        plt.close("all")
