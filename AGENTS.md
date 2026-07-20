@@ -6,8 +6,7 @@ This document supplements:
 
 * CONTRIBUTING.md
 * docs/sources/devguide/
-* maintainers/ (release procedures only — all other maintainer docs have moved
-  to the private SpectroChemPy Maintainer Repository)
+* maintainers/
 
 Agents must follow all project contribution rules defined there.
 
@@ -30,6 +29,7 @@ Priorities:
 Prefer small, reversible, reviewable changes.
 
 Avoid broad rewrites unless explicitly requested.
+
 
 ---
 
@@ -77,297 +77,55 @@ Prefer incremental migration.
 
 ---
 
-# Audit Policy
+# Design and Documentation Workflow
 
-## Working notes
 
-All implementation reports, investigations, reviews and working notes that are
-useful beyond a single session must be written in the
-**SpectroChemPy Maintainer Repository** (`spectrochempy_maintainer`), under the
-appropriate subdirectory:
+Agents should update durable documentation alongside implementation whenever
+architectural decisions, public contracts or long-term plans change.
 
-* `notes/audits/` — active investigations, campaign logs, risk analysis, test
-  results, architecture audits;
-* `notes/` — general maintainer notes, migration records, research summaries;
-* `archive/audits/` — historical PR-by-PR notes and completed campaign logs;
-* `proposals/` — incubating design proposals;
-* `roadmap/` — maintainer-facing planning and campaign sequencing;
-* `governance/` — cross-cutting process and philosophy documents.
 
-Use audit notes (in `spectrochempy_maintainer/notes/audits/`) for:
-
-* migration details;
-* architectural decisions;
-* implementation notes;
-* roadmap planning;
-* risk analysis;
-* test results.
-
-For multi-PR projects, maintain dedicated audit files in
-`spectrochempy_maintainer/notes/audits/`.
-
-Local scratch notes (truly temporary, single session) may remain locally
-unversioned. They must not be introduced into the public `spectrochempy/`
-repository.
-
-The old `audit/` directory in the public repository has been removed. No new
-files should be created there.
-
-## Promotion destinations
-
-All design contracts, architecture notes, roadmaps, and API conventions have
-been moved to the **SpectroChemPy Maintainer Repository**
-(`spectrochempy_maintainer`).  The public repository only retains release and
-emergency recovery procedures under `maintainers/`.
-
-When an audit leads to a durable architectural decision, promote that knowledge
-into the appropriate destination within the maintainer repository:
-
-| Destination | Use for |
-|---|---|
-| `spectrochempy_maintainer/rfcs/` | Normative behavior contracts and accepted decisions |
-| `spectrochempy_maintainer/architecture/` | Durable architecture notes and current reference |
-| `spectrochempy_maintainer/roadmap/` | Migration roadmaps and campaign ordering |
-
-**Promotion never consists of simply moving or copying the audit file.**
-The maintainer document must be a **rewritten, maintained document** that
-extracts the durable knowledge from the audit.  The original audit remains in
-the SpectroChemPy Maintainer Repository as historical context.
-
-The original working note is a transient document and is not the authoritative
-reference.
-
-## Curated governance notes in the maintainer repository
-
-Some audits retain long-term value as historical context even though they are
-no longer primary authority.  They remain in the SpectroChemPy Maintainer
-Repository as curated governance notes
-(`spectrochempy_maintainer/archive/` or `spectrochempy_maintainer/notes/`).
-
-These governance notes preserve decision-space analysis, migration baselines,
-and risk maps for future maintainers.  They are **not copies** of local working
-notes.  They are distinct from:
-
-- `spectrochempy_maintainer/notes/audits/` — active working notes;
-- `spectrochempy_maintainer/architecture/` — current durable architecture reference;
-- `spectrochempy_maintainer/rfcs/` — normative behavior contracts.
-
-Only preserve a note as a governance note when it records knowledge that
-future maintainers will need for context, not for authority.
-
-## Campaign closure
-
-Before closing a campaign, verify whether the working notes contain any
-architectural, maintenance, compatibility, or roadmap knowledge that future
-maintainers will need.
-
-If so, summarize that information in the appropriate
-`spectrochempy_maintainer/` destination before considering the campaign
-complete.
-
-## Examples
+Large design or architectural work should normally follow this progression:
 
 ```text
-# Local scratch note (disposable, never versioned)
-/tmp/my-scratch-notes.md
-
-# Working note (shared in maintainer repository)
-spectrochempy_maintainer/notes/audits/campaign-architecture-audit.md
-
-# Curated governance note (promoted to spectrochempy_maintainer)
-spectrochempy_maintainer/archive/coordinate-arithmetic-audit.md
-
-# Accepted RFC (tracked, normative)
-spectrochempy_maintainer/rfcs/namespace-api-convention.md
-
-# Durable architecture note (tracked, current reference)
-spectrochempy_maintainer/architecture/reader-normalization-architecture.md
-
-# Roadmap (tracked)
-spectrochempy_maintainer/roadmap/vendor-io-migration.md
-```
-
-Detailed implementation history belongs in working notes in the maintainer
-repository, not changelog entries.
-
-Agents must produce or update a note in the SpectroChemPy Maintainer Repository
-after each work session, documenting what was done, key decisions, test results,
-risks, and next steps.  For multi-PR projects, maintain dedicated files in
-`spectrochempy_maintainer/notes/audits/` and update them before considering a
-task complete.
-
-## Maintainer repository hygiene
-
-When writing into `spectrochempy_maintainer` during work on `spectrochempy`,
-prefer updating an existing active document over creating a new one.
-
-Before creating a new note, verify whether the same topic already has:
-
-* an active audit in `spectrochempy_maintainer/notes/audits/`;
-* a maintained roadmap entry in `spectrochempy_maintainer/roadmap/`;
-* a maintained contract in `spectrochempy_maintainer/rfcs/`;
-* a maintained architecture note in `spectrochempy_maintainer/architecture/`.
-
-Do not create a new document when extending the existing one would preserve
-clarity.
-
-For any active topic, keep a single obvious entry point:
-
-* roadmap for current priority and campaign state;
-* RFC for the normative contract or decision;
-* architecture note for the maintained current model;
-* audit for evidence, implementation notes, and unresolved questions.
-
-Audits in `spectrochempy_maintainer/notes/audits/` must contain only:
-
-* active investigations;
-* ongoing campaign logs;
-* unresolved implementation/design notes.
-
-Move a note to `spectrochempy_maintainer/archive/audits/` once it becomes
-primarily:
-
-* a validation log;
-* a post-merge confirmation;
-* an implementation history record;
-* evidence already absorbed by code and maintained documents.
-
-When promoting knowledge from an audit or proposal into
-`spectrochempy_maintainer/rfcs/`, `architecture/`, or `roadmap/`:
-
-* rewrite the durable content instead of copying it;
-* update the source note with a clear status and link to the maintained
-  destination;
-* archive the source note when it no longer carries an open decision.
-
-Keep `spectrochempy_maintainer/roadmap/current-roadmap.md` short.  It should
-contain only:
-
-* active priorities;
-* near-term follow-up;
-* pointers to deeper documents.
-
-Deferred or backlog material belongs in a separate governance note, not in the
-main current roadmap.
-
-At the end of the session, explicitly decide for every maintainer note touched:
-
-* still active;
-* promoted to maintained reference;
-* archived as historical context.
-
----
-
-# Architecture Documentation Lifecycle
-
-Architecture work should normally progress through the following lifecycle:
-
-```text
-Audit
-  ↓
+Exploration
+        ↓
 RFC (optional)
-  ↓
+        ↓
 Implementation
-  ↓
-Architecture Note / Maintainer Reference
+        ↓
+Pull Request
+        ↓
+Review and discussion
+        ↓
+Merge
+        ↓
+Architecture note / Roadmap / RFC update (if needed)
 ```
 
-The goal is to ensure that durable architectural knowledge does not remain
-exclusively in local audit notes after a campaign is completed.
+Exploration may take place through private notes, experiments, or preliminary
+design discussions. These working materials are optional and are not part of
+the project's authoritative documentation.
 
-## Audit
+RFCs capture proposed or accepted design decisions before or during
+implementation. Not every change requires an RFC.
 
-Use audits for:
+Architecture notes describe the maintained architecture once a design has
+stabilized. Roadmap documents capture long-term planning and implementation
+sequencing when appropriate.
 
-* exploration;
-* characterization;
-* investigation;
-* design discussion.
+Discussion of RFCs, architecture notes and other durable maintainer
+documentation should normally take place on the corresponding Pull Request.
+Separate Issues or Discussions remain available when they provide additional
+value but are not required.
 
-Audits are working documents.
+Long-lived engineering knowledge should not remain exclusively in exploratory
+notes or Pull Request discussions. Once a design stabilizes, it should be
+captured in the appropriate maintained documentation.
 
-Audits are not authoritative by default for current maintained contracts.
+## Review Expectations
 
-## RFC
-
-Use RFCs to:
-
-* define a proposed contract;
-* record decisions;
-* guide implementation.
-
-RFCs may be:
-
-* proposed;
-* accepted;
-* implemented;
-* superseded.
-
-## Architecture Notes
-
-Use architecture notes to:
-
-* describe current architecture;
-* capture stable contracts;
-* document important design decisions;
-* serve as maintainer references.
-
-Architecture notes become the authoritative source once a design stabilizes.
-
-## Promotion Requirement
-
-When a campaign results in:
-
-* an accepted RFC;
-* significant architectural change;
-* multiple implementation PRs;
-* a long-term contract;
-
-the maintainer should evaluate whether part of the audit material must be
-promoted into the appropriate destination within the maintainer repository:
-
-* `spectrochempy_maintainer/rfcs/` — for normative contracts and decisions;
-* `spectrochempy_maintainer/architecture/` — for durable current architecture reference;
-* `spectrochempy_maintainer/roadmap/` — for migration ordering and campaign planning;
-* `spectrochempy_maintainer/archive/` or `spectrochempy_maintainer/notes/` —
-  for historical context that future maintainers will need (non-authoritative),
-  curated and rewritten.
-
-before the campaign is considered complete.
-
-Architectural reasoning should not remain exclusively in audit documents.
-
-## Audit Deliverables
-
-Major architecture audits should end with a final section named:
-
-```text
-Promotion Candidates
-```
-
-That section should identify:
-
-* content suitable for RFCs;
-* content suitable for architecture notes;
-* content that should remain historical only.
-
-Where possible, suggest target filenames.
-
-This requirement applies to major architecture audits, not to minor bug
-investigations or narrow implementation notes.
-
-## Campaign Closure Checklist
-
-Before closing a major architecture campaign, verify:
-
-* RFC status updated;
-* roadmap updated;
-* relevant architecture notes updated or created;
-* promotion candidates reviewed;
-* authoritative documentation synchronized.
-
-This checklist is meant to keep durable knowledge discoverable, not to add
-heavy process.
+RFCs, architecture notes and other durable maintainer documentation should be
+reviewed through the normal Pull Request workflow before merging.
 
 ---
 
@@ -384,7 +142,6 @@ Do not use the changelog as a PR-by-PR implementation journal.
 
 For multi-PR projects:
 
-* keep detailed history in research notes in the maintainer repository;
 * consolidate related work into meaningful release-level entries;
 * prefer updating an existing entry over creating many near-duplicate entries.
 
@@ -593,8 +350,7 @@ Agents may:
 * inspect files;
 * modify source code;
 * modify tests;
-* modify documentation;
-* update audit notes;
+* modify documentation, including durable maintainer documentation;
 * analyze architecture;
 * review code;
 * suggest validation commands.
@@ -631,7 +387,7 @@ Unless explicitly requested otherwise:
 Prefer producing:
 
 * code changes;
-* audit updates;
+* durable documentation updates when appropriate ;
 * suggested commit title;
 * suggested PR title;
 * concise PR description;
@@ -661,17 +417,13 @@ Unless explicitly delegated to finalize work, provide:
 
 * source changes;
 * test updates if needed;
-* documentation updates if needed;
-* audit updates;
+* documentation updates if needed (including RFCs, architecture notes or roadmap documents);
 * suggested commit title;
 * suggested PR title;
 * concise PR description;
 * targeted validation commands;
 * remaining risks;
 * recommended follow-up work.
-
-For multi-PR projects, update or create the relevant audit note before
-considering the task complete.
 
 Do not perform git operations automatically.
 
@@ -686,6 +438,6 @@ Evaluate:
 * regression risk;
 * architectural consistency;
 * testing adequacy;
-* roadmap alignment.
+* consistency with accepted RFCs and architecture documentation.
 
 Do not approve changes solely because tests pass.
