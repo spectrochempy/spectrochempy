@@ -54,6 +54,34 @@ def test_plot1d_with_marker(synthetic_1d):
     assert ax is not None
 
 
+def test_plot1d_with_marker_none_does_not_crash(synthetic_1d):
+    """
+    marker=None is matplotlib's own idiom for "no marker" and must not crash.
+
+    Regression test: `effective_marker = marker if marker.upper() != "AUTO"
+    else None` called `.upper()` unconditionally, so passing `marker=None`
+    (a legitimate, matplotlib-standard value, not just an unsupported edge
+    case) raised `AttributeError: 'NoneType' object has no attribute
+    'upper'` instead of simply plotting without a marker.
+    """
+    ax = synthetic_1d.plot(marker=None, show=False)
+    assert ax is not None
+    assert ax.lines[0].get_marker() in (None, "None")
+
+
+def test_plot1d_with_linestyle_none_does_not_crash(synthetic_1d):
+    """
+    ls=None is matplotlib's own idiom for the default linestyle and must
+    not crash.
+
+    Regression test: the same unguarded `.upper()` pattern as the marker
+    case above also existed for `ls` in the `pen=True` branch.
+    """
+    ax = synthetic_1d.plot(pen=True, ls=None, show=False)
+    assert ax is not None
+    assert ax.lines[0].get_linestyle() == "-"
+
+
 def test_plot1d_with_label(synthetic_1d):
     """Test plot1d with label."""
     ax = synthetic_1d.plot(label="test label", show=False)
