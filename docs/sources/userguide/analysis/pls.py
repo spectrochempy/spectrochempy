@@ -139,8 +139,15 @@ _ = y_test_hat.T.plot(title="predicted moisture for $X_{test}$", marker="o")
 
 # %%
 ax = pls.plot_parity(label="calibration")
-_ = pls.plot_parity(y_test, y_test_hat, c="red", label="validation", clear=False)
-_ = ax.legend(loc="lower right")
+pls.plot_parity(
+    y_test,
+    y_test_hat,
+    ax=ax,
+    c="red",
+    label="validation",
+    clear=False,
+)
+ax.legend(loc="lower right")
 
 # %% [markdown]
 # The goodness of fit (as expressed by R-squared) can also be obtained using the `score()` method. For the training dataset

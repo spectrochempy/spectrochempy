@@ -72,7 +72,13 @@ if ds_list is not None:
     # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     ax = pls.plot_parity(label="calibration", s=150)
     _ = pls.plot_parity(
-        y_test, pls.predict(X_test), s=150, c="red", label="validation", clear=False
+        y_test,
+        pls.predict(X_test),
+        ax=ax,
+        s=150,
+        c="red",
+        label="validation",
+        clear=False,
     )
     ax.legend(loc="lower right")
 
