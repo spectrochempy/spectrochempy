@@ -351,12 +351,16 @@ def plot_1D(dataset, method=None, **kwargs):
         if scatter and not pen:
             effective_linestyle = "None"
         elif pen:
-            effective_linestyle = ls if ls.upper() != "AUTO" else "-"
+            effective_linestyle = (
+                "-" if isinstance(ls, str) and ls.upper() == "AUTO" else ls
+            )
         else:
             effective_linestyle = "None"
 
         # Determine effective marker
-        effective_marker = marker if marker.upper() != "AUTO" else None
+        effective_marker = (
+            None if isinstance(marker, str) and marker.upper() == "AUTO" else marker
+        )
 
         if bar:
             # bar only
