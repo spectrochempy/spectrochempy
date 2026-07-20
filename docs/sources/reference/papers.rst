@@ -7,6 +7,9 @@ Papers citing `SpectroChemPy`
 2026
 ====
 
+- Unveiling amorphous intermediates in mechanochemical metal--organic synthesis through in situ PXRD and THz-Raman coupling
+  :cite:t:`macchietti:2026`, `DOI: 10.1039/D6MR00045B <https://doi.org/10.1039/D6MR00045B>`__.
+
 - Isobutanol Dehydration to Linear Butenes on Ferrierite: Mechanistic Insights from operando FTIR, Chemometrics and Kinetic Modelling
   :cite:t:`vottero:2026`, `DOI: 10.26434/chemrxiv.15005433/v1 <https://chemrxiv.org/doi/abs/10.26434/chemrxiv.15005433/v1>`__.
 
@@ -22,7 +25,7 @@ Papers citing `SpectroChemPy`
 - Machine Learning--Integrated Raman Spectroscopy Identifies Race-Associated Biochemical Signatures in Prostate Cancer,
   :cite:t:`iftesum:2026`, `DOI: 10.1002/jbio.70293 <https://doi.org/10.1002/jbio.70293>`__.
 
-- Ba-exchanged gismondine for CO 2 direct air capture (DAC),
+- Ba-exchanged gismondine for CO2 direct air capture (DAC),
   :cite:t:`al_atrach:2026`, `DOI: 10.1039/D6TA03011D <https://doi.org/10.1039/D6TA03011D>`__.
 
 - Speciation of silanol groups on commercial precipitated silicas via IR spectroscopy,

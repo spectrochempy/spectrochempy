@@ -100,31 +100,21 @@ mcr_2 = scp.MCRALS(
 
 _ = mcr_2.fit(X, Ckin)
 
-# %%
-# The legacy traitlet-based API is still supported for backward compatibility::
-#
-#     mcr_2 = scp.MCRALS()
-#     mcr_2.hardConc = [0, 1, 2]
-#     mcr_2.getConc = kin.fit_to_concentrations
-#     mcr_2.argsGetConc = ([0, 1, 2], [0, 1, 2], param_to_optimize)
-#     mcr_2.kwargsGetConc = {"ivp_solver_kwargs": {"return_NDDataset": False}}
-#     _ = mcr_2.fit(X, Ckin)
 
 # %%
-# Now, let's compare the concentration profile of MCR-ALS
-# (C = X(C_{kin}^+ X)^+) with
-# that of the optimized kinetic model (C_{kin} \equiv `C_constrained`):
+# Now, let's compare the concentration profile of the hard-soft modeling with
+# the previous one:
 
 # sphinx_gallery_thumbnail_number = 6
 
 _ = mcr_2.C.T.plot()
-_ = mcr_2.C_constrained.T.plot(clear=False)
+_ = mcr_1.C_constrained.T.plot(clear=False, ls="--")
 
 # %%
-# Finally, let's plot some of the pure spectra profiles St, and the
+# Finally, let's plot the pure spectra profiles St, and some the
 #  reconstructed dataset  (X_hat = C St) vs original dataset (X) and residuals.
 _ = mcr_2.St.plot()
-_ = mcr_2.plot_merit(nb_traces=10)
+_ = mcr_2.plot_merit(nb_traces=10, offset=5)
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when
