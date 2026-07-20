@@ -6,7 +6,6 @@ This document supplements:
 
 * CONTRIBUTING.md
 * docs/sources/devguide/
-* maintainers/ (release and recovery procedures)
 * maintainers/ (release and recovery procedures, plus shared stable maintainer RFCs, architecture references, and selected governance references)
 
 Agents must follow all project contribution rules defined there.
@@ -77,138 +76,60 @@ Prefer incremental migration.
 
 ---
 
-# Audit Policy
+# Design and Documentation Workflow
 
-## Working notes
+Active, private, exploratory, or not-yet-stable working notes belong in the
+**SpectroChemPy Maintainer Repository** (`spectrochempy_maintainer`).
 
-All implementation reports, investigations, reviews and working notes that are
-useful beyond a single session must be written in the
-**SpectroChemPy Maintainer Repository** (`spectrochempy_maintainer`) when they
-are still active, private, exploratory, or not yet ready for the shared public
-maintainer corpus.
-
-Use the private maintainer repository for:
+Use `spectrochempy_maintainer` for:
 
 * `notes/audits/` — active investigations, campaign logs, risk analysis, test
-  results, architecture audits;
-* `notes/` — general maintainer notes, migration records, research summaries;
-* `archive/audits/` — historical PR-by-PR notes and completed campaign logs;
-* `proposals/` — incubating design proposals;
-* `roadmap/` — maintainer-facing planning and campaign sequencing;
-* `governance/` — cross-cutting process and philosophy documents.
+  results, and implementation notes;
+* `notes/`, `proposals/`, `roadmap/`, `governance/` — private incubation,
+  maintainer planning, and non-public working material;
+* `archive/` — historical context that remains useful but is no longer an
+  active reference.
 
-Use the public shared maintainer corpus in `spectrochempy/maintainers/` for
-stable documents that are ready for collective review and long-term reference:
+Stable shared maintainer documentation belongs in the public repository under
+`spectrochempy/maintainers/`:
 
-* `maintainers/rfcs/` — shared stable RFCs and accepted contracts;
-* `maintainers/architecture/` — shared durable architecture references.
-* `maintainers/governance/` — shared stable governance and documentation-process references.
+* `maintainers/rfcs/` — accepted or still-relevant shared RFCs and contracts;
+* `maintainers/architecture/` — maintained architecture references;
+* `maintainers/governance/` — stable governance and documentation-process
+  references;
+* `maintainers/` root — operational maintainer procedures such as release and
+  recovery.
 
-Use audit notes (in `spectrochempy_maintainer/notes/audits/`) for:
-
-* migration details;
-* architectural decisions;
-* implementation notes;
-* roadmap planning;
-* risk analysis;
-* test results.
-
-For multi-PR projects, maintain dedicated audit files in
-`spectrochempy_maintainer/notes/audits/`.
-
-Local scratch notes (truly temporary, single session) may remain locally
-unversioned. They must not be introduced into the public `spectrochempy/`
-repository.
+Local scratch notes may remain unversioned. They must not be introduced into
+the public `spectrochempy/` repository.
 
 The old `audit/` directory in the public repository has been removed. No new
 files should be created there.
 
-## Promotion destinations
+## Promotion and Review
 
-Stable shared maintainer contracts, architecture notes, and governance
-references now live in the public repository under
-`spectrochempy/maintainers/`.
+When a private audit or proposal leads to a durable design decision, extract
+the stable result into the appropriate document under `spectrochempy/maintainers/`.
 
-The private maintainer repository remains the place for active audits,
-historical archives, private incubation, and non-public planning.
+Promotion never consists of simply moving or copying the audit file. Rewrite
+the durable content as a maintained public document and keep the original audit
+in `spectrochempy_maintainer` when its historical context is still useful.
 
-When an audit leads to a durable architectural decision, promote that knowledge
-into the appropriate public destination:
+Discussion of RFCs, architecture notes, and other durable shared maintainer
+documentation should normally happen through the corresponding Pull Request.
+Separate Issues or Discussions may still be used when they add value, but they
+are not required.
 
-| Destination | Use for |
-|---|---|
-| `spectrochempy/maintainers/rfcs/` | Normative behavior contracts and accepted decisions |
-| `spectrochempy/maintainers/architecture/` | Durable architecture notes and current reference |
-| `spectrochempy/maintainers/governance/` | Shared stable governance and documentation-process references |
+Long-lived engineering knowledge should not remain exclusively in private notes
+or Pull Request discussions once a design has stabilized.
 
-**Promotion never consists of simply moving or copying the audit file.**
-The maintainer document must be a **rewritten, maintained document** that
-extracts the durable knowledge from the audit.  The original audit normally
-remains in the private maintainer repository as historical context.
+## Working-note hygiene
 
-The original working note is a transient document and is not the authoritative
-reference.
+For multi-PR projects, maintain a dedicated audit note in
+`spectrochempy_maintainer/notes/audits/` and update it as the work evolves.
 
-## Curated governance notes in the maintainer repository
-
-Some audits retain long-term value as historical context even though they are
-no longer primary authority.  They remain in the SpectroChemPy Maintainer
-Repository as curated governance notes
-(`spectrochempy_maintainer/archive/` or `spectrochempy_maintainer/notes/`).
-
-These governance notes preserve decision-space analysis, migration baselines,
-and risk maps for future maintainers.  They are **not copies** of local working
-notes.  They are distinct from:
-
-- `spectrochempy_maintainer/notes/audits/` — active working notes;
-- `spectrochempy/maintainers/architecture/` — current shared durable architecture reference;
-- `spectrochempy/maintainers/rfcs/` — shared normative behavior contracts.
-
-Only preserve a note as a governance note when it records knowledge that
-future maintainers will need for context, not for authority.
-
-## Campaign closure
-
-Before closing a campaign, verify whether the working notes contain any
-architectural, maintenance, compatibility, or roadmap knowledge that future
-maintainers will need.
-
-If so, summarize that information in the appropriate
-`spectrochempy_maintainer/` destination before considering the campaign
-complete.
-
-## Examples
-
-```text
-# Local scratch note (disposable, never versioned)
-/tmp/my-scratch-notes.md
-
-# Working note (shared in maintainer repository)
-spectrochempy_maintainer/notes/audits/campaign-architecture-audit.md
-
-# Curated governance note (promoted to spectrochempy_maintainer)
-spectrochempy_maintainer/archive/coordinate-arithmetic-audit.md
-
-# Accepted RFC (tracked, normative)
-spectrochempy/maintainers/rfcs/namespace-api-convention.md
-
-# Durable architecture note (tracked, current reference)
-spectrochempy/maintainers/architecture/reader-normalization-architecture.md
-```
-
-Detailed implementation history belongs in working notes in the maintainer
-repository, not changelog entries.
-
-Agents must produce or update a note in the SpectroChemPy Maintainer Repository
-after each work session, documenting what was done, key decisions, test results,
-risks, and next steps.  For multi-PR projects, maintain dedicated files in
-`spectrochempy_maintainer/notes/audits/` and update them before considering a
-task complete.
-
-## Maintainer repository hygiene
-
-When writing into `spectrochempy_maintainer` during work on `spectrochempy`,
-prefer updating an existing active document over creating a new one.
+When writing into `spectrochempy_maintainer`, prefer updating an existing
+active document over creating a new one.
 
 Before creating a new note, verify whether the same topic already has:
 
@@ -216,155 +137,39 @@ Before creating a new note, verify whether the same topic already has:
 * a maintained contract in `spectrochempy/maintainers/rfcs/`;
 * a maintained architecture note in `spectrochempy/maintainers/architecture/`.
 
-Do not create a new document when extending the existing one would preserve
-clarity.
-
 For any active topic, keep a single obvious entry point:
 
-* roadmap for current priority and campaign state;
+* audit for evidence, implementation notes, and unresolved questions;
 * RFC for the normative contract or decision;
-* architecture note for the maintained current model;
-* audit for evidence, implementation notes, and unresolved questions.
+* architecture note for the maintained current model.
 
-Audits in `spectrochempy_maintainer/notes/audits/` must contain only:
+Move an audit note to `spectrochempy_maintainer/archive/` once it becomes
+primarily a validation log, implementation history record, or historical
+context already absorbed by code and maintained documentation.
 
-* active investigations;
-* ongoing campaign logs;
-* unresolved implementation/design notes.
+At the end of the session, explicitly decide for each maintainer note touched
+whether it remains active, should be promoted, or should be archived.
 
-Move a note to `spectrochempy_maintainer/archive/audits/` once it becomes
-primarily:
+## Lifecycle
 
-* a validation log;
-* a post-merge confirmation;
-* an implementation history record;
-* evidence already absorbed by code and maintained documents.
-
-When promoting knowledge from an audit or proposal into
-`spectrochempy/maintainers/rfcs/` or `maintainers/architecture/`:
-
-* rewrite the durable content instead of copying it;
-* update the source note with a clear status and link to the maintained
-  destination;
-* archive the source note when it no longer carries an open decision.
-
-At the end of the session, explicitly decide for every maintainer note touched:
-
-* still active;
-* promoted to maintained reference;
-* archived as historical context.
-
----
-
-# Architecture Documentation Lifecycle
-
-Architecture work should normally progress through the following lifecycle:
+Large design or architectural work should normally follow this progression:
 
 ```text
-Audit
-  ↓
+Exploration
+    ->
 RFC (optional)
-  ↓
+    ->
 Implementation
-  ↓
-Architecture Note / Maintainer Reference
+    ->
+Pull Request review and discussion
+    ->
+Merge
+    ->
+Architecture / governance / RFC update when needed
 ```
 
-The goal is to ensure that durable architectural knowledge does not remain
-exclusively in local audit notes after a campaign is completed.
-
-## Audit
-
-Use audits for:
-
-* exploration;
-* characterization;
-* investigation;
-* design discussion.
-
-Audits are working documents.
-
-Audits are not authoritative by default for current maintained contracts.
-
-## RFC
-
-Use RFCs to:
-
-* define a proposed contract;
-* record decisions;
-* guide implementation.
-
-RFCs may be:
-
-* proposed;
-* accepted;
-* implemented;
-* superseded.
-
-## Architecture Notes
-
-Use architecture notes to:
-
-* describe current architecture;
-* capture stable contracts;
-* document important design decisions;
-* serve as maintainer references.
-
-Architecture notes become the authoritative source once a design stabilizes.
-
-## Promotion Requirement
-
-When a campaign results in:
-
-* an accepted RFC;
-* significant architectural change;
-* multiple implementation PRs;
-* a long-term contract;
-
-the maintainer should evaluate whether part of the audit material must be
-promoted into the appropriate destination:
-
-* `spectrochempy/maintainers/rfcs/` — for normative contracts and decisions;
-* `spectrochempy/maintainers/architecture/` — for durable current architecture reference;
-* `spectrochempy_maintainer/archive/` or `spectrochempy_maintainer/notes/` —
-  for historical context that future maintainers will need (non-authoritative),
-  curated and rewritten.
-
-before the campaign is considered complete.
-
-Architectural reasoning should not remain exclusively in audit documents.
-
-## Audit Deliverables
-
-Major architecture audits should end with a final section named:
-
-```text
-Promotion Candidates
-```
-
-That section should identify:
-
-* content suitable for RFCs;
-* content suitable for architecture notes;
-* content that should remain historical only.
-
-Where possible, suggest target filenames.
-
-This requirement applies to major architecture audits, not to minor bug
-investigations or narrow implementation notes.
-
-## Campaign Closure Checklist
-
-Before closing a major architecture campaign, verify:
-
-* RFC status updated;
-* roadmap updated;
-* relevant architecture notes updated or created;
-* promotion candidates reviewed;
-* authoritative documentation synchronized.
-
-This checklist is meant to keep durable knowledge discoverable, not to add
-heavy process.
+Agents must update the relevant private audit note after each work session when
+the task involves substantial implementation, design, or investigation work.
 
 ---
 
