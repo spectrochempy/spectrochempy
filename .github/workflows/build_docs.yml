@@ -16,6 +16,13 @@ on:
   push:
     branches:
       - "**"
+    paths-ignore:
+      - "AGENTS.md"
+      - "CONTRIBUTING.md"
+      - "README.md"
+      - ".github/PULL_REQUEST_TEMPLATE.md"
+      - "maintainers/*.md"
+      - "maintainers/**/*.md"
 
   pull_request:
 
