@@ -30,6 +30,9 @@ EXTRA_NMR = EXTRA_DATADIR / "testdata" / "nmrdata"
 TOPSPIN_2D = (
     scp.preferences.datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_2d"
 )
+BRUKER_ECHOANTI_2D = (
+    scp.preferences.datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "exam2d_HC"
+)
 
 
 def _has_agilent_data():
@@ -42,6 +45,10 @@ def _has_jeol_data():
 
 def _has_topspin_2d():
     return (TOPSPIN_2D / "1" / "ser").exists()
+
+
+def _has_bruker_echoanti_2d():
+    return (BRUKER_ECHOANTI_2D / "3" / "ser").exists()
 
 
 def _mag_from_quat_or_complex(ds):
@@ -206,6 +213,67 @@ class TestEmFFT2DTopSpin:
         mirror_max = float(mag[row_slice, col_slice].max())
 
         assert mirror_max / float(mag[idx]) < 0.2
+
+
+@pytest.mark.skipif(
+    not _has_bruker_echoanti_2d(), reason="Bruker Echo-Antiecho data not available"
+)
+class TestEmFFT2DBrukerEchoAntiecho:
+    """Type B: Bruker Echo-Antiecho em + FFT chain."""
+
+    def test_bruker_echoanti_two_step_fft_peak_near_reference(self):
+        """
+        Two-step SCP processing should match TopSpin on real Echo-Antiecho data.
+
+        The key regression to guard here is an F1 mirror-image reconstruction:
+        a wrong indirect-dimension orientation lands the main peak at the
+        mirrored Y position relative to the TopSpin processed reference.
+        """
+        ds = scp.read_topspin(BRUKER_ECHOANTI_2D, expno=3, remove_digital_filter=True)
+        ref = scp.read_topspin(BRUKER_ECHOANTI_2D / "3" / "pdata" / "1" / "2rr")
+
+        f2 = ds.em(lb=2.0).fft(size=ref.shape[1])
+        f1 = f2.zf_size(size=ref.shape[0], dim="y").em(lb=2.0, dim="y").fft(dim="y")
+
+        mag = _mag_from_quat_or_complex(f1)
+        idx, _ = _peak_info(mag)
+        y_peak = float(f1.y.data[idx[0]])
+        x_peak = float(f1.x.data[idx[1]])
+
+        ref_mag = _mag_from_quat_or_complex(ref)
+        ref_idx, _ = _peak_info(ref_mag)
+        ref_y = float(ref.y.data[ref_idx[0]])
+        ref_x = float(ref.x.data[ref_idx[1]])
+
+        assert abs(y_peak - ref_y) < 1.0
+        assert abs(x_peak - ref_x) < 1.0
+
+    def test_bruker_echoanti_two_step_fft_real_peak_near_reference(self):
+        """
+        The displayed real spectrum should also align with the TopSpin reference.
+
+        This guards the remaining quadrature-phase failure mode where the
+        magnitude peak is correct but the real part still needs the conventional
+        -90° intermediate F2 phase before the F1 transform.
+        """
+        ds = scp.read_topspin(BRUKER_ECHOANTI_2D, expno=3, remove_digital_filter=True)
+        ref = scp.read_topspin(BRUKER_ECHOANTI_2D / "3" / "pdata" / "1" / "2rr")
+
+        f2 = scp.nmr.Experiment(ds).process(apodization="em", lb=2.0, size=ref.shape[1])
+        f1 = f2.zf_size(size=ref.shape[0], dim="y").em(lb=2.0, dim="y").fft(dim="y")
+
+        ref_real = np.abs(np.asarray(ref.real.data))
+        ref_idx = np.unravel_index(np.argmax(ref_real), ref_real.shape)
+        ref_y = float(ref.y.data[ref_idx[0]])
+        ref_x = float(ref.x.data[ref_idx[1]])
+
+        fft_real = np.abs(np.asarray(f1.real.data))
+        idx = np.unravel_index(np.argmax(fft_real), fft_real.shape)
+        y_peak = float(f1.y.data[idx[0]])
+        x_peak = float(f1.x.data[idx[1]])
+
+        assert abs(y_peak - ref_y) < 1.0
+        assert abs(x_peak - ref_x) < 1.0
 
 
 @pytest.mark.skipif(not _has_agilent_data(), reason="Agilent test data not available")

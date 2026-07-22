@@ -87,6 +87,12 @@ class Experiment:
     validation, and state-aware processing orchestration.  Does **not**
     copy, subclass, or mutate the underlying dataset.
 
+    The current public processing workflow is intentionally limited to
+    validated 1D experiments.  Multi-dimensional datasets may still be
+    classified and inspected, but their processing remains outside the
+    public supported scope until the scientific characterization work is
+    complete.
+
     Parameters
     ----------
     dataset : NDDataset or list of NDDataset
@@ -369,12 +375,24 @@ class Experiment:
             report.add_info("Raw 1D FID detected.")
         elif self.source_kind == "ser":
             report.add_info("Raw 2D SER detected.")
+            report.add_warning(
+                "Multi-dimensional NMR processing is not part of the current "
+                "public supported workflow."
+            )
         elif self.source_kind == "processed_1d":
             report.add_info("Processed 1D spectrum detected — no FFT required.")
         elif self.source_kind == "processed_2d":
             report.add_info("Processed 2D spectrum detected — no FFT required.")
+            report.add_warning(
+                "Multi-dimensional NMR processing is not part of the current "
+                "public supported workflow."
+            )
         elif self.source_kind == "partially_processed":
             report.add_info("Partially processed multi-dimensional data detected.")
+            report.add_warning(
+                "Multi-dimensional NMR processing is not part of the current "
+                "public supported workflow."
+            )
 
         return report
 
@@ -397,6 +415,9 @@ class Experiment:
 
         Applies only operations that are scientifically appropriate for the
         current data domain.  Never modifies the source dataset.
+
+        The supported public processing workflow currently covers validated
+        1D experiments only.
 
         Parameters
         ----------
@@ -424,9 +445,20 @@ class Experiment:
         ------
         RuntimeError
             If the data domain does not support the requested operations.
+        NotImplementedError
+            If the dataset is multi-dimensional and therefore outside the
+            current public supported processing scope.
         """
 
         ds = self._dataset
+
+        if self.ndim > 1:
+            msg = (
+                "Public NMR processing currently supports only validated 1D "
+                "experiments. Multi-dimensional NMR processing remains out of "
+                "public scope pending further scientific characterization."
+            )
+            raise NotImplementedError(msg)
 
         if self.is_time_domain:
             return self._process_time_domain(
@@ -479,6 +511,9 @@ class Experiment:
 
         # 3. FFT
         work = work.fft()
+
+        # 3b. Encoding-specific intermediate phase convention adjustments
+        work = self._apply_default_post_fft_phase(work)
 
         # 4. Phase correction
         if phase is not None:
@@ -551,6 +586,21 @@ class Experiment:
         msg = f"Unknown phase mode: {mode!r}. Use 'manual' or 'metadata'."
         raise ValueError(msg)
 
+    def _apply_default_post_fft_phase(self, ds: NDDataset) -> NDDataset:
+        """
+        Apply encoding-specific convention fixes after the first FFT pass.
+
+        For 2D Bruker Echo-Antiecho data, a -90° zero-order phase on the
+        direct-dimension spectrum provides the correct intermediate convention
+        before the second transform along F1. Without this step, the final real
+        spectrum remains in quadrature relative to the TopSpin processed
+        reference even though the magnitude peak is correctly positioned.
+        """
+        encoding = self.encoding or ()
+        if self.ndim >= 2 and "ECHO-ANTIECHO" in encoding:
+            return self._apply_phase(ds, "manual", phc0=-90.0, phc1=0.0)
+        return ds
+
     # ------------------------------------------------------------------
     # Summary and representation
     # ------------------------------------------------------------------
@@ -566,8 +616,8 @@ class Experiment:
         if self.encoding:
             lines.append(f"  encoding: {' × '.join(self.encoding)}")
         lines.append(f"  processable: {'yes' if self.is_processable else 'no'}")
-        if self.ndim >= 2 and self.is_time_domain:
-            lines.append("  FFT 2D: not yet supported")
+        if self.ndim >= 2:
+            lines.append("  public processing: 1D only")
         return "\n".join(lines)
 
     def __repr__(self) -> str:
