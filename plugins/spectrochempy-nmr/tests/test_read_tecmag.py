@@ -103,6 +103,11 @@ class TestTecMagReader:
         dataset = _read_tecmag_or_skip(str(TECMAG_DIR / "LiCl_ref1.tnt"))
         assert dataset.meta.nucleus[0] is not None
         assert "Li" in dataset.meta.nucleus[0]
+        assert "\x00" not in dataset.meta.nucleus[0]
+
+    def test_read_tecmag_metadata_encoding(self):
+        dataset = _read_tecmag_or_skip(str(TECMAG_DIR / "LiCl_ref1.tnt"))
+        assert dataset.meta.encoding == ["QSIM"]
 
     def test_read_tecmag_metadata_origin(self):
         dataset = _read_tecmag_or_skip(str(TECMAG_DIR / "LiCl_ref1.tnt"))

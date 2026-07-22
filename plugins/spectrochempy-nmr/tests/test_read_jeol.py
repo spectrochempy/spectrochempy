@@ -160,6 +160,10 @@ class TestReadJeol:
         ds = _read_jeol_or_skip(str(JEOL_DIR / "1H.jdf"))
         assert np.issubdtype(ds.data.dtype, np.complexfloating)
 
+    def test_1d_encoding_is_direct_complex(self):
+        ds = _read_jeol_or_skip(str(JEOL_DIR / "1H.jdf"))
+        assert ds.meta.encoding == ["QSIM"]
+
     def test_1d_has_coords(self):
         ds = _read_jeol_or_skip(str(JEOL_DIR / "1H.jdf"))
         assert ds.x is not None

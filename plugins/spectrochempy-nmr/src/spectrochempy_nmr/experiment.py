@@ -13,6 +13,7 @@ never references Bruker-specific field names (``nuc1``, ``pulprog``,
 
 from __future__ import annotations
 
+import re
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -519,6 +520,9 @@ class Experiment:
         if phase is not None:
             work = self._apply_phase(work, phase, phc0=phc0, phc1=phc1)
 
+        # 5. Calibrate the final spectral axis using canonical NMR metadata.
+        work = self._calibrate_1d_spectral_axis(work)
+
         return work
 
     def _process_frequency_domain(
@@ -600,6 +604,44 @@ class Experiment:
         if self.ndim >= 2 and "ECHO-ANTIECHO" in encoding:
             return self._apply_phase(ds, "manual", phc0=-90.0, phc1=0.0)
         return ds
+
+    def _calibrate_1d_spectral_axis(self, ds: NDDataset) -> NDDataset:
+        """
+        Normalize the final 1D frequency axis to ppm when possible.
+
+        Some readers preserve enough information for ``fft()`` to create a
+        frequency-domain axis in Hz but not to complete the final ppm
+        calibration automatically.  The canonical NMR metadata already carries
+        the spectrometer frequency and nucleus information, so finalize the
+        public 1D output here in a vendor-independent way.
+        """
+        if ds.ndim != 1:
+            return ds
+
+        coord = ds.coord(0)
+        if str(coord.units) == "ppm":
+            return ds
+
+        sfo = self._nmr_meta.spectrometer_freq_mhz
+        nuclei = self._nmr_meta.nuclei
+        if not sfo or sfo[0] is None:
+            return ds
+
+        work = ds.copy()
+        work.meta.readonly = False
+        coord = work.coord(0)
+        from spectrochempy.core.units import ur  # noqa: PLC0415
+
+        coord.meta["acquisition_frequency"] = float(sfo[0]) * ur.MHz
+        coord.ito("ppm")
+
+        if nuclei and nuclei[0]:
+            nucleus = str(nuclei[0])
+            match = re.match(r"([^a-zA-Z]+)([a-zA-Z]+)", nucleus)
+            nucleus_label = rf"$^{{{match[1]}}}{match[2]}$" if match else nucleus
+            coord.title = rf"$\delta\ {nucleus_label}$"
+
+        return work
 
     # ------------------------------------------------------------------
     # Summary and representation
