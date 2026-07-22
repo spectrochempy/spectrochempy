@@ -497,7 +497,9 @@ class TestPublic1DMathConventions:
         base = exp.process()
         zfilled = exp.process(size=256)
 
-        base_peak = float(np.asarray(base.x.data)[int(np.argmax(np.abs(np.asarray(base.data))))])
+        base_peak = float(
+            np.asarray(base.x.data)[int(np.argmax(np.abs(np.asarray(base.data))))]
+        )
         zf_peak = float(
             np.asarray(zfilled.x.data)[int(np.argmax(np.abs(np.asarray(zfilled.data))))]
         )
@@ -529,7 +531,9 @@ class TestPublic1DRealAxisValidation:
         reason="Agilent 1D data missing",
     )
     def test_agilent_1d_axis_is_centered_when_no_vendor_offset_exists(self):
-        spectrum = Experiment(_read_or_skip(EXTRA_NMR / "agilent" / "agilent_1d" / "fid")).process()
+        spectrum = Experiment(
+            _read_or_skip(EXTRA_NMR / "agilent" / "agilent_1d" / "fid")
+        ).process()
         axis = np.asarray(spectrum.x.data)
         peak_idx = int(np.argmax(np.abs(np.asarray(spectrum.data))))
         center_ppm = (float(axis[0]) + float(axis[-1])) / 2.0
@@ -567,7 +571,9 @@ class TestPublic1DRealAxisValidation:
         reason="TecMag 1D data missing",
     )
     def test_tecmag_reference_peak_remains_near_zero_ppm(self):
-        spectrum = Experiment(_read_or_skip(EXTRA_NMR / "tecmag" / "LiCl_ref1.tnt")).process()
+        spectrum = Experiment(
+            _read_or_skip(EXTRA_NMR / "tecmag" / "LiCl_ref1.tnt")
+        ).process()
         axis = np.asarray(spectrum.x.data)
         peak_ppm = float(axis[int(np.argmax(np.abs(np.asarray(spectrum.data))))])
         center_ppm = (float(axis[0]) + float(axis[-1])) / 2.0

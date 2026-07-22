@@ -13,9 +13,10 @@ never references Bruker-specific field names (``nuc1``, ``pulprog``,
 
 from __future__ import annotations
 
-import numpy as np
 import re
 from typing import TYPE_CHECKING
+
+import numpy as np
 
 if TYPE_CHECKING:
     from spectrochempy.core.dataset.nddataset import NDDataset
