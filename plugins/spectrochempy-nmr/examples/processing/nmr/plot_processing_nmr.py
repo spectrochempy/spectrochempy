@@ -6,12 +6,16 @@
 # ======================================================================================
 # ruff: noqa
 """
-Processing NMR spectra (slicing, baseline correction, peak picking, peak fitting)
-=================================================================================
-Various examples of processing NMR spectra
+Processing a 1D NMR spectrum
+============================
+Basic 1D NMR processing and inspection with the official
+``spectrochempy-nmr`` plugin.
 
-Requires the official ``spectrochempy-nmr`` plugin.
-Install with: ``pip install spectrochempy[nmr]``.
+This example stays within the currently validated public scope of the plugin:
+
+* reading a 1D NMR dataset;
+* processing the FID to a frequency-domain spectrum;
+* inspecting slices, correcting the baseline and picking peaks.
 """
 
 # %%
@@ -20,92 +24,39 @@ Install with: ``pip install spectrochempy[nmr]``.
 import spectrochempy as scp
 
 # %%
-# Importing a 2D NMR spectra
-# --------------------------
-# Define the folder where are the spectra
+# Import a 1D NMR FID
+# -------------------
 datadir = scp.preferences.datadir
 nmrdir = datadir / "nmrdata"
 
-dataset = scp.nmr.read(
-    nmrdir / "bruker" / "tests" / "nmr" / "topspin_2d" / "1" / "pdata" / "1" / "2rr"
-)
+dataset = scp.nmr.read(nmrdir / "bruker" / "tests" / "nmr" / "topspin_1d" / "1" / "fid")
+
+# %%
+# Process the 1D FID
+# ------------------
+experiment = scp.nmr.Experiment(dataset)
+dataset = experiment.process(apodization="em", lb=2.0, size=16384, phase="metadata")
 
 
 # %%
-# Analysing the 2D NMD dataset
-# ----------------------------
+# Analyse the processed 1D spectrum
+# ---------------------------------
 # Print dataset summary
 dataset
 
 # %%
 # Plot the dataset
-_ = dataset.plot_map()
-
-# %%
-# Extract slices along x
-s = dataset[-27.6, :]
-_ = s.plot()
-
-# %%
-# Baseline correction of this slice
-# Note that only the real part is corrected
-sa = s.snip(snip_width=100)
-_ = sa.plot()
-
-# %%
-# apply this correction to the whole dataset
-sb = dataset.snip(snip_width=100)
-_ = sb.plot_map()
+_ = dataset.plot()
 
 # %%
 # Select a region of interest
-sc = sb[
-    -40.0:-15.0, 55.0:20.0
-]  # note the use of float to make selection using coordinates (not point indexes)
-_ = sc.plot_map()
-
-# %%
-# Extract slices along x
-s1 = sc[-27.6, :]
-_ = s1.plot()
-
-# %%
-s2 = sc[-25.7, :]
-_ = s2.plot()
-
-# %%
-# plot two slices on the same figure
-_ = s1.plot()
-_ = s2.plot(
-    clear=False,
-    color="red",
-    linestyle="-",
-)
-
-# %%
-# Now slice along y
-s3 = sc[:, 40.0]
-s4 = sc[:, 36.0]
-
-# %%
-# IMPORTANT: note that when the slice is along y, this results in a column vector of
-# shape (308, 1). When an NDDataset method is applied to this slice, such as a baseline
-# correction, it will be applied by default to the last dimension [rows] (in this case
-# the dimension of size 1, which is not what is generally expected). To avoid this,
-# we can use the squeeze method to remove this dimension or transpose the slice to
-# obtain a vector of rows of shape (1, 308)
-s3 = s3.squeeze()
-s4 = s4.squeeze()
-
-# %%
-# plot the two slices on the same figure
-_ = s3.plot(color="violet", ls="-", lw="2")
-_ = s4.plot(clear=False, color="green", ls="-", lw="2")
+spectrum = dataset[-40.0:-15.0]
+_ = spectrum.plot()
 
 # %%
 # Peak picking
 # ------------
-peaks, _ = s2.find_peaks()
+peaks, _ = spectrum.find_peaks()
 
 
 # %%
@@ -135,17 +86,12 @@ def plot_with_pp(s, peaks):
         )
 
 
-plot_with_pp(s2, peaks)
+plot_with_pp(spectrum, peaks)
 
 # %%
 # Set some parameters to get less but significant peaks
-peaks, _ = s2.find_peaks(height=1.0, distance=1.0)
-plot_with_pp(s2, peaks)
-
-# %%
-# Now look in the other dimension using slice s4
-peaks, _ = s4.find_peaks(height=1.0, distance=1.0)
-plot_with_pp(s4, peaks)
+peaks, _ = spectrum.find_peaks(height=1.0, distance=1.0)
+plot_with_pp(spectrum, peaks)
 
 # %%
 # Peak fitting
@@ -208,8 +154,8 @@ shape: voigtmodel
 """
 
 # %%
-# We will work here on the slice s4 (taken in the y dimension).
-s4p = s4.snip()  # Baseline correction
+# We will work here on the processed 1D region of interest.
+s4p = spectrum.snip()  # Baseline correction
 
 # %%
 # create an Optimize object

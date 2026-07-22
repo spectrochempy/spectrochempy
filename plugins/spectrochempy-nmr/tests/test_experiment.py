@@ -9,7 +9,6 @@
 
 import numpy as np
 import pytest
-import quaternion
 from spectrochempy_nmr.experiment import Experiment
 from spectrochempy_nmr.experiment import ExperimentValidation
 
@@ -444,33 +443,29 @@ class TestProcessFrequencyDomain:
 
 
 class TestProcess2D:
-    """Test 2D time-domain processing through Experiment.process()."""
+    """Test that 2D datasets are outside the public processing scope."""
 
     @pytest.mark.skipif(not _has_topspin_2d(), reason="TopSpin 2D data missing")
-    def test_2d_ser_processes_successfully(self):
+    def test_2d_ser_is_rejected(self):
         ser = _read_or_skip(nmrdir / "topspin_2d/1/ser")
         exp = Experiment(ser)
-        result = exp.process()
-        assert result.ndim == 2
-        assert result.dtype == quaternion.quaternion
+        with pytest.raises(NotImplementedError, match="only validated 1D experiments"):
+            exp.process()
 
     @pytest.mark.skipif(not _has_topspin_2d(), reason="TopSpin 2D data missing")
-    def test_2d_ser_with_apodization(self):
+    def test_2d_ser_with_apodization_is_rejected(self):
         ser = _read_or_skip(nmrdir / "topspin_2d/1/ser")
         exp = Experiment(ser)
-        result = exp.process(apodization="em", lb=2.0)
-        assert result.ndim == 2
-        assert result.dtype == quaternion.quaternion
+        with pytest.raises(NotImplementedError, match="only validated 1D experiments"):
+            exp.process(apodization="em", lb=2.0)
 
     @pytest.mark.skipif(not _has_topspin_2d_pdata(), reason="TopSpin 2D pdata missing")
-    def test_2d_processed_returns_copy(self):
-        """Processed 2D is frequency-domain; process() returns a copy."""
+    def test_2d_processed_is_rejected(self):
+        """Processed 2D data is still outside the public processing scope."""
         spec2d = _read_or_skip(nmrdir / "topspin_2d/1/pdata/1/2rr")
         exp = Experiment(spec2d)
-        result = exp.process()
-        assert isinstance(result, NDDataset)
-        assert result.shape == spec2d.shape
-        np.testing.assert_allclose(spec2d.data, result.data, atol=1e-10)
+        with pytest.raises(NotImplementedError, match="only validated 1D experiments"):
+            exp.process()
 
 
 # ---------------------------------------------------------------------------
@@ -497,7 +492,7 @@ class TestSummaryAndRepr:
         exp = Experiment(ser)
         s = exp.summary()
         assert "time × time" in s
-        assert "not yet supported" in s
+        assert "public processing: 1D only" in s
 
     @pytest.mark.skipif(not _has_topspin_1d(), reason="TopSpin 1D data missing")
     def test_repr_fid(self):
@@ -639,58 +634,21 @@ def _has_topspin_2d():
 
 @pytest.mark.skipif(not _has_topspin_2d(), reason="TopSpin 2D data not available")
 class TestExperiment2DProcessing:
-    """Verify Experiment.process() works on 2D time-domain data."""
+    """Verify multi-dimensional processing is kept out of the public API."""
 
-    def test_process_2d_em_fft(self):
-        """Em + fft + auto-phase on 2D quaternion data."""
+    def test_process_2d_em_fft_rejected(self):
+        """The public processing workflow is intentionally 1D-only."""
         ds = scp.nmr.read(nmrdir / "topspin_2d", expno=1, remove_digital_filter=True)
         exp = Experiment(ds)
         assert exp.is_time_domain
         assert exp.ndim == 2
 
-        result = exp.process(apodization="em", lb=2.0)
-        assert result.shape == (96, 948)
-        assert result.dtype == quaternion.quaternion
-        assert result.meta.isfreq == [False, True]
-        assert result.x.units == "ppm"
-        assert str(result.y.units) == "µs"
-        # F2 should be auto-phased
-        assert result.meta.phased[-1] is True
-        assert result.meta.phc0[-1].magnitude == 0.0
+        with pytest.raises(NotImplementedError, match="only validated 1D experiments"):
+            exp.process(apodization="em", lb=2.0)
 
-    def test_process_2d_no_apodization(self):
-        """Fft without apodization on 2D data."""
-        ds = scp.nmr.read(nmrdir / "topspin_2d", expno=1, remove_digital_filter=True)
-        exp = Experiment(ds)
-
-        result = exp.process()
-        assert result.shape == (96, 948)
-        assert result.dtype == quaternion.quaternion
-        assert result.meta.phased[-1] is True
-
-    def test_process_2d_manual_phase(self):
-        """Manual phase correction on 2D data."""
-        ds = scp.nmr.read(nmrdir / "topspin_2d", expno=1, remove_digital_filter=True)
-        exp = Experiment(ds)
-
-        result = exp.process(phase="manual", phc0=45.0)
-        assert result.shape == (96, 948)
-        assert result.dtype == quaternion.quaternion
-
-    def test_process_2d_peak_exists(self):
-        """Processed 2D data has a non-zero peak."""
-        ds = scp.nmr.read(nmrdir / "topspin_2d", expno=1, remove_digital_filter=True)
-        exp = Experiment(ds)
-
-        result = exp.process(apodization="em", lb=2.0)
-        mag = scp.abs(result)
-        maxval = float(np.max(mag.data))
-        assert maxval > 0, "No peak found after 2D processing"
-
-    def test_validate_2d_no_blocker_message(self):
-        """validate() no longer warns about 2D processing being unsupported."""
+    def test_validate_2d_reports_public_scope_warning(self):
+        """Validation should make the current public scope explicit."""
         ds = scp.nmr.read(nmrdir / "topspin_2d", expno=1, remove_digital_filter=True)
         exp = Experiment(ds)
         report = exp.validate()
-        for msg in report.info + report.warnings + report.errors:
-            assert "not yet supported" not in msg.lower()
+        assert any("public supported workflow" in msg for msg in report.warnings)

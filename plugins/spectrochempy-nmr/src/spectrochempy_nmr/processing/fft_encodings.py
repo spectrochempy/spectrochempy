@@ -111,6 +111,27 @@ def _states_second_pass_fft(data, *, tppi=False):
     return _rebuild_quaternion(positive, np.zeros_like(positive))
 
 
+def _echoanti_second_pass_fft(data):
+    """
+    Process the indirect dimension for ECHO-ANTIECHO data.
+
+    After the first pass the quaternion stores two complex subspectra directly.
+    On real Bruker Echo-Antiecho data the indirect-dimension branch must be
+    reconstructed with the conjugated orientation; using the plain complex FFT
+    mirrors the F1 peak relative to the TopSpin processed reference.
+    """
+    from spectrochempy_nmr.processing.hypercomplex import _extract_quaternion_components
+    from spectrochempy_nmr.processing.hypercomplex import _rebuild_quaternion
+
+    RR, RI, IR, II = _extract_quaternion_components(data)
+    fr = RR + 1j * RI
+    fi = IR + 1j * II
+
+    fr = np.fft.fftshift(np.fft.fft(np.conjugate(fr)), -1)
+    fi = np.fft.fftshift(np.fft.fft(np.conjugate(fi)), -1)
+    return _rebuild_quaternion(fr, fi)
+
+
 def _fft_encoding_handler(data, encoding, **kwargs):
     """
     Dispatch NMR encoding-specific FFT transforms.
@@ -141,6 +162,8 @@ def _fft_encoding_handler(data, encoding, **kwargs):
     if original_axis != -1:
         if "STATES" in encoding:
             return _states_second_pass_fft(data, tppi=tppi or "TPPI" in encoding)
+        if "ECHO-ANTIECHO" in encoding:
+            return _echoanti_second_pass_fft(data)
 
         from spectrochempy_nmr.processing.hypercomplex import (
             _extract_quaternion_components,

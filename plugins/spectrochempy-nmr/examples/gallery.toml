@@ -28,13 +28,3 @@ section_ref = "examples-processing-nmr-index"
 path = "processing/nmr/plot_processing_cp_nmr.py"
 section = "NMR processing"
 section_ref = "examples-processing-nmr-index"
-
-[[examples]]
-path = "processing/nmr/plot_processing_nmr_relax.py"
-section = "NMR processing"
-section_ref = "examples-processing-nmr-index"
-
-[[examples]]
-path = "processing/nmr/plot_validate_bruker_2d_against_pdata.py"
-section = "NMR processing"
-section_ref = "examples-processing-nmr-index"

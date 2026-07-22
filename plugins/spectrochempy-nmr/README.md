@@ -3,12 +3,14 @@
 NMR plugin for SpectroChemPy.
 
 This package is the home for NMR-specific readers and tools that are useful in
-SpectroChemPy but should not live in the core package. It currently contributes
-the Bruker TopSpin reader, exposed through `scp.nmr.read(...)` and registered
-under the reader name `topspin`.
+SpectroChemPy but should not live in the core package. It currently provides a
+validated public workflow for 1D NMR data across the supported readers, exposed
+through `scp.nmr.read(...)` and `scp.nmr.Experiment(...)`.
 
 Future NMR readers or processing helpers can be added here without creating a
-new plugin package for each vendor format.
+new plugin package for each vendor format. Multi-dimensional NMR remains under
+active characterization and is not currently part of the public supported
+processing workflow.
 
 ## Installation
 
@@ -29,8 +31,11 @@ pip install -e plugins/spectrochempy-nmr
 import spectrochempy as scp
 
 dataset = scp.nmr.read("path/to/1/fid")
-dataset = scp.nmr.read("path/to/2rr")
+dataset = scp.nmr.read("path/to/1/pdata/1/1r")
 dataset = scp.nmr.read("path/to/experiment", expno=1, procno=1)
+
+experiment = scp.nmr.Experiment(dataset)
+spectrum = experiment.process(apodization="em", lb=2.0, size=32768)
 ```
 
 The NMR ppm/frequency unit context is also provided by this plugin:

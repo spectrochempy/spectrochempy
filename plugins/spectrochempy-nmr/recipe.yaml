@@ -31,9 +31,9 @@ tests:
 about:
   summary: "NMR readers and tools plugin for SpectroChemPy"
   description: |
-    Official SpectroChemPy plugin providing Bruker TopSpin NMR data reading,
-    NMR-specific FFT encodings (STATES, TPPI, ECHO-ANTIECHO), and ppm/Hz
-    unit conversion contexts.
+    Official SpectroChemPy plugin providing vendor NMR data reading,
+    a validated public 1D processing workflow, and ppm/Hz unit conversion
+    contexts for SpectroChemPy.
   homepage: https://www.spectrochempy.fr
   license: LicenseRef-CeCILL-B
   repository: https://github.com/spectrochempy/spectrochempy

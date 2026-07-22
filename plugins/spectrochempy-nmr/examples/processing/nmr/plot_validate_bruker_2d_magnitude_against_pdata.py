@@ -6,17 +6,17 @@
 # ======================================================================================
 # ruff: noqa
 """
-Validate 2D Bruker reconstruction against TopSpin pdata
-=======================================================
+Validate 2D Bruker magnitude-mode reconstruction against TopSpin pdata
+======================================================================
 
 This example compares a 2D Bruker raw ``ser`` dataset processed in
 SpectroChemPy with the corresponding TopSpin processed reference stored in
 ``pdata/1``.
 
-It is primarily intended as a validation/inspection tool for hypercomplex
-2D NMR encodings.  When a richer local validation dataset is available, it is
-used automatically.  Otherwise the example falls back to the public bundled
-TopSpin 2D dataset.
+It uses the bundled ``exam2d_HH`` dataset, which is a Bruker magnitude-mode
+case already packaged in ``spectrochempy_data``.  The goal is to validate the
+standard reconstruction workflow against the TopSpin reference on a real
+dataset that is distinct from the current hypercomplex example family.
 
 Requires the official ``spectrochempy-nmr`` plugin.
 Install with: ``pip install spectrochempy[nmr]``.
@@ -25,48 +25,19 @@ Install with: ``pip install spectrochempy[nmr]``.
 # %%
 # Import API
 # ----------
-from pathlib import Path
-
 import numpy as np
 
 import spectrochempy as scp
 from spectrochempy_nmr import Experiment
 
 
-def _candidate_datasets():
-    """Return validation candidates ordered from richest local data to public fallback."""
-    home = Path.home()
-    return [
-        {
-            "label": "Local Bruker validation dataset (eddy/151215/2)",
-            "base": home / "Dropbox/F.STORAGE/bruker/data/eddy/nmr/151215",
-            "expno": 2,
-            "lb_f2": 2.0,
-            "lb_f1": 2.0,
-        },
-        {
-            "label": "Bundled TopSpin validation dataset",
-            "base": scp.preferences.datadir
-            / "nmrdata"
-            / "bruker"
-            / "tests"
-            / "nmr"
-            / "topspin_2d",
-            "expno": 1,
-            "lb_f2": 2.0,
-            "lb_f1": 5.0,
-        },
-    ]
-
-
-def _select_candidate():
-    """Pick the first candidate that has both a raw SER and processed pdata."""
-    for candidate in _candidate_datasets():
-        expdir = candidate["base"] / str(candidate["expno"])
-        if (expdir / "ser").exists() and (expdir / "pdata" / "1").exists():
-            return candidate
-    msg = "No Bruker validation dataset with both ser and pdata/1 was found."
-    raise FileNotFoundError(msg)
+DATASET = {
+    "label": "Bundled Bruker magnitude-mode validation dataset",
+    "base": scp.preferences.datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "exam2d_HH",
+    "expno": 1,
+    "lb_f2": 2.0,
+    "lb_f1": 2.0,
+}
 
 
 def _magnitude(dataset):
@@ -86,19 +57,21 @@ def _peak_coords(dataset):
 
 
 # %%
-# Select a dataset
-# ----------------
-candidate = _select_candidate()
-print(candidate["label"])
-print(candidate["base"] / str(candidate["expno"]))
+# Locate the bundled dataset
+# --------------------------
+expdir = DATASET["base"] / str(DATASET["expno"])
+if not (expdir / "ser").exists() or not (expdir / "pdata" / "1").exists():
+    msg = "The bundled magnitude-mode validation dataset was not found."
+    raise FileNotFoundError(msg)
+
+print(DATASET["label"])
+print(expdir)
 
 # %%
 # Read the raw SER and the TopSpin processed reference
 # ----------------------------------------------------
-ser = scp.read_topspin(
-    candidate["base"], expno=candidate["expno"], remove_digital_filter=True
-)
-reference = scp.read_topspin(candidate["base"], expno=candidate["expno"], procno=1)
+ser = scp.read_topspin(DATASET["base"], expno=DATASET["expno"], remove_digital_filter=True)
+reference = scp.read_topspin(DATASET["base"], expno=DATASET["expno"], procno=1)
 
 # %%
 # Print a short summary
@@ -110,15 +83,14 @@ reference
 # %%
 # Process the raw SER in two stages
 # ---------------------------------
-# We match the TopSpin digital sizes using the reference spectrum shape.
 f2_processed = Experiment(ser).process(
     apodization="em",
-    lb=candidate["lb_f2"],
+    lb=DATASET["lb_f2"],
     size=reference.shape[1],
 )
 reconstructed = (
     f2_processed.zf_size(size=reference.shape[0], dim="y")
-    .em(lb=candidate["lb_f1"], dim="y")
+    .em(lb=DATASET["lb_f1"], dim="y")
     .fft(dim="y")
 )
 
@@ -163,15 +135,9 @@ _ = scp_column.plot(color="black", ylabel="normalized intensity")
 _ = ref_column.plot(clear=False, color="red", linestyle="--")
 
 # %%
-# Optional: simple manual phase touch-up for a closer visual overlay
-# ------------------------------------------------------------------
-# The reconstruction above is intentionally shown as produced by the standard
-# pipeline.  If we want a closer visual match against the TopSpin reference, we
-# can apply a small manual zero-order phase correction on F2 before comparing
-# slices again.  The exact value remains dataset-dependent.
-reconstructed_phased = reconstructed.pk(phc0=35.0, phc1=0.0, dim="x", rel=True)
-reconstructed_phased = reconstructed_phased.pk(phc0=-15.0, phc1=0.0, dim="y", rel=True)
-
+# Optional: compare a lightly phased reconstruction
+# -------------------------------------------------
+reconstructed_phased = reconstructed.pk(phc0=10.0, phc1=0.0, dim="x", rel=True)
 
 # %%
 # Compare the normalized F2 slice again after the manual phase touch-up
@@ -180,17 +146,3 @@ scp_slice_phased.title = "normalized intensity"
 
 _ = scp_slice_phased.plot(color="blue", ylabel="normalized intensity")
 _ = ref_slice.plot(clear=False, color="red", linestyle="--", xlim=slice_xlim)
-
-# %%
-
-scp_column = reconstructed_phased[:, ref_x].squeeze().normalize(method="max", dim="y")
-ref_column = reference[:, ref_x].squeeze().normalize(method="max", dim="y")
-scp_column.title = "normalized intensity"
-ref_column.title = "normalized intensity"
-
-_ = scp_column.plot(color="black", ylabel="normalized intensity")
-_ = ref_column.plot(clear=False, color="red", linestyle="--")
-
-# %%
-
-# %%
