@@ -13,7 +13,9 @@ from spectrochempy_nmr.experiment import Experiment
 from spectrochempy_nmr.experiment import ExperimentValidation
 
 import spectrochempy as scp
+from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.units import ur
 
 DATADIR = scp.preferences.datadir
 NMRDATA = DATADIR / "nmrdata"
@@ -36,6 +38,39 @@ def _read_or_skip(*args, **kwargs):
     if result is None:
         pytest.skip("NMR test data could not be read in this environment")
     return result
+
+
+def _make_synthetic_vendor_fid(
+    *,
+    npts=64,
+    sw_hz=6400.0,
+    obs_mhz=400.0,
+    freq_hz=500.0,
+    offset_ppm=None,
+    origin="tecmag",
+    nucleus="1H",
+):
+    dt = 1.0 / sw_hz
+    t = np.arange(npts, dtype=float) * dt
+    fid = np.exp(2j * np.pi * freq_hz * t)
+    coord = Coord(t, units="s", title="F1 acquisition time")
+    coord.meta["acquisition_frequency"] = obs_mhz * ur.MHz
+
+    ds = scp.NDDataset(fid, coordset=[coord])
+    ds.origin = origin
+    ds.meta.readonly = False
+    ds.meta.origin = origin
+    ds.meta.td = [npts]
+    ds.meta.isfreq = [False]
+    ds.meta.encoding = ["QSIM"]
+    ds.meta.nucleus = [nucleus]
+    ds.meta.datatype = "FID"
+    ds.meta.iscomplex = [True]
+    ds.meta.sw_h = [sw_hz]
+    ds.meta.sfrq = [obs_mhz]
+    ds.meta.offset = [offset_ppm]
+    ds.meta.readonly = True
+    return ds
 
 
 def _has_topspin_1d():
@@ -424,6 +459,121 @@ class TestProcessTimeDomain:
         assert exp.encoding == ("QSIM",)
         spectrum = exp.process()
         assert str(spectrum.coord(0).units) == "ppm"
+
+
+class TestPublic1DMathConventions:
+    """Numerically characterize the public 1D FFT and axis conventions."""
+
+    def test_positive_frequency_peak_appears_on_positive_ppm_side(self):
+        ds = _make_synthetic_vendor_fid(freq_hz=500.0)
+        spectrum = Experiment(ds).process()
+        axis = np.asarray(spectrum.x.data)
+        peak_idx = int(np.argmax(np.abs(np.asarray(spectrum.data))))
+
+        assert str(spectrum.x.units) == "ppm"
+        assert axis[0] > axis[-1]
+        assert axis[peak_idx] > 0.0
+
+    def test_negative_frequency_peak_appears_on_negative_ppm_side(self):
+        ds = _make_synthetic_vendor_fid(freq_hz=-500.0)
+        spectrum = Experiment(ds).process()
+        axis = np.asarray(spectrum.x.data)
+        peak_idx = int(np.argmax(np.abs(np.asarray(spectrum.data))))
+
+        assert axis[peak_idx] < 0.0
+
+    def test_zero_frequency_peak_stays_near_axis_center(self):
+        ds = _make_synthetic_vendor_fid(freq_hz=0.0)
+        spectrum = Experiment(ds).process()
+        axis = np.asarray(spectrum.x.data)
+        peak_idx = int(np.argmax(np.abs(np.asarray(spectrum.data))))
+
+        assert peak_idx in (spectrum.shape[0] // 2 - 1, spectrum.shape[0] // 2)
+        assert abs(axis[peak_idx]) <= abs(axis[0] - axis[-1]) / spectrum.shape[0]
+
+    def test_zero_filling_preserves_peak_position(self):
+        ds = _make_synthetic_vendor_fid(freq_hz=500.0)
+        exp = Experiment(ds)
+        base = exp.process()
+        zfilled = exp.process(size=256)
+
+        base_peak = float(np.asarray(base.x.data)[int(np.argmax(np.abs(np.asarray(base.data))))])
+        zf_peak = float(
+            np.asarray(zfilled.x.data)[int(np.argmax(np.abs(np.asarray(zfilled.data))))]
+        )
+
+        assert abs(zf_peak - base_peak) < 0.1
+
+    def test_vendor_offset_centers_axis_when_available(self):
+        ds = _make_synthetic_vendor_fid(freq_hz=0.0, origin="jeol", offset_ppm=7.0)
+        spectrum = Experiment(ds).process()
+        axis = np.asarray(spectrum.x.data)
+        center_ppm = (float(axis[0]) + float(axis[-1])) / 2.0
+
+        assert center_ppm == pytest.approx(7.0, abs=0.05)
+
+    def test_axis_is_convertible_back_to_hz_with_same_orientation(self):
+        ds = _make_synthetic_vendor_fid(freq_hz=500.0)
+        spectrum = Experiment(ds).process()
+        hz = spectrum.x.to("Hz")
+
+        assert str(hz.units) == "Hz"
+        assert float(hz.data[0]) > float(hz.data[-1])
+
+
+class TestPublic1DRealAxisValidation:
+    """Validate final 1D spectral-axis calibration on real vendor data."""
+
+    @pytest.mark.skipif(
+        not (EXTRA_NMR / "agilent" / "agilent_1d" / "fid").exists(),
+        reason="Agilent 1D data missing",
+    )
+    def test_agilent_1d_axis_is_centered_when_no_vendor_offset_exists(self):
+        spectrum = Experiment(_read_or_skip(EXTRA_NMR / "agilent" / "agilent_1d" / "fid")).process()
+        axis = np.asarray(spectrum.x.data)
+        peak_idx = int(np.argmax(np.abs(np.asarray(spectrum.data))))
+        center_ppm = (float(axis[0]) + float(axis[-1])) / 2.0
+
+        assert str(spectrum.x.units) == "ppm"
+        assert center_ppm == pytest.approx(0.0, abs=0.05)
+        assert 0 < peak_idx < spectrum.shape[0] - 1
+
+    @pytest.mark.skipif(
+        not (EXTRA_NMR / "jeol" / "1H.jdf").exists(),
+        reason="JEOL 1H data missing",
+    )
+    def test_jeol_1h_axis_respects_vendor_offset(self):
+        fid = _read_or_skip(EXTRA_NMR / "jeol" / "1H.jdf")
+        spectrum = Experiment(fid).process()
+        axis = np.asarray(spectrum.x.data)
+        center_ppm = (float(axis[0]) + float(axis[-1])) / 2.0
+
+        assert center_ppm == pytest.approx(float(fid.meta.offset[0]), abs=0.05)
+
+    @pytest.mark.skipif(
+        not (EXTRA_NMR / "jeol" / "13C.jdf").exists(),
+        reason="JEOL 13C data missing",
+    )
+    def test_jeol_13c_axis_respects_vendor_offset(self):
+        fid = _read_or_skip(EXTRA_NMR / "jeol" / "13C.jdf")
+        spectrum = Experiment(fid).process()
+        axis = np.asarray(spectrum.x.data)
+        center_ppm = (float(axis[0]) + float(axis[-1])) / 2.0
+
+        assert center_ppm == pytest.approx(float(fid.meta.offset[0]), abs=0.05)
+
+    @pytest.mark.skipif(
+        not (EXTRA_NMR / "tecmag" / "LiCl_ref1.tnt").exists(),
+        reason="TecMag 1D data missing",
+    )
+    def test_tecmag_reference_peak_remains_near_zero_ppm(self):
+        spectrum = Experiment(_read_or_skip(EXTRA_NMR / "tecmag" / "LiCl_ref1.tnt")).process()
+        axis = np.asarray(spectrum.x.data)
+        peak_ppm = float(axis[int(np.argmax(np.abs(np.asarray(spectrum.data))))])
+        center_ppm = (float(axis[0]) + float(axis[-1])) / 2.0
+
+        assert center_ppm == pytest.approx(0.0, abs=0.05)
+        assert peak_ppm == pytest.approx(0.0, abs=0.5)
 
 
 # ---------------------------------------------------------------------------
