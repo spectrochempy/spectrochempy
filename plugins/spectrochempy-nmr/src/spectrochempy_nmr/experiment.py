@@ -16,6 +16,8 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING
 
+import numpy as np
+
 if TYPE_CHECKING:
     from spectrochempy.core.dataset.nddataset import NDDataset
 
@@ -617,10 +619,8 @@ class Experiment:
             return ds
 
         coord = ds.coord(0)
-        if str(coord.units) == "ppm":
-            return ds
-
         sfo = self._nmr_meta.spectrometer_freq_mhz
+        sw_hz = self._nmr_meta.spectral_width_hz
         nuclei = self._nmr_meta.nuclei
         if not sfo or sfo[0] is None:
             return ds
@@ -630,8 +630,36 @@ class Experiment:
         coord = work.coord(0)
         from spectrochempy.core.units import ur  # noqa: PLC0415
 
-        coord.meta["acquisition_frequency"] = float(sfo[0]) * ur.MHz
-        coord.ito("ppm")
+        origin = getattr(self.dataset, "origin", None)
+        if (
+            origin in {"agilent", "jeol", "tecmag", "simpson"}
+            and self.source_kind == "fid"
+            and sw_hz
+            and sw_hz[0] is not None
+            and coord.size > 1
+        ):
+            offset_ppm = 0.0
+            raw_offset = getattr(self.dataset.meta, "offset", None)
+            if raw_offset and raw_offset[0] is not None:
+                offset_ppm = float(raw_offset[0])
+
+            ppm_width = float(sw_hz[0]) / float(sfo[0])
+            sizem = max(coord.size - 1, 1)
+            delta_ppm = -ppm_width / sizem
+            first_ppm = offset_ppm - delta_ppm * sizem / 2.0
+            ppm_axis = np.arange(coord.size, dtype=float) * delta_ppm + first_ppm
+
+            from spectrochempy.core.dataset.coord import Coord  # noqa: PLC0415
+
+            newcoord = Coord(ppm_axis, units="ppm")
+            newcoord.meta["acquisition_frequency"] = float(sfo[0]) * ur.MHz
+            work.set_coordset(newcoord)
+            coord = newcoord
+        else:
+            if str(coord.units) == "ppm":
+                return work
+            coord.meta["acquisition_frequency"] = float(sfo[0]) * ur.MHz
+            coord.ito("ppm")
 
         if nuclei and nuclei[0]:
             nucleus = str(nuclei[0])
