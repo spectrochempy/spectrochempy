@@ -521,9 +521,7 @@ class Experiment:
             work = self._apply_phase(work, phase, phc0=phc0, phc1=phc1)
 
         # 5. Calibrate the final spectral axis using canonical NMR metadata.
-        work = self._calibrate_1d_spectral_axis(work)
-
-        return work
+        return self._calibrate_1d_spectral_axis(work)
 
     def _process_frequency_domain(
         self,
