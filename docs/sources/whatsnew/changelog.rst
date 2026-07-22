@@ -41,7 +41,9 @@ New Features
   official readers for Agilent/Varian, JEOL JDF, TecMag TNT, and SIMPSON
   datasets.  These readers integrate with the plugin I/O namespaces
   (``scp.nmr.read(...)``, ``scp.topspin.read(...)``, ``scp.agilent.read(...)``)
-  while preserving the familiar root-level compatibility aliases.
+  while preserving the familiar root-level compatibility aliases.  The
+  currently validated public workflow is centered on 1D NMR data; the 2D
+  workflow remains under separate scientific characterization.
 
 - Extra NMR validation datasets can now be fetched on demand with
   ``download_extra_testdata()``, which clones the additional test corpus from
@@ -79,25 +81,14 @@ Bug Fixes
 - NMR reader and processing reliability has improved substantially.  TopSpin
   metadata handling is more robust, ``scp.nmr.Experiment`` now correctly
   classifies non-Bruker datasets, and JEOL time-domain coordinates are created
-  with the proper units so operations such as ``em()`` no longer fail on 2D
-  JEOL data.
+  with the proper units so operations such as ``em()`` no longer fail on JEOL
+  time-domain data.
 
-- The 2D NMR FFT pipeline is now much more reliable for hypercomplex and
-  quaternion-encoded datasets.  FFT dispatch now preserves the correct
-  encoding after dimension reordering, QSIM and DQD encodings are transformed
-  through complex subspectra instead of invalid direct quaternion FFT calls,
-  phase metadata is initialized consistently for 2D quaternion data, and
-  ``fft()`` now auto-phases quaternion data via a plugin-provided handler
-  that decomposes into complex subspectra, applies the phase correction,
-  and rebuilds the quaternion representation.
-
-- TopSpin 2D SER processing now reconstructs indirect-dimension
-  ``STATES-TPPI`` data correctly.  ``Experiment.process()`` and the explicit
-  F1 processing workflow now produce spectra much closer to the processed
-  TopSpin ``2rr`` reference, without the strong mirror-image artifact that
-  previously remained in F1.  The raw 2D NMR example has also been updated to
-  compare the SpectroChemPy result with the TopSpin reference using a
-  normalized slice overlay.
+- Public NMR documentation and examples no longer imply that 2D processing is
+  already a stable supported workflow.  The public API, gallery and maintainer
+  messaging are now aligned on a temporary recentring to validated 1D NMR
+  processing while the 2D pipeline continues as a separate characterization
+  effort.
 
 - Plotting behavior has been corrected in a few visible edge cases:
   ``legend=True`` now works again for 2D lines/stack plots, and labels
@@ -125,6 +116,12 @@ Breaking Changes
   only. Reading 3D/4D data raises ``NotImplementedError``. The previous
   "nD" claim was not backed by a suitable hypercomplex representation for
   dimensions higher than two.
+
+- The public ``scp.nmr.Experiment.process()`` workflow is now intentionally
+  limited to validated 1D NMR experiments.  Multi-dimensional datasets may
+  still be read, classified and inspected, but 2D processing is temporarily
+  out of the public supported scope while the scientific characterization work
+  continues.
 
 - ``MCRALS.constraints`` is now a validated traitlet, enabling both constructor
   and post-construction assignment while preserving the distinction between
