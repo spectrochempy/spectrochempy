@@ -155,6 +155,15 @@ def _fft_encoding_handler(data, encoding, **kwargs):
     tppi = kwargs.get("tppi", False)
     original_axis = kwargs.get("original_axis", -1)
 
+    if encoding is None or str(encoding).strip().lower() in {"", "none", "unknown"}:
+        # For 1D complex direct-dimension data, the vendor-independent fallback
+        # is a standard complex FFT.  This keeps the public 1D pipeline robust
+        # even if a reader leaves the direct encoding unspecified.
+        if hasattr(data, "dtype") and data.dtype.kind != "V":
+            return _qf_fft(data)
+        msg = "NMR encoding metadata is missing for hypercomplex/quaternion data"
+        raise NotImplementedError(msg)
+
     # Second pass (indirect dimension): the quaternion was rebuilt from
     # [Re(fr), Im(fr), Re(fi), Im(fi)] by the first pass.  Extract the
     # complex subspectra directly and FFT along axis=-1 (which is F1 after

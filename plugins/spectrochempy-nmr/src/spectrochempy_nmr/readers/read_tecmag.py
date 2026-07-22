@@ -171,7 +171,7 @@ def _read_tnt(*args, **kwargs):
         # Nucleus name (strip null bytes and padding)
         nuc_raw = dic["nuclei"][i]
         if isinstance(nuc_raw, bytes):
-            nuc = nuc_raw.decode("latin1").rstrip("\x00").strip()
+            nuc = nuc_raw.decode("latin1").split("\x00", 1)[0].strip()
             nuc = re.sub(r"[^a-zA-Z0-9]+$", "", nuc)
         else:
             nuc = str(nuc_raw)
@@ -184,6 +184,10 @@ def _read_tnt(*args, **kwargs):
 
         # Data is always complex in .tnt
         meta.iscomplex[i] = True
+
+        # TecMag 1D data uses a direct complex quadrature acquisition.
+        if ndim == 1:
+            meta.encoding[i] = "QSIM"
 
     # Spectral width in Hz with units
     meta.sw_h = [None] * ndim
@@ -228,6 +232,18 @@ def _read_tnt(*args, **kwargs):
         sw_hz = meta.sw_h[axis]
         freq_mhz = meta.sfrq[axis]
         nuc = meta.nucleus[axis]
+
+        if not meta.isfreq[axis]:
+            if sw_hz is not None and float(sw_hz.magnitude) > 0:
+                dw = (1.0 / sw_hz).to("us")
+                coordpoints = np.arange(size)
+                coord = Coord(coordpoints * dw, title=f"F{axis + 1} acquisition time")
+            else:
+                coord = Coord(np.arange(size), title=f"F{axis + 1} acquisition time")
+
+            if freq_mhz is not None:
+                coord.meta["acquisition_frequency"] = freq_mhz * ur.MHz
+            return coord
 
         if sw_hz is not None and freq_mhz is not None and size > 1:
             sizem = max(size - 1, 1)

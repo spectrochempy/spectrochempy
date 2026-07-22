@@ -18,6 +18,8 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 DATADIR = scp.preferences.datadir
 NMRDATA = DATADIR / "nmrdata"
 nmrdir = NMRDATA / "bruker" / "tests" / "nmr"
+EXTRA_DATADIR = scp.preferences.datadir.parent / "testdata-extra"
+EXTRA_NMR = EXTRA_DATADIR / "testdata" / "nmrdata"
 
 
 def _require_path(path):
@@ -389,6 +391,39 @@ class TestProcessTimeDomain:
         exp = Experiment(fid)
         with pytest.raises(ValueError, match="Unknown phase mode"):
             exp.process(phase="bad_mode")
+
+    @pytest.mark.skipif(
+        not (EXTRA_NMR / "agilent" / "agilent_1d" / "fid").exists(),
+        reason="Agilent 1D data missing",
+    )
+    def test_agilent_1d_pipeline_calibrates_to_ppm(self):
+        fid = _read_or_skip(EXTRA_NMR / "agilent" / "agilent_1d" / "fid")
+        exp = Experiment(fid)
+        spectrum = exp.process()
+        assert exp.encoding == ("QSIM",)
+        assert str(spectrum.coord(0).units) == "ppm"
+
+    @pytest.mark.skipif(
+        not (EXTRA_NMR / "jeol" / "1H.jdf").exists(),
+        reason="JEOL 1D data missing",
+    )
+    def test_jeol_1d_pipeline_uses_direct_complex_encoding(self):
+        fid = _read_or_skip(EXTRA_NMR / "jeol" / "1H.jdf")
+        exp = Experiment(fid)
+        assert exp.encoding == ("QSIM",)
+        spectrum = exp.process()
+        assert str(spectrum.coord(0).units) == "ppm"
+
+    @pytest.mark.skipif(
+        not (EXTRA_NMR / "tecmag" / "LiCl_ref1.tnt").exists(),
+        reason="TecMag 1D data missing",
+    )
+    def test_tecmag_1d_pipeline_uses_direct_complex_encoding(self):
+        fid = _read_or_skip(EXTRA_NMR / "tecmag" / "LiCl_ref1.tnt")
+        exp = Experiment(fid)
+        assert exp.encoding == ("QSIM",)
+        spectrum = exp.process()
+        assert str(spectrum.coord(0).units) == "ppm"
 
 
 # ---------------------------------------------------------------------------

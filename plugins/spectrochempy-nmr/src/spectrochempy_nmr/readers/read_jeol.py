@@ -97,18 +97,31 @@ def read_jeol(*paths, **kwargs):
 # ======================================================================================
 
 
-# Mapping from JEOL axis_type strings to SpectroChemPy encoding + iscomplex
-_JEOL_AXIS_TYPE_MAP = {
-    "real": ("QF", False),
-    "tppi": ("TPPI", True),
-    "complex": ("STATES", True),
-    "real_complex": ("STATES-TPPI", True),
-}
+def _jeol_axis_type_to_encoding(axis_type_str, *, axis: int, ndim: int):
+    """
+    Map a JEOL ``data_axis_type`` string to a canonical encoding.
 
+    JEOL uses axis-type labels such as ``complex`` and ``real_complex`` for
+    both 1D and 2D data.  In 1D those values describe direct-dimension complex
+    quadrature and should therefore be normalized to a vendor-independent
+    direct encoding (``QSIM``), not to 2D indirect encodings such as
+    ``STATES``.
+    """
+    axis_type = str(axis_type_str).lower()
 
-def _jeol_axis_type_to_encoding(axis_type_str):
-    """Map a JEOL data_axis_type string to (encoding, iscomplex)."""
-    return _JEOL_AXIS_TYPE_MAP.get(axis_type_str, ("unknown", False))
+    if axis_type == "real":
+        return "QF", False
+    if axis_type == "tppi":
+        return "TPPI", True
+    if axis_type == "complex":
+        if ndim == 1 or axis == ndim - 1:
+            return "QSIM", True
+        return "STATES", True
+    if axis_type == "real_complex":
+        if ndim == 1 or axis == ndim - 1:
+            return "QSIM", True
+        return "STATES-TPPI", True
+    return "unknown", False
 
 
 @_importer_method
@@ -183,7 +196,7 @@ def _read_jdf(*args, **kwargs):
         # Encoding and iscomplex from axis_type
         axis_type = header.get("data_axis_type", [None] * 8)[i]
         if axis_type is not None:
-            enc, ic = _jeol_axis_type_to_encoding(axis_type)
+            enc, ic = _jeol_axis_type_to_encoding(axis_type, axis=i, ndim=ndim)
             meta.encoding[i] = enc
             meta.iscomplex[i] = ic
 
