@@ -25,6 +25,9 @@ def get_n_decimals(n, sigdigits=3):
     int
         number of significant decimals to use when rounding float.
     """
+    if not np.isfinite(n) or n == 0:
+        return sigdigits - 1
+
     try:
         n_decimals = sigdigits - int(np.floor(np.log10(abs(n)))) - 1
     except OverflowError:

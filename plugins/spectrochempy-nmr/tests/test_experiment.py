@@ -7,6 +7,8 @@
 
 """Tests for scp.nmr.Experiment — NMR-specific scientific model."""
 
+import warnings
+
 import numpy as np
 import pytest
 from spectrochempy_nmr.experiment import Experiment
@@ -581,38 +583,78 @@ class TestPublic1DRealAxisValidation:
         assert center_ppm == pytest.approx(0.0, abs=0.05)
         assert peak_ppm == pytest.approx(0.0, abs=0.5)
 
-    @pytest.mark.skipif(not _has_topspin_1d(), reason="TopSpin 1D data missing")
-    def test_processed_topspin_axis_stays_linear_and_keeps_common_metadata(self):
-        spectrum = Experiment(_read_or_skip(nmrdir / "topspin_1d/1/fid")).process(
-            apodization="em",
-            lb=2.0,
-            size=16384,
-            phase="metadata",
+    @pytest.mark.skipif(
+        not (_has_topspin_1d() and _has_topspin_1d_pdata()),
+        reason="TopSpin 1D raw/pdata pair missing",
+    )
+    def test_topspin_raw_process_matches_topspin_reference_oracle(self):
+        fid = _read_or_skip(nmrdir / "topspin_1d/1/fid")
+        ref = _read_or_skip(nmrdir / "topspin_1d", expno=1, procno=1)
+
+        spectrum = Experiment(fid).process(size=int(ref.meta.si[0]), phase=None)
+
+        assert float(spectrum.x.data[0]) > float(spectrum.x.data[-1])
+
+        ref_axis = np.asarray(ref.x.data, dtype=float)
+        ref_data = np.asarray(ref.data).squeeze()
+        calc_axis = np.asarray(spectrum.x.data, dtype=float)
+        calc_data = np.asarray(spectrum.data).squeeze()
+
+        if ref_axis[0] > ref_axis[-1]:
+            ref_axis = ref_axis[::-1]
+            ref_data = ref_data[::-1]
+        if calc_axis[0] > calc_axis[-1]:
+            calc_axis = calc_axis[::-1]
+            calc_data = calc_data[::-1]
+
+        interp = np.interp(ref_axis, calc_axis, calc_data.real) + 1j * np.interp(
+            ref_axis, calc_axis, calc_data.imag
         )
 
-        assert spectrum.origin == "topspin"
-        assert spectrum.x.linear
+        amplitude_scale = np.vdot(interp, ref_data) / np.vdot(interp, interp)
+        maxabs_ratio = np.max(np.abs(ref_data)) / np.max(np.abs(interp))
+
+        interp /= np.max(np.abs(interp))
+        ref_data /= np.max(np.abs(ref_data))
+
+        complex_overlap = np.abs(np.vdot(interp, ref_data)) / (
+            np.linalg.norm(interp) * np.linalg.norm(ref_data)
+        )
+        real_corr = np.corrcoef(interp.real, ref_data.real)[0, 1]
+
+        calc_peak_ppm = float(ref_axis[int(np.argmax(np.abs(interp)))])
+        ref_peak_ppm = float(ref_axis[int(np.argmax(np.abs(ref_data)))])
+
         assert str(spectrum.x.units) == "ppm"
-        assert spectrum.x.meta.get("acquisition_frequency") is not None
-        assert getattr(spectrum.meta, "nuc1", None) is not None
-        assert getattr(spectrum.meta, "encoding", None) == ["QSIM"]
-        assert any("pk" in entry for entry in spectrum.history)
+        assert spectrum.x.linear
+        assert calc_peak_ppm == pytest.approx(ref_peak_ppm, abs=0.05)
+        assert abs(amplitude_scale) == pytest.approx(1.0, abs=0.01)
+        assert np.angle(amplitude_scale, deg=True) == pytest.approx(0.0, abs=0.1)
+        assert maxabs_ratio == pytest.approx(1.0, abs=0.01)
+        assert complex_overlap > 0.999
+        assert real_corr > 0.999
 
     @pytest.mark.skipif(not _has_topspin_1d(), reason="TopSpin 1D data missing")
-    def test_example_style_slice_remains_monotonic_but_hits_core_linearity_limit(self):
-        spectrum = Experiment(_read_or_skip(nmrdir / "topspin_1d/1/fid")).process(
-            apodization="em",
-            lb=2.0,
-            size=16384,
-            phase="metadata",
-        )
-        region = spectrum[-40.0:-15.0]
-        axis = np.asarray(region.x._data, dtype=float)
-        diffs = np.diff(axis)
+    def test_topspin_1d_process_emits_no_runtime_warning(self):
+        fid = _read_or_skip(nmrdir / "topspin_1d/1/fid")
 
-        assert np.all(diffs < 0.0)
-        assert abs(np.max(diffs) - np.min(diffs)) < 0.0015
-        assert region.x.linear is False
+        with warnings.catch_warnings(record=True) as recorded:
+            warnings.simplefilter("always")
+            spectrum = Experiment(fid).process(
+                apodization="em",
+                lb=2.0,
+                size=16384,
+                phase="metadata",
+            )
+
+        runtime_messages = [
+            str(w.message)
+            for w in recorded
+            if issubclass(w.category, RuntimeWarning)
+        ]
+
+        assert spectrum.x.linear
+        assert runtime_messages == []
 
 
 # ---------------------------------------------------------------------------
