@@ -648,9 +648,7 @@ class TestPublic1DRealAxisValidation:
             )
 
         runtime_messages = [
-            str(w.message)
-            for w in recorded
-            if issubclass(w.category, RuntimeWarning)
+            str(w.message) for w in recorded if issubclass(w.category, RuntimeWarning)
         ]
 
         assert spectrum.x.linear
