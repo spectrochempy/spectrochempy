@@ -76,7 +76,8 @@ def plot_with_pp(s, peaks):
         ylim=(-0.1, 7),
     )
     for p in pks:
-        x, y = p.coord(-1).values.m, (p + 0.2).values.m
+        x = float(p.coord(-1).data.squeeze())
+        y = float((p + 0.2).data.squeeze())
         ax.annotate(
             f"{x:0.1f}",
             xy=(x, y),
@@ -89,8 +90,14 @@ def plot_with_pp(s, peaks):
 plot_with_pp(spectrum, peaks)
 
 # %%
-# Set some parameters to get less but significant peaks
-peaks, _ = spectrum.find_peaks(height=1.0, distance=1.0)
+# Set some parameters to get less but significant peaks.
+#
+# The sliced ppm region remains scientifically regular, but today the core
+# `Coord` machinery may still flag the sliced axis as non-linear because of
+# floating-point rounding on the sub-axis. Until that core behavior is
+# characterized separately, use a plain point-count distance here so the
+# public 1D example stays executable end to end.
+peaks, _ = spectrum.find_peaks(height=1.0, distance=30, use_coord=False)
 plot_with_pp(spectrum, peaks)
 
 # %%

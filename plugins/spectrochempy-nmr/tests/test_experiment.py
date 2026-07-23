@@ -581,6 +581,39 @@ class TestPublic1DRealAxisValidation:
         assert center_ppm == pytest.approx(0.0, abs=0.05)
         assert peak_ppm == pytest.approx(0.0, abs=0.5)
 
+    @pytest.mark.skipif(not _has_topspin_1d(), reason="TopSpin 1D data missing")
+    def test_processed_topspin_axis_stays_linear_and_keeps_common_metadata(self):
+        spectrum = Experiment(_read_or_skip(nmrdir / "topspin_1d/1/fid")).process(
+            apodization="em",
+            lb=2.0,
+            size=16384,
+            phase="metadata",
+        )
+
+        assert spectrum.origin == "topspin"
+        assert spectrum.x.linear
+        assert str(spectrum.x.units) == "ppm"
+        assert spectrum.x.meta.get("acquisition_frequency") is not None
+        assert getattr(spectrum.meta, "nuc1", None) is not None
+        assert getattr(spectrum.meta, "encoding", None) == ["QSIM"]
+        assert any("pk" in entry for entry in spectrum.history)
+
+    @pytest.mark.skipif(not _has_topspin_1d(), reason="TopSpin 1D data missing")
+    def test_example_style_slice_remains_monotonic_but_hits_core_linearity_limit(self):
+        spectrum = Experiment(_read_or_skip(nmrdir / "topspin_1d/1/fid")).process(
+            apodization="em",
+            lb=2.0,
+            size=16384,
+            phase="metadata",
+        )
+        region = spectrum[-40.0:-15.0]
+        axis = np.asarray(region.x._data, dtype=float)
+        diffs = np.diff(axis)
+
+        assert np.all(diffs < 0.0)
+        assert abs(np.max(diffs) - np.min(diffs)) < 0.0015
+        assert region.x.linear is False
+
 
 # ---------------------------------------------------------------------------
 # Processing — frequency-domain 1D
