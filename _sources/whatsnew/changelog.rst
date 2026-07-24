@@ -1,0 +1,194 @@
+
+:orphan:
+
+What's New in Revision {{ revision }}
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-{{ revision }}.
+See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
+
+..
+   Do not remove the ``revision`` marker. It will be replaced during doc building.
+   Also do not delete the section titles.
+   Add your list of changes between (Add here) and (section) comments
+   keeping a blank line before and after this list.
+
+.. section
+
+New Features
+~~~~~~~~~~~~
+
+- MCRALS now supports three dimensionless stopping tolerances:
+  ``tol_residual_change`` (default ``1e-3``),
+  ``tol_reconstruction_error``, and ``tol_profile_change``. The latter two
+  are disabled by default. The optimisation stops when any enabled criterion
+  is satisfied, and ``result.diagnostics`` reports all three values together
+  with ``convergence_reason``. The INFO log now displays
+  ``reconstruction_error``, ``residual_change``, ``profile_change``, and the
+  residual trend, followed by the exact value and tolerance responsible for
+  convergence. The former ``RSE / PCA``, ``RSE / Exp``, and ``%change``
+  columns have been removed because they did not map clearly to the stopping
+  criteria.
+.. Add here new public features (do not delete this comment)
+
+- `read_matlab()` now reconstructs `NDDataset` objects from the minimal
+  MATLAB exchange payload written by `write_matlab()`, restoring the
+  dataset's name, title, units, description, dimension names, and
+  coordinates (values, units, and titles). (#1270)
+
+- NMR support has been significantly expanded.  SpectroChemPy now provides
+  ``scp.nmr.Experiment`` as a state-aware NMR scientific model, alongside new
+  official readers for Agilent/Varian, JEOL JDF, TecMag TNT, and SIMPSON
+  datasets.  These readers integrate with the plugin I/O namespaces
+  (``scp.nmr.read(...)``, ``scp.topspin.read(...)``, ``scp.agilent.read(...)``)
+  while preserving the familiar root-level compatibility aliases.  The
+  currently validated public workflow is centered on 1D NMR data; the 2D
+  workflow remains under separate scientific characterization.
+
+- Extra NMR validation datasets can now be fetched on demand with
+  ``download_extra_testdata()``, which clones the additional test corpus from
+  ``spectrochempy_data`` into ``~/.spectrochempy/testdata-extra/``.
+
+- Plotting and analysis displays are more informative by default.  Score-plot
+  labels can now use ``adjustText`` for collision-aware placement, and PCA
+  components are displayed with ``PC1``, ``PC2``, ... labels in legends and
+  coordinate displays instead of generic ``#0``, ``#1``, ... identifiers.
+
+
+.. section
+
+Bug Fixes
+~~~~~~~~~
+.. Add here new bug fixes (do not delete this comment)
+
+- `plot()` and `plot_multiple()` no longer crash when `marker=None` or
+  `ls=None` is passed explicitly. Both are matplotlib's own standard
+  values (no marker, default linestyle), so passing them is legitimate,
+  not invalid input. (#1462)
+
+- 2D ``plot_map()``/``plot()`` now keep a readable layout for datasets whose
+  X and Y axes share units but span very different numeric ranges.  Explicit
+  ``figsize=...`` overrides are also now honored reliably when a plotting call
+  reuses an existing figure with ``clear=False``.
+
+- `read_matlab()` no longer crashes on `.mat` files containing a plain MATLAB
+  cell-array variable. It previously raised an unguarded `TypeError` (surfaced
+  only as a swallowed `UserWarning`, with the function silently returning
+  `None`), or, for files with other variables alongside the cell array, an
+  `AttributeError` in the dataset-merging step. Such variables are now safely
+  skipped with a warning. (#1270)
+
+- NMR reader and processing reliability has improved substantially.  TopSpin
+  metadata handling is more robust, ``scp.nmr.Experiment`` now correctly
+  classifies non-Bruker datasets, and JEOL time-domain coordinates are created
+  with the proper units so operations such as ``em()`` no longer fail on JEOL
+  time-domain data.
+
+- Public NMR documentation and examples no longer imply that 2D processing is
+  already a stable supported workflow.  The public API, gallery and maintainer
+  messaging are now aligned on a temporary recentring to validated 1D NMR
+  processing while the 2D pipeline continues as a separate characterization
+  effort.
+
+- Plotting behavior has been corrected in a few visible edge cases:
+  ``legend=True`` now works again for 2D lines/stack plots, and labels
+  auto-derived from coordinate metadata are displayed as expected in the
+  resulting legend.
+
+- ``em(lb=0)`` and ``em(lb=0.0 * ur.Hz)`` are now treated as valid no-op
+  calls instead of raising a ``ZeroDivisionError``.
+
+
+.. section
+
+Dependency Updates
+~~~~~~~~~~~~~~~~~~
+.. Add here new dependency updates (do not delete this comment)
+
+
+.. section
+
+Breaking Changes
+~~~~~~~~~~~~~~~~
+.. Add here new breaking changes (do not delete this comment)
+
+- The TopSpin reader (``scp.nmr.read_topspin``) now supports 1D and 2D data
+  only. Reading 3D/4D data raises ``NotImplementedError``. The previous
+  "nD" claim was not backed by a suitable hypercomplex representation for
+  dimensions higher than two.
+
+- The public ``scp.nmr.Experiment.process()`` workflow is now intentionally
+  limited to validated 1D NMR experiments.  Multi-dimensional datasets may
+  still be read, classified and inspected, but 2D processing is temporarily
+  out of the public supported scope while the scientific characterization work
+  continues.
+
+- ``MCRALS.constraints`` is now a validated traitlet, enabling both constructor
+  and post-construction assignment while preserving the distinction between
+  ``None`` (built-in defaults) and ``[]`` (explicitly unconstrained fit).
+  Assignment of ``constraints`` after fitting invalidates the fitted state.
+  The ``constraints`` parameter is not config-file serializable.
+
+- MCRALS public outputs ``C``, ``St`` and residuals now correspond to the
+  **constrained** factor pair ``(C_constrained, St_constrained)`` instead of
+  the previous mixed pair ``(C_LS, St_constrained)``.  This matches the
+  semantics of Tauler MATLAB MCR-ALS, pyMCR, and PLS_Toolbox.  Convergence
+  diagnostics also use the constrained pair, which can change convergence
+  speed and iteration counts compared with the old behaviour.  The
+   unconstrained least-squares estimate is still available via the new
+   ``C_ls`` property. (:pr:`XXXX`)
+
+- Refactored the internal ALS iteration loop in ``MCRALS._fit`` to match the
+  standard Tauler formulation: each iteration now performs exactly one C solve
+  followed by one constraint pass, then one St solve followed by one constraint
+  pass (previously the concentration constraint pipeline ran twice per
+  iteration, causing side-effects to double for ``ModelProfile`` generators).
+  This may change iterate counts and numerical results under active
+  constraints, but the publicly documented ``C @ St ≈ X`` reconstruction
+  invariant is preserved. (:pr:`XXXX`)
+
+
+.. section
+
+Deprecations
+~~~~~~~~~~~~
+.. Add here new deprecations (do not delete this comment)
+
+- MCRALS public documentation now exposes only dimensionless convergence
+  tolerances, profile-specific solvers, and the unified ``constraints`` API.
+
+- Plotting names are being regularized: ``AnalysisBase.plotmerit`` is
+  deprecated in favor of ``plot_merit``, and ``parityplot`` is deprecated in
+  favor of ``plot_parity``.  The old aliases remain available for now and are
+  scheduled for removal in version 0.12.
+
+
+.. section
+
+Developer
+~~~~~~~~~
+.. Add here developer changes (do not delete this comment)
+
+- Added comprehensive regression coverage for the `write_matlab()` /
+  `read_matlab()` minimal exchange payload: non-default dimension names, a
+  true 1D round trip, an empty-coordinate edge case, and adversarial cases
+  where a file shares the right variable names but the wrong structure.
+  (#1270)
+
+- The NMR test suite has been modernized and made substantially more reliable:
+  skipped legacy FFT tests were reactivated, visual-only tests were replaced
+  with numerical assertions, and targeted plugin tests now check observable
+  processing behavior instead of manual inspection only.
+
+- Plotting internals were consolidated across core and plugin composite
+  functions.  Shared figure/axes lifecycle helpers now reduce duplicated
+  plotting boilerplate, composite plotting APIs are more consistent, and the
+  non-functional Plotly/Dash backend has been removed from the maintained code
+  path.
+
+- Developer-facing documentation and infrastructure were also cleaned up:
+  examples now favor SpectroChemPy-native idioms over raw NumPy patterns,
+  generic NMRGlue helpers were factored into a shared base module, and the
+  official plugin marker used by CI and publishing now relies on the private
+  ``[tool.spectrochempy] official-plugin = true`` field instead of an invalid
+  Trove classifier.

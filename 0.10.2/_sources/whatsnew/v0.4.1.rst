@@ -1,0 +1,25 @@
+What's new in revision 0.4.1 [2022-03-14]
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-0.4.1. See :ref:`release` for a full changelog
+including other versions of SpectroChemPy.
+
+Breaking changes
+~~~~~~~~~~~~~~~~
+
+-  Requires pint >= 0.18
+
+New features
+~~~~~~~~~~~~
+
+-  Compatibility with Python 3.10:
+
+   -  Spectrochempy is tested with 3.10, 3.9 version of python, and on
+      Windows and linux platform. Older versions > 3.6 of python or
+      different platforms may still work, but with no guaranty.
+
+Bug fixes
+~~~~~~~~~
+
+-  Transmittance and absorbance units now correctly handled.
+-  Save dialog selection.

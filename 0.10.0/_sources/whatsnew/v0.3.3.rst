@@ -1,0 +1,24 @@
+What's new in revision 0.3.3 [2022-03-9]
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-0.3.3. See :ref:`release` for a full changelog
+including other versions of SpectroChemPy.
+
+New features
+~~~~~~~~~~~~
+
+-  Remove the dependency to ``nmrglue`` .
+-  Improve ``pip`` installation (see Issue #402)
+-  Make ``widget`` as the default backend for matplotlib plots.
+-  Add ``BaselineCorrector()`` widget.
+-  Add ``download_nist_ir()`` to download IR spectra from NIST/webbook.
+-  Allow extracting background interferogram or spectrum in
+   ``read_srs()`` .
+-  Allow extracting sample and background interferograms in
+   ``read_spa()`` .
+
+Bug fixes
+~~~~~~~~~
+
+-  Fix bug in ``read_srs`` .
+-  Fix gettingstarted/overview after IRIS refactoring.

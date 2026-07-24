@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>spectrochempy.FastICA &mdash; SpectroChemPy v0.10.2 0.10.2 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/spectrochempy.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sphinx-design.5ea377869091fd0449014c60fc090103.min.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/spectrochempy.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../../_static/scpy.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script src="../../_static/clipboard.min.js"></script>
+        <script src="../../_static/copybutton.js"></script>
+        <script src="../../_static/design-tabs.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="spectrochempy.NMF" href="spectrochempy.NMF.html" />
+    <link rel="prev" title="spectrochempy.MCRALS" href="spectrochempy.MCRALS.html" />
+ 
+<style>
+    .popup-warning {
+        display: none;
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
+        background: #d8d7d5;
+        border: 1px solid #2c2c2b;
+        border-radius: 4px;
+        padding: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        animation: slideIn 0.5s ease-out;
+        font-size: smaller;
+    }
+
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+        }
+
+        to {
+            transform: translateX(0);
+        }
+    }
+
+    .popup-warning .close-btn {
+        float: right;
+        cursor: pointer;
+        margin-left: 10px;
+    }
+</style>
+<html data-versions="0.10.2,0.10.1,0.10.0,0.9.3,0.9.2,0.9.1,0.9.0,0.8.4,0.8.3,0.8.2,0.8.1,0.8.0,0.7.2,0.7.1,0.7.0,0.6.10">
+<script src="../../_static/js/versions.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+
+
+<a href="../../index.html">
+    
+    <img src="../../_static/scpy.png" class="logo" alt="Logo" />
+</a>
+
+<div class="switch-menus">
+    <select id="versions-dropdown"></select>
+</div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../whatsnew/latest.html">What’s New in Revision 0.10.2</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/quickstart.html">5-minute quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/install/index.html">Installation guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/install/install_win.html">Installation Guide for Windows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/install/install_mac_linux.html">Installation Guide for Mac OSX and Linux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/install/install_colab.html">Install in Google Colaboratory (Colab)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/install/install_adds.html">Optional Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/install/install_sources.html">Installation from Sources</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/examples/index.html">Example's gallery</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/index.html">Core functionalities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/index.html">How to use NDDataset</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_a_create_dataset.html">NDDataset creation and plotting example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_b_coordinates.html">NDDataset coordinates example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_c_units.html">Units manipulation examples</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_d_slicing.html">Slice an NDDataset with indices and coordinates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_preferences.html">NDDataset creation and plotting example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/b_interoperability/index.html">Interoperability</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/b_interoperability/plot_xarray_netcdf_interoperability.html">Interoperability with xarray and NetCDF</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/index.html">Import / Export</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_generic_read.html">Reading datasets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_IR_from_omnic.html">Loading an IR (omnic SPG) experimental file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_IR_from_opus.html">Loading Bruker OPUS files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_nmr_from_bruker.html">Loading of experimental NMR data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_raman_from_labspec.html">Loading RAMAN experimental file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_renishaw.html">Reading Renishaw WiRE files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_spc.html">Reading SPC format files</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/d_plotting/index.html">Plotting datasets</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/d_plotting/plot_plot_multiple.html">Using <code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_multiple</span></code> to plot several datasets on the same figure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/d_plotting/plot_plot_types.html">Choose an explicit plot type for a 2D IR dataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/d_plotting/plot_plotting.html">Introduction to the plotting librairie</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/d_plotting/plot_styles.html">Apply built-in plotting styles</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/e_project/index.html">Project Management</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/e_project/plot_project.html">Project creation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/index.html">Analysis NDDataset</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/index.html">Decomposition</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_efa.html">EFA example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_efa_keller_massart.html">EFA (Keller and Massart original example)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_fast_ica.html">FastICA example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_iris_intro.html">IRIS: 2D-IRIS analysis (plugin)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_mcrals_chrom1.html">MCR-ALS example (adapted from Jaumot et al. 2005)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_mcrals_kinetics.html">MCR-ALS with kinetic constraints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_nmf.html">NMF analysis example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_pca_iris.html">PCA example (iris dataset)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_pca_spec.html">PCA analysis example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_simplisma.html">SIMPLISMA example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/b_crossdecomposition/index.html">Cross-decomposition</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/b_crossdecomposition/plot_pls.html">PLS regression example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/c_curvefitting/index.html">Curvefitting</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/c_curvefitting/plot_fit.html">Fitting 1D dataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/c_curvefitting/plot_lstsq_single_equation.html">Solve a linear equation using LSTSQ</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/d_peak_analysis/index.html">Peak analysis</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/d_peak_analysis/plot_peak_finding.html">Find peak maxima in an IR time series</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/d_peak_analysis/plot_peak_integration.html">Integrate a baseline-corrected IR band</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/index.html">Processing NDDataset</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/apodization/index.html">Apodization</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/apodization/plot_proc_em.html">Exponential window multiplication</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/apodization/plot_proc_sp.html">Sine bell and squared Sine bell window multiplication</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/baseline/index.html">Baseline</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/baseline/plot_baseline_correction.html">NDDataset baseline correction</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/denoising/index.html">Denoising</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/denoising/plot_denoising.html">Denoising a 2D Raman spectrum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/denoising/plot_despike.html">Removing cosmic ray spikes from a Raman spectrum</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/filtering/index.html">Filtering</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/filtering/plot_filter.html">Savitky-Golay and Whittaker-Eilers smoothing of a Raman spectrum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/filtering/plot_smoothing_window_size.html">Compare smoothing window sizes on a Raman spectrum</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/nmr/index.html">NMR processing (plugin-based)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/nmr/plot_processing_cp_nmr.html">Analysis CP NMR spectra</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/nmr/plot_processing_nmr.html">Processing NMR spectra (slicing, baseline correction, peak picking, peak fitting)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/nmr/plot_processing_nmr_relax.html">Processing Relaxation measurement</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/nmr/plot_read_nmr_topspin.html">NMR: reading TopSpin files (plugin)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/raman/index.html">Processing Raman datasets</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/raman/plot_processing_raman.html">Processing RAMAN spectra</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/transformations/index.html">Transformations</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/transformations/plot_masking_transpose_units.html">Mask a saturated region and transform an IR dataset</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/index.html">Plugin-dependent functionality</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-iris/index.html">IRIS plugin</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-iris/plot_spectrochempy_iris__analysis__a_decomposition__plot_iris_intro.html">IRIS: 2D-IRIS analysis (plugin)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-nmr/index.html">NMR plugin</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-nmr/plot_spectrochempy_nmr__core__c_importer__plot_read_nmr_from_bruker.html">Loading of experimental NMR data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-nmr/plot_spectrochempy_nmr__processing__apodization__plot_proc_em.html">Exponential window multiplication</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-nmr/plot_spectrochempy_nmr__processing__apodization__plot_proc_sp.html">Sine bell and squared Sine bell window multiplication</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-nmr/plot_spectrochempy_nmr__processing__nmr__plot_processing_cp_nmr.html">Analysis CP NMR spectra</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-nmr/plot_spectrochempy_nmr__processing__nmr__plot_processing_nmr.html">Processing NMR spectra (slicing, baseline correction, peak picking, peak fitting)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-nmr/plot_spectrochempy_nmr__processing__nmr__plot_processing_nmr_relax.html">Processing Relaxation measurement</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-nmr/plot_spectrochempy_nmr__processing__nmr__plot_read_nmr_topspin.html">NMR: reading TopSpin files (plugin)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-perkinelmer/index.html">PerkinElmer plugin</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-perkinelmer/plot_spectrochempy_perkinelmer__plot_read_perkinelmer.html">Reading a PerkinElmer SP file (plugin)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/getting_help.html">Getting help</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 User's Guide &amp; Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/introduction/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/importexport/index.html">Import &amp; Export</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/importexport/import.html">Import Data in SpectroChemPy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/importexport/importIR.html">Import IR Data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/importexport/importOMNIC.html">Import of OMNIC files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/importexport/importOPUS.html">Import of Bruker OPUS files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/importexport/importJCAMPDX.html">Import/Export of JCAMP-DX files</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/plotting/index.html">Plotting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plotting/overview.html">Plotting Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plotting/customization.html">Customizing a Plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plotting/preferences.html">Plotting Preferences</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plotting/plot_types.html">Plot Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plotting/styles.html">Styles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plotting/advanced.html">Advanced Matplotlib Integration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/processing/index.html">Processing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/slicing.html">Slicing NDDatasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/transformations.html">Basic transformations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/math_operations.html">Mathematical operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/smoothing.html">Filtering, Smoothing and Denoising</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/baseline.html">Baseline corrections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/denoising.html">Denoising</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/apodization.html">Apodization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/td_baseline.html">Time domain baseline correction (NMR)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/fourier.html">One-dimensional (1D) Fourier transformation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/fourier.html#Real-Fourier-transform">Real Fourier transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/interferogram.html">FTIR interferogram processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/alignment.html">Alignment of datasets</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/analysis/index.html">Analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/analysis/peak_finding.html">Peak Maxima Finding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/analysis/peak_integration.html">Peak Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/analysis/fitting.html">Fitting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/analysis/pca.html">Principal Component Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/analysis/pls.html">Partial Least Squares Regression (PLSRegression)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/analysis/mcr_als.html">MCR ALS</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/plugins/index.html">Plugins</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plugins/official_plugins.html">Official plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plugins/nmr.html">NMR plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plugins/tensor.html">Tensor plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plugins/hypercomplex.html">Hypercomplex (quaternion) plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plugins/iris.html">IRIS plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plugins/perkinelmer.html">PerkinElmer plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plugins/experimental_plugins.html">Experimental plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plugins/examples.html">Plugin-dependent Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plugins/roadmap.html">Plugin roadmap</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/api/api.html">API Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/objects/index.html">Core objects</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/objects/dataset/dataset.html">The NDDataset object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/objects/dataset/dataset.html#More-insight-on-coordinates">More insight on coordinates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/objects/dataset/dataset.html#Methods-to-create-NDDataset">Methods to create NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/objects/project/project.html">Project management</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🔍 Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Public API reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.NDDataset.html">spectrochempy.NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.Coord.html">spectrochempy.Coord</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.CoordSet.html">spectrochempy.CoordSet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.empty.html">spectrochempy.empty</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.zeros.html">spectrochempy.zeros</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.ones.html">spectrochempy.ones</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.full.html">spectrochempy.full</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.empty_like.html">spectrochempy.empty_like</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.zeros_like.html">spectrochempy.zeros_like</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.ones_like.html">spectrochempy.ones_like</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.full_like.html">spectrochempy.full_like</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.eye.html">spectrochempy.eye</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.identity.html">spectrochempy.identity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.random.html">spectrochempy.random</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.diag.html">spectrochempy.diag</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.fromfunction.html">spectrochempy.fromfunction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.fromiter.html">spectrochempy.fromiter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.arange.html">spectrochempy.arange</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.linspace.html">spectrochempy.linspace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.logspace.html">spectrochempy.logspace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.geomspace.html">spectrochempy.geomspace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.take.html">spectrochempy.take</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.load.html">spectrochempy.load</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read.html">spectrochempy.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_topspin.html">spectrochempy.read_topspin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_csv.html">spectrochempy.read_csv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_ddr.html">spectrochempy.read_ddr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_dir.html">spectrochempy.read_dir</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_hdr.html">spectrochempy.read_hdr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_jcamp.html">spectrochempy.read_jcamp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_labspec.html">spectrochempy.read_labspec</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_wire.html">spectrochempy.read_wire</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_wdf.html">spectrochempy.read_wdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_mat.html">spectrochempy.read_mat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_matlab.html">spectrochempy.read_matlab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_omnic.html">spectrochempy.read_omnic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_opus.html">spectrochempy.read_opus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_quadera.html">spectrochempy.read_quadera</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_sdr.html">spectrochempy.read_sdr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_soc.html">spectrochempy.read_soc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_spa.html">spectrochempy.read_spa</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_spc.html">spectrochempy.read_spc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_spg.html">spectrochempy.read_spg</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_srs.html">spectrochempy.read_srs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.NDDataset.from_xarray.html">spectrochempy.NDDataset.from_xarray</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.NDDataset.from_netcdf.html">spectrochempy.NDDataset.from_netcdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.load_iris.html">spectrochempy.load_iris</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.download_nist_ir.html">spectrochempy.download_nist_ir</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.NDDataset.save.html">spectrochempy.NDDataset.save</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.NDDataset.save_as.html">spectrochempy.NDDataset.save_as</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.write.html">spectrochempy.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.write_csv.html">spectrochempy.write_csv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.write_jcamp.html">spectrochempy.write_jcamp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.write_mat.html">spectrochempy.write_mat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.write_matlab.html">spectrochempy.write_matlab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.to_array.html">spectrochempy.to_array</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.to_netcdf.html">spectrochempy.to_netcdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.to_xarray.html">spectrochempy.to_xarray</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot.html">spectrochempy.plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot_1D.html">spectrochempy.plot_1D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot_pen.html">spectrochempy.plot_pen</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot_scatter.html">spectrochempy.plot_scatter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot_scatter_pen.html">spectrochempy.plot_scatter_pen</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot_with_transposed.html">spectrochempy.plot_with_transposed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot_bar.html">spectrochempy.plot_bar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot_2D.html">spectrochempy.plot_2D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot_contour.html">spectrochempy.plot_contour</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot_contourf.html">spectrochempy.plot_contourf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot_image.html">spectrochempy.plot_image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot_lines.html">spectrochempy.plot_lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot_map.html">spectrochempy.plot_map</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot_stack.html">spectrochempy.plot_stack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot_3D.html">spectrochempy.plot_3D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot_surface.html">spectrochempy.plot_surface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot_waterfall.html">spectrochempy.plot_waterfall</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot_multiple.html">spectrochempy.plot_multiple</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.multiplot.html">spectrochempy.multiplot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.multiplot_contour.html">spectrochempy.multiplot_contour</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.multiplot_contourf.html">spectrochempy.multiplot_contourf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.multiplot_image.html">spectrochempy.multiplot_image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.multiplot_lines.html">spectrochempy.multiplot_lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.multiplot_map.html">spectrochempy.multiplot_map</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.multiplot_scatter.html">spectrochempy.multiplot_scatter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.multiplot_stack.html">spectrochempy.multiplot_stack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.multiplot_with_transposed.html">spectrochempy.multiplot_with_transposed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.show.html">spectrochempy.show</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.transpose.html">spectrochempy.transpose</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.swapdims.html">spectrochempy.swapdims</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.squeeze.html">spectrochempy.squeeze</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.set_complex.html">spectrochempy.set_complex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.concatenate.html">spectrochempy.concatenate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.stack.html">spectrochempy.stack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.diag.html">spectrochempy.diag</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.diagonal.html">spectrochempy.diagonal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.take.html">spectrochempy.take</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.sort.html">spectrochempy.sort</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.argmin.html">spectrochempy.argmin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.argmax.html">spectrochempy.argmax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.coordmin.html">spectrochempy.coordmin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.coordmax.html">spectrochempy.coordmax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.amin.html">spectrochempy.amin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.amax.html">spectrochempy.amax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.min.html">spectrochempy.min</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.max.html">spectrochempy.max</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.ptp.html">spectrochempy.ptp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.clip.html">spectrochempy.clip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.around.html">spectrochempy.around</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.round.html">spectrochempy.round</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.dot.html">spectrochempy.dot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.SVD.html">spectrochempy.SVD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.LSTSQ.html">spectrochempy.LSTSQ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.NNLS.html">spectrochempy.NNLS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.all.html">spectrochempy.all</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.any.html">spectrochempy.any</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.sum.html">spectrochempy.sum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.cumsum.html">spectrochempy.cumsum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.trapezoid.html">spectrochempy.trapezoid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.simpson.html">spectrochempy.simpson</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.conj.html">spectrochempy.conj</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.conjugate.html">spectrochempy.conjugate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.abs.html">spectrochempy.abs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.absolute.html">spectrochempy.absolute</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.remove_masks.html">spectrochempy.remove_masks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.Unit.html">spectrochempy.Unit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.Quantity.html">spectrochempy.Quantity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.to.html">spectrochempy.to</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.to_base_units.html">spectrochempy.to_base_units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.to_reduced_units.html">spectrochempy.to_reduced_units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.ito.html">spectrochempy.ito</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.ito_base_units.html">spectrochempy.ito_base_units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.ito_reduced_units.html">spectrochempy.ito_reduced_units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.is_units_compatible.html">spectrochempy.is_units_compatible</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.mc.html">spectrochempy.mc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.ps.html">spectrochempy.ps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.mean.html">spectrochempy.mean</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.average.html">spectrochempy.average</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.std.html">spectrochempy.std</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.sum.html">spectrochempy.sum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.var.html">spectrochempy.var</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.Baseline.html">spectrochempy.Baseline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.autosub.html">spectrochempy.autosub</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.get_baseline.html">spectrochempy.get_baseline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.basc.html">spectrochempy.basc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.detrend.html">spectrochempy.detrend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.asls.html">spectrochempy.asls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.snip.html">spectrochempy.snip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.fft.html">spectrochempy.fft</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.ifft.html">spectrochempy.ifft</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.ht.html">spectrochempy.ht</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.fsh.html">spectrochempy.fsh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.fsh2.html">spectrochempy.fsh2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.pk.html">spectrochempy.pk</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.pk_exp.html">spectrochempy.pk_exp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.dc.html">spectrochempy.dc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.zf.html">spectrochempy.zf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.zf_auto.html">spectrochempy.zf_auto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.zf_double.html">spectrochempy.zf_double</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.zf_size.html">spectrochempy.zf_size</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.cs.html">spectrochempy.cs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.ls.html">spectrochempy.ls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.roll.html">spectrochempy.roll</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.rs.html">spectrochempy.rs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.bartlett.html">spectrochempy.bartlett</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.blackmanharris.html">spectrochempy.blackmanharris</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.hamming.html">spectrochempy.hamming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.general_hamming.html">spectrochempy.general_hamming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.hann.html">spectrochempy.hann</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.triang.html">spectrochempy.triang</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.em.html">spectrochempy.em</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.gm.html">spectrochempy.gm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.sp.html">spectrochempy.sp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.sine.html">spectrochempy.sine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.qsin.html">spectrochempy.qsin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.sinm.html">spectrochempy.sinm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.Filter.html">spectrochempy.Filter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.savgol.html">spectrochempy.savgol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.smooth.html">spectrochempy.smooth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.whittaker.html">spectrochempy.whittaker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.denoise.html">spectrochempy.denoise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.despike.html">spectrochempy.despike</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.align.html">spectrochempy.align</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.interpolate.html">spectrochempy.interpolate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.pipe.html">spectrochempy.pipe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.LSTSQ.html">spectrochempy.LSTSQ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.NNLS.html">spectrochempy.NNLS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.Optimize.html">spectrochempy.Optimize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.PLSRegression.html">spectrochempy.PLSRegression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.EFA.html">spectrochempy.EFA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.MCRALS.html">spectrochempy.MCRALS</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">spectrochempy.FastICA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.NMF.html">spectrochempy.NMF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.PCA.html">spectrochempy.PCA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.SVD.html">spectrochempy.SVD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.SIMPLISMA.html">spectrochempy.SIMPLISMA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.PSD.html">spectrochempy.PSD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.gaussianmodel.html">spectrochempy.gaussianmodel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.lorentzianmodel.html">spectrochempy.lorentzianmodel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.voigtmodel.html">spectrochempy.voigtmodel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.asymmetricvoigtmodel.html">spectrochempy.asymmetricvoigtmodel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.sigmoidmodel.html">spectrochempy.sigmoidmodel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.polynomialbaseline.html">spectrochempy.polynomialbaseline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.find_peaks.html">spectrochempy.find_peaks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.ActionMassKinetics.html">spectrochempy.ActionMassKinetics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.PFR.html">spectrochempy.PFR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.Project.html">spectrochempy.Project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.set_loglevel.html">spectrochempy.set_loglevel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.get_loglevel.html">spectrochempy.get_loglevel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.debug_.html">spectrochempy.debug_</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.info_.html">spectrochempy.info_</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.warning_.html">spectrochempy.warning_</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.error_.html">spectrochempy.error_</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.show_versions.html">spectrochempy.show_versions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.pathclean.html">spectrochempy.pathclean</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../papers.html">Papers citing <code class="xref py py-obj docutils literal notranslate"><span class="pre">SpectroChemPy</span></code></a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🛠️ Contribute</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/issues.html">Bug reports &amp; feature request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/examples.html">Sharing examples &amp; tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/index.html">Developer’s Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../devguide/contributing.html">Contributing to SpectroChemPy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../devguide/contributing_codebase.html">Contributing to the code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../devguide/contributing_codespecifics.html">Contributing to specific parts of the code</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/codespec_adding_reader.html">Adding a Reader</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../devguide/contributing_documentation.html">Contributing to Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../devguide/contributing_plotting.html">Plotting Contributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../devguide/plugins/index.html">Plugin developer guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/plugins/writing_plugins.html">Plugin author guide</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/plugins/architecture.html">Plugin architecture</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/plugins/accessors.html">Plugin accessors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/plugins/numeric_backends.html">Numeric backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/plugins/unit_contexts.html">Unit contexts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/plugins/packaging.html">Packaging a Plugin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/plugins/testing.html">Testing a Plugin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/plugins/api_policy.html">Plugin API Policy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/plugins/domain_architecture.html">Official plugin architecture notes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/plugins/roadmap.html">Plugin architecture map</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">✨ Credits</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/credits.html">Contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/credits.html#third-party-licenses">Third-party Licenses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/citing.html">Citing SpectroChemPy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/license.html">SpectroChempy License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/license.html#other-licenses">Other Licenses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/seealso.html">See also</a></li>
+</ul>
+
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">SpectroChemPy v0.10.2</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Public API reference</a></li>
+      <li class="breadcrumb-item active">spectrochempy.FastICA</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="spectrochempy.MCRALS.html" class="btn btn-neutral float-left" title="spectrochempy.MCRALS" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="spectrochempy.NMF.html" class="btn btn-neutral float-right" title="spectrochempy.NMF" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+
+           <div itemprop="articleBody">
+             
+  <section id="spectrochempy-fastica">
+<h1>spectrochempy.FastICA<a class="headerlink" href="#spectrochempy-fastica" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="spectrochempy.FastICA">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FastICA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'WARNING'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">warm_start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'parallel'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'logcosh'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fun_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_components</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w_init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">whiten</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'unit-variance'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">whiten_solver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'svd'</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/src/spectrochempy/analysis/decomposition/fast_ica.py#L26-L399"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.FastICA" title="Permalink to this definition"></a></dt>
+<dd><p>Fast algorithm for Independent Component Analysis (FastICA).</p>
+<p>A wrapper of <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.FastICA.html#sklearn.decomposition.FastICA" title="(in scikit-learn v1.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sklearn.decomposition.FastICA</span></code></a>.</p>
+<p><a class="reference internal" href="../glossary.html#term-ICA"><span class="xref std std-term">ICA</span></a> (Independent Component Analysis) extracts the underlying sources of
+the variability of a set of spectra <span class="math notranslate nohighlight">\(X\)</span> into the spectral profiles <span class="math notranslate nohighlight">\(S^t\)</span>
+of the underlying sources and a mixing matrix <span class="math notranslate nohighlight">\(A\)</span>.</p>
+<p>In terms of matrix equation:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}X = \bar{X} + A \\cdot S^t + E\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\bar{X}\)</span> is the mean of the dataset and <span class="math notranslate nohighlight">\(E\)</span> is the matrix of
+residuals.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul>
+<li><p><strong>log_level</strong> (any of [<code class="docutils literal notranslate"><span class="pre">&quot;INFO&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;DEBUG&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;WARNING&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;ERROR&quot;</span></code>], optional, default: <code class="docutils literal notranslate"><span class="pre">&quot;WARNING&quot;</span></code>) – The log level at startup. It can be changed later on using the
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">set_log_level</span></code> method or by changing the <code class="docutils literal notranslate"><span class="pre">log_level</span></code> attribute.</p></li>
+<li><p><strong>warm_start</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>, optional, default: <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>) – When fitting repeatedly on the same dataset, but for multiple
+parameter values (such as to find the value maximizing performance),
+reuse the solution of the previous call to fit and add more components
+(if available) in a sequential manner.</p>
+<p>When <code class="xref py py-obj docutils literal notranslate"><span class="pre">warm_start</span></code> is <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code></a>, the existing fitted model attributes is used to
+initialize the new model in a subsequent call to <a class="reference internal" href="#spectrochempy.FastICA.fit" title="spectrochempy.FastICA.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a>.</p>
+</li>
+<li><p><strong>algorithm</strong> (any value of [<code class="docutils literal notranslate"><span class="pre">'parallel'</span></code>, <code class="docutils literal notranslate"><span class="pre">'deflation'</span></code>], optional, default: <code class="docutils literal notranslate"><span class="pre">'parallel'</span></code>) – Specify which algorithm to use for FastICA.</p></li>
+<li><p><strong>fun</strong> (any of [‘logcosh’, ‘exp’, ‘cube’] or a callable or a unicode string, optional, default: <code class="docutils literal notranslate"><span class="pre">'logcosh'</span></code>) – The functional form of the function used in the approximation to neg-entropy.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">string</span></code>: could be either <code class="docutils literal notranslate"><span class="pre">&quot;logcosh&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;exp&quot;</span></code>, or <code class="docutils literal notranslate"><span class="pre">&quot;cube&quot;</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">callable</span></code>: You can provide your own function. It should return a tuple containing
+the value of the function, and of its derivative, in the point. The derivative should
+be averaged along its last dimension.</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">my_g</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">3</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">fun</span></code> can be also a serialized function created using dill and base64
+python libraries. Normally not used directly, it is here for internal
+process.</p>
+</div>
+</li>
+<li><p><strong>fun_args</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>, optional, default: {}) – Arguments to send to the functional form.</p>
+<p>If empty or None and if <code class="docutils literal notranslate"><span class="pre">fun==&quot;logcosh&quot;</span></code> , <a class="reference internal" href="#spectrochempy.FastICA.fun_args" title="spectrochempy.FastICA.fun_args"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fun_args</span></code></a> will take value
+<code class="docutils literal notranslate"><span class="pre">{alpha</span> <span class="pre">:</span> <span class="pre">1.0}</span></code>.</p>
+</li>
+<li><p><strong>max_iter</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>, optional, default: <code class="docutils literal notranslate"><span class="pre">200</span></code>) – Maximum number of iterations before timing out.</p></li>
+<li><p><strong>n_components</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>, optional, default: <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>) – Number of components (sources) to use.</p></li>
+<li><p><strong>random_state</strong> (an int or a RandomState, optional, default: <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>) – Used to initialize <code class="docutils literal notranslate"><span class="pre">w_init</span></code> when not specified, with a normaldistribution. Pass an <code class="docutils literal notranslate"><span class="pre">int</span></code>, for reproducible results across multiple function calls.</p></li>
+<li><p><strong>tol</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a>, optional, default: <code class="docutils literal notranslate"><span class="pre">0.0001</span></code>) – Tolerance at which the un-mixing matrix is considered to have converged.</p></li>
+<li><p><strong>w_init</strong> (a SpectroChemPy NDDataset, optional, default: <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>) – Initial un-mixing array.</p>
+<p>NDDataset or array-like of shape (n_components, n_components). If w_init=None, then an
+array of values drawn from a normal distribution is used.</p>
+</li>
+<li><p><strong>whiten</strong> (any of [‘arbitrary-variance’, ‘unit-variance’] or a boolean, optional, default: <code class="docutils literal notranslate"><span class="pre">'unit-variance'</span></code>) – Specify the whitening strategy to use.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;arbitrary-variance&quot;</span></code>: a whitening with variance arbitrary is used.</p></li>
+<li><p>“unit-variance” : the whitening matrix is rescaled to ensure that each recovered
+source has unit variance.</p></li>
+<li><p>False : the data is already considered to be whitened, and no whitening is performed.</p></li>
+</ul>
+</li>
+<li><p><strong>whiten_solver</strong> (any value of [<code class="docutils literal notranslate"><span class="pre">'svd'</span></code>, <code class="docutils literal notranslate"><span class="pre">'eigh'</span></code>], optional, default: <code class="docutils literal notranslate"><span class="pre">'svd'</span></code>) – The solver to use for whitening.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;svd&quot;</span></code>: is more stable numerically if the problem is degenerate, and often faster
+when <a class="reference internal" href="../glossary.html#term-n_observations"><span class="xref std std-term">n_observations</span></a> &lt;= <a class="reference internal" href="../glossary.html#term-n_features"><span class="xref std std-term">n_features</span></a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;eigh&quot;</span></code>: is generally more memory efficient when
+<a class="reference internal" href="../glossary.html#term-n_observations"><span class="xref std std-term">n_observations</span></a> &gt;= <a class="reference internal" href="../glossary.html#term-n_features"><span class="xref std std-term">n_features</span></a>, and can be faster when
+<a class="reference internal" href="../glossary.html#term-n_observations"><span class="xref std std-term">n_observations</span></a> &gt;= 50 * <a class="reference internal" href="../glossary.html#term-n_features"><span class="xref std std-term">n_features</span></a>.</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#spectrochempy.FastICA.fit" title="spectrochempy.FastICA.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a></dt><dd><p>Fit the FastICA model on X.</p>
+</dd>
+<dt><a class="reference internal" href="#spectrochempy.FastICA.transform" title="spectrochempy.FastICA.transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform</span></code></a></dt><dd><p>Apply dimensionality reduction.</p>
+</dd>
+<dt><a class="reference internal" href="#spectrochempy.FastICA.fit_transform" title="spectrochempy.FastICA.fit_transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_transform</span></code></a></dt><dd><p>Fit the model and apply dimensionality reduction.</p>
+</dd>
+</dl>
+</div>
+<p>Initialize the BaseConfigurable class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>log_level</strong> (<em>int, optional</em>) – The log level at startup. Default is logging.WARNING.</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – Additional keyword arguments for configuration.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Attributes Summary</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.FastICA.A" title="spectrochempy.FastICA.A"><code class="xref py py-obj docutils literal notranslate"><span class="pre">A</span></code></a></p></td>
+<td><p>The mixing system A.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.FastICA.St" title="spectrochempy.FastICA.St"><code class="xref py py-obj docutils literal notranslate"><span class="pre">St</span></code></a></p></td>
+<td><p>The spectral profiles of the independant sources.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.FastICA.X" title="spectrochempy.FastICA.X"><code class="xref py py-obj docutils literal notranslate"><span class="pre">X</span></code></a></p></td>
+<td><p>Return the X input dataset (eventually modified by the model).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.FastICA.Y" title="spectrochempy.FastICA.Y"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Y</span></code></a></p></td>
+<td><p>The <a class="reference internal" href="#spectrochempy.FastICA.Y" title="spectrochempy.FastICA.Y"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Y</span></code></a> input.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.FastICA.algorithm" title="spectrochempy.FastICA.algorithm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">algorithm</span></code></a></p></td>
+<td><p>Specify which algorithm to use for FastICA.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.FastICA.components" title="spectrochempy.FastICA.components"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components</span></code></a></p></td>
+<td><p><a class="reference internal" href="spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NDDataset</span></code></a> with components in feature space (<a class="reference internal" href="../glossary.html#term-n_components"><span class="xref std std-term">n_components</span></a>, <a class="reference internal" href="../glossary.html#term-n_features"><span class="xref std std-term">n_features</span></a>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.FastICA.config" title="spectrochempy.FastICA.config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">config</span></code></a></p></td>
+<td><p><a class="reference external" href="https://traitlets.readthedocs.io/en/stable/config-api.html#traitlets.config.Config" title="(in traitlets v5.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">traitlets.config.Config</span></code></a> object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.FastICA.fun" title="spectrochempy.FastICA.fun"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fun</span></code></a></p></td>
+<td><p>The functional form of the function used in the approximation to neg-entropy.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.FastICA.fun_args" title="spectrochempy.FastICA.fun_args"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fun_args</span></code></a></p></td>
+<td><p>Arguments to send to the functional form.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.FastICA.log" title="spectrochempy.FastICA.log"><code class="xref py py-obj docutils literal notranslate"><span class="pre">log</span></code></a></p></td>
+<td><p>Return <code class="docutils literal notranslate"><span class="pre">log</span></code> output.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.FastICA.max_iter" title="spectrochempy.FastICA.max_iter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max_iter</span></code></a></p></td>
+<td><p>Maximum number of iterations before timing out.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.FastICA.mean" title="spectrochempy.FastICA.mean"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean</span></code></a></p></td>
+<td><p>The mean of X over features.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.FastICA.mixing" title="spectrochempy.FastICA.mixing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mixing</span></code></a></p></td>
+<td><p>The pseudo inverse of components.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.FastICA.n_components" title="spectrochempy.FastICA.n_components"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_components</span></code></a></p></td>
+<td><p>Number of components (sources) to use.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.FastICA.n_iter" title="spectrochempy.FastICA.n_iter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_iter</span></code></a></p></td>
+<td><p>Number of iterations.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.FastICA.name" title="spectrochempy.FastICA.name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">name</span></code></a></p></td>
+<td><p>Object name</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.FastICA.random_state" title="spectrochempy.FastICA.random_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">random_state</span></code></a></p></td>
+<td><p>Used to initialize <code class="docutils literal notranslate"><span class="pre">w_init</span></code> when not specified, with a normaldistribution.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.FastICA.result" title="spectrochempy.FastICA.result"><code class="xref py py-obj docutils literal notranslate"><span class="pre">result</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">AnalysisResult</span></code> object wrapping the fitted FastICA estimator.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.FastICA.tol" title="spectrochempy.FastICA.tol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tol</span></code></a></p></td>
+<td><p>Tolerance at which the un-mixing matrix is considered to have converged.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.FastICA.w_init" title="spectrochempy.FastICA.w_init"><code class="xref py py-obj docutils literal notranslate"><span class="pre">w_init</span></code></a></p></td>
+<td><p>Initial un-mixing array.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.FastICA.whiten" title="spectrochempy.FastICA.whiten"><code class="xref py py-obj docutils literal notranslate"><span class="pre">whiten</span></code></a></p></td>
+<td><p>Specify the whitening strategy to use.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.FastICA.whiten_solver" title="spectrochempy.FastICA.whiten_solver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">whiten_solver</span></code></a></p></td>
+<td><p>The solver to use for whitening.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.FastICA.whitening" title="spectrochempy.FastICA.whitening"><code class="xref py py-obj docutils literal notranslate"><span class="pre">whitening</span></code></a></p></td>
+<td><p>NDDataset of shape (n_components, n_features).</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods Summary</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.FastICA.fit" title="spectrochempy.FastICA.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a>(X)</p></td>
+<td><p>Fit the FastICA model on X.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.FastICA.fit_transform" title="spectrochempy.FastICA.fit_transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_transform</span></code></a>(X[, Y])</p></td>
+<td><p>Fit the model with <a class="reference internal" href="#spectrochempy.FastICA.X" title="spectrochempy.FastICA.X"><code class="xref py py-obj docutils literal notranslate"><span class="pre">X</span></code></a> and apply the dimensionality reduction on <a class="reference internal" href="#spectrochempy.FastICA.X" title="spectrochempy.FastICA.X"><code class="xref py py-obj docutils literal notranslate"><span class="pre">X</span></code></a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.FastICA.get_components" title="spectrochempy.FastICA.get_components"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_components</span></code></a>([n_components])</p></td>
+<td><p>Return the component's dataset: (selected <a class="reference internal" href="../glossary.html#term-n_components"><span class="xref std std-term">n_components</span></a>, <a class="reference internal" href="../glossary.html#term-n_features"><span class="xref std std-term">n_features</span></a>).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.FastICA.inverse_transform" title="spectrochempy.FastICA.inverse_transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">inverse_transform</span></code></a>([X_transform])</p></td>
+<td><p>Transform data back to its original space.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.FastICA.params" title="spectrochempy.FastICA.params"><code class="xref py py-obj docutils literal notranslate"><span class="pre">params</span></code></a>([default])</p></td>
+<td><p>Return current or default configuration values.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.FastICA.plot_merit" title="spectrochempy.FastICA.plot_merit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_merit</span></code></a>([X, X_hat])</p></td>
+<td><p>Plot the input (<a class="reference internal" href="#spectrochempy.FastICA.X" title="spectrochempy.FastICA.X"><code class="xref py py-obj docutils literal notranslate"><span class="pre">X</span></code></a>), reconstructed (<code class="xref py py-obj docutils literal notranslate"><span class="pre">X_hat</span></code>) and residuals.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.FastICA.plotmerit" title="spectrochempy.FastICA.plotmerit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plotmerit</span></code></a>([X, X_hat])</p></td>
+<td><p>Plot the input (<a class="reference internal" href="#spectrochempy.FastICA.X" title="spectrochempy.FastICA.X"><code class="xref py py-obj docutils literal notranslate"><span class="pre">X</span></code></a>), reconstructed (<code class="xref py py-obj docutils literal notranslate"><span class="pre">X_hat</span></code>) and residuals.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.FastICA.reconstruct" title="spectrochempy.FastICA.reconstruct"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reconstruct</span></code></a>([X_transform])</p></td>
+<td><p>Transform data back to its original space.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.FastICA.reduce" title="spectrochempy.FastICA.reduce"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reduce</span></code></a>([X])</p></td>
+<td><p>Apply dimensionality reduction to <a class="reference internal" href="#spectrochempy.FastICA.X" title="spectrochempy.FastICA.X"><code class="xref py py-obj docutils literal notranslate"><span class="pre">X</span></code></a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.FastICA.reset" title="spectrochempy.FastICA.reset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset</span></code></a>()</p></td>
+<td><p>Reset configuration parameters to their default values.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.FastICA.to_dict" title="spectrochempy.FastICA.to_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_dict</span></code></a>()</p></td>
+<td><p>Return config value in a dict form.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.FastICA.transform" title="spectrochempy.FastICA.transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform</span></code></a>([X])</p></td>
+<td><p>Apply dimensionality reduction to <a class="reference internal" href="#spectrochempy.FastICA.X" title="spectrochempy.FastICA.X"><code class="xref py py-obj docutils literal notranslate"><span class="pre">X</span></code></a>.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes Documentation</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.A">
+<span class="sig-name descname"><span class="pre">A</span></span><a class="headerlink" href="#spectrochempy.FastICA.A" title="Permalink to this definition"></a></dt>
+<dd><p>The mixing system A.</p>
+<p>NDDataset of size (<code class="xref py py-obj docutils literal notranslate"><span class="pre">n_observations</span></code>, <a class="reference internal" href="#spectrochempy.FastICA.n_components" title="spectrochempy.FastICA.n_components"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_components</span></code></a>). It is the matrix
+returned by the <a class="reference internal" href="#spectrochempy.FastICA.transform" title="spectrochempy.FastICA.transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform()</span></code></a> method.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.St">
+<span class="sig-name descname"><span class="pre">St</span></span><a class="headerlink" href="#spectrochempy.FastICA.St" title="Permalink to this definition"></a></dt>
+<dd><p>The spectral profiles of the independant sources.</p>
+<p>NDDataset of size (<a class="reference internal" href="#spectrochempy.FastICA.n_components" title="spectrochempy.FastICA.n_components"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_components</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">n_features</span></code>). It is the transpose of the
+<code class="docutils literal notranslate"><span class="pre">mixing_</span></code> matrix returned by Scikit-Learn.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.X">
+<span class="sig-name descname"><span class="pre">X</span></span><a class="headerlink" href="#spectrochempy.FastICA.X" title="Permalink to this definition"></a></dt>
+<dd><p>Return the X input dataset (eventually modified by the model).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.Y">
+<span class="sig-name descname"><span class="pre">Y</span></span><a class="headerlink" href="#spectrochempy.FastICA.Y" title="Permalink to this definition"></a></dt>
+<dd><p>The <a class="reference internal" href="#spectrochempy.FastICA.Y" title="spectrochempy.FastICA.Y"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Y</span></code></a> input.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.algorithm">
+<span class="sig-name descname"><span class="pre">algorithm</span></span><a class="headerlink" href="#spectrochempy.FastICA.algorithm" title="Permalink to this definition"></a></dt>
+<dd><p>Specify which algorithm to use for FastICA.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.components">
+<span class="sig-name descname"><span class="pre">components</span></span><a class="headerlink" href="#spectrochempy.FastICA.components" title="Permalink to this definition"></a></dt>
+<dd><p><a class="reference internal" href="spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NDDataset</span></code></a> with components in feature space (<a class="reference internal" href="../glossary.html#term-n_components"><span class="xref std std-term">n_components</span></a>, <a class="reference internal" href="../glossary.html#term-n_features"><span class="xref std std-term">n_features</span></a>).</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#spectrochempy.FastICA.get_components" title="spectrochempy.FastICA.get_components"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_components</span></code></a></dt><dd><p>Retrieve only the specified number of components.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.config">
+<span class="sig-name descname"><span class="pre">config</span></span><a class="headerlink" href="#spectrochempy.FastICA.config" title="Permalink to this definition"></a></dt>
+<dd><p><a class="reference external" href="https://traitlets.readthedocs.io/en/stable/config-api.html#traitlets.config.Config" title="(in traitlets v5.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">traitlets.config.Config</span></code></a> object.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.fun">
+<span class="sig-name descname"><span class="pre">fun</span></span><a class="headerlink" href="#spectrochempy.FastICA.fun" title="Permalink to this definition"></a></dt>
+<dd><p>The functional form of the function used in the approximation to neg-entropy.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">string</span></code>: could be either <code class="docutils literal notranslate"><span class="pre">&quot;logcosh&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;exp&quot;</span></code>, or <code class="docutils literal notranslate"><span class="pre">&quot;cube&quot;</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">callable</span></code>: You can provide your own function. It should return a tuple containing
+the value of the function, and of its derivative, in the point. The derivative should
+be averaged along its last dimension.</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">my_g</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">3</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">fun</span></code> can be also a serialized function created using dill and base64
+python libraries. Normally not used directly, it is here for internal
+process.</p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.fun_args">
+<span class="sig-name descname"><span class="pre">fun_args</span></span><a class="headerlink" href="#spectrochempy.FastICA.fun_args" title="Permalink to this definition"></a></dt>
+<dd><p>Arguments to send to the functional form.</p>
+<p>If empty or None and if <code class="docutils literal notranslate"><span class="pre">fun==&quot;logcosh&quot;</span></code> , <a class="reference internal" href="#spectrochempy.FastICA.fun_args" title="spectrochempy.FastICA.fun_args"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fun_args</span></code></a> will take value
+<code class="docutils literal notranslate"><span class="pre">{alpha</span> <span class="pre">:</span> <span class="pre">1.0}</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.log">
+<span class="sig-name descname"><span class="pre">log</span></span><a class="headerlink" href="#spectrochempy.FastICA.log" title="Permalink to this definition"></a></dt>
+<dd><p>Return <code class="docutils literal notranslate"><span class="pre">log</span></code> output.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.max_iter">
+<span class="sig-name descname"><span class="pre">max_iter</span></span><a class="headerlink" href="#spectrochempy.FastICA.max_iter" title="Permalink to this definition"></a></dt>
+<dd><p>Maximum number of iterations before timing out.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.mean">
+<span class="sig-name descname"><span class="pre">mean</span></span><a class="headerlink" href="#spectrochempy.FastICA.mean" title="Permalink to this definition"></a></dt>
+<dd><p>The mean of X over features.</p>
+<p>Only set if <a class="reference internal" href="#spectrochempy.FastICA.whiten" title="spectrochempy.FastICA.whiten"><code class="xref py py-obj docutils literal notranslate"><span class="pre">whiten</span></code></a> is True, it is needed (and used) to reconstruct a dataset
+by <code class="docutils literal notranslate"><span class="pre">inverse_transform(A)</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.mixing">
+<span class="sig-name descname"><span class="pre">mixing</span></span><a class="headerlink" href="#spectrochempy.FastICA.mixing" title="Permalink to this definition"></a></dt>
+<dd><p>The pseudo inverse of components.</p>
+<p>NDDataset of size (<code class="xref py py-obj docutils literal notranslate"><span class="pre">n_features</span></code>, <a class="reference internal" href="#spectrochempy.FastICA.n_components" title="spectrochempy.FastICA.n_components"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_components</span></code></a>). It is the linear operator
+that maps independent sources to the data, and the transpose of <a class="reference internal" href="#spectrochempy.FastICA.St" title="spectrochempy.FastICA.St"><code class="xref py py-obj docutils literal notranslate"><span class="pre">St</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.n_components">
+<span class="sig-name descname"><span class="pre">n_components</span></span><a class="headerlink" href="#spectrochempy.FastICA.n_components" title="Permalink to this definition"></a></dt>
+<dd><p>Number of components (sources) to use.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.n_iter">
+<span class="sig-name descname"><span class="pre">n_iter</span></span><a class="headerlink" href="#spectrochempy.FastICA.n_iter" title="Permalink to this definition"></a></dt>
+<dd><p>Number of iterations.</p>
+<p>If the algorithm is “deflation”, n_iter is the maximum number of iterations run
+across all components. Else they are just the number of iterations taken to
+converge.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#spectrochempy.FastICA.name" title="Permalink to this definition"></a></dt>
+<dd><p>Object name</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.random_state">
+<span class="sig-name descname"><span class="pre">random_state</span></span><a class="headerlink" href="#spectrochempy.FastICA.random_state" title="Permalink to this definition"></a></dt>
+<dd><p>Used to initialize <code class="docutils literal notranslate"><span class="pre">w_init</span></code> when not specified, with a normaldistribution. Pass an <code class="docutils literal notranslate"><span class="pre">int</span></code>, for reproducible results across multiple function calls.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.result">
+<span class="sig-name descname"><span class="pre">result</span></span><a class="headerlink" href="#spectrochempy.FastICA.result" title="Permalink to this definition"></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">AnalysisResult</span></code> object wrapping the fitted FastICA estimator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><em>AnalysisResult</em> – Container with <code class="docutils literal notranslate"><span class="pre">parameters</span></code>, <code class="docutils literal notranslate"><span class="pre">outputs</span></code>, and <code class="docutils literal notranslate"><span class="pre">diagnostics</span></code>
+derived from the fitted estimator.</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>NotFittedError</strong> – If the estimator has not been fitted yet.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.tol">
+<span class="sig-name descname"><span class="pre">tol</span></span><a class="headerlink" href="#spectrochempy.FastICA.tol" title="Permalink to this definition"></a></dt>
+<dd><p>Tolerance at which the un-mixing matrix is considered to have converged.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.w_init">
+<span class="sig-name descname"><span class="pre">w_init</span></span><a class="headerlink" href="#spectrochempy.FastICA.w_init" title="Permalink to this definition"></a></dt>
+<dd><p>Initial un-mixing array.</p>
+<p>NDDataset or array-like of shape (n_components, n_components). If w_init=None, then an
+array of values drawn from a normal distribution is used.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.whiten">
+<span class="sig-name descname"><span class="pre">whiten</span></span><a class="headerlink" href="#spectrochempy.FastICA.whiten" title="Permalink to this definition"></a></dt>
+<dd><p>Specify the whitening strategy to use.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;arbitrary-variance&quot;</span></code>: a whitening with variance arbitrary is used.</p></li>
+<li><p>“unit-variance” : the whitening matrix is rescaled to ensure that each recovered
+source has unit variance.</p></li>
+<li><p>False : the data is already considered to be whitened, and no whitening is performed.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.whiten_solver">
+<span class="sig-name descname"><span class="pre">whiten_solver</span></span><a class="headerlink" href="#spectrochempy.FastICA.whiten_solver" title="Permalink to this definition"></a></dt>
+<dd><p>The solver to use for whitening.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;svd&quot;</span></code>: is more stable numerically if the problem is degenerate, and often faster
+when <a class="reference internal" href="../glossary.html#term-n_observations"><span class="xref std std-term">n_observations</span></a> &lt;= <a class="reference internal" href="../glossary.html#term-n_features"><span class="xref std std-term">n_features</span></a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;eigh&quot;</span></code>: is generally more memory efficient when
+<a class="reference internal" href="../glossary.html#term-n_observations"><span class="xref std std-term">n_observations</span></a> &gt;= <a class="reference internal" href="../glossary.html#term-n_features"><span class="xref std std-term">n_features</span></a>, and can be faster when
+<a class="reference internal" href="../glossary.html#term-n_observations"><span class="xref std std-term">n_observations</span></a> &gt;= 50 * <a class="reference internal" href="../glossary.html#term-n_features"><span class="xref std std-term">n_features</span></a>.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.whitening">
+<span class="sig-name descname"><span class="pre">whitening</span></span><a class="headerlink" href="#spectrochempy.FastICA.whitening" title="Permalink to this definition"></a></dt>
+<dd><p>NDDataset of shape (n_components, n_features).</p>
+<p>Only set if whiten is not None. This is the pre-whitening matrix that projects
+data onto the first n_components principal components.</p>
+</dd></dl>
+
+<p class="rubric">Methods Documentation</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/src/spectrochempy/analysis/decomposition/fast_ica.py#L256-L20"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.FastICA.fit" title="Permalink to this definition"></a></dt>
+<dd><p>Fit the FastICA model on X.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>X</strong> (<a class="reference internal" href="spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NDDataset</span></code></a> or <a class="reference internal" href="../glossary.html#term-array-like"><span class="xref std std-term">array-like</span></a> of shape (<a class="reference internal" href="../glossary.html#term-n_observations"><span class="xref std std-term">n_observations</span></a>, <a class="reference internal" href="../glossary.html#term-n_features"><span class="xref std std-term">n_features</span></a>)) – Training data.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><em>self</em> – The fitted instance itself.</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#spectrochempy.FastICA.transform" title="spectrochempy.FastICA.transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform</span></code></a></dt><dd><p>Apply dimensionality reduction.</p>
+</dd>
+<dt><a class="reference internal" href="#spectrochempy.FastICA.fit_transform" title="spectrochempy.FastICA.fit_transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_transform</span></code></a></dt><dd><p>Fit the model and apply dimensionality reduction.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.fit_transform">
+<span class="sig-name descname"><span class="pre">fit_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/src/spectrochempy/analysis/_base/_analysisbase.py#L401-L29"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.FastICA.fit_transform" title="Permalink to this definition"></a></dt>
+<dd><p>Fit the model with <a class="reference internal" href="#spectrochempy.FastICA.X" title="spectrochempy.FastICA.X"><code class="xref py py-obj docutils literal notranslate"><span class="pre">X</span></code></a> and apply the dimensionality reduction on <a class="reference internal" href="#spectrochempy.FastICA.X" title="spectrochempy.FastICA.X"><code class="xref py py-obj docutils literal notranslate"><span class="pre">X</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<a class="reference internal" href="spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NDDataset</span></code></a> or <a class="reference internal" href="../glossary.html#term-array-like"><span class="xref std std-term">array-like</span></a> of shape (<a class="reference internal" href="../glossary.html#term-n_observations"><span class="xref std std-term">n_observations</span></a>, <a class="reference internal" href="../glossary.html#term-n_features"><span class="xref std std-term">n_features</span></a>)) – Training data.</p></li>
+<li><p><strong>Y</strong> (<em>any</em>) – Depends on the model.</p></li>
+<li><p><strong>**kwargs</strong> (<em>keyword arguments, optional</em>) – Additional keyword arguments passed to the underlying implementation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><a class="reference internal" href="spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NDDataset</span></code></a> – Dataset with shape (<a class="reference internal" href="../glossary.html#term-n_observations"><span class="xref std std-term">n_observations</span></a>, <a class="reference internal" href="../glossary.html#term-n_components"><span class="xref std std-term">n_components</span></a>).</p>
+</dd>
+<dt class="field-odd">Other Parameters</dt>
+<dd class="field-odd"><p><strong>n_components</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>, optional) – The number of components to use for the reduction.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.get_components">
+<span class="sig-name descname"><span class="pre">get_components</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_components</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spectrochempy.FastICA.get_components" title="Permalink to this definition"></a></dt>
+<dd><p>Return the component’s dataset: (selected <a class="reference internal" href="../glossary.html#term-n_components"><span class="xref std std-term">n_components</span></a>, <a class="reference internal" href="../glossary.html#term-n_features"><span class="xref std std-term">n_features</span></a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>n_components</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>, optional, default: <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>) – The number of components to keep in the output dataset.
+If <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>, all calculated components are returned.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><a class="reference internal" href="spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.core.dataset.nddataset.NDDataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NDDataset</span></code></a> – Dataset with shape (<a class="reference internal" href="../glossary.html#term-n_components"><span class="xref std std-term">n_components</span></a>, <a class="reference internal" href="../glossary.html#term-n_features"><span class="xref std std-term">n_features</span></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.inverse_transform">
+<span class="sig-name descname"><span class="pre">inverse_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X_transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spectrochempy.FastICA.inverse_transform" title="Permalink to this definition"></a></dt>
+<dd><p>Transform data back to its original space.</p>
+<p>In other words, return an input <code class="xref py py-obj docutils literal notranslate"><span class="pre">X_original</span></code> whose reduce/transform would
+be <code class="xref py py-obj docutils literal notranslate"><span class="pre">X_transform</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X_transform</strong> (array-like of shape (<a class="reference internal" href="../glossary.html#term-n_observations"><span class="xref std std-term">n_observations</span></a>, <a class="reference internal" href="../glossary.html#term-n_components"><span class="xref std std-term">n_components</span></a>), optional) – Reduced <a class="reference internal" href="#spectrochempy.FastICA.X" title="spectrochempy.FastICA.X"><code class="xref py py-obj docutils literal notranslate"><span class="pre">X</span></code></a> data, where <code class="xref py py-obj docutils literal notranslate"><span class="pre">n_observations</span></code> is the number of observations
+and <a class="reference internal" href="#spectrochempy.FastICA.n_components" title="spectrochempy.FastICA.n_components"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_components</span></code></a> is the number of components. If <code class="xref py py-obj docutils literal notranslate"><span class="pre">X_transform</span></code> is not
+provided, a transform of <a class="reference internal" href="#spectrochempy.FastICA.X" title="spectrochempy.FastICA.X"><code class="xref py py-obj docutils literal notranslate"><span class="pre">X</span></code></a> provided in <a class="reference internal" href="#spectrochempy.FastICA.fit" title="spectrochempy.FastICA.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a> is performed first.</p></li>
+<li><p><strong>**kwargs</strong> (<em>keyword parameters, optional</em>) – See Other Parameters.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><a class="reference internal" href="spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NDDataset</span></code></a> – Dataset with shape (<a class="reference internal" href="../glossary.html#term-n_observations"><span class="xref std std-term">n_observations</span></a>, <a class="reference internal" href="../glossary.html#term-n_features"><span class="xref std std-term">n_features</span></a>).</p>
+</dd>
+<dt class="field-odd">Other Parameters</dt>
+<dd class="field-odd"><p><strong>n_components</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>, optional) – The number of components to use for the reconstruction.</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#spectrochempy.FastICA.reconstruct" title="spectrochempy.FastICA.reconstruct"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reconstruct</span></code></a></dt><dd><p>Alias of inverse_transform (Deprecated).</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.params">
+<span class="sig-name descname"><span class="pre">params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/src/spectrochempy/utils/metaconfigurable.py#L87-L21"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.FastICA.params" title="Permalink to this definition"></a></dt>
+<dd><p>Return current or default configuration values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>default</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>, optional, default: <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>) – If <code class="xref py py-obj docutils literal notranslate"><span class="pre">default</span></code> is <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code></a>, the default parameters are returned,
+else the current values.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> – Current or default configuration values.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.plot_merit">
+<span class="sig-name descname"><span class="pre">plot_merit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_hat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/src/spectrochempy/analysis/_base/_analysisbase.py#L503-L72"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.FastICA.plot_merit" title="Permalink to this definition"></a></dt>
+<dd><p>Plot the input (<a class="reference internal" href="#spectrochempy.FastICA.X" title="spectrochempy.FastICA.X"><code class="xref py py-obj docutils literal notranslate"><span class="pre">X</span></code></a>), reconstructed (<code class="xref py py-obj docutils literal notranslate"><span class="pre">X_hat</span></code>) and residuals.</p>
+<p><span class="math notranslate nohighlight">\(X\)</span> and <span class="math notranslate nohighlight">\(\hat{X}\)</span> can be passed as arguments. If not,
+the <a class="reference internal" href="#spectrochempy.FastICA.X" title="spectrochempy.FastICA.X"><code class="xref py py-obj docutils literal notranslate"><span class="pre">X</span></code></a> attribute is used for <span class="math notranslate nohighlight">\(X\)</span>hat{X}`is computed by
+the <a class="reference internal" href="#spectrochempy.FastICA.inverse_transform" title="spectrochempy.FastICA.inverse_transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">inverse_transform</span></code></a> method</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<a class="reference internal" href="spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NDDataset</span></code></a>, optional) – Original dataset. If is not provided (default), the <a class="reference internal" href="#spectrochempy.FastICA.X" title="spectrochempy.FastICA.X"><code class="xref py py-obj docutils literal notranslate"><span class="pre">X</span></code></a>
+attribute is used and X_hat is computed using <a class="reference internal" href="#spectrochempy.FastICA.inverse_transform" title="spectrochempy.FastICA.inverse_transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">inverse_transform</span></code></a>.</p></li>
+<li><p><strong>X_hat</strong> (<a class="reference internal" href="spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NDDataset</span></code></a>, optional) – Inverse transformed dataset. if <a class="reference internal" href="#spectrochempy.FastICA.X" title="spectrochempy.FastICA.X"><code class="xref py py-obj docutils literal notranslate"><span class="pre">X</span></code></a> is provided, <code class="xref py py-obj docutils literal notranslate"><span class="pre">X_hat</span></code>
+must also be provided as compuyed externally.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.11.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Axes</span></code></a> – Matplotlib subplot axe.</p>
+</dd>
+<dt class="field-odd">Other Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>exp_c</strong> (<em>color, colormap, or list of colors, optional</em>) – Color(s) for experimental spectra.
+- None: use unified semantic resolver (auto-detect categorical/sequential)
+- Single color: use for all experimental spectra
+- Colormap name/object: sample colors from colormap
+- List/tuple: use as explicit color cycle</p></li>
+<li><p><strong>calc_c</strong> (<em>color, colormap, or list of colors, optional</em>) – Color(s) for calculated spectra.
+- None: use default blue “#2a6fbb”
+- Single color: use for all calculated spectra
+- Colormap name/object: sample colors from colormap
+- List/tuple: use as explicit color cycle</p></li>
+<li><p><strong>resid_c</strong> (<em>color, colormap, or list of colors, optional</em>) – Color(s) for residual spectra.
+- None: use default grey “0.4”
+- Single color: use for all residual spectra
+- Colormap name/object: sample colors from colormap
+- List/tuple: use as explicit color cycle</p></li>
+<li><p><strong>exp_linestyle</strong> (<em>str, optional</em>) – Line style for experimental spectra. Default: “-“.</p></li>
+<li><p><strong>calc_linestyle</strong> (<em>str, optional</em>) – Line style for calculated spectra. Default: “–“.</p></li>
+<li><p><strong>resid_linestyle</strong> (<em>str, optional</em>) – Line style for residual spectra. Default: “-“.</p></li>
+<li><p><strong>exp_linewidth</strong> (<em>float, optional</em>) – Line width for experimental spectra. Default: 1.2.</p></li>
+<li><p><strong>calc_linewidth</strong> (<em>float, optional</em>) – Line width for calculated spectra. Default: 1.0.</p></li>
+<li><p><strong>resid_linewidth</strong> (<em>float, optional</em>) – Line width for residual spectra. Default: 1.0.</p></li>
+<li><p><strong>min_contrast</strong> (<em>float, optional</em>) – Minimum contrast ratio for sequential colormaps. Default: 1.5.</p></li>
+<li><p><strong>offset</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a>, optional, default: <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>) – Specify the separation (in percent) between the
+<span class="math notranslate nohighlight">\(X\)</span> , <span class="math notranslate nohighlight">\(X_hat\)</span> and <span class="math notranslate nohighlight">\(E\)</span>.</p></li>
+<li><p><strong>nb_traces</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> or <code class="docutils literal notranslate"><span class="pre">'all'</span></code>, optional) – Number of lines to display. Default is <code class="docutils literal notranslate"><span class="pre">'all'</span></code>.</p></li>
+<li><p><strong>**others</strong> (<em>Other keywords parameters</em>) – Parameters passed to the internal <a class="reference internal" href="spectrochempy.plot.html#spectrochempy.plot" title="spectrochempy.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a> method of the <a class="reference internal" href="#spectrochempy.FastICA.X" title="spectrochempy.FastICA.X"><code class="xref py py-obj docutils literal notranslate"><span class="pre">X</span></code></a> dataset.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.plotmerit">
+<span class="sig-name descname"><span class="pre">plotmerit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_hat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/src/spectrochempy/analysis/_base/_analysisbase.py#L503-L72"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.FastICA.plotmerit" title="Permalink to this definition"></a></dt>
+<dd><p>Plot the input (<a class="reference internal" href="#spectrochempy.FastICA.X" title="spectrochempy.FastICA.X"><code class="xref py py-obj docutils literal notranslate"><span class="pre">X</span></code></a>), reconstructed (<code class="xref py py-obj docutils literal notranslate"><span class="pre">X_hat</span></code>) and residuals.</p>
+<p><span class="math notranslate nohighlight">\(X\)</span> and <span class="math notranslate nohighlight">\(\hat{X}\)</span> can be passed as arguments. If not,
+the <a class="reference internal" href="#spectrochempy.FastICA.X" title="spectrochempy.FastICA.X"><code class="xref py py-obj docutils literal notranslate"><span class="pre">X</span></code></a> attribute is used for <span class="math notranslate nohighlight">\(X\)</span>hat{X}`is computed by
+the <a class="reference internal" href="#spectrochempy.FastICA.inverse_transform" title="spectrochempy.FastICA.inverse_transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">inverse_transform</span></code></a> method</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<a class="reference internal" href="spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NDDataset</span></code></a>, optional) – Original dataset. If is not provided (default), the <a class="reference internal" href="#spectrochempy.FastICA.X" title="spectrochempy.FastICA.X"><code class="xref py py-obj docutils literal notranslate"><span class="pre">X</span></code></a>
+attribute is used and X_hat is computed using <a class="reference internal" href="#spectrochempy.FastICA.inverse_transform" title="spectrochempy.FastICA.inverse_transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">inverse_transform</span></code></a>.</p></li>
+<li><p><strong>X_hat</strong> (<a class="reference internal" href="spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NDDataset</span></code></a>, optional) – Inverse transformed dataset. if <a class="reference internal" href="#spectrochempy.FastICA.X" title="spectrochempy.FastICA.X"><code class="xref py py-obj docutils literal notranslate"><span class="pre">X</span></code></a> is provided, <code class="xref py py-obj docutils literal notranslate"><span class="pre">X_hat</span></code>
+must also be provided as compuyed externally.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.11.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Axes</span></code></a> – Matplotlib subplot axe.</p>
+</dd>
+<dt class="field-odd">Other Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>exp_c</strong> (<em>color, colormap, or list of colors, optional</em>) – Color(s) for experimental spectra.
+- None: use unified semantic resolver (auto-detect categorical/sequential)
+- Single color: use for all experimental spectra
+- Colormap name/object: sample colors from colormap
+- List/tuple: use as explicit color cycle</p></li>
+<li><p><strong>calc_c</strong> (<em>color, colormap, or list of colors, optional</em>) – Color(s) for calculated spectra.
+- None: use default blue “#2a6fbb”
+- Single color: use for all calculated spectra
+- Colormap name/object: sample colors from colormap
+- List/tuple: use as explicit color cycle</p></li>
+<li><p><strong>resid_c</strong> (<em>color, colormap, or list of colors, optional</em>) – Color(s) for residual spectra.
+- None: use default grey “0.4”
+- Single color: use for all residual spectra
+- Colormap name/object: sample colors from colormap
+- List/tuple: use as explicit color cycle</p></li>
+<li><p><strong>exp_linestyle</strong> (<em>str, optional</em>) – Line style for experimental spectra. Default: “-“.</p></li>
+<li><p><strong>calc_linestyle</strong> (<em>str, optional</em>) – Line style for calculated spectra. Default: “–“.</p></li>
+<li><p><strong>resid_linestyle</strong> (<em>str, optional</em>) – Line style for residual spectra. Default: “-“.</p></li>
+<li><p><strong>exp_linewidth</strong> (<em>float, optional</em>) – Line width for experimental spectra. Default: 1.2.</p></li>
+<li><p><strong>calc_linewidth</strong> (<em>float, optional</em>) – Line width for calculated spectra. Default: 1.0.</p></li>
+<li><p><strong>resid_linewidth</strong> (<em>float, optional</em>) – Line width for residual spectra. Default: 1.0.</p></li>
+<li><p><strong>min_contrast</strong> (<em>float, optional</em>) – Minimum contrast ratio for sequential colormaps. Default: 1.5.</p></li>
+<li><p><strong>offset</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a>, optional, default: <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>) – Specify the separation (in percent) between the
+<span class="math notranslate nohighlight">\(X\)</span> , <span class="math notranslate nohighlight">\(X_hat\)</span> and <span class="math notranslate nohighlight">\(E\)</span>.</p></li>
+<li><p><strong>nb_traces</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a> or <code class="docutils literal notranslate"><span class="pre">'all'</span></code>, optional) – Number of lines to display. Default is <code class="docutils literal notranslate"><span class="pre">'all'</span></code>.</p></li>
+<li><p><strong>**others</strong> (<em>Other keywords parameters</em>) – Parameters passed to the internal <a class="reference internal" href="spectrochempy.plot.html#spectrochempy.plot" title="spectrochempy.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a> method of the <a class="reference internal" href="#spectrochempy.FastICA.X" title="spectrochempy.FastICA.X"><code class="xref py py-obj docutils literal notranslate"><span class="pre">X</span></code></a> dataset.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.reconstruct">
+<span class="sig-name descname"><span class="pre">reconstruct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X_transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/src/spectrochempy/analysis/_base/_analysisbase.py#L444-L6"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.FastICA.reconstruct" title="Permalink to this definition"></a></dt>
+<dd><p>Transform data back to its original space.</p>
+<p>In other words, return an input <code class="xref py py-obj docutils literal notranslate"><span class="pre">X_original</span></code> whose reduce/transform would
+be <code class="xref py py-obj docutils literal notranslate"><span class="pre">X_transform</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X_transform</strong> (array-like of shape (<a class="reference internal" href="../glossary.html#term-n_observations"><span class="xref std std-term">n_observations</span></a>, <a class="reference internal" href="../glossary.html#term-n_components"><span class="xref std std-term">n_components</span></a>), optional) – Reduced <a class="reference internal" href="#spectrochempy.FastICA.X" title="spectrochempy.FastICA.X"><code class="xref py py-obj docutils literal notranslate"><span class="pre">X</span></code></a> data, where <code class="xref py py-obj docutils literal notranslate"><span class="pre">n_observations</span></code> is the number of observations
+and <a class="reference internal" href="#spectrochempy.FastICA.n_components" title="spectrochempy.FastICA.n_components"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_components</span></code></a> is the number of components. If <code class="xref py py-obj docutils literal notranslate"><span class="pre">X_transform</span></code> is not
+provided, a transform of <a class="reference internal" href="#spectrochempy.FastICA.X" title="spectrochempy.FastICA.X"><code class="xref py py-obj docutils literal notranslate"><span class="pre">X</span></code></a> provided in <a class="reference internal" href="#spectrochempy.FastICA.fit" title="spectrochempy.FastICA.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a> is performed first.</p></li>
+<li><p><strong>**kwargs</strong> (<em>keyword parameters, optional</em>) – See Other Parameters.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><a class="reference internal" href="spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NDDataset</span></code></a> – Dataset with shape (<a class="reference internal" href="../glossary.html#term-n_observations"><span class="xref std std-term">n_observations</span></a>, <a class="reference internal" href="../glossary.html#term-n_features"><span class="xref std std-term">n_features</span></a>).</p>
+</dd>
+<dt class="field-odd">Other Parameters</dt>
+<dd class="field-odd"><p><strong>n_components</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>, optional) – The number of components to use for the reconstruction.</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#spectrochempy.FastICA.reconstruct" title="spectrochempy.FastICA.reconstruct"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reconstruct</span></code></a></dt><dd><p>Alias of inverse_transform (Deprecated).</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>Deprecated in version 0.6, will be removed in 0.11.0.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.reduce">
+<span class="sig-name descname"><span class="pre">reduce</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/src/spectrochempy/analysis/_base/_analysisbase.py#L432-L5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.FastICA.reduce" title="Permalink to this definition"></a></dt>
+<dd><p>Apply dimensionality reduction to <a class="reference internal" href="#spectrochempy.FastICA.X" title="spectrochempy.FastICA.X"><code class="xref py py-obj docutils literal notranslate"><span class="pre">X</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<a class="reference internal" href="spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NDDataset</span></code></a> or <a class="reference internal" href="../glossary.html#term-array-like"><span class="xref std std-term">array-like</span></a> of shape (<a class="reference internal" href="../glossary.html#term-n_observations"><span class="xref std std-term">n_observations</span></a>, <a class="reference internal" href="../glossary.html#term-n_features"><span class="xref std std-term">n_features</span></a>), optional) – New data, where <a class="reference internal" href="../glossary.html#term-n_observations"><span class="xref std std-term">n_observations</span></a> is the number of observations
+and <a class="reference internal" href="../glossary.html#term-n_features"><span class="xref std std-term">n_features</span></a> is the number of features.
+if not provided, the input dataset of the <a class="reference internal" href="#spectrochempy.FastICA.fit" title="spectrochempy.FastICA.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a> method will be used.</p></li>
+<li><p><strong>**kwargs</strong> (<em>keyword parameters, optional</em>) – See Other Parameters.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><a class="reference internal" href="spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NDDataset</span></code></a> – Dataset with shape (<a class="reference internal" href="../glossary.html#term-n_observations"><span class="xref std std-term">n_observations</span></a>, <a class="reference internal" href="../glossary.html#term-n_components"><span class="xref std std-term">n_components</span></a>).</p>
+</dd>
+<dt class="field-odd">Other Parameters</dt>
+<dd class="field-odd"><p><strong>n_components</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>, optional) – The number of components to use for the reduction. If not given
+the number of components is eventually the one specified or determined
+in the <a class="reference internal" href="#spectrochempy.FastICA.fit" title="spectrochempy.FastICA.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a> process.</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Deprecated in version 0.6, will be removed in 0.11.0.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/src/spectrochempy/utils/metaconfigurable.py#L110-L17"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.FastICA.reset" title="Permalink to this definition"></a></dt>
+<dd><p>Reset configuration parameters to their default values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/src/spectrochempy/utils/metaconfigurable.py#L60-L13"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.FastICA.to_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Return config value in a dict form.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> – A regular dictionary.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.FastICA.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spectrochempy.FastICA.transform" title="Permalink to this definition"></a></dt>
+<dd><p>Apply dimensionality reduction to <a class="reference internal" href="#spectrochempy.FastICA.X" title="spectrochempy.FastICA.X"><code class="xref py py-obj docutils literal notranslate"><span class="pre">X</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<a class="reference internal" href="spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NDDataset</span></code></a> or <a class="reference internal" href="../glossary.html#term-array-like"><span class="xref std std-term">array-like</span></a> of shape (<a class="reference internal" href="../glossary.html#term-n_observations"><span class="xref std std-term">n_observations</span></a>, <a class="reference internal" href="../glossary.html#term-n_features"><span class="xref std std-term">n_features</span></a>), optional) – New data, where <a class="reference internal" href="../glossary.html#term-n_observations"><span class="xref std std-term">n_observations</span></a> is the number of observations
+and <a class="reference internal" href="../glossary.html#term-n_features"><span class="xref std std-term">n_features</span></a> is the number of features.
+if not provided, the input dataset of the <a class="reference internal" href="#spectrochempy.FastICA.fit" title="spectrochempy.FastICA.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a> method will be used.</p></li>
+<li><p><strong>**kwargs</strong> (<em>keyword parameters, optional</em>) – See Other Parameters.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><a class="reference internal" href="spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NDDataset</span></code></a> – Dataset with shape (<a class="reference internal" href="../glossary.html#term-n_observations"><span class="xref std std-term">n_observations</span></a>, <a class="reference internal" href="../glossary.html#term-n_components"><span class="xref std std-term">n_components</span></a>).</p>
+</dd>
+<dt class="field-odd">Other Parameters</dt>
+<dd class="field-odd"><p><strong>n_components</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>, optional) – The number of components to use for the reduction. If not given
+the number of components is eventually the one specified or determined
+in the <a class="reference internal" href="#spectrochempy.FastICA.fit" title="spectrochempy.FastICA.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a> process.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<p class="rubric">Examples using spectrochempy.FastICA</p>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="FastICA example"><img alt="" src="../../_images/sphx_glr_plot_fast_ica_thumb.png" />
+<p><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_fast_ica.html#sphx-glr-gettingstarted-examples-gallery-auto-examples-analysis-a-decomposition-plot-fast-ica-py"><span class="std std-ref">FastICA example</span></a></p>
+  <div class="sphx-glr-thumbnail-title">FastICA example</div>
+</div></div></section>
+
+
+           </div>
+          </div>
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="spectrochempy.MCRALS.html" class="btn btn-neutral float-left" title="spectrochempy.MCRALS" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="spectrochempy.NMF.html" class="btn btn-neutral float-right" title="spectrochempy.NMF" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2014-2026 Laboratoire Catalyse et Spectrochimie (LCS) — CeCILL-B license.
+      <span class="lastupdated">Last updated on Jun 26, 2026.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

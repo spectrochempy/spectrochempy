@@ -1,0 +1,15 @@
+What's new in revision 0.5.3
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-0.5.3.
+See :ref:`release` for a full changelog including other versions of SpectroChemPy.
+
+New features
+~~~~~~~~~~~~
+* EFA speed optimization.
+
+Bug fixes
+~~~~~~~~~
+* Many code fixes.
+* Fix some examples.
+* Code cleaning.
