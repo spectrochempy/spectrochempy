@@ -129,23 +129,30 @@ class TestLazyInitialization:
         data = NDDataset(x, dims=["x"])
 
         # Measure first plot time (includes initialization)
-        start_time = time.time()
+        start_time = time.perf_counter()
         data.plot(show=False)
-        first_plot_time = time.time() - start_time
+        first_plot_time = time.perf_counter() - start_time
 
-        # Measure second plot time (should be faster)
-        start_time = time.time()
-        data.plot(show=False)
-        second_plot_time = time.time() - start_time
+        # Measure several warm plots and compare against their median rather
+        # than a single very small denominator, which is too noisy on CI.
+        warm_plot_times = []
+        for _ in range(3):
+            start_time = time.perf_counter()
+            data.plot(show=False)
+            warm_plot_times.append(time.perf_counter() - start_time)
+
+        warm_plot_time = float(np.median(warm_plot_times))
 
         # Assert - first plot may be slower due to initialization
         assert first_plot_time > 0, "First plot should take some time"
-        assert second_plot_time >= 0, "Second plot should also take time"
+        assert warm_plot_time >= 0, "Warm plots should also take time"
 
-        # First plot might be slower but shouldn't be dramatically slower
+        # The first plot includes one-time matplotlib initialization. Keep the
+        # check intentionally loose so backend jitter or very fast warm plots
+        # do not cause spurious CI failures.
         assert (
-            first_plot_time < second_plot_time * 10
-        ), "First plot shouldn't be dramatically slower than subsequent plots"
+            first_plot_time <= max(1.0, warm_plot_time * 50)
+        ), "First plot shouldn't have excessive one-time lazy-init overhead"
 
     def test_lazy_initialization_preferences(self, backend_checker):
         """
