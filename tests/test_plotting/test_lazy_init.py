@@ -150,8 +150,8 @@ class TestLazyInitialization:
         # The first plot includes one-time matplotlib initialization. Keep the
         # check intentionally loose so backend jitter or very fast warm plots
         # do not cause spurious CI failures.
-        assert (
-            first_plot_time <= max(1.0, warm_plot_time * 50)
+        assert first_plot_time <= max(
+            1.0, warm_plot_time * 50
         ), "First plot shouldn't have excessive one-time lazy-init overhead"
 
     def test_lazy_initialization_preferences(self, backend_checker):
