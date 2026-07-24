@@ -29,7 +29,8 @@ Key observed patterns:
     - History appended with timestamp formatting
     - Mask reconstruction is operation-dependent
     - Labels on exact coordinate matches only
-    - Multi-coordinate interpolation currently raises a ValueError
+    - Multi-coordinate interpolation preserves the group and interpolates
+      secondary numeric coordinates from the selected default coordinate
 """
 
 import numpy as np
@@ -96,6 +97,7 @@ def ds_multi_coord():
     primary = Coord(xp, title="wavenumber", units="cm^-1")
     secondary = Coord(xs, title="wn_squared")
     multi_x = CoordSet(primary, secondary, name="x")
+    multi_x.select([c.title for c in multi_x.coords].index("wavenumber") + 1)
     y = Coord(np.linspace(0.0, 60.0, 5), title="time", units="s")
     return NDDataset(
         np.arange(35.0, dtype="float64").reshape(5, 7),
@@ -200,23 +202,26 @@ class TestCoordSet:
 
     def test_multi_coord_preserves_group_nature(self, ds_multi_coord):
         target = np.linspace(3500.0, 1500.0, 3)
-        with pytest.raises(ValueError, match="cannot convert float NaN to integer"):
-            ds_multi_coord.interpolate(dim="x", coord=target)
+        r = ds_multi_coord.interpolate(dim="x", coord=target)
+        assert isinstance(r.coord("x"), CoordSet)
+        assert r.coord("x").is_same_dim
 
     def test_multi_coord_default_unchanged(self, ds_multi_coord):
         target = np.linspace(3500.0, 1500.0, 3)
-        with pytest.raises(ValueError, match="cannot convert float NaN to integer"):
-            ds_multi_coord.interpolate(dim="x", coord=target)
+        r = ds_multi_coord.interpolate(dim="x", coord=target)
+        assert r.coord("x").default.title == ds_multi_coord.coord("x").default.title
 
     def test_secondary_coord_interpolated(self, ds_multi_coord):
         target = np.linspace(3500.0, 1500.0, 3)
-        with pytest.raises(ValueError, match="cannot convert float NaN to integer"):
-            ds_multi_coord.interpolate(dim="x", coord=target)
+        r = ds_multi_coord.interpolate(dim="x", coord=target)
+        secondary = next(c for c in r.coord("x").coords if c.title == "wn_squared")
+        np.testing.assert_allclose(secondary.data, target**2, rtol=1e-10)
 
     def test_secondary_coord_values_interpolated(self, ds_multi_coord):
         target = np.array([3000.0, 2000.0, 1500.0])
-        with pytest.raises(ValueError, match="cannot convert float NaN to integer"):
-            ds_multi_coord.interpolate(dim="x", coord=target)
+        r = ds_multi_coord.interpolate(dim="x", coord=target)
+        secondary = next(c for c in r.coord("x").coords if c.title == "wn_squared")
+        np.testing.assert_allclose(secondary.data, target**2, rtol=1e-10)
 
     def test_coord_title_preserved_for_explicit_coord_target(self, ds_2d):
         target = Coord(np.linspace(3500.0, 1500.0, 3), title="mine", units="cm^-1")
@@ -267,7 +272,7 @@ class TestLabels:
         assert r.coord("x")._labels is None
 
     def test_multi_coord_labels_consistent(self, ds_multi_coord):
-        """Current behavior: only the interpolated secondary coord keeps labels."""
+        """Current behavior: labels follow the selected interpolation coordinate."""
         primary = ds_multi_coord.coord("x").default
         primary.labels = ["p0", "p1", "p2", "p3", "p4", "p5", "p6"]
         values = np.asarray(primary.data)
@@ -282,8 +287,8 @@ class TestLabels:
             labels_by_title[c.title] = (
                 None if raw is None else list(np.asarray(c.get_labels()))
             )
-        assert labels_by_title["wn_squared"] == ["p3", "p1"]
-        assert labels_by_title["wavenumber"] is None
+        assert labels_by_title["wn_squared"] is None
+        assert labels_by_title["wavenumber"] == ["p3", "p1"]
 
 
 # ======================================================================================
@@ -465,13 +470,14 @@ class TestSecondaryCoordinates:
 
     def test_secondary_coord_interpolated(self, ds_multi_coord):
         target = np.linspace(3500.0, 1500.0, 3)
-        with pytest.raises(ValueError, match="cannot convert float NaN to integer"):
-            ds_multi_coord.interpolate(dim="x", coord=target)
+        r = ds_multi_coord.interpolate(dim="x", coord=target)
+        secondary = next(c for c in r.coord("x").coords if c.title == "wn_squared")
+        np.testing.assert_allclose(secondary.data, target**2, rtol=1e-10)
 
     def test_secondary_coord_units_preserved(self, ds_multi_coord):
         target = np.linspace(3500.0, 1500.0, 3)
-        with pytest.raises(ValueError, match="cannot convert float NaN to integer"):
-            ds_multi_coord.interpolate(dim="x", coord=target)
+        r = ds_multi_coord.interpolate(dim="x", coord=target)
+        assert r.coord("x").default.units == ds_multi_coord.coord("x").default.units
 
 
 # ======================================================================================

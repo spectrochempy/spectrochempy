@@ -488,6 +488,7 @@ class TestInterpolateCoordReconstruction:
         from spectrochempy import CoordSet
 
         multi_coord = CoordSet(coord_x, secondary, name="x")
+        multi_coord.select([c.title for c in multi_coord.coords].index("x") + 1)
         ds = NDDataset(data, coordset=[coord_y, multi_coord])
         assert isinstance(ds.coord("x"), CoordSet)
 

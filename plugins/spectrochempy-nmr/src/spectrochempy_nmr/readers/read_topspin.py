@@ -832,11 +832,18 @@ def _read_topspin(*args, **kwargs):
     if not processed:
         dic, data = read_fid(f_expno, acqus_files=acqus_files, procs_files=procs_files)
 
-        # Apply a -90° phase shift to align nmrglue's raw data convention with
-        # TopSpin's convention. Empirically verified on topspin_1d/1: removing
-        # this rotation drops the module correlation with TopSpin's processed
-        # 1r spectrum from 0.91 to 0.69.
-        data = data * np.exp(-1j * np.pi / 2.0)
+        # Keep the raw 1D FID in nmrglue's direct-complex orientation.
+        # The public 1D QSIM FFT path already applies the conjugated Fourier
+        # convention needed to recover the TopSpin spectral orientation from
+        # that raw signal.  Injecting an additional -90° rotation here would
+        # leave the final 1D spectrum globally quadrature-shifted relative to
+        # the bundled TopSpin `1r`/`1i` reference.
+        #
+        # Historical 2D SER work used the imported -90° direct-dimension
+        # rotation. Keep that behavior there until the separate 2D campaign is
+        # revisited.
+        if path.name == "ser":
+            data = data * np.exp(-1j * np.pi / 2.0)
 
         # Look the case when the reshaping was not correct
         # for example, this happens when the number
@@ -1056,10 +1063,12 @@ def _read_topspin(*args, **kwargs):
         if not hasattr(meta, "phc0") or meta.phc0 is None:
             meta.phc0 = [0] * data.ndim
 
-    # Final phase convention adjustment to keep the data coherent with
-    # Bruker/TopSpin processing. Combined with the -90° shift above, this
-    # aligns the FFT magnitude with TopSpin's 1r output.
-    if meta.iscomplex[-1]:
+    # For multi-dimensional and already-processed direct-complex data we keep
+    # the historical imported convention adjustment.  For raw 1D FIDs, however,
+    # the public QSIM FFT path already applies the required conjugated Fourier
+    # convention; conjugating the raw FID here would cancel that convention and
+    # produce a spectrum inconsistent with the bundled TopSpin 1r reference.
+    if meta.iscomplex[-1] and (processed or parmode > 0):
         data = np.conj(data * np.exp(np.pi * 1j / 2.0))
 
     # normalised amplitudes to ns=1 and rg=1
@@ -1069,7 +1078,14 @@ def _read_topspin(*args, **kwargs):
             [1] * data.ndim,
         )  # sometimes these parameters are not present
         meta.rg = meta.get("rg", [1.0] * data.ndim)
-        fac = float(meta.ns[-1]) * float(meta.rg[-1])
+        if processed:
+            # TopSpin pdata amplitudes already carry the scan averaging.
+            # Dividing them again by NS makes the treated vendor reference
+            # artificially smaller than the spectrum reconstructed from the raw
+            # FID with the public pipeline.
+            fac = float(meta.rg[-1])
+        else:
+            fac = float(meta.ns[-1]) * float(meta.rg[-1])
         meta.rgold = [meta.rg[-1]]
         meta.rg[-1] = 1.0
         meta.nsold = [meta.ns[-1]]  # store the old value of NS

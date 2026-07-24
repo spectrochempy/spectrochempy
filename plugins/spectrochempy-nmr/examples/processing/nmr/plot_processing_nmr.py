@@ -21,6 +21,8 @@ This example stays within the currently validated public scope of the plugin:
 # %%
 # Import API
 # ----------
+import numpy as np
+
 import spectrochempy as scp
 
 # %%
@@ -50,13 +52,19 @@ _ = dataset.plot()
 
 # %%
 # Select a region of interest
-spectrum = dataset[-40.0:-15.0]
+spectrum = dataset[-7.0:12.0]
 _ = spectrum.plot()
 
 # %%
 # Peak picking
 # ------------
-peaks, _ = spectrum.find_peaks()
+#
+# The ppm slice remains scientifically regular, but the current core `Coord`
+# machinery can still lose the `linear` flag after slicing because of
+# floating-point rounding on the sub-axis.  Until that core behavior is fixed,
+# use plain point spacing for peak picking in this example so it remains fully
+# executable.
+peaks, _ = spectrum.find_peaks(use_coord=False)
 
 
 # %%
@@ -66,17 +74,20 @@ peaks, _ = spectrum.find_peaks()
 
 def plot_with_pp(s, peaks):
     ax = s.plot()  # output the spectrum on ax. ax will receive next plot too;
-    pks = peaks + 0.2  # add a small offset on the y position of the markers
-    _ = pks.plot_scatter(
-        ax=ax,
+    peak_offset = 0.02 * float(np.max(np.abs(np.asarray(s.data))))
+    axis = np.asarray(s.x.data, dtype=float)
+    point_pos = np.asarray(peaks.x.data, dtype=float).squeeze()
+    peak_y = np.asarray(peaks.data, dtype=float).squeeze()
+    peak_x = np.interp(point_pos, np.arange(s.shape[-1], dtype=float), axis)
+    marker_y = peak_y + peak_offset
+
+    ax.scatter(
+        peak_x,
+        marker_y,
         marker="v",
         color="black",
-        clear=False,  # we need to keep the previous output on ax
-        data_only=True,  # we don't need to redraw all things like labels, etc...
-        ylim=(-0.1, 7),
     )
-    for p in pks:
-        x, y = p.coord(-1).values.m, (p + 0.2).values.m
+    for x, y in zip(peak_x, marker_y, strict=False):
         ax.annotate(
             f"{x:0.1f}",
             xy=(x, y),
@@ -86,72 +97,55 @@ def plot_with_pp(s, peaks):
         )
 
 
+def peak_positions_and_heights(s, peaks):
+    axis = np.asarray(s.x.data, dtype=float)
+    point_pos = np.asarray(peaks.x.data, dtype=float).squeeze()
+    peak_y = np.asarray(peaks.data, dtype=float).squeeze()
+    peak_x = np.interp(point_pos, np.arange(s.shape[-1], dtype=float), axis)
+    order = np.argsort(peak_x)
+    return peak_x[order], peak_y[order]
+
+
+def build_fit_script(s, peaks):
+    peak_x, peak_y = peak_positions_and_heights(s, peaks)
+    lines = [
+        "#-----------------------------------------------------------",
+        "# Automatically initialized from the currently selected peaks",
+        "#-----------------------------------------------------------",
+        "",
+        "COMMON:",
+        "$ commonwidth: 0.2, 0.01, 1.0",
+        "$ commonratio: .5, 0, 1",
+        "",
+    ]
+    for i, (x, y) in enumerate(zip(peak_x, peak_y, strict=False), start=1):
+        lines.extend(
+            [
+                f"MODEL: LINE_{i}",
+                "shape: voigtmodel",
+                f"    $ ampl:  {y:0.1f}, 0.0, none",
+                f"    $ pos:   {x:0.4f}, {x - 0.25:0.4f}, {x + 0.25:0.4f}",
+                "    > ratio: commonratio",
+                "    > width: commonwidth",
+                "",
+            ]
+        )
+    return "\n".join(lines)
+
+
 plot_with_pp(spectrum, peaks)
 
 # %%
 # Set some parameters to get less but significant peaks
-peaks, _ = spectrum.find_peaks(height=1.0, distance=1.0)
+peaks, _ = spectrum.find_peaks(height=50000.0, distance=20, use_coord=False)
 plot_with_pp(spectrum, peaks)
 
 # %%
 # Peak fitting
 # ------------
 #
-# Fit parameters are defined in a script (a single text as below)
-script = """
-#-----------------------------------------------------------
-# syntax for parameters definition:
-# name: value, low_bound,  high_bound
-# available prefix:
-#  # for comments
-#  * for fixed parameters
-#  $ for variable parameters
-#  > for reference to a parameter in the COMMON block
-#    (> is forbidden in the COMMON block)
-# common block parameters should not have a _ in their names
-#-----------------------------------------------------------
-#
-
-COMMON:
-$ commonwidth: 1, 0, 5
-$ commonratio: .5, 0, 1
-
-MODEL: LINE_1
-shape: voigtmodel
-    $ ampl:  1, 0.0, none
-    $ pos:   -21.7, -22., -20
-    > ratio: commonratio
-    > width: commonwidth
-
-MODEL: LINE_2
-shape: voigtmodel
-    $ ampl:  4, 0.0, none
-    $ pos:   -24, -24.5, -23.5
-    > ratio: commonratio
-    > width: commonwidth
-
-MODEL: LINE_3
-shape: voigtmodel
-    $ ampl:  4, 0.0, none
-    $ pos:   -25.4, -25.8, -25
-    > ratio: commonratio
-    > width: commonwidth
-
-MODEL: LINE_4
-shape: voigtmodel
-    $ ampl:  4, 0.0, none
-    $ pos:   -27.8, -28.5, -27
-    > ratio: commonratio
-    > width: commonwidth
-
-MODEL: LINE_5
-shape: voigtmodel
-    $ ampl:  4, 0.0, none
-    $ pos:   -31.5, -32, -31
-    > ratio: commonratio
-    > width: commonwidth
-
-"""
+# Fit parameters are initialized from the currently selected peaks.
+script = build_fit_script(spectrum, peaks)
 
 # %%
 # We will work here on the processed 1D region of interest.
@@ -164,7 +158,7 @@ f1 = scp.Optimize(log_level="INFO")
 # %%
 # Set parameters
 f1.script = script
-f1.max_iter = 5000
+f1.max_iter = 30000
 
 
 # %%
@@ -186,3 +180,5 @@ _ = f1.plot_merit(offset=2)
 # when the example is run as a notebook (`.ipynb`).
 
 # scp.show()
+
+# %%
