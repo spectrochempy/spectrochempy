@@ -574,6 +574,25 @@ class TestProcessTimeDomain:
         with pytest.raises((TypeError, ValueError), match=match):
             exp.process(**kwargs)
 
+    @pytest.mark.skipif(not _has_topspin_1d_pdata(), reason="TopSpin 1D pdata missing")
+    @pytest.mark.parametrize(
+        "kwargs",
+        [
+            {"apodization": "em", "lb": 2.0},
+            {"apodization": "gm", "lb": 2.0, "gb": 1.0},
+            {"apodization": "sp", "ssb": 2.0, "pow": 2},
+        ],
+    )
+    def test_frequency_domain_rejects_explicit_apodization_requests(self, kwargs):
+        spectrum = _read_or_skip(nmrdir / "topspin_1d", expno=1, procno=1)
+        exp = Experiment(spectrum)
+
+        with pytest.raises(
+            RuntimeError,
+            match="Frequency-domain datasets cannot accept apodization requests",
+        ):
+            exp.process(**kwargs)
+
     def test_gm_process_matches_manual_apodize_then_fft_on_synthetic_fid(self):
         ds = _make_synthetic_vendor_fid(npts=64, sw_hz=6400.0, freq_hz=250.0)
         public = Experiment(ds.copy()).process(

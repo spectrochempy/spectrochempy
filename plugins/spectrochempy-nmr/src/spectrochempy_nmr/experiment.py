@@ -442,7 +442,8 @@ class Experiment:
         ----------
         apodization : str, optional
             Apodization function name (``'em'``, ``'gm'``, ``'sp'``).
-            Only applied to time-domain data.  Ignored for frequency-domain.
+            Only accepted for time-domain data. Frequency-domain datasets
+            reject explicit apodization requests.
         lb : float or Quantity, optional
             Explicit line-broadening parameter for ``'em'`` and Lorentzian
             term for ``'gm'``. If omitted, the selected core apodization
@@ -509,6 +510,13 @@ class Experiment:
                 phc1=phc1,
             )
         if self.is_frequency_domain:
+            self._reject_frequency_domain_apodization_requests(
+                apodization,
+                lb=lb,
+                gb=gb,
+                ssb=ssb,
+                pow=pow,
+            )
             return self._process_frequency_domain(
                 ds,
                 phase=phase,
@@ -518,6 +526,36 @@ class Experiment:
         msg = (
             f"Cannot process data in '{self.domain}' domain. "
             f"Current state: {' × '.join(self.domains)}"
+        )
+        raise RuntimeError(msg)
+
+    def _reject_frequency_domain_apodization_requests(
+        self,
+        apodization: str | None,
+        *,
+        lb: float | Quantity | None,
+        gb: float | Quantity | None,
+        ssb: float | None,
+        pow: float | None,
+    ) -> None:
+        """Reject explicit apodization requests on already transformed spectra."""
+        provided = {
+            "apodization": apodization,
+            "lb": lb,
+            "gb": gb,
+            "ssb": ssb,
+            "pow": pow,
+        }
+        non_null = [name for name, value in provided.items() if value is not None]
+        if not non_null:
+            return
+
+        names = ", ".join(non_null)
+        msg = (
+            "Frequency-domain datasets cannot accept apodization requests in "
+            f"Experiment.process(). Received: {names}. Use apodization only on "
+            "time-domain FIDs, or call process() without apodization arguments "
+            "to preserve the existing frequency-domain workflow."
         )
         raise RuntimeError(msg)
 
