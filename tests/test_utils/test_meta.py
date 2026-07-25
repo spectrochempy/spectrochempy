@@ -321,6 +321,45 @@ def test_nested_meta_update():
     meta.update(update_meta)
     assert meta.nested.key == "new value"
 
+
+def test_repr_html_supports_plain_nested_dicts():
+    """Plain nested dicts should render without requiring a ``data`` wrapper."""
+    meta = Meta(
+        title="demo",
+        nmr_processing={
+            "vendor_profile": {
+                "vendor": "bruker",
+                "source_files": ["procs"],
+                "parameters": {"LB": 2.0 * ur.Hz},
+            },
+            "observed_state": {"processing_history": "not_established"},
+        },
+    )
+
+    html = meta._repr_html_()
+
+    assert "nmr_processing" in html
+    assert "vendor_profile" in html
+    assert "bruker" in html
+    assert "processing_history" in html
+
+
+def test_repr_html_preserves_historical_data_wrapped_dicts():
+    """Historical nested dicts exposing a ``data`` payload should still render."""
+    meta = Meta(
+        opus={
+            "name": "history-block",
+            "data": {
+                "value": "OPUS value",
+            },
+        }
+    )
+
+    html = meta._repr_html_()
+
+    assert "history-block [opus]" in html
+    assert "OPUS value" in html
+
     # Update with a dictionary
     meta2 = Meta()
     nested_meta = {"key": "value"}

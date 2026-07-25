@@ -5,8 +5,12 @@
 # ======================================================================================
 # ruff: noqa: S101, F841
 
+import shutil
+from pathlib import Path
 
+import numpy as np
 import pytest
+from spectrochempy_nmr.experiment import Experiment
 
 import spectrochempy as scp
 
@@ -29,6 +33,33 @@ def _read_topspin_or_skip(*args, **kwargs):
     if result is None:
         pytest.skip("NMR test data could not be read in this environment")
     return result
+
+
+def _copy_topspin_1d_without_pdata(tmp_path: Path) -> Path:
+    source = _require_path(nmrdir / "topspin_1d" / "1")
+    target = tmp_path / "1"
+    target.mkdir()
+    for filename in ["fid", "acqu", "acqus", "pulseprogram"]:
+        src = source / filename
+        if src.exists():
+            shutil.copy2(src, target / filename)
+    return target / "fid"
+
+
+def _copy_topspin_1d_with_custom_procs(tmp_path: Path, extra_lines: list[str]) -> Path:
+    source = _require_path(nmrdir / "topspin_1d" / "1")
+    target = tmp_path / "1"
+    pdata = target / "pdata" / "1"
+    pdata.mkdir(parents=True)
+    for filename in ["fid", "acqu", "acqus", "pulseprogram"]:
+        src = source / filename
+        if src.exists():
+            shutil.copy2(src, target / filename)
+    procs = (source / "pdata" / "1" / "procs").read_text()
+    pdata.joinpath("procs").write_text(
+        procs.replace("##END=\n", "".join(extra_lines) + "##END=\n")
+    )
+    return target / "fid"
 
 
 def _has_readdir_nmr_data():
@@ -266,6 +297,141 @@ def test_processed_data_phc0_from_procs():
     assert hasattr(nd.meta, "phc0")
     assert len(nd.meta.phc0) >= 1
     assert float(nd.meta.phc0[0].magnitude) != 0.0
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_topspin_vendor_profile_is_added_for_raw_fid():
+    nd = _read_topspin_or_skip(_require_path(nmrdir / "topspin_1d/1/fid"))
+
+    assert hasattr(nd.meta, "nmr_processing")
+    assert "scp_processing" not in nd.meta.nmr_processing
+    assert nd.meta.nmr_processing["observed_state"] == {
+        "processing_history": "not_established"
+    }
+
+    profile = nd.meta.nmr_processing["vendor_profile"]
+    assert profile["vendor"] == "bruker"
+    assert profile["source_files"] == ["procs"]
+
+    params = profile["parameters"]
+    assert params["WDW"] == 1
+    assert params["LB"] == 0.0 * scp.ur.Hz
+    assert params["GB"] == 0
+    assert params["SSB"] == 0
+    assert params["SI"] == 16384
+    assert params["FT_mod"] == 6
+    assert float(params["PHC0"].magnitude) == pytest.approx(52.43836)
+    assert float(params["PHC1"].magnitude) == pytest.approx(-16.8366)
+    assert str(params["PHC0"].units) == "deg"
+    assert str(params["PHC1"].units) == "deg"
+    assert params["OFFSET"] == pytest.approx(253.0909)
+    assert params["FCOR"] == 1
+    assert params["PKNL"] is True
+    assert params["NC_proc"] == -5
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_topspin_vendor_profile_is_added_for_processed_1r():
+    nd = _read_topspin_or_skip(_require_path(nmrdir / "topspin_1d/1/pdata/1/1r"))
+
+    assert hasattr(nd.meta, "nmr_processing")
+    assert "scp_processing" not in nd.meta.nmr_processing
+    profile = nd.meta.nmr_processing["vendor_profile"]
+    assert profile["vendor"] == "bruker"
+    assert profile["source_files"] == ["procs"]
+    assert float(profile["parameters"]["PHC0"].magnitude) == pytest.approx(52.43836)
+    assert float(profile["parameters"]["PHC1"].magnitude) == pytest.approx(-16.8366)
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_topspin_vendor_profile_without_procs_uses_observed_state_only(tmp_path):
+    nd = scp.read_topspin(_copy_topspin_1d_without_pdata(tmp_path))
+
+    assert hasattr(nd.meta, "nmr_processing")
+    assert nd.meta.nmr_processing == {
+        "observed_state": {"processing_history": "not_established"}
+    }
+    assert "scp_processing" not in nd.meta.nmr_processing
+    assert np.iscomplexobj(nd.data)
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_topspin_vendor_profile_preserves_extra_procs_parameter(tmp_path):
+    nd = scp.read_topspin(
+        _copy_topspin_1d_with_custom_procs(
+            tmp_path, ["##$X_TEST= 7\n", "##$X_FLAG= yes\n"]
+        )
+    )
+
+    params = nd.meta.nmr_processing["vendor_profile"]["parameters"]
+    assert params["X_TEST"] == 7
+    assert params["X_FLAG"] is True
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_topspin_vendor_profile_copy_is_independent():
+    nd = _read_topspin_or_skip(_require_path(nmrdir / "topspin_1d/1/fid"))
+    copied = nd.copy()
+
+    assert copied.meta.nmr_processing == nd.meta.nmr_processing
+    assert copied.meta.nmr_processing is not nd.meta.nmr_processing
+    assert (
+        copied.meta.nmr_processing["vendor_profile"]
+        is not nd.meta.nmr_processing["vendor_profile"]
+    )
+    assert (
+        copied.meta.nmr_processing["vendor_profile"]["parameters"]
+        is not nd.meta.nmr_processing["vendor_profile"]["parameters"]
+    )
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_topspin_vendor_profile_persists_through_save_and_load(tmp_path):
+    nd = _read_topspin_or_skip(_require_path(nmrdir / "topspin_1d/1/fid"))
+    target = tmp_path / "topspin_vendor_profile.scp"
+
+    nd.dump(target)
+    restored = scp.NDDataset.load(target)
+
+    assert restored.meta.nmr_processing == nd.meta.nmr_processing
+    assert "nmr_processing" in str(restored.meta)
+    assert "nmr_processing" in restored.meta._repr_html_()
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_topspin_vendor_profile_does_not_change_raw_data_without_procs(tmp_path):
+    original = _read_topspin_or_skip(_require_path(nmrdir / "topspin_1d/1/fid"))
+    stripped = scp.read_topspin(_copy_topspin_1d_without_pdata(tmp_path))
+
+    np.testing.assert_array_equal(np.asarray(original.data), np.asarray(stripped.data))
+    assert stripped.meta.nmr_processing == {
+        "observed_state": {"processing_history": "not_established"}
+    }
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_topspin_vendor_profile_is_not_consumed_by_experiment_process(tmp_path):
+    original = _read_topspin_or_skip(_require_path(nmrdir / "topspin_1d/1/fid"))
+    stripped = original.copy()
+    stripped.meta.readonly = False
+    stripped.meta.data.pop("nmr_processing", None)
+    stripped.meta.readonly = True
+
+    processed_with_profile = Experiment(original).process(
+        apodization="em",
+        lb=5.0,
+        size=16384,
+    )
+    processed_without_profile = Experiment(stripped).process(
+        apodization="em",
+        lb=5.0,
+        size=16384,
+    )
+
+    np.testing.assert_allclose(
+        np.asarray(processed_with_profile.data),
+        np.asarray(processed_without_profile.data),
+    )
 
 
 # --------------------------------------------------------------------------

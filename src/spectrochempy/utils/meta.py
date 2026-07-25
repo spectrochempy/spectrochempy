@@ -233,10 +233,13 @@ class Meta:
                 if isinstance(v, dict):
                     key = f"{v['name']} [{k}]" if "name" in v else k
                     # case of opus metadata for example:
-                    if list(v["data"].keys()) == ["value"]:
-                        s += _make_section(key, v["data"]["value"])
+                    if "data" in v and isinstance(v["data"], dict):
+                        if list(v["data"].keys()) == ["value"]:
+                            s += _make_section(key, v["data"]["value"])
+                        else:
+                            s += _make_section(key, _make_html(v["data"]), details=True)
                     else:
-                        s += _make_section(key, _make_html(v["data"]), details=True)
+                        s += _make_section(key, _make_html(v), details=True)
             return s
 
         s = "<div class='scp-output'>"
