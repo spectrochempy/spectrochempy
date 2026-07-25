@@ -48,7 +48,9 @@ For NMR, the high-level scientific API is ``Experiment``::
 
     dataset = scp.nmr.read(path)
     experiment = scp.nmr.Experiment(dataset)
-    spectrum = experiment.process(lb=10.0, phase="manual", phc0=45.0)
+    spectrum = experiment.process(
+        apodization="em", lb=10.0, phase="manual", phc0=45.0
+    )
 
 Low-level NMR operations (apodization, phasing, FFT) already exist as
 ``NDDataset`` methods (``dataset.em(...)``, ``dataset.pk(...)``,

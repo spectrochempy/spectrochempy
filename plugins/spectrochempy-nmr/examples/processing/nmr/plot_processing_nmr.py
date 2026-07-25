@@ -14,8 +14,11 @@ Basic 1D NMR processing and inspection with the official
 This example stays within the currently validated public scope of the plugin:
 
 * reading a 1D NMR dataset;
-* processing the FID to a frequency-domain spectrum;
+* processing the FID to a frequency-domain spectrum with explicit
+  SpectroChemPy parameters;
 * inspecting slices, correcting the baseline and picking peaks.
+
+It does not claim replay of vendor processing parameters from metadata.
 """
 
 # %%
@@ -31,24 +34,46 @@ import spectrochempy as scp
 datadir = scp.preferences.datadir
 nmrdir = datadir / "nmrdata"
 
-dataset = scp.nmr.read(nmrdir / "bruker" / "tests" / "nmr" / "topspin_1d" / "1" / "fid")
+fid = scp.nmr.read(nmrdir / "bruker" / "tests" / "nmr" / "topspin_1d" / "1" / "fid")
 
 # %%
-# Process the 1D FID
-# ------------------
-experiment = scp.nmr.Experiment(dataset)
-dataset = experiment.process(apodization="em", lb=2.0, size=16384, phase="metadata")
-
+# Compare two explicit apodization choices
+# ----------------------------------------
+# The source FID is left unchanged. Each processed spectrum comes from its own
+# independent copy so the comparison is purely about the explicit `lb` value.
+low_lb = scp.nmr.Experiment(fid.copy()).process(
+    apodization="em",
+    lb=2.0,
+    size=16384,
+    phase=None,
+)
+high_lb = scp.nmr.Experiment(fid.copy()).process(
+    apodization="em",
+    lb=20.0,
+    size=16384,
+    phase=None,
+)
 
 # %%
-# Analyse the processed 1D spectrum
-# ---------------------------------
-# Print dataset summary
+# Overlay the two processed spectra on the same axes
+# --------------------------------------------------
+ax = low_lb.plot(color="C0", label="LB = 2 Hz")
+high_lb.plot(
+    ax=ax,
+    color="C1",
+    linestyle="--",
+    label="LB = 20 Hz",
+)
+ax.legend()
+
+# %%
+# Continue with the mildly broadened spectrum
+# -------------------------------------------
+#
+# The rest of the example uses `low_lb`, which keeps the resolved multiplets
+# visually useful for peak picking and fitting.
+dataset = low_lb
 dataset
-
-# %%
-# Plot the dataset
-_ = dataset.plot()
 
 # %%
 # Select a region of interest

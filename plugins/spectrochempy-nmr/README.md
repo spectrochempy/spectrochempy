@@ -4,7 +4,7 @@ NMR plugin for SpectroChemPy.
 
 This package is the home for NMR-specific readers and tools that are useful in
 SpectroChemPy but should not live in the core package. It currently provides a
-validated public workflow for 1D NMR data across the supported readers, exposed
+validated public 1D workflow for reading data and processing raw 1D FIDs
 through `scp.nmr.read(...)` and `scp.nmr.Experiment(...)`.
 
 Future NMR readers or processing helpers can be added here without creating a
@@ -37,6 +37,14 @@ dataset = scp.nmr.read("path/to/experiment", expno=1, procno=1)
 experiment = scp.nmr.Experiment(dataset)
 spectrum = experiment.process(apodization="em", lb=2.0, size=32768)
 ```
+
+This explicit processing example does not imply that vendor processing
+parameters are automatically imported and replayed from metadata. That contract
+remains under active characterization.
+
+The current explicit apodization contract covers the public modes already
+exposed by `Experiment.process()`: `em(lb=...)`, `gm(lb=..., gb=...)`, and
+`sp(ssb=..., pow=...)`.
 
 The NMR ppm/frequency unit context is also provided by this plugin:
 

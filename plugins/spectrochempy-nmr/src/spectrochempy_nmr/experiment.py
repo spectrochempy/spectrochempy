@@ -14,12 +14,23 @@ never references Bruker-specific field names (``nuc1``, ``pulprog``,
 from __future__ import annotations
 
 import re
+from numbers import Real
 from typing import TYPE_CHECKING
 
 import numpy as np
 
+from spectrochempy.core.units import Quantity
+from spectrochempy.core.units import ur
+
 if TYPE_CHECKING:
     from spectrochempy.core.dataset.nddataset import NDDataset
+
+
+_APODIZATION_ALLOWED_PARAMS = {
+    "em": ("lb",),
+    "gm": ("lb", "gb"),
+    "sp": ("ssb", "pow"),
+}
 
 
 # ---------------------------------------------------------------------------
@@ -108,7 +119,9 @@ class Experiment:
     >>> fid = scp.nmr.read(path)
     >>> experiment = scp.nmr.Experiment(fid)
     >>> experiment.summary()
-    >>> spectrum = experiment.process(lb=10.0, phase="manual", phc0=45.0)
+    >>> spectrum = experiment.process(
+    ...     apodization="em", lb=10.0, phase="manual", phc0=45.0
+    ... )
     """
 
     def __init__(self, dataset):
@@ -407,7 +420,10 @@ class Experiment:
         self,
         *,
         apodization: str | None = None,
-        lb: float = 1.0,
+        lb: float | Quantity | None = None,
+        gb: float | Quantity | None = None,
+        ssb: float | None = None,
+        pow: float | None = None,
         size: int | None = None,
         phase: str | None = None,
         phc0: float = 0.0,
@@ -426,9 +442,23 @@ class Experiment:
         ----------
         apodization : str, optional
             Apodization function name (``'em'``, ``'gm'``, ``'sp'``).
-            Only applied to time-domain data.  Ignored for frequency-domain.
-        lb : float
-            Line broadening in Hz (for ``apodization='em'``).  Default 1.0.
+            Only accepted for time-domain data. Frequency-domain datasets
+            reject explicit apodization requests.
+        lb : float or Quantity, optional
+            Explicit line-broadening parameter for ``'em'`` and Lorentzian
+            term for ``'gm'``. If omitted, the selected core apodization
+            function uses its own default.
+        gb : float or Quantity, optional
+            Explicit Gaussian broadening parameter for ``'gm'``. If omitted,
+            the selected core apodization function uses its own default.
+        ssb : float, optional
+            Explicit sine-bell shift parameter for ``'sp'``. Must be positive
+            when provided. If omitted, the selected core apodization function
+            uses its own default.
+        pow : float, optional
+            Explicit exponent parameter for ``'sp'``. Only ``1`` and ``2`` are
+            accepted by the public API. If omitted, the selected core
+            apodization function uses its own default.
         size : int, optional
             Zero-fill target size.  Only applied to time-domain data.
         phase : str, optional
@@ -451,6 +481,9 @@ class Experiment:
         NotImplementedError
             If the dataset is multi-dimensional and therefore outside the
             current public supported processing scope.
+        ValueError
+            If an apodization parameter combination is incompatible with the
+            selected apodization mode.
         """
 
         ds = self._dataset
@@ -468,12 +501,22 @@ class Experiment:
                 ds,
                 apodization=apodization,
                 lb=lb,
+                gb=gb,
+                ssb=ssb,
+                pow=pow,
                 size=size,
                 phase=phase,
                 phc0=phc0,
                 phc1=phc1,
             )
         if self.is_frequency_domain:
+            self._reject_frequency_domain_apodization_requests(
+                apodization,
+                lb=lb,
+                gb=gb,
+                ssb=ssb,
+                pow=pow,
+            )
             return self._process_frequency_domain(
                 ds,
                 phase=phase,
@@ -486,12 +529,45 @@ class Experiment:
         )
         raise RuntimeError(msg)
 
+    def _reject_frequency_domain_apodization_requests(
+        self,
+        apodization: str | None,
+        *,
+        lb: float | Quantity | None,
+        gb: float | Quantity | None,
+        ssb: float | None,
+        pow: float | None,
+    ) -> None:
+        """Reject explicit apodization requests on already transformed spectra."""
+        provided = {
+            "apodization": apodization,
+            "lb": lb,
+            "gb": gb,
+            "ssb": ssb,
+            "pow": pow,
+        }
+        non_null = [name for name, value in provided.items() if value is not None]
+        if not non_null:
+            return
+
+        names = ", ".join(non_null)
+        msg = (
+            "Frequency-domain datasets cannot accept apodization requests in "
+            f"Experiment.process(). Received: {names}. Use apodization only on "
+            "time-domain FIDs, or call process() without apodization arguments "
+            "to preserve the existing frequency-domain workflow."
+        )
+        raise RuntimeError(msg)
+
     def _process_time_domain(
         self,
         ds: NDDataset,
         *,
         apodization: str | None,
-        lb: float,
+        lb: float | Quantity | None,
+        gb: float | Quantity | None,
+        ssb: float | None,
+        pow: float | None,
         size: int | None,
         phase: str | None,
         phc0: float,
@@ -501,8 +577,15 @@ class Experiment:
         work = ds.copy()
 
         # 1. Apodization
+        apodization_kwargs = self._validate_apodization_arguments(
+            apodization,
+            lb=lb,
+            gb=gb,
+            ssb=ssb,
+            pow=pow,
+        )
         if apodization is not None:
-            work = self._apply_apodization(work, apodization, lb=lb)
+            work = self._apply_apodization(work, apodization, **apodization_kwargs)
 
         # 2. Zero-filling / FFT sizing
         if size is not None:
@@ -541,25 +624,153 @@ class Experiment:
 
         return work
 
-    def _apply_apodization(
-        self, ds: NDDataset, func_name: str, *, lb: float
-    ) -> NDDataset:
+    def _validate_apodization_arguments(
+        self,
+        apodization: str | None,
+        *,
+        lb: float | Quantity | None,
+        gb: float | Quantity | None,
+        ssb: float | None,
+        pow: float | None,
+    ) -> dict[str, float | Quantity]:
+        """Validate the explicit public apodization contract."""
+        provided = {
+            "lb": lb,
+            "gb": gb,
+            "ssb": ssb,
+            "pow": pow,
+        }
+        non_null = {
+            name: value for name, value in provided.items() if value is not None
+        }
+
+        if apodization is None:
+            if non_null:
+                names = ", ".join(sorted(non_null))
+                msg = (
+                    "Explicit apodization parameters require an apodization mode. "
+                    f"Received parameters without apodization: {names}."
+                )
+                raise ValueError(msg)
+            return {}
+
+        func_name = apodization.lower()
+        if func_name not in _APODIZATION_ALLOWED_PARAMS:
+            msg = (
+                f"Unknown apodization function: {func_name!r}. Use 'em', 'gm', or 'sp'."
+            )
+            raise ValueError(msg)
+
+        allowed = set(_APODIZATION_ALLOWED_PARAMS[func_name])
+        invalid = sorted(name for name in non_null if name not in allowed)
+        if invalid:
+            names = ", ".join(invalid)
+            msg = (
+                f"Apodization {func_name!r} does not accept parameter(s): {names}. "
+                f"Allowed parameters: {', '.join(_APODIZATION_ALLOWED_PARAMS[func_name])}."
+            )
+            raise ValueError(msg)
+
+        validated: dict[str, float | Quantity] = {}
+        for name in _APODIZATION_ALLOWED_PARAMS[func_name]:
+            value = provided[name]
+            if value is None:
+                continue
+            validated[name] = self._validate_apodization_parameter(
+                func_name, name, value
+            )
+        return validated
+
+    def _validate_apodization_parameter(
+        self,
+        func_name: str,
+        param_name: str,
+        value: float | Quantity,
+    ) -> float | Quantity:
+        """Validate one explicit apodization parameter."""
+        if param_name in {"lb", "gb"}:
+            return self._validate_frequency_like_parameter(func_name, param_name, value)
+        if param_name == "ssb":
+            if isinstance(value, Quantity):
+                msg = f"Parameter 'ssb' for apodization {func_name!r} must be a plain scalar."
+                raise TypeError(msg)
+            if not isinstance(value, Real):
+                msg = f"Parameter 'ssb' for apodization {func_name!r} must be a real scalar."
+                raise TypeError(msg)
+            magnitude = float(value)
+            if not np.isfinite(magnitude):
+                msg = f"Parameter 'ssb' for apodization {func_name!r} must be finite."
+                raise ValueError(msg)
+            if magnitude <= 0.0:
+                msg = "Parameter 'ssb' for apodization 'sp' must be strictly positive."
+                raise ValueError(msg)
+            return magnitude
+        if param_name == "pow":
+            if isinstance(value, Quantity):
+                msg = f"Parameter 'pow' for apodization {func_name!r} must be a plain scalar."
+                raise TypeError(msg)
+            if not isinstance(value, Real):
+                msg = f"Parameter 'pow' for apodization {func_name!r} must be a real scalar."
+                raise TypeError(msg)
+            magnitude = float(value)
+            if not np.isfinite(magnitude):
+                msg = f"Parameter 'pow' for apodization {func_name!r} must be finite."
+                raise ValueError(msg)
+            if magnitude not in (1.0, 2.0):
+                msg = "Parameter 'pow' for apodization 'sp' must be 1 or 2."
+                raise ValueError(msg)
+            return int(magnitude)
+
+        msg = f"Unsupported apodization parameter {param_name!r}."
+        raise ValueError(msg)
+
+    def _validate_frequency_like_parameter(
+        self,
+        func_name: str,
+        param_name: str,
+        value: float | Quantity,
+    ) -> float | Quantity:
+        """Validate frequency-like explicit apodization parameters."""
+        if isinstance(value, Quantity):
+            if value.dimensionality != ur.Hz.dimensionality:
+                msg = (
+                    f"Parameter {param_name!r} for apodization {func_name!r} must "
+                    "have frequency units compatible with Hz."
+                )
+                raise ValueError(msg)
+            magnitude = float(value.magnitude)
+        else:
+            if not isinstance(value, Real):
+                msg = (
+                    f"Parameter {param_name!r} for apodization {func_name!r} must "
+                    "be a real scalar or a Quantity."
+                )
+                raise TypeError(msg)
+            magnitude = float(value)
+
+        if not np.isfinite(magnitude):
+            msg = f"Parameter {param_name!r} for apodization {func_name!r} must be finite."
+            raise ValueError(msg)
+        return value
+
+    def _apply_apodization(self, ds: NDDataset, func_name: str, **kwargs) -> NDDataset:
         """Apply an apodization function by name."""
         func_name = func_name.lower()
-        if func_name == "em":
-            from spectrochempy.processing.fft.apodization import em  # noqa: PLC0415
+        from spectrochempy.processing.fft.apodization import em  # noqa: PLC0415
+        from spectrochempy.processing.fft.apodization import gm  # noqa: PLC0415
+        from spectrochempy.processing.fft.apodization import sp  # noqa: PLC0415
 
-            return em(ds, lb=lb)
-        if func_name == "gm":
-            from spectrochempy.processing.fft.apodization import gm  # noqa: PLC0415
-
-            return gm(ds, lb=lb)
-        if func_name == "sp":
-            from spectrochempy.processing.fft.apodization import sp  # noqa: PLC0415
-
-            return sp(ds)
-        msg = f"Unknown apodization function: {func_name!r}. Use 'em', 'gm', or 'sp'."
-        raise ValueError(msg)
+        apodizers = {
+            "em": em,
+            "gm": gm,
+            "sp": sp,
+        }
+        if func_name not in apodizers:
+            msg = (
+                f"Unknown apodization function: {func_name!r}. Use 'em', 'gm', or 'sp'."
+            )
+            raise ValueError(msg)
+        return apodizers[func_name](ds, **kwargs)
 
     def _apply_phase(
         self, ds: NDDataset, mode: str, *, phc0: float, phc1: float

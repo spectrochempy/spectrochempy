@@ -92,6 +92,23 @@ def _topspin_1d_oracle_metrics(spectrum, ref):
     }
 
 
+def _manual_apodize_then_fft(dataset, apodization, *, size=None, **kwargs):
+    apodizers = {
+        "em": scp.em,
+        "gm": scp.gm,
+        "sp": scp.sp,
+    }
+    work = apodizers[apodization](dataset.copy(), inplace=False, **kwargs)
+    if size is not None:
+        work = work.zf_size(size=size)
+    return work.fft()
+
+
+def _manual_public_process(experiment, dataset, apodization, *, size=None, **kwargs):
+    work = _manual_apodize_then_fft(dataset, apodization, size=size, **kwargs)
+    return experiment._calibrate_1d_spectral_axis(work)
+
+
 def _make_synthetic_vendor_fid(
     *,
     npts=64,
@@ -464,6 +481,237 @@ class TestProcessTimeDomain:
         exp = Experiment(fid)
         _ = exp.process(apodization="em", lb=10.0)
         assert exp.is_time_domain  # Experiment itself is unchanged
+
+    @pytest.mark.skipif(not _has_topspin_1d(), reason="TopSpin 1D data missing")
+    def test_explicit_lb_changes_public_result_and_keeps_inputs_independent(self):
+        fid = _read_or_skip(nmrdir / "topspin_1d/1/fid")
+        source_data = np.asarray(fid.data).copy()
+
+        fid_low = fid.copy()
+        fid_high = fid.copy()
+        assert not np.shares_memory(np.asarray(fid_low.data), np.asarray(fid.data))
+        assert not np.shares_memory(np.asarray(fid_high.data), np.asarray(fid.data))
+        assert not np.shares_memory(np.asarray(fid_low.data), np.asarray(fid_high.data))
+
+        low = Experiment(fid_low).process(
+            apodization="em",
+            lb=2.0,
+            size=16384,
+            phase=None,
+        )
+        high = Experiment(fid_high).process(
+            apodization="em",
+            lb=20000.0,
+            size=16384,
+            phase=None,
+        )
+
+        low_data = np.asarray(low.data)
+        high_data = np.asarray(high.data)
+
+        assert not np.array_equal(low_data, high_data)
+        assert not np.allclose(low_data, high_data)
+        assert np.max(np.abs(low_data - high_data)) > 1.0e5
+        assert np.linalg.norm(low_data - high_data) / np.linalg.norm(low_data) > 0.5
+        assert np.max(np.abs(low_data)) > 1.0e5
+        assert np.max(np.abs(high_data)) < 2.0e4
+
+        np.testing.assert_array_equal(fid.data, source_data)
+        np.testing.assert_array_equal(fid_low.data, source_data)
+        np.testing.assert_array_equal(fid_high.data, source_data)
+
+    @pytest.mark.skipif(not _has_topspin_1d(), reason="TopSpin 1D data missing")
+    def test_public_em_processing_matches_manual_apodize_then_fft(self):
+        from spectrochempy.processing.fft.zero_filling import zf_size
+
+        fid = _read_or_skip(nmrdir / "topspin_1d/1/fid")
+        lb = 20000.0
+        size = 16384
+
+        exp = Experiment(fid.copy())
+        public = exp.process(apodization="em", lb=lb, size=size, phase=None)
+
+        direct_apodized = scp.em(fid.copy(), lb=lb, inplace=False)
+        internal_apodized = exp._apply_apodization(fid.copy(), "em", lb=lb)
+
+        np.testing.assert_allclose(
+            np.asarray(internal_apodized.data),
+            np.asarray(direct_apodized.data),
+            atol=1.0e-12,
+        )
+
+        manual = zf_size(internal_apodized, size=size).fft()
+
+        np.testing.assert_allclose(
+            np.asarray(public.data),
+            np.asarray(manual.data),
+            atol=1.0e-12,
+        )
+        np.testing.assert_allclose(
+            np.asarray(public.x.data),
+            np.asarray(manual.x.data),
+            atol=1.0e-12,
+        )
+
+    @pytest.mark.parametrize(
+        ("kwargs", "match"),
+        [
+            ({"lb": 2.0}, "without apodization"),
+            ({"apodization": "em", "gb": 0.5}, "does not accept parameter"),
+            ({"apodization": "gm", "ssb": 2.0}, "does not accept parameter"),
+            ({"apodization": "sp", "lb": 2.0}, "does not accept parameter"),
+            ({"apodization": "sp", "pow": 3}, "must be 1 or 2"),
+            ({"apodization": "sp", "ssb": 0.0}, "must be strictly positive"),
+            (
+                {"apodization": "gm", "gb": 1.0 * ur.s},
+                "compatible with Hz",
+            ),
+        ],
+    )
+    def test_invalid_apodization_argument_combinations_raise(self, kwargs, match):
+        fid = _read_or_skip(nmrdir / "topspin_1d/1/fid")
+        exp = Experiment(fid)
+        with pytest.raises((TypeError, ValueError), match=match):
+            exp.process(**kwargs)
+
+    @pytest.mark.skipif(not _has_topspin_1d_pdata(), reason="TopSpin 1D pdata missing")
+    @pytest.mark.parametrize(
+        "kwargs",
+        [
+            {"apodization": "em", "lb": 2.0},
+            {"apodization": "gm", "lb": 2.0, "gb": 1.0},
+            {"apodization": "sp", "ssb": 2.0, "pow": 2},
+        ],
+    )
+    def test_frequency_domain_rejects_explicit_apodization_requests(self, kwargs):
+        spectrum = _read_or_skip(nmrdir / "topspin_1d", expno=1, procno=1)
+        exp = Experiment(spectrum)
+
+        with pytest.raises(
+            RuntimeError,
+            match="Frequency-domain datasets cannot accept apodization requests",
+        ):
+            exp.process(**kwargs)
+
+    def test_gm_process_matches_manual_apodize_then_fft_on_synthetic_fid(self):
+        ds = _make_synthetic_vendor_fid(npts=64, sw_hz=6400.0, freq_hz=250.0)
+        public = Experiment(ds.copy()).process(
+            apodization="gm",
+            lb=-2.0,
+            gb=4.0,
+            size=128,
+            phase=None,
+        )
+        manual = _manual_public_process(
+            Experiment(ds.copy()),
+            ds,
+            "gm",
+            lb=-2.0,
+            gb=4.0,
+            size=128,
+        )
+
+        np.testing.assert_allclose(public.data, manual.data, atol=1.0e-12)
+        np.testing.assert_allclose(public.x.data, manual.x.data, atol=1.0e-12)
+
+    def test_sp_process_matches_manual_apodize_then_fft_on_synthetic_fid(self):
+        ds = _make_synthetic_vendor_fid(npts=64, sw_hz=6400.0, freq_hz=250.0)
+        public = Experiment(ds.copy()).process(
+            apodization="sp",
+            ssb=2.0,
+            pow=2,
+            size=128,
+            phase=None,
+        )
+        manual = _manual_public_process(
+            Experiment(ds.copy()),
+            ds,
+            "sp",
+            ssb=2.0,
+            pow=2,
+            size=128,
+        )
+
+        np.testing.assert_allclose(public.data, manual.data, atol=1.0e-12)
+        np.testing.assert_allclose(public.x.data, manual.x.data, atol=1.0e-12)
+
+    def test_gm_parameter_defaults_match_core_defaults_on_synthetic_fid(self):
+        ds = _make_synthetic_vendor_fid(npts=64, sw_hz=6400.0, freq_hz=250.0)
+        public = Experiment(ds.copy()).process(
+            apodization="gm",
+            size=128,
+            phase=None,
+        )
+        manual = _manual_public_process(Experiment(ds.copy()), ds, "gm", size=128)
+
+        np.testing.assert_allclose(public.data, manual.data, atol=1.0e-12)
+        np.testing.assert_allclose(public.x.data, manual.x.data, atol=1.0e-12)
+
+    def test_sp_parameter_defaults_match_core_defaults_on_synthetic_fid(self):
+        ds = _make_synthetic_vendor_fid(npts=64, sw_hz=6400.0, freq_hz=250.0)
+        public = Experiment(ds.copy()).process(
+            apodization="sp",
+            size=128,
+            phase=None,
+        )
+        manual = _manual_public_process(Experiment(ds.copy()), ds, "sp", size=128)
+
+        np.testing.assert_allclose(public.data, manual.data, atol=1.0e-12)
+        np.testing.assert_allclose(public.x.data, manual.x.data, atol=1.0e-12)
+
+    @pytest.mark.skipif(not _has_topspin_1d(), reason="TopSpin 1D data missing")
+    def test_real_fid_gm_gb_changes_public_result_without_mutating_source(self):
+        fid = _read_or_skip(nmrdir / "topspin_1d/1/fid")
+        source_data = np.asarray(fid.data).copy()
+
+        low = Experiment(fid.copy()).process(
+            apodization="gm",
+            lb=-2.0,
+            gb=1.0,
+            size=16384,
+            phase=None,
+        )
+        high = Experiment(fid.copy()).process(
+            apodization="gm",
+            lb=-2.0,
+            gb=8.0,
+            size=16384,
+            phase=None,
+        )
+
+        assert not np.allclose(np.asarray(low.data), np.asarray(high.data))
+        np.testing.assert_array_equal(fid.data, source_data)
+
+    @pytest.mark.skipif(not _has_topspin_1d(), reason="TopSpin 1D data missing")
+    def test_real_fid_sp_ssb_and_pow_change_public_result_without_mutating_source(self):
+        fid = _read_or_skip(nmrdir / "topspin_1d/1/fid")
+        source_data = np.asarray(fid.data).copy()
+
+        ssb_low = Experiment(fid.copy()).process(
+            apodization="sp",
+            ssb=1.0,
+            pow=1,
+            size=16384,
+            phase=None,
+        )
+        ssb_high = Experiment(fid.copy()).process(
+            apodization="sp",
+            ssb=4.0,
+            pow=1,
+            size=16384,
+            phase=None,
+        )
+        pow_high = Experiment(fid.copy()).process(
+            apodization="sp",
+            ssb=4.0,
+            pow=2,
+            size=16384,
+            phase=None,
+        )
+
+        assert not np.allclose(np.asarray(ssb_low.data), np.asarray(ssb_high.data))
+        assert not np.allclose(np.asarray(ssb_high.data), np.asarray(pow_high.data))
+        np.testing.assert_array_equal(fid.data, source_data)
 
     @pytest.mark.skipif(not _has_topspin_1d(), reason="TopSpin 1D data missing")
     def test_unknown_apodization_on_real_fid_raises(self):
