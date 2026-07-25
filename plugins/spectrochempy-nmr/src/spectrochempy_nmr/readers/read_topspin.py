@@ -40,6 +40,11 @@ from spectrochempy_nmr.extern.nmrglue import read_pdata
 # ======================================================================================
 FnMODE = ["undefined", "QF", "QSEQ", "TPPI", "STATES", "STATES-TPPI", "ECHO-ANTIECHO"]
 AQ_mod = ["QF", "QSIM", "QSEQ", "DQD"]
+_TOPSPIN_VENDOR_PARAMETER_UNITS = {
+    "LB": ur.Hz,
+    "PHC0": ur.deg,
+    "PHC1": ur.deg,
+}
 
 nmr_valid_meta = [
     # ACQU
@@ -796,6 +801,62 @@ def _get_files(path, typ="acqu"):
     return files
 
 
+def _convert_topspin_vendor_parameter_value(key, value):
+    unit = _TOPSPIN_VENDOR_PARAMETER_UNITS.get(key)
+    if unit is None:
+        return value
+
+    if isinstance(value, bool):
+        return value
+
+    if isinstance(value, list | tuple):
+        if all(
+            isinstance(item, int | float) and not isinstance(item, bool)
+            for item in value
+        ):
+            return np.array(value) * unit
+        return value
+
+    if isinstance(value, np.ndarray):
+        if np.issubdtype(value.dtype, np.number) and not np.issubdtype(
+            value.dtype, np.bool_
+        ):
+            return value * unit
+        return value
+
+    if isinstance(value, int | float):
+        return value * unit
+
+    return value
+
+
+def _build_topspin_nmr_processing(dic):
+    nmr_processing = {
+        "observed_state": {
+            "processing_history": "not_established",
+        },
+    }
+
+    procs = dic.get("procs")
+    if not procs:
+        return nmr_processing
+
+    parameters = {}
+    for key, value in procs.items():
+        if key.startswith("_"):
+            continue
+        parameters[key] = _convert_topspin_vendor_parameter_value(key, value)
+
+    nmr_processing["vendor_profile"] = {
+        "vendor": "bruker",
+        # Use a JSON-stable sequence here so save/load preserves the exact shape.
+        "source_files": ["procs"],
+        "parameters": parameters,
+    }
+
+    return nmr_processing
+
+
 @_importer_method
 def _read_topspin(*args, **kwargs):
     dataset, path = args
@@ -1110,6 +1171,7 @@ def _read_topspin(*args, **kwargs):
 
     # and the metadata (and make them readonly)
     meta.datatype = datatype
+    meta.nmr_processing = _build_topspin_nmr_processing(dic)
     meta.pathname = str(path)
 
     # add two parameters needed for phasing

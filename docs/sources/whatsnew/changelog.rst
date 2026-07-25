@@ -31,6 +31,12 @@ New Features
   criteria.
 .. Add here new public features (do not delete this comment)
 
+- TopSpin datasets now preserve a descriptive vendor processing profile in
+  ``dataset.meta.nmr_processing``. The profile records the vendor ``procs``
+  values with stable provenance, but it is not applied automatically to raw
+  FIDs, does not replay vendor processing, and does not yet expose any
+  SpectroChemPy ``requested`` / ``applied`` processing trace.
+
 - `read_matlab()` now reconstructs `NDDataset` objects from the minimal
   MATLAB exchange payload written by `write_matlab()`, restoring the
   dataset's name, title, units, description, dimension names, and

@@ -35,6 +35,27 @@ resolution, processed-data defaults, acquisition metadata, and NMR unit
 contexts. Core SpectroChemPy remains responsible for generic datasets, units,
 plotting, and ordinary FFT operations.
 
+TopSpin Processing Profile
+==========================
+
+TopSpin datasets may expose a descriptive vendor processing profile in
+``dataset.meta.nmr_processing``:
+
+.. code-block:: python
+
+    dataset = scp.nmr.read("path/to/fid")
+    profile = dataset.meta.nmr_processing["vendor_profile"]
+
+This profile records values read from the vendor ``procs`` file. It is
+descriptive only:
+
+- it is not applied automatically when reading a raw FID;
+- it is not replayed automatically by ``scp.nmr.Experiment(...).process()``;
+- it does not establish the exact historical processing sequence of an already
+  processed vendor spectrum such as TopSpin ``1r``;
+- SpectroChemPy-owned ``requested`` / ``applied`` processing traces are handled
+  separately and are not yet part of this metadata.
+
 Compatibility aliases
 =====================
 
