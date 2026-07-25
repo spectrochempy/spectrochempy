@@ -61,6 +61,13 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- ``scp.nmr.Experiment.process()`` now forwards the full explicit public
+  apodization contract for the modes it already exposes:
+  ``em(lb=...)``, ``gm(lb=..., gb=...)``, and ``sp(ssb=..., pow=...)``.
+  Incompatible parameter combinations such as ``apodization=\"em\", gb=...``
+  or ``apodization=None, lb=...`` now raise explicit errors instead of being
+  silently ignored.
+
 - `plot()` and `plot_multiple()` no longer crash when `marker=None` or
   `ls=None` is passed explicitly. Both are matplotlib's own standard
   values (no marker, default linestyle), so passing them is legitimate,

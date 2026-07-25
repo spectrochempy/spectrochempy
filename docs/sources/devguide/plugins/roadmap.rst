@@ -32,7 +32,9 @@ The ``Experiment`` class is the chosen high-level NMR API layer::
 
     dataset = scp.nmr.read(path)
     experiment = scp.nmr.Experiment(dataset)
-    spectrum = experiment.process(lb=10.0, phase="manual", phc0=45.0)
+    spectrum = experiment.process(
+        apodization="em", lb=10.0, phase="manual", phc0=45.0
+    )
 
 Dataset accessors such as ``dataset.nmr.phase(...)`` or
 ``dataset.nmr.apodize(...)`` are **not** part of the planned API. Low-level
