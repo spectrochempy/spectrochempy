@@ -180,7 +180,7 @@ jobs:
       - name: Set up Python ${{ matrix.pythonVersion }}
         if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
         id: setup_python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.pythonVersion }}
           cache: "pip"
