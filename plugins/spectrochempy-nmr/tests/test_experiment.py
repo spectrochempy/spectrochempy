@@ -109,6 +109,14 @@ def _manual_public_process(experiment, dataset, apodization, *, size=None, **kwa
     return experiment._calibrate_1d_spectral_axis(work)
 
 
+def _plain_nested(value):
+    if isinstance(value, dict):
+        return {key: _plain_nested(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_plain_nested(item) for item in value]
+    return value
+
+
 def _make_synthetic_vendor_fid(
     *,
     npts=64,
@@ -1085,6 +1093,192 @@ class TestPublic1DRealAxisValidation:
         assert restored.meta.nmr_processing == result.meta.nmr_processing
         assert "scp_processing" in str(restored.meta)
         assert "scp_processing" in restored.meta._repr_html_()
+
+    def test_process_trace_records_gm_contract_without_vendor_leakage(self):
+        ds = _make_synthetic_vendor_fid(npts=64, sw_hz=6400.0, freq_hz=250.0)
+        ds.meta.readonly = False
+        ds.meta.nmr_processing = {
+            "vendor_profile": {
+                "vendor": "bruker",
+                "parameters": {
+                    "LB": 9.0 * ur.Hz,
+                    "GB": 7.0,
+                    "SSB": 5,
+                },
+            },
+            "observed_state": {"processing_history": "not_established"},
+        }
+        ds.meta.readonly = True
+
+        result = Experiment(ds).process(apodization="gm", lb=2.0, gb=1.0, size=128)
+
+        trace = result.meta.nmr_processing["scp_processing"]
+        assert trace["requested"] == {
+            "apodization": "gm",
+            "lb": 2.0 * ur.Hz,
+            "gb": 1.0 * ur.Hz,
+            "size": 128,
+        }
+        assert trace["applied"] == {
+            "apodization": "gm",
+            "lb": 2.0 * ur.Hz,
+            "gb": 1.0 * ur.Hz,
+            "zero_filling": {"size": 128},
+            "fft": True,
+            "axis_calibration": "ppm",
+        }
+        assert "ssb" not in trace["requested"]
+        assert "pow" not in trace["requested"]
+        assert "ssb" not in trace["applied"]
+        assert "pow" not in trace["applied"]
+        assert result.meta.nmr_processing["vendor_profile"]["parameters"]["LB"] == (
+            9.0 * ur.Hz
+        )
+        assert result.meta.nmr_processing["vendor_profile"]["parameters"]["GB"] == 7.0
+
+    def test_process_trace_records_sp_contract_without_vendor_leakage(self):
+        ds = _make_synthetic_vendor_fid(npts=64, sw_hz=6400.0, freq_hz=250.0)
+        ds.meta.readonly = False
+        ds.meta.nmr_processing = {
+            "vendor_profile": {
+                "vendor": "bruker",
+                "parameters": {
+                    "LB": 9.0 * ur.Hz,
+                    "GB": 7.0,
+                    "SSB": 99,
+                },
+            },
+            "observed_state": {"processing_history": "not_established"},
+        }
+        ds.meta.readonly = True
+
+        result = Experiment(ds).process(apodization="sp", ssb=2.0, pow=2, size=128)
+
+        trace = result.meta.nmr_processing["scp_processing"]
+        assert trace["requested"] == {
+            "apodization": "sp",
+            "ssb": 2.0,
+            "pow": 2,
+            "size": 128,
+        }
+        assert trace["applied"] == {
+            "apodization": "sp",
+            "ssb": 2.0,
+            "pow": 2,
+            "zero_filling": {"size": 128},
+            "fft": True,
+            "axis_calibration": "ppm",
+        }
+        assert "lb" not in trace["requested"]
+        assert "gb" not in trace["requested"]
+        assert "lb" not in trace["applied"]
+        assert "gb" not in trace["applied"]
+        assert result.meta.nmr_processing["vendor_profile"]["parameters"]["SSB"] == 99
+
+    def test_process_trace_records_metadata_phase_without_vendor_replay(self):
+        ds = _make_synthetic_vendor_fid(npts=64, sw_hz=6400.0, freq_hz=250.0)
+        ds.meta.readonly = False
+        ds.meta.nmr_processing = {
+            "vendor_profile": {
+                "vendor": "bruker",
+                "parameters": {
+                    "PHC0": 52.0 * ur.deg,
+                    "PHC1": -17.0 * ur.deg,
+                },
+            },
+            "observed_state": {"processing_history": "not_established"},
+        }
+        ds.meta.readonly = True
+
+        implicit = Experiment(ds.copy()).process()
+        metadata = Experiment(ds.copy()).process(phase="metadata")
+
+        np.testing.assert_allclose(np.asarray(metadata.data), np.asarray(implicit.data))
+        np.testing.assert_allclose(
+            np.asarray(metadata.x.data),
+            np.asarray(implicit.x.data),
+        )
+
+        trace = metadata.meta.nmr_processing["scp_processing"]
+        assert trace["requested"] == {"phase": "metadata"}
+        assert trace["applied"] == {
+            "fft": True,
+            "phase": {"mode": "metadata"},
+            "axis_calibration": "ppm",
+        }
+        assert "phc0" not in trace["applied"]["phase"]
+        assert "phc1" not in trace["applied"]["phase"]
+        assert metadata.meta.nmr_processing["vendor_profile"]["parameters"]["PHC0"] == (
+            52.0 * ur.deg
+        )
+        assert metadata.meta.nmr_processing["vendor_profile"]["parameters"]["PHC1"] == (
+            -17.0 * ur.deg
+        )
+
+    def test_process_trace_distinguishes_explicit_default_value_from_omission(self):
+        ds = _make_synthetic_vendor_fid(npts=64, sw_hz=6400.0, freq_hz=250.0)
+
+        implicit = Experiment(ds.copy()).process()
+        explicit = Experiment(ds.copy()).process(phc0=0.0)
+
+        np.testing.assert_allclose(np.asarray(explicit.data), np.asarray(implicit.data))
+        np.testing.assert_allclose(
+            np.asarray(explicit.x.data),
+            np.asarray(implicit.x.data),
+        )
+        assert implicit.meta.nmr_processing["scp_processing"]["requested"] == {}
+        assert explicit.meta.nmr_processing["scp_processing"]["requested"] == {
+            "phc0": 0.0 * ur.deg
+        }
+        assert implicit.meta.nmr_processing["scp_processing"]["applied"] == {
+            "fft": True,
+            "axis_calibration": "ppm",
+        }
+        assert explicit.meta.nmr_processing["scp_processing"]["applied"] == {
+            "fft": True,
+            "axis_calibration": "ppm",
+        }
+
+    def test_process_trace_preserves_source_observed_state_without_shared_references(
+        self,
+    ):
+        ds = _make_synthetic_vendor_fid(npts=64, sw_hz=6400.0, freq_hz=250.0)
+        ds.meta.readonly = False
+        ds.meta.nmr_processing = {
+            "vendor_profile": {
+                "vendor": "bruker",
+                "parameters": {"LB": 9.0 * ur.Hz},
+            },
+            "observed_state": {
+                "processing_history": "not_established",
+                "notes": {"status": "baseline", "items": ["a", "b"]},
+            },
+        }
+        ds.meta.readonly = True
+        initial_state = _plain_nested(ds.meta.nmr_processing)
+
+        result = Experiment(ds).process(apodization="em", lb=5.0, size=128)
+
+        assert result.meta.nmr_processing["observed_state"]["processing_history"] == (
+            "spectrochempy_process_recorded"
+        )
+        assert _plain_nested(ds.meta.nmr_processing) == initial_state
+        assert (
+            result.meta.nmr_processing["vendor_profile"]
+            is not ds.meta.nmr_processing["vendor_profile"]
+        )
+        assert (
+            result.meta.nmr_processing["observed_state"]
+            is not ds.meta.nmr_processing["observed_state"]
+        )
+
+        result.meta.readonly = False
+        result.meta.nmr_processing["scp_processing"]["requested"]["apodization"] = "gm"
+        result.meta.nmr_processing["vendor_profile"]["parameters"]["LB"] = 1.0 * ur.Hz
+        result.meta.nmr_processing["observed_state"]["processing_history"] = "changed"
+        result.meta.readonly = True
+
+        assert _plain_nested(ds.meta.nmr_processing) == initial_state
 
 
 # ---------------------------------------------------------------------------
