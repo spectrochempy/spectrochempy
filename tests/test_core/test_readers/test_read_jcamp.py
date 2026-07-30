@@ -195,7 +195,9 @@ def test_write_jcamp_masked_values(tmp_path):
         maxsplit=1,
     )[0]
 
-    # the masked underlying value never leaks into the exported numeric payload
+    # Numeric leakage must be checked in the XYDATA payload itself: unrelated
+    # metadata such as ##OWNER may legitimately contain "999" in some
+    # environments and would otherwise cause a false-positive failure.
     assert "999" not in xydata_section
     # each masked point is written as the JCAMP missing marker
     assert xydata_section.count("? ") == 10

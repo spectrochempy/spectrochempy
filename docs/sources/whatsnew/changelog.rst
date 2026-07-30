@@ -157,8 +157,8 @@ Breaking Changes
   semantics of Tauler MATLAB MCR-ALS, pyMCR, and PLS_Toolbox.  Convergence
   diagnostics also use the constrained pair, which can change convergence
   speed and iteration counts compared with the old behaviour.  The
-   unconstrained least-squares estimate is still available via the new
-   ``C_ls`` property. (:pr:`XXXX`)
+  unconstrained least-squares estimate is still available via the new
+  ``C_ls`` property. (:pr:`XXXX`)
 
 - Refactored the internal ALS iteration loop in ``MCRALS._fit`` to match the
   standard Tauler formulation: each iteration now performs exactly one C solve
