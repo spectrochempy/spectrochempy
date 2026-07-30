@@ -53,8 +53,38 @@ descriptive only:
 - it is not replayed automatically by ``scp.nmr.Experiment(...).process()``;
 - it does not establish the exact historical processing sequence of an already
   processed vendor spectrum such as TopSpin ``1r``;
-- SpectroChemPy-owned ``requested`` / ``applied`` processing traces are handled
-  separately and are not yet part of this metadata.
+- SpectroChemPy-owned processing traces are handled separately from the vendor
+  profile.
+
+SpectroChemPy Processing Trace
+==============================
+
+The result of ``scp.nmr.Experiment(...).process()`` records the
+SpectroChemPy-owned processing call in
+``result.meta.nmr_processing["scp_processing"]``:
+
+.. code-block:: python
+
+    experiment = scp.nmr.Experiment(fid)
+    result = experiment.process(apodization="em", lb=5.0)
+
+    trace = result.meta.nmr_processing["scp_processing"]
+    requested = trace["requested"]
+    applied = trace["applied"]
+
+This trace is attached to the result only. The source dataset is not mutated.
+
+- ``requested`` contains only the arguments explicitly provided to
+  ``Experiment.process()``.
+- ``applied`` contains only the operations that SpectroChemPy actually
+  executed and the values those operations really consumed.
+- ``dataset.meta.nmr_processing["vendor_profile"]`` remains descriptive vendor
+  metadata and is never applied automatically.
+- the trace records the SpectroChemPy processing associated with the current
+  result, not a complete historical processing history for the dataset.
+- vendor replay is not implemented.
+- ``phase="metadata"`` keeps its current dataset-metadata phase path and does
+  not replay TopSpin ``PHC0`` / ``PHC1`` from ``procs``.
 
 Compatibility aliases
 =====================

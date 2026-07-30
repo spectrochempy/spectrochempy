@@ -432,6 +432,21 @@ def test_topspin_vendor_profile_is_not_consumed_by_experiment_process(tmp_path):
         np.asarray(processed_with_profile.data),
         np.asarray(processed_without_profile.data),
     )
+    assert (
+        processed_with_profile.meta.nmr_processing["vendor_profile"]
+        == original.meta.nmr_processing["vendor_profile"]
+    )
+    assert processed_with_profile.meta.nmr_processing["scp_processing"][
+        "requested"
+    ] == {
+        "apodization": "em",
+        "lb": 5.0 * scp.ur.Hz,
+        "size": 16384,
+    }
+    assert (
+        processed_with_profile.meta.nmr_processing["scp_processing"]["applied"]["lb"]
+        == 5.0 * scp.ur.Hz
+    )
 
 
 # --------------------------------------------------------------------------

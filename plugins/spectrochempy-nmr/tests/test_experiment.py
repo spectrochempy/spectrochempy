@@ -552,6 +552,8 @@ class TestProcessTimeDomain:
             np.asarray(manual.x.data),
             atol=1.0e-12,
         )
+        assert str(public.x.units) == str(manual.x.units)
+        np.testing.assert_array_equal(np.asarray(public.mask), np.asarray(manual.mask))
 
     @pytest.mark.parametrize(
         ("kwargs", "match"),
@@ -613,6 +615,8 @@ class TestProcessTimeDomain:
 
         np.testing.assert_allclose(public.data, manual.data, atol=1.0e-12)
         np.testing.assert_allclose(public.x.data, manual.x.data, atol=1.0e-12)
+        assert str(public.x.units) == str(manual.x.units)
+        np.testing.assert_array_equal(np.asarray(public.mask), np.asarray(manual.mask))
 
     def test_sp_process_matches_manual_apodize_then_fft_on_synthetic_fid(self):
         ds = _make_synthetic_vendor_fid(npts=64, sw_hz=6400.0, freq_hz=250.0)
@@ -634,6 +638,8 @@ class TestProcessTimeDomain:
 
         np.testing.assert_allclose(public.data, manual.data, atol=1.0e-12)
         np.testing.assert_allclose(public.x.data, manual.x.data, atol=1.0e-12)
+        assert str(public.x.units) == str(manual.x.units)
+        np.testing.assert_array_equal(np.asarray(public.mask), np.asarray(manual.mask))
 
     def test_gm_parameter_defaults_match_core_defaults_on_synthetic_fid(self):
         ds = _make_synthetic_vendor_fid(npts=64, sw_hz=6400.0, freq_hz=250.0)
@@ -991,6 +997,95 @@ class TestPublic1DRealAxisValidation:
         assert spectrum.x.linear
         assert runtime_messages == []
 
+    def test_process_trace_records_only_explicit_requests_and_actual_time_domain_steps(
+        self,
+    ):
+        ds = _make_synthetic_vendor_fid(npts=64, sw_hz=6400.0, freq_hz=250.0)
+
+        result = Experiment(ds).process(apodization="em", lb=5.0, size=128)
+
+        assert getattr(ds.meta, "nmr_processing", None) is None
+        trace = result.meta.nmr_processing["scp_processing"]
+        assert trace["requested"] == {
+            "apodization": "em",
+            "lb": 5.0 * ur.Hz,
+            "size": 128,
+        }
+        assert trace["applied"] == {
+            "apodization": "em",
+            "lb": 5.0 * ur.Hz,
+            "zero_filling": {"size": 128},
+            "fft": True,
+            "axis_calibration": "ppm",
+        }
+        assert result.meta.nmr_processing["observed_state"] == {
+            "processing_history": "spectrochempy_process_recorded"
+        }
+
+    def test_process_trace_distinguishes_explicit_none_from_omitted_phase(self):
+        ds = _make_synthetic_vendor_fid(npts=64, sw_hz=6400.0, freq_hz=250.0)
+
+        implicit = Experiment(ds.copy()).process()
+        explicit = Experiment(ds.copy()).process(phase=None)
+
+        np.testing.assert_allclose(np.asarray(explicit.data), np.asarray(implicit.data))
+        np.testing.assert_allclose(
+            np.asarray(explicit.x.data),
+            np.asarray(implicit.x.data),
+        )
+        assert implicit.meta.nmr_processing["scp_processing"]["requested"] == {}
+        assert explicit.meta.nmr_processing["scp_processing"]["requested"] == {
+            "phase": None
+        }
+        assert "phase" not in implicit.meta.nmr_processing["scp_processing"]["applied"]
+        assert "phase" not in explicit.meta.nmr_processing["scp_processing"]["applied"]
+
+    def test_process_trace_does_not_report_zero_filling_when_size_is_unchanged(self):
+        ds = _make_synthetic_vendor_fid(npts=64, sw_hz=6400.0, freq_hz=250.0)
+
+        result = Experiment(ds).process(size=64)
+
+        trace = result.meta.nmr_processing["scp_processing"]
+        assert trace["requested"] == {"size": 64}
+        assert "zero_filling" not in trace["applied"]
+        assert trace["applied"]["fft"] is True
+
+    def test_process_trace_replaces_previous_trace_instead_of_building_history(self):
+        ds = _make_synthetic_vendor_fid(npts=64, sw_hz=6400.0, freq_hz=250.0)
+
+        first = Experiment(ds).process(apodization="em", lb=3.0, size=128)
+        second = Experiment(first).process(phase=None)
+
+        assert first.meta.nmr_processing["scp_processing"]["requested"] == {
+            "apodization": "em",
+            "lb": 3.0 * ur.Hz,
+            "size": 128,
+        }
+        assert second.meta.nmr_processing["scp_processing"]["requested"] == {
+            "phase": None,
+        }
+        assert second.meta.nmr_processing["scp_processing"]["applied"] == {}
+
+    def test_process_trace_persists_through_copy_and_dump_roundtrip(self, tmp_path):
+        ds = _make_synthetic_vendor_fid(npts=64, sw_hz=6400.0, freq_hz=250.0)
+        result = Experiment(ds).process(apodization="gm", lb=2.0, gb=1.0, size=128)
+        copied = result.copy()
+        target = tmp_path / "nmr_trace.scp"
+
+        assert copied.meta.nmr_processing == result.meta.nmr_processing
+        assert copied.meta.nmr_processing is not result.meta.nmr_processing
+        assert (
+            copied.meta.nmr_processing["scp_processing"]
+            is not result.meta.nmr_processing["scp_processing"]
+        )
+
+        result.dump(target)
+        restored = scp.NDDataset.load(target)
+
+        assert restored.meta.nmr_processing == result.meta.nmr_processing
+        assert "scp_processing" in str(restored.meta)
+        assert "scp_processing" in restored.meta._repr_html_()
+
 
 # ---------------------------------------------------------------------------
 # Processing — frequency-domain 1D
@@ -1036,6 +1131,26 @@ class TestProcessFrequencyDomain:
         exp = Experiment(spec)
         _ = exp.process(phase="manual", phc0=10.0)
         np.testing.assert_array_equal(spec.data, original_data)
+
+    @pytest.mark.skipif(not _has_topspin_1d_pdata(), reason="TopSpin 1D pdata missing")
+    def test_frequency_domain_trace_records_phase_without_fft(self):
+        spec = _read_or_skip(nmrdir / "topspin_1d/1/pdata/1/1r")
+
+        result = Experiment(spec).process(phase="manual", phc0=10.0)
+
+        trace = result.meta.nmr_processing["scp_processing"]
+        assert trace["requested"] == {
+            "phase": "manual",
+            "phc0": 10.0 * ur.deg,
+        }
+        assert trace["applied"] == {
+            "phase": {
+                "mode": "manual",
+                "phc0": 10.0 * ur.deg,
+                "phc1": 0.0 * ur.deg,
+            }
+        }
+        assert "scp_processing" not in spec.meta.nmr_processing
 
 
 # ---------------------------------------------------------------------------

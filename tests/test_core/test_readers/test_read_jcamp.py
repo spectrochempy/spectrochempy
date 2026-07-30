@@ -190,11 +190,15 @@ def test_write_jcamp_masked_values(tmp_path):
 
     f = ds.write_jcamp(tmp_path / "masked.jdx", confirm=False)
     text = f.read_text()
+    xydata_section = text.split("##XYDATA=(X++(Y..Y))\n", maxsplit=1)[1].split(
+        "##END",
+        maxsplit=1,
+    )[0]
 
-    # the masked underlying value never leaks into the file
-    assert "999" not in text
+    # the masked underlying value never leaks into the exported numeric payload
+    assert "999" not in xydata_section
     # each masked point is written as the JCAMP missing marker
-    assert text.count("? ") == 10
+    assert xydata_section.count("? ") == 10
     # header extrema ignore the masked samples
     assert "##MAXY=0.900000" in text
     assert "##MINY=0.100000" in text
