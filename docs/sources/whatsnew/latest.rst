@@ -33,6 +33,15 @@ New Features
   FIDs, does not replay vendor processing, and does not yet expose any
   SpectroChemPy ``requested`` / ``applied`` processing trace.
 
+- The result of ``scp.nmr.Experiment.process()`` now records a structured
+  SpectroChemPy-owned processing trace in
+  ``result.meta.nmr_processing["scp_processing"]``. The ``requested`` mapping
+  keeps only the arguments explicitly provided by the user, while ``applied``
+  keeps only the operations that were actually executed and the values they
+  really consumed. The source dataset remains unchanged, vendor ``procs``
+  metadata stays descriptive, and ``phase="metadata"`` still does not replay
+  TopSpin ``PHC0`` / ``PHC1``.
+
 - `read_matlab()` now reconstructs `NDDataset` objects from the minimal
   MATLAB exchange payload written by `write_matlab()`, restoring the
   dataset's name, title, units, description, dimension names, and

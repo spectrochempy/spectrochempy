@@ -16,6 +16,7 @@ from __future__ import annotations
 import re
 from numbers import Real
 from typing import TYPE_CHECKING
+from typing import cast
 
 import numpy as np
 
@@ -31,6 +32,29 @@ _APODIZATION_ALLOWED_PARAMS = {
     "gm": ("lb", "gb"),
     "sp": ("ssb", "pow"),
 }
+
+
+class _DefaultSentinel:
+    """Private default marker with a stable signature representation."""
+
+    def __init__(self, rendered: str):
+        self._rendered = rendered
+
+    def __repr__(self) -> str:
+        return self._rendered
+
+
+_UNSET_NONE = _DefaultSentinel("None")
+_UNSET_ZERO = _DefaultSentinel("0.0")
+_DEFAULT_APODIZATION = cast(str | None, _UNSET_NONE)
+_DEFAULT_LB = cast(float | Quantity | None, _UNSET_NONE)
+_DEFAULT_GB = cast(float | Quantity | None, _UNSET_NONE)
+_DEFAULT_SSB = cast(float | None, _UNSET_NONE)
+_DEFAULT_POW = cast(float | None, _UNSET_NONE)
+_DEFAULT_SIZE = cast(int | None, _UNSET_NONE)
+_DEFAULT_PHASE = cast(str | None, _UNSET_NONE)
+_DEFAULT_PHC0 = cast(float, _UNSET_ZERO)
+_DEFAULT_PHC1 = cast(float, _UNSET_ZERO)
 
 
 # ---------------------------------------------------------------------------
@@ -419,15 +443,15 @@ class Experiment:
     def process(
         self,
         *,
-        apodization: str | None = None,
-        lb: float | Quantity | None = None,
-        gb: float | Quantity | None = None,
-        ssb: float | None = None,
-        pow: float | None = None,
-        size: int | None = None,
-        phase: str | None = None,
-        phc0: float = 0.0,
-        phc1: float = 0.0,
+        apodization: str | None = _DEFAULT_APODIZATION,
+        lb: float | Quantity | None = _DEFAULT_LB,
+        gb: float | Quantity | None = _DEFAULT_GB,
+        ssb: float | None = _DEFAULT_SSB,
+        pow: float | None = _DEFAULT_POW,
+        size: int | None = _DEFAULT_SIZE,
+        phase: str | None = _DEFAULT_PHASE,
+        phc0: float = _DEFAULT_PHC0,
+        phc1: float = _DEFAULT_PHC1,
     ) -> NDDataset:
         """
         State-aware NMR processing.
@@ -487,6 +511,27 @@ class Experiment:
         """
 
         ds = self._dataset
+        explicit_arguments = {
+            "apodization": apodization is not _UNSET_NONE,
+            "lb": lb is not _UNSET_NONE,
+            "gb": gb is not _UNSET_NONE,
+            "ssb": ssb is not _UNSET_NONE,
+            "pow": pow is not _UNSET_NONE,
+            "size": size is not _UNSET_NONE,
+            "phase": phase is not _UNSET_NONE,
+            "phc0": phc0 is not _UNSET_ZERO,
+            "phc1": phc1 is not _UNSET_ZERO,
+        }
+
+        apodization = None if apodization is _UNSET_NONE else apodization
+        lb = None if lb is _UNSET_NONE else lb
+        gb = None if gb is _UNSET_NONE else gb
+        ssb = None if ssb is _UNSET_NONE else ssb
+        pow = None if pow is _UNSET_NONE else pow
+        size = None if size is _UNSET_NONE else size
+        phase = None if phase is _UNSET_NONE else phase
+        phc0 = 0.0 if phc0 is _UNSET_ZERO else phc0
+        phc1 = 0.0 if phc1 is _UNSET_ZERO else phc1
 
         if self.ndim > 1:
             msg = (
@@ -508,6 +553,7 @@ class Experiment:
                 phase=phase,
                 phc0=phc0,
                 phc1=phc1,
+                explicit_arguments=explicit_arguments,
             )
         if self.is_frequency_domain:
             self._reject_frequency_domain_apodization_requests(
@@ -522,6 +568,7 @@ class Experiment:
                 phase=phase,
                 phc0=phc0,
                 phc1=phc1,
+                explicit_arguments=explicit_arguments,
             )
         msg = (
             f"Cannot process data in '{self.domain}' domain. "
@@ -572,6 +619,7 @@ class Experiment:
         phase: str | None,
         phc0: float,
         phc1: float,
+        explicit_arguments: dict[str, bool],
     ) -> NDDataset:
         """Process time-domain data: apodize → zero-fill → FFT → phase."""
         work = ds.copy()
@@ -584,19 +632,35 @@ class Experiment:
             ssb=ssb,
             pow=pow,
         )
+        requested = self._build_requested_trace(
+            explicit_arguments,
+            apodization=apodization,
+            apodization_kwargs=apodization_kwargs,
+            size=size,
+            phase=phase,
+            phc0=phc0,
+            phc1=phc1,
+        )
+        applied: dict[str, object] = {}
         if apodization is not None:
             work = self._apply_apodization(work, apodization, **apodization_kwargs)
+            applied["apodization"] = apodization.lower()
+            applied.update(self._normalize_trace_mapping(apodization_kwargs))
 
         # 2. Zero-filling / FFT sizing
         if size is not None:
+            initial_size = int(work.shape[-1])
             from spectrochempy.processing.fft.zero_filling import (  # noqa: PLC0415
                 zf_size,
             )
 
             work = zf_size(work, size=size)
+            if int(work.shape[-1]) != initial_size:
+                applied["zero_filling"] = {"size": int(work.shape[-1])}
 
         # 3. FFT
         work = work.fft()
+        applied["fft"] = True
 
         # 3b. Encoding-specific intermediate phase convention adjustments
         work = self._apply_default_post_fft_phase(work)
@@ -604,9 +668,21 @@ class Experiment:
         # 4. Phase correction
         if phase is not None:
             work = self._apply_phase(work, phase, phc0=phc0, phc1=phc1)
+            applied["phase"] = self._build_applied_phase_trace(
+                phase,
+                phc0=phc0,
+                phc1=phc1,
+            )
 
         # 5. Calibrate the final spectral axis using canonical NMR metadata.
-        return self._calibrate_1d_spectral_axis(work)
+        calibrated = self._calibrate_1d_spectral_axis(work)
+        if self._axis_calibration_changed_axis(work, calibrated):
+            applied["axis_calibration"] = str(calibrated.coord(0).units)
+        return self._attach_scp_processing_trace(
+            calibrated,
+            requested=requested,
+            applied=applied,
+        )
 
     def _process_frequency_domain(
         self,
@@ -615,14 +691,144 @@ class Experiment:
         phase: str | None,
         phc0: float,
         phc1: float,
+        explicit_arguments: dict[str, bool],
     ) -> NDDataset:
         """Process frequency-domain data: phase only (no re-FFT)."""
         work = ds.copy()
+        requested = self._build_requested_trace(
+            explicit_arguments,
+            apodization=None,
+            apodization_kwargs={},
+            size=None,
+            phase=phase,
+            phc0=phc0,
+            phc1=phc1,
+        )
+        applied: dict[str, object] = {}
 
         if phase is not None:
             work = self._apply_phase(work, phase, phc0=phc0, phc1=phc1)
+            applied["phase"] = self._build_applied_phase_trace(
+                phase,
+                phc0=phc0,
+                phc1=phc1,
+            )
 
-        return work
+        return self._attach_scp_processing_trace(
+            work,
+            requested=requested,
+            applied=applied,
+        )
+
+    def _build_requested_trace(
+        self,
+        explicit_arguments: dict[str, bool],
+        *,
+        apodization: str | None,
+        apodization_kwargs: dict[str, float | Quantity],
+        size: int | None,
+        phase: str | None,
+        phc0: float,
+        phc1: float,
+    ) -> dict[str, object]:
+        """Record only the arguments explicitly provided by the user."""
+        requested: dict[str, object] = {}
+        if explicit_arguments["apodization"]:
+            requested["apodization"] = apodization
+        for name, value in apodization_kwargs.items():
+            if explicit_arguments[name]:
+                requested[name] = self._normalize_trace_value(name, value)
+        if explicit_arguments["size"]:
+            requested["size"] = int(size) if size is not None else None
+        if explicit_arguments["phase"]:
+            requested["phase"] = phase
+        if explicit_arguments["phc0"]:
+            requested["phc0"] = self._normalize_trace_value("phc0", phc0)
+        if explicit_arguments["phc1"]:
+            requested["phc1"] = self._normalize_trace_value("phc1", phc1)
+        return requested
+
+    def _normalize_trace_mapping(
+        self,
+        mapping: dict[str, float | Quantity],
+    ) -> dict[str, object]:
+        """Normalize trace values to a persistence-friendly public shape."""
+        return {
+            name: self._normalize_trace_value(name, value)
+            for name, value in mapping.items()
+        }
+
+    def _normalize_trace_value(
+        self,
+        name: str,
+        value: float | int | str | Quantity | None,
+    ) -> object:
+        """Normalize trace values with the public units expected by the contract."""
+        if name in {"lb", "gb"} and value is not None:
+            return self._as_hz_quantity(value)
+        if name in {"phc0", "phc1"} and value is not None:
+            return float(value) * ur.deg
+        if name == "size" and value is not None:
+            return int(value)
+        return value
+
+    def _as_hz_quantity(self, value: float | Quantity) -> Quantity:
+        """Represent frequency-like processing values as quantities in Hz."""
+        if isinstance(value, Quantity):
+            return value.to(ur.Hz)
+        return float(value) * ur.Hz
+
+    def _build_applied_phase_trace(
+        self,
+        mode: str,
+        *,
+        phc0: float,
+        phc1: float,
+    ) -> dict[str, object]:
+        """Record only the phase information actually consumed by the phase step."""
+        phase_trace: dict[str, object] = {"mode": mode}
+        if mode == "manual":
+            phase_trace["phc0"] = self._normalize_trace_value("phc0", phc0)
+            phase_trace["phc1"] = self._normalize_trace_value("phc1", phc1)
+        return phase_trace
+
+    def _axis_calibration_changed_axis(
+        self, before: NDDataset, after: NDDataset
+    ) -> bool:
+        """Return True when the final calibration step changed the public axis."""
+        before_coord = before.coord(0)
+        after_coord = after.coord(0)
+        if str(before_coord.units) != str(after_coord.units):
+            return True
+        if before_coord.title != after_coord.title:
+            return True
+        return not np.array_equal(
+            np.asarray(before_coord.data), np.asarray(after_coord.data)
+        )
+
+    def _attach_scp_processing_trace(
+        self,
+        ds: NDDataset,
+        *,
+        requested: dict[str, object],
+        applied: dict[str, object],
+    ) -> NDDataset:
+        """Attach the SpectroChemPy processing trace to the result dataset only."""
+        readonly = ds.meta.readonly
+        ds.meta.readonly = False
+
+        existing = getattr(ds.meta, "nmr_processing", None)
+        nmr_processing = dict(existing) if existing is not None else {}
+        nmr_processing["observed_state"] = {
+            "processing_history": "spectrochempy_process_recorded"
+        }
+        nmr_processing["scp_processing"] = {
+            "requested": requested,
+            "applied": applied,
+        }
+        ds.meta["nmr_processing"] = nmr_processing
+        ds.meta.readonly = readonly
+        return ds
 
     def _validate_apodization_arguments(
         self,

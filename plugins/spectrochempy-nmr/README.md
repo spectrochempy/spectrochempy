@@ -46,6 +46,14 @@ The current explicit apodization contract covers the public modes already
 exposed by `Experiment.process()`: `em(lb=...)`, `gm(lb=..., gb=...)`, and
 `sp(ssb=..., pow=...)`.
 
+The result of `Experiment.process()` also records the SpectroChemPy-owned
+processing trace in `result.meta.nmr_processing["scp_processing"]`.
+`requested` contains only the arguments explicitly provided by the user,
+whereas `applied` contains only the operations that were actually executed and
+the values they really consumed. This trace is attached to the result only:
+the source dataset is not mutated, the vendor `procs` profile remains purely
+descriptive, and `phase="metadata"` does not replay TopSpin `PHC0`/`PHC1`.
+
 The NMR ppm/frequency unit context is also provided by this plugin:
 
 ```python
