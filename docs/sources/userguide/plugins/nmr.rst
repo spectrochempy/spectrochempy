@@ -83,8 +83,12 @@ This trace is attached to the result only. The source dataset is not mutated.
 - the trace records the SpectroChemPy processing associated with the current
   result, not a complete historical processing history for the dataset.
 - vendor replay is not implemented.
-- ``phase="metadata"`` keeps its current dataset-metadata phase path and does
-  not replay TopSpin ``PHC0`` / ``PHC1`` from ``procs``.
+- ``phase="metadata"`` applies the dataset's current ``meta.phc0`` /
+  ``meta.phc1`` state through the existing ``pk()`` path. It does not consult
+  ``vendor_profile`` and does not replay TopSpin ``PHC0`` / ``PHC1`` from
+  ``procs``. On the validated raw TopSpin 1D oracle path it is currently
+  numerically identical to ``phase=None``; on already frequency-domain spectra
+  carrying phase metadata, it can still apply a real phase correction.
 
 Compatibility aliases
 =====================

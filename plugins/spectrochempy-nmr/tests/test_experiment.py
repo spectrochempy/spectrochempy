@@ -1198,7 +1198,6 @@ class TestPublic1DRealAxisValidation:
             np.asarray(metadata.x.data),
             np.asarray(implicit.x.data),
         )
-
         trace = metadata.meta.nmr_processing["scp_processing"]
         assert trace["requested"] == {"phase": "metadata"}
         assert trace["applied"] == {
@@ -1345,6 +1344,42 @@ class TestProcessFrequencyDomain:
             }
         }
         assert "scp_processing" not in spec.meta.nmr_processing
+
+    @pytest.mark.skipif(not _has_topspin_1d_pdata(), reason="TopSpin 1D pdata missing")
+    def test_frequency_domain_metadata_phase_uses_dataset_phase_metadata(self):
+        spec = _read_or_skip(nmrdir / "topspin_1d/1/pdata/1/1r")
+
+        implicit = Experiment(spec.copy()).process()
+        metadata = Experiment(spec.copy()).process(phase="metadata")
+        manual_from_current_meta = Experiment(spec.copy()).process(
+            phase="manual",
+            phc0=-float(spec.meta.phc0[0].magnitude),
+            phc1=-float(spec.meta.phc1[0].magnitude),
+        )
+
+        assert not np.allclose(np.asarray(metadata.data), np.asarray(implicit.data))
+        np.testing.assert_allclose(
+            np.asarray(metadata.data),
+            np.asarray(manual_from_current_meta.data),
+        )
+        np.testing.assert_array_equal(
+            np.asarray(metadata.x.data),
+            np.asarray(implicit.x.data),
+        )
+
+        trace = metadata.meta.nmr_processing["scp_processing"]
+        assert trace["requested"] == {"phase": "metadata"}
+        assert trace["applied"] == {"phase": {"mode": "metadata"}}
+        assert (
+            metadata.meta.nmr_processing["vendor_profile"]
+            == spec.meta.nmr_processing["vendor_profile"]
+        )
+        assert metadata.meta.phc0[0] == 0.0 * ur.deg
+        assert metadata.meta.phc1[0] == 0.0 * ur.deg
+        assert metadata.meta.phased == [True]
+        assert spec.meta.phased is None
+        assert spec.meta.phc0[0] == 52.43836 * ur.deg
+        assert spec.meta.phc1[0] == -16.8366 * ur.deg
 
 
 # ---------------------------------------------------------------------------
