@@ -486,8 +486,11 @@ class Experiment:
         size : int, optional
             Zero-fill target size.  Only applied to time-domain data.
         phase : str, optional
-            ``'manual'`` to apply ``phc0``/``'phc1``, ``'metadata'`` to use
-            stored phase values, or ``None`` for no phasing.
+            ``'manual'`` to apply explicit ``phc0``/``phc1``,
+            ``'metadata'`` to apply the dataset's current phase metadata via
+            ``pk()``, or ``None`` for no phasing. ``'metadata'`` uses the
+            dataset's own ``meta.phc0`` / ``meta.phc1`` state when present; it
+            does not replay ``vendor_profile`` or TopSpin ``procs`` values.
         phc0 : float
             Zero-order phase correction in degrees (manual mode).
         phc1 : float
