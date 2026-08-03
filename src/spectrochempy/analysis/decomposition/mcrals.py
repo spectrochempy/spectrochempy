@@ -833,6 +833,12 @@ class MCRALS(DecompositionAnalysis):
         When `warm_start` is `True`, the existing fitted model attributes is used to
         initialize the new model in a subsequent call to `fit`.
 
+    See Also
+    --------
+    fit : Fit the MCRALS model on X.
+    transform : Apply dimensionality reduction.
+    fit_transform : Fit the model and apply dimensionality reduction.
+
     Notes
     -----
     Three dimensionless stopping diagnostics are evaluated after each ALS
@@ -860,12 +866,6 @@ class MCRALS(DecompositionAnalysis):
     resolved factor units. For horizontal augmentation, ``St_blocks`` carries
     block-specific physical metadata; the heterogeneous concatenated ``St`` is
     deliberately unitless with a neutral title.
-
-    See Also
-    --------
-    fit : Fit the MCRALS model on X.
-    transform : Apply dimensionality reduction.
-    fit_transform : Fit the model and apply dimensionality reduction.
 
     """
 
@@ -3896,14 +3896,14 @@ MCRALS.__signature__ = Signature(
     ]
 )
 
-# The decorator @signature_has_configurable_traits strips manual entries for
-# ``config=True`` traitlets (max_iter, tol, maxdiv, …) and merges auto‑generated
-# entries for ALL such traitlets (including legacy names) into a single
-# ``Parameters`` section.  We keep only entries whose name matches a param in the
-# custom ``__signature__`` (excluding VAR_POSITIONAL ``*args``) and drop everything
-# legacy.  This keeps the keep-list in sync with the public API automatically:
-# adding a param to ``__signature__`` adds it to the docstring, and removing one
-# removes it.
+# The shared decorator preserves manual entries, but it still builds the
+# ``Parameters`` section from the full set of ``config=True`` traitlets. MCRALS
+# intentionally exposes a narrower custom ``__signature__`` than that full
+# traitlet surface, so we keep only entries whose name matches a param in the
+# custom ``__signature__`` (excluding VAR_POSITIONAL ``*args``) and drop
+# everything legacy. This keeps the keep-list in sync with the public API
+# automatically: adding a param to ``__signature__`` adds it to the docstring,
+# and removing one removes it.
 _doc = MCRALS.__doc__
 
 if _doc:

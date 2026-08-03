@@ -4,6 +4,7 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 import inspect
+import re
 import warnings
 
 import numpy as np
@@ -68,12 +69,80 @@ class TestSignatureHasConfigurableTraits:
 
         # Check that the docstring was updated
         assert "value : `int`" in MyClass.__doc__
-        assert "name : `str`" in MyClass.__doc__
+        assert "name : str" in MyClass.__doc__
 
         # Check instance creation with trait parameters
         instance = MyClass(value=42, name="test")
         assert instance.value == 42
         assert instance.name == "test"
+
+    def test_signature_has_configurable_traits_preserves_manual_entries(self):
+        @signature_has_configurable_traits
+        class MyClass(tr.HasTraits):
+            """
+            My test class.
+
+            Parameters
+            ----------
+            other : float
+                Manual non-configurable parameter.
+            name : str
+                Manual name description.
+                Manual name continuation.
+
+            Attributes
+            ----------
+            fitted_ : bool
+                Learned attribute.
+
+            Notes
+            -----
+            Manual note.
+            """
+
+            value = tr.Int(0, config=True, help="An integer value")
+            name = tr.Unicode("default", config=True, help="Generic trait help")
+
+            def __init__(self, name=None, other=1.0, **kwargs):
+                super().__init__(**kwargs)
+                if name is not None:
+                    self.name = name
+                self.other = other
+
+        doc = MyClass.__doc__
+        assert doc is not None
+
+        params_match = re.search(
+            r"Parameters\n----------\n(?P<body>.*?)(?:\n\nAttributes\n----------|\Z)",
+            doc,
+            re.S,
+        )
+        assert params_match is not None
+        params_body = params_match.group("body")
+
+        assert params_body.startswith(
+            "name : str\n"
+            "    Manual name description.\n"
+            "    Manual name continuation.\n"
+            "other : float\n"
+            "    Manual non-configurable parameter.\n"
+            "value : `int`, optional, default: ``0``\n"
+            "    An integer value",
+        )
+        assert params_body.count("name :") == 1
+        assert params_body.count("other :") == 1
+        assert params_body.count("value :") == 1
+        assert "Parameters\n----------\n    Manual name description." not in doc
+        assert "Attributes\n----------\nfitted_ : bool\n    Learned attribute." in doc
+        assert "Notes\n-----\nManual note." in doc
+        assert doc.count("Parameters\n----------") == 1
+        assert list(inspect.signature(MyClass).parameters) == ["name", "other", "value"]
+
+        original_doc = doc
+        original_sig = inspect.signature(MyClass)
+        signature_has_configurable_traits(MyClass)
+        assert MyClass.__doc__ == original_doc
+        assert inspect.signature(MyClass) == original_sig
 
 
 class TestWrapNdarrayOutput:

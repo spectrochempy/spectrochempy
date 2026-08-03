@@ -7,6 +7,7 @@
 import copy
 import functools
 import inspect
+import re
 from functools import partial
 from functools import update_wrapper
 from inspect import Parameter
@@ -116,10 +117,110 @@ def deprecated(name=None, *, kind="method", replace="", removed=None, extra_msg=
 # ======================================================================================
 T = TypeVar("T", bound=tr.HasTraits)
 
+_KNOWN_NUMPYDOC_SECTIONS = {
+    "Parameters",
+    "Returns",
+    "Yields",
+    "Other Parameters",
+    "Raises",
+    "Warns",
+    "Warnings",
+    "See Also",
+    "Notes",
+    "References",
+    "Examples",
+    "Attributes",
+    "Methods",
+}
+_PARAMETER_DECLARATION_RE = re.compile(
+    r"^\s*([*]{0,2}[A-Za-z_]\w*(?:\s*,\s*[*]{0,2}[A-Za-z_]\w*)*)\s*:\s*",
+)
+
 
 def _get_default(value):
     """Get default argument value, given the trait default value."""
     return Parameter.empty if value == tr.Undefined else value
+
+
+def _parse_numpydoc_sections(docstring):
+    """Return the summary block and the ordered numpydoc sections."""
+    lines = docstring.splitlines()
+    summary_lines = []
+    sections = []
+    current_section = None
+    current_lines = []
+    i = 0
+
+    while i < len(lines):
+        line = lines[i]
+        stripped = line.strip()
+
+        if (
+            stripped in _KNOWN_NUMPYDOC_SECTIONS
+            and i + 1 < len(lines)
+            and lines[i + 1].strip()
+            and set(lines[i + 1].strip()) == {"-"}
+        ):
+            if current_section is None:
+                summary_lines = current_lines
+            else:
+                sections.append((current_section, "\n".join(current_lines).rstrip()))
+
+            current_section = stripped
+            current_lines = []
+            i += 2
+            continue
+
+        current_lines.append(line)
+        i += 1
+
+    if current_section is None:
+        summary_lines = current_lines
+    else:
+        sections.append((current_section, "\n".join(current_lines).rstrip()))
+
+    return "\n".join(summary_lines).strip(), sections
+
+
+def _parse_parameter_entries(section_content):
+    """
+    Return free text and parameter entries from a numpydoc Parameters section body.
+
+    Each entry keeps the declaration line and its whole indented description.
+    """
+    preamble_lines = []
+    entries = []
+    current_names = None
+    current_lines = []
+
+    def _flush_entry():
+        if current_names is not None:
+            entries.append((current_names, "\n".join(current_lines).rstrip()))
+
+    for line in section_content.splitlines():
+        match = _PARAMETER_DECLARATION_RE.match(line)
+        if match:
+            _flush_entry()
+            current_names = tuple(name.strip() for name in match.group(1).split(","))
+            current_lines = [line]
+            continue
+
+        if current_names is None:
+            preamble_lines.append(line)
+        else:
+            current_lines.append(line)
+
+    _flush_entry()
+    return "\n".join(preamble_lines).strip("\n"), entries
+
+
+def _format_numpydoc_section(name, content):
+    """Format a numpydoc section block."""
+    underline = "-" * len(name)
+    content = content.rstrip()
+    if content:
+        return f"{name}\n{underline}\n{content}"
+    return f"{name}\n{underline}"
 
 
 def signature_has_configurable_traits(cls: type[T]) -> type[T]:
@@ -207,10 +308,7 @@ def signature_has_configurable_traits(cls: type[T]) -> type[T]:
     # Start with the existing docstring (summary + extended summary)
     existing_doc = cls.__doc__ or ""
 
-    # Build the Parameters section from traits
-    trait_params = ""
-    trait_names = {name for name, _ in traits}
-
+    trait_entry_map = {}
     for name, value in traits:
         # Determine type string
         type_ = type(value).__name__
@@ -240,142 +338,84 @@ def signature_has_configurable_traits(cls: type[T]) -> type[T]:
         else:
             default = f"``{default!r}``"
 
-        trait_params += f"{name} : {type_str}, optional, default: {default}\n"
+        lines = [f"{name} : {type_str}, optional, default: {default}"]
         desc = value.help or ""
         if desc:
-            for line in desc.splitlines():
-                trait_params += f"    {line}\n"
-        else:
-            trait_params += "\n"
+            lines.extend(f"    {line}" for line in desc.splitlines())
+        trait_entry_map[name] = "\n".join(lines)
 
-    # Parse docstring into sections using a robust line-by-line approach
-    # Known numpydoc section names
-    KNOWN_SECTIONS = {
-        "Parameters",
-        "Returns",
-        "Yields",
-        "Other Parameters",
-        "Raises",
-        "Warns",
-        "Warnings",
-        "See Also",
-        "Notes",
-        "References",
-        "Examples",
-        "Attributes",
-        "Methods",
-    }
+    summary, sections = _parse_numpydoc_sections(existing_doc)
+    params_sections = [content for name, content in sections if name == "Parameters"]
 
-    lines = existing_doc.split("\n")
-    sections_dict = {}
-    current_section = "__summary__"
-    current_content = []
-    i = 0
+    params_preamble_parts = []
+    manual_entries = []
+    seen_param_names = set()
 
-    while i < len(lines):
-        line = lines[i]
-        stripped = line.strip()
+    for params_content in params_sections:
+        params_preamble, parsed_entries = _parse_parameter_entries(params_content)
+        if params_preamble:
+            params_preamble_parts.append(params_preamble)
 
-        # Check if this is a section header
-        if stripped in KNOWN_SECTIONS and i + 1 < len(lines):
-            next_line = lines[i + 1]
-            # Check if next line is all dashes (allowing whitespace)
-            if next_line.strip() and all(c == "-" for c in next_line.strip()):
-                # Save current section
-                if current_content:
-                    content = "\n".join(current_content).rstrip()
-                    if current_section in sections_dict:
-                        sections_dict[current_section] += "\n" + content
-                    else:
-                        sections_dict[current_section] = content
-
-                # Start new section
-                current_section = stripped
-                current_content = []
-                i += 2  # Skip header and underline
+        for names, block in parsed_entries:
+            if seen_param_names.intersection(names):
                 continue
+            manual_entries.append((names, block))
+            seen_param_names.update(names)
 
-        current_content.append(line)
-        i += 1
+    public_param_order = list(cls.__signature__.parameters)
+    manual_entry_by_name = {}
+    for entry_index, (names, _) in enumerate(manual_entries):
+        for name in names:
+            manual_entry_by_name.setdefault(name, entry_index)
 
-    # Save final section
-    if current_content:
-        content = "\n".join(current_content).rstrip()
-        if current_section in sections_dict:
-            sections_dict[current_section] += "\n" + content
-        else:
-            sections_dict[current_section] = content
+    ordered_entries = []
+    used_entry_indices = set()
+    documented_names = set()
 
-    # Extract summary
-    summary = sections_dict.pop("__summary__", "").strip()
+    for param_name in public_param_order:
+        entry_index = manual_entry_by_name.get(param_name)
+        if entry_index is not None:
+            if entry_index not in used_entry_indices:
+                names, block = manual_entries[entry_index]
+                ordered_entries.append(block.rstrip())
+                used_entry_indices.add(entry_index)
+                documented_names.update(names)
+            continue
 
-    # Extract all Parameters content and merge
-    params_content = ""
-    if "Parameters" in sections_dict:
-        params_content = sections_dict.pop("Parameters").strip()
+        if param_name in trait_entry_map and param_name not in documented_names:
+            ordered_entries.append(trait_entry_map[param_name])
+            documented_names.add(param_name)
 
-    # Build merged Parameters section
-    merged_params = []
+    for entry_index, (names, block) in enumerate(manual_entries):
+        if entry_index not in used_entry_indices:
+            ordered_entries.append(block.rstrip())
+            documented_names.update(names)
 
-    # Add existing non-trait params
-    if params_content:
-        for line in params_content.split("\n"):
-            stripped = line.strip()
-            if stripped:
-                # Check if it's a parameter definition (param_name : ...)
-                import re
+    merged_params_parts = [part for part in params_preamble_parts if part.strip()]
+    merged_params_parts.extend(entry for entry in ordered_entries if entry.strip())
+    merged_params = "\n".join(merged_params_parts).strip()
+    params_block = (
+        _format_numpydoc_section("Parameters", merged_params) if merged_params else ""
+    )
 
-                param_match = re.match(r"^(\w+)\s*:", stripped)
-                if param_match:
-                    param_name = param_match.group(1)
-                    if param_name not in trait_names:
-                        merged_params.append(line)
-                else:
-                    # It's a continuation line
-                    merged_params.append(line)
-            else:
-                merged_params.append(line)
-
-    # Add trait params
-    if trait_params:
-        merged_params.append(trait_params.rstrip())
-
-    # Build final docstring with proper section order
     doc_parts = []
-
-    # Add summary
     if summary:
         doc_parts.append(summary)
 
-    # Add merged Parameters section
-    if merged_params:
-        params_section = "Parameters\n----------\n" + "\n".join(merged_params)
-        doc_parts.append(params_section)
+    inserted_params = False
+    if not params_sections and params_block:
+        doc_parts.append(params_block)
+        inserted_params = True
 
-    # Add remaining sections in preferred order
-    section_order = [
-        "Returns",
-        "Yields",
-        "Other Parameters",
-        "Raises",
-        "Warns",
-        "Warnings",
-        "See Also",
-        "Notes",
-        "References",
-        "Examples",
-        "Attributes",
-        "Methods",
-    ]
+    for section_name, content in sections:
+        if section_name == "Parameters":
+            if not inserted_params and params_block:
+                doc_parts.append(params_block)
+                inserted_params = True
+            continue
+        doc_parts.append(_format_numpydoc_section(section_name, content))
 
-    for section_name in section_order:
-        if section_name in sections_dict:
-            content = sections_dict[section_name]
-            underline = "-" * len(section_name)
-            doc_parts.append(f"{section_name}\n{underline}\n{content}")
-
-    # Join with double newlines
-    doc = "\n\n".join(doc_parts)
+    doc = "\n\n".join(part for part in doc_parts if part)
     # Add leading newline to satisfy numpydoc GL01 (expects 1 blank line at start)
     # and trailing newline for GL02 (expects 1 blank line at end)
     cls.__doc__ = "\n" + doc + "\n"

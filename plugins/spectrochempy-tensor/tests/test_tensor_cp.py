@@ -9,6 +9,7 @@
 
 import numpy as np
 import pytest
+import re
 
 from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis._base._result import AnalysisResult
@@ -44,6 +45,36 @@ def _make_synthetic_3d():
 
 class TestCP:
     """Test suite for CP decomposition class."""
+
+    def test_cp_docstring_parameters_section_is_well_formed(self):
+        """Runtime docstring keeps manual entries intact and appends missing traits."""
+        doc = CP.__doc__
+        assert doc is not None
+
+        params_match = re.search(
+            r"Parameters\n----------\n(?P<body>.*?)(?:\n\nAttributes\n----------|\Z)",
+            doc,
+            re.S,
+        )
+        assert params_match is not None
+        params_body = params_match.group("body")
+        assert params_body.startswith(
+            'cvg_criterion : {"abs_rec_error", "rec_error"}, default="abs_rec_error"\n'
+            '    Stopping criterion for ALS. "abs_rec_error" uses absolute difference,',
+        )
+        assert params_body.count("n_components :") == 1
+        assert params_body.index("cvg_criterion :") < params_body.index(
+            "n_components :"
+        )
+        assert (
+            "n_components : int\n"
+            "    Number of components (rank) for the decomposition."
+        ) in params_body
+        assert "Parameters\n----------\n    Number of components" not in doc
+        assert (
+            'cvg_criterion : {"abs_rec_error", "rec_error"}, default="abs_rec_error"'
+            in params_body
+        )
 
     def test_cp_import_without_tensorly(self):
         """
