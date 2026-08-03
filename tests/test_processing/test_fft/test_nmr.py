@@ -97,6 +97,9 @@ def test_nmr_fft_1D(NMR_dataset_1D):
     new2 = new.ifft()
     energy_roundtrip = np.sum(np.abs(new2.data) ** 2)
     assert abs(energy_roundtrip / energy_time - 1.0) < 0.01
+    assert new2.x.units == ur.us
+    assert_array_almost_equal(new2.x.data[1] - new2.x.data[0], 4.0, decimal=6)
+    assert_array_almost_equal(new2.x.data[-1], (new2.size - 1) * 4.0, decimal=6)
 
 
 # ---------------------------------------------------------------------------

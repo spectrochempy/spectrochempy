@@ -49,7 +49,7 @@ low_lb = scp.nmr.Experiment(fid.copy()).process(
 )
 high_lb = scp.nmr.Experiment(fid.copy()).process(
     apodization="em",
-    lb=20.0,
+    lb=50.0,
     size=16384,
     phase=None,
 )
@@ -62,9 +62,10 @@ high_lb.plot(
     ax=ax,
     color="C1",
     linestyle="--",
-    label="LB = 20 Hz",
+    label="LB = 50 Hz",
+    xlim=(-7.0, 12.0),
 )
-ax.legend()
+_ = ax.legend()
 
 # %%
 # Continue with the mildly broadened spectrum
@@ -205,5 +206,3 @@ _ = f1.plot_merit(offset=2)
 # when the example is run as a notebook (`.ipynb`).
 
 # scp.show()
-
-# %%

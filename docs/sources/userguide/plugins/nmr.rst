@@ -112,14 +112,8 @@ The generated public API page for the NMR plugin is listed in
 Examples
 ========
 
-For phase-sensitive 2D NMR workflows, install hypercomplex support as well:
-
-.. code-block:: bash
-
-    pip install spectrochempy[nmr,hypercomplex]
-
-See also the hypercomplex plugin guide for phase-sensitive 2D NMR workflows
-built on TopSpin datasets.
+The published public examples for this plugin currently focus on validated 1D
+workflows.
 
 Limitations
 ===========

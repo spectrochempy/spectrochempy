@@ -6,9 +6,23 @@
 # ======================================================================================
 # ruff: noqa
 """
-Processing Relaxation measurement
-=================================
-Processing NMR spectra taken for relaxation measurements
+Processing a saturation-recovery relaxation series
+==================================================
+
+This example processes a pseudo-2D series of 1D spectra acquired with a
+variable recovery delay and fits a simple saturation-recovery model to the
+dominant resonance.
+
+The bundled Bruker dataset stores the delays in ``vdlist`` and the pulse
+program indicates a CP/MAS saturation-recovery experiment. The example keeps a
+modest public scope:
+
+- process the 1D FIDs with explicit SpectroChemPy operations;
+- extract a signal trace from the dominant processed resonance;
+- fit a simple two-parameter recovery model to that trace.
+
+It does not claim replay of vendor processing, nor exact equivalence with the
+TopSpin fitting tools bundled alongside the dataset.
 
 Requires the official ``spectrochempy-nmr`` plugin.
 Install with: ``pip install spectrochempy[nmr]``.
@@ -23,9 +37,9 @@ import spectrochempy as scp
 U = scp.ur
 
 # %%
-# Importing a pseudo 2D NMR spectra
-# ---------------------------------
-# Define the folder where are the spectra
+# Import a pseudo-2D delay series
+# -------------------------------
+# Define the folder containing the Bruker experiment.
 datadir = scp.preferences.datadir
 nmrdir = datadir / "nmrdata" / "bruker" / "tests" / "nmr"
 
@@ -38,17 +52,22 @@ dataset = scp.nmr.read(nmrdir / "relax" / "100" / "ser", use_list="vdlist")
 dataset
 
 # %%
-# Plot the dataset
+# Plot the processed spectra
+# --------------------------
+# The `vdlist` delays become the secondary coordinate of the pseudo-2D series.
 ds = dataset.em(lb=15 * U.Hz)
 ds = ds.fft()
-ds = ds.pk(phc0=-10 * U.deg, phc1=0 * U.deg)
-_ = ds.plot(xlim=(-60, -140))
+ds = ds.pk(phc0=-145 * U.deg, phc1=0 * U.deg)
+_ = ds.plot(xlim=(100, -50))
 
 # %%
-# Integrate a region
-dsint = ds[:, -90.0:-115.0].simpson()
-_ = dsint.plot(marker="^", ls=":")
-dsint.real
+# Build a signal trace from the dominant resonance
+# -----------------------------------------------
+# The strongest processed peak in this series sits around 20–22 ppm.
+# We integrate a narrow ppm window around that resonance for each delay.
+signal = ds[:, 20.0:45.0].simpson()
+_ = signal.plot(marker="^", ls=":")
+signal.real
 
 # %%
 # Fit a model
@@ -60,7 +79,7 @@ fitter = scp.Optimize(log_level="INFO", method="leastsq")
 # %%
 # Define the model to fit
 def T1_model(t, I0, T1):  # no underscore in parameters names.
-    # T1 relaxation model
+    # Simple saturation-recovery model.
     import numpy as np
 
     I = I0 * (1 - np.exp(-t / T1))
@@ -83,15 +102,25 @@ shape: T1_model
 """
 
 # %%
-# Performs the fit
-_ = fitter.fit(dsint)
+# Perform the fit
+_ = fitter.fit(signal)
 
 # %%
 som = fitter.predict()
 som
 
 # %%
-_ = fitter.plotmerit(dsint, som, method="scatter", title="T1 relaxation fitting")
+# Plot the measured recovery points and the fitted curve separately so the
+# experimental series remains a true scatter plot.
+ax = signal.plot_scatter(
+    color="tab:blue",
+    marker="o",
+    markersize=5,
+    label="measured signal",
+    title="Saturation-recovery fit of the dominant resonance",
+)
+_ = som.plot(clear=False, color="tab:orange", lw=1.8, label="fitted curve")
+_ = ax.legend()
 
 # %%
 # This ends the example ! The following line can be removed or commented

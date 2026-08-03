@@ -34,8 +34,8 @@
 # # One-dimensional (1D) Fourier transformation
 
 # %% [markdown]
-# In this notebook, we are going to transform time-domain data into 1D or 2D spectra using SpectroChemPy
-# processing tools
+# In this notebook, we transform time-domain NMR data into a 1D spectrum using
+# SpectroChemPy processing tools.
 
 # %%
 import spectrochempy as scp

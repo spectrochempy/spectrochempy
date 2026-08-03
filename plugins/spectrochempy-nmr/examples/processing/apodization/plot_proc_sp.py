@@ -58,28 +58,42 @@ new5, curve5 = dataset1D.sinm(ssb=8, retapod=True, inplace=False)
 
 # %%
 # Plotting
-_ = dataset1D.plot(zlim=(-2, 2), color="k")
-_ = curve1.plot(color="r", clear=False)
-_ = new1.plot(
-    data_only=True, color="r", clear=False, label=" sinm with ssb= 2 (cosine window)"
-)
-_ = curve2.plot(color="b", clear=False)
-_ = new2.plot(
-    data_only=True, color="b", clear=False, label=" sinm with ssb= 1 (sine window)"
-)
-_ = curve3.plot(color="m", clear=False)
-_ = new3.plot(data_only=True, color="m", clear=False, label=" qsin with ssb= 2")
-_ = curve4.plot(color="g", clear=False)
-_ = new4.plot(data_only=True, color="g", clear=False, label=" qsin with ssb= 1")
-_ = curve5.plot(color="c", ls="--", clear=False)
-_ = new5.plot(
-    data_only=True,
-    color="c",
-    ls="--",
+# --------
+# Compare sine bell windows on a first figure.
+ax = dataset1D.real.plot(color="k", label="original FID", xlim=(0, 15000))
+_ = curve1.plot(clear=False, color="r", ls="--", label="window, sinm ssb = 2")
+_ = new1.real.plot(
     clear=False,
-    label=" sinm with ssb= 8",
-    legend="best",
+    color="r",
+    label="apodized FID, sinm ssb = 2 (cosine window)",
 )
+_ = curve2.plot(clear=False, color="b", ls="--", label="window, sinm ssb = 1")
+_ = new2.real.plot(
+    clear=False,
+    color="b",
+    label="apodized FID, sinm ssb = 1 (sine window)",
+)
+_ = ax.legend()
+
+# %%
+# Compare squared sine windows on a second figure.
+ax = dataset1D.real.plot(color="k", label="original FID", xlim=(0, 15000))
+_ = curve3.plot(clear=False, color="m", ls="--", label="window, qsin ssb = 2")
+_ = new3.real.plot(clear=False, color="m", label="apodized FID, qsin ssb = 2")
+_ = curve4.plot(clear=False, color="g", ls="--", label="window, qsin ssb = 1")
+_ = new4.real.plot(clear=False, color="g", label="apodized FID, qsin ssb = 1")
+_ = ax.legend()
+
+# %%
+# Mixed sine/cosine windows are easier to inspect separately.
+ax = dataset1D.real.plot(color="k", label="original FID", xlim=(0, 15000))
+_ = curve5.plot(clear=False, color="c", ls="--", label="window, sinm ssb = 8")
+_ = new5.real.plot(
+    clear=False,
+    color="c",
+    label="apodized FID, sinm ssb = 8",
+)
+_ = ax.legend()
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

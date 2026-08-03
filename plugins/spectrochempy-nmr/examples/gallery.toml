@@ -25,6 +25,6 @@ section = "NMR processing"
 section_ref = "examples-processing-nmr-index"
 
 [[examples]]
-path = "processing/nmr/plot_processing_cp_nmr.py"
+path = "processing/nmr/plot_processing_nmr_relax.py"
 section = "NMR processing"
 section_ref = "examples-processing-nmr-index"

@@ -6,10 +6,11 @@
 # ======================================================================================
 # ruff: noqa
 """
-Loading of experimental NMR data
-=================================
+Loading of experimental 1D NMR data
+===================================
 
-In this example, we load a NMR dataset (in the Bruker format) and plot it.
+In this example, we load a 1D Bruker TopSpin NMR dataset and inspect the raw
+FID with the public ``scp.nmr.read(...)`` API.
 
 Requires the official ``spectrochempy-nmr`` plugin.
 Install with: ``pip install spectrochempy[nmr]``.
@@ -37,14 +38,13 @@ ndd = scp.nmr.read(path, expno=1, remove_digital_filter=True)
 _ = ndd.plot()
 
 # %%
-# Now load a 2D  dataset
-
-path = datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_2d"
-ndd = scp.nmr.read(path, expno=1, remove_digital_filter=True)
-_ = ndd.plot()
+# The public gallery currently focuses on validated 1D workflows. Raw 2D TopSpin
+# examples remain in the repository for later characterization, but they are not
+# presented here because multi-dimensional processing is still outside the
+# supported public scope.
 
 # %%
-# This ends the example ! The following line can be uncommented if no plot shows when
-# running the .py script with python
+# This ends the example! The following line can be uncommented if no plot shows
+# when running the .py script with python.
 
 # scp.show()
