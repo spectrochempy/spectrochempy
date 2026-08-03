@@ -5,7 +5,6 @@ from __future__ import annotations
 import re
 
 from spectrochempy.core.dataset.coord import Coord  # noqa: PLC0415
-from spectrochempy.core.units import ur  # noqa: PLC0415
 
 
 def _meta_dim_index(new, dim):
@@ -68,10 +67,7 @@ def _fft_postprocess_result(new, dim=-1, inv=False, **kwargs):
     else:
         # frequency/ppm → time
         # Replace the generic core-created coordinate with a proper NMR time axis.
-        sw_val = abs(x.data[-1] - x.data[0])
-        if x.units == "ppm":
-            sw_val = (bf1.to("Hz").magnitude * sw_val) / 1.0e6
-        deltat = (1.0 / sw_val) * ur.us
+        deltat = (1.0 / sw.to("Hz")).to("us")
 
         newcoord = Coord.arange(size) * deltat
         newcoord.name = x.name

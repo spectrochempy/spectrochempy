@@ -43,11 +43,28 @@ new2, curve2 = dataset1D.copy().em(
 
 # %%
 # Plotting
-_ = dataset1D.plot(zlim=(-2, 2), color="k")
-_ = curve1.plot(color="r")
-_ = new1.plot(color="r", clear=False, label=" em = 20 hz")
-_ = curve2.plot(color="b", clear=False)
-_ = new2.plot(dcolor="b", clear=False, label=" em = 30 HZ, shifted = ")
+# --------
+# Compare the original FID with the exponential window and the apodized signal.
+ax = dataset1D.real.plot(color="k", label="original FID", xlim=(0, 15000))
+_ = curve1.plot(clear=False, color="r", ls="--", label="window, lb = 20 Hz")
+_ = new1.real.plot(clear=False, color="r", label="apodized FID, lb = 20 Hz")
+_ = ax.legend()
+
+# %%
+# Shifted windows are easier to read on a separate figure.
+ax = dataset1D.real.plot(color="k", label="original FID", xlim=(0, 15000))
+_ = curve2.plot(
+    clear=False,
+    color="b",
+    ls="--",
+    label="window, lb = 100 Hz, shifted = 10000 us",
+)
+_ = new2.real.plot(
+    clear=False,
+    color="b",
+    label="apodized FID, lb = 100 Hz, shifted = 10000 us",
+)
+_ = ax.legend()
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

@@ -112,6 +112,12 @@ Bug Fixes
 - ``em(lb=0)`` and ``em(lb=0.0 * ur.Hz)`` are now treated as valid no-op
   calls instead of raising a ``ZeroDivisionError``.
 
+- The public NMR examples are now more consistent with the validated 1D scope:
+  the gallery no longer publishes the unstable CP and 2D workflows, the
+  apodization and relaxation examples were clarified visually, and inverse FFT
+  reconstruction now restores a correct NMR time axis in the 1D Fourier
+  tutorial.
+
 Breaking Changes
 ~~~~~~~~~~~~~~~~
 
