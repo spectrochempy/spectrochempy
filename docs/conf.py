@@ -400,6 +400,44 @@ def _copy_example_tree(source: Path, destination: Path) -> None:
     )
 
 
+def _stage_manifest_section_readmes(
+    staged_examples: Path, entries: list[dict[str, str]]
+) -> None:
+    copied = set()
+
+    for entry in entries:
+        manifest_root = entry["manifest"].parent
+        source_path = Path(entry["path"])
+
+        for parent in [*source_path.parents][:-1]:
+            readme = manifest_root / parent / "readme.rst"
+            if not readme.exists():
+                continue
+
+            destination = staged_examples / parent / "readme.rst"
+            key = destination.as_posix()
+            if key in copied:
+                continue
+
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(readme, destination)
+            copied.add(key)
+
+
+def _stage_manifest_examples(
+    staged_examples: Path, entries: list[dict[str, str]]
+) -> None:
+    for entry in entries:
+        manifest_root = entry["manifest"].parent
+        source = manifest_root / entry["path"]
+        if not source.exists():
+            continue
+
+        destination = staged_examples / entry["path"]
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, destination)
+
+
 def _plugin_gallery_manifests() -> list[Path]:
     # Official plugins only. Experimental plugins are excluded from the main
     # gallery to keep the user experience stable.
@@ -610,8 +648,9 @@ def _stage_gallery_examples() -> Path:
     for section in gallery_sections:
         _copy_example_tree(example_source_dir / section, staged_examples / section)
 
-    for manifest in _plugin_gallery_manifests():
-        _copy_example_tree(manifest.parent, staged_examples)
+    plugin_gallery_entries = _load_plugin_gallery_entries()
+    _stage_manifest_section_readmes(staged_examples, plugin_gallery_entries)
+    _stage_manifest_examples(staged_examples, plugin_gallery_entries)
 
     return staged_examples
 
