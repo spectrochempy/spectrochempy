@@ -3,6 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
+# ruff: noqa: S101, S603
 
 """Targeted checks for the public NMR example gallery."""
 
@@ -17,7 +18,6 @@ from pathlib import Path
 import pytest
 
 import spectrochempy as scp
-
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 PLUGIN_ROOT = REPO_ROOT / "plugins" / "spectrochempy-nmr"
@@ -69,7 +69,7 @@ def test_public_nmr_gallery_examples_execute(relative_path, tmp_path):
         ]
     ).rstrip(os.pathsep)
 
-    result = subprocess.run(  # noqa: S603
+    result = subprocess.run(
         [sys.executable, str(example)],
         cwd=REPO_ROOT,
         env=env,
