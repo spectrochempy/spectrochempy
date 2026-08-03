@@ -400,7 +400,9 @@ def _copy_example_tree(source: Path, destination: Path) -> None:
     )
 
 
-def _stage_manifest_section_readmes(staged_examples: Path, entries: list[dict[str, str]]) -> None:
+def _stage_manifest_section_readmes(
+    staged_examples: Path, entries: list[dict[str, str]]
+) -> None:
     copied = set()
 
     for entry in entries:
@@ -422,7 +424,9 @@ def _stage_manifest_section_readmes(staged_examples: Path, entries: list[dict[st
             copied.add(key)
 
 
-def _stage_manifest_examples(staged_examples: Path, entries: list[dict[str, str]]) -> None:
+def _stage_manifest_examples(
+    staged_examples: Path, entries: list[dict[str, str]]
+) -> None:
     for entry in entries:
         manifest_root = entry["manifest"].parent
         source = manifest_root / entry["path"]
