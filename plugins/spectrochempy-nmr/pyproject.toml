@@ -11,7 +11,7 @@ readme = "README.md"
 classifiers = [
 ]
 dependencies = [
-    "spectrochempy>=0.10,<0.12",
+    "spectrochempy>=0.12,<0.13",
     "numpy",
     # nmrglue is intentionally vendored/adapted in spectrochempy_nmr.nmrglue.
 ]
