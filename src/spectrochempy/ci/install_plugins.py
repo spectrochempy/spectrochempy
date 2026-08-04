@@ -4,9 +4,9 @@ Install SpectroChemPy plugins from the local source tree.
 
 Usage::
 
-    python -m spectrochempy.ci.install_plugins --editable all
+    python -m spectrochempy.ci.install_plugins --editable --no-deps all
     python -m spectrochempy.ci.install_plugins nmr iris
-    python -m spectrochempy.ci.install_plugins --editable perkinelmer
+    python -m spectrochempy.ci.install_plugins --editable --no-deps perkinelmer
     python -m spectrochempy.ci.install_plugins --list-names
     python -m spectrochempy.ci.install_plugins --list-names --root /workspace
 """
@@ -69,13 +69,14 @@ def _pip_install(
 
     pip = pip_cmd or [sys.executable, "-m", "pip"]
     cmd = [*pip, "install"]
-    if editable:
-        cmd.append("-e")
     if no_deps:
         cmd.append("--no-deps")
     if no_build_isolation:
         cmd.append("--no-build-isolation")
-    cmd.append(str(plugin_path))
+    if editable:
+        cmd.extend(["-e", str(plugin_path)])
+    else:
+        cmd.append(str(plugin_path))
 
     print(f"Installing {plugin} {'(editable)' if editable else ''}...")
     result = subprocess.run(cmd, capture_output=True, text=True)
