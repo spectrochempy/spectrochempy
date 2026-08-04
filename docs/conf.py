@@ -897,12 +897,15 @@ class SpectroChemPyClassDocumenter(ClassDocumenter):
 
     @classmethod
     def can_document_member(cls, member, membername, isattr, parent):
-        return ClassDocumenter.can_document_member(
-            member,
-            membername,
-            isattr,
-            parent,
-        ) or _unwrap_documented_class(member) is not None
+        return (
+            ClassDocumenter.can_document_member(
+                member,
+                membername,
+                isattr,
+                parent,
+            )
+            or _unwrap_documented_class(member) is not None
+        )
 
     def import_object(self, raiseerror=False):
         if not super().import_object(raiseerror=raiseerror):
