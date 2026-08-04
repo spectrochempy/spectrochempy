@@ -618,7 +618,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
         )
 
     # Backward compatibility alias
-    @deprecated(replace="plot_merit", removed="0.12")
+    @deprecated(replace="plot_merit", removed="0.13.0")
     def plotmerit(self, X=None, X_hat=None, **kwargs):
         """
         Backward-compatible alias for :meth:`plot_merit`. Deprecated.
@@ -945,7 +945,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         return _plot_parity(Y, Y_hat, ax=ax, clear=clear, show=show, **kwargs)
 
     # Backward compatibility alias
-    @deprecated(replace="plot_parity", removed="0.12")
+    @deprecated(replace="plot_parity", removed="0.13.0")
     def parityplot(
         self, Y=None, Y_hat=None, *, ax=None, clear=True, show=True, **kwargs
     ):
