@@ -306,7 +306,7 @@ def signature_has_configurable_traits(cls: type[T]) -> type[T]:
     # Build docstring from traits and existing docstring
     # -------------------------------------------------
     # Start with the existing docstring (summary + extended summary)
-    existing_doc = cls.__doc__ or ""
+    existing_doc = inspect.cleandoc(cls.__doc__ or "")
 
     trait_entry_map = {}
     for name, value in traits:

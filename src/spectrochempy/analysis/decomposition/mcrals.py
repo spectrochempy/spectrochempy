@@ -3908,7 +3908,9 @@ _doc = MCRALS.__doc__
 
 if _doc:
     import re as _re
+    from inspect import cleandoc as _cleandoc
 
+    _doc = _cleandoc(_doc)
     _PH = "Parameters\n----------\n"
     _params_start = _doc.find(_PH)
     if _params_start >= 0:
@@ -3946,11 +3948,11 @@ if _doc:
                 _entries.append((_current_name, "\n".join(_current_lines)))
 
         for _line in _params_only.split("\n"):
-            _m = _re.match(r"^(\w+)\s*:", _line)
+            _m = _re.match(r"^\s*(\w+)\s*:", _line)
             if _m:
                 _save_entry()
                 _current_name = _m.group(1)
-                _current_lines = [_line]
+                _current_lines = [_line.lstrip()]
             elif _current_name is not None:
                 _current_lines.append(_line)
         _save_entry()
@@ -3962,7 +3964,13 @@ if _doc:
 
         # Rebuild docstring (blank line before subsequent sections is essential for numpydoc)
         MCRALS.__doc__ = (
-            _before_params + _PH + "\n".join(_filtered) + "\n\n" + _after_params
+            "\n"
+            + _before_params
+            + _PH
+            + "\n".join(_filtered)
+            + "\n\n"
+            + _after_params.rstrip()
+            + "\n"
         )
 
 
