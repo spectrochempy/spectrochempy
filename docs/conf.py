@@ -19,6 +19,7 @@ from datetime import datetime
 from pathlib import Path
 
 import jinja2
+from sphinx.ext.autodoc import ClassDocumenter
 
 import spectrochempy
 
@@ -882,6 +883,41 @@ def autodoc_skip_member(app, what, name, obj, skip, options):
     return skip or exclude
 
 
+def _unwrap_documented_class(obj):
+    """Return the wrapped class for class-like lazy proxies, if any."""
+    try:
+        wrapped = getattr(obj, "__wrapped__", None)
+    except Exception:
+        return None
+    return wrapped if inspect.isclass(wrapped) else None
+
+
+class SpectroChemPyClassDocumenter(ClassDocumenter):
+    """Treat class-valued plugin proxies as ordinary classes for autodoc."""
+
+    @classmethod
+    def can_document_member(cls, member, membername, isattr, parent):
+        return (
+            ClassDocumenter.can_document_member(
+                member,
+                membername,
+                isattr,
+                parent,
+            )
+            or _unwrap_documented_class(member) is not None
+        )
+
+    def import_object(self, raiseerror=False):
+        if not super().import_object(raiseerror=raiseerror):
+            return False
+
+        wrapped = _unwrap_documented_class(self.object)
+        if wrapped is not None:
+            self.object = wrapped
+
+        return True
+
+
 def shorter_signature(app, what, name, obj, options, signature, return_annotation):
     """Prevent displaying self in signature."""
     if what == "data":
@@ -932,6 +968,7 @@ def setup(app):
     app.connect("source-read", rstjinja)
     app.connect("autodoc-skip-member", autodoc_skip_member)
     app.connect("autodoc-process-signature", shorter_signature)
+    app.add_autodocumenter(SpectroChemPyClassDocumenter, override=True)
     app.add_css_file("css/spectrochempy.css")  # also can be a full URL
     app.config.rst_mimetype = rst_mimetype
 
