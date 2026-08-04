@@ -95,14 +95,15 @@ used by PyPI wheels:
 .. code-block:: bash
 
     pip install -e .
-    python -m spectrochempy.ci.install_plugins --editable all
+    python -m spectrochempy.ci.install_plugins --editable --no-deps all
+    pip install osqp xlrd numpy-quaternion tensorly
     pip install -e plugins/spectrochempy-cantera  # experimental, not auto-discovered
 
 The bundled plugins can also be installed with the helper:
 
 .. code-block:: bash
 
-    python -m spectrochempy.ci.install_plugins --editable all
+    python -m spectrochempy.ci.install_plugins --editable --no-deps all
 
 After installation, SpectroChemPy discovers the plugins automatically via
 the ``spectrochempy.plugins`` entry point group.

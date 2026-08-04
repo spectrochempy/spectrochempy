@@ -234,7 +234,11 @@ jobs:
         run: |
           set -e
           start=$SECONDS
-          python -m spectrochempy.ci.install_plugins --editable all
+          python -m spectrochempy.ci.install_plugins --editable --no-deps all
+          # Install plugin runtime dependencies explicitly.  In the monorepo
+          # editable workflow we must avoid resolving the core package from
+          # PyPI before the next core release exists there.
+          python -m pip install osqp xlrd numpy-quaternion tensorly
           duration=$((SECONDS - start))
           echo "plugin installation: ${duration}s" | tee -a "$CI_TIMING_FILE"
 
