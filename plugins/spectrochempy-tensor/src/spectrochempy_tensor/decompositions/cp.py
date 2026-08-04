@@ -124,38 +124,6 @@ class CP(DecompositionAnalysis):
         Modes for which initial values are not modified during optimization.
         The last mode cannot be fixed.
 
-    Attributes
-    ----------
-    A : NDDataset
-        Factor matrix for mode 0 with shape (mode_0_size, n_components).
-    B : NDDataset
-        Factor matrix for mode 1 with shape (mode_1_size, n_components).
-    C : NDDataset
-        Factor matrix for mode 2 with shape (mode_2_size, n_components).
-    loadings : tuple
-        Tuple of factor matrices (A, B, C).
-    weights : ndarray
-        Weights from CP decomposition.
-    errors : list or None
-        Iteration errors during fitting. Available when TensorLy returns them
-        (typically with constrained_parafac). Returns None if unavailable
-        or if not fitted yet.
-    SSE : float
-        Sum of Squared Errors of the reconstruction.
-    explained_variance : float
-        Percentage of variance explained by the model.
-    core_consistency : float
-        CORCONDIA (Core Consistency) diagnostic value. Can be negative if overfactoring.
-
-    Methods
-    -------
-    fit(X)
-        Fit the CP model to a 3D dataset.
-    fit_transform(X)
-        Fit the model and return the reconstructed tensor.
-    inverse_transform()
-        Return the reconstructed tensor from fitted factors.
-
     Notes
     -----
     This method requires the optional dependency ``tensorly``.
