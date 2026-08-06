@@ -103,7 +103,9 @@ class SpectroChemPyJSONConfigManager(BaseJSONConfigManager):
         backup = filename.with_name(f"{filename.name}.corrupt-{timestamp}")
         counter = 1
         while backup.exists():
-            backup = filename.with_name(f"{filename.name}.corrupt-{timestamp}-{counter}")
+            backup = filename.with_name(
+                f"{filename.name}.corrupt-{timestamp}-{counter}"
+            )
             counter += 1
         return backup
 
