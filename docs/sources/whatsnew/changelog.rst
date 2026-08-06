@@ -31,6 +31,11 @@ Bug Fixes
   config updates, writes JSON atomically, preserves corrupted files under a
   backup name, and avoids emitting raw persistence exceptions on stdout.
 
+- Internal `MCRALS` revalidation after `_n_components` changes no longer emits
+  transient config-file writes for normalized legacy constraint traits during
+  `fit()`, while explicit user changes to persisted parameters still behave as
+  before.
+
 .. section
 
 Dependency Updates
