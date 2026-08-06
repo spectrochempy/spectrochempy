@@ -1866,6 +1866,17 @@ and `St`.
             current = getattr(self, name)
             validated = validator(SimpleNamespace(value=current))
             if self._trait_value_differs(current, validated):
+                # This normalization is intentionally internal-only. We re-run
+                # the existing validators to preserve their scientific checks,
+                # but when symbolic values such as ``"all"`` or ``"default"``
+                # resolve to concrete indices, we write the normalized value
+                # directly into trait storage instead of going through
+                # ``setattr``.
+                #
+                # This deliberately skips Traitlets notifications, including
+                # config persistence and any future observers on these legacy
+                # traits. If a future observer must react to this
+                # normalization step, this helper should be revisited.
                 self._trait_values[name] = validated
 
     @staticmethod
