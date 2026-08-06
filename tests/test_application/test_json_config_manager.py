@@ -7,10 +7,10 @@
 
 from __future__ import annotations
 
-from concurrent.futures import ThreadPoolExecutor
 import json
 import threading
 import warnings
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from spectrochempy.application.config import SpectroChemPyJSONConfigManager
