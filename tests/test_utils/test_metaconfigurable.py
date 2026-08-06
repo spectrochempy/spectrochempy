@@ -40,8 +40,10 @@ class FailingConfigManager(MockConfigManager):
 class MockParent(Configurable):
     """Mock parent with config and config_manager."""
 
-    def __init__(self):
-        self.config_manager = MockConfigManager()
+    def __init__(self, config_manager=None):
+        self.config_manager = (
+            MockConfigManager() if config_manager is None else config_manager
+        )
         self.config = Config()
         super().__init__()  # Initialize the parent Configurable class
 
@@ -50,9 +52,7 @@ class FailingMockParent(MockParent):
     """Mock parent that injects a failing config manager."""
 
     def __init__(self):
-        self.config_manager = FailingConfigManager()
-        self.config = Config()
-        super(MockParent, self).__init__()
+        super().__init__(config_manager=FailingConfigManager())
 
 
 class A_Configurable(MetaConfigurable):
