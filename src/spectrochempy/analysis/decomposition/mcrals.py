@@ -19,6 +19,7 @@ import logging
 import warnings
 from dataclasses import dataclass
 from dataclasses import field
+from types import SimpleNamespace
 
 import dill
 import numpy as np
@@ -1845,27 +1846,33 @@ and `St`.
     def _n_components_change(self, change):
         # triggered in _guess_profile
         if self._n_components > 0:
-            # perform a validation of default configuration parameters
-            # Indeed, if not forced here these parameters are validated only when they
-            # are set explicitly.
-            # Here is an ugly trick to force this validation. # TODO: better way?
-            # DEVNOTE: _validating_legacy flag prevents __setattr__ from
-            # tracking these internal re-assignments as explicit user assignments.
-            # The try/finally ensures the flag is reset even if validation raises.
-            self._validating_legacy = True
-            try:
-                with warnings.catch_warnings():
-                    warnings.simplefilter(action="ignore", category=FutureWarning)
-                    self.closureTarget = self.closureTarget
-                    self.getC_to_C_idx = self.getC_to_C_idx
-                    self.getSt_to_St_idx = self.getSt_to_St_idx
-                    self.nonnegConc = self.nonnegConc
-                    self.nonnegSpec = self.nonnegSpec
-                    self.unimodConc = self.unimodConc
-                    self.unimodSpec = self.unimodSpec
-                    self.closureConc = self.closureConc
-            finally:
-                self._validating_legacy = False
+            # Re-validate component-dependent legacy traits once the real
+            # number of components is known, but keep this internal
+            # normalization out of trait notifications and config persistence.
+            self._revalidate_component_dependent_traits()
+
+    def _revalidate_component_dependent_traits(self):
+        validators = {
+            "closureTarget": self._validate_closureTarget,
+            "getC_to_C_idx": self._validate_getC_to_C_idx,
+            "getSt_to_St_idx": self._validate_getSt_to_St_idx,
+            "nonnegConc": self._validate_nonnegConc,
+            "nonnegSpec": self._validate_nonnegSpec,
+            "unimodConc": self._validate_unimodConc,
+            "unimodSpec": self._validate_unimodSpec,
+            "closureConc": self._validate_closureConc,
+        }
+        for name, validator in validators.items():
+            current = getattr(self, name)
+            validated = validator(SimpleNamespace(value=current))
+            if self._trait_value_differs(current, validated):
+                self._trait_values[name] = validated
+
+    @staticmethod
+    def _trait_value_differs(current, validated):
+        if isinstance(current, np.ndarray) or isinstance(validated, np.ndarray):
+            return not np.array_equal(np.asarray(current), np.asarray(validated))
+        return current != validated
 
     # ----------------------------------------------------------------------------------
     # Constraints traitlet — validated, observes fitted state
