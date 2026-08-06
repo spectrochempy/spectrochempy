@@ -1852,6 +1852,16 @@ and `St`.
             self._revalidate_component_dependent_traits()
 
     def _revalidate_component_dependent_traits(self):
+        # This normalization is intentionally internal-only. We re-run the
+        # existing validators to preserve their scientific checks, but when a
+        # symbolic user-facing value such as ``"all"`` or ``"default"``
+        # resolves to a concrete list/array we write the normalized value
+        # directly into trait storage instead of going through ``setattr``.
+        #
+        # This deliberately skips Traitlets notifications, including config
+        # persistence and any future observers on these legacy traits. If a
+        # future observer must react to this normalization step, this helper
+        # will need to be revisited rather than assuming observers are called.
         validators = {
             "closureTarget": self._validate_closureTarget,
             "getC_to_C_idx": self._validate_getC_to_C_idx,

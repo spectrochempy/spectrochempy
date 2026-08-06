@@ -31,10 +31,18 @@ jobs:
     if: github.repository == 'spectrochempy/spectrochempy'
 
     steps:
+      - name: Generate app token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ vars.RELEASER_APP_ID }}
+          private-key: ${{ secrets.RELEASER_APP_PRIVATE_KEY }}
+
       - name: Checkout code
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Check Zenodo integration is enabled
         run: |
@@ -88,24 +96,81 @@ jobs:
       - name: Push new branch
         run: git push origin release/${{ github.event.inputs.versionString }}
 
-      - name: Create pull request into master
-        uses: thomaseizinger/create-pull-request@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          head: release/${{ github.event.inputs.versionString }}
-          base: master
-          reviewers: ${{ github.actor }}
-          title: Release version ${{ github.event.inputs.versionString }}
-          body: |
-            Hi @${{ github.actor }}!
+      - name: Create or reuse pull request into master
+        id: release-pr
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          RELEASE_VERSION: ${{ github.event.inputs.versionString }}
+        run: |
+          body_file="$RUNNER_TEMP/release-pr-body.md"
+          cat > "$body_file" <<EOF
+          Hi @${{ github.actor }}!
 
-            This PR was created in response to a manual trigger of the release workflow
-            here:
-            https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}.
+          This PR was created in response to a manual trigger of the release workflow
+          here:
+          https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}.
 
-            I've updated the docs/whatsnew/*rst files, CITATION.cff, zenodo.json plus eventual
-            changes on the requirements/environment files:
-            ${{ steps.make-commit.outputs.commit }}.
-            Merging this PR should be followed by the creation of the corresponding
-            draft release.
-            Publishing this release will trigger publishing on pypi, anaconda and zenodo.
+          I've updated the docs/whatsnew/*rst files, CITATION.cff, zenodo.json plus eventual
+          changes on the requirements/environment files:
+          ${{ steps.make-commit.outputs.commit }}.
+
+          Auto-merge is enabled automatically by this workflow. The PR will merge with the
+          normal repository requirements once the required checks and reviews pass.
+
+          Publishing this release will trigger publishing on pypi, anaconda and zenodo.
+          EOF
+
+          pr_number="$(gh pr list \
+            --repo "${{ github.repository }}" \
+            --head "release/$RELEASE_VERSION" \
+            --base master \
+            --state open \
+            --json number \
+            --jq '.[0].number')"
+
+          if [ -n "$pr_number" ] && [ "$pr_number" != "null" ]; then
+            pr_url="$(gh pr view "$pr_number" --repo "${{ github.repository }}" --json url --jq .url)"
+            gh pr edit "$pr_number" \
+              --repo "${{ github.repository }}" \
+              --title "Release version $RELEASE_VERSION" \
+              --body-file "$body_file"
+            if ! gh pr edit "$pr_number" \
+              --repo "${{ github.repository }}" \
+              --add-reviewer "${{ github.actor }}"; then
+              echo "::warning::Could not add ${{ github.actor }} as reviewer on existing PR $pr_number."
+            fi
+          else
+            pr_url="$(gh pr create \
+              --repo "${{ github.repository }}" \
+              --base master \
+              --head "release/$RELEASE_VERSION" \
+              --title "Release version $RELEASE_VERSION" \
+              --body-file "$body_file" \
+              --reviewer "${{ github.actor }}")"
+            pr_number="$(gh pr view "$pr_url" --repo "${{ github.repository }}" --json number --jq .number)"
+          fi
+
+          echo "number=$pr_number" >> "$GITHUB_OUTPUT"
+          echo "url=$pr_url" >> "$GITHUB_OUTPUT"
+
+      - name: Enable auto-merge on release PR
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          if ! gh pr merge "${{ steps.release-pr.outputs.number }}" \
+            --repo "${{ github.repository }}" \
+            --auto \
+            --merge \
+            --match-head-commit "${{ steps.make-commit.outputs.commit }}"; then
+            echo "::error::Failed to enable auto-merge for ${{ steps.release-pr.outputs.url }}."
+            echo "::error::Check that the repository setting 'Allow auto-merge' is enabled and that the spectrochempy-releaser app can manage pull requests."
+            exit 1
+          fi
+
+          {
+            echo "### Release PR prepared"
+            echo
+            echo "- PR: ${{ steps.release-pr.outputs.url }}"
+            echo "- Head commit: ${{ steps.make-commit.outputs.commit }}"
+            echo "- Merge mode: auto-merge (merge commit)"
+          } >> "$GITHUB_STEP_SUMMARY"
