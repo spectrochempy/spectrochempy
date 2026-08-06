@@ -9,6 +9,10 @@ release, avec leur cause et la résolution appliquée.
 
 ## Les checks ne démarrent pas sur une PR de release
 
+> État : incident historique du flux fondé sur `GITHUB_TOKEN`, résolu par la
+> migration de `prepare_new_release.yml` vers la GitHub App
+> `spectrochempy-releaser`.
+
 ### Symptôme
 
 Sur une Pull Request de release créée par `github-actions[bot]`, les
@@ -29,17 +33,20 @@ les workflows de CI (tests, builds) ne démarrent pas.
 
 ### Résolution
 
-- Vérifier manuellement les modifications dans la PR
-- Si tout est correct, **merge manuellement** la PR (les checks sont requis
-  mais peuvent être contournés par un administrateur)
-- Une fois mergée, les workflows post-merge fonctionneront normalement
-  (push event via `GITHUB_TOKEN`)
+- Mettre à jour `prepare_new_release.yml` pour utiliser un jeton de la GitHub
+  App `spectrochempy-releaser` au lieu du seul `GITHUB_TOKEN` pour le
+  checkout, la création de PR et l'activation de l'auto-merge
+- Relancer le workflow **Prepare a new release**
+- Vérifier que les checks démarrent bien sur la PR recréée ou mise à jour
+- Vérifier que l'option de dépôt **Allow auto-merge** est activée si le
+  workflow échoue au moment du `gh pr merge --auto`
 
 ### Prévention
 
-- Utiliser un **PAT dédié** (Personal Access Token) pour le checkout dans
-  `prepare_new_release.yml`, ce qui déclencherait les événements GitHub
-  normalement
+- Conserver la GitHub App `spectrochempy-releaser` installée avec une clé
+  privée valide et les permissions nécessaires sur le dépôt
+- Éviter de revenir à un flux de PR de release créé uniquement avec
+  `GITHUB_TOKEN`
 
 ---
 
