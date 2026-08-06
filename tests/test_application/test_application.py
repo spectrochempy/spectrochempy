@@ -5,6 +5,7 @@
 # ======================================================================================
 # ruff: noqa
 import os
+import json
 import logging
 import pytest
 from pathlib import Path
@@ -84,15 +85,20 @@ def test_datadir():
     assert DATADIR.name == "testdata"
 
 
-def test_invalid_json_config_is_removed_after_close(tmp_path):
-    """Invalid JSON config files should be removed without blocking startup."""
+def test_invalid_json_config_is_repaired_on_startup(tmp_path, capsys):
+    """Invalid JSON config files should be preserved and repaired on startup."""
     invalid = tmp_path / "CP.json"
     invalid.write_text("{not valid json", encoding="utf-8")
 
     app = SpectroChemPy(config_dir=tmp_path, log_level=logging.WARNING)
     app._init_all_preferences()
 
-    assert not invalid.exists()
+    backups = list(tmp_path.glob("CP.json.corrupt-*"))
+
+    assert capsys.readouterr().out == ""
+    assert invalid.exists()
+    assert len(backups) == 1
+    assert json.loads(invalid.read_text(encoding="utf-8")) == {}
     assert app.general_preferences is not None
     assert app.plot_preferences is not None
 

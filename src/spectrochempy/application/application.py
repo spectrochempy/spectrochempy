@@ -7,7 +7,6 @@
 
 import inspect
 import io
-import json
 import logging
 import sys
 import traceback
@@ -22,6 +21,8 @@ from IPython.core.interactiveshell import InteractiveShell
 from traitlets.config.application import Application
 from traitlets.config.configurable import Config
 from traitlets.config.manager import BaseJSONConfigManager
+
+from spectrochempy.application.config import SpectroChemPyJSONConfigManager
 
 __all__ = [
     "DEBUG",
@@ -147,7 +148,7 @@ class SpectroChemPy(Application):
 
     @tr.default("config_manager")
     def _config_manager_default(self):
-        return BaseJSONConfigManager(config_dir=str(self.config_dir))
+        return SpectroChemPyJSONConfigManager(config_dir=str(self.config_dir))
 
     reset_config = tr.Bool(False, help="Should we restore a default configuration ?")
 
@@ -298,16 +299,7 @@ class SpectroChemPy(Application):
                         # remove the user json file to reset to defaults
                         jsonname.unlink()
                     else:
-                        # check integrity of the file
-                        invalid_json = False
-                        with jsonname.open() as f:
-                            try:
-                                json.load(f)
-                            except json.JSONDecodeError:
-                                invalid_json = True
-                        if invalid_json:
-                            jsonname.unlink()
-                            continue
+                        self.config_manager.ensure_file_is_valid(jsonname)
                         configfiles.append(jsonname)
 
             for cfgname in configfiles:

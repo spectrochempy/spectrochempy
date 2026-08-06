@@ -26,6 +26,10 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Concurrent writes from `MetaConfigurable` instances such as `MCRALS` no longer
+  corrupt shared JSON config files. SpectroChemPy now serializes same-process
+  config updates, writes JSON atomically, preserves corrupted files under a
+  backup name, and avoids emitting raw persistence exceptions on stdout.
 
 .. section
 

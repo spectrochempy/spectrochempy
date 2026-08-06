@@ -11,6 +11,7 @@
 # ======================================================================================
 """Implements the base class for all configurables."""
 
+import threading
 from pathlib import Path
 
 import numpy as np
@@ -23,6 +24,7 @@ from traitlets.config import Config
 from traitlets.config.configurable import Configurable
 from traitlets.config.loader import LazyConfigValue
 
+from spectrochempy.utils._logging import warning_
 from spectrochempy.utils.objects import Adict
 
 ur = UnitRegistry()
@@ -38,6 +40,8 @@ class MetaConfigurable(Configurable):
     """
 
     name = tr.Unicode(allow_none=True, help="Object name")
+    _warning_lock = threading.Lock()
+    _warned_persistence_failures: set[tuple[str, str, str, str]] = set()
 
     def __init__(self, **kwargs):
         # keep only the current config section
@@ -176,5 +180,18 @@ class MetaConfigurable(Configurable):
                     },
                 )
             except Exception as e:
-                print(e)  # noqa: T201
-                pass
+                self._warn_config_persistence_failure(change.name, e)
+
+    def _warn_config_persistence_failure(self, trait_name, exc):
+        filename = Path(self.cfg.config_dir) / f"{self.name}.json"
+        key = (self.__class__.__name__, str(filename), trait_name, repr(exc))
+        with self._warning_lock:
+            if key in self._warned_persistence_failures:
+                return
+            self._warned_persistence_failures.add(key)
+
+        warning_(
+            "Failed to persist SpectroChemPy configuration "
+            f"for {self.__class__.__name__}.{trait_name} in {filename!s}: {exc}",
+            UserWarning,
+        )
