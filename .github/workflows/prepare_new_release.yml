@@ -160,10 +160,11 @@ jobs:
           if ! gh pr merge "${{ steps.release-pr.outputs.number }}" \
             --repo "${{ github.repository }}" \
             --auto \
-            --merge \
+            --squash \
             --match-head-commit "${{ steps.make-commit.outputs.commit }}"; then
             echo "::error::Failed to enable auto-merge for ${{ steps.release-pr.outputs.url }}."
             echo "::error::Check that the repository setting 'Allow auto-merge' is enabled and that the spectrochempy-releaser app can manage pull requests."
+            echo "::error::The repository ruleset must also allow squash merges for master."
             exit 1
           fi
 
@@ -172,5 +173,5 @@ jobs:
             echo
             echo "- PR: ${{ steps.release-pr.outputs.url }}"
             echo "- Head commit: ${{ steps.make-commit.outputs.commit }}"
-            echo "- Merge mode: auto-merge (merge commit)"
+            echo "- Merge mode: auto-merge (squash)"
           } >> "$GITHUB_STEP_SUMMARY"

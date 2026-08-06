@@ -197,7 +197,7 @@ Le workflow :
   - `CITATION.cff`
   - `zenodo.json`
 - Ouvre une **Pull Request** vers `master` avec le token de la GitHub App
-- Active l'**auto-merge** (merge commit) sur cette PR
+- Active l'**auto-merge** (squash) sur cette PR
 
 ### 4. Vérifier la PR de release
 
