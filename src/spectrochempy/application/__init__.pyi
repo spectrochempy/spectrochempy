@@ -11,6 +11,7 @@ __all__ = [
     "_preferences",
     "application",
     "check_update",
+    "config",
     "datadir",
     "envsetup",
     "info",
@@ -23,6 +24,7 @@ __all__ = [
 from . import _preferences
 from . import application
 from . import check_update
+from . import config
 from . import datadir
 from . import envsetup
 from . import info

@@ -6,6 +6,7 @@
 """Tests for metaconfigurable module."""
 
 import tempfile
+import warnings
 
 import pytest
 import traitlets as tr
@@ -29,6 +30,13 @@ class MockConfigManager:
         self.configs[name].update(config)
 
 
+class FailingConfigManager(MockConfigManager):
+    """Config manager that always fails to persist."""
+
+    def update(self, name, config):
+        raise RuntimeError("simulated config persistence failure")
+
+
 class MockParent(Configurable):
     """Mock parent with config and config_manager."""
 
@@ -36,6 +44,15 @@ class MockParent(Configurable):
         self.config_manager = MockConfigManager()
         self.config = Config()
         super().__init__()  # Initialize the parent Configurable class
+
+
+class FailingMockParent(MockParent):
+    """Mock parent that injects a failing config manager."""
+
+    def __init__(self):
+        self.config_manager = FailingConfigManager()
+        self.config = Config()
+        super(MockParent, self).__init__()
 
 
 class A_Configurable(MetaConfigurable):
@@ -122,3 +139,20 @@ def test_trait_change_updates_config(test_configurable):
         test_configurable.cfg.configs["A_Configurable"]["A_Configurable"]["test_param"]
         == 100
     )
+
+
+def test_trait_change_failure_warns_once_without_stdout(capsys):
+    """Persistence failures should warn once and stay off stdout."""
+    configurable = A_Configurable(parent=FailingMockParent())
+
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        configurable.test_param = 100
+        configurable.test_param = 101
+
+    stdout = capsys.readouterr().out
+
+    assert stdout == ""
+    assert len(caught) == 1
+    assert "Failed to persist SpectroChemPy configuration" in str(caught[0].message)
+    assert "A_Configurable.test_param" in str(caught[0].message)
