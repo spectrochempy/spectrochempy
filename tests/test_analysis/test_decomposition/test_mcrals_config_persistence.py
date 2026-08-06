@@ -7,11 +7,11 @@
 
 from __future__ import annotations
 
-from concurrent.futures import ThreadPoolExecutor
-from contextlib import redirect_stdout
-from collections import Counter
 import io
 import threading
+from collections import Counter
+from concurrent.futures import ThreadPoolExecutor
+from contextlib import redirect_stdout
 
 import numpy as np
 import pytest
@@ -32,7 +32,9 @@ class CountingConfigManager(SpectroChemPyJSONConfigManager):
 
     def update(self, section_name, new_data):
         with self._calls_lock:
-            self.calls.append((section_name, tuple(new_data.get(section_name, {}).keys())))
+            self.calls.append(
+                (section_name, tuple(new_data.get(section_name, {}).keys()))
+            )
         return super().update(section_name, new_data)
 
 
@@ -190,7 +192,9 @@ def test_concurrent_fits_only_persist_constructor_writes(
 
     assert all(stdout == "" for stdout, _, _, _ in results)
     assert all(fitted for _, fitted, _, _ in results)
-    assert all(c_shape[1] == 2 and st_shape[0] == 2 for _, _, c_shape, st_shape in results)
+    assert all(
+        c_shape[1] == 2 and st_shape[0] == 2 for _, _, c_shape, st_shape in results
+    )
     assert Counter(
         trait for _, traits in counting_manager.calls for trait in traits
     ) == Counter(
