@@ -7,6 +7,7 @@
 
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
 import json
 import threading
 import warnings
@@ -16,39 +17,46 @@ from spectrochempy.application.config import SpectroChemPyJSONConfigManager
 
 
 def test_update_serializes_whole_read_modify_write_sequence(tmp_path):
-    """Distinct concurrent updates should both survive in the final JSON."""
-    manager = SpectroChemPyJSONConfigManager(config_dir=str(tmp_path))
+    """Distinct managers targeting one file should share one logical update lock."""
+    manager_a = SpectroChemPyJSONConfigManager(config_dir=str(tmp_path))
+    manager_b = SpectroChemPyJSONConfigManager(config_dir=str(tmp_path))
     entered_first_write = threading.Event()
     release_first_write = threading.Event()
     first_call = True
-    original_atomic_write = manager._atomic_write_json
+    original_atomic_write = SpectroChemPyJSONConfigManager._atomic_write_json
+    write_lock = threading.Lock()
 
-    def controlled_atomic_write(filename, data):
+    def controlled_atomic_write(self, filename, data):
         nonlocal first_call
-        if first_call:
-            first_call = False
-            entered_first_write.set()
-            assert release_first_write.wait(timeout=5)
-        original_atomic_write(filename, data)
+        with write_lock:
+            if first_call:
+                first_call = False
+                entered_first_write.set()
+                assert release_first_write.wait(timeout=5)
+        original_atomic_write(self, filename, data)
 
-    manager._atomic_write_json = controlled_atomic_write
+    SpectroChemPyJSONConfigManager._atomic_write_json = controlled_atomic_write
 
     def update_alpha():
-        manager.update("Shared", {"Shared": {"alpha": 1}})
+        return manager_a.update("Shared", {"Shared": {"alpha": 1}})
 
     def update_beta():
-        manager.update("Shared", {"Shared": {"beta": 2}})
+        return manager_b.update("Shared", {"Shared": {"beta": 2}})
 
-    thread_alpha = threading.Thread(target=update_alpha)
-    thread_beta = threading.Thread(target=update_beta)
+    try:
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            future_alpha = executor.submit(update_alpha)
+            assert entered_first_write.wait(timeout=5)
+            future_beta = executor.submit(update_beta)
+            release_first_write.set()
 
-    thread_alpha.start()
-    assert entered_first_write.wait(timeout=5)
-    thread_beta.start()
-    release_first_write.set()
-
-    thread_alpha.join(timeout=5)
-    thread_beta.join(timeout=5)
+            # result() propagates worker exceptions to the main test thread.
+            future_alpha.result(timeout=5)
+            future_beta.result(timeout=5)
+            assert future_alpha.done()
+            assert future_beta.done()
+    finally:
+        SpectroChemPyJSONConfigManager._atomic_write_json = original_atomic_write
 
     path = tmp_path / "Shared.json"
     payload = json.loads(path.read_text(encoding="utf-8"))
