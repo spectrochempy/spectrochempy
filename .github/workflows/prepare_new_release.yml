@@ -101,11 +101,8 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           RELEASE_VERSION: ${{ github.event.inputs.versionString }}
-          BODY_FILE: ${{ runner.temp }}/release-pr-body.md
-          PAYLOAD_FILE: ${{ runner.temp }}/release-pr-payload.json
         run: |
           body_file="$RUNNER_TEMP/release-pr-body.md"
-          payload_file="$RUNNER_TEMP/release-pr-payload.json"
           cat > "$body_file" <<EOF
           Hi @${{ github.actor }}!
 
@@ -123,19 +120,8 @@ jobs:
           Publishing this release will trigger publishing on pypi, anaconda and zenodo.
           EOF
 
-          python3 -c '
-          import json
-          import os
-          from pathlib import Path
-
-          body_file = Path(os.environ["BODY_FILE"])
-          payload_file = Path(os.environ["PAYLOAD_FILE"])
-          payload = {
-              "title": "Release version " + os.environ["RELEASE_VERSION"],
-              "body": body_file.read_text(),
-          }
-          payload_file.write_text(json.dumps(payload))
-          '
+          pr_title="Release version $RELEASE_VERSION"
+          pr_body="$(cat "$body_file")"
 
           pr_number="$(gh api \
             "repos/${{ github.repository }}/pulls?state=open&head=${{ github.repository_owner }}:release/$RELEASE_VERSION&base=master" \
@@ -146,7 +132,8 @@ jobs:
             gh api \
               --method PATCH \
               "repos/${{ github.repository }}/pulls/$pr_number" \
-              --input "$payload_file" >/dev/null
+              -f title="$pr_title" \
+              -f body="$pr_body" >/dev/null
             if ! gh api \
               --method POST \
               "repos/${{ github.repository }}/pulls/$pr_number/requested_reviewers" \
@@ -154,26 +141,16 @@ jobs:
               echo "::warning::Could not add ${{ github.actor }} as reviewer on existing PR $pr_number."
             fi
           else
-            python3 -c '
-            import json
-            import os
-            from pathlib import Path
-
-            payload_file = Path(os.environ["PAYLOAD_FILE"])
-            payload = json.loads(payload_file.read_text())
-            payload.update({
-                "head": "release/" + os.environ["RELEASE_VERSION"],
-                "base": "master",
-            })
-            payload_file.write_text(json.dumps(payload))
-            '
-
-            pr_json="$(gh api \
+            pr_fields="$(gh api \
               --method POST \
               "repos/${{ github.repository }}/pulls" \
-              --input "$payload_file")"
-            pr_url="$(printf '%s' "$pr_json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["html_url"])')"
-            pr_number="$(printf '%s' "$pr_json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["number"])')"
+              -f title="$pr_title" \
+              -f body="$pr_body" \
+              -f head="release/$RELEASE_VERSION" \
+              -f base="master" \
+              --template '{{.number}} {{.html_url}}')"
+            pr_number="${pr_fields%% *}"
+            pr_url="${pr_fields#* }"
 
             if ! gh api \
               --method POST \
