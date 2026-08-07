@@ -123,7 +123,7 @@ jobs:
           Publishing this release will trigger publishing on pypi, anaconda and zenodo.
           EOF
 
-          python3 - <<'PY'
+          python3 -c '
           import json
           import os
           from pathlib import Path
@@ -131,11 +131,11 @@ jobs:
           body_file = Path(os.environ["BODY_FILE"])
           payload_file = Path(os.environ["PAYLOAD_FILE"])
           payload = {
-              "title": f"Release version {os.environ['RELEASE_VERSION']}",
+              "title": f"Release version {os.environ[\"RELEASE_VERSION\"]}",
               "body": body_file.read_text(),
           }
           payload_file.write_text(json.dumps(payload))
-          PY
+          '
 
           pr_number="$(gh api \
             "repos/${{ github.repository }}/pulls?state=open&head=${{ github.repository_owner }}:release/$RELEASE_VERSION&base=master" \
@@ -154,7 +154,7 @@ jobs:
               echo "::warning::Could not add ${{ github.actor }} as reviewer on existing PR $pr_number."
             fi
           else
-            python3 - <<'PY'
+            python3 -c '
             import json
             import os
             from pathlib import Path
@@ -162,11 +162,11 @@ jobs:
             payload_file = Path(os.environ["PAYLOAD_FILE"])
             payload = json.loads(payload_file.read_text())
             payload.update({
-                "head": f"release/{os.environ['RELEASE_VERSION']}",
+                "head": f"release/{os.environ[\"RELEASE_VERSION\"]}",
                 "base": "master",
             })
             payload_file.write_text(json.dumps(payload))
-            PY
+            '
 
             pr_json="$(gh api \
               --method POST \
