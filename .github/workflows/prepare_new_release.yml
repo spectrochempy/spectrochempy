@@ -131,7 +131,7 @@ jobs:
           body_file = Path(os.environ["BODY_FILE"])
           payload_file = Path(os.environ["PAYLOAD_FILE"])
           payload = {
-              "title": f"Release version {os.environ[\"RELEASE_VERSION\"]}",
+              "title": "Release version " + os.environ["RELEASE_VERSION"],
               "body": body_file.read_text(),
           }
           payload_file.write_text(json.dumps(payload))
@@ -162,7 +162,7 @@ jobs:
             payload_file = Path(os.environ["PAYLOAD_FILE"])
             payload = json.loads(payload_file.read_text())
             payload.update({
-                "head": f"release/{os.environ[\"RELEASE_VERSION\"]}",
+                "head": "release/" + os.environ["RELEASE_VERSION"],
                 "base": "master",
             })
             payload_file.write_text(json.dumps(payload))
