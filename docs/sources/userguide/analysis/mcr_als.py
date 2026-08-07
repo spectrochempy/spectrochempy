@@ -627,26 +627,33 @@ _ = scp.multiplot(
 # concentration profile to explain all techniques simultaneously.
 
 # %% [markdown]
-# #### Loading the DNA thermal denaturation dataset
+# #### Building two complementary spectral blocks
 #
-# The dataset contains UV absorbance and CD (circular dichroism) spectra
-# recorded during a DNA melting experiment: 24 temperature steps from
-# 21 °C to 90 °C, 101 wavelengths from 230 nm to 330 nm.
+# To keep this tutorial fully reproducible in offline test environments, we
+# derive a horizontal-augmentation example from the ALS2004 benchmark itself.
+# We split the wavelength axis into two complementary blocks:
+#
+# - a left block containing the lower wavelengths, kept as ordinary
+#   non-negative absorbance data;
+# - a right block that we mean-center row-wise to mimic a signed measurement
+#   channel where positive and negative bands coexist.
 
 # %%
-dna = scp.read_matlab("matlabdata/dna_data.mat", merge=False)
+split_index = X.shape[1] // 2
 
-temp_coord = scp.Coord(dna[1].data.flatten(), title="temperature", units="°C")
-wave_coord = scp.Coord(dna[0].data.flatten(), title="wavelength", units="nm")
+X_uv = X[:, :split_index].copy()
+X_uv.name = "Block A"
+X_uv.title = "absorbance"
+X_uv.x.title = "wavelength"
 
-X_uv = scp.NDDataset(dna[3].data, name="UV", title="absorbance")
-X_uv.add_coordset(x=wave_coord, y=temp_coord)
+X_cd = X[:, split_index:].copy()
+X_cd.name = "Block B"
+X_cd.title = "centered absorbance"
+X_cd.x.title = "wavelength"
+X_cd.data = X_cd.data - X_cd.data.mean(axis=1, keepdims=True)
 
-X_cd = scp.NDDataset(dna[2].data, name="CD", title="ellipticity")
-X_cd.add_coordset(x=wave_coord, y=temp_coord)
-
-print(f"UV: {X_uv.shape}")
-print(f"CD: {X_cd.shape}")
+print(f"{X_uv.name}: {X_uv.shape}")
+print(f"{X_cd.name}: {X_cd.shape}")
 
 # %%
 
@@ -654,8 +661,8 @@ _ = scp.multiplot(
     (X_uv, X_cd),
     nrow=1,
     ncol=2,
-    labels=("UV spectra", "CD spectra"),
-    suptitle="DNA melting",
+    labels=("Block A", "Block B"),
+    suptitle="Horizontal augmentation example",
 )
 
 # %% [markdown]
@@ -677,20 +684,22 @@ scp.log10(efa.f_ev.clip(1e-5)).T.plot(color="dodgerblue")
 _ = scp.log10(efa.b_ev.clip(1e-5)).T.plot(clear=False, color="limegreen")
 
 # %% [markdown]
-# The plot above show that only two components are identified (the matrix is exactly of rank 2).
+# The plot above still supports a four-component model, consistent with the
+# original ALS2004 decomposition.
 
 # %%
-efa.n_components = 2
+efa.n_components = 4
 C0 = efa.transform()
 _ = C0.T.plot()
 
 # %% [markdown]
 # #### Choosing the right constraints
 #
-# UV absorption spectra are non-negative but CD spectra are **signed** (positive and negative
-# bands), so global non-negativity on $S^T$ would be incorrect.
+# The first block is non-negative, but the mean-centered second block is
+# **signed** (positive and negative bands), so global non-negativity on
+# $S^T$ would be incorrect.
 #
-# We therefore apply `NonNegative` only to the **UV spectral block**
+# We therefore apply `NonNegative` only to the **first spectral block**
 # (block 0):
 
 # %%
@@ -715,16 +724,16 @@ import matplotlib.pyplot as plt
 
 fig, axes = plt.subplots(1, 3, figsize=(12, 4))
 _ = mcr_h.C.T.plot(ax=axes[0], title="$C$")
-_ = mcr_h.St_blocks[0].plot(ax=axes[1], title="$S^T_1$ (UV)")
-_ = mcr_h.St_blocks[1].plot(ax=axes[2], title="$S^T_2$ (CD)")
+_ = mcr_h.St_blocks[0].plot(ax=axes[1], title="$S^T_1$ (Block A)")
+_ = mcr_h.St_blocks[1].plot(ax=axes[2], title="$S^T_2$ (Block B)")
 plt.tight_layout()
 
 
 # %% [markdown]
-# The resolved profiles separate native (folded) and denatured (unfolded)
-# DNA.  The UV block shows two distinct absorption spectra; the CD block
-# shows the characteristic signed bands of the folded structure declining
-# as temperature increases.
+# The resolved concentration profiles are shared across both spectral blocks.
+# The first block stays non-negative, while the second retains its signed
+# structure, illustrating why block-specific constraints matter in horizontal
+# augmentation.
 
 # %% [markdown]
 # ## Summary — choosing the right workflow
