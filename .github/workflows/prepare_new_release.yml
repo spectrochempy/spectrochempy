@@ -74,8 +74,8 @@ jobs:
               ${{ github.event.inputs.versionString }}
           fi
 
-      - name: Create release branch
-        run: git checkout -b release/${{ github.event.inputs.versionString }}
+      - name: Create or reset release branch
+        run: git checkout -B release/${{ github.event.inputs.versionString }}
 
       - name: Initialize mandatory git config
         run: |
@@ -93,16 +93,19 @@ jobs:
           git commit --no-verify --message "Prepare release ${{ github.event.inputs.versionString }}"
           echo "commit=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
 
-      - name: Push new branch
-        run: git push origin release/${{ github.event.inputs.versionString }}
+      - name: Push release branch
+        run: git push --force-with-lease origin release/${{ github.event.inputs.versionString }}
 
       - name: Create or reuse pull request into master
         id: release-pr
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           RELEASE_VERSION: ${{ github.event.inputs.versionString }}
+          BODY_FILE: ${{ runner.temp }}/release-pr-body.md
+          PAYLOAD_FILE: ${{ runner.temp }}/release-pr-payload.json
         run: |
           body_file="$RUNNER_TEMP/release-pr-body.md"
+          payload_file="$RUNNER_TEMP/release-pr-payload.json"
           cat > "$body_file" <<EOF
           Hi @${{ github.actor }}!
 
@@ -120,58 +123,97 @@ jobs:
           Publishing this release will trigger publishing on pypi, anaconda and zenodo.
           EOF
 
-          pr_number="$(gh pr list \
-            --repo "${{ github.repository }}" \
-            --head "release/$RELEASE_VERSION" \
-            --base master \
-            --state open \
-            --json number \
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          body_file = Path(os.environ["BODY_FILE"])
+          payload_file = Path(os.environ["PAYLOAD_FILE"])
+          payload = {
+              "title": f"Release version {os.environ['RELEASE_VERSION']}",
+              "body": body_file.read_text(),
+          }
+          payload_file.write_text(json.dumps(payload))
+          PY
+
+          pr_number="$(gh api \
+            "repos/${{ github.repository }}/pulls?state=open&head=${{ github.repository_owner }}:release/$RELEASE_VERSION&base=master" \
             --jq '.[0].number')"
 
           if [ -n "$pr_number" ] && [ "$pr_number" != "null" ]; then
-            pr_url="$(gh pr view "$pr_number" --repo "${{ github.repository }}" --json url --jq .url)"
-            gh pr edit "$pr_number" \
-              --repo "${{ github.repository }}" \
-              --title "Release version $RELEASE_VERSION" \
-              --body-file "$body_file"
-            if ! gh pr edit "$pr_number" \
-              --repo "${{ github.repository }}" \
-              --add-reviewer "${{ github.actor }}"; then
+            pr_url="$(gh api "repos/${{ github.repository }}/pulls/$pr_number" --jq '.html_url')"
+            gh api \
+              --method PATCH \
+              "repos/${{ github.repository }}/pulls/$pr_number" \
+              --input "$payload_file" >/dev/null
+            if ! gh api \
+              --method POST \
+              "repos/${{ github.repository }}/pulls/$pr_number/requested_reviewers" \
+              -f "reviewers[]=${{ github.actor }}" >/dev/null; then
               echo "::warning::Could not add ${{ github.actor }} as reviewer on existing PR $pr_number."
             fi
           else
-            pr_url="$(gh pr create \
-              --repo "${{ github.repository }}" \
-              --base master \
-              --head "release/$RELEASE_VERSION" \
-              --title "Release version $RELEASE_VERSION" \
-              --body-file "$body_file" \
-              --reviewer "${{ github.actor }}")"
-            pr_number="$(gh pr view "$pr_url" --repo "${{ github.repository }}" --json number --jq .number)"
+            python3 - <<'PY'
+            import json
+            import os
+            from pathlib import Path
+
+            payload_file = Path(os.environ["PAYLOAD_FILE"])
+            payload = json.loads(payload_file.read_text())
+            payload.update({
+                "head": f"release/{os.environ['RELEASE_VERSION']}",
+                "base": "master",
+            })
+            payload_file.write_text(json.dumps(payload))
+            PY
+
+            pr_json="$(gh api \
+              --method POST \
+              "repos/${{ github.repository }}/pulls" \
+              --input "$payload_file")"
+            pr_url="$(printf '%s' "$pr_json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["html_url"])')"
+            pr_number="$(printf '%s' "$pr_json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["number"])')"
+
+            if ! gh api \
+              --method POST \
+              "repos/${{ github.repository }}/pulls/$pr_number/requested_reviewers" \
+              -f "reviewers[]=${{ github.actor }}" >/dev/null; then
+              echo "::warning::Could not add ${{ github.actor }} as reviewer on new PR $pr_number."
+            fi
           fi
 
           echo "number=$pr_number" >> "$GITHUB_OUTPUT"
           echo "url=$pr_url" >> "$GITHUB_OUTPUT"
 
       - name: Enable auto-merge on release PR
+        id: auto-merge
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-          if ! gh pr merge "${{ steps.release-pr.outputs.number }}" \
+          auto_merge_enabled=false
+          if gh pr merge "${{ steps.release-pr.outputs.number }}" \
             --repo "${{ github.repository }}" \
             --auto \
             --squash \
             --match-head-commit "${{ steps.make-commit.outputs.commit }}"; then
-            echo "::error::Failed to enable auto-merge for ${{ steps.release-pr.outputs.url }}."
-            echo "::error::Check that the repository setting 'Allow auto-merge' is enabled and that the spectrochempy-releaser app can manage pull requests."
-            echo "::error::The repository ruleset must also allow squash merges for master."
-            exit 1
+            auto_merge_enabled=true
+          else
+            echo "::warning::Failed to enable auto-merge for ${{ steps.release-pr.outputs.url }}."
+            echo "::warning::Check that the repository setting 'Allow auto-merge' is enabled and that the spectrochempy-releaser app can manage pull requests."
+            echo "::warning::The repository ruleset must also allow squash merges for master."
           fi
+
+          echo "enabled=$auto_merge_enabled" >> "$GITHUB_OUTPUT"
 
           {
             echo "### Release PR prepared"
             echo
             echo "- PR: ${{ steps.release-pr.outputs.url }}"
             echo "- Head commit: ${{ steps.make-commit.outputs.commit }}"
-            echo "- Merge mode: auto-merge (squash)"
+            if [ "$auto_merge_enabled" = "true" ]; then
+              echo "- Merge mode: auto-merge (squash)"
+            else
+              echo "- Merge mode: manual follow-up required (auto-merge could not be enabled)"
+            fi
           } >> "$GITHUB_STEP_SUMMARY"
