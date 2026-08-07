@@ -13,7 +13,7 @@ du dépôt `spectrochempy/spectrochempy` :
 | Secret | Usage |
 |--------|-------|
 | `ANACONDA_API_TOKEN` | Publication sur Anaconda.org (compte `spectrocat`) — core + plugins |
-| `RELEASER_APP_PRIVATE_KEY` | Clé privée de la GitHub App `spectrochempy-releaser` (pour contourner la protection de branche lors des releases de plugins) |
+| `RELEASER_APP_PRIVATE_KEY` | Clé privée de la GitHub App `spectrochempy-releaser` (automation des releases core via PR + auto-merge, et contournement des règles pour les pushes/tags de release plugin) |
 
 | Variable | Usage |
 |----------|-------|
@@ -41,10 +41,22 @@ Ce bypass est nécessaire car `release_plugin.yml` crée un commit de bump de
 version et le pousse directement sur `master` avant de créer le tag de
 release.
 
+Pour les **releases core**, le workflow `prepare_new_release.yml`
+s'authentifie désormais aussi avec cette GitHub App, mais dans un mode plus
+strict : l'app crée la branche `release/X.Y.Z`, ouvre la PR de release et
+active l'**auto-merge**. La fusion elle-même reste soumise aux checks et aux
+reviews normaux du dépôt ; elle n'utilise pas de bypass humain. Cette
+authentification via GitHub App évite aussi le mode `approval-required`
+associé aux PR créées avec le seul `GITHUB_TOKEN`.
+
 La création et la suppression de tags sont protégées par des **tag rulesets**
 séparés. La GitHub App `spectrochempy-releaser` doit également figurer dans
 la liste de bypass de ces rulesets.
 
+> **Important** : l'option de dépôt **Allow auto-merge** doit être activée
+> (`Settings → General → Pull Requests → Allow auto-merge`) pour que la PR de
+> release core puisse être fusionnée automatiquement après CI verte.
+>
 > **Important** : ne pas conserver simultanément une ancienne **Branch
 > protection rule** (legacy) sur `master`. Les règles de dépôt sont
 > cumulatives, et une legacy rule continuerait de bloquer l'application de
@@ -68,6 +80,13 @@ Avant de lancer une release plugin :
 > La configuration ci-dessus a été validée par une release plugin complète
 > réussie (bump sur `master`, création de tag, GitHub Release, publication
 > PyPI).
+
+Avant de lancer une release core :
+
+- [ ] Confirmer que l'option **Allow auto-merge** du dépôt est activée
+- [ ] Confirmer que la GitHub App `spectrochempy-releaser` est installée sur
+      le repo avec les permissions nécessaires pour créer/éditer une PR et
+      activer l'auto-merge
 
 ### Comptes externes
 
@@ -177,7 +196,8 @@ Le workflow :
   - `docs/sources/whatsnew/latest.rst`
   - `CITATION.cff`
   - `zenodo.json`
-- Ouvre une **Pull Request** vers `master`
+- Ouvre une **Pull Request** vers `master` avec le token de la GitHub App
+- Active l'**auto-merge** (squash) sur cette PR
 
 ### 4. Vérifier la PR de release
 
@@ -188,11 +208,14 @@ Dans la Pull Request :
 - Vérifier que les versions sont correctes
 - Si des dépendances ont changé, vérifier `pyproject.toml` et
   `environments/environment_build.yml` également
+- Vérifier que l'état **auto-merge enabled** apparaît bien sur la PR
 
-### 5. Merge de la PR
+### 5. Laisser GitHub fusionner la PR
 
-- Cliquer **Merge pull request**
-- La fusion déclenche automatiquement le workflow
+- Ne pas merger manuellement la PR par bypass si les checks ne sont pas verts
+- Une fois les checks requis et l'éventuelle review satisfaits, GitHub fusionne
+  automatiquement la PR
+- Cette fusion déclenche automatiquement le workflow
   **Publish a draft new release**
 
 ### 6. Draft Release GitHub
@@ -621,7 +644,7 @@ entrées sont incorrectes car :
 ### Avant toute release
 
 - [ ] Vérifier que les secrets GitHub nécessaires sont valides :
-      - Core : `ANACONDA_API_TOKEN` (Trusted Publishing PyPI ne nécessite pas de token secret)
+      - Core : `ANACONDA_API_TOKEN`, `RELEASER_APP_PRIVATE_KEY` + `RELEASER_APP_ID` (Trusted Publishing PyPI ne nécessite pas de token secret)
       - Plugins : `ANACONDA_API_TOKEN`, `RELEASER_APP_PRIVATE_KEY` + `RELEASER_APP_ID` (Trusted Publishing PyPI ne nécessite pas de token secret)
 - [ ] Vérifier l'état des services externes (Zenodo, PyPI, Anaconda.org)
 - [ ] Lancer les tests CI sur la branche cible
@@ -638,9 +661,10 @@ entrées sont incorrectes car :
       `spectrochempy` sur PyPI → Trusted Publishers → GitHub repository
       `spectrochempy/spectrochempy`, workflow `build_package.yml`,
       environment `pypi`)
+- [ ] Vérifier que l'option **Allow auto-merge** du dépôt est activée
 - [ ] Lancer **Prepare a new release** avec la version X.Y.Z
 - [ ] Vérifier la PR de release (CITATION.cff, zenodo.json, whatsnew)
-- [ ] Merger la PR → attendre la Draft Release
+- [ ] Vérifier que l'auto-merge est activé sur la PR → attendre la Draft Release
 - [ ] Vérifier la Draft Release, puis publier
 - [ ] Vérifier PyPI : `pip install spectrochempy==X.Y.Z`
 - [ ] Vérifier Anaconda : `anaconda show spectrocat/spectrochempy`
