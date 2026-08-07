@@ -44,8 +44,8 @@ release.
 Pour les **releases core**, le workflow `prepare_new_release.yml`
 s'authentifie désormais aussi avec cette GitHub App, mais dans un mode plus
 strict : l'app crée la branche `release/X.Y.Z`, ouvre la PR de release et
-active l'**auto-merge**. La fusion elle-même reste soumise aux checks et aux
-reviews normaux du dépôt ; elle n'utilise pas de bypass humain. Cette
+tente d'activer l'**auto-merge**. La fusion elle-même reste soumise aux checks
+et aux reviews normaux du dépôt ; elle n'utilise pas de bypass humain. Cette
 authentification via GitHub App évite aussi le mode `approval-required`
 associé aux PR créées avec le seul `GITHUB_TOKEN`.
 
@@ -197,7 +197,7 @@ Le workflow :
   - `CITATION.cff`
   - `zenodo.json`
 - Ouvre une **Pull Request** vers `master` avec le token de la GitHub App
-- Active l'**auto-merge** (squash) sur cette PR
+- Tente d'activer l'**auto-merge** (squash) sur cette PR
 
 ### 4. Vérifier la PR de release
 
@@ -209,6 +209,8 @@ Dans la Pull Request :
 - Si des dépendances ont changé, vérifier `pyproject.toml` et
   `environments/environment_build.yml` également
 - Vérifier que l'état **auto-merge enabled** apparaît bien sur la PR
+- Si ce n'est pas le cas, activer l'auto-merge manuellement et noter
+  l'avertissement émis par le workflow
 
 ### 5. Laisser GitHub fusionner la PR
 
