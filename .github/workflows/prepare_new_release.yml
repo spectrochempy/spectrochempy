@@ -108,23 +108,59 @@ jobs:
             local endpoint="$2"
             shift 2
 
+            local stdout_file
             local stderr_file
+            stdout_file="$(mktemp)"
             stderr_file="$(mktemp)"
 
-            if GH_TOKEN="$APP_GH_TOKEN" gh api --method "$method" "$endpoint" "$@" 2>"$stderr_file"; then
-              rm -f "$stderr_file"
+            if GH_TOKEN="$APP_GH_TOKEN" gh api --method "$method" "$endpoint" "$@" >"$stdout_file" 2>"$stderr_file"; then
+              cat "$stdout_file"
+              rm -f "$stdout_file" "$stderr_file"
               return 0
             fi
 
             if grep -q "Resource not accessible by integration" "$stderr_file"; then
               echo "::warning::GitHub App token could not access $endpoint; retrying with github.token." >&2
-              rm -f "$stderr_file"
-              GH_TOKEN="$FALLBACK_GH_TOKEN" gh api --method "$method" "$endpoint" "$@"
-              return $?
+              if GH_TOKEN="$FALLBACK_GH_TOKEN" gh api --method "$method" "$endpoint" "$@" >"$stdout_file" 2>"$stderr_file"; then
+                cat "$stdout_file"
+                rm -f "$stdout_file" "$stderr_file"
+                return 0
+              fi
             fi
 
-            cat "$stderr_file" >&2
-            rm -f "$stderr_file"
+            if [ -s "$stdout_file" ]; then
+              cat "$stdout_file" >&2
+            fi
+            if [ -s "$stderr_file" ]; then
+              cat "$stderr_file" >&2
+            fi
+            rm -f "$stdout_file" "$stderr_file"
+            return 1
+          }
+
+          gh_api_app_only() {
+            local method="$1"
+            local endpoint="$2"
+            shift 2
+
+            local stdout_file
+            local stderr_file
+            stdout_file="$(mktemp)"
+            stderr_file="$(mktemp)"
+
+            if GH_TOKEN="$APP_GH_TOKEN" gh api --method "$method" "$endpoint" "$@" >"$stdout_file" 2>"$stderr_file"; then
+              cat "$stdout_file"
+              rm -f "$stdout_file" "$stderr_file"
+              return 0
+            fi
+
+            if [ -s "$stdout_file" ]; then
+              cat "$stdout_file" >&2
+            fi
+            if [ -s "$stderr_file" ]; then
+              cat "$stderr_file" >&2
+            fi
+            rm -f "$stdout_file" "$stderr_file"
             return 1
           }
 
@@ -149,18 +185,17 @@ jobs:
           pr_title="Release version $RELEASE_VERSION"
           pr_body="$(cat "$body_file")"
 
-          pr_number="$(GH_TOKEN="$APP_GH_TOKEN" gh api \
+          pr_number="$(gh_api_app_only GET \
             "repos/${{ github.repository }}/pulls?state=open&head=${{ github.repository_owner }}:release/$RELEASE_VERSION&base=master" \
             --jq '.[0].number')"
 
           if [ -n "$pr_number" ] && [ "$pr_number" != "null" ]; then
-            pr_url="$(GH_TOKEN="$APP_GH_TOKEN" gh api "repos/${{ github.repository }}/pulls/$pr_number" --jq '.html_url')"
+            pr_url="$(gh_api_app_only GET "repos/${{ github.repository }}/pulls/$pr_number" --jq '.html_url')"
             gh_api_with_fallback PATCH \
               "repos/${{ github.repository }}/pulls/$pr_number" \
               -f title="$pr_title" \
               -f body="$pr_body" >/dev/null
-            if ! GH_TOKEN="$APP_GH_TOKEN" gh api \
-              --method POST \
+            if ! gh_api_app_only POST \
               "repos/${{ github.repository }}/pulls/$pr_number/requested_reviewers" \
               -f "reviewers[]=${{ github.actor }}" >/dev/null; then
               echo "::warning::Could not add ${{ github.actor }} as reviewer on existing PR $pr_number."
@@ -175,8 +210,7 @@ jobs:
             pr_number="$(printf '%s' "$pr_json" | python3 -c 'import json,sys; data=json.load(sys.stdin); print(data["number"])')"
             pr_url="$(printf '%s' "$pr_json" | python3 -c 'import json,sys; data=json.load(sys.stdin); print(data["html_url"])')"
 
-            if ! GH_TOKEN="$APP_GH_TOKEN" gh api \
-              --method POST \
+            if ! gh_api_app_only POST \
               "repos/${{ github.repository }}/pulls/$pr_number/requested_reviewers" \
               -f "reviewers[]=${{ github.actor }}" >/dev/null; then
               echo "::warning::Could not add ${{ github.actor }} as reviewer on new PR $pr_number."
