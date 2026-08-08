@@ -117,7 +117,7 @@ jobs:
             fi
 
             if grep -q "Resource not accessible by integration" "$stderr_file"; then
-              echo "::warning::GitHub App token could not access $endpoint; retrying with github.token."
+              echo "::warning::GitHub App token could not access $endpoint; retrying with github.token." >&2
               rm -f "$stderr_file"
               GH_TOKEN="$FALLBACK_GH_TOKEN" gh api --method "$method" "$endpoint" "$@"
               return $?
@@ -166,15 +166,14 @@ jobs:
               echo "::warning::Could not add ${{ github.actor }} as reviewer on existing PR $pr_number."
             fi
           else
-            pr_fields="$(gh_api_with_fallback POST \
+            pr_json="$(gh_api_with_fallback POST \
               "repos/${{ github.repository }}/pulls" \
               -f title="$pr_title" \
               -f body="$pr_body" \
               -f head="release/$RELEASE_VERSION" \
-              -f base="master" \
-              --template '{{.number}} {{.html_url}}')"
-            pr_number="${pr_fields%% *}"
-            pr_url="${pr_fields#* }"
+              -f base="master")"
+            pr_number="$(printf '%s' "$pr_json" | python3 -c 'import json,sys; data=json.load(sys.stdin); print(data["number"])')"
+            pr_url="$(printf '%s' "$pr_json" | python3 -c 'import json,sys; data=json.load(sys.stdin); print(data["html_url"])')"
 
             if ! GH_TOKEN="$APP_GH_TOKEN" gh api \
               --method POST \
@@ -182,6 +181,13 @@ jobs:
               -f "reviewers[]=${{ github.actor }}" >/dev/null; then
               echo "::warning::Could not add ${{ github.actor }} as reviewer on new PR $pr_number."
             fi
+          fi
+
+          if ! gh_api_with_fallback POST \
+            "repos/${{ github.repository }}/issues/$pr_number/labels" \
+            -f "labels[]=no-changelog" \
+            -f "labels[]=non-standard-prefix" >/dev/null; then
+            echo "::warning::Could not apply labels to release PR $pr_number."
           fi
 
           echo "number=$pr_number" >> "$GITHUB_OUTPUT"
