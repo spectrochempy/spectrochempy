@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fitting &mdash; SpectroChemPy v0.10.1 0.10.1 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/spectrochempy.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sphinx-design.5ea377869091fd0449014c60fc090103.min.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/nbsphinx-code-cells.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/spectrochempy.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../../_static/scpy.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script src="../../_static/clipboard.min.js"></script>
+        <script src="../../_static/copybutton.js"></script>
+        <script src="../../_static/design-tabs.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Principal Component Analysis" href="pca.html" />
+    <link rel="prev" title="Peak Integration" href="peak_integration.html" />
+ 
+<style>
+    .popup-warning {
+        display: none;
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
+        background: #d8d7d5;
+        border: 1px solid #2c2c2b;
+        border-radius: 4px;
+        padding: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        animation: slideIn 0.5s ease-out;
+        font-size: smaller;
+    }
+
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+        }
+
+        to {
+            transform: translateX(0);
+        }
+    }
+
+    .popup-warning .close-btn {
+        float: right;
+        cursor: pointer;
+        margin-left: 10px;
+    }
+</style>
+<html data-versions="0.10.1,0.10.0,0.9.3,0.9.2,0.9.1,0.9.0,0.8.4,0.8.3,0.8.2,0.8.1,0.8.0,0.7.2,0.7.1,0.7.0,0.6.10">
+<script src="../../_static/js/versions.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+
+
+<a href="../../index.html">
+    
+    <img src="../../_static/scpy.png" class="logo" alt="Logo" />
+</a>
+
+<div class="switch-menus">
+    <select id="versions-dropdown"></select>
+</div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../whatsnew/latest.html">What’s New in Revision 0.10.1</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/quickstart.html">5-minute quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/install/index.html">Installation guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/install/install_win.html">Installation Guide for Windows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/install/install_mac_linux.html">Installation Guide for Mac OSX and Linux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/install/install_colab.html">Install in Google Colaboratory (Colab)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/install/install_adds.html">Optional Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/install/install_sources.html">Installation from Sources</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/examples/index.html">Example's gallery</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/index.html">Core functionalities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/index.html">How to use NDDataset</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_a_create_dataset.html">NDDataset creation and plotting example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_b_coordinates.html">NDDataset coordinates example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_c_units.html">Units manipulation examples</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_d_slicing.html">Slice an NDDataset with indices and coordinates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_preferences.html">NDDataset creation and plotting example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/b_interoperability/index.html">Interoperability</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/b_interoperability/plot_xarray_netcdf_interoperability.html">Interoperability with xarray and NetCDF</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/index.html">Import / Export</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_generic_read.html">Reading datasets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_IR_from_omnic.html">Loading an IR (omnic SPG) experimental file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_IR_from_opus.html">Loading Bruker OPUS files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_nmr_from_bruker.html">Loading of experimental NMR data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_raman_from_labspec.html">Loading RAMAN experimental file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_renishaw.html">Reading Renishaw WiRE files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_spc.html">Reading SPC format files</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/d_plotting/index.html">Plotting datasets</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/d_plotting/plot_plot_multiple.html">Using <code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_multiple</span></code> to plot several datasets on the same figure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/d_plotting/plot_plot_types.html">Choose an explicit plot type for a 2D IR dataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/d_plotting/plot_plotting.html">Introduction to the plotting librairie</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/d_plotting/plot_styles.html">Apply built-in plotting styles</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/e_project/index.html">Project Management</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/e_project/plot_project.html">Project creation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/index.html">Analysis NDDataset</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/index.html">Decomposition</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_efa.html">EFA example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_efa_keller_massart.html">EFA (Keller and Massart original example)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_fast_ica.html">FastICA example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_iris_intro.html">IRIS: 2D-IRIS analysis (plugin)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_mcrals_chrom1.html">MCR-ALS example (adapted from Jaumot et al. 2005)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_mcrals_kinetics.html">MCR-ALS with kinetic constraints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_nmf.html">NMF analysis example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_pca_iris.html">PCA example (iris dataset)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_pca_spec.html">PCA analysis example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_simplisma.html">SIMPLISMA example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/b_crossdecomposition/index.html">Cross-decomposition</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/b_crossdecomposition/plot_pls.html">PLS regression example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/c_curvefitting/index.html">Curvefitting</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/c_curvefitting/plot_fit.html">Fitting 1D dataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/c_curvefitting/plot_lstsq_single_equation.html">Solve a linear equation using LSTSQ</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/d_peak_analysis/index.html">Peak analysis</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/d_peak_analysis/plot_peak_finding.html">Find peak maxima in an IR time series</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/d_peak_analysis/plot_peak_integration.html">Integrate a baseline-corrected IR band</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/index.html">Processing NDDataset</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/apodization/index.html">Apodization</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/apodization/plot_proc_em.html">Exponential window multiplication</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/apodization/plot_proc_sp.html">Sine bell and squared Sine bell window multiplication</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/baseline/index.html">Baseline</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/baseline/plot_baseline_correction.html">NDDataset baseline correction</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/denoising/index.html">Denoising</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/denoising/plot_denoising.html">Denoising a 2D Raman spectrum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/denoising/plot_despike.html">Removing cosmic ray spikes from a Raman spectrum</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/filtering/index.html">Filtering</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/filtering/plot_filter.html">Savitky-Golay and Whittaker-Eilers smoothing of a Raman spectrum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/filtering/plot_smoothing_window_size.html">Compare smoothing window sizes on a Raman spectrum</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/nmr/index.html">NMR processing (plugin-based)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/nmr/plot_processing_cp_nmr.html">Analysis CP NMR spectra</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/nmr/plot_processing_nmr.html">Processing NMR spectra (slicing, baseline correction, peak picking, peak fitting)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/nmr/plot_processing_nmr_relax.html">Processing Relaxation measurement</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/nmr/plot_read_nmr_topspin.html">NMR: reading TopSpin files (plugin)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/raman/index.html">Processing Raman datasets</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/raman/plot_processing_raman.html">Processing RAMAN spectra</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/transformations/index.html">Transformations</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/transformations/plot_masking_transpose_units.html">Mask a saturated region and transform an IR dataset</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/index.html">Plugin-dependent functionality</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-iris/index.html">IRIS plugin</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-iris/plot_spectrochempy_iris__analysis__a_decomposition__plot_iris_intro.html">IRIS: 2D-IRIS analysis (plugin)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-nmr/index.html">NMR plugin</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-nmr/plot_spectrochempy_nmr__core__c_importer__plot_read_nmr_from_bruker.html">Loading of experimental NMR data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-nmr/plot_spectrochempy_nmr__processing__apodization__plot_proc_em.html">Exponential window multiplication</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-nmr/plot_spectrochempy_nmr__processing__apodization__plot_proc_sp.html">Sine bell and squared Sine bell window multiplication</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-nmr/plot_spectrochempy_nmr__processing__nmr__plot_processing_cp_nmr.html">Analysis CP NMR spectra</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-nmr/plot_spectrochempy_nmr__processing__nmr__plot_processing_nmr.html">Processing NMR spectra (slicing, baseline correction, peak picking, peak fitting)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-nmr/plot_spectrochempy_nmr__processing__nmr__plot_processing_nmr_relax.html">Processing Relaxation measurement</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-nmr/plot_spectrochempy_nmr__processing__nmr__plot_read_nmr_topspin.html">NMR: reading TopSpin files (plugin)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/getting_help.html">Getting help</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 User's Guide &amp; Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../importexport/index.html">Import &amp; Export</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../importexport/import.html">Import Data in SpectroChemPy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../importexport/importIR.html">Import IR Data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../importexport/importOMNIC.html">Import of OMNIC files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../importexport/importOPUS.html">Import of Bruker OPUS files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../importexport/importJCAMPDX.html">Import/Export of JCAMP-DX files</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../plotting/index.html">Plotting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../plotting/overview.html">Plotting Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plotting/customization.html">Customizing a Plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plotting/preferences.html">Plotting Preferences</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plotting/plot_types.html">Plot Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plotting/styles.html">Styles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plotting/advanced.html">Advanced Matplotlib Integration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../processing/index.html">Processing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../processing/slicing.html">Slicing NDDatasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../processing/transformations.html">Basic transformations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../processing/math_operations.html">Mathematical operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../processing/smoothing.html">Filtering, Smoothing and Denoising</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../processing/baseline.html">Baseline corrections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../processing/denoising.html">Denoising</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../processing/apodization.html">Apodization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../processing/td_baseline.html">Time domain baseline correction (NMR)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../processing/fourier.html">One-dimensional (1D) Fourier transformation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../processing/fourier.html#Real-Fourier-transform">Real Fourier transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../processing/interferogram.html">FTIR interferogram processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../processing/alignment.html">Alignment of datasets</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Analysis</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="peak_finding.html">Peak Maxima Finding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="peak_integration.html">Peak Integration</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Fitting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pca.html">Principal Component Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pls.html">Partial Least Squares Regression (PLSRegression)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcr_als.html">MCR ALS</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../plugins/index.html">Plugins</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../plugins/official_plugins.html">Official plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plugins/nmr.html">NMR plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plugins/tensor.html">Tensor plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plugins/hypercomplex.html">Hypercomplex (quaternion) plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plugins/iris.html">IRIS plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plugins/experimental_plugins.html">Experimental plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plugins/examples.html">Plugin-dependent Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plugins/roadmap.html">Plugin roadmap</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api/api.html">API Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../objects/index.html">Core objects</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../objects/dataset/dataset.html">The NDDataset object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../objects/dataset/dataset.html#More-insight-on-coordinates">More insight on coordinates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../objects/dataset/dataset.html#Methods-to-create-NDDataset">Methods to create NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../objects/project/project.html">Project management</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🔍 Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/index.html">Public API reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.NDDataset.html">spectrochempy.NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.Coord.html">spectrochempy.Coord</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.CoordSet.html">spectrochempy.CoordSet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.empty.html">spectrochempy.empty</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.zeros.html">spectrochempy.zeros</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.ones.html">spectrochempy.ones</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.full.html">spectrochempy.full</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.empty_like.html">spectrochempy.empty_like</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.zeros_like.html">spectrochempy.zeros_like</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.ones_like.html">spectrochempy.ones_like</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.full_like.html">spectrochempy.full_like</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.eye.html">spectrochempy.eye</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.identity.html">spectrochempy.identity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.random.html">spectrochempy.random</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.diag.html">spectrochempy.diag</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.fromfunction.html">spectrochempy.fromfunction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.fromiter.html">spectrochempy.fromiter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.arange.html">spectrochempy.arange</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.linspace.html">spectrochempy.linspace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.logspace.html">spectrochempy.logspace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.geomspace.html">spectrochempy.geomspace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.take.html">spectrochempy.take</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.load.html">spectrochempy.load</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.read.html">spectrochempy.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.read_topspin.html">spectrochempy.read_topspin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.read_csv.html">spectrochempy.read_csv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.read_ddr.html">spectrochempy.read_ddr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.read_dir.html">spectrochempy.read_dir</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.read_hdr.html">spectrochempy.read_hdr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.read_jcamp.html">spectrochempy.read_jcamp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.read_labspec.html">spectrochempy.read_labspec</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.read_wire.html">spectrochempy.read_wire</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.read_wdf.html">spectrochempy.read_wdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.read_mat.html">spectrochempy.read_mat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.read_matlab.html">spectrochempy.read_matlab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.read_omnic.html">spectrochempy.read_omnic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.read_opus.html">spectrochempy.read_opus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.read_quadera.html">spectrochempy.read_quadera</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.read_sdr.html">spectrochempy.read_sdr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.read_soc.html">spectrochempy.read_soc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.read_spa.html">spectrochempy.read_spa</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.read_spc.html">spectrochempy.read_spc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.read_spg.html">spectrochempy.read_spg</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.read_srs.html">spectrochempy.read_srs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.NDDataset.from_xarray.html">spectrochempy.NDDataset.from_xarray</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.NDDataset.from_netcdf.html">spectrochempy.NDDataset.from_netcdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.load_iris.html">spectrochempy.load_iris</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.download_nist_ir.html">spectrochempy.download_nist_ir</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.NDDataset.save.html">spectrochempy.NDDataset.save</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.NDDataset.save_as.html">spectrochempy.NDDataset.save_as</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.write.html">spectrochempy.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.write_csv.html">spectrochempy.write_csv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.write_jcamp.html">spectrochempy.write_jcamp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.write_mat.html">spectrochempy.write_mat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.write_matlab.html">spectrochempy.write_matlab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.to_array.html">spectrochempy.to_array</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.to_netcdf.html">spectrochempy.to_netcdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.to_xarray.html">spectrochempy.to_xarray</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.plot.html">spectrochempy.plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.plot_1D.html">spectrochempy.plot_1D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.plot_pen.html">spectrochempy.plot_pen</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.plot_scatter.html">spectrochempy.plot_scatter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.plot_scatter_pen.html">spectrochempy.plot_scatter_pen</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.plot_with_transposed.html">spectrochempy.plot_with_transposed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.plot_bar.html">spectrochempy.plot_bar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.plot_2D.html">spectrochempy.plot_2D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.plot_contour.html">spectrochempy.plot_contour</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.plot_contourf.html">spectrochempy.plot_contourf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.plot_image.html">spectrochempy.plot_image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.plot_lines.html">spectrochempy.plot_lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.plot_map.html">spectrochempy.plot_map</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.plot_stack.html">spectrochempy.plot_stack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.plot_3D.html">spectrochempy.plot_3D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.plot_surface.html">spectrochempy.plot_surface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.plot_waterfall.html">spectrochempy.plot_waterfall</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.plot_multiple.html">spectrochempy.plot_multiple</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.multiplot.html">spectrochempy.multiplot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.multiplot_contour.html">spectrochempy.multiplot_contour</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.multiplot_contourf.html">spectrochempy.multiplot_contourf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.multiplot_image.html">spectrochempy.multiplot_image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.multiplot_lines.html">spectrochempy.multiplot_lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.multiplot_map.html">spectrochempy.multiplot_map</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.multiplot_scatter.html">spectrochempy.multiplot_scatter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.multiplot_stack.html">spectrochempy.multiplot_stack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.multiplot_with_transposed.html">spectrochempy.multiplot_with_transposed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.show.html">spectrochempy.show</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.transpose.html">spectrochempy.transpose</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.swapdims.html">spectrochempy.swapdims</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.squeeze.html">spectrochempy.squeeze</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.set_complex.html">spectrochempy.set_complex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.concatenate.html">spectrochempy.concatenate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.stack.html">spectrochempy.stack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.diag.html">spectrochempy.diag</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.diagonal.html">spectrochempy.diagonal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.take.html">spectrochempy.take</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.sort.html">spectrochempy.sort</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.argmin.html">spectrochempy.argmin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.argmax.html">spectrochempy.argmax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.coordmin.html">spectrochempy.coordmin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.coordmax.html">spectrochempy.coordmax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.amin.html">spectrochempy.amin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.amax.html">spectrochempy.amax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.min.html">spectrochempy.min</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.max.html">spectrochempy.max</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.ptp.html">spectrochempy.ptp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.clip.html">spectrochempy.clip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.around.html">spectrochempy.around</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.round.html">spectrochempy.round</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.dot.html">spectrochempy.dot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.SVD.html">spectrochempy.SVD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.LSTSQ.html">spectrochempy.LSTSQ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.NNLS.html">spectrochempy.NNLS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.all.html">spectrochempy.all</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.any.html">spectrochempy.any</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.sum.html">spectrochempy.sum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.cumsum.html">spectrochempy.cumsum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.trapezoid.html">spectrochempy.trapezoid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.simpson.html">spectrochempy.simpson</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.conj.html">spectrochempy.conj</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.conjugate.html">spectrochempy.conjugate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.abs.html">spectrochempy.abs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.absolute.html">spectrochempy.absolute</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.remove_masks.html">spectrochempy.remove_masks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.Unit.html">spectrochempy.Unit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.Quantity.html">spectrochempy.Quantity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.to.html">spectrochempy.to</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.to_base_units.html">spectrochempy.to_base_units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.to_reduced_units.html">spectrochempy.to_reduced_units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.ito.html">spectrochempy.ito</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.ito_base_units.html">spectrochempy.ito_base_units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.ito_reduced_units.html">spectrochempy.ito_reduced_units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.is_units_compatible.html">spectrochempy.is_units_compatible</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.mc.html">spectrochempy.mc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.ps.html">spectrochempy.ps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.mean.html">spectrochempy.mean</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.average.html">spectrochempy.average</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.std.html">spectrochempy.std</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.sum.html">spectrochempy.sum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.var.html">spectrochempy.var</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.Baseline.html">spectrochempy.Baseline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.autosub.html">spectrochempy.autosub</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.get_baseline.html">spectrochempy.get_baseline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.basc.html">spectrochempy.basc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.detrend.html">spectrochempy.detrend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.asls.html">spectrochempy.asls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.snip.html">spectrochempy.snip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.fft.html">spectrochempy.fft</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.ifft.html">spectrochempy.ifft</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.ht.html">spectrochempy.ht</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.fsh.html">spectrochempy.fsh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.fsh2.html">spectrochempy.fsh2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.pk.html">spectrochempy.pk</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.pk_exp.html">spectrochempy.pk_exp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.dc.html">spectrochempy.dc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.zf.html">spectrochempy.zf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.zf_auto.html">spectrochempy.zf_auto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.zf_double.html">spectrochempy.zf_double</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.zf_size.html">spectrochempy.zf_size</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.cs.html">spectrochempy.cs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.ls.html">spectrochempy.ls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.roll.html">spectrochempy.roll</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.rs.html">spectrochempy.rs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.bartlett.html">spectrochempy.bartlett</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.blackmanharris.html">spectrochempy.blackmanharris</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.hamming.html">spectrochempy.hamming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.general_hamming.html">spectrochempy.general_hamming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.hann.html">spectrochempy.hann</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.triang.html">spectrochempy.triang</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.em.html">spectrochempy.em</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.gm.html">spectrochempy.gm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.sp.html">spectrochempy.sp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.sine.html">spectrochempy.sine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.qsin.html">spectrochempy.qsin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.sinm.html">spectrochempy.sinm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.Filter.html">spectrochempy.Filter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.savgol.html">spectrochempy.savgol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.smooth.html">spectrochempy.smooth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.whittaker.html">spectrochempy.whittaker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.denoise.html">spectrochempy.denoise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.despike.html">spectrochempy.despike</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.align.html">spectrochempy.align</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.interpolate.html">spectrochempy.interpolate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.pipe.html">spectrochempy.pipe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.LSTSQ.html">spectrochempy.LSTSQ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.NNLS.html">spectrochempy.NNLS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.Optimize.html">spectrochempy.Optimize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.PLSRegression.html">spectrochempy.PLSRegression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.EFA.html">spectrochempy.EFA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.MCRALS.html">spectrochempy.MCRALS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.FastICA.html">spectrochempy.FastICA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.NMF.html">spectrochempy.NMF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.PCA.html">spectrochempy.PCA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.SVD.html">spectrochempy.SVD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.SIMPLISMA.html">spectrochempy.SIMPLISMA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.PSD.html">spectrochempy.PSD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.gaussianmodel.html">spectrochempy.gaussianmodel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.lorentzianmodel.html">spectrochempy.lorentzianmodel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.voigtmodel.html">spectrochempy.voigtmodel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.asymmetricvoigtmodel.html">spectrochempy.asymmetricvoigtmodel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.sigmoidmodel.html">spectrochempy.sigmoidmodel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.polynomialbaseline.html">spectrochempy.polynomialbaseline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.find_peaks.html">spectrochempy.find_peaks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.ActionMassKinetics.html">spectrochempy.ActionMassKinetics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.PFR.html">spectrochempy.PFR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.Project.html">spectrochempy.Project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.set_loglevel.html">spectrochempy.set_loglevel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.get_loglevel.html">spectrochempy.get_loglevel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.debug_.html">spectrochempy.debug_</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.info_.html">spectrochempy.info_</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.warning_.html">spectrochempy.warning_</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.error_.html">spectrochempy.error_</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.show_versions.html">spectrochempy.show_versions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/generated/spectrochempy.pathclean.html">spectrochempy.pathclean</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/papers.html">Papers citing <code class="xref py py-obj docutils literal notranslate"><span class="pre">SpectroChemPy</span></code></a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🛠️ Contribute</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/issues.html">Bug reports &amp; feature request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/examples.html">Sharing examples &amp; tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/index.html">Developer’s Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../devguide/contributing.html">Contributing to SpectroChemPy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../devguide/contributing_codebase.html">Contributing to the code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../devguide/contributing_codespecifics.html">Contributing to specific parts of the code</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/codespec_adding_reader.html">Adding a Reader</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../devguide/contributing_documentation.html">Contributing to Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../devguide/contributing_plotting.html">Plotting Contributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../devguide/plugins/index.html">Plugin developer guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/plugins/writing_plugins.html">Plugin author guide</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/plugins/architecture.html">Plugin architecture</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/plugins/accessors.html">Plugin accessors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/plugins/numeric_backends.html">Numeric backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/plugins/unit_contexts.html">Unit contexts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/plugins/packaging.html">Packaging a Plugin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/plugins/testing.html">Testing a Plugin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/plugins/api_policy.html">Plugin API Policy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/plugins/domain_architecture.html">Official plugin architecture notes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/plugins/roadmap.html">Plugin architecture map</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">✨ Credits</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/credits.html">Contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/credits.html#third-party-licenses">Third-party Licenses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/citing.html">Citing SpectroChemPy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/license.html">SpectroChempy License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/license.html#other-licenses">Other Licenses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/seealso.html">See also</a></li>
+</ul>
+
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">SpectroChemPy v0.10.1</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Analysis</a></li>
+      <li class="breadcrumb-item active">Fitting</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="peak_integration.html" class="btn btn-neutral float-left" title="Peak Integration" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pca.html" class="btn btn-neutral float-right" title="Principal Component Analysis" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+
+           <div itemprop="articleBody">
+             
+  <section id="Fitting">
+<h1>Fitting<a class="headerlink" href="#Fitting" title="Permalink to this heading"></a></h1>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">spectrochempy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">scp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">spectrochempy</span><span class="w"> </span><span class="kn">import</span> <span class="n">ur</span>
+</pre></div>
+</div>
+</div>
+<section id="Solving-a-linear-equation-using-the-least-square-method-(LSTSQ)">
+<h2>Solving a linear equation using the least square method (LSTSQ)<a class="headerlink" href="#Solving-a-linear-equation-using-the-least-square-method-(LSTSQ)" title="Permalink to this heading"></a></h2>
+<p>In the first example, we find the least square solution of a simple linear equation.</p>
+<p>Let’s first create a NDDataset with some data. We have for instance some noisy data that represent the distance <code class="docutils literal notranslate"><span class="pre">d</span></code> traveled by some objects versus time <code class="docutils literal notranslate"><span class="pre">t</span></code>:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">func</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">var</span><span class="p">):</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">v</span> <span class="o">*</span> <span class="n">t</span> <span class="o">+</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">))</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">var</span>
+    <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">return</span> <span class="n">d</span>
+
+
+<span class="n">time</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">Coord</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;hour&quot;</span><span class="p">)</span>
+<span class="n">d</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">fromfunction</span><span class="p">(</span>
+    <span class="n">func</span><span class="p">,</span>
+    <span class="n">v</span><span class="o">=</span><span class="mf">100.0</span> <span class="o">*</span> <span class="n">ur</span><span class="p">(</span><span class="s2">&quot;km/hr&quot;</span><span class="p">),</span>
+    <span class="n">var</span><span class="o">=</span><span class="mf">60.0</span> <span class="o">*</span> <span class="n">ur</span><span class="p">(</span><span class="s2">&quot;km&quot;</span><span class="p">),</span>
+    <span class="c1"># extra arguments passed to the function v, var</span>
+    <span class="n">coordset</span><span class="o">=</span><span class="n">scp</span><span class="o">.</span><span class="n">CoordSet</span><span class="p">(</span><span class="n">t</span><span class="o">=</span><span class="n">time</span><span class="p">),</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;mydataset&quot;</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;distance travelled&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Here is a plot of these data-points:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">prefs</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">preferences</span>
+<span class="n">prefs</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">d</span><span class="o">.</span><span class="n">plot_scatter</span><span class="p">(</span><span class="n">markersize</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">mfc</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Original data&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<style>/* SpectroChemPy output styling */
+.scp-output {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.scp-output details {
+    padding: 1px;
+}
+
+.scp-output summary {
+    cursor: pointer;
+    font-weight: normal;
+    /*bold;*/
+    font-size: 11pt;
+}
+
+.scp-output summary:hover {
+    color: #888;
+}
+
+/* Parameters display styling */
+.scp-output .section {
+    display: flex;
+    flex-direction: row;
+    gap: 2px;
+    font-family: Arial, sans-serif;
+    font-size: 10pt;
+    margin-left: 15px;
+}
+
+.scp-output .meta-name,
+.scp-output .attr-name {
+    font-weight: 500;
+    color: #28A745;
+    text-align: right;
+}
+
+.scp-output .attr-name {
+    min-width: 100px;
+}
+
+.scp-output .meta-name {
+    min-width: 150px;
+}
+
+.scp-output .meta-value,
+.scp-output .attr-value {
+    flex: 1;
+}
+
+.scp-output .numeric {
+    color: #2D7FF9;
+    margin-left: 120px;
+    font-size: 10pt;
+}
+
+.scp-output .label {
+    color: darkcyan;
+    margin-left: 120px;
+    font-size: 10pt;
+}
+
+.scp-output .attr-value .numeric {
+    color: #2D7FF9;
+    margin-left: 0px;
+    font-size: 10pt;
+}
+
+.scp-output .attr-value .label {
+    color: darkcyan;
+    margin-left: 0px;
+    font-size: 10pt;
+}
+</style></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Axes: xlabel=&#39;time $\\mathrm{/\\ \\mathrm{h}}$&#39;, ylabel=&#39;distance travelled $\\mathrm{/\\ \\mathrm{km}}$&#39;&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_analysis_fitting_5_2.png" src="../../_images/userguide_analysis_fitting_5_2.png" />
+</div>
+</div>
+<p>We want to fit a line through these data-points of equation</p>
+<p><span class="math notranslate nohighlight">\(d = v.t + d_0\)</span></p>
+<p>By construction, we know already that the line should have a gradient of roughly 100 km/h and cut the y-axis at, more or less, 0 km.</p>
+<p>Using LSTSQ, the solution is found very easily:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lst</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">LSTSQ</span><span class="p">()</span>
+<span class="n">lst</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+
+<span class="n">v</span><span class="p">,</span> <span class="n">d0</span> <span class="o">=</span> <span class="n">lst</span><span class="o">.</span><span class="n">coef</span><span class="p">,</span> <span class="n">lst</span><span class="o">.</span><span class="n">intercept</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;speed : </span><span class="si">{</span><span class="n">v</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">,  distance at time 0 : </span><span class="si">{</span><span class="n">d0</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">dfit</span> <span class="o">=</span> <span class="n">lst</span><span class="o">.</span><span class="n">predict</span><span class="p">()</span>
+<span class="n">dfit</span><span class="o">.</span><span class="n">plot_pen</span><span class="p">(</span><span class="n">clear</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;g&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot; Fitted line&quot;</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+speed : 99.690 kilometer hour^-1,  distance at time 0 : 3.102 kilometer
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Axes: xlabel=&#39;time $\\mathrm{/\\ \\mathrm{h}}$&#39;, ylabel=&#39;distance travelled $\\mathrm{/\\ \\mathrm{km}}$&#39;&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_analysis_fitting_7_2.png" src="../../_images/userguide_analysis_fitting_7_2.png" />
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title fa fa-exclamation-circle">Note</p>
+<p>In the particular case where the variation is proportional to the x dataset coordinate, the same result can be obtained directly using <code class="docutils literal notranslate"><span class="pre">d</span></code> as a single parameter on LSTSQ (as <code class="docutils literal notranslate"><span class="pre">t</span></code> is the <code class="docutils literal notranslate"><span class="pre">x</span></code> coordinate axis!)</p>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lst</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">LSTSQ</span><span class="p">()</span>
+<span class="n">lst</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+<span class="n">v</span><span class="p">,</span> <span class="n">d0</span> <span class="o">=</span> <span class="n">lst</span><span class="o">.</span><span class="n">coef</span><span class="p">,</span> <span class="n">lst</span><span class="o">.</span><span class="n">intercept</span>
+</pre></div>
+</div>
+</div>
+<p>and the final plot</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">d</span><span class="o">.</span><span class="n">plot_scatter</span><span class="p">(</span>
+    <span class="n">markersize</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
+    <span class="n">mfc</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+    <span class="n">mec</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Original data&quot;</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Linear regression, $r^2=</span><span class="si">{</span><span class="n">lst</span><span class="o">.</span><span class="n">score</span><span class="p">()</span><span class="si">:</span><span class="s2"> .3f</span><span class="si">}</span><span class="s2"> &quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">dfit</span> <span class="o">=</span> <span class="n">lst</span><span class="o">.</span><span class="n">predict</span><span class="p">()</span>
+<span class="n">dfit</span><span class="o">.</span><span class="n">plot_pen</span><span class="p">(</span><span class="n">clear</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;g&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot; Fitted line&quot;</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Axes: title={&#39;center&#39;: &#39;Linear regression, $r^2= 0.996 &#39;}, xlabel=&#39;time $\\mathrm{/\\ \\mathrm{h}}$&#39;, ylabel=&#39;distance travelled $\\mathrm{/\\ \\mathrm{km}}$&#39;&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_analysis_fitting_11_1.png" src="../../_images/userguide_analysis_fitting_11_1.png" />
+</div>
+</div>
+<p>Let’s try now with a quadratic increase of the speed:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">func</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">var</span><span class="p">):</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="p">(</span><span class="n">t</span> <span class="o">/</span> <span class="mf">3.0</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">))</span> <span class="o">-</span> <span class="mf">0.8</span><span class="p">)</span> <span class="o">*</span> <span class="n">var</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">magnitude</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span> <span class="o">*</span> <span class="n">d</span><span class="o">.</span><span class="n">units</span>
+    <span class="k">return</span> <span class="n">d</span>
+
+
+<span class="n">time</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">Coord</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;hour&quot;</span><span class="p">)</span>
+<span class="n">d2</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">NDDataset</span><span class="o">.</span><span class="n">fromfunction</span><span class="p">(</span>
+    <span class="n">func</span><span class="p">,</span>
+    <span class="n">a</span><span class="o">=</span><span class="mf">100.0</span> <span class="o">*</span> <span class="n">ur</span><span class="p">(</span><span class="s2">&quot;km/hr^2&quot;</span><span class="p">),</span>
+    <span class="n">var</span><span class="o">=</span><span class="mf">60.0</span> <span class="o">*</span> <span class="n">ur</span><span class="p">(</span><span class="s2">&quot;km&quot;</span><span class="p">),</span>
+    <span class="c1"># extra arguments passed to the function v, var</span>
+    <span class="n">coordset</span><span class="o">=</span><span class="n">scp</span><span class="o">.</span><span class="n">CoordSet</span><span class="p">(</span><span class="n">t</span><span class="o">=</span><span class="n">time</span><span class="p">),</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;mydataset&quot;</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;distance travelled&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">d2</span><span class="o">.</span><span class="n">plot_scatter</span><span class="p">(</span><span class="n">markersize</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">mfc</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Axes: xlabel=&#39;time $\\mathrm{/\\ \\mathrm{h}}$&#39;, ylabel=&#39;distance travelled $\\mathrm{/\\ \\mathrm{km}}$&#39;&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_analysis_fitting_13_1.png" src="../../_images/userguide_analysis_fitting_13_1.png" />
+</div>
+</div>
+<p>Now we must use the first syntax LSTQ(X, Y) as the variation is not proportional to time, but to its square.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">X</span> <span class="o">=</span> <span class="n">time</span><span class="o">**</span><span class="mi">2</span>
+<span class="n">lst</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">LSTSQ</span><span class="p">()</span>
+<span class="n">lst</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">d2</span><span class="p">)</span>
+
+<span class="n">v</span><span class="p">,</span> <span class="n">d0</span> <span class="o">=</span> <span class="n">lst</span><span class="o">.</span><span class="n">coef</span><span class="p">,</span> <span class="n">lst</span><span class="o">.</span><span class="n">intercept</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;acceleration : </span><span class="si">{</span><span class="n">v</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">,  distance at time 0 : </span><span class="si">{</span><span class="n">d0</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+acceleration : 11.135 kilometer hour^-2,  distance at time 0 : -13.781 kilometer
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">d2</span><span class="o">.</span><span class="n">plot_scatter</span><span class="p">(</span>
+    <span class="n">markersize</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
+    <span class="n">mfc</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+    <span class="n">mec</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Original data&quot;</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Least-square fitting example on quadratic data&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">dfit</span> <span class="o">=</span> <span class="n">lst</span><span class="o">.</span><span class="n">predict</span><span class="p">()</span>
+
+<span class="n">dfit</span><span class="o">.</span><span class="n">plot_pen</span><span class="p">(</span><span class="n">clear</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;g&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot; Fitted line&quot;</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Axes: title={&#39;center&#39;: &#39;Least-square fitting example on quadratic data&#39;}, xlabel=&#39;time $\\mathrm{/\\ \\mathrm{h}}$&#39;, ylabel=&#39;distance travelled $\\mathrm{/\\ \\mathrm{km}}$&#39;&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_analysis_fitting_16_1.png" src="../../_images/userguide_analysis_fitting_16_1.png" />
+</div>
+</div>
+</section>
+<section id="Least-square-with-non-negativity-constraint-(NNLS)">
+<h2>Least square with non-negativity constraint (NNLS)<a class="headerlink" href="#Least-square-with-non-negativity-constraint-(NNLS)" title="Permalink to this heading"></a></h2>
+<p>When fitting data with LSTSQ, it happens that we get some negative values were it should not, for instance having a negative distance at time 0.</p>
+<p>In this case, we can use the NNLS method of fitting. It operates as <code class="docutils literal notranslate"><span class="pre">LSTSQ</span></code> but keep the Y values always positive.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">X</span> <span class="o">=</span> <span class="n">time</span><span class="o">**</span><span class="mi">2</span>
+<span class="n">nls</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">NNLS</span><span class="p">()</span>
+<span class="n">nls</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">d2</span><span class="p">)</span>
+
+<span class="n">v</span><span class="p">,</span> <span class="n">d0</span> <span class="o">=</span> <span class="n">lst</span><span class="o">.</span><span class="n">coef</span><span class="p">,</span> <span class="n">lst</span><span class="o">.</span><span class="n">intercept</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;acceleration : </span><span class="si">{</span><span class="n">v</span><span class="si">:</span><span class="s2"> .3f</span><span class="si">}</span><span class="s2">,  distance at time 0 : </span><span class="si">{</span><span class="n">d0</span><span class="si">:</span><span class="s2"> .3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+acceleration :  11.135 kilometer hour^-2,  distance at time 0 : -13.781 kilometer
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">d2</span><span class="o">.</span><span class="n">plot_scatter</span><span class="p">(</span>
+    <span class="n">markersize</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
+    <span class="n">mfc</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+    <span class="n">mec</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Original data&quot;</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Non-negative Least-square fitting example&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">dfit</span> <span class="o">=</span> <span class="n">lst</span><span class="o">.</span><span class="n">predict</span><span class="p">()</span>
+
+<span class="n">dfit</span><span class="o">.</span><span class="n">plot_pen</span><span class="p">(</span><span class="n">clear</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;g&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot; Fitted line&quot;</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Axes: title={&#39;center&#39;: &#39;Non-negative Least-square fitting example&#39;}, xlabel=&#39;time $\\mathrm{/\\ \\mathrm{h}}$&#39;, ylabel=&#39;distance travelled $\\mathrm{/\\ \\mathrm{km}}$&#39;&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_analysis_fitting_20_1.png" src="../../_images/userguide_analysis_fitting_20_1.png" />
+</div>
+</div>
+</section>
+<section id="NDDataset-modelling-using-non-linear-optimisation-method">
+<h2>NDDataset modelling using non-linear optimisation method<a class="headerlink" href="#NDDataset-modelling-using-non-linear-optimisation-method" title="Permalink to this heading"></a></h2>
+<p>First we will load an IR dataset</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nd</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;irdata/nh4y-activation.spg&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>As we want to start with a single 1D spectra, we select the last one (index -1)</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nd</span> <span class="o">=</span> <span class="n">nd</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+<span class="c1"># nd[-1] returns a nddataset with shape (1,5549)</span>
+<span class="c1"># this is why we squeeze it to get a pure 1D dataset with shape (5549,)</span>
+</pre></div>
+</div>
+</div>
+<p>Now we slice it to keep only the OH vibration region:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ndOH</span> <span class="o">=</span> <span class="n">nd</span><span class="p">[</span><span class="mf">3700.0</span><span class="p">:</span><span class="mf">3300.0</span><span class="p">]</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">ndOH</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_analysis_fitting_27_0.png" src="../../_images/userguide_analysis_fitting_27_0.png" />
+</div>
+</div>
+<section id="Baseline-correction">
+<h3>Baseline correction<a class="headerlink" href="#Baseline-correction" title="Permalink to this heading"></a></h3>
+<p>We can perform a linear baseline correction to start with this data (see the :doc:<code class="docutils literal notranslate"><span class="pre">baseline</span> <span class="pre">tutorial</span> <span class="pre">&lt;/userguide/processing/baseline&gt;</span></code>). For removing a linear baseline, the fastest method is however to use the <code class="docutils literal notranslate"><span class="pre">abc</span></code> ( automatic baseline correction)</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ndOHcorr</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">basc</span><span class="p">(</span><span class="n">ndOH</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">ndOHcorr</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_analysis_fitting_30_0.png" src="../../_images/userguide_analysis_fitting_30_0.png" />
+</div>
+</div>
+</section>
+<section id="Peak-finding">
+<h3>Peak finding<a class="headerlink" href="#Peak-finding" title="Permalink to this heading"></a></h3>
+<p>Below we will need to start with some guess of the peak position and width. For this we can use the <code class="docutils literal notranslate"><span class="pre">find_peaks()</span></code> method (see :doc:<code class="docutils literal notranslate"><span class="pre">Peak</span> <span class="pre">finding</span> <span class="pre">tutorial</span> <span class="pre">&lt;/userguide/analysis/peak_finding&gt;</span></code>)</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">peaks</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">ndOHcorr</span><span class="o">.</span><span class="n">find_peaks</span><span class="p">()</span>
+<span class="n">peaks</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">values</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<table><tbody><tr><th>Magnitude</th><td style='text-align:left;'><pre>[3693.693 3678.355 3624.857 3541.323]</pre></td></tr><tr><th>Units</th><td style='text-align:left;'>cm<sup>-1</sup></td></tr></tbody></table></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ax</span> <span class="o">=</span> <span class="n">ndOHcorr</span><span class="o">.</span><span class="n">plot_pen</span><span class="p">()</span>  <span class="c1"># output the spectrum on ax. ax will receive next plot too</span>
+<span class="n">pks</span> <span class="o">=</span> <span class="n">peaks</span> <span class="o">+</span> <span class="mf">0.01</span>  <span class="c1"># add a small offset on the y position of the markers</span>
+<span class="n">pks</span><span class="o">.</span><span class="n">plot_scatter</span><span class="p">(</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+    <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;v&quot;</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+    <span class="n">clear</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># we need to keep the previous output on ax</span>
+    <span class="n">data_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># we don&#39;t need to redraw all things like labels, etc...</span>
+    <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">1.3</span><span class="p">),</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Axes: xlabel=&#39;wavenumbers $\\mathrm{/\\ \\mathrm{cm}^{-1}}$&#39;, ylabel=&#39;absorbance $\\mathrm{/\\ \\mathrm{a.u.}}$&#39;&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_analysis_fitting_33_1.png" src="../../_images/userguide_analysis_fitting_33_1.png" />
+</div>
+</div>
+<p>The maximum of the two major peaks are thus exactly at 3624.61 and 3541.68 cm<span class="math notranslate nohighlight">\(^{-1}\)</span></p>
+</section>
+<section id="Fitting-script">
+<h3>Fitting script<a class="headerlink" href="#Fitting-script" title="Permalink to this heading"></a></h3>
+<p>Now we will define the fitting procedure as a script</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">script</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+
+<span class="s2">#-----------------------------------------------------------</span>
+<span class="s2"># syntax for parameters definition :</span>
+<span class="s2"># name : value, low_bound,  high_bound</span>
+<span class="s2">#  * for fixed parameters</span>
+<span class="s2">#  $ for variable parameters</span>
+<span class="s2">#  &gt; for reference to a parameter in the COMMON block</span>
+<span class="s2">#    (&gt; is forbidden in the COMMON block)</span>
+<span class="s2"># common block parameters should not have a _ in their names</span>
+<span class="s2">#-----------------------------------------------------------</span>
+<span class="s2">#</span>
+<span class="s2">COMMON:</span>
+<span class="s2"># common parameters ex.</span>
+<span class="s2"># $ gwidth: 1.0, 0.0, none</span>
+<span class="s2">$ gratio: 0.1, 0.0, 1.0</span>
+<span class="s2">$ gasym: 0.1, 0, 1</span>
+
+<span class="s2">MODEL: LINE_1</span>
+<span class="s2">shape: asymmetricvoigtmodel</span>
+<span class="s2">    * ampl:  1.0, 0.0, none</span>
+<span class="s2">    $ pos:   3624.61, 3610.0, 3640.0</span>
+<span class="s2">    &gt; ratio: gratio</span>
+<span class="s2">    &gt; asym: gasym</span>
+<span class="s2">    $ width: 200, 0, 1000</span>
+
+<span class="s2">MODEL: LINE_2</span>
+<span class="s2">shape: asymmetricvoigtmodel</span>
+<span class="s2">    $ ampl:  0.2, 0.0, none</span>
+<span class="s2">    $ pos:   3541.68, 3520.0, 3560.0</span>
+<span class="s2">    &gt; ratio: gratio</span>
+<span class="s2">    &gt; asym: gasym</span>
+<span class="s2">    $ width: 200, 0, 1000</span>
+
+<span class="s2">&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</div>
+<section id="Syntax-for-parameters-definition">
+<h4>Syntax for parameters definition<a class="headerlink" href="#Syntax-for-parameters-definition" title="Permalink to this heading"></a></h4>
+<p>In such script, the char <code class="docutils literal notranslate"><span class="pre">#</span></code> at the beginning of a line denote that the whole line is a comment. Comments are obviously optional but may be useful to explain</p>
+<p>Each individual model component is identified by the keyword <code class="docutils literal notranslate"><span class="pre">MODEL</span></code></p>
+<p>A <code class="docutils literal notranslate"><span class="pre">MODEL</span></code> have a name, <em>e.g.</em>, <code class="docutils literal notranslate"><span class="pre">MODEL:</span> <span class="pre">LINE_1</span></code> .</p>
+<p>Then come for each model components its <code class="docutils literal notranslate"><span class="pre">shape</span></code> , <em>i.e.,</em> the shape of the line.</p>
+<p>Come after the definition of the model parameters depending on the shape, e.g., for a <code class="docutils literal notranslate"><span class="pre">gaussianmodel</span></code> we have three parameters: <code class="docutils literal notranslate"><span class="pre">amplitude</span></code> (<code class="docutils literal notranslate"><span class="pre">ampl</span></code>), <code class="docutils literal notranslate"><span class="pre">width</span></code> and <code class="docutils literal notranslate"><span class="pre">position</span></code> (<code class="docutils literal notranslate"><span class="pre">pos</span></code>) of the line.</p>
+<p>To define a given parameter, we have to write its <code class="docutils literal notranslate"><span class="pre">name</span></code> and a set of 3 values: the expected <code class="docutils literal notranslate"><span class="pre">value</span></code> and 2 limits for the allowed variations : <code class="docutils literal notranslate"><span class="pre">low_bound</span></code>, <code class="docutils literal notranslate"><span class="pre">high_bound</span></code>:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>name : value, low_bound,  high_bound
+</pre></div>
+</div>
+<p>These parameters are preceded by a mark saying what kind of parameter it will behave in the fit procedure:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">$</span></code> is the default and denote a variable parameters</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">*</span></code> denotes fixed parameters</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&gt;</span></code> say that the given parameters is actually defined in a COMMON block</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">COMMON</span></code>is the common block containing parameters to which a parameter in the MODEL blocks can make reference using the <code class="docutils literal notranslate"><span class="pre">&gt;</span></code> markers. (<code class="docutils literal notranslate"><span class="pre">&gt;</span></code> obviously is forbidden in the COMMON block) common block parameters should not have a <code class="docutils literal notranslate"><span class="pre">_</span></code>(underscore) in their names</p>
+<p>With this parameter script definition, you can thus make rather complex search for modelling, as you can make parameters dependents or fixed.</p>
+<p>The line shape can be (up to now) in the following list of shape (for 1D models - see below for 2D):</p>
+<ul>
+<li><p>PolynomialBaseline -&gt; <code class="docutils literal notranslate"><span class="pre">polynomialbaseline</span></code>:</p>
+<p>Arbitrary-degree polynomial (degree limited to 10, however). As a linear baseline is automatically calculated during fitting, this polynom is always of greater or equal to order 2 (parabolic function at the minimum).</p>
+<p><span class="math notranslate nohighlight">\(f(x) = ampl * \sum_{i=2}^{max} c_i*x^i\)</span></p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>MODEL: baseline
+shape: polynomialbaseline
+# This polynomial starts at the order 2
+$ ampl: val, 0.0, None
+$ c_2: 1.0, None, None
+* c_3: 0.0, None, None
+* c_4: 0.0, None, None
+# etc
+</pre></div>
+</div>
+</li>
+<li><p>Gaussian Model -&gt; <code class="docutils literal notranslate"><span class="pre">gaussianmodel</span></code>:</p>
+<p>Normalized 1D gaussian function.</p>
+<p><span class="math notranslate nohighlight">\(f(x) = \frac{ampl}{\sqrt{2 \pi \sigma^2}} \exp({\frac{-(x-pos)^2}{2 \sigma^2}})\)</span></p>
+<p>where <span class="math notranslate nohighlight">\(\sigma = \frac{width}{2.3548}\)</span></p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>MODEL: Linex
+shape: gaussianmodel
+$ ampl: val, 0.0, None
+$ width: val, 0.0, None
+$ pos: val, lob,  upb
+</pre></div>
+</div>
+</li>
+<li><p>Lorentzian Model -&gt; <code class="docutils literal notranslate"><span class="pre">lorentzianmodel</span></code>:</p>
+<p>A standard Lorentzian function (also known as the Cauchy distribution).</p>
+<p><span class="math notranslate nohighlight">\(f(x) = \frac{ampl * \lambda}{\pi [(x-pos)^2+ \lambda^2]}\)</span></p>
+<p>where <span class="math notranslate nohighlight">\(\lambda = \frac{width}{2}\)</span></p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>MODEL: liney:
+shape: lorentzianmodel
+$ ampl:val, 0.0, None
+$ width: val, 0.0, None
+$ pos: val, lob, upb
+</pre></div>
+</div>
+</li>
+<li><p>Voigt Model -&gt; <code class="docutils literal notranslate"><span class="pre">voigtmodel</span></code>:</p>
+<p>A Voigt model constructed as the convolution of a <code class="docutils literal notranslate"><span class="pre">GaussianModel</span></code> and a <code class="docutils literal notranslate"><span class="pre">LorentzianModel</span></code> – commonly used for spectral line fitting.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>MODEL: linez
+shape: voigtmodel
+$ ampl: val, 0.0, None
+$ width: val, 0.0, None
+$ pos: val, lob, upb
+$ ratio: val, 0.0, 1.0
+</pre></div>
+</div>
+</li>
+<li><p>Asymmetric Voigt Model -&gt; <code class="docutils literal notranslate"><span class="pre">asymmetricvoigtmodel</span></code>:</p>
+<p>An asymmetric Voigt model (A. L. Stancik and E. B. Brauns, Vibrational Spectroscopy, 2008, 47, 66-69)</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>MODEL: linez
+shape: voigtmodel
+$ ampl: val, 0.0, None
+$ width: val, 0.0, None
+$ pos: val, lob, upb
+$ ratio: val, 0.0, 1.0
+$ asym: val, 0.0, 1.0
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">f1</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">Optimize</span><span class="p">(</span><span class="n">log_level</span><span class="o">=</span><span class="s2">&quot;INFO&quot;</span><span class="p">)</span>
+<span class="n">f1</span><span class="o">.</span><span class="n">script</span> <span class="o">=</span> <span class="n">script</span>
+<span class="n">f1</span><span class="o">.</span><span class="n">max_iter</span> <span class="o">=</span> <span class="mi">2000</span>
+<span class="c1"># f1.autobase = True</span>
+<span class="n">f1</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">ndOHcorr</span><span class="p">)</span>
+
+<span class="c1"># Show the result</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">ndOHcorr</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="p">(</span><span class="n">f1</span><span class="o">.</span><span class="n">components</span><span class="p">[:])</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">clear</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">autoscale</span><span class="p">(</span><span class="n">enable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">)</span>
+
+<span class="c1"># plotmerit</span>
+<span class="n">som</span> <span class="o">=</span> <span class="n">f1</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">()</span>
+<span class="n">f1</span><span class="o">.</span><span class="n">plotmerit</span><span class="p">(</span><span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;scatter&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+ **************************************************
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+ Result:
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+ **************************************************
+
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+ COMMON:
+        $ gratio:     0.5474, 0.0, 1.0
+        $ gasym:     0.8842, 0, 1
+
+ MODEL: line_1
+ shape: asymmetricvoigtmodel
+        * ampl:     1.0000, 0.0, none
+        &gt; asym:gasym
+        $ pos:  3622.7494, 3610.0, 3640.0
+        &gt; ratio:gratio
+        $ width:    48.6369, 0, 1000
+
+ MODEL: line_2
+ shape: asymmetricvoigtmodel
+        $ ampl:     0.9059, 0.0, none
+        &gt; asym:gasym
+        $ pos:  3537.1347, 3520.0, 3560.0
+        &gt; ratio:gratio
+        $ width:    77.5669, 0, 1000
+
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Axes: xlabel=&#39;wavenumbers $\\mathrm{/\\ \\mathrm{cm}^{-1}}$&#39;, ylabel=&#39;absorbance $\\mathrm{/\\ \\mathrm{a.u.}}$&#39;&gt;
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_analysis_fitting_38_5.png" src="../../_images/userguide_analysis_fitting_38_5.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_analysis_fitting_38_6.png" src="../../_images/userguide_analysis_fitting_38_6.png" />
+</div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title fa fa-exclamation-circle">Todo</p>
+<p>Tutorial to be continued with other methods of optimization and fitting (2D…)</p>
+</div>
+<script type="application/vnd.jupyter.widget-state+json">
+{"state": {}, "version_major": 2, "version_minor": 0}
+</script></section>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="peak_integration.html" class="btn btn-neutral float-left" title="Peak Integration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pca.html" class="btn btn-neutral float-right" title="Principal Component Analysis" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2014-2026 Laboratoire Catalyse et Spectrochimie (LCS) — CeCILL-B license.
+      <span class="lastupdated">Last updated on Jun 23, 2026.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

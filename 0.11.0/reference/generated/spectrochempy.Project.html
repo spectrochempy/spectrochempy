@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>spectrochempy.Project &mdash; SpectroChemPy v0.11.0 0.11.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/spectrochempy.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sphinx-design.5ea377869091fd0449014c60fc090103.min.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/spectrochempy.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../../_static/scpy.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script src="../../_static/clipboard.min.js"></script>
+        <script src="../../_static/copybutton.js"></script>
+        <script src="../../_static/design-tabs.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="spectrochempy.set_loglevel" href="spectrochempy.set_loglevel.html" />
+    <link rel="prev" title="spectrochempy.PFR" href="spectrochempy.PFR.html" />
+ 
+<style>
+    .popup-warning {
+        display: none;
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
+        background: #d8d7d5;
+        border: 1px solid #2c2c2b;
+        border-radius: 4px;
+        padding: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        animation: slideIn 0.5s ease-out;
+        font-size: smaller;
+    }
+
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+        }
+
+        to {
+            transform: translateX(0);
+        }
+    }
+
+    .popup-warning .close-btn {
+        float: right;
+        cursor: pointer;
+        margin-left: 10px;
+    }
+</style>
+<html data-versions="0.11.0,0.10.2,0.10.1,0.10.0,0.9.3,0.6.10">
+<script src="../../_static/js/versions.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+
+
+<a href="../../index.html">
+    
+    <img src="../../_static/scpy.png" class="logo" alt="Logo" />
+</a>
+
+<div class="switch-menus">
+    <select id="versions-dropdown"></select>
+</div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../whatsnew/latest.html">What’s New in Revision 0.11.0</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/quickstart.html">5-minute quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/install/index.html">Installation guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/install/install_win.html">Installation Guide for Windows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/install/install_mac_linux.html">Installation Guide for Mac OSX and Linux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/install/install_colab.html">Install in Google Colaboratory (Colab)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/install/install_adds.html">Optional Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/install/install_sources.html">Installation from Sources</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/examples/index.html">Example's gallery</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/index.html">Core functionalities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/index.html">How to use NDDataset</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_a_create_dataset.html">NDDataset creation and plotting example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_b_coordinates.html">NDDataset coordinates example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_c_units.html">Units manipulation examples</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_d_slicing.html">Slice an NDDataset with indices and coordinates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_preferences.html">NDDataset creation and plotting example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/b_interoperability/index.html">Interoperability</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/b_interoperability/plot_xarray_netcdf_interoperability.html">Interoperability with xarray and NetCDF</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/index.html">Import / Export</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_generic_read.html">Reading datasets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_IR_from_omnic.html">Loading an IR (omnic SPG) experimental file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_IR_from_opus.html">Loading Bruker OPUS files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_nmr_from_bruker.html">Loading of experimental NMR data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_raman_from_labspec.html">Loading RAMAN experimental file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_renishaw.html">Reading Renishaw WiRE files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_spc.html">Reading SPC format files</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/d_plotting/index.html">Plotting datasets</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/d_plotting/plot_plot_multiple.html">Using <code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_multiple</span></code> to plot several datasets on the same figure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/d_plotting/plot_plot_types.html">Choose an explicit plot type for a 2D IR dataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/d_plotting/plot_plotting.html">Introduction to the plotting library</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/d_plotting/plot_styles.html">Apply built-in plotting styles</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/e_project/index.html">Project Management</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/e_project/plot_project.html">Project creation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/index.html">Analysis NDDataset</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/index.html">Decomposition</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_efa.html">EFA example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_efa_keller_massart.html">EFA (Keller and Massart original example)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_fast_ica.html">FastICA example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_iris_intro.html">IRIS: 2D-IRIS analysis (plugin)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_mcrals_chrom1.html">MCR-ALS example (adapted from Jaumot et al. 2005)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_mcrals_kinetics.html">MCR-ALS with kinetic constraints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_nmf.html">NMF analysis example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_pca_iris.html">PCA example (iris dataset)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_pca_spec.html">PCA analysis example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_simplisma.html">SIMPLISMA example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_synthetic_profiles.html">Build synthetic concentration profiles</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/b_crossdecomposition/index.html">Cross-decomposition</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/b_crossdecomposition/plot_pls.html">PLS regression example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/c_curvefitting/index.html">Curvefitting</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/c_curvefitting/plot_fit.html">Fitting 1D dataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/c_curvefitting/plot_lineshapes.html">Built-in line-shape helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/c_curvefitting/plot_lstsq_single_equation.html">Solve a linear equation using LSTSQ</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/d_peak_analysis/index.html">Peak analysis</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/d_peak_analysis/plot_peak_finding.html">Find peak maxima in an IR time series</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/d_peak_analysis/plot_peak_integration.html">Integrate a baseline-corrected IR band</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/index.html">Processing NDDataset</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/apodization/index.html">Apodization</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/apodization/plot_proc_em.html">Exponential window multiplication</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/apodization/plot_proc_sp.html">Sine bell and squared Sine bell window multiplication</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/baseline/index.html">Baseline</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/baseline/plot_baseline_correction.html">NDDataset baseline correction</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/denoising/index.html">Denoising</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/denoising/plot_denoising.html">Denoising a 2D Raman spectrum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/denoising/plot_despike.html">Removing cosmic ray spikes from a Raman spectrum</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/filtering/index.html">Filtering</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/filtering/plot_filter.html">Savitky-Golay and Whittaker-Eilers smoothing of a Raman spectrum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/filtering/plot_smoothing_window_size.html">Compare smoothing window sizes on a Raman spectrum</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/nmr/index.html">NMR processing (plugin-based)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/nmr/plot_processing_cp_nmr.html">Analysis CP NMR spectra</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/nmr/plot_processing_nmr.html">Processing NMR spectra (slicing, baseline correction, peak picking, peak fitting)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/nmr/plot_processing_nmr_relax.html">Processing Relaxation measurement</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/nmr/plot_read_nmr_topspin.html">NMR: reading TopSpin files (plugin)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/raman/index.html">Processing Raman datasets</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/raman/plot_processing_raman.html">Processing RAMAN spectra</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/transformations/index.html">Transformations</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/transformations/plot_masking_transpose_units.html">Mask a saturated region and transform an IR dataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/transformations/plot_preprocessing.html">Chemometric preprocessing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/transformations/plot_transformers_sklearn.html">Preprocessing transformers and scikit-learn compatibility</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/index.html">Plugin-dependent functionality</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-iris/index.html">IRIS plugin</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-iris/plot_spectrochempy_iris__analysis__a_decomposition__plot_iris_intro.html">IRIS: 2D-IRIS analysis (plugin)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-nmr/index.html">NMR plugin</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-nmr/plot_spectrochempy_nmr__core__c_importer__plot_read_nmr_from_bruker.html">Loading of experimental NMR data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-nmr/plot_spectrochempy_nmr__processing__apodization__plot_proc_em.html">Exponential window multiplication</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-nmr/plot_spectrochempy_nmr__processing__apodization__plot_proc_sp.html">Sine bell and squared Sine bell window multiplication</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-nmr/plot_spectrochempy_nmr__processing__nmr__plot_processing_cp_nmr.html">Analysis CP NMR spectra</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-nmr/plot_spectrochempy_nmr__processing__nmr__plot_processing_nmr.html">Processing NMR spectra (slicing, baseline correction, peak picking, peak fitting)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-nmr/plot_spectrochempy_nmr__processing__nmr__plot_processing_nmr_relax.html">Processing Relaxation measurement</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-nmr/plot_spectrochempy_nmr__processing__nmr__plot_read_nmr_topspin.html">NMR: reading TopSpin files (plugin)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-perkinelmer/index.html">PerkinElmer plugin</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-perkinelmer/plot_spectrochempy_perkinelmer__plot_read_perkinelmer.html">Reading a PerkinElmer SP file (plugin)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/getting_help.html">Getting help</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 User's Guide &amp; Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/introduction/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/importexport/index.html">Import &amp; Export</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/importexport/import.html">Import Data in SpectroChemPy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/importexport/importIR.html">Import IR Data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/importexport/importOMNIC.html">Import of OMNIC files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/importexport/importOPUS.html">Import of Bruker OPUS files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/importexport/importJCAMPDX.html">Import/Export of JCAMP-DX files</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/plotting/index.html">Plotting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plotting/overview.html">Plotting Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plotting/customization.html">Customizing a Plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plotting/preferences.html">Plotting Preferences</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plotting/plot_types.html">Plot Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plotting/styles.html">Styles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plotting/advanced.html">Advanced Matplotlib Integration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/processing/index.html">Processing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/slicing.html">Slicing NDDatasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/transformations.html">Basic transformations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/transformations.html#Chemometric-preprocessing">Chemometric preprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/math_operations.html">Mathematical operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/smoothing.html">Filtering, Smoothing and Denoising</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/baseline.html">Baseline corrections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/denoising.html">Denoising</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/apodization.html">Apodization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/td_baseline.html">Time domain baseline correction (NMR)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/fourier.html">One-dimensional (1D) Fourier transformation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/fourier.html#Real-Fourier-transform">Real Fourier transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/interferogram.html">FTIR interferogram processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/alignment.html">Alignment of datasets</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/analysis/index.html">Analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/analysis/peak_finding.html">Peak Maxima Finding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/analysis/peak_analysis_workflow.html">Peak Analysis Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/analysis/peak_integration.html">Peak Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/analysis/fitting.html">Fitting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/analysis/pca.html">Principal Component Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/analysis/pls.html">Partial Least Squares Regression (PLSRegression)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/analysis/mcr_als.html">MCR ALS</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/plugins/index.html">Plugins</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plugins/official_plugins.html">Official plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plugins/nmr.html">NMR plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plugins/tensor.html">Tensor plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plugins/hypercomplex.html">Hypercomplex (quaternion) plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plugins/iris.html">IRIS plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plugins/carroucell.html">Carroucell plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plugins/perkinelmer.html">PerkinElmer plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plugins/experimental_plugins.html">Experimental plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plugins/examples.html">Plugin-dependent Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plugins/roadmap.html">Plugin roadmap</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/api/api.html">API Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/objects/index.html">Core objects</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/objects/dataset/dataset.html">The NDDataset object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/objects/dataset/dataset.html#More-insight-on-coordinates">More insight on coordinates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/objects/dataset/dataset.html#Methods-to-create-NDDataset">Methods to create NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/objects/project/project.html">Project management</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🔍 Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Public API reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.NDDataset.html">spectrochempy.NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.Coord.html">spectrochempy.Coord</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.CoordSet.html">spectrochempy.CoordSet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.empty.html">spectrochempy.empty</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.zeros.html">spectrochempy.zeros</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.ones.html">spectrochempy.ones</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.full.html">spectrochempy.full</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.empty_like.html">spectrochempy.empty_like</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.zeros_like.html">spectrochempy.zeros_like</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.ones_like.html">spectrochempy.ones_like</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.full_like.html">spectrochempy.full_like</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.eye.html">spectrochempy.eye</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.identity.html">spectrochempy.identity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.random.html">spectrochempy.random</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.normal.html">spectrochempy.normal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.diag.html">spectrochempy.diag</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.fromfunction.html">spectrochempy.fromfunction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.fromiter.html">spectrochempy.fromiter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.arange.html">spectrochempy.arange</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.linspace.html">spectrochempy.linspace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.logspace.html">spectrochempy.logspace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.geomspace.html">spectrochempy.geomspace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.take.html">spectrochempy.take</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.load.html">spectrochempy.load</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read.html">spectrochempy.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_csv.html">spectrochempy.read_csv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_ddr.html">spectrochempy.read_ddr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_dir.html">spectrochempy.read_dir</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_hdr.html">spectrochempy.read_hdr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_jcamp.html">spectrochempy.read_jcamp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_labspec.html">spectrochempy.read_labspec</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_wire.html">spectrochempy.read_wire</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_wdf.html">spectrochempy.read_wdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_mat.html">spectrochempy.read_mat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_matlab.html">spectrochempy.read_matlab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_omnic.html">spectrochempy.read_omnic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_opus.html">spectrochempy.read_opus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_quadera.html">spectrochempy.read_quadera</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_sdr.html">spectrochempy.read_sdr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_soc.html">spectrochempy.read_soc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_spa.html">spectrochempy.read_spa</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_spc.html">spectrochempy.read_spc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_spg.html">spectrochempy.read_spg</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.read_srs.html">spectrochempy.read_srs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.NDDataset.from_xarray.html">spectrochempy.NDDataset.from_xarray</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.NDDataset.from_netcdf.html">spectrochempy.NDDataset.from_netcdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.load_iris.html">spectrochempy.load_iris</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.download_nist_ir.html">spectrochempy.download_nist_ir</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.NDDataset.save.html">spectrochempy.NDDataset.save</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.NDDataset.save_as.html">spectrochempy.NDDataset.save_as</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.write.html">spectrochempy.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.write_csv.html">spectrochempy.write_csv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.write_jcamp.html">spectrochempy.write_jcamp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.write_mat.html">spectrochempy.write_mat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.write_matlab.html">spectrochempy.write_matlab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.to_array.html">spectrochempy.to_array</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.to_netcdf.html">spectrochempy.to_netcdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.to_xarray.html">spectrochempy.to_xarray</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot.html">spectrochempy.plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot_1D.html">spectrochempy.plot_1D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot_pen.html">spectrochempy.plot_pen</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot_scatter.html">spectrochempy.plot_scatter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot_scatter_pen.html">spectrochempy.plot_scatter_pen</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot_with_transposed.html">spectrochempy.plot_with_transposed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot_bar.html">spectrochempy.plot_bar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot_2D.html">spectrochempy.plot_2D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot_contour.html">spectrochempy.plot_contour</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot_contourf.html">spectrochempy.plot_contourf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot_image.html">spectrochempy.plot_image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot_lines.html">spectrochempy.plot_lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot_map.html">spectrochempy.plot_map</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot_stack.html">spectrochempy.plot_stack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot_3D.html">spectrochempy.plot_3D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot_surface.html">spectrochempy.plot_surface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot_waterfall.html">spectrochempy.plot_waterfall</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.plot_multiple.html">spectrochempy.plot_multiple</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.multiplot.html">spectrochempy.multiplot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.multiplot_contour.html">spectrochempy.multiplot_contour</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.multiplot_contourf.html">spectrochempy.multiplot_contourf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.multiplot_lines.html">spectrochempy.multiplot_lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.multiplot_scatter.html">spectrochempy.multiplot_scatter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.multiplot_with_transposed.html">spectrochempy.multiplot_with_transposed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.show.html">spectrochempy.show</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.transpose.html">spectrochempy.transpose</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.swapdims.html">spectrochempy.swapdims</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.squeeze.html">spectrochempy.squeeze</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.set_complex.html">spectrochempy.set_complex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.concatenate.html">spectrochempy.concatenate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.stack.html">spectrochempy.stack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.normalize.html">spectrochempy.normalize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.center.html">spectrochempy.center</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.autoscale.html">spectrochempy.autoscale</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.snv.html">spectrochempy.snv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.msc.html">spectrochempy.msc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.pareto_scale.html">spectrochempy.pareto_scale</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.range_scale.html">spectrochempy.range_scale</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.robust_scale.html">spectrochempy.robust_scale</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.log_transform.html">spectrochempy.log_transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.CenterTransformer.html">spectrochempy.CenterTransformer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.AutoscaleTransformer.html">spectrochempy.AutoscaleTransformer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.SNVTransformer.html">spectrochempy.SNVTransformer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.NormalizeTransformer.html">spectrochempy.NormalizeTransformer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.MSCTransformer.html">spectrochempy.MSCTransformer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.ParetoScaleTransformer.html">spectrochempy.ParetoScaleTransformer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.RangeScaleTransformer.html">spectrochempy.RangeScaleTransformer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.RobustScaleTransformer.html">spectrochempy.RobustScaleTransformer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.LogTransformer.html">spectrochempy.LogTransformer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.diag.html">spectrochempy.diag</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.diagonal.html">spectrochempy.diagonal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.take.html">spectrochempy.take</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.sort.html">spectrochempy.sort</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.argmin.html">spectrochempy.argmin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.argmax.html">spectrochempy.argmax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.coordmin.html">spectrochempy.coordmin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.coordmax.html">spectrochempy.coordmax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.amin.html">spectrochempy.amin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.amax.html">spectrochempy.amax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.min.html">spectrochempy.min</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.max.html">spectrochempy.max</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.ptp.html">spectrochempy.ptp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.clip.html">spectrochempy.clip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.around.html">spectrochempy.around</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.round.html">spectrochempy.round</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.dot.html">spectrochempy.dot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.SVD.html">spectrochempy.SVD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.LSTSQ.html">spectrochempy.LSTSQ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.NNLS.html">spectrochempy.NNLS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.all.html">spectrochempy.all</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.any.html">spectrochempy.any</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.sum.html">spectrochempy.sum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.cumsum.html">spectrochempy.cumsum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.trapezoid.html">spectrochempy.trapezoid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.simpson.html">spectrochempy.simpson</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.conj.html">spectrochempy.conj</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.conjugate.html">spectrochempy.conjugate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.abs.html">spectrochempy.abs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.absolute.html">spectrochempy.absolute</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.remove_masks.html">spectrochempy.remove_masks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.Unit.html">spectrochempy.Unit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.Quantity.html">spectrochempy.Quantity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.to.html">spectrochempy.to</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.to_base_units.html">spectrochempy.to_base_units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.to_reduced_units.html">spectrochempy.to_reduced_units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.ito.html">spectrochempy.ito</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.ito_base_units.html">spectrochempy.ito_base_units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.ito_reduced_units.html">spectrochempy.ito_reduced_units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.is_units_compatible.html">spectrochempy.is_units_compatible</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.mc.html">spectrochempy.mc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.ps.html">spectrochempy.ps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.mean.html">spectrochempy.mean</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.average.html">spectrochempy.average</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.std.html">spectrochempy.std</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.sum.html">spectrochempy.sum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.var.html">spectrochempy.var</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.Baseline.html">spectrochempy.Baseline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.autosub.html">spectrochempy.autosub</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.get_baseline.html">spectrochempy.get_baseline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.basc.html">spectrochempy.basc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.detrend.html">spectrochempy.detrend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.asls.html">spectrochempy.asls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.snip.html">spectrochempy.snip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.fft.html">spectrochempy.fft</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.ifft.html">spectrochempy.ifft</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.ht.html">spectrochempy.ht</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.fsh.html">spectrochempy.fsh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.fsh2.html">spectrochempy.fsh2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.pk.html">spectrochempy.pk</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.pk_exp.html">spectrochempy.pk_exp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.dc.html">spectrochempy.dc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.zf.html">spectrochempy.zf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.zf_auto.html">spectrochempy.zf_auto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.zf_double.html">spectrochempy.zf_double</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.zf_size.html">spectrochempy.zf_size</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.cs.html">spectrochempy.cs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.ls.html">spectrochempy.ls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.roll.html">spectrochempy.roll</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.rs.html">spectrochempy.rs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.bartlett.html">spectrochempy.bartlett</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.blackmanharris.html">spectrochempy.blackmanharris</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.hamming.html">spectrochempy.hamming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.general_hamming.html">spectrochempy.general_hamming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.hann.html">spectrochempy.hann</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.triang.html">spectrochempy.triang</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.em.html">spectrochempy.em</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.gm.html">spectrochempy.gm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.sp.html">spectrochempy.sp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.sine.html">spectrochempy.sine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.qsin.html">spectrochempy.qsin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.sinm.html">spectrochempy.sinm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.Filter.html">spectrochempy.Filter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.savgol.html">spectrochempy.savgol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.smooth.html">spectrochempy.smooth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.whittaker.html">spectrochempy.whittaker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.denoise.html">spectrochempy.denoise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.despike.html">spectrochempy.despike</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.align.html">spectrochempy.align</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.interpolate.html">spectrochempy.interpolate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.pipe.html">spectrochempy.pipe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.LSTSQ.html">spectrochempy.LSTSQ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.NNLS.html">spectrochempy.NNLS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.Optimize.html">spectrochempy.Optimize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.PLSRegression.html">spectrochempy.PLSRegression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.EFA.html">spectrochempy.EFA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.MCRALS.html">spectrochempy.MCRALS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.analysis.constraints.Constraint.html">spectrochempy.analysis.constraints.Constraint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.analysis.constraints.Closure.html">spectrochempy.analysis.constraints.Closure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.analysis.constraints.FixedValues.html">spectrochempy.analysis.constraints.FixedValues</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.analysis.constraints.Monotonic.html">spectrochempy.analysis.constraints.Monotonic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.analysis.constraints.NonNegative.html">spectrochempy.analysis.constraints.NonNegative</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.analysis.constraints.ModelProfile.html">spectrochempy.analysis.constraints.ModelProfile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.analysis.constraints.ReferenceProfile.html">spectrochempy.analysis.constraints.ReferenceProfile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.analysis.constraints.Selectivity.html">spectrochempy.analysis.constraints.Selectivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.analysis.constraints.Unimodal.html">spectrochempy.analysis.constraints.Unimodal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.analysis.constraints.ZeroRegion.html">spectrochempy.analysis.constraints.ZeroRegion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.FastICA.html">spectrochempy.FastICA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.NMF.html">spectrochempy.NMF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.PCA.html">spectrochempy.PCA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.SVD.html">spectrochempy.SVD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.SIMPLISMA.html">spectrochempy.SIMPLISMA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.PSD.html">spectrochempy.PSD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.polynomial.html">spectrochempy.polynomial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.gaussian.html">spectrochempy.gaussian</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.gaussianmodel.html">spectrochempy.gaussianmodel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.lorentzian.html">spectrochempy.lorentzian</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.lorentzianmodel.html">spectrochempy.lorentzianmodel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.voigt.html">spectrochempy.voigt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.voigtmodel.html">spectrochempy.voigtmodel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.asymmetricvoigt.html">spectrochempy.asymmetricvoigt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.asymmetricvoigtmodel.html">spectrochempy.asymmetricvoigtmodel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.sigmoid.html">spectrochempy.sigmoid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.sigmoidmodel.html">spectrochempy.sigmoidmodel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.polynomialbaseline.html">spectrochempy.polynomialbaseline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.find_peaks.html">spectrochempy.find_peaks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.PeakFindingResult.html">spectrochempy.PeakFindingResult</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.PeakTable.html">spectrochempy.PeakTable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.ActionMassKinetics.html">spectrochempy.ActionMassKinetics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.PFR.html">spectrochempy.PFR</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">spectrochempy.Project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.set_loglevel.html">spectrochempy.set_loglevel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.get_loglevel.html">spectrochempy.get_loglevel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.debug_.html">spectrochempy.debug_</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.info_.html">spectrochempy.info_</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.warning_.html">spectrochempy.warning_</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.error_.html">spectrochempy.error_</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.show_versions.html">spectrochempy.show_versions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.ScpObjectList.html">spectrochempy.ScpObjectList</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.pathclean.html">spectrochempy.pathclean</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../plugins.html">Plugin public API reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.nmr.read.html">spectrochempy.nmr.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.perkinelmer.read.html">spectrochempy.perkinelmer.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.carroucell.read_carroucell.html">spectrochempy.carroucell.read_carroucell</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.iris.IRIS.html">spectrochempy.iris.IRIS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectrochempy.tensor.CP.html">spectrochempy.tensor.CP</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../papers.html">Papers citing <code class="xref py py-obj docutils literal notranslate"><span class="pre">SpectroChemPy</span></code></a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🛠️ Contribute</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/issues.html">Bug reports &amp; feature request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/examples.html">Sharing examples &amp; tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/index.html">Developer’s Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../devguide/contributing.html">Contributing to SpectroChemPy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../devguide/contributing_codebase.html">Contributing to the code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../devguide/contributing_codespecifics.html">Contributing to specific parts of the code</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/codespec_adding_reader.html">Adding a Reader</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../devguide/contributing_documentation.html">Contributing to Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../devguide/contributing_plotting.html">Plotting Contributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../devguide/plotting_architecture.html">Plotting Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../devguide/plugins/index.html">Plugin developer guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/plugins/writing_plugins.html">Plugin author guide</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/plugins/architecture.html">Plugin architecture</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/plugins/accessors.html">Plugin accessors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/plugins/numeric_backends.html">Numeric backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/plugins/unit_contexts.html">Unit contexts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/plugins/packaging.html">Packaging a Plugin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/plugins/testing.html">Testing a Plugin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/plugins/api_policy.html">Plugin API Policy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/plugins/domain_architecture.html">Official plugin architecture notes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/plugins/roadmap.html">Plugin architecture map</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">✨ Credits</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/credits.html">Contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/credits.html#third-party-licenses">Third-party Licenses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/citing.html">Citing SpectroChemPy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/license.html">SpectroChempy License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/license.html#other-licenses">Other Licenses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/seealso.html">See also</a></li>
+</ul>
+
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">SpectroChemPy v0.11.0</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Public API reference</a></li>
+      <li class="breadcrumb-item active">spectrochempy.Project</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="spectrochempy.PFR.html" class="btn btn-neutral float-left" title="spectrochempy.PFR" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="spectrochempy.set_loglevel.html" class="btn btn-neutral float-right" title="spectrochempy.set_loglevel" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+
+           <div itemprop="articleBody">
+             
+  <section id="spectrochempy-project">
+<h1>spectrochempy.Project<a class="headerlink" href="#spectrochempy-project" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="spectrochempy.Project">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Project</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">argnames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">meta</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/src/spectrochempy/core/project/project.py#L35-L792"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Project" title="Permalink to this definition"></a></dt>
+<dd><p>Lightweight hierarchical container for datasets and subprojects.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Project</span></code> owns child objects (<code class="docutils literal notranslate"><span class="pre">NDDataset</span></code> and nested <code class="docutils literal notranslate"><span class="pre">Project</span></code>
+instances) with strict single-parent ownership. It enforces:</p>
+<ul class="simple">
+<li><p><strong>Single-parent ownership</strong> — a child has at most one parent, and
+moving a child between projects is an ownership transfer.</p></li>
+<li><p><strong>Acyclic hierarchy</strong> — self-insertion and ancestor insertion are
+rejected with <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>.</p></li>
+<li><p><strong>Explicit duplicate rejection</strong> — adding a child whose name already
+exists in the project raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>.</p></li>
+<li><p><strong>Key/name identity</strong> — after insertion or replacement,
+<code class="docutils literal notranslate"><span class="pre">project[key].name</span> <span class="pre">==</span> <span class="pre">key</span></code>.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">Project</span></code> is a dataset container, not a workspace, workflow engine,
+provenance graph, or generic object store.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> (<em>Series of objects, optional</em>) – Argument type will be interpreted correctly if they are of type
+<code class="docutils literal notranslate"><span class="pre">NDDataset</span></code> or <code class="docutils literal notranslate"><span class="pre">Project</span></code>.
+This is optional, as they can be added later.</p></li>
+<li><p><strong>argnames</strong> (<em>list, optional</em>) – If not None, this list gives the names associated to each
+object passed as args. It MUST be the same length as the
+number of args, or an error will be raised.
+If None, the internal name of each object will be used instead.</p></li>
+<li><p><strong>name</strong> (<em>str, optional</em>) – The name of the project.  If the name is not provided, it will be
+generated automatically.</p></li>
+<li><p><strong>**meta</strong> (<em>dict</em>) – Any other attributes to describe the project.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NDDataset</span></code></a></dt><dd><p>The main object containing arrays.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">spectrochempy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">scp</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">myproj</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">Project</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;project_1&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">NDDataset</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="mf">3.</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;dataset_1&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">myproj</span><span class="o">.</span><span class="n">add_dataset</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">myproj</span><span class="p">)</span>
+<span class="go">Project project_1:</span>
+<span class="go">    ⤷ dataset_1 (dataset)</span>
+</pre></div>
+</div>
+<p class="rubric">Attributes Summary</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.Project.allitems" title="spectrochempy.Project.allitems"><code class="xref py py-obj docutils literal notranslate"><span class="pre">allitems</span></code></a></p></td>
+<td><p>All items contained in this project (list).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.Project.allnames" title="spectrochempy.Project.allnames"><code class="xref py py-obj docutils literal notranslate"><span class="pre">allnames</span></code></a></p></td>
+<td><p>Names of all objects contained in this project (list).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.Project.datasets" title="spectrochempy.Project.datasets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">datasets</span></code></a></p></td>
+<td><p>Datasets included in this project excluding those located in subprojects.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.Project.datasets_names" title="spectrochempy.Project.datasets_names"><code class="xref py py-obj docutils literal notranslate"><span class="pre">datasets_names</span></code></a></p></td>
+<td><p>Names of all dataset included in this project.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.Project.filename" title="spectrochempy.Project.filename"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filename</span></code></a></p></td>
+<td><p>Get current filename for this dataset.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.Project.filetype" title="spectrochempy.Project.filetype"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filetype</span></code></a></p></td>
+<td><p>Type of current file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.Project.has_defined_name" title="spectrochempy.Project.has_defined_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">has_defined_name</span></code></a></p></td>
+<td><p>True if the name was explicitly provided by the user (bool).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.Project.id" title="spectrochempy.Project.id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">id</span></code></a></p></td>
+<td><p>Readonly object identifier (str).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.Project.meta" title="spectrochempy.Project.meta"><code class="xref py py-obj docutils literal notranslate"><span class="pre">meta</span></code></a></p></td>
+<td><p>Metadata for the project (meta).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.Project.name" title="spectrochempy.Project.name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">name</span></code></a></p></td>
+<td><p>A user-friendly name for the project.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.Project.parent" title="spectrochempy.Project.parent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parent</span></code></a></p></td>
+<td><p>Parent project of this subproject, or <code class="docutils literal notranslate"><span class="pre">None</span></code> when this is a root project (project).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.Project.projects" title="spectrochempy.Project.projects"><code class="xref py py-obj docutils literal notranslate"><span class="pre">projects</span></code></a></p></td>
+<td><p>Subprojects included in this project (list).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.Project.projects_names" title="spectrochempy.Project.projects_names"><code class="xref py py-obj docutils literal notranslate"><span class="pre">projects_names</span></code></a></p></td>
+<td><p>Names of all subprojects included in this project (list).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.Project.suffix" title="spectrochempy.Project.suffix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">suffix</span></code></a></p></td>
+<td><p>Filename suffix.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods Summary</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.Project.add_dataset" title="spectrochempy.Project.add_dataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_dataset</span></code></a>(dataset[, name])</p></td>
+<td><p>Add a single dataset to the current project.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.Project.add_datasets" title="spectrochempy.Project.add_datasets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_datasets</span></code></a>(*datasets)</p></td>
+<td><p>Add several datasets to the current project.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.Project.add_project" title="spectrochempy.Project.add_project"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_project</span></code></a>(proj[, name])</p></td>
+<td><p>Add a subproject to the current project.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.Project.add_projects" title="spectrochempy.Project.add_projects"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_projects</span></code></a>(*projects)</p></td>
+<td><p>Add one or more subprojects to the current project.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.Project.clear_datasets" title="spectrochempy.Project.clear_datasets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_datasets</span></code></a>()</p></td>
+<td><p>Remove all datasets from the project.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.Project.clear_projects" title="spectrochempy.Project.clear_projects"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_projects</span></code></a>()</p></td>
+<td><p>Remove all subprojects from the current project.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.Project.copy" title="spectrochempy.Project.copy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code></a>([deep])</p></td>
+<td><p>Make a copy of the current project.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.Project.dump" title="spectrochempy.Project.dump"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dump</span></code></a>(filename, **kwargs)</p></td>
+<td><p>Save the current object into compressed native spectrochempy format.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.Project.load" title="spectrochempy.Project.load"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code></a>(filename, **kwargs)</p></td>
+<td><p>Open data from a '<em>.scp' (NDDataset) or '</em>.pscp' (Project) file.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.Project.loads" title="spectrochempy.Project.loads"><code class="xref py py-obj docutils literal notranslate"><span class="pre">loads</span></code></a>(js, Any])</p></td>
+<td><p>Deserialize dataset from JSON.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.Project.remove_dataset" title="spectrochempy.Project.remove_dataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_dataset</span></code></a>(name)</p></td>
+<td><p>Remove a dataset from the project and reset its parent to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.Project.remove_project" title="spectrochempy.Project.remove_project"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_project</span></code></a>(name)</p></td>
+<td><p>Remove a subproject from the current project and reset its parent to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.Project.save" title="spectrochempy.Project.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a>(**kwargs)</p></td>
+<td><p>Save dataset in native .scp format.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.Project.save_as" title="spectrochempy.Project.save_as"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_as</span></code></a>(filename, **kwargs)</p></td>
+<td><p>Save the current NDDataset in SpectroChemPy format (.scp).</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes Documentation</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.Project.allitems">
+<span class="sig-name descname"><span class="pre">allitems</span></span><a class="headerlink" href="#spectrochempy.Project.allitems" title="Permalink to this definition"></a></dt>
+<dd><p>All items contained in this project (list).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.Project.allnames">
+<span class="sig-name descname"><span class="pre">allnames</span></span><a class="headerlink" href="#spectrochempy.Project.allnames" title="Permalink to this definition"></a></dt>
+<dd><p>Names of all objects contained in this project (list).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.Project.datasets">
+<span class="sig-name descname"><span class="pre">datasets</span></span><a class="headerlink" href="#spectrochempy.Project.datasets" title="Permalink to this definition"></a></dt>
+<dd><p>Datasets included in this project excluding those located in subprojects.</p>
+<p>(list).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.Project.datasets_names">
+<span class="sig-name descname"><span class="pre">datasets_names</span></span><a class="headerlink" href="#spectrochempy.Project.datasets_names" title="Permalink to this definition"></a></dt>
+<dd><p>Names of all dataset included in this project.</p>
+<p>(does not return those located in sub-folders) (list).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.Project.filename">
+<span class="sig-name descname"><span class="pre">filename</span></span><a class="headerlink" href="#spectrochempy.Project.filename" title="Permalink to this definition"></a></dt>
+<dd><p>Get current filename for this dataset.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.Project.filetype">
+<span class="sig-name descname"><span class="pre">filetype</span></span><a class="headerlink" href="#spectrochempy.Project.filetype" title="Permalink to this definition"></a></dt>
+<dd><p>Type of current file.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.Project.has_defined_name">
+<span class="sig-name descname"><span class="pre">has_defined_name</span></span><a class="headerlink" href="#spectrochempy.Project.has_defined_name" title="Permalink to this definition"></a></dt>
+<dd><p>True if the name was explicitly provided by the user (bool).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.Project.id">
+<span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#spectrochempy.Project.id" title="Permalink to this definition"></a></dt>
+<dd><p>Readonly object identifier (str).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.Project.meta">
+<span class="sig-name descname"><span class="pre">meta</span></span><a class="headerlink" href="#spectrochempy.Project.meta" title="Permalink to this definition"></a></dt>
+<dd><p>Metadata for the project (meta).</p>
+<p>meta contains all attribute except the name,
+id and parent of the current project.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.Project.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#spectrochempy.Project.name" title="Permalink to this definition"></a></dt>
+<dd><p>A user-friendly name for the project.</p>
+<p>The default is automatically generated (str).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.Project.parent">
+<span class="sig-name descname"><span class="pre">parent</span></span><a class="headerlink" href="#spectrochempy.Project.parent" title="Permalink to this definition"></a></dt>
+<dd><p>Parent project of this subproject, or <code class="docutils literal notranslate"><span class="pre">None</span></code> when this is a root project (project).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.Project.projects">
+<span class="sig-name descname"><span class="pre">projects</span></span><a class="headerlink" href="#spectrochempy.Project.projects" title="Permalink to this definition"></a></dt>
+<dd><p>Subprojects included in this project (list).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.Project.projects_names">
+<span class="sig-name descname"><span class="pre">projects_names</span></span><a class="headerlink" href="#spectrochempy.Project.projects_names" title="Permalink to this definition"></a></dt>
+<dd><p>Names of all subprojects included in this project (list).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.Project.suffix">
+<span class="sig-name descname"><span class="pre">suffix</span></span><a class="headerlink" href="#spectrochempy.Project.suffix" title="Permalink to this definition"></a></dt>
+<dd><p>Filename suffix.</p>
+<p>Read Only property - automatically set when the filename is updated
+if it has a suffix, else give
+the default suffix for the given type of object.</p>
+</dd></dl>
+
+<p class="rubric">Methods Documentation</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Project.add_dataset">
+<span class="sig-name descname"><span class="pre">add_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/src/spectrochempy/core/project/project.py#L645-L46"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Project.add_dataset" title="Permalink to this definition"></a></dt>
+<dd><p>Add a single dataset to the current project.</p>
+<p>The dataset is attached to this project as its parent, and its
+<code class="docutils literal notranslate"><span class="pre">.name</span></code> is set to the entry key (matching the key/name identity
+invariant).  If a child with the same name already exists in the
+project (datasets and subprojects share a single namespace),
+a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> is raised.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset</strong> (<a class="reference internal" href="spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NDDataset</span></code></a>) – Dataset to add.</p></li>
+<li><p><strong>name</strong> (<em>str, optional</em>) – Entry key in the project.  If not provided, defaults to
+<code class="docutils literal notranslate"><span class="pre">dataset.name</span></code>.  When provided, <code class="docutils literal notranslate"><span class="pre">dataset.name</span></code> is
+overwritten to match this value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If a child named <code class="docutils literal notranslate"><span class="pre">name</span></code> already exists in this project.</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#spectrochempy.Project.add_datasets" title="spectrochempy.Project.add_datasets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_datasets</span></code></a></dt><dd><p>Add several datasets to the current project.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">spectrochempy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">scp</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds1</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">NDDataset</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">proj</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">Project</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">proj</span><span class="o">.</span><span class="n">add_dataset</span><span class="p">(</span><span class="n">ds1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Toto&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Project.add_datasets">
+<span class="sig-name descname"><span class="pre">add_datasets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">datasets</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/src/spectrochempy/core/project/project.py#L609-L34"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Project.add_datasets" title="Permalink to this definition"></a></dt>
+<dd><p>Add several datasets to the current project.</p>
+<p>Each dataset is added via <a class="reference internal" href="#spectrochempy.Project.add_dataset" title="spectrochempy.Project.add_dataset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_dataset</span></code></a>.  If any dataset
+name collides with an existing entry, a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> is raised
+and no datasets are added (the first duplicate raises).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>*datasets</strong> (series of <a class="reference internal" href="spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NDDataset</span></code></a>) – Datasets to add to the current project.
+Entry keys are the datasets’ current names.</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If any dataset name already exists in this project.</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#spectrochempy.Project.add_dataset" title="spectrochempy.Project.add_dataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_dataset</span></code></a></dt><dd><p>Add a single dataset to the current project.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">spectrochempy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">scp</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds1</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">NDDataset</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds2</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">NDDataset</span><span class="p">([</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds3</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">NDDataset</span><span class="p">([</span><span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">proj</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">Project</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">proj</span><span class="o">.</span><span class="n">add_datasets</span><span class="p">(</span><span class="n">ds1</span><span class="p">,</span> <span class="n">ds2</span><span class="p">,</span> <span class="n">ds3</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Project.add_project">
+<span class="sig-name descname"><span class="pre">add_project</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/src/spectrochempy/core/project/project.py#L753-L44"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Project.add_project" title="Permalink to this definition"></a></dt>
+<dd><p>Add a subproject to the current project.</p>
+<p>The subproject is attached to this project as its parent.  Its
+<code class="docutils literal notranslate"><span class="pre">.name</span></code> is set to the entry key when <code class="docutils literal notranslate"><span class="pre">name</span></code> differs from the
+subproject’s current name.  If a child with the same name already
+exists in the project (datasets and subprojects share a single
+namespace), a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> is raised.</p>
+<p>Self-insertion and ancestor insertion are rejected with
+<code class="docutils literal notranslate"><span class="pre">ValueError</span></code> (cycles are not allowed in the project hierarchy).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>proj</strong> (<a class="reference internal" href="#spectrochempy.Project" title="spectrochempy.Project"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Project</span></code></a>) – Subproject to add.</p></li>
+<li><p><strong>name</strong> (<em>str, optional</em>) – Entry key in the project.  If not provided, defaults to
+<code class="docutils literal notranslate"><span class="pre">proj.name</span></code>.  When provided (and different from the
+current name), <code class="docutils literal notranslate"><span class="pre">proj.name</span></code> is overwritten to match.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If a child named <code class="docutils literal notranslate"><span class="pre">name</span></code> already exists in this project, or
+    if adding the subproject would create a cycle.</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#spectrochempy.Project.add_projects" title="spectrochempy.Project.add_projects"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_projects</span></code></a></dt><dd><p>Add several subprojects at once.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Project.add_projects">
+<span class="sig-name descname"><span class="pre">add_projects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">projects</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/src/spectrochempy/core/project/project.py#L726-L25"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Project.add_projects" title="Permalink to this definition"></a></dt>
+<dd><p>Add one or more subprojects to the current project.</p>
+<p>Each subproject is added via <a class="reference internal" href="#spectrochempy.Project.add_project" title="spectrochempy.Project.add_project"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_project</span></code></a>.  If any
+subproject name collides with an existing entry, a
+<code class="docutils literal notranslate"><span class="pre">ValueError</span></code> is raised.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>*projects</strong> (series of <a class="reference internal" href="#spectrochempy.Project" title="spectrochempy.Project"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Project</span></code></a>) – The subprojects to add.
+Entry keys are the subprojects’ current names.</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If any subproject name already exists in this project.</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#spectrochempy.Project.add_project" title="spectrochempy.Project.add_project"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_project</span></code></a></dt><dd><p>Add a single subproject.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Project.clear_datasets">
+<span class="sig-name descname"><span class="pre">clear_datasets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/src/spectrochempy/core/project/project.py#L710-L11"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Project.clear_datasets" title="Permalink to this definition"></a></dt>
+<dd><p>Remove all datasets from the project.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#spectrochempy.Project.remove_dataset" title="spectrochempy.Project.remove_dataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_dataset</span></code></a></dt><dd><p>Remove a single dataset.</p>
+</dd>
+<dt><a class="reference internal" href="#spectrochempy.Project.add_dataset" title="spectrochempy.Project.add_dataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_dataset</span></code></a></dt><dd><p>Add a dataset.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Project.clear_projects">
+<span class="sig-name descname"><span class="pre">clear_projects</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/src/spectrochempy/core/project/project.py#L816-L11"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Project.clear_projects" title="Permalink to this definition"></a></dt>
+<dd><p>Remove all subprojects from the current project.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#spectrochempy.Project.remove_project" title="spectrochempy.Project.remove_project"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_project</span></code></a></dt><dd><p>Remove a single subproject.</p>
+</dd>
+<dt><a class="reference internal" href="#spectrochempy.Project.add_project" title="spectrochempy.Project.add_project"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_project</span></code></a></dt><dd><p>Add a subproject.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Project.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/src/spectrochempy/core/project/project.py#L573-L31"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Project.copy" title="Permalink to this definition"></a></dt>
+<dd><p>Make a copy of the current project.</p>
+<p>This method produces a recursive detached copy (every child is a new
+independent object) when called without arguments (<code class="docutils literal notranslate"><span class="pre">deep=True</span></code>).
+In that mode, copied children are re-attached inside the copied tree,
+so nested datasets and subprojects point to their copied parent.
+With <code class="docutils literal notranslate"><span class="pre">deep=False</span></code> it creates a new container whose children are
+shared references to the original — the children’s <code class="docutils literal notranslate"><span class="pre">parent</span></code> pointers
+remain unchanged.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">copy.copy(project)</span></code> and <code class="docutils literal notranslate"><span class="pre">copy.deepcopy(project)</span></code> both
+produce a deep copy, matching the default <code class="docutils literal notranslate"><span class="pre">copy(deep=True)</span></code>
+behavior.  This is intentional per the project copy semantics
+project copy semantics contract (maintainer repository) and
+differs from Python’s default shallow <code class="docutils literal notranslate"><span class="pre">copy.copy</span></code> semantics.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>deep</strong> (<em>bool, optional</em>) – If True (default), a recursive detached copy is made
+where every child is a new independent object.
+If False, a new container is created with shared children.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><em>Project</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Project.dump">
+<span class="sig-name descname"><span class="pre">dump</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/src/spectrochempy/core/dataset/arraymixins/ndio.py#L484-L34"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Project.dump" title="Permalink to this definition"></a></dt>
+<dd><p>Save the current object into compressed native spectrochempy format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (str of  <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#module-pathlib" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pathlib</span></code></a> object) – File name where to save the current object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Project.load">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">pathlib.Path</span> <span class="pre">|</span> <span class="pre">BinaryIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs:</span> <span class="pre">Any)</span> <span class="pre">-&gt;</span> <span class="pre">Any:</span> <span class="pre">&quot;&quot;&quot;</span> <span class="pre">Open</span> <span class="pre">data</span> <span class="pre">from</span> <span class="pre">a</span> <span class="pre">'*.scp'</span> <span class="pre">(NDDataset)</span> <span class="pre">or</span> <span class="pre">'*.pscp'</span> <span class="pre">(Project)</span> <span class="pre">file.</span> <span class="pre">Parameters</span> <span class="pre">----------</span> <span class="pre">filename</span> <span class="pre">:</span> <span class="pre">`str`</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">`pathlib`</span> <span class="pre">or</span> <span class="pre">`file`</span> <span class="pre">objects</span> <span class="pre">The</span> <span class="pre">name</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">file</span> <span class="pre">to</span> <span class="pre">read</span> <span class="pre">(or</span> <span class="pre">a</span> <span class="pre">file</span> <span class="pre">objects).</span> <span class="pre">**kwargs</span> <span class="pre">Optional</span> <span class="pre">keyword</span> <span class="pre">parameters</span> <span class="pre">(see</span> <span class="pre">Other</span> <span class="pre">Parameters).</span> <span class="pre">Other</span> <span class="pre">Parameters</span> <span class="pre">----------------</span> <span class="pre">content</span> <span class="pre">:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional</span> <span class="pre">The</span> <span class="pre">optional</span> <span class="pre">content</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">file(s)</span> <span class="pre">to</span> <span class="pre">be</span> <span class="pre">loaded</span> <span class="pre">as</span> <span class="pre">a</span> <span class="pre">binary</span> <span class="pre">string.</span> <span class="pre">allow_unsafe_legacy</span> <span class="pre">:</span> <span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default=False</span> <span class="pre">Allow</span> <span class="pre">loading</span> <span class="pre">legacy</span> <span class="pre">SCP/PSCP</span> <span class="pre">payloads</span> <span class="pre">that</span> <span class="pre">require</span> <span class="pre">pickle-based</span> <span class="pre">native</span> <span class="pre">persistence.</span> <span class="pre">Enable</span> <span class="pre">this</span> <span class="pre">only</span> <span class="pre">for</span> <span class="pre">files</span> <span class="pre">from</span> <span class="pre">known</span> <span class="pre">and</span> <span class="pre">trusted</span> <span class="pre">sources.</span> <span class="pre">See</span> <span class="pre">Also</span> <span class="pre">--------</span> <span class="pre">read</span> <span class="pre">:</span> <span class="pre">Import</span> <span class="pre">dataset</span> <span class="pre">from</span> <span class="pre">various</span> <span class="pre">orgines.</span> <span class="pre">save</span> <span class="pre">:</span> <span class="pre">Save</span> <span class="pre">the</span> <span class="pre">current</span> <span class="pre">dataset.</span> <span class="pre">Notes</span> <span class="pre">-----</span> <span class="pre">Adapted</span> <span class="pre">from</span> <span class="pre">`numpy.load`</span> <span class="pre">.</span> <span class="pre">Examples</span> <span class="pre">--------</span> <span class="pre">&gt;&gt;&gt;</span> <span class="pre">nd1</span> <span class="pre">=</span> <span class="pre">scp.read('irdata/nh4y-activation.spg')</span> <span class="pre">&gt;&gt;&gt;</span> <span class="pre">f</span> <span class="pre">=</span> <span class="pre">nd1.save()</span> <span class="pre">&gt;&gt;&gt;</span> <span class="pre">f.name</span> <span class="pre">'nh4y-activation.scp'</span> <span class="pre">&gt;&gt;&gt;</span> <span class="pre">nd2</span> <span class="pre">=</span> <span class="pre">scp.load(f)</span> <span class="pre">Alternatively</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">this</span> <span class="pre">method</span> <span class="pre">can</span> <span class="pre">be</span> <span class="pre">called</span> <span class="pre">as</span> <span class="pre">a</span> <span class="pre">class</span> <span class="pre">method</span> <span class="pre">of</span> <span class="pre">NDDataset</span> <span class="pre">or</span> <span class="pre">Project</span> <span class="pre">object:</span> <span class="pre">&gt;&gt;&gt;</span> <span class="pre">from</span> <span class="pre">spectrochempy</span> <span class="pre">import</span> <span class="pre">*</span> <span class="pre">&gt;&gt;&gt;</span> <span class="pre">nd2</span> <span class="pre">=</span> <span class="pre">NDDataset.load(f)</span> <span class="pre">&quot;&quot;&quot;</span> <span class="pre">content</span> <span class="pre">=</span> <span class="pre">kwargs.get(&quot;content&quot;)</span> <span class="pre">allow_unsafe_legacy</span> <span class="pre">=</span> <span class="pre">kwargs.get(&quot;allow_unsafe_legacy&quot;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">False)</span> <span class="pre">resolved_filename</span> <span class="pre">=</span> <span class="pre">None</span> <span class="pre">if</span> <span class="pre">content</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">None:</span> <span class="pre">fid</span> <span class="pre">=</span> <span class="pre">io.BytesIO(content)</span> <span class="pre">else:</span> <span class="pre">#</span> <span class="pre">be</span> <span class="pre">sure</span> <span class="pre">to</span> <span class="pre">convert</span> <span class="pre">filename</span> <span class="pre">to</span> <span class="pre">a</span> <span class="pre">pathlib</span> <span class="pre">object</span> <span class="pre">with</span> <span class="pre">the</span> <span class="pre">#</span> <span class="pre">default</span> <span class="pre">suffix</span> <span class="pre">filename</span> <span class="pre">=</span> <span class="pre">pathclean(filename)</span> <span class="pre">suffix</span> <span class="pre">=</span> <span class="pre">cls().suffix</span> <span class="pre">filename</span> <span class="pre">=</span> <span class="pre">filename.with_suffix(suffix)</span> <span class="pre">if</span> <span class="pre">kwargs.get(&quot;directory&quot;)</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">None:</span> <span class="pre">filename</span> <span class="pre">=</span> <span class="pre">pathclean(kwargs.get(&quot;directory&quot;))</span> <span class="pre">/</span> <span class="pre">filename</span> <span class="pre">if</span> <span class="pre">not</span> <span class="pre">filename.exists(</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/src/spectrochempy/core/dataset/arraymixins/ndio.py#L266-L89"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Project.load" title="Permalink to this definition"></a></dt>
+<dd><p>Open data from a ‘<em>.scp’ (NDDataset) or ‘</em>.pscp’ (Project) file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a> , <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#module-pathlib" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pathlib</span></code></a> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">file</span></code> objects) – The name of the file to read (or a file objects).</p></li>
+<li><p><strong>**kwargs</strong> – Optional keyword parameters (see Other Parameters).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Other Parameters</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>content</strong> (<em>str, optional</em>) – The optional content of the file(s) to be loaded as a binary string.</p></li>
+<li><p><strong>allow_unsafe_legacy</strong> (<em>bool, optional, default=False</em>) – Allow loading legacy SCP/PSCP payloads that require pickle-based
+native persistence. Enable this only for files from known and
+trusted sources.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="spectrochempy.read.html#spectrochempy.read" title="spectrochempy.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code></a></dt><dd><p>Import dataset from various orgines.</p>
+</dd>
+<dt><a class="reference internal" href="#spectrochempy.Project.save" title="spectrochempy.Project.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a></dt><dd><p>Save the current dataset.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>Adapted from <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.load.html#numpy.load" title="(in NumPy v2.5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.load</span></code></a> .</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">nd1</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;irdata/nh4y-activation.spg&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">nd1</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">name</span>
+<span class="go">&#39;nh4y-activation.scp&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nd2</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Alternatively, this method can be called as a class method of NDDataset or Project object:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">spectrochempy</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nd2</span> <span class="o">=</span> <span class="n">NDDataset</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Project.loads">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">loads</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">js:</span> <span class="pre">dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Any])</span> <span class="pre">-&gt;</span> <span class="pre">Any:</span> <span class="pre">&quot;&quot;&quot;</span> <span class="pre">Deserialize</span> <span class="pre">dataset</span> <span class="pre">from</span> <span class="pre">JSON.</span> <span class="pre">Parameters</span> <span class="pre">----------</span> <span class="pre">js</span> <span class="pre">:</span> <span class="pre">dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Any]</span> <span class="pre">JSON</span> <span class="pre">object</span> <span class="pre">to</span> <span class="pre">deserialize</span> <span class="pre">Returns</span> <span class="pre">-------</span> <span class="pre">Any</span> <span class="pre">Deserialized</span> <span class="pre">dataset</span> <span class="pre">object</span> <span class="pre">Raises</span> <span class="pre">------</span> <span class="pre">TypeError</span> <span class="pre">If</span> <span class="pre">JSON</span> <span class="pre">cannot</span> <span class="pre">be</span> <span class="pre">properly</span> <span class="pre">deserialized</span> <span class="pre">&quot;&quot;&quot;</span> <span class="pre">from</span> <span class="pre">spectrochempy.core.dataset.coord</span> <span class="pre">import</span> <span class="pre">Coord</span> <span class="pre">from</span> <span class="pre">spectrochempy.core.dataset.coordset</span> <span class="pre">import</span> <span class="pre">CoordSet</span> <span class="pre">from</span> <span class="pre">spectrochempy.core.dataset.nddataset</span> <span class="pre">import</span> <span class="pre">NDDataset</span> <span class="pre">from</span> <span class="pre">spectrochempy.core.project.project</span> <span class="pre">import</span> <span class="pre">Project</span> <span class="pre">#</span> <span class="pre">.........................</span> <span class="pre">def</span> <span class="pre">restore_coordset_state(coordset:</span> <span class="pre">CoordSet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val:</span> <span class="pre">dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Any])</span> <span class="pre">-&gt;</span> <span class="pre">CoordSet:</span> <span class="pre">default_index</span> <span class="pre">=</span> <span class="pre">val.get(&quot;default_index&quot;)</span> <span class="pre">if</span> <span class="pre">default_index</span> <span class="pre">is</span> <span class="pre">None</span> <span class="pre">and</span> <span class="pre">isinstance(val.get(&quot;default&quot;)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/src/spectrochempy/core/dataset/arraymixins/ndio.py#L361-L121"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Project.loads" title="Permalink to this definition"></a></dt>
+<dd><p>Deserialize dataset from JSON.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>js</strong> (<em>dict[str, Any]</em>) – JSON object to deserialize</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><em>Any</em> – Deserialized dataset object</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.14)"><strong>TypeError</strong></a> – If JSON cannot be properly deserialized</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Project.remove_dataset">
+<span class="sig-name descname"><span class="pre">remove_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/src/spectrochempy/core/project/project.py#L693-L15"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Project.remove_dataset" title="Permalink to this definition"></a></dt>
+<dd><p>Remove a dataset from the project and reset its parent to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – Name of the dataset to remove.</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#spectrochempy.Project.remove_project" title="spectrochempy.Project.remove_project"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_project</span></code></a></dt><dd><p>Remove a subproject.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Project.remove_project">
+<span class="sig-name descname"><span class="pre">remove_project</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/src/spectrochempy/core/project/project.py#L799-L15"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Project.remove_project" title="Permalink to this definition"></a></dt>
+<dd><p>Remove a subproject from the current project and reset its parent to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – Name of the project to remove.</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#spectrochempy.Project.remove_dataset" title="spectrochempy.Project.remove_dataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_dataset</span></code></a></dt><dd><p>Remove a dataset.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Project.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/src/spectrochempy/core/dataset/arraymixins/ndio.py#L152-L34"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Project.save" title="Permalink to this definition"></a></dt>
+<dd><p>Save dataset in native .scp format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>**kwargs</strong> (<em>Any</em>) – Optional arguments passed to save_as()</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><em>Optional[pathlib.Path]</em> – Path to saved file if successful, None if save failed</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Project.save_as">
+<span class="sig-name descname"><span class="pre">save_as</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">&quot;&quot;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs:</span> <span class="pre">Any)</span> <span class="pre">-&gt;</span> <span class="pre">pathlib.Path</span> <span class="pre">|</span> <span class="pre">None:</span> <span class="pre">&quot;&quot;&quot;</span> <span class="pre">Save</span> <span class="pre">the</span> <span class="pre">current</span> <span class="pre">NDDataset</span> <span class="pre">in</span> <span class="pre">SpectroChemPy</span> <span class="pre">format</span> <span class="pre">(.scp).</span> <span class="pre">Parameters</span> <span class="pre">----------</span> <span class="pre">filename</span> <span class="pre">:</span> <span class="pre">str</span> <span class="pre">The</span> <span class="pre">filename</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">file</span> <span class="pre">where</span> <span class="pre">to</span> <span class="pre">save</span> <span class="pre">the</span> <span class="pre">current</span> <span class="pre">dataset.</span> <span class="pre">**kwargs</span> <span class="pre">Optional</span> <span class="pre">keyword</span> <span class="pre">parameters</span> <span class="pre">(see</span> <span class="pre">Other</span> <span class="pre">Parameters).</span> <span class="pre">Other</span> <span class="pre">Parameters</span> <span class="pre">----------------</span> <span class="pre">directory</span> <span class="pre">:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional</span> <span class="pre">If</span> <span class="pre">specified</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">the</span> <span class="pre">given</span> <span class="pre">`directory`</span> <span class="pre">and</span> <span class="pre">the</span> <span class="pre">`filename`</span> <span class="pre">will</span> <span class="pre">be</span> <span class="pre">appended.</span> <span class="pre">See</span> <span class="pre">Also</span> <span class="pre">--------</span> <span class="pre">save</span> <span class="pre">:</span> <span class="pre">Save</span> <span class="pre">current</span> <span class="pre">dataset.</span> <span class="pre">write</span> <span class="pre">:</span> <span class="pre">Export</span> <span class="pre">current</span> <span class="pre">dataset</span> <span class="pre">to</span> <span class="pre">different</span> <span class="pre">format.</span> <span class="pre">Notes</span> <span class="pre">-----</span> <span class="pre">Adapted</span> <span class="pre">from</span> <span class="pre">:class:`numpy.savez`</span> <span class="pre">.</span> <span class="pre">Examples</span> <span class="pre">--------</span> <span class="pre">Read</span> <span class="pre">some</span> <span class="pre">data</span> <span class="pre">from</span> <span class="pre">an</span> <span class="pre">OMNIC</span> <span class="pre">file</span> <span class="pre">&gt;&gt;&gt;</span> <span class="pre">nd</span> <span class="pre">=</span> <span class="pre">scp.read_omnic('wodger.spg')</span> <span class="pre">&gt;&gt;&gt;</span> <span class="pre">assert</span> <span class="pre">nd.name</span> <span class="pre">==</span> <span class="pre">'wodger'</span> <span class="pre">Write</span> <span class="pre">it</span> <span class="pre">in</span> <span class="pre">SpectroChemPy</span> <span class="pre">format</span> <span class="pre">(.scp)</span> <span class="pre">(return</span> <span class="pre">a</span> <span class="pre">`pathlib`</span> <span class="pre">object)</span> <span class="pre">&gt;&gt;&gt;</span> <span class="pre">filename</span> <span class="pre">=</span> <span class="pre">nd.save_as('new_wodger')</span> <span class="pre">Check</span> <span class="pre">the</span> <span class="pre">existence</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">scp</span> <span class="pre">file</span> <span class="pre">&gt;&gt;&gt;</span> <span class="pre">assert</span> <span class="pre">filename.is_file()</span> <span class="pre">&gt;&gt;&gt;</span> <span class="pre">assert</span> <span class="pre">filename.name</span> <span class="pre">==</span> <span class="pre">'new_wodger.scp'</span> <span class="pre">Remove</span> <span class="pre">this</span> <span class="pre">file</span> <span class="pre">&gt;&gt;&gt;</span> <span class="pre">filename.unlink()</span> <span class="pre">&quot;&quot;&quot;</span> <span class="pre">if</span> <span class="pre">filename:</span> <span class="pre">#</span> <span class="pre">we</span> <span class="pre">have</span> <span class="pre">a</span> <span class="pre">filename</span> <span class="pre">#</span> <span class="pre">by</span> <span class="pre">default</span> <span class="pre">it</span> <span class="pre">use</span> <span class="pre">the</span> <span class="pre">saved</span> <span class="pre">directory</span> <span class="pre">filename</span> <span class="pre">=</span> <span class="pre">pathclean(filename)</span> <span class="pre">if</span> <span class="pre">self.directory</span> <span class="pre">and</span> <span class="pre">self.directory</span> <span class="pre">!=</span> <span class="pre">filename.parent:</span> <span class="pre">filename</span> <span class="pre">=</span> <span class="pre">self.directory</span> <span class="pre">/</span> <span class="pre">filename</span> <span class="pre">else:</span> <span class="pre">filename</span> <span class="pre">=</span> <span class="pre">self.directory</span> <span class="pre">#</span> <span class="pre">suffix</span> <span class="pre">must</span> <span class="pre">be</span> <span class="pre">specified</span> <span class="pre">which</span> <span class="pre">correspond</span> <span class="pre">to</span> <span class="pre">the</span> <span class="pre">type</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">#</span> <span class="pre">object</span> <span class="pre">to</span> <span class="pre">save</span> <span class="pre">default_suffix</span> <span class="pre">=</span> <span class="pre">SCPY_SUFFIX[self._implements()]</span> <span class="pre">if</span> <span class="pre">filename</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">None</span> <span class="pre">and</span> <span class="pre">not</span> <span class="pre">filename.is_dir(</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/src/spectrochempy/core/dataset/arraymixins/ndio.py#L188-L76"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Project.save_as" title="Permalink to this definition"></a></dt>
+<dd><p>Save the current NDDataset in SpectroChemPy format (.scp).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – The filename of the file where to save the current dataset.</p></li>
+<li><p><strong>**kwargs</strong> – Optional keyword parameters (see Other Parameters).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Other Parameters</dt>
+<dd class="field-even"><p><strong>directory</strong> (<em>str, optional</em>) – If specified, the given <code class="xref py py-obj docutils literal notranslate"><span class="pre">directory</span></code> and the <a class="reference internal" href="#spectrochempy.Project.filename" title="spectrochempy.Project.filename"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filename</span></code></a> will be
+appended.</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#spectrochempy.Project.save" title="spectrochempy.Project.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a></dt><dd><p>Save current dataset.</p>
+</dd>
+<dt><a class="reference internal" href="spectrochempy.write.html#spectrochempy.write" title="spectrochempy.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a></dt><dd><p>Export current dataset to different format.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>Adapted from <code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.savez</span></code> .</p>
+<p class="rubric">Examples</p>
+<p>Read some data from an OMNIC file</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">nd</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">read_omnic</span><span class="p">(</span><span class="s1">&#39;wodger.spg&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">nd</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;wodger&#39;</span>
+</pre></div>
+</div>
+<p>Write it in SpectroChemPy format (.scp)
+(return a <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#module-pathlib" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pathlib</span></code></a> object)</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">filename</span> <span class="o">=</span> <span class="n">nd</span><span class="o">.</span><span class="n">save_as</span><span class="p">(</span><span class="s1">&#39;new_wodger&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Check the existence of the scp file</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">filename</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">filename</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;new_wodger.scp&#39;</span>
+</pre></div>
+</div>
+<p>Remove this file</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">filename</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<p class="rubric">Examples using spectrochempy.Project</p>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="In this example, we create a Project from scratch"><img alt="" src="../../_images/sphx_glr_plot_project_thumb.png" />
+<p><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/e_project/plot_project.html#sphx-glr-gettingstarted-examples-gallery-auto-examples-core-e-project-plot-project-py"><span class="std std-ref">Project creation</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Project creation</div>
+</div></div></section>
+
+
+           </div>
+          </div>
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="spectrochempy.PFR.html" class="btn btn-neutral float-left" title="spectrochempy.PFR" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="spectrochempy.set_loglevel.html" class="btn btn-neutral float-right" title="spectrochempy.set_loglevel" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2014-2026 Laboratoire Catalyse et Spectrochimie (LCS) — CeCILL-B license.
+      <span class="lastupdated">Last updated on Jul 12, 2026.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

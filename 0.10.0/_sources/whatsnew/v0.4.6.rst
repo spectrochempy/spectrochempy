@@ -1,0 +1,25 @@
+What's new in revision 0.4.6 [2022-05-16]
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-0.4.6. See :ref:`release` for a full changelog
+including other versions of SpectroChemPy.
+
+New features
+~~~~~~~~~~~~
+
+-  ``read_omnic()`` : now collects and store in meta:
+   ``collection_length`` , ``laser_frequency`` , and ``optical_velocity`` .
+
+Bug fixes
+~~~~~~~~~
+
+-  Issue #462, correct load and dump of multicoordinates in scp format.
+-  MCRALS: handling of ``nonnegSpec=[]`` or ``None`` .
+-  apodization: recognition of interferogram.
+-  ``read_srs()`` : add mask when NAN values are present.
+-  Issues #468, Conda install problems.
+
+Deprecations
+~~~~~~~~~~~~
+
+-  MCRALS: ``logs`` attribute now replaced by ``log`` .

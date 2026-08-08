@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>What’s New in Revision 0.11.0 &mdash; SpectroChemPy v0.11.0 0.11.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/spectrochempy.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sphinx-design.5ea377869091fd0449014c60fc090103.min.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/spectrochempy.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/scpy.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/design-tabs.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Quickstart Tutorial 🚀" href="../gettingstarted/quickstart.html" />
+    <link rel="prev" title="SpectroChemPy: Advanced Spectroscopic Data Analysis" href="../index.html" />
+ 
+<style>
+    .popup-warning {
+        display: none;
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
+        background: #d8d7d5;
+        border: 1px solid #2c2c2b;
+        border-radius: 4px;
+        padding: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        animation: slideIn 0.5s ease-out;
+        font-size: smaller;
+    }
+
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+        }
+
+        to {
+            transform: translateX(0);
+        }
+    }
+
+    .popup-warning .close-btn {
+        float: right;
+        cursor: pointer;
+        margin-left: 10px;
+    }
+</style>
+<html data-versions="0.11.0,0.10.2,0.10.1,0.10.0,0.9.3,0.6.10">
+<script src="../_static/js/versions.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+
+
+<a href="../index.html">
+    
+    <img src="../_static/scpy.png" class="logo" alt="Logo" />
+</a>
+
+<div class="switch-menus">
+    <select id="versions-dropdown"></select>
+</div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">What’s New in Revision 0.11.0</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🚀 Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/quickstart.html">5-minute quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/install/index.html">Installation guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../gettingstarted/install/install_win.html">Installation Guide for Windows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gettingstarted/install/install_mac_linux.html">Installation Guide for Mac OSX and Linux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gettingstarted/install/install_colab.html">Install in Google Colaboratory (Colab)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gettingstarted/install/install_adds.html">Optional Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gettingstarted/install/install_sources.html">Installation from Sources</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/examples/index.html">Example's gallery</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/index.html">Core functionalities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/index.html">How to use NDDataset</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_a_create_dataset.html">NDDataset creation and plotting example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_b_coordinates.html">NDDataset coordinates example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_c_units.html">Units manipulation examples</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_d_slicing.html">Slice an NDDataset with indices and coordinates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_preferences.html">NDDataset creation and plotting example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/b_interoperability/index.html">Interoperability</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/b_interoperability/plot_xarray_netcdf_interoperability.html">Interoperability with xarray and NetCDF</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/c_importer/index.html">Import / Export</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_generic_read.html">Reading datasets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_IR_from_omnic.html">Loading an IR (omnic SPG) experimental file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_IR_from_opus.html">Loading Bruker OPUS files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_nmr_from_bruker.html">Loading of experimental NMR data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_raman_from_labspec.html">Loading RAMAN experimental file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_renishaw.html">Reading Renishaw WiRE files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_spc.html">Reading SPC format files</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/d_plotting/index.html">Plotting datasets</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/d_plotting/plot_plot_multiple.html">Using <code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_multiple</span></code> to plot several datasets on the same figure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/d_plotting/plot_plot_types.html">Choose an explicit plot type for a 2D IR dataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/d_plotting/plot_plotting.html">Introduction to the plotting library</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/d_plotting/plot_styles.html">Apply built-in plotting styles</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/e_project/index.html">Project Management</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/e_project/plot_project.html">Project creation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/index.html">Analysis NDDataset</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/index.html">Decomposition</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_efa.html">EFA example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_efa_keller_massart.html">EFA (Keller and Massart original example)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_fast_ica.html">FastICA example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_iris_intro.html">IRIS: 2D-IRIS analysis (plugin)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_mcrals_chrom1.html">MCR-ALS example (adapted from Jaumot et al. 2005)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_mcrals_kinetics.html">MCR-ALS with kinetic constraints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_nmf.html">NMF analysis example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_pca_iris.html">PCA example (iris dataset)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_pca_spec.html">PCA analysis example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_simplisma.html">SIMPLISMA example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_synthetic_profiles.html">Build synthetic concentration profiles</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/b_crossdecomposition/index.html">Cross-decomposition</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/b_crossdecomposition/plot_pls.html">PLS regression example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/c_curvefitting/index.html">Curvefitting</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/c_curvefitting/plot_fit.html">Fitting 1D dataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/c_curvefitting/plot_lineshapes.html">Built-in line-shape helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/c_curvefitting/plot_lstsq_single_equation.html">Solve a linear equation using LSTSQ</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/d_peak_analysis/index.html">Peak analysis</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/d_peak_analysis/plot_peak_finding.html">Find peak maxima in an IR time series</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/d_peak_analysis/plot_peak_integration.html">Integrate a baseline-corrected IR band</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/index.html">Processing NDDataset</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/apodization/index.html">Apodization</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/apodization/plot_proc_em.html">Exponential window multiplication</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/apodization/plot_proc_sp.html">Sine bell and squared Sine bell window multiplication</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/baseline/index.html">Baseline</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/baseline/plot_baseline_correction.html">NDDataset baseline correction</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/denoising/index.html">Denoising</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/denoising/plot_denoising.html">Denoising a 2D Raman spectrum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/denoising/plot_despike.html">Removing cosmic ray spikes from a Raman spectrum</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/filtering/index.html">Filtering</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/filtering/plot_filter.html">Savitky-Golay and Whittaker-Eilers smoothing of a Raman spectrum</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/filtering/plot_smoothing_window_size.html">Compare smoothing window sizes on a Raman spectrum</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/nmr/index.html">NMR processing (plugin-based)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/nmr/plot_processing_cp_nmr.html">Analysis CP NMR spectra</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/nmr/plot_processing_nmr.html">Processing NMR spectra (slicing, baseline correction, peak picking, peak fitting)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/nmr/plot_processing_nmr_relax.html">Processing Relaxation measurement</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/nmr/plot_read_nmr_topspin.html">NMR: reading TopSpin files (plugin)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/raman/index.html">Processing Raman datasets</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/raman/plot_processing_raman.html">Processing RAMAN spectra</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/transformations/index.html">Transformations</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/transformations/plot_masking_transpose_units.html">Mask a saturated region and transform an IR dataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/transformations/plot_preprocessing.html">Chemometric preprocessing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/transformations/plot_transformers_sklearn.html">Preprocessing transformers and scikit-learn compatibility</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_plugins/index.html">Plugin-dependent functionality</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-iris/index.html">IRIS plugin</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-iris/plot_spectrochempy_iris__analysis__a_decomposition__plot_iris_intro.html">IRIS: 2D-IRIS analysis (plugin)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-nmr/index.html">NMR plugin</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-nmr/plot_spectrochempy_nmr__core__c_importer__plot_read_nmr_from_bruker.html">Loading of experimental NMR data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-nmr/plot_spectrochempy_nmr__processing__apodization__plot_proc_em.html">Exponential window multiplication</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-nmr/plot_spectrochempy_nmr__processing__apodization__plot_proc_sp.html">Sine bell and squared Sine bell window multiplication</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-nmr/plot_spectrochempy_nmr__processing__nmr__plot_processing_cp_nmr.html">Analysis CP NMR spectra</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-nmr/plot_spectrochempy_nmr__processing__nmr__plot_processing_nmr.html">Processing NMR spectra (slicing, baseline correction, peak picking, peak fitting)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-nmr/plot_spectrochempy_nmr__processing__nmr__plot_processing_nmr_relax.html">Processing Relaxation measurement</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-nmr/plot_spectrochempy_nmr__processing__nmr__plot_read_nmr_topspin.html">NMR: reading TopSpin files (plugin)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-perkinelmer/index.html">PerkinElmer plugin</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_plugins/spectrochempy-perkinelmer/plot_spectrochempy_perkinelmer__plot_read_perkinelmer.html">Reading a PerkinElmer SP file (plugin)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/getting_help.html">Getting help</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">📚 User's Guide &amp; Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/introduction/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/importexport/index.html">Import &amp; Export</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/importexport/import.html">Import Data in SpectroChemPy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/importexport/importIR.html">Import IR Data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/importexport/importOMNIC.html">Import of OMNIC files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/importexport/importOPUS.html">Import of Bruker OPUS files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/importexport/importJCAMPDX.html">Import/Export of JCAMP-DX files</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/plotting/index.html">Plotting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/plotting/overview.html">Plotting Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/plotting/customization.html">Customizing a Plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/plotting/preferences.html">Plotting Preferences</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/plotting/plot_types.html">Plot Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/plotting/styles.html">Styles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/plotting/advanced.html">Advanced Matplotlib Integration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/processing/index.html">Processing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/processing/slicing.html">Slicing NDDatasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/processing/transformations.html">Basic transformations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/processing/transformations.html#Chemometric-preprocessing">Chemometric preprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/processing/math_operations.html">Mathematical operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/processing/smoothing.html">Filtering, Smoothing and Denoising</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/processing/baseline.html">Baseline corrections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/processing/denoising.html">Denoising</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/processing/apodization.html">Apodization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/processing/td_baseline.html">Time domain baseline correction (NMR)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/processing/fourier.html">One-dimensional (1D) Fourier transformation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/processing/fourier.html#Real-Fourier-transform">Real Fourier transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/processing/interferogram.html">FTIR interferogram processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/processing/alignment.html">Alignment of datasets</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/analysis/index.html">Analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/analysis/peak_finding.html">Peak Maxima Finding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/analysis/peak_analysis_workflow.html">Peak Analysis Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/analysis/peak_integration.html">Peak Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/analysis/fitting.html">Fitting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/analysis/pca.html">Principal Component Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/analysis/pls.html">Partial Least Squares Regression (PLSRegression)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/analysis/mcr_als.html">MCR ALS</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/plugins/index.html">Plugins</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/plugins/official_plugins.html">Official plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/plugins/nmr.html">NMR plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/plugins/tensor.html">Tensor plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/plugins/hypercomplex.html">Hypercomplex (quaternion) plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/plugins/iris.html">IRIS plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/plugins/carroucell.html">Carroucell plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/plugins/perkinelmer.html">PerkinElmer plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/plugins/experimental_plugins.html">Experimental plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/plugins/examples.html">Plugin-dependent Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/plugins/roadmap.html">Plugin roadmap</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/api/api.html">API Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/objects/index.html">Core objects</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/objects/dataset/dataset.html">The NDDataset object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/objects/dataset/dataset.html#More-insight-on-coordinates">More insight on coordinates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/objects/dataset/dataset.html#Methods-to-create-NDDataset">Methods to create NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/objects/project/project.html">Project management</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🔍 Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/index.html">Public API reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.NDDataset.html">spectrochempy.NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.Coord.html">spectrochempy.Coord</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.CoordSet.html">spectrochempy.CoordSet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.empty.html">spectrochempy.empty</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.zeros.html">spectrochempy.zeros</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.ones.html">spectrochempy.ones</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.full.html">spectrochempy.full</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.empty_like.html">spectrochempy.empty_like</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.zeros_like.html">spectrochempy.zeros_like</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.ones_like.html">spectrochempy.ones_like</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.full_like.html">spectrochempy.full_like</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.eye.html">spectrochempy.eye</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.identity.html">spectrochempy.identity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.random.html">spectrochempy.random</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.normal.html">spectrochempy.normal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.diag.html">spectrochempy.diag</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.fromfunction.html">spectrochempy.fromfunction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.fromiter.html">spectrochempy.fromiter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.arange.html">spectrochempy.arange</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.linspace.html">spectrochempy.linspace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.logspace.html">spectrochempy.logspace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.geomspace.html">spectrochempy.geomspace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.take.html">spectrochempy.take</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.load.html">spectrochempy.load</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.read.html">spectrochempy.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.read_csv.html">spectrochempy.read_csv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.read_ddr.html">spectrochempy.read_ddr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.read_dir.html">spectrochempy.read_dir</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.read_hdr.html">spectrochempy.read_hdr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.read_jcamp.html">spectrochempy.read_jcamp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.read_labspec.html">spectrochempy.read_labspec</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.read_wire.html">spectrochempy.read_wire</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.read_wdf.html">spectrochempy.read_wdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.read_mat.html">spectrochempy.read_mat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.read_matlab.html">spectrochempy.read_matlab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.read_omnic.html">spectrochempy.read_omnic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.read_opus.html">spectrochempy.read_opus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.read_quadera.html">spectrochempy.read_quadera</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.read_sdr.html">spectrochempy.read_sdr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.read_soc.html">spectrochempy.read_soc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.read_spa.html">spectrochempy.read_spa</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.read_spc.html">spectrochempy.read_spc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.read_spg.html">spectrochempy.read_spg</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.read_srs.html">spectrochempy.read_srs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.NDDataset.from_xarray.html">spectrochempy.NDDataset.from_xarray</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.NDDataset.from_netcdf.html">spectrochempy.NDDataset.from_netcdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.load_iris.html">spectrochempy.load_iris</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.download_nist_ir.html">spectrochempy.download_nist_ir</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.NDDataset.save.html">spectrochempy.NDDataset.save</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.NDDataset.save_as.html">spectrochempy.NDDataset.save_as</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.write.html">spectrochempy.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.write_csv.html">spectrochempy.write_csv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.write_jcamp.html">spectrochempy.write_jcamp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.write_mat.html">spectrochempy.write_mat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.write_matlab.html">spectrochempy.write_matlab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.to_array.html">spectrochempy.to_array</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.to_netcdf.html">spectrochempy.to_netcdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.to_xarray.html">spectrochempy.to_xarray</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.plot.html">spectrochempy.plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.plot_1D.html">spectrochempy.plot_1D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.plot_pen.html">spectrochempy.plot_pen</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.plot_scatter.html">spectrochempy.plot_scatter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.plot_scatter_pen.html">spectrochempy.plot_scatter_pen</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.plot_with_transposed.html">spectrochempy.plot_with_transposed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.plot_bar.html">spectrochempy.plot_bar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.plot_2D.html">spectrochempy.plot_2D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.plot_contour.html">spectrochempy.plot_contour</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.plot_contourf.html">spectrochempy.plot_contourf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.plot_image.html">spectrochempy.plot_image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.plot_lines.html">spectrochempy.plot_lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.plot_map.html">spectrochempy.plot_map</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.plot_stack.html">spectrochempy.plot_stack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.plot_3D.html">spectrochempy.plot_3D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.plot_surface.html">spectrochempy.plot_surface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.plot_waterfall.html">spectrochempy.plot_waterfall</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.plot_multiple.html">spectrochempy.plot_multiple</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.multiplot.html">spectrochempy.multiplot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.multiplot_contour.html">spectrochempy.multiplot_contour</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.multiplot_contourf.html">spectrochempy.multiplot_contourf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.multiplot_lines.html">spectrochempy.multiplot_lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.multiplot_scatter.html">spectrochempy.multiplot_scatter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.multiplot_with_transposed.html">spectrochempy.multiplot_with_transposed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.show.html">spectrochempy.show</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.transpose.html">spectrochempy.transpose</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.swapdims.html">spectrochempy.swapdims</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.squeeze.html">spectrochempy.squeeze</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.set_complex.html">spectrochempy.set_complex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.concatenate.html">spectrochempy.concatenate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.stack.html">spectrochempy.stack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.normalize.html">spectrochempy.normalize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.center.html">spectrochempy.center</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.autoscale.html">spectrochempy.autoscale</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.snv.html">spectrochempy.snv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.msc.html">spectrochempy.msc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.pareto_scale.html">spectrochempy.pareto_scale</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.range_scale.html">spectrochempy.range_scale</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.robust_scale.html">spectrochempy.robust_scale</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.log_transform.html">spectrochempy.log_transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.CenterTransformer.html">spectrochempy.CenterTransformer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.AutoscaleTransformer.html">spectrochempy.AutoscaleTransformer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.SNVTransformer.html">spectrochempy.SNVTransformer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.NormalizeTransformer.html">spectrochempy.NormalizeTransformer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.MSCTransformer.html">spectrochempy.MSCTransformer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.ParetoScaleTransformer.html">spectrochempy.ParetoScaleTransformer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.RangeScaleTransformer.html">spectrochempy.RangeScaleTransformer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.RobustScaleTransformer.html">spectrochempy.RobustScaleTransformer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.LogTransformer.html">spectrochempy.LogTransformer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.diag.html">spectrochempy.diag</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.diagonal.html">spectrochempy.diagonal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.take.html">spectrochempy.take</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.sort.html">spectrochempy.sort</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.argmin.html">spectrochempy.argmin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.argmax.html">spectrochempy.argmax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.coordmin.html">spectrochempy.coordmin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.coordmax.html">spectrochempy.coordmax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.amin.html">spectrochempy.amin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.amax.html">spectrochempy.amax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.min.html">spectrochempy.min</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.max.html">spectrochempy.max</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.ptp.html">spectrochempy.ptp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.clip.html">spectrochempy.clip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.around.html">spectrochempy.around</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.round.html">spectrochempy.round</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.dot.html">spectrochempy.dot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.SVD.html">spectrochempy.SVD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.LSTSQ.html">spectrochempy.LSTSQ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.NNLS.html">spectrochempy.NNLS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.all.html">spectrochempy.all</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.any.html">spectrochempy.any</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.sum.html">spectrochempy.sum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.cumsum.html">spectrochempy.cumsum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.trapezoid.html">spectrochempy.trapezoid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.simpson.html">spectrochempy.simpson</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.conj.html">spectrochempy.conj</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.conjugate.html">spectrochempy.conjugate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.abs.html">spectrochempy.abs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.absolute.html">spectrochempy.absolute</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.remove_masks.html">spectrochempy.remove_masks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.Unit.html">spectrochempy.Unit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.Quantity.html">spectrochempy.Quantity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.to.html">spectrochempy.to</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.to_base_units.html">spectrochempy.to_base_units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.to_reduced_units.html">spectrochempy.to_reduced_units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.ito.html">spectrochempy.ito</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.ito_base_units.html">spectrochempy.ito_base_units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.ito_reduced_units.html">spectrochempy.ito_reduced_units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.is_units_compatible.html">spectrochempy.is_units_compatible</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.mc.html">spectrochempy.mc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.ps.html">spectrochempy.ps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.mean.html">spectrochempy.mean</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.average.html">spectrochempy.average</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.std.html">spectrochempy.std</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.sum.html">spectrochempy.sum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.var.html">spectrochempy.var</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.Baseline.html">spectrochempy.Baseline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.autosub.html">spectrochempy.autosub</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.get_baseline.html">spectrochempy.get_baseline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.basc.html">spectrochempy.basc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.detrend.html">spectrochempy.detrend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.asls.html">spectrochempy.asls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.snip.html">spectrochempy.snip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.fft.html">spectrochempy.fft</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.ifft.html">spectrochempy.ifft</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.ht.html">spectrochempy.ht</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.fsh.html">spectrochempy.fsh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.fsh2.html">spectrochempy.fsh2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.pk.html">spectrochempy.pk</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.pk_exp.html">spectrochempy.pk_exp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.dc.html">spectrochempy.dc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.zf.html">spectrochempy.zf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.zf_auto.html">spectrochempy.zf_auto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.zf_double.html">spectrochempy.zf_double</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.zf_size.html">spectrochempy.zf_size</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.cs.html">spectrochempy.cs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.ls.html">spectrochempy.ls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.roll.html">spectrochempy.roll</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.rs.html">spectrochempy.rs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.bartlett.html">spectrochempy.bartlett</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.blackmanharris.html">spectrochempy.blackmanharris</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.hamming.html">spectrochempy.hamming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.general_hamming.html">spectrochempy.general_hamming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.hann.html">spectrochempy.hann</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.triang.html">spectrochempy.triang</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.em.html">spectrochempy.em</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.gm.html">spectrochempy.gm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.sp.html">spectrochempy.sp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.sine.html">spectrochempy.sine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.qsin.html">spectrochempy.qsin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.sinm.html">spectrochempy.sinm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.Filter.html">spectrochempy.Filter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.savgol.html">spectrochempy.savgol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.smooth.html">spectrochempy.smooth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.whittaker.html">spectrochempy.whittaker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.denoise.html">spectrochempy.denoise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.despike.html">spectrochempy.despike</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.align.html">spectrochempy.align</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.interpolate.html">spectrochempy.interpolate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.pipe.html">spectrochempy.pipe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.LSTSQ.html">spectrochempy.LSTSQ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.NNLS.html">spectrochempy.NNLS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.Optimize.html">spectrochempy.Optimize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.PLSRegression.html">spectrochempy.PLSRegression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.EFA.html">spectrochempy.EFA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.MCRALS.html">spectrochempy.MCRALS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.analysis.constraints.Constraint.html">spectrochempy.analysis.constraints.Constraint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.analysis.constraints.Closure.html">spectrochempy.analysis.constraints.Closure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.analysis.constraints.FixedValues.html">spectrochempy.analysis.constraints.FixedValues</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.analysis.constraints.Monotonic.html">spectrochempy.analysis.constraints.Monotonic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.analysis.constraints.NonNegative.html">spectrochempy.analysis.constraints.NonNegative</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.analysis.constraints.ModelProfile.html">spectrochempy.analysis.constraints.ModelProfile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.analysis.constraints.ReferenceProfile.html">spectrochempy.analysis.constraints.ReferenceProfile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.analysis.constraints.Selectivity.html">spectrochempy.analysis.constraints.Selectivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.analysis.constraints.Unimodal.html">spectrochempy.analysis.constraints.Unimodal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.analysis.constraints.ZeroRegion.html">spectrochempy.analysis.constraints.ZeroRegion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.FastICA.html">spectrochempy.FastICA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.NMF.html">spectrochempy.NMF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.PCA.html">spectrochempy.PCA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.SVD.html">spectrochempy.SVD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.SIMPLISMA.html">spectrochempy.SIMPLISMA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.PSD.html">spectrochempy.PSD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.polynomial.html">spectrochempy.polynomial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.gaussian.html">spectrochempy.gaussian</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.gaussianmodel.html">spectrochempy.gaussianmodel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.lorentzian.html">spectrochempy.lorentzian</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.lorentzianmodel.html">spectrochempy.lorentzianmodel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.voigt.html">spectrochempy.voigt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.voigtmodel.html">spectrochempy.voigtmodel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.asymmetricvoigt.html">spectrochempy.asymmetricvoigt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.asymmetricvoigtmodel.html">spectrochempy.asymmetricvoigtmodel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.sigmoid.html">spectrochempy.sigmoid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.sigmoidmodel.html">spectrochempy.sigmoidmodel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.polynomialbaseline.html">spectrochempy.polynomialbaseline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.find_peaks.html">spectrochempy.find_peaks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.PeakFindingResult.html">spectrochempy.PeakFindingResult</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.PeakTable.html">spectrochempy.PeakTable</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.ActionMassKinetics.html">spectrochempy.ActionMassKinetics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.PFR.html">spectrochempy.PFR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.Project.html">spectrochempy.Project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.set_loglevel.html">spectrochempy.set_loglevel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.get_loglevel.html">spectrochempy.get_loglevel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.debug_.html">spectrochempy.debug_</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.info_.html">spectrochempy.info_</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.warning_.html">spectrochempy.warning_</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.error_.html">spectrochempy.error_</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.show_versions.html">spectrochempy.show_versions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.ScpObjectList.html">spectrochempy.ScpObjectList</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.pathclean.html">spectrochempy.pathclean</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/plugins.html">Plugin public API reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.nmr.read.html">spectrochempy.nmr.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.perkinelmer.read.html">spectrochempy.perkinelmer.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.carroucell.read_carroucell.html">spectrochempy.carroucell.read_carroucell</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.iris.IRIS.html">spectrochempy.iris.IRIS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/generated/spectrochempy.tensor.CP.html">spectrochempy.tensor.CP</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/bibliography.html">Bibliography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/papers.html">Papers citing <code class="xref py py-obj docutils literal notranslate"><span class="pre">SpectroChemPy</span></code></a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">🛠️ Contribute</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../devguide/issues.html">Bug reports &amp; feature request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../devguide/examples.html">Sharing examples &amp; tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../devguide/index.html">Developer’s Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../devguide/contributing.html">Contributing to SpectroChemPy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../devguide/contributing_codebase.html">Contributing to the code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../devguide/contributing_codespecifics.html">Contributing to specific parts of the code</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../devguide/codespec_adding_reader.html">Adding a Reader</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../devguide/contributing_documentation.html">Contributing to Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../devguide/contributing_plotting.html">Plotting Contributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../devguide/plotting_architecture.html">Plotting Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../devguide/plugins/index.html">Plugin developer guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../devguide/plugins/writing_plugins.html">Plugin author guide</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../devguide/plugins/architecture.html">Plugin architecture</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../devguide/plugins/accessors.html">Plugin accessors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../devguide/plugins/numeric_backends.html">Numeric backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../devguide/plugins/unit_contexts.html">Unit contexts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../devguide/plugins/packaging.html">Packaging a Plugin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../devguide/plugins/testing.html">Testing a Plugin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../devguide/plugins/api_policy.html">Plugin API Policy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../devguide/plugins/domain_architecture.html">Official plugin architecture notes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../devguide/plugins/roadmap.html">Plugin architecture map</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">✨ Credits</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../credits/credits.html">Contributors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../credits/credits.html#third-party-licenses">Third-party Licenses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../credits/citing.html">Citing SpectroChemPy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../credits/license.html">SpectroChempy License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../credits/license.html#other-licenses">Other Licenses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../credits/seealso.html">See also</a></li>
+</ul>
+
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SpectroChemPy v0.11.0</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">What’s New in Revision 0.11.0</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="../index.html" class="btn btn-neutral float-left" title="SpectroChemPy: Advanced Spectroscopic Data Analysis" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../gettingstarted/quickstart.html" class="btn btn-neutral float-right" title="Quickstart Tutorial 🚀" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+
+           <div itemprop="articleBody">
+             
+  <section id="what-s-new-in-revision-0-11-0">
+<h1>What’s New in Revision 0.11.0<a class="headerlink" href="#what-s-new-in-revision-0-11-0" title="Permalink to this heading"></a></h1>
+<p>These are the changes in SpectroChemPy-0.11.0.
+See <a class="reference internal" href="index.html#release"><span class="std std-ref">Release notes</span></a> for a full changelog, including other versions of SpectroChemPy.</p>
+<section id="new-features">
+<h2>New Features<a class="headerlink" href="#new-features" title="Permalink to this heading"></a></h2>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">MCRALS</span></code>: added the <code class="docutils literal notranslate"><span class="pre">constraints=</span></code> parameter that accepts a list of
+public <code class="docutils literal notranslate"><span class="pre">Constraint</span></code> objects (<code class="docutils literal notranslate"><span class="pre">NonNegative</span></code>, <code class="docutils literal notranslate"><span class="pre">Unimodal</span></code>, <code class="docutils literal notranslate"><span class="pre">Closure</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Monotonic</span></code>, <code class="docutils literal notranslate"><span class="pre">ModelProfile</span></code>, …).  Both the new <code class="docutils literal notranslate"><span class="pre">constraints=</span></code> API and
+the legacy traitlet-based parameters now route through the same internal
+pipeline: the public <code class="docutils literal notranslate"><span class="pre">Constraint</span></code> objects have become the canonical
+intermediate representation.  Mixed usage (legacy traitlets + <code class="docutils literal notranslate"><span class="pre">constraints=</span></code>
+at the same time) raises a clear <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>.  The legacy traitlet-based</p>
+<blockquote>
+<div><p>API remains fully supported for backward compatibility.  (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1383">PR #1383</a>)</p>
+</div></blockquote>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AnalysisResult</span></code> (PCA, NMF, PLS, MCR‑ALS, …) and <code class="docutils literal notranslate"><span class="pre">FitResult</span></code> now have a
+rich <code class="docutils literal notranslate"><span class="pre">_repr_html_</span></code> for Jupyter notebooks, with collapsible Parameters,
+Outputs, and Diagnostics sections and recursive rendering of embedded
+NDDataset objects using their native HTML representation.  The text
+<code class="docutils literal notranslate"><span class="pre">__repr__</span></code> and the public API are unchanged. (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1299">PR #1299</a>)</p></li>
+<li><p>Peak analysis workflows are now easier to inspect and validate:
+<code class="docutils literal notranslate"><span class="pre">find_peaks(...,</span> <span class="pre">as_result=True)</span></code> returns a lightweight
+<code class="docutils literal notranslate"><span class="pre">PeakFindingResult</span></code> object with <code class="docutils literal notranslate"><span class="pre">peaks</span></code>, <code class="docutils literal notranslate"><span class="pre">properties</span></code>, a <code class="docutils literal notranslate"><span class="pre">table</span></code>
+view, <code class="docutils literal notranslate"><span class="pre">to_dict()</span></code>, <code class="docutils literal notranslate"><span class="pre">to_csv()</span></code>, <code class="docutils literal notranslate"><span class="pre">sort_by()</span></code>, <code class="docutils literal notranslate"><span class="pre">head()</span></code>, <code class="docutils literal notranslate"><span class="pre">top()</span></code>,
+and <code class="docutils literal notranslate"><span class="pre">column()</span></code> helpers, while
+<code class="docutils literal notranslate"><span class="pre">Optimize.validate_script(script=None)</span></code> can validate a curve-fitting
+script before launching the optimisation and returns structured
+<code class="docutils literal notranslate"><span class="pre">ScriptError</span></code> diagnostics.  The default <code class="docutils literal notranslate"><span class="pre">find_peaks()</span></code> return value
+remains the historical <code class="docutils literal notranslate"><span class="pre">(peaks,</span> <span class="pre">properties)</span></code> tuple, and the new helpers do
+not add a pandas dependency. (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1351">PR #1351</a>)</p></li>
+<li><p>The analysis user guide now includes a reference peak-analysis workflow
+tutorial connecting peak detection, <code class="docutils literal notranslate"><span class="pre">PeakFindingResult</span></code>, <code class="docutils literal notranslate"><span class="pre">PeakTable</span></code>,
+CSV export, manual script writing, script validation, and <code class="docutils literal notranslate"><span class="pre">Optimize.fit()</span></code>
+in one end-to-end example. The <code class="xref py py-obj docutils literal notranslate"><span class="pre">Optimize</span></code> user-facing documentation now also
+clarifies method selection (<code class="xref py py-obj docutils literal notranslate"><span class="pre">least_squares</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">leastsq</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">simplex</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">basinhopping</span></code>), the meaning of <code class="docutils literal notranslate"><span class="pre">FitResult.parameters</span></code> as run
+configuration, and the lightweight <code class="docutils literal notranslate"><span class="pre">validate_constraints()</span></code> /
+<code class="docutils literal notranslate"><span class="pre">constraints</span></code> normalization surface for constraint validation before fit.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FitResult</span></code> from <code class="docutils literal notranslate"><span class="pre">Optimize.result</span></code> now exposes a residual dataset as
+<code class="docutils literal notranslate"><span class="pre">result.outputs[&quot;residuals&quot;]</span></code> / <code class="docutils literal notranslate"><span class="pre">result.residuals</span></code> and basic fit-quality
+diagnostics under <code class="docutils literal notranslate"><span class="pre">result.diagnostics</span></code>: <code class="docutils literal notranslate"><span class="pre">rss</span></code> / <code class="docutils literal notranslate"><span class="pre">sse</span></code>, <code class="docutils literal notranslate"><span class="pre">rmse</span></code>,
+<code class="docutils literal notranslate"><span class="pre">r_squared</span></code>, <code class="docutils literal notranslate"><span class="pre">n_observations</span></code>, <code class="docutils literal notranslate"><span class="pre">n_varying_parameters</span></code>,
+<code class="docutils literal notranslate"><span class="pre">degrees_of_freedom</span></code>, <code class="docutils literal notranslate"><span class="pre">reduced_chi_square</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">adjusted_r_squared</span></code>, plus normalized solver <code class="docutils literal notranslate"><span class="pre">success</span></code>, <code class="docutils literal notranslate"><span class="pre">status</span></code>,
+and <code class="docutils literal notranslate"><span class="pre">message</span></code> fields. (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1365">PR #1365</a>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Optimize</span></code> now retains the raw least-squares Jacobian on
+<code class="docutils literal notranslate"><span class="pre">opt.jacobian</span></code> when a backend naturally provides one, while methods
+without a native Jacobian expose <code class="docutils literal notranslate"><span class="pre">None</span></code>. (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1369">PR #1369</a>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FitResult.covariance</span></code> now exposes an approximate local least-squares
+covariance matrix for the fitted varying parameters, derived from the
+Jacobian when available and residual degrees of freedom are positive.
+<code class="docutils literal notranslate"><span class="pre">FitResult.variance</span></code> and <code class="docutils literal notranslate"><span class="pre">FitResult.stderr</span></code> expose the covariance
+diagonal and corresponding approximate parameter standard errors, and
+<code class="docutils literal notranslate"><span class="pre">FitResult.correlation</span></code> exposes the corresponding parameter-correlation
+matrix through the same availability rules. (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1373">PR #1373</a>, <a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1375">PR #1375</a>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FitResult.confidence_intervals</span></code> now exposes approximate two-sided 95%
+confidence intervals for the fitted varying parameters, derived from the
+fitted values, standard errors, and Student-t critical values using the
+residual degrees of freedom. (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1376">PR #1376</a>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FitResult.diagnostics</span></code> now exposes Gaussian-residual model-comparison
+criteria <code class="docutils literal notranslate"><span class="pre">aic</span></code> and <code class="docutils literal notranslate"><span class="pre">bic</span></code> derived from the residual sum of squares,
+observation count, and effective varying-parameter count. (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1378">PR #1378</a>)</p>
+<p>Existing <code class="docutils literal notranslate"><span class="pre">result.fitted</span></code> and <code class="docutils literal notranslate"><span class="pre">result.components</span></code> behavior is preserved.</p>
+</li>
+<li><p>SpectroChemPy now exposes top-level helpers for common 1D line shapes:
+<code class="docutils literal notranslate"><span class="pre">scp.polynomial(...)</span></code>, <code class="docutils literal notranslate"><span class="pre">scp.gaussian(...)</span></code>,
+<code class="docutils literal notranslate"><span class="pre">scp.lorentzian(...)</span></code>,
+<code class="docutils literal notranslate"><span class="pre">scp.voigt(...)</span></code>, <code class="docutils literal notranslate"><span class="pre">scp.asymmetricvoigt(...)</span></code>, and <code class="docutils literal notranslate"><span class="pre">scp.sigmoid(...)</span></code>.
+The line-shape helpers except <code class="docutils literal notranslate"><span class="pre">scp.sigmoid</span></code> also accept
+<code class="docutils literal notranslate"><span class="pre">normalized=False</span></code> to return a profile whose peak amplitude is exactly
+<code class="docutils literal notranslate"><span class="pre">ampl</span></code>. Common mathematical helpers are also available at top level:
+<code class="docutils literal notranslate"><span class="pre">scp.exp(...)</span></code>, <code class="docutils literal notranslate"><span class="pre">scp.log(...)</span></code>, <code class="docutils literal notranslate"><span class="pre">scp.log10(...)</span></code>, <code class="docutils literal notranslate"><span class="pre">scp.sin(...)</span></code>,
+and <code class="docutils literal notranslate"><span class="pre">scp.cos(...)</span></code>. Synthetic profile creation also gains
+<code class="docutils literal notranslate"><span class="pre">scp.normal(...)</span></code> for native Gaussian noise generation without dropping to</p>
+<blockquote>
+<div><p>NumPy. (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1311">PR #1311</a>, <a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1312">PR #1312</a>)</p>
+</div></blockquote>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">stack(...,</span> <span class="pre">axis=1)</span></code> is now supported for stacking 1D profiles as
+columns into a 2D dataset.  This makes the workflow for building
+synthetic concentration or profile matrices fully native within the
+SpectroChemPy API, without falling back to <code class="docutils literal notranslate"><span class="pre">np.column_stack(...)</span></code>
+or manual <code class="xref py py-obj docutils literal notranslate"><span class="pre">NDDataset</span></code> wrapping. (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1309">PR #1309</a>, <a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1310">PR #1310</a>)</p></li>
+<li><p>Reading multi-object files such as MATLAB <code class="docutils literal notranslate"><span class="pre">.mat</span></code> files, multi-subfile SPC
+files, and ZIP archives now returns a <code class="docutils literal notranslate"><span class="pre">ScpObjectList</span></code> result with helper
+methods for selecting datasets by size, name, dimensionality, or shape.
+The <code class="docutils literal notranslate"><span class="pre">ScpObjectList</span></code> also gained <code class="docutils literal notranslate"><span class="pre">dataset_by_ndim()</span></code>, <code class="docutils literal notranslate"><span class="pre">dataset_by_name()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">datasets_by_shape()</span></code> and other selection helpers. The list-like
+<code class="docutils literal notranslate"><span class="pre">__getitem__</span></code>/<code class="docutils literal notranslate"><span class="pre">__len__</span></code> interface is unchanged, and the new helpers
+do not add new dependencies. (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1306">PR #1306</a>, <a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1362">PR #1362</a>)</p></li>
+<li><p>SpectroChemPy now has a fuller preprocessing API for chemometric workflows:
+standard operations such as <code class="docutils literal notranslate"><span class="pre">normalize()</span></code>, <code class="docutils literal notranslate"><span class="pre">center()</span></code>, <code class="docutils literal notranslate"><span class="pre">autoscale()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">snv()</span></code>, <code class="docutils literal notranslate"><span class="pre">msc()</span></code>, <code class="docutils literal notranslate"><span class="pre">pareto_scale()</span></code>, <code class="docutils literal notranslate"><span class="pre">range_scale()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">robust_scale()</span></code>, and <code class="docutils literal notranslate"><span class="pre">log_transform()</span></code> are available as first-class
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">NDDataset</span></code> methods, and matching stateful transformer classes
+(<code class="docutils literal notranslate"><span class="pre">CenterTransformer</span></code>, <code class="docutils literal notranslate"><span class="pre">AutoscaleTransformer</span></code>, <code class="docutils literal notranslate"><span class="pre">SNVTransformer</span></code>,
+<code class="docutils literal notranslate"><span class="pre">NormalizeTransformer</span></code>, <code class="docutils literal notranslate"><span class="pre">MSCTransformer</span></code>, <code class="docutils literal notranslate"><span class="pre">ParetoScaleTransformer</span></code>,
+<code class="docutils literal notranslate"><span class="pre">RangeScaleTransformer</span></code>, <code class="docutils literal notranslate"><span class="pre">RobustScaleTransformer</span></code>, <code class="docutils literal notranslate"><span class="pre">LogTransformer</span></code>)
+support <code class="docutils literal notranslate"><span class="pre">fit()</span></code>, <code class="docutils literal notranslate"><span class="pre">transform()</span></code>, <code class="docutils literal notranslate"><span class="pre">fit_transform()</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">inverse_transform()</span></code> where applicable.  The transformers also expose
+<code class="docutils literal notranslate"><span class="pre">get_params()</span></code> / <code class="docutils literal notranslate"><span class="pre">set_params(**params)</span></code> and a clear <code class="docutils literal notranslate"><span class="pre">__repr__</span></code>,
+enabling safer reuse on new data and easier parameter inspection or cloning.
+(<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1339">PR #1339</a>, <a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1344">PR #1344</a>, <a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1345">PR #1345</a>)</p></li>
+<li><p>2D <code class="docutils literal notranslate"><span class="pre">plot(method=&quot;lines&quot;/&quot;stack&quot;)</span></code> now automatically uses coordinate labels
+as matplotlib line labels, so that <code class="docutils literal notranslate"><span class="pre">ax.legend()</span></code> shows meaningful names
+without needing to pass labels explicitly.  Legend entries are displayed
+in natural (first-to-last) order. (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1320">PR #1320</a>)</p></li>
+<li><p>Added top-level <code class="docutils literal notranslate"><span class="pre">scp.polynomial(...)</span></code> and <code class="docutils literal notranslate"><span class="pre">scp.normal(...)</span></code> helpers
+for synthetic spectral profile generation, completing the set of
+accessible line-shape helpers. (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1360">PR #1360</a>)</p></li>
+</ul>
+</section>
+<section id="bug-fixes">
+<h2>Bug Fixes<a class="headerlink" href="#bug-fixes" title="Permalink to this heading"></a></h2>
+<ul>
+<li><p>FIX: The <code class="docutils literal notranslate"><span class="pre">Optimize</span></code> script parser now rejects three categories of
+previously-silent misconfiguration: <code class="docutils literal notranslate"><span class="pre">MODEL:</span></code> blocks without a <code class="docutils literal notranslate"><span class="pre">shape:</span></code>
+definition, <code class="docutils literal notranslate"><span class="pre">shape:</span></code> lines that appear before any <code class="docutils literal notranslate"><span class="pre">MODEL:</span></code> declaration,
+and duplicate <code class="docutils literal notranslate"><span class="pre">MODEL:</span></code> labels (which historically overwrote the first
+model’s parameters).  These scripts could never produce valid fit results,
+and the parser now reports them as explicit errors instead of silently
+accepting them. (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1386">PR #1386</a>)</p></li>
+<li><p>WiRE (<code class="docutils literal notranslate"><span class="pre">.wdf</span></code>) reader no longer attaches YLST data as a confusing auxiliary <code class="docutils literal notranslate"><span class="pre">m</span></code>
+coordinate in <code class="docutils literal notranslate"><span class="pre">coordset</span></code>. The YLST data is now stored on <code class="docutils literal notranslate"><span class="pre">dataset.meta</span></code> (as
+<code class="docutils literal notranslate"><span class="pre">ylst_data</span></code>, <code class="docutils literal notranslate"><span class="pre">ylst_title</span></code>, <code class="docutils literal notranslate"><span class="pre">ylst_units</span></code>) where it belongs as per-spectrum
+metadata. (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1332">PR #1332</a>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MCRALS</span></code> correctness fixes (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1340">PR #1340</a>, <a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1363">PR #1363</a>): empty <code class="docutils literal notranslate"><span class="pre">closureConc</span></code> no longer runs a
+wasteful closure block (PR1 B4); single-component closure targets
+(<code class="docutils literal notranslate"><span class="pre">closureConc=[0]</span></code>, <code class="docutils literal notranslate"><span class="pre">closureConc=&quot;all&quot;</span></code>) are now honoured instead of
+being silently disabled by <code class="docutils literal notranslate"><span class="pre">np.any</span></code> (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/issues/#911">##911</a>); <code class="docutils literal notranslate"><span class="pre">normSpec='max'</span></code> /
+<code class="docutils literal notranslate"><span class="pre">'euclid'</span></code> with a zero-norm spectrum no longer produces <code class="docutils literal notranslate"><span class="pre">nan</span></code>/<code class="docutils literal notranslate"><span class="pre">inf</span></code>
+(PR1 B9); <code class="docutils literal notranslate"><span class="pre">getConc</span></code> / <code class="docutils literal notranslate"><span class="pre">getSpec</span></code> dispatch now correctly uses
+<code class="docutils literal notranslate"><span class="pre">argsGetSpec</span></code> / <code class="docutils literal notranslate"><span class="pre">kwargsGetSpec</span></code> instead of the <code class="docutils literal notranslate"><span class="pre">argsGetSpecc</span></code> typo
+(PR1 B1) and accepts bare-profile, 2-tuple <code class="docutils literal notranslate"><span class="pre">(profiles,</span> <span class="pre">new_args)</span></code>, and
+3-tuple <code class="docutils literal notranslate"><span class="pre">(profiles,</span> <span class="pre">new_args,</span> <span class="pre">extra)</span></code> returns (PR1 B2);
+<code class="docutils literal notranslate"><span class="pre">getSt_to_St_idx</span></code> with <code class="docutils literal notranslate"><span class="pre">None</span></code> entries no longer crashes in the
+validator’s <code class="docutils literal notranslate"><span class="pre">max()</span></code> call (PR1 B5); <code class="docutils literal notranslate"><span class="pre">_unimodal_1D</span></code> no longer
+infinite-loops or indexes out of bounds for pathological tolerances
+(<code class="docutils literal notranslate"><span class="pre">tol</span> <span class="pre">&lt;</span> <span class="pre">1</span></code>, including <code class="docutils literal notranslate"><span class="pre">tol</span> <span class="pre">==</span> <span class="pre">1.0</span></code>) while remaining byte-identical
+in the documented regime (<code class="docutils literal notranslate"><span class="pre">tol</span> <span class="pre">&gt;=</span> <span class="pre">1.1</span></code>) (PR1 B6); <code class="docutils literal notranslate"><span class="pre">monoIncTol</span></code> and
+<code class="docutils literal notranslate"><span class="pre">monoDecTol</span></code> are now documented as <code class="docutils literal notranslate"><span class="pre">Float</span></code> traits (PR1 B7/B8).
+The same <code class="docutils literal notranslate"><span class="pre">np.any</span></code> component-selection anti-pattern that caused
+<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/issues/#911">##911</a> in <code class="docutils literal notranslate"><span class="pre">_ClosureConstraint</span></code> has now been fixed across the
+remaining constraint activation guards: selecting only component 0
+with <code class="docutils literal notranslate"><span class="pre">nonnegConc=[0]</span></code>, <code class="docutils literal notranslate"><span class="pre">nonnegSpec=[0]</span></code>, <code class="docutils literal notranslate"><span class="pre">unimodConc=[0]</span></code>,
+<code class="docutils literal notranslate"><span class="pre">unimodSpec=[0]</span></code>, <code class="docutils literal notranslate"><span class="pre">monoIncConc=[0]</span></code>, <code class="docutils literal notranslate"><span class="pre">monoDecConc=[0]</span></code>,
+<code class="docutils literal notranslate"><span class="pre">hardConc=[0]</span></code> or <code class="docutils literal notranslate"><span class="pre">hardSpec=[0]</span></code> no longer silently disables the
+constraint (the guards now use an explicit truthiness test instead of
+<code class="docutils literal notranslate"><span class="pre">np.any(...)</span></code>, since <code class="docutils literal notranslate"><span class="pre">np.any([0])</span></code> evaluates to <code class="docutils literal notranslate"><span class="pre">False</span></code>).</p></li>
+<li><p>Plotting behavior is more consistent again: scatter plots now show markers as
+expected, single-dataset <code class="docutils literal notranslate"><span class="pre">plot_multiple()</span></code> / <code class="docutils literal notranslate"><span class="pre">multiplot()</span></code> calls preserve
+the requested plotting method, 1D and 2D artists honor more style keywords
+consistently, <code class="docutils literal notranslate"><span class="pre">use_plotly=True</span></code> fails with a clear error when Plotly is not
+available, and legacy <code class="docutils literal notranslate"><span class="pre">lines</span></code> / <code class="docutils literal notranslate"><span class="pre">pen</span></code> aliases continue to work across
+dimensional fallbacks. (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1381">PR #1381</a>, <a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1384">PR #1384</a>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">plotmerit()</span></code> / <code class="docutils literal notranslate"><span class="pre">plot_compare()</span></code> are now clearer for fit inspection:
+the reconstructed trace remains visible even for near-perfect overlaps, the
+historical <code class="docutils literal notranslate"><span class="pre">kind=&quot;scatter&quot;</span></code> / <code class="docutils literal notranslate"><span class="pre">method=&quot;scatter&quot;</span></code> options now produce
+real marker-based rendering, <code class="docutils literal notranslate"><span class="pre">nb_traces</span></code> is honored in the current plotting
+path, and <code class="docutils literal notranslate"><span class="pre">offset</span></code> once again separates the residual trace from the main
+signal to improve notebook readability. (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1377">PR #1377</a>)</p></li>
+<li><p>Fixed several processing regressions and edge cases: multi-dimensional ZPD
+detection in interferogram apodization is more reliable, <code class="docutils literal notranslate"><span class="pre">rs()</span></code>, <code class="docutils literal notranslate"><span class="pre">ls()</span></code>,
+and <code class="docutils literal notranslate"><span class="pre">roll()</span></code> now shift multi-dimensional data along the correct axis,
+<code class="docutils literal notranslate"><span class="pre">denoise()</span></code> validates its 2D input correctly. (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1352">PR #1352</a>)</p></li>
+<li><p>Preprocessing transformers no longer emit a traitlets dtype warning when
+operating on <code class="docutils literal notranslate"><span class="pre">MaskedArray</span></code> inputs — the internal cast now uses
+<code class="docutils literal notranslate"><span class="pre">np.asarray()</span></code> instead of <code class="docutils literal notranslate"><span class="pre">np.array()</span></code> to preserve the plain-ndarray
+contract while silencing the warning. (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1348">PR #1348</a>)</p></li>
+<li><p>Fixed several processing regressions and edge cases: <code class="docutils literal notranslate"><span class="pre">npy.dot()</span></code> now
+checks the correct operand type and honours the <code class="docutils literal notranslate"><span class="pre">strict</span></code> argument. (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1352">PR #1352</a>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PLSRegression</span></code> now works with a 1D <code class="docutils literal notranslate"><span class="pre">NDDataset</span></code> as the response variable
+<code class="docutils literal notranslate"><span class="pre">y</span></code>. This fixes failures in <code class="docutils literal notranslate"><span class="pre">predict()</span></code>, <code class="docutils literal notranslate"><span class="pre">y_scores</span></code>, <code class="docutils literal notranslate"><span class="pre">y_loadings</span></code>,</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">y_weights</span></code>, <code class="docutils literal notranslate"><span class="pre">y_rotations</span></code>, <code class="docutils literal notranslate"><span class="pre">result</span></code>, and <code class="docutils literal notranslate"><span class="pre">coef</span></code> when fitting with a
+1D target. (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1305">PR #1305</a>)</p>
+</div></blockquote>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Optimize._parsing</span></code> no longer infinite-loops when a numpy name (e.g. <code class="docutils literal notranslate"><span class="pre">pi</span></code>,
+<code class="docutils literal notranslate"><span class="pre">sin</span></code>, <code class="docutils literal notranslate"><span class="pre">cos</span></code>) appears in a reference expression.  The old <code class="docutils literal notranslate"><span class="pre">str.replace</span></code>
+re-matched the token inside the <code class="docutils literal notranslate"><span class="pre">np.</span></code>-prefixed replacement, causing
+<code class="docutils literal notranslate"><span class="pre">pi</span> <span class="pre">→</span> <span class="pre">np.pi</span> <span class="pre">→</span> <span class="pre">np.np.pi</span> <span class="pre">→</span> <span class="pre">…</span></code>.  Fixed by using <code class="docutils literal notranslate"><span class="pre">re.sub</span></code> with a
+negative lookbehind assertion. (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1397">PR #1397</a>)</p></li>
+</ul>
+</section>
+<section id="dependency-updates">
+<h2>Dependency Updates<a class="headerlink" href="#dependency-updates" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Bumped <code class="docutils literal notranslate"><span class="pre">actions/cache</span></code> from 5 to 6 (CI only). (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1316">PR #1316</a>)</p></li>
+<li><p>Bumped <code class="docutils literal notranslate"><span class="pre">actions/checkout</span></code> from 4 to 7 (CI only). (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1353">PR #1353</a>)</p></li>
+</ul>
+</section>
+<section id="deprecations">
+<h2>Deprecations<a class="headerlink" href="#deprecations" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>The historical internal import path
+<code class="docutils literal notranslate"><span class="pre">spectrochempy.processing.alignement</span></code> is superseded by the canonical
+<code class="docutils literal notranslate"><span class="pre">spectrochempy.processing.alignment</span></code> namespace. The public
+<code class="docutils literal notranslate"><span class="pre">scp.align(...)</span></code> and <code class="docutils literal notranslate"><span class="pre">dataset.align(...)</span></code> APIs are unchanged. The old
+path remains available as a deprecated compatibility alias, scheduled for
+removal in <code class="docutils literal notranslate"><span class="pre">0.12.0</span></code>. (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1372">PR #1372</a>)</p></li>
+<li><p>Plotting <code class="docutils literal notranslate"><span class="pre">method=&quot;stack&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">method=&quot;map&quot;</span></code> aliases are deprecated.
+Use the canonical <code class="docutils literal notranslate"><span class="pre">method=&quot;lines&quot;</span></code> (for 1D) or let the dispatcher choose
+automatically.  The aliases will be removed in <code class="docutils literal notranslate"><span class="pre">0.12.0</span></code>.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">force_stack</span></code> keyword argument in concatenation functions is
+deprecated in favour of the unqualified <code class="docutils literal notranslate"><span class="pre">method=&quot;stack&quot;</span></code> call. It will
+be removed in <code class="docutils literal notranslate"><span class="pre">0.12.0</span></code>.</p></li>
+</ul>
+</section>
+<section id="developer">
+<h2>Developer<a class="headerlink" href="#developer" title="Permalink to this heading"></a></h2>
+<ul>
+<li><p>MAINT: Moved the Optimize backend onto the canonical <code class="docutils literal notranslate"><span class="pre">_FitModelSpec</span></code>
+representation for model preparation, solver vectorization/restoration,
+diagnostics, and result parameter extraction while keeping
+<code class="docutils literal notranslate"><span class="pre">FitParameters</span></code> as a compatibility layer. The preferred execution path
+now resolves references through <code class="docutils literal notranslate"><span class="pre">prepare_model()</span></code> before numerical
+optimization, preserving the existing fit behaviour and public API.
+The parser now also produces the canonical model representation first and
+only derives <code class="docutils literal notranslate"><span class="pre">FitParameters</span></code> for legacy compatibility surfaces such as
+<code class="docutils literal notranslate"><span class="pre">Optimize.fp</span></code> and the historical parser return value. (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1392">PR #1392</a>, <a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1393">PR #1393</a>)</p></li>
+<li><p>MAINT: Extracted parameter-space transforms from <code class="docutils literal notranslate"><span class="pre">FitParameters</span></code> into
+standalone <code class="docutils literal notranslate"><span class="pre">_to_internal</span></code> / <code class="docutils literal notranslate"><span class="pre">_to_external</span></code> utilities
+(<code class="docutils literal notranslate"><span class="pre">_parameter_transform.py</span></code>).  Two historical bugs fixed: <code class="docutils literal notranslate"><span class="pre">lob</span> <span class="pre">is</span> <span class="pre">not</span>
+<span class="pre">None</span></code> → <code class="docutils literal notranslate"><span class="pre">upb</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">None</span></code>, <code class="docutils literal notranslate"><span class="pre">pei</span> <span class="pre">=</span> <span class="pre">pi</span></code> → <code class="docutils literal notranslate"><span class="pre">pei</span> <span class="pre">=</span> <span class="pre">item</span></code>.  (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1388">PR #1388</a>, <a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1389">PR #1389</a>)</p></li>
+<li><p>MAINT: Added private <code class="docutils literal notranslate"><span class="pre">_FitModelSpec</span></code> structured model-definition object
+with <code class="docutils literal notranslate"><span class="pre">from_fitparameters(fp)</span></code> constructor, <code class="docutils literal notranslate"><span class="pre">to_script()</span></code> serializer, and
+<code class="docutils literal notranslate"><span class="pre">count_varying()</span></code> / <code class="docutils literal notranslate"><span class="pre">extract_varying_values()</span></code> inspection methods.
+<code class="docutils literal notranslate"><span class="pre">_ComponentParamsView</span></code> adapter decouples <code class="docutils literal notranslate"><span class="pre">getmodel()</span></code> from the
+<code class="docutils literal notranslate"><span class="pre">{param}_{label}</span></code> parser convention by duck-typing.  Strategy B of the
+Optimize convergence plan — three phases delivered: parameter transform
+extraction, structured model spec, component-params adapter.  (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1387">PR #1387</a>, <a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1390">PR #1390</a>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MCRALS</span></code>: introduced the public constraint API skeleton
+(<code class="docutils literal notranslate"><span class="pre">spectrochempy.analysis.decomposition.mcrals_constraints</span></code>). The new
+public classes <code class="docutils literal notranslate"><span class="pre">Constraint</span></code> (abstract base), <code class="docutils literal notranslate"><span class="pre">NonNegative</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Closure</span></code>, <code class="docutils literal notranslate"><span class="pre">Unimodal</span></code>, <code class="docutils literal notranslate"><span class="pre">Monotonic</span></code>, <code class="docutils literal notranslate"><span class="pre">ZeroRegion</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Selectivity</span></code>, <code class="docutils literal notranslate"><span class="pre">FixedValues</span></code>, <code class="docutils literal notranslate"><span class="pre">ReferenceProfile</span></code> and
+<code class="docutils literal notranslate"><span class="pre">ModelProfile</span></code> describe scientific prior knowledge about the
+concentration (<code class="docutils literal notranslate"><span class="pre">&quot;C&quot;</span></code>) or spectral (<code class="docutils literal notranslate"><span class="pre">&quot;St&quot;</span></code>) profiles of <code class="docutils literal notranslate"><span class="pre">MCRALS</span></code></p>
+<blockquote>
+<div><p>as declarative, first-class objects. All ten classes are importable
+from the <code class="docutils literal notranslate"><span class="pre">spectrochempy.analysis.constraints</span></code> submodule
+(<code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">spectrochempy.analysis</span> <span class="pre">import</span> <span class="pre">constraints</span></code>), registered in the
+public API reference, and covered by dedicated construction / validation</p>
+</div></blockquote>
+<p>/ equality / repr / model / tolerance tests
+(<code class="docutils literal notranslate"><span class="pre">tests/test_analysis/test_decomposition/test_mcrals_constraints.py</span></code>).
+This PR introduces the vocabulary and public surface <strong>only</strong>: the
+classes are data containers and validators, they are <strong>not yet
+connected</strong> to the internal constraint engine, and using them does
+not change the behaviour of <code class="docutils literal notranslate"><span class="pre">MCRALS.fit</span></code>. No public APIs and no
+numerical behaviour change. Connection to the internal engine, the
+legacy traitlet converter, and the actual enforcement implementations
+are the subject of subsequent PRs (see the project RFC for the
+roadmap).</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MCRALS</span></code>: added a behavioral characterization test matrix
+(<code class="docutils literal notranslate"><span class="pre">tests/test_analysis/test_decomposition/test_mcrals.py</span></code>) freezing the
+current numerical output of <code class="docutils literal notranslate"><span class="pre">MCRALS</span></code> across the documented constraint
+(non-negativity, unimodality, monotonicity, closure, spectral
+normalization, hard-generated profiles), solver (<code class="docutils literal notranslate"><span class="pre">lstsq</span></code>, <code class="docutils literal notranslate"><span class="pre">nnls</span></code>,
+<code class="docutils literal notranslate"><span class="pre">pnnls</span></code>) and initialization (<code class="docutils literal notranslate"><span class="pre">C</span></code> vs. <code class="docutils literal notranslate"><span class="pre">St</span></code>) space, ahead of the next
+structural refactoring. The tests use a tiny deterministic synthetic
+dataset and compare against fixed expected arrays. The matrix initially
+exposed the same <code class="docutils literal notranslate"><span class="pre">np.any([0])</span></code> component-selection anti-pattern that
+affected issue #911 in <code class="docutils literal notranslate"><span class="pre">_ClosureConstraint</span></code> (selecting only component 0
+with <code class="docutils literal notranslate"><span class="pre">nonnegConc=[0]</span></code> / <code class="docutils literal notranslate"><span class="pre">monoIncConc=[0]</span></code> / <code class="docutils literal notranslate"><span class="pre">monoDecConc=[0]</span></code> /
+<code class="docutils literal notranslate"><span class="pre">hardConc=[0]</span></code> / <code class="docutils literal notranslate"><span class="pre">hardSpec=[0]</span></code> silently disabled the constraint);
+these are now fixed (see the Bug Fixes section above) and frozen as
+passing regression tests. See <code class="docutils literal notranslate"><span class="pre">MCRALS_PR4_BEHAVIOR_TESTS.md</span></code> for the
+characterization report.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MCRALS</span></code>: internal architecture overhaul, no public API or numerical
+behavior change. <code class="docutils literal notranslate"><span class="pre">MCRALS._fit</span></code> is now structured around an internal
+constraint engine: the public traitlets (<code class="docutils literal notranslate"><span class="pre">nonnegConc</span></code>, <code class="docutils literal notranslate"><span class="pre">unimodConc</span></code>,
+<code class="docutils literal notranslate"><span class="pre">monoIncConc</span></code>/<code class="docutils literal notranslate"><span class="pre">monoDecConc</span></code>, <code class="docutils literal notranslate"><span class="pre">closureConc</span></code>, <code class="docutils literal notranslate"><span class="pre">normSpec</span></code>,
+<code class="docutils literal notranslate"><span class="pre">hardConc</span></code>/<code class="docutils literal notranslate"><span class="pre">hardSpec</span></code> and their spectral counterparts) are translated
+once per fit into a private, ordered list of <code class="docutils literal notranslate"><span class="pre">_Constraint</span></code> objects, and
+the ALS loop iterates over them rather than calling each constraint by
+name. All constraint classes are private (<code class="docutils literal notranslate"><span class="pre">_</span></code>-prefixed) and not
+exported in <code class="docutils literal notranslate"><span class="pre">__all__</span></code>; the constraint order, the in-place vs. copy
+semantics, the traitlets, the <code class="docutils literal notranslate"><span class="pre">fit</span></code> / <code class="docutils literal notranslate"><span class="pre">transform</span></code> / <code class="docutils literal notranslate"><span class="pre">fit_transform</span></code>
+/ <code class="docutils literal notranslate"><span class="pre">inverse_transform</span></code> signatures, the <code class="docutils literal notranslate"><span class="pre">_outfit</span></code> return tuple, and
+the <code class="docutils literal notranslate"><span class="pre">getConc</span></code> / <code class="docutils literal notranslate"><span class="pre">getSpec</span></code> external-generator contract are preserved
+byte-for-byte. This refactoring reduces <code class="docutils literal notranslate"><span class="pre">_fit</span></code> from a ~230-line
+monolith to a high-level loop over constraint pipelines and prepares
+the ground for future work (constraint pipelines, generated-profile
+abstraction, multi-criteria convergence, scikit-learn compatibility).</p></li>
+<li><p>Centralized internal plotting kwargs normalization in a private helper
+module to reduce duplication across plotting entry points while preserving
+public plotting aliases and rendering behavior. (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1370">PR #1370</a>)</p></li>
+<li><p>Centralized internal plotting method normalization in a private helper
+module to reduce duplication across backend dispatch, multiplot handling,
+and 1D/2D fallback validation, without changing the public plotting API. (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1370">PR #1370</a>)</p></li>
+<li><p>CI: Added a PR compliance workflow (<code class="xref py py-obj docutils literal notranslate"><span class="pre">pr-compliance.yml</span></code>) that automatically
+checks:
+(1) the PR title starts with a valid prefix listed in <code class="xref py py-obj docutils literal notranslate"><span class="pre">CONTRIBUTING.md</span></code>
+(read dynamically so the list stays single-source),
+(2) <code class="xref py py-obj docutils literal notranslate"><span class="pre">docs/sources/whatsnew/changelog.rst</span></code> has been updated.
+Both checks can be bypassed via the labels <code class="xref py py-obj docutils literal notranslate"><span class="pre">non-standard-prefix</span></code> and
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">no-changelog</span></code> respectively. The PR-title prefix extraction now tolerates
+Markdown table spacing in <code class="xref py py-obj docutils literal notranslate"><span class="pre">CONTRIBUTING.md</span></code>, and Dependabot PRs are exempt
+from both the prefix and changelog checks so automated dependency updates do
+not require manual title edits or labels.</p></li>
+<li><p>DEV: Added a <code class="xref py py-obj docutils literal notranslate"><span class="pre">commit-msg</span></code> pre-commit hook (<code class="xref py py-obj docutils literal notranslate"><span class="pre">check_commit_prefix</span></code>) that
+reads the allowed prefixes directly from <code class="xref py py-obj docutils literal notranslate"><span class="pre">CONTRIBUTING.md</span></code> and rejects
+any commit whose subject line does not start with one of them.
+Merge commits and reverts are automatically exempt.
+Use <code class="xref py py-obj docutils literal notranslate"><span class="pre">git</span> <span class="pre">commit</span> <span class="pre">--no-verify</span></code> to bypass locally if necessary.</p></li>
+<li><p>MAINT: Refactored all nine procedural preprocessing functions
+(<code class="xref py py-obj docutils literal notranslate"><span class="pre">normalize</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">center</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">autoscale</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">snv</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">msc</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">pareto_scale</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">range_scale</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">robust_scale</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">log_transform</span></code>) to internally
+delegate to their transformer counterparts.  This eliminates code
+duplication between the procedural and transformer APIs while
+preserving full backward compatibility, including <code class="xref py py-obj docutils literal notranslate"><span class="pre">inplace</span></code> behaviour
+and history messages. (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1344">PR #1344</a>)</p></li>
+<li><p>CI: Moved archived stable docs builds (oldest supported + recent
+versions) out of the per-push <code class="docutils literal notranslate"><span class="pre">build_docs.yml</span></code> workflow into a
+dedicated weekly <code class="docutils literal notranslate"><span class="pre">build_docs_archived_versions.yml</span></code> workflow.  This
+shrinks the main deployment artifact (~382 MB previously) and avoids
+GitHub Pages <code class="docutils literal notranslate"><span class="pre">syncing_files</span></code> timeouts caused by oversized bundles.
+The main workflow now builds only the current version (plus preview
+docs for documentation branches).  Added <code class="docutils literal notranslate"><span class="pre">timeout-minutes:</span> <span class="pre">360</span></code> to
+both workflows and <code class="docutils literal notranslate"><span class="pre">continue-on-error:</span> <span class="pre">true</span></code> on archived-version
+steps so a single failing old-tag build does not block the rest. (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1350">PR #1350</a>)</p></li>
+<li><p>DOC: Refreshed the installation guide across all platforms:
+added <code class="docutils literal notranslate"><span class="pre">uv</span></code> as the recommended installation method, created a
+“Choosing an installation method” decision table, replaced
+deprecated Mambaforge references with Miniforge, and updated
+contributor setup instructions to match the project’s own
+<code class="docutils literal notranslate"><span class="pre">uv</span></code>-based development toolchain.  Conda/mamba and pip remain
+documented as alternatives.  (<a class="reference external" href="https://github.com/spectrochempy/spectrochempy/pull/1368">PR #1368</a>)</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="SpectroChemPy: Advanced Spectroscopic Data Analysis" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../gettingstarted/quickstart.html" class="btn btn-neutral float-right" title="Quickstart Tutorial 🚀" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2014-2026 Laboratoire Catalyse et Spectrochimie (LCS) — CeCILL-B license.
+      <span class="lastupdated">Last updated on Jul 12, 2026.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,10 @@
+What's new in revision 0.5.4
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-0.5.4.
+See :ref:`release` for a full changelog including other versions of SpectroChemPy.
+
+Bug fixes
+~~~~~~~~~
+* Documentation building fix.
+* Update check warning corrected.

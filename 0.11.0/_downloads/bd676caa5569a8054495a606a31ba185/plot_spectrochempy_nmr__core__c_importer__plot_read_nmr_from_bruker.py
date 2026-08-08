@@ -1,0 +1,52 @@
+# ======================================================================================
+# Copyright (©) 2014-2026 Laboratoire Catalyse et Spectrochimie (LCS), Caen, France.
+# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
+# See full LICENSE agreement in the root directory.
+# ======================================================================================
+# ruff: noqa
+"""
+Loading of experimental NMR data
+=================================
+
+In this example, we load a NMR dataset (in the Bruker format) and plot it.
+
+Requires the official ``spectrochempy-nmr`` plugin.
+Install with: ``pip install spectrochempy[nmr]``.
+
+"""
+# sphinx_gallery_thumbnail_path = 'gettingstarted/examples/gallery/auto_examples_core/c_importer/images/thumb/sphx_glr_plot_read_nmr_from_bruker_thumb.png'
+
+# %%
+import spectrochempy as scp
+
+# %%
+# `datadir.path` contains the path to a default data directory.
+
+datadir = scp.preferences.datadir
+
+path = datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_1d"
+
+# %%
+# load the data in a new dataset
+
+ndd = scp.nmr.read(path, expno=1, remove_digital_filter=True)
+
+# %%
+# view it...
+
+_ = ndd.plot()
+
+# %%
+# Now load a 2D  dataset
+
+path = datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_2d"
+ndd = scp.nmr.read(path, expno=1, remove_digital_filter=True)
+_ = ndd.plot()
+
+# %%
+# This ends the example ! The following line can be uncommented if no plot shows when
+# running the .py script with python
+
+# scp.show()
+
+# %%

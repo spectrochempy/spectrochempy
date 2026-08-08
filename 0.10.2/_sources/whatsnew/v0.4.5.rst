@@ -1,0 +1,20 @@
+What's new in revision 0.4.5 [2022-04-09]
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-0.4.5. See :ref:`release` for a full changelog
+including other versions of SpectroChemPy.
+
+New features
+~~~~~~~~~~~~
+
+-  Documentation improvement.
+-  MCRALS: add spectra unimodality constraint on MCRALS, ``unimodMod``
+   and ``unimodTol`` now deprecated.
+-  PCA: add ``plotmerit()`` method in PCA.
+-  Readers: add Surface Optics Corp. reader.
+-  SIMPLISMA: ``verbose`` parameter now deprecated.
+
+Bug fixes
+~~~~~~~~~
+
+-  Compatibility with pint=0.19.
