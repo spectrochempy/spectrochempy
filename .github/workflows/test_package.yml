@@ -76,6 +76,26 @@ jobs:
           raise SystemExit(subprocess.run(cmd, check=False).returncode)
           PY
 
+  safe-docs-bypass-tests:
+    needs: [classify-pr-bypass]
+    if: ${{ github.event_name == 'pull_request' && needs.classify-pr-bypass.outputs.skip == 'true' }}
+    name: ${{ matrix.check_name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - check_name: Test core-only using ubuntu-latest and python 3.14
+          - check_name: Test using ubuntu-latest and python 3.14
+          - check_name: Test using ubuntu-latest and python 3.11
+          - check_name: Test using windows-latest and python 3.14
+          - check_name: Test using macos-latest and python 3.14
+    steps:
+      - name: Report safe-docs bypass
+        run: |
+          echo "Skipping heavyweight test job due to safe-docs-no-ci."
+          echo "Reason: ${{ needs.classify-pr-bypass.outputs.reason }}"
+
   test-package:
     needs: [classify-pr-bypass]
     # Skip tests for releases and limit scheduled runs to main repository
