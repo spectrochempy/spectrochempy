@@ -99,9 +99,35 @@ jobs:
       - name: Create or reuse pull request into master
         id: release-pr
         env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          APP_GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          FALLBACK_GH_TOKEN: ${{ github.token }}
           RELEASE_VERSION: ${{ github.event.inputs.versionString }}
         run: |
+          gh_api_with_fallback() {
+            local method="$1"
+            local endpoint="$2"
+            shift 2
+
+            local stderr_file
+            stderr_file="$(mktemp)"
+
+            if GH_TOKEN="$APP_GH_TOKEN" gh api --method "$method" "$endpoint" "$@" 2>"$stderr_file"; then
+              rm -f "$stderr_file"
+              return 0
+            fi
+
+            if grep -q "Resource not accessible by integration" "$stderr_file"; then
+              echo "::warning::GitHub App token could not access $endpoint; retrying with github.token."
+              rm -f "$stderr_file"
+              GH_TOKEN="$FALLBACK_GH_TOKEN" gh api --method "$method" "$endpoint" "$@"
+              return $?
+            fi
+
+            cat "$stderr_file" >&2
+            rm -f "$stderr_file"
+            return 1
+          }
+
           body_file="$RUNNER_TEMP/release-pr-body.md"
           cat > "$body_file" <<EOF
           Hi @${{ github.actor }}!
@@ -123,26 +149,24 @@ jobs:
           pr_title="Release version $RELEASE_VERSION"
           pr_body="$(cat "$body_file")"
 
-          pr_number="$(gh api \
+          pr_number="$(GH_TOKEN="$APP_GH_TOKEN" gh api \
             "repos/${{ github.repository }}/pulls?state=open&head=${{ github.repository_owner }}:release/$RELEASE_VERSION&base=master" \
             --jq '.[0].number')"
 
           if [ -n "$pr_number" ] && [ "$pr_number" != "null" ]; then
-            pr_url="$(gh api "repos/${{ github.repository }}/pulls/$pr_number" --jq '.html_url')"
-            gh api \
-              --method PATCH \
+            pr_url="$(GH_TOKEN="$APP_GH_TOKEN" gh api "repos/${{ github.repository }}/pulls/$pr_number" --jq '.html_url')"
+            gh_api_with_fallback PATCH \
               "repos/${{ github.repository }}/pulls/$pr_number" \
               -f title="$pr_title" \
               -f body="$pr_body" >/dev/null
-            if ! gh api \
+            if ! GH_TOKEN="$APP_GH_TOKEN" gh api \
               --method POST \
               "repos/${{ github.repository }}/pulls/$pr_number/requested_reviewers" \
               -f "reviewers[]=${{ github.actor }}" >/dev/null; then
               echo "::warning::Could not add ${{ github.actor }} as reviewer on existing PR $pr_number."
             fi
           else
-            pr_fields="$(gh api \
-              --method POST \
+            pr_fields="$(gh_api_with_fallback POST \
               "repos/${{ github.repository }}/pulls" \
               -f title="$pr_title" \
               -f body="$pr_body" \
@@ -152,7 +176,7 @@ jobs:
             pr_number="${pr_fields%% *}"
             pr_url="${pr_fields#* }"
 
-            if ! gh api \
+            if ! GH_TOKEN="$APP_GH_TOKEN" gh api \
               --method POST \
               "repos/${{ github.repository }}/pulls/$pr_number/requested_reviewers" \
               -f "reviewers[]=${{ github.actor }}" >/dev/null; then
