@@ -12,6 +12,7 @@ import numpy as np
 import pytest
 
 import spectrochempy as scp
+from spectrochempy.core.units import ur
 from spectrochempy.utils.datetimeutils import UTC
 
 
@@ -30,6 +31,17 @@ def _dataset_with_y():
         coordset=[y, x],
         units="absorbance",
         name="valid_1d",
+    )
+
+
+def _single_spectrum_dataset(*, x_units="cm^-1", y_units="absorbance"):
+    x = scp.Coord(np.linspace(4000.0, 1000.0, 6), units=x_units, title="x")
+    y = scp.Coord([0.0])
+    return scp.NDDataset(
+        np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0]).reshape(1, 6),
+        coordset=[y, x],
+        units=y_units,
+        name="single_policy",
     )
 
 
@@ -195,6 +207,126 @@ def test_write_jcamp_valid_dataset_round_trip(tmp_path):
     assert np.allclose(back.data, dataset.data)
 
 
+@pytest.mark.parametrize(
+    ("x_units", "expected_token", "output_stem", "expected_readback_unit"),
+    [
+        ("cm^-1", "1/CM", "cm_inv", "cm^-1"),
+        ("1/cm", "1/CM", "one_per_cm", "cm^-1"),
+        ("um", "MICROMETERS", "micrometers", "um"),
+        ("nm", "NANOMETERS", "nanometers", "nm"),
+    ],
+)
+def test_write_jcamp_emits_truthful_xunits_for_exact_scale_inputs(
+    tmp_path, x_units, expected_token, output_stem, expected_readback_unit
+):
+    dataset = _single_spectrum_dataset(x_units=x_units, y_units="absorbance")
+
+    path = dataset.write_jcamp(tmp_path / f"{output_stem}.jdx", confirm=False)
+    text = path.read_text()
+
+    assert f"##XUNITS={expected_token}" in text
+    back = scp.read_jcamp(path)
+    assert np.allclose(back.x.data, dataset.x.data)
+    assert back.x.units == ur.Unit(expected_readback_unit)
+
+
+def test_write_jcamp_emits_arbitrary_units_for_unitless_x(tmp_path):
+    dataset = _single_spectrum_dataset(x_units=None, y_units="absorbance")
+
+    path = dataset.write_jcamp(tmp_path / "unitless_x.jdx", confirm=False)
+    text = path.read_text()
+
+    assert "##XUNITS=ARBITRARY UNITS" in text
+    back = scp.read_jcamp(path)
+    assert back.x.units is None
+    assert back.x.title == "arbitrary unit"
+    assert np.allclose(back.x.data, dataset.x.data)
+
+
+@pytest.mark.parametrize(
+    ("y_units", "expected_token", "expected_readback_unit", "expected_title"),
+    [
+        ("absorbance", "ABSORBANCE", "absorbance", "absorbance"),
+        ("transmittance", "TRANSMITTANCE", "transmittance", "transmittance"),
+    ],
+)
+def test_write_jcamp_emits_truthful_yunits_for_supported_inputs(
+    tmp_path, y_units, expected_token, expected_readback_unit, expected_title
+):
+    dataset = _single_spectrum_dataset(x_units="cm^-1", y_units=y_units)
+
+    path = dataset.write_jcamp(tmp_path / f"{expected_token}.jdx", confirm=False)
+    text = path.read_text()
+
+    assert f"##YUNITS={expected_token}" in text
+    back = scp.read_jcamp(path)
+    assert np.allclose(back.data, dataset.data)
+    assert back.units == expected_readback_unit
+    assert back.title == expected_title
+
+
+def test_write_jcamp_emits_arbitrary_units_for_unitless_y(tmp_path):
+    dataset = _single_spectrum_dataset(x_units="cm^-1", y_units=None)
+
+    path = dataset.write_jcamp(tmp_path / "unitless_y.jdx", confirm=False)
+    text = path.read_text()
+
+    assert "##YUNITS=ARBITRARY UNITS" in text
+    back = scp.read_jcamp(path)
+    assert np.allclose(back.data, dataset.data)
+    assert back.units is None
+    assert back.title == "<untitled>"
+
+
+@pytest.mark.parametrize(("x_units"), ["m^-1", "Hz", "dimensionless"])
+def test_write_jcamp_rejects_unsupported_x_units_before_file_creation(
+    tmp_path, x_units
+):
+    dataset = _single_spectrum_dataset(x_units=x_units, y_units="absorbance")
+    target = tmp_path / "bad_x.jdx"
+    original_filename = dataset.filename
+
+    with pytest.raises(ValueError, match="exact numeric scale"):
+        dataset.write_jcamp(target, confirm=False)
+
+    assert not target.exists()
+    assert dataset.filename == original_filename
+
+
+@pytest.mark.parametrize(
+    ("y_units"), ["count", "dimensionless", "absolute_transmittance"]
+)
+def test_write_jcamp_rejects_unsupported_y_units_before_file_creation(
+    tmp_path, y_units
+):
+    dataset = _single_spectrum_dataset(x_units="cm^-1", y_units=y_units)
+    target = tmp_path / "bad_y.jdx"
+    original_filename = dataset.filename
+
+    with pytest.raises(ValueError, match="only supports y units"):
+        dataset.write_jcamp(target, confirm=False)
+
+    assert not target.exists()
+    assert dataset.filename == original_filename
+
+
+def test_write_jcamp_generic_dispatch_applies_unit_policy(tmp_path):
+    x_none_y_none = _single_spectrum_dataset(x_units=None, y_units=None)
+
+    target = scp.write(x_none_y_none, tmp_path / "generic_policy.jdx", confirm=False)
+    text = target.read_text()
+    assert "##XUNITS=ARBITRARY UNITS" in text
+    assert "##YUNITS=ARBITRARY UNITS" in text
+
+    rejected = _single_spectrum_dataset(x_units="m^-1", y_units="absorbance")
+    bad_target = tmp_path / "generic_bad.jdx"
+
+    with pytest.raises(ValueError, match="exact numeric scale"):
+        scp.write(rejected, bad_target, confirm=False)
+
+    assert not bad_target.exists()
+
+
 def test_write_jcamp_link_extrema_are_computed_per_spectrum(tmp_path):
     dataset = _linked_dataset()
 
@@ -274,3 +406,29 @@ def test_write_jcamp_link_extrema_are_computed_per_spectrum(tmp_path):
         np.nan_to_num(expected_data, nan=0.0),
     )
     assert np.array_equal(np.isnan(back.data), np.isnan(expected_data))
+
+
+def test_write_jcamp_link_uses_same_unit_policy_as_singletons(tmp_path):
+    x = scp.Coord([1.0, 2.0, 3.0, 4.0], units=None, title="x")
+    y = scp.Coord([0.0, 1.0])
+    y.labels = np.array(
+        [
+            [datetime(2024, 1, 1, 12, 0, tzinfo=UTC), "spec_a"],
+            [datetime(2024, 1, 1, 12, 1, tzinfo=UTC), "spec_b"],
+        ],
+        dtype=object,
+    )
+    dataset = scp.NDDataset(
+        np.array([[1.0, 2.0, 3.0, 4.0], [4.0, 3.0, 2.0, 1.0]]),
+        coordset=[y, x],
+        units=None,
+        name="linked_policy",
+    )
+
+    path = dataset.write_jcamp(tmp_path / "linked_policy.jdx", confirm=False)
+    blocks = _parse_jcamp_blocks(path.read_text())
+
+    assert len(blocks) == 2
+    for block in blocks:
+        assert block["XUNITS"] == "ARBITRARY UNITS"
+        assert block["YUNITS"] == "ARBITRARY UNITS"

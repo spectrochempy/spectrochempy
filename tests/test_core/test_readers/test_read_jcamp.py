@@ -153,6 +153,26 @@ def test_read_jcamp_transmittance_units():
     assert ds.units == "transmittance"
 
 
+def test_read_jcamp_arbitrary_yunits_leave_units_unset_and_title_default():
+    jdx = """##TITLE=arbitrary_test
+##JCAMP-DX=5.01
+##DATA TYPE=INFRARED SPECTRUM
+##XUNITS=1/CM
+##YUNITS=ARBITRARY UNITS
+##FIRSTX=4000.0
+##LASTX=3996.0
+##XFACTOR=1.0
+##YFACTOR=1.0
+##NPOINTS=4
+##XYDATA=(X++(Y..Y))
+4000.0 90.0 85.0 80.0 75.0
+##END
+"""
+    ds = read_jcamp({"arbitrary_test.jdx": jdx.encode("utf8")})
+    assert ds.units is None
+    assert ds.title == "<untitled>"
+
+
 def test_read_jcamp_header_value_with_equals():
     # A header value containing "=" (e.g. a sample id) must not break the
     # ``keyword=text`` split (#1150): the parser now splits on the first "="

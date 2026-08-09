@@ -364,6 +364,10 @@ def _read_jdx(*args, **kwargs):
     elif yunits[0].strip() == "TRANSMITTANCE":
         dataset.units = "transmittance"
         dataset.title = "transmittance"
+    elif yunits[0].strip() == "ARBITRARY UNITS":
+        # The JCAMP token describes a unitless/arbitrary ordinate. Keep the
+        # dataset units unset and do not synthesize a title from the token.
+        dataset._units = None
 
     # now add coordinates
     _x = Coord(xaxis, title=axisname, units=axisunit)

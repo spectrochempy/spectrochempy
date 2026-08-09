@@ -32,6 +32,13 @@ Bug Fixes
   extrema across all blocks. The scientific payload, singleton exports and
   unit tags are unchanged.
 
+- JCAMP writing now emits truthful `XUNITS` / `YUNITS` tags instead of always
+  claiming `1/CM` and `ABSORBANCE`. The writer preserves numeric values
+  unchanged, accepts only exact-scale mappings (`cm^-1`, `um`, `nm`,
+  `absorbance`, `transmittance`, or no unit), rejects merely convertible or
+  named arbitrary units such as `m^-1`, `dimensionless`, and `count`, and the
+  reader now maps `YUNITS=ARBITRARY UNITS` back to `dataset.units = None`.
+
 - CSV export now rejects complex datasets before creating or truncating a file,
   instead of writing complex-valued CSV content that SpectroChemPy cannot read
   back correctly.

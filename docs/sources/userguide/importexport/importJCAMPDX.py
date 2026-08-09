@@ -76,6 +76,17 @@ newS0
 # It is important to note here that the conversion to JCAMP-DX changes the last digits
 # of absorbance and wavenumbers:
 
+# %% [markdown]
+# The writer preserves the numeric values it writes. It does not silently convert
+# wavelength to wavenumber or transmittance to absorbance. Current export support
+# is therefore limited to exact-scale JCAMP mappings:
+#
+# - x: `cm^-1`, `um`, `nm`, or no unit (`ARBITRARY UNITS`);
+# - y: `absorbance`, `transmittance`, or no unit (`ARBITRARY UNITS`).
+#
+# Other merely convertible or named arbitrary units are rejected until you
+# convert them explicitly before export.
+
 
 # %%
 from spectrochempy.utils.compare import difference
