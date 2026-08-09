@@ -56,11 +56,33 @@ def write_jcamp(*args, **kwargs):
     return exporter(*args, **kwargs)
 
 
+def _check_dataset_supported(dataset):
+    """
+    Validate that ``dataset`` matches the JCAMP-DX model this writer supports.
+
+    The JCAMP writer requires a `y` coordinate describing the spectra axis and
+    cannot represent complex data. Both checks run before any file is created
+    or truncated and before any dataset attribute is modified.
+    """
+    try:
+        y_coord = dataset.y
+    except AttributeError:
+        y_coord = None
+    if y_coord is None:
+        raise ValueError(
+            "JCAMP export requires a `y` coordinate describing the spectra; "
+            "the dataset has no `y` coordinate.",
+        )
+    if dataset.data.dtype.kind == "c":
+        raise TypeError("JCAMP export does not support complex NDDataset data.")
+
+
 @exportermethod
 def _write_jcamp(*args, **kwargs):
     # Writes a dataset in JCAMP-DX format
 
     dataset, filename = args
+    _check_dataset_supported(dataset)
     dataset.filename = filename
 
     # Make JCAMP_DX file
