@@ -42,3 +42,12 @@ Bug Fixes
 - CSV export now rejects complex datasets before creating or truncating a file,
   instead of writing complex-valued CSV content that SpectroChemPy cannot read
   back correctly.
+
+Deprecations
+~~~~~~~~~~~~
+
+- Writer kwargs `protocol=` and `description=` are now deprecated across the
+  generic, specialized and namespace writer APIs. Writer dispatch continues to
+  be determined only by the filename suffix, exported description metadata
+  continues to come from `dataset.description`, and passing either kwarg will
+  raise `TypeError` in `0.13.0`.

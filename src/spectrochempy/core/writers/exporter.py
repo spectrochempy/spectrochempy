@@ -8,6 +8,8 @@
 __all__ = ["write"]
 __dataset_methods__ = __all__
 
+import warnings
+
 from traitlets import Any
 from traitlets import HasTraits
 
@@ -15,6 +17,27 @@ from spectrochempy.core.readers.filetypes import registry
 from spectrochempy.utils.file import check_filename_to_save
 from spectrochempy.utils.file import pathclean
 from spectrochempy.utils.file import patterns
+
+
+def _warn_deprecated_writer_kwargs(kwargs):
+    if "protocol" in kwargs:
+        warnings.warn(
+            "Writer keyword argument `protocol` is deprecated and will be "
+            "removed in 0.13.0. Writer dispatch is determined by the filename "
+            "suffix or by using an explicit specialized / namespaced writer "
+            "API; `protocol=` does not select the writer.",
+            DeprecationWarning,
+            stacklevel=4,
+        )
+    if "description" in kwargs:
+        warnings.warn(
+            "Writer keyword argument `description` is deprecated and will be "
+            "removed in 0.13.0. Exported description metadata comes from "
+            "`dataset.description`, not from a write-time `description=` "
+            "override.",
+            DeprecationWarning,
+            stacklevel=4,
+        )
 
 
 # --------------------------------------------------------------------------------------
@@ -34,6 +57,7 @@ class Exporter(HasTraits):
         args = self._setup_object(*args)
 
         try:
+            _warn_deprecated_writer_kwargs(kwargs)
             if "filetypes" not in kwargs:
                 kwargs["filetypes"] = list(self.filetypes.values())
                 if args and args[0] is not None:  # filename
@@ -119,12 +143,16 @@ def write(dataset, filename=None, **kwargs):
     Other Parameters
     ----------------
     protocol : {'scp', 'matlab', 'jcamp', 'csv'}, optional
-        Protocol used for writing. If not provided, the correct protocol
-        is inferred (whenever it is possible) from the file name extension.
+        Deprecated. Writer dispatch is determined by the file name extension or
+        by using an explicit specialized writer API. Passing `protocol=` emits
+        a `DeprecationWarning` in 0.12 and will raise `TypeError` in 0.13.0.
     directory : str, optional
         Where to write the specified `filename` . If not specified, write in the current directory.
     description: str, optional
-        A Custom description.
+        Deprecated. Exported description metadata comes from
+        `dataset.description`, not from a write-time override. Passing
+        `description=` emits a `DeprecationWarning` in 0.12 and will raise
+        `TypeError` in 0.13.0.
     csv_delimiter : str, optional
         Set the column delimiter in CSV file.
         By default it is the one set in SpectroChemPy `Preferences` .

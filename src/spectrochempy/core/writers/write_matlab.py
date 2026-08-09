@@ -29,7 +29,9 @@ def write_matlab(*args, **kwargs):
         If not provided, a dialog is opened to select a file for writing.
     **kwargs
         Additional keyword arguments accepted by the generic writer API.
-        This specialized writer always exports MATLAB `.mat` files.
+        This specialized writer always exports MATLAB `.mat` files. Deprecated
+        generic writer kwargs such as `protocol=` and `description=` still emit
+        a `DeprecationWarning` in 0.12 and will raise `TypeError` in 0.13.0.
 
     Returns
     -------

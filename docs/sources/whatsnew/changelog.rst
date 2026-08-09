@@ -75,6 +75,12 @@ Deprecations
 ~~~~~~~~~~~~
 .. Add here new deprecations (do not delete this comment)
 
+- Writer kwargs `protocol=` and `description=` are now deprecated across the
+  generic, specialized and namespace writer APIs. Writer dispatch continues to
+  be determined only by the filename suffix, exported description metadata
+  continues to come from `dataset.description`, and passing either kwarg will
+  raise `TypeError` in `0.13.0`.
+
 
 .. section
 

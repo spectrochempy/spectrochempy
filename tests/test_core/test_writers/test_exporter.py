@@ -5,11 +5,13 @@
 # ======================================================================================
 # ruff: noqa
 
+from pathlib import Path
+
 import pytest
+from spectrochempy.utils import testing
 
 import spectrochempy as scp
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.utils import testing
 
 
 def test_write(mock_cwd, ndataset_1d):
@@ -66,6 +68,48 @@ def test_write_xls_uses_unsupported_format_path(ndataset_1d):
 
     with pytest.raises(ValueError, match=r"Unsupported export format `\.xls`"):
         nd.write("unsupported.xls", overwrite=True)
+
+
+def test_generic_write_protocol_kwarg_warns_but_keeps_default_scp_save(
+    mock_cwd, ndataset_1d
+):
+    nd = ndataset_1d.copy()
+    nd.name = "synthetic"
+    target = Path("synthetic.scp")
+    if target.exists():
+        target.unlink()
+
+    with pytest.warns(DeprecationWarning, match="`protocol` is deprecated"):
+        filename = scp.write(nd, protocol="csv")
+
+    assert filename.stem == "synthetic"
+    assert filename.suffix == ".scp"
+    assert filename.exists()
+
+    nd2 = NDDataset.load(filename)
+    testing.assert_dataset_equal(nd2, nd)
+    filename.unlink()
+
+
+def test_generic_write_description_kwarg_warns_but_uses_dataset_description(
+    tmp_path, ndataset_1d
+):
+    nd = ndataset_1d.copy()
+    nd.name = "synthetic"
+    nd.description = "source description"
+    original_description = nd.description
+
+    target = tmp_path / "synthetic.scp"
+
+    with pytest.warns(DeprecationWarning, match="`description` is deprecated"):
+        filename = scp.write(nd, target, description="custom", confirm=False)
+
+    assert filename == target
+    assert filename.exists()
+    assert nd.description == original_description
+
+    reloaded = NDDataset.load(filename)
+    assert reloaded.description == "source description"
 
 
 # EOF
