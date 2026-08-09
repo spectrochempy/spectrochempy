@@ -113,3 +113,46 @@ def test_write_matlab_does_not_modify_source_dataset(tmp_path):
     dataset.write_matlab(tmp_path / "trace.mat", confirm=False)
 
     assert dataset.filename == original_filename
+
+
+@pytest.mark.parametrize("api", ["method", "namespace"])
+def test_write_matlab_deprecated_description_warns_but_uses_dataset_description(
+    tmp_path, api
+):
+    dataset = scp.NDDataset(
+        np.linspace(0.1, 0.5, 5),
+        name="spectrum",
+        title="absorbance",
+        units="mV",
+        description="source description",
+    )
+    target = tmp_path / f"{api}.mat"
+
+    with pytest.warns(DeprecationWarning, match="`description` is deprecated"):
+        if api == "method":
+            path = dataset.write_matlab(target, description="custom", confirm=False)
+        else:
+            path = scp.matlab.write(
+                dataset, target, description="custom", confirm=False
+            )
+
+    assert path == target
+    assert dataset.description == "source description"
+    exported = loadmat(path, simplify_cells=True)
+    assert exported["description"] == "source description"
+
+
+@pytest.mark.parametrize("api", ["method", "namespace"])
+def test_write_matlab_deprecated_protocol_warns_but_still_writes_matlab(tmp_path, api):
+    dataset = scp.NDDataset(np.arange(5.0), name="trace")
+    target = tmp_path / f"{api}.mat"
+
+    with pytest.warns(DeprecationWarning, match="`protocol` is deprecated"):
+        if api == "method":
+            path = dataset.write_matlab(target, protocol="csv", confirm=False)
+        else:
+            path = scp.matlab.write(dataset, target, protocol="csv", confirm=False)
+
+    assert path == target
+    exported = loadmat(path, simplify_cells=True)
+    assert np.array_equal(exported["data"], np.arange(5.0))

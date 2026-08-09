@@ -31,14 +31,14 @@ def write_csv(*args, **kwargs):
         If not provided, a dialog is opened to select a file for writing.
     directory : str, optional
         Where to write the specified `filename` . If not specified, write in the current directory.
-    description: str, optional
-        A Custom description.
     delimiter : str, optional
         Set the column delimiter in CSV file.
         By default it is ',' or the one set in SpectroChemPy `Preferences` .
     **kwargs
         Additional keyword arguments accepted by the generic writer API.
-        This specialized writer always exports CSV files.
+        This specialized writer always exports CSV files. Deprecated generic
+        writer kwargs such as `protocol=` and `description=` still emit a
+        `DeprecationWarning` in 0.12 and will raise `TypeError` in 0.13.0.
 
     Returns
     -------

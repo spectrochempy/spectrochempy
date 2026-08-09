@@ -31,11 +31,11 @@ def write_jcamp(*args, **kwargs):
         If not provided, a dialog is opened to select a file for writing.
     directory : str, optional
         Where to write the specified `filename` . If not specified, write in the current directory.
-    description: str, optional
-        A Custom description.
     **kwargs
         Additional keyword arguments accepted by the generic writer API.
-        This specialized writer always exports JCAMP-DX files.
+        This specialized writer always exports JCAMP-DX files. Deprecated
+        generic writer kwargs such as `protocol=` and `description=` still emit
+        a `DeprecationWarning` in 0.12 and will raise `TypeError` in 0.13.0.
 
     Returns
     -------

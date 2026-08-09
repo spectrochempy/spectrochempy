@@ -186,3 +186,53 @@ def test_write_csv_valid_real_round_trip_still_works(tmp_path, ds_1d_with_coords
     assert back.shape == (1, 5)
     np.testing.assert_allclose(back.data.ravel(), dataset.data)
     np.testing.assert_allclose(back.x.data, dataset.x.data)
+
+
+@pytest.mark.parametrize("api", ["method", "namespace"])
+def test_write_csv_deprecated_protocol_warns_and_still_writes_csv(
+    tmp_path, ds_1d_with_coords, api
+):
+    dataset = ds_1d_with_coords.copy()
+    dataset.title = "absorbance"
+    dataset.units = "absorbance"
+    dataset.name = f"real_csv_{api}"
+    target = tmp_path / f"{api}.csv"
+
+    with pytest.warns(DeprecationWarning, match="`protocol` is deprecated"):
+        if api == "method":
+            path = dataset.write_csv(target, protocol="matlab", confirm=False)
+        else:
+            path = scp.csv.write(dataset, target, protocol="matlab", confirm=False)
+
+    assert path == target
+    assert path.suffix == ".csv"
+    text = path.read_text()
+    assert "wavenumber / cm^-1,absorbance / a.u." in text
+
+    back = scp.read_csv(path)
+    np.testing.assert_allclose(back.data.ravel(), dataset.data)
+    np.testing.assert_allclose(back.x.data, dataset.x.data)
+
+
+@pytest.mark.parametrize("api", ["method", "namespace"])
+def test_write_csv_deprecated_description_warns_without_overriding_export(
+    tmp_path, ds_1d_with_coords, api
+):
+    dataset = ds_1d_with_coords.copy()
+    dataset.title = "absorbance"
+    dataset.units = "absorbance"
+    dataset.name = f"real_csv_{api}"
+    dataset.description = "source description"
+    target = tmp_path / f"{api}.csv"
+
+    with pytest.warns(DeprecationWarning, match="`description` is deprecated"):
+        if api == "method":
+            path = dataset.write_csv(target, description="custom", confirm=False)
+        else:
+            path = scp.csv.write(dataset, target, description="custom", confirm=False)
+
+    assert path == target
+    assert dataset.description == "source description"
+    text = path.read_text()
+    assert "custom" not in text
+    assert "source description" not in text
