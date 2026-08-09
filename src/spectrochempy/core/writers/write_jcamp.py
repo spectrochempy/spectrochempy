@@ -152,8 +152,9 @@ def _write_jcamp(*args, **kwargs):
             fid.write(f"##MINX={minx:.6f}\n")
             fid.write(f"##XFACTOR={xfactor}\n")
 
-            firsty, lasty = ydata[0, 0], ydata[0, -1]
-            maxy, miny = np.nanmax(ydata), np.nanmin(ydata)
+            spectrum = ydata[i]
+            firsty, lasty = spectrum[0], spectrum[-1]
+            maxy, miny = np.nanmax(spectrum), np.nanmin(spectrum)
             yfactor = 1.0e-8
 
             fid.write(f"##FIRSTY={firsty:.6f}\n")

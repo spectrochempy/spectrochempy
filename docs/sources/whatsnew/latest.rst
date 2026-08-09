@@ -26,3 +26,8 @@ Bug Fixes
   with complex data (previously silently written with corrupted content).
   No partial or corrupt file is left behind and the source dataset is
   unmodified.
+
+- JCAMP `LINK` files now compute `FIRSTY`, `LASTY`, `MAXY` and `MINY`
+  separately for each spectrum block instead of repeating the first/global
+  extrema across all blocks. The scientific payload, singleton exports and
+  unit tags are unchanged.
