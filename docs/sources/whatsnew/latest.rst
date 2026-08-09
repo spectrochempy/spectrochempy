@@ -6,21 +6,17 @@
 
 :orphan:
 
-What's New in Revision 0.12.1
+What's New in Revision 0.12.2.dev
 ---------------------------------------------------------------------------------------
 
-These are the changes in SpectroChemPy-0.12.1.
+These are the changes in SpectroChemPy-0.12.2.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
 
 Bug Fixes
 ~~~~~~~~~
 
-- Concurrent writes from `MetaConfigurable` instances such as `MCRALS` no longer
-  corrupt shared JSON config files. SpectroChemPy now serializes same-process
-  config updates, writes JSON atomically, preserves corrupted files under a
-  backup name, and avoids emitting raw persistence exceptions on stdout.
-
-- Internal `MCRALS` revalidation after `_n_components` changes no longer emits
-  transient config-file writes for normalized legacy constraint traits during
-  `fit()`, while explicit user changes to persisted parameters still behave as
-  before.
+- Filter and smoothing outputs (`smooth`, `savgol`, `savgol_filter`, `whittaker`)
+  now preserve the source dataset `name` and append a single history entry while
+  retaining all prior entries, instead of renaming with a ``_Filter.transform``
+  suffix and replacing the history. Savitzky-Golay derivative outputs
+  (`deriv > 0`), ``denoise`` and analysis outputs are unchanged.

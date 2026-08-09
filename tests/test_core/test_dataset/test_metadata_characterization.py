@@ -159,7 +159,7 @@ def test_wrapper_based_filter_preserves_scientific_context_metadata(
 ):
     result = scp.Filter(method="savgol", size=5, order=2).transform(metadata_dataset)
 
-    assert result.name == "sample_001_Filter.transform"
+    assert result.name == metadata_dataset.name
     assert result.title == metadata_dataset.title
     assert result.meta == metadata_dataset.meta
     assert result.meta is not metadata_dataset.meta
@@ -172,16 +172,17 @@ def test_wrapper_based_filter_preserves_scientific_context_metadata(
     assert_basic_metadata_preserved(
         result,
         metadata_dataset,
-        check_name=False,
-        check_title=False,
+        check_name=True,
+        check_title=True,
         check_filename=True,
         meta_keys=("project", "instrument"),
     )
     assert_units_preserved(result, metadata_dataset)
     assert_dims_equal(result, ["y", "x"])
     assert_coordset_matches(result, metadata_dataset)
-    assert len(result.history) == 1
-    assert "Created using method Filter.transform" in result.history[0]
+    assert_history_appended(
+        result, metadata_dataset, "Created using method Filter.transform"
+    )
 
 
 def test_integrate_preserves_metadata_with_operation_overrides(metadata_dataset):
