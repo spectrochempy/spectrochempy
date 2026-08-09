@@ -20,3 +20,9 @@ Bug Fixes
   retaining all prior entries, instead of renaming with a ``_Filter.transform``
   suffix and replacing the history. Savitzky-Golay derivative outputs
   (`deriv > 0`), ``denoise`` and analysis outputs are unchanged.
+
+- JCAMP writing now rejects, before any file is created or truncated, datasets
+  without a `y` coordinate (previously producing a partial file) and datasets
+  with complex data (previously silently written with corrupted content).
+  No partial or corrupt file is left behind and the source dataset is
+  unmodified.
