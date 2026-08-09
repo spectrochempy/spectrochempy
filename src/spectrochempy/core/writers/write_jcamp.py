@@ -9,6 +9,7 @@ from datetime import datetime
 
 import numpy as np
 
+from spectrochempy.core.units import ur
 from spectrochempy.core.writers.exporter import Exporter
 from spectrochempy.core.writers.exporter import exportermethod
 from spectrochempy.utils.datetimeutils import UTC
@@ -77,12 +78,60 @@ def _check_dataset_supported(dataset):
         raise TypeError("JCAMP export does not support complex NDDataset data.")
 
 
+def _format_unit(unit):
+    return "None" if unit is None else str(unit)
+
+
+def _unit_matches_exact_scale(unit, canonical_unit):
+    """
+    Return ``True`` only for exact-scale aliases of ``canonical_unit``.
+
+    This intentionally relies on unit identity/equality, not generic
+    dimensional compatibility or convertibility: values written by the JCAMP
+    writer must not be implicitly rescaled.
+    """
+    return unit is not None and unit == ur.Unit(canonical_unit)
+
+
+def _jcamp_xunits_token(dataset):
+    x = dataset.x
+    if x.unitless:
+        return "ARBITRARY UNITS"
+    if _unit_matches_exact_scale(x.units, "cm^-1"):
+        return "1/CM"
+    if _unit_matches_exact_scale(x.units, "um"):
+        return "MICROMETERS"
+    if _unit_matches_exact_scale(x.units, "nm"):
+        return "NANOMETERS"
+    raise ValueError(
+        "JCAMP export only supports x coordinates with the exact numeric scale "
+        "of cm^-1, um/µm, nm, or no unit. "
+        f"Got x units {_format_unit(x.units)!r}. Convert explicitly before export.",
+    )
+
+
+def _jcamp_yunits_token(dataset):
+    if dataset.unitless:
+        return "ARBITRARY UNITS"
+    if _unit_matches_exact_scale(dataset.units, "absorbance"):
+        return "ABSORBANCE"
+    if _unit_matches_exact_scale(dataset.units, "transmittance"):
+        return "TRANSMITTANCE"
+    raise ValueError(
+        "JCAMP export only supports y units absorbance, transmittance, or no "
+        f"unit. Got y units {_format_unit(dataset.units)!r}. Convert explicitly "
+        "before export.",
+    )
+
+
 @exportermethod
 def _write_jcamp(*args, **kwargs):
     # Writes a dataset in JCAMP-DX format
 
     dataset, filename = args
     _check_dataset_supported(dataset)
+    xunits_token = _jcamp_xunits_token(dataset)
+    yunits_token = _jcamp_yunits_token(dataset)
     dataset.filename = filename
 
     # Make JCAMP_DX file
@@ -139,8 +188,8 @@ def _write_jcamp(*args, **kwargs):
             fid.write(f"##LONGDATE={timestamp.strftime('%Y/%m/%d')}\n")
             fid.write(f"##TIME={timestamp.strftime('%H:%M:%S')}\n")
 
-            fid.write("##XUNITS=1/CM\n")
-            fid.write("##YUNITS=ABSORBANCE\n")
+            fid.write(f"##XUNITS={xunits_token}\n")
+            fid.write(f"##YUNITS={yunits_token}\n")
 
             firstx, lastx = dataset.x.data[0], dataset.x.data[-1]
             maxx, minx = max(firstx, lastx), min(firstx, lastx)
