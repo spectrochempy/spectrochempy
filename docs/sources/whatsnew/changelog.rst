@@ -54,6 +54,10 @@ Bug Fixes
   instead of writing complex-valued CSV content that SpectroChemPy cannot read
   back correctly.
 
+- Native `.scp` and `.pscp` persistence now preserves dataset history entries
+  exactly across load/save round-trips instead of collapsing non-empty history
+  to the first entry and retimestamping it during native reconstruction.
+
 
 .. section
 

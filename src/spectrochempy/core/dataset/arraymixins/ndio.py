@@ -462,7 +462,11 @@ class NDIO(tr.HasTraits):
                         pass
 
                     elif key in ["_history"]:
-                        obj.history = val
+                        from spectrochempy.core.dataset.nddataset import (
+                            _restore_portable_history,
+                        )
+
+                        obj._history = _restore_portable_history(val)
 
                     else:
                         if isinstance(val, TYPE_BOOL) and key == "_mask":
