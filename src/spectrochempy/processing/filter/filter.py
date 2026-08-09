@@ -183,6 +183,7 @@ and ‘nearest’.
         # path sets it, so every other method (and deriv=0) leaves the title as
         # that of the input data.
         self._output_title_suffix = None
+        self._preserve_identity = True
 
         # smooth with moving average
         # --------------------------
@@ -233,6 +234,7 @@ and ‘nearest’.
                     self.deriv, f"{self.deriv}th"
                 )
                 self._output_title_suffix = f"({ordinal} derivative)"
+                self._preserve_identity = False
 
         # Whittaker-Eilers filter
         # -----------------------

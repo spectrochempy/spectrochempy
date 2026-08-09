@@ -442,6 +442,7 @@ class _set_output:
         typex=None,
         typey=None,
         typesingle=None,
+        preserve_identity=False,
     ):
         self.method = method
         update_wrapper(self, method)
@@ -451,6 +452,7 @@ class _set_output:
         self.typex = typex
         self.typey = typey
         self.typesingle = typesingle
+        self.preserve_identity = preserve_identity
 
     @preserve_signature
     def __get__(self, obj, objtype):
@@ -499,6 +501,7 @@ class _set_output:
             meta_from_tuple = self.meta_from
 
         out = []
+        preserve = self.preserve_identity and getattr(obj, "_preserve_identity", True)
         for data, meta_from in zip(data_tuple, meta_from_tuple, strict=False):
             X_transf = NDDataset(data)
 
@@ -540,7 +543,11 @@ class _set_output:
                     X_transf.units = X.units
                 else:
                     X_transf.units = self.units
-            X_transf.name = f"{X.name}_{obj.name}.{self.method.__name__}"
+            if preserve:
+                X_transf.name = metadata_source.name
+                X_transf._history = list(metadata_source._history or [])
+            else:
+                X_transf.name = f"{X.name}_{obj.name}.{self.method.__name__}"
             X_transf.history = f"Created using method {obj.name}.{self.method.__name__}"
             if self.title is not None:
                 if self.title == "keep":
@@ -669,7 +676,10 @@ class _set_output:
             # Only squeeze if the input was originally 1D (expanded to 2D)
             # This preserves intentionally 2D datasets with shape (1, N)
             if getattr(obj, "_X_original_ndim", 2) == 1:
-                out.append(X_transf.squeeze())
+                X_transf = X_transf.squeeze()
+                if preserve:
+                    X_transf._history = X_transf._history[:-1]
+                out.append(X_transf)
             else:
                 out.append(X_transf)
 
@@ -686,6 +696,7 @@ def _wrap_ndarray_output_to_nddataset(
     typex=None,
     typey=None,
     typesingle=None,
+    preserve_identity=False,
 ):
     # wrap _set_output to allow for deferred calling
     if method:
@@ -702,6 +713,7 @@ def _wrap_ndarray_output_to_nddataset(
                 typex=typex,
                 typey=typey,
                 typesingle=typesingle,
+                preserve_identity=preserve_identity,
             )
 
         out = wrapper

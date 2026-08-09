@@ -1,22 +1,25 @@
 """
 Characterization tests for processing-wrapper semantics on NDDataset.
 
-This suite characterizes CURRENT behavior of processing wrappers
+This suite characterizes the behavior of processing wrappers
 (smooth, savgol, whittaker, basc, detrend, asls, denoise).
-It does NOT validate a desired future policy.
 
 Coverage:
     - Return type, shape, dims, CoordSet, units, masks
     - Metadata (title, name, author, description, origin, meta)
     - History, identity, provenance
 
-Two distinct assembly patterns emerge:
-    Group A (Filter/PCA-based: smooth, savgol, whittaker, denoise):
-        name appended, no modeldata attribute,
-        history rewritten
+Two distinct assembly patterns exist:
+    Group A (Filter/PCA-based: smooth, savgol, whittaker):
+        name preserved, no modeldata attribute,
+        history appended (aligned to the single-source Category A policy)
     Group B (Baseline-based: basc, detrend, asls):
         name preserved, no modeldata attribute,
         history appended
+
+The Savitzky-Golay derivative (``deriv > 0``) and the PCA-based ``denoise``
+keep their historical Group A behavior (name recompute, history replace)
+until their classification is decided (RFC DQ1 / DQ2).
 """
 
 import numpy as np
@@ -103,8 +106,8 @@ class TestFilterWrappers:
     """
     Characterize Filter-based wrappers: smooth, savgol, whittaker.
 
-    Observation: these all rewrite history, append _Filter.transform
-    to name, and expose no modeldata attribute.
+    Observation: these preserve the source name, append history
+    (retaining prior entries), and expose no modeldata attribute.
     """
 
     @pytest.mark.parametrize("method", ["smooth", "savgol", "whittaker"])
@@ -134,10 +137,10 @@ class TestFilterWrappers:
         assert r.title == "ds_title"
 
     @pytest.mark.parametrize("method", ["smooth", "savgol", "whittaker"])
-    def test_name_appended(self, ds, method):
-        """Notable: name is appended with '_Filter.transform'."""
+    def test_name_preserved(self, ds, method):
+        """Notable: name is preserved unchanged (aligned to Group B)."""
         r = _call_filter(ds, method)
-        assert r.name == "ds_name_Filter.transform"
+        assert r.name == "ds_name"
 
     def test_author_preserved(self, ds):
         r = ds.smooth(size=3)
@@ -161,15 +164,15 @@ class TestFilterWrappers:
         assert ds.meta.project == "test_project"
 
     @pytest.mark.parametrize("method", ["smooth", "savgol", "whittaker"])
-    def test_history_rewritten(self, ds, method):
+    def test_history_appended(self, ds, method):
         """
-        Notable: history is REWRITTEN, not appended.
-        Original entries are lost.
+        Notable: history is APPENDED (retaining prior entries), aligned
+        to the Group B / Category A policy.
         """
         r = _call_filter(ds, method)
-        assert len(r.history) == 1
-        assert "Created using method Filter.transform" in r.history[0]
-        assert "original" not in r.history[0].lower()
+        assert len(r.history) == 2
+        assert "original entry" in r.history[0].lower()
+        assert "Created using method Filter.transform" in r.history[1]
 
     @pytest.mark.parametrize("method", ["smooth", "savgol", "whittaker"])
     def test_modeldata_dropped(self, ds, method):
@@ -267,9 +270,10 @@ class TestPcaWrapper:
     """
     Characterize PCA-based denoise wrapper.
 
-    Observation: Follows Group A pattern (name appended, no modeldata
-    attribute, history rewritten) but with different
-    method suffix (_PCA.inverse_transform).
+    Observation: follows the historical Group A pattern (name appended,
+    no modeldata attribute, history rewritten) with the
+    ``_PCA.inverse_transform`` suffix. Its classification is deferred
+    (RFC DQ2), so this behavior is intentionally unchanged.
     """
 
     def test_return_type(self, ds):
@@ -377,19 +381,21 @@ class TestIdentityProvenance:
     Characterize identity and provenance through processing wrappers.
 
     Observations:
-    - Group A (Filter/PCA): identity partially preserved (title, author,
-      origin, meta survive), but name is modified and history rewritten,
-      suggesting a derived or transformed identity.
+    - Group A (Filter): identity preserved (name, title, author, origin,
+      meta survive) and history appended, consistent with same-object
+      identity, aligned to the Category A policy.
     - Group B (Baseline): identity preserved (all fields survive),
       history appended, consistent with same-object identity.
+    - PCA-based ``denoise`` (DQ2): identity partially preserved and
+      history rewritten (historical Group A pattern, unchanged).
     """
 
-    def test_filter_identity_partial(self, ds):
+    def test_filter_identity_preserved(self, ds):
         r = ds.smooth(size=3)
         assert r.title == ds.title
         assert r.author == ds.author
         assert r.origin == ds.origin
-        assert r.name != ds.name  # appended suffix
+        assert r.name == ds.name
 
     def test_baseline_identity_preserved(self, ds):
         r = ds.basc()
@@ -398,10 +404,11 @@ class TestIdentityProvenance:
         assert r.author == ds.author
         assert r.origin == ds.origin
 
-    def test_filter_provenance_rewritten(self, ds):
+    def test_filter_provenance_extended(self, ds):
         r = ds.smooth(size=3)
-        assert len(r.history) == 1
-        assert r.history[0] != ds.history[0]
+        assert len(r.history) == 2
+        assert r.history[0] == ds.history[0]
+        assert "Filter.transform" in r.history[1]
 
     def test_baseline_provenance_extended(self, ds):
         r = ds.basc()

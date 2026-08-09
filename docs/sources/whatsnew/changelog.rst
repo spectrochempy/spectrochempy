@@ -26,6 +26,12 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Filter and smoothing outputs (`smooth`, `savgol`, `savgol_filter`, `whittaker`)
+  now preserve the source dataset `name` and append a single history entry while
+  retaining all prior entries, instead of renaming with a ``_Filter.transform``
+  suffix and replacing the history. Savitzky-Golay derivative outputs
+  (`deriv > 0`), ``denoise`` and analysis outputs are unchanged.
+
 
 .. section
 

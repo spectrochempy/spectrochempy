@@ -102,7 +102,7 @@ class ProcessingConfigurable(BaseConfigurable):
     # ----------------------------------------------------------------------------------
     # Public methods and property
     # ----------------------------------------------------------------------------------
-    @_wrap_ndarray_output_to_nddataset
+    @_wrap_ndarray_output_to_nddataset(meta_from="_X", preserve_identity=True)
     def transform(self, dataset, dim=-1):
         r"""
         Transform the input dataset X using the current model.
