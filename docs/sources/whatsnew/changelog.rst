@@ -43,6 +43,10 @@ Bug Fixes
   extrema across all blocks. The scientific payload, singleton exports and
   unit tags are unchanged.
 
+- CSV export now rejects complex datasets before creating or truncating a file,
+  instead of writing complex-valued CSV content that SpectroChemPy cannot read
+  back correctly.
+
 
 .. section
 

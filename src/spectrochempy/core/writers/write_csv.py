@@ -63,9 +63,22 @@ def write_csv(*args, **kwargs):
     return exporter(*args, **kwargs)
 
 
+def _check_dataset_supported(dataset):
+    """
+    Validate that ``dataset`` matches the CSV writer's supported data model.
+
+    The CSV writer cannot represent complex-valued payloads in a format that
+    SpectroChemPy can read back, so reject them before any write-side effect
+    such as filename mutation, squeezing, file creation, or truncation.
+    """
+    if dataset.data.dtype.kind == "c":
+        raise TypeError("CSV export does not support complex NDDataset data.")
+
+
 @exportermethod
 def _write_csv(*args, **kwargs):
     dataset, filename = args
+    _check_dataset_supported(dataset)
     dataset.filename = filename
 
     delimiter = kwargs.get("delimiter", prefs.csv_delimiter)

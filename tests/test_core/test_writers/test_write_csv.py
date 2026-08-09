@@ -24,6 +24,21 @@ def ds_2d_with_coords(ds_1d_with_coords):
     return scp.NDDataset(np.ones((3, 5)), coordset=[y_coord, coord])
 
 
+@pytest.fixture
+def ds_complex_no_coord():
+    return scp.NDDataset(np.array([1.0 + 2.0j, 2.0 + 1.0j, 3.0 + 0.5j]))
+
+
+@pytest.fixture
+def ds_complex_with_coord():
+    coord = scp.Coord(np.linspace(4000, 3998, 3), title="wavenumber", units="cm^-1")
+    return scp.NDDataset(
+        np.array([1.0 + 2.0j, 3.0 + 4.0j, 5.0 + 0.25j]),
+        coordset=[coord],
+        name="complex_csv",
+    )
+
+
 def test_write_csv(mock_cwd):
     # 1D dataset without coords
     ds = scp.NDDataset([1, 2, 3])
@@ -82,3 +97,92 @@ def test_write_csv_masked_values(tmp_path):
     arr = np.asarray(back.data, dtype=float).ravel()
     assert np.isnan(arr[3:6]).all()
     assert np.isfinite(np.concatenate([arr[:3], arr[6:]])).all()
+
+
+def test_write_csv_rejects_complex_data_without_coord(tmp_path, ds_complex_no_coord):
+    target = tmp_path / "complex.csv"
+    original_filename = ds_complex_no_coord.filename
+
+    with pytest.raises(
+        TypeError,
+        match="CSV export does not support complex NDDataset data.",
+    ):
+        scp.write_csv(ds_complex_no_coord, target, confirm=False)
+
+    assert not target.exists()
+    assert ds_complex_no_coord.filename == original_filename
+
+
+def test_write_csv_rejects_complex_data_keeps_existing_file(
+    tmp_path, ds_complex_with_coord
+):
+    target = tmp_path / "complex.csv"
+    target.write_bytes(b"SENTINEL\n")
+    original_bytes = target.read_bytes()
+    original_filename = ds_complex_with_coord.filename
+
+    with pytest.raises(
+        TypeError,
+        match="CSV export does not support complex NDDataset data.",
+    ):
+        ds_complex_with_coord.write_csv(target, confirm=False, overwrite=True)
+
+    assert target.read_bytes() == original_bytes
+    assert ds_complex_with_coord.filename == original_filename
+
+
+def test_write_csv_namespace_dispatch_rejects_complex_data(
+    tmp_path, ds_complex_with_coord
+):
+    target = tmp_path / "complex_namespace.csv"
+    original_filename = ds_complex_with_coord.filename
+
+    with pytest.raises(
+        TypeError,
+        match="CSV export does not support complex NDDataset data.",
+    ):
+        scp.csv.write(ds_complex_with_coord, target, confirm=False)
+
+    assert not target.exists()
+    assert ds_complex_with_coord.filename == original_filename
+
+
+def test_write_csv_generic_dispatch_rejects_complex_data(
+    tmp_path, ds_complex_with_coord
+):
+    original_filename = ds_complex_with_coord.filename
+
+    for method_name, target_name in [
+        ("write", "complex_dataset_method.csv"),
+        ("scp.write", "complex_top_level.csv"),
+    ]:
+        target = tmp_path / target_name
+        with pytest.raises(
+            TypeError,
+            match="CSV export does not support complex NDDataset data.",
+        ):
+            if method_name == "write":
+                ds_complex_with_coord.write(target, confirm=False)
+            else:
+                scp.write(ds_complex_with_coord, target, confirm=False)
+        assert not target.exists()
+        assert ds_complex_with_coord.filename == original_filename
+
+
+def test_write_csv_valid_real_round_trip_still_works(tmp_path, ds_1d_with_coords):
+    dataset = ds_1d_with_coords.copy()
+    dataset.title = "absorbance"
+    dataset.units = "absorbance"
+    dataset.name = "real_csv"
+
+    path = scp.write_csv(dataset, tmp_path / "real.csv", confirm=False)
+
+    assert path.exists()
+    assert dataset.filename == path
+    text = path.read_text()
+    assert "wavenumber / cm^-1,absorbance / a.u." in text
+
+    back = scp.read_csv(path)
+    assert back.shape == (1, 5)
+    np.testing.assert_allclose(back.data.ravel(), dataset.data)
+    np.testing.assert_allclose(back.x.data, dataset.x.data)
