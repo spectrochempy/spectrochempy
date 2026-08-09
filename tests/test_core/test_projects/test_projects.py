@@ -6,6 +6,8 @@ import base64
 import json
 import pickle
 import zipfile
+from datetime import UTC
+from datetime import datetime
 
 import numpy as np
 import pytest
@@ -57,6 +59,19 @@ def _assert_project_membership(project, child, key, *, present):
     else:
         assert key not in project.projects_names
         assert child not in project.projects
+
+
+def _make_project_history_entries(prefix):
+    return [
+        (datetime(2024, 2, 1, 8, 0, 0, tzinfo=UTC), f"{prefix} ENTRY_A"),
+        (datetime(2024, 2, 1, 8, 1, 0, tzinfo=UTC), f"{prefix} ENTRY_B"),
+        (datetime(2024, 2, 1, 8, 2, 0, tzinfo=UTC), f"{prefix} ENTRY_B"),
+    ]
+
+
+def _assert_exact_dataset_history(restored, expected):
+    assert restored.history == expected.history
+    assert restored._history == expected._history
 
 
 # =============================================================================
@@ -1186,6 +1201,26 @@ class TestSerializationRoundtrip:
 
         loaded = Project.load(filename, allow_unsafe_legacy=True)
         assert "data" in loaded.datasets_names
+
+    def test_save_load_preserves_exact_child_dataset_histories(self, tmp_path):
+        proj = Project(name="history_project")
+        first = NDDataset([1.0, 2.0, 3.0], name="first", title="first dataset")
+        second = NDDataset([4.0, 5.0, 6.0], name="second", title="second dataset")
+        first._history = _make_project_history_entries("FIRST")
+        second._history = _make_project_history_entries("SECOND")
+        proj.add_dataset(first)
+        proj.add_dataset(second)
+
+        filename = proj.save_as(tmp_path / "history_project")
+        loaded = Project.load(filename)
+
+        _assert_exact_dataset_history(loaded["first"], first)
+        _assert_exact_dataset_history(loaded["second"], second)
+
+        second_cycle = Project.load(loaded.save_as(tmp_path / "history_project_cycle2"))
+
+        _assert_exact_dataset_history(second_cycle["first"], first)
+        _assert_exact_dataset_history(second_cycle["second"], second)
 
 
 class TestArgNamesEdgeCases:

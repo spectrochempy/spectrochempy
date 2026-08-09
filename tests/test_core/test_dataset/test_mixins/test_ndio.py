@@ -11,6 +11,8 @@ import base64
 import json
 import pickle
 import zipfile
+from datetime import UTC
+from datetime import datetime
 
 import numpy as np
 import pytest
@@ -20,6 +22,7 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils.exceptions import SpectroChemPyError
+from spectrochempy.utils.jsonutils import json_loads
 from spectrochempy.utils.testing import assert_array_equal, assert_dataset_equal
 
 # Basic
@@ -42,6 +45,50 @@ def _rewrite_dataset_data_payload_as_legacy_pickle(filename):
 
     with zipfile.ZipFile(filename, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
         zipf.writestr(member, json.dumps(js, indent=2))
+
+
+def _make_exact_history_entries():
+    return [
+        (
+            datetime(2024, 1, 2, 3, 4, 5, tzinfo=UTC),
+            "ENTRY_A: first line\nsecond line",
+        ),
+        (
+            datetime(2024, 1, 2, 3, 5, 5, tzinfo=UTC),
+            "ENTRY_B / punctuation?! µ identical payload",
+        ),
+        (
+            datetime(2024, 1, 2, 3, 6, 5, tzinfo=UTC),
+            "ENTRY_B / punctuation?! µ identical payload",
+        ),
+    ]
+
+
+def _make_history_dataset(name="native_history"):
+    ds = NDDataset(
+        np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]),
+        dims=["y", "x"],
+        coordset=[
+            Coord([0.0, 1.0], name="y", title="time", units="s"),
+            Coord([10.0, 20.0, 30.0], name="x", title="wavenumber", units="cm^-1"),
+        ],
+        name=name,
+        title="native history demo",
+        description="native roundtrip",
+        meta={"sample": "demo", "nested": {"state": "exact-history"}},
+        mask=np.array([[False, True, False], [False, False, False]]),
+    )
+    return ds
+
+
+def _assert_exact_history(restored, expected):
+    assert restored.history == expected.history
+    assert restored._history == expected._history
+
+
+def _assert_preserved_dataset_roundtrip(restored, expected):
+    assert_dataset_equal(restored, expected)
+    _assert_exact_history(restored, expected)
 
 
 def test_ndio_generic(ndataset_1d, tmp_path, monkeypatch):
@@ -259,6 +306,112 @@ def test_ndio_safe_roundtrip_uses_versioned_payload(tmp_path):
 
     loaded = NDDataset.load(filename)
     assert_dataset_equal(loaded, ds)
+
+
+@pytest.mark.parametrize(
+    "history_entries",
+    [
+        pytest.param([], id="empty"),
+        pytest.param(_make_exact_history_entries()[:1], id="single"),
+        pytest.param(_make_exact_history_entries(), id="multiple"),
+    ],
+)
+def test_ndio_loads_roundtrip_preserves_exact_history_without_zip(history_entries):
+    ds = _make_history_dataset()
+    ds._history = list(history_entries)
+
+    rebuilt = NDDataset.loads(json_loads(ds.dumps()))
+
+    _assert_preserved_dataset_roundtrip(rebuilt, ds)
+
+
+def test_ndio_loads_restores_serialized_history_instead_of_using_public_setter():
+    ds = _make_history_dataset()
+    ds._history = _make_exact_history_entries()
+    serialized_history = list(ds.history)
+
+    rebuilt = NDDataset.loads(json_loads(ds.dumps()))
+    setter_target = NDDataset()
+    setter_target.history = serialized_history
+
+    _assert_exact_history(rebuilt, ds)
+    assert setter_target.history != ds.history
+    assert setter_target._history != ds._history
+
+
+def test_ndio_dump_load_preserves_exact_history_across_repeated_cycles(tmp_path):
+    source = _make_history_dataset(name="history_cycles")
+    source._history = _make_exact_history_entries()
+    current = source
+
+    for cycle in range(3):
+        filename = current.save_as(tmp_path / f"history_cycle_{cycle}", confirm=False)
+        current = NDDataset.load(filename)
+        _assert_preserved_dataset_roundtrip(current, source)
+
+
+def test_ndio_save_load_allows_normal_history_append_after_restore(
+    tmp_path, monkeypatch
+):
+    source = _make_history_dataset(name="history_append")
+    source._history = _make_exact_history_entries()[:2]
+    restored = NDDataset.load(
+        source.save_as(tmp_path / "history_append", confirm=False)
+    )
+
+    appended_at = datetime(2024, 1, 2, 4, 0, 0, tzinfo=UTC)
+    monkeypatch.setattr(
+        "spectrochempy.core.dataset.nddataset.utcnow", lambda: appended_at
+    )
+    restored.history = "ENTRY_C appended after load"
+
+    reloaded = NDDataset.load(
+        restored.save_as(tmp_path / "history_append_again", confirm=False)
+    )
+
+    assert reloaded._history[:2] == source._history
+    assert reloaded._history[2] == (appended_at, "ENTRY_C appended after load")
+    assert reloaded.history[-1].endswith("> ENTRY_C appended after load")
+
+
+def test_native_public_scp_surfaces_preserve_exact_history(tmp_path):
+    function_ds = _make_history_dataset(name="function_surface")
+    function_ds._history = _make_exact_history_entries()
+    function_filename = scp.write(
+        function_ds,
+        tmp_path / "function_surface.scp",
+        overwrite=True,
+    )
+    function_loaded = scp.load(function_filename)
+    _assert_preserved_dataset_roundtrip(function_loaded, function_ds)
+
+    method_ds = _make_history_dataset(name="method_surface")
+    method_ds._history = _make_exact_history_entries()
+    method_filename = method_ds.write(tmp_path / "method_surface.scp", overwrite=True)
+    method_loaded = scp.read(method_filename)
+    _assert_preserved_dataset_roundtrip(method_loaded, method_ds)
+
+
+def test_ndio_load_without_history_field_keeps_dataset_loadable(tmp_path):
+    ds = _make_history_dataset(name="missing_history")
+    ds._history = _make_exact_history_entries()
+    filename = ds.save_as(tmp_path / "missing_history", confirm=False)
+
+    with zipfile.ZipFile(filename, "r") as zipf:
+        member = zipf.namelist()[0]
+        js = json.loads(zipf.read(member).decode("utf-8"))
+
+    js.pop("history", None)
+
+    with zipfile.ZipFile(filename, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
+        zipf.writestr(member, json.dumps(js, indent=2))
+
+    loaded = NDDataset.load(filename)
+
+    assert loaded.history == []
+    assert_array_equal(loaded.data, ds.data)
+    assert_array_equal(loaded.mask, ds.mask)
+    assert loaded.meta["nested"] == ds.meta["nested"]
 
 
 if __name__ == "__main__":
