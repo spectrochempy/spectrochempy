@@ -293,6 +293,22 @@ def test_write_jcamp_rejects_unsupported_x_units_before_file_creation(
     assert dataset.filename == original_filename
 
 
+@pytest.mark.parametrize(("x_units"), ["m^-1", "Hz", "dimensionless"])
+def test_write_jcamp_rejects_unsupported_x_units_keeps_existing_file(
+    tmp_path, x_units
+):
+    dataset = _single_spectrum_dataset(x_units=x_units, y_units="absorbance")
+    target = tmp_path / "bad_x_existing.jdx"
+    target.write_text("SENTINEL")
+    original_filename = dataset.filename
+
+    with pytest.raises(ValueError, match="exact numeric scale"):
+        dataset.write_jcamp(target, confirm=False, overwrite=True)
+
+    assert target.read_text() == "SENTINEL"
+    assert dataset.filename == original_filename
+
+
 @pytest.mark.parametrize(
     ("y_units"), ["count", "dimensionless", "absolute_transmittance"]
 )
@@ -307,6 +323,24 @@ def test_write_jcamp_rejects_unsupported_y_units_before_file_creation(
         dataset.write_jcamp(target, confirm=False)
 
     assert not target.exists()
+    assert dataset.filename == original_filename
+
+
+@pytest.mark.parametrize(
+    ("y_units"), ["count", "dimensionless", "absolute_transmittance"]
+)
+def test_write_jcamp_rejects_unsupported_y_units_keeps_existing_file(
+    tmp_path, y_units
+):
+    dataset = _single_spectrum_dataset(x_units="cm^-1", y_units=y_units)
+    target = tmp_path / "bad_y_existing.jdx"
+    target.write_text("SENTINEL")
+    original_filename = dataset.filename
+
+    with pytest.raises(ValueError, match="only supports y units"):
+        dataset.write_jcamp(target, confirm=False, overwrite=True)
+
+    assert target.read_text() == "SENTINEL"
     assert dataset.filename == original_filename
 
 
