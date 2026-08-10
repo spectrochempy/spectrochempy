@@ -3071,8 +3071,6 @@ class NDMath:
 
         import numpy as np  # noqa: PLC0415
 
-        from spectrochempy.utils._logging import warning_  # noqa: PLC0415
-
         if isufunc:
             operands = (*args[:1], d, *args[1:]) if reflected else (d, *args)
 
@@ -3110,12 +3108,10 @@ class NDMath:
 
             # Emit the recorded warning outside the recording context so it
             # reaches the caller: domain errors on visible values leave visible
-            # inf/nan (or complex promotion) instead of raising.
+            # inf/nan (or complex promotion) instead of raising. This applies
+            # uniformly to division by zero, overflow and invalid value.
             if ws:
-                if "overflow encountered" in ws[-1].message.args[0]:
-                    warning_(ws[-1].message.args[0])
-                else:
-                    warn(ws[-1].message.args[0], category=ws[-1].category, stacklevel=2)
+                warn(ws[-1].message.args[0], category=ws[-1].category, stacklevel=2)
         else:
             branch = _ExecutionPlan.select(fname, d, args)
             try:
