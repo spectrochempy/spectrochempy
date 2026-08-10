@@ -101,7 +101,9 @@ def concatenate(*datasets, **kwargs):
 
     if _should_promote_1d_column_concatenation(datasets, kwargs):
         return _stack_1d_profiles_as_columns(
-            datasets, metadata_sources=metadata_sources
+            datasets,
+            metadata_sources=metadata_sources,
+            operation=operation,
         )
 
     # get axis from arguments
@@ -264,6 +266,7 @@ def stack(*datasets, **kwargs):
         return _stack_1d_profiles_as_columns(
             datasets,
             metadata_sources=source_datasets,
+            operation="stack",
         )
     if axis not in (0, None):
         raise NotImplementedError("stack() currently supports only axis=0 or axis=1")
@@ -291,7 +294,7 @@ def stack(*datasets, **kwargs):
     )
 
 
-def _stack_1d_profiles_as_columns(datasets, *, metadata_sources=None):
+def _stack_1d_profiles_as_columns(datasets, *, metadata_sources=None, operation):
     if not datasets:
         raise ValueError("stack() requires at least one dataset")
 
@@ -335,7 +338,7 @@ def _stack_1d_profiles_as_columns(datasets, *, metadata_sources=None):
     return concatenate(
         *promoted,
         dims=newdim,
-        _metadata_operation="stack",
+        _metadata_operation=operation,
         _metadata_sources=metadata_sources,
     )
 

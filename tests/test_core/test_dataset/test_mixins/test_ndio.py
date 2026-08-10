@@ -8,6 +8,7 @@
 """Tests for the ndplugin module"""
 
 import base64
+import copy
 import json
 import pickle
 import zipfile
@@ -145,6 +146,34 @@ def test_ndio_2D(ndataset_2d, tmp_path):
     nd = NDDataset.load(tmp_path / "essai2D")
     assert nd.directory == tmp_path
     f.unlink()
+
+
+def test_filename_none_copy_and_deepcopy_preserve_explicit_none():
+    ds = NDDataset([1.0, 2.0, 3.0], name="filename_none")
+    ds.filename = None
+
+    shallow = ds.copy()
+    deep = copy.deepcopy(ds)
+
+    assert ds.filename is None
+    assert shallow.filename is None
+    assert deep.filename is None
+
+
+def test_filename_none_not_serialized_as_extra_schema_field(tmp_path):
+    ds = NDDataset([1.0, 2.0, 3.0], name="schema_filename_none")
+    ds.filename = None
+    filename = ds.save_as(tmp_path / "schema_filename_none", confirm=False)
+
+    with zipfile.ZipFile(filename, "r") as zipf:
+        member = zipf.namelist()[0]
+        js = json.loads(zipf.read(member).decode("utf-8"))
+
+    assert "_filename_explicit_none" not in js
+    assert "filename_explicit_none" not in js
+
+    loaded = NDDataset.load(filename)
+    assert loaded.filename == filename
 
 
 def test_ndio_roundtrip_preserves_selected_non_first_default(tmp_path):

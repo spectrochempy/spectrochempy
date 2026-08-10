@@ -371,12 +371,27 @@ class TestConcatenateMetadata:
         c = concatenate(dataset_x, dataset_x, dims="x")
         assert c.author == "author_x"
 
+    def test_author_ignores_absent_values_and_preserves_order(self, dataset_x, dataset_y):
+        dataset_x.author = ""
+        dataset_y.author = " author_y "
+        dataset_z = dataset_y.copy()
+        dataset_z.author = "author_z"
+        c = concatenate(dataset_x, dataset_y, dataset_z, dims="x")
+        assert c.author == " author_y  & author_z"
+
     def test_description_synthesized(self, dataset_x, dataset_y):
         c = concatenate(dataset_x, dataset_y, dims="x")
         assert (
             c.description
             == "Concatenation of 2 datasets:\n( dataset_x_name, dataset_y_name )"
         )
+
+    def test_text_consensus_is_case_and_whitespace_sensitive(self, dataset_x, dataset_y):
+        dataset_x.title = "Shared"
+        dataset_y.title = " shared "
+        c = concatenate(dataset_x, dataset_y, dims="x")
+        assert c._title is None
+        assert c.title == "<untitled>"
 
     def test_description_uses_unnamed_placeholder(self, dataset_x, dataset_y):
         dataset_x._name = ""
@@ -393,16 +408,29 @@ class TestConcatenateMetadata:
         c = concatenate(dataset_x, dataset_y, dims="x")
         assert c.origin == "origin_x"
 
+    def test_origin_ignores_partial_absence(self, dataset_x, dataset_y):
+        dataset_x.origin = ""
+        dataset_y.origin = "origin_y"
+        c = concatenate(dataset_x, dataset_y, dims="x")
+        assert c.origin == "origin_y"
+
     def test_meta_cleared_when_payloads_differ(self, dataset_x, dataset_y):
         c = concatenate(dataset_x, dataset_y, dims="x")
         assert c.meta.project is None
 
     def test_meta_deep_copied_from_first_on_consensus(self, dataset_x, dataset_y):
         dataset_y.meta.project = dataset_x.meta.project
+        dataset_x.meta.processing = ["baseline"]
+        dataset_y.meta.processing = ["baseline"]
         c = concatenate(dataset_x, dataset_y, dims="x")
+        assert c.meta == dataset_x.meta
+        assert c.meta is not dataset_x.meta
         c.meta.project = "modified"
+        c.meta.processing.append("changed")
         assert dataset_x.meta.project == "project_x"
         assert dataset_y.meta.project == "project_x"
+        assert dataset_x.meta.processing == ["baseline"]
+        assert dataset_y.meta.processing == ["baseline"]
 
     def test_filename_cleared(self, dataset_x, dataset_y):
         dataset_x.filename = "dataset_x.scp"
@@ -434,6 +462,19 @@ class TestConcatenateMetadata:
         assert before <= c._created <= after
         assert before <= c._modified <= after
         assert c._created == c._modified
+
+    def test_input_timestamps_remain_unchanged(self, dataset_x, dataset_y):
+        dataset_x._created = datetime(2020, 1, 2, 3, 4, 5, tzinfo=UTC)
+        dataset_x._modified = datetime(2020, 1, 2, 4, 4, 5, tzinfo=UTC)
+        dataset_y._created = datetime(2021, 1, 2, 3, 4, 5, tzinfo=UTC)
+        dataset_y._modified = datetime(2021, 1, 2, 4, 4, 5, tzinfo=UTC)
+
+        concatenate(dataset_x, dataset_y, dims="x")
+
+        assert dataset_x._created == datetime(2020, 1, 2, 3, 4, 5, tzinfo=UTC)
+        assert dataset_x._modified == datetime(2020, 1, 2, 4, 4, 5, tzinfo=UTC)
+        assert dataset_y._created == datetime(2021, 1, 2, 3, 4, 5, tzinfo=UTC)
+        assert dataset_y._modified == datetime(2021, 1, 2, 4, 4, 5, tzinfo=UTC)
 
 
 # ======================================================================================
@@ -556,6 +597,12 @@ class TestStackCharacterization:
         a, b = stack_pair_1d
         s = stack(a, b)
         assert len(s.history) == 1
+        assert "Created by stack from 2 datasets: alpha, beta" in s.history[0]
+
+    def test_stack_axis_1_metadata_matches_stack_contract(self, stack_pair_1d):
+        a, b = stack_pair_1d
+        s = stack(a, b, axis=1)
+        assert s.description == "Stack of 2 datasets:\n( alpha, beta )"
         assert "Created by stack from 2 datasets: alpha, beta" in s.history[0]
 
     def test_stack_author_merged(self, stack_pair_1d):

@@ -1173,6 +1173,9 @@ class NDArray(tr.HasTraits):
                 _attr = do_copy(getattr(self, f"_{attr}"))
                 setattr(new, f"_{attr}", _attr)
 
+        if hasattr(self, "_filename_explicit_none"):
+            new._filename_explicit_none = self._filename_explicit_none
+
         # name must be changed
         if not keepname:
             new.name = ""  # default

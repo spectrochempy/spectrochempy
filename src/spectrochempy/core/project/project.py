@@ -402,6 +402,10 @@ class Project(AbstractProject, NDIO):
         new._name = self._name
         new._explicit_name = self._explicit_name
         new._meta = cpy.deepcopy(self._meta, memo=memo)
+        if hasattr(self, "_filename"):
+            new._filename = cpy.deepcopy(self._filename, memo=memo)
+        if hasattr(self, "_filename_explicit_none"):
+            new._filename_explicit_none = self._filename_explicit_none
 
         if deep:
             for name, ds in self._datasets.items():
