@@ -68,6 +68,22 @@ def test_read_matlab_multiple_variables(tmp_path):
     assert not any(ds.name.startswith("__") for ds in datasets)
 
 
+def test_read_matlab_singleton_shape_groups_preserve_variable_names(tmp_path):
+    path = tmp_path / "singleton_groups.mat"
+    savemat(
+        path,
+        {
+            "alpha": np.arange(6.0).reshape(2, 3),
+            "beta": np.arange(8.0).reshape(2, 4),
+        },
+    )
+
+    datasets = read_matlab(path)
+
+    assert isinstance(datasets, list)
+    assert {ds.name for ds in datasets} == {"alpha", "beta"}
+
+
 def test_read_matlab_single_1d_array_currently_uses_row_shape_and_no_coordset(tmp_path):
     path = tmp_path / "single_1d.mat"
     savemat(path, {"trace": np.arange(5)})

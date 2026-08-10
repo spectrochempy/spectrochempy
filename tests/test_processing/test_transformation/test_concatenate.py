@@ -5,6 +5,9 @@
 # ======================================================================================
 # ruff: noqa
 
+from datetime import UTC
+from datetime import datetime
+
 import numpy as np
 import pytest
 
@@ -86,6 +89,9 @@ def test_concatenate(IR_dataset_2D):
 
     # titles
     s0.title = "new_title"
+    assert concatenate(s0, s1).title == "<untitled>"
+
+    s1.title = "new_title"
     assert concatenate(s0, s1).title == "new_title"
 
     # incompatible dimensions
@@ -181,6 +187,13 @@ def test_concatenate_axis_1_for_1d_profiles():
     assert result.shape == (5, 3)
     assert result.dims == ["x", "y"]
     assert result.y.labels is not None
+    assert result.description == (
+        "Concatenation of 3 datasets:\n( <unnamed>, <unnamed>, <unnamed> )"
+    )
+    assert (
+        "Created by concatenate from 3 datasets: <unnamed>, <unnamed>, <unnamed>"
+        in result.history[0]
+    )
 
 
 # ==============================================================================
@@ -368,3 +381,156 @@ def test_stack_regression():
     assert result.shape == (2, 2, 3)
     # The new leading dimension coordinate should have two labels
     assert len(result.dims) == 3
+
+
+def test_concatenate_resets_multi_source_identity_metadata():
+    x = scp.Coord(np.arange(3.0), name="x")
+    y = scp.Coord(np.arange(2.0), name="y")
+    ds1 = scp.NDDataset(
+        np.ones((2, 3)),
+        coordset=[y, x],
+        name="left",
+        title="shared",
+    )
+    ds2 = scp.NDDataset(
+        np.full((2, 3), 2.0),
+        coordset=[y, x],
+        name="right",
+        title="shared",
+    )
+    ds1.origin = "origin-left"
+    ds2.origin = "origin-right"
+    ds1.filename = "left.scp"
+    ds2.filename = "right.scp"
+
+    result = concatenate(ds1, ds2, dims="x")
+
+    assert result._name == ""
+    assert result.name.startswith("NDDataset")
+    assert result.title == "shared"
+    assert result.description == "Concatenation of 2 datasets:\n( left, right )"
+    assert result.origin == "multiple: origin-left | origin-right"
+    assert result.filename is None
+    assert "Created by concatenate from 2 datasets: left, right" in result.history[0]
+
+
+def test_stack_uses_stack_specific_metadata_text():
+    x = scp.Coord(np.arange(3.0), name="x")
+    ds1 = scp.NDDataset(np.array([1.0, 2.0, 3.0]), coordset=[x], name="left")
+    ds2 = scp.NDDataset(np.array([4.0, 5.0, 6.0]), coordset=[x], name="right")
+
+    result = stack(ds1, ds2)
+
+    assert result.description == "Stack of 2 datasets:\n( left, right )"
+    assert "Created by stack from 2 datasets: left, right" in result.history[0]
+
+
+def test_stack_axis_1_uses_stack_specific_metadata_text():
+    x = scp.Coord(np.arange(3.0), name="x")
+    ds1 = scp.NDDataset(np.array([1.0, 2.0, 3.0]), coordset=[x], name="left")
+    ds2 = scp.NDDataset(np.array([4.0, 5.0, 6.0]), coordset=[x], name="right")
+
+    result = stack(ds1, ds2, axis=1)
+
+    assert result.description == "Stack of 2 datasets:\n( left, right )"
+    assert "Created by stack from 2 datasets: left, right" in result.history[0]
+
+
+def test_concatenate_does_not_mutate_inputs():
+    x = scp.Coord(np.arange(3.0), name="x")
+    y = scp.Coord(np.arange(2.0), name="y")
+    ds1 = scp.NDDataset(
+        np.ones((2, 3)),
+        coordset=[y, x],
+        name="left",
+        title="left-title",
+    )
+    ds2 = scp.NDDataset(
+        np.full((2, 3), 2.0),
+        coordset=[y, x],
+        name="right",
+        title="right-title",
+    )
+    ds1.filename = "left.scp"
+    ds2.filename = "right.scp"
+    original_ds1_dims = list(ds1.dims)
+    original_ds2_dims = list(ds2.dims)
+    original_ds1_filename = ds1.filename
+    original_ds2_filename = ds2.filename
+
+    concatenate(ds1, ds2, dims="x")
+
+    assert ds1.dims == original_ds1_dims
+    assert ds2.dims == original_ds2_dims
+    assert ds1.title == "left-title"
+    assert ds2.title == "right-title"
+    assert ds1.filename == original_ds1_filename
+    assert ds2.filename == original_ds2_filename
+
+
+def test_concatenate_does_not_mutate_input_state_beyond_identity_metadata():
+    x = scp.Coord(np.arange(3.0), name="x")
+    masked = np.ma.array([1.0, 2.0, 3.0], mask=[False, True, False])
+    ds1 = scp.NDDataset(masked, coordset=[x], units="m", name="left")
+    ds2 = scp.NDDataset(masked * 2.0, coordset=[x], units="m", name="right")
+    ds1.history = "left history"
+    ds2.history = "right history"
+    ds1.meta.project = "shared"
+    ds2.meta.project = "shared"
+    ds1._created = datetime(2020, 1, 2, 3, 4, 5, tzinfo=UTC)
+    ds1._modified = datetime(2020, 1, 2, 4, 4, 5, tzinfo=UTC)
+    ds2._created = datetime(2021, 1, 2, 3, 4, 5, tzinfo=UTC)
+    ds2._modified = datetime(2021, 1, 2, 4, 4, 5, tzinfo=UTC)
+    before_ds1_data = ds1.data.copy()
+    before_ds2_data = ds2.data.copy()
+    before_ds1_mask = ds1.mask.copy()
+    before_ds2_mask = ds2.mask.copy()
+    before_ds1_history = list(ds1.history)
+    before_ds2_history = list(ds2.history)
+    before_ds1_created = ds1._created
+    before_ds2_created = ds2._created
+    before_ds1_modified = ds1._modified
+    before_ds2_modified = ds2._modified
+    before_ds1_units = ds1.units
+    before_ds2_units = ds2.units
+
+    concatenate(ds1, ds2, axis=1)
+
+    np.testing.assert_allclose(ds1.data, before_ds1_data)
+    np.testing.assert_allclose(ds2.data, before_ds2_data)
+    np.testing.assert_array_equal(ds1.mask, before_ds1_mask)
+    np.testing.assert_array_equal(ds2.mask, before_ds2_mask)
+    assert ds1.units == before_ds1_units
+    assert ds2.units == before_ds2_units
+    assert ds1.history == before_ds1_history
+    assert ds2.history == before_ds2_history
+    assert ds1.meta.project == "shared"
+    assert ds2.meta.project == "shared"
+    assert ds1._created == before_ds1_created
+    assert ds2._created == before_ds2_created
+    assert ds1._modified == before_ds1_modified
+    assert ds2._modified == before_ds2_modified
+
+
+def test_stack_does_not_mutate_inputs_for_axis_0_or_axis_1():
+    x = scp.Coord(np.arange(3.0), name="x")
+    axis0_left = scp.NDDataset(np.array([1.0, 2.0, 3.0]), coordset=[x], name="left")
+    axis0_right = scp.NDDataset(
+        np.array([4.0, 5.0, 6.0]),
+        coordset=[x],
+        name="right",
+    )
+    axis1_left = axis0_left.copy()
+    axis1_right = axis0_right.copy()
+
+    stack(axis0_left, axis0_right)
+    stack(axis1_left, axis1_right, axis=1)
+
+    assert axis0_left.shape == (3,)
+    assert axis0_right.shape == (3,)
+    assert axis0_left.dims == ["x"]
+    assert axis0_right.dims == ["x"]
+    assert axis1_left.shape == (3,)
+    assert axis1_right.shape == (3,)
+    assert axis1_left.dims == ["x"]
+    assert axis1_right.dims == ["x"]

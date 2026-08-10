@@ -178,6 +178,17 @@ def test_dataset_filename():
     ndd2.filename = "zzzz"
     assert ndd2.filename == Path("zzzz")
 
+    ndd2.filename = None
+    assert ndd2.filename is None
+    ndd2.filename = "restored.spc"
+    assert ndd2.filename == Path("restored.spc")
+
+    ndd3 = scp.NDDataset([7.0, 8.0, 9.0], name="named")
+    assert ndd3.filename == Path("named.scp")
+    ndd3.filename = None
+    ndd3.name = "renamed"
+    assert ndd3.filename is None
+
 
 def test_nddataset_deepcopy():
     """Deep copy via copy.deepcopy or copy() isolates all mutable state."""
