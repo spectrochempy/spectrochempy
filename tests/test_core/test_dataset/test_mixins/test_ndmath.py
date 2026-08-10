@@ -108,7 +108,12 @@ def test_ndmath_unary_ufuncs_simple_data(nd2d, name, comment):
 
     ref_masked = f(np.ma.MaskedArray(data, mask=mask))
     if isinstance(result_masked, NDDataset) and name not in _numpy_deviation:
-        assert_array_equal(result_masked.data, ref_masked.data)
+        # Only the explicit mask and the visible (unmasked) values are
+        # contractual for masked operands (RFC arithmetic-mask-semantics):
+        # the mask must be preserved and the unmasked data must match the
+        # NumPy reference.  Data under a masked position is non-normative.
+        assert_array_equal(result_masked.mask, mask)
+        assert_array_equal(result_masked.data[~mask], ref_masked.data[~mask])
 
 
 def test_unary_ops():
@@ -1541,6 +1546,82 @@ def test_mask_propagation():
     assert r.mask[1]
     assert r.mask[2]
     assert not r.mask[3]
+
+
+def test_mask_policy_div_by_zero_visible():
+    """
+    Masked-path division by zero leaves visible inf, no auto-mask.
+
+    RFC arithmetic-mask-semantics: the result must be identical to the
+    unmasked path on the visible (unmasked) positions.
+    """
+    ds = NDDataset(np.array([1.0, 0.0, 3.0]))
+    dsm = NDDataset(np.array([1.0, 0.0, 3.0]), mask=[False, True, False])
+    with np.errstate(divide="ignore", invalid="ignore"):
+        r = dsm / 0.0
+        ru = ds / 0.0
+    # the explicit mask is preserved, no auto-mask on new invalid values
+    assert_array_equal(r.mask, [False, True, False])
+    # visible values are identical to the unmasked path
+    assert_array_equal(r.data[~r.mask], ru.data[~np.asarray(r.mask)])
+    assert np.all(np.isinf(r.data[~r.mask]))
+
+
+def test_mask_policy_reflected_divide_masked_zero():
+    """`2 / ds` with a masked zero does not raise and preserves the mask."""
+    dsm = NDDataset(np.array([1.0, 0.0, 3.0]), mask=[False, True, False])
+    with np.errstate(divide="ignore"):
+        r = 2 / dsm
+    assert isinstance(r, NDDataset)
+    assert_array_equal(r.mask, [False, True, False])
+    assert_array_equal(r.data[~r.mask], np.array([2.0, 2.0 / 3.0]))
+
+
+def test_mask_policy_ma_masked_symmetry():
+    """
+    `np.ma.masked` is usable as either operand without AttributeError.
+
+    The ufunc forms behave symmetrically and return a fully masked
+    NDDataset.  The `np.ma.masked + ds` operator form is intercepted by
+    NumPy and returns a masked array, but never raises.
+    """
+    ds = NDDataset(np.array([1.0, 2.0, 3.0]))
+    left = np.add(np.ma.masked, ds)
+    right = np.add(ds, np.ma.masked)
+    assert isinstance(left, NDDataset)
+    assert isinstance(right, NDDataset)
+    assert_array_equal(left.mask, [True, True, True])
+    assert_array_equal(right.mask, [True, True, True])
+    assert_array_equal(left.data, right.data)
+    r_left = np.ma.masked + ds
+    r_right = ds + np.ma.masked
+    assert_array_equal(np.ma.asarray(r_left).mask, [True, True, True])
+    assert isinstance(r_right, NDDataset)
+    assert r_right.mask.all()
+
+
+def test_mask_policy_domain_never_extends_mask():
+    """Ufunc domain errors on masked inputs never extend the mask."""
+    data = np.array([1.0, -4.0, np.e])
+    mask = np.array([False, True, False])
+    dsm = NDDataset(data.copy(), mask=mask)
+    r = np.log(dsm)
+    # the domain error occurs at the masked position: the explicit mask
+    # is preserved, no domain position is added
+    assert_array_equal(r.mask, mask)
+    # visible values are the ufunc output on the visible inputs
+    assert_array_equal(r.data[~mask], np.log(data[~mask]))
+
+
+def test_mask_policy_union_broadcasting():
+    """Mask union is applied on the broadcast shapes."""
+    a = NDDataset(np.ones((2, 3)), mask=[[True, False, False], [False, False, False]])
+    b = NDDataset(np.ones(3), mask=[False, True, False])
+    r = a + b
+    assert_array_equal(r.mask, [[True, True, False], [False, True, False]])
+    c = NDDataset(np.ones((2, 1)), mask=[[False], [True]])
+    r2 = a + c
+    assert_array_equal(r2.mask, [[True, False, False], [True, True, True]])
 
 
 def test_complex_data_operations():

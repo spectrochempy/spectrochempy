@@ -2689,7 +2689,7 @@ class NDMath:
     # ------------------------------------------------------------------------
     # private methods
     # ------------------------------------------------------------------------
-    def _preprocess_op_inputs(self, fname, inputs):
+    def _preprocess_op_inputs(self, fname, inputs, reflected=False):
         inputs = list(inputs)  # work with a list of objs not tuples
         # print(fname)
 
@@ -2746,15 +2746,14 @@ class NDMath:
             if fname in ["mul", "multiply", "add", "iadd"]:
                 pass
             elif fname in ["truediv", "divide", "true_divide"]:
-                fname = "multiply"
-                inputs[0] = np.reciprocal(inputs[0])
+                reflected = True
             elif fname in ["isub", "sub", "subtract"]:
                 fname = "add"
                 inputs[0] = np.negative(inputs[0])
             else:
                 raise NotImplementedError
 
-        return fname, inputs, objtypes, returntype, is_masked
+        return fname, inputs, objtypes, returntype, is_masked, reflected
 
     # ------------------------------------------------------------------
     # Helper: prepare probe quantities for unit calculations
@@ -2850,9 +2849,7 @@ class NDMath:
 
             # Extract raw data from other
             if othertype in ["NDDataset", "Coord"]:
-                arg = (
-                    other._umasked(other.data, other.mask) if is_masked else other.data
-                )
+                arg = other.data
             else:
                 arg = other.m if isinstance(other, Quantity) else other
 
@@ -2960,6 +2957,7 @@ class NDMath:
         otherqs: list,
         remove_units: bool,
         compatible_units: bool,
+        reflected: bool = False,
     ):
         """
         Compute the resulting units for an operation.
@@ -3031,7 +3029,10 @@ class NDMath:
                 f_u = np.add
 
             try:
-                res = f_u(q, *otherqs)
+                if reflected:
+                    res = f_u(*otherqs, q) if otherqs else f_u(q)
+                else:
+                    res = f_u(q, *otherqs)
             except Exception as e:
                 if not otherqs:
                     res = q
@@ -3054,9 +3055,13 @@ class NDMath:
         d: np.ndarray,
         args: list,
         isufunc: bool,
+        reflected: bool = False,
     ) -> np.ndarray:
         """
         Execute *f* on data *d* and operand *args*.
+
+        When *reflected* is True the operation is ``scalar / data`` instead of
+        ``data / scalar``.
 
         Returns the result data array (may be masked).
         """
@@ -3068,28 +3073,40 @@ class NDMath:
         from spectrochempy.utils._logging import warning_  # noqa: PLC0415
 
         if isufunc:
+            operands = (*args[:1], d, *args[1:]) if reflected else (d, *args)
+
             with catch_warnings(record=True) as ws:
                 # ufunc-specific preprocessing
                 if fname == "log1p":
                     fname = "log"
                     d = d + 1.0
+                    operands = (d, *args)
                 if fname in ["arccos", "arcsin", "arctanh"]:
                     if np.any(np.abs(d) > 1):
                         d = d.astype(np.complex128)
+                        operands = (
+                            (*args[:1], d, *args[1:]) if reflected else (d, *args)
+                        )
                 elif fname in ["sqrt"] and np.any(d < 0):
                     d = d.astype(np.complex128)
+                    operands = (*args[:1], d, *args[1:]) if reflected else (d, *args)
 
                 if fname == "sqrt":
                     data = d ** (1.0 / 2.0)
                 elif fname == "cbrt":
                     data = np.sign(d) * np.abs(d) ** (1.0 / 3.0)
                 else:
-                    data = getattr(np, fname)(d, *args)
+                    data = getattr(np, fname)(*operands)
 
                 # Warning-based fallback to complex
                 if ws and "invalid value encountered in " in ws[-1].message.args[0]:
                     ws = []
-                    data = getattr(np, fname)(d.astype(np.complex128), *args)
+                    if reflected:
+                        data = getattr(np, fname)(
+                            *args[:1], d.astype(np.complex128), *args[1:]
+                        )
+                    else:
+                        data = getattr(np, fname)(d.astype(np.complex128), *args)
                     if ws:
                         raise ValueError(ws[-1].message.args[0])
                 elif ws and "overflow encountered" in ws[-1].message.args[0]:
@@ -3099,17 +3116,103 @@ class NDMath:
         else:
             branch = _ExecutionPlan.select(fname, d, args)
             try:
-                data = _ExecutionPlan.execute(branch, f, d, args)
+                if reflected:
+                    data = _ExecutionPlan.execute(branch, f, args[0], [d])
+                else:
+                    data = _ExecutionPlan.execute(branch, f, d, args)
             except Exception as e:
                 raise ArithmeticError(e.args[0]) from e
 
         return data
+
+    @staticmethod
+    def _explicit_operation_mask(
+        is_masked: bool,
+        obj,
+        objtype: str,
+        other,
+        othertype: str | None,
+    ) -> np.ndarray:
+        """
+        Return the explicit result mask for an arithmetic operation.
+
+        The result mask is the union of the broadcast explicit masks of the
+        NDDataset operands (a single masked source is preserved exactly).
+        ``numpy.ma`` domain masks are never included. Returns ``NOMASK`` when
+        no operand carries an explicit mask.
+        """
+        if not is_masked:
+            return NOMASK
+
+        masks: list = []
+        for operand, otype in ((obj, objtype), (other, othertype)):
+            if operand is None:
+                continue
+            if otype == "MaskedConstant":
+                m = True
+            elif otype in ("NDDataset", "Coord"):
+                m = operand.mask
+                if m is NOMASK or m is None:
+                    continue
+            elif isinstance(operand, np.ma.MaskedArray):
+                m = operand.mask
+            else:
+                continue
+            m = np.asarray(m, dtype=bool)
+            if m.ndim == 0:
+                if not bool(m):
+                    continue
+            elif not np.any(m):
+                continue
+            masks.append(m)
+
+        if not masks:
+            return NOMASK
+
+        result = masks[0]
+        for m in masks[1:]:
+            result = result | m
+        return result
+
+    @staticmethod
+    def _apply_explicit_mask(
+        data: np.ndarray,
+        d: np.ndarray,
+        is_masked: bool,
+        obj,
+        objtype: str,
+        other,
+        othertype: str | None,
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """
+        Restrict *data* to the explicit operand masks and return ``(data, mask)``.
+
+        Any mask produced by ``numpy.ma`` domain rules is discarded; the
+        operand input data *d* is restored at explicitly masked positions.
+        """
+        if isinstance(data, np.ma.MaskedArray):
+            data = data._data
+
+        mask = NDMath._explicit_operation_mask(
+            is_masked, obj, objtype, other, othertype
+        )
+
+        if mask is NOMASK or not np.any(mask):
+            return data, NOMASK
+
+        mask = np.broadcast_to(np.asarray(mask, dtype=bool), data.shape).copy()
+        if np.any(mask):
+            source = np.broadcast_to(d, data.shape)
+            np.copyto(data, source, where=mask)
+
+        return data, mask
 
     def _op(
         self,
         f: Callable,
         inputs: Sequence[ArrayLike],
         isufunc: bool = False,
+        reflected: bool = False,
     ) -> tuple[np.ndarray, str | None, np.ndarray, str | None]:
         # Achieve an operation f on the objs
 
@@ -3124,7 +3227,8 @@ class NDMath:
             objtypes,
             returntype,
             is_masked,
-        ) = self._preprocess_op_inputs(fname, inputs)
+            reflected,
+        ) = self._preprocess_op_inputs(fname, inputs, reflected)
 
         # Now we can proceed
 
@@ -3141,9 +3245,7 @@ class NDMath:
         # ------------------------------------------------------------------------------
         is_dataset = objtype == "NDDataset"
 
-        # Get the underlying data: If one of the input is masked, we will work with
-        # masked array
-        d = obj._umasked(obj.data, obj.mask) if is_masked and is_dataset else obj.data
+        d = obj.data
 
         # Prepare probe quantities and operand data
         q, otherqs, args = self._prepare_operation_quantities(
@@ -3160,24 +3262,16 @@ class NDMath:
 
         # Resolve operation units
         units = self._resolve_operation_units(
-            fname, f, q, otherqs, remove_units, compatible_units
+            fname, f, q, otherqs, remove_units, compatible_units, reflected
         )
 
         # perform operation on magnitudes
-        data = self._execute_operation(
-            f,
-            fname,
-            d,
-            args,
-            isufunc,
-        )
+        data = self._execute_operation(f, fname, d, args, isufunc, reflected)
 
-        # get possible mask
-        if isinstance(data, np.ma.MaskedArray):
-            mask = data._mask
-            data = data._data
-        else:
-            mask = NOMASK
+        # restrict the result mask to the explicit operand masks
+        data, mask = self._apply_explicit_mask(
+            data, d, is_masked, obj, objtype, other, othertype
+        )
 
         # return calculated data, units and mask
         return data, units, mask, returntype
@@ -3201,6 +3295,7 @@ class NDMath:
     def _check_order(fname, inputs):
         objtypes = []
         returntype = None
+        reflected = False
         for _i, obj in enumerate(inputs):
             # type
             objtype = type(obj).__name__
@@ -3221,8 +3316,7 @@ class NDMath:
             if fname in ["mul", "add", "iadd"]:
                 pass
             elif fname in ["truediv", "divide", "true_divide"]:
-                fname = "mul"
-                inputs[0] = np.reciprocal(inputs[0])
+                reflected = True
             elif fname in ["isub", "sub", "subtract"]:
                 fname = "add"
                 inputs[0] = np.negative(inputs[0])
@@ -3234,7 +3328,7 @@ class NDMath:
                 raise NotImplementedError
 
         f = getattr(np, fname) if fname in ["exp"] else getattr(operator, fname)
-        return f, inputs
+        return f, inputs, reflected
 
     @staticmethod
     def _binary_op(f, reflexive=False):
@@ -3242,7 +3336,7 @@ class NDMath:
         def func(self, other):
             fname = f.__name__
             objs = [self, other] if not reflexive else [other, self]
-            fm, objs = self._check_order(fname, objs)
+            fm, objs, reflected = self._check_order(fname, objs)
 
             if hasattr(self, "history"):
                 history = (
@@ -3252,7 +3346,7 @@ class NDMath:
             else:
                 history = None
 
-            data, units, mask, returntype = self._op(fm, objs)
+            data, units, mask, returntype = self._op(fm, objs, reflected=reflected)
             return self._op_result(data, units, mask, history, returntype)
 
         return func
@@ -3267,9 +3361,9 @@ class NDMath:
             # else:
             #    history = None
             objs = [self, other]
-            fm, objs = self._check_order(fname, objs)
+            fm, objs, reflected = self._check_order(fname, objs)
 
-            data, units, mask, returntype = self._op(fm, objs)
+            data, units, mask, returntype = self._op(fm, objs, reflected=reflected)
             self._data = data
             self._units = units
             self._mask = mask

@@ -15,6 +15,15 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 Bug Fixes
 ~~~~~~~~~
 
+- Arithmetic operations on masked datasets now follow the documented mask
+  policy: only the explicit operand masks are preserved (as their broadcast
+  union for two datasets) and newly invalid numeric values are no longer
+  auto-masked. In particular, division by zero on the masked path leaves
+  visible `inf`/`nan` exactly like the unmasked path, `2 / ds` with a masked
+  zero no longer raises and preserves the mask, ufunc domain errors on masked
+  inputs (e.g. `log` or `sqrt` of a masked negative) never extend the mask,
+  and `np.ma.masked` is usable as either operand without an error.
+
 - Filter and smoothing outputs (`smooth`, `savgol`, `savgol_filter`, `whittaker`)
   now preserve the source dataset `name` and append a single history entry while
   retaining all prior entries, instead of renaming with a ``_Filter.transform``
