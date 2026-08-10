@@ -3206,7 +3206,8 @@ class NDMath:
         mask = np.broadcast_to(np.asarray(mask, dtype=bool), data.shape).copy()
         if np.any(mask):
             source = np.broadcast_to(d, data.shape)
-            np.copyto(data, source, where=mask)
+            if np.can_cast(source.dtype, data.dtype, casting="same_kind"):
+                np.copyto(data, source, where=mask)
 
         return data, mask
 

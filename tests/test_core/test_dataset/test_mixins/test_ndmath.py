@@ -1673,6 +1673,23 @@ def test_mask_policy_non_mutation():
     assert not ds.is_masked
 
 
+def test_mask_policy_bool_result_with_masked_input():
+    """
+    Boolean results (comparisons, ``logical_not``) on masked datasets work.
+
+    The explicit mask is preserved even when the result dtype (bool) cannot
+    represent the restored operand data (float).
+    """
+    data = np.array([-1.0, 0.5, 2.0, -3.0])
+    mask = np.array([False, True, False, False])
+    ds = NDDataset(data.copy(), mask=mask.copy())
+    cmp = ds < 0
+    assert_array_equal(cmp.mask, mask)
+    not_cmp = np.logical_not(cmp)
+    assert_array_equal(not_cmp.mask, mask)
+    assert np.issubdtype(not_cmp.data.dtype, np.bool_)
+
+
 def test_mask_policy_union_broadcasting():
     """Mask union is applied on the broadcast shapes."""
     a = NDDataset(np.ones((2, 3)), mask=[[True, False, False], [False, False, False]])
