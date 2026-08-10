@@ -1167,6 +1167,16 @@ class TestSerializationRoundtrip:
         loaded = Project.load(filename)
         assert loaded.filename == filename
 
+    def test_project_copy_preserves_only_explicit_filename_none(self):
+        proj = Project(name="project_copy_filename_none")
+        proj.add_dataset(NDDataset([1.0, 2.0, 3.0], name="data"))
+        proj.filename = None
+
+        copied = proj.copy()
+
+        assert copied.filename is None
+        assert copied.name == proj.name
+
     def test_save_as_creates_new_file(self, ds1):
         proj = Project(name="overwrite_test")
         proj.add_dataset(ds1)

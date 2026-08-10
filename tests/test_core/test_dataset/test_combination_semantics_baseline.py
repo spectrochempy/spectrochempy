@@ -371,7 +371,9 @@ class TestConcatenateMetadata:
         c = concatenate(dataset_x, dataset_x, dims="x")
         assert c.author == "author_x"
 
-    def test_author_ignores_absent_values_and_preserves_order(self, dataset_x, dataset_y):
+    def test_author_ignores_absent_values_and_preserves_order(
+        self, dataset_x, dataset_y
+    ):
         dataset_x.author = ""
         dataset_y.author = " author_y "
         dataset_z = dataset_y.copy()
@@ -386,7 +388,9 @@ class TestConcatenateMetadata:
             == "Concatenation of 2 datasets:\n( dataset_x_name, dataset_y_name )"
         )
 
-    def test_text_consensus_is_case_and_whitespace_sensitive(self, dataset_x, dataset_y):
+    def test_text_consensus_is_case_and_whitespace_sensitive(
+        self, dataset_x, dataset_y
+    ):
         dataset_x.title = "Shared"
         dataset_y.title = " shared "
         c = concatenate(dataset_x, dataset_y, dims="x")
