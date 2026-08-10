@@ -918,6 +918,9 @@ def merge_datasets(datasets, **kwargs):
 
         # Try to merge each shape group
         for shape_group in shape_groups.values():
+            if len(shape_group) == 1:
+                merged_datasets.extend(shape_group)
+                continue
             try:
                 if shape_group[0].ndim == 1:
                     merged = stack(shape_group)
