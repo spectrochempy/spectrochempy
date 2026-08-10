@@ -1553,12 +1553,14 @@ def test_mask_policy_div_by_zero_visible():
     Masked-path division by zero leaves visible inf, no auto-mask.
 
     RFC arithmetic-mask-semantics: the result must be identical to the
-    unmasked path on the visible (unmasked) positions.
+    unmasked path on the visible (unmasked) positions, and the standard
+    NumPy RuntimeWarning is raised (never a ValueError).
     """
     ds = NDDataset(np.array([1.0, 0.0, 3.0]))
     dsm = NDDataset(np.array([1.0, 0.0, 3.0]), mask=[False, True, False])
-    with np.errstate(divide="ignore", invalid="ignore"):
+    with pytest.warns(RuntimeWarning):
         r = dsm / 0.0
+    with pytest.warns(RuntimeWarning):
         ru = ds / 0.0
     # the explicit mask is preserved, no auto-mask on new invalid values
     assert_array_equal(r.mask, [False, True, False])
@@ -1568,9 +1570,9 @@ def test_mask_policy_div_by_zero_visible():
 
 
 def test_mask_policy_reflected_divide_masked_zero():
-    """`2 / ds` with a masked zero does not raise and preserves the mask."""
+    """`2 / ds` with a masked zero warns (never raises) and preserves the mask."""
     dsm = NDDataset(np.array([1.0, 0.0, 3.0]), mask=[False, True, False])
-    with np.errstate(divide="ignore"):
+    with pytest.warns(RuntimeWarning):
         r = 2 / dsm
     assert isinstance(r, NDDataset)
     assert_array_equal(r.mask, [False, True, False])
@@ -1579,25 +1581,41 @@ def test_mask_policy_reflected_divide_masked_zero():
 
 def test_mask_policy_ma_masked_symmetry():
     """
-    `np.ma.masked` is usable as either operand without AttributeError.
+    `np.ma.masked` is usable as either operand for +, -, *, /.
 
     The ufunc forms behave symmetrically and return a fully masked
-    NDDataset.  The `np.ma.masked + ds` operator form is intercepted by
-    NumPy and returns a masked array, but never raises.
+    NDDataset.  The `np.ma.masked <op> ds` operator forms are intercepted by
+    NumPy and return a masked array: the *mask* stays symmetric even though
+    the *type* does not.  None of these paths raises.
     """
     ds = NDDataset(np.array([1.0, 2.0, 3.0]))
-    left = np.add(np.ma.masked, ds)
-    right = np.add(ds, np.ma.masked)
-    assert isinstance(left, NDDataset)
-    assert isinstance(right, NDDataset)
-    assert_array_equal(left.mask, [True, True, True])
-    assert_array_equal(right.mask, [True, True, True])
-    assert_array_equal(left.data, right.data)
-    r_left = np.ma.masked + ds
-    r_right = ds + np.ma.masked
-    assert_array_equal(np.ma.asarray(r_left).mask, [True, True, True])
-    assert isinstance(r_right, NDDataset)
-    assert r_right.mask.all()
+    # ufunc forms: symmetric, fully masked NDDataset
+    for f in (np.add, np.subtract, np.multiply, np.divide):
+        left = f(np.ma.masked, ds)
+        right = f(ds, np.ma.masked)
+        assert isinstance(left, NDDataset)
+        assert isinstance(right, NDDataset)
+        assert_array_equal(left.mask, [True, True, True])
+        assert_array_equal(right.mask, [True, True, True])
+    # `np.ma.masked <op> ds` operator forms are intercepted by NumPy and
+    # return a fully masked masked array (mask symmetric, type not)
+    for r in (
+        np.ma.masked + ds,
+        np.ma.masked - ds,
+        np.ma.masked * ds,
+        np.ma.masked / ds,
+    ):
+        assert_array_equal(np.ma.asarray(r).mask, [True, True, True])
+    # `ds <op> np.ma.masked` operator forms return a fully masked NDDataset;
+    # the division form warns because the raw computation divides by masked
+    # (= 0), but never raises
+    for r in (ds + np.ma.masked, ds - np.ma.masked, ds * np.ma.masked):
+        assert isinstance(r, NDDataset)
+        assert r.mask.all()
+    with pytest.warns(RuntimeWarning):
+        r_div2 = ds / np.ma.masked
+    assert isinstance(r_div2, NDDataset)
+    assert r_div2.mask.all()
 
 
 def test_mask_policy_domain_never_extends_mask():
@@ -1605,12 +1623,54 @@ def test_mask_policy_domain_never_extends_mask():
     data = np.array([1.0, -4.0, np.e])
     mask = np.array([False, True, False])
     dsm = NDDataset(data.copy(), mask=mask)
-    r = np.log(dsm)
+    with pytest.warns(RuntimeWarning):
+        r = np.log(dsm)
     # the domain error occurs at the masked position: the explicit mask
     # is preserved, no domain position is added
     assert_array_equal(r.mask, mask)
     # visible values are the ufunc output on the visible inputs
     assert_array_equal(r.data[~mask], np.log(data[~mask]))
+
+
+def test_mask_policy_visible_invalid_with_masked_position():
+    """
+    Domain invalidity on a *visible* position while another position is
+    explicitly masked: warns (never raises), promotes to complex, and the
+    mask is not extended.
+    """
+    data = np.array([-4.0, 1.0, np.e])
+    mask = np.array([False, True, False])
+    dsm = NDDataset(data.copy(), mask=mask)
+    with pytest.warns(RuntimeWarning):
+        r = np.log(dsm)
+    # the new invalid value is at the visible position 0 -> complex
+    # promotion, while position 1 stays explicitly masked and the mask is
+    # unchanged
+    assert_array_equal(r.mask, mask)
+    assert np.iscomplexobj(r.data)
+    assert_array_equal(r.data[~mask], np.log(data[~mask].astype(np.complex128)))
+    assert r.data[0].real == pytest.approx(np.log(4.0))
+
+
+def test_mask_policy_non_mutation():
+    """Arithmetic through the masked path never mutates the source dataset."""
+    data = np.array([1.0, 0.0, 3.0])
+    mask = np.array([False, True, False])
+    dsm = NDDataset(data.copy(), mask=mask.copy())
+    ds = NDDataset(np.array([1.0, 2.0, 3.0]))
+    with pytest.warns(RuntimeWarning):
+        _ = dsm / 0.0
+    with pytest.warns(RuntimeWarning):
+        _ = 2 / dsm
+    with pytest.warns(RuntimeWarning):
+        _ = np.log(dsm)
+    _ = ds + np.ma.masked
+    _ = np.multiply(np.ma.masked, ds)
+    assert_array_equal(dsm.data, data)
+    assert_array_equal(dsm.mask, mask)
+    assert dsm.is_masked
+    assert_array_equal(ds.data, np.array([1.0, 2.0, 3.0]))
+    assert not ds.is_masked
 
 
 def test_mask_policy_union_broadcasting():

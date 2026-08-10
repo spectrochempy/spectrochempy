@@ -3067,6 +3067,7 @@ class NDMath:
         """
 
         from warnings import catch_warnings  # noqa: PLC0415
+        from warnings import warn  # noqa: PLC0415
 
         import numpy as np  # noqa: PLC0415
 
@@ -3100,19 +3101,21 @@ class NDMath:
 
                 # Warning-based fallback to complex
                 if ws and "invalid value encountered in " in ws[-1].message.args[0]:
-                    ws = []
                     if reflected:
                         data = getattr(np, fname)(
                             *args[:1], d.astype(np.complex128), *args[1:]
                         )
                     else:
                         data = getattr(np, fname)(d.astype(np.complex128), *args)
-                    if ws:
-                        raise ValueError(ws[-1].message.args[0])
-                elif ws and "overflow encountered" in ws[-1].message.args[0]:
+
+            # Emit the recorded warning outside the recording context so it
+            # reaches the caller: domain errors on visible values leave visible
+            # inf/nan (or complex promotion) instead of raising.
+            if ws:
+                if "overflow encountered" in ws[-1].message.args[0]:
                     warning_(ws[-1].message.args[0])
-                elif ws:
-                    raise ValueError(ws[-1].message.args[0])
+                else:
+                    warn(ws[-1].message.args[0], category=ws[-1].category, stacklevel=2)
         else:
             branch = _ExecutionPlan.select(fname, d, args)
             try:
