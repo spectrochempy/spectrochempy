@@ -295,7 +295,9 @@ _ = out.plot(figsize=(6, 2.5))
 # ##### log
 # Natural logarithm, element-wise.
 #
-# This doesn't generate an error for negative numbers, but the output is masked for those values
+# This doesn't generate an error for negative numbers: the negative values are
+# promoted to complex numbers (with the standard NumPy ``RuntimeWarning``) and
+# the mask is never extended to the newly invalid positions.
 
 # %%
 out = np.log(dataset)
@@ -307,6 +309,9 @@ ax = out.plot(figsize=(6, 2.5), show_mask=True)
 
 # %%
 out = np.log(dataset - dataset.min())
+# log(0) = -inf at the minimum position: the invalid value stays visible (with
+# a warning) and is masked explicitly before plotting
+out[~np.isfinite(out)] = MASKED
 _ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]

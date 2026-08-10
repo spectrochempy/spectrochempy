@@ -26,6 +26,22 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Arithmetic operations on masked datasets now follow the documented mask
+  policy: only the explicit operand masks are preserved (as their broadcast
+  union for two datasets) and newly invalid numeric values are no longer
+  auto-masked. In particular, division by zero on the masked path leaves
+  visible `inf`/`nan` exactly like the unmasked path, `2 / ds` with a masked
+  zero preserves the mask, and ufunc domain errors on masked inputs
+  (e.g. `log` or `sqrt` of a masked negative) never extend the mask.
+  Domain errors on *visible* values (division by zero, overflow, invalid
+  value) now emit the standard NumPy ``RuntimeWarning`` and return the
+  visible `inf`/`nan` (or complex promotion) instead of raising a
+  ``ValueError``, identically to the unmasked path. Finally, `np.ma.masked`
+  is usable as either operand for ``+``, ``-``, ``*`` and ``/`` without an
+  error; the mask stays symmetric, although ``np.ma.masked <op> ds`` operator
+  forms may still be intercepted by NumPy and return a ``numpy.ma.MaskedArray``
+  (the type asymmetry is inherent to NumPy, not to SpectroChemPy).
+
 - Filter and smoothing outputs (`smooth`, `savgol`, `savgol_filter`, `whittaker`)
   now preserve the source dataset `name` and append a single history entry while
   retaining all prior entries, instead of renaming with a ``_Filter.transform``
