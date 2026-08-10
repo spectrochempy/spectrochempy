@@ -1,19 +1,7 @@
-"""
-Characterization tests for combination operation semantics on NDDataset.
+"""Semantic tests for concatenate()/stack() multi-source metadata policy."""
 
-This suite characterizes CURRENT behavior of concatenate() and stack().
-It does NOT validate a desired future policy.
-
-Coverage:
-    - concatenate: data, CoordSet, units, masks, metadata, history,
-      identity/provenance, edge cases
-    - stack: data, CoordSet, metadata, provenance
-
-Result Assembly Pattern observations (see RFC):
-    Combination operations follow Pattern B (Rebuild / Synthesize):
-    the result is assembled from a copy of the last dataset with
-    selective field overwrites, not a pure copy-first approach.
-"""
+from datetime import UTC
+from datetime import datetime
 
 import numpy as np
 import pytest
@@ -22,6 +10,7 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.processing.transformation.concatenate import concatenate
 from spectrochempy.processing.transformation.concatenate import stack
+from spectrochempy.utils.datetimeutils import utcnow
 from spectrochempy.utils.exceptions import DimensionsCompatibilityError
 from spectrochempy.utils.exceptions import UnitsCompatibilityError
 from tests.test_core.test_dataset._semantic_dataset_helpers import assert_dims_equal
@@ -358,56 +347,93 @@ class TestConcatenateMasks:
 
 
 class TestConcatenateMetadata:
-    r"""
-    Characterize metadata propagation through concatenation.
+    def test_title_requires_exact_consensus(self, dataset_x, dataset_y):
+        c = concatenate(dataset_x, dataset_y, dims="x")
+        assert c._title is None
+        assert c.title == "<untitled>"
 
-    Observations (not policy):
-    - title comes from the FIRST dataset (with warning if different)
-    - name comes from the LAST dataset (via copy of last input)
-    - author is merged with ' & ' separator
-    - description is synthesized: 'Concatenation of N datasets:\n( name1, name2, ... )'
-    - origin comes from the LAST dataset (via copy)
-    - meta comes from the LAST dataset (via copy)
-    """
-
-    def test_title_from_first_dataset(self, dataset_x, dataset_y):
+    def test_title_preserved_on_exact_consensus(self, dataset_x, dataset_y):
+        dataset_y.title = "dataset_x"
         c = concatenate(dataset_x, dataset_y, dims="x")
         assert c.title == "dataset_x"
 
-    def test_name_from_last_dataset(self, dataset_x, dataset_y):
+    def test_name_is_cleared_to_auto_generated_identity(self, dataset_x, dataset_y):
         c = concatenate(dataset_x, dataset_y, dims="x")
-        assert c.name == "dataset_y_name"
+        assert c._name == ""
+        assert c.name.startswith("NDDataset")
+        assert c.name not in {dataset_x.name, dataset_y.name}
 
     def test_author_merged(self, dataset_x, dataset_y):
         c = concatenate(dataset_x, dataset_y, dims="x")
-        assert "author_x" in c.author
-        assert "author_y" in c.author
-        assert " & " in c.author
+        assert c.author == "author_x & author_y"
 
     def test_author_deduplicated(self, dataset_x):
-        """Notable behavior: same author is not duplicated."""
         c = concatenate(dataset_x, dataset_x, dims="x")
-        assert c.author.count("author_x") == 1
+        assert c.author == "author_x"
 
     def test_description_synthesized(self, dataset_x, dataset_y):
         c = concatenate(dataset_x, dataset_y, dims="x")
-        assert "Concatenation of 2  datasets" in c.description
-        assert "dataset_x_name" in c.description
-        assert "dataset_y_name" in c.description
+        assert (
+            c.description
+            == "Concatenation of 2 datasets:\n( dataset_x_name, dataset_y_name )"
+        )
 
-    def test_origin_from_last_dataset(self, dataset_x, dataset_y):
+    def test_description_uses_unnamed_placeholder(self, dataset_x, dataset_y):
+        dataset_x._name = ""
+        dataset_y._name = ""
         c = concatenate(dataset_x, dataset_y, dims="x")
-        assert c.origin == "origin_y"
+        assert c.description == "Concatenation of 2 datasets:\n( <unnamed>, <unnamed> )"
 
-    def test_meta_from_last_dataset(self, dataset_x, dataset_y):
+    def test_origin_synthesized_for_multiple_sources(self, dataset_x, dataset_y):
         c = concatenate(dataset_x, dataset_y, dims="x")
-        assert c.meta.project == "project_y"
+        assert c.origin == "multiple: origin_x | origin_y"
 
-    def test_meta_deep_copied(self, dataset_x, dataset_y):
-        """Notable behavior: modifying result meta should not affect source."""
+    def test_origin_preserved_on_exact_consensus(self, dataset_x, dataset_y):
+        dataset_y.origin = "origin_x"
+        c = concatenate(dataset_x, dataset_y, dims="x")
+        assert c.origin == "origin_x"
+
+    def test_meta_cleared_when_payloads_differ(self, dataset_x, dataset_y):
+        c = concatenate(dataset_x, dataset_y, dims="x")
+        assert c.meta.project is None
+
+    def test_meta_deep_copied_from_first_on_consensus(self, dataset_x, dataset_y):
+        dataset_y.meta.project = dataset_x.meta.project
         c = concatenate(dataset_x, dataset_y, dims="x")
         c.meta.project = "modified"
-        assert dataset_y.meta.project == "project_y"
+        assert dataset_x.meta.project == "project_x"
+        assert dataset_y.meta.project == "project_x"
+
+    def test_filename_cleared(self, dataset_x, dataset_y):
+        dataset_x.filename = "dataset_x.scp"
+        dataset_y.filename = "dataset_y.scp"
+        c = concatenate(dataset_x, dataset_y, dims="x")
+        assert c.filename is None
+
+    def test_acquisition_date_requires_exact_consensus(self, dataset_x, dataset_y):
+        dataset_x.acquisition_date = datetime(2024, 1, 2, 3, 4, 5, tzinfo=UTC)
+        dataset_y.acquisition_date = datetime(2024, 1, 3, 3, 4, 5, tzinfo=UTC)
+        c = concatenate(dataset_x, dataset_y, dims="x")
+        assert c.acquisition_date is None
+
+    def test_acquisition_date_preserved_on_consensus(self, dataset_x, dataset_y):
+        acquisition_date = datetime(2024, 1, 2, 3, 4, 5, tzinfo=UTC)
+        dataset_x.acquisition_date = acquisition_date
+        dataset_y.acquisition_date = acquisition_date
+        c = concatenate(dataset_x, dataset_y, dims="x")
+        assert c._acquisition_date == acquisition_date
+        assert c.acquisition_date == acquisition_date.astimezone(c._timezone).isoformat(
+            sep=" ",
+            timespec="seconds",
+        )
+
+    def test_created_and_modified_describe_new_result(self, dataset_x, dataset_y):
+        before = utcnow()
+        c = concatenate(dataset_x, dataset_y, dims="x")
+        after = utcnow()
+        assert before <= c._created <= after
+        assert before <= c._modified <= after
+        assert c._created == c._modified
 
 
 # ======================================================================================
@@ -416,20 +442,15 @@ class TestConcatenateMetadata:
 
 
 class TestConcatenateHistory:
-    """
-    Characterize history behavior through concatenation.
-
-    Notable behavior: history is REWRITTEN, not appended.
-    Original history entries from input datasets are lost.
-    """
-
     def test_history_rewritten(self, dataset_x, dataset_y):
         c = concatenate(dataset_x, dataset_y, dims="x")
         assert len(c.history) == 1
-        assert "Created by concatenate" in c.history[0]
+        assert (
+            "Created by concatenate from 2 datasets: dataset_x_name, dataset_y_name"
+            in c.history[0]
+        )
 
     def test_original_history_lost(self, dataset_x, dataset_y):
-        """Notable behavior: input dataset history is not preserved."""
         c = concatenate(dataset_x, dataset_y, dims="x")
         assert c.history[0] != dataset_x.history[0]
         assert c.history[0] != dataset_y.history[0]
@@ -445,41 +466,27 @@ class TestConcatenateHistory:
 
 
 class TestConcatenateIdentityProvenance:
-    """
-    Observe identity and provenance patterns in concatenation.
-
-    Observations (not policy):
-    - title, author, description, name are handled individually
-      (title: first, name: last, author: merged, description: synthesized)
-      This is NOT a copy-first identity preservation pattern.
-    - origin and meta come from the last dataset (copy artifact)
-    - history is rewritten — provenance is not preserved
-    - This most closely resembles Pattern B (Rebuild / Synthesize):
-      the result is a synthesized object, not an identity-preserved
-      transformation of the first input.
-    """
-
     def test_identity_pattern_is_rebuild(self, dataset_x, dataset_y):
-        """
-        Concatenation is not identity-preserving:
-        the result is a synthesized multi-source object.
-        """
         c = concatenate(dataset_x, dataset_y, dims="x")
-        assert c.title != dataset_y.title  # title not from last
-        assert c.name != dataset_x.name  # name not from first
-        assert c.author != dataset_x.author  # author merged
-        assert c.description != dataset_x.description  # synthesized
-        assert c.description != dataset_y.description
+        assert c._title is None
+        assert c._name == ""
+        assert c.author == "author_x & author_y"
+        assert (
+            c.description
+            == "Concatenation of 2 datasets:\n( dataset_x_name, dataset_y_name )"
+        )
+        assert c.origin == "multiple: origin_x | origin_y"
 
     def test_provenance_rewritten(self, dataset_x, dataset_y):
-        """History is rewritten — provenance from inputs is lost."""
         c = concatenate(dataset_x, dataset_y, dims="x")
         assert c.history != dataset_x.history
         assert c.history != dataset_y.history
-        assert "Created by concatenate" in c.history[0]
+        assert (
+            "Created by concatenate from 2 datasets: dataset_x_name, dataset_y_name"
+            in c.history[0]
+        )
 
     def test_same_title_no_warning(self):
-        """No warning when both datasets have the same title."""
         x = Coord(np.linspace(4000.0, 1000.0, 7))
         y = Coord(np.linspace(0.0, 60.0, 5))
         a = NDDataset(np.arange(35.0).reshape(5, 7), coordset=[y, x], title="same")
@@ -494,15 +501,7 @@ class TestConcatenateIdentityProvenance:
 
 
 class TestStackCharacterization:
-    """
-    Characterize stack() current behavior.
-
-    stack prepends a new dimension, creates a coordinate with labels
-    from dataset names, then delegates to concatenate(dims=0).
-
-    Note: stack requires datasets to have CoordSets — bare datasets
-    (no CoordSet) raise KeyError. All tests below use CoordSet datasets.
-    """
+    """stack() shares the concatenate() multi-source metadata policy."""
 
     @pytest.fixture
     def stack_pair_1d(self):
@@ -545,26 +544,26 @@ class TestStackCharacterization:
         labels = s[s.dims[0]].labels
         assert labels is not None
 
-    def test_stack_title_from_first(self, stack_pair_1d):
+    def test_stack_title_requires_consensus(self, stack_pair_1d):
         a, b = stack_pair_1d
         a.title = "first"
         b.title = "second"
         s = stack(a, b)
-        assert s.title == "first"
+        assert s._title is None
+        assert s.title == "<untitled>"
 
     def test_stack_history_rewritten(self, stack_pair_1d):
         a, b = stack_pair_1d
         s = stack(a, b)
         assert len(s.history) == 1
-        assert "Created by concatenate" in s.history[0]
+        assert "Created by stack from 2 datasets: alpha, beta" in s.history[0]
 
     def test_stack_author_merged(self, stack_pair_1d):
         a, b = stack_pair_1d
         a.author = "alice"
         b.author = "bob"
         s = stack(a, b)
-        assert "alice" in s.author
-        assert "bob" in s.author
+        assert s.author == "alice & bob"
 
     def test_stack_incompatible_shapes_raises(self):
         x1 = Coord(np.linspace(0.0, 10.0, 7))
@@ -588,44 +587,37 @@ class TestStackCharacterization:
     # stack() origin propagation
     # ------------------------------------------------------------------
 
-    def test_stack_origin_from_last_dataset(self):
-        """
-        Notable: origin propagates from the LAST dataset
-        (consistent with concatenate's copy-of-last pattern).
-        """
+    def test_stack_origin_synthesized_from_all_inputs(self):
         x = Coord(np.linspace(0.0, 10.0, 3))
         a = NDDataset(np.array([10.0, 20.0, 30.0]), coordset=[x])
         b = NDDataset(np.array([40.0, 50.0, 60.0]), coordset=[x])
         a.origin = "origin_first"
         b.origin = "origin_last"
         s = stack(a, b)
-        assert s.origin == "origin_last"
+        assert s.origin == "multiple: origin_first | origin_last"
 
     # ------------------------------------------------------------------
     # stack() custom meta propagation
     # ------------------------------------------------------------------
 
-    def test_stack_meta_from_last_dataset(self):
-        """Notable: custom meta propagates from the LAST dataset."""
+    def test_stack_meta_cleared_when_payloads_differ(self):
         x = Coord(np.linspace(0.0, 10.0, 3))
         a = NDDataset(np.array([10.0, 20.0, 30.0]), coordset=[x])
         b = NDDataset(np.array([40.0, 50.0, 60.0]), coordset=[x])
         a.meta.project = "project_first"
         b.meta.project = "project_last"
         s = stack(a, b)
-        assert s.meta.project == "project_last"
+        assert s.meta.project is None
 
     def test_stack_meta_deep_copied(self):
-        """
-        Notable: result meta is deep-copied, not aliased
-        to the source dataset object.
-        """
         x = Coord(np.linspace(0.0, 10.0, 3))
         a = NDDataset(np.array([10.0, 20.0, 30.0]), coordset=[x])
         b = NDDataset(np.array([40.0, 50.0, 60.0]), coordset=[x])
+        a.meta.project = "original"
         b.meta.project = "original"
         s = stack(a, b)
         s.meta.project = "modified"
+        assert a.meta.project == "original"
         assert b.meta.project == "original"
 
 

@@ -7,7 +7,7 @@ __all__ = ["concatenate", "stack"]
 
 __dataset_methods__ = __all__
 
-from warnings import warn
+from copy import deepcopy
 
 import numpy as np
 
@@ -16,6 +16,7 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.utils import exceptions
 from spectrochempy.utils.datetimeutils import utcnow
 from spectrochempy.utils.decorators import deprecated
+from spectrochempy.utils.meta import Meta
 from spectrochempy.utils.objects import OrderedSet
 
 
@@ -85,13 +86,23 @@ def concatenate(*datasets, **kwargs):
         deprecated("force_stack", replace="method stack()", removed="0.13.0")
         return stack(datasets)
 
+    operation = kwargs.pop("_metadata_operation", "concatenate")
+    metadata_sources = kwargs.pop("_metadata_sources", None)
+    if operation not in {"concatenate", "stack"}:
+        raise ValueError(f"Unsupported metadata operation context: {operation}")
+
+    source_datasets = _normalize_datasets(datasets)
+    source_datasets = [_reject_coord_input(dataset) for dataset in source_datasets]
+    if metadata_sources is None:
+        metadata_sources = source_datasets
+
     # get a copy of input datasets in order that input data are not modified
-    datasets = _get_copy(datasets)
-    # Reject Coord inputs — Coord must be explicitly wrapped in NDDataset
-    datasets = [_reject_coord_input(d) for d in datasets]
+    datasets = [dataset.copy() for dataset in source_datasets]
 
     if _should_promote_1d_column_concatenation(datasets, kwargs):
-        return _stack_1d_profiles_as_columns(datasets)
+        return _stack_1d_profiles_as_columns(
+            datasets, metadata_sources=metadata_sources
+        )
 
     # get axis from arguments
     axis, dim = datasets[0].get_axis(**kwargs)
@@ -170,28 +181,7 @@ def concatenate(*datasets, **kwargs):
     out._mask = mask
     out._units = units
 
-    out.description = f"Concatenation of {len(datasets)}  datasets:\n"
-    out.description += f"( {datasets[0].name}"
-    out.title = datasets[0].title
-    authortuple = (datasets[0].author,)
-
-    for dataset in datasets[1:]:
-        if out.title != dataset.title:
-            warn(
-                "Different data title => the title is that of the 1st dataset",
-                stacklevel=2,
-            )
-
-        if dataset.author not in authortuple:
-            authortuple = authortuple + (dataset.author,)
-
-        out.author = " & ".join([str(author) for author in authortuple])
-
-        out.description += f", {dataset.name}"
-
-    out.description += " )"
-    out._date = out._modified = utcnow()
-    out.history = ["Created by concatenate"]
+    _apply_combination_metadata(out, metadata_sources, operation=operation)
 
     return out
 
@@ -261,16 +251,20 @@ def stack(*datasets, **kwargs):
     (200, 2)
 
     """
-    datasets = _get_copy(datasets)
+    source_datasets = _normalize_datasets(datasets)
+    source_datasets = [_reject_coord_input(dataset) for dataset in source_datasets]
+    datasets = [dataset.copy() for dataset in source_datasets]
     # Reject Coord inputs — Coord must be explicitly wrapped in NDDataset
-    datasets = [_reject_coord_input(d) for d in datasets]
     axis = kwargs.pop("axis", 0)
     if kwargs:
         unexpected = ", ".join(sorted(kwargs))
         raise TypeError(f"stack() got unexpected keyword argument(s): {unexpected}")
 
     if axis in (1, -1):
-        return _stack_1d_profiles_as_columns(datasets)
+        return _stack_1d_profiles_as_columns(
+            datasets,
+            metadata_sources=source_datasets,
+        )
     if axis not in (0, None):
         raise NotImplementedError("stack() currently supports only axis=0 or axis=1")
 
@@ -289,15 +283,22 @@ def stack(*datasets, **kwargs):
         dataset.add_coordset(newcoord)
         dataset.dims = [newcoord.name] + dataset.dims
 
-    return concatenate(*datasets, dims=0)
+    return concatenate(
+        *datasets,
+        dims=0,
+        _metadata_operation="stack",
+        _metadata_sources=source_datasets,
+    )
 
 
-def _stack_1d_profiles_as_columns(datasets):
+def _stack_1d_profiles_as_columns(datasets, *, metadata_sources=None):
     if not datasets:
         raise ValueError("stack() requires at least one dataset")
 
     # Reject Coord inputs — Coord must be explicitly wrapped in NDDataset
     datasets = [_reject_coord_input(d) for d in datasets]
+    if metadata_sources is None:
+        metadata_sources = datasets
 
     shapes = {ds.shape for ds in datasets}
     if len(shapes) != 1:
@@ -331,7 +332,12 @@ def _stack_1d_profiles_as_columns(datasets):
         dataset.set_coordset({source_dim: xcoord, newdim: column_coord})
         promoted.append(dataset)
 
-    return concatenate(*promoted, dims=newdim)
+    return concatenate(
+        *promoted,
+        dims=newdim,
+        _metadata_operation="stack",
+        _metadata_sources=metadata_sources,
+    )
 
 
 def _should_promote_1d_column_concatenation(datasets, kwargs):
@@ -371,8 +377,111 @@ def _reject_coord_input(obj):
     return obj
 
 
-def _get_copy(datasets):
-    # get a copy of datasets from the input
+def _normalize_datasets(datasets):
     if isinstance(datasets, tuple) and isinstance(datasets[0], list | tuple):
         datasets = datasets[0]
-    return [ds.copy() for ds in datasets]
+    return list(datasets)
+
+
+def _apply_combination_metadata(out, datasets, *, operation):
+    names = _render_names(datasets)
+
+    out._name = ""
+    out._title = _consensus_text(dataset.title for dataset in datasets)
+    out.description = _make_description(operation, names)
+    out.author = _merge_authors(datasets)
+    out.origin = _merge_origins(datasets)
+    out.filename = None
+    out._meta = _combine_meta(datasets)
+    out._acquisition_date = _consensus_acquisition_date(datasets)
+    out.history = [_make_history_entry(operation, names)]
+
+    operation_time = utcnow()
+    out._date = operation_time
+    out._created = operation_time
+    out._modified = operation_time
+
+
+def _effective_text(value):
+    if value in (None, ""):
+        return None
+    return str(value)
+
+
+def _consensus_text(values):
+    effective = [_effective_text(value) for value in values]
+    if any(value is None for value in effective):
+        return None
+    first = effective[0]
+    if all(value == first for value in effective[1:]):
+        return first
+    return None
+
+
+def _deduplicated_texts(values):
+    texts = []
+    for value in values:
+        text = _effective_text(value)
+        if text is None or text in texts:
+            continue
+        texts.append(text)
+    return texts
+
+
+def _render_names(datasets):
+    names = []
+    for dataset in datasets:
+        name = _effective_text(dataset._name)
+        names.append(name if name is not None else "<unnamed>")
+    return names
+
+
+def _make_description(operation, names):
+    label = "Concatenation" if operation == "concatenate" else "Stack"
+    rendered = ", ".join(names)
+    return f"{label} of {len(names)} datasets:\n( {rendered} )"
+
+
+def _merge_authors(datasets):
+    authors = _deduplicated_texts(dataset.author for dataset in datasets)
+    if not authors:
+        return ""
+    if len(authors) == 1:
+        return authors[0]
+    return " & ".join(authors)
+
+
+def _merge_origins(datasets):
+    origins = [_effective_text(dataset.origin) for dataset in datasets]
+    if origins and all(origin is not None for origin in origins):
+        first = origins[0]
+        if all(origin == first for origin in origins[1:]):
+            return first
+
+    distinct = _deduplicated_texts(origins)
+    if not distinct:
+        return ""
+    if len(distinct) == 1:
+        return distinct[0]
+    return f"multiple: {' | '.join(distinct)}"
+
+
+def _combine_meta(datasets):
+    first_meta = datasets[0].meta
+    if all(dataset.meta == first_meta for dataset in datasets[1:]):
+        return deepcopy(first_meta)
+    return Meta()
+
+
+def _consensus_acquisition_date(datasets):
+    first = datasets[0]._acquisition_date
+    if first is None:
+        return None
+    if all(dataset._acquisition_date == first for dataset in datasets[1:]):
+        return deepcopy(first)
+    return None
+
+
+def _make_history_entry(operation, names):
+    rendered = ", ".join(names)
+    return f"Created by {operation} from {len(names)} datasets: {rendered}"

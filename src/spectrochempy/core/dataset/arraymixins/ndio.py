@@ -88,6 +88,7 @@ class NDIO(tr.HasTraits):
     """
 
     _filename = tr.Union((tr.Instance(pathlib.Path), tr.Unicode()), allow_none=True)
+    _filename_explicit_none = tr.Bool(False)
 
     def __init__(self, **kwargs):
         if "filename" in kwargs:
@@ -103,6 +104,8 @@ class NDIO(tr.HasTraits):
     @property
     def filename(self) -> pathlib.Path | None:
         """Get current filename for this dataset."""
+        if self._filename_explicit_none:
+            return None
         if self._filename:
             filename = self._filename
             if isinstance(self._filename, str):
@@ -115,8 +118,9 @@ class NDIO(tr.HasTraits):
             return pathlib.Path(self.name).with_suffix(SCPY_SUFFIX[self._implements()])
 
     @filename.setter
-    def filename(self, val: str | pathlib.Path) -> None:
+    def filename(self, val: str | pathlib.Path | None) -> None:
         self._filename = pathclean(val)
+        self._filename_explicit_none = val is None
 
     @property
     def filetype(self) -> list[str]:

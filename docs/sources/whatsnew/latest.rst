@@ -47,6 +47,13 @@ Bug Fixes
   exactly across load/save round-trips instead of collapsing non-empty history
   to the first entry and retimestamping it during native reconstruction.
 
+- `concatenate()` and `stack()` now treat their outputs as multi-source derived
+  datasets for identity and provenance metadata. They no longer silently
+  inherit `name`, `origin`, `filename`, `meta`, or timestamps from one source
+  dataset, use deterministic synthesized `description` and `history` text,
+  preserve `title` and `acquisition_date` only on exact consensus, and keep
+  all scientific assembly behavior and input datasets unchanged.
+
 Deprecations
 ~~~~~~~~~~~~
 

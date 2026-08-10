@@ -326,7 +326,7 @@ class TestMultiSourceOperations:
         assert "Inplace binary op" in _entry(ds1.history[-1])
 
     def test_concatenate_replaces_history(self):
-        """Concatenate REPLACES history with 'Created by concatenate'."""
+        """Concatenate replaces history with a single synthesized entry."""
         a = scp.NDDataset([[1.0, 2.0], [3.0, 4.0]], name="A")
         b = scp.NDDataset([[5.0, 6.0], [7.0, 8.0]], name="B")
         a.history = ["History A"]
@@ -335,7 +335,9 @@ class TestMultiSourceOperations:
         result = scp.concatenate(a, b)
 
         assert len(result.history) == 1
-        assert _entry(result.history[0]) == "Created by concatenate"
+        assert (
+            _entry(result.history[0]) == "Created by concatenate from 2 datasets: A, B"
+        )
 
     def test_importer_merge_replaces_history(self):
         """Importer merge replaces history with 'Merged from several files'."""
@@ -595,7 +597,9 @@ class TestHistoryLoss:
         a.history = ["Input A history"]
         b.history = ["Input B history"]
         result = scp.concatenate(a, b)
-        assert _entry(result.history[0]) == "Created by concatenate"
+        assert (
+            _entry(result.history[0]) == "Created by concatenate from 2 datasets: A, B"
+        )
 
     def test_integration_loses_prior_history(self):
         """Integration results lose prior operation history."""

@@ -178,6 +178,9 @@ def test_dataset_filename():
     ndd2.filename = "zzzz"
     assert ndd2.filename == Path("zzzz")
 
+    ndd2.filename = None
+    assert ndd2.filename is None
+
 
 def test_nddataset_deepcopy():
     """Deep copy via copy.deepcopy or copy() isolates all mutable state."""
