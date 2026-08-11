@@ -21,14 +21,15 @@ policy `spectrochempy_maintainer/rfcs/analysis-output-metadata-policy.md`
   distinct);
 - ``fit`` always replaces or clears the snapshots from its new inputs, so no
   obsolete metadata survives a refit;
-- X-side and Y-side outputs use their own scientific source; supervised
-  ``predict`` is multi-source and keeps its previous behavior until PR 2;
+- X-side and Y-side outputs use their own scientific source;
+- supervised ``predict`` now follows the accepted multi-source PR 2 policy
+  (`Xtrain`, `Ytrain`, `Xpredict`) without leaking stale fitted provenance;
 - input datasets are never mutated and output metadata is independent of later
   source mutation.
 
-Fields other than ``author`` (name, title, description, history, filename,
-created, modified, acquisition_date, units, ...) are deliberately unchanged
-here; they are aligned in the later policy PRs.
+The PR 1 author guarantees remain covered here and are complemented by the PR 2
+deterministic identity/provenance/history rules where the accepted policy now
+requires them.
 """
 
 import numpy as np
@@ -168,7 +169,9 @@ class TestSourceNonMutation:
         assert scores.meta is not ds.meta
         assert scores.meta.project == "provenance"
         assert "injected" not in scores.meta
-        assert scores.history[-1].endswith("Created using method PCA.transform")
+        assert scores.history[-1].endswith(
+            "Created analysis output scores with PCA from source_name."
+        )
 
 
 class TestPCAMonoSource:
@@ -310,23 +313,46 @@ class TestPLSRegressionYside:
         ):
             assert output.author == "y_author"
 
-    def test_predict_provenance_deferred_until_pr2(self, pls_inputs):
+    def test_predict_merges_training_and_prediction_provenance(self, pls_inputs):
         X, Y = pls_inputs
+        X.name = "xtrain"
+        X.origin = "origin_xtrain"
+        Y.name = "ytrain"
+        Y.origin = "origin_ytrain"
         pls = PLSRegression(n_components=2).fit(X, Y)
 
-        # A supervised prediction combines Xtrain + Ytrain + Xpredict: the
-        # accepted RFC does not define a partial Y-only merge. PR 1 leaves
-        # predict() unchanged; the runtime value is the recreated user/host.
         prediction = pls.predict()
-        assert prediction.author != "y_author"
-        assert prediction.author != "x_author"
-        assert prediction.author == get_user_and_node()
+        assert prediction.author == "x_author & y_author"
+        assert prediction.origin == "origin_xtrain & origin_ytrain"
+        assert prediction.title == "prediction"
+        assert prediction.name == "xtrain_PLSRegression.prediction"
+        assert prediction.description == (
+            "Prediction from PLSRegression fit of xtrain + ytrain applied to xtrain."
+        )
+        assert prediction.history[-1].endswith(
+            "Created analysis output prediction with PLSRegression from "
+            "xtrain + ytrain; applied to xtrain."
+        )
+        assert prediction.filename is None
+        assert prediction.meta is not Y.meta
 
-        # A direct X argument changes the data used, not the provenance
-        # model: still the recreated runtime value until PR 2.
         Xnew = X.copy()
         Xnew.author = "predict_author"
-        assert pls.predict(Xnew).author == get_user_and_node()
+        Xnew.origin = "origin_predict"
+        Xnew.name = "xpredict"
+        direct_prediction = pls.predict(Xnew)
+        assert direct_prediction.author == "x_author & y_author & predict_author"
+        assert (
+            direct_prediction.origin == "origin_xtrain & origin_ytrain & origin_predict"
+        )
+        assert direct_prediction.name == "xpredict_PLSRegression.prediction"
+        assert direct_prediction.description == (
+            "Prediction from PLSRegression fit of xtrain + ytrain applied to xpredict."
+        )
+        assert direct_prediction.history[-1].endswith(
+            "Created analysis output prediction with PLSRegression from "
+            "xtrain + ytrain; applied to xpredict."
+        )
 
     def test_transform_both_uses_respective_authors(self, pls_inputs):
         X, Y = pls_inputs
@@ -335,6 +361,25 @@ class TestPLSRegressionYside:
         x_scores, y_scores = pls.transform(X, Y, both=True)
         assert x_scores.author == "x_author"
         assert y_scores.author == "y_author"
+
+    def test_predict_direct_array_like_does_not_leak_old_dataset_provenance(
+        self, pls_inputs
+    ):
+        X, Y = pls_inputs
+        X.name = "xtrain"
+        Y.name = "ytrain"
+        pls = PLSRegression(n_components=2).fit(X, Y)
+
+        prediction = pls.predict(X.data)
+        assert prediction.author == "x_author & y_author"
+        assert prediction.name == "PLSRegression.prediction"
+        assert prediction.description == (
+            "Prediction from PLSRegression fit of xtrain + ytrain applied to <unnamed>."
+        )
+        assert prediction.history[-1].endswith(
+            "Created analysis output prediction with PLSRegression from "
+            "xtrain + ytrain; applied to <unnamed>."
+        )
 
     def test_transform_direct_y_argument_is_authoritative(self, pls_inputs):
         X, Y = pls_inputs

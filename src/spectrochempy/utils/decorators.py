@@ -444,6 +444,7 @@ class _set_output:
         typesingle=None,
         preserve_identity=False,
         use_snapshot=True,  # reuse the fit metadata snapshot on stored paths
+        analysis_role=None,
     ):
         self.method = method
         update_wrapper(self, method)
@@ -455,6 +456,7 @@ class _set_output:
         self.typesingle = typesingle
         self.preserve_identity = preserve_identity
         self.use_snapshot = use_snapshot
+        self.analysis_role = analysis_role
 
     @preserve_signature
     def __get__(self, obj, objtype):
@@ -481,6 +483,8 @@ class _set_output:
         sentinel = object()
         direct_X = sentinel
         direct_Y = sentinel
+        direct_X_kind = "none"
+        direct_Y_kind = "none"
         x_params = ("X", "dataset", "X_transform")
         y_params = ("Y", "Y_transform")
         try:
@@ -497,8 +501,18 @@ class _set_output:
                             continue
                         if key in x_params:
                             direct_X = value
+                            direct_X_kind = (
+                                "dataset"
+                                if isinstance(value, NDDataset)
+                                else "arraylike"
+                            )
                         elif key in y_params:
                             direct_Y = value
+                            direct_Y_kind = (
+                                "dataset"
+                                if isinstance(value, NDDataset)
+                                else "arraylike"
+                            )
                 elif (
                     param.kind
                     in (
@@ -513,22 +527,40 @@ class _set_output:
                         continue
                     if name in x_params:
                         direct_X = value
+                        direct_X_kind = (
+                            "dataset" if isinstance(value, NDDataset) else "arraylike"
+                        )
                     elif name in y_params:
                         direct_Y = value
+                        direct_Y_kind = (
+                            "dataset" if isinstance(value, NDDataset) else "arraylike"
+                        )
         else:
             # Fallback for exotic signatures: first two positional arguments
             # and the recognized keyword arguments.
             if args and args[0] is not None:
                 direct_X = args[0]
+                direct_X_kind = (
+                    "dataset" if isinstance(args[0], NDDataset) else "arraylike"
+                )
             if len(args) > 1 and args[1] is not None:
                 direct_Y = args[1]
+                direct_Y_kind = (
+                    "dataset" if isinstance(args[1], NDDataset) else "arraylike"
+                )
             for key in x_params:
                 if kwargs.get(key) is not None:
                     direct_X = kwargs[key]
+                    direct_X_kind = (
+                        "dataset" if isinstance(kwargs[key], NDDataset) else "arraylike"
+                    )
                     break
             for key in y_params:
                 if kwargs.get(key) is not None:
                     direct_Y = kwargs[key]
+                    direct_Y_kind = (
+                        "dataset" if isinstance(kwargs[key], NDDataset) else "arraylike"
+                    )
                     break
 
         # get the method output - one or two arrays depending on the method and *args
@@ -557,8 +589,14 @@ class _set_output:
 
         out = []
         preserve = self.preserve_identity and getattr(obj, "_preserve_identity", True)
-        for data, meta_from in zip(data_tuple, meta_from_tuple, strict=False):
+        for idx, (data, meta_from) in enumerate(
+            zip(data_tuple, meta_from_tuple, strict=False)
+        ):
             X_transf = NDDataset(data)
+            if isinstance(self.analysis_role, tuple):
+                role_id = self.analysis_role[idx]
+            else:
+                role_id = self.analysis_role
 
             # Now set the NDDataset attributes from the original X
 
@@ -757,8 +795,32 @@ class _set_output:
                 X_transf = X_transf.squeeze()
                 if preserve:
                     X_transf._history = X_transf._history[:-1]
+                if role_id is not None and hasattr(
+                    obj, "_apply_analysis_output_metadata"
+                ):
+                    X_transf = obj._apply_analysis_output_metadata(
+                        X_transf,
+                        role_id=role_id,
+                        meta_from=meta_from,
+                        direct_x=None if direct_X is sentinel else direct_X,
+                        direct_y=None if direct_Y is sentinel else direct_Y,
+                        direct_x_kind=direct_X_kind,
+                        direct_y_kind=direct_Y_kind,
+                    )
                 out.append(X_transf)
             else:
+                if role_id is not None and hasattr(
+                    obj, "_apply_analysis_output_metadata"
+                ):
+                    X_transf = obj._apply_analysis_output_metadata(
+                        X_transf,
+                        role_id=role_id,
+                        meta_from=meta_from,
+                        direct_x=None if direct_X is sentinel else direct_X,
+                        direct_y=None if direct_Y is sentinel else direct_Y,
+                        direct_x_kind=direct_X_kind,
+                        direct_y_kind=direct_Y_kind,
+                    )
                 out.append(X_transf)
 
         if len(out) == 1:
@@ -776,6 +838,7 @@ def _wrap_ndarray_output_to_nddataset(
     typesingle=None,
     preserve_identity=False,
     use_snapshot=True,
+    analysis_role=None,
 ):
     # wrap _set_output to allow for deferred calling
     if method:
@@ -794,6 +857,7 @@ def _wrap_ndarray_output_to_nddataset(
                 typesingle=typesingle,
                 preserve_identity=preserve_identity,
                 use_snapshot=use_snapshot,
+                analysis_role=analysis_role,
             )
 
         out = wrapper

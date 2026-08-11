@@ -548,18 +548,30 @@ class SIMPLISMA(DecompositionAnalysis):
     def C(self):
         """Intensities ('concentrations') of pure compounds in spectra."""
         C = self.transform()
-        C.name = "Relative Concentrations"
         C.coord(-1).title = "# pure compound"
-        C.description = "Concentration/contribution matrix from SIMPLISMA:"  # + logs
-        return C
+        return self._apply_analysis_output_metadata(
+            C,
+            role_id="concentration_profiles",
+            meta_from="_X",
+            direct_x=None,
+            direct_y=None,
+            direct_x_kind="none",
+            direct_y_kind="none",
+        )
 
     @property
     def St(self):
         """Spectra of pure compounds."""
         St = self.components
-        St.name = "Pure compound spectra"
-        St.description = "Pure compound spectra matrix from SIMPLISMA:"  # + logs
-        return St
+        return self._apply_analysis_output_metadata(
+            St,
+            role_id="spectral_profiles",
+            meta_from="_X",
+            direct_x=None,
+            direct_y=None,
+            direct_x_kind="none",
+            direct_y_kind="none",
+        )
 
     @property
     def Pt(self):

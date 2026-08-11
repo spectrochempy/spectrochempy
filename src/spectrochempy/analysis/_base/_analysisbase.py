@@ -22,6 +22,7 @@ from spectrochempy.utils.decorators import _wrap_ndarray_output_to_nddataset
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.exceptions import NotFittedError
 from spectrochempy.utils.exceptions import SpectroChemPyError
+from spectrochempy.utils.meta import Meta
 from spectrochempy.utils.traits import NDDatasetType
 
 
@@ -55,9 +56,9 @@ class AnalysisSourceMetadata:
         self.filename = source.filename
         self.meta = copy.deepcopy(source.meta)
         self.units = source.units
-        self.created = source.created
-        self.modified = source.modified
-        self.acquisition_date = source.acquisition_date
+        self.created = source._created
+        self.modified = source._modified
+        self.acquisition_date = source._acquisition_date
         self.history = list(source.history or [])
         self.dims = tuple(source.dims)
         self.coordset = source.coordset.copy() if source.coordset is not None else None
@@ -107,6 +108,26 @@ class AnalysisConfigurable(BaseConfigurable):
         allow_none=True,
         help="Snapshot of the metadata of the scientific source assigned to _Y",
     )
+
+    _ANALYSIS_ROLE_TITLES = {
+        "scores": "scores",
+        "y_scores": "y scores",
+        "components": "components",
+        "loadings": "loadings",
+        "weights": "weights",
+        "rotations": "rotations",
+        "concentration_profiles": "concentration profiles",
+        "spectral_profiles": "spectral profiles",
+        "reconstruction": "reconstruction",
+        "fitted_data": "fitted data",
+        "prediction": "prediction",
+        "residuals": "residuals",
+        "diagnostic": "diagnostic",
+        "singular_values": "singular values",
+        "explained_variance": "explained variance",
+        "explained_variance_ratio": "explained variance ratio",
+        "cumulative_explained_variance": "cumulative explained variance",
+    }
 
     # ----------------------------------------------------------------------------------
     # Configuration parameters (mostly defined in subclass
@@ -175,6 +196,317 @@ class AnalysisConfigurable(BaseConfigurable):
         else:
             snapshot = None
         setattr(self, f"{role}_source_metadata", snapshot)
+
+    def _normalize_analysis_role(self, role_id):
+        if role_id == "reconstruction" and type(self).__name__ == "Optimize":
+            return "fitted_data"
+        return role_id
+
+    def _analysis_role_title(self, role_id):
+        return self._ANALYSIS_ROLE_TITLES[role_id]
+
+    @staticmethod
+    def _analysis_ordered_unique_text(values):
+        ordered = []
+        seen = set()
+        for value in values:
+            if value in (None, ""):
+                continue
+            if value in seen:
+                continue
+            ordered.append(value)
+            seen.add(value)
+        if not ordered:
+            return None
+        if len(ordered) == 1:
+            return ordered[0]
+        return " & ".join(ordered)
+
+    @staticmethod
+    def _analysis_source_label(source_metadata):
+        if source_metadata is None or source_metadata.name in (None, ""):
+            return "<unnamed>"
+        return source_metadata.name
+
+    @staticmethod
+    def _analysis_source_token(source_metadata):
+        if source_metadata is None or source_metadata.name in (None, ""):
+            return None
+        return source_metadata.name
+
+    def _analysis_source_list(self, sources):
+        items = [
+            self._analysis_source_label(source)
+            for source in sources
+            if source is not None
+        ]
+        if not items:
+            return "<unnamed>"
+        return " + ".join(items)
+
+    @staticmethod
+    def _analysis_acquisition_date_consensus(sources):
+        sources = [source for source in sources if source is not None]
+        if not sources:
+            return None
+        if len(sources) == 1:
+            return sources[0].acquisition_date
+        values = [source.acquisition_date for source in sources]
+        if any(value is None for value in values):
+            return None
+        if all(value == values[0] for value in values[1:]):
+            return values[0]
+        return None
+
+    @staticmethod
+    def _analysis_snapshot_from_direct_source(source):
+        if isinstance(source, NDDataset):
+            return AnalysisSourceMetadata(source)
+        return None
+
+    def _analysis_resolve_source_metadata(self, role, direct_kind, direct_source):
+        if direct_kind == "dataset":
+            return self._analysis_snapshot_from_direct_source(direct_source)
+        if direct_kind == "arraylike":
+            return None
+        return getattr(self, f"{role}_source_metadata", None)
+
+    def _analysis_reset_history(self, dataset, payload):
+        dataset._history = []
+        dataset.history = payload
+
+    def _analysis_generated_name(self, role_id, source_metadata=None):
+        token = self._analysis_source_token(source_metadata)
+        estimator = type(self).__name__
+        if token is not None:
+            return f"{token}_{estimator}.{role_id}"
+        return f"{estimator}.{role_id}"
+
+    def _analysis_generated_description(
+        self,
+        role_id,
+        *,
+        sources=None,
+        fit_sources=None,
+        prediction_source=None,
+    ):
+        estimator = type(self).__name__
+        role_title = self._analysis_role_title(role_id)
+        source_list = self._analysis_source_list(sources or [])
+        if role_id == "prediction":
+            fit_source_list = self._analysis_source_list(fit_sources or [])
+            prediction_source_list = self._analysis_source_list([prediction_source])
+            return (
+                f"Prediction from {estimator} fit of {fit_source_list} "
+                f"applied to {prediction_source_list}."
+            )
+        if role_id == "fitted_data":
+            return f"Fitted data from {estimator} fit of {source_list}."
+        if role_id == "residuals":
+            return f"Residuals from {estimator} fit of {source_list}."
+        if role_id in {
+            "diagnostic",
+            "singular_values",
+            "explained_variance",
+            "explained_variance_ratio",
+            "cumulative_explained_variance",
+        }:
+            return f"{role_title} diagnostic from {estimator} fit of {source_list}."
+        return f"{role_title} from {estimator} fit of {source_list}."
+
+    def _analysis_generated_history(
+        self,
+        role_id,
+        *,
+        sources=None,
+        fit_sources=None,
+        prediction_source=None,
+    ):
+        estimator = type(self).__name__
+        source_list = self._analysis_source_list(sources or [])
+        if role_id == "prediction":
+            fit_source_list = self._analysis_source_list(fit_sources or [])
+            prediction_source_list = self._analysis_source_list([prediction_source])
+            return (
+                f"Created analysis output prediction with {estimator} from "
+                f"{fit_source_list}; applied to {prediction_source_list}."
+            )
+        if role_id == "fitted_data":
+            return f"Created fitted data with {estimator} from {source_list}."
+        if role_id == "residuals":
+            return f"Created residuals with {estimator} from {source_list}."
+        if role_id in {
+            "diagnostic",
+            "singular_values",
+            "explained_variance",
+            "explained_variance_ratio",
+            "cumulative_explained_variance",
+        }:
+            return f"Created diagnostic {role_id} with {estimator} from {source_list}."
+        return f"Created analysis output {role_id} with {estimator} from {source_list}."
+
+    def _analysis_apply_prediction_support(self, dataset, direct_x_kind, direct_x):
+        xpredict = None
+        if direct_x_kind == "dataset":
+            xpredict = direct_x
+        elif direct_x_kind == "none":
+            xpredict = getattr(self, "_X", None)
+        ytrain = getattr(self, "_Y", None)
+
+        if dataset.ndim == 1:
+            if xpredict is not None and xpredict.coordset is not None:
+                dim = xpredict.dims[0]
+                coord = (
+                    xpredict.coord(0).copy() if xpredict.coord(0) is not None else None
+                )
+                dataset.dims = [dim]
+                dataset.set_coordset({dim: coord})
+        elif dataset.ndim >= 2:
+            obs_dim = dataset.dims[0]
+            target_dim = dataset.dims[-1]
+            obs_coord = None
+            target_coord = None
+            if xpredict is not None:
+                obs_dim = xpredict.dims[0]
+                if xpredict.coordset is not None and xpredict.coord(0) is not None:
+                    obs_coord = xpredict.coord(0).copy()
+            if isinstance(ytrain, NDDataset) and ytrain.ndim > 1:
+                target_dim = ytrain.dims[-1]
+                if ytrain.coordset is not None and ytrain.coord(-1) is not None:
+                    target_coord = ytrain.coord(-1).copy()
+            if obs_dim == target_dim:
+                target_dim = dataset.dims[-1]
+            dataset.dims = [obs_dim, target_dim]
+            dataset.set_coordset({obs_dim: obs_coord, target_dim: target_coord})
+
+        mask = None
+        if dataset.ndim >= 1 and xpredict is not None:
+            xmask = np.ma.getmaskarray(xpredict.mask)
+            if np.any(xmask):
+                if xmask.ndim == 1 and xmask.shape[0] == dataset.shape[0]:
+                    row_mask = xmask
+                elif xmask.ndim >= 2 and xmask.shape[0] == dataset.shape[0]:
+                    row_mask = np.any(xmask.reshape(xmask.shape[0], -1), axis=1)
+                else:
+                    row_mask = None
+                if row_mask is not None:
+                    if dataset.ndim == 1:
+                        mask = row_mask.copy()
+                    else:
+                        mask = np.broadcast_to(
+                            row_mask[:, np.newaxis], dataset.shape
+                        ).copy()
+
+        if dataset.ndim >= 2 and isinstance(ytrain, NDDataset):
+            ymask = np.ma.getmaskarray(ytrain.mask)
+            if np.any(ymask):
+                if ymask.ndim == 1 and ymask.shape[0] == dataset.shape[-1]:
+                    target_mask = ymask
+                elif ymask.ndim >= 2 and ymask.shape[-1] == dataset.shape[-1]:
+                    flat = ymask.reshape(-1, ymask.shape[-1])
+                    target_mask = np.all(flat, axis=0)
+                else:
+                    target_mask = None
+                if target_mask is not None:
+                    col_mask = np.broadcast_to(
+                        target_mask[np.newaxis, :], dataset.shape
+                    )
+                    mask = (
+                        col_mask.copy()
+                        if mask is None
+                        else np.logical_or(mask, col_mask)
+                    )
+
+        dataset.mask = np.False_ if mask is None or not np.any(mask) else mask
+        return dataset
+
+    def _apply_analysis_output_metadata(
+        self,
+        dataset,
+        *,
+        role_id,
+        meta_from,
+        direct_x,
+        direct_y,
+        direct_x_kind,
+        direct_y_kind,
+    ):
+        role_id = self._normalize_analysis_role(role_id)
+        x_source = self._analysis_resolve_source_metadata("_X", direct_x_kind, direct_x)
+        y_source = self._analysis_resolve_source_metadata("_Y", direct_y_kind, direct_y)
+        single_source = x_source if meta_from == "_X" else y_source
+
+        if role_id == "prediction":
+            x_train = getattr(self, "_X_source_metadata", None)
+            y_train = getattr(self, "_Y_source_metadata", None)
+            x_predict = x_source
+            provenance_sources = [
+                source for source in (x_train, y_train, x_predict) if source is not None
+            ]
+            merged_author = self._analysis_ordered_unique_text(
+                [source.author for source in provenance_sources]
+            )
+            merged_origin = self._analysis_ordered_unique_text(
+                [source.origin for source in provenance_sources]
+            )
+            dataset.author = merged_author
+            dataset.origin = "" if merged_origin is None else merged_origin
+            dataset.meta = (
+                copy.deepcopy(y_train.meta) if y_train is not None else Meta()
+            )
+            dataset.name = self._analysis_generated_name(role_id, x_predict)
+            dataset.title = self._analysis_role_title(role_id)
+            dataset.description = self._analysis_generated_description(
+                role_id,
+                fit_sources=[
+                    source for source in (x_train, y_train) if source is not None
+                ],
+                prediction_source=x_predict,
+            )
+            dataset.filename = None
+            dataset.acquisition_date = self._analysis_acquisition_date_consensus(
+                provenance_sources
+            )
+            self._analysis_reset_history(
+                dataset,
+                self._analysis_generated_history(
+                    role_id,
+                    fit_sources=[
+                        source for source in (x_train, y_train) if source is not None
+                    ],
+                    prediction_source=x_predict,
+                ),
+            )
+            return self._analysis_apply_prediction_support(
+                dataset, direct_x_kind, direct_x
+            )
+
+        sources = [single_source] if single_source is not None else []
+        if single_source is not None:
+            dataset.author = copy.copy(single_source.author)
+            dataset.origin = (
+                "" if single_source.origin is None else copy.copy(single_source.origin)
+            )
+            dataset.meta = copy.deepcopy(single_source.meta)
+            dataset.acquisition_date = self._analysis_acquisition_date_consensus(
+                sources
+            )
+        else:
+            dataset.meta = Meta()
+            dataset.acquisition_date = None
+            dataset.origin = ""
+
+        dataset.name = self._analysis_generated_name(role_id, single_source)
+        dataset.title = self._analysis_role_title(role_id)
+        dataset.description = self._analysis_generated_description(
+            role_id, sources=sources
+        )
+        dataset.filename = None
+        self._analysis_reset_history(
+            dataset,
+            self._analysis_generated_history(role_id, sources=sources),
+        )
+        return dataset
 
     # ----------------------------------------------------------------------------------
     # Private validation and default getter methods
@@ -436,7 +768,12 @@ class DecompositionAnalysis(AnalysisConfigurable):
     # ----------------------------------------------------------------------------------
     # Public methods
     # ----------------------------------------------------------------------------------
-    @_wrap_ndarray_output_to_nddataset(units=None, title=None, typex="components")
+    @_wrap_ndarray_output_to_nddataset(
+        units=None,
+        title=None,
+        typex="components",
+        analysis_role="scores",
+    )
     def transform(self, X=None, **kwargs):
         r"""
         Apply dimensionality reduction to `X`.
@@ -490,7 +827,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
     # Get doc sections for reuse in subclass
 
-    @_wrap_ndarray_output_to_nddataset
+    @_wrap_ndarray_output_to_nddataset(analysis_role="reconstruction")
     def inverse_transform(self, X_transform=None, **kwargs):
         r"""
         Transform data back to its original space.
@@ -580,7 +917,12 @@ class DecompositionAnalysis(AnalysisConfigurable):
             self.fit(X)
         return self.transform(X, **kwargs)
 
-    @_wrap_ndarray_output_to_nddataset(units=None, title=None, typey="components")
+    @_wrap_ndarray_output_to_nddataset(
+        units=None,
+        title=None,
+        typey="components",
+        analysis_role="components",
+    )
     def get_components(self, n_components=None):
         r"""
         Return the component's dataset: (selected :term:`n_components`, :term:`n_features`).
@@ -604,7 +946,12 @@ class DecompositionAnalysis(AnalysisConfigurable):
         return self._get_components()[:n_components]
 
     @property
-    @_wrap_ndarray_output_to_nddataset(units=None, title="keep", typey="components")
+    @_wrap_ndarray_output_to_nddataset(
+        units=None,
+        title="keep",
+        typey="components",
+        analysis_role="components",
+    )
     def components(self):
         r"""
         `NDDataset` with components in feature space (:term:`n_components`, :term:`n_features`).
@@ -765,7 +1112,12 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
     # Public methods
     # ----------------------------------------------------------------------------------
 
-    @_wrap_ndarray_output_to_nddataset(meta_from="_Y", title=None, use_snapshot=False)
+    @_wrap_ndarray_output_to_nddataset(
+        meta_from="_Y",
+        title=None,
+        use_snapshot=False,
+        analysis_role="prediction",
+    )
     def predict(self, X=None):
         r"""
         Predict targets of given observations.
@@ -844,6 +1196,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         title=None,
         meta_from=("_X", "_Y"),
         typex="components",
+        analysis_role=("scores", "y_scores"),
     )
     def transform(self, X=None, Y=None, both=False, **kwargs):
         r"""

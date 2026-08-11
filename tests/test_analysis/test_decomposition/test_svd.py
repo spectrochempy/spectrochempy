@@ -60,7 +60,7 @@ def test_svd(low_rank_dataset):
     assert svd.U.shape == (4, 4)
     assert svd.VT.shape == (4, 5)
     assert svd.sv.shape == (4,)
-    assert svd.sv.title == "Singular values"
+    assert svd.sv.title == "singular values"
     assert svd.sv.dims == ["k"]
     assert_allclose(svd.s, [5.0, 3.0, 0.0, 0.0])
     assert_allclose(svd.ev_ratio.data, [2500.0 / 34.0, 900.0 / 34.0, 0.0, 0.0])
@@ -102,7 +102,7 @@ def test_svd_compute_uv_false(low_rank_dataset):
     # Singular values are correct
     assert_allclose(svd.s, [5.0, 3.0, 0.0, 0.0])
     assert svd.sv.shape == (4,)
-    assert svd.sv.title == "Singular values"
+    assert svd.sv.title == "singular values"
     # Diagnostics work correctly
     assert svd.ev.shape == (4,)
     assert svd.ev_ratio.shape == (4,)

@@ -321,7 +321,16 @@ for reproducible results across multiple function calls.""",
     @property
     def loadings(self):
         """Return PCA loadings."""
-        return self.get_components()
+        loadings = self.get_components()
+        return self._apply_analysis_output_metadata(
+            loadings,
+            role_id="loadings",
+            meta_from="_X",
+            direct_x=None,
+            direct_y=None,
+            direct_x_kind="none",
+            direct_y_kind="none",
+        )
 
     @property
     def scores(self):
@@ -376,6 +385,7 @@ for reproducible results across multiple function calls.""",
         units=None,
         title="explained variance",
         typesingle="components",
+        analysis_role="explained_variance",
     )
     def explained_variance(self):
         return self._pca.explained_variance_
@@ -387,6 +397,7 @@ for reproducible results across multiple function calls.""",
         units="percent",
         title="explained variance ratio",
         typesingle="components",
+        analysis_role="explained_variance_ratio",
     )
     def explained_variance_ratio(self):
         return self._pca.explained_variance_ratio_ * 100.0
@@ -398,6 +409,7 @@ for reproducible results across multiple function calls.""",
         units="percent",
         title="cumulative explained variance",
         typesingle="components",
+        analysis_role="cumulative_explained_variance",
     )
     def cumulative_explained_variance(self):
         return np.cumsum(self._pca.explained_variance_ratio_) * 100.0

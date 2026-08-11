@@ -139,7 +139,7 @@ def test_pca_transform_fit_transform_and_inverse(low_rank_pca_dataset):
     assert X_hat_2.shape == dataset.shape
     X_hat = pca.inverse_transform()
     assert_allclose(X_hat.data, dataset.data, atol=1.0e-12)
-    assert X_hat.title == dataset.title
+    assert X_hat.title == "reconstruction"
     assert X_hat.units == dataset.units
     assert X_hat.dims == dataset.dims
 
