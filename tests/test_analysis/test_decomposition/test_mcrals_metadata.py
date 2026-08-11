@@ -49,9 +49,9 @@ def test_metadata_from_calibrated_st_guess():
 
     mcr = _fit(X, St0)
 
-    assert mcr.St.title == "molar absorptivity"
+    assert mcr.St.title == "spectral profiles"
     assert mcr.St.units == St0.units
-    assert mcr.C.title == "concentration"
+    assert mcr.C.title == "concentration profiles"
     assert mcr.C.units == X.units / St0.units
     np.testing.assert_array_equal(mcr.C.y.data, X.y.data)
     assert mcr.C.y.title == X.y.title
@@ -67,9 +67,9 @@ def test_metadata_from_calibrated_c_guess():
 
     mcr = _fit(X, C0)
 
-    assert mcr.C.title == "amount concentration"
+    assert mcr.C.title == "concentration profiles"
     assert mcr.C.units == C0.units
-    assert mcr.St.title == X.title
+    assert mcr.St.title == "spectral profiles"
     assert mcr.St.units == X.units / C0.units
 
 
@@ -105,8 +105,8 @@ def test_unitless_guess_uses_ambiguous_scale_fallback():
 
     assert mcr.C.units is None
     assert mcr.St.units is None
-    assert mcr.C.title == "relative concentration"
-    assert mcr.St.title == X.title
+    assert mcr.C.title == "concentration profiles"
+    assert mcr.St.title == "spectral profiles"
 
 
 def test_normalization_clears_calibrated_factor_units():
@@ -125,7 +125,7 @@ def test_normalization_clears_calibrated_factor_units():
 
     assert mcr.C.units is None
     assert mcr.St.units is None
-    assert mcr.C.title == "relative concentration"
+    assert mcr.C.title == "concentration profiles"
 
 
 def test_vertical_blocks_inherit_calibrated_c_metadata_and_coordinates():
@@ -194,7 +194,7 @@ def test_horizontal_spectral_blocks_keep_block_physical_metadata():
 
     assert mcr.C.units == ur.mole / ur.liter
     assert mcr.St.units is None
-    assert mcr.St.title == "concatenated spectral profiles"
+    assert mcr.St.title == "spectral profiles"
     assert blocks[0].title == "absorbance"
     assert blocks[0].units == St0_uv.units
     assert blocks[1].title == "ellipticity"

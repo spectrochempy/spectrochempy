@@ -201,6 +201,7 @@ class SVD(DecompositionAnalysis):
         units=None,
         title="Singular values",
         typesingle="components",
+        analysis_role="singular_values",
     )
     def singular_values(self):
         """Return a NDDataset containing singular values."""
@@ -213,9 +214,15 @@ class SVD(DecompositionAnalysis):
         """Return a NDDataset of the explained variance."""
         size = self.sv.size
         ev = self.sv**2 / (size - 1)
-        ev.name = "ev"
-        ev.title = "explained variance"
-        return ev
+        return self._apply_analysis_output_metadata(
+            ev,
+            role_id="explained_variance",
+            meta_from="_X",
+            direct_x=None,
+            direct_y=None,
+            direct_x_kind="none",
+            direct_y_kind="none",
+        )
 
     ev = explained_variance
 
@@ -223,10 +230,16 @@ class SVD(DecompositionAnalysis):
     def explained_variance_ratio(self):
         """Return Explained Variance per singular values."""
         ratio = self.ev * 100.0 / np.sum(self.ev)
-        ratio.name = "ev_ratio"
-        ratio.title = "explained variance ratio"
         ratio.units = "percent"
-        return ratio
+        return self._apply_analysis_output_metadata(
+            ratio,
+            role_id="explained_variance_ratio",
+            meta_from="_X",
+            direct_x=None,
+            direct_y=None,
+            direct_x_kind="none",
+            direct_y_kind="none",
+        )
 
     ev_ratio = explained_variance_ratio
 
@@ -234,10 +247,16 @@ class SVD(DecompositionAnalysis):
     def cumulative_explained_variance(self):
         """Return Cumulative Explained Variance."""
         ev_cum = np.cumsum(self.ev_ratio)
-        ev_cum.name = "ev_cum"
-        ev_cum.title = "cumulative explained variance"
         ev_cum.units = "percent"
-        return ev_cum
+        return self._apply_analysis_output_metadata(
+            ev_cum,
+            role_id="cumulative_explained_variance",
+            meta_from="_X",
+            direct_x=None,
+            direct_y=None,
+            direct_x_kind="none",
+            direct_y_kind="none",
+        )
 
     ev_cum = cumulative_explained_variance
 

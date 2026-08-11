@@ -1899,6 +1899,15 @@ class Optimize(DecompositionAnalysis):
             getattr(self, "_fit_meta", {}),
             getattr(self, "_model_spec", None),
         )
+        residuals = self._apply_analysis_output_metadata(
+            residuals,
+            role_id="residuals",
+            meta_from="_X",
+            direct_x=None,
+            direct_y=None,
+            direct_x_kind="none",
+            direct_y_kind="none",
+        )
         covariance = _compute_covariance_matrix(
             self._X,
             fitted,

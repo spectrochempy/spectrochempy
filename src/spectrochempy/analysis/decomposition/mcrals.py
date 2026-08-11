@@ -3484,8 +3484,25 @@ and `St`.
             Final accepted concentration profiles with resolved factor title,
             units, observation coordinate, and component labels.
         """
+        from spectrochempy.core.dataset.nddataset import NDDataset  # noqa: PLC0415
+
         C = super().transform(X, **kwargs)
-        return self._apply_output_metadata(C, self._output_factor_metadata().C)
+        C = self._apply_output_metadata(C, self._output_factor_metadata().C)
+        return self._apply_analysis_output_metadata(
+            C,
+            role_id="concentration_profiles",
+            meta_from="_X",
+            direct_x=X,
+            direct_y=None,
+            direct_x_kind=(
+                "dataset"
+                if isinstance(X, NDDataset)
+                else "arraylike"
+                if X is not None
+                else "none"
+            ),
+            direct_y_kind="none",
+        )
 
     def inverse_transform(self, X_transform=None, **kwargs):
         r"""
@@ -3541,8 +3558,15 @@ and `St`.
         """
         C = self.transform()
         self._apply_output_metadata(C, self._output_factor_metadata().C)
-        C.name = "Pure concentration profile, mcs-als of " + self.X.name
-        return C
+        return self._apply_analysis_output_metadata(
+            C,
+            role_id="concentration_profiles",
+            meta_from="_X",
+            direct_x=None,
+            direct_y=None,
+            direct_x_kind="none",
+            direct_y_kind="none",
+        )
 
     @property
     def St(self):
@@ -3573,8 +3597,15 @@ and `St`.
         """
         St = self.components
         self._apply_output_metadata(St, self._output_factor_metadata().St)
-        St.name = "Pure spectra profile, mcs-als of " + self.X.name
-        return St
+        return self._apply_analysis_output_metadata(
+            St,
+            role_id="spectral_profiles",
+            meta_from="_X",
+            direct_x=None,
+            direct_y=None,
+            direct_x_kind="none",
+            direct_y_kind="none",
+        )
 
     @property
     @_wrap_ndarray_output_to_nddataset(units=None, title=None, typex="components")

@@ -133,11 +133,11 @@ class TestCategoryAExclusions:
 
     def test_denoise_unchanged(self, ds):
         result = ds.denoise(ratio=99.0)
-        assert result.name == "ds_name_PCA.inverse_transform"
+        assert result.name == "ds_name_PCA.reconstruction"
         assert len(result.history) == 1
 
     def test_pca_scores_unchanged(self, ds):
         pca = PCA(n_components=2)
         scores = pca.fit_transform(ds)
-        assert scores.name == "ds_name_PCA.transform"
+        assert scores.name == "ds_name_PCA.scores"
         assert len(scores.history) == 1

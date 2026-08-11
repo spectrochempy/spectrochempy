@@ -1,31 +1,24 @@
 """
-Characterization tests for analysis output semantics.
+Policy tests for deterministic analysis output metadata.
 
-This suite characterizes CURRENT behavior of representative public analysis
-outputs. It does NOT validate a desired future policy.
+This suite validates the accepted maintainer policy
+`spectrochempy_maintainer/rfcs/analysis-output-metadata-policy.md`
+for representative decomposition outputs in the PR 2 runtime tranche:
 
-Coverage:
-    - Latent analysis outputs (`transform()`, `components`, concentration and
-      spectral profiles)
-    - Diagnostic outputs (explained variance, singular values)
-    - Reconstruction outputs (`inverse_transform()`)
-    - CoordSet synthesis around the generated component axis
-    - Metadata and provenance propagation through analysis wrappers
-    - Current API limitation for `SVD`
+- canonical derived identity (`name`, `title`, `description`, `filename`);
+- canonical provenance/history text;
+- independent copied metadata;
+- fresh result timestamps distinct from source acquisition lineage;
+- preserved structural support where the RFC says the source remains the
+  scientific context authority.
 
-Key observed patterns:
-    - Most decomposition outputs are derived analysis objects rather than
-      same-object dataset transformations
-    - Latent outputs synthesize a `k` component axis while preserving the
-      surviving source axis metadata
-    - Latent and diagnostic outputs usually rewrite `name` and `history`
-      and frequently drop data units
-    - Reconstruction outputs return to the source geometry and keep source
-      scientific context more closely
-    - `SVD` currently exposes diagnostic vectors and raw factor arrays, but
-      does not implement the generic reduction API
+The numerical outputs themselves are covered elsewhere; this file focuses on
+the exact public metadata contract for representative families.
 """
 
+from datetime import UTC
+from datetime import datetime
+from datetime import timedelta
 from pathlib import Path
 
 import numpy as np
@@ -65,6 +58,9 @@ def semantic_dataset():
     ds.description = "source description"
     ds.origin = "test_origin"
     ds.filename = Path("source.spc")
+    ds.acquisition_date = datetime(2024, 1, 2, 3, 4, 5, tzinfo=UTC)
+    ds._created = datetime(2020, 1, 2, 3, 4, 5, tzinfo=UTC)
+    ds._modified = datetime(2021, 1, 2, 3, 4, 5, tzinfo=UTC)
     ds.meta.project = "analysis-output"
     ds.meta.tags = ["baseline"]
     ds.history = ["original history entry"]
@@ -192,52 +188,72 @@ class TestLatentOutputs:
 
 
 class TestMetadataAndProvenance:
-    """Characterize metadata propagation on analysis wrappers."""
+    """Validate canonical metadata propagation on representative outputs."""
 
-    def test_transform_rewrites_name_history_and_drops_title_units(
-        self, semantic_dataset
-    ):
+    def test_transform_applies_canonical_scores_metadata(self, semantic_dataset):
+        before = datetime.now(UTC)
         scores = PCA(n_components=2).fit(semantic_dataset).transform()
+        after = datetime.now(UTC)
 
-        assert scores.name == "source_name_PCA.transform"
-        assert scores.title != semantic_dataset.title
+        assert scores.name == "source_name_PCA.scores"
+        assert scores.title == "scores"
+        assert scores.description == "scores from PCA fit of source_name."
         assert scores.units is None
         assert scores.author == semantic_dataset.author
         assert scores.origin == semantic_dataset.origin
-        assert scores.filename == semantic_dataset.filename
+        assert scores.filename is None
         assert scores.meta.project == semantic_dataset.meta.project
         assert scores.meta.tags == semantic_dataset.meta.tags
         assert scores.meta is not semantic_dataset.meta
-        assert scores.history[-1].endswith("Created using method PCA.transform")
+        assert scores.acquisition_date == semantic_dataset.acquisition_date
+        assert (
+            before - timedelta(seconds=1)
+            <= scores._created
+            <= after + timedelta(seconds=1)
+        )
+        assert (
+            before - timedelta(seconds=1)
+            <= scores._modified
+            <= after + timedelta(seconds=1)
+        )
+        assert scores.history[-1].endswith(
+            "Created analysis output scores with PCA from source_name."
+        )
 
-    def test_components_keep_source_title_but_rewrite_name_and_history(
-        self, semantic_dataset
-    ):
+    def test_components_apply_canonical_component_identity(self, semantic_dataset):
         loadings = PCA(n_components=2).fit(semantic_dataset).components
 
         assert loadings.name == "source_name_PCA.components"
-        assert loadings.title == semantic_dataset.title
+        assert loadings.title == "components"
         assert loadings.units is None
-        assert loadings.description == ""
-        assert loadings.history[-1].endswith("Created using method PCA.components")
+        assert loadings.description == "components from PCA fit of source_name."
+        assert loadings.filename is None
+        assert loadings.history[-1].endswith(
+            "Created analysis output components with PCA from source_name."
+        )
 
-    def test_diagnostic_output_rewrites_title_and_preserves_metadata_copy(
+    def test_diagnostic_output_uses_canonical_diagnostic_text_and_metadata_copy(
         self, semantic_dataset
     ):
         ev_ratio = PCA(n_components=2).fit(semantic_dataset).ev_ratio
 
         assert ev_ratio.title == "explained variance ratio"
+        assert ev_ratio.name == "source_name_PCA.explained_variance_ratio"
+        assert ev_ratio.description == (
+            "explained variance ratio diagnostic from PCA fit of source_name."
+        )
         assert ev_ratio.units == "percent"
         assert ev_ratio.author == semantic_dataset.author
         assert ev_ratio.meta.project == semantic_dataset.meta.project
         assert ev_ratio.meta is not semantic_dataset.meta
+        assert ev_ratio.filename is None
         assert ev_ratio.history[-1].endswith(
-            "Created using method PCA.explained_variance_ratio"
+            "Created diagnostic explained_variance_ratio with PCA from source_name."
         )
 
 
 class TestReconstructionOutputs:
-    """Characterize reconstruction outputs as source-geometry returns."""
+    """Validate source-geometry reconstructions as derived outputs."""
 
     def test_pca_inverse_transform_returns_source_geometry_and_context(
         self, semantic_dataset
@@ -248,11 +264,15 @@ class TestReconstructionOutputs:
         assert reconstructed.dims == semantic_dataset.dims
         assert reconstructed.y.title == semantic_dataset.y.title
         assert reconstructed.x.title == semantic_dataset.x.title
-        assert reconstructed.title == semantic_dataset.title
+        assert reconstructed.title == "reconstruction"
         assert reconstructed.units == semantic_dataset.units
-        assert reconstructed.name == "source_name_PCA.inverse_transform"
+        assert reconstructed.name == "source_name_PCA.reconstruction"
+        assert reconstructed.description == (
+            "reconstruction from PCA fit of source_name."
+        )
+        assert reconstructed.filename is None
         assert reconstructed.history[-1].endswith(
-            "Created using method PCA.inverse_transform"
+            "Created analysis output reconstruction with PCA from source_name."
         )
 
     def test_nmf_inverse_transform_returns_source_geometry_and_context(
@@ -273,12 +293,12 @@ class TestReconstructionOutputs:
         assert reconstructed.dims == efa_dataset.dims
         assert reconstructed.y.title == efa_dataset.y.title
         assert reconstructed.x.title == efa_dataset.x.title
-        assert reconstructed.title == efa_dataset.title
+        assert reconstructed.title == "reconstruction"
         assert reconstructed.units == efa_dataset.units
 
 
 class TestDiagnosticOutputs:
-    """Characterize diagnostic outputs that summarize fitted models."""
+    """Validate diagnostic analysis datasets."""
 
     def test_pca_explained_variance_ratio_is_component_vector(self, semantic_dataset):
         ev_ratio = PCA(n_components=2).fit(semantic_dataset).ev_ratio
@@ -296,8 +316,17 @@ class TestDiagnosticOutputs:
         assert sv.shape == (semantic_dataset.shape[1],)
         assert sv.dims == ["k"]
         assert sv.k.title == "components"
-        assert sv.title == "Singular values"
+        assert sv.title == "singular values"
+        assert sv.name == "source_name_SVD.singular_values"
+        assert sv.description == (
+            "singular values diagnostic from SVD fit of source_name."
+        )
+        assert sv.author == semantic_dataset.author
+        assert sv.filename is None
         assert sv.units is None
+        assert sv.history[-1].endswith(
+            "Created diagnostic singular_values with SVD from source_name."
+        )
 
 
 class TestCurrentApiLimits:

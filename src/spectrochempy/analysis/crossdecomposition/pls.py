@@ -193,6 +193,7 @@ class PLSRegression(CrossDecompositionAnalysis):
         units=None,
         title=None,
         typey="components",
+        analysis_role="loadings",
     )
     def x_loadings(self):
         return self._x_loadings
@@ -203,6 +204,7 @@ class PLSRegression(CrossDecompositionAnalysis):
         units=None,
         title=None,
         typey="components",
+        analysis_role="loadings",
     )
     def y_loadings(self):
         return self._y_loadings
@@ -212,6 +214,7 @@ class PLSRegression(CrossDecompositionAnalysis):
         units=None,
         title=None,
         typex="components",
+        analysis_role="scores",
     )
     def x_scores(self):
         return self._x_scores
@@ -222,6 +225,7 @@ class PLSRegression(CrossDecompositionAnalysis):
         units=None,
         title=None,
         typex="components",
+        analysis_role="y_scores",
     )
     def y_scores(self):
         return self._y_scores
@@ -231,6 +235,7 @@ class PLSRegression(CrossDecompositionAnalysis):
         units=None,
         title=None,
         typey="components",
+        analysis_role="rotations",
     )
     def x_rotations(self):
         return self._x_rotations
@@ -239,6 +244,7 @@ class PLSRegression(CrossDecompositionAnalysis):
     @_wrap_ndarray_output_to_nddataset(
         meta_from="_Y",
         typey="components",
+        analysis_role="rotations",
     )
     def y_rotations(self):
         return self._y_rotations
@@ -246,6 +252,7 @@ class PLSRegression(CrossDecompositionAnalysis):
     @property
     @_wrap_ndarray_output_to_nddataset(
         typey="components",
+        analysis_role="weights",
     )
     def x_weights(self):
         return self._x_weights
@@ -254,6 +261,7 @@ class PLSRegression(CrossDecompositionAnalysis):
     @_wrap_ndarray_output_to_nddataset(
         meta_from="_Y",
         typey="components",
+        analysis_role="weights",
     )
     def y_weights(self):
         return self._y_weights

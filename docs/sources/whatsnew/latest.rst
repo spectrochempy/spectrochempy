@@ -15,14 +15,16 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 Bug Fixes
 ~~~~~~~~~
 
-- Analysis outputs that reuse the stored scientific input (e.g. ``PCA.scores``,
-  ``components``, diagnostics, ``result`` outputs, ``PLSRegression`` X-side and
-  Y-side surfaces, ``Optimize.fitted``) now preserve the exact ``author`` of the
-  scientific source dataset instead of recreating the runtime ``user@host``
-  value through the internal ``NDDataset`` input conversion. The snapshot is
-  captured once at ``fit`` time and is never overwritten by later direct calls:
-  a direct ``NDDataset`` argument remains authoritative for the output of that
-  call only, X-side outputs use the X source and Y-side outputs use the Y
-  source, array-like inputs are unaffected, and input datasets are not mutated.
-  Supervised predictions (``predict``) keep their previous behavior until the
-  multi-source provenance policy is implemented.
+- Analysis and fitting outputs now follow deterministic derived-metadata rules
+  instead of inheriting path-dependent combinations of source identity and
+  wrapper defaults. Single-source outputs preserve the captured scientific
+  provenance from ``fit()`` time while generating canonical derived
+  ``name``/``title``/``description``/``history`` text and clearing
+  ``filename``; direct ``NDDataset`` arguments remain authoritative for that
+  call only, array-like inputs do not leak stale provenance, and input datasets
+  are not mutated. Supervised ``PLSRegression.predict()`` now applies the
+  accepted multi-source provenance order (``Xtrain``, ``Ytrain``, then the
+  prediction input), ``Optimize.result.residuals`` now follows the same
+  canonical derived-output policy as fitted data, and SVD diagnostic
+  ``NDDataset`` outputs now use the common diagnostic metadata contract while
+  raw ``U``/``s``/``VT`` factors remain unchanged.

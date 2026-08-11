@@ -281,6 +281,7 @@ array of values drawn from a normal distribution is used."""
         title=None,
         typey="features",
         typex="components",
+        analysis_role="components",
     )
     def mixing(self):
         r"""
@@ -296,6 +297,7 @@ array of values drawn from a normal distribution is used."""
         units=None,
         title=None,
         typey="components",
+        analysis_role="spectral_profiles",
     )
     def St(self):
         r"""
@@ -311,6 +313,7 @@ array of values drawn from a normal distribution is used."""
         units=None,
         title=None,
         typex="components",
+        analysis_role="scores",
     )
     def A(self):
         r"""
