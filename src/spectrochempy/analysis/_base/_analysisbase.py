@@ -345,6 +345,64 @@ class AnalysisConfigurable(BaseConfigurable):
             return f"Created diagnostic {role_id} with {estimator} from {source_list}."
         return f"Created analysis output {role_id} with {estimator} from {source_list}."
 
+    def _analysis_additional_provenance_sources(
+        self,
+        role_id,
+        *,
+        x_source,
+        y_source,
+        direct_x,
+        direct_y,
+        direct_x_kind,
+        direct_y_kind,
+    ):
+        return ()
+
+    def _analysis_meta_authority_source(
+        self,
+        role_id,
+        *,
+        single_source,
+        provenance_sources,
+        x_source,
+        y_source,
+    ):
+        return single_source
+
+    def _analysis_units_for_role(
+        self,
+        role_id,
+        *,
+        dataset,
+        x_source,
+        y_source,
+        single_source,
+        fit_x_source=None,
+        fit_y_source=None,
+    ):
+        role_id = self._normalize_analysis_role(role_id)
+        if role_id in {
+            "scores",
+            "y_scores",
+            "components",
+            "loadings",
+            "weights",
+            "rotations",
+            "concentration_profiles",
+            "spectral_profiles",
+            "diagnostic",
+            "singular_values",
+            "explained_variance",
+        }:
+            return None
+        if role_id in {"explained_variance_ratio", "cumulative_explained_variance"}:
+            return "percent"
+        if role_id in {"reconstruction", "fitted_data", "residuals"}:
+            return x_source.units if x_source is not None else None
+        if role_id == "prediction":
+            return fit_y_source.units if fit_y_source is not None else None
+        return dataset.units
+
     def _apply_analysis_output_metadata(
         self,
         dataset,
@@ -402,32 +460,78 @@ class AnalysisConfigurable(BaseConfigurable):
                     prediction_source=x_predict,
                 ),
             )
+            dataset.units = self._analysis_units_for_role(
+                role_id,
+                dataset=dataset,
+                x_source=x_predict,
+                y_source=y_train,
+                single_source=None,
+                fit_x_source=x_train,
+                fit_y_source=y_train,
+            )
             return dataset
 
-        sources = [single_source] if single_source is not None else []
-        if single_source is not None:
-            dataset.author = copy.copy(single_source.author)
-            dataset.origin = (
-                "" if single_source.origin is None else copy.copy(single_source.origin)
+        additional_sources = list(
+            self._analysis_additional_provenance_sources(
+                role_id,
+                x_source=x_source,
+                y_source=y_source,
+                direct_x=direct_x,
+                direct_y=direct_y,
+                direct_x_kind=direct_x_kind,
+                direct_y_kind=direct_y_kind,
             )
-            dataset.meta = copy.deepcopy(single_source.meta)
+        )
+        provenance_sources = [single_source] if single_source is not None else []
+        provenance_sources.extend(
+            source for source in additional_sources if source is not None
+        )
+        meta_authority = self._analysis_meta_authority_source(
+            role_id,
+            single_source=single_source,
+            provenance_sources=provenance_sources,
+            x_source=x_source,
+            y_source=y_source,
+        )
+
+        if provenance_sources:
+            merged_author = self._analysis_ordered_unique_text(
+                [source.author for source in provenance_sources]
+            )
+            merged_origin = self._analysis_ordered_unique_text(
+                [source.origin for source in provenance_sources]
+            )
+            dataset.author = copy.copy(merged_author)
+            dataset.origin = "" if merged_origin is None else copy.copy(merged_origin)
             dataset.acquisition_date = self._analysis_acquisition_date_consensus(
-                sources
+                provenance_sources
             )
         else:
-            dataset.meta = Meta()
-            dataset.acquisition_date = None
+            dataset.author = copy.copy(getattr(dataset, "author", None))
             dataset.origin = ""
+            dataset.acquisition_date = None
+
+        if meta_authority is not None:
+            dataset.meta = copy.deepcopy(meta_authority.meta)
+        else:
+            dataset.meta = Meta()
 
         dataset.name = self._analysis_generated_name(role_id, single_source)
         dataset.title = self._analysis_role_title(role_id)
         dataset.description = self._analysis_generated_description(
-            role_id, sources=sources
+            role_id, sources=provenance_sources
         )
         dataset.filename = None
         self._analysis_reset_history(
             dataset,
-            self._analysis_generated_history(role_id, sources=sources),
+            self._analysis_generated_history(role_id, sources=provenance_sources),
+        )
+        dataset.units = self._analysis_units_for_role(
+            role_id,
+            dataset=dataset,
+            x_source=x_source,
+            y_source=y_source,
+            single_source=single_source,
         )
         return dataset
 

@@ -26,6 +26,7 @@ import numpy as np
 import scipy
 import traitlets as tr
 
+from spectrochempy.analysis._base._analysisbase import AnalysisSourceMetadata
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis._base._analysisbase import _wrap_ndarray_output_to_nddataset
@@ -140,6 +141,7 @@ class _FactorMetadata:
 
     title: str | None = None
     units: object | None = None
+    provenance_sources: tuple[AnalysisSourceMetadata, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -2814,7 +2816,11 @@ and `St`.
         title = value.title
         if title in (None, "", "<untitled>"):
             title = None
-        return _FactorMetadata(title=title, units=value.units)
+        return _FactorMetadata(
+            title=title,
+            units=value.units,
+            provenance_sources=(AnalysisSourceMetadata(value),),
+        )
 
     @staticmethod
     def _profile_array(profile):
@@ -2841,7 +2847,14 @@ and `St`.
         if len(titles) > 1:
             raise ValueError(f"{label} blocks have inconsistent titles.")
         title = next(iter(titles), None)
-        return _FactorMetadata(title=title, units=reference)
+        provenance_sources = tuple(
+            source for item in metadata for source in item.provenance_sources
+        )
+        return _FactorMetadata(
+            title=title,
+            units=reference,
+            provenance_sources=provenance_sources,
+        )
 
     def _capture_factor_metadata(self, X_blocks, Y, mode=None):
         """Capture initial metadata and classify the supplied factor guess."""
@@ -2936,6 +2949,8 @@ and `St`.
         scale_preserved = self._scale_is_physically_preserved()
         C_units = context.C.units
         St_units = context.St.units
+        C_provenance_sources = ()
+        St_provenance_sources = ()
 
         supplied_St_blocks = (
             context.St_blocks
@@ -2975,6 +2990,30 @@ and `St`.
             if not scale_preserved:
                 C_units = None
                 block_St_units = [None] * len(X_blocks)
+                C_provenance_sources = ()
+                block_St_provenance_sources = [()] * len(X_blocks)
+            else:
+                if C_units is not None and context.C.units is not None:
+                    C_provenance_sources = context.C.provenance_sources
+                elif C_units is not None:
+                    C_provenance_sources = tuple(
+                        source
+                        for item in supplied_St_blocks
+                        if item.units is not None
+                        for source in item.provenance_sources
+                    )
+                else:
+                    C_provenance_sources = ()
+                block_St_provenance_sources = []
+                for source, units in zip(
+                    supplied_St_blocks, block_St_units, strict=True
+                ):
+                    if units is not None and source.units is not None:
+                        block_St_provenance_sources.append(source.provenance_sources)
+                    elif units is not None and context.C.units is not None:
+                        block_St_provenance_sources.append(context.C.provenance_sources)
+                    else:
+                        block_St_provenance_sources.append(())
 
             C_title = (
                 context.C.title
@@ -2985,7 +3024,11 @@ and `St`.
                 if C_units is not None
                 else "relative concentration"
             )
-            C_meta = _FactorMetadata(C_title, C_units)
+            C_meta = _FactorMetadata(
+                C_title,
+                C_units,
+                provenance_sources=C_provenance_sources,
+            )
             St_block_meta = tuple(
                 _FactorMetadata(
                     (
@@ -2996,9 +3039,14 @@ and `St`.
                         else X_meta.title or "spectral profiles"
                     ),
                     units,
+                    provenance_sources=block_sources,
                 )
-                for X_meta, source, units in zip(
-                    X_blocks, supplied_St_blocks, block_St_units, strict=True
+                for X_meta, source, units, block_sources in zip(
+                    X_blocks,
+                    supplied_St_blocks,
+                    block_St_units,
+                    block_St_provenance_sources,
+                    strict=True,
                 )
             )
             return _ResolvedFactorMetadata(
@@ -3027,6 +3075,22 @@ and `St`.
         if not scale_preserved:
             C_units = None
             St_units = None
+            C_provenance_sources = ()
+            St_provenance_sources = ()
+        else:
+            if C_units is not None and context.C.units is not None:
+                C_provenance_sources = context.C.provenance_sources
+            elif C_units is not None and context.St.units is not None:
+                C_provenance_sources = context.St.provenance_sources
+            else:
+                C_provenance_sources = ()
+
+            if St_units is not None and context.St.units is not None:
+                St_provenance_sources = context.St.provenance_sources
+            elif St_units is not None and context.C.units is not None:
+                St_provenance_sources = context.C.provenance_sources
+            else:
+                St_provenance_sources = ()
 
         C_title = (
             context.C.title
@@ -3042,8 +3106,16 @@ and `St`.
             and context.St.title
             else X_blocks[0].title or "spectral profiles"
         )
-        C_meta = _FactorMetadata(C_title, C_units)
-        St_meta = _FactorMetadata(St_title, St_units)
+        C_meta = _FactorMetadata(
+            C_title,
+            C_units,
+            provenance_sources=C_provenance_sources,
+        )
+        St_meta = _FactorMetadata(
+            St_title,
+            St_units,
+            provenance_sources=St_provenance_sources,
+        )
         n_C_blocks = len(X_blocks) if context.mode == "vertical" else 1
         return _ResolvedFactorMetadata(
             C=C_meta,
@@ -3065,6 +3137,56 @@ and `St`.
                 St_blocks=(_FactorMetadata("spectral profiles", None),),
                 scale_is_physically_preserved=False,
             ),
+        )
+
+    def _analysis_units_for_role(
+        self,
+        role_id,
+        *,
+        dataset,
+        x_source,
+        y_source,
+        single_source,
+        fit_x_source=None,
+        fit_y_source=None,
+    ):
+        if role_id == "concentration_profiles":
+            return self._output_factor_metadata().C.units
+        if role_id == "spectral_profiles":
+            return self._output_factor_metadata().St.units
+        return super()._analysis_units_for_role(
+            role_id,
+            dataset=dataset,
+            x_source=x_source,
+            y_source=y_source,
+            single_source=single_source,
+            fit_x_source=fit_x_source,
+            fit_y_source=fit_y_source,
+        )
+
+    def _analysis_additional_provenance_sources(
+        self,
+        role_id,
+        *,
+        x_source,
+        y_source,
+        direct_x,
+        direct_y,
+        direct_x_kind,
+        direct_y_kind,
+    ):
+        if role_id == "concentration_profiles":
+            return self._output_factor_metadata().C.provenance_sources
+        if role_id == "spectral_profiles":
+            return self._output_factor_metadata().St.provenance_sources
+        return super()._analysis_additional_provenance_sources(
+            role_id,
+            x_source=x_source,
+            y_source=y_source,
+            direct_x=direct_x,
+            direct_y=direct_y,
+            direct_x_kind=direct_x_kind,
+            direct_y_kind=direct_y_kind,
         )
 
     @staticmethod

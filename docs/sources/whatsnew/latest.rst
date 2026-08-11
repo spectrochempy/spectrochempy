@@ -25,6 +25,9 @@ Bug Fixes
   are not mutated. Supervised ``PLSRegression.predict()`` now applies the
   accepted multi-source provenance order (``Xtrain``, ``Ytrain``, then the
   prediction input), ``Optimize.result.residuals`` now follows the same
-  canonical derived-output policy as fitted data, and SVD diagnostic
-  ``NDDataset`` outputs now use the common diagnostic metadata contract while
-  raw ``U``/``s``/``VT`` factors remain unchanged.
+  canonical derived-output policy as fitted data, latent analysis factors now
+  follow the accepted unitless/default-units policy, source-domain
+  reconstructions and residuals preserve exact source units, supervised
+  predictions preserve exact ``Ytrain`` units, and SVD diagnostic ``NDDataset``
+  outputs now use the common diagnostic metadata contract while raw
+  ``U``/``s``/``VT`` factors remain unchanged.
