@@ -42,6 +42,7 @@ def test_optimize_fitted_and_components_preserve_source_author(
     assert result.fitted.description == (
         "Fitted data from Optimize fit of optimize_source."
     )
+    assert result.fitted.units == ds.units
     assert result.fitted.filename is None
     assert result.fitted.meta.project == "curvefit"
     assert result.fitted.meta is not ds.meta
@@ -49,6 +50,7 @@ def test_optimize_fitted_and_components_preserve_source_author(
     assert result.fitted.history[-1].endswith(
         "Created fitted data with Optimize from optimize_source."
     )
+    assert opt.predict().units == ds.units
     assert result.components.author == "optimize_author"
 
     # Numeric no-regression: residuals still equal observed minus fitted.
@@ -76,3 +78,16 @@ def test_optimize_fitted_and_components_preserve_source_author(
     # Input must not be mutated by the fit.
     assert np.array_equal(ds.data, data_before)
     assert ds.author == "optimize_author"
+
+
+def test_optimize_fitted_and_residuals_preserve_none_units(
+    synthetic_two_peak_dataset, optimize_script
+):
+    ds = synthetic_two_peak_dataset.to(None, force=True)
+
+    opt = scp.Optimize(script=optimize_script).fit(ds)
+    result = opt.result
+
+    assert result.fitted.units is None
+    assert opt.predict().units is None
+    assert result.residuals.units is None

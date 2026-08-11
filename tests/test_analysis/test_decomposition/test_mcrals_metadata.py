@@ -5,6 +5,9 @@
 # ======================================================================================
 """Physical metadata policy for MCR-ALS resolved factors."""
 
+from datetime import UTC
+from datetime import datetime
+
 import numpy as np
 import pytest
 
@@ -61,6 +64,56 @@ def test_metadata_from_calibrated_st_guess():
     assert mcr.St.x.units == X.x.units
 
 
+def test_calibrated_st_guess_adds_contributive_provenance_and_keeps_x_meta():
+    X, _, St = _standard_problem()
+    X.author = "x_author"
+    X.origin = "x_origin"
+    X.meta.project = "x_project"
+    X.acquisition_date = datetime(2024, 1, 2, 3, 4, 5, tzinfo=UTC)
+    St0 = NDDataset(
+        St,
+        title="molar absorptivity",
+        units=ur.absorbance * ur.liter / ur.mole,
+        name="st_seed",
+    )
+    St0.author = "st_author"
+    St0.origin = "st_origin"
+    St0.meta.project = "st_project"
+    St0.acquisition_date = X._acquisition_date
+    X_before = X.copy()
+    St0_before = St0.copy()
+
+    mcr = _fit(X, St0)
+
+    for output in (mcr.C, mcr.St):
+        assert output.author == "x_author & st_author"
+        assert output.origin == "x_origin & st_origin"
+        assert output.meta.project == "x_project"
+        assert "st_project" not in repr(output.meta)
+        assert output.acquisition_date == X.acquisition_date
+
+    assert (
+        mcr.C.description
+        == "concentration profiles from MCRALS fit of mixture + st_seed."
+    )
+    assert mcr.C.history[-1].endswith(
+        "Created analysis output concentration_profiles with MCRALS from mixture + st_seed."
+    )
+    assert (
+        mcr.St.description == "spectral profiles from MCRALS fit of mixture + st_seed."
+    )
+    assert mcr.St.history[-1].endswith(
+        "Created analysis output spectral_profiles with MCRALS from mixture + st_seed."
+    )
+
+    assert X.author == X_before.author
+    assert X.origin == X_before.origin
+    assert X.meta.project == X_before.meta.project
+    assert St0.author == St0_before.author
+    assert St0.origin == St0_before.origin
+    assert St0.meta.project == St0_before.meta.project
+
+
 def test_metadata_from_calibrated_c_guess():
     X, C, _ = _standard_problem()
     C0 = NDDataset(C, title="amount concentration", units=ur.mole / ur.liter)
@@ -71,6 +124,39 @@ def test_metadata_from_calibrated_c_guess():
     assert mcr.C.units == C0.units
     assert mcr.St.title == "spectral profiles"
     assert mcr.St.units == X.units / C0.units
+
+
+def test_calibrated_c_guess_deduplicates_author_and_uses_exact_date_consensus():
+    X, C, _ = _standard_problem()
+    X.author = "shared_author"
+    X.origin = "x_origin"
+    X.meta.project = "x_project"
+    X.acquisition_date = datetime(2024, 1, 2, 3, 4, 5, tzinfo=UTC)
+    C0 = NDDataset(
+        C,
+        title="amount concentration",
+        units=ur.mole / ur.liter,
+        name="c_seed",
+    )
+    C0.author = "shared_author"
+    C0.origin = "c_origin"
+    C0.acquisition_date = datetime(2024, 1, 2, 3, 4, 6, tzinfo=UTC)
+
+    mcr = _fit(X, C0)
+
+    for output in (mcr.C, mcr.St):
+        assert output.author == "shared_author"
+        assert output.origin == "x_origin & c_origin"
+        assert output.meta.project == "x_project"
+        assert output.acquisition_date is None
+
+    assert (
+        mcr.C.description
+        == "concentration profiles from MCRALS fit of mixture + c_seed."
+    )
+    assert (
+        mcr.St.description == "spectral profiles from MCRALS fit of mixture + c_seed."
+    )
 
 
 def test_compatible_both_guesses_are_accepted():
@@ -99,7 +185,13 @@ def test_incompatible_both_guesses_are_rejected():
 
 def test_unitless_guess_uses_ambiguous_scale_fallback():
     X, C, _ = _standard_problem()
-    C0 = NDDataset(C, title="unsupported guess title")
+    X.author = "x_author"
+    X.origin = "x_origin"
+    X.meta.project = "x_project"
+    C0 = NDDataset(C, title="unsupported guess title", name="c_seed")
+    C0.author = "c_author"
+    C0.origin = "c_origin"
+    C0.meta.project = "c_project"
 
     mcr = _fit(X, C0)
 
@@ -107,11 +199,28 @@ def test_unitless_guess_uses_ambiguous_scale_fallback():
     assert mcr.St.units is None
     assert mcr.C.title == "concentration profiles"
     assert mcr.St.title == "spectral profiles"
+    assert mcr.C.author == "x_author"
+    assert mcr.St.author == "x_author"
+    assert mcr.C.origin == "x_origin"
+    assert mcr.St.origin == "x_origin"
+    assert mcr.C.meta.project == "x_project"
+    assert mcr.St.meta.project == "x_project"
+    assert mcr.C.description == "concentration profiles from MCRALS fit of mixture."
+    assert mcr.St.description == "spectral profiles from MCRALS fit of mixture."
 
 
 def test_normalization_clears_calibrated_factor_units():
     X, C, _ = _standard_problem()
-    C0 = NDDataset(C, title="amount concentration", units=ur.mole / ur.liter)
+    X.author = "x_author"
+    X.origin = "x_origin"
+    C0 = NDDataset(
+        C,
+        title="amount concentration",
+        units=ur.mole / ur.liter,
+        name="c_seed",
+    )
+    C0.author = "c_author"
+    C0.origin = "c_origin"
     mcr = MCRALS(
         normSpec="max",
         nonnegConc=[],
@@ -126,6 +235,10 @@ def test_normalization_clears_calibrated_factor_units():
     assert mcr.C.units is None
     assert mcr.St.units is None
     assert mcr.C.title == "concentration profiles"
+    assert mcr.C.author == "x_author"
+    assert mcr.St.author == "x_author"
+    assert mcr.C.origin == "x_origin"
+    assert mcr.St.origin == "x_origin"
 
 
 def test_vertical_blocks_inherit_calibrated_c_metadata_and_coordinates():

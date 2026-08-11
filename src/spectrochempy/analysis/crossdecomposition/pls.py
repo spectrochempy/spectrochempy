@@ -243,6 +243,7 @@ class PLSRegression(CrossDecompositionAnalysis):
     @property
     @_wrap_ndarray_output_to_nddataset(
         meta_from="_Y",
+        units=None,
         typey="components",
         analysis_role="rotations",
     )
@@ -251,6 +252,7 @@ class PLSRegression(CrossDecompositionAnalysis):
 
     @property
     @_wrap_ndarray_output_to_nddataset(
+        units=None,
         typey="components",
         analysis_role="weights",
     )
@@ -260,6 +262,7 @@ class PLSRegression(CrossDecompositionAnalysis):
     @property
     @_wrap_ndarray_output_to_nddataset(
         meta_from="_Y",
+        units=None,
         typey="components",
         analysis_role="weights",
     )
