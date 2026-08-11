@@ -299,14 +299,10 @@ class TestPcaWrapper:
         r = ds.denoise(ratio=99.0)
         assert r.name == "ds_name_PCA.inverse_transform"
 
-    def test_author_from_system(self, ds):
-        """
-        Notable: denoise overrides author with system hostname,
-        unlike Filter wrappers which preserve it.
-        """
+    def test_author_preserved(self, ds):
+        """Notable: denoise preserves the scientific source author."""
         r = ds.denoise(ratio=99.0)
-        assert r.author != "test_author"
-        assert "@" in r.author  # likely "user@hostname" format
+        assert r.author == "test_author"
 
     def test_origin_preserved(self, ds):
         r = ds.denoise(ratio=99.0)

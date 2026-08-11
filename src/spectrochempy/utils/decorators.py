@@ -443,6 +443,7 @@ class _set_output:
         typey=None,
         typesingle=None,
         preserve_identity=False,
+        use_snapshot=True,  # reuse the fit metadata snapshot on stored paths
     ):
         self.method = method
         update_wrapper(self, method)
@@ -453,6 +454,7 @@ class _set_output:
         self.typey = typey
         self.typesingle = typesingle
         self.preserve_identity = preserve_identity
+        self.use_snapshot = use_snapshot
 
     @preserve_signature
     def __get__(self, obj, objtype):
@@ -470,11 +472,64 @@ class _set_output:
         if args and type(args[0]) is type(obj):
             args = args[1:]
 
-        original_X = None
-        if args and isinstance(args[0], NDDataset):
-            original_X = args[0]
-        elif isinstance(kwargs.get("dataset"), NDDataset):
-            original_X = kwargs["dataset"]
+        # Identify the direct X and Y arguments of the call, if any.  Three
+        # states are distinguished per role: no direct argument (the fitted
+        # snapshot is reused), a direct NDDataset (its exact author is used),
+        # and a direct array-like (no scientific provenance: the snapshot is
+        # ignored and the runtime value is kept).  An explicit ``None`` counts
+        # as "no direct argument" since it means "reuse the stored input".
+        sentinel = object()
+        direct_X = sentinel
+        direct_Y = sentinel
+        x_params = ("X", "dataset", "X_transform")
+        y_params = ("Y", "Y_transform")
+        try:
+            bound = signature(self.method).bind_partial(obj, *args, **kwargs)
+        except TypeError:
+            bound = None
+        if bound is not None:
+            for name, param in signature(self.method).parameters.items():
+                if name == "self":
+                    continue
+                if param.kind is inspect.Parameter.VAR_KEYWORD:
+                    for key, value in bound.arguments.get(name, {}).items():
+                        if value is None:
+                            continue
+                        if key in x_params:
+                            direct_X = value
+                        elif key in y_params:
+                            direct_Y = value
+                elif (
+                    param.kind
+                    in (
+                        inspect.Parameter.POSITIONAL_ONLY,
+                        inspect.Parameter.POSITIONAL_OR_KEYWORD,
+                        inspect.Parameter.KEYWORD_ONLY,
+                    )
+                    and name in bound.arguments
+                ):
+                    value = bound.arguments[name]
+                    if value is None:
+                        continue
+                    if name in x_params:
+                        direct_X = value
+                    elif name in y_params:
+                        direct_Y = value
+        else:
+            # Fallback for exotic signatures: first two positional arguments
+            # and the recognized keyword arguments.
+            if args and args[0] is not None:
+                direct_X = args[0]
+            if len(args) > 1 and args[1] is not None:
+                direct_Y = args[1]
+            for key in x_params:
+                if kwargs.get(key) is not None:
+                    direct_X = kwargs[key]
+                    break
+            for key in y_params:
+                if kwargs.get(key) is not None:
+                    direct_Y = kwargs[key]
+                    break
 
         # get the method output - one or two arrays depending on the method and *args
         output = self.method(obj, *args, **kwargs)
@@ -507,11 +562,19 @@ class _set_output:
 
             # Now set the NDDataset attributes from the original X
 
-            # determine the input X dataset
+            # determine the input dataset of the current role
             X = getattr(obj, meta_from)
-            metadata_source = (
-                original_X if meta_from == "_X" and original_X is not None else X
-            )
+            direct_source = direct_X if meta_from == "_X" else direct_Y
+            if direct_source is not sentinel and isinstance(direct_source, NDDataset):
+                # A direct scientific source is authoritative for this call.
+                metadata_source = direct_source
+                use_snapshot = False
+            else:
+                metadata_source = X
+                # The snapshot is reused only when no direct argument of this
+                # role was given: a direct array-like carries no provenance
+                # and must not leak the fitted source author.
+                use_snapshot = self.use_snapshot and direct_source is sentinel
 
             # Promote 1D metadata source (e.g., _Y with 1D y) to 2D for
             # coordinate assignment so that dims[1], coord(1), shape[1] etc.
@@ -534,7 +597,22 @@ class _set_output:
                 X = X_new
 
             X_transf.meta = copy.deepcopy(metadata_source.meta)
-            X_transf.author = copy.copy(metadata_source.author)
+            # The exact author of the scientific source is preferred over the
+            # value recreated by the NDDataset coercion of the stored input.
+            # A direct NDDataset argument is authoritative for the output of
+            # its role (X or Y); a direct array-like argument carries no
+            # scientific provenance and keeps the runtime value; stored
+            # ``_X`` / ``_Y`` outputs reuse the metadata snapshot captured at
+            # ``fit`` time only when no direct argument of that role was
+            # given.  Supervised (multi-source) outputs such as ``predict``
+            # do not use the snapshot (deferred to the multi-source policy,
+            # PR 2).
+            author = metadata_source.author
+            if use_snapshot:
+                source_metadata = getattr(obj, f"{meta_from}_source_metadata", None)
+                if source_metadata is not None:
+                    author = source_metadata.author
+            X_transf.author = copy.copy(author)
             X_transf.description = copy.copy(metadata_source.description)
             X_transf.origin = copy.copy(metadata_source.origin)
             X_transf.filename = copy.copy(metadata_source.filename)
@@ -697,6 +775,7 @@ def _wrap_ndarray_output_to_nddataset(
     typey=None,
     typesingle=None,
     preserve_identity=False,
+    use_snapshot=True,
 ):
     # wrap _set_output to allow for deferred calling
     if method:
@@ -714,6 +793,7 @@ def _wrap_ndarray_output_to_nddataset(
                 typey=typey,
                 typesingle=typesingle,
                 preserve_identity=preserve_identity,
+                use_snapshot=use_snapshot,
             )
 
         out = wrapper
