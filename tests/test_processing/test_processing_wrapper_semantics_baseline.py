@@ -270,10 +270,9 @@ class TestPcaWrapper:
     """
     Characterize PCA-based denoise wrapper.
 
-    Observation: follows the historical Group A pattern (name appended,
-    no modeldata attribute, history rewritten) with the
-    ``_PCA.inverse_transform`` suffix. Its classification is deferred
-    (RFC DQ2), so this behavior is intentionally unchanged.
+    Observation: follows the PR 2 canonical analysis-output policy for
+    reconstruction outputs: generated reconstruction identity, no modeldata
+    attribute, and canonical rewritten history.
     """
 
     def test_return_type(self, ds):
@@ -292,12 +291,12 @@ class TestPcaWrapper:
 
     def test_title_preserved(self, ds):
         r = ds.denoise(ratio=99.0)
-        assert r.title == "ds_title"
+        assert r.title == "reconstruction"
 
     def test_name_appended(self, ds):
-        """Notable: name is appended with '_PCA.inverse_transform'."""
+        """Notable: name uses the canonical reconstruction role id."""
         r = ds.denoise(ratio=99.0)
-        assert r.name == "ds_name_PCA.inverse_transform"
+        assert r.name == "ds_name_PCA.reconstruction"
 
     def test_author_preserved(self, ds):
         """Notable: denoise preserves the scientific source author."""
@@ -313,10 +312,10 @@ class TestPcaWrapper:
         assert r.meta.project == "test_project"
 
     def test_history_rewritten(self, ds):
-        """Notable: history rewritten (Group A pattern)."""
+        """Notable: history is rewritten to the canonical reconstruction entry."""
         r = ds.denoise(ratio=99.0)
         assert len(r.history) == 1
-        assert "Created using method PCA.inverse_transform" in r.history[0]
+        assert "Created analysis output reconstruction with PCA from ds_name." in r.history[0]
 
     def test_modeldata_dropped(self, ds):
         """Notable: wrappers no longer expose a modeldata attribute."""
@@ -382,8 +381,8 @@ class TestIdentityProvenance:
       identity, aligned to the Category A policy.
     - Group B (Baseline): identity preserved (all fields survive),
       history appended, consistent with same-object identity.
-    - PCA-based ``denoise`` (DQ2): identity partially preserved and
-      history rewritten (historical Group A pattern, unchanged).
+    - PCA-based ``denoise`` (DQ2): scientific provenance preserved, but
+      analysis-output identity follows the canonical reconstruction contract.
     """
 
     def test_filter_identity_preserved(self, ds):

@@ -107,7 +107,7 @@ def test_nmf_fit_components_and_metadata(nmf_dataset, nmf_model):
     assert_dataset_equal(nmf_model.X, nmf_dataset)
     assert nmf_model.components.shape == (3, nmf_dataset.shape[1])
     assert nmf_model.components.dims == ["k", "x"]
-    assert nmf_model.components.title == nmf_dataset.title
+    assert nmf_model.components.title == "components"
     assert nmf_model.components.x.title == nmf_dataset.x.title
     assert nmf_model.components.x.units == nmf_dataset.x.units
     assert np.all(nmf_model.components.data >= -NMF_NONNEGATIVE_TOL)
@@ -152,7 +152,7 @@ def test_nmf_transform_fit_transform_and_inverse(nmf_dataset, nmf_model):
 
     reconstructed = nmf_model.inverse_transform()
     assert reconstructed.shape == dataset.shape
-    assert reconstructed.title == dataset.title
+    assert reconstructed.title == "reconstruction"
     assert reconstructed.units == dataset.units
     assert reconstructed.dims == dataset.dims
     assert_allclose(reconstructed.data, dataset.data, rtol=3.0e-2, atol=1.0e-3)
