@@ -315,7 +315,10 @@ class TestPcaWrapper:
         """Notable: history is rewritten to the canonical reconstruction entry."""
         r = ds.denoise(ratio=99.0)
         assert len(r.history) == 1
-        assert "Created analysis output reconstruction with PCA from ds_name." in r.history[0]
+        assert (
+            "Created analysis output reconstruction with PCA from ds_name."
+            in r.history[0]
+        )
 
     def test_modeldata_dropped(self, ds):
         """Notable: wrappers no longer expose a modeldata attribute."""
