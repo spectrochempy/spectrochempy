@@ -5,6 +5,7 @@
 # ======================================================================================
 """Module implementing the base abstract classes to define estimators such as PCA, ..."""
 
+import copy
 import logging
 import warnings
 
@@ -22,6 +23,45 @@ from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.exceptions import NotFittedError
 from spectrochempy.utils.exceptions import SpectroChemPyError
 from spectrochempy.utils.traits import NDDatasetType
+
+
+# ======================================================================================
+# Base class AnalysisConfigurable
+# ======================================================================================
+class AnalysisSourceMetadata:
+    """
+    Internal snapshot of the metadata of a scientific source dataset.
+
+    It is captured from the raw ``X`` / ``Y`` input *before* any
+    ``NDDatasetType`` / ``NDDataset(value)`` coercion or internal preprocessing,
+    so that model outputs can reuse the exact source metadata (e.g. ``author``)
+    instead of the values recreated by the coercion step.
+
+    This is deliberately not a second dataset: it only holds a disconnected
+    copy of the metadata fields, independent of the source object (no shared
+    mutable reference to ``meta``, ``coordset``, ``history`` or ``mask``).
+
+    Only ``author`` is currently consumed by the output wrapping decorator.
+    The other fields are preserved for the deterministic identity/history
+    alignment (see the accepted analysis output metadata policy, PR 2).
+    """
+
+    def __init__(self, source: NDDataset):
+        self.name = source.name
+        self.title = source.title
+        self.description = source.description
+        self.author = source.author
+        self.origin = source.origin
+        self.filename = source.filename
+        self.meta = copy.deepcopy(source.meta)
+        self.units = source.units
+        self.created = source.created
+        self.modified = source.modified
+        self.acquisition_date = source.acquisition_date
+        self.history = list(source.history or [])
+        self.dims = tuple(source.dims)
+        self.coordset = source.coordset.copy() if source.coordset is not None else None
+        self.mask = source.mask.copy() if source.mask is not None else None
 
 
 # ======================================================================================
@@ -57,6 +97,17 @@ class AnalysisConfigurable(BaseConfigurable):
     _fitted = tr.Bool(False, help="False if the model was not yet fitted")
     _outfit = tr.Any(help="the output of the _fit method - generally a tuple")
 
+    _X_source_metadata = tr.Instance(
+        AnalysisSourceMetadata,
+        allow_none=True,
+        help="Snapshot of the metadata of the scientific source assigned to _X",
+    )
+    _Y_source_metadata = tr.Instance(
+        AnalysisSourceMetadata,
+        allow_none=True,
+        help="Snapshot of the metadata of the scientific source assigned to _Y",
+    )
+
     # ----------------------------------------------------------------------------------
     # Configuration parameters (mostly defined in subclass
     # as they depend on the model estimator)
@@ -83,6 +134,47 @@ class AnalysisConfigurable(BaseConfigurable):
             # We should not be able to use any methods requiring fit results
             # until the fit method has been executed
             self._fitted = False
+
+    # ----------------------------------------------------------------------------------
+    # Private metadata snapshot helpers
+    # ----------------------------------------------------------------------------------
+    def _capture_source_metadata(self, role, value, force=False):
+        """
+        Capture (or clear) the metadata snapshot of a scientific source input.
+
+        This helper must be called with the raw input value *before* any
+        ``NDDatasetType`` / ``NDDataset(value)`` coercion or internal
+        preprocessing, at each ``_X`` / ``_Y`` assignment site of a ``fit``.
+
+        Persistent snapshots are only replaced or cleared by ``fit``.
+        Argument-less methods reuse them, and direct-call methods never touch
+        them: a direct ``NDDataset`` argument is used as temporary authority
+        for that call only.
+
+        Parameters
+        ----------
+        role : `str`
+            ``"_X"`` or ``"_Y"``.
+        value : `NDDataset`, array-like or `None`
+            Raw value about to be assigned to the ``_X`` / ``_Y`` trait.
+        force : `bool`, optional
+            ``fit`` semantics: ``True`` clears the snapshot when `value` is
+            ``None`` instead of keeping it.
+
+        Notes
+        -----
+        - an ``NDDataset`` source replaces the current snapshot;
+        - an array-like source clears the snapshot (no scientific source
+          metadata to preserve);
+        - ``None`` keeps the current snapshot unless ``force`` is ``True``.
+        """
+        if value is None and not force:
+            return
+        if isinstance(value, NDDataset):
+            snapshot = AnalysisSourceMetadata(value)
+        else:
+            snapshot = None
+        setattr(self, f"{role}_source_metadata", snapshot)
 
     # ----------------------------------------------------------------------------------
     # Private validation and default getter methods
@@ -138,7 +230,9 @@ class AnalysisConfigurable(BaseConfigurable):
 
         # fire the X and eventually Y validation and preprocessing.
         # X and Y are expected to be resp. NDDataset and NDDataset or list of NDDataset.
+        self._capture_source_metadata("_X", X, force=True)
         self._X = X
+        self._capture_source_metadata("_Y", Y, force=True)
         if Y is not None:
             self._Y = Y
 
@@ -671,7 +765,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
     # Public methods
     # ----------------------------------------------------------------------------------
 
-    @_wrap_ndarray_output_to_nddataset(meta_from="_Y", title=None)
+    @_wrap_ndarray_output_to_nddataset(meta_from="_Y", title=None, use_snapshot=False)
     def predict(self, X=None):
         r"""
         Predict targets of given observations.
@@ -1097,7 +1191,9 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
 
         # fire the X and Y validation and preprocessing.
         if Y is not None:
+            self._capture_source_metadata("_X", X, force=True)
             self._X = _make2D(X)
+            self._capture_source_metadata("_Y", Y, force=True)
             self._Y = Y
         else:
             # X should contain the X and Y information (X being the coord and Y the data)
@@ -1106,7 +1202,9 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
                     "The passed argument must have a x coordinates,"
                     "or X input and Y target must be passed separately",
                 )
+            self._capture_source_metadata("_X", X.coord(0), force=True)
             self._X = _make2D(X.coord(0))
+            self._capture_source_metadata("_Y", X, force=True)
             self._Y = X
 
         # _X_preprocessed has been computed when X was set, as well as _Y_preprocessed.

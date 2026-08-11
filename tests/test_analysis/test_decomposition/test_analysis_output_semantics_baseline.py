@@ -202,7 +202,7 @@ class TestMetadataAndProvenance:
         assert scores.name == "source_name_PCA.transform"
         assert scores.title != semantic_dataset.title
         assert scores.units is None
-        assert scores.author != semantic_dataset.author
+        assert scores.author == semantic_dataset.author
         assert scores.origin == semantic_dataset.origin
         assert scores.filename == semantic_dataset.filename
         assert scores.meta.project == semantic_dataset.meta.project
@@ -228,7 +228,7 @@ class TestMetadataAndProvenance:
 
         assert ev_ratio.title == "explained variance ratio"
         assert ev_ratio.units == "percent"
-        assert ev_ratio.author != semantic_dataset.author
+        assert ev_ratio.author == semantic_dataset.author
         assert ev_ratio.meta.project == semantic_dataset.meta.project
         assert ev_ratio.meta is not semantic_dataset.meta
         assert ev_ratio.history[-1].endswith(

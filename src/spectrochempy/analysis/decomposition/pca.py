@@ -326,7 +326,7 @@ for reproducible results across multiple function calls.""",
     @property
     def scores(self):
         """Returns PCA scores."""
-        return self.transform(self.X)
+        return self.transform()
 
     @property
     def result(self):

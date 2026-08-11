@@ -6,76 +6,23 @@
 
 :orphan:
 
-What's New in Revision 0.12.2
+What's New in Revision 0.12.3.dev
 ---------------------------------------------------------------------------------------
 
-These are the changes in SpectroChemPy-0.12.2.
+These are the changes in SpectroChemPy-0.12.3.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
 
 Bug Fixes
 ~~~~~~~~~
 
-- CSV export and JCAMP writing now reject datasets they cannot represent
-  honestly before creating or truncating any file: complex datasets for both
-  formats, and JCAMP datasets without a ``y`` coordinate. No partial or
-  corrupt file is left behind and the source dataset is unmodified.
-
-- JCAMP ``LINK`` files now compute ``FIRSTY``, ``LASTY``, ``MAXY`` and
-  ``MINY`` separately for each spectrum block instead of repeating the first
-  or global extrema across all blocks. The scientific payload and singleton
-  exports are unchanged.
-
-- JCAMP writing now emits truthful ``XUNITS``/``YUNITS`` tags instead of
-  always claiming ``1/CM`` and ``ABSORBANCE``. Numeric values are written
-  unchanged: only exact-scale mappings are accepted (``cm^-1``, ``um``,
-  ``nm``, ``absorbance``, ``transmittance``, or no unit), while merely
-  convertible or arbitrary named units such as ``m^-1``, ``dimensionless``
-  and ``count`` are rejected before any file is created. The reader now maps
-  ``YUNITS=ARBITRARY UNITS`` back to an unset dataset unit.
-
-- Native ``.scp`` and ``.pscp`` persistence now preserves dataset history
-  entries exactly across load/save round-trips instead of collapsing
-  non-empty history to the first entry and retimestamping it during native
-  reconstruction.
-
-- Filter and smoothing outputs (``smooth``, ``savgol``, ``savgol_filter``,
-  ``whittaker``) now preserve the source dataset ``name`` and append a single
-  history entry while retaining all prior entries, instead of renaming with a
-  ``_Filter.transform`` suffix and replacing the history. Savitzky-Golay
-  derivative outputs (``deriv > 0``), ``denoise`` and analysis outputs are
-  unchanged.
-
-- ``concatenate()`` and ``stack()`` now treat their outputs as multi-source
-  derived datasets for identity and provenance metadata. They no longer
-  silently inherit ``name``, ``origin``, ``filename``, ``meta`` or timestamps
-  from a single source dataset, use deterministic synthesized ``description``
-  and ``history`` text, and preserve ``title`` and ``acquisition_date`` only
-  on exact consensus. All scientific assembly behavior and the input datasets
-  are unchanged.
-
-- Arithmetic on masked datasets now follows the explicit-mask policy: only
-  the explicit operand masks are preserved (as their broadcast union for two
-  datasets) and newly invalid numeric values are no longer auto-masked.
-  Division by zero on the masked path leaves visible ``inf``/``nan`` exactly
-  like the unmasked path, ``2 / ds`` with a masked zero preserves the mask,
-  and ufunc domain errors on masked inputs (e.g. ``log`` or ``sqrt`` of a
-  masked negative) never extend the mask.
-
-- Domain errors on *visible* values (division by zero, overflow, invalid
-  value) now emit the standard NumPy ``RuntimeWarning`` and return the
-  visible ``inf``/``nan`` (or complex promotion) instead of raising a
-  ``ValueError``, identically to the unmasked path. ``np.ma.masked`` is
-  usable as either operand of ``+``, ``-``, ``*`` and ``/``, although the
-  ``np.ma.masked <op> ds`` operator forms may still be intercepted by NumPy
-  and return a ``numpy.ma.MaskedArray`` (the type asymmetry is inherent to
-  NumPy, not to SpectroChemPy).
-
-Deprecations
-~~~~~~~~~~~~
-
-- Writer keyword arguments ``protocol=`` and ``description=`` are now
-  deprecated across the generic, specialized and namespace writer APIs.
-  Writer dispatch continues to be determined only by the filename suffix and
-  exported description metadata continues to come from ``dataset.description``.
-  Passing either keyword emits a ``DeprecationWarning`` in 0.12.x and will
-  raise ``TypeError`` in 0.13.0.
+- Analysis outputs that reuse the stored scientific input (e.g. ``PCA.scores``,
+  ``components``, diagnostics, ``result`` outputs, ``PLSRegression`` X-side and
+  Y-side surfaces, ``Optimize.fitted``) now preserve the exact ``author`` of the
+  scientific source dataset instead of recreating the runtime ``user@host``
+  value through the internal ``NDDataset`` input conversion. The snapshot is
+  captured once at ``fit`` time and is never overwritten by later direct calls:
+  a direct ``NDDataset`` argument remains authoritative for the output of that
+  call only, X-side outputs use the X source and Y-side outputs use the Y
+  source, array-like inputs are unaffected, and input datasets are not mutated.
+  Supervised predictions (``predict``) keep their previous behavior until the
+  multi-source provenance policy is implemented.

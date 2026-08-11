@@ -26,6 +26,18 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Analysis outputs that reuse the stored scientific input (e.g. ``PCA.scores``,
+  ``components``, diagnostics, ``result`` outputs, ``PLSRegression`` X-side and
+  Y-side surfaces, ``Optimize.fitted``) now preserve the exact ``author`` of the
+  scientific source dataset instead of recreating the runtime ``user@host``
+  value through the internal ``NDDataset`` input conversion. The snapshot is
+  captured once at ``fit`` time and is never overwritten by later direct calls:
+  a direct ``NDDataset`` argument remains authoritative for the output of that
+  call only, X-side outputs use the X source and Y-side outputs use the Y
+  source, array-like inputs are unaffected, and input datasets are not mutated.
+  Supervised predictions (``predict``) keep their previous behavior until the
+  multi-source provenance policy is implemented.
+
 
 .. section
 
