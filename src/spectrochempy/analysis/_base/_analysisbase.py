@@ -345,81 +345,6 @@ class AnalysisConfigurable(BaseConfigurable):
             return f"Created diagnostic {role_id} with {estimator} from {source_list}."
         return f"Created analysis output {role_id} with {estimator} from {source_list}."
 
-    def _analysis_apply_prediction_support(self, dataset, direct_x_kind, direct_x):
-        xpredict = None
-        if direct_x_kind == "dataset":
-            xpredict = direct_x
-        elif direct_x_kind == "none":
-            xpredict = getattr(self, "_X", None)
-        ytrain = getattr(self, "_Y", None)
-
-        if dataset.ndim == 1:
-            if xpredict is not None and xpredict.coordset is not None:
-                dim = xpredict.dims[0]
-                coord = (
-                    xpredict.coord(0).copy() if xpredict.coord(0) is not None else None
-                )
-                dataset.dims = [dim]
-                dataset.set_coordset({dim: coord})
-        elif dataset.ndim >= 2:
-            obs_dim = dataset.dims[0]
-            target_dim = dataset.dims[-1]
-            obs_coord = None
-            target_coord = None
-            if xpredict is not None:
-                obs_dim = xpredict.dims[0]
-                if xpredict.coordset is not None and xpredict.coord(0) is not None:
-                    obs_coord = xpredict.coord(0).copy()
-            if isinstance(ytrain, NDDataset) and ytrain.ndim > 1:
-                target_dim = ytrain.dims[-1]
-                if ytrain.coordset is not None and ytrain.coord(-1) is not None:
-                    target_coord = ytrain.coord(-1).copy()
-            if obs_dim == target_dim:
-                target_dim = dataset.dims[-1]
-            dataset.dims = [obs_dim, target_dim]
-            dataset.set_coordset({obs_dim: obs_coord, target_dim: target_coord})
-
-        mask = None
-        if dataset.ndim >= 1 and xpredict is not None:
-            xmask = np.ma.getmaskarray(xpredict.mask)
-            if np.any(xmask):
-                if xmask.ndim == 1 and xmask.shape[0] == dataset.shape[0]:
-                    row_mask = xmask
-                elif xmask.ndim >= 2 and xmask.shape[0] == dataset.shape[0]:
-                    row_mask = np.any(xmask.reshape(xmask.shape[0], -1), axis=1)
-                else:
-                    row_mask = None
-                if row_mask is not None:
-                    if dataset.ndim == 1:
-                        mask = row_mask.copy()
-                    else:
-                        mask = np.broadcast_to(
-                            row_mask[:, np.newaxis], dataset.shape
-                        ).copy()
-
-        if dataset.ndim >= 2 and isinstance(ytrain, NDDataset):
-            ymask = np.ma.getmaskarray(ytrain.mask)
-            if np.any(ymask):
-                if ymask.ndim == 1 and ymask.shape[0] == dataset.shape[-1]:
-                    target_mask = ymask
-                elif ymask.ndim >= 2 and ymask.shape[-1] == dataset.shape[-1]:
-                    flat = ymask.reshape(-1, ymask.shape[-1])
-                    target_mask = np.all(flat, axis=0)
-                else:
-                    target_mask = None
-                if target_mask is not None:
-                    col_mask = np.broadcast_to(
-                        target_mask[np.newaxis, :], dataset.shape
-                    )
-                    mask = (
-                        col_mask.copy()
-                        if mask is None
-                        else np.logical_or(mask, col_mask)
-                    )
-
-        dataset.mask = np.False_ if mask is None or not np.any(mask) else mask
-        return dataset
-
     def _apply_analysis_output_metadata(
         self,
         dataset,
@@ -477,9 +402,7 @@ class AnalysisConfigurable(BaseConfigurable):
                     prediction_source=x_predict,
                 ),
             )
-            return self._analysis_apply_prediction_support(
-                dataset, direct_x_kind, direct_x
-            )
+            return dataset
 
         sources = [single_source] if single_source is not None else []
         if single_source is not None:

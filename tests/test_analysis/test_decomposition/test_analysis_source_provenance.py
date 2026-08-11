@@ -32,6 +32,9 @@ deterministic identity/provenance/history rules where the accepted policy now
 requires them.
 """
 
+from datetime import datetime
+from datetime import timezone
+
 import numpy as np
 import pytest
 
@@ -317,8 +320,10 @@ class TestPLSRegressionYside:
         X, Y = pls_inputs
         X.name = "xtrain"
         X.origin = "origin_xtrain"
+        X.meta.from_x = "x_only"
         Y.name = "ytrain"
         Y.origin = "origin_ytrain"
+        Y.meta.from_y = "y_only"
         pls = PLSRegression(n_components=2).fit(X, Y)
 
         prediction = pls.predict()
@@ -335,6 +340,8 @@ class TestPLSRegressionYside:
         )
         assert prediction.filename is None
         assert prediction.meta is not Y.meta
+        assert prediction.meta.from_y == "y_only"
+        assert "from_x" not in prediction.meta
 
         Xnew = X.copy()
         Xnew.author = "predict_author"
@@ -353,6 +360,153 @@ class TestPLSRegressionYside:
             "Created analysis output prediction with PLSRegression from "
             "xtrain + ytrain; applied to xpredict."
         )
+        assert direct_prediction.meta is not Y.meta
+        assert direct_prediction.meta.from_y == "y_only"
+        direct_prediction.meta.from_y = "mutated"
+        assert Y.meta.from_y == "y_only"
+
+    def test_predict_consensus_discards_absent_values_and_preserves_exact_text(
+        self, pls_inputs
+    ):
+        X, Y = pls_inputs
+        X.origin = " Lab A "
+        X.name = "xtrain"
+        Y.author = ""
+        Y.origin = "lab a"
+        Y.name = "ytrain"
+        pls = PLSRegression(n_components=2).fit(X, Y)
+        pls._X_source_metadata.author = None
+
+        Xnew = X.copy()
+        Xnew.author = "predict_author"
+        Xnew.origin = " Lab A "
+        Xnew.name = ""
+
+        prediction = pls.predict(Xnew)
+        assert prediction.author == "predict_author"
+        assert prediction.origin == " Lab A  & lab a"
+        assert prediction.name == "xtrain_PLSRegression.prediction"
+        assert prediction.description == (
+            "Prediction from PLSRegression fit of xtrain + ytrain applied to xtrain."
+        )
+        assert prediction.history[-1].endswith(
+            "Created analysis output prediction with PLSRegression from "
+            "xtrain + ytrain; applied to xtrain."
+        )
+
+    def test_predict_empty_snapshot_name_uses_unnamed_text_and_no_name_prefix(
+        self, pls_inputs
+    ):
+        X, Y = pls_inputs
+        X.name = "xtrain"
+        Y.name = "ytrain"
+        pls = PLSRegression(n_components=2).fit(X, Y)
+        pls._X_source_metadata.name = ""
+
+        prediction = pls.predict()
+        assert prediction.name == "PLSRegression.prediction"
+        assert prediction.description == (
+            "Prediction from PLSRegression fit of <unnamed> + ytrain applied to <unnamed>."
+        )
+        assert prediction.history[-1].endswith(
+            "Created analysis output prediction with PLSRegression from "
+            "<unnamed> + ytrain; applied to <unnamed>."
+        )
+
+    @pytest.mark.parametrize(
+        ("x_date", "y_date", "predict_date", "expect_consensus"),
+        [
+            pytest.param(
+                None,
+                None,
+                None,
+                False,
+                id="all-missing",
+            ),
+            pytest.param(
+                "same",
+                "same",
+                "same",
+                True,
+                id="exact-consensus",
+            ),
+            pytest.param(
+                "same",
+                "different",
+                "same",
+                False,
+                id="divergent-dates",
+            ),
+            pytest.param(
+                "same",
+                None,
+                "same",
+                False,
+                id="partial-missing",
+            ),
+        ],
+    )
+    def test_predict_acquisition_date_uses_exact_consensus(
+        self, pls_inputs, x_date, y_date, predict_date, expect_consensus
+    ):
+        X, Y = pls_inputs
+        base = datetime(2026, 8, 11, 10, 0, tzinfo=timezone.utc)
+        X.acquisition_date = base if x_date == "same" else None
+        Y.acquisition_date = (
+            base
+            if y_date == "same"
+            else datetime(2026, 8, 11, 11, 0, tzinfo=timezone.utc)
+            if y_date == "different"
+            else None
+        )
+        pls = PLSRegression(n_components=2).fit(X, Y)
+
+        Xnew = X.copy()
+        Xnew.acquisition_date = base if predict_date == "same" else None
+        prediction = pls.predict(Xnew)
+
+        if expect_consensus:
+            assert prediction._acquisition_date == base
+        else:
+            assert prediction.acquisition_date is None
+
+    def test_refit_replaces_prediction_snapshots_without_stale_metadata(
+        self, pls_inputs
+    ):
+        X, Y = pls_inputs
+        X.author = "x_author_1"
+        X.origin = "origin_x_1"
+        X.name = "xtrain1"
+        X.meta.marker = "x1"
+        Y.author = "y_author_1"
+        Y.origin = "origin_y_1"
+        Y.name = "ytrain1"
+        Y.meta.marker = "y1"
+
+        pls = PLSRegression(n_components=2).fit(X, Y)
+
+        X2 = X.copy()
+        X2.author = "x_author_2"
+        X2.origin = "origin_x_2"
+        X2.name = "xtrain2"
+        X2.meta.marker = "x2"
+        Y2 = Y.copy()
+        Y2.author = "y_author_2"
+        Y2.origin = "origin_y_2"
+        Y2.name = "ytrain2"
+        Y2.meta.marker = "y2"
+
+        pls.fit(X2, Y2)
+        prediction = pls.predict()
+
+        assert prediction.author == "x_author_2 & y_author_2"
+        assert prediction.origin == "origin_x_2 & origin_y_2"
+        assert prediction.name == "xtrain2_PLSRegression.prediction"
+        assert prediction.description == (
+            "Prediction from PLSRegression fit of xtrain2 + ytrain2 applied to xtrain2."
+        )
+        assert prediction.meta.marker == "y2"
+        assert "y1" not in repr(prediction.meta)
 
     def test_transform_both_uses_respective_authors(self, pls_inputs):
         X, Y = pls_inputs
