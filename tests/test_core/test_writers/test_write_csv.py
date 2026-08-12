@@ -198,7 +198,7 @@ def test_write_csv_deprecated_protocol_warns_and_still_writes_csv(
     dataset.name = f"real_csv_{api}"
     target = tmp_path / f"{api}.csv"
 
-    with pytest.warns(DeprecationWarning, match="`protocol` is deprecated"):
+    with pytest.warns(DeprecationWarning, match="`protocol` is deprecated") as record:
         if api == "method":
             path = dataset.write_csv(target, protocol="matlab", confirm=False)
         else:
@@ -206,6 +206,9 @@ def test_write_csv_deprecated_protocol_warns_and_still_writes_csv(
 
     assert path == target
     assert path.suffix == ".csv"
+    messages = [str(item.message) for item in record]
+    assert all("0.13.0" not in message for message in messages)
+    assert any("deprecation policy is satisfied" in message for message in messages)
     text = path.read_text()
     assert "wavenumber / cm^-1,absorbance / a.u." in text
 
@@ -225,7 +228,9 @@ def test_write_csv_deprecated_description_warns_without_overriding_export(
     dataset.description = "source description"
     target = tmp_path / f"{api}.csv"
 
-    with pytest.warns(DeprecationWarning, match="`description` is deprecated"):
+    with pytest.warns(
+        DeprecationWarning, match="`description` is deprecated"
+    ) as record:
         if api == "method":
             path = dataset.write_csv(target, description="custom", confirm=False)
         else:
@@ -233,6 +238,9 @@ def test_write_csv_deprecated_description_warns_without_overriding_export(
 
     assert path == target
     assert dataset.description == "source description"
+    messages = [str(item.message) for item in record]
+    assert all("0.13.0" not in message for message in messages)
+    assert any("deprecation policy is satisfied" in message for message in messages)
     text = path.read_text()
     assert "custom" not in text
     assert "source description" not in text

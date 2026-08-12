@@ -38,7 +38,8 @@ def write_csv(*args, **kwargs):
         Additional keyword arguments accepted by the generic writer API.
         This specialized writer always exports CSV files. Deprecated generic
         writer kwargs such as `protocol=` and `description=` still emit a
-        `DeprecationWarning` in 0.12 and will raise `TypeError` in 0.13.0.
+        `DeprecationWarning`; removal remains warning-first and is governed by
+        the SpectroChemPy deprecation lifecycle policy.
 
     Returns
     -------

@@ -22,11 +22,17 @@ from spectrochempy.utils.exceptions import UnitsCompatibilityError
 
 def test_legacy_align_import_is_deprecated():
     sys.modules.pop("spectrochempy.processing.alignement.align", None)
-    with pytest.deprecated_call(match="processing.alignement.align"):
+    with pytest.deprecated_call(match="processing.alignement.align") as record:
         legacy_module = importlib.import_module(
             "spectrochempy.processing.alignement.align"
         )
     assert legacy_module.align is align
+    messages = [str(item.message) for item in record]
+    assert any(
+        "spectrochempy.processing.alignment.align" in message for message in messages
+    )
+    assert all("0.13.0" not in message for message in messages)
+    assert any("deprecation policy is satisfied" in message for message in messages)
 
 
 def test_align(ds1, ds2):

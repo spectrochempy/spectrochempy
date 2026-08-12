@@ -8,12 +8,11 @@
 __all__ = ["write"]
 __dataset_methods__ = __all__
 
-import warnings
-
 from traitlets import Any
 from traitlets import HasTraits
 
 from spectrochempy.core.readers.filetypes import registry
+from spectrochempy.utils.decorators import warn_deprecated
 from spectrochempy.utils.file import check_filename_to_save
 from spectrochempy.utils.file import pathclean
 from spectrochempy.utils.file import patterns
@@ -21,21 +20,33 @@ from spectrochempy.utils.file import patterns
 
 def _warn_deprecated_writer_kwargs(kwargs):
     if "protocol" in kwargs:
-        warnings.warn(
-            "Writer keyword argument `protocol` is deprecated and will be "
-            "removed in 0.13.0. Writer dispatch is determined by the filename "
-            "suffix or by using an explicit specialized / namespaced writer "
-            "API; `protocol=` does not select the writer.",
-            DeprecationWarning,
+        warn_deprecated(
+            "protocol",
+            subject="Writer keyword argument `protocol`",
+            kind="writer keyword argument",
+            policy=True,
+            action="is deprecated",
+            replace=None,
+            extra_msg=(
+                "Writer dispatch is determined by the filename suffix or by "
+                "using an explicit specialized / namespaced writer API; "
+                "`protocol=` does not select the writer."
+            ),
             stacklevel=4,
         )
     if "description" in kwargs:
-        warnings.warn(
-            "Writer keyword argument `description` is deprecated and will be "
-            "removed in 0.13.0. Exported description metadata comes from "
-            "`dataset.description`, not from a write-time `description=` "
-            "override.",
-            DeprecationWarning,
+        warn_deprecated(
+            "description",
+            subject="Writer keyword argument `description`",
+            kind="writer keyword argument",
+            policy=True,
+            action="is deprecated",
+            replace=None,
+            extra_msg=(
+                "Exported description metadata comes from "
+                "`dataset.description`, not from a write-time "
+                "`description=` override."
+            ),
             stacklevel=4,
         )
 
@@ -145,14 +156,16 @@ def write(dataset, filename=None, **kwargs):
     protocol : {'scp', 'matlab', 'jcamp', 'csv'}, optional
         Deprecated. Writer dispatch is determined by the file name extension or
         by using an explicit specialized writer API. Passing `protocol=` emits
-        a `DeprecationWarning` in 0.12 and will raise `TypeError` in 0.13.0.
+        a `DeprecationWarning`; removal remains warning-first and is governed
+        by the SpectroChemPy deprecation lifecycle policy.
     directory : str, optional
         Where to write the specified `filename` . If not specified, write in the current directory.
     description: str, optional
         Deprecated. Exported description metadata comes from
         `dataset.description`, not from a write-time override. Passing
-        `description=` emits a `DeprecationWarning` in 0.12 and will raise
-        `TypeError` in 0.13.0.
+        `description=` emits a `DeprecationWarning`; removal remains
+        warning-first and is governed by the SpectroChemPy deprecation
+        lifecycle policy.
     csv_delimiter : str, optional
         Set the column delimiter in CSV file.
         By default it is the one set in SpectroChemPy `Preferences` .

@@ -7,7 +7,7 @@
 
 from __future__ import annotations
 
-import warnings
+from spectrochempy.utils.decorators import warn_deprecated
 
 CANONICAL_1D_METHODS = frozenset(
     {
@@ -96,10 +96,12 @@ def normalize_backend_method(
         canonical = _BACKEND_METHOD_ALIASES[method]
         if warned_aliases is not None and method not in warned_aliases:
             warned_aliases.add(method)
-            warnings.warn(
-                f'method="{method}" is deprecated and will be removed in 0.13.0. '
-                f'Use method="{canonical}" instead.',
-                DeprecationWarning,
+            warn_deprecated(
+                f'method="{method}"',
+                kind="plotting alias",
+                replace=f'method="{canonical}"',
+                policy=True,
+                action="is deprecated",
                 stacklevel=stacklevel,
             )
         return canonical

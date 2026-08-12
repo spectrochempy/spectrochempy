@@ -51,8 +51,6 @@ This module serves as the main entry point for the SpectroChemPy package, provid
 - Dynamic attribute access to NDDataset methods
 """
 
-import warnings
-
 import lazy_loader as _lazy_loader
 
 # --------------------------------------------------------------------------------------
@@ -65,6 +63,7 @@ original_getattr, original_dir, *_ = _lazy_loader.attach_stub(__name__, __file__
 
 from spectrochempy.lazyimport.api_methods import _LAZY_IMPORTS
 from spectrochempy.lazyimport.dataset_methods import _LAZY_DATASETS_IMPORTS
+from spectrochempy.utils.decorators import warn_deprecated
 
 from . import application
 
@@ -168,11 +167,13 @@ def _plugin_root_export(name, namespace_cls):
         if export is None:
             continue
         if export["deprecated"] and name not in _EMITTED_PLUGIN_ROOT_WARNINGS:
-            warnings.warn(
-                f"scp.{name} is deprecated since SpectroChemPy 0.9.0 "
-                f"and will be removed in 0.13.0. "
-                f"Use {export['replacement']} instead.",
-                DeprecationWarning,
+            warn_deprecated(
+                f"scp.{name}",
+                kind="public API alias",
+                replace=export["replacement"],
+                since="0.10.0",
+                policy=True,
+                action="is deprecated",
                 stacklevel=3,
             )
             _EMITTED_PLUGIN_ROOT_WARNINGS.add(name)

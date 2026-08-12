@@ -125,8 +125,12 @@ def test_concatenate(IR_dataset_2D):
     assert s.y.size == s1.y.size
     assert s.x.size == s1.x.size
 
-    with pytest.warns(DeprecationWarning):
+    with pytest.warns(DeprecationWarning, match="force_stack") as record:
         concatenate(s1, s2, force_stack=True)
+    messages = [str(item.message) for item in record]
+    assert any("method stack()" in message for message in messages)
+    assert all("0.13.0" not in message for message in messages)
+    assert any("deprecation policy is satisfied" in message for message in messages)
 
     # If one of the dimensions is of size one, then this dimension is NOT removed before stacking
     s0 = dataset[0]
