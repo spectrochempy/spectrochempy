@@ -1893,8 +1893,9 @@ class Optimize(DecompositionAnalysis):
         # simple and aligned with the PCA / SVD result behaviour.
 
         fitted = self.predict()
+        observed = self.X
         residuals, fit_diagnostics = _compute_fit_diagnostics(
-            self._X,
+            observed,
             fitted,
             getattr(self, "_fit_meta", {}),
             getattr(self, "_model_spec", None),
@@ -1909,7 +1910,7 @@ class Optimize(DecompositionAnalysis):
             direct_y_kind="none",
         )
         covariance = _compute_covariance_matrix(
-            self._X,
+            observed,
             fitted,
             self.jacobian,
             fit_diagnostics,

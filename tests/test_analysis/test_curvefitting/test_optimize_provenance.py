@@ -91,3 +91,24 @@ def test_optimize_fitted_and_residuals_preserve_none_units(
     assert result.fitted.units is None
     assert opt.predict().units is None
     assert result.residuals.units is None
+
+
+def test_optimize_fitted_and_residuals_restore_public_geometry_and_mask(
+    synthetic_two_peak_dataset, optimize_script
+):
+    ds = synthetic_two_peak_dataset.copy()
+    ds[40] = scp.MASKED
+
+    opt = scp.Optimize(script=optimize_script).fit(ds)
+    observed = opt.X
+    result = opt.result
+
+    for output in (result.fitted, result.residuals):
+        assert output.shape == observed.shape
+        assert output.dims == observed.dims
+        np.testing.assert_array_equal(output.mask, observed.mask)
+        assert output.coordset is not observed.coordset
+        np.testing.assert_allclose(output.x.data, observed.x.data)
+
+    result.fitted.mask[0, 0] = True
+    assert not observed.mask[0, 0]

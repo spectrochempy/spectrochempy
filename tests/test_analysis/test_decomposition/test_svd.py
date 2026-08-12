@@ -77,7 +77,7 @@ def test_svd(low_rank_dataset):
     assert svd.U.shape == (3, 3)
     assert svd.VT.shape == (3, 4)
     assert_allclose(svd.s, [5.0, 3.0, 0.0])
-    assert_allclose(svd.ev_ratio.data, [2500.0 / 34.0, 900.0 / 34.0, 0.0, 0.0])
+    assert_allclose(svd.ev_ratio.data, [2500.0 / 34.0, 900.0 / 34.0, 0.0])
 
     svd.full_matrices = True
     svd.fit(masked)

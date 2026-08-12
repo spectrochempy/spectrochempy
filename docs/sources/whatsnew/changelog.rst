@@ -43,6 +43,15 @@ Bug Fixes
   outputs now use the common diagnostic metadata contract while raw
   ``U``/``s``/``VT`` factors remain unchanged.
 
+- Analysis outputs now align their public geometry support with the accepted
+  family-specific rules: latent factors and profiles stay unmasked unless an
+  exact restored full-row/full-column authority exists, source-domain
+  reconstructions and fitted/residual outputs recover the public ``X``
+  coordset and mask only when their geometry matches exactly, ``PLSRegression``
+  predictions rebuild their observation axis from ``Xpredict`` and target axis
+  from ``Ytrain`` without whole-source geometry copies, and diagnostic outputs
+  remain generated and unmasked.
+
 
 .. section
 
