@@ -132,7 +132,15 @@ def preserve_signature(f):
     return f
 
 
-def deprecated(name=None, *, kind="method", replace="", removed=None, extra_msg=""):
+def deprecated(
+    name=None,
+    *,
+    kind="method",
+    replace="",
+    removed=None,
+    extra_msg="",
+    policy=False,
+):
     """
     Deprecate a function or attribute.
 
@@ -149,6 +157,9 @@ def deprecated(name=None, *, kind="method", replace="", removed=None, extra_msg=
         Additional message.
     removed : str, optional
         Version string when this method will be removed
+    policy : bool, optional
+        If True, express removal timing through the accepted SpectroChemPy
+        deprecation policy instead of a version string.
     """
 
     if name is not None:
@@ -159,6 +170,7 @@ def deprecated(name=None, *, kind="method", replace="", removed=None, extra_msg=
             replace=replace,
             removed=removed,
             extra_msg=extra_msg,
+            policy=policy,
             stacklevel=2,
         )
         return None
@@ -176,6 +188,7 @@ def deprecated(name=None, *, kind="method", replace="", removed=None, extra_msg=
                 replace=replace,
                 removed=removed,
                 extra_msg=extra_msg,
+                policy=policy,
                 stacklevel=2,
             )
             return func(*args, **kwargs)

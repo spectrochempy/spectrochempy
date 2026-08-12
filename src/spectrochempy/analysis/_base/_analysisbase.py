@@ -1419,10 +1419,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
     # Backward compatibility alias
     @deprecated(
         replace="plot_merit",
-        extra_msg=(
-            "Removal will not occur before the SpectroChemPy deprecation policy "
-            "is satisfied."
-        ),
+        policy=True,
     )
     def plotmerit(self, X=None, X_hat=None, **kwargs):
         """
@@ -1758,10 +1755,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
     # Backward compatibility alias
     @deprecated(
         replace="plot_parity",
-        extra_msg=(
-            "Removal will not occur before the SpectroChemPy deprecation policy "
-            "is satisfied."
-        ),
+        policy=True,
     )
     def parityplot(
         self, Y=None, Y_hat=None, *, ax=None, clear=True, show=True, **kwargs

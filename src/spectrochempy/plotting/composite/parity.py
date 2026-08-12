@@ -141,10 +141,7 @@ def plot_parity(
 
 @deprecated(
     replace="plot_parity",
-    extra_msg=(
-        "Removal will not occur before the SpectroChemPy deprecation policy "
-        "is satisfied."
-    ),
+    policy=True,
 )
 def parityplot(*args, **kwargs):
     """

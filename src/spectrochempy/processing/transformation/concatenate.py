@@ -86,10 +86,7 @@ def concatenate(*datasets, **kwargs):
         deprecated(
             "force_stack",
             replace="method stack()",
-            extra_msg=(
-                "Removal will not occur before the SpectroChemPy deprecation "
-                "policy is satisfied."
-            ),
+            policy=True,
         )
         return stack(datasets)
 
