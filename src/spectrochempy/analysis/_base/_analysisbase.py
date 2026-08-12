@@ -8,6 +8,7 @@
 import copy
 import logging
 import warnings
+from types import SimpleNamespace
 
 import numpy as np
 import traitlets as tr
@@ -18,6 +19,7 @@ from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.baseconfigurable import BaseConfigurable
+from spectrochempy.utils.constants import NOMASK
 from spectrochempy.utils.decorators import _wrap_ndarray_output_to_nddataset
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.exceptions import NotFittedError
@@ -60,6 +62,7 @@ class AnalysisSourceMetadata:
         self.modified = source._modified
         self.acquisition_date = source._acquisition_date
         self.history = list(source.history or [])
+        self.shape = tuple(source.shape)
         self.dims = tuple(source.dims)
         self.coordset = source.coordset.copy() if source.coordset is not None else None
         self.mask = source.mask.copy() if source.mask is not None else None
@@ -402,6 +405,362 @@ class AnalysisConfigurable(BaseConfigurable):
         if role_id == "prediction":
             return fit_y_source.units if fit_y_source is not None else None
         return dataset.units
+
+    @staticmethod
+    def _analysis_full_rows(mask):
+        if mask is None:
+            return None
+        array = np.asarray(mask)
+        if array.ndim < 2:
+            return None
+        return np.all(array, axis=-1)
+
+    @staticmethod
+    def _analysis_full_columns(mask):
+        if mask is None:
+            return None
+        array = np.asarray(mask)
+        if array.ndim < 2:
+            return None
+        return np.all(array, axis=-2)
+
+    @staticmethod
+    def _analysis_copy_mask(mask):
+        if mask is None or np.isscalar(mask):
+            return np.False_
+        return np.array(mask, copy=True)
+
+    def _analysis_set_unmasked(self, dataset):
+        dataset._mask = NOMASK
+        return dataset
+
+    def _analysis_restore_svd_diagnostic_axis(self, dataset):
+        if type(self).__name__ != "SVD" or dataset.ndim != 1:
+            return self._analysis_set_unmasked(dataset)
+
+        target_size = min(getattr(self, "_X_shape", dataset.shape))
+        if target_size <= dataset.shape[0]:
+            return self._analysis_set_unmasked(dataset)
+
+        data = np.zeros(target_size, dtype=dataset.dtype)
+        data[: dataset.shape[0]] = np.asarray(dataset.data)
+        dataset.data = data
+
+        if dataset.dims:
+            from spectrochempy.core.dataset.coord import Coord
+
+            dim = dataset.dims[0]
+            title = "components"
+            if dataset.coordset is not None and dataset.coordset[dim] is not None:
+                title = dataset.coordset[dim].title or title
+            dataset.set_coordset(
+                {
+                    dim: Coord(
+                        None,
+                        labels=[f"#{i}" for i in range(target_size)],
+                        title=title,
+                    )
+                }
+            )
+
+        return self._analysis_set_unmasked(dataset)
+
+    def _analysis_copy_coordset(self, source):
+        if source is None or source.coordset is None:
+            return None
+        return source.coordset.copy()
+
+    def _analysis_copy_exact_geometry(self, dataset, source):
+        if source is None:
+            return self._analysis_set_unmasked(dataset)
+        dataset.dims = list(source.dims)
+        dataset._coordset = self._analysis_copy_coordset(source)
+        dataset._mask = self._analysis_copy_mask(source.mask)
+        return dataset
+
+    def _analysis_restore_axis_from_source(self, dataset, source, axis):
+        if source is None:
+            return self._analysis_set_unmasked(dataset)
+        full_mask = (
+            self._analysis_full_rows(source.mask)
+            if axis == 0
+            else self._analysis_full_columns(source.mask)
+        )
+        dataset = self._analysis_apply_full_axis_mask(dataset, full_mask, axis=axis)
+        if source.coordset is None or dataset.coordset is None:
+            return dataset
+        if axis == 0:
+            dataset.coordset[dataset.dims[0]] = source.coordset[source.dims[0]].copy()
+        elif axis == -1:
+            dataset.coordset[dataset.dims[-1]] = source.coordset[source.dims[-1]].copy()
+        return dataset
+
+    def _analysis_apply_full_axis_mask(self, dataset, full_mask, axis):
+        if full_mask is None:
+            return self._analysis_set_unmasked(dataset)
+        full_mask = np.asarray(full_mask, dtype=bool)
+        if not np.any(full_mask):
+            return self._analysis_set_unmasked(dataset)
+        if dataset.ndim == 1:
+            if axis != 0:
+                return self._analysis_set_unmasked(dataset)
+            if full_mask.shape[0] == dataset.shape[0]:
+                dataset._mask = full_mask.copy()
+                return dataset
+            if np.count_nonzero(~full_mask) != dataset.shape[0]:
+                return self._analysis_set_unmasked(dataset)
+            data = np.ma.zeros(full_mask.shape[0], dtype=dataset.dtype)
+            data[~full_mask] = np.ma.asarray(dataset.masked_data)
+            data[full_mask] = np.ma.masked
+            dataset.data = data
+            dataset._mask = np.asarray(data.mask)
+            return dataset
+        mask = np.zeros(dataset.shape, dtype=bool)
+        if axis == 0:
+            if full_mask.shape[0] == dataset.shape[0]:
+                mask[full_mask, ...] = True
+            elif np.count_nonzero(~full_mask) == dataset.shape[0]:
+                data = np.ma.zeros(
+                    (full_mask.shape[0], dataset.shape[1]), dtype=dataset.dtype
+                )
+                data[~full_mask, :] = np.ma.asarray(dataset.masked_data)
+                data[full_mask, :] = np.ma.masked
+                dataset.data = data
+                mask = np.asarray(data.mask)
+            else:
+                return self._analysis_set_unmasked(dataset)
+        elif axis == -1:
+            if full_mask.shape[0] == dataset.shape[-1]:
+                mask[..., full_mask] = True
+            elif np.count_nonzero(~full_mask) == dataset.shape[-1]:
+                data = np.ma.zeros(
+                    (dataset.shape[0], full_mask.shape[0]), dtype=dataset.dtype
+                )
+                data[:, ~full_mask] = np.ma.asarray(dataset.masked_data)
+                data[:, full_mask] = np.ma.masked
+                dataset.data = data
+                mask = np.asarray(data.mask)
+            else:
+                return self._analysis_set_unmasked(dataset)
+        else:
+            return self._analysis_set_unmasked(dataset)
+        dataset._mask = mask
+        return dataset
+
+    def _analysis_restore_full_geometry(self, dataset, source):
+        if source is None:
+            return self._analysis_set_unmasked(dataset)
+
+        if tuple(dataset.shape) == tuple(source.shape):
+            return self._analysis_copy_exact_geometry(dataset, source)
+
+        source_mask = source.mask
+        if source_mask is None:
+            return self._analysis_set_unmasked(dataset)
+
+        source_mask = np.asarray(source_mask, dtype=bool)
+        if source_mask.ndim == 1:
+            if dataset.ndim != 1 or np.count_nonzero(~source_mask) != dataset.shape[0]:
+                return self._analysis_set_unmasked(dataset)
+            data = np.ma.zeros(source.shape[0], dtype=dataset.dtype)
+            data[~source_mask] = np.ma.asarray(dataset.masked_data)
+            data[source_mask] = np.ma.masked
+            dataset.data = data
+            dataset.dims = list(source.dims)
+            dataset._coordset = self._analysis_copy_coordset(source)
+            dataset._mask = np.asarray(data.mask)
+            return dataset
+
+        rows = self._analysis_full_rows(source_mask)
+        cols = self._analysis_full_columns(source_mask)
+        data = np.ma.asarray(dataset.masked_data)
+
+        if rows.shape[0] == data.shape[0]:
+            pass
+        elif np.count_nonzero(~rows) == data.shape[0]:
+            expanded = np.ma.zeros((rows.shape[0], data.shape[1]), dtype=dataset.dtype)
+            expanded[~rows, :] = data
+            expanded[rows, :] = np.ma.masked
+            data = expanded
+        else:
+            return self._analysis_set_unmasked(dataset)
+
+        if cols.shape[0] == data.shape[1]:
+            pass
+        elif np.count_nonzero(~cols) == data.shape[1]:
+            expanded = np.ma.zeros((data.shape[0], cols.shape[0]), dtype=dataset.dtype)
+            expanded[:, ~cols] = data
+            expanded[:, cols] = np.ma.masked
+            data = expanded
+        else:
+            return self._analysis_set_unmasked(dataset)
+
+        data[source_mask] = np.ma.masked
+        dataset.data = data
+        dataset.dims = list(source.dims)
+        dataset._coordset = self._analysis_copy_coordset(source)
+        dataset._mask = np.asarray(data.mask)
+        return dataset
+
+    def _analysis_reconstruction_geometry_source(
+        self,
+        role_id,
+        *,
+        x_source,
+        direct_x_kind,
+    ):
+        if role_id not in {"reconstruction", "fitted_data", "residuals"}:
+            return None
+        if direct_x_kind != "none":
+            return None
+        if getattr(self, "_X_original_ndim", 2) == 1:
+            return SimpleNamespace(
+                shape=tuple(self._X_shape),
+                dims=tuple(self._X.dims),
+                coordset=copy.copy(self._X_coordset),
+                mask=copy.copy(self._X_mask),
+            )
+        return AnalysisSourceMetadata(self.X)
+
+    def _analysis_prediction_dims_and_coordset(self, dataset, x_predict, y_train):
+        if dataset.ndim == 1:
+            obs_dim = dataset.dims[0]
+            obs_coord = None
+            if x_predict is not None and x_predict.coordset is not None:
+                source_dim = x_predict.dims[0]
+                obs_dim = source_dim
+                obs_coord = x_predict.coordset[source_dim].copy()
+            dataset.dims = [obs_dim]
+            dataset.set_coordset({obs_dim: obs_coord})
+            return dataset
+
+        default_obs_dim, default_target_dim = dataset.dims
+        obs_dim = default_obs_dim
+        target_dim = default_target_dim
+        obs_coord = None
+        target_coord = None
+
+        if x_predict is not None and len(x_predict.dims) >= 1:
+            source_obs_dim = x_predict.dims[0]
+            if x_predict.coordset is not None:
+                obs_coord = x_predict.coordset[source_obs_dim].copy()
+            obs_dim = source_obs_dim
+
+        if y_train is not None and len(y_train.dims) >= 1:
+            source_target_dim = y_train.dims[-1]
+            if y_train.coordset is not None:
+                target_coord = y_train.coordset[source_target_dim].copy()
+            target_dim = source_target_dim
+
+        if obs_dim == target_dim:
+            obs_dim = default_obs_dim
+            target_dim = default_target_dim
+
+        dataset.dims = [obs_dim, target_dim]
+        dataset.set_coordset({obs_dim: obs_coord, target_dim: target_coord})
+        return dataset
+
+    def _analysis_prediction_mask(self, dataset, x_predict, y_train):
+        if dataset.ndim == 1:
+            obs_rows = (
+                self._analysis_full_rows(x_predict.mask)
+                if x_predict is not None
+                else None
+            )
+            return self._analysis_apply_full_axis_mask(dataset, obs_rows, axis=0)
+
+        mask = np.zeros(dataset.shape, dtype=bool)
+        contributed = False
+
+        obs_rows = (
+            self._analysis_full_rows(x_predict.mask) if x_predict is not None else None
+        )
+        if (
+            obs_rows is not None
+            and obs_rows.shape[0] == dataset.shape[0]
+            and np.any(obs_rows)
+        ):
+            mask[obs_rows, :] = True
+            contributed = True
+
+        target_cols = (
+            self._analysis_full_columns(y_train.mask) if y_train is not None else None
+        )
+        if (
+            target_cols is not None
+            and target_cols.shape[0] == dataset.shape[-1]
+            and np.any(target_cols)
+        ):
+            mask[:, target_cols] = True
+            contributed = True
+
+        dataset._mask = mask if contributed else NOMASK
+        return dataset
+
+    def _apply_analysis_output_geometry(
+        self,
+        dataset,
+        *,
+        role_id,
+        meta_from,
+        direct_x,
+        direct_y,
+        direct_x_kind,
+        direct_y_kind,
+    ):
+        role_id = self._normalize_analysis_role(role_id)
+        x_source = self._analysis_resolve_source_metadata("_X", direct_x_kind, direct_x)
+        y_source = self._analysis_resolve_source_metadata("_Y", direct_y_kind, direct_y)
+
+        if role_id in {
+            "diagnostic",
+            "singular_values",
+            "explained_variance",
+            "explained_variance_ratio",
+            "cumulative_explained_variance",
+        }:
+            return self._analysis_restore_svd_diagnostic_axis(dataset)
+
+        if role_id == "prediction":
+            dataset = self._analysis_prediction_dims_and_coordset(
+                dataset, x_source, y_source
+            )
+            return self._analysis_prediction_mask(dataset, x_source, y_source)
+
+        if (
+            role_id in {"reconstruction", "fitted_data", "residuals"}
+            and direct_x_kind == "arraylike"
+        ):
+            dataset._coordset = None
+            return self._analysis_set_unmasked(dataset)
+
+        geometry_source = self._analysis_reconstruction_geometry_source(
+            role_id,
+            x_source=x_source,
+            direct_x_kind=direct_x_kind,
+        )
+        if geometry_source is not None:
+            return self._analysis_restore_full_geometry(dataset, geometry_source)
+
+        if role_id in {"scores", "concentration_profiles"}:
+            return self._analysis_restore_axis_from_source(dataset, x_source, axis=0)
+
+        if role_id == "y_scores":
+            return self._analysis_restore_axis_from_source(dataset, y_source, axis=0)
+
+        if role_id in {
+            "components",
+            "loadings",
+            "weights",
+            "rotations",
+            "spectral_profiles",
+        }:
+            authority = x_source
+            if role_id in {"loadings", "weights", "rotations"} and meta_from == "_Y":
+                authority = y_source
+            return self._analysis_restore_axis_from_source(dataset, authority, axis=-1)
+
+        return self._analysis_set_unmasked(dataset)
 
     def _apply_analysis_output_metadata(
         self,

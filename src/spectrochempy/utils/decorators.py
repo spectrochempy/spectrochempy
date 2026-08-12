@@ -787,41 +787,39 @@ class _set_output:
                         },
                     )
 
-            # eventually restore masks
-            X_transf = obj._restore_masked_data(X_transf, axis=axis)
+            if role_id is None or not hasattr(obj, "_apply_analysis_output_geometry"):
+                # Preserve the legacy generic restoration path for non-analysis outputs.
+                X_transf = obj._restore_masked_data(X_transf, axis=axis)
+
             # Only squeeze if the input was originally 1D (expanded to 2D)
             # This preserves intentionally 2D datasets with shape (1, N)
             if getattr(obj, "_X_original_ndim", 2) == 1:
                 X_transf = X_transf.squeeze()
                 if preserve:
                     X_transf._history = X_transf._history[:-1]
-                if role_id is not None and hasattr(
-                    obj, "_apply_analysis_output_metadata"
-                ):
-                    X_transf = obj._apply_analysis_output_metadata(
-                        X_transf,
-                        role_id=role_id,
-                        meta_from=meta_from,
-                        direct_x=None if direct_X is sentinel else direct_X,
-                        direct_y=None if direct_Y is sentinel else direct_Y,
-                        direct_x_kind=direct_X_kind,
-                        direct_y_kind=direct_Y_kind,
-                    )
-                out.append(X_transf)
-            else:
-                if role_id is not None and hasattr(
-                    obj, "_apply_analysis_output_metadata"
-                ):
-                    X_transf = obj._apply_analysis_output_metadata(
-                        X_transf,
-                        role_id=role_id,
-                        meta_from=meta_from,
-                        direct_x=None if direct_X is sentinel else direct_X,
-                        direct_y=None if direct_Y is sentinel else direct_Y,
-                        direct_x_kind=direct_X_kind,
-                        direct_y_kind=direct_Y_kind,
-                    )
-                out.append(X_transf)
+
+            if role_id is not None and hasattr(obj, "_apply_analysis_output_geometry"):
+                X_transf = obj._apply_analysis_output_geometry(
+                    X_transf,
+                    role_id=role_id,
+                    meta_from=meta_from,
+                    direct_x=None if direct_X is sentinel else direct_X,
+                    direct_y=None if direct_Y is sentinel else direct_Y,
+                    direct_x_kind=direct_X_kind,
+                    direct_y_kind=direct_Y_kind,
+                )
+
+            if role_id is not None and hasattr(obj, "_apply_analysis_output_metadata"):
+                X_transf = obj._apply_analysis_output_metadata(
+                    X_transf,
+                    role_id=role_id,
+                    meta_from=meta_from,
+                    direct_x=None if direct_X is sentinel else direct_X,
+                    direct_y=None if direct_Y is sentinel else direct_Y,
+                    direct_x_kind=direct_X_kind,
+                    direct_y_kind=direct_Y_kind,
+                )
+            out.append(X_transf)
 
         if len(out) == 1:
             return out[0]
