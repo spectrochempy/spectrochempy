@@ -16,7 +16,6 @@ __configurables__ = ["MCRALS"]
 
 import base64
 import logging
-import warnings
 from dataclasses import dataclass
 from dataclasses import field
 from types import SimpleNamespace
@@ -35,6 +34,7 @@ from spectrochempy.analysis.decomposition.mcrals_constraints import Constraint
 from spectrochempy.application.application import info_
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.decorators import signature_has_configurable_traits
+from spectrochempy.utils.decorators import warn_deprecated
 
 # --------------------------------------------------------------------------------------
 # Names of legacy traitlet-based constraint parameters.
@@ -1384,29 +1384,40 @@ and `St`.
                 raise ValueError(
                     "Cannot specify both deprecated `tol` and " "`tol_residual_change`."
                 )
-            warnings.warn(
-                "`tol` is deprecated; use `tol_residual_change` with a "
-                "relative value instead (for example, tol=0.1 becomes "
-                "tol_residual_change=1e-3).",
-                FutureWarning,
+            warn_deprecated(
+                "tol",
+                subject="`tol`",
+                replace="tol_residual_change",
+                action="is deprecated",
+                category=FutureWarning,
+                extra_msg=(
+                    "Use a relative value instead (for example, tol=0.1 "
+                    "becomes tol_residual_change=1e-3)."
+                ),
                 stacklevel=2,
             )
             kwargs["tol_residual_change"] = kwargs["tol"] / 100.0
 
         # Detect deprecated solver kwarg names and warn.
         if "solverConc" in kwargs:
-            warnings.warn(
-                "`solverConc` is deprecated; use `solver_C` instead.",
-                FutureWarning,
+            warn_deprecated(
+                "solverConc",
+                subject="`solverConc`",
+                replace="solver_C",
+                action="is deprecated",
+                category=FutureWarning,
                 stacklevel=2,
             )
             if "solver_C" in kwargs:
                 raise ValueError("Cannot specify both `solverConc` and `solver_C`.")
             kwargs["solver_C"] = kwargs.pop("solverConc")
         if "solverSpec" in kwargs:
-            warnings.warn(
-                "`solverSpec` is deprecated; use `solver_St` instead.",
-                FutureWarning,
+            warn_deprecated(
+                "solverSpec",
+                subject="`solverSpec`",
+                replace="solver_St",
+                action="is deprecated",
+                category=FutureWarning,
                 stacklevel=2,
             )
             if "solver_St" in kwargs:
@@ -1416,10 +1427,12 @@ and `St`.
         # Detect legacy constraint traitlet kwargs and warn.
         _legacy_in_kwargs = _LEGACY_CONSTRAINT_TRAITS & set(kwargs)
         if _legacy_in_kwargs:
-            warnings.warn(
-                "Legacy MCR-ALS constraint parameters are deprecated; "
-                "use the `constraints` API instead.",
-                FutureWarning,
+            warn_deprecated(
+                "legacy_constraints",
+                subject="Legacy MCR-ALS constraint parameters",
+                replace="constraints",
+                action="are deprecated",
+                category=FutureWarning,
                 stacklevel=2,
             )
 
@@ -1478,10 +1491,13 @@ and `St`.
         # parameters are assigned on an already-initialized instance.
         init_done = getattr(self, "_init_done", False)
         if name == "tol" and init_done:
-            warnings.warn(
-                "`tol` is deprecated; use `tol_residual_change` with a "
-                "relative value instead.",
-                FutureWarning,
+            warn_deprecated(
+                "tol",
+                subject="`tol`",
+                replace="tol_residual_change",
+                action="is deprecated",
+                category=FutureWarning,
+                extra_msg="Use a relative value instead.",
                 stacklevel=2,
             )
             super().__setattr__(name, value)
@@ -1494,9 +1510,12 @@ and `St`.
             return
         if name in ("solverConc", "solverSpec") and init_done:
             replacement = "solver_C" if name == "solverConc" else "solver_St"
-            warnings.warn(
-                f"`{name}` is deprecated; use `{replacement}` instead.",
-                FutureWarning,
+            warn_deprecated(
+                name,
+                subject=f"`{name}`",
+                replace=replacement,
+                action="is deprecated",
+                category=FutureWarning,
                 stacklevel=2,
             )
         elif name in _LEGACY_CONSTRAINT_TRAITS and init_done:
@@ -1513,10 +1532,12 @@ and `St`.
                     "cannot be used together."
                 )
             object.__getattribute__(self, "_explicit_legacy_traits").add(name)
-            warnings.warn(
-                f"Legacy MCR-ALS constraint parameter `{name}` is deprecated; "
-                "use the `constraints` API instead.",
-                FutureWarning,
+            warn_deprecated(
+                name,
+                subject=f"Legacy MCR-ALS constraint parameter `{name}`",
+                replace="constraints",
+                action="is deprecated",
+                category=FutureWarning,
                 stacklevel=2,
             )
         super().__setattr__(name, value)

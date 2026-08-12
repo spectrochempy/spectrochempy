@@ -5,18 +5,18 @@
 # ======================================================================================
 """Compatibility wrapper for the historical ``processing.alignement`` namespace."""
 
-import warnings
-
 from spectrochempy.processing.alignment.align import align
 from spectrochempy.processing.alignment.align import can_merge_or_align
+from spectrochempy.utils.decorators import warn_deprecated
 
 __all__ = ["align", "can_merge_or_align"]
 __dataset_methods__ = ["align"]
 
-warnings.warn(
-    "Importing from `spectrochempy.processing.alignement.align` is deprecated "
-    "and will be removed in 0.13.0. Use "
-    "`spectrochempy.processing.alignment.align` instead.",
-    DeprecationWarning,
+warn_deprecated(
+    "spectrochempy.processing.alignement.align",
+    kind="import path",
+    replace="spectrochempy.processing.alignment.align",
+    policy=True,
+    action="is deprecated",
     stacklevel=2,
 )

@@ -83,7 +83,11 @@ def concatenate(*datasets, **kwargs):
     """
     # check use
     if "force_stack" in kwargs:
-        deprecated("force_stack", replace="method stack()", removed="0.13.0")
+        deprecated(
+            "force_stack",
+            replace="method stack()",
+            policy=True,
+        )
         return stack(datasets)
 
     operation = kwargs.pop("_metadata_operation", "concatenate")

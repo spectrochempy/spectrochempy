@@ -410,9 +410,15 @@ class TestDeprecatedRootAliases:
             warnings.simplefilter("always")
             obj = scp.IRIS
             assert obj is not None, "IRIS should still be accessible"
+            messages = [str(msg.message) for msg in w]
             assert any(
-                "deprecated" in str(msg.message).lower() for msg in w
-            ), f"No deprecation warning: {[str(m.message) for m in w]}"
+                "deprecated" in message.lower() for message in messages
+            ), f"No deprecation warning: {messages}"
+            assert any("0.10.0" in message for message in messages)
+            assert all("0.13.0" not in message for message in messages)
+            assert any(
+                "deprecation policy is satisfied" in message for message in messages
+            )
 
     @pytest.mark.skipif(not _IRIS_INSTALLED, reason="iris plugin not installed")
     def test_iris_kernel_root_alias_deprecated(self):
@@ -425,7 +431,9 @@ class TestDeprecatedRootAliases:
             warnings.simplefilter("always")
             obj = scp.IrisKernel
             assert obj is not None
-            assert any("deprecated" in str(msg.message).lower() for msg in w)
+            messages = [str(msg.message) for msg in w]
+            assert any("deprecated" in message.lower() for message in messages)
+            assert all("0.13.0" not in message for message in messages)
 
     @pytest.mark.skipif(not _CANTERA_INSTALLED, reason="cantera plugin not installed")
     def test_pfr_root_alias_deprecated(self):
@@ -438,7 +446,9 @@ class TestDeprecatedRootAliases:
             warnings.simplefilter("always")
             obj = scp.PFR
             assert obj is not None
-            assert any("deprecated" in str(msg.message).lower() for msg in w)
+            messages = [str(msg.message) for msg in w]
+            assert any("deprecated" in message.lower() for message in messages)
+            assert all("0.13.0" not in message for message in messages)
 
     @pytest.mark.skipif(not _IRIS_INSTALLED, reason="iris plugin not installed")
     def test_namespaced_access_no_warning(self):
@@ -471,9 +481,11 @@ class TestDeprecatedRootAliases:
             warnings.simplefilter("always")
             obj = scp.CP
             assert obj is not None, "CP should still be accessible"
+            messages = [str(msg.message) for msg in w]
             assert any(
-                "scp.tensor.CP" in str(msg.message) for msg in w
-            ), f"No CP deprecation warning: {[str(m.message) for m in w]}"
+                "scp.tensor.CP" in message for message in messages
+            ), f"No CP deprecation warning: {messages}"
+            assert all("0.13.0" not in message for message in messages)
 
 
 class TestSubmoduleImport:

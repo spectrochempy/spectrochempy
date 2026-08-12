@@ -139,14 +139,17 @@ def plot_parity(
     return ax
 
 
-@deprecated(replace="plot_parity", removed="0.13.0")
+@deprecated(
+    replace="plot_parity",
+    policy=True,
+)
 def parityplot(*args, **kwargs):
     """
     Plot predicted vs measured values (parity plot).
 
-    .. deprecated::
-        Use :func:`plot_parity` instead.  This alias will be removed in
-        version 0.13.0.
+    .. deprecated:: 0.12.0
+        Use :func:`plot_parity` instead. Removal will not occur before the
+        SpectroChemPy deprecation policy is satisfied.
 
     Parameters
     ----------

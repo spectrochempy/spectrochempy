@@ -10,6 +10,7 @@ import numpy as np
 import pytest
 
 from spectrochempy import NDDataset
+from spectrochempy.plotting.composite.parity import parityplot
 from spectrochempy.plotting.composite.parity import plot_parity
 
 
@@ -178,4 +179,14 @@ class TestParityPlot:
         assert (
             ax1.figure is not ax2.figure
         ), "without ax, each call must create a new figure (stateless contract)"
+        plt.close("all")
+
+    def test_deprecated_parityplot_alias_warns_without_promising_013(self):
+        with pytest.warns(DeprecationWarning, match="plot_parity") as record:
+            ax = parityplot(self.Y, self.Y_hat, show=False)
+
+        assert isinstance(ax, plt.Axes)
+        messages = [str(item.message) for item in record]
+        assert all("0.13.0" not in message for message in messages)
+        assert any("deprecation policy is satisfied" in message for message in messages)
         plt.close("all")

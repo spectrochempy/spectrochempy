@@ -15,6 +15,14 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 Bug Fixes
 ~~~~~~~~~
 
+- Public deprecation warnings no longer promise API removals in ``0.13.0`` for
+  deprecated plotting aliases, the historical ``processing.alignement`` import
+  path, deprecated plugin root aliases, ``concatenate(..., force_stack=True)``,
+  or deprecated writer ``protocol=`` / ``description=`` kwargs. These paths
+  remain available with warnings, and their eventual removal is now governed by
+  the accepted SpectroChemPy deprecation lifecycle policy instead of an expired
+  fixed-version target.
+
 - Analysis and fitting outputs now follow deterministic derived-metadata rules
   instead of inheriting path-dependent combinations of source identity and
   wrapper defaults. Single-source outputs preserve the captured scientific

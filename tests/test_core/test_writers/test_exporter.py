@@ -79,12 +79,15 @@ def test_generic_write_protocol_kwarg_warns_but_keeps_default_scp_save(
     if target.exists():
         target.unlink()
 
-    with pytest.warns(DeprecationWarning, match="`protocol` is deprecated"):
+    with pytest.warns(DeprecationWarning, match="`protocol` is deprecated") as record:
         filename = scp.write(nd, protocol="csv")
 
     assert filename.stem == "synthetic"
     assert filename.suffix == ".scp"
     assert filename.exists()
+    messages = [str(item.message) for item in record]
+    assert all("0.13.0" not in message for message in messages)
+    assert any("deprecation policy is satisfied" in message for message in messages)
 
     nd2 = NDDataset.load(filename)
     testing.assert_dataset_equal(nd2, nd)
@@ -101,12 +104,17 @@ def test_generic_write_description_kwarg_warns_but_uses_dataset_description(
 
     target = tmp_path / "synthetic.scp"
 
-    with pytest.warns(DeprecationWarning, match="`description` is deprecated"):
+    with pytest.warns(
+        DeprecationWarning, match="`description` is deprecated"
+    ) as record:
         filename = scp.write(nd, target, description="custom", confirm=False)
 
     assert filename == target
     assert filename.exists()
     assert nd.description == original_description
+    messages = [str(item.message) for item in record]
+    assert all("0.13.0" not in message for message in messages)
+    assert any("deprecation policy is satisfied" in message for message in messages)
 
     reloaded = NDDataset.load(filename)
     assert reloaded.description == "source description"

@@ -40,6 +40,24 @@ class TestDeprecated:
             assert issubclass(w[0].category, DeprecationWarning)
             assert "`old_attr` attribute" in str(w[0].message)
 
+    def test_deprecated_policy_message_replaces_future_version_sentence(self):
+        @deprecated(replace="new_function", policy=True)
+        def old_function():
+            return 42
+
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            result = old_function()
+            assert len(w) == 1
+            message = str(w[0].message)
+            assert "future version" not in message
+            assert message.count("deprecation policy is satisfied") == 1
+            assert (
+                "It will not be removed before the SpectroChemPy deprecation "
+                "policy is satisfied."
+            ) in message
+            assert result == 42
+
 
 class TestSignatureHasConfigurableTraits:
     def test_signature_has_configurable_traits(self):

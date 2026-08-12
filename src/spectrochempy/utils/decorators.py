@@ -19,6 +19,78 @@ from warnings import warn
 import traitlets as tr
 
 
+def _deprecated_removal_sentence(removed=None, *, policy=False):
+    """Return the removal sentence for a deprecation warning."""
+    if policy:
+        return (
+            "It will not be removed before the SpectroChemPy deprecation policy "
+            "is satisfied."
+        )
+    sremoved = f"version {removed}" if removed else "future version"
+    return f"It will be removed in {sremoved}."
+
+
+def format_deprecated_message(
+    name,
+    *,
+    subject=None,
+    kind="method",
+    replace="",
+    removed=None,
+    extra_msg="",
+    since=None,
+    policy=False,
+    action="is now deprecated",
+):
+    """Return a standardized deprecation message."""
+    if subject is None:
+        subject = f"The `{name}` {kind}" if kind else f"`{name}`"
+    if since:
+        msg = f"{subject} {action} since SpectroChemPy {since}. "
+    else:
+        msg = f"{subject} {action}. "
+
+    if replace:
+        msg += f"Use `{replace}` instead. "
+
+    msg += _deprecated_removal_sentence(removed, policy=policy)
+    if extra_msg:
+        msg += f" {extra_msg.lstrip()}"
+    return msg
+
+
+def warn_deprecated(
+    name,
+    *,
+    subject=None,
+    kind="method",
+    replace="",
+    removed=None,
+    extra_msg="",
+    since=None,
+    policy=False,
+    action="is now deprecated",
+    category=DeprecationWarning,
+    stacklevel=2,
+):
+    """Emit a standardized ``DeprecationWarning``."""
+    warn(
+        format_deprecated_message(
+            name,
+            subject=subject,
+            kind=kind,
+            replace=replace,
+            removed=removed,
+            extra_msg=extra_msg,
+            since=since,
+            policy=policy,
+            action=action,
+        ),
+        category=category,
+        stacklevel=stacklevel,
+    )
+
+
 def preserve_signature(f):
     """
     Preserve the signature of the function being wrapped.
@@ -60,7 +132,15 @@ def preserve_signature(f):
     return f
 
 
-def deprecated(name=None, *, kind="method", replace="", removed=None, extra_msg=""):
+def deprecated(
+    name=None,
+    *,
+    kind="method",
+    replace="",
+    removed=None,
+    extra_msg="",
+    policy=False,
+):
     """
     Deprecate a function or attribute.
 
@@ -77,23 +157,22 @@ def deprecated(name=None, *, kind="method", replace="", removed=None, extra_msg=
         Additional message.
     removed : str, optional
         Version string when this method will be removed
+    policy : bool, optional
+        If True, express removal timing through the accepted SpectroChemPy
+        deprecation policy instead of a version string.
     """
-
-    def output_warning_message(name, kind, replace, removed, extra_msg):
-        sreplace = f"Use `{replace}` instead. " if replace is not None else ""
-        msg = f" The `{name}` {kind} is now deprecated. {sreplace}"
-        sremoved = f"version {removed}" if removed else "future version"
-        msg += f"`{name}` {kind} will be removed in {sremoved}. "
-        msg += extra_msg
-        warn(
-            msg,
-            category=DeprecationWarning,
-            stacklevel=2,
-        )
 
     if name is not None:
         kind = "attribute"
-        output_warning_message(name, kind, replace, removed, extra_msg)
+        warn_deprecated(
+            name,
+            kind=kind,
+            replace=replace,
+            removed=removed,
+            extra_msg=extra_msg,
+            policy=policy,
+            stacklevel=2,
+        )
         return None
 
     def deprecation_decorator(func):
@@ -103,7 +182,15 @@ def deprecated(name=None, *, kind="method", replace="", removed=None, extra_msg=
             name = func.__qualname__
             if name.endswith("__init__"):
                 name = name.split(".", maxsplit=1)[0]
-            output_warning_message(name, kind, replace, removed, extra_msg)
+            warn_deprecated(
+                name,
+                kind=kind,
+                replace=replace,
+                removed=removed,
+                extra_msg=extra_msg,
+                policy=policy,
+                stacklevel=2,
+            )
             return func(*args, **kwargs)
 
         return wrapper

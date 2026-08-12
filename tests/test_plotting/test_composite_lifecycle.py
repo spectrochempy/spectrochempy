@@ -406,6 +406,15 @@ class TestPlotMeritLifecycle:
         ax = plot_merit(trained_pca, show=False)
         assert isinstance(ax, plt.Axes)
 
+    def test_plotmerit_alias_warns_without_promising_013(self, trained_pca):
+        with pytest.warns(DeprecationWarning, match="plot_merit") as record:
+            ax = trained_pca.plotmerit(show=False)
+
+        assert isinstance(ax, plt.Axes)
+        messages = [str(item.message) for item in record]
+        assert all("0.13.0" not in message for message in messages)
+        assert any("deprecation policy is satisfied" in message for message in messages)
+
 
 # ======================================================================================
 # Undefined lifecycle path tests
