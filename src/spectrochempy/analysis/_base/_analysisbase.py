@@ -435,34 +435,6 @@ class AnalysisConfigurable(BaseConfigurable):
         return dataset
 
     def _analysis_restore_svd_diagnostic_axis(self, dataset):
-        if type(self).__name__ != "SVD" or dataset.ndim != 1:
-            return self._analysis_set_unmasked(dataset)
-
-        target_size = min(getattr(self, "_X_shape", dataset.shape))
-        if target_size <= dataset.shape[0]:
-            return self._analysis_set_unmasked(dataset)
-
-        data = np.zeros(target_size, dtype=dataset.dtype)
-        data[: dataset.shape[0]] = np.asarray(dataset.data)
-        dataset.data = data
-
-        if dataset.dims:
-            from spectrochempy.core.dataset.coord import Coord
-
-            dim = dataset.dims[0]
-            title = "components"
-            if dataset.coordset is not None and dataset.coordset[dim] is not None:
-                title = dataset.coordset[dim].title or title
-            dataset.set_coordset(
-                {
-                    dim: Coord(
-                        None,
-                        labels=[f"#{i}" for i in range(target_size)],
-                        title=title,
-                    )
-                }
-            )
-
         return self._analysis_set_unmasked(dataset)
 
     def _analysis_copy_coordset(self, source):

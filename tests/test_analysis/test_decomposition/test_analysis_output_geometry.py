@@ -265,7 +265,10 @@ def test_pls_prediction_monotarget_uses_public_1d_observation_geometry():
     pls = PLSRegression(n_components=2).fit(X, Y)
     Xpredict = scp.NDDataset(
         rng.normal(size=(4, 5)),
-        coordset=[scp.Coord(np.arange(4.0) + 100.0, title="predict obs"), scp.Coord(np.arange(5.0) + 50.0)],
+        coordset=[
+            scp.Coord(np.arange(4.0) + 100.0, title="predict obs"),
+            scp.Coord(np.arange(5.0) + 50.0),
+        ],
     )
     Xpredict[2, :] = scp.MASKED
 
@@ -292,7 +295,7 @@ def test_svd_diagnostics_stay_generated_and_unmasked(geometry_source_dataset):
         assert diagnostic.coordset["k"].title == "components"
 
 
-def test_svd_diagnostics_restore_public_k_axis_without_source_mask_transfer(
+def test_svd_diagnostics_keep_natural_length_without_source_mask_transfer(
     geometry_source_dataset,
 ):
     masked = geometry_source_dataset.copy()
@@ -307,7 +310,7 @@ def test_svd_diagnostics_restore_public_k_axis_without_source_mask_transfer(
         svd.explained_variance_ratio,
         svd.cumulative_explained_variance,
     ):
-        assert diagnostic.shape == (5,)
+        assert diagnostic.shape == svd.s.shape
         assert diagnostic.mask is np.False_
         assert diagnostic.dims == ["k"]
         assert diagnostic.coordset is not None

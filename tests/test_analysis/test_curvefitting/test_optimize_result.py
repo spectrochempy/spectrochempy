@@ -706,6 +706,141 @@ class TestOptimizeResult:
             2,
         )
 
+    def test_public_diagnostics_match_internal_solver_domain_without_mask(
+        self, synthetic_two_peak_dataset, optimize_script
+    ):
+        opt = scp.Optimize()
+        opt.script = optimize_script
+        opt.autobase = True
+        opt.max_iter = 10
+        opt.fit(synthetic_two_peak_dataset)
+
+        fitted_public = opt.predict()
+        residuals_internal, diagnostics_internal = _compute_fit_diagnostics(
+            opt._X,
+            fitted_public.copy(),
+            getattr(opt, "_fit_meta", {}),
+            getattr(opt, "_model_spec", None),
+        )
+        residuals_public, diagnostics_public = _compute_fit_diagnostics(
+            opt.X,
+            fitted_public,
+            getattr(opt, "_fit_meta", {}),
+            getattr(opt, "_model_spec", None),
+        )
+
+        for key in (
+            "n_observations",
+            "n_varying_parameters",
+            "degrees_of_freedom",
+            "sse",
+            "rss",
+            "rmse",
+            "r_squared",
+            "reduced_chi_square",
+            "adjusted_r_squared",
+            "aic",
+            "bic",
+        ):
+            assert diagnostics_public[key] == pytest.approx(
+                diagnostics_internal[key],
+                nan_ok=True,
+            )
+
+        covariance_internal = _compute_covariance_matrix(
+            opt._X,
+            fitted_public.copy(),
+            opt.jacobian,
+            diagnostics_internal,
+        )
+        covariance_public = _compute_covariance_matrix(
+            opt.X,
+            fitted_public,
+            opt.jacobian,
+            diagnostics_public,
+        )
+
+        np.testing.assert_allclose(
+            np.ma.asarray(residuals_public.masked_data),
+            np.ma.asarray(residuals_internal.masked_data),
+        )
+        np.testing.assert_allclose(covariance_public, covariance_internal)
+
+    def test_public_diagnostics_match_internal_solver_domain_with_mask(
+        self, synthetic_two_peak_dataset, optimize_script
+    ):
+        ds = synthetic_two_peak_dataset.copy()
+        ds[40] = scp.MASKED
+
+        opt = scp.Optimize()
+        opt.script = optimize_script
+        opt.autobase = True
+        opt.max_iter = 10
+        opt.fit(ds)
+
+        fitted_public = opt.predict()
+        fitted_internal = scp.NDDataset(
+            np.ma.asarray(fitted_public.masked_data).compressed().reshape(opt._X.shape)
+        )
+        residuals_internal, diagnostics_internal = _compute_fit_diagnostics(
+            opt._X,
+            fitted_internal,
+            getattr(opt, "_fit_meta", {}),
+            getattr(opt, "_model_spec", None),
+        )
+        residuals_public, diagnostics_public = _compute_fit_diagnostics(
+            opt.X,
+            fitted_public,
+            getattr(opt, "_fit_meta", {}),
+            getattr(opt, "_model_spec", None),
+        )
+
+        for key in (
+            "n_observations",
+            "n_varying_parameters",
+            "degrees_of_freedom",
+            "sse",
+            "rss",
+            "rmse",
+            "r_squared",
+            "reduced_chi_square",
+            "adjusted_r_squared",
+            "aic",
+            "bic",
+        ):
+            assert diagnostics_public[key] == pytest.approx(
+                diagnostics_internal[key],
+                nan_ok=True,
+            )
+
+        assert diagnostics_public["n_observations"] == int(
+            np.ma.asarray(opt._X.masked_data).count()
+        )
+        assert (
+            np.ma.asarray(residuals_public.masked_data).count()
+            == diagnostics_public["n_observations"]
+        )
+        assert np.array_equal(np.asarray(residuals_public.mask), np.asarray(opt.X.mask))
+
+        covariance_internal = _compute_covariance_matrix(
+            opt._X,
+            fitted_internal,
+            opt.jacobian,
+            diagnostics_internal,
+        )
+        covariance_public = _compute_covariance_matrix(
+            opt.X,
+            fitted_public,
+            opt.jacobian,
+            diagnostics_public,
+        )
+
+        np.testing.assert_allclose(covariance_public, covariance_internal)
+        np.testing.assert_allclose(
+            np.ma.asarray(residuals_public.masked_data).compressed(),
+            np.ma.asarray(residuals_internal.masked_data).compressed(),
+        )
+
     # ----------------------------------------------------------------------------------
     # Representation
     # ----------------------------------------------------------------------------------
