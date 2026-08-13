@@ -7,7 +7,7 @@
 # ruff: noqa
 """
 SIMPLISMA example
------------------
+=================
 In this example, we perform the PCA dimensionality reduction of a spectra
 dataset
 

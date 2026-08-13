@@ -54,7 +54,7 @@ peaks.x.values
 
 # %%
 # Visualize detected peaks
-# ^^^^^^^^^^^^^^^^^^^^^^^^^
+# ~~~~~~~~~~~~~~~~~~~~~~~~~
 ax = last.plot_pen()
 markers = peaks + 0.015
 _ = markers.plot_scatter(

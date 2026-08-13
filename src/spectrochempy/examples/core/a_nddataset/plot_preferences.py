@@ -25,7 +25,7 @@ import spectrochempy as scp
 
 # %%
 # Coordinates
-# +++++++++++
+# ~~~~~~~~~~~
 # The `Coord` object allows creating an array of coordinates directly with
 # ``Coord.linspace``, attaching metadata (units, labels, title) in a single
 # step — no separate numpy array needed.
@@ -48,7 +48,7 @@ print(a)
 
 # %%
 # Data and nd-Dataset
-# +++++++++++++++++++
+# ~~~~~~~~~~~~~~~~~~~
 # ``scp.fromfunction`` builds an NDDataset directly from a Python function.
 # The function receives the coordinate arrays and returns the intensity values.
 def synth_func(temperature, time, wavenumber):

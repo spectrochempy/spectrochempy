@@ -46,7 +46,7 @@ _ = efa1.fit(dataset)
 
 # %%
 # Forward and backward evolution
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Forward evolution of the first 5 components
 f = efa1.f_ev[:, :5]
 _ = f.T.plot(yscale="log", legend=f.k.labels)

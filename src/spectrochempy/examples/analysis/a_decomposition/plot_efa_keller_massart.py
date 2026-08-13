@@ -25,7 +25,7 @@ import spectrochempy as scp
 # Generate a test dataset
 # -----------------------
 # 1) simulated chromatogram
-# *************************
+# ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 t = scp.Coord.arange(15, units="minutes", title="time")  # time coordinates
 c = scp.Coord(range(2), title="components")  # component coordinates
@@ -38,7 +38,7 @@ _ = dsc.plot(title="concentration")
 
 # %%
 # 2) absorption spectra
-# **********************
+# ~~~~~~~~~~~~~~~~~~~~~~
 
 spec = np.array([[2.0, 3.0, 4.0, 2.0], [3.0, 4.0, 2.0, 1.0]])
 w = scp.Coord.arange(1, 5, 1, units="nm", title="wavelength")
@@ -48,7 +48,7 @@ _ = dss.plot(title="spectra")
 
 # %%
 # 3) simulated data matrix
-# ************************
+# ~~~~~~~~~~~~~~~~~~~~~~~~
 
 dataset = scp.dot(dsc.T, dss)
 dataset += scp.normal(scale=0.1, size=dataset.shape)
@@ -58,7 +58,7 @@ _ = dataset.plot(title="calculated dataset")
 
 # %%
 # 4) evolving factor analysis (EFA)
-# *********************************
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 efa = scp.EFA()
 _ = efa.fit(dataset)
 
