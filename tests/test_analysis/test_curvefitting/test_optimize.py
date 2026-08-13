@@ -9,8 +9,11 @@ import pytest
 from numpy.testing import assert_allclose
 
 import spectrochempy as scp
+from spectrochempy.analysis.curvefitting._parameters import FitParameters
 from spectrochempy.analysis.curvefitting.optimize import ConstraintError
 from spectrochempy.analysis.curvefitting.optimize import ScriptError
+from spectrochempy.analysis.curvefitting.optimize import _modelspec_parameter_names
+from spectrochempy.analysis.curvefitting.optimize import _validate_script_content
 
 
 # -----------------------------------------------------------------------------------
@@ -179,6 +182,25 @@ class TestValidateScript:
         # validate_script must not mutate self.fp
         assert opt.fp is fp_before
 
+    def test_validate_script_repeated_calls_are_stable(self):
+        opt = scp.Optimize()
+        opt.script = VALID_SCRIPT
+        fp_before = opt.fp
+        first = opt.validate_script()
+        second = opt.validate_script()
+        assert first == second == []
+        # repeated validation must neither mutate fp nor rebuild the spec
+        assert opt.fp is fp_before
+
+    def test_validate_script_invalid_repeated_calls_are_stable(self):
+        opt = scp.Optimize()
+        script = "MODEL: X\nshape: unknownmodel\n"
+        first = opt.validate_script(script)
+        second = opt.validate_script(script)
+        assert len(first) == len(second) == 1
+        assert first[0].message == second[0].message
+        assert "unknownmodel" in first[0].message
+
 
 class TestValidateConstraints:
     """Tests for Optimize.validate_constraints()."""
@@ -292,6 +314,47 @@ class TestValidateConstraints:
                 "limit": 1,
                 "parameters": ["missing_parameter"],
             }
+
+    def test_constraints_trait_validates_against_canonical_spec(self):
+        # Parameter-name validation must rely on the canonical _FitModelSpec
+        # and keep working even when the legacy Optimize.fp view is absent.
+        opt = scp.Optimize()
+        opt.script = VALID_SCRIPT
+        opt.fp = None
+        with pytest.raises(ValueError, match="Unknown parameter name"):
+            opt.constraints = {
+                "type": "max_connections",
+                "limit": 1,
+                "parameters": ["missing_parameter"],
+            }
+
+    def test_constraint_parameter_names_match_fitparameters_keys(self):
+        # The canonical spec and the legacy FitParameters view expose exactly
+        # the same flat parameter names for constraint-name validation.
+        opt = scp.Optimize()
+        opt.script = VALID_SCRIPT
+        fp_ref, errors = _validate_script_content(VALID_SCRIPT)
+        assert errors == []
+        assert _modelspec_parameter_names(opt._model_spec) == set(fp_ref.keys())
+
+    def test_fp_matches_historical_parser_output(self):
+        # Optimize.fp keeps its public type and reproduces the historical
+        # _validate_script_content output for the same script.
+        opt = scp.Optimize()
+        opt.script = VALID_SCRIPT
+        fp_ref, errors = _validate_script_content(VALID_SCRIPT)
+        assert errors == []
+        fp = opt.fp
+        assert isinstance(fp, FitParameters)
+        assert fp.models == fp_ref.models
+        assert fp.model == fp_ref.model
+        assert list(fp.keys()) == list(fp_ref.keys())
+        for key in fp_ref.keys():
+            assert fp[key] == fp_ref[key]
+            assert fp.fixed[key] == fp_ref.fixed[key]
+            assert fp.reference[key] == fp_ref.reference[key]
+            assert fp.lob.get(key) == fp_ref.lob.get(key)
+            assert fp.upb.get(key) == fp_ref.upb.get(key)
 
     def test_fit_does_not_crash_when_constraints_are_present(
         self, synthetic_two_peak_dataset, optimize_script

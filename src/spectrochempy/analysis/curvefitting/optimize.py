@@ -1270,8 +1270,13 @@ class Optimize(DecompositionAnalysis):
         if constraints in (None, {}, []):
             return None
 
-        fit_parameters = self.fp
-        errors = _validate_constraints_content(constraints, fit_parameters)
+        # Validate parameter-name references against the canonical model spec
+        # rather than the legacy FitParameters view. The spec is always kept in
+        # sync with ``self.fp`` by ``_script_validate`` and exposes the same
+        # parameter names, so this removes the only FitParameters dependency of
+        # the structured-validation flow.
+        model_spec = getattr(self, "_model_spec", None)
+        errors = _validate_constraints_content(constraints, model_spec)
         if errors:
             raise ValueError(str(errors[0]))
 
