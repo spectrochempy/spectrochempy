@@ -6,7 +6,7 @@
 # ruff: noqa
 """
 PCA analysis example
---------------------
+====================
 In this example, we perform the PCA dimensionality reduction of a spectra
 dataset
 
@@ -46,7 +46,7 @@ scores
 
 # %%
 # Display the results graphically
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # First we can set some preferences for the plot
 prefs = scp.preferences

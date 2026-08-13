@@ -7,7 +7,7 @@
 # ruff: noqa
 """
 Built-in line-shape helpers
----------------------------
+===========================
 
 This example shows the direct top-level helpers for generating common 1D
 profiles without instantiating fitting models explicitly.

@@ -8,7 +8,7 @@
 """
 
 Fitting 1D dataset
-------------------
+==================
 In this example, we find the least  square solution of a simple linear
 equation.
 

@@ -30,7 +30,7 @@ _ = dataset.plot(method="image")
 
 # %%
 # Handle diverging colormaps
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~
 # A diverging colormap is triggered when negative values are present.
 # Enforce a sequential colormap explicitly:
 _ = dataset.plot_image(cmap="cividis")

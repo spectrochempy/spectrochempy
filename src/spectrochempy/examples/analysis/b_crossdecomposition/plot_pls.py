@@ -6,7 +6,7 @@
 # ruff: noqa
 """
 PLS regression example
-----------------------
+======================
 In this example, we perform a PLS regression to predict the moisture of corn samples
 from their NIR spectra.
 
