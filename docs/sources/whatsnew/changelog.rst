@@ -60,6 +60,12 @@ Bug Fixes
   from ``Ytrain`` without whole-source geometry copies, and diagnostic outputs
   remain generated and unmasked.
 
+- Sphinx Gallery example pages now use a consistent RST heading hierarchy.
+  Top-level page titles are emitted at the correct level in the generated
+  gallery, and nested section markers were normalized so the HTML navigation is
+  structured consistently. This change is documentation-only and does not alter
+  the scientific behavior of the examples.
+
 
 .. section
 
