@@ -11,3 +11,12 @@ What's New in Revision 0.12.4.dev
 
 These are the changes in SpectroChemPy-0.12.4.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
+
+Developer
+~~~~~~~~~
+
+- The ``Optimize`` structured-validation flow now validates constraint
+  parameter-name references against the canonical ``_FitModelSpec``
+  representation instead of the legacy ``FitParameters`` view (``Optimize.fp``).
+  ``FitParameters`` and ``Optimize.fp`` remain available and unchanged, and the
+  fitting DSL and scientific results are unaffected.

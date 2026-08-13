@@ -53,3 +53,9 @@ Deprecations
 Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
+
+- The ``Optimize`` structured-validation flow now validates constraint
+  parameter-name references against the canonical ``_FitModelSpec``
+  representation instead of the legacy ``FitParameters`` view (``Optimize.fp``).
+  ``FitParameters`` and ``Optimize.fp`` remain available and unchanged, and the
+  fitting DSL and scientific results are unaffected.
