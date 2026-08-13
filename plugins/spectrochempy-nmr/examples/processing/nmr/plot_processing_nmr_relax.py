@@ -49,7 +49,7 @@ dataset = scp.nmr.read(nmrdir / "relax" / "100" / "ser", use_list="vdlist")
 # Analysing the data
 # ---------------------
 # Print dataset summary
-dataset
+print(dataset)
 
 # %%
 # Plot the processed spectra
@@ -108,7 +108,7 @@ _ = fitter.fit(signal)
 
 # %%
 som = fitter.predict()
-som
+print(som)
 
 # %%
 # Plot the measured recovery points and the fitted curve separately so the

@@ -90,7 +90,7 @@ when available)
 
 .. code-block:: Python
 
-    dataset
+    print(dataset)
 
 
 
@@ -381,7 +381,7 @@ Let's use the left and right bases to perform the integration of the peaks.
         title="area",
     )
     _ = area.plot(marker="o", lw="1", ls=":", legend="best", colormap="jet")
-    area
+    print(area)
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 158-159

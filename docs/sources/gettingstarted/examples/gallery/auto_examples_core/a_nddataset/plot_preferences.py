@@ -70,11 +70,8 @@ print(mydataset)
 # %%
 # We want to plot a section of this 3D NDDataset:
 #
-# NDDataset can be sliced like conventional numpy-array...
-new = mydataset[..., 0]
-
-# %%
-# or maybe more conveniently in this case, using an axis labels:
+# NDDataset can be sliced like conventional numpy-array, or maybe more
+# conveniently in this case, using an axis label:
 new = mydataset["hot"]
 
 # %%

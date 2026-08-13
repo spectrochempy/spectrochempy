@@ -46,7 +46,7 @@ dataset = scp.nmr.read(nmrdir, glob="**/fid")
 
 # %%
 # 15 fids have been read and merged into a single dataset
-dataset
+print(dataset)
 
 # %%
 # The new dimension (y) have several coordinates corresponding to all metadata that change from fid to fid.
@@ -164,7 +164,7 @@ area = scp.NDDataset(
     title="area",
 )
 _ = area.plot(marker="o", lw="1", ls=":", legend="best", colormap="jet")
-area
+print(area)
 
 # %%
 # Fitting a model to these data

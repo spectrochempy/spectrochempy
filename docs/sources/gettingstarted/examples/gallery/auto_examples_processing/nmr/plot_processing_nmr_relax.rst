@@ -92,7 +92,7 @@ Print dataset summary
 
 .. code-block:: Python
 
-    dataset
+    print(dataset)
 
 
 
@@ -303,7 +303,7 @@ Perform the fit
 .. code-block:: Python
 
     som = fitter.predict()
-    som
+    print(som)
 
 
 

@@ -155,17 +155,18 @@ The function receives the coordinate arrays and returns the intensity values.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 71-74
+.. GENERATED FROM PYTHON SOURCE LINES 71-72
 
 We want to plot a section of this 3D NDDataset:
 
-NDDataset can be sliced like conventional numpy-array...
+NDDataset can be sliced like conventional numpy-array, or maybe more
+conveniently in this case, using an axis label:
 
-.. GENERATED FROM PYTHON SOURCE LINES 74-76
+.. GENERATED FROM PYTHON SOURCE LINES 73-74
 
 .. code-block:: Python
 
-    new = mydataset[..., 0]
+    new = mydataset["hot"]
 
 
 
