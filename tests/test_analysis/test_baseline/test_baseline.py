@@ -1,5 +1,8 @@
+import warnings
+
 import numpy as np
 import pytest
+from scipy.sparse import SparseEfficiencyWarning
 
 import spectrochempy as scp
 from spectrochempy.processing.baselineprocessing.baselineprocessing import Baseline
@@ -66,6 +69,28 @@ def test_baseline_asls_1d(synthetic_1d_baseline_dataset):
     assert baseline.shape == dataset.shape
     assert np.all(np.isfinite(baseline.data))
     assert np.all(np.isfinite(corrected.data))
+
+
+def test_baseline_asls_1d_emits_no_sparse_efficiency_warning(
+    synthetic_1d_baseline_dataset,
+):
+    dataset, _, _ = synthetic_1d_baseline_dataset
+
+    blc = Baseline(log_level="WARNING")
+    blc.model = "asls"
+    blc.mu = 0.5 * 10**9
+    blc.asymmetry = 0.001
+
+    with warnings.catch_warnings(record=True) as recorded:
+        warnings.simplefilter("always")
+        blc.fit(dataset)
+
+    sparse_warnings = [
+        warning
+        for warning in recorded
+        if issubclass(warning.category, SparseEfficiencyWarning)
+    ]
+    assert sparse_warnings == []
 
 
 def test_baseline_asls_2d(synthetic_2d_baseline_dataset):

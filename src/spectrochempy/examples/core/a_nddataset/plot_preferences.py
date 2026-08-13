@@ -101,12 +101,12 @@ _ = new.plot(method="image", colorbar=True)
 _ = scp.abs(new).plot(method="image", colorbar=True)
 
 # %% Contour plots are also available, with the same default colormap as for the image method:
-_ = new.plot(method="map")
-_ = scp.abs(new).plot(method="map")
+_ = new.plot(method="contour")
+_ = scp.abs(new).plot(method="contour")
 
 # %%
 # Note that the scp allows one to use this syntax too:
-_ = scp.plot_map(new)
+_ = scp.plot_contour(new)
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

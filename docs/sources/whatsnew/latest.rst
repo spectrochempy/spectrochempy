@@ -15,6 +15,17 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 Bug Fixes
 ~~~~~~~~~
 
+- Derived analysis outputs now remain compatible with source datasets whose
+  metadata contains read-only nested structures. In particular,
+  ``Optimize.predict()`` and ``Optimize.result.residuals`` now attach detached
+  writable metadata copies instead of attempting in-place updates against
+  locked source-derived metadata.
+
+- The AsLS baseline-correction path now avoids the SciPy
+  ``SparseEfficiencyWarning`` previously exposed by published gallery examples,
+  without changing the underlying baseline-correction algorithm or the
+  scientific results.
+
 - Fix inconsistent fit diagnostics after directly mutating the public
   ``Optimize.fp`` view (for example setting ``fp.fixed``): the mutation was
   ignored by the optimization but was re-injected into the reported state by

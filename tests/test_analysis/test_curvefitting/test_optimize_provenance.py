@@ -112,3 +112,31 @@ def test_optimize_fitted_and_residuals_restore_public_geometry_and_mask(
 
     result.fitted.mask[0, 0] = True
     assert not observed.mask[0, 0]
+
+
+def test_optimize_predict_accepts_readonly_source_metadata(
+    synthetic_two_peak_dataset, optimize_script
+):
+    ds = synthetic_two_peak_dataset.copy()
+    ds.name = "readonly_source"
+    ds.meta.project = "nmr-relax"
+    ds.meta.processing = {"reader": "topspin"}
+    ds.meta.readonly = True
+
+    opt = scp.Optimize(script=optimize_script).fit(ds)
+
+    prediction = opt.predict()
+    residuals = opt.result.residuals
+
+    assert prediction.name == "readonly_source_Optimize.fitted_data"
+    assert prediction.meta.project == "nmr-relax"
+    assert prediction.meta.processing["reader"] == "topspin"
+    assert prediction.meta.readonly is False
+    prediction.meta.processing["reader"] = "changed"
+    assert ds.meta.processing["reader"] == "topspin"
+
+    assert residuals.meta.project == "nmr-relax"
+    assert residuals.meta.processing["reader"] == "topspin"
+    assert residuals.meta.readonly is False
+    residuals.meta.processing["reader"] = "residuals-changed"
+    assert ds.meta.processing["reader"] == "topspin"
