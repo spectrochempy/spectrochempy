@@ -53,14 +53,14 @@ import spectrochempy as scp
 
 # %% {"pycharm": {"name": "#%%\n"}}
 X = scp.read_omnic("irdata/CO@Mo_Al2O3.SPG")
-print(X)
+X
 
 # %% [markdown]
 # The same result is obtained with the namespace API:
 
 # %%
 X = scp.omnic.read("irdata/CO@Mo_Al2O3.SPG")
-print(X)
+X
 
 # %% [markdown]
 # The displayed attributes are detailed in the following:
@@ -112,7 +112,7 @@ X.description
 #   through the `units` attribute.
 
 # %%
-print(X.values)
+X.values
 
 # %%
 X.data
@@ -131,6 +131,7 @@ X.units
 
 # %%
 print(X.x)
+X.x
 
 # %% [markdown]
 # - `y` : this dimension contains:
@@ -142,7 +143,7 @@ print(X.x)
 #     - the name of each spectrum.
 
 # %%
-print(X.y)
+X.y
 
 # %% [markdown]
 # - `dims`: note that the `x` and `y` dimensions are the second and first
@@ -272,7 +273,7 @@ X.y.values  # displays the `y` dimension
 
 # %%
 single_spa = scp.read_omnic("irdata/subdir/7_CZ0-100_Pd_101.SPA")
-print(single_spa)
+single_spa
 
 # %% [markdown]
 # The OMNIC reader can also import several `.spa` files together, provided that they share
@@ -304,7 +305,7 @@ print(merged)
 
 # %%
 grouped = scp.read_omnic("irdata/subdir/1-20")
-print(grouped)
+grouped
 
 # %% [markdown]
 # In cases where not all files are compatible, they are returned in different
@@ -323,7 +324,7 @@ Y.names
 # The desired dataset can be obtained using a list:
 
 # %%
-print(Y[1])
+Y[1]
 
 # %% [markdown]
 # Other ways to select only files with the `.spa` extension are:
@@ -333,14 +334,14 @@ print(Y[1])
 
 # %%
 spa_only = scp.read_spa("irdata/subdir/")
-print(spa_only)
+spa_only
 
 # %% [markdown]
 # - using a pattern filter
 
 # %%
 spa_pattern = scp.read_omnic("irdata/subdir/", pattern="*.spa")
-print(spa_pattern)
+spa_pattern
 
 # %% [markdown]
 # One advantage of the latter solution is greater flexibility. For instance,

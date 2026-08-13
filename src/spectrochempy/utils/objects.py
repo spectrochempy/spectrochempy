@@ -366,16 +366,23 @@ class ScpObjectList(list):
         objtypes = "mixed" if len(objtypes) > 1 else objtypes[0]
         if objtypes == "_Axes":
             return ""
-        html = f"<div class='scp-output'><details><summary>List (len={len(self)}, type={objtypes})</summary><ul>"
+        html = (
+            "<div class='scp-output'>"
+            f"<details><summary>List (len={len(self)}, type={objtypes})</summary><ul>"
+        )
         for i, item in enumerate(self):
             try:
-                html += f"<div class='scp-output section'>{convert_to_html(item, open=False, id=i)}</div>\n"
+                html += (
+                    "<li class='scp-output section'>"
+                    f"{convert_to_html(item, open=False, id=i)}</li>\n"
+                )
             except Exception:
                 # Fallback for objects that can't be converted to HTML
                 html += (
-                    f"<div class='scp-output section'><pre>{repr(item)}</pre></div>\n"
+                    "<li class='scp-output section'>"
+                    f"<pre>{repr(item)}</pre></li>\n"
                 )
-        html += "</details></div>"
+        html += "</ul></details></div>"
         return html
 
     @property
