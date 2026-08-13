@@ -64,6 +64,7 @@ import re
 import shutil
 import sys
 import tempfile
+import traceback
 import warnings
 import zipfile
 from contextlib import suppress
@@ -103,6 +104,11 @@ TEMPDIRS = PROJECT.parent / "tempdirs"
 ON_GITHUB = os.environ.get("GITHUB_ACTIONS") == "true"
 CORE_TAG_PREFIX = "spectrochempy-v"
 SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
+
+
+def _trace_ci(message):
+    if ON_GITHUB:
+        print(f"[docs make] {message}", flush=True)
 
 
 def _canonical_doc_tag(tagname):
@@ -765,12 +771,20 @@ class BuildDocumentation:
         # Simplified documentation building process.
         # Returns: int - Sphinx build result
 
+        _trace_ci(
+            "_make_docs start "
+            f"noexec={self.settings['noexec']} "
+            f"skip_post={environ.get('SCPY_SKIP_POST_BUILD', '0')}"
+        )
         self._prepare_build()
+        _trace_ci("_prepare_build completed")
         build_result = self._run_sphinx_build()
+        _trace_ci(f"_run_sphinx_build returned {build_result!r}")
         if environ.get("SCPY_SKIP_POST_BUILD") == "1":
-            print("Skipping docs post-build actions (SCPY_SKIP_POST_BUILD=1)")
+            _trace_ci("Skipping docs post-build actions (SCPY_SKIP_POST_BUILD=1)")
             return build_result
         self._post_build()
+        _trace_ci("_post_build completed")
         return build_result
 
     def _prepare_build(self):
@@ -921,6 +935,7 @@ class BuildDocumentation:
 
         try:
             sp.build()
+            _trace_ci(f"Sphinx build completed with statuscode={sp.statuscode!r}")
             return 0
         except SystemExit as e:
             outdir_path = Path(outdir)
@@ -930,7 +945,7 @@ class BuildDocumentation:
                 and built_index.exists()
                 and e.code not in (0, None)
             ):
-                print(
+                _trace_ci(
                     "Warning: Build raised SystemExit after HTML generation; "
                     "treating it as success in PR validation mode"
                 )
@@ -1280,4 +1295,11 @@ def main():
 
 # ======================================================================================
 if __name__ == "__main__":
-    sys.exit(_main())
+    try:
+        exit_code = _main()
+        _trace_ci(f"_main returned {exit_code!r}")
+    except BaseException:
+        if ON_GITHUB:
+            traceback.print_exc()
+        raise
+    sys.exit(exit_code)
