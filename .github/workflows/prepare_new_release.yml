@@ -182,7 +182,7 @@ jobs:
           Publishing this release will trigger publishing on pypi, anaconda and zenodo.
           EOF
 
-          pr_title="Release version $RELEASE_VERSION"
+          pr_title="REL: Release version $RELEASE_VERSION"
           pr_body="$(cat "$body_file")"
 
           pr_number="$(gh_api_app_only GET \
@@ -219,8 +219,7 @@ jobs:
 
           if ! gh_api_with_fallback POST \
             "repos/${{ github.repository }}/issues/$pr_number/labels" \
-            -f "labels[]=no-changelog" \
-            -f "labels[]=non-standard-prefix" >/dev/null; then
+            -f "labels[]=no-changelog" >/dev/null; then
             echo "::warning::Could not apply labels to release PR $pr_number."
           fi
 
