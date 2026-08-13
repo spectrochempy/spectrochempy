@@ -767,6 +767,9 @@ class BuildDocumentation:
 
         self._prepare_build()
         build_result = self._run_sphinx_build()
+        if environ.get("SCPY_SKIP_POST_BUILD") == "1":
+            print("Skipping docs post-build actions (SCPY_SKIP_POST_BUILD=1)")
+            return build_result
         self._post_build()
         return build_result
 
