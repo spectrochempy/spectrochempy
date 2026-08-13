@@ -79,9 +79,15 @@ documents (`AGENTS.md`, root `*.md`, `maintainers/**/*.md`, PR templates, and
 similar non-executable repository-policy files), maintainers may add the label
 **`safe-docs-no-ci`** to bypass the heavyweight test and docs workflows.
 
+The same label may also be used for the narrow release-notes-only case where
+the changed files are limited to:
+
+* `docs/sources/whatsnew/changelog.rst`
+* generated `docs/sources/whatsnew/latest.rst`
+
 This label must **not** be used for:
 
-* `docs/` changes, even when the files are non-Python;
+* other `docs/` changes, even when the files are non-Python;
 * `examples/` changes;
 * plugin Markdown such as `plugins/**/README.md`;
 * code changes hidden inside a documentation PR;

@@ -453,11 +453,15 @@ are limited to safe documentation/policy paths such as:
 * root-level `*.md`;
 * `maintainers/**/*.md`;
 * `CONTRIBUTING.md`;
+* `docs/sources/whatsnew/changelog.rst`;
+* generated `docs/sources/whatsnew/latest.rst` when it changes only as the
+  direct companion of `changelog.rst`;
 * the PR template and similar non-executable repository-policy documents.
 
 Do **not** use ``safe-docs-no-ci`` for:
 
-* `docs/` changes, even when the files are non-Python;
+* `docs/` changes outside the narrow `whatsnew/changelog.rst` +
+  generated `latest.rst` exception above, even when the files are non-Python;
 * `examples/` changes;
 * gallery/example/tutorial updates;
 * plugin Markdown such as `plugins/**/README.md`;

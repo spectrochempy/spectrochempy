@@ -20,6 +20,11 @@ SAFE_EXACT = {
     ".github/PULL_REQUEST_TEMPLATE.md",
 }
 
+SAFE_DOCS_EXACT = {
+    "docs/sources/whatsnew/changelog.rst",
+    "docs/sources/whatsnew/latest.rst",
+}
+
 SAFE_PREFIXES = ("maintainers/",)
 
 UNSAFE_PREFIXES = (
@@ -68,6 +73,8 @@ def is_safe_docs_only(files: list[str]) -> bool:
     if not files:
         return False
     for path in files:
+        if path in SAFE_DOCS_EXACT:
+            continue
         if any(path.startswith(prefix) for prefix in UNSAFE_PREFIXES):
             return False
         if path in SAFE_EXACT:
