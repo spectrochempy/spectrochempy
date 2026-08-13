@@ -949,8 +949,8 @@ class BuildDocumentation:
         print(f"Updated docs versions manifest: {manifest['versions']}")
 
         # Remove the environment variables
-        del environ["PREVIOUS_VERSIONS"]
-        del environ["SPHINX_NOEXEC"]
+        environ.pop("PREVIOUS_VERSIONS", None)
+        environ.pop("SPHINX_NOEXEC", None)
         if "SPHINX_PATTERN" in environ:
             del environ["SPHINX_PATTERN"]
 
