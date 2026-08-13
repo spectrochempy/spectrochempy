@@ -288,20 +288,27 @@ def _modelspec_internal_vector(spec):
 
 
 def _sync_fitparameters_from_modelspec(fp, spec):
-    """Update a FitParameters object with values from a model spec."""
-    for name, ps in spec.common_params.items():
-        if ps.reference is not None:
-            continue
-        if name in fp:
-            fp.data[name] = ps.value
+    """
+    Reset a ``FitParameters`` view in place to faithfully reflect a spec.
 
-    for comp in spec.components:
-        for name, ps in comp.params.items():
-            if ps.reference is not None:
-                continue
-            key = f"{name}_{comp.label}"
-            if key in fp:
-                fp.data[key] = ps.value
+    Preserves the object identity of *fp* while rebuilding its full view from
+    the canonical model spec: values, ``fixed``/``vary`` flags, bounds,
+    reference flags, model structure and experiment metadata are all restored.
+    Direct legacy-view mutations (``fp.fixed``, ``fp.lob``/``fp.upb``,
+    ``fp.reference``, ...) therefore cannot survive into the public
+    ``Optimize.fp`` after a fit when they are not authoritative.
+    """
+    view = spec.to_fitparameters()
+    fp.data = view.data
+    fp.lob = view.lob
+    fp.upb = view.upb
+    fp.fixed = view.fixed
+    fp.reference = view.reference
+    fp.common = view.common
+    fp.model = view.model
+    fp.models = view.models
+    fp.expvars = view.expvars
+    fp.expnumber = view.expnumber
     return fp
 
 
@@ -1201,10 +1208,11 @@ class Optimize(DecompositionAnalysis):
         # values without re-parsing it into canonical state (see maintainer
         # decision recorded in the FitParameters ADR amendment, 2026-08-13).
         # The canonical spec keeps the full-precision optimized values and the
-        # public fp view keeps its identity and synced values. Writing the
-        # render directly into trait storage bypasses the script validator,
-        # which would otherwise rebuild the spec from the rounded text.
-        self._trait_values["script"] = str(fp)
+        # public fp view keeps its identity and synced values. The render is
+        # written without running the script validator (which would rebuild the
+        # spec from the rounded text) but observers of ``script`` are still
+        # notified as for a normal assignment.
+        self._set_rendered_script(str(fp))
 
         # log.info the results
         display.clear_output(wait=True)
@@ -1268,6 +1276,23 @@ class Optimize(DecompositionAnalysis):
         self._model_spec = spec
         self.fp = spec.to_fitparameters()
         return proposal.value
+
+    # ----------------------------------------------------------------------------------
+    def _set_rendered_script(self, value):
+        """
+        Assign the ``script`` trait without re-parsing it into canonical state.
+
+        The post-fit script is a rendered representation of the fitted values;
+        the canonical spec and the ``fp`` view already reflect the executed
+        optimization. Unlike a regular assignment, the script validator (which
+        would rebuild the canonical state from the rendered text) is bypassed,
+        but observers of ``script`` are still notified as for a normal
+        assignment (see traitlets ``TraitType.set`` semantics).
+        """
+        old = self.script  # materialize the default value when needed
+        self._trait_values["script"] = value
+        if old != value:
+            self._notify_trait("script", old, value)
 
     @tr.validate("constraints")
     def _constraints_validate(self, proposal):
