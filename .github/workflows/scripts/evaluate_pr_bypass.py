@@ -21,6 +21,16 @@ SAFE_EXACT = {
 }
 
 SAFE_DOCS_EXACT = {
+    "docs/sources/credits/citing.rst",
+    "docs/sources/credits/license.rst",
+    "docs/sources/credits/seealso.rst",
+    "docs/sources/gettingstarted/getting_help.rst",
+    "docs/sources/gettingstarted/whyscpy.rst",
+    "docs/sources/reference/bibliography.bib",
+    "docs/sources/reference/bibliography.rst",
+    "docs/sources/reference/faq.rst",
+    "docs/sources/reference/glossary.rst",
+    "docs/sources/reference/papers.rst",
     "docs/sources/whatsnew/changelog.rst",
     "docs/sources/whatsnew/latest.rst",
 }

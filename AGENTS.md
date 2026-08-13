@@ -453,6 +453,16 @@ are limited to safe documentation/policy paths such as:
 * root-level `*.md`;
 * `maintainers/**/*.md`;
 * `CONTRIBUTING.md`;
+* `docs/sources/credits/citing.rst`;
+* `docs/sources/credits/license.rst`;
+* `docs/sources/credits/seealso.rst`;
+* `docs/sources/gettingstarted/getting_help.rst`;
+* `docs/sources/gettingstarted/whyscpy.rst`;
+* `docs/sources/reference/bibliography.bib`;
+* `docs/sources/reference/bibliography.rst`;
+* `docs/sources/reference/faq.rst`;
+* `docs/sources/reference/glossary.rst`;
+* `docs/sources/reference/papers.rst`;
 * `docs/sources/whatsnew/changelog.rst`;
 * generated `docs/sources/whatsnew/latest.rst` when it changes only as the
   direct companion of `changelog.rst`;
@@ -460,8 +470,8 @@ are limited to safe documentation/policy paths such as:
 
 Do **not** use ``safe-docs-no-ci`` for:
 
-* `docs/` changes outside the narrow `whatsnew/changelog.rst` +
-  generated `latest.rst` exception above, even when the files are non-Python;
+* `docs/` changes outside the explicit safe-file allowlist above, even when
+  the files are non-Python;
 * `examples/` changes;
 * gallery/example/tutorial updates;
 * plugin Markdown such as `plugins/**/README.md`;
