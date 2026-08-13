@@ -1197,9 +1197,14 @@ class Optimize(DecompositionAnalysis):
         self._fit_config = fit_config
         self._solver_artifacts = solver_artifacts
 
-        # replace the previous script with new fp parameters
-        self.script = str(fp)
-        self._model_spec = _FitModelSpec.from_fitparameters(self.fp)
+        # Replace the previous script with a rendered view of the new parameter
+        # values without re-parsing it into canonical state (see maintainer
+        # decision recorded in the FitParameters ADR amendment, 2026-08-13).
+        # The canonical spec keeps the full-precision optimized values and the
+        # public fp view keeps its identity and synced values. Writing the
+        # render directly into trait storage bypasses the script validator,
+        # which would otherwise rebuild the spec from the rounded text.
+        self._trait_values["script"] = str(fp)
 
         # log.info the results
         display.clear_output(wait=True)

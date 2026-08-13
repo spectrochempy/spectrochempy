@@ -403,6 +403,26 @@ class TestOptimizeResult:
 
         assert opt.result.diagnostics["n_varying_parameters"] == 9
 
+    def test_postfit_diagnostics_reflect_executed_optimization(
+        self, synthetic_two_peak_dataset, optimize_script
+    ):
+        # Direct fp-view mutations are not authoritative for the canonical spec.
+        # The reported diagnostics must match the executed optimization (9
+        # varying parameters) instead of the ignored fp.fixed mutation.
+        opt = scp.Optimize()
+        opt.script = optimize_script
+        opt.autobase = True
+        opt.max_iter = 10
+        opt.fp.fixed["pos_line_1"] = True
+        opt.fit(synthetic_two_peak_dataset)
+
+        diag = opt.result.diagnostics
+        assert diag["n_varying_parameters"] == 9
+        assert diag["degrees_of_freedom"] == (
+            diag["n_observations"] - diag["n_varying_parameters"]
+        )
+        assert np.isfinite(diag["rss"])
+
     def test_fit_stores_modelspec_synced_with_fitparameters(
         self, synthetic_two_peak_dataset, optimize_script
     ):

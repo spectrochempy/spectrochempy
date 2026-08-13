@@ -12,6 +12,9 @@ import spectrochempy as scp
 from spectrochempy.analysis.curvefitting._parameters import FitParameters
 from spectrochempy.analysis.curvefitting.optimize import ConstraintError
 from spectrochempy.analysis.curvefitting.optimize import ScriptError
+from spectrochempy.analysis.curvefitting.optimize import (
+    _extract_varying_parameter_values,
+)
 from spectrochempy.analysis.curvefitting.optimize import _modelspec_parameter_names
 from spectrochempy.analysis.curvefitting.optimize import _validate_script_content
 
@@ -400,3 +403,163 @@ def test_fit_single_dataset(synthetic_two_peak_dataset, optimize_script):
         rtol=0.02,
         atol=3.0,
     )
+
+
+# -----------------------------------------------------------------------------------
+# post-fit fp / script contract (round-trip alignment)
+# -----------------------------------------------------------------------------------
+def test_fit_preserves_fp_identity_and_type(
+    synthetic_two_peak_dataset, optimize_script
+):
+    # The canonical spec is the source of truth and the public fp view is kept
+    # in place after a fit: identity is preserved and the type is unchanged.
+    opt = scp.Optimize()
+    opt.script = optimize_script
+    opt.autobase = True
+    opt.max_iter = 10
+    fp_before = opt.fp
+    opt.fit(synthetic_two_peak_dataset)
+    assert opt.fp is fp_before
+    assert isinstance(opt.fp, FitParameters)
+
+
+def test_fit_syncs_full_precision_values_into_fp(
+    synthetic_two_peak_dataset, optimize_script
+):
+    # The synced fp view mirrors the canonical spec exactly (full precision);
+    # it is not rebuilt from the 4-decimal rendered script.
+    opt = scp.Optimize()
+    opt.script = optimize_script
+    opt.autobase = True
+    opt.max_iter = 10
+    opt.fit(synthetic_two_peak_dataset)
+    spec = opt._model_spec
+    for key, ps in spec._iter_varying():
+        assert opt.fp[key] == ps.value
+
+
+def test_fit_renders_script_at_display_precision(
+    synthetic_two_peak_dataset, optimize_script
+):
+    # The post-fit script is a rendered public representation of the fitted
+    # values: syntactically valid, models, references and the COMMON block
+    # survive, and values approximate the internal full-precision state to the
+    # historical 4-decimal display precision.
+    opt = scp.Optimize()
+    opt.script = optimize_script
+    opt.autobase = True
+    opt.max_iter = 10
+    opt.fit(synthetic_two_peak_dataset)
+
+    assert "COMMON" in opt.script
+    assert "MODEL: line_1" in opt.script
+    assert "MODEL: line_2" in opt.script
+    assert "> ratio:gratio" in opt.script
+    assert opt.validate_script(opt.script) == []
+
+    rendered_fp, errors = _validate_script_content(opt.script)
+    assert errors == []
+    for key in rendered_fp.keys():
+        if isinstance(opt.fp[key], str) or isinstance(rendered_fp[key], str):
+            continue
+        assert float(rendered_fp[key]) == pytest.approx(float(opt.fp[key]), abs=1e-4)
+
+
+def test_explicit_script_assignment_after_fit_rebuilds_canonical_state(
+    synthetic_two_peak_dataset, optimize_script
+):
+    # Only an explicit user assignment of a new script is authoritative: it
+    # rebuilds the canonical spec and the fp view.
+    opt = scp.Optimize()
+    opt.script = optimize_script
+    opt.autobase = True
+    opt.max_iter = 10
+    opt.fit(synthetic_two_peak_dataset)
+
+    new_script = """
+MODEL: X
+shape: gaussianmodel
+    $ ampl: 1.0, 0.0, none
+    $ pos:  500, 0, 1000
+    $ width: 10, 0, 100
+"""
+    opt.script = new_script
+    assert opt.fp["pos_x"] == 500.0
+    assert opt._model_spec.components[0].params["pos"].value == 500.0
+
+
+def test_direct_fp_fixed_mutation_does_not_corrupt_reported_state(
+    synthetic_two_peak_dataset, optimize_script
+):
+    # Direct fp-view mutations are not authoritative: the canonical spec wins.
+    # The reported state must stay consistent with what was actually optimized
+    # (9 varying parameters), not with the ignored fp.fixed mutation.
+    opt = scp.Optimize()
+    opt.script = optimize_script
+    opt.autobase = True
+    opt.max_iter = 10
+    opt.fp.fixed["pos_line_1"] = True
+    opt.fit(synthetic_two_peak_dataset)
+
+    diag = opt.result.diagnostics
+    assert diag["n_varying_parameters"] == 9
+    assert opt._model_spec.components[0].params["pos"].vary is True
+
+
+def test_direct_fp_value_mutation_does_not_change_fit(
+    synthetic_two_peak_dataset, optimize_script
+):
+    opt = scp.Optimize()
+    opt.script = optimize_script
+    opt.autobase = True
+    opt.max_iter = 10
+    opt.fp["pos_line_1"] = (3500.0, 3400.0, 3700.0)  # ignored by the canonical spec
+    opt.fit(synthetic_two_peak_dataset)
+
+    assert opt.result.diagnostics["n_varying_parameters"] == 9
+    assert opt._model_spec.components[0].params["pos"].value == pytest.approx(
+        3620.0, abs=3.0
+    )
+
+
+def test_fp_only_entry_fits_and_preserves_identity(
+    synthetic_two_peak_dataset, optimize_script
+):
+    # The fp-only legacy entry path remains live: a FitParameters view can be
+    # fitted directly, the same public object is kept, and the post-fit script
+    # is rendered.
+    ref = scp.Optimize()
+    ref.script = optimize_script
+    ref.autobase = True
+    ref.max_iter = 10
+    ref.fit(synthetic_two_peak_dataset)
+
+    opt = scp.Optimize()
+    fp = ref.fp.copy()
+    opt.fp = fp
+    opt.autobase = True
+    opt.max_iter = 10
+    opt.fit(synthetic_two_peak_dataset)
+
+    assert opt.fp is fp
+    assert isinstance(opt.fp, FitParameters)
+    assert opt.result.diagnostics["n_varying_parameters"] == 9
+    assert opt.fp["pos_line_1"] == pytest.approx(3620.0, abs=3.0)
+    assert "MODEL" in opt.script
+    assert_allclose(
+        opt._model_spec.extract_varying_values(),
+        _extract_varying_parameter_values(opt.fp),
+    )
+
+
+def test_successive_fits_are_stable(synthetic_two_peak_dataset, optimize_script):
+    opt = scp.Optimize()
+    opt.script = optimize_script
+    opt.autobase = True
+    opt.max_iter = 10
+    opt.fit(synthetic_two_peak_dataset)
+    first_cost = opt.result.diagnostics["cost"]
+    first_pos = opt.fp["pos_line_1"]
+    opt.fit(synthetic_two_peak_dataset)
+    assert opt.result.diagnostics["cost"] == pytest.approx(first_cost, rel=1e-6)
+    assert opt.fp["pos_line_1"] == pytest.approx(first_pos, rel=1e-6)
