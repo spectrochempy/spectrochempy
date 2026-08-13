@@ -524,7 +524,9 @@ baseline/trends for different segments of the data.
                 while True:
                     W = sparse.spdiags(w, 0, N, N)
                     C = W + lamb * D.dot(D.transpose())
-                    z = spsolve(C, w * y)
+                    # Convert once to a direct-solver-friendly sparse format to
+                    # avoid gallery-facing SparseEfficiencyWarning noise.
+                    z = spsolve(C.tocsc(), w * y)
                     w = p * (y > z) + (1 - p) * (y < z)
                     change = np.sum(np.abs(w_old - w)) / N
                     # info_(change)

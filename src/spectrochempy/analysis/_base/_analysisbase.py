@@ -209,6 +209,17 @@ class AnalysisConfigurable(BaseConfigurable):
         return self._ANALYSIS_ROLE_TITLES[role_id]
 
     @staticmethod
+    def _analysis_output_meta_copy(meta_source):
+        """Return a detached, writable metadata copy for derived outputs."""
+        if meta_source is None:
+            return Meta()
+        new_meta = copy.deepcopy(meta_source)
+        new_meta.readonly = False
+        new_meta.parent = None
+        new_meta.name = None
+        return new_meta
+
+    @staticmethod
     def _analysis_ordered_unique_text(values):
         ordered = []
         seen = set()
@@ -765,8 +776,8 @@ class AnalysisConfigurable(BaseConfigurable):
             )
             dataset.author = merged_author
             dataset.origin = "" if merged_origin is None else merged_origin
-            dataset.meta = (
-                copy.deepcopy(y_train.meta) if y_train is not None else Meta()
+            dataset._meta = self._analysis_output_meta_copy(
+                y_train.meta if y_train is not None else None
             )
             dataset.name = self._analysis_generated_name(role_id, x_predict)
             dataset.title = self._analysis_role_title(role_id)
@@ -843,9 +854,9 @@ class AnalysisConfigurable(BaseConfigurable):
             dataset.acquisition_date = None
 
         if meta_authority is not None:
-            dataset.meta = copy.deepcopy(meta_authority.meta)
+            dataset._meta = self._analysis_output_meta_copy(meta_authority.meta)
         else:
-            dataset.meta = Meta()
+            dataset._meta = Meta()
 
         dataset.name = self._analysis_generated_name(role_id, single_source)
         dataset.title = self._analysis_role_title(role_id)

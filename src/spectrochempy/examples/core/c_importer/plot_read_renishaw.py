@@ -57,6 +57,8 @@ _ = dataset.plot_image()
 
 # %%
 # Grid scan data:
+# This sample mapping does not store an explicit map-area type. SpectroChemPy
+# therefore warns and assumes the usual XY column-major scan order.
 dataset = scp.read_wdf("ramandata/wire/mapping.wdf")
 _ = dataset.sum(dim=2).plot_image(equal_aspect=True)
 _ = dataset[..., 1529.0].plot_image(equal_aspect=True)
