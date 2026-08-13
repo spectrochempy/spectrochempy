@@ -8,19 +8,7 @@
 """
 Analysis CP NMR spectra
 =======================
-
-Temporarily excluded from the public gallery.
-
-The bundled dataset is a CP/MAS contact-time series (`cpF1F2hetcor` pulse
-program, `vdlist` present on the final experiment), but the current public read
-path no longer returns the merged pseudo-2D dataset shape assumed by this
-historical script. Reading the whole directory yields a `ScpObjectList` of
-independent 1D FIDs, and the contact-time metadata needed for a reliable public
-series reconstruction are not yet exposed in a stable, documented way.
-
-The source is kept here as future characterization material for a dedicated
-CP-series follow-up, but it is not published while the public 1D example set is
-restricted to validated executable workflows.
+Example with handling of a series of CP NMR spectra.
 
 Requires the official ``spectrochempy-nmr`` plugin.
 Install with: ``pip install spectrochempy[nmr]``.
