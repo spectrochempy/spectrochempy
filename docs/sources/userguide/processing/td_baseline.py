@@ -34,9 +34,10 @@
 #
 # Here we show how to baseline correct dataset in the time domain before applying FFT.
 #
-# The example spectra were downloaded from [this page](
-# http://anorganik.uni-tuebingen.de/klaus/nmr/processing/index.php?p=dcoffset/dcoffset) where you can find some
-# explanations on this kind of process.
+# The example spectra were downloaded from a historical University of Tubingen
+# NMR processing page describing DC-offset correction. That original external
+# page is no longer reliably reachable, so the example below focuses on the
+# SpectroChemPy workflow directly.
 
 # %%
 import spectrochempy as scp

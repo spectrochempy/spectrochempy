@@ -310,7 +310,7 @@ scp.read_omnic("irdata/subdir/1-20")
 
 # %%
 Y = scp.read_omnic("irdata/subdir/")
-Y
+Y.names
 
 # %% [markdown]
 # Here we get a list of two NDDatasets because there are two file types in the
@@ -341,7 +341,8 @@ scp.read_omnic("irdata/subdir/", pattern="*.spa")
 # the following selects only `*101.spa` and `*102.spa`:
 
 # %%
-scp.read_omnic("irdata/subdir/", pattern="*10[12].spa", merge=False)
+selected = scp.read_omnic("irdata/subdir/", pattern="*10[12].spa", merge=False)
+len(selected), selected.names
 
 # %% [markdown]
 # ## Handling Metadata

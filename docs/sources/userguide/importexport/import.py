@@ -351,7 +351,8 @@ folder = DATADIR / "irdata" / "subdir"
 #   ignored silently:
 
 # %%
-scp.read_dir(folder)
+merged_groups = scp.read_dir(folder)
+merged_groups.names
 # %% [markdown]
 # The above command reads all files in the `DATADIR/irdata/subdir/`
 # directory and merges them into two groups of compatible NDDatasets:
@@ -364,7 +365,8 @@ scp.read_dir(folder)
 # (or, equivalently, `read`). If you want to read the files separately, you
 # can use the `merge=False` keyword:
 # %%
-scp.read_dir(folder, merge=False)
+separate_datasets = scp.read_dir(folder, merge=False)
+len(separate_datasets), separate_datasets.names
 
 # %% [markdown]
 # As expected the result is a list of 5 NDDataset objects, one for each file in the directory.
@@ -394,18 +396,21 @@ scp.read_dir(folder, merge=False)
 #
 # Now we read all files (a total of 9) in the `DATADIR/irdata/subdir/` directory and its subdirectories:
 # %%
-scp.read_dir(folder, recursive=True, merge=False)
+recursive_datasets = scp.read_dir(folder, recursive=True, merge=False)
+len(recursive_datasets), recursive_datasets.names
 # %% [markdown]
 # and we allow merging them:
 # %%
-scp.read_dir(folder, recursive=True)
+recursive_groups = scp.read_dir(folder, recursive=True)
+recursive_groups.names
 # %% [markdown]
 # As the 8 `.spa` files are compatible, they are merged into a single `NDDataset` object. The `.srs` file is read separately.
 
 # %% [markdown]
 # A specific reader can equivalently read the folder recursively:
 # %%
-scp.read_omnic(folder, recursive=True)
+omnic_groups = scp.read_omnic(folder, recursive=True)
+omnic_groups.names
 
 # %% [markdown]
 # Let's see an example with the `pattern` option:
@@ -443,6 +448,7 @@ scp.read_omnic(folder, recursive=True, pattern="*4.spa")  # equivalent
 # files separately.
 
 # %%
-scp.read(
+zip_datasets = scp.read(
     "https://eigenvector.com/wp-content/uploads/2019/06/corn.mat_.zip", merge=False
 )
+len(zip_datasets), zip_datasets.names
