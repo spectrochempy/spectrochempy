@@ -20,13 +20,25 @@ def _load_module():
     return module
 
 
-def test_safe_docs_bypass_allows_whatsnew_pair_only():
+def test_safe_docs_bypass_allows_whatsnew_pair():
     module = _load_module()
 
     assert module.is_safe_docs_only(
         [
             "docs/sources/whatsnew/changelog.rst",
             "docs/sources/whatsnew/latest.rst",
+        ]
+    )
+
+
+def test_safe_docs_bypass_allows_explicit_narrative_docs_allowlist():
+    module = _load_module()
+
+    assert module.is_safe_docs_only(
+        [
+            "docs/sources/credits/citing.rst",
+            "docs/sources/reference/faq.rst",
+            "docs/sources/reference/bibliography.bib",
         ]
     )
 
@@ -38,6 +50,17 @@ def test_safe_docs_bypass_rejects_other_docs_paths():
         [
             "docs/sources/whatsnew/changelog.rst",
             "docs/sources/userguide/plugins_examples.rst",
+        ]
+    )
+
+
+def test_safe_docs_bypass_rejects_docs_templates_and_indexes():
+    module = _load_module()
+
+    assert not module.is_safe_docs_only(
+        [
+            "docs/sources/credits/credits.rst.tmpl",
+            "docs/sources/index.rst",
         ]
     )
 

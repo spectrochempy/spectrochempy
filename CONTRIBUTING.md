@@ -79,9 +79,18 @@ documents (`AGENTS.md`, root `*.md`, `maintainers/**/*.md`, PR templates, and
 similar non-executable repository-policy files), maintainers may add the label
 **`safe-docs-no-ci`** to bypass the heavyweight test and docs workflows.
 
-The same label may also be used for the narrow release-notes-only case where
-the changed files are limited to:
+The same label may also be used for the narrow exact-path allowlist below:
 
+* `docs/sources/credits/citing.rst`
+* `docs/sources/credits/license.rst`
+* `docs/sources/credits/seealso.rst`
+* `docs/sources/gettingstarted/getting_help.rst`
+* `docs/sources/gettingstarted/whyscpy.rst`
+* `docs/sources/reference/bibliography.bib`
+* `docs/sources/reference/bibliography.rst`
+* `docs/sources/reference/faq.rst`
+* `docs/sources/reference/glossary.rst`
+* `docs/sources/reference/papers.rst`
 * `docs/sources/whatsnew/changelog.rst`
 * generated `docs/sources/whatsnew/latest.rst`
 
