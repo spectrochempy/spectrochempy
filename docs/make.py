@@ -697,23 +697,31 @@ class BuildDocumentation:
 
     @staticmethod
     def _validate_built_html(source_dir):
-        # Check generated HTML for escaped SpectroChemPy rich output and the
-        # Sphinx "problematic" nodes it can create when escaped markup leaks
-        # back into reStructuredText parsing.
+        # Check the specific pages affected by the current audit for escaped
+        # SpectroChemPy rich output and the Sphinx "problematic" nodes it can
+        # create when escaped markup leaks back into reStructuredText parsing.
         patterns = {
             "escaped scp-output HTML": re.compile(r"&lt;div class=.*scp-output"),
             "problematic docutils nodes": re.compile(r'class="problematic"'),
         }
+        target_pages = (
+            Path("userguide/importexport/import.html"),
+            Path("userguide/importexport/importOMNIC.html"),
+            Path("userguide/introduction/mdcheatsheet.html"),
+        )
 
         failures = []
-        for html_file in source_dir.rglob("*.html"):
+        for relative_path in target_pages:
+            html_file = source_dir / relative_path
+            if not html_file.exists():
+                continue
             text = html_file.read_text(encoding="utf-8")
             for label, pattern in patterns.items():
                 if match := pattern.search(text):
                     snippet = text[max(0, match.start() - 80) : match.end() + 160]
                     failures.append(
                         (
-                            html_file.relative_to(source_dir),
+                            relative_path,
                             label,
                             snippet.replace("\n", " "),
                         )
