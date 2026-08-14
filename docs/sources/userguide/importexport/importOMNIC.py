@@ -53,14 +53,14 @@ import spectrochempy as scp
 
 # %% {"pycharm": {"name": "#%%\n"}}
 X = scp.read_omnic("irdata/CO@Mo_Al2O3.SPG")
-print(X)
+X
 
 # %% [markdown]
 # The same result is obtained with the namespace API:
 
 # %%
 X = scp.omnic.read("irdata/CO@Mo_Al2O3.SPG")
-print(X)
+X
 
 # %% [markdown]
 # The displayed attributes are detailed in the following:
@@ -112,7 +112,7 @@ X.description
 #   through the `units` attribute.
 
 # %%
-print(X.values)
+X.values
 
 # %%
 X.data
@@ -131,6 +131,7 @@ X.units
 
 # %%
 print(X.x)
+X.x
 
 # %% [markdown]
 # - `y` : this dimension contains:
@@ -142,7 +143,7 @@ print(X.x)
 #     - the name of each spectrum.
 
 # %%
-print(X.y)
+X.y
 
 # %% [markdown]
 # - `dims`: note that the `x` and `y` dimensions are the second and first
@@ -235,7 +236,6 @@ X.y.values
 
 # %%
 X2 = scp.read_omnic("irdata/CO@Mo_Al2O3.SPG", sortbydate=False)
-print(X2)
 
 # %% [markdown]
 # In the present case, this will change nothing because the spectra in the OMNIC file
@@ -272,8 +272,7 @@ X.y.values  # displays the `y` dimension
 # of a group:
 
 # %%
-single_spa = scp.read_omnic("irdata/subdir/7_CZ0-100_Pd_101.SPA")
-print(single_spa)
+scp.read_omnic("irdata/subdir/7_CZ0-100_Pd_101.SPA")
 
 # %% [markdown]
 # The OMNIC reader can also import several `.spa` files together, provided that they share
@@ -293,10 +292,7 @@ list_files = (
     "7_CZ0-100_Pd_103.SPA",
     "7_CZ0-100_Pd_104.SPA",
 )
-merged = scp.read_omnic(
-    list_files, directory="irdata/subdir", name="Merged 7_CZ0-100 Pd"
-)
-print(merged)
+scp.read_omnic(list_files, directory="irdata/subdir", name="Merged 7_CZ0-100 Pd")
 
 # %% [markdown]
 # When compatible `.spa` files are alone in a directory, a very convenient
@@ -304,8 +300,7 @@ print(merged)
 # using only the directory path as argument that will gather the .spa files together:
 
 # %%
-grouped = scp.read_omnic("irdata/subdir/1-20")
-print(grouped)
+scp.read_omnic("irdata/subdir/1-20")
 
 # %% [markdown]
 # In cases where not all files are compatible, they are returned in different
@@ -315,7 +310,7 @@ print(grouped)
 
 # %%
 Y = scp.read_omnic("irdata/subdir/")
-Y.names
+Y
 
 # %% [markdown]
 # Here we get a list of two NDDatasets because there are two file types in the
@@ -324,7 +319,7 @@ Y.names
 # The desired dataset can be obtained using a list:
 
 # %%
-print(Y[1])
+Y[1]
 
 # %% [markdown]
 # Other ways to select only files with the `.spa` extension are:
@@ -333,23 +328,20 @@ print(Y[1])
 # - using a more specific reader:
 
 # %%
-spa_only = scp.read_spa("irdata/subdir/")
-print(spa_only)
+scp.read_spa("irdata/subdir/")
 
 # %% [markdown]
 # - using a pattern filter
 
 # %%
-spa_pattern = scp.read_omnic("irdata/subdir/", pattern="*.spa")
-print(spa_pattern)
+scp.read_omnic("irdata/subdir/", pattern="*.spa")
 
 # %% [markdown]
 # One advantage of the latter solution is greater flexibility. For instance,
 # the following selects only `*101.spa` and `*102.spa`:
 
 # %%
-selected = scp.read_omnic("irdata/subdir/", pattern="*10[12].spa", merge=False)
-len(selected), selected.names
+scp.read_omnic("irdata/subdir/", pattern="*10[12].spa", merge=False)
 
 # %% [markdown]
 # ## Handling Metadata

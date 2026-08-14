@@ -780,6 +780,10 @@ class BuildDocumentation:
         _trace_ci("_prepare_build completed")
         build_result = self._run_sphinx_build()
         _trace_ci(f"_run_sphinx_build returned {build_result!r}")
+        source_dir = HTML / self._doc_version
+        if source_dir.exists() and any(source_dir.iterdir()):
+            self._validate_built_html(source_dir)
+            _trace_ci("_validate_built_html completed")
         if environ.get("SCPY_SKIP_POST_BUILD") == "1":
             _trace_ci("Skipping docs post-build actions (SCPY_SKIP_POST_BUILD=1)")
             return build_result
@@ -937,20 +941,6 @@ class BuildDocumentation:
             sp.build()
             _trace_ci(f"Sphinx build completed with statuscode={sp.statuscode!r}")
             return 0
-        except SystemExit as e:
-            outdir_path = Path(outdir)
-            built_index = outdir_path / "index.html"
-            if (
-                environ.get("SCPY_SKIP_POST_BUILD") == "1"
-                and built_index.exists()
-                and e.code not in (0, None)
-            ):
-                _trace_ci(
-                    "Warning: Build raised SystemExit after HTML generation; "
-                    "treating it as success in PR validation mode"
-                )
-                return 0
-            raise
         except Exception as e:
             print(f"Warning: Build encountered an error: {e}")
             if "build-finished" in str(e):
@@ -966,7 +956,6 @@ class BuildDocumentation:
         # Check if the source directory exists and is not empty
         source_dir = HTML / doc_version
         if source_dir.exists() and any(source_dir.iterdir()):
-            self._validate_built_html(source_dir)
             # Copy all files, including hidden ones, from source_dir to HTML
             # except if we are building an oldest version or version is dirty
             if not self.tagname:

@@ -46,7 +46,7 @@ dataset = scp.nmr.read(nmrdir, glob="**/fid")
 
 # %%
 # 15 fids have been read and merged into a single dataset
-print(dataset)
+dataset
 
 # %%
 # The new dimension (y) have several coordinates corresponding to all metadata that change from fid to fid.
@@ -164,15 +164,14 @@ area = scp.NDDataset(
     title="area",
 )
 _ = area.plot(marker="o", lw="1", ls=":", legend="best", colormap="jet")
-print(area)
+area
 
 # %%
 # Fitting a model to these data
 import numpy as np
 
-# Keep the gallery output focused on the fitted curves rather than optimizer
-# progress chatter, which otherwise renders as an empty "Out:" block.
-fitter = scp.Optimize(log_level="WARNING", method="leastsq")
+# create an Optimize object using a simple leastsq method
+fitter = scp.Optimize(log_level="INFO", method="leastsq")
 
 
 # define a model

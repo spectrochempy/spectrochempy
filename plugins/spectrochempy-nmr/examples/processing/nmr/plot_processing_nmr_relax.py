@@ -49,7 +49,7 @@ dataset = scp.nmr.read(nmrdir / "relax" / "100" / "ser", use_list="vdlist")
 # Analysing the data
 # ---------------------
 # Print dataset summary
-print(dataset)
+dataset
 
 # %%
 # Plot the processed spectra
@@ -67,14 +67,13 @@ _ = ds.plot(xlim=(100, -50))
 # We integrate a narrow ppm window around that resonance for each delay.
 signal = ds[:, 20.0:45.0].simpson()
 _ = signal.plot(marker="^", ls=":")
-print(signal.real)
+signal.real
 
 # %%
 # Fit a model
 # -----------
-# Keep the gallery output focused on the fitted result rather than optimizer
-# progress chatter, which otherwise renders as an empty "Out:" block.
-fitter = scp.Optimize(log_level="WARNING", method="leastsq")
+# create an Optimize object using a simple leastsq method
+fitter = scp.Optimize(log_level="INFO", method="leastsq")
 
 
 # %%
@@ -108,7 +107,7 @@ _ = fitter.fit(signal)
 
 # %%
 som = fitter.predict()
-print(som)
+som
 
 # %%
 # Plot the measured recovery points and the fitted curve separately so the

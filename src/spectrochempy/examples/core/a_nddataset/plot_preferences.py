@@ -70,9 +70,12 @@ print(mydataset)
 # %%
 # We want to plot a section of this 3D NDDataset:
 #
-# NDDataset can be sliced like conventional numpy-array, or maybe more
-# conveniently in this case, using an axis label:
-section = mydataset["hot"]
+# NDDataset can be sliced like conventional numpy-array...
+new = mydataset[..., 0]
+
+# %%
+# or maybe more conveniently in this case, using an axis labels:
+new = mydataset["hot"]
 
 # %%
 # To plot a dataset, use the `plot` command (generic plot).
@@ -80,7 +83,7 @@ section = mydataset["hot"]
 # and the ordinate axis is in absorbance units (au). The y dimension of the dataset is the time-on-stream (in minutes).
 # Because the time-on-stream values are floats, this triggers the default sequential colormap ('viridis'). The
 # corresponding values can be seen if `colorbar` is passed as `True`:
-_ = section.plot(colorbar=True)
+_ = new.plot(colorbar=True)
 
 # %%
 # It is also possible to display this dataset as an image (actually a filled contour plot).
@@ -89,21 +92,21 @@ _ = section.plot(colorbar=True)
 # colormap is diverging (`RdBu`).
 #
 # sphinx_gallery_thumbnail_number = 2
-_ = section.plot(method="image", colorbar=True)
+_ = new.plot(method="image", colorbar=True)
 
 # %%
 # If a dataset contains only positive values, the default colormap is
 # sequential (`viridis`):
 
-_ = scp.abs(section).plot(method="image", colorbar=True)
+_ = scp.abs(new).plot(method="image", colorbar=True)
 
 # %% Contour plots are also available, with the same default colormap as for the image method:
-_ = section.plot(method="contour")
-_ = scp.abs(section).plot(method="contour")
+_ = new.plot(method="contour")
+_ = scp.abs(new).plot(method="contour")
 
 # %%
 # Note that the scp allows one to use this syntax too:
-_ = scp.plot_contour(section)
+_ = scp.plot_contour(new)
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when
