@@ -379,8 +379,7 @@ class ScpObjectList(list):
             except Exception:
                 # Fallback for objects that can't be converted to HTML
                 html += (
-                    "<li class='scp-output section'>"
-                    f"<pre>{repr(item)}</pre></li>\n"
+                    "<li class='scp-output section'>" f"<pre>{repr(item)}</pre></li>\n"
                 )
         html += "</ul></details></div>"
         return html

@@ -67,7 +67,7 @@ _ = ds.plot(xlim=(100, -50))
 # We integrate a narrow ppm window around that resonance for each delay.
 signal = ds[:, 20.0:45.0].simpson()
 _ = signal.plot(marker="^", ls=":")
-signal.real
+print(signal.real)
 
 # %%
 # Fit a model
