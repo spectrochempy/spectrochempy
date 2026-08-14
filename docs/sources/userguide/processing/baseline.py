@@ -220,8 +220,8 @@ _ = blc.plot()
 
 # %%
 blc.model = "asls"
-blc.lamb = 10**9
-blc.asymmetry = 0.002
+blc.lamb = 3 * 10**8
+blc.asymmetry = 0.001
 _ = blc.fit(X)
 X6 = blc.transform()
 _ = X6.plot()
@@ -233,7 +233,7 @@ _ = X6.plot()
 
 # %%
 blc.model = "snip"
-blc.snip_width = 200
+blc.snip_width = 180
 _ = blc.fit(X)
 X7 = blc.transform()
 _ = X7.plot()
