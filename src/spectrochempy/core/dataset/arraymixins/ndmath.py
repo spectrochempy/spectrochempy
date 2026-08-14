@@ -217,6 +217,246 @@ def _get_name(x):
     return str(x.name if hasattr(x, "name") else x)
 
 
+# --------------------------------------------------------------------------------------
+# Arithmetic title semantics
+#
+# Single shared rule engine implementing the accepted arithmetic-title-semantics
+# policy (families T1/T1b/T2/T3/T4/T5):
+#   - T1/T1b identity-preserving operations keep the source title verbatim;
+#   - T2/T3 unary transforms compose ``opname(source)``;
+#   - T4 dataset<->scalar additive and dimensionless-scaling operations keep the
+#     source title verbatim; ``ds ** p`` composes ``power(source, canon(p))``;
+#   - T5 dataset-dataset additive keeps identical titles and composes different
+#     ones; product/ratio always compose ``opname(left, right)``;
+#   - scalar operands entering a composition use the canonical scalar formatter;
+#   - composed titles longer than the limit collapse to an absent title.
+# Operators and ufuncs share this engine so both paths produce identical titles.
+# --------------------------------------------------------------------------------------
+
+# Max length (in Unicode code points) of a composed title (policy section 6).
+_TITLE_LIMIT = 120
+
+# T1/T1b: identity-preserving operations -- title preserved verbatim.
+_TITLE_PRESERVE = frozenset(
+    {
+        "negative",
+        "absolute",
+        "abs",
+        "fabs",
+        "positive",
+        "rint",
+        "floor",
+        "ceil",
+        "trunc",
+        "fix",
+    }
+)
+
+# T2/T3: domain-changing unary transforms -- compose ``opname(source)``.
+_TITLE_COMPOSE_UNARY = frozenset(
+    {
+        "square",
+        "sqrt",
+        "reciprocal",
+        "log",
+        "log2",
+        "log10",
+        "log1p",
+        "exp",
+        "exp2",
+        "expm1",
+        "sin",
+        "cos",
+        "tan",
+        "arcsin",
+        "arccos",
+        "arctan",
+        "sinh",
+        "cosh",
+        "tanh",
+        "arcsinh",
+        "arccosh",
+        "arctanh",
+    }
+)
+
+# T5 additive family (units-compatible operations behaving like add):
+# identical operand titles preserved, different ones composed, a scalar
+# operand keeps the dataset context verbatim (T4).
+_TITLE_ADDITIVE = frozenset(
+    {
+        "add",
+        "subtract",
+        "maximum",
+        "minimum",
+        "fmax",
+        "fmin",
+        "copysign",
+        "logaddexp",
+        "logaddexp2",
+    }
+)
+
+# T5 product/ratio family: compose ``opname(left, right)`` between datasets;
+# a scalar operand rescales and keeps the dataset context verbatim (T4).
+_TITLE_RATIO = frozenset(
+    {"multiply", "divide", "floor_divide", "remainder", "fmod"}
+)
+
+# ``power`` composes ``power(left, right)`` with both operands (T4/T5).
+_TITLE_POWER = "power"
+
+# Operator-name -> normalized ufunc-name mapping so that operators and ufuncs
+# produce the identical composed title (``ds ** 2`` == ``np.power(ds, 2)``).
+# ``np.true_divide`` and ``np.divide`` share the ufunc name ``divide``;
+# ``np.mod`` and ``np.remainder`` share the ufunc name ``remainder``.
+_TITLE_CANONICAL_NAME = {
+    "add": "add",
+    "sub": "subtract",
+    "mul": "multiply",
+    "truediv": "divide",
+    "floordiv": "floor_divide",
+    "mod": "remainder",
+    "pow": "power",
+    "neg": "negative",
+    "pos": "positive",
+    "abs": "absolute",
+}
+
+
+class _PreserveTitle:
+    """Sentinel returned by the title engine for "keep the source title verbatim"."""
+
+
+_TITLE_PRESERVE_SENTINEL = _PreserveTitle()
+
+
+def _canonical_scalar(value):
+    """
+    Canonical rendering of a scalar operand for composed titles (policy 5.5).
+
+    Returns ``None`` for scalar types that are out of norm for title composition.
+    """
+    if isinstance(value, np.generic):
+        value = value.item()
+    if isinstance(value, bool):
+        value = int(value)
+    if isinstance(value, complex):
+        if value.imag == 0:
+            value = value.real
+        else:
+            return repr(value)
+    if isinstance(value, float):
+        if np.isfinite(value) and value.is_integer():
+            value = int(value)
+    if isinstance(value, (int, float, complex)):
+        return repr(value)
+    return None
+
+
+def _title_token(operand):
+    """Token describing how an operand enters title composition.
+
+    Absence is the stored state (``_title`` falsy or the ``"<untitled>"``
+    display default), not the display value returned by the ``title`` property.
+    """
+    if hasattr(operand, "_title"):
+        title = operand._title
+        if not title or title == "<untitled>":
+            return ("untitled",)
+        return ("title", title)
+    rendered = _canonical_scalar(operand)
+    if rendered is None:
+        return ("value",)
+    return ("scalar", rendered)
+
+
+def _title_grown(title):
+    """Apply the stateless growth rule: collapse to an absent title beyond the limit."""
+    if len(title) > _TITLE_LIMIT:
+        return None
+    return title
+
+
+def _title_additive(fname, tokens):
+    if len(tokens) < 2:
+        return None
+    left, right = tokens
+    # T4: additive with a scalar (or out-of-norm value) operand offsets/rescales.
+    if left[0] == "title" and right[0] in ("scalar", "value"):
+        return _TITLE_PRESERVE_SENTINEL
+    if right[0] == "title" and left[0] in ("scalar", "value"):
+        return _TITLE_PRESERVE_SENTINEL
+    # T5: dataset-dataset additive.
+    if left[0] != "title" or right[0] != "title":
+        return None
+    if left[1] == right[1]:
+        return _TITLE_PRESERVE_SENTINEL  # identical titles -> rescaling
+    return _title_grown(f"{fname}({left[1]}, {right[1]})")
+
+
+def _title_ratio(fname, tokens, reflected):
+    if len(tokens) < 2:
+        return None
+    left, right = tokens
+    if reflected:
+        # Reflected division (``s / ds``): compose with the scalar first.
+        if left[0] == "scalar" and right[0] == "title":
+            return _title_grown(f"{fname}({left[1]}, {right[1]})")
+        if left[0] == "title" and right[0] == "scalar":
+            return _title_grown(f"{fname}({left[1]}, {right[1]})")
+        return None
+    # T4: ratio with a scalar (or out-of-norm value) operand rescales.
+    if left[0] == "title" and right[0] in ("scalar", "value"):
+        return _TITLE_PRESERVE_SENTINEL
+    if right[0] == "title" and left[0] in ("scalar", "value"):
+        return _TITLE_PRESERVE_SENTINEL
+    # T5: dataset-dataset ratio always composes.
+    if left[0] != "title" or right[0] != "title":
+        return None
+    return _title_grown(f"{fname}({left[1]}, {right[1]})")
+
+
+def _title_for(fname, operands, reflected=False):
+    """
+    Compute the result title of an arithmetic operation.
+
+    Returns the new title, ``None`` when the result title is absent, or the
+    ``_TITLE_PRESERVE_SENTINEL`` when the source title must be kept verbatim.
+    """
+    fname = _TITLE_CANONICAL_NAME.get(fname, fname)
+
+    if fname in _TITLE_PRESERVE:
+        return _TITLE_PRESERVE_SENTINEL
+
+    tokens = [_title_token(op) for op in operands]
+
+    # T2/T3: unary composition ``opname(source)``.
+    if fname in _TITLE_COMPOSE_UNARY:
+        if tokens and tokens[0][0] == "title":
+            return _title_grown(f"{fname}({tokens[0][1]})")
+        return None
+
+    # T4/T5: ``power(left, right)`` with both operands.
+    if fname == _TITLE_POWER:
+        if (
+            len(tokens) >= 2
+            and tokens[0][0] in ("title", "scalar")
+            and tokens[1][0] in ("title", "scalar")
+        ):
+            return _title_grown(f"power({tokens[0][1]}, {tokens[1][1]})")
+        return None
+
+    if fname in _TITLE_ADDITIVE:
+        return _title_additive(fname, tokens)
+
+    if fname in _TITLE_RATIO:
+        return _title_ratio(fname, tokens, reflected)
+
+    # Unlisted operation: operator parity (preserve).
+    return _TITLE_PRESERVE_SENTINEL
+
+
 def _extract_ufuncs(strg):
     ufuncs = {}
     regex = r"^([a-z,0-9,_]*)\((x.*)\[.*]\)\W*(.*\.)$"
@@ -476,29 +716,6 @@ class NDMath:
         "gt",
     ]
     __complex_funcs = ["real", "imag", "absolute", "abs"]
-    __keep_title = [
-        "negative",
-        "absolute",
-        "abs",
-        "fabs",
-        "rint",
-        "floor",
-        "ceil",
-        "trunc",
-        "add",
-        "subtract",
-    ]
-    __remove_title = [
-        "multiply",
-        "divide",
-        "true_divide",
-        "floor_divide",
-        "mod",
-        "fmod",
-        "remainder",
-        "logaddexp",
-        "logaddexp2",
-    ]
     __remove_units = [
         "logical_not",
         "isfinite",
@@ -527,7 +744,6 @@ class NDMath:
             return NotImplemented
 
         fname = ufunc.__name__
-        from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 
         # set history string
         history = f"Ufunc {fname} applied."
@@ -536,18 +752,20 @@ class NDMath:
             return (getattr(np, fname))(inputs[0].masked_data)
 
         # case of a dataset
-        data, units, mask, returntype = self._op(ufunc, inputs, isufunc=True)
-        new = self._op_result(data, units, mask, history, returntype)
+        data, units, mask, returntype, reflected = self._op(ufunc, inputs, isufunc=True)
 
-        # make a new title depending on the operation
-        if fname in self.__remove_title:
-            new.title = f"<{fname}>"
-        elif fname not in self.__keep_title and isinstance(new, NDArray):
-            if hasattr(new, "title") and new.title is not None:
-                new.title = f"{fname}({new.title})"
-            else:
-                new.title = f"{fname}(data)"
-        return new
+        # The title is computed by the shared arithmetic-title-semantics engine
+        # (`_title_for`), identical for the operator and the ufunc paths.
+        return self._op_result(
+            data,
+            units,
+            mask,
+            history,
+            returntype,
+            fname=fname,
+            operands=inputs,
+            reflected=reflected,
+        )
 
     # ----------------------------------------------------------------------------------
     # public methods
@@ -3213,7 +3431,7 @@ class NDMath:
         inputs: Sequence[ArrayLike],
         isufunc: bool = False,
         reflected: bool = False,
-    ) -> tuple[np.ndarray, str | None, np.ndarray, str | None]:
+    ) -> tuple[np.ndarray, str | None, np.ndarray, str | None, bool]:
         # Achieve an operation f on the objs
 
         fname = f.__name__
@@ -3274,7 +3492,7 @@ class NDMath:
         )
 
         # return calculated data, units and mask
-        return data, units, mask, returntype
+        return data, units, mask, returntype, reflected
 
     @staticmethod
     def _unary_op(f):
@@ -3286,8 +3504,17 @@ class NDMath:
             else:
                 history = None
 
-            data, units, mask, returntype = self._op(f, [self])
-            return self._op_result(data, units, mask, history, returntype)
+            data, units, mask, returntype, reflected = self._op(f, [self])
+            return self._op_result(
+                data,
+                units,
+                mask,
+                history,
+                returntype,
+                fname=fname,
+                operands=[self],
+                reflected=reflected,
+            )
 
         return func
 
@@ -3335,8 +3562,10 @@ class NDMath:
         @functools.wraps(f)
         def func(self, other):
             fname = f.__name__
-            objs = [self, other] if not reflexive else [other, self]
-            fm, objs, reflected = self._check_order(fname, objs)
+            # Keep the operands in mathematical order for the title engine;
+            # `_check_order` may reorder them in place for computation.
+            operands = [self, other] if not reflexive else [other, self]
+            fm, objs, reflected = self._check_order(fname, list(operands))
 
             if hasattr(self, "history"):
                 history = (
@@ -3346,8 +3575,19 @@ class NDMath:
             else:
                 history = None
 
-            data, units, mask, returntype = self._op(fm, objs, reflected=reflected)
-            return self._op_result(data, units, mask, history, returntype)
+            data, units, mask, returntype, reflected = self._op(
+                fm, objs, reflected=reflected
+            )
+            return self._op_result(
+                data,
+                units,
+                mask,
+                history,
+                returntype,
+                fname=fname,
+                operands=operands,
+                reflected=reflected,
+            )
 
         return func
 
@@ -3363,7 +3603,9 @@ class NDMath:
             objs = [self, other]
             fm, objs, reflected = self._check_order(fname, objs)
 
-            data, units, mask, returntype = self._op(fm, objs, reflected=reflected)
+            data, units, mask, returntype, reflected = self._op(
+                fm, objs, reflected=reflected
+            )
             self._data = data
             self._units = units
             self._mask = mask
@@ -3372,7 +3614,17 @@ class NDMath:
 
         return func
 
-    def _op_result(self, data, units=None, mask=None, history=None, returntype=None):
+    def _op_result(
+        self,
+        data,
+        units=None,
+        mask=None,
+        history=None,
+        returntype=None,
+        fname=None,
+        operands=None,
+        reflected=False,
+    ):
         # make a new NDArray resulting of some operation
 
         new = self.copy()
@@ -3389,6 +3641,15 @@ class NDMath:
             new._mask = cpy.copy(mask)
         if history is not None and hasattr(new, "history"):
             new.history = history.strip()
+
+        # apply the arithmetic title semantics (shared engine for operators and
+        # ufuncs); the title is set to the composed form or to an absent state.
+        # Store the raw value because the ``title`` setter ignores falsy values,
+        # and an absent title is represented as ``_title = None``.
+        if fname is not None and operands:
+            title = _title_for(fname, operands, reflected)
+            if title is not _TITLE_PRESERVE_SENTINEL:
+                new._title = title
 
         # case when we want to return a simple masked ndarray
         if returntype == "masked_array":

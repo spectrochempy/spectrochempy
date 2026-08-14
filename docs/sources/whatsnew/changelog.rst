@@ -26,6 +26,18 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Elementwise arithmetic on ``NDDataset``/``NDArray`` now follows a single
+  shared title rule engine, making Python operators and their ``numpy`` ufunc
+  counterparts produce identical titles. Identity-preserving operations
+  (``abs``, ``negative``, ``positive``, rounding, ...) and dataset-scalar
+  additive or dimensionless-scaling operations keep the source ``title``
+  verbatim; unary transforms compose it (``sin(source)``, ``sqrt(source)``);
+  dataset-dataset operations compose ``add(...)``/``subtract(...)``/
+  ``multiply(...)``/``divide(...)``; powers compose ``power(source, p)``. The
+  previous ``"<fname>"`` substitution and the operator/ufunc title divergence
+  have been removed, and composed titles longer than 120 code points collapse
+  to an absent title.
+
 - Derived analysis outputs now remain compatible with source datasets whose
   metadata contains read-only nested structures. In particular,
   ``Optimize.predict()`` and ``Optimize.result.residuals`` now attach detached
