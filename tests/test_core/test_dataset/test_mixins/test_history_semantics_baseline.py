@@ -167,11 +167,11 @@ class TestSingleSourceTransformations:
         result = np.sin(np.exp(ds1))
         assert len(result.history) == len(ds1.history) + 2
 
-    def test_ufunc_title_wrapping(self, ds1):
-        """Ufuncs not in __keep_title wrap the title."""
+    def test_ufunc_preserves_title(self, ds1):
+        """Ufuncs preserve the source title (Category A semantics)."""
         ds1.title = "test data"
         result = np.sin(ds1)
-        assert result.title == "sin(test data)"
+        assert result.title == "test data"
 
 
 # ===========================================================================

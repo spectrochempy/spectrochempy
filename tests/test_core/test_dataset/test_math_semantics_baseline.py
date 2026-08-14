@@ -262,8 +262,8 @@ class TestDatasetScalarArithmetic:
         assert_masked_values(rich_dataset / 2.0, (0, 0))
 
     # ---- title behavior ----
-    # Current: ALL Python operators (+, -, *, /) preserve the title.
-    # Title overwriting only happens via __array_ufunc__ for ufunc paths.
+    # Category A arithmetic preserves the title for BOTH the operator path
+    # (+, -, *, /) and the elementwise ufunc path (np.add, np.multiply, ...).
 
     def test_add_title(self, rich_dataset):
         assert (rich_dataset + 2.0).title == "reference spectrum"
@@ -276,6 +276,12 @@ class TestDatasetScalarArithmetic:
 
     def test_truediv_title(self, rich_dataset):
         assert (rich_dataset / 2.0).title == "reference spectrum"
+
+    def test_mul_ufunc_title(self, rich_dataset):
+        assert np.multiply(rich_dataset, 2.0).title == "reference spectrum"
+
+    def test_add_ufunc_title(self, rich_dataset):
+        assert np.add(rich_dataset, 2.0).title == "reference spectrum"
 
     # ---- name behavior ----
 
@@ -492,12 +498,13 @@ class TestUfuncCharacterization:
     Characterize representative ufuncs on NDDataset.
 
     Selected operations:
-        abs    -- identity-preserving, in __keep_title
-        sqrt   -- domain changing, not in __keep_title
+        abs    -- identity-preserving
+        sqrt   -- domain changing
         exp    -- requires dimensionless units
         log    -- requires dimensionless units
         sin    -- requires radian units, returns dimensionless
 
+    Category A (preserve geometry) ufuncs preserve the source title.
     Each ufunc is tested with appropriate unit context.
     """
 
@@ -542,7 +549,7 @@ class TestUfuncCharacterization:
     def test_sqrt_title(self):
         ds = NDDataset([1.0, 4.0], title="test")
         result = np.sqrt(ds)
-        assert result.title == "sqrt(test)"
+        assert result.title == "test"
 
     def test_sqrt_name(self):
         ds = NDDataset([1.0, 4.0], name="myname")
@@ -591,7 +598,7 @@ class TestUfuncCharacterization:
     def test_sin_title(self):
         ds = NDDataset([0.0, 1.0], title="angle", units="radian")
         result = np.sin(ds)
-        assert result.title == "sin(angle)"
+        assert result.title == "angle"
 
     def test_sin_name(self):
         ds = NDDataset([0.0, 1.0], name="angle_data", units="radian")
@@ -857,11 +864,11 @@ class TestEmptyDatasetBehavior:
 #    intersecting at the given index.  This differs from numpy's per-element
 #    masked array behavior and is the current spectroscopy-oriented policy.
 #
-# 2. Title is preserved for ALL Python operators (+, -, *, /) on NDDataset.
-#    The __remove_title list (multiply, divide, etc.) only affects operations
-#    routed through __array_ufunc__ (e.g. np.multiply()), not through Python
-#    operators (__mul__, __truediv__).  This is a split between operator and
-#    ufunc title behavior.
+# 2. Title is preserved for ALL elementwise arithmetic, both through Python
+#    operators (+, -, *, /) and through elementwise ufuncs (np.multiply,
+#    np.sin, np.sqrt, ...).  The ufunc path previously replaced the title
+#    (e.g. "<multiply>") or wrapped it (e.g. "sin(...)") for some operations;
+#    this divergence from the operator path was removed (G1).
 #
 # 3. History messages differ by operation path:
 #    - Binary operators: "Binary operation {name} with `{other}` ..."

@@ -476,29 +476,6 @@ class NDMath:
         "gt",
     ]
     __complex_funcs = ["real", "imag", "absolute", "abs"]
-    __keep_title = [
-        "negative",
-        "absolute",
-        "abs",
-        "fabs",
-        "rint",
-        "floor",
-        "ceil",
-        "trunc",
-        "add",
-        "subtract",
-    ]
-    __remove_title = [
-        "multiply",
-        "divide",
-        "true_divide",
-        "floor_divide",
-        "mod",
-        "fmod",
-        "remainder",
-        "logaddexp",
-        "logaddexp2",
-    ]
     __remove_units = [
         "logical_not",
         "isfinite",
@@ -527,7 +504,6 @@ class NDMath:
             return NotImplemented
 
         fname = ufunc.__name__
-        from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 
         # set history string
         history = f"Ufunc {fname} applied."
@@ -537,17 +513,10 @@ class NDMath:
 
         # case of a dataset
         data, units, mask, returntype = self._op(ufunc, inputs, isufunc=True)
-        new = self._op_result(data, units, mask, history, returntype)
 
-        # make a new title depending on the operation
-        if fname in self.__remove_title:
-            new.title = f"<{fname}>"
-        elif fname not in self.__keep_title and isinstance(new, NDArray):
-            if hasattr(new, "title") and new.title is not None:
-                new.title = f"{fname}({new.title})"
-            else:
-                new.title = f"{fname}(data)"
-        return new
+        # Category A (preserve geometry) ufuncs preserve the source title;
+        # `_op_result` carries it over from the source dataset.
+        return self._op_result(data, units, mask, history, returntype)
 
     # ----------------------------------------------------------------------------------
     # public methods

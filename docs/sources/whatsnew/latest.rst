@@ -15,6 +15,12 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 Bug Fixes
 ~~~~~~~~~
 
+- Elementwise ufunc results on ``NDDataset`` and ``NDArray`` now preserve the
+  source ``title``, consistent with Python arithmetic operators (``+``, ``-``,
+  ``*``, ``/``). Previously some ufunc paths replaced the title (for example
+  ``"<multiply>"``) or wrapped it (for example ``"sin(...)"``); this
+  operator/ufunc title divergence has been removed.
+
 - Derived analysis outputs now remain compatible with source datasets whose
   metadata contains read-only nested structures. In particular,
   ``Optimize.predict()`` and ``Optimize.result.residuals`` now attach detached
