@@ -161,7 +161,7 @@ def _render_sections(sections: list[DisplaySection]) -> str:
         if section.role == "summary":
             parts.append(body)
         elif section.role in ("data", "dimension"):
-            title = (section.title or section.role.capitalize()).replace("`", "")
+            title = section.title or section.role.capitalize()
             parts.append(
                 f'<div class="scp-output section">'
                 f"<details><summary>{title}</summary>\n{body}\n"
