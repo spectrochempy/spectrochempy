@@ -11,6 +11,7 @@ like attribute access and read-only capabilities.
 """
 
 import collections
+import re
 import uuid
 from datetime import datetime
 from typing import Any
@@ -382,7 +383,7 @@ class ScpObjectList(list):
                     "<li class='scp-output section'>" f"<pre>{repr(item)}</pre></li>\n"
                 )
         html += "</ul></details></div>"
-        return html
+        return re.sub(r">\s+<", "><", html).replace("\n", "")
 
     @property
     def names(self):

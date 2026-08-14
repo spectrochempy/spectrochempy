@@ -30,6 +30,7 @@ DO NOT:
 """
 
 import numpy as np
+from IPython.core.interactiveshell import InteractiveShell
 
 from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 from spectrochempy.core.dataset.coord import Coord
@@ -2406,6 +2407,15 @@ class TestNDDatasetSemanticHTML:
         html = ds._repr_html_()
         assert "1" in html
         assert "3" in html
+
+    def test_ipython_html_bundle_is_normalized(self):
+        """The MIME HTML bundle should not expose raw CR or reST-like backticks."""
+        ds = NDDataset([1.0, 2.0], name="probe")
+        ds.history = "Acquisition échantillon\rSecond line"
+        data, _metadata = InteractiveShell.instance().display_formatter.format(ds)
+        html = data["text/html"]
+        assert "\r" not in html
+        assert "Dimension `" not in html
 
     def test_units_present(self):
         """Units appear in the HTML."""

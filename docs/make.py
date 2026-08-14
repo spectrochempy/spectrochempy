@@ -906,6 +906,17 @@ class BuildDocumentation:
         environ["SPHINX_SRCDIR"] = srcdir = str(self.SRC)
         environ["SPHINX_CONFDIR"] = confdir = str(DOCS)
         environ["SOURCES"] = str(self.PROJECT_SOURCES)
+        source_root = str(self.PROJECT_SOURCES.parent)
+        current_pythonpath = environ.get("PYTHONPATH", "")
+        pythonpath_entries = (
+            current_pythonpath.split(os.pathsep) if current_pythonpath else []
+        )
+        if source_root not in pythonpath_entries:
+            environ["PYTHONPATH"] = os.pathsep.join(
+                [source_root, *filter(None, pythonpath_entries)]
+            )
+        if source_root not in sys.path:
+            sys.path.insert(0, source_root)
 
         outdir = f"{HTML}/{doc_version}"
         doctreesdir = f"{DOCTREES}/{doc_version}"
