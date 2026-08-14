@@ -127,12 +127,14 @@ _ = corrected.plot()
 # Try the AsLS model
 # -------------------
 # The Asymmetric Least Squares model (Eilers and Boelens, 2005) offers
-# a different trade-off. The ``mu`` parameter controls smoothness and
-# ``asymmetry`` controls the weighting.
+# a different trade-off. The ``lamb`` parameter controls smoothness and
+# ``asymmetry`` controls the weighting. Here we use a stiffer baseline and a
+# lower asymmetry than the original gallery values so the result stays closer
+# to the multivariate polynomial reference.
 blc.multivariate = False
 blc.model = "asls"
-blc.mu = 10**9
-blc.asymmetry = 0.002
+blc.lamb = 3 * 10**8
+blc.asymmetry = 0.001
 _ = blc.fit(ndp)
 
 # %%
@@ -155,10 +157,11 @@ _ = corrected.plot()
 # %%
 # Try the SNIP model
 # -------------------
-# The Statistics-sensitive Non-linear Iterative Peak-clipping method:
+# The Statistics-sensitive Non-linear Iterative Peak-clipping method. A slightly
+# narrower window follows the polynomial reference more closely on this dataset.
 blc.multivariate = False
 blc.model = "snip"
-blc.snip_width = 200
+blc.snip_width = 180
 _ = blc.fit(ndp)
 
 # %%
