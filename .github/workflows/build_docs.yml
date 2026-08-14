@@ -269,10 +269,21 @@ jobs:
             BRANCH="${{ github.ref_name }}"
           fi
 
+          GALLERY_CACHE_DIR="docs/sources/gettingstarted/examples/gallery"
+          if find "$GALLERY_CACHE_DIR" -type f -name 'sphx_glr_*_thumb.png' -print -quit >/dev/null 2>&1; then
+            HAS_GALLERY_CACHE=true
+          else
+            HAS_GALLERY_CACHE=false
+          fi
+
           if [[ "$BRANCH" == docs/* || "$BRANCH" == doc/* || "$BRANCH" == codex/doc-* ]]; then
             echo "fresh_docs=true" >> "$GITHUB_OUTPUT"
             echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
             echo "Documentation fresh-run mode enabled for branch: $BRANCH"
+          elif [[ "$HAS_GALLERY_CACHE" != "true" ]]; then
+            echo "fresh_docs=true" >> "$GITHUB_OUTPUT"
+            echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+            echo "Documentation fresh-run mode enabled because no reusable gallery cache is present in the checkout."
           else
             echo "fresh_docs=false" >> "$GITHUB_OUTPUT"
             echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
@@ -318,12 +329,14 @@ jobs:
             SCPY_BUILDDIR=${{ steps.publish.outputs.build_subdir }} \
               python3 docs/make.py -j auto html
           elif [[ "${{ github.event_name }}" == "pull_request" && "${{ steps.docs_mode.outputs.fresh_docs }}" == "true" ]]; then
-            python3 docs/make.py -j auto html
+            SCPY_SKIP_POST_BUILD=1 \
+              python3 docs/make.py -j auto html
           elif [[ "${{ github.event_name }}" == "pull_request" && "${{ steps.publish.outputs.is_preview }}" == "true" ]]; then
             SCPY_BUILDDIR=${{ steps.publish.outputs.build_subdir }} \
               python3 docs/make.py --no-exec -j auto html
           elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            python3 docs/make.py --no-exec -j auto html
+            SCPY_SKIP_POST_BUILD=1 \
+              python3 docs/make.py --no-exec -j auto html
           elif [[ "${{ steps.publish.outputs.is_preview }}" == "true" ]]; then
             SCPY_BUILDDIR=${{ steps.publish.outputs.build_subdir }} \
               python3 docs/make.py -j auto html

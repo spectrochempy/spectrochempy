@@ -33,7 +33,7 @@
 # %% [markdown]
 # # Import/Export of JCAMP-DX files
 #
-# [JCAMP-DX](http://www.jcamp-dx.org/) is an open format initially developed for IR
+# [JCAMP-DX](https://artefacts.ceda.ac.uk/formats/jcamp_dx/) is an open format initially developed for IR
 # data and extended to other spectroscopies. At present, the JCAMP-DX reader implemented
 # in SpectroChemPy is limited to IR data and AFFN encoding (see <cite data-cite="mcdonald:1988">McDonald and Wilks, 1988</cite>.
 #

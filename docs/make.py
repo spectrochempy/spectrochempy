@@ -64,6 +64,7 @@ import re
 import shutil
 import sys
 import tempfile
+import traceback
 import warnings
 import zipfile
 from contextlib import suppress
@@ -103,6 +104,11 @@ TEMPDIRS = PROJECT.parent / "tempdirs"
 ON_GITHUB = os.environ.get("GITHUB_ACTIONS") == "true"
 CORE_TAG_PREFIX = "spectrochempy-v"
 SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
+
+
+def _trace_ci(message):
+    if ON_GITHUB:
+        print(f"[docs make] {message}", flush=True)
 
 
 def _canonical_doc_tag(tagname):
@@ -676,17 +682,67 @@ class BuildDocumentation:
     @staticmethod
     def _get_previous_tag():
         # Get the previous core release tag from the git repository.
-        # Filters for plain semver tags (e.g., 0.9.0) to exclude plugin tags.
+        # Keep only plain stable semver tags (e.g., 0.9.0) and exclude
+        # prereleases such as 0.9.0.dev0.
         # Returns: str - The previous release tag
 
         sh("git fetch --tags", silent=True)
         tags = sh(
-            "git tag -l '[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname",
+            "git tag -l --sort=-v:refname",
             silent=True,
         )
         if tags:
-            return tags.strip().split("\n")[0]
+            stable_tags = [
+                tag
+                for tag in tags.strip().split("\n")
+                if re.fullmatch(r"\d+\.\d+\.\d+", tag)
+            ]
+            if stable_tags:
+                return stable_tags[0]
         return ""
+
+    @staticmethod
+    def _validate_built_html(source_dir):
+        # Check the specific pages affected by the current audit for escaped
+        # SpectroChemPy rich output and the Sphinx "problematic" nodes it can
+        # create when escaped markup leaks back into reStructuredText parsing.
+        patterns = {
+            "escaped scp-output HTML": re.compile(r"&lt;div class=.*scp-output"),
+            "problematic docutils nodes": re.compile(r'class="problematic"'),
+        }
+        target_pages = (
+            Path("userguide/importexport/import.html"),
+            Path("userguide/importexport/importOMNIC.html"),
+            Path("userguide/introduction/mdcheatsheet.html"),
+        )
+
+        failures = []
+        for relative_path in target_pages:
+            html_file = source_dir / relative_path
+            if not html_file.exists():
+                continue
+            text = html_file.read_text(encoding="utf-8")
+            for label, pattern in patterns.items():
+                if match := pattern.search(text):
+                    snippet = text[max(0, match.start() - 80) : match.end() + 160]
+                    failures.append(
+                        (
+                            relative_path,
+                            label,
+                            snippet.replace("\n", " "),
+                        )
+                    )
+
+        if failures:
+            details = "\n".join(
+                f"- {path}: {label}\n  {snippet}"
+                for path, label, snippet in failures[:10]
+            )
+            raise RuntimeError(
+                "Generated HTML validation failed:\n"
+                f"{details}\n"
+                "Detected escaped SpectroChemPy rich HTML or docutils problematic nodes."
+            )
 
     def _make_dirs(self):
         # Create the directories required to build the documentation.
@@ -715,9 +771,24 @@ class BuildDocumentation:
         # Simplified documentation building process.
         # Returns: int - Sphinx build result
 
+        _trace_ci(
+            "_make_docs start "
+            f"noexec={self.settings['noexec']} "
+            f"skip_post={environ.get('SCPY_SKIP_POST_BUILD', '0')}"
+        )
         self._prepare_build()
+        _trace_ci("_prepare_build completed")
         build_result = self._run_sphinx_build()
+        _trace_ci(f"_run_sphinx_build returned {build_result!r}")
+        source_dir = HTML / self._doc_version
+        if source_dir.exists() and any(source_dir.iterdir()):
+            self._validate_built_html(source_dir)
+            _trace_ci("_validate_built_html completed")
+        if environ.get("SCPY_SKIP_POST_BUILD") == "1":
+            _trace_ci("Skipping docs post-build actions (SCPY_SKIP_POST_BUILD=1)")
+            return build_result
         self._post_build()
+        _trace_ci("_post_build completed")
         return build_result
 
     def _prepare_build(self):
@@ -835,6 +906,17 @@ class BuildDocumentation:
         environ["SPHINX_SRCDIR"] = srcdir = str(self.SRC)
         environ["SPHINX_CONFDIR"] = confdir = str(DOCS)
         environ["SOURCES"] = str(self.PROJECT_SOURCES)
+        source_root = str(self.PROJECT_SOURCES.parent)
+        current_pythonpath = environ.get("PYTHONPATH", "")
+        pythonpath_entries = (
+            current_pythonpath.split(os.pathsep) if current_pythonpath else []
+        )
+        if source_root not in pythonpath_entries:
+            environ["PYTHONPATH"] = os.pathsep.join(
+                [source_root, *filter(None, pythonpath_entries)]
+            )
+        if source_root not in sys.path:
+            sys.path.insert(0, source_root)
 
         outdir = f"{HTML}/{doc_version}"
         doctreesdir = f"{DOCTREES}/{doc_version}"
@@ -868,6 +950,7 @@ class BuildDocumentation:
 
         try:
             sp.build()
+            _trace_ci(f"Sphinx build completed with statuscode={sp.statuscode!r}")
             return 0
         except Exception as e:
             print(f"Warning: Build encountered an error: {e}")
@@ -906,8 +989,8 @@ class BuildDocumentation:
         print(f"Updated docs versions manifest: {manifest['versions']}")
 
         # Remove the environment variables
-        del environ["PREVIOUS_VERSIONS"]
-        del environ["SPHINX_NOEXEC"]
+        environ.pop("PREVIOUS_VERSIONS", None)
+        environ.pop("SPHINX_NOEXEC", None)
         if "SPHINX_PATTERN" in environ:
             del environ["SPHINX_PATTERN"]
 
@@ -1212,4 +1295,11 @@ def main():
 
 # ======================================================================================
 if __name__ == "__main__":
-    sys.exit(_main())
+    try:
+        exit_code = _main()
+        _trace_ci(f"_main returned {exit_code!r}")
+    except BaseException:
+        if ON_GITHUB:
+            traceback.print_exc()
+        raise
+    sys.exit(exit_code)

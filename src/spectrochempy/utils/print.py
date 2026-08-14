@@ -115,11 +115,16 @@ def _render_sections(sections: list[DisplaySection]) -> str:
     str
         HTML string without outer ``<div class='scp-output'>`` or heading.
     """
+
+    def _normalize_text(text: str) -> str:
+        text = text.replace("\r\n", "\n").replace("\r", "\n").replace("\t", "    ")
+        return text.replace("\n", "<br/>")
+
     parts = []
     for section in sections:
         items_html = []
         for item in section.items:
-            v = item.value.replace("\n", "<br/>")
+            v = _normalize_text(item.value)
             if item.kind == "field":
                 items_html.append(
                     f'<div class="scp-output section">'
@@ -149,9 +154,9 @@ def _render_sections(sections: list[DisplaySection]) -> str:
             elif item.kind == "block":
                 items_html.append(f"<div>{v}</div>")
             elif item.kind == "html":
-                items_html.append(v)
+                items_html.append(v.replace("\n", ""))
 
-        body = "\n".join(items_html)
+        body = "".join(items_html)
 
         if section.role == "summary":
             parts.append(body)
@@ -165,7 +170,7 @@ def _render_sections(sections: list[DisplaySection]) -> str:
         else:
             parts.append(body)
 
-    return "\n".join(parts)
+    return "".join(parts)
 
 
 def pstr(object, **kwargs):
@@ -358,6 +363,7 @@ def _process_section(section):
         return s
 
     out = "\n".join(section)
+    out = out.replace("\r\n", "\n").replace("\r", "\n").replace("\t", "    ")
 
     regex = r"\0{3}[\w\W]*?\0{3}"
 
@@ -411,7 +417,11 @@ def _process_section(section):
         n_spaces = len(line) - len(line.lstrip())
         return f"<div>{'&nbsp;' * n_spaces}{line.lstrip()}</div>"
 
-    return re.sub(regex, subst, out, count=0, flags=re.MULTILINE)
+    return re.sub(
+        r"Dimension `([^`]+)`",
+        r"Dimension \1",
+        re.sub(regex, subst, out, count=0, flags=re.MULTILINE),
+    )
 
 
 def convert_to_html(obj, open=False, id=None):
@@ -454,15 +464,23 @@ def convert_to_html(obj, open=False, id=None):
     open = "" if not open else " open"
     idx = f"{id}: " if id is not None else ""
     s += f"<details{open}><summary>{idx}{_html_heading(obj)}</summary>"
-    s += "\n".join(html_output)
+    s += "".join(html_output)
     s += "</details>"
     s += "</div>"
 
-    s = s.replace("SUMMARY", "Summary")
-    s = s.replace("DIMENSION", "Dimension")
-    s = s.replace("DATA", "Data")
-
-    return s  # noqa: RET504
+    return re.sub(
+        r"Dimension `([^`]+)`",
+        r"Dimension \1",
+        (
+            s.replace("SUMMARY", "Summary")
+            .replace("DIMENSION", "Dimension")
+            .replace("DATA", "Data")
+            .replace("\r\n", "\n")
+            .replace("\r", "\n")
+            .replace("\t", "    ")
+            .replace("\n", "")
+        ),
+    )
 
 
 # ======================================================================================

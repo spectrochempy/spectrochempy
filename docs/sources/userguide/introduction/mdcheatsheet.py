@@ -31,7 +31,8 @@
 
 # %% [markdown]
 # Copied and adapted
-# from __[this guide](https://www.ibm.com/support/knowledgecenter/en/SSGNPV_2.0.0/dsx/markd-jupyter.html)__!
+# from the Jupyter Notebook documentation on
+# __[Working with Markdown Cells](https://jupyter-notebook.readthedocs.io/en/5.7.6/examples/Notebook/Working%20With%20Markdown%20Cells.html)__.
 #
 # This Markdown cheat sheet provides a quick overview of all the Markdown syntax elements to format Markdown cells in
 # Jupyter notebooks.

@@ -1,5 +1,6 @@
 import pytest
 
+import spectrochempy as scp
 from spectrochempy.utils.objects import Adict
 from spectrochempy.utils.objects import OrderedSet
 from spectrochempy.utils.objects import ReadOnlyDict
@@ -317,6 +318,21 @@ class TestScpObjectList:
         filtered = datasets.filter_by_shape((10, 20))
         assert len(filtered) == 2
         assert isinstance(filtered, ScpObjectList)
+
+    def test_repr_html_renders_valid_nested_list_markup(self):
+        """ScpObjectList rich HTML should render list items without escaping."""
+        ds1 = scp.NDDataset([1.0, 2.0, 3.0], name="first", title="signal")
+        ds2 = scp.NDDataset([4.0, 5.0, 6.0], name="second", title="signal")
+
+        html = ScpObjectList([ds1, ds2])._repr_html_()
+
+        assert "<ul>" in html
+        assert html.count("<li class='scp-output section'>") == 2
+        assert "</ul>" in html
+        assert "&lt;div class=" not in html
+        assert 'class="problematic"' not in html
+        assert "NDDataset [first]" in html
+        assert "NDDataset [second]" in html
 
 
 if __name__ == "__main__":

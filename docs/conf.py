@@ -21,6 +21,19 @@ from pathlib import Path
 import jinja2
 from sphinx.ext.autodoc import ClassDocumenter
 
+# Ensure docs and executed notebooks import the in-tree source tree first.
+DOCS_CONFDIR = Path(__file__).parent
+DOCS_PROJECT = DOCS_CONFDIR.parent
+DOCS_SOURCE_ROOT = DOCS_PROJECT / "src"
+if str(DOCS_SOURCE_ROOT) not in sys.path:
+    sys.path.insert(0, str(DOCS_SOURCE_ROOT))
+current_pythonpath = os.environ.get("PYTHONPATH", "")
+pythonpath_entries = current_pythonpath.split(os.pathsep) if current_pythonpath else []
+if str(DOCS_SOURCE_ROOT) not in pythonpath_entries:
+    os.environ["PYTHONPATH"] = os.pathsep.join(
+        [str(DOCS_SOURCE_ROOT), *filter(None, pythonpath_entries)]
+    )
+
 import spectrochempy
 
 # If extensions (or modules to document with autodoc) are in another directory,
