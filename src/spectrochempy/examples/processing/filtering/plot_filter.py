@@ -32,8 +32,8 @@ ax = Xm.plot(clear=False, color="r", ls="-", lw=1.5, label="SG filter")
 diff = X - Xm
 s = round(diff.std(dim=-1).values, 2)
 ax = diff.plot(clear=False, ls="-", lw=1, label=f"difference (std={s})")
-ax.legend(loc="best", fontsize=10)
-ax.set_title("Savitzky-Golay filter (size=7, order=2)")
+_ = ax.legend(loc="best", fontsize=10)
+_ = ax.set_title("Savitzky-Golay filter (size=7, order=2)")
 
 # %%
 # Whittaker-Eilers smoothing
@@ -45,5 +45,5 @@ ax = Xm.plot(clear=False, color="r", ls="-", lw=1.5, label="WE filter")
 diff = X - Xm
 s = round(diff.std(dim=-1).values, 2)
 ax = diff.plot(clear=False, ls="-", lw=1, label=f"difference (std={s})")
-ax.legend(loc="best", fontsize=10)
-ax.set_title("Whittaker-Eiler filter (order=2, lamb=1.5)")
+_ = ax.legend(loc="best", fontsize=10)
+_ = ax.set_title("Whittaker-Eiler filter (order=2, lamb=1.5)")

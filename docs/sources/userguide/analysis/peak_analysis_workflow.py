@@ -82,7 +82,7 @@ nd_oh_corr = scp.basc(
 )
 ax = nd_oh.plot(label="Synthetic spectrum")
 _ = nd_oh_corr.plot(clear=False, label="Baseline-corrected spectrum")
-ax.legend()
+_ = ax.legend()
 
 # %% [markdown]
 # ## Detect peaks and inspect the structured result
@@ -263,7 +263,7 @@ components = fit_result.components
 # %%
 _ = nd_oh_corr.plot()
 ax = components[:].plot(clear=False)
-ax.autoscale(enable=True, axis="y")
+_ = ax.autoscale(enable=True, axis="y")
 
 # %% [markdown]
 # `plot_merit()` overlays the corrected spectrum, the fitted profile, and the

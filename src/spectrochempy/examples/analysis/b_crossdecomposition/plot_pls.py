@@ -80,7 +80,7 @@ if ds_list is not None:
         label="validation",
         clear=False,
     )
-    ax.legend(loc="lower right")
+    _ = ax.legend(loc="lower right")
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

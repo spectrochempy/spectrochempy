@@ -86,7 +86,7 @@ _ = f1.fit(ndOH)
 scp.info_(f"numbers of components: {f1.n_components}")
 _ = ndOH.plot()
 ax = (f1.components[:]).plot(clear=False)
-ax.autoscale(enable=True, axis="y")
+_ = ax.autoscale(enable=True, axis="y")
 
 # %%
 # Fit the model
@@ -98,7 +98,7 @@ _ = f1.fit(ndOH)
 # Show the result
 _ = ndOH.plot()
 ax = (f1.components[:]).plot(clear=False)
-ax.autoscale(enable=True, axis="y")
+_ = ax.autoscale(enable=True, axis="y")
 
 # %%
 # Evaluate the fit quality

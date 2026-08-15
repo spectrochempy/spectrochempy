@@ -107,9 +107,9 @@ _ = ds.plot(figsize=(10, 4))
 
 # %%
 ax = ds.plot()
-ax.set_title("NH4Y Activation Spectrum")
-ax.set_xlabel("Wavenumber (cm⁻¹)")
-ax.set_ylabel("Absorbance (a.u.)")
+_ = ax.set_title("NH4Y Activation Spectrum")
+_ = ax.set_xlabel("Wavenumber (cm⁻¹)")
+_ = ax.set_ylabel("Absorbance (a.u.)")
 
 # %% [markdown]
 # ## Grid
