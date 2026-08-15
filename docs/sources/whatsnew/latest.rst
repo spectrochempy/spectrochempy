@@ -59,6 +59,12 @@ Bug Fixes
   of incorrectly triggering a pre-fit ``NotFittedError`` during
   initialization.
 
+- ``PCA.transform()`` and ``PCA.scores`` no longer fail when the fitted source
+  dataset has feature coordinates but no explicit observation-axis coordinate
+  entry. The result now preserves the available feature metadata and keeps the
+  missing observation axis as an empty coordinate instead of raising
+  ``KeyError("y")``.
+
 Developer
 ~~~~~~~~~
 

@@ -766,9 +766,21 @@ class _set_output:
             # make coordset
             M, N = X.shape
 
+            def _coord_or_none(dataset, axis):
+                if dataset.coordset is None:
+                    return None
+                try:
+                    dim = dataset.dims[axis]
+                    coord = dataset.coordset[dim]
+                except (KeyError, IndexError, TypeError, ValueError):
+                    return None
+                return coord.copy() if coord is not None else None
+
             if X_transf.shape == X.shape and self.typex is None and self.typey is None:
                 X_transf.dims = X.dims
-                X_transf.set_coordset({X.dims[0]: X.coord(0), X.dims[1]: X.coord(1)})
+                X_transf.set_coordset(
+                    {X.dims[0]: _coord_or_none(X, 0), X.dims[1]: _coord_or_none(X, 1)}
+                )
             else:
                 # Resolve component labels — defer to analysis subclasses
                 # (e.g. PCA → PC1, PC2, …).
@@ -806,9 +818,7 @@ class _set_output:
                     X_transf.dims = [X.dims[1], "k"]
                     X_transf.set_coordset(
                         {
-                            X.dims[1]: (
-                                X.coord(1).copy() if X.coord(1) is not None else None
-                            ),
+                            X.dims[1]: _coord_or_none(X, 1),
                             "k": Coord(
                                 None,
                                 labels=_component_labels(X_transf.shape[-1]),
@@ -825,18 +835,14 @@ class _set_output:
                                 labels=_component_labels(X_transf.shape[0]),
                                 title="components",
                             ),
-                            X.dims[1]: (
-                                X.coord(1).copy() if X.coord(-1) is not None else None
-                            ),
+                            X.dims[1]: _coord_or_none(X, 1),
                         },
                     )
                 elif self.typex == "components":
                     X_transf.dims = [X.dims[0], "k"]
                     X_transf.set_coordset(
                         {
-                            X.dims[0]: (
-                                X.coord(0).copy() if X.coord(0) is not None else None
-                            ),
+                            X.dims[0]: _coord_or_none(X, 0),
                             # cannot use X.y in case of transposed X
                             "k": Coord(
                                 None,
@@ -854,18 +860,14 @@ class _set_output:
                                 labels=[f"#{i}" for i in range(X_transf.shape[-1])],
                                 title="components",
                             ),
-                            X.dims[1]: (
-                                X.coord(1).copy() if X.coord(1) is not None else None
-                            ),
+                            X.dims[1]: _coord_or_none(X, 1),
                         },
                     )
                 elif self.typey == "features":
                     X_transf.dims = [X.dims[1], "k"]
                     X_transf.set_coordset(
                         {
-                            X.dims[1]: (
-                                X.coord(1).copy() if X.coord(1) is not None else None
-                            ),
+                            X.dims[1]: _coord_or_none(X, 1),
                             "k": Coord(
                                 None,
                                 labels=[f"#{i}" for i in range(X_transf.shape[-1])],

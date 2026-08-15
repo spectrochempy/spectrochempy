@@ -473,9 +473,19 @@ class AnalysisConfigurable(BaseConfigurable):
         if source.coordset is None or dataset.coordset is None:
             return dataset
         if axis == 0:
-            dataset.coordset[dataset.dims[0]] = source.coordset[source.dims[0]].copy()
+            try:
+                coord = source.coordset[source.dims[0]]
+            except KeyError:
+                coord = None
+            if coord is not None:
+                dataset.coordset[dataset.dims[0]] = coord.copy()
         elif axis == -1:
-            dataset.coordset[dataset.dims[-1]] = source.coordset[source.dims[-1]].copy()
+            try:
+                coord = source.coordset[source.dims[-1]]
+            except KeyError:
+                coord = None
+            if coord is not None:
+                dataset.coordset[dataset.dims[-1]] = coord.copy()
         return dataset
 
     def _analysis_apply_full_axis_mask(self, dataset, full_mask, axis):
