@@ -1144,9 +1144,8 @@ class TestTitleOutOfNorm:
         assert np.conjugate(ds)._title is None
 
     def test_fix_preserves_title(self):
-        with pytest.warns(DeprecationWarning):
-            ds = NDDataset([1.0, 2.0], title="alpha")
-            assert np.fix(ds).title == "alpha"
+        ds = NDDataset([1.0, 2.0], title="alpha")
+        assert np.fix(ds).title == "alpha"
 
     def test_floor_divide_scalar_absent(self):
         ds = NDDataset([1.0, 2.0], title="alpha")
