@@ -17,6 +17,7 @@ from numpy.testing import assert_allclose
 import spectrochempy as scp
 from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis.decomposition.pca import PCA
+from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import docutils as chd
 from spectrochempy.utils import testing
@@ -142,6 +143,35 @@ def test_pca_transform_fit_transform_and_inverse(low_rank_pca_dataset):
     assert X_hat.title == "reconstruction"
     assert X_hat.units == dataset.units
     assert X_hat.dims == dataset.dims
+
+
+def test_pca_transform_handles_partial_coordset_without_observation_axis():
+    x = scp.Coord(np.linspace(400.0, 700.0, 4), title="wavelength", units="nm")
+    dataset = scp.NDDataset(
+        np.array(
+            [
+                [0.0, 1.0, 2.0, 3.0],
+                [1.0, 2.0, 3.0, 4.0],
+                [2.0, 3.0, 4.0, 5.0],
+            ]
+        ),
+        units="absorbance",
+    )
+    dataset.coordset = CoordSet(x=x)
+
+    pca = PCA(n_components=2).fit(dataset)
+
+    scores = pca.transform()
+    assert scores.shape == (3, 2)
+    assert scores.dims == ["y", "k"]
+    assert scores.coordset is not None
+    assert scores.y.is_empty
+    assert scores.k.title == "components"
+
+    scores_prop = pca.scores
+    assert scores_prop.shape == (3, 2)
+    assert scores_prop.y.is_empty
+    assert_allclose(scores_prop.data, scores.data)
 
 
 def test_pca_reporting(low_rank_pca_dataset):
