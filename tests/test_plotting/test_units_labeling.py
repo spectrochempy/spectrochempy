@@ -10,6 +10,8 @@ Tests automatic axis labeling from coordinates,
 unit formatting, and unitless coordinate handling.
 """
 
+from spectrochempy.utils.mplutils import make_label
+
 
 def assert_dataset_state_unchanged(dataset_before, dataset_after):
     """Verify dataset was not mutated by plotting."""
@@ -123,6 +125,29 @@ class TestUnitsLabeling:
 
         # Y-axis should have data title without unit suffix
         assert "Test Signal" in ylabel, "Should contain data title"
+        assert r"\mathrm{}" not in xlabel
+        assert r"\mathrm{}" not in ylabel
+        assert " / " not in xlabel
+        assert " / " not in ylabel
 
         # Verify dataset unchanged
         assert_dataset_state_unchanged(ds_before, dataset)
+
+    def test_make_label_omits_empty_unit_suffixes(self):
+        """Unitless labels should not include empty unit wrappers or slashes."""
+        import numpy as np
+
+        from spectrochempy import Coord
+        from spectrochempy import NDDataset
+
+        x_coord = Coord(data=np.linspace(0, 10, 20), title="Position")
+        dataset = NDDataset(
+            np.random.random(20),
+            title="Apodization curve",
+            coordset=[x_coord],
+        )
+
+        assert make_label(x_coord, "x") == "Position"
+        assert make_label(dataset, "values") == "Apodization curve"
+        assert make_label(x_coord, "x", use_mpl=False) == "Position"
+        assert make_label(dataset, "values", use_mpl=False) == "Apodization curve"
