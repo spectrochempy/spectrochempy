@@ -4,17 +4,21 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-Characterization tests for mathematical semantics baseline.
+Characterization tests for mathematical semantics.
 
-This suite characterizes CURRENT behavior of identity-preserving operations
-on NDDataset.  It does NOT validate a desired future policy.
-
-Purpose: detect future changes, not enforce a preferred policy.
+This suite characterizes the mathematical semantics of NDDataset arithmetic
+and ufunc application.  Since the arithmetic-title-semantics policy has been
+accepted, the title assertions in STEP 8 validate the normative behavior of
+the policy (RFC sections 5.1, 5.5, 6 and 7); the rest of the suite
+characterizes current behavior to detect future changes.
 
 Coverage:
     - arithmetic (dataset +/-/*/ scalar)
     - arithmetic (dataset +/- dataset)
     - ufuncs (abs, sqrt, exp, log, sin)
+    - title semantics (identity-preserving, unary composition, dataset-scalar,
+      dataset-dataset, canonical scalars, growth rule, absent titles, in-place
+      operators, out-of-norm operations)
     - history behavior
     - CoordSet preservation
     - metadata, units, masks, title, name
@@ -384,7 +388,8 @@ class TestDatasetDatasetArithmetic:
         - Result units: first operand's units
         - CoordSet preserved from first operand
         - Metadata propagated from first operand
-        - Title preserved for add/sub
+        - Title follows T5: identical titles preserved, different titles
+          composed (``add(...)`` / ``subtract(...)``)
         - Name preserved from first operand
         - History appended with binary operation info
     """
@@ -416,10 +421,14 @@ class TestDatasetDatasetArithmetic:
         assert_dims_equal(rich_dataset - compatible_dataset, ["y", "x"])
 
     def test_add_title(self, rich_dataset, compatible_dataset):
-        assert (rich_dataset + compatible_dataset).title == "reference spectrum"
+        assert (rich_dataset + compatible_dataset).title == (
+            "add(reference spectrum, compatible spectrum)"
+        )
 
     def test_sub_title(self, rich_dataset, compatible_dataset):
-        assert (rich_dataset - compatible_dataset).title == "reference spectrum"
+        assert (rich_dataset - compatible_dataset).title == (
+            "subtract(reference spectrum, compatible spectrum)"
+        )
 
     def test_add_name(self, rich_dataset, compatible_dataset):
         assert (rich_dataset + compatible_dataset).name == "rich_dataset"
@@ -492,11 +501,11 @@ class TestUfuncCharacterization:
     Characterize representative ufuncs on NDDataset.
 
     Selected operations:
-        abs    -- identity-preserving, in __keep_title
-        sqrt   -- domain changing, not in __keep_title
+        abs    -- identity-preserving (T1), title kept verbatim
+        sqrt   -- domain changing (T2/T3), title composed
         exp    -- requires dimensionless units
         log    -- requires dimensionless units
-        sin    -- requires radian units, returns dimensionless
+        sin    -- domain changing (T2/T3), title composed
 
     Each ufunc is tested with appropriate unit context.
     """
@@ -848,7 +857,373 @@ class TestEmptyDatasetBehavior:
 
 
 # ======================================================================================
-# STEP 8: SURPRISING BEHAVIOR DOCUMENTATION
+# STEP 8: ARITHMETIC TITLE SEMANTICS
+# ======================================================================================
+#
+# The accepted arithmetic-title-semantics policy (RFC sections 5.1, 5.5, 6
+# and 7) is implemented by a single shared rule engine: operators and ufuncs
+# must produce identical titles.  These tests assert the normative families:
+#   T1/T1b  identity-preserving operations keep the title verbatim;
+#   T2/T3   unary transforms compose ``opname(source)``;
+#   T4      dataset<->scalar additive / dimensionless-scaling keep the title,
+#           powers compose ``power(source, canon(p))``, reflected division and
+#           reflected powers compose;
+#   T5      dataset-dataset additive composes different titles, products and
+#           ratios always compose;
+#   growth  composed titles beyond the 120-code-point limit collapse to an
+#           absent title (stored ``_title`` is ``None``).
+#
+
+
+class TestTitleIdentityPreserving:
+    """T1/T1b: identity-preserving operations keep the source title verbatim."""
+
+    @pytest.mark.parametrize(
+        "op",
+        [
+            np.negative,
+            np.positive,
+            np.absolute,
+            np.abs,
+            np.fabs,
+            np.rint,
+            np.floor,
+            np.ceil,
+            np.trunc,
+        ],
+    )
+    def test_ufunc_keeps_title(self, op):
+        ds = NDDataset([1.5, -2.5], units="m", title="alpha")
+        assert op(ds).title == "alpha"
+
+    def test_unary_operators_keep_title(self):
+        ds = NDDataset([1.5, -2.5], units="m", title="alpha")
+        assert (+ds).title == "alpha"
+        assert (-ds).title == "alpha"
+        assert abs(ds).title == "alpha"
+
+
+class TestTitleUnaryComposition:
+    """T2/T3: domain-changing unary transforms compose ``opname(source)``."""
+
+    @pytest.mark.parametrize(
+        "op, expected",
+        [
+            (np.square, "square(alpha)"),
+            (np.sqrt, "sqrt(alpha)"),
+            (np.reciprocal, "reciprocal(alpha)"),
+            (np.exp, "exp(alpha)"),
+            (np.exp2, "exp2(alpha)"),
+            (np.expm1, "expm1(alpha)"),
+            (np.log, "log(alpha)"),
+            (np.log2, "log2(alpha)"),
+            (np.log10, "log10(alpha)"),
+            (np.log1p, "log1p(alpha)"),
+            (np.sin, "sin(alpha)"),
+            (np.cos, "cos(alpha)"),
+            (np.tan, "tan(alpha)"),
+            (np.arcsin, "arcsin(alpha)"),
+            (np.arccos, "arccos(alpha)"),
+            (np.arctan, "arctan(alpha)"),
+            (np.sinh, "sinh(alpha)"),
+            (np.cosh, "cosh(alpha)"),
+            (np.tanh, "tanh(alpha)"),
+            (np.arcsinh, "arcsinh(alpha)"),
+            (np.arccosh, "arccosh(alpha)"),
+            (np.arctanh, "arctanh(alpha)"),
+        ],
+    )
+    def test_ufunc_composes_title(self, op, expected):
+        ds = NDDataset([0.5], units="dimensionless", title="alpha")
+        assert op(ds).title == expected
+
+
+class TestTitleDatasetScalar:
+    """T4: dataset<->scalar additive and dimensionless-scaling keep the title."""
+
+    def test_ufuncs_with_scalar_keep_title(self):
+        ds = NDDataset([1.0, 2.0], units="absorbance", title="alpha")
+        assert np.add(ds, 2.0).title == "alpha"
+        assert np.subtract(ds, 2.0).title == "alpha"
+        assert np.multiply(ds, 2.0).title == "alpha"
+        assert np.true_divide(ds, 2.0).title == "alpha"
+
+    def test_power_composes_canonical_scalar(self):
+        ds = NDDataset([1.0, 2.0], units="absorbance", title="alpha")
+        assert (ds**2).title == "power(alpha, 2)"
+        assert (ds**2.0).title == "power(alpha, 2)"
+        assert np.power(ds, 2).title == "power(alpha, 2)"
+
+    def test_reflected_division_composes(self):
+        ds = NDDataset([1.0, 2.0], units="absorbance", title="alpha")
+        assert (2.0 / ds).title == "divide(2, alpha)"
+        assert np.true_divide(2.0, ds).title == "divide(2, alpha)"
+
+    def test_reflected_power_composes(self):
+        ds = NDDataset([1.0, 2.0], units="absorbance", title="alpha")
+        assert (2.0**ds).title == "power(2, alpha)"
+
+
+class TestTitleDatasetDataset:
+    """T5: additive composes different titles, products/ratios always compose."""
+
+    def test_identical_titles_kept(self):
+        a = NDDataset([1.0, 2.0], title="alpha")
+        b = NDDataset([1.0, 2.0], title="alpha")
+        assert (a + b).title == "alpha"
+        assert (a - b).title == "alpha"
+
+    def test_add_composes(self):
+        a = NDDataset([1.0, 2.0], title="alpha")
+        b = NDDataset([1.0, 2.0], title="beta")
+        assert (a + b).title == "add(alpha, beta)"
+        assert np.add(a, b).title == "add(alpha, beta)"
+
+    def test_subtract_composes(self):
+        a = NDDataset([1.0, 2.0], title="alpha")
+        b = NDDataset([1.0, 2.0], title="beta")
+        assert (a - b).title == "subtract(alpha, beta)"
+        assert np.subtract(a, b).title == "subtract(alpha, beta)"
+
+    def test_multiply_composes(self):
+        a = NDDataset([1.0, 2.0], title="alpha")
+        b = NDDataset([1.0, 2.0], title="beta")
+        assert (a * b).title == "multiply(alpha, beta)"
+        assert np.multiply(a, b).title == "multiply(alpha, beta)"
+
+    def test_divide_composes(self):
+        a = NDDataset([1.0, 2.0], title="alpha")
+        b = NDDataset([1.0, 2.0], title="beta")
+        assert (a / b).title == "divide(alpha, beta)"
+        assert np.true_divide(a, b).title == "divide(alpha, beta)"
+
+    def test_floor_divide_absent(self):
+        a = NDDataset([4.0, 9.0], title="alpha")
+        b = NDDataset([2.0, 3.0], title="beta")
+        assert (a // b)._title is None
+        assert np.floor_divide(a, b)._title is None
+
+    def test_mod_absent(self):
+        a = NDDataset([4.0, 9.0], title="alpha")
+        b = NDDataset([2.0, 3.0], title="beta")
+        assert np.mod(a, b)._title is None
+        assert np.remainder(a, b)._title is None
+
+    def test_fmod_absent(self):
+        a = NDDataset([4.0, 9.0], title="alpha")
+        b = NDDataset([2.0, 3.0], title="beta")
+        assert np.fmod(a, b)._title is None
+
+    def test_unlisted_binary_ufuncs_absent(self):
+        a = NDDataset([1.0, 2.0], title="alpha")
+        b = NDDataset([1.0, 2.0], title="beta")
+        assert np.maximum(a, b)._title is None
+        assert np.minimum(a, b)._title is None
+        assert np.fmax(a, b)._title is None
+        assert np.fmin(a, b)._title is None
+        assert np.copysign(a, b)._title is None
+        assert np.logaddexp(a, b)._title is None
+        assert np.logaddexp2(a, b)._title is None
+
+
+class TestTitleOperatorUfuncParity:
+    """Operators and ufuncs share one engine: identical composed titles."""
+
+    def test_add_parity(self):
+        a = NDDataset([1.0, 2.0], title="alpha")
+        b = NDDataset([1.0, 2.0], title="beta")
+        assert (a + b).title == np.add(a, b).title
+
+    def test_subtract_parity(self):
+        a = NDDataset([1.0, 2.0], title="alpha")
+        b = NDDataset([1.0, 2.0], title="beta")
+        assert (a - b).title == np.subtract(a, b).title
+
+    def test_multiply_parity(self):
+        a = NDDataset([1.0, 2.0], title="alpha")
+        b = NDDataset([1.0, 2.0], title="beta")
+        assert (a * b).title == np.multiply(a, b).title == "multiply(alpha, beta)"
+
+    def test_divide_parity(self):
+        a = NDDataset([1.0, 2.0], title="alpha")
+        b = NDDataset([1.0, 2.0], title="beta")
+        assert (a / b).title == np.true_divide(a, b).title == "divide(alpha, beta)"
+
+    def test_reflected_divide_parity(self):
+        a = NDDataset([1.0, 2.0], title="alpha")
+        assert (2.0 / a).title == np.true_divide(2.0, a).title == "divide(2, alpha)"
+
+    def test_power_parity(self):
+        ds = NDDataset([1.0, 2.0], title="alpha")
+        assert (ds**2).title == np.power(ds, 2).title == "power(alpha, 2)"
+
+
+class TestTitleCanonicalScalars:
+    """Section 5.5: canonical scalar representation inside composed titles."""
+
+    def test_integral_float_rendered_as_int(self):
+        ds = NDDataset([1.0, 2.0], title="alpha")
+        assert (ds ** np.float64(2.0)).title == "power(alpha, 2)"
+        assert (ds ** np.int64(2)).title == "power(alpha, 2)"
+
+    def test_fractional_float_kept(self):
+        ds = NDDataset([1.0, 2.0], title="alpha")
+        assert (ds**2.5).title == "power(alpha, 2.5)"
+
+    def test_negative_exponent(self):
+        ds = NDDataset([1.0, 2.0], title="alpha")
+        assert (ds**-2).title == "power(alpha, -2)"
+
+    def test_negative_zero_rendered_as_zero(self):
+        ds = NDDataset([1.0, 2.0], title="alpha")
+        assert (ds**-0.0).title == "power(alpha, 0)"
+
+    def test_bool_rendered_as_int(self):
+        ds = NDDataset([1.0, 2.0], title="alpha")
+        assert (ds ** np.bool_(True)).title == "power(alpha, 1)"
+
+    def test_complex_with_zero_imag(self):
+        ds = NDDataset([1.0, 2.0], title="alpha")
+        assert (ds ** (2 + 0j)).title == "power(alpha, 2)"
+
+    def test_complex_kept(self):
+        ds = NDDataset([1.0, 2.0], title="alpha")
+        assert (ds ** (2 + 3j)).title == "power(alpha, (2+3j))"
+
+    def test_non_finite(self):
+        ds = NDDataset([1.0, 2.0], title="alpha")
+        assert np.power(ds, np.nan).title == "power(alpha, nan)"
+        assert np.power(ds, np.inf).title == "power(alpha, inf)"
+
+    def test_scientific_notation(self):
+        ds = NDDataset([1.0, 2.0], title="alpha")
+        assert np.true_divide(1e-05, ds).title == "divide(1e-05, alpha)"
+
+
+class TestTitleGrowthAndAbsence:
+    """Section 6 (120-code-point limit) and absent-title rule (section 7)."""
+
+    def test_exact_limit_kept(self):
+        source = "x" * 115
+        ds = NDDataset([1.0], title=source)
+        result = np.sin(ds)
+        assert result.title == f"sin({source})"
+        assert len(result.title) == 120
+
+    def test_over_limit_collapses(self):
+        source = "x" * 116
+        ds = NDDataset([1.0], title=source)
+        result = np.sin(ds)
+        assert result._title is None
+        assert result.title == "<untitled>"
+
+    def test_chained_composition_collapses(self):
+        ds = NDDataset([0.5], title="x")
+        for _ in range(30):
+            ds = np.sin(ds)
+        assert ds._title is None
+
+    def test_untitled_source_absent(self):
+        ds = NDDataset([1.0, 2.0])
+        assert np.sqrt(ds)._title is None
+        assert np.sin(ds).title == "<untitled>"
+
+    def test_untitled_operand_absent(self):
+        a = NDDataset([1.0, 2.0], title="alpha")
+        b = NDDataset([1.0, 2.0])
+        assert (a + b)._title is None
+        assert (a * b)._title is None
+
+
+class TestTitleOutOfNorm:
+    """Operations (or operands) outside the normed table yield an absent title."""
+
+    def test_unlisted_unary_ufunc_absent(self):
+        ds = NDDataset([1.0, 2.0], title="alpha")
+        assert np.cbrt(ds)._title is None
+        assert np.conjugate(ds)._title is None
+
+    def test_fix_preserves_title(self):
+        ds = NDDataset([1.0, 2.0], title="alpha")
+        assert np.fix(ds).title == "alpha"
+
+    def test_floor_divide_scalar_absent(self):
+        ds = NDDataset([1.0, 2.0], title="alpha")
+        assert (ds // 2)._title is None
+        assert np.floor_divide(ds, 2)._title is None
+
+    def test_remainder_scalar_absent(self):
+        ds = NDDataset([1.0, 2.0], title="alpha")
+        assert np.remainder(ds, 2)._title is None
+
+    def test_maximum_minimum_scalar_absent(self):
+        ds = NDDataset([1.0, 2.0], title="alpha")
+        assert np.maximum(ds, 2.0)._title is None
+        assert np.minimum(ds, 2.0)._title is None
+
+    def test_array_operand_keeps_title(self):
+        # A non-canonizable array operand contributes no quantity identity and
+        # is classified like a T4 scalar: the titled operand's context is kept
+        # (explicit out-of-RFC-scope classification, PR #1534).
+        ds = NDDataset([1.0, 2.0], title="alpha")
+        assert (ds * np.array([1.0, 2.0])).title == "alpha"
+        assert (ds + np.array([1.0, 2.0])).title == "alpha"
+        assert np.multiply(ds, np.array([1.0, 2.0])).title == "alpha"
+        assert np.add(ds, np.array([1.0, 2.0])).title == "alpha"
+
+
+class TestTitleInplaceOperations:
+    """In-place operators share the engine: ``ds **= 2`` == ``ds = ds ** 2``."""
+
+    def test_inplace_power_composes(self):
+        ds = NDDataset([1.0, 2.0], title="alpha")
+        ds **= 2
+        assert ds.title == "power(alpha, 2)"
+
+    def test_inplace_additive_keeps_title(self):
+        ds = NDDataset([1.0, 2.0], title="alpha")
+        ds += 2
+        assert ds.title == "alpha"
+        ds -= 1
+        assert ds.title == "alpha"
+
+    def test_inplace_ratio_keeps_title(self):
+        ds = NDDataset([1.0, 2.0], title="alpha")
+        ds *= 2
+        assert ds.title == "alpha"
+        ds /= 2
+        assert ds.title == "alpha"
+
+    def test_inplace_floor_divide_absent(self):
+        ds = NDDataset([1.0, 2.0], title="alpha")
+        ds //= 2
+        assert ds._title is None
+
+    def test_inplace_matches_operator(self):
+        a = NDDataset([1.0, 2.0], title="alpha")
+        b = NDDataset([1.0, 2.0], title="alpha")
+        b **= 2
+        assert b.title == (a**2).title
+
+
+class TestReflectedPowerNonMutation:
+    """Reflected power (``2 ** ds``) never mutates the source dataset."""
+
+    def test_source_not_mutated(self):
+        ds = NDDataset([2.0, 4.0, 8.0], title="alpha")
+        orig = ds.data.copy()
+        result = 2.0**ds
+        assert_array_equal(ds.data, orig)
+        assert result.title == "power(2, alpha)"
+
+    def test_result_computes_exp(self):
+        ds = NDDataset([1.0, 2.0, 3.0], title="alpha")
+        result = 2.0**ds
+        np.testing.assert_allclose(result.data, 2.0 ** np.array([1.0, 2.0, 3.0]))
+
+
+# ======================================================================================
+# STEP 9: SURPRISING BEHAVIOR DOCUMENTATION
 # ======================================================================================
 #
 # Surprising behaviors discovered during characterization:
@@ -857,11 +1232,21 @@ class TestEmptyDatasetBehavior:
 #    intersecting at the given index.  This differs from numpy's per-element
 #    masked array behavior and is the current spectroscopy-oriented policy.
 #
-# 2. Title is preserved for ALL Python operators (+, -, *, /) on NDDataset.
-#    The __remove_title list (multiply, divide, etc.) only affects operations
-#    routed through __array_ufunc__ (e.g. np.multiply()), not through Python
-#    operators (__mul__, __truediv__).  This is a split between operator and
-#    ufunc title behavior.
+# 2. Title follows the accepted arithmetic-title-semantics policy through a
+#    single shared rule engine: operators and ufuncs produce identical titles.
+#    Identity-preserving operations (T1/T1b) and dataset-scalar additive and
+#    dimensionless-scaling operations (T4) keep the title verbatim; unary
+#    transforms compose ``opname(source)`` (T2/T3); dataset-dataset additive
+#    operations compose different titles (T5); products and ratios always
+#    compose.  Operations outside the normed table (maximum, floor_divide,
+#    cbrt, ...) yield an absent title (stored ``_title`` is ``None``); nothing
+#    is preserved or fabricated silently.  Composed titles longer than 120 code
+#    points also collapse to absent.  In-place operators share the engine
+#    through their canonical names (``ds **= 2`` == ``ds = ds ** 2``); Coord
+#    arithmetic is left to its own (CoordSet) title conventions.  A
+#    non-canonizable array operand (e.g. ``ds + np.array([...])``) is
+#    classified like a T4 scalar and keeps the titled operand's context; this
+#    is an explicit out-of-RFC-scope classification, not a silent default.
 #
 # 3. History messages differ by operation path:
 #    - Binary operators: "Binary operation {name} with `{other}` ..."
