@@ -16,16 +16,19 @@ Bug Fixes
 ~~~~~~~~~
 
 - Elementwise arithmetic on ``NDDataset``/``NDArray`` now follows a single
-  shared title rule engine, making Python operators and their ``numpy`` ufunc
-  counterparts produce identical titles. Identity-preserving operations
-  (``abs``, ``negative``, ``positive``, rounding, ...) and dataset-scalar
-  additive or dimensionless-scaling operations keep the source ``title``
-  verbatim; unary transforms compose it (``sin(source)``, ``sqrt(source)``);
-  dataset-dataset operations compose ``add(...)``/``subtract(...)``/
-  ``multiply(...)``/``divide(...)``; powers compose ``power(source, p)``. The
-  previous ``"<fname>"`` substitution and the operator/ufunc title divergence
-  have been removed, and composed titles longer than 120 code points collapse
-  to an absent title.
+  shared title rule engine, making Python operators, their in-place variants
+  and their ``numpy`` ufunc counterparts produce identical titles.
+  Identity-preserving operations (``abs``, ``negative``, ``positive``,
+  rounding, ...) and dataset-scalar additive or dimensionless-scaling
+  operations keep the source ``title`` verbatim; unary transforms compose it
+  (``sin(source)``, ``sqrt(source)``); dataset-dataset operations compose
+  ``add(...)``/``subtract(...)``/``multiply(...)``/``divide(...)``; powers
+  compose ``power(source, p)``. Operations outside this table yield an absent
+  title instead of a fabricated or silently preserved one, the previous
+  ``"<fname>"`` substitution and the operator/ufunc title divergence have
+  been removed, and composed titles longer than 120 code points collapse to
+  an absent title. Reflected powers such as ``2.0 ** ds`` no longer mutate
+  the source dataset.
 
 - Derived analysis outputs now remain compatible with source datasets whose
   metadata contains read-only nested structures. In particular,

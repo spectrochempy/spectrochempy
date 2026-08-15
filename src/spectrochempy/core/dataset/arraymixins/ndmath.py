@@ -229,8 +229,12 @@ def _get_name(x):
 #   - T5 dataset-dataset additive keeps identical titles and composes different
 #     ones; product/ratio always compose ``opname(left, right)``;
 #   - scalar operands entering a composition use the canonical scalar formatter;
-#   - composed titles longer than the limit collapse to an absent title.
+#   - composed titles longer than the limit collapse to an absent title;
+#   - any operation (or operand) outside the normed table yields an absent
+#     title: nothing is ever preserved or fabricated silently.
 # Operators and ufuncs share this engine so both paths produce identical titles.
+# The engine applies to NDDataset/NDArray results only; Coord title semantics
+# are governed elsewhere (CoordSet display default) and are left untouched.
 # --------------------------------------------------------------------------------------
 
 # Max length (in Unicode code points) of a composed title (policy section 6).
@@ -282,26 +286,13 @@ _TITLE_COMPOSE_UNARY = frozenset(
 
 # T5 additive family (units-compatible operations behaving like add):
 # identical operand titles preserved, different ones composed, a scalar
-# operand keeps the dataset context verbatim (T4).
-_TITLE_ADDITIVE = frozenset(
-    {
-        "add",
-        "subtract",
-        "maximum",
-        "minimum",
-        "fmax",
-        "fmin",
-        "copysign",
-        "logaddexp",
-        "logaddexp2",
-    }
-)
+# operand keeps the dataset context verbatim (T4). Normed to add/subtract.
+_TITLE_ADDITIVE = frozenset({"add", "subtract"})
 
 # T5 product/ratio family: compose ``opname(left, right)`` between datasets;
 # a scalar operand rescales and keeps the dataset context verbatim (T4).
-_TITLE_RATIO = frozenset(
-    {"multiply", "divide", "floor_divide", "remainder", "fmod"}
-)
+# Normed to multiply/divide only.
+_TITLE_RATIO = frozenset({"multiply", "divide"})
 
 # ``power`` composes ``power(left, right)`` with both operands (T4/T5).
 _TITLE_POWER = "power"
@@ -310,6 +301,7 @@ _TITLE_POWER = "power"
 # produce the identical composed title (``ds ** 2`` == ``np.power(ds, 2)``).
 # ``np.true_divide`` and ``np.divide`` share the ufunc name ``divide``;
 # ``np.mod`` and ``np.remainder`` share the ufunc name ``remainder``.
+# In-place operators map to their plain canonical names (``iadd`` -> ``add``).
 _TITLE_CANONICAL_NAME = {
     "add": "add",
     "sub": "subtract",
@@ -318,6 +310,12 @@ _TITLE_CANONICAL_NAME = {
     "floordiv": "floor_divide",
     "mod": "remainder",
     "pow": "power",
+    "iadd": "add",
+    "isub": "subtract",
+    "imul": "multiply",
+    "itruediv": "divide",
+    "ifloordiv": "floor_divide",
+    "ipow": "power",
     "neg": "negative",
     "pos": "positive",
     "abs": "absolute",
@@ -346,16 +344,16 @@ def _canonical_scalar(value):
             value = value.real
         else:
             return repr(value)
-    if isinstance(value, float):
-        if np.isfinite(value) and value.is_integer():
-            value = int(value)
+    if isinstance(value, float) and np.isfinite(value) and value.is_integer():
+        value = int(value)
     if isinstance(value, (int, float, complex)):
         return repr(value)
     return None
 
 
 def _title_token(operand):
-    """Token describing how an operand enters title composition.
+    """
+    Token describing how an operand enters title composition.
 
     Absence is the stored state (``_title`` falsy or the ``"<untitled>"``
     display default), not the display value returned by the ``title`` property.
@@ -382,7 +380,12 @@ def _title_additive(fname, tokens):
     if len(tokens) < 2:
         return None
     left, right = tokens
-    # T4: additive with a scalar (or out-of-norm value) operand offsets/rescales.
+    # T4: additive with a canonical scalar operand offsets/rescales the
+    # quantity and keeps the dataset context verbatim. Non-canonizable array
+    # operands ("value") are classified the same way: they contribute no
+    # quantity identity, so the titled operand's context is kept. This is an
+    # explicit out-of-RFC-scope classification (see PR #1534), matching the
+    # historical copy-first behavior; it is never applied to unlisted ops.
     if left[0] == "title" and right[0] in ("scalar", "value"):
         return _TITLE_PRESERVE_SENTINEL
     if right[0] == "title" and left[0] in ("scalar", "value"):
@@ -406,7 +409,8 @@ def _title_ratio(fname, tokens, reflected):
         if left[0] == "title" and right[0] == "scalar":
             return _title_grown(f"{fname}({left[1]}, {right[1]})")
         return None
-    # T4: ratio with a scalar (or out-of-norm value) operand rescales.
+    # T4: ratio with a canonical scalar rescales. Non-canonizable array
+    # operands ("value") are classified the same way (see _title_additive).
     if left[0] == "title" and right[0] in ("scalar", "value"):
         return _TITLE_PRESERVE_SENTINEL
     if right[0] == "title" and left[0] in ("scalar", "value"):
@@ -423,6 +427,8 @@ def _title_for(fname, operands, reflected=False):
 
     Returns the new title, ``None`` when the result title is absent, or the
     ``_TITLE_PRESERVE_SENTINEL`` when the source title must be kept verbatim.
+    Operations outside the normed table yield an absent title (``None``):
+    nothing is preserved or fabricated silently.
     """
     fname = _TITLE_CANONICAL_NAME.get(fname, fname)
 
@@ -453,8 +459,8 @@ def _title_for(fname, operands, reflected=False):
     if fname in _TITLE_RATIO:
         return _title_ratio(fname, tokens, reflected)
 
-    # Unlisted operation: operator parity (preserve).
-    return _TITLE_PRESERVE_SENTINEL
+    # Unlisted operation: absent title (no silent preservation, no fabrication).
+    return None
 
 
 def _extract_ufuncs(strg):
@@ -3549,7 +3555,9 @@ class NDMath:
                 inputs[0] = np.negative(inputs[0])
             elif fname in ["pow"]:
                 fname = "exp"
-                inputs[0] *= np.log(inputs[1])
+                # rebind (not in-place ``*=``) so the source operand is never
+                # mutated: ``2 ** ds`` must not alter ``ds``.
+                inputs[0] = inputs[0] * np.log(inputs[1])
                 inputs = inputs[:1]
             else:
                 raise NotImplementedError
@@ -3610,6 +3618,14 @@ class NDMath:
             self._units = units
             self._mask = mask
 
+            # Apply the shared arithmetic title engine in place: same canonical
+            # names as the plain operators (``iadd`` -> ``add``, ``ipow`` ->
+            # ``power``, ...) so ``ds **= 2`` behaves like ``ds = ds ** 2``.
+            if returntype != "Coord":
+                title = _title_for(fname, [self, other], reflected)
+                if title is not _TITLE_PRESERVE_SENTINEL:
+                    self._title = title
+
             return self
 
         return func
@@ -3646,7 +3662,9 @@ class NDMath:
         # ufuncs); the title is set to the composed form or to an absent state.
         # Store the raw value because the ``title`` setter ignores falsy values,
         # and an absent title is represented as ``_title = None``.
-        if fname is not None and operands:
+        # Coord results are excluded: their title semantics are governed
+        # elsewhere (CoordSet display default), not by this policy.
+        if fname is not None and operands and returntype != "Coord":
             title = _title_for(fname, operands, reflected)
             if title is not _TITLE_PRESERVE_SENTINEL:
                 new._title = title
