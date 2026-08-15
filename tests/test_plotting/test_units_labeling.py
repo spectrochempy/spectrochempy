@@ -27,9 +27,9 @@ def assert_dataset_state_unchanged(dataset_before, dataset_after):
     new_keys = set(after_dict.keys()) - set(before_dict.keys())
     plotting_keys = new_keys - internal_attrs
 
-    assert (
-        not plotting_keys
-    ), f"Dataset mutated by plotting with new attributes: {plotting_keys}"
+    assert not plotting_keys, (
+        f"Dataset mutated by plotting with new attributes: {plotting_keys}"
+    )
     assert not hasattr(dataset_after, "fig")
     assert not hasattr(dataset_after, "ndaxes")
 
@@ -119,9 +119,9 @@ class TestUnitsLabeling:
         # Should not have unit suffixes
         assert "Position" in xlabel, "Should contain coordinate title"
         # Should not have things like "/dimensionless" or similar
-        assert (
-            "/dimensionless" not in xlabel
-        ), "Should not contain unit suffix for unitless"
+        assert "/dimensionless" not in xlabel, (
+            "Should not contain unit suffix for unitless"
+        )
 
         # Y-axis should have data title without unit suffix
         assert "Test Signal" in ylabel, "Should contain data title"
@@ -141,7 +141,11 @@ class TestUnitsLabeling:
         from spectrochempy import NDDataset
 
         x_coord = Coord(data=np.linspace(0, 10, 20), title="Position")
-        dataset = NDDataset(np.random.random(20), title="Apodization curve", coordset=[x_coord])
+        dataset = NDDataset(
+            np.random.random(20),
+            title="Apodization curve",
+            coordset=[x_coord],
+        )
 
         assert make_label(x_coord, "x") == "Position"
         assert make_label(dataset, "values") == "Apodization curve"
