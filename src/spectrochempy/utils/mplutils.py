@@ -312,22 +312,20 @@ def make_label(ss, lab="<no_axe_label>", use_mpl=True):
     if "<untitled>" in label:
         label = "values"
 
+    has_display_units = ss.units is not None and str(ss.units) not in [
+        "dimensionless",
+        "absolute_transmittance",
+    ]
+
     if use_mpl:
-        if ss.units is not None and str(ss.units) not in [
-            "dimensionless",
-            "absolute_transmittance",
-        ]:
+        if has_display_units:
             units = rf"/\ {ss.units:~L}"
             if pint_version < 24:
                 units = units.replace("%", r"\%")
-        else:
-            units = ""
-        label = rf"{label} $\mathrm{{{units}}}$"
+            label = rf"{label} $\mathrm{{{units}}}$"
     else:
-        if ss.units is not None and str(ss.units) != "dimensionless":
+        if has_display_units:
             units = rf"{ss.units:~H}"
-        else:
-            units = ""
-        label = rf"{label} / {units}"
+            label = rf"{label} / {units}"
 
     return label
