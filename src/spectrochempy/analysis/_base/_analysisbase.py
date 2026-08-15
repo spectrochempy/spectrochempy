@@ -1023,7 +1023,7 @@ class AnalysisConfigurable(BaseConfigurable):
 
         """
         for key, value in params.items():
-            if not hasattr(self, key):
+            if not self._has_writable_public_parameter(key):
                 raise SpectroChemPyError(
                     f"Invalid parameter '{key}' for {self.__class__.__name__}."
                 )

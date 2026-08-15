@@ -434,6 +434,11 @@ def test_MCRALS_errors(model, data):
     except KeyError as exc:
         assert "'nonexistent' is not a valid" in exc.args[0]
 
+    try:
+        _ = MCRALS(n_components=3, log_level="DEBUG")
+    except KeyError as exc:
+        assert "'n_components' is not a valid" in exc.args[0]
+
     # guess with wrong size of dimensions
     try:
         mcr.fit(

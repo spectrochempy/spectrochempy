@@ -12,6 +12,7 @@ Implements the base abstract classes to define models and estimators.
 import logging
 from contextlib import suppress
 from copy import copy
+from inspect import getattr_static
 
 import numpy as np
 import traitlets as tr
@@ -110,7 +111,7 @@ class BaseConfigurable(MetaConfigurable):
         # ---------------------
         # Reset all config parameters to default, if not warm_start
         defaults = self.params(default=True)
-        configkw = {} if self._warm_start else defaults
+        configkw = {} if self._warm_start else defaults.copy()
 
         # Eventually take parameters from kwargs
         configkw.update(kwargs)
@@ -118,7 +119,7 @@ class BaseConfigurable(MetaConfigurable):
         # Now update all configuration parameters
         # if an item k is not in the config parameters, an error is raised.
         for k, v in configkw.items():
-            if hasattr(self, k) and k in defaults:
+            if self._has_writable_public_parameter(k):
                 current = getattr(self, k)
                 # Handle array comparison
                 if isinstance(current, np.ndarray) or isinstance(v, np.ndarray):
@@ -140,6 +141,12 @@ class BaseConfigurable(MetaConfigurable):
     # ----------------------------------------------------------------------------------
     # Private methods
     # ----------------------------------------------------------------------------------
+    def _has_writable_public_parameter(self, name):
+        if self.has_trait(name):
+            return True
+        descriptor = getattr_static(type(self), name, None)
+        return isinstance(descriptor, property) and descriptor.fset is not None
+
     def _make_dataset(self, d):
         # Transform an array-like object to NDDataset
         # or a list of array-like to a list of NDQataset
