@@ -88,7 +88,7 @@ _ = pca.plot_score(color_mapping="labels")
 # The 3D score plot (first 3 PCs) shows that a third PC does not further
 # distinguish versicolor from virginica:
 ax = pca.plot_score(components=(1, 2, 3), color_mapping="labels")
-ax.view_init(10, 75)
+_ = ax.view_init(10, 75)
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

@@ -72,7 +72,7 @@ m = St.ptp()
 for i in range(St.shape[0]):
     St.data[i] -= i * m / 2
 ax = St.plot(title="Components", colormap=None, legend=St.k.labels)
-ax.set_yticks([])
+_ = ax.set_yticks([])
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when
