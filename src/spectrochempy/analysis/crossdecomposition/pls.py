@@ -274,7 +274,9 @@ class PLSRegression(CrossDecompositionAnalysis):
         coef = NDDataset(self._coef)
         coef.dims = ["x", "y"]
         try:
-            y_coord = self._Y.y
+            y_coord = None
+            if self._Y.coordset is not None and self._Y.ndim > 1:
+                y_coord = self._Y.coordset[self._Y.dims[-1]].copy()
         except (AttributeError, IndexError, TypeError):
             y_coord = None
         coef.set_coordset(

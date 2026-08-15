@@ -201,6 +201,39 @@ class TestPLSRegressionResult:
     def test_coef_is_nddataset(self, pls_fitted):
         assert hasattr(pls_fitted.coef, "shape")
 
+    def test_coef_uses_target_coordinate_when_y_has_observation_axis(self):
+        import spectrochempy as scp
+
+        rng = np.random.default_rng(0)
+        X = scp.NDDataset(
+            rng.normal(size=(8, 5)),
+            coordset=[
+                scp.Coord(np.arange(8), title="samples"),
+                scp.Coord(np.linspace(1000.0, 2000.0, 5), title="wavelength"),
+            ],
+        )
+        Y = scp.NDDataset(
+            rng.normal(size=(8, 2)),
+            coordset=[
+                scp.Coord(np.arange(8), title="observations"),
+                scp.Coord([10, 20], title="targets", labels=["a", "b"]),
+            ],
+        )
+
+        pls = PLSRegression(n_components=2)
+        pls.fit(X, Y)
+
+        coef = pls.coef
+        assert coef.shape == (5, 2)
+        assert coef.x.size == 5
+        assert coef.y.size == 2
+        assert coef.y.title == "targets"
+        assert list(coef.y.labels) == ["a", "b"]
+        assert_allclose(
+            pls.result.outputs["coef"].data,
+            coef.data,
+        )
+
     def test_all_outputs_are_nddataset(self, pls_fitted):
         for key, value in pls_fitted.result.outputs.items():
             assert hasattr(value, "shape"), f"{key} is not an NDDataset"
