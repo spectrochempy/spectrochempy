@@ -54,6 +54,11 @@ Bug Fixes
   coordinate. The coefficient wrapper now preserves the target-axis coordinate
   instead of attaching the observation axis to the result.
 
+- ``MCRALS`` now rejects unsupported constructor keywords such as
+  ``n_components=...`` with the normal invalid-parameter ``KeyError`` instead
+  of incorrectly triggering a pre-fit ``NotFittedError`` during
+  initialization.
+
 Developer
 ~~~~~~~~~
 
