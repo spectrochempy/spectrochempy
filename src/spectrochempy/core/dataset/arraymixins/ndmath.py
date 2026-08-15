@@ -355,17 +355,21 @@ def _title_token(operand):
     """
     Token describing how an operand enters title composition.
 
+    Always a ``(kind, payload)`` tuple: ``("title", title)``,
+    ``("scalar", rendered)`` for canonical scalars, and ``("untitled", None)`` /
+    ``("value", None)`` when the operand carries no composed-able title.
+
     Absence is the stored state (``_title`` falsy or the ``"<untitled>"``
     display default), not the display value returned by the ``title`` property.
     """
     if hasattr(operand, "_title"):
         title = operand._title
         if not title or title == "<untitled>":
-            return ("untitled",)
+            return ("untitled", None)
         return ("title", title)
     rendered = _canonical_scalar(operand)
     if rendered is None:
-        return ("value",)
+        return ("value", None)
     return ("scalar", rendered)
 
 
