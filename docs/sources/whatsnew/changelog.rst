@@ -60,6 +60,11 @@ Bug Fixes
   actually optimized. The canonical model spec is now the sole source of truth
   after a fit.
 
+- ``PLSRegression.coef`` no longer fails when the fitted multivariate target
+  dataset carries both an observation coordinate and a target-variable
+  coordinate. The coefficient wrapper now preserves the target-axis coordinate
+  instead of attaching the observation axis to the result.
+
 
 .. section
 
