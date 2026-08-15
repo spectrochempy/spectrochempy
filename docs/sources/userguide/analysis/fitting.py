@@ -613,7 +613,7 @@ components = f1.result.components
 # %%
 _ = ndOHcorr.plot()
 ax = (components[:]).plot(clear=False)
-ax.autoscale(enable=True, axis="y")
+_ = ax.autoscale(enable=True, axis="y")
 
 # %% [markdown]
 # `plot_merit()` overlays the experimental spectrum, the fitted profile, and the

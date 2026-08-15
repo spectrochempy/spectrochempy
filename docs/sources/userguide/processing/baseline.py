@@ -383,7 +383,7 @@ R1 = R.detrend()
 _ = R.plot(label="original")
 _ = R1.plot(label="detrended", clear=False)
 ax = (R - R1).plot(label="trend", clear=False, cmap=None, color="red", ls=":")
-ax.legend(loc="upper left")
+_ = ax.legend(loc="upper left")
 _ = ax.set_ylim([-0.3, 0.8])
 
 # %% [markdown]

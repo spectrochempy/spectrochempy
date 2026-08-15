@@ -33,11 +33,11 @@ ds1 = ds[0]
 
 # %%
 ax = ds1.plot()
-ax.set_title(r"NH$_4$Y Activation - $\nu_{NH}$ Region")
-ax.set_xlabel(r"Wavenumber (cm$^{-1}$)")
-ax.set_ylabel("Absorbance (a.u.)")
-ax.set_xlim(3500, 2800)
-ax.annotate(
+_ = ax.set_title(r"NH$_4$Y Activation - $\nu_{NH}$ Region")
+_ = ax.set_xlabel(r"Wavenumber (cm$^{-1}$)")
+_ = ax.set_ylabel("Absorbance (a.u.)")
+_ = ax.set_xlim(3500, 2800)
+_ = ax.annotate(
     "NH stretch",
     xy=(3250, 0.6),
     xytext=(3400, 0.7),
@@ -84,9 +84,9 @@ _ = ds.plot_image(cmap="RdBu_r", norm=norm, colorbar=True)
 
 # %%
 ax = ds1.plot()
-ax.set_xlabel(r"$ \tilde{\nu}$ (cm$^{-1}$)")
-ax.set_ylabel(r"$ \epsilon$ (mol$^{-1}$·L·cm$^{-1}$)")
-ax.set_title(r"Beer-Lambert: $A = \epsilon c l$")
+_ = ax.set_xlabel(r"$ \tilde{\nu}$ (cm$^{-1}$)")
+_ = ax.set_ylabel(r"$ \epsilon$ (mol$^{-1}$·L·cm$^{-1}$)")
+_ = ax.set_title(r"Beer-Lambert: $A = \epsilon c l$")
 
 # %% [markdown]
 # ## Reproducibility

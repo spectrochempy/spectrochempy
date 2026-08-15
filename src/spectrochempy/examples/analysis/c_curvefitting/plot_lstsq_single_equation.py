@@ -45,7 +45,7 @@ _ = plt.plot(time, distance_fitted, ":r", label="Linear regression output")
 plt.xlabel("time / h")
 plt.ylabel("distance / km")
 plt.title(f"Linear regression, $R^2={rsquare:.3f}$")
-plt.legend()
+_ = plt.legend()
 
 # %%
 # Using NDDatasets as input (X and Y)

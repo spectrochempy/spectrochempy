@@ -40,7 +40,7 @@ profiles.title = "relative concentration"
 
 # %%
 ax = profiles.T.plot()
-ax.legend()
+_ = ax.legend()
 
 # %%
 # Use built-in Gaussian line-shape helper
@@ -60,4 +60,4 @@ profiles_gaussian.title = "relative concentration"
 
 # %%
 ax = profiles_gaussian.T.plot()
-ax.legend()
+_ = ax.legend()

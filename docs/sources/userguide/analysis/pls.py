@@ -147,7 +147,7 @@ pls.plot_parity(
     label="validation",
     clear=False,
 )
-ax.legend(loc="lower right")
+_ = ax.legend(loc="lower right")
 
 # %% [markdown]
 # The goodness of fit (as expressed by R-squared) can also be obtained using the `score()` method. For the training dataset
