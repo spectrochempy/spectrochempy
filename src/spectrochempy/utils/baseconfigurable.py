@@ -110,7 +110,8 @@ class BaseConfigurable(MetaConfigurable):
         # ---------------------
         # Reset all config parameters to default, if not warm_start
         defaults = self.params(default=True)
-        configkw = {} if self._warm_start else defaults
+        default_keys = set(defaults)
+        configkw = {} if self._warm_start else defaults.copy()
 
         # Eventually take parameters from kwargs
         configkw.update(kwargs)
@@ -118,7 +119,7 @@ class BaseConfigurable(MetaConfigurable):
         # Now update all configuration parameters
         # if an item k is not in the config parameters, an error is raised.
         for k, v in configkw.items():
-            if hasattr(self, k) and k in defaults:
+            if k in default_keys:
                 current = getattr(self, k)
                 # Handle array comparison
                 if isinstance(current, np.ndarray) or isinstance(v, np.ndarray):
