@@ -65,6 +65,11 @@ Bug Fixes
   missing observation axis as an empty coordinate instead of raising
   ``KeyError("y")``.
 
+- The documentation warning shown on development builds now links to the
+  actual latest stable release again. Stable-doc discovery now accepts the
+  current prefixed release tags and no longer falls back to obsolete legacy
+  versions such as ``0.8.4``.
+
 Developer
 ~~~~~~~~~
 
