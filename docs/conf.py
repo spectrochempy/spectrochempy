@@ -373,12 +373,34 @@ if on_github_actions:
 # get previous versions and save versions dic them in the versions.json file
 # which will be used by versions.js script to display the versions in the sidebar
 previous_versions = os.environ.get("PREVIOUS_VERSIONS", "").split(",")
-last_release = os.environ.get("LAST_RELEASE", "")
+
+
+def _stable_release_version():
+    env_release = os.environ.get("LAST_RELEASE", "")
+    if env_release:
+        return env_release
+
+    whatsnew_versions = []
+    for path in (SRC / "whatsnew").glob("v*.rst"):
+        match = re.fullmatch(r"v(\d+\.\d+\.\d+)\.rst", path.name)
+        if match:
+            whatsnew_versions.append(match.group(1))
+
+    if not whatsnew_versions:
+        return ""
+
+    return max(
+        whatsnew_versions,
+        key=lambda value: tuple(int(part) for part in value.split(".")),
+    )
+
+
+last_release = _stable_release_version()
 
 html_context = {
     "current_version": "stable" if ("dev" not in version) else "latest",
     "latest_version": f"{root}/index.html",
-    "release": f"{root}/{last_release}/index.html",
+    "stable_release_url": f"{root}/{last_release}/index.html" if last_release else "",
     "previous_versions": os.environ.get("PREVIOUS_VERSIONS", "").split(","),  # Added
     # This is for the citing page
     "version": release,

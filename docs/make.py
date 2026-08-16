@@ -682,7 +682,8 @@ class BuildDocumentation:
     @staticmethod
     def _get_previous_tag():
         # Get the previous core release tag from the git repository.
-        # Keep only plain stable semver tags (e.g., 0.9.0) and exclude
+        # Accept both current prefixed core tags (e.g. spectrochempy-v0.12.3)
+        # and legacy plain semver tags (e.g. 0.9.0), while excluding
         # prereleases such as 0.9.0.dev0.
         # Returns: str - The previous release tag
 
@@ -692,13 +693,13 @@ class BuildDocumentation:
             silent=True,
         )
         if tags:
-            stable_tags = [
-                tag
-                for tag in tags.strip().split("\n")
-                if re.fullmatch(r"\d+\.\d+\.\d+", tag)
-            ]
-            if stable_tags:
-                return stable_tags[0]
+            stable_versions = []
+            for tag in tags.strip().split("\n"):
+                _candidates, version = _canonical_doc_tag(tag)
+                if SEMVER_RE.fullmatch(version):
+                    stable_versions.append(version)
+            if stable_versions:
+                return stable_versions[0]
         return ""
 
     @staticmethod
