@@ -54,7 +54,7 @@ dataset
 # %%
 # Plot the processed spectra
 # --------------------------
-# The `vdlist` delays become the secondary coordinate of the pseudo-2D series.
+# The ``vdlist`` delays become the secondary coordinate of the pseudo-2D series.
 ds = dataset.em(lb=15 * U.Hz)
 ds = ds.fft()
 ds = ds.pk(phc0=-145 * U.deg, phc1=0 * U.deg)
@@ -124,6 +124,6 @@ _ = ax.legend()
 
 # %%
 # This ends the example ! The following line can be removed or commented
-# when the example is run as a notebook (`.ipynb`).
+# when the example is run as a notebook (``.ipynb``).
 
 # scp.show()

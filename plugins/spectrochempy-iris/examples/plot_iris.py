@@ -22,9 +22,9 @@ from spectrochempy_iris import IrisKernel
 X = scp.read("irdata/CO@Mo_Al2O3.SPG")
 
 # %%
-# `X` has two coordinates:
-# * `wavenumbers` named "x"
-# * and `timestamps` (*i.e.,* the time of recording) named "y".
+# ``X`` has two coordinates:
+# * ``wavenumbers`` named "x"
+# * and ``timestamps`` (*i.e.,* the time of recording) named "y".
 
 print(X.coordset)
 
@@ -32,11 +32,11 @@ print(X.coordset)
 # Setting new coordinates
 # -----------------------
 #
-# The `y` coordinates of the dataset is the acquisition timestamp.
+# The ``y`` coordinates of the dataset is the acquisition timestamp.
 # However, each spectrum has been recorded with a given pressure of CO
 # in the infrared cell.
 #
-# Hence, it would be interesting to add pressure coordinates to the `y` dimension:
+# Hence, it would be interesting to add pressure coordinates to the ``y`` dimension:
 
 pressures = [
     0.003,
@@ -76,7 +76,7 @@ X.y
 X.coordset
 
 # %%
-# By default, the current coordinate is the first one (here `c_times` ).
+# By default, the current coordinate is the first one (here ``c_times`` ).
 # For example, it will be used by default for
 # plotting:
 
@@ -102,7 +102,7 @@ _ = X_.plot_contourf()
 # %%
 # IRIS analysis without regularization
 # ------------------------------------
-# Perform IRIS without regularization (the loglevel can be set to `INFO` to have
+# Perform IRIS without regularization (the loglevel can be set to ``INFO`` to have
 # information on the running process)
 iris1 = IRIS(log_level="INFO")
 
@@ -111,7 +111,7 @@ iris1 = IRIS(log_level="INFO")
 K = IrisKernel(X_, "langmuir", q=[-8, -1, 50])
 
 # %%
-# The actual kernel is given by the `kernel` attribute
+# The actual kernel is given by the ``kernel`` attribute
 kernel = K.kernel
 kernel
 
@@ -120,8 +120,8 @@ kernel
 _ = iris1.fit(X_, K)
 
 # %%
-# Grouped fitted outputs are also available from `iris1.result`. Historical
-# direct access such as `iris1.f`, `iris1.K`, `iris1.RSS`, and `iris1.SM`
+# Grouped fitted outputs are also available from ``iris1.result``. Historical
+# direct access such as ``iris1.f``, ``iris1.K``, ``iris1.RSS``, and ``iris1.SM``
 # remains supported.
 f = iris1.result.f
 _ = iris1.result.K

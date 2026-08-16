@@ -59,8 +59,8 @@ iris_analysis = scp.iris.IRIS(reg_par=[-10, 1, 12])
 _ = iris_analysis.fit(ds, K)
 
 # %%
-# Grouped fitted outputs are also available from `iris_analysis.result`, while
-# direct access such as `iris_analysis.f` remains supported.
+# Grouped fitted outputs are also available from ``iris_analysis.result``, while
+# direct access such as ``iris_analysis.f`` remains supported.
 f = iris_analysis.result.f
 
 _ = f[-7].plot_contour(colorbar=True)

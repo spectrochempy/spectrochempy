@@ -57,12 +57,12 @@ print(f"Shape: {topspin.shape}")
 #
 # For this bundled TopSpin example, the processed reference uses:
 # - digital-filter correction on the FID;
-# - no exponential/sine-bell apodization (`LB=0`, `GB=0`, `SSB=0`);
-# - zero filling to `SI=16384`.
+# - no exponential/sine-bell apodization (``LB=0``, ``GB=0``, ``SSB=0``);
+# - zero filling to ``SI=16384``.
 #
 # The FID metadata also carries TopSpin's stored phasing parameters, and the
 # public complex FFT path reuses that convention automatically for this direct
-# 1D `QSIM` dataset.
+# 1D ``QSIM`` dataset.
 spectrum = fid.fft(size=int(topspin.meta.si[0]))
 
 # %%
@@ -92,12 +92,12 @@ print(f"Amplitude scale (calc -> TopSpin): {amplitude_scale.real:0.6f}")
 print(f"Amplitude ratio max|TopSpin|/max|calc|: {maxabs_ratio:0.6f}")
 
 # %%
-# Overlay the real absorptive part against the TopSpin `1r` reference.
+# Overlay the real absorptive part against the TopSpin ``1r`` reference.
 ax = topspin.real.plot(color="black")
 _ = spectrum.real.plot(ax=ax, clear=False, color="red")
 
 # %%
-# The imaginary parts (`1i`-like channel) can also be compared directly.
+# The imaginary parts (``1i``-like channel) can also be compared directly.
 ax = topspin.imag.plot(color="black")
 _ = spectrum.imag.plot(ax=ax, clear=False, color="red")
 

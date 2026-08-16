@@ -33,7 +33,7 @@ dataset[:, 882.0:1280.0] = scp.MASKED
 # %%
 # Make sure all data are positive. For this we use the math functionalities of NDDataset
 # objects (:meth:`min` function to find the minimum value of the dataset
-# and the `-` operator for subtrating this value to all spectra of the dataset.
+# and the ``-`` operator for subtrating this value to all spectra of the dataset.
 dataset -= dataset.min()
 
 # %%
@@ -52,6 +52,8 @@ model = scp.NMF(n_components=4, log_level="INFO")
 # Fit the model
 # -------------
 _ = model.fit(dataset)
+
+# %%
 # Get the results
 # ---------------
 #

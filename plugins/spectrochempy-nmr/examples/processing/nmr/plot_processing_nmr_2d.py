@@ -14,7 +14,7 @@ Temporarily excluded from the public gallery.
 This source is preserved for the future 2D characterization campaign, but the
 current public NMR workflow intentionally supports only validated 1D
 processing. On the merged public branch, ``scp.nmr.Experiment.process()``
-raises `NotImplementedError` for multi-dimensional datasets, so this example is
+raises ``NotImplementedError`` for multi-dimensional datasets, so this example is
 not published while 2D support remains under separate scientific review.
 
 This example complements :ref:`sphx_glr_plugins_spectrochempy-nmr_examples_processing_nmr_plot_processing_nmr.py`:

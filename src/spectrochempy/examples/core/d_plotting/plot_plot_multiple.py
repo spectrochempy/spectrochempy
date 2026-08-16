@@ -5,11 +5,11 @@
 # ======================================================================================
 # ruff: noqa
 """
-Using `plot_multiple` to plot several datasets on the same figure
-=================================================================
+Using ``plot_multiple`` to plot several datasets on the same figure
+===================================================================
 In this example, we will display several Raman datasets on the same figure
-using the `plot_multiple` helper. Unlike `multiplot`, which creates a grid of
-panels, `plot_multiple` overlays several datasets on one shared axes. Several
+using the ``plot_multiple`` helper. Unlike ``multiplot``, which creates a grid of
+panels, ``plot_multiple`` overlays several datasets on one shared axes. Several
 options are available to customize that overlay.
 """
 

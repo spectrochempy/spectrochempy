@@ -6,7 +6,7 @@
 # ruff: noqa
 """
 Integrate a baseline-corrected IR band
-=====================================
+======================================
 
 This example shows how to baseline-correct a spectral region and compare
 trapezoidal and Simpson integration on a sequence of IR spectra.

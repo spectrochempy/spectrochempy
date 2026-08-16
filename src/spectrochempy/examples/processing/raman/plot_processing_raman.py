@@ -38,7 +38,7 @@ _ = B.plot()
 # Baseline correction
 # -------------------
 # Let's try to remove the baseline using different methods
-# For this we use the `Baseline` processor
+# For this we use the ``Baseline`` processor
 #
 # First, we define the baseline processor
 blc = scp.Baseline(log_level="INFO")
@@ -49,15 +49,15 @@ blc = scp.Baseline(log_level="INFO")
 # %%
 # Detrending
 # ~~~~~~~~~~
-# the `detrend` method is not strictly speaking a method to calculate a bottom line,
+# the ``detrend`` method is not strictly speaking a method to calculate a bottom line,
 # but it can be useful as a preprocessing to remove a trend.
 # Let's define the model to be used for detrending
 blc.model = "detrend"
 
 # %%
 # Now we need to define the order of the detrending either as an integer giving the
-# degree of the polynomial trend or a string among { `constant` , `linear` ,
-# `quadratic` , `cubic` }
+# degree of the polynomial trend or a string among { ``constant`` , ``linear`` ,
+# ``quadratic`` , ``cubic`` }
 blc.order = "linear"
 
 # %%
@@ -65,7 +65,7 @@ blc.order = "linear"
 _ = blc.fit(B)
 
 # %%
-# The baseline is now stored in the `baseline` attribute of the processor
+# The baseline is now stored in the ``baseline`` attribute of the processor
 corr = blc.transform()
 baseline = blc.baseline
 
@@ -97,7 +97,7 @@ plot_result(B, corr, baseline)
 # %%
 # Ok this is a good start.
 # But we can do better with more specific baseline correction methods.
-# Let's try the asymmetric least squares smoothing model ( `asls` ), on this detrended
+# Let's try the asymmetric least squares smoothing model ( ``asls`` ), on this detrended
 # spectrum:
 Bd = blc.corrected
 
@@ -123,7 +123,7 @@ plot_result(Bd, corr, baseline)
 
 # %%
 # The correction appears to be good, but let's see if we can do better by using the
-# `snip` method. This method requires to adjust the width of a window (usually set to
+# ``snip`` method. This method requires to adjust the width of a window (usually set to
 # the FWHM of the characteristic peaks).
 blc.model = "snip"
 blc.snip_width = 55  # estimated FWHM of the peaks (expressed in point. TODO: alternatively use true coordinates)
@@ -160,7 +160,7 @@ baseline = blc.baseline
 _ = corr.plot()
 
 # %%
-# or the `snip` method (which is much faster)
+# or the ``snip`` method (which is much faster)
 blc.model = "snip"
 _ = blc.fit(C)
 corr = blc.transform()
@@ -177,6 +177,6 @@ _ = G[::10].plot()
 
 # %%
 # This ends the example ! The following line can be removed or commented
-# when the example is run as a notebook (`.ipynb`).
+# when the example is run as a notebook (``.ipynb``).
 
 # scp.show()

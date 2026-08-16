@@ -17,7 +17,7 @@ This dataset (and others) can be downloaded from the
 <https://mcrals.wordpress.com/download/example-data-sets>`_.
 
 For the user convenience, this dataset is present in the test data directory
-`scp.preferences.datadir` of SpectroChemPy as ``als2004dataset.MAT``.
+``scp.preferences.datadir`` of SpectroChemPy as ``als2004dataset.MAT``.
 """
 
 # %%
@@ -29,12 +29,12 @@ import spectrochempy as scp
 # ---------------------------
 #
 # The file type (matlab) is inferred from the extension ``.mat``, so we
-# can use the generic API function `read`.  Alternatively, one can be more
-# specific by using the `read_matlab` function. Both have exactly the same behavior.
+# can use the generic API function ``read``.  Alternatively, one can be more
+# specific by using the ``read_matlab`` function. Both have exactly the same behavior.
 datasets = scp.read("matlabdata/als2004dataset.MAT")
 
 # %%
-# As the ``.mat`` file contains 6 matrices, 6 `NDDataset` objects are returned.
+# As the ``.mat`` file contains 6 matrices, 6 ``NDDataset`` objects are returned.
 print("NDDataset names:")
 for ds in datasets:
     print(f"{ds.name} : {ds.shape}")
@@ -67,7 +67,7 @@ _ = guess.plot()
 #
 # We first create a MCR-ALS object named here ``mcr``.
 #
-# The `log_level` option can be set to ``"INFO"`` to get verbose output of
+# The ``log_level`` option can be set to ``"INFO"`` to get verbose output of
 # the MCR-ALS optimization steps.
 mcr = scp.MCRALS(log_level="INFO")
 
@@ -75,7 +75,7 @@ mcr = scp.MCRALS(log_level="INFO")
 # Fit the MCR-ALS model
 # -----------------------
 #
-# Then we execute the optimization process using the `fit` method with
+# Then we execute the optimization process using the ``fit`` method with
 # the ``X`` and ``guess`` dataset as input arguments.
 _ = mcr.fit(X, guess)
 

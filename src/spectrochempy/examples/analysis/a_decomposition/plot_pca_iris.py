@@ -7,7 +7,7 @@
 """
 PCA example (iris dataset)
 ==========================
-In this example, we perform the PCA dimensionality reduction of the classical `iris`
+In this example, we perform the PCA dimensionality reduction of the classical ``iris``
 dataset (Ronald A. Fisher.
 "The Use of Multiple Measurements in Taxonomic Problems. Annals of Eugenics, 7, pp.179-188, 1936).
 
@@ -26,7 +26,7 @@ dataset = scp.load_iris()
 # Fit a PCA model with automatic component selection
 # ---------------------------------------------------
 # Using ``n_components="mle"``, the optimal number of components is determined
-# automatically. Note: `"mle"` cannot be used when n_observations < n_features.
+# automatically. Note: ``"mle"`` cannot be used when n_observations < n_features.
 pca = scp.PCA(n_components="mle")
 _ = pca.fit(dataset)
 
