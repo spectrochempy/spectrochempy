@@ -67,9 +67,9 @@ print(f"speed : {v: .2f},  d0 : {d0: .2f},  r^2={rsquare: .3f}")
 # %%
 # Prediction returns an NDDataset when inputs are NDDatasets:
 distance_fitted2 = lstsq.predict()
-print(distance_fitted2)
 
 assert (distance_fitted == distance_fitted2.data).all()
+distance_fitted2
 
 # %%
 # Using a single NDDataset with x-coordinates

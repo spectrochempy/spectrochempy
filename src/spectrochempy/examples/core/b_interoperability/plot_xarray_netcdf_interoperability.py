@@ -76,7 +76,9 @@ dataset.history = "Created for the xarray and NetCDF interoperability tutorial"
 # --------------------------------
 # Coordinates, units, scientific identity, and provenance are all attached to
 # the dataset before conversion.
-print(dataset)
+dataset
+
+# %%
 print("Dimensions:", tuple(dataset.dims))
 print("Coordinates:", dataset.coordtitles)
 print("Data units:", dataset.units)

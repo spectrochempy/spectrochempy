@@ -26,7 +26,7 @@ X = scp.read("irdata/CO@Mo_Al2O3.SPG")
 # * ``wavenumbers`` named "x"
 # * and ``timestamps`` (*i.e.,* the time of recording) named "y".
 
-print(X.coordset)
+X.coordset
 
 # %%
 # Setting new coordinates

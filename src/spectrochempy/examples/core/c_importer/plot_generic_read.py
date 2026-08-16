@@ -28,7 +28,7 @@ TEST_FOLDER = Path(os.environ.get("TEST_FOLDER", "irdata"))
 # Read a IR data recorded in Omnic format (``.spg`` extension).
 # We just pass the file name as parameter.
 dataset = scp.read(TEST_FILE)
-print(dataset)
+dataset
 
 # %%
 if dataset is not None:
@@ -43,7 +43,7 @@ dataset = scp.read(filename)
 # Note that is the file is not found in the current working directory, SpectroChemPy
 # will try to find it in the ``datadir`` directory defined in ``preferences`` :
 datadir = scp.preferences.datadir
-print(datadir)
+datadir
 
 # %%
 # If the supplied argument is a directory, then the whole directory is read at once.
