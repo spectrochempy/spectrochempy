@@ -11,10 +11,10 @@ Analysis CP NMR spectra
 
 Temporarily excluded from the public gallery.
 
-The bundled dataset is a CP/MAS contact-time series (`cpF1F2hetcor` pulse
-program, `vdlist` present on the final experiment), but the current public read
+The bundled dataset is a CP/MAS contact-time series (``cpF1F2hetcor`` pulse
+program, ``vdlist`` present on the final experiment), but the current public read
 path no longer returns the merged pseudo-2D dataset shape assumed by this
-historical script. Reading the whole directory yields a `ScpObjectList` of
+historical script. Reading the whole directory yields a ``ScpObjectList`` of
 independent 1D FIDs, and the contact-time metadata needed for a reliable public
 series reconstruction are not yet exposed in a stable, documented way.
 
@@ -39,7 +39,7 @@ datadir = scp.preferences.datadir
 nmrdir = datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "CP"
 
 # %%
-# Set the `glob` pattern in order to load a series of spectra of given type
+# Set the ``glob`` pattern in order to load a series of spectra of given type
 # in the given directory (here we read fid, but we could also read "1r" files
 # when available)
 dataset = scp.nmr.read(nmrdir, glob="**/fid")
@@ -51,7 +51,7 @@ dataset
 # %%
 # The new dimension (y) have several coordinates corresponding to all metadata that change from fid to fid.
 #
-# In the present case, the relevant coordinates is given by the `p15` array which is the array of CP contact times.
+# In the present case, the relevant coordinates is given by the ``p15`` array which is the array of CP contact times.
 #
 # To have y using this coordinates, we need to select it
 dataset.y.select(3)
@@ -192,7 +192,7 @@ s = area[index]
 # Define the parameter variables using a script
 # (parameter: value, low_bound,  high_bound)
 # - no underscore in parameters names.
-# - times are in the units of the data time coordinates (here `s`)
+# - times are in the units of the data time coordinates (here ``s``)
 # - initially we assume relaxation (T1rho) time constant vey large
 fitter.script = """
  MODEL: cp
@@ -270,6 +270,6 @@ ax.set_xlim(0, 16000)
 
 # %%
 # This ends the example ! The following line can be removed or commented
-# when the example is run as a notebook (`.ipynb`).
+# when the example is run as a notebook (``.ipynb``).
 
 # scp.show()

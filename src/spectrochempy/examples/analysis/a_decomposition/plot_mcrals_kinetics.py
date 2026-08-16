@@ -26,7 +26,7 @@ import spectrochempy as scp
 # %%
 # Loading a NDDataset
 # -------------------
-# Load the data with the `read` function.
+# Load the data with the ``read`` function.
 ds = scp.read("matlabdata/METING9.MAT")
 
 # %%
@@ -37,7 +37,7 @@ ds = scp.read("matlabdata/METING9.MAT")
 print("NDDataset names: " + str([d.name for d in ds]))
 
 # %%
-# We load the experimental spectra (in `ds[1]`), add the `y` (time) and `x`
+# We load the experimental spectra (in ``ds[1]``), add the ``y`` (time) and ``x``
 # (wavelength) coordinates, and keep one spectrum of out 4:
 D = scp.NDDataset(ds[1][:, 1:].data.T)
 D.y = scp.Coord(ds[0].data.squeeze(), title="time") / 60

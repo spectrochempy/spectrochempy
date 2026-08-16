@@ -8,7 +8,7 @@
 Removing cosmic ray spikes from a Raman spectrum
 ================================================
 
-In this example, we use the `despike` method to remove the noise from a Raman
+In this example, we use the ``despike`` method to remove the noise from a Raman
 spectrum.
 """
 

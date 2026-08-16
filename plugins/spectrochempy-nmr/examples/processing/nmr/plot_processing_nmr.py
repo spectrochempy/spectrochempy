@@ -40,7 +40,7 @@ fid = scp.nmr.read(nmrdir / "bruker" / "tests" / "nmr" / "topspin_1d" / "1" / "f
 # Compare two explicit apodization choices
 # ----------------------------------------
 # The source FID is left unchanged. Each processed spectrum comes from its own
-# independent copy so the comparison is purely about the explicit `lb` value.
+# independent copy so the comparison is purely about the explicit ``lb`` value.
 low_lb = scp.nmr.Experiment(fid.copy()).process(
     apodization="em",
     lb=2.0,
@@ -71,7 +71,7 @@ _ = ax.legend()
 # Continue with the mildly broadened spectrum
 # -------------------------------------------
 #
-# The rest of the example uses `low_lb`, which keeps the resolved multiplets
+# The rest of the example uses ``low_lb``, which keeps the resolved multiplets
 # visually useful for peak picking and fitting.
 dataset = low_lb
 dataset
@@ -85,8 +85,8 @@ _ = spectrum.plot()
 # Peak picking
 # ------------
 #
-# The ppm slice remains scientifically regular, but the current core `Coord`
-# machinery can still lose the `linear` flag after slicing because of
+# The ppm slice remains scientifically regular, but the current core ``Coord``
+# machinery can still lose the ``linear`` flag after slicing because of
 # floating-point rounding on the sub-axis.  Until that core behavior is fixed,
 # use plain point spacing for peak picking in this example so it remains fully
 # executable.
@@ -203,6 +203,6 @@ _ = f1.plot_merit(offset=2)
 
 # %%
 # This ends the example ! The following line can be removed or commented
-# when the example is run as a notebook (`.ipynb`).
+# when the example is run as a notebook (``.ipynb``).
 
 # scp.show()

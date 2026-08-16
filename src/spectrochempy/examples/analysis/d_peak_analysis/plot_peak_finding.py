@@ -6,7 +6,7 @@
 # ruff: noqa
 """
 Find peak maxima in an IR time series
-====================================
+=====================================
 
 This example shows a compact workflow to locate peak maxima on an IR dataset
 and visualize the detected positions on top of the last spectrum.

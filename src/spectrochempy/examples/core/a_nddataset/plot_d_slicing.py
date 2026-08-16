@@ -1,3 +1,4 @@
+# %%
 # ======================================================================================
 # Copyright (©) 2014-2026 Laboratoire Catalyse et Spectrochimie (LCS), Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -22,7 +23,7 @@ dataset = scp.read_omnic(
     description="CO adsorption, difference spectra",
 )
 dataset.y = (dataset.y - dataset[0].y).to("minute")
-print(dataset)
+dataset
 
 # %%
 prefs = scp.preferences
@@ -48,7 +49,7 @@ _ = carbonyl_region.plot()
 
 # %%
 # The same applies to the time axis:
-window = dataset[80.0:180.0, 2300.0:1900.0]
+window = dataset[80.0:137.0, 2300.0:1900.0]
 _ = window.plot()
 
 # %%

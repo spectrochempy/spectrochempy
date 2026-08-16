@@ -6,7 +6,7 @@
 # ruff: noqa
 """
 Mask a saturated region and transform an IR dataset
-==================================================
+===================================================
 
 This example shows three common operations on a 2D infrared dataset:
 masking a saturated region, transposing the dataset, and converting axis units.

@@ -9,7 +9,7 @@
 Denoising a 2D Raman spectrum
 =============================
 
-In this example, we use the `denoise` method to remove the noise from a 2D Raman
+In this example, we use the ``denoise`` method to remove the noise from a 2D Raman
 spectrum.
 """
 

@@ -8,7 +8,7 @@
 Reading datasets
 ================
 
-In this example, we show the use of the generic `read` method to create dataset
+In this example, we show the use of the generic ``read`` method to create dataset
 either from local or remote files.
 """
 
@@ -28,36 +28,36 @@ TEST_FOLDER = Path(os.environ.get("TEST_FOLDER", "irdata"))
 # Read a IR data recorded in Omnic format (``.spg`` extension).
 # We just pass the file name as parameter.
 dataset = scp.read(TEST_FILE)
-print(dataset)
+dataset
 
 # %%
 if dataset is not None:
     _ = dataset.plot(style="paper")
 
 # %%
-# When using `read`, we can pass filename as a `str` or a `~pathlib.Path` object.
+# When using ``read``, we can pass filename as a ``str`` or a ``pathlib.Path`` object.
 filename = TEST_FILE
 dataset = scp.read(filename)
 
 # %%
-# Note that is the file is not found in the current working directory, `SpectroChemPy`
-# will try to find it in the ``datadir`` directory defined in `preferences` :
+# Note that is the file is not found in the current working directory, SpectroChemPy
+# will try to find it in the ``datadir`` directory defined in ``preferences`` :
 datadir = scp.preferences.datadir
-print(datadir)
+datadir
 
 # %%
 # If the supplied argument is a directory, then the whole directory is read at once.
 # By default, the different files will be merged along the first dimension (y).
 # However, for this to work, the second dimension (x) must be compatible (same size)
 # or else a WARNING appears. To avoid the warning and get individual spectra, you can
-# set ``merge`` to `False` . This test-data directory may also contain historical
-# trusted native `.scp` archives, which require explicit legacy opt-in.
+# set ``merge`` to ``False`` . This test-data directory may also contain historical
+# trusted native ``.scp`` archives, which require explicit legacy opt-in.
 dataset_list = scp.read(TEST_FOLDER, merge=False, allow_unsafe_legacy=True)
 print(dataset_list)
 
 # %%
 # to get full details on the parameters that can be used, look at the API documentation:
-# `spectrochempy.read` .
+# ``spectrochempy.read`` .
 
 # %%
 # Import dataset from remote files
@@ -71,7 +71,7 @@ except FileNotFoundError:
 else:
     # %%
     # In this case the matlab data contains 7 arrays that have been automatically
-    # transformed to `NDDataset` .
+    # transformed to ``NDDataset`` .
     for nd in dataset_list:
         print(f"{nd.name} : {nd.shape}")
 
@@ -79,7 +79,7 @@ else:
     # The `eigenvector.com <eigenvector.com>`__ website contains the same data in a
     # compressed (zipped) format:
     # `corn.mat_.zip <https://eigenvector.com/wp-content/uploads/2019/06/corn.mat_.zip>`__ .
-    # This can also be used by the `read` method.
+    # This can also be used by the ``read`` method.
     dataset_list = scp.read(
         "https://eigenvector.com/wp-content/uploads/2019/06/corn.mat_.zip"
     )

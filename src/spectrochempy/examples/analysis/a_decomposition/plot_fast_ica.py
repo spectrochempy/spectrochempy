@@ -78,7 +78,7 @@ X_hat_b = ica.inverse_transform()
 _ = X_hat_b.plot(title=r"$\hat{X} =$ ica.inverse_transform()")
 
 # %%
-# Finally, the quality of the reconstriction can be checked by `plot_merit()`
+# Finally, the quality of the reconstriction can be checked by ``plot_merit()``
 
 _ = ica.plot_merit(nb_traces=15)
 # %%

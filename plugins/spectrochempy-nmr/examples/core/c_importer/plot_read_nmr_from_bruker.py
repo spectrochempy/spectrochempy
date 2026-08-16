@@ -21,7 +21,7 @@ Install with: ``pip install spectrochempy[nmr]``.
 import spectrochempy as scp
 
 # %%
-# `datadir.path` contains the path to a default data directory.
+# ``datadir.path`` contains the path to a default data directory.
 
 datadir = scp.preferences.datadir
 

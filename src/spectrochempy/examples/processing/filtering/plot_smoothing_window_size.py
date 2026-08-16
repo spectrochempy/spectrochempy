@@ -6,7 +6,7 @@
 # ruff: noqa
 """
 Compare smoothing window sizes on a Raman spectrum
-=================================================
+==================================================
 
 This example shows how the smoothing window size changes the balance between
 noise reduction and signal distortion on a Raman spectrum.

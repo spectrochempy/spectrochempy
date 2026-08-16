@@ -7,7 +7,7 @@
 # ruff: noqa
 """
 Build synthetic concentration profiles
-=====================================
+======================================
 
 This example shows two convenient ways to build simple synthetic profiles
 directly with the SpectroChemPy API:
