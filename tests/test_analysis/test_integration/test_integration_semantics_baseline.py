@@ -127,13 +127,11 @@ class TestReturnTypeShapeDims:
             integration_dataset.trapezoid(dim=None, keepdims=True)
 
     def test_multi_axis_via_axis_kwarg_not_supported(self, integration_dataset):
-        with pytest.raises(
-            TypeError, match="multiple values for keyword argument 'axis'"
-        ):
+        with pytest.raises(TypeError, match="Tuple/list selectors are not supported"):
             integration_dataset.trapezoid(axis=(0, 1))
 
     def test_multi_axis_via_dim_tuple_not_supported(self, integration_dataset):
-        with pytest.raises(TypeError, match="list indices must be integers or slices"):
+        with pytest.raises(TypeError, match="Tuple/list selectors are not supported"):
             integration_dataset.trapezoid(dim=("y", "x"))
 
 
