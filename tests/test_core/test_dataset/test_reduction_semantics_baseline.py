@@ -734,3 +734,178 @@ class TestBareDatasetReduction:
     def test_argmax_bare(self, bare_dataset):
         am = bare_dataset.argmax()
         assert am == 2
+
+
+# ======================================================================================
+# AXIS/DIMS KEYWORD ROUTING
+# ======================================================================================
+
+
+class TestAxisKeywordRouting:
+    """Characterize the axis=/dims= -> dim routing for reduction methods.
+
+    These tests verify the FIX applied to the _from_numpy_method descriptor:
+    ``axis`` and ``dims`` keywords are routed into ``dim`` for all reduction
+    methods that declare a ``dim`` parameter with default None.
+    """
+
+    def test_mean_axis_0_equivalent_to_dim_y(self, reduction_dataset):
+        r_axis = reduction_dataset.mean(axis=0)
+        r_dim = reduction_dataset.mean(dim="y")
+        assert isinstance(r_axis, NDDataset)
+        np.testing.assert_allclose(r_axis.data, r_dim.data)
+        assert list(r_axis.dims) == list(r_dim.dims)
+
+    def test_mean_axis_1_equivalent_to_dim_x(self, reduction_dataset):
+        r_axis = reduction_dataset.mean(axis=1)
+        r_dim = reduction_dataset.mean(dim="x")
+        np.testing.assert_allclose(r_axis.data, r_dim.data)
+
+    def test_sum_axis_0_equivalent_to_dim_y(self, reduction_dataset):
+        r_axis = reduction_dataset.sum(axis=0)
+        r_dim = reduction_dataset.sum(dim="y")
+        np.testing.assert_allclose(r_axis.data, r_dim.data)
+        assert list(r_axis.dims) == list(r_dim.dims)
+
+    def test_std_axis_0_equivalent_to_dim_y(self, reduction_dataset):
+        r_axis = reduction_dataset.std(axis=0)
+        r_dim = reduction_dataset.std(dim="y")
+        np.testing.assert_allclose(r_axis.data, r_dim.data)
+
+    def test_var_axis_0_equivalent_to_dim_y(self, reduction_dataset):
+        r_axis = reduction_dataset.var(axis=0)
+        r_dim = reduction_dataset.var(dim="y")
+        np.testing.assert_allclose(r_axis.data, r_dim.data)
+
+    def test_amax_axis_0_equivalent_to_dim_y(self, reduction_dataset):
+        r_axis = reduction_dataset.amax(axis=0)
+        r_dim = reduction_dataset.amax(dim="y")
+        np.testing.assert_allclose(r_axis.data, r_dim.data)
+
+    def test_amin_axis_0_equivalent_to_dim_y(self, reduction_dataset):
+        r_axis = reduction_dataset.amin(axis=0)
+        r_dim = reduction_dataset.amin(dim="y")
+        np.testing.assert_allclose(r_axis.data, r_dim.data)
+
+    def test_ptp_axis_0_equivalent_to_dim_y(self, reduction_dataset):
+        r_axis = reduction_dataset.ptp(axis=0)
+        r_dim = reduction_dataset.ptp(dim="y")
+        np.testing.assert_allclose(r_axis.data, r_dim.data)
+
+    def test_argmax_axis_0(self, reduction_dataset):
+        r_axis = reduction_dataset.argmax(axis=0)
+        r_dim = reduction_dataset.argmax(dim="y")
+        assert np.array_equal(r_axis, r_dim)
+
+    def test_argmin_axis_0(self, reduction_dataset):
+        r_axis = reduction_dataset.argmin(axis=0)
+        r_dim = reduction_dataset.argmin(dim="y")
+        assert np.array_equal(r_axis, r_dim)
+
+    def test_cumsum_axis_0_equivalent_to_dim_y(self, reduction_dataset):
+        r_axis = reduction_dataset.cumsum(axis=0)
+        r_dim = reduction_dataset.cumsum(dim="y")
+        np.testing.assert_allclose(r_axis.data, r_dim.data)
+
+    def test_axis_negative_index(self, reduction_dataset):
+        r_axis = reduction_dataset.sum(axis=-1)
+        r_dim = reduction_dataset.sum(dim="x")
+        np.testing.assert_allclose(r_axis.data, r_dim.data)
+
+    def test_axis_none_is_global(self, reduction_dataset):
+        r_axis = reduction_dataset.sum(axis=None)
+        r_dim = reduction_dataset.sum(dim=None)
+        assert np.isclose(r_axis, r_dim)
+
+    def test_dims_keyword_routes(self, reduction_dataset):
+        r_dims = reduction_dataset.mean(dims="y")
+        r_dim = reduction_dataset.mean(dim="y")
+        np.testing.assert_allclose(r_dims.data, r_dim.data)
+
+    def test_axis_and_dim_same_value_conflict(self, reduction_dataset):
+        with pytest.raises(TypeError, match="conflicting dimension selectors"):
+            reduction_dataset.mean(dim="y", axis=0)
+
+    def test_axis_and_dim_different_value_conflict(self, reduction_dataset):
+        with pytest.raises(TypeError, match="conflicting dimension selectors"):
+            reduction_dataset.mean(dim="y", axis=1)
+
+    def test_dims_and_dim_same_value_conflict(self, reduction_dataset):
+        with pytest.raises(TypeError, match="conflicting dimension selectors"):
+            reduction_dataset.mean(dim="y", dims="y")
+
+    def test_unknown_kwarg_raises(self, reduction_dataset):
+        with pytest.raises(TypeError, match="unexpected keyword argument"):
+            reduction_dataset.mean(axis=0, some_typo=True)
+
+    def test_axis_coordset_reduced(self, reduction_dataset):
+        r = reduction_dataset.sum(axis=0)
+        assert r.coordset is not None
+        assert r.coordset.names == ["x"]
+
+    def test_axis_coordset_surviving_preserved(self, reduction_dataset):
+        r = reduction_dataset.sum(axis=0)
+        assert r["x"].title == "wavenumber"
+        assert "cm" in str(r["x"].units)
+
+    def test_axis_keepdims(self, reduction_dataset):
+        r = reduction_dataset.sum(axis=0, keepdims=True)
+        assert r.shape == (1, 7)
+
+    def test_axis_preserves_metadata(self, reduction_dataset):
+        r = reduction_dataset.mean(axis=0)
+        assert r.title == reduction_dataset.title
+        assert r.name == reduction_dataset.name
+        assert r.author == reduction_dataset.author
+
+    def test_axis_source_not_mutated(self, reduction_dataset):
+        data_before = reduction_dataset.data.copy()
+        reduction_dataset.mean(axis=0)
+        np.testing.assert_array_equal(reduction_dataset.data, data_before)
+
+    def test_axis_masked_data(self):
+        arr = np.ma.MaskedArray(
+            np.arange(35.0).reshape(5, 7), mask=np.zeros((5, 7), dtype=bool)
+        )
+        arr[0, 0] = np.ma.masked
+        ds = NDDataset(arr)
+        r = ds.mean(axis=0)
+        assert isinstance(r, NDDataset)
+        assert r.shape == (7,)
+
+    def test_axis_classmethod(self, reduction_dataset):
+        r = NDDataset.mean(reduction_dataset, axis=0)
+        r_dim = reduction_dataset.mean(dim="y")
+        np.testing.assert_allclose(r.data, r_dim.data)
+
+    def test_axis_api_path(self, reduction_dataset):
+        r = reduction_dataset.mean(axis=0)
+        assert isinstance(r, NDDataset)
+
+    def test_axis_negative_coordset(self, reduction_dataset):
+        r = reduction_dataset.sum(axis=-1)
+        assert r.coordset is not None
+        assert r.coordset.names == ["y"]
+
+    def test_axis_bool_all(self, reduction_dataset):
+        r = reduction_dataset.all(axis=0)
+        assert isinstance(r, np.ndarray)
+        assert r.shape == (7,)
+
+    def test_axis_bool_any(self, reduction_dataset):
+        r = reduction_dataset.any(axis=0)
+        assert isinstance(r, np.ndarray)
+        assert r.shape == (7,)
+
+    def test_axis_average(self, reduction_dataset):
+        r = reduction_dataset.average(axis=0)
+        r_dim = reduction_dataset.average(dim="y")
+        np.testing.assert_allclose(r.data, r_dim.data)
+
+    def test_coordmax_axis(self, reduction_dataset):
+        r = reduction_dataset.coordmax(axis=0)
+        assert r is not None
+
+    def test_coordmin_axis(self, reduction_dataset):
+        r = reduction_dataset.coordmin(axis=0)
+        assert r is not None
