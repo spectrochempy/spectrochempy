@@ -81,6 +81,15 @@ Bug Fixes
   current prefixed release tags and no longer falls back to obsolete legacy
   versions such as ``0.8.4``.
 
+- Passing ``axis=`` or ``dims=`` to NDDataset reduction methods (``sum``,
+  ``mean``, ``std``, ``var``, ``ptp``, ``amax``/``max``, ``amin``/``min``,
+  ``argmax``, ``argmin``, ``average``, ``coordmax``, ``coordmin``,
+  ``cumsum``, ``all``, ``any``) now correctly reduces along the requested
+  axis instead of computing a global reduction. ``axis=`` and ``dims=`` are
+  accepted as aliases of ``dim=``; passing more than one dimension selector
+  simultaneously raises ``TypeError``. Unrecognised keyword arguments now
+  raise ``TypeError`` instead of being silently stored as attributes.
+
 
 .. section
 

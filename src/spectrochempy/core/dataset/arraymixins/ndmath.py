@@ -32,6 +32,14 @@ __dataset_methods__ = []
 ArrayLike = np.ndarray | NDArray
 DType = TypeVar("DType", bound=np.dtype[Any])
 
+# Keyword arguments accepted but ignored by reduction methods. They belong to
+# the numpy reduction protocol (``numpy.all``, ``numpy.sum``, ... forward them
+# to the underlying ``.all()``/``.sum()`` methods) and are not supported by the
+# spectrochempy reductions, which return new objects.
+_NUMPY_REDUCTION_KWARGS = frozenset(
+    {"keepdims", "out", "initial", "where", "returned"},
+)
+
 
 def _reduce_method(method: Callable) -> Callable:
     # Decorator that sets the reduce flag to true for _from_numpy decorator.
@@ -100,6 +108,7 @@ class _from_numpy_method:
                             new = NDDataset(dataset)
 
             argpos = []
+            dim_pos = None
 
             for par in pars.values():
                 if par.name in [
@@ -108,6 +117,8 @@ class _from_numpy_method:
                     "kwargs",
                 ]:  # or (par.name == 'dataset' and instance is not None):
                     continue
+                if par.name == "dim" and par.default is None:
+                    dim_pos = len(argpos)
                 argpos.append(
                     args.pop(0) if args else kwargs.pop(par.name, par.default),
                 )
@@ -137,6 +148,35 @@ class _from_numpy_method:
             # -----------------------------
             # Create from an existing array
             # ------------------------------
+            # For methods declaring a `dim` selector (default None), `axis`
+            # and `dims` keywords are aliases of `dim`. Only one effective
+            # (non-None) selector is allowed, and unknown keywords raise
+            # instead of being silently stored as attributes.
+            if dim_pos is not None:
+                for keyword in ("axis", "dims"):
+                    if keyword in kwargs:
+                        selector = kwargs.pop(keyword)
+                        if argpos[dim_pos] is not None and selector is not None:
+                            raise TypeError(
+                                f"{method}() got conflicting dimension selectors: "
+                                f"`{keyword}` cannot be used together with `dim` "
+                                f"(got `dim={argpos[dim_pos]!r}` and "
+                                f"`{keyword}={selector!r}`). Use only one of "
+                                "`dim`, `dims` or `axis`.",
+                            )
+                        if selector is not None:
+                            argpos[dim_pos] = selector
+                unknown = [
+                    k
+                    for k in kwargs
+                    if k not in new._attributes_() and k not in _NUMPY_REDUCTION_KWARGS
+                ]
+                if unknown:
+                    raise TypeError(
+                        f"{method}() got an unexpected keyword argument "
+                        f"{unknown[0]!r}",
+                    )
+
             # Replace some attribute according to the kwargs
             for k, v in list(kwargs.items())[:]:
                 if k != "units":
