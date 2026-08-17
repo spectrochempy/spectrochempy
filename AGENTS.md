@@ -558,28 +558,24 @@ When possible:
 
 # Pre-commit Policy
 
-Pre-commit validation must be run **once** before creating a pull request or
-pushing to ``upstream/master``.  It must not be run during normal development.
+**Before opening a PR or pushing to a branch that will become a PR**, run:
 
-Command:
-
-```bash id="4qukx8"
+```bash
 pre-commit run --all-files
 ```
 
-Rationale:
+This is **mandatory**.  A branch that has not been pre-commit-cleaned must not
+be pushed.  If pre-commit modifies files, amend the commit and push again.
 
-- Running pre-commit repeatedly during development wastes CI quota and agent
-  time.
-- A single final run before push is sufficient because pre-commit hooks are
-  deterministic.
-- Pre-commit handles all linting and formatting, including ``ruff`` checks,
-  so there is no need to run linting tools manually during development.
+During normal development (before the final push), do **not** run pre-commit
+repeatedly — it wastes CI quota and agent time.  Pre-commit hooks are
+deterministic; a single final run is sufficient.
 
 When not delegated:
 
 * provide the command;
-* explain why it should be run.
+* explain why it should be run;
+* **run it before pushing** if the branch is being pushed as a PR.
 
 ---
 
@@ -627,7 +623,8 @@ Unless explicitly requested, do not:
 * create releases;
 * publish packages;
 * run broad test suites;
-* run pre-commit during normal development (see Pre-commit Policy).
+* run pre-commit during normal development (see Pre-commit Policy — it **is**
+  required before a push to a PR branch).
 
 ---
 
@@ -639,7 +636,8 @@ Unless explicitly requested otherwise:
 * do not commit changes;
 * do not push changes;
 * do not open pull requests;
-* do not run pre-commit during normal development (see Pre-commit Policy);
+* do not run pre-commit during normal development (see Pre-commit Policy — it
+  **is** required before a push to a PR);
 * do not run broad test suites.
 
 Prefer producing:
@@ -688,6 +686,9 @@ For multi-PR projects, update or create the relevant audit note before
 considering the task complete.
 
 Do not perform git operations automatically.
+
+When delegated to push or create a PR, always run ``pre-commit run --all-files``
+first and amend the commit if it modifies files.
 
 ---
 

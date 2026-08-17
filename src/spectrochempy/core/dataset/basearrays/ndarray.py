@@ -554,9 +554,26 @@ class NDArray(tr.HasTraits):
     def _dims_default(self):
         return DEFAULT_DIM_NAME[-self.ndim :]
 
-    def _get_dims_from_args(self, *dims, **kwargs):
+    def _get_dims_from_args(self, *dims, allow_multiple=False, **kwargs):
         # utility function to read dims args and kwargs
         # sequence of dims or axis, or `dim` , `dims` or `axis` keyword are accepted
+
+        # Unwrap the *args nesting: get_axis(("y","x")) arrives as
+        # dims=(("y","x"),) — a 1-tuple wrapping the user's tuple.
+        if len(dims) == 1 and isinstance(dims[0], (tuple, list)):
+            if not allow_multiple:
+                raise TypeError(
+                    f"Tuple/list selectors are not supported for this "
+                    f"operation. Got {dims[0]!r}."
+                )
+            dims = dims[0]
+            # Reject empty sequences explicitly — an empty tuple/list is
+            # not a valid dimension selector (unlike "no argument at all").
+            if len(dims) == 0:
+                raise TypeError(
+                    "An empty sequence is not a valid dimension selector. "
+                    "Use dim=None for a global reduction.",
+                )
 
         # check if we have arguments
         if not dims:
@@ -566,7 +583,8 @@ class NDArray(tr.HasTraits):
         axis = kwargs.pop("axis", None)
 
         kdims = kwargs.pop("dims", kwargs.pop("dim", axis))  # dim or dims keyword
-        if kdims is not None:
+        from_keyword = kdims is not None
+        if from_keyword:
             if dims is not None:
                 warnings.warn(
                     "the unnamed arguments are interpreted as `dims` . But a named "
@@ -578,14 +596,77 @@ class NDArray(tr.HasTraits):
                 )
             dims = kdims
 
-        if dims is not None and not isinstance(dims, list):
-            dims = list(dims) if isinstance(dims, tuple) else [dims]
+        # --- Tuple / list selector handling -----------------------------------
+        # A tuple or list selector (e.g. dim=("y", "x") or dim=[0, 1]) is
+        # flattened into a list of individual dimension specifiers.  Nested
+        # sequences are rejected (not part of the public contract).
+        #
+        # Keyword-provided tuples/lists are gated by allow_multiple.
+        # Positional *args tuples (e.g. get_axis("x") → dims=("x",)) are
+        # always converted to lists — they represent individual arguments,
+        # not user-supplied multi-axis selectors.
+        if isinstance(dims, (tuple, list)):
+            if from_keyword and not allow_multiple:
+                raise TypeError(
+                    f"Tuple/list selectors are not supported for this "
+                    f"operation. Got {dims!r}."
+                )
+            if len(dims) == 0:
+                raise TypeError(
+                    "An empty sequence is not a valid dimension "
+                    "selector. Use dim=None for a global reduction.",
+                )
+            # Flatten and validate — runs for ALL tuple/list paths.
+            flat = []
+            for item in dims:
+                if isinstance(item, (tuple, list)):
+                    raise TypeError(
+                        "Nested sequences are not supported as dimension "
+                        "selectors. Use a flat tuple or list, e.g. "
+                        "dim=('y', 'x').",
+                    )
+                if isinstance(item, (bool, np.bool_)):
+                    raise TypeError(
+                        "Boolean values are not accepted as dimension "
+                        "selectors. Use an integer index (e.g. 0, 1) "
+                        "or a dimension name.",
+                    )
+                flat.append(item)
+            dims = flat
+        elif dims is not None:
+            dims = [dims]
+
+        # Reject single boolean values (bool and np.bool_) — they are int
+        # subclasses and would otherwise be accepted as axis 0/1.
+        if (
+            isinstance(dims, list)
+            and len(dims) == 1
+            and isinstance(dims[0], (bool, np.bool_))
+        ):
+            raise TypeError(
+                "Boolean values are not accepted as dimension "
+                "selectors. Use an integer index (e.g. 0, 1) or "
+                "a dimension name."
+            )
 
         if dims is not None:
             for i, item in enumerate(dims[:]):
                 if item is not None and not isinstance(item, str):
                     item = self.dims[item]
                 dims[i] = item
+
+        # --- Post-normalisation validation ------------------------------------
+        # Duplicate check runs after name-to-index normalisation so that
+        # mixed name/index duplicates like ("x", 1) are caught.
+        if isinstance(dims, list) and len(dims) > 1:
+            seen = []
+            for item in dims:
+                if item in seen:
+                    raise TypeError(
+                        f"Duplicate dimension {item!r} in selector. "
+                        "Each dimension may appear only once.",
+                    )
+                seen.append(item)
 
         if dims is not None and len(dims) == 1:
             dims = dims[0]
@@ -1294,7 +1375,14 @@ class NDArray(tr.HasTraits):
 
         """
         # handle the various syntax to pass the axis
-        dims = self._get_dims_from_args(*args, **kwargs)
+        allow_multiple = kwargs.pop("allow_multiple", False)
+        if not allow_multiple:
+            allow_multiple = getattr(self, "_allow_multiple_dim", False)
+        # only_first=False explicitly requests multi-axis info — the caller
+        # is designed to handle multiple dims (e.g. interpolation, alignment).
+        if not allow_multiple and not kwargs.get("only_first", True):
+            allow_multiple = True
+        dims = self._get_dims_from_args(*args, allow_multiple=allow_multiple, **kwargs)
         axis = self._get_dims_index(dims)
         allows_none = kwargs.get("allows_none", False)
 
@@ -1322,6 +1410,10 @@ class NDArray(tr.HasTraits):
         if len(dims) == 1 and only_first:
             dims = dims[0]
             axis = axis[0]
+        else:
+            # NumPy reduction functions accept a tuple of ints for multi-axis,
+            # but not a list.
+            axis = tuple(axis)
 
         return axis, dims
 

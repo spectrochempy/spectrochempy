@@ -79,6 +79,18 @@ Bug Fixes
   simultaneously raises ``TypeError``. Unrecognised keyword arguments now
   raise ``TypeError`` instead of being silently stored as attributes.
 
+- Multi-axis reduction methods (``sum``, ``mean``, ``std``, ``var``, ``ptp``,
+  ``amax``/``max``, ``amin``/``min``, ``all``, ``any``, ``average``) now
+  accept tuple and list selectors for specifying multiple dimensions at once,
+  e.g. ``ds.mean(dim=('y', 'x'))`` or ``ds.sum(dim=[0, 1])``. Mixed dimension
+  names and positional indices are normalised, order is preserved, and
+  ``keepdims=True`` is supported. ``average`` follows numpy semantics: when
+  all dimensions are reduced with ``keepdims=True``, the result remains a
+  scalar (existing behaviour, not regressed). Single-axis methods
+  (``argmax``, ``argmin``, ``cumsum``, ``coordmax``, ``coordmin``) reject
+  tuple/list selectors with a clear error. Empty sequences, boolean values,
+  nested sequences, and duplicate dimensions are rejected.
+
 Developer
 ~~~~~~~~~
 

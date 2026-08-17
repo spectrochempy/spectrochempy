@@ -40,6 +40,34 @@ _NUMPY_REDUCTION_KWARGS = frozenset(
     {"keepdims", "out", "initial", "where", "returned"},
 )
 
+# --- M1 / M2 family classification ------------------------------------------
+# M1: multi-axis reductions — accept tuple/list selectors.
+# M2: single-axis reductions — reject tuple/list selectors.
+# Derived from the accepted RFC (dimension-selection-policy-rfc.md).
+_M1_METHODS = frozenset(
+    {
+        "mean",
+        "sum",
+        "std",
+        "var",
+        "ptp",
+        "amax",
+        "amin",
+        "all",
+        "any",
+        "average",
+    }
+)
+_M2_METHODS = frozenset(
+    {
+        "argmax",
+        "argmin",
+        "cumsum",
+        "coordmax",
+        "coordmin",
+    }
+)
+
 
 def _reduce_method(method: Callable) -> Callable:
     # Decorator that sets the reduce flag to true for _from_numpy decorator.
@@ -177,6 +205,25 @@ class _from_numpy_method:
                         f"{unknown[0]!r}",
                     )
 
+                # --- Single-axis rejection (M2 family) -----------------------
+                # M2 methods (argmax, argmin, cumsum, coordmax, coordmin) are
+                # intrinsically one-dimensional and must not accept tuple/list
+                # selectors.  M1 methods (mean, sum, etc.) accept them.
+                method_name = method.split(".")[-1]  # e.g. "mean" from "NDMath.mean"
+                if method_name in _M2_METHODS:
+                    sel = argpos[dim_pos]
+                    if sel is not None and isinstance(sel, (list, tuple)):
+                        raise TypeError(
+                            f"{method}() accepts only a single dimension "
+                            f"selector. Tuple/list selectors are not "
+                            f"supported. Got {sel!r}.",
+                        )
+
+                # M1 methods may receive tuple/list selectors.  Flag the
+                # copy so that get_axis allows multi-axis resolution.
+                if method_name in _M1_METHODS:
+                    new._allow_multiple_dim = True
+
             # Replace some attribute according to the kwargs
             for k, v in list(kwargs.items())[:]:
                 if k != "units":
@@ -240,12 +287,22 @@ def _reduce_dims(cls, dim, keepdims=False):
     if hasattr(cls, "coordset"):
         coordset = cls.coordset
         if dim is not None:
+            # Normalise to a list so that multi-axis selectors are handled
+            # uniformly — each dimension is reduced individually.
+            dim_list = dim if isinstance(dim, list) else [dim]
             if coordset is not None:
-                new_coordset = coordset._reduce_dim(dim, keepdims=keepdims)
+                # Reduce each dimension individually through the coordset
+                # lifecycle (keeps keepdims semantics correct per-dim).
+                cs = coordset
+                for d in dim_list:
+                    cs = cs._reduce_dim(d, keepdims=keepdims)
+                new_coordset = cs
                 if not keepdims:
-                    dims.remove(dim)
+                    for d in dim_list:
+                        dims.remove(d)
             elif not keepdims:
-                dims.remove(dim)
+                for d in dim_list:
+                    dims.remove(d)
         else:
             # dim being None we eventually remove the coordset
             new_coordset = None
@@ -1055,10 +1112,14 @@ class NDMath:
             coordset = cls.coordset
             if coordset is not None:
                 if dim is not None:
-                    new_coordset = coordset._reduce_dim(dim, keepdims=keepdims)
-                    cls._coordset = new_coordset
+                    dim_list = dim if isinstance(dim, list) else [dim]
+                    cs = coordset
+                    for d in dim_list:
+                        cs = cs._reduce_dim(d, keepdims=keepdims)
+                    cls._coordset = cs
                     if not keepdims:
-                        dims.remove(dim)
+                        for d in dim_list:
+                            dims.remove(d)
                 else:
                     # find the coordinates
                     idx = np.ma.argmax(dataset)
@@ -1135,10 +1196,14 @@ class NDMath:
             coordset = cls.coordset
             if coordset is not None:
                 if dim is not None:
-                    new_coordset = coordset._reduce_dim(dim, keepdims=keepdims)
-                    cls._coordset = new_coordset
+                    dim_list = dim if isinstance(dim, list) else [dim]
+                    cs = coordset
+                    for d in dim_list:
+                        cs = cs._reduce_dim(d, keepdims=keepdims)
+                    cls._coordset = cs
                     if not keepdims:
-                        dims.remove(dim)
+                        for d in dim_list:
+                            dims.remove(d)
                 else:
                     # find the coordinates
                     idx = np.ma.argmin(dataset)
