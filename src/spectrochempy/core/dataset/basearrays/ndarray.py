@@ -1378,6 +1378,10 @@ class NDArray(tr.HasTraits):
         allow_multiple = kwargs.pop("allow_multiple", False)
         if not allow_multiple:
             allow_multiple = getattr(self, "_allow_multiple_dim", False)
+        # only_first=False explicitly requests multi-axis info — the caller
+        # is designed to handle multiple dims (e.g. interpolation, alignment).
+        if not allow_multiple and not kwargs.get("only_first", True):
+            allow_multiple = True
         dims = self._get_dims_from_args(*args, allow_multiple=allow_multiple, **kwargs)
         axis = self._get_dims_index(dims)
         allows_none = kwargs.get("allows_none", False)
