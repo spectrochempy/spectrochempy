@@ -742,7 +742,8 @@ class TestBareDatasetReduction:
 
 
 class TestAxisKeywordRouting:
-    """Characterize the axis=/dims= -> dim routing for reduction methods.
+    """
+    Characterize the axis=/dims= -> dim routing for reduction methods.
 
     These tests verify the FIX applied to the _from_numpy_method descriptor:
     ``axis`` and ``dims`` keywords are routed into ``dim`` for all reduction
