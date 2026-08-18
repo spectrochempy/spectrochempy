@@ -376,7 +376,6 @@ def test_read_spc_barbituates_explicit_x_regression(galacticdata):
     assert nsub == 286
     fnpts_dir_offset = struct.unpack_from("<I", raw, 4)[0]
     assert fnpts_dir_offset > 0, "directory offset must be non-zero"
-    hdr_size = 512
     float_dtype = "<f4"
     expected_x_values = []
     dir_offset = fnpts_dir_offset
@@ -395,3 +394,26 @@ def test_read_spc_barbituates_explicit_x_regression(galacticdata):
         np.testing.assert_array_almost_equal(np.asarray(x), expected_x_values[i])
         assert np.min(np.asarray(x)) >= 0.0
         assert np.max(np.asarray(x)) <= 300.0
+
+
+def test_read_spc_old_format_xey(galacticdata):
+    fpath = galacticdata / "2024-11-22-SPC_1661.spc"
+    if not fpath.exists():
+        pytest.skip("old-format SPC file not available")
+    raw = fpath.read_bytes()
+    assert raw[1] == 0x4D, "fversn must be 0x4D (old format)"
+    assert raw[0] == 0x00, "ftflgs must be 0x00 (XE-Y, no flags)"
+    spc = _SpcFile(raw)
+    assert spc.format == "XE-Y"
+    assert spc.version == "old format"
+    assert spc.head_size == 256
+    assert spc.nsub is None
+    assert len(spc.nds) == 1
+    x, y, z = spc.nds[0]
+    assert x.shape == (31528,)
+    assert y.shape == (31528,)
+    assert float(x[0]) < float(x[-1]), "X must be ascending"
+    np.testing.assert_array_almost_equal(
+        np.asarray(x),
+        np.linspace(float(spc.first), float(spc.last), 31528),
+    )
