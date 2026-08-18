@@ -12,26 +12,8 @@ What's New in Revision 0.12.5.dev
 These are the changes in SpectroChemPy-0.12.5.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
 
-New Features
-~~~~~~~~~~~~
-
-Bug Fixes
+Developer
 ~~~~~~~~~
 - Fix ``safe-docs-no-ci`` CI bypass for push events: the workflow now looks up
   the associated PR via ``gh pr list --commit`` to recover its labels when the
   push event context has none (`#1546 <https://github.com/spectrochempy/spectrochempy/issues/1546>`_).
-- Fix ``latest.rst`` generation: changelog sections containing both real entries
-  and the placeholder comment were silently dropped because the section-skip
-  check ran before stripping the comment.
-
-Dependency Updates
-~~~~~~~~~~~~~~~~~~
-
-Breaking Changes
-~~~~~~~~~~~~~~~~
-
-Deprecations
-~~~~~~~~~~~~
-
-Developer
-~~~~~~~~~
