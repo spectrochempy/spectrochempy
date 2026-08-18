@@ -26,88 +26,6 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
-- SPC files using explicit X coordinates are now read correctly for ``MXY``
-  and ``X-MY`` layouts. ``MXY`` subfiles previously read coordinate values
-  from the fixed header boundary instead of their own X-array offset, while
-  ``X-MY`` files failed to propagate their shared X axis to later subfiles.
-  Because the data shape and Y values could still appear valid, users who
-  previously imported ``MXY`` or ``X-MY`` files should re-read the original
-  SPC files and regenerate any derived datasets.
-
-- Passing ``axis=`` or ``dims=`` to ``NDDataset`` reduction methods now
-  correctly reduces along the requested axis instead of computing a global
-  reduction. ``axis=`` and ``dims=`` are accepted as aliases of ``dim=``;
-  passing more than one dimension selector simultaneously raises
-  ``TypeError``. Unrecognised keyword arguments now raise ``TypeError``
-  instead of being silently stored as attributes.
-
-- Multi-axis reduction methods (``sum``, ``mean``, ``std``, ``var``, ``ptp``,
-  ``amax``/``max``, ``amin``/``min``, ``all``, ``any``, ``average``) now
-  accept tuple and list selectors for specifying multiple dimensions at once,
-  e.g. ``ds.mean(dim=('y', 'x'))`` or ``ds.sum(dim=[0, 1])``. Mixed dimension
-  names and positional indices are normalised, order is preserved, and
-  ``keepdims=True`` is supported. Single-axis methods (``argmax``,
-  ``argmin``, ``cumsum``, ``coordmax``, ``coordmin``) reject tuple/list
-  selectors with a clear error. Empty sequences, boolean values, nested
-  sequences, and duplicate dimensions are rejected.
-
-- Python operators, in-place variants, and ``numpy`` ufunc counterparts now
-  produce identical titles on ``NDDataset``/``NDArray`` arithmetic.
-  Identity-preserving operations keep the source title; unary transforms
-  compose it (e.g. ``sqrt(source)``); dataset-dataset operations compose
-  ``add(...)``/``subtract(...)``/``multiply(...)``/``divide(...)``; powers
-  compose ``power(source, p)``. Composed titles longer than 120 code points
-  collapse to an absent title. Reflected powers such as ``2.0 ** ds`` no
-  longer mutate the source dataset.
-
-- ``Optimize`` post-fit diagnostics now align with the executed optimization.
-  Mutations to the public ``Optimize.fp`` view (e.g. setting ``fp.fixed``) are
-  no longer silently ignored by the reported state. The canonical model spec is
-  the sole source of truth after a fit, and ``Optimize.predict()`` /
-  ``Optimize.result.residuals`` attach detached writable metadata copies
-  instead of attempting in-place updates against locked source-derived
-  metadata.
-
-- ``PLSRegression.coef`` no longer fails when the fitted multivariate target
-  dataset carries both an observation coordinate and a target-variable
-  coordinate. The coefficient wrapper now preserves the target-axis coordinate
-  instead of attaching the observation axis to the result.
-
-- ``PCA.transform()`` and ``PCA.scores`` no longer fail when the fitted source
-  dataset has feature coordinates but no explicit observation-axis coordinate
-  entry. The result now preserves the available feature metadata and keeps the
-  missing observation axis as an empty coordinate instead of raising
-  ``KeyError("y")``.
-
-- ``MCRALS`` now rejects unsupported constructor keywords such as
-  ``n_components=...`` with the normal invalid-parameter ``KeyError`` instead
-  of incorrectly triggering a pre-fit ``NotFittedError`` during
-  initialization.
-
-- Empty unit suffixes are no longer emitted in plot labels when the dataset
-  has no units attached.
-
-- The documentation warning shown on development builds now links to the
-  actual latest stable release again. Stable-doc discovery now accepts the
-  current prefixed release tags and no longer falls back to obsolete legacy
-  versions such as ``0.8.4``.
-
-- The AsLS baseline-correction path now avoids the SciPy
-  ``SparseEfficiencyWarning`` previously exposed by published gallery examples,
-  without changing the underlying baseline-correction algorithm or the
-  scientific results.
-
-- Gallery example pages now use a consistent RST heading hierarchy. Top-level
-  page titles are emitted at the correct level in the generated gallery, and
-  nested section markers were normalized so the HTML navigation is structured
-  consistently.
-
-- The User Guide import pages now render with correct rich HTML formatting and
-  link to the current stable documentation version.
-
-- Stray Matplotlib output and rendering artifacts have been suppressed in
-  jupytext-based gallery examples.
-
 
 .. section
 
@@ -134,16 +52,4 @@ Deprecations
 
 Developer
 ~~~~~~~~~
-
-- ``Optimize`` no longer rebuilds its canonical model state by re-parsing the
-  post-fit rendered script. After a successful fit the canonical spec keeps the
-  full-precision optimized values, the public ``Optimize.fp`` view keeps its
-  identity and its in-place synced values, and ``Optimize.script`` becomes a
-  rendered representation of the fitted values. No API is removed or
-  deprecated.
-
-- The ``Optimize`` structured-validation flow now validates constraint
-  parameter-name references against the canonical ``_FitModelSpec``
-  representation instead of the legacy ``FitParameters`` view (``Optimize.fp``).
-  ``FitParameters`` and ``Optimize.fp`` remain available and unchanged, and the
-  fitting DSL and scientific results are unaffected.
+.. Add here developer changes (do not delete this comment)
