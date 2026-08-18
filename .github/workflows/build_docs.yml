@@ -53,6 +53,7 @@ jobs:
       - name: Evaluate safe-docs CI bypass
         id: eval
         env:
+          EVENT_NAME: ${{ github.event_name }}
           BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
           HEAD_SHA: ${{ github.sha }}
           LABELS_JSON: ${{ github.event_name == 'pull_request' && toJSON(github.event.pull_request.labels.*.name) || '[]' }}
@@ -64,6 +65,25 @@ jobs:
           import sys
 
           labels = json.loads(os.environ["LABELS_JSON"])
+
+          # For push events, labels are unavailable.  Look up the PR that
+          # introduced this commit (if any) to recover its labels.
+          if not labels and os.environ.get("EVENT_NAME") == "push":
+              head = os.environ["HEAD_SHA"]
+              try:
+                  result = subprocess.run(
+                      ["gh", "pr", "list", "--commit", head,
+                       "--state", "all", "--json", "labels",
+                       "--jq", ".[].labels[].name"],
+                      check=True, text=True, capture_output=True,
+                  )
+                  labels = [
+                      line.strip() for line in result.stdout.splitlines()
+                      if line.strip()
+                  ]
+              except (subprocess.CalledProcessError, FileNotFoundError):
+                  pass
+
           cmd = [
               sys.executable,
               ".github/workflows/scripts/evaluate_pr_bypass.py",
