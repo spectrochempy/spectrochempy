@@ -24,6 +24,12 @@ New Features
 
 Bug Fixes
 ~~~~~~~~~
+- Fix ``safe-docs-no-ci`` CI bypass for push events: the workflow now looks up
+  the associated PR via ``gh pr list --commit`` to recover its labels when the
+  push event context has none (`#1546 <https://github.com/spectrochempy/spectrochempy/issues/1546>`_).
+- Fix ``latest.rst`` generation: changelog sections containing both real entries
+  and the placeholder comment were silently dropped because the section-skip
+  check ran before stripping the comment.
 .. Add here new bug fixes (do not delete this comment)
 
 
