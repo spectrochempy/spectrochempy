@@ -15,59 +15,52 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 Bug Fixes
 ~~~~~~~~~
 
-- Fix incorrect explicit X-coordinate extraction in SPC multi-file formats
-  (``MXY`` and ``X-MY``).  ``_SpcFile._extract_x_data`` always read X values
-  from the fixed header boundary (``self.head_size``) instead of the supplied
-  ``offset`` argument, so every MXY subfile read X values from bytes at the
-  fixed header boundary instead of its own subfile X-array offset.  ``X-MY`` files with more than one subfile received ``x=None`` for
-  subfiles 1+ because the shared-X save was gated on ``"XE" in self.format``
-  which is false for ``"X-MY"``.  Users who imported MXY or X-MY SPC files
-  may have received wrong X coordinates; the fix corrects both the read
-  position and the shared-X propagation.
+- SPC files using explicit X coordinates are now read correctly for ``MXY``
+  and ``X-MY`` layouts. ``MXY`` subfiles previously read coordinate values
+  from the fixed header boundary instead of their own X-array offset, while
+  ``X-MY`` files failed to propagate their shared X axis to later subfiles.
+  Because the data shape and Y values could still appear valid, users who
+  previously imported ``MXY`` or ``X-MY`` files should re-read the original
+  SPC files and regenerate any derived datasets.
 
-- Elementwise arithmetic on ``NDDataset``/``NDArray`` now follows a single
-  shared title rule engine, making Python operators, their in-place variants
-  and their ``numpy`` ufunc counterparts produce identical titles.
-  Identity-preserving operations (``abs``, ``negative``, ``positive``,
-  rounding, ...) and dataset-scalar additive or dimensionless-scaling
-  operations keep the source ``title`` verbatim; unary transforms compose it
-  (``sin(source)``, ``sqrt(source)``); dataset-dataset operations compose
+- Passing ``axis=`` or ``dims=`` to ``NDDataset`` reduction methods now
+  correctly reduces along the requested axis instead of computing a global
+  reduction. ``axis=`` and ``dims=`` are accepted as aliases of ``dim=``;
+  passing more than one dimension selector simultaneously raises
+  ``TypeError``. Unrecognised keyword arguments now raise ``TypeError``
+  instead of being silently stored as attributes.
+
+- Multi-axis reduction methods (``sum``, ``mean``, ``std``, ``var``, ``ptp``,
+  ``amax``/``max``, ``amin``/``min``, ``all``, ``any``, ``average``) now
+  accept tuple and list selectors for specifying multiple dimensions at once,
+  e.g. ``ds.mean(dim=('y', 'x'))`` or ``ds.sum(dim=[0, 1])``. Mixed dimension
+  names and positional indices are normalised, order is preserved, and
+  ``keepdims=True`` is supported. Single-axis methods (``argmax``,
+  ``argmin``, ``cumsum``, ``coordmax``, ``coordmin``) reject tuple/list
+  selectors with a clear error. Empty sequences, boolean values, nested
+  sequences, and duplicate dimensions are rejected.
+
+- Python operators, in-place variants, and ``numpy`` ufunc counterparts now
+  produce identical titles on ``NDDataset``/``NDArray`` arithmetic.
+  Identity-preserving operations keep the source title; unary transforms
+  compose it (e.g. ``sqrt(source)``); dataset-dataset operations compose
   ``add(...)``/``subtract(...)``/``multiply(...)``/``divide(...)``; powers
-  compose ``power(source, p)``. Operations outside this table yield an absent
-  title instead of a fabricated or silently preserved one, the previous
-  ``"<fname>"`` substitution and the operator/ufunc title divergence have
-  been removed, and composed titles longer than 120 code points collapse to
-  an absent title. Reflected powers such as ``2.0 ** ds`` no longer mutate
-  the source dataset.
+  compose ``power(source, p)``. Composed titles longer than 120 code points
+  collapse to an absent title. Reflected powers such as ``2.0 ** ds`` no
+  longer mutate the source dataset.
 
-- Derived analysis outputs now remain compatible with source datasets whose
-  metadata contains read-only nested structures. In particular,
-  ``Optimize.predict()`` and ``Optimize.result.residuals`` now attach detached
-  writable metadata copies instead of attempting in-place updates against
-  locked source-derived metadata.
-
-- The AsLS baseline-correction path now avoids the SciPy
-  ``SparseEfficiencyWarning`` previously exposed by published gallery examples,
-  without changing the underlying baseline-correction algorithm or the
-  scientific results.
-
-- Fix inconsistent fit diagnostics after directly mutating the public
-  ``Optimize.fp`` view (for example setting ``fp.fixed``): the mutation was
-  ignored by the optimization but was re-injected into the reported state by
-  the post-fit script round-trip, so ``n_varying_parameters``,
-  ``degrees_of_freedom`` and the rendered script could disagree with what was
-  actually optimized. The canonical model spec is now the sole source of truth
-  after a fit.
+- ``Optimize`` post-fit diagnostics now align with the executed optimization.
+  Mutations to the public ``Optimize.fp`` view (e.g. setting ``fp.fixed``) are
+  no longer silently ignored by the reported state. The canonical model spec is
+  the sole source of truth after a fit, and ``Optimize.predict()`` /
+  ``Optimize.result.residuals`` attach detached writable metadata copies
+  instead of attempting in-place updates against locked source-derived
+  metadata.
 
 - ``PLSRegression.coef`` no longer fails when the fitted multivariate target
   dataset carries both an observation coordinate and a target-variable
   coordinate. The coefficient wrapper now preserves the target-axis coordinate
   instead of attaching the observation axis to the result.
-
-- ``MCRALS`` now rejects unsupported constructor keywords such as
-  ``n_components=...`` with the normal invalid-parameter ``KeyError`` instead
-  of incorrectly triggering a pre-fit ``NotFittedError`` during
-  initialization.
 
 - ``PCA.transform()`` and ``PCA.scores`` no longer fail when the fitted source
   dataset has feature coordinates but no explicit observation-axis coordinate
@@ -75,31 +68,34 @@ Bug Fixes
   missing observation axis as an empty coordinate instead of raising
   ``KeyError("y")``.
 
+- ``MCRALS`` now rejects unsupported constructor keywords such as
+  ``n_components=...`` with the normal invalid-parameter ``KeyError`` instead
+  of incorrectly triggering a pre-fit ``NotFittedError`` during
+  initialization.
+
+- Empty unit suffixes are no longer emitted in plot labels when the dataset
+  has no units attached.
+
 - The documentation warning shown on development builds now links to the
   actual latest stable release again. Stable-doc discovery now accepts the
   current prefixed release tags and no longer falls back to obsolete legacy
   versions such as ``0.8.4``.
 
-- Passing ``axis=`` or ``dims=`` to NDDataset reduction methods (``sum``,
-  ``mean``, ``std``, ``var``, ``ptp``, ``amax``/``max``, ``amin``/``min``,
-  ``argmax``, ``argmin``, ``average``, ``coordmax``, ``coordmin``,
-  ``cumsum``, ``all``, ``any``) now correctly reduces along the requested
-  axis instead of computing a global reduction. ``axis=`` and ``dims=`` are
-  accepted as aliases of ``dim=``; passing more than one dimension selector
-  simultaneously raises ``TypeError``. Unrecognised keyword arguments now
-  raise ``TypeError`` instead of being silently stored as attributes.
+- The AsLS baseline-correction path now avoids the SciPy
+  ``SparseEfficiencyWarning`` previously exposed by published gallery examples,
+  without changing the underlying baseline-correction algorithm or the
+  scientific results.
 
-- Multi-axis reduction methods (``sum``, ``mean``, ``std``, ``var``, ``ptp``,
-  ``amax``/``max``, ``amin``/``min``, ``all``, ``any``, ``average``) now
-  accept tuple and list selectors for specifying multiple dimensions at once,
-  e.g. ``ds.mean(dim=('y', 'x'))`` or ``ds.sum(dim=[0, 1])``. Mixed dimension
-  names and positional indices are normalised, order is preserved, and
-  ``keepdims=True`` is supported. ``average`` follows numpy semantics: when
-  all dimensions are reduced with ``keepdims=True``, the result remains a
-  scalar (existing behaviour, not regressed). Single-axis methods
-  (``argmax``, ``argmin``, ``cumsum``, ``coordmax``, ``coordmin``) reject
-  tuple/list selectors with a clear error. Empty sequences, boolean values,
-  nested sequences, and duplicate dimensions are rejected.
+- Gallery example pages now use a consistent RST heading hierarchy. Top-level
+  page titles are emitted at the correct level in the generated gallery, and
+  nested section markers were normalized so the HTML navigation is structured
+  consistently.
+
+- The User Guide import pages now render with correct rich HTML formatting and
+  link to the current stable documentation version.
+
+- Stray Matplotlib output and rendering artifacts have been suppressed in
+  jupytext-based gallery examples.
 
 Developer
 ~~~~~~~~~
@@ -108,11 +104,8 @@ Developer
   post-fit rendered script. After a successful fit the canonical spec keeps the
   full-precision optimized values, the public ``Optimize.fp`` view keeps its
   identity and its in-place synced values, and ``Optimize.script`` becomes a
-  rendered representation of the fitted values: the display precision of the
-  render no longer limits the precision of the internal fitted state, and the
-  rendered text is never re-injected into the canonical model.
-  ``FitParameters`` and ``Optimize.fp`` are unchanged, the fp-only entry path is
-  preserved, and no API is removed or deprecated.
+  rendered representation of the fitted values. No API is removed or
+  deprecated.
 
 - The ``Optimize`` structured-validation flow now validates constraint
   parameter-name references against the canonical ``_FitModelSpec``
