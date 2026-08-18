@@ -5,6 +5,7 @@
 # ======================================================================================
 # ruff: noqa
 
+import struct
 from datetime import datetime
 
 import numpy as np
@@ -180,43 +181,217 @@ def test_read_spc_without_collection_time_keeps_acquisition_date_empty(galacticd
     assert str(dataset.y.units) == "s"
 
 
-def test_extract_x_data_reads_from_head_size_not_offset():
-    # AUDIT (#1151): pin the CURRENT behavior of ``_SpcFile._extract_x_data``.
-    #
-    # The method reads the explicit X array from the fixed header boundary
-    # (``offset=self.head_size``) and discards the ``np.frombuffer`` read at the
-    # supplied ``offset`` argument, so the returned X never depends on
-    # ``offset``.  This synthetic, data-free test documents that behavior so any
-    # future correction is a deliberate, reviewed change.
-    #
-    # Impact, verified against the Galactic SPC layout and the two call sites in
-    # ``_get_sub_file``:
-    #   * X-Y / X-MY files: the single explicit X block sits immediately after
-    #     the header, so the call site passes ``offset == head_size`` and the
-    #     returned X is correct (the discarded read would have produced the same
-    #     bytes).
-    #   * MXY (TXVALS + TXYXYS) files: each subfile owns a separate X array at a
-    #     varying offset (after its 32-byte subheader), so reading from the fixed
-    #     ``head_size`` returns the first block's bytes for every subfile -- a
-    #     latent coordinate-extraction error that leaves the dataset shape intact
-    #     while corrupting the X coordinates.
+def _build_spc_header(ftflgs=0x80, npts=0, nsub=0, first=0.0, last=0.0):
+    """Build a 512-byte SPC header using the exact struct layout from the reader."""
+    head_fmt = "<cccciddicccci9s9sh32s130s30siicchf48sfifc187s"
+    return struct.pack(
+        head_fmt,
+        bytes([ftflgs]),  # ftflgs
+        b"\x4b",  # fversn: new LSB 1st
+        b"\x00",  # fexper
+        b"\x80",  # fexp: float Y (0x80)
+        npts,  # fnpts
+        float(first),  # ffirst
+        float(last),  # flast
+        nsub,  # fnsub
+        b"\x00",  # fxtype
+        b"\x00",  # fytype
+        b"\x00",  # fztype
+        b"\x00",  # fpost
+        0,  # fdate
+        b"\x00" * 9,  # fres
+        b"\x00" * 9,  # fsource
+        0,  # fpeakpt
+        b"\x00" * 32,  # fspare
+        b"\x00" * 130,  # fcmnt
+        b"\x00" * 30,  # fcatxt
+        0,  # flogoff
+        0,  # fmods
+        b"\x00",  # fprocs
+        b"\x01",  # flevel
+        1,  # fsampin
+        1.0,  # ffactor
+        b"\x00" * 48,  # fmethod
+        0.0,  # fzinc
+        0,  # fwplanes
+        0.0,  # fwinc
+        b"\x00",  # fwtype
+        b"\x00" * 187,  # freserv
+    )
+
+
+def _build_subheader(subindx=0, subtime=0.0, subnext=0.0, npts=0):
+    """Build a 32-byte SPC subfile header."""
+    subhdr_fmt = "<cchfffiif4s"
+    return struct.pack(
+        subhdr_fmt,
+        b"\x00",  # subflgs
+        b"\x80",  # subexp: float (0x80)
+        subindx,  # subindx
+        float(subtime),  # subtime
+        float(subnext),  # subnext
+        0.0,  # subnois
+        npts,  # subnpts
+        0,  # subscan
+        0.0,  # subwlevel
+        b"\x00" * 4,  # subresv
+    )
+
+
+def _make_xy_spc(npts=4, x_values=None, y_values=None):
+    """Build a minimal X-Y SPC file (1 subfile, TXVALS flag)."""
+    if x_values is None:
+        x_values = np.array([10.0, 20.0, 30.0, 40.0], dtype="<f4")
+    if y_values is None:
+        y_values = np.array([1.1, 2.2, 3.3, 4.4], dtype="<f4")
+    npts = len(x_values)
+    header = _build_spc_header(ftflgs=0x80, npts=npts)
+    subhdr = _build_subheader(subindx=0, subtime=0.0, subnext=1.0, npts=npts)
+    return header + x_values.tobytes() + subhdr + y_values.tobytes()
+
+
+def _make_xmy_spc(npts=3, nsub=3, shared_x=None, y_lists=None):
+    """Build a minimal X-MY SPC file (shared X, multiple subfiles, TMULTI+TXVALS)."""
+    if shared_x is None:
+        shared_x = np.array([100.0, 200.0, 300.0], dtype="<f4")
+    if y_lists is None:
+        y_lists = [
+            np.array([1.0, 2.0, 3.0], dtype="<f4"),
+            np.array([4.0, 5.0, 6.0], dtype="<f4"),
+            np.array([7.0, 8.0, 9.0], dtype="<f4"),
+        ]
+    nsub = len(y_lists)
+    header = _build_spc_header(ftflgs=0x84, npts=npts, nsub=nsub)
+    buf = bytearray(header)
+    buf.extend(shared_x.tobytes())
+    for i, y in enumerate(y_lists):
+        subhdr = _build_subheader(
+            subindx=i, subtime=float(i), subnext=float(i + 1), npts=npts
+        )
+        buf.extend(subhdr)
+        buf.extend(y.tobytes())
+    return bytes(buf)
+
+
+def _make_mxy_spc(nsub=3, npts_per_sub=None):
+    """Build a directory-based MXY SPC file (per-subfile X, TMULTI+TXVALS+TXYXYS).
+
+    Layout: header(512) + directory(nsub*12) + subfiles.
+    Each subfile: subhdr(32) + X(npts*4) + Y(npts*4).
+    """
+    if npts_per_sub is None:
+        npts_per_sub = [4, 3, 5]
+    header = _build_spc_header(ftflgs=0xC4, npts=512, nsub=nsub)
+    dir_offset = 512
+    dir_size = nsub * 12
+    sub_start = dir_offset + dir_size
+    buf = bytearray(header)
+    all_x = []
+    all_y = []
+    sub_positions = []
+    pos = sub_start
+    for i, npts in enumerate(npts_per_sub):
+        x = np.arange(100 * (i + 1), 100 * (i + 1) + npts, dtype="<f4")
+        y = np.ones(npts, dtype="<f4") * (i + 1)
+        all_x.append(x)
+        all_y.append(y)
+        ssfsize = 32 + npts * 4 + npts * 4
+        sub_positions.append((pos, ssfsize, float(i)))
+        pos += ssfsize
+    for ssfposn, ssfsize, ssftime in sub_positions:
+        buf.extend(struct.pack("<IIf", ssfposn, ssfsize, ssftime))
+    for i, npts in enumerate(npts_per_sub):
+        subhdr = _build_subheader(
+            subindx=i, subtime=float(i), subnext=float(i + 1), npts=npts
+        )
+        buf.extend(subhdr)
+        buf.extend(all_x[i].tobytes())
+        buf.extend(all_y[i].tobytes())
+    return bytes(buf), all_x, all_y
+
+
+def test_extract_x_data_reads_from_supplied_offset():
     spc = object.__new__(_SpcFile)
     spc.head_size = 512
     spc.float32_dtype = "<f4"
-
     npts = 4
-    x_at_head_size = np.array([10.0, 11.0, 12.0, 13.0], dtype="<f4")
-    x_at_subfile_offset = np.array([90.0, 91.0, 92.0, 93.0], dtype="<f4")
-
-    # an offset like a later subfile's X array (after head + subheader + X/Y)
-    offset = spc.head_size + 32 + npts * 4
+    x_at_offset = np.array([90.0, 91.0, 92.0, 93.0], dtype="<f4")
+    offset = 700
     content = bytearray(offset + npts * 4)
-    content[spc.head_size : spc.head_size + npts * 4] = x_at_head_size.tobytes()
-    content[offset : offset + npts * 4] = x_at_subfile_offset.tobytes()
-    content = bytes(content)
+    content[offset : offset + npts * 4] = x_at_offset.tobytes()
+    x = np.asarray(spc._extract_x_data(offset, bytes(content), npts))
+    np.testing.assert_array_equal(x, x_at_offset)
 
-    x = np.asarray(spc._extract_x_data(offset, content, npts))
 
-    # current behavior: X comes from head_size, the ``offset`` argument is unused
-    np.testing.assert_array_equal(x, x_at_head_size)
-    assert not np.array_equal(x, x_at_subfile_offset)
+def test_extract_x_data_xy_synthetic():
+    content = _make_xy_spc(npts=4)
+    x_expected = np.array([10.0, 20.0, 30.0, 40.0], dtype="<f4")
+    y_expected = np.array([1.1, 2.2, 3.3, 4.4], dtype="<f4")
+    spc = _SpcFile(content)
+    assert spc.format == "X-Y"
+    assert len(spc.nds) == 1
+    x, y, z = spc.nds[0]
+    np.testing.assert_array_almost_equal(np.asarray(x), x_expected)
+    np.testing.assert_array_almost_equal(np.asarray(y), y_expected)
+
+
+def test_extract_xmy_synthetic_shared_x():
+    shared_x = np.array([100.0, 200.0, 300.0], dtype="<f4")
+    content = _make_xmy_spc(npts=3, nsub=3, shared_x=shared_x)
+    spc = _SpcFile(content)
+    assert spc.format == "X-MY"
+    assert len(spc.nds) == 3
+    for i, (x, y, z) in enumerate(spc.nds):
+        assert x.shape == (3,)
+        np.testing.assert_array_almost_equal(np.asarray(x), shared_x)
+    x0 = spc.nds[0][0]
+    for i in range(1, 3):
+        assert spc.nds[i][0] is x0
+
+
+def test_extract_mxy_synthetic_unique_x():
+    npts_per_sub = [4, 3, 5]
+    content, all_x, all_y = _make_mxy_spc(nsub=3, npts_per_sub=npts_per_sub)
+    spc = _SpcFile(content)
+    assert spc.format == "MXY"
+    assert len(spc.nds) == 3
+    for i, (x, y, z) in enumerate(spc.nds):
+        npts = npts_per_sub[i]
+        assert x.shape == (npts,)
+        np.testing.assert_array_almost_equal(np.asarray(x), all_x[i])
+        np.testing.assert_array_almost_equal(np.asarray(y), all_y[i])
+
+
+def test_read_spc_barbituates_explicit_x_regression(galacticdata):
+    fpath = galacticdata / "BARBITUATES.SPC"
+    if not fpath.exists():
+        pytest.skip("BARBITUATES.SPC not available")
+    raw = fpath.read_bytes()
+    assert raw[1] == 0x4B
+    ftflgs = raw[0]
+    assert ftflgs & 0x80, "TXVALS flag must be set"
+    assert ftflgs & 0x04, "TMULTI flag must be set"
+    assert ftflgs & 0x40, "TXYXYS flag must be set"
+    nsub = struct.unpack_from("<I", raw, 24)[0]
+    assert nsub == 286
+    fnpts_dir_offset = struct.unpack_from("<I", raw, 4)[0]
+    assert fnpts_dir_offset > 0, "directory offset must be non-zero"
+    hdr_size = 512
+    float_dtype = "<f4"
+    expected_x_values = []
+    dir_offset = fnpts_dir_offset
+    for i in range(nsub):
+        ssfposn, ssfsize, ssftime = struct.unpack_from("<IIf", raw, dir_offset)
+        dir_offset += 12
+        npts = int((ssfsize - 32) / 8)
+        x = np.frombuffer(raw, dtype=float_dtype, offset=ssfposn + 32, count=npts)
+        expected_x_values.append(x)
+    spc = _SpcFile(raw)
+    assert spc.format == "MXY"
+    assert len(spc.nds) == nsub
+    for i in range(nsub):
+        x, y, z = spc.nds[i]
+        assert x.shape[0] == expected_x_values[i].shape[0]
+        np.testing.assert_array_almost_equal(np.asarray(x), expected_x_values[i])
+        assert np.min(np.asarray(x)) >= 0.0
+        assert np.max(np.asarray(x)) <= 300.0

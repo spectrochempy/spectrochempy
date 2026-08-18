@@ -369,7 +369,7 @@ class _SpcFile:
 
             if "M" in self.format:
                 xinit = None
-                if "XE" in self.format:
+                if "XE" in self.format or self.format == "X-MY":
                     # save x
                     xinit = x
                 if self.nsub:
@@ -485,14 +485,12 @@ class _SpcFile:
         # extract x data
         # --------------
         # X values FNPTS 32-bit floating X values
-        x = np.frombuffer(
+        return np.frombuffer(
             content,
-            offset=self.head_size,
+            offset=offset,
             dtype=self.float32_dtype,
             count=npts,
         )
-        np.frombuffer(content, offset=offset, dtype=self.float32_dtype, count=npts)
-        return x
 
     def _extract_y_data(self, offset, content, npts):
         iexp = self._exp()
