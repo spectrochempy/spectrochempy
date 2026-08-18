@@ -18,8 +18,8 @@ Bug Fixes
 - Fix incorrect explicit X-coordinate extraction in SPC multi-file formats
   (``MXY`` and ``X-MY``).  ``_SpcFile._extract_x_data`` always read X values
   from the fixed header boundary (``self.head_size``) instead of the supplied
-  ``offset`` argument, so every MXY subfile received the first subfile's X
-  bytes.  ``X-MY`` files with more than one subfile received ``x=None`` for
+  ``offset`` argument, so every MXY subfile read X values from bytes at the
+  fixed header boundary instead of its own subfile X-array offset.  ``X-MY`` files with more than one subfile received ``x=None`` for
   subfiles 1+ because the shared-X save was gated on ``"XE" in self.format``
   which is false for ``"X-MY"``.  Users who imported MXY or X-MY SPC files
   may have received wrong X coordinates; the fix corrects both the read

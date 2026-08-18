@@ -337,6 +337,11 @@ def test_extract_x_data_xy_synthetic():
 
 def test_extract_xmy_synthetic_shared_x():
     shared_x = np.array([100.0, 200.0, 300.0], dtype="<f4")
+    expected_y = [
+        np.array([1.0, 2.0, 3.0], dtype="<f4"),
+        np.array([4.0, 5.0, 6.0], dtype="<f4"),
+        np.array([7.0, 8.0, 9.0], dtype="<f4"),
+    ]
     content = _make_xmy_spc(npts=3, nsub=3, shared_x=shared_x)
     spc = _SpcFile(content)
     assert spc.format == "X-MY"
@@ -344,6 +349,7 @@ def test_extract_xmy_synthetic_shared_x():
     for i, (x, y, z) in enumerate(spc.nds):
         assert x.shape == (3,)
         np.testing.assert_array_almost_equal(np.asarray(x), shared_x)
+        np.testing.assert_array_almost_equal(np.asarray(y), expected_y[i])
     x0 = spc.nds[0][0]
     for i in range(1, 3):
         assert spc.nds[i][0] is x0
