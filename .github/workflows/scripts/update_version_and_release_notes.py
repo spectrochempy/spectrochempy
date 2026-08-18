@@ -258,6 +258,8 @@ def make_release_note_index(revision):
     cleaned_sections = [header]
 
     for section in sections[1:]:
+        if section.strip().endswith("(do not delete this comment)"):
+            continue
         content = re.sub(
             r"(\.\. Add.*\(do not delete this comment\)\n)",
             "",
@@ -265,8 +267,6 @@ def make_release_note_index(revision):
             count=0,
             flags=0,
         )
-        if not content.strip():
-            continue
         content = content.strip() + "\n"
         cleaned_sections.append(content)
 

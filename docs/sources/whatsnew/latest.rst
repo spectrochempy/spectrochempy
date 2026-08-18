@@ -12,21 +12,6 @@ What's New in Revision 0.12.5.dev
 These are the changes in SpectroChemPy-0.12.5.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
 
-New Features
-~~~~~~~~~~~~
-
-Bug Fixes
-~~~~~~~~~
-
-Dependency Updates
-~~~~~~~~~~~~~~~~~~
-
-Breaking Changes
-~~~~~~~~~~~~~~~~
-
-Deprecations
-~~~~~~~~~~~~
-
 Developer
 ~~~~~~~~~
 - Fix ``safe-docs-no-ci`` CI bypass for push events: the workflow now looks up
