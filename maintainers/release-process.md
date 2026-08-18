@@ -19,13 +19,6 @@ du dépôt `spectrochempy/spectrochempy` :
 |----------|-------|
 | `RELEASER_APP_ID` | App ID de la GitHub App `spectrochempy-releaser` |
 
-> **Note spectrochempy_data** : le dépôt de données
-> `spectrochempy/spectrochempy_data` utilise `github.token` (fourni
-> automatiquement par GitHub Actions) pour pusher les fichiers de test et
-> créer les releases. Aucun secret PAT n'est nécessaire. Le workflow
-> `release.yml` tente d'utiliser `secrets.PAT_RELEASE` si défini, mais
-> celui-ci n'est plus utilisé — ne pas le recréer.
->
 > **Note PyPI** : le package **core** (`spectrochempy`) et les **plugins**
 > utilisent tous [Trusted Publishing](https://docs.pypi.org/trusted-publishers/)
 > (OIDC) via respectivement `build_package.yml` et `publish_plugins.yml`.
