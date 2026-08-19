@@ -21,6 +21,74 @@ __dataset_methods__ = [
 __configurables__ = ["Filter"]
 __all__ = __dataset_methods__ + __configurables__
 
+
+def _detect_uniform_spacing(dataset, dim):
+    """
+    Detect uniform spacing from the coordinate along *dim*.
+
+    Uses the raw float64 storage (``coord._data``) to avoid precision loss
+    from the ``Coord`` rounding layer.  All successive differences are
+    compared to their mean with ``numpy.allclose(rtol=1e-10, atol=0)``.
+    The mean signed delta is returned (not ``diffs[0]``).
+
+    Parameters
+    ----------
+    dataset : `NDDataset`
+        The dataset whose coordinate is inspected.
+    dim : int
+        The resolved integer axis index.
+
+    Returns
+    -------
+    delta_signed : float or None
+        The mean signed spacing when the coordinate is uniformly spaced,
+        or ``None`` when detection fails.
+    message : str or None
+        Explanation when *delta_signed* is ``None``, else ``None``.
+    """
+    try:
+        coord = dataset.coord(dim)
+    except AttributeError:
+        return None, "no coordinate available"
+
+    if coord is None:
+        return None, "coordinate is None"
+
+    if coord.is_masked or (
+        hasattr(coord, "_mask")
+        and isinstance(coord._mask, np.ndarray)
+        and np.any(coord._mask)
+    ):
+        return None, "coordinate contains masked values"
+
+    # Use coord._data (raw float64 storage) rather than coord.data.
+    # The public .data property applies a rounding layer that truncates
+    # float64 to ~4 significant digits, destroying the uniform-spacing
+    # signal.  _data preserves the original precision.
+    try:
+        values = np.asarray(coord._data, dtype=float)
+    except (TypeError, ValueError):
+        return None, "coordinate is not numeric"
+
+    if values.ndim != 1 or values.size < 2:
+        return None, "coordinate has fewer than 2 points"
+
+    if not np.all(np.isfinite(values)):
+        return None, "coordinate contains non-finite values (NaN or Inf)"
+
+    diffs = np.diff(values)
+
+    if np.all(diffs == 0):
+        return None, "coordinate is degenerate (all values identical)"
+
+    mean_diff = np.mean(diffs)
+
+    if not np.allclose(diffs, mean_diff, rtol=1e-10, atol=0):
+        return None, "coordinate is not uniformly spaced"
+
+    return float(mean_diff), None
+
+
 _common_see_also = """
 See Also
 --------
@@ -123,9 +191,17 @@ class Filter(ProcessingConfigurable):
     ).tag(config=True)
 
     delta = tr.Float(
-        default_value=1.0,
+        default_value=None,
+        allow_none=True,
         help="The spacing of the samples to which the filter will be applied. "
-        "This is only used if deriv > 0.",
+        "This is only used if deriv > 0.\n\n"
+        "When ``None`` (the default), the spacing "
+        "is automatically derived from the coordinate of the processed axis "
+        "if the coordinate is uniformly spaced.  If the coordinate is missing, "
+        "non-uniform, or non-numeric, the index-based delta of 1.0 is used "
+        "with a warning.\n\n"
+        "When set to a numeric value, that value is used as-is and no "
+        "automatic coordinate detection is performed.",
     ).tag(config=True)
 
     mode = tr.Enum(
@@ -211,17 +287,53 @@ and ‘nearest’.
         # Savitzky-Golay filter
         # ---------------------
         elif self.method == "savgol":
+            # ------------------------------------------------------------------
+            # Coordinate-aware delta: when delta is None (auto-detect) and a
+            # derivative is requested, derive the signed spacing from the
+            # coordinate.  The sign naturally handles ascending/descending
+            # coordinates so no _reversed correction is needed.
+            # ------------------------------------------------------------------
+            delta_used = self.delta
+            _auto_detected = False
+
+            if self.delta is None:
+                if self.deriv:
+                    delta_signed, msg = _detect_uniform_spacing(
+                        self._X,
+                        self._dim,
+                    )
+                    if delta_signed is not None:
+                        delta_used = delta_signed
+                        _auto_detected = True
+                    else:
+                        delta_used = 1.0
+                        import warnings as _warnings
+
+                        _warnings.warn(
+                            f"Savitzky-Golay derivative requested but {msg}. "
+                            "Falling back to index-based delta=1.0. "
+                            "To obtain physically scaled derivatives, provide "
+                            "a uniformly spaced coordinate or set delta explicitly.",
+                            stacklevel=2,
+                        )
+                else:
+                    # deriv=0: delta is irrelevant; scipy needs a float
+                    delta_used = 1.0
+
             kwargs = {
                 "axis": self._dim,
                 "deriv": self.deriv,
-                "delta": self.delta,
+                "delta": delta_used,
                 "mode": self.mode,
                 "cval": self.cval,
             }
             data = scipy.signal.savgol_filter(X, self.size, self.order, **kwargs)
 
-            # Change derived data sign if we have reversed coordinate axis
-            if self._reversed and self.deriv:
+            # _reversed correction: ONLY when an explicit delta was used
+            # (the user supplied delta=1.0 or another value).  When the
+            # delta was auto-detected from the coordinate the sign is
+            # already correct and no further correction must be applied.
+            if not _auto_detected and self._reversed and self.deriv:
                 data = data * (-1) ** self.deriv
 
             # Annotate the output title so a derivative quantity is clearly
@@ -310,7 +422,7 @@ def smooth(dataset, size=5, window="avg", dim=-1, **kwargs):
 
 
 # --------------------------------------------------------------------------------------
-def savgol(dataset, size=5, order=2, dim=-1, **kwargs):
+def savgol(dataset, size=5, order=2, dim=-1, delta=None, **kwargs):
     """
     Savitzky-Golay filter.
 
@@ -329,6 +441,20 @@ def savgol(dataset, size=5, order=2, dim=-1, **kwargs):
     dim : `int` or `str`, optional, default: -1
         Axis along which to apply the filter.  Accepts a dimension name
         (e.g. ``"x"``) or an integer index (e.g. ``-1`` for the last axis).
+    delta : `float` or ``None``, optional, default: ``None``
+        Sample spacing of the coordinate to which the filter is applied.
+
+        * ``None`` (default) — when ``deriv > 0``, the signed spacing is
+          automatically derived from the coordinate of the processed axis
+          if the coordinate is uniformly spaced.  On a non-uniform or
+          missing coordinate a warning is emitted and the index-based
+          ``delta=1.0`` is used as a fallback.
+        * A numeric value — used as-is; no automatic coordinate detection
+          is performed.
+
+        .. versionchanged:: 0.12.5
+           Default changed from ``1.0`` to ``None`` (auto-detect).
+
     **kwargs : keyword arguments, optional
         Additional keyword arguments passed to the filter.
 
@@ -341,8 +467,6 @@ def savgol(dataset, size=5, order=2, dim=-1, **kwargs):
     ----------------
     deriv : `int`, optional, default: 0
         The order of the derivative to compute.
-    delta : `float`, optional, default: 1.0
-        The spacing of the samples to which the filter will be applied.
     mode : `str`, optional, default: 'nearest'
         The mode parameter determines how the array borders are handled.
     cval : `float`, optional, default: 0.0
@@ -356,13 +480,16 @@ def savgol(dataset, size=5, order=2, dim=-1, **kwargs):
 
     Notes
     -----
-    Even spacing of the axis coordinates is NOT checked.
-    Be aware that Savitzky-Golay algorithm is based on indexes, not on coordinates.
+    When ``delta`` is ``None`` (the default), the sample spacing is
+    detected from the coordinate and passed directly to
+    ``scipy.signal.savgol_filter``.  The Savitzky-Golay algorithm is
+    fundamentally index-based; the detected delta scales the derivative
+    coefficients during the convolution.
 
     """
-    # TODO : check if coordinates are evenly spaced
-
-    return Filter(method="savgol", size=size, order=order, **kwargs).transform(
+    return Filter(
+        method="savgol", size=size, order=order, delta=delta, **kwargs
+    ).transform(
         dataset,
         dim=dim,
     )

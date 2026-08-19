@@ -23,6 +23,18 @@ Bug Fixes
   (``bool``, ``tuple``, ``list``) and unknown names raise ``TypeError`` or
   ``ValueError``.
 
+- Savitzky-Golay derivatives now automatically use the signed spacing of a
+  uniformly spaced coordinate when ``delta`` is omitted
+  (`#1091 <https://github.com/spectrochempy/spectrochempy/issues/1091>`_).
+  For ``deriv > 0``, the ``savgol()`` wrapper detects the coordinate along the
+  processed axis and derives a signed delta.  An ascending coordinate yields a
+  positive delta, a descending one yields a negative delta.  The derivative
+  sign therefore conforms to the physical variable carried by the coordinate
+  without relying on the unit-based ``_reversed`` heuristic.  An explicit
+  ``delta`` has priority and disables auto-detection.  On a non-uniform
+  or missing coordinate a warning is emitted and the index-based ``delta=1.0``
+  is used as a fallback.  ``deriv=0`` is unchanged.
+
 Developer
 ~~~~~~~~~
 - Fix ``safe-docs-no-ci`` CI bypass for push events: the workflow now looks up
