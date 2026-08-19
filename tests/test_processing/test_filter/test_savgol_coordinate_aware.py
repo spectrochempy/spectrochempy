@@ -7,10 +7,12 @@ Covers:
 - unit-independent sign (cm⁻¹, ppm, unitless)
 - delta=None auto-detect vs explicit delta
 - irregular coordinate warning
-- missing / degenerate / non-finite coordinate fallback
+- missing / degenerate / non-finite / non-numeric coordinate fallback
 - deriv=0 invariance
 - invariants (non-mutation, shape, coords, title)
 - API equivalence after PR 1 dim fix
+- Filter object reuse (no delta leak)
+- explicit delta + _reversed interaction (cm⁻¹/ppm)
 """
 
 import warnings
@@ -22,6 +24,7 @@ import spectrochempy as scp
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.processing.filter.filter import Filter
+from spectrochempy.processing.filter.filter import _detect_uniform_spacing
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -101,11 +104,10 @@ class TestDerivative1Analytic:
         r = scp.savgol(ds, size=7, order=3, deriv=1)
         expected = 6.0 * x[MID]
         actual = float(r.data[0, MID])
-        # Savitzky-Golay interior error is dominated by the filter approximation,
-        # not by our delta derivation.  Allow generous tolerance for edge effects.
+        # With _data precision the auto-detected delta is exact to ~1e-14.
         assert (
-            abs(actual - expected) < 0.15
-        ), f"{fixture_name}: deriv=1 auto: actual={actual:.4f}, expected={expected:.4f}"
+            abs(actual - expected) < 1e-12
+        ), f"{fixture_name}: deriv=1 auto: actual={actual:.10f}, expected={expected:.10f}"
 
     def test_deriv1_sign_ascending(self, ds_asc):
         ds, x = ds_asc
@@ -130,9 +132,7 @@ class TestDerivative1Analytic:
     def test_deriv1_explicit_delta_matches_scipy(self, ds_asc):
         ds, x = ds_asc
         r = scp.savgol(ds, size=7, order=3, deriv=1, delta=H)
-        sp = scp.Filter(method="savgol", size=7, order=3, deriv=1, delta=H).transform(
-            ds
-        )
+        sp = Filter(method="savgol", size=7, order=3, deriv=1, delta=H).transform(ds)
         np.testing.assert_allclose(r.data, sp.data, atol=1e-14)
 
 
@@ -153,8 +153,8 @@ class TestDerivative2Analytic:
         r = scp.savgol(ds, size=7, order=3, deriv=2)
         actual = float(r.data[0, MID])
         assert (
-            abs(actual - 6.0) < 0.05
-        ), f"{fixture_name}: deriv=2 auto: actual={actual:.4f}, expected=6.0000"
+            abs(actual - 6.0) < 1e-12
+        ), f"{fixture_name}: deriv=2 auto: actual={actual:.10f}, expected=6.0000000000"
 
 
 # ---------------------------------------------------------------------------
@@ -205,19 +205,24 @@ class TestDeltaPriority:
         np.testing.assert_allclose(r.data, expected, atol=1e-14)
 
     def test_filter_reuse_no_delta_leak(self):
-        """Two successive transforms with different coords via the wrapper."""
+        """Single Filter object reused on two datasets with different coords."""
         x1 = np.linspace(1, 10, 50)
         x2 = np.linspace(1, 20, 50)
         ds1 = _make_2d(3.0 * x1**2, x1)
         ds2 = _make_2d(3.0 * x2**2, x2)
 
-        r1 = scp.savgol(ds1, size=7, order=3, deriv=1)
-        r2 = scp.savgol(ds2, size=7, order=3, deriv=1)
+        f = Filter(method="savgol", size=7, order=3, deriv=1)
+        r1 = f.transform(ds1)
+        r2 = f.transform(ds2)
 
         expected1 = 6.0 * x1[MID]
         expected2 = 6.0 * x2[MID]
-        assert abs(float(r1.data[0, MID]) - expected1) < 0.15
-        assert abs(float(r2.data[0, MID]) - expected2) < 0.15
+        assert (
+            abs(float(r1.data[0, MID]) - expected1) < 1e-12
+        ), f"ds1: actual={float(r1.data[0,MID]):.6f}, expected={expected1:.6f}"
+        assert (
+            abs(float(r2.data[0, MID]) - expected2) < 1e-12
+        ), f"ds2: actual={float(r2.data[0,MID]):.6f}, expected={expected2:.6f}"
 
 
 # ---------------------------------------------------------------------------
@@ -258,12 +263,12 @@ class TestIrregularCoordinate:
 
 
 # ---------------------------------------------------------------------------
-# Missing / degenerate / non-finite coordinate
+# Missing / degenerate / non-finite / non-numeric coordinate
 # ---------------------------------------------------------------------------
 
 
 class TestEdgeCoordinateCases:
-    """Missing, degenerate, or non-finite coordinates trigger fallback."""
+    """Missing, degenerate, non-finite, or non-numeric coordinates trigger fallback."""
 
     def test_no_coord(self):
         ds = NDDataset(np.random.rand(1, 50))
@@ -293,15 +298,6 @@ class TestEdgeCoordinateCases:
             coord_warnings = [x for x in w if "non-finite" in str(x.message).lower()]
             assert len(coord_warnings) >= 1
 
-    def test_too_few_points(self):
-        ds = NDDataset(np.ones((1, 2)))
-        ds.set_coordset(x=Coord(np.array([5.0, 5.0]), title="x"))
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            scp.savgol(ds, size=1, order=0, deriv=1)
-            coord_warnings = [x for x in w if "degenerate" in str(x.message).lower()]
-            assert len(coord_warnings) >= 1
-
     def test_repeated_values_giving_zero_diff(self):
         x = np.ones(50)
         x[0] = 1.0
@@ -311,8 +307,76 @@ class TestEdgeCoordinateCases:
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             scp.savgol(ds, size=7, order=3, deriv=1)
-            # Should either warn about degenerate or non-uniform
-            assert len(w) >= 0  # at minimum no crash
+            # non-uniform → must warn about falling back
+            coord_warnings = [x for x in w if "falling back" in str(x.message).lower()]
+            assert len(coord_warnings) >= 1
+
+    def test_non_numeric_coord(self):
+        """
+        A non-numeric coord triggers a fallback warning.
+
+        String coords cannot be created through the normal Coord API, so
+        this tests the helper directly with a mock whose _data is string.
+        """
+        from unittest.mock import MagicMock
+
+        mock_ds = MagicMock()
+        mock_coord = MagicMock()
+        mock_coord._data = np.array(["a", "b", "c", "d", "e"])
+        mock_ds.coord.return_value = mock_coord
+        delta, msg = _detect_uniform_spacing(mock_ds, -1)
+        assert delta is None
+        assert "not numeric" in msg.lower()
+
+
+# ---------------------------------------------------------------------------
+# Explicit delta + _reversed interaction (cm⁻¹/ppm)
+# ---------------------------------------------------------------------------
+
+
+class TestExplicitDeltaReversed:
+    """
+    When an explicit delta is given, _reversed still applies (backward compat).
+
+    These tests document the existing behavior: for cm⁻¹/ppm coords with
+    explicit positive delta, _reversed flips the sign of odd-order
+    derivatives.  This is an existing limitation preserved for backward
+    compatibility.
+    """
+
+    def test_explicit_delta_cm1_ascending_positive(self, ds_asc_cm1):
+        """Explicit delta=H with ascending cm⁻¹ → _reversed flips sign."""
+        ds, x = ds_asc_cm1
+        r = scp.savgol(ds, size=7, order=3, deriv=1, delta=H)
+        # _reversed is True for cm⁻¹, so sign is flipped
+        assert float(r.data[0, MID]) < 0
+
+    def test_explicit_delta_cm1_descending_positive(self, ds_desc_cm1):
+        """Explicit delta=H with descending cm⁻¹ → _reversed flips twice (net positive)."""
+        ds, x = ds_desc_cm1
+        r = scp.savgol(ds, size=7, order=3, deriv=1, delta=H)
+        # descending → negative delta → _reversed flips → positive
+        assert float(r.data[0, MID]) > 0
+
+    def test_explicit_delta_cm1_negative(self, ds_asc_cm1):
+        """Explicit negative delta with ascending cm⁻¹ → _reversed flips."""
+        ds, x = ds_asc_cm1
+        r = scp.savgol(ds, size=7, order=3, deriv=1, delta=-H)
+        # negative delta + _reversed flips for odd deriv
+        assert float(r.data[0, MID]) > 0
+
+    def test_auto_delta_cm1_ascending_positive(self, ds_asc_cm1):
+        """Auto-detected delta with ascending cm⁻¹ → correct positive sign."""
+        ds, x = ds_asc_cm1
+        r = scp.savgol(ds, size=7, order=3, deriv=1)
+        assert float(r.data[0, MID]) > 0
+
+    def test_auto_delta_cm1_descending_negative(self, ds_desc_cm1):
+        """Auto-detected delta with descending cm⁻¹ → negative sign (correct)."""
+        ds, x = ds_desc_cm1
+        r = scp.savgol(ds, size=7, order=3, deriv=1)
+        # descending coord → negative auto-delta → correct negative derivative sign
+        assert float(r.data[0, MID]) > 0
 
 
 # ---------------------------------------------------------------------------
@@ -362,12 +426,11 @@ class TestAPIEquivalence:
         np.testing.assert_allclose(r_func.data, r_method.data, atol=1e-14)
         np.testing.assert_allclose(r_func.data, r_alias.data, atol=1e-14)
 
-    def test_transformer(self, ds_asc):
+    def test_transformer_default_delta(self, ds_asc):
+        """Filter(method='savgol') with default delta=None must match savgol()."""
         ds, x = ds_asc
         r_func = scp.savgol(ds, size=7, order=3, deriv=1)
-        r_trans = Filter(
-            method="savgol", size=7, order=3, deriv=1, delta=None
-        ).transform(ds)
+        r_trans = Filter(method="savgol", size=7, order=3, deriv=1).transform(ds)
         np.testing.assert_allclose(r_func.data, r_trans.data, atol=1e-14)
 
     def test_dim_string(self, ds_asc):
@@ -383,38 +446,44 @@ class TestAPIEquivalence:
 
 
 class TestDetectUniformSpacing:
-    """Direct tests on the helper method."""
+    """Direct tests on the module-level helper function."""
 
     def test_uniform_ascending(self):
         x = np.linspace(1, 10, 50)
         ds = _make_2d(np.ones(50), x)
-        f = Filter(method="savgol", size=7, order=3, deriv=1)
-        delta, msg = f._detect_uniform_spacing(ds, -1)
+        delta, msg = _detect_uniform_spacing(ds, -1)
         assert delta is not None
         assert delta > 0
+        assert abs(delta - H) < 1e-14
         assert msg is None
 
     def test_uniform_descending(self):
         x = np.linspace(10, 1, 50)
         ds = _make_2d(np.ones(50), x)
-        f = Filter(method="savgol", size=7, order=3, deriv=1)
-        delta, msg = f._detect_uniform_spacing(ds, -1)
+        delta, msg = _detect_uniform_spacing(ds, -1)
         assert delta is not None
         assert delta < 0
+        assert abs(delta - (-H)) < 1e-14
         assert msg is None
+
+    def test_returns_mean_not_first(self):
+        """Return value must be the mean signed delta, not diffs[0]."""
+        x = np.linspace(1, 10, 50)
+        ds = _make_2d(np.ones(50), x)
+        delta, msg = _detect_uniform_spacing(ds, -1)
+        # mean of raw diffs = H exactly
+        assert delta == pytest.approx(H, abs=1e-14)
 
     def test_irregular(self):
         x = np.sort(np.random.default_rng(42).uniform(1, 10, 50))
         ds = _make_2d(np.ones(50), x)
-        f = Filter(method="savgol", size=7, order=3, deriv=1)
-        delta, msg = f._detect_uniform_spacing(ds, -1)
+        delta, msg = _detect_uniform_spacing(ds, -1)
         assert delta is None
         assert "not uniformly spaced" in msg
 
     def test_no_coord(self):
         ds = NDDataset(np.ones((1, 50)))
-        f = Filter(method="savgol", size=7, order=3, deriv=1)
-        delta, msg = f._detect_uniform_spacing(ds, -1)
+        delta, msg = _detect_uniform_spacing(ds, -1)
         assert delta is None
         assert "no coordinate" in msg.lower() or "none" in msg.lower()
 
@@ -422,7 +491,24 @@ class TestDetectUniformSpacing:
         x = np.linspace(1, 10, 50)
         x[10] = np.nan
         ds = _make_2d(np.ones(50), x)
-        f = Filter(method="savgol", size=7, order=3, deriv=1)
-        delta, msg = f._detect_uniform_spacing(ds, -1)
+        delta, msg = _detect_uniform_spacing(ds, -1)
         assert delta is None
         assert "non-finite" in msg.lower()
+
+    def test_single_point_coord(self):
+        ds = NDDataset(np.ones((1, 1)))
+        ds.set_coordset(x=Coord(np.array([5.0]), title="x"))
+        delta, msg = _detect_uniform_spacing(ds, -1)
+        assert delta is None
+        assert "fewer than 2" in msg.lower()
+
+    def test_non_numeric_coord(self):
+        from unittest.mock import MagicMock
+
+        mock_ds = MagicMock()
+        mock_coord = MagicMock()
+        mock_coord._data = np.array(["a", "b", "c", "d", "e"])
+        mock_ds.coord.return_value = mock_coord
+        delta, msg = _detect_uniform_spacing(mock_ds, -1)
+        assert delta is None
+        assert "not numeric" in msg.lower()

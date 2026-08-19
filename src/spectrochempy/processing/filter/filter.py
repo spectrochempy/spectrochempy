@@ -21,6 +21,63 @@ __dataset_methods__ = [
 __configurables__ = ["Filter"]
 __all__ = __dataset_methods__ + __configurables__
 
+
+def _detect_uniform_spacing(dataset, dim):
+    """
+    Detect uniform spacing from the coordinate along *dim*.
+
+    Uses the raw float64 storage (``coord._data``) to avoid precision loss
+    from the ``Coord`` rounding layer.  All successive differences are
+    compared to their mean with ``numpy.allclose(rtol=1e-10, atol=0)``.
+    The mean signed delta is returned (not ``diffs[0]``).
+
+    Parameters
+    ----------
+    dataset : `NDDataset`
+        The dataset whose coordinate is inspected.
+    dim : int
+        The resolved integer axis index.
+
+    Returns
+    -------
+    delta_signed : float or None
+        The mean signed spacing when the coordinate is uniformly spaced,
+        or ``None`` when detection fails.
+    message : str or None
+        Explanation when *delta_signed* is ``None``, else ``None``.
+    """
+    try:
+        coord = dataset.coord(dim)
+    except Exception:
+        return None, "no coordinate available"
+
+    if coord is None:
+        return None, "coordinate is None"
+
+    try:
+        values = np.asarray(coord._data, dtype=float)
+    except (TypeError, ValueError):
+        return None, "coordinate is not numeric"
+
+    if values.ndim != 1 or values.size < 2:
+        return None, "coordinate has fewer than 2 points"
+
+    if not np.all(np.isfinite(values)):
+        return None, "coordinate contains non-finite values (NaN or Inf)"
+
+    diffs = np.diff(values)
+
+    if np.all(diffs == 0):
+        return None, "coordinate is degenerate (all values identical)"
+
+    mean_diff = np.mean(diffs)
+
+    if not np.allclose(diffs, mean_diff, rtol=1e-10, atol=0):
+        return None, "coordinate is not uniformly spaced"
+
+    return float(mean_diff), None
+
+
 _common_see_also = """
 See Also
 --------
@@ -123,11 +180,11 @@ class Filter(ProcessingConfigurable):
     ).tag(config=True)
 
     delta = tr.Float(
-        default_value=1.0,
+        default_value=None,
         allow_none=True,
         help="The spacing of the samples to which the filter will be applied. "
         "This is only used if deriv > 0.\n\n"
-        "When ``None`` (the default for the ``savgol()`` wrapper), the spacing "
+        "When ``None`` (the default), the spacing "
         "is automatically derived from the coordinate of the processed axis "
         "if the coordinate is uniformly spaced.  If the coordinate is missing, "
         "non-uniform, or non-numeric, the index-based delta of 1.0 is used "
@@ -230,7 +287,7 @@ and ‘nearest’.
 
             if self.delta is None:
                 if self.deriv:
-                    delta_signed, msg = self._detect_uniform_spacing(
+                    delta_signed, msg = _detect_uniform_spacing(
                         self._X,
                         self._dim,
                     )
@@ -384,7 +441,7 @@ def savgol(dataset, size=5, order=2, dim=-1, delta=None, **kwargs):
         * A numeric value — used as-is; no automatic coordinate detection
           is performed.
 
-        .. versionchanged:: 0.13.0
+        .. versionchanged:: 0.12.5
            Default changed from ``1.0`` to ``None`` (auto-detect).
 
     **kwargs : keyword arguments, optional
@@ -412,8 +469,10 @@ def savgol(dataset, size=5, order=2, dim=-1, delta=None, **kwargs):
 
     Notes
     -----
-    Even spacing of the axis coordinates is NOT checked.
-    Be aware that Savitzky-Golay algorithm is based on indexes, not on coordinates.
+    When ``delta`` is ``None`` (the default), the Savitzky-Golay filter
+    automatically detects the coordinate spacing.  Be aware that the
+    Savitzky-Golay algorithm is fundamentally index-based; coordinate-aware
+    scaling is applied as a post-processing step.
 
     """
     # TODO : check if coordinates are evenly spaced
