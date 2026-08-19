@@ -1219,6 +1219,16 @@ def test_random():
     assert ds.x.size == 200
 
 
+def test_random_seed_reproducibility():
+    """Test that seed produces reproducible output."""
+    ds1 = scp.random((10,), seed=42)
+    ds2 = scp.random((10,), seed=42)
+    np.testing.assert_array_equal(ds1.data, ds2.data)
+
+    ds3 = scp.random((10,), seed=123)
+    assert not np.array_equal(ds1.data, ds3.data)
+
+
 def test_normal():
     """Test normal creation function."""
     ds = scp.normal(loc=2.0, scale=0.5, size=(3, 3), units="km")
@@ -1236,6 +1246,16 @@ def test_normal():
     assert ds.shape == (200,)
     assert ds.x.size == 200
     assert abs(ds.mean().m - 1.5) < 0.1
+
+
+def test_normal_seed_reproducibility():
+    """Test that seed produces reproducible output."""
+    ds1 = scp.normal(loc=0.0, scale=1.0, size=(10,), seed=42)
+    ds2 = scp.normal(loc=0.0, scale=1.0, size=(10,), seed=42)
+    np.testing.assert_array_equal(ds1.data, ds2.data)
+
+    ds3 = scp.normal(loc=0.0, scale=1.0, size=(10,), seed=123)
+    assert not np.array_equal(ds1.data, ds3.data)
 
 
 def test_diagonal():
