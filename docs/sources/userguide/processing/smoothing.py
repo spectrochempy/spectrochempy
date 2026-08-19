@@ -143,7 +143,7 @@ _ = scp.plot_compare(Xn, Xhan, title="Hanning filter (7 points)")
 # As for the previous kernel-based filters, it is a moving-window based method. Hence,
 # the window length (`size` parameter) plays an equivalent role. Moreover,
 # instead of choosing a window function, the user can choose the order of the
-# polynomial used to fit the window data points (`order` , default value: 0).
+# polynomial used to fit the window data points (`order`, default value: 2).
 # The latter must be strictly smaller than the window size (so that the polynomial
 # coefficients can be fully determined).
 
@@ -170,6 +170,64 @@ filter.size = 7
 Xsm2 = filter(Xn)
 _ = scp.plot_compare(Xn, Xsm2, title="Savitzky-Golay (7 points, order=2)")
 
+
+# %% [markdown]
+# ### Savitzky-Golay derivatives
+#
+# The Savitzky-Golay filter can also compute derivatives of the data by setting
+# the `deriv` parameter. The algorithm assumes a **uniformly spaced**
+# coordinate along the processed axis.
+#
+# #### Automatic spacing detection (`delta=None`)
+#
+# When `deriv > 0` and `delta` is omitted (default), SpectroChemPy
+# automatically detects the signed spacing from the coordinate of the
+# processed axis. An ascending coordinate yields a positive delta, a
+# descending one yields a negative delta. If the coordinate is irregular,
+# missing, masked, non-finite or non-numeric, a `UserWarning` is emitted and the
+# calculation falls back to an index-based `delta=1.0`.
+#
+# #### Explicit spacing (`delta` numeric)
+#
+# An explicit `delta` is passed directly to SciPy with its sign. The value
+# is interpreted in the current unit of the selected coordinate. For a
+# descending coordinate, supply a negative `delta` if the derivative should
+# follow the physical axis.
+#
+# #### Unit propagation
+#
+# When the derivative is physically scaled (auto-detected uniform
+# coordinate or explicit delta with a coordinate that carries units), the
+# output units are `source_units / coordinate_units**deriv`.  For example,
+# a first derivative of absorbance with respect to `cm⁻¹` yields
+# `absorbance·cm`.  Smoothing (`deriv=0`) and index-based fallbacks keep
+# the source units unchanged.
+#
+# The example below builds a synthetic parabola, computes its first
+# derivative analytically, and compares it with the Savitzky-Golay
+# derivative:
+
+# %%
+# Build a synthetic signal y = 3 * x^2 on a uniform coordinate
+x = scp.Coord.linspace(1.0, 10.0, 100, title="wavenumber")
+x.units = "1/centimeter"
+y = 3.0 * x.data**2
+ds = scp.NDDataset(y, units="absorbance")
+ds.set_coordset(x=x)
+
+# Compute the first derivative with Savitzky-Golay
+ds_deriv = scp.savgol(ds, size=7, order=3, deriv=1)
+
+# Analytical derivative: dy/dx = 6 * x
+analytical = 6.0 * x.data
+
+# Plot comparison
+ax = ds_deriv.plot(color="r", lw=2, label="SG derivative")
+ax.plot(x.data, analytical, color="b", ls="--", lw=1, label="analytical")
+ax.set_title("Savitzky-Golay derivative vs. analytical")
+ax.set_xlabel("wavenumber / cm⁻¹")
+ax.set_ylabel(f"derivative / ({ds_deriv.units})")
+_ = ax.legend(loc="best")
 
 # %% [markdown]
 # ### Whittaker-Eilers filter
@@ -262,31 +320,25 @@ for window in ["flat", "bartlett", "han", "hamming", "blackman"]:
 # N+1 points, with the largest weight on the central point and smaller weights for
 # external points.
 #
-# The window functions as used in SpectroChemPy are derived from the scipy library.
-# These builtin functions are such
-# that the value of the central point is 1. Hence, as shown below,  they are normalized
-# to the sum of weights. The
-# code below displays the corresponding normalized functions for size=27 points:
+# The code below displays the corresponding normalized functions for size=27 points.
+# Each window is revealed by smoothing a single impulse: the response is the
+# normalized kernel actually used by the filter.
 
 # %%
-import numpy as np
-import scipy
-
 functions = []
 labels = []
 size = 27
-for i, method in enumerate(["bartlett", "han", "hamming", "blackman"]):
-    data = scipy.signal.get_window(method, size, fftbins=False)
-    data = data / np.sum(data)
 
-    s = scp.NDDataset(
-        data + 0.02 * i
-    )  # normalized window function, y shifted : +0.1 for each function
-    functions.append(s)
-    labels.append(f"function: {method}")
+impulse = scp.zeros(size)
+impulse[size // 2] = 1.0
+
+for i, window in enumerate(["bartlett", "han", "hamming", "blackman"]):
+    response = impulse.smooth(size=size, window=window, mode="constant")
+    functions.append(response + 0.02 * i)
+    labels.append(f"window: {window}")
 
 ax = scp.plot_multiple(
-    figsize=(8, 5),  # ylim=(0,0.1),
+    figsize=(8, 5),
     method="pen",
     datasets=functions,
     labels=labels,
