@@ -262,6 +262,8 @@ and ‘nearest’.
         # that of the input data.
         self._output_title_suffix = None
         self._preserve_identity = True
+        # Clear any stale dynamic-unit override from a previous call.
+        self._output_units = None
 
         # smooth with moving average
         # --------------------------
@@ -290,6 +292,12 @@ and ‘nearest’.
         # ---------------------
         elif self.method == "savgol":
             delta_used = self.delta
+            # Track delta provenance for unit propagation.
+            #   "irrelevant"   -> deriv == 0 (smoothing)
+            #   "coordinate"   -> auto-detected from uniform coordinate
+            #   "explicit"     -> user-provided numeric delta
+            #   "fallback"     -> irregular/missing coord, delta=1.0
+            delta_source = "irrelevant"
 
             if self.delta is None:
                 if self.deriv:
@@ -299,8 +307,10 @@ and ‘nearest’.
                     )
                     if delta_signed is not None:
                         delta_used = delta_signed
+                        delta_source = "coordinate"
                     else:
                         delta_used = 1.0
+                        delta_source = "fallback"
                         import warnings as _warnings
 
                         _warnings.warn(
@@ -313,6 +323,8 @@ and ‘nearest’.
                 else:
                     # deriv=0: delta is irrelevant; scipy needs a float
                     delta_used = 1.0
+            else:
+                delta_source = "explicit"
 
             kwargs = {
                 "axis": self._dim,
@@ -323,9 +335,23 @@ and ‘nearest’.
             }
             data = scipy.signal.savgol_filter(X, self.size, self.order, **kwargs)
 
+            # Propagate units for derivative paths that claim physical scaling.
+            # Smoothing (deriv=0) and index fallbacks keep source units.
+            if self.deriv > 0 and delta_source in ("coordinate", "explicit"):
+                coord = self._X.coord(self._dim)
+                coord_units = coord.units if coord is not None else None
+                source_units = self._X.units
+                if source_units is not None and coord_units is not None:
+                    self._output_units = source_units / coord_units**self.deriv
+                elif source_units is not None:
+                    # Coordinate has no unit: keep source units (U3)
+                    self._output_units = source_units
+                else:
+                    # Source has no unit: result has no unit (U5)
+                    self._output_units = None
+
             # Annotate the output title so a derivative quantity is clearly
-            # identified. Units are intentionally kept as-is in this PR;
-            # physical unit propagation is a separate follow-up.
+            # identified.  Coordinates are preserved by the output wrapping.
             if self.deriv:
                 ordinal = {1: "1st", 2: "2nd", 3: "3rd"}.get(
                     self.deriv, f"{self.deriv}th"
@@ -434,10 +460,11 @@ def savgol(dataset, size=5, order=2, dim=-1, delta=None, **kwargs):
           if the coordinate is uniformly spaced.  On a non-uniform or
           missing coordinate a warning is emitted and the index-based
           ``delta=1.0`` is used as a fallback.
-        * A numeric value — passed directly to SciPy with its sign.  No
-          unit-based correction is applied.  For a descending coordinate,
-          supply a negative ``delta`` if the derivative should follow the
-          physical axis.
+        * A numeric value — passed directly to SciPy with its sign.  The
+          value is interpreted in the current unit of the selected
+          coordinate.  No unit-based correction (``_reversed``) is applied.
+          For a descending coordinate, supply a negative ``delta`` if the
+          derivative should follow the physical axis.
 
         .. versionchanged:: 0.12.5
            Default changed from ``1.0`` to ``None`` (auto-detect).
@@ -482,6 +509,19 @@ def savgol(dataset, size=5, order=2, dim=-1, delta=None, **kwargs):
     provided, with its sign.  The coordinate units (``cm⁻¹``, ``ppm``,
     etc.) have no effect on the result in this case.  The user is
     responsible for the sign convention.
+
+    **Units.**  For ``deriv > 0`` with a physically scaled delta
+    (auto-detected from a uniform coordinate or explicitly provided
+    when the coordinate carries units), the output units are
+    ``source_units / coordinate_units**deriv``.  For example, a first
+    derivative of absorbance with respect to ``cm⁻¹`` yields
+    ``absorbance·cm``.  Smoothing (``deriv=0``) and index-based
+    fallbacks preserve the source units unchanged.  If the source has
+    no units, the result has no units regardless of the coordinate.
+
+    .. versionchanged:: 0.12.5
+       Units are now propagated for physically scaled derivative
+       paths.  Smoothing and index fallbacks keep source units.
 
     """
     return Filter(

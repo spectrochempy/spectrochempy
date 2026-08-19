@@ -741,7 +741,15 @@ class _set_output:
             X_transf.description = copy.copy(metadata_source.description)
             X_transf.origin = copy.copy(metadata_source.origin)
             X_transf.filename = copy.copy(metadata_source.filename)
-            if self.units is not None:
+            # Allow a processing method to override output units dynamically
+            # by setting ``_output_units`` on the instance (e.g. for physically
+            # scaled derivatives in Savitzky-Golay).  Always clear afterwards
+            # to prevent state leakage between calls.
+            output_units = getattr(obj, "_output_units", None)
+            if output_units is not None:
+                X_transf.units = output_units
+                obj._output_units = None
+            elif self.units is not None:
                 if self.units == "keep":
                     X_transf.units = X.units
                 else:

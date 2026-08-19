@@ -139,9 +139,11 @@ class TestSavgolDerivativeMetadata:
             result.coord("x").data, dataset_2d_with_meta.coord("x").data
         )
 
-    def test_deriv_keeps_original_units(self, dataset_2d_with_meta):
-        # Conservative: index-based derivative scaling is not tied to a
-        # validated physical spacing, so units are unchanged.
+    def test_deriv_keeps_source_units_when_coordinate_has_no_units(
+        self, dataset_2d_with_meta
+    ):
+        # When the coordinate has no units, a derivative cannot claim a
+        # physical scale.  The source units are preserved (rule U3/U4).
         result = scp.savgol(dataset_2d_with_meta, size=7, order=3, deriv=1)
         assert result.units == "absorbance", result.units
 
