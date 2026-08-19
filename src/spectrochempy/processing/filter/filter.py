@@ -193,15 +193,17 @@ class Filter(ProcessingConfigurable):
     delta = tr.Float(
         default_value=None,
         allow_none=True,
-        help="The spacing of the samples to which the filter will be applied. "
+        help="The signed sample spacing passed to ``scipy.signal.savgol_filter``. "
         "This is only used if deriv > 0.\n\n"
-        "When ``None`` (the default), the spacing "
+        "When ``None`` (the default), the signed spacing "
         "is automatically derived from the coordinate of the processed axis "
-        "if the coordinate is uniformly spaced.  If the coordinate is missing, "
-        "non-uniform, or non-numeric, the index-based delta of 1.0 is used "
-        "with a warning.\n\n"
-        "When set to a numeric value, that value is used as-is and no "
-        "automatic coordinate detection is performed.",
+        "if the coordinate is uniformly spaced.  On a non-uniform or "
+        "missing coordinate a warning is emitted and the index-based "
+        "``delta=1.0`` is used as a fallback.\n\n"
+        "When set to a numeric value, that value is passed directly to "
+        "SciPy with its sign.  No unit-based correction (``_reversed``) "
+        "is applied.  For a descending coordinate, supply a negative "
+        "``delta`` if the derivative should follow the physical axis.",
     ).tag(config=True)
 
     mode = tr.Enum(
@@ -287,14 +289,7 @@ and ‘nearest’.
         # Savitzky-Golay filter
         # ---------------------
         elif self.method == "savgol":
-            # ------------------------------------------------------------------
-            # Coordinate-aware delta: when delta is None (auto-detect) and a
-            # derivative is requested, derive the signed spacing from the
-            # coordinate.  The sign naturally handles ascending/descending
-            # coordinates so no _reversed correction is needed.
-            # ------------------------------------------------------------------
             delta_used = self.delta
-            _auto_detected = False
 
             if self.delta is None:
                 if self.deriv:
@@ -304,7 +299,6 @@ and ‘nearest’.
                     )
                     if delta_signed is not None:
                         delta_used = delta_signed
-                        _auto_detected = True
                     else:
                         delta_used = 1.0
                         import warnings as _warnings
@@ -329,18 +323,9 @@ and ‘nearest’.
             }
             data = scipy.signal.savgol_filter(X, self.size, self.order, **kwargs)
 
-            # _reversed correction: ONLY when an explicit delta was used
-            # (the user supplied delta=1.0 or another value).  When the
-            # delta was auto-detected from the coordinate the sign is
-            # already correct and no further correction must be applied.
-            if not _auto_detected and self._reversed and self.deriv:
-                data = data * (-1) ** self.deriv
-
             # Annotate the output title so a derivative quantity is clearly
-            # identified. Units are intentionally kept as-is (the Savitzky-Golay
-            # path is index-based and does not validate even spacing, so we do
-            # not claim physically transformed units) and coordinates are
-            # preserved by the output wrapping.
+            # identified. Units are intentionally kept as-is in this PR;
+            # physical unit propagation is a separate follow-up.
             if self.deriv:
                 ordinal = {1: "1st", 2: "2nd", 3: "3rd"}.get(
                     self.deriv, f"{self.deriv}th"
@@ -442,18 +427,25 @@ def savgol(dataset, size=5, order=2, dim=-1, delta=None, **kwargs):
         Axis along which to apply the filter.  Accepts a dimension name
         (e.g. ``"x"``) or an integer index (e.g. ``-1`` for the last axis).
     delta : `float` or ``None``, optional, default: ``None``
-        Sample spacing of the coordinate to which the filter is applied.
+        Sample spacing passed to ``scipy.signal.savgol_filter``.
 
         * ``None`` (default) — when ``deriv > 0``, the signed spacing is
           automatically derived from the coordinate of the processed axis
           if the coordinate is uniformly spaced.  On a non-uniform or
           missing coordinate a warning is emitted and the index-based
           ``delta=1.0`` is used as a fallback.
-        * A numeric value — used as-is; no automatic coordinate detection
-          is performed.
+        * A numeric value — passed directly to SciPy with its sign.  No
+          unit-based correction is applied.  For a descending coordinate,
+          supply a negative ``delta`` if the derivative should follow the
+          physical axis.
 
         .. versionchanged:: 0.12.5
            Default changed from ``1.0`` to ``None`` (auto-detect).
+
+        .. versionchanged:: 0.12.5
+           Explicit ``delta`` is now passed to SciPy with its sign.
+           The former ``_reversed`` unit-based correction is no longer
+           applied when ``delta`` is explicitly provided.
 
     **kwargs : keyword arguments, optional
         Additional keyword arguments passed to the filter.
@@ -485,6 +477,11 @@ def savgol(dataset, size=5, order=2, dim=-1, delta=None, **kwargs):
     ``scipy.signal.savgol_filter``.  The Savitzky-Golay algorithm is
     fundamentally index-based; the detected delta scales the derivative
     coefficients during the convolution.
+
+    When ``delta`` is a numeric value, it is passed to SciPy exactly as
+    provided, with its sign.  The coordinate units (``cm⁻¹``, ``ppm``,
+    etc.) have no effect on the result in this case.  The user is
+    responsible for the sign convention.
 
     """
     return Filter(

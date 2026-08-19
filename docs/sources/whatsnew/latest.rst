@@ -35,6 +35,18 @@ Bug Fixes
   or missing coordinate a warning is emitted and the index-based ``delta=1.0``
   is used as a fallback.  ``deriv=0`` is unchanged.
 
+- Fix sign of Savitzky-Golay derivatives when an explicit ``delta`` is
+  provided with ``cm⁻¹`` or ``ppm`` coordinates
+  (`#1552 <https://github.com/spectrochempy/spectrochempy/issues/1552>`_).
+  The former ``_reversed`` correction applied ``(-1)**deriv`` on the
+  Savitzky-Golay path when the coordinate carried ``cm⁻¹`` or ``ppm``
+  units, flipping the sign of odd-order derivatives on ascending
+  coordinates.  An explicit ``delta`` is now passed to SciPy with its
+  sign; no unit-based correction is applied.  For a descending
+  coordinate, supply a negative ``delta`` if the derivative should follow
+  the physical axis.  This is a numeric correction for affected calls
+  with odd-order derivatives.
+
 Developer
 ~~~~~~~~~
 - Fix ``safe-docs-no-ci`` CI bypass for push events: the workflow now looks up
