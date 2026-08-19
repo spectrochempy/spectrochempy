@@ -19,6 +19,7 @@ import warnings
 
 import numpy as np
 import pytest
+import scipy.signal
 
 import spectrochempy as scp
 from spectrochempy.core.dataset.coord import Coord
@@ -338,43 +339,30 @@ class TestEdgeCoordinateCases:
 
 class TestExplicitDeltaReversed:
     """
-    Explicit delta + _reversed interaction documents a known bug.
+    Explicit delta + coordinate unit interaction.
 
-    For cm⁻¹/ppm coords with explicit positive delta, _reversed flips
-    the sign of odd-order derivatives.  xfail(strict=True) ensures the
-    test fails if the bug is ever fixed, prompting an update.
+    Since #1552, an explicit delta is passed to SciPy with its sign and
+    the ``_reversed`` correction is no longer applied.  All tests pass
+    without xfail.
     """
 
-    @pytest.mark.xfail(
-        strict=True,
-        reason="Explicit delta with cm-1 ascending: _reversed incorrectly "
-        "flips sign. Expected positive. See #1091 follow-up.",
-    )
     def test_explicit_delta_cm1_ascending_positive(self, ds_asc_cm1):
         ds, x = ds_asc_cm1
         r = scp.savgol(ds, size=7, order=3, deriv=1, delta=H)
-        # Currently returns negative due to _reversed; correct is positive
-        assert float(r.data[0, MID]) > 0
+        expected = scipy.signal.savgol_filter(3.0 * x**2, 7, 3, deriv=1, delta=H)[MID]
+        assert abs(float(r.data[0, MID]) - expected) < 1e-10
 
-    def test_explicit_delta_cm1_descending_correct(self, ds_desc_cm1):
-        """Explicit delta=H with descending cm-1 → _reversed cancels correctly."""
+    def test_explicit_delta_cm1_descending_positive(self, ds_desc_cm1):
         ds, x = ds_desc_cm1
         r = scp.savgol(ds, size=7, order=3, deriv=1, delta=H)
-        expected = 6.0 * x[MID]
-        # For descending coords, _reversed happens to correct the sign
-        # and the magnitude matches.
-        assert float(r.data[0, MID]) > 0
-        assert abs(float(r.data[0, MID]) - expected) < 1e-12
+        expected = scipy.signal.savgol_filter(3.0 * x**2, 7, 3, deriv=1, delta=H)[MID]
+        assert abs(float(r.data[0, MID]) - expected) < 1e-10
 
-    @pytest.mark.xfail(
-        strict=True,
-        reason="Explicit negative delta with cm-1 ascending: _reversed "
-        "flips sign. Expected negative. See #1091 follow-up.",
-    )
     def test_explicit_delta_cm1_negative(self, ds_asc_cm1):
         ds, x = ds_asc_cm1
         r = scp.savgol(ds, size=7, order=3, deriv=1, delta=-H)
-        # Correct result: negative (descending direction)
+        expected = scipy.signal.savgol_filter(3.0 * x**2, 7, 3, deriv=1, delta=-H)[MID]
+        assert abs(float(r.data[0, MID]) - expected) < 1e-10
         assert float(r.data[0, MID]) < 0
 
     def test_auto_delta_cm1_ascending_positive(self, ds_asc_cm1):
@@ -389,6 +377,84 @@ class TestExplicitDeltaReversed:
         r = scp.savgol(ds, size=7, order=3, deriv=1)
         # descending coord → negative auto-delta → y=3x², 6x > 0
         assert float(r.data[0, MID]) > 0
+
+
+# ---------------------------------------------------------------------------
+# Explicit delta sign matrix (#1552)
+# ---------------------------------------------------------------------------
+
+
+class TestExplicitDeltaSignMatrix:
+    """
+    Explicit delta is authoritative: sign, magnitude, and unit-independence.
+
+    For every (direction, unit, delta_sign) combination, the result must
+    match ``scipy.signal.savgol_filter`` with the same delta.
+    """
+
+    @pytest.mark.parametrize(
+        "unit",
+        [None, "1/centimeter", "ppm", "meter"],
+        ids=["none", "cm-1", "ppm", "meter"],
+    )
+    @pytest.mark.parametrize(
+        "direction",
+        ["ascending", "descending"],
+        ids=["asc", "desc"],
+    )
+    def test_positive_delta_matches_scipy(self, direction, unit):
+        x = (
+            np.linspace(1, 10, 50)
+            if direction == "ascending"
+            else np.linspace(10, 1, 50)
+        )
+        y = 3.0 * x**2
+        ds = _make_2d(y, x, unit=unit)
+        r = scp.savgol(ds, size=7, order=3, deriv=1, delta=H)
+        expected = scipy.signal.savgol_filter(y, 7, 3, deriv=1, delta=H)[MID]
+        assert abs(float(r.data[0, MID]) - expected) < 1e-10
+
+    @pytest.mark.parametrize(
+        "unit",
+        [None, "1/centimeter", "ppm", "meter"],
+        ids=["none", "cm-1", "ppm", "meter"],
+    )
+    @pytest.mark.parametrize(
+        "direction",
+        ["ascending", "descending"],
+        ids=["asc", "desc"],
+    )
+    def test_negative_delta_matches_scipy(self, direction, unit):
+        x = (
+            np.linspace(1, 10, 50)
+            if direction == "ascending"
+            else np.linspace(10, 1, 50)
+        )
+        y = 3.0 * x**2
+        ds = _make_2d(y, x, unit=unit)
+        r = scp.savgol(ds, size=7, order=3, deriv=1, delta=-H)
+        expected = scipy.signal.savgol_filter(y, 7, 3, deriv=1, delta=-H)[MID]
+        assert abs(float(r.data[0, MID]) - expected) < 1e-10
+
+    def test_positive_delta_ascending_sign(self):
+        x = np.linspace(1, 10, 50)
+        ds = _make_2d(3.0 * x**2, x, unit="1/centimeter")
+        r = scp.savgol(ds, size=7, order=3, deriv=1, delta=H)
+        assert float(r.data[0, MID]) > 0
+
+    def test_negative_delta_ascending_sign(self):
+        x = np.linspace(1, 10, 50)
+        ds = _make_2d(3.0 * x**2, x, unit="1/centimeter")
+        r = scp.savgol(ds, size=7, order=3, deriv=1, delta=-H)
+        assert float(r.data[0, MID]) < 0
+
+    def test_deriv2_unaffected_by_sign_convention(self):
+        x = np.linspace(1, 10, 50)
+        y = 3.0 * x**2
+        ds = _make_2d(y, x, unit="1/centimeter")
+        r = scp.savgol(ds, size=7, order=3, deriv=2, delta=H)
+        expected = scipy.signal.savgol_filter(y, 7, 3, deriv=2, delta=H)[MID]
+        assert abs(float(r.data[0, MID]) - expected) < 1e-10
 
 
 # ---------------------------------------------------------------------------
