@@ -25,6 +25,14 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
+- Fix ``dim`` keyword argument in Savitzky-Golay, smoothing and Whittaker
+  filters (`#1091 <https://github.com/spectrochempy/spectrochempy/issues/1091>`_).
+  ``savgol()``, ``smooth()``, ``whittaker()`` and
+  ``Filter(...).transform()`` now accept a ``dim`` parameter to select the
+  processing axis.  Dimension names (e.g. ``"x"``) and integer indices are
+  resolved via the standard dimension selection mechanism.  Invalid types
+  (``bool``, ``tuple``, ``list``) and unknown names raise ``TypeError`` or
+  ``ValueError``.
 
 
 .. section

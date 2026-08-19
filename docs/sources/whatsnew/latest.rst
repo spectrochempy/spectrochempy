@@ -12,6 +12,17 @@ What's New in Revision 0.12.5.dev
 These are the changes in SpectroChemPy-0.12.5.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
 
+Bug Fixes
+~~~~~~~~~
+- Fix ``dim`` keyword argument in Savitzky-Golay, smoothing and Whittaker
+  filters (`#1091 <https://github.com/spectrochempy/spectrochempy/issues/1091>`_).
+  ``savgol()``, ``smooth()``, ``whittaker()`` and
+  ``Filter(...).transform()`` now accept a ``dim`` parameter to select the
+  processing axis.  Dimension names (e.g. ``"x"``) and integer indices are
+  resolved via the standard dimension selection mechanism.  Invalid types
+  (``bool``, ``tuple``, ``list``) and unknown names raise ``TypeError`` or
+  ``ValueError``.
+
 Developer
 ~~~~~~~~~
 - Fix ``safe-docs-no-ci`` CI bypass for push events: the workflow now looks up

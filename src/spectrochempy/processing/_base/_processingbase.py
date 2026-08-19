@@ -126,7 +126,11 @@ class ProcessingConfigurable(BaseConfigurable):
         # fire the X validation and preprocessing.
         # X is expected to be a NDDataset or list of NDDataset.
         self._X = dataset
-        self._dim = dim
+
+        # Resolve string / complex dim selectors via the dataset's standard
+        # get_axis() mechanism before assigning to the integer traitlet.
+        resolved, _ = dataset.get_axis(dim, negative_axis=True)
+        self._dim = resolved
 
         # _X_preprocessed has been computed when X was set.
         # At this stage they should be simple ndarrays

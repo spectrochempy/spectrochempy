@@ -254,7 +254,7 @@ and ‘nearest’.
 # --------------------------------------------------------------------------------------
 
 
-def smooth(dataset, size=5, window="avg", **kwargs):
+def smooth(dataset, size=5, window="avg", dim=-1, **kwargs):
     """
     Smooth the data using a window with requested size.
 
@@ -270,6 +270,9 @@ def smooth(dataset, size=5, window="avg", **kwargs):
         The type of window from 'flat' or 'avg', 'han' or 'hanning', 'hamming',
         'bartlett', 'blackman'.
         `avg` window will produce a moving average smoothing.
+    dim : `int` or `str`, optional, default: -1
+        Axis along which to apply the filter.  Accepts a dimension name
+        (e.g. ``"x"``) or an integer index (e.g. ``-1`` for the last axis).
     **kwargs : keyword arguments, optional
         Additional keyword arguments passed to the filter.
 
@@ -280,8 +283,6 @@ def smooth(dataset, size=5, window="avg", **kwargs):
 
     Other Parameters
     ----------------
-    dim : `int`, optional, default: -1
-        Axis along which to apply the filter.
     mode : `str`, optional, default: 'nearest'
         The mode parameter determines how the array borders are handled.
     cval : `float`, optional, default: 0.0
@@ -300,7 +301,7 @@ def smooth(dataset, size=5, window="avg", **kwargs):
         if window == "hanning":
             window = "han"
 
-        return Filter(method=window, size=size, **kwargs).transform(dataset)
+        return Filter(method=window, size=size, **kwargs).transform(dataset, dim=dim)
     raise ValueError(
         f"Window type '{window}' is not supported. "
         f"Supported types are 'flat' or 'avg', 'han' or 'hanning', 'hamming', "
@@ -309,7 +310,7 @@ def smooth(dataset, size=5, window="avg", **kwargs):
 
 
 # --------------------------------------------------------------------------------------
-def savgol(dataset, size=5, order=2, **kwargs):
+def savgol(dataset, size=5, order=2, dim=-1, **kwargs):
     """
     Savitzky-Golay filter.
 
@@ -325,6 +326,9 @@ def savgol(dataset, size=5, order=2, **kwargs):
     order : `int`, optional, default: 2
         The order of the polynomial used to fit the data. `order` must be less
         than size.
+    dim : `int` or `str`, optional, default: -1
+        Axis along which to apply the filter.  Accepts a dimension name
+        (e.g. ``"x"``) or an integer index (e.g. ``-1`` for the last axis).
     **kwargs : keyword arguments, optional
         Additional keyword arguments passed to the filter.
 
@@ -335,8 +339,6 @@ def savgol(dataset, size=5, order=2, **kwargs):
 
     Other Parameters
     ----------------
-    dim : `int`, optional, default: -1
-        Axis along which to apply the filter.
     deriv : `int`, optional, default: 0
         The order of the derivative to compute.
     delta : `float`, optional, default: 1.0
@@ -360,7 +362,10 @@ def savgol(dataset, size=5, order=2, **kwargs):
     """
     # TODO : check if coordinates are evenly spaced
 
-    return Filter(method="savgol", size=size, order=order, **kwargs).transform(dataset)
+    return Filter(method="savgol", size=size, order=order, **kwargs).transform(
+        dataset,
+        dim=dim,
+    )
 
 
 def savgol_filter(*args, **kwargs):
@@ -372,7 +377,7 @@ def savgol_filter(*args, **kwargs):
     return savgol(*args, **kwargs)
 
 
-def whittaker(dataset, lamb=1.0, order=2, **kwargs):
+def whittaker(dataset, lamb=1.0, order=2, dim=-1, **kwargs):
     """
     Smooth the data using the Whittaker smoothing algorithm.
 
@@ -389,6 +394,9 @@ def whittaker(dataset, lamb=1.0, order=2, **kwargs):
         The smoothing parameter. Larger values make the result smoother.
     order : `int`, optional, default: 2
         The difference order of the penalized least-squares.
+    dim : `int` or `str`, optional, default: -1
+        Axis along which to apply the filter.  Accepts a dimension name
+        (e.g. ``"x"``) or an integer index (e.g. ``-1`` for the last axis).
     **kwargs : keyword arguments, optional
         Additional keyword arguments passed to the filter.
 
@@ -399,8 +407,6 @@ def whittaker(dataset, lamb=1.0, order=2, **kwargs):
 
     Other Parameters
     ----------------
-    dim : `int`, optional, default: -1
-        Axis along which to apply the filter.
     log_level : `str`, optional, default: 'WARNING'
         The log level for the filter.
 
@@ -411,4 +417,5 @@ def whittaker(dataset, lamb=1.0, order=2, **kwargs):
     """
     return Filter(method="whittaker", lamb=lamb, order=order, **kwargs).transform(
         dataset,
+        dim=dim,
     )
