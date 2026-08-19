@@ -12,6 +12,14 @@ What's New in Revision 0.12.5.dev
 These are the changes in SpectroChemPy-0.12.5.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
 
+New Features
+~~~~~~~~~~~~
+
+- Add ``seed`` parameter to ``scp.random()`` and ``scp.normal()``.
+  The parameter is forwarded to ``numpy.random.default_rng``, making
+  it possible to obtain reproducible random numbers in scripts and
+  gallery examples.
+
 Bug Fixes
 ~~~~~~~~~
 - Fix ``dim`` keyword argument in Savitzky-Golay, smoothing and Whittaker

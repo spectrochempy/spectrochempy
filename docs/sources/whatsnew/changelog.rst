@@ -19,6 +19,10 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- Add ``seed`` parameter to ``scp.random()`` and ``scp.normal()``.
+  The parameter is forwarded to ``numpy.random.default_rng``, making
+  it possible to obtain reproducible random numbers in scripts and
+  gallery examples.
 
 .. section
 

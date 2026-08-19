@@ -2579,11 +2579,11 @@ class NDMath:
         return cls
 
     @_from_numpy_method
-    def random(cls, size=None, dtype=None, **kwargs):
+    def random(cls, size=None, dtype=None, seed=None, **kwargs):
         r"""
         Return random floats in the half-open interval [0.0, 1.0).
 
-        Results are from the “continuous uniform” distribution over the stated interval.
+        Results are from the "continuous uniform" distribution over the stated interval.
 
         .. note::
             To sample :math:`\\mathrm{Uniform}[a, b)` with :math:`b > a`, multiply the
@@ -2599,6 +2599,10 @@ class NDMath:
         dtype : dtype, optional
             Desired dtype of the result, only float64 and float32 are supported.
             The default value is np.float64.
+        seed : int or SeedSequence or Generator, optional
+            Seed for the random number generator.  Passed to
+            `numpy.random.default_rng`.  Default is `None`, which produces
+            non-reproducible output.
         **kwargs
             Keywords argument used when creating the returned object, such as units,
             name, title, etc...
@@ -2612,12 +2616,12 @@ class NDMath:
         """
         from numpy.random import default_rng
 
-        rng = default_rng()
+        rng = default_rng(seed)
 
         return cls(rng.random(size, dtype), **kwargs)
 
     @_from_numpy_method
-    def normal(cls, loc=0.0, scale=1.0, size=None, dtype=None, **kwargs):
+    def normal(cls, loc=0.0, scale=1.0, size=None, dtype=None, seed=None, **kwargs):
         r"""
         Return samples from a normal (Gaussian) distribution.
 
@@ -2631,6 +2635,10 @@ class NDMath:
             Output shape. Default is None, in which case a single value is returned.
         dtype : dtype, optional
             Desired dtype of the result. The default is ``np.float64``.
+        seed : int or SeedSequence or Generator, optional
+            Seed for the random number generator.  Passed to
+            `numpy.random.default_rng`.  Default is `None`, which produces
+            non-reproducible output.
         **kwargs
             Keyword arguments used when creating the returned object, such as units,
             name, title, etc.
@@ -2642,7 +2650,7 @@ class NDMath:
         """
         from numpy.random import default_rng
 
-        rng = default_rng()
+        rng = default_rng(seed)
         data = rng.normal(loc=loc, scale=scale, size=size)
 
         if dtype is not None:
