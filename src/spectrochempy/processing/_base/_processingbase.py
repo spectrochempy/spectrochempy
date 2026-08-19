@@ -5,12 +5,17 @@
 # ======================================================================================
 """Module implementing the base abstract classes to define estimators such as PCA, ..."""
 
+import logging
+
+import numpy as np
 import traitlets as tr
 
 from spectrochempy.application.application import app
 from spectrochempy.utils.baseconfigurable import BaseConfigurable
 from spectrochempy.utils.decorators import _wrap_ndarray_output_to_nddataset
 from spectrochempy.utils.exceptions import NotTransformedError
+
+logger = logging.getLogger(__name__)
 
 
 # ======================================================================================
@@ -143,6 +148,67 @@ class ProcessingConfigurable(BaseConfigurable):
         # methods which need to be applied will be possibly used.
         self._transformed = True
         return Xt
+
+    # ------------------------------------------------------------------
+    # Coordinate spacing detection (used by savgol for auto-delta)
+    # ------------------------------------------------------------------
+    def _detect_uniform_spacing(self, dataset, dim):
+        """
+        Detect uniform spacing from the coordinate along *dim*.
+
+        Returns ``(delta_signed, message)`` where *delta_signed* is a float
+        when the coordinate is uniformly spaced, or ``None`` when detection
+        fails (in which case *message* explains why).
+
+        The returned delta carries the sign of the real storage order:
+        an ascending coordinate yields a positive delta, a descending one
+        yields a negative delta.
+
+        Detection uses ``numpy.diff`` and checks that the range of
+        spacings is within a relative tolerance of 1% of the mean
+        spacing.  This accommodates the limited precision of coordinate
+        storage while remaining far below physically meaningful spacing
+        variations.  No median or implicit fallback is produced.
+
+        Parameters
+        ----------
+        dataset : `NDDataset`
+            The dataset whose coordinate is inspected.
+        dim : int
+            The resolved integer axis index.
+
+        Returns
+        -------
+        delta_signed : float or None
+        message : str or None
+        """
+        try:
+            coord = dataset.coord(dim)
+        except Exception:
+            return None, "no coordinate available"
+
+        if coord is None:
+            return None, "coordinate is None"
+
+        values = np.asarray(coord.data, dtype=float)
+
+        if values.ndim != 1 or values.size < 2:
+            return None, "coordinate has fewer than 2 points"
+
+        if not np.all(np.isfinite(values)):
+            return None, "coordinate contains non-finite values (NaN or Inf)"
+
+        diffs = np.diff(values)
+
+        if np.all(diffs == 0):
+            return None, "coordinate is degenerate (all values identical)"
+
+        mean_diff = np.mean(diffs)
+        spread = np.ptp(diffs)
+        if spread / np.abs(mean_diff) > 0.01:
+            return None, "coordinate is not uniformly spaced"
+
+        return float(diffs[0]), None
 
     @property
     def log(self):

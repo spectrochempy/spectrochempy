@@ -124,8 +124,16 @@ class Filter(ProcessingConfigurable):
 
     delta = tr.Float(
         default_value=1.0,
+        allow_none=True,
         help="The spacing of the samples to which the filter will be applied. "
-        "This is only used if deriv > 0.",
+        "This is only used if deriv > 0.\n\n"
+        "When ``None`` (the default for the ``savgol()`` wrapper), the spacing "
+        "is automatically derived from the coordinate of the processed axis "
+        "if the coordinate is uniformly spaced.  If the coordinate is missing, "
+        "non-uniform, or non-numeric, the index-based delta of 1.0 is used "
+        "with a warning.\n\n"
+        "When set to a numeric value, that value is used as-is and no "
+        "automatic coordinate detection is performed.",
     ).tag(config=True)
 
     mode = tr.Enum(
@@ -211,17 +219,53 @@ and ‘nearest’.
         # Savitzky-Golay filter
         # ---------------------
         elif self.method == "savgol":
+            # ------------------------------------------------------------------
+            # Coordinate-aware delta: when delta is None (auto-detect) and a
+            # derivative is requested, derive the signed spacing from the
+            # coordinate.  The sign naturally handles ascending/descending
+            # coordinates so no _reversed correction is needed.
+            # ------------------------------------------------------------------
+            delta_used = self.delta
+            _auto_detected = False
+
+            if self.delta is None:
+                if self.deriv:
+                    delta_signed, msg = self._detect_uniform_spacing(
+                        self._X,
+                        self._dim,
+                    )
+                    if delta_signed is not None:
+                        delta_used = delta_signed
+                        _auto_detected = True
+                    else:
+                        delta_used = 1.0
+                        import warnings as _warnings
+
+                        _warnings.warn(
+                            f"Savitzky-Golay derivative requested but {msg}. "
+                            "Falling back to index-based delta=1.0. "
+                            "To obtain physically scaled derivatives, provide "
+                            "a uniformly spaced coordinate or set delta explicitly.",
+                            stacklevel=2,
+                        )
+                else:
+                    # deriv=0: delta is irrelevant; scipy needs a float
+                    delta_used = 1.0
+
             kwargs = {
                 "axis": self._dim,
                 "deriv": self.deriv,
-                "delta": self.delta,
+                "delta": delta_used,
                 "mode": self.mode,
                 "cval": self.cval,
             }
             data = scipy.signal.savgol_filter(X, self.size, self.order, **kwargs)
 
-            # Change derived data sign if we have reversed coordinate axis
-            if self._reversed and self.deriv:
+            # _reversed correction: ONLY when an explicit delta was used
+            # (the user supplied delta=1.0 or another value).  When the
+            # delta was auto-detected from the coordinate the sign is
+            # already correct and no further correction must be applied.
+            if not _auto_detected and self._reversed and self.deriv:
                 data = data * (-1) ** self.deriv
 
             # Annotate the output title so a derivative quantity is clearly
@@ -310,7 +354,7 @@ def smooth(dataset, size=5, window="avg", dim=-1, **kwargs):
 
 
 # --------------------------------------------------------------------------------------
-def savgol(dataset, size=5, order=2, dim=-1, **kwargs):
+def savgol(dataset, size=5, order=2, dim=-1, delta=None, **kwargs):
     """
     Savitzky-Golay filter.
 
@@ -329,6 +373,20 @@ def savgol(dataset, size=5, order=2, dim=-1, **kwargs):
     dim : `int` or `str`, optional, default: -1
         Axis along which to apply the filter.  Accepts a dimension name
         (e.g. ``"x"``) or an integer index (e.g. ``-1`` for the last axis).
+    delta : `float` or ``None``, optional, default: ``None``
+        Sample spacing of the coordinate to which the filter is applied.
+
+        * ``None`` (default) — when ``deriv > 0``, the signed spacing is
+          automatically derived from the coordinate of the processed axis
+          if the coordinate is uniformly spaced.  On a non-uniform or
+          missing coordinate a warning is emitted and the index-based
+          ``delta=1.0`` is used as a fallback.
+        * A numeric value — used as-is; no automatic coordinate detection
+          is performed.
+
+        .. versionchanged:: 0.13.0
+           Default changed from ``1.0`` to ``None`` (auto-detect).
+
     **kwargs : keyword arguments, optional
         Additional keyword arguments passed to the filter.
 
@@ -341,8 +399,6 @@ def savgol(dataset, size=5, order=2, dim=-1, **kwargs):
     ----------------
     deriv : `int`, optional, default: 0
         The order of the derivative to compute.
-    delta : `float`, optional, default: 1.0
-        The spacing of the samples to which the filter will be applied.
     mode : `str`, optional, default: 'nearest'
         The mode parameter determines how the array borders are handled.
     cval : `float`, optional, default: 0.0
@@ -362,7 +418,9 @@ def savgol(dataset, size=5, order=2, dim=-1, **kwargs):
     """
     # TODO : check if coordinates are evenly spaced
 
-    return Filter(method="savgol", size=size, order=order, **kwargs).transform(
+    return Filter(
+        method="savgol", size=size, order=order, delta=delta, **kwargs
+    ).transform(
         dataset,
         dim=dim,
     )
