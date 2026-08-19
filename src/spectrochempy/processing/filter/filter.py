@@ -48,12 +48,23 @@ def _detect_uniform_spacing(dataset, dim):
     """
     try:
         coord = dataset.coord(dim)
-    except Exception:
+    except AttributeError:
         return None, "no coordinate available"
 
     if coord is None:
         return None, "coordinate is None"
 
+    if coord.is_masked or (
+        hasattr(coord, "_mask")
+        and isinstance(coord._mask, np.ndarray)
+        and np.any(coord._mask)
+    ):
+        return None, "coordinate contains masked values"
+
+    # Use coord._data (raw float64 storage) rather than coord.data.
+    # The public .data property applies a rounding layer that truncates
+    # float64 to ~4 significant digits, destroying the uniform-spacing
+    # signal.  _data preserves the original precision.
     try:
         values = np.asarray(coord._data, dtype=float)
     except (TypeError, ValueError):
@@ -469,14 +480,13 @@ def savgol(dataset, size=5, order=2, dim=-1, delta=None, **kwargs):
 
     Notes
     -----
-    When ``delta`` is ``None`` (the default), the Savitzky-Golay filter
-    automatically detects the coordinate spacing.  Be aware that the
-    Savitzky-Golay algorithm is fundamentally index-based; coordinate-aware
-    scaling is applied as a post-processing step.
+    When ``delta`` is ``None`` (the default), the sample spacing is
+    detected from the coordinate and passed directly to
+    ``scipy.signal.savgol_filter``.  The Savitzky-Golay algorithm is
+    fundamentally index-based; the detected delta scales the derivative
+    coefficients during the convolution.
 
     """
-    # TODO : check if coordinates are evenly spaced
-
     return Filter(
         method="savgol", size=size, order=order, delta=delta, **kwargs
     ).transform(

@@ -322,6 +322,8 @@ class TestEdgeCoordinateCases:
 
         mock_ds = MagicMock()
         mock_coord = MagicMock()
+        mock_coord.is_masked = False
+        mock_coord._mask = False
         mock_coord._data = np.array(["a", "b", "c", "d", "e"])
         mock_ds.coord.return_value = mock_coord
         delta, msg = _detect_uniform_spacing(mock_ds, -1)
@@ -336,46 +338,56 @@ class TestEdgeCoordinateCases:
 
 class TestExplicitDeltaReversed:
     """
-    When an explicit delta is given, _reversed still applies (backward compat).
+    Explicit delta + _reversed interaction documents a known bug.
 
-    These tests document the existing behavior: for cm⁻¹/ppm coords with
-    explicit positive delta, _reversed flips the sign of odd-order
-    derivatives.  This is an existing limitation preserved for backward
-    compatibility.
+    For cm⁻¹/ppm coords with explicit positive delta, _reversed flips
+    the sign of odd-order derivatives.  xfail(strict=True) ensures the
+    test fails if the bug is ever fixed, prompting an update.
     """
 
+    @pytest.mark.xfail(
+        strict=True,
+        reason="Explicit delta with cm-1 ascending: _reversed incorrectly "
+        "flips sign. Expected positive. See #1091 follow-up.",
+    )
     def test_explicit_delta_cm1_ascending_positive(self, ds_asc_cm1):
-        """Explicit delta=H with ascending cm⁻¹ → _reversed flips sign."""
         ds, x = ds_asc_cm1
         r = scp.savgol(ds, size=7, order=3, deriv=1, delta=H)
-        # _reversed is True for cm⁻¹, so sign is flipped
-        assert float(r.data[0, MID]) < 0
-
-    def test_explicit_delta_cm1_descending_positive(self, ds_desc_cm1):
-        """Explicit delta=H with descending cm⁻¹ → _reversed flips twice (net positive)."""
-        ds, x = ds_desc_cm1
-        r = scp.savgol(ds, size=7, order=3, deriv=1, delta=H)
-        # descending → negative delta → _reversed flips → positive
+        # Currently returns negative due to _reversed; correct is positive
         assert float(r.data[0, MID]) > 0
 
+    def test_explicit_delta_cm1_descending_correct(self, ds_desc_cm1):
+        """Explicit delta=H with descending cm-1 → _reversed cancels correctly."""
+        ds, x = ds_desc_cm1
+        r = scp.savgol(ds, size=7, order=3, deriv=1, delta=H)
+        expected = 6.0 * x[MID]
+        # For descending coords, _reversed happens to correct the sign
+        # and the magnitude matches.
+        assert float(r.data[0, MID]) > 0
+        assert abs(float(r.data[0, MID]) - expected) < 1e-12
+
+    @pytest.mark.xfail(
+        strict=True,
+        reason="Explicit negative delta with cm-1 ascending: _reversed "
+        "flips sign. Expected negative. See #1091 follow-up.",
+    )
     def test_explicit_delta_cm1_negative(self, ds_asc_cm1):
-        """Explicit negative delta with ascending cm⁻¹ → _reversed flips."""
         ds, x = ds_asc_cm1
         r = scp.savgol(ds, size=7, order=3, deriv=1, delta=-H)
-        # negative delta + _reversed flips for odd deriv
-        assert float(r.data[0, MID]) > 0
+        # Correct result: negative (descending direction)
+        assert float(r.data[0, MID]) < 0
 
     def test_auto_delta_cm1_ascending_positive(self, ds_asc_cm1):
-        """Auto-detected delta with ascending cm⁻¹ → correct positive sign."""
+        """Auto-detected delta with ascending cm-1 → correct positive sign."""
         ds, x = ds_asc_cm1
         r = scp.savgol(ds, size=7, order=3, deriv=1)
         assert float(r.data[0, MID]) > 0
 
-    def test_auto_delta_cm1_descending_negative(self, ds_desc_cm1):
-        """Auto-detected delta with descending cm⁻¹ → negative sign (correct)."""
+    def test_auto_delta_cm1_descending_positive(self, ds_desc_cm1):
+        """Auto-detected delta with descending cm-1 → correct positive sign."""
         ds, x = ds_desc_cm1
         r = scp.savgol(ds, size=7, order=3, deriv=1)
-        # descending coord → negative auto-delta → correct negative derivative sign
+        # descending coord → negative auto-delta → y=3x², 6x > 0
         assert float(r.data[0, MID]) > 0
 
 
@@ -507,8 +519,41 @@ class TestDetectUniformSpacing:
 
         mock_ds = MagicMock()
         mock_coord = MagicMock()
+        mock_coord.is_masked = False
+        mock_coord._mask = False
         mock_coord._data = np.array(["a", "b", "c", "d", "e"])
         mock_ds.coord.return_value = mock_coord
         delta, msg = _detect_uniform_spacing(mock_ds, -1)
         assert delta is None
         assert "not numeric" in msg.lower()
+
+    def test_masked_coord(self):
+        """A coordinate with masked values triggers fallback."""
+        from unittest.mock import MagicMock
+
+        mock_ds = MagicMock()
+        mock_coord = MagicMock()
+        mock_coord.is_masked = True
+        mock_coord._mask = np.array([False, False, True, False, False])
+        mock_ds.coord.return_value = mock_coord
+        delta, msg = _detect_uniform_spacing(mock_ds, -1)
+        assert delta is None
+        assert "masked" in msg.lower()
+
+    def test_data_precision_vs_raw(self):
+        """
+        coord.data truncates float64; coord._data preserves it.
+
+        This test justifies using the private _data attribute:
+        the public .data property rounds values to ~4 significant digits,
+        which destroys the uniform-spacing signal for linspace coords.
+        """
+        x = np.linspace(1, 10, 50)
+        c = Coord(x, title="x")
+        data_rounded = np.asarray(c.data, dtype=float)
+        data_raw = np.asarray(c._data, dtype=float)
+        max_err_rounded = np.max(np.abs(data_rounded - x))
+        max_err_raw = np.max(np.abs(data_raw - x))
+        # rounded has ~0.5% error, raw has machine-precision error
+        assert max_err_rounded > 1e-4, "expected coord.data to truncate"
+        assert max_err_raw < 1e-14, "expected coord._data to preserve precision"

@@ -5,16 +5,12 @@
 # ======================================================================================
 """Module implementing the base abstract classes to define estimators such as PCA, ..."""
 
-import logging
-
 import traitlets as tr
 
 from spectrochempy.application.application import app
 from spectrochempy.utils.baseconfigurable import BaseConfigurable
 from spectrochempy.utils.decorators import _wrap_ndarray_output_to_nddataset
 from spectrochempy.utils.exceptions import NotTransformedError
-
-logger = logging.getLogger(__name__)
 
 
 # ======================================================================================
@@ -148,9 +144,6 @@ class ProcessingConfigurable(BaseConfigurable):
         self._transformed = True
         return Xt
 
-    # ------------------------------------------------------------------
-    # Coordinate spacing detection (used by savgol for auto-delta)
-    # ------------------------------------------------------------------
     @property
     def log(self):
         """Return ``log`` output."""
