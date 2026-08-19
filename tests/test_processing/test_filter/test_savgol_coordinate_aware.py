@@ -623,3 +623,313 @@ class TestDetectUniformSpacing:
         # rounded has ~0.5% error, raw has machine-precision error
         assert max_err_rounded > 1e-4, "expected coord.data to truncate"
         assert max_err_raw < 1e-14, "expected coord._data to preserve precision"
+
+
+# ---------------------------------------------------------------------------
+# Unit propagation (PR 4)
+# ---------------------------------------------------------------------------
+
+
+class TestUnitPropagation:
+    """
+    Physical units are propagated for derivative paths that claim a coordinate
+    scale, and preserved for smoothing and index-based fallbacks.
+
+    Policy matrix:
+    - U0  deriv=0               → keep source units
+    - U1  auto, physical coord  → source / coord_units**deriv
+    - U2  explicit, coord unit  → source / coord_units**deriv
+    - U3  explicit, no coord u  → keep source units
+    - U4  fallback              → keep source units
+    - U5  source units=None     → result units=None
+    - U6  source dimensionless  → 1 / coord_units**deriv
+    - U7  coord dimensionless   → keep source units
+    - U8  ppm                   → source / ppm**deriv (symbolic, dimensionless)
+    """
+
+    @pytest.fixture
+    def ds_abs_cm1(self):
+        x = np.linspace(1, 10, 50)
+        ds = _make_2d(3.0 * x**2, x, unit="1/centimeter", title="wavenumber")
+        ds.units = "absorbance"
+        return ds, x
+
+    @pytest.fixture
+    def ds_volt_s(self):
+        x = np.linspace(1, 10, 50)
+        ds = _make_2d(5.0 * x + 2.0, x, unit="second", title="time")
+        ds.units = "volt"
+        return ds, x
+
+    # U0 — smoothing keeps source units
+    def test_deriv0_keeps_source_units(self, ds_abs_cm1):
+        ds, x = ds_abs_cm1
+        r = scp.savgol(ds, size=7, order=3, deriv=0)
+        assert r.units == ds.units
+
+    # U1 — auto-detect physical path
+    def test_deriv1_auto_absorbance_cm1(self, ds_abs_cm1):
+        ds, x = ds_abs_cm1
+        r = scp.savgol(ds, size=7, order=3, deriv=1)
+        assert r.units == ds.units / ds.coord(-1).units
+
+    def test_deriv2_auto_absorbance_cm1(self, ds_abs_cm1):
+        ds, x = ds_abs_cm1
+        r = scp.savgol(ds, size=7, order=3, deriv=2)
+        assert r.units == ds.units / ds.coord(-1).units ** 2
+
+    def test_deriv1_auto_volt_second(self, ds_volt_s):
+        ds, x = ds_volt_s
+        r = scp.savgol(ds, size=7, order=3, deriv=1)
+        assert r.units == ds.units / ds.coord(-1).units
+
+    def test_deriv2_auto_volt_second(self, ds_volt_s):
+        ds, x = ds_volt_s
+        r = scp.savgol(ds, size=7, order=3, deriv=2)
+        assert r.units == ds.units / ds.coord(-1).units ** 2
+
+    # U2 — explicit delta with coordinate unit
+    def test_deriv1_explicit_volt_second(self, ds_volt_s):
+        ds, x = ds_volt_s
+        H = x[1] - x[0]
+        r = scp.savgol(ds, size=7, order=3, deriv=1, delta=H)
+        assert r.units == ds.units / ds.coord(-1).units
+
+    def test_deriv2_explicit_volt_second(self, ds_volt_s):
+        ds, x = ds_volt_s
+        H = x[1] - x[0]
+        r = scp.savgol(ds, size=7, order=3, deriv=2, delta=H)
+        assert r.units == ds.units / ds.coord(-1).units ** 2
+
+    # U3 — explicit delta, no coordinate unit
+    def test_deriv1_explicit_no_coord_unit(self):
+        x = np.linspace(1, 10, 50)
+        ds = _make_2d(3.0 * x**2, x, unit=None, title="x")
+        ds.units = "absorbance"
+        H = x[1] - x[0]
+        r = scp.savgol(ds, size=7, order=3, deriv=1, delta=H)
+        assert r.units == ds.units
+
+    # U4 — fallback (irregular coord) keeps source units
+    def test_deriv1_fallback_keeps_source_units(self):
+        x = np.sort(np.random.default_rng(42).uniform(1, 10, 50))
+        ds = _make_2d(3.0 * x**2, x, unit="1/centimeter", title="wavenumber")
+        ds.units = "absorbance"
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            r = scp.savgol(ds, size=7, order=3, deriv=1)
+        assert r.units == ds.units
+
+    # U5 — source units=None
+    def test_deriv1_source_none(self):
+        x = np.linspace(1, 10, 50)
+        ds = _make_2d(3.0 * x**2, x, unit="second", title="time")
+        # No units set on source
+        r = scp.savgol(ds, size=7, order=3, deriv=1)
+        assert r.units is None
+
+    # U6 — source dimensionless
+    def test_deriv1_source_dimensionless(self):
+        x = np.linspace(1, 10, 50)
+        ds = _make_2d(3.0 * x**2, x, unit="second", title="time")
+        ds.units = "dimensionless"
+        r = scp.savgol(ds, size=7, order=3, deriv=1)
+        assert r.units == ds.units / ds.coord(-1).units
+
+    # U7 — coordinate dimensionless
+    def test_deriv1_coord_dimensionless(self):
+        x = np.linspace(1, 10, 50)
+        ds = _make_2d(3.0 * x**2, x, unit="dimensionless", title="x")
+        ds.units = "volt"
+        r = scp.savgol(ds, size=7, order=3, deriv=1)
+        assert r.units == ds.units
+
+    # U8 — ppm
+    def test_deriv1_auto_ppm(self):
+        x = np.linspace(1, 10, 50)
+        ds = _make_2d(3.0 * x**2, x, unit="ppm", title="x")
+        ds.units = "absorbance"
+        r = scp.savgol(ds, size=7, order=3, deriv=1)
+        # ppm is dimensionless in Pint, but the symbolic representation
+        # is preserved as absorbance / ppm = a.u.·ppm⁻¹
+        assert r.units.dimensionality == ds.units.dimensionality
+        assert str(r.units) == "a.u.⋅ppm⁻¹"
+
+    # Conversion coherence: second ↔ millisecond
+    def test_deriv1_second_millisecond_conversion(self):
+        x_s = np.linspace(0.001, 0.010, 50)
+        x_ms = x_s * 1000
+        # Same physical function: y = 3 * t² (t in seconds)
+        y_s = 3.0 * x_s**2
+        y_ms = 3.0 * (x_ms / 1000.0) ** 2  # identical physical values
+
+        ds_s = _make_2d(y_s, x_s, unit="second", title="time")
+        ds_s.units = "volt"
+
+        ds_ms = _make_2d(y_ms, x_ms, unit="millisecond", title="time")
+        ds_ms.units = "volt"
+
+        r_s = scp.savgol(ds_s, size=7, order=3, deriv=1)
+        r_ms = scp.savgol(ds_ms, size=7, order=3, deriv=1)
+
+        # Convert ms result to s units and compare
+        r_ms_to_s = r_ms.to("V / s")
+        np.testing.assert_allclose(
+            r_s.data,
+            r_ms_to_s.data,
+            rtol=1e-10,
+        )
+
+    # Filter reuse with different unit contexts
+    def test_filter_reuse_different_units(self):
+        x = np.linspace(1, 10, 50)
+        y = 3.0 * x**2
+
+        ds1 = _make_2d(y, x, unit="second", title="time")
+        ds1.units = "volt"
+
+        ds2 = _make_2d(y, x, unit="1/centimeter", title="wavenumber")
+        ds2.units = "absorbance"
+
+        f = Filter(method="savgol", size=7, order=3, deriv=1)
+        r1 = f.transform(ds1)
+        r2 = f.transform(ds2)
+
+        assert r1.units == ds1.units / ds1.coord(-1).units
+        assert r2.units == ds2.units / ds2.coord(-1).units
+
+    # API equivalence for unit propagation
+    def test_api_equivalence_units(self, ds_volt_s):
+        ds, x = ds_volt_s
+        r_func = scp.savgol(ds, size=7, order=3, deriv=1)
+        r_method = ds.savgol(size=7, order=3, deriv=1)
+        r_alias = scp.savgol_filter(ds, size=7, order=3, deriv=1)
+        r_transform = Filter(method="savgol", size=7, order=3, deriv=1).transform(ds)
+
+        assert r_func.units == r_method.units == r_alias.units == r_transform.units
+        assert r_func.units == ds.units / ds.coord(-1).units
+
+    # Descending coordinate still propagates units correctly
+    def test_deriv1_descending_units(self):
+        x = np.linspace(10, 1, 50)
+        y = 3.0 * x**2
+        ds = _make_2d(y, x, unit="second", title="time")
+        ds.units = "volt"
+        r = scp.savgol(ds, size=7, order=3, deriv=1)
+        assert r.units == ds.units / ds.coord(-1).units
+
+    # Non-mutation
+    def test_source_units_not_mutated(self, ds_abs_cm1):
+        ds, x = ds_abs_cm1
+        original_units = ds.units
+        scp.savgol(ds, size=7, order=3, deriv=1)
+        assert ds.units == original_units
+
+    def test_coord_units_not_mutated(self, ds_abs_cm1):
+        ds, x = ds_abs_cm1
+        original_coord_units = ds.coord(-1).units
+        scp.savgol(ds, size=7, order=3, deriv=1)
+        assert ds.coord(-1).units == original_coord_units
+
+    # -------------------------------------------------------------------------
+    # Critical paths: delta_source governs units, not coord.units alone
+    # -------------------------------------------------------------------------
+
+    def test_explicit_delta_irregular_coord_with_unit(self):
+        """Explicit delta with irregular coord → physical units (U2)."""
+        x = np.sort(np.random.default_rng(42).uniform(1, 10, 50))
+        ds = _make_2d(3.0 * x**2, x, unit="1/centimeter", title="wavenumber")
+        ds.units = "absorbance"
+        H = x[1] - x[0]
+        r = scp.savgol(ds, size=7, order=3, deriv=1, delta=H)
+        # explicit delta → physical units even though coord is irregular
+        assert r.units == ds.units / ds.coord(-1).units
+
+    def test_explicit_delta_missing_coord(self):
+        """Explicit delta with no coord → source units (U3)."""
+        x = np.linspace(1, 10, 50)
+        ds = NDDataset((3.0 * x**2).reshape(1, -1), units="volt")
+        # No coordset at all
+        H = x[1] - x[0]
+        r = scp.savgol(ds, size=7, order=3, deriv=1, delta=H)
+        assert r.units == ds.units
+
+    def test_auto_fallback_missing_coord(self):
+        """Auto-detect with missing coord → source units (U4)."""
+        x = np.linspace(1, 10, 50)
+        ds = NDDataset((3.0 * x**2).reshape(1, -1), units="volt")
+        # No coordset at all
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            r = scp.savgol(ds, size=7, order=3, deriv=1)
+        assert r.units == ds.units
+
+    def test_auto_fallback_masked_coord(self):
+        """Auto-detect with masked coord → source units (U4)."""
+        x = np.linspace(1, 10, 50)
+        ds = NDDataset((3.0 * x**2).reshape(1, -1), units="volt")
+        c = Coord(x, title="time")
+        c.units = "second"
+        ds.set_coordset(x=c)
+        # Patch _detect_uniform_spacing to simulate masked fallback,
+        # then verify the full savgol path preserves source units.
+        from unittest.mock import patch
+
+        with patch.object(
+            scp.processing.filter.filter,
+            "_detect_uniform_spacing",
+            return_value=(None, "coordinate contains masked values"),
+        ), warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            r = scp.savgol(ds, size=7, order=3, deriv=1)
+        assert r.units == ds.units
+        assert any("Falling back" in str(warning.message) for warning in w)
+
+    def test_auto_fallback_nan_coord(self):
+        """Auto-detect with NaN in coord → source units (U4)."""
+        x = np.linspace(1, 10, 50).copy()
+        x[25] = np.nan
+        ds = _make_2d(3.0 * x**2, x, unit="second", title="time")
+        ds.units = "volt"
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            r = scp.savgol(ds, size=7, order=3, deriv=1)
+        assert r.units == ds.units
+
+    # -------------------------------------------------------------------------
+    # Architectural: no unit leakage across Filter reuse
+    # -------------------------------------------------------------------------
+
+    def test_filter_chained_physical_fallback_smooth(self):
+        """
+        Same Filter object: physical derivative → fallback → smoothing.
+        Proves _output_units does not leak between calls.
+        """
+        x = np.linspace(1, 10, 50)
+        y = 3.0 * x**2
+
+        # 1. Physical derivative (auto-detect)
+        ds_phys = _make_2d(y, x, unit="second", title="time")
+        ds_phys.units = "volt"
+
+        # 2. Fallback (no coord)
+        ds_fallback = NDDataset(y.reshape(1, -1), units="volt")
+
+        # 3. Smoothing
+        ds_smooth = _make_2d(y, x, unit="second", title="time")
+        ds_smooth.units = "volt"
+
+        f = Filter(method="savgol", size=7, order=3, deriv=1)
+
+        r1 = f.transform(ds_phys)
+        assert r1.units == ds_phys.units / ds_phys.coord(-1).units
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            r2 = f.transform(ds_fallback)
+        assert r2.units == ds_fallback.units
+
+        # Reuse the *same* Filter object for smoothing to prove no state leak
+        f.deriv = 0
+        r3 = f.transform(ds_smooth)
+        assert r3.units == ds_smooth.units

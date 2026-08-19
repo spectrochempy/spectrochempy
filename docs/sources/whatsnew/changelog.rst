@@ -58,6 +58,14 @@ Bug Fixes
   the physical axis.  This is a numeric correction for affected calls
   with odd-order derivatives.
 
+- Savitzky-Golay derivative units are now propagated for physically
+  scaled paths.  A derivative of order ``n`` carries
+  ``source_units / coordinate_units**n`` when the delta is derived from
+  a uniform coordinate or explicitly provided while the coordinate has
+  units.  Smoothing (``deriv=0``) and index-based fallbacks preserve
+  the source units unchanged.  This is a scientific correction
+  observable for datasets with physical units.
+
 
 .. section
 
