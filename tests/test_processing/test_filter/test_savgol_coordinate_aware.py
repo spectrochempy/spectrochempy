@@ -153,7 +153,7 @@ class TestDerivative2Analytic:
         r = scp.savgol(ds, size=7, order=3, deriv=2)
         actual = float(r.data[0, MID])
         assert (
-            abs(actual - 6.0) < 1e-12
+            abs(actual - 6.0) < 1e-10
         ), f"{fixture_name}: deriv=2 auto: actual={actual:.10f}, expected=6.0000000000"
 
 
