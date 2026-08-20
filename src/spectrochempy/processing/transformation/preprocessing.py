@@ -254,6 +254,13 @@ def msc(dataset, reference=None, dim="y", inplace=False):
     `NDDataset`
         The MSC-corrected dataset.
 
+    Raises
+    ------
+    SpectroChemPyError
+        If the dataset is not 2-D, the reference is incompatible, a spectrum
+        has too few valid paired points, the effective reference is constant,
+        or the local slope is zero.
+
     Examples
     --------
     >>> dataset = scp.read("irdata/nh4.spg")

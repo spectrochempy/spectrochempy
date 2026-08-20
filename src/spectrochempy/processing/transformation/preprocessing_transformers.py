@@ -677,6 +677,14 @@ class MSCTransformer(BasePreprocessor):
         Slopes of the per-observation regressions for the dataset passed
         to ``fit()``. These are diagnostics, not reusable transform state.
 
+    Raises
+    ------
+    SpectroChemPyError
+        If the dataset is not 2-D, the reference or transform spectral
+        geometry is incompatible, a spectrum has too few valid paired
+        points, the effective reference is constant, the local slope is
+        zero, or ``inverse_transform()`` is requested.
+
     Examples
     --------
     >>> scaler = scp.MSCTransformer()
@@ -716,7 +724,7 @@ class MSCTransformer(BasePreprocessor):
                 ref = self.reference.masked_data
                 self._check_reference_coord_compatibility(dataset, self.reference)
             else:
-                ref = np.ma.masked_invalid(np.asarray(self.reference))
+                ref = np.ma.masked_invalid(np.ma.asarray(self.reference))
             if ref.ndim != 1:
                 raise SpectroChemPyError("MSC reference must be a 1-D spectrum.")
             if ref.size != data.shape[spectral_axis]:
@@ -819,7 +827,8 @@ class MSCTransformer(BasePreprocessor):
         sum_ref2 = np.ma.sum(r**2, axis=spectral_axis, keepdims=True)
         den = n * sum_ref2 - sum_ref**2
 
-        if np.any(np.isclose(np.ma.asarray(den).filled(0), 0.0)):
+        den_data = np.ma.asarray(den).filled(np.nan)
+        if np.any((den_data == 0.0) | ~np.isfinite(den_data)):
             raise SpectroChemPyError(
                 "MSC denominator is zero; reference spectrum is constant over "
                 "the valid points."
@@ -829,7 +838,8 @@ class MSCTransformer(BasePreprocessor):
         sum_xref = np.ma.sum(x * r, axis=spectral_axis, keepdims=True)
 
         b = (n * sum_xref - sum_ref * sum_x) / den
-        if np.any(np.isclose(np.ma.asarray(b).filled(0), 0.0)):
+        b_data = np.ma.asarray(b).filled(np.nan)
+        if np.any((b_data == 0.0) | ~np.isfinite(b_data)):
             raise SpectroChemPyError(
                 "MSC slope is zero; the spectrum cannot be corrected against "
                 "the reference."

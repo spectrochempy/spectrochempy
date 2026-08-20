@@ -992,6 +992,36 @@ class TestMSCTransformer:
         expected = _msc_oracle(msc_2d[2:].data, ref)
         assert np.allclose(transformed.data, expected)
 
+    def test_small_scale_reference_is_valid(self):
+        ref = np.array([1.0e-6, 2.0e-6, 4.0e-6])
+        data = np.array(
+            [
+                [2.0e-6, 4.0e-6, 8.0e-6],
+                [5.0e-6, 1.0e-6, 7.0e-6],
+            ]
+        )
+        ds = NDDataset(data)
+        transformed = MSCTransformer(reference=ref, dim="y").fit_transform(ds)
+        expected = _msc_oracle(data, ref)
+        assert np.allclose(transformed.data, expected)
+
+    @pytest.mark.parametrize("scale", [1.0e-9, 1.0e9])
+    def test_msc_is_scale_invariant(self, msc_2d, scale):
+        ref = msc_2d.data[0] * scale
+        data = msc_2d.data * scale
+        ds = NDDataset(data, coordset=msc_2d.coordset)
+        transformed = MSCTransformer(reference=ref, dim="y").fit_transform(ds)
+        expected = _msc_oracle(data, ref)
+        assert np.allclose(transformed.data, expected)
+
+    def test_explicit_masked_array_reference_preserves_mask(self, msc_2d):
+        ref = np.ma.array(msc_2d.data[0], mask=[False, True, False, False, True, False])
+        scaler = MSCTransformer(reference=ref, dim="y").fit(msc_2d[:2])
+        transformed = scaler.transform(msc_2d[2:])
+        expected = _msc_oracle(msc_2d[2:].data, ref)
+        assert np.allclose(transformed.data, expected)
+        assert np.array_equal(np.ma.getmaskarray(scaler.reference_), ref.mask)
+
     def test_explicit_nddataset_reference(self, msc_2d):
         ref = NDDataset(msc_2d.data[0], coordset=[msc_2d.coord("x")])
         scaler = MSCTransformer(reference=ref, dim="y").fit(msc_2d[:2])
