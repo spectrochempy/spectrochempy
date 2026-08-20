@@ -62,7 +62,7 @@ _ = X.plot()
 # %%
 # select a region by slicing (note the original shape is (1, 1024)
 Xn = X[:, :400.0]
-Xn += 200 * scp.random(Xn.shape)  # add some noise
+Xn += 200 * scp.random(Xn.shape, seed=42)  # add some noise
 Xn.name = "initial"
 _ = Xn.plot()
 

@@ -19,7 +19,7 @@ import spectrochempy as scp
 # -------------------------
 dataset = scp.read("ramandata/labspec/SMC1-Initial_RT.txt")
 region = dataset[:, :400.0]
-region += 200 * scp.random(region.shape)
+region += 200 * scp.random(region.shape, seed=42)
 region.name = "noisy spectrum"
 
 prefs = scp.preferences
