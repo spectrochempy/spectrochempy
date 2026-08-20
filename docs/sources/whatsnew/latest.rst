@@ -15,6 +15,11 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 New Features
 ~~~~~~~~~~~~
 
+- Add ``scp.migrate_legacy_file()`` for explicit migration of legacy
+  SCP/PSCP files to the safe ``raw-base64`` format. Legacy files with
+  pickle-based payloads can be converted safely with an explicit trust
+  acknowledgement (``allow_unsafe_legacy=True``). The source file is
+  never modified or deleted.
 - Add ``seed`` parameter to ``scp.random()`` and ``scp.normal()``.
   The parameter is forwarded to ``numpy.random.default_rng``, making
   it possible to obtain reproducible random numbers in scripts and

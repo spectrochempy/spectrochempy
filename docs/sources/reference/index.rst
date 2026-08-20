@@ -183,6 +183,7 @@ The NMR readers ``read_topspin`` and ``read_agilent`` require the
     :toctree: generated/
 
     load
+    migrate_legacy_file
     read
     read_agilent
     read_csv

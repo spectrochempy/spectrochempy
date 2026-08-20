@@ -22,6 +22,7 @@ import spectrochempy as scp
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.project.project import Project
 from spectrochempy.utils.exceptions import SpectroChemPyError
 from spectrochempy.utils.jsonutils import json_loads
 from spectrochempy.utils.testing import assert_array_equal, assert_dataset_equal
@@ -42,6 +43,26 @@ def _rewrite_dataset_data_payload_as_legacy_pickle(filename):
     js["data"] = {
         "__class__": "NUMPY_ARRAY",
         "base64": base64.b64encode(pickle.dumps(current.data)).decode(),
+    }
+
+    with zipfile.ZipFile(filename, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
+        zipf.writestr(member, json.dumps(js, indent=2))
+
+
+def _rewrite_project_dataset_payload_as_legacy_pickle(filename):
+    current = Project.load(filename)
+
+    with zipfile.ZipFile(filename, "r") as zipf:
+        member = zipf.namelist()[0]
+        js = json.loads(zipf.read(member).decode("utf-8"))
+
+    js.pop("__format__", None)
+    js.pop("__version__", None)
+    js["datasets"][0]["data"] = {
+        "__class__": "NUMPY_ARRAY",
+        "base64": base64.b64encode(
+            pickle.dumps(np.array(current.datasets[0].data)),
+        ).decode(),
     }
 
     with zipfile.ZipFile(filename, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
@@ -441,6 +462,266 @@ def test_ndio_load_without_history_field_keeps_dataset_loadable(tmp_path):
     assert_array_equal(loaded.data, ds.data)
     assert_array_equal(loaded.mask, ds.mask)
     assert loaded.meta["nested"] == ds.meta["nested"]
+
+
+# ---------------------------------------------------------------------------
+# Legacy migration tests
+# ---------------------------------------------------------------------------
+
+
+def test_migrate_legacy_file_requires_trust_acknowledgement(tmp_path):
+    from spectrochempy.utils.persistence import migrate_legacy_file
+
+    ds = NDDataset(np.array([1.0, 2.0, 3.0]), name="migrate_trust")
+    filename = ds.save_as(tmp_path / "migrate_trust", confirm=False)
+    _rewrite_dataset_data_payload_as_legacy_pickle(filename)
+
+    with pytest.raises(SpectroChemPyError, match="allow_unsafe_legacy=True"):
+        migrate_legacy_file(filename)
+
+    with pytest.warns(UserWarning, match="trusted sources"):
+        migrated = migrate_legacy_file(filename, allow_unsafe_legacy=True)
+
+    loaded = NDDataset.load(migrated)
+    assert_dataset_equal(loaded, ds)
+
+
+def test_migrate_legacy_file_converts_to_safe_format(tmp_path):
+    from spectrochempy.utils.persistence import migrate_legacy_file
+
+    ds = NDDataset(np.array([1.0, 2.0, 3.0]), name="migrate_basic")
+    filename = ds.save_as(tmp_path / "migrate_basic", confirm=False)
+    _rewrite_dataset_data_payload_as_legacy_pickle(filename)
+
+    with pytest.warns(UserWarning):
+        migrated = migrate_legacy_file(filename, allow_unsafe_legacy=True, verbose=True)
+
+    loaded = NDDataset.load(migrated)
+    assert_dataset_equal(loaded, ds)
+
+    with zipfile.ZipFile(migrated, "r") as zipf:
+        member = zipf.namelist()[0]
+        js = json.loads(zipf.read(member).decode("utf-8"))
+    assert js["data"]["encoding"] == "raw-base64"
+    assert js["__format__"] == "scp"
+    assert js["__version__"] == 2
+
+
+def test_migrate_legacy_file_safe_load_after_migration(tmp_path, monkeypatch):
+    from spectrochempy.utils.persistence import migrate_legacy_file
+
+    ds = NDDataset(np.array([1.0, 2.0, 3.0]), name="migrate_nopickle")
+    filename = ds.save_as(tmp_path / "migrate_nopickle", confirm=False)
+    _rewrite_dataset_data_payload_as_legacy_pickle(filename)
+
+    with pytest.warns(UserWarning):
+        migrated = migrate_legacy_file(filename, allow_unsafe_legacy=True)
+
+    def fail_pickle_loads(*args, **kwargs):
+        raise AssertionError("pickle.loads must not run during safe default load")
+
+    with monkeypatch.context() as m:
+        m.setattr("spectrochempy.utils.jsonutils.pickle.loads", fail_pickle_loads)
+        loaded = NDDataset.load(migrated)
+
+    assert_array_equal(loaded.data, ds.data)
+
+
+def test_migrate_legacy_file_preserves_coords(tmp_path):
+    from spectrochempy.utils.persistence import migrate_legacy_file
+
+    x = Coord(np.linspace(4000, 400, 100), title="wavenumber")
+    ds = NDDataset(
+        np.random.default_rng(42).random((5, 100)),
+        name="migrate_coords",
+        coord=(Coord(np.arange(5)), x),
+    )
+    filename = ds.save_as(tmp_path / "migrate_coords", confirm=False)
+    _rewrite_dataset_data_payload_as_legacy_pickle(filename)
+
+    with pytest.warns(UserWarning):
+        migrated = migrate_legacy_file(filename, allow_unsafe_legacy=True)
+    loaded = NDDataset.load(migrated)
+
+    assert_dataset_equal(loaded, ds)
+
+
+def test_migrate_legacy_file_raises_for_already_safe(tmp_path):
+    from spectrochempy.utils.persistence import migrate_legacy_file
+
+    ds = NDDataset(np.array([1.0, 2.0, 3.0]), name="migrate_already_safe")
+    filename = ds.save_as(tmp_path / "migrate_already_safe", confirm=False)
+
+    with pytest.raises(SpectroChemPyError, match="already in safe format"):
+        migrate_legacy_file(filename, allow_unsafe_legacy=True)
+
+
+def test_migrate_legacy_file_raises_for_nonexistent_source():
+    from spectrochempy.utils.persistence import migrate_legacy_file
+
+    with pytest.raises(FileNotFoundError):
+        migrate_legacy_file("/nonexistent/file.scp", allow_unsafe_legacy=True)
+
+
+def test_migrate_legacy_file_raises_for_wrong_extension(tmp_path):
+    from spectrochempy.utils.persistence import migrate_legacy_file
+
+    f = tmp_path / "data.csv"
+    f.write_text("a,b,c")
+
+    with pytest.raises(ValueError, match="must have a .scp or .pscp extension"):
+        migrate_legacy_file(f, allow_unsafe_legacy=True)
+
+
+def test_migrate_legacy_file_raises_when_destination_exists(tmp_path):
+    from spectrochempy.utils.persistence import migrate_legacy_file
+
+    ds = NDDataset(np.array([1.0, 2.0, 3.0]), name="migrate_exists")
+    filename = ds.save_as(tmp_path / "migrate_exists", confirm=False)
+    _rewrite_dataset_data_payload_as_legacy_pickle(filename)
+
+    dest = tmp_path / "migrate_exists_migrated.scp"
+    dest.write_text("existing content")
+
+    with pytest.raises(FileExistsError):
+        migrate_legacy_file(filename, allow_unsafe_legacy=True)
+
+    with pytest.warns(UserWarning):
+        migrated = migrate_legacy_file(
+            filename, destination=dest, allow_unsafe_legacy=True, overwrite=True
+        )
+    loaded = NDDataset.load(migrated)
+    assert_array_equal(loaded.data, ds.data)
+
+
+def test_migrate_legacy_file_raises_for_source_equals_destination(tmp_path):
+    from spectrochempy.utils.persistence import migrate_legacy_file
+
+    ds = NDDataset(np.array([1.0, 2.0, 3.0]), name="migrate_same")
+    filename = ds.save_as(tmp_path / "migrate_same", confirm=False)
+    _rewrite_dataset_data_payload_as_legacy_pickle(filename)
+
+    with pytest.raises(ValueError, match="resolve to the same path"):
+        migrate_legacy_file(filename, destination=filename, allow_unsafe_legacy=True)
+
+    assert filename.exists()
+
+
+def test_migrate_legacy_file_default_destination(tmp_path):
+    from spectrochempy.utils.persistence import migrate_legacy_file
+
+    ds = NDDataset(np.array([1.0, 2.0, 3.0]), name="migrate_default_dest")
+    filename = ds.save_as(tmp_path / "migrate_default_dest", confirm=False)
+    _rewrite_dataset_data_payload_as_legacy_pickle(filename)
+
+    with pytest.warns(UserWarning):
+        migrated = migrate_legacy_file(filename, allow_unsafe_legacy=True)
+
+    assert migrated == tmp_path / "migrate_default_dest_migrated.scp"
+    loaded = NDDataset.load(migrated)
+    assert_dataset_equal(loaded, ds)
+
+
+def test_migrate_legacy_file_preserves_existing_destination_on_failure(
+    tmp_path, monkeypatch
+):
+    from spectrochempy.utils.persistence import migrate_legacy_file
+
+    ds = NDDataset(np.array([1.0, 2.0, 3.0]), name="migrate_cleanup")
+    filename = ds.save_as(tmp_path / "migrate_cleanup", confirm=False)
+    _rewrite_dataset_data_payload_as_legacy_pickle(filename)
+
+    dest = tmp_path / "migrate_cleanup_migrated.scp"
+    dest.write_text("original content that must be preserved")
+
+    def fail_dump(self, f, **kwargs):
+        raise RuntimeError("dump failed")
+
+    with monkeypatch.context() as m:
+        m.setattr(NDDataset, "dump", fail_dump)
+        with pytest.raises(RuntimeError, match="dump failed"):
+            migrate_legacy_file(
+                filename,
+                destination=dest,
+                allow_unsafe_legacy=True,
+                overwrite=True,
+            )
+
+    # Original destination must survive the failure.
+    assert dest.exists()
+    assert dest.read_text() == "original content that must be preserved"
+
+
+def test_migrate_legacy_file_pscp_roundtrip(tmp_path):
+    from spectrochempy.utils.persistence import migrate_legacy_file
+
+    ds1 = NDDataset(np.array([1.0, 2.0, 3.0]), name="pscp_child1")
+    ds2 = NDDataset(np.array([4.0, 5.0, 6.0]), name="pscp_child2")
+    proj = Project(name="migrate_pscp_project")
+    proj.add_dataset(ds1)
+    proj.add_dataset(ds2)
+
+    filename = proj.save_as(tmp_path / "migrate_pscp_project", confirm=False)
+    _rewrite_project_dataset_payload_as_legacy_pickle(filename)
+
+    with pytest.warns(UserWarning):
+        migrated = migrate_legacy_file(filename, allow_unsafe_legacy=True)
+
+    loaded = Project.load(migrated)
+    assert len(loaded.datasets) == 2
+    assert_array_equal(loaded["pscp_child1"].data, ds1.data)
+    assert_array_equal(loaded["pscp_child2"].data, ds2.data)
+
+    with zipfile.ZipFile(migrated, "r") as zipf:
+        member = zipf.namelist()[0]
+        js = json.loads(zipf.read(member).decode("utf-8"))
+    assert js["__format__"] == "pscp"
+    assert js["__version__"] == 2
+
+
+def test_migrate_legacy_file_atomic_replaces_existing(tmp_path):
+    from spectrochempy.utils.persistence import migrate_legacy_file
+
+    ds = NDDataset(np.array([1.0, 2.0, 3.0]), name="migrate_atomic")
+    filename = ds.save_as(tmp_path / "migrate_atomic", confirm=False)
+    _rewrite_dataset_data_payload_as_legacy_pickle(filename)
+
+    dest = tmp_path / "migrate_atomic_migrated.scp"
+    dest.write_text("old content")
+
+    with pytest.warns(UserWarning):
+        migrated = migrate_legacy_file(
+            filename, destination=dest, allow_unsafe_legacy=True, overwrite=True
+        )
+
+    loaded = NDDataset.load(migrated)
+    assert_dataset_equal(loaded, ds)
+
+
+def test_migrate_legacy_file_rejects_cross_suffix(tmp_path):
+    from spectrochempy.utils.persistence import migrate_legacy_file
+
+    ds = NDDataset(np.array([1.0, 2.0, 3.0]), name="migrate_cross")
+    filename = ds.save_as(tmp_path / "migrate_cross", confirm=False)
+    _rewrite_dataset_data_payload_as_legacy_pickle(filename)
+
+    with pytest.raises(ValueError, match="does not match source suffix"):
+        migrate_legacy_file(
+            filename, destination=tmp_path / "wrong.pscp", allow_unsafe_legacy=True
+        )
+
+
+def test_migrate_legacy_file_rejects_destination_without_suffix(tmp_path):
+    from spectrochempy.utils.persistence import migrate_legacy_file
+
+    ds = NDDataset(np.array([1.0, 2.0, 3.0]), name="migrate_nosuffix")
+    filename = ds.save_as(tmp_path / "migrate_nosuffix", confirm=False)
+    _rewrite_dataset_data_payload_as_legacy_pickle(filename)
+
+    with pytest.raises(ValueError, match="must have a .scp or .pscp extension"):
+        migrate_legacy_file(
+            filename, destination=tmp_path / "output", allow_unsafe_legacy=True
+        )
 
 
 if __name__ == "__main__":
