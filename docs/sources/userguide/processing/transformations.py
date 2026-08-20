@@ -209,6 +209,9 @@ _ = nd.plot(title="SNV corrected")
 #
 # MSC corrects for multiplicative and additive scattering effects by linearly
 # regressing each spectrum against a reference (the mean spectrum by default).
+# In transformer workflows, `MSCTransformer.fit()` learns only the reference
+# spectrum.  The intercept and slope remain local to each transformed spectrum,
+# so `inverse_transform()` is intentionally unsupported.
 
 # %%
 nd = ds.msc()
@@ -227,9 +230,10 @@ _ = nd.plot(title="MSC corrected")
 # X_test_scaled  = scaler.transform(X_test)   # uses train mean/std
 # ```
 #
-# Sample-local operations such as `SNVTransformer` and
-# `NormalizeTransformer(dim="x")` still compute each observation's statistics
-# during `transform()`, because those statistics belong to the spectrum being
+# Sample-local operations such as `SNVTransformer`,
+# `NormalizeTransformer(dim="x")`, and the per-spectrum regression step in
+# `MSCTransformer` still compute each observation's statistics during
+# `transform()`, because those statistics belong to the spectrum being
 # transformed rather than to the training set.  Their inverse transform is not
 # supported unless a future API carries the required per-observation state on
 # the transformed result.

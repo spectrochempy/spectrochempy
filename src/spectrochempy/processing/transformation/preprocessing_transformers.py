@@ -650,9 +650,13 @@ class MSCTransformer(BasePreprocessor):
     r"""
     Multiplicative Scatter Correction (MSC) transformer.
 
-    Fits a linear regression of each observation against a reference
-    spectrum during ``fit()``, then corrects with
-    :math:`(x - a) / b` during ``transform()``.
+    Learns a reusable reference spectrum during ``fit()``.  During
+    ``transform()``, each observation in the dataset being transformed is
+    locally regressed against that reference and corrected with
+    :math:`(x - a) / b`.
+
+    ``inverse_transform()`` is not supported.  The regression coefficients
+    are local to each transformed dataset and are not safe reusable state.
 
     Parameters
     ----------
@@ -666,9 +670,20 @@ class MSCTransformer(BasePreprocessor):
     reference_ : `~numpy.ndarray`
         Reference spectrum used for fitting.
     a_ : `~numpy.ndarray`
-        Intercepts of the per-observation regressions.
+        Intercepts of the per-observation regressions for the dataset
+        passed to ``fit()``. These are diagnostics, not reusable
+        transform state.
     b_ : `~numpy.ndarray`
-        Slopes of the per-observation regressions.
+        Slopes of the per-observation regressions for the dataset passed
+        to ``fit()``. These are diagnostics, not reusable transform state.
+
+    Raises
+    ------
+    SpectroChemPyError
+        If the dataset is not 2-D, the reference or transform spectral
+        geometry is incompatible, a spectrum has too few valid paired
+        points, the effective reference is constant, the local slope is
+        zero, or ``inverse_transform()`` is requested.
 
     Examples
     --------
@@ -688,6 +703,7 @@ class MSCTransformer(BasePreprocessor):
 
     def _fit(self, dataset):
         axis, self._dim_name = dataset.get_axis(self.dim)
+        self._dim_name = str(self._dim_name)
         data = dataset.masked_data
 
         if data.ndim != 2:
@@ -696,15 +712,19 @@ class MSCTransformer(BasePreprocessor):
             )
 
         spectral_axis = 1 if axis == 0 else 0
+        self._spectral_axis_ = spectral_axis
+        self._spectral_dim_name_ = str(dataset.dims[spectral_axis])
+        self._spectral_size_ = data.shape[spectral_axis]
+        self._spectral_coord_ = self._coord_signature(dataset, self._spectral_dim_name_)
 
         if self.reference is None:
             ref = np.ma.mean(data, axis=axis)
-            ref = np.asarray(ref)
         else:
             if hasattr(self.reference, "masked_data"):
                 ref = self.reference.masked_data
+                self._check_reference_coord_compatibility(dataset, self.reference)
             else:
-                ref = np.ma.masked_invalid(np.asarray(self.reference))
+                ref = np.ma.masked_invalid(np.ma.asarray(self.reference))
             if ref.ndim != 1:
                 raise SpectroChemPyError("MSC reference must be a 1-D spectrum.")
             if ref.size != data.shape[spectral_axis]:
@@ -713,27 +733,138 @@ class MSCTransformer(BasePreprocessor):
                     f"dataset spectral size ({data.shape[spectral_axis]})."
                 )
 
-        self.reference_ = ref
+        self.reference_ = np.ma.array(ref, copy=True)
+        self.a_, self.b_ = self._msc_coefficients(data, self.reference_, spectral_axis)
 
+    @staticmethod
+    def _coord_signature(dataset, dim_name):
+        coord = dataset.coord(dim_name)
+        if coord is None:
+            return None
+        return {
+            "data": np.array(coord.data, copy=True),
+            "units": coord.units,
+        }
+
+    def _check_reference_coord_compatibility(self, dataset, reference):
+        ref_dim_name = str(reference.dims[0])
+        ref_coord = reference.coord(ref_dim_name)
+        if ref_coord is None:
+            return
+        spectral_coord = dataset.coord(self._spectral_dim_name_)
+        if spectral_coord is None:
+            return
+        if ref_coord.units != spectral_coord.units:
+            raise SpectroChemPyError(
+                "MSC reference coordinates are incompatible with the dataset "
+                "spectral coordinates: units differ."
+            )
+        if not np.array_equal(ref_coord.data, spectral_coord.data):
+            raise SpectroChemPyError(
+                "MSC reference coordinates are incompatible with the dataset "
+                "spectral coordinates."
+            )
+
+    def _check_spectral_compatibility(self, dataset):
+        axis, dim_name = dataset.get_axis(self.dim)
+        dim_name = str(dim_name)
+        if dim_name != self._dim_name:
+            raise SpectroChemPyError(
+                "MSCTransformer transform dimension is incompatible with fit(). "
+                "Refit the transformer after changing dimensions."
+            )
+
+        spectral_axis = 1 if axis == 0 else 0
+        spectral_dim_name = str(dataset.dims[spectral_axis])
+        if spectral_dim_name != self._spectral_dim_name_:
+            raise SpectroChemPyError(
+                "MSCTransformer spectral dimension is incompatible with fit()."
+            )
+        if dataset.masked_data.shape[spectral_axis] != self._spectral_size_:
+            raise SpectroChemPyError(
+                "MSCTransformer spectral size is incompatible with fit()."
+            )
+
+        coord_signature = self._coord_signature(dataset, spectral_dim_name)
+        if self._spectral_coord_ is not None and coord_signature is not None:
+            if coord_signature["units"] != self._spectral_coord_["units"]:
+                raise SpectroChemPyError(
+                    "MSCTransformer spectral coordinates are incompatible "
+                    "with fit(): units differ."
+                )
+            if not np.array_equal(
+                coord_signature["data"], self._spectral_coord_["data"]
+            ):
+                raise SpectroChemPyError(
+                    "MSCTransformer spectral coordinates are incompatible "
+                    "with fit(): coordinate order changed."
+                )
+
+        return spectral_axis
+
+    def _msc_coefficients(self, data, ref, spectral_axis):
+        data = np.ma.asarray(data)
+        ref = np.ma.asarray(ref)
         ref_shape = [1, 1]
         ref_shape[spectral_axis] = -1
         ref_b = ref.reshape(ref_shape)
 
-        n = ref.size
-        sum_ref = np.ma.sum(ref)
-        sum_ref2 = np.ma.sum(ref**2)
-        den = n * sum_ref2 - sum_ref**2
+        data_mask = np.ma.getmaskarray(data)
+        ref_data = np.broadcast_to(np.ma.getdata(ref_b), data.shape)
+        ref_mask = np.broadcast_to(np.ma.getmaskarray(ref_b), data.shape)
+        combined_mask = data_mask | ref_mask
 
-        if den == 0:
+        x = np.ma.array(np.ma.getdata(data), mask=combined_mask)
+        r = np.ma.array(ref_data, mask=combined_mask)
+
+        n = np.ma.count(x, axis=spectral_axis, keepdims=True)
+        if np.any(n < 2):
             raise SpectroChemPyError(
-                "MSC denominator is zero; reference spectrum is constant."
+                "MSC requires at least two valid spectral points per spectrum."
             )
 
-        sum_x = np.ma.sum(data, axis=spectral_axis, keepdims=True)
-        sum_xref = np.ma.sum(data * ref_b, axis=spectral_axis, keepdims=True)
+        ref_range = np.ma.max(r, axis=spectral_axis, keepdims=True) - np.ma.min(
+            r, axis=spectral_axis, keepdims=True
+        )
+        ref_range_data = np.ma.asarray(ref_range).filled(np.nan)
+        if np.any((ref_range_data == 0.0) | ~np.isfinite(ref_range_data)):
+            raise SpectroChemPyError(
+                "MSC denominator is zero; reference spectrum is constant over "
+                "the valid points."
+            )
 
-        self.b_ = (n * sum_xref - sum_ref * sum_x) / den
-        self.a_ = (sum_x - self.b_ * sum_ref) / n
+        mean_ref = np.ma.mean(r, axis=spectral_axis, keepdims=True)
+        mean_x = np.ma.mean(x, axis=spectral_axis, keepdims=True)
+        r_centered = r - mean_ref
+        x_centered = x - mean_x
+        den = np.ma.sum(r_centered**2, axis=spectral_axis, keepdims=True)
+
+        den_data = np.ma.asarray(den).filled(np.nan)
+        if np.any((den_data == 0.0) | ~np.isfinite(den_data)):
+            raise SpectroChemPyError(
+                "MSC denominator is zero; reference spectrum is constant over "
+                "the valid points."
+            )
+
+        covariance = np.ma.sum(
+            x_centered * r_centered, axis=spectral_axis, keepdims=True
+        )
+        covariance_data = np.ma.asarray(covariance).filled(np.nan)
+        if np.any(~np.isfinite(covariance_data)):
+            raise SpectroChemPyError(
+                "MSC covariance is not finite; the spectrum cannot be corrected "
+                "against the reference."
+            )
+
+        b = covariance / den
+        b_data = np.ma.asarray(b).filled(np.nan)
+        if np.any((b_data == 0.0) | ~np.isfinite(b_data)):
+            raise SpectroChemPyError(
+                "MSC slope is zero; the spectrum cannot be corrected against "
+                "the reference."
+            )
+        a = mean_x - b * mean_ref
+        return a, b
 
     def _transform(self, dataset):
         new = dataset.copy()
@@ -744,37 +875,19 @@ class MSCTransformer(BasePreprocessor):
                 "MSCTransformer currently supports only 2-D datasets."
             )
 
-        axis, _ = dataset.get_axis(self.dim)
-        spectral_axis = 1 if axis == 0 else 0
+        spectral_axis = self._check_spectral_compatibility(dataset)
 
         ref = self.reference_
-        ref_shape = [1, 1]
-        ref_shape[spectral_axis] = -1
-        ref_b = ref.reshape(ref_shape)
-
-        n = ref.size
-        sum_ref = np.ma.sum(ref)
-        sum_ref2 = np.ma.sum(ref**2)
-        den = n * sum_ref2 - sum_ref**2
-
-        sum_x = np.ma.sum(data, axis=spectral_axis, keepdims=True)
-        sum_xref = np.ma.sum(data * ref_b, axis=spectral_axis, keepdims=True)
-
-        b = (n * sum_xref - sum_ref * sum_x) / den
-        a = (sum_x - b * sum_ref) / n
-
-        b_safe = np.where(b == 0, 1, b)
-        self._set_data(new, (data - a) / b_safe)
+        a, b = self._msc_coefficients(data, ref, spectral_axis)
+        self._set_data(new, (data - a) / b)
         new.history = f"MSCTransformer applied on dimension {self._dim_name}"
         return new
 
     def _inverse_transform(self, dataset):
-        new = dataset.copy()
-        data = dataset.masked_data
-
-        self._set_data(new, data * self.b_ + self.a_)
-        new.history = f"MSCTransformer inverse applied on dimension {self._dim_name}"
-        return new
+        raise SpectroChemPyError(
+            "MSCTransformer inverse_transform is not supported because MSC "
+            "regression coefficients are local to each transformed dataset."
+        )
 
 
 class ParetoScaleTransformer(BasePreprocessor):

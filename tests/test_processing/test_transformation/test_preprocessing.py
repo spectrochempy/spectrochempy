@@ -54,6 +54,22 @@ def simple_2d():
     return NDDataset(data, coordset=[y, x])
 
 
+@pytest.fixture
+def msc_2d():
+    """Return non-proportional 2-D spectra suitable for MSC tests."""
+    x = Coord(np.linspace(1000.0, 1500.0, 6), title="wavenumber", units="cm^-1")
+    y = Coord(np.linspace(0, 3, 4), title="time")
+    data = np.array(
+        [
+            [2.0, 4.0, 7.0, 11.0, 16.0, 22.0],
+            [3.0, 8.0, 13.0, 21.0, 34.0, 55.0],
+            [5.0, 1.0, 9.0, 2.0, 8.0, 3.0],
+            [11.0, 7.0, 3.0, 13.0, 4.0, 17.0],
+        ]
+    )
+    return NDDataset(data, coordset=[y, x])
+
+
 def _normalize_oracle(data, method, axis):
     if method == "max":
         norm = np.max(np.abs(data), axis=axis, keepdims=True)
@@ -74,6 +90,37 @@ def _snv_oracle(data, axis):
     mean = np.mean(data, axis=axis, keepdims=True)
     std = np.std(data, axis=axis, keepdims=True)
     return (data - mean) / np.where(std == 0, 1, std)
+
+
+def _msc_coefficients_oracle(data, ref, spectral_axis):
+    data = np.ma.asarray(data)
+    ref = np.ma.asarray(ref)
+    ref_shape = [1, 1]
+    ref_shape[spectral_axis] = -1
+    ref_b = ref.reshape(ref_shape)
+
+    data_mask = np.ma.getmaskarray(data)
+    ref_data = np.broadcast_to(np.ma.getdata(ref_b), data.shape)
+    ref_mask = np.broadcast_to(np.ma.getmaskarray(ref_b), data.shape)
+    mask = data_mask | ref_mask
+
+    x = np.ma.array(np.ma.getdata(data), mask=mask)
+    r = np.ma.array(ref_data, mask=mask)
+
+    mean_ref = np.ma.mean(r, axis=spectral_axis, keepdims=True)
+    mean_x = np.ma.mean(x, axis=spectral_axis, keepdims=True)
+    r_centered = r - mean_ref
+    x_centered = x - mean_x
+    den = np.ma.sum(r_centered**2, axis=spectral_axis, keepdims=True)
+    covariance = np.ma.sum(x_centered * r_centered, axis=spectral_axis, keepdims=True)
+    b = covariance / den
+    a = mean_x - b * mean_ref
+    return a, b
+
+
+def _msc_oracle(data, ref, spectral_axis=1):
+    a, b = _msc_coefficients_oracle(data, ref, spectral_axis)
+    return (np.ma.asarray(data) - a) / b
 
 
 # ---------------------------------------------------------------------------
@@ -211,26 +258,22 @@ class TestSNV:
 
 
 class TestMSC:
-    def test_default_reference(self, simple_2d):
-        nd = msc(simple_2d)
-        ref = np.mean(simple_2d.data, axis=0)
-        # Non-constant spectra should match the reference after correction
-        for i in range(simple_2d.shape[0] - 1):
-            assert np.allclose(nd.data[i], ref)
-        # Constant spectrum (last row) has b=0, so it becomes zero
-        assert np.allclose(nd.data[-1], 0.0)
+    def test_default_reference(self, msc_2d):
+        nd = msc(msc_2d)
+        ref = np.mean(msc_2d.data, axis=0)
+        expected = _msc_oracle(msc_2d.data, ref)
+        assert np.allclose(nd.data, expected)
 
-    def test_explicit_reference(self, simple_2d):
-        ref = simple_2d.data[0]
-        nd = msc(simple_2d, reference=ref)
+    def test_explicit_reference(self, msc_2d):
+        ref = msc_2d.data[0]
+        nd = msc(msc_2d, reference=ref)
         # Spectrum 0 corrected against itself should equal itself
         assert np.allclose(nd.data[0], ref)
 
-    def test_regression_against_ref(self, simple_2d):
-        nd = msc(simple_2d)
-        ref = np.mean(simple_2d.data, axis=0)
-        # Non-constant spectra should regress to a≈0, b≈1
-        for i in range(simple_2d.shape[0] - 1):
+    def test_regression_against_ref(self, msc_2d):
+        nd = msc(msc_2d)
+        ref = np.mean(msc_2d.data, axis=0)
+        for i in range(msc_2d.shape[0]):
             # Fit corrected[i] = a + b * ref; should yield a≈0, b≈1
             n = ref.size
             sum_ref = np.sum(ref)
@@ -242,17 +285,27 @@ class TestMSC:
             a = (sum_corr - b * sum_ref) / n
             assert np.isclose(a, 0.0, atol=1e-10)
             assert np.isclose(b, 1.0, atol=1e-10)
-        # Constant spectrum has b=0, so it becomes zero and does not regress
-        assert np.allclose(nd.data[-1], 0.0)
 
     def test_constant_reference_error(self, simple_2d):
         const_ref = np.ones(simple_2d.shape[1])
         with pytest.raises(SpectroChemPyError, match="denominator is zero"):
             msc(simple_2d, reference=const_ref)
 
+    @pytest.mark.parametrize("value", [0.1, 1.0e-6, 1.0e9])
+    def test_constant_reference_error_is_scale_invariant(self, msc_2d, value):
+        const_ref = np.full(msc_2d.shape[1], value)
+        with pytest.raises(SpectroChemPyError, match="denominator is zero"):
+            msc(msc_2d, reference=const_ref)
+
     def test_wrong_reference_size(self, simple_2d):
         with pytest.raises(SpectroChemPyError, match="reference size"):
             msc(simple_2d, reference=np.ones(3))
+
+    def test_zero_slope_error(self, msc_2d):
+        ds = msc_2d.copy()
+        ds._data[0] = np.ones(msc_2d.shape[1])
+        with pytest.raises(SpectroChemPyError, match="slope is zero"):
+            msc(ds, reference=msc_2d.data[1])
 
     def test_nd_error(self, simple_2d):
         """MSC currently supports only 2-D datasets."""
@@ -261,8 +314,8 @@ class TestMSC:
         with pytest.raises(SpectroChemPyError, match="2-D datasets"):
             msc(ds_3d)
 
-    def test_inplace(self, simple_2d):
-        nd = simple_2d.copy()
+    def test_inplace(self, msc_2d):
+        nd = msc_2d.copy()
         result = msc(nd, inplace=True)
         assert result is nd
 
@@ -297,9 +350,10 @@ class TestMasks:
         nd = snv(ds)
         assert nd.mask[:, 2].all()
 
-    def test_mask_preserved_msc(self, simple_2d):
-        ds = simple_2d.copy()
-        ds[:, 2] = MASKED
+    def test_mask_preserved_msc(self, msc_2d):
+        ds = msc_2d.copy()
+        ds._mask = np.zeros_like(ds.data, dtype=bool)
+        ds._mask[:, 2] = True
         nd = msc(ds)
         assert nd.mask[:, 2].all()
 
@@ -844,44 +898,248 @@ class TestNormalizeTransformer:
 
 
 class TestMSCTransformer:
-    def test_fit_transform_agrees_with_msc(self, simple_2d):
-        expected = msc(simple_2d, dim="y")
+    def test_fit_transform_agrees_with_msc(self, msc_2d):
+        expected = msc(msc_2d, dim="y")
         scaler = MSCTransformer(dim="y")
-        nd = scaler.fit_transform(simple_2d)
+        nd = scaler.fit_transform(msc_2d)
         assert np.allclose(nd.data, expected.data)
         assert "MSCTransformer applied" in nd.history[-1]
 
-    def test_transform_without_fit_raises(self, simple_2d):
+    def test_transform_without_fit_raises(self, msc_2d):
         scaler = MSCTransformer(dim="y")
         with pytest.raises(SpectroChemPyError, match="not fitted yet"):
-            scaler.transform(simple_2d)
+            scaler.transform(msc_2d)
 
-    def test_inverse_transform_restores_data(self, simple_2d):
+    def test_inverse_transform_raises(self, msc_2d):
         scaler = MSCTransformer(dim="y")
-        scaled = scaler.fit_transform(simple_2d)
-        restored = scaler.inverse_transform(scaled)
-        assert np.allclose(restored.data, simple_2d.data)
-        assert "MSCTransformer inverse applied" in restored.history[-1]
+        scaled = scaler.fit_transform(msc_2d)
+        with pytest.raises(SpectroChemPyError, match="not supported"):
+            scaler.inverse_transform(scaled)
 
-    def test_train_test_reuse(self, simple_2d):
-        train = simple_2d[:2]
-        test = simple_2d[2:]
+    def test_train_test_reuse(self, msc_2d):
+        train = msc_2d[:2]
+        test = msc_2d[2:]
         scaler = MSCTransformer(dim="y")
         scaler.fit(train)
         test_msc = scaler.transform(test)
-        # Reference learned from train mean; a and b recalculated per observation
         ref = np.mean(train.data, axis=0)
-        n = ref.size
-        sum_ref = np.sum(ref)
-        sum_ref2 = np.sum(ref**2)
-        den = n * sum_ref2 - sum_ref**2
-        sum_x = np.sum(test.data, axis=1, keepdims=True)
-        sum_xref = np.sum(test.data * ref, axis=1, keepdims=True)
-        b = (n * sum_xref - sum_ref * sum_x) / den
-        a = (sum_x - b * sum_ref) / n
-        b_safe = np.where(b == 0, 1, b)
-        expected = (test.data - a) / b_safe
+        expected = _msc_oracle(test.data, ref)
         assert np.allclose(test_msc.data, expected)
+
+    def test_fit_coefficients_are_diagnostics_not_transform_state(self, msc_2d):
+        train = msc_2d[:2]
+        test = msc_2d[2:]
+        scaler = MSCTransformer(dim="y").fit(train)
+        expected_a, expected_b = _msc_coefficients_oracle(
+            train.data, scaler.reference_, spectral_axis=1
+        )
+        assert np.allclose(scaler.a_, expected_a)
+        assert np.allclose(scaler.b_, expected_b)
+
+        a_before = scaler.a_.copy()
+        b_before = scaler.b_.copy()
+        scaler.transform(test)
+        assert np.allclose(scaler.a_, a_before)
+        assert np.allclose(scaler.b_, b_before)
+
+    def test_inverse_does_not_reuse_train_coefficients_with_different_rows(
+        self, msc_2d
+    ):
+        train = msc_2d[:1]
+        test = msc_2d[1:]
+        scaler = MSCTransformer(dim="y").fit(train)
+        transformed = scaler.transform(test)
+        with pytest.raises(SpectroChemPyError, match="not supported"):
+            scaler.inverse_transform(transformed)
+
+    def test_inverse_does_not_reuse_train_coefficients_with_equal_rows(self, msc_2d):
+        train = msc_2d[:2]
+        test = msc_2d[2:].copy()
+        test._data = np.array(
+            [
+                [20.0, 1.0, 15.0, 3.0, 11.0, 9.0],
+                [4.0, 18.0, 6.0, 16.0, 9.0, 13.0],
+            ]
+        )
+        scaler = MSCTransformer(dim="y").fit(train)
+        transformed = scaler.transform(test)
+        with pytest.raises(SpectroChemPyError, match="not supported"):
+            scaler.inverse_transform(transformed)
+
+    def test_observation_permutation_uses_local_coefficients(self, msc_2d):
+        train = msc_2d[:2]
+        test = msc_2d[[3, 2]]
+        scaler = MSCTransformer(dim="y").fit(train)
+        transformed = scaler.transform(test)
+        expected = _msc_oracle(test.data, scaler.reference_)
+        assert np.allclose(transformed.data, expected)
+
+    def test_repeated_transform_calls_do_not_share_last_state(self, msc_2d):
+        train = msc_2d[:2]
+        test_a = msc_2d[2:]
+        test_b = msc_2d[[3, 2]]
+        scaler = MSCTransformer(dim="y").fit(train)
+        first = scaler.transform(test_a)
+        _ = scaler.transform(test_b)
+        second = scaler.transform(test_a)
+        assert np.allclose(first.data, second.data)
+
+    def test_independent_instances_do_not_share_state(self, msc_2d):
+        first = MSCTransformer(reference=msc_2d.data[0], dim="y").fit(msc_2d[:2])
+        second = MSCTransformer(reference=msc_2d.data[1], dim="y").fit(msc_2d[:2])
+        transformed_first = first.transform(msc_2d[2:])
+        transformed_second = second.transform(msc_2d[2:])
+        assert not np.allclose(transformed_first.data, transformed_second.data)
+
+    def test_explicit_array_reference(self, msc_2d):
+        ref = msc_2d.data[0]
+        scaler = MSCTransformer(reference=ref, dim="y").fit(msc_2d[:2])
+        transformed = scaler.transform(msc_2d[2:])
+        expected = _msc_oracle(msc_2d[2:].data, ref)
+        assert np.allclose(transformed.data, expected)
+
+    def test_small_scale_reference_is_valid(self):
+        ref = np.array([1.0e-6, 2.0e-6, 4.0e-6])
+        data = np.array(
+            [
+                [2.0e-6, 4.0e-6, 8.0e-6],
+                [5.0e-6, 1.0e-6, 7.0e-6],
+            ]
+        )
+        ds = NDDataset(data)
+        transformed = MSCTransformer(reference=ref, dim="y").fit_transform(ds)
+        expected = _msc_oracle(data, ref)
+        assert np.allclose(transformed.data, expected)
+
+    def test_nearly_constant_small_scale_reference_is_valid(self):
+        ref = np.array([1.0e-9, 1.0e-9, 1.0000001e-9, 1.0e-9, 1.0e-9, 1.0e-9])
+        data = np.array(
+            [
+                [2.0e-9, 2.0e-9, 2.0000002e-9, 2.0e-9, 2.0e-9, 2.0e-9],
+                [1.0e-9, 1.1e-9, 1.0000004e-9, 0.9e-9, 1.2e-9, 0.8e-9],
+            ]
+        )
+        ds = NDDataset(data)
+        transformed = MSCTransformer(reference=ref, dim="y").fit_transform(ds)
+        expected = _msc_oracle(data, ref)
+        assert np.allclose(transformed.data, expected)
+
+    @pytest.mark.parametrize("scale", [1.0e-9, 1.0e9])
+    def test_msc_is_scale_invariant(self, msc_2d, scale):
+        ref = msc_2d.data[0] * scale
+        data = msc_2d.data * scale
+        ds = NDDataset(data, coordset=msc_2d.coordset)
+        transformed = MSCTransformer(reference=ref, dim="y").fit_transform(ds)
+        expected = _msc_oracle(data, ref)
+        assert np.allclose(transformed.data, expected)
+
+    def test_explicit_masked_array_reference_preserves_mask(self, msc_2d):
+        ref = np.ma.array(msc_2d.data[0], mask=[False, True, False, False, True, False])
+        scaler = MSCTransformer(reference=ref, dim="y").fit(msc_2d[:2])
+        transformed = scaler.transform(msc_2d[2:])
+        expected = _msc_oracle(msc_2d[2:].data, ref)
+        assert np.allclose(transformed.data, expected)
+        assert np.array_equal(np.ma.getmaskarray(scaler.reference_), ref.mask)
+
+    def test_explicit_nddataset_reference(self, msc_2d):
+        ref = NDDataset(msc_2d.data[0], coordset=[msc_2d.coord("x")])
+        scaler = MSCTransformer(reference=ref, dim="y").fit(msc_2d[:2])
+        transformed = scaler.transform(msc_2d[2:])
+        expected = _msc_oracle(msc_2d[2:].data, ref.data)
+        assert np.allclose(transformed.data, expected)
+
+    def test_explicit_nddataset_reference_rejects_coordinate_mismatch(self, msc_2d):
+        ref_coord = Coord(
+            msc_2d.coord("x").data[::-1],
+            units=msc_2d.coord("x").units,
+        )
+        ref = NDDataset(msc_2d.data[0], coordset=[ref_coord])
+        with pytest.raises(SpectroChemPyError, match="reference coordinates"):
+            MSCTransformer(reference=ref, dim="y").fit(msc_2d)
+
+    def test_transform_rejects_incompatible_feature_count(self, msc_2d):
+        scaler = MSCTransformer(dim="y").fit(msc_2d[:2])
+        with pytest.raises(SpectroChemPyError, match="spectral size"):
+            scaler.transform(NDDataset(np.ones((2, 5))))
+
+    def test_transform_rejects_reordered_spectral_coordinates(self, msc_2d):
+        scaler = MSCTransformer(dim="y").fit(msc_2d[:2])
+        test = msc_2d[2:].copy()
+        test.set_coordset(
+            y=test.coord("y"),
+            x=Coord(test.coord("x").data[::-1], units=test.coord("x").units),
+        )
+        with pytest.raises(SpectroChemPyError, match="coordinate order changed"):
+            scaler.transform(test)
+
+    def test_transform_rejects_spectral_coordinate_unit_mismatch(self, msc_2d):
+        scaler = MSCTransformer(dim="y").fit(msc_2d[:2])
+        test = msc_2d[2:].copy()
+        test.set_coordset(
+            y=test.coord("y"),
+            x=Coord(test.coord("x").data, units="Hz"),
+        )
+        with pytest.raises(SpectroChemPyError, match="units differ"):
+            scaler.transform(test)
+
+    def test_transform_accepts_compatible_transpose(self, msc_2d):
+        scaler = MSCTransformer(dim="y").fit(msc_2d)
+        test = msc_2d.T
+        transformed = scaler.transform(test)
+        expected = _msc_oracle(test.data, scaler.reference_, spectral_axis=0)
+        assert np.allclose(transformed.data, expected)
+
+    def test_nominal_and_numeric_dim_agree(self, msc_2d):
+        nominal = MSCTransformer(dim="y").fit_transform(msc_2d)
+        numeric = MSCTransformer(dim=0).fit_transform(msc_2d)
+        assert np.allclose(nominal.data, numeric.data)
+
+    def test_masked_regression_uses_effective_valid_pairs(self, msc_2d):
+        ds = msc_2d.copy()
+        ds._mask = np.zeros_like(ds.data, dtype=bool)
+        ds._mask[0, 1] = True
+        ds._mask[1, 2] = True
+        ds._mask[:, 4] = True
+        transformed = MSCTransformer(dim="y").fit_transform(ds)
+        ref = np.ma.mean(ds.masked_data, axis=0)
+        expected = _msc_oracle(ds.masked_data, ref)
+        assert np.allclose(transformed.data[~ds.mask], expected.data[~ds.mask])
+        assert np.array_equal(transformed.mask, ds.mask)
+
+    def test_fully_masked_spectrum_raises(self, msc_2d):
+        ds = msc_2d.copy()
+        ds._mask = np.zeros_like(ds.data, dtype=bool)
+        ds._mask[0, :] = True
+        with pytest.raises(SpectroChemPyError, match="valid spectral points"):
+            MSCTransformer(dim="y").fit_transform(ds)
+
+    def test_metadata_units_coords_mask_and_inputs_preserved(self, msc_2d):
+        train = msc_2d[:2].copy()
+        test = msc_2d[2:].copy()
+        reference = NDDataset(msc_2d.data[0], coordset=[msc_2d.coord("x")])
+        test._mask = np.zeros_like(test.data, dtype=bool)
+        test._mask[0, 2] = True
+        test.units = "absorbance"
+        test.title = "test spectra"
+        test.meta.foo = "bar"
+        train_data = train.data.copy()
+        test_data = test.data.copy()
+        test_mask = test.mask.copy()
+        reference_data = reference.data.copy()
+
+        transformed = (
+            MSCTransformer(reference=reference, dim="y").fit(train).transform(test)
+        )
+
+        assert np.array_equal(train.data, train_data)
+        assert np.array_equal(test.data, test_data)
+        assert np.array_equal(test.mask, test_mask)
+        assert np.array_equal(reference.data, reference_data)
+        assert np.array_equal(transformed.mask, test_mask)
+        assert transformed.units == test.units
+        assert transformed.title == test.title
+        assert transformed.meta.foo == "bar"
+        assert transformed.coordset == test.coordset
 
     def test_transform_1d_raises(self):
         # SpectroChemPy keeps 2-D shape on scalar index, so use a true 1-D array

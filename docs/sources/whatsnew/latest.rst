@@ -27,6 +27,14 @@ New Features
 
 Bug Fixes
 ~~~~~~~~~
+- Fix ``MSCTransformer.inverse_transform()`` so it no longer reuses
+  fit-dataset diagnostic coefficients positionally for independently
+  transformed datasets.  ``MSCTransformer`` now documents ``a_`` and ``b_`` as
+  fit-dataset diagnostics, preserves explicit masked references, computes MSC
+  regressions from the effective paired masks, and reuses the learned reference
+  only with compatible spectral geometry, including feature count, spectral
+  dimension name, coordinate order and coordinate units when present.
+
 - Fix sample-local preprocessing transformers so ``SNVTransformer`` and
   ``NormalizeTransformer(dim="x")`` compute per-spectrum statistics on the
   dataset being transformed instead of reusing training spectra positionally.
@@ -76,6 +84,17 @@ Bug Fixes
   units.  Smoothing (``deriv=0``) and index-based fallbacks preserve
   the source units unchanged.  This is a scientific correction
   observable for datasets with physical units.
+
+Breaking Changes
+~~~~~~~~~~~~~~~~
+- ``MSCTransformer.inverse_transform()`` now raises an explicit error.  The
+  previous behavior could appear to restore the result of ``fit_transform()``
+  on the same dataset, but it reused training coefficients positionally and
+  was unsafe for datasets transformed later.
+
+- ``msc()`` and ``MSCTransformer`` now raise when a spectrum has zero local
+  slope relative to the reference.  The previous ``b_safe`` fallback produced
+  a zero-valued corrected spectrum, hiding an invalid MSC regression.
 
 Developer
 ~~~~~~~~~
