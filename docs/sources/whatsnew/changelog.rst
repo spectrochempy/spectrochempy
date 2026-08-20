@@ -34,6 +34,13 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
+- Fix FFT frequency-coordinate generation.  FTIR interferogram FFT results now
+  use a positive descending wavenumber axis from the Nyquist wavenumber toward
+  zero, so the documented ``400–4000 cm^-1`` window again contains the
+  calculated spectra.  Generic FFT coordinates now follow the
+  ``fftshift(fftfreq)`` order used by the transformed data, while NMR plugin
+  FFT post-processing remains unchanged.
+
 - Fix ``MSCTransformer.inverse_transform()`` so it no longer reuses
   fit-dataset diagnostic coefficients positionally for independently
   transformed datasets.  ``MSCTransformer`` now documents ``a_`` and ``b_`` as
