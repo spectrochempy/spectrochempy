@@ -17,8 +17,10 @@ scikit-learn conventions (scikit-learn itself is **not** a dependency).
 They complement the procedural functions in
 :mod:`spectrochempy.processing.transformation.preprocessing` and are
 intended for machine-learning workflows (train/test splits,
-cross-validation, pipelines) where statistics must be learned once and
-reused across multiple datasets.
+cross-validation, pipelines) where feature-wise statistics must be
+learned once and reused across multiple datasets.  Sample-local
+operations such as SNV and normalization along ``x`` compute their
+statistics from the dataset passed to ``transform()``.
 
 """
 
@@ -406,10 +408,16 @@ class SNVTransformer(AutoscaleTransformer):
 
     def _fit(self, dataset):
         _, self._dim_name = dataset.get_axis(self.dim)
+        self._dim_name = str(self._dim_name)
 
     def _transform(self, dataset):
         new = dataset.copy()
-        axis, _ = dataset.get_axis(self.dim)
+        axis, dim_name = dataset.get_axis(self.dim)
+        if str(dim_name) != self._dim_name:
+            raise SpectroChemPyError(
+                "SNVTransformer transform dimension is incompatible with fit(). "
+                "Refit the transformer after changing dimensions."
+            )
         data = dataset.masked_data
         mean = np.ma.mean(data, axis=axis, keepdims=True)
         std = np.ma.std(data, axis=axis, keepdims=True)
@@ -431,10 +439,9 @@ class NormalizeTransformer(BasePreprocessor):
 
     Learns the normalization factor along a reusable feature dimension
     during ``fit()`` and applies it during ``transform()``.  For the
-    standard spectral case ``dim='x'`` on 2-D datasets, normalization is
-    sample-local: ``fit()`` validates the mode and ``transform()`` computes
-    each observation's normalization factor on the dataset being
-    transformed.
+    spectral dimension ``dim='x'``, normalization is sample-local:
+    ``fit()`` validates the mode and ``transform()`` computes each
+    observation's normalization factor on the dataset being transformed.
 
     Parameters
     ----------
@@ -478,8 +485,12 @@ class NormalizeTransformer(BasePreprocessor):
 
     def _fit(self, dataset):
         axis, self._dim_name = dataset.get_axis(self.dim)
+        self._dim_name = str(self._dim_name)
         data = dataset.masked_data
-        self._sample_local_ = data.ndim == 2 and axis == 1
+        self._sample_local_ = self._dim_name == "x"
+        self._fit_axis_ = axis
+        self._fit_shape_ = data.shape
+        self._fit_compatible_coords_ = self._compatible_coords(dataset, axis)
 
         if self.method not in ("max", "sum", "vector", "minmax"):
             raise SpectroChemPyError(
@@ -519,7 +530,14 @@ class NormalizeTransformer(BasePreprocessor):
     def _transform(self, dataset):
         new = dataset.copy()
         data = dataset.masked_data
-        axis, _ = dataset.get_axis(self.dim)
+        axis, dim_name = dataset.get_axis(self.dim)
+        dim_name = str(dim_name)
+
+        if dim_name != self._dim_name:
+            raise SpectroChemPyError(
+                "NormalizeTransformer transform dimension is incompatible with "
+                "fit(). Refit the transformer after changing dimensions."
+            )
 
         if self._sample_local_:
             params = self._normalization_parameters(data, axis)
@@ -527,6 +545,7 @@ class NormalizeTransformer(BasePreprocessor):
             dmin = params.get("dmin_")
             drange = params.get("range_")
         else:
+            self._check_transform_compatibility(dataset, axis)
             norm = getattr(self, "norm_", None)
             dmin = getattr(self, "dmin_", None)
             drange = getattr(self, "range_", None)
@@ -541,6 +560,46 @@ class NormalizeTransformer(BasePreprocessor):
             f"{self._dim_name}"
         )
         return new
+
+    @staticmethod
+    def _compatible_coords(dataset, learned_axis):
+        coords = {}
+        for axis, dim_name in enumerate(dataset.dims):
+            if axis == learned_axis:
+                continue
+            coord = dataset.coord(dim_name)
+            if coord is not None:
+                coords[str(dim_name)] = np.array(coord.data, copy=True)
+        return coords
+
+    def _check_transform_compatibility(self, dataset, axis):
+        data_shape = dataset.masked_data.shape
+        if len(data_shape) != len(self._fit_shape_):
+            raise SpectroChemPyError(
+                "NormalizeTransformer transform dataset is incompatible with "
+                "fit(): number of dimensions changed."
+            )
+
+        for current_axis, current_size in enumerate(data_shape):
+            if current_axis == axis:
+                continue
+            fit_size = self._fit_shape_[current_axis]
+            if current_size != fit_size:
+                raise SpectroChemPyError(
+                    "NormalizeTransformer transform dataset is incompatible "
+                    "with fit(): non-normalized dimensions changed."
+                )
+
+            dim_name = str(dataset.dims[current_axis])
+            expected = self._fit_compatible_coords_.get(dim_name)
+            coord = dataset.coord(dim_name)
+            if expected is not None and coord is not None:
+                current = np.array(coord.data)
+                if not np.array_equal(current, expected):
+                    raise SpectroChemPyError(
+                        "NormalizeTransformer transform dataset is incompatible "
+                        "with fit(): non-normalized coordinates changed."
+                    )
 
     def _inverse_transform(self, dataset):
         if self._sample_local_:

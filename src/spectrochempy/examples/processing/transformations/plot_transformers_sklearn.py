@@ -13,7 +13,8 @@ SpectroChemPy preprocessing operations can be used as transformer objects
 with an explicit ``fit()`` / ``transform()`` lifecycle.  Feature-wise
 scalers learn statistics from a training set and reuse them on new data.
 Sample-local operations such as SNV and spectral normalization compute
-each observation's statistics during ``transform()``.
+each observation's statistics during ``transform()`` and do not support a
+safe inverse without result-attached per-observation state.
 
 The transformers also expose ``get_params()`` / ``set_params()`` so they
 work with ``sklearn.base.clone()`` when scikit-learn is installed.

@@ -230,7 +230,9 @@ _ = nd.plot(title="MSC corrected")
 # Sample-local operations such as `SNVTransformer` and
 # `NormalizeTransformer(dim="x")` still compute each observation's statistics
 # during `transform()`, because those statistics belong to the spectrum being
-# transformed rather than to the training set.
+# transformed rather than to the training set.  Their inverse transform is not
+# supported unless a future API carries the required per-observation state on
+# the transformed result.
 #
 # All nine operations have a matching transformer (e.g.
 # `CenterTransformer`, `NormalizeTransformer`, `MSCTransformer`, …).
