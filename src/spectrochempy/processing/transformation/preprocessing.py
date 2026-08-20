@@ -235,6 +235,8 @@ def msc(dataset, reference=None, dim="y", inplace=False):
 
     where :math:`a_i` and :math:`b_i` are the intercept and slope of
     the least-squares fit of observation :math:`i` to the reference.
+    The same reference can be reused through `MSCTransformer` only for
+    datasets with compatible spectral geometry.
 
     Parameters
     ----------

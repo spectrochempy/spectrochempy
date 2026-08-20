@@ -34,6 +34,12 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
+- Fix ``MSCTransformer`` train/test reuse so ``transform(test)`` recomputes
+  the MSC intercept and slope for each transformed spectrum instead of relying
+  on coefficients learned from the training set.  The learned reference is now
+  reused only with compatible spectral geometry, including feature count,
+  spectral dimension name, coordinate order and coordinate units when present.
+
 - Fix sample-local preprocessing transformers so ``SNVTransformer`` and
   ``NormalizeTransformer(dim="x")`` compute per-spectrum statistics on the
   dataset being transformed instead of reusing training spectra positionally.
@@ -97,6 +103,10 @@ Dependency Updates
 Breaking Changes
 ~~~~~~~~~~~~~~~~
 .. Add here new breaking changes (do not delete this comment)
+- ``MSCTransformer.inverse_transform()`` now raises an explicit error.  The
+  previous behavior could appear to restore the result of ``fit_transform()``
+  on the same dataset, but it reused training coefficients positionally and
+  was unsafe for datasets transformed later.
 
 
 .. section
