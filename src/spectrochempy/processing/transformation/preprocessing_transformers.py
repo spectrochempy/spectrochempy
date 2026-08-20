@@ -490,6 +490,7 @@ class NormalizeTransformer(BasePreprocessor):
         self._sample_local_ = self._dim_name == "x"
         self._fit_axis_ = axis
         self._fit_shape_ = data.shape
+        self._fit_dims_ = tuple(str(dim_name) for dim_name in dataset.dims)
         self._fit_compatible_coords_ = self._compatible_coords(dataset, axis)
 
         if self.method not in ("max", "sum", "vector", "minmax"):
@@ -545,7 +546,7 @@ class NormalizeTransformer(BasePreprocessor):
             dmin = params.get("dmin_")
             drange = params.get("range_")
         else:
-            self._check_transform_compatibility(dataset, axis)
+            self._check_dataset_compatibility(dataset, axis, "transform")
             norm = getattr(self, "norm_", None)
             dmin = getattr(self, "dmin_", None)
             drange = getattr(self, "range_", None)
@@ -572,11 +573,24 @@ class NormalizeTransformer(BasePreprocessor):
                 coords[str(dim_name)] = np.array(coord.data, copy=True)
         return coords
 
-    def _check_transform_compatibility(self, dataset, axis):
+    def _check_dataset_compatibility(self, dataset, axis, action):
         data_shape = dataset.masked_data.shape
+        dims = tuple(str(dim_name) for dim_name in dataset.dims)
+        if dims != self._fit_dims_:
+            raise SpectroChemPyError(
+                f"NormalizeTransformer {action} dataset is incompatible with "
+                "fit(): dimension order changed."
+            )
+
+        if axis != self._fit_axis_:
+            raise SpectroChemPyError(
+                f"NormalizeTransformer {action} dataset is incompatible with "
+                "fit(): normalization axis changed."
+            )
+
         if len(data_shape) != len(self._fit_shape_):
             raise SpectroChemPyError(
-                "NormalizeTransformer transform dataset is incompatible with "
+                f"NormalizeTransformer {action} dataset is incompatible with "
                 "fit(): number of dimensions changed."
             )
 
@@ -586,7 +600,7 @@ class NormalizeTransformer(BasePreprocessor):
             fit_size = self._fit_shape_[current_axis]
             if current_size != fit_size:
                 raise SpectroChemPyError(
-                    "NormalizeTransformer transform dataset is incompatible "
+                    f"NormalizeTransformer {action} dataset is incompatible "
                     "with fit(): non-normalized dimensions changed."
                 )
 
@@ -597,7 +611,7 @@ class NormalizeTransformer(BasePreprocessor):
                 current = np.array(coord.data)
                 if not np.array_equal(current, expected):
                     raise SpectroChemPyError(
-                        "NormalizeTransformer transform dataset is incompatible "
+                        f"NormalizeTransformer {action} dataset is incompatible "
                         "with fit(): non-normalized coordinates changed."
                     )
 
@@ -611,6 +625,14 @@ class NormalizeTransformer(BasePreprocessor):
 
         new = dataset.copy()
         data = dataset.masked_data
+        axis, dim_name = dataset.get_axis(self.dim)
+        if str(dim_name) != self._dim_name:
+            raise SpectroChemPyError(
+                "NormalizeTransformer inverse_transform dimension is "
+                "incompatible with fit(). Refit the transformer after changing "
+                "dimensions."
+            )
+        self._check_dataset_compatibility(dataset, axis, "inverse_transform")
 
         if self.method in ("max", "sum", "vector"):
             self._set_data(new, data * self.norm_)

@@ -786,6 +786,45 @@ class TestNormalizeTransformer:
         with pytest.raises(SpectroChemPyError, match="coordinates changed"):
             scaler.transform(test)
 
+    def test_feature_wise_transform_rejects_square_transposed_dataset(self):
+        coord = Coord(np.array([1.0, 2.0, 3.0]), title="shared")
+        train = NDDataset(
+            np.array(
+                [
+                    [1.0, 2.0, 5.0],
+                    [3.0, 7.0, 11.0],
+                    [13.0, 17.0, 19.0],
+                ]
+            ),
+            coordset=[coord, coord],
+        )
+        scaler = NormalizeTransformer(method="max", dim="y").fit(train)
+        with pytest.raises(SpectroChemPyError, match="dimension order changed"):
+            scaler.transform(train.T)
+
+    def test_feature_wise_inverse_rejects_square_transposed_dataset(self):
+        coord = Coord(np.array([1.0, 2.0, 3.0]), title="shared")
+        train = NDDataset(
+            np.array(
+                [
+                    [1.0, 2.0, 5.0],
+                    [3.0, 7.0, 11.0],
+                    [13.0, 17.0, 19.0],
+                ]
+            ),
+            coordset=[coord, coord],
+        )
+        scaler = NormalizeTransformer(method="max", dim="y").fit(train)
+        scaled = scaler.transform(train)
+        with pytest.raises(SpectroChemPyError, match="dimension order changed"):
+            scaler.inverse_transform(scaled.T)
+
+    def test_feature_wise_transform_rejects_3d_permuted_non_normalized_axes(self):
+        train = NDDataset(np.arange(27.0).reshape(3, 3, 3) + 1.0)
+        scaler = NormalizeTransformer(method="max", dim="y").fit(train)
+        with pytest.raises(SpectroChemPyError, match="dimension order changed"):
+            scaler.transform(train.transpose(2, 1, 0))
+
     def test_feature_wise_inverse_transform_restores_data(self, simple_2d):
         for method in ("max", "sum", "vector", "minmax"):
             scaler = NormalizeTransformer(method=method, dim="y")
