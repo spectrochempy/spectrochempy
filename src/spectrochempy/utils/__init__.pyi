@@ -27,6 +27,7 @@ __all__ = [
     "objects",
     "optional",
     "packages",
+    "persistence",
     "print",
     "show_versions",
     "system",
@@ -58,6 +59,7 @@ from . import numutils
 from . import objects
 from . import optional
 from . import packages
+from . import persistence
 from . import print
 from . import show_versions
 from . import system

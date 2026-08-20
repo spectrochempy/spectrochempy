@@ -82,6 +82,7 @@ _LAZY_IMPORTS = {
     "long_description": "spectrochempy.application.info",
     "preferences": "spectrochempy.application.preferences",
     "load": "spectrochempy.core.dataset.arraymixins.ndio",
+    "migrate_legacy_file": "spectrochempy.utils.persistence",
     "abs": "spectrochempy.core.dataset.arraymixins.ndmath",
     "absolute": "spectrochempy.core.dataset.arraymixins.ndmath",
     "all": "spectrochempy.core.dataset.arraymixins.ndmath",
