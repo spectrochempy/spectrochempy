@@ -68,7 +68,7 @@ baseline = scp.polynomial(
 )
 peak_1 = scp.gaussian(x, ampl=0.95, pos=3624.0, width=42.39, normalized=False)
 peak_2 = scp.gaussian(x, ampl=0.32, pos=3542.0, width=51.81, normalized=False)
-noise = scp.normal(loc=0.0, scale=0.007, size=x.size)
+noise = scp.normal(loc=0.0, scale=0.007, size=x.size, seed=42)
 
 nd_oh = baseline + peak_1 + peak_2 + noise
 nd_oh.title = "Synthetic OH region"
