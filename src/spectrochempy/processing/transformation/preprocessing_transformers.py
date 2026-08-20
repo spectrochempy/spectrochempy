@@ -380,12 +380,13 @@ class SNVTransformer(AutoscaleTransformer):
     r"""
     Standard Normal Variate (SNV) transformer.
 
-    Equivalent to :class:`AutoscaleTransformer` with ``dim='x'``.
     Each observation (spectrum) is mean-centered and scaled to unit
-    variance individually.
+    variance individually.  ``fit()`` validates the preprocessing axis,
+    while ``transform()`` computes the per-spectrum statistics on the
+    dataset being transformed.
 
-    This is a thin wrapper that hard-codes ``dim='x'`` and provides a
-    more descriptive name for the common NIR preprocessing step.
+    This transformer hard-codes ``dim='x'`` and provides a descriptive
+    name for the common NIR preprocessing step.
 
     Examples
     --------
@@ -403,23 +404,37 @@ class SNVTransformer(AutoscaleTransformer):
     def __init__(self):
         super().__init__(dim="x")
 
+    def _fit(self, dataset):
+        _, self._dim_name = dataset.get_axis(self.dim)
+
     def _transform(self, dataset):
-        new = super()._transform(dataset)
+        new = dataset.copy()
+        axis, _ = dataset.get_axis(self.dim)
+        data = dataset.masked_data
+        mean = np.ma.mean(data, axis=axis, keepdims=True)
+        std = np.ma.std(data, axis=axis, keepdims=True)
+        std_safe = np.where(std == 0, 1, std)
+        self._set_data(new, (data - mean) / std_safe)
         new.history = "SNVTransformer applied"
         return new
 
     def _inverse_transform(self, dataset):
-        new = super()._inverse_transform(dataset)
-        new.history = "SNVTransformer inverse applied"
-        return new
+        raise SpectroChemPyError(
+            "SNVTransformer inverse_transform is not supported because SNV "
+            "computes sample-local statistics during transform()."
+        )
 
 
 class NormalizeTransformer(BasePreprocessor):
     r"""
     Normalization transformer.
 
-    Learns the normalization factor along a dimension during ``fit()``
-    and applies it during ``transform()``.
+    Learns the normalization factor along a reusable feature dimension
+    during ``fit()`` and applies it during ``transform()``.  For the
+    standard spectral case ``dim='x'`` on 2-D datasets, normalization is
+    sample-local: ``fit()`` validates the mode and ``transform()`` computes
+    each observation's normalization factor on the dataset being
+    transformed.
 
     Parameters
     ----------
@@ -464,39 +479,62 @@ class NormalizeTransformer(BasePreprocessor):
     def _fit(self, dataset):
         axis, self._dim_name = dataset.get_axis(self.dim)
         data = dataset.masked_data
+        self._sample_local_ = data.ndim == 2 and axis == 1
 
-        if self.method == "max":
-            self.norm_ = np.ma.max(np.ma.abs(data), axis=axis, keepdims=True)
-            self.norm_ = np.where(self.norm_ == 0, 1, self.norm_)
-
-        elif self.method == "sum":
-            self.norm_ = np.ma.sum(np.ma.abs(data), axis=axis, keepdims=True)
-            self.norm_ = np.where(self.norm_ == 0, 1, self.norm_)
-
-        elif self.method == "vector":
-            self.norm_ = np.sqrt(np.ma.sum(data**2, axis=axis, keepdims=True))
-            self.norm_ = np.where(self.norm_ == 0, 1, self.norm_)
-
-        elif self.method == "minmax":
-            self.dmin_ = np.ma.min(data, axis=axis, keepdims=True)
-            self.dmax_ = np.ma.max(data, axis=axis, keepdims=True)
-            self.range_ = self.dmax_ - self.dmin_
-            self.range_ = np.where(self.range_ == 0, 1, self.range_)
-
-        else:
+        if self.method not in ("max", "sum", "vector", "minmax"):
             raise SpectroChemPyError(
                 f"Unknown normalization method '{self.method}'. "
                 f"Choose from 'max', 'sum', 'vector', 'minmax'."
             )
 
+        if self._sample_local_:
+            return
+
+        params = self._normalization_parameters(data, axis)
+        for name, value in params.items():
+            setattr(self, name, value)
+
+    def _normalization_parameters(self, data, axis):
+        if self.method == "max":
+            norm = np.ma.max(np.ma.abs(data), axis=axis, keepdims=True)
+            return {"norm_": np.where(norm == 0, 1, norm)}
+
+        if self.method == "sum":
+            norm = np.ma.sum(np.ma.abs(data), axis=axis, keepdims=True)
+            return {"norm_": np.where(norm == 0, 1, norm)}
+
+        if self.method == "vector":
+            norm = np.sqrt(np.ma.sum(data**2, axis=axis, keepdims=True))
+            return {"norm_": np.where(norm == 0, 1, norm)}
+
+        dmin = np.ma.min(data, axis=axis, keepdims=True)
+        dmax = np.ma.max(data, axis=axis, keepdims=True)
+        drange = dmax - dmin
+        return {
+            "dmin_": dmin,
+            "dmax_": dmax,
+            "range_": np.where(drange == 0, 1, drange),
+        }
+
     def _transform(self, dataset):
         new = dataset.copy()
         data = dataset.masked_data
+        axis, _ = dataset.get_axis(self.dim)
+
+        if self._sample_local_:
+            params = self._normalization_parameters(data, axis)
+            norm = params.get("norm_")
+            dmin = params.get("dmin_")
+            drange = params.get("range_")
+        else:
+            norm = getattr(self, "norm_", None)
+            dmin = getattr(self, "dmin_", None)
+            drange = getattr(self, "range_", None)
 
         if self.method in ("max", "sum", "vector"):
-            self._set_data(new, data / self.norm_)
+            self._set_data(new, data / norm)
         elif self.method == "minmax":
-            self._set_data(new, (data - self.dmin_) / self.range_)
+            self._set_data(new, (data - dmin) / drange)
 
         new.history = (
             f"NormalizeTransformer ({self.method}) applied on dimension "
@@ -505,6 +543,13 @@ class NormalizeTransformer(BasePreprocessor):
         return new
 
     def _inverse_transform(self, dataset):
+        if self._sample_local_:
+            raise SpectroChemPyError(
+                "NormalizeTransformer inverse_transform is not supported for "
+                "sample-local normalization because normalization factors are "
+                "computed during transform()."
+            )
+
         new = dataset.copy()
         data = dataset.masked_data
 

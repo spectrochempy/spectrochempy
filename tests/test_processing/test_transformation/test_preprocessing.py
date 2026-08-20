@@ -505,12 +505,11 @@ class TestSNVTransformer:
         with pytest.raises(SpectroChemPyError, match="not fitted yet"):
             scaler.transform(simple_2d)
 
-    def test_inverse_transform_restores_data(self, simple_2d):
+    def test_inverse_transform_raises(self, simple_2d):
         scaler = SNVTransformer()
         scaled = scaler.fit_transform(simple_2d)
-        restored = scaler.inverse_transform(scaled)
-        assert np.allclose(restored.data, simple_2d.data)
-        assert "SNVTransformer inverse applied" in restored.history[-1]
+        with pytest.raises(SpectroChemPyError, match="not supported"):
+            scaler.inverse_transform(scaled)
 
     def test_dim_is_x(self, simple_2d):
         scaler = SNVTransformer()
@@ -523,12 +522,27 @@ class TestSNVTransformer:
         scaler = SNVTransformer()
         scaler.fit(train)
         test_snv = scaler.transform(test)
-        # Stats computed per spectrum (dim=x)
-        train_mean = np.mean(train.data, axis=1, keepdims=True)
-        train_std = np.std(train.data, axis=1, keepdims=True)
-        train_std_safe = np.where(train_std == 0, 1, train_std)
-        expected = (test.data - train_mean) / train_std_safe
-        assert np.allclose(test_snv.data, expected)
+        expected = snv(test)
+        assert np.allclose(test_snv.data, expected.data)
+
+    def test_transform_handles_different_number_of_observations(self, simple_2d):
+        train = simple_2d[:1]
+        test = simple_2d[1:]
+        scaler = SNVTransformer()
+        scaler.fit(train)
+        test_snv = scaler.transform(test)
+        expected = snv(test)
+        assert np.allclose(test_snv.data, expected.data)
+
+    def test_transform_is_observation_local_after_fit(self, simple_2d):
+        train = simple_2d[:3]
+        test = simple_2d[1:].copy()
+        test._data = test.data * np.array([[2.0], [3.0], [4.0]])
+        scaler = SNVTransformer()
+        scaler.fit(train)
+        test_snv = scaler.transform(test)
+        expected = snv(test)
+        assert np.allclose(test_snv.data, expected.data)
 
 
 class TestNormalizeTransformer:
@@ -561,8 +575,8 @@ class TestNormalizeTransformer:
         for method in ("max", "sum", "vector", "minmax"):
             scaler = NormalizeTransformer(method=method, dim="x")
             scaled = scaler.fit_transform(simple_2d)
-            restored = scaler.inverse_transform(scaled)
-            assert np.allclose(restored.data, simple_2d.data)
+            with pytest.raises(SpectroChemPyError, match="not supported"):
+                scaler.inverse_transform(scaled)
 
     def test_unknown_method(self, simple_2d):
         with pytest.raises(SpectroChemPyError, match="Unknown normalization method"):
@@ -574,7 +588,45 @@ class TestNormalizeTransformer:
         scaler = NormalizeTransformer(method="max", dim="x")
         scaler.fit(train)
         test_norm = scaler.transform(test)
-        train_norm = np.max(np.abs(train.data), axis=1, keepdims=True)
+        expected = normalize(test, method="max", dim="x")
+        assert np.allclose(test_norm.data, expected.data)
+
+    @pytest.mark.parametrize("method", ["max", "sum", "vector", "minmax"])
+    def test_sample_local_transform_handles_different_observations(
+        self, simple_2d, method
+    ):
+        train = simple_2d[:1]
+        test = simple_2d[1:]
+        scaler = NormalizeTransformer(method=method, dim="x")
+        scaler.fit(train)
+        test_norm = scaler.transform(test)
+        expected = normalize(test, method=method, dim="x")
+        assert np.allclose(test_norm.data, expected.data)
+
+    def test_sample_local_transform_is_observation_local_after_fit(self, simple_2d):
+        train = simple_2d[:3]
+        test = simple_2d[1:].copy()
+        test._data = test.data * np.array([[2.0], [3.0], [4.0]])
+        scaler = NormalizeTransformer(method="max", dim="x")
+        scaler.fit(train)
+        test_norm = scaler.transform(test)
+        expected = normalize(test, method="max", dim="x")
+        assert np.allclose(test_norm.data, expected.data)
+
+    def test_feature_wise_inverse_transform_restores_data(self, simple_2d):
+        for method in ("max", "sum", "vector", "minmax"):
+            scaler = NormalizeTransformer(method=method, dim="y")
+            scaled = scaler.fit_transform(simple_2d)
+            restored = scaler.inverse_transform(scaled)
+            assert np.allclose(restored.data, simple_2d.data)
+
+    def test_feature_wise_train_test_reuse(self, simple_2d):
+        train = simple_2d[:2]
+        test = simple_2d[2:]
+        scaler = NormalizeTransformer(method="max", dim="y")
+        scaler.fit(train)
+        test_norm = scaler.transform(test)
+        train_norm = np.max(np.abs(train.data), axis=0, keepdims=True)
         expected = test.data / train_norm
         assert np.allclose(test_norm.data, expected)
 
