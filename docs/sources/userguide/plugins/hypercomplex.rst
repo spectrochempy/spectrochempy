@@ -70,9 +70,8 @@ An ordinary complex dataset stores one complex number per point:
 .. code-block:: python
 
     import spectrochempy as scp
-    import numpy as np
 
-    c = scp.NDDataset(np.array([1+2j, 3+4j]))
+    c = scp.NDDataset([1+2j, 3+4j])
 
 A **hypercomplex** dataset stores *two* complex numbers per point,
 typically written as a quaternion:

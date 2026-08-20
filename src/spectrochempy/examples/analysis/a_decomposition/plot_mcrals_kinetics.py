@@ -19,8 +19,6 @@ For convenience, this dataset is also available in the SpectroChemPy test-data
 directory as ``matlabdata/METING9.MAT``.
 """
 
-import numpy as np
-
 import spectrochempy as scp
 
 # %%
@@ -69,7 +67,7 @@ _ = mcr_1.St.plot()
 # roughly estimated rate constants:
 reactions = ("A -> B", "B -> C")
 species_concentrations = {"A": 5.0, "B": 0.0, "C": 0.0}
-k0 = np.array((0.5, 0.05))
+k0 = [0.5, 0.05]
 kin = scp.ActionMassKinetics(reactions, species_concentrations, k0)
 
 # %%

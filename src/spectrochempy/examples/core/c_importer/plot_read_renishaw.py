@@ -42,10 +42,7 @@ _ = dataset.plot(method="image", diverging_margin=0.1)
 # %%
 # Filter blank spectra
 # --------------------
-import numpy as np
-
-keep_rows = np.where(dataset.data.mean(axis=1) > 0)[0]
-dataset = dataset[keep_rows]
+dataset = dataset[dataset.data.mean(axis=1) > 0]
 _ = dataset.plot_image()
 
 # %%

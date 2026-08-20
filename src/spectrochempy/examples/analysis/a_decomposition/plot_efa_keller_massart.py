@@ -15,8 +15,6 @@ In this example, we perform the Evolving Factor Analysis of a TEST dataset
 """
 
 # %%
-import numpy as np
-
 import spectrochempy as scp
 
 # sphinx_gallery_thumbnail_number = 5
@@ -30,7 +28,7 @@ import spectrochempy as scp
 t = scp.Coord.arange(15, units="minutes", title="time")  # time coordinates
 c = scp.Coord(range(2), title="components")  # component coordinates
 
-dsc = scp.zeros((2, 15), dtype=np.float64, coords=[c, t])
+dsc = scp.zeros((2, 15), coords=[c, t])
 dsc[0, 3:8] = [1, 3, 6, 3, 1]  # compound 1
 dsc[1, 5:11] = [1, 3, 5, 3, 1, 0.5]  # compound 2
 
@@ -40,7 +38,7 @@ _ = dsc.plot(title="concentration")
 # 2) absorption spectra
 # ~~~~~~~~~~~~~~~~~~~~~~
 
-spec = np.array([[2.0, 3.0, 4.0, 2.0], [3.0, 4.0, 2.0, 1.0]])
+spec = [[2.0, 3.0, 4.0, 2.0], [3.0, 4.0, 2.0, 1.0]]
 w = scp.Coord.arange(1, 5, 1, units="nm", title="wavelength")
 
 dss = scp.NDDataset(data=spec, coords=[c, w])
@@ -51,7 +49,7 @@ _ = dss.plot(title="spectra")
 # ~~~~~~~~~~~~~~~~~~~~~~~~
 
 dataset = scp.dot(dsc.T, dss)
-dataset += scp.normal(scale=0.1, size=dataset.shape)
+dataset += scp.normal(scale=0.1, size=dataset.shape, seed=42)
 dataset.title = "intensity"
 
 _ = dataset.plot(title="calculated dataset")
