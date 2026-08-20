@@ -34,8 +34,6 @@
 #
 
 # %%
-import numpy as np
-
 import spectrochempy as scp
 from spectrochempy import ur
 
@@ -49,7 +47,8 @@ from spectrochempy import ur
 
 # %%
 def func(t, v, var):
-    d = v * t + (np.random.rand(len(t)) - 0.5) * var
+    noise = scp.random(size=len(t), seed=42)
+    d = v * t + (noise.data - 0.5) * var
     d[0].data = 0.0
     return d
 
@@ -129,7 +128,8 @@ _ = dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="be
 
 # %%
 def func(t, a, var):
-    d = a * (t / 3.0) ** 2 + (np.random.rand(len(t)) - 0.8) * var
+    noise = scp.random(size=len(t), seed=43)
+    d = a * (t / 3.0) ** 2 + (noise.data - 0.8) * var
     for i in range(t.size):
         if d[i].magnitude < 0:
             d[i] = 0.0 * d.units
