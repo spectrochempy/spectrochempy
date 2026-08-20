@@ -9,11 +9,12 @@
 Preprocessing transformers and scikit-learn compatibility
 =========================================================
 
-SpectroChemPy preprocessing operations can be used as **stateful
-transformers** that learn statistics from a training set and reuse them
-on new data.  This is essential for machine-learning workflows where
-train and test sets must be processed with the *same* scaling
-parameters.
+SpectroChemPy preprocessing operations can be used as transformer objects
+with an explicit ``fit()`` / ``transform()`` lifecycle.  Feature-wise
+scalers learn statistics from a training set and reuse them on new data.
+Sample-local operations such as SNV and spectral normalization compute
+each observation's statistics during ``transform()`` and do not support a
+safe inverse without result-attached per-observation state.
 
 The transformers also expose ``get_params()`` / ``set_params()`` so they
 work with ``sklearn.base.clone()`` when scikit-learn is installed.
@@ -63,7 +64,7 @@ print("Std shape:  ", scaler.std_.shape)
 # %%
 # Parameter inspection with ``get_params`` / ``set_params``
 # ---------------------------------------------------------
-# All transformers follow scikit-learn conventions.
+# Transformers follow scikit-learn parameter conventions.
 
 print("Original params:", scaler.get_params())
 

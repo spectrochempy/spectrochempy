@@ -34,6 +34,15 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
+- Fix sample-local preprocessing transformers so ``SNVTransformer`` and
+  ``NormalizeTransformer(dim="x")`` compute per-spectrum statistics on the
+  dataset being transformed instead of reusing training spectra positionally.
+  Their ``inverse_transform()`` now raises an explicit error for these
+  sample-local modes because the required per-observation factors are not
+  learned reusable state. This is an intentional behavior break from the
+  previous unsafe inverse, which could only work by reusing training or
+  last-transform state positionally.
+
 - Fix ``dim`` keyword argument in Savitzky-Golay, smoothing and Whittaker
   filters (`#1091 <https://github.com/spectrochempy/spectrochempy/issues/1091>`_).
   ``savgol()``, ``smooth()``, ``whittaker()`` and

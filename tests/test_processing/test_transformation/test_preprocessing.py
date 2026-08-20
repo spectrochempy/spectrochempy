@@ -54,6 +54,28 @@ def simple_2d():
     return NDDataset(data, coordset=[y, x])
 
 
+def _normalize_oracle(data, method, axis):
+    if method == "max":
+        norm = np.max(np.abs(data), axis=axis, keepdims=True)
+        return data / np.where(norm == 0, 1, norm)
+    if method == "sum":
+        norm = np.sum(np.abs(data), axis=axis, keepdims=True)
+        return data / np.where(norm == 0, 1, norm)
+    if method == "vector":
+        norm = np.sqrt(np.sum(data**2, axis=axis, keepdims=True))
+        return data / np.where(norm == 0, 1, norm)
+
+    dmin = np.min(data, axis=axis, keepdims=True)
+    drange = np.max(data, axis=axis, keepdims=True) - dmin
+    return (data - dmin) / np.where(drange == 0, 1, drange)
+
+
+def _snv_oracle(data, axis):
+    mean = np.mean(data, axis=axis, keepdims=True)
+    std = np.std(data, axis=axis, keepdims=True)
+    return (data - mean) / np.where(std == 0, 1, std)
+
+
 # ---------------------------------------------------------------------------
 # normalize
 # ---------------------------------------------------------------------------
@@ -505,12 +527,11 @@ class TestSNVTransformer:
         with pytest.raises(SpectroChemPyError, match="not fitted yet"):
             scaler.transform(simple_2d)
 
-    def test_inverse_transform_restores_data(self, simple_2d):
+    def test_inverse_transform_raises(self, simple_2d):
         scaler = SNVTransformer()
         scaled = scaler.fit_transform(simple_2d)
-        restored = scaler.inverse_transform(scaled)
-        assert np.allclose(restored.data, simple_2d.data)
-        assert "SNVTransformer inverse applied" in restored.history[-1]
+        with pytest.raises(SpectroChemPyError, match="not supported"):
+            scaler.inverse_transform(scaled)
 
     def test_dim_is_x(self, simple_2d):
         scaler = SNVTransformer()
@@ -523,12 +544,93 @@ class TestSNVTransformer:
         scaler = SNVTransformer()
         scaler.fit(train)
         test_snv = scaler.transform(test)
-        # Stats computed per spectrum (dim=x)
-        train_mean = np.mean(train.data, axis=1, keepdims=True)
-        train_std = np.std(train.data, axis=1, keepdims=True)
-        train_std_safe = np.where(train_std == 0, 1, train_std)
-        expected = (test.data - train_mean) / train_std_safe
+        expected = snv(test)
+        assert np.allclose(test_snv.data, expected.data)
+
+    def test_transform_handles_different_number_of_observations(self, simple_2d):
+        train = simple_2d[:1]
+        test = simple_2d[1:]
+        scaler = SNVTransformer()
+        scaler.fit(train)
+        test_snv = scaler.transform(test)
+        expected = snv(test)
+        assert np.allclose(test_snv.data, expected.data)
+
+    def test_transform_is_observation_local_after_fit(self, simple_2d):
+        train = simple_2d[:3]
+        test = simple_2d[1:].copy()
+        test._data = test.data * np.array([[2.0], [3.0], [4.0]])
+        scaler = SNVTransformer()
+        scaler.fit(train)
+        test_snv = scaler.transform(test)
+        expected = _snv_oracle(test.data, axis=1)
         assert np.allclose(test_snv.data, expected)
+
+    def test_transform_is_observation_permutation_local(self, simple_2d):
+        train = simple_2d[:2]
+        test = NDDataset(
+            np.array(
+                [
+                    [2.0, 5.0, 9.0, 3.0, 8.0, 13.0],
+                    [7.0, 1.0, 4.0, 6.0, 11.0, 10.0],
+                    [3.0, 12.0, 2.0, 14.0, 5.0, 9.0],
+                ]
+            ),
+            coordset=[Coord([20.0, 10.0, 30.0], title="time"), simple_2d.coord("x")],
+        )
+        scaler = SNVTransformer().fit(train)
+        test_snv = scaler.transform(test)
+        expected = _snv_oracle(test.data, axis=1)
+        assert np.allclose(test_snv.data, expected)
+        assert np.array_equal(test_snv.coord("y").data, test.coord("y").data)
+
+    def test_transform_1d_is_sample_local(self):
+        train = NDDataset(np.array([1.0, 2.0, 4.0]))
+        test = NDDataset(np.array([2.0, 5.0, 10.0, 20.0]))
+        scaler = SNVTransformer().fit(train)
+        test_snv = scaler.transform(test)
+        expected = _snv_oracle(test.data, axis=0)
+        assert np.allclose(test_snv.data, expected)
+
+    def test_transform_3d_x_is_sample_local(self):
+        train = NDDataset(np.arange(12.0).reshape(1, 3, 4))
+        test = NDDataset(np.arange(24.0).reshape(2, 3, 4) + 1.0)
+        scaler = SNVTransformer().fit(train)
+        test_snv = scaler.transform(test)
+        expected = _snv_oracle(test.data, axis=2)
+        assert np.allclose(test_snv.data, expected)
+
+    def test_transposed_x_dimension_is_sample_local(self, simple_2d):
+        train = simple_2d.T[:, :2]
+        test = simple_2d.T[:, 2:]
+        scaler = SNVTransformer().fit(train)
+        test_snv = scaler.transform(test)
+        expected = _snv_oracle(test.data, axis=0)
+        assert np.allclose(test_snv.data, expected)
+
+    def test_transform_preserves_metadata_and_inputs(self, simple_2d):
+        train = simple_2d[:2].copy()
+        test = simple_2d[2:].copy()
+        test._mask = np.zeros_like(test.data, dtype=bool)
+        test._mask[0, 2] = True
+        test.units = "absorbance"
+        test.title = "test spectra"
+        test.meta.foo = "bar"
+        train_data = train.data.copy()
+        test_data = test.data.copy()
+        test_mask = test.mask.copy()
+
+        scaler = SNVTransformer().fit(train)
+        test_snv = scaler.transform(test)
+
+        assert np.array_equal(train.data, train_data)
+        assert np.array_equal(test.data, test_data)
+        assert np.array_equal(test.mask, test_mask)
+        assert np.array_equal(test_snv.mask, test_mask)
+        assert test_snv.units == test.units
+        assert test_snv.title == test.title
+        assert test_snv.meta.foo == "bar"
+        assert test_snv.coordset == test.coordset
 
 
 class TestNormalizeTransformer:
@@ -561,8 +663,8 @@ class TestNormalizeTransformer:
         for method in ("max", "sum", "vector", "minmax"):
             scaler = NormalizeTransformer(method=method, dim="x")
             scaled = scaler.fit_transform(simple_2d)
-            restored = scaler.inverse_transform(scaled)
-            assert np.allclose(restored.data, simple_2d.data)
+            with pytest.raises(SpectroChemPyError, match="not supported"):
+                scaler.inverse_transform(scaled)
 
     def test_unknown_method(self, simple_2d):
         with pytest.raises(SpectroChemPyError, match="Unknown normalization method"):
@@ -574,7 +676,169 @@ class TestNormalizeTransformer:
         scaler = NormalizeTransformer(method="max", dim="x")
         scaler.fit(train)
         test_norm = scaler.transform(test)
+        expected = normalize(test, method="max", dim="x")
+        assert np.allclose(test_norm.data, expected.data)
+
+    @pytest.mark.parametrize("method", ["max", "sum", "vector", "minmax"])
+    def test_sample_local_transform_handles_different_observations(
+        self, simple_2d, method
+    ):
+        train = simple_2d[:1]
+        test = simple_2d[1:]
+        scaler = NormalizeTransformer(method=method, dim="x")
+        scaler.fit(train)
+        test_norm = scaler.transform(test)
+        expected = normalize(test, method=method, dim="x")
+        assert np.allclose(test_norm.data, expected.data)
+
+    def test_sample_local_transform_is_observation_local_after_fit(self, simple_2d):
+        train = simple_2d[:3]
+        test = simple_2d[1:].copy()
+        test._data = test.data * np.array([[2.0], [3.0], [4.0]])
+        scaler = NormalizeTransformer(method="max", dim="x")
+        scaler.fit(train)
+        test_norm = scaler.transform(test)
+        expected = _normalize_oracle(test.data, method="max", axis=1)
+        assert np.allclose(test_norm.data, expected)
+
+    def test_sample_local_transform_is_observation_permutation_local(self, simple_2d):
+        train = simple_2d[:2]
+        test = NDDataset(
+            np.array(
+                [
+                    [2.0, 5.0, 9.0, 3.0, 8.0, 13.0],
+                    [7.0, 1.0, 4.0, 6.0, 11.0, 10.0],
+                    [3.0, 12.0, 2.0, 14.0, 5.0, 9.0],
+                ]
+            ),
+            coordset=[Coord([20.0, 10.0, 30.0], title="time"), simple_2d.coord("x")],
+        )
+        scaler = NormalizeTransformer(method="max", dim="x").fit(train)
+        test_norm = scaler.transform(test)
+        expected = _normalize_oracle(test.data, method="max", axis=1)
+        assert np.allclose(test_norm.data, expected)
+        assert np.array_equal(test_norm.coord("y").data, test.coord("y").data)
+
+    @pytest.mark.parametrize("method", ["max", "sum", "vector", "minmax"])
+    def test_sample_local_transform_1d_uses_test_spectrum(self, method):
+        train = NDDataset(np.array([1.0, 2.0, 4.0]))
+        test = NDDataset(np.array([2.0, 5.0, 10.0, 20.0]))
+        scaler = NormalizeTransformer(method=method, dim="x").fit(train)
+        test_norm = scaler.transform(test)
+        expected = _normalize_oracle(test.data, method=method, axis=0)
+        assert np.allclose(test_norm.data, expected)
+
+    @pytest.mark.parametrize("method", ["max", "sum", "vector", "minmax"])
+    def test_sample_local_transform_3d_x_uses_test_spectra(self, method):
+        train = NDDataset(np.arange(12.0).reshape(1, 3, 4))
+        test = NDDataset(np.arange(24.0).reshape(2, 3, 4) + 1.0)
+        scaler = NormalizeTransformer(method=method, dim="x").fit(train)
+        test_norm = scaler.transform(test)
+        expected = _normalize_oracle(test.data, method=method, axis=2)
+        assert np.allclose(test_norm.data, expected)
+
+    def test_transposed_x_dimension_is_sample_local(self, simple_2d):
+        train = simple_2d.T[:, :2]
+        test = simple_2d.T[:, 2:]
+        scaler = NormalizeTransformer(method="max", dim="x").fit(train)
+        test_norm = scaler.transform(test)
+        expected = _normalize_oracle(test.data, method="max", axis=0)
+        assert np.allclose(test_norm.data, expected)
+
+    def test_transposed_y_dimension_remains_feature_wise(self, simple_2d):
+        train = simple_2d.T[:, :2]
+        test = simple_2d.T[:, 2:]
+        scaler = NormalizeTransformer(method="max", dim="y").fit(train)
+        test_norm = scaler.transform(test)
         train_norm = np.max(np.abs(train.data), axis=1, keepdims=True)
+        expected = test.data / np.where(train_norm == 0, 1, train_norm)
+        assert np.allclose(test_norm.data, expected)
+
+    def test_sample_local_transform_preserves_metadata_and_inputs(self, simple_2d):
+        train = simple_2d[:2].copy()
+        test = simple_2d[2:].copy()
+        test._mask = np.zeros_like(test.data, dtype=bool)
+        test._mask[0, 2] = True
+        test.units = "absorbance"
+        test.title = "test spectra"
+        test.meta.foo = "bar"
+        train_data = train.data.copy()
+        test_data = test.data.copy()
+        test_mask = test.mask.copy()
+
+        scaler = NormalizeTransformer(method="max", dim="x").fit(train)
+        test_norm = scaler.transform(test)
+
+        assert np.array_equal(train.data, train_data)
+        assert np.array_equal(test.data, test_data)
+        assert np.array_equal(test.mask, test_mask)
+        assert np.array_equal(test_norm.mask, test_mask)
+        assert test_norm.units == test.units
+        assert test_norm.title == test.title
+        assert test_norm.meta.foo == "bar"
+        assert test_norm.coordset == test.coordset
+
+    def test_feature_wise_transform_rejects_reordered_coordinates(self, simple_2d):
+        train = simple_2d[:2]
+        test = simple_2d[2:].copy()
+        test.set_coordset(y=test.coord("y"), x=Coord(test.coord("x").data[::-1]))
+        scaler = NormalizeTransformer(method="max", dim="y").fit(train)
+        with pytest.raises(SpectroChemPyError, match="coordinates changed"):
+            scaler.transform(test)
+
+    def test_feature_wise_transform_rejects_square_transposed_dataset(self):
+        coord = Coord(np.array([1.0, 2.0, 3.0]), title="shared")
+        train = NDDataset(
+            np.array(
+                [
+                    [1.0, 2.0, 5.0],
+                    [3.0, 7.0, 11.0],
+                    [13.0, 17.0, 19.0],
+                ]
+            ),
+            coordset=[coord, coord],
+        )
+        scaler = NormalizeTransformer(method="max", dim="y").fit(train)
+        with pytest.raises(SpectroChemPyError, match="dimension order changed"):
+            scaler.transform(train.T)
+
+    def test_feature_wise_inverse_rejects_square_transposed_dataset(self):
+        coord = Coord(np.array([1.0, 2.0, 3.0]), title="shared")
+        train = NDDataset(
+            np.array(
+                [
+                    [1.0, 2.0, 5.0],
+                    [3.0, 7.0, 11.0],
+                    [13.0, 17.0, 19.0],
+                ]
+            ),
+            coordset=[coord, coord],
+        )
+        scaler = NormalizeTransformer(method="max", dim="y").fit(train)
+        scaled = scaler.transform(train)
+        with pytest.raises(SpectroChemPyError, match="dimension order changed"):
+            scaler.inverse_transform(scaled.T)
+
+    def test_feature_wise_transform_rejects_3d_permuted_non_normalized_axes(self):
+        train = NDDataset(np.arange(27.0).reshape(3, 3, 3) + 1.0)
+        scaler = NormalizeTransformer(method="max", dim="y").fit(train)
+        with pytest.raises(SpectroChemPyError, match="dimension order changed"):
+            scaler.transform(train.transpose(2, 1, 0))
+
+    def test_feature_wise_inverse_transform_restores_data(self, simple_2d):
+        for method in ("max", "sum", "vector", "minmax"):
+            scaler = NormalizeTransformer(method=method, dim="y")
+            scaled = scaler.fit_transform(simple_2d)
+            restored = scaler.inverse_transform(scaled)
+            assert np.allclose(restored.data, simple_2d.data)
+
+    def test_feature_wise_train_test_reuse(self, simple_2d):
+        train = simple_2d[:2]
+        test = simple_2d[2:]
+        scaler = NormalizeTransformer(method="max", dim="y")
+        scaler.fit(train)
+        test_norm = scaler.transform(test)
+        train_norm = np.max(np.abs(train.data), axis=0, keepdims=True)
         expected = test.data / train_norm
         assert np.allclose(test_norm.data, expected)
 
