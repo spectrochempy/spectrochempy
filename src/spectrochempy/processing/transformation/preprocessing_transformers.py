@@ -823,9 +823,21 @@ class MSCTransformer(BasePreprocessor):
                 "MSC requires at least two valid spectral points per spectrum."
             )
 
-        sum_ref = np.ma.sum(r, axis=spectral_axis, keepdims=True)
-        sum_ref2 = np.ma.sum(r**2, axis=spectral_axis, keepdims=True)
-        den = n * sum_ref2 - sum_ref**2
+        ref_range = np.ma.max(r, axis=spectral_axis, keepdims=True) - np.ma.min(
+            r, axis=spectral_axis, keepdims=True
+        )
+        ref_range_data = np.ma.asarray(ref_range).filled(np.nan)
+        if np.any((ref_range_data == 0.0) | ~np.isfinite(ref_range_data)):
+            raise SpectroChemPyError(
+                "MSC denominator is zero; reference spectrum is constant over "
+                "the valid points."
+            )
+
+        mean_ref = np.ma.mean(r, axis=spectral_axis, keepdims=True)
+        mean_x = np.ma.mean(x, axis=spectral_axis, keepdims=True)
+        r_centered = r - mean_ref
+        x_centered = x - mean_x
+        den = np.ma.sum(r_centered**2, axis=spectral_axis, keepdims=True)
 
         den_data = np.ma.asarray(den).filled(np.nan)
         if np.any((den_data == 0.0) | ~np.isfinite(den_data)):
@@ -834,17 +846,24 @@ class MSCTransformer(BasePreprocessor):
                 "the valid points."
             )
 
-        sum_x = np.ma.sum(x, axis=spectral_axis, keepdims=True)
-        sum_xref = np.ma.sum(x * r, axis=spectral_axis, keepdims=True)
+        covariance = np.ma.sum(
+            x_centered * r_centered, axis=spectral_axis, keepdims=True
+        )
+        covariance_data = np.ma.asarray(covariance).filled(np.nan)
+        if np.any(~np.isfinite(covariance_data)):
+            raise SpectroChemPyError(
+                "MSC covariance is not finite; the spectrum cannot be corrected "
+                "against the reference."
+            )
 
-        b = (n * sum_xref - sum_ref * sum_x) / den
+        b = covariance / den
         b_data = np.ma.asarray(b).filled(np.nan)
         if np.any((b_data == 0.0) | ~np.isfinite(b_data)):
             raise SpectroChemPyError(
                 "MSC slope is zero; the spectrum cannot be corrected against "
                 "the reference."
             )
-        a = (sum_x - b * sum_ref) / n
+        a = mean_x - b * mean_ref
         return a, b
 
     def _transform(self, dataset):

@@ -107,14 +107,14 @@ def _msc_coefficients_oracle(data, ref, spectral_axis):
     x = np.ma.array(np.ma.getdata(data), mask=mask)
     r = np.ma.array(ref_data, mask=mask)
 
-    n = np.ma.count(x, axis=spectral_axis, keepdims=True)
-    sum_ref = np.ma.sum(r, axis=spectral_axis, keepdims=True)
-    sum_ref2 = np.ma.sum(r**2, axis=spectral_axis, keepdims=True)
-    den = n * sum_ref2 - sum_ref**2
-    sum_x = np.ma.sum(x, axis=spectral_axis, keepdims=True)
-    sum_xref = np.ma.sum(x * r, axis=spectral_axis, keepdims=True)
-    b = (n * sum_xref - sum_ref * sum_x) / den
-    a = (sum_x - b * sum_ref) / n
+    mean_ref = np.ma.mean(r, axis=spectral_axis, keepdims=True)
+    mean_x = np.ma.mean(x, axis=spectral_axis, keepdims=True)
+    r_centered = r - mean_ref
+    x_centered = x - mean_x
+    den = np.ma.sum(r_centered**2, axis=spectral_axis, keepdims=True)
+    covariance = np.ma.sum(x_centered * r_centered, axis=spectral_axis, keepdims=True)
+    b = covariance / den
+    a = mean_x - b * mean_ref
     return a, b
 
 
@@ -290,6 +290,12 @@ class TestMSC:
         const_ref = np.ones(simple_2d.shape[1])
         with pytest.raises(SpectroChemPyError, match="denominator is zero"):
             msc(simple_2d, reference=const_ref)
+
+    @pytest.mark.parametrize("value", [0.1, 1.0e-6, 1.0e9])
+    def test_constant_reference_error_is_scale_invariant(self, msc_2d, value):
+        const_ref = np.full(msc_2d.shape[1], value)
+        with pytest.raises(SpectroChemPyError, match="denominator is zero"):
+            msc(msc_2d, reference=const_ref)
 
     def test_wrong_reference_size(self, simple_2d):
         with pytest.raises(SpectroChemPyError, match="reference size"):
@@ -998,6 +1004,19 @@ class TestMSCTransformer:
             [
                 [2.0e-6, 4.0e-6, 8.0e-6],
                 [5.0e-6, 1.0e-6, 7.0e-6],
+            ]
+        )
+        ds = NDDataset(data)
+        transformed = MSCTransformer(reference=ref, dim="y").fit_transform(ds)
+        expected = _msc_oracle(data, ref)
+        assert np.allclose(transformed.data, expected)
+
+    def test_nearly_constant_small_scale_reference_is_valid(self):
+        ref = np.array([1.0e-9, 1.0e-9, 1.0000001e-9, 1.0e-9, 1.0e-9, 1.0e-9])
+        data = np.array(
+            [
+                [2.0e-9, 2.0e-9, 2.0000002e-9, 2.0e-9, 2.0e-9, 2.0e-9],
+                [1.0e-9, 1.1e-9, 1.0000004e-9, 0.9e-9, 1.2e-9, 0.8e-9],
             ]
         )
         ds = NDDataset(data)
