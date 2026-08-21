@@ -181,6 +181,7 @@ _ = ndp[-1].plot(clear=False, color="green", ls="--")
 _ = corrected.plot()
 
 # %%
+
 # Uncomment the following line to display all figures when running the script
 # directly with Python.
 #

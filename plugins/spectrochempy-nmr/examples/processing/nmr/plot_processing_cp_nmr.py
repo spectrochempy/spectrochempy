@@ -264,6 +264,7 @@ ax.set_xlim(0, 16000)
 # Deconvolution of these two peaks is therefore probably necessary for a better analysis.
 
 # %%
+
 # Uncomment the following line to display all figures when running the script
 # directly with Python.
 #

@@ -83,6 +83,7 @@ else:
     _ = dataset_list[-4].plot()
 
 # %%
+
 # Uncomment the following line to display all figures when running the script
 # directly with Python.
 #

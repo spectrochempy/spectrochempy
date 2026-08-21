@@ -31,6 +31,7 @@ dataset.y.title = "acquisition time"
 _ = dataset.plot_stack()
 
 # %%
+
 # Uncomment the following line to display all figures when running the script
 # directly with Python.
 #

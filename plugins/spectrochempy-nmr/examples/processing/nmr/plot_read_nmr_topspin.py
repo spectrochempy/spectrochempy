@@ -102,6 +102,7 @@ ax = topspin.imag.plot(color="black")
 _ = spectrum.imag.plot(ax=ax, clear=False, color="red")
 
 # %%
+
 # Uncomment the following line to display all figures when running the script
 # directly with Python.
 #
