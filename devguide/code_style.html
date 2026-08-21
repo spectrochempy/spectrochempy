@@ -1,0 +1,1068 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpectroChemPy code style guide &mdash; SpectroChemPy v0.6.11.dev82 0.6.11.dev82 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/spectrochempy.css?v=08b5a373" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/spectrochempy.css?v=08b5a373" />
+
+  
+    <link rel="shortcut icon" href="../_static/scpy.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5253294d"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+ 
+<html data-versions="0.6.10">
+<script src="../_static/js/versions.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/scpy.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+<div class="version-selector">
+    <span class="fa fa-book"> SpectroChemPy version:</span>
+    <select id="versions-dropdown">
+    </select>
+</div>
+
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../whatsnew/latest.html">What’s new in revision 0.6.11.dev</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../whatsnew/latest.html#new-features">New features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../whatsnew/latest.html#bug-fixes">Bug fixes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../whatsnew/latest.html#dependency-updates">Dependency updates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../whatsnew/latest.html#breaking-changes">Breaking changes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../whatsnew/latest.html#deprecations">Deprecations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../whatsnew/index.html">Release notes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../whatsnew/index.html#version-0-6">Version 0.6</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/latest.html">What’s new in revision 0.6.11.dev</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/latest.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/latest.html#bug-fixes">Bug fixes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/latest.html#dependency-updates">Dependency updates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/latest.html#breaking-changes">Breaking changes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/latest.html#deprecations">Deprecations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.6.10.html">What’s new in revision 0.6.10</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.6.10.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.6.10.html#bug-fixes">Bug fixes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.6.10.html#breaking-changes">Breaking changes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.6.10.html#deprecations">Deprecations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.6.9.html">What’s new in revision 0.6.9</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.6.9.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.6.8.html">What’s new in revision 0.6.8</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.6.8.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.6.8.html#bug-fixes">Bug fixes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.6.8.html#breaking-changes">Breaking changes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.6.7.html">What’s new in revision 0.6.7</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.6.7.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.6.7.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.6.6.html">What’s new in revision 0.6.6</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.6.6.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.6.6.html#bug-fixes">Bug fixes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.6.6.html#deprecations">Deprecations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.6.5.html">What’s new in revision 0.6.5</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.6.5.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.6.4.html">What’s new in revision 0.6.4</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.6.4.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.6.4.html#bug-fixes">Bug fixes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.6.4.html#breaking-changes">Breaking changes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.6.4.html#deprecations">Deprecations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.6.3.html">What’s new in revision 0.6.3</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.6.3.html#new-features">New features</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.6.2.html">What’s new in revision 0.6.2</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.6.2.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.6.2.html#bug-fixes">Bug fixes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.6.2.html#breaking-changes">Breaking changes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.6.2.html#deprecations">Deprecations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.6.1.html">What’s new in revision 0.6.1</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.6.1.html#breaking-changes">Breaking changes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.6.1.html#deprecations">Deprecations</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../whatsnew/index.html#version-0-5">Version 0.5</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.5.5.html">What’s new in revision 0.5.5</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.5.5.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.5.5.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.5.4.html">What’s new in revision 0.5.4</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.5.4.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.5.3.html">What’s new in revision 0.5.3</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.5.3.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.5.3.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.5.2.html">What’s new in revision 0.5.2</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.5.2.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.5.2.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.5.1.html">What’s new in revision 0.5.1</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.5.1.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.5.1.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.5.0.html">What’s new in revision 0.5.0 [2023-01-11]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.5.0.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.5.0.html#breaking-changes">Breaking changes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../whatsnew/index.html#version-0-4">Version 0.4</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.4.10.html">What’s new in revision 0.4.10 [2023-01-07]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.4.10.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.4.10.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.4.9.html">What’s new in revision 0.4.9 [2023-01-05]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.4.9.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.4.9.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.4.7.html">What’s new in revision 0.4.7 [2022-05-16]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.4.7.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.4.6.html">What’s new in revision 0.4.6 [2022-05-16]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.4.6.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.4.6.html#bug-fixes">Bug fixes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.4.6.html#deprecations">Deprecations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.4.5.html">What’s new in revision 0.4.5 [2022-04-09]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.4.5.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.4.5.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.4.4.html">What’s new in revision 0.4.4 [2022-03-22]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.4.4.html#new-features">New features</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.4.3.html">What’s new in revision 0.4.3 [2022-03-20]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.4.3.html#new-features">New features</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.4.2.html">What’s new in revision 0.4.2 [2022-03-16]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.4.2.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.4.2.html#deprecations">Deprecations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.4.2.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.4.1.html">What’s new in revision 0.4.1 [2022-03-14]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.4.1.html#breaking-changes">Breaking changes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.4.1.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.4.1.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../whatsnew/index.html#version-0-3">Version 0.3</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.3.3.html">What’s new in revision 0.3.3 [2022-03-9]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.3.3.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.3.3.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.3.2.html">What’s new in revision 0.3.2 [2022-01-31]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.3.2.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.3.2.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.3.1.html">What’s new in revision 0.3.1 [2022-01-21]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.3.1.html#new-features">New features</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.3.0.html">What’s new in revision 0.3.0 [2022-01-20]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.3.0.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.3.0.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../whatsnew/index.html#version-0-2">Version 0.2</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.2.23.html">What’s new in revision 0.2.23 [2022-01-16]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.2.23.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.2.22.html">What’s new in revision 0.2.22 [2022-01-10]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.2.22.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.2.21.html">What’s new in revision 0.2.21 [2022-01-09]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.2.21.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.2.21.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.2.18.html">What’s new in revision 0.2.18 [2022-01-05]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.2.18.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.2.18.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.2.17.html">What’s new in revision 0.2.17 [2021-11-29]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.2.17.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.2.17.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.2.16.html">What’s new in revision 0.2.16 [2021-11-11]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.2.16.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.2.16.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.2.15.html">What’s new in revision 0.2.15 [2021-03-29]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.2.15.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.2.15.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.2.14.html">What’s new in revision 0.2.14 [2021-02-25]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.2.14.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.2.14.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.2.13.html">What’s new in revision 0.2.13 [2021-02-23]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.2.13.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.2.12.html">What’s new in revision 0.2.12 [2021-02-23]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.2.12.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.2.11.html">What’s new in revision 0.2.11 [2021-02-17]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.2.11.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.2.10.html">What’s new in revision 0.2.10 [2021-02-14]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.2.10.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.2.10.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.2.9.html">What’s new in revision 0.2.9 [2021-11-29]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.2.9.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.2.8.html">What’s new in revision 0.2.8</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.2.8.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.2.8.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.2.7.html">What’s new in revision 0.2.7</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.2.7.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.2.7.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.2.6.html">What’s new in revision 0.2.6</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.2.6.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.2.6.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.2.5.html">What’s new in revision 0.2.5</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.2.5.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.2.5.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.2.4.html">What’s new in revision 0.2.4</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.2.4.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.2.4.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.2.0.html">What’s new in revision 0.2.0</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.2.0.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../whatsnew/v0.2.0.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../whatsnew/index.html#version-0-1">Version 0.1</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../whatsnew/v0.1.0.html">Revisions 0.1.0 to 0.1.19</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/whyscpy.html">Why <code class="xref py py-obj docutils literal notranslate"><span class="pre">SpectroChemPy</span></code>  ?</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../gettingstarted/whyscpy.html#designed-for-open-science">Designed for Open Science</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gettingstarted/whyscpy.html#open-source-software-on-an-open-source-platform">Open Source Software on an Open-Source Platform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gettingstarted/whyscpy.html#powered-by-python">Powered by Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gettingstarted/whyscpy.html#why-not-spectrochempy">Why NOT <code class="xref py py-obj docutils literal notranslate"><span class="pre">SpectroChemPy</span></code> ?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/overview.html">Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../gettingstarted/overview.html#NDDataset,-the-main-object">NDDataset, the main object</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/overview.html#Display-dataset-information">Display dataset information</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/overview.html#Plotting-a-dataset">Plotting a dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/overview.html#Slicing-a-dataset">Slicing a dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/overview.html#Maths-on-datasets">Maths on datasets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/overview.html#Processing-a-dataset">Processing a dataset</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/overview.html#Smoothing">Smoothing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/overview.html#Baseline-correction">Baseline correction</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/overview.html#Analysis">Analysis</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/overview.html#IRIS-processing">IRIS processing</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/examples/index.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/index.html">Core functionalities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/index.html#how-to-use-nddataset">How to use NDDataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/index.html#import-export">Import / Export</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/index.html#plotting-datasets">Plotting datasets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/index.html#project-management">Project Management</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/index.html">How to use NDDataset</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_a_create_dataset.html">NDDataset creation and plotting example</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_b_coordinates.html">NDDataset coordinates example</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_c_units.html">Units manipulation examples</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/c_importer/index.html">Import / Export</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_generic_read.html">Reading datasets</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_IR_from_omnic.html">Loading an IR (omnic SPG) experimental file</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_IR_from_opus.html">Loading Bruker OPUS files</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_nmr_from_bruker.html">Loading of experimental 1D NMR data</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_raman_from_labspec.html">Loading RAMAN experimental file</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_renishaw.html">Reading Renishaw WiRE files</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/d_plotting/index.html">Plotting datasets</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/d_plotting/plot_plot_multiple.html">Using <code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_multiple</span></code> to plot several datasets on the same figure</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/d_plotting/plot_plotting.html">Introduction to the plotting librairie</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/e_project/index.html">Project Management</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_core/e_project/plot_project.html">Project creation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/index.html">Analysis NDDataset</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/index.html#decomposition">Decomposition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/index.html#cross-decomposition">Cross-decomposition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/index.html#curvefitting">Curvefitting</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/index.html">Decomposition</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_efa.html">EFA example</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_efa_keller_massart.html">EFA (Keller and Massart original example)</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_fast_ica.html">FastICA example</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_iris.html">2D-IRIS analysis example</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_mcrals_chrom1.html">MCR-ALS example (adapted from Jaumot et al. 2005)</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_mcrals_kinetics.html">MCR-ALS with kinetic constraints</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_nmf.html">NMF analysis example</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_pca_iris.html">PCA example (iris dataset)</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_pca_spec.html">PCA analysis example</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_simplisma.html">SIMPLISMA example</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/b_crossdecomposition/index.html">Cross-decomposition</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/b_crossdecomposition/plot_pls.html">PLS regression example</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/c_curvefitting/index.html">Curvefitting</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/c_curvefitting/plot_fit.html">Fitting 1D dataset</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_analysis/c_curvefitting/plot_lstsq_single_equation.html">Solve a linear equation using LSTSQ</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/index.html">Processing NDDataset</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/index.html#apodization">Apodization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/index.html#baseline">Baseline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/index.html#denoising">Denoising</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/index.html#filtering">filtering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/index.html#processing-nmr-datasets">Processing NMR datasets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/index.html#processing-raman-datasets">Processing Raman datasets</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/apodization/index.html">Apodization</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/apodization/plot_proc_em.html">Exponential window multiplication</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/apodization/plot_proc_sp.html">Sine bell and squared Sine bell window multiplication</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/d_baseline/index.html">Baseline</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/d_baseline/plot_baseline_correction.html">NDDataset baseline correction</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/denoising/index.html">Denoising</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/denoising/plot_denoising.html">Denoising a 2D Raman spectrum</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/denoising/plot_despike.html">Removing cosmic ray spikes from a Raman spectrum</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/filtering/index.html">filtering</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/filtering/plot_filter.html">Savitky-Golay and Whittaker-Eilers smoothing of a Raman spectrum</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/nmr/index.html">Processing NMR datasets</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/nmr/plot_processing_cp_nmr.html">Analysis CP NMR spectra</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/nmr/plot_processing_nmr.html">Processing NMR spectra (slicing, baseline correction, peak picking, peak fitting)</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/nmr/plot_processing_nmr_relax.html">Processing Relaxation measurement</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/raman/index.html">Processing Raman datasets</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../gettingstarted/examples/gallery/auto_examples_processing/raman/plot_processing_raman.html">Processing RAMAN spectra</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/install/index.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../gettingstarted/install/index.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../gettingstarted/install/index.html#installation-of-spectrochempy">Installation of <code class="xref py py-obj docutils literal notranslate"><span class="pre">SpectroChemPy</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/install/install_mac.html">Installation Guide for Mac OSX</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/install/install_mac.html#installation-using-conda">Installation using Conda</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/install/install_mac.html#installation-using-pip">Installation using pip</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/install/install_mac.html#check-the-installation">Check the Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/install/install_win.html">Installation Guide for Windows</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/install/install_win.html#installation-using-conda">Installation using Conda</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/install/install_win.html#installation-using-pip">Installation using pip</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/install/install_win.html#check-the-installation">Check the Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/install/install_sources.html">Installation from sources (master or develop versions)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/install/install_sources.html#installing-git">Installing git</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/install/install_sources.html#cloning-the-repository-locally">Cloning the repository locally</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/install/install_sources.html#create-a-conda-environment">Create a conda environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/install/install_sources.html#install-spectrochempy-in-this-environment">Install <code class="xref py py-obj docutils literal notranslate"><span class="pre">SpectroChemPy</span></code> in this environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/install/install_sources.html#updating-spectrochempy">Updating <code class="xref py py-obj docutils literal notranslate"><span class="pre">SpectroChemPy</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/install/install_colab.html">Install in Google Colaboratory (Colab)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/install/install_colab.html#load-and-install-spectrochempy-with-pip">Load and install SpectroChemPy with pip</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/install/install_colab.html#load-data-files">Load data files</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../gettingstarted/install/install_adds.html">Install optional dependencies</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/install/install_adds.html#examples-and-test-data">Examples and test data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/install/install_adds.html#cantera">Cantera</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gettingstarted/install/install_adds.html#qt">QT</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User's Guide &amp; Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/introduction/introduction.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/introduction/introduction.html#About-this-user's-guide">About this user’s guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/introduction/introduction.html#How-to-get-started">How to get started</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/introduction/introduction.html#Writing-and-executing-SpectroChemPy-scripts">Writing and executing SpectroChemPy scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/introduction/introduction.html#Loading-the-API">Loading the API</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/introduction/introduction.html#Where-to-go-next?">Where to go next?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/api/api.html">API Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/api/api.html#General-information">General information</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/api/api.html#Loglevel">Loglevel</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/api/api.html#Error-handling">Error handling</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/objects/index.html">Core objects</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/objects/index.html#nddataset">NDDataset</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/objects/dataset/dataset.html">The NDDataset object</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/objects/dataset/dataset.html#1D-Dataset-(unidimensional-dataset)">1D-Dataset (unidimensional dataset)</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../userguide/objects/dataset/dataset.html#nD-Dataset-(multidimensional-dataset)">nD-Dataset (multidimensional dataset)</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/objects/dataset/dataset.html#About-the-dates-and-times">About the dates and times</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/objects/dataset/dataset.html#About-the-history-attribute">About the <code class="docutils literal notranslate"><span class="pre">history</span></code> attribute</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/objects/dataset/dataset.html#Units">Units</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/objects/dataset/dataset.html#Coordinates">Coordinates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/objects/dataset/dataset.html#Labels">Labels</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/objects/dataset/dataset.html#More-insight-on-coordinates">More insight on coordinates</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/objects/dataset/dataset.html#Sharing-coordinates-between-dimensions">Sharing coordinates between dimensions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/objects/dataset/dataset.html#Setting-coordinates-using-set_coordset">Setting coordinates using <code class="docutils literal notranslate"><span class="pre">set_coordset</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../userguide/objects/dataset/dataset.html#Syntax-1">Syntax 1</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../userguide/objects/dataset/dataset.html#Syntax-2">Syntax 2</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/objects/dataset/dataset.html#Adding-several-coordinates-to-a-single-dimension">Adding several coordinates to a single dimension</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/objects/dataset/dataset.html#Summary-of-the-coordinate-setting-syntax">Summary of the coordinate setting syntax</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/objects/dataset/dataset.html#Methods-to-create-NDDataset">Methods to create NDDataset</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/objects/dataset/dataset.html#Create-a-dataset-from-a-function">Create a dataset from a function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/objects/dataset/dataset.html#Using-numpy-like-constructors-of-NDDatasets">Using numpy-like constructors of NDDatasets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/objects/dataset/dataset.html#Copying-existing-NDDataset">Copying existing NDDataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/objects/dataset/dataset.html#Importing-from-external-dataset">Importing from external dataset</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/objects/index.html#project">Project</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/objects/project/project.html">Project management</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/objects/project/project.html#Project-creation">Project creation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/objects/project/project.html#Remove-an-element-from-a-project">Remove an element from a project</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/objects/project/project.html#Get-project's-elements">Get project’s elements</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/objects/project/project.html#Saving-and-loading-projects">Saving and loading projects</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../userguide/objects/project/project.html#Saving">Saving</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../userguide/objects/project/project.html#Loading">Loading</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/objects/index.html#script">Script</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/importexport/index.html">Import &amp; Export</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/importexport/import.html">Import Data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/importexport/import.html#Dialog-boxes">Dialog boxes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/importexport/import.html#Import-with-explicit-directory-or-file-pathnames">Import with explicit directory or file pathnames</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/importexport/import.html#A-good-practice:-use-relative-paths">A good practice: use relative paths</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/importexport/import.html#Good-practice:-use-os-or-pathlib-modules">Good practice: use <code class="docutils literal notranslate"><span class="pre">os</span></code> or <code class="docutils literal notranslate"><span class="pre">pathlib</span></code> modules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/importexport/import.html#Another-default-search-directory:-datadir">Another default search directory: <code class="docutils literal notranslate"><span class="pre">datadir</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/importexport/importIR.html">Import IR Data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/importexport/importIR.html#Supported-file-formats">Supported file formats</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/importexport/importIR.html#Import-of-OMNIC-files">Import of OMNIC files</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/importexport/importIR.html#a)-import-spg-file">a) import spg file</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../userguide/importexport/importIR.html#Acquisition-dates-and-y-axis">Acquisition dates and <code class="docutils literal notranslate"><span class="pre">y</span></code> axis</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../userguide/importexport/importIR.html#The-order-of-spectra">The order of spectra</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/importexport/importIR.html#b)-Import-of-.spa-files">b) Import of .spa files</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/importexport/importIR.html#Import-of-Bruker-OPUS-files">Import of Bruker OPUS files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/importexport/importIR.html#Import/Export-of-JCAMP-DX-files">Import/Export of JCAMP-DX files</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/processing/index.html">Processing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/processing/slicing.html">Slicing NDDatasets</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/processing/slicing.html#What-is-the-slicing-?">What is the slicing ?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/processing/slicing.html#Slicing-of-NDDatasets">Slicing of NDDatasets</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/slicing.html#Slicing-with-indexes">Slicing with indexes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/slicing.html#Slicing-with-coordinates">Slicing with coordinates</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/processing/transformations.html">Basic transformations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/processing/transformations.html#Masking-data">Masking data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/processing/transformations.html#Transposition">Transposition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/processing/transformations.html#Changing-units">Changing units</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/processing/math_operations.html">Mathematical operations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/processing/math_operations.html#Ufuncs-(Universal-Numpy's-functions)">Ufuncs (Universal Numpy’s functions)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/processing/math_operations.html#List-of-UFuncs-working-on-NDDataset:">List of UFuncs working on <code class="docutils literal notranslate"><span class="pre">NDDataset</span></code>:</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/math_operations.html#Functions-affecting-magnitudes-of-the-number-but-keeping-units">Functions affecting magnitudes of the number but keeping units</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/math_operations.html#Functions-affecting-magnitudes-of-the-number-but-also-units">Functions affecting magnitudes of the number but also units</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/math_operations.html#Functions-that-require-no-units-or-dimensionless-units-for-inputs.-Returns-dimensionless-objects.">Functions that require no units or dimensionless units for inputs. Returns dimensionless objects.</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/math_operations.html#Functions-that-return-numpy-arrays-(Work-only-for-NDDataset)">Functions that return numpy arrays (<em>Work only for NDDataset</em>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/math_operations.html#Trigonometric-functions.-Require-unitless-data-or-radian-units.">Trigonometric functions. Require unitless data or radian units.</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/math_operations.html#Hyperbolic-functions">Hyperbolic functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/math_operations.html#Unit-conversions">Unit conversions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/math_operations.html#Binary-Ufuncs">Binary Ufuncs</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/processing/math_operations.html#Usage">Usage</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/math_operations.html#Unary-functions">Unary functions</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../userguide/processing/math_operations.html#id1">Functions affecting magnitudes of the number but keeping units</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../userguide/processing/math_operations.html#id2">Functions affecting magnitudes of the number but also units</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../userguide/processing/math_operations.html#id3">Functions that require no units or dimensionless units for inputs. Returns dimensionless objects.</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../userguide/processing/math_operations.html#id4">Functions that return numpy arrays (<em>Work only for NDDataset</em>)</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../userguide/processing/math_operations.html#Trigonometric-functions.-Require-dimensionless/unitless-dataset-or-radians.">Trigonometric functions. Require dimensionless/unitless dataset or radians.</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../userguide/processing/math_operations.html#Angle-units-conversion">Angle units conversion</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../userguide/processing/math_operations.html#id5">Hyperbolic functions</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/math_operations.html#Binary-functions">Binary functions</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../userguide/processing/math_operations.html#Arithmetic">Arithmetic</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/processing/math_operations.html#Complex-or-hypercomplex-NDDatasets">Complex or hypercomplex NDDatasets</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/processing/smoothing.html">Filtering, Smoothing and Denoising</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/processing/smoothing.html#The-Filter-processor">The <code class="docutils literal notranslate"><span class="pre">Filter</span></code> processor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/smoothing.html#Moving-average">Moving average</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/smoothing.html#Convolution-with-window-filters">Convolution with window filters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/smoothing.html#Savitzky-Golay-filter">Savitzky-Golay filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/smoothing.html#Whittaker-Eilers-filter">Whittaker-Eilers filter</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/processing/smoothing.html#Filtering-using-API-or-NDDataset-methods.">Filtering using API or NDDataset methods.</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/smoothing.html#The-smooth-method">The <code class="docutils literal notranslate"><span class="pre">smooth</span></code> method</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../userguide/processing/smoothing.html#Window-size-influence">Window size influence</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/smoothing.html#Convolution-with-windows">Convolution with windows</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/smoothing.html#Savitzky-Golay-filter:savgol">Savitzky-Golay filter:<code class="docutils literal notranslate"><span class="pre">savgol</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/smoothing.html#Whittaker-eilers-filter-:-whittaker">Whittaker-eilers filter : <code class="docutils literal notranslate"><span class="pre">whittaker</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/processing/baseline.html">Baseline corrections</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/processing/baseline.html#The-Baseline-processor">The <code class="docutils literal notranslate"><span class="pre">Baseline</span></code> processor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/baseline.html#How-it-works?">How it works?</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/baseline.html#Example">Example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/baseline.html#Overview-of-the-other-model">Overview of the other model</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../userguide/processing/baseline.html#Polynomial">Polynomial</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/baseline.html#Multivariate-approach">Multivariate approach</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/processing/baseline.html#Baseline-correction-using-NDDataset-or-API-methods">Baseline correction using NDDataset or API methods</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/baseline.html#Detrending">Detrending</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../userguide/processing/baseline.html#Constant-trend">Constant trend</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../userguide/processing/baseline.html#Linear-trend">Linear trend</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../userguide/processing/baseline.html#Polynomial-trend">Polynomial trend</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../userguide/processing/baseline.html#Detrend-independently-on-several-data-segment">Detrend independently on several data segment</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/baseline.html#basc">basc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/baseline.html#Rubberband">Rubberband</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/baseline.html#Code-snippet-for-'advanced'-baseline-correction">Code snippet for ‘advanced’ baseline correction</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/processing/denoising.html">Denoising</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/processing/denoising.html#Denoising-2D-spectra">Denoising 2D spectra</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/processing/denoising.html#Removing-cosmic-rays-spike-from-Raman-spectra">Removing cosmic rays spike from Raman spectra</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/denoising.html#Median-filter">Median filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/denoising.html#despike-method"><code class="docutils literal notranslate"><span class="pre">despike</span></code> method</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/processing/apodization.html">Apodization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/processing/apodization.html#Introduction">Introduction</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/apodization.html#Plot-of-the-Real-and-Imaginary-original-data">Plot of the Real and Imaginary original data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/apodization.html#Exponential-multiplication">Exponential multiplication</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../userguide/processing/apodization.html#Shifted-apodization">Shifted apodization</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/apodization.html#Other-apodization-functions">Other apodization functions</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../userguide/processing/apodization.html#Gaussian-Lorentzian-apodization">Gaussian-Lorentzian apodization</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../userguide/processing/apodization.html#Shifted-Gaussian-Lorentzian-apodization">Shifted Gaussian-Lorentzian apodization</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../userguide/processing/apodization.html#Apodization-using-sine-window-multiplication">Apodization using sine window multiplication</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/processing/td_baseline.html">Time domain baseline correction (NMR)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/processing/fourier.html">One-dimensional (1D) Fourier transformation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/processing/fourier.html#FFT-of-1D-NMR-spectra">FFT of 1D NMR spectra</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/processing/fourier.html#Preprocessing">Preprocessing</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/fourier.html#Line-broadening">Line broadening</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/fourier.html#Zero-filling">Zero-filling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/fourier.html#Time-domain-baseline-correction">Time domain baseline correction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/fourier.html#Magnitude-calculation">Magnitude calculation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/fourier.html#Power-spectrum">Power spectrum</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/processing/fourier.html#Real-Fourier-transform">Real Fourier transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/processing/interferogram.html">FTIR interferogram processing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/processing/interferogram.html#Comparison-with-the-OMNIC-processing.">Comparison with the OMNIC processing.</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/processing/alignment.html">Alignment of datasets</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/processing/alignment.html#Example">Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/processing/alignment.html#Methods-for-alignments">Methods for alignments</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/alignment.html#inner-method"><code class="docutils literal notranslate"><span class="pre">inner</span></code> method</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/alignment.html#first-method"><code class="docutils literal notranslate"><span class="pre">first</span></code> method</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/processing/alignment.html#last-method"><code class="docutils literal notranslate"><span class="pre">last</span></code> method</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/processing/alignment.html#Alignment-along-several-dimensions">Alignment along several dimensions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/analysis/index.html">Analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/analysis/peak_finding.html">Peak Maxima Finding</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/analysis/peak_finding.html#Loading-an-experimental-dataset">Loading an experimental dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/analysis/peak_finding.html#Find-maxima-by-manual-inspection-of-the-plot">Find maxima by manual inspection of the plot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/analysis/peak_finding.html#Find-maxima-with-an-automated-method:-find_peaks()">Find maxima with an automated method: <code class="docutils literal notranslate"><span class="pre">find_peaks()</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/analysis/peak_finding.html#Default-behaviour">Default behaviour</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/analysis/peak_finding.html#Options-of-find_peaks()">Options of <code class="docutils literal notranslate"><span class="pre">find_peaks()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/analysis/peak_finding.html#More-on-peak-properties">More on peak properties</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../userguide/analysis/peak_finding.html#Prominence">Prominence</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../userguide/analysis/peak_finding.html#Width">Width</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/analysis/peak_finding.html#A-code-snippet-to-display-properties">A code snippet to display properties</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/analysis/peak_integration.html">Peak Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/analysis/fitting.html">Fitting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/analysis/fitting.html#Solving-a-linear-equation-using-the-least-square-method-(LSTSQ)">Solving a linear equation using the least square method (LSTSQ)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/analysis/fitting.html#Least-square-with-non-negativity-constraint-(NNLS)">Least square with non-negativity constraint (NNLS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/analysis/fitting.html#NDDataset-modelling-using-non-linear-optimisation-method">NDDataset modelling using non-linear optimisation method</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/analysis/fitting.html#Baseline-correction">Baseline correction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/analysis/fitting.html#Peak-finding">Peak finding</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/analysis/fitting.html#Fitting-script">Fitting script</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../userguide/analysis/fitting.html#Syntax-for-parameters-definition">Syntax for parameters definition</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/analysis/pca.html">Principal Component Analysis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/analysis/pca.html#Introduction">Introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/analysis/pca.html#Loading-of-the-dataset">Loading of the dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/analysis/pca.html#Running-a-PCA">Running a PCA</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/analysis/pls.html">Partial Least Squares Regression (PLSRegression)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/analysis/pls.html#Introduction">Introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/analysis/pls.html#Loading-of-the-dataset">Loading of the dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/analysis/pls.html#Running-PLSRegression">Running PLSRegression</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/analysis/mcr_als.html">MCR ALS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/analysis/mcr_als.html#Introduction">Introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/analysis/mcr_als.html#The-(minimal)-dataset">The (minimal) dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/analysis/mcr_als.html#Initial-guess-and-MCR-ALS-optimization">Initial guess and MCR ALS optimization</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/analysis/mcr_als.html#Case-of-initial-spectral-profiles">Case of initial spectral profiles</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../userguide/analysis/mcr_als.html#ALS-Optimization">ALS Optimization</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../userguide/analysis/mcr_als.html#More-information-about-the-MCRALS-estimator">More information about the MCRALS estimator</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../userguide/analysis/mcr_als.html#Solutions">Solutions</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../userguide/analysis/mcr_als.html#A-basic-illustration-of-the-rotational-ambiguity">A basic illustration of the rotational ambiguity</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../userguide/analysis/mcr_als.html#Guessing-the-concentration-profile-with-PCA-+-EFA">Guessing the concentration profile with PCA + EFA</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../userguide/analysis/mcr_als.html#Use-of-PCA-to-assess-the-number-of-pure-species">Use of PCA to assess the number of pure species</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../userguide/analysis/mcr_als.html#Determination-of-initial-concentrations-using-EFA">Determination of initial concentrations using EFA</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/analysis/mcr_als.html#Augmented-datasets">Augmented datasets</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../userguide/plotting/plotting.html">Plotting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/plotting/plotting.html#Load-the-API">Load the API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/plotting/plotting.html#Loading-the-data">Loading the data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/plotting/plotting.html#Preparing-the-data">Preparing the data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/plotting/plotting.html#Selecting-the-output-window">Selecting the output window</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/plotting/plotting.html#Default-plotting">Default plotting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/plotting/plotting.html#Changing-the-aspect-of-the-plot">Changing the aspect of the plot</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../userguide/plotting/plotting.html#Change-the-NDDataset.preferences">Change the <code class="docutils literal notranslate"><span class="pre">NDDataset.preferences</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/plotting/plotting.html#Adding-titles-and-annotations">Adding titles and annotations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/plotting/plotting.html#Changing-the-plot-style-using-matplotlib-style-sheets">Changing the plot style using matplotlib style sheets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/plotting/plotting.html#Create-your-own-style">Create your own style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/plotting/plotting.html#Changing-the-type-of-plot">Changing the type of plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/plotting/plotting.html#Plotting-1D-datasets">Plotting 1D datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/plotting/plotting.html#Plotting-several-dataset-on-the-same-figure">Plotting several dataset on the same figure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../userguide/plotting/plotting.html#Overview-of-the-main-configuration-parameters">Overview of the main configuration parameters</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contribute</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="issues.html">Bug reports &amp; feature request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Sharing examples &amp; tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Developer’s Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html">Contributing to SpectroChemPy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#general-principles">General Principles</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="issues.html">Reporting Issues</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#be-prepared-to-work-on-the-code">Be prepared to work on the code</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="contributing.html#version-control-git-and-github">Version control, Git, and GitHub</a></li>
+<li class="toctree-l4"><a class="reference internal" href="contributing.html#installing-git">Installing git</a></li>
+<li class="toctree-l4"><a class="reference internal" href="contributing.html#optional-installing-a-gui-git-client">Optional: installing a GUI git client</a></li>
+<li class="toctree-l4"><a class="reference internal" href="contributing.html#forking-the-spectrochempy-repository">Forking the spectrochempy repository</a></li>
+<li class="toctree-l4"><a class="reference internal" href="contributing.html#creating-a-python-development-environment">Creating a Python development environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="contributing.html#controlling-the-environments">Controlling the environments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="contributing.html#creating-a-branch">Creating a branch</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#contributing-your-changes-to-spectrochempy">Contributing your changes to SpectroChemPy</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="contributing.html#commit-your-code">Commit your code</a></li>
+<li class="toctree-l4"><a class="reference internal" href="contributing.html#push-your-changes">Push your changes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="contributing.html#review-your-code">Review Your Code</a></li>
+<li class="toctree-l4"><a class="reference internal" href="contributing.html#make-the-pull-request-pr">Make the pull request (PR)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="contributing.html#update-your-pull-request">Update your pull request</a></li>
+<li class="toctree-l4"><a class="reference internal" href="contributing.html#automatically-fix-formatting-errors">Automatically fix formatting errors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="contributing.html#delete-your-merged-branch-optional">Delete your merged branch (optional)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#tips-for-a-successful-pull-request">Tips for a successful pull request</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="contributing_codebase.html">Contributing to the code</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="contributing_codebase.html#code-standards">Code standards</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contributing_codebase.html#pre-commit">Pre-commit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contributing_codebase.html#optional-dependencies">Optional dependencies</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="contributing_codebase.html#python-pep8-black">Python (PEP8 / black)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="contributing_codebase.html#backwards-compatibility">Backwards compatibility</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="contributing_codebase.html#testing-with-continuous-integration">Testing with continuous integration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contributing_codebase.html#test-driven-development-code-writing">Test-driven development/code writing</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="contributing_codebase.html#writing-tests">Writing tests</a></li>
+<li class="toctree-l4"><a class="reference internal" href="contributing_codebase.html#using-pytest">Using <code class="docutils literal notranslate"><span class="pre">pytest</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="contributing_codebase.html#running-the-test-suite">Running the test suite</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contributing_codebase.html#documenting-change-log">Documenting change log</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="contributing_codespecifics.html">Contributing to specific parts of the code</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="codespec_adding_reader.html">Adding a Reader</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="codespec_adding_reader.html#add-a-test-and-sample-files">1. Add a test and sample files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="codespec_adding_reader.html#complete-filetypes-and-alias">2. Complete FILETYPES and ALIAS</a></li>
+<li class="toctree-l4"><a class="reference internal" href="codespec_adding_reader.html#create-the-reader-xxx-py-file">3. Create the reader_xxx.py file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="codespec_adding_reader.html#general-guidelines-for-data-and-metadata-format">3. General Guidelines for data and metadata format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="codespec_adding_reader.html#polish-your-code-and-make-the-pull-requests">4. Polish your code and make the Pull Requests</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="contributing_documentation.html">Contributing to the documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="contributing_documentation.html#about-the-spectrochempy-documentation">About the spectrochempy documentation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="contributing_docstring.html">SpectroChemPy Docstring Guide</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="contributing_docstring.html#about-docstrings-and-standards">About docstrings and standards</a></li>
+<li class="toctree-l5"><a class="reference internal" href="contributing_docstring.html#writing-a-docstring">Writing a docstring</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="contributing_documentation.html#updating-a-spectrochempy-docstring">Updating a spectrochempy docstring</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contributing_documentation.html#how-to-build-the-spectrochempy-documentation">How to build the spectrochempy documentation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="contributing_documentation.html#requirements">Requirements</a></li>
+<li class="toctree-l4"><a class="reference internal" href="contributing_documentation.html#building-the-documentation">Building the documentation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="contributing_documentation.html#building-master-branch-documentation">Building master branch documentation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Credits</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../credits/credits.html">Acknowledgments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../credits/credits.html#third-party-licenses">Third-party Licenses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../credits/citing.html">Citing SpectroChemPy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../credits/license.html">SpectroChempy License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../credits/license.html#other-licenses">Other Licenses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../credits/seealso.html">See also</a></li>
+</ul>
+
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SpectroChemPy v0.6.11.dev82</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">SpectroChemPy code style guide</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/devguide/code_style.rst" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+<div class="admonition warning">
+    <p class="first admonition-title">Warning</p>
+    <p class="last"> You are reading the documentation related to the development version.
+        <a href="/0.6.10/index.html">Go here</a> if you are looking for the documentation of the stable
+        release.
+    </p>
+</div>
+
+
+           <div itemprop="articleBody">
+             
+  <section id="spectrochempy-code-style-guide">
+<span id="code-style"></span><h1>SpectroChemPy code style guide<a class="headerlink" href="#spectrochempy-code-style-guide" title="Link to this heading"></a></h1>
+<nav class="contents local" id="table-of-contents">
+<p class="topic-title">Table of contents:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#testing" id="id1">Testing</a></p>
+<ul>
+<li><p><a class="reference internal" href="#failing-tests" id="id2">Failing tests</a></p></li>
+<li><p><a class="reference internal" href="#do-not-use-pytest-xfail" id="id3">Do not use <code class="docutils literal notranslate"><span class="pre">pytest.xfail</span></code></a></p></li>
+<li><p><a class="reference internal" href="#using-pytest-mark-xfail" id="id4">Using <code class="docutils literal notranslate"><span class="pre">pytest.mark.xfail</span></code></a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<p>SpectroChemPy follows the <a class="reference external" href="https://www.python.org/dev/peps/pep-0008/">PEP8</a>
+standard and uses <a class="reference external" href="https://black.readthedocs.io/en/stable/">Black</a>
+and <a class="reference external" href="https://flake8.pycqa.org/en/latest/">Flake8</a> to ensure a
+consistent code format throughout the project. We encourage you to use
+<a class="reference internal" href="contributing_codebase.html#contributing-pre-commit"><span class="std std-ref">pre-commit</span></a> to automatically run <code class="docutils literal notranslate"><span class="pre">black</span></code> ,
+<code class="docutils literal notranslate"><span class="pre">flake8</span></code> whenever you make a git commit.</p>
+<section id="testing">
+<h2><a class="toc-backref" href="#id1" role="doc-backlink">Testing</a><a class="headerlink" href="#testing" title="Link to this heading"></a></h2>
+<section id="failing-tests">
+<h3><a class="toc-backref" href="#id2" role="doc-backlink">Failing tests</a><a class="headerlink" href="#failing-tests" title="Link to this heading"></a></h3>
+<p>See <a class="reference external" href="https://docs.pytest.org/en/latest/skipping.html">https://docs.pytest.org/en/latest/skipping.html</a> for background.</p>
+</section>
+<section id="do-not-use-pytest-xfail">
+<h3><a class="toc-backref" href="#id3" role="doc-backlink">Do not use <code class="docutils literal notranslate"><span class="pre">pytest.xfail</span></code></a><a class="headerlink" href="#do-not-use-pytest-xfail" title="Link to this heading"></a></h3>
+<p>Do not use this method. It has the same behavior as <code class="docutils literal notranslate"><span class="pre">pytest.skip</span></code> , namely
+it immediately stops the test and does not check if the test will fail. If
+this is the behavior you desire, use <code class="docutils literal notranslate"><span class="pre">pytest.skip</span></code> instead.</p>
+</section>
+<section id="using-pytest-mark-xfail">
+<h3><a class="toc-backref" href="#id4" role="doc-backlink">Using <code class="docutils literal notranslate"><span class="pre">pytest.mark.xfail</span></code></a><a class="headerlink" href="#using-pytest-mark-xfail" title="Link to this heading"></a></h3>
+<p>Use this method if a test is known to fail but the manner in which it fails
+is not meant to be captured. It is common to use this method for a test that
+exhibits buggy behavior or a non-implemented feature. If
+the failing test has flaky behavior, use the argument <code class="docutils literal notranslate"><span class="pre">strict=False</span></code> . This
+will make it so pytest does not fail if the test happens to pass.</p>
+<p>Prefer the decorator <code class="docutils literal notranslate"><span class="pre">&#64;pytest.mark.xfail</span></code> and the argument <code class="docutils literal notranslate"><span class="pre">pytest.param</span></code>
+over usage within a test so that the test is appropriately marked during the
+collection phase of pytest. For xfailing a test that involves multiple
+parameters, a fixture, or a combination of these, it is only possible to
+xfail during the testing phase. To do so, use the <code class="docutils literal notranslate"><span class="pre">request</span></code> fixture:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_xfail</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">mark</span> <span class="o">=</span> <span class="n">pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">xfail</span><span class="p">(</span><span class="n">raises</span><span class="o">=</span><span class="ne">TypeError</span><span class="p">,</span> <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;Indicate why here&quot;</span><span class="p">)</span>
+    <span class="n">request</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">add_marker</span><span class="p">(</span><span class="n">mark</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>xfail is not to be used for tests involving failure due to invalid user arguments.
+For these tests, we need to verify the correct exception type and error message
+is being raised, using <code class="docutils literal notranslate"><span class="pre">pytest.raises</span></code> instead.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2014-2025 - A.Travert &amp; C.Fernandez @ LCS.
+      <span class="lastupdated">Last updated on Feb 16, 2025.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

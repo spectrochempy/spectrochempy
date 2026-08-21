@@ -1,0 +1,20 @@
+{
+    "versions": [
+        {
+            "name": "STABLE",
+            "url": "/0.6.10/index.html"
+        },
+        {
+            "name": "dirty",
+            "url": "/dirty/index.html"
+        },
+        {
+            "name": "0.6.10",
+            "url": "/0.6.10/index.html"
+        },
+        {
+            "name": "0.6.9",
+            "url": "/0.6.9/index.html"
+        }
+    ]
+}
