@@ -38,7 +38,7 @@ def _example_files() -> list[Path]:
     )
 
 
-def _module_docstring_end(lines: list[str], source: str) -> int | None:
+def _module_docstring_start(lines: list[str], source: str) -> int | None:
     module = ast.parse(source)
     if (
         module.body
@@ -46,20 +46,15 @@ def _module_docstring_end(lines: list[str], source: str) -> int | None:
         and isinstance(module.body[0].value, ast.Constant)
         and isinstance(module.body[0].value.value, str)
     ):
-        return module.body[0].end_lineno
+        return module.body[0].lineno
 
     for lineno, line in enumerate(lines, start=1):
         if line.strip().startswith('"""') or line.strip().startswith("'''"):
-            quote = line.strip()[:3]
-            if line.strip().count(quote) >= 2 and len(line.strip()) > 3:
-                return lineno
-            for end_lineno in range(lineno + 1, len(lines) + 1):
-                if quote in lines[end_lineno - 1]:
-                    return end_lineno
+            return lineno
     return None
 
 
-def test_thumbnail_directives_follow_module_docstring():
+def test_thumbnail_directives_precede_module_docstring():
     misplaced = []
     for path in _example_files():
         source = path.read_text(encoding="utf-8")
@@ -72,25 +67,22 @@ def test_thumbnail_directives_follow_module_docstring():
         if not directive_indexes:
             continue
 
-        docstring_end = _module_docstring_end(lines, source)
+        docstring_start = _module_docstring_start(lines, source)
         first_cell = next(
             (index for index, line in enumerate(lines) if line.startswith("# %%")),
             None,
         )
         first_directive = directive_indexes[0]
-        expected = docstring_end
-        while (
-            expected is not None
-            and expected < len(lines)
-            and not lines[expected].strip()
-        ):
-            expected += 1
-
+        ruff_index = next(
+            (index for index, line in enumerate(lines) if line.startswith("# ruff:")),
+            None,
+        )
         if (
             len(directive_indexes) != 1
-            or expected is None
-            or first_directive != expected
-            or (first_cell is not None and first_cell < first_directive)
+            or docstring_start is None
+            or first_directive >= docstring_start - 1
+            or (ruff_index is not None and first_directive != ruff_index + 1)
+            or (first_cell is not None and first_directive > first_cell)
         ):
             misplaced.append(path.relative_to(REPO_ROOT).as_posix())
 

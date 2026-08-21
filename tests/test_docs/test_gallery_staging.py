@@ -34,12 +34,12 @@ def _write_external_plugin_manifest(root: Path) -> Path:
     source.write_text(
         textwrap.dedent(
             '''
+            # sphinx_gallery_thumbnail_number = 1
+
             """
             External reader example
             =======================
             """
-
-            # sphinx_gallery_thumbnail_number = 1
 
             # %%
             import spectrochempy as scp
@@ -117,6 +117,20 @@ def test_plugin_index_references_canonical_gallery_page(monkeypatch, tmp_path):
     )
     assert "``spectrochempy-external``" in readme
     assert ":ref:`Import / Export <examples-importer-index>`" in readme
+
+
+def test_plugin_gallery_manifests_do_not_leave_top_level_plot_examples():
+    offenders = []
+    for manifest in sorted(
+        (REPO_ROOT / "plugins").glob("spectrochempy-*/examples/gallery.toml")
+    ):
+        examples_dir = manifest.parent
+        offenders.extend(
+            path.relative_to(REPO_ROOT).as_posix()
+            for path in sorted(examples_dir.glob("plot_*.py"))
+        )
+
+    assert offenders == []
 
 
 def test_generated_credits_file_keeps_final_newline(monkeypatch):

@@ -4,6 +4,8 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # ruff: noqa
+# sphinx_gallery_thumbnail_number = -1
+
 """
 Exponential window multiplication
 =================================
@@ -14,8 +16,6 @@ Requires the official ``spectrochempy-nmr`` plugin.
 Install with: ``pip install spectrochempy[nmr]``.
 
 """
-
-# sphinx_gallery_thumbnail_number = -1
 
 # %%
 import spectrochempy as scp

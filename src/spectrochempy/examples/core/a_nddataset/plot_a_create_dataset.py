@@ -4,14 +4,14 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # ruff: noqa
+# sphinx_gallery_thumbnail_number = 2
+
 """
 NDDataset creation and plotting example
 =======================================
 In this example, we create a 3D NDDataset from scratch,
 and then we plot one section (a 2D plane)
 """
-
-# sphinx_gallery_thumbnail_number = 2
 
 # %%
 # Creation

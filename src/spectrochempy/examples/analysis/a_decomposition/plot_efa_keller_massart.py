@@ -4,6 +4,8 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # ruff: noqa
+# sphinx_gallery_thumbnail_number = 5
+
 """
 EFA (Keller and Massart original example)
 =========================================
@@ -13,8 +15,6 @@ In this example, we perform the Evolving Factor Analysis of a TEST dataset
 12 (1992) 209-224 )
 
 """
-
-# sphinx_gallery_thumbnail_number = 5
 
 # %%
 import spectrochempy as scp
