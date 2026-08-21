@@ -91,6 +91,11 @@ def test_nmr_fft_1D(NMR_dataset_1D):
     assert new.shape == (2**15,)
     assert new.data.dtype == np.complex128
     assert np.any(new.data.imag != 0)  # result should be complex
+    assert str(new.x.units) == "ppm"
+    assert new.x.title == r"$\delta\ ^{1}H$"
+    assert np.all(np.diff(new.x.data) < 0)
+    assert_array_almost_equal(new.x.data[0], 253.092, decimal=3)
+    assert_array_almost_equal(new.x.data[-1], -246.838, decimal=3)
 
     # IFFT preserves energy (Parseval's theorem)
     energy_time = np.sum(np.abs(dataset1D.data) ** 2)

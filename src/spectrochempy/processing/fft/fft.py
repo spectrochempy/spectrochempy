@@ -323,14 +323,13 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
             dw = x.spacing
             if isinstance(dw, list):
                 pass  # print()
-            sw = 1 / 2 / dw
-            sf = -sw / 2
+            if is_ir:
+                kept_frequencies = np.fft.rfftfreq(size)[:coord_size][::-1]
+                newcoord = Coord(kept_frequencies / abs(dw))
+            else:
+                shifted_frequencies = np.fft.fftshift(np.fft.fftfreq(coord_size))
+                newcoord = Coord(shifted_frequencies / dw)
 
-            sizem = max(coord_size - 1, 1)
-            deltaf = -sw / sizem
-            first = sf - deltaf * sizem / 2.0
-
-            newcoord = Coord.arange(coord_size) * deltaf + first
             newcoord.show_datapoints = False
             newcoord.name = x.name
             new.title = "intensity"
