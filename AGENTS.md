@@ -440,48 +440,6 @@ gh pr edit <PR_NUMBER> --add-label no-changelog
 
 The label must be applied before the workflow runs, or CI will fail.
 
-## Safe-docs CI bypass
-
-For PRs that modify only non-executable maintainer or policy documentation,
-maintainers may apply the label ``safe-docs-no-ci`` to bypass the heavyweight
-test and docs workflows.
-
-This label is intentionally narrow.  It is valid only when the changed files
-are limited to safe documentation/policy paths such as:
-
-* `AGENTS.md`;
-* root-level `*.md`;
-* `maintainers/**/*.md`;
-* `CONTRIBUTING.md`;
-* `docs/sources/credits/citing.rst`;
-* `docs/sources/credits/license.rst`;
-* `docs/sources/credits/seealso.rst`;
-* `docs/sources/gettingstarted/getting_help.rst`;
-* `docs/sources/gettingstarted/whyscpy.rst`;
-* `docs/sources/reference/bibliography.bib`;
-* `docs/sources/reference/bibliography.rst`;
-* `docs/sources/reference/faq.rst`;
-* `docs/sources/reference/glossary.rst`;
-* `docs/sources/reference/papers.rst`;
-* `docs/sources/whatsnew/changelog.rst`;
-* generated `docs/sources/whatsnew/latest.rst` when it changes only as the
-  direct companion of `changelog.rst`;
-* the PR template and similar non-executable repository-policy documents.
-
-Do **not** use ``safe-docs-no-ci`` for:
-
-* `docs/` changes outside the explicit safe-file allowlist above, even when
-  the files are non-Python;
-* `examples/` changes;
-* gallery/example/tutorial updates;
-* plugin Markdown such as `plugins/**/README.md`;
-* code changes hidden inside a documentation PR;
-* any change that can affect executable documentation, packaging, plugins, or
-  runtime behavior.
-
-The CI bypass is enforced conservatively: the label alone is not sufficient if
-the changed files are outside the approved safe-documentation scope.
-
 ---
 
 # Cost-Aware Development

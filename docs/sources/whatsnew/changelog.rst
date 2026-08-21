@@ -34,12 +34,18 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
-- Fix FFT frequency-coordinate generation.  FTIR interferogram FFT results now
-  use a positive descending wavenumber axis from the highest retained
-  ``rfft`` bin toward zero, so the documented ``400–4000 cm^-1`` window again
-  contains the calculated spectra.  Generic FFT coordinates now follow the
-  ``fftshift(fftfreq)`` order used by the transformed data, while NMR plugin
-  FFT post-processing remains unchanged.
+- Fix FFT frequency-coordinate generation (:pr:`1563`).
+  FTIR interferogram FFT results now use a positive descending wavenumber axis
+  from the highest retained ``rfft`` bin toward zero, so the documented
+  ``400–4000 cm^-1`` window again contains the calculated spectra.
+  Generic FFT coordinates now follow the ``fftshift(fftfreq)`` order used by
+  the transformed data, while NMR plugin FFT post-processing remains unchanged.
+
+- Consolidate Sphinx-Gallery structure and rendering
+  (:pr:`1564`, :pr:`1565`).
+  Plugin examples are now staged once in canonical scientific sections,
+  thumbnail directives are placed before module docstrings to avoid empty
+  cells, and stale top-level plugin examples were removed.
 
 - Fix ``MSCTransformer.inverse_transform()`` so it no longer reuses
   fit-dataset diagnostic coefficients positionally for independently
@@ -59,7 +65,7 @@ Bug Fixes
   last-transform state positionally.
 
 - Fix ``dim`` keyword argument in Savitzky-Golay, smoothing and Whittaker
-  filters (`#1091 <https://github.com/spectrochempy/spectrochempy/issues/1091>`_).
+  filters (:issue:`1091`).
   ``savgol()``, ``smooth()``, ``whittaker()`` and
   ``Filter(...).transform()`` now accept a ``dim`` parameter to select the
   processing axis.  Dimension names (e.g. ``"x"``) and integer indices are
@@ -69,7 +75,7 @@ Bug Fixes
 
 - Savitzky-Golay derivatives now automatically use the signed spacing of a
   uniformly spaced coordinate when ``delta`` is omitted
-  (`#1091 <https://github.com/spectrochempy/spectrochempy/issues/1091>`_).
+  (:issue:`1091`).
   For ``deriv > 0``, the ``savgol()`` wrapper detects the coordinate along the
   processed axis and derives a signed delta.  An ascending coordinate yields a
   positive delta, a descending one yields a negative delta.  The derivative
@@ -81,7 +87,7 @@ Bug Fixes
 
 - Fix sign of Savitzky-Golay derivatives when an explicit ``delta`` is
   provided with ``cm⁻¹`` or ``ppm`` coordinates
-  (`#1552 <https://github.com/spectrochempy/spectrochempy/issues/1552>`_).
+  (:issue:`1552`).
   The former ``_reversed`` correction applied ``(-1)**deriv`` on the
   Savitzky-Golay path when the coordinate carried ``cm⁻¹`` or ``ppm``
   units, flipping the sign of odd-order derivatives on ascending
@@ -117,9 +123,17 @@ Breaking Changes
   on the same dataset, but it reused training coefficients positionally and
   was unsafe for datasets transformed later.
 
+  *Migration:* if you need to reverse MSC, apply the stored ``a_`` and ``b_``
+  coefficients manually or refit on the target dataset.  Most workflows only
+  need the forward-corrected spectra and do not require an inverse.
+
 - ``msc()`` and ``MSCTransformer`` now raise when a spectrum has zero local
   slope relative to the reference.  The previous ``b_safe`` fallback produced
   a zero-valued corrected spectrum, hiding an invalid MSC regression.
+
+  *Migration:* verify that reference and sample spectra contain spectral
+  variation (non-constant values) before calling ``msc()``.  Constant or
+  degenerate spectra are invalid MSC inputs.
 
 
 .. section
@@ -134,6 +148,3 @@ Deprecations
 Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
-- Fix ``safe-docs-no-ci`` CI bypass for push events: the workflow now looks up
-  the associated PR via ``gh pr list --commit`` to recover its labels when the
-  push event context has none (`#1546 <https://github.com/spectrochempy/spectrochempy/issues/1546>`_).
