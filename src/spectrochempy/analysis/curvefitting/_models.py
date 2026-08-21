@@ -20,6 +20,8 @@ __all__ = [
     "gaussianmodel",
     "lorentzian",
     "lorentzianmodel",
+    "pseudovoigt",
+    "pseudovoigtmodel",
     "voigt",
     "voigtmodel",
     "asymmetricvoigt",
@@ -223,6 +225,48 @@ def lorentzian(x, ampl=1.0, pos=0.0, width=1.0, normalized=True, **kwargs):
         ampl=ampl,
         pos=pos,
         width=width,
+        normalized=normalized,
+        **kwargs,
+    )
+
+
+def pseudovoigt(x, ampl=1.0, pos=0.0, width=1.0, ratio=0.5, normalized=True, **kwargs):
+    """
+    Return a pseudo-Voigt profile.
+
+    The pseudo-Voigt profile is a linear combination of Lorentzian and
+    Gaussian profiles sharing the same centre and FWHM.
+
+    Parameters
+    ----------
+    x : array-like or Coord
+        Abscissa values.
+    ampl : float, optional
+        Amplitude. When *normalized* is ``True`` (default) this scales the
+        area under the curve. When *normalized* is ``False`` this is the peak
+        height.
+    pos : float, optional
+        Position of the peak centre.
+    width : float, optional
+        Full width at half maximum (FWHM).
+    ratio : float, optional
+        Ratio of Gaussian to Lorentzian character (0 = pure Lorentzian,
+        1 = pure Gaussian).
+    normalized : bool, optional
+        If ``True`` (default) the profile is normalized so that its integral
+        is approximately *ampl*. If ``False`` the peak value is exactly
+        *ampl*.
+    **kwargs
+        Additional keyword arguments forwarded to the model evaluator.
+    """
+    return _evaluate_model(
+        pseudovoigtmodel,
+        x,
+        name="pseudovoigt",
+        ampl=ampl,
+        pos=pos,
+        width=width,
+        ratio=ratio,
         normalized=normalized,
         **kwargs,
     )
@@ -461,6 +505,41 @@ class lorentzianmodel:
         normalized = kargs.get("normalized", True)
         w = w * abs(x[1] - x[0]) if normalized else w * np.pi * lb
         return ampl * w
+
+
+# ======================================================================================
+# PseudoVoigtModel
+# ======================================================================================
+class pseudovoigtmodel:
+    """
+    A pseudo-Voigt model.
+
+    The pseudo-Voigt profile is a linear combination of Lorentzian and
+    Gaussian profiles with the same centre and FWHM:
+
+    .. math::
+        f(x) = (1 - ratio) L(x) + ratio G(x)
+
+    The convention follows the existing Voigt parameterization:
+    ``ratio=0`` is pure Lorentzian and ``ratio=1`` is pure Gaussian.
+    """
+
+    type = "1D"
+    args = ["ampl", "pos", "width", "ratio"]
+
+    script = """
+    MODEL: line%(id)d\nshape: pseudovoigtmodel
+    $ ampl: %(ampl).3f, 0.0, None
+    $ width: %(width).3f, 0.0, None
+    $ pos: %(pos).3f, %(poslb).3f, %(poshb).3f
+    $ ratio: 0.5, 0.0, 1.0
+    """
+
+    @make_units_compatibility
+    def f(self, x, ampl, pos, width, ratio, **kargs):
+        gaussian_part = gaussianmodel().f(x, 1.0, pos, width, **kargs)
+        lorentzian_part = lorentzianmodel().f(x, 1.0, pos, width, **kargs)
+        return ampl * ((1.0 - ratio) * lorentzian_part + ratio * gaussian_part)
 
 
 # ======================================================================================

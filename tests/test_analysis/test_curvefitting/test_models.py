@@ -33,6 +33,12 @@ _MODELS = [
         "lorentzianmodel", ["ampl", "pos", "width"], 0.6366197723675814, id="lorentzian"
     ),
     pytest.param(
+        "pseudovoigtmodel",
+        ["ampl", "pos", "width", "ratio"],
+        0.7880245271284375,
+        id="pseudovoigt",
+    ),
+    pytest.param(
         "voigtmodel", ["ampl", "pos", "width", "ratio"], 0.8982186579508358, id="voigt"
     ),
     pytest.param(
@@ -58,6 +64,11 @@ _HELPERS = [
     ),
     pytest.param("gaussian", dict(ampl=1.0, pos=0.5, width=0.1), id="gaussian"),
     pytest.param("lorentzian", dict(ampl=1.0, pos=0.5, width=0.1), id="lorentzian"),
+    pytest.param(
+        "pseudovoigt",
+        dict(ampl=1.0, pos=0.5, width=0.1, ratio=0.5),
+        id="pseudovoigt",
+    ),
     pytest.param("voigt", dict(ampl=1.0, pos=0.5, width=0.1, ratio=0.5), id="voigt"),
     pytest.param(
         "asymmetricvoigt",
@@ -292,6 +303,7 @@ class TestNormalizedFalse:
         [
             pytest.param("gaussian", {}, id="gaussian"),
             pytest.param("lorentzian", {}, id="lorentzian"),
+            pytest.param("pseudovoigt", {"ratio": 0.5}, id="pseudovoigt"),
             pytest.param("voigt", {"ratio": 0.5}, id="voigt"),
         ],
     )
@@ -307,6 +319,7 @@ class TestNormalizedFalse:
         [
             pytest.param("gaussian", {}, id="gaussian"),
             pytest.param("lorentzian", {}, id="lorentzian"),
+            pytest.param("pseudovoigt", {"ratio": 0.5}, id="pseudovoigt"),
             pytest.param("voigt", {"ratio": 0.5}, id="voigt"),
         ],
     )
@@ -323,6 +336,7 @@ class TestNormalizedFalse:
         [
             pytest.param("gaussian", {}, id="gaussian"),
             pytest.param("lorentzian", {}, id="lorentzian"),
+            pytest.param("pseudovoigt", {"ratio": 0.5}, id="pseudovoigt"),
             pytest.param("voigt", {"ratio": 0.5}, id="voigt"),
         ],
     )
@@ -345,6 +359,72 @@ class TestNormalizedFalse:
         r1 = scp.gaussian(x, ampl=1.0, pos=0.0, width=1.0, normalized=False)
         r2 = scp.gaussian(x, ampl=2.5, pos=0.0, width=1.0, normalized=False)
         np.testing.assert_allclose(r2, 2.5 * r1, rtol=1e-12)
+
+
+class TestPseudoVoigt:
+    """Pseudo-Voigt contract tests."""
+
+    def test_ratio_zero_matches_lorentzian(self):
+        x = np.linspace(-5, 5, 1001)
+
+        pseudo = scp.pseudovoigt(x, ampl=2.0, pos=0.5, width=1.2, ratio=0.0)
+        lorentzian = scp.lorentzian(x, ampl=2.0, pos=0.5, width=1.2)
+
+        np.testing.assert_allclose(pseudo, lorentzian, rtol=1e-12, atol=1e-14)
+
+    def test_ratio_one_matches_gaussian(self):
+        x = np.linspace(-5, 5, 1001)
+
+        pseudo = scp.pseudovoigt(x, ampl=2.0, pos=0.5, width=1.2, ratio=1.0)
+        gaussian = scp.gaussian(x, ampl=2.0, pos=0.5, width=1.2)
+
+        np.testing.assert_allclose(pseudo, gaussian, rtol=1e-12, atol=1e-14)
+
+    def test_intermediate_ratio_is_linear_mixture(self):
+        x = np.linspace(-5, 5, 1001)
+        kwargs = dict(ampl=2.0, pos=0.5, width=1.2, normalized=True)
+
+        pseudo = scp.pseudovoigt(x, ratio=0.25, **kwargs)
+        expected = 0.75 * scp.lorentzian(x, **kwargs) + 0.25 * scp.gaussian(x, **kwargs)
+
+        np.testing.assert_allclose(pseudo, expected, rtol=1e-12, atol=1e-14)
+
+    def test_normalized_false_keeps_peak_height(self):
+        x = np.linspace(-5, 5, 2001)
+
+        pseudo = scp.pseudovoigt(
+            x, ampl=3.0, pos=0.0, width=1.0, ratio=0.3, normalized=False
+        )
+
+        assert np.isclose(pseudo.max(), 3.0, rtol=1e-12)
+
+    def test_units_follow_existing_lineshape_convention(self):
+        x = scp.Coord.linspace(-5, 5, 1001, units="m")
+
+        pseudo = scp.pseudovoigt(
+            x, ampl=2.0 * ur("g"), pos=0.0 * ur("m"), width=1000.0 * ur("mm")
+        )
+
+        assert isinstance(pseudo, scp.NDDataset)
+        assert pseudo.units == ur("g")
+        assert pseudo.x.units == ur("m")
+        assert np.all(np.isfinite(pseudo.data))
+
+    def test_optimize_accepts_pseudovoigtmodel_shape(self):
+        script = """
+        MODEL: PEAK
+        shape: pseudovoigtmodel
+            $ ampl: 1.0, 0.0, none
+            $ pos: 0.0, -1.0, 1.0
+            $ width: 1.0, 0.0, none
+            $ ratio: 0.5, 0.0, 1.0
+        """
+        opt = scp.Optimize()
+
+        assert opt.validate_script(script) == []
+        opt.script = script
+
+        assert opt.fp is not None
 
 
 class TestBaselineHelper:

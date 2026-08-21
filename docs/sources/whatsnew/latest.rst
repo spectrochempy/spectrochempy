@@ -11,3 +11,10 @@ What's New in Revision 0.12.6.dev
 
 These are the changes in SpectroChemPy-0.12.6.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
+
+New Features
+~~~~~~~~~~~~
+
+- Added the ``pseudovoigt`` helper and ``pseudovoigtmodel`` curve-fitting
+  model, using the existing ``ampl``, ``pos``, ``width``, ``ratio`` and
+  ``normalized`` line-shape conventions.

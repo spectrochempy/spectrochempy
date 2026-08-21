@@ -788,6 +788,8 @@ Lineshape models
     gaussianmodel
     lorentzian
     lorentzianmodel
+    pseudovoigt
+    pseudovoigtmodel
     voigt
     voigtmodel
     asymmetricvoigt

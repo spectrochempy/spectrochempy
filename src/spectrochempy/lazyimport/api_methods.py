@@ -26,6 +26,8 @@ _LAZY_IMPORTS = {
     "gaussianmodel": "spectrochempy.analysis.curvefitting._models",
     "lorentzian": "spectrochempy.analysis.curvefitting._models",
     "lorentzianmodel": "spectrochempy.analysis.curvefitting._models",
+    "pseudovoigt": "spectrochempy.analysis.curvefitting._models",
+    "pseudovoigtmodel": "spectrochempy.analysis.curvefitting._models",
     "voigt": "spectrochempy.analysis.curvefitting._models",
     "voigtmodel": "spectrochempy.analysis.curvefitting._models",
     "asymmetricvoigt": "spectrochempy.analysis.curvefitting._models",

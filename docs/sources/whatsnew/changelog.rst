@@ -19,6 +19,9 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- Added the ``pseudovoigt`` helper and ``pseudovoigtmodel`` curve-fitting
+  model, using the existing ``ampl``, ``pos``, ``width``, ``ratio`` and
+  ``normalized`` line-shape conventions.
 
 .. section
 
