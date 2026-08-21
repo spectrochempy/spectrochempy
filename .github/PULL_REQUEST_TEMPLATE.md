@@ -11,7 +11,6 @@
 - [ ] The new API methods have been included in a section of `docs/sources/reference/index.rst`.
 - [ ] Title follows the prefix convention defined in `CONTRIBUTING.md` (or label `non-standard-prefix` is applied).
 - [ ] Changelog entry is present (or label `no-changelog` is applied).
-- [ ] If this PR changes only safe maintainer/policy docs, or only files from the explicit safe-docs allowlist in `CONTRIBUTING.md`, the label `safe-docs-no-ci` has been applied; otherwise it has not.
 - [ ] If you are a new contributor, you have added your name (affiliation and ORCID
       if you have one) in the `zenodo.json` in the field contributors field. _Be careful
       not to break the json format (check the content of the file with the
