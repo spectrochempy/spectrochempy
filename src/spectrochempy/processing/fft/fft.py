@@ -323,13 +323,9 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
             dw = x.spacing
             if isinstance(dw, list):
                 pass  # print()
-            nyquist = 1 / 2 / dw
-
             if is_ir:
-                sizem = max(coord_size - 1, 1)
-                deltaf = -nyquist / sizem
-                first = nyquist
-                newcoord = Coord.arange(coord_size) * deltaf + first
+                kept_frequencies = np.fft.rfftfreq(size)[:coord_size][::-1]
+                newcoord = Coord(kept_frequencies / abs(dw))
             else:
                 shifted_frequencies = np.fft.fftshift(np.fft.fftfreq(coord_size))
                 newcoord = Coord(shifted_frequencies / dw)

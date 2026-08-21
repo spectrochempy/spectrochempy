@@ -28,9 +28,9 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 - Fix FFT frequency-coordinate generation.  FTIR interferogram FFT results now
-  use a positive descending wavenumber axis from the Nyquist wavenumber toward
-  zero, so the documented ``400–4000 cm^-1`` window again contains the
-  calculated spectra.  Generic FFT coordinates now follow the
+  use a positive descending wavenumber axis from the highest retained
+  ``rfft`` bin toward zero, so the documented ``400–4000 cm^-1`` window again
+  contains the calculated spectra.  Generic FFT coordinates now follow the
   ``fftshift(fftfreq)`` order used by the transformed data, while NMR plugin
   FFT post-processing remains unchanged.
 

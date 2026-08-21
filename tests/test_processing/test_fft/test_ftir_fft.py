@@ -44,6 +44,19 @@ def _assert_ftir_coordinate(dataset):
     assert ((x >= 400.0) & (x <= 4000.0)).sum() > 1000
 
 
+def _assert_ftir_coordinate_matches_rfft_bins(source, transformed):
+    x = np.asarray(transformed.x.data, dtype=float)
+    spacing = abs(source.x.spacing)
+    expected = np.fft.rfftfreq(source.size)[: transformed.x.size][::-1] / spacing
+    expected = Coord(expected).to("cm^-1").data
+
+    assert np.array_equal(x, expected)
+    assert x[0] == expected[0]
+    assert np.isclose(x[0], 7898.731)
+    assert np.isclose(x[0] - x[1], expected[0] - expected[1])
+    assert np.isclose(x[0] - x[1], 1.899)
+
+
 def _compare_to_omnic(dataset):
     omnic = scp.read_spa("irdata/interferogram/spectre.SPA")
     x = np.asarray(dataset.x.data, dtype=float)
@@ -77,6 +90,7 @@ def test_ftir_interferogram_fft_coordinate_matches_spectrum_window():
     assert work.shape == (1, 8320)
     assert transformed.shape == (1, 4160)
     _assert_ftir_coordinate(transformed)
+    _assert_ftir_coordinate_matches_rfft_bins(work, transformed)
     _compare_to_omnic(transformed)
     assert np.array_equal(ir.data, source_data)
     assert np.array_equal(ir.x.data, source_coord)
@@ -89,6 +103,7 @@ def test_ftir_interferogram_hamming_fft_coordinate_matches_spectrum_window():
     assert work.shape == (1, 8320)
     assert transformed.shape == (1, 4160)
     _assert_ftir_coordinate(transformed)
+    _assert_ftir_coordinate_matches_rfft_bins(work, transformed)
     _compare_to_omnic(transformed)
     assert np.array_equal(ir.data, source_data)
     assert np.array_equal(ir.x.data, source_coord)
