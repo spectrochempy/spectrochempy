@@ -36,8 +36,9 @@ B = scp.read_labspec("ramandata/labspec/subdir")
 _ = B.plot()
 
 # %%
-
 # Uncomment the following line to display all figures when running the script
 # directly with Python.
-#
+
+# %%
+
 # scp.show()

@@ -56,8 +56,9 @@ msc = region.msc()
 _ = msc.plot(title="MSC corrected")
 
 # %%
-
 # Uncomment the following line to display all figures when running the script
 # directly with Python.
-#
+
+# %%
+
 # scp.show()

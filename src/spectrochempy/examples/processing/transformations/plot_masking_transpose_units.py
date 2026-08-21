@@ -51,8 +51,9 @@ dataset.y.ito("hours")
 _ = dataset.plot()
 
 # %%
-
 # Uncomment the following line to display all figures when running the script
 # directly with Python.
-#
+
+# %%
+
 # scp.show()
