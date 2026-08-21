@@ -14,10 +14,11 @@ In this example, we perform the Evolving Factor Analysis of a TEST dataset
 
 """
 
+# sphinx_gallery_thumbnail_number = 5
+
 # %%
 import spectrochempy as scp
 
-# sphinx_gallery_thumbnail_number = 5
 
 # %%
 # Generate a test dataset
@@ -93,7 +94,7 @@ C = efa.transform()
 _ = C.T.plot(title="EFA concentration")
 
 # %%
-# This ends the example ! The following line can be uncommented if no plot shows when
-# running the .py script with python
-
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+#
 # scp.show()

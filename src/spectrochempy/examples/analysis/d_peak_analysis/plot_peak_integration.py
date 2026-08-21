@@ -65,7 +65,7 @@ relative_difference.units = "percent"
 _ = relative_difference.plot(scatter=True, ms=5)
 
 # %%
-# This ends the example. Uncomment the next line to display the figures when
-# running the script directly with Python.
-
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+#
 # scp.show()

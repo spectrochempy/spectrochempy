@@ -6,7 +6,6 @@
 # ruff: noqa: T201,S603
 """SpectroChemPy documentation build configuration file."""
 
-import ast
 import inspect
 import json
 import os
@@ -277,7 +276,8 @@ def _load_zenodo_contributors():
 with open(os.path.join(SRC, "credits", "credits.rst.tmpl"), encoding="utf-8") as f:
     t = jinja2.Template(f.read())
 with open(os.path.join(SRC, "credits", "credits.rst"), "w", encoding="utf-8") as f:
-    f.write(t.render(contributors=_load_zenodo_contributors()))
+    rendered_credits = t.render(contributors=_load_zenodo_contributors()).rstrip()
+    f.write(f"{rendered_credits}\n")
 # -- Options for HTML output ---------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
@@ -414,8 +414,6 @@ html_context = {
 
 # Sphinx-gallery ---------------------------------------------------------------
 # Generate the plots for the gallery
-from sphinx_gallery.sorting import FileNameSortKey
-
 example_source_dir = SOURCES / "examples"
 example_generated_dir = "gettingstarted/examples/gallery"
 gallery_sections = ("core", "processing", "analysis", "plugins")
@@ -527,15 +525,6 @@ def _gallery_ref_for_example(path: str) -> str:
     return f"sphx_glr_{ref_path.replace('/', '_')}"
 
 
-def _gallery_thumbnail_for_example(path: str) -> str:
-    source_path = Path(path)
-    section = source_path.parts[0]
-    generated_path = Path(example_generated_dir, f"auto_examples_{section}")
-    example_dir = generated_path.joinpath(*source_path.parts[1:-1])
-    thumbnail = f"sphx_glr_{source_path.stem}_thumb.png"
-    return example_dir.joinpath("images", "thumb", thumbnail).as_posix()
-
-
 def _section_cell(section: str, section_ref: str) -> str:
     if section_ref:
         return f":ref:`{section} <{section_ref}>`"
@@ -594,9 +583,9 @@ def _plugin_gallery_readme(entries: list[dict[str, str]]) -> str:
         "Plugin-dependent functionality",
         "###############################",
         "",
-        "This section contains examples that require optional SpectroChemPy plugins.",
-        "Official plugin examples also appear in their respective scientific sections,",
-        "so you can browse either by topic or by plugin.",
+        "This section indexes examples that require optional SpectroChemPy plugins.",
+        "Each entry links to the canonical gallery page in its scientific section,",
+        "where the example script is generated and executed once.",
         "",
         _plugin_examples_table(entries),
         "",
@@ -613,67 +602,6 @@ def _write_plugin_gallery_readmes(
         _plugin_gallery_readme(entries),
         encoding="utf-8",
     )
-
-    plugins = {}
-    for entry in entries:
-        plugins.setdefault(entry["plugin"], entry["plugin_title"])
-
-    for name, title in sorted(plugins.items()):
-        title = str(title)
-        underline = "-" * len(title)
-        plugin_section_dir = plugin_dir / name
-        plugin_section_dir.mkdir(parents=True, exist_ok=True)
-        (plugin_section_dir / "readme.rst").write_text(
-            f"{title}\n{underline}\n",
-            encoding="utf-8",
-        )
-
-
-def _stage_plugin_gallery_examples(
-    staged_examples: Path, entries: list[dict[str, str]]
-) -> None:
-    plugin_dir = staged_examples / "plugins"
-    for entry in entries:
-        source = entry["manifest"].parent / entry["path"]
-        if not source.exists():
-            continue
-
-        source_path = Path(entry["path"])
-        stem = "__".join([entry["plugin"], *source_path.with_suffix("").parts])
-        stem = re.sub(r"[^0-9A-Za-z_]+", "_", stem)
-        destination = plugin_dir / entry["plugin"] / f"plot_{stem}.py"
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        content = source.read_text(encoding="utf-8")
-        thumbnail_path = _gallery_thumbnail_for_example(entry["path"])
-        destination.write_text(
-            _with_plugin_gallery_thumbnail(content, thumbnail_path),
-            encoding="utf-8",
-        )
-
-
-def _with_plugin_gallery_thumbnail(content: str, thumbnail_path: str) -> str:
-    directive = f"# sphinx_gallery_thumbnail_path = {thumbnail_path!r}"
-    lines = content.splitlines()
-
-    try:
-        module = ast.parse(content)
-    except SyntaxError:
-        return f"{directive}\n{content}"
-
-    if (
-        module.body
-        and isinstance(module.body[0], ast.Expr)
-        and isinstance(module.body[0].value, ast.Constant)
-        and isinstance(module.body[0].value.value, str)
-        and module.body[0].end_lineno is not None
-    ):
-        insert_at = module.body[0].end_lineno
-        return "\n".join([*lines[:insert_at], directive, *lines[insert_at:]]) + "\n"
-
-    if lines and lines[0].startswith("# %%"):
-        return "\n".join([lines[0], directive, *lines[1:]]) + "\n"
-
-    return f"{directive}\n{content}"
 
 
 def _stage_gallery_examples() -> Path:
@@ -701,10 +629,11 @@ def _get_default_image_scraper():
 
 if not single_doc_or_dir:
     # generate example only if were are in full doc mode
+    from sphinx_gallery.sorting import FileNameSortKey
+
     plugin_gallery_entries = _load_plugin_gallery_entries()
     example_source_dir = _stage_gallery_examples()
     _write_plugin_gallery_readmes(example_source_dir, plugin_gallery_entries)
-    _stage_plugin_gallery_examples(example_source_dir, plugin_gallery_entries)
 
     sphinx_gallery_conf = {
         "plot_gallery": not noexec,

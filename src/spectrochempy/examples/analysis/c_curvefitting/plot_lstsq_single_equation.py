@@ -12,6 +12,7 @@ In this example, we find the least  square solution of a simple linear
 equation.
 
 """
+
 # sphinx_gallery_thumbnail_number = 2
 
 # %%
@@ -103,7 +104,7 @@ distance_fitted3 = lstsq.predict()
 _ = distance_fitted3.plot_pen(clear=False, color="g", label="Fitted line", legend=True)
 
 # %%
-# This ends the example ! The following line can be uncommented if no plot shows when
-# running the .py script with python
-
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+#
 # scp.show()

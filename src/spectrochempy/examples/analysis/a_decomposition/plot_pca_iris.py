@@ -91,7 +91,7 @@ ax = pca.plot_score(components=(1, 2, 3), color_mapping="labels")
 _ = ax.view_init(10, 75)
 
 # %%
-# This ends the example ! The following line can be uncommented if no plot shows when
-# running the .py script with python
-
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+#
 # scp.show()

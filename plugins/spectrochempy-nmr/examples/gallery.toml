@@ -4,15 +4,18 @@ title = "NMR plugin"
 
 [[examples]]
 path = "core/c_importer/plot_read_nmr_from_bruker.py"
-section = "Import/export"
+section = "Import / Export"
+section_ref = "examples-importer-index"
 
 [[examples]]
 path = "processing/apodization/plot_proc_em.py"
 section = "Processing / apodization"
+section_ref = "examples-processing-apodization-index"
 
 [[examples]]
 path = "processing/apodization/plot_proc_sp.py"
 section = "Processing / apodization"
+section_ref = "examples-processing-apodization-index"
 
 [[examples]]
 path = "processing/nmr/plot_read_nmr_topspin.py"

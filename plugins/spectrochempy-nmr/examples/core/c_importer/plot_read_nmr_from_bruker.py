@@ -20,12 +20,7 @@ Install with: ``pip install spectrochempy[nmr]``.
 # %%
 import spectrochempy as scp
 
-# %%
-# ``datadir.path`` contains the path to a default data directory.
-
-datadir = scp.preferences.datadir
-
-path = datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_1d"
+path = "nmrdata/bruker/tests/nmr/topspin_1d"
 
 # %%
 # load the data in a new dataset
@@ -44,7 +39,7 @@ _ = ndd.plot()
 # supported public scope.
 
 # %%
-# This ends the example! The following line can be uncommented if no plot shows
-# when running the .py script with python.
-
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+#
 # scp.show()

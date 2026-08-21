@@ -1,4 +1,3 @@
-# %%
 # ======================================================================================
 # Copyright (©) 2014-2026 Laboratoire Catalyse et Spectrochimie (LCS), Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -12,6 +11,8 @@ Denoising a 2D Raman spectrum
 In this example, we use the ``denoise`` method to remove the noise from a 2D Raman
 spectrum.
 """
+
+# sphinx_gallery_thumbnail_number = -1
 
 # %%
 # Import spectrochempy
@@ -49,7 +50,6 @@ _ = nd2.plot(title="denoised data")
 # ------------------------------
 nd3 = nd1.denoise(ratio=95)
 _ = nd3.plot(title="denoised data")
-# sphinx_gallery_thumbnail_number = 5
 
 nd4 = nd1.denoise(ratio=90)
 _ = nd4.plot(title="denoised data")
@@ -59,6 +59,7 @@ _ = nd4.plot(title="denoised data")
 # effect on cosmic ray spikes.  Consider using ``despike`` methods for those.
 
 # %%
-# This ends the basic example of denoising a 2D Raman spectrum.
-# scp.show()  # uncomment to show plot if running from a script
-# sphinx_gallery_thumbnail_number = -1
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+#
+# scp.show()

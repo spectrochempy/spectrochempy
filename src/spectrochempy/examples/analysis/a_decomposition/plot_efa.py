@@ -12,19 +12,15 @@ In this example, we perform the Evolving Factor Analysis
 
 """
 
-# %%
 # sphinx_gallery_thumbnail_number = 2
 
 # %%
-import os
-
 import spectrochempy as scp
 
 # %%
 # Load and preprocess the dataset
 # --------------------------------
-datadir = scp.preferences.datadir
-dataset = scp.read_omnic(os.path.join(datadir, "irdata", "nh4y-activation.spg"))
+dataset = scp.read_omnic("irdata/nh4y-activation.spg")
 
 # %%
 # Change the time origin
@@ -97,7 +93,7 @@ LT = pca.loadings
 _ = LT.plot(title="PCA components", legend=LT.k.labels)
 
 # %%
-# This ends the example ! The following line can be uncommented if no plot shows when
-# running the .py script with python
-
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+#
 # scp.show()

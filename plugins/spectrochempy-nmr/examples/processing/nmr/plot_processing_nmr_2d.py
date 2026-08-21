@@ -51,8 +51,11 @@ import spectrochempy as scp
 # The raw SER file contains time-domain data together with the acquisition
 # metadata needed to decode the hypercomplex encoding in F1.
 
-nmrdir = scp.preferences.datadir / "nmrdata" / "bruker" / "tests" / "nmr"
-ser = scp.nmr.read(nmrdir / "topspin_2d", expno=1, remove_digital_filter=True)
+ser = scp.nmr.read(
+    "nmrdata/bruker/tests/nmr/topspin_2d",
+    expno=1,
+    remove_digital_filter=True,
+)
 
 # %%
 # Print dataset summary — both dimensions are in time domain
@@ -65,7 +68,7 @@ _ = ser.plot_map()
 # %%
 # For comparison, load the TopSpin-processed reference spectrum.
 # This is similar to the dataset used in ``plot_processing_nmr.py``.
-reference = scp.nmr.read(nmrdir / "topspin_2d" / "1" / "pdata" / "1" / "2rr")
+reference = scp.nmr.read("nmrdata/bruker/tests/nmr/topspin_2d/1/pdata/1/2rr")
 
 # %%
 # Plot the processed TopSpin reference

@@ -12,6 +12,8 @@ In this example, we use the ``despike`` method to remove the noise from a Raman
 spectrum.
 """
 
+# sphinx_gallery_thumbnail_number = -1
+
 import spectrochempy as scp
 
 # %%
@@ -58,9 +60,7 @@ _ = X4.plot(clear=False, ls="-", c="r")
 
 
 # %%
-# This ends the example ! The following line can be uncommented if no plot shows when
-# running the .py script with python
-
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+#
 # scp.show()
-
-# sphinx_gallery_thumbnail_number = -1

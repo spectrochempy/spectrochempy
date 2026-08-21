@@ -34,15 +34,10 @@ import spectrochempy as scp
 # %%
 # Import NMR spectra
 # ------------------
-# Define the folder where are the spectra
-datadir = scp.preferences.datadir
-nmrdir = datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "CP"
-
-# %%
 # Set the ``glob`` pattern in order to load a series of spectra of given type
 # in the given directory (here we read fid, but we could also read "1r" files
 # when available)
-dataset = scp.nmr.read(nmrdir, glob="**/fid")
+dataset = scp.nmr.read("nmrdata/bruker/tests/nmr/CP", glob="**/fid")
 
 # %%
 # 15 fids have been read and merged into a single dataset
@@ -269,7 +264,7 @@ ax.set_xlim(0, 16000)
 # Deconvolution of these two peaks is therefore probably necessary for a better analysis.
 
 # %%
-# This ends the example ! The following line can be removed or commented
-# when the example is run as a notebook (``.ipynb``).
-
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+#
 # scp.show()

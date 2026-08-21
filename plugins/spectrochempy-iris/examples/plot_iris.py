@@ -11,6 +11,8 @@
 In this example, we perform the 2D IRIS analysis of CO adsorption on a sulfide catalyst.
 """
 
+# sphinx_gallery_thumbnail_number = 11
+
 # %%
 import spectrochempy as scp
 from spectrochempy_iris import IRIS
@@ -165,13 +167,12 @@ _ = iris3.plotlcurve(title="L curve, automated search")
 # The data corresponding to the largest curvature of the L-curve
 # are at index 5 of the output data.
 
-# sphinx_gallery_thumbnail_number = 11
 
 _ = iris3.f[5].plot_contour()
 _ = iris3.plotmerit(5)
 
 # %%
-# This ends the example ! The following line can be uncommented if no plot shows when
-# running the .py script with python
-
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+#
 # scp.show()

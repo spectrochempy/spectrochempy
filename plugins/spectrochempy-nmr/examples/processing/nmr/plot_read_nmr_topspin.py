@@ -30,7 +30,7 @@ import spectrochempy as scp
 # remain available for compatibility.
 
 fid = scp.nmr.read(
-    scp.preferences.datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_1d",
+    "nmrdata/bruker/tests/nmr/topspin_1d",
     expno=1,
     remove_digital_filter=True,
 )
@@ -45,7 +45,7 @@ _ = fid.plot()
 # %%
 # Read the processed TopSpin reference spectrum.
 topspin = scp.nmr.read(
-    scp.preferences.datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_1d",
+    "nmrdata/bruker/tests/nmr/topspin_1d",
     expno=1,
     procno=1,
 )
@@ -102,8 +102,7 @@ ax = topspin.imag.plot(color="black")
 _ = spectrum.imag.plot(ax=ax, clear=False, color="red")
 
 # %%
-# If the plugin is not installed, the function or method raises a
-# :class:`~spectrochempy.plugins.deps.MissingPluginError` with installation
-# instructions.
-
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+#
 # scp.show()

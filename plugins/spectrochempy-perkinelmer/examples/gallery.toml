@@ -3,5 +3,6 @@ name = "spectrochempy-perkinelmer"
 title = "PerkinElmer plugin"
 
 [[examples]]
-path = "plot_read_perkinelmer.py"
-section = "Import/export"
+path = "core/c_importer/plot_read_perkinelmer.py"
+section = "Import / Export"
+section_ref = "examples-importer-index"

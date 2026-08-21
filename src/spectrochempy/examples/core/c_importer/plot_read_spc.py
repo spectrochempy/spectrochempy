@@ -34,9 +34,8 @@ for nd in ex3:
     _ = nd.plot_bar(width=0.1, clear=False)
 ex3
 
-# This ends the example ! The following line can be uncommented if no plot shows when
-# running the .py script with python
-
-# scp.show()
-
 # %%
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+#
+# scp.show()

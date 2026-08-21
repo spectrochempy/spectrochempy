@@ -15,16 +15,12 @@ options are available to customize that overlay.
 
 # %%
 # Import spectrochempy as usual
-import os
-from pathlib import Path
-
 import spectrochempy as scp
 
 # %%
 # Load and inspect the data
 # --------------------------
-TEST_FILE = Path(os.environ.get("TEST_FILE", "ramandata/labspec/serie190214-1.txt"))
-B1 = scp.read(TEST_FILE)
+B1 = scp.read("ramandata/labspec/serie190214-1.txt")
 
 # %%
 # Basic plot with categorical colors (``cmap=None``):
@@ -67,7 +63,7 @@ _ = scp.plot_multiple(
 )
 
 # %%
-# This ends the example ! The following line can be uncommented if no plot shows when
-# running the .py script with python
-
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+#
 # scp.show()

@@ -125,7 +125,7 @@ ax.set_ylabel(f"derivative / ({ds_d1.units})")
 _ = ax.legend(loc="best")
 
 # %%
-# This ends the example. Uncomment the next line to display the figures
-# when running the script directly with Python.
-
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+#
 # scp.show()
