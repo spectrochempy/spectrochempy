@@ -1,4 +1,3 @@
-# %%
 # ======================================================================================
 # Copyright (©) 2014-2026 Laboratoire Catalyse et Spectrochimie (LCS), Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -16,13 +15,15 @@ Install with: ``pip install spectrochempy[nmr]``.
 
 """
 
+# sphinx_gallery_thumbnail_number = -1
+
 # %%
 import spectrochempy as scp
 
 Hz = scp.ur.Hz
 us = scp.ur.us
 
-path = scp.preferences.datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_1d"
+path = "nmrdata/bruker/tests/nmr/topspin_1d"
 dataset1D = scp.nmr.read(path, expno=1, remove_digital_filter=True)
 
 # %%
@@ -67,9 +68,7 @@ _ = new2.real.plot(
 _ = ax.legend()
 
 # %%
-# This ends the example ! The following line can be uncommented if no plot shows when
-# running the .py script with python
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+#
 # scp.show()
-
-# %%
-# sphinx_gallery_thumbnail_number = -1

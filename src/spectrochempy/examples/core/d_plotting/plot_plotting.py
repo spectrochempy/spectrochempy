@@ -15,22 +15,13 @@ This short gallery example shows three common ideas:
 - ``plot_multiple()`` overlaying several 1D datasets on one shared axes.
 """
 
-# %%
-
-import os
-from pathlib import Path
-
 import numpy as np
 import spectrochempy as scp
 
 # %%
 # Locate and load a dataset
 # --------------------------
-datadir = scp.preferences.datadir
-TEST_FILE = Path(
-    os.environ.get("TEST_FILE", datadir / "irdata" / "nh4y-activation.spg")
-)
-dataset = scp.read(TEST_FILE)
+dataset = scp.read("irdata/nh4y-activation.spg")
 
 # %%
 # Default plot and style
@@ -69,7 +60,7 @@ _ = scp.plot_multiple(
 _ = scp.plot_multiple(method="scatter", datasets=datasets, labels=labels, legend="best")
 
 # %%
-# This ends the example ! The following line can be uncommented if no plot shows when
-# running the .py script with python
-
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+#
 # scp.show()

@@ -22,8 +22,7 @@ import spectrochempy as scp
 # %%
 # Load and prepare the dataset
 # ----------------------------
-datadir = scp.preferences.datadir
-nd = scp.read_omnic(datadir / "irdata" / "nh4y-activation.spg")
+nd = scp.read_omnic("irdata/nh4y-activation.spg")
 
 # %%
 # Keep only the spectral region of interest
@@ -182,7 +181,7 @@ _ = ndp[-1].plot(clear=False, color="green", ls="--")
 _ = corrected.plot()
 
 # %%
-# This ends the example ! The following line can be uncommented if no plot shows when
-# running the .py script with python
-
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+#
 # scp.show()

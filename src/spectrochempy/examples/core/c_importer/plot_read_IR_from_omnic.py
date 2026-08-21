@@ -18,8 +18,7 @@ import spectrochempy as scp
 # %%
 # Load and display the dataset
 # -----------------------------
-datadir = scp.preferences.datadir
-dataset = scp.read_omnic(datadir / "irdata" / "nh4y-activation.spg")
+dataset = scp.read_omnic("irdata/nh4y-activation.spg")
 _ = dataset.plot_stack(style="paper")
 
 # %%
@@ -32,7 +31,7 @@ dataset.y.title = "acquisition time"
 _ = dataset.plot_stack()
 
 # %%
-# This ends the example ! The following line can be uncommented if no plot shows when
-# running the .py script with python
-
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+#
 # scp.show()

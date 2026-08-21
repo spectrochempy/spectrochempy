@@ -60,7 +60,7 @@ _ = simpl.components.plot(title="Pure profiles")
 _ = simpl.plot_merit(offset=0, nb_traces=5)
 
 # %%
-# This ends the example ! The following line can be uncommented if no plot shows when
-# running the .py script with python
-
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+#
 # scp.show()

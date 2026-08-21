@@ -10,6 +10,8 @@ FastICA example
 
 """
 
+# sphinx_gallery_thumbnail_number = 3
+
 # %%
 # Import the spectrochempy API package
 import spectrochempy as scp
@@ -58,7 +60,6 @@ St = ica.St  # or model.mixing.T
 # %%
 # Plot them
 
-# sphinx_gallery_thumbnail_number = 3
 
 _ = A.T.plot(title="Mixing System", colormap=None)
 _ = St.plot(title="Sources spectral profiles", colormap=None)
@@ -82,7 +83,7 @@ _ = X_hat_b.plot(title=r"$\hat{X} =$ ica.inverse_transform()")
 
 _ = ica.plot_merit(nb_traces=15)
 # %%
-# This ends the example ! The following line can be uncommented if no plot shows when
-# running the .py script with python
-
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+#
 # scp.show()

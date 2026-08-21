@@ -31,10 +31,7 @@ import spectrochempy as scp
 # %%
 # Import a 1D NMR FID
 # -------------------
-datadir = scp.preferences.datadir
-nmrdir = datadir / "nmrdata"
-
-fid = scp.nmr.read(nmrdir / "bruker" / "tests" / "nmr" / "topspin_1d" / "1" / "fid")
+fid = scp.nmr.read("nmrdata/bruker/tests/nmr/topspin_1d/1/fid")
 
 # %%
 # Compare two explicit apodization choices
@@ -202,7 +199,7 @@ som = f1.inverse_transform()
 _ = f1.plot_merit(offset=2)
 
 # %%
-# This ends the example ! The following line can be removed or commented
-# when the example is run as a notebook (``.ipynb``).
-
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+#
 # scp.show()

@@ -14,20 +14,16 @@ either from local or remote files.
 
 # %%
 # First we need to import the spectrochempy API package
-import os
 from pathlib import Path
 
 import spectrochempy as scp
-
-TEST_FILE = Path(os.environ.get("TEST_FILE", "irdata/nh4y-activation.spg"))
-TEST_FOLDER = Path(os.environ.get("TEST_FOLDER", "irdata"))
 
 # %%
 # Import dataset from local files
 # -------------------------------
 # Read a IR data recorded in Omnic format (``.spg`` extension).
 # We just pass the file name as parameter.
-dataset = scp.read(TEST_FILE)
+dataset = scp.read("irdata/nh4y-activation.spg")
 dataset
 
 # %%
@@ -36,14 +32,8 @@ if dataset is not None:
 
 # %%
 # When using ``read``, we can pass filename as a ``str`` or a ``pathlib.Path`` object.
-filename = TEST_FILE
+filename = Path("irdata/nh4y-activation.spg")
 dataset = scp.read(filename)
-
-# %%
-# Note that is the file is not found in the current working directory, SpectroChemPy
-# will try to find it in the ``datadir`` directory defined in ``preferences`` :
-datadir = scp.preferences.datadir
-datadir
 
 # %%
 # If the supplied argument is a directory, then the whole directory is read at once.
@@ -52,7 +42,7 @@ datadir
 # or else a WARNING appears. To avoid the warning and get individual spectra, you can
 # set ``merge`` to ``False`` . This test-data directory may also contain historical
 # trusted native ``.scp`` archives, which require explicit legacy opt-in.
-dataset_list = scp.read(TEST_FOLDER, merge=False, allow_unsafe_legacy=True)
+dataset_list = scp.read("irdata", merge=False, allow_unsafe_legacy=True)
 print(dataset_list)
 
 # %%
@@ -93,7 +83,7 @@ else:
     _ = dataset_list[-4].plot()
 
 # %%
-# This ends the example ! The following line can be uncommented if no plot shows when
-# running the .py script with python
-
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+#
 # scp.show()

@@ -1,4 +1,3 @@
-# %%
 # ======================================================================================
 # Copyright (©) 2014-2026 Laboratoire Catalyse et Spectrochimie (LCS), Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -13,17 +12,16 @@ In this example, we find the least  square solution of a simple linear
 equation.
 
 """
+
 # sphinx_gallery_thumbnail_number = 2
 
 # %%
-import os
-
 import spectrochempy as scp
 
 # %%
 # Load and prepare an IR spectrum
 # --------------------------------
-nd = scp.read_omnic(os.path.join("irdata", "nh4y-activation.spg"))
+nd = scp.read_omnic("irdata/nh4y-activation.spg")
 
 # %%
 # Select the OH region and mask a noisy interval:
@@ -106,7 +104,7 @@ som = f1.inverse_transform()
 _ = f1.plot_merit(ndOH, som, offset=15)
 
 # %%
-# This ends the example ! The following line can be uncommented if no plot shows when
-# running the .py script with python
-
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+#
 # scp.show()

@@ -1,4 +1,3 @@
-# %%
 # ======================================================================================
 # Copyright (©) 2014-2026 Laboratoire Catalyse et Spectrochimie (LCS), Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -12,11 +11,12 @@ In this example, we create a 3D NDDataset from scratch,
 and then we plot one section (a 2D plane)
 """
 
+# sphinx_gallery_thumbnail_number = 2
+
 # %%
 # Creation
 # --------
 # Now we will create a 3D NDDataset from scratch
-import numpy as np
 
 # %%
 # As usual, we start by loading the spectrochempy library
@@ -45,12 +45,14 @@ coord2 = scp.Coord.linspace(4000.0, 1000.0, 100, units="cm^-1", title="wavenumbe
 a = coord0["normal"]
 a
 
-
 # %%
 # Data and nd-Dataset
 # ~~~~~~~~~~~~~~~~~~~
 # ``scp.fromfunction`` builds an NDDataset directly from a Python function.
 # The function receives the coordinate arrays and returns the intensity values.
+import numpy as np
+
+
 def synth_func(temperature, time, wavenumber):
     return np.sin(2.0 * np.pi * wavenumber / 4000.0) * np.exp(-time / 60) * temperature
 
@@ -91,7 +93,6 @@ _ = new.plot(colorbar=True)
 # related to the value of the absorbance. As the dataset contains both negative and positive values, the default
 # colormap is diverging (``RdBu``).
 #
-# sphinx_gallery_thumbnail_number = 2
 _ = new.plot(method="image", colorbar=True)
 
 # %%
@@ -109,7 +110,7 @@ _ = scp.abs(new).plot(method="contour")
 _ = scp.plot_contour(new)
 
 # %%
-# This ends the example ! The following line can be uncommented if no plot shows when
-# running the .py script with python
-
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+#
 # scp.show()

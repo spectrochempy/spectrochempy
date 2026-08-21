@@ -39,11 +39,7 @@ U = scp.ur
 # %%
 # Import a pseudo-2D delay series
 # -------------------------------
-# Define the folder containing the Bruker experiment.
-datadir = scp.preferences.datadir
-nmrdir = datadir / "nmrdata" / "bruker" / "tests" / "nmr"
-
-dataset = scp.nmr.read(nmrdir / "relax" / "100" / "ser", use_list="vdlist")
+dataset = scp.nmr.read("nmrdata/bruker/tests/nmr/relax/100/ser", use_list="vdlist")
 
 # %%
 # Analysing the data
@@ -123,7 +119,7 @@ _ = som.plot(clear=False, color="tab:orange", lw=1.8, label="fitted curve")
 _ = ax.legend()
 
 # %%
-# This ends the example ! The following line can be removed or commented
-# when the example is run as a notebook (``.ipynb``).
-
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+#
 # scp.show()

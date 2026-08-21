@@ -48,7 +48,7 @@ sg = scp.Filter(method="savgol", size=7, order=2)(region)
 _ = scp.plot_compare(region, sg, title="Savitzky-Golay smoothing (size=7, order=2)")
 
 # %%
-# This ends the example. Uncomment the next line to display the figures when
-# running the script directly with Python.
-
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+#
 # scp.show()

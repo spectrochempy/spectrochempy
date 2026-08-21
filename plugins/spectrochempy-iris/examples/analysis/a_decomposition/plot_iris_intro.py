@@ -65,4 +65,8 @@ f = iris_analysis.result.f
 
 _ = f[-7].plot_contour(colorbar=True)
 
+# %%
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+#
 # scp.show()

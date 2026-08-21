@@ -1,4 +1,3 @@
-# %%
 # ======================================================================================
 # Copyright (©) 2014-2026 Laboratoire Catalyse et Spectrochimie (LCS), Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -7,7 +6,7 @@
 # ruff: noqa
 """
 Reading a PerkinElmer SP file (plugin)
-=========================================
+======================================
 
 This example shows how to read a PerkinElmer ``.sp`` binary IR file using the
 optional ``spectrochempy-perkinelmer`` plugin.
@@ -17,6 +16,9 @@ optional ``spectrochempy-perkinelmer`` plugin.
    **Requires the official ``spectrochempy-perkinelmer`` plugin.**
    Install with: ``pip install spectrochempy[perkinelmer]``.
 """
+
+
+# sphinx_gallery_thumbnail_number = 1
 
 # %%
 import spectrochempy as scp
@@ -28,10 +30,7 @@ import spectrochempy as scp
 # ``scp.perkinelmer``. A single-spectrum ``.sp`` file is loaded as an
 # ``NDDataset`` with wavelength coordinates and available metadata.
 
-datadir = scp.preferences.datadir
-filename = datadir / "irdata" / "perkinelmer" / "spectra.sp"
-
-dataset = scp.perkinelmer.read(filename)
+dataset = scp.perkinelmer.read("irdata/perkinelmer/spectra.sp")
 
 # %%
 # Display the dataset summary:
@@ -51,11 +50,7 @@ print(f"Accumulations:   {dataset.meta.accumulations}")
 _ = dataset.plot()
 
 # %%
-# Use the plotted spectrum as the gallery thumbnail.
-# sphinx_gallery_thumbnail_number = 1
-
-# %%
-# This ends the example ! The following line can be removed or commented
-# when the example is run as a notebook (``.ipynb``).
-
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+#
 # scp.show()

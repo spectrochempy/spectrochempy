@@ -12,16 +12,12 @@ This example compares a few explicit plotting methods available for the same
 infrared dataset.
 """
 
-import os
-from pathlib import Path
-
 import spectrochempy as scp
 
 # %%
 # Load and prepare the dataset
 # -----------------------------
-TEST_FILE = Path(os.environ.get("TEST_FILE", "irdata/nh4y-activation.spg"))
-dataset = scp.read(TEST_FILE)
+dataset = scp.read("irdata/nh4y-activation.spg")
 dataset = dataset[:, 4000.0:650.0]
 dataset.y -= dataset.y[0]
 dataset.y.ito("hour")
@@ -56,7 +52,7 @@ _ = dataset.plot_image(
 )
 
 # %%
-# This ends the example. Uncomment the next line to display the figures when
-# running the script directly with Python.
-
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+#
 # scp.show()

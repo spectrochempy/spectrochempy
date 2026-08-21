@@ -17,13 +17,8 @@ import spectrochempy as scp
 # %%
 # Importing a 1D spectra
 # ----------------------
-# Define the folder where are the spectra
-datadir = scp.preferences.datadir
-ramandir = datadir / "ramandata/labspec"
-
-# %%
 # Read a single spectrum
-A = scp.read_labspec("SMC1-Initial_RT.txt", directory=ramandir)
+A = scp.read_labspec("ramandata/labspec/SMC1-Initial_RT.txt")
 
 # %%
 # Plot the spectrum
@@ -138,7 +133,7 @@ plot_result(Bs, corr, baseline)
 # --------------------------------------------------
 # First, we read the series of spectra
 
-C = scp.read_labspec("Activation.txt", directory=ramandir)
+C = scp.read_labspec("ramandata/labspec/Activation.txt")
 # C = C[20:]  # discard the first 20 spectra
 _ = C.plot()
 
@@ -176,7 +171,7 @@ G = scp.denoise(D, ratio=98)
 _ = G[::10].plot()
 
 # %%
-# This ends the example ! The following line can be removed or commented
-# when the example is run as a notebook (``.ipynb``).
-
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+#
 # scp.show()

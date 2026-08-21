@@ -19,6 +19,8 @@ For convenience, this dataset is also available in the SpectroChemPy test-data
 directory as ``matlabdata/METING9.MAT``.
 """
 
+# sphinx_gallery_thumbnail_number = 6
+
 import spectrochempy as scp
 
 # %%
@@ -103,7 +105,6 @@ _ = mcr_2.fit(X, Ckin)
 # Now, let's compare the concentration profile of the hard-soft modeling with
 # the previous one:
 
-# sphinx_gallery_thumbnail_number = 6
 
 _ = mcr_2.C.T.plot()
 _ = mcr_1.C_constrained.T.plot(clear=False, ls="--")
@@ -115,7 +116,7 @@ _ = mcr_2.St.plot()
 _ = mcr_2.plot_merit(nb_traces=10, offset=5)
 
 # %%
-# This ends the example ! The following line can be uncommented if no plot shows when
-# running the .py script with python
-
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+#
 # scp.show()

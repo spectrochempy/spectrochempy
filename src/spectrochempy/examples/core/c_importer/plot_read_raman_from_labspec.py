@@ -13,9 +13,7 @@ import spectrochempy as scp
 # %%
 # Read and plot a single file
 # ----------------------------
-datadir = scp.preferences.datadir
-ramandir = datadir / "ramandata/labspec"
-A = scp.read_labspec("Activation.txt", directory=ramandir)
+A = scp.read_labspec("ramandata/labspec/Activation.txt")
 A
 
 # %%
@@ -34,11 +32,11 @@ _ = A.plot_map()
 # %%
 # Read and merge multiple files
 # ------------------------------
-B = scp.read_labspec(ramandir / "subdir")
+B = scp.read_labspec("ramandata/labspec/subdir")
 _ = B.plot()
 
 # %%
-# This ends the example ! The following line can be uncommented if no plot shows when
-# running the .py script with python
-
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+#
 # scp.show()
