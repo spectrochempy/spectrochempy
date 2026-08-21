@@ -4,6 +4,8 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # ruff: noqa
+# sphinx_gallery_thumbnail_number = -1
+
 """
 Denoising a 2D Raman spectrum
 =============================
@@ -11,8 +13,6 @@ Denoising a 2D Raman spectrum
 In this example, we use the ``denoise`` method to remove the noise from a 2D Raman
 spectrum.
 """
-
-# sphinx_gallery_thumbnail_number = -1
 
 # %%
 # Import spectrochempy

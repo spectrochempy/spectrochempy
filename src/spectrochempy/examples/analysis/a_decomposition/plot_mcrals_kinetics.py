@@ -4,6 +4,8 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # ruff: noqa
+# sphinx_gallery_thumbnail_number = 6
+
 """
 MCR-ALS with kinetic constraints
 ================================
@@ -18,8 +20,6 @@ of Amsterdam <http://www.bdagroup.nl/content/Downloads/datasets/datasets.php>`__
 For convenience, this dataset is also available in the SpectroChemPy test-data
 directory as ``matlabdata/METING9.MAT``.
 """
-
-# sphinx_gallery_thumbnail_number = 6
 
 import spectrochempy as scp
 
