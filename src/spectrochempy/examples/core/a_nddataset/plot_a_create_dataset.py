@@ -110,6 +110,7 @@ _ = scp.abs(new).plot(method="contour")
 _ = scp.plot_contour(new)
 
 # %%
+
 # Uncomment the following line to display all figures when running the script
 # directly with Python.
 #

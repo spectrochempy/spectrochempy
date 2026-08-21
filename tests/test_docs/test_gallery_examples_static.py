@@ -21,6 +21,7 @@ THUMBNAIL_PREFIXES = (
 )
 CANONICAL_FOOTER = (
     "# %%\n"
+    "\n"
     "# Uncomment the following line to display all figures when running the script\n"
     "# directly with Python.\n"
     "#\n"

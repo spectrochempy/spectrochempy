@@ -59,6 +59,7 @@ _ = nd4.plot(title="denoised data")
 # effect on cosmic ray spikes.  Consider using ``despike`` methods for those.
 
 # %%
+
 # Uncomment the following line to display all figures when running the script
 # directly with Python.
 #

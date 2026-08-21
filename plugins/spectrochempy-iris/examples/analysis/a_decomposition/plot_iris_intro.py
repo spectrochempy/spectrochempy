@@ -138,6 +138,7 @@ _ = iris3.plotmerit(5)
 
 
 # %%
+
 # Uncomment the following line to display all figures when running the script
 # directly with Python.
 #

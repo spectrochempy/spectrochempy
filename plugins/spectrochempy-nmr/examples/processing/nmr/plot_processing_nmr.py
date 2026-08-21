@@ -199,6 +199,7 @@ som = f1.inverse_transform()
 _ = f1.plot_merit(offset=2)
 
 # %%
+
 # Uncomment the following line to display all figures when running the script
 # directly with Python.
 #

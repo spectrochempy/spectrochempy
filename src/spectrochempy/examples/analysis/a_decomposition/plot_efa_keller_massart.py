@@ -94,6 +94,7 @@ C = efa.transform()
 _ = C.T.plot(title="EFA concentration")
 
 # %%
+
 # Uncomment the following line to display all figures when running the script
 # directly with Python.
 #

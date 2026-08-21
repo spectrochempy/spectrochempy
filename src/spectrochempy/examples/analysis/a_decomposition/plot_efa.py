@@ -93,6 +93,7 @@ LT = pca.loadings
 _ = LT.plot(title="PCA components", legend=LT.k.labels)
 
 # %%
+
 # Uncomment the following line to display all figures when running the script
 # directly with Python.
 #

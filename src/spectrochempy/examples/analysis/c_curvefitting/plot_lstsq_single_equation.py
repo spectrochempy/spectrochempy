@@ -104,6 +104,7 @@ distance_fitted3 = lstsq.predict()
 _ = distance_fitted3.plot_pen(clear=False, color="g", label="Fitted line", legend=True)
 
 # %%
+
 # Uncomment the following line to display all figures when running the script
 # directly with Python.
 #
