@@ -105,4 +105,4 @@ _ = spectrum.imag.plot(ax=ax, clear=False, color="red")
 # Uncomment the following line to display all figures when running the script
 # directly with Python.
 #
-# scp.show()
+# # scp.show()

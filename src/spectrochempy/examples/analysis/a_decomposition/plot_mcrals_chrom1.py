@@ -101,4 +101,4 @@ _ = mcr.plot_merit(nb_traces=5)
 # Uncomment the following line to display all figures when running the script
 # directly with Python.
 #
-# scp.show()
+# # scp.show()

@@ -65,4 +65,4 @@ _ = dataset[..., 1529.0].plot_image(equal_aspect=True)
 # Uncomment the following line to display all figures when running the script
 # directly with Python.
 #
-# scp.show()
+# # scp.show()

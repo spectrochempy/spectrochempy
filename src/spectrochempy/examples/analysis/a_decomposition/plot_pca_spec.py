@@ -128,4 +128,4 @@ _ = pca.plot_score(scores=scores, show_labels=True, labels_column=2)
 # Uncomment the following line to display all figures when running the script
 # directly with Python.
 #
-# scp.show()
+# # scp.show()

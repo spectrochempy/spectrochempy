@@ -24,7 +24,7 @@ CANONICAL_FOOTER = (
     "# Uncomment the following line to display all figures when running the script\n"
     "# directly with Python.\n"
     "#\n"
-    "# scp.show()\n"
+    "# # scp.show()\n"
 )
 DATADIR_TEST_VARIABLES = {"TEST_FILE", "TEST_FOLDER", "TEST_NMR_FOLDER"}
 

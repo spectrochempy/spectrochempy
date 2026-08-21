@@ -51,4 +51,4 @@ _ = scp.plot_compare(region, sg, title="Savitzky-Golay smoothing (size=7, order=
 # Uncomment the following line to display all figures when running the script
 # directly with Python.
 #
-# scp.show()
+# # scp.show()

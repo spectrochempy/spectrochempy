@@ -107,4 +107,4 @@ _ = distance_fitted3.plot_pen(clear=False, color="g", label="Fitted line", legen
 # Uncomment the following line to display all figures when running the script
 # directly with Python.
 #
-# scp.show()
+# # scp.show()
