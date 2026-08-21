@@ -8,8 +8,6 @@
 import numpy as np
 
 import spectrochempy as scp
-from spectrochempy import Coord
-from spectrochempy import NDDataset
 from spectrochempy.core.units import ur
 
 
@@ -48,7 +46,7 @@ def _assert_ftir_coordinate_matches_rfft_bins(source, transformed):
     x = np.asarray(transformed.x.data, dtype=float)
     spacing = abs(source.x.spacing)
     expected = np.fft.rfftfreq(source.size)[: transformed.x.size][::-1] / spacing
-    expected = Coord(expected).to("cm^-1").data
+    expected = scp.Coord(expected).to("cm^-1").data
 
     assert np.array_equal(x, expected)
     assert x[0] == expected[0]
@@ -116,9 +114,9 @@ def test_generic_complex_fft_coordinate_matches_shifted_frequency_order():
     frequency = bin_index / (size * spacing)
     time = np.arange(size) * spacing
     data = np.exp(2j * np.pi * frequency * time)
-    dataset = NDDataset(
+    dataset = scp.NDDataset(
         data,
-        coordset=[Coord(time, units="s")],
+        coordset=[scp.Coord(time, units="s")],
         meta={"td": [size], "isfreq": [False]},
     )
 
@@ -141,9 +139,9 @@ def test_generic_real_fft_coordinate_matches_shifted_frequency_order():
     frequency = bin_index / (size * spacing)
     time = np.arange(size) * spacing
     data = np.cos(2 * np.pi * frequency * time)
-    dataset = NDDataset(
+    dataset = scp.NDDataset(
         data,
-        coordset=[Coord(time, units="s")],
+        coordset=[scp.Coord(time, units="s")],
         meta={"td": [size], "isfreq": [False]},
     )
 
