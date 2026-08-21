@@ -77,8 +77,9 @@ ax = St.plot(title="Components", colormap=None, legend=St.k.labels)
 _ = ax.set_yticks([])
 
 # %%
-
 # Uncomment the following line to display all figures when running the script
 # directly with Python.
-#
+
+# %%
+
 # scp.show()

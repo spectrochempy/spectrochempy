@@ -116,8 +116,9 @@ _ = mcr_2.St.plot()
 _ = mcr_2.plot_merit(nb_traces=10, offset=5)
 
 # %%
-
 # Uncomment the following line to display all figures when running the script
 # directly with Python.
-#
+
+# %%
+
 # scp.show()

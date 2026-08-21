@@ -138,8 +138,9 @@ row10.x.select(2)
 _ = row10.plot()
 
 # %%
-
 # Uncomment the following line to display all figures when running the script
 # directly with Python.
-#
+
+# %%
+
 # scp.show()

@@ -35,8 +35,9 @@ for nd in ex3:
 ex3
 
 # %%
-
 # Uncomment the following line to display all figures when running the script
 # directly with Python.
-#
+
+# %%
+
 # scp.show()

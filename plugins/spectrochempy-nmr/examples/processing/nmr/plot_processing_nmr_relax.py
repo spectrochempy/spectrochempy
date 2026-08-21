@@ -119,8 +119,9 @@ _ = som.plot(clear=False, color="tab:orange", lw=1.8, label="fitted curve")
 _ = ax.legend()
 
 # %%
-
 # Uncomment the following line to display all figures when running the script
 # directly with Python.
-#
+
+# %%
+
 # scp.show()

@@ -96,8 +96,9 @@ _ = new5.real.plot(
 _ = ax.legend()
 
 # %%
-
 # Uncomment the following line to display all figures when running the script
 # directly with Python.
-#
+
+# %%
+
 # scp.show()

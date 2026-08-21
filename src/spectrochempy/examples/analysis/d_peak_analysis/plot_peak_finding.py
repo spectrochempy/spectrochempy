@@ -95,8 +95,9 @@ evolution.units = "cm^-1"
 _ = evolution.plot(ls=":", marker="o", ms=3)
 
 # %%
-
 # Uncomment the following line to display all figures when running the script
 # directly with Python.
-#
+
+# %%
+
 # scp.show()
