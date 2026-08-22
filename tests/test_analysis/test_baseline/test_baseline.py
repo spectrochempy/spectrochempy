@@ -9,6 +9,27 @@ from spectrochempy.processing.baselineprocessing.baselineprocessing import Basel
 from spectrochempy.utils.testing import assert_dataset_equal
 
 
+def _make_simple_baseline_dataset(
+    n_points=11, *, descending=False, units="cm^-1", dataset_units="absorbance"
+):
+    x = np.linspace(1000.0, 2000.0, n_points)
+    if descending:
+        x = x[::-1]
+
+    # Exact polynomial support keeps the validation tests focused on API
+    # contracts rather than numeric quality.
+    data = 0.002 * x + 0.5
+
+    dataset = scp.NDDataset(
+        data,
+        coordset=[scp.Coord(x, title="wavenumber", units=units)],
+        units=dataset_units,
+        title="simple baseline dataset",
+    )
+    dataset.name = f"simple_baseline_{n_points}"
+    return dataset
+
+
 def test_baseline_fit_1d(synthetic_1d_baseline_dataset):
     dataset, _, _ = synthetic_1d_baseline_dataset
 
@@ -210,6 +231,106 @@ def test_baseline_polynomial_with_ranges(synthetic_1d_baseline_dataset):
 
     assert blc.baseline.shape == dataset.shape
     assert np.all(np.isfinite(blc.baseline.data))
+
+
+@pytest.mark.parametrize(
+    ("n_points", "order", "should_fit"),
+    [
+        (1, "constant", True),
+        (1, 1, False),
+        (2, 1, True),
+        (2, 3, False),
+        (3, 1, True),
+        (3, 3, False),
+    ],
+)
+def test_baseline_polynomial_short_dataset_validation(n_points, order, should_fit):
+    dataset = _make_simple_baseline_dataset(n_points)
+
+    blc = Baseline(model="polynomial", order=order)
+
+    if should_fit:
+        blc.fit(dataset)
+        assert np.all(np.isfinite(np.asarray(blc.baseline.data)))
+        assert blc.baseline.units == dataset.units
+    else:
+        with pytest.raises(ValueError, match="too short"):
+            blc.fit(dataset)
+
+
+def test_baseline_polynomial_without_ranges_and_without_limits_errors():
+    dataset = _make_simple_baseline_dataset()
+    original = dataset.copy()
+
+    blc = Baseline(model="polynomial", order=1, include_limits=False)
+
+    with pytest.raises(ValueError, match="No baseline support ranges were selected"):
+        blc.fit(dataset)
+
+    assert_dataset_equal(dataset, original)
+
+
+def test_baseline_polynomial_constant_order_accepts_single_point_range():
+    dataset = _make_simple_baseline_dataset()
+
+    blc = Baseline(model="polynomial", order="constant", include_limits=False)
+    blc.ranges = [[1500.0, 1500.0]]
+    blc.fit(dataset)
+
+    assert blc.baseline.shape == dataset.shape
+    assert blc.baseline.units == dataset.units
+    assert blc.corrected.units == dataset.units
+
+
+@pytest.mark.parametrize(
+    ("ranges", "message"),
+    [
+        ([[1500.0, 1500.0]], "support is too small"),
+        ([[1500.0, 1500.1]], "support is too small"),
+        ([[1500.0, 1500.0], [1700.0, 1700.0]], "support is too small"),
+    ],
+)
+def test_baseline_polynomial_rejects_insufficient_support_ranges(ranges, message):
+    dataset = _make_simple_baseline_dataset()
+    original = dataset.copy()
+
+    blc = Baseline(model="polynomial", order=3, include_limits=False)
+    blc.ranges = ranges
+
+    with pytest.raises(ValueError, match=message):
+        blc.fit(dataset)
+
+    assert_dataset_equal(dataset, original)
+
+
+@pytest.mark.parametrize("descending", [False, True])
+def test_baseline_polynomial_rejects_ranges_outside_domain(descending):
+    dataset = _make_simple_baseline_dataset(descending=descending)
+    original = dataset.copy()
+
+    blc = Baseline(model="polynomial", order=1, include_limits=False)
+    blc.ranges = [[2500.0, 2600.0]]
+
+    with pytest.raises(ValueError, match="do not intersect the coordinate domain"):
+        blc.fit(dataset)
+
+    assert_dataset_equal(dataset, original)
+
+
+@pytest.mark.parametrize("descending", [False, True])
+def test_baseline_polynomial_accepts_partially_out_of_domain_ranges(descending):
+    dataset = _make_simple_baseline_dataset(descending=descending)
+    original = dataset.copy()
+
+    blc = Baseline(model="polynomial", order=1, include_limits=False)
+    blc.ranges = [[900.0, 1200.0], [1800.0, 2100.0]]
+    blc.fit(dataset)
+
+    assert blc.baseline.shape == dataset.shape
+    assert blc.baseline.units == dataset.units
+    assert blc.corrected.units == dataset.units
+    assert blc.baseline.x.is_descendant == dataset.x.is_descendant
+    assert_dataset_equal(dataset, original)
 
 
 def test_preprocessing_nddataset_methods(synthetic_1d_baseline_dataset):

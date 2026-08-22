@@ -153,6 +153,12 @@ X3[:, 891.0:1234.0].mask.all(), blc.baseline[:, 891.0:1234.0].mask.all()
 # using `[3500.0, 4500.]` would
 # lead to exactly the same result. It is also possible to formally pick a single
 # wavenumber `3750.`.
+#
+# The selected support must contain enough distinct coordinate points for the
+# requested fit. In practice, polynomial orders require more support points than
+# the requested degree, while `order="pchip"` requires at least two distinct
+# points. Ranges that do not intersect the coordinate domain now raise a clear
+# `ValueError`.
 
 # %%
 ranges = (

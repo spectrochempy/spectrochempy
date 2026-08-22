@@ -29,6 +29,10 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Hardened polynomial baseline fitting on short or underspecified spectra by
+  validating support size explicitly, reporting non-intersecting ranges with
+  clear ``ValueError`` messages, and avoiding internal index failures when
+  automatic edge support is enabled.
 
 .. section
 
