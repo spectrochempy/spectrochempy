@@ -4,7 +4,8 @@ requires = ["setuptools>=64", "setuptools-scm>=8", "wheel"]
 
 [project]
 authors = [
-  {name = "Arnaud Travert & Christian Fernandez", email = "contact@spectrochempy.fr"},
+  {name = "Arnaud Travert", email = "contact@spectrochempy.fr"},
+  {name = "Christian Fernandez", email = "christian.fernandez@ensicaen.fr"},
 ]
 classifiers = [
   "Development Status :: 4 - Beta",
