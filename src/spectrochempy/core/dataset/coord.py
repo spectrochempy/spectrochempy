@@ -897,17 +897,27 @@ class Coord(NDMath, NDArray):
         makeitlinear = is_number(spacing)
 
         if not makeitlinear and is_iterable(spacing):
-            # may be the variation in % are small enough (0.1%)
-            spacing_max = np.max(spacing)
-            spacing_scale = np.abs(spacing_max)
-            if spacing_scale == 0:
-                variation = 0.0
+            # The spacings are not uniform at the requested precision.
+            # Decide whether they are close enough to uniform to allow
+            # linearization, using magnitude-based comparisons so that
+            # ascending and descending axes are treated symmetrically.
+            mags = np.abs(np.asarray(spacing, dtype=float))
+            signs = np.sign(spacing)
+            if (
+                not np.all(np.isfinite(mags))
+                or np.any(mags == 0)
+                or np.unique(signs[signs != 0]).size > 1
+            ):
+                # A zero spacing (duplicated coordinate value), a non-finite
+                # spacing, or spacings of opposite signs can never describe a
+                # regularly spaced axis: keep the original data untouched.
+                makeitlinear = False
             else:
-                variation = (
-                    (spacing_max - np.min(spacing)) * 100.0 / spacing_scale / 2.0
-                )
-            if variation <= self._linearize_below:
-                makeitlinear = True
+                spacing_max = np.max(mags)
+                spacing_min = np.min(mags)
+                variation = (spacing_max - spacing_min) * 100.0 / spacing_max / 2.0
+                if variation <= self._linearize_below:
+                    makeitlinear = True
 
         if makeitlinear:
             # single spacing with this precision
