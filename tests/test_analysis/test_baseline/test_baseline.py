@@ -6,6 +6,7 @@ from scipy.sparse import SparseEfficiencyWarning
 
 import spectrochempy as scp
 from spectrochempy.processing.baselineprocessing.baselineprocessing import Baseline
+from spectrochempy.processing.transformation.concatenate import concatenate
 from spectrochempy.utils.testing import assert_dataset_equal
 
 
@@ -63,6 +64,16 @@ def _make_shape_probe_dataset(
     )
     dataset.name = name
     return dataset
+
+
+def _explicit_polynomial_support(dataset, ranges):
+    sections = []
+    for pair in ranges:
+        section = dataset[..., slice(*pair)]
+        if section is None:
+            continue
+        sections.append(section)
+    return concatenate(sections)
 
 
 def test_baseline_fit_1d(synthetic_1d_baseline_dataset):
@@ -539,6 +550,36 @@ def test_baseline_polynomial_accepts_partially_out_of_domain_ranges(descending):
     assert blc.baseline.units == dataset.units
     assert blc.corrected.units == dataset.units
     assert blc.baseline.x.is_descendant == dataset.x.is_descendant
+    assert_dataset_equal(dataset, original)
+
+
+@pytest.mark.parametrize(
+    ("n_rows", "descending", "masked"),
+    [
+        (None, False, False),
+        (None, True, False),
+        (3, False, False),
+        (3, True, True),
+    ],
+)
+def test_baseline_polynomial_support_assembly_matches_explicit_concatenation(
+    n_rows, descending, masked
+):
+    dataset = _make_shape_probe_dataset(n_rows=n_rows, descending=descending)
+    if masked:
+        dataset[1050.0:1100.0] = scp.MASKED
+        dataset[1400.0:1500.0] = scp.MASKED
+    original = dataset.copy()
+
+    blc = Baseline(model="polynomial", order=3, include_limits=False)
+    blc.ranges = [[1000.0, 1125.0], [1875.0, 2000.0]]
+    blc.fit(dataset)
+
+    expected = _explicit_polynomial_support(blc._X, blc.used_ranges)
+    expected.sort(inplace=True, descend=False)
+
+    assert_dataset_equal(blc._X_ranges, expected)
+    assert np.array_equal(np.asarray(blc._X_ranges.mask), np.asarray(expected.mask))
     assert_dataset_equal(dataset, original)
 
 
