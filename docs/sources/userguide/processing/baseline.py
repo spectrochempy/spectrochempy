@@ -93,7 +93,9 @@ _ = blc.plot()
 
 # %% [markdown]
 # One can also use the property `corrected` instead of the method `transform()`,
-# both giving equivalent results.
+# both giving equivalent results. In both cases, `baseline` and `corrected`
+# preserve the logical shape of the input dataset: a strictly 1D input remains
+# 1D, while an explicitly 2D input remains 2D.
 
 # %%
 X1 = blc.corrected

@@ -30,6 +30,41 @@ def _make_simple_baseline_dataset(
     return dataset
 
 
+def _make_shape_probe_dataset(
+    n_points=64,
+    *,
+    n_rows=None,
+    descending=False,
+    units="cm^-1",
+    dataset_units="absorbance",
+):
+    x = np.linspace(1000.0, 2000.0, n_points)
+    if descending:
+        x = x[::-1]
+
+    base = 0.002 * x + 0.5 + 0.1 * np.sin(np.linspace(0.0, 4.0, n_points))
+    if n_rows is None:
+        data = base
+        coordset = [scp.Coord(x, title="wavenumber", units=units)]
+        name = f"shape_probe_1d_{n_points}"
+    else:
+        data = np.vstack([base + 0.01 * i for i in range(n_rows)])
+        coordset = [
+            scp.Coord(np.arange(n_rows, dtype=float), title="row", units=None),
+            scp.Coord(x, title="wavenumber", units=units),
+        ]
+        name = f"shape_probe_{n_rows}x{n_points}"
+
+    dataset = scp.NDDataset(
+        data,
+        coordset=coordset,
+        units=dataset_units,
+        title="baseline shape probe dataset",
+    )
+    dataset.name = name
+    return dataset
+
+
 def test_baseline_fit_1d(synthetic_1d_baseline_dataset):
     dataset, _, _ = synthetic_1d_baseline_dataset
 
@@ -57,6 +92,134 @@ def test_baseline_fit_2d(synthetic_2d_baseline_dataset):
     assert baseline.shape == dataset.shape
     assert np.all(np.isfinite(baseline.data))
     assert np.all(np.isfinite(corrected.data))
+
+
+@pytest.mark.parametrize(
+    ("model", "kwargs"),
+    [
+        ("polynomial", {"order": 3}),
+        ("asls", {"lamb": 1e5, "asymmetry": 0.05}),
+        ("snip", {"snip_width": 15}),
+        ("rubberband", {}),
+    ],
+)
+@pytest.mark.parametrize("descending", [False, True])
+def test_baseline_corrected_preserves_shape_for_strict_1d_inputs(
+    model, kwargs, descending
+):
+    dataset = _make_shape_probe_dataset(descending=descending)
+    original = dataset.copy()
+
+    blc = Baseline(model=model, **kwargs)
+    blc.fit(dataset)
+
+    baseline = blc.baseline
+    corrected = blc.corrected
+
+    assert baseline.shape == dataset.shape
+    assert corrected.shape == dataset.shape
+    assert baseline.dims == dataset.dims
+    assert corrected.dims == dataset.dims
+    assert baseline.units == dataset.units
+    assert corrected.units == dataset.units
+    np.testing.assert_allclose(baseline.x.data, dataset.x.data)
+    np.testing.assert_allclose(corrected.x.data, dataset.x.data)
+    assert baseline.x.is_descendant == dataset.x.is_descendant
+    assert corrected.x.is_descendant == dataset.x.is_descendant
+    np.testing.assert_allclose(
+        np.asarray(corrected.data),
+        np.asarray(dataset.data) - np.asarray(baseline.data),
+    )
+    assert_dataset_equal(dataset, original)
+
+
+@pytest.mark.parametrize(
+    ("model", "kwargs"),
+    [
+        ("polynomial", {"order": 3}),
+        ("asls", {"lamb": 1e5, "asymmetry": 0.05}),
+        ("snip", {"snip_width": 15}),
+        ("rubberband", {}),
+    ],
+)
+@pytest.mark.parametrize("n_rows", [1, 3])
+def test_baseline_corrected_preserves_shape_for_2d_inputs(model, kwargs, n_rows):
+    dataset = _make_shape_probe_dataset(n_rows=n_rows)
+    original = dataset.copy()
+
+    blc = Baseline(model=model, **kwargs)
+    blc.fit(dataset)
+
+    baseline = blc.baseline
+    corrected = blc.corrected
+
+    assert baseline.shape == dataset.shape
+    assert corrected.shape == dataset.shape
+    assert baseline.dims == dataset.dims
+    assert corrected.dims == dataset.dims
+    assert baseline.units == dataset.units
+    assert corrected.units == dataset.units
+    np.testing.assert_allclose(baseline.x.data, dataset.x.data)
+    np.testing.assert_allclose(corrected.x.data, dataset.x.data)
+    np.testing.assert_allclose(baseline.y.data, dataset.y.data)
+    np.testing.assert_allclose(corrected.y.data, dataset.y.data)
+    np.testing.assert_allclose(
+        np.asarray(corrected.data),
+        np.asarray(dataset.data) - np.asarray(baseline.data),
+    )
+    assert_dataset_equal(dataset, original)
+
+
+@pytest.mark.parametrize(
+    ("func", "kwargs"),
+    [
+        (scp.basc, {}),
+        (scp.asls, {"lamb": 1e5, "asymmetry": 0.05}),
+        (lambda dataset: dataset.get_baseline(model="polynomial", order=3), {}),
+    ],
+)
+@pytest.mark.parametrize(
+    ("n_rows", "descending"),
+    [
+        (None, False),
+        (None, True),
+        (1, False),
+    ],
+)
+def test_baseline_public_helpers_preserve_public_shape(
+    func, kwargs, n_rows, descending
+):
+    dataset = _make_shape_probe_dataset(n_rows=n_rows, descending=descending)
+    original = dataset.copy()
+
+    output = func(dataset, **kwargs) if kwargs else func(dataset)
+
+    assert output.shape == dataset.shape
+    assert output.dims == dataset.dims
+    assert output.units == dataset.units
+    np.testing.assert_allclose(output.x.data, dataset.x.data)
+    assert output.x.is_descendant == dataset.x.is_descendant
+    if n_rows is not None:
+        np.testing.assert_allclose(output.y.data, dataset.y.data)
+    assert_dataset_equal(dataset, original)
+
+
+def test_baseline_corrected_preserves_mask_and_shape_for_strict_1d_snip():
+    dataset = _make_shape_probe_dataset()
+    dataset[1400.0:1500.0] = scp.MASKED
+    original = dataset.copy()
+    expected_mask = np.asarray(dataset.mask).copy()
+
+    blc = Baseline(model="snip", snip_width=15)
+    blc.fit(dataset)
+    corrected = blc.corrected
+
+    assert corrected.shape == dataset.shape
+    assert corrected.dims == dataset.dims
+    assert np.asarray(corrected.mask).shape == expected_mask.shape
+    assert np.array_equal(np.asarray(corrected.mask), expected_mask)
+    assert np.array_equal(np.asarray(dataset.mask), np.asarray(original.mask))
+    assert_dataset_equal(dataset, original)
 
 
 def test_baseline_polynomial_recovers_known_1d_baseline(
