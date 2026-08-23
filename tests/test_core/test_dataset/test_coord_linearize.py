@@ -1,4 +1,5 @@
-"""Regression tests for Coord.linearize() linearity detection.
+"""
+Regression tests for Coord.linearize() linearity detection.
 
 These tests cover the symmetric handling of ascending and descending axes,
 and ensure that irregular or duplicated coordinates are never silently
@@ -10,7 +11,6 @@ import pytest
 
 from spectrochempy import NDDataset
 from spectrochempy.core.dataset.coord import Coord
-
 
 # ==============================================================================
 # Regular axes: intentional linearization must be preserved
@@ -153,6 +153,7 @@ class TestLinearizeDuplicateValues:
         c = Coord(values)
         np.testing.assert_allclose(c.data, values)
 
+
 # ==============================================================================
 # Non-finite values: no artificial linearization, no silent loss
 # ==============================================================================
@@ -188,9 +189,7 @@ class TestNDDatasetDescendingDuplicateIntegration:
     def test_dataset_keeps_descending_duplicated_coordinates(self):
         # historical bug: this axis was replaced by a uniform grid at
         # dataset-construction time, before any processing could see it
-        values = np.array(
-            [10.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, 1.0, 0.0]
-        )
+        values = np.array([10.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, 1.0, 0.0])
         ds = NDDataset(np.arange(len(values), dtype=float))
         ds.set_coordset(Coord(title="x", data=values))
         np.testing.assert_allclose(ds.x._data.squeeze(), values)
