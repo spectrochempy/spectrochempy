@@ -204,6 +204,24 @@ def test_baseline_public_helpers_preserve_public_shape(
     assert_dataset_equal(dataset, original)
 
 
+def test_baseline_corrected_preserves_mask_and_shape_for_strict_1d_snip():
+    dataset = _make_shape_probe_dataset()
+    dataset[1400.0:1500.0] = scp.MASKED
+    original = dataset.copy()
+    expected_mask = np.asarray(dataset.mask).copy()
+
+    blc = Baseline(model="snip", snip_width=15)
+    blc.fit(dataset)
+    corrected = blc.corrected
+
+    assert corrected.shape == dataset.shape
+    assert corrected.dims == dataset.dims
+    assert np.asarray(corrected.mask).shape == expected_mask.shape
+    assert np.array_equal(np.asarray(corrected.mask), expected_mask)
+    assert np.array_equal(np.asarray(dataset.mask), np.asarray(original.mask))
+    assert_dataset_equal(dataset, original)
+
+
 def test_baseline_polynomial_recovers_known_1d_baseline(
     synthetic_1d_baseline_dataset,
 ):
