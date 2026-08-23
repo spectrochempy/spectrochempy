@@ -1,3 +1,4 @@
+from functools import partial
 import warnings
 
 import numpy as np
@@ -671,49 +672,49 @@ def test_baseline_polynomial_support_assembly_matches_explicit_concatenation(
         (
             "polynomial",
             {"order": 3, "include_limits": False},
-            lambda: _make_shape_probe_dataset(),
+            partial(_make_shape_probe_dataset),
             [[1000.0, 1125.0], [1875.0, 2000.0]],
             None,
         ),
         (
             "polynomial",
             {"order": 3, "include_limits": False},
-            lambda: _make_shape_probe_dataset(n_rows=3),
+            partial(_make_shape_probe_dataset, n_rows=3),
             [[1000.0, 1125.0], [1875.0, 2000.0]],
             None,
         ),
         (
             "polynomial",
             {"order": 3, "include_limits": False},
-            lambda: _make_shape_probe_dataset(),
+            partial(_make_shape_probe_dataset),
             [[1000.0, 1050.0], [1200.0, 1275.0], [1875.0, 2000.0]],
             None,
         ),
         (
             "asls",
             {"lamb": 1e5, "asymmetry": 0.05},
-            lambda: _make_shape_probe_dataset(),
+            partial(_make_shape_probe_dataset),
             None,
             None,
         ),
         (
             "asls",
             {"lamb": 1e5, "asymmetry": 0.05},
-            lambda: _make_shape_probe_dataset(),
+            partial(_make_shape_probe_dataset),
             None,
             (1400.0, 1500.0),
         ),
         (
             "snip",
             {"snip_width": 15},
-            lambda: _make_shape_probe_dataset(),
+            partial(_make_shape_probe_dataset),
             None,
             None,
         ),
         (
             "rubberband",
             {},
-            lambda: _make_shape_probe_dataset(),
+            partial(_make_shape_probe_dataset),
             None,
             None,
         ),
