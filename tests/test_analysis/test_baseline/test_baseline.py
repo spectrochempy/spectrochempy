@@ -1,5 +1,5 @@
-from functools import partial
 import warnings
+from functools import partial
 
 import numpy as np
 import pytest
