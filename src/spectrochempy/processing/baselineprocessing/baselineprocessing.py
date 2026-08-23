@@ -350,6 +350,27 @@ baseline/trends for different segments of the data.
     def _format_domain(domain_min, domain_max):
         return f"[{domain_min}, {domain_max}]"
 
+    @staticmethod
+    def _last_axis_is_monotone_increasing(dataset):
+        """
+        Return whether the dataset last axis is already fully monotone increasing.
+
+        This is a local fast-path guard for ``Baseline.fit()``: when the relevant
+        axis is already in the exact order required by the historical ascending
+        sort path, we can skip the corresponding ``sort(inplace=True,
+        descend=False)`` call without changing results.
+        """
+        values = np.asarray(dataset.coordset[dataset.dims[-1]].data)
+        if values.size < 2:
+            return True
+        return not np.any(values[:-1] > values[1:])
+
+    def _ensure_last_axis_monotone_increasing(self, dataset):
+        if self._last_axis_is_monotone_increasing(dataset):
+            return False
+        dataset.sort(inplace=True, descend=False)
+        return True
+
     def _polynomial_edge_ranges(self, values):
         values = np.asarray(values)
         if values.size == 0:
@@ -741,11 +762,11 @@ baseline/trends for different segments of the data.
 
         # _X_ranges has been computed when X and _ranges were set,
         # but we need increasing order of the coordinates
-        self._X_ranges.sort(inplace=True, descend=False)
+        self._ensure_last_axis_monotone_increasing(self._X_ranges)
 
         # to simplify further operation we also sort the self._X data
         descend = Xx.is_descendant
-        self._X.sort(inplace=True, descend=False)
+        self._ensure_last_axis_monotone_increasing(self._X)
         Xx = self._X.coordset[self._X.dims[-1]]  # get it again after sorting
 
         # _X_ranges is now ready, we can fit. _Xranges contains

@@ -267,13 +267,68 @@ def _measure_instrumented_fit_breakdown(
         dataset = scenario.factory()
         blc = _build_baseline(scenario)
         iteration_stats: dict[str, TimingStat] = defaultdict(TimingStat)
+        sort_context: dict[str, str | None] = {"value": None}
 
         with ExitStack() as stack:
             _patch_timed_method(
                 iteration_stats, NDDataset, "copy", "nddataset.copy", stack
             )
-            _patch_timed_method(
-                iteration_stats, NDDataset, "sort", "nddataset.sort", stack
+
+            original_sort = NDDataset.sort
+
+            def timed_sort(
+                self,
+                _original_sort=original_sort,
+                _sort_context=sort_context,
+                _iteration_stats=iteration_stats,
+                **kwargs,
+            ):
+                direction = "desc" if kwargs.get("descend") else "asc"
+                context = _sort_context["value"] or "other"
+                label = f"nddataset.sort.{direction}.{context}"
+                start = perf_counter()
+                try:
+                    return _original_sort(self, **kwargs)
+                finally:
+                    _iteration_stats[label].add(perf_counter() - start)
+
+            NDDataset.sort = timed_sort
+            stack.callback(setattr, NDDataset, "sort", original_sort)
+
+            original_ensure_monotone = (
+                baseline_module.Baseline._ensure_last_axis_monotone_increasing
+            )
+
+            def timed_ensure_monotone(
+                self,
+                candidate,
+                _original_ensure_monotone=original_ensure_monotone,
+                _sort_context=sort_context,
+                _iteration_stats=iteration_stats,
+            ):
+                if candidate is self._X_ranges:
+                    context = "_X_ranges"
+                elif candidate is self._X:
+                    context = "_X"
+                else:
+                    context = "other"
+                label = f"baseline.ensure_last_axis_monotone_increasing.{context}"
+                start = perf_counter()
+                _sort_context["value"] = context
+                try:
+                    return _original_ensure_monotone(self, candidate)
+                finally:
+                    _sort_context["value"] = None
+                    _iteration_stats[label].add(perf_counter() - start)
+
+            baseline_module.Baseline._ensure_last_axis_monotone_increasing = (
+                timed_ensure_monotone
+            )
+            stack.callback(
+                setattr,
+                baseline_module.Baseline,
+                "_ensure_last_axis_monotone_increasing",
+                original_ensure_monotone,
             )
             _patch_timed_method(
                 iteration_stats,
