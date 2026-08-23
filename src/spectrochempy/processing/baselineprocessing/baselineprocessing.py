@@ -18,9 +18,6 @@ from spectrochempy.application.application import info_
 from spectrochempy.application.application import warning_
 from spectrochempy.processing.baselineprocessing.baselineutils import lls
 from spectrochempy.processing.baselineprocessing.baselineutils import lls_inv
-from spectrochempy.processing.transformation.concatenate import (
-    concatenate,  # noqa: F401
-)
 from spectrochempy.utils.constants import TYPE_FLOAT
 from spectrochempy.utils.constants import TYPE_INTEGER
 from spectrochempy.utils.coordrange import trim_ranges

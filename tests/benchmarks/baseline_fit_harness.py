@@ -289,13 +289,14 @@ def _measure_instrumented_fit_breakdown(
                 "coord.loc2index",
                 stack,
             )
-            _patch_timed_method(
-                iteration_stats,
-                baseline_module,
-                "concatenate",
-                "baseline.concatenate",
-                stack,
-            )
+            if hasattr(baseline_module, "concatenate"):
+                _patch_timed_method(
+                    iteration_stats,
+                    baseline_module,
+                    "concatenate",
+                    "baseline.concatenate",
+                    stack,
+                )
             _patch_timed_method(
                 iteration_stats,
                 baseline_module,
