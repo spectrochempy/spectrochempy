@@ -22,6 +22,12 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- Fixed a false linearity detection in ``Coord`` that could silently replace
+  descending coordinates containing duplicated or irregularly spaced values
+  with an artificial uniform grid. Such coordinates are now preserved as
+  provided, while genuinely regular ascending and descending axes keep being
+  detected as linear.
+
 - Hardened polynomial baseline fitting on short or underspecified spectra by
   validating support size explicitly, reporting non-intersecting ranges with
   clear ``ValueError`` messages, and avoiding internal index failures when
