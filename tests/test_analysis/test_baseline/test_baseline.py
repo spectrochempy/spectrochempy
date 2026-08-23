@@ -567,6 +567,7 @@ def test_baseline_polynomial_support_assembly_matches_explicit_concatenation(
 ):
     dataset = _make_shape_probe_dataset(n_rows=n_rows, descending=descending)
     if masked:
+        dataset[1050.0:1100.0] = scp.MASKED
         dataset[1400.0:1500.0] = scp.MASKED
     original = dataset.copy()
 
@@ -578,6 +579,7 @@ def test_baseline_polynomial_support_assembly_matches_explicit_concatenation(
     expected.sort(inplace=True, descend=False)
 
     assert_dataset_equal(blc._X_ranges, expected)
+    assert np.array_equal(np.asarray(blc._X_ranges.mask), np.asarray(expected.mask))
     assert_dataset_equal(dataset, original)
 
 
