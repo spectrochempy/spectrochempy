@@ -39,7 +39,6 @@ import spectrochempy as scp
 import spectrochempy.processing.baselineprocessing.baselineprocessing as baseline_module
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.processing.baselineprocessing.baselineprocessing import Baseline
 
 
 @dataclass(frozen=True)
@@ -162,8 +161,11 @@ def _default_scenarios() -> dict[str, Scenario]:
     return scenarios
 
 
-def _build_baseline(scenario: Scenario) -> Baseline:
-    blc = Baseline(model=scenario.model, **scenario.baseline_kwargs)
+def _build_baseline(scenario: Scenario) -> baseline_module.Baseline:
+    blc = baseline_module.Baseline(
+        model=scenario.model,
+        **scenario.baseline_kwargs,
+    )
     if "ranges" in scenario.fit_kwargs:
         blc.ranges = scenario.fit_kwargs["ranges"]
     return blc
@@ -303,7 +305,7 @@ def _measure_instrumented_fit_breakdown(
             )
             _patch_timed_method(
                 iteration_stats,
-                Baseline,
+                baseline_module.Baseline,
                 "_fit",
                 "baseline._fit",
                 stack,
