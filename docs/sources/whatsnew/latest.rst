@@ -26,3 +26,7 @@ Bug Fixes
   validating support size explicitly, reporting non-intersecting ranges with
   clear ``ValueError`` messages, and avoiding internal index failures when
   automatic edge support is enabled.
+
+- Fixed model-dependent shape inconsistencies in ``Baseline.corrected`` so that
+  baseline and corrected datasets preserve the input dataset shape and
+  dimensions.
