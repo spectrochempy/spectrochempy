@@ -1,10 +1,12 @@
 import warnings
+from functools import partial
 
 import numpy as np
 import pytest
 from scipy.sparse import SparseEfficiencyWarning
 
 import spectrochempy as scp
+from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.processing.baselineprocessing.baselineprocessing import Baseline
 from spectrochempy.processing.transformation.concatenate import concatenate
 from spectrochempy.utils.testing import assert_dataset_equal
@@ -74,6 +76,100 @@ def _explicit_polynomial_support(dataset, ranges):
             continue
         sections.append(section)
     return concatenate(sections)
+
+
+def _make_nonmonotonic_baseline_dataset():
+    x = np.array([1000.0, 1125.0, 1075.0, 1250.0, 1375.0, 1325.0, 1500.0])
+    data = 0.002 * x + 0.5 + 0.05 * np.sin(np.linspace(0.0, 3.0, x.size))
+    dataset = scp.NDDataset(
+        data,
+        coordset=[scp.Coord(x, title="wavenumber", units="cm^-1")],
+        units="absorbance",
+        title="nonmonotonic baseline dataset",
+    )
+    dataset.name = "nonmonotonic_baseline_dataset"
+    return dataset
+
+
+def _make_nan_axis_baseline_dataset():
+    x = np.array([1000.0, 1125.0, np.nan, 1250.0, 1375.0, 1500.0])
+    data = np.linspace(1.0, 2.0, x.size)
+    dataset = scp.NDDataset(
+        data,
+        coordset=[scp.Coord(x, title="wavenumber", units="cm^-1")],
+        units="absorbance",
+        title="nan axis baseline dataset",
+    )
+    dataset.name = "nan_axis_baseline_dataset"
+    return dataset
+
+
+def _clone_baseline_for_oracle(blc):
+    oracle = Baseline(model=blc.model)
+    for name in (
+        "order",
+        "include_limits",
+        "lamb",
+        "asymmetry",
+        "snip_width",
+        "tol",
+        "max_iter",
+        "lls",
+        "multivariate",
+        "n_components",
+        "breakpoints",
+    ):
+        if hasattr(blc, name):
+            setattr(oracle, name, getattr(blc, name))
+    oracle.ranges = [list(pair) for pair in getattr(blc, "ranges", [])]
+    return oracle
+
+
+def _sort_spy(monkeypatch):
+    calls = []
+    original_sort = NDDataset.sort
+
+    def wrapped(self, **kwargs):
+        calls.append(
+            {
+                "dataset_id": id(self),
+                "descend": kwargs.get("descend"),
+                "inplace": kwargs.get("inplace"),
+            }
+        )
+        return original_sort(self, **kwargs)
+
+    monkeypatch.setattr(NDDataset, "sort", wrapped)
+    return calls
+
+
+def _guard_spy(monkeypatch):
+    calls = []
+    original_guard = Baseline._last_axis_is_monotone_nondecreasing
+
+    def wrapped(self, dataset):
+        result = original_guard(dataset)
+        calls.append(
+            {
+                "dataset_id": id(dataset),
+                "result": result,
+            }
+        )
+        return result
+
+    monkeypatch.setattr(Baseline, "_last_axis_is_monotone_nondecreasing", wrapped)
+    return calls
+
+
+def _historical_fit(blc, dataset, monkeypatch):
+    oracle = _clone_baseline_for_oracle(blc)
+    monkeypatch.setattr(
+        Baseline,
+        "_last_axis_is_monotone_nondecreasing",
+        lambda self, dataset: False,
+    )
+    oracle.fit(dataset)
+    return oracle
 
 
 def test_baseline_fit_1d(synthetic_1d_baseline_dataset):
@@ -580,6 +676,158 @@ def test_baseline_polynomial_support_assembly_matches_explicit_concatenation(
 
     assert_dataset_equal(blc._X_ranges, expected)
     assert np.array_equal(np.asarray(blc._X_ranges.mask), np.asarray(expected.mask))
+    assert_dataset_equal(dataset, original)
+
+
+@pytest.mark.parametrize(
+    ("model", "kwargs", "dataset_factory", "ranges", "mask_region"),
+    [
+        (
+            "polynomial",
+            {"order": 3, "include_limits": False},
+            partial(_make_shape_probe_dataset),
+            [[1000.0, 1125.0], [1875.0, 2000.0]],
+            None,
+        ),
+        (
+            "polynomial",
+            {"order": 3, "include_limits": False},
+            partial(_make_shape_probe_dataset, n_rows=3),
+            [[1000.0, 1125.0], [1875.0, 2000.0]],
+            None,
+        ),
+        (
+            "polynomial",
+            {"order": 3, "include_limits": False},
+            partial(_make_shape_probe_dataset),
+            [[1000.0, 1050.0], [1200.0, 1275.0], [1875.0, 2000.0]],
+            None,
+        ),
+        (
+            "asls",
+            {"lamb": 1e5, "asymmetry": 0.05},
+            partial(_make_shape_probe_dataset),
+            None,
+            None,
+        ),
+        (
+            "asls",
+            {"lamb": 1e5, "asymmetry": 0.05},
+            partial(_make_shape_probe_dataset),
+            None,
+            (1400.0, 1500.0),
+        ),
+        (
+            "snip",
+            {"snip_width": 15},
+            partial(_make_shape_probe_dataset),
+            None,
+            None,
+        ),
+        (
+            "rubberband",
+            {},
+            partial(_make_shape_probe_dataset),
+            None,
+            None,
+        ),
+    ],
+)
+def test_baseline_fit_skips_unneeded_ascending_sorts_and_matches_historical_path(
+    monkeypatch, model, kwargs, dataset_factory, ranges, mask_region
+):
+    dataset = dataset_factory()
+    if mask_region is not None:
+        dataset[slice(*mask_region)] = scp.MASKED
+    original = dataset.copy()
+
+    blc = Baseline(model=model, **kwargs)
+    if ranges is not None:
+        blc.ranges = ranges
+
+    guard_calls = _guard_spy(monkeypatch)
+    sort_calls = _sort_spy(monkeypatch)
+    blc.fit(dataset)
+
+    expected_guard_ids = {id(blc._X_ranges), id(blc._X)}
+    assert len(guard_calls) == 2
+    assert {call["dataset_id"] for call in guard_calls} == expected_guard_ids
+    assert all(call["result"] for call in guard_calls)
+    assert sort_calls == []
+
+    baseline = blc.baseline
+    corrected = blc.corrected
+
+    monkeypatch.undo()
+    oracle = _historical_fit(blc, original.copy(), monkeypatch)
+
+    assert_dataset_equal(baseline, oracle.baseline)
+    assert_dataset_equal(corrected, oracle.corrected)
+    assert_dataset_equal(dataset, original)
+
+
+def test_baseline_fit_preserves_descending_sort_path(monkeypatch):
+    dataset = _make_shape_probe_dataset(descending=True)
+    original = dataset.copy()
+
+    blc = Baseline(model="rubberband")
+    sort_calls = _sort_spy(monkeypatch)
+    blc.fit(dataset)
+
+    assert len(sort_calls) == 3
+    assert sum(call["descend"] is False for call in sort_calls) == 2
+    assert sum(call["descend"] is True for call in sort_calls) == 1
+
+    baseline = blc.baseline
+    corrected = blc.corrected
+
+    monkeypatch.undo()
+    oracle = _historical_fit(blc, original.copy(), monkeypatch)
+
+    assert_dataset_equal(baseline, oracle.baseline)
+    assert_dataset_equal(corrected, oracle.corrected)
+    assert_dataset_equal(dataset, original)
+
+
+def test_baseline_fit_preserves_nonmonotonic_sort_path(monkeypatch):
+    dataset = _make_nonmonotonic_baseline_dataset()
+    original = dataset.copy()
+
+    blc = Baseline(model="asls", lamb=1e5, asymmetry=0.05)
+    sort_calls = _sort_spy(monkeypatch)
+    blc.fit(dataset)
+
+    assert len(sort_calls) == 2
+    assert all(call["descend"] is False for call in sort_calls)
+
+    baseline = blc.baseline
+    corrected = blc.corrected
+
+    monkeypatch.undo()
+    oracle = _historical_fit(blc, original.copy(), monkeypatch)
+
+    assert_dataset_equal(baseline, oracle.baseline)
+    assert_dataset_equal(corrected, oracle.corrected)
+    assert_dataset_equal(dataset, original)
+
+
+def test_baseline_fit_preserves_nan_axis_sort_path(monkeypatch):
+    dataset = _make_nan_axis_baseline_dataset()
+    original = dataset.copy()
+
+    blc = Baseline(model="asls", lamb=1e5, asymmetry=0.05)
+    sort_calls = _sort_spy(monkeypatch)
+    with pytest.raises(AttributeError, match="coordset"):
+        blc.fit(dataset)
+
+    assert len(sort_calls) == 2
+    assert all(call["descend"] is False for call in sort_calls)
+
+    monkeypatch.undo()
+    oracle = _clone_baseline_for_oracle(blc)
+    with pytest.raises(AttributeError, match="coordset"):
+        _historical_fit(oracle, original.copy(), monkeypatch)
+
     assert_dataset_equal(dataset, original)
 
 
