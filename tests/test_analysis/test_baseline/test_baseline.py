@@ -237,6 +237,7 @@ def test_baseline_polynomial_with_ranges(synthetic_1d_baseline_dataset):
     ("n_points", "order", "should_fit"),
     [
         (1, "constant", True),
+        (1, 0, True),
         (1, 1, False),
         (2, 1, True),
         (2, 3, False),
@@ -283,6 +284,35 @@ def test_baseline_polynomial_constant_order_accepts_single_point_range():
 
 
 @pytest.mark.parametrize(
+    ("descending", "ranges", "should_fit"),
+    [
+        (False, [[1500.0, 1500.0]], False),
+        (True, [[1500.0, 1500.0]], False),
+        (False, [[1400.0, 1400.0], [1600.0, 1600.0]], True),
+        (True, [[1400.0, 1400.0], [1600.0, 1600.0]], True),
+    ],
+)
+def test_baseline_polynomial_pchip_support_validation(descending, ranges, should_fit):
+    dataset = _make_simple_baseline_dataset(descending=descending)
+    original = dataset.copy()
+
+    blc = Baseline(model="polynomial", order="pchip", include_limits=False)
+    blc.ranges = ranges
+
+    if should_fit:
+        blc.fit(dataset)
+        assert blc.baseline.shape == dataset.shape
+        assert blc.baseline.units == dataset.units
+        assert blc.corrected.units == dataset.units
+        assert blc.baseline.x.is_descendant == dataset.x.is_descendant
+    else:
+        with pytest.raises(ValueError, match="support is too small"):
+            blc.fit(dataset)
+
+    assert_dataset_equal(dataset, original)
+
+
+@pytest.mark.parametrize(
     ("ranges", "message"),
     [
         ([[1500.0, 1500.0]], "support is too small"),
@@ -312,6 +342,22 @@ def test_baseline_polynomial_rejects_ranges_outside_domain(descending):
     blc.ranges = [[2500.0, 2600.0]]
 
     with pytest.raises(ValueError, match="do not intersect the coordinate domain"):
+        blc.fit(dataset)
+
+    assert_dataset_equal(dataset, original)
+
+
+@pytest.mark.parametrize("descending", [False, True])
+def test_baseline_polynomial_rejects_mixed_in_and_out_of_domain_ranges(descending):
+    dataset = _make_simple_baseline_dataset(descending=descending)
+    original = dataset.copy()
+
+    blc = Baseline(model="polynomial", order=1, include_limits=False)
+    blc.ranges = [[1100.0, 1200.0], [2500.0, 2600.0]]
+
+    with pytest.raises(
+        ValueError, match="Some requested baseline ranges do not intersect"
+    ):
         blc.fit(dataset)
 
     assert_dataset_equal(dataset, original)
