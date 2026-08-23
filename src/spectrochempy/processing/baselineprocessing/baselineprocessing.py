@@ -712,6 +712,7 @@ baseline/trends for different segments of the data.
         # Set X
         # -----
         X = X.copy()
+        self._X_input = X.copy()
 
         if (
             self.model == "asls"
@@ -805,11 +806,14 @@ baseline/trends for different segments of the data.
         NDDataset
             Dataset with baseline correction applied
         """
-        if self.model == "asls" and hasattr(self, "Xmasked"):
-            corrected = self.Xmasked - self.baseline
-        else:
-            corrected = self.X - self.baseline
-        return corrected
+        source = getattr(self, "_X_input", None)
+        if source is None:
+            source = (
+                self.Xmasked
+                if self.model == "asls" and hasattr(self, "Xmasked")
+                else self.X
+            )
+        return source - self.baseline
 
     @property
     def corrected(self):
