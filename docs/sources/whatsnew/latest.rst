@@ -18,3 +18,11 @@ New Features
 - Added the ``pseudovoigt`` helper and ``pseudovoigtmodel`` curve-fitting
   model, using the existing ``ampl``, ``pos``, ``width``, ``ratio`` and
   ``normalized`` line-shape conventions.
+
+Bug Fixes
+~~~~~~~~~
+
+- Hardened polynomial baseline fitting on short or underspecified spectra by
+  validating support size explicitly, reporting non-intersecting ranges with
+  clear ``ValueError`` messages, and avoiding internal index failures when
+  automatic edge support is enabled.

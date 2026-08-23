@@ -334,6 +334,93 @@ baseline/trends for different segments of the data.
         # clean the result (reorder and suppress overlaps)
         return trim_ranges(*ranges)
 
+    @staticmethod
+    def _coordinate_domain_bounds(values):
+        values = np.asarray(values)
+        if values.size == 0:
+            raise ValueError(
+                "Baseline polynomial fitting requires a non-empty coordinate domain."
+            )
+        return min(values[0], values[-1]), max(values[0], values[-1])
+
+    @staticmethod
+    def _range_intersects_domain(range_pair, domain_min, domain_max):
+        return not (range_pair[1] < domain_min or range_pair[0] > domain_max)
+
+    @staticmethod
+    def _format_domain(domain_min, domain_max):
+        return f"[{domain_min}, {domain_max}]"
+
+    def _polynomial_edge_ranges(self, values):
+        values = np.asarray(values)
+        if values.size == 0:
+            raise ValueError(
+                "Baseline polynomial fitting requires a non-empty coordinate domain."
+            )
+        required = self._minimum_polynomial_support_points()
+        span = min(values.size, max(3, int(np.ceil(required / 2))))
+        return [[values[0], values[span - 1]], [values[-span], values[-1]]]
+
+    def _minimum_polynomial_support_points(self):
+        if self.order == "pchip":
+            return 2
+        return int(self.order) + 1
+
+    def _validate_requested_polynomial_ranges(self, ranges, domain_min, domain_max):
+        if not ranges:
+            return
+
+        invalid_ranges = [
+            pair
+            for pair in ranges
+            if not self._range_intersects_domain(pair, domain_min, domain_max)
+        ]
+        if not invalid_ranges:
+            return
+
+        domain = self._format_domain(domain_min, domain_max)
+        if len(invalid_ranges) == len(ranges):
+            raise ValueError(
+                "Requested baseline ranges do not intersect the coordinate "
+                f"domain {domain}. Requested ranges={ranges}."
+            )
+
+        raise ValueError(
+            "Some requested baseline ranges do not intersect the coordinate "
+            f"domain {domain}. Non-intersecting ranges={invalid_ranges}."
+        )
+
+    def _validate_polynomial_support(self, x_support, dataset_coord):
+        support_values = np.asarray(x_support)
+        distinct_support = np.unique(support_values).size
+        required = self._minimum_polynomial_support_points()
+        domain_min, domain_max = self._coordinate_domain_bounds(dataset_coord.data)
+        domain = self._format_domain(domain_min, domain_max)
+
+        if distinct_support == 0:
+            raise ValueError(
+                "Baseline polynomial support is empty after range selection. "
+                f"Coordinate domain={domain}, used_ranges={self._ranges}."
+            )
+
+        if distinct_support >= required:
+            return
+
+        distinct_dataset = np.unique(np.asarray(dataset_coord.data)).size
+        if distinct_dataset < required and distinct_support == distinct_dataset:
+            raise ValueError(
+                "Dataset is too short for the requested baseline polynomial fit: "
+                f"order={self.order!r}, distinct_points={distinct_dataset}, "
+                f"required_points>={required}, coordinate domain={domain}."
+            )
+
+        raise ValueError(
+            "Baseline polynomial support is too small for the requested fit: "
+            f"order={self.order!r}, distinct_support_points={distinct_support}, "
+            f"required_points>={required}, coordinate domain={domain}, "
+            f"used_ranges={self._ranges}."
+        )
+
     @tr.observe("_X", "ranges", "include_limits", "model", "multivariate")
     def _preprocess_as_X_or_ranges_changed(self, change):
         # set X and ranges using the new or current value
@@ -355,20 +442,27 @@ baseline/trends for different segments of the data.
             self._X_ranges = X.copy()
             return
 
-        ranges = change.new if change.name == "ranges" else self.ranges.copy()
+        requested_ranges = change.new if change.name == "ranges" else self.ranges.copy()
+        ranges = requested_ranges.copy()
         if X is None:
             # not a lot to do here
             # just return after cleaning ranges
             self._ranges = ranges = trim_ranges(*ranges)
             return
 
+        lastcoord = X.coordset[X.dims[-1]]
+        x = lastcoord.data
+        domain_min, domain_max = self._coordinate_domain_bounds(x)
+        self._validate_requested_polynomial_ranges(
+            requested_ranges, domain_min, domain_max
+        )
+
         if self.include_limits and X is not None:
             # be sure to extend ranges with the extrema of the x-axis
             # (it will not make a difference if this was already done before)
-            lastcoord = X.coordset[X.dims[-1]]  # we have to take into account the
-            # possibility of transposed data, so we can't use directly X.x
-            x = lastcoord.data
-            ranges += [[x[0], x[2]], [x[-3], x[-1]]]
+            # we have to take into account the possibility of transposed data,
+            # so we can't use directly X.x
+            ranges += self._polynomial_edge_ranges(x)
 
         if self.breakpoints:
             # we should also include breakpoints in the ranges
@@ -378,6 +472,12 @@ baseline/trends for different segments of the data.
 
         # trim, order and clean up ranges (save it in self._ranges)
         self._ranges = ranges = trim_ranges(*ranges)
+
+        if not ranges:
+            raise ValueError(
+                "No baseline support ranges were selected for polynomial fitting. "
+                "Provide at least one range or keep include_limits=True."
+            )
 
         # Extract the dataset sections corresponding to the provided ranges
         # BUT warning, this does not work for masked data (as after removal of the
@@ -392,6 +492,13 @@ baseline/trends for different segments of the data.
             if sect is None:
                 continue
             s.append(sect)
+
+        if not s:
+            domain = self._format_domain(domain_min, domain_max)
+            raise ValueError(
+                "No baseline support points could be selected from the requested "
+                f"ranges. Coordinate domain={domain}, used_ranges={ranges}."
+            )
 
         # determine _X_ranges (used by fit) by concatenating the sections
         self._X_ranges = concatenate(s)
@@ -645,6 +752,8 @@ baseline/trends for different segments of the data.
             bplist.append(bp)
         # sort and remove duplicates
         bplist = sorted(set(bplist))
+        if len(bplist) == 1:
+            bplist = [bplist[0], bplist[0]]
 
         # loop on breakpoints pairs
         baseline = np.zeros_like(self._X.data)
@@ -657,6 +766,8 @@ baseline/trends for different segments of the data.
             xb = xbase[istart : iend + 1]
             yb = ybase[..., istart : iend + 1]
             Xpart = self._X[..., ixstart : ixend + 1]
+            if self.model == "polynomial":
+                self._validate_polynomial_support(xb, Xx)
             baseline[..., ixstart : ixend + 1] = self._fit(xb, yb, Xpart)
             istart = iend + 1
             ixstart = ixend + 1
