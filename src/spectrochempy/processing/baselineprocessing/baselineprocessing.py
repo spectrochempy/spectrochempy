@@ -18,7 +18,9 @@ from spectrochempy.application.application import info_
 from spectrochempy.application.application import warning_
 from spectrochempy.processing.baselineprocessing.baselineutils import lls
 from spectrochempy.processing.baselineprocessing.baselineutils import lls_inv
-from spectrochempy.processing.transformation.concatenate import concatenate
+from spectrochempy.processing.transformation.concatenate import (
+    concatenate,  # noqa: F401
+)
 from spectrochempy.utils.constants import TYPE_FLOAT
 from spectrochempy.utils.constants import TYPE_INTEGER
 from spectrochempy.utils.coordrange import trim_ranges
@@ -421,6 +423,30 @@ baseline/trends for different segments of the data.
             f"used_ranges={self._ranges}."
         )
 
+    def _assemble_polynomial_support_dataset(self, X, ranges):
+        dim = X.dims[-1]
+        section_data = []
+        section_coordsets = []
+
+        for pair in ranges:
+            keys = X._make_index((Ellipsis, slice(*pair)))
+            data = X.masked_data[keys]
+            if data.shape[-1] == 0:
+                continue
+            section_data.append(data)
+            section_coordsets.append(X.coordset._slice_dims(X.dims, keys))
+
+        if not section_data:
+            return None
+
+        concatenated = np.ma.concatenate(tuple(section_data), axis=-1)
+
+        out = X.copy(deep=False)
+        out._data = np.asarray(concatenated)
+        out._mask = concatenated.mask
+        out._coordset = X.coordset._concatenate_dim(dim, section_coordsets)
+        return out
+
     @tr.observe("_X", "ranges", "include_limits", "model", "multivariate")
     def _preprocess_as_X_or_ranges_changed(self, change):
         # set X and ranges using the new or current value
@@ -479,29 +505,18 @@ baseline/trends for different segments of the data.
                 "Provide at least one range or keep include_limits=True."
             )
 
-        # Extract the dataset sections corresponding to the provided ranges
-        # BUT warning, this does not work for masked data (as after removal of the
-        # masked part, the  X.x coordinates is not more linear .The coordinate must have
-        # been transformed to normal coordinate before. See AnalysisConfigurable.
-        # _X_validate
-        s = []
-        for pair in ranges:
-            # determine the slices
-            sl = slice(*pair)
-            sect = X[..., sl]
-            if sect is None:
-                continue
-            s.append(sect)
+        # Extract the dataset sections corresponding to the provided ranges.
+        # This preserves the existing location-slicing semantics while avoiding
+        # the construction of intermediate NDDataset sections that would
+        # immediately be re-concatenated for polynomial fitting.
+        self._X_ranges = self._assemble_polynomial_support_dataset(X, ranges)
 
-        if not s:
+        if self._X_ranges is None:
             domain = self._format_domain(domain_min, domain_max)
             raise ValueError(
                 "No baseline support points could be selected from the requested "
                 f"ranges. Coordinate domain={domain}, used_ranges={ranges}."
             )
-
-        # determine _X_ranges (used by fit) by concatenating the sections
-        self._X_ranges = concatenate(s)
 
         # we will also do necessary validation of other parameters:
         if self.multivariate:
