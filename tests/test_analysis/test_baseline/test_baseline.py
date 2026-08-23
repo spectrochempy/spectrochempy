@@ -91,6 +91,19 @@ def _make_nonmonotonic_baseline_dataset():
     return dataset
 
 
+def _make_nan_axis_baseline_dataset():
+    x = np.array([1000.0, 1125.0, np.nan, 1250.0, 1375.0, 1500.0])
+    data = np.linspace(1.0, 2.0, x.size)
+    dataset = scp.NDDataset(
+        data,
+        coordset=[scp.Coord(x, title="wavenumber", units="cm^-1")],
+        units="absorbance",
+        title="nan axis baseline dataset",
+    )
+    dataset.name = "nan_axis_baseline_dataset"
+    return dataset
+
+
 def _clone_baseline_for_oracle(blc):
     oracle = Baseline(model=blc.model)
     for name in (
@@ -132,7 +145,7 @@ def _sort_spy(monkeypatch):
 
 def _guard_spy(monkeypatch):
     calls = []
-    original_guard = Baseline._last_axis_is_monotone_increasing
+    original_guard = Baseline._last_axis_is_monotone_nondecreasing
 
     def wrapped(self, dataset):
         result = original_guard(dataset)
@@ -144,7 +157,7 @@ def _guard_spy(monkeypatch):
         )
         return result
 
-    monkeypatch.setattr(Baseline, "_last_axis_is_monotone_increasing", wrapped)
+    monkeypatch.setattr(Baseline, "_last_axis_is_monotone_nondecreasing", wrapped)
     return calls
 
 
@@ -152,7 +165,7 @@ def _historical_fit(blc, dataset, monkeypatch):
     oracle = _clone_baseline_for_oracle(blc)
     monkeypatch.setattr(
         Baseline,
-        "_last_axis_is_monotone_increasing",
+        "_last_axis_is_monotone_nondecreasing",
         lambda self, dataset: False,
     )
     oracle.fit(dataset)
@@ -795,6 +808,26 @@ def test_baseline_fit_preserves_nonmonotonic_sort_path(monkeypatch):
 
     assert_dataset_equal(baseline, oracle.baseline)
     assert_dataset_equal(corrected, oracle.corrected)
+    assert_dataset_equal(dataset, original)
+
+
+def test_baseline_fit_preserves_nan_axis_sort_path(monkeypatch):
+    dataset = _make_nan_axis_baseline_dataset()
+    original = dataset.copy()
+
+    blc = Baseline(model="asls", lamb=1e5, asymmetry=0.05)
+    sort_calls = _sort_spy(monkeypatch)
+    with pytest.raises(AttributeError, match="coordset"):
+        blc.fit(dataset)
+
+    assert len(sort_calls) == 2
+    assert all(call["descend"] is False for call in sort_calls)
+
+    monkeypatch.undo()
+    oracle = _clone_baseline_for_oracle(blc)
+    with pytest.raises(AttributeError, match="coordset"):
+        _historical_fit(oracle, original.copy(), monkeypatch)
+
     assert_dataset_equal(dataset, original)
 
 

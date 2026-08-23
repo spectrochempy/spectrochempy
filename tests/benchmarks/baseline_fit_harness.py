@@ -296,7 +296,7 @@ def _measure_instrumented_fit_breakdown(
             stack.callback(setattr, NDDataset, "sort", original_sort)
 
             original_ensure_monotone = (
-                baseline_module.Baseline._ensure_last_axis_monotone_increasing
+                baseline_module.Baseline._ensure_last_axis_monotone_nondecreasing
             )
 
             def timed_ensure_monotone(
@@ -312,7 +312,7 @@ def _measure_instrumented_fit_breakdown(
                     context = "_X"
                 else:
                     context = "other"
-                label = f"baseline.ensure_last_axis_monotone_increasing.{context}"
+                label = f"baseline.ensure_last_axis_monotone_nondecreasing.{context}"
                 start = perf_counter()
                 _sort_context["value"] = context
                 try:
@@ -321,13 +321,13 @@ def _measure_instrumented_fit_breakdown(
                     _sort_context["value"] = None
                     _iteration_stats[label].add(perf_counter() - start)
 
-            baseline_module.Baseline._ensure_last_axis_monotone_increasing = (
+            baseline_module.Baseline._ensure_last_axis_monotone_nondecreasing = (
                 timed_ensure_monotone
             )
             stack.callback(
                 setattr,
                 baseline_module.Baseline,
-                "_ensure_last_axis_monotone_increasing",
+                "_ensure_last_axis_monotone_nondecreasing",
                 original_ensure_monotone,
             )
             _patch_timed_method(

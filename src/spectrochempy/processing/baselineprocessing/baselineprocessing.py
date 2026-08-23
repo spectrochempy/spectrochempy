@@ -351,9 +351,9 @@ baseline/trends for different segments of the data.
         return f"[{domain_min}, {domain_max}]"
 
     @staticmethod
-    def _last_axis_is_monotone_increasing(dataset):
+    def _last_axis_is_monotone_nondecreasing(dataset):
         """
-        Return whether the dataset last axis is already fully monotone increasing.
+        Return whether the dataset last axis is already fully monotone nondecreasing.
 
         This is a local fast-path guard for ``Baseline.fit()``: when the relevant
         axis is already in the exact order required by the historical ascending
@@ -363,10 +363,10 @@ baseline/trends for different segments of the data.
         values = np.asarray(dataset.coordset[dataset.dims[-1]].data)
         if values.size < 2:
             return True
-        return not np.any(values[:-1] > values[1:])
+        return bool(np.all(values[:-1] <= values[1:]))
 
-    def _ensure_last_axis_monotone_increasing(self, dataset):
-        if self._last_axis_is_monotone_increasing(dataset):
+    def _ensure_last_axis_monotone_nondecreasing(self, dataset):
+        if self._last_axis_is_monotone_nondecreasing(dataset):
             return False
         dataset.sort(inplace=True, descend=False)
         return True
@@ -762,11 +762,11 @@ baseline/trends for different segments of the data.
 
         # _X_ranges has been computed when X and _ranges were set,
         # but we need increasing order of the coordinates
-        self._ensure_last_axis_monotone_increasing(self._X_ranges)
+        self._ensure_last_axis_monotone_nondecreasing(self._X_ranges)
 
         # to simplify further operation we also sort the self._X data
         descend = Xx.is_descendant
-        self._ensure_last_axis_monotone_increasing(self._X)
+        self._ensure_last_axis_monotone_nondecreasing(self._X)
         Xx = self._X.coordset[self._X.dims[-1]]  # get it again after sorting
 
         # _X_ranges is now ready, we can fit. _Xranges contains
