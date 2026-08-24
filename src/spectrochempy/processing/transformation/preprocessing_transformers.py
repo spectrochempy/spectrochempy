@@ -317,6 +317,133 @@ class BasePreprocessor:
     def _is_spectrochempy_object(value):
         return hasattr(value, "masked_data") or hasattr(value, "coordset")
 
+    def _record_fit_compatibility(self, dataset, axis, dim_name):
+        r"""Store the dataset signature required to reuse learned statistics."""
+        shape = dataset.masked_data.shape
+        self._fit_signature_ = {
+            "ndim": len(shape),
+            "dims": tuple(str(name) for name in dataset.dims),
+            "axis": axis,
+            "dim_name": str(dim_name),
+            "shape": tuple(shape),
+            "data_units": dataset.units,
+            "coords": self._compatibility_coord_signatures(dataset, axis),
+        }
+
+    def _check_fit_compatibility(self, dataset, axis, action):
+        r"""Validate that *dataset* can reuse statistics learned during fit()."""
+        signature = self._fit_signature_
+        cls = self.__class__.__name__
+        current_shape = dataset.masked_data.shape
+        current_dims = tuple(str(name) for name in dataset.dims)
+
+        if len(current_shape) != signature["ndim"]:
+            self._raise_incompatible(action, "number of dimensions changed", cls)
+
+        if current_dims != signature["dims"]:
+            self._raise_incompatible(action, "dimension order changed", cls)
+
+        if axis != signature["axis"]:
+            self._raise_incompatible(action, "preprocessing axis changed", cls)
+
+        current_dim_name = current_dims[axis]
+        if current_dim_name != signature["dim_name"]:
+            self._raise_incompatible(action, "preprocessing dimension changed", cls)
+
+        if not self._same_units(dataset.units, signature["data_units"]):
+            self._raise_incompatible(action, "data units changed", cls)
+
+        for current_axis, current_size in enumerate(current_shape):
+            if current_axis == axis:
+                continue
+            dim_name = current_dims[current_axis]
+            expected_size = signature["shape"][current_axis]
+            if current_size != expected_size:
+                self._raise_incompatible(
+                    action,
+                    f"non-reduced dimension '{dim_name}' length changed",
+                    cls,
+                )
+
+            expected = signature["coords"][dim_name]
+            current = self._feature_coord_signature(dataset, dim_name)
+            self._check_coord_compatibility(expected, current, dim_name, action, cls)
+
+    @classmethod
+    def _compatibility_coord_signatures(cls, dataset, axis):
+        signatures = {}
+        for current_axis, dim_name in enumerate(dataset.dims):
+            if current_axis == axis:
+                continue
+            name = str(dim_name)
+            signatures[name] = cls._feature_coord_signature(dataset, name)
+        return signatures
+
+    @staticmethod
+    def _feature_coord_signature(dataset, dim_name):
+        coord = dataset.coord(dim_name)
+        if coord is None or getattr(coord, "data", None) is None:
+            return {"present": False, "units": None, "data": None}
+        return {
+            "present": True,
+            "units": coord.units,
+            "data": np.array(coord.data, copy=True),
+        }
+
+    @classmethod
+    def _check_coord_compatibility(cls, expected, current, dim_name, action, owner):
+        if current["present"] != expected["present"]:
+            cls._raise_incompatible(
+                action,
+                f"coordinate presence changed for dimension '{dim_name}'",
+                owner,
+            )
+
+        if not expected["present"]:
+            return
+
+        if (current["units"] is None) != (expected["units"] is None):
+            cls._raise_incompatible(
+                action,
+                f"coordinate units changed for dimension '{dim_name}'",
+                owner,
+            )
+
+        data = np.array(current["data"], copy=True)
+        if current["units"] is not None and current["units"] != expected["units"]:
+            if current["units"].dimensionality != expected["units"].dimensionality:
+                cls._raise_incompatible(
+                    action,
+                    f"coordinate units are incompatible for dimension '{dim_name}'",
+                    owner,
+                )
+            data = (data * current["units"]).to(expected["units"]).magnitude
+
+        if data.shape != expected["data"].shape or not np.allclose(
+            data,
+            expected["data"],
+            rtol=1.0e-12,
+            atol=1.0e-15,
+            equal_nan=True,
+        ):
+            cls._raise_incompatible(
+                action,
+                f"coordinates changed for dimension '{dim_name}'",
+                owner,
+            )
+
+    @staticmethod
+    def _same_units(current, expected):
+        if current is None or expected is None:
+            return current is expected
+        return current == expected
+
+    @staticmethod
+    def _raise_incompatible(action, reason, owner):
+        raise SpectroChemPyError(
+            f"{owner} {action} dataset is incompatible with fit(): {reason}."
+        )
+
     def _fit(self, dataset):
         raise NotImplementedError("Subclasses must implement _fit().")
 
@@ -357,20 +484,26 @@ class CenterTransformer(BasePreprocessor):
 
     """
 
-    _learned_attributes = ("mean_", "_dim_name")
+    _learned_attributes = ("mean_", "_dim_name", "_fit_signature_")
 
     def _fit(self, dataset):
         axis, self._dim_name = dataset.get_axis(self.dim)
+        self._dim_name = str(self._dim_name)
+        self._record_fit_compatibility(dataset, axis, self._dim_name)
         self.mean_ = np.ma.mean(dataset.masked_data, axis=axis, keepdims=True)
 
     def _transform(self, dataset):
         new = dataset.copy()
+        axis, _ = dataset.get_axis(self.dim)
+        self._check_fit_compatibility(dataset, axis, "transform")
         self._set_data(new, dataset.masked_data - self.mean_)
         new.history = f"CenterTransformer applied on dimension {self._dim_name}"
         return new
 
     def _inverse_transform(self, dataset):
         new = dataset.copy()
+        axis, _ = dataset.get_axis(self.dim)
+        self._check_fit_compatibility(dataset, axis, "inverse_transform")
         self._set_data(new, dataset.masked_data + self.mean_)
         new.history = f"CenterTransformer inverse applied on dimension {self._dim_name}"
         return new
@@ -408,16 +541,20 @@ class AutoscaleTransformer(BasePreprocessor):
 
     """
 
-    _learned_attributes = ("mean_", "std_", "_dim_name")
+    _learned_attributes = ("mean_", "std_", "_dim_name", "_fit_signature_")
 
     def _fit(self, dataset):
         axis, self._dim_name = dataset.get_axis(self.dim)
+        self._dim_name = str(self._dim_name)
+        self._record_fit_compatibility(dataset, axis, self._dim_name)
         data = dataset.masked_data
         self.mean_ = np.ma.mean(data, axis=axis, keepdims=True)
         self.std_ = np.ma.std(data, axis=axis, keepdims=True)
 
     def _transform(self, dataset):
         new = dataset.copy()
+        axis, _ = dataset.get_axis(self.dim)
+        self._check_fit_compatibility(dataset, axis, "transform")
         data = dataset.masked_data
         std_safe = np.where(self.std_ == 0, 1, self.std_)
         self._set_data(new, (data - self.mean_) / std_safe)
@@ -426,6 +563,8 @@ class AutoscaleTransformer(BasePreprocessor):
 
     def _inverse_transform(self, dataset):
         new = dataset.copy()
+        axis, _ = dataset.get_axis(self.dim)
+        self._check_fit_compatibility(dataset, axis, "inverse_transform")
         data = dataset.masked_data
         std_safe = np.where(self.std_ == 0, 1, self.std_)
         self._set_data(new, data * std_safe + self.mean_)
@@ -545,10 +684,7 @@ class NormalizeTransformer(BasePreprocessor):
         "range_",
         "_dim_name",
         "_sample_local_",
-        "_fit_axis_",
-        "_fit_shape_",
-        "_fit_dims_",
-        "_fit_compatible_coords_",
+        "_fit_signature_",
     )
 
     def __init__(self, method="max", dim="x"):
@@ -560,10 +696,6 @@ class NormalizeTransformer(BasePreprocessor):
         self._dim_name = str(self._dim_name)
         data = dataset.masked_data
         self._sample_local_ = self._dim_name == "x"
-        self._fit_axis_ = axis
-        self._fit_shape_ = data.shape
-        self._fit_dims_ = tuple(str(dim_name) for dim_name in dataset.dims)
-        self._fit_compatible_coords_ = self._compatible_coords(dataset, axis)
 
         if self.method not in ("max", "sum", "vector", "minmax"):
             raise SpectroChemPyError(
@@ -574,6 +706,7 @@ class NormalizeTransformer(BasePreprocessor):
         if self._sample_local_:
             return
 
+        self._record_fit_compatibility(dataset, axis, self._dim_name)
         params = self._normalization_parameters(data, axis)
         for name, value in params.items():
             setattr(self, name, value)
@@ -606,19 +739,18 @@ class NormalizeTransformer(BasePreprocessor):
         axis, dim_name = dataset.get_axis(self.dim)
         dim_name = str(dim_name)
 
-        if dim_name != self._dim_name:
-            raise SpectroChemPyError(
-                "NormalizeTransformer transform dimension is incompatible with "
-                "fit(). Refit the transformer after changing dimensions."
-            )
-
         if self._sample_local_:
+            if dim_name != self._dim_name:
+                raise SpectroChemPyError(
+                    "NormalizeTransformer transform dimension is incompatible with "
+                    "fit(). Refit the transformer after changing dimensions."
+                )
             params = self._normalization_parameters(data, axis)
             norm = params.get("norm_")
             dmin = params.get("dmin_")
             drange = params.get("range_")
         else:
-            self._check_dataset_compatibility(dataset, axis, "transform")
+            self._check_fit_compatibility(dataset, axis, "transform")
             norm = getattr(self, "norm_", None)
             dmin = getattr(self, "dmin_", None)
             drange = getattr(self, "range_", None)
@@ -634,59 +766,6 @@ class NormalizeTransformer(BasePreprocessor):
         )
         return new
 
-    @staticmethod
-    def _compatible_coords(dataset, learned_axis):
-        coords = {}
-        for axis, dim_name in enumerate(dataset.dims):
-            if axis == learned_axis:
-                continue
-            coord = dataset.coord(dim_name)
-            if coord is not None:
-                coords[str(dim_name)] = np.array(coord.data, copy=True)
-        return coords
-
-    def _check_dataset_compatibility(self, dataset, axis, action):
-        data_shape = dataset.masked_data.shape
-        dims = tuple(str(dim_name) for dim_name in dataset.dims)
-        if dims != self._fit_dims_:
-            raise SpectroChemPyError(
-                f"NormalizeTransformer {action} dataset is incompatible with "
-                "fit(): dimension order changed."
-            )
-
-        if axis != self._fit_axis_:
-            raise SpectroChemPyError(
-                f"NormalizeTransformer {action} dataset is incompatible with "
-                "fit(): normalization axis changed."
-            )
-
-        if len(data_shape) != len(self._fit_shape_):
-            raise SpectroChemPyError(
-                f"NormalizeTransformer {action} dataset is incompatible with "
-                "fit(): number of dimensions changed."
-            )
-
-        for current_axis, current_size in enumerate(data_shape):
-            if current_axis == axis:
-                continue
-            fit_size = self._fit_shape_[current_axis]
-            if current_size != fit_size:
-                raise SpectroChemPyError(
-                    f"NormalizeTransformer {action} dataset is incompatible "
-                    "with fit(): non-normalized dimensions changed."
-                )
-
-            dim_name = str(dataset.dims[current_axis])
-            expected = self._fit_compatible_coords_.get(dim_name)
-            coord = dataset.coord(dim_name)
-            if expected is not None and coord is not None:
-                current = np.array(coord.data)
-                if not np.array_equal(current, expected):
-                    raise SpectroChemPyError(
-                        f"NormalizeTransformer {action} dataset is incompatible "
-                        "with fit(): non-normalized coordinates changed."
-                    )
-
     def _inverse_transform(self, dataset):
         if self._sample_local_:
             raise SpectroChemPyError(
@@ -697,14 +776,8 @@ class NormalizeTransformer(BasePreprocessor):
 
         new = dataset.copy()
         data = dataset.masked_data
-        axis, dim_name = dataset.get_axis(self.dim)
-        if str(dim_name) != self._dim_name:
-            raise SpectroChemPyError(
-                "NormalizeTransformer inverse_transform dimension is "
-                "incompatible with fit(). Refit the transformer after changing "
-                "dimensions."
-            )
-        self._check_dataset_compatibility(dataset, axis, "inverse_transform")
+        axis, _ = dataset.get_axis(self.dim)
+        self._check_fit_compatibility(dataset, axis, "inverse_transform")
 
         if self.method in ("max", "sum", "vector"):
             self._set_data(new, data * self.norm_)
@@ -1005,19 +1078,23 @@ class ParetoScaleTransformer(BasePreprocessor):
 
     """
 
-    _learned_attributes = ("mean_", "std_", "_dim_name")
+    _learned_attributes = ("mean_", "std_", "_dim_name", "_fit_signature_")
 
     def __init__(self, dim="y"):
         super().__init__(dim=dim)
 
     def _fit(self, dataset):
         axis, self._dim_name = dataset.get_axis(self.dim)
+        self._dim_name = str(self._dim_name)
+        self._record_fit_compatibility(dataset, axis, self._dim_name)
         data = dataset.masked_data
         self.mean_ = np.ma.mean(data, axis=axis, keepdims=True)
         self.std_ = np.ma.std(data, axis=axis, keepdims=True)
 
     def _transform(self, dataset):
         new = dataset.copy()
+        axis, _ = dataset.get_axis(self.dim)
+        self._check_fit_compatibility(dataset, axis, "transform")
         data = dataset.masked_data
 
         std_safe = np.where(self.std_ == 0, 1, self.std_)
@@ -1027,6 +1104,8 @@ class ParetoScaleTransformer(BasePreprocessor):
 
     def _inverse_transform(self, dataset):
         new = dataset.copy()
+        axis, _ = dataset.get_axis(self.dim)
+        self._check_fit_compatibility(dataset, axis, "inverse_transform")
         data = dataset.masked_data
 
         std_safe = np.where(self.std_ == 0, 1, self.std_)
@@ -1070,13 +1149,15 @@ class RangeScaleTransformer(BasePreprocessor):
 
     """
 
-    _learned_attributes = ("dmin_", "dmax_", "range_", "_dim_name")
+    _learned_attributes = ("dmin_", "dmax_", "range_", "_dim_name", "_fit_signature_")
 
     def __init__(self, dim="y"):
         super().__init__(dim=dim)
 
     def _fit(self, dataset):
         axis, self._dim_name = dataset.get_axis(self.dim)
+        self._dim_name = str(self._dim_name)
+        self._record_fit_compatibility(dataset, axis, self._dim_name)
         data = dataset.masked_data
 
         self.dmin_ = np.ma.min(data, axis=axis, keepdims=True)
@@ -1086,6 +1167,8 @@ class RangeScaleTransformer(BasePreprocessor):
 
     def _transform(self, dataset):
         new = dataset.copy()
+        axis, _ = dataset.get_axis(self.dim)
+        self._check_fit_compatibility(dataset, axis, "transform")
         data = dataset.masked_data
 
         self._set_data(new, data / self.range_)
@@ -1094,6 +1177,8 @@ class RangeScaleTransformer(BasePreprocessor):
 
     def _inverse_transform(self, dataset):
         new = dataset.copy()
+        axis, _ = dataset.get_axis(self.dim)
+        self._check_fit_compatibility(dataset, axis, "inverse_transform")
         data = dataset.masked_data
 
         self._set_data(new, data * self.range_)
@@ -1135,13 +1220,15 @@ class RobustScaleTransformer(BasePreprocessor):
 
     """
 
-    _learned_attributes = ("median_", "mad_", "_dim_name")
+    _learned_attributes = ("median_", "mad_", "_dim_name", "_fit_signature_")
 
     def __init__(self, dim="y"):
         super().__init__(dim=dim)
 
     def _fit(self, dataset):
         axis, self._dim_name = dataset.get_axis(self.dim)
+        self._dim_name = str(self._dim_name)
+        self._record_fit_compatibility(dataset, axis, self._dim_name)
         data = dataset.masked_data
 
         self.median_ = np.ma.median(data, axis=axis, keepdims=True)
@@ -1151,6 +1238,8 @@ class RobustScaleTransformer(BasePreprocessor):
 
     def _transform(self, dataset):
         new = dataset.copy()
+        axis, _ = dataset.get_axis(self.dim)
+        self._check_fit_compatibility(dataset, axis, "transform")
         data = dataset.masked_data
 
         self._set_data(new, (data - self.median_) / self.mad_)
@@ -1159,6 +1248,8 @@ class RobustScaleTransformer(BasePreprocessor):
 
     def _inverse_transform(self, dataset):
         new = dataset.copy()
+        axis, _ = dataset.get_axis(self.dim)
+        self._check_fit_compatibility(dataset, axis, "inverse_transform")
         data = dataset.masked_data
 
         self._set_data(new, data * self.mad_ + self.median_)
