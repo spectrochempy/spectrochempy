@@ -9,6 +9,7 @@ import spectrochempy as scp
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.processing.baselineprocessing.baselineprocessing import Baseline
 from spectrochempy.processing.transformation.concatenate import concatenate
+from spectrochempy.utils.exceptions import NotFittedError
 from spectrochempy.utils.testing import assert_dataset_equal
 
 
@@ -927,6 +928,29 @@ def test_baseline_validation_runs_before_numerical_kernel(model, kwargs):
     finally:
         mp.undo()
     assert kernel_spy_called == []
+
+
+@pytest.mark.parametrize("model,kwargs", _BASELINE_CONTRACT_MODELS)
+def test_baseline_rejected_refit_resets_fitted_state(model, kwargs):
+    # a successful fit followed by an invalid refit must not leave the
+    # instance exposing the previous results as if they were still valid
+    good_dataset = _make_shape_probe_dataset()
+    bad_dataset = _make_contract_probe_dataset([1000.0, 1125.0, 1125.0, 1375.0, 1500.0])
+
+    blc = _contract_baseline(model, kwargs)
+    blc.fit(good_dataset)
+    assert blc._fitted is True
+
+    with pytest.raises(ValueError, match="strictly"):
+        blc.fit(bad_dataset)
+
+    assert blc._fitted is False
+    with pytest.raises(NotFittedError):
+        _ = blc.baseline
+    with pytest.raises(NotFittedError):
+        _ = blc.corrected
+    with pytest.raises(NotFittedError):
+        blc.transform()
 
 
 def test_baseline_rejects_duplicates_before_breakpoint_and_pchip_paths():

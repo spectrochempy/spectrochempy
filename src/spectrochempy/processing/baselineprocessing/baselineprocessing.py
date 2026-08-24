@@ -391,9 +391,10 @@ baseline/trends for different segments of the data.
         try:
             coord = X.coordset[X.dims[-1]]
             values = np.asarray(coord.data)
-        except Exception:
-            # datasets without usable coordinates are left to the existing
-            # machinery, which reports its own historical error
+        except (AttributeError, TypeError):
+            # inputs without usable coordinates (plain arrays or datasets
+            # without a coordset) are left to the existing machinery, which
+            # reports its own historical error; anything else must propagate
             return
         if values.dtype.kind not in "fiu" or values.size < 2:
             return
@@ -787,7 +788,11 @@ baseline/trends for different segments of the data.
             increasing or strictly decreasing.
 
         """
-        # Reject invalid last-axis coordinates first, before any copy, range
+        # Reset the fitted state first: a rejected fit must not leave the
+        # instance exposing results from a previous successful fit.
+        self._fitted = False
+
+        # Reject invalid last-axis coordinates before any copy, range
         # construction, mask removal, sort or numerical work.
         self._validate_last_axis_coordinates(X)
 
