@@ -29,6 +29,11 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Preprocessing transformers now invalidate fitted state when constructor
+  parameters actually change, clear learned attributes after invalidation or a
+  failed refit, and keep ``set_params()`` calls with invalid parameter names
+  from partially modifying the transformer.
+
 - ``Baseline.fit()`` now explicitly rejects datasets whose last-axis
   coordinates contain non-finite values (``NaN`` or infinities), duplicated
   values, or direction changes, raising a clear ``ValueError`` instead of

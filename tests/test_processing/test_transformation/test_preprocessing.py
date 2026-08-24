@@ -1337,6 +1337,62 @@ class TestSklearnCompatibility:
         with pytest.raises(SpectroChemPyError, match="Invalid parameter"):
             scaler.set_params(invalid_param=42)
 
+    def test_set_params_invalid_name_is_transactional(self):
+        scaler = NormalizeTransformer(method="max", dim="y")
+        with pytest.raises(SpectroChemPyError, match="Invalid parameter"):
+            scaler.set_params(dim="x", invalid_parameter=1)
+        assert scaler.dim == "y"
+        assert scaler.method == "max"
+
+    def test_set_params_applies_multiple_valid_parameters(self):
+        scaler = NormalizeTransformer(method="max", dim="x")
+        result = scaler.set_params(method="sum", dim="y")
+        assert result is scaler
+        assert scaler.method == "sum"
+        assert scaler.dim == "y"
+
+    def test_set_params_unchanged_value_preserves_fit(self, simple_2d):
+        scaler = AutoscaleTransformer(dim="y").fit(simple_2d)
+        mean = scaler.mean_.copy()
+        std = scaler.std_.copy()
+        scaler.set_params(dim="y")
+        assert scaler._fitted
+        assert np.array_equal(scaler.mean_, mean)
+        assert np.array_equal(scaler.std_, std)
+
+    def test_set_params_changed_value_invalidates_and_clears_state(self, simple_2d):
+        scaler = AutoscaleTransformer(dim="y").fit(simple_2d)
+        scaler.set_params(dim="x")
+        assert scaler.dim == "x"
+        assert not scaler._fitted
+        assert not hasattr(scaler, "mean_")
+        assert not hasattr(scaler, "std_")
+        with pytest.raises(SpectroChemPyError, match="not fitted yet"):
+            scaler.transform(simple_2d)
+        with pytest.raises(SpectroChemPyError, match="not fitted yet"):
+            scaler.inverse_transform(simple_2d)
+
+    def test_msc_reference_array_comparison_is_not_ambiguous(self, msc_2d):
+        ref = msc_2d.data[0].copy()
+        scaler = MSCTransformer(reference=ref, dim="y").fit(msc_2d)
+        scaler.set_params(reference=ref.copy())
+        assert scaler._fitted
+        assert hasattr(scaler, "reference_")
+
+        scaler.set_params(reference=ref + 1.0)
+        assert not scaler._fitted
+        assert not hasattr(scaler, "reference_")
+
+    def test_msc_reference_dataset_comparison_uses_identity(self, msc_2d):
+        ref = NDDataset(msc_2d.data[0], coordset=[msc_2d.coord("x")])
+        scaler = MSCTransformer(reference=ref, dim="y").fit(msc_2d)
+        scaler.set_params(reference=ref)
+        assert scaler._fitted
+
+        scaler.set_params(reference=ref.copy())
+        assert not scaler._fitted
+        assert not hasattr(scaler, "reference_")
+
     def test_repr_autoscale(self):
         scaler = AutoscaleTransformer(dim="y")
         assert repr(scaler) == "AutoscaleTransformer(dim='y')"
@@ -1375,3 +1431,142 @@ class TestSklearnCompatibility:
         transformer = LogTransformer(method="log", eps=1e-5)
         cloned = clone(transformer)
         assert cloned.get_params() == transformer.get_params()
+
+
+class TestPreprocessorLifecycle:
+    @pytest.mark.parametrize(
+        ("factory", "learned_attrs"),
+        [
+            (CenterTransformer, ("mean_", "_dim_name")),
+            (AutoscaleTransformer, ("mean_", "std_", "_dim_name")),
+            (ParetoScaleTransformer, ("mean_", "std_", "_dim_name")),
+            (RangeScaleTransformer, ("dmin_", "dmax_", "range_", "_dim_name")),
+            (RobustScaleTransformer, ("median_", "mad_", "_dim_name")),
+        ],
+    )
+    def test_scaler_fit_failure_invalidates_and_cleans(
+        self, simple_2d, factory, learned_attrs
+    ):
+        scaler = factory(dim="y").fit(simple_2d)
+        for attr in learned_attrs:
+            assert hasattr(scaler, attr)
+
+        scaler.dim = "missing"
+        with pytest.raises(ValueError, match="Dimension"):
+            scaler.fit(simple_2d)
+
+        assert not scaler._fitted
+        for attr in learned_attrs:
+            assert not hasattr(scaler, attr)
+        with pytest.raises(SpectroChemPyError, match="not fitted yet"):
+            scaler.transform(simple_2d)
+
+    @pytest.mark.parametrize(
+        ("factory", "learned_attrs"),
+        [
+            (CenterTransformer, ("mean_", "_dim_name")),
+            (AutoscaleTransformer, ("mean_", "std_", "_dim_name")),
+            (ParetoScaleTransformer, ("mean_", "std_", "_dim_name")),
+            (RangeScaleTransformer, ("dmin_", "dmax_", "range_", "_dim_name")),
+            (RobustScaleTransformer, ("median_", "mad_", "_dim_name")),
+        ],
+    )
+    def test_scaler_parameter_change_cleans_declared_state(
+        self, simple_2d, factory, learned_attrs
+    ):
+        scaler = factory(dim="y").fit(simple_2d)
+        scaler.set_params(dim="x")
+        assert not scaler._fitted
+        for attr in learned_attrs:
+            assert not hasattr(scaler, attr)
+
+    def test_normalize_fit_failure_removes_partial_state(self, simple_2d):
+        scaler = NormalizeTransformer(method="unknown", dim="y")
+        with pytest.raises(SpectroChemPyError, match="Unknown normalization method"):
+            scaler.fit(simple_2d)
+        assert not scaler._fitted
+        for attr in scaler._learned_attributes:
+            assert not hasattr(scaler, attr)
+
+    def test_normalize_refit_failure_invalidates_previous_state(self, simple_2d):
+        scaler = NormalizeTransformer(method="max", dim="y").fit(simple_2d)
+        assert hasattr(scaler, "norm_")
+        scaler.method = "unknown"
+        with pytest.raises(SpectroChemPyError, match="Unknown normalization method"):
+            scaler.fit(simple_2d)
+        assert not scaler._fitted
+        for attr in scaler._learned_attributes:
+            assert not hasattr(scaler, attr)
+
+    def test_msc_fit_failure_removes_partial_state(self, msc_2d):
+        scaler = MSCTransformer(reference=np.ones(3), dim="y")
+        with pytest.raises(SpectroChemPyError, match="reference size"):
+            scaler.fit(msc_2d)
+        assert not scaler._fitted
+        for attr in scaler._learned_attributes:
+            assert not hasattr(scaler, attr)
+
+    def test_msc_refit_failure_invalidates_previous_state(self, msc_2d):
+        scaler = MSCTransformer(dim="y").fit(msc_2d)
+        assert hasattr(scaler, "reference_")
+        scaler.reference = np.ones(3)
+        with pytest.raises(SpectroChemPyError, match="reference size"):
+            scaler.fit(msc_2d)
+        assert not scaler._fitted
+        for attr in scaler._learned_attributes:
+            assert not hasattr(scaler, attr)
+
+    def test_fit_transform_failure_does_not_use_old_state(self, simple_2d):
+        scaler = AutoscaleTransformer(dim="y").fit(simple_2d)
+        scaler.dim = "missing"
+        with pytest.raises(ValueError, match="Dimension"):
+            scaler.fit_transform(simple_2d)
+        assert not scaler._fitted
+        assert not hasattr(scaler, "mean_")
+        assert not hasattr(scaler, "std_")
+
+    def test_logtransformer_parameter_change_requires_refit(self, simple_2d):
+        transformer = LogTransformer(method="log1p").fit(simple_2d)
+        transformer.set_params(eps=1.0e-5)
+        assert not transformer._fitted
+        with pytest.raises(SpectroChemPyError, match="not fitted yet"):
+            transformer.transform(simple_2d)
+        transformer.fit(simple_2d)
+        assert transformer._fitted
+
+    def test_logtransformer_fit_validates_method(self, simple_2d):
+        transformer = LogTransformer(method="unknown")
+        with pytest.raises(SpectroChemPyError, match="Unknown LogTransformer method"):
+            transformer.fit(simple_2d)
+        assert not transformer._fitted
+        with pytest.raises(SpectroChemPyError, match="Unknown LogTransformer method"):
+            transformer.fit_transform(simple_2d)
+        assert not transformer._fitted
+
+    def test_snv_refit_failure_invalidates_validation_state(self, simple_2d):
+        scaler = SNVTransformer().fit(simple_2d)
+        assert hasattr(scaler, "_dim_name")
+        with pytest.raises(ValueError, match="Dimension"):
+            scaler.fit(NDDataset(np.array(1.0)))
+        assert not scaler._fitted
+        assert not hasattr(scaler, "_dim_name")
+        with pytest.raises(SpectroChemPyError, match="not fitted yet"):
+            scaler.transform(simple_2d)
+
+    @pytest.mark.parametrize(
+        ("factory", "procedural"),
+        [
+            (CenterTransformer, center),
+            (AutoscaleTransformer, autoscale),
+            (ParetoScaleTransformer, pareto_scale),
+            (RangeScaleTransformer, range_scale),
+            (RobustScaleTransformer, robust_scale),
+        ],
+    )
+    def test_successful_scaler_transformations_are_unchanged(
+        self, simple_2d, factory, procedural
+    ):
+        scaler = factory(dim="y")
+        transformed = scaler.fit_transform(simple_2d)
+        expected = procedural(simple_2d, dim="y")
+        assert np.allclose(transformed.data, expected.data)

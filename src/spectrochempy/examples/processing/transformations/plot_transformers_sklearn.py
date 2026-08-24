@@ -95,9 +95,13 @@ except ImportError:
 # -----------------
 # ``inverse_transform()`` restores the original absorbance units.  This
 # is useful when interpreting model predictions (e.g., converting
-# PCA scores back to original space).
+# PCA scores back to original space).  Since changing parameters invalidates
+# fitted transformer state, set the intended parameters and fit before
+# inverting.
 
-X_train_restored = scaler.set_params(dim="y").inverse_transform(X_train_scaled)
+scaler.set_params(dim="y")
+scaler.fit(X_train)
+X_train_restored = scaler.inverse_transform(X_train_scaled)
 print(
     "Restored data matches original?",
     np.allclose(X_train_restored.data, X_train.data),
