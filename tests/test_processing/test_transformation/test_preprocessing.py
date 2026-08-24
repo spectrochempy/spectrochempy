@@ -86,6 +86,41 @@ def _normalize_oracle(data, method, axis):
     return (data - dmin) / np.where(drange == 0, 1, drange)
 
 
+def _feature_compat_dataset(
+    n_observations=4,
+    x_values=None,
+    x_units="cm",
+    data_units="m",
+    coordset=True,
+):
+    if x_values is None:
+        x_values = np.array([1.0, 2.0, 3.0])
+    x_values = np.asarray(x_values, dtype=float)
+    data = np.arange(n_observations * x_values.size, dtype=float).reshape(
+        n_observations, x_values.size
+    )
+    dataset = NDDataset(data + 1.0)
+    if coordset:
+        dataset.set_coordset(
+            y=Coord(np.arange(n_observations, dtype=float), units="s"),
+            x=Coord(x_values, units=x_units),
+        )
+    if data_units is not None:
+        dataset.units = data_units
+    return dataset
+
+
+def _stateful_preprocessor_factories():
+    return [
+        CenterTransformer,
+        AutoscaleTransformer,
+        ParetoScaleTransformer,
+        RangeScaleTransformer,
+        RobustScaleTransformer,
+        lambda dim="y": NormalizeTransformer(method="max", dim=dim),
+    ]
+
+
 def _snv_oracle(data, axis):
     mean = np.mean(data, axis=axis, keepdims=True)
     std = np.std(data, axis=axis, keepdims=True)
@@ -1437,11 +1472,17 @@ class TestPreprocessorLifecycle:
     @pytest.mark.parametrize(
         ("factory", "learned_attrs"),
         [
-            (CenterTransformer, ("mean_", "_dim_name")),
-            (AutoscaleTransformer, ("mean_", "std_", "_dim_name")),
-            (ParetoScaleTransformer, ("mean_", "std_", "_dim_name")),
-            (RangeScaleTransformer, ("dmin_", "dmax_", "range_", "_dim_name")),
-            (RobustScaleTransformer, ("median_", "mad_", "_dim_name")),
+            (CenterTransformer, ("mean_", "_dim_name", "_fit_signature_")),
+            (AutoscaleTransformer, ("mean_", "std_", "_dim_name", "_fit_signature_")),
+            (ParetoScaleTransformer, ("mean_", "std_", "_dim_name", "_fit_signature_")),
+            (
+                RangeScaleTransformer,
+                ("dmin_", "dmax_", "range_", "_dim_name", "_fit_signature_"),
+            ),
+            (
+                RobustScaleTransformer,
+                ("median_", "mad_", "_dim_name", "_fit_signature_"),
+            ),
         ],
     )
     def test_scaler_fit_failure_invalidates_and_cleans(
@@ -1464,11 +1505,17 @@ class TestPreprocessorLifecycle:
     @pytest.mark.parametrize(
         ("factory", "learned_attrs"),
         [
-            (CenterTransformer, ("mean_", "_dim_name")),
-            (AutoscaleTransformer, ("mean_", "std_", "_dim_name")),
-            (ParetoScaleTransformer, ("mean_", "std_", "_dim_name")),
-            (RangeScaleTransformer, ("dmin_", "dmax_", "range_", "_dim_name")),
-            (RobustScaleTransformer, ("median_", "mad_", "_dim_name")),
+            (CenterTransformer, ("mean_", "_dim_name", "_fit_signature_")),
+            (AutoscaleTransformer, ("mean_", "std_", "_dim_name", "_fit_signature_")),
+            (ParetoScaleTransformer, ("mean_", "std_", "_dim_name", "_fit_signature_")),
+            (
+                RangeScaleTransformer,
+                ("dmin_", "dmax_", "range_", "_dim_name", "_fit_signature_"),
+            ),
+            (
+                RobustScaleTransformer,
+                ("median_", "mad_", "_dim_name", "_fit_signature_"),
+            ),
         ],
     )
     def test_scaler_parameter_change_cleans_declared_state(
@@ -1570,3 +1617,177 @@ class TestPreprocessorLifecycle:
         transformed = scaler.fit_transform(simple_2d)
         expected = procedural(simple_2d, dim="y")
         assert np.allclose(transformed.data, expected.data)
+
+    @pytest.mark.parametrize("factory", _stateful_preprocessor_factories())
+    def test_stateful_preprocessors_accept_new_observations(self, factory):
+        train = _feature_compat_dataset(n_observations=4)
+        test = _feature_compat_dataset(n_observations=6)
+        scaler = factory(dim="y").fit(train)
+
+        transformed = scaler.transform(test)
+
+        assert transformed.shape == test.shape
+
+    @pytest.mark.parametrize("factory", _stateful_preprocessor_factories())
+    def test_stateful_preprocessors_accept_matching_coordless_data(self, factory):
+        train = _feature_compat_dataset(coordset=False)
+        test = _feature_compat_dataset(n_observations=6, coordset=False)
+        scaler = factory(dim="y").fit(train)
+
+        transformed = scaler.transform(test)
+
+        assert transformed.shape == test.shape
+
+    @pytest.mark.parametrize("factory", _stateful_preprocessor_factories())
+    def test_stateful_preprocessors_accept_convertible_feature_units(self, factory):
+        train = _feature_compat_dataset(x_values=[1.0, 2.0, 3.0], x_units="cm")
+        test = _feature_compat_dataset(
+            n_observations=6,
+            x_values=[0.01, 0.02, 0.03],
+            x_units="m",
+        )
+        scaler = factory(dim="y").fit(train)
+
+        transformed = scaler.transform(test)
+
+        assert transformed.shape == test.shape
+
+    @pytest.mark.parametrize(
+        ("factory", "dataset", "message"),
+        [
+            (
+                factory,
+                dataset,
+                message,
+            )
+            for factory in _stateful_preprocessor_factories()
+            for dataset, message in [
+                (
+                    NDDataset(np.ones((4, 3, 1))),
+                    "number of dimensions changed",
+                ),
+                (
+                    _feature_compat_dataset(x_values=[1.0, 2.0, 3.0, 4.0]),
+                    "non-reduced dimension 'x' length changed",
+                ),
+                (
+                    _feature_compat_dataset(x_values=[3.0, 2.0, 1.0]),
+                    "coordinates changed for dimension 'x'",
+                ),
+                (
+                    _feature_compat_dataset(x_values=[1.0, 2.1, 3.0]),
+                    "coordinates changed for dimension 'x'",
+                ),
+                (
+                    _feature_compat_dataset(coordset=False),
+                    "coordinate presence changed for dimension 'x'",
+                ),
+                (
+                    _feature_compat_dataset(x_units=None),
+                    "coordinate units changed for dimension 'x'",
+                ),
+                (
+                    _feature_compat_dataset(x_units="s"),
+                    "coordinate units are incompatible for dimension 'x'",
+                ),
+                (
+                    _feature_compat_dataset(
+                        x_values=[0.01, 0.021, 0.03],
+                        x_units="m",
+                    ),
+                    "coordinates changed for dimension 'x'",
+                ),
+                (
+                    _feature_compat_dataset(data_units="cm"),
+                    "data units changed",
+                ),
+                (
+                    _feature_compat_dataset(data_units=None),
+                    "data units changed",
+                ),
+            ]
+        ],
+    )
+    def test_stateful_preprocessors_reject_incompatible_geometry(
+        self, factory, dataset, message
+    ):
+        scaler = factory(dim="y").fit(_feature_compat_dataset())
+
+        with pytest.raises(SpectroChemPyError, match=message):
+            scaler.transform(dataset)
+
+    @pytest.mark.parametrize("factory", _stateful_preprocessor_factories())
+    def test_stateful_preprocessors_reject_dimension_order_change(self, factory):
+        train = _feature_compat_dataset()
+        scaler = factory(dim="y").fit(train)
+
+        with pytest.raises(SpectroChemPyError, match="dimension order changed"):
+            scaler.transform(train.T)
+
+    @pytest.mark.parametrize("factory", _stateful_preprocessor_factories())
+    def test_stateful_preprocessors_reject_square_transpose(self, factory):
+        train = _feature_compat_dataset(
+            n_observations=3,
+            x_values=[1.0, 2.0, 3.0],
+        )
+        scaler = factory(dim="y").fit(train)
+
+        with pytest.raises(SpectroChemPyError, match="dimension order changed"):
+            scaler.transform(train.T)
+
+    @pytest.mark.parametrize("factory", _stateful_preprocessor_factories())
+    def test_stateful_preprocessors_reject_preprocessing_axis_change(self, factory):
+        train = _feature_compat_dataset()
+        scaler = factory(dim="y").fit(train)
+        scaler.dim = "x"
+
+        with pytest.raises(SpectroChemPyError, match="preprocessing axis changed"):
+            scaler.transform(train)
+
+    @pytest.mark.parametrize("factory", _stateful_preprocessor_factories())
+    def test_stateful_preprocessors_reject_inverse_incompatible_geometry(self, factory):
+        train = _feature_compat_dataset()
+        scaler = factory(dim="y").fit(train)
+        transformed = scaler.transform(train)
+        transformed.set_coordset(
+            y=transformed.coord("y"),
+            x=Coord([3.0, 2.0, 1.0], units="cm"),
+        )
+
+        with pytest.raises(SpectroChemPyError, match="coordinates changed"):
+            scaler.inverse_transform(transformed)
+
+    @pytest.mark.parametrize("factory", _stateful_preprocessor_factories())
+    def test_stateful_preprocessor_signature_copies_coordinate_values(self, factory):
+        train = _feature_compat_dataset()
+        original = _feature_compat_dataset()
+        scaler = factory(dim="y").fit(train)
+        train.coord("x").data = np.array([3.0, 2.0, 1.0])
+
+        transformed = scaler.transform(original)
+
+        assert transformed.shape == original.shape
+
+    @pytest.mark.parametrize("factory", _stateful_preprocessor_factories())
+    def test_stateful_preprocessor_masks_can_differ(self, factory):
+        train = _feature_compat_dataset()
+        test = _feature_compat_dataset(n_observations=6)
+        test[:, 1] = MASKED
+        scaler = factory(dim="y").fit(train)
+
+        transformed = scaler.transform(test)
+
+        assert np.array_equal(transformed.mask, test.mask)
+
+    def test_sample_local_normalize_does_not_reuse_fit_geometry(self):
+        train = _feature_compat_dataset(x_values=[1.0, 2.0, 3.0])
+        test = _feature_compat_dataset(
+            n_observations=2,
+            x_values=[10.0, 20.0, 30.0, 40.0],
+        )
+        scaler = NormalizeTransformer(method="max", dim="x").fit(train)
+
+        transformed = scaler.transform(test)
+
+        assert transformed.shape == test.shape
+        assert not hasattr(scaler, "_fit_signature_")

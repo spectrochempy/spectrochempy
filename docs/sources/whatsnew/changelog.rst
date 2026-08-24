@@ -29,6 +29,11 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Feature-wise preprocessing transformers now reject incompatible transform
+  or inverse-transform datasets before applying learned statistics, covering
+  feature geometry, coordinate values and units, and data-unit mismatches while
+  still allowing new observations along the fitted reduction axis.
+
 - Preprocessing transformers now invalidate fitted state when constructor
   parameters actually change, clear learned attributes after invalidation or a
   failed refit, and keep ``set_params()`` calls with invalid parameter names
