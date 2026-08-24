@@ -29,22 +29,13 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
-- Feature-wise preprocessing transformers now reject incompatible transform
-  or inverse-transform datasets before applying learned statistics, covering
-  feature geometry, coordinate values and units, and data-unit mismatches while
-  still allowing new observations along the fitted reduction axis.
-
-- Preprocessing transformers now invalidate fitted state when constructor
-  parameters actually change, clear learned attributes after invalidation or a
-  failed refit, and keep ``set_params()`` calls with invalid parameter names
-  from partially modifying the transformer.
-
-- ``Baseline.fit()`` now explicitly rejects datasets whose last-axis
-  coordinates contain non-finite values (``NaN`` or infinities), duplicated
-  values, or direction changes, raising a clear ``ValueError`` instead of
-  silently reordering results or failing with model-dependent internal
-  errors. Strictly monotonic but irregularly spaced axes remain accepted, in
-  both increasing and decreasing orders.
+- ``Baseline`` fitting is now stricter and more predictable: polynomial
+  support is validated before fitting, invalid or non-intersecting ranges raise
+  clear ``ValueError`` messages, fitted/corrected outputs preserve the input
+  shape, and last-axis coordinates with ``NaN``, infinities, duplicates, or
+  direction changes are rejected before model-specific internals can produce
+  inconsistent results. The Baseline implementation also avoids unnecessary
+  ascending-axis sorts and reduces polynomial range-assembly overhead.
 
 - Fixed a false linearity detection in ``Coord`` that could silently replace
   descending coordinates containing duplicated or irregularly spaced values
@@ -52,14 +43,12 @@ Bug Fixes
   provided, while genuinely regular ascending and descending axes keep being
   detected as linear.
 
-- Hardened polynomial baseline fitting on short or underspecified spectra by
-  validating support size explicitly, reporting non-intersecting ranges with
-  clear ``ValueError`` messages, and avoiding internal index failures when
-  automatic edge support is enabled.
-
-- Fixed model-dependent shape inconsistencies in ``Baseline.corrected`` so that
-  baseline and corrected datasets preserve the input dataset shape and
-  dimensions.
+- Stateful preprocessing transformers now reset learned state reliably after
+  constructor-parameter changes or failed refits, keep invalid ``set_params()``
+  calls transactional, and reject incompatible transform or inverse-transform
+  datasets before applying learned statistics. The compatibility guard covers
+  feature geometry, coordinate values and units, and data-unit mismatches while
+  still allowing new observations along the fitted reduction axis.
 
 .. section
 
