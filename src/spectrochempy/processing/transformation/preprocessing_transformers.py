@@ -82,6 +82,8 @@ class BasePreprocessor:
 
     """
 
+    _learned_attributes = ()
+
     def __init__(self, dim="y"):
         self.dim = dim
         self._fitted = False
@@ -101,8 +103,14 @@ class BasePreprocessor:
             The fitted instance.
 
         """
-        self._fit(dataset)
-        self._fitted = True
+        self._invalidate_fitted_state()
+        try:
+            self._fit(dataset)
+        except Exception:
+            self._invalidate_fitted_state()
+            raise
+        else:
+            self._fitted = True
         return self
 
     def transform(self, dataset):
@@ -242,14 +250,24 @@ class BasePreprocessor:
         AutoscaleTransformer(dim='x')
 
         """
-        valid = self.get_params().keys()
+        valid = self.get_params()
+        invalid = [key for key in params if key not in valid]
+        if invalid:
+            key = invalid[0]
+            valid_names = ", ".join(sorted(valid))
+            raise SpectroChemPyError(
+                f"Invalid parameter '{key}' for {self.__class__.__name__}. "
+                f"Valid parameters: {valid_names}."
+            )
+
+        changed = any(
+            not self._parameter_values_equal(valid[key], value)
+            for key, value in params.items()
+        )
         for key, value in params.items():
-            if key not in valid:
-                raise SpectroChemPyError(
-                    f"Invalid parameter '{key}' for {self.__class__.__name__}. "
-                    f"Valid parameters: {', '.join(sorted(valid))}."
-                )
             setattr(self, key, value)
+        if changed:
+            self._invalidate_fitted_state()
         return self
 
     def __repr__(self):
@@ -263,6 +281,44 @@ class BasePreprocessor:
     def _set_data(self, new, data):
         r"""Assign transformed data, coercing MaskedArray → plain ndarray."""
         new._data = np.asarray(data)
+
+    def _invalidate_fitted_state(self):
+        r"""Mark the transformer as unfitted and clear declared learned state."""
+        self._fitted = False
+        for name in self._learned_attributes:
+            if hasattr(self, name):
+                delattr(self, name)
+
+    @classmethod
+    def _parameter_values_equal(cls, old, new):
+        r"""Return whether two constructor parameter values are effectively equal."""
+        if old is new:
+            return True
+        if old is None or new is None:
+            return False
+        if cls._is_spectrochempy_object(old) or cls._is_spectrochempy_object(new):
+            return False
+        if isinstance(old, np.ma.MaskedArray) or isinstance(new, np.ma.MaskedArray):
+            try:
+                return bool(np.ma.allequal(old, new))
+            except (TypeError, ValueError):
+                return False
+        if isinstance(old, np.ndarray) or isinstance(new, np.ndarray):
+            try:
+                return bool(np.array_equal(old, new, equal_nan=True))
+            except (TypeError, ValueError):
+                return False
+        try:
+            result = old == new
+        except (TypeError, ValueError):
+            return False
+        if isinstance(result, (bool, np.bool_)):
+            return bool(result)
+        return False
+
+    @staticmethod
+    def _is_spectrochempy_object(value):
+        return hasattr(value, "masked_data") or hasattr(value, "coordset")
 
     def _fit(self, dataset):
         raise NotImplementedError("Subclasses must implement _fit().")
@@ -303,6 +359,8 @@ class CenterTransformer(BasePreprocessor):
     center : Procedural mean-centering function.
 
     """
+
+    _learned_attributes = ("mean_", "_dim_name")
 
     def _fit(self, dataset):
         axis, self._dim_name = dataset.get_axis(self.dim)
@@ -353,6 +411,8 @@ class AutoscaleTransformer(BasePreprocessor):
 
     """
 
+    _learned_attributes = ("mean_", "std_", "_dim_name")
+
     def _fit(self, dataset):
         axis, self._dim_name = dataset.get_axis(self.dim)
         data = dataset.masked_data
@@ -402,6 +462,8 @@ class SNVTransformer(AutoscaleTransformer):
     AutoscaleTransformer : General autoscaling transformer.
 
     """
+
+    _learned_attributes = ("_dim_name",)
 
     def __init__(self):
         super().__init__(dim="x")
@@ -478,6 +540,19 @@ class NormalizeTransformer(BasePreprocessor):
     normalize : Procedural normalization function.
 
     """
+
+    _learned_attributes = (
+        "norm_",
+        "dmin_",
+        "dmax_",
+        "range_",
+        "_dim_name",
+        "_sample_local_",
+        "_fit_axis_",
+        "_fit_shape_",
+        "_fit_dims_",
+        "_fit_compatible_coords_",
+    )
 
     def __init__(self, method="max", dim="x"):
         super().__init__(dim=dim)
@@ -696,6 +771,17 @@ class MSCTransformer(BasePreprocessor):
     msc : Procedural MSC function.
 
     """
+
+    _learned_attributes = (
+        "reference_",
+        "a_",
+        "b_",
+        "_dim_name",
+        "_spectral_axis_",
+        "_spectral_dim_name_",
+        "_spectral_size_",
+        "_spectral_coord_",
+    )
 
     def __init__(self, reference=None, dim="y"):
         super().__init__(dim=dim)
@@ -922,6 +1008,8 @@ class ParetoScaleTransformer(BasePreprocessor):
 
     """
 
+    _learned_attributes = ("mean_", "std_", "_dim_name")
+
     def __init__(self, dim="y"):
         super().__init__(dim=dim)
 
@@ -984,6 +1072,8 @@ class RangeScaleTransformer(BasePreprocessor):
     range_scale : Procedural range scaling function.
 
     """
+
+    _learned_attributes = ("dmin_", "dmax_", "range_", "_dim_name")
 
     def __init__(self, dim="y"):
         super().__init__(dim=dim)
@@ -1048,6 +1138,8 @@ class RobustScaleTransformer(BasePreprocessor):
 
     """
 
+    _learned_attributes = ("median_", "mad_", "_dim_name")
+
     def __init__(self, dim="y"):
         super().__init__(dim=dim)
 
@@ -1111,14 +1203,19 @@ class LogTransformer(BasePreprocessor):
 
     """
 
+    _learned_attributes = ()
+
     def __init__(self, method="log1p", eps=1e-10):
         super().__init__(dim=None)
         self.method = method
         self.eps = eps
 
     def _fit(self, dataset):
-        # Stateless — nothing to learn
-        pass
+        if self.method not in ("log1p", "log"):
+            raise SpectroChemPyError(
+                f"Unknown LogTransformer method '{self.method}'. "
+                f"Choose from 'log1p' or 'log'."
+            )
 
     def _transform(self, dataset):
         new = dataset.copy()
