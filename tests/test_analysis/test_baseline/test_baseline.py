@@ -78,32 +78,6 @@ def _explicit_polynomial_support(dataset, ranges):
     return concatenate(sections)
 
 
-def _make_nonmonotonic_baseline_dataset():
-    x = np.array([1000.0, 1125.0, 1075.0, 1250.0, 1375.0, 1325.0, 1500.0])
-    data = 0.002 * x + 0.5 + 0.05 * np.sin(np.linspace(0.0, 3.0, x.size))
-    dataset = scp.NDDataset(
-        data,
-        coordset=[scp.Coord(x, title="wavenumber", units="cm^-1")],
-        units="absorbance",
-        title="nonmonotonic baseline dataset",
-    )
-    dataset.name = "nonmonotonic_baseline_dataset"
-    return dataset
-
-
-def _make_nan_axis_baseline_dataset():
-    x = np.array([1000.0, 1125.0, np.nan, 1250.0, 1375.0, 1500.0])
-    data = np.linspace(1.0, 2.0, x.size)
-    dataset = scp.NDDataset(
-        data,
-        coordset=[scp.Coord(x, title="wavenumber", units="cm^-1")],
-        units="absorbance",
-        title="nan axis baseline dataset",
-    )
-    dataset.name = "nan_axis_baseline_dataset"
-    return dataset
-
-
 def _clone_baseline_for_oracle(blc):
     oracle = Baseline(model=blc.model)
     for name in (
@@ -217,7 +191,7 @@ def test_baseline_corrected_preserves_shape_for_strict_1d_inputs(
     dataset = _make_shape_probe_dataset(descending=descending)
     original = dataset.copy()
 
-    blc = Baseline(model=model, **kwargs)
+    blc = _contract_baseline(model, kwargs)
     blc.fit(dataset)
 
     baseline = blc.baseline
@@ -254,7 +228,7 @@ def test_baseline_corrected_preserves_shape_for_2d_inputs(model, kwargs, n_rows)
     dataset = _make_shape_probe_dataset(n_rows=n_rows)
     original = dataset.copy()
 
-    blc = Baseline(model=model, **kwargs)
+    blc = _contract_baseline(model, kwargs)
     blc.fit(dataset)
 
     baseline = blc.baseline
@@ -741,7 +715,7 @@ def test_baseline_fit_skips_unneeded_ascending_sorts_and_matches_historical_path
         dataset[slice(*mask_region)] = scp.MASKED
     original = dataset.copy()
 
-    blc = Baseline(model=model, **kwargs)
+    blc = _contract_baseline(model, kwargs)
     if ranges is not None:
         blc.ranges = ranges
 
@@ -789,45 +763,196 @@ def test_baseline_fit_preserves_descending_sort_path(monkeypatch):
     assert_dataset_equal(dataset, original)
 
 
-def test_baseline_fit_preserves_nonmonotonic_sort_path(monkeypatch):
-    dataset = _make_nonmonotonic_baseline_dataset()
+# ==============================================================================
+# Last-axis coordinate contract: finite and strictly monotonic
+# ==============================================================================
+
+_BASELINE_CONTRACT_MODELS = [
+    ("polynomial", {}),
+    ("polynomial-pchip", {"model": "polynomial", "order": "pchip"}),
+    ("asls", {"lamb": 1e5, "asymmetry": 0.05}),
+    ("snip", {"snip_width": 15}),
+    ("rubberband", {}),
+]
+
+
+# (name, coordinate values, expected message fragment)
+def _contract_baseline(model, kwargs):
+    """Build a Baseline instance from a contract-test model entry."""
+    merged = {"model": model.split("-")[0], **kwargs}
+    return Baseline(**merged)
+
+
+_INVALID_COORDINATE_CASES = [
+    ("ascending_duplicate", [1000.0, 1125.0, 1125.0, 1375.0, 1500.0], "strictly"),
+    ("descending_duplicate", [1500.0, 1375.0, 1250.0, 1250.0, 1000.0], "strictly"),
+    (
+        "multiple_duplicates",
+        [1000.0, 1000.0, 1125.0, 1250.0, 1250.0, 1500.0],
+        "strictly",
+    ),
+    ("constant_axis", [1250.0] * 5, "strictly"),
+    (
+        "nonmonotonic_ascending_endpoints",
+        [1000.0, 1125.0, 1075.0, 1250.0, 1375.0, 1325.0, 1500.0],
+        "strictly",
+    ),
+    (
+        "nonmonotonic_descending_endpoints",
+        [1500.0, 1375.0, 1425.0, 1250.0, 1125.0, 1175.0, 1000.0],
+        "strictly",
+    ),
+    ("nan_at_start", [np.nan, 1125.0, 1250.0, 1375.0, 1500.0], "finite"),
+    ("nan_in_middle", [1000.0, 1125.0, np.nan, 1375.0, 1500.0], "finite"),
+    ("nan_at_end", [1000.0, 1125.0, 1250.0, 1375.0, np.nan], "finite"),
+    ("plus_inf", [1000.0, 1125.0, 1250.0, 1375.0, np.inf], "finite"),
+    ("minus_inf", [-np.inf, 1125.0, 1250.0, 1375.0, 1500.0], "finite"),
+    ("multiple_nonfinite", [-np.inf, 1125.0, np.nan, 1375.0, np.inf], "finite"),
+]
+
+
+def _make_contract_probe_dataset(x_values, n_rows=None, mask_region=None):
+    x = np.asarray(x_values, dtype=float)
+    base = 0.002 * x + 0.5 + 0.05 * np.sin(np.linspace(0.0, 3.0, x.size))
+    if n_rows is None:
+        data = base
+        coordset = [scp.Coord(x, title="wavenumber", units="cm^-1")]
+    else:
+        data = np.vstack([base + 0.01 * i for i in range(n_rows)])
+        coordset = [
+            scp.Coord(np.arange(n_rows, dtype=float), title="row"),
+            scp.Coord(x, title="wavenumber", units="cm^-1"),
+        ]
+    dataset = scp.NDDataset(
+        data,
+        coordset=coordset,
+        units="absorbance",
+        title="coordinate contract probe dataset",
+    )
+    if mask_region is not None:
+        dataset[..., slice(*mask_region)] = scp.MASKED
+    return dataset
+
+
+@pytest.mark.parametrize("model,kwargs", _BASELINE_CONTRACT_MODELS)
+@pytest.mark.parametrize(
+    "case_name,x_values,message_fragment", _INVALID_COORDINATE_CASES
+)
+def test_baseline_rejects_invalid_last_axis_coordinates(
+    model, kwargs, case_name, x_values, message_fragment
+):
+    dataset = _make_contract_probe_dataset(x_values)
     original = dataset.copy()
 
-    blc = Baseline(model="asls", lamb=1e5, asymmetry=0.05)
-    sort_calls = _sort_spy(monkeypatch)
-    blc.fit(dataset)
+    blc = _contract_baseline(model, kwargs)
+    with pytest.raises(ValueError, match=message_fragment):
+        blc.fit(dataset)
 
-    assert len(sort_calls) == 2
-    assert all(call["descend"] is False for call in sort_calls)
+    # no silent mutation, whatever the model
+    assert_dataset_equal(dataset, original)
 
-    baseline = blc.baseline
-    corrected = blc.corrected
+    # the fitted flag must not have been set by the failed fit
+    assert not blc._fitted
 
-    monkeypatch.undo()
-    oracle = _historical_fit(blc, original.copy(), monkeypatch)
 
-    assert_dataset_equal(baseline, oracle.baseline)
-    assert_dataset_equal(corrected, oracle.corrected)
+@pytest.mark.parametrize("model,kwargs", _BASELINE_CONTRACT_MODELS)
+def test_baseline_rejects_invalid_coordinates_for_masked_2d_inputs(model, kwargs):
+    dataset = _make_contract_probe_dataset(
+        [1000.0, 1125.0, 1125.0, 1375.0, 1500.0],
+        n_rows=2,
+        mask_region=(1100.0, 1400.0),
+    )
+    original = dataset.copy()
+    blc = _contract_baseline(model, kwargs)
+    with pytest.raises(ValueError, match="strictly"):
+        blc.fit(dataset)
     assert_dataset_equal(dataset, original)
 
 
-def test_baseline_fit_preserves_nan_axis_sort_path(monkeypatch):
-    dataset = _make_nan_axis_baseline_dataset()
-    original = dataset.copy()
+@pytest.mark.parametrize("model,kwargs", _BASELINE_CONTRACT_MODELS)
+def test_baseline_accepts_irregular_strictly_monotonic_coordinates(model, kwargs):
+    for descending in (False, True):
+        values = np.array([1000.0, 1090.0, 1234.5, 1300.0, 1520.0, 1611.0, 2000.0])
+        if descending:
+            values = values[::-1].copy()
+        dataset = _make_contract_probe_dataset(values)
+        original = dataset.copy()
 
-    blc = Baseline(model="asls", lamb=1e5, asymmetry=0.05)
-    sort_calls = _sort_spy(monkeypatch)
-    with pytest.raises(AttributeError, match="coordset"):
+        blc = _contract_baseline(model, kwargs)
         blc.fit(dataset)
 
-    assert len(sort_calls) == 2
-    assert all(call["descend"] is False for call in sort_calls)
+        baseline = blc.baseline
+        corrected = blc.corrected
 
-    monkeypatch.undo()
-    oracle = _clone_baseline_for_oracle(blc)
-    with pytest.raises(AttributeError, match="coordset"):
-        _historical_fit(oracle, original.copy(), monkeypatch)
+        assert baseline.shape == dataset.shape
+        assert corrected.shape == dataset.shape
+        np.testing.assert_allclose(
+            np.asarray(baseline.x.data), np.asarray(dataset.x.data), atol=1e-3
+        )
+        assert_dataset_equal(dataset, original)
 
+
+@pytest.mark.parametrize("model,kwargs", _BASELINE_CONTRACT_MODELS)
+def test_baseline_accepts_regular_axes_both_orientations_2d(model, kwargs):
+    for descending in (False, True):
+        dataset = _make_shape_probe_dataset(descending=descending, n_rows=2)
+        original = dataset.copy()
+        blc = _contract_baseline(model, kwargs)
+        blc.fit(dataset)
+        baseline = blc.baseline
+        corrected = blc.corrected
+        assert baseline.shape == dataset.shape
+        assert corrected.shape == dataset.shape
+        assert_dataset_equal(dataset, original)
+
+
+@pytest.mark.parametrize("model,kwargs", _BASELINE_CONTRACT_MODELS)
+def test_baseline_validation_runs_before_numerical_kernel(model, kwargs):
+    # even a kernel that would crash later on invalid input fails fast with
+    # the public contract error instead
+    dataset = _make_contract_probe_dataset([1000.0, 1100.0, np.nan, 1300.0])
+    kernel_spy_called = []
+    original_fit_method = Baseline._fit
+
+    def spy_fit(self, *args, **kwargs):
+        kernel_spy_called.append(True)
+        return original_fit_method(self, *args, **kwargs)
+
+    mp = pytest.MonkeyPatch()
+    try:
+        mp.setattr(Baseline, "_fit", spy_fit)
+        blc = _contract_baseline(model, kwargs)
+        with pytest.raises(ValueError, match="finite"):
+            blc.fit(dataset)
+    finally:
+        mp.undo()
+    assert kernel_spy_called == []
+
+
+def test_baseline_rejects_duplicates_before_breakpoint_and_pchip_paths():
+    # historical internal failures (breakpoint TypeError, pchip strictness
+    # error) become unreachable thanks to the early validation
+    values = [1000.0, 1125.0, 1125.0, 1375.0, 1500.0]
+    dataset = _make_contract_probe_dataset(values)
+    blc = Baseline(
+        model="polynomial", order="pchip", breakpoints=[1125.0], include_limits=True
+    )
+    with pytest.raises(ValueError, match="strictly"):
+        blc.fit(dataset)
+
+
+def test_baseline_accepts_valid_breakpoints_and_multiple_ranges():
+    dataset = _make_shape_probe_dataset()
+    original = dataset.copy()
+
+    blc = Baseline(model="polynomial", order=2, breakpoints=[1450.0])
+    blc.ranges = [[1000.0, 1200.0], [1700.0, 2000.0]]
+    blc.fit(dataset)
+
+    baseline = blc.baseline
+    corrected = blc.corrected
+    assert baseline.shape == dataset.shape
+    assert corrected.shape == dataset.shape
     assert_dataset_equal(dataset, original)
 
 
