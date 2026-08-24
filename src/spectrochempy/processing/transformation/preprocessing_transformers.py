@@ -309,12 +309,9 @@ class BasePreprocessor:
             except (TypeError, ValueError):
                 return False
         try:
-            result = old == new
+            return bool(old == new)
         except (TypeError, ValueError):
             return False
-        if isinstance(result, (bool, np.bool_)):
-            return bool(result)
-        return False
 
     @staticmethod
     def _is_spectrochempy_object(value):
