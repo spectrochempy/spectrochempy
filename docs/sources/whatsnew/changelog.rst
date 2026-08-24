@@ -29,6 +29,13 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- ``Baseline.fit()`` now explicitly rejects datasets whose last-axis
+  coordinates contain non-finite values (``NaN`` or infinities), duplicated
+  values, or direction changes, raising a clear ``ValueError`` instead of
+  silently reordering results or failing with model-dependent internal
+  errors. Strictly monotonic but irregularly spaced axes remain accepted, in
+  both increasing and decreasing orders.
+
 - Fixed a false linearity detection in ``Coord`` that could silently replace
   descending coordinates containing duplicated or irregularly spaced values
   with an artificial uniform grid. Such coordinates are now preserved as

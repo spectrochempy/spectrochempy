@@ -103,6 +103,12 @@ class Baseline(AnalysisConfigurable):
     By default, `ranges` is set to the feature limits (i.e., ``ranges=[features[0],
     features[-1]]``) and the baseline is fitted on the full range of the dataset.
 
+    The last axis of the input dataset must have finite coordinates that are
+    strictly increasing or strictly decreasing. Irregularly spaced coordinates
+    are accepted as long as they are strictly monotonic. Duplicated coordinate
+    values, direction changes, and non-finite values (``NaN`` or infinities)
+    are rejected with a ``ValueError`` when ``fit`` is called.
+
     Parameters
     ----------
     log_level : any of [``"INFO"``, ``"DEBUG"``, ``"WARNING"``, ``"ERROR"``], optional, default: ``"WARNING"``
@@ -370,6 +376,40 @@ baseline/trends for different segments of the data.
             return False
         dataset.sort(inplace=True, descend=False)
         return True
+
+    @staticmethod
+    def _validate_last_axis_coordinates(X):
+        """
+        Reject invalid last-axis coordinates before any fitting work.
+
+        The last axis coordinates must be finite and strictly increasing or
+        strictly decreasing (full-axis check, not inferred from the axis
+        endpoints). Duplicated coordinate values and direction changes are
+        rejected, as well as ``NaN`` or infinite values. Irregularly spaced
+        but strictly monotonic coordinates are accepted.
+        """
+        try:
+            coord = X.coordset[X.dims[-1]]
+            values = np.asarray(coord.data)
+        except (AttributeError, TypeError):
+            # inputs without usable coordinates (plain arrays or datasets
+            # without a coordset) are left to the existing machinery, which
+            # reports its own historical error; anything else must propagate
+            return
+        if values.dtype.kind not in "fiu" or values.size < 2:
+            return
+        if not np.all(np.isfinite(values)):
+            raise ValueError(
+                "Baseline fitting requires finite last-axis coordinates: "
+                "NaN or infinite coordinate values are not accepted."
+            )
+        diffs = np.diff(values)
+        if not (np.all(diffs > 0) or np.all(diffs < 0)):
+            raise ValueError(
+                "Baseline fitting requires last-axis coordinates to be "
+                "strictly increasing or strictly decreasing: duplicated "
+                "coordinate values and direction changes are not accepted."
+            )
 
     def _polynomial_edge_ranges(self, values):
         values = np.asarray(values)
@@ -732,14 +772,30 @@ baseline/trends for different segments of the data.
         Parameters
         ----------
         X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`, :term:`n_features`)
-            Training data.
+            Training data. The last-axis coordinates must be finite and
+            strictly increasing or strictly decreasing (duplicated values,
+            direction changes and non-finite values are rejected).
 
         Returns
         -------
         self
             The fitted instance itself.
 
+        Raises
+        ------
+        ValueError
+            If the last-axis coordinates are not finite, or not strictly
+            increasing or strictly decreasing.
+
         """
+        # Reset the fitted state first: a rejected fit must not leave the
+        # instance exposing results from a previous successful fit.
+        self._fitted = False
+
+        # Reject invalid last-axis coordinates before any copy, range
+        # construction, mask removal, sort or numerical work.
+        self._validate_last_axis_coordinates(X)
+
         self._fitted = False  # reinit this flag
 
         # Set X
