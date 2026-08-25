@@ -900,6 +900,56 @@ class TestInplaceOperations:
         assert len(ds.history) == 2
         assert "Inplace binary op" in str(ds.history[1])
 
+    # ---- in-place isolation guards (out-of-place copy elision boundary) ----
+    # In-place operators execute through mutating functions on a defensive
+    # copy of the first operand; these tests pin the observable contracts
+    # that depend on that copy.
+
+    def test_inplace_returns_same_object(self, unmasked_dataset):
+        ds = unmasked_dataset.copy()
+        result = ds.__iadd__(2.0)
+        assert result is ds
+
+    def test_inplace_does_not_mutate_external_buffer(self):
+        arr = np.array([1.0, 2.0, 3.0])
+        ds = NDDataset(arr)
+
+        ds *= 10.0
+
+        assert_array_equal(arr, [1.0, 2.0, 3.0])
+        assert_array_equal(ds.data, [10.0, 20.0, 30.0])
+
+    def test_inplace_with_non_writable_buffer(self):
+        arr = np.array([1.0, 2.0, 3.0])
+        arr.setflags(write=False)
+        ds = NDDataset(arr)
+
+        ds += 1.0
+
+        assert_array_equal(ds.data, [2.0, 3.0, 4.0])
+        assert_array_equal(arr, [1.0, 2.0, 3.0])
+
+    def test_inplace_incompatible_units_raise_without_partial_mutation(self):
+        left = make_semantic_2d_dataset(units="m", title="left metres", name="left_m")
+        right = make_semantic_2d_dataset(
+            title="right seconds",
+            name="right_s",
+            units="s",
+        )
+        before_data = left.data.copy()
+        before_mask = left.mask.copy()
+        before_units = left.units
+
+        with pytest.raises(DimensionalityError):
+            left += right
+
+        # NOTE: the in-place operator appends its history entry before the
+        # computation (pre-existing behavior); data, mask and units must not
+        # be partially mutated by the failed operation.
+        assert_array_equal(left.data, before_data)
+        assert_array_equal(left.mask, before_mask)
+        assert left.units == before_units
+
 
 class TestInplaceOperationsUnmasked:
     """Characterize in-place arithmetic on unmasked dataset."""
