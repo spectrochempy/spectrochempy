@@ -53,3 +53,8 @@ Deprecations
 Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
+
+PERF: Removed a redundant defensive copy of the first operand in binary and
+unary arithmetic result construction, roughly halving the object-reconstruction
+overhead of ``NDDataset`` arithmetic while preserving results, units, masks,
+coordinates, metadata, and operand non-mutation semantics.

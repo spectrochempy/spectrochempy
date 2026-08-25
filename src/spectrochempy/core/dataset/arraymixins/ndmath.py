@@ -3573,7 +3573,12 @@ class NDMath:
 
         # Now we can proceed
 
-        obj = cpy.copy(inputs.pop(0))
+        # The first operand is only read by the preparation/execution/mask
+        # helpers below (data, units, mask, coordset); none of them mutate it,
+        # so no defensive copy of it is needed here. Only ``other`` can be
+        # mutated in place (unit conversion through ``ito``), and it keeps its
+        # own defensive copy for that purpose.
+        obj = inputs.pop(0)
         objtype = objtypes.pop(0)
 
         other = None

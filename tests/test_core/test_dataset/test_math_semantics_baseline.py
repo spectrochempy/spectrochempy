@@ -32,6 +32,7 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.units import Unit
+from spectrochempy.utils.constants import MASKED
 from spectrochempy.utils.testing import assert_array_equal
 from tests.test_core.test_dataset._semantic_dataset_helpers import (
     assert_basic_metadata_preserved,
@@ -506,6 +507,90 @@ class TestDatasetDatasetArithmetic:
 
     def test_radd_numerical(self, unmasked_dataset):
         assert_array_equal((2.0 + unmasked_dataset).data, 2.0 + unmasked_dataset.data)
+
+    # ---- result isolation ----
+    # Mutating the arithmetic result through public APIs must never leak back
+    # into the operands (guards the copy-first result construction).
+
+    @staticmethod
+    def _operand_snapshot(ds):
+        return {
+            "data": ds.data.copy(),
+            "mask": ds.mask.copy(),
+            "x_data": ds.x.data.copy(),
+            "x_title": ds.x.title,
+            "meta_project": ds.meta.project,
+            "meta_instrument": ds.meta.instrument,
+            "history": list(ds.history),
+            "units": ds.units,
+            "title": ds.title,
+            "name": ds.name,
+        }
+
+    @classmethod
+    def _assert_operand_snapshot(cls, ds, snapshot):
+        assert_array_equal(ds.data, snapshot["data"])
+        assert_array_equal(ds.mask, snapshot["mask"])
+        assert_array_equal(ds.x.data, snapshot["x_data"])
+        assert ds.x.title == snapshot["x_title"]
+        assert ds.meta.project == snapshot["meta_project"]
+        assert ds.meta.instrument == snapshot["meta_instrument"]
+        assert ds.history == snapshot["history"]
+        assert ds.units == snapshot["units"]
+        assert ds.title == snapshot["title"]
+        assert ds.name == snapshot["name"]
+
+    @pytest.mark.parametrize("other_kind", ["scalar", "dataset"])
+    def test_result_mutation_does_not_affect_operands(
+        self, rich_dataset, compatible_dataset, other_kind
+    ):
+        other = 2.0 if other_kind == "scalar" else compatible_dataset
+        left_before = self._operand_snapshot(rich_dataset)
+        right_before = (
+            self._operand_snapshot(compatible_dataset)
+            if other_kind == "dataset"
+            else None
+        )
+
+        result = rich_dataset + other
+        result[0, 1] = 99.0
+        result[2, 2] = MASKED
+        result.x.data[0] = 1234.0
+        result.x.title = "changed coordinate"
+        result.meta.project = "changed project"
+        result.history = "changed history"
+        result.title = "changed title"
+        result.name = "changed name"
+
+        self._assert_operand_snapshot(rich_dataset, left_before)
+        if other_kind == "dataset":
+            self._assert_operand_snapshot(compatible_dataset, right_before)
+
+    def test_unit_conversion_does_not_mutate_source_operands(self):
+        left = make_semantic_2d_dataset(units="m", title="left metres", name="left_m")
+        right = make_semantic_2d_dataset(
+            data=np.ones((5, 7)) * 100.0,
+            units="cm",
+            title="right centimetres",
+            name="right_cm",
+        )
+        left_before = self._operand_snapshot(left)
+        right_before = self._operand_snapshot(right)
+
+        result = left + right
+
+        assert result.units == Unit("m")
+        assert_array_equal(result.data, left.data + right.data / 100.0)
+        self._assert_operand_snapshot(left, left_before)
+        self._assert_operand_snapshot(right, right_before)
+
+    def test_reflected_add_does_not_mutate_source(self, unmasked_dataset):
+        before = self._operand_snapshot(unmasked_dataset)
+
+        result = 2.0 + unmasked_dataset
+
+        assert_array_equal(result.data, 2.0 + unmasked_dataset.data)
+        self._assert_operand_snapshot(unmasked_dataset, before)
 
     def test_rsub_numerical(self, unmasked_dataset):
         assert_array_equal(

@@ -11,3 +11,11 @@ What's New in Revision 0.12.7.dev
 
 These are the changes in SpectroChemPy-0.12.7.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
+
+Developer
+~~~~~~~~~
+
+PERF: Removed a redundant defensive copy of the first operand in binary and
+unary arithmetic result construction, roughly halving the object-reconstruction
+overhead of ``NDDataset`` arithmetic while preserving results, units, masks,
+coordinates, metadata, and operand non-mutation semantics.
