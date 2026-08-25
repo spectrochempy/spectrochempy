@@ -3554,6 +3554,7 @@ class NDMath:
         inputs: Sequence[ArrayLike],
         isufunc: bool = False,
         reflected: bool = False,
+        inplace: bool = False,
     ) -> tuple[np.ndarray, str | None, np.ndarray, str | None, bool]:
         # Achieve an operation f on the objs
 
@@ -3573,7 +3574,16 @@ class NDMath:
 
         # Now we can proceed
 
-        obj = cpy.copy(inputs.pop(0))
+        # Out-of-place operations only read the first operand in the
+        # preparation/execution/mask helpers below, so its defensive copy can
+        # be skipped. In-place operations dispatch to mutating functions
+        # (e.g. ``operator.iadd``) that modify the first operand's data
+        # buffer directly; there the defensive copy is kept so the observable
+        # behavior is unchanged: caller buffers (including arrays the dataset
+        # was built from) are not mutated before the final assignments, a
+        # non-writable buffer stays usable, and a failure after the numerical
+        # step cannot leave the source partially mutated.
+        obj = cpy.copy(inputs.pop(0)) if inplace else inputs.pop(0)
         objtype = objtypes.pop(0)
 
         other = None
@@ -3729,7 +3739,7 @@ class NDMath:
             fm, objs, reflected = self._check_order(fname, objs)
 
             data, units, mask, returntype, reflected = self._op(
-                fm, objs, reflected=reflected
+                fm, objs, reflected=reflected, inplace=True
             )
             self._data = data
             self._units = units

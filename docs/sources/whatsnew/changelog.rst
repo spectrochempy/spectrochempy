@@ -53,3 +53,10 @@ Deprecations
 Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
+
+PERF: Skipped the redundant defensive copy of the first operand in out-of-place
+binary and unary arithmetic result construction, removing one root dataset
+reconstruction per operation (root copies from 2 to 1 for dataset/scalar and
+from 4 to 3 for dataset/dataset) while preserving results, units, masks,
+coordinates, metadata, and operand non-mutation semantics. In-place operators
+keep their defensive copy unchanged.
