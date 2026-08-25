@@ -191,5 +191,4 @@ def write(dataset, filename=None, **kwargs):
 @exportermethod
 def _write_scp(*args, **kwargs):
     dataset, filename = args
-    dataset.filename = str(filename)
     return dataset.dump(filename, **kwargs)

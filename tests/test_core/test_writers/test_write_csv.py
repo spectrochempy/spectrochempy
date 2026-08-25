@@ -73,6 +73,48 @@ def test_write_csv_with_coords(mock_cwd, ds_1d_with_coords, ds_2d_with_coords):
     f.unlink()
 
 
+def test_write_csv_rejects_unsupported_2d_without_identity_side_effect(tmp_path):
+    x = scp.Coord(np.linspace(4000, 1000, 5), title="wavenumber", units="cm^-1")
+    y = scp.Coord([1.0, 2.0, 3.0], title="time", units="s")
+    dataset = scp.NDDataset(
+        np.ones((3, 5)),
+        coordset=[y, x],
+        name="csv_2d_rejected",
+    )
+    target = tmp_path / "unsupported_2d.csv"
+    original_filename = dataset.filename
+    original_name = dataset.name
+
+    with pytest.raises(NotImplementedError, match="Only implemented for 1D"):
+        dataset.write_csv(target, confirm=False)
+
+    assert not target.exists()
+    assert dataset.filename == original_filename
+    assert dataset.name == original_name
+
+
+def test_write_csv_rejects_unsupported_2d_keeps_existing_file_and_identity(tmp_path):
+    x = scp.Coord(np.linspace(4000, 1000, 5), title="wavenumber", units="cm^-1")
+    y = scp.Coord([1.0, 2.0, 3.0], title="time", units="s")
+    dataset = scp.NDDataset(
+        np.ones((3, 5)),
+        coordset=[y, x],
+        name="csv_2d_existing",
+    )
+    target = tmp_path / "unsupported_2d.csv"
+    target.write_bytes(b"SENTINEL\n")
+    original_bytes = target.read_bytes()
+    original_filename = dataset.filename
+    original_name = dataset.name
+
+    with pytest.raises(NotImplementedError, match="Only implemented for 1D"):
+        dataset.write_csv(target, confirm=False, overwrite=True)
+
+    assert target.read_bytes() == original_bytes
+    assert dataset.filename == original_filename
+    assert dataset.name == original_name
+
+
 def test_write_csv_masked_values(tmp_path):
     # masked samples must be exported as missing values (NaN), not as their
     # (stale) underlying data (#1135), mirroring the JCAMP-DX writer (#1132)
@@ -179,6 +221,7 @@ def test_write_csv_valid_real_round_trip_still_works(tmp_path, ds_1d_with_coords
 
     assert path.exists()
     assert dataset.filename == path
+    assert dataset.name == "real_csv"
     text = path.read_text()
     assert "wavenumber / cm^-1,absorbance / a.u." in text
 

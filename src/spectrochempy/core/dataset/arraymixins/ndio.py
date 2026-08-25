@@ -186,7 +186,6 @@ class NDIO(tr.HasTraits):
         # was already saved previously with this name,
         # in this case we do not display a dialog and overwrite the same file
 
-        self.name = filename.stem
         return self.dump(filename, **kwargs)
 
     def save_as(self, filename: str = "", **kwargs: Any) -> pathlib.Path | None:
@@ -263,7 +262,6 @@ class NDIO(tr.HasTraits):
         )
 
         if filename:
-            self.filename = filename
             return self.dump(filename, **kwargs)
         return None
 
