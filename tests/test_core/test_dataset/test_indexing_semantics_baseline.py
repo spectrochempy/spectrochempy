@@ -17,6 +17,7 @@ import pytest
 
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.utils.testing import assert_array_equal
 from tests.test_core.test_dataset._semantic_dataset_helpers import (
     assert_basic_metadata_preserved,
 )
@@ -563,6 +564,20 @@ class TestIdentity:
         """Notable: original history is preserved, not replaced."""
         r = ds[0]
         assert "Original entry" in r.history[0]
+
+    def test_slicing_does_not_mutate_source_state(self, ds):
+        """Non-in-place slicing leaves source scientific state unchanged."""
+        data = ds.data.copy()
+        x_data = ds.x.data.copy()
+        meta_project = ds.meta.project
+        history = list(ds.history)
+
+        _ = ds[1:4, 2:5]
+
+        assert_array_equal(ds.data, data)
+        assert_array_equal(ds.x.data, x_data)
+        assert ds.meta.project == meta_project
+        assert ds.history == history
 
 
 # ======================================================================================

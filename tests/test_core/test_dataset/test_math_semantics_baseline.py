@@ -462,6 +462,31 @@ class TestDatasetDatasetArithmetic:
             "semantic_characterization"
         )
 
+    def test_add_does_not_mutate_operands(self, rich_dataset, compatible_dataset):
+        left_data = rich_dataset.data.copy()
+        right_data = compatible_dataset.data.copy()
+        left_mask = rich_dataset.mask.copy()
+        right_mask = compatible_dataset.mask.copy()
+        left_x = rich_dataset.x.data.copy()
+        right_x = compatible_dataset.x.data.copy()
+        left_meta = rich_dataset.meta.project
+        right_meta = compatible_dataset.meta.project
+        left_history = list(rich_dataset.history)
+        right_history = list(compatible_dataset.history)
+
+        _ = rich_dataset + compatible_dataset
+
+        assert_array_equal(rich_dataset.data, left_data)
+        assert_array_equal(compatible_dataset.data, right_data)
+        assert_array_equal(rich_dataset.mask, left_mask)
+        assert_array_equal(compatible_dataset.mask, right_mask)
+        assert_array_equal(rich_dataset.x.data, left_x)
+        assert_array_equal(compatible_dataset.x.data, right_x)
+        assert rich_dataset.meta.project == left_meta
+        assert compatible_dataset.meta.project == right_meta
+        assert rich_dataset.history == left_history
+        assert compatible_dataset.history == right_history
+
     # ---- numerical (unmasked) ----
 
     def test_add_numerical(self, unmasked_dataset, compatible_dataset):
