@@ -6,7 +6,9 @@
 # ruff: noqa
 
 from pathlib import Path
+from unittest.mock import patch
 
+import numpy as np
 import pytest
 from spectrochempy.utils import testing
 
@@ -52,6 +54,36 @@ def test_write(mock_cwd, ndataset_1d):
     assert filename.stem == nd.name
     assert filename.suffix == ".scp"
     filename.unlink()
+
+
+def test_write_scp_failure_preserves_identity_and_target(tmp_path):
+    nd = NDDataset(np.arange(3.0), name="native_write_source")
+    nd.filename = tmp_path / "initial.scp"
+    target = tmp_path / "broken.scp"
+    original_filename = nd.filename
+    original_name = nd.name
+
+    with patch.object(
+        type(nd), "dump", side_effect=RuntimeError("forced dump failure")
+    ):
+        with pytest.raises(RuntimeError, match="forced dump failure"):
+            nd.write(target, confirm=False)
+
+    assert not target.exists()
+    assert nd.filename == original_filename
+    assert nd.name == original_name
+
+
+def test_write_scp_success_preserves_existing_identity_semantics(tmp_path):
+    nd = NDDataset(np.arange(3.0), name="native_write_source")
+    target = tmp_path / "written.scp"
+
+    filename = nd.write(target, confirm=False)
+
+    assert filename == target
+    assert target.exists()
+    assert nd.filename == target
+    assert nd.name == "written"
 
 
 def test_excel_writer_entry_points_are_not_public(ndataset_1d):

@@ -14,6 +14,7 @@ import pickle
 import zipfile
 from datetime import UTC
 from datetime import datetime
+from unittest.mock import patch
 
 import numpy as np
 import pytest
@@ -167,6 +168,77 @@ def test_ndio_2D(ndataset_2d, tmp_path):
     nd = NDDataset.load(tmp_path / "essai2D")
     assert nd.directory == tmp_path
     f.unlink()
+
+
+def test_save_as_failure_preserves_identity_and_target(tmp_path):
+    ds = NDDataset(np.arange(3.0), name="save_as_source")
+    ds.filename = tmp_path / "initial.scp"
+    target = tmp_path / "broken_save_as.scp"
+    original_filename = ds.filename
+    original_name = ds.name
+
+    with patch.object(
+        type(ds), "dump", side_effect=RuntimeError("forced dump failure")
+    ):
+        with pytest.raises(RuntimeError, match="forced dump failure"):
+            ds.save_as(target, confirm=False)
+
+    assert not target.exists()
+    assert ds.filename == original_filename
+    assert ds.name == original_name
+
+
+def test_save_failure_preserves_identity_and_target(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    ds = NDDataset(np.arange(3.0), name="save_source.raw")
+    ds.filename = tmp_path / "initial.scp"
+    target = tmp_path / "save_source.scp"
+    original_filename = ds.filename
+    original_name = ds.name
+
+    with patch.object(
+        type(ds), "dump", side_effect=RuntimeError("forced dump failure")
+    ):
+        with pytest.raises(RuntimeError, match="forced dump failure"):
+            ds.save(confirm=False)
+
+    assert not target.exists()
+    assert ds.filename == original_filename
+    assert ds.name == original_name
+
+
+def test_native_save_surfaces_success_preserves_identity_semantics(
+    tmp_path, monkeypatch
+):
+    save_as_ds = NDDataset(np.arange(3.0), name="save_as_source")
+    save_as_target = tmp_path / "saved_as.scp"
+
+    save_as_filename = save_as_ds.save_as(save_as_target, confirm=False)
+
+    assert save_as_filename == save_as_target
+    assert save_as_target.exists()
+    assert save_as_ds.filename == save_as_target
+    assert save_as_ds.name == "saved_as"
+
+    monkeypatch.chdir(tmp_path)
+    save_ds = NDDataset(np.arange(3.0), name="save_source.raw")
+
+    save_filename = save_ds.save(confirm=False)
+
+    assert save_filename.name == "save_source.scp"
+    assert save_filename.exists()
+    assert save_ds.filename == save_filename
+    assert save_ds.name == "save_source"
+
+    dump_ds = NDDataset(np.arange(3.0), name="dump_source")
+    dump_target = tmp_path / "dumped.scp"
+
+    dump_filename = dump_ds.dump(dump_target)
+
+    assert dump_filename == dump_target
+    assert dump_target.exists()
+    assert dump_ds.filename == dump_target
+    assert dump_ds.name == "dumped"
 
 
 def test_filename_none_copy_and_deepcopy_preserve_explicit_none():

@@ -80,13 +80,14 @@ def _check_dataset_supported(dataset):
 def _write_csv(*args, **kwargs):
     dataset, filename = args
     _check_dataset_supported(dataset)
-    dataset.filename = filename
 
     delimiter = kwargs.get("delimiter", prefs.csv_delimiter)
 
     # check dimensionality of the dataset
     if dataset.squeeze().ndim > 1:
         raise NotImplementedError("Only implemented for 1D NDDatasets")
+
+    dataset.filename = filename
 
     # squeeze if necessary
     if dataset.ndim > 1:
