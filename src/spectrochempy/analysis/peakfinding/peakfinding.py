@@ -74,7 +74,16 @@ def _column_value(value, *, unit=None, as_float=False):
     return value
 
 
-_BASE_PEAK_COLUMNS = ("index", "position", "height")
+_BASE_PEAK_COLUMNS = (
+    "index",
+    "position",
+    "height",
+)
+_SAMPLE_PEAK_COLUMNS = (
+    "sample_index",
+    "sample_position",
+    "sample_height",
+)
 _PROPERTY_COLUMN_NAMES = {
     "peak_heights": "peak_height",
     "prominences": "prominence",
@@ -90,7 +99,24 @@ _PROPERTY_COLUMN_NAMES = {
 }
 
 
-def _peak_rows(peaks, properties, *, raw_property_names=False):
+def _copy_values(values):
+    """Return a detached copy when the object supports copying."""
+    if values is None:
+        return None
+    if hasattr(values, "copy"):
+        return values.copy()
+    return list(values)
+
+
+def _peak_rows(
+    peaks,
+    properties,
+    *,
+    sample_index=None,
+    sample_position=None,
+    sample_height=None,
+    raw_property_names=False,
+):
     """Build row dictionaries from peak positions, heights, and properties."""
     if peaks is None:
         return []
@@ -116,6 +142,12 @@ def _peak_rows(peaks, properties, *, raw_property_names=False):
             "position": _sequence_item(positions, index),
             "height": _sequence_item(heights, index),
         }
+        if sample_index is not None:
+            row["sample_index"] = _sequence_item(sample_index, index)
+        if sample_position is not None:
+            row["sample_position"] = _sequence_item(sample_position, index)
+        if sample_height is not None:
+            row["sample_height"] = _sequence_item(sample_height, index)
         for key, values in per_peak_properties.items():
             column = key if raw_property_names else _PROPERTY_COLUMN_NAMES.get(key, key)
             row[column] = _sequence_item(values, index)
@@ -142,6 +174,13 @@ def _fieldnames(rows, *, columns=_BASE_PEAK_COLUMNS):
     return fieldnames
 
 
+def _has_sample_fields(sample_index, sample_position, sample_height):
+    """Return True when all discrete sample fields are available."""
+    return all(
+        value is not None for value in (sample_index, sample_position, sample_height)
+    )
+
+
 class PeakTable:
     """
     Dependency-light tabular view of detected peaks.
@@ -160,11 +199,30 @@ class PeakTable:
     dictionary remains available on :class:`PeakFindingResult`.
     """
 
-    __slots__ = ("peaks", "properties", "_rows")
+    __slots__ = (
+        "peaks",
+        "properties",
+        "sample_index",
+        "sample_position",
+        "sample_height",
+        "_rows",
+    )
 
-    def __init__(self, peaks, properties=None, rows=None):
+    def __init__(
+        self,
+        peaks,
+        properties=None,
+        rows=None,
+        *,
+        sample_index=None,
+        sample_position=None,
+        sample_height=None,
+    ):
         self.peaks = peaks
         self.properties = dict(properties or {})
+        self.sample_index = _copy_values(sample_index)
+        self.sample_position = _copy_values(sample_position)
+        self.sample_height = _copy_values(sample_height)
         self._rows = None if rows is None else [dict(row) for row in rows]
 
     def __len__(self):
@@ -181,19 +239,32 @@ class PeakTable:
     @property
     def columns(self):
         """Return stable base columns plus currently available optional columns."""
-        return tuple(_fieldnames(self.to_dict()))
+        columns = list(_BASE_PEAK_COLUMNS)
+        if _has_sample_fields(
+            self.sample_index,
+            self.sample_position,
+            self.sample_height,
+        ):
+            columns.extend(_SAMPLE_PEAK_COLUMNS)
+        return tuple(_fieldnames(self.to_dict(), columns=columns))
 
     def to_dict(self):
         """
         Return peak information as a list of dictionaries.
 
-        Each dictionary contains ``index``, ``position``, ``height`` and any
-        available per-peak properties. Values keep their native units when they
-        are unit-bearing quantities.
+        Each dictionary contains ``index``, ``position``, ``height``, available
+        discrete sample fields and any available per-peak properties. Values
+        keep their native units when they are unit-bearing quantities.
         """
         if self._rows is not None:
             return [dict(row) for row in self._rows]
-        return _peak_rows(self.peaks, self.properties)
+        return _peak_rows(
+            self.peaks,
+            self.properties,
+            sample_index=self.sample_index,
+            sample_position=self.sample_position,
+            sample_height=self.sample_height,
+        )
 
     def head(self, n):
         """
@@ -283,7 +354,7 @@ class PeakTable:
         """
         path = Path(path)
         rows = self.to_dict()
-        fieldnames = _fieldnames(rows)
+        fieldnames = self.columns
 
         with path.open("w", newline="", encoding="utf-8") as fid:
             writer = csv.DictWriter(fid, fieldnames=fieldnames, delimiter=delimiter)
@@ -313,11 +384,28 @@ class PeakFindingResult:
     table helpers and does not require pandas.
     """
 
-    __slots__ = ("peaks", "properties")
+    __slots__ = (
+        "peaks",
+        "properties",
+        "sample_index",
+        "sample_position",
+        "sample_height",
+    )
 
-    def __init__(self, peaks, properties=None):
+    def __init__(
+        self,
+        peaks,
+        properties=None,
+        *,
+        sample_index=None,
+        sample_position=None,
+        sample_height=None,
+    ):
         self.peaks = peaks
         self.properties = dict(properties or {})
+        self.sample_index = _copy_values(sample_index)
+        self.sample_position = _copy_values(sample_position)
+        self.sample_height = _copy_values(sample_height)
 
     def __len__(self):
         return 0 if self.peaks is None else len(self.peaks)
@@ -333,17 +421,31 @@ class PeakFindingResult:
     @property
     def table(self):
         """Return a dependency-light tabular view of the detected peaks."""
-        return PeakTable(self.peaks, self.properties)
+        return PeakTable(
+            self.peaks,
+            self.properties,
+            sample_index=self.sample_index,
+            sample_position=self.sample_position,
+            sample_height=self.sample_height,
+        )
 
     def to_dict(self):
         """
         Return peak information as a list of dictionaries.
 
-        Each dictionary contains ``index``, ``position``, ``height``, and any
+        Each dictionary contains ``index`` (the row identifier), refined
+        ``position`` and ``height``, available discrete sample fields, plus any
         per-peak properties whose length matches the number of detected peaks.
         Values keep their native units when they are unit-bearing quantities.
         """
-        return _peak_rows(self.peaks, self.properties, raw_property_names=True)
+        return _peak_rows(
+            self.peaks,
+            self.properties,
+            sample_index=self.sample_index,
+            sample_position=self.sample_position,
+            sample_height=self.sample_height,
+            raw_property_names=True,
+        )
 
     def to_csv(self, path, *, delimiter=","):
         """
@@ -526,12 +628,21 @@ def find_peaks(
         ``as_result=False``.
     result : PeakFindingResult
         Structured peak finding result. Returned when ``as_result=True``.
+        Result rows include ``sample_index``, ``sample_position`` and
+        ``sample_height`` for the discrete detector sample in addition to the
+        refined ``position`` and ``height``.
 
     Notes
     -----
     - Peak positions are refined using quadratic interpolation when window_length > 1
     - The function handles units automatically when use_coord=True
     - For noisy data, consider preprocessing with smoothing functions
+    - In :class:`PeakFindingResult`, ``index`` is the row identifier,
+      ``sample_index`` is the local index returned by the detector for the
+      1D signal actually analyzed, ``sample_position`` and ``sample_height``
+      are the coordinate and signal value at that sample, and ``position`` and
+      ``height`` are the existing refined values. No global index into a parent
+      dataset is reported for sliced inputs.
 
     Examples
     --------
@@ -654,6 +765,14 @@ def find_peaks(
     properties = properties if properties else {}
 
     out = X[peaks]
+    sample_index = peaks.astype(int, copy=True)
+    if use_coord:
+        sample_position = _copy_values(lastcoord.values[sample_index])
+    else:
+        sample_position = sample_index.copy()
+    sample_height = _copy_values(X.data[sample_index])
+    if X.units is not None:
+        sample_height = sample_height * X.units
 
     if not use_coord:
         out.coordset = None  # remove the coordinates
@@ -731,6 +850,12 @@ def find_peaks(
     out.history = f"find_peaks(): {len(peaks)} peak(s) found"
 
     if as_result:
-        return PeakFindingResult(out, properties)
+        return PeakFindingResult(
+            out,
+            properties,
+            sample_index=sample_index,
+            sample_position=sample_position,
+            sample_height=sample_height,
+        )
 
     return out, properties

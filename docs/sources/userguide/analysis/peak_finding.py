@@ -364,7 +364,11 @@ _ = ax.legend(fontsize=6)
 # If a tabular representation is needed for reporting or export, use
 # `as_result=True`. This keeps the default tuple return unchanged, but returns a
 # lightweight result object with a `table` view, dictionary rows and CSV export
-# helpers.
+# helpers. In result rows, `index` is only the row identifier. `sample_index` is
+# the local detector index in the 1D signal that was analyzed, with
+# `sample_position` and `sample_height` giving the exact coordinate and signal
+# value at that point. `position` and `height` remain the refined values and may
+# differ after interpolation.
 
 # %%
 result = s.find_peaks(height=(0.15, 0.22), prominence=0, as_result=True)

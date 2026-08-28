@@ -109,7 +109,11 @@ table
 # `PeakTable` gives us a dependency-light view of the detected peaks.  The raw
 # peak dataset and the raw SciPy-style property dictionary are still available on
 # `result`, but the table is often a better starting point for inspection,
-# export, and later workflow steps.
+# export, and later workflow steps.  Each row keeps both the refined
+# `position`/`height` and the exact discrete sample reported by the detector:
+# `sample_index` is local to the 1D signal passed to `find_peaks`, while
+# `sample_position` and `sample_height` are the coordinate and signal value at
+# that sample.
 
 # %%
 rows = table.to_dict()
