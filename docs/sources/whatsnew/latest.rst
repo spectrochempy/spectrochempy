@@ -12,6 +12,15 @@ What's New in Revision 0.12.7.dev
 These are the changes in SpectroChemPy-0.12.7.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
 
+New Features
+~~~~~~~~~~~~
+
+Added discrete detector-sample fields to ``find_peaks(..., as_result=True)``
+rows. ``PeakFindingResult`` and ``PeakTable`` now expose ``sample_index``,
+``sample_position`` and ``sample_height`` alongside the existing refined
+``position`` and ``height`` values, preserving the local SciPy detector index
+without reconstructing it from interpolated positions.
+
 Developer
 ~~~~~~~~~
 

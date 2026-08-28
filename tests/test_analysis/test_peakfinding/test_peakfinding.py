@@ -2,6 +2,7 @@ import os
 
 import numpy as np
 import pytest
+import scipy.signal
 
 from spectrochempy.analysis.peakfinding.peakfinding import PeakFindingResult
 from spectrochempy.analysis.peakfinding.peakfinding import PeakTable
@@ -188,13 +189,24 @@ def test_as_result_keeps_peak_data_and_allows_unpacking(simple_peaks_dataset):
 def test_peak_finding_result_to_dict(simple_peaks_dataset):
     """Structured result exposes dependency-light row dictionaries."""
     result = find_peaks(simple_peaks_dataset, height=0.5, width=0.1, as_result=True)
+    expected_indices, _ = scipy.signal.find_peaks(simple_peaks_dataset.data, height=0.5)
 
     rows = result.to_dict()
 
     assert len(rows) == 3
     assert rows[0]["index"] == 0
+    assert result.sample_index.tolist() == expected_indices.tolist()
+    assert rows[0]["sample_index"] == int(expected_indices[0])
     assert rows[0]["position"].units == ur("cm^-1")
     assert rows[0]["height"].units == ur.absorbance
+    assert rows[0]["sample_position"].units == ur("cm^-1")
+    assert rows[0]["sample_height"].units == ur.absorbance
+    assert rows[0]["sample_position"].m == pytest.approx(
+        simple_peaks_dataset.x.values[expected_indices[0]].m
+    )
+    assert rows[0]["sample_height"].m == pytest.approx(
+        simple_peaks_dataset.data[expected_indices[0]]
+    )
     assert "peak_heights" in rows[0]
     assert "widths" in rows[0]
 
@@ -212,13 +224,157 @@ def test_peak_table_exposes_singular_column_names(simple_peaks_dataset):
     assert list(table) == rows
     assert "peak_height" in table.columns
     assert "width" in table.columns
+    assert "sample_index" in table.columns
+    assert "sample_position" in table.columns
+    assert "sample_height" in table.columns
     assert "peak_heights" not in table.columns
     assert "widths" not in table.columns
     assert rows[0]["position"].units == ur("cm^-1")
     assert rows[0]["height"].units == ur.absorbance
+    assert rows[0]["sample_position"].units == ur("cm^-1")
+    assert rows[0]["sample_height"].units == ur.absorbance
     assert rows[0]["peak_height"].units == ur.absorbance
     assert rows[0]["width"].units == ur("cm^-1")
     assert "peak_heights" in result.properties
+
+
+def test_peak_finding_result_discrete_fields_track_scipy_indices():
+    """sample_index preserves the raw detector indices, not nearest positions."""
+    x = np.linspace(0.0, 6.0, 7)
+    y = np.array([0.0, 0.0, 2.0, 1.8, 0.0, 1.0, 0.0])
+    dataset = NDDataset(
+        y,
+        coordset=[Coord(x, title="x", units="cm^-1")],
+        units="absorbance",
+    )
+    expected_indices, _ = scipy.signal.find_peaks(y, height=0.5)
+
+    result = find_peaks(dataset, height=0.5, as_result=True)
+    rows = result.to_dict()
+
+    assert result.sample_index.tolist() == expected_indices.tolist()
+    assert [row["sample_index"] for row in rows] == expected_indices.tolist()
+    assert [row["sample_position"].m for row in rows] == pytest.approx(
+        x[expected_indices]
+    )
+    assert [row["sample_height"].m for row in rows] == pytest.approx(
+        y[expected_indices]
+    )
+    assert rows[0]["position"].m != pytest.approx(rows[0]["sample_position"].m)
+    assert rows[0]["height"].m != pytest.approx(rows[0]["sample_height"].m)
+
+
+def test_peak_finding_result_sample_fields_with_descending_axis():
+    """Discrete sample fields follow signal order on descending coordinates."""
+    x = np.linspace(10.0, 0.0, 11)
+    y = np.zeros_like(x)
+    y[[2, 8]] = [1.0, 2.0]
+    dataset = NDDataset(
+        y,
+        coordset=[Coord(x, title="x", units="cm^-1")],
+        units="absorbance",
+    )
+    expected_indices, _ = scipy.signal.find_peaks(y, height=0.5)
+
+    result = find_peaks(dataset, height=0.5, as_result=True)
+
+    assert result.sample_index.tolist() == expected_indices.tolist()
+    assert [value.m for value in result.sample_position] == pytest.approx(
+        x[expected_indices]
+    )
+    assert [value.m for value in result.sample_height] == pytest.approx(
+        y[expected_indices]
+    )
+
+
+def test_peak_finding_result_sample_fields_with_irregular_axis():
+    """sample_position uses the actual coordinate at the detector index."""
+    x = np.array([0.0, 0.3, 1.0, 2.1, 3.8, 6.0, 8.5])
+    y = np.array([0.0, 1.0, 0.0, 0.2, 2.0, 0.1, 0.0])
+    dataset = NDDataset(
+        y,
+        coordset=[Coord(x, title="x", units="cm^-1")],
+        units="absorbance",
+    )
+    expected_indices, _ = scipy.signal.find_peaks(y, height=0.5)
+
+    with pytest.warns(UserWarning):
+        result = find_peaks(dataset, height=0.5, as_result=True)
+
+    assert result.sample_index.tolist() == expected_indices.tolist()
+    assert [value.m for value in result.sample_position] == pytest.approx(
+        x[expected_indices]
+    )
+    assert [value.m for value in result.sample_height] == pytest.approx(
+        y[expected_indices]
+    )
+
+
+def test_peak_finding_result_sample_fields_without_coordinate_use():
+    """With use_coord=False, sample_position is the local point index."""
+    x = np.linspace(0.0, 10.0, 11)
+    y = np.zeros_like(x)
+    y[[3, 7]] = [1.0, 2.0]
+    dataset = NDDataset(y, coordset=[Coord(x, title="x")])
+    expected_indices, _ = scipy.signal.find_peaks(y, height=0.5)
+
+    result = find_peaks(dataset, height=0.5, use_coord=False, as_result=True)
+
+    assert result.sample_index.tolist() == expected_indices.tolist()
+    assert result.sample_position.tolist() == expected_indices.tolist()
+    assert result.sample_height.tolist() == y[expected_indices].tolist()
+
+
+def test_peak_finding_result_sample_index_is_local_to_roi():
+    """sample_index is local to the 1D dataset passed to find_peaks."""
+    x = np.linspace(0.0, 10.0, 11)
+    y = np.zeros_like(x)
+    y[6] = 1.0
+    dataset = NDDataset(
+        y,
+        coordset=[Coord(x, title="x", units="cm^-1")],
+        units="absorbance",
+    )
+    roi = dataset[3:9]
+    expected_indices, _ = scipy.signal.find_peaks(roi.data, height=0.5)
+
+    result = find_peaks(roi, height=0.5, as_result=True)
+    row = result.to_dict()[0]
+
+    assert result.sample_index.tolist() == expected_indices.tolist()
+    assert row["sample_index"] == 3
+    assert row["sample_position"].m == pytest.approx(6.0)
+    assert row["sample_height"].m == pytest.approx(1.0)
+
+
+def test_peak_finding_result_sample_fields_align_with_plateau_properties():
+    """Plateau properties remain aligned with the same rows as sample fields."""
+    y = np.zeros(12)
+    y[2:5] = 1.0
+    y[8:10] = 2.0
+    expected_indices, expected_properties = scipy.signal.find_peaks(y, plateau_size=2)
+    dataset = NDDataset(y)
+
+    result = find_peaks(
+        dataset,
+        plateau_size=2,
+        use_coord=False,
+        window_length=0,
+        as_result=True,
+    )
+    rows = result.to_dict()
+
+    assert result.sample_index.tolist() == expected_indices.tolist()
+    assert [row["sample_index"] for row in rows] == expected_indices.tolist()
+    assert [row["sample_height"] for row in rows] == pytest.approx(y[expected_indices])
+    assert (
+        result.properties["left_edges"].tolist()
+        == expected_properties["left_edges"].tolist()
+    )
+    assert (
+        result.properties["right_edges"].tolist()
+        == expected_properties["right_edges"].tolist()
+    )
 
 
 def test_peak_table_sort_head_and_column_helpers(simple_peaks_dataset):
@@ -252,6 +408,25 @@ def test_peak_table_helper_unknown_column(simple_peaks_dataset):
         result.table.column("missing")
 
 
+def test_manual_peak_table_without_sample_fields_does_not_advertise_them(
+    simple_peaks_dataset,
+):
+    """Manual public construction keeps columns aligned with row contents."""
+    peaks, properties = find_peaks(simple_peaks_dataset, height=0.5, width=0.1)
+
+    table = PeakTable(peaks, properties)
+    result_table = PeakFindingResult(peaks, properties).table
+
+    assert "sample_index" not in table.columns
+    assert "sample_position" not in table.columns
+    assert "sample_height" not in table.columns
+    assert table.to_dict()[0].keys() == result_table.to_dict()[0].keys()
+    with pytest.raises(KeyError, match="Unknown peak-table column"):
+        table.column("sample_index")
+    with pytest.raises(KeyError, match="Unknown peak-table column"):
+        result_table.column("sample_index")
+
+
 def test_peak_finding_result_to_dict_single_peak(simple_peaks_dataset):
     """Single-peak coordinate values can be scalar quantities."""
     result = find_peaks(
@@ -275,6 +450,9 @@ def test_peak_finding_result_to_csv(simple_peaks_dataset, tmp_path):
     assert written == path
     text = path.read_text(encoding="utf-8")
     assert text.startswith("index,position,height")
+    assert "sample_index" in text
+    assert "sample_position" in text
+    assert "sample_height" in text
     assert "peak_heights" in text
     assert "widths" in text
 
@@ -289,6 +467,9 @@ def test_peak_table_to_csv(simple_peaks_dataset, tmp_path):
     assert written == path
     text = path.read_text(encoding="utf-8")
     assert text.startswith("index,position,height")
+    assert "sample_index" in text
+    assert "sample_position" in text
+    assert "sample_height" in text
     assert "peak_height" in text
     assert "width" in text
     assert "peak_heights" not in text
