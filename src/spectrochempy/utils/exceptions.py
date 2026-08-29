@@ -91,11 +91,20 @@ class NotFittedError(NotTransformedError):
     """
 
     def __init__(self, attr=None, message=None):
+        if message is not None:
+            super().__init__(message=message)
+            return
         frame = inspect.currentframe().f_back
         caller = frame.f_code.co_name if attr is None else attr
-        model = frame.f_locals["self"].name
+        self_obj = frame.f_locals.get("self")
+        model = getattr(
+            self_obj,
+            "name",
+            self_obj.__class__.__name__ if self_obj is not None else "estimator",
+        )
         message = (
-            f"To use `{caller}` ,  the method `fit` of model `{model}`"
+            f"Model `{model}` is not fitted yet. To use `{caller}` ,  the method `fit`"
+            f" of model `{model}`"
             f" should be executed first"
         )
         super().__init__(message=message)

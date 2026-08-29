@@ -53,3 +53,8 @@ Deprecations
 Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
+
+- Added the internal estimator-contract helpers required before a future
+  ``Pipeline`` implementation: allowlist-based fitted-state inspection,
+  unfitted cloning, canonical not-fitted behavior for supported transformers,
+  and lifecycle invalidation for accepted analysis terminal candidates.

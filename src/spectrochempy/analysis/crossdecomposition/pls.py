@@ -36,6 +36,23 @@ if sklearn_version < "1.5":
 # ======================================================================================
 @signature_has_configurable_traits
 class PLSRegression(CrossDecompositionAnalysis):
+    _pipeline_contract_managed = True
+    _learned_attributes = CrossDecompositionAnalysis._learned_attributes + (
+        "_x_weights",
+        "_y_weights",
+        "_x_loadings",
+        "_y_loadings",
+        "_x_scores",
+        "_y_scores",
+        "_x_rotations",
+        "_y_rotations",
+        "_coef",
+        "_intercept",
+        "_n_iter",
+        "_n_feature_in",
+        "_n_components",
+    )
+
     # ----------------------------------------------------------------------------------
     # Runtime Parameters,
     # only those specific to PLSRegression, the other being defined in AnalysisConfigurable.
@@ -91,7 +108,10 @@ class PLSRegression(CrossDecompositionAnalysis):
             **kwargs,
         )
 
-        # initialize sklearn PLSRegression
+        self._reset_backend_estimator()
+
+    def _reset_backend_estimator(self):
+        """Initialize the sklearn PLS backend from current configuration."""
         self._plsregression = cross_decomposition.PLSRegression(
             n_components=self.n_components,
             scale=self.scale,
@@ -106,6 +126,7 @@ class PLSRegression(CrossDecompositionAnalysis):
     def _fit(self, X, y):
         # this method is called by the abstract class fit.
         # Input X and Y are np.ndarray
+        self._reset_backend_estimator()
         self._plsregression.fit(X, y)
         self._x_weights = self._plsregression.x_weights_.T
         self._y_weights = self._plsregression.y_weights_.T

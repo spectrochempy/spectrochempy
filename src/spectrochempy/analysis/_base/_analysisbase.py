@@ -8,6 +8,7 @@
 import copy
 import logging
 import warnings
+from contextlib import suppress
 from types import SimpleNamespace
 
 import numpy as np
@@ -18,6 +19,7 @@ from spectrochempy.application.application import app
 from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.extern.traittypes import Array
+from spectrochempy.utils._estimator import parameter_values_equal
 from spectrochempy.utils.baseconfigurable import BaseConfigurable
 from spectrochempy.utils.constants import NOMASK
 from spectrochempy.utils.decorators import _wrap_ndarray_output_to_nddataset
@@ -100,6 +102,16 @@ class AnalysisConfigurable(BaseConfigurable):
     # ----------------------------------------------------------------------------------
     _fitted = tr.Bool(False, help="False if the model was not yet fitted")
     _outfit = tr.Any(help="the output of the _fit method - generally a tuple")
+    _pipeline_contract_managed = False
+    _learned_attributes = (
+        "_outfit",
+        "_X",
+        "_Y",
+        "_X_preprocessed",
+        "_Y_preprocessed",
+        "_X_source_metadata",
+        "_Y_source_metadata",
+    )
 
     _X_source_metadata = tr.Instance(
         AnalysisSourceMetadata,
@@ -937,31 +949,39 @@ class AnalysisConfigurable(BaseConfigurable):
         fit_reduce : Alias of `fit_transform` (Deprecated).
 
         """
-        self._fitted = False  # reinit this flag
+        if self._pipeline_contract_managed:
+            self._invalidate_fitted_state()
+        else:
+            self._fitted = False  # reinit this flag
 
-        # fire the X and eventually Y validation and preprocessing.
-        # X and Y are expected to be resp. NDDataset and NDDataset or list of NDDataset.
-        self._capture_source_metadata("_X", X, force=True)
-        self._X = X
-        self._capture_source_metadata("_Y", Y, force=True)
-        if Y is not None:
-            self._Y = Y
-
-        # _X_preprocessed has been computed when X was set, as well as _Y_preprocessed.
-        # At this stage they should be simple ndarrays
-        newX = self._X_preprocessed
-        newY = self._Y_preprocessed if Y is not None else None
-
-        # Call to the actual _fit method (overloaded in the subclass)
-        # warning : _fit must take ndarray arguments not NDDataset arguments.
-        # when method must return NDDataset from the calculated data,
-        # we use the decorator _wrap_ndarray_output_to_nddataset, as in the PCA
-        # model for example.
         try:
-            self._outfit = self._fit(newX, newY)
-        except TypeError:
-            # in case Y s not used in _fit
-            self._outfit = self._fit(newX)
+            # fire the X and eventually Y validation and preprocessing.
+            # X and Y are expected to be resp. NDDataset and NDDataset or list of NDDataset.
+            self._capture_source_metadata("_X", X, force=True)
+            self._X = X
+            self._capture_source_metadata("_Y", Y, force=True)
+            if Y is not None:
+                self._Y = Y
+
+            # _X_preprocessed has been computed when X was set, as well as _Y_preprocessed.
+            # At this stage they should be simple ndarrays
+            newX = self._X_preprocessed
+            newY = self._Y_preprocessed if Y is not None else None
+
+            # Call to the actual _fit method (overloaded in the subclass)
+            # warning : _fit must take ndarray arguments not NDDataset arguments.
+            # when method must return NDDataset from the calculated data,
+            # we use the decorator _wrap_ndarray_output_to_nddataset, as in the PCA
+            # model for example.
+            try:
+                self._outfit = self._fit(newX, newY)
+            except TypeError:
+                # in case Y s not used in _fit
+                self._outfit = self._fit(newX)
+        except Exception:
+            if self._pipeline_contract_managed:
+                self._invalidate_fitted_state()
+            raise
 
         # if the process was successful, _fitted is set to True so that other method
         # which needs fit will be possibly used.
@@ -1032,13 +1052,45 @@ class AnalysisConfigurable(BaseConfigurable):
             If a parameter name does not correspond to a configurable trait.
 
         """
-        for key, value in params.items():
-            if not self._has_writable_public_parameter(key):
-                raise SpectroChemPyError(
-                    f"Invalid parameter '{key}' for {self.__class__.__name__}."
-                )
-            setattr(self, key, value)
+        invalid = [
+            key for key in params if not self._has_writable_public_parameter(key)
+        ]
+        if invalid:
+            key = invalid[0]
+            valid_names = ", ".join(sorted(self.get_params(deep=False)))
+            msg = f"Invalid parameter '{key}' for {self.__class__.__name__}."
+            if valid_names:
+                msg += f" Valid parameters: {valid_names}."
+            raise SpectroChemPyError(msg)
+
+        current = self.get_params(deep=False)
+        changed = any(
+            not parameter_values_equal(current[key], value)
+            for key, value in params.items()
+        )
+        applied = []
+        try:
+            for key, value in params.items():
+                setattr(self, key, value)
+                applied.append(key)
+        except Exception:
+            for key in reversed(applied):
+                setattr(self, key, current[key])
+            raise
+        if changed and self._pipeline_contract_managed:
+            self._invalidate_fitted_state()
         return self
+
+    def _invalidate_fitted_state(self):
+        """Mark managed estimators as unfitted and clear known runtime state."""
+        self._fitted = False
+        for name in self._learned_attributes:
+            with suppress(AttributeError, TypeError, NotFittedError):
+                delattr(self, name)
+        self._reset_backend_estimator()
+
+    def _reset_backend_estimator(self):
+        """Reset class-specific numerical backend after invalidation."""
 
     def __repr__(self):
         cls = self.__class__.__name__
@@ -1796,6 +1848,8 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
 # Base class LinearRegressionAnalysis
 # ======================================================================================
 class LinearRegressionAnalysis(AnalysisConfigurable):
+    _pipeline_contract_managed = True
+
     # ----------------------------------------------------------------------------------
     # Configuration parameters (mostly defined in subclass
     # as they depend on the model estimator)
@@ -1837,7 +1891,10 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
             **kwargs,
         )
 
-        # initialize sklearn LinearRegression
+        self._reset_backend_estimator()
+
+    def _reset_backend_estimator(self):
+        """Initialize the sklearn linear-regression backend from current config."""
         self._linear_regression = linear_model.LinearRegression(
             fit_intercept=self.fit_intercept,
             n_jobs=None,  # not used for the moment (XXX: should we add this?)
@@ -1907,11 +1964,7 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
             Returns the instance itself.
 
         """
-        self._fitted = False  # reiniit this flag
-
-        # store if the original input type is a dataset (or at least a subclass instance
-        # of NDArray)
-        self._is_dataset = isinstance(X, NDArray)
+        self._invalidate_fitted_state()
 
         def _make2D(X):
             # For regression analysis we need X as a NDDataset with two dimensions
@@ -1927,35 +1980,44 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
                 X.set_coordset(x=coordx, a=None)
             return X
 
-        # fire the X and Y validation and preprocessing.
-        if Y is not None:
-            self._capture_source_metadata("_X", X, force=True)
-            self._X = _make2D(X)
-            self._capture_source_metadata("_Y", Y, force=True)
-            self._Y = Y
-        else:
-            # X should contain the X and Y information (X being the coord and Y the data)
-            if X.coordset is None:
-                raise ValueError(
-                    "The passed argument must have a x coordinates,"
-                    "or X input and Y target must be passed separately",
-                )
-            self._capture_source_metadata("_X", X.coord(0), force=True)
-            self._X = _make2D(X.coord(0))
-            self._capture_source_metadata("_Y", X, force=True)
-            self._Y = X
+        try:
+            # store if the original input type is a dataset (or at least a subclass
+            # instance of NDArray)
+            self._is_dataset = isinstance(X, NDArray)
 
-        # _X_preprocessed has been computed when X was set, as well as _Y_preprocessed.
-        # At this stage they should be simple ndarrays
-        newX = self._X_preprocessed
-        newY = self._Y_preprocessed
+            # fire the X and Y validation and preprocessing.
+            if Y is not None:
+                self._capture_source_metadata("_X", X, force=True)
+                self._X = _make2D(X)
+                self._capture_source_metadata("_Y", Y, force=True)
+                self._Y = Y
+            else:
+                # X should contain the X and Y information (X being the coord and Y
+                # the data)
+                if X.coordset is None:
+                    raise ValueError(
+                        "The passed argument must have a x coordinates,"
+                        "or X input and Y target must be passed separately",
+                    )
+                self._capture_source_metadata("_X", X.coord(0), force=True)
+                self._X = _make2D(X.coord(0))
+                self._capture_source_metadata("_Y", X, force=True)
+                self._Y = X
 
-        # call to the actual _fit method (overloaded in the subclass)
-        # warning : _fit must take ndarray arguments not NDDataset arguments.
-        # when method must return NDDataset from the calculated data,
-        # we use the decorator _wrap_ndarray_output_to_nddataset, as below or in the PCA
-        # model for example.
-        self._outfit = self._fit(newX, newY, sample_weight=sample_weight)
+            # _X_preprocessed has been computed when X was set, as well as _Y_preprocessed.
+            # At this stage they should be simple ndarrays
+            newX = self._X_preprocessed
+            newY = self._Y_preprocessed
+
+            # call to the actual _fit method (overloaded in the subclass)
+            # warning : _fit must take ndarray arguments not NDDataset arguments.
+            # when method must return NDDataset from the calculated data,
+            # we use the decorator _wrap_ndarray_output_to_nddataset, as below or in the PCA
+            # model for example.
+            self._outfit = self._fit(newX, newY, sample_weight=sample_weight)
+        except Exception:
+            self._invalidate_fitted_state()
+            raise
 
         # if the process was successful,_fitted is set to True so that other method which
         # needs fit will be possibly used.

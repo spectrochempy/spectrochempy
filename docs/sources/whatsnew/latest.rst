@@ -6,27 +6,16 @@
 
 :orphan:
 
-What's New in Revision 0.12.7
+What's New in Revision 0.12.8.dev
 ---------------------------------------------------------------------------------------
 
-These are the changes in SpectroChemPy-0.12.7.
+These are the changes in SpectroChemPy-0.12.8.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
-
-New Features
-~~~~~~~~~~~~
-
-Added discrete detector-sample fields to ``find_peaks(..., as_result=True)``
-rows. ``PeakFindingResult`` and ``PeakTable`` now expose ``sample_index``,
-``sample_position`` and ``sample_height`` alongside the existing refined
-``position`` and ``height`` values, preserving the local SciPy detector index
-without reconstructing it from interpolated positions.
 
 Developer
 ~~~~~~~~~
 
-PERF: Skipped the redundant defensive copy of the first operand in out-of-place
-binary and unary arithmetic result construction, removing one root dataset
-reconstruction per operation (root copies from 2 to 1 for dataset/scalar and
-from 4 to 3 for dataset/dataset) while preserving results, units, masks,
-coordinates, metadata, and operand non-mutation semantics. In-place operators
-keep their defensive copy unchanged.
+- Added the internal estimator-contract helpers required before a future
+  ``Pipeline`` implementation: allowlist-based fitted-state inspection,
+  unfitted cloning, canonical not-fitted behavior for supported transformers,
+  and lifecycle invalidation for accepted analysis terminal candidates.
