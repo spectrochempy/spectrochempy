@@ -5,6 +5,9 @@
 # ======================================================================================
 """Focused tests for the internal estimator contract used by future pipelines."""
 
+from collections.abc import Mapping
+from numbers import Number
+
 import numpy as np
 import pytest
 import traitlets as tr
@@ -43,6 +46,7 @@ from spectrochempy.processing.transformation.preprocessing_transformers import (
 from spectrochempy.processing.transformation.preprocessing_transformers import (
     SNVTransformer,
 )
+from spectrochempy.utils._estimator import _clone_constructor_parameter
 from spectrochempy.utils._estimator import clone_unfitted
 from spectrochempy.utils._estimator import is_fitted
 from spectrochempy.utils.exceptions import NotFittedError
@@ -100,7 +104,64 @@ def _category_method(estimator):
     return "transform"
 
 
-@pytest.mark.parametrize("estimator", _final_transformer_cases() + _final_estimator_cases())
+def _assert_random_state_equal(left, right):
+    left_state = left.get_state()
+    right_state = right.get_state()
+    assert left_state[0] == right_state[0]
+    assert np.array_equal(left_state[1], right_state[1])
+    assert left_state[2:] == right_state[2:]
+
+
+def _assert_cloned_parameter_matches_policy(original, cloned):
+    if original is None or isinstance(original, str | bytes | bool | Number):
+        assert cloned == original
+        return
+    if isinstance(original, np.random.RandomState):
+        assert cloned is not original
+        _assert_random_state_equal(cloned, original)
+        return
+    if isinstance(original, np.ma.MaskedArray):
+        assert cloned is not original
+        assert np.ma.allequal(cloned, original)
+        return
+    if isinstance(original, np.ndarray):
+        assert cloned is not original
+        assert np.array_equal(cloned, original, equal_nan=True)
+        return
+    if isinstance(original, tuple):
+        assert cloned is not original
+        assert type(cloned) is type(original)
+        for original_item, cloned_item in zip(original, cloned, strict=True):
+            _assert_cloned_parameter_matches_policy(original_item, cloned_item)
+        return
+    if isinstance(original, list):
+        assert cloned is not original
+        assert type(cloned) is type(original)
+        for original_item, cloned_item in zip(original, cloned, strict=True):
+            _assert_cloned_parameter_matches_policy(original_item, cloned_item)
+        return
+    if isinstance(original, set):
+        assert cloned is not original
+        assert type(cloned) is type(original)
+        assert cloned == original
+        return
+    if isinstance(original, Mapping):
+        assert cloned is not original
+        assert type(cloned) is type(original)
+        assert cloned.keys() == original.keys()
+        for key, original_item in original.items():
+            _assert_cloned_parameter_matches_policy(original_item, cloned[key])
+        return
+    if original.__class__.__module__.startswith("spectrochempy.core.dataset"):
+        assert cloned is not original
+        assert cloned == original
+        return
+    assert cloned is original
+
+
+@pytest.mark.parametrize(
+    "estimator", _final_transformer_cases() + _final_estimator_cases()
+)
 def test_is_fitted_tracks_allowlisted_estimator_lifecycle(estimator):
     X, Y = _xy()
     assert is_fitted(estimator) is False
@@ -111,7 +172,9 @@ def test_is_fitted_tracks_allowlisted_estimator_lifecycle(estimator):
     assert is_fitted(estimator) is True
 
 
-@pytest.mark.parametrize("estimator", _final_transformer_cases() + _final_estimator_cases())
+@pytest.mark.parametrize(
+    "estimator", _final_transformer_cases() + _final_estimator_cases()
+)
 def test_clone_unfitted_reconstructs_configuration_without_learned_state(estimator):
     X, Y = _xy()
     _fit_estimator(estimator, X, Y)
@@ -120,7 +183,11 @@ def test_clone_unfitted_reconstructs_configuration_without_learned_state(estimat
 
     assert cloned is not estimator
     assert type(cloned) is type(estimator)
-    assert cloned.get_params(deep=False).keys() == estimator.get_params(deep=False).keys()
+    original_params = estimator.get_params(deep=False)
+    cloned_params = cloned.get_params(deep=False)
+    assert cloned_params.keys() == original_params.keys()
+    for name, original_value in original_params.items():
+        _assert_cloned_parameter_matches_policy(original_value, cloned_params[name])
     assert is_fitted(cloned) is False
     if isinstance(estimator, PCA):
         assert not hasattr(cloned._pca, "components_")
@@ -159,17 +226,41 @@ def test_clone_unfitted_copies_spectrochempy_parameters():
 def test_clone_unfitted_copies_random_state_without_sharing_state():
     state = np.random.RandomState(123)
     pca = PCA(n_components=2, random_state=state)
+    state.rand()
 
     cloned = clone_unfitted(pca)
 
     assert cloned.random_state is not pca.random_state
-    assert cloned.random_state.get_state()[1].tolist() == pca.random_state.get_state()[
-        1
-    ].tolist()
+    _assert_random_state_equal(cloned.random_state, pca.random_state)
     cloned.random_state.rand()
-    assert cloned.random_state.get_state()[1].tolist() != pca.random_state.get_state()[
-        1
-    ].tolist()
+    assert cloned.random_state.get_state()[2] != pca.random_state.get_state()[2]
+
+
+def test_clone_unfitted_recursively_copies_container_parameters():
+    reference = {
+        "array": np.arange(3.0),
+        "nested": [np.ma.array([1.0, 2.0], mask=[False, True])],
+    }
+    transformer = MSCTransformer(reference=reference, dim="y")
+
+    cloned = clone_unfitted(transformer)
+
+    _assert_cloned_parameter_matches_policy(transformer.reference, cloned.reference)
+    cloned.reference["array"][0] = 99.0
+    cloned.reference["nested"][0][0] = 42.0
+    assert transformer.reference["array"][0] != 99.0
+    assert transformer.reference["nested"][0][0] != 42.0
+
+
+def test_constructor_parameter_clone_preserves_generator_position():
+    generator = np.random.default_rng(123)
+    generator.random(4)
+
+    cloned = _clone_constructor_parameter(generator)
+
+    assert cloned is not generator
+    assert cloned.bit_generator.state == generator.bit_generator.state
+    assert cloned.random() == generator.random()
 
 
 @pytest.mark.parametrize("unsupported", [SVD(), Baseline()])
@@ -180,7 +271,9 @@ def test_clone_and_fitted_helpers_reject_unsupported_candidates(unsupported):
         is_fitted(unsupported)
 
 
-@pytest.mark.parametrize("estimator", _final_transformer_cases() + _final_estimator_cases())
+@pytest.mark.parametrize(
+    "estimator", _final_transformer_cases() + _final_estimator_cases()
+)
 def test_allowlisted_methods_raise_canonical_not_fitted_error(estimator):
     X, Y = _xy()
     method = _category_method(estimator)
@@ -194,7 +287,21 @@ def test_allowlisted_methods_raise_canonical_not_fitted_error(estimator):
     assert isinstance(output, scp.NDDataset)
 
 
-@pytest.mark.parametrize("estimator", [PCA(n_components=2), PLSRegression(n_components=2), LSTSQ(), NNLS()])
+@pytest.mark.parametrize("estimator", _final_estimator_cases())
+def test_allowlisted_score_raises_canonical_not_fitted_error(estimator):
+    X, Y = _xy()
+
+    with pytest.raises(NotFittedError):
+        estimator.score(X, Y[:, 0])
+
+    _fit_estimator(estimator, X, Y)
+    assert isinstance(estimator.score(X, Y[:, 0]), float)
+
+
+@pytest.mark.parametrize(
+    "estimator",
+    [PCA(n_components=2), PLSRegression(n_components=2), LSTSQ(), NNLS()],
+)
 def test_analysis_set_params_effective_change_invalidates_fitted_state(estimator):
     X, Y = _xy()
     _fit_estimator(estimator, X, Y)
@@ -209,9 +316,15 @@ def test_analysis_set_params_effective_change_invalidates_fitted_state(estimator
     assert is_fitted(estimator) is False
     with pytest.raises(NotFittedError):
         getattr(estimator, _category_method(estimator))(X)
+    if isinstance(estimator, PLSRegression | LSTSQ | NNLS):
+        with pytest.raises(NotFittedError):
+            estimator.score(X, Y[:, 0])
 
 
-@pytest.mark.parametrize("estimator", [PCA(n_components=2), PLSRegression(n_components=2), LSTSQ(), NNLS()])
+@pytest.mark.parametrize(
+    "estimator",
+    [PCA(n_components=2), PLSRegression(n_components=2), LSTSQ(), NNLS()],
+)
 def test_analysis_set_params_equal_update_preserves_fitted_state(estimator):
     X, Y = _xy()
     _fit_estimator(estimator, X, Y)
@@ -244,7 +357,10 @@ def test_analysis_set_params_invalid_value_is_transactional():
     assert is_fitted(pca) is True
 
 
-@pytest.mark.parametrize("estimator", [PCA(n_components=2), PLSRegression(n_components=2), LSTSQ(), NNLS()])
+@pytest.mark.parametrize(
+    "estimator",
+    [PCA(n_components=2), PLSRegression(n_components=2), LSTSQ(), NNLS()],
+)
 def test_failed_initial_fit_leaves_allowlisted_analysis_unfitted(estimator):
     X, Y = _xy()
 
@@ -263,7 +379,10 @@ def test_failed_initial_fit_leaves_allowlisted_analysis_unfitted(estimator):
     assert is_fitted(estimator) is False
 
 
-@pytest.mark.parametrize("estimator", [PCA(n_components=2), PLSRegression(n_components=2), LSTSQ(), NNLS()])
+@pytest.mark.parametrize(
+    "estimator",
+    [PCA(n_components=2), PLSRegression(n_components=2), LSTSQ(), NNLS()],
+)
 def test_failed_refit_clears_allowlisted_analysis_state(estimator):
     X, Y = _xy()
     _fit_estimator(estimator, X, Y)
@@ -284,6 +403,9 @@ def test_failed_refit_clears_allowlisted_analysis_state(estimator):
     assert is_fitted(estimator) is False
     with pytest.raises(NotFittedError):
         getattr(estimator, _category_method(estimator))(X)
+    if isinstance(estimator, PLSRegression | LSTSQ | NNLS):
+        with pytest.raises(NotFittedError):
+            estimator.score(X, Y[:, 0])
 
 
 def test_svd_is_characterized_but_excluded_because_transform_is_not_implemented():
