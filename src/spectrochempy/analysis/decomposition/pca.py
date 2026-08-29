@@ -54,6 +54,20 @@ class PCA(DecompositionAnalysis):
 
     """
 
+    _pipeline_contract_managed = True
+    _learned_attributes = DecompositionAnalysis._learned_attributes + (
+        "_components",
+        "_noise_variance",
+        "_n_observations",
+        "_explained_variance",
+        "_explained_variance_ratio",
+        "_singular_values",
+        "_n_components",
+        "_std",
+        "_min",
+        "_ampl",
+    )
+
     # ----------------------------------------------------------------------------------
     # Runtime Parameters,
     # only those specific to PCA, the other being defined in AnalysisConfigurable.
@@ -184,7 +198,10 @@ for reproducible results across multiple function calls.""",
             **kwargs,
         )
 
-        # initialize sklearn PCA
+        self._reset_backend_estimator()
+
+    def _reset_backend_estimator(self):
+        """Initialize the sklearn PCA backend from current configuration."""
         self._pca = decomposition.PCA(
             n_components=self.n_components,
             whiten=self.whiten,
@@ -244,6 +261,7 @@ for reproducible results across multiple function calls.""",
         # this method is called by the abstract class fit.
         # Input X is a np.ndarray
         # Y is ignored in this model
+        self._reset_backend_estimator()
 
         # call the sklearn _fit function on data (it outputs SVD results)
         # _outfit is a tuple handle the eventual output of _fit for further processing.

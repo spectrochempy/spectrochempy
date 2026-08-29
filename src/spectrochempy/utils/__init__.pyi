@@ -7,6 +7,7 @@
 # ruff: noqa
 
 __all__ = [
+    "_estimator",
     "_logging",
     "baseconfigurable",
     "colors",
@@ -39,6 +40,7 @@ __all__ = [
     "zip",
 ]
 
+from . import _estimator
 from . import _logging
 from . import baseconfigurable
 from . import colors

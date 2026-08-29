@@ -53,6 +53,7 @@ import inspect
 
 import numpy as np
 
+from spectrochempy.utils.exceptions import NotFittedError
 from spectrochempy.utils.exceptions import SpectroChemPyError
 
 
@@ -134,10 +135,7 @@ class BasePreprocessor:
 
         """
         if not self._fitted:
-            raise SpectroChemPyError(
-                "This transformer instance is not fitted yet. "
-                "Call 'fit' with appropriate arguments before using this method."
-            )
+            raise NotFittedError(attr="transform")
         return self._transform(dataset)
 
     def fit_transform(self, dataset):
@@ -182,10 +180,7 @@ class BasePreprocessor:
 
         """
         if not self._fitted:
-            raise SpectroChemPyError(
-                "This transformer instance is not fitted yet. "
-                "Call 'fit' with appropriate arguments before using this method."
-            )
+            raise NotFittedError(attr="inverse_transform")
         return self._inverse_transform(dataset)
 
     def get_params(self, deep=True):
