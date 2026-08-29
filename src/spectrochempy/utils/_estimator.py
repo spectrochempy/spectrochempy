@@ -115,6 +115,8 @@ def parameter_values_equal(old, new):
         return True
     if old is None or new is None:
         return False
+    if _is_immutable_scalar(old) and _is_immutable_scalar(new):
+        return old == new
     if _is_spectrochempy_object(old) or _is_spectrochempy_object(new):
         return False
     if isinstance(old, np.ma.MaskedArray) or isinstance(new, np.ma.MaskedArray):
@@ -127,16 +129,21 @@ def parameter_values_equal(old, new):
             return bool(np.array_equal(old, new, equal_nan=True))
         except (TypeError, ValueError):
             return False
-    try:
-        equal = old == new
-    except Exception:
-        return False
-    if isinstance(equal, np.ndarray | np.bool_):
-        try:
-            return bool(np.all(equal))
-        except (TypeError, ValueError):
-            return False
-    return bool(equal)
+    if isinstance(old, tuple) and isinstance(new, tuple):
+        return len(old) == len(new) and all(
+            parameter_values_equal(left, right)
+            for left, right in zip(old, new, strict=True)
+        )
+    if isinstance(old, list) and isinstance(new, list):
+        return len(old) == len(new) and all(
+            parameter_values_equal(left, right)
+            for left, right in zip(old, new, strict=True)
+        )
+    if isinstance(old, Mapping) and isinstance(new, Mapping):
+        return old.keys() == new.keys() and all(
+            parameter_values_equal(old[key], new[key]) for key in old
+        )
+    return False
 
 
 def _clone_constructor_parameter(value):
