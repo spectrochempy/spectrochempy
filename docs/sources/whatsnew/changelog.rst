@@ -19,6 +19,9 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- Added ``Pipeline`` for linear, reproducible composition of allowlisted
+  SpectroChemPy preprocessing transformers with a final transformer or
+  supervised estimator.
 
 .. section
 

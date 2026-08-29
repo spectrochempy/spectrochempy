@@ -20,6 +20,7 @@ in the gallery (:ref:`examples-index`).
    peak_analysis_workflow
    peak_integration
    fitting
+   pipeline
    pca
    pls
    mcr_als

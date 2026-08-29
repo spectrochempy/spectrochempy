@@ -54,6 +54,7 @@ _LAZY_IMPORTS = {
     "find_peaks": "spectrochempy.analysis.peakfinding.peakfinding",
     "PeakFindingResult": "spectrochempy.analysis.peakfinding.peakfinding",
     "PeakTable": "spectrochempy.analysis.peakfinding.peakfinding",
+    "Pipeline": "spectrochempy.analysis.pipeline",
     "DEBUG": "spectrochempy.application.application",
     "INFO": "spectrochempy.application.application",
     "WARNING": "spectrochempy.application.application",
