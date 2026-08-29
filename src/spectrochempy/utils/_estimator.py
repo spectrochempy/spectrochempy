@@ -129,7 +129,7 @@ def parameter_values_equal(old, new):
             return False
     try:
         equal = old == new
-    except (TypeError, ValueError):
+    except Exception:
         return False
     if isinstance(equal, np.ndarray | np.bool_):
         try:
