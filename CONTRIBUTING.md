@@ -82,6 +82,11 @@ The PR description should begin with:
 2. what is intentionally out of scope;
 3. references to related issues and PRs when applicable.
 
+Keep the applicable checklist items from `.github/PULL_REQUEST_TEMPLATE.md`
+in the PR description, especially changelog, reference API, and title-prefix
+items. Mark them done or explain why they do not apply so reviewers can see
+that they were considered.
+
 If a pull request adds or exposes a new public API symbol at top level
 (``spectrochempy.<name>`` / ``scp.<name>``), update
 `docs/sources/reference/index.rst` in the appropriate section so the symbol

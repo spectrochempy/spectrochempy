@@ -2,12 +2,12 @@
 
 **Checklist**:
 
-<!-- delete unused entries -->
+<!-- delete unused optional entries, but keep the compliance entries that apply to this PR -->
 - [ ] Close the #xxxx.
 - [ ] Tests have been added.
 - [ ] `pyproject.toml` file has been updated with new dependencies.
 - [ ] User-visible changes have been documented in the appropriate section of `docs/sources/whatsnew/changelog.rst`.
-- [ ] Developer changes (tests, CI, refactoring, tooling) have been documented in the ``Developer`` section of `docs/sources/whatsnew/changelog.rst`.
+- [ ] Developer changes (tests, CI, refactoring, tooling) have been documented in the `Developer` section of `docs/sources/whatsnew/changelog.rst`.
 - [ ] The new API methods have been included in a section of `docs/sources/reference/index.rst`.
 - [ ] Title follows the prefix convention defined in `CONTRIBUTING.md` (or label `non-standard-prefix` is applied).
 - [ ] Changelog entry is present (or label `no-changelog` is applied).
