@@ -349,16 +349,6 @@ Chemometric preprocessing
     RobustScaleTransformer
     LogTransformer
 
-Pipeline composition
-====================
-
-.. autosummary::
-    :nosignatures:
-    :toctree: generated/
-
-    Pipeline
-
-
 Indexing
 ========
 
@@ -654,6 +644,16 @@ Miscellaneous
 ********
 Analysis
 ********
+
+
+Pipeline composition
+====================
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    Pipeline
 
 
 Linear regression

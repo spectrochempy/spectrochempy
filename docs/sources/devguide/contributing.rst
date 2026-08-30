@@ -159,6 +159,13 @@ checks matching your change have been run locally when practical:
 * ``pre-commit run --all-files`` for formatting and generated docs files before
   the final commit when practical
 
+Keep the applicable checklist items from the template in the pull request
+description so reviewers can see whether changelog, reference API, and
+title-prefix requirements were considered. For any new public top-level API symbol
+(``spectrochempy.<name>`` / ``scp.<name>``), the relevant checklist item means
+adding the symbol to the appropriate section of
+``docs/sources/reference/index.rst``.
+
 Tips for Success
 ----------------
 
