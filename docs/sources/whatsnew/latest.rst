@@ -12,6 +12,13 @@ What's New in Revision 0.12.8.dev
 These are the changes in SpectroChemPy-0.12.8.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
 
+New Features
+~~~~~~~~~~~~
+
+- Added ``Pipeline`` for linear, reproducible composition of allowlisted
+  SpectroChemPy preprocessing transformers with a final transformer or
+  supervised estimator.
+
 Developer
 ~~~~~~~~~
 

@@ -14,7 +14,7 @@ import numpy as np
 
 from spectrochempy.utils.exceptions import SpectroChemPyError
 
-_PIPELINE_V1_TRANSFORMERS = frozenset(
+_PIPELINE_V1_INTERMEDIATE_TRANSFORMERS = frozenset(
     {
         "spectrochempy.processing.transformation.preprocessing_transformers.CenterTransformer",
         "spectrochempy.processing.transformation.preprocessing_transformers.AutoscaleTransformer",
@@ -25,8 +25,11 @@ _PIPELINE_V1_TRANSFORMERS = frozenset(
         "spectrochempy.processing.transformation.preprocessing_transformers.NormalizeTransformer",
         "spectrochempy.processing.transformation.preprocessing_transformers.MSCTransformer",
         "spectrochempy.processing.transformation.preprocessing_transformers.LogTransformer",
-        "spectrochempy.analysis.decomposition.pca.PCA",
     }
+)
+
+_PIPELINE_V1_FINAL_TRANSFORMERS = _PIPELINE_V1_INTERMEDIATE_TRANSFORMERS | frozenset(
+    {"spectrochempy.analysis.decomposition.pca.PCA"}
 )
 
 _PIPELINE_V1_FINAL_ESTIMATORS = frozenset(
@@ -38,7 +41,7 @@ _PIPELINE_V1_FINAL_ESTIMATORS = frozenset(
 )
 
 PIPELINE_V1_SUPPORTED_ESTIMATORS = (
-    _PIPELINE_V1_TRANSFORMERS | _PIPELINE_V1_FINAL_ESTIMATORS
+    _PIPELINE_V1_FINAL_TRANSFORMERS | _PIPELINE_V1_FINAL_ESTIMATORS
 )
 
 
@@ -50,6 +53,18 @@ def _qualified_name(estimator):
 def is_pipeline_v1_supported(estimator):
     """Return whether *estimator* is in the normative v1 pipeline allowlist."""
     return _qualified_name(estimator) in PIPELINE_V1_SUPPORTED_ESTIMATORS
+
+
+def pipeline_v1_step_kind(estimator, *, final):
+    """Return the normative v1 Pipeline category for *estimator*."""
+    qualified = _qualified_name(estimator)
+    if qualified in _PIPELINE_V1_INTERMEDIATE_TRANSFORMERS:
+        return "transformer" if final else "intermediate"
+    if final and qualified in _PIPELINE_V1_FINAL_TRANSFORMERS:
+        return "transformer"
+    if final and qualified in _PIPELINE_V1_FINAL_ESTIMATORS:
+        return "estimator"
+    return "unsupported"
 
 
 def is_fitted(estimator):

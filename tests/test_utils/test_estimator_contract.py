@@ -49,6 +49,7 @@ from spectrochempy.processing.transformation.preprocessing_transformers import (
 from spectrochempy.utils._estimator import _clone_constructor_parameter
 from spectrochempy.utils._estimator import clone_unfitted
 from spectrochempy.utils._estimator import is_fitted
+from spectrochempy.utils._estimator import pipeline_v1_step_kind
 from spectrochempy.utils.exceptions import NotFittedError
 from spectrochempy.utils.exceptions import SpectroChemPyError
 
@@ -269,6 +270,25 @@ def test_clone_and_fitted_helpers_reject_unsupported_candidates(unsupported):
         clone_unfitted(unsupported)
     with pytest.raises(SpectroChemPyError, match="not supported"):
         is_fitted(unsupported)
+
+
+@pytest.mark.parametrize("transformer", _preprocessor_cases())
+def test_pipeline_v1_step_kind_classifies_preprocessors(transformer):
+    assert pipeline_v1_step_kind(transformer, final=False) == "intermediate"
+    assert pipeline_v1_step_kind(transformer, final=True) == "transformer"
+
+
+def test_pipeline_v1_step_kind_classifies_terminal_only_candidates():
+    assert pipeline_v1_step_kind(PCA(n_components=2), final=False) == "unsupported"
+    assert pipeline_v1_step_kind(PCA(n_components=2), final=True) == "transformer"
+    assert (
+        pipeline_v1_step_kind(PLSRegression(n_components=2), final=False)
+        == "unsupported"
+    )
+    assert (
+        pipeline_v1_step_kind(PLSRegression(n_components=2), final=True) == "estimator"
+    )
+    assert pipeline_v1_step_kind(SVD(), final=True) == "unsupported"
 
 
 @pytest.mark.parametrize(
