@@ -1,23 +1,45 @@
+# ---
+# jupyter:
+#   jupytext:
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: all
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+#       jupytext_version: 1.16.7
+#   kernelspec:
+#     display_name: Python 3 (ipykernel)
+#     language: python
+#     name: python3
+#   language_info:
+#     codemirror_mode:
+#       name: ipython
+#       version: 3
+#     file_extension: .py
+#     mimetype: text/x-python
+#     name: python
+#     nbconvert_exporter: python
+#     pygments_lexer: ipython3
+#     version: 3.10.8
+# ---
+
+# %% [markdown]
+# # Pipeline
+#
+# ``Pipeline`` composes a small, reproducible sequence of SpectroChemPy
+# preprocessing transformers and a final transformer or supervised estimator.
+# It is useful when you want to fit preprocessing and a model together, then
+# reuse exactly the preprocessing learned from calibration spectra on new
+# spectra.
+#
+# The first public version is intentionally modest. Its goal is not to replace a
+# workflow engine or scikit-learn's full ``Pipeline`` API, but to make common
+# SpectroChemPy estimator workflows easier to repeat without data leakage:
+# preprocessing steps are fitted only when ``Pipeline.fit()`` is called, so test
+# spectra do not accidentally influence centering or scaling statistics.
+
 # %%
-"""
-Pipeline.
-
-Pipeline
-========
-
-``Pipeline`` composes a small, reproducible sequence of SpectroChemPy
-preprocessing transformers and a final transformer or supervised estimator.
-It is useful when you want to fit preprocessing and a model together, then
-reuse exactly the preprocessing learned from calibration spectra on new
-spectra.
-
-The first public version is intentionally modest. Its goal is not to replace a
-workflow engine or scikit-learn's full ``Pipeline`` API, but to make common
-SpectroChemPy estimator workflows easier to repeat without data leakage:
-preprocessing steps are fitted only when ``Pipeline.fit()`` is called, so test
-spectra do not accidentally influence centering or scaling statistics.
-"""
-
 import numpy as np
 
 import spectrochempy as scp
@@ -53,7 +75,7 @@ target = scp.NDDataset(
 )
 _ = dataset.plot(show=False)
 
-# %%
+# %% [markdown]
 # A complete calibration/test example
 # -----------------------------------
 #
@@ -62,6 +84,7 @@ _ = dataset.plot(show=False)
 # The scaler below learns its statistics from ``X_cal`` only; those fitted
 # statistics are reused when predicting ``X_test``.
 
+# %%
 test_indices = [2, 5, 8, 11]
 cal_indices = [i for i in range(concentration.size) if i not in test_indices]
 
@@ -98,10 +121,11 @@ summary = scp.NDDataset(
 )
 summary
 
-# %%
+# %% [markdown]
 # The fitted final estimator can still be inspected directly. Here we reuse its
 # parity-plot helper and add the independent test predictions in red.
 
+# %%
 fitted_pls = regression_pipeline.fitted_named_steps_["pls"]
 ax = fitted_pls.plot_parity(label="calibration", s=120, show=False)
 _ = fitted_pls.plot_parity(
@@ -116,13 +140,14 @@ _ = fitted_pls.plot_parity(
 )
 _ = ax.legend(loc="lower right")
 
-# %%
+# %% [markdown]
 # Transformer-final pipelines
 # ---------------------------
 #
 # A transformer-final pipeline ends with a preprocessing transformer or with
 # ``PCA``. ``fit_transform(X)`` is equivalent to ``fit(X).transform(X)``.
 
+# %%
 pca_pipeline = scp.Pipeline(
     [
         ("center", scp.CenterTransformer(dim="y")),
@@ -132,7 +157,7 @@ pca_pipeline = scp.Pipeline(
 scores = pca_pipeline.fit_transform(dataset)
 scores
 
-# %%
+# %% [markdown]
 # Template and fitted steps
 # -------------------------
 #
@@ -142,13 +167,14 @@ scores
 # Learned runtime state is available after fitting through ``fitted_steps_``
 # and ``fitted_named_steps_``.
 
+# %%
 print(
     regression_pipeline.named_steps["scale"]
     is regression_pipeline.fitted_named_steps_["scale"]
 )
 print(regression_pipeline.steps[0][1] is regression_pipeline.fitted_steps_[0][1])
 
-# %%
+# %% [markdown]
 # Nested parameters
 # -----------------
 #
@@ -157,12 +183,13 @@ print(regression_pipeline.steps[0][1] is regression_pipeline.fitted_steps_[0][1]
 # Any effective change invalidates the fitted state, so you must call
 # ``fit()`` again before using ``predict()`` or ``transform()``.
 
+# %%
 regression_pipeline.get_params(deep=True)["pls__n_components"]
 regression_pipeline.set_params(pls__n_components=1)
 regression_pipeline.fit(X_cal, y_cal)
 regression_pipeline.predict(X_test)
 
-# %%
+# %% [markdown]
 # What Pipeline v1 does and does not do
 # -------------------------------------
 #
@@ -179,7 +206,7 @@ regression_pipeline.predict(X_test)
 # a fresh pipeline inside each fold so that every preprocessing statistic stays
 # fold-local.
 
-# %%
+# %% [markdown]
 # Supported v1 classes
 # --------------------
 #

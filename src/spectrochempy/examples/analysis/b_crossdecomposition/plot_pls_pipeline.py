@@ -4,6 +4,7 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # ruff: noqa
+# sphinx_gallery_thumbnail_number = 2
 """
 PLS regression with a Pipeline
 ==============================
