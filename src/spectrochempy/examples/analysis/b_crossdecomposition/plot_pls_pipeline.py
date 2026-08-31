@@ -27,14 +27,15 @@ try:
     ds_list = scp.read("http://www.eigenvector.com/data/Corn/corn.mat", merge=False)
 except FileNotFoundError:
     ds_list = None
-    print("Eigenvector corn dataset not reachable; skipping the remote Pipeline example.")
+    print(
+        "Eigenvector corn dataset not reachable; skipping the remote Pipeline example."
+    )
 else:
     ds_list_names = [f"{i} : {ds.name}({ds.shape})" for i, ds in enumerate(ds_list)]
     print(ds_list_names)
 
 # %%
 if ds_list is not None:
-    # %%
     # Inspect the spectra and select moisture
     # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     # The 5th dataset ``m5spec`` contains NIR spectra from 80 corn samples
@@ -54,7 +55,8 @@ if ds_list is not None:
     # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     # Use regularly spaced samples after sorting by moisture so the validation
     # set spans the concentration range instead of becoming a simple high-index
-    # holdout.
+    # holdout. This deterministic split is used only for demonstration;
+    # real validation splits should follow the experimental design.
     moisture_order = np.argsort(np.asarray(y.data).ravel())
     validation_indices = sorted(moisture_order[3::4].tolist())
     calibration_indices = [i for i in range(X.shape[0]) if i not in validation_indices]
