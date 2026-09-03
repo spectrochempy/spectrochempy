@@ -29,6 +29,8 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- correct OMNIC SRS series time-axis anchor and 84-byte spectrum labels
+
 
 .. section
 
