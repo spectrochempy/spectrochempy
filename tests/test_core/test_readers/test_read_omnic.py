@@ -7,6 +7,7 @@
 
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 import spectrochempy as scp
@@ -214,3 +215,74 @@ def test_decode_experiment_info_block():
 @pytest.mark.skip(reason="Requires an SPG file with inconsistent x-axes (#863)")
 def test_allow_inconsistent_x_with_real_file():
     """Exercise both return paths once a representative sample is available."""
+
+
+def _srs_header(path):
+    """Locate the SRS series header the way `read_srs` does and return its info."""
+    from spectrochempy.core.readers.read_omnic import _read_header
+
+    sub_rs = b"\x02\x00\x00\x00\x18\x00\x00\x00\x00\x00\x48\x43\x00\x50\x43\x47"
+    sub_tg = b"\x02\x00\x00\x00\x18\x00\x00\x00\x00\x00"
+    with open(path, "rb") as fid:
+        bytestring = fid.read()
+    sub = sub_rs if bytestring.find(sub_rs, 1) > 0 else sub_tg
+    pos = bytestring.find(sub, 1)
+    index = [pos]
+    while pos != -1:
+        pos = bytestring.find(sub, pos + 1)
+        index.append(pos)
+    pos_info_data = np.array(index[:-1])[0] + (-152)
+    with open(path, "rb") as fid:
+        return _read_header(fid, pos_info_data)
+
+
+@pytest.mark.usefixtures("_skip_if_no_testdata")
+def test_read_srs_time_axis_anchored_at_time_min():
+    """The SRS time axis must start from the series minimum/first time, not the
+    (mislabeled) `firsty` field which is really the regular step.
+
+    The public fixtures only differ from the step at sub-rounding precision
+    (the axis is rounded to 3 decimals), so this test pins the correct anchored
+    construction formula. The maintainer-only `series0001.srs` is the file where
+    the bug is numerically visible.
+    """
+    path = IRDATA / "omnic_series" / "GC_Demo.srs"
+    info = _srs_header(path)
+    nd = scp.read_srs(path)
+
+    y = nd.y.data
+    assert len(y) == info["ny"]
+    # Anchored at the series minimum (in minutes) and ending at `lasty`.
+    expected = np.around(np.linspace(info["time_min"], info["lasty"], info["ny"]), 3)
+    np.testing.assert_allclose(y, expected)
+    assert y[0] == np.around(info["time_min"], 3)
+    assert y[-1] == np.around(info["lasty"], 3)
+
+    # Guard the field separation: `firsty` is the step, not the axis start, and
+    # `time_min` is the same header field as `collection_length` kept in minutes.
+    assert info["time_min"] == np.float32(info["collection_length"] / 60)
+    assert info["time_min"] != info["firsty"]
+
+
+@pytest.mark.usefixtures("_skip_if_no_testdata")
+def test_read_srs_labels_stop_at_record_boundary():
+    """SRS spectrum labels must contain only the human-readable name and must not
+    leak binary metadata or spectral bytes.
+
+    Regression: the per-spectrum SRS record is 84 bytes but labels were read
+    with a 256-byte window, so binary metadata and spectrum data were decoded
+    into the label.
+    """
+    path = IRDATA / "omnic_series" / "GC_Demo.srs"
+    info = _srs_header(path)
+    nd = scp.read_srs(path)
+
+    labels = nd.y.labels
+    assert len(labels) == info["ny"] == 788
+    assert labels[0] == "Linked spectrum at 0.025 min."
+    assert labels[1] == "Linked spectrum at 0.051 min."
+    # No label may contain non-text control bytes (the historical leak marker).
+    for label in labels:
+        for ch in label:
+            assert not (ord(ch) < 32 and ch not in "\n\t"), label
+    assert labels[-1].startswith("Linked spectrum at")

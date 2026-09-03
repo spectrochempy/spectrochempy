@@ -19,6 +19,11 @@ New Features
   SpectroChemPy preprocessing transformers with a final transformer or
   supervised estimator.
 
+Bug Fixes
+~~~~~~~~~
+
+- correct OMNIC SRS series time-axis anchor and 84-byte spectrum labels
+
 Developer
 ~~~~~~~~~
 

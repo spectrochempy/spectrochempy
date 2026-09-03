@@ -1461,7 +1461,7 @@ def _read_srs(*args, **kwargs):
     if not return_bg:
         dataset.name = info["name"]
         _y = Coord(
-            np.around(np.linspace(info["firsty"], info["lasty"], info["ny"]), 3),
+            np.around(np.linspace(info["time_min"], info["lasty"], info["ny"]), 3),
             title="Time",
             units="minute",
             labels=names,
@@ -1722,7 +1722,13 @@ def _read_header(fid, pos, is_first_spectrum=True):
         # Hack because name seems not to be well read for srs
         out["name"] = out["name"].split("\n")[0]
         fid.seek(pos + 1002)
-        out["collection_length"] = fromfile(fid, "float32", 1) * 60
+        # The stored float32 at +1002 is the OMNIC series *minimum / first time*
+        # (in minutes). `collection_length` keeps the historical public meaning
+        # (that value converted to seconds); `time_min` is the same field kept in
+        # minutes, used as the time-axis start. Do not conflate the two.
+        collection_length = fromfile(fid, "float32", 1)
+        out["collection_length"] = collection_length * 60
+        out["time_min"] = collection_length
         fid.seek(pos + 1006)
         out["lasty"] = fromfile(fid, "float32", 1)
         fid.seek(pos + 1010)
@@ -1737,6 +1743,31 @@ def _read_header(fid, pos, is_first_spectrum=True):
             out["background_name"] = _readbtext(fid, pos + 208, 256)[10:]
 
     return out
+
+
+def _read_srs_spectra_name(fid, pos):
+    """
+    Read the 84-byte per-spectrum SRS name record and return its label.
+
+    The SRS spectrum record is exactly 84 bytes: a null-terminated human-readable
+    name followed by binary metadata and, after the record, the spectral bytes.
+    Reading beyond the record (as the historical 256-byte read did) leaks binary
+    metadata and spectrum data into the label, so this SRS-specific helper stops
+    at the first null and never inspects more than the 84-byte record.
+
+    `_readbtext` is intentionally left untouched to avoid regressions in the
+    shared SPA/SPG readers.
+    """
+    fid.seek(pos)
+    record = fid.read(84)
+    name = record.split(b"\x00", 1)[0]
+    try:
+        return name.decode("utf-8")
+    except UnicodeDecodeError:
+        try:
+            return name.decode("latin_1")
+        except UnicodeDecodeError:  # pragma: no cover
+            return name.decode("utf-8", errors="ignore")
 
 
 def _read_srs_spectra(fid, pos_data, n_spectra, n_points):
@@ -1757,7 +1788,7 @@ def _read_srs_spectra(fid, pos_data, n_spectra, n_points):
     # read the spectra/interferogram names and data
     # the first one....
     pos = pos_data
-    names.append(_readbtext(fid, pos, 256))
+    names.append(_read_srs_spectra_name(fid, pos))
     pos += 84
     fid.seek(pos)
     data[0, :] = fromfile(fid, dtype="float32", count=n_points)[:]
@@ -1765,7 +1796,7 @@ def _read_srs_spectra(fid, pos_data, n_spectra, n_points):
     # ... and the remaining ones:
     for i in np.arange(n_spectra)[1:]:
         pos += 16
-        names.append(_readbtext(fid, pos, 256))
+        names.append(_read_srs_spectra_name(fid, pos))
         pos += 84
         fid.seek(pos)
         data[i, :] = fromfile(fid, dtype="float32", count=n_points)[:]
