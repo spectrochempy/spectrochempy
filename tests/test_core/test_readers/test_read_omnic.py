@@ -286,3 +286,116 @@ def test_read_srs_labels_stop_at_record_boundary():
         for ch in label:
             assert not (ord(ch) < 32 and ch not in "\n\t"), label
     assert labels[-1].startswith("Linked spectrum at")
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "rapid_scan_reprocessed.srs",
+        "GC_Demo.srs",
+        "high_speed.srs",
+        "TGA_demo.srs",
+    ],
+)
+@pytest.mark.usefixtures("_skip_if_no_testdata")
+def test_read_srs_spectral_descending_by_default(name):
+    """Spectral SRS files must be exposed in the public descending-wavenumber
+    convention (like `read_spa`) without any manual reversal.
+
+    The raw SRS spectral array is stored ascending-wavenumber; `_read_srs`
+    normalizes it so the X axis runs high -> low wavenumber with the intensity
+    data matched to it.
+
+    Regression: before the fix these files either required `reverse_x=True`
+    (GC/TGA/high-speed) or were exposed ascending (`rapid_scan_reprocessed`).
+    """
+    nd = scp.read_srs(IRDATA / "omnic_series" / name)
+    x = np.asarray(nd.x)
+    # Spectral records carry real units (not None / data points).
+    assert nd.x.units is not None
+    assert x[0] > x[-1]  # descending wavenumber
+    # The first sample is associated with the high wavenumber (X[0]).
+    assert nd.shape[-1] == len(x)
+    assert getattr(nd.meta, "interferogram", None) is None
+
+
+@pytest.mark.usefixtures("_skip_if_no_testdata")
+def test_read_srs_spectral_default_equals_former_reverse_x():
+    """The default read must now match what used to require `reverse_x=True`
+    (the documented issue #858 workaround), for every affected file.
+
+    Pinned endpoint values are the physical X/data association verified against
+    the legacy `reverse_x=True` orientation, which in turn follows the same
+    convention as the SPA-validated series storage.
+    """
+    cases = {
+        "GC_Demo.srs": (99.8824, "high_wavenumber"),
+        "high_speed.srs": (-0.0233, "high_wavenumber"),
+    }
+    for name, (expected_first, _) in cases.items():
+        nd = scp.read_srs(IRDATA / "omnic_series" / name)
+        data = np.asarray(nd.data)
+        x = np.asarray(nd.x)
+        # data[0] is the intensity at X[0] = high wavenumber (descending).
+        assert np.isclose(data[0, 0], expected_first, atol=1e-3)
+        assert x[0] > x[-1]
+
+
+@pytest.mark.usefixtures("_skip_if_no_testdata")
+def test_read_srs_interferogram_not_reversed():
+    """`rapid_scan.srs` interferograms must remain on the interferogram path and
+    must not be treated as spectral data (no reversal, ascending OPD axis).
+    """
+    nd = scp.read_srs(IRDATA / "omnic_series" / "rapid_scan.srs")
+    assert nd.meta.interferogram is True
+    x = np.asarray(nd.x)
+    # Interferogram axis is optical path difference, exposed ascending, not a
+    # descending spectral wavenumber axis.
+    assert nd.x.title == "optical path difference"
+    assert x[0] < x[-1]
+    assert nd.shape == (643, 4160)
+
+
+@pytest.mark.usefixtures("_skip_if_no_testdata")
+def test_read_srs_background_spectral_descending():
+    """Spectral backgrounds must be normalized per-record, using their own
+    (possibly reversed) firstx/lastx endpoints, to the same descending X as the
+    series.
+
+    Regression: background headers store firstx/lastx reversed relative to the
+    series header for the same grid; a single global header rule would expose
+    them mis-oriented.
+    """
+    for name in ["GC_Demo.srs", "high_speed.srs"]:
+        series = scp.read_srs(IRDATA / "omnic_series" / name)
+        bg = scp.read_srs(IRDATA / "omnic_series" / name, return_bg=True)
+        xbg = np.asarray(bg.x)
+        # Background uses the same descending wavenumber grid as the series.
+        assert xbg[0] > xbg[-1]
+        np.testing.assert_allclose(xbg, np.asarray(series.x), rtol=1e-4)
+        assert bg.shape == (1, series.shape[-1])
+
+
+@pytest.mark.usefixtures("_skip_if_no_testdata")
+def test_read_srs_reverse_x_deprecated():
+    """`reverse_x` is a deprecated no-op: passing it emits a DeprecationWarning
+    and returns the same (correct, automatically normalized) result as the
+    default, so users of the #858 workaround keep getting correct data without
+    a double reversal.
+    """
+    path = IRDATA / "omnic_series" / "GC_Demo.srs"
+    default = scp.read_srs(path)
+    with pytest.warns(DeprecationWarning):
+        legacy = scp.read_srs(path, reverse_x=True)
+    np.testing.assert_allclose(np.asarray(legacy.data), np.asarray(default.data))
+    np.testing.assert_allclose(np.asarray(legacy.x), np.asarray(default.x))
+
+
+@pytest.mark.usefixtures("_skip_if_no_testdata")
+def test_read_srs_and_read_spa_share_descending_convention():
+    """A corrected `read_srs` must expose spectral X with the same
+    descending-wavenumber, data-matched convention as `read_spa`."""
+    srs = scp.read_srs(IRDATA / "omnic_series" / "GC_Demo.srs")
+    spa = scp.read_spa(IRDATA / "subdir" / "20-50" / "7_CZ0-100_Pd_21.SPA")
+    assert np.asarray(srs.x)[0] > np.asarray(srs.x)[-1]
+    assert np.asarray(spa.x)[0] > np.asarray(spa.x)[-1]
