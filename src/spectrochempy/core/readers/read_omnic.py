@@ -27,6 +27,7 @@ from spectrochempy.core.units import ur
 from spectrochempy.utils._logging import info_
 from spectrochempy.utils.datetimeutils import UTC
 from spectrochempy.utils.datetimeutils import utcnow
+from spectrochempy.utils.decorators import warn_deprecated
 from spectrochempy.utils.file import fromfile
 
 
@@ -516,11 +517,24 @@ def read_srs(*paths, **kwargs):
     ----------------
     return_bg : bool, optional
         Default value is False. When set to 'True' returns the series background
+
+    .. note::
+       SRS **spectral** series are now read normalized to the public
+       SpectroChemPy convention used by :func:`read_spa`: the wavenumber X
+       coordinate is exposed descending (high to low wavenumber) with the
+       intensity data matched to it. This normalization is applied
+       automatically, per spectrum/background record, from each record's own
+       endpoints. Rapid-scan interferograms keep their ascending
+       data-points coordinate and are not treated as spectral data.
+
     reverse_x : bool, optional
-        Specifies whether to reverse the x-axis (wavenumber) data. Default is False.
-        In most srs files, the absorbance/intensity data are recorded from high to low
-        wavenumbers. However, in some cases the data maybe stored in low to high order.
-        If your data appear reversed, set 'reverse_x=True'.
+        .. deprecated::
+            No longer needed. Spectral orientation is handled automatically as
+            described above; this historical workaround (introduced for issue
+            #858) is now a no-op and will be removed according to the
+            SpectroChemPy deprecation policy. Passing ``reverse_x=True`` emits a
+            ``DeprecationWarning`` and is ignored.
+
     content : `bytes` object, optional
     Instead of passing a filename for further reading, a bytes content can be
     directly provided as bytes objects.
@@ -1143,7 +1157,21 @@ def _read_srs(*args, **kwargs):
     frombytes = kwargs.get("frombytes", False)
 
     return_bg = kwargs.get("return_bg", False)
-    reverse_x = kwargs.get("reverse_x", False)
+    if kwargs.get("reverse_x", False):
+        warn_deprecated(
+            "reverse_x",
+            subject="The `reverse_x` keyword argument of `read_srs`",
+            kind="keyword argument",
+            action="is deprecated",
+            replace=None,
+            policy=True,
+            extra_msg=(
+                "SRS spectral orientation is now handled automatically "
+                "(descending wavenumber, data matched to it). This option is a "
+                "no-op and will be removed according to SpectroChemPy policy."
+            ),
+            stacklevel=4,
+        )
 
     # in this case, filename is actually a byte content
     fid = io.BytesIO(filename) if frombytes else open(filename, "rb")  # noqa: SIM115
@@ -1432,12 +1460,29 @@ def _read_srs(*args, **kwargs):
                 # but the data are those of an ifg... For now need more examples
                 return None
 
-    # Create NDDataset Object for the series
-    if not return_bg:
-        dataset = NDDataset(data) if not reverse_x else NDDataset(data[:, ::-1])
+    # Create NDDataset object for the series / background.
+    #
+    # The raw SRS spectral intensity array is stored ascending-wavenumber, but
+    # the public SpectroChemPy / `read_spa` convention presents OMNIC spectra
+    # with descending wavenumber and data matched to it. Spectral records are
+    # normalized here using each record's own firstx/lastx endpoints (which may
+    # differ between the series header and the background header). Interferogram
+    # records (`xunits` is None, i.e. `xtitle` == "data points") keep the raw
+    # ascending data-points coordinate and are never reversed. `_read_header`
+    # returns raw firstx/lastx without reordering them.
+    is_interferogram = info["xunits"] is None
 
+    if is_interferogram:
+        data_out = data
+        x0, x1 = info["firstx"], info["lastx"]
     else:
-        dataset = NDDataset(np.expand_dims(data, axis=0))
+        data_out = data[::-1] if return_bg else data[:, ::-1]
+        x0, x1 = max(info["firstx"], info["lastx"]), min(info["firstx"], info["lastx"])
+
+    if return_bg:
+        dataset = NDDataset(np.expand_dims(data_out, axis=0))
+    else:
+        dataset = NDDataset(data_out)
 
     # in case part of the spectra/ifg has been blanked:
     dataset.mask = np.isnan(dataset.data)
@@ -1450,8 +1495,8 @@ def _read_srs(*args, **kwargs):
     # now add coordinates
 
     _x = Coord.linspace(
-        info["firstx"],
-        info["lastx"],
+        x0,
+        x1,
         int(info["nx"]),
         title=info["xtitle"],
         units=info["xunits"],
@@ -1714,10 +1759,6 @@ def _read_header(fid, pos, is_first_spectrum=True):
         out["history"] = _readbtext(fid, pos + 208, None)
 
     if filetype == "srs":
-        if out["nbkgscan"] == 0 and out["firstx"] > out["lastx"]:
-            # an interferogram in rapid scan mode
-            out["firstx"], out["lastx"] = out["lastx"], out["firstx"]
-
         out["name"] = _readbtext(fid, pos + 938, 256)
         # Hack because name seems not to be well read for srs
         out["name"] = out["name"].split("\n")[0]

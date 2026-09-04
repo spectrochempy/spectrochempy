@@ -23,6 +23,14 @@ Bug Fixes
 ~~~~~~~~~
 
 - correct OMNIC SRS series time-axis anchor and 84-byte spectrum labels
+- fixed OMNIC SRS X/data orientation and deprecated the ``reverse_x``
+  workaround
+
+Deprecations
+~~~~~~~~~~~~
+
+- The ``reverse_x`` keyword argument of ``read_srs`` is deprecated: SRS
+  spectral orientation is now handled automatically
 
 Developer
 ~~~~~~~~~
