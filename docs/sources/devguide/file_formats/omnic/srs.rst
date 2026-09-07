@@ -53,10 +53,11 @@ section).
      - spectral (335 × 1868)
      - repeated-record layout; spectral axis
 
-``[ESTABLISHED]`` The record layout `84 + nx·4 + 16` bytes per spectrum (see
-:ref:`Repeated spectrum records <srs-repeated-records>`) reproduces the
-spectral arrays exactly in independent binary reconstruction for all of the
-files above and all four acquisition families.
+``[ESTABLISHED]`` The repeated-record layout ``84 + nx*4 + 16`` bytes
+reproduces the data arrays exactly in independent binary reconstruction for
+all of the files above and all four acquisition families, covering both
+spectra and rapid-scan interferograms (see :ref:`Repeated spectrum records
+<srs-repeated-records>`).
 
 In addition, **one independently controlled TG/GC series** was used as a
 physical validation oracle. Individual spectra of that series were exported by
@@ -89,7 +90,8 @@ Overall file organization
     |   [84-byte prefix | nx * 4-byte float32 payload | 16-byte trailer]
     |   ... x ny
     +------------------+
-    | trailer region:  Gram-Schmidt header + matrix
+    | post-series profile region (observed in the controlled series):
+    |                  Gram-Schmidt-related data
     |                  copied series metadata
     |                  SeriesProfile block(s), one per profile
     +------------------+
@@ -395,11 +397,13 @@ Repeated spectrum records
 -------------------------
 
 ``[ESTABLISHED]`` In the tested SRS series, each spectrum record has the
-following layout:
+following layout. The same repeated-record structure is also observed for the
+rapid-scan interferograms in ``rapid_scan.srs``, so the description below is
+generic to both spectral series and interferogram records:
 
 .. code-block:: text
 
-    spectrum record
+    data record
     ├── 84-byte prefix
     ├── nx × 4-byte float32 intensity payload
     └── 16-byte trailer
@@ -407,8 +411,8 @@ following layout:
 * ``[ESTABLISHED]`` The **spectrum name is null-terminated inside the
   84-byte prefix**; the prefix also carries binary metadata (per-file mostly
   constant fields and a per-spectrum minimum-Y value).
-* ``[ESTABLISHED]`` The payload boundaries reproduce the spectral arrays
-  exactly in independent binary reconstruction (stride
+* ``[ESTABLISHED]`` The payload boundaries reproduce the data arrays exactly
+  in independent binary reconstruction (stride
   `84 + nx·4 + 16` bytes per record).
 * ``[ESTABLISHED]`` The trailer size (16 bytes) holds for all tested files.
 
@@ -441,7 +445,8 @@ following layout:
 Inter-spectrum trailer (16 bytes; trailer-relative offsets)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-``[ESTABLISHED]`` Tested spectral records are followed by a 16-byte trailer.
+``[ESTABLISHED]`` Tested records (both spectral series and rapid-scan
+interferograms) are followed by a 16-byte trailer.
 
 ``[OBSERVED]`` One uint32 field in this trailer behaves as a **cumulative
 time counter in centiseconds** (values increase with spectrum index and track
