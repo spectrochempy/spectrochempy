@@ -68,3 +68,4 @@ Developer
   ``Pipeline`` implementation: allowlist-based fitted-state inspection,
   unfitted cloning, canonical not-fitted behavior for supported transformers,
   and lifecycle invalidation for accepted analysis terminal candidates.
+- Added a developer-guide reference for the OMNIC SRS file format.
