@@ -342,10 +342,12 @@ def test_read_srs_spectral_default_equals_former_reverse_x():
 
 
 @pytest.mark.usefixtures("_skip_if_no_testdata")
-def test_read_srs_interferogram_not_reversed():
+def test_read_srs_interferogram_not_reversed(monkeypatch):
     """`rapid_scan.srs` interferograms must remain on the interferogram path and
-    must not be treated as spectral data (no reversal, ascending OPD axis).
-    """
+    must not be treated as spectral data (no reversal, ascending OPD axis, data
+    kept in raw storage order)."""
+    from spectrochempy.core.readers import read_omnic
+
     nd = scp.read_srs(IRDATA / "omnic_series" / "rapid_scan.srs")
     assert nd.meta.interferogram is True
     x = np.asarray(nd.x)
@@ -354,6 +356,22 @@ def test_read_srs_interferogram_not_reversed():
     assert nd.x.title == "optical path difference"
     assert x[0] < x[-1]
     assert nd.shape == (643, 4160)
+
+    # Data is kept in raw storage order (not spectral-normalized): reversing it
+    # reproduces the same file read as if it were a (reversed) spectral record.
+    real_read_header = read_omnic._read_header
+
+    def _forced_spectral(fid, pos, is_first_spectrum=True):
+        info = real_read_header(fid, pos, is_first_spectrum=is_first_spectrum)
+        info["xtitle"] = "wavenumbers"
+        info["xunits"] = "cm^-1"
+        return info
+
+    monkeypatch.setattr(read_omnic, "_read_header", _forced_spectral)
+    spectral = read_omnic._read_srs(
+        NDDataset(), IRDATA / "omnic_series" / "rapid_scan.srs"
+    )
+    np.testing.assert_allclose(np.asarray(nd.data)[:, ::-1], np.asarray(spectral.data))
 
 
 @pytest.mark.usefixtures("_skip_if_no_testdata")
@@ -378,17 +396,33 @@ def test_read_srs_background_spectral_descending():
 
 @pytest.mark.usefixtures("_skip_if_no_testdata")
 def test_read_srs_reverse_x_deprecated():
-    """`reverse_x` is a deprecated no-op: passing it emits a DeprecationWarning
-    and returns the same (correct, automatically normalized) result as the
-    default, so users of the #858 workaround keep getting correct data without
-    a double reversal.
-    """
+    """`reverse_x` is a deprecated no-op: supplying the keyword (with any value,
+    `True` or `False`) emits a `DeprecationWarning` and returns the same
+    (correct, automatically normalized) result as the default, so users of the
+    #858 workaround keep getting correct data without a double reversal."""
     path = IRDATA / "omnic_series" / "GC_Demo.srs"
     default = scp.read_srs(path)
     with pytest.warns(DeprecationWarning):
-        legacy = scp.read_srs(path, reverse_x=True)
-    np.testing.assert_allclose(np.asarray(legacy.data), np.asarray(default.data))
-    np.testing.assert_allclose(np.asarray(legacy.x), np.asarray(default.x))
+        legacy_true = scp.read_srs(path, reverse_x=True)
+    with pytest.warns(DeprecationWarning):
+        legacy_false = scp.read_srs(path, reverse_x=False)
+    np.testing.assert_allclose(np.asarray(legacy_true.data), np.asarray(default.data))
+    np.testing.assert_allclose(np.asarray(legacy_true.x), np.asarray(default.x))
+    np.testing.assert_allclose(np.asarray(legacy_false.data), np.asarray(default.data))
+    np.testing.assert_allclose(np.asarray(legacy_false.x), np.asarray(default.x))
+
+
+@pytest.mark.usefixtures("_skip_if_no_testdata")
+def test_read_srs_no_reverse_x_keyword_no_deprecation():
+    """Omitting the `reverse_x` keyword entirely must not emit a
+    `DeprecationWarning`."""
+    import warnings
+
+    path = IRDATA / "omnic_series" / "GC_Demo.srs"
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        scp.read_srs(path)
+    assert not any(issubclass(warning.category, DeprecationWarning) for warning in w)
 
 
 @pytest.mark.usefixtures("_skip_if_no_testdata")
@@ -399,3 +433,49 @@ def test_read_srs_and_read_spa_share_descending_convention():
     spa = scp.read_spa(IRDATA / "subdir" / "20-50" / "7_CZ0-100_Pd_21.SPA")
     assert np.asarray(srs.x)[0] > np.asarray(srs.x)[-1]
     assert np.asarray(spa.x)[0] > np.asarray(spa.x)[-1]
+
+
+@pytest.mark.usefixtures("_skip_if_no_testdata")
+def test_read_srs_unknown_xunits_not_interferogram(monkeypatch):
+    """A record whose X-unit code is unknown (`xunits is None` but not an
+    explicit data-points axis) must not be classified as an interferogram, must
+    not be spectral-normalized, and must emit a warning instead of silently
+    treating it as either an interferogram or a spectral record."""
+    import warnings
+
+    from spectrochempy.core.readers import read_omnic
+
+    real_read_header = read_omnic._read_header
+
+    def _forced(xtitle, xunits):
+        def _wrap(fid, pos, is_first_spectrum=True):
+            info = real_read_header(fid, pos, is_first_spectrum=is_first_spectrum)
+            info["xtitle"] = xtitle
+            info["xunits"] = xunits
+            return info
+
+        return _wrap
+
+    path = IRDATA / "omnic_series" / "GC_Demo.srs"
+
+    # Reference: the same file read as a spectral record (normalized to
+    # descending wavenumber).
+    monkeypatch.setattr(read_omnic, "_read_header", _forced("wavenumbers", "cm^-1"))
+    spectral = read_omnic._read_srs(NDDataset(), path)
+
+    # Unknown X-axis type: xunits is None but the axis is not data points.
+    monkeypatch.setattr(read_omnic, "_read_header", _forced("xaxis", None))
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        unknown = read_omnic._read_srs(NDDataset(), path)
+
+    # An explicit warning is emitted about the unrecognized X axis.
+    assert any("X axis is not recognized" in str(x.message) for x in w)
+    # Not classified as an interferogram (no interferogram metadata).
+    assert getattr(unknown.meta, "interferogram", None) is None
+    assert unknown.x.title == "xaxis"
+    # Left in raw storage orientation: the data is NOT spectral-normalized
+    # (it is the reverse of the normalized spectral read).
+    np.testing.assert_allclose(
+        np.asarray(unknown.data)[:, ::-1], np.asarray(spectral.data)
+    )

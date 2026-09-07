@@ -25,6 +25,7 @@ from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.core.readers.importer import _openfid
 from spectrochempy.core.units import ur
 from spectrochempy.utils._logging import info_
+from spectrochempy.utils._logging import warning_
 from spectrochempy.utils.datetimeutils import UTC
 from spectrochempy.utils.datetimeutils import utcnow
 from spectrochempy.utils.decorators import warn_deprecated
@@ -532,7 +533,8 @@ def read_srs(*paths, **kwargs):
             No longer needed. Spectral orientation is handled automatically as
             described above; this historical workaround (introduced for issue
             #858) is now a no-op and will be removed according to the
-            SpectroChemPy deprecation policy. Passing ``reverse_x=True`` emits a
+            SpectroChemPy deprecation policy. Supplying the ``reverse_x``
+            keyword (with any value, ``True`` or ``False``) emits a
             ``DeprecationWarning`` and is ignored.
 
     content : `bytes` object, optional
@@ -1157,7 +1159,7 @@ def _read_srs(*args, **kwargs):
     frombytes = kwargs.get("frombytes", False)
 
     return_bg = kwargs.get("return_bg", False)
-    if kwargs.get("reverse_x", False):
+    if "reverse_x" in kwargs:
         warn_deprecated(
             "reverse_x",
             subject="The `reverse_x` keyword argument of `read_srs`",
@@ -1467,17 +1469,38 @@ def _read_srs(*args, **kwargs):
     # with descending wavenumber and data matched to it. Spectral records are
     # normalized here using each record's own firstx/lastx endpoints (which may
     # differ between the series header and the background header). Interferogram
-    # records (`xunits` is None, i.e. `xtitle` == "data points") keep the raw
-    # ascending data-points coordinate and are never reversed. `_read_header`
-    # returns raw firstx/lastx without reordering them.
-    is_interferogram = info["xunits"] is None
-
-    if is_interferogram:
+    # records keep the raw ascending data-points coordinate and are never
+    # reversed. `_read_header` returns raw firstx/lastx without reordering them.
+    #
+    # The X axis is classified into one of three cases:
+    #
+    #   * spectral record: known physical spectral coordinate (xunit codes
+    #     1/3/4/32); normalize to the public descending-wavenumber convention.
+    #   * interferogram: explicit data-points axis (xunit code 2); keep the raw
+    #     ascending coordinate and leave data/order unchanged.
+    #   * unknown X-axis type: `xunits` is None but the axis is not a
+    #     data-points axis (the `_read_header` fallback for an unrecognized
+    #     x-unit code). Never silently classify this as an interferogram, and
+    #     do not apply spectral normalization to an axis whose meaning is
+    #     unknown. Leave the record in its raw storage orientation and warn.
+    if info["xunits"] is not None:
+        # spectral record
+        data_out = data[::-1] if return_bg else data[:, ::-1]
+        x0, x1 = max(info["firstx"], info["lastx"]), min(info["firstx"], info["lastx"])
+    elif info["xtitle"] == "data points":
+        # interferogram
         data_out = data
         x0, x1 = info["firstx"], info["lastx"]
     else:
-        data_out = data[::-1] if return_bg else data[:, ::-1]
-        x0, x1 = max(info["firstx"], info["lastx"]), min(info["firstx"], info["lastx"])
+        # unknown X-axis type
+        warning_(
+            "The nature of the SRS X axis is not recognized: "
+            "xunits is None and xtitle is "
+            f"{info['xtitle']!r}. The record is left in its raw storage "
+            "orientation and is not treated as an interferogram."
+        )
+        data_out = data
+        x0, x1 = info["firstx"], info["lastx"]
 
     if return_bg:
         dataset = NDDataset(np.expand_dims(data_out, axis=0))
