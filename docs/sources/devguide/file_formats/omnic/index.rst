@@ -40,3 +40,4 @@ patterns with ``[UNKNOWN]`` semantics.
    :maxdepth: 2
 
    srs
+   spa
