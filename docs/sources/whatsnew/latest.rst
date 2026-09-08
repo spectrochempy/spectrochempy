@@ -67,5 +67,5 @@ unfitted cloning, canonical not-fitted behavior for supported transformers,
 and opt-in lifecycle invalidation for the accepted analysis terminal
 candidates. (#1589)
 
-DOC: Added a developer-guide reference for the OMNIC SRS file format. (#1596)
-DOC: Added a developer-guide reference for the OMNIC SPA file format. (#1597)
+DOC: Added developer-guide references for the OMNIC SRS and SPA file
+formats. (#1596, #1597)
