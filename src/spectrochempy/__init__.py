@@ -220,8 +220,10 @@ def __getattr__(name):
             from spectrochempy.core.dataset.nddataset import NDDataset
 
             return getattr(NDDataset, name)
-        # Remaining reserved names are public submodules handled by the
-        # lazy-loader fallback at the end of this function.
+        # Remaining reserved names are public submodules: resolve them through
+        # the lazy loader immediately, so that a plugin-provided namespace,
+        # reader, extension or root export can never shadow them.
+        return original_getattr(name)
 
     import sys
 

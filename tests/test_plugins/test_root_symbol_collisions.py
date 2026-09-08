@@ -287,3 +287,29 @@ def test_reserved_name_wins_over_root_export_collision(clean_plugin_namespaces):
         assert not callable(getattr(obj, "read", None))
     finally:
         plugin_manager.list_plugins = original_plugins
+
+
+def test_reserved_submodule_wins_over_extension_collision():
+    # A plugin extension named after a public submodule must not shadow it:
+    # ``scp.analysis`` stays the core submodule and is not replaced by the
+    # plugin-provided extension object.
+    import spectrochempy.analysis as core_analysis
+    from spectrochempy.plugins.registry import registry
+
+    registry.extensions.register(
+        "analysis",
+        "analysis",
+        "PLUGIN_ANALYSIS_OBJECT",
+        description="collision with the public submodule",
+    )
+    try:
+        obj = scp.analysis
+        assert obj is core_analysis
+        assert obj != "PLUGIN_ANALYSIS_OBJECT"
+        # ``dir(scp)`` still advertises ``analysis`` (the core submodule), and
+        # does not surface any plugin-provided extension object.
+        names = dir(scp)
+        assert "analysis" in names
+        assert all(name != "PLUGIN_ANALYSIS_OBJECT" for name in names)
+    finally:
+        registry.extensions._extensions.pop("analysis", None)
