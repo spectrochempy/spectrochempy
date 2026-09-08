@@ -247,7 +247,7 @@ fields.
    * - ``+92``
      - ``float32``
      - Aperture where applicable.
-     - ``[STRONGLY SUPPORTED]`` for the acquired variant; not universal.
+     - ``[OBSERVED]`` for the acquired variant; not universal.
    * - ``+96``
      - ``float32``
      - Raman excitation/laser frequency.
@@ -286,19 +286,19 @@ following relationships are mature enough to document generically:
        ``[UNKNOWN]``.
    * - ``+16``
      - Digitizer-bit field.
-     - ``[STRONGLY SUPPORTED]`` in the validated acquired variants.
+     - ``[ESTABLISHED]`` in the validated acquired variants.
    * - ``+20``
      - High-pass filter.
-     - ``[STRONGLY SUPPORTED]`` where independently matched to acquisition reports.
+     - ``[ESTABLISHED]`` where independently matched to acquisition reports.
    * - ``+24``
      - Low-pass filter.
-     - ``[STRONGLY SUPPORTED]`` where independently matched to acquisition reports.
+     - ``[ESTABLISHED]`` where independently matched to acquisition reports.
    * - ``+44``
      - Sample gain.
-     - ``[STRONGLY SUPPORTED]`` where independently matched to acquisition reports.
+     - ``[ESTABLISHED]`` where independently matched to acquisition reports.
    * - ``+48``
      - Optical velocity.
-     - ``[STRONGLY SUPPORTED]`` in validated acquired/IFG variants.
+     - ``[ESTABLISHED]`` in validated acquired/IFG variants.
 
 The ``+140..+188`` header region can mirror these parameters, but the mirror is
 blank in an observed newer-layout family. A reader or format consumer should
@@ -343,13 +343,13 @@ Y/data-unit codes
      - Certainty/scope
    * - ``0x10``
      - Percent transmittance.
-     - ``[STRONGLY SUPPORTED]`` in the validated library/retrieved variant.
+     - ``[ESTABLISHED]`` in the validated library/retrieved variant.
    * - ``0x11``
      - Absorbance.
      - ``[ESTABLISHED]`` in the validated spectral family.
    * - ``0x16``
      - Volts-labelled detector signal.
-     - ``[STRONGLY SUPPORTED]`` for the standalone saved-IFG representation;
+     - ``[ESTABLISHED]`` for the standalone saved-IFG representation;
        this is a label, not proof of calibrated voltage.
    * - ``0x17``
      - Transmittance.
@@ -503,16 +503,16 @@ has a fixed-anchor layout supported by multiple independent native blocks:
      - Certainty
    * - ``+10``
      - Experiment path/file text begins.
-     - ``[STRONGLY SUPPORTED]``
+     - ``[ESTABLISHED]``
    * - ``+90``
      - Experiment title/name text.
-     - ``[STRONGLY SUPPORTED]``
+     - ``[ESTABLISHED]``
    * - ``+154``
      - Descriptive or custom text.
-     - ``[STRONGLY SUPPORTED]``; the historical ``+254`` comment is contradicted.
+     - ``[ESTABLISHED]``; the historical ``+254`` comment is contradicted.
    * - ``+413``
      - Accessory-related text anchor.
-     - ``[STRONGLY SUPPORTED]``
+     - ``[ESTABLISHED]``
    * - ``+670``
      - Duplicate or prefixed path-like text.
      - ``[OBSERVED]``; exact role remains unresolved.
