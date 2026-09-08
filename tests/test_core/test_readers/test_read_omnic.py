@@ -92,6 +92,63 @@ def test_read_omnic():
     )
     assert a is None
 
+
+@pytest.mark.usefixtures("_skip_if_no_testdata")
+def test_spa_ifg_sample_spacing_factor1():
+    """SPA sample interferogram: OPD step honors the native sample spacing.
+
+    The header of ``carroucell_samp/2-BaSO4_0.SPA`` records a sample spacing
+    of 1.0 together with a reference frequency of 15798.259765625 cm^-1, so
+    the optical path difference step must be ``1 / (2 * nu)`` rather than the
+    former (2x too large) ``1 / nu``.
+    """
+    from spectrochempy.core.units import ur
+
+    nu = 15798.259765625  # reference frequency stored in the file (+80)
+    nd = scp.read_spa(IRDATA / "carroucell_samp" / "2-BaSO4_0.SPA", return_ifg="sample")
+    x = nd.x
+
+    assert x.units == ur("mm")
+    assert x.title == "optical path difference"
+    assert nd.meta.sample_spacing == 1.0
+
+    step = x._data[1] - x._data[0]
+    expected_step = 1.0 / (2.0 * nu) * 10.0  # cm -> mm
+    assert step == pytest.approx(expected_step, rel=1e-5)
+    # make sure we are not back to the pre-fix (wrong) 1 / nu step
+    legacy_step = 1.0 / nu * 10.0
+    assert step != pytest.approx(legacy_step, rel=1e-3)
+
+    # origin kept at the interferogram peak
+    zpd = int(np.argmax(nd)[-1])
+    assert x._data[zpd] == 0.0
+
+
+@pytest.mark.usefixtures("_skip_if_no_testdata")
+def test_spa_ifg_sample_spacing_factor2():
+    """SPA interferogram with native sample spacing 2.0 keeps the 1/nu step.
+
+    ``interferogram/interfero.SPA`` records a sample spacing of 2.0, so the
+    step ``2 / (2 * nu) = 1 / nu`` must remain unchanged.
+    """
+    from spectrochempy.core.units import ur
+
+    nu = 15798.259765625  # reference frequency stored in the file (+80)
+    nd = scp.read_spa(IRDATA / "interferogram" / "interfero.SPA")
+    x = nd.x
+
+    assert x.units == ur("mm")
+    assert x.title == "optical path difference"
+    assert nd.meta.sample_spacing == 2.0
+
+    step = x._data[1] - x._data[0]
+    expected_step = 2.0 / (2.0 * nu) * 10.0  # = 1 / nu
+    assert step == pytest.approx(expected_step, rel=1e-5)
+
+    # origin kept at the interferogram peak
+    zpd = int(np.argmax(nd)[-1])
+    assert x._data[zpd] == 0.0
+
     # rapid_sca series
     a = scp.read_srs("irdata/omnic_series/rapid_scan.srs")
     assert str(a) == "NDDataset: [float64] V (shape: (y:643, x:4160))"

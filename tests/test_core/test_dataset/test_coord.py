@@ -613,3 +613,33 @@ def test_coord_deepcopy_isolation():
     assert c0.title == "wavenumber"
     c1._data[0] = 9999
     assert c0.data[0] == 4000.0
+
+
+def test_coord_set_laser_frequency_sample_spacing():
+    """OPD step honors the native sample spacing: step = ss / (2 * nu).
+
+    The default path (no sample spacing given, as used by the SPC and SRS
+    readers) must keep the legacy ``1 / nu`` step.
+    """
+    nu = 15798.26 * ur("cm^-1")
+
+    # default: 1 / nu step (legacy behavior preserved for SPC/SRS callers)
+    a = Coord(np.zeros(10))
+    a._zpd = 3
+    a.set_laser_frequency(frequency=nu)
+    step = a._data[1] - a._data[0]
+    assert a.units == ur("mm")
+    assert a.title == "optical path difference"
+    assert step == pytest.approx(1.0 / 15798.26 * 10.0, rel=1e-5)
+
+    # explicit sample spacing 2.0 gives the same 1 / nu step
+    b = Coord(np.zeros(10))
+    b._zpd = 3
+    b.set_laser_frequency(frequency=nu, sample_spacing=2.0)
+    assert b._data[1] - b._data[0] == pytest.approx(step, rel=1e-12)
+
+    # explicit sample spacing 1.0 halves the step
+    c = Coord(np.zeros(10))
+    c._zpd = 3
+    c.set_laser_frequency(frequency=nu, sample_spacing=1.0)
+    assert c._data[1] - c._data[0] == pytest.approx(0.5 * step, rel=1e-12)

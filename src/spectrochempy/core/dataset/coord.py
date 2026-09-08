@@ -791,7 +791,7 @@ class Coord(NDMath, NDArray):
     # Public methods and properties
     # ----------------------------------------------------------------------------------
 
-    def set_laser_frequency(self, frequency=None):
+    def set_laser_frequency(self, frequency=None, sample_spacing=None):
         r"""
         Set the laser frequency.
 
@@ -800,11 +800,20 @@ class Coord(NDMath, NDArray):
         difference to time. The laser frequency is also used to calculate
         the wavenumber axis.
 
+        The optical path difference step is derived from both the laser
+        frequency and the (native) sample spacing factor:
+        ``spacing = sample_spacing / (2 * frequency)``.
+
         Parameters
         ----------
         frequency : `float` or `Quantity`, optional, default=15798.26 * ur("cm^-1")
             The laser frequency in cm^-1 or Hz. If the value is in cm^-1, the
             frequency is converted to Hz using the current speed of light value.
+        sample_spacing : `float`, optional, default=None
+            Native sample spacing factor (e.g. ``1.0`` or ``2.0``) used to
+            derive the optical path difference step. When ``None``, the value
+            previously stored in the metadata is used, falling back to ``2.0``
+            (i.e. an optical path difference step of ``1 / frequency``).
 
         """
         if frequency is None:
@@ -816,6 +825,10 @@ class Coord(NDMath, NDArray):
         frequency.ito("Hz")
         self.meta.laser_frequency = frequency
 
+        if sample_spacing is None:
+            sample_spacing = self.meta.get("sample_spacing", 2.0)
+        self.meta.sample_spacing = sample_spacing
+
         if self._use_time:
             spacing = 1.0 / frequency
             spacing.ito("picoseconds")
@@ -825,7 +838,7 @@ class Coord(NDMath, NDArray):
 
         else:
             frequency.ito("cm^-1")
-            spacing = 1.0 / frequency
+            spacing = sample_spacing / (2.0 * frequency)
             spacing.ito("mm")
             offset = -spacing.m * self._zpd
             self._data = np.arange(self.shape[-1]) * spacing.m + offset

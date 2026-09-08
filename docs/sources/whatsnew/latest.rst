@@ -22,6 +22,8 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- correct OMNIC SPA interferogram optical path difference coordinates by
+  honoring the native sample-spacing factor
 - correct OMNIC SRS series time-axis anchor and 84-byte spectrum labels
 - fixed OMNIC SRS X/data orientation and deprecated the ``reverse_x``
   workaround
