@@ -162,7 +162,7 @@ class PluginManager:
             for ns_name, ns_spec in io_namespaces.items():
                 read_path = ns_spec.get("read")
                 write_path = ns_spec.get("write")
-                register_io_namespace(ns_name, read_path, write_path)
+                register_io_namespace(ns_name, read_path, write_path, plugin=name)
 
     # ------------------------------------------------------------------
     # Declarative hook collection

@@ -447,12 +447,16 @@ class NMRPlugin(SpectroChemPyPlugin):
     spectrochempy_min_version = "0.9.0"
     PLUGIN_API_VERSION = CORE_PLUGIN_API_VERSION
     capabilities = [PluginCapability.READER]
+    # NOTE: ``simpson`` is intentionally absent from ``io_namespaces`` because
+    # ``scp.simpson`` is the public numerical-integration function of the core
+    # (see spectrochempy.analysis.integration).  The SIMPSON reader remains
+    # available through the explicit ``read_simpson`` reader registered in
+    # ``register_readers`` below (``scp.read_simpson`` / ``scp.nmr.read_simpson``).
     io_namespaces = {
         "topspin": {"read": "nmr.read_topspin"},
         "agilent": {"read": "nmr.read_agilent"},
         "jeol": {"read": "nmr.read_jeol"},
         "tecmag": {"read": "nmr.read_tecmag"},
-        "simpson": {"read": "nmr.read_simpson"},
     }
 
     def register_readers(self) -> list[dict]:

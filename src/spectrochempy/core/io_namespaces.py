@@ -40,14 +40,38 @@ _CORE_IO_NAMESPACES: dict[str, tuple[str | None, str | None]] = {
 # namespace-style API as core I/O domains.
 _PLUGIN_IO_NAMESPACES: dict[str, tuple[str | None, str | None]] = {}
 
+# Namespace requests rejected because they collide with a public root symbol.
+# Maps ``name -> "plugin=<plugin> read=<read_path> write=<write_path>"`` and is
+# available for introspection/diagnostics.  The plugin itself remains fully
+# functional; only the conflicting short namespace is refused.
+_REJECTED_IO_NAMESPACES: dict[str, str] = {}
+
+
+def _namespace_owner(name: str) -> str | None:
+    """Return the plugin an I/O namespace was contributed by, if known."""
+    read_path = None
+    for _name, (_read, _write) in _PLUGIN_IO_NAMESPACES.items():
+        if _name == name:
+            read_path = _read
+            break
+    if not read_path or "." not in read_path:
+        return None
+    return read_path.split(".", 1)[0]
+
 
 def register_io_namespace(
     name: str,
     read_path: str | None = None,
     write_path: str | None = None,
-) -> None:
+    plugin: str | None = None,
+) -> bool:
     """
     Register a plugin-contributed I/O namespace.
+
+    Names that collide with a public ``scp`` root symbol are rejected with a
+    controlled warning instead of silently shadowing the core API.  The
+    reader behind ``read_<name>`` remains available through its explicit
+    top-level function.
 
     Parameters
     ----------
@@ -58,8 +82,61 @@ def register_io_namespace(
         the ``spectrochempy`` package (for example ``nmr.read_topspin``).
     write_path : str or None
         Dotted attribute path resolving to the write function, if any.
+    plugin : str or None
+        Name of the contributing plugin, used in diagnostics.
+
+    Returns
+    -------
+    bool
+        ``True`` when the namespace was registered, ``False`` when it was
+        rejected because of a reserved-name collision (or because a core
+        namespace already owns the name).
     """
+    import warnings
+
+    from spectrochempy.lazyimport.root_symbols import is_reserved_root_symbol
+
+    if name in _CORE_IO_NAMESPACES:
+        _REJECTED_IO_NAMESPACES[
+            name
+        ] = f"plugin={plugin or 'unknown'} core namespace '{name}'"
+        warnings.warn(
+            f"Refusing plugin I/O namespace '{name}' (plugin={plugin or 'unknown'}): "
+            f"'{name}' is already a core I/O namespace.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+        return False
+
+    if is_reserved_root_symbol(name):
+        _REJECTED_IO_NAMESPACES[
+            name
+        ] = f"plugin={plugin or 'unknown'} read={read_path} write={write_path}"
+        if read_path and "." in read_path:
+            reader_surface = f"scp.{read_path.rsplit('.', 1)[-1]}"
+        else:
+            reader_surface = f"scp.read_{name}"
+        warnings.warn(
+            f"Refusing plugin I/O namespace '{name}' (plugin={plugin or 'unknown'}): "
+            f"'{name}' is a reserved public SpectroChemPy symbol. Use "
+            f"'{reader_surface}' instead.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+        return False
+
+    if name in _PLUGIN_IO_NAMESPACES:
+        warnings.warn(
+            f"I/O namespace '{name}' (plugin={plugin or 'unknown'}) is already "
+            f"registered by plugin '{_namespace_owner(name) or 'unknown'}'; "
+            "keeping the first registration.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+        return False
+
     _PLUGIN_IO_NAMESPACES[name] = (read_path, write_path)
+    return True
 
 
 def unregister_io_namespace(name: str) -> None:

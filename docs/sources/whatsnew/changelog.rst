@@ -29,6 +29,11 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- fixed ``scp.simpson`` so it always resolves to the public numerical
+  integration function, even when a plugin contributes a SIMPSON I/O
+  reader; conflicting plugin short namespaces are rejected instead of
+  silently shadowing a core symbol (``scp.read_simpson`` remains the
+  explicit reader surface)
 - correct OMNIC SPA interferogram optical path difference coordinates by
   honoring the native sample-spacing factor
 - correct OMNIC SRS series time-axis anchor and 84-byte spectrum labels
@@ -66,6 +71,10 @@ Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
 
+- Added a centralized reserved-root-symbol policy
+  (``spectrochempy/lazyimport/root_symbols.py``) so plugins cannot shadow
+  public ``scp`` symbols; conflicting plugin I/O namespaces are rejected
+  with a controlled warning while the ``read_<format>`` reader is preserved
 - Added the internal estimator-contract helpers required before a future
   ``Pipeline`` implementation: allowlist-based fitted-state inspection,
   unfitted cloning, canonical not-fitted behavior for supported transformers,

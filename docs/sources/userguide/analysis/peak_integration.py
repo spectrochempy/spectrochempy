@@ -92,6 +92,13 @@ inttrapz = Xcorr.trapezoid(dim="x")
 intsimps = Xcorr.simpson(dim="x")
 
 # %% [markdown]
+# `intsimps` is a numerical integration.  `dataset.simpson(dim="x")` and the
+# equivalent top-level `scp.simpson(dataset, dim="x")` produce the same result.
+# Do not confuse this integration function with `scp.read_simpson(...)`, which
+# reads SIMPSON NMR simulation data files — the two are unrelated operations
+# that happen to share the "simpson" name.
+
+# %% [markdown]
 # As you can see, both methods give almost the same results in this case.
 
 # %%

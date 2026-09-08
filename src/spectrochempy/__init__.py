@@ -63,6 +63,7 @@ original_getattr, original_dir, *_ = _lazy_loader.attach_stub(__name__, __file__
 
 from spectrochempy.lazyimport.api_methods import _LAZY_IMPORTS
 from spectrochempy.lazyimport.dataset_methods import _LAZY_DATASETS_IMPORTS
+from spectrochempy.lazyimport.plot_profile import _PLOT_PROFILE_FUNCTIONS
 from spectrochempy.utils.decorators import warn_deprecated
 
 from . import application
@@ -85,39 +86,42 @@ from spectrochempy.plugins.registry import registry
 _EMITTED_PLUGIN_ROOT_WARNINGS: set[str] = set()
 
 # --------------------------------------------------------------------------------------
-# Plot profile API (lazy loaded)
+# Reserved public root symbols
 # --------------------------------------------------------------------------------------
-# These are exposed at top-level for convenience
-_PLOT_PROFILE_FUNCTIONS = {
-    "set_plot_profile": "spectrochempy.plotting.profile",
-    "get_plot_profile": "spectrochempy.plotting.profile",
-    "list_plot_profiles": "spectrochempy.plotting.profile",
-    "save_plot_profile": "spectrochempy.plotting.profile",
-    "delete_plot_profile": "spectrochempy.plotting.profile",
-}
+# The set of names that are public ``scp`` symbols and therefore can never be
+# shadowed by a plugin-provided namespace, reader export or root export.  It
+# is built from the existing sources of truth (lazy imports, NDDataset-method
+# exports, plot-profile functions, core I/O namespaces and public submodules).
+from spectrochempy.lazyimport.root_symbols import is_reserved_root_symbol
+from spectrochempy.lazyimport.root_symbols import reserved_root_symbols
 
 
 def __dir__():
     names = set(original_dir()) if callable(original_dir) else set()
     names.update(_PLOT_PROFILE_FUNCTIONS)
-    names.update(_namespace_names())
     names.update(_io_namespace_names())
-    # Include already-discovered plugin readers and extensions
-    # without triggering entry-point scanning (dir() should be side-effect free).
+    # Include already-discovered plugin readers, extensions, namespaces and
+    # root exports without triggering entry-point scanning (dir() must be
+    # side-effect free).  Plugin-provided names that collide with a reserved
+    # public root symbol are not advertised: revealing an ambiguous name would
+    # break the stability guarantee that ``dir(scp)`` documents.
     names.update(_reader_names())
     names.update(_extension_names())
     names.update(_root_export_names())
+    names.update(_namespace_names())
     return sorted(names)
 
 
 def _reader_names():
-    return {f"read_{name}" for name in registry.available_readers}
+    reserved = reserved_root_symbols()
+    return {f"read_{name}" for name in registry.available_readers} - reserved
 
 
 def _namespace_names():
     from spectrochempy.plugins.features import EXPERIMENTAL_PLUGIN_NAMESPACES
 
-    return set(KNOWN_PLUGIN_NAMESPACES) | set(EXPERIMENTAL_PLUGIN_NAMESPACES)
+    names = set(KNOWN_PLUGIN_NAMESPACES) | set(EXPERIMENTAL_PLUGIN_NAMESPACES)
+    return names - reserved_root_symbols()
 
 
 def _io_namespace_names():
@@ -127,18 +131,20 @@ def _io_namespace_names():
 
 
 def _extension_names():
+    reserved = reserved_root_symbols()
     names = set()
     for category in ("analysis", "simulation"):
         for entry_name in registry.extensions.list_category(category):
             names.add(entry_name)
-    return names
+    return names - reserved
 
 
 def _root_export_names():
+    reserved = reserved_root_symbols()
     names = set()
     for plugin in registry.available_plugins.values():
         names.update(getattr(plugin, "root_exports", {}))
-    return names
+    return names - reserved
 
 
 def _normalise_root_export(plugin, alias, export):
@@ -195,6 +201,27 @@ def __getattr__(name):
         from spectrochempy.plotting import profile as _profile_module
 
         return getattr(_profile_module, name)
+
+    # Public core symbols always win over plugin-provided symbols.  Resolve
+    # reserved root symbols here so that a plugin I/O namespace, analysis
+    # namespace, reader export or root export can never shadow them,
+    # regardless of discovery order.
+    if is_reserved_root_symbol(name):
+        from spectrochempy.core.io_namespaces import _CORE_IO_NAMESPACES
+        from spectrochempy.core.io_namespaces import _IONamespace
+
+        if name in _CORE_IO_NAMESPACES:
+            return _IONamespace(name)
+        if name in _LAZY_IMPORTS:
+            module_path = _LAZY_IMPORTS[name]
+            module = __import__(module_path, fromlist=[name])
+            return getattr(module, name)
+        if name in _LAZY_DATASETS_IMPORTS:
+            from spectrochempy.core.dataset.nddataset import NDDataset
+
+            return getattr(NDDataset, name)
+        # Remaining reserved names are public submodules handled by the
+        # lazy-loader fallback at the end of this function.
 
     import sys
 
