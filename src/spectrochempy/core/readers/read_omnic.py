@@ -1133,6 +1133,7 @@ def _read_spa(*args, **kwargs):
     dataset.meta.collection_length = info["collection_length"] / 100 * ur("s")
     dataset.meta.optical_velocity = info["optical_velocity"]
     dataset.meta.laser_frequency = info["reference_frequency"] * ur("cm^-1")
+    dataset.meta.sample_spacing = info["sample_spacing"]
 
     if _exp_info is not None:
         for meta_key, val in _exp_info.items():
@@ -1141,11 +1142,14 @@ def _read_spa(*args, **kwargs):
             dataset.description = _exp_info["experiment_title"]
 
     if dataset.x.units is None and dataset.x.title == "data points":
-        # interferogram
+        # interferogram: build the OPD axis from the reference frequency and
+        # the native sample spacing (spacing = sample_spacing / (2 * nu)).
         dataset.meta.interferogram = True
         dataset.meta.td = list(dataset.shape)
         dataset.x._zpd = int(np.argmax(dataset)[-1])
-        dataset.x.set_laser_frequency()
+        dataset.x.set_laser_frequency(
+            frequency=info["reference_frequency"], sample_spacing=info["sample_spacing"]
+        )
         dataset.x._use_time_axis = (
             False  # True to have time, else it will be optical path difference
         )
@@ -1775,6 +1779,8 @@ def _read_header(fid, pos, is_first_spectrum=True):
     out["collection_length"] = fromfile(fid, "uint32", 1)
     fid.seek(pos + 80)
     out["reference_frequency"] = fromfile(fid, "float32", 1)
+    fid.seek(pos + 84)
+    out["sample_spacing"] = fromfile(fid, "float32", 1)
     fid.seek(pos + 188)
     out["optical_velocity"] = fromfile(fid, "float32", 1)
 
