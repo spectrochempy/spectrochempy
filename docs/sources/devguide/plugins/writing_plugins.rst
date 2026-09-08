@@ -53,6 +53,32 @@ Readers and writers
 Readers create datasets and belong under ``scp.<plugin>`` or compatibility
 ``scp.read_<format>`` aliases. They should not be dataset accessors.
 
+A plugin may contribute a short I/O namespace through its ``io_namespaces``
+attribute so that ``scp.<namespace>.read(...)`` delegates to a reader::
+
+    io_namespaces = {
+        "myformat": {"read": "myplugin.read_myformat"},
+    }
+
+The short namespace must **not** collide with any public ``scp`` symbol
+(integration/analysis functions, ``NDDataset`` methods exposed at root,
+compatibility aliases, public submodules, or core I/O namespaces). A
+conflicting short namespace is rejected with a warning at registration, but
+the reader remains available through its explicit ``scp.read_<format>``
+function.
+
+For the other plugin-provided root surfaces (``root_exports``, reader exports,
+``analysis``/``simulation`` extensions), the collision is avoided through
+**resolution priority**: ``scp.__getattr__`` always resolves a public core
+symbol before any plugin-provided name, regardless of plugin installation or
+discovery order. These surfaces are not rejected at registration time; the
+core symbol simply wins on access.
+
+For example ``spectrochempy-nmr`` does **not** register a ``simpson`` I/O
+namespace because ``scp.simpson`` is the core numerical-integration function;
+the SIMPSON reader is exposed only as ``scp.read_simpson`` /
+``scp.nmr.read_simpson``.
+
 Use plugin handlers for format-specific filename inference:
 
 .. code-block:: python

@@ -88,6 +88,35 @@ Core I/O namespaces such as ``jcamp``, ``csv``, ``omnic``, ``opus``,
 are reserved.  Plugins must not claim these names, to prevent shadowing
 and keep ``scp.<domain>`` unambiguous.
 
+Reserved public root symbols
+----------------------------
+
+A plugin's short I/O namespace must not collide with a public ``scp`` symbol.
+Registration refuses the namespace with a controlled warning whenever its name
+matches an existing public ``scp`` symbol — a public function or class, an
+``NDDataset`` method exposed at root, a compatibility alias, a public
+submodule, a core I/O namespace, or a plot-profile function.  The rejected
+name is recorded in ``spectrochempy.core.io_namespaces._REJECTED_IO_NAMESPACES``
+for introspection.
+
+The reader behind a refused namespace is unaffected: it remains available
+through its explicit ``read_<format>`` function (for example
+``scp.read_simpson`` / ``scp.<plugin>.read_simpson``).  Never rely on a short
+namespace that matches a public root symbol, and never build a hybrid object
+that is both callable and carries ``.read``.
+
+For the other plugin-provided root surfaces (``root_exports``, reader exports,
+``analysis`` and ``simulation`` extensions), the guarantee is **resolution
+priority**: whenever a name is a public ``scp`` symbol, root attribute access
+always resolves to the core symbol, regardless of plugin installation or
+discovery order.  These surfaces are not rejected at registration time.
+
+.. code-block:: text
+
+    I/O namespace names colliding with a public scp symbol are rejected at
+    registration; all other plugin root surfaces are resolved core-first, so
+    the core symbol always wins.
+
 Documentation and examples should prefer namespace APIs, such as
 ``scp.iris.IRIS()``, over root-level compatibility
 aliases such as ``scp.IRIS``. Compatibility aliases may remain in
