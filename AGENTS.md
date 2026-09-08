@@ -625,6 +625,26 @@ Never propose unprefixed titles.
 
 ---
 
+# Branch Names
+
+Do **not** create branches starting with ``release/`` for pull requests.
+
+The ``release/`` prefix is reserved for the official publication process:
+
+* ``.github/workflows/publish_draft_new_release.yml`` creates a GitHub release
+  from any merged PR whose head branch starts with ``release/`` (the branch
+  name is decoded as the release version);
+* ``.github/workflows/pre-commit.yml`` skips CI pre-commit on ``release/``
+  head branches.
+
+A branch created by an agent must never carry the ``release/`` prefix, even
+for release-related chores such as consolidating changelog entries: it would
+trigger (or suppress) release machinery that does not belong to a normal PR.
+Use a descriptive non-reserved prefix instead (for example ``chore/``,
+``fix/``, ``docs/``, ``feat/``, ``refactor/``).
+
+---
+
 # Default Deliverable
 
 Unless explicitly delegated to finalize work, provide:
