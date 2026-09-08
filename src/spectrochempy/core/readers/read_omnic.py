@@ -490,6 +490,10 @@ def read_srs(*paths, **kwargs):
     r"""
     Open a Thermo Nicolet file or a list of files with extension ``.srs``.
 
+    .. note::
+       The reverse-engineered binary layout of the ``.srs`` format is
+       documented in :doc:`/devguide/file_formats/omnic/srs`.
+
     Parameters
     ----------
     *paths : `str`, `~pathlib.Path` object objects or valid urls, optional
@@ -1576,7 +1580,7 @@ def _read_srs(*args, **kwargs):
 
 def _readbtext(fid, pos, size):
     # Read some text in binary file of given size. If size is None, the text is read
-    # until b\0\ is encountered.
+    # until a null byte (b"\x00") is encountered.
     # Returns utf-8 string
     fid.seek(pos)
     if size is None:
@@ -1630,29 +1634,33 @@ def _read_header(fid, pos, is_first_spectrum=True):
 
     Notes
     -----
-        So far, the header structure is as follows:
+        So far, the header structure is as follows (offsets are relative to the
+        header base position; the positioning of the srs series header and the
+        full field map are documented in the public format reference
+        :doc:`/devguide/file_formats/omnic/srs`):
 
         - starts with b'\x01' , b'\x02', b'\x03' ... maybe indicating the header "type"
         - nx (UInt32): 4 bytes behind
-        - xunits (UInt8): 8 bytes behind. So far, we have the following correspondence:
+        - xunits (UInt8): 8 bytes behind. So far, we have the following
+          correspondence (the byte value of the unit code):
 
-            * `x\01` : wavenumbers, cm-1
-            * `x\02` : datapoints (interferogram)
-            * `x\03` : wavelength, nm
-            * `x\04' : wavelength, um
-            * `x\20' : Raman shift, cm-1
+            * \x01 : wavenumbers, cm-1
+            * \x02 : datapoints (interferogram)
+            * \x03 : wavelength, nm
+            * \x04 : wavelength, um
+            * \x20 : Raman shift, cm-1
 
         - data units (UInt8): 12 bytes behind. So far, we have the following
           correspondence:
 
-            * `x\0B` : reflectance (%)
-            * `x\0C` : Kubelka_Munk
-            * `x\0F` : single beam
-            * `x\11` : absorbance
-            * `x\10` : transmittance (%)
-            * `x\16` : Volts (interferogram)
-            * `x\1A` : photoacoustic
-            * `x\1F` : Raman intensity
+            * \x0B : reflectance (%)
+            * \x0C : Kubelka_Munk
+            * \x0F : single beam
+            * \x11 : absorbance
+            * \x10 : transmittance (%)
+            * \x16 : Volts (interferogram)
+            * \x1A : photoacoustic
+            * \x1F : Raman intensity
 
         - first x value (float32), 16 bytes behind
         - last x value (float32), 20 bytes behind
@@ -1663,7 +1671,10 @@ def _read_header(fid, pos, is_first_spectrum=True):
         - ... unknown
         - number of background scans (UInt32), 52 bytes behind
         - ... unknown
-        - collection length in 1/100th of sec (UIint32), 68 bytes behind
+        - general-header collection length in 1/100th of sec (UInt32), 68
+          bytes behind. This is the shared acquisition-time field; for srs
+          series the public "collection length" is derived from the series
+          minimum time at +1002 (see below), not from this field.
         - ... unknown
         - reference frequency (float32), 80 bytes behind
         - ...
@@ -1674,14 +1685,20 @@ def _read_header(fid, pos, is_first_spectrum=True):
         For "rapid-scan" srs files:
 
         - series name (text), 938 bytes behind
-        - collection length (float32), 1002 bytes behind
-        - last y (float 32), 1006 bytes behind
-        - first y (float 32), 1010 bytes behind
+        - series minimum / first time in minutes (float32), 1002 bytes
+          behind. Historically described as "collection length": the public
+          `collection_length` is this value converted to seconds (x60), while
+          `time_min` keeps it in minutes and is used as the time-axis anchor.
+          Do not conflate it with the general-header collection length at +68.
+        - series maximum / last time in minutes (float32), 1006 bytes behind
+        - regular time step in minutes (float32), 1010 bytes behind. This
+          field was historically misnamed "first y": it is the series step,
+          not the minimum (the minimum is the +1002 field above).
         - ny (UInt32), 1026
         - ... y unit could be at pos+1030 with 01 = minutes ?
         - history (text), 1200 bytes behind (only initial history.
            When reprocessed, updated history is at the end of the file after the
-           b`\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff` sequence
+           b'\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff' sequence
 
     """
     out = {}

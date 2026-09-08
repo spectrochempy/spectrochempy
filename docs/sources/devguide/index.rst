@@ -29,3 +29,4 @@ repository and are intentionally kept outside this published guide.
     contributing_plotting
     plotting_architecture
     plugins/index
+    file_formats/index
