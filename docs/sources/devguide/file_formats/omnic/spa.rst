@@ -5,454 +5,600 @@ OMNIC SPA file format
 
 .. note::
 
-   This is a Phase 1, implementation-informed and explicitly unofficial
-   description of the OMNIC SPA format. See :ref:`omnic-file-formats` for
-   provenance, limitations, and certainty-level definitions. The page records
-   apparent binary structures without treating the current SpectroChemPy
-   reader as a normative format specification.
+   This is an unofficial interoperability reference for the OMNIC ``.spa``
+   format. It is based on independent controlled binary and oracle analysis
+   across several observed SPA variants. OMNIC producers and versions may use
+   different subsets of these structures. The certainty tags below describe
+   the strength and scope of each claim; they do not turn this page into an
+   official vendor specification. See :ref:`omnic-file-formats` for
+   provenance and the definitions of the certainty levels.
 
-Tested files and evidence
--------------------------
+Evidence and scope
+------------------
 
-The Phase 1 evidence basis is narrower than for the SRS reference. It consists
-primarily of the open-source SpectroChemPy SPA reader, its comments, and its
-existing tests. No new binary reverse engineering or controlled native-file
-comparison was performed for this page. The existing tests use external OMNIC
-files when available and use synthetic bytes for the Experiment Information
-decoder.
+The reference separates structural evidence from semantic interpretation:
 
-.. list-table:: Existing SPA test coverage
-   :header-rows: 1
+* ``[ESTABLISHED]`` means that a structure or relationship is supported by
+  independent binary/oracle evidence, controlled behavior, or exact
+  arithmetic in multiple native cases.
+* ``[OBSERVED]`` means that a reproducible structure or correlation was seen
+  in the analyzed variants but is not established as universal.
+* ``[HYPOTHESIS]`` means that a semantic interpretation is plausible but not
+  demonstrated.
+* ``[UNKNOWN]`` means that the position or structure may be known while its
+  meaning remains unresolved.
 
-   * - File or input
-     - Content or purpose
-     - Structures exercised
-   * - ``7_CZ0-100_Pd_101.SPA``
-     - SPA path/bytes equivalence test
-     - normal spectrum; bytes-content import
-   * - ``7_CZ0-100_Pd_21.SPA``
-     - normal SPA spectrum
-     - spectral header; intensity block; missing-IFG behavior
-   * - ``2-BaSO4_0.SPA``
-     - sample and background interferogram retrieval
-     - the two interferogram key associations
-   * - synthetic ``0x79`` blocks
-     - decoder unit tests
-     - sequential text-field hypothesis; subtype rejection; short blocks
-
-``[OBSERVED]`` The Phase-1 implementation evidence and existing tests
-consistently support the following apparent relationships: a key-record
-sequence begins at file offset 304; key ``0x02`` supplies a spectral-header
-location; key ``0x03`` supplies a spectrum-data location; keys ``0x66`` and
-``0x67`` are associated with the two interferogram paths; and key ``0x82`` is
-associated with an Experiment Information block. These are evidence-backed
-associations, not yet universal SPA format invariants.
-
-The following remain without independent native-file validation: the timestamp
-epoch and timezone, key semantics and table termination, the physical meaning
-of unit codes, spectral storage orientation, interferogram identity and
-scaling, ZPD semantics, and the Experiment Information layout.
+The evidence covers ordinary acquired spectra, processed acquired spectra,
+library/retrieved spectra, acquired spectra with paired interferograms,
+standalone saved interferograms, a Raman variant, Experiment-Information-
+bearing variants, and a newer-layout variant. These descriptions are generic;
+they do not depend on particular proprietary files or on the availability of
+OMNIC-distributed examples.
 
 Overall file organization
 -------------------------
 
-The currently understood organization is pointer-based rather than a claim
-that the data blocks are contiguous:
+An SPA file is organized as a fixed file header followed by a counted table of
+16-byte key records. The records point to blocks elsewhere in the file; the
+blocks are not required to be contiguous.
 
 .. code-block:: text
 
-    OMNIC SPA layout (logical regions currently understood)
-    ========================================================
+   fixed file region
+   ├── signature at file offset 0
+   ├── saved name/title text at file offset 30
+   ├── nlines (number of key records) at file offset 294
+   ├── raw acquisition-time value at file offset 296
+   └── key table beginning at file offset 304
 
-    +----------------------------------------------------------+
-    | fixed file-header region                                |
-    |   name/title field at 0x1e                              |
-     |   time/date-related field at 0x128                      |
-    +----------------------------------------------------------+
-    | apparent key-record sequence, beginning at 0x130        |
-    |   [key | referenced position | referenced length | ???] |
-    +----------------------------------------------------------+
-       |          |          |          |          |          |
-       v          v          v          v          v          v
-    spectral   spectrum   comments   history   sample/bg   experiment /
-    header     payload    / text     text      IFG data    custom/unknown
-    (0x02)     (0x03)     (0x04)     (0x1b)    (0x66/67)   blocks
+   referenced blocks
+   ├── 0x02  general/spectral header
+   ├── 0x03  primary data payload
+   ├── 0x04  comments or user text
+   ├── 0x1b  processing/history text
+   └── other variant-dependent blocks
 
-The diagram shows relationships supported by the Phase-1 evidence. It does not
-establish physical ordering, block boundaries beyond the referenced lengths,
-or the existence of a declared key-table count. The regions not reached by a
-recognized key remain unmapped here.
+``[ESTABLISHED]`` The signature begins with the ASCII text ``Spectral Data
+File`` for the SPA/SPG family. The saved name/title field begins at offset 30,
+``nlines`` is a little-endian ``uint16`` at offset 294, the raw timestamp is at
+offset 296, and the first key record is at offset 304.
 
-Offset conventions
-------------------
+The remaining fixed-header bytes are not assigned meanings here unless stated
+below. In particular, a recognizable file signature does not imply that every
+producer uses the same complete header map.
 
-* Offsets 30, 296, and 304 are file-relative, measured from the first byte of
-  the SPA file.
-* The apparent key-record offsets in the key-table section are entry-relative:
-  key byte at +0, referenced position at +2, and referenced length at +6.
-* Spectral-header offsets are relative to the position referenced by key
-  ``0x02``.
-* Positions referenced by keys ``0x03``, ``0x04``, ``0x1b``, ``0x66``,
-  ``0x67``, and ``0x82`` are file-position candidates in the Phase-1
-  reconstruction. This pointer interpretation is implementation evidence; the
-  complete entry schema and pointer rules remain ``[UNKNOWN]``.
+Key-record table
+----------------
 
-File header
------------
-
-The following candidate fixed fields occur at the indicated file-relative
-locations in the Phase-1 reconstruction. The table reports each raw field and
-the historical interpretation separately. In particular, the date
-interpretation is not an established SPA format fact.
-
-.. list-table:: File-relative fields
-   :header-rows: 1
-
-   * - Offset
-     - Size and type
-     - Apparent meaning
-     - Certainty
-   * - 30 (``0x1e``)
-     - up to 256 bytes
-     - Null-padded text candidate for an original OMNIC name/title. A source
-       comment calls it the filename under which the spectrum was saved.
-     - ``[OBSERVED]`` location in the Phase-1 reconstruction; filename versus
-       title semantics are ``[HYPOTHESIS]``.
-   * - 296 (``0x128``)
-     - 4-byte ``uint32``
-     - Time/date-related value historically interpreted as seconds after
-       ``1899-12-31 00:00 UTC``.
-     - ``[OBSERVED]`` raw field location; epoch, timezone, units, and exact
-       semantic role are ``[UNKNOWN]``.
-   * - 304 (``0x130``)
-     - start of an apparent sequence of 16-byte records
-     - Beginning of the apparent key-record area used to locate referenced
-       blocks.
-     - ``[OBSERVED]`` starting position in Phase-1 evidence; record count and
-       physical extent are ``[UNKNOWN]``.
-
-The first 18 bytes are also examined by the shared header decoder. The byte
-sequence ``Spectral Data File`` selects the SPA/SPG family in that decoder,
-while ``Spectral Exte File`` selects SRS. This signature distinction is shared
-decoder logic rather than an independent SPA validation result.
-
-Acquisition timestamp
-~~~~~~~~~~~~~~~~~~~~~
-
-The raw value at +296 is represented in the Phase-1 reconstruction as a native
-unsigned 32-bit integer. The historical interpretation can be written as:
+``[ESTABLISHED]`` Each key record occupies 16 bytes in the observed SPA
+families. The generic record layout is:
 
 .. code-block:: text
 
-    date = 1899-12-31 00:00 UTC + raw_value seconds
+   relative offset   type       role
+   +0                uint8      key
+   +1                uint8      reserved/variant-dependent byte
+   +2                uint32     referenced block position
+   +6                uint32     referenced block length
+   +10..+15          bytes      trailing/variant-dependent data
 
-``[HYPOTHESIS]`` This epoch and timezone may reflect the original author's
-interpretation rather than a documented OMNIC convention. The raw type and
-location should be validated first against OMNIC-reported acquisition dates;
-the historical conversion is not independent evidence for the epoch.
+Positions and lengths are file-relative for the referenced blocks. ``nlines``
+counts key records, not every byte between the table and the first payload.
 
-Key-table structure
--------------------
+``[OBSERVED]`` Ordinary/acquired families use a ``0x00`` terminator slot and
+zero padding after the active records. Observed library-derived variants use a
+grid of 16-byte-stride ``0x01`` slots before the first main block. The grid's
+boundaries and structural role are known in those variants, but its slot
+semantics are ``[UNKNOWN]``. Terminator and following-region details remain
+variant-dependent; no universal interpretation is assigned to every trailing
+record byte.
 
-``[OBSERVED]`` Beginning at file offset 304, the Phase-1 evidence is consistent
-with a sequence of apparent 16-byte records. This page does not call it a
-fixed-size table: no count or total length is established.
+Recognized key associations
+---------------------------
 
-.. code-block:: text
+The following table distinguishes an established association from a universal
+semantic guarantee. A key identifies a block in the observed variants; it does
+not by itself determine the signal interpretation of that block.
 
-   entry offset | size/type          | apparent role                 | status
-   ------------ | ------------------ | ----------------------------- | ----------------
-   +0           | uint8              | key value                     | [OBSERVED]
-   +2           | uint32             | referenced block position    | [OBSERVED] association
-   +6           | uint32             | referenced block length      | [OBSERVED] association
-   +10 .. +15   | 6 bytes            | unmapped entry data           | [UNKNOWN]
-
-The +2 and +6 fields are pointer and length candidates for recognized records;
-their universal applicability and units remain ``[UNKNOWN]``.
-
-The apparent sequence advances by 16 bytes in the Phase-1 reconstruction and stops when the
-key byte is ``0x00`` or ``0x01``. ``[HYPOTHESIS]`` These values may be table
-terminators, but their roles and universality have not been established. The
-source comments also mention preceding ``0x01`` or ``0x0a`` bytes and occasional
-``0x01`` records; those observations have not been reconciled into a formal
-key-table structure.
-
-Recognized and mentioned keys
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The associations below distinguish properties supported by Phase-1 evidence
-from semantic interpretations that remain provisional.
-
-.. list-table:: Key values in the Phase 1 evidence
+.. list-table:: SPA key associations
    :header-rows: 1
 
    * - Key
-     - Association in current evidence
-     - Format status
+     - Generic association
+     - Certainty and scope
    * - ``0x02``
-     - Referenced block associated with the apparent spectral-header region.
-     - ``[OBSERVED]`` header association; semantic role is not independently
-       validated.
+     - General/spectral header block.
+     - ``[ESTABLISHED]`` association; field applicability remains variant-dependent.
    * - ``0x03``
-     - Referenced position and length associated with the apparent spectral
-       float payload.
-     - ``[OBSERVED]`` spectral-data association; payload role needs native-file
-       validation.
+     - Primary data payload.
+     - ``[ESTABLISHED]`` association. It may contain a wavenumber spectrum or a
+       standalone interferogram; header/unit context determines the signal type.
    * - ``0x04``
-     - Referenced position and length associated with one or more user/custom
-       text blocks.
-     - ``[OBSERVED]`` text association; complete key meaning is ``[UNKNOWN]``.
+     - Comment or user-text block.
+     - ``[ESTABLISHED]`` text association where present; complete text conventions
+       are variant-dependent.
    * - ``0x1b``
-     - Referenced position and length associated with processing-history text.
-     - ``[OBSERVED]`` history association; variants are ``[UNKNOWN]``.
+     - Processing/acquisition history text.
+     - ``[ESTABLISHED]`` association where present; history content and presence
+       vary by save operation.
    * - ``0x53``
-     - Not decoded. A source comment says it is probably present for a
-       retrieved library spectrum.
-     - ``[HYPOTHESIS]`` only.
-   * - ``0x64``
-     - Not decoded.
-     - ``[UNKNOWN]``; the source comment gives no semantic interpretation.
+     - Library/retrieval-associated saved-spectrum text.
+     - ``[OBSERVED]`` association; full structure and semantics are ``[UNKNOWN]``.
+   * - ``0x64`` / ``0x65``
+     - Companion interferogram-related blocks.
+     - ``[OBSERVED]`` in the acquired-pair variant; general semantics remain
+       ``[UNKNOWN]``.
    * - ``0x66``
-     - Referenced float-data block associated by SpectroChemPy with the
-       sample-IFG path.
-     - ``[OBSERVED]`` association in the Phase-1 evidence; sample identity is
-       ``[HYPOTHESIS]`` pending physical validation.
+     - Sample interferogram in a validated acquired-pair variant.
+     - ``[ESTABLISHED]`` for that variant through independent Fourier-transform
+       reconstruction; not a universal SPA rule.
    * - ``0x67``
-     - Referenced float-data block associated by SpectroChemPy with the
-       background-IFG path.
-     - ``[OBSERVED]`` association in the Phase-1 evidence; background identity
-       is ``[HYPOTHESIS]`` pending physical validation.
+     - Background interferogram in the same validated acquired-pair variant.
+     - ``[ESTABLISHED]`` for that variant through independent Fourier-transform
+       reconstruction; standalone saved interferograms may use ``0x03`` instead.
    * - ``0x69``
-     - Not decoded.
-     - ``[UNKNOWN]``.
+     - Recurring 12-byte auxiliary block outside the observed library variant.
+     - Block boundaries are ``[ESTABLISHED]``; semantics are ``[UNKNOWN]``.
    * - ``0x6a``
-     - Not decoded.
-     - ``[UNKNOWN]``.
+     - Spectrometer/acquisition parameter block.
+     - ``[ESTABLISHED]`` block association and several field relationships;
+       some family-code semantics remain ``[UNKNOWN]``.
    * - ``0x80``
-     - Not decoded.
-     - ``[UNKNOWN]``.
+     - 128-byte all-zero block in one newer-layout/writer-associated family.
+     - ``[OBSERVED]`` correlation only. It is not established as a writer
+       generation marker; its semantic role is ``[UNKNOWN]``.
    * - ``0x82``
-     - First qualifying referenced block is associated with Experiment
-       Information.
-     - ``[OBSERVED]`` block association; subtype and field layout remain
-       ``[HYPOTHESIS]``.
+     - Experiment Information block.
+     - ``[ESTABLISHED]`` association. Subtype ``0x79`` has a supported native
+       layout; subtype ``0x9d`` remains ``[UNKNOWN]`` and is not mandatory
+       before every ``0x79`` occurrence.
    * - ``0x92``
-     - Not decoded. A source comment calls it custom information.
-     - ``[UNKNOWN]``.
+     - Custom-information association.
+     - ``[OBSERVED]`` association in some variants; structure and semantics are
+       ``[UNKNOWN]``.
 
-Spectral header
----------------
+The presence or absence of a key is itself variant-dependent. In particular,
+``0x03`` must not be described universally as ``the spectrum``: its X-unit
+context distinguishes a spectral payload from an explicit data-points
+interferogram in the validated examples.
 
-The apparent spectral header begins at the position referenced by key ``0x02``.
-The following candidate fields occur at offsets relative to that position. They are
-presented as fields of the apparent shared header, not as a guarantee that all
-SPA versions use the same map.
+General ``0x02`` header
+------------------------
 
-.. code-block:: text
+The following offsets are relative to the block referenced by ``0x02``. The
+table deliberately separates mature meanings from observations and unresolved
+fields.
 
-   offset | type       | candidate interpretation       | certainty
-   ------ | ---------- | -------------------------------- | --------------------------
-   +4     | uint32     | spectral point count (``nx``)   | [OBSERVED] association
-   +8     | uint8      | X-unit code                     | [OBSERVED] location
-   +12    | uint8      | data/Y-unit code                | [OBSERVED] location
-   +16    | float32    | ``firstx`` endpoint             | [OBSERVED]; meaning [UNKNOWN]
-   +20    | float32    | ``lastx`` endpoint              | [OBSERVED]; meaning [UNKNOWN]
-   +28    | uint32     | candidate scan-point count     | [OBSERVED]; meaning [UNKNOWN]
-   +32    | uint32     | historically ZPD-associated    | [OBSERVED]; relation [UNKNOWN]
-   +36    | uint32     | candidate scan count           | [OBSERVED]; meaning pending
-   +52    | uint32     | candidate background scans     | [OBSERVED]; meaning pending
-   +68    | uint32     | candidate collection duration  | [HYPOTHESIS]
-   +80    | float32    | candidate reference frequency  | [HYPOTHESIS]
-   +188   | float32    | candidate optical velocity     | [HYPOTHESIS]
-   +208   | variable   | candidate processing history   | [OBSERVED]; extent [UNKNOWN]
+.. list-table:: ``0x02`` header fields
+   :header-rows: 1
+
+   * - Offset
+     - Type
+     - Meaning
+     - Scope/certainty
+   * - ``+4``
+     - ``uint32``
+     - Stored point count.
+     - ``[ESTABLISHED]`` for observed spectral and Raman headers.
+   * - ``+8``
+     - ``uint8``
+     - X-unit code.
+     - ``[ESTABLISHED]`` field; mappings below are scoped by variant.
+   * - ``+12``
+     - ``uint8``
+     - Y/data-unit code.
+     - ``[ESTABLISHED]`` field; mappings below are scoped by variant.
+   * - ``+16``
+     - ``float32``
+     - OMNIC ``Last X``.
+     - ``[ESTABLISHED]`` for the validated spectral family; see orientation below.
+   * - ``+20``
+     - ``float32``
+     - OMNIC ``First X``.
+     - ``[ESTABLISHED]`` for the validated spectral family; see orientation below.
+   * - ``+28``
+     - ``uint32``
+     - Scan points.
+     - ``[ESTABLISHED]`` field location; applicability and relation to FFT points
+       are variant-dependent.
+   * - ``+32``
+     - ``uint32``
+     - OMNIC interferogram peak position.
+     - ``[ESTABLISHED]`` in validated native IFGs; formal physical ZPD meaning
+       remains ``[UNKNOWN]``.
+   * - ``+36``
+     - ``uint32``
+     - Sample scans.
+     - ``[OBSERVED]`` field and interpretation in acquired variants.
+   * - ``+40``
+     - ``float32``
+     - Duplicate numeric peak position.
+     - ``[ESTABLISHED]`` match to ``+32`` in validated native IFGs; broader
+       applicability is ``[OBSERVED]``.
+   * - ``+44``
+     - ``uint32``
+     - FFT points.
+     - ``[OBSERVED]`` transform-geometry field.
+   * - ``+48``
+     - ``uint32``
+     - Transform/trailing geometry field.
+     - ``[ESTABLISHED]`` as ``N_stored - P`` in validated native IFGs; exact
+       native semantic name remains ``[UNKNOWN]``.
+   * - ``+52``
+     - ``uint32``
+     - Background scans.
+     - ``[OBSERVED]`` field and interpretation in acquired variants.
+   * - ``+56``
+     - ``float32``
+     - Background gain where applicable.
+     - ``[OBSERVED]`` in the validated acquired family; generality is ``[UNKNOWN]``.
+   * - ``+68``
+     - ``uint32``
+     - Collection duration multiplied by 100.
+     - ``[ESTABLISHED]`` for the general header family.
+   * - ``+80``
+     - ``float32``
+     - Reference/HeNe-class frequency.
+     - ``[ESTABLISHED]`` in validated native cases; distinct from Raman ``+96``.
+   * - ``+84``
+     - ``float32``
+     - Sample-spacing factor.
+     - ``[ESTABLISHED]`` in validated IFG cases; used in the native OPD relation.
+   * - ``+92``
+     - ``float32``
+     - Aperture where applicable.
+     - ``[OBSERVED]`` for the acquired variant; not universal.
+   * - ``+96``
+     - ``float32``
+     - Raman excitation/laser frequency.
+     - ``[ESTABLISHED]`` for the validated Raman variant; not a general IR field.
+   * - ``+140..+188``
+     - mixed
+     - Mirror of the beginning of ``0x6a`` in some variants.
+     - ``[OBSERVED]`` byte-for-byte mirror in some files; blank in another
+       newer-layout family. Use ``0x6a`` as the canonical parameter source.
+   * - ``+188``
+     - ``float32``
+     - Optical velocity mirror.
+     - ``[ESTABLISHED]`` as a mirror relationship where populated; applicability
+       is variant-dependent.
+
+Other numeric fields in the header are intentionally not assigned meanings by
+this reference. In particular, derived transform quantities must not be
+mistaken for stored fields.
+
+Spectrometer and acquisition parameters (``0x6a``)
+---------------------------------------------------
+
+``[ESTABLISHED]`` The recurring ``0x6a`` block is a 56-byte
+spectrometer/acquisition parameter block in the validated variants. The
+following relationships are mature enough to document generically:
+
+.. list-table:: Mature ``0x6a`` fields
+   :header-rows: 1
+
+   * - Relative offset
+     - Meaning
+     - Certainty/scope
+   * - ``+0..+12``
+     - Instrument-family and acquisition codes.
+     - ``[OBSERVED]`` values and combinations; individual code semantics remain
+       ``[UNKNOWN]``.
+   * - ``+16``
+     - Digitizer-bit field.
+     - ``[ESTABLISHED]`` in the validated acquired variants.
+   * - ``+20``
+     - High-pass filter.
+     - ``[ESTABLISHED]`` where independently matched to acquisition reports.
+   * - ``+24``
+     - Low-pass filter.
+     - ``[ESTABLISHED]`` where independently matched to acquisition reports.
+   * - ``+44``
+     - Sample gain.
+     - ``[ESTABLISHED]`` where independently matched to acquisition reports.
+   * - ``+48``
+     - Optical velocity.
+     - ``[ESTABLISHED]`` in validated acquired/IFG variants.
+
+The ``+140..+188`` header region can mirror these parameters, but the mirror is
+blank in an observed newer-layout family. A reader or format consumer should
+therefore treat ``0x6a`` as the canonical parameter block and the header mirror
+as variant-dependent.
+
+Unit codes
+----------
 
 X-unit codes
 ~~~~~~~~~~~~
 
-The Phase-1 evidence supplies the following candidate mappings. The numeric
-codes are observed in the Phase-1 evidence; the semantic labels remain
-provisional unless otherwise noted.
+.. list-table:: Validated X-unit mappings
+   :header-rows: 1
 
-.. code-block:: text
+   * - Code
+     - Meaning
+     - Certainty/scope
+   * - ``0x01``
+     - Wavenumbers, ``cm^-1``.
+     - ``[ESTABLISHED]`` in the validated spectral family.
+   * - ``0x02``
+     - Data points.
+     - ``[ESTABLISHED]`` for the validated standalone interferogram context;
+       it is not itself a universal interferogram marker without context.
+   * - ``0x20``
+     - Raman shift, ``cm^-1``.
+     - ``[ESTABLISHED]`` for the validated Raman variant.
+   * - ``0x03`` / ``0x04``
+     - Wavelength, nm / wavelength, micrometres.
+     - ``[OBSERVED]`` mappings from the shared OMNIC header family; broader SPA
+       coverage is not established here.
 
-   code   | candidate interpretation       | status
-   ------ | ------------------------------ | ------------------------------
-   0x01   | wavenumbers, cm^-1             | [OBSERVED] candidate mapping
-   0x02   | data points, no physical unit  | [OBSERVED] candidate mapping
-   0x03   | wavelength, nm                 | [OBSERVED] candidate mapping
-   0x04   | wavelength, um                 | [OBSERVED] candidate mapping
-   0x20   | Raman shift, cm^-1             | [OBSERVED] candidate mapping
-   other  | unknown X axis                 | [UNKNOWN]
-
-Data/Y-unit codes
+Y/data-unit codes
 ~~~~~~~~~~~~~~~~~
 
+.. list-table:: Validated Y/data-unit mappings
+   :header-rows: 1
+
+   * - Code
+     - Meaning
+     - Certainty/scope
+   * - ``0x10``
+     - Percent transmittance.
+     - ``[ESTABLISHED]`` in the validated library/retrieved variant.
+   * - ``0x11``
+     - Absorbance.
+     - ``[ESTABLISHED]`` in the validated spectral family.
+   * - ``0x16``
+     - Volts-labelled detector signal.
+     - ``[ESTABLISHED]`` for the standalone saved-IFG representation;
+       this is a label, not proof of calibrated voltage.
+   * - ``0x17``
+     - Transmittance.
+     - ``[OBSERVED]`` in the shared OMNIC header family.
+   * - ``0x1f``
+     - Raman intensity.
+     - ``[ESTABLISHED]`` for the validated Raman variant.
+   * - ``0x0b`` / ``0x0c`` / ``0x0f`` / ``0x14`` / ``0x15`` / ``0x1a``
+     - Reflectance, log(1/R), single beam, Kubelka--Munk, reflectance, and
+       photoacoustic mappings respectively.
+     - ``[OBSERVED]`` shared-header mappings; applicability and exact physical
+       calibration are variant-dependent.
+
+Spectrum payload and orientation
+--------------------------------
+
+The primary payload is referenced by key ``0x03``. ``[ESTABLISHED]`` in the
+validated spectral family, it consists of little-endian ``float32`` intensity
+values whose count agrees with ``+4`` and whose X coordinate is linear between
+the two header endpoints.
+
+For the validated spectral family:
+
+* header ``+16`` is OMNIC **Last X**;
+* header ``+20`` is OMNIC **First X**;
+* the native payload is stored in descending wavenumber order;
+* payload element 0 corresponds to ``+16`` and the final element corresponds
+  to ``+20``.
+
+The historical internal reader names ``firstx`` and ``lastx`` describe storage
+order rather than OMNIC's display terminology. This orientation is not
+independently generalized here to every library/retrieved variant.
+
+The key association ``0x03`` does not by itself imply a spectrum. A header with
+X-unit code ``0x02`` can use the same key for a standalone saved interferogram
+with a data-points X coordinate.
+
+Interferograms
+--------------
+
+In the validated acquired-pair variant, ``0x66`` is the sample interferogram
+and ``0x67`` is the background interferogram. ``[ESTABLISHED]`` This identity
+was supported by independent Fourier reconstruction, not merely by the
+reader's parameter names. It is scoped to that acquired-pair variant: a
+standalone saved interferogram may place its primary data in ``0x03`` instead.
+
+The native IFG payload is stored as ``float32`` values. A standalone saved IFG
+has an OMNIC Volts label, but ``[UNKNOWN]`` whether this implies a calibrated
+absolute voltage scale. Do not generalize that label automatically to every
+``0x66``/``0x67`` block, and do not infer a universal amplitude normalization
+from the stored values.
+
+Peak and transform geometry
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For the validated native IFG cases:
+
+* ``+32`` is a ``uint32`` and ``+40`` is a ``float32``;
+* both match OMNIC's interferogram peak position;
+* both match the raw signal ``argmax``;
+* this establishes the peak/centerburst index relationship, but not a formal
+  physical zero-path-difference (ZPD) definition.
+
+``[ESTABLISHED]`` In the same native cases:
+
 .. code-block:: text
 
-   code   | candidate interpretation       | status
-   ------ | ------------------------------ | ------------------------------
-   0x11   | absorbance                     | [OBSERVED] candidate mapping
-   0x10   | transmittance, percent         | [OBSERVED] candidate mapping
-   0x0b   | reflectance, percent           | [OBSERVED] candidate mapping
-   0x0c   | log(1/R)                       | [OBSERVED]; comment disagrees
-   0x0f   | single beam                    | [OBSERVED] candidate mapping
-   0x14   | Kubelka--Munk                 | [OBSERVED]; comment disagrees
-   0x15   | reflectance, unitless          | [OBSERVED]; meaning [UNKNOWN]
-   0x16   | detector signal, V             | [OBSERVED] candidate mapping
-   0x1a   | photoacoustic                  | [OBSERVED] candidate mapping
-   0x1f   | Raman intensity                | [OBSERVED] candidate mapping
-   other  | intensity                      | [UNKNOWN]
+   +48 = N_stored - P
 
-Spectrum data
--------------
+where ``N_stored`` is the native stored IFG payload length and ``P`` is the
+peak position. The exact OMNIC semantic name or counting rationale for ``+48``
+remains ``[UNKNOWN]``. Keep the following quantities distinct:
 
-The block referenced by key ``0x03`` is a candidate sequence of numeric values.
-In the Phase-1 reconstruction, the apparent key-record length divided by four
-gives the number of referenced ``float32`` values. No explicit byte-order
-marker, separate payload header, or independently validated scaling operation
-has been identified.
+* native stored IFG length ``N_stored``;
+* peak position ``P``;
+* stored field ``+48``;
+* derived transform base ``N_hat = 2 * (+48)``;
+* FFT length ``+44``.
 
-``[OBSERVED]`` The Phase-1 reconstruction associates the payload length with
-the candidate header point count ``nx`` and reconstructs a linear X coordinate
-from ``firstx`` to ``lastx``. No reversal or numeric transformation is part of
-that reconstruction. This is evidence about the present interpretation, not
-proof of raw physical storage orientation.
+``N_hat`` is a derived quantity, not a stored native field and not a universal
+name for a native OMNIC quantity.
 
-The following distinctions must remain separate:
+Zero filling
+~~~~~~~~~~~~
 
-* the raw ordering of the referenced float payload;
-* the meanings and order of the header endpoints;
-* a linearly reconstructed coordinate; and
-* any presentation convention applied by downstream software.
+Where the validated transform relationship applies:
 
-In particular, the SpectroChemPy public X presentation must not be used as
-independent evidence that SPA values are physically stored in either ascending
-or descending wavenumber order. Phase 2 should compare raw values,
-header endpoints, OMNIC-reported First X/Last X/Data spacing, and an external
-physical or exported-spectrum reference.
+.. code-block:: text
 
-Interferogram structures
-------------------------
+   FFT = N_hat * 2**zero_fill_level
+   N_hat = 2 * (+48)       (derived)
 
-Two key records are associated with interferogram payloads in the current
-Phase-1 evidence:
+This is an arithmetic relationship between stored geometry and FFT length. The
+zero-filling level is directly supported for some acquired cases and inferred
+from the arithmetic in another native IFG case; it must not be treated as a
+universal interpretation of every SPA header.
 
-* ``0x66`` is used for the request called ``sample``;
-* ``0x67`` is used for the request called ``background``.
+Native IFG coordinate sampling
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-These labels are ``[OBSERVED]`` associations in the Phase-1 evidence,
-not independently established key semantics. Both payloads have the same
-apparent position/length and float32 structure as the spectrum. The shared
-header also contains candidate scan-point, ZPD, scan-count, background-scan,
-and reference-frequency fields, but their relationship to these blocks is not
-validated.
+``[ESTABLISHED]`` in the validated native IFG cases, the physical optical-path
+difference step is:
 
-The current evidence does not establish:
+.. code-block:: text
 
-* whether the two blocks always represent sample and background data;
-* whether their values are volts or another detector-domain quantity;
-* whether payloads are scaled or transformed;
-* whether the header ZPD is expressed in the same index space as the payload;
-* how the physical OPD/time coordinate is encoded; or
-* whether separate acquisition metadata exist for the background block.
+   Delta_OPD = sample_spacing / (2 * reference_frequency)
 
-The data-point coordinate, maximum-based ZPD, and laser-frequency handling in
-the current reconstruction are intentionally not used here as format
-definitions.
+where ``reference_frequency`` is header ``+80`` and ``sample_spacing`` is
+header ``+84``. The peak/argmax supplies the origin used by the validated
+reconstruction. Formal physical ZPD semantics remain ``[UNKNOWN]``.
 
-Text, comments, and processing history
---------------------------------------
+This relationship is now implemented by the public reader for the corrected
+sample-spacing path, but the format statement is based on native evidence
+rather than on reader behavior alone.
 
-The apparent text-bearing structures are:
+Acquisition time and timezone
+-----------------------------
 
-* the fixed file-relative name/title field at +30;
-* one or more key ``0x04`` referenced text blocks, associated in the current
-  Phase-1 evidence with user/custom comments;
-* a key ``0x1b`` referenced history block; and
-* the variable text associated with spectral-header offset +208, which the
-  shared decoder associates with SPA/SPG processing history.
+For ordinary acquired SPA variants, ``[ESTABLISHED]`` the raw little-endian
+``uint32`` at file-relative offset ``+296`` represents:
 
-``[OBSERVED]`` The Phase-1 reconstruction treats fixed-length text as null-padded and
-tries UTF-8 and Latin-1 decoding. This supports the existence of text-bearing
-regions in the current interpretation, but does not establish a universal
-encoding, null convention, or complete history layout. Keys ``0x92`` and
-possibly ``0x53`` may identify additional custom/library text or metadata, but
-their structures are ``[UNKNOWN]``.
+.. code-block:: text
+
+   1899-12-31 00:00:00 UTC + raw seconds
+
+The result is an absolute UTC acquisition instant. A 32-bit rollover is
+observed and must be handled when interpreting values near the counter limit.
+
+The displayed GMT/local offset is not an intrinsic SPA timezone field in the
+validated files. ``[ESTABLISHED]`` OMNIC renders the stored absolute instant
+using the timezone configuration and rules of the Windows system displaying
+the file; changing that viewing-system timezone changes the displayed offset
+without changing the SPA bytes.
+
+This interpretation is variant-dependent. Library/retrieved variants can use
+``+296`` for a counter or default-like value that is not a valid acquisition
+date. A reader must not promote the field to ``acquisition_date`` without
+checking the variant.
 
 Experiment Information
 ----------------------
 
-Key ``0x82`` is associated with an Experiment Information block. Two competing
-descriptions are present in the Phase 1 evidence:
+Key ``0x82`` identifies Experiment Information blocks. Native subtype ``0x79``
+has a fixed-anchor layout supported by multiple independent native blocks:
 
-1. **Sequential-field hypothesis.** The executable Phase-1 parser accepts a
-   block of at least 50 bytes whose first byte is subtype ``0x79``. Under this
-   hypothesis, the first 10 bytes form a header and the remaining bytes split
-   at null separators into up to four fields: experiment path, experiment
-   filename, accessory name, and experiment title.
-2. **Fixed-slot hypothesis.** An older source comment describes fields at
-   offsets +10, +90, +254, and +413 and mentions custom text.
+.. list-table:: Native subtype ``0x79`` anchors
+   :header-rows: 1
 
-The synthetic unit tests establish only that the sequential decoder behaves as
-designed for synthetic blocks, including unsupported subtypes and missing
-fields. They do not establish that native OMNIC SPA blocks use that layout.
-The fixed-slot description is comment-based and likewise remains unvalidated.
+   * - Relative anchor
+     - Generic content
+     - Certainty
+   * - ``+10``
+     - Experiment path/file text begins.
+     - ``[ESTABLISHED]``
+   * - ``+90``
+     - Experiment title/name text.
+     - ``[ESTABLISHED]``
+   * - ``+154``
+     - Descriptive or custom text.
+     - ``[ESTABLISHED]``; the historical ``+254`` comment is contradicted.
+   * - ``+413``
+     - Accessory-related text anchor.
+     - ``[ESTABLISHED]``
+   * - ``+670``
+     - Duplicate or prefixed path-like text.
+     - ``[OBSERVED]``; exact role remains unresolved.
 
-Consequently the subtype, header size, field order, field offsets, padding,
-encoding, repeat behavior, and custom-text location are ``[UNKNOWN]`` or
-``[HYPOTHESIS]``. Native files with varied experiment settings are required to
-choose between these descriptions.
+The strings are NUL-terminated and padded between the observed anchors.
+``+413..+670`` also contains unresolved numeric or padding content. Subtype
+``0x9d`` is structurally recognized but its semantics are ``[UNKNOWN]``; it is
+not mandatory before every subtype ``0x79`` block. The two subtypes must not be
+collapsed into one universal record layout.
 
-Unknown and unmapped fields
----------------------------
+The current public reader's sequential decoder is an implementation detail and
+does not define this fixed-slot native layout. A future reader audit may map
+these anchors into metadata, but no reader change is part of this reference.
 
-The initial unmapped inventory is:
+Raman variant
+-------------
 
-* the six trailing bytes of each apparent key record;
-* the key-table count, extent, and meaning of the ``0x00``/``0x01`` stop values;
-* unknown key values ``0x64``, ``0x69``, ``0x6a``, and ``0x80``;
-* the complete roles of ``0x53`` and ``0x92``;
-* the timestamp epoch, timezone, and precision;
-* the semantic relationship among ``nx``, scan points, and FFT points;
-* unlisted spectral-header fields between and beyond the decoded offsets;
-* payload byte order, block headers, scaling, and integrity checks;
-* physical spectral orientation and endpoint semantics;
-* interferogram identity, scaling, ZPD, and coordinate representation;
-* text encoding and history variants; and
-* the native Experiment Information layout and custom-text field.
+The validated Raman variant uses:
 
-Open questions
---------------
+* X-unit code ``0x20`` for Raman shift in ``cm^-1``;
+* Y/data-unit code ``0x1f`` for Raman intensity;
+* header ``+80`` for the reference/HeNe-class frequency;
+* header ``+96`` for the Raman excitation/laser frequency.
 
-Phase 2 should validate the format itself, rather than merely reproduce the
-current reconstruction:
+``[ESTABLISHED]`` These are distinct physical quantities. The Raman ``+96``
+interpretation is scoped to the validated Raman variant and should not be
+promoted to a general-purpose field for all SPA files. A reader metadata issue
+must not be used to claim that the stored Raman X axis is shifted or otherwise
+incorrect.
 
-1. What epoch, timezone, and precision does the +296 timestamp use?
-2. What bounds or count govern the apparent key-record sequence, and what do
-   the six unhandled entry bytes contain?
-3. Are the key associations for ``0x02``, ``0x03``, ``0x66``, ``0x67``, and
-   ``0x82`` stable across SPA families and OMNIC versions?
-4. Which unit meanings correspond to the numeric X/data codes, including the
-   ``0x0c``/``0x14`` discrepancy?
-5. Is the spectral payload little-endian float32, and is its raw physical order
-   the same as the order implied by the header endpoints?
-6. How do ``nx``, scan points, FFT points, first/last X, and data spacing
-   relate?
-7. Do keys ``0x66`` and ``0x67`` always identify sample/background
-   interferograms, and what are their scaling, ZPD, and coordinate semantics?
-8. Is Experiment Information sequential or fixed-slot, and where are accessory,
-   title, experiment filename, and custom text stored?
-9. What are the structures and encodings of history, comments, library-related,
-   and custom-information blocks?
-10. Do these structures vary with detector, beamsplitter, resolution, zero
-    filling, scan settings, processing history, or OMNIC version?
+Library/retrieved variants
+--------------------------
 
-Implementation notes
---------------------
+Library/retrieved spectra retain the key-table pointer model but can differ
+structurally from ordinary acquired spectra:
 
-The open-source ``read_spa`` implementation is the principal Phase 1 evidence
-source. Its current handling is useful for locating candidate fields, but its
-parser mechanics, NDDataset metadata mapping, IFG API labels, and robustness
-limitations are maintained separately in the Phase 1 audit. They should not be
-read as additional format evidence. No production implementation change is
-part of this reference.
+* the ``0x02`` block can occur at a different physical file location while
+  retaining the relevant relative header fields;
+* acquisition-only fields can be zero, default-like, or not applicable;
+* the raw ``+296`` value must not automatically become an acquisition date;
+* a 16-byte-stride ``0x01`` grid can occur before the first main block;
+* ``0x53`` is associated with saved-spectrum/library text;
+* the primary payload remains located through the key table.
+
+The grid boundaries and structural role are ``[OBSERVED]`` in these variants,
+but its slot semantics are ``[UNKNOWN]``. The full semantics of ``0x53`` and
+the library-specific timestamp are also ``[UNKNOWN]``. No complete library
+format is claimed here.
+
+Other unresolved structures and limitations
+--------------------------------------------
+
+The following structures are useful format-research landmarks but should not
+be assigned unsupported meanings:
+
+* ``0x69`` — recurring 12-byte auxiliary block; semantics ``[UNKNOWN]``.
+* ``0x80`` — 128-byte all-zero block associated with an observed newer-layout
+  family; writer correlation is ``[OBSERVED]`` and the role is ``[UNKNOWN]``.
+* ``0x9d`` — recognized Experiment Information subtype; semantics ``[UNKNOWN]``.
+* ``0x01`` grid — observed library/retrieved layout and boundaries; slot
+  semantics ``[UNKNOWN]``.
+* ``0x53`` — saved-spectrum/library-associated text; complete encoding and
+  semantics ``[UNKNOWN]``.
+* instrument-family code meanings within ``0x6a``;
+* the formal physical meaning of ZPD and the exact native semantic name of
+  ``+48``;
+* general absolute IFG scaling and calibrated-voltage semantics;
+* generality of paired-IFG identities beyond the validated acquired-pair
+  variant;
+* variant-specific timestamp meanings and Experiment Information tail fields.
+
+Implementation notes and limitations
+------------------------------------
+
+This page describes format evidence, not a complete critique of
+``read_omnic.py``. The current implementation may not expose every established
+field, may use variant-specific fallbacks, and may still need a separate
+field-by-field audit against this reference. In particular:
+
+* the corrected ``+84`` sample-spacing relation is implemented in the public
+  reader;
+* native subtype-``0x79`` Experiment Information is fixed-slot, whereas the
+  current decoder uses a sequential strategy;
+* some variant-specific metadata, including the Raman distinction between
+  ``+80`` and ``+96``, may not yet be surfaced with native semantics.
+
+No production reader behavior is changed by this document. The public reader,
+tests, and this reference should be reconciled in a separate reader-audit and
+implementation sequence.
