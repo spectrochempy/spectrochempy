@@ -62,16 +62,17 @@ attribute so that ``scp.<namespace>.read(...)`` delegates to a reader::
 
 The short namespace must **not** collide with any public ``scp`` symbol
 (integration/analysis functions, ``NDDataset`` methods exposed at root,
-compatibility aliases, public submodules, core I/O namespaces, or an
-already-registered root export). A conflicting short namespace is rejected with
-a warning, but the reader remains available through its explicit
-``scp.read_<format>`` function.
+compatibility aliases, public submodules, or core I/O namespaces). A
+conflicting short namespace is rejected with a warning at registration, but
+the reader remains available through its explicit ``scp.read_<format>``
+function.
 
-.. code-block:: text
-
-    Plugin-provided namespaces and root exports must not collide with public
-    SpectroChemPy symbols. Conflicting short namespaces are rejected; readers
-    remain accessible through their explicit read_<format> function.
+For the other plugin-provided root surfaces (``root_exports``, reader exports,
+``analysis``/``simulation`` extensions), the collision is avoided through
+**resolution priority**: ``scp.__getattr__`` always resolves a public core
+symbol before any plugin-provided name, regardless of plugin installation or
+discovery order. These surfaces are not rejected at registration time; the
+core symbol simply wins on access.
 
 For example ``spectrochempy-nmr`` does **not** register a ``simpson`` I/O
 namespace because ``scp.simpson`` is the core numerical-integration function;

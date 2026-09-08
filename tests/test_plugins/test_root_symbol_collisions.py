@@ -11,6 +11,14 @@ Verifies that public ``scp`` root symbols can never be silently shadowed by a
 plugin-provided I/O namespace, root export, analysis/simulation extension or
 reader export, and that the reserved-name policy is deterministic regardless
 of plugin installation or discovery order.
+
+Two complementary guarantees are tested:
+
+- registration-time rejection of plugin **I/O namespaces** whose name
+  collides with a public ``scp`` root symbol (``register_io_namespace``);
+- **resolution priority**: for every plugin root surface (reader exports,
+  ``root_exports``, ``analysis``/``simulation`` extensions), root attribute
+  access always resolves a public core symbol first.
 """
 
 import subprocess
@@ -246,7 +254,7 @@ def test_dir_read_simpson_present():
 
 
 # -----------------------------------------------------------------------------
-# Root/analysis/extension shadowing (defense-in-depth)
+# Reserved-name set construction (defense-in-depth)
 # -----------------------------------------------------------------------------
 
 
@@ -261,12 +269,21 @@ def test_dataset_method_symbol_is_reserved():
     assert is_reserved_root_symbol("simpson")
 
 
-def test_reserved_name_wins_even_if_badly_registered(clean_plugin_namespaces):
-    # Even if a callable root export were somehow still in the registry, the
-    # reserved-name fast path in __getattr__ must keep the core symbol.
-    from spectrochempy.lazyimport.root_symbols import reserved_root_symbols
+def test_reserved_name_wins_over_root_export_collision(clean_plugin_namespaces):
+    # Inject a plugin that registers ``simpson`` as a root export.  The
+    # reserved-name fast path must still return the core integration function.
+    from spectrochempy.plugins.manager import plugin_manager
 
-    reserved = reserved_root_symbols()
-    assert "simpson" in reserved
-    obj = scp.simpson
-    assert obj.__module__ == "spectrochempy.analysis.integration.integrate"
+    class _CollisionPlugin:
+        name = "collision-test"
+        version = "1.0.0"
+        root_exports = {"simpson": {"target": "read_simpson", "namespace": "nmr"}}
+
+    original_plugins = plugin_manager.list_plugins
+    plugin_manager.list_plugins = lambda: [*original_plugins(), _CollisionPlugin()]
+    try:
+        obj = scp.simpson
+        assert obj.__module__ == "spectrochempy.analysis.integration.integrate"
+        assert not callable(getattr(obj, "read", None))
+    finally:
+        plugin_manager.list_plugins = original_plugins

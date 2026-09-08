@@ -13,8 +13,17 @@
 Reserved public root symbols of ``spectrochempy``.
 
 This module computes, from existing sources of truth, the set of names that
-are public at the ``scp`` root and therefore can never be silently shadowed
-by a plugin-provided symbol (namespace, reader export, root export, …).
+are public at the ``scp`` root.  These names are protected against plugin
+collisions in two ways:
+
+- the plugin manager rejects a plugin I/O namespace whose name collides with
+  one of these symbols (see ``register_io_namespace``);
+- the root ``__getattr__`` always resolves these names to the core symbol,
+  regardless of plugin installation or discovery order.
+
+Other plugin-provided root surfaces (``root_exports``, reader exports,
+``analysis``/``simulation`` extensions) are not rejected at registration
+time; they are protected only by the resolution priority above.
 
 Sources of truth used:
 
@@ -29,12 +38,6 @@ Sources of truth used:
   namespace names;
 - the public submodules declared in ``spectrochempy/__init__.pyi`` (the same
   source that ``lazy_loader.attach_stub`` parses at import time).
-
-Plugin maintainers and the plugin manager use
-:func:`is_reserved_root_symbol` to reject registered names that would collide
-with a public root symbol, and the root ``__getattr__`` guarantees that
-reserved names always resolve to the core symbol regardless of discovery
-order.
 """
 
 from __future__ import annotations
