@@ -989,6 +989,7 @@ def _read_spa(*args, **kwargs):
     pos = 304
     spa_comments = []  # several custom comments can be present
     _exp_info = None
+    optical_velocity = None
     while "continue":
         fid.seek(pos)
         key = fromfile(fid, dtype="uint8", count=1)
@@ -1024,6 +1025,18 @@ def _read_spa(*args, **kwargs):
 
         elif key == 103 and return_ifg == "background":
             b_ifg_intensities = _getintensities(fid, pos)
+
+        elif key == 106:
+            # The 0x6a block is the canonical source for acquisition
+            # parameters.  The 0x02 header contains a variant-dependent mirror
+            # at +188, but newer layouts may leave that mirror blank.
+            fid.seek(pos + 2)
+            parameters_pos = fromfile(fid, "uint32", 1)
+            fid.seek(pos + 6)
+            parameters_len = fromfile(fid, "uint32", 1)
+            if parameters_len >= 52:
+                fid.seek(parameters_pos + 48)
+                optical_velocity = fromfile(fid, "float32", 1)
 
         elif key == 130 and _exp_info is None:
             fid.seek(pos + 2)
@@ -1135,7 +1148,10 @@ def _read_spa(*args, **kwargs):
     dataset._date = utcnow()
 
     dataset.meta.collection_length = info["collection_length"] / 100 * ur("s")
-    dataset.meta.optical_velocity = info["optical_velocity"]
+    if optical_velocity is None:
+        # Retain compatibility with supported files that do not carry 0x6a.
+        optical_velocity = info["optical_velocity"]
+    dataset.meta.optical_velocity = optical_velocity
     dataset.meta.laser_frequency = info["reference_frequency"] * ur("cm^-1")
     dataset.meta.sample_spacing = info["sample_spacing"]
 

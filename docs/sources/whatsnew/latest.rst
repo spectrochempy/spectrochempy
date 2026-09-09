@@ -36,6 +36,8 @@ Bug Fixes
 - Correct OMNIC ``.spa`` interferogram optical-path-difference coordinates by
   honoring the native header sample-spacing factor instead of always assuming
   a doubled step.
+- Correct OMNIC ``.spa`` optical-velocity metadata by using the canonical
+  acquisition-parameter block when the legacy header mirror is blank.
 - Correct OMNIC ``.srs`` series time-axis anchoring (it now starts from the
   recorded series minimum time) and fix per-spectrum labels, which no longer
   include binary metadata leaked past the 84-byte record.
