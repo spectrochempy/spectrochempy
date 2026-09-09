@@ -453,8 +453,15 @@ def test_spa_library_timestamp_is_not_promoted(tmp_path):
 
 def test_allow_inconsistent_x_parameter_documented():
     assert "allow_inconsistent_x" in scp.read_spg.__doc__
+    assert "return_ifg" not in scp.read_spg.__doc__
     assert "allow_inconsistent_x" in scp.read_omnic.__doc__
     assert "allow_inconsistent_x=True" in scp.read_omnic.__doc__
+    assert (
+        scp.read_spa.__doc__.count('return_ifg : {None, "sample", "background"}') == 1
+    )
+    assert "standalone data-points interferogram" in scp.read_spa.__doc__
+    assert 'return_ifg="sample"' in scp.read_spa.__doc__
+    assert "native sample-spacing" in scp.read_spa.__doc__
 
 
 def test_decode_experiment_info_block():

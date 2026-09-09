@@ -29,11 +29,9 @@ New Features
   estimator-final pipelines, with nested ``set_params`` support and fitted-state
    invalidation.
 
-- OMNIC SPA imports now expose corrected Experiment Information,
-  Raman reference/excitation metadata, and validated acquisition metadata for
-  scan geometry, gains, filters, aperture, and digitizer settings where
-  available; invalid library/retrieved timestamps are not promoted as
-  acquisition dates. (#1605, #1606)
+- Improve OMNIC SPA imports with corrected Experiment Information and Raman
+  metadata, additional acquisition metadata, and proper handling of
+  library/retrieved files without valid acquisition timestamps.
 
 .. section
 
@@ -92,10 +90,9 @@ Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
 
-MAINT: Continue modernizing the OMNIC SPA reader around the validated
-native-format model, including counted key-table parsing, shared native-block
-dispatch, consolidated acquisition-parameter parsing, and clearer internal
-coordinate/peak terminology. (#1604, #1605, #1606)
+MAINT: Refactor the OMNIC SPA reader with structured native parsing and clearer
+signal, coordinate, metadata, Dataset construction, and reader-documentation
+paths.
 
 MAINT: Added a centralized reserved-root-symbol policy
 (``spectrochempy/lazyimport/root_symbols.py``) so plugins cannot shadow

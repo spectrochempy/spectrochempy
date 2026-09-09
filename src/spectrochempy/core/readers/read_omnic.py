@@ -453,6 +453,11 @@ def read_spa(*paths, **kwargs):
     so not downloaded.
     sortbydate : `bool`, optional, default: `True`
     Sort multiple filename by acquisition date.
+    return_ifg : {None, "sample", "background"}, optional
+    Select an associated sample or background interferogram stored with an
+    acquired spectrum. Standalone data-points interferograms are returned by
+    the ordinary ``read_spa()`` call and are not selected through this option.
+    If the requested associated interferogram is absent, ``None`` is returned.
 
     See Also
     --------
@@ -473,6 +478,17 @@ def read_spa(*paths, **kwargs):
     -----
     This method is an alias of `read_omnic`, except that the type of file
     is constrained to ``.spa``.
+
+    The default read returns the primary SPA signal: a descending spectral
+    dataset for a spectral payload or a standalone data-points interferogram when
+    the primary payload uses data-points X semantics. Associated sample and
+    background interferograms can be requested with ``return_ifg="sample"``
+    and ``return_ifg="background"``; if the requested associated block is
+    absent, the reader returns ``None``. Interferogram coordinates use the
+    native sample-spacing and reference-frequency information to construct
+    optical path difference values. Acquisition dates and validated
+    acquisition metadata are exposed when applicable to the SPA variant;
+    OMNIC Experiment Information is available under ``omnic_*`` metadata.
 
     Examples
     --------
@@ -920,235 +936,249 @@ def _read_spg(*args, **kwargs):
     return dataset
 
 
+@dataclass
+class _SpaParsedData:
+    """Native SPA state kept separate from Dataset construction."""
+
+    spa_name: str
+    info: dict
+    acquisition_date: datetime | None
+    timestamp: float
+    is_library_variant: bool
+    comments: list[str]
+    history: str | None
+    experiment_info: dict | None
+    acquisition_parameters: dict
+    primary_payload: np.ndarray | None
+    sample_payload: np.ndarray | None
+    background_payload: np.ndarray | None
+
+
+def _parse_spa_native(fid, return_ifg):
+    """Parse SPA native structures and requested payloads without Dataset mutation."""
+    spa_name = _readbtext(fid, 30, 256)
+    fid.seek(296)
+    raw_timestamp = int(fromfile(fid, dtype="uint32", count=1))
+    records = _read_spa_key_table(fid)
+    has_library_text = any(record.key == 0x53 for record in records)
+    fid.seek(304 + 16 * len(records))
+    post_table_key = fid.read(1)
+    is_library_variant = has_library_text and post_table_key == b"\x01"
+    if is_library_variant:
+        acquisition_date = None
+        timestamp = 0.0
+    else:
+        acquisition_date = datetime(1899, 12, 31, 0, 0, tzinfo=UTC) + timedelta(
+            seconds=raw_timestamp
+        )
+        timestamp = acquisition_date.timestamp()
+
+    comments = []
+    history = None
+    experiment_info = None
+    acquisition_parameters = {}
+    primary_payload = None
+    sample_payload = None
+    background_payload = None
+    info = None
+
+    for record in records:
+        if record.key == 2:
+            info = _read_header(fid, record.position)
+        elif record.key == 3 and return_ifg is None:
+            primary_payload = _read_spa_float32_payload(fid, record)
+        elif record.key == 4:
+            fid.seek(record.position)
+            comments.append(fid.read(record.length).decode("latin-1", "replace"))
+        elif record.key == 27:
+            history = _readbtext(fid, record.position, record.length)
+        elif record.key == 102 and return_ifg == "sample":
+            sample_payload = _read_spa_float32_payload(fid, record)
+        elif record.key == 103 and return_ifg == "background":
+            background_payload = _read_spa_float32_payload(fid, record)
+        elif record.key == 106:
+            acquisition_parameters.update(_read_spa_acquisition_parameters(fid, record))
+        elif record.key == 130 and experiment_info is None and record.length >= 50:
+            fid.seek(record.position)
+            experiment_info = _decode_experiment_info_block(fid.read(record.length))
+
+    if info is None:
+        raise OSError("Error: SPA general header (key 0x02) was not found")
+    return _SpaParsedData(
+        spa_name=spa_name,
+        info=info,
+        acquisition_date=acquisition_date,
+        timestamp=timestamp,
+        is_library_variant=is_library_variant,
+        comments=comments,
+        history=history,
+        experiment_info=experiment_info,
+        acquisition_parameters=acquisition_parameters,
+        primary_payload=primary_payload,
+        sample_payload=sample_payload,
+        background_payload=background_payload,
+    )
+
+
+def _select_spa_payload(parsed, return_ifg):
+    """Select primary or associated payload while preserving the public API."""
+    if return_ifg == "sample":
+        payload = parsed.sample_payload
+    elif return_ifg == "background":
+        payload = parsed.background_payload
+    else:
+        payload = parsed.primary_payload
+    if payload is None:
+        info_("No interferogram found, read_spa returns None")
+    return payload
+
+
+def _build_spa_y_coord(parsed, filename, return_ifg):
+    """Build the timestamp or undated singleton Y coordinate."""
+    if parsed.acquisition_date is None:
+        return Coord([0], title="spectrum", units=None, labels=([None], [filename]))
+    title = (
+        "sample acquisition timestamp (GMT)"
+        if return_ifg == "background"
+        else "acquisition timestamp (GMT)"
+    )
+    return Coord(
+        [parsed.timestamp],
+        title=title,
+        units="s",
+        labels=([parsed.acquisition_date], [filename]),
+    )
+
+
+def _build_spa_x_coord(info, payload, return_ifg):
+    """Build the established spectral or data-points/OPD X coordinate."""
+    if return_ifg is None:
+        return Coord.linspace(
+            info["native_last_x"],
+            info["native_first_x"],
+            int(info["nx"]),
+            title=info["xtitle"],
+            units=info["xunits"],
+        )
+    return Coord.arange(len(payload), title="data points", units=None)
+
+
+def _attach_spa_metadata(dataset, parsed):
+    """Attach established generic SPA metadata and mature acquisition fields."""
+    info = parsed.info
+    parameters = parsed.acquisition_parameters
+    dataset.meta.collection_length = info["collection_length"] / 100 * ur("s")
+    dataset.meta.optical_velocity = parameters.get(
+        "optical_velocity", info["optical_velocity"]
+    )
+    dataset.meta.reference_frequency = info["reference_frequency"] * ur("cm^-1")
+    dataset.meta.laser_frequency = (
+        info["raman_excitation_frequency"] * ur("cm^-1")
+        if info["xtitle"] == "raman shift"
+        else info["reference_frequency"] * ur("cm^-1")
+    )
+    dataset.meta.sample_spacing = info["sample_spacing"]
+    if parsed.is_library_variant:
+        return
+    dataset.meta.scan_points = int(info["scan_points"])
+    dataset.meta.interferogram_peak_position = int(info["peak_position"])
+    dataset.meta.sample_scans = int(info["sample_scans"])
+    dataset.meta.background_scans = int(info["background_scans"])
+    dataset.meta.fft_points = int(info["fft_points"])
+    dataset.meta.background_gain = float(info["background_gain"])
+    dataset.meta.aperture = float(info["aperture"])
+    if "digitizer_bits" in parameters:
+        dataset.meta.digitizer_bits = int(parameters["digitizer_bits"])
+    if "sample_gain" in parameters:
+        dataset.meta.sample_gain = float(parameters["sample_gain"])
+    if "high_pass" in parameters:
+        dataset.meta.high_pass_filter = float(parameters["high_pass"])
+    if "low_pass" in parameters:
+        dataset.meta.low_pass_filter = float(parameters["low_pass"])
+
+
+def _finalize_spa_dataset(dataset, filename, kwargs, parsed, return_ifg):
+    """Construct and finalize one SPA Dataset from parsed native state."""
+    payload = _select_spa_payload(parsed, return_ifg)
+    if payload is None:
+        return None
+    dataset.data = np.array(payload[np.newaxis], dtype="float32")
+    dataset.mask = np.isnan(dataset.data)
+    info = parsed.info
+    if return_ifg is None:
+        default_description = (
+            f"# Omnic name: {parsed.spa_name}\n# Filename: {filename.name}"
+        )
+        dataset.units = info["units"]
+        dataset.title = info["title"]
+    else:
+        suffix = "sample" if return_ifg == "sample" else "background"
+        default_description = (
+            f"# Omnic name: {parsed.spa_name} : {suffix} IFG\n"
+            f" # Filename: {filename.name}"
+        )
+        dataset.units = "V"
+        dataset.title = "detector signal"
+    dataset.set_coordset(
+        y=_build_spa_y_coord(parsed, filename, return_ifg),
+        x=_build_spa_x_coord(info, payload, return_ifg),
+    )
+    dataset.name = (
+        parsed.spa_name if return_ifg is None else f"{parsed.spa_name}: Sample IFG"
+    )
+    dataset.filename = filename
+    if return_ifg != "background" and parsed.acquisition_date is not None:
+        dataset.acquisition_date = parsed.acquisition_date
+    dataset.origin = "omnic"
+    dataset.description = kwargs.get("description", default_description) + "\n"
+    if parsed.comments:
+        dataset.description += "# Comments from Omnic:\n"
+        for comment in parsed.comments:
+            dataset.description += comment + "\n---------------------\n"
+    dataset.history = "Imported from spa file(s)"
+    if parsed.history and parsed.history.strip():
+        dataset.history = (
+            "Data processing history from Omnic :\n------------------------------------\n"
+            + parsed.history
+        )
+    dataset._date = utcnow()
+    _attach_spa_metadata(dataset, parsed)
+    if parsed.experiment_info is not None:
+        for meta_key, value in parsed.experiment_info.items():
+            setattr(dataset.meta, f"omnic_{meta_key}", value)
+        if not dataset.description.strip() and parsed.experiment_info.get(
+            "experiment_title"
+        ):
+            dataset.description = parsed.experiment_info["experiment_title"]
+    is_ifg = return_ifg is not None or info["xtitle"] == "data points"
+    if is_ifg:
+        dataset.meta.interferogram = True
+        dataset.meta.td = list(dataset.shape)
+        # This is the data-derived peak index, not formal physical ZPD.
+        dataset.x._zpd = int(np.argmax(dataset)[-1])
+        dataset.x.set_laser_frequency(
+            frequency=info["reference_frequency"],
+            sample_spacing=info["sample_spacing"],
+        )
+        dataset.x._use_time_axis = False
+    return dataset
+
+
 @_importer_method
 def _read_spa(*args, **kwargs):
     dataset, filename = args
-
-    fid, kwargs = _openfid(filename, **kwargs)
-
     return_ifg = kwargs.get("return_ifg", None)
     if return_ifg not in (None, "sample", "background"):
         raise ValueError(
             f"Invalid return_ifg value: {return_ifg!r}. "
             "Expected None, 'sample', or 'background'."
         )
-
-    # Read name:
-    # The name  starts at position hex 1e = decimal 30. Its max length
-    # is 256 bytes. It is the original filename under which the spectrum has
-    # been saved: it won't match with the actual filename if a subsequent
-    # renaming has been done in the OS.
-    spa_name = _readbtext(fid, 30, 256)
-
-    # The raw acquisition-time value is at file offset 296.
-    fid.seek(296)
-    raw_timestamp = int(fromfile(fid, dtype="uint32", count=1))
-
-    # The active key table is counted at +294 and consists of 16-byte records
-    # beginning at +304. Terminators, padding, and post-table variant data are
-    # intentionally outside the parsed record list.
-    # Current dispatch handles the primary header/payload, comments, history,
-    # associated IFGs, optical velocity, and Experiment Information blocks.
-    # Detailed key semantics and variant scope are documented in spa.rst.
-    #
-
-    records = _read_spa_key_table(fid)
-    has_library_text = any(record.key == 0x53 for record in records)
-    fid.seek(304 + 16 * len(records))
-    post_table_key = fid.read(1)
-    # This is the discriminator for the observed validated library/retrieved
-    # layout: 0x53 together with the post-table 0x01 grid. It is not a
-    # universal semantic interpretation of either structure.
-    is_library_variant = has_library_text and post_table_key == b"\x01"
-    if is_library_variant:
-        acquisitiondate = None
-        timestamp = 0.0
-    else:
-        acqdate = datetime(1899, 12, 31, 0, 0, tzinfo=UTC) + timedelta(
-            seconds=raw_timestamp,
-        )
-        acquisitiondate = acqdate
-        timestamp = acqdate.timestamp()
-    spa_comments = []  # several custom comments can be present
-    _exp_info = None
-    acquisition_parameters = {}
-    for record in records:
-        key = record.key
-
-        if key == 2:
-            info = _read_header(fid, record.position)
-
-        elif key == 3 and return_ifg is None:
-            intensities = _read_spa_float32_payload(fid, record)
-
-        elif key == 4:
-            fid.seek(record.position)
-            spa_comments.append(fid.read(record.length).decode("latin-1", "replace"))
-
-        elif key == 27:
-            spa_history = _readbtext(fid, record.position, record.length)
-
-        elif key == 102 and return_ifg == "sample":
-            s_ifg_intensities = _read_spa_float32_payload(fid, record)
-
-        elif key == 103 and return_ifg == "background":
-            b_ifg_intensities = _read_spa_float32_payload(fid, record)
-
-        elif key == 106:
-            acquisition_parameters.update(_read_spa_acquisition_parameters(fid, record))
-
-        elif key == 130 and _exp_info is None and record.length >= 50:
-            fid.seek(record.position)
-            blk_data = fid.read(record.length)
-            _exp_info = _decode_experiment_info_block(blk_data)
-
-    fid.close()
-
-    if (return_ifg == "sample" and "s_ifg_intensities" not in locals()) or (
-        return_ifg == "background" and "b_ifg_intensities" not in locals()
-    ):
-        info_("No interferogram found, read_spa returns None")
-        return None
-    if return_ifg == "sample":
-        intensities = s_ifg_intensities
-    elif return_ifg == "background":
-        intensities = b_ifg_intensities
-    # load intensity into the  NDDataset
-    dataset.data = np.array(intensities[np.newaxis], dtype="float32")
-
-    if return_ifg == "background":
-        title = "sample acquisition timestamp (GMT)"  # bckg acquisition date is not known for the moment...
-    else:
-        title = "acquisition timestamp (GMT)"  # no ambiguity here
-
-    if acquisitiondate is None:
-        _y = Coord([0], title="spectrum", units=None, labels=([None], [filename]))
-    else:
-        _y = Coord(
-            [timestamp],
-            title=title,
-            units="s",
-            labels=([acquisitiondate], [filename]),
-        )
-
-    # useful when a part of the spectrum/ifg has been blanked:
-    dataset.mask = np.isnan(dataset.data)
-
-    if return_ifg is None:
-        default_description = f"# Omnic name: {spa_name}\n# Filename: {filename.name}"
-        dataset.units = info["units"]
-        dataset.title = info["title"]
-
-        # now add coordinates
-        nx = info["nx"]
-        native_last_x = info["native_last_x"]
-        native_first_x = info["native_first_x"]
-        xunit = info["xunits"]
-        xtitle = info["xtitle"]
-
-        _x = Coord.linspace(
-            native_last_x,
-            native_first_x,
-            int(nx),
-            title=xtitle,
-            units=xunit,
-        )
-
-    else:  # interferogram
-        if return_ifg == "sample":
-            default_description = (
-                f"# Omnic name: {spa_name} : sample IFG\n # Filename: {filename.name}"
-            )
-        else:
-            default_description = f"# Omnic name: {spa_name} : background IFG\n # Filename: {filename.name}"
-        spa_name += ": Sample IFG"
-        dataset.units = "V"
-        dataset.title = "detector signal"
-
-        _x = Coord.arange(
-            len(intensities),
-            title="data points",
-            units=None,
-        )
-
-    dataset.set_coordset(y=_y, x=_x)
-    dataset.name = spa_name  # to be consistent with omnic behaviour
-    dataset.filename = filename
-    if return_ifg != "background" and acquisitiondate is not None:
-        dataset.acquisition_date = acquisitiondate
-    dataset.origin = "omnic"
-
-    # Set origin, description, history, date
-    # Omnic spg file don't have specific "origin" field stating the oirigin of the data
-
-    dataset.description = kwargs.get("description", default_description) + "\n"
-    if spa_comments:
-        dataset.description += "# Comments from Omnic:\n"
-        for comment in spa_comments:
-            dataset.description += comment + "\n---------------------\n"
-
-    dataset.history = "Imported from spa file(s)"
-
-    if "spa_history" in locals() and len(spa_history.strip()) > 0:
-        dataset.history = (
-            "Data processing history from Omnic :\n------------------------------------\n"
-            + spa_history
-        )
-
-    dataset._date = utcnow()
-
-    dataset.meta.collection_length = info["collection_length"] / 100 * ur("s")
-    optical_velocity = acquisition_parameters.get("optical_velocity")
-    if optical_velocity is None:
-        # Retain compatibility with supported files that do not carry 0x6a.
-        optical_velocity = info["optical_velocity"]
-    dataset.meta.optical_velocity = optical_velocity
-    dataset.meta.reference_frequency = info["reference_frequency"] * ur("cm^-1")
-    if info["xtitle"] == "raman shift":
-        dataset.meta.laser_frequency = info["raman_excitation_frequency"] * ur("cm^-1")
-    else:
-        dataset.meta.laser_frequency = info["reference_frequency"] * ur("cm^-1")
-    dataset.meta.sample_spacing = info["sample_spacing"]
-
-    if not is_library_variant:
-        dataset.meta.scan_points = int(info["scan_points"])
-        dataset.meta.interferogram_peak_position = int(info["peak_position"])
-        dataset.meta.sample_scans = int(info["sample_scans"])
-        dataset.meta.background_scans = int(info["background_scans"])
-        dataset.meta.fft_points = int(info["fft_points"])
-        dataset.meta.background_gain = float(info["background_gain"])
-        dataset.meta.aperture = float(info["aperture"])
-        if "digitizer_bits" in acquisition_parameters:
-            dataset.meta.digitizer_bits = int(acquisition_parameters["digitizer_bits"])
-        if "sample_gain" in acquisition_parameters:
-            dataset.meta.sample_gain = float(acquisition_parameters["sample_gain"])
-        for name in ("high_pass", "low_pass"):
-            if name in acquisition_parameters:
-                setattr(
-                    dataset.meta, f"{name}_filter", float(acquisition_parameters[name])
-                )
-
-    if _exp_info is not None:
-        for meta_key, val in _exp_info.items():
-            setattr(dataset.meta, f"omnic_{meta_key}", val)
-        if not dataset.description.strip() and _exp_info.get("experiment_title"):
-            dataset.description = _exp_info["experiment_title"]
-
-    if dataset.x.units is None and dataset.x.title == "data points":
-        # interferogram: build the OPD axis from the reference frequency and
-        # the native sample spacing (spacing = sample_spacing / (2 * nu)).
-        dataset.meta.interferogram = True
-        dataset.meta.td = list(dataset.shape)
-        # This is the data-derived peak index, not formal physical ZPD.
-        dataset.x._zpd = int(np.argmax(dataset)[-1])
-        dataset.x.set_laser_frequency(
-            frequency=info["reference_frequency"], sample_spacing=info["sample_spacing"]
-        )
-        dataset.x._use_time_axis = (
-            False  # True to have time, else it will be optical path difference
-        )
-
-    return dataset
+    fid, kwargs = _openfid(filename, **kwargs)
+    try:
+        parsed = _parse_spa_native(fid, return_ifg)
+    finally:
+        fid.close()
+    return _finalize_spa_dataset(dataset, filename, kwargs, parsed, return_ifg)
 
 
 @_importer_method
