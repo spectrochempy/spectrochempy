@@ -334,13 +334,6 @@ def read_spg(*paths, **kwargs):
     so not downloaded.
     sortbydate : `bool`, optional, default: `True`
     Sort multiple filename by acquisition date.
-    return_ifg : {None, "sample", "background"}, optional
-    Select an associated interferogram stored with an acquired spectrum.
-    Standalone data-points interferograms are read by the default call.
-    return_ifg : {None, "sample", "background"}, optional
-    Select an associated sample or background interferogram stored with an
-    acquired spectrum. A standalone data-points interferogram is returned by
-    the ordinary ``read_spa()`` call and is not selected through this option.
     allow_inconsistent_x : `bool`, optional, default: `False`
     Allow spectra with different x-axis definitions and return one `NDDataset`
     per spectrum instead of a merged dataset.
@@ -460,6 +453,11 @@ def read_spa(*paths, **kwargs):
     so not downloaded.
     sortbydate : `bool`, optional, default: `True`
     Sort multiple filename by acquisition date.
+    return_ifg : {None, "sample", "background"}, optional
+    Select an associated sample or background interferogram stored with an
+    acquired spectrum. Standalone data-points interferograms are returned by
+    the ordinary ``read_spa()`` call and are not selected through this option.
+    If the requested associated interferogram is absent, ``None`` is returned.
 
     See Also
     --------
