@@ -63,10 +63,11 @@ Deprecations
 Developer
 ~~~~~~~~~
 
-MAINT: Continue modernizing the OMNIC SPA reader around the validated
-native-format model, including counted key-table parsing, shared native-block
-dispatch, consolidated acquisition-parameter parsing, and clearer internal
-coordinate/peak terminology. (#1604, #1605, #1606)
+MAINT: Complete the OMNIC SPA reader modernization around the validated
+native-format model, with counted key-table parsing, consolidated native-block
+and acquisition-parameter parsing, clearer coordinate/peak terminology,
+simplified signal/Dataset construction, and synchronized reader documentation.
+(#1604, #1605, #1606, #1607)
 
 MAINT: Added a centralized reserved-root-symbol policy
 (``spectrochempy/lazyimport/root_symbols.py``) so plugins cannot shadow
