@@ -63,10 +63,13 @@ Bug Fixes
 Breaking Changes
 ~~~~~~~~~~~~~~~~
 
-- OMNIC Experiment Information no longer exposes
-  ``dataset.meta.omnic_experiment_file``. Use
+- Removed ``dataset.meta.omnic_experiment_file`` from OMNIC Experiment
+  Information. Despite its name, this field exposed the native experiment
+  title rather than a reliable filename and could therefore provide incorrect
+  provenance information. It was removed as a metadata-correctness fix rather
+  than retained through the normal deprecation cycle. Use
   ``dataset.meta.omnic_experiment_title`` for the native title/name field;
-  it is not a reliable filename. The separate description is now exposed as
+  the separate description is available as
   ``dataset.meta.omnic_experiment_description``. (#1605)
 
 Deprecations
