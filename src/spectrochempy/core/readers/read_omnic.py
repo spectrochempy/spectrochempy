@@ -656,15 +656,11 @@ def _read_spg(*args, **kwargs):
     #     key: hex 03, dec  03: intensity position
     #     key: hex 04, dec  04: user text position
     #     key: hex 1B, dec  27: position of History text
-    #     key: hex 64, dec 100: ?
     #     key: hex 66  dec 102: sample interferogram
     #     key: hex 67  dec 103: background interferogram
-    #     key: hex 69, dec 105: ?
-    #     key: hex 6a, dec 106: ?
+    #     key: hex 6a, dec 106: canonical acquisition-parameter block
     #     key: hex 6b, dec 107: position of spectrum title, the acquisition
     #     date follows at +256(dec)
-    #     key: hex 80, dec 128: ?
-    #     key: hex 82, dec 130: rotation angle ?
     #
     # the number of line per block may change from file to file but the total
     # number of lines is given at hex 294, hence allowing counting the
@@ -959,26 +955,9 @@ def _read_spa(*args, **kwargs):
     # The active key table is counted at +294 and consists of 16-byte records
     # beginning at +304. Terminators, padding, and post-table variant data are
     # intentionally outside the parsed record list.
-    #
-    #     key: hex 02, dec  02: position of spectral header (=> nx,
-    #                                 firstx, lastx, nscans, nbkgscans)
-    #     key: hex 03, dec  03: intensity position
-    #     #     key: hex 04, dec  04: user text position (custom info, can be present
-    #                           several times. The text length is five bytes later)
-    #     key: hex 1B, dec  27: position of History text, The text length
-    #                           is five bytes later
-    #     key: hex 53, dec  83: probably not a position, present when 'Retrieved from library'
-    #     key: hex 64, dec 100: ?
-    #     key: hex 66  dec 102: sample interferogram
-    #     key: hex 67  dec 103: background interferogram
-    #     key: hex 69, dec 105: ?
-    #     key: hex 6a, dec 106: ?
-    #     key: hex 80, dec 128: ?
-    #     key: hex 82, dec 130: position of 'Experiment Information', The text length
-    #                           is five bytes later. The block gives Experiment filename (at +10)
-    #                           Experiment title (+90), custom text (+254), accessory name (+413)
-    #     key: hex 92, dec 146: position of 'custom infos', The text length
-    #                           is five bytes later.
+    # Current dispatch handles the primary header/payload, comments, history,
+    # associated IFGs, optical velocity, and Experiment Information blocks.
+    # Detailed key semantics and variant scope are documented in spa.rst.
     #
 
     records = _read_spa_key_table(fid)
@@ -992,8 +971,7 @@ def _read_spa(*args, **kwargs):
             info = _read_header(fid, record.position)
 
         elif key == 3 and return_ifg is None:
-            fid.seek(record.position)
-            intensities = fromfile(fid, "float32", int(record.length / 4))
+            intensities = _read_spa_float32_payload(fid, record)
 
         elif key == 4:
             fid.seek(record.position)
@@ -1003,12 +981,10 @@ def _read_spa(*args, **kwargs):
             spa_history = _readbtext(fid, record.position, record.length)
 
         elif key == 102 and return_ifg == "sample":
-            fid.seek(record.position)
-            s_ifg_intensities = fromfile(fid, "float32", int(record.length / 4))
+            s_ifg_intensities = _read_spa_float32_payload(fid, record)
 
         elif key == 103 and return_ifg == "background":
-            fid.seek(record.position)
-            b_ifg_intensities = fromfile(fid, "float32", int(record.length / 4))
+            b_ifg_intensities = _read_spa_float32_payload(fid, record)
 
         elif key == 106:
             # The 0x6a block is the canonical source for acquisition
@@ -1919,6 +1895,12 @@ def _read_spa_key_table(fid):
             )
         )
     return records
+
+
+def _read_spa_float32_payload(fid, record):
+    """Read a float32 payload referenced by an SPA key record."""
+    fid.seek(record.position)
+    return fromfile(fid, "float32", int(record.length / 4))
 
 
 def _getintensities(fid, pos):
