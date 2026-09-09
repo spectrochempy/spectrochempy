@@ -287,6 +287,8 @@ def _synthetic_spa_with_optical_velocity(
     struct.pack_into("<I", content, 296, timestamp)
     for offset, (key, position, length) in zip((304, 320, 336), records):
         struct.pack_into("<BBII", content, offset, key, 0, position, length)
+    if library:
+        content[304 + 16 * len(records)] = 1
 
     header = 400
     struct.pack_into("<I", content, header + 4, 2)
@@ -404,7 +406,6 @@ def test_decode_experiment_info_block():
     result = _decode_experiment_info_block(block)
     assert result is not None
     assert result["experiment_path"] == r"C:\MYDOCU~1\omnic\Param\CARROU~2.EXP"
-    assert result["experiment_file"] == "CARROU~2.EXP"
     assert result["accessory_name"] == "iS50 Main Sample"
     assert result["experiment_title"] == "CARROU~2.EXP"
     assert (
@@ -424,7 +425,6 @@ def test_decode_experiment_info_block():
     assert result["experiment_path"] == "path"
     assert result["experiment_description"] == "description"
     assert result["accessory_name"] == "accessory"
-    assert "experiment_file" not in result
     assert "experiment_title" not in result
 
     # Short blocks are safely bounded and return available fields only.

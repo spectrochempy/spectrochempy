@@ -952,7 +952,13 @@ def _read_spa(*args, **kwargs):
     #
 
     records = _read_spa_key_table(fid)
-    is_library_variant = any(record.key == 0x53 for record in records)
+    has_library_text = any(record.key == 0x53 for record in records)
+    fid.seek(304 + 16 * len(records))
+    post_table_key = fid.read(1)
+    # This is the discriminator for the observed validated library/retrieved
+    # layout: 0x53 together with the post-table 0x01 grid. It is not a
+    # universal semantic interpretation of either structure.
+    is_library_variant = has_library_text and post_table_key == b"\x01"
     if is_library_variant:
         acquisitiondate = None
         timestamp = 0.0
@@ -1968,10 +1974,5 @@ def _decode_experiment_info_block(data: bytes) -> dict | None:
         value = _read_slot(start, end)
         if value:
             result[name] = value
-
-    # Retain the historical key as a compatibility alias for the native title
-    # slot while exposing the corrected fixed-anchor names above.
-    if "experiment_title" in result:
-        result["experiment_file"] = result["experiment_title"]
 
     return result or None

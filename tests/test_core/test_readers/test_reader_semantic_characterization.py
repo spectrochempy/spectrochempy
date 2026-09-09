@@ -333,8 +333,8 @@ class TestOmnicCharacterization:
         # from the expected list.
         if dataset.meta.omnic_experiment_path is not None:
             assert isinstance(dataset.meta.omnic_experiment_path, str)
-        if dataset.meta.omnic_experiment_file is not None:
-            assert isinstance(dataset.meta.omnic_experiment_file, str)
+        if dataset.meta.omnic_experiment_description is not None:
+            assert isinstance(dataset.meta.omnic_experiment_description, str)
         if dataset.meta.omnic_accessory is not None:
             assert isinstance(dataset.meta.omnic_accessory, str)
         if dataset.meta.omnic_experiment_title is not None:
@@ -363,8 +363,8 @@ class TestOmnicCharacterization:
         )
         if dataset.meta.omnic_experiment_path is not None:
             assert isinstance(dataset.meta.omnic_experiment_path, str)
-        if dataset.meta.omnic_experiment_file is not None:
-            assert isinstance(dataset.meta.omnic_experiment_file, str)
+        if dataset.meta.omnic_experiment_description is not None:
+            assert isinstance(dataset.meta.omnic_experiment_description, str)
         if dataset.meta.omnic_accessory is not None:
             assert isinstance(dataset.meta.omnic_accessory, str)
         if dataset.meta.omnic_experiment_title is not None:
