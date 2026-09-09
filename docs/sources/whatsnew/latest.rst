@@ -57,6 +57,8 @@ Deprecations
 Developer
 ~~~~~~~~~
 
+ENH: modernize the OMNIC SPA reader using validated native-format semantics.
+
 MAINT: Added a centralized reserved-root-symbol policy
 (``spectrochempy/lazyimport/root_symbols.py``) so plugins cannot shadow
 public ``scp`` symbols; conflicting plugin I/O namespaces are rejected at
