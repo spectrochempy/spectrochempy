@@ -5,6 +5,7 @@
 # ======================================================================================
 # ruff: noqa
 
+import io
 import struct
 from pathlib import Path
 
@@ -196,6 +197,66 @@ def test_return_ifg_validation(tmp_path):
     assert result is None
     assert len(w) >= 1
     assert any("Invalid return_ifg value" in str(warning.message) for warning in w)
+
+
+def _spa_key_table_bytes(records, suffix=b""):
+    content = bytearray(304)
+    struct.pack_into("<H", content, 294, len(records))
+    for key, position, length in records:
+        content.extend(struct.pack("<BBII", key, 0, position, length))
+        content.extend(b"\x00" * 6)
+    content.extend(suffix)
+    return bytes(content)
+
+
+def test_read_spa_key_table_uses_counted_records():
+    from spectrochempy.core.readers.read_omnic import _read_spa_key_table
+
+    records = _read_spa_key_table(
+        io.BytesIO(
+            _spa_key_table_bytes([(2, 400, 140), (3, 600, 8)], suffix=b"\x00" * 16)
+        )
+    )
+
+    assert [(record.key, record.position, record.length) for record in records] == [
+        (2, 400, 140),
+        (3, 600, 8),
+    ]
+
+
+def test_read_spa_key_table_excludes_library_grid():
+    from spectrochempy.core.readers.read_omnic import _read_spa_key_table
+
+    grid = b"\x01\x00\x00\x00\x00\x00\x00\x00" + b"\x00" * 8
+    records = _read_spa_key_table(
+        io.BytesIO(_spa_key_table_bytes([(2, 400, 140), (3, 600, 8)], suffix=grid * 3))
+    )
+
+    assert [record.key for record in records] == [2, 3]
+
+
+def test_read_spa_key_table_preserves_repeated_keys():
+    from spectrochempy.core.readers.read_omnic import _read_spa_key_table
+
+    records = _read_spa_key_table(
+        io.BytesIO(_spa_key_table_bytes([(4, 400, 5), (4, 500, 6)]))
+    )
+
+    assert [(record.key, record.position, record.length) for record in records] == [
+        (4, 400, 5),
+        (4, 500, 6),
+    ]
+
+
+def test_read_spa_key_table_rejects_truncated_table():
+    from spectrochempy.core.readers.read_omnic import _read_spa_key_table
+
+    content = bytearray(304)
+    struct.pack_into("<H", content, 294, 1)
+    content.extend(b"\x00" * 15)
+
+    with pytest.raises(ValueError, match="truncated record table"):
+        _read_spa_key_table(io.BytesIO(content))
 
 
 def _synthetic_spa_with_optical_velocity(mirror, canonical=None):

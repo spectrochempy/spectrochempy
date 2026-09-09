@@ -13,6 +13,7 @@ __all__ = ["read_omnic", "read_spg", "read_spa", "read_srs"]
 
 import io
 import re
+from dataclasses import dataclass
 from datetime import datetime
 from datetime import timedelta
 
@@ -655,15 +656,11 @@ def _read_spg(*args, **kwargs):
     #     key: hex 03, dec  03: intensity position
     #     key: hex 04, dec  04: user text position
     #     key: hex 1B, dec  27: position of History text
-    #     key: hex 64, dec 100: ?
     #     key: hex 66  dec 102: sample interferogram
     #     key: hex 67  dec 103: background interferogram
-    #     key: hex 69, dec 105: ?
-    #     key: hex 6a, dec 106: ?
+    #     key: hex 6a, dec 106: canonical acquisition-parameter block
     #     key: hex 6b, dec 107: position of spectrum title, the acquisition
     #     date follows at +256(dec)
-    #     key: hex 80, dec 128: ?
-    #     key: hex 82, dec 130: rotation angle ?
     #
     # the number of line per block may change from file to file but the total
     # number of lines is given at hex 294, hence allowing counting the
@@ -955,105 +952,52 @@ def _read_spa(*args, **kwargs):
     # use datetime.fromtimestamp(d, timezone.utc)) to transform back to datetime object
     timestamp = acqdate.timestamp()
 
-    # From hex 120 = decimal 304, the spectrum is described
-    # by a block of lines starting with "key values",
-    # for instance hex[02 6a 6b 69 1b 03 82] -> dec[02 106  107 105 27 03 130]
-    # Each of these lines provides positions of data and metadata in the file:
+    # The active key table is counted at +294 and consists of 16-byte records
+    # beginning at +304. Terminators, padding, and post-table variant data are
+    # intentionally outside the parsed record list.
+    # Current dispatch handles the primary header/payload, comments, history,
+    # associated IFGs, optical velocity, and Experiment Information blocks.
+    # Detailed key semantics and variant scope are documented in spa.rst.
     #
-    #     key: hex 02, dec  02: position of spectral header (=> nx,
-    #                                 firstx, lastx, nscans, nbkgscans)
-    #     key: hex 03, dec  03: intensity position
-    #     #     key: hex 04, dec  04: user text position (custom info, can be present
-    #                           several times. The text length is five bytes later)
-    #     key: hex 1B, dec  27: position of History text, The text length
-    #                           is five bytes later
-    #     key: hex 53, dec  83: probably not a position, present when 'Retrieved from library'
-    #     key: hex 64, dec 100: ?
-    #     key: hex 66  dec 102: sample interferogram
-    #     key: hex 67  dec 103: background interferogram
-    #     key: hex 69, dec 105: ?
-    #     key: hex 6a, dec 106: ?
-    #     key: hex 80, dec 128: ?
-    #     key: hex 82, dec 130: position of 'Experiment Information', The text length
-    #                           is five bytes later. The block gives Experiment filename (at +10)
-    #                           Experiment title (+90), custom text (+254), accessory name (+413)
-    #     key: hex 92, dec 146: position of 'custom infos', The text length
-    #                           is five bytes later.
-    #
-    # The line preceding the block start with '01' or '0A'
-    # The lines after the block generally start with '00', except in few cases where
-    # they start by '01'. In such cases, the '53' key is also present
-    # (before the '1B').
 
-    # scan "key values"
-    pos = 304
+    records = _read_spa_key_table(fid)
     spa_comments = []  # several custom comments can be present
     _exp_info = None
     optical_velocity = None
-    while "continue":
-        fid.seek(pos)
-        key = fromfile(fid, dtype="uint8", count=1)
-
-        # print(key, end=' ; ')
+    for record in records:
+        key = record.key
 
         if key == 2:
-            # read the position of the header
-            fid.seek(pos + 2)
-            pos_header = fromfile(fid, dtype="uint32", count=1)
-            info = _read_header(fid, pos_header)
+            info = _read_header(fid, record.position)
 
         elif key == 3 and return_ifg is None:
-            intensities = _getintensities(fid, pos)
+            intensities = _read_spa_float32_payload(fid, record)
 
         elif key == 4:
-            fid.seek(pos + 2)
-            comments_pos = fromfile(fid, "uint32", 1)
-            fid.seek(pos + 6)
-            comments_len = fromfile(fid, "uint32", 1)
-            fid.seek(comments_pos)
-            spa_comments.append(fid.read(comments_len).decode("latin-1", "replace"))
+            fid.seek(record.position)
+            spa_comments.append(fid.read(record.length).decode("latin-1", "replace"))
 
         elif key == 27:
-            fid.seek(pos + 2)
-            history_pos = fromfile(fid, "uint32", 1)
-            fid.seek(pos + 6)
-            history_len = fromfile(fid, "uint32", 1)
-            spa_history = _readbtext(fid, history_pos, history_len)
+            spa_history = _readbtext(fid, record.position, record.length)
 
         elif key == 102 and return_ifg == "sample":
-            s_ifg_intensities = _getintensities(fid, pos)
+            s_ifg_intensities = _read_spa_float32_payload(fid, record)
 
         elif key == 103 and return_ifg == "background":
-            b_ifg_intensities = _getintensities(fid, pos)
+            b_ifg_intensities = _read_spa_float32_payload(fid, record)
 
         elif key == 106:
             # The 0x6a block is the canonical source for acquisition
             # parameters.  The 0x02 header contains a variant-dependent mirror
             # at +188, but newer layouts may leave that mirror blank.
-            fid.seek(pos + 2)
-            parameters_pos = fromfile(fid, "uint32", 1)
-            fid.seek(pos + 6)
-            parameters_len = fromfile(fid, "uint32", 1)
-            if parameters_len >= 52:
-                fid.seek(parameters_pos + 48)
+            if record.length >= 52:
+                fid.seek(record.position + 48)
                 optical_velocity = fromfile(fid, "float32", 1)
 
-        elif key == 130 and _exp_info is None:
-            fid.seek(pos + 2)
-            blk_pos = fromfile(fid, "uint32", 1)
-            fid.seek(pos + 6)
-            blk_len = fromfile(fid, "uint32", 1)
-            if blk_len >= 50:
-                cur = fid.tell()
-                fid.seek(blk_pos)
-                blk_data = fid.read(blk_len)
-                fid.seek(cur)
-                _exp_info = _decode_experiment_info_block(blk_data)
-
-        elif key == 00 or key == 1:
-            break
-
-        pos += 16
+        elif key == 130 and _exp_info is None and record.length >= 50:
+            fid.seek(record.position)
+            blk_data = fid.read(record.length)
+            _exp_info = _decode_experiment_info_block(blk_data)
 
     fid.close()
 
@@ -1906,6 +1850,57 @@ def _read_srs_spectra(fid, pos_data, n_spectra, n_points):
         pos += n_points * 4
 
     return names, data
+
+
+@dataclass(frozen=True)
+class _SpaKeyRecord:
+    """One counted 16-byte record from an SPA key table."""
+
+    key: int
+    position: int
+    length: int
+
+
+def _read_spa_key_table(fid):
+    """
+    Read the counted active records from an SPA key table.
+
+    The active table starts at file offset 304 and contains ``nlines`` records,
+    where ``nlines`` is the little-endian uint16 at offset 294. Any
+    variant-dependent terminator, padding, or post-table grid is deliberately
+    outside this representation; see the public SPA format reference.
+    """
+    fid.seek(294)
+    count_bytes = fid.read(2)
+    if len(count_bytes) != 2:
+        raise ValueError("Invalid SPA key table: missing record count")
+    nlines = int.from_bytes(count_bytes, byteorder="little")
+    table_end = 304 + 16 * nlines
+
+    fid.seek(0, io.SEEK_END)
+    if table_end > fid.tell():
+        raise ValueError("Invalid SPA key table: truncated record table")
+
+    fid.seek(304)
+    records = []
+    for _ in range(nlines):
+        raw_record = fid.read(16)
+        if len(raw_record) != 16:  # pragma: no cover - table_end guards this
+            raise ValueError("Invalid SPA key table: truncated record")
+        records.append(
+            _SpaKeyRecord(
+                key=raw_record[0],
+                position=int.from_bytes(raw_record[2:6], byteorder="little"),
+                length=int.from_bytes(raw_record[6:10], byteorder="little"),
+            )
+        )
+    return records
+
+
+def _read_spa_float32_payload(fid, record):
+    """Read a float32 payload referenced by an SPA key record."""
+    fid.seek(record.position)
+    return fromfile(fid, "float32", int(record.length / 4))
 
 
 def _getintensities(fid, pos):
