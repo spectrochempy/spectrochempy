@@ -48,6 +48,20 @@ def test_read_omnic_local_wodger():
     assert str(nd1.y.units) == "s"
 
 
+def test_read_spg_experiment_info_uses_native_fixed_slots():
+    dataset = scp.read_spg(WODGER, sortbydate=False)
+
+    assert dataset.meta.omnic_experiment_path == (
+        r"C:\MYDOCU~1\omnic\Param\VLADIM~1.EXP"
+    )
+    assert dataset.meta.omnic_experiment_title == "Transmission"
+    assert dataset.meta.omnic_experiment_description == (
+        "This is the default experiment file."
+    )
+    assert dataset.meta.omnic_accessory_name == "None"
+    assert dataset.meta.omnic_experiment_file is None
+
+
 @pytest.mark.usefixtures("_skip_if_no_testdata")
 def test_read_omnic():
     # Class method opening a dialog (but for test it is preset)
