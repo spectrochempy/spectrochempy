@@ -5,6 +5,7 @@
 # ======================================================================================
 # ruff: noqa
 
+import struct
 from pathlib import Path
 
 import numpy as np
@@ -195,6 +196,51 @@ def test_return_ifg_validation(tmp_path):
     assert result is None
     assert len(w) >= 1
     assert any("Invalid return_ifg value" in str(warning.message) for warning in w)
+
+
+def _synthetic_spa_with_optical_velocity(mirror, canonical):
+    """Build a minimal SPA containing both optical-velocity representations."""
+    content = bytearray(768)
+    content[:18] = b"Spectral Data File"
+    content[30:42] = b"synthetic.spa"
+    struct.pack_into("<H", content, 294, 3)
+
+    records = ((2, 400, 140), (106, 700, 56), (3, 756, 8))
+    for offset, (key, position, length) in zip((304, 320, 336), records):
+        struct.pack_into("<BBII", content, offset, key, 0, position, length)
+
+    header = 400
+    struct.pack_into("<I", content, header + 4, 2)
+    content[header + 8] = 1
+    content[header + 12] = 17
+    struct.pack_into("<ff", content, header + 16, 4000.0, 3999.0)
+    struct.pack_into("<I", content, header + 68, 100)
+    struct.pack_into("<f", content, header + 80, 15798.0)
+    struct.pack_into("<f", content, header + 84, 1.0)
+    struct.pack_into("<f", content, header + 188, mirror)
+    struct.pack_into("<f", content, 700 + 48, canonical)
+    struct.pack_into("<ff", content, 756, 1.0, 2.0)
+    return bytes(content)
+
+
+def test_spa_uses_canonical_optical_velocity(tmp_path):
+    """The 0x6a value wins over the legacy 0x02 header mirror."""
+    path = tmp_path / "canonical.spa"
+    path.write_bytes(_synthetic_spa_with_optical_velocity(0.0, 0.3165))
+
+    dataset = scp.read_spa(path)
+
+    assert dataset.meta.optical_velocity == pytest.approx(0.3165)
+
+
+def test_spa_preserves_matching_optical_velocity_layout(tmp_path):
+    """The canonical and mirrored values remain unchanged when they agree."""
+    path = tmp_path / "matching.spa"
+    path.write_bytes(_synthetic_spa_with_optical_velocity(0.3165, 0.3165))
+
+    dataset = scp.read_spa(path)
+
+    assert dataset.meta.optical_velocity == pytest.approx(0.3165)
 
 
 def test_allow_inconsistent_x_parameter_documented():
