@@ -375,8 +375,6 @@ def test_spa_falls_back_to_mirror_without_canonical_parameters(tmp_path):
 
 
 def test_spa_exposes_mature_acquisition_metadata(tmp_path):
-    from spectrochempy.core.units import ur
-
     path = tmp_path / "acquisition-metadata.spa"
     path.write_bytes(
         _synthetic_spa_with_optical_velocity(
@@ -393,27 +391,23 @@ def test_spa_exposes_mature_acquisition_metadata(tmp_path):
             digitizer_bits=20,
             high_pass=200.0,
             low_pass=11000.0,
-            sample_gain=16.0,
+            sample_gain=12.5,
         )
     )
 
     dataset = scp.read_spa(path)
 
-    assert dataset.meta.omnic_scan_points == 1234
-    assert dataset.meta.omnic_interferogram_peak_position == 512
-    assert dataset.meta.omnic_sample_scans == 8
-    assert dataset.meta.omnic_background_scans == 4
-    assert dataset.meta.omnic_fft_points == 4096
-    assert dataset.meta.omnic_background_gain == pytest.approx(2.5)
-    assert dataset.meta.omnic_aperture == pytest.approx(75.0)
-    assert dataset.meta.omnic_digitizer_bits == 20
-    assert dataset.meta.omnic_sample_gain == pytest.approx(16.0)
-    assert dataset.meta.omnic_high_pass.to(ur("cm^-1")).magnitude == pytest.approx(
-        200.0
-    )
-    assert dataset.meta.omnic_low_pass.to(ur("cm^-1")).magnitude == pytest.approx(
-        11000.0
-    )
+    assert dataset.meta.scan_points == 1234
+    assert dataset.meta.interferogram_peak_position == 512
+    assert dataset.meta.sample_scans == 8
+    assert dataset.meta.background_scans == 4
+    assert dataset.meta.fft_points == 4096
+    assert dataset.meta.background_gain == pytest.approx(2.5)
+    assert dataset.meta.aperture == pytest.approx(75.0)
+    assert dataset.meta.digitizer_bits == 20
+    assert dataset.meta.sample_gain == pytest.approx(12.5)
+    assert dataset.meta.high_pass_filter == pytest.approx(200.0)
+    assert dataset.meta.low_pass_filter == pytest.approx(11000.0)
 
 
 def test_spa_raman_uses_excitation_and_preserves_reference_frequency(tmp_path):
@@ -434,9 +428,9 @@ def test_spa_raman_uses_excitation_and_preserves_reference_frequency(tmp_path):
     assert dataset.meta.laser_frequency.to(ur("cm^-1")).magnitude == pytest.approx(
         9395.0
     )
-    assert dataset.meta.omnic_reference_frequency.to(
-        ur("cm^-1")
-    ).magnitude == pytest.approx(15798.2)
+    assert dataset.meta.reference_frequency.to(ur("cm^-1")).magnitude == pytest.approx(
+        15798.2
+    )
     np.testing.assert_allclose(dataset.x.data, [4000.0, 3999.0])
 
 

@@ -1103,34 +1103,29 @@ def _read_spa(*args, **kwargs):
         # Retain compatibility with supported files that do not carry 0x6a.
         optical_velocity = info["optical_velocity"]
     dataset.meta.optical_velocity = optical_velocity
+    dataset.meta.reference_frequency = info["reference_frequency"] * ur("cm^-1")
     if info["xtitle"] == "raman shift":
         dataset.meta.laser_frequency = info["raman_excitation_frequency"] * ur("cm^-1")
-        dataset.meta.omnic_reference_frequency = info["reference_frequency"] * ur(
-            "cm^-1"
-        )
     else:
         dataset.meta.laser_frequency = info["reference_frequency"] * ur("cm^-1")
     dataset.meta.sample_spacing = info["sample_spacing"]
 
     if not is_library_variant:
-        dataset.meta.omnic_scan_points = int(info["scan_points"])
-        dataset.meta.omnic_interferogram_peak_position = int(info["peak_position"])
-        dataset.meta.omnic_sample_scans = int(info["sample_scans"])
-        dataset.meta.omnic_background_scans = int(info["background_scans"])
-        dataset.meta.omnic_fft_points = int(info["fft_points"])
-        dataset.meta.omnic_background_gain = float(info["background_gain"])
-        dataset.meta.omnic_aperture = float(info["aperture"])
-        for name in ("digitizer_bits", "sample_gain"):
-            if name in acquisition_parameters:
-                setattr(
-                    dataset.meta, f"omnic_{name}", int(acquisition_parameters[name])
-                )
+        dataset.meta.scan_points = int(info["scan_points"])
+        dataset.meta.interferogram_peak_position = int(info["peak_position"])
+        dataset.meta.sample_scans = int(info["sample_scans"])
+        dataset.meta.background_scans = int(info["background_scans"])
+        dataset.meta.fft_points = int(info["fft_points"])
+        dataset.meta.background_gain = float(info["background_gain"])
+        dataset.meta.aperture = float(info["aperture"])
+        if "digitizer_bits" in acquisition_parameters:
+            dataset.meta.digitizer_bits = int(acquisition_parameters["digitizer_bits"])
+        if "sample_gain" in acquisition_parameters:
+            dataset.meta.sample_gain = float(acquisition_parameters["sample_gain"])
         for name in ("high_pass", "low_pass"):
             if name in acquisition_parameters:
                 setattr(
-                    dataset.meta,
-                    f"omnic_{name}",
-                    acquisition_parameters[name] * ur("cm^-1"),
+                    dataset.meta, f"{name}_filter", float(acquisition_parameters[name])
                 )
 
     if _exp_info is not None:
