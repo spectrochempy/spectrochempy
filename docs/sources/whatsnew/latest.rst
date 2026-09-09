@@ -57,7 +57,9 @@ Deprecations
 Developer
 ~~~~~~~~~
 
-ENH: modernize the OMNIC SPA reader using validated native-format semantics.
+ENH: modernize the OMNIC SPA reader using validated native-format semantics,
+including structured key-table parsing and corrected Experiment Information,
+Raman-frequency, and acquisition-date metadata.
 
 MAINT: Added a centralized reserved-root-symbol policy
 (``spectrochempy/lazyimport/root_symbols.py``) so plugins cannot shadow

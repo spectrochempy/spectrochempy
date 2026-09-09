@@ -48,6 +48,20 @@ def test_read_omnic_local_wodger():
     assert str(nd1.y.units) == "s"
 
 
+def test_read_spg_experiment_info_uses_native_fixed_slots():
+    dataset = scp.read_spg(WODGER, sortbydate=False)
+
+    assert dataset.meta.omnic_experiment_path == (
+        r"C:\MYDOCU~1\omnic\Param\VLADIM~1.EXP"
+    )
+    assert dataset.meta.omnic_experiment_title == "Transmission"
+    assert dataset.meta.omnic_experiment_description == (
+        "This is the default experiment file."
+    )
+    assert dataset.meta.omnic_accessory_name == "None"
+    assert dataset.meta.omnic_experiment_file is None
+
+
 @pytest.mark.usefixtures("_skip_if_no_testdata")
 def test_read_omnic():
     # Class method opening a dialog (but for test it is preset)
@@ -259,7 +273,16 @@ def test_read_spa_key_table_rejects_truncated_table():
         _read_spa_key_table(io.BytesIO(content))
 
 
-def _synthetic_spa_with_optical_velocity(mirror, canonical=None):
+def _synthetic_spa_with_optical_velocity(
+    mirror,
+    canonical=None,
+    *,
+    xunits=1,
+    reference_frequency=15798.0,
+    raman_frequency=0.0,
+    timestamp=0,
+    library=False,
+):
     """Build a minimal SPA with optional canonical optical-velocity metadata."""
     content = bytearray(768)
     content[:18] = b"Spectral Data File"
@@ -268,20 +291,28 @@ def _synthetic_spa_with_optical_velocity(mirror, canonical=None):
     records = [(2, 400, 140)]
     if canonical is not None:
         records.append((106, 700, 56))
+    if library:
+        records.append((0x53, 0, 0))
     payload_position = 756 if canonical is not None else 700
+    if library and canonical is None:
+        payload_position = 700
     records.append((3, payload_position, 8))
     struct.pack_into("<H", content, 294, len(records))
+    struct.pack_into("<I", content, 296, timestamp)
     for offset, (key, position, length) in zip((304, 320, 336), records):
         struct.pack_into("<BBII", content, offset, key, 0, position, length)
+    if library:
+        content[304 + 16 * len(records)] = 1
 
     header = 400
     struct.pack_into("<I", content, header + 4, 2)
-    content[header + 8] = 1
+    content[header + 8] = xunits
     content[header + 12] = 17
     struct.pack_into("<ff", content, header + 16, 4000.0, 3999.0)
     struct.pack_into("<I", content, header + 68, 100)
-    struct.pack_into("<f", content, header + 80, 15798.0)
+    struct.pack_into("<f", content, header + 80, reference_frequency)
     struct.pack_into("<f", content, header + 84, 1.0)
+    struct.pack_into("<f", content, header + 96, raman_frequency)
     struct.pack_into("<f", content, header + 188, mirror)
     if canonical is not None:
         struct.pack_into("<f", content, 700 + 48, canonical)
@@ -319,6 +350,47 @@ def test_spa_falls_back_to_mirror_without_canonical_parameters(tmp_path):
     assert dataset.meta.optical_velocity == pytest.approx(8.8617)
 
 
+def test_spa_raman_uses_excitation_and_preserves_reference_frequency(tmp_path):
+    from spectrochempy.core.units import ur
+
+    path = tmp_path / "raman.spa"
+    path.write_bytes(
+        _synthetic_spa_with_optical_velocity(
+            8.8617,
+            xunits=0x20,
+            reference_frequency=15798.2,
+            raman_frequency=9395.0,
+        )
+    )
+
+    dataset = scp.read_spa(path)
+
+    assert dataset.meta.laser_frequency.to(ur("cm^-1")).magnitude == pytest.approx(
+        9395.0
+    )
+    assert dataset.meta.omnic_reference_frequency.to(
+        ur("cm^-1")
+    ).magnitude == pytest.approx(15798.2)
+    np.testing.assert_allclose(dataset.x.data, [4000.0, 3999.0])
+
+
+def test_spa_library_timestamp_is_not_promoted(tmp_path):
+    path = tmp_path / "library.spa"
+    path.write_bytes(
+        _synthetic_spa_with_optical_velocity(
+            8.8617,
+            timestamp=1577962800,
+            library=True,
+        )
+    )
+
+    dataset = scp.read_spa(path)
+
+    assert dataset.acquisition_date is None
+    assert dataset.y.title == "spectrum"
+    assert dataset.y.labels[0, 0] is None
+
+
 def test_allow_inconsistent_x_parameter_documented():
     assert "allow_inconsistent_x" in scp.read_spg.__doc__
     assert "allow_inconsistent_x" in scp.read_omnic.__doc__
@@ -326,69 +398,96 @@ def test_allow_inconsistent_x_parameter_documented():
 
 
 def test_decode_experiment_info_block():
-    """_decode_experiment_info_block correctly decodes 0x79 blocks."""
+    """Decode native fixed-slot subtype-0x79 Experiment Information blocks."""
     from spectrochempy.core.readers.read_omnic import _decode_experiment_info_block
 
-    # Helper to build a 0x79 block
-    def _build_block(*fields):
-        payload = b"\x00".join(f.encode("utf-8") for f in fields) + b"\x00"
-        header = bytes([0x79, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00])
-        block = header + payload
-        if len(block) < 60:
-            block += b"\x00" * (60 - len(block))
-        return block
+    def _build_block(fields, size=700, subtype=0x79):
+        block = bytearray(size)
+        block[0] = subtype
+        for offset, value in fields.items():
+            encoded = value.encode("utf-8") + b"\x00"
+            block[offset : offset + len(encoded)] = encoded
+        return bytes(block)
 
-    # Normal 4-field block
     block = _build_block(
-        r"C:\MYDOCU~1\omnic\Param\CARROU~2.EXP",
-        "CARROU~2.EXP",
-        "iS50 Main Sample",
-        "Default experiment for iS50 Main Sample Compartment",
+        {
+            10: r"C:\MYDOCU~1\omnic\Param\CARROU~2.EXP",
+            90: "CARROU~2.EXP",
+            154: "Default experiment for iS50 Main Sample Compartment",
+            413: "iS50 Main Sample",
+        }
     )
     result = _decode_experiment_info_block(block)
     assert result is not None
     assert result["experiment_path"] == r"C:\MYDOCU~1\omnic\Param\CARROU~2.EXP"
-    assert result["experiment_file"] == "CARROU~2.EXP"
     assert result["accessory_name"] == "iS50 Main Sample"
+    assert result["experiment_title"] == "CARROU~2.EXP"
     assert (
-        result["experiment_title"]
+        result["experiment_description"]
         == "Default experiment for iS50 Main Sample Compartment"
     )
 
-    # Subtype 0x9e (System Status) -> None
+    # Unsupported subtype is ignored.
     bad = bytearray(block)
     bad[0] = 0x9E
     assert _decode_experiment_info_block(bytes(bad)) is None
 
-    # Too short -> None
-    assert _decode_experiment_info_block(b"\x00" * 40) is None
-
-    # Single field -> experiment_path only
-    block = _build_block(r"C:\path\to\file.spa")
+    # Empty middle slot does not compact later fixed fields.
+    block = _build_block({10: "path", 154: "description", 413: "accessory"})
     result = _decode_experiment_info_block(block)
     assert result is not None
-    assert result["experiment_path"] == r"C:\path\to\file.spa"
-    assert "experiment_file" not in result
-    assert "accessory_name" not in result
+    assert result["experiment_path"] == "path"
+    assert result["experiment_description"] == "description"
+    assert result["accessory_name"] == "accessory"
     assert "experiment_title" not in result
 
-    # Three fields without title
-    block = _build_block(r"C:\ATR\crystal.exp", "crystal.exp", "ATR Crystal")
-    result = _decode_experiment_info_block(block)
-    assert result is not None
-    assert result["experiment_path"] == r"C:\ATR\crystal.exp"
-    assert result["experiment_file"] == "crystal.exp"
-    assert result["accessory_name"] == "ATR Crystal"
-    assert "experiment_title" not in result
+    # Short blocks are safely bounded and return available fields only.
+    result = _decode_experiment_info_block(_build_block({10: "short"}, size=40))
+    assert result == {"experiment_path": "short"}
 
-    # Unix-style path in field 0
-    block = _build_block("/home/omnic/param/test.exp", "test.exp", "iS50 Sample")
-    result = _decode_experiment_info_block(block)
-    assert result is not None
-    assert result["experiment_path"] == "/home/omnic/param/test.exp"
-    assert result["experiment_file"] == "test.exp"
-    assert result["accessory_name"] == "iS50 Sample"
-    assert "experiment_title" not in result
+
+def _synthetic_spa_with_experiment_blocks(blocks):
+    content = bytearray(5000)
+    content[:18] = b"Spectral Data File"
+    content[30:42] = b"synthetic.spa"
+    records = [(2, 400, 140)]
+    for index, block in enumerate(blocks):
+        position = 700 + index * 800
+        records.append((130, position, len(block)))
+        content[position : position + len(block)] = block
+    records.append((3, 4000, 8))
+    struct.pack_into("<H", content, 294, len(records))
+    for offset, (key, position, length) in zip(
+        range(304, 304 + 16 * len(records), 16), records
+    ):
+        struct.pack_into("<BBII", content, offset, key, 0, position, length)
+    header = 400
+    struct.pack_into("<I", content, header + 4, 2)
+    content[header + 8] = 1
+    content[header + 12] = 17
+    struct.pack_into("<ff", content, header + 16, 4000.0, 3999.0)
+    struct.pack_into("<I", content, header + 68, 100)
+    struct.pack_into("<f", content, header + 80, 15798.0)
+    struct.pack_into("<f", content, header + 84, 1.0)
+    struct.pack_into("<ff", content, 4000, 1.0, 2.0)
+    return bytes(content)
+
+
+def test_spa_uses_later_79_after_unsupported_82(tmp_path):
+    path = tmp_path / "experiment-info.spa"
+    unsupported = bytes([0x9D]) + b"\x00" * 699
+    supported = bytearray(700)
+    supported[0] = 0x79
+    supported[10:18] = b"native\x00\x00"
+    supported[90:99] = b"title\x00\x00\x00"
+    path.write_bytes(
+        _synthetic_spa_with_experiment_blocks([unsupported, bytes(supported)])
+    )
+
+    dataset = scp.read_spa(path)
+
+    assert dataset.meta.omnic_experiment_path == "native"
+    assert dataset.meta.omnic_experiment_title == "title"
 
 
 @pytest.mark.skip(reason="Requires an SPG file with inconsistent x-axes (#863)")
