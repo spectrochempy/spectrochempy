@@ -13,6 +13,7 @@ __all__ = ["read_omnic", "read_spg", "read_spa", "read_srs"]
 
 import io
 import re
+import struct
 from dataclasses import dataclass
 from datetime import datetime
 from datetime import timedelta
@@ -970,7 +971,7 @@ def _read_spa(*args, **kwargs):
         timestamp = acqdate.timestamp()
     spa_comments = []  # several custom comments can be present
     _exp_info = None
-    optical_velocity = None
+    acquisition_parameters = {}
     for record in records:
         key = record.key
 
@@ -994,12 +995,7 @@ def _read_spa(*args, **kwargs):
             b_ifg_intensities = _read_spa_float32_payload(fid, record)
 
         elif key == 106:
-            # The 0x6a block is the canonical source for acquisition
-            # parameters.  The 0x02 header contains a variant-dependent mirror
-            # at +188, but newer layouts may leave that mirror blank.
-            if record.length >= 52:
-                fid.seek(record.position + 48)
-                optical_velocity = fromfile(fid, "float32", 1)
+            acquisition_parameters.update(_read_spa_acquisition_parameters(fid, record))
 
         elif key == 130 and _exp_info is None and record.length >= 50:
             fid.seek(record.position)
@@ -1045,14 +1041,14 @@ def _read_spa(*args, **kwargs):
 
         # now add coordinates
         nx = info["nx"]
-        firstx = info["firstx"]
-        lastx = info["lastx"]
+        native_last_x = info["native_last_x"]
+        native_first_x = info["native_first_x"]
         xunit = info["xunits"]
         xtitle = info["xtitle"]
 
         _x = Coord.linspace(
-            firstx,
-            lastx,
+            native_last_x,
+            native_first_x,
             int(nx),
             title=xtitle,
             units=xunit,
@@ -1102,18 +1098,35 @@ def _read_spa(*args, **kwargs):
     dataset._date = utcnow()
 
     dataset.meta.collection_length = info["collection_length"] / 100 * ur("s")
+    optical_velocity = acquisition_parameters.get("optical_velocity")
     if optical_velocity is None:
         # Retain compatibility with supported files that do not carry 0x6a.
         optical_velocity = info["optical_velocity"]
     dataset.meta.optical_velocity = optical_velocity
+    dataset.meta.reference_frequency = info["reference_frequency"] * ur("cm^-1")
     if info["xtitle"] == "raman shift":
         dataset.meta.laser_frequency = info["raman_excitation_frequency"] * ur("cm^-1")
-        dataset.meta.omnic_reference_frequency = info["reference_frequency"] * ur(
-            "cm^-1"
-        )
     else:
         dataset.meta.laser_frequency = info["reference_frequency"] * ur("cm^-1")
     dataset.meta.sample_spacing = info["sample_spacing"]
+
+    if not is_library_variant:
+        dataset.meta.scan_points = int(info["scan_points"])
+        dataset.meta.interferogram_peak_position = int(info["peak_position"])
+        dataset.meta.sample_scans = int(info["sample_scans"])
+        dataset.meta.background_scans = int(info["background_scans"])
+        dataset.meta.fft_points = int(info["fft_points"])
+        dataset.meta.background_gain = float(info["background_gain"])
+        dataset.meta.aperture = float(info["aperture"])
+        if "digitizer_bits" in acquisition_parameters:
+            dataset.meta.digitizer_bits = int(acquisition_parameters["digitizer_bits"])
+        if "sample_gain" in acquisition_parameters:
+            dataset.meta.sample_gain = float(acquisition_parameters["sample_gain"])
+        for name in ("high_pass", "low_pass"):
+            if name in acquisition_parameters:
+                setattr(
+                    dataset.meta, f"{name}_filter", float(acquisition_parameters[name])
+                )
 
     if _exp_info is not None:
         for meta_key, val in _exp_info.items():
@@ -1126,6 +1139,7 @@ def _read_spa(*args, **kwargs):
         # the native sample spacing (spacing = sample_spacing / (2 * nu)).
         dataset.meta.interferogram = True
         dataset.meta.td = list(dataset.shape)
+        # This is the data-derived peak index, not formal physical ZPD.
         dataset.x._zpd = int(np.argmax(dataset)[-1])
         dataset.x.set_laser_frequency(
             frequency=info["reference_frequency"], sample_spacing=info["sample_spacing"]
@@ -1642,7 +1656,7 @@ def _read_header(fid, pos, is_first_spectrum=True):
         - last x value (float32), 20 bytes behind
         - ... unknown
         - scan points (UInt32), 28 bytes behind
-        - zpd (UInt32),  32 bytes behind
+        - interferogram peak position (UInt32), 32 bytes behind
         - number of scans (UInt32), 36 bytes behind
         - ... unknown
         - number of background scans (UInt32), 52 bytes behind
@@ -1754,26 +1768,41 @@ def _read_header(fid, pos, is_first_spectrum=True):
                 f"The nature of data is not recognized (key == {key}), title set to 'Intensity'"
             )
 
-    # firstx, lastx
+    # Native endpoint names follow OMNIC terminology: +16 is Last X and +20
+    # is First X. Historical aliases are retained for the shared readers.
     fid.seek(pos + 16)
-    out["firstx"] = fromfile(fid, "float32", 1)
+    out["native_last_x"] = fromfile(fid, "float32", 1)
     fid.seek(pos + 20)
-    out["lastx"] = fromfile(fid, "float32", 1)
+    out["native_first_x"] = fromfile(fid, "float32", 1)
+    out["firstx"] = out["native_last_x"]
+    out["lastx"] = out["native_first_x"]
     fid.seek(pos + 28)
 
-    out["scan_pts"] = fromfile(fid, "uint32", 1)
+    out["scan_points"] = fromfile(fid, "uint32", 1)
+    out["scan_pts"] = out["scan_points"]
     fid.seek(pos + 32)
-    out["zpd"] = fromfile(fid, "uint32", 1)
+    out["peak_position"] = fromfile(fid, "uint32", 1)
+    out["zpd"] = out["peak_position"]
     fid.seek(pos + 36)
-    out["nscan"] = fromfile(fid, "uint32", 1)
+    out["sample_scans"] = fromfile(fid, "uint32", 1)
+    out["nscan"] = out["sample_scans"]
+    fid.seek(pos + 44)
+    out["fft_points"] = fromfile(fid, "uint32", 1)
+    fid.seek(pos + 48)
+    out["trailing_geometry"] = fromfile(fid, "uint32", 1)
     fid.seek(pos + 52)
-    out["nbkgscan"] = fromfile(fid, "uint32", 1)
+    out["background_scans"] = fromfile(fid, "uint32", 1)
+    out["nbkgscan"] = out["background_scans"]
+    fid.seek(pos + 56)
+    out["background_gain"] = fromfile(fid, "float32", 1)
     fid.seek(pos + 68)
     out["collection_length"] = fromfile(fid, "uint32", 1)
     fid.seek(pos + 80)
     out["reference_frequency"] = fromfile(fid, "float32", 1)
     fid.seek(pos + 84)
     out["sample_spacing"] = fromfile(fid, "float32", 1)
+    fid.seek(pos + 92)
+    out["aperture"] = fromfile(fid, "float32", 1)
     fid.seek(pos + 96)
     out["raman_excitation_frequency"] = fromfile(fid, "float32", 1)
     fid.seek(pos + 188)
@@ -1919,6 +1948,26 @@ def _read_spa_float32_payload(fid, record):
     """Read a float32 payload referenced by an SPA key record."""
     fid.seek(record.position)
     return fromfile(fid, "float32", int(record.length / 4))
+
+
+def _read_spa_acquisition_parameters(fid, record):
+    """Read mature acquisition fields from the canonical 0x6a block."""
+    if record.length < 20:
+        return {}
+    fid.seek(record.position)
+    data = fid.read(record.length)
+    parameters = {}
+
+    if len(data) >= 20:
+        parameters["digitizer_bits"] = struct.unpack_from("<I", data, 16)[0]
+    if len(data) >= 28:
+        parameters["high_pass"] = struct.unpack_from("<f", data, 20)[0]
+        parameters["low_pass"] = struct.unpack_from("<f", data, 24)[0]
+    if len(data) >= 48:
+        parameters["sample_gain"] = struct.unpack_from("<f", data, 44)[0]
+    if len(data) >= 52:
+        parameters["optical_velocity"] = struct.unpack_from("<f", data, 48)[0]
+    return parameters
 
 
 def _getintensities(fid, pos):

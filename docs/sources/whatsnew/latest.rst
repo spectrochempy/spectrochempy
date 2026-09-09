@@ -23,7 +23,13 @@ New Features
   ``fitted_named_steps_``); ``transform`` / ``fit_transform`` are available
   for transformer-final pipelines and ``predict`` / ``score`` for
   estimator-final pipelines, with nested ``set_params`` support and fitted-state
-  invalidation.
+   invalidation.
+
+- OMNIC SPA imports now expose corrected Experiment Information,
+  Raman reference/excitation metadata, and validated acquisition metadata for
+  scan geometry, gains, filters, aperture, and digitizer settings where
+  available; invalid library/retrieved timestamps are not promoted as
+  acquisition dates. (#1605, #1606)
 
 Bug Fixes
 ~~~~~~~~~
@@ -57,9 +63,10 @@ Deprecations
 Developer
 ~~~~~~~~~
 
-ENH: modernize the OMNIC SPA reader using validated native-format semantics,
-including structured key-table parsing and corrected Experiment Information,
-Raman-frequency, and acquisition-date metadata.
+MAINT: Continue modernizing the OMNIC SPA reader around the validated
+native-format model, including counted key-table parsing, shared native-block
+dispatch, consolidated acquisition-parameter parsing, and clearer internal
+coordinate/peak terminology. (#1604, #1605, #1606)
 
 MAINT: Added a centralized reserved-root-symbol policy
 (``spectrochempy/lazyimport/root_symbols.py``) so plugins cannot shadow

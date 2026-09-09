@@ -282,6 +282,18 @@ def _synthetic_spa_with_optical_velocity(
     raman_frequency=0.0,
     timestamp=0,
     library=False,
+    scan_points=0,
+    peak_position=0,
+    sample_scans=0,
+    fft_points=0,
+    trailing_geometry=0,
+    background_scans=0,
+    background_gain=0.0,
+    aperture=0.0,
+    digitizer_bits=0,
+    high_pass=0.0,
+    low_pass=0.0,
+    sample_gain=0.0,
 ):
     """Build a minimal SPA with optional canonical optical-velocity metadata."""
     content = bytearray(768)
@@ -309,12 +321,24 @@ def _synthetic_spa_with_optical_velocity(
     content[header + 8] = xunits
     content[header + 12] = 17
     struct.pack_into("<ff", content, header + 16, 4000.0, 3999.0)
+    struct.pack_into("<I", content, header + 28, scan_points)
+    struct.pack_into("<I", content, header + 32, peak_position)
+    struct.pack_into("<I", content, header + 36, sample_scans)
+    struct.pack_into("<I", content, header + 44, fft_points)
+    struct.pack_into("<I", content, header + 48, trailing_geometry)
+    struct.pack_into("<I", content, header + 52, background_scans)
+    struct.pack_into("<f", content, header + 56, background_gain)
     struct.pack_into("<I", content, header + 68, 100)
     struct.pack_into("<f", content, header + 80, reference_frequency)
     struct.pack_into("<f", content, header + 84, 1.0)
+    struct.pack_into("<f", content, header + 92, aperture)
     struct.pack_into("<f", content, header + 96, raman_frequency)
     struct.pack_into("<f", content, header + 188, mirror)
     if canonical is not None:
+        struct.pack_into("<I", content, 700 + 16, digitizer_bits)
+        struct.pack_into("<f", content, 700 + 20, high_pass)
+        struct.pack_into("<f", content, 700 + 24, low_pass)
+        struct.pack_into("<f", content, 700 + 44, sample_gain)
         struct.pack_into("<f", content, 700 + 48, canonical)
     struct.pack_into("<ff", content, payload_position, 1.0, 2.0)
     return bytes(content)
@@ -350,6 +374,42 @@ def test_spa_falls_back_to_mirror_without_canonical_parameters(tmp_path):
     assert dataset.meta.optical_velocity == pytest.approx(8.8617)
 
 
+def test_spa_exposes_mature_acquisition_metadata(tmp_path):
+    path = tmp_path / "acquisition-metadata.spa"
+    path.write_bytes(
+        _synthetic_spa_with_optical_velocity(
+            8.8617,
+            8.8617,
+            scan_points=1234,
+            peak_position=512,
+            sample_scans=8,
+            fft_points=4096,
+            trailing_geometry=2048,
+            background_scans=4,
+            background_gain=2.5,
+            aperture=75.0,
+            digitizer_bits=20,
+            high_pass=200.0,
+            low_pass=11000.0,
+            sample_gain=12.5,
+        )
+    )
+
+    dataset = scp.read_spa(path)
+
+    assert dataset.meta.scan_points == 1234
+    assert dataset.meta.interferogram_peak_position == 512
+    assert dataset.meta.sample_scans == 8
+    assert dataset.meta.background_scans == 4
+    assert dataset.meta.fft_points == 4096
+    assert dataset.meta.background_gain == pytest.approx(2.5)
+    assert dataset.meta.aperture == pytest.approx(75.0)
+    assert dataset.meta.digitizer_bits == 20
+    assert dataset.meta.sample_gain == pytest.approx(12.5)
+    assert dataset.meta.high_pass_filter == pytest.approx(200.0)
+    assert dataset.meta.low_pass_filter == pytest.approx(11000.0)
+
+
 def test_spa_raman_uses_excitation_and_preserves_reference_frequency(tmp_path):
     from spectrochempy.core.units import ur
 
@@ -368,9 +428,9 @@ def test_spa_raman_uses_excitation_and_preserves_reference_frequency(tmp_path):
     assert dataset.meta.laser_frequency.to(ur("cm^-1")).magnitude == pytest.approx(
         9395.0
     )
-    assert dataset.meta.omnic_reference_frequency.to(
-        ur("cm^-1")
-    ).magnitude == pytest.approx(15798.2)
+    assert dataset.meta.reference_frequency.to(ur("cm^-1")).magnitude == pytest.approx(
+        15798.2
+    )
     np.testing.assert_allclose(dataset.x.data, [4000.0, 3999.0])
 
 
