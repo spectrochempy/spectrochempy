@@ -939,18 +939,9 @@ def _read_spa(*args, **kwargs):
     # renaming has been done in the OS.
     spa_name = _readbtext(fid, 30, 256)
 
-    # The acquisition date (GMT) is at hex 128 = decimal 296.
-    # Second since 31/12/1899, 00:00
+    # The raw acquisition-time value is at file offset 296.
     fid.seek(296)
-    timestamp = fromfile(fid, dtype="uint32", count=1)
-    acqdate = datetime(1899, 12, 31, 0, 0, tzinfo=UTC) + timedelta(
-        seconds=int(timestamp),
-    )
-    acquisitiondate = acqdate
-
-    # Transform back to timestamp for storage in the Coord object
-    # use datetime.fromtimestamp(d, timezone.utc)) to transform back to datetime object
-    timestamp = acqdate.timestamp()
+    raw_timestamp = int(fromfile(fid, dtype="uint32", count=1))
 
     # The active key table is counted at +294 and consists of 16-byte records
     # beginning at +304. Terminators, padding, and post-table variant data are
@@ -961,6 +952,16 @@ def _read_spa(*args, **kwargs):
     #
 
     records = _read_spa_key_table(fid)
+    is_library_variant = any(record.key == 0x53 for record in records)
+    if is_library_variant:
+        acquisitiondate = None
+        timestamp = 0.0
+    else:
+        acqdate = datetime(1899, 12, 31, 0, 0, tzinfo=UTC) + timedelta(
+            seconds=raw_timestamp,
+        )
+        acquisitiondate = acqdate
+        timestamp = acqdate.timestamp()
     spa_comments = []  # several custom comments can be present
     _exp_info = None
     optical_velocity = None
@@ -1018,12 +1019,15 @@ def _read_spa(*args, **kwargs):
     else:
         title = "acquisition timestamp (GMT)"  # no ambiguity here
 
-    _y = Coord(
-        [timestamp],
-        title=title,
-        units="s",
-        labels=([acquisitiondate], [filename]),
-    )
+    if acquisitiondate is None:
+        _y = Coord([0], title="spectrum", units=None, labels=([None], [filename]))
+    else:
+        _y = Coord(
+            [timestamp],
+            title=title,
+            units="s",
+            labels=([acquisitiondate], [filename]),
+        )
 
     # useful when a part of the spectrum/ifg has been blanked:
     dataset.mask = np.isnan(dataset.data)
@@ -1068,7 +1072,7 @@ def _read_spa(*args, **kwargs):
     dataset.set_coordset(y=_y, x=_x)
     dataset.name = spa_name  # to be consistent with omnic behaviour
     dataset.filename = filename
-    if return_ifg != "background":
+    if return_ifg != "background" and acquisitiondate is not None:
         dataset.acquisition_date = acquisitiondate
     dataset.origin = "omnic"
 
@@ -1096,7 +1100,13 @@ def _read_spa(*args, **kwargs):
         # Retain compatibility with supported files that do not carry 0x6a.
         optical_velocity = info["optical_velocity"]
     dataset.meta.optical_velocity = optical_velocity
-    dataset.meta.laser_frequency = info["reference_frequency"] * ur("cm^-1")
+    if info["xtitle"] == "raman shift":
+        dataset.meta.laser_frequency = info["raman_excitation_frequency"] * ur("cm^-1")
+        dataset.meta.omnic_reference_frequency = info["reference_frequency"] * ur(
+            "cm^-1"
+        )
+    else:
+        dataset.meta.laser_frequency = info["reference_frequency"] * ur("cm^-1")
     dataset.meta.sample_spacing = info["sample_spacing"]
 
     if _exp_info is not None:
@@ -1758,6 +1768,8 @@ def _read_header(fid, pos, is_first_spectrum=True):
     out["reference_frequency"] = fromfile(fid, "float32", 1)
     fid.seek(pos + 84)
     out["sample_spacing"] = fromfile(fid, "float32", 1)
+    fid.seek(pos + 96)
+    out["raman_excitation_frequency"] = fromfile(fid, "float32", 1)
     fid.seek(pos + 188)
     out["optical_velocity"] = fromfile(fid, "float32", 1)
 
@@ -1931,39 +1943,35 @@ def _decode_experiment_info_block(data: bytes) -> dict | None:
     Returns
     -------
     dict or None
-        Dictionary with keys ``experiment_path``, ``experiment_file``,
-        ``accessory_name``, and/or ``experiment_title``, or None if the
-        block is not a valid subtype 0x79 block.
+        Dictionary with fixed-slot subtype-0x79 fields, or None if the block
+        is not a supported subtype.
     """
-    if len(data) < 50 or data[0] != 0x79:
+    if not data or data[0] != 0x79:
         return None
 
-    # Payload starts at byte 10 (10-byte header).
-    # Null-terminated fields appear sequentially:
-    #   [0] experiment_path   — full Windows path
-    #   [1] experiment_file   — experiment file name stored in the 0x79 block
-    #   [2] accessory_name    — accessory / compartment name
-    #   [3] experiment_title  — experiment description
-    payload = data[10:]
-    raw = payload.split(b"\x00")
-
-    decoded = [
-        f.decode("utf-8", errors="replace").strip("\x00").strip() for f in raw if f
-    ]
-
-    if not decoded:
-        return None
-
-    _FIELD_NAMES = [
-        "experiment_path",
-        "experiment_file",
-        "accessory_name",
-        "experiment_title",
-    ]
+    def _read_slot(start, end):
+        if start >= len(data):
+            return None
+        slot = data[start : min(end, len(data))]
+        value = slot.split(b"\x00", 1)[0]
+        if not value:
+            return None
+        return value.decode("utf-8", errors="replace").strip()
 
     result: dict[str, str] = {}
-    for i in range(min(len(decoded), len(_FIELD_NAMES))):
-        if decoded[i]:
-            result[_FIELD_NAMES[i]] = decoded[i]
+    for name, start, end in (
+        ("experiment_path", 10, 90),
+        ("experiment_title", 90, 154),
+        ("experiment_description", 154, 413),
+        ("accessory_name", 413, 670),
+    ):
+        value = _read_slot(start, end)
+        if value:
+            result[name] = value
 
-    return result
+    # Retain the historical key as a compatibility alias for the native title
+    # slot while exposing the corrected fixed-anchor names above.
+    if "experiment_title" in result:
+        result["experiment_file"] = result["experiment_title"]
+
+    return result or None
