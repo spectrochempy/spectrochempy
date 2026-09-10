@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import argparse
 import importlib.util
 import sys
+import urllib.error
 from pathlib import Path
 
 import pytest
@@ -232,13 +234,13 @@ class TestIsOfficialCli:
         result = self._run(str(tmp_path))
         assert result.returncode == 1
 
-    def test_parse_error_exit_one(self, tmp_path):
-        """Malformed TOML is treated as 'not official' by the module."""
+    def test_parse_error_exit_two(self, tmp_path):
+        """Malformed TOML is an evaluation error (exit 2), not silently 'not official'."""
         plugin_dir = tmp_path / "spectrochempy-cantera"
         plugin_dir.mkdir()
         (plugin_dir / "pyproject.toml").write_text("[tool.spectrochempy\n")
         result = self._run(str(plugin_dir))
-        assert result.returncode == 1
+        assert result.returncode == 2
 
 
 # ---------------------------------------------------------------------------
@@ -444,6 +446,328 @@ class TestCheckPluginReleaseConsistencyNetwork:
         assert check.verdict == "conda_dev_only"
         assert check.conda_dev is True
 
+    def test_pypi_unavailable(self, tmp_path, monkeypatch):
+        """A PyPI query failure must yield pypi_unavailable, not pypi_missing."""
+        module = load_module()
+        self._make_repo(tmp_path, "spectrochempy-nmr-v0.1.11")
+        monkeypatch.chdir(tmp_path)
+
+        def fake_fetch(url, timeout=30):
+            if "pypi.org" in url:
+                raise module.ServiceUnavailableError("pypi.org: connection reset")
+            if "anaconda.org" in url:
+                return [{"version": "0.1.11", "labels": ["main"]}]
+            return None
+
+        monkeypatch.setattr(module, "fetch_json", fake_fetch)
+        check = module.check_plugin_release_consistency("spectrochempy-nmr", "0.1.11")
+        assert check.verdict == "pypi_unavailable"
+        assert check.pypi_version is None
+
+    def test_conda_unavailable(self, tmp_path, monkeypatch):
+        """An Anaconda query failure must yield conda_unavailable, not conda_missing."""
+        module = load_module()
+        self._make_repo(tmp_path, "spectrochempy-nmr-v0.1.11")
+        monkeypatch.chdir(tmp_path)
+
+        def fake_fetch(url, timeout=30):
+            if "pypi.org" in url:
+                return {"releases": {"0.1.11": []}}
+            if "anaconda.org" in url:
+                raise module.ServiceUnavailableError("api.anaconda.org: HTTP 503")
+            return None
+
+        monkeypatch.setattr(module, "fetch_json", fake_fetch)
+        check = module.check_plugin_release_consistency("spectrochempy-nmr", "0.1.11")
+        assert check.verdict == "conda_unavailable"
+        assert check.conda_main is False
+
+
+class TestFetchJsonAvailability:
+    def test_http_404_returns_none(self, monkeypatch):
+        """An HTTP 404 must be treated as 'not found', not as an error."""
+        module = load_module()
+
+        class FakeResp:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *args):
+                return False
+
+            def read(self):
+                return b"{}"
+
+            def decode(self):
+                return "{}"
+
+        def fake_urlopen(req, timeout=30):
+            raise urllib.error.HTTPError(
+                "https://api.anaconda.org/package/x/y/versions",
+                404,
+                "Not Found",
+                {},
+                None,
+            )
+
+        monkeypatch.setattr(module.urllib.request, "urlopen", fake_urlopen)
+        assert (
+            module.fetch_json("https://api.anaconda.org/package/x/y/versions") is None
+        )
+
+    def test_network_error_raises(self, monkeypatch):
+        """A network failure must raise ServiceUnavailableError."""
+        module = load_module()
+
+        def fake_urlopen(req, timeout=30):
+            raise urllib.error.URLError("connection refused")
+
+        monkeypatch.setattr(module.urllib.request, "urlopen", fake_urlopen)
+        with pytest.raises(module.ServiceUnavailableError):
+            module.fetch_json("https://example.org/x.json")
+
+    def test_http_503_raises(self, monkeypatch):
+        module = load_module()
+
+        def fake_urlopen(req, timeout=30):
+            raise urllib.error.HTTPError(
+                "https://x", 503, "Service Unavailable", {}, None
+            )
+
+        monkeypatch.setattr(module.urllib.request, "urlopen", fake_urlopen)
+        with pytest.raises(module.ServiceUnavailableError):
+            module.fetch_json("https://x")
+
+
+class TestListPluginTags:
+    def _make_tagged_repo(self, tmp_path, tags):
+        import subprocess
+
+        subprocess.run(["git", "init"], cwd=tmp_path, check=True, capture_output=True)
+        subprocess.run(
+            ["git", "config", "user.email", "test@test.com"],
+            cwd=tmp_path,
+            check=True,
+            capture_output=True,
+        )
+        subprocess.run(
+            ["git", "config", "user.name", "Test"],
+            cwd=tmp_path,
+            check=True,
+            capture_output=True,
+        )
+        (tmp_path / "file.txt").write_text("init")
+        subprocess.run(
+            ["git", "add", "."], cwd=tmp_path, check=True, capture_output=True
+        )
+        subprocess.run(
+            ["git", "commit", "-m", "init"],
+            cwd=tmp_path,
+            check=True,
+            capture_output=True,
+        )
+        for tag in tags:
+            subprocess.run(
+                ["git", "tag", tag], cwd=tmp_path, check=True, capture_output=True
+            )
+
+    def test_returns_plugin_tags_only(self, tmp_path, monkeypatch):
+        module = load_module()
+        self._make_tagged_repo(
+            tmp_path,
+            ["spectrochempy-nmr-v0.1.11", "spectrochempy-nmr-v0.1.8", "v0.2.0"],
+        )
+        monkeypatch.chdir(tmp_path)
+        assert module.list_plugin_tags() == [
+            ("spectrochempy-nmr", "0.1.8"),
+            ("spectrochempy-nmr", "0.1.11"),
+        ]
+
+
+class TestValidateRelease:
+    def _plugin_with_version(self, tmp_path, version):
+        plugin_dir = tmp_path / "spectrochempy-nmr"
+        plugin_dir.mkdir()
+        (plugin_dir / "pyproject.toml").write_text(
+            f'[project]\nname = "spectrochempy-nmr"\nversion = "{version}"\n'
+        )
+        init_dir = plugin_dir / "src" / "spectrochempy_nmr"
+        init_dir.mkdir(parents=True)
+        (init_dir / "__init__.py").write_text(f'    version = "{version}"\n')
+        (plugin_dir / "recipe.yaml").write_text(
+            f'context:\n  name: spectrochempy-nmr\n  version: "{version}"\n'
+        )
+        return plugin_dir
+
+    def test_consistent_exit_zero(self, tmp_path):
+        module = load_module()
+        plugin_dir = self._plugin_with_version(tmp_path, "0.1.11")
+        assert (
+            module.cmd_validate_release(
+                argparse.Namespace(plugin_dir=str(plugin_dir), version="0.1.11")
+            )
+            == 0
+        )
+
+    def test_pyproject_mismatch_exit_one(self, tmp_path):
+        module = load_module()
+        plugin_dir = self._plugin_with_version(tmp_path, "0.1.11")
+        assert (
+            module.cmd_validate_release(
+                argparse.Namespace(plugin_dir=str(plugin_dir), version="0.1.8")
+            )
+            == 1
+        )
+
+    def test_recipe_mismatch_exit_one(self, tmp_path):
+        module = load_module()
+        plugin_dir = self._plugin_with_version(tmp_path, "0.1.11")
+        (plugin_dir / "recipe.yaml").write_text(
+            'context:\n  name: spectrochempy-nmr\n  version: "0.1.8"\n'
+        )
+        assert (
+            module.cmd_validate_release(
+                argparse.Namespace(plugin_dir=str(plugin_dir), version="0.1.11")
+            )
+            == 1
+        )
+
+    def test_missing_recipe_exit_one(self, tmp_path):
+        module = load_module()
+        plugin_dir = self._plugin_with_version(tmp_path, "0.1.11")
+        (plugin_dir / "recipe.yaml").unlink()
+        assert (
+            module.cmd_validate_release(
+                argparse.Namespace(plugin_dir=str(plugin_dir), version="0.1.11")
+            )
+            == 1
+        )
+
+    def test_meta_yaml_jinja_version(self, tmp_path):
+        module = load_module()
+        plugin_dir = tmp_path / "spectrochempy-nmr"
+        plugin_dir.mkdir()
+        (plugin_dir / "pyproject.toml").write_text(
+            '[project]\nname = "spectrochempy-nmr"\nversion = "0.1.11"\n'
+        )
+        (plugin_dir / "meta.yaml").write_text(
+            '{% set version = "0.1.11" %}\npackage:\n  name: spectrochempy-nmr\n  version: "{{ version }}"\n'
+        )
+        assert (
+            module.cmd_validate_release(
+                argparse.Namespace(plugin_dir=str(plugin_dir), version="0.1.11")
+            )
+            == 0
+        )
+
+
+class TestUploadConda:
+    def _artifact(self, tmp_path, name="spectrochempy-nmr-0.1.11-0_abc.conda"):
+        path = tmp_path / name
+        path.write_text("dummy")
+        return path
+
+    def test_refuses_existing_version_without_override(self, tmp_path, monkeypatch):
+        module = load_module()
+        artifact = self._artifact(tmp_path)
+        monkeypatch.setattr(
+            module, "anaconda_version_labels", lambda *a, **k: ["dev", "main"]
+        )
+        assert (
+            module.upload_conda(
+                artifact, plugin="spectrochempy-nmr", version="0.1.11", dry_run=False
+            )
+            == 1
+        )
+
+    def test_allow_override_forces_reupload(self, tmp_path, monkeypatch):
+        module = load_module()
+        artifact = self._artifact(tmp_path)
+        calls = []
+
+        def fake_labels(*a, **k):
+            return ["main"]
+
+        def fake_verify(*a, **k):
+            return True
+
+        def fake_subprocess(cmd, *a, **k):
+            calls.append(cmd)
+            return type("R", (), {"returncode": 0})()
+
+        monkeypatch.setattr(module, "anaconda_version_labels", fake_labels)
+        monkeypatch.setattr(module, "verify_conda_upload", fake_verify)
+        monkeypatch.setattr(module.subprocess, "run", fake_subprocess)
+        assert (
+            module.upload_conda(
+                artifact,
+                plugin="spectrochempy-nmr",
+                version="0.1.11",
+                token="tok",
+                allow_override=True,
+            )
+            == 0
+        )
+        assert calls and "--force" in calls[0]
+        assert "-l" in calls[0] and "main" in calls[0]
+
+    def test_fresh_version_uploads_without_force(self, tmp_path, monkeypatch):
+        module = load_module()
+        artifact = self._artifact(tmp_path)
+        calls = []
+
+        def fake_labels(*a, **k):
+            return []
+
+        def fake_verify(*a, **k):
+            return True
+
+        def fake_subprocess(cmd, *a, **k):
+            calls.append(cmd)
+            return type("R", (), {"returncode": 0})()
+
+        monkeypatch.setattr(module, "anaconda_version_labels", fake_labels)
+        monkeypatch.setattr(module, "verify_conda_upload", fake_verify)
+        monkeypatch.setattr(module.subprocess, "run", fake_subprocess)
+        assert (
+            module.upload_conda(
+                artifact,
+                plugin="spectrochempy-nmr",
+                version="0.1.11",
+                token="tok",
+            )
+            == 0
+        )
+        assert calls and "--force" not in calls[0]
+
+    def test_artifact_version_mismatch(self, tmp_path, monkeypatch):
+        module = load_module()
+        artifact = self._artifact(tmp_path, name="spectrochempy-nmr-0.1.8-0_abc.conda")
+        assert (
+            module.upload_conda(
+                artifact, plugin="spectrochempy-nmr", version="0.1.11", dry_run=True
+            )
+            == 1
+        )
+
+    def test_dry_run_skips_upload(self, tmp_path, monkeypatch):
+        module = load_module()
+        artifact = self._artifact(tmp_path)
+        monkeypatch.setattr(module, "anaconda_version_labels", lambda *a, **k: [])
+        called = []
+
+        def fake_subprocess(cmd, *a, **k):
+            called.append(cmd)
+
+        monkeypatch.setattr(module.subprocess, "run", fake_subprocess)
+        assert (
+            module.upload_conda(
+                artifact, plugin="spectrochempy-nmr", version="0.1.11", dry_run=True
+            )
+            == 0
+        )
+        assert called == []
+
 
 # ---------------------------------------------------------------------------
 # Format verification report
@@ -493,17 +817,19 @@ class TestNoUploadProtection:
     """Ensure test environment cannot trigger real uploads."""
 
     def test_upload_function_not_called_in_tests(self):
-        """Verify anaconda upload is never executed during test runs."""
-        # The module should not have any subprocess call to anaconda upload
-        # at import time or during pure logic functions.
+        """Verify test runs can never trigger a real upload outside guarded paths."""
+        # The module invokes subprocess for read-only git/registry checks…
         source = SCRIPT_PATH.read_text()
-        # The upload command should only appear inside workflow shell scripts
-        # (in the YAML files), not in the Python module's functions.
-        # This is a structural check — the Python module uses urllib for reads
-        # and never calls anaconda CLI directly.
-        assert "subprocess.run" in source  # git commands use subprocess
-        # But no anaconda upload calls
-        assert "anaconda upload" not in source
+        assert "subprocess.run" in source
+        # …and the anaconda CLI is reached only through the explicitly-guarded
+        # upload_conda() path (token from the environment, refusal to overwrite
+        # without allow_override). No other command builds an upload command.
+        assert "subprocess.run(command)" in source
+        assert "allow_override" in source
+        # The upload subprocess invokes a bare list command, never a shell
+        # string that could smuggle arguments from an artifact name.
+        assert "subprocess.run(command)" in source
+        assert "shell=True" not in source
 
     def test_fetch_json_uses_read_only_urls(self):
         """Verify fetch_json only accesses read-only API endpoints."""

@@ -564,6 +564,20 @@ official-plugin = true` dans `pyproject.toml` pour identifier les plugins
 officiels.  Ce même marqueur est utilisé par `publish_plugins.yml` (PyPI)
 et `plugin_release_status.py` (tableau de statut).
 
+Avant la construction, le job de release exécute désormais
+`conda_publish.py validate-release` **sur le checkout exact du tag** :
+les versions de `pyproject.toml`, de `__init__.py` (lorsqu'il déclare une
+version) et de la recette conda (`recipe.yaml` / `meta.yaml`) doivent
+toutes correspondre à la version du tag, sinon la publication est
+bloquée (`exit 1`) ou l'évaluation échoue (`exit 2`).
+
+L'upload utilise `conda_publish.py upload-conda` qui refuse de remplacer
+une version déjà publiée sur le label `main` **sauf** dérogation explicite
+(`--allow-override`), vérifie le nom/version exact de l'artifact
+(`<plugin>-<version>-…`), n'appelle `anaconda upload --force` que dans ce
+cas de dérogation, et confirme l'apparition du label via l'API `/files`
+après l'upload.
+
 #### Vérification post-release
 
 Après chaque release de plugin, vérifier la présence sur les trois
@@ -582,7 +596,12 @@ anaconda show spectrocat/spectrochempy-XXX
 
 Ou utiliser le workflow automatisé **Verify plugin release consistency**
 (`verify_plugin_release_consistency.yml`) qui produit un tableau comparatif
-GitHub / PyPI / Conda pour tous les plugins officiels.
+GitHub / PyPI / Conda pour **tous les tags de release historiques** des
+plugins officiels (`conda_publish.py check-all`, basé sur `git tag`).
+Il est déclenché manuellement et sur un planning hebdomadaire (lundi
+03:00 UTC) : un déclenchement à chaque push sur `master` maintiendrait la
+branche rouge tant que les releases historiques ne sont pas réparées.
+Une fois la récupération terminée, ce trigger peut être réactivé.
 
 #### En cas d'échec de publication Conda
 
@@ -608,6 +627,11 @@ Si la publication PyPI a réussi mais que la publication Conda a échoué
    - Sélectionner le mode dry-run par défaut pour valider la construction
    - Vérifier l'artifact produit
    - Relancer avec `dry_run=false` et `confirm_upload=true` pour publier
+   - Le workflow valide la release depuis le **checkout exact du tag**
+     (outillage stocké depuis `master` avant le détachement du tag) et
+     refuse de remplacer une version déjà publiée sur `main` sauf à
+     cocher explicitement `allow_override=true` (dérogation documentée,
+     ignorée en dry-run)
    - Le workflow utilise un environnement GitHub dédié (`conda-publish`)
      avec approbation obligatoire
 
@@ -619,9 +643,22 @@ Le script `.github/workflows/scripts/conda_publish.py` fournit des
 fonctions réutilisables pour :
 
 - Valider le format des tags plugins (`verify-tag`)
+- Vérifier le marqueur de plugin officiel (`is-official`) — un
+  `pyproject.toml` illisible provoque une erreur (`exit 2`), jamais un
+  « non officiel » silencieux
 - Vérifier la cohérence d'une release sur GitHub / PyPI / Conda
-  (`check-release`, `check-all`)
+  (`check-release`, `check-all` — historique, sur tous les tags plugins)
+- Valider une release sur le checkout du tag (`validate-release`, bloquant)
+- Publier un artifact Conda en toute sécurité (`upload-conda` — refuse le
+  remplacement sans dérogation, `--force` uniquement en cas de dérogation)
+- Confirmer une publication (`verify-conda`, poll des labels) et lire
+  l'état d'une version (`conda-state`)
 - Lister les plugins officiels (`list-official`)
+
+Une indisponibilité de PyPI ou d'Anaconda.org (réseau, timeout, 5xx) est
+distinguée d'une version réellement absente (`ServiceUnavailableError` /
+verdicts `pypi_unavailable` / `conda_unavailable`) : on ne peut pas
+conclure « version manquante » quand le registraire est injoignable.
 
 Ces fonctions sont utilisées par les workflows de vérification et de
 récupération, et sont testées dans
@@ -642,7 +679,11 @@ Python 3.11.
 
 Le job de découverte utilise désormais `conda_publish.py is-official`
 (module testé) avec `actions/setup-python` 3.11, et un échec du check
-fait échouer le job au lieu d'être silencieusement ignoré.
+fait échouer le job au lieu d'être silencieusement ignoré.  Depuis la
+vérification cartographiée ci-dessous, la publication est de plus
+validée de façon **bloquante** depuis le tag et ne peut plus écraser une
+version publiée (voir « Comment la publication Conda fonctionne-t-elle »
+au-dessus).
 
 Vérifié le 2026-09-10 via `conda_publish.py check-all` : les versions
 stables suivantes existent sur GitHub et PyPI mais **ne sont pas sur

@@ -96,6 +96,11 @@ jobs:
       plugin_version: ${{ steps.detect.outputs.plugin_version }}
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
@@ -105,7 +110,7 @@ jobs:
         id: detect
         run: |
           python3 .github/workflows/scripts/conda_publish.py verify-tag \
-            "${{ github.ref_name }}" 2>/dev/null && IS_PLUGIN=true || IS_PLUGIN=false
+            "${{ github.ref_name }}" && IS_PLUGIN=true || IS_PLUGIN=false
 
           if [[ "${{ github.ref_name }}" == spectrochempy-v* ]] && [[ "${{ github.event_name }}" == "release" ]]; then
             echo "is_core_release=true" >> "$GITHUB_OUTPUT"
@@ -359,14 +364,20 @@ jobs:
               continue
             fi
             # Check for the Official Plugin marker using the shared module.
-            python3 .github/workflows/scripts/conda_publish.py is-official "${dir%/}" >/dev/null 2>&1
-            rc=$?
-            if [ "$rc" -eq 1 ]; then
-              echo "Skipping $name (not declared official)"
-              continue
-            elif [ "$rc" -ne 0 ]; then
+            # is-official exits 0 (official), 1 (not official) or 2
+            # (evaluation error).  With set -e the non-zero exit codes would
+            # abort the step, so the check must run inside an if/else and the
+            # return code must be captured explicitly.
+            if python3 .github/workflows/scripts/conda_publish.py is-official "${dir%/}"; then
+              :
+            else
+              rc=$?
+              if [ "$rc" -eq 1 ]; then
+                echo "Skipping $name (not declared official)"
+                continue
+              fi
               echo "::error::Official marker check failed for $name (exit $rc)"
-              exit 1
+              exit "$rc"
             fi
             if [ -f "${dir}recipe.yaml" ] || [ -f "${dir}meta.yaml" ]; then
               recipe_file="recipe.yaml"
@@ -619,6 +630,15 @@ jobs:
           fi
           echo "Plugin $PLUGIN confirmed in conda plugins matrix"
 
+      - name: Validate plugin metadata against the tag
+        run: |
+          PLUGIN="${{ needs.detect-release-scope.outputs.plugin_name }}"
+          VERSION="${{ needs.detect-release-scope.outputs.plugin_version }}"
+          # Blocking: pyproject.toml / __init__.py / recipe versions must all
+          # match the release tag version, read from the exact tag checkout.
+          python3 .github/workflows/scripts/conda_publish.py validate-release \
+            "plugins/$PLUGIN" "$VERSION"
+
       - name: Install Conda environment with Micromamba
         uses: mamba-org/setup-micromamba@v3
         with:
@@ -672,14 +692,14 @@ jobs:
 
           FOUND=0
           for pkg in output/**/*.conda output/**/*.tar.bz2; do
-            if [[ -f "$pkg" ]] && [[ "$(basename "$pkg")" == "$PLUGIN-$VERSION"* ]]; then
+            if [[ -f "$pkg" ]] && [[ "$(basename "$pkg")" == "$PLUGIN-$VERSION-"* ]]; then
               echo "Found matching package: $pkg"
               FOUND=1
             fi
           done
 
           if [ "$FOUND" -eq 0 ]; then
-            echo "::error::No conda package found matching $PLUGIN==$VERSION"
+            echo "::error::No conda package found matching $PLUGIN==$VERSION (exact version)"
             echo "Built packages:"
             find output -type f \( -name "*.conda" -o -name "*.tar.bz2" \)
             exit 1
@@ -726,40 +746,15 @@ jobs:
               echo "Skipping core package (already uploaded): $package"
               continue
             fi
-            echo "Uploading $package with label: main"
-            anaconda --token "$ANACONDA_API_TOKEN" upload --force -l "main" "$package"
+            # Shared uploader: refuses to overwrite an already-published
+            # version, verifies the artifact name/version and polls the
+            # /files API after the upload.
+            python3 .github/workflows/scripts/conda_publish.py upload-conda \
+              "$package" \
+              --plugin "$PLUGIN" \
+              --version "$VERSION" \
+              --owner spectrocat \
+              --label main
           done
 
           echo "::notice::Plugin $PLUGIN==$VERSION uploaded to Anaconda label: main"
-
-      - name: Verify upload
-        run: |
-          PLUGIN="${{ needs.detect-release-scope.outputs.plugin_name }}"
-          VERSION="${{ needs.detect-release-scope.outputs.plugin_version }}"
-          echo "Verifying $PLUGIN==$VERSION is now on Anaconda main..."
-
-          LABELS=$(python3 -c "
-          import json, urllib.request
-          url = 'https://api.anaconda.org/package/spectrocat/$PLUGIN'
-          try:
-              req = urllib.request.Request(url, headers={'Accept': 'application/json'})
-              with urllib.request.urlopen(req, timeout=30) as resp:
-                  data = json.loads(resp.read().decode())
-              for v in data.get('versions', []):
-                  if v.get('version') == '$VERSION':
-                      labels = [l.get('name','') for l in v.get('labels', [])]
-                      print(' '.join(labels))
-                      raise SystemExit(0)
-          except SystemExit:
-              raise
-          except Exception:
-              pass
-          print('NOT_FOUND')
-          ")
-
-          if echo "$LABELS" | grep -q "main"; then
-            echo "SUCCESS: $PLUGIN==$VERSION is on main label (labels: $LABELS)"
-          else
-            echo "::warning::Upload verification: $PLUGIN==$VERSION labels: $LABELS"
-            echo "The package may take a few minutes to appear on Anaconda.org."
-          fi

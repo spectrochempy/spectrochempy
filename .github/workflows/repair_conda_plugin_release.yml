@@ -7,8 +7,13 @@ name: Repair plugin Conda publication
 #
 # Safety guarantees:
 #   - Tag must match <plugin_name>-v<version> pattern
-#   - Plugin must be declared official
-#   - Version is extracted from the tag and verified against metadata
+#   - Plugin must be declared official (evaluation failure = abort)
+#   - The release is validated from the exact tag checkout: the version from
+#     pyproject.toml, __init__.py (when declared) and the recipe must all
+#     match the tag version — any mismatch is blocking
+#   - A recipe (recipe.yaml / meta.yaml) must exist at the tag
+#   - Upload refuses to overwrite a version already published on the target
+#     label unless allow_override=true (explicit, documented derogation)
 #   - Default mode is dry-run (no upload)
 #   - Upload requires explicit confirmation and an environment approval
 #   - Never touches PyPI, GitHub releases, or git tags
@@ -34,6 +39,11 @@ on:
         required: false
         default: false
         type: boolean
+      allow_override:
+        description: "Dangerous: allow replacing an already-published version on the main label (explicit derogation). Ignored in dry-run mode."
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -46,8 +56,8 @@ jobs:
     outputs:
       plugin: ${{ steps.validate.outputs.plugin }}
       version: ${{ steps.validate.outputs.version }}
-      recipe_path: ${{ steps.validate.outputs.recipe_path }}
-      recipe_file: ${{ steps.validate.outputs.recipe_file }}
+      recipe_path: ${{ steps.recipe.outputs.recipe_path }}
+      recipe_file: ${{ steps.recipe.outputs.recipe_file }}
 
     steps:
       - name: Checkout code
@@ -72,17 +82,37 @@ jobs:
           echo "plugin=$PLUGIN" >> "$GITHUB_OUTPUT"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
-          # Verify plugin is official
-          python3 .github/workflows/scripts/validate_official_plugin.py \
+          # Verify plugin is official.  is-official exits 0 (official),
+          # 1 (not official) or 2 (evaluation error) — any non-zero aborts.
+          python3 .github/workflows/scripts/conda_publish.py is-official \
             "plugins/$PLUGIN"
 
-          # Verify tag exists
-          if ! git ls-remote --tags origin "refs/tags/${{ inputs.tag }}" | grep -q "${{ inputs.tag }}"; then
-            echo "::error::Tag ${{ inputs.tag }} does not exist in the remote repository"
-            exit 1
-          fi
+          echo "Inputs valid: $PLUGIN v$VERSION is an official plugin"
 
-          # Find recipe file
+      - name: Stash validation tooling from master
+        run: |
+          # The release tag predates the shared validation script.  Copy the
+          # master version out of the tree so it survives the tag checkout.
+          cp .github/workflows/scripts/conda_publish.py /tmp/conda_publish.py
+
+      - name: Checkout release tag
+        run: |
+          git checkout --detach "${{ inputs.tag }}"
+
+      - name: Validate metadata against the tag
+        run: |
+          PLUGIN="${{ steps.validate.outputs.plugin }}"
+          VERSION="${{ steps.validate.outputs.version }}"
+          # Blocking: pyproject.toml / __init__.py (when declared) / recipe
+          # versions must all match the tag version, read from the exact tag
+          # checkout.  Any mismatch fails the job before building.
+          python3 /tmp/conda_publish.py validate-release \
+            "plugins/$PLUGIN" "$VERSION"
+
+      - name: Find recipe file
+        id: recipe
+        run: |
+          PLUGIN="${{ steps.validate.outputs.plugin }}"
           RECIPE_DIR="plugins/$PLUGIN"
           if [ -f "$RECIPE_DIR/recipe.yaml" ]; then
             echo "recipe_path=$RECIPE_DIR" >> "$GITHUB_OUTPUT"
@@ -91,56 +121,29 @@ jobs:
             echo "recipe_path=$RECIPE_DIR" >> "$GITHUB_OUTPUT"
             echo "recipe_file=meta.yaml" >> "$GITHUB_OUTPUT"
           else
-            echo "::error::No recipe.yaml or meta.yaml found for $PLUGIN"
+            echo "::error::No recipe.yaml or meta.yaml found for $PLUGIN at tag ${{ inputs.tag }}"
             exit 1
           fi
 
-          # Verify version consistency across sources
-          PYPROJ_VER=$(python3 -c "
-          import re, sys
-          text = open('plugins/$PLUGIN/pyproject.toml').read().split('[project]', 1)[-1]
-          m = re.search(r'^version\s*=\"([^\"]+)\"', text, re.MULTILINE)
-          print(m.group(1) if m else '')
-          ")
-          echo "pyproject.toml version: $PYPROJ_VER"
-          if [ "$PYPROJ_VER" != "$VERSION" ]; then
-            echo "::warning::pyproject.toml version ($PYPROJ_VER) differs from tag version ($VERSION)"
-          fi
-
-          echo "Validation passed for $PLUGIN v$VERSION"
-
       - name: Check existing Conda package
         run: |
-          VERSION="${{ steps.validate.outputs.version }}"
           PLUGIN="${{ steps.validate.outputs.plugin }}"
-          echo "Checking if $PLUGIN==$VERSION already exists on Conda..."
-
-          EXISTING=$(python3 -c "
-          from __future__ import annotations
-          import json, urllib.request, urllib.error
-          url = 'https://api.anaconda.org/package/spectrocat/$PLUGIN'
-          try:
-              req = urllib.request.Request(url, headers={'Accept': 'application/json'})
-              with urllib.request.urlopen(req, timeout=30) as resp:
-                  data = json.loads(resp.read().decode())
-              for v in data.get('versions', []):
-                  if v.get('version') == '$VERSION':
-                      labels = [l.get('name','') for l in v.get('labels', [])]
-                      print(f'exists:{\":\".join(labels)}')
-                      raise SystemExit(0)
-          except SystemExit:
-              raise
-          except Exception:
-              pass
-          print('not_found')
-          ")
-
-          if [[ "$EXISTING" == exists:* ]]; then
-            LABELS="${EXISTING#exists:}"
-            echo "::warning::$PLUGIN==$VERSION already exists on Conda with labels: $LABELS"
-            echo "The package may already be published. Proceeding anyway (upload uses --force)."
-          else
+          VERSION="${{ steps.validate.outputs.version }}"
+          # Informational: uses the /files API via the shared module.  The
+          # publish job re-checks authoritatively and refuses to overwrite
+          # without allow_override.
+          set +e
+          python3 /tmp/conda_publish.py conda-state "$PLUGIN" "$VERSION" --owner spectrocat
+          rc=$?
+          set -e
+          if [ "$rc" -eq 0 ]; then
+            echo "::warning::$PLUGIN==$VERSION already exists on Conda (labels above)."
+            echo "To republish it anyway, re-run with allow_override=true (explicit derogation)."
+          elif [ "$rc" -eq 1 ]; then
             echo "$PLUGIN==$VERSION not found on Conda. Publication needed."
+          else
+            echo "::warning::Could not query Anaconda.org for $PLUGIN==$VERSION (exit $rc)."
+            echo "The publish job will re-check before uploading."
           fi
 
   build:
@@ -191,21 +194,25 @@ jobs:
           PLUGIN="${{ needs.validate.outputs.plugin }}"
           VERSION="${{ needs.validate.outputs.version }}"
 
-          # Verify the built package matches expected name and version
+          # Verify the built package matches the exact expected name and version.
+          # The version must be followed by a '-' (build string) so that a
+          # version like 0.1.1 cannot match an artifact built at 0.1.11.
           FOUND=0
           for pkg in output/**/*.conda output/**/*.tar.bz2; do
-            if [[ -f "$pkg" ]] && [[ "$(basename "$pkg")" == "$PLUGIN-"* ]]; then
+            if [[ -f "$pkg" ]] && [[ "$(basename "$pkg")" == "$PLUGIN-$VERSION-"* ]]; then
               echo "Found matching package: $pkg"
               FOUND=1
             fi
           done
 
           if [ "$FOUND" -eq 0 ]; then
-            echo "::error::No conda package found matching $PLUGIN"
+            echo "::error::No conda package found matching $PLUGIN==$VERSION (exact version)"
+            echo "Built packages:"
+            find output -type f \( -name "*.conda" -o -name "*.tar.bz2" \)
             exit 1
           fi
 
-          echo "Package verification passed."
+          echo "Package verification passed: $PLUGIN==$VERSION"
 
       - name: Upload conda build artifacts
         if: ${{ !env.ACT }}
@@ -233,6 +240,20 @@ jobs:
         shell: bash -l {0}
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+
+      - name: Install anaconda-client
+        run: |
+          # The upload runs on a fresh runner without the Micromamba build
+          # environment, so the anaconda CLI must be installed explicitly.
+          python -m pip install anaconda-client
+
       - name: Download build artifact
         uses: actions/download-artifact@v8
         with:
@@ -254,6 +275,12 @@ jobs:
             exit 1
           fi
 
+          OVERRIDE=""
+          if [ "${{ inputs.allow_override }}" = "true" ]; then
+            OVERRIDE="--allow-override"
+            echo "::warning::allow_override=true: an already-published version may be replaced."
+          fi
+
           echo "Uploading $PLUGIN==$VERSION to Anaconda label: main"
 
           packages=(/tmp/conda-pkg/**/*.tar.bz2 /tmp/conda-pkg/**/*.conda)
@@ -263,36 +290,24 @@ jobs:
           fi
 
           for package in "${packages[@]}"; do
+            basename=$(basename "$package")
+            if [[ "$basename" == spectrochempy-[0-9]* ]]; then
+              echo "Skipping core package (already uploaded): $package"
+              continue
+            fi
             echo "Uploading $package"
-            anaconda --token "$ANACONDA_API_TOKEN" upload --force -l "main" "$package"
+            # Shared uploader: verifies the artifact name/version, refuses to
+            # overwrite a version already on the label unless allow_override,
+            # and polls the /files API after the upload to confirm.
+            python3 .github/workflows/scripts/conda_publish.py upload-conda \
+              "$package" \
+              --plugin "$PLUGIN" \
+              --version "$VERSION" \
+              --owner spectrocat \
+              --label main $OVERRIDE
           done
 
           echo "::notice::Successfully uploaded $PLUGIN==$VERSION to Anaconda main label"
-
-      - name: Verify upload
-        run: |
-          PLUGIN="${{ needs.validate.outputs.plugin }}"
-          VERSION="${{ needs.validate.outputs.version }}"
-          echo "Verifying $PLUGIN==$VERSION is now on Anaconda main..."
-
-          LABELS=$(python3 -c "
-          import json, urllib.request
-          url = 'https://api.anaconda.org/package/spectrocat/$PLUGIN'
-          req = urllib.request.Request(url, headers={'Accept': 'application/json'})
-          with urllib.request.urlopen(req, timeout=30) as resp:
-              data = json.loads(resp.read().decode())
-          for v in data.get('versions', []):
-              if v.get('version') == '$VERSION':
-                  print(' '.join([l.get('name','') for l in v.get('labels', [])]))
-                  raise SystemExit(0)
-          print('NOT_FOUND')
-          ")
-
-          if echo "$LABELS" | grep -q "main"; then
-            echo "SUCCESS: $PLUGIN==$VERSION is on main label"
-          else
-            echo "::warning::Upload may not have completed. Labels: $LABELS"
-          fi
 
   dry-run-summary:
     name: Dry-run summary
@@ -318,6 +333,8 @@ jobs:
           echo "dry_run: false" >> "$GITHUB_STEP_SUMMARY"
           echo "confirm_upload: true" >> "$GITHUB_STEP_SUMMARY"
           echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "To *replace* an already-published version on main, also set \`allow_override: true\` (explicit derogation, otherwise the upload is refused)." >> "$GITHUB_STEP_SUMMARY"
 
           echo ""
           echo "=== DRY RUN COMPLETE ==="

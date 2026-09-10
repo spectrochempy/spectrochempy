@@ -210,6 +210,7 @@ exclude = ["~*"] # Exclude files and directories. "tests/**"
   "S101", # Use of assert detected. The enclosed code will be executed only when the assertion fails.
   "S603", # subprocess call with shell=True identified, security issue.
   "S607", # subprocess call with a partial executable path (tests invoke git intentionally).
+  "S106", # Hardcoded dummy tokens passed to guarded upload_conda() in tests.
   "T201", # print statement found.
   "D205", # 1 blank line required between summary line and description.
   "D401", # First line should be in imperative mood; try rephrasing.
