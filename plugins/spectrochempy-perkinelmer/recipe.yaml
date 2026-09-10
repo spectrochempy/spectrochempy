@@ -1,0 +1,43 @@
+context:
+  name: spectrochempy-perkinelmer
+  version: "0.1.4"
+
+package:
+  name: "${{ name }}"
+  version: "${{ version }}"
+
+source:
+  path: ../../plugins/spectrochempy-perkinelmer
+
+build:
+  number: 0
+  noarch: python
+  script: python -m pip install . --no-deps --ignore-installed -vv
+
+requirements:
+  host:
+    - python >=3.11
+    - pip
+    - setuptools >=64
+  run:
+    - python >=3.11
+    - spectrochempy >=0.10
+    - numpy
+
+tests:
+  - script:
+      - python -c "import importlib.util; assert importlib.util.find_spec('spectrochempy_perkinelmer') is not None"
+
+about:
+  summary: "PerkinElmer file reader plugin for SpectroChemPy"
+  description: |
+    Official SpectroChemPy plugin providing vendor file reading support
+    for PerkinElmer instruments.
+  homepage: https://www.spectrochempy.fr
+  license: LicenseRef-CeCILL-B
+  repository: https://github.com/spectrochempy/spectrochempy
+
+extra:
+  recipe-maintainers:
+    - fernandezc
+    - atravert

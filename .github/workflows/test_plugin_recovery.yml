@@ -1,0 +1,188 @@
+# Vertical CI test for the `master-fallback` plugin Conda recovery path
+# (`conda_publish.py resolve-recipe` + `rattler-build`).
+#
+# The repair workflow (repair_conda_plugin_release.yml) recovers tags that
+# have NO Conda recipe in the tag itself (e.g. the historical PerkinElmer
+# tags) by taking the canonical recipe from master, injecting the version
+# and aligning the spectrochempy run bound with the tag pyproject.  The
+# regular CI only ever builds recipes that already exist on the PR branch,
+# so this dedicated job validates the *actual recovery path* end to end:
+#
+#   1. extract the REAL content of tag spectrochempy-perkinelmer-v0.1.4
+#      into a temporary checkout-like layout;
+#   2. run conda_publish.py resolve-recipe with the PR's master recipe;
+#   3. assert recipe_origin=master-fallback and the recovered recipe content
+#      (version injected, core bound aligned with the tag pyproject);
+#   4. build the recovered recipe for real with rattler-build;
+#   5. assert the artifact is named exactly spectrochempy-perkinelmer-0.1.4-…
+#   6. NEVER uploads or publishes anything (no Anaconda API token used).
+
+name: Test plugin Conda recovery (master-fallback)
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/scripts/conda_publish.py'
+      - '.github/workflows/repair_conda_plugin_release.yml'
+      - 'plugins/spectrochempy-perkinelmer/**'
+      - '.github/workflows/test_plugin_recovery.yml'
+  push:
+    branches:
+      - master
+    paths:
+      - '.github/workflows/scripts/conda_publish.py'
+      - '.github/workflows/repair_conda_plugin_release.yml'
+      - 'plugins/spectrochempy-perkinelmer/**'
+      - '.github/workflows/test_plugin_recovery.yml'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "PerkinElmer tag version to recover (e.g. 0.1.4)"
+        required: true
+        default: "0.1.4"
+        type: string
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  recovery-build:
+    name: Build recovered PerkinElmer recipe (master-fallback)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+
+      - name: Assert historical tag exists
+        env:
+          VERSION: ${{ inputs.version || '0.1.4' }}
+        run: |
+          git rev-parse --verify --quiet \
+            "refs/tags/spectrochempy-perkinelmer-v${VERSION}^{commit}" \
+            || { echo "::error::tag spectrochempy-perkinelmer-v${VERSION} not found"; exit 1; }
+
+      - name: Extract real tag content into a checkout-like layout
+        env:
+          VERSION: ${{ inputs.version || '0.1.4' }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/recovery"
+          # Preserve the plugins/<plugin> prefix so the recovery recipe's
+          # source path (../../plugins/<plugin>) resolves to the same place
+          # it would in a real tag checkout.
+          git archive "spectrochempy-perkinelmer-v$VERSION" \
+            plugins/spectrochempy-perkinelmer | tar -x -C "$RUNNER_TEMP/recovery"
+          test -f "$RUNNER_TEMP/recovery/plugins/spectrochempy-perkinelmer/pyproject.toml"
+          echo "Extracted tag content:"
+          find "$RUNNER_TEMP/recovery" -type f | sort
+
+      - name: Resolve recipe from the PR master recipe (master-fallback)
+        id: resolve
+        env:
+          TAG_VERSION: ${{ inputs.version || '0.1.4' }}
+        run: |
+          set -euo pipefail
+          python3 .github/workflows/scripts/conda_publish.py resolve-recipe \
+            --tag-dir "$RUNNER_TEMP/recovery/plugins/spectrochempy-perkinelmer" \
+            --version "$TAG_VERSION" \
+            --master-recipe "plugins/spectrochempy-perkinelmer/recipe.yaml" \
+            > /tmp/resolve.out
+          cat /tmp/resolve.out
+          grep -q "recipe_origin=master-fallback" /tmp/resolve.out
+          grep -q "recipe_file=recipe.yaml" /tmp/resolve.out
+          RECIPE_PATH="$(sed -n 's/^recipe_path=//p' /tmp/resolve.out)"
+          echo "recipe_path=$RECIPE_PATH" >> "$GITHUB_OUTPUT"
+          echo "recipe_file=recipe.yaml" >> "$GITHUB_OUTPUT"
+
+      - name: Assert recovered recipe content
+        env:
+          TAG_VERSION: ${{ inputs.version || '0.1.4' }}
+        run: |
+          set -euo pipefail
+          RECIPE="$RUNNER_TEMP/recovery/plugins/spectrochempy-perkinelmer/recipe.yaml"
+          test -f "$RECIPE"
+          grep -q "version: \"$TAG_VERSION\"" "$RECIPE"
+          python3 - "$RECIPE" <<'PY'
+          import pathlib
+          import sys
+
+          recipe = pathlib.Path(sys.argv[1]).read_text().splitlines()
+          in_run = False
+          for line in recipe:
+              stripped = line.strip()
+              if stripped == "requirements:":
+                  in_run = False
+              if stripped == "run:":
+                  in_run = True
+                  continue
+              if in_run and stripped.startswith("- spectrochempy"):
+                  assert ">=0.12,<0.13" in stripped, (
+                      f"bound not aligned with tag pyproject: {stripped!r}"
+                  )
+                  print("core bound aligned with tag pyproject:", stripped)
+                  break
+          else:
+              raise SystemExit("no - spectrochempy line found in requirements.run")
+          PY
+
+      - name: Validate recovered release metadata
+        env:
+          TAG_VERSION: ${{ inputs.version || '0.1.4' }}
+        run: |
+          python3 .github/workflows/scripts/conda_publish.py validate-release \
+            "$RUNNER_TEMP/recovery/plugins/spectrochempy-perkinelmer" "$TAG_VERSION"
+
+      - name: Build recovered recipe with rattler-build
+        uses: prefix-dev/rattler-build-action@v0.2.39
+        env:
+          CONDA_BLD_PATH: ../recovery-output
+        with:
+          recipe-path: ${{ steps.resolve.outputs.recipe_path }}/${{ steps.resolve.outputs.recipe_file }}
+          upload-artifact: false
+          # spectrocat comes first so spectrochempy resolves from our channel.
+          build-args: >-
+            -c conda-forge
+            -c spectrocat
+
+      - name: Verify artifact exact name and version
+        env:
+          TAG_VERSION: ${{ inputs.version || '0.1.4' }}
+        run: |
+          set -euo pipefail
+          mv ../recovery-output recovery-output
+          echo "=== Built packages ==="
+          find recovery-output -type f \( -name "*.conda" -o -name "*.tar.bz2" \)
+          FOUND=0
+          for pkg in recovery-output/**/*.conda recovery-output/**/*.tar.bz2; do
+            if [[ -f "$pkg" ]] && [[ "$(basename "$pkg")" == "spectrochempy-perkinelmer-$TAG_VERSION-"* ]]; then
+              echo "Found exact artifact: $pkg"
+              FOUND=1
+            fi
+          done
+          if [ "$FOUND" -eq 0 ]; then
+            echo "::error::No artifact spectrochempy-perkinelmer-$TAG_VERSION-* was produced"
+            exit 1
+          fi
+
+      - name: Upload recovered package artifact (no publication)
+        if: ${{ !env.ACT }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: recovery-spectrochempy-perkinelmer-${{ inputs.version || '0.1.4' }}
+          path: |
+            recovery-output/**/*.conda
+            recovery-output/**/*.tar.bz2
+          retention-days: 30

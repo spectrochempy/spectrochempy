@@ -30,6 +30,14 @@ TAG_RE = re.compile(
     r"^(?P<plugin>spectrochempy-[a-z0-9-]+)-v(?P<version>\d+\.\d+\.\d+)$"
 )
 
+# A version submitted to the repair workflow must be a bare X.Y.Z release
+# number.  Anything else (empty, a leading ``v``, a plugin name, a full tag,
+# whitespace or shell metacharacters) is refused *before* it can reach a
+# shell command, so no user input ever enters a checkout or upload command.
+VERSION_ONLY_RE = re.compile(r"^\d+\.\d+\.\d+$")
+
+PLUGIN_NAME_RE = re.compile(r"^spectrochempy-[a-z0-9-]+$")
+
 PYPI_JSON_URL = "https://pypi.org/pypi/{package}/json"
 ANACONDA_FILES_URL = "https://api.anaconda.org/package/{owner}/{package}/files"
 
@@ -119,6 +127,197 @@ def read_recipe_version(recipe_path: Path) -> str | None:
     if match:
         return match.group(1) or match.group(2) or match.group(3)
     return None
+
+
+def validate_version_input(version: str) -> str:
+    """
+    Validate a strict ``X.Y.Z`` release version for the repair workflow.
+
+    Only the three numeric components are accepted.  Empty strings, a leading
+    ``v``, a full ``<plugin>-v<version>`` tag, partial versions, whitespace
+    and any shell metacharacter are rejected: the value may later be used to
+    build a checkout ref, so nothing beyond ``[0-9.]`` is ever allowed.
+    """
+    if not isinstance(version, str) or version == "":
+        raise ValueError("version cannot be empty")
+    if not VERSION_ONLY_RE.fullmatch(version):
+        raise ValueError(
+            f"version '{version}' must be exactly three numeric components "
+            "(e.g. 0.1.8): no 'v' prefix, no plugin name, no tag, "
+            "no whitespace and no special characters"
+        )
+    return version
+
+
+def validate_plugin_name(plugin_name: str) -> str:
+    """Validate a plugin name (``spectrochempy-<name>`` with [a-z0-9-])."""
+    if not isinstance(plugin_name, str) or not PLUGIN_NAME_RE.fullmatch(plugin_name):
+        raise ValueError(
+            f"plugin name '{plugin_name}' must match 'spectrochempy-<name>' "
+            "with [a-z0-9-] only"
+        )
+    return plugin_name
+
+
+def canonical_plugin_tag(plugin_name: str, version: str) -> str:
+    """
+    Build the canonical release tag ``<plugin_name>-v<version>`` for a plugin.
+
+    The version is validated as a bare ``X.Y.Z`` first, so the returned tag
+    is always of the exact ``spectrochempy-<name>-v<X.Y.Z>`` form.
+    """
+    validate_plugin_name(plugin_name)
+    validate_version_input(version)
+    return f"{plugin_name}-v{version}"
+
+
+def unpack_recipe(tag_dir: Path) -> tuple[Path, str] | None:
+    """
+    Return ``(recipe_path, recipe_file)`` for a plugin checkout, or None.
+
+    Prefers ``recipe.yaml`` (current convention) and falls back to the
+    legacy ``meta.yaml`` form.
+    """
+    for recipe_file in ("recipe.yaml", "meta.yaml"):
+        recipe_path = tag_dir / recipe_file
+        if recipe_path.is_file():
+            return recipe_path, recipe_file
+    return None
+
+
+def inject_recipe_version(recipe_text: str, new_version: str) -> str:
+    """
+    Deterministically inject a version into a conda ``recipe.yaml`` text.
+
+    Replaces the ``context.version`` field and leaves ``package.version``
+    (a Jinja2 ``${{ version }}`` reference) untouched.  Raises ``ValueError``
+    if no ``context:`` block with a quoted ``version`` can be found, so a
+    recipe that cannot be adapted fails loudly instead of building silently.
+    """
+    validate_version_input(new_version)
+    lines = recipe_text.splitlines(keepends=True)
+    context_indent = -1
+    for i, line in enumerate(lines):
+        text = line.rstrip("\n")
+        indent = len(text) - len(text.lstrip())
+        content = text.strip()
+        if content == "context:":
+            context_indent = indent
+            continue
+        if context_indent >= 0 and indent <= context_indent and content:
+            break
+        if context_indent >= 0:
+            match = re.match(
+                rf"^ {{{context_indent + 2}}}version\s*:\s*\"([^\"]*)\"\s*$",
+                line,
+            )
+            if match:
+                prefix = " " * (context_indent + 2)
+                lines[i] = f'{prefix}version: "{new_version}"\n'
+                return "".join(lines)
+    raise ValueError(
+        "could not find a quoted `context:  version:` field in the recipe "
+        f"to inject version '{new_version}' into"
+    )
+
+
+def read_plugin_requirement(plugin_dir: Path, package: str) -> str | None:
+    """
+    Return a conda-style run requirement for ``package`` from a pyproject.toml.
+
+    Reads PEP 508 ``dependencies`` (``spectrochempy>=0.12,<0.13``) and
+    normalises it to conda syntax (``spectrochempy >=0.12,<0.13``).  Extras
+    (``[...]``) and markers (``; ...``) are ignored: plugin requirements do
+    not use them.  Returns None when the package is not a dependency or the
+    file cannot be read.
+    """
+    try:
+        import tomllib
+    except ImportError:
+        import tomli as tomllib  # type: ignore[no-redef]
+
+    pyproject = plugin_dir / "pyproject.toml"
+    if not pyproject.is_file():
+        return None
+    data = tomllib.loads(pyproject.read_text())
+    dependencies = data.get("project", {}).get("dependencies", [])
+    for dep in dependencies:
+        # 'spectrochempy[extra] >= 0.12, <0.13' -> name (extras ignored) + the
+        # spec part that follows the name/extras.
+        match = re.match(
+            r"^\s*" + re.escape(package) + r"(?:\[[^\]]*\])?\s*(?P<spec>[^;]*)$",
+            dep,
+        )
+        if match:
+            spec = match.group("spec").strip()
+            return f"{package} {spec}".strip() if spec else package
+    return None
+
+
+def align_recipe_requirement(recipe_text: str, plugin_dir: Path) -> str:
+    """
+    Align the run requirement of ``package`` in a recipe with its pyproject.
+
+    For the master-recipe fallback of historical tags, the recovery recipe
+    must not claim a core bound that contradicts the tag's own pyproject.
+    This rewrites the ``- spectrochempy ...`` line inside ``requirements.run``
+    to the requirement declared by ``plugin_dir/pyproject.toml``.  When the
+    package is absent from ``dependencies`` the recipe is returned unchanged
+    (the master bound stays, deterministically).
+    """
+    requirement = read_plugin_requirement(plugin_dir, "spectrochempy")
+    if requirement is None:
+        return recipe_text
+    lines = recipe_text.splitlines(keepends=True)
+    in_requirements = False
+    in_run = False
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if stripped == "requirements:":
+            in_requirements = True
+            continue
+        if in_requirements and stripped == "run:":
+            in_run = True
+            continue
+        if in_requirements and in_run and re.match(r"^-\s*spectrochempy\b", stripped):
+            indent = line[: len(line) - len(line.lstrip())]
+            lines[i] = f"{indent}- {requirement}\n"
+            break
+        if in_requirements and not stripped.startswith(("-", "run:")):
+            in_run = False
+    return "".join(lines)
+
+
+def resolve_recipe(
+    tag_dir: Path, version: str, master_recipe: str | None = None
+) -> tuple[str, str, str]:
+    """
+    Determine which recipe to build for a repair, as ``(dir, file, origin)``.
+
+    - ``origin="tag"``: the tag checkout already contains a ``recipe.yaml``
+      or ``meta.yaml`` — it is used as-is (its version is verified by the
+      caller through ``validate-release``).
+    - ``origin="master-fallback"``: the tag has no recipe (e.g. historical
+      PerkinElmer tags).  The canonical recipe from ``master`` is used as a
+      recovery recipe: the requested version is injected deterministically
+      and the ``spectrochempy`` run bound is aligned with the tag's own
+      pyproject.  The recovery recipe is written to ``tag_dir/recipe.yaml``
+      inside the tag checkout so it resolves like a recipe shipped in the
+      tag.  Raises ``ValueError`` when no master recipe is available, so a
+      tag without any recipe cannot be recovered silently.
+    """
+    tag_recipe = unpack_recipe(tag_dir)
+    if tag_recipe is not None:
+        return str(tag_dir), tag_recipe[1], "tag"
+    if master_recipe is None or not Path(master_recipe).is_file():
+        raise ValueError(
+            f"no recipe (recipe.yaml / meta.yaml) found at tag and no master "
+            f"recipe available to recover it from: {tag_dir}"
+        )
+    text = inject_recipe_version(Path(master_recipe).read_text(), version)
+    text = align_recipe_requirement(text, tag_dir)
+    (tag_dir / "recipe.yaml").write_text(text)
+    return str(tag_dir), "recipe.yaml", "master-fallback"
 
 
 def is_official_plugin(plugin_dir: Path) -> bool:
@@ -316,6 +515,48 @@ def git_tag_exists(tag: str, cwd: str | Path = ".") -> bool:
     return result.returncode == 0 and tag in result.stdout
 
 
+def verify_tag_exists(
+    tag: str, plugin_name: str | None = None, cwd: str | Path = "."
+) -> bool:
+    """
+    Verify a release tag exists before any checkout is attempted.
+
+    Uses ``git rev-parse --verify --quiet refs/tags/<tag>^{commit}`` so that
+    a protected/ambiguous ref cannot shadow a missing tag.  When the tag is
+    missing, the available plugin releases are listed to the caller's stderr
+    so the operator can pick an existing one.
+    """
+    # git is a trusted VCS binary (fixed args, the tag was validated earlier
+    # against the plugin tag pattern), so the subprocess audit is not
+    # applicable here.
+    result = subprocess.run(
+        ["git", "rev-parse", "--verify", "--quiet", f"refs/tags/{tag}^{{commit}}"],  # noqa: S603, S607
+        capture_output=True,
+        text=True,
+        cwd=cwd,
+    )
+    if result.returncode == 0:
+        return True
+
+    if plugin_name:
+        releases = list_plugin_tags(cwd)
+        versions = sorted(
+            (
+                v
+                for p, v in releases
+                if p == plugin_name and git_tag_exists(f"{p}-v{v}", cwd)
+            ),
+        )
+        print(
+            f"::error::tag '{tag}' does not exist. Existing releases for "
+            f"'{plugin_name}': {', '.join(versions) if versions else '(none found)'}",
+            file=sys.stderr,
+        )
+    else:
+        print(f"::error::tag '{tag}' does not exist", file=sys.stderr)
+    return False
+
+
 # ---------------------------------------------------------------------------
 # Version reading
 # ---------------------------------------------------------------------------
@@ -482,6 +723,32 @@ def parse_args() -> argparse.Namespace:
     # list-official
     sub.add_parser("list-official", help="List official plugin names")
 
+    # derive-tag
+    p_derive = sub.add_parser(
+        "derive-tag",
+        help=(
+            "Derive and verify the canonical release tag for a plugin version "
+            "(<plugin>-v<version>)"
+        ),
+    )
+    p_derive.add_argument("--plugin", required=True, help="Plugin package name")
+    p_derive.add_argument("--version", required=True, help="Version (X.Y.Z)")
+
+    # resolve-recipe
+    p_rec = sub.add_parser(
+        "resolve-recipe",
+        help=(
+            "Resolve which recipe to build for a repair: the tag's own "
+            "recipe (origin=tag) or a master-recipe fallback with the "
+            "requested version injected (origin=master-fallback)"
+        ),
+    )
+    p_rec.add_argument("--tag-dir", required=True, help="Plugin dir at tag checkout")
+    p_rec.add_argument("--version", required=True, help="Version (X.Y.Z)")
+    p_rec.add_argument(
+        "--master-recipe", default="", help="Path to the master recipe.yaml"
+    )
+
     # is-official
     p_off = sub.add_parser(
         "is-official",
@@ -611,6 +878,49 @@ def cmd_list_official(_args: argparse.Namespace) -> int:
     plugins = discover_official_plugins(Path("plugins"))
     for p in plugins:
         print(p)
+    return 0
+
+
+def cmd_derive_tag(args: argparse.Namespace) -> int:
+    """Derive the canonical tag for a plugin/version and verify it exists."""
+    try:
+        tag = canonical_plugin_tag(args.plugin, args.version)
+    except ValueError as exc:
+        print(f"::error::{exc}", file=sys.stderr)
+        return 1
+    if not verify_tag_exists(tag, plugin_name=args.plugin):
+        return 1
+    print(
+        f"Derived and verified release tag: plugin={args.plugin}, "
+        f"version={args.version}, tag={tag}"
+    )
+    return 0
+
+
+def cmd_resolve_recipe(args: argparse.Namespace) -> int:
+    """
+    Resolve the recipe to build and print GITHUB_OUTPUT-compatible lines.
+
+    Emits ``recipe_path=<abs path>``, ``recipe_file=<name>`` and
+    ``recipe_origin=<tag|master-fallback>``.  In ``master-fallback`` mode the
+    recovery recipe (with the requested version injected and the core bound
+    aligned with the tag pyproject) is written to the tag checkout, so the
+    build job can consume it exactly like a recipe that ships in the tag.
+    """
+    try:
+        path, recipe_file, origin = resolve_recipe(
+            Path(args.tag_dir), args.version, args.master_recipe or None
+        )
+    except ValueError as exc:
+        print(f"::error::{exc}", file=sys.stderr)
+        return 2
+    print(f"recipe_path={path}")
+    print(f"recipe_file={recipe_file}")
+    print(f"recipe_origin={origin}")
+    print(
+        f"::notice::Resolved recipe for {args.tag_dir}: origin={origin}, file={recipe_file}",
+        file=sys.stderr,
+    )
     return 0
 
 
@@ -841,6 +1151,8 @@ def main() -> int:
         "check-release": cmd_check_release,
         "check-all": cmd_check_all,
         "list-official": cmd_list_official,
+        "derive-tag": cmd_derive_tag,
+        "resolve-recipe": cmd_resolve_recipe,
         "is-official": cmd_is_official,
         "validate-release": cmd_validate_release,
         "upload-conda": cmd_upload,

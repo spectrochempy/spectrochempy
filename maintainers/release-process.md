@@ -338,6 +338,7 @@ logique de détection des changements reste cohérente :
 | `plugin_release_status.yml` | `--all-official --summary` — Affiche un tableau read-only dans le résumé du workflow |
 | `release_plugin.yml` | `--all-official --summary` — Affiche le même tableau comme confirmation avant release |
 | `publish_plugins.yml` | `--plugin <name> --apply-dev-version --github-output --json` — Injecte la version de développement et expose les métadonnées |
+| `test_plugin_recovery.yml` | `resolve-recipe` + `validate-release` — Test CI vertical du fallback master-fallback (PerkinElmer 0.1.4), aucune publication |
 
 ### Pourquoi pas de logique dupliquée dans les workflows
 
@@ -624,10 +625,25 @@ Si la publication PyPI a réussi mais que la publication Conda a échoué
 5. Pour publier rétroactivement le paquet Conda manquant, utiliser le
    workflow **Repair plugin Conda publication**
    (`repair_conda_plugin_release.yml`) :
+
+   - **Entrer uniquement le plugin et la version `X.Y.Z`** (jamais le tag
+     complet) : le tag canonique `spectrochempy-XXX-vX.Y.Z` est *dérivé*
+     puis **vérifié** contre les tags réels du dépôt avant tout checkout.
+     Lors de la construction, le checkout est effectué sur
+     `refs/tags/<tag>` explicite, jamais sur une entrée utilisateur.
+   - Toutes les valeurs d'opérateur (plugin, version, flags) sont
+     injectées dans les scripts shell **uniquement via `env:`**, jamais
+     par interpolation GitHub `${{ inputs.* }}` directe dans les blocs
+     `run:`.  Cette garantie structurelle empêche toute injection shell
+     depuis le texte saisi par l'opérateur.
+   - Le plugin est sélectionné dans une **liste fermée** des 6 plugins
+     officiels (carroucell, hypercomplex, iris, nmr, perkinelmer, tensor).
    - Sélectionner le mode dry-run par défaut pour valider la construction
    - Vérifier l'artifact produit
    - Relancer avec `dry_run=false` et `confirm_upload=true` pour publier
-   - Le workflow valide la release depuis le **checkout exact du tag**
+   - **La recette utilisée est résolue** (`recipe_origin=tag` ou
+     `recipe_origin=master-fallback`) et reportée dans le résumé; le
+     workflow valide la release depuis le **checkout exact du tag**
      (outillage stocké depuis `master` avant le détachement du tag) et
      refuse de remplacer une version déjà publiée sur `main` sauf à
      cocher explicitement `allow_override=true` (dérogation documentée,
@@ -637,18 +653,86 @@ Si la publication PyPI a réussi mais que la publication Conda a échoué
 
 6. Vérifier la publication avec `anaconda show spectrocat/spectrochempy-XXX`.
 
+#### Récupération des tags sans recette (PerkinElmer)
+
+`spectrochempy-perkinelmer` n'a historiquement **jamais eu** de recette
+conda dans ses tags (0.1.1 → 0.1.4), donc `unpack_recipe` n'y trouve ni
+`recipe.yaml` ni `meta.yaml`.  Pour ces tags, le workflow bascule sur la
+recette **canonique de `master`** (`recipe_origin=master-fallback`) :
+
+1. La recette `plugins/<plugin>/recipe.yaml` de `master` est utilisée
+   comme recette de récupération.
+2. La version du tag y est **injectée de façon déterministe**
+   (`inject_recipe_version`, champ `context.version`) ; `package.version`
+   reste la référence Jinja `${{ version }}`, donc l'artifact construit est
+   exactement `<plugin>-<version>-…`.
+3. La borne `spectrochempy` de la section `run` est **alignée sur le
+   `pyproject.toml` du tag lui-même** (`align_recipe_requirement`), pas sur
+   celle de `master` : la recette de récupération ne peut pas déclarer une
+   borne de core que le tag contredirait.  Si le tag ne déclare pas de
+   dépendance `spectrochempy`, la borne de `master` est conservée, de façon
+   déterministe.
+
+> **Politique de borne : recette master vs pyproject.**  Les recettes Conda
+> officielles sur `master` déclarent `spectrochempy >=0.10` (borne basse
+> commune, pas de borne supérieure) par convention, alors que le
+> `pyproject.toml` de chaque plugin déclare `spectrochempy>=0.12,<0.13`
+> (bornes strictes du plugin).  Cette différence est **délibérée** : la
+> recette master couvre la résolution Conda (Python >=3.11, compatibilité
+> binaire avec la chaîne de compilation), tandis que le pyproject impose la
+> compatibilité API pour le code Python.  Le `master-fallback` aligne la
+> recette de récupération sur la borne **pyproject du tag** (ex.
+> `>=0.12,<0.13`), garantissant que l'artifact construit est compatible
+> avec le code réel du tag.
+
+4. La recette de récupération est écrite dans `plugins/<plugin>/recipe.yaml`
+   du checkout du tag, puis consommée exactement comme une recette qui
+   existerait dans le tag.
+
+`resolve_recipe` **ne bascule jamais silencieusement** :
+
+- `origin="tag"` : une recette existe dans le tag — elle est utilisée
+  telle quelle (sa cohérence de version est ensuite contrôlée par
+  `validate-release`, échec bloquant en cas de désaccord).
+- `origin="master-fallback"` : aucune recette dans le tag, recette de
+  `master` disponible.
+- **Erreur bloquante** : aucune recette dans le tag **et** aucune recette
+  `master` (le plugin est retiré de master, par exemple).  Un tag sans
+  recette ne peut pas être « réparé » en silence avec une recette
+  inconnue.  `conda_publish.py resolve-recipe` sort avec le code 2 dans
+  ce cas.
+
+Pour tester ce fallback en CI sans toucher aux tags historiques, le
+workflow dédié `test_plugin_recovery.yml` construit réellement le paquet
+`spectrochempy-perkinelmer-v0.1.4` via le chemin `master-fallback` :
+extraction du contenu du vrai tag (`git archive`), résolution de la recette,
+vérification de l'origine `master-fallback` et du contenu (borne alignée
+`>=0.12,<0.13`), build `rattler-build`, vérification de l'artifact exact
+`spectrochempy-perkinelmer-0.1.4-*`, sans aucune publication.  Ce workflow
+se déclenche sur les PR touchant `conda_publish.py`,
+`repair_conda_plugin_release.yml`, `plugins/spectrochempy-perkinelmer/**`
+ou le workflow lui-même.  Jamais supprimer ou déplacer les tags 0.1.1 →
+0.1.4 (sources historiques).
+
 #### Rôle de `conda_publish.py`
 
 Le script `.github/workflows/scripts/conda_publish.py` fournit des
 fonctions réutilisables pour :
 
 - Valider le format des tags plugins (`verify-tag`)
+- Dériver et vérifier le tag canonique `spectrochempy-XXX-vX.Y.Z` depuis
+  un plugin et une version seuls (`derive-tag`) — une version autre que
+  `X.Y.Z` stricte (préfixe `v`, nom de plugin, tag complet, espaces,
+  métacaractère shell) est rejetée avant toute commande shell
 - Vérifier le marqueur de plugin officiel (`is-official`) — un
   `pyproject.toml` illisible provoque une erreur (`exit 2`), jamais un
   « non officiel » silencieux
 - Vérifier la cohérence d'une release sur GitHub / PyPI / Conda
   (`check-release`, `check-all` — historique, sur tous les tags plugins)
 - Valider une release sur le checkout du tag (`validate-release`, bloquant)
+- Résoudre la recette à construire pour une réparation (`resolve-recipe`),
+  avec bascule `master-fallback` pour les tags sans recette — émet
+  `recipe_path`/`recipe_file`/`recipe_origin` au format `GITHUB_OUTPUT`
 - Publier un artifact Conda en toute sécurité (`upload-conda` — refuse le
   remplacement sans dérogation, `--force` uniquement en cas de dérogation)
 - Confirmer une publication (`verify-conda`, poll des labels) et lire
@@ -696,12 +780,13 @@ stables suivantes existent sur GitHub et PyPI mais **ne sont pas sur
 | `spectrochempy-iris`         | `0.1.7`, `0.1.8` |
 | `spectrochempy-nmr`          | `0.1.8`, `0.1.10`, `0.1.11` |
 | `spectrochempy-tensor`       | `0.1.4`, `0.1.5` |
-| `spectrochempy-perkinelmer`  | toutes (aucun paquet Conda ; **recette manquante** à ajouter avant récupération) |
+| `spectrochempy-perkinelmer`  | toutes (aucun paquet Conda ; récupérées via `master-fallback`, recette de récupération ajoutée) |
 
 `spectrochempy-perkinelmer` n'a jamais eu de `recipe.yaml`/`meta.yaml`
-dans le dépôt : même corrigé, le job de découverte ne peut pas le publier.
-L'ajout d'une recette Conda pour ce plugin est un préalable nécessaire à
-sa publication sur `spectrocat`.
+**dans ses tags historiques**.  Depuis que la recette de ce plugin est
+présente sur `master` (avec la borne standard `spectrochempy >=0.10`), les
+old tags peuvent être récupérés via le `master-fallback` décrit plus haut
+(`conda_publish.py resolve-recipe`).
 
 ---
 

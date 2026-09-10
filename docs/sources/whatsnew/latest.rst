@@ -26,3 +26,10 @@ Bug Fixes
   equals the OMNIC "Total collection time", i.e. the series last time
   (+1006, in minutes) converted to seconds. The time axis is unchanged and
   is still anchored at the series first time. (#1613)
+
+- Added the missing Conda recipe for ``spectrochempy-perkinelmer`` and
+  made the repair workflow take a bare ``X.Y.Z`` version (tag derived and
+  verified) with a closed plugin list.  Tags without a recipe are now
+  recoverable from the canonical ``master`` recipe with a deterministic
+  version injection and a core bound aligned with the tag pyproject
+  (``recipe_origin=master-fallback``).
