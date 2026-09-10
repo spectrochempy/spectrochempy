@@ -80,9 +80,10 @@ Overall file organization
     | file header /    |   file magic, file-level flags, key table
     | key-table region |   (first 304 bytes + entries)
     +------------------+                  ^
-    | series metadata /|------------------+-- series-header base at
-    | header region    |                     key[0].ref_pos (152 bytes before
-    +------------------+                     the first detection signature)
+    | series metadata /|------------------+-- series-header base at the
+    | header region    |                     key[0] entry position (+2),
+    +------------------+                     152 bytes before the first
+                                             detection signature
     | background header |   its own X endpoints
     | / background data |
     +------------------+
@@ -110,8 +111,9 @@ Offset conventions
 * File-header / key-table offsets are file-relative (relative to the start of
   the file).
 * Series-header offsets are relative to the located *series-header base*
-  (at ``key[0].ref_pos``, i.e. the position of the first detection signature
-  minus 152; see :ref:`srs-detection-signatures`).
+  (at the position referenced by the ``key[0]`` entry — entry offset +2 —
+  i.e. the position of the first detection signature minus 152; see
+  :ref:`srs-detection-signatures`).
 * Repeated-record offsets use the record start as origin; trailer offsets use
   the trailer start; SeriesProfile fields use the block start as origin.
 
@@ -145,12 +147,12 @@ File header / key-table region (file-relative)
      - UInt8
      - Level-of-processing flag: ``0x27`` pristine, ``0x0f`` reprocessed
        (verified for the RapidScan family; other families show both values
-       too).
+       too; ``0x48`` also observed on a TGA specimen).
      - ``[OBSERVED]``
    * - 294
      - 2
      - UInt16
-     - Number of key-table entries (28–29 observed).
+     - Number of key-table entries (24–33 in the files examined).
      - ``[OBSERVED]``
    * - 304
      - n × 16
@@ -161,6 +163,14 @@ File header / key-table region (file-relative)
 Key-table entry (16 bytes; entry-relative offsets)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+``[ESTABLISHED]`` Each key record occupies 16 bytes and follows the generic
+OMNIC key-record layout also used by the SPA/SPG families (see
+:ref:`spa-format`): a 1-byte key, a reserved/variant byte, a 4-byte
+file-relative block position, a 4-byte block length and 6
+trailing/variant-dependent bytes. Only the first entry — the **series**
+entry — is interpreted here; the positions, lengths and trailing data of the
+other entries remain largely unresolved.
+
 .. list-table::
    :header-rows: 1
 
@@ -170,27 +180,36 @@ Key-table entry (16 bytes; entry-relative offsets)
      - Meaning
      - Certainty
    * - 0
-     - 2
-     - UInt16
-     - Key type / role indicator (``0x02`` identifies the series entry).
+     - 1
+     - UInt8
+     - Key / role indicator (``0x02`` identifies the series entry;
+       ``nlines`` at offset 294 counts the entries).
+     - ``[ESTABLISHED]`` for the first entry
+   * - 1
+     - 1
+     - UInt8
+     - Reserved / variant-dependent byte (0 in the files examined).
      - ``[OBSERVED]``
-   * - 4
+   * - 2
      - 4
      - UInt32
-     - Often 0 in the observed files; role unclear.
-     - ``[UNKNOWN]``
-   * - 8
+     - File-relative position of the referenced block. For the first entry
+       this is the series-header base, exactly 152 bytes before the first
+       detection signature (identical in all files examined).
+     - ``[ESTABLISHED]`` for the first entry
+   * - 6
      - 4
      - UInt32
-     - ``ref_pos``: file offset of the referenced section. For the first
-       entry, ``ref_pos`` equals the series-header base, which is exactly 152
-       bytes before the first detection signature (verified across six files).
-     - ``[ESTABLISHED]``
-   * - 12
-     - 4
-     - UInt32
-     - Referenced section size in bytes.
-     - ``[HYPOTHESIS]``
+     - Referenced block length in bytes (0 for the first entry in the files
+       examined).
+     - ``[OBSERVED]`` value / ``[UNKNOWN]`` role
+   * - 10
+     - 6
+     - bytes
+     - Trailing / variant-dependent data; ``8c 00 00 00 01 00`` (the UInt32
+       pair ``0x008c0000`` / ``0x00010000`` at entry offsets +8/+12) for the
+       first entry in all files examined.
+     - ``[OBSERVED]``
 
 Series metadata
 ---------------
@@ -257,8 +276,10 @@ have been interpreted so far; the rest of the region is unmapped.
    * - 32
      - 4
      - UInt32
-     - ZPD (zero-path-difference) position.
-     - ``[OBSERVED]``
+     - Interferogram peak position (matches OMNIC's series-info field of the
+       same name in all files examined). Equivalence with the physical
+       zero-path-difference position is not established.
+     - ``[ESTABLISHED]``
    * - 36
      - 4
      - UInt32
@@ -290,14 +311,19 @@ have been interpreted so far; the rest of the region is unmapped.
    * - 84
      - 4
      - Float32
-     - 1.0 in TG/GC and HighSpeed, 2.0 in RapidScan files examined; see
-       :ref:`srs-unknown-fields`.
-     - ``[OBSERVED]`` (correlated only)
+     - OMNIC **sample spacing** (matches the series-info field of the same
+       name in all files examined). Varies with acquisition configuration,
+       not with the acquisition family: 2.0 in the RapidScan, HighSpeed and
+       TGA files examined, 1.0 in the GC file.
+     - ``[ESTABLISHED]``
    * - 184
      - 4
      - Float32
-     - Same value pattern as +84.
-     - ``[OBSERVED]`` (correlated only)
+     - Not covered by OMNIC's reported series-info fields; value differs from
+       +84 in two of the five files examined (2.0 in the RapidScan files,
+       1.0 in the HighSpeed, GC and TGA files); see
+       :ref:`srs-unknown-fields`.
+     - ``[OBSERVED]`` value / ``[UNKNOWN]`` semantic
    * - 188
      - 4
      - Float32
@@ -349,6 +375,20 @@ have been interpreted so far; the rest of the region is unmapped.
      - UInt8
      - Y-unit code; a value of 1 may mean minutes.
      - ``[HYPOTHESIS]``
+   * - 1036
+     - 4
+     - Float32
+     - Flow-cell temperature (°C; TG/GC files only). Matches OMNIC's reported
+       series-info value in the TG/GC files examined (200.0–220.0); 0.0 in
+       the other files.
+     - ``[ESTABLISHED]`` (TG/GC files examined)
+   * - 1040
+     - 4
+     - Float32
+     - Transfer-line temperature (°C; TG/GC files only). Matches OMNIC's
+       reported series-info value in the TG/GC files examined
+       (200.0–220.0); 0.0 in the other files.
+     - ``[ESTABLISHED]`` (TG/GC files examined)
    * - 1044
      - 2
      - UInt16
@@ -690,8 +730,9 @@ recognizable 10–16 byte signature. The tested files show:
 Positioning relationships (all values verified in the tested corpus):
 
 * the **first** signature occurs 152 bytes after the series-header base
-  (``key[0].ref_pos`` points at the same header — ``[ESTABLISHED]`` for
-  ``key[0]`` across the six public files; ``[OBSERVED]`` as a general rule);
+  (the position field of the ``key[0]`` entry — entry offset +2 — points at
+  the same header: ``[ESTABLISHED]`` for ``key[0]`` across the files
+  examined; ``[OBSERVED]`` as a general rule);
 * the **second** signature occurs 152 bytes before the background header;
 * the **last** signature occurs 60 bytes before the series spectral-data
   start (data = signature position + 60);
@@ -732,25 +773,22 @@ listed as correlated observations only; no unsupported semantic is assigned.
      - Float32
      - 1.0 in non-RapidScan, 0.0 in RapidScan files examined.
      - ``[OBSERVED]`` (correlated only)
-   * - Series header +84
-     - 4
-     - Float32
-     - 1.0 in TG/GC and HighSpeed, 2.0 in RapidScan files examined.
-     - ``[OBSERVED]`` (correlated only)
    * - Series header +184
      - 4
      - Float32
-     - Same pattern as +84.
+     - 2.0 in the RapidScan files, 1.0 in the HighSpeed, GC and TGA files
+       examined; not covered by OMNIC's reported series-info fields.
      - ``[OBSERVED]`` (correlated only)
    * - Series header +1048
      - 2
      - UInt16
      - 200 in the tested files.
      - ``[UNKNOWN]``
-   * - Key-table entry +4
-     - 4
-     - UInt32
-     - Often 0.
+   * - Key-table entries other than the first
+     - 16 each
+     - record
+     - Key values, referenced positions, lengths and trailing data not yet
+       interpreted.
      - ``[UNKNOWN]``
    * - Record prefix +22..75
      - var
@@ -764,12 +802,13 @@ listed as correlated observations only; no unsupported semantic is assigned.
      - ``[OBSERVED]`` values / ``[UNKNOWN]`` semantics
 
 Confound warning: in the current corpus, RapidScan is the only family
-observed with a distinct value pattern for the fields below; the HighSpeed and
-TG/GC samples (``TGA_demo.srs`` shares the TG/GC structure) all share the
-same pattern. These fields therefore "correlate" with the acquisition family
-in this sample without being independently confirmed as family markers. They
-are more plausibly measurement-mode or axis-registration fields, but nothing
-beyond the correlation is established.
+observed with a distinct value pattern for the correlated fields listed above
+(``+24``, ``+56``, ``+184``); the HighSpeed and TG/GC samples
+(``TGA_demo.srs`` shares the TG/GC structure) all share the same pattern.
+These fields therefore "correlate" with the acquisition family in this sample
+without being independently confirmed as family markers. They are more
+plausibly measurement-mode or axis-registration fields, but nothing beyond the
+correlation is established.
 
 Open questions
 --------------
@@ -788,7 +827,8 @@ Open questions
   third HighSpeed signature occurrence?
 * Do the detection signatures and the −152 / +60 positioning relationships
   generalize across OMNIC versions?
-* What are the key-table fields at +4 and +12?
+* What is the meaning and structure of the key-table entries beyond the first
+  (series) entry, and of the per-entry trailing bytes?
 * What is the structure and role of the trailer's copied "series metadata"
   region?
 
