@@ -333,11 +333,11 @@ jobs:
     # plugin builds below.  For plugin releases: core resolves from the
     # spectrocat channel, so no dependency is needed.
     needs: [classify-pr-scope, detect-release-scope]
+    # Skip discovery for core releases (no plugin builds needed)
     if: >
       github.repository == 'spectrochempy/spectrochempy' &&
       (github.event_name != 'pull_request' ||
       needs.classify-pr-scope.outputs.docs_only != 'true') &&
-      # Skip discovery for core releases (no plugin builds needed)
       !(github.event_name == 'release' && needs.detect-release-scope.outputs.is_core_release == 'true')
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
