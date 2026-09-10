@@ -6,12 +6,26 @@ name: Repair plugin Conda publication
 # Conda package was not published to spectrocat/main.
 #
 # Safety guarantees:
-#   - Tag must match <plugin_name>-v<version> pattern
+#   - The operator supplies ONLY a plugin (closed list of official plugins)
+#     and a bare X.Y.Z version.  The tag <plugin>-v<version> is derived
+#     programmatically (conda_publish.py derive-tag): the version is strictly
+#     validated (no 'v' prefix, no plugin name, no tag, no whitespace, no
+#     shell metacharacters -- nothing but digits and dots).
+#   - The derived tag is explicitly verified to EXIST (git rev-parse
+#     refs/tags/<tag>^{commit}) BEFORE any checkout; if missing, the
+#     available releases for that plugin are listed.
+#   - Checkout uses the explicit ref refs/tags/<tag>, never a bare name.
 #   - Plugin must be declared official (evaluation failure = abort)
-#   - The release is validated from the exact tag checkout: the version from
-#     pyproject.toml, __init__.py (when declared) and the recipe must all
-#     match the tag version — any mismatch is blocking
-#   - A recipe (recipe.yaml / meta.yaml) must exist at the tag
+#   - The release is validated on the exact tag checkout: the version from
+#     pyproject.toml, __init__.py (when declared) and the resolved recipe
+#     must all match the tag version -- any mismatch is blocking
+#   - A recipe at the tag (recipe.yaml / meta.yaml) is used as-is.  When the
+#     tag has NO recipe (e.g. historical PerkinElmer tags), the canonical
+#     recipe from master is used as a recovery recipe: the requested version
+#     is injected deterministically and the spectrochempy run bound is
+#     aligned with the tag's own pyproject.toml.  The chosen origin is
+#     reported as recipe_origin=tag|master-fallback and never applied to a
+#     tag that has a recipe but an inconsistent one (that is blocking).
 #   - Upload refuses to overwrite a version already published on the target
 #     label unless allow_override=true (explicit, documented derogation)
 #   - Default mode is dry-run (no upload)
@@ -22,11 +36,18 @@ on:
   workflow_dispatch:
     inputs:
       plugin_name:
-        description: "Plugin package name (e.g. spectrochempy-nmr)"
+        description: "Official plugin package name"
         required: true
-        type: string
-      tag:
-        description: "Existing release tag (e.g. spectrochempy-nmr-v0.1.11)"
+        type: choice
+        options:
+          - spectrochempy-carroucell
+          - spectrochempy-hypercomplex
+          - spectrochempy-iris
+          - spectrochempy-nmr
+          - spectrochempy-perkinelmer
+          - spectrochempy-tensor
+      version:
+        description: "Version to repair (e.g. 0.1.8). The release tag <plugin>-v<version> is derived and verified automatically."
         required: true
         type: string
       dry_run:
@@ -50,14 +71,16 @@ permissions:
 
 jobs:
   validate:
-    name: Validate tag and plugin
+    name: Validate version, tag and recipe
     runs-on: ubuntu-latest
     if: github.repository == 'spectrochempy/spectrochempy'
     outputs:
       plugin: ${{ steps.validate.outputs.plugin }}
       version: ${{ steps.validate.outputs.version }}
+      tag: ${{ steps.validate.outputs.tag }}
       recipe_path: ${{ steps.recipe.outputs.recipe_path }}
       recipe_file: ${{ steps.recipe.outputs.recipe_file }}
+      recipe_origin: ${{ steps.recipe.outputs.recipe_origin }}
 
     steps:
       - name: Checkout code
@@ -70,60 +93,84 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Validate inputs
+      - name: Validate inputs and derive release tag
         id: validate
         run: |
-          python3 .github/workflows/scripts/conda_publish.py verify-tag \
-            "${{ inputs.tag }}" --plugin "${{ inputs.plugin_name }}"
-
+          set -euo pipefail
           PLUGIN="${{ inputs.plugin_name }}"
-          VERSION=$(echo "${{ inputs.tag }}" | sed -n 's/^.*-v\([0-9.]*\)$/\1/p')
+          VERSION="${{ inputs.version }}"
 
-          echo "plugin=$PLUGIN" >> "$GITHUB_OUTPUT"
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          # Strict version validation + canonical tag derivation + explicit
+          # existence check (rev-parse refs/tags/<tag>^{commit}), with the
+          # available releases listed if the tag is missing.
+          python3 .github/workflows/scripts/conda_publish.py derive-tag \
+            --plugin "$PLUGIN" --version "$VERSION"
 
           # Verify plugin is official.  is-official exits 0 (official),
           # 1 (not official) or 2 (evaluation error) — any non-zero aborts.
           python3 .github/workflows/scripts/conda_publish.py is-official \
             "plugins/$PLUGIN"
 
-          echo "Inputs valid: $PLUGIN v$VERSION is an official plugin"
+          TAG="$PLUGIN-v$VERSION"
+          echo "plugin=$PLUGIN" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
-      - name: Stash validation tooling from master
+          echo "Inputs valid: $PLUGIN v$VERSION -> release tag $TAG"
+
+      - name: Stash validation tooling and master recipe
+        id: stash
         run: |
-          # The release tag predates the shared validation script.  Copy the
-          # master version out of the tree so it survives the tag checkout.
+          set -euo pipefail
+          PLUGIN="${{ inputs.plugin_name }}"
+          # The release tag may predate the shared validation script and its
+          # recipe.  Copy the master versions out of the tree so they survive
+          # the tag checkout (used by resolve-recipe as recovery recipe).
           cp .github/workflows/scripts/conda_publish.py /tmp/conda_publish.py
+          if [ -f "plugins/$PLUGIN/recipe.yaml" ]; then
+            cp "plugins/$PLUGIN/recipe.yaml" /tmp/master_recipe.yaml
+            echo "master_recipe=/tmp/master_recipe.yaml" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::No recipe.yaml for $PLUGIN on master; the tag must carry one."
+          fi
 
-      - name: Checkout release tag
+      - name: Checkout release tag (explicit ref)
         run: |
-          git checkout --detach "${{ inputs.tag }}"
+          set -euo pipefail
+          # Tag existence was verified in the previous job step; checkout the
+          # full ref so a short or ambiguous name can never be resolved.
+          git checkout --detach "refs/tags/${{ steps.validate.outputs.tag }}"
+
+      - name: Resolve recipe to build
+        id: recipe
+        run: |
+          set -euo pipefail
+          PLUGIN="${{ steps.validate.outputs.plugin }}"
+          VERSION="${{ steps.validate.outputs.version }}"
+          MASTER_RECIPE="${MASTER_RECIPE:-}"
+          # Emits recipe_path / recipe_file / recipe_origin.  In
+          # master-fallback mode it writes the recovery recipe (version
+          # injected, core bound aligned with the tag pyproject) into the
+          # plugin dir of this checkout.
+          python3 /tmp/conda_publish.py resolve-recipe \
+            --tag-dir "plugins/$PLUGIN" \
+            --version "$VERSION" \
+            --master-recipe "$MASTER_RECIPE" >> "$GITHUB_OUTPUT"
+        env:
+          MASTER_RECIPE: ${{ steps.stash.outputs.master_recipe }}
 
       - name: Validate metadata against the tag
         run: |
           PLUGIN="${{ steps.validate.outputs.plugin }}"
           VERSION="${{ steps.validate.outputs.version }}"
-          # Blocking: pyproject.toml / __init__.py (when declared) / recipe
-          # versions must all match the tag version, read from the exact tag
-          # checkout.  Any mismatch fails the job before building.
+          RECIPE_FILE="${{ steps.recipe.outputs.recipe_file }}"
+          # Blocking: pyproject.toml / __init__.py (when declared) / resolved
+          # recipe versions must all match the tag version, read from the
+          # exact tag checkout.  Any mismatch fails the job before building.
           python3 /tmp/conda_publish.py validate-release \
             "plugins/$PLUGIN" "$VERSION"
 
-      - name: Find recipe file
-        id: recipe
-        run: |
-          PLUGIN="${{ steps.validate.outputs.plugin }}"
-          RECIPE_DIR="plugins/$PLUGIN"
-          if [ -f "$RECIPE_DIR/recipe.yaml" ]; then
-            echo "recipe_path=$RECIPE_DIR" >> "$GITHUB_OUTPUT"
-            echo "recipe_file=recipe.yaml" >> "$GITHUB_OUTPUT"
-          elif [ -f "$RECIPE_DIR/meta.yaml" ]; then
-            echo "recipe_path=$RECIPE_DIR" >> "$GITHUB_OUTPUT"
-            echo "recipe_file=meta.yaml" >> "$GITHUB_OUTPUT"
-          else
-            echo "::error::No recipe.yaml or meta.yaml found for $PLUGIN at tag ${{ inputs.tag }}"
-            exit 1
-          fi
+          echo "Recipe origin for $PLUGIN v$VERSION: ${{ steps.recipe.outputs.recipe_origin }} ($RECIPE_FILE)"
 
       - name: Check existing Conda package
         run: |
@@ -156,10 +203,9 @@ jobs:
         shell: bash -l {0}
 
     steps:
-      - name: Checkout tag
+      - name: Checkout code
         uses: actions/checkout@v7
         with:
-          ref: ${{ inputs.tag }}
           fetch-depth: 0
 
       - name: Install Conda environment with Micromamba
@@ -171,12 +217,44 @@ jobs:
             python=3.11
           cache-environment: true
 
+      - name: Stash tooling and master recipe
+        id: stash
+        run: |
+          set -euo pipefail
+          PLUGIN="${{ inputs.plugin_name }}"
+          cp .github/workflows/scripts/conda_publish.py /tmp/conda_publish.py
+          if [ -f "plugins/$PLUGIN/recipe.yaml" ]; then
+            cp "plugins/$PLUGIN/recipe.yaml" /tmp/master_recipe.yaml
+            echo "master_recipe=/tmp/master_recipe.yaml" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout release tag (explicit ref)
+        run: |
+          set -euo pipefail
+          git checkout --detach "refs/tags/${{ needs.validate.outputs.tag }}"
+
+      - name: Resolve recipe to build
+        id: recipe
+        run: |
+          set -euo pipefail
+          PLUGIN="${{ needs.validate.outputs.plugin }}"
+          VERSION="${{ needs.validate.outputs.version }}"
+          MASTER_RECIPE="${MASTER_RECIPE:-}"
+          # Same deterministic resolution as the validate job, so the build
+          # workspace contains the same recipe the validator reviewed.
+          python3 /tmp/conda_publish.py resolve-recipe \
+            --tag-dir "plugins/$PLUGIN" \
+            --version "$VERSION" \
+            --master-recipe "$MASTER_RECIPE" >> "$GITHUB_OUTPUT"
+        env:
+          MASTER_RECIPE: ${{ steps.stash.outputs.master_recipe }}
+
       - name: Build conda plugin package
         uses: prefix-dev/rattler-build-action@v0.2.39
         env:
           CONDA_BLD_PATH: ../output
         with:
-          recipe-path: ${{ needs.validate.outputs.recipe_path }}/${{ needs.validate.outputs.recipe_file }}
+          recipe-path: ${{ steps.recipe.outputs.recipe_path }}/${{ steps.recipe.outputs.recipe_file }}
           upload-artifact: false
           build-args: >-
             -c conda-forge
@@ -320,12 +398,14 @@ jobs:
         run: |
           PLUGIN="${{ needs.validate.outputs.plugin }}"
           VERSION="${{ needs.validate.outputs.version }}"
+          ORIGIN="${{ needs.validate.outputs.recipe_origin }}"
 
           echo "## Dry-run summary" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Plugin**: \`$PLUGIN\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Version**: \`$VERSION\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Tag**: \`${{ inputs.tag }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Tag**: \`${{ needs.validate.outputs.tag }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Recipe origin**: \`$ORIGIN\` (tag recipe vs master-recipe recovery fallback)" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Mode**: Dry-run (no upload performed)" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "To publish, re-run with:" >> "$GITHUB_STEP_SUMMARY"
@@ -340,6 +420,8 @@ jobs:
           echo "=== DRY RUN COMPLETE ==="
           echo "Plugin: $PLUGIN"
           echo "Version: $VERSION"
+          echo "Tag: ${{ needs.validate.outputs.tag }}"
+          echo "Recipe origin: $ORIGIN"
           echo "Artifact: conda-repair-$PLUGIN"
           echo ""
           echo "No upload was performed. To upload, re-run with dry_run=false and confirm_upload=true."
