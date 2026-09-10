@@ -36,7 +36,7 @@ Bug Fixes
   first time (+1002, in minutes) incorrectly converted to seconds; it now
   equals the OMNIC "Total collection time", i.e. the series last time
   (+1006, in minutes) converted to seconds. The time axis is unchanged and
-  is still anchored at the series first time.
+  is still anchored at the series first time. (#1613)
 
 
 .. section
