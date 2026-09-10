@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # ruff: noqa: T201
-"""Shared helpers for Conda plugin publication and verification.
+"""
+Shared helpers for Conda plugin publication and verification.
 
 Provides functions for:
 - Parsing and validating plugin tags
@@ -18,7 +19,9 @@ import subprocess
 import sys
 import urllib.error
 import urllib.request
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict
+from dataclasses import dataclass
+from dataclasses import field
 from pathlib import Path
 
 TAG_RE = re.compile(
@@ -37,8 +40,11 @@ def parse_plugin_tag(tag: str) -> tuple[str, str] | None:
     return match.group("plugin"), match.group("version")
 
 
-def validate_tag_format(tag: str, expected_plugin: str | None = None) -> tuple[str, str]:
-    """Validate a plugin tag and return (plugin_name, version).
+def validate_tag_format(
+    tag: str, expected_plugin: str | None = None
+) -> tuple[str, str]:
+    """
+    Validate a plugin tag and return (plugin_name, version).
 
     Raises ValueError with a clear diagnostic if the tag is invalid.
     """
@@ -122,10 +128,17 @@ def discover_official_plugins(plugins_dir: Path) -> list[str]:
 def fetch_json(url: str, timeout: int = 30) -> dict | None:
     """Fetch JSON from a URL, returning None on failure."""
     try:
-        req = urllib.request.Request(url, headers={"Accept": "application/json"})
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
+        # URLs are built from https:// API constants only (never user-supplied
+        # or file:// schemes), so the urlopen audit is not applicable here.
+        req = urllib.request.Request(url, headers={"Accept": "application/json"})  # noqa: S310
+        with urllib.request.urlopen(req, timeout=timeout) as resp:  # noqa: S310
             return json.loads(resp.read().decode())
-    except (urllib.error.URLError, urllib.error.HTTPError, json.JSONDecodeError, OSError):
+    except (
+        urllib.error.URLError,
+        urllib.error.HTTPError,
+        json.JSONDecodeError,
+        OSError,
+    ):
         return None
 
 
@@ -146,10 +159,9 @@ def pypi_latest_version(package: str) -> str | None:
     return info.get("version")
 
 
-def anaconda_versions(
-    package: str, owner: str = "spectrocat"
-) -> dict[str, list[str]]:
-    """Return {version: [labels]} for a package on Anaconda.org.
+def anaconda_versions(package: str, owner: str = "spectrocat") -> dict[str, list[str]]:
+    """
+    Return {version: [labels]} for a package on Anaconda.org.
 
     Uses the package /files endpoint, which lists every uploaded file with
     its channel labels.  Returns empty dict if the package is not found.
@@ -182,13 +194,17 @@ def anaconda_version_labels(
 
 
 def git_tag_exists(tag: str, cwd: str | Path = ".") -> bool:
-    """Check if a git tag exists in the repository.
+    """
+    Check if a git tag exists in the repository.
 
     Checks the remote first; falls back to local tags if no remote is configured.
     """
+    # git is a trusted VCS binary (fixed args from the repo config, never
+    # untrusted input), so the subprocess audit is not applicable.  The tag is
+    # validated earlier against the PEP 440 pattern.
     # Try remote first (works in CI with origin configured)
     result = subprocess.run(
-        ["git", "ls-remote", "--tags", "origin", f"refs/tags/{tag}"],
+        ["git", "ls-remote", "--tags", "origin", f"refs/tags/{tag}"],  # noqa: S603, S607
         capture_output=True,
         text=True,
         cwd=cwd,
@@ -198,7 +214,7 @@ def git_tag_exists(tag: str, cwd: str | Path = ".") -> bool:
 
     # Fallback: check local tags
     result = subprocess.run(
-        ["git", "tag", "--list", tag],
+        ["git", "tag", "--list", tag],  # noqa: S603, S607
         capture_output=True,
         text=True,
         cwd=cwd,
@@ -206,29 +222,8 @@ def git_tag_exists(tag: str, cwd: str | Path = ".") -> bool:
     return result.returncode == 0 and tag in result.stdout
 
 
-def git_checkout_tag(tag: str, cwd: str | Path = ".") -> bool:
-    """Checkout a specific git tag. Returns True on success."""
-    result = subprocess.run(
-        ["git", "checkout", tag],
-        capture_output=True,
-        text=True,
-        cwd=cwd,
-    )
-    return result.returncode == 0
-
-
-def run_git(*args: str, cwd: str | Path = ".") -> str:
-    """Run a git command and return stdout."""
-    result = subprocess.run(
-        ("git", *args),
-        check=True,
-        capture_output=True,
-        text=True,
-        cwd=cwd,
-    )
-    return result.stdout.strip()
-
-
+# ---------------------------------------------------------------------------
+# Version reading
 # ---------------------------------------------------------------------------
 # Verification data structures
 # ---------------------------------------------------------------------------
@@ -254,7 +249,8 @@ def check_plugin_release_consistency(
     *,
     skip_network: bool = False,
 ) -> PluginReleaseCheck:
-    """Check consistency of a plugin release across GitHub / PyPI / Conda.
+    """
+    Check consistency of a plugin release across GitHub / PyPI / Conda.
 
     Returns a PluginReleaseCheck with the verdict.
     """
@@ -447,17 +443,14 @@ def cmd_is_official(args: argparse.Namespace) -> int:
 
 def main() -> int:
     args = parse_args()
-    if args.command == "verify-tag":
-        return cmd_verify_tag(args)
-    elif args.command == "check-release":
-        return cmd_check_release(args)
-    elif args.command == "check-all":
-        return cmd_check_all(args)
-    elif args.command == "list-official":
-        return cmd_list_official(args)
-    elif args.command == "is-official":
-        return cmd_is_official(args)
-    return 1
+    commands = {
+        "verify-tag": cmd_verify_tag,
+        "check-release": cmd_check_release,
+        "check-all": cmd_check_all,
+        "list-official": cmd_list_official,
+        "is-official": cmd_is_official,
+    }
+    return commands.get(args.command, lambda _: 1)(args)
 
 
 if __name__ == "__main__":

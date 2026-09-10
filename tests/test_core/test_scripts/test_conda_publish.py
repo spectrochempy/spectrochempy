@@ -3,18 +3,13 @@
 from __future__ import annotations
 
 import importlib.util
-import json
 import sys
 from pathlib import Path
 
 import pytest
 
 SCRIPT_PATH = (
-    Path(__file__).parents[3]
-    / ".github"
-    / "workflows"
-    / "scripts"
-    / "conda_publish.py"
+    Path(__file__).parents[3] / ".github" / "workflows" / "scripts" / "conda_publish.py"
 )
 
 
@@ -117,9 +112,7 @@ class TestReadPluginVersion:
     def test_read_recipe_version(self, tmp_path):
         module = load_module()
         recipe = tmp_path / "recipe.yaml"
-        recipe.write_text(
-            'context:\n  name: spectrochempy-nmr\n  version: "0.1.11"\n'
-        )
+        recipe.write_text('context:\n  name: spectrochempy-nmr\n  version: "0.1.11"\n')
         assert module.read_recipe_version(recipe) == "0.1.11"
 
     def test_missing_pyproject(self, tmp_path):
@@ -275,9 +268,7 @@ class TestCheckPluginReleaseConsistency:
         )
         (tmp_path / "file.txt").write_text("init")
         subprocess.run(["git", "add", "."], check=True, capture_output=True)
-        subprocess.run(
-            ["git", "commit", "-m", "init"], check=True, capture_output=True
-        )
+        subprocess.run(["git", "commit", "-m", "init"], check=True, capture_output=True)
         subprocess.run(
             ["git", "tag", "spectrochempy-nmr-v0.1.11"],
             check=True,
@@ -310,9 +301,7 @@ class TestCheckPluginReleaseConsistency:
         )
         (tmp_path / "file.txt").write_text("init")
         subprocess.run(["git", "add", "."], check=True, capture_output=True)
-        subprocess.run(
-            ["git", "commit", "-m", "init"], check=True, capture_output=True
-        )
+        subprocess.run(["git", "commit", "-m", "init"], check=True, capture_output=True)
 
         check = module.check_plugin_release_consistency(
             "spectrochempy-nmr", "0.1.11", skip_network=True
@@ -352,9 +341,7 @@ class TestAnacondaVersions:
                 {"version": "0.1.2", "labels": [{"name": "main"}]}
             ],
         )
-        assert module.anaconda_versions("spectrochempy-nmr") == {
-            "0.1.2": ["main"]
-        }
+        assert module.anaconda_versions("spectrochempy-nmr") == {"0.1.2": ["main"]}
 
     def test_package_not_found(self, monkeypatch):
         module = self._plugin(monkeypatch)
@@ -365,9 +352,7 @@ class TestAnacondaVersions:
         monkeypatch.setattr(
             module,
             "fetch_json",
-            lambda url, timeout=30: [
-                {"version": "0.1.1", "labels": ["dev", "main"]}
-            ],
+            lambda url, timeout=30: [{"version": "0.1.1", "labels": ["dev", "main"]}],
         )
         assert module.anaconda_version_labels("spectrochempy-nmr", "0.1.1") == [
             "dev",
@@ -394,11 +379,18 @@ class TestCheckPluginReleaseConsistencyNetwork:
             capture_output=True,
         )
         (tmp_path / "file.txt").write_text("init")
-        subprocess.run(["git", "add", "."], cwd=tmp_path, check=True, capture_output=True)
         subprocess.run(
-            ["git", "commit", "-m", "init"], cwd=tmp_path, check=True, capture_output=True
+            ["git", "add", "."], cwd=tmp_path, check=True, capture_output=True
         )
-        subprocess.run(["git", "tag", tag], cwd=tmp_path, check=True, capture_output=True)
+        subprocess.run(
+            ["git", "commit", "-m", "init"],
+            cwd=tmp_path,
+            check=True,
+            capture_output=True,
+        )
+        subprocess.run(
+            ["git", "tag", tag], cwd=tmp_path, check=True, capture_output=True
+        )
 
     def test_aligned(self, tmp_path, monkeypatch):
         module = load_module()
@@ -502,7 +494,6 @@ class TestNoUploadProtection:
 
     def test_upload_function_not_called_in_tests(self):
         """Verify anaconda upload is never executed during test runs."""
-        module = load_module()
         # The module should not have any subprocess call to anaconda upload
         # at import time or during pure logic functions.
         source = SCRIPT_PATH.read_text()
@@ -556,10 +547,7 @@ class TestConcurrencyKeyBehavior:
 
     def test_build_package_yml_concurrency(self):
         workflow = (
-            Path(__file__).parents[3]
-            / ".github"
-            / "workflows"
-            / "build_package.yml"
+            Path(__file__).parents[3] / ".github" / "workflows" / "build_package.yml"
         ).read_text()
         # Should NOT cancel in-progress for stable releases
         assert "cancel-in-progress:" in workflow
@@ -568,16 +556,13 @@ class TestConcurrencyKeyBehavior:
 
     def test_no_unconditional_cancel(self):
         workflow = (
-            Path(__file__).parents[3]
-            / ".github"
-            / "workflows"
-            / "build_package.yml"
+            Path(__file__).parents[3] / ".github" / "workflows" / "build_package.yml"
         ).read_text()
         # The cancel-in-progress should not be simply "true"
         lines = [
-            l.strip()
-            for l in workflow.splitlines()
-            if "cancel-in-progress" in l
+            line.strip()
+            for line in workflow.splitlines()
+            if "cancel-in-progress" in line
         ]
         assert len(lines) >= 1
         for line in lines:

@@ -26,6 +26,12 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Restored publication of official plugins (``[tool.spectrochempy]``
+  ``official-plugin = true``) on Conda, which was silently skipped by the
+  release workflow.  Added a recovery workflow to republish plugin versions
+  that are missing on ``spectrocat/main`` and a consistency check between
+  GitHub releases, PyPI and Conda. (#1611)
+
 
 .. section
 
