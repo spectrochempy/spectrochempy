@@ -11,3 +11,12 @@ What's New in Revision 0.12.9.dev
 
 These are the changes in SpectroChemPy-0.12.9.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
+
+Bug Fixes
+~~~~~~~~~
+
+- Restored publication of official plugins (``[tool.spectrochempy]``
+  ``official-plugin = true``) on Conda, which was silently skipped by the
+  release workflow.  Added a recovery workflow to republish plugin versions
+  that are missing on ``spectrocat/main`` and a consistency check between
+  GitHub releases, PyPI and Conda. (#1611)

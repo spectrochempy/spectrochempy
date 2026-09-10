@@ -1,0 +1,141 @@
+name: Verify plugin release consistency
+
+# Read-only workflow checking that every official plugin release tag is
+# present on GitHub, PyPI and the Conda main label.
+#
+# Triggered on a schedule and manually only: running it on every push to
+# master would keep the branch red until historical plugin releases are
+# repaired (see maintainers/release-process.md).  Once the repair workflow
+# has caught up, a push trigger can be re-enabled.
+
+on:
+  schedule:
+    - cron: "0 3 * * 1" # Mondays 03:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-consistency:
+    name: Check release consistency
+    runs-on: ubuntu-latest
+    if: github.repository == 'spectrochempy/spectrochempy'
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+
+      - name: Check all official plugin releases
+        id: check
+        run: |
+          # check-all exits 1 when a release is inconsistent or a registry is
+          # unreachable.  Capture the code explicitly so the report and the
+          # counters are still produced before the workflow decides to fail.
+          set +e
+          python3 .github/workflows/scripts/conda_publish.py check-all \
+            --json > /tmp/check-results.json
+          rc=$?
+          set -e
+          echo "check_rc=$rc" >> "$GITHUB_OUTPUT"
+
+          rc="$rc" python3 - <<'PY'
+          import json
+          import os
+
+          try:
+              data = json.load(open("/tmp/check-results.json"))
+          except Exception as exc:
+              print(f"::warning::Could not read check results: {exc}")
+              data = []
+
+          aligned = sum(1 for c in data if c["verdict"] == "aligned")
+          issues = len(data) - aligned
+          # A check that produced no results (e.g. crash) must fail the job.
+          if not data and os.environ.get("rc") != "0":
+              issues = 1
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
+              f.write(f"aligned={aligned}\n")
+              f.write(f"issues={issues}\n")
+          print(f"aligned={aligned} issues={issues}")
+          PY
+
+      - name: Write step summary
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+
+          try:
+              data = json.load(open("/tmp/check-results.json"))
+          except Exception:
+              data = []
+
+          vmap = {
+              "aligned": "aligned",
+              "conda_missing": "stable Conda missing",
+              "conda_dev_only": "dev-only (no stable)",
+              "pypi_missing": "PyPI version missing",
+              "pypi_unavailable": "PyPI unavailable",
+              "conda_unavailable": "Conda unavailable",
+              "missing_github_release": "GitHub release missing",
+          }
+
+          lines = ["## Plugin release consistency report", ""]
+          lines.append("| Plugin | Version | GitHub | PyPI | Conda main | Verdict |")
+          lines.append("|--------|---------|--------|------|------------|---------|")
+          for c in data:
+              gh = "yes" if c["github_release"] else "no"
+              pypi = c["pypi_version"] or "not found"
+              main = "yes" if c["conda_main"] else "no"
+              verdict = vmap.get(c["verdict"], c["verdict"])
+              lines.append(
+                  f"| {c['plugin']} | {c['version']} | {gh} | {pypi} | {main} | {verdict} |"
+              )
+          lines.append("")
+
+          if data:
+              issues = sum(1 for c in data if c["verdict"] != "aligned")
+              if issues:
+                  lines.append("### Action required")
+                  lines.append("")
+                  lines.append(
+                      f"{issues} release(s) are not aligned across GitHub, PyPI and Conda."
+                  )
+                  lines.append(
+                      "Use the **Repair plugin Conda publication** workflow to fix "
+                      "missing Conda packages."
+                  )
+              else:
+                  lines.append(
+                      ":white_check_mark: All official plugin releases are aligned "
+                      "across GitHub, PyPI, and Conda."
+                  )
+          else:
+              lines.append(
+                  "_No release data to display (the check failed to produce results). "
+                  "See the step log._"
+              )
+
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as f:
+              f.write("\n".join(lines) + "\n")
+          PY
+
+      - name: Fail if issues found
+        if: steps.check.outputs.issues != '0'
+        run: |
+          echo "::error::${{ steps.check.outputs.issues }} release(s) have version alignment issues"
+          exit 1
