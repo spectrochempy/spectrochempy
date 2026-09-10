@@ -20,3 +20,9 @@ Bug Fixes
   release workflow.  Added a recovery workflow to republish plugin versions
   that are missing on ``spectrocat/main`` and a consistency check between
   GitHub releases, PyPI and Conda. (#1611)
+
+- Corrected the SRS series ``meta.collection_length``: it was the series
+  first time (+1002, in minutes) incorrectly converted to seconds; it now
+  equals the OMNIC "Total collection time", i.e. the series last time
+  (+1006, in minutes) converted to seconds. The time axis is unchanged and
+  is still anchored at the series first time. (#1613)

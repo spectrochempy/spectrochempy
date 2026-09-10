@@ -1694,7 +1694,7 @@ def _read_header(fid, pos, is_first_spectrum=True):
         - general-header collection length in 1/100th of sec (UInt32), 68
           bytes behind. This is the shared acquisition-time field; for srs
           series the public "collection length" is derived from the series
-          minimum time at +1002 (see below), not from this field.
+          last time at +1006 (see below), not from this field.
         - ... unknown
         - reference frequency (float32), 80 bytes behind
         - ...
@@ -1706,11 +1706,11 @@ def _read_header(fid, pos, is_first_spectrum=True):
 
         - series name (text), 938 bytes behind
         - series minimum / first time in minutes (float32), 1002 bytes
-          behind. Historically described as "collection length": the public
-          `collection_length` is this value converted to seconds (x60), while
-          `time_min` keeps it in minutes and is used as the time-axis anchor.
-          Do not conflate it with the general-header collection length at +68.
-        - series maximum / last time in minutes (float32), 1006 bytes behind
+          behind. `time_min` keeps it in minutes and is used as the time-axis
+          anchor. Do not conflate it with the collection length at +68.
+        - series maximum / last time in minutes (float32), 1006 bytes behind,
+          converted to seconds (x60) it is the OMNIC "Total collection time"
+          and the public `collection_length` for srs series.
         - regular time step in minutes (float32), 1010 bytes behind. This
           field was historically misnamed "first y": it is the series step,
           not the minimum (the minimum is the +1002 field above).
@@ -1847,14 +1847,15 @@ def _read_header(fid, pos, is_first_spectrum=True):
         out["name"] = out["name"].split("\n")[0]
         fid.seek(pos + 1002)
         # The stored float32 at +1002 is the OMNIC series *minimum / first time*
-        # (in minutes). `collection_length` keeps the historical public meaning
-        # (that value converted to seconds); `time_min` is the same field kept in
-        # minutes, used as the time-axis start. Do not conflate the two.
-        collection_length = fromfile(fid, "float32", 1)
-        out["collection_length"] = collection_length * 60
-        out["time_min"] = collection_length
+        # in minutes; `time_min` keeps it in minutes and anchors the time axis.
+        out["time_min"] = fromfile(fid, "float32", 1)
         fid.seek(pos + 1006)
+        # +1006 is the OMNIC series *maximum / last time* in minutes. Converted
+        # to seconds it is the OMNIC "Total collection time", exposed as the
+        # public `collection_length` for SRS series. Do not conflate it with the
+        # +1002 first time (nor with the general-header +68 field).
         out["lasty"] = fromfile(fid, "float32", 1)
+        out["collection_length"] = out["lasty"] * 60
         fid.seek(pos + 1010)
         out["firsty"] = fromfile(fid, "float32", 1)
         fid.seek(pos + 1026)
