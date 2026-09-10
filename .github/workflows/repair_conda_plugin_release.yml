@@ -1,0 +1,328 @@
+name: Repair plugin Conda publication
+
+# Manual workflow to build and publish a single plugin's Conda package
+# from an existing release tag.  Used to recover from historical publication
+# failures where the GitHub release and PyPI upload succeeded but the
+# Conda package was not published to spectrocat/main.
+#
+# Safety guarantees:
+#   - Tag must match <plugin_name>-v<version> pattern
+#   - Plugin must be declared official
+#   - Version is extracted from the tag and verified against metadata
+#   - Default mode is dry-run (no upload)
+#   - Upload requires explicit confirmation and an environment approval
+#   - Never touches PyPI, GitHub releases, or git tags
+
+on:
+  workflow_dispatch:
+    inputs:
+      plugin_name:
+        description: "Plugin package name (e.g. spectrochempy-nmr)"
+        required: true
+        type: string
+      tag:
+        description: "Existing release tag (e.g. spectrochempy-nmr-v0.1.11)"
+        required: true
+        type: string
+      dry_run:
+        description: "Dry-run mode: build but do not upload (recommended)"
+        required: true
+        default: true
+        type: boolean
+      confirm_upload:
+        description: "Set to true ONLY after verifying the dry-run output (ignored in dry-run mode)"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate tag and plugin
+    runs-on: ubuntu-latest
+    if: github.repository == 'spectrochempy/spectrochempy'
+    outputs:
+      plugin: ${{ steps.validate.outputs.plugin }}
+      version: ${{ steps.validate.outputs.version }}
+      recipe_path: ${{ steps.validate.outputs.recipe_path }}
+      recipe_file: ${{ steps.validate.outputs.recipe_file }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+
+      - name: Validate inputs
+        id: validate
+        run: |
+          python3 .github/workflows/scripts/conda_publish.py verify-tag \
+            "${{ inputs.tag }}" --plugin "${{ inputs.plugin_name }}"
+
+          PLUGIN="${{ inputs.plugin_name }}"
+          VERSION=$(echo "${{ inputs.tag }}" | sed -n 's/^.*-v\([0-9.]*\)$/\1/p')
+
+          echo "plugin=$PLUGIN" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+          # Verify plugin is official
+          python3 .github/workflows/scripts/validate_official_plugin.py \
+            "plugins/$PLUGIN"
+
+          # Verify tag exists
+          if ! git ls-remote --tags origin "refs/tags/${{ inputs.tag }}" | grep -q "${{ inputs.tag }}"; then
+            echo "::error::Tag ${{ inputs.tag }} does not exist in the remote repository"
+            exit 1
+          fi
+
+          # Find recipe file
+          RECIPE_DIR="plugins/$PLUGIN"
+          if [ -f "$RECIPE_DIR/recipe.yaml" ]; then
+            echo "recipe_path=$RECIPE_DIR" >> "$GITHUB_OUTPUT"
+            echo "recipe_file=recipe.yaml" >> "$GITHUB_OUTPUT"
+          elif [ -f "$RECIPE_DIR/meta.yaml" ]; then
+            echo "recipe_path=$RECIPE_DIR" >> "$GITHUB_OUTPUT"
+            echo "recipe_file=meta.yaml" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::No recipe.yaml or meta.yaml found for $PLUGIN"
+            exit 1
+          fi
+
+          # Verify version consistency across sources
+          PYPROJ_VER=$(python3 -c "
+          import re, sys
+          text = open('plugins/$PLUGIN/pyproject.toml').read().split('[project]', 1)[-1]
+          m = re.search(r'^version\s*=\"([^\"]+)\"', text, re.MULTILINE)
+          print(m.group(1) if m else '')
+          ")
+          echo "pyproject.toml version: $PYPROJ_VER"
+          if [ "$PYPROJ_VER" != "$VERSION" ]; then
+            echo "::warning::pyproject.toml version ($PYPROJ_VER) differs from tag version ($VERSION)"
+          fi
+
+          echo "Validation passed for $PLUGIN v$VERSION"
+
+      - name: Check existing Conda package
+        run: |
+          VERSION="${{ steps.validate.outputs.version }}"
+          PLUGIN="${{ steps.validate.outputs.plugin }}"
+          echo "Checking if $PLUGIN==$VERSION already exists on Conda..."
+
+          EXISTING=$(python3 -c "
+          from __future__ import annotations
+          import json, urllib.request, urllib.error
+          url = 'https://api.anaconda.org/package/spectrocat/$PLUGIN'
+          try:
+              req = urllib.request.Request(url, headers={'Accept': 'application/json'})
+              with urllib.request.urlopen(req, timeout=30) as resp:
+                  data = json.loads(resp.read().decode())
+              for v in data.get('versions', []):
+                  if v.get('version') == '$VERSION':
+                      labels = [l.get('name','') for l in v.get('labels', [])]
+                      print(f'exists:{\":\".join(labels)}')
+                      raise SystemExit(0)
+          except SystemExit:
+              raise
+          except Exception:
+              pass
+          print('not_found')
+          ")
+
+          if [[ "$EXISTING" == exists:* ]]; then
+            LABELS="${EXISTING#exists:}"
+            echo "::warning::$PLUGIN==$VERSION already exists on Conda with labels: $LABELS"
+            echo "The package may already be published. Proceeding anyway (upload uses --force)."
+          else
+            echo "$PLUGIN==$VERSION not found on Conda. Publication needed."
+          fi
+
+  build:
+    name: Build Conda package
+    needs: validate
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - name: Checkout tag
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag }}
+          fetch-depth: 0
+
+      - name: Install Conda environment with Micromamba
+        uses: mamba-org/setup-micromamba@v3
+        with:
+          environment-file: environments/environment_build.yml
+          environment-name: scpy_build
+          create-args: >-
+            python=3.11
+          cache-environment: true
+
+      - name: Build conda plugin package
+        uses: prefix-dev/rattler-build-action@v0.2.39
+        env:
+          CONDA_BLD_PATH: ../output
+        with:
+          recipe-path: ${{ needs.validate.outputs.recipe_path }}/${{ needs.validate.outputs.recipe_file }}
+          upload-artifact: false
+          build-args: >-
+            -c conda-forge
+            -c spectrocat
+
+      - name: Move conda build output
+        run: |
+          mv ../output .
+
+      - name: Verify built package
+        run: |
+          echo "=== Built packages ==="
+          find output -type f \( -name "*.conda" -o -name "*.tar.bz2" \)
+
+          PLUGIN="${{ needs.validate.outputs.plugin }}"
+          VERSION="${{ needs.validate.outputs.version }}"
+
+          # Verify the built package matches expected name and version
+          FOUND=0
+          for pkg in output/**/*.conda output/**/*.tar.bz2; do
+            if [[ -f "$pkg" ]] && [[ "$(basename "$pkg")" == "$PLUGIN-"* ]]; then
+              echo "Found matching package: $pkg"
+              FOUND=1
+            fi
+          done
+
+          if [ "$FOUND" -eq 0 ]; then
+            echo "::error::No conda package found matching $PLUGIN"
+            exit 1
+          fi
+
+          echo "Package verification passed."
+
+      - name: Upload conda build artifacts
+        if: ${{ !env.ACT }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: conda-repair-${{ needs.validate.outputs.plugin }}
+          path: |
+            output/**/*.conda
+            output/**/*.tar.bz2
+          retention-days: 30
+
+  publish:
+    name: Publish to Conda main
+    needs: [validate, build]
+    runs-on: ubuntu-latest
+    if: |
+      inputs.dry_run != true &&
+      inputs.confirm_upload == true
+    environment:
+      name: conda-publish
+      url: https://anaconda.org/spectrocat
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: conda-repair-${{ needs.validate.outputs.plugin }}
+          path: /tmp/conda-pkg
+
+      - name: Upload to Anaconda.org (main label)
+        env:
+          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob globstar
+
+          PLUGIN="${{ needs.validate.outputs.plugin }}"
+          VERSION="${{ needs.validate.outputs.version }}"
+
+          if [ -z "${ANACONDA_API_TOKEN:-}" ]; then
+            echo "::error::ANACONDA_API_TOKEN is not set. Cannot upload to Anaconda.org."
+            exit 1
+          fi
+
+          echo "Uploading $PLUGIN==$VERSION to Anaconda label: main"
+
+          packages=(/tmp/conda-pkg/**/*.tar.bz2 /tmp/conda-pkg/**/*.conda)
+          if [ ${#packages[@]} -eq 0 ]; then
+            echo "::error::No conda packages found in artifact"
+            exit 1
+          fi
+
+          for package in "${packages[@]}"; do
+            echo "Uploading $package"
+            anaconda --token "$ANACONDA_API_TOKEN" upload --force -l "main" "$package"
+          done
+
+          echo "::notice::Successfully uploaded $PLUGIN==$VERSION to Anaconda main label"
+
+      - name: Verify upload
+        run: |
+          PLUGIN="${{ needs.validate.outputs.plugin }}"
+          VERSION="${{ needs.validate.outputs.version }}"
+          echo "Verifying $PLUGIN==$VERSION is now on Anaconda main..."
+
+          LABELS=$(python3 -c "
+          import json, urllib.request
+          url = 'https://api.anaconda.org/package/spectrocat/$PLUGIN'
+          req = urllib.request.Request(url, headers={'Accept': 'application/json'})
+          with urllib.request.urlopen(req, timeout=30) as resp:
+              data = json.loads(resp.read().decode())
+          for v in data.get('versions', []):
+              if v.get('version') == '$VERSION':
+                  print(' '.join([l.get('name','') for l in v.get('labels', [])]))
+                  raise SystemExit(0)
+          print('NOT_FOUND')
+          ")
+
+          if echo "$LABELS" | grep -q "main"; then
+            echo "SUCCESS: $PLUGIN==$VERSION is on main label"
+          else
+            echo "::warning::Upload may not have completed. Labels: $LABELS"
+          fi
+
+  dry-run-summary:
+    name: Dry-run summary
+    needs: [validate, build]
+    runs-on: ubuntu-latest
+    if: inputs.dry_run == true
+
+    steps:
+      - name: Print dry-run summary
+        run: |
+          PLUGIN="${{ needs.validate.outputs.plugin }}"
+          VERSION="${{ needs.validate.outputs.version }}"
+
+          echo "## Dry-run summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Plugin**: \`$PLUGIN\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Version**: \`$VERSION\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Tag**: \`${{ inputs.tag }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Mode**: Dry-run (no upload performed)" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "To publish, re-run with:" >> "$GITHUB_STEP_SUMMARY"
+          echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "dry_run: false" >> "$GITHUB_STEP_SUMMARY"
+          echo "confirm_upload: true" >> "$GITHUB_STEP_SUMMARY"
+          echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
+
+          echo ""
+          echo "=== DRY RUN COMPLETE ==="
+          echo "Plugin: $PLUGIN"
+          echo "Version: $VERSION"
+          echo "Artifact: conda-repair-$PLUGIN"
+          echo ""
+          echo "No upload was performed. To upload, re-run with dry_run=false and confirm_upload=true."

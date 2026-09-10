@@ -1,0 +1,85 @@
+name: Verify plugin release consistency
+
+# Manual workflow to check that all official plugin releases are present
+# on GitHub, PyPI, and the Conda main label.  Can also be run as a
+# read-only step after any plugin release.
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-consistency:
+    name: Check release consistency
+    runs-on: ubuntu-latest
+    if: github.repository == 'spectrochempy/spectrochempy'
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+
+      - name: Check all official plugin releases
+        id: check
+        run: |
+          python3 .github/workflows/scripts/conda_publish.py check-all \
+            --json > /tmp/check-results.json
+
+          # Count issues
+          ALIGNED=$(python3 -c "
+          import json
+          data = json.load(open('/tmp/check-results.json'))
+          print(sum(1 for c in data if c['verdict'] == 'aligned'))
+          ")
+          ISSUES=$(python3 -c "
+          import json
+          data = json.load(open('/tmp/check-results.json'))
+          print(sum(1 for c in data if c['verdict'] != 'aligned'))
+          ")
+
+          echo "aligned=$ALIGNED" >> "$GITHUB_OUTPUT"
+          echo "issues=$ISSUES" >> "$GITHUB_OUTPUT"
+
+          # Print human-readable report
+          python3 .github/workflows/scripts/conda_publish.py check-all
+
+      - name: Write step summary
+        if: always()
+        run: |
+          python3 .github/workflows/scripts/conda_publish.py check-all > /tmp/report.txt
+
+          echo "## Plugin release consistency report" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          cat /tmp/report.txt >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          ISSUES="${{ steps.check.outputs.issues }}"
+          if [ "$ISSUES" -gt 0 ]; then
+            echo "### Action required" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "$ISSUES plugin(s) have version alignment issues." >> "$GITHUB_STEP_SUMMARY"
+            echo "Use the **Repair plugin Conda publication** workflow to fix missing Conda packages." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo ":white_check_mark: All official plugin releases are aligned across GitHub, PyPI, and Conda." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Fail if issues found
+        if: steps.check.outputs.issues != '0'
+        run: |
+          echo "::error::${{ steps.check.outputs.issues }} plugin(s) have version alignment issues"
+          exit 1

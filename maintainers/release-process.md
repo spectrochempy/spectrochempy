@@ -551,6 +551,117 @@ pip install spectrochempy-XXX==X.Y.Z
 anaconda show spectrocat/spectrochempy-XXX
 ```
 
+### Publication Conda des plugins : garanties et récupération
+
+#### Comment la publication Conda fonctionne-t-elle pour les plugins ?
+
+Lorsqu'une release de plugin est publiée (tag `spectrochempy-XXX-vX.Y.Z`),
+le workflow `build_package.yml` détecte automatiquement le tag plugin et
+publie le paquet Conda sur le label `main` d'Anaconda.org (`spectrocat`).
+
+Le mécanisme de découverte utilise le marqueur `[tool.spectrochempy]
+official-plugin = true` dans `pyproject.toml` pour identifier les plugins
+officiels.  Ce même marqueur est utilisé par `publish_plugins.yml` (PyPI)
+et `plugin_release_status.py` (tableau de statut).
+
+#### Vérification post-release
+
+Après chaque release de plugin, vérifier la présence sur les trois
+registraires :
+
+```bash
+# GitHub
+gh release view spectrochempy-XXX-vX.Y.Z --repo spectrochempy/spectrochempy
+
+# PyPI
+pip install spectrochempy-XXX==X.Y.Z
+
+# Conda
+anaconda show spectrocat/spectrochempy-XXX
+```
+
+Ou utiliser le workflow automatisé **Verify plugin release consistency**
+(`verify_plugin_release_consistency.yml`) qui produit un tableau comparatif
+GitHub / PyPI / Conda pour tous les plugins officiels.
+
+#### En cas d'échec de publication Conda
+
+Si la publication PyPI a réussi mais que la publication Conda a échoué
+(le paquet n'est pas sur `spectrocat/main`) :
+
+1. **Ne pas créer une nouvelle version** pour masquer l'échec de
+   publication.  La version existante sur PyPI et GitHub est correcte ;
+   seul le paquet Conda est manquant.
+
+2. **Ne pas recréer ou déplacer un tag existant.**
+
+3. **Ne pas republier sur PyPI.**
+
+4. Utiliser temporairement les paquets PyPI :
+   ```bash
+   pip install spectrochempy-XXX==X.Y.Z
+   ```
+
+5. Pour publier rétroactivement le paquet Conda manquant, utiliser le
+   workflow **Repair plugin Conda publication**
+   (`repair_conda_plugin_release.yml`) :
+   - Sélectionner le mode dry-run par défaut pour valider la construction
+   - Vérifier l'artifact produit
+   - Relancer avec `dry_run=false` et `confirm_upload=true` pour publier
+   - Le workflow utilise un environnement GitHub dédié (`conda-publish`)
+     avec approbation obligatoire
+
+6. Vérifier la publication avec `anaconda show spectrocat/spectrochempy-XXX`.
+
+#### Rôle de `conda_publish.py`
+
+Le script `.github/workflows/scripts/conda_publish.py` fournit des
+fonctions réutilisables pour :
+
+- Valider le format des tags plugins (`verify-tag`)
+- Vérifier la cohérence d'une release sur GitHub / PyPI / Conda
+  (`check-release`, `check-all`)
+- Lister les plugins officiels (`list-official`)
+
+Ces fonctions sont utilisées par les workflows de vérification et de
+récupération, et sont testées dans
+`tests/test_core/test_scripts/test_conda_publish.py`.
+
+#### Cause racine historique et versions manquantes
+
+L'échec historique de publication Conda (ex. `spectrochempy-carroucell
+v0.1.7`) provenait du job `discover-conda-plugins` de `build_package.yml`
+qui vérifiait le marqueur `[tool.spectrochempy] official-plugin = true` via
+un `python3 -c "import tomllib ..."` inline **sans installer Python 3.11**.
+Sur l'image runner (Python 3.10 par défaut), `import tomllib` échouait
+systématiquement, et l'erreur était masquée par `2>/dev/null` : tous les
+plugins étaient alors ignorés (« not declared official ») alors que le
+marqueur était bien présent dans le tag.  La publication PyPI, elle,
+réussissait car le job de découverte de `publish_plugins.yml` installe bien
+Python 3.11.
+
+Le job de découverte utilise désormais `conda_publish.py is-official`
+(module testé) avec `actions/setup-python` 3.11, et un échec du check
+fait échouer le job au lieu d'être silencieusement ignoré.
+
+Vérifié le 2026-09-10 via `conda_publish.py check-all` : les versions
+stables suivantes existent sur GitHub et PyPI mais **ne sont pas sur
+`spectrocat/main`** (à publier avec le workflow de récupération) :
+
+| Plugin | Versions manquantes sur Conda `main` |
+|--------|---------------------------------------|
+| `spectrochempy-carroucell`   | `0.1.7`, `0.1.8` |
+| `spectrochempy-hypercomplex` | `0.1.7`, `0.1.8` |
+| `spectrochempy-iris`         | `0.1.7`, `0.1.8` |
+| `spectrochempy-nmr`          | `0.1.8`, `0.1.10`, `0.1.11` |
+| `spectrochempy-tensor`       | `0.1.4`, `0.1.5` |
+| `spectrochempy-perkinelmer`  | toutes (aucun paquet Conda ; **recette manquante** à ajouter avant récupération) |
+
+`spectrochempy-perkinelmer` n'a jamais eu de `recipe.yaml`/`meta.yaml`
+dans le dépôt : même corrigé, le job de découverte ne peut pas le publier.
+L'ajout d'une recette Conda pour ce plugin est un préalable nécessaire à
+sa publication sur `spectrocat`.
+
 ---
 
 ## Zenodo and plugin releases
@@ -687,6 +798,8 @@ entrées sont incorrectes car :
       vérifier que la release plugin n'affiche pas le badge "Latest")
 - [ ] Vérifier PyPI : `pip install spectrochempy-XXX==X.Y.Z`
 - [ ] Vérifier Anaconda : `anaconda show spectrocat/spectrochempy-XXX`
+- [ ] Si le paquet Conda est absent de `main`, lancer **Repair plugin Conda publication**
+      en mode dry-run pour diagnostiquer, puis publier après review
 - [ ] Répéter pour chaque plugin (nmr → iris → tensor → hypercomplex → carroucell)
 - [ ] Réactiver l'intégration GitHub → Zenodo (avant la prochaine release core)
 
@@ -735,6 +848,45 @@ entrées sont incorrectes car :
       release plugin
 - [ ] Si des entrées plugins existent dans Zenodo, les supprimer
       (voir `emergency-recovery.md`)
+
+---
+
+## Interdictions en cas d'échec de publication
+
+Lorsqu'un échec de publication est détecté (par exemple un paquet présent
+sur PyPI mais absent de Conda) :
+
+1. **Ne jamais créer une nouvelle version** uniquement pour corriger un
+   échec de publication.  La version existante est correcte sur GitHub et
+   PyPI ; seul le canal de distribution manquant doit être réparé.
+
+2. **Ne jamais recréer ou déplacer un tag existant.**  Les tags sont
+   immuables et leur déplacement romprait les liens depuis PyPI, les
+   documents citant la version, et les caches des utilisateurs.
+
+3. **Ne jamais republier un paquet sur PyPI** sous la même version.  PyPI
+   est immuable : une version publiée ne peut pas être remplacée.
+
+4. **Ne jamais modifier une Release GitHub existante** pour corriger un
+   échec de publication externe.  La Release GitHub est un point d'entrée
+   readonly une fois publiée.
+
+5. **Utiliser les mécanismes de récupération dédiés** (workflow
+   `repair_conda_plugin_release.yml`) pour republier uniquement sur le
+   canal Conda manquant.
+
+### Recommandation temporaire
+
+Tant que les versions Conda historiques ne sont pas toutes réparées, les
+utilisateurs doivent privilégier les paquets PyPI :
+
+```bash
+pip install spectrochempy-XXX==X.Y.Z
+```
+
+Cette recommandation sera levée une fois que le workflow
+**Verify plugin release consistency** confirme l'alignement de toutes les
+versions stables sur GitHub, PyPI et Conda.
 
 ---
 

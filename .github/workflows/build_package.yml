@@ -34,7 +34,9 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Never cancel in-progress builds for stable releases or tags.
+  # Only cancel draft/dev builds when a newer push arrives on the same ref.
+  cancel-in-progress: ${{ !startsWith(github.ref_name, 'spectrochempy-v') && !contains(github.ref_name, '-v') }}
 
 jobs:
   classify-pr-scope:
@@ -83,6 +85,45 @@ jobs:
               stream.write(f"docs_only={'true' if docs_only else 'false'}\n")
           print(f"docs_only={docs_only}")
           PY
+
+  detect-release-scope:
+    name: Detect release scope
+    runs-on: ubuntu-latest
+    outputs:
+      is_core_release: ${{ steps.detect.outputs.is_core_release }}
+      is_plugin_release: ${{ steps.detect.outputs.is_plugin_release }}
+      plugin_name: ${{ steps.detect.outputs.plugin_name }}
+      plugin_version: ${{ steps.detect.outputs.plugin_version }}
+
+    steps:
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Detect release type
+        id: detect
+        run: |
+          python3 .github/workflows/scripts/conda_publish.py verify-tag \
+            "${{ github.ref_name }}" 2>/dev/null && IS_PLUGIN=true || IS_PLUGIN=false
+
+          if [[ "${{ github.ref_name }}" == spectrochempy-v* ]] && [[ "${{ github.event_name }}" == "release" ]]; then
+            echo "is_core_release=true" >> "$GITHUB_OUTPUT"
+            echo "is_plugin_release=false" >> "$GITHUB_OUTPUT"
+            echo "Detected: core release (${{ github.ref_name }})"
+          elif [[ "$IS_PLUGIN" == "true" ]] && [[ "${{ github.event_name }}" == "release" ]]; then
+            PLUGIN=$(echo "${{ github.ref_name }}" | sed 's/-v[0-9.]*$//')
+            VERSION=$(echo "${{ github.ref_name }}" | sed 's/^.*-v//')
+            echo "is_core_release=false" >> "$GITHUB_OUTPUT"
+            echo "is_plugin_release=true" >> "$GITHUB_OUTPUT"
+            echo "plugin_name=$PLUGIN" >> "$GITHUB_OUTPUT"
+            echo "plugin_version=$VERSION" >> "$GITHUB_OUTPUT"
+            echo "Detected: plugin release ($PLUGIN v$VERSION)"
+          else
+            echo "is_core_release=false" >> "$GITHUB_OUTPUT"
+            echo "is_plugin_release=false" >> "$GITHUB_OUTPUT"
+            echo "Detected: non-release event (${{ github.event_name }}, ref=${{ github.ref_name }})"
+          fi
 
   build-and-publish_pypi:
     name: Build and publish distribution to PyPI
@@ -283,11 +324,16 @@ jobs:
   discover-conda-plugins:
     name: Discover plugins with conda recipes
     runs-on: ubuntu-latest
-    needs: [classify-pr-scope, build_and_publish_conda_package]
+    # For push/PR: core build produces the local channel artifact used by
+    # plugin builds below.  For plugin releases: core resolves from the
+    # spectrocat channel, so no dependency is needed.
+    needs: [classify-pr-scope, detect-release-scope]
     if: >
       github.repository == 'spectrochempy/spectrochempy' &&
       (github.event_name != 'pull_request' ||
-      needs.classify-pr-scope.outputs.docs_only != 'true')
+      needs.classify-pr-scope.outputs.docs_only != 'true') &&
+      # Skip discovery for core releases (no plugin builds needed)
+      !(github.event_name == 'release' && needs.detect-release-scope.outputs.is_core_release == 'true')
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
@@ -296,6 +342,11 @@ jobs:
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
 
       - name: Set plugin matrix
         id: set-matrix
@@ -307,15 +358,15 @@ jobs:
               echo "Skipping $name (developer template, not publishable)"
               continue
             fi
-            # Check for the Official Plugin marker.
-            if ! python3 -c "
-            import tomllib, sys
-            data = tomllib.loads(open('${dir}pyproject.toml').read())
-            sc = data.get('tool', {}).get('spectrochempy', {})
-            sys.exit(0 if sc.get('official-plugin') is True else 1)
-            " 2>/dev/null; then
+            # Check for the Official Plugin marker using the shared module.
+            python3 .github/workflows/scripts/conda_publish.py is-official "${dir%/}" >/dev/null 2>&1
+            rc=$?
+            if [ "$rc" -eq 1 ]; then
               echo "Skipping $name (not declared official)"
               continue
+            elif [ "$rc" -ne 0 ]; then
+              echo "::error::Official marker check failed for $name (exit $rc)"
+              exit 1
             fi
             if [ -f "${dir}recipe.yaml" ] || [ -f "${dir}meta.yaml" ]; then
               recipe_file="recipe.yaml"
@@ -337,9 +388,13 @@ jobs:
   build_and_publish_conda_plugins:
     name: Build and publish conda plugin packages to Anaconda.org
     runs-on: ubuntu-latest
-    needs: [classify-pr-scope, discover-conda-plugins]
+    # Depends on core build for the local channel artifact.
+    needs: [classify-pr-scope, discover-conda-plugins, build_and_publish_conda_package]
+    # Only run for push/PR events (not plugin releases — those are handled
+    # by build_and_publish_plugin_conda_release below).
     if: |
       github.repository == 'spectrochempy/spectrochempy' &&
+      github.event_name != 'release' &&
       (github.event_name != 'pull_request' ||
       needs.classify-pr-scope.outputs.docs_only != 'true') &&
       needs.discover-conda-plugins.outputs.matrix != '{}' &&
@@ -518,3 +573,193 @@ jobs:
           done
 
           echo "::notice::Plugin ${{ matrix.plugin.name }} uploaded to Anaconda label: main"
+
+  # ---------------------------------------------------------------------------
+  # Plugin release Conda builds
+  # ---------------------------------------------------------------------------
+  # When a plugin release tag (spectrochempy-XXX-vY.Z.W) is published, this
+  # job builds and publishes ONLY that plugin's Conda package.  It runs
+  # independently from the core build to avoid depending on a core artifact
+  # that is not produced for plugin-only releases.
+
+  build_and_publish_plugin_conda_release:
+    name: "Conda release: ${{ needs.detect-release-scope.outputs.plugin_name }}"
+    needs: [classify-pr-scope, detect-release-scope, discover-conda-plugins]
+    if: |
+      github.repository == 'spectrochempy/spectrochempy' &&
+      needs.detect-release-scope.outputs.is_plugin_release == 'true' &&
+      needs.discover-conda-plugins.outputs.matrix != '{}' &&
+      needs.discover-conda-plugins.outputs.matrix != ''
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - name: Checkout tag commit
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Verify plugin in discovered matrix
+        run: |
+          PLUGIN="${{ needs.detect-release-scope.outputs.plugin_name }}"
+          MATRIX="${{ needs.discover-conda-plugins.outputs.matrix }}"
+          if ! echo "$MATRIX" | grep -q "\"name\":\"$PLUGIN\""; then
+            echo "::error::Plugin $PLUGIN not found in discovered conda plugins matrix"
+            echo "Matrix: $MATRIX"
+            exit 1
+          fi
+          echo "Plugin $PLUGIN confirmed in conda plugins matrix"
+
+      - name: Install Conda environment with Micromamba
+        uses: mamba-org/setup-micromamba@v3
+        with:
+          environment-file: environments/environment_build.yml
+          environment-name: scpy_build
+          create-args: >-
+            python=3.11
+          cache-environment: true
+
+      - name: Extract plugin recipe info from matrix
+        id: recipe-info
+        run: |
+          PLUGIN="${{ needs.detect-release-scope.outputs.plugin_name }}"
+          python3 -c "
+          import json, sys
+          matrix = json.loads('''${{ needs.discover-conda-plugins.outputs.matrix }}''')
+          for p in matrix.get('plugin', []):
+              if p['name'] == '$PLUGIN':
+                  print(f\"recipe={p['recipe']}\")
+                  print(f\"recipe_file={p['recipe_file']}\")
+                  with open('$GITHUB_OUTPUT', 'a') as f:
+                      f.write(f\"recipe={p['recipe']}\n\")
+                      f.write(f\"recipe_file={p['recipe_file']}\n\")
+                  sys.exit(0)
+          print(f'::error::Plugin $PLUGIN not in matrix', file=sys.stderr)
+          sys.exit(1)
+          "
+
+      - name: Build conda plugin package
+        uses: prefix-dev/rattler-build-action@v0.2.39
+        env:
+          CONDA_BLD_PATH: ../output
+        with:
+          recipe-path: ${{ steps.recipe-info.outputs.recipe }}/${{ steps.recipe-info.outputs.recipe_file }}
+          upload-artifact: false
+          build-args: >-
+            -c conda-forge
+            -c spectrocat
+
+      - name: Move conda build output
+        run: |
+          mv ../output .
+
+      - name: Verify built package matches tag
+        run: |
+          PLUGIN="${{ needs.detect-release-scope.outputs.plugin_name }}"
+          VERSION="${{ needs.detect-release-scope.outputs.plugin_version }}"
+
+          echo "=== Built packages ==="
+          find output -type f \( -name "*.conda" -o -name "*.tar.bz2" \)
+
+          FOUND=0
+          for pkg in output/**/*.conda output/**/*.tar.bz2; do
+            if [[ -f "$pkg" ]] && [[ "$(basename "$pkg")" == "$PLUGIN-$VERSION"* ]]; then
+              echo "Found matching package: $pkg"
+              FOUND=1
+            fi
+          done
+
+          if [ "$FOUND" -eq 0 ]; then
+            echo "::error::No conda package found matching $PLUGIN==$VERSION"
+            echo "Built packages:"
+            find output -type f \( -name "*.conda" -o -name "*.tar.bz2" \)
+            exit 1
+          fi
+
+          echo "Package verification passed: $PLUGIN==$VERSION"
+
+      - name: Upload conda build artifacts
+        if: ${{ !env.ACT }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: conda-plugin-release-${{ needs.detect-release-scope.outputs.plugin_name }}
+          path: |
+            output/**/*.conda
+            output/**/*.tar.bz2
+          retention-days: 30
+
+      - name: Upload plugin to Anaconda.org (main label)
+        env:
+          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob globstar
+
+          PLUGIN="${{ needs.detect-release-scope.outputs.plugin_name }}"
+          VERSION="${{ needs.detect-release-scope.outputs.plugin_version }}"
+
+          echo "Stable plugin release: uploading $PLUGIN==$VERSION to Anaconda label: main"
+
+          if [ -z "${ANACONDA_API_TOKEN:-}" ]; then
+            echo "::error::ANACONDA_API_TOKEN is not set. Cannot upload to Anaconda.org."
+            exit 1
+          fi
+
+          packages=(output/**/*.tar.bz2 output/**/*.conda)
+          if [ ${#packages[@]} -eq 0 ]; then
+            echo "::error::No conda packages found in output/"
+            exit 1
+          fi
+
+          for package in "${packages[@]}"; do
+            basename=$(basename "$package")
+            if [[ "$basename" == spectrochempy-[0-9]* ]]; then
+              echo "Skipping core package (already uploaded): $package"
+              continue
+            fi
+            echo "Uploading $package with label: main"
+            anaconda --token "$ANACONDA_API_TOKEN" upload --force -l "main" "$package"
+          done
+
+          echo "::notice::Plugin $PLUGIN==$VERSION uploaded to Anaconda label: main"
+
+      - name: Verify upload
+        run: |
+          PLUGIN="${{ needs.detect-release-scope.outputs.plugin_name }}"
+          VERSION="${{ needs.detect-release-scope.outputs.plugin_version }}"
+          echo "Verifying $PLUGIN==$VERSION is now on Anaconda main..."
+
+          LABELS=$(python3 -c "
+          import json, urllib.request
+          url = 'https://api.anaconda.org/package/spectrocat/$PLUGIN'
+          try:
+              req = urllib.request.Request(url, headers={'Accept': 'application/json'})
+              with urllib.request.urlopen(req, timeout=30) as resp:
+                  data = json.loads(resp.read().decode())
+              for v in data.get('versions', []):
+                  if v.get('version') == '$VERSION':
+                      labels = [l.get('name','') for l in v.get('labels', [])]
+                      print(' '.join(labels))
+                      raise SystemExit(0)
+          except SystemExit:
+              raise
+          except Exception:
+              pass
+          print('NOT_FOUND')
+          ")
+
+          if echo "$LABELS" | grep -q "main"; then
+            echo "SUCCESS: $PLUGIN==$VERSION is on main label (labels: $LABELS)"
+          else
+            echo "::warning::Upload verification: $PLUGIN==$VERSION labels: $LABELS"
+            echo "The package may take a few minutes to appear on Anaconda.org."
+          fi
