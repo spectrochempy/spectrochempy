@@ -604,9 +604,57 @@ def test_read_srs_time_axis_anchored_at_time_min():
     assert y[-1] == np.around(info["lasty"], 3)
 
     # Guard the field separation: `firsty` is the step, not the axis start, and
-    # `time_min` is the same header field as `collection_length` kept in minutes.
-    assert info["time_min"] == np.float32(info["collection_length"] / 60)
+    # `collection_length` is the total series time derived from the series last
+    # time (+1006), not from the first time (+1002) kept in `time_min`.
+    assert info["time_min"] != info["lasty"]
     assert info["time_min"] != info["firsty"]
+    assert info["collection_length"] == np.float32(info["lasty"] * 60)
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "rapid_scan.srs",
+        "rapid_scan_reprocessed.srs",
+        "GC_Demo.srs",
+        "high_speed.srs",
+        "TGA_demo.srs",
+    ],
+)
+@pytest.mark.usefixtures("_skip_if_no_testdata")
+def test_read_srs_collection_length_is_total_series_time(name):
+    """The SRS `meta.collection_length` must be the total series collection
+    time — the series last time (+1006, minutes) converted to seconds —
+    matching the OMNIC "Total collection time", not the first-time value
+    (+1002) converted to seconds.
+
+    Controlled SRS/TXT validation established +1006 as the OMNIC total
+    collection time across the five public fixtures; this test pins the
+    metadata value to `+1006 * 60` and keeps the time axis anchored at the
+    series first time (+1002).
+    """
+    from spectrochempy.core.units import ur
+
+    path = IRDATA / "omnic_series" / name
+    info = _srs_header(path)
+    nd = scp.read_srs(path)
+
+    # Total series collection time, derived from the series last time (+1006).
+    assert info["collection_length"] == np.float32(info["lasty"] * 60)
+    assert nd.meta.collection_length.magnitude == np.float64(info["collection_length"])
+    assert nd.meta.collection_length.units == ur("s")
+    # ...and strictly larger than the historical (wrong) first-time value.
+    assert nd.meta.collection_length.magnitude > np.float32(info["time_min"]) * 60
+
+    # Y-axis start still comes from the series first time (+1002) and the axis
+    # still ends at the series last time (+1006). The axis is rounded to 3
+    # decimals (see `_read_srs`), hence the 0.5e-3 tolerance.
+    assert nd.y.data[0] == pytest.approx(
+        np.around(float(info["time_min"]), 3), abs=0.5e-3
+    )
+    assert nd.y.data[-1] == pytest.approx(
+        np.around(float(info["lasty"]), 3), abs=0.5e-3
+    )
 
 
 @pytest.mark.usefixtures("_skip_if_no_testdata")

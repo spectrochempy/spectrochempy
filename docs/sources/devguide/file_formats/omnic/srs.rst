@@ -301,7 +301,8 @@ have been interpreted so far; the rest of the region is unmapped.
      - UInt32
      - General-header *collection length* in 1/100 s. This is the shared
        acquisition-time field of the OMNIC header family; it must **not** be
-       conflated with the series minimum/first time at +1002.
+       conflated with the series minimum/first time at +1002 (nor with the
+       public SRS ``collection_length`` derived from +1006).
      - ``[OBSERVED]``
    * - 80
      - 4
@@ -349,16 +350,19 @@ have been interpreted so far; the rest of the region is unmapped.
      - 4
      - Float32
      - **Series minimum / first time, in minutes** — the time-axis anchor.
-       This field was historically misinterpreted as a "collection length";
-       the general-header collection-length field is the one at +68. Some
-       implementations expose it as a collection duration in seconds
-       (value × 60) for backward compatibility.
+       Historically misinterpreted as a "collection length"; the general-header
+       collection-length field is the one at +68 (not to be conflated either).
+       The public ``collection_length`` for SRS series is derived from the
+       series maximum / last time at +1006 (see the 1006 row), not from this
+       field.
      - ``[ESTABLISHED]``
    * - 1006
      - 4
      - Float32
-     - Series maximum / last time, in minutes.
-     - ``[OBSERVED]``
+     - Series maximum / last time, in minutes. Converted to seconds (× 60) it
+       is the OMNIC "Total collection time" and the public ``collection_length``
+       exposed by the reader for SRS series.
+     - ``[ESTABLISHED]``
    * - 1010
      - 4
      - Float32
