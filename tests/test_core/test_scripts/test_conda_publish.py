@@ -1354,6 +1354,92 @@ class TestRepairWorkflowStructure:
         assert "recipe_origin" in text
         assert "master-fallback" in text or "recipe_origin" in text
 
+    def test_no_github_interpolation_in_run_blocks(self):
+        """Operator-supplied values must reach shells only through `env:`."""
+        import yaml
+
+        data = yaml.safe_load(self._text())
+        jobs = data["jobs"]
+        for job_name, job in jobs.items():
+            for step in job.get("steps", []):
+                run = step.get("run")
+                if run is None:
+                    continue
+                assert "${{" not in run, (
+                    f"job {job_name!r} step {step.get('name', '')!r} interpolates a "
+                    f"'${{{{...}}}}' expression directly into a run: block; values "
+                    "must be passed through env: instead"
+                )
+
+
+# ---------------------------------------------------------------------------
+# PerkinElmer canonical recipe (exists on master, matches convention)
+# ---------------------------------------------------------------------------
+
+
+class TestRecoveryWorkflow:
+    """Structural coverage of the vertical `master-fallback` recovery CI."""
+
+    WORKFLOW = (
+        Path(__file__).parents[3] / ".github" / "workflows" / "test_plugin_recovery.yml"
+    )
+
+    def _data(self):
+        import yaml
+
+        return yaml.safe_load(self.WORKFLOW.read_text())
+
+    def test_workflow_exists_and_runs_on_plugin_paths(self):
+        assert self.WORKFLOW.is_file()
+        data = self._data()
+        trigger = data.get("on") or data.get(True)
+        for event in ("pull_request", "push"):
+            assert event in trigger
+            assert "plugins/spectrochempy-perkinelmer/**" in trigger[event]["paths"]
+            assert (
+                ".github/workflows/test_plugin_recovery.yml" in trigger[event]["paths"]
+            )
+
+    def test_extracts_real_tag_via_git_archive(self):
+        text = self.WORKFLOW.read_text()
+        assert "git archive" in text
+        assert "spectrochempy-perkinelmer-v$" in text
+        assert "fetch-depth: 0" in text
+
+    def test_resolves_master_recipe_and_asserts_origin(self):
+        text = self.WORKFLOW.read_text()
+        assert "--master-recipe" in text
+        assert "recipe_origin=master-fallback" in text
+        assert "resolve-recipe" in text
+
+    def test_asserts_recovered_recipe_content(self):
+        text = self.WORKFLOW.read_text()
+        assert 'version: \\"$TAG_VERSION\\"' in text or '"$TAG_VERSION"' in text
+        assert ">=0.12,<0.13" in text
+
+    def test_validates_and_builds_recovery(self):
+        text = self.WORKFLOW.read_text()
+        assert "validate-release" in text
+        assert "rattler-build-action" in text
+        assert "-c spectrocat" in text
+
+    def test_verify_artifact_exact_name(self):
+        text = self.WORKFLOW.read_text()
+        assert "spectrochempy-perkinelmer-$TAG_VERSION-" in text
+
+    def test_never_publishes_or_uses_token(self):
+        text = self.WORKFLOW.read_text()
+        assert "ANACONDA_API_TOKEN" not in text
+        assert "upload-artifact@v7" in text
+        assert "no publication" in text.lower() or "never" in text.lower()
+
+    def test_no_github_interpolation_in_run_blocks(self):
+        for job in self._data()["jobs"].values():
+            for step in job.get("steps", []):
+                run = step.get("run")
+                if run is not None:
+                    assert "${{" not in run
+
 
 # ---------------------------------------------------------------------------
 # PerkinElmer canonical recipe (exists on master, matches convention)
