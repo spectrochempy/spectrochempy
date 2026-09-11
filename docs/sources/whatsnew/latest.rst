@@ -23,7 +23,7 @@ New Features
   i * step)``.  The numeric relative time axis and the spectrum-name labels
   are unchanged.  Series without a valid native anchor (GC variants,
   reprocessed RapidScan files) leave ``acquisition_date`` unset and keep the
-  names-only Y labels.
+  names-only Y labels. (#1617)
 
 Bug Fixes
 ~~~~~~~~~
