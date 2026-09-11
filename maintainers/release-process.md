@@ -150,6 +150,106 @@ services externes.
 
 ---
 
+## Validation des artefacts de release (workflow de validation)
+
+Un workflow dédié **valide les artefacts localement construits** sans rien
+publier, sans secret et sans contact avec les registres de publication :
+
+`.github/workflows/validate_release_artifacts.yml` + le script partagé
+`.github/workflows/scripts/validate_release_artifacts.py`.
+
+### Rôle
+
+- Vérifier que les artefacts **que nous publierions** sont cohérents et
+  installables (metadata, contenu des archives, smoke test).
+- C'est la brique de base de la future architecture
+  **« build once → validate → publish »** : un artefact est construit une
+  seule fois, validé avant publication, puis publié.
+- Aucune étape du workflow ne publie ni ne téléverse d'artefact, et aucun
+  secret n'est requis (permissions réduites à `contents: read`).
+
+### Déclencheurs
+
+| Déclencheur | Comportement |
+| --- | --- |
+| `pull_request` / `push` | Valide les artefacts Python du **core** (wheel + sdist) |
+| `workflow_dispatch` | Valide le core en Python ; option `validate_conda` pour le package Conda ; option `include_plugins` pour les plugins officiels |
+| `release` | Valide les artefacts Python du core (+ Conda si tag core, plugins officiels si plugins) |
+
+### Utilisation
+
+Le script s'utilise aussi bien localement qu'en CI :
+
+```bash
+# Artefacts Python (wheel + sdist)
+python .github/workflows/scripts/validate_release_artifacts.py \
+  python --package spectrochempy --version 0.12.8 --dist dist/
+
+# Package Conda (.conda ou .tar.bz2)
+python .github/workflows/scripts/validate_release_artifacts.py \
+  conda --package spectrochempy-nmr --version 0.1.11 \
+  --artifact output/spectrochempy-nmr-0.1.11-0_0.conda
+
+# Les deux
+python .github/workflows/scripts/validate_release_artifacts.py \
+  all --package spectrochempy --version 0.12.8 \
+  --dist dist/ --artifact output/spectrochempy-0.12.8-0_0.conda
+```
+
+Options utiles :
+
+- `--no-deps` : installe le wheel dans un venv partageant les packages de
+  l'environnement de base (`--system-site-packages`) pour un smoke test
+  hors-ligne rapide. Sans cette option, un venv isolé résout les dépendances
+  depuis PyPI.
+- `--json` / `--markdown` : sorties structurées (le Markdown est destiné à
+  `$GITHUB_STEP_SUMMARY`), ou `--json-output FILE` / `--markdown-output FILE`
+  pour écrire dans un fichier.
+- `--module` : module à importer pour le smoke test (défaut : dérivé du nom
+  du package, ex. `spectrochempy-nmr` → `spectrochempy_nmr`).
+
+Le code de sortie est `0` si toutes les vérifications passent, `1` sinon
+(failures). Les warnings ne font pas échouer la validation.
+
+### Ce que le validateur vérifie
+
+1. **Découverte** : wheel + sdist présents dans `dist/`, noms et versions
+   conformes (avertissement en cas d'artefacts multiples ou de version
+   inattendue).
+2. **Métadonnées** : `METADATA` / `PKG-INFO` / `info/index.json` lisibles,
+   cohérence nom/version entre wheel et sdist, `Requires-Dist` déclarés.
+3. **Contenu des archives** : pas de path traversal (`../`), pas de chemins
+   absolus, pas de fichiers sensibles (`.env`, clés, `.netrc`), pas de
+   symlinks dans le wheel.
+4. **Signature wheel** : `twine check --strict` (si `twine` est disponible).
+5. **Installation + smoke test** : venv isolé, `pip install`, import du
+   module et vérification de `__version__`.
+6. **Rebuild depuis le sdist** : reconstruit un wheel depuis le sdist et
+   compare les métadonnées (cohérence reproductible du build).
+7. **Conda** : extension, nom/version, `index.json` / `repodata_record.json`,
+   contenu de l'archive, puis install/smoke test via `micromamba` dans un
+   canal local.
+
+### Règles de sécurité
+
+- Aucun `shell=True` : tous les `subprocess` passent par des listes
+  d'arguments.
+- Aucun répertoire `env`/`$HOME` utilisé comme `workdir`.
+- Les chemins extraits des archives sont validés avant toute manipulation.
+- Les fichiers temporaires (venv, rebuild, canal conda local) sont créés via
+  `tempfile.mkdtemp` et nettoyés.
+- Aucune commande de publication ni aucun contact avec PyPI/Anaconda.org.
+
+### Tests
+
+Les tests unitaires du script se trouvent dans
+`tests/test_core/test_scripts/test_validate_release_artifacts.py` (découverte,
+métadonnées, contenu, CLI, rapport JSON/Markdown, sécurité). Ils suivent le
+même motif que `test_conda_publish.py` (chargement du script via
+`importlib.util`).
+
+---
+
 ## Release du core
 
 > **Note Zenodo** : avant une release du core, vérifier que l'intégration

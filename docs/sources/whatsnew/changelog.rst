@@ -72,3 +72,11 @@ Deprecations
 Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
+
+MAINT: Added ``.github/workflows/scripts/validate_release_artifacts.py``, a
+standalone local validator for release artifacts (Python wheel + sdist and
+Conda packages) that checks metadata consistency, archive safety, signature
+compatibility, installability and smoke-tests, plus its unit tests and the
+``.github/workflows/validate_release_artifacts.yml`` workflow. It never
+publishes anything, requires no secrets, and is the foundation for a planned
+"build once, then validate, then publish" publication architecture.
