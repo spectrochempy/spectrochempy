@@ -30,9 +30,9 @@ A realistic analysis is rarely a single algorithm. Instrumental files must be
 read and organized, axes identified, units assigned, and metadata retained.
 Data are then selected, smoothed, baseline-corrected, filtered, normalized, or
 repeatedly transformed before visualization and univariate or multivariate
-analysis. For a time-resolved or temperature-resolved series, every operation
-must preserve the correspondence between each spectrum and the experimental
-variable that produced it.
+analysis. For a time-resolved or temperature-resolved series, operations must
+preserve or explicitly transform the correspondence between spectra and the
+experimental variables associated with them.
 
 Commercial and graphical software can provide efficient environments for
 routine and exploratory analysis. Depending on the software, however, the exact
@@ -109,14 +109,14 @@ SpectroChemPy provides a coherent set of interfaces built on this data model.
   selection, baseline correction, automatic subtraction, smoothing and
   filtering, derivative calculation, normalization and scaling, denoising,
   FFT and Fourier-related operations, and masking.
-- **Analysis**: SVD, PCA, EFA, MCR-ALS (with the usual constraints), PLS,
-  NMF, ICA, SIMPLISMA, peak finding and integration, and curve fitting with
-  documented lineshape models.
+- **Analysis**: SVD, PCA, EFA, MCR-ALS, PLS, NMF, ICA, SIMPLISMA, peak finding
+  and integration, and curve fitting with documented lineshape models.
 - **Visualization**: a plotting interface adapted to 1D, 2D, and 3D
   spectroscopic data, with multiple styles and reusable preferences.
-- **Workflows**: estimators follow a scikit-learn-compatible interface, and
+- **Workflows**: many SpectroChemPy analysis estimators follow a
+  scikit-learn-compatible interface, and
   :class:`~spectrochempy.analysis.pipeline.Pipeline` provides a linear
-  composition of allowlisted preprocessing steps and supported terminal
+  composition of an approved set of preprocessing steps and supported terminal
   estimators. This makes the sequence and parameters explicit, but does not by
   itself capture the input data, software environment, or every requirement for
   reproducibility.
@@ -130,9 +130,10 @@ Designed for open science
 
 SpectroChemPy is distributed under the
 `CeCILL-B license <https://cecill.info/index.en.html>`__, a free-software
-license that permits use, modification, and redistribution under its stated
-conditions. Users of the software in scientific work are also asked to cite the
-project as described in the :ref:`citation guidelines <citing>`.
+license with characteristics similar to BSD licenses, which permits use,
+modification, and redistribution under its stated conditions. Users of the
+software in scientific work are also asked to cite the project as described in
+the :ref:`citation guidelines <citing>`.
 
 Processing is scriptable, so a complete analysis can be written, versioned, and
 shared as a script or notebook. The dataset ``history`` field provides an
@@ -145,8 +146,9 @@ execution environment to be archived separately.
 
    SpectroChemPy does not guarantee "data integrity": the validity of the raw
    data and the appropriate use of the tools remain the responsibility of the
-   user. It is open-source software that may contain bugs; critical bugs
-   affecting data integrity, if any, are documented for the version concerned.
+   user. It is open-source software that may contain bugs; users should consult
+   the release notes and known issues for information about identified problems
+   affecting the versions they use.
 
 Part of the scientific Python ecosystem
 =======================================
