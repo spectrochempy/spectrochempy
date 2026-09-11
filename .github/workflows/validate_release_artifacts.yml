@@ -1,0 +1,269 @@
+# Validate release artifacts before any publication.
+#
+# This workflow builds the artifacts locally (wheel + sdist for Python, and on
+# demand the Conda package) and runs the shared validator
+# (.github/workflows/scripts/validate_release_artifacts.py) against them.
+#
+# It is the foundation of the planned "build once, then validate, then publish"
+# publication architecture. It never publishes anything, uploads nothing, and
+# requires no secret.
+
+name: Validate release artifacts ✔️
+
+on:
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - 'maintainers/**'
+      - 'audit/**'
+  push:
+    branches:
+      - master
+      - 'fix/*'
+    paths-ignore:
+      - 'docs/**'
+      - 'maintainers/**'
+      - 'audit/**'
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      validate_conda:
+        description: Also build and validate the Conda package
+        type: boolean
+        default: false
+      include_plugins:
+        description: Also validate all official plugins (Python artifacts)
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  detect-version:
+    name: Detect core version
+    runs-on: ubuntu-latest
+    outputs:
+      core_version: ${{ steps.version.outputs.core_version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Determine core version
+        id: version
+        run: |
+          LATEST_CORE_TAG=$(git tag -l 'spectrochempy-v*' --sort=-v:refname | head -1)
+          if [[ -z "$LATEST_CORE_TAG" ]]; then
+            echo "::error::No core tag found — cannot determine core version"
+            exit 1
+          fi
+          if [[ "${{ github.ref_name }}" == spectrochempy-v* ]]; then
+            CORE_VERSION="${GITHUB_REF_NAME#spectrochempy-v}"
+          else
+            LATEST_CORE_VERSION="${LATEST_CORE_TAG#spectrochempy-v}"
+            IFS=. read -r CORE_MAJOR CORE_MINOR CORE_PATCH <<< "$LATEST_CORE_VERSION"
+            COMMITS_SINCE_CORE_TAG=$(git rev-list --count "$LATEST_CORE_TAG"..HEAD)
+            CORE_VERSION="${CORE_MAJOR}.${CORE_MINOR}.$((CORE_PATCH + 1)).dev${COMMITS_SINCE_CORE_TAG}"
+          fi
+          echo "core_version=$CORE_VERSION" >> "$GITHUB_OUTPUT"
+          echo "Using core version: $CORE_VERSION (latest core tag: $LATEST_CORE_TAG)"
+
+  discover-plugins:
+    name: Discover official plugins
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Set plugin matrix
+        id: set-matrix
+        run: |
+          plugins=()
+          for dir in plugins/*/; do
+            name=$(basename "$dir")
+            if [ "$name" = "plugin-template" ]; then
+              echo "Skipping $name (developer template)"
+              continue
+            fi
+            version=$(python3 -c "
+            import tomllib
+            with open('${dir}pyproject.toml', 'rb') as f:
+                data = tomllib.load(f)
+            sc = data.get('tool', {}).get('spectrochempy', {})
+            print('official' if sc.get('official-plugin') is True else 'not-official')
+            print(data.get('project', {}).get('version', ''))
+            ")
+            status="${version%%$'\n'*}"
+            pkg_version="${version#*$'\n'}"
+            if [ "$status" != "official" ]; then
+              echo "Skipping $name (not declared official)"
+              continue
+            fi
+            plugins+=("{\"name\":\"$name\",\"version\":\"$pkg_version\"}")
+          done
+          if [ ${#plugins[@]} -eq 0 ]; then
+            echo "No official plugins found. Skipping plugin validation."
+            echo "matrix={}" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          joined=$(IFS=,; echo "${plugins[*]}")
+          echo "matrix={\"plugin\":[$joined]}" >> "$GITHUB_OUTPUT"
+
+  validate-core-python:
+    name: Validate core Python artifacts
+    needs: detect-version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+
+      - name: Build wheel and sdist
+        run: |
+          python -m pip install build
+          SETUPTOOLS_SCM_PRETEND_VERSION=${{ needs.detect-version.outputs.core_version }} \
+            python -m build --sdist --wheel --outdir dist .
+
+      - name: Validate Python artifacts
+        id: validate
+        run: |
+          python .github/workflows/scripts/validate_release_artifacts.py \
+            python --package spectrochempy \
+            --version ${{ needs.detect-version.outputs.core_version }} \
+            --dist dist \
+            --markdown-output /tmp/validation.md
+
+      - name: Publish validation report to step summary
+        if: always()
+        run: |
+          cat /tmp/validation.md >> "$GITHUB_STEP_SUMMARY" || true
+
+  validate-core-conda:
+    name: Validate core Conda package
+    needs: detect-version
+    if: |
+      (github.event_name == 'release' && startsWith(github.ref_name, 'spectrochempy-v')) ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.validate_conda == 'true')
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Install Conda environment with Micromamba
+        uses: mamba-org/setup-micromamba@v3
+        with:
+          environment-file: environments/environment_build.yml
+          environment-name: scpy_validate
+          create-args: >-
+            python=3.11
+          cache-environment: true
+
+      - name: Generate conda recipe
+        run: |
+          python3 .github/workflows/scripts/generate_conda_recipe.py
+          cat recipe/recipe.yaml
+
+      - name: Build conda package
+        uses: prefix-dev/rattler-build-action@v0.2.39
+        env:
+          CONDA_BLD_PATH: ../output
+        with:
+          recipe-path: recipe/recipe.yaml
+          upload-artifact: false
+          build-args: "-c conda-forge -c spectrocat"
+
+      - name: Move conda build output
+        run: |
+          mv ../output .
+
+      - name: Validate Conda artifact
+        id: validate
+        run: |
+          shopt -s nullglob globstar
+          package=(output/**/*.conda)
+          if [ ${#package[@]} -eq 0 ]; then
+            echo "::error::No .conda package produced in output/"
+            exit 1
+          fi
+          echo "Validating $package"
+          python3 .github/workflows/scripts/validate_release_artifacts.py \
+            conda --package spectrochempy \
+            --version ${{ needs.detect-version.outputs.core_version }} \
+            --artifact "$package" \
+            --markdown-output /tmp/validation.md
+
+      - name: Publish validation report to step summary
+        if: always()
+        run: |
+          cat /tmp/validation.md >> "$GITHUB_STEP_SUMMARY" || true
+
+  validate-plugins-python:
+    name: Validate plugin Python artifacts
+    needs: [detect-version, discover-plugins]
+    if: |
+      (github.event_name == 'release' ||
+       (github.event_name == 'workflow_dispatch' && github.event.inputs.include_plugins == 'true')) &&
+      needs.discover-plugins.outputs.matrix != '{}' &&
+      needs.discover-plugins.outputs.matrix != ''
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.discover-plugins.outputs.matrix) }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+
+      - name: Install core wheel into the base environment
+        run: |
+          python -m pip install build
+          SETUPTOOLS_SCM_PRETEND_VERSION=${{ needs.detect-version.outputs.core_version }} \
+            python -m build --sdist --wheel --outdir dist-core .
+          python -m pip install dist-core/*.whl
+
+      - name: Build plugin wheel and sdist
+        run: |
+          python -m build --sdist --wheel --outdir dist plugins/${{ matrix.plugin.name }}
+
+      - name: Validate plugin Python artifacts
+        id: validate
+        run: |
+          python .github/workflows/scripts/validate_release_artifacts.py \
+            python --package ${{ matrix.plugin.name }} \
+            --version ${{ matrix.plugin.version }} \
+            --dist dist \
+            --no-deps \
+            --markdown-output /tmp/validation.md
+
+      - name: Publish validation report to step summary
+        if: always()
+        run: |
+          cat /tmp/validation.md >> "$GITHUB_STEP_SUMMARY" || true
