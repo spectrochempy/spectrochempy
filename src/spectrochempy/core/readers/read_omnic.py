@@ -550,6 +550,17 @@ def read_srs(*paths, **kwargs):
        endpoints. Rapid-scan interferograms keep their ascending
        data-points coordinate and are not treated as spectral data.
 
+    .. note::
+       Series that carry a native absolute acquisition timestamp (the OMNIC
+       ``Collected`` instant stored at file offset 296; RapidScan, HighSpeed
+       and TGA samples) expose it through the standard ``acquisition_date``
+       convention, and their Y coordinate gains an extra label column with
+       the per-spectrum absolute `datetime` objects derived as
+       ``Collected + timedelta(minutes=time_min + i * step)`` in full
+       precision from the native series fields. Variants without a valid
+       anchor (GC, reprocessed RapidScan) leave ``acquisition_date`` unset
+       and keep the single-column names-only Y labels.
+
     reverse_x : bool, optional
         .. deprecated::
             No longer needed. Spectral orientation is handled automatically as
@@ -775,10 +786,7 @@ def _read_spg(*args, **kwargs):
         # and the acquisition date
         fid.seek(spa_title_pos + 256)
         timestamp = fromfile(fid, dtype="uint32", count=1)
-        # since 31/12/1899, 00:00
-        acqdate = datetime(1899, 12, 31, 0, 0, tzinfo=UTC) + timedelta(
-            seconds=int(timestamp),
-        )
+        acqdate = _decode_omnic_timestamp(int(timestamp))
         acquisitiondates.append(acqdate)
         timestamps.append(acqdate.timestamp())
 
@@ -968,9 +976,7 @@ def _parse_spa_native(fid, return_ifg):
         acquisition_date = None
         timestamp = 0.0
     else:
-        acquisition_date = datetime(1899, 12, 31, 0, 0, tzinfo=UTC) + timedelta(
-            seconds=raw_timestamp
-        )
+        acquisition_date = _decode_omnic_timestamp(raw_timestamp)
         timestamp = acquisition_date.timestamp()
 
     comments = []
@@ -1490,6 +1496,14 @@ def _read_srs(*args, **kwargs):
                 # but the data are those of an ifg... For now need more examples
                 return None
 
+    # Read the native series-level acquisition instant ('Collected').
+    # This is used for the non-bg path only but is computed here because
+    # pos_info_data and is_tg are set by all variant branches above.
+    if not return_bg:
+        acquisition_date = _read_srs_acquisition_date(fid, pos_info_data, is_tg)
+    else:
+        acquisition_date = None
+
     # Create NDDataset object for the series / background.
     #
     # The raw SRS spectral intensity array is stored ascending-wavenumber, but
@@ -1556,11 +1570,15 @@ def _read_srs(*args, **kwargs):
     # specific infos for series data
     if not return_bg:
         dataset.name = info["name"]
+        if acquisition_date is not None:
+            labels = [_srs_datetime_labels(acquisition_date, info), names]
+        else:
+            labels = names
         _y = Coord(
             np.around(np.linspace(info["time_min"], info["lasty"], info["ny"]), 3),
             title="Time",
             units="minute",
-            labels=names,
+            labels=labels,
         )
 
     else:
@@ -1582,6 +1600,9 @@ def _read_srs(*args, **kwargs):
     dataset.meta.laser_frequency = info["reference_frequency"] * ur("cm^-1")
     dataset.meta.collection_length = info["collection_length"] * ur("s")
     dataset.meta.optical_velocity = info["optical_velocity"]
+
+    if not return_bg and acquisition_date is not None:
+        dataset.acquisition_date = acquisition_date
 
     if dataset.x.units is None and dataset.x.title == "data points":
         # interferogram
@@ -1625,6 +1646,88 @@ def _readbtext(fid, pos, size):
         except UnicodeDecodeError:  # pragma: no cover
             text = btext.decode(encoding="utf-8", errors="ignore")
     return text
+
+
+def _decode_omnic_timestamp(raw):
+    """
+    Decode a native OMNIC UInt32 timestamp (seconds since 1899-12-31 UTC).
+
+    The OMNIC/SPA epoch is 1899-12-31 00:00:00 UTC.  The raw value is
+    interpreted as unsigned little-endian UInt32.
+    """
+    return datetime(1899, 12, 31, 0, 0, tzinfo=UTC) + timedelta(seconds=raw)
+
+
+def _read_srs_acquisition_date(fid, pos_info, tg_family):
+    """
+    Return the native SRS series ``Collected`` instant, or ``None``.
+
+    The native UInt32 OMNIC timestamp at **file offset 296** is the
+    canonical series-level acquisition anchor for every SRS variant that
+    carries the field (RapidScan / HighSpeed families and TGA).  The
+    field has header-relative copies at:
+
+    * ``pos_info + 836`` for RapidScan / HighSpeed;
+    * ``pos_info + 368`` and ``pos_info + 828`` for TG/GC-family TGA.
+
+    Variants without the field (GC) hold unrelated bytes at offset 296;
+    reprocessed files carry a zeroed field.  Both must yield ``None``
+    rather than a fabricated date.
+
+    The copy-check prevents false positives in GC (ASCII text at offset
+    296) while remaining tolerant of unseen variants whose single-file
+    header-relative copy offsets differ slightly from the controlled
+    corpus.
+
+    Parameters
+    ----------
+    fid : file-like
+        Open SRS binary stream positioned anywhere.
+    pos_info : int
+        Series header base position (``pos_info_data`` from the reader).
+    tg_family : bool
+        ``True`` for TG/GC-family files, ``False`` for RapidScan /
+        HighSpeed families.
+
+    Returns
+    -------
+    datetime or None
+    """
+    fid.seek(296)
+    raw = int(fromfile(fid, dtype="uint32", count=1))
+    if raw == 0:
+        return None
+    copy_offsets = (pos_info + 368, pos_info + 828) if tg_family else (pos_info + 836,)
+    for offset in copy_offsets:
+        fid.seek(offset)
+        if int(fromfile(fid, dtype="uint32", count=1)) == raw:
+            return _decode_omnic_timestamp(raw)
+    return None
+
+
+def _srs_datetime_labels(acquisition_date, info):
+    """
+    Derive per-spectrum absolute datetimes from native series fields.
+
+    Model A::
+
+        datetime[i] = acquisition_date + timedelta(minutes=time_min + i*step)
+
+    computed in full precision from the native float32 header fields
+    ``time_min`` (+1002) and ``firsty`` (+1010, the regular step), **not**
+    from the already-rounded three-decimal Y coordinate.  The resulting
+    ``datetime`` objects carry microsecond resolution (inherited from
+    Python's ``timedelta`` float arithmetic); no second-truncation is
+    applied so the labels faithfully represent the physically-derived
+    acquisition instants rather than mimicking the whole-second
+    serialization format of OMNIC-exported SPA timestamps.
+    """
+    ny = int(info["ny"])
+    time_min = float(info["time_min"])
+    step = float(info["firsty"])
+    return [
+        acquisition_date + timedelta(minutes=time_min + i * step) for i in range(ny)
+    ]
 
 
 def _nextline(pos):

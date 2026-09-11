@@ -154,6 +154,16 @@ File header / key-table region (file-relative)
      - UInt16
      - Number of key-table entries (24–33 in the files examined).
      - ``[OBSERVED]``
+   * - 296
+     - 4
+     - UInt32
+     - Native series-level acquisition timestamp (``Collected``): seconds
+       since the OMNIC epoch (1899-12-31 00:00:00 UTC), unsigned
+       little-endian. This is the canonical series-absolute anchor used by
+       the reader (see :ref:`srs-time-representation`). Zeroed in
+       reprocessed files; holds unrelated bytes in GC variants.
+     - ``[ESTABLISHED]`` for RapidScan / HighSpeed / TGA samples;
+       ``[OBSERVED]`` absence for GC
    * - 304
      - n × 16
      - KeyTable[]
@@ -555,6 +565,43 @@ elapsed time of spectrum *i+1*, quantized to integer centiseconds; dividing by
 per-spectrum increment equals the collection period; in the independently
 controlled series the increment is the regular time step above.
 
+Absolute series anchor (``Collected``) and derived datetimes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``[ESTABLISHED]`` for the RapidScan, HighSpeed and TGA samples examined, the
+series additionally carries a native absolute acquisition instant at
+**file-relative offset 296**: a UInt32 OMNIC-epoch timestamp (seconds since
+1899-12-31 00:00:00 UTC, unsigned little-endian) following the same
+convention as the SPA/SPG timestamps. It equals the series ``Collected`` time
+reported by OMNIC: the SPA serialization of the independently controlled
+series stores the same instant as the timestamp of its first exported record.
+
+The field has header-relative copies that the reader verifies against before
+trusting it (the offsets differ between families):
+
+* ``pos_info + 836`` for RapidScan / HighSpeed;
+* ``pos_info + 368`` and ``pos_info + 828`` for TG/GC-family TGA files.
+
+``[OBSERVED]`` The copy-check prevents false positives: GC files, whose
+offset 296 holds unrelated bytes (ASCII text / assorted values), and
+reprocessed RapidScan files, whose field is zeroed, yield *no* absolute
+anchor (``None``) rather than a fabricated date.
+
+Combined with the regular time model above, the per-spectrum absolute
+instants follow Model A
+
+.. code-block:: text
+
+    datetime[i] = Collected + timedelta(minutes=time_min + i * step)
+
+computed in full precision from the native float32 ``time_min`` (+1002) and
+``step`` (+1010) fields (microsecond resolution), not from the already
+rounded three-decimal Y coordinate. Their whole-second truncation matches the
+timestamps OMNIC writes when exporting the series spectra as SPA files. The
+reader exposes the anchor through the standard ``acquisition_date``
+convention and the derived instants as an additional Y-label column (see
+:ref:`srs-implementation-references`).
+
 .. _srs-spectral-sample-order:
 
 Spectral sample order
@@ -847,7 +894,16 @@ SpectroChemPy implements the knowledge above in
 * :func:`spectrochempy.read_srs` is the public entry point for ``.srs`` files;
 * the internal functions ``_read_srs``, ``_read_header`` and
   ``_read_srs_spectra`` apply the record layout, header decoding, and
-  normalization described in this page.
+  normalization described in this page;
+* the series-level absolute anchor (file offset 296) is read and validated by
+  ``_read_srs_acquisition_date`` through the header-relative copies described
+  in :ref:`srs-time-representation`;
+* when the anchor is valid the dataset exposes it as ``acquisition_date``
+  (the standard SPA convention) and the Y coordinate gains a second label
+  column holding the per-spectrum absolute datetimes derived by
+  ``_srs_datetime_labels`` (Model A above), alongside the unchanged spectrum
+  names. Variants without a valid anchor keep the current single-column
+  names-only Y labels.
 
 The public presentation conventions of the reader are distinct from the raw
 storage order documented here:
