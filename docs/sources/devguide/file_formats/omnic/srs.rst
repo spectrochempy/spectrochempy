@@ -34,8 +34,8 @@ The evidence derives from independent controlled binary and oracle analysis
 across several observed SRS variants, spanning the RapidScan, HighSpeed and
 TG/GC acquisition families: ordinary spectral series, rapid-scan
 interferogram series, reprocessed series, and background-containing variants.
-One independently controlled TG/GC series served as a physical validation
-oracle: its individual spectra were exported by OMNIC as SPA files and
+One independently controlled TG/GC series served as a controlled OMNIC
+export oracle: its individual spectra were exported by OMNIC as SPA files and
 compared against the raw SRS samples (see :ref:`srs-spectral-sample-order`),
 and the same series also exercised the trailer's SeriesProfile, Gram-Schmidt
 and Area structures (see :ref:`srs-seriesprofile`). These descriptions are
@@ -62,7 +62,7 @@ spectral data are stored as a sequence of repeated fixed-stride records.
    └── key records beginning at file offset 304
 
    referenced blocks
-   ├── series metadata region (through the first key record)
+   ├── series metadata region (referenced by the first key record)
    │     └── series-header base: key[0] position, 152 bytes before the first
    │         detection signature
    ├── background header / background data (when a background is present)
@@ -200,10 +200,13 @@ Series metadata
 
 In the observed variants, the series-header base is located 152 bytes before
 the first detection signature (see :ref:`srs-detection-signatures`). Offsets
-in the tables below are relative to that base. The metadata associated with
-the series extend well beyond the first 152 bytes: the exact subdivision into
-OMNIC internal blocks is only partially understood. Only the fields listed
-below have been interpreted so far; the rest of the region is unmapped.
+in the tables below are relative to that base (so the ``+296`` row below is a
+series-header-relative field, unrelated to the file-relative offset 296 —
+the native ``Collected`` timestamp — of the header table above). The metadata
+associated with the series extend well beyond the first 152 bytes: the exact
+subdivision into OMNIC internal blocks is only partially understood. Only the
+fields listed below have been interpreted so far; the rest of the region is
+unmapped.
 
 Signal and acquisition fields
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -341,7 +344,8 @@ Series identity and time-model fields
    * - 296
      - 8
      - UInt64
-     - Raw file size.
+     - Raw file size (series-header-relative; not to be confused with the
+       file-relative offset 296 ``Collected`` timestamp above).
      - ``[HYPOTHESIS]``
    * - 938
      - ≤ 256
@@ -499,9 +503,10 @@ Inter-spectrum trailer (16 bytes; trailer-relative offsets)
 ``[ESTABLISHED]`` Observed records (both spectral series and rapid-scan
 interferograms) are followed by a 16-byte trailer.
 
-``[OBSERVED]`` One uint32 field in this trailer behaves as a **cumulative
-time counter in centiseconds** (values increase with spectrum index and track
-the series time axis).
+``[OBSERVED]`` One uint32 field in the trailer of the *non-final* records
+behaves as a **cumulative time counter in centiseconds** (values increase
+with spectrum index and track the series time axis). The final record's
+trailer is instead repurposed for series statistics.
 
 ``[UNKNOWN]`` The remaining trailer fields are not fully interpreted.
 
@@ -523,7 +528,8 @@ the series time axis).
      - 4
      - UInt32
      - Cumulative elapsed-time counter in centiseconds for the **next**
-       spectrum (see :ref:`srs-time-representation`).
+       spectrum (non-final records only; see
+       :ref:`srs-time-representation`).
      - ``[OBSERVED]``
    * - 8
      - 8
@@ -555,12 +561,11 @@ Positioning relationships (all values verified in the observed variants):
 * the **second** signature occurs 152 bytes before the background header;
 * the **last** signature occurs 60 bytes before the series spectral-data
   start (data = signature position + 60);
-* in HighSpeed variants, the third occurrence's role is not understood and
-  the fourth is the data-position one.
+* in HighSpeed variants, the fourth signature occurrence is the
+  data-position one.
 
 These are **observed** positioning relationships, not guaranteed layout
-invariants. The exact significance of the 60-byte offset and the exact roles
-of the third/fourth signatures remain only partially understood.
+invariants.
 
 .. _srs-seriesprofile:
 
@@ -663,12 +668,14 @@ Four quantities describe the series time axis; they must not be conflated:
 where ``time_min`` reads from +1002 and ``step`` from +1010.
 
 The trailer's centisecond counter provides an independent confirmation:
-``[OBSERVED]`` the counter stored in the trailer of spectrum *i* holds the
-elapsed time of spectrum *i+1*, quantized to integer centiseconds; dividing
-by 6000 (centiseconds per minute) reproduces the time axis and matches the
-3-decimal times embedded in the spectrum names. In the RapidScan variant the
-per-spectrum increment equals the collection period; in the independently
-controlled series the increment equals the regular time step above.
+``[OBSERVED]`` for non-final records, the counter stored in the trailer of
+spectrum *i* holds the elapsed time of spectrum *i+1*, quantized to integer
+centiseconds; dividing by 6000 (centiseconds per minute) reproduces the time
+axis and matches the 3-decimal times embedded in the spectrum names. The
+final record's trailer is instead repurposed for series statistics. In the
+RapidScan variant the per-spectrum increment equals the collection period; in
+the independently controlled series the increment equals the regular time
+step above.
 
 Absolute series anchor (``Collected``) and derived datetimes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -685,10 +692,12 @@ exported spectrum's timestamp is ``Collected + time_min`` (≈ ``time_min`` ≈
 ``Collected`` itself.
 
 The field has header-relative copies that the reader verifies against before
-trusting it (the offsets differ between families):
+trusting it (the offsets differ between families, and are relative to the
+series-header base):
 
-* ``pos_info + 836`` for RapidScan / HighSpeed;
-* ``pos_info + 368`` and ``pos_info + 828`` for TG/GC-family TGA files.
+* series-header base + 836 for RapidScan / HighSpeed;
+* series-header base + 368 and series-header base + 828 for TG/GC-family
+  TGA files.
 
 ``[OBSERVED]`` The copy-check prevents false positives: GC files, whose
 offset 296 holds unrelated bytes (ASCII text / assorted values), and
@@ -705,9 +714,12 @@ datetimes follow Model A
     datetime[i] = Collected + timedelta(minutes=time_min + i * step)
 
 computed in full precision from the native float32 ``time_min`` (+1002) and
-``step`` (+1010) fields (microsecond resolution), not from the already
-rounded three-decimal Y coordinate. Their whole-second truncation matches
-the timestamps OMNIC writes when exporting the series spectra as SPA files.
+``step`` (+1010) fields, preserving the full precision represented by the
+native float32 timing fields rather than the already-rounded three-decimal
+public Y coordinate. The derived datetimes agree with the OMNIC-exported
+SPA timestamps at their serialization precision (whole seconds), while
+SpectroChemPy retains the full precision derived from the native series
+fields.
 The reader exposes the anchor through the standard ``acquisition_date``
 convention and the derived datetimes as an additional Y-label column (see
 :ref:`srs-implementation-references`).  Which acquisition event (integration
@@ -781,8 +793,8 @@ Chemigram / Area observations (experimental)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``[OBSERVED]`` Profile vectors whose areas were recomputed from the spectral
-data reproduce the stored vectors: one region matched exactly, the others
-within a small affine residual (linear correlation ~1.00000).
+data closely reproduce the stored vectors, with small residuals where
+applicable.
 
 ``[HYPOTHESIS]`` The stored "Area" profile values follow a
 baseline-subtracted integral of the intensity over the labelled region
@@ -857,9 +869,8 @@ Confound warning: in the observed variants, RapidScan is the only family
 with a distinct value pattern for the correlated fields listed above
 (``+24``, ``+56``, ``+184``); the HighSpeed and TG/GC samples all share the
 same pattern. These fields therefore "correlate" with the acquisition family
-in this sample without being independently confirmed as family markers. They
-are more plausibly measurement-mode or axis-registration fields, but nothing
-beyond the correlation is established.
+in this sample without being independently confirmed as family markers;
+nothing beyond the correlation is established.
 
 Open questions and limitations
 ------------------------------
@@ -890,8 +901,10 @@ Format-to-public-behaviour mapping:
   normalization is applied per-spectrum from each record's own
   ``firstx``/``lastx`` endpoints.
 * Rapid-scan interferograms retain the raw **ascending data-points**
-  coordinate. These records are flagged internally (``meta.interferogram``)
-  with a ZPD index and laser frequency set from the X coordinate.
+  coordinate. These records are flagged internally (``meta.interferogram``);
+  their ZPD index is the data-derived peak index, and the laser frequency is
+  set to the reader's standard default rather than derived from these
+  records' coordinate or data.
 * Records with an unrecognized X-unit code are left in raw storage
   orientation with an informational message; they are neither treated as
   interferograms nor spectral-normalized.
