@@ -7,6 +7,8 @@
 
 import io
 import struct
+from datetime import datetime
+from datetime import timedelta
 from pathlib import Path
 
 import numpy as np
@@ -15,6 +17,7 @@ import pytest
 import spectrochempy as scp
 from spectrochempy.application.preferences import preferences as prefs
 from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.utils.datetimeutils import UTC
 from spectrochempy.utils.testing import assert_dataset_equal
 
 DATADIR = prefs.datadir
@@ -872,3 +875,135 @@ def test_read_srs_unknown_xunits_not_interferogram(monkeypatch):
     np.testing.assert_allclose(
         np.asarray(unknown.data)[:, ::-1], np.asarray(spectral.data)
     )
+
+
+# ---------------------------------------------------------------------------
+# SRS native series-level acquisition date and derived per-spectrum datetimes
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.usefixtures("_skip_if_no_testdata")
+@pytest.mark.parametrize(
+    ("name", "expected"),
+    [
+        ("rapid_scan.srs", datetime(2020, 11, 24, 10, 21, 29, tzinfo=UTC)),
+        ("high_speed.srs", datetime(2023, 10, 22, 7, 2, 13, tzinfo=UTC)),
+        ("TGA_demo.srs", datetime(2006, 2, 24, 18, 34, 57, tzinfo=UTC)),
+    ],
+)
+def test_read_srs_native_acquisition_date(name, expected):
+    """SRS series with a valid native timestamp expose the OMNIC `Collected`
+    timestamp through the same `acquisition_date` convention as SPA: the stored
+    value is a timezone-aware Python datetime in UTC that matches the native
+    UInt32 decoding (OMNIC epoch 1899-12-31 UTC)."""
+    nd = scp.read_srs(IRDATA / "omnic_series" / name)
+
+    # Stored value: timezone-aware Python datetime in UTC.
+    assert isinstance(nd._acquisition_date, datetime)
+    assert nd._acquisition_date.tzinfo is not None
+    assert nd._acquisition_date.utcoffset() == timedelta(0)
+    assert nd._acquisition_date == expected
+
+    # Public property: same instant, ISO-string rendering in the dataset
+    # timezone (the SPA convention, which renders in `_timezone`).
+    assert nd.acquisition_date is not None
+    rendered = datetime.fromisoformat(nd.acquisition_date.replace(" ", "T"))
+    assert rendered == expected.astimezone(rendered.tzinfo)
+
+
+@pytest.mark.usefixtures("_skip_if_no_testdata")
+@pytest.mark.parametrize("name", ["rapid_scan_reprocessed.srs", "GC_Demo.srs"])
+def test_read_srs_absent_or_zero_timestamp_leaves_date_unset(name):
+    """A zeroed native field (reprocessed RapidScan) or a variant without the
+    field (GC: offset 296 holds unrelated bytes) must leave
+    `dataset.acquisition_date` unset -- never the OMNIC epoch."""
+    nd = scp.read_srs(IRDATA / "omnic_series" / name)
+
+    assert nd._acquisition_date is None
+    assert nd.acquisition_date is None
+
+
+@pytest.mark.usefixtures("_skip_if_no_testdata")
+def test_read_srs_y_coordinate_invariant_with_datetime_labels():
+    """Adding absolute datetime labels must not alter the numeric relative Y
+    coordinate: same values, same minutes units, same endpoint anchors.
+
+    The reader stores ``np.around(linspace(...), 3)`` and ``Coord.data``
+    returns the display-linearized variant (sigdigits=4), which may differ
+    by up to ~0.001 on interior points; endpoints are exact.
+    """
+    path = IRDATA / "omnic_series" / "TGA_demo.srs"
+    info = _srs_header(path)
+    nd = scp.read_srs(path)
+
+    y = nd.y.data
+    assert nd.y.units == "minute"
+    assert len(y) == info["ny"]
+    expected = np.around(np.linspace(info["time_min"], info["lasty"], info["ny"]), 3)
+    np.testing.assert_allclose(y, expected, atol=1.5e-3)
+    assert y[0] == pytest.approx(np.around(info["time_min"], 3), abs=0.5e-3)
+    assert y[-1] == pytest.approx(np.around(info["lasty"], 3), abs=0.5e-3)
+
+
+@pytest.mark.usefixtures("_skip_if_no_testdata")
+def test_read_srs_datetime_labels_follow_full_precision_native_formula():
+    """Per-spectrum datetime labels are derived with
+
+        datetime[i] = acquisition_date + timedelta(minutes=time_min + i*step)
+
+    in full precision from the native +1002/+1010 series fields (not from the
+    rounded 3-decimal Y coordinate), and their whole-second truncation matches
+    OMNIC's exported SPA serialization.
+
+    `TGA_demo.srs` is the public fixture of the controlled TGA series whose
+    full 485-spectrum OMNIC SPA export established Model A (export oracle):
+    the exported native SPA stamps for records 0/415/484 are 2006-02-24
+    18:35:01 / 19:09:23 / 19:15:05 UTC.
+    """
+    path = IRDATA / "omnic_series" / "TGA_demo.srs"
+    info = _srs_header(path)
+    nd = scp.read_srs(path)
+
+    collected = datetime(2006, 2, 24, 18, 34, 57, tzinfo=UTC)
+    time_min = float(info["time_min"])
+    step = float(info["firsty"])
+
+    labels = nd.y.labels
+    assert labels.shape == (info["ny"], 2)
+    # Column 0: absolute datetime objects; column 1: unchanged spectrum names.
+    assert all(isinstance(labels[i, 0], datetime) for i in (0, info["ny"] // 2, -1))
+    assert all(isinstance(labels[i, 1], str) for i in (0, info["ny"] // 2, -1))
+    assert labels[0, 1].startswith("Linked spectrum at")
+
+    # Full-precision native formula, first/interior/last records.
+    for i in (0, info["ny"] // 2, info["ny"] - 1):
+        expected_dt = collected + timedelta(minutes=time_min + i * step)
+        assert labels[i, 0] == expected_dt
+        # Sub-second precision is preserved (no artificial whole-second
+        # truncation mimicking the export serialization).
+        assert labels[i, 0].microsecond == expected_dt.microsecond
+
+    # Evidence-pinned whole-second exported SPA timestamps (records 0/415/484).
+    exported = {
+        0: datetime(2006, 2, 24, 18, 35, 1, tzinfo=UTC),
+        415: datetime(2006, 2, 24, 19, 9, 23, tzinfo=UTC),
+        484: datetime(2006, 2, 24, 19, 15, 5, tzinfo=UTC),
+    }
+    for i, stamp in exported.items():
+        label = labels[i, 0]
+        assert label.replace(microsecond=0) == stamp
+
+
+@pytest.mark.usefixtures("_skip_if_no_testdata")
+def test_read_srs_undated_labels_keep_single_column_names():
+    """Variants without a native absolute anchor keep the current single-column
+    Y labels exactly as before (spectrum names only, no datetime column)."""
+    path = IRDATA / "omnic_series" / "GC_Demo.srs"
+    info = _srs_header(path)
+    nd = scp.read_srs(path)
+
+    labels = nd.y.labels
+    assert labels.shape == (info["ny"],)
+    assert labels[0] == "Linked spectrum at 0.025 min."
+    assert labels[1] == "Linked spectrum at 0.051 min."
+    assert all(isinstance(label, str) for label in labels)

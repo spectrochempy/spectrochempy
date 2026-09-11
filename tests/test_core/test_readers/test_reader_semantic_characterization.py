@@ -370,21 +370,28 @@ class TestOmnicCharacterization:
         if dataset.meta.omnic_experiment_title is not None:
             assert isinstance(dataset.meta.omnic_experiment_title, str)
 
-    def test_srs_currently_sets_origin_and_history(self, omnic_srs_dataset):
+    def test_srs_sets_origin_history_and_acquisition_date(self, omnic_srs_dataset):
         dataset = omnic_srs_dataset
 
+        # `rapid_scan.srs` carries a native series-level timestamp, so the
+        # dataset exposes it through the standard `acquisition_date` convention
+        # and the Y coordinate carries absolute datetime labels in addition to
+        # the OMNIC spectrum names.
         assert_dataset_provenance(
             dataset,
             origin="omnic",
-            acquisition_date_present=False,
+            acquisition_date_present=True,
         )
         if dataset.history:
             history_text = " ".join(str(entry) for entry in dataset.history).lower()
             assert "srs file" in history_text
         assert_coordinate_semantics(dataset, "x")
-        assert_coordinate_semantics(dataset, "y")
-        if dataset.y.labels is not None:
-            assert_label_structure(dataset.y)
+        y = assert_coordinate_semantics(dataset, "y", units="min")
+        # The relative Y data is untouched (minutes); only the labels gain the
+        # datetime column.
+        labels = assert_label_structure(y, shape=(dataset.y.size, 2))
+        assert isinstance(labels[0, 0], datetime)
+        assert isinstance(labels[0, 1], str)
         assert "laser_frequency" in dataset.meta
         assert "collection_length" in dataset.meta
         assert "optical_velocity" in dataset.meta
