@@ -551,8 +551,8 @@ def read_srs(*paths, **kwargs):
        data-points coordinate and are not treated as spectral data.
 
     .. note::
-       Series that carry a native absolute acquisition timestamp (the OMNIC
-       ``Collected`` instant stored at file offset 296; RapidScan, HighSpeed
+       Series that carry a native absolute series timestamp (the OMNIC
+       ``Collected`` timestamp stored at file offset 296; RapidScan, HighSpeed
        and TGA samples) expose it through the standard ``acquisition_date``
        convention, and their Y coordinate gains an extra label column with
        the per-spectrum absolute `datetime` objects derived as
@@ -1496,7 +1496,7 @@ def _read_srs(*args, **kwargs):
                 # but the data are those of an ifg... For now need more examples
                 return None
 
-    # Read the native series-level acquisition instant ('Collected').
+    # Read the native series-level 'Collected' timestamp.
     # This is used for the non-bg path only but is computed here because
     # pos_info_data and is_tg are set by all variant branches above.
     if not return_bg:
@@ -1660,24 +1660,22 @@ def _decode_omnic_timestamp(raw):
 
 def _read_srs_acquisition_date(fid, pos_info, tg_family):
     """
-    Return the native SRS series ``Collected`` instant, or ``None``.
+    Return the native SRS series-level ``Collected`` timestamp, or ``None``.
 
     The native UInt32 OMNIC timestamp at **file offset 296** is the
-    canonical series-level acquisition anchor for every SRS variant that
-    carries the field (RapidScan / HighSpeed families and TGA).  The
-    field has header-relative copies at:
+    series-level ``Collected`` anchor for the controlled variants examined
+    (RapidScan / HighSpeed families and TG/GC-family TGA).  Only the
+    evidence-backed header-relative copy locations are accepted:
 
     * ``pos_info + 836`` for RapidScan / HighSpeed;
     * ``pos_info + 368`` and ``pos_info + 828`` for TG/GC-family TGA.
 
-    Variants without the field (GC) hold unrelated bytes at offset 296;
-    reprocessed files carry a zeroed field.  Both must yield ``None``
-    rather than a fabricated date.
-
-    The copy-check prevents false positives in GC (ASCII text at offset
-    296) while remaining tolerant of unseen variants whose single-file
-    header-relative copy offsets differ slightly from the controlled
-    corpus.
+    An unsupported or unrecognized layout (different header-relative copy
+    offsets, or none) yields ``None``; this conservative behavior is
+    intentional -- only the known copy locations are checked so that no
+    date is fabricated for an unseen variant.  Variants without the field
+    (GC) hold unrelated bytes at offset 296, and reprocessed files carry a
+    zeroed field; both yield ``None`` rather than a fabricated date.
 
     Parameters
     ----------
@@ -1718,9 +1716,12 @@ def _srs_datetime_labels(acquisition_date, info):
     from the already-rounded three-decimal Y coordinate.  The resulting
     ``datetime`` objects carry microsecond resolution (inherited from
     Python's ``timedelta`` float arithmetic); no second-truncation is
-    applied so the labels faithfully represent the physically-derived
-    acquisition instants rather than mimicking the whole-second
-    serialization format of OMNIC-exported SPA timestamps.
+    applied, so the labels faithfully represent the derived per-spectrum
+    absolute datetimes rather than mimicking the whole-second
+    serialization format of OMNIC-exported SPA timestamps.  No claim is
+    made about which acquisition event (start, midpoint, end, ...) the
+    OMNIC timestamp corresponds to; only the arithmetic relationship is
+    established.
     """
     ny = int(info["ny"])
     time_min = float(info["time_min"])

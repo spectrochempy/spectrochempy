@@ -569,12 +569,15 @@ Absolute series anchor (``Collected``) and derived datetimes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``[ESTABLISHED]`` for the RapidScan, HighSpeed and TGA samples examined, the
-series additionally carries a native absolute acquisition instant at
+series additionally carries a native absolute series timestamp at
 **file-relative offset 296**: a UInt32 OMNIC-epoch timestamp (seconds since
 1899-12-31 00:00:00 UTC, unsigned little-endian) following the same
-convention as the SPA/SPG timestamps. It equals the series ``Collected`` time
-reported by OMNIC: the SPA serialization of the independently controlled
-series stores the same instant as the timestamp of its first exported record.
+convention as the SPA/SPG timestamps. It equals the series ``Collected``
+timestamp reported by OMNIC.  The per-spectrum timestamps OMNIC writes when
+exporting the series spectra as SPA files follow Model A below: the first
+exported spectrum's timestamp is ``Collected + time_min`` (≈ ``time_min`` ≈
+4.96 s after ``Collected`` in the controlled TGA series), **not**
+``Collected`` itself.
 
 The field has header-relative copies that the reader verifies against before
 trusting it (the offsets differ between families):
@@ -585,10 +588,12 @@ trusting it (the offsets differ between families):
 ``[OBSERVED]`` The copy-check prevents false positives: GC files, whose
 offset 296 holds unrelated bytes (ASCII text / assorted values), and
 reprocessed RapidScan files, whose field is zeroed, yield *no* absolute
-anchor (``None``) rather than a fabricated date.
+anchor (``None``) rather than a fabricated date. The reader only accepts the
+evidence-backed copy locations listed above; a layout with different copy
+offsets is unsupported and yields ``None``.
 
 Combined with the regular time model above, the per-spectrum absolute
-instants follow Model A
+datetimes follow Model A
 
 .. code-block:: text
 
@@ -599,8 +604,11 @@ computed in full precision from the native float32 ``time_min`` (+1002) and
 rounded three-decimal Y coordinate. Their whole-second truncation matches the
 timestamps OMNIC writes when exporting the series spectra as SPA files. The
 reader exposes the anchor through the standard ``acquisition_date``
-convention and the derived instants as an additional Y-label column (see
-:ref:`srs-implementation-references`).
+convention and the derived datetimes as an additional Y-label column (see
+:ref:`srs-implementation-references`).  Which acquisition event (integration
+start, midpoint, end, ...) the OMNIC timestamp corresponds to is not
+experimentally established (see the Open questions section); no physical
+start/end interpretation is implied.
 
 .. _srs-spectral-sample-order:
 
@@ -882,6 +890,12 @@ Open questions
   (series) entry, and of the per-entry trailing bytes?
 * What is the structure and role of the trailer's copied "series metadata"
   region?
+* Which acquisition event (integration start, midpoint, end, ...) does the
+  per-spectrum OMNIC timestamp correspond to physically? The arithmetic
+  mapping (Model A) is established, but the physical semantics of the native
+  timestamp are not; a controlled experiment comparing very short and very
+  long acquisitions (e.g. 2 vs 1024 scans) with independently noted start/end
+  times is planned to answer this.
 
 .. _srs-implementation-references:
 

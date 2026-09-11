@@ -893,7 +893,7 @@ def test_read_srs_unknown_xunits_not_interferogram(monkeypatch):
 )
 def test_read_srs_native_acquisition_date(name, expected):
     """SRS series with a valid native timestamp expose the OMNIC `Collected`
-    instant through the same `acquisition_date` convention as SPA: the stored
+    timestamp through the same `acquisition_date` convention as SPA: the stored
     value is a timezone-aware Python datetime in UTC that matches the native
     UInt32 decoding (OMNIC epoch 1899-12-31 UTC)."""
     nd = scp.read_srs(IRDATA / "omnic_series" / name)
@@ -983,7 +983,7 @@ def test_read_srs_datetime_labels_follow_full_precision_native_formula():
         # truncation mimicking the export serialization).
         assert labels[i, 0].microsecond == expected_dt.microsecond
 
-    # Evidence-pinned whole-second exported SPA instants (records 0/415/484).
+    # Evidence-pinned whole-second exported SPA timestamps (records 0/415/484).
     exported = {
         0: datetime(2006, 2, 24, 18, 35, 1, tzinfo=UTC),
         415: datetime(2006, 2, 24, 19, 9, 23, tzinfo=UTC),
