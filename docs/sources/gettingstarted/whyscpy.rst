@@ -51,30 +51,31 @@ by a conventional table alone.
 
 Plain ``numpy.ndarray`` objects are the foundation of scientific computing with
 Python, but by themselves they carry no axes, units, masks, or labels. The
-meaning of the data must be re-established by convention at every step: the
-axis order, the unit conversion, the meaning of each column. These conventions
-remain implicit, which makes a workflow harder to inspect, compare, reuse, or
-turn into a reproducible record.
+meaning of the data must be re-established at every step: the axis order, the
+unit conversion, the meaning of each column. That context must therefore be
+managed separately by the surrounding code or conventions.
 
 What NDDataset provides
 =======================
 
 The central object of SpectroChemPy, :class:`~spectrochempy.NDDataset`,
-associates a multidimensional numerical array with everything needed to
-interpret it:
+associates a multidimensional numerical array with the relevant scientific
+context needed to interpret it:
 
 - **named dimensions** with explicit `dimension` names (for example ``x`` for
   the spectral axis and ``y`` for the observation axis) that provide stable
   handles for operations;
 - **coordinates** (`Coord` objects, grouped in a `CoordSet`) that carry the
-  physical positions along each dimension, together with their titles and
-  units;
+  physical positions along each dimension — for example, the set of
+  wavenumbers and their unit for the ``x`` dimension — together with their
+  titles and other coordinate metadata;
 - **coordinate-aware selection**: a region can be chosen by integer index, by a
   physical interval of a coordinate, or by a label;
-- **units** on the data values and on each coordinate, with conversion of
-  compatible units and rejection of incompatible ones;
-- **labels** attaching categorical identifiers (for instance a sample name) to
-  individual points;
+- **units** associated with the data values and coordinates; they can be
+  converted to compatible units and help determine whether operations on the
+  dataset are dimensionally valid;
+- **labels** attaching identifiers or other non-numerical information, such
+  as sample names or acquisition datetimes, to individual coordinate points;
 - **masks** marking values that should be treated as invalid or absent, for
   example a saturated detector region;
 - **metadata** describing the experimental and acquisition context when the
@@ -92,8 +93,8 @@ participate in the history contract add an inspectable entry describing what
 was done. The :ref:`user_guide` details
 this data model and its boundaries.
 
-From import to models: one environment
-======================================
+From import to models: a common data model
+==========================================
 
 SpectroChemPy provides a coherent set of interfaces built on this data model.
 
@@ -116,7 +117,7 @@ SpectroChemPy provides a coherent set of interfaces built on this data model.
 - **Workflows**: many SpectroChemPy analysis estimators follow a
   scikit-learn-compatible interface, and
   :class:`~spectrochempy.analysis.pipeline.Pipeline` provides a linear
-  composition of an approved set of preprocessing steps and supported terminal
+  composition of a supported set of preprocessing steps and terminal
   estimators. This makes the sequence and parameters explicit, but does not by
   itself capture the input data, software environment, or every requirement for
   reproducibility.
@@ -135,8 +136,8 @@ modification, and redistribution under its stated conditions. Users of the
 software in scientific work are also asked to cite the project as described in
 the :ref:`citation guidelines <citing>`.
 
-Processing is scriptable, so a complete analysis can be written, versioned, and
-shared as a script or notebook. The dataset ``history`` field provides an
+Processing is scriptable, so an analysis workflow can be written, versioned,
+and shared as a script or notebook. The dataset ``history`` field provides an
 inspectable record for supported operations. :ref:`Project <userguide.objects>`
 can organize related datasets and subprojects, but complete reproducibility
 still requires the scripts, parameters, input files, software versions, and
