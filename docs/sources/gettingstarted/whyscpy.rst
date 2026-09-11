@@ -34,28 +34,27 @@ analysis. For a time-resolved or temperature-resolved series, every operation
 must preserve the correspondence between each spectrum and the experimental
 variable that produced it.
 
-Commercial software packages provide powerful and easy-to-use graphical
-interfaces, but they generally keep the underlying algorithms undisclosed.
-For most routine use this is acceptable; for detailed scientific work, however,
-the spectroscopist may need to know exactly what was done to the data. The
-"click, drag and drop" approach also makes it difficult to reproduce a
-treatment or to trace the history of a dataset.
+Commercial and graphical software can provide efficient environments for
+routine and exploratory analysis. Depending on the software, however, the exact
+algorithms, parameters, intermediate states, or processing history may not be
+fully accessible or readily exportable. This can make detailed inspection and
+reproduction of an analysis more difficult.
 
 What spreadsheets and plain arrays do not provide
 ==================================================
 
-Tabular tools (spreadsheets, data frames) handle data that fit naturally into a
-rectangular structure and that are treated the same way row by row. Their
-strength is uniformity, but they do not carry the scientific meaning of each
-axis or distinguish intensities, coordinates, units, and metadata. Such
-information lives in separate columns, separate files, or nowhere at all.
+Tabular tools are well suited to observations and variables that fit naturally
+into rows and columns. Multidimensional spectroscopic datasets, however, may
+require several experimental coordinates per dimension, physical units, masks,
+acquisition metadata, and domain-specific conventions that are not represented
+by a conventional table alone.
 
-Plain numerical arrays (NumPy arrays, for example) are the foundation of
-scientific computing with Python, but by themselves they carry no axes, units,
-masks, or labels. The meaning of the data must be re-established by convention
-at every step: the axis order, the unit conversion, the meaning of each column.
-These conventions remain implicit, which makes a workflow harder to inspect,
-compare, reuse, or turn into a reproducible record.
+Plain ``numpy.ndarray`` objects are the foundation of scientific computing with
+Python, but by themselves they carry no axes, units, masks, or labels. The
+meaning of the data must be re-established by convention at every step: the
+axis order, the unit conversion, the meaning of each column. These conventions
+remain implicit, which makes a workflow harder to inspect, compare, reuse, or
+turn into a reproducible record.
 
 What NDDataset provides
 =======================
@@ -80,14 +79,17 @@ interpret it:
   example a saturated detector region;
 - **metadata** describing the experimental and acquisition context when the
   imported format provides it;
-- **history** recording the timestamped transformations applied to a dataset
-  since its creation.
+- **history** recording timestamped entries for the operations that
+  participate in the history contract since the dataset creation.
 
-Because the scientific context is part of the object, ordinary operations
-preserve or update it instead of discarding it. Slicing, transposition, unit
-conversion, and arithmetic carry the relevant coordinates, units, and masks
-along, and the dataset history keeps an inspectable trace of what was done.
-The :ref:`user_guide` details
+Because the scientific context is part of the object, operations implemented
+for :class:`~spectrochempy.NDDataset` are designed to preserve or update the
+relevant context according to their documented contracts. Slicing,
+transposition, unit conversion, and arithmetic carry the relevant coordinates,
+units, and masks along. This behavior is operation-dependent and should be
+checked for the version and workflow being used, and operations that
+participate in the history contract add an inspectable entry describing what
+was done. The :ref:`user_guide` details
 this data model and its boundaries.
 
 From import to models: one environment
@@ -95,25 +97,29 @@ From import to models: one environment
 
 SpectroChemPy provides a coherent set of interfaces built on this data model.
 
-- **Importing**: readers translate a wide range of instrumental and exchange
-  formats into the common representation, including OMNIC, OPUS, LabSpec,
-  PerkinElmer, WDF, SPC, JCAMP-DX, MAT, DDR, and directory scans, keeping the
-  coordinates and metadata that can be determined from each file. Datasets can
-  also be exported to CSV, JCAMP-DX, MATLAB, or converted to xarray datasets and
+- **Importing**: readers provided by the core package and by optional plugins
+  translate supported instrumental and exchange formats into the common
+  representation, including core readers such as OMNIC, OPUS, LabSpec, WDF,
+  SPC, JCAMP-DX, MAT, DDR, and directory scans, as well as plugin readers such
+  as those for NMR and PerkinElmer instruments. The coordinates and metadata
+  that can be determined from each file are kept, and datasets can also be
+  exported to CSV, JCAMP-DX, MATLAB, or converted to xarray datasets and
   NetCDF.
 - **Processing**: unit-aware arithmetic, slicing and coordinate-based
   selection, baseline correction, automatic subtraction, smoothing and
   filtering, derivative calculation, normalization and scaling, denoising,
   FFT and Fourier-related operations, and masking.
 - **Analysis**: SVD, PCA, EFA, MCR-ALS (with the usual constraints), PLS,
-  NMF, ICA, SIMPLISMA, peak finding and integration, and curve fitting with a
-  large set of lineshape models.
+  NMF, ICA, SIMPLISMA, peak finding and integration, and curve fitting with
+  documented lineshape models.
 - **Visualization**: a plotting interface adapted to 1D, 2D, and 3D
   spectroscopic data, with multiple styles and reusable preferences.
 - **Workflows**: estimators follow a scikit-learn-compatible interface, and
-  :class:`~spectrochempy.analysis.pipeline.Pipeline` composes supported
-  preprocessing steps with PCA, PLS, or other estimators in one reproducible
-  definition.
+  :class:`~spectrochempy.analysis.pipeline.Pipeline` provides a linear
+  composition of allowlisted preprocessing steps and supported terminal
+  estimators. This makes the sequence and parameters explicit, but does not by
+  itself capture the input data, software environment, or every requirement for
+  reproducibility.
 
 Many examples covering these features are collected in the
 :ref:`gallery of examples <examples-index>`, which can be run as Jupyter
@@ -122,16 +128,18 @@ notebooks.
 Designed for open science
 =========================
 
-SpectroChemPy is fully open source under the
-`CeCILL-B license <https://cecill.info/index.en.html>`__, similar to BSD
-licenses. The license requires strong attribution and citation of the software,
-in return for the freedom to use, study, modify, and redistribute it.
+SpectroChemPy is distributed under the
+`CeCILL-B license <https://cecill.info/index.en.html>`__, a free-software
+license that permits use, modification, and redistribution under its stated
+conditions. Users of the software in scientific work are also asked to cite the
+project as described in the :ref:`citation guidelines <citing>`.
 
-Because the algorithms are documented in the code, a treatment can be inspected
-instead of being taken on trust. Processing is scriptable, so a complete
-analysis can be written, versioned, and shared as a script or notebook. The
-dataset ``history`` field and the :ref:`Project <userguide.objects>` facilities
-help keeping track of a job from the import of raw data to the final results.
+Processing is scriptable, so a complete analysis can be written, versioned, and
+shared as a script or notebook. The dataset ``history`` field provides an
+inspectable record for supported operations. :ref:`Project <userguide.objects>`
+can organize related datasets and subprojects, but complete reproducibility
+still requires the scripts, parameters, input files, software versions, and
+execution environment to be archived separately.
 
 .. note::
 
@@ -144,9 +152,10 @@ Part of the scientific Python ecosystem
 =======================================
 
 SpectroChemPy is built on NumPy and interoperates with the wider Python
-ecosystem. It is not a replacement for it. Datasets can be converted to NumPy
-arrays or to xarray datasets, and the complete data model interoperates with
-libraries that accept these representations. The scikit-learn-compatible
+ecosystem. It is not a replacement for it. Numerical values can be exposed as
+NumPy arrays, and datasets can be converted to xarray representations. The
+scientific context preserved by each conversion depends on the target
+representation and the documented mapping. The scikit-learn-compatible
 estimator and pipeline interfaces allow SpectroChemPy operations to be combined
 with general statistical learning tools.
 
@@ -178,8 +187,8 @@ You might NOT want to use SpectroChemPy if:
   NMR. Missing readers or methods can be suggested
   (:ref:`contributing.bugs_report`); requests are considered to broaden the
   supported scope.
-- you work on very sensitive applications (health, chemical safety, plant
-  production, ...) where the risk of using software under active development
+- you work on very sensitive applications (health, chemical safety, ...) where
+  the risk of using software under active development
   cannot be accepted. That is a legitimate choice.
 - you are fully satisfied with your current tools. We do not dispute that, and
   we remain open to your opinion and suggestions
