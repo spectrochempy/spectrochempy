@@ -19,6 +19,16 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- :func:`read_srs` now exposes the OMNIC ``Collected`` series timestamp of
+  SRS series through the standard ``acquisition_date`` dataset property (same
+  convention as :func:`read_spa`), and the Y coordinate of dated series gains
+  a per-spectrum absolute `datetime` label column derived in full precision
+  from the native series fields as ``Collected + timedelta(minutes=time_min +
+  i * step)``.  The numeric relative time axis and the spectrum-name labels
+  are unchanged.  Series without a valid native anchor (GC variants,
+  reprocessed RapidScan files) leave ``acquisition_date`` unset and keep the
+  names-only Y labels. (#1617)
+
 
 .. section
 
