@@ -70,6 +70,51 @@ def msc_2d():
     return NDDataset(data, coordset=[y, x])
 
 
+def _history_messages(dataset):
+    return [entry.split("> ", 1)[1] for entry in dataset.history]
+
+
+@pytest.mark.parametrize(
+    ("operation", "kwargs"),
+    [
+        (normalize, {"method": "max", "dim": "x"}),
+        (center, {"dim": "x"}),
+        (autoscale, {"dim": "x"}),
+        (msc, {"dim": "y"}),
+        (pareto_scale, {"dim": "x"}),
+        (range_scale, {"dim": "x"}),
+        (robust_scale, {"dim": "x"}),
+        (log_transform, {"method": "log1p"}),
+    ],
+)
+def test_functional_inplace_preserves_complete_derived_history(
+    msc_2d, operation, kwargs
+):
+    source = msc_2d.copy()
+    source.name = "source"
+    source.title = "spectra"
+    source.author = "author"
+    source.origin = "synthetic"
+    source.meta.operator = "tester"
+    source.history = "Seed history"
+
+    expected = operation(source, **kwargs)
+    actual = source.copy()
+    returned = operation(actual, inplace=True, **kwargs)
+
+    assert returned is actual
+    np.testing.assert_allclose(actual.data, expected.data)
+    np.testing.assert_array_equal(actual.mask, expected.mask)
+    assert actual.coordset == expected.coordset
+    assert actual.name == expected.name
+    assert actual.title == expected.title
+    assert actual.author == expected.author
+    assert actual.origin == expected.origin
+    assert actual.meta == expected.meta
+    assert _history_messages(actual) == _history_messages(expected)
+    assert len(actual.history) == 2
+
+
 def _normalize_oracle(data, method, axis):
     if method == "max":
         norm = np.max(np.abs(data), axis=axis, keepdims=True)
