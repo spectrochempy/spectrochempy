@@ -1,0 +1,445 @@
+:orphan:
+
+.. _examples-processing-index:
+
+####################
+Processing NDDataset
+####################
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+Apodization
+-----------
+
+This section contains examples of how to apply apodization functions to NDDatasets.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we perform exponential window multiplication to apodize a NMR signal in the time domain.">
+
+.. only:: html
+
+  .. image:: /gettingstarted/examples/gallery/auto_examples_processing/apodization/images/thumb/sphx_glr_plot_proc_em_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_gettingstarted_examples_gallery_auto_examples_processing_apodization_plot_proc_em.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Exponential window multiplication</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we use sine bell or squared sine bell window multiplication to apodize a NMR signal in the time domain.">
+
+.. only:: html
+
+  .. image:: /gettingstarted/examples/gallery/auto_examples_processing/apodization/images/thumb/sphx_glr_plot_proc_sp_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_gettingstarted_examples_gallery_auto_examples_processing_apodization_plot_proc_sp.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Sine bell and squared Sine bell window multiplication</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+Baseline
+--------
+
+This section contains examples of how to correct the baseline of NDDatasets.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we perform a baseline correction of a 2D NDDataset interactively, using the multivariate method and a pchip/``polynomial`` interpolation.">
+
+.. only:: html
+
+  .. image:: /gettingstarted/examples/gallery/auto_examples_processing/baseline/images/thumb/sphx_glr_plot_baseline_correction_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_gettingstarted_examples_gallery_auto_examples_processing_baseline_plot_baseline_correction.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">NDDataset baseline correction</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+Denoising
+-----------
+
+This section contains examples of how to denoise NDDatasets.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we use the denoise method to remove the noise from a 2D Raman spectrum.">
+
+.. only:: html
+
+  .. image:: /gettingstarted/examples/gallery/auto_examples_processing/denoising/images/thumb/sphx_glr_plot_denoising_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_gettingstarted_examples_gallery_auto_examples_processing_denoising_plot_denoising.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Denoising a 2D Raman spectrum</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we use the despike method to remove the noise from a Raman spectrum.">
+
+.. only:: html
+
+  .. image:: /gettingstarted/examples/gallery/auto_examples_processing/denoising/images/thumb/sphx_glr_plot_despike_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_gettingstarted_examples_gallery_auto_examples_processing_denoising_plot_despike.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Removing cosmic ray spikes from a Raman spectrum</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+Filtering
+---------
+
+This section contains examples of how to filter NDDatasets.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Savitky-Golay and Whittaker-Eilers smoothing of a Raman spectrum">
+
+.. only:: html
+
+  .. image:: /gettingstarted/examples/gallery/auto_examples_processing/filtering/images/thumb/sphx_glr_plot_filter_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_gettingstarted_examples_gallery_auto_examples_processing_filtering_plot_filter.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Savitky-Golay and Whittaker-Eilers smoothing of a Raman spectrum</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to compute derivatives with the Savitzky-Golay filter and illustrates the automatic coordinate-aware scaling introduced in SpectroChemPy 0.12.5.">
+
+.. only:: html
+
+  .. image:: /gettingstarted/examples/gallery/auto_examples_processing/filtering/images/thumb/sphx_glr_plot_savgol_derivatives_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_gettingstarted_examples_gallery_auto_examples_processing_filtering_plot_savgol_derivatives.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Savitzky-Golay derivatives on a synthetic spectrum</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how the smoothing window size changes the balance between noise reduction and signal distortion on a Raman spectrum.">
+
+.. only:: html
+
+  .. image:: /gettingstarted/examples/gallery/auto_examples_processing/filtering/images/thumb/sphx_glr_plot_smoothing_window_size_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_gettingstarted_examples_gallery_auto_examples_processing_filtering_plot_smoothing_window_size.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Compare smoothing window sizes on a Raman spectrum</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+NMR processing (plugin-based)
+-----------------------------
+
+.. note::
+
+    These examples require the official ``spectrochempy-nmr`` plugin.
+
+    Install it with:
+
+    .. code-block:: bash
+
+        pip install spectrochempy[nmr]
+
+    See :ref:`plugins` for more information.
+
+    The currently validated public workflow is centered on 1D NMR data.
+    Longer-running multi-dimensional or pseudo-2D characterization examples may
+    exist in the repository, but they are not part of the public supported
+    processing scope at this stage.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example stays within the currently validated public scope of the plugin:">
+
+.. only:: html
+
+  .. image:: /gettingstarted/examples/gallery/auto_examples_processing/nmr/images/thumb/sphx_glr_plot_processing_nmr_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_gettingstarted_examples_gallery_auto_examples_processing_nmr_plot_processing_nmr.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Processing a 1D NMR spectrum</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example processes a pseudo-2D series of 1D spectra acquired with a variable recovery delay and fits a simple saturation-recovery model to the dominant resonance.">
+
+.. only:: html
+
+  .. image:: /gettingstarted/examples/gallery/auto_examples_processing/nmr/images/thumb/sphx_glr_plot_processing_nmr_relax_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_gettingstarted_examples_gallery_auto_examples_processing_nmr_plot_processing_nmr_relax.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Processing a saturation-recovery relaxation series</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to read Bruker TopSpin NMR files using the optional spectrochempy-nmr plugin.">
+
+.. only:: html
+
+  .. image:: /gettingstarted/examples/gallery/auto_examples_processing/nmr/images/thumb/sphx_glr_plot_read_nmr_topspin_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_gettingstarted_examples_gallery_auto_examples_processing_nmr_plot_read_nmr_topspin.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">NMR: reading TopSpin files (plugin)</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+Processing Raman datasets
+-------------------------
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Processing RAMAN spectra">
+
+.. only:: html
+
+  .. image:: /gettingstarted/examples/gallery/auto_examples_processing/raman/images/thumb/sphx_glr_plot_processing_raman_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_gettingstarted_examples_gallery_auto_examples_processing_raman_plot_processing_raman.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Processing RAMAN spectra</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+Transformations
+---------------
+
+This section contains examples of common masking, transposition, and unit
+conversion workflows on NDDatasets.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows three common operations on a 2D infrared dataset: masking a saturated region, transposing the dataset, and converting axis units.">
+
+.. only:: html
+
+  .. image:: /gettingstarted/examples/gallery/auto_examples_processing/transformations/images/thumb/sphx_glr_plot_masking_transpose_units_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_gettingstarted_examples_gallery_auto_examples_processing_transformations_plot_masking_transpose_units.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Mask a saturated region and transform an IR dataset</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example demonstrates the standard preprocessing operations available in SpectroChemPy: normalization, mean-centering, autoscaling, Standard Normal Variate (SNV), and Multiplicative Scatter Correction (MSC).">
+
+.. only:: html
+
+  .. image:: /gettingstarted/examples/gallery/auto_examples_processing/transformations/images/thumb/sphx_glr_plot_preprocessing_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_gettingstarted_examples_gallery_auto_examples_processing_transformations_plot_preprocessing.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Chemometric preprocessing</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="SpectroChemPy preprocessing operations can be used as transformer objects with an explicit fit() / transform() lifecycle.  Feature-wise scalers learn statistics from a training set and reuse them on new data. Sample-local operations such as SNV and spectral normalization compute each observation&#x27;s statistics during transform() and do not support a safe inverse without result-attached per-observation state.">
+
+.. only:: html
+
+  .. image:: /gettingstarted/examples/gallery/auto_examples_processing/transformations/images/thumb/sphx_glr_plot_transformers_sklearn_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_gettingstarted_examples_gallery_auto_examples_processing_transformations_plot_transformers_sklearn.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Preprocessing transformers and scikit-learn compatibility</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+   :includehidden:
+
+
+   /gettingstarted/examples/gallery/auto_examples_processing/apodization/index.rst
+   /gettingstarted/examples/gallery/auto_examples_processing/baseline/index.rst
+   /gettingstarted/examples/gallery/auto_examples_processing/denoising/index.rst
+   /gettingstarted/examples/gallery/auto_examples_processing/filtering/index.rst
+   /gettingstarted/examples/gallery/auto_examples_processing/nmr/index.rst
+   /gettingstarted/examples/gallery/auto_examples_processing/raman/index.rst
+   /gettingstarted/examples/gallery/auto_examples_processing/transformations/index.rst
+

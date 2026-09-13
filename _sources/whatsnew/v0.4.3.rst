@@ -1,0 +1,13 @@
+What's new in revision 0.4.3 [2022-03-20]
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-0.4.3. See :ref:`release` for a full changelog
+including other versions of SpectroChemPy.
+
+New features
+~~~~~~~~~~~~
+
+-  Individual test data files can be automatically downloaded from the
+   Github ``spectrochempy_data`` repository is not present in the
+   default ``preferences.datadir`` . Installing the conda package
+   ``spectrochempy_data`` is still possible but not necessary.

@@ -1,0 +1,34 @@
+# ======================================================================================
+# Copyright (©) 2014-2026 Laboratoire Catalyse et Spectrochimie (LCS), Caen, France.
+# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
+# See full LICENSE agreement in the root directory.
+# ======================================================================================
+# ruff: noqa
+"""
+Loading Bruker OPUS files
+=========================
+
+Here we load an experimental Bruker OPUS files and plot it.
+
+"""
+
+# %%
+# Read and display OPUS files
+# ----------------------------
+import spectrochempy as scp
+
+Z = scp.read_opus(
+    ["test.0000", "test.0001", "test.0002", "test.0003"], directory="irdata/OPUS"
+)
+Z
+
+# %%
+_ = Z.plot()
+
+# %%
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+
+# %%
+
+# scp.show()

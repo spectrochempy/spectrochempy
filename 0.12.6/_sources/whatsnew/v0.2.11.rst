@@ -1,0 +1,11 @@
+What's new in revision 0.2.11 [2021-02-17]
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-0.2.11. See :ref:`release` for a full changelog
+including other versions of SpectroChemPy.
+
+Bug fixes
+~~~~~~~~~
+
+-  Plot2D now works when more than one coord in ‘y’ axis (#238).
+-  Spectrochempy_data location has been corrected (#239).

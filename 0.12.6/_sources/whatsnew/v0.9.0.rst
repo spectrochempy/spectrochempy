@@ -1,0 +1,83 @@
+:orphan:
+
+What's New in Revision 0.9.0
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-0.9.0.
+See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
+
+New Features
+~~~~~~~~~~~~
+- Core plugin system: external packages can now register readers, writers,
+  processors, visualizers, analyses, simulations, and dataset accessors via
+  ``spectrochempy.plugins`` entry points.
+- Plugin API: stable public interface at ``spectrochempy.api.plugins`` for
+  plugin authors, with versioned API guarantees.
+- Plugin documentation: developer guide covering architecture, API policy,
+  packaging, and testing.
+- NMR plugin (``spectrochempy-nmr``): TopSpin/Bruker reader and NMR utilities
+  are now provided by an official plugin at ``plugins/spectrochempy-nmr/``.
+- IRIS plugin (``spectrochempy-iris``): IRIS analysis and plotting are now
+  provided by an official plugin at ``plugins/spectrochempy-iris/``.
+- Cantera plugin (``spectrochempy-cantera``): Plug Flow Reactor simulation
+  utilities added at ``plugins/spectrochempy-cantera/`` as an **experimental**
+  plugin (not officially supported, API may change).
+- Hypercomplex / quaternion support has been extracted from the core into the
+  official ``spectrochempy-hypercomplex`` plugin. Use ``dataset.hyper.set_quaternion()``
+  after installing the plugin.
+- Carroucell reader extracted from the core into the official
+  ``spectrochempy-carroucell`` plugin.
+- Added ``NDDataset.reshape()``.
+
+Bug Fixes
+~~~~~~~~~
+
+- Refactored PSD processing.
+
+Dependency Updates
+~~~~~~~~~~~~~~~~~~
+
+- Core dependency trimming: ``osqp`` and ``numpydoc`` removed from core
+  dependencies; ``xlrd`` moved to the carroucell plugin.
+- Added ``spectrochempy[plugins]`` pip extra that installs the official plugins:
+  NMR, IRIS, Hypercomplex, and Carroucell. Cantera is available separately as an
+  experimental plugin.
+
+
+
+Breaking Changes
+~~~~~~~~~~~~~~~~
+
+- Reader functions (e.g. ``read_omnic``, ``read_opus``) are no longer
+  available as ``NDDataset`` methods. Use ``scp.read_omnic(...)`` or
+  plugin-namespaced access (e.g. ``scp.nmr.read_topspin(...)``) instead.
+- TopSpin reading is now provided by the official NMR plugin. Use
+  ``scp.nmr.read_topspin(...)`` after installing ``spectrochempy[nmr]``.
+  The historical ``scp.read_topspin(...)`` alias remains available as a
+  compatibility layer.
+- IRIS analysis is now provided by the official IRIS plugin. Use
+  ``scp.iris.IRIS`` or ``from spectrochempy.iris import IRIS`` after installing
+  ``spectrochempy[iris]``. Limited root-level compatibility aliases remain
+  available with deprecation warnings.
+
+
+Developer
+~~~~~~~~~
+
+- FEATURE: Plugin template: cookie-cutter project template in ``plugins/plugin-template/``.
+- FEATURE: Plugin test harness: ``PluginTestHarness`` in
+  ``spectrochempy.testing.plugins`` for isolated plugin testing without
+  global state leakage.
+- MAINT: NDMath internal refactor: extracted focused private helpers
+  (``_prepare_operation_quantities``, ``_check_coordinate_compatibility``,
+  ``_resolve_operation_units``, ``_execute_operation``) and ``_ExecutionPlan``
+  class from ``NDMath._op()``, reducing it from ~300 to ~70 lines.
+- MAINT: ``__array_ufunc__`` now explicitly rejects unsupported ufunc methods
+  (``reduce``, ``accumulate``, ``outer``, ``at``) by returning ``NotImplemented``.
+- CI: Core publication workflows now only trigger on core release tags
+  (``spectrochempy-v*``), preventing accidental core republication when
+  plugin releases are created.
+- CI: PyPI publication uses ``skip-existing`` to avoid hard failures on
+  duplicate version uploads.
+- CI: Conda stable (``main`` label) uploads no longer use ``--force``,
+  preventing accidental overwrites of published releases.
