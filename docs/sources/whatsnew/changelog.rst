@@ -36,6 +36,14 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Preserved the complete human-readable history when functional preprocessing
+  operations are applied in place.  The existing entries and the new
+  transformer event are now retained without duplicating timestamps.
+
+- Corrected :func:`download_nist_ir` so its NIST download event actually
+  replaces the generic JCAMP import event while retaining subsequent reader
+  history entries.
+
 - Restored publication of official plugins (``[tool.spectrochempy]``
   ``official-plugin = true``) on Conda, which was silently skipped by the
   release workflow.  Added a recovery workflow to republish plugin versions
