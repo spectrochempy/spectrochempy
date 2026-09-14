@@ -340,15 +340,6 @@ def discover_python_artifacts(
 
 def check_twine(artifacts: PythonArtifacts, report: ValidationReport) -> None:
     """Run twine check --strict on the wheel and sdist."""
-    twine_bin = shutil.which("twine")
-    if twine_bin is None:
-        report.add(
-            "twine",
-            Severity.WARNING,
-            "twine not installed; skipping twine check",
-        )
-        return
-
     files: list[str] = []
     if artifacts.wheel:
         files.append(str(artifacts.wheel))
@@ -356,6 +347,15 @@ def check_twine(artifacts: PythonArtifacts, report: ValidationReport) -> None:
         files.append(str(artifacts.sdist))
     if not files:
         report.add("twine", Severity.SKIPPED, "No artifacts to check")
+        return
+
+    twine_bin = shutil.which("twine")
+    if twine_bin is None:
+        report.add(
+            "twine",
+            Severity.FAILURE,
+            "twine is required for complete Python artifact validation",
+        )
         return
 
     result = subprocess.run(
@@ -799,10 +799,15 @@ def install_and_smoketest(
             "Wheel installed successfully" + (" (--no-deps)" if no_deps else ""),
         )
 
-        # Import test
-        import_cmd = f"import {module_name}; print(getattr({module_name}, '__version__', 'unknown'))"
+        # Import test. Pass the module as an argument rather than interpolating it
+        # into executable Python code.
         result = subprocess.run(
-            [str(venv_python), "-c", import_cmd],
+            [
+                str(venv_python),
+                "-c",
+                "import importlib, sys; importlib.import_module(sys.argv[1])",
+                module_name,
+            ],
             capture_output=True,
             text=True,
         )
@@ -813,13 +818,49 @@ def install_and_smoketest(
                 f"Failed to import {module_name}",
                 details=result.stderr[-2000:],
             )
-        else:
-            imported_ver = result.stdout.strip()
+            return
+
+        report.add(
+            "install:import",
+            Severity.SUCCESS,
+            f"Successfully imported {module_name}",
+        )
+
+        result = subprocess.run(
+            [
+                str(venv_python),
+                "-c",
+                "from importlib.metadata import version; import sys; "
+                "print(version(sys.argv[1]))",
+                package,
+            ],
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
             report.add(
-                "install:import",
-                Severity.SUCCESS,
-                f"Successfully imported {module_name} (version: {imported_ver})",
+                "install:version",
+                Severity.FAILURE,
+                f"Cannot read installed distribution version for {package}",
+                details=result.stderr[-2000:],
             )
+            return
+
+        installed_version = result.stdout.strip()
+        if installed_version != version:
+            report.add(
+                "install:version",
+                Severity.FAILURE,
+                f"Installed distribution version mismatch: expected {version}, "
+                f"got {installed_version}",
+            )
+            return
+
+        report.add(
+            "install:version",
+            Severity.SUCCESS,
+            f"Installed distribution version matches {version}",
+        )
 
     finally:
         shutil.rmtree(venv_dir, ignore_errors=True)
@@ -1300,7 +1341,8 @@ def install_and_smoketest_conda(
             [
                 str(py_bin),
                 "-c",
-                f"import {module_name}; print(getattr({module_name}, '__version__', 'unknown'))",
+                "import importlib, sys; importlib.import_module(sys.argv[1])",
+                module_name,
             ],
             capture_output=True,
             text=True,
@@ -1312,13 +1354,49 @@ def install_and_smoketest_conda(
                 f"Failed to import {module_name}",
                 details=result.stderr[-2000:],
             )
-        else:
-            imported_ver = result.stdout.strip()
+            return
+
+        report.add(
+            "conda:import",
+            Severity.SUCCESS,
+            f"Successfully imported {module_name}",
+        )
+
+        result = subprocess.run(
+            [
+                str(py_bin),
+                "-c",
+                "from importlib.metadata import version; import sys; "
+                "print(version(sys.argv[1]))",
+                package,
+            ],
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
             report.add(
-                "conda:import",
-                Severity.SUCCESS,
-                f"Successfully imported {module_name} (version: {imported_ver})",
+                "conda:version",
+                Severity.FAILURE,
+                f"Cannot read installed distribution version for {package}",
+                details=result.stderr[-2000:],
             )
+            return
+
+        installed_version = result.stdout.strip()
+        if installed_version != version:
+            report.add(
+                "conda:version",
+                Severity.FAILURE,
+                f"Installed distribution version mismatch: expected {version}, "
+                f"got {installed_version}",
+            )
+            return
+
+        report.add(
+            "conda:version",
+            Severity.SUCCESS,
+            f"Installed distribution version matches {version}",
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -1463,7 +1541,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Install with --no-deps",
     )
 
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+    if args.command == "all" and not (args.dist or args.artifact):
+        parser.error("all requires at least one of --dist or --artifact")
+    return args
 
 
 def main(argv: list[str] | None = None) -> int:

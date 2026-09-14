@@ -4,10 +4,13 @@
 # demand the Conda package) and runs the shared validator
 # (.github/workflows/scripts/validate_release_artifacts.py) against them.
 #
-# It is the pre-publication validator for the planned "build once, then
-# validate, then publish" architecture. This first milestone does not retain
-# artifacts between jobs. It never publishes anything, uploads nothing, and
-# requires no secret; dependency resolution may access package channels.
+# It is the validator-only first milestone of the planned "build once, then
+# validate, then publish" architecture. Pull-request and master runs happen
+# before publication but validate rebuilt artifacts; release:published runs
+# are post-trigger checks and cannot gate the independent publishing workflow.
+# This workflow does not retain artifacts between jobs, publish anything,
+# upload anything, or require secrets; dependency resolution may access package
+# channels.
 
 name: Validate release artifacts ✔️
 
@@ -137,7 +140,7 @@ jobs:
 
       - name: Build wheel and sdist
         run: |
-          python -m pip install build
+          python -m pip install build twine
           SETUPTOOLS_SCM_PRETEND_VERSION=${{ needs.detect-version.outputs.core_version }} \
             python -m build --sdist --wheel --outdir dist .
 
@@ -245,7 +248,7 @@ jobs:
 
       - name: Install core wheel into the base environment
         run: |
-          python -m pip install build
+          python -m pip install build twine
           SETUPTOOLS_SCM_PRETEND_VERSION=${{ needs.detect-version.outputs.core_version }} \
             python -m build --sdist --wheel --outdir dist-core .
           python -m pip install dist-core/*.whl

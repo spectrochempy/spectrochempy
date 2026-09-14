@@ -628,6 +628,72 @@ class TestInstallCondaArtifact:
             for check in report.checks
         )
 
+    @pytest.mark.parametrize(
+        ("installed_version", "version_returncode", "expected_passed"),
+        [
+            ("1.0.0", 0, True),
+            ("2.0.0", 0, False),
+            ("", 1, False),
+        ],
+        ids=["matching-version", "version-mismatch", "metadata-unavailable"],
+    )
+    def test_installed_distribution_version_is_required(
+        self,
+        tmp_path,
+        monkeypatch,
+        installed_version,
+        version_returncode,
+        expected_passed,
+    ):
+        module = load_module()
+        artifact = _make_conda(tmp_path)
+        env_python = tmp_path / "env" / "bin" / "python"
+        env_python.parent.mkdir(parents=True)
+        env_python.touch()
+
+        class FixedTemporaryDirectory:
+            def __init__(self, **kwargs):  # noqa: ARG002
+                pass
+
+            def __enter__(self):
+                return str(tmp_path)
+
+            def __exit__(self, *args):
+                return False
+
+        monkeypatch.setattr(
+            module.tempfile, "TemporaryDirectory", FixedTemporaryDirectory
+        )
+        monkeypatch.setattr(
+            module.shutil,
+            "which",
+            lambda name: "/usr/bin/micromamba" if name == "micromamba" else None,
+        )
+
+        def fake_run(command, capture_output=True, text=True):  # noqa: ARG001
+            if "importlib.metadata" in " ".join(command):
+                stderr = "PackageNotFoundError" if version_returncode else ""
+                return subprocess.CompletedProcess(
+                    command,
+                    version_returncode,
+                    f"{installed_version}\n" if installed_version else "",
+                    stderr,
+                )
+            return subprocess.CompletedProcess(command, 0, "", "")
+
+        monkeypatch.setattr(module.subprocess, "run", fake_run)
+        report = module.ValidationReport("testpkg", "1.0.0", "conda")
+        module.install_and_smoketest_conda(
+            artifact, "testpkg", "1.0.0", "testpkg", report
+        )
+
+        assert report.passed is expected_passed
+        version_check = next(c for c in report.checks if c.name == "conda:version")
+        expected_severity = (
+            module.Severity.SUCCESS if expected_passed else module.Severity.FAILURE
+        )
+        assert version_check.severity == expected_severity
+
     def test_install_failure_is_failure_and_uses_exact_artifact(
         self, tmp_path, monkeypatch
     ):
@@ -658,22 +724,69 @@ class TestInstallCondaArtifact:
 
 
 # ---------------------------------------------------------------------------
+# Twine validation
+# ---------------------------------------------------------------------------
+
+
+class TestTwineCheck:
+    def test_missing_twine_is_failure_when_artifacts_exist(self, tmp_path, monkeypatch):
+        module = load_module()
+        artifacts = module.PythonArtifacts(wheel=_make_wheel(tmp_path))
+        monkeypatch.setattr(module.shutil, "which", lambda name: None)
+        report = module.ValidationReport("testpkg", "1.0.0", "python")
+
+        module.check_twine(artifacts, report)
+
+        assert not report.passed
+        assert report.checks[-1].severity == module.Severity.FAILURE
+
+    def test_twine_strict_is_executed(self, tmp_path, monkeypatch):
+        module = load_module()
+        wheel = _make_wheel(tmp_path)
+        artifacts = module.PythonArtifacts(wheel=wheel)
+        calls = []
+        monkeypatch.setattr(module.shutil, "which", lambda name: "/usr/bin/twine")
+
+        def fake_run(command, capture_output=True, text=True):  # noqa: ARG001
+            calls.append(command)
+            return subprocess.CompletedProcess(command, 0, "", "")
+
+        monkeypatch.setattr(module.subprocess, "run", fake_run)
+        report = module.ValidationReport("testpkg", "1.0.0", "python")
+
+        module.check_twine(artifacts, report)
+
+        assert calls == [["/usr/bin/twine", "check", "--strict", str(wheel)]]
+        assert report.passed
+
+
+# ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
 
 
 def _stub_successful_python_execution(module, monkeypatch):
+    def successful_twine(artifacts, report):
+        report.add("twine", module.Severity.SUCCESS, "checked")
+
     def successful_install(artifacts, package, version, module_name, no_deps, report):
         report.add("install:install", module.Severity.SUCCESS, "installed")
 
     def successful_rebuild(artifacts, package, version, report):
         report.add("rebuild:build", module.Severity.SUCCESS, "rebuilt")
 
+    monkeypatch.setattr(module, "check_twine", successful_twine)
     monkeypatch.setattr(module, "install_and_smoketest", successful_install)
     monkeypatch.setattr(module, "rebuild_from_sdist", successful_rebuild)
 
 
 class TestCLI:
+    def test_all_requires_at_least_one_artifact_input(self):
+        module = load_module()
+        with pytest.raises(SystemExit) as exc_info:
+            module.main(["all", "--package", "testpkg", "--version", "1.0.0"])
+        assert exc_info.value.code == 2
+
     def test_python_subcommand(self, tmp_path, monkeypatch):
         module = load_module()
         _stub_successful_python_execution(module, monkeypatch)
@@ -903,7 +1016,9 @@ class TestInstallSmokeTest:
                 return subprocess.CompletedProcess(cmd, 0, "", "")
             if "pip" in cmd:
                 return subprocess.CompletedProcess(cmd, 0, "success", "")
-            return subprocess.CompletedProcess(cmd, 0, "__version__ = '1.0.0'\n", "")
+            if "importlib.metadata" in " ".join(cmd):
+                return subprocess.CompletedProcess(cmd, 0, "1.0.0\n", "")
+            return subprocess.CompletedProcess(cmd, 0, "", "")
 
         monkeypatch.setattr(module.subprocess, "run", fake_run)
         report = module.ValidationReport("testpkg", "1.0.0", "python")
@@ -914,6 +1029,10 @@ class TestInstallSmokeTest:
 
         venv_cmd = next(c for c in calls if "--system-site-packages" in c)
         assert "--system-site-packages" in venv_cmd
+        assert any(
+            c.name == "install:version" and c.severity == module.Severity.SUCCESS
+            for c in report.checks
+        )
 
     def test_venv_isolated_without_no_deps(self, tmp_path, monkeypatch):
         """Without --no-deps the venv must stay isolated from the base env."""
@@ -928,7 +1047,9 @@ class TestInstallSmokeTest:
                 return subprocess.CompletedProcess(cmd, 0, "", "")
             if "pip" in cmd:
                 return subprocess.CompletedProcess(cmd, 0, "success", "")
-            return subprocess.CompletedProcess(cmd, 0, "1.0.0\n", "")
+            if "importlib.metadata" in " ".join(cmd):
+                return subprocess.CompletedProcess(cmd, 0, "1.0.0\n", "")
+            return subprocess.CompletedProcess(cmd, 0, "", "")
 
         monkeypatch.setattr(module.subprocess, "run", fake_run)
         report = module.ValidationReport("testpkg", "1.0.0", "python")
@@ -939,6 +1060,52 @@ class TestInstallSmokeTest:
 
         venv_cmd = next(c for c in calls if "-m" in c and "venv" in c)
         assert "--system-site-packages" not in venv_cmd
+
+    @pytest.mark.parametrize(
+        ("installed_version", "version_returncode", "expected_message"),
+        [
+            ("2.0.0", 0, "version mismatch"),
+            ("", 1, "Cannot read installed distribution version"),
+        ],
+        ids=["version-mismatch", "metadata-unavailable"],
+    )
+    def test_installed_distribution_version_failure(
+        self,
+        tmp_path,
+        monkeypatch,
+        installed_version,
+        version_returncode,
+        expected_message,
+    ):
+        module = load_module()
+        wheel = _make_wheel(tmp_path, "testpkg", "1.0.0")
+
+        def fake_run(cmd, capture_output=True, text=True):  # noqa: ARG001
+            if "-m" in cmd and "venv" in cmd:
+                return subprocess.CompletedProcess(cmd, 0, "", "")
+            if "pip" in cmd:
+                return subprocess.CompletedProcess(cmd, 0, "success", "")
+            if "importlib.metadata" in " ".join(cmd):
+                stderr = "PackageNotFoundError" if version_returncode else ""
+                return subprocess.CompletedProcess(
+                    cmd,
+                    version_returncode,
+                    f"{installed_version}\n" if installed_version else "",
+                    stderr,
+                )
+            return subprocess.CompletedProcess(cmd, 0, "", "")
+
+        monkeypatch.setattr(module.subprocess, "run", fake_run)
+        report = module.ValidationReport("testpkg", "1.0.0", "python")
+        artifacts = module.PythonArtifacts(wheel=wheel)
+        module.install_and_smoketest(
+            artifacts, "testpkg", "1.0.0", None, no_deps=True, report=report
+        )
+
+        assert not report.passed
+        version_check = next(c for c in report.checks if c.name == "install:version")
+        assert version_check.severity == module.Severity.FAILURE
+        assert expected_message in version_check.message
 
     def test_import_failure_reported(self, tmp_path, monkeypatch):
         module = load_module()

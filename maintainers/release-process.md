@@ -162,7 +162,7 @@ publier et sans utiliser de secret :
 
 - Vérifier que les artefacts **que nous publierions** sont cohérents et
   installables (metadata, contenu des archives, smoke test).
-- Ce premier jalon est uniquement le **validateur préalable** de la future
+- Ce premier jalon est uniquement le **validateur** de la future
   architecture **« build once → validate → publish »**. Les artefacts construits
   ne sont pas encore conservés entre les jobs ; leur téléversement comme
   artefacts GitHub Actions viendra dans une PR ultérieure.
@@ -173,9 +173,18 @@ publier et sans utiliser de secret :
 
 | Déclencheur | Comportement |
 | --- | --- |
-| `pull_request` / `push` | Valide les artefacts Python du **core** (wheel + sdist) |
+| `pull_request` / `push` | Valide avant publication des artefacts Python du **core** reconstruits pour cette exécution (wheel + sdist) |
 | `workflow_dispatch` | Valide le core en Python ; option `validate_conda` pour le package Conda ; option `include_plugins` pour les plugins officiels |
-| `release` | Valide les artefacts Python du core (+ Conda si tag core, plugins officiels si plugins) |
+| `release: published` | Effectue un contrôle post-déclenchement des artefacts reconstruits du core (+ Conda si tag core, plugins officiels si plugins) |
+
+Les exécutions sur une pull request ou sur `master` précèdent une publication,
+mais elles reconstruisent leurs propres artefacts. L'événement
+`release: published` démarre ce workflow et le workflow de publication
+indépendamment : ce contrôle intervient donc après le déclenchement et ne peut
+pas empêcher l'autre workflow de publier. Ce premier jalon ne sécurise pas
+encore la publication elle-même ; ce sera le rôle de l'architecture ultérieure
+qui conservera puis transmettra les mêmes artefacts entre construction,
+validation et publication.
 
 ### Utilisation
 
@@ -196,6 +205,8 @@ python .github/workflows/scripts/validate_release_artifacts.py \
   all --package spectrochempy --version 0.12.8 \
   --dist dist/ --artifact output/spectrochempy-0.12.8-0_0.conda
 ```
+
+La commande `all` exige au moins une des options `--dist` ou `--artifact`.
 
 Options utiles :
 
@@ -226,15 +237,18 @@ Le code de sortie est `0` si toutes les vérifications passent, `1` sinon
 3. **Contenu des archives** : pas de path traversal (`../`), pas de chemins
    absolus, pas de fichiers sensibles (`.env`, clés, `.netrc`), pas de
    symlinks dans le wheel.
-4. **Signature wheel** : `twine check --strict` (si `twine` est disponible).
+4. **Signature wheel** : `twine check --strict` ; `twine` est obligatoire pour
+   une validation Python complète et son absence fait échouer le validateur.
 5. **Installation + smoke test** : venv isolé, `pip install`, import du
-   module et vérification de `__version__`.
+   module et comparaison de la version de distribution installée, lue avec
+   `importlib.metadata.version()`, à la version attendue.
 6. **Rebuild depuis le sdist** : reconstruit un wheel depuis le sdist et
    compare les métadonnées (cohérence reproductible du build).
 7. **Conda** : extension, nom/version et `info/index.json`, y compris dans les
    archives internes `info-*.tar.zst` et `pkg-*.tar.zst` du format `.conda`,
-   puis installation de l'artefact local exact et smoke test. La résolution
-   des dépendances peut consulter `conda-forge` et `spectrocat`.
+   puis installation de l'artefact local exact, import et comparaison de la
+   version de distribution installée à la version attendue. La résolution des
+   dépendances peut consulter `conda-forge` et `spectrocat`.
 
 ### Règles de sécurité
 

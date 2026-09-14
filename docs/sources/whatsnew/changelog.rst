@@ -92,10 +92,12 @@ Developer
 .. Add here developer changes (do not delete this comment)
 
 MAINT: Added ``.github/workflows/scripts/validate_release_artifacts.py``, a
-standalone pre-publication validator for release artifacts (Python wheel +
+standalone validator for release artifacts (Python wheel +
 sdist and Conda packages) that checks metadata consistency, archive safety,
-signature compatibility, installability and smoke-tests, plus its unit tests
-and the ``.github/workflows/validate_release_artifacts.yml`` workflow. It never
-publishes anything or requires secrets. This first milestone validates locally
-built artifacts but does not yet retain them between jobs; artifact upload is
-deferred to a later PR.
+signature compatibility, installability and smoke-tests, including an exact
+check of the installed distribution version, plus its unit tests and the
+``.github/workflows/validate_release_artifacts.yml`` workflow. Complete Python
+validation requires ``twine``. It never publishes anything or requires secrets.
+This first milestone validates locally rebuilt artifacts but does not yet
+retain them between jobs or gate the independent publication workflow;
+artifact upload is deferred to a later PR.
