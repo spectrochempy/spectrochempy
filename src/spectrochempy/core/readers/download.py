@@ -148,7 +148,12 @@ def download_nist_ir(CAS, index="all"):
             ds = read_jcamp("temp.jdx")
 
             # replace the default entry ":imported from jdx file":
-            ds.history[0] = f"Downloaded from NIST: {url}"
+            message = f"Downloaded from NIST: {url}"
+            if ds._history:
+                date, _ = ds._history[0]
+                ds._history[0] = (date, message)
+            else:
+                ds.history = message
             out.append(ds)
             (Path() / "temp.jdx").unlink()
 

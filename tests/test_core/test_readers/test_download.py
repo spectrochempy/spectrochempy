@@ -5,8 +5,53 @@
 # ======================================================================================
 # ruff: noqa
 
+import numpy as np
 
-# import spectrochempy as scp
+from spectrochempy import NDDataset
+from spectrochempy.core.readers import download as download_module
+
+
+def test_download_nist_replaces_import_history_without_losing_later_entries(
+    monkeypatch, tmp_path
+):
+    class Response:
+        content = b"##TITLE=fake"
+
+        @staticmethod
+        def iter_content():
+            yield b"##TITLE=fake"
+
+    expected_data = np.array([1.0, 2.0])
+    source_holder = {}
+
+    def fake_read_jcamp(filename):
+        dataset = NDDataset(expected_data, title="fixture", origin="synthetic")
+        dataset.meta.operator = "tester"
+        dataset.history = "Imported from jdx file"
+        dataset.history = "Vendor processing retained"
+        source_holder["dataset"] = dataset
+        source_holder["first_date"] = dataset._history[0][0]
+        return dataset
+
+    monkeypatch.setattr(
+        download_module.requests, "get", lambda *args, **kwargs: Response()
+    )
+    monkeypatch.setattr(download_module, "read_jcamp", fake_read_jcamp)
+    monkeypatch.chdir(tmp_path)
+
+    result = download_module.download_nist_ir("7732-18-5", index=0)
+
+    assert result is source_holder["dataset"]
+    assert result._history[0][0] == source_holder["first_date"]
+    assert len(result.history) == 2
+    assert "Downloaded from NIST:" in result.history[0]
+    assert "Imported from jdx file" not in result.history[0]
+    assert "Vendor processing retained" in result.history[1]
+    assert all(isinstance(entry, str) for entry in result.history)
+    np.testing.assert_array_equal(result.data, expected_data)
+    assert result.title == "fixture"
+    assert result.origin == "synthetic"
+    assert result.meta.operator == "tester"
 
 
 # def test_download_nist():
