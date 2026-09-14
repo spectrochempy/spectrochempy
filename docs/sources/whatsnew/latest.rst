@@ -15,6 +15,12 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 New Features
 ~~~~~~~~~~~~
 
+- Added the experimental :mod:`spectrochempy.provenance` namespace with
+  immutable structured operation/reference models, an append-only ledger,
+  context-local capture ownership, and conservative parameter normalization.
+  This first provenance substrate is opt-in and does not yet instrument
+  scientific operations or export manifests.
+
 - Added :func:`differentiate`, a discoverable public interface for smoothed
   numerical derivatives. It delegates to the existing Savitzky-Golay
   implementation and is available as both ``scp.differentiate(dataset)`` and

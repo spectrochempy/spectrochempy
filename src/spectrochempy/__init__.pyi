@@ -16,6 +16,7 @@ __all__ = [
     "plotting",
     "plugins",
     "processing",
+    "provenance",
     "testing",
     "utils",
 ]
@@ -29,5 +30,6 @@ from . import ipython
 from . import plotting
 from . import plugins
 from . import processing
+from . import provenance
 from . import testing
 from . import utils
