@@ -19,6 +19,12 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- Added :func:`differentiate`, a discoverable public interface for smoothed
+  numerical derivatives. It delegates to the existing Savitzky-Golay
+  implementation and is available as both ``scp.differentiate(dataset)`` and
+  ``dataset.differentiate()``. The derivative order must be a positive integer
+  no greater than the fitted polynomial order.
+
 - :func:`read_srs` now exposes the OMNIC ``Collected`` series timestamp of
   SRS series through the standard ``acquisition_date`` dataset property (same
   convention as :func:`read_spa`), and the Y coordinate of dated series gains

@@ -613,6 +613,7 @@ Smoothing, filtering, denoising
     :toctree: generated/
 
     Filter
+    differentiate
     savgol
     smooth
     whittaker

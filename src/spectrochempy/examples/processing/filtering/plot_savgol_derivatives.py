@@ -9,14 +9,15 @@
 Savitzky-Golay derivatives on a synthetic spectrum
 ==================================================
 
-This example shows how to compute derivatives with the Savitzky-Golay
-filter and illustrates the automatic coordinate-aware scaling introduced
-in SpectroChemPy 0.12.5.
+This example shows how to compute smoothed derivatives with the public
+``differentiate()`` interface. The calculation is delegated to the
+Savitzky-Golay filter and illustrates the automatic coordinate-aware scaling
+introduced in SpectroChemPy 0.12.5.
 
 The Savitzky-Golay algorithm assumes a **uniformly spaced** coordinate.
-When ``deriv > 0`` and ``delta`` is omitted, the signed spacing is
+When ``delta`` is omitted, the signed spacing is
 automatically detected from the coordinate.  The resulting units follow
-the physical rule ``source_units / coordinate_units**deriv``.
+the physical rule ``source_units / coordinate_units**derivative_order``.
 """
 
 import spectrochempy as scp
@@ -61,11 +62,18 @@ _ = ax.legend(loc="best")
 # %%
 # First derivative with automatic delta
 # --------------------------------------
-# ``deriv=1`` triggers automatic detection of the signed spacing from the
-# coordinate.  The result carries the units ``absorbance / cm⁻¹``,
+# ``derivative_order=1`` triggers automatic detection of the signed spacing
+# from the coordinate.  The result carries the units ``absorbance / cm⁻¹``,
 # i.e. ``absorbance·cm``.
 
-ds_d1 = scp.savgol(ds, size=15, order=3, deriv=1)
+ds_d1 = scp.differentiate(
+    ds,
+    derivative_order=1,
+    size=15,
+    polynomial_order=3,
+)
+
+# This is equivalent to scp.savgol(ds, size=15, order=3, deriv=1).
 
 # The analytical derivative of a Gaussian is available for comparison:
 # d/dx exp(-0.5*((x-mu)/sigma)^2) = -(x-mu)/sigma^2 * y
@@ -92,7 +100,12 @@ x_desc = scp.Coord(x_desc_data, title="wavenumber")
 x_desc.units = "1/centimeter"
 ds_desc = scp.NDDataset(y.data[::-1] + noise.data[::-1], units="absorbance")
 ds_desc.set_coordset(x=x_desc)
-ds_desc_d1 = scp.savgol(ds_desc, size=15, order=3, deriv=1)
+ds_desc_d1 = scp.differentiate(
+    ds_desc,
+    derivative_order=1,
+    size=15,
+    polynomial_order=3,
+)
 
 ax = ds_desc_d1.plot(
     color="r", lw=2, label="SG derivative (descending)", figsize=(8, 4)
@@ -112,7 +125,13 @@ _ = ax.legend(loc="best")
 # ascending) and obtain the same result as the automatic path.
 
 delta = float(x.data[1] - x.data[0])
-ds_d1_explicit = scp.savgol(ds, size=15, order=3, deriv=1, delta=delta)
+ds_d1_explicit = scp.differentiate(
+    ds,
+    derivative_order=1,
+    size=15,
+    polynomial_order=3,
+    delta=delta,
+)
 
 # Plot the explicit-delta result on top of the auto-detected one
 ax = ds_d1.plot(color="r", lw=2, label="auto-detected delta", figsize=(8, 4))
