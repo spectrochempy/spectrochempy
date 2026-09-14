@@ -19,6 +19,11 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- Added the experimental and opt-in :mod:`spectrochempy.provenance` substrate:
+  immutable structured operation/reference models, an append-only ledger,
+  context-local capture ownership, and conservative parameter normalization.
+  It does not instrument scientific operations and does not export
+  reproducibility manifests yet.
 
 .. section
 

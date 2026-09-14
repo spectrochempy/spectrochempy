@@ -12,6 +12,15 @@ What's New in Revision 1.0.0rc2.dev
 These are the changes in SpectroChemPy-1.0.0rc2.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
 
+New Features
+~~~~~~~~~~~~
+
+- Added the experimental and opt-in :mod:`spectrochempy.provenance` substrate:
+  immutable structured operation/reference models, an append-only ledger,
+  context-local capture ownership, and conservative parameter normalization.
+  It does not instrument scientific operations and does not export
+  reproducibility manifests yet.
+
 Bug Fixes
 ~~~~~~~~~
 
