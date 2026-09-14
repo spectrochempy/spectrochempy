@@ -61,6 +61,20 @@ Bug Fixes
   version injection and a core bound aligned with the tag pyproject
   (``recipe_origin=master-fallback``).
 
+Breaking Changes
+~~~~~~~~~~~~~~~~
+
+- Removed the long-deprecated ``simps`` alias; use ``simpson`` instead.
+- Removed the long-deprecated ``force_stack`` compatibility behavior from
+  ``concatenate``; use ``stack`` directly.
+
+Deprecations
+~~~~~~~~~~~~
+
+- ``Preferences.all()`` now emits the policy-compliant deprecation warning
+  that starts its compatibility period in 1.0. Use
+  ``Preferences.list_all()`` instead; no premature removal version is promised.
+
 Developer
 ~~~~~~~~~
 

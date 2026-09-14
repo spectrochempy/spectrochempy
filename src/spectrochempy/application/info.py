@@ -166,11 +166,10 @@ class SCPInfo(tr.HasTraits):
                 <strong>Version:</strong> {self.release}<br>
                 <strong>Authors:</strong> {self.authors}<br>
                 <strong>License:</strong> {self.license}<br>
-                <div class='warning'> SpectroChemPy is still experimental and under
-                active development.
-                Its current design and functionalities are subject to major changes,
-                reorganizations,
-                bugs and crashes!!!. Please report any issues to the
+                <div class='note'> The public API intended for SpectroChemPy 1.0 is
+                feature-frozen during the release-candidate period and stable in the
+                final 1.0 release. Capabilities explicitly documented as experimental
+                remain outside this commitment. Please report any issues to the
                 <a url='https://github.com/spectrochempy/spectrochempy/issues'>
                 Issue Tracker<a>
                 </div><br><br>

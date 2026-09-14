@@ -22,7 +22,6 @@ NDDataset methods from API.
 # API methods that are also NDDataset methods
 # --------------------------------------------------------------------------------------
 _LAZY_DATASETS_IMPORTS = {
-    "simps": "spectrochempy.analysis.integration.integrate",
     "simpson": "spectrochempy.analysis.integration.integrate",
     "trapezoid": "spectrochempy.analysis.integration.integrate",
     "find_peaks": "spectrochempy.analysis.peakfinding.peakfinding",
@@ -66,8 +65,6 @@ _LAZY_DATASETS_IMPORTS = {
     "write_matlab": "spectrochempy.core.writers.write_matlab",
     "write_mat": "spectrochempy.core.writers.write_matlab",
     "align": "spectrochempy.processing.alignment.align",
-    "ab": "spectrochempy.processing.baselineprocessing.baseline_deprecated",
-    "abc": "spectrochempy.processing.baselineprocessing.baseline_deprecated",
     "get_baseline": "spectrochempy.processing.baselineprocessing.baselineprocessing",
     "basc": "spectrochempy.processing.baselineprocessing.baselineprocessing",
     "detrend": "spectrochempy.processing.baselineprocessing.baselineprocessing",

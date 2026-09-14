@@ -154,7 +154,7 @@ def test_status_introspection_after_rejection(clean_plugin_namespaces):
 
 
 def test_reserved_set_covers_public_symbols():
-    for name in ("simpson", "simps", "trapezoid", "Coord", "NDDataset", "read_jcamp"):
+    for name in ("simpson", "trapezoid", "Coord", "NDDataset", "read_jcamp"):
         assert is_reserved_root_symbol(name)
 
 

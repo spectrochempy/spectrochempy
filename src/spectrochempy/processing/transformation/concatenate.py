@@ -15,7 +15,6 @@ from spectrochempy.core.dataset.basearrays.ndarray import DEFAULT_DIM_NAME
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.utils import exceptions
 from spectrochempy.utils.datetimeutils import utcnow
-from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.meta import Meta
 from spectrochempy.utils.objects import OrderedSet
 
@@ -81,14 +80,11 @@ def concatenate(*datasets, **kwargs):
     ((55, 5549), (55, 5549), (55, 11098))
 
     """
-    # check use
     if "force_stack" in kwargs:
-        deprecated(
-            "force_stack",
-            replace="method stack()",
-            policy=True,
+        raise TypeError(
+            "The `force_stack` keyword was removed in SpectroChemPy 1.0. "
+            "Use `stack()` directly."
         )
-        return stack(datasets)
 
     operation = kwargs.pop("_metadata_operation", "concatenate")
     metadata_sources = kwargs.pop("_metadata_sources", None)

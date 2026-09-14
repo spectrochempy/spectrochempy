@@ -7,6 +7,9 @@
 
 import copy
 import json
+from unittest.mock import patch
+
+import pytest
 from spectrochempy.utils.meta import Meta
 from spectrochempy.core.units import ur
 from spectrochempy.utils.testing import raises
@@ -509,6 +512,20 @@ def test_preferences_set():
     # Test style creation
     stylename = prefs.makestyle("mydefault")
     assert stylename == "mydefault"
+
+
+def test_preferences_all_is_a_compatible_deprecated_alias():
+    """The deprecated helper warns and delegates to its supported replacement."""
+    prefs = PreferencesSet()
+
+    with patch.object(PreferencesSet, "list_all") as list_all:
+        with pytest.warns(
+            DeprecationWarning,
+            match=r"Preferences\.all.*Preferences\.list_all.*deprecation policy",
+        ):
+            prefs.all()
+
+    list_all.assert_called_once_with()
 
 
 if __name__ == "__main__":

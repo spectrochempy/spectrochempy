@@ -27,7 +27,7 @@ def test_integrate():
 
     # default dim='x'
     area_trap = dataset.trapezoid()
-    area_simp = dataset.simps()
+    area_simp = dataset.simpson()
 
     assert area_trap.shape == (4,)
     assert area_trap.dims == ["y"]
@@ -51,6 +51,13 @@ def test_integrate():
     expected_trap_y = 3.0 * x.data**2 + 9.0
     assert_allclose(area_trap_y.data, expected_trap_y)
     assert area_trap_y.units == dataset.units * dataset.y.units
+
+
+def test_simps_alias_was_removed_for_1_0():
+    dataset = scp.NDDataset([1.0, 2.0, 3.0])
+
+    assert not hasattr(scp, "simps")
+    assert not hasattr(dataset, "simps")
 
 
 # ==============================================================================

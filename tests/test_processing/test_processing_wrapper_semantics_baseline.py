@@ -25,6 +25,7 @@ until their classification is decided (RFC DQ1 / DQ2).
 import numpy as np
 import pytest
 
+import spectrochempy as scp
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 
@@ -184,6 +185,18 @@ class TestFilterWrappers:
 # ======================================================================================
 # GROUP B: BASELINE-BASED WRAPPERS (basc, detrend, asls)
 # ======================================================================================
+
+
+@pytest.mark.parametrize("name", ["BaselineCorrection", "ab", "abc"])
+def test_removed_top_level_baseline_aliases_are_not_registered(name):
+    with pytest.raises(AttributeError):
+        getattr(scp, name)
+
+
+@pytest.mark.parametrize("name", ["ab", "abc"])
+def test_removed_dataset_baseline_aliases_are_not_registered(ds, name):
+    with pytest.raises(AttributeError):
+        getattr(ds, name)
 
 
 class TestBaselineWrappers:
