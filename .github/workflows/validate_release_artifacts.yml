@@ -4,9 +4,10 @@
 # demand the Conda package) and runs the shared validator
 # (.github/workflows/scripts/validate_release_artifacts.py) against them.
 #
-# It is the foundation of the planned "build once, then validate, then publish"
-# publication architecture. It never publishes anything, uploads nothing, and
-# requires no secret.
+# It is the pre-publication validator for the planned "build once, then
+# validate, then publish" architecture. This first milestone does not retain
+# artifacts between jobs. It never publishes anything, uploads nothing, and
+# requires no secret; dependency resolution may access package channels.
 
 name: Validate release artifacts ✔️
 
@@ -96,20 +97,19 @@ jobs:
               echo "Skipping $name (developer template)"
               continue
             fi
-            version=$(python3 -c "
-            import tomllib
-            with open('${dir}pyproject.toml', 'rb') as f:
-                data = tomllib.load(f)
-            sc = data.get('tool', {}).get('spectrochempy', {})
-            print('official' if sc.get('official-plugin') is True else 'not-official')
-            print(data.get('project', {}).get('version', ''))
-            ")
-            status="${version%%$'\n'*}"
-            pkg_version="${version#*$'\n'}"
-            if [ "$status" != "official" ]; then
+            set +e
+            python3 .github/workflows/scripts/conda_publish.py is-official "$dir"
+            official_status=$?
+            set -e
+            if [ "$official_status" -eq 1 ]; then
               echo "Skipping $name (not declared official)"
               continue
             fi
+            if [ "$official_status" -ne 0 ]; then
+              echo "::error::Cannot determine whether $name is official"
+              exit "$official_status"
+            fi
+            pkg_version=$(python3 -c 'import sys, tomllib; print(tomllib.load(open(sys.argv[1], "rb"))["project"]["version"])' "${dir}pyproject.toml")
             plugins+=("{\"name\":\"$name\",\"version\":\"$pkg_version\"}")
           done
           if [ ${#plugins[@]} -eq 0 ]; then
@@ -178,6 +178,7 @@ jobs:
           environment-name: scpy_validate
           create-args: >-
             python=3.11
+            zstandard
           cache-environment: true
 
       - name: Generate conda recipe

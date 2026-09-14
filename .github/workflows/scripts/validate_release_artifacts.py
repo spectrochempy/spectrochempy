@@ -4,7 +4,8 @@ r"""
 Validate locally-built release artifacts before publication.
 
 Supports Python artifacts (wheel + sdist) and Conda packages (.conda / .tar.bz2).
-Designed to be invoked locally and in CI, never contacting any publication service.
+Designed to be invoked locally and in CI without publishing or using secrets.
+Dependency installation may contact configured Python or Conda package indexes.
 
 Usage::
 
@@ -24,7 +25,7 @@ Usage::
 from __future__ import annotations
 
 import argparse
-import contextlib
+import io
 import json
 import re
 import shutil
@@ -131,9 +132,7 @@ def _print_report(report: ValidationReport) -> None:
         Severity.NOT_APPLICABLE: "-",
     }
     print(f"\n{'=' * 60}")
-    print(
-        f"  Validation: {report.package} {report.version}" f" ({report.artifact_type})"
-    )
+    print(f"  Validation: {report.package} {report.version} ({report.artifact_type})")
     print(f"{'=' * 60}")
     for c in report.checks:
         sym = symbols[c.severity]
@@ -945,6 +944,93 @@ def rebuild_from_sdist(
 # ---------------------------------------------------------------------------
 
 
+@dataclass
+class CondaPackageContents:
+    """Relevant members read from a Conda package archive."""
+
+    paths: list[str]
+    index: dict[str, Any]
+    has_python: bool
+
+
+def _decompress_zstd(payload: bytes) -> bytes:
+    """Decompress a zstd payload with Python 3.14 or python-zstandard."""
+    try:
+        from compression import zstd  # noqa: PLC0415
+
+        return zstd.decompress(payload)
+    except ImportError:
+        try:
+            import zstandard  # noqa: PLC0415
+        except ImportError as exc:
+            raise RuntimeError(
+                "Reading .conda packages requires Python 3.14+ or the "
+                "'zstandard' package"
+            ) from exc
+
+        with zstandard.ZstdDecompressor().stream_reader(io.BytesIO(payload)) as reader:
+            return reader.read()
+
+
+def _read_tar_payload(payload: bytes, mode: str = "r:") -> tuple[list[str], dict]:
+    """Return member paths and index metadata from an in-memory tar archive."""
+    paths: list[str] = []
+    index: dict[str, Any] = {}
+    with tarfile.open(fileobj=io.BytesIO(payload), mode=mode) as tf:
+        for member in tf.getmembers():
+            paths.append(member.name)
+            if member.name == "info/index.json":
+                fileobj = tf.extractfile(member)
+                if fileobj is not None:
+                    index = json.loads(fileobj.read().decode("utf-8"))
+    return paths, index
+
+
+def _read_conda_package(artifact: Path) -> CondaPackageContents:
+    """Read legacy and v2 Conda package layouts without extracting them."""
+    if artifact.name.endswith(".tar.bz2"):
+        paths, index = _read_tar_payload(artifact.read_bytes(), mode="r:bz2")
+        has_python = any(
+            path.endswith(".py") and not path.startswith("info/") for path in paths
+        )
+        return CondaPackageContents(paths=paths, index=index, has_python=has_python)
+
+    with zipfile.ZipFile(artifact) as zf:
+        outer_paths = zf.namelist()
+        info_archives = [
+            name
+            for name in outer_paths
+            if Path(name).name.startswith("info-") and name.endswith(".tar.zst")
+        ]
+        package_archives = [
+            name
+            for name in outer_paths
+            if Path(name).name.startswith("pkg-") and name.endswith(".tar.zst")
+        ]
+        if len(info_archives) != 1 or len(package_archives) != 1:
+            raise ValueError(
+                "A .conda package must contain exactly one info-*.tar.zst and "
+                "one pkg-*.tar.zst archive"
+            )
+        if "metadata.json" not in outer_paths:
+            raise ValueError("A .conda package must contain metadata.json")
+
+        outer_metadata = json.loads(zf.read("metadata.json"))
+        if outer_metadata.get("conda_pkg_format_version") != 2:
+            raise ValueError("Unsupported .conda package format version")
+
+        info_payload = _decompress_zstd(zf.read(info_archives[0]))
+        package_payload = _decompress_zstd(zf.read(package_archives[0]))
+
+    info_paths, index = _read_tar_payload(info_payload)
+    package_paths, _ = _read_tar_payload(package_payload)
+    return CondaPackageContents(
+        paths=[*outer_paths, *info_paths, *package_paths],
+        index=index,
+        has_python=any(path.endswith(".py") for path in package_paths),
+    )
+
+
 def discover_conda_artifact(
     artifact_path: Path,
     package: str,
@@ -976,16 +1062,8 @@ def discover_conda_artifact(
         f"Valid Conda package extension: {name}",
     )
 
-    if not name.startswith(package) or not name.startswith(package.replace("-", "_")):
-        report.add(
-            "conda:name",
-            Severity.FAILURE,
-            f"Package name mismatch in filename: {name} (expected {package})",
-        )
-        return None
-    report.add("conda:name", Severity.SUCCESS, "Package name correct in filename")
-
-    if f"-{version}-" not in name:
+    version_marker = f"-{version}-"
+    if version_marker not in name:
         report.add(
             "conda:version",
             Severity.FAILURE,
@@ -993,6 +1071,16 @@ def discover_conda_artifact(
         )
         return None
     report.add("conda:version", Severity.SUCCESS, "Version correct in filename")
+
+    filename_package = name.split(version_marker, maxsplit=1)[0]
+    if _normalise_dist_name(filename_package) != _normalise_dist_name(package):
+        report.add(
+            "conda:name",
+            Severity.FAILURE,
+            f"Package name mismatch in filename: {name} (expected {package})",
+        )
+        return None
+    report.add("conda:name", Severity.SUCCESS, "Package name correct in filename")
 
     return artifact_path
 
@@ -1004,46 +1092,21 @@ def validate_conda_metadata(
     report: ValidationReport,
 ) -> dict[str, Any]:
     """Read and validate Conda package metadata."""
-    info: dict[str, Any] = {}
-    name = artifact.name
-
-    if name.endswith(".conda"):
-        try:
-            with zipfile.ZipFile(artifact) as zf:
-                for n in zf.namelist():
-                    if n.endswith("info/repodata_record.json") or n.endswith(
-                        "info/index.json"
-                    ):
-                        with contextlib.suppress(json.JSONDecodeError):
-                            info = json.loads(zf.read(n))
-        except zipfile.BadZipFile:
-            report.add(
-                "conda:read",
-                Severity.FAILURE,
-                f"Cannot read .conda file: {name}",
-            )
-            return info
-    elif name.endswith(".tar.bz2"):
-        try:
-            with tarfile.open(artifact, "r:bz2") as tf:
-                for member in tf.getmembers():
-                    if member.name.endswith("info/index.json"):
-                        fobj = tf.extractfile(member)
-                        if fobj:
-                            info = json.loads(fobj.read().decode("utf-8"))
-        except Exception as exc:
-            report.add(
-                "conda:read",
-                Severity.FAILURE,
-                f"Cannot read .tar.bz2 file: {name}: {exc}",
-            )
-            return info
+    try:
+        info = _read_conda_package(artifact).index
+    except Exception as exc:
+        report.add(
+            "conda:read",
+            Severity.FAILURE,
+            f"Cannot read Conda package {artifact.name}: {exc}",
+        )
+        return {}
 
     if not info:
         report.add(
             "conda:metadata",
-            Severity.WARNING,
-            "No index.json or repodata_record.json found in package",
+            Severity.FAILURE,
+            "No info/index.json found in package",
         )
         return info
 
@@ -1055,7 +1118,13 @@ def validate_conda_metadata(
 
     # Name
     pkg_name = info.get("name", "")
-    if pkg_name and pkg_name != package:
+    if not pkg_name:
+        report.add(
+            "conda:metadata:name",
+            Severity.FAILURE,
+            "Conda metadata does not declare a package name",
+        )
+    elif pkg_name != package:
         report.add(
             "conda:metadata:name",
             Severity.FAILURE,
@@ -1070,7 +1139,13 @@ def validate_conda_metadata(
 
     # Version
     pkg_ver = info.get("version", "")
-    if pkg_ver and pkg_ver != version:
+    if not pkg_ver:
+        report.add(
+            "conda:metadata:version",
+            Severity.FAILURE,
+            "Conda metadata does not declare a version",
+        )
+    elif pkg_ver != version:
         report.add(
             "conda:metadata:version",
             Severity.FAILURE,
@@ -1129,50 +1204,25 @@ def validate_conda_content(
     artifact: Path, package: str, report: ValidationReport
 ) -> None:
     """Check Conda package contents for dangerous or undesirable entries."""
-    name = artifact.name
-
     try:
-        if name.endswith(".conda"):
-            with zipfile.ZipFile(artifact) as zf:
-                names = zf.namelist()
-                _check_archive_paths(names, report)
-
-                has_python = any(n.endswith(".py") and "info/" not in n for n in names)
-                if has_python:
-                    report.add(
-                        "conda:content:python",
-                        Severity.SUCCESS,
-                        "Python files found in package",
-                    )
-                else:
-                    report.add(
-                        "conda:content:python",
-                        Severity.WARNING,
-                        "No Python files found outside info/",
-                    )
-
-        elif name.endswith(".tar.bz2"):
-            with tarfile.open(artifact, "r:bz2") as tf:
-                names = [m.name for m in tf.getmembers()]
-                _check_archive_paths(names, report)
-
-                has_python = any(n.endswith(".py") and "info/" not in n for n in names)
-                if has_python:
-                    report.add(
-                        "conda:content:python",
-                        Severity.SUCCESS,
-                        "Python files found in package",
-                    )
-                else:
-                    report.add(
-                        "conda:content:python",
-                        Severity.WARNING,
-                        "No Python files found outside info/",
-                    )
+        contents = _read_conda_package(artifact)
+        _check_archive_paths(contents.paths, report)
+        if contents.has_python:
+            report.add(
+                "conda:content:python",
+                Severity.SUCCESS,
+                "Python files found in package payload",
+            )
+        else:
+            report.add(
+                "conda:content:python",
+                Severity.FAILURE,
+                "No Python files found in package payload",
+            )
     except Exception as exc:
         report.add(
             "conda:content",
-            Severity.WARNING,
+            Severity.FAILURE,
             f"Cannot inspect Conda package contents: {exc}",
         )
 
@@ -1191,8 +1241,8 @@ def install_and_smoketest_conda(
     if micromamba is None:
         report.add(
             "conda:install",
-            Severity.WARNING,
-            "No conda/mamba/micromamba found; skipping install test",
+            Severity.FAILURE,
+            "No conda/mamba/micromamba found; install validation is required",
         )
         return
 
@@ -1202,32 +1252,9 @@ def install_and_smoketest_conda(
     with tempfile.TemporaryDirectory(prefix="validate_conda_") as tmpdir:
         tmpdir_path = Path(tmpdir)
         env_dir = tmpdir_path / "env"
-        local_channel = tmpdir_path / "channel"
 
-        # Create local channel structure
-        subdir_dir = local_channel / "noarch"
-        if artifact.name.endswith(".tar.bz2"):
-            subdir_dir = local_channel / "noarch"
-        else:
-            subdir_dir = local_channel / "noarch"
-        subdir_dir.mkdir(parents=True)
-        shutil.copy2(artifact, subdir_dir / artifact.name)
-
-        # Index the channel
-        if "conda" in micromamba or "mamba" in micromamba:
-            subprocess.run(
-                [micromamba, "index", str(local_channel)],
-                capture_output=True,
-                text=True,
-            )
-        else:
-            subprocess.run(
-                [micromamba, "index", str(local_channel)],
-                capture_output=True,
-                text=True,
-            )
-
-        # Create env and install
+        # Install the exact local artifact. Dependencies may be resolved from
+        # the configured read-only channels.
         create_cmd = [
             micromamba,
             "create",
@@ -1235,20 +1262,18 @@ def install_and_smoketest_conda(
             str(env_dir),
             "-y",
             "-c",
-            str(local_channel),
+            "conda-forge",
+            "-c",
+            "spectrocat",
+            str(artifact.resolve()),
         ]
-        # Add conda-forge for dependencies (read-only)
-        create_cmd.extend(["-c", "conda-forge"])
-        # Add spectrocat for core dependency
-        create_cmd.extend(["-c", "spectrocat"])
-        create_cmd.append(package)
 
         result = subprocess.run(create_cmd, capture_output=True, text=True)
         if result.returncode != 0:
             report.add(
                 "conda:install",
-                Severity.WARNING,
-                "micromamba install failed (expected if core not in channel)",
+                Severity.FAILURE,
+                "Conda artifact installation failed",
                 details=result.stdout[-2000:] + result.stderr[-2000:],
             )
             return
@@ -1263,30 +1288,37 @@ def install_and_smoketest_conda(
         py_bin = env_dir / "bin" / "python"
         if not py_bin.exists():
             py_bin = env_dir / "bin" / "python3"
-        if py_bin.exists():
-            result = subprocess.run(
-                [
-                    str(py_bin),
-                    "-c",
-                    f"import {module_name}; print(getattr({module_name}, '__version__', 'unknown'))",
-                ],
-                capture_output=True,
-                text=True,
+        if not py_bin.exists():
+            report.add(
+                "conda:import",
+                Severity.FAILURE,
+                "Installed environment does not contain a Python interpreter",
             )
-            if result.returncode != 0:
-                report.add(
-                    "conda:import",
-                    Severity.FAILURE,
-                    f"Failed to import {module_name}",
-                    details=result.stderr[-2000:],
-                )
-            else:
-                imported_ver = result.stdout.strip()
-                report.add(
-                    "conda:import",
-                    Severity.SUCCESS,
-                    f"Successfully imported {module_name} (version: {imported_ver})",
-                )
+            return
+
+        result = subprocess.run(
+            [
+                str(py_bin),
+                "-c",
+                f"import {module_name}; print(getattr({module_name}, '__version__', 'unknown'))",
+            ],
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
+            report.add(
+                "conda:import",
+                Severity.FAILURE,
+                f"Failed to import {module_name}",
+                details=result.stderr[-2000:],
+            )
+        else:
+            imported_ver = result.stdout.strip()
+            report.add(
+                "conda:import",
+                Severity.SUCCESS,
+                f"Successfully imported {module_name} (version: {imported_ver})",
+            )
 
 
 # ---------------------------------------------------------------------------

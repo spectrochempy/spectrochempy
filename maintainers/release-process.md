@@ -153,7 +153,7 @@ services externes.
 ## Validation des artefacts de release (workflow de validation)
 
 Un workflow dédié **valide les artefacts localement construits** sans rien
-publier, sans secret et sans contact avec les registres de publication :
+publier et sans utiliser de secret :
 
 `.github/workflows/validate_release_artifacts.yml` + le script partagé
 `.github/workflows/scripts/validate_release_artifacts.py`.
@@ -162,9 +162,10 @@ publier, sans secret et sans contact avec les registres de publication :
 
 - Vérifier que les artefacts **que nous publierions** sont cohérents et
   installables (metadata, contenu des archives, smoke test).
-- C'est la brique de base de la future architecture
-  **« build once → validate → publish »** : un artefact est construit une
-  seule fois, validé avant publication, puis publié.
+- Ce premier jalon est uniquement le **validateur préalable** de la future
+  architecture **« build once → validate → publish »**. Les artefacts construits
+  ne sont pas encore conservés entre les jobs ; leur téléversement comme
+  artefacts GitHub Actions viendra dans une PR ultérieure.
 - Aucune étape du workflow ne publie ni ne téléverse d'artefact, et aucun
   secret n'est requis (permissions réduites à `contents: read`).
 
@@ -208,6 +209,10 @@ Options utiles :
 - `--module` : module à importer pour le smoke test (défaut : dérivé du nom
   du package, ex. `spectrochempy-nmr` → `spectrochempy_nmr`).
 
+La lecture des archives internes d'un paquet `.conda` v2 nécessite Python
+3.14 ou le paquet Python `zstandard`. Le workflow installe explicitement ce
+dernier dans son environnement de validation Conda.
+
 Le code de sortie est `0` si toutes les vérifications passent, `1` sinon
 (failures). Les warnings ne font pas échouer la validation.
 
@@ -226,9 +231,10 @@ Le code de sortie est `0` si toutes les vérifications passent, `1` sinon
    module et vérification de `__version__`.
 6. **Rebuild depuis le sdist** : reconstruit un wheel depuis le sdist et
    compare les métadonnées (cohérence reproductible du build).
-7. **Conda** : extension, nom/version, `index.json` / `repodata_record.json`,
-   contenu de l'archive, puis install/smoke test via `micromamba` dans un
-   canal local.
+7. **Conda** : extension, nom/version et `info/index.json`, y compris dans les
+   archives internes `info-*.tar.zst` et `pkg-*.tar.zst` du format `.conda`,
+   puis installation de l'artefact local exact et smoke test. La résolution
+   des dépendances peut consulter `conda-forge` et `spectrocat`.
 
 ### Règles de sécurité
 
@@ -238,7 +244,9 @@ Le code de sortie est `0` si toutes les vérifications passent, `1` sinon
 - Les chemins extraits des archives sont validés avant toute manipulation.
 - Les fichiers temporaires (venv, rebuild, canal conda local) sont créés via
   `tempfile.mkdtemp` et nettoyés.
-- Aucune commande de publication ni aucun contact avec PyPI/Anaconda.org.
+- Aucune commande de publication et aucune utilisation de secrets. Selon les
+  options, `pip` peut consulter PyPI et l'installation Conda peut consulter
+  `conda-forge` et `spectrocat`/Anaconda.org pour résoudre les dépendances.
 
 ### Tests
 

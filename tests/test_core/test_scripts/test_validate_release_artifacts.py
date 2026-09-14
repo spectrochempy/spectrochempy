@@ -11,6 +11,8 @@ import tarfile
 import zipfile
 from pathlib import Path
 
+import pytest
+
 SCRIPT_PATH = (
     Path(__file__).parents[3]
     / ".github"
@@ -127,14 +129,36 @@ def _make_sdist(
     return sdist_path
 
 
+def _compress_zstd(payload: bytes) -> bytes:
+    try:
+        from compression import zstd
+
+        return zstd.compress(payload)
+    except ImportError:
+        zstandard = pytest.importorskip("zstandard")
+        return zstandard.ZstdCompressor().compress(payload)
+
+
+def _make_tar(entries: dict[str, bytes]) -> bytes:
+    payload = io.BytesIO()
+    with tarfile.open(fileobj=payload, mode="w:") as tf:
+        for name, content in entries.items():
+            info = tarfile.TarInfo(name=name)
+            info.size = len(content)
+            tf.addfile(info, io.BytesIO(content))
+    return payload.getvalue()
+
+
 def _make_conda(
     tmp_path: Path,
     name: str = "testpkg",
     version: str = "1.0.0",
     extra_files: dict[str, bytes] | None = None,
+    include_index: bool = True,
+    include_python: bool = True,
 ) -> Path:
-    """Build a minimal valid .conda file in tmp_path."""
-    artifact_name = f"{name}-{version}-0_0.tar.bz2"
+    """Build a minimal genuine v2 .conda file in tmp_path."""
+    artifact_name = f"{name}-{version}-0_0.conda"
     artifact_path = tmp_path / artifact_name
     index_json = {
         "name": name,
@@ -146,21 +170,48 @@ def _make_conda(
         "depends": ["python >=3.11", "numpy"],
     }
 
-    with tarfile.open(artifact_path, "w:bz2") as tf:
-        data = json.dumps(index_json).encode("utf-8")
-        info = tarfile.TarInfo(name="info/index.json")
-        info.size = len(data)
-        tf.addfile(info, io.BytesIO(data))
-        py_content = b"__version__ = '1.0.0'\n"
-        py_info = tarfile.TarInfo(name=f"{name.replace('-', '_')}/__init__.py")
-        py_info.size = len(py_content)
-        tf.addfile(py_info, io.BytesIO(py_content))
-        if extra_files:
-            for fname, content in extra_files.items():
-                info2 = tarfile.TarInfo(name=f"info/{fname}")
-                info2.size = len(content)
-                tf.addfile(info2, io.BytesIO(content))
+    info_entries = {}
+    if include_index:
+        info_entries["info/index.json"] = json.dumps(index_json).encode("utf-8")
+    if extra_files:
+        info_entries.update(
+            {f"info/{key}": value for key, value in extra_files.items()}
+        )
+    package_entries = {}
+    if include_python:
+        package_entries[
+            f"{name.replace('-', '_')}/__init__.py"
+        ] = f"__version__ = '{version}'\n".encode()
 
+    stem = artifact_path.name.removesuffix(".conda")
+    with zipfile.ZipFile(artifact_path, "w") as zf:
+        zf.writestr("metadata.json", json.dumps({"conda_pkg_format_version": 2}))
+        zf.writestr(f"info-{stem}.tar.zst", _compress_zstd(_make_tar(info_entries)))
+        zf.writestr(f"pkg-{stem}.tar.zst", _compress_zstd(_make_tar(package_entries)))
+
+    return artifact_path
+
+
+def _make_legacy_conda(
+    tmp_path: Path, name: str = "testpkg", version: str = "1.0.0"
+) -> Path:
+    """Build a minimal legacy .tar.bz2 Conda package."""
+    artifact_path = tmp_path / f"{name}-{version}-0_0.tar.bz2"
+    index_json = {
+        "name": name,
+        "version": version,
+        "build": "0_0",
+        "subdir": "noarch",
+        "depends": ["python >=3.11"],
+    }
+    with tarfile.open(artifact_path, "w:bz2") as tf:
+        for path, content in {
+            "info/index.json": json.dumps(index_json).encode(),
+            f"{name.replace('-', '_')}/__init__.py": b"",
+        }.items():
+            info = tarfile.TarInfo(name=path)
+            info.size = len(content)
+            tf.addfile(info, io.BytesIO(content))
     return artifact_path
 
 
@@ -492,6 +543,22 @@ class TestDiscoverCondaArtifact:
         assert result is None
         assert not report.passed
 
+    def test_hyphenated_package_name(self, tmp_path):
+        module = load_module()
+        artifact = _make_conda(tmp_path, "test-pkg", "1.0.0")
+        report = module.ValidationReport("test-pkg", "1.0.0", "conda")
+        result = module.discover_conda_artifact(artifact, "test-pkg", "1.0.0", report)
+        assert result == artifact
+        assert report.passed
+
+    def test_different_package_with_common_prefix_fails(self, tmp_path):
+        module = load_module()
+        artifact = _make_conda(tmp_path, "testpkg-extra", "1.0.0")
+        report = module.ValidationReport("testpkg", "1.0.0", "conda")
+        result = module.discover_conda_artifact(artifact, "testpkg", "1.0.0", report)
+        assert result is None
+        assert not report.passed
+
 
 class TestValidateCondaMetadata:
     def test_reads_metadata(self, tmp_path):
@@ -510,6 +577,25 @@ class TestValidateCondaMetadata:
         module.validate_conda_metadata(artifact, "testpkg", "1.0.0", report)
         assert not report.passed
 
+    def test_reads_legacy_tar_bz2_metadata(self, tmp_path):
+        module = load_module()
+        artifact = _make_legacy_conda(tmp_path)
+        report = module.ValidationReport("testpkg", "1.0.0", "conda")
+        info = module.validate_conda_metadata(artifact, "testpkg", "1.0.0", report)
+        assert info["name"] == "testpkg"
+        assert report.passed
+
+    def test_missing_inner_index_is_failure(self, tmp_path):
+        module = load_module()
+        artifact = _make_conda(tmp_path, include_index=False)
+        report = module.ValidationReport("testpkg", "1.0.0", "conda")
+        module.validate_conda_metadata(artifact, "testpkg", "1.0.0", report)
+        assert not report.passed
+        assert any(
+            check.name == "conda:metadata" and check.severity == module.Severity.FAILURE
+            for check in report.checks
+        )
+
 
 class TestValidateCondaContent:
     def test_clean_package(self, tmp_path):
@@ -519,15 +605,78 @@ class TestValidateCondaContent:
         module.validate_conda_content(artifact, "testpkg", report)
         assert report.passed
 
+    def test_missing_package_python_is_failure(self, tmp_path):
+        module = load_module()
+        artifact = _make_conda(tmp_path, include_python=False)
+        report = module.ValidationReport("testpkg", "1.0.0", "conda")
+        module.validate_conda_content(artifact, "testpkg", report)
+        assert not report.passed
+
+
+class TestInstallCondaArtifact:
+    def test_missing_installer_is_failure(self, tmp_path, monkeypatch):
+        module = load_module()
+        artifact = _make_conda(tmp_path)
+        monkeypatch.setattr(module.shutil, "which", lambda name: None)
+        report = module.ValidationReport("testpkg", "1.0.0", "conda")
+        module.install_and_smoketest_conda(
+            artifact, "testpkg", "1.0.0", "testpkg", report
+        )
+        assert not report.passed
+        assert any(
+            check.name == "conda:install" and check.severity == module.Severity.FAILURE
+            for check in report.checks
+        )
+
+    def test_install_failure_is_failure_and_uses_exact_artifact(
+        self, tmp_path, monkeypatch
+    ):
+        module = load_module()
+        artifact = _make_conda(tmp_path)
+        calls = []
+        monkeypatch.setattr(
+            module.shutil,
+            "which",
+            lambda name: "/usr/bin/micromamba" if name == "micromamba" else None,
+        )
+
+        def failed_install(command, capture_output=True, text=True):  # noqa: ARG001
+            calls.append(command)
+            return subprocess.CompletedProcess(command, 1, "", "solver failed")
+
+        monkeypatch.setattr(module.subprocess, "run", failed_install)
+        report = module.ValidationReport("testpkg", "1.0.0", "conda")
+        module.install_and_smoketest_conda(
+            artifact, "testpkg", "1.0.0", "testpkg", report
+        )
+        assert str(artifact.resolve()) in calls[0]
+        assert not report.passed
+        assert any(
+            check.name == "conda:install" and check.severity == module.Severity.FAILURE
+            for check in report.checks
+        )
+
 
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
 
 
+def _stub_successful_python_execution(module, monkeypatch):
+    def successful_install(artifacts, package, version, module_name, no_deps, report):
+        report.add("install:install", module.Severity.SUCCESS, "installed")
+
+    def successful_rebuild(artifacts, package, version, report):
+        report.add("rebuild:build", module.Severity.SUCCESS, "rebuilt")
+
+    monkeypatch.setattr(module, "install_and_smoketest", successful_install)
+    monkeypatch.setattr(module, "rebuild_from_sdist", successful_rebuild)
+
+
 class TestCLI:
-    def test_python_subcommand(self, tmp_path):
+    def test_python_subcommand(self, tmp_path, monkeypatch):
         module = load_module()
+        _stub_successful_python_execution(module, monkeypatch)
         dist = tmp_path / "dist"
         dist.mkdir()
         _make_wheel(dist, "testpkg", "1.0.0")
@@ -562,9 +711,14 @@ class TestCLI:
         )
         assert rc == 1
 
-    def test_conda_subcommand(self, tmp_path):
+    def test_conda_subcommand(self, tmp_path, monkeypatch):
         module = load_module()
         artifact = _make_conda(tmp_path, "testpkg", "1.0.0")
+
+        def successful_install(artifact, package, version, module_name, report):
+            report.add("conda:install", module.Severity.SUCCESS, "installed")
+
+        monkeypatch.setattr(module, "install_and_smoketest_conda", successful_install)
         rc = module.main(
             [
                 "conda",
@@ -578,8 +732,9 @@ class TestCLI:
         )
         assert rc == 0
 
-    def test_json_output(self, tmp_path, capsys):
+    def test_json_output(self, tmp_path, capsys, monkeypatch):
         module = load_module()
+        _stub_successful_python_execution(module, monkeypatch)
         dist = tmp_path / "dist"
         dist.mkdir()
         _make_wheel(dist, "testpkg", "1.0.0")
@@ -601,8 +756,9 @@ class TestCLI:
         assert data["package"] == "testpkg"
         assert data["passed"] is True
 
-    def test_markdown_output(self, tmp_path, capsys):
+    def test_markdown_output(self, tmp_path, capsys, monkeypatch):
         module = load_module()
+        _stub_successful_python_execution(module, monkeypatch)
         dist = tmp_path / "dist"
         dist.mkdir()
         _make_wheel(dist, "testpkg", "1.0.0")
