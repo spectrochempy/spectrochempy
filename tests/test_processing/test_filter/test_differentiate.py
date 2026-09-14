@@ -166,17 +166,41 @@ class TestDifferentiateEquivalence:
 
 
 class TestDifferentiateValidation:
+    @pytest.mark.parametrize("derivative_order", [0, -1, 1.5, True])
+    def test_rejects_non_positive_or_non_integer_derivative_order(
+        self, derivative_order
+    ):
+        dataset = _make_quadratic_dataset()
+
+        with pytest.raises(
+            ValueError,
+            match="derivative_order must be a positive integer",
+        ):
+            scp.differentiate(dataset, derivative_order=derivative_order)
+
+    def test_rejects_derivative_order_above_polynomial_order(self):
+        dataset = _make_quadratic_dataset()
+
+        with pytest.raises(
+            ValueError,
+            match="derivative_order must not exceed polynomial_order",
+        ):
+            scp.differentiate(
+                dataset,
+                derivative_order=3,
+                polynomial_order=2,
+            )
+
     @pytest.mark.parametrize(
         ("differentiate_kwargs", "savgol_kwargs"),
         [
-            ({"derivative_order": -1}, {"deriv": -1}),
             (
                 {"size": 5, "polynomial_order": 5},
                 {"size": 5, "order": 5, "deriv": 1},
             ),
             ({"size": 4}, {"size": 4, "deriv": 1}),
         ],
-        ids=["invalid-derivative-order", "incompatible-polynomial", "invalid-window"],
+        ids=["incompatible-polynomial", "invalid-window"],
     )
     def test_reuses_savgol_errors(self, differentiate_kwargs, savgol_kwargs):
         dataset = _make_quadratic_dataset()

@@ -179,7 +179,8 @@ _ = scp.plot_compare(Xn, Xsm2, title="Savitzky-Golay (7 points, order=2)")
 # `polynomial_order` parameters correspond respectively to `deriv` and `order`
 # in `savgol()`. The algorithm assumes a **uniformly spaced** coordinate along
 # the processed axis. The same operation is also available as the
-# `dataset.differentiate()` method.
+# `dataset.differentiate()` method. `derivative_order` must be a positive
+# integer no greater than `polynomial_order`.
 #
 # #### Automatic spacing detection (`delta=None`)
 #

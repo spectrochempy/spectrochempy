@@ -3,6 +3,8 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
+from numbers import Integral
+
 import numpy as np
 import scipy.signal
 import traitlets as tr
@@ -459,7 +461,8 @@ def differentiate(
         Input dataset to differentiate.
     derivative_order : `int`, optional, default: 1
         Order of the derivative. This maps to the ``deriv`` parameter of
-        `savgol`.
+        `savgol`. It must be a positive integer not greater than
+        ``polynomial_order``.
     size : `int`, optional, default: 5
         Size of the Savitzky-Golay window. It must be a positive odd integer.
     polynomial_order : `int`, optional, default: 2
@@ -492,7 +495,9 @@ def differentiate(
     The call ``differentiate(dataset, derivative_order=n, size=w,
     polynomial_order=p)`` is equivalent to ``savgol(dataset, deriv=n,
     size=w, order=p)``. Coordinate spacing, sign, units, masks, title,
-    history, dimension selection, and validation follow `savgol` unchanged.
+    history, dimension selection, and numerical validation follow `savgol`
+    unchanged. This facade additionally requires a positive derivative order
+    no greater than the polynomial order.
 
     Examples
     --------
@@ -503,6 +508,19 @@ def differentiate(
     ...     polynomial_order=3,
     ... )
     """
+    if (
+        isinstance(derivative_order, bool)
+        or not isinstance(derivative_order, Integral)
+        or derivative_order < 1
+    ):
+        raise ValueError("derivative_order must be a positive integer")
+    if (
+        isinstance(polynomial_order, Integral)
+        and not isinstance(polynomial_order, bool)
+        and derivative_order > polynomial_order
+    ):
+        raise ValueError("derivative_order must not exceed polynomial_order")
+
     return savgol(
         dataset,
         size=size,
