@@ -99,7 +99,7 @@ def normalize(dataset, method="max", dim="x", inplace=False):
     result = NormalizeTransformer(method=method, dim=dim).fit_transform(dataset)
     if inplace:
         dataset._data = result._data
-        dataset.history = result.history
+        dataset._history = result._history.copy()
         return dataset
     return result
 
@@ -131,7 +131,7 @@ def center(dataset, dim="y", inplace=False):
     result = CenterTransformer(dim=dim).fit_transform(dataset)
     if inplace:
         dataset._data = result._data
-        dataset.history = result.history
+        dataset._history = result._history.copy()
         return dataset
     return result
 
@@ -173,7 +173,7 @@ def autoscale(dataset, dim="y", inplace=False):
     result = AutoscaleTransformer(dim=dim).fit_transform(dataset)
     if inplace:
         dataset._data = result._data
-        dataset.history = result.history
+        dataset._history = result._history.copy()
         return dataset
     return result
 
@@ -275,7 +275,7 @@ def msc(dataset, reference=None, dim="y", inplace=False):
     result = MSCTransformer(reference=reference, dim=dim).fit_transform(dataset)
     if inplace:
         dataset._data = result._data
-        dataset.history = result.history
+        dataset._history = result._history.copy()
         return dataset
     return result
 
@@ -315,7 +315,7 @@ def pareto_scale(dataset, dim="y", inplace=False):
     result = ParetoScaleTransformer(dim=dim).fit_transform(dataset)
     if inplace:
         dataset._data = result._data
-        dataset.history = result.history
+        dataset._history = result._history.copy()
         return dataset
     return result
 
@@ -359,7 +359,7 @@ def range_scale(dataset, dim="y", inplace=False):
     result = RangeScaleTransformer(dim=dim).fit_transform(dataset)
     if inplace:
         dataset._data = result._data
-        dataset.history = result.history
+        dataset._history = result._history.copy()
         return dataset
     return result
 
@@ -403,7 +403,7 @@ def robust_scale(dataset, dim="y", inplace=False):
     result = RobustScaleTransformer(dim=dim).fit_transform(dataset)
     if inplace:
         dataset._data = result._data
-        dataset.history = result.history
+        dataset._history = result._history.copy()
         return dataset
     return result
 
@@ -442,6 +442,6 @@ def log_transform(dataset, method="log1p", eps=1e-10, inplace=False):
     result = LogTransformer(method=method, eps=eps).fit_transform(dataset)
     if inplace:
         dataset._data = result._data
-        dataset.history = result.history
+        dataset._history = result._history.copy()
         return dataset
     return result
