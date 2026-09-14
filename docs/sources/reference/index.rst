@@ -642,6 +642,32 @@ Miscellaneous
     pipe
 
 
+Experimental provenance substrate
+=================================
+
+The initial provenance API is grouped under :mod:`spectrochempy.provenance`.
+It defines passive value models and explicit capture ownership only; scientific
+operations are not instrumented in P1.
+
+.. currentmodule:: spectrochempy.provenance
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    ObjectRef
+    StateRef
+    ResultRef
+    OperationRef
+    ReferenceLink
+    OperationRecord
+    ProvenanceLedger
+    ProvenanceCapture
+    ProvenanceValidationError
+
+.. currentmodule:: spectrochempy
+
+
 ********
 Analysis
 ********
