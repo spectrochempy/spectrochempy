@@ -249,6 +249,7 @@ _LAZY_IMPORTS = {
     "zf": "spectrochempy.processing.fft.zero_filling",
     "denoise": "spectrochempy.processing.filter.denoise",
     "despike": "spectrochempy.processing.filter.denoise",
+    "differentiate": "spectrochempy.processing.filter.filter",
     "savgol_filter": "spectrochempy.processing.filter.filter",
     "savgol": "spectrochempy.processing.filter.filter",
     "smooth": "spectrochempy.processing.filter.filter",

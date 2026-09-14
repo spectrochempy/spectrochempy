@@ -174,13 +174,16 @@ _ = scp.plot_compare(Xn, Xsm2, title="Savitzky-Golay (7 points, order=2)")
 # %% [markdown]
 # ### Savitzky-Golay derivatives
 #
-# The Savitzky-Golay filter can also compute derivatives of the data by setting
-# the `deriv` parameter. The algorithm assumes a **uniformly spaced**
-# coordinate along the processed axis.
+# The public `differentiate()` function computes smoothed derivatives by
+# delegating to the Savitzky-Golay filter. Its `derivative_order` and
+# `polynomial_order` parameters correspond respectively to `deriv` and `order`
+# in `savgol()`. The algorithm assumes a **uniformly spaced** coordinate along
+# the processed axis. The same operation is also available as the
+# `dataset.differentiate()` method.
 #
 # #### Automatic spacing detection (`delta=None`)
 #
-# When `deriv > 0` and `delta` is omitted (default), SpectroChemPy
+# When `delta` is omitted (default), SpectroChemPy
 # automatically detects the signed spacing from the coordinate of the
 # processed axis. An ascending coordinate yields a positive delta, a
 # descending one yields a negative delta. If the coordinate is irregular,
@@ -198,10 +201,10 @@ _ = scp.plot_compare(Xn, Xsm2, title="Savitzky-Golay (7 points, order=2)")
 #
 # When the derivative is physically scaled (auto-detected uniform
 # coordinate or explicit delta with a coordinate that carries units), the
-# output units are `source_units / coordinate_units**deriv`.  For example,
-# a first derivative of absorbance with respect to `cm⁻¹` yields
-# `absorbance·cm`.  Smoothing (`deriv=0`) and index-based fallbacks keep
-# the source units unchanged.
+# output units are `source_units / coordinate_units**derivative_order`. For
+# example, a first derivative of absorbance with respect to `cm⁻¹` yields
+# `absorbance·cm`. Smoothing (`deriv=0`) and index-based fallbacks keep the
+# source units unchanged.
 #
 # The example below builds a synthetic parabola, computes its first
 # derivative analytically, and compares it with the Savitzky-Golay
@@ -216,7 +219,15 @@ ds = scp.NDDataset(y, units="absorbance")
 ds.set_coordset(x=x)
 
 # Compute the first derivative with Savitzky-Golay
-ds_deriv = scp.savgol(ds, size=7, order=3, deriv=1)
+ds_deriv = scp.differentiate(
+    ds,
+    derivative_order=1,
+    size=7,
+    polynomial_order=3,
+)
+
+# This is equivalent to:
+# scp.savgol(ds, size=7, order=3, deriv=1)
 
 # Analytical derivative: dy/dx = 6 * x
 analytical = 6.0 * x.data

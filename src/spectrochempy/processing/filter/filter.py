@@ -13,6 +13,7 @@ from spectrochempy.processing._base._processingbase import ProcessingConfigurabl
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 
 __dataset_methods__ = [
+    "differentiate",
     "savgol_filter",
     "savgol",
     "smooth",
@@ -93,6 +94,7 @@ _common_see_also = """
 See Also
 --------
 Filter : Define and apply filters/smoothers using various algorithms.
+differentiate : Compute a smoothed derivative using a Savitzky-Golay filter.
 smooth : Function to smooth data using various window filters.
 savgol : Savitzky-Golay filter.
 savgol_filter : Alias of `savgol`
@@ -433,6 +435,87 @@ def smooth(dataset, size=5, window="avg", dim=-1, **kwargs):
 
 
 # --------------------------------------------------------------------------------------
+def differentiate(
+    dataset,
+    derivative_order=1,
+    *,
+    size=5,
+    polynomial_order=2,
+    delta=None,
+    dim=-1,
+    mode="interp",
+    cval=0.0,
+):
+    """
+    Differentiate a spectrum using a Savitzky-Golay polynomial filter.
+
+    This is a discoverable differentiation interface to `savgol`; it computes
+    a smoothed numerical derivative and does not use a separate finite-difference
+    implementation.
+
+    Parameters
+    ----------
+    dataset : `NDDataset`
+        Input dataset to differentiate.
+    derivative_order : `int`, optional, default: 1
+        Order of the derivative. This maps to the ``deriv`` parameter of
+        `savgol`.
+    size : `int`, optional, default: 5
+        Size of the Savitzky-Golay window. It must be a positive odd integer.
+    polynomial_order : `int`, optional, default: 2
+        Order of the polynomial fitted within each window. This maps to the
+        ``order`` parameter of `savgol` and must be less than ``size``.
+    delta : `float` or ``None``, optional, default: ``None``
+        Signed sample spacing. When ``None``, `savgol` derives it from a
+        uniformly spaced coordinate. If that is not possible, `savgol` warns
+        and falls back to index-based spacing.
+    dim : `int` or `str`, optional, default: -1
+        Axis along which to differentiate. A dimension name such as ``"x"``
+        or an integer axis index can be used.
+    mode : `str`, optional, default: ``"interp"``
+        Extension mode passed to the Savitzky-Golay filter.
+    cval : `float`, optional, default: 0.0
+        Padding value used when ``mode="constant"``.
+
+    Returns
+    -------
+    `NDDataset`
+        Smoothed derivative with the metadata produced by the equivalent
+        `savgol` call.
+
+    See Also
+    --------
+    savgol : General Savitzky-Golay filtering and differentiation interface.
+
+    Notes
+    -----
+    The call ``differentiate(dataset, derivative_order=n, size=w,
+    polynomial_order=p)`` is equivalent to ``savgol(dataset, deriv=n,
+    size=w, order=p)``. Coordinate spacing, sign, units, masks, title,
+    history, dimension selection, and validation follow `savgol` unchanged.
+
+    Examples
+    --------
+    >>> first_derivative = scp.differentiate(  # doctest: +SKIP
+    ...     dataset,
+    ...     derivative_order=1,
+    ...     size=15,
+    ...     polynomial_order=3,
+    ... )
+    """
+    return savgol(
+        dataset,
+        size=size,
+        order=polynomial_order,
+        dim=dim,
+        delta=delta,
+        deriv=derivative_order,
+        mode=mode,
+        cval=cval,
+    )
+
+
+# --------------------------------------------------------------------------------------
 def savgol(dataset, size=5, order=2, dim=-1, delta=None, **kwargs):
     """
     Savitzky-Golay filter.
@@ -496,6 +579,7 @@ def savgol(dataset, size=5, order=2, dim=-1, delta=None, **kwargs):
     See Also
     --------
     Filter : Filter processing.
+    differentiate : Discoverable interface for Savitzky-Golay derivatives.
 
     Notes
     -----
