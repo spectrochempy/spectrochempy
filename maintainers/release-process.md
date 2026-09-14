@@ -150,6 +150,128 @@ services externes.
 
 ---
 
+## Validation des artefacts de release (workflow de validation)
+
+Un workflow dédié **valide les artefacts localement construits** sans rien
+publier et sans utiliser de secret :
+
+`.github/workflows/validate_release_artifacts.yml` + le script partagé
+`.github/workflows/scripts/validate_release_artifacts.py`.
+
+### Rôle
+
+- Vérifier que les artefacts **que nous publierions** sont cohérents et
+  installables (metadata, contenu des archives, smoke test).
+- Ce premier jalon est uniquement le **validateur** de la future
+  architecture **« build once → validate → publish »**. Les artefacts construits
+  ne sont pas encore conservés entre les jobs ; leur téléversement comme
+  artefacts GitHub Actions viendra dans une PR ultérieure.
+- Aucune étape du workflow ne publie ni ne téléverse d'artefact, et aucun
+  secret n'est requis (permissions réduites à `contents: read`).
+
+### Déclencheurs
+
+| Déclencheur | Comportement |
+| --- | --- |
+| `pull_request` / `push` | Valide avant publication des artefacts Python du **core** reconstruits pour cette exécution (wheel + sdist) |
+| `workflow_dispatch` | Valide le core en Python ; option `validate_conda` pour le package Conda ; option `include_plugins` pour les plugins officiels |
+| `release: published` | Effectue un contrôle post-déclenchement des artefacts reconstruits du core (+ Conda si tag core, plugins officiels si plugins) |
+
+Les exécutions sur une pull request ou sur `master` précèdent une publication,
+mais elles reconstruisent leurs propres artefacts. L'événement
+`release: published` démarre ce workflow et le workflow de publication
+indépendamment : ce contrôle intervient donc après le déclenchement et ne peut
+pas empêcher l'autre workflow de publier. Ce premier jalon ne sécurise pas
+encore la publication elle-même ; ce sera le rôle de l'architecture ultérieure
+qui conservera puis transmettra les mêmes artefacts entre construction,
+validation et publication.
+
+### Utilisation
+
+Le script s'utilise aussi bien localement qu'en CI :
+
+```bash
+# Artefacts Python (wheel + sdist)
+python .github/workflows/scripts/validate_release_artifacts.py \
+  python --package spectrochempy --version 0.12.8 --dist dist/
+
+# Package Conda (.conda ou .tar.bz2)
+python .github/workflows/scripts/validate_release_artifacts.py \
+  conda --package spectrochempy-nmr --version 0.1.11 \
+  --artifact output/spectrochempy-nmr-0.1.11-0_0.conda
+
+# Les deux
+python .github/workflows/scripts/validate_release_artifacts.py \
+  all --package spectrochempy --version 0.12.8 \
+  --dist dist/ --artifact output/spectrochempy-0.12.8-0_0.conda
+```
+
+La commande `all` exige au moins une des options `--dist` ou `--artifact`.
+
+Options utiles :
+
+- `--no-deps` : installe le wheel dans un venv partageant les packages de
+  l'environnement de base (`--system-site-packages`) pour un smoke test
+  hors-ligne rapide. Sans cette option, un venv isolé résout les dépendances
+  depuis PyPI.
+- `--json` / `--markdown` : sorties structurées (le Markdown est destiné à
+  `$GITHUB_STEP_SUMMARY`), ou `--json-output FILE` / `--markdown-output FILE`
+  pour écrire dans un fichier.
+- `--module` : module à importer pour le smoke test (défaut : dérivé du nom
+  du package, ex. `spectrochempy-nmr` → `spectrochempy_nmr`).
+
+La lecture des archives internes d'un paquet `.conda` v2 nécessite Python
+3.14 ou le paquet Python `zstandard`. Le workflow installe explicitement ce
+dernier dans son environnement de validation Conda.
+
+Le code de sortie est `0` si toutes les vérifications passent, `1` sinon
+(failures). Les warnings ne font pas échouer la validation.
+
+### Ce que le validateur vérifie
+
+1. **Découverte** : wheel + sdist présents dans `dist/`, noms et versions
+   conformes (avertissement en cas d'artefacts multiples ou de version
+   inattendue).
+2. **Métadonnées** : `METADATA` / `PKG-INFO` / `info/index.json` lisibles,
+   cohérence nom/version entre wheel et sdist, `Requires-Dist` déclarés.
+3. **Contenu des archives** : pas de path traversal (`../`), pas de chemins
+   absolus, pas de fichiers sensibles (`.env`, clés, `.netrc`), pas de
+   symlinks dans le wheel.
+4. **Signature wheel** : `twine check --strict` ; `twine` est obligatoire pour
+   une validation Python complète et son absence fait échouer le validateur.
+5. **Installation + smoke test** : venv isolé, `pip install`, import du
+   module et comparaison de la version de distribution installée, lue avec
+   `importlib.metadata.version()`, à la version attendue.
+6. **Rebuild depuis le sdist** : reconstruit un wheel depuis le sdist et
+   compare les métadonnées (cohérence reproductible du build).
+7. **Conda** : extension, nom/version et `info/index.json`, y compris dans les
+   archives internes `info-*.tar.zst` et `pkg-*.tar.zst` du format `.conda`,
+   puis installation de l'artefact local exact, import et comparaison de la
+   version de distribution installée à la version attendue. La résolution des
+   dépendances peut consulter `conda-forge` et `spectrocat`.
+
+### Règles de sécurité
+
+- Aucun `shell=True` : tous les `subprocess` passent par des listes
+  d'arguments.
+- Aucun répertoire `env`/`$HOME` utilisé comme `workdir`.
+- Les chemins extraits des archives sont validés avant toute manipulation.
+- Les fichiers temporaires (venv, rebuild, canal conda local) sont créés via
+  `tempfile.mkdtemp` et nettoyés.
+- Aucune commande de publication et aucune utilisation de secrets. Selon les
+  options, `pip` peut consulter PyPI et l'installation Conda peut consulter
+  `conda-forge` et `spectrocat`/Anaconda.org pour résoudre les dépendances.
+
+### Tests
+
+Les tests unitaires du script se trouvent dans
+`tests/test_core/test_scripts/test_validate_release_artifacts.py` (découverte,
+métadonnées, contenu, CLI, rapport JSON/Markdown, sécurité). Ils suivent le
+même motif que `test_conda_publish.py` (chargement du script via
+`importlib.util`).
+
+---
+
 ## Release du core
 
 > **Note Zenodo** : avant une release du core, vérifier que l'intégration

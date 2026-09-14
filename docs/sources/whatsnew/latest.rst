@@ -54,3 +54,17 @@ Bug Fixes
   recoverable from the canonical ``master`` recipe with a deterministic
   version injection and a core bound aligned with the tag pyproject
   (``recipe_origin=master-fallback``).
+
+Developer
+~~~~~~~~~
+
+MAINT: Added ``.github/workflows/scripts/validate_release_artifacts.py``, a
+standalone validator for release artifacts (Python wheel +
+sdist and Conda packages) that checks metadata consistency, archive safety,
+signature compatibility, installability and smoke-tests, including an exact
+check of the installed distribution version, plus its unit tests and the
+``.github/workflows/validate_release_artifacts.yml`` workflow. Complete Python
+validation requires ``twine``. It never publishes anything or requires secrets.
+This first milestone validates locally rebuilt artifacts but does not yet
+retain them between jobs or gate the independent publication workflow;
+artifact upload is deferred to a later PR.
