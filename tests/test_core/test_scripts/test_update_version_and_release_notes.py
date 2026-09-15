@@ -15,6 +15,11 @@ import pytest
 SCRIPTS = Path(__file__).parents[3] / ".github" / "workflows" / "scripts"
 SCRIPT_PATH = SCRIPTS / "update_version_and_release_notes.py"
 
+pytestmark = pytest.mark.skipif(
+    importlib.util.find_spec("setuptools_scm") is None,
+    reason="setuptools_scm not available in this environment",
+)
+
 _module = None
 
 
