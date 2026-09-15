@@ -63,6 +63,7 @@ jobs:
       - name: Determine core version
         id: version
         run: |
+          python3 -m pip install --quiet packaging
           LATEST_CORE_TAG=$(git tag -l 'spectrochempy-v*' --sort=-v:refname | head -1)
           if [[ -z "$LATEST_CORE_TAG" ]]; then
             echo "::error::No core tag found — cannot determine core version"
@@ -72,9 +73,9 @@ jobs:
             CORE_VERSION="${GITHUB_REF_NAME#spectrochempy-v}"
           else
             LATEST_CORE_VERSION="${LATEST_CORE_TAG#spectrochempy-v}"
-            IFS=. read -r CORE_MAJOR CORE_MINOR CORE_PATCH <<< "$LATEST_CORE_VERSION"
             COMMITS_SINCE_CORE_TAG=$(git rev-list --count "$LATEST_CORE_TAG"..HEAD)
-            CORE_VERSION="${CORE_MAJOR}.${CORE_MINOR}.$((CORE_PATCH + 1)).dev${COMMITS_SINCE_CORE_TAG}"
+            CORE_DEV_BASE=$(python3 .github/workflows/scripts/release_version.py next-dev "$LATEST_CORE_VERSION")
+            CORE_VERSION="${CORE_DEV_BASE}.dev${COMMITS_SINCE_CORE_TAG}"
           fi
           echo "core_version=$CORE_VERSION" >> "$GITHUB_OUTPUT"
           echo "Using core version: $CORE_VERSION (latest core tag: $LATEST_CORE_TAG)"

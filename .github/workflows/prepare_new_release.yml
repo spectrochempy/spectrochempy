@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       versionString:
-        description: "The version we want to release (e.g. 0.4.2)"
+        description: "The version we want to release (e.g. 1.0.0 or 1.0.0rc1)"
         required: true
       confirm_zenodo_enabled:
         description: "Confirm Zenodo GitHub integration is ENABLED before creating the release PR (see maintainers/release-process.md)"
@@ -62,6 +62,12 @@ jobs:
           python3 -m pip install json5 pyyaml packaging
           python3 -m pip install "cffconvert @ git+https://github.com/citation-file-format/cffconvert@b6045d7"
           python3 -m pip install setuptools_scm
+
+      - name: Validate release version input
+        run: |
+          python3 .github/workflows/scripts/release_version.py validate "${{ github.event.inputs.versionString }}"
+          python3 .github/workflows/scripts/release_version.py describe "${{ github.event.inputs.versionString }}" \
+            >> "$GITHUB_STEP_SUMMARY"
 
       - name: Check plugin version constraints compatibility
         run: |
