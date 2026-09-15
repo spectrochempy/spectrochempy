@@ -41,7 +41,7 @@ def _write_pyproject(
     plugin_dir.mkdir()
     tool = ""
     if official:
-        tool = '\n[tool.spectrochempy]\nofficial-plugin = true\n'
+        tool = "\n[tool.spectrochempy]\nofficial-plugin = true\n"
     (plugin_dir / "pyproject.toml").write_text(
         f'[project]\nname = "{plugin_dir.name}"\n'
         f'version = "0.1.0"\ndependencies = [\n'
@@ -54,19 +54,24 @@ def test_version_allowed_accepts_release_candidates(checker):
     assert checker.version_allowed("1.0.0rc2", ">=0.12,<2")
     assert checker.version_allowed("1.0.0", ">=0.12,<2")
 
+
 def test_version_allowed_accepts_late_012(checker):
     assert checker.version_allowed("0.12.8", ">=0.12,<2")
+
 
 def test_version_allowed_rejects_next_major(checker):
     assert not checker.version_allowed("2.0.0", ">=0.12,<2")
     assert not checker.version_allowed("2.0.0rc1", ">=0.12,<2")
 
+
 def test_version_allowed_rejects_below_minimum(checker):
     assert checker.version_allowed("0.12.0", ">=0.12,<2")
     assert not checker.version_allowed("0.11.9", ">=0.12,<2")
 
+
 def test_version_allowed_invalid(checker):
     assert not checker.version_allowed("not-a-version", ">=0.12,<2")
+
 
 def test_is_official_plugin(checker, tmp_path):
     official = tmp_path / "spectrochempy-official"
