@@ -299,9 +299,19 @@ Depuis l'interface GitHub :
 3. Renseigner les paramètres :
 
 ```
-versionString = X.Y.Z                          # (ex: 0.9.0 ou 0.10.0)
+versionString = X.Y.Z                          # stable finale (ex: 1.0.0)
+versionString = X.Y.ZrcN                       # release candidate (ex: 1.0.0rc1)
 confirm_zenodo_enabled = true                  # ← cocher après avoir vérifié Zenodo
 ```
+
+> **Format de version accepté** : `X.Y.Z` (stable) ou `X.Y.ZrcN`
+> (release candidate, ex. `1.0.0rc1`). Le tag git canonique correspondant
+> est `spectrochempy-vX.Y.Z` ou `spectrochempy-vX.Y.ZrcN`. Le workflow
+> `prepare_new_release.yml` valide le format avant tout traitement et
+> dérive automatiquement le tag, le flag « prerelease » GitHub, le fichier
+> de release notes (`vX.Y.ZrcN.rst`), la version de développement suivante
+> et le classifieur PyPI via le script partagé
+> `.github/workflows/scripts/release_version.py`.
 
 > **Important** : avant de lancer le workflow, vérifier que l'intégration
 > GitHub → Zenodo est **On** (voir [Zenodo](#zenodo) ci-dessus).
@@ -388,6 +398,35 @@ Le site publié par GitHub Pages est construit dans la branche `gh-pages` :
   mais le répertoire public de documentation reste `X.Y.Z/` ;
 - les tags plugins (`spectrochempy-<plugin>-vX.Y.Z`) ne doivent pas créer de
   documentation stable séparée.
+
+### Release candidate (RC) du core
+
+Pour publier une **release candidate** (ex. `1.0.0rc1`, avant la finale
+`1.0.0`) :
+
+1. Lancer **Prepare a new release** avec `versionString = X.Y.ZrcN`
+   (validé par `release_version.py`, cf. format ci-dessus).
+2. Le workflow de publication crée une **Draft Release** marquée
+   **prerelease** (flag automatique dérivé de la version) :
+   - Tag : `spectrochempy-vX.Y.ZrcN`
+   - Titre : `SpectroChemPy vX.Y.ZrcN`
+3. Publier la Draft comme d'habitude — la publication déclenche PyPI,
+   Anaconda.org et les docs. PyPI reçoit une version `X.Y.ZrcN`
+   (PEP 440, plus récente que les dev mais plus vieille que la finale).
+4. Zenodo **ignore automatiquement les prereleases GitHub** : aucune
+   archive DOI n'est produite pour l'RC (comportement de l'intégration
+   Zenodo). Ce n'est pas une erreur.
+5. La documentation de l'RC est publiée à la racine (docs `latest`) et
+   affiche la bannière « développement » ; aucune release candidate ne crée
+   de répertoire versionné propre (`X.Y.ZrcN/`) ni d'entrée dans le
+   dropdown des versions.
+6. Pour la finale `1.0.0`, relancer simplement le workflow avec
+   `versionString = 1.0.0`. La release finale est une release stable,
+   qui obtient le tag `spectrochempy-v1.0.0`, son répertoire de docs
+   versionné `1.0.0/` et son archive Zenodo.
+7. Après la publication de la finale, le classifieur PyPI passe à
+   `5 - Production/Stable` (dérivé par `release_version.py`) — les RC et
+   les versions 0.x restent en `4 - Beta`.
 
 `latest.rst` ne doit pas être modifié manuellement : il est régénéré depuis
 `docs/sources/whatsnew/changelog.rst` par le hook pre-commit.

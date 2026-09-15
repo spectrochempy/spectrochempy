@@ -96,6 +96,16 @@ jobs:
         run: |
           . .venv/bin/activate
           mapfile -t tags < <(git tag --list 'spectrochempy-v*' | sort -V)
+          # Only use final stable releases: release candidates never get their
+          # own archived docs directory (they are published as root/latest docs).
+          stable_tags=()
+          for tag in "${tags[@]}"; do
+            version="${tag#spectrochempy-v}"
+            if [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              stable_tags+=("$tag")
+            fi
+          done
+          tags=("${stable_tags[@]}")
           keep_count=4
           start_index=0
           if (( ${#tags[@]} > keep_count )); then

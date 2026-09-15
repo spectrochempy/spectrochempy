@@ -18,6 +18,8 @@ from datetime import datetime
 from pathlib import Path
 
 import jinja2
+from packaging.version import InvalidVersion
+from packaging.version import Version
 from sphinx.ext.autodoc import ClassDocumenter
 
 # Ensure docs and executed notebooks import the in-tree source tree first.
@@ -375,6 +377,14 @@ if on_github_actions:
 previous_versions = os.environ.get("PREVIOUS_VERSIONS", "").split(",")
 
 
+def _is_prerelease_or_dev(version_str):
+    try:
+        ver = Version(version_str)
+        return bool(ver.is_prerelease or ver.is_devrelease)
+    except InvalidVersion:
+        return "dev" in version_str or "rc" in version_str
+
+
 def _stable_release_version():
     env_release = os.environ.get("LAST_RELEASE", "")
     if env_release:
@@ -382,23 +392,29 @@ def _stable_release_version():
 
     whatsnew_versions = []
     for path in (SRC / "whatsnew").glob("v*.rst"):
-        match = re.fullmatch(r"v(\d+\.\d+\.\d+)\.rst", path.name)
+        match = re.fullmatch(r"v(\d+\.\d+\.\d+(?:rc\d+)?)\.rst", path.name)
         if match:
             whatsnew_versions.append(match.group(1))
 
     if not whatsnew_versions:
         return ""
 
-    return max(
-        whatsnew_versions,
-        key=lambda value: tuple(int(part) for part in value.split(".")),
-    )
+    def _version(value):
+        try:
+            return Version(value)
+        except InvalidVersion:
+            return Version("0.0.0")
+
+    stable_versions = [v for v in whatsnew_versions if not _version(v).is_prerelease]
+    if not stable_versions:
+        stable_versions = whatsnew_versions
+    return max(stable_versions, key=_version)
 
 
 last_release = _stable_release_version()
 
 html_context = {
-    "current_version": "stable" if ("dev" not in version) else "latest",
+    "current_version": "latest" if _is_prerelease_or_dev(version) else "stable",
     "latest_version": f"{root}/index.html",
     "stable_release_url": f"{root}/{last_release}/index.html" if last_release else "",
     "previous_versions": os.environ.get("PREVIOUS_VERSIONS", "").split(","),  # Added

@@ -71,6 +71,17 @@ from contextlib import suppress
 from os import environ
 from pathlib import Path
 
+try:
+    from packaging.version import InvalidVersion
+    from packaging.version import Version
+except ImportError:  # pragma: no cover
+    InvalidVersion = ValueError
+
+    class Version:  # type: ignore[no-redef]
+        def __init__(self, version: str):
+            raise InvalidVersion(f"packaging is not available: {version}")
+
+
 from tools.helpers import sh
 
 # Suppress other specific warnings
@@ -104,6 +115,7 @@ TEMPDIRS = PROJECT.parent / "tempdirs"
 ON_GITHUB = os.environ.get("GITHUB_ACTIONS") == "true"
 CORE_TAG_PREFIX = "spectrochempy-v"
 SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
+RELEASE_VERSION_RE = re.compile(r"^\d+\.\d+\.\d+(?:rc\d+)?$")
 
 
 def _trace_ci(message):
@@ -115,15 +127,18 @@ def _canonical_doc_tag(tagname):
     """Return possible git tags and the version directory for a docs tag."""
     if tagname.startswith(CORE_TAG_PREFIX):
         version = tagname.removeprefix(CORE_TAG_PREFIX)
-        if SEMVER_RE.match(version):
+        if RELEASE_VERSION_RE.match(version):
             return [tagname], version
-    if SEMVER_RE.match(tagname):
+    if RELEASE_VERSION_RE.match(tagname):
         return [tagname, f"{CORE_TAG_PREFIX}{tagname}"], tagname
     return [tagname], tagname
 
 
 def _version_sort_key(version):
-    return tuple(int(part) for part in version.split("."))
+    try:
+        return Version(version)
+    except InvalidVersion:
+        return Version("0.0.0")
 
 
 def _get_published_versions(html_dir=HTML):
@@ -677,7 +692,14 @@ class BuildDocumentation:
         last_tag = self._get_previous_tag() if not self.tagname else None
         if self.tagname is not None:
             return self.tagname, last_tag, self.tagname
-        return version, last_tag, "latest" if "dev" in version else last_tag
+        try:
+            is_final = (
+                not Version(version).is_prerelease
+                and not Version(version).is_devrelease
+            )
+        except InvalidVersion:
+            is_final = "dev" not in version
+        return version, last_tag, last_tag if is_final else "latest"
 
     @staticmethod
     def _get_previous_tag():
