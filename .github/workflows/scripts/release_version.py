@@ -105,10 +105,13 @@ def release_notes_name(version: str) -> str:
 
 def docs_version(version: str) -> str:
     """
-    Return the documentation version directory for ``version``.
+    Return the documentation version identity for ``version``.
 
-    Release candidates keep their ``rcN`` suffix so that they never collide
-    with the matching final release documentation directory.
+    The full version identity (including any ``rcN`` suffix) is preserved
+    for metadata purposes. The choice between the root/``latest`` channel
+    and a stable archived directory is made by the documentation
+    publication logic (``docs/make.py``), not by this helper: release
+    candidates are published on ``latest`` and are never archived.
     """
     return canonical_version(version)
 
