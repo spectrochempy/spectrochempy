@@ -88,3 +88,18 @@ validation requires ``twine``. It never publishes anything or requires secrets.
 This first milestone validates locally rebuilt artifacts but does not yet
 retain them between jobs or gate the independent publication workflow;
 artifact upload is deferred to a later PR.
+
+CI: Added ``.github/workflows/scripts/release_version.py``, a single source of
+truth for release-candidate semantics built on ``packaging.version.Version``
+(accepts only canonical ``X.Y.Z`` or ``X.Y.ZrcN``, derives tag name, GitHub
+``prerelease`` flag, release-note filename, documentation version and next
+development version), and wired it into the release workflows. The release
+candidate input is now validated in ``prepare_new_release.yml``; ``publish_draft_new_release.yml``
+derives the prerelease flag and tag from the helper instead of hardcoding
+``prerelease: false``; ``update_version_and_release_notes.py`` preserves the
+``rcN`` suffix in CITATION.cff, Zenodo metadata and the release-note index;
+``build_package.yml``/``validate_release_artifacts.yml`` compute the next
+development version from the helper; ``docs/make.py``, ``docs/conf.py`` and
+``versions.js`` build release-candidate documentation as root/``latest`` and
+keep archives stable-only; ``build_docs_archived_versions.yml`` skips RC tags.
+Included the focused script tests and the documented RC release procedure.
