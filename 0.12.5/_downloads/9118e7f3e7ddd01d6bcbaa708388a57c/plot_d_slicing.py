@@ -1,0 +1,67 @@
+# %%
+# ======================================================================================
+# Copyright (©) 2014-2026 Laboratoire Catalyse et Spectrochimie (LCS), Caen, France.
+# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
+# See full LICENSE agreement in the root directory.
+# ======================================================================================
+# ruff: noqa
+"""
+Slice an NDDataset with indices and coordinates
+===============================================
+
+This example shows how to combine standard Python slicing with
+coordinate-aware slicing on an infrared time series.
+"""
+
+import spectrochempy as scp
+
+# %%
+# Load and inspect the dataset
+# -----------------------------
+dataset = scp.read_omnic(
+    "irdata/CO@Mo_Al2O3.SPG",
+    description="CO adsorption, difference spectra",
+)
+dataset.y = (dataset.y - dataset[0].y).to("minute")
+dataset
+
+# %%
+prefs = scp.preferences
+prefs.figure.figsize = (7, 4)
+_ = dataset.plot()
+
+# %%
+# Integer-based slicing
+# ----------------------
+# Standard integer slices work as expected on both dimensions:
+first_four = dataset[:4]
+every_other_point = dataset[:, ::2]
+
+print(first_four.shape)
+print(every_other_point.shape)
+
+# %%
+# Coordinate-aware slicing
+# -------------------------
+# Using floats slices directly on axis coordinates instead of integer indices:
+carbonyl_region = dataset[:, 2300.0:1900.0]
+_ = carbonyl_region.plot()
+
+# %%
+# The same applies to the time axis:
+window = dataset[80.0:137.0, 2300.0:1900.0]
+_ = window.plot()
+
+# %%
+# Selecting the closest spectrum
+# -------------------------------
+# A single float selects the nearest spectrum on that axis:
+selected = dataset[60.0]
+selected.y
+
+# %%
+
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+#
+# scp.show()
