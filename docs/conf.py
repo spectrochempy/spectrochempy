@@ -414,9 +414,7 @@ def _stable_release_version():
 last_release = _stable_release_version()
 
 html_context = {
-    "current_version": "latest"
-    if _is_prerelease_or_dev(version)
-    else "stable",
+    "current_version": "latest" if _is_prerelease_or_dev(version) else "stable",
     "latest_version": f"{root}/index.html",
     "stable_release_url": f"{root}/{last_release}/index.html" if last_release else "",
     "previous_versions": os.environ.get("PREVIOUS_VERSIONS", "").split(","),  # Added

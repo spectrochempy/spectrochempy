@@ -693,9 +693,10 @@ class BuildDocumentation:
         if self.tagname is not None:
             return self.tagname, last_tag, self.tagname
         try:
-            is_final = not Version(version).is_prerelease and not Version(
-                version
-            ).is_devrelease
+            is_final = (
+                not Version(version).is_prerelease
+                and not Version(version).is_devrelease
+            )
         except InvalidVersion:
             is_final = "dev" not in version
         return version, last_tag, last_tag if is_final else "latest"

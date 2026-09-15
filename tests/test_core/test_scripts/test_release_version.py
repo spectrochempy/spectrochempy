@@ -229,9 +229,7 @@ WORKFLOWS = Path(__file__).parents[3] / ".github" / "workflows"
 
 
 def test_publish_draft_release_derives_tag_and_prerelease():
-    content = (WORKFLOWS / "publish_draft_new_release.yml").read_text(
-        encoding="utf-8"
-    )
+    content = (WORKFLOWS / "publish_draft_new_release.yml").read_text(encoding="utf-8")
     # The Create Release step must use the helper-derived values, not a
     # hard-coded stable tag / prerelease=false.
     assert "prerelease: false" not in content
@@ -242,9 +240,7 @@ def test_publish_draft_release_derives_tag_and_prerelease():
 
 
 def test_publish_draft_release_has_no_hardcoded_stable_tag():
-    content = (WORKFLOWS / "publish_draft_new_release.yml").read_text(
-        encoding="utf-8"
-    )
+    content = (WORKFLOWS / "publish_draft_new_release.yml").read_text(encoding="utf-8")
     assert "spectrochempy-v${{ github.event.inputs.versionString }}" not in content
 
 
@@ -264,9 +260,7 @@ def test_build_package_uses_helper_next_dev():
 
 
 def test_validate_release_artifacts_uses_helper_next_dev():
-    content = (WORKFLOWS / "validate_release_artifacts.yml").read_text(
-        encoding="utf-8"
-    )
+    content = (WORKFLOWS / "validate_release_artifacts.yml").read_text(encoding="utf-8")
     assert "release_version.py next-dev" in content
     assert "IFS=. read -r CORE_MAJOR CORE_MINOR CORE_PATCH" not in content
     assert "CORE_PATCH + 1" not in content
@@ -283,9 +277,9 @@ def test_archived_docs_skips_release_candidate_tags():
 
 
 def test_update_script_no_longer_truncates_rc_versions():
-    content = (
-        WORKFLOWS / "scripts" / "update_version_and_release_notes.py"
-    ).read_text(encoding="utf-8")
+    content = (WORKFLOWS / "scripts" / "update_version_and_release_notes.py").read_text(
+        encoding="utf-8"
+    )
     # Zenodo / CITATION must keep the full version, including any rcN suffix.
     assert "'.'.join(version.split('.')[:3])" not in content
     assert "from release_version import" in content

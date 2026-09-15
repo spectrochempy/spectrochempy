@@ -12,9 +12,7 @@ from pathlib import Path
 
 import pytest
 
-SCRIPTS = (
-    Path(__file__).parents[3] / ".github" / "workflows" / "scripts"
-)
+SCRIPTS = Path(__file__).parents[3] / ".github" / "workflows" / "scripts"
 SCRIPT_PATH = SCRIPTS / "update_version_and_release_notes.py"
 
 _module = None

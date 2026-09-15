@@ -70,9 +70,7 @@ def parse_release(version: str) -> Version:
     try:
         return Version(version)
     except InvalidVersion as exc:  # pragma: no cover - regex already guards
-        raise ReleaseVersionError(
-            f"Unsupported release version {version!r}."
-        ) from exc
+        raise ReleaseVersionError(f"Unsupported release version {version!r}.") from exc
 
 
 def canonical_version(version: str) -> str:
