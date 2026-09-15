@@ -36,22 +36,36 @@ document.addEventListener("DOMContentLoaded", function () {
             .split('/')
             .filter(part => part.length > 0);
 
-        const versionPattern = /^\d+\.\d+\.\d+$/;
+        const versionPattern = /^\d+\.\d+\.\d+(?:rc\d+)?$/;
         return pathParts.length > 0 && versionPattern.test(pathParts[0])
             ? pathParts[0]
             : 'latest';
+    }
+
+    function parseVersion(v) {
+        const match = v.match(/^(\d+)\.(\d+)\.(\d+)(?:rc(\d+))?$/);
+        if (!match) {
+            return [0, 0, 0, Infinity];
+        }
+        const rc = match[4] === undefined ? Infinity : Number(match[4]);
+        return [Number(match[1]), Number(match[2]), Number(match[3]), rc];
     }
 
     function sortVersions(versions) {
         return versions
             .filter(v => typeof v === 'string' && v)
             .sort((a, b) => {
-                const partsA = a.split('.').map(Number);
-                const partsB = b.split('.').map(Number);
-                for (let i = 0; i < 3; i++) {
+                const partsA = parseVersion(a);
+                const partsB = parseVersion(b);
+                for (let i = 0; i < partsA.length; i++) {
                     if (partsA[i] !== partsB[i]) {
                         return partsB[i] - partsA[i];
                     }
+                }
+                // A final release sorts above its own release candidate
+                if (a.includes('rc') !== b.includes('rc') && partsA[0] === partsB[0]
+                    && partsA[1] === partsB[1] && partsA[2] === partsB[2]) {
+                    return a.includes('rc') ? 1 : -1;
                 }
                 return 0;
             });
@@ -73,7 +87,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (Array.isArray(manifest)) {
                 return manifest
                     .map(item => typeof item === 'string' ? item : item?.name)
-                    .filter(name => /^\d+\.\d+\.\d+$/.test(name));
+                    .filter(name => /^\d+\.\d+\.\d+(?:rc\d+)?$/.test(name));
             }
             return fallback;
         } catch {

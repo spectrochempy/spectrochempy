@@ -26,6 +26,8 @@ from pathlib import Path
 
 import yaml
 from packaging.version import Version
+from release_version import canonical_version
+from release_version import release_notes_name
 
 try:
     NO_CFFCONVERT = False
@@ -90,7 +92,7 @@ class Zenodo:
         """Update the version string metadata."""
         if version is None:
             version = gitversion
-        self._js["version"] = ".".join(version.split(".")[:3])
+        self._js["version"] = canonical_version(version)
 
     def __str__(self):
         return json.dumps(self._js, indent=2)
@@ -179,7 +181,7 @@ class Citation:
         """Update the version metadata."""
         if version is None:
             version = gitversion
-        self._citation.cffobj["version"] = ".".join(version.split(".")[:3])
+        self._citation.cffobj["version"] = canonical_version(version)
 
 
 def make_citation(version):
@@ -294,7 +296,7 @@ def make_release_note_index(revision):
         )
     else:
         # Handle release version
-        (WN / f"v{revision}.rst").write_text(
+        (WN / release_notes_name(revision)).write_text(
             changelog_content,
             encoding="utf-8",
             newline="\n",
@@ -383,7 +385,7 @@ def _generate_release_index(revision):
     # releases such as 0.10.x sort after 0.9.x.
     release_files = []
     for path in WN.glob("v*.rst"):
-        match = re.fullmatch(r"v(\d+\.\d+\.\d+)\.rst", path.name)
+        match = re.fullmatch(r"v(\d+\.\d+\.\d+(?:rc\d+)?)\.rst", path.name)
         if not match:
             continue
         version_str = match.group(1)

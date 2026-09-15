@@ -31,7 +31,7 @@ repos:
         description: Update version number and udate release notes
         entry: python .github/workflows/scripts/update_version_and_release_notes.py
         language: python
-        additional_dependencies: [pyyaml, cffconvert, setuptools_scm]
+        additional_dependencies: [pyyaml, cffconvert, setuptools_scm, packaging]
         pass_filenames: false
       - id: check_commit_prefix
         name: check commit message prefix
