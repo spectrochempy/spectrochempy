@@ -835,16 +835,14 @@ recette **canonique de `master`** (`recipe_origin=master-fallback`) :
    déterministe.
 
 > **Politique de borne : recette master vs pyproject.**  Les recettes Conda
-> officielles sur `master` déclarent `spectrochempy >=0.10` (borne basse
-> commune, pas de borne supérieure) par convention, alors que le
-> `pyproject.toml` de chaque plugin déclare `spectrochempy>=0.12,<0.13`
-> (bornes strictes du plugin).  Cette différence est **délibérée** : la
-> recette master couvre la résolution Conda (Python >=3.11, compatibilité
-> binaire avec la chaîne de compilation), tandis que le pyproject impose la
-> compatibilité API pour le code Python.  Le `master-fallback` aligne la
-> recette de récupération sur la borne **pyproject du tag** (ex.
-> `>=0.12,<0.13`), garantissant que l'artifact construit est compatible
-> avec le code réel du tag.
+> officielles et le `pyproject.toml` de chaque plugin déclarent désormais la
+> même politique `spectrochempy >=0.12,<2` (borne basse 0.12, borne haute
+> exclusive 2.x qui admet les release candidates 1.0.0rcN et les finales
+> 1.x).  La recette master et le pyproject expriment ainsi une
+> compatibilité identique.  Le `master-fallback` aligne la recette de
+> récupération sur la borne **pyproject du tag** (ex. `>=0.12,<0.13` pour les
+> tags historiques antérieurs à cet alignement), garantissant que l'artifact
+> construit est compatible avec le code réel du tag.
 
 4. La recette de récupération est écrite dans `plugins/<plugin>/recipe.yaml`
    du checkout du tag, puis consommée exactement comme une recette qui

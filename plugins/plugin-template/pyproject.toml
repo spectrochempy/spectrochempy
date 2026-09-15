@@ -19,7 +19,7 @@ requires-python = ">=3.11"
 classifiers = [
 ]
 dependencies = [
-    "spectrochempy>=0.12,<0.13",
+    "spectrochempy>=0.12,<2",
 ]
 
 # Uncomment and adjust when scaffolding a new plugin:
