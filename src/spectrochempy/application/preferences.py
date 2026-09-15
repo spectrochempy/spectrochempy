@@ -9,6 +9,7 @@ import textwrap
 from traitlets import TraitError
 
 from spectrochempy.application.application import app
+from spectrochempy.utils.decorators import warn_deprecated
 from spectrochempy.utils.file import pathclean
 from spectrochempy.utils.meta import Meta
 
@@ -206,8 +207,17 @@ class PreferencesSet(Meta):
         """
         List all plot parameters with their current and default value.
 
-        ..deprecated:: 1.0.0, use `list_all` instead. To be removed in 1.1.0.
+        .. deprecated:: 1.0.0
+           Use :meth:`list_all` instead. Removal is governed by the
+           SpectroChemPy deprecation policy.
         """
+        warn_deprecated(
+            "Preferences.all",
+            replace="Preferences.list_all",
+            since="1.0.0",
+            policy=True,
+            stacklevel=2,
+        )
         self.list_all()
 
     def help(self, key):

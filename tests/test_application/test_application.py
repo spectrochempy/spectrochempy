@@ -14,6 +14,7 @@ from spectrochempy.application.application import SpectroChemPy
 from spectrochempy.application.application import app
 from unittest.mock import patch
 import subprocess
+import sys
 
 
 def test_app_initialization():
@@ -28,6 +29,29 @@ def test_version_info():
     assert len(scp.version.split(".")) >= 3  # Should have at least major.minor.patch
     assert isinstance(scp.copyright, str)
     assert "LCS" in scp.copyright
+
+
+def test_package_status_is_stable_by_default():
+    """The package description must not label the whole API experimental."""
+    assert "feature-frozen during the release-candidate period" in scp.long_description
+    assert "stable in the" in scp.long_description
+    assert "final 1.0 release" in scp.long_description
+    assert "outside this commitment" in scp.long_description
+    assert "still experimental" not in scp.long_description
+
+
+def test_normal_import_has_no_package_experimental_warning(tmp_path):
+    """A normal import must not emit a package-level experimental warning."""
+    result = subprocess.run(
+        [sys.executable, "-W", "always", "-c", "import spectrochempy"],
+        capture_output=True,
+        text=True,
+        check=False,
+        env={**os.environ, "SCP_CONFIG_HOME": str(tmp_path)},
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "spectrochempy is still experimental" not in result.stderr.lower()
 
 
 def test_logging_levels():

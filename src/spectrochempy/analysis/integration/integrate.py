@@ -5,16 +5,14 @@
 # ======================================================================================
 """Integration methods."""
 
-__all__ = ["simps", "simpson", "trapezoid"]
+__all__ = ["simpson", "trapezoid"]
 
-__dataset_methods__ = ["simps", "simpson", "trapezoid"]
+__dataset_methods__ = ["simpson", "trapezoid"]
 
 import functools
 
 import numpy as np
 import scipy.integrate
-
-from spectrochempy.utils.decorators import deprecated
 
 
 def _integrate_method(method):
@@ -167,7 +165,6 @@ def simpson(dataset, *args, **kwargs):
 
     See Also
     --------
-    simps : An alias of ``simpson`` (deprecated).
     trapezoid : Integrate using the composite simpson rule.
 
     Example
@@ -179,13 +176,3 @@ def simpson(dataset, *args, **kwargs):
 
     """
     return scipy.integrate.simpson(np.asarray(dataset), **kwargs)
-
-
-@deprecated(replace="simpson")
-def simps(dataset, **kwargs):
-    return simpson(dataset, **kwargs)
-
-
-simps.__doc__ = f"""
-    An alias of ``simpson`` kept for backwards compatibility.
-{trapezoid.__doc__}"""

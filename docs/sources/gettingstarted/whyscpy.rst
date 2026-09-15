@@ -172,6 +172,13 @@ See the :ref:`See also <see_also>` page for complementary projects and
 :ref:`bibliography <bibliography>` for scientific works using or relating to
 SpectroChemPy.
 
+The public API intended for SpectroChemPy 1.0 is feature-frozen during the
+release-candidate period and declared stable with the final 1.0 release.
+Capabilities that remain experimental are identified explicitly in their own
+documentation and are outside that commitment. Deprecated APIs remain
+available for the compatibility period defined by the project deprecation
+policy and point users to their supported replacements.
+
 When another tool is more appropriate
 =====================================
 
@@ -190,9 +197,9 @@ You might NOT want to use SpectroChemPy if:
   NMR. Missing readers or methods can be suggested
   (:ref:`contributing.bugs_report`); requests are considered to broaden the
   supported scope.
-- you work on very sensitive applications (health, chemical safety, ...) where
-  the risk of using software under active development
-  cannot be accepted. That is a legitimate choice.
+- you work on very sensitive applications (health, chemical safety, ...) that
+  require certified or independently validated software. That is a legitimate
+  choice.
 - you are fully satisfied with your current tools. We do not dispute that, and
   we remain open to your opinion and suggestions
   (:ref:`contributing.bugs_report`).

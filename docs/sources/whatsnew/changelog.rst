@@ -83,12 +83,20 @@ Breaking Changes
 ~~~~~~~~~~~~~~~~
 .. Add here new breaking changes (do not delete this comment)
 
+- Removed the long-deprecated ``simps`` alias; use ``simpson`` instead.
+- Removed the long-deprecated ``force_stack`` compatibility behavior from
+  ``concatenate``; use ``stack`` directly.
+
 
 .. section
 
 Deprecations
 ~~~~~~~~~~~~
 .. Add here new deprecations (do not delete this comment)
+
+- ``Preferences.all()`` now emits the policy-compliant deprecation warning
+  that starts its compatibility period in 1.0. Use
+  ``Preferences.list_all()`` instead; no premature removal version is promised.
 
 
 .. section

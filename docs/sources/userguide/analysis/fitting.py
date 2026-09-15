@@ -233,8 +233,8 @@ _ = ndOH.plot()
 # %% [markdown]
 # We can perform a linear baseline correction to start with this data (see the
 # :doc:`baseline tutorial </userguide/processing/baseline>`).
-# For removing a linear baseline, the fastest method is however to use the `abc` (
-# automatic baseline correction)
+# For removing a linear baseline, the fastest method is `basc` (baseline
+# correction).
 
 # %%
 ndOHcorr = scp.basc(ndOH)
