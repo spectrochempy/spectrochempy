@@ -21,7 +21,7 @@ requirements:
     - setuptools >=64
   run:
     - python >=3.11
-    - spectrochempy >=0.10
+    - spectrochempy >=0.12,<2
     - numpy
 
 tests:

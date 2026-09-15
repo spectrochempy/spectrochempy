@@ -78,6 +78,17 @@ Deprecations
 Developer
 ~~~~~~~~~
 
+MAINT: Aligned the six official plugins (carroucell, hypercomplex, iris,
+nmr, perkinelmer, tensor) and the plugin template on a single core
+compatibility contract ``spectrochempy>=0.12,<2`` in both ``pyproject.toml``
+and ``recipe.yaml``. This admits the 1.0.0 release candidates (``1.0.0rcN``)
+and all 1.x final releases while excluding the next major (2.x). Rewrote
+``.github/workflows/scripts/check_plugin_core_compatibility.py`` on top of
+``packaging`` (correct PEP 440 semantics, including pre-releases) and made
+the gating scope explicit: the six official plugins are blocking, Cantera
+and the plugin template are informational only and never block a release.
+Added unit tests for the rewritten checker.
+
 MAINT: Added ``.github/workflows/scripts/validate_release_artifacts.py``, a
 standalone validator for release artifacts (Python wheel +
 sdist and Conda packages) that checks metadata consistency, archive safety,
