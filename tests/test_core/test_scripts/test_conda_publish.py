@@ -8,6 +8,7 @@ import json
 import sys
 import urllib.error
 from pathlib import Path
+from urllib.parse import urlparse
 
 import pytest
 
@@ -23,6 +24,11 @@ def load_module():
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module
+
+
+def _url_host(url: str) -> str:
+    """Exact hostname of *url* via ``urlparse`` (CodeQL-safe, no substring match)."""
+    return urlparse(url).hostname or ""
 
 
 # ---------------------------------------------------------------------------
@@ -401,9 +407,9 @@ class TestCheckPluginReleaseConsistencyNetwork:
         monkeypatch.chdir(tmp_path)
 
         def fake_fetch(url, timeout=30):
-            if "pypi.org" in url:
+            if _url_host(url) == "pypi.org":
                 return {"releases": {"0.1.11": [], "0.1.8": []}}
-            if "anaconda.org" in url:
+            if _url_host(url) == "api.anaconda.org":
                 return [{"version": "0.1.11", "labels": ["main"]}]
             return None
 
@@ -419,9 +425,9 @@ class TestCheckPluginReleaseConsistencyNetwork:
         monkeypatch.chdir(tmp_path)
 
         def fake_fetch(url, timeout=30):
-            if "pypi.org" in url:
+            if _url_host(url) == "pypi.org":
                 return {"releases": {"0.1.8": []}}
-            if "anaconda.org" in url:
+            if _url_host(url) == "api.anaconda.org":
                 return [{"version": "0.1.11", "labels": ["main"]}]
             return None
 
@@ -436,9 +442,9 @@ class TestCheckPluginReleaseConsistencyNetwork:
         monkeypatch.chdir(tmp_path)
 
         def fake_fetch(url, timeout=30):
-            if "pypi.org" in url:
+            if _url_host(url) == "pypi.org":
                 return {"releases": {"0.1.11": []}}
-            if "anaconda.org" in url:
+            if _url_host(url) == "api.anaconda.org":
                 return [{"version": "0.1.11", "labels": ["dev"]}]
             return None
 
@@ -454,9 +460,9 @@ class TestCheckPluginReleaseConsistencyNetwork:
         monkeypatch.chdir(tmp_path)
 
         def fake_fetch(url, timeout=30):
-            if "pypi.org" in url:
+            if _url_host(url) == "pypi.org":
                 raise module.ServiceUnavailableError("pypi.org: connection reset")
-            if "anaconda.org" in url:
+            if _url_host(url) == "api.anaconda.org":
                 return [{"version": "0.1.11", "labels": ["main"]}]
             return None
 
@@ -472,9 +478,9 @@ class TestCheckPluginReleaseConsistencyNetwork:
         monkeypatch.chdir(tmp_path)
 
         def fake_fetch(url, timeout=30):
-            if "pypi.org" in url:
+            if _url_host(url) == "pypi.org":
                 return {"releases": {"0.1.11": []}}
-            if "anaconda.org" in url:
+            if _url_host(url) == "api.anaconda.org":
                 raise module.ServiceUnavailableError("api.anaconda.org: HTTP 503")
             return None
 
@@ -836,8 +842,8 @@ class TestNoUploadProtection:
         """Verify fetch_json only accesses read-only API endpoints."""
         module = load_module()
         # The URLs in the module should be read-only API endpoints
-        assert "pypi.org/pypi" in module.PYPI_JSON_URL
-        assert "api.anaconda.org" in module.ANACONDA_FILES_URL
+        assert urlparse(module.PYPI_JSON_URL).hostname == "pypi.org"
+        assert urlparse(module.ANACONDA_FILES_URL).hostname == "api.anaconda.org"
 
 
 # ---------------------------------------------------------------------------

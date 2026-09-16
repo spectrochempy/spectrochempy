@@ -56,6 +56,11 @@ Bug Fixes
   variable and validated by structured JSON parsing in
   ``conda_publish.py`` (``matrix-contains`` / ``matrix-recipe``).
 
+- Removed the URL substring matching reported by CodeQL
+  (``py/incomplete-url-substring-sanitization``) in the ``conda_publish.py``
+  tests: test doubles and URL assertions now compare the exact hostname
+  parsed with ``urllib.parse.urlparse`` instead of checking ``"host" in url``.
+
 - Corrected the SRS series ``meta.collection_length``: it was the series
   first time (+1002, in minutes) incorrectly converted to seconds; it now
   equals the OMNIC "Total collection time", i.e. the series last time
