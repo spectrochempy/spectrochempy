@@ -758,12 +758,24 @@ anaconda show spectrocat/spectrochempy-XXX
 
 Ou utiliser le workflow automatisé **Verify plugin release consistency**
 (`verify_plugin_release_consistency.yml`) qui produit un tableau comparatif
-GitHub / PyPI / Conda pour **tous les tags de release historiques** des
-plugins officiels (`conda_publish.py check-all`, basé sur `git tag`).
+GitHub / PyPI / Conda pour les versions récentes stables des plugins
+officiels (`conda_publish.py check-all`, basé sur `git tag`).  Par défaut,
+la fenêtre est limitée aux **3 dernières versions stables par plugin**,
+sélectionnées par **ordre semver** (0.1.10 > 0.1.9, jamais lexicographique) :
+les tags core, dev et prerelease (`rc`, `devN`) sont exclus.  Un plugin
+ayant moins de 3 tags stables voit toutes ses versions vérifiées.
+`check-all --full-history` rétablit l'analyse de **tous** les tags
+historiques (utile pour un audit complet, mais prioritaire sur un état de
+réparation exhaustif).  Le résumé du workflow rapporte la fenêtre contrôlée
+et le nombre de versions hors périmètre.
+
 Il est déclenché manuellement et sur un planning hebdomadaire (lundi
-03:00 UTC) : un déclenchement à chaque push sur `master` maintiendrait la
-branche rouge tant que les releases historiques ne sont pas réparées.
-Une fois la récupération terminée, ce trigger peut être réactivé.
+03:00 UTC).  Avec la fenêtre récente-only, les manques historiques hors
+fenêtre ne rendent plus la branche rouge : seules les incohérences **dans
+la fenêtre** (versions récentes) font échouer le job.  Une ancienne version
+manquante encore visible dans la fenêtre n'est en revanche **pas** un
+bloqueur de release rc1 : seuls comptent pour la publication les manques
+sur les versions qui accompagneront la release (voir la procédure release).
 
 #### En cas d'échec de publication Conda
 
@@ -887,7 +899,8 @@ fonctions réutilisables pour :
   `pyproject.toml` illisible provoque une erreur (`exit 2`), jamais un
   « non officiel » silencieux
 - Vérifier la cohérence d'une release sur GitHub / PyPI / Conda
-  (`check-release`, `check-all` — historique, sur tous les tags plugins)
+  (`check-release` ; `check-all` — par défaut limité aux 3 dernières
+  versions stables par plugin, `--full-history` pour tous les tags)
 - Valider une release sur le checkout du tag (`validate-release`, bloquant)
 - Résoudre la recette à construire pour une réparation (`resolve-recipe`),
   avec bascule `master-fallback` pour les tags sans recette — émet
@@ -1170,8 +1183,11 @@ pip install spectrochempy-XXX==X.Y.Z
 ```
 
 Cette recommandation sera levée une fois que le workflow
-**Verify plugin release consistency** confirme l'alignement de toutes les
-versions stables sur GitHub, PyPI et Conda.
+**Verify plugin release consistency** confirme l'alignement des versions
+récentes sur GitHub, PyPI et Conda (fenêtre par défaut : 3 dernières
+versions stables par plugin).  L'historique complet reste auditable via
+`check-all --full-history` (uniquement en audit manuel, hors CI de
+branche).
 
 ---
 
