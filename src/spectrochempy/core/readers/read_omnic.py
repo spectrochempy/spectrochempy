@@ -1211,412 +1211,417 @@ def _read_srs(*args, **kwargs):
 
     # in this case, filename is actually a byte content
     fid = io.BytesIO(filename) if frombytes else open(filename, "rb")  # noqa: SIM115
+    try:
+        # read the file and determine whether it is a rapidscan or a high speed real time
+        is_rapidscan, is_highspeed, is_tg = False, False, False
 
-    # read the file and determine whether it is a rapidscan or a high speed real time
-    is_rapidscan, is_highspeed, is_tg = False, False, False
+        """ At pos=304 (hex:130) is the position of the '02' key for series. Here we don't use it.
+        Instead, we use one of the following sequence :
 
-    """ At pos=304 (hex:130) is the position of the '02' key for series. Here we don't use it.
-    Instead, we use one of the following sequence :
+        RapidScan series:
+        ----------------
+        the following sequence appears 3 times in the file
+        b'\x02\x00\x00\x00\x18\x00\x00\x00\x00\x00\x48\x43\x00\x50\x43\x47
 
-    RapidScan series:
-    ----------------
-    the following sequence appears 3 times in the file
-    b'\x02\x00\x00\x00\x18\x00\x00\x00\x00\x00\x48\x43\x00\x50\x43\x47
-
-    They are used to assert the srs file is rapid_scan and to locate headers and data:
-    - The 1st one is located 152 bytes after the series header position
-    - The 2nd one is located 152 bytes before the background header position and
-       56 bytes before either the background data / or the background title and infos
-       followed by the background data
-    - The 3rd one is located 60 bytes before the series data (spectre/ifg names and
-    intensities
+        They are used to assert the srs file is rapid_scan and to locate headers and data:
+        - The 1st one is located 152 bytes after the series header position
+        - The 2nd one is located 152 bytes before the background header position and
+           56 bytes before either the background data / or the background title and infos
+           followed by the background data
+        - The 3rd one is located 60 bytes before the series data (spectre/ifg names and
+        intensities
 
 
-    High Speed Real time series:
-    ---------------------------
-    the following sequence appears 4 times in the file:
-    b"\x02\x00\x00\x00\x18\x00\x00\x00\x00\x00\x48\x43\x00\xc8\xaf\x47"
+        High Speed Real time series:
+        ---------------------------
+        the following sequence appears 4 times in the file:
+        b"\x02\x00\x00\x00\x18\x00\x00\x00\x00\x00\x48\x43\x00\xc8\xaf\x47"
 
-    They are used to assert the srs file is high speed and to locate headers and data:
-    - The 1st one is located 152 bytes after the series header position
-    - The 2nd one is located 152 bytes before the background header position and
-       56 bytes before either the background data / or the background title and infos
-       followed by the background data
-    - The 3rd one is located 60 bytes before some data (don't know yet what it is)
-    - The 4th one is located 60 bytes before the series data (spectra)
+        They are used to assert the srs file is high speed and to locate headers and data:
+        - The 1st one is located 152 bytes after the series header position
+        - The 2nd one is located 152 bytes before the background header position and
+           56 bytes before either the background data / or the background title and infos
+           followed by the background data
+        - The 3rd one is located 60 bytes before some data (don't know yet what it is)
+        - The 4th one is located 60 bytes before the series data (spectra)
 
-    TGA/IR or GC series:
-    ---------------------------
-    the following sequence appears 3 times in the file:
-    b"\x02\x00\x00\x00\x18\x00\x00\x00\x00\x00", the next bytes can differ from
-    one file to another.
+        TGA/IR or GC series:
+        ---------------------------
+        the following sequence appears 3 times in the file:
+        b"\x02\x00\x00\x00\x18\x00\x00\x00\x00\x00", the next bytes can differ from
+        one file to another.
 
-    As it is common to other types of TG/IR they will be used to assert if the srs file
-    is TGA/IR or GC  *after the other formats*. They also allows locating headers and
-    data:
-    - The 1st one is located 152 bytes after the series header position
-    - The 2nd one is located 152 bytes before the background header position and
-       56 bytes before either the background data / or the background title and infos
-       followed by the background data
-    - The 3rd one is located 60 bytes before the series data (spectre/ifg names and
-    intensities ?
-    """
+        As it is common to other types of TG/IR they will be used to assert if the srs file
+        is TGA/IR or GC  *after the other formats*. They also allows locating headers and
+        data:
+        - The 1st one is located 152 bytes after the series header position
+        - The 2nd one is located 152 bytes before the background header position and
+           56 bytes before either the background data / or the background title and infos
+           followed by the background data
+        - The 3rd one is located 60 bytes before the series data (spectre/ifg names and
+        intensities ?
+        """
 
-    sub_rs = b"\x02\x00\x00\x00\x18\x00\x00\x00\x00\x00\x48\x43\x00\x50\x43\x47"
-    sub_hs = b"\x02\x00\x00\x00\x18\x00\x00\x00\x00\x00\x48\x43\x00\xc8\xaf\x47"
-    sub_tg = b"\x02\x00\x00\x00\x18\x00\x00\x00\x00\x00"
+        sub_rs = b"\x02\x00\x00\x00\x18\x00\x00\x00\x00\x00\x48\x43\x00\x50\x43\x47"
+        sub_hs = b"\x02\x00\x00\x00\x18\x00\x00\x00\x00\x00\x48\x43\x00\xc8\xaf\x47"
+        sub_tg = b"\x02\x00\x00\x00\x18\x00\x00\x00\x00\x00"
 
-    # find the first occurrence and determine whether the srs is rapidscan or high
-    # speed real time
-    fid.seek(0)
-    bytestring = fid.read()
+        # find the first occurrence and determine whether the srs is rapidscan or high
+        # speed real time
+        fid.seek(0)
+        bytestring = fid.read()
 
-    # try rapidscan first:
-    pos = bytestring.find(sub_rs, 1)
-    if pos > 0:
-        is_rapidscan = True
-    else:
-        # not rapidscan, try high speed real time
-        pos = bytestring.find(sub_hs, 1)
+        # try rapidscan first:
+        pos = bytestring.find(sub_rs, 1)
         if pos > 0:
-            is_highspeed = True
+            is_rapidscan = True
         else:
-            # neith rapid scan nor high speed real time, try TGA/IR
-            pos = bytestring.find(sub_tg, 1)
+            # not rapidscan, try high speed real time
+            pos = bytestring.find(sub_hs, 1)
             if pos > 0:
-                is_tg = True
+                is_highspeed = True
+            else:
+                # neith rapid scan nor high speed real time, try TGA/IR
+                pos = bytestring.find(sub_tg, 1)
+                if pos > 0:
+                    is_tg = True
 
+                else:
+                    raise NotImplementedError(
+                        "The reader is only implemented for Rapid Scan, "
+                        "High Speed Real Time, GC or TGA srs files. If you think "
+                        "your file belongs to one of these types, or if "
+                        "you'd like an update of the reader to read your "
+                        "file type, please report the issue on "
+                        "https://github.com/spectrochempy/spectrochempy"
+                        "/issues ",
+                    )
+
+        if is_rapidscan:
+            # determine whether the srs is reprocessed. At pos=292 (hex:124) appears a
+            # difference between pristine and reprocessed series
+            fid.seek(292)
+            key = fromfile(fid, dtype="uint8", count=16)[0]
+            if key == 39:  # (hex: 27)
+                is_reprocessed = False
+            elif key == 15:  # (hex = 0F)
+                is_reprocessed = True
             else:
                 raise NotImplementedError(
-                    "The reader is only implemented for Rapid Scan, "
-                    "High Speed Real Time, GC or TGA srs files. If you think "
-                    "your file belongs to one of these types, or if "
-                    "you'd like an update of the reader to read your "
-                    "file type, please report the issue on "
+                    "The file is not recognized as a Rapid Scan "
+                    "srs file. Please report the issue on "
                     "https://github.com/spectrochempy/spectrochempy"
                     "/issues ",
                 )
 
-    if is_rapidscan:
-        # determine whether the srs is reprocessed. At pos=292 (hex:124) appears a
-        # difference between pristine and reprocessed series
-        fid.seek(292)
-        key = fromfile(fid, dtype="uint8", count=16)[0]
-        if key == 39:  # (hex: 27)
-            is_reprocessed = False
-        elif key == 15:  # (hex = 0F)
-            is_reprocessed = True
-        else:
-            raise NotImplementedError(
-                "The file is not recognized as a Rapid Scan "
-                "srs file. Please report the issue on "
-                "https://github.com/spectrochempy/spectrochempy"
-                "/issues ",
-            )
+            # find the 2 following starting indexes of sub_rs.
+            # we will use the 1st (-> series info), the 2nd (-> background) and
+            # the 3rd  (-> data)
 
-        # find the 2 following starting indexes of sub_rs.
-        # we will use the 1st (-> series info), the 2nd (-> background) and
-        # the 3rd  (-> data)
+            fid.seek(0)
+            bytestring = fid.read()
+            index = [pos]
+            while pos != -1:
+                pos = bytestring.find(sub_rs, pos + 1)
+                index.append(pos)
 
-        fid.seek(0)
-        bytestring = fid.read()
-        index = [pos]
-        while pos != -1:
-            pos = bytestring.find(sub_rs, pos + 1)
-            index.append(pos)
+            index = np.array(index[:-1]) + [-152, -152, 60]
 
-        index = np.array(index[:-1]) + [-152, -152, 60]
+            if len(index) != 3:
+                raise NotImplementedError(
+                    "The file is not recognized as a Rapid Scan "
+                    "srs file. Please report the issue on "
+                    "https://github.com/spectrochempy/spectrochempy"
+                    "/issues ",
+                )
 
-        if len(index) != 3:
-            raise NotImplementedError(
-                "The file is not recognized as a Rapid Scan "
-                "srs file. Please report the issue on "
-                "https://github.com/spectrochempy/spectrochempy"
-                "/issues ",
-            )
+            pos_info_data = index[0]
+            pos_info_bg = index[1]
+            pos_data = index[2]
 
-        pos_info_data = index[0]
-        pos_info_bg = index[1]
-        pos_data = index[2]
+            # read series data, except if the user asks for the background
+            if not return_bg:
+                info = _read_header(fid, pos_info_data)
+                names, data = _read_srs_spectra(fid, pos_data, info["ny"], info["nx"])
 
-        # read series data, except if the user asks for the background
-        if not return_bg:
-            info = _read_header(fid, pos_info_data)
-            names, data = _read_srs_spectra(fid, pos_data, info["ny"], info["nx"])
+                # now get series history
+                if not is_reprocessed:
+                    history = info["history"]
+                else:
+                    # In reprocessed series the updated "DATA PROCESSING HISTORY" is located right after
+                    # the following 16 byte sequence:
+                    sub = b"\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff"
+                    pos = bytestring.find(sub) + 16
+                    history = _readbtext(fid, pos, None)
 
-            # now get series history
-            if not is_reprocessed:
-                history = info["history"]
-            else:
-                # In reprocessed series the updated "DATA PROCESSING HISTORY" is located right after
-                # the following 16 byte sequence:
+            # read the background if the user asked for it.
+            if return_bg:
+                # First get background info
+                info = _read_header(fid, pos_info_bg)
+
+                if "background_name" not in info:
+                    # it is a short header
+                    fid.seek(index[1] + 208)
+                    data = fromfile(fid, dtype="float32", count=info["nx"])
+                else:
+                    # longer header, in such case the header indicates a spectrum
+                    # but the data are those of an ifg... For now need more examples
+                    return None
+
+                # uncomment below to load the last datafield has the same dimension as the time axis
+                # its function is not known. related to Grams-schmidt ?
+
+                # pos = _nextline(pos)
+                # found = False
+                # while not found:
+                #     pos += 16
+                #     f.seek(pos)
+                #     key = fromfile(f, dtype='uint8', count=1)
+                #     if key == 1:
+                #         pos += 4
+                #         f.seek(pos)
+                #         X = fromfile(f, dtype='float32', count=info['ny'])
+                #         found = True
+                #
+                # X = NDDataset(X)
+                # _x = Coord(np.around(np.linspace(0, info['ny']-1, info['ny']), 0),
+                #            title='time',
+                #            units='minutes')
+                # X.set_coordset(x=_x)
+                # X.name = '?'
+                # X.title = '?'
+                # X.description = 'unknown'
+                # X.history = str(datetime.now(timezone.utc)) + ':imported from srs
+
+        if is_highspeed:
+            # find the 3 following starting indexes of sub.
+            # 1st -> series info),
+            # 2nd -> background ?
+            # 3rd -> data ?
+            # 4th  -> ?
+            fid.seek(0)
+            bytestring = fid.read()
+            index = [pos]
+            while pos != -1:
+                pos = bytestring.find(sub_hs, pos + 1)
+                index.append(pos)
+
+            index = np.array(index[:-1]) + [-152, -152, 0, 60]
+
+            pos_info_data = index[0]
+            pos_bg = index[1]
+            pos_x = index[2]
+            pos_data = index[3]
+
+            if len(index) != 4:
+                raise NotImplementedError(
+                    "The file is not recognized as a High Speed Real "
+                    "Time srs file. Please report the issue on "
+                    "https://github.com/spectrochempy/spectrochempy"
+                    "/issues ",
+                )
+
+            if not return_bg:
+                info = _read_header(fid, pos_info_data)
+                # container for names and data
+
+                names, data = _read_srs_spectra(fid, pos_data, info["ny"], info["nx"])
+
+                # Get series history. on the sample file, the history seems overwritten by
+                # some post-processing, so info["history"] returns a corrupted string.
+                # The "DATA PROCESSING HISTORY" (as indicated by omnic) is located right
+                # after the following 16 byte sequence:
                 sub = (
-                    b"\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff"
+                    b"\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xff"
                 )
                 pos = bytestring.find(sub) + 16
                 history = _readbtext(fid, pos, None)
 
-        # read the background if the user asked for it.
-        if return_bg:
-            # First get background info
-            info = _read_header(fid, pos_info_bg)
+                # read the background if the user asked for it.
 
-            if "background_name" not in info:
-                # it is a short header
-                fid.seek(index[1] + 208)
-                data = fromfile(fid, dtype="float32", count=info["nx"])
-            else:
-                # longer header, in such case the header indicates a spectrum
-                # but the data are those of an ifg... For now need more examples
-                return None
+            elif return_bg:
+                # First get background info
+                info = _read_header(fid, pos_bg)
 
-            # uncomment below to load the last datafield has the same dimension as the time axis
-            # its function is not known. related to Grams-schmidt ?
+                if "background_name" not in info:
+                    # it is a short header
+                    fid.seek(index[1] + 208)
+                    data = fromfile(fid, dtype="float32", count=info["nx"])
+                else:
+                    # longer header, in such case the header indicates a spectrum
+                    # but the data are those of an ifg... For now need more examples
+                    return None
 
-            # pos = _nextline(pos)
-            # found = False
-            # while not found:
-            #     pos += 16
-            #     f.seek(pos)
-            #     key = fromfile(f, dtype='uint8', count=1)
-            #     if key == 1:
-            #         pos += 4
-            #         f.seek(pos)
-            #         X = fromfile(f, dtype='float32', count=info['ny'])
-            #         found = True
-            #
-            # X = NDDataset(X)
-            # _x = Coord(np.around(np.linspace(0, info['ny']-1, info['ny']), 0),
-            #            title='time',
-            #            units='minutes')
-            # X.set_coordset(x=_x)
-            # X.name = '?'
-            # X.title = '?'
-            # X.description = 'unknown'
-            # X.history = str(datetime.now(timezone.utc)) + ':imported from srs
+        if is_tg:
+            fid.seek(0)
+            bytestring = fid.read()
+            index = [pos]
+            while pos != -1:
+                pos = bytestring.find(sub_tg, pos + 1)
+                index.append(pos)
 
-    if is_highspeed:
-        # find the 3 following starting indexes of sub.
-        # 1st -> series info),
-        # 2nd -> background ?
-        # 3rd -> data ?
-        # 4th  -> ?
-        fid.seek(0)
-        bytestring = fid.read()
-        index = [pos]
-        while pos != -1:
-            pos = bytestring.find(sub_hs, pos + 1)
-            index.append(pos)
+            index = np.array(index[:-1]) + [-152, -152, 60]
 
-        index = np.array(index[:-1]) + [-152, -152, 0, 60]
+            if len(index) != 3:
+                raise NotImplementedError(
+                    "The file is not recognized as a TG IR or GC "
+                    "srs file. Please report the issue on "
+                    "https://github.com/spectrochempy/spectrochempy"
+                    "/issues ",
+                )
 
-        pos_info_data = index[0]
-        pos_bg = index[1]
-        pos_x = index[2]
-        pos_data = index[3]
+            pos_info_data = index[0]
+            pos_info_bg = index[1]
+            pos_data = index[2]
 
-        if len(index) != 4:
-            raise NotImplementedError(
-                "The file is not recognized as a High Speed Real "
-                "Time srs file. Please report the issue on "
-                "https://github.com/spectrochempy/spectrochempy"
-                "/issues ",
-            )
-
-        if not return_bg:
-            info = _read_header(fid, pos_info_data)
-            # container for names and data
-
-            names, data = _read_srs_spectra(fid, pos_data, info["ny"], info["nx"])
-
-            # Get series history. on the sample file, the history seems overwritten by
-            # some post-processing, so info["history"] returns a corrupted string.
-            # The "DATA PROCESSING HISTORY" (as indicated by omnic) is located right
-            # after the following 16 byte sequence:
-            sub = b"\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xff"
-            pos = bytestring.find(sub) + 16
-            history = _readbtext(fid, pos, None)
+            # read series data, except if the user asks for the background
+            if not return_bg:
+                info = _read_header(fid, pos_info_data)
+                names, data = _read_srs_spectra(fid, pos_data, info["ny"], info["nx"])
+                # Note: info["history"] is empty in TG IR or GC series
+                # the position of the history is indicated at pos 856 or 878 depending on the
+                # file.
 
             # read the background if the user asked for it.
+            if return_bg:
+                # First get background info
+                info = _read_header(fid, pos_info_bg)
 
-        elif return_bg:
-            # First get background info
-            info = _read_header(fid, pos_bg)
+                if "background_name" not in info:
+                    # it is a short header
+                    fid.seek(index[1] + 208)
+                    data = fromfile(fid, dtype="float32", count=info["nx"])
+                else:
+                    # longer header, in such case the header indicates a spectrum
+                    # but the data are those of an ifg... For now need more examples
+                    return None
 
-            if "background_name" not in info:
-                # it is a short header
-                fid.seek(index[1] + 208)
-                data = fromfile(fid, dtype="float32", count=info["nx"])
+        # Read the native series-level 'Collected' timestamp.
+        # This is used for the non-bg path only but is computed here because
+        # pos_info_data and is_tg are set by all variant branches above.
+        if not return_bg:
+            acquisition_date = _read_srs_acquisition_date(fid, pos_info_data, is_tg)
+        else:
+            acquisition_date = None
+
+        # Create NDDataset object for the series / background.
+        #
+        # The raw SRS spectral intensity array is stored ascending-wavenumber, but
+        # the public SpectroChemPy / `read_spa` convention presents OMNIC spectra
+        # with descending wavenumber and data matched to it. Spectral records are
+        # normalized here using each record's own firstx/lastx endpoints (which may
+        # differ between the series header and the background header). Interferogram
+        # records keep the raw ascending data-points coordinate and are never
+        # reversed. `_read_header` returns raw firstx/lastx without reordering them.
+        #
+        # The X axis is classified into one of three cases:
+        #
+        #   * spectral record: known physical spectral coordinate (xunit codes
+        #     1/3/4/32); normalize to the public descending-wavenumber convention.
+        #   * interferogram: explicit data-points axis (xunit code 2); keep the raw
+        #     ascending coordinate and leave data/order unchanged.
+        #   * unknown X-axis type: `xunits` is None but the axis is not a
+        #     data-points axis (the `_read_header` fallback for an unrecognized
+        #     x-unit code). Never silently classify this as an interferogram, and
+        #     do not apply spectral normalization to an axis whose meaning is
+        #     unknown. Leave the record in its raw storage orientation and warn.
+        if info["xunits"] is not None:
+            # spectral record
+            data_out = data[::-1] if return_bg else data[:, ::-1]
+            x0, x1 = (
+                max(info["firstx"], info["lastx"]),
+                min(info["firstx"], info["lastx"]),
+            )
+        elif info["xtitle"] == "data points":
+            # interferogram
+            data_out = data
+            x0, x1 = info["firstx"], info["lastx"]
+        else:
+            # unknown X-axis type
+            warning_(
+                "The nature of the SRS X axis is not recognized: "
+                "xunits is None and xtitle is "
+                f"{info['xtitle']!r}. The record is left in its raw storage "
+                "orientation and is not treated as an interferogram."
+            )
+            data_out = data
+            x0, x1 = info["firstx"], info["lastx"]
+
+        if return_bg:
+            dataset = NDDataset(np.expand_dims(data_out, axis=0))
+        else:
+            dataset = NDDataset(data_out)
+
+        # in case part of the spectra/ifg has been blanked:
+        dataset.mask = np.isnan(dataset.data)
+
+        dataset.units = info["units"]
+        dataset.title = info["title"]
+        dataset.origin = "omnic"
+        dataset.filename = filename
+
+        # now add coordinates
+
+        _x = Coord.linspace(
+            x0,
+            x1,
+            int(info["nx"]),
+            title=info["xtitle"],
+            units=info["xunits"],
+        )
+
+        # specific infos for series data
+        if not return_bg:
+            dataset.name = info["name"]
+            if acquisition_date is not None:
+                labels = [_srs_datetime_labels(acquisition_date, info), names]
             else:
-                # longer header, in such case the header indicates a spectrum
-                # but the data are those of an ifg... For now need more examples
-                return None
-
-    if is_tg:
-        fid.seek(0)
-        bytestring = fid.read()
-        index = [pos]
-        while pos != -1:
-            pos = bytestring.find(sub_tg, pos + 1)
-            index.append(pos)
-
-        index = np.array(index[:-1]) + [-152, -152, 60]
-
-        if len(index) != 3:
-            raise NotImplementedError(
-                "The file is not recognized as a TG IR or GC "
-                "srs file. Please report the issue on "
-                "https://github.com/spectrochempy/spectrochempy"
-                "/issues ",
+                labels = names
+            _y = Coord(
+                np.around(np.linspace(info["time_min"], info["lasty"], info["ny"]), 3),
+                title="Time",
+                units="minute",
+                labels=labels,
             )
 
-        pos_info_data = index[0]
-        pos_info_bg = index[1]
-        pos_data = index[2]
-
-        # read series data, except if the user asks for the background
-        if not return_bg:
-            info = _read_header(fid, pos_info_data)
-            names, data = _read_srs_spectra(fid, pos_data, info["ny"], info["nx"])
-            # Note: info["history"] is empty in TG IR or GC series
-            # the position of the history is indicated at pos 856 or 878 depending on the
-            # file.
-
-        # read the background if the user asked for it.
-        if return_bg:
-            # First get background info
-            info = _read_header(fid, pos_info_bg)
-
-            if "background_name" not in info:
-                # it is a short header
-                fid.seek(index[1] + 208)
-                data = fromfile(fid, dtype="float32", count=info["nx"])
-            else:
-                # longer header, in such case the header indicates a spectrum
-                # but the data are those of an ifg... For now need more examples
-                return None
-
-    # Read the native series-level 'Collected' timestamp.
-    # This is used for the non-bg path only but is computed here because
-    # pos_info_data and is_tg are set by all variant branches above.
-    if not return_bg:
-        acquisition_date = _read_srs_acquisition_date(fid, pos_info_data, is_tg)
-    else:
-        acquisition_date = None
-
-    # Create NDDataset object for the series / background.
-    #
-    # The raw SRS spectral intensity array is stored ascending-wavenumber, but
-    # the public SpectroChemPy / `read_spa` convention presents OMNIC spectra
-    # with descending wavenumber and data matched to it. Spectral records are
-    # normalized here using each record's own firstx/lastx endpoints (which may
-    # differ between the series header and the background header). Interferogram
-    # records keep the raw ascending data-points coordinate and are never
-    # reversed. `_read_header` returns raw firstx/lastx without reordering them.
-    #
-    # The X axis is classified into one of three cases:
-    #
-    #   * spectral record: known physical spectral coordinate (xunit codes
-    #     1/3/4/32); normalize to the public descending-wavenumber convention.
-    #   * interferogram: explicit data-points axis (xunit code 2); keep the raw
-    #     ascending coordinate and leave data/order unchanged.
-    #   * unknown X-axis type: `xunits` is None but the axis is not a
-    #     data-points axis (the `_read_header` fallback for an unrecognized
-    #     x-unit code). Never silently classify this as an interferogram, and
-    #     do not apply spectral normalization to an axis whose meaning is
-    #     unknown. Leave the record in its raw storage orientation and warn.
-    if info["xunits"] is not None:
-        # spectral record
-        data_out = data[::-1] if return_bg else data[:, ::-1]
-        x0, x1 = max(info["firstx"], info["lastx"]), min(info["firstx"], info["lastx"])
-    elif info["xtitle"] == "data points":
-        # interferogram
-        data_out = data
-        x0, x1 = info["firstx"], info["lastx"]
-    else:
-        # unknown X-axis type
-        warning_(
-            "The nature of the SRS X axis is not recognized: "
-            "xunits is None and xtitle is "
-            f"{info['xtitle']!r}. The record is left in its raw storage "
-            "orientation and is not treated as an interferogram."
-        )
-        data_out = data
-        x0, x1 = info["firstx"], info["lastx"]
-
-    if return_bg:
-        dataset = NDDataset(np.expand_dims(data_out, axis=0))
-    else:
-        dataset = NDDataset(data_out)
-
-    # in case part of the spectra/ifg has been blanked:
-    dataset.mask = np.isnan(dataset.data)
-
-    dataset.units = info["units"]
-    dataset.title = info["title"]
-    dataset.origin = "omnic"
-    dataset.filename = filename
-
-    # now add coordinates
-
-    _x = Coord.linspace(
-        x0,
-        x1,
-        int(info["nx"]),
-        title=info["xtitle"],
-        units=info["xunits"],
-    )
-
-    # specific infos for series data
-    if not return_bg:
-        dataset.name = info["name"]
-        if acquisition_date is not None:
-            labels = [_srs_datetime_labels(acquisition_date, info), names]
         else:
-            labels = names
-        _y = Coord(
-            np.around(np.linspace(info["time_min"], info["lasty"], info["ny"]), 3),
-            title="Time",
-            units="minute",
-            labels=labels,
-        )
+            _y = Coord()
 
-    else:
-        _y = Coord()
+        dataset.set_coordset(y=_y, x=_x)
 
-    dataset.set_coordset(y=_y, x=_x)
+        # Set origin, description and history
+        dataset.origin = "omnic"
+        dataset.description = kwargs.get("description", "Dataset from omnic srs file.")
 
-    # Set origin, description and history
-    dataset.origin = "omnic"
-    dataset.description = kwargs.get("description", "Dataset from omnic srs file.")
-
-    if "history" in locals():
+        if "history" in locals():
+            dataset.history.append(
+                "Omnic 'DATA PROCESSING HISTORY' :\n"
+                "--------------------------------\n" + history,
+            )
         dataset.history.append(
-            "Omnic 'DATA PROCESSING HISTORY' :\n"
-            "--------------------------------\n" + history,
-        )
-    dataset.history.append(str(utcnow()) + ": imported from srs file " + str(filename))
-
-    dataset.meta.laser_frequency = info["reference_frequency"] * ur("cm^-1")
-    dataset.meta.collection_length = info["collection_length"] * ur("s")
-    dataset.meta.optical_velocity = info["optical_velocity"]
-
-    if not return_bg and acquisition_date is not None:
-        dataset.acquisition_date = acquisition_date
-
-    if dataset.x.units is None and dataset.x.title == "data points":
-        # interferogram
-        dataset.meta.interferogram = True
-        dataset.meta.td = list(dataset.shape)
-        dataset.x._zpd = int(np.argmax(dataset)[-1])  # zero path difference
-        dataset.x.set_laser_frequency()
-        dataset.x._use_time_axis = (
-            False  # True to have time, else it will  be optical path difference
+            str(utcnow()) + ": imported from srs file " + str(filename)
         )
 
-    fid.close()
+        dataset.meta.laser_frequency = info["reference_frequency"] * ur("cm^-1")
+        dataset.meta.collection_length = info["collection_length"] * ur("s")
+        dataset.meta.optical_velocity = info["optical_velocity"]
 
-    return dataset
+        if not return_bg and acquisition_date is not None:
+            dataset.acquisition_date = acquisition_date
+
+        if dataset.x.units is None and dataset.x.title == "data points":
+            # interferogram
+            dataset.meta.interferogram = True
+            dataset.meta.td = list(dataset.shape)
+            dataset.x._zpd = int(np.argmax(dataset)[-1])  # zero path difference
+            dataset.x.set_laser_frequency()
+            dataset.x._use_time_axis = (
+                False  # True to have time, else it will  be optical path difference
+            )
+
+        return dataset
+    finally:
+        fid.close()
 
 
 def _readbtext(fid, pos, size):
