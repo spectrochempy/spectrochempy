@@ -91,3 +91,38 @@ def test_shared_helper_release_notes_name():
 
     assert release_notes_name("1.0.0rc1") == "v1.0.0rc1.rst"
     assert release_notes_name("1.0.0") == "v1.0.0.rst"
+
+
+@pytest.mark.parametrize(
+    ("gitversion", "prepared", "expected"),
+    [
+        ("0.12.9.dev0", "1.0.0rc1", "1.0.0rc2.dev"),
+        ("1.0.0rc2.dev4", "1.0.0rc1", "1.0.0rc2.dev"),
+        ("1.0.0rc3.dev2", "1.0.0rc1", "1.0.0rc3.dev"),
+        ("1.0.0rc2.dev0", "1.0.0", "1.0.1.dev"),
+        ("0.12.9.dev0", "0.12.8", "0.12.9.dev"),
+    ],
+)
+def test_unreleased_notes_follow_prepared_release(
+    update_module, tmp_path, monkeypatch, gitversion, prepared, expected
+):
+    monkeypatch.setattr(update_module, "WN", tmp_path)
+    monkeypatch.setattr(update_module, "gitversion", gitversion)
+    changelog = "What's New in Revision {{ revision }}\n\npending fix\n"
+    (tmp_path / "changelog.rst").write_text(changelog, encoding="utf-8")
+    release_note = tmp_path / f"v{prepared}.rst"
+    release_note.write_text("frozen release notes\n", encoding="utf-8")
+    (tmp_path / "v0.1.0.rst").write_text("older release\n", encoding="utf-8")
+
+    update_module.make_release_note_index("unreleased")
+    latest = (tmp_path / "latest.rst").read_text(encoding="utf-8")
+    index = (tmp_path / "index.rst").read_text(encoding="utf-8")
+    assert f"What's New in Revision {expected}\n" in latest
+    assert "pending fix" in latest
+    assert "    latest\n" in index
+    assert release_note.read_text(encoding="utf-8") == "frozen release notes\n"
+    assert (tmp_path / "changelog.rst").read_text(encoding="utf-8") == changelog
+
+    update_module.make_release_note_index("unreleased")
+    assert (tmp_path / "latest.rst").read_text(encoding="utf-8") == latest
+    assert (tmp_path / "index.rst").read_text(encoding="utf-8") == index

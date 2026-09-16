@@ -363,6 +363,34 @@ Aller sur la
 [page des releases](https://github.com/spectrochempy/spectrochempy/releases)
 pour vérifier la Draft.
 
+### Récupérer un brouillon absent après fusion
+
+Si le workflow échoue avant de créer le brouillon, corriger le workflow pour
+les prochaines releases. Un **Re-run** conserve le commit et la définition du
+workflow de l'exécution initiale : il ne récupère pas une correction fusionnée
+plus tard. La fusion d'une PR de correction ordinaire ne déclenche pas non
+plus le job réservé aux branches `release/`.
+
+Pour récupérer RC1, vérifier d'abord dans les Releases du dépôt qu'aucun
+brouillon ni release `spectrochempy-v1.0.0rc1` n'existe déjà. Si un tag
+existe, vérifier qu'il pointe vers le commit RC1 ci-dessous ; arrêter en cas
+de divergence. Créer ensuite uniquement le brouillon sur ce commit exact :
+
+```bash
+gh release create spectrochempy-v1.0.0rc1 \
+  --repo spectrochempy/spectrochempy \
+  --target 801979cbd643300409e048eeb1ab02a44bcb266c \
+  --title "SpectroChemPy v1.0.0rc1" \
+  --draft --prerelease
+```
+
+Cette commande est une action manuelle de récupération, pas une étape de
+validation de la PR. Vérifier le brouillon et compléter ses notes avant
+l'étape de publication ci-dessous. Ne pas créer une nouvelle branche de
+release pour cette récupération : son commit de fusion changerait la cible
+RC1. Pour une autre version, adapter explicitement version, commit et statut
+de préversion.
+
 ### 7. Publier la Release GitHub
 
 - Éditer la Draft Release si nécessaire (ajouter des notes)

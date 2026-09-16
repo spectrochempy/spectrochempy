@@ -6,8 +6,8 @@
 
 :orphan:
 
-What's New in Revision 0.12.9.dev
+What's New in Revision 1.0.0rc2.dev
 ---------------------------------------------------------------------------------------
 
-These are the changes in SpectroChemPy-0.12.9.dev.
+These are the changes in SpectroChemPy-1.0.0rc2.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
