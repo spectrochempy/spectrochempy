@@ -667,10 +667,13 @@ class TestSelectStableVersionsForChecking:
             "0.1.9",
         ]
 
-    def test_zero_max_versions_returns_all(self):
+    def test_non_positive_max_versions_raises(self):
         module = load_module()
         tags = [("spectrochempy-nmr", "0.1.1"), ("spectrochempy-nmr", "0.1.2")]
-        assert module.select_stable_versions_for_checking(tags, max_versions=0) == tags
+        with pytest.raises(ValueError, match="positive integer"):
+            module.select_stable_versions_for_checking(tags, max_versions=0)
+        with pytest.raises(ValueError, match="positive integer"):
+            module.select_stable_versions_for_checking(tags, max_versions=-1)
 
 
 class TestCmdCheckAllWindowed:
@@ -801,6 +804,21 @@ class TestCmdCheckAllWindowed:
         for v in ("0.1.9", "0.1.11", "0.1.12"):
             assert f"| spectrochempy-nmr | {v} |" in out
         assert "| spectrochempy-carroucell | 0.1.9 |" in out
+
+    def test_cli_rejects_non_positive_max_versions(self, capsys):
+        module = load_module()
+        with pytest.raises(SystemExit):
+            module.parse_args(["check-all", "--max-versions", "0"])
+        assert "positive integer" in capsys.readouterr().err
+        with pytest.raises(SystemExit):
+            module.parse_args(["check-all", "--max-versions", "not-an-int"])
+        assert "must be an integer" in capsys.readouterr().err
+
+    def test_cli_full_history_accepts_unset_max_versions(self):
+        module = load_module()
+        args = module.parse_args(["check-all", "--full-history"])
+        assert args.full_history is True
+        assert args.max_versions == 3
 
 
 class TestValidateRelease:

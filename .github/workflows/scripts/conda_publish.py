@@ -541,10 +541,13 @@ def select_stable_versions_for_checking(
 
     Returns up to ``max_versions`` of the highest semver versions per plugin
     from git tags.  Plugins with fewer than ``max_versions`` tags return all
-    their versions.
+    their versions.  ``max_versions`` must be strictly positive; the full
+    history is only reachable through ``--full-history``.
     """
-    if not tags or max_versions <= 0:
+    if not tags:
         return list(tags)
+    if max_versions <= 0:
+        raise ValueError("max_versions must be a positive integer")
     from collections import defaultdict
 
     by_plugin: dict[str, list[tuple[str, str]]] = defaultdict(list)
@@ -760,7 +763,18 @@ def format_verification_report(checks: list[PluginReleaseCheck]) -> str:
 # ---------------------------------------------------------------------------
 
 
-def parse_args() -> argparse.Namespace:
+def _positive_int(value: str) -> int:
+    """Argparse type requiring a strictly positive integer."""
+    try:
+        n = int(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(f"must be an integer, got {value!r}") from exc
+    if n <= 0:
+        raise argparse.ArgumentTypeError(f"must be a positive integer, got {value!r}")
+    return n
+
+
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
 
@@ -798,9 +812,9 @@ def parse_args() -> argparse.Namespace:
     )
     p_all.add_argument(
         "--max-versions",
-        type=int,
+        type=_positive_int,
         default=3,
-        help="Maximum most-recent versions to check per plugin (default: 3)",
+        help="Maximum most-recent versions to check per plugin (must be a positive integer, default: 3)",
     )
     p_all.add_argument(
         "--full-history",
@@ -944,7 +958,7 @@ def parse_args() -> argparse.Namespace:
         help="Discovered-plugins matrix JSON (e.g. from $MATRIX_JSON)",
     )
 
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
 def cmd_verify_tag(args: argparse.Namespace) -> int:
@@ -989,7 +1003,7 @@ def cmd_check_all(args: argparse.Namespace) -> int:
                 "excluded": 0,
             }
         else:
-            max_versions = int(getattr(args, "max_versions", 3) or 3)
+            max_versions = getattr(args, "max_versions", 3)
             check_keys = select_stable_versions_for_checking(tags, max_versions)
             window = {
                 "mode": "windowed",
