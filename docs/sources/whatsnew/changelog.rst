@@ -1,4 +1,3 @@
-
 :orphan:
 
 What's New in Revision {{ revision }}
@@ -50,42 +49,14 @@ Bug Fixes
   replaces the generic JCAMP import event while retaining subsequent reader
   history entries.
 
-- Restored publication of official plugins (``[tool.spectrochempy]``
-  ``official-plugin = true``) on Conda, which was silently skipped by the
-  release workflow.  Added a recovery workflow to republish plugin versions
-  that are missing on ``spectrocat/main`` and a consistency check between
-  GitHub releases, PyPI and Conda. (#1611)
-
-- Fixed the plugin Conda release validation: the discovered-plugins matrix
-  (a JSON payload) was interpolated into shell scripts, whose parser stripped
-  every inner double quote and made the "Verify plugin in discovered matrix"
-  guard and the recipe-extraction step fail (or false-negative) on every
-  plugin release.  The matrix is now transported through an environment
-  variable and validated by structured JSON parsing in
-  ``conda_publish.py`` (``matrix-contains`` / ``matrix-recipe``).
-
-- Removed the URL substring matching reported by CodeQL
-  (``py/incomplete-url-substring-sanitization``) in the ``conda_publish.py``
-  tests: test doubles and URL assertions now compare the exact hostname
-  parsed with ``urllib.parse.urlparse`` instead of checking ``"host" in url``.
-
 - Corrected the SRS series ``meta.collection_length``: it was the series
   first time (+1002, in minutes) incorrectly converted to seconds; it now
   equals the OMNIC "Total collection time", i.e. the series last time
-  (+1006, in minutes) converted to seconds. The time axis is unchanged and
-  is still anchored at the series first time. (#1613)
-
-- Added the missing Conda recipe for ``spectrochempy-perkinelmer`` and
-  made the repair workflow take a bare ``X.Y.Z`` version (tag derived and
-  verified) with a closed plugin list.  Tags without a recipe are now
-  recoverable from the canonical ``master`` recipe with a deterministic
-  version injection and a core bound aligned with the tag pyproject
-  (``recipe_origin=master-fallback``).
-
-- Fixed a resource leak reported by CodeQL (``py/file-not-closed``) in
-  :func:`read_srs`: the underlying file handle opened by ``read_srs`` is now
-  closed on every exit path, including the early ``None`` returns and raised
-  errors, instead of only on the success path.
+  (+1006, in minutes) converted to seconds.  The time axis is unchanged and
+  is still anchored at the series first time.  Also fixed a resource leak in
+  :func:`read_srs`: the file handle opened by the reader is now closed on
+  every exit path, including the early ``None`` returns and raised errors,
+  instead of only on the success path. (#1613)
 
 
 .. section
@@ -123,6 +94,11 @@ Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
 
+MAINT: Defined the SpectroChemPy 1.0 stability boundary in the public
+documentation: the package-wide ``experimental`` claim is removed and the
+status of each public feature (stable, experimental or deprecated) is now
+stated explicitly, so that behaviour kept in 1.0 is clearly committed.
+
 MAINT: Aligned the six official plugins (carroucell, hypercomplex, iris,
 nmr, perkinelmer, tensor) and the plugin template on a single core
 compatibility contract ``spectrochempy>=0.12,<2`` in both ``pyproject.toml``
@@ -133,6 +109,25 @@ and all 1.x final releases while excluding the next major (2.x). Rewrote
 the gating scope explicit: the six official plugins are blocking, Cantera
 and the plugin template are informational only and never block a release.
 Added unit tests for the rewritten checker.
+
+CI: Restored the publication of official plugins
+(``[tool.spectrochempy]`` ``official-plugin = true``) on Conda, which was
+silently skipped by the release workflow, and added a recovery workflow to
+republish plugin versions that are missing on ``spectrocat/main`` together
+with a consistency check between GitHub releases, PyPI and Conda. (#1611)
+
+CI: Fixed the plugin Conda release validation: the discovered-plugins matrix
+(a JSON payload) was interpolated into shell scripts, whose parser stripped
+every inner double quote and made the "Verify plugin in discovered matrix"
+guard and the recipe-extraction step fail (or false-negative) on every
+plugin release.  The matrix is now transported through an environment
+variable and validated by structured JSON parsing in ``conda_publish.py``
+(``matrix-contains`` / ``matrix-recipe``).  Also added the missing Conda
+recipe for ``spectrochempy-perkinelmer`` and made the repair workflow take a
+bare ``X.Y.Z`` version (tag derived and verified) with a closed plugin list;
+tags without a recipe are now recoverable from the canonical ``master``
+recipe with a deterministic version injection and a core bound aligned with
+the tag pyproject (``recipe_origin=master-fallback``).
 
 MAINT: Added ``.github/workflows/scripts/validate_release_artifacts.py``, a
 standalone validator for release artifacts (Python wheel +
@@ -159,3 +154,8 @@ development version from the helper; ``docs/make.py``, ``docs/conf.py`` and
 ``versions.js`` build release-candidate documentation as root/``latest`` and
 keep archives stable-only; ``build_docs_archived_versions.yml`` skips RC tags.
 Included the focused script tests and the documented RC release procedure.
+
+CI: Removed the URL substring matching reported by CodeQL
+(``py/incomplete-url-substring-sanitization``) in the ``conda_publish.py``
+tests: test doubles and URL assertions now compare the exact hostname
+parsed with ``urllib.parse.urlparse`` instead of checking ``"host" in url``.
