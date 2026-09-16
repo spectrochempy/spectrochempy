@@ -590,6 +590,236 @@ class TestListPluginTags:
             ("spectrochempy-nmr", "0.1.11"),
         ]
 
+    def test_prerelease_and_dev_tags_excluded(self, tmp_path, monkeypatch):
+        """Pre-release and dev tags (rc, dev, four-component) are not releases."""
+        module = load_module()
+        self._make_tagged_repo(
+            tmp_path,
+            [
+                "spectrochempy-nmr-v0.1.11",
+                "spectrochempy-nmr-v0.1.12rc1",
+                "spectrochempy-nmr-v0.1.11.dev1",
+                "spectrochempy-nmr-v0.1.12.1",
+                "spectrochempy-v1.0.0rc1",
+            ],
+        )
+        monkeypatch.chdir(tmp_path)
+        assert module.list_plugin_tags() == [("spectrochempy-nmr", "0.1.11")]
+
+
+class TestSelectStableVersionsForChecking:
+    """Windowing policy of check-all (most-recent stable versions per plugin)."""
+
+    def test_empty_input(self):
+        module = load_module()
+        assert module.select_stable_versions_for_checking([]) == []
+
+    def test_semver_order_not_lexicographic(self):
+        module = load_module()
+        tags = [
+            ("spectrochempy-nmr", "0.1.8"),
+            ("spectrochempy-nmr", "0.1.10"),
+            ("spectrochempy-nmr", "0.1.9"),
+        ]
+        # 0.1.10 must sort after 0.1.9 (semver), not before it (lexicographic).
+        selected = module.select_stable_versions_for_checking(tags, max_versions=3)
+        assert [v for _, v in selected] == ["0.1.8", "0.1.9", "0.1.10"]
+        assert [v for _, v in module.select_stable_versions_for_checking(tags, 1)] == [
+            "0.1.10"
+        ]
+
+    def test_per_plugin_limit_of_three(self):
+        module = load_module()
+        tags = [
+            ("spectrochempy-nmr", "0.1.1"),
+            ("spectrochempy-nmr", "0.1.2"),
+            ("spectrochempy-nmr", "0.1.5"),
+            ("spectrochempy-nmr", "0.1.6"),
+            ("spectrochempy-nmr", "0.1.9"),
+        ]
+        selected = module.select_stable_versions_for_checking(tags, max_versions=3)
+        assert [v for _, v in selected] == ["0.1.5", "0.1.6", "0.1.9"]
+
+    def test_less_than_three_returns_all(self):
+        module = load_module()
+        tags = [
+            ("spectrochempy-perkinelmer", "0.1.1"),
+            ("spectrochempy-perkinelmer", "0.1.2"),
+        ]
+        selected = module.select_stable_versions_for_checking(tags, max_versions=3)
+        assert [v for _, v in selected] == ["0.1.1", "0.1.2"]
+
+    def test_limit_applied_per_plugin(self):
+        module = load_module()
+        tags = [
+            ("spectrochempy-carroucell", "0.1.1"),
+            ("spectrochempy-carroucell", "0.1.4"),
+            ("spectrochempy-carroucell", "0.1.2"),
+            ("spectrochempy-carroucell", "0.1.3"),
+            ("spectrochempy-iris", "0.1.9"),
+            ("spectrochempy-iris", "0.1.8"),
+        ]
+        selected = module.select_stable_versions_for_checking(tags, max_versions=3)
+        carroucell = [v for p, v in selected if p == "spectrochempy-carroucell"]
+        assert carroucell == ["0.1.2", "0.1.3", "0.1.4"]
+        assert [v for p, v in selected if p == "spectrochempy-iris"] == [
+            "0.1.8",
+            "0.1.9",
+        ]
+
+    def test_non_positive_max_versions_raises(self):
+        module = load_module()
+        tags = [("spectrochempy-nmr", "0.1.1"), ("spectrochempy-nmr", "0.1.2")]
+        with pytest.raises(ValueError, match="positive integer"):
+            module.select_stable_versions_for_checking(tags, max_versions=0)
+        with pytest.raises(ValueError, match="positive integer"):
+            module.select_stable_versions_for_checking(tags, max_versions=-1)
+
+
+class TestCmdCheckAllWindowed:
+    """check-all applies the per-plugin window by default (--max-versions 3)."""
+
+    def _make_repo(self, tmp_path, tags):
+        import subprocess
+
+        subprocess.run(["git", "init"], cwd=tmp_path, check=True, capture_output=True)
+        subprocess.run(
+            ["git", "config", "user.email", "test@test.com"],
+            cwd=tmp_path,
+            check=True,
+            capture_output=True,
+        )
+        subprocess.run(
+            ["git", "config", "user.name", "Test"],
+            cwd=tmp_path,
+            check=True,
+            capture_output=True,
+        )
+        (tmp_path / "file.txt").write_text("init")
+        subprocess.run(
+            ["git", "add", "."], cwd=tmp_path, check=True, capture_output=True
+        )
+        subprocess.run(
+            ["git", "commit", "-m", "init"],
+            cwd=tmp_path,
+            check=True,
+            capture_output=True,
+        )
+        for tag in tags:
+            subprocess.run(
+                ["git", "tag", tag], cwd=tmp_path, check=True, capture_output=True
+            )
+
+    def test_default_window_limits_to_three(self, tmp_path, monkeypatch, capsys):
+        module = load_module()
+        self._make_repo(
+            tmp_path,
+            [
+                "spectrochempy-nmr-v0.1.1",
+                "spectrochempy-nmr-v0.1.2",
+                "spectrochempy-nmr-v0.1.8",
+                "spectrochempy-nmr-v0.1.9",
+                "spectrochempy-nmr-v0.1.11",
+            ],
+        )
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setattr(
+            module,
+            "check_plugin_release_consistency",
+            lambda plugin, version, **kw: module.PluginReleaseCheck(
+                plugin=plugin, version=version, github_release=True, verdict="aligned"
+            ),
+        )
+        rc = module.cmd_check_all(
+            argparse.Namespace(
+                skip_network=True, as_json=False, full_history=False, max_versions=3
+            )
+        )
+        assert rc == 0
+        out = capsys.readouterr().out
+        assert "| spectrochempy-nmr | 0.1.1 |" not in out
+        assert "| spectrochempy-nmr | 0.1.2 |" not in out
+        for v in ("0.1.8", "0.1.9", "0.1.11"):
+            assert f"| spectrochempy-nmr | {v} |" in out
+        assert "check window: windowed (3/5)" in out
+
+    def test_full_history_checks_all_tags(self, tmp_path, monkeypatch, capsys):
+        module = load_module()
+        self._make_repo(
+            tmp_path,
+            [
+                "spectrochempy-nmr-v0.1.9",
+                "spectrochempy-nmr-v0.1.11",
+                "spectrochempy-nmr-v0.1.12",
+            ],
+        )
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setattr(
+            module,
+            "check_plugin_release_consistency",
+            lambda plugin, version, **kw: module.PluginReleaseCheck(
+                plugin=plugin, version=version, github_release=True, verdict="aligned"
+            ),
+        )
+        rc = module.cmd_check_all(
+            argparse.Namespace(
+                skip_network=True, as_json=False, full_history=True, max_versions=3
+            )
+        )
+        assert rc == 0
+        out = capsys.readouterr().out
+        assert "check window: full-history (3/3)" in out
+
+    def test_window_excludes_old_versions_and_flags_in_window(
+        self, tmp_path, monkeypatch, capsys
+    ):
+        """
+        A tag in the window with missing publication is still reported, while
+        older out-of-window versions are excluded from the report.
+        """
+        module = load_module()
+        self._make_repo(
+            tmp_path,
+            [
+                "spectrochempy-nmr-v0.1.1",
+                "spectrochempy-nmr-v0.1.9",
+                "spectrochempy-nmr-v0.1.11",
+                "spectrochempy-nmr-v0.1.12",
+                "spectrochempy-carroucell-v0.1.9",
+            ],
+        )
+        monkeypatch.chdir(tmp_path)
+        # skip_network: no registry data => conda_missing for every windowed check.
+        rc = module.cmd_check_all(
+            argparse.Namespace(
+                skip_network=True, as_json=False, full_history=False, max_versions=3
+            )
+        )
+        out = capsys.readouterr().out
+        assert rc == 1
+        assert "stable Conda missing" in out
+        # 0.1.1 is out of the 3-latest window for nmr -> excluded from the report.
+        assert "| spectrochempy-nmr | 0.1.1 |" not in out
+        assert "check window: windowed (4/5)" in out
+        for v in ("0.1.9", "0.1.11", "0.1.12"):
+            assert f"| spectrochempy-nmr | {v} |" in out
+        assert "| spectrochempy-carroucell | 0.1.9 |" in out
+
+    def test_cli_rejects_non_positive_max_versions(self, capsys):
+        module = load_module()
+        with pytest.raises(SystemExit):
+            module.parse_args(["check-all", "--max-versions", "0"])
+        assert "positive integer" in capsys.readouterr().err
+        with pytest.raises(SystemExit):
+            module.parse_args(["check-all", "--max-versions", "not-an-int"])
+        assert "must be an integer" in capsys.readouterr().err
+
+    def test_cli_full_history_accepts_unset_max_versions(self):
+        module = load_module()
+        args = module.parse_args(["check-all", "--full-history"])
+        assert args.full_history is True
+        assert args.max_versions == 3
+
 
 class TestValidateRelease:
     def _plugin_with_version(self, tmp_path, version):
@@ -868,6 +1098,14 @@ class TestTagRegex:
         assert module.TAG_RE.match("spectrochempy-nmr") is None
         assert module.TAG_RE.match("spectrochempy-nmr-v") is None
         assert module.TAG_RE.match("spectrochempy-nmr-vabc") is None
+
+    def test_prerelease_and_dev_versions_excluded(self):
+        """Pre-release/dev tags are not stable releases and never selected."""
+        module = load_module()
+        assert module.TAG_RE.match("spectrochempy-nmr-v0.1.12rc1") is None
+        assert module.TAG_RE.match("spectrochempy-nmr-v0.1.11.dev1") is None
+        assert module.TAG_RE.match("spectrochempy-nmr-v0.1.12.1") is None
+        assert module.TAG_RE.match("spectrochempy-v1.0.0rc1") is None
 
 
 # ---------------------------------------------------------------------------

@@ -532,6 +532,40 @@ def list_plugin_tags(cwd: str | Path = ".") -> list[tuple[str, str]]:
     return parsed
 
 
+def select_stable_versions_for_checking(
+    tags: list[tuple[str, str]],
+    max_versions: int = 3,
+) -> list[tuple[str, str]]:
+    """
+    Select the most recent stable versions to check per plugin.
+
+    Returns up to ``max_versions`` of the highest semver versions per plugin
+    from git tags.  Plugins with fewer than ``max_versions`` tags return all
+    their versions.  ``max_versions`` must be strictly positive; the full
+    history is only reachable through ``--full-history``.
+    """
+    if not tags:
+        return list(tags)
+    if max_versions <= 0:
+        raise ValueError("max_versions must be a positive integer")
+    from collections import defaultdict
+
+    by_plugin: dict[str, list[tuple[str, str]]] = defaultdict(list)
+    for plugin, version in tags:
+        by_plugin[plugin].append((plugin, version))
+    result: list[tuple[str, str]] = []
+    for versions in by_plugin.values():
+        # Order each plugin's versions in semver order first, so the window
+        # is the most recent ones regardless of the input tag order.
+        ordered = sorted(
+            versions,
+            key=lambda pair: tuple(int(p) for p in pair[1].split(".")),
+        )
+        result.extend(ordered[-max_versions:])
+    result.sort(key=lambda pair: (pair[0], tuple(int(p) for p in pair[1].split("."))))
+    return result
+
+
 def git_tag_exists(tag: str, cwd: str | Path = ".") -> bool:
     """
     Check if a git tag exists in the repository.
@@ -729,7 +763,18 @@ def format_verification_report(checks: list[PluginReleaseCheck]) -> str:
 # ---------------------------------------------------------------------------
 
 
-def parse_args() -> argparse.Namespace:
+def _positive_int(value: str) -> int:
+    """Argparse type requiring a strictly positive integer."""
+    try:
+        n = int(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(f"must be an integer, got {value!r}") from exc
+    if n <= 0:
+        raise argparse.ArgumentTypeError(f"must be a positive integer, got {value!r}")
+    return n
+
+
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
 
@@ -764,6 +809,17 @@ def parse_args() -> argparse.Namespace:
     )
     p_all.add_argument(
         "--json", action="store_true", dest="as_json", help="Output JSON"
+    )
+    p_all.add_argument(
+        "--max-versions",
+        type=_positive_int,
+        default=3,
+        help="Maximum most-recent versions to check per plugin (must be a positive integer, default: 3)",
+    )
+    p_all.add_argument(
+        "--full-history",
+        action="store_true",
+        help="Check all historical versions (overrides --max-versions)",
     )
 
     # list-official
@@ -902,7 +958,7 @@ def parse_args() -> argparse.Namespace:
         help="Discovered-plugins matrix JSON (e.g. from $MATRIX_JSON)",
     )
 
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
 def cmd_verify_tag(args: argparse.Namespace) -> int:
@@ -927,10 +983,42 @@ def cmd_check_release(args: argparse.Namespace) -> int:
 
 
 def cmd_check_all(args: argparse.Namespace) -> int:
-    """Check consistency for every official plugin release (all git tags)."""
+    """
+    Check consistency for official plugin releases within the check window.
+
+    By default only the most recent stable versions per plugin are checked
+    (``--max-versions``, default 3).  ``--full-history`` checks every
+    historical plugin tag instead.  In a non-git checkout, the versions
+    declared by the current ``pyproject.toml`` files are checked instead.
+    """
     tags = list_plugin_tags()
     if tags:
-        check_keys: list[tuple[str, str]] = tags
+        full_history = bool(getattr(args, "full_history", False))
+        if full_history:
+            check_keys: list[tuple[str, str]] = tags
+            window = {
+                "mode": "full-history",
+                "total": len(tags),
+                "checked": len(tags),
+                "excluded": 0,
+            }
+        else:
+            max_versions = getattr(args, "max_versions", 3)
+            check_keys = select_stable_versions_for_checking(tags, max_versions)
+            window = {
+                "mode": "windowed",
+                "total": len(tags),
+                "checked": len(check_keys),
+                "excluded": len(tags) - len(check_keys),
+                "max_versions": max_versions,
+            }
+        if window["excluded"]:
+            print(
+                f"::notice::Plugin check window: {window['checked']}/{window['total']} "
+                f"versions checked ({window['excluded']} older versions excluded "
+                f"by the {window['max_versions']}-latest per-plugin limit)",
+                file=sys.stderr,
+            )
     else:
         # Fallback when not inside a git checkout: check the versions declared
         # by the current pyproject.toml files.
@@ -940,6 +1028,12 @@ def cmd_check_all(args: argparse.Namespace) -> int:
             version = read_plugin_version(plugins_dir / plugin)
             if version:
                 check_keys.append((plugin, version))
+        window = {
+            "mode": "pyproject-fallback",
+            "total": len(check_keys),
+            "checked": len(check_keys),
+            "excluded": 0,
+        }
     checks: list[PluginReleaseCheck] = []
     for plugin, version in check_keys:
         checks.append(
@@ -951,6 +1045,9 @@ def cmd_check_all(args: argparse.Namespace) -> int:
         print(json.dumps([asdict(c) for c in checks], indent=2))
     else:
         print(format_verification_report(checks))
+        print(
+            f"# check window: {window['mode']} ({window['checked']}/{window['total']})"
+        )
     return 0 if all(c.verdict == "aligned" for c in checks) else 1
 
 

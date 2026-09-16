@@ -45,7 +45,7 @@ jobs:
           # counters are still produced before the workflow decides to fail.
           set +e
           python3 .github/workflows/scripts/conda_publish.py check-all \
-            --json > /tmp/check-results.json
+            --json > /tmp/check-results.json 2> /tmp/check-stderr.log
           rc=$?
           set -e
           echo "check_rc=$rc" >> "$GITHUB_OUTPUT"
@@ -95,6 +95,21 @@ jobs:
           }
 
           lines = ["## Plugin release consistency report", ""]
+
+          # Surface the check window (e.g. "N older versions excluded"), if the
+          # script reported one via a ::notice:: on stderr.
+          try:
+              notice = (
+                  line.removeprefix("::notice::").strip()
+                  for line in open("/tmp/check-stderr.log", encoding="utf-8")
+              )
+              window_line = next((n for n in notice if n.startswith("Plugin check window")), None)
+          except OSError:
+              window_line = None
+          if window_line:
+              lines.append(f"> {window_line}")
+              lines.append("")
+
           lines.append("| Plugin | Version | GitHub | PyPI | Conda main | Verdict |")
           lines.append("|--------|---------|--------|------|------------|---------|")
           for c in data:
