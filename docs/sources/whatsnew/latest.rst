@@ -74,6 +74,11 @@ Bug Fixes
   version injection and a core bound aligned with the tag pyproject
   (``recipe_origin=master-fallback``).
 
+- Fixed a resource leak reported by CodeQL (``py/file-not-closed``) in
+  :func:`read_srs`: the underlying file handle opened by ``read_srs`` is now
+  closed on every exit path, including the early ``None`` returns and raised
+  errors, instead of only on the success path.
+
 Breaking Changes
 ~~~~~~~~~~~~~~~~
 
