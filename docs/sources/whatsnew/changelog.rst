@@ -56,6 +56,14 @@ Bug Fixes
   that are missing on ``spectrocat/main`` and a consistency check between
   GitHub releases, PyPI and Conda. (#1611)
 
+- Fixed the plugin Conda release validation: the discovered-plugins matrix
+  (a JSON payload) was interpolated into shell scripts, whose parser stripped
+  every inner double quote and made the "Verify plugin in discovered matrix"
+  guard and the recipe-extraction step fail (or false-negative) on every
+  plugin release.  The matrix is now transported through an environment
+  variable and validated by structured JSON parsing in
+  ``conda_publish.py`` (``matrix-contains`` / ``matrix-recipe``).
+
 - Corrected the SRS series ``meta.collection_length``: it was the series
   first time (+1002, in minutes) incorrectly converted to seconds; it now
   equals the OMNIC "Total collection time", i.e. the series last time

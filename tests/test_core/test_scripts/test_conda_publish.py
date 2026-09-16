@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import importlib.util
+import json
 import sys
 import urllib.error
 from pathlib import Path
@@ -1491,3 +1492,165 @@ class TestConcurrencyKeyBehavior:
         assert len(lines) >= 1
         for line in lines:
             assert line != "cancel-in-progress: true"
+
+
+# ---------------------------------------------------------------------------
+# Discovered-plugins matrix (conda release guard and recipe extraction)
+# ---------------------------------------------------------------------------
+
+
+class _MatrixMixin:
+    @staticmethod
+    def _matrix(plugins=("spectrochempy-hypercomplex",)):
+        """Six-entry matrix as emitted by the discover-conda-plugins job."""
+        return json.dumps(
+            {
+                "plugin": [
+                    {
+                        "name": name,
+                        "recipe": f"plugins/{name}/recipe",
+                        "recipe_file": "recipe.yaml",
+                    }
+                    for name in (
+                        "spectrochempy-carroucell",
+                        "spectrochempy-hypercomplex",
+                        "spectrochempy-iris",
+                        "spectrochempy-nmr",
+                        "spectrochempy-perkinelmer",
+                        "spectrochempy-tensor",
+                    )
+                    if name in plugins
+                ]
+            }
+        )
+
+
+class TestMatrixPluginNames(_MatrixMixin):
+    OFFICIAL = (
+        "spectrochempy-carroucell",
+        "spectrochempy-hypercomplex",
+        "spectrochempy-iris",
+        "spectrochempy-nmr",
+        "spectrochempy-perkinelmer",
+        "spectrochempy-tensor",
+    )
+
+    def test_all_official_plugins_recognized(self):
+        module = load_module()
+        matrix = self._matrix(plugins=self.OFFICIAL)
+        assert module.matrix_plugin_names(matrix) == list(self.OFFICIAL)
+        assert all(name in module.matrix_plugin_names(matrix) for name in self.OFFICIAL)
+
+    def test_whitespace_insensitive(self):
+        module = load_module()
+        compact = self._matrix(plugins=self.OFFICIAL)
+        spaced = json.dumps(json.loads(compact), indent=4)
+        assert module.matrix_plugin_names(spaced) == list(self.OFFICIAL)
+
+    def test_empty_matrix(self):
+        module = load_module()
+        assert module.matrix_plugin_names('{"plugin": []}') == []
+
+    def test_malformed_matrix_raises(self):
+        module = load_module()
+        for payload in ("not-json", "{plugin:[}", '{"nope": []}'):
+            with pytest.raises(ValueError):
+                module.matrix_plugin_names(payload)
+
+
+class TestMatrixPluginEntry(_MatrixMixin):
+    def test_hypercomplex_entry(self):
+        module = load_module()
+        entry = module.matrix_plugin_entry(self._matrix(), "spectrochempy-hypercomplex")
+        assert entry["name"] == "spectrochempy-hypercomplex"
+        assert entry["recipe"] == "plugins/spectrochempy-hypercomplex/recipe"
+        assert entry["recipe_file"] == "recipe.yaml"
+
+    def test_unknown_plugin_raises(self):
+        module = load_module()
+        with pytest.raises(ValueError) as exc:
+            module.matrix_plugin_entry(self._matrix(), "spectrochempy-nope")
+        assert "not found" in str(exc.value)
+
+
+class TestCmdMatrixContains(_MatrixMixin):
+    def test_known_plugin_exit_zero(self, capsys):
+        module = load_module()
+        assert (
+            module.cmd_matrix_contains(
+                argparse.Namespace(
+                    plugin="spectrochempy-hypercomplex", matrix=self._matrix()
+                )
+            )
+            == 0
+        )
+        assert "confirmed" in capsys.readouterr().out
+
+    def test_unknown_plugin_exit_one(self, capsys):
+        module = load_module()
+        assert (
+            module.cmd_matrix_contains(
+                argparse.Namespace(plugin="spectrochempy-nope", matrix=self._matrix())
+            )
+            == 1
+        )
+        assert "not found" in capsys.readouterr().err
+
+    def test_malformed_matrix_exit_two(self, capsys):
+        module = load_module()
+        assert (
+            module.cmd_matrix_contains(
+                argparse.Namespace(plugin="spectrochempy-hypercomplex", matrix="nope")
+            )
+            == 2
+        )
+        assert "::error::" in capsys.readouterr().err
+
+
+class TestCmdMatrixRecipe(_MatrixMixin):
+    def test_emits_github_output_lines(self, capsys):
+        module = load_module()
+        assert (
+            module.cmd_matrix_recipe(
+                argparse.Namespace(
+                    plugin="spectrochempy-hypercomplex", matrix=self._matrix()
+                )
+            )
+            == 0
+        )
+        lines = [ln for ln in capsys.readouterr().out.splitlines() if "=" in ln]
+        assert "recipe=plugins/spectrochempy-hypercomplex/recipe" in lines
+        assert "recipe_file=recipe.yaml" in lines
+
+    def test_unknown_plugin_exit_two(self, capsys):
+        module = load_module()
+        assert (
+            module.cmd_matrix_recipe(
+                argparse.Namespace(plugin="spectrochempy-nope", matrix=self._matrix())
+            )
+            == 2
+        )
+        assert "::error::" in capsys.readouterr().err
+
+
+class TestGuardNotShellInterpolated:
+    def test_matrix_never_interpolated_into_shell_script(self):
+        workflow = (
+            Path(__file__).parents[3] / ".github" / "workflows" / "build_package.yml"
+        ).read_text()
+        # The matrix JSON must be transported via an environment variable, never
+        # embedded in run: script text where bash strips the double quotes.
+        assert "MATRIX_JSON" in workflow
+        assert 'echo "$MATRIX" | grep' not in workflow
+        assert "json.loads('''${{" not in workflow
+
+    def test_values_use_github_expression_in_env_key(self):
+        workflow = (
+            Path(__file__).parents[3] / ".github" / "workflows" / "build_package.yml"
+        ).read_text()
+        assert (
+            "MATRIX_JSON: ${{ needs.discover-conda-plugins.outputs.matrix }}"
+            in workflow
+        )
+        assert "matrix-contains" in workflow
+        assert "matrix-recipe" in workflow

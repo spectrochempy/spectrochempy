@@ -357,6 +357,52 @@ def discover_official_plugins(plugins_dir: Path) -> list[str]:
     return results
 
 
+def _parse_plugin_matrix(matrix_json: str) -> list[dict]:
+    """
+    Parse a discovered-plugins matrix payload into its entry list.
+
+    The matrix is the JSON object produced by the ``discover-conda-plugins``
+    job: ``{"plugin": [{"name": ..., "recipe": ..., "recipe_file": ...}]}``.
+    Raises ValueError with a clear diagnostic when the payload is not a valid
+    plugin matrix.
+    """
+    try:
+        data = json.loads(matrix_json)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"invalid plugin matrix JSON: {exc}") from exc
+    if not isinstance(data, dict):
+        raise ValueError("plugin matrix is not a JSON object")
+    entries = data.get("plugin")
+    if not isinstance(entries, list):
+        raise ValueError("plugin matrix has no 'plugin' list")
+    for entry in entries:
+        if not isinstance(entry, dict) or "name" not in entry:
+            raise ValueError(f"plugin matrix entry has no 'name': {entry!r}")
+    return entries
+
+
+def matrix_plugin_names(matrix_json: str) -> list[str]:
+    """Return the sorted plugin names declared by a discovered-plugins matrix."""
+    return sorted(entry["name"] for entry in _parse_plugin_matrix(matrix_json))
+
+
+def matrix_plugin_entry(matrix_json: str, plugin: str) -> dict:
+    """
+    Return the matrix entry for ``plugin``.
+
+    Raises ValueError when the plugin is absent from the matrix or the matrix
+    is invalid.
+    """
+    for entry in _parse_plugin_matrix(matrix_json):
+        if entry["name"] == plugin:
+            return entry
+    names = ", ".join(matrix_plugin_names(matrix_json)) or "<none>"
+    raise ValueError(
+        f"plugin {plugin} not found in discovered plugins matrix "
+        f"(discovered: {names})"
+    )
+
+
 def fetch_json(url: str, timeout: int = 30) -> dict | list | None:
     """
     Fetch JSON from a URL.
@@ -822,6 +868,40 @@ def parse_args() -> argparse.Namespace:
     p_cs.add_argument("version")
     p_cs.add_argument("--owner", default="spectrocat")
 
+    # matrix-contains
+    p_mc = sub.add_parser(
+        "matrix-contains",
+        help=(
+            "Exit 0 if a plugin belongs to a discovered-plugins matrix, "
+            "exit 1 otherwise, exit 2 if the matrix cannot be parsed. The "
+            "matrix must be transported via an environment variable (never "
+            "shell-interpolated) so its JSON quoting survives intact."
+        ),
+    )
+    p_mc.add_argument("--plugin", required=True, help="Plugin package name")
+    p_mc.add_argument(
+        "--matrix",
+        required=True,
+        help="Discovered-plugins matrix JSON (e.g. from $MATRIX_JSON)",
+    )
+
+    # matrix-recipe
+    p_mr = sub.add_parser(
+        "matrix-recipe",
+        help=(
+            "Print GITHUB_OUTPUT-compatible recipe=/recipe_file= lines for a "
+            "plugin in a discovered-plugins matrix. The matrix must be "
+            "transported via an environment variable (never "
+            "shell-interpolated) so its JSON quoting survives intact."
+        ),
+    )
+    p_mr.add_argument("--plugin", required=True, help="Plugin package name")
+    p_mr.add_argument(
+        "--matrix",
+        required=True,
+        help="Discovered-plugins matrix JSON (e.g. from $MATRIX_JSON)",
+    )
+
     return parser.parse_args()
 
 
@@ -1144,6 +1224,45 @@ def cmd_conda_state(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_matrix_contains(args: argparse.Namespace) -> int:
+    """Exit 0 when the plugin belongs to the discovered-plugins matrix."""
+    try:
+        names = matrix_plugin_names(args.matrix)
+    except ValueError as exc:
+        print(f"::error::{exc}", file=sys.stderr)
+        return 2
+    if args.plugin not in names:
+        print(
+            f"::error::Plugin {args.plugin} not found in discovered conda "
+            f"plugins matrix (discovered: {', '.join(names) or '<none>'})",
+            file=sys.stderr,
+        )
+        return 1
+    print(f"Plugin {args.plugin} confirmed in conda plugins matrix")
+    return 0
+
+
+def cmd_matrix_recipe(args: argparse.Namespace) -> int:
+    """Print recipe=/recipe_file= lines for a plugin in the matrix."""
+    try:
+        entry = matrix_plugin_entry(args.matrix, args.plugin)
+    except ValueError as exc:
+        print(f"::error::{exc}", file=sys.stderr)
+        return 2
+    try:
+        recipe = entry["recipe"]
+        recipe_file = entry["recipe_file"]
+    except KeyError as exc:
+        print(
+            f"::error::matrix entry for {args.plugin} lacks {exc}",
+            file=sys.stderr,
+        )
+        return 2
+    print(f"recipe={recipe}")
+    print(f"recipe_file={recipe_file}")
+    return 0
+
+
 def main() -> int:
     args = parse_args()
     commands = {
@@ -1158,6 +1277,8 @@ def main() -> int:
         "upload-conda": cmd_upload,
         "verify-conda": cmd_verify_conda,
         "conda-state": cmd_conda_state,
+        "matrix-contains": cmd_matrix_contains,
+        "matrix-recipe": cmd_matrix_recipe,
     }
     return commands.get(args.command, lambda _: 1)(args)
 

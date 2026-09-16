@@ -622,15 +622,16 @@ jobs:
           python-version: "3.11"
 
       - name: Verify plugin in discovered matrix
+        env:
+          PLUGIN: ${{ needs.detect-release-scope.outputs.plugin_name }}
+          MATRIX_JSON: ${{ needs.discover-conda-plugins.outputs.matrix }}
         run: |
-          PLUGIN="${{ needs.detect-release-scope.outputs.plugin_name }}"
-          MATRIX="${{ needs.discover-conda-plugins.outputs.matrix }}"
-          if ! echo "$MATRIX" | grep -q "\"name\":\"$PLUGIN\""; then
-            echo "::error::Plugin $PLUGIN not found in discovered conda plugins matrix"
-            echo "Matrix: $MATRIX"
-            exit 1
-          fi
-          echo "Plugin $PLUGIN confirmed in conda plugins matrix"
+          # The matrix JSON is transported via an environment variable so its
+          # quoting survives intact: shell-interpolating it into the script
+          # text strips every inner double quote and makes any textual grep
+          # against it a false negative. Use the structured parser instead.
+          python3 .github/workflows/scripts/conda_publish.py matrix-contains \
+            --plugin "$PLUGIN" --matrix "$MATRIX_JSON"
 
       - name: Validate plugin metadata against the tag
         run: |
@@ -652,22 +653,13 @@ jobs:
 
       - name: Extract plugin recipe info from matrix
         id: recipe-info
+        env:
+          PLUGIN: ${{ needs.detect-release-scope.outputs.plugin_name }}
+          MATRIX_JSON: ${{ needs.discover-conda-plugins.outputs.matrix }}
         run: |
-          PLUGIN="${{ needs.detect-release-scope.outputs.plugin_name }}"
-          python3 -c "
-          import json, sys
-          matrix = json.loads('''${{ needs.discover-conda-plugins.outputs.matrix }}''')
-          for p in matrix.get('plugin', []):
-              if p['name'] == '$PLUGIN':
-                  print(f\"recipe={p['recipe']}\")
-                  print(f\"recipe_file={p['recipe_file']}\")
-                  with open('$GITHUB_OUTPUT', 'a') as f:
-                      f.write(f\"recipe={p['recipe']}\n\")
-                      f.write(f\"recipe_file={p['recipe_file']}\n\")
-                  sys.exit(0)
-          print(f'::error::Plugin $PLUGIN not in matrix', file=sys.stderr)
-          sys.exit(1)
-          "
+          # Same structured, env-transported parsing as the verify step above.
+          python3 .github/workflows/scripts/conda_publish.py matrix-recipe \
+            --plugin "$PLUGIN" --matrix "$MATRIX_JSON" >> "$GITHUB_OUTPUT"
 
       - name: Build conda plugin package
         uses: prefix-dev/rattler-build-action@v0.2.39
