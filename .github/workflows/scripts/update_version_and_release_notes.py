@@ -27,6 +27,7 @@ from pathlib import Path
 import yaml
 from packaging.version import Version
 from release_version import canonical_version
+from release_version import next_dev_version
 from release_version import release_notes_name
 
 try:
@@ -248,6 +249,15 @@ def make_release_note_index(revision):
     # Handle version string
     if revision == "unreleased":
         revision = gitversion.split(".dev")[0]
+        # A release PR records its notes before the tag is published. Until
+        # then SCM (or CI's pretend version) can still describe the old series.
+        # Do not let development notes go backwards behind a prepared release.
+        for path in WN.glob("v*.rst"):
+            match = re.fullmatch(r"v(\d+\.\d+\.\d+(?:rc\d+)?)\.rst", path.name)
+            if match:
+                next_revision = next_dev_version(match.group(1))
+                if Version(next_revision) > Version(revision):
+                    revision = next_revision
         revision = revision + ".dev"
 
     # Process changelog content
