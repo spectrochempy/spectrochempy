@@ -58,7 +58,7 @@ def plot_1D(dataset, method=None, **kwargs):
         - ``scatter+pen``: scatter plot with solid line
 
 
-    **kwargs : keyword arguments, optional
+    kwargs : keyword arguments, optional
         Additional matplotlib / plotting keyword arguments.
 
     Other Parameters
