@@ -26,6 +26,9 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Fixed ``average(..., keepdims=True)`` so reduced dimensions are retained in
+  both the data shape and dataset metadata, consistently with other reductions.
+
 - Restored asynchronous update notifications after lazy application startup.
   Stable installations now ignore prereleases, while release-candidate
   installations are notified about newer candidates and the final release.

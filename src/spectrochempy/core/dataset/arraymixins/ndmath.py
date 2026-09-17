@@ -1392,7 +1392,13 @@ class NDMath:
 
         """
         axis, dim = cls.get_axis(dim, allows_none=True)
-        m, sumweight = np.ma.average(dataset, axis=axis, weights=weights, returned=True)
+        m, sumweight = np.ma.average(
+            dataset,
+            axis=axis,
+            weights=weights,
+            returned=True,
+            keepdims=keepdims,
+        )
 
         if np.isscalar(m):
             return Quantity(m, cls.units) if cls.units is not None else m
