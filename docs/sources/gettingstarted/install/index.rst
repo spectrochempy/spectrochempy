@@ -143,7 +143,7 @@ If you prefer a standalone Python installation, use your platform's method:
          sudo dnf install python3.13
 
 Installing SpectroChemPy
------------------------
+------------------------
 
 Create Environment
 ~~~~~~~~~~~~~~~~~~

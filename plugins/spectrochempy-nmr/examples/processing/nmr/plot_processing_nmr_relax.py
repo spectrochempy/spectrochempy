@@ -58,7 +58,7 @@ _ = ds.plot(xlim=(100, -50))
 
 # %%
 # Build a signal trace from the dominant resonance
-# -----------------------------------------------
+# ------------------------------------------------
 # The strongest processed peak in this series sits around 20–22 ppm.
 # We integrate a narrow ppm window around that resonance for each delay.
 signal = ds[:, 20.0:45.0].simpson()

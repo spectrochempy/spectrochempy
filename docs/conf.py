@@ -816,6 +816,7 @@ exclusions = (
     "clear_instance",
     "cross_validation_lock",
     "document_config_options",
+    "default_format",
     "flatten_flags",
     "generate_config_file",
     "has_trait",
