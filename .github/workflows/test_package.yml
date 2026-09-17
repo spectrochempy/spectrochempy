@@ -171,8 +171,8 @@ jobs:
             echo "SETUPTOOLS_SCM_PRETEND_VERSION=0.10.1.dev0" >> "$GITHUB_ENV"
           else
             VERSION="${LATEST_TAG#spectrochempy-v}"
-            IFS=. read -r MAJOR MINOR PATCH <<< "$VERSION"
-            echo "SETUPTOOLS_SCM_PRETEND_VERSION=${MAJOR}.${MINOR}.$((PATCH + 1)).dev0" >> "$GITHUB_ENV"
+            NEXT_DEV=$(python .github/workflows/scripts/release_version.py next-dev "$VERSION")
+            echo "SETUPTOOLS_SCM_PRETEND_VERSION=${NEXT_DEV}.dev0" >> "$GITHUB_ENV"
           fi
 
       - name: Install spectrochempy

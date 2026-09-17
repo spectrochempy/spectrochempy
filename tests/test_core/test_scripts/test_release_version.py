@@ -266,6 +266,13 @@ def test_validate_release_artifacts_uses_helper_next_dev():
     assert "CORE_PATCH + 1" not in content
 
 
+def test_package_uses_helper_next_dev():
+    content = (WORKFLOWS / "test_package.yml").read_text(encoding="utf-8")
+    assert "release_version.py next-dev" in content
+    assert "IFS=. read -r MAJOR MINOR PATCH" not in content
+    assert "PATCH + 1" not in content
+
+
 def test_archived_docs_skips_release_candidate_tags():
     content = (WORKFLOWS / "build_docs_archived_versions.yml").read_text(
         encoding="utf-8"
