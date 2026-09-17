@@ -4,9 +4,7 @@
 Why SpectroChemPy?
 **********************
 
-**Table of Contents**
-
-.. contents:: Contents
+.. contents:: Table of Contents
    :local:
    :depth: 2
 
