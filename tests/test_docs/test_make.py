@@ -29,11 +29,12 @@ def _load_docs_make(monkeypatch):
 
 def test_warning_is_error_cli_setting_is_preserved(monkeypatch):
     docs_make = _load_docs_make(monkeypatch)
+    build_documentation = docs_make.BuildDocumentation
     captured = {}
 
     class BuildDocumentationStub:
         def __init__(self, **kwargs):
-            builder = object.__new__(docs_make.BuildDocumentation)
+            builder = object.__new__(build_documentation)
             captured.update(builder._init_settings(kwargs))
 
         def html(self):
