@@ -54,6 +54,46 @@ unchanged. This first slice covers only single-source out-of-place operations;
 in-place operations, arithmetic, concatenation, estimators, and readers are not
 instrumented.
 
+Demonstrator: interactive selection followed by transpose
+---------------------------------------------------------
+
+A common interactive workflow selects a region in the assistant and then
+transposes it. The region bounds are chosen at runtime and are not present in
+the originating script; with capture active they are still retained in the
+ledger, together with the link to the transposed result:
+
+.. code-block:: python
+
+   import numpy as np
+
+   import spectrochempy as scp
+
+   dataset = scp.NDDataset(np.arange(24.0).reshape(4, 6))
+
+
+   def apply_viewer_region_then_transpose(data, x_bounds, y_bounds):
+       selection = data[slice(*x_bounds), slice(*y_bounds)]
+       return selection.transpose()
+
+
+   with scp.provenance.ProvenanceCapture() as capture:
+       result = apply_viewer_region_then_transpose(dataset, (1, 3), (0, 2))
+
+   slice_record, transpose_record = capture.ledger.operation_records
+   assert slice_record.to_dict()["parameters"]["requested"]["values"]["selection"] == [
+       {"type": "slice", "start": 1, "stop": 3, "step": None},
+       {"type": "slice", "start": 0, "stop": 2, "step": None},
+   ]
+   assert transpose_record.inputs[0].reference.id == slice_record.outputs[0].reference.id
+
+The applied selection is recorded even though
+``apply_viewer_region_then_transpose`` contains no region bounds: only the
+runtime arguments carried the interactive decision. The second record
+references the first record's output, so the trace retains both the selection
+that was actually applied and its link to the transposed result. This
+demonstrates the passive trace value of P2; it does not provide replay, and the
+records are data, not executable instructions.
+
 Explicit record construction
 ----------------------------
 

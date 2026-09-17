@@ -1,4 +1,5 @@
 import gc
+import inspect
 import weakref
 
 import numpy as np
@@ -143,6 +144,34 @@ def test_data_isolation_between_source_and_result():
 
     assert len(capture.ledger) == 1
     assert source.data[:, 1:3].sum() != 0.0
+
+
+def _apply_viewer_region_then_transpose(data, x_bounds, y_bounds):
+    selection = data[slice(*x_bounds), slice(*y_bounds)]
+    return selection.transpose()
+
+
+def test_interactive_region_selection_then_transpose_is_traced():
+    source = _dataset()
+    x_bounds, y_bounds = (1, 3), (0, 2)
+    source_code = inspect.getsource(_apply_viewer_region_then_transpose)
+    assert "(1, 3)" not in source_code
+    assert "(0, 2)" not in source_code
+
+    with ProvenanceCapture() as capture:
+        result = _apply_viewer_region_then_transpose(source, x_bounds, y_bounds)
+
+    slice_record, transpose_record = capture.ledger.operation_records
+    selection = slice_record.to_dict()["parameters"]["requested"]["values"]["selection"]
+    assert selection == [
+        {"type": "slice", "start": 1, "stop": 3, "step": None},
+        {"type": "slice", "start": 0, "stop": 2, "step": None},
+    ]
+    assert (
+        transpose_record.inputs[0].reference.id == slice_record.outputs[0].reference.id
+    )
+    assert result.shape == (2, 2)
+    assert np.array_equal(result.data, source.data[1:3, 0:2].T)
 
 
 def test_capture_does_not_retain_live_objects():
