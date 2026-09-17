@@ -1,0 +1,18 @@
+What's new in revision 0.3.0 [2022-01-20]
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-0.3.0. See :ref:`release` for a full changelog
+including other versions of SpectroChemPy.
+
+New features
+~~~~~~~~~~~~
+
+-  Package refactoring which may break previous behaviour. This is why
+   we updated the minor version number from 0.2 to 0.3.
+-  GRAMS/Thermo Galactic .spc file reader.
+-  Fitting models updated and tested.
+
+Bug fixes
+~~~~~~~~~
+
+-  Bug in check_updates preventing working without connection.

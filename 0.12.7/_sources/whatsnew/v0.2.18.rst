@@ -1,0 +1,22 @@
+What's new in revision 0.2.18 [2022-01-05]
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-0.2.18. See :ref:`release` for a full changelog
+including other versions of SpectroChemPy.
+
+New features
+~~~~~~~~~~~~
+
+-  pip installation now possible
+-  Some code revision
+-  NNMF revision
+-  Documentation improvement
+
+Bug fixes
+~~~~~~~~~
+
+-  Issue #310
+-  The order of multicoordinates for a single dimension
+-  Integrate methods to avoid code-climate warnings (duplicate code)
+-  Documentation for the integrate methods
+-  skipping test_sh under windows

@@ -1,0 +1,19 @@
+What's new in revision 0.4.9 [2023-01-05]
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-0.4.9. See :ref:`release` for a full changelog
+including other versions of SpectroChemPy.
+
+New features
+~~~~~~~~~~~~
+
+-  ``cmap=None`` can be used in ``plot(method='stack')``
+-  Deprecation warning when pint version < 0.20
+-  Compatibility with matplotlib >= 3.5
+-  Compatibility with numpy >= 1.22
+
+Bug fixes
+~~~~~~~~~
+
+-  Issue #490, compatibility with pint 0.20
+-  ``read_opus`` handles “%Y/%m/%d” date format
