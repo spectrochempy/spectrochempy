@@ -14,6 +14,7 @@ import pytest
 
 SCRIPTS = Path(__file__).parents[3] / ".github" / "workflows" / "scripts"
 SCRIPT_PATH = SCRIPTS / "update_version_and_release_notes.py"
+INDEX_TEMPLATE = Path(__file__).parents[3] / "docs" / "sources" / "index.rst.tmpl"
 
 pytestmark = pytest.mark.skipif(
     importlib.util.find_spec("setuptools_scm") is None,
@@ -60,6 +61,20 @@ def test_release_index_includes_rc_notes(update_module, fake_whatsnew):
     # RC note must appear in the generated index (listing v1.0.0rc1.rst)
     assert "v1.0.0rc1" in index
     assert "v1.0.0" in index
+
+
+def test_release_index_is_orphan(update_module, fake_whatsnew):
+    update_module._generate_release_index("1.0.0rc1")
+    index = (fake_whatsnew / "index.rst").read_text(encoding="utf-8")
+
+    assert index.startswith(":orphan:\n\n.. _release:")
+
+
+def test_current_release_is_top_level_navigation():
+    index_template = INDEX_TEMPLATE.read_text(encoding="utf-8")
+
+    assert "\n    whatsnew/latest\n" in index_template
+    assert "\n    whatsnew/index\n" not in index_template
 
 
 def test_rc_version_keeps_rc_suffix_in_release_notes(update_module, tmp_path):
