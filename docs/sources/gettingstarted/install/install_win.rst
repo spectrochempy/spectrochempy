@@ -80,7 +80,7 @@ Environment Setup
             python -m pip install --upgrade pip
 
 Installing SpectroChemPy
------------------------
+------------------------
 
 .. tabs::
 
