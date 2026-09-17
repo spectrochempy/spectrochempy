@@ -37,6 +37,7 @@ _CATEGORIES = {
 _STATUSES = {"succeeded", "failed"}
 _CAPTURE_STATUSES = {"complete", "partial", "unknown"}
 _STATE_EFFECTS = {"unchanged", "changed", "unknown"}
+_OMISSION_STATUSES = {"unknown", "omitted", "redacted", "unsupported"}
 
 
 def _validate_identifier(value: str, name: str) -> None:
@@ -60,11 +61,15 @@ def _thaw(value: Any) -> Any:
     return value
 
 
+def _is_omission_status(value: Any) -> bool:
+    return isinstance(value, str) and value in _OMISSION_STATUSES
+
+
 def _incomplete_paths(value: Any, path: str = "parameters") -> list[dict[str, str]]:
     omissions = []
     if isinstance(value, Mapping):
         status = value.get("status")
-        if status in {"unknown", "omitted", "redacted", "unsupported"}:
+        if _is_omission_status(status):
             omissions.append({"field": path, "status": status})
         if value.get("redaction") is not None:
             omissions.append({"field": path, "status": "redacted"})
@@ -100,14 +105,12 @@ def _discover_provider_version(provider_name: str, provider_version: str | None)
 def _parameter_field_statuses(values: Mapping[str, Any]) -> dict[str, Any]:
     fields = {}
     for name, value in values.items():
-        if isinstance(value, Mapping) and value.get("status") in {
-            "unknown",
-            "omitted",
-            "redacted",
-            "unsupported",
-        }:
-            fields[name] = {"status": value["status"]}
-        elif isinstance(value, Mapping) and value.get("redaction") is not None:
+        if not isinstance(value, Mapping):
+            continue
+        status = value.get("status")
+        if _is_omission_status(status):
+            fields[name] = {"status": status}
+        elif value.get("redaction") is not None:
             fields[name] = {"status": "redacted"}
     return fields
 
@@ -393,15 +396,6 @@ class OperationRecord:
             not isinstance(item, Mapping) for item in capture_omissions
         ):
             raise ValueError("capture.omissions must be a list of mappings")
-        omissions = _incomplete_paths(requested, "parameters.requested")
-        if resolved is not None:
-            omissions.extend(_incomplete_paths(resolved, "parameters.resolved"))
-        if omissions:
-            capture = {
-                **capture,
-                "status": "partial" if capture_status == "complete" else capture_status,
-                "omissions": _merge_omissions(capture_omissions, omissions),
-            }
         if any(not isinstance(warning, Mapping) for warning in self.warnings):
             raise TypeError("warnings must contain mappings")
         warnings = tuple(
@@ -430,22 +424,30 @@ class OperationRecord:
             if self.fitted_state_summary is None
             else normalize_value(self.fitted_state_summary, strict=self.strict)
         )
-        if self.category == "fit" and self.status == "succeeded":
-            fitted_omissions = (
-                [{"field": "fitted_state_summary", "status": "omitted"}]
-                if fitted_state_summary is None
-                else _incomplete_paths(
-                    fitted_state_summary,
-                    "fitted_state_summary",
-                )
+
+        omissions = _incomplete_paths(requested, "parameters.requested")
+        if resolved is not None:
+            omissions.extend(_incomplete_paths(resolved, "parameters.resolved"))
+        for index, warning in enumerate(warnings):
+            omissions.extend(_incomplete_paths(warning, f"warnings[{index}]"))
+        if fitted_state_summary is not None:
+            omissions.extend(
+                _incomplete_paths(fitted_state_summary, "fitted_state_summary")
             )
-            if fitted_omissions:
-                if capture["status"] == "complete":
-                    capture["status"] = "partial"
-                capture["omissions"] = _merge_omissions(
-                    capture.get("omissions", []),
-                    fitted_omissions,
-                )
+        if (
+            self.category == "fit"
+            and self.status == "succeeded"
+            and fitted_state_summary is None
+        ):
+            omissions.append({"field": "fitted_state_summary", "status": "omitted"})
+        aggregated_omissions = _merge_omissions(capture_omissions, omissions)
+        if capture_status == "complete" and aggregated_omissions:
+            capture_status = "partial"
+        capture = {
+            **capture,
+            "status": capture_status,
+            "omissions": aggregated_omissions,
+        }
         if self.parent_operation is not None and not isinstance(
             self.parent_operation, OperationRef
         ):
