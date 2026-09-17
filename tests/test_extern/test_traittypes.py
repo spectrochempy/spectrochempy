@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 import pytest
 from traitlets import HasTraits
@@ -45,6 +47,19 @@ def test_array_assignment():
 
     obj.arr_none = None
     assert obj.arr_none is None
+
+
+def test_array_dtype_warning():
+    """Warn only when assigning an array that requires dtype coercion."""
+    obj = HasArray()
+
+    with pytest.warns(UserWarning, match="A coerced copy has been created"):
+        obj.arr_dtype = np.array([1, 2, 3], dtype=np.int64)
+
+    with warnings.catch_warnings(record=True) as record:
+        warnings.simplefilter("always")
+        obj.arr_dtype = np.ma.array([1.0, 2.0, 3.0], dtype=np.float64)
+    assert not record
 
 
 # Test validators
