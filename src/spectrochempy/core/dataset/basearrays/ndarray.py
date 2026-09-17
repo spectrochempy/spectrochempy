@@ -1858,16 +1858,26 @@ class NDArray(tr.HasTraits):
 
         Parameters
         ----------
-        dims : None or int or tuple of ints, optional
+        *dims : None or int or tuple of ints, optional
             Selects a subset of the single-dimensional entries in the
             shape. If a dimension (dim) is selected with shape entry greater than
             one, an error is raised.
+        inplace : bool, optional, default=False
+            Modify this array instead of returning a copy.
+        return_axis : bool, optional, default=False
+            Also return the indexes of the removed dimensions. This option is
+            intended for subclasses that must update dimension metadata.
+        **kwargs
+            Alternative dimension selectors accepted by `_get_dims_from_args`.
 
         Returns
         -------
         squeezed : same object type
             The input array, but with all or a subset of the
             dimensions of length 1 removed.
+        axis : list of int or None
+            Indexes of the removed dimensions, returned only when
+            `return_axis=True`.
 
         Raises
         ------
