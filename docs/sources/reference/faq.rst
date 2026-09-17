@@ -11,14 +11,14 @@ Frequently asked questions (FAQ)
 
 General
 -------
-Where are the preference's files saved?
+Where are the preference files saved?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Typically, the main application preference file is saved in a hidden directory located in your home user directory:
 
 ``$HOME/.spectrochempy/config`` under the name ``spectrochempy_cfg.py``
 
-But if the `SCP_CONFIG_HOME` environment variable is set and the `$SCP_CONFIG_HOME/spectrochempy` directory exists,
+But if the ``SCP_CONFIG_HOME`` environment variable is set and the ``$SCP_CONFIG_HOME/spectrochempy`` directory exists,
 it will be that directory.
 
 In principle you should not need to access files in this directory,
@@ -69,7 +69,7 @@ The index of a wavelength (or any other type of coord) can be obtained by the `l
    2074
 
 
-The exact value of the coordinate can the be obtained by:
+The exact value of the coordinate can then be obtained by:
 
 .. sourcecode:: python
 

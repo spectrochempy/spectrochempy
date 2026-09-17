@@ -17,7 +17,7 @@ Install it with:
 
 .. code-block:: bash
 
-    pip install spectrochempy[nmr]
+    python -m pip install "spectrochempy[nmr]"
 
 Recommended API
 ===============

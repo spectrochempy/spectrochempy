@@ -58,16 +58,20 @@ for specific domains. Install them as needed:
           uv pip install "spectrochempy[iris]"      # 2D-IRIS analysis
           uv pip install "spectrochempy[nmr]"       # Bruker TopSpin reader & NMR processing
           uv pip install "spectrochempy[tensor]"    # TensorLy-backed tensor decompositions
+          uv pip install spectrochempy-hypercomplex # Quaternion support
           uv pip install spectrochempy-carroucell   # Carroucell experiment reader
+          uv pip install spectrochempy-perkinelmer  # PerkinElmer .sp reader
 
     .. tab:: Using pip
 
        .. code-block:: bash
 
-          pip install spectrochempy[iris]      # 2D-IRIS analysis
-          pip install spectrochempy[nmr]       # Bruker TopSpin reader & NMR processing
-          pip install spectrochempy[tensor]    # TensorLy-backed tensor decompositions
-          pip install spectrochempy-carroucell  # Carroucell experiment reader
+          python -m pip install "spectrochempy[iris]"      # 2D-IRIS analysis
+          python -m pip install "spectrochempy[nmr]"       # Bruker TopSpin reader & NMR processing
+          python -m pip install "spectrochempy[tensor]"    # TensorLy-backed tensor decompositions
+          python -m pip install spectrochempy-hypercomplex # Quaternion support
+          python -m pip install spectrochempy-carroucell   # Carroucell experiment reader
+          python -m pip install spectrochempy-perkinelmer  # PerkinElmer .sp reader
 
     .. tab:: Using mamba
 
@@ -78,6 +82,7 @@ for specific domains. Install them as needed:
           mamba install -c spectrocat spectrochempy-tensor  # Tensor decompositions
           mamba install -c spectrocat spectrochempy-hypercomplex  # Quaternion support
           mamba install -c spectrocat spectrochempy-carroucell  # Carroucell reader
+          mamba install -c spectrocat spectrochempy-perkinelmer  # PerkinElmer .sp reader
 
     .. tab:: Development install (from source)
 
@@ -86,7 +91,9 @@ for specific domains. Install them as needed:
          pip install -e plugins/spectrochempy-iris
          pip install -e plugins/spectrochempy-nmr
          pip install -e plugins/spectrochempy-tensor
+         pip install -e plugins/spectrochempy-hypercomplex
          pip install -e plugins/spectrochempy-carroucell
+         pip install -e plugins/spectrochempy-perkinelmer
 
 Each plugin is independently versioned and maintained. Missing plugins
 raise a clear ``MissingPluginError`` with installation instructions when
