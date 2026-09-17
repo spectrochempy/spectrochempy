@@ -26,6 +26,11 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Restored asynchronous update notifications after lazy application startup.
+  Stable installations now ignore prereleases, while release-candidate
+  installations are notified about newer candidates and the final release.
+  (:pr:`1636`)
+
 
 .. section
 
