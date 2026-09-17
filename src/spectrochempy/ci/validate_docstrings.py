@@ -10,8 +10,8 @@ If a function or method is provided in the form "spectrochempy.function",
 the specified function or method.
 
 Usage::
-    $ scripts/validate_docstrings.py
-    $ scripts/scripts/validate_docstrings.py spectrochempy.NDDataset.read
+    $ python -m spectrochempy.ci.validate_docstrings
+    $ python -m spectrochempy.ci.validate_docstrings spectrochempy.NDDataset.read
 
 Copied and modified from https://github.com/pandas-dev/pandas/scripts/validate_docstrings.py (BSD 3-Clause License)
 
@@ -21,7 +21,6 @@ from __future__ import annotations
 
 import argparse
 import doctest
-import importlib
 import io
 import json
 import os
@@ -29,6 +28,7 @@ import pathlib
 import subprocess
 import sys
 import tempfile
+from collections import Counter
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -51,7 +51,7 @@ ERROR_MSGS = {
     "SA05": "{reference_name} in `See Also` section does not need `spectrochempy` "
     "prefix, use {right_reference} instead.",
     "EX02": "Examples do not pass tests:\n{doctest_log}",
-    "EX03": "flake8 error: {error_code} {error_message}{times_happening}",
+    "EX03": "Ruff error: {error_code} {error_message}{times_happening}",
     "EX04": "Do not import {imported_library}, as it is imported "
     "automatically for the examples (numpy as np, spectrochempy as scp)",
 }
@@ -122,12 +122,15 @@ def get_api_items(api_doc_fd):
             item = line.strip()
             if item in IGNORE_VALIDATION:
                 continue
-            func = importlib.import_module(current_module)
-            for part in item.split("."):
-                func = getattr(func, part)
+            func_name = (
+                item
+                if item.startswith("spectrochempy.")
+                else ".".join([current_module, item])
+            )
+            func = Validator._load_obj(func_name)
 
             yield (
-                ".".join([current_module, item]),
+                func_name,
                 func,
                 current_section,
                 current_subsection,
@@ -183,11 +186,12 @@ class spectrochempyDocstring(Validator):
         return [line.source for line in lines]
 
     def validate_pep8(self):
+        """Validate example source with the project's Ruff configuration."""
         if not self.examples:
             return
 
-        # F401 is needed to not generate flake8 errors in examples
-        # that do not user numpy or spectrochempy
+        # F401 is needed to avoid unused-import errors in examples
+        # that do not use numpy or spectrochempy
         content = "".join(
             (
                 "import numpy as np  # noqa: F401\n",
@@ -196,21 +200,40 @@ class spectrochempyDocstring(Validator):
             ),
         )
 
-        error_messages = []
-        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8") as file:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            suffix=".py",
+        ) as file:
             file.write(content)
             file.flush()
-            cmd = ["python", "-m", "flake8", "--quiet", "--statistics", file.name]
-            response = subprocess.run(cmd, capture_output=True, check=False, text=True)  # noqa: S603
-            stdout = response.stdout
-            stdout = stdout.replace(file.name, "")
-            messages = stdout.strip("\n")
-            if messages and messages != "0":
-                error_messages.append(messages)
+            cmd = [
+                sys.executable,
+                "-m",
+                "ruff",
+                "check",
+                "--no-cache",
+                "--output-format=json",
+                "--select=E,F,W",
+                file.name,
+            ]
+            response = subprocess.run(
+                cmd,  # noqa: S603
+                capture_output=True,
+                check=False,
+                text=True,
+            )
 
-        for error_message in error_messages:
-            error_count, error_code, message = error_message.split(maxsplit=2)
-            yield error_code, message, int(error_count)
+        if response.returncode not in (0, 1):
+            raise RuntimeError(
+                "Ruff could not validate the docstring examples: "
+                f"{response.stderr.strip()}"
+            )
+
+        messages = json.loads(response.stdout or "[]")
+        counts = Counter((item["code"], item["message"]) for item in messages)
+        for (error_code, message), error_count in counts.items():
+            yield error_code, message, error_count
 
     def non_hyphenated_array_like(self):
         return "array_like" in self.raw_doc
@@ -289,7 +312,23 @@ def spectrochempy_validate(func_name: str):
     return result
 
 
-def validate_all(prefix, ignore_deprecated=False):
+def discover_api_reference_files(api_reference_path=None):
+    """Return the RST sources that define the maintained public API."""
+    if api_reference_path is None:
+        repository_root = pathlib.Path(__file__).resolve().parents[3]
+        api_reference_path = repository_root / "docs" / "sources" / "reference"
+    else:
+        api_reference_path = pathlib.Path(api_reference_path)
+
+    api_doc_fnames = sorted(api_reference_path.glob("*.rst"))
+    if not api_doc_fnames:
+        raise RuntimeError(
+            f"No public API reference sources were found in {api_reference_path}."
+        )
+    return api_doc_fnames
+
+
+def validate_all(prefix, ignore_deprecated=False, api_reference_path=None):
     """
     Execute the validation of all docstrings, and return a dict with the results.
 
@@ -300,6 +339,9 @@ def validate_all(prefix, ignore_deprecated=False):
         validated. If None, all docstrings will be validated.
     ignore_deprecated: bool, default False
         If True, deprecated objects are ignored when validating docstrings.
+    api_reference_path : path-like, optional
+        Override the maintained API-reference source directory. Primarily useful
+        for focused validation and tests.
 
     Returns
     -------
@@ -311,15 +353,22 @@ def validate_all(prefix, ignore_deprecated=False):
     result = {}
     seen = {}
 
-    base_path = pathlib.Path(__file__).parent.parent
-    api_doc_fnames = pathlib.Path(base_path, "docs", "reference")
     api_items = []
-    for api_doc_fname in api_doc_fnames.glob("*.rst"):
-        with open(api_doc_fname) as f:
+    for api_doc_fname in discover_api_reference_files(api_reference_path):
+        with open(api_doc_fname, encoding="utf-8") as f:
             try:
                 api_items += list(get_api_items(f))
-            except AttributeError:
-                continue
+            except (AttributeError, ImportError) as exc:
+                raise RuntimeError(
+                    f"Could not resolve a public API entry from {api_doc_fname}. "
+                    "Install the documented official plugins before running the "
+                    "complete validator."
+                ) from exc
+
+    if not api_items:
+        raise RuntimeError(
+            "The public API reference sources produced an empty validation inventory."
+        )
 
     for func_name, _, section, subsection in api_items:
         if prefix and not func_name.startswith(prefix):
@@ -433,7 +482,7 @@ if __name__ == "__main__":
         choices=format_opts,
         help="format of the output when validating "
         "multiple docstrings (ignored when validating one). "
-        "It can be {str(format_opts)[1:-1]}",
+        f"It can be {str(format_opts)[1:-1]}",
     )
     argparser.add_argument(
         "--prefix",
@@ -441,7 +490,7 @@ if __name__ == "__main__":
         help="pattern for the "
         "docstring names, in order to decide which ones "
         'will be validated. A prefix "spectrochempy.Series.str."'
-        "will make the script validate all the docstrings "
+        " will make the script validate all the docstrings "
         "of methods starting by this pattern. It is "
         "ignored if parameter function is provided",
     )
