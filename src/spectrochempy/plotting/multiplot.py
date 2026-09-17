@@ -143,9 +143,10 @@ def multiplot(
         ``"scatter"``, ``"lines"``, ``"contour"``, ``"contourf"``,
         ``"image"``, and ``"with_transposed"``. Compatibility aliases such as
         ``"stack"`` and ``"map"`` are normalized internally.
-    nrows, ncols : int, default=1
-        Number of rows/cols of the subplot grid. ncol*nrow must be equal
-        to the number of datasets to plot.
+    nrow, ncol : int, default=1
+        Number of rows and columns in the subplot grid. ``nrow * ncol`` must
+        provide enough panels for the datasets to plot. The plural aliases
+        ``nrows`` and ``ncols`` are accepted as additional keyword arguments.
     sharex, sharey : bool or {'none', 'all', 'row', 'col'}, default=False
         Controls sharing of properties among x (`sharex` ) or y (`sharey` )
         axes::
@@ -192,11 +193,21 @@ def multiplot(
     suptitle : str
         Title of the figure to display on top.
     suptitle_color : color
-        Color of the subtitles
+        Color of the figure title.
+    colorbar : bool, default=False
+        Forward the colorbar request to each dataset plot.
+    mpl_event : bool, default=True
+        Connect the interactive Matplotlib layout callbacks. Callbacks are
+        connected only when Matplotlib is in interactive mode.
+    return_dict : bool, default=False
+        Return the figure, axes array, and named axes dictionary instead of
+        only the axes collection.
     show : bool, optional, default: True
         Whether SpectroChemPy should perform its explicit display step after
         plotting. In notebook environments, figures may still render inline
         without this explicit call.
+    **kwargs
+        Additional figure-layout, style, and dataset-plot options.
 
     Returns
     -------
