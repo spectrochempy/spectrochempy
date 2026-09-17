@@ -17,7 +17,7 @@ Installation
 
 .. code-block:: bash
 
-    pip install spectrochempy[tensor]
+    python -m pip install "spectrochempy[tensor]"
 
 or directly:
 

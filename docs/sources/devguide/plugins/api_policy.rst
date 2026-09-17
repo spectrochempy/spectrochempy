@@ -23,7 +23,7 @@ The legacy alias ``scp.read_topspin(...)`` is kept as a compatibility layer for
 existing code.  When the NMR plugin is installed, it delegates through the
 plugin reader registry to ``scp.nmr.read_topspin(...)``.  When the plugin is not
 installed, the core stub raises a ``MissingPluginError`` with the install hint
-``pip install spectrochempy[nmr]``.
+``python -m pip install "spectrochempy[nmr]"``.
 
 Dataset accessors
 -----------------

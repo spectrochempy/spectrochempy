@@ -55,11 +55,17 @@ Official plugins can be installed through SpectroChemPy extras:
 
 .. code-block:: bash
 
-    pip install spectrochempy[iris]
-    pip install spectrochempy[nmr]
-    pip install spectrochempy[tensor]
-    pip install spectrochempy[nmr,hypercomplex]  # NMR with 2D hypercomplex support
-    pip install spectrochempy[perkinelmer]
+    python -m pip install "spectrochempy[iris]"
+    python -m pip install "spectrochempy[nmr]"
+    python -m pip install "spectrochempy[tensor]"
+
+The Hypercomplex and PerkinElmer plugins do not have dedicated extras in the
+core distribution. Install their packages directly:
+
+.. code-block:: bash
+
+    python -m pip install "spectrochempy[nmr]" spectrochempy-hypercomplex
+    python -m pip install spectrochempy-perkinelmer
 
 or directly:
 
