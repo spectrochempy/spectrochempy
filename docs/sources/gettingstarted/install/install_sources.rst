@@ -97,11 +97,22 @@ Update source code:
 
     git pull origin master --ff-only
 
-Reinstall package:
+Reinstall the package in editable mode, using the command that matches the
+selected development setup:
 
-.. sourcecode:: bash
+.. tabs::
 
-    python -m pip install .
+    .. tab:: uv
+
+        .. code-block:: bash
+
+            uv pip install -e ".[dev]"
+
+    .. tab:: pip / mamba environment
+
+        .. code-block:: bash
+
+            python -m pip install -e .
 
 .. note::
 

@@ -41,10 +41,10 @@ Install the plugin directly or through the NMR extra:
 
 .. code-block:: bash
 
-    pip install spectrochempy-hypercomplex
+    python -m pip install spectrochempy-hypercomplex
 
     # or, together with the NMR plugin
-    pip install spectrochempy[nmr,hypercomplex]
+    python -m pip install "spectrochempy[nmr]" spectrochempy-hypercomplex
 
 The plugin is discovered automatically once installed. No explicit loading
 step is required.

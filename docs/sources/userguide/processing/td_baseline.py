@@ -46,7 +46,7 @@ import spectrochempy as scp
 # This example uses Bruker NMR data.
 #
 # Requires the official ``spectrochempy-nmr`` plugin.
-# Install with: ``pip install spectrochempy[nmr]``.
+# Install with: ``python -m pip install "spectrochempy[nmr]"``.
 
 # %%
 path = scp.preferences.datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "h3po4"

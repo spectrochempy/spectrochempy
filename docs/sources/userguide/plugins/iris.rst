@@ -17,7 +17,7 @@ Install it with:
 
 .. code-block:: bash
 
-    pip install spectrochempy[iris]
+    python -m pip install "spectrochempy[iris]"
 
 Recommended API
 ===============

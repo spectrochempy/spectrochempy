@@ -42,12 +42,28 @@ import re
 try:
     from packaging.version import InvalidVersion
     from packaging.version import Version
-except ImportError:  # pragma: no cover - packaging is required by tooling
+except ImportError:  # pragma: no cover - exercised in a dependency-free subprocess
     InvalidVersion = ValueError
 
     class Version:  # type: ignore[no-redef]
+        """Minimal release-version parser for bootstrap use before installation."""
+
         def __init__(self, version: str):
-            raise InvalidVersion(f"packaging is not available: {version}")
+            match = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)(?:rc(\d+))?", version)
+            if match is None:
+                raise InvalidVersion(version)
+            major, minor, micro, rc = match.groups()
+            self.major = int(major)
+            self.minor = int(minor)
+            self.micro = int(micro)
+            self.pre = ("rc", int(rc)) if rc is not None else None
+            self.is_prerelease = self.pre is not None
+
+        def __str__(self) -> str:
+            base = f"{self.major}.{self.minor}.{self.micro}"
+            if self.pre is None:
+                return base
+            return f"{base}{self.pre[0]}{self.pre[1]}"
 
 
 TAG_PREFIX = "spectrochempy-v"

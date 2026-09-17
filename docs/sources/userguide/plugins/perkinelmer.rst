@@ -17,7 +17,7 @@ Install it with:
 
 .. code-block:: bash
 
-    pip install spectrochempy[perkinelmer]
+    python -m pip install spectrochempy-perkinelmer
 
 Recommended API
 ===============

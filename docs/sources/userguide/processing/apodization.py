@@ -43,7 +43,7 @@ from spectrochempy.core.units import ur
 # Fourier transformation. It generally helps for signal-to-noise improvement.
 #
 # Requires the official ``spectrochempy-nmr`` plugin.
-# Install with: ``pip install spectrochempy[nmr]``.
+# Install with: ``python -m pip install "spectrochempy[nmr]"``.
 
 # %%
 # read an experimental spectra

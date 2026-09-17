@@ -208,6 +208,17 @@ def test_cli_run_as_subprocess():
     assert "tag=spectrochempy-v1.0.0" in result.stdout
 
 
+def test_cli_next_dev_bootstraps_without_site_packages():
+    result = subprocess.run(
+        [sys.executable, "-S", str(SCRIPT_PATH), "next-dev", "1.0.0rc1"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0
+    assert result.stdout.strip() == "1.0.0rc2"
+
+
 # ---------------------------------------------------------------------------
 # PEP 440 ordering
 # ---------------------------------------------------------------------------
@@ -264,6 +275,13 @@ def test_validate_release_artifacts_uses_helper_next_dev():
     assert "release_version.py next-dev" in content
     assert "IFS=. read -r CORE_MAJOR CORE_MINOR CORE_PATCH" not in content
     assert "CORE_PATCH + 1" not in content
+
+
+def test_package_uses_helper_next_dev():
+    content = (WORKFLOWS / "test_package.yml").read_text(encoding="utf-8")
+    assert "release_version.py next-dev" in content
+    assert "IFS=. read -r MAJOR MINOR PATCH" not in content
+    assert "PATCH + 1" not in content
 
 
 def test_archived_docs_skips_release_candidate_tags():

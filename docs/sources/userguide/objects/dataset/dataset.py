@@ -179,7 +179,8 @@ d1D
 #
 # Some other attributes are defined to describe the data:
 # * `title`: A long name that will be used in plots or in some other operations.
-# * `history`: History of operations performed on the object since its creation.
+# * `history`: Timestamped entries for operations that participate in the history
+#   contract. It is inspectable but is not a complete provenance record.
 # * `description`: A comment or a description of the object's purpose or contents.
 # * `origin`: An optional reference to the source of the data.
 
@@ -326,8 +327,8 @@ nd.history
 # If you want to replace the full history, use brackets around your history line:
 
 # %%
-nd.history = "Created form scratch"
-nd.history = "a second ligne that will be erased"
+nd.history = "Created from scratch"
+nd.history = "A second line that will be erased"
 nd.history = ["A more interesting message"]
 nd.history
 
@@ -852,7 +853,7 @@ _ = nd.plot()
 # Now, lets load a NMR dataset (in the Bruker format).
 #
 # Requires the official ``spectrochempy-nmr`` plugin.
-# Install with: ``pip install spectrochempy[nmr]``.
+# Install with: ``python -m pip install "spectrochempy[nmr]"``.
 
 # %%
 path = datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_1d"

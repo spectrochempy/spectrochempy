@@ -71,7 +71,7 @@ proj
 # First we read the dataset (here some NMR data) and we give it some name (e.g. 'nmr n°1').
 #
 # Requires the official ``spectrochempy-nmr`` plugin.
-# Install with: ``pip install spectrochempy[nmr]``.
+# Install with: ``python -m pip install "spectrochempy[nmr]"``.
 
 # %%
 datadir = scp.pathclean(scp.preferences.datadir)
