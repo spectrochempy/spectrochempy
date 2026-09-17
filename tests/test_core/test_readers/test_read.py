@@ -114,7 +114,7 @@ def test_read_missing_file(tmp_path):
 def test_read_invalid_url_type():
     """Reading a non-scpy-readable URL should raise TypeError."""
     with pytest.raises(TypeError):
-        scp.read("https://www.spectrochempy.fr/latest/index.html")
+        scp.read("https://example.invalid/index.html")
 
 
 @pytest.mark.network

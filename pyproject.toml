@@ -113,7 +113,7 @@ test = [
 ]
 
 [project.urls]
-documentation = "https://www.spectrochempy.fr/latest"
+documentation = "https://www.spectrochempy.fr/"
 homepage = "https://www.spectrochempy.fr"
 issues = "https://github.com/spectrochempy/spectrochempy/issues"
 repository = "https://github.com/spectrochempy/spectrochempy"

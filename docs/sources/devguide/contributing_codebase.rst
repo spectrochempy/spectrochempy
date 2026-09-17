@@ -200,8 +200,8 @@ Writing tests
 All tests should go into the ``tests`` directory.
 This folder contains many current examples of tests, and we suggest looking to these for
 inspiration.  If your test requires working with files or
-network connectivity, there is more information on the `testing page
-<https://github.com/spectrochempy-dev/spectrochempy/wiki/Testing>`_ of the wiki.
+network connectivity, follow the :ref:`test-suite guidance
+<contributing.running-tests>` below.
 
 The easiest way to verify that your code is correct is to
 explicitly construct the result you expect, then compare the actual result to
@@ -304,6 +304,8 @@ A test run of this using yields:
    -- Docs: https://docs.pytest.org/en/stable/warnings.html
    ============ 8 passed, 2 warnings in 0.28s ==============
 
+
+.. _contributing.running-tests:
 
 Running the test suite
 ----------------------
