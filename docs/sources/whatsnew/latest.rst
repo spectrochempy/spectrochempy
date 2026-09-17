@@ -15,6 +15,10 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 Bug Fixes
 ~~~~~~~~~
 
+- Fixed ``average(..., keepdims=True)`` so reduced dimensions are retained in
+  both the data shape and dataset metadata, consistently with other reductions.
+  (:pr:`1641`)
+
 - Restored asynchronous update notifications after lazy application startup.
   Stable installations now ignore prereleases, while release-candidate
   installations are notified about newer candidates and the final release.
