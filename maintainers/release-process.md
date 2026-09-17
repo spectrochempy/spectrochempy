@@ -331,6 +331,13 @@ Le workflow :
 - Ouvre une **Pull Request** vers `master` avec le token de la GitHub App
 - Tente d'activer l'**auto-merge** (squash) sur cette PR
 
+Pour une release candidate, le fichier de notes contient les changements
+depuis la candidate précédente. Lors de la préparation de la version stable
+`X.Y.Z`, le générateur consolide automatiquement les notes de toutes les
+`X.Y.ZrcN` correspondantes et les éventuels changements ajoutés après la
+dernière candidate. La page stable décrit donc tout le cycle de release, même
+si `changelog.rst` est vide juste après la dernière RC.
+
 ### 4. Vérifier la PR de release
 
 Dans la Pull Request :
@@ -358,6 +365,8 @@ Le workflow `publish_draft_new_release.yml` crée une **Draft Release** avec :
 
 - Tag : `spectrochempy-vX.Y.Z`
 - Titre : `SpectroChemPy vX.Y.Z`
+- Corps : lien permanent vers le fichier de notes relu dans le commit exact
+  de la release ; la page GitHub n'est donc jamais créée sans description
 
 Aller sur la
 [page des releases](https://github.com/spectrochempy/spectrochempy/releases)
@@ -1103,6 +1112,8 @@ entrées sont incorrectes car :
 - [ ] Vérifier que l'option **Allow auto-merge** du dépôt est activée
 - [ ] Lancer **Prepare a new release** avec la version X.Y.Z
 - [ ] Vérifier la PR de release (CITATION.cff, zenodo.json, whatsnew)
+- [ ] Pour une stable suivant des RC, vérifier que `vX.Y.Z.rst` consolide les
+      notes de toutes les `vX.Y.ZrcN.rst`
 - [ ] Vérifier que l'auto-merge est activé sur la PR → attendre la Draft Release
 - [ ] Vérifier la Draft Release, puis publier
 - [ ] Vérifier PyPI : `pip install spectrochempy==X.Y.Z`

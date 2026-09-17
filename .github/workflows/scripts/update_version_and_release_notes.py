@@ -46,6 +46,11 @@ ZENODO = PROJECT / "zenodo.json"
 DOCS = PROJECT / "docs"
 WN = DOCS / "sources" / "whatsnew"
 
+_SECTION_PATTERN = re.compile(
+    r"^(?P<title>[^\n]+)\n~{3,}\n(?P<body>.*?)(?=^[^\n]+\n~{3,}\n|\Z)",
+    flags=re.M | re.S,
+)
+
 gitversion = get_version(
     root=PROJECT,
     relative_to=__file__,
@@ -221,6 +226,102 @@ def make_zenodo(version):
     zenodo.save()
 
 
+def _render_changelog(content, revision):
+    """Render a changelog template for a specific revision."""
+    sections = re.split(r"^\.\. section$", content, flags=re.M)
+
+    header = re.sub(r"(\.\.\n(.*\n)*)", "", sections[0], count=0, flags=0)
+    header = header.strip() + "\n"
+    cleaned_sections = [header]
+
+    for section in sections[1:]:
+        if section.strip().endswith("(do not delete this comment)"):
+            continue
+        section = re.sub(
+            r"(\.\. Add.*\(do not delete this comment\)\n)",
+            "",
+            section,
+            count=0,
+            flags=0,
+        )
+        cleaned_sections.append(section.strip() + "\n")
+
+    return "\n".join(cleaned_sections).replace("{{ revision }}", revision)
+
+
+def _split_release_sections(content):
+    """Return a release-note header and its ordered named sections."""
+    matches = list(_SECTION_PATTERN.finditer(content))
+    if not matches:
+        return content.rstrip(), []
+
+    header = content[: matches[0].start()].rstrip()
+    sections = [
+        (match.group("title").strip(), match.group("body").strip())
+        for match in matches
+        if match.group("body").strip()
+    ]
+    return header, sections
+
+
+def _release_candidate_paths(revision):
+    """Return the ordered release-candidate notes belonging to a final release."""
+    parsed = Version(revision)
+    if parsed.is_prerelease or parsed.is_devrelease:
+        return []
+
+    base = f"{parsed.major}.{parsed.minor}.{parsed.micro}"
+    candidates = []
+    for path in WN.glob(f"v{base}rc*.rst"):
+        match = re.fullmatch(rf"v{re.escape(base)}rc(\d+)\.rst", path.name)
+        if match:
+            candidates.append((int(match.group(1)), path))
+    return [path for _, path in sorted(candidates)]
+
+
+def _make_cumulative_stable_notes(revision, current_notes):
+    """Fold matching RC notes and post-RC changes into final stable notes."""
+    candidate_paths = _release_candidate_paths(revision)
+    if not candidate_paths:
+        return current_notes
+
+    header, current_sections = _split_release_sections(current_notes)
+    section_order = []
+    combined = defaultdict(list)
+
+    for path in candidate_paths:
+        _, sections = _split_release_sections(path.read_text(encoding="utf-8"))
+        for title, body in sections:
+            if title not in combined:
+                section_order.append(title)
+            combined[title].append(body)
+
+    for title, body in current_sections:
+        if title not in combined:
+            section_order.append(title)
+        combined[title].append(body)
+
+    candidates = ", ".join(
+        f"``{path.stem.removeprefix('v')}``" for path in candidate_paths
+    )
+    parts = [
+        header,
+        (
+            "This stable release consolidates the changes published during the "
+            f"release-candidate cycle ({candidates}) and any changes made after "
+            "the last candidate."
+        ),
+    ]
+    for title in section_order:
+        parts.extend(
+            [
+                f"{title}\n{'~' * len(title)}",
+                "\n\n".join(combined[title]),
+            ]
+        )
+    return "\n\n".join(parts).rstrip() + "\n"
+
+
 def make_release_note_index(revision):
     """
     Generate and update release notes documentation.
@@ -262,36 +363,19 @@ def make_release_note_index(revision):
 
     # Process changelog content
     content = (WN / "changelog.rst").read_text(encoding="utf-8")
-    sections = re.split(r"^\.\. section$", content, flags=re.M)
-
-    # Clean and organize sections
-    header = re.sub(r"(\.\.\n(.*\n)*)", "", sections[0], count=0, flags=0)
-    header = header.strip() + "\n"
-    cleaned_sections = [header]
-
-    for section in sections[1:]:
-        if section.strip().endswith("(do not delete this comment)"):
-            continue
-        content = re.sub(
-            r"(\.\. Add.*\(do not delete this comment\)\n)",
-            "",
-            section,
-            count=0,
-            flags=0,
+    changelog_content = _render_changelog(content, revision)
+    if ".dev" not in revision:
+        changelog_content = _make_cumulative_stable_notes(
+            revision,
+            changelog_content,
         )
-        content = content.strip() + "\n"
-        cleaned_sections.append(content)
-
-    # Generate final changelog
-    changelog_content = "\n".join(cleaned_sections)
-    changelog_content = changelog_content.replace("{{ revision }}", revision)
 
     # Add auto-generated notice (only for latest.rst)
     auto_gen_note = (
         "..\n"
-        "   NOTE: This file is automatically generated from ``changelog.rst``.\n"
+        "   NOTE: This file is automatically generated by the release-note tooling.\n"
         "   Do not edit it manually — your changes will be overwritten.\n"
-        "   Edit ``changelog.rst`` in the same directory instead.\n"
+        "   Edit ``changelog.rst`` in the same directory for unreleased changes.\n"
         "   (This note is read by AI agents; manual edits belong in changelog.rst)\n"
         "\n"
     )

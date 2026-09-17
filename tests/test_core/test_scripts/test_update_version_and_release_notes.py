@@ -101,6 +101,45 @@ def test_final_release_notes_name(update_module, tmp_path):
     assert (tmp_path / "v1.0.0.rst").exists()
 
 
+def test_final_release_consolidates_release_candidate_notes(update_module, tmp_path):
+    update_module.WN = tmp_path
+
+    def changelog(change):
+        return update_module._get_changelog_template().replace(
+            ".. Add here new bug fixes (do not delete this comment)",
+            f".. Add here new bug fixes (do not delete this comment)\n\n- {change}",
+        )
+
+    (tmp_path / "changelog.rst").write_text(
+        changelog("Fixed the first candidate issue."),
+        encoding="utf-8",
+    )
+    update_module.make_release_note_index("1.0.0rc1")
+
+    (tmp_path / "changelog.rst").write_text(
+        changelog("Fixed the second candidate issue."),
+        encoding="utf-8",
+    )
+    update_module.make_release_note_index("1.0.0rc2")
+
+    # Preparing the final release immediately after RC2 starts from the empty
+    # changelog template, but its notes must still describe the complete cycle.
+    update_module.make_release_note_index("1.0.0")
+
+    final = (tmp_path / "v1.0.0.rst").read_text(encoding="utf-8")
+    assert "Fixed the first candidate issue." in final
+    assert "Fixed the second candidate issue." in final
+    assert "``1.0.0rc1``, ``1.0.0rc2``" in final
+    assert final.count("Bug Fixes\n~~~~~~~~~") == 1
+
+    assert "Fixed the first candidate issue." in (tmp_path / "v1.0.0rc1.rst").read_text(
+        encoding="utf-8"
+    )
+    assert "Fixed the second candidate issue." in (
+        tmp_path / "v1.0.0rc2.rst"
+    ).read_text(encoding="utf-8")
+
+
 def test_shared_helper_release_notes_name():
     from release_version import release_notes_name
 

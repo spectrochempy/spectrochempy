@@ -255,6 +255,13 @@ def test_publish_draft_release_has_no_hardcoded_stable_tag():
     assert "spectrochempy-v${{ github.event.inputs.versionString }}" not in content
 
 
+def test_publish_draft_release_links_reviewed_release_notes():
+    content = (WORKFLOWS / "publish_draft_new_release.yml").read_text(encoding="utf-8")
+    assert "body: |" in content
+    assert "steps.vsem.outputs.release_notes" in content
+    assert "pull_request.merge_commit_sha" in content
+
+
 def test_prepare_release_validates_version_before_proceeding():
     content = (WORKFLOWS / "prepare_new_release.yml").read_text(encoding="utf-8")
     assert "release_version.py" in content
