@@ -33,6 +33,7 @@ Bug Fixes
 
 - Fixed cross-decomposition inverse transforms so Y is reconstructed from its
   own transformed scores instead of reusing the X scores.
+  (:pr:`1642`)
 
 
 .. section
