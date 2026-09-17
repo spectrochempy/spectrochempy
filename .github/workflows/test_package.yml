@@ -165,6 +165,7 @@ jobs:
       - name: Derive pretend version from latest git tag
         if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
         run: |
+          set -e
           LATEST_TAG=$(git tag --list 'spectrochempy-v*' --sort=-v:refname | head -1)
           if [ -z "$LATEST_TAG" ]; then
             echo "No core version tag found, using 0.10.1.dev0 as fallback"

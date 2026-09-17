@@ -208,6 +208,17 @@ def test_cli_run_as_subprocess():
     assert "tag=spectrochempy-v1.0.0" in result.stdout
 
 
+def test_cli_next_dev_bootstraps_without_site_packages():
+    result = subprocess.run(
+        [sys.executable, "-S", str(SCRIPT_PATH), "next-dev", "1.0.0rc1"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0
+    assert result.stdout.strip() == "1.0.0rc2"
+
+
 # ---------------------------------------------------------------------------
 # PEP 440 ordering
 # ---------------------------------------------------------------------------
