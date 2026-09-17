@@ -46,6 +46,11 @@ through weak references and are released when the context closes. The ledger
 stores only immutable records and opaque ledger-local references, never the
 datasets, arrays, or their lineage graphs.
 
+A :class:`~spectrochempy.provenance.ProvenanceCapture` instance is single-use.
+Once its context closes — normally or through an exception — it cannot be
+reopened or resumed, and it is no longer active in tasks that inherit the
+context. Create a new instance for each capture session.
+
 The selection is captured as a JSON-safe structural description (``slice``,
 ``ellipsis``, and index values), and transpose records the requested dimension
 order. Slicing and transpose never mutate the source, and the textual
