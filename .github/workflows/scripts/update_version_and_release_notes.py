@@ -438,7 +438,9 @@ Version {vers}
 
 def _get_index_header():
     """Return the standard header for the release notes index."""
-    return """.. _release:
+    return """:orphan:
+
+.. _release:
 
 *************
 Release notes
