@@ -35,6 +35,10 @@ Bug Fixes
   installations are notified about newer candidates and the final release.
   (:pr:`1636`)
 
+- Fixed cross-decomposition inverse transforms so Y is reconstructed from its
+  own transformed scores instead of reusing the X scores.
+  (:pr:`1642`)
+
 
 .. section
 
