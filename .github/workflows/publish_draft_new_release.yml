@@ -54,3 +54,7 @@ jobs:
           name: SpectroChemPy v${{ env.RELEASE_VERSION }}
           draft: true
           prerelease: ${{ steps.vsem.outputs.prerelease }}
+          body: |
+            The reviewed release notes for SpectroChemPy ${{ env.RELEASE_VERSION }} are available at:
+
+            https://github.com/${{ github.repository }}/blob/${{ github.event.pull_request.merge_commit_sha }}/docs/sources/whatsnew/${{ steps.vsem.outputs.release_notes }}
