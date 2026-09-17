@@ -9,7 +9,9 @@ from __future__ import annotations
 
 from contextvars import ContextVar
 from contextvars import Token
+from typing import Any
 
+from spectrochempy.provenance._identity import IdentityRegistry
 from spectrochempy.provenance._models import ObjectRef
 from spectrochempy.provenance._models import OperationRecord
 from spectrochempy.provenance._models import OperationRef
@@ -150,11 +152,43 @@ class ProvenanceCapture:
         self.__ledger = ProvenanceLedger()
         self.__token: Token | None = None
         self.__closed = False
+        self.__identity = IdentityRegistry()
+        self.__record_count = 0
+        self.__capture_warnings: list[dict[str, Any]] = []
 
     @property
     def ledger(self) -> ProvenanceLedger:
         """The append-only ledger owned by this capture."""
         return self.__ledger
+
+    @property
+    def capture_warnings(self) -> tuple[dict[str, Any], ...]:
+        """Bounded structured warnings emitted by best-effort capture."""
+        return tuple(self.__capture_warnings)
+
+    @property
+    def _identity_size(self) -> int:
+        return len(self.__identity)
+
+    def _next_record_id(self) -> str:
+        self.__record_count += 1
+        return f"op-{self.__record_count:06d}"
+
+    def _observe_source(self, value: Any) -> StateRef:
+        return self.__identity.observe(value)
+
+    def _register_output(self, value: Any) -> StateRef:
+        return self.__identity.register_output(value)
+
+    def _note_capture_warning(self, operation_id: str, exc: BaseException) -> None:
+        cls = type(exc)
+        warning = {
+            "operation_id": operation_id,
+            "status": "capture_failed",
+            "exception_type": f"{cls.__module__}.{cls.__qualname__}",
+        }
+        if len(self.__capture_warnings) < 64:
+            self.__capture_warnings.append(warning)
 
     @property
     def active(self) -> bool:
@@ -186,4 +220,5 @@ class ProvenanceCapture:
         _ACTIVE_CAPTURE.reset(token)
         self.__token = None
         self.__closed = True
+        self.__identity.clear()
         return False

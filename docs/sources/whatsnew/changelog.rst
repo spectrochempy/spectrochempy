@@ -25,6 +25,12 @@ New Features
   It does not instrument scientific operations and does not export
   reproducibility manifests yet.
 
+- Instrumented out-of-place ``NDDataset`` slicing and ``NDDataset.transpose``
+  so an active :class:`~spectrochempy.provenance.ProvenanceCapture` records
+  single-source selection and transpose operations, with transient weak object
+  tracking and unchanged data and textual history. All other operations remain
+  uninstrumented.
+
 .. section
 
 Bug Fixes
