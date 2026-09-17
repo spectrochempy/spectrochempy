@@ -8,7 +8,7 @@ SpectroChemPy
 [![codecov](https://codecov.io/gh/spectrochempy/spectrochempy/graph/badge.svg?token=A0NHMQNQ1E)](https://codecov.io/gh/spectrochempy/spectrochempy)
 ![Conda](https://img.shields.io/conda/v/spectrocat/spectrochempy)
 [![PyPI version](https://badge.fury.io/py/spectrochempy.svg)](https://badge.fury.io/py/spectrochempy)
-[![Docs](https://readthedocs.org/projects/docs/badge/?version=latest)](https://www.spectrochempy.fr/latest)
+[![Documentation](https://img.shields.io/badge/docs-online-blue.svg)](https://www.spectrochempy.fr/)
 [![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.3823841-blue.svg)](https://doi.org/10.5281/zenodo.3823841)
 ![Conda](https://img.shields.io/conda/l/spectrocat/spectrochempy)
 
