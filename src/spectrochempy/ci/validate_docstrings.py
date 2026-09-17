@@ -315,8 +315,16 @@ def spectrochempy_validate(func_name: str):
 def discover_api_reference_files(api_reference_path=None):
     """Return the RST sources that define the maintained public API."""
     if api_reference_path is None:
-        repository_root = pathlib.Path(__file__).resolve().parents[3]
-        api_reference_path = repository_root / "docs" / "sources" / "reference"
+        source_root = pathlib.Path(__file__).resolve().parents[3]
+        search_roots = (pathlib.Path.cwd(), *pathlib.Path.cwd().parents, source_root)
+        api_reference_path = next(
+            (
+                root / "docs" / "sources" / "reference"
+                for root in search_roots
+                if (root / "docs" / "sources" / "reference").is_dir()
+            ),
+            source_root / "docs" / "sources" / "reference",
+        )
     else:
         api_reference_path = pathlib.Path(api_reference_path)
 

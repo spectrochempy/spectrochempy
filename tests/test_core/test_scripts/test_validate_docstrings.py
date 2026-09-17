@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import io
+from pathlib import Path
 
 import pytest
 
@@ -43,7 +44,14 @@ def _bad_docstring(value):
     return value
 
 
-def test_reference_discovery_uses_maintained_sources():
+def test_reference_discovery_uses_maintained_sources(monkeypatch, tmp_path):
+    repository_root = Path(__file__).resolve().parents[3]
+    installed_module = (
+        tmp_path / "site-packages" / "spectrochempy" / "ci" / "validate_docstrings.py"
+    )
+    monkeypatch.setattr(vd, "__file__", str(installed_module))
+    monkeypatch.chdir(repository_root / "tests" / "test_core")
+
     files = vd.discover_api_reference_files()
 
     assert {path.name for path in files} >= {"index.rst", "plugins.rst"}
