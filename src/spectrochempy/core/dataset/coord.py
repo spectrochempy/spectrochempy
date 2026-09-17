@@ -524,13 +524,17 @@ class Coord(NDMath, NDArray):
 
         Parameters
         ----------
-        loc : float.
+        loc : float
             Value corresponding to a given location on the coordinates axis.
+        return_error : bool, optional, default=False
+            If True and `loc` lies outside the coordinate limits, return the
+            closest index together with the ``"out_of_limits"`` status.
 
         Returns
         -------
-        index : int.
-            The corresponding index.
+        int or tuple of (int, str)
+            Corresponding index. When `return_error=True` and `loc` is outside
+            the coordinate limits, also return the status string.
 
         Examples
         --------
