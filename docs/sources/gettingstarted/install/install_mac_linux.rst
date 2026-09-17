@@ -97,7 +97,7 @@ Install SpectroChemPy
             # or if you want to install interactive version (including jupyter)
             uv pip install "spectrochempy[interactive]"
 
-        Development version:
+        Latest prerelease:
 
         .. code-block:: bash
 
@@ -111,7 +111,7 @@ Install SpectroChemPy
 
             mamba install -c spectrocat spectrochempy
 
-        Development version
+        Development-channel build
 
         .. code-block:: bash
 

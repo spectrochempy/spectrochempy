@@ -1339,14 +1339,12 @@ class NDMath:
         ----------
         dataset : array_like
             Array containing data to be averaged.
-        dim : None or int or dimension name or tuple of int or dimensions, optional
-            Dimension or dimensions along which to operate.  By default, flattened
-            input is used.
-            If this is a tuple, the minimum is selected over multiple dimensions,
-            instead of a single dimension or all the dimensions as before.
+        dim : None, int, str, or tuple of int or str, optional
+            Dimension or dimensions along which to average. By default, the
+            flattened input is used. A tuple averages over multiple dimensions.
         weights : array_like, optional
-            An array of weights associated with the values in `dataset` . Each value in
-            `a` contributes to the average according to its associated weight.
+            An array of weights associated with the values in `dataset`. Each value
+            contributes to the average according to its associated weight.
             The weights array can either be 1-D (in which case its length must be
             the size of `dataset` along the given axis) or of the same shape as
             `dataset` .
@@ -1359,8 +1357,9 @@ class NDMath:
 
         Returns
         -------
-        average,
-            Return the average along the specified axis.
+        NDDataset, Quantity, or scalar
+            Weighted average along the selected dimension or dimensions. A full
+            reduction returns a scalar or a quantity when units are defined.
 
         Raises
         ------

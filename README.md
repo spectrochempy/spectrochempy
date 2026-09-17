@@ -20,13 +20,17 @@ Windows, macOS) and combines a lightweight scientific core with optional
 plugins for domain-specific workflows.
 
 Its central object, `NDDataset`, provides numerical data together with
-coordinates, units, masks, labels, provenance, and metadata, making it easier
+coordinates, units, masks, labels, history, and metadata, making it easier
 to build reproducible spectroscopy workflows in Python.
+
+The history records participating operations on a dataset. It is inspectable,
+but it is not a complete provenance record; reproducibility also requires the
+originating script or notebook, inputs, environment, and parameters.
 
 ## Key Features
 
 * **Core Data Structure**: `NDDataset` with coordinates, units, masks, labels,
-  provenance, and metadata
+  history, and metadata
 * **Project Management**: Organize and manipulate multiple datasets within a
   `Project`
 * **Data Processing**:
@@ -100,9 +104,11 @@ Plugins are discovered automatically once installed — no manual loading step r
 
 `spectrochempy-cantera` is available as an **experimental** plugin. It is not
 officially supported, not included in aggregate extras, and must be installed
-manually::
+manually:
 
-    pip install spectrochempy-cantera
+```bash
+python -m pip install spectrochempy-cantera
+```
 
 ## Quick Links
 

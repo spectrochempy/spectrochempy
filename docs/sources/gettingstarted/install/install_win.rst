@@ -80,7 +80,7 @@ Environment Setup
             python -m pip install --upgrade pip
 
 Installing SpectroChemPy
------------------------
+------------------------
 
 .. tabs::
 
@@ -93,7 +93,7 @@ Installing SpectroChemPy
          :: or with interactive extras
          uv pip install "spectrochempy[interactive]"
 
-      Development version:
+      Latest prerelease:
 
       .. code-block:: bat
 
@@ -105,7 +105,7 @@ Installing SpectroChemPy
 
          mamba install -c spectrocat spectrochempy
 
-      Development version:
+      Development-channel build:
 
       .. code-block:: bat
 

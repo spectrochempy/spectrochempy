@@ -285,21 +285,21 @@ jobs:
           start=$SECONDS
           if [[ "${{ github.event_name }}" == "pull_request" && "${{ steps.publish.outputs.is_preview }}" == "true" && "${{ steps.docs_mode.outputs.fresh_docs }}" == "true" ]]; then
             SCPY_BUILDDIR=${{ steps.publish.outputs.build_subdir }} \
-              python3 docs/make.py -j auto html
+              python3 docs/make.py --warning-is-error -j auto html
           elif [[ "${{ github.event_name }}" == "pull_request" && "${{ steps.docs_mode.outputs.fresh_docs }}" == "true" ]]; then
             SCPY_SKIP_POST_BUILD=1 \
-              python3 docs/make.py -j auto html
+              python3 docs/make.py --warning-is-error -j auto html
           elif [[ "${{ github.event_name }}" == "pull_request" && "${{ steps.publish.outputs.is_preview }}" == "true" ]]; then
             SCPY_BUILDDIR=${{ steps.publish.outputs.build_subdir }} \
-              python3 docs/make.py --no-exec -j auto html
+              python3 docs/make.py --warning-is-error --no-exec -j auto html
           elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
             SCPY_SKIP_POST_BUILD=1 \
-              python3 docs/make.py --no-exec -j auto html
+              python3 docs/make.py --warning-is-error --no-exec -j auto html
           elif [[ "${{ steps.publish.outputs.is_preview }}" == "true" ]]; then
             SCPY_BUILDDIR=${{ steps.publish.outputs.build_subdir }} \
-              python3 docs/make.py -j auto html
+              python3 docs/make.py --warning-is-error -j auto html
           else
-            python3 docs/make.py -j auto html
+            python3 docs/make.py --warning-is-error -j auto html
           fi
           duration=$((SECONDS - start))
           echo "documentation build: ${duration}s" | tee -a "$CI_TIMING_FILE"

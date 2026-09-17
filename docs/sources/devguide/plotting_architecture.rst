@@ -319,9 +319,9 @@ Figure and axes ownership follows a consistent pattern across all plot types:
   (``mplutils.py``) which implement the same ``ax`` / ``clear`` / ``show``
   contract.
 * ``ax``, ``clear``, and ``show`` are the universal lifecycle controls across
-all plot types — dataset plots, composite plots, ``plot_multiple``,
-   ``plot_parity``, and official plugin plotters all follow the same
-   conventions.
+  all plot types — dataset plots, composite plots, ``plot_multiple``,
+  ``plot_parity``, and official plugin plotters all follow the same
+  conventions.
 * The shared helpers keep lifecycle logic in one place and prevent the
   duplication that previously existed (five near-identical ``if ax is None``
   + ``clear`` + ``show`` patterns).

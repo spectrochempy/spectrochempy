@@ -143,7 +143,7 @@ If you prefer a standalone Python installation, use your platform's method:
          sudo dnf install python3.13
 
 Installing SpectroChemPy
------------------------
+------------------------
 
 Create Environment
 ~~~~~~~~~~~~~~~~~~
@@ -201,6 +201,21 @@ Install Package
       .. code-block:: bash
 
          python -m pip install spectrochempy
+
+Testing a release candidate
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Release candidates are prereleases and are not selected by the ordinary
+unversioned installation command. To test the published 1.0 release candidate,
+install and verify the exact version explicitly:
+
+.. code-block:: bash
+
+   python -m pip install "spectrochempy==1.0.0rc1"
+   python -c "import spectrochempy as scp; print(scp.__version__)"
+
+This differs from a moving development build. After the final 1.0 release,
+use the ordinary stable installation commands above.
 
 
 Additional Resources

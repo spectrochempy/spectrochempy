@@ -530,7 +530,7 @@ class BuildDocumentation:
             "tutorials": kwargs.get("tutorials", False),
             "verbosity": kwargs.get("verbosity", 0),
             "jobs": self._get_jobs(kwargs.get("jobs", "auto")),
-            "warningiserror": kwargs.get("warning_is_error", False),
+            "warningiserror": kwargs.get("warningiserror", False),
             "whatsnew": kwargs.get("whatsnew", False),
             "tagname": kwargs.get("tagname", None),
             "singledoc": kwargs.get("singledoc", None),
