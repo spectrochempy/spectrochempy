@@ -155,7 +155,11 @@ class Array(SciType):
             return super().validate(obj, value)
         try:
             r = np.asarray(value, dtype=self.dtype)
-            if isinstance(value, np.ndarray) and r is not value:
+            if (
+                isinstance(value, np.ndarray)
+                and self.dtype is not None
+                and np.dtype(value.dtype) != np.dtype(self.dtype)
+            ):
                 warnings.warn(
                     f'Given trait value dtype "{np.dtype(value.dtype).name}" does not match required type "{np.dtype(self.dtype).name}". '
                     "A coerced copy has been created.",

@@ -40,6 +40,8 @@
 # SpectroChemPy workflow directly.
 
 # %%
+import warnings
+
 import spectrochempy as scp
 
 # %%
@@ -72,7 +74,16 @@ _ = spec.plot(xlim=(5, -5))
 
 # %%
 path = scp.preferences.datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "cadmium"
-fid2 = scp.nmr.read(path, expno=100)
+# This compact documentation fixture intentionally contains fewer points than
+# advertised by its original Bruker metadata. The reader safely keeps all
+# available points, so the resulting shape warning is not useful to the example.
+with warnings.catch_warnings():
+    warnings.filterwarnings(
+        "ignore",
+        message=r"\(956,\)cannot be shaped into\(1024,\)",
+        category=UserWarning,
+    )
+    fid2 = scp.nmr.read(path, expno=100)
 _ = fid2.plot(show_complex=True)
 
 # %%
