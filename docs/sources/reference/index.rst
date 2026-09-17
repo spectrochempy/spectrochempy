@@ -166,7 +166,7 @@ Import/export
 *************
 
 Import a NDDataset from external source
-======================================
+=======================================
 
 Reader functions may return either a single ``NDDataset`` or a list-like
 ``ScpObjectList`` when several datasets are discovered and not merged. In that

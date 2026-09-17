@@ -16,7 +16,7 @@ New Features
   pipeline: the public ``Constraint`` objects have become the canonical
   intermediate representation.  Mixed usage (legacy traitlets + ``constraints=``
   at the same time) raises a clear ``ValueError``.  The legacy traitlet-based
-    API remains fully supported for backward compatibility.  (:pr:`1383`)
+  API remains fully supported for backward compatibility.  (:pr:`1383`)
 
 - ``AnalysisResult`` (PCA, NMF, PLS, MCR‑ALS, …) and ``FitResult`` now have a
   rich ``_repr_html_`` for Jupyter notebooks, with collapsible Parameters,
@@ -85,7 +85,7 @@ New Features
   ``scp.exp(...)``, ``scp.log(...)``, ``scp.log10(...)``, ``scp.sin(...)``,
   and ``scp.cos(...)``. Synthetic profile creation also gains
   ``scp.normal(...)`` for native Gaussian noise generation without dropping to
-    NumPy. (:pr:`1311`, :pr:`1312`)
+  NumPy. (:pr:`1311`, :pr:`1312`)
 
 - ``stack(..., axis=1)`` is now supported for stacking 1D profiles as
   columns into a 2D dataset.  This makes the workflow for building
@@ -193,8 +193,8 @@ Bug Fixes
 
 - ``PLSRegression`` now works with a 1D ``NDDataset`` as the response variable
   ``y``. This fixes failures in ``predict()``, ``y_scores``, ``y_loadings``,
-   ``y_weights``, ``y_rotations``, ``result``, and ``coef`` when fitting with a
-   1D target. (:pr:`1305`)
+  ``y_weights``, ``y_rotations``, ``result``, and ``coef`` when fitting with a
+  1D target. (:pr:`1305`)
 
 - ``Optimize._parsing`` no longer infinite-loops when a numpy name (e.g. ``pi``,
   ``sin``, ``cos``) appears in a reference expression.  The old ``str.replace``
@@ -259,10 +259,10 @@ Developer
   ``Selectivity``, ``FixedValues``, ``ReferenceProfile`` and
   ``ModelProfile`` describe scientific prior knowledge about the
   concentration (``"C"``) or spectral (``"St"``) profiles of ``MCRALS``
-   as declarative, first-class objects. All ten classes are importable
-   from the ``spectrochempy.analysis.constraints`` submodule
-   (``from spectrochempy.analysis import constraints``), registered in the
-   public API reference, and covered by dedicated construction / validation
+  as declarative, first-class objects. All ten classes are importable
+  from the ``spectrochempy.analysis.constraints`` submodule
+  (``from spectrochempy.analysis import constraints``), registered in the
+  public API reference, and covered by dedicated construction / validation
   / equality / repr / model / tolerance tests
   (``tests/test_analysis/test_decomposition/test_mcrals_constraints.py``).
   This PR introduces the vocabulary and public surface **only**: the
