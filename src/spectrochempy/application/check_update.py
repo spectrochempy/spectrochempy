@@ -5,7 +5,6 @@
 # ======================================================================================
 """Check SpectroChemPy updates."""
 
-import json
 import time
 from contextlib import suppress
 from datetime import date
@@ -18,10 +17,12 @@ import requests
 from IPython import get_ipython
 from IPython.display import Javascript
 from IPython.display import display
+from packaging.version import InvalidVersion
 from packaging.version import Version
-from packaging.version import parse as parse_version
 
 __all__ = ["check_update"]
+
+PYPI_JSON_URL = "https://pypi.org/pypi/spectrochempy/json"
 
 
 # --------------------------------------------------------------------------------------
@@ -34,15 +35,43 @@ class NeedsUpdateWarning(UserWarning):
 # --------------------------------------------------------------------------------------
 # Pypi version checking
 # --------------------------------------------------------------------------------------
-def _get_pypi_version():
-    """Get the last released pypi version."""
-    url = "https://pypi.python.org/pypi/spectrochempy/json"
+def _select_latest_release(releases, current_version):
+    """Select the newest usable PyPI release for the installed version channel."""
+    current = Version(str(current_version))
+    candidates = []
 
-    connection_timeout = 120  # secondss
+    for raw_version, files in releases.items():
+        try:
+            candidate = Version(raw_version)
+        except InvalidVersion:
+            continue
+
+        usable_files = [item for item in files if not item.get("yanked", False)]
+        if not usable_files or candidate.is_devrelease:
+            continue
+        if not current.is_prerelease and candidate.is_prerelease:
+            continue
+
+        candidates.append((candidate, usable_files))
+
+    if not candidates:
+        return None
+
+    version, files = max(candidates, key=lambda item: item[0])
+    release_date = min(
+        date.fromisoformat(item["upload_time_iso_8601"].split("T")[0]) for item in files
+    )
+    return version, release_date
+
+
+def _get_pypi_version(current_version):
+    """Get the newest applicable PyPI version for the installed channel."""
+
+    connection_timeout = 120  # seconds
     start_time = time.time()
     while True:
         try:
-            response = requests.get(url, timeout=connection_timeout)
+            response = requests.get(PYPI_JSON_URL, timeout=connection_timeout)
             if response.status_code != 200:  # pragma: no cover
                 return None
             break  # exit the while loop in case of success
@@ -56,16 +85,7 @@ def _get_pypi_version():
                 return None
             time.sleep(1)  # attempting once every second
 
-    releases = json.loads(response.text)["releases"]
-    versions = sorted(releases, key=parse_version)
-    last_version = versions[-1]
-    release_date = date.fromisoformat(
-        releases[last_version][0]["upload_time_iso_8601"].split("T")[0],
-    )
-    # import datetime
-    # # for testing message
-    # return Version("2.0.0"), datetime.date(2021, 10, 1)
-    return Version(last_version), release_date
+    return _select_latest_release(response.json()["releases"], current_version)
 
 
 # --------------------------------------------------------------------------------------
@@ -164,7 +184,7 @@ def _display_needs_update_message(frequency):
 # ======================================================================================
 def check_update(version, frequency):
     old = Version(version)
-    res = _get_pypi_version()
+    res = _get_pypi_version(old)
     if res is not None:
         version, _ = res
     else:  # pragma: no cover
