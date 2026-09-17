@@ -335,7 +335,7 @@ def sp(dataset, ssb=1, pow=1, **kwargs):
     .. math::
         sp(t) = \sin(\frac{(\pi - \phi) t }{\text{aq}} + \phi)^{pow}
 
-    where :math:`0 < t < \text{aq}` and  :math:`\phi = \pi ⁄ \text{sbb}` when :math:`\text{ssb} \ge 2` or
+    where :math:`0 < t < \text{aq}` and  :math:`\phi = \pi ⁄ \text{ssb}` when :math:`\text{ssb} \ge 2` or
     :math:`\phi = 0` when :math:`\text{ssb} < 2`
 
     :math:`\text{aq}` is an acquisition status parameter and :math:`\text{ssb}` is a processing parameter (see the
@@ -346,13 +346,15 @@ def sp(dataset, ssb=1, pow=1, **kwargs):
     ----------
     dataset : Dataset
         Dataset we want to apodize using Sine Bell or Squared Sine Bell window multiplication.
-    sbb : int or float, optional, default=1
+    ssb : int or float, optional, default=1
         This processing parameter mimics the behaviour of the SSB parameter on bruker TOPSPIN software:
         Typical values are 1 for a pure sine function and 2 for a pure cosine function.
         Values greater than 2 give a mixed sine/cosine function. Note that all values smaller than 2, for example 0,
         have the same effect as :math:`\text{ssb}=1` , namely a pure sine function.
     pow : enum [1,2], optional, default=1
         Exponent value - If pow=2 a Squared Sine Bell window multiplication is performed.
+    **kwargs
+        Additional apodization controls described under Other Parameters.
 
     Returns
     -------
