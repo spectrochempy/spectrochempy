@@ -575,15 +575,16 @@ class TestMultiAxisAverage:
             ds2d.average(dim=("y", "x"), weights=np.array([1.0, 2.0, 3.0]))
 
     def test_average_keepdims(self, ds2d):
-        """Average with keepdims on partial reduction preserves shape."""
-        # Full 2D reduction returns scalar (existing behavior)
-        r_full = ds2d.average(dim=("y", "x"))
-        assert np.isclose(r_full, 5.5)
+        """Average with keepdims preserves reduced dimensions."""
+        r_full = ds2d.average(dim=("y", "x"), keepdims=True)
+        assert r_full.shape == (1, 1)
+        assert list(r_full.dims) == ["y", "x"]
+        np.testing.assert_allclose(r_full.data, [[5.5]])
 
-        # Partial reduction preserves dims
-        r_partial = ds2d.average(dim="y")
-        assert r_partial.shape == (4,)
-        assert list(r_partial.dims) == ["x"]
+        r_partial = ds2d.average(dim="y", keepdims=True)
+        assert r_partial.shape == (1, 4)
+        assert list(r_partial.dims) == ["y", "x"]
+        np.testing.assert_allclose(r_partial.data, [[4.0, 5.0, 6.0, 7.0]])
 
 
 # ======================================================================================

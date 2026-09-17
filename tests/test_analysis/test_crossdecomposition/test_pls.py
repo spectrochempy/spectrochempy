@@ -303,6 +303,25 @@ class TestPLSMultivariate:
         assert_allclose(score_val, score_val_skl, rtol=1e-5)
         assert 0.0 < score_val <= 1.0
 
+    def test_inverse_transform_uses_y_scores(self):
+        x_scores, y_scores = self.pls.transform(both=True)
+        x_hat, y_hat = self.pls.inverse_transform(x_scores, y_scores, both=True)
+        x_scores_skl, y_scores_skl = self.skl.transform(
+            self.d["Xc"].data,
+            self.d["Yc"].data,
+        )
+        x_hat_skl, y_hat_skl = self.skl.inverse_transform(
+            x_scores_skl,
+            y_scores_skl,
+        )
+
+        assert_allclose(x_hat.data, x_hat_skl, rtol=1e-5)
+        assert_allclose(y_hat.data, y_hat_skl, rtol=1e-5)
+
+        x_default, y_default = self.pls.inverse_transform(both=True)
+        assert_allclose(x_default.data, x_hat_skl, rtol=1e-5)
+        assert_allclose(y_default.data, y_hat_skl, rtol=1e-5)
+
 
 class TestPLSMaskedData:
     """PLS with masked regions in X."""
