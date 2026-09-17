@@ -8,7 +8,7 @@ it via ``dataset *= apod``.  This does not work for quaternion arrays
 This module provides a ``pk.execute`` handler that:
   1. Decomposes the quaternion into two complex subspectra
      (``fr = RR + j*RI``, ``fi = IR + j*II``).
-  2. Multiplies each subspectro by the phase apodization independently.
+  2. Multiplies each subspectrum by the phase apodization independently.
   3. Rebuilds the quaternion from the phased subspectra.
 
 The handler is registered by the NMR plugin and dispatched from the
@@ -20,7 +20,7 @@ from __future__ import annotations
 
 def quaternion_pk_handler(dataset, **kwargs):
     """
-    Phase quaternion data by applying correction to each subspectro.
+    Phase quaternion data by applying correction to each complex subspectrum.
 
     Modifies the dataset **in place** (data array replaced, metadata
     updated by the caller).
@@ -30,15 +30,21 @@ def quaternion_pk_handler(dataset, **kwargs):
     dataset : NDDataset
         The dataset with quaternion data.  The target axis must already
         be swapped to position -1 (done by the ``_phase_method`` decorator).
-    apod : ndarray
-        1-D complex apodization vector from the ``pk`` kernel.
     **kwargs
-        Forwarded from ``pk()``; unused here.
+        Options forwarded from ``pk()``. The handler reads ``apod``.
+
+    Other Parameters
+    ----------------
+    apod : ndarray
+        One-dimensional complex apodization vector produced by the ``pk``
+        kernel. If omitted or set to None, the handler returns None without
+        modifying `dataset`.
 
     Returns
     -------
-    NDDataset
-        The same dataset, with phased data.
+    NDDataset or None
+        The same dataset with phased data, or None when ``apod`` is unavailable.
+
     """
     from spectrochempy_nmr.processing.hypercomplex import _extract_quaternion_components
     from spectrochempy_nmr.processing.hypercomplex import _rebuild_quaternion
