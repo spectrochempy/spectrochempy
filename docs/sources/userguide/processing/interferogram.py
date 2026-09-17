@@ -36,8 +36,19 @@
 # A situation where we need transform of real data is the case of FTIR interferogram.
 
 # %%
+import warnings
+
 import spectrochempy as scp
 from spectrochempy.core.units import ur
+
+# Reciprocal-axis conversion evaluates the zero-frequency FFT bin before the
+# plots select their non-zero wavenumber range. The resulting infinity is not
+# displayed and is unrelated to the processing demonstrated below.
+warnings.filterwarnings(
+    "ignore",
+    message="divide by zero encountered in divide",
+    category=RuntimeWarning,
+)
 
 # %%
 ir = scp.read_spa("irdata/interferogram/interfero.SPA")
