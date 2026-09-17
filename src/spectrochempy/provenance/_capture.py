@@ -149,6 +149,7 @@ class ProvenanceCapture:
     def __init__(self):
         self.__ledger = ProvenanceLedger()
         self.__token: Token | None = None
+        self.__closed = False
 
     @property
     def ledger(self) -> ProvenanceLedger:
@@ -158,14 +159,21 @@ class ProvenanceCapture:
     @property
     def active(self) -> bool:
         """Whether this capture is innermost in the current context."""
-        return _ACTIVE_CAPTURE.get() is self
+        return not self.__closed and _ACTIVE_CAPTURE.get() is self
 
     @classmethod
     def current(cls) -> ProvenanceCapture | None:
-        """Return the innermost capture in the current context, if any."""
-        return _ACTIVE_CAPTURE.get()
+        """Return the innermost open capture in the current context, if any."""
+        capture = _ACTIVE_CAPTURE.get()
+        if capture is not None and capture.__closed:
+            return None
+        return capture
 
     def __enter__(self) -> ProvenanceCapture:
+        if self.__closed:
+            raise RuntimeError(
+                "A ProvenanceCapture cannot be re-entered after it is closed"
+            )
         if self.__token is not None:
             raise RuntimeError("A ProvenanceCapture cannot be re-entered")
         self.__token = _ACTIVE_CAPTURE.set(self)
@@ -177,4 +185,5 @@ class ProvenanceCapture:
             raise RuntimeError("ProvenanceCapture context is not active")
         _ACTIVE_CAPTURE.reset(token)
         self.__token = None
+        self.__closed = True
         return False

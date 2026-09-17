@@ -262,6 +262,38 @@ def test_same_capture_cannot_be_reentered():
         assert ProvenanceCapture.current() is capture
 
 
+def test_closed_capture_cannot_be_reopened():
+    capture = ProvenanceCapture()
+    with capture:
+        pass
+
+    with pytest.raises(RuntimeError, match="after it is closed"), capture:
+        pass
+
+
+def test_inherited_task_context_does_not_outlive_closed_capture():
+    async def scenario():
+        capture = ProvenanceCapture()
+        started = asyncio.Event()
+        release = asyncio.Event()
+
+        async def child():
+            started.set()
+            await release.wait()
+            return ProvenanceCapture.current(), capture.active
+
+        with capture:
+            task = asyncio.create_task(child())
+            await started.wait()
+        release.set()
+        return await task
+
+    current, active = asyncio.run(scenario())
+
+    assert current is None
+    assert not active
+
+
 def test_new_thread_has_independent_context():
     with ProvenanceCapture() as capture:
         with ThreadPoolExecutor(max_workers=1) as executor:

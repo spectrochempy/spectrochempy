@@ -206,6 +206,38 @@ def test_omitted_coordinate_labels_mark_capture_partial():
     } in payload["capture"]["omissions"]
 
 
+@pytest.mark.parametrize("status", [{"enabled": True}, ["enabled"]])
+def test_non_string_status_value_is_treated_as_user_data(status):
+    record = _record(
+        requested_parameters={"options": {"status": status}},
+        strict=False,
+    )
+    payload = record.to_dict()
+
+    assert payload["parameters"]["requested"]["values"]["options"] == {"status": status}
+    assert payload["parameters"]["requested"]["fields"] == {}
+    assert payload["capture"] == {"status": "complete", "omissions": []}
+
+
+def test_complete_capture_with_omissions_is_downgraded_to_partial():
+    omission = {"field": "provider.entry_point", "status": "unknown"}
+    record = _record(capture={"status": "complete", "omissions": [omission]})
+    payload = record.to_dict()
+
+    assert payload["capture"]["status"] == "partial"
+    assert payload["capture"]["omissions"] == [omission]
+
+
+def test_unsupported_warning_value_marks_capture_partial():
+    record = _record(warnings=({"note": object()},), strict=False)
+    payload = record.to_dict()
+
+    assert payload["capture"]["status"] == "partial"
+    assert payload["capture"]["omissions"] == [
+        {"field": "warnings[0].note", "status": "unsupported"}
+    ]
+
+
 def test_unknown_provider_version_is_explicit():
     record = _record(provider_name="unknown-provider", provider_version=None)
     assert record.to_dict()["provider"]["version"] == {
