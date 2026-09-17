@@ -19,3 +19,6 @@ Bug Fixes
   Stable installations now ignore prereleases, while release-candidate
   installations are notified about newer candidates and the final release.
   (:pr:`1636`)
+
+- Fixed cross-decomposition inverse transforms so Y is reconstructed from its
+  own transformed scores instead of reusing the X scores.

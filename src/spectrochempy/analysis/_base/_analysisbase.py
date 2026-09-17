@@ -1725,11 +1725,12 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
             Y_transform = Y_transform.data
 
         elif Y_transform is None and both is True:
-            Y_transform = self.transform(**kwargs).data
+            _, Y_transform = self.transform(both=True, **kwargs)
+            Y_transform = Y_transform.data
 
         if Y_transform is None:
             return self._inverse_transform(X_transform)
-        X, Y = self._inverse_transform(X_transform, X_transform)
+        X, Y = self._inverse_transform(X_transform, Y_transform)
         return X, Y
 
     def fit_transform(self, X, Y, both=False):
