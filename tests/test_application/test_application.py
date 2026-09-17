@@ -15,6 +15,7 @@ from spectrochempy.application.application import app
 from unittest.mock import patch
 import subprocess
 import sys
+from unittest.mock import Mock
 
 
 def test_app_initialization():
@@ -149,6 +150,26 @@ def test_get_release_date_with_git():
     date = release_date
     assert isinstance(date, str)
     assert date != "unknown"
+
+
+def test_lazy_environment_starts_update_check_once(monkeypatch):
+    from spectrochempy.application import application
+
+    start = Mock()
+    update = Mock()
+    monkeypatch.setattr(application.app, "start", start)
+    monkeypatch.setattr(application, "_start_update_check", update)
+    monkeypatch.setattr(application, "_no_display", False)
+    monkeypatch.setattr(application, "_scpy_startup_loglevel", "INFO")
+    monkeypatch.setattr(application, "_is_pytest", False)
+    monkeypatch.setattr(application, "_app_started", False)
+    monkeypatch.delenv("DOC_BUILDING", raising=False)
+
+    application._get_environment()
+    application._get_environment()
+
+    start.assert_called_once_with()
+    update.assert_called_once_with()
 
 
 if __name__ == "__main__":

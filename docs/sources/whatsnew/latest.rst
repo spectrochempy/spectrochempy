@@ -11,3 +11,11 @@ What's New in Revision 1.0.0rc2.dev
 
 These are the changes in SpectroChemPy-1.0.0rc2.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
+
+Bug Fixes
+~~~~~~~~~
+
+- Restored asynchronous update notifications after lazy application startup.
+  Stable installations now ignore prereleases, while release-candidate
+  installations are notified about newer candidates and the final release.
+  (:pr:`1636`)

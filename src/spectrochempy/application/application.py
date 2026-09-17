@@ -514,6 +514,8 @@ def _get_environment():
     if not _app_started:
         app.start()
         _app_started = True
+        if not _is_pytest and environ.get("DOC_BUILDING") is None:
+            _start_update_check()
 
     return _no_display, _scpy_startup_loglevel, _is_pytest
 
@@ -622,10 +624,12 @@ def _start_update_check():
     from .check_update import check_update
     from .info import version
 
-    _get_environment()  # Ensure environment is set up
     check_update_frequency = app.general_preferences.check_update_frequency
     DISPLAY_UPDATE = threading.Thread(
-        target=check_update, args=(version, check_update_frequency)
+        target=check_update,
+        args=(version, check_update_frequency),
+        name="spectrochempy-update-check",
+        daemon=True,
     )
     DISPLAY_UPDATE.start()
 
@@ -642,9 +646,8 @@ def _start_testdata_download():
     DOWNLOAD_TESTDATA.start()
 
 
-# Background threads were previously started at module level but have been
-# removed to avoid loading matplotlib at import time (lazy loading goal).
-# The functions are kept for potential future use but are not called.
+# Background work starts only after lazy application initialization so importing
+# SpectroChemPy remains free of network access and eager matplotlib setup.
 
 
 # --------------------------------------------------------------------------------------
