@@ -42,9 +42,7 @@ def test_release_candidate_tracks_new_candidates_and_final_release():
         "1.0.0": _release("2026-09-25"),
     }
 
-    latest, release_date = check_update._select_latest_release(
-        releases, "1.0.0rc1"
-    )
+    latest, release_date = check_update._select_latest_release(releases, "1.0.0rc1")
 
     assert latest == Version("1.0.0")
     assert release_date == date(2026, 9, 25)
