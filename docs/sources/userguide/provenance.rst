@@ -14,16 +14,51 @@ and is assembled on the experimental ``develop`` branch. It is not part of the
 SpectroChemPy 1.0 release and its contract may still evolve.
 
 P1 establishes immutable references and records, an append-only ledger, and a
-context-local capture mechanism. It deliberately performs no automatic
-instrumentation yet. Scientific operations executed inside a capture context
-therefore do not create records until a later, separately reviewed phase adds
-specific semantic hooks.
+context-local capture mechanism. P2 adds the first runtime instrumentation:
+out-of-place ``NDDataset`` slicing and ``NDDataset.transpose`` create one
+operation record each while a capture context is active. Every other scientific
+operation remains uninstrumented and creates no record.
+
+Captured slicing and transpose
+------------------------------
+
+Capture is opt-in. Outside an active :class:`~spectrochempy.provenance.ProvenanceCapture`,
+slicing and transpose behave exactly as before and create no record:
+
+.. code-block:: python
+
+   import numpy as np
+
+   import spectrochempy as scp
+
+   dataset = scp.NDDataset(np.arange(24.0).reshape(4, 6))
+
+   with scp.provenance.ProvenanceCapture() as capture:
+       selection = dataset[:, 1:3]
+       transposed = selection.transpose()
+
+   assert len(capture.ledger) == 2
+
+The first record references the source dataset state and creates a new object
+and initial state for the selection; the second references the selection state
+as its input and creates another new object. Objects are tracked transiently
+through weak references and are released when the context closes. The ledger
+stores only immutable records and opaque ledger-local references, never the
+datasets, arrays, or their lineage graphs.
+
+The selection is captured as a JSON-safe structural description (``slice``,
+``ellipsis``, and index values), and transpose records the requested dimension
+order. Slicing and transpose never mutate the source, and the textual
+:attr:`~spectrochempy.NDDataset.history` produced by the operation is
+unchanged. This first slice covers only single-source out-of-place operations;
+in-place operations, arithmetic, concatenation, estimators, and readers are not
+instrumented.
 
 Explicit record construction
 ----------------------------
 
-Records can currently be constructed and appended explicitly for development
-and schema evaluation:
+Records can also be constructed and appended explicitly for development and
+schema evaluation:
 
 .. code-block:: python
 
