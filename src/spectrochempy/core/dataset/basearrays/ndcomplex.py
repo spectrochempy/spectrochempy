@@ -340,16 +340,19 @@ class NDComplexArray(NDArray):
 
         Parameters
         ----------
-        dims : int, str or tuple of int or str, optional, default=(0,)
-            Dimension names or indexes along which the method should be applied.
+        dim1 : int or str
+            Name or index of the first dimension.
+        dim2 : int or str
+            Name or index of the second dimension.
         inplace : bool, optional, default=False
             Flag to say that the method return a new object (default)
             or not (inplace=True)
 
         Returns
         -------
-        transposed
-            Same object or a copy depending on the `inplace` flag.
+        NDComplexArray
+            Array with the two dimensions exchanged. This is the same object
+            when `inplace=True`; otherwise, it is a copy.
 
         """
         return super().swapdims(dim1, dim2, inplace=inplace)

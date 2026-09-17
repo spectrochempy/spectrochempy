@@ -469,15 +469,16 @@ def ht(dataset, N=None):
 
     Parameters
     ----------
-    data : ndarrat
-        Array of NMR data.
-    N : int or None
-        Number of Fourier components.
+    dataset : array-like
+        Real or complex NMR data. The Hilbert transform is applied along the
+        last dimension.
+    N : int or None, optional
+        Number of Fourier components passed to the Hilbert transform.
 
     Returns
     -------
-    ndata : ndarray
-        NMR data which has been Hilvert transformed.
+    ndarray
+        Complex NMR data reconstructed by the Hilbert transform.
 
     """
     # create an empty output array
