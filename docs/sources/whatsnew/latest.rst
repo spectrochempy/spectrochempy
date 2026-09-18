@@ -21,8 +21,21 @@ New Features
   It does not instrument scientific operations and does not export
   reproducibility manifests yet.
 
+- Instrumented out-of-place ``NDDataset`` slicing and ``NDDataset.transpose``
+  so an active :class:`~spectrochempy.provenance.ProvenanceCapture` records
+  single-source selection and transpose operations, with transient weak object
+  tracking and unchanged data and textual history. All other operations remain
+  uninstrumented.
+
 Bug Fixes
 ~~~~~~~~~
+
+- Hardened the experimental provenance instrumentation: an in-place
+  modification of a tracked dataset is detected and reported (``partial``
+  capture with an ``unrecorded_state_change`` omission) instead of silently
+  chaining to a stale state; parameter description failures never break the
+  recorded scientific operation; and failed operations keep the bounded
+  requested parameters.
 
 - Fixed ``average(..., keepdims=True)`` so reduced dimensions are retained in
   both the data shape and dataset metadata, consistently with other reductions.
