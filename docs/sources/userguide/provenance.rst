@@ -46,6 +46,21 @@ through weak references and are released when the context closes. The ledger
 stores only immutable records and opaque ledger-local references, never the
 datasets, arrays, or their lineage graphs.
 
+Each object state is verified against a bounded numeric fingerprint when it is
+used again as an input. If an object was changed outside the recorded
+operations — for example by an in-place modification of its ``data`` — the
+next record does not silently reuse the stale state: it references the object's
+current observed state and is captured as ``partial`` with an explicit
+``unrecorded_state_change`` omission. Verified chains keep a ``complete``
+capture and their input-to-output reference links.
+
+Parameter descriptions are prepared inside the capture protection, so a
+failure in capture never raises into scientific code: the operation still
+returns normally and the unavailable parameter is recorded as an omission with
+a ``partial`` capture. Failed operations record the bounded parameters that
+were requested under ``parameters.requested`` together with the structured
+failure.
+
 A :class:`~spectrochempy.provenance.ProvenanceCapture` instance is single-use.
 Once its context closes — normally or through an exception — it cannot be
 reopened or resumed, and it is no longer active in tasks that inherit the
