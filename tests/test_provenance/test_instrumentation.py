@@ -71,6 +71,53 @@ def test_chained_operations_share_state_reference():
     assert np.array_equal(result.data, source.data[:, 1:3].T)
 
 
+def test_verified_chain_reports_complete_capture():
+    source = _dataset()
+    with ProvenanceCapture() as capture:
+        result = source[:, 1:3].transpose()
+
+    first, second = capture.ledger.operation_records
+    assert first.capture["status"] == "complete"
+    assert second.capture["status"] == "complete"
+    assert second.inputs[0].reference.id == first.outputs[0].reference.id
+    assert np.array_equal(result.data, source.data[:, 1:3].T)
+
+
+def test_unrecorded_mutation_breaks_false_chaining():
+    source = _dataset()
+    with ProvenanceCapture() as capture:
+        selection = source[:, 1:3]
+        selection.data[:] = 0.0
+        result = selection.transpose()
+
+    slice_record, transpose_record = capture.ledger.operation_records
+    assert slice_record.capture["status"] == "complete"
+    assert transpose_record.capture["status"] == "partial"
+    assert (
+        transpose_record.inputs[0].reference.id != slice_record.outputs[0].reference.id
+    )
+    assert any(
+        "unrecorded_state_change" in str(item)
+        for item in transpose_record.capture["omissions"]
+    )
+    assert result.shape == (2, 4)
+    assert result.data.sum() == 0.0
+    assert source.data[:, 1:3].sum() != 0.0
+
+
+def test_reused_source_with_unrecorded_change_is_detected():
+    source = _dataset()
+    with ProvenanceCapture() as capture:
+        source[:, 0:1]
+        source.data[:, 0] = 0.0
+        source[:, 2:3]
+
+    first, second = capture.ledger.operation_records
+    assert first.capture["status"] == "complete"
+    assert second.capture["status"] == "partial"
+    assert first.inputs[0].reference.id != second.inputs[0].reference.id
+
+
 def test_repeated_source_reuses_state_reference():
     source = _dataset()
     with ProvenanceCapture() as capture:
@@ -104,9 +151,11 @@ def test_failed_transpose_records_failure_and_preserves_exception():
     record = capture.ledger.operation_records[0]
     assert record.status == "failed"
     assert record.outputs == ()
+    assert record.capture["status"] == "complete"
     payload = record.to_dict()
     assert payload["warnings"][0]["reason"] == "operation_failed"
     assert payload["warnings"][0]["exception_type"].endswith("AxisError")
+    assert payload["parameters"]["requested"]["values"]["dims"] == [5, 6]
 
 
 def test_capture_failure_does_not_alter_result(monkeypatch):
@@ -123,6 +172,27 @@ def test_capture_failure_does_not_alter_result(monkeypatch):
     assert np.array_equal(result.data, source.data[:, 1:3])
     assert capture.capture_warnings
     assert capture.capture_warnings[0]["status"] == "capture_failed"
+
+
+def test_parameter_description_failure_does_not_break_slicing(monkeypatch):
+    from spectrochempy.provenance import _instrument
+
+    def _boom(items):
+        raise RuntimeError("selection not serializable")
+
+    monkeypatch.setattr(_instrument, "describe_selection", _boom)
+
+    source = _dataset()
+    with ProvenanceCapture() as capture:
+        result = source[:, 1:3]
+
+    assert len(capture.ledger) == 1
+    assert np.array_equal(result.data, source.data[:, 1:3])
+    assert capture.capture_warnings
+    assert capture.capture_warnings[0]["status"] == "capture_failed"
+    record = capture.ledger.operation_records[0]
+    assert record.to_dict()["parameters"]["requested"]["values"]["status"] == "omitted"
+    assert record.capture["status"] == "partial"
 
 
 def test_transpose_history_is_preserved_inside_capture():

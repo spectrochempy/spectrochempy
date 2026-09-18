@@ -37,6 +37,29 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+<<<<<<< HEAD
+=======
+- Hardened the experimental provenance instrumentation: an in-place
+  modification of a tracked dataset is detected and reported (``partial``
+  capture with an ``unrecorded_state_change`` omission) instead of silently
+  chaining to a stale state; parameter description failures never break the
+  recorded scientific operation; and failed operations keep the bounded
+  requested parameters.
+
+- Fixed ``average(..., keepdims=True)`` so reduced dimensions are retained in
+  both the data shape and dataset metadata, consistently with other reductions.
+  (:pr:`1641`)
+
+- Restored asynchronous update notifications after lazy application startup.
+  Stable installations now ignore prereleases, while release-candidate
+  installations are notified about newer candidates and the final release.
+  (:pr:`1636`)
+
+- Fixed cross-decomposition inverse transforms so Y is reconstructed from its
+  own transformed scores instead of reusing the X scores.
+  (:pr:`1642`)
+
+>>>>>>> 8f5973fda (FIX: verify state continuity, protect parameter capture, and keep failure parameters)
 
 .. section
 

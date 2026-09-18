@@ -573,6 +573,9 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
                     source=self,
                     exc=exc,
                     started_at=started_at,
+                    requested_parameters=lambda: {
+                        "selection": _instrument.describe_selection(saveditems)
+                    },
                 )
             raise
 
@@ -582,7 +585,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
                 operation_id=_instrument.SLICE_OPERATION_ID,
                 source=self,
                 result=new,
-                requested_parameters={
+                requested_parameters=lambda: {
                     "selection": _instrument.describe_selection(saveditems)
                 },
                 implementation="spectrochempy.NDDataset.__getitem__",
@@ -2040,6 +2043,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
                     source=self,
                     exc=exc,
                     started_at=started_at,
+                    requested_parameters=lambda: {"dims": list(dims)},
                 )
             raise
 
@@ -2049,7 +2053,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
                 operation_id=_instrument.TRANSPOSE_OPERATION_ID,
                 source=self,
                 result=new,
-                requested_parameters={"dims": list(dims)},
+                requested_parameters=lambda: {"dims": list(dims)},
                 implementation="spectrochempy.NDDataset.transpose",
                 started_at=started_at,
                 summary=message,

@@ -12,6 +12,7 @@ from contextvars import Token
 from typing import Any
 
 from spectrochempy.provenance._identity import IdentityRegistry
+from spectrochempy.provenance._identity import ObservedState
 from spectrochempy.provenance._models import ObjectRef
 from spectrochempy.provenance._models import OperationRecord
 from spectrochempy.provenance._models import OperationRef
@@ -174,7 +175,7 @@ class ProvenanceCapture:
         self.__record_count += 1
         return f"op-{self.__record_count:06d}"
 
-    def _observe_source(self, value: Any) -> StateRef:
+    def _observe_source(self, value: Any) -> ObservedState:
         return self.__identity.observe(value)
 
     def _register_output(self, value: Any) -> StateRef:
