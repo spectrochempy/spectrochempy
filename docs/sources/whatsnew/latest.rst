@@ -14,6 +14,10 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 
 This stable release consolidates the changes published during the release-candidate cycle (``1.0.0rc1``) and any changes made after the last candidate.
 
+SpectroChemPy 1.0.0 is the project's first release officially classified as
+``Production/Stable``, marking the transition from the beta development stage
+to a stable production release.
+
 New Features
 ~~~~~~~~~~~~
 
