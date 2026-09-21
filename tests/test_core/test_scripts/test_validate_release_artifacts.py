@@ -671,13 +671,21 @@ class TestInstallCondaArtifact:
         )
 
         def fake_run(command, capture_output=True, text=True):  # noqa: ARG001
-            if "importlib.metadata" in " ".join(command):
+            command_text = " ".join(command)
+            if "importlib.metadata" in command_text:
                 stderr = "PackageNotFoundError" if version_returncode else ""
                 return subprocess.CompletedProcess(
                     command,
                     version_returncode,
                     f"{installed_version}\n" if installed_version else "",
                     stderr,
+                )
+            if "importlib.import_module" in command_text:
+                return subprocess.CompletedProcess(
+                    command,
+                    0,
+                    f"{tmp_path}/env/site-packages/testpkg/__init__.py\n",
+                    "",
                 )
             return subprocess.CompletedProcess(command, 0, "", "")
 
@@ -699,6 +707,7 @@ class TestInstallCondaArtifact:
     ):
         module = load_module()
         artifact = _make_conda(tmp_path)
+        assert artifact.is_file()
         calls = []
         monkeypatch.setattr(
             module.shutil,
@@ -708,6 +717,8 @@ class TestInstallCondaArtifact:
 
         def failed_install(command, capture_output=True, text=True):  # noqa: ARG001
             calls.append(command)
+            if command[1] == "create":
+                return subprocess.CompletedProcess(command, 0, "", "")
             return subprocess.CompletedProcess(command, 1, "", "solver failed")
 
         monkeypatch.setattr(module.subprocess, "run", failed_install)
@@ -715,12 +726,175 @@ class TestInstallCondaArtifact:
         module.install_and_smoketest_conda(
             artifact, "testpkg", "1.0.0", "testpkg", report
         )
-        assert str(artifact.resolve()) in calls[0]
+        install_cmd = next(c for c in calls if c[1] == "install")
+        assert str(artifact.resolve()) in install_cmd
         assert not report.passed
         assert any(
             check.name == "conda:install" and check.severity == module.Severity.FAILURE
             for check in report.checks
         )
+
+    def test_env_creation_failure_is_failure(self, tmp_path, monkeypatch):
+        module = load_module()
+        artifact = _make_conda(tmp_path)
+        monkeypatch.setattr(
+            module.shutil,
+            "which",
+            lambda name: "/usr/bin/micromamba" if name == "micromamba" else None,
+        )
+
+        def failed_create(command, capture_output=True, text=True):  # noqa: ARG001
+            return subprocess.CompletedProcess(command, 1, "", "solver failed")
+
+        monkeypatch.setattr(module.subprocess, "run", failed_create)
+        report = module.ValidationReport("testpkg", "1.0.0", "conda")
+        module.install_and_smoketest_conda(
+            artifact, "testpkg", "1.0.0", "testpkg", report
+        )
+        assert not report.passed
+        install_check = next(c for c in report.checks if c.name == "conda:install")
+        assert install_check.severity == module.Severity.FAILURE
+        assert "environment creation failed" in install_check.message
+
+    def test_package_without_declared_dependencies_is_failure(
+        self, tmp_path, monkeypatch
+    ):
+        module = load_module()
+        artifact = _make_conda(tmp_path)
+        monkeypatch.setattr(
+            module,
+            "_read_conda_package",
+            lambda _: module.CondaPackageContents(
+                paths=["pkg/__init__.py"], index={"name": "testpkg"}, has_python=True
+            ),
+        )
+        monkeypatch.setattr(
+            module.shutil,
+            "which",
+            lambda name: "/usr/bin/micromamba" if name == "micromamba" else None,
+        )
+        report = module.ValidationReport("testpkg", "1.0.0", "conda")
+        module.install_and_smoketest_conda(
+            artifact, "testpkg", "1.0.0", "testpkg", report
+        )
+        assert not report.passed
+        install_check = next(c for c in report.checks if c.name == "conda:install")
+        assert install_check.severity == module.Severity.FAILURE
+        assert "does not declare dependencies" in install_check.message
+
+    def test_env_created_from_dependencies_and_exact_artifact(
+        self, tmp_path, monkeypatch
+    ):
+        """The env must be created from declared deps, then link the artifact."""
+        module = load_module()
+        artifact = _make_conda(tmp_path)
+        calls = []
+        monkeypatch.setattr(
+            module.shutil,
+            "which",
+            lambda name: "/usr/bin/micromamba" if name == "micromamba" else None,
+        )
+
+        class FixedTemporaryDirectory:
+            def __init__(self, **kwargs):  # noqa: ARG002
+                pass
+
+            def __enter__(self):
+                return str(tmp_path)
+
+            def __exit__(self, *args):
+                return False
+
+        monkeypatch.setattr(
+            module.tempfile, "TemporaryDirectory", FixedTemporaryDirectory
+        )
+
+        env_python = tmp_path / "env" / "bin" / "python"
+        env_python.parent.mkdir(parents=True)
+        env_python.touch()
+
+        def fake_run(command, capture_output=True, text=True):  # noqa: ARG001
+            calls.append(list(command))
+            command_text = " ".join(command)
+            if command[1] == "create":
+                return subprocess.CompletedProcess(command, 0, "", "")
+            if command[1] == "install":
+                return subprocess.CompletedProcess(command, 0, "", "")
+            if "importlib.import_module" in command_text:
+                return subprocess.CompletedProcess(
+                    command,
+                    0,
+                    f"{tmp_path}/env/site-packages/testpkg/__init__.py\n",
+                    "",
+                )
+            if "importlib.metadata" in command_text:
+                return subprocess.CompletedProcess(command, 0, "1.0.0\n", "")
+            return subprocess.CompletedProcess(command, 0, "", "")
+
+        monkeypatch.setattr(module.subprocess, "run", fake_run)
+        report = module.ValidationReport("testpkg", "1.0.0", "conda")
+        module.install_and_smoketest_conda(
+            artifact, "testpkg", "1.0.0", "testpkg", report
+        )
+
+        create_cmd = next(c for c in calls if c[1] == "create")
+        assert "python >=3.11" in create_cmd
+        assert "numpy" in create_cmd
+        assert str(artifact.resolve()) not in create_cmd
+
+        install_cmd = next(c for c in calls if c[1] == "install")
+        assert str(artifact.resolve()) in install_cmd
+
+        assert report.passed
+        import_check = next(c for c in report.checks if c.name == "conda:import")
+        assert import_check.severity == module.Severity.SUCCESS
+        assert "validated environment" in import_check.message
+
+    def test_import_from_outside_environment_is_failure(self, tmp_path, monkeypatch):
+        """An import resolved from the checkout or another env must fail."""
+        module = load_module()
+        artifact = _make_conda(tmp_path)
+        monkeypatch.setattr(
+            module.shutil,
+            "which",
+            lambda name: "/usr/bin/micromamba" if name == "micromamba" else None,
+        )
+
+        class FixedTemporaryDirectory:
+            def __init__(self, **kwargs):  # noqa: ARG002
+                pass
+
+            def __enter__(self):
+                return str(tmp_path)
+
+            def __exit__(self, *args):
+                return False
+
+        monkeypatch.setattr(
+            module.tempfile, "TemporaryDirectory", FixedTemporaryDirectory
+        )
+
+        env_python = tmp_path / "env" / "bin" / "python"
+        env_python.parent.mkdir(parents=True)
+        env_python.touch()
+
+        def fake_run(command, capture_output=True, text=True):  # noqa: ARG001
+            command_text = " ".join(command)
+            if "importlib.import_module" in command_text:
+                return subprocess.CompletedProcess(
+                    command, 0, "/some/checkout/spectrochempy/__init__.py\n", ""
+                )
+            return subprocess.CompletedProcess(command, 0, "", "")
+
+        monkeypatch.setattr(module.subprocess, "run", fake_run)
+        report = module.ValidationReport("testpkg", "1.0.0", "conda")
+        module.install_and_smoketest_conda(
+            artifact, "testpkg", "1.0.0", "testpkg", report
+        )
+        assert not report.passed
+        import_check = next(c for c in report.checks if c.name == "conda:import")
+        assert import_check.severity == module.Severity.FAILURE
+        assert "outside the validated environment" in import_check.message
 
 
 # ---------------------------------------------------------------------------
