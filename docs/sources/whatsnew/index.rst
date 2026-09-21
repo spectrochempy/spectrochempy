@@ -21,6 +21,7 @@ Version 1.0
     :maxdepth: 1
 
     latest
+    v1.0.0
     v1.0.0rc1
 
 Version 0.12

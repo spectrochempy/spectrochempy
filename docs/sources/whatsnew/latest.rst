@@ -6,10 +6,10 @@
 
 :orphan:
 
-What's New in Revision 1.0.0rc2.dev
+What's New in Revision 1.0.1.dev
 ---------------------------------------------------------------------------------------
 
-These are the changes in SpectroChemPy-1.0.0rc2.dev.
+These are the changes in SpectroChemPy-1.0.1.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
 
 New Features
@@ -20,19 +20,3 @@ New Features
   context-local capture ownership, and conservative parameter normalization.
   It does not instrument scientific operations and does not export
   reproducibility manifests yet.
-
-Bug Fixes
-~~~~~~~~~
-
-- Fixed ``average(..., keepdims=True)`` so reduced dimensions are retained in
-  both the data shape and dataset metadata, consistently with other reductions.
-  (:pr:`1641`)
-
-- Restored asynchronous update notifications after lazy application startup.
-  Stable installations now ignore prereleases, while release-candidate
-  installations are notified about newer candidates and the final release.
-  (:pr:`1636`)
-
-- Fixed cross-decomposition inverse transforms so Y is reconstructed from its
-  own transformed scores instead of reusing the X scores.
-  (:pr:`1642`)
