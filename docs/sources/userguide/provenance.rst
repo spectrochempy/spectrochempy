@@ -72,7 +72,9 @@ order. Slicing and transpose never mutate the source, and the textual
 :attr:`~spectrochempy.NDDataset.history` produced by the operation is
 unchanged. This first slice covers only single-source out-of-place operations;
 in-place operations, arithmetic, concatenation, estimators, and readers are not
-instrumented.
+instrumented. In particular, in-place slicing
+(``dataset[:, ..., INPLACE]``) and in-place transpose are outside the capture
+scope and create no record.
 
 Demonstrator: interactive selection followed by transpose
 ---------------------------------------------------------

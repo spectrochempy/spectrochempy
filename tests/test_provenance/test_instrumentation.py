@@ -6,6 +6,7 @@ import numpy as np
 
 import spectrochempy as scp
 from spectrochempy.provenance import ProvenanceCapture
+from spectrochempy.utils.constants import INPLACE
 
 
 def _dataset():
@@ -137,6 +138,76 @@ def test_inplace_transpose_is_not_recorded():
 
     assert id(returned) == original_id
     assert len(capture.ledger) == 0
+
+
+def test_inplace_slicing_is_not_recorded():
+    source = _dataset()
+    original_id = id(source)
+    with ProvenanceCapture() as capture:
+        returned = source[:, 1:3, INPLACE]
+
+    assert id(returned) == original_id
+    assert returned.shape == (4, 2)
+    assert np.array_equal(returned.data, np.arange(24.0).reshape(4, 6)[:, 1:3])
+    assert len(capture.ledger) == 0
+
+
+def test_inplace_slice_followed_by_transpose_is_single_record():
+    source = _dataset()
+    with ProvenanceCapture() as capture:
+        source[:, 1:3, INPLACE]
+        result = source.transpose()
+
+    assert len(capture.ledger) == 1
+    record = capture.ledger.operation_records[0]
+    assert record.operation_id == "org.spectrochempy.dataset.transpose"
+    assert record.status == "succeeded"
+    assert record.capture["status"] == "complete"
+    assert result.shape == (2, 4)
+    assert np.array_equal(result.data, source.data.T)
+    assert result.history[-1].endswith("Data transposed")
+
+
+def test_location_slicing_records_requested_coordinate_selection():
+    source = scp.NDDataset(np.arange(24.0).reshape(4, 6))
+    source.set_coordset(x=np.linspace(0, 1, 6), y=np.arange(4.0))
+    with ProvenanceCapture() as capture:
+        result = source[:, 0.2:0.6]
+
+    assert result.shape == (4, 3)
+    assert np.array_equal(result.data, source.data[:, 1:4])
+    assert len(capture.ledger) == 1
+    record = capture.ledger.operation_records[0]
+    selection = record.to_dict()["parameters"]["requested"]["values"]["selection"]
+    assert selection == [
+        {"type": "slice", "start": None, "stop": None, "step": None},
+        {"type": "slice", "start": 0.2, "stop": 0.6, "step": None},
+    ]
+    assert record.capture["status"] == "complete"
+
+
+def test_coordinate_name_access_is_not_recorded():
+    source = scp.NDDataset(np.arange(24.0).reshape(4, 6))
+    source.set_coordset(x=np.linspace(0, 1, 6), y=np.arange(4.0))
+    with ProvenanceCapture() as capture:
+        coord = source["x"]
+
+    assert isinstance(coord, scp.Coord)
+    assert len(capture.ledger) == 0
+
+
+def test_fancy_indexing_array_is_recorded_as_omission_when_large():
+    source = scp.NDDataset(np.arange(10000.0).reshape(100, 100))
+    fancy = np.arange(70)
+    with ProvenanceCapture() as capture:
+        result = source[:, fancy]
+
+    assert len(capture.ledger) == 1
+    record = capture.ledger.operation_records[0]
+    payload = record.to_dict()
+    assert "array_size_limit" in str(payload["parameters"]["requested"]["values"])
+    assert record.capture["status"] == "partial"
+    assert np.array_equal(result.data, source.data[:, fancy])
 
 
 def test_failed_transpose_records_failure_and_preserves_exception():

@@ -28,8 +28,9 @@ New Features
 - Instrumented out-of-place ``NDDataset`` slicing and ``NDDataset.transpose``
   so an active :class:`~spectrochempy.provenance.ProvenanceCapture` records
   single-source selection and transpose operations, with transient weak object
-  tracking and unchanged data and textual history. All other operations remain
-  uninstrumented.
+  tracking and unchanged data and textual history. All other operations - including
+  in-place slicing and in-place transpose - remain uninstrumented and create no
+  record.
 
 .. section
 
@@ -44,7 +45,10 @@ Bug Fixes
   capture with an ``unrecorded_state_change`` omission) instead of silently
   chaining to a stale state; parameter description failures never break the
   recorded scientific operation; and failed operations keep the bounded
-  requested parameters.
+  requested parameters. In addition, in-place slicing
+  (``dataset[:, ..., INPLACE]``) is no longer mis-recorded as a complete
+  out-of-place slice - it is excluded from capture, matching the in-place
+  transpose policy.
 
 - Fixed ``average(..., keepdims=True)`` so reduced dimensions are retained in
   both the data shape and dataset metadata, consistently with other reductions.

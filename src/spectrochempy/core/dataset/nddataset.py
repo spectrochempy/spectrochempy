@@ -56,6 +56,7 @@ from spectrochempy.core.dataset.basearrays.ndcomplex import NDComplexArray
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.utils._logging import warning_
+from spectrochempy.utils.constants import INPLACE
 from spectrochempy.utils.datetimeutils import utcnow
 from spectrochempy.utils.exceptions import SpectroChemPyError
 from spectrochempy.utils.optional import import_optional_dependency
@@ -548,9 +549,19 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             with suppress(Exception):
                 return self._coordset[items]
 
-        from spectrochempy.provenance import _instrument  # noqa: PLC0415
+        inplace = bool(isinstance(items, tuple) and items) and str(
+            items[-1]
+        ) == INPLACE
 
-        capture, started_at = _instrument.provenance_boundary()
+        if not inplace:
+            from spectrochempy.provenance import _instrument  # noqa: PLC0415
+
+            capture, started_at = _instrument.provenance_boundary()
+        else:
+            # In-place slicing is outside the P2 capture scope (same policy as
+            # in-place transpose): it mutates the source and must not be
+            # recorded as an out-of-place slice creating a new object.
+            capture, started_at = None, None
 
         # slicing
         try:
