@@ -549,9 +549,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             with suppress(Exception):
                 return self._coordset[items]
 
-        inplace = bool(isinstance(items, tuple) and items) and str(
-            items[-1]
-        ) == INPLACE
+        inplace = bool(isinstance(items, tuple) and items) and str(items[-1]) == INPLACE
 
         if not inplace:
             from spectrochempy.provenance import _instrument  # noqa: PLC0415
