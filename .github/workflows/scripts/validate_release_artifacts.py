@@ -1290,12 +1290,34 @@ def install_and_smoketest_conda(
     if module_name is None:
         module_name = package.replace("-", "_")
 
+    try:
+        index = _read_conda_package(artifact).index
+    except Exception as exc:
+        report.add(
+            "conda:install",
+            Severity.FAILURE,
+            f"Cannot read Conda package metadata for {artifact.name}: {exc}",
+        )
+        return
+
+    declared_deps = index.get("depends", [])
+    if not declared_deps:
+        report.add(
+            "conda:install",
+            Severity.FAILURE,
+            "Conda package metadata does not declare dependencies",
+        )
+        return
+
     with tempfile.TemporaryDirectory(prefix="validate_conda_") as tmpdir:
         tmpdir_path = Path(tmpdir)
         env_dir = tmpdir_path / "env"
 
-        # Install the exact local artifact. Dependencies may be resolved from
-        # the configured read-only channels.
+        # A local archive path is linked as a single package: the solver does
+        # not resolve the dependencies it declares. Create the environment from
+        # the archive's declared dependencies first so the validated
+        # environment contains the Python interpreter and runtime libraries the
+        # package needs, then link the exact local artifact on top.
         create_cmd = [
             micromamba,
             "create",
@@ -1306,10 +1328,37 @@ def install_and_smoketest_conda(
             "conda-forge",
             "-c",
             "spectrocat",
-            str(artifact.resolve()),
+            *declared_deps,
         ]
 
         result = subprocess.run(create_cmd, capture_output=True, text=True)
+        if result.returncode != 0:
+            report.add(
+                "conda:install",
+                Severity.FAILURE,
+                "Conda environment creation failed",
+                details=result.stdout[-2000:] + result.stderr[-2000:],
+            )
+            return
+
+        report.add(
+            "conda:install",
+            Severity.SUCCESS,
+            ("Conda environment created from the archive's declared " "dependencies"),
+        )
+
+        # Install the exact local artifact. Its declared dependencies are
+        # already satisfied by the environment created above; the validated
+        # artifact must be the local file, never a channel copy.
+        install_cmd = [
+            micromamba,
+            "install",
+            "-p",
+            str(env_dir),
+            "-y",
+            str(artifact.resolve()),
+        ]
+        result = subprocess.run(install_cmd, capture_output=True, text=True)
         if result.returncode != 0:
             report.add(
                 "conda:install",
@@ -1325,7 +1374,7 @@ def install_and_smoketest_conda(
             "Conda package installed in isolated env",
         )
 
-        # Import test
+        # Import test with the environment's own interpreter
         py_bin = env_dir / "bin" / "python"
         if not py_bin.exists():
             py_bin = env_dir / "bin" / "python3"
@@ -1341,7 +1390,9 @@ def install_and_smoketest_conda(
             [
                 str(py_bin),
                 "-c",
-                "import importlib, sys; importlib.import_module(sys.argv[1])",
+                "import importlib, sys; "
+                "m = importlib.import_module(sys.argv[1]); "
+                "print(m.__file__)",
                 module_name,
             ],
             capture_output=True,
@@ -1356,10 +1407,31 @@ def install_and_smoketest_conda(
             )
             return
 
+        printed_paths = result.stdout.strip().splitlines()
+        import_path = printed_paths[-1] if printed_paths else ""
+        if not import_path:
+            report.add(
+                "conda:import",
+                Severity.FAILURE,
+                f"Import of {module_name} reported no module location",
+            )
+            return
+
+        if not Path(import_path).resolve().is_relative_to(env_dir.resolve()):
+            report.add(
+                "conda:import",
+                Severity.FAILURE,
+                (
+                    f"Imported {module_name} from outside the validated "
+                    f"environment: {import_path}"
+                ),
+            )
+            return
+
         report.add(
             "conda:import",
             Severity.SUCCESS,
-            f"Successfully imported {module_name}",
+            (f"Successfully imported {module_name} from the validated " "environment"),
         )
 
         result = subprocess.run(

@@ -7,7 +7,7 @@ authors = [
   {name = "Arnaud Travert & Christian Fernandez", email = "contact@spectrochempy.fr"},
 ]
 classifiers = [
-  "Development Status :: 4 - Beta",
+  "Development Status :: 5 - Production/Stable",
   "Topic :: Utilities",
   "Topic :: Scientific/Engineering",
   "Topic :: Software Development :: Libraries",

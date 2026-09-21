@@ -202,20 +202,17 @@ Install Package
 
          python -m pip install spectrochempy
 
-Testing a release candidate
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Verifying the stable 1.0 installation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Release candidates are prereleases and are not selected by the ordinary
-unversioned installation command. To test the published 1.0 release candidate,
-install and verify the exact version explicitly:
+The ordinary installation commands above now select the stable 1.0 release.
+For a reproducible environment, install and verify the exact version
+explicitly:
 
 .. code-block:: bash
 
-   python -m pip install "spectrochempy==1.0.0rc1"
+   python -m pip install "spectrochempy==1.0.0"
    python -c "import spectrochempy as scp; print(scp.__version__)"
-
-This differs from a moving development build. After the final 1.0 release,
-use the ordinary stable installation commands above.
 
 
 Additional Resources
