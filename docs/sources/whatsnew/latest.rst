@@ -20,3 +20,23 @@ New Features
   context-local capture ownership, and conservative parameter normalization.
   It does not instrument scientific operations and does not export
   reproducibility manifests yet.
+
+- Instrumented out-of-place ``NDDataset`` slicing and ``NDDataset.transpose``
+  so an active :class:`~spectrochempy.provenance.ProvenanceCapture` records
+  single-source selection and transpose operations, with transient weak object
+  tracking and unchanged data and textual history. All other operations - including
+  in-place slicing and in-place transpose - remain uninstrumented and create no
+  record.
+
+Bug Fixes
+~~~~~~~~~
+
+- Hardened the experimental provenance instrumentation: an in-place
+  modification of a tracked dataset is detected and reported (``partial``
+  capture with an ``unrecorded_state_change`` omission) instead of silently
+  chaining to a stale state; parameter description failures never break the
+  recorded scientific operation; and failed operations keep the bounded
+  requested parameters. In addition, in-place slicing
+  (``dataset[:, ..., INPLACE]``) is no longer mis-recorded as a complete
+  out-of-place slice - it is excluded from capture, matching the in-place
+  transpose policy.

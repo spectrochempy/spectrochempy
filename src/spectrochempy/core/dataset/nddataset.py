@@ -56,6 +56,7 @@ from spectrochempy.core.dataset.basearrays.ndcomplex import NDComplexArray
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.utils._logging import warning_
+from spectrochempy.utils.constants import INPLACE
 from spectrochempy.utils.datetimeutils import utcnow
 from spectrochempy.utils.exceptions import SpectroChemPyError
 from spectrochempy.utils.optional import import_optional_dependency
@@ -548,17 +549,59 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             with suppress(Exception):
                 return self._coordset[items]
 
+        inplace = bool(isinstance(items, tuple) and items) and str(items[-1]) == INPLACE
+
+        if not inplace:
+            from spectrochempy.provenance import _instrument  # noqa: PLC0415
+
+            capture, started_at = _instrument.provenance_boundary()
+        else:
+            # In-place slicing is outside the P2 capture scope (same policy as
+            # in-place transpose): it mutates the source and must not be
+            # recorded as an out-of-place slice creating a new object.
+            capture, started_at = None, None
+
         # slicing
-        new, items = super().__getitem__(items, return_index=True)
+        try:
+            new, items = super().__getitem__(items, return_index=True)
 
-        if new is None:
-            return None
+            if new is None:
+                return None
 
-        if self._coordset is not None:
-            new_coords = self._coordset._slice_dims(self.dims, items)
-            new.set_coordset(*new_coords, keepnames=True)
+            if self._coordset is not None:
+                new_coords = self._coordset._slice_dims(self.dims, items)
+                new.set_coordset(*new_coords, keepnames=True)
 
-        new.history = f"Slice extracted: ({saveditems})"
+            new.history = f"Slice extracted: ({saveditems})"
+        except Exception as exc:
+            if capture is not None:
+                _instrument.record_failure(
+                    capture,
+                    operation_id=_instrument.SLICE_OPERATION_ID,
+                    implementation="spectrochempy.NDDataset.__getitem__",
+                    source=self,
+                    exc=exc,
+                    started_at=started_at,
+                    requested_parameters=lambda: {
+                        "selection": _instrument.describe_selection(saveditems)
+                    },
+                )
+            raise
+
+        if capture is not None and isinstance(new, NDDataset):
+            _instrument.record_out_of_place(
+                capture,
+                operation_id=_instrument.SLICE_OPERATION_ID,
+                source=self,
+                result=new,
+                requested_parameters=lambda: {
+                    "selection": _instrument.describe_selection(saveditems)
+                },
+                implementation="spectrochempy.NDDataset.__getitem__",
+                started_at=started_at,
+                summary=f"Slice extracted: ({saveditems})",
+            )
+
         return new
 
     def __getattr__(self, item):
@@ -1987,10 +2030,43 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         --------
         swapdims : Interchange two dimensions of a NDDataset.
         """
-        new = super().transpose(*dims, inplace=inplace)
-        new.history = (
-            f"Data transposed between dims: {dims}" if dims else "Data transposed"
-        )
+        message = f"Data transposed between dims: {dims}" if dims else "Data transposed"
+
+        if inplace:
+            new = super().transpose(*dims, inplace=inplace)
+            new.history = message
+            return new
+
+        from spectrochempy.provenance import _instrument  # noqa: PLC0415
+
+        capture, started_at = _instrument.provenance_boundary()
+        try:
+            new = super().transpose(*dims, inplace=inplace)
+            new.history = message
+        except Exception as exc:
+            if capture is not None:
+                _instrument.record_failure(
+                    capture,
+                    operation_id=_instrument.TRANSPOSE_OPERATION_ID,
+                    implementation="spectrochempy.NDDataset.transpose",
+                    source=self,
+                    exc=exc,
+                    started_at=started_at,
+                    requested_parameters=lambda: {"dims": list(dims)},
+                )
+            raise
+
+        if capture is not None and isinstance(new, NDDataset):
+            _instrument.record_out_of_place(
+                capture,
+                operation_id=_instrument.TRANSPOSE_OPERATION_ID,
+                source=self,
+                result=new,
+                requested_parameters=lambda: {"dims": list(dims)},
+                implementation="spectrochempy.NDDataset.transpose",
+                started_at=started_at,
+                summary=message,
+            )
 
         return new
 

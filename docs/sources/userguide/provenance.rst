@@ -14,16 +14,117 @@ and is assembled on the experimental ``develop`` branch. It is not part of the
 SpectroChemPy 1.0 release and its contract may still evolve.
 
 P1 establishes immutable references and records, an append-only ledger, and a
-context-local capture mechanism. It deliberately performs no automatic
-instrumentation yet. Scientific operations executed inside a capture context
-therefore do not create records until a later, separately reviewed phase adds
-specific semantic hooks.
+context-local capture mechanism. P2 adds the first runtime instrumentation:
+out-of-place ``NDDataset`` slicing and ``NDDataset.transpose`` create one
+operation record each while a capture context is active. Every other scientific
+operation remains uninstrumented and creates no record.
+
+Captured slicing and transpose
+------------------------------
+
+Capture is opt-in. Outside an active :class:`~spectrochempy.provenance.ProvenanceCapture`,
+slicing and transpose behave exactly as before and create no record:
+
+.. code-block:: python
+
+   import numpy as np
+
+   import spectrochempy as scp
+
+   dataset = scp.NDDataset(np.arange(24.0).reshape(4, 6))
+
+   with scp.provenance.ProvenanceCapture() as capture:
+       selection = dataset[:, 1:3]
+       transposed = selection.transpose()
+
+   assert len(capture.ledger) == 2
+
+The first record references the source dataset state and creates a new object
+and initial state for the selection; the second references the selection state
+as its input and creates another new object. Objects are tracked transiently
+through weak references and are released when the context closes. The ledger
+stores only immutable records and opaque ledger-local references, never the
+datasets, arrays, or their lineage graphs.
+
+Each object state carries a numeric fingerprint when it is used again as an
+input. The fingerprint covers the data **values** (a digest over the numeric
+buffer), the array **shape**, and the **dtype** only: it does not cover the
+mask, the coordinates, the units, or the metadata. Consequently, an in-place
+mutation of ``data`` between two recorded operations is detected (the next
+record references the object's current observed state and is captured as
+``partial`` with an explicit ``unrecorded_state_change`` omission), while a
+change confined to the mask, coordinates, units, or metadata is not detected.
+Verified chains keep a ``complete`` capture and their input-to-output reference
+links. Only the stored digest is bounded: computing it reads the whole data
+buffer and may create a contiguous copy of it.
+
+Parameter descriptions are prepared inside the capture protection, so a
+failure in capture never raises into scientific code: the operation still
+returns normally and the unavailable parameter is recorded as an omission with
+a ``partial`` capture. Failed operations record the bounded parameters that
+were requested under ``parameters.requested`` together with the structured
+failure.
+
+A :class:`~spectrochempy.provenance.ProvenanceCapture` instance is single-use.
+Once its context closes — normally or through an exception — it cannot be
+reopened or resumed, and it is no longer active in tasks that inherit the
+context. Create a new instance for each capture session.
+
+The selection is captured as a JSON-safe structural description (``slice``,
+``ellipsis``, and index values), and transpose records the requested dimension
+order. Slicing and transpose never mutate the source, and the textual
+:attr:`~spectrochempy.NDDataset.history` produced by the operation is
+unchanged. This first slice covers only single-source out-of-place operations;
+in-place operations, arithmetic, concatenation, estimators, and readers are not
+instrumented. In particular, in-place slicing
+(``dataset[:, ..., INPLACE]``) and in-place transpose are outside the capture
+scope and create no record.
+
+Demonstrator: interactive selection followed by transpose
+---------------------------------------------------------
+
+A common interactive workflow selects a region in the assistant and then
+transposes it. The region bounds are chosen at runtime and are not present in
+the originating script; with capture active they are still retained in the
+ledger, together with the link to the transposed result:
+
+.. code-block:: python
+
+   import numpy as np
+
+   import spectrochempy as scp
+
+   dataset = scp.NDDataset(np.arange(24.0).reshape(4, 6))
+
+
+   def apply_viewer_region_then_transpose(data, x_bounds, y_bounds):
+       selection = data[slice(*x_bounds), slice(*y_bounds)]
+       return selection.transpose()
+
+
+   with scp.provenance.ProvenanceCapture() as capture:
+       result = apply_viewer_region_then_transpose(dataset, (1, 3), (0, 2))
+
+   slice_record, transpose_record = capture.ledger.operation_records
+   assert slice_record.to_dict()["parameters"]["requested"]["values"]["selection"] == [
+       {"type": "slice", "start": 1, "stop": 3, "step": None},
+       {"type": "slice", "start": 0, "stop": 2, "step": None},
+   ]
+   assert transpose_record.inputs[0].reference.id == slice_record.outputs[0].reference.id
+
+The applied selection is recorded even though
+``apply_viewer_region_then_transpose`` contains no region bounds: only the
+runtime arguments carried the interactive decision. The second record
+references the first record's output, so the trace retains both the selection
+that was actually applied and its link to the transposed result. This
+demonstrates the passive trace value of P2; it does not provide replay, and the
+records are data, not executable instructions.
 
 Explicit record construction
 ----------------------------
 
-Records can currently be constructed and appended explicitly for development
-and schema evaluation:
+Records can also be constructed and appended explicitly for development and
+schema evaluation:
 
 .. code-block:: python
 
