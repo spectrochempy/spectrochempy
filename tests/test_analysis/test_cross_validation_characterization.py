@@ -18,6 +18,10 @@ from spectrochempy.utils._estimator import is_fitted
 from spectrochempy.utils.exceptions import SpectroChemPyError
 
 
+class _ExpectedPipelineCloneGapError(Exception):
+    """Identify only the currently documented Pipeline cloning gap."""
+
+
 @pytest.fixture()
 def cv_data():
     """Return deterministic spectra and an aligned univariate response."""
@@ -211,7 +215,7 @@ def test_pipeline_fit_uses_fresh_fold_local_preprocessing_state(cv_data):
 
 @pytest.mark.xfail(
     strict=True,
-    raises=SpectroChemPyError,
+    raises=_ExpectedPipelineCloneGapError,
     reason="The accepted CV contract requires Pipeline-aware unfitted cloning.",
 )
 def test_clone_unfitted_pipeline_contract_gap():
@@ -222,7 +226,26 @@ def test_clone_unfitted_pipeline_contract_gap():
         ]
     )
 
-    cloned = clone_unfitted(pipeline)
+    try:
+        cloned = clone_unfitted(pipeline)
+    except SpectroChemPyError as exc:
+        expected = "Pipeline is not supported by the pipeline v1 estimator contract."
+        if str(exc) != expected:
+            raise
+        raise _ExpectedPipelineCloneGapError from exc
 
     assert cloned is not pipeline
-    assert cloned.get_params(deep=False) == pipeline.get_params(deep=False)
+    assert cloned._fitted is False
+    assert [name for name, _ in cloned.steps] == [name for name, _ in pipeline.steps]
+
+    for (original_name, original_step), (cloned_name, cloned_step) in zip(
+        pipeline.steps, cloned.steps, strict=True
+    ):
+        assert cloned_name == original_name
+        assert type(cloned_step) is type(original_step)
+        assert cloned_step is not original_step
+        assert cloned_step.get_params(deep=False) == original_step.get_params(
+            deep=False
+        )
+        assert is_fitted(cloned_step) is False
+        assert is_fitted(original_step) is False
