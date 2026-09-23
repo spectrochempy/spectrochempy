@@ -18,5 +18,6 @@ Developer
 - MAINT: Added private cross-validation building blocks: helpers for resolving
   observation dimensions, validating and slicing aligned folds, and restoring
   prediction geometry (#1653), plus unfitted cloning of ``Pipeline`` templates
-  and their supported steps (#1654).  No public cross-validation API is
+  and their supported steps (#1654), and per-target regression metric kernels
+  with explicit validity reporting.  No public cross-validation API is
   introduced.
