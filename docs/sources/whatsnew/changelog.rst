@@ -53,3 +53,8 @@ Deprecations
 Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
+
+- MAINT: Added private helpers for resolving observation dimensions, validating
+  aligned fold positions, slicing row-oriented ``NDDataset`` subsets, and
+  restoring predictions to the validation target geometry.  No public
+  cross-validation API is introduced. (#1653)
