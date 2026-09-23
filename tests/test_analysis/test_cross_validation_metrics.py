@@ -300,6 +300,21 @@ def test_integer_arithmetic_is_promoted_before_subtraction():
     assert_allclose(_mae(observed, predicted), 1.0)
 
 
+def test_large_offset_preserves_small_float64_differences():
+    observed = np.array([1.0e16, 1.0e16 + 2.0, 1.0e16 + 4.0], dtype=np.float64)
+    predicted = observed + 2.0
+
+    assert_allclose(_rmse(observed, predicted), 2.0, rtol=0.0, atol=0.0)
+    assert_allclose(_bias(observed, predicted), 2.0, rtol=0.0, atol=0.0)
+    n_valid, values, defined, reasons = _evaluate_target_metrics(
+        observed, predicted, metrics=("r2",)
+    )
+    assert n_valid == 3
+    assert_allclose(values["r2"], -0.5, rtol=0.0, atol=0.0)
+    assert defined["r2"] is True
+    assert reasons["r2"] is None
+
+
 def test_nonfinite_numeric_result_is_reported_not_presented_as_valid():
     largest = np.finfo(float).max
     observed, predicted = _targets(

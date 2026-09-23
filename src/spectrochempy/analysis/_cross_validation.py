@@ -343,55 +343,53 @@ def _restore_prediction_geometry(prediction, target_geometry):
 
 def _stable_mean(values):
     """Return a scaled mean without integer arithmetic or avoidable overflow."""
-    values = np.asarray(values, dtype=np.longdouble)
+    values = np.asarray(values, dtype=float)
     if values.size == 0:
-        return np.longdouble(np.nan)
+        return np.nan
     scale = np.max(np.abs(values))
     if scale == 0:
-        return np.longdouble(0.0)
+        return 0.0
     with np.errstate(over="ignore", invalid="ignore"):
-        return scale * np.sum(values / scale, dtype=np.longdouble) / values.size
+        return scale * np.sum(values / scale, dtype=float) / values.size
 
 
 def _stable_mean_absolute(values):
     """Return a scaled mean absolute value."""
-    values = np.asarray(values, dtype=np.longdouble)
+    values = np.asarray(values, dtype=float)
     if values.size == 0:
-        return np.longdouble(np.nan)
+        return np.nan
     scale = np.max(np.abs(values))
     if scale == 0:
-        return np.longdouble(0.0)
+        return 0.0
     with np.errstate(over="ignore", invalid="ignore"):
-        return scale * np.sum(np.abs(values / scale), dtype=np.longdouble) / values.size
+        return scale * np.sum(np.abs(values / scale), dtype=float) / values.size
 
 
 def _stable_root_mean_square(values):
     """Return a scaled root mean square."""
-    values = np.asarray(values, dtype=np.longdouble)
+    values = np.asarray(values, dtype=float)
     if values.size == 0:
-        return np.longdouble(np.nan)
+        return np.nan
     scale = np.max(np.abs(values))
     if scale == 0:
-        return np.longdouble(0.0)
+        return 0.0
     with np.errstate(over="ignore", invalid="ignore"):
         scaled = values / scale
-        return scale * np.sqrt(
-            np.sum(scaled * scaled, dtype=np.longdouble) / values.size
-        )
+        return scale * np.sqrt(np.sum(scaled * scaled, dtype=float) / values.size)
 
 
 def _stable_sum_of_squares(values):
     """Represent a sum of squares as a scale and a finite scaled sum."""
-    values = np.asarray(values, dtype=np.longdouble)
+    values = np.asarray(values, dtype=float)
     scale = np.max(np.abs(values))
     if scale == 0:
-        return np.longdouble(0.0), np.longdouble(0.0)
+        return 0.0, 0.0
     scaled = values / scale
-    return scale, np.sum(scaled * scaled, dtype=np.longdouble)
+    return scale, np.sum(scaled * scaled, dtype=float)
 
 
 def _scaled_errors(observed, predicted):
-    """Return predicted-minus-observed errors and their external scale."""
+    """Return direct errors, scaling only when subtraction would overflow."""
     observed_array = np.asarray(observed)
     predicted_array = np.asarray(predicted)
     if np.issubdtype(observed_array.dtype, np.integer) and np.issubdtype(
@@ -404,48 +402,60 @@ def _scaled_errors(observed, predicted):
                     observed_array.flat, predicted_array.flat, strict=True
                 )
             ),
-            dtype=np.longdouble,
+            dtype=float,
             count=observed_array.size,
         )
-        return errors.reshape(observed_array.shape), np.longdouble(1.0)
+        return errors.reshape(observed_array.shape), 1.0
 
-    observed_float = np.asarray(observed_array, dtype=np.longdouble)
-    predicted_float = np.asarray(predicted_array, dtype=np.longdouble)
+    observed_float = np.asarray(observed_array, dtype=float)
+    predicted_float = np.asarray(predicted_array, dtype=float)
+    with np.errstate(over="ignore", invalid="ignore"):
+        direct_errors = predicted_float - observed_float
+    if np.all(np.isfinite(direct_errors)):
+        return direct_errors, 1.0
+
     scale = max(
         np.max(np.abs(observed_float)),
         np.max(np.abs(predicted_float)),
     )
     if scale == 0:
-        return np.zeros(observed_float.shape, dtype=np.longdouble), np.longdouble(1.0)
+        return np.zeros(observed_float.shape, dtype=float), 1.0
     with np.errstate(over="ignore", invalid="ignore"):
         return predicted_float / scale - observed_float / scale, scale
 
 
 def _scaled_centered_observations(observed):
-    """Return centered observations and their external scale."""
+    """Center near the data, scaling only when direct subtraction overflows."""
     observed_array = np.asarray(observed)
     if np.issubdtype(observed_array.dtype, np.integer):
         origin = int(observed_array.flat[0])
         offsets = np.fromiter(
             (int(value) - origin for value in observed_array.flat),
-            dtype=np.longdouble,
+            dtype=float,
             count=observed_array.size,
         ).reshape(observed_array.shape)
-        return offsets - _stable_mean(offsets), np.longdouble(1.0)
+        return offsets - _stable_mean(offsets), 1.0
 
-    observed_float = np.asarray(observed_array, dtype=np.longdouble)
+    observed_float = np.asarray(observed_array, dtype=float)
+    origin = observed_float.flat[0]
+    with np.errstate(over="ignore", invalid="ignore"):
+        offsets = observed_float - origin
+    if np.all(np.isfinite(offsets)):
+        return offsets - _stable_mean(offsets), 1.0
+
     scale = np.max(np.abs(observed_float))
     if scale == 0:
-        return np.zeros(observed_float.shape, dtype=np.longdouble), np.longdouble(1.0)
+        return np.zeros(observed_float.shape, dtype=float), 1.0
     scaled = observed_float / scale
-    return scaled - _stable_mean(scaled), scale
+    scaled_offsets = scaled - scaled.flat[0]
+    return scaled_offsets - _stable_mean(scaled_offsets), scale
 
 
 def _log_sum_of_squares(values, external_scale):
     """Return log(sum((external_scale * values) ** 2)) without overflow."""
     inner_scale, scaled_sum = _stable_sum_of_squares(values)
     if inner_scale == 0 or scaled_sum == 0:
-        return np.longdouble(-np.inf)
+        return -np.inf
     return 2 * np.log(external_scale) + 2 * np.log(inner_scale) + np.log(scaled_sum)
 
 
@@ -475,12 +485,21 @@ def _r2(observed, predicted):
     errors, error_scale = _scaled_errors(observed, predicted)
     centered, centered_scale = _scaled_centered_observations(observed)
     with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+        inner_error_scale, scaled_error_sum = _stable_sum_of_squares(errors)
+        if inner_error_scale == 0 or scaled_error_sum == 0:
+            return 1.0
+        inner_centered_scale, scaled_centered_sum = _stable_sum_of_squares(centered)
+        scale_ratio = (error_scale / centered_scale) * (
+            inner_error_scale / inner_centered_scale
+        )
+        ratio = scale_ratio**2 * (scaled_error_sum / scaled_centered_sum)
+        if np.isfinite(ratio):
+            return 1.0 - ratio
+
         log_error_sum = _log_sum_of_squares(errors, error_scale)
-        if np.isneginf(log_error_sum):
-            return np.longdouble(1.0)
         log_centered_sum = _log_sum_of_squares(centered, centered_scale)
         ratio = np.exp(log_error_sum - log_centered_sum)
-        return np.longdouble(1.0) - ratio
+        return 1.0 - ratio
 
 
 def _as_finite_float(value):
@@ -677,7 +696,7 @@ def _compute_regression_metrics(
     metric_reasons = {name: [] for name in metric_names}
 
     for target in range(n_targets):
-        target_prediction = predicted_rows[:, target].astype(np.longdouble, copy=True)
+        target_prediction = predicted_rows[:, target].astype(float, copy=True)
         target_prediction[~prediction_valid_rows[:, target]] = np.nan
         n_valid, values, defined, reasons = _evaluate_target_metrics(
             observed_rows[:, target], target_prediction, metrics=metric_names
@@ -689,8 +708,8 @@ def _compute_regression_metrics(
             metric_reasons[name].append(reasons[name])
 
     with np.errstate(over="ignore", invalid="ignore"):
-        residual_values = np.asarray(observed_values, dtype=np.longdouble) - np.asarray(
-            predicted_values, dtype=np.longdouble
+        residual_values = np.asarray(observed_values, dtype=float) - np.asarray(
+            predicted_values, dtype=float
         )
         residual_values = np.asarray(residual_values, dtype=float)
     residuals = observed.copy()
