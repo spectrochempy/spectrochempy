@@ -1575,6 +1575,11 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         if X is None:
             X = self._X_preprocessed
         elif isinstance(X, NDDataset):
+            # Match fit-time handling of fully masked feature columns while
+            # retaining rows for prediction-output geometry and mask restoration.
+            masked_columns = self._analysis_full_columns(X.mask)
+            if masked_columns is not None and np.any(masked_columns):
+                X = X[:, ~masked_columns]
             X = X.data
 
         return self._predict(X)

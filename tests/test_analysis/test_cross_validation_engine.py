@@ -188,6 +188,47 @@ def test_pipeline_matches_manual_loop_and_fits_preprocessing_per_fold(
     assert len({id(estimator) for estimator in result.fold_estimators}) == 3
 
 
+def test_pipeline_with_msc_preserves_masked_feature_geometry(supervised_data):
+    X, y = supervised_data
+    mask = np.zeros(X.shape, dtype=bool)
+    mask[:, -1] = True
+    X.mask = mask
+    reference = scp.NDDataset(
+        np.mean(X.data, axis=0),
+        coordset=[X.x.copy()],
+        dims=["x"],
+    )
+    template = scp.Pipeline(
+        [
+            ("msc", scp.MSCTransformer(reference=reference, dim="y")),
+            ("pls", scp.PLSRegression(n_components=1, scale=False)),
+        ]
+    )
+    folds = list(KFold(n_splits=2).split(np.arange(X.shape[0])))
+    manual, manual_estimators = _manual_oof(template, X, y, folds)
+
+    result = _execute_cross_validation(
+        template,
+        X,
+        y,
+        splitter=KFold(n_splits=2),
+        return_estimators=True,
+    )
+
+    assert_allclose(result.oof_predictions.data, manual.data)
+    assert np.array_equal(X.mask, mask)
+    for retained, expected in zip(
+        result.fold_estimators,
+        manual_estimators,
+        strict=True,
+    ):
+        assert retained.fitted_named_steps_["msc"]._spectral_size_ == X.shape[1]
+        assert_allclose(
+            retained.fitted_named_steps_["msc"].reference_,
+            expected.fitted_named_steps_["msc"].reference_,
+        )
+
+
 def test_transposed_multivariate_and_one_dimensional_targets_restore_geometry(
     supervised_data,
 ):

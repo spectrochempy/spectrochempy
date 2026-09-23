@@ -217,7 +217,6 @@ class _CrossValidationPlan:
     groups_values: np.ndarray | None
     groups_summary: _GroupsSummary | None
     folds: tuple[tuple[np.ndarray, np.ndarray], ...]
-    active_x_features: np.ndarray | None
 
 
 _REGRESSION_METRICS = ("rmse", "r2", "bias", "mae")
@@ -424,21 +423,11 @@ def _prepare_validated_fold_subsets(
     train,
     validation,
     geometry,
-    *,
-    active_x_features=None,
 ):
     """Slice one fold whose geometry and positions were already validated."""
 
     X_train = _slice_along_axis(X, train, geometry.x_sample_axis)
     X_validation = _slice_along_axis(X, validation, geometry.x_sample_axis)
-    if active_x_features is not None:
-        feature_axis = 1 - geometry.x_sample_axis
-        X_train = _slice_along_axis(X_train, active_x_features, feature_axis)
-        X_validation = _slice_along_axis(
-            X_validation,
-            active_x_features,
-            feature_axis,
-        )
     y_train = _slice_along_axis(y, train, geometry.y_sample_axis)
     y_validation = _slice_along_axis(y, validation, geometry.y_sample_axis)
     target_geometry = _TargetGeometry(
@@ -1151,11 +1140,6 @@ def _validate_cross_validation_input_values(X, observed, geometry):
     feature_mask = np.asarray(row_masks[0], dtype=bool)
     if np.all(feature_mask):
         raise SpectroChemPyError("X must contain at least one unmasked feature.")
-    if np.any(feature_mask):
-        active = np.flatnonzero(~feature_mask).astype(np.intp, copy=False)
-        active.flags.writeable = False
-        return active
-    return None
 
 
 def _materialize_splitter_folds(splitter, *, groups, n_observations):
@@ -1238,7 +1222,7 @@ def _prepare_cross_validation_plan(
 ):
     """Validate inputs and return a complete plan before any estimator fit."""
     geometry = _resolve_sample_geometry(X, observed, sample_dim=sample_dim)
-    active_x_features = _validate_cross_validation_input_values(
+    _validate_cross_validation_input_values(
         X,
         observed,
         geometry,
@@ -1285,7 +1269,6 @@ def _prepare_cross_validation_plan(
         groups_values=groups_values,
         groups_summary=groups_summary,
         folds=validated_folds,
-        active_x_features=active_x_features,
     )
 
 
@@ -1621,7 +1604,6 @@ def _execute_cross_validation(
             train,
             validation,
             plan.geometry,
-            active_x_features=plan.active_x_features,
         )
         try:
             fold_estimator = clone_unfitted(estimator)

@@ -338,3 +338,6 @@ class TestPLSMaskedData:
         expected_cols = d["n_features"] - (mid_end - mid_start)
         assert pls._X.shape == (d["n_cal"], expected_cols)
         assert pls.X.shape == (d["n_cal"], d["n_features"])
+        prediction = pls.predict(Xc)
+        assert prediction.shape == d["yc"].shape
+        assert np.all(np.isfinite(prediction.data))
