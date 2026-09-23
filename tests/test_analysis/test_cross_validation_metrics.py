@@ -315,6 +315,17 @@ def test_large_offset_preserves_small_float64_differences():
     assert reasons["r2"] is None
 
 
+def test_large_representable_bias_and_mae_do_not_overflow_before_division():
+    observed = np.array([0.0, 0.0])
+    predicted = np.array([1.0e308, 1.0e308])
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", RuntimeWarning)
+        assert_allclose(_rmse(observed, predicted), 1.0e308)
+        assert_allclose(_bias(observed, predicted), 1.0e308)
+        assert_allclose(_mae(observed, predicted), 1.0e308)
+
+
 def test_nonfinite_numeric_result_is_reported_not_presented_as_valid():
     largest = np.finfo(float).max
     observed, predicted = _targets(

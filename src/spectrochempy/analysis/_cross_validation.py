@@ -350,7 +350,7 @@ def _stable_mean(values):
     if scale == 0:
         return 0.0
     with np.errstate(over="ignore", invalid="ignore"):
-        return scale * np.sum(values / scale, dtype=float) / values.size
+        return scale * (np.sum(values / scale, dtype=float) / values.size)
 
 
 def _stable_mean_absolute(values):
@@ -362,7 +362,7 @@ def _stable_mean_absolute(values):
     if scale == 0:
         return 0.0
     with np.errstate(over="ignore", invalid="ignore"):
-        return scale * np.sum(np.abs(values / scale), dtype=float) / values.size
+        return scale * (np.sum(np.abs(values / scale), dtype=float) / values.size)
 
 
 def _stable_root_mean_square(values):
