@@ -19,6 +19,9 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- Added ``cross_validate`` and ``CrossValidationResult`` for bounded supervised
+  PLS and Pipeline cross-validation with aligned ``NDDataset`` outputs,
+  per-target metrics, fold records, and optional fitted fold estimators (#1658).
 
 .. section
 
@@ -54,15 +57,15 @@ Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
 
-- MAINT: Added private cross-validation building blocks: helpers for resolving
+- MAINT: Added the cross-validation building blocks used by the public API:
+  helpers for resolving
   observation dimensions, validating and slicing aligned folds, and restoring
   prediction geometry (#1653), plus unfitted cloning of ``Pipeline`` templates
   and their supported steps (#1654), and per-target regression metric kernels
-  with explicit validity reporting (#1655).  No public cross-validation API
-  is introduced.
+  with explicit validity reporting (#1655).
 - MAINT: Added an internal structured cross-validation result prototype that
   validates complete out-of-fold coverage and records aligned predictions,
   residuals, metrics, fold positions, configuration snapshots, and optional
   fitted fold estimators (#1656), followed by a private supervised execution
   engine with fold-local cloning, fitting, prediction, and OOF assembly
-  (#1657).  The implementation remains private and does not add a public API.
+  (#1657).

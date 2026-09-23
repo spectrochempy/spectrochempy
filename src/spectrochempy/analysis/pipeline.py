@@ -17,7 +17,6 @@ from spectrochempy.utils.exceptions import NotFittedError
 from spectrochempy.utils.exceptions import SpectroChemPyError
 
 __all__ = ["Pipeline"]
-__configurables__ = ["Pipeline"]
 
 _RESERVED_STEP_NAMES = frozenset(
     {

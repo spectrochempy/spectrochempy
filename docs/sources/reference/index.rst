@@ -686,6 +686,26 @@ Partial Least Square regression
 
     PLSRegression
 
+Supervised cross-validation
+============================
+
+``cross_validate`` evaluates one fixed PLS or PLS-ending Pipeline
+configuration. It does not perform hyperparameter search or nested
+cross-validation.
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    cross_validate
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+    :template: autosummary/result-class.rst
+
+    CrossValidationResult
+
 Evolving factor analysis
 ========================
 
