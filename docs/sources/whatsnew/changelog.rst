@@ -21,7 +21,7 @@ New Features
 
 - Added ``cross_validate`` and ``CrossValidationResult`` for bounded supervised
   PLS and Pipeline cross-validation with aligned ``NDDataset`` outputs,
-  per-target metrics, fold records, and optional fitted fold estimators.
+  per-target metrics, fold records, and optional fitted fold estimators (#1658).
 
 .. section
 
