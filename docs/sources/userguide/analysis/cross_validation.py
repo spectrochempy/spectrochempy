@@ -35,19 +35,16 @@
 # [CrossValidationResult](../../reference/generated/spectrochempy.CrossValidationResult.rst).
 
 # %%
-import numpy as np
 from sklearn.model_selection import KFold
 
 import spectrochempy as scp
 
-rng = np.random.default_rng(7)
 sample = scp.Coord.arange(18, title="sample")
 wavenumber = scp.Coord.linspace(1000.0, 1200.0, 24, title="wavenumber", units="cm^-1")
-concentration = np.linspace(0.2, 1.8, sample.size)
-band = np.exp(-0.5 * ((wavenumber.data - 1100.0) / 22.0) ** 2)
-spectra = concentration[:, None] * band + rng.normal(
-    scale=0.015, size=(sample.size, wavenumber.size)
-)
+concentration = scp.linspace(0.2, 1.8, sample.size).data
+band = scp.exp(-0.5 * ((wavenumber.data - 1100.0) / 22.0) ** 2)
+noise = scp.normal(scale=0.015, size=(sample.size, wavenumber.size), seed=7).data
+spectra = concentration[:, None] * band + noise
 
 X = scp.NDDataset(
     spectra,
@@ -118,12 +115,12 @@ print(result.metric("rmsecv").values)
 # %%
 for name in ("rmsecv", "r2", "bias", "mae"):
     metric = result.metric(name)
-    value = float(np.asarray(metric.values.data).squeeze())
+    value = float(metric.values.data.squeeze())
     units = "" if metric.values.units is None else f" {metric.values.units}"
     print(f"{name}: {value:.4f}{units}; defined={metric.defined[0]}")
 
 print("validation positions:", [fold.validation_positions for fold in result.folds])
-print("valid pairs:", int(np.asarray(result.n_valid.data).squeeze()))
+print("valid pairs:", int(result.n_valid.data.squeeze()))
 
 # %% [markdown]
 # ## Undefined values, masks, and limits
