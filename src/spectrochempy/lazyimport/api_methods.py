@@ -19,6 +19,8 @@ SpectroChemPy API.
 """
 
 _LAZY_IMPORTS = {
+    "CrossValidationResult": "spectrochempy.analysis.cross_validation",
+    "cross_validate": "spectrochempy.analysis.cross_validation",
     "PLSRegression": "spectrochempy.analysis.crossdecomposition.pls",
     "polynomial": "spectrochempy.analysis.curvefitting._models",
     "polynomialbaseline": "spectrochempy.analysis.curvefitting._models",

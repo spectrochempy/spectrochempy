@@ -5,12 +5,15 @@
 # ======================================================================================
 """Integration tests for the private supervised cross-validation engine."""
 
+import inspect
+
 import numpy as np
 import pytest
 from numpy.testing import assert_allclose
 from sklearn.model_selection import GroupKFold
 from sklearn.model_selection import KFold
 from sklearn.model_selection import LeaveOneOut
+from sklearn.model_selection import ShuffleSplit
 
 import spectrochempy as scp
 from spectrochempy.analysis._cross_validation import _execute_cross_validation
@@ -80,6 +83,218 @@ def _manual_oof(template, X, y, folds):
     result = y.copy()
     result.data = values
     return result, fitted
+
+
+def test_public_exports_and_signature_match_the_contract():
+    assert scp.cross_validate.__name__ == "cross_validate"
+    assert scp.CrossValidationResult.__name__ == "CrossValidationResult"
+    signature = inspect.signature(scp.cross_validate)
+    assert tuple(signature.parameters) == (
+        "estimator",
+        "X",
+        "y",
+        "cv",
+        "groups",
+        "sample_dim",
+        "metrics",
+        "return_estimators",
+    )
+    assert signature.parameters["cv"].default == 5
+    assert signature.parameters["groups"].default is None
+    assert signature.parameters["sample_dim"].default == "y"
+    assert signature.parameters["metrics"].default == ("rmsecv", "r2")
+    assert signature.parameters["return_estimators"].default is False
+    assert all(
+        signature.parameters[name].kind is inspect.Parameter.KEYWORD_ONLY
+        for name in (
+            "cv",
+            "groups",
+            "sample_dim",
+            "metrics",
+            "return_estimators",
+        )
+    )
+
+
+def test_integer_cv_matches_explicit_splitter_and_manual_oof(supervised_data):
+    X, y = supervised_data
+    template = scp.PLSRegression(n_components=2, scale=False)
+    folds = list(KFold(n_splits=4, shuffle=False).split(np.arange(X.shape[0])))
+    manual, _ = _manual_oof(template, X, y, folds)
+
+    integer_result = scp.cross_validate(template, X, y, cv=np.int64(4))
+    explicit_result = scp.cross_validate(template, X, y, cv=KFold(n_splits=4))
+
+    assert isinstance(integer_result, scp.CrossValidationResult)
+    assert integer_result.splitter.class_name.endswith(".KFold")
+    assert integer_result.splitter.parameters["n_splits"] == 4
+    assert integer_result.splitter.parameters["shuffle"] is False
+    assert_allclose(integer_result.oof_predictions.data, manual.data)
+    assert_allclose(
+        integer_result.oof_predictions.data,
+        explicit_result.oof_predictions.data,
+    )
+
+
+def test_integer_cv_with_groups_matches_groupkfold(supervised_data):
+    X, y = supervised_data
+    groups = np.repeat(np.arange(4), 2)
+    template = scp.PLSRegression(n_components=1, scale=False)
+
+    integer_result = scp.cross_validate(template, X, y, cv=4, groups=groups)
+    explicit_result = scp.cross_validate(
+        template,
+        X,
+        y,
+        cv=GroupKFold(n_splits=4),
+        groups=groups,
+    )
+
+    assert integer_result.splitter.class_name.endswith(".GroupKFold")
+    assert integer_result.groups.n_groups == 4
+    assert_allclose(
+        integer_result.oof_predictions.data,
+        explicit_result.oof_predictions.data,
+    )
+
+
+@pytest.mark.parametrize(
+    ("overrides", "message"),
+    [
+        ({"cv": True}, "cv must be an integer"),
+        ({"cv": 2.5}, "floating-point"),
+        ({"cv": 1}, "at least 2"),
+        ({"cv": ShuffleSplit(n_splits=2)}, "KFold, GroupKFold, or LeaveOneOut"),
+        ({"metrics": "rmsecv"}, "ordered sequence"),
+        ({"metrics": {"rmsecv", "r2"}}, "ordered sequence"),
+        ({"metrics": ()}, "At least one"),
+        ({"metrics": ("r2", "r2")}, "must not be repeated"),
+        ({"metrics": ("rmse",)}, "Use 'rmsecv'"),
+        ({"metrics": ("unknown",)}, "Unsupported"),
+        ({"return_estimators": 1}, "must be a boolean"),
+    ],
+)
+def test_public_options_are_validated_before_fit(
+    supervised_data,
+    monkeypatch,
+    overrides,
+    message,
+):
+    X, y = supervised_data
+    fit_calls = 0
+
+    def unexpected_fit(self, X_train, y_train):
+        nonlocal fit_calls
+        fit_calls += 1
+        return self
+
+    monkeypatch.setattr(scp.PLSRegression, "fit", unexpected_fit)
+    with pytest.raises(SpectroChemPyError, match=message):
+        scp.cross_validate(
+            scp.PLSRegression(n_components=1),
+            X,
+            y,
+            **overrides,
+        )
+    assert fit_calls == 0
+
+
+@pytest.mark.parametrize(
+    ("cv", "groups", "message"),
+    [
+        (9, None, "n_splits=9"),
+        (3, np.repeat([0, 1], 4), "number of groups"),
+        (KFold(n_splits=2), np.repeat([0, 1], 4), "non-group splitter"),
+        (GroupKFold(n_splits=2), None, "requires groups"),
+    ],
+)
+def test_splitter_constraints_fail_before_fit(
+    supervised_data,
+    monkeypatch,
+    cv,
+    groups,
+    message,
+):
+    X, y = supervised_data
+    fit_calls = 0
+
+    def unexpected_fit(self, X_train, y_train):
+        nonlocal fit_calls
+        fit_calls += 1
+        return self
+
+    monkeypatch.setattr(scp.PLSRegression, "fit", unexpected_fit)
+    with pytest.raises(SpectroChemPyError, match=message):
+        scp.cross_validate(
+            scp.PLSRegression(n_components=1),
+            X,
+            y,
+            cv=cv,
+            groups=groups,
+        )
+    assert fit_calls == 0
+
+
+def test_public_result_fields_metric_order_and_optional_estimators(supervised_data):
+    X, y = supervised_data
+    result = scp.cross_validate(
+        scp.PLSRegression(n_components=1, scale=False),
+        X,
+        y,
+        cv=4,
+        metrics=("mae", "rmsecv", "bias"),
+        return_estimators=True,
+    )
+
+    assert isinstance(result, scp.CrossValidationResult)
+    assert tuple(metric.name for metric in result.global_metrics) == (
+        "mae",
+        "rmsecv",
+        "bias",
+    )
+    assert tuple(metric.name for metric in result.folds[0].metrics) == (
+        "mae",
+        "rmse",
+        "bias",
+    )
+    assert result.metric("rmsecv").values.units == y.units
+    assert result.n_valid.shape == (y.shape[1],)
+    assert result.observed.coordset == y.coordset
+    assert result.oof_predictions.coordset == y.coordset
+    assert result.residuals.coordset == y.coordset
+    assert result.sample_dim == "y"
+    assert (result.x_sample_axis, result.y_sample_axis) == (0, 0)
+    assert result.observation_coordinate == y.y
+    assert result.estimator.class_name.endswith(".PLSRegression")
+    assert result.n_splits == 4
+    assert len(result.folds) == 4
+    assert len(result.fold_estimators) == 4
+    assert result.operation.operation == "cross_validate"
+    assert "non-executable" in result.operation.note
+
+
+def test_public_pipeline_supports_univariate_target_and_distinct_axes(supervised_data):
+    X, y = supervised_data
+    univariate_y = y[:, 0].squeeze()
+    template = scp.Pipeline(
+        [
+            ("center", scp.CenterTransformer(dim="y")),
+            ("pls", scp.PLSRegression(n_components=1, scale=False)),
+        ]
+    )
+    X_before = X.copy()
+    y_before = univariate_y.copy()
+
+    result = scp.cross_validate(template, X.T, univariate_y, cv=4)
+
+    assert isinstance(result, scp.CrossValidationResult)
+    assert result.oof_predictions.shape == univariate_y.shape
+    assert (result.x_sample_axis, result.y_sample_axis) == (1, 0)
+    assert template._fitted is False
+    assert_allclose(X.data, X_before.data)
+    assert X.coordset == X_before.coordset
+    assert_allclose(univariate_y.data, y_before.data)
+    assert univariate_y.coordset == y_before.coordset
 
 
 def test_pls_engine_matches_independent_manual_loop_and_materializes_once(
@@ -207,11 +422,11 @@ def test_pipeline_with_msc_preserves_masked_feature_geometry(supervised_data):
     folds = list(KFold(n_splits=2).split(np.arange(X.shape[0])))
     manual, manual_estimators = _manual_oof(template, X, y, folds)
 
-    result = _execute_cross_validation(
+    result = scp.cross_validate(
         template,
         X,
         y,
-        splitter=KFold(n_splits=2),
+        cv=KFold(n_splits=2),
         return_estimators=True,
     )
 
@@ -380,11 +595,11 @@ def test_consistently_masked_features_are_preserved(supervised_data, transpose_X
     mask[tuple(index)] = True
     X.mask = mask
 
-    result = _execute_cross_validation(
+    result = scp.cross_validate(
         scp.PLSRegression(n_components=1, scale=False),
         X,
         y,
-        splitter=KFold(n_splits=2),
+        cv=KFold(n_splits=2),
     )
 
     assert np.all(np.isfinite(result.oof_predictions.data))
@@ -416,4 +631,3 @@ def test_fold_errors_are_contextualized_and_preserve_their_cause(
 
 def test_engine_remains_private():
     assert not hasattr(scp, "_execute_cross_validation")
-    assert not hasattr(scp, "cross_validate")

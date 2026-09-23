@@ -8,15 +8,21 @@
 import copy
 from collections.abc import Mapping
 from dataclasses import dataclass
+from numbers import Integral
 from numbers import Number
 from types import MappingProxyType
 
 import numpy as np
+from sklearn.model_selection import GroupKFold
+from sklearn.model_selection import KFold
+from sklearn.model_selection import LeaveOneOut
 
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils._estimator import clone_unfitted
 from spectrochempy.utils.exceptions import SpectroChemPyError
+
+__all__ = ["CrossValidationResult", "cross_validate"]
 
 
 @dataclass(frozen=True)
@@ -53,8 +59,8 @@ class _FoldSubsets:
 
 
 @dataclass(frozen=True)
-class _PerTargetMetric:
-    """Values and explicit definedness for one regression metric."""
+class CrossValidationMetric:
+    """Per-target values and explicit definedness for one CV metric."""
 
     name: str
     values: NDDataset
@@ -68,7 +74,7 @@ class _RegressionMetricResult:
 
     residuals: NDDataset
     n_valid: NDDataset
-    metrics: tuple[_PerTargetMetric, ...]
+    metrics: tuple[CrossValidationMetric, ...]
 
     def metric(self, name):
         """Return one requested metric by its internal kernel name."""
@@ -153,13 +159,13 @@ class _UndefinedMetric:
 
 
 @dataclass(frozen=True)
-class _CrossValidationFoldResult:
+class CrossValidationFoldResult:
     """Validated fold positions and per-target metric records."""
 
     fold_index: int
     train_positions: np.ndarray
     validation_positions: np.ndarray
-    metrics: tuple[_PerTargetMetric, ...]
+    metrics: tuple[CrossValidationMetric, ...]
     n_valid: NDDataset
 
     def metric(self, name):
@@ -171,12 +177,69 @@ class _CrossValidationFoldResult:
 
 
 @dataclass(frozen=True)
-class _CrossValidationResult:
+class CrossValidationResult:
     """
-    Internal structured cross-validation result prototype.
+    Structured result returned by :func:`cross_validate`.
 
-    The record owns copies of its dataset inputs and tracking containers, but
-    is not deeply immutable because retained NDDataset objects remain mutable.
+    This frozen record owns isolated copies of its dataset inputs, fold
+    positions, configuration snapshots, and tracking containers. Its
+    `NDDataset` members remain mutable, so the result is not deeply immutable.
+    It is not persistent and does not provide replay or automatic provenance.
+
+    Parameters
+    ----------
+    estimator : object
+        Non-executable estimator configuration snapshot. It exposes
+        ``class_name``, ``parameters``, and, for a Pipeline, ordered ``steps``.
+    splitter : object
+        Non-executable splitter snapshot exposing ``class_name`` and
+        ``parameters``.
+    n_splits : int
+        Number of validated folds.
+    sample_dim : str
+        Observation dimension name shared by X and y.
+    x_sample_axis, y_sample_axis : int
+        Original observation-axis positions in X and y.
+    observation_coordinate : Coord or None
+        Isolated observation coordinate when one is available.
+    groups : object or None
+        Compact group summary exposing ``n_groups`` and ordered ``counts``.
+    observed, oof_predictions, residuals : NDDataset
+        Isolated target datasets in the original y geometry and units.
+    global_metrics : tuple of CrossValidationMetric
+        Requested global metrics in caller order. Prefer :meth:`metric` for
+        lookup by name.
+    n_valid : NDDataset
+        Number of finite, unmasked observed/predicted pairs per target.
+    folds : tuple of CrossValidationFoldResult
+        Fold records in splitter order. Each record exposes ``fold_index``,
+        read-only ``train_positions`` and ``validation_positions``, ``n_valid``,
+        and :meth:`CrossValidationFoldResult.metric`.
+    warnings : tuple of str
+        Validation warnings. V1 normally returns an empty tuple.
+    undefined_metrics : tuple
+        Explicit records exposing metric scope, target, reason, and optional
+        fold index whenever a requested metric is undefined.
+    fold_estimators : tuple or None
+        Independent fitted fold estimators only when requested. Retaining them
+        can substantially increase memory use because each estimator is copied.
+    operation : object
+        Minimal non-executable operation description. It is not provenance or
+        a replay specification.
+
+    See Also
+    --------
+    cross_validate : Evaluate a fixed supervised regression configuration.
+
+    Examples
+    --------
+    >>> values = np.arange(24.0).reshape(8, 3)
+    >>> X = scp.NDDataset(values, dims=["y", "x"])
+    >>> y = scp.NDDataset((1.0 + values[:, 0])[:, None], dims=["y", "t"])
+    >>> model = scp.PLSRegression(n_components=1, scale=False)
+    >>> result = scp.cross_validate(model, X, y, cv=4)
+    >>> isinstance(result, scp.CrossValidationResult)
+    True
     """
 
     estimator: _EstimatorConfiguration
@@ -190,16 +253,36 @@ class _CrossValidationResult:
     observed: NDDataset
     oof_predictions: NDDataset
     residuals: NDDataset
-    global_metrics: tuple[_PerTargetMetric, ...]
+    global_metrics: tuple[CrossValidationMetric, ...]
     n_valid: NDDataset
-    folds: tuple[_CrossValidationFoldResult, ...]
+    folds: tuple[CrossValidationFoldResult, ...]
     warnings: tuple[str, ...]
     undefined_metrics: tuple[_UndefinedMetric, ...]
     fold_estimators: tuple[object, ...] | None
     operation: _ValidationDescription
 
     def metric(self, name):
-        """Return one global metric by its result-level name."""
+        """
+        Return a requested global metric by its public name.
+
+        Parameters
+        ----------
+        name : {"rmsecv", "r2", "bias", "mae"}
+            Metric selected in the original :func:`cross_validate` call.
+
+        Returns
+        -------
+        CrossValidationMetric
+            Frozen record containing ``name``, an `NDDataset` in target
+            geometry under ``values``, per-target boolean ``defined`` flags,
+            and matching reason codes under ``reasons``. RMSECV, bias, and MAE
+            carry target units; R² is unitless.
+
+        Raises
+        ------
+        KeyError
+            If *name* was not requested.
+        """
         for metric in self.global_metrics:
             if metric.name == name:
                 return metric
@@ -877,7 +960,7 @@ def _compute_regression_metrics(
     for name in metric_names:
         units = None if name == "r2" else observed.units
         outputs.append(
-            _PerTargetMetric(
+            CrossValidationMetric(
                 name=name,
                 values=_target_output(
                     metric_values[name],
@@ -984,12 +1067,12 @@ def _snapshot_estimator_configuration(estimator):
         )
     if class_name != pipeline_name:
         raise SpectroChemPyError(
-            "The structured CV prototype supports only PLSRegression or an "
+            "Cross-validation supports only PLSRegression or an "
             "exact Pipeline ending in PLSRegression."
         )
     if not cloned.steps or _qualified_class_name(cloned.steps[-1][1]) != pls_name:
         raise SpectroChemPyError(
-            "The structured CV prototype requires Pipeline to end in PLSRegression."
+            "Cross-validation requires Pipeline to end in PLSRegression."
         )
     steps = tuple(
         _PipelineStepConfiguration(
@@ -1156,7 +1239,7 @@ def _materialize_splitter_folds(splitter, *, groups, n_observations):
         )
     except Exception as exc:
         raise SpectroChemPyError(
-            "Cannot materialize cross-validation folds from the splitter."
+            f"Cannot materialize cross-validation folds from the splitter: {exc}"
         ) from exc
 
 
@@ -1281,7 +1364,7 @@ def _readonly_positions(values):
 def _renamed_metric(metric, name):
     values = metric.values.copy()
     values.title = name
-    return _PerTargetMetric(
+    return CrossValidationMetric(
         name=name,
         values=values,
         defined=metric.defined,
@@ -1454,7 +1537,7 @@ def _assemble_cross_validation_result(
         )
         fold_metrics = fold_metric_result.metrics
         fold_results.append(
-            _CrossValidationFoldResult(
+            CrossValidationFoldResult(
                 fold_index=fold_index,
                 train_positions=_readonly_positions(train),
                 validation_positions=_readonly_positions(validation),
@@ -1502,7 +1585,7 @@ def _assemble_cross_validation_result(
             )
         )
 
-    return _CrossValidationResult(
+    return CrossValidationResult(
         estimator=plan.estimator_configuration,
         splitter=plan.splitter_configuration,
         n_splits=len(fold_results),
@@ -1649,4 +1732,156 @@ def _execute_cross_validation(
         oof_predictions=oof_predictions,
         retain_estimators=return_estimators,
         fold_estimators=retained_estimators,
+    )
+
+
+_PUBLIC_REGRESSION_METRICS = ("rmsecv", "r2", "bias", "mae")
+
+
+def _resolve_public_metrics(metrics):
+    """Validate public metric selectors and translate RMSECV for the kernel."""
+    if metrics is None or isinstance(metrics, str | bytes | Mapping | set | frozenset):
+        raise SpectroChemPyError(
+            "metrics must be a non-empty ordered sequence of metric names."
+        )
+    try:
+        names = tuple(metrics)
+    except TypeError as exc:
+        raise SpectroChemPyError(
+            "metrics must be a non-empty ordered sequence of metric names."
+        ) from exc
+    if not names:
+        raise SpectroChemPyError("At least one cross-validation metric is required.")
+    if not all(isinstance(name, str) for name in names):
+        raise SpectroChemPyError("Every cross-validation metric name must be a string.")
+    if len(set(names)) != len(names):
+        raise SpectroChemPyError("Cross-validation metric names must not be repeated.")
+    if "rmse" in names:
+        raise SpectroChemPyError(
+            "Use 'rmsecv', not 'rmse', as the public cross-validation metric."
+        )
+    unsupported = [name for name in names if name not in _PUBLIC_REGRESSION_METRICS]
+    if unsupported:
+        raise SpectroChemPyError(
+            f"Unsupported cross-validation metric: {unsupported[0]!r}."
+        )
+    return tuple("rmse" if name == "rmsecv" else name for name in names)
+
+
+def _resolve_public_splitter(cv, *, groups):
+    """Resolve the bounded public cv selector without consuming a splitter."""
+    if isinstance(cv, bool | np.bool_):
+        raise SpectroChemPyError("cv must be an integer of at least 2 or a splitter.")
+    if isinstance(cv, Integral):
+        n_splits = int(cv)
+        if n_splits < 2:
+            raise SpectroChemPyError("Integer cv must be at least 2.")
+        if groups is None:
+            return KFold(n_splits=n_splits, shuffle=False)
+        return GroupKFold(n_splits=n_splits)
+    if isinstance(cv, Number):
+        raise SpectroChemPyError("cv must not be a floating-point value.")
+    if type(cv) not in (KFold, GroupKFold, LeaveOneOut):
+        raise SpectroChemPyError(
+            "cv must be an integer or an explicit KFold, GroupKFold, or "
+            "LeaveOneOut splitter."
+        )
+    return cv
+
+
+def cross_validate(
+    estimator,
+    X,
+    y,
+    *,
+    cv=5,
+    groups=None,
+    sample_dim="y",
+    metrics=("rmsecv", "r2"),
+    return_estimators=False,
+):
+    """
+    Evaluate a fixed supervised regression configuration by cross-validation.
+
+    Each fold receives a fresh unfitted estimator. Pipeline preprocessing is
+    learned only from that fold's calibration observations, and predictions
+    are assembled once in the original target order and geometry. The supplied
+    estimator, datasets, groups, and explicit splitter remain unchanged.
+
+    Parameters
+    ----------
+    estimator : PLSRegression or Pipeline
+        Unfitted or fitted template to clone for each fold. A Pipeline must end
+        in `PLSRegression`.
+    X : NDDataset
+        Two-dimensional predictor dataset.
+    y : NDDataset
+        One- or two-dimensional target dataset aligned with X along
+        *sample_dim*.
+    cv : int, KFold, GroupKFold, or LeaveOneOut, optional, default: 5
+        Cross-validation design. An integer creates unshuffled `KFold` when
+        *groups* is absent and `GroupKFold` otherwise. Integers must be at
+        least 2; booleans and floating-point values are rejected.
+    groups : array-like or NDDataset, optional
+        One group identity per observation. Required by `GroupKFold` and
+        forbidden for splitters that do not use groups.
+    sample_dim : str, optional, default: "y"
+        Dimension identifying observations independently in X and y.
+    metrics : ordered iterable of str, optional
+        Global metrics selected from ``"rmsecv"``, ``"r2"``, ``"bias"``, and
+        ``"mae"``. Names must be unique and the order is preserved. ``"rmse"``
+        is not a public selector; fold records use that generic internal name.
+        An empty selection is rejected.
+    return_estimators : bool, optional, default: False
+        Retain independent fitted estimators for every fold. Enabling this may
+        substantially increase memory use.
+
+    Returns
+    -------
+    CrossValidationResult
+        Structured OOF predictions, residuals, global and fold metrics,
+        validated positions, configuration snapshots, and optional estimators.
+        Dataset members are isolated copies but remain mutable.
+
+    Raises
+    ------
+    SpectroChemPyError
+        If the estimator, splitter, groups, geometry, masks, values, metrics,
+        or complete unique OOF coverage violate the bounded v1 contract.
+
+    See Also
+    --------
+    CrossValidationResult : Structured result returned by this function.
+
+    Notes
+    -----
+    This function evaluates one fixed estimator configuration. It performs no
+    hyperparameter search, nested cross-validation, final full-data fit,
+    persistence, replay, or automatic provenance capture.
+
+    Examples
+    --------
+    >>> values = np.arange(24.0).reshape(8, 3)
+    >>> X = scp.NDDataset(values, dims=["y", "x"])
+    >>> y = scp.NDDataset((1.0 + values[:, 0])[:, None], dims=["y", "t"])
+    >>> model = scp.PLSRegression(n_components=1, scale=False)
+    >>> result = scp.cross_validate(model, X, y, cv=4)
+    >>> result.oof_predictions.shape
+    (8, 1)
+    >>> result.metric("rmsecv").values.shape
+    (1,)
+    """
+    internal_metrics = _resolve_public_metrics(metrics)
+    splitter = _resolve_public_splitter(cv, groups=groups)
+    if not isinstance(return_estimators, bool | np.bool_):
+        raise SpectroChemPyError("return_estimators must be a boolean.")
+    return _execute_cross_validation(
+        estimator,
+        X,
+        y,
+        splitter=splitter,
+        groups=groups,
+        sample_dim=sample_dim,
+        metrics=internal_metrics,
+        return_estimators=bool(return_estimators),
     )

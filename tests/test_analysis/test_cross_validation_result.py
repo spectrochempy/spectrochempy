@@ -411,7 +411,7 @@ def test_fold_estimators_are_opt_in_fitted_and_isolated(validation_data):
         _build(validation_data, fold_estimators=fitted)
 
 
-def test_operation_description_is_non_executable_and_result_remains_private(
+def test_operation_description_is_non_executable_and_result_is_public(
     validation_data,
 ):
     result = _build(validation_data)
@@ -420,7 +420,7 @@ def test_operation_description_is_non_executable_and_result_remains_private(
     assert [item.role for item in result.operation.inputs] == ["X", "y"]
     assert "non-executable" in result.operation.note
     assert "provenance" in result.operation.note
-    assert not hasattr(scp, "CrossValidationResult")
+    assert isinstance(result, scp.CrossValidationResult)
     assert not hasattr(scp, "_CrossValidationResult")
 
 
