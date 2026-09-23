@@ -11,3 +11,11 @@ What's New in Revision 1.0.1.dev
 
 These are the changes in SpectroChemPy-1.0.1.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
+
+Developer
+~~~~~~~~~
+
+- MAINT: Added private helpers for resolving observation dimensions, validating
+  aligned fold positions, slicing row-oriented ``NDDataset`` subsets, and
+  restoring predictions to the validation target geometry.  No public
+  cross-validation API is introduced.
