@@ -111,9 +111,9 @@ print(result.metric("rmsecv").values)
 #   independent fitted fold estimators when `return_estimators=True`.
 #
 # RMSECV, bias, and MAE carry the target units; R² is unitless. Global RMSECV
-# is computed directly from all OOF residuals. It is **not** the arithmetic
-# mean of fold RMSE values, which would give folds equal weight even when their
-# sizes differ.
+# is computed directly from all OOF residuals. Equivalently, it is the square
+# root of the fold-size-weighted mean of the squared fold RMSE values. It is
+# **not** their arithmetic mean, even when every fold has the same size.
 
 # %%
 for name in ("rmsecv", "r2", "bias", "mae"):
@@ -146,6 +146,6 @@ print("valid pairs:", int(np.asarray(result.n_valid.data).squeeze()))
 # scores is subject to selection bias; use a separate design, such as nested
 # cross-validation, when model selection itself must be evaluated.
 #
-# A complete application to real NIR spectra, including an independently
-# reproduced OOF calculation and parity/residual plots, is available in the
+# A complete application to real NIR spectra, including OOF predictions and
+# parity/residual plots, is available in the
 # [Gallery example](../../gettingstarted/examples/gallery/auto_examples_analysis/b_crossdecomposition/plot_cross_validation.rst).

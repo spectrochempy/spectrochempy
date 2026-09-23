@@ -96,9 +96,11 @@ def _metric_value(result, name):
 # Inspect global OOF metrics
 # --------------------------
 # RMSECV, bias, and MAE retain the moisture unit; R² is unitless. Global
-# RMSECV is calculated from all OOF residuals together, not by averaging fold
-# RMSE values. The comparison is descriptive: this example does not claim that
-# MSC should improve this dataset or use the displayed scores to select a model.
+# RMSECV is calculated from all OOF residuals together: it is the square root
+# of the fold-size-weighted mean of squared fold RMSE values, not their
+# arithmetic mean. The comparison is descriptive: this example does not claim
+# that MSC should improve this dataset or use the displayed scores to select a
+# model.
 print("model            RMSECV (%)      R2     bias (%)      MAE (%)")
 for label, result in (("PLS", pls_result), ("MSC + PLS", msc_result)):
     print(
