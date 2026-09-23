@@ -21,7 +21,6 @@ by Eigenvector with permission. Here we use only the M5 spectra and moisture.
 
 # %%
 # Import packages
-import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.model_selection import KFold
 
@@ -112,37 +111,92 @@ for label, result in (("PLS", pls_result), ("MSC + PLS", msc_result)):
     )
 
 # %%
-# Plot parity and residuals
-# -------------------------
+# Plot parity and residuals with NDDataset
+# ----------------------------------------
 # Both result objects preserve the original sample order and target geometry.
+# The observed moisture values become the coordinate of small plotting
+# datasets, so the plots use the regular SpectroChemPy 1D plotting API. These
+# plotting datasets alone are sorted by reference moisture to provide the
+# monotonic coordinate expected by a 1D plot; the OOF result order is unchanged.
 observed = np.asarray(pls_result.observed.data).squeeze()
 pls_predicted = np.asarray(pls_result.oof_predictions.data).squeeze()
 msc_predicted = np.asarray(msc_result.oof_predictions.data).squeeze()
 
-limits = [
-    min(observed.min(), pls_predicted.min(), msc_predicted.min()),
-    max(observed.max(), pls_predicted.max(), msc_predicted.max()),
+plot_order = np.argsort(observed)
+reference_moisture = scp.Coord(
+    observed[plot_order], title="Reference moisture", units="%"
+)
+parity_datasets = [
+    scp.NDDataset(
+        prediction[plot_order],
+        coordset=[reference_moisture.copy()],
+        dims=["x"],
+        title="OOF-predicted moisture",
+        units="%",
+    )
+    for prediction in (pls_predicted, msc_predicted)
 ]
-fig, axes = plt.subplots(1, 2, figsize=(11, 4.5), layout="constrained")
-axes[0].plot(limits, limits, color="0.35", linestyle="--", label="identity")
-axes[0].scatter(observed, pls_predicted, label="PLS", alpha=0.8)
-axes[0].scatter(observed, msc_predicted, label="MSC + PLS", alpha=0.8)
-axes[0].set(
-    xlabel="Reference moisture (%)",
-    ylabel="OOF-predicted moisture (%)",
+identity = scp.NDDataset(
+    observed[plot_order],
+    coordset=[reference_moisture.copy()],
+    dims=["x"],
+    title="OOF-predicted moisture",
+    units="%",
+)
+parity_ax = scp.plot_multiple(
+    parity_datasets,
+    method="scatter",
+    pen=False,
+    labels=["PLS", "MSC + PLS"],
+    legend="best",
     title="Out-of-fold parity",
+    show=False,
 )
-axes[0].legend()
+_ = identity.plot_pen(
+    ax=parity_ax,
+    clear=False,
+    color="0.35",
+    ls="--",
+    label="identity",
+    legend=True,
+    show=False,
+)
 
-axes[1].axhline(0.0, color="0.35", linestyle="--")
-axes[1].scatter(observed, observed - pls_predicted, label="PLS", alpha=0.8)
-axes[1].scatter(observed, observed - msc_predicted, label="MSC + PLS", alpha=0.8)
-axes[1].set(
-    xlabel="Reference moisture (%)",
-    ylabel="OOF residual (%)",
-    title="Out-of-fold residuals",
+residual_datasets = [
+    scp.NDDataset(
+        (observed - prediction)[plot_order],
+        coordset=[reference_moisture.copy()],
+        dims=["x"],
+        title="OOF residual",
+        units="%",
+    )
+    for prediction in (pls_predicted, msc_predicted)
+]
+zero_residual = scp.NDDataset(
+    np.zeros_like(observed)[plot_order],
+    coordset=[reference_moisture.copy()],
+    dims=["x"],
+    title="OOF residual",
+    units="%",
 )
-axes[1].legend()
+residual_ax = scp.plot_multiple(
+    residual_datasets,
+    method="scatter",
+    pen=False,
+    labels=["PLS", "MSC + PLS"],
+    legend="best",
+    title="Out-of-fold residuals",
+    show=False,
+)
+_ = zero_residual.plot_pen(
+    ax=residual_ax,
+    clear=False,
+    color="0.35",
+    ls="--",
+    label="zero residual",
+    legend=True,
+    show=False,
+)
 
 # %%
 # The template estimators remain unfitted. ``cross_validate`` fits independent
