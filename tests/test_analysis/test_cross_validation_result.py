@@ -281,6 +281,37 @@ def test_group_summary_is_compact_and_group_usage_is_bounded(validation_data):
         )
 
 
+def test_groupkfold_rejects_folds_that_leak_groups(validation_data):
+    groups = np.array([0, 1, 0, 1, 2])
+    splitter = GroupKFold(n_splits=3)
+    leaking_folds = list(KFold(n_splits=3).split(np.arange(5)))
+
+    with pytest.raises(
+        SpectroChemPyError, match="group in both training and validation"
+    ):
+        _build(
+            validation_data,
+            splitter=splitter,
+            folds=leaking_folds,
+            groups=groups,
+        )
+
+
+def test_masked_numpy_groups_are_rejected(validation_data):
+    group_values = np.array([0, 0, 1, 2, 2])
+    groups = np.ma.array(group_values, mask=[False, True, False, False, False])
+    splitter = GroupKFold(n_splits=3)
+    folds = list(splitter.split(np.arange(5), groups=group_values))
+
+    with pytest.raises(SpectroChemPyError, match="groups must not contain masked"):
+        _build(
+            validation_data,
+            splitter=splitter,
+            folds=folds,
+            groups=groups,
+        )
+
+
 def test_result_snapshots_inputs_positions_configuration_and_containers(
     validation_data,
 ):

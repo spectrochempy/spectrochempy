@@ -1013,12 +1013,14 @@ def _prepare_groups(groups, observed, *, sample_dim, n_observations):
             raise SpectroChemPyError("groups must not contain masked values.")
         values = np.asarray(np.ma.getdata(masked)).copy()
     else:
-        values = np.asarray(groups)
-        if values.ndim != 1 or values.size != n_observations:
+        masked = np.ma.asarray(groups)
+        if masked.ndim != 1 or masked.size != n_observations:
             raise SpectroChemPyError(
                 "groups must be one-dimensional with one value per observation."
             )
-        values = values.copy()
+        if np.any(np.ma.getmaskarray(masked)):
+            raise SpectroChemPyError("groups must not contain masked values.")
+        values = np.asarray(np.ma.getdata(masked)).copy()
 
     counts = {}
     order = []
@@ -1284,6 +1286,14 @@ def _build_cross_validation_result(
             raise SpectroChemPyError(
                 f"Fold {fold_index} training and validation positions overlap."
             )
+        if groups_values is not None:
+            training_groups = set(groups_values[train].tolist())
+            validation_groups = set(groups_values[validation].tolist())
+            if training_groups & validation_groups:
+                raise SpectroChemPyError(
+                    f"Fold {fold_index} places a group in both training and "
+                    "validation positions."
+                )
         coverage[validation] += 1
 
         fold_observed = _slice_along_axis(
