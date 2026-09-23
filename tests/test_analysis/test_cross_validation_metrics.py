@@ -12,8 +12,8 @@ import pytest
 from numpy.testing import assert_allclose
 
 import spectrochempy as scp
-from spectrochempy.analysis._cross_validation import _compute_regression_metrics
 from spectrochempy.analysis._cross_validation import _bias
+from spectrochempy.analysis._cross_validation import _compute_regression_metrics
 from spectrochempy.analysis._cross_validation import _evaluate_target_metrics
 from spectrochempy.analysis._cross_validation import _mae
 from spectrochempy.analysis._cross_validation import _rmse
@@ -189,7 +189,9 @@ def test_compatible_prediction_units_are_converted_without_mutation():
     assert predicted.units == predicted_before.units
 
 
-@pytest.mark.parametrize("unit_case", ["incompatible", "missing-observed", "missing-predicted"])
+@pytest.mark.parametrize(
+    "unit_case", ["incompatible", "missing-observed", "missing-predicted"]
+)
 def test_incoherent_target_units_are_rejected(unit_case):
     observed, predicted = _targets(
         [[1.0, 10.0], [2.0, 20.0]], [[1.0, 10.0], [2.0, 20.0]]

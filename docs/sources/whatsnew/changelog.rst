@@ -58,5 +58,5 @@ Developer
   observation dimensions, validating and slicing aligned folds, and restoring
   prediction geometry (#1653), plus unfitted cloning of ``Pipeline`` templates
   and their supported steps (#1654), and per-target regression metric kernels
-  with explicit validity reporting.  No public cross-validation API is
-  introduced.
+  with explicit validity reporting (#1655).  No public cross-validation API
+  is introduced.
