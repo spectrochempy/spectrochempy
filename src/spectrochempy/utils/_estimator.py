@@ -44,6 +44,8 @@ PIPELINE_V1_SUPPORTED_ESTIMATORS = (
     _PIPELINE_V1_FINAL_TRANSFORMERS | _PIPELINE_V1_FINAL_ESTIMATORS
 )
 
+_PIPELINE_V1_QUALIFIED_NAME = "spectrochempy.analysis.pipeline.Pipeline"
+
 
 def _qualified_name(estimator):
     cls = estimator.__class__
@@ -84,13 +86,16 @@ def is_fitted(estimator):
 
 def clone_unfitted(estimator):
     """
-    Reconstruct a supported estimator from its constructor configuration.
+    Reconstruct a supported estimator or Pipeline from constructor configuration.
 
     Parameter isolation is deliberately bounded: immutable scalar values are
     reused; NumPy arrays, masked arrays, SpectroChemPy objects, random-state
     objects, and built-in containers are copied; arbitrary objects are reused
-    by reference.
+    by reference. Pipeline template steps are cloned recursively through this
+    same contract; Pipeline learned state is never copied.
     """
+    if _qualified_name(estimator) == _PIPELINE_V1_QUALIFIED_NAME:
+        return _clone_pipeline_unfitted(estimator)
     if not is_pipeline_v1_supported(estimator):
         raise SpectroChemPyError(
             f"{estimator.__class__.__name__} is not supported by the "
@@ -121,6 +126,30 @@ def clone_unfitted(estimator):
         raise SpectroChemPyError(
             f"Cloning {estimator.__class__.__name__} produced a fitted instance."
         )
+    return cloned
+
+
+def _clone_pipeline_unfitted(pipeline):
+    """Reconstruct a Pipeline from recursively cloned template steps."""
+    cloned_steps = []
+    for position, (name, step) in enumerate(pipeline.steps):
+        try:
+            cloned_step = clone_unfitted(step)
+        except Exception as exc:
+            raise SpectroChemPyError(
+                f"Cannot clone Pipeline step '{name}' at position {position} "
+                f"(class {step.__class__.__name__})."
+            ) from exc
+        cloned_steps.append((name, cloned_step))
+
+    try:
+        cloned = pipeline.__class__(cloned_steps)
+    except Exception as exc:
+        raise SpectroChemPyError(
+            "Cannot reconstruct Pipeline from its cloned template steps."
+        ) from exc
+    if bool(getattr(cloned, "_fitted", False)):
+        raise SpectroChemPyError("Cloning Pipeline produced a fitted instance.")
     return cloned
 
 

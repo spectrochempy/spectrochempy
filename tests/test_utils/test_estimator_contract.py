@@ -160,6 +160,26 @@ def _assert_cloned_parameter_matches_policy(original, cloned):
     assert cloned is original
 
 
+def _assert_pipeline_templates_cloned(original, cloned):
+    assert cloned is not original
+    assert cloned._fitted is False
+    assert [name for name, _ in cloned.steps] == [name for name, _ in original.steps]
+    for (original_name, original_step), (cloned_name, cloned_step) in zip(
+        original.steps, cloned.steps, strict=True
+    ):
+        assert cloned_name == original_name
+        assert type(cloned_step) is type(original_step)
+        assert cloned_step is not original_step
+        original_params = original_step.get_params(deep=False)
+        cloned_params = cloned_step.get_params(deep=False)
+        assert cloned_params.keys() == original_params.keys()
+        for name, original_value in original_params.items():
+            _assert_cloned_parameter_matches_policy(original_value, cloned_params[name])
+        assert is_fitted(cloned_step) is False
+    with pytest.raises(NotFittedError):
+        _ = cloned.fitted_steps_
+
+
 @pytest.mark.parametrize(
     "estimator", _final_transformer_cases() + _final_estimator_cases()
 )
@@ -251,6 +271,166 @@ def test_clone_unfitted_recursively_copies_container_parameters():
     cloned.reference["nested"][0][0] = 42.0
     assert transformer.reference["array"][0] != 99.0
     assert transformer.reference["nested"][0][0] != 42.0
+
+
+def test_clone_unfitted_reconstructs_pipeline_templates():
+    center = CenterTransformer(dim="y")
+    pls = PLSRegression(n_components=2, scale=False)
+    pipeline = scp.Pipeline([("center", center), ("pls", pls)])
+
+    cloned = clone_unfitted(pipeline)
+
+    _assert_pipeline_templates_cloned(pipeline, cloned)
+    assert pipeline.steps == (("center", center), ("pls", pls))
+    assert pipeline._fitted is False
+
+
+def test_pipeline_cloning_does_not_expand_the_fitted_estimator_allowlist():
+    pipeline = scp.Pipeline(
+        [
+            ("center", CenterTransformer(dim="y")),
+            ("pls", PLSRegression(n_components=1)),
+        ]
+    )
+
+    cloned = clone_unfitted(pipeline)
+
+    with pytest.raises(SpectroChemPyError, match="not supported"):
+        is_fitted(pipeline)
+    with pytest.raises(SpectroChemPyError, match="not supported"):
+        is_fitted(cloned)
+
+
+def test_clone_unfitted_discards_fitted_pipeline_state_without_mutating_original():
+    X, y = _xy()
+    pipeline = scp.Pipeline(
+        [
+            ("center", CenterTransformer(dim="y")),
+            ("pls", PLSRegression(n_components=1, scale=False)),
+        ]
+    ).fit(X, y)
+    original_templates = pipeline.steps
+    original_fitted_steps = pipeline.fitted_steps_
+    original_mean = pipeline.fitted_named_steps_["center"].mean_.copy()
+    original_coef = pipeline.fitted_named_steps_["pls"]._coef.copy()
+
+    cloned = clone_unfitted(pipeline)
+
+    _assert_pipeline_templates_cloned(pipeline, cloned)
+    assert pipeline._fitted is True
+    assert pipeline.steps is original_templates
+    assert pipeline.fitted_steps_ is original_fitted_steps
+    assert np.array_equal(pipeline.fitted_named_steps_["center"].mean_, original_mean)
+    assert np.array_equal(pipeline.fitted_named_steps_["pls"]._coef, original_coef)
+
+
+def test_clone_unfitted_discards_learned_state_from_fitted_templates():
+    X, y = _xy()
+    center = CenterTransformer(dim="y").fit(X)
+    pls = PLSRegression(n_components=1, scale=False).fit(X, y)
+    original_mean = center.mean_.copy()
+    original_coef = pls._coef.copy()
+    pipeline = scp.Pipeline([("center", center), ("pls", pls)])
+
+    cloned = clone_unfitted(pipeline)
+
+    _assert_pipeline_templates_cloned(pipeline, cloned)
+    assert is_fitted(center) is True
+    assert is_fitted(pls) is True
+    assert np.array_equal(center.mean_, original_mean)
+    assert np.array_equal(pls._coef, original_coef)
+    assert not hasattr(cloned.named_steps["center"], "mean_")
+    assert not hasattr(cloned.named_steps["pls"]._plsregression, "x_weights_")
+
+
+def test_pipeline_clones_fit_independently_on_different_calibrations():
+    X, y = _xy()
+    shifted = X.copy()
+    shifted.data = X.data + 10.0
+    template = scp.Pipeline(
+        [
+            ("center", CenterTransformer(dim="y")),
+            ("pls", PLSRegression(n_components=1, scale=False)),
+        ]
+    )
+    first = clone_unfitted(template).fit(X, y)
+    first_mean = first.fitted_named_steps_["center"].mean_.copy()
+    first_coef = first.fitted_named_steps_["pls"]._coef.copy()
+
+    second = clone_unfitted(template).fit(shifted, y)
+
+    assert template._fitted is False
+    assert first._fitted is True
+    assert second._fitted is True
+    assert not np.array_equal(
+        first.fitted_named_steps_["center"].mean_,
+        second.fitted_named_steps_["center"].mean_,
+    )
+    assert np.array_equal(first.fitted_named_steps_["center"].mean_, first_mean)
+    assert np.array_equal(first.fitted_named_steps_["pls"]._coef, first_coef)
+    assert (
+        first.fitted_named_steps_["center"] is not second.fitted_named_steps_["center"]
+    )
+    assert first.fitted_named_steps_["pls"] is not second.fitted_named_steps_["pls"]
+    assert not np.shares_memory(
+        first.fitted_named_steps_["center"].mean_,
+        second.fitted_named_steps_["center"].mean_,
+    )
+    assert not np.shares_memory(
+        first.fitted_named_steps_["pls"]._coef,
+        second.fitted_named_steps_["pls"]._coef,
+    )
+
+
+def test_pipeline_clones_isolate_supported_mutable_parameters():
+    reference = np.linspace(1.0, 2.0, 6)
+    pipeline = scp.Pipeline(
+        [
+            ("msc", MSCTransformer(reference=reference, dim="y")),
+            ("pls", PLSRegression(n_components=2, scale=False)),
+        ]
+    )
+
+    first = clone_unfitted(pipeline)
+    second = clone_unfitted(pipeline)
+
+    original_reference = pipeline.named_steps["msc"].reference
+    first_reference = first.named_steps["msc"].reference
+    second_reference = second.named_steps["msc"].reference
+    assert first_reference is not original_reference
+    assert second_reference is not original_reference
+    assert first_reference is not second_reference
+    first_reference[0] = 99.0
+    assert original_reference[0] != 99.0
+    assert second_reference[0] != 99.0
+
+
+def test_pipeline_clone_failure_reports_step_context_and_preserves_cause(
+    monkeypatch,
+):
+    center = CenterTransformer(dim="y")
+    pipeline = scp.Pipeline(
+        [("center", center), ("pls", PLSRegression(n_components=2))]
+    )
+
+    def fail_get_params(*, deep=True):
+        raise ValueError("broken step parameters")
+
+    monkeypatch.setattr(center, "get_params", fail_get_params)
+
+    with pytest.raises(
+        SpectroChemPyError,
+        match=(
+            "Cannot clone Pipeline step 'center' at position 0 "
+            "\\(class CenterTransformer\\)"
+        ),
+    ) as excinfo:
+        clone_unfitted(pipeline)
+
+    assert isinstance(excinfo.value.__cause__, ValueError)
+    assert str(excinfo.value.__cause__) == "broken step parameters"
+    assert pipeline._fitted is False
+    assert pipeline.named_steps["center"] is center
 
 
 def test_constructor_parameter_clone_preserves_generator_position():
