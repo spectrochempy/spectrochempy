@@ -21,7 +21,6 @@ by Eigenvector with permission. Here we use only the M5 spectra and moisture.
 
 # %%
 # Import packages
-import numpy as np
 from sklearn.model_selection import KFold
 
 import spectrochempy as scp
@@ -88,7 +87,7 @@ msc_result = scp.cross_validate(msc_pls, X, y, cv=splitter, metrics=metrics)
 
 
 def _metric_value(result, name):
-    return float(np.asarray(result.metric(name).values.data).squeeze())
+    return float(result.metric(name).values.data.squeeze())
 
 
 # %%
@@ -118,11 +117,11 @@ for label, result in (("PLS", pls_result), ("MSC + PLS", msc_result)):
 # datasets, so the plots use the regular SpectroChemPy 1D plotting API. These
 # plotting datasets alone are sorted by reference moisture to provide the
 # monotonic coordinate expected by a 1D plot; the OOF result order is unchanged.
-observed = np.asarray(pls_result.observed.data).squeeze()
-pls_predicted = np.asarray(pls_result.oof_predictions.data).squeeze()
-msc_predicted = np.asarray(msc_result.oof_predictions.data).squeeze()
+observed = pls_result.observed.data.squeeze()
+pls_predicted = pls_result.oof_predictions.data.squeeze()
+msc_predicted = msc_result.oof_predictions.data.squeeze()
 
-plot_order = np.argsort(observed)
+plot_order = observed.argsort()
 reference_moisture = scp.Coord(
     observed[plot_order], title="Reference moisture", units="%"
 )
@@ -173,7 +172,7 @@ residual_datasets = [
     for prediction in (pls_predicted, msc_predicted)
 ]
 zero_residual = scp.NDDataset(
-    np.zeros_like(observed)[plot_order],
+    observed[plot_order] * 0.0,
     coordset=[reference_moisture.copy()],
     dims=["x"],
     title="OOF residual",
