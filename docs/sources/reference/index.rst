@@ -698,6 +698,12 @@ cross-validation.
     :toctree: generated/
 
     cross_validate
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+    :template: autosummary/result-class.rst
+
     CrossValidationResult
 
 Evolving factor analysis
