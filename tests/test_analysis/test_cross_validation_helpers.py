@@ -215,6 +215,17 @@ def test_ambiguous_sample_dimension_is_rejected(aligned_data):
         _resolve_sample_geometry(X, y)
 
 
+def test_multiple_observation_coordinates_are_rejected_explicitly(aligned_data):
+    X, y = aligned_data
+    X.set_coordset(
+        y=[X.coordset["y"].copy(), scp.Coord(np.arange(7), title="run")],
+        x=X.coordset["x"].copy(),
+    )
+
+    with pytest.raises(SpectroChemPyError, match="multiple coordinates"):
+        _resolve_sample_geometry(X, y)
+
+
 @pytest.mark.parametrize(
     ("positions", "message"),
     [

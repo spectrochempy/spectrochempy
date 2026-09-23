@@ -9,6 +9,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils.exceptions import SpectroChemPyError
 
@@ -50,6 +51,11 @@ def _coordinate_for_dimension(dataset, dim):
     if dataset.coordset is None:
         return None
     coordinate = dataset.coordset[dim]
+    if isinstance(coordinate, CoordSet):
+        raise SpectroChemPyError(
+            f"Dimension {dim!r} uses multiple coordinates; cross-validation "
+            "alignment currently requires a single coordinate."
+        )
     if coordinate is None or (not coordinate.has_data and not coordinate.is_labeled):
         return None
     return coordinate
