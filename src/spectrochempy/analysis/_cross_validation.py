@@ -8,6 +8,7 @@
 import copy
 from collections.abc import Mapping
 from dataclasses import dataclass
+from dataclasses import fields
 from numbers import Integral
 from numbers import Number
 from types import MappingProxyType
@@ -176,7 +177,7 @@ class CrossValidationFoldResult:
         raise KeyError(name)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, init=False)
 class CrossValidationResult:
     """
     Structured result returned by :func:`cross_validate`.
@@ -185,8 +186,10 @@ class CrossValidationResult:
     positions, configuration snapshots, and tracking containers. Its
     `NDDataset` members remain mutable, so the result is not deeply immutable.
     It is not persistent and does not provide replay or automatic provenance.
+    Instances are created only by :func:`cross_validate`; direct construction
+    is not supported.
 
-    Parameters
+    Attributes
     ----------
     estimator : object
         Non-executable estimator configuration snapshot. It exposes
@@ -261,6 +264,12 @@ class CrossValidationResult:
     fold_estimators: tuple[object, ...] | None
     operation: _ValidationDescription
 
+    def __init__(self):
+        raise SpectroChemPyError(
+            "CrossValidationResult cannot be constructed directly; use "
+            "cross_validate()."
+        )
+
     def metric(self, name):
         """
         Return a requested global metric by its public name.
@@ -287,6 +296,19 @@ class CrossValidationResult:
             if metric.name == name:
                 return metric
         raise KeyError(name)
+
+
+def _construct_cross_validation_result(**values):
+    """Construct a result only after the builder has validated every field."""
+    field_names = tuple(field.name for field in fields(CrossValidationResult))
+    if set(values) != set(field_names):
+        raise SpectroChemPyError(
+            "Internal CrossValidationResult construction requires every field."
+        )
+    result = object.__new__(CrossValidationResult)
+    for field_name in field_names:
+        object.__setattr__(result, field_name, values[field_name])
+    return result
 
 
 @dataclass(frozen=True)
@@ -1585,7 +1607,7 @@ def _assemble_cross_validation_result(
             )
         )
 
-    return CrossValidationResult(
+    return _construct_cross_validation_result(
         estimator=plan.estimator_configuration,
         splitter=plan.splitter_configuration,
         n_splits=len(fold_results),

@@ -424,6 +424,14 @@ def test_operation_description_is_non_executable_and_result_is_public(
     assert not hasattr(scp, "_CrossValidationResult")
 
 
+def test_public_result_rejects_direct_construction():
+    invalid_fields = dict.fromkeys(scp.CrossValidationResult.__dataclass_fields__)
+    with pytest.raises(TypeError, match="unexpected keyword argument"):
+        scp.CrossValidationResult(**invalid_fields)
+    with pytest.raises(SpectroChemPyError, match="cannot be constructed directly"):
+        scp.CrossValidationResult()
+
+
 @pytest.mark.parametrize("warnings", ["single string", ["valid", 2]])
 def test_warning_container_is_validated(validation_data, warnings):
     with pytest.raises(SpectroChemPyError, match="warning"):
