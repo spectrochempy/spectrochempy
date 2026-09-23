@@ -5,12 +5,17 @@
 # ======================================================================================
 """Internal dataset preparation helpers for supervised cross-validation."""
 
+import copy
+from collections.abc import Mapping
 from dataclasses import dataclass
+from numbers import Number
+from types import MappingProxyType
 
 import numpy as np
 
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.utils._estimator import clone_unfitted
 from spectrochempy.utils.exceptions import SpectroChemPyError
 
 
@@ -68,6 +73,134 @@ class _RegressionMetricResult:
     def metric(self, name):
         """Return one requested metric by its internal kernel name."""
         for metric in self.metrics:
+            if metric.name == name:
+                return metric
+        raise KeyError(name)
+
+
+@dataclass(frozen=True)
+class _PipelineStepConfiguration:
+    """Non-fitted configuration snapshot for one Pipeline template step."""
+
+    name: str
+    class_name: str
+    parameters: Mapping
+
+
+@dataclass(frozen=True)
+class _EstimatorConfiguration:
+    """Non-executable estimator configuration snapshot."""
+
+    class_name: str
+    parameters: Mapping
+    steps: tuple[_PipelineStepConfiguration, ...] = ()
+
+
+@dataclass(frozen=True)
+class _SplitterConfiguration:
+    """Non-executable splitter configuration snapshot."""
+
+    class_name: str
+    parameters: Mapping
+
+
+@dataclass(frozen=True)
+class _GroupCount:
+    """One group identity and its observation count."""
+
+    value: object
+    count: int
+
+
+@dataclass(frozen=True)
+class _GroupsSummary:
+    """Compact group summary without retaining the caller's array."""
+
+    n_groups: int
+    counts: tuple[_GroupCount, ...]
+
+
+@dataclass(frozen=True)
+class _DatasetDescription:
+    """Minimal, non-executable description of one validation input."""
+
+    role: str
+    name: str | None
+    title: str | None
+    shape: tuple[int, ...]
+    dims: tuple[str, ...]
+    units: str | None
+
+
+@dataclass(frozen=True)
+class _ValidationDescription:
+    """Minimal operation description, deliberately not full provenance."""
+
+    operation: str
+    inputs: tuple[_DatasetDescription, ...]
+    note: str
+
+
+@dataclass(frozen=True)
+class _UndefinedMetric:
+    """One explicitly undefined metric associated with a target and scope."""
+
+    scope: str
+    metric: str
+    target_index: int
+    reason: str
+    fold_index: int | None = None
+
+
+@dataclass(frozen=True)
+class _CrossValidationFoldResult:
+    """Validated fold positions and per-target metric records."""
+
+    fold_index: int
+    train_positions: np.ndarray
+    validation_positions: np.ndarray
+    metrics: tuple[_PerTargetMetric, ...]
+    n_valid: NDDataset
+
+    def metric(self, name):
+        """Return one fold metric by its generic kernel name."""
+        for metric in self.metrics:
+            if metric.name == name:
+                return metric
+        raise KeyError(name)
+
+
+@dataclass(frozen=True)
+class _CrossValidationResult:
+    """
+    Internal structured cross-validation result prototype.
+
+    The record owns copies of its dataset inputs and tracking containers, but
+    is not deeply immutable because retained NDDataset objects remain mutable.
+    """
+
+    estimator: _EstimatorConfiguration
+    splitter: _SplitterConfiguration
+    n_splits: int
+    sample_dim: str
+    x_sample_axis: int
+    y_sample_axis: int
+    observation_coordinate: object
+    groups: _GroupsSummary | None
+    observed: NDDataset
+    oof_predictions: NDDataset
+    residuals: NDDataset
+    global_metrics: tuple[_PerTargetMetric, ...]
+    n_valid: NDDataset
+    folds: tuple[_CrossValidationFoldResult, ...]
+    warnings: tuple[str, ...]
+    undefined_metrics: tuple[_UndefinedMetric, ...]
+    fold_estimators: tuple[object, ...] | None
+    operation: _ValidationDescription
+
+    def metric(self, name):
+        """Return one global metric by its result-level name."""
+        for metric in self.global_metrics:
             if metric.name == name:
                 return metric
         raise KeyError(name)
@@ -743,4 +876,511 @@ def _compute_regression_metrics(
             title="n_valid",
         ),
         metrics=tuple(outputs),
+    )
+
+
+def _qualified_class_name(value):
+    cls = value.__class__
+    return f"{cls.__module__}.{cls.__name__}"
+
+
+def _readonly_array(value):
+    copied = np.array(copy.deepcopy(value), copy=True, subok=True)
+    copied.flags.writeable = False
+    if isinstance(copied, np.ma.MaskedArray):
+        copied.data.flags.writeable = False
+        if isinstance(copied.mask, np.ndarray):
+            copied.mask.flags.writeable = False
+    return copied
+
+
+def _snapshot_configuration_value(value):
+    """Take an isolated, non-executable snapshot of a configuration value."""
+    if value is None or isinstance(value, str | bytes | bool | Number):
+        return value
+    if isinstance(value, np.ma.MaskedArray | np.ndarray):
+        return _readonly_array(value)
+    if isinstance(value, np.random.RandomState):
+        return MappingProxyType(
+            {
+                "kind": "RandomState",
+                "state": _snapshot_configuration_value(value.get_state()),
+            }
+        )
+    if isinstance(value, np.random.Generator):
+        return MappingProxyType(
+            {
+                "kind": value.bit_generator.__class__.__name__,
+                "state": _snapshot_configuration_value(value.bit_generator.state),
+            }
+        )
+    if _qualified_class_name(value).startswith("spectrochempy.core.dataset"):
+        return value.copy()
+    if isinstance(value, Mapping):
+        return MappingProxyType(
+            {key: _snapshot_configuration_value(item) for key, item in value.items()}
+        )
+    if isinstance(value, tuple | list):
+        return tuple(_snapshot_configuration_value(item) for item in value)
+    if isinstance(value, set | frozenset):
+        return frozenset(_snapshot_configuration_value(item) for item in value)
+    return repr(value)
+
+
+def _snapshot_parameters(estimator):
+    if not hasattr(estimator, "get_params"):
+        raise SpectroChemPyError(
+            f"{estimator.__class__.__name__} does not expose get_params()."
+        )
+    parameters = estimator.get_params(deep=False)
+    if not isinstance(parameters, dict):
+        raise SpectroChemPyError(
+            f"{estimator.__class__.__name__}.get_params(deep=False) must "
+            "return a dictionary."
+        )
+    return MappingProxyType(
+        {
+            name: _snapshot_configuration_value(value)
+            for name, value in parameters.items()
+        }
+    )
+
+
+def _snapshot_estimator_configuration(estimator):
+    """Snapshot the bounded CV estimator configuration without learned state."""
+    cloned = clone_unfitted(estimator)
+    class_name = _qualified_class_name(cloned)
+    pls_name = "spectrochempy.analysis.crossdecomposition.pls.PLSRegression"
+    pipeline_name = "spectrochempy.analysis.pipeline.Pipeline"
+    if class_name == pls_name:
+        return _EstimatorConfiguration(
+            class_name=class_name,
+            parameters=_snapshot_parameters(cloned),
+        )
+    if class_name != pipeline_name:
+        raise SpectroChemPyError(
+            "The structured CV prototype supports only PLSRegression or an "
+            "exact Pipeline ending in PLSRegression."
+        )
+    if not cloned.steps or _qualified_class_name(cloned.steps[-1][1]) != pls_name:
+        raise SpectroChemPyError(
+            "The structured CV prototype requires Pipeline to end in PLSRegression."
+        )
+    steps = tuple(
+        _PipelineStepConfiguration(
+            name=name,
+            class_name=_qualified_class_name(step),
+            parameters=_snapshot_parameters(step),
+        )
+        for name, step in cloned.steps
+    )
+    return _EstimatorConfiguration(
+        class_name=class_name,
+        parameters=MappingProxyType({}),
+        steps=steps,
+    )
+
+
+def _snapshot_splitter_configuration(splitter):
+    parameters = {
+        name: _snapshot_configuration_value(value)
+        for name, value in vars(splitter).items()
+        if not name.startswith("_") and not callable(value)
+    }
+    return _SplitterConfiguration(
+        class_name=_qualified_class_name(splitter),
+        parameters=MappingProxyType(parameters),
+    )
+
+
+def _prepare_groups(groups, observed, *, sample_dim, n_observations):
+    if groups is None:
+        return None, None
+    if isinstance(groups, NDDataset):
+        if groups.ndim != 1 or groups.dims.count(sample_dim) != 1:
+            raise SpectroChemPyError("groups must be one-dimensional along sample_dim.")
+        if groups.shape[0] != n_observations:
+            raise SpectroChemPyError(
+                "groups must contain exactly one value per observation."
+            )
+        _validate_coordinate_alignment(
+            _coordinate_for_dimension(observed, sample_dim),
+            _coordinate_for_dimension(groups, sample_dim),
+            context="Group observation",
+        )
+        masked = np.ma.asarray(groups.masked_data)
+        if np.any(np.ma.getmaskarray(masked)):
+            raise SpectroChemPyError("groups must not contain masked values.")
+        values = np.asarray(np.ma.getdata(masked)).copy()
+    else:
+        values = np.asarray(groups)
+        if values.ndim != 1 or values.size != n_observations:
+            raise SpectroChemPyError(
+                "groups must be one-dimensional with one value per observation."
+            )
+        values = values.copy()
+
+    counts = {}
+    order = []
+    for raw_value in values.tolist():
+        value = raw_value.item() if isinstance(raw_value, np.generic) else raw_value
+        if isinstance(value, Number) and not np.isfinite(value):
+            raise SpectroChemPyError("groups must not contain non-finite values.")
+        try:
+            hash(value)
+        except TypeError as exc:
+            raise SpectroChemPyError("Each group identity must be hashable.") from exc
+        if value not in counts:
+            counts[value] = 0
+            order.append(value)
+        counts[value] += 1
+
+    summary_counts = tuple(
+        _GroupCount(
+            value=_snapshot_configuration_value(value),
+            count=counts[value],
+        )
+        for value in order
+    )
+    return values, _GroupsSummary(n_groups=len(summary_counts), counts=summary_counts)
+
+
+def _validate_splitter(splitter, *, groups, n_observations, n_folds):
+    class_name = _qualified_class_name(splitter)
+    supported = {
+        "sklearn.model_selection._split.KFold",
+        "sklearn.model_selection._split.GroupKFold",
+        "sklearn.model_selection._split.LeaveOneOut",
+    }
+    if class_name not in supported:
+        raise SpectroChemPyError(
+            f"{splitter.__class__.__name__} is not a supported v1 CV splitter."
+        )
+    is_group_splitter = class_name.endswith(".GroupKFold")
+    if is_group_splitter and groups is None:
+        raise SpectroChemPyError("GroupKFold requires groups.")
+    if not is_group_splitter and groups is not None:
+        raise SpectroChemPyError("groups must not be supplied to a non-group splitter.")
+    try:
+        expected_folds = splitter.get_n_splits(
+            np.empty((n_observations, 1)), groups=groups
+        )
+    except Exception as exc:
+        raise SpectroChemPyError(
+            "Cannot resolve the splitter's number of folds."
+        ) from exc
+    if expected_folds != n_folds:
+        raise SpectroChemPyError(
+            f"Splitter expects {expected_folds} folds but {n_folds} were supplied."
+        )
+    return _snapshot_splitter_configuration(splitter)
+
+
+def _readonly_positions(values):
+    copied = np.array(values, dtype=np.intp, copy=True)
+    copied.flags.writeable = False
+    return copied
+
+
+def _renamed_metric(metric, name):
+    values = metric.values.copy()
+    values.title = name
+    return _PerTargetMetric(
+        name=name,
+        values=values,
+        defined=metric.defined,
+        reasons=metric.reasons,
+    )
+
+
+def _undefined_metric_records(metrics, *, scope, fold_index=None):
+    records = []
+    for metric in metrics:
+        for target_index, (defined, reason) in enumerate(
+            zip(metric.defined, metric.reasons, strict=True)
+        ):
+            if not defined:
+                records.append(
+                    _UndefinedMetric(
+                        scope=scope,
+                        metric=metric.name,
+                        target_index=target_index,
+                        reason=reason,
+                        fold_index=fold_index,
+                    )
+                )
+    return records
+
+
+def _dataset_description(dataset, role):
+    return _DatasetDescription(
+        role=role,
+        name=getattr(dataset, "name", None),
+        title=getattr(dataset, "title", None),
+        shape=tuple(dataset.shape),
+        dims=tuple(dataset.dims),
+        units=str(dataset.units) if dataset.has_units else None,
+    )
+
+
+def _configuration_values_equal(left, right):
+    """Compare isolated configuration snapshots, including array values."""
+    if left is right:
+        return True
+    if type(left) is not type(right):
+        return False
+    if isinstance(left, np.ma.MaskedArray):
+        return bool(np.ma.allequal(left, right))
+    if isinstance(left, np.ndarray):
+        return bool(np.array_equal(left, right, equal_nan=True))
+    if isinstance(left, NDDataset):
+        return bool(left == right)
+    if isinstance(left, Mapping):
+        return left.keys() == right.keys() and all(
+            _configuration_values_equal(left[key], right[key]) for key in left
+        )
+    if isinstance(left, tuple):
+        return len(left) == len(right) and all(
+            _configuration_values_equal(old, new)
+            for old, new in zip(left, right, strict=True)
+        )
+    return bool(left == right)
+
+
+def _estimator_configurations_equal(left, right):
+    if left.class_name != right.class_name or len(left.steps) != len(right.steps):
+        return False
+    if not _configuration_values_equal(left.parameters, right.parameters):
+        return False
+    return all(
+        old.name == new.name
+        and old.class_name == new.class_name
+        and _configuration_values_equal(old.parameters, new.parameters)
+        for old, new in zip(left.steps, right.steps, strict=True)
+    )
+
+
+def _copy_fold_estimators(
+    fold_estimators,
+    *,
+    retain_estimators,
+    estimator_configuration,
+    n_folds,
+):
+    if not retain_estimators:
+        if fold_estimators is not None:
+            raise SpectroChemPyError(
+                "fold_estimators were supplied while retain_estimators is False."
+            )
+        return None
+    if fold_estimators is None:
+        raise SpectroChemPyError(
+            "retain_estimators=True requires one fitted estimator per fold."
+        )
+    estimators = tuple(fold_estimators)
+    if len(estimators) != n_folds:
+        raise SpectroChemPyError(
+            "The number of retained estimators must match the number of folds."
+        )
+    retained = []
+    for fold_index, fitted in enumerate(estimators):
+        if _qualified_class_name(fitted) != estimator_configuration.class_name:
+            raise SpectroChemPyError(
+                f"Retained estimator for fold {fold_index} has the wrong class."
+            )
+        if not bool(getattr(fitted, "_fitted", False)):
+            raise SpectroChemPyError(
+                f"Retained estimator for fold {fold_index} is not fitted."
+            )
+        fitted_configuration = _snapshot_estimator_configuration(fitted)
+        if not _estimator_configurations_equal(
+            fitted_configuration, estimator_configuration
+        ):
+            raise SpectroChemPyError(
+                f"Retained estimator for fold {fold_index} has a different "
+                "constructor configuration."
+            )
+        try:
+            retained.append(copy.deepcopy(fitted))
+        except Exception as exc:
+            raise SpectroChemPyError(
+                f"Cannot isolate retained estimator for fold {fold_index}."
+            ) from exc
+    return tuple(retained)
+
+
+def _build_cross_validation_result(
+    *,
+    estimator,
+    splitter,
+    X,
+    observed,
+    oof_predictions,
+    folds,
+    sample_dim="y",
+    metrics=_REGRESSION_METRICS,
+    groups=None,
+    warnings=(),
+    retain_estimators=False,
+    fold_estimators=None,
+):
+    """Build a coherent internal structured CV result from complete OOF data."""
+    geometry = _resolve_sample_geometry(X, observed, sample_dim=sample_dim)
+    metric_names = _validate_metric_names(metrics)
+    estimator_configuration = _snapshot_estimator_configuration(estimator)
+    groups_values, groups_summary = _prepare_groups(
+        groups,
+        observed,
+        sample_dim=sample_dim,
+        n_observations=geometry.n_observations,
+    )
+
+    supplied_folds = tuple(folds)
+    if not supplied_folds:
+        raise SpectroChemPyError("At least one CV fold must be supplied.")
+    splitter_configuration = _validate_splitter(
+        splitter,
+        groups=groups_values,
+        n_observations=geometry.n_observations,
+        n_folds=len(supplied_folds),
+    )
+
+    observed_snapshot = observed.copy()
+    prediction_snapshot = _validate_metric_inputs(
+        observed_snapshot,
+        oof_predictions,
+        sample_dim=sample_dim,
+    )
+    global_result = _compute_regression_metrics(
+        observed_snapshot,
+        prediction_snapshot,
+        sample_dim=sample_dim,
+        metrics=metric_names,
+    )
+    global_metrics = tuple(
+        _renamed_metric(metric, "rmsecv") if metric.name == "rmse" else metric
+        for metric in global_result.metrics
+    )
+
+    coverage = np.zeros(geometry.n_observations, dtype=np.intp)
+    fold_results = []
+    undefined_metrics = _undefined_metric_records(global_metrics, scope="global")
+    for fold_index, fold in enumerate(supplied_folds):
+        if not isinstance(fold, tuple | list) or len(fold) != 2:
+            raise SpectroChemPyError(
+                "Each fold must contain training and validation positions."
+            )
+        train = _validate_fold_positions(
+            fold[0],
+            n_observations=geometry.n_observations,
+            name=f"Fold {fold_index} training",
+        )
+        validation = _validate_fold_positions(
+            fold[1],
+            n_observations=geometry.n_observations,
+            name=f"Fold {fold_index} validation",
+        )
+        if np.intersect1d(train, validation).size:
+            raise SpectroChemPyError(
+                f"Fold {fold_index} training and validation positions overlap."
+            )
+        coverage[validation] += 1
+
+        fold_observed = _slice_along_axis(
+            observed_snapshot, validation, geometry.y_sample_axis
+        )
+        fold_prediction = _slice_along_axis(
+            prediction_snapshot, validation, geometry.y_sample_axis
+        )
+        fold_metric_result = _compute_regression_metrics(
+            fold_observed,
+            fold_prediction,
+            sample_dim=sample_dim,
+            metrics=metric_names,
+        )
+        fold_metrics = fold_metric_result.metrics
+        fold_results.append(
+            _CrossValidationFoldResult(
+                fold_index=fold_index,
+                train_positions=_readonly_positions(train),
+                validation_positions=_readonly_positions(validation),
+                metrics=fold_metrics,
+                n_valid=fold_metric_result.n_valid,
+            )
+        )
+        undefined_metrics.extend(
+            _undefined_metric_records(
+                fold_metrics,
+                scope="fold",
+                fold_index=fold_index,
+            )
+        )
+
+    if np.any(coverage == 0):
+        raise SpectroChemPyError(
+            "Validation folds do not cover every observation exactly once."
+        )
+    if np.any(coverage > 1):
+        raise SpectroChemPyError(
+            "Validation folds repeat one or more observation positions."
+        )
+
+    if isinstance(warnings, str):
+        raise SpectroChemPyError("warnings must be a sequence of strings.")
+    warning_snapshot = tuple(warnings)
+    if not all(isinstance(message, str) for message in warning_snapshot):
+        raise SpectroChemPyError("Each warning must be a string.")
+
+    retained_estimators = _copy_fold_estimators(
+        fold_estimators,
+        retain_estimators=retain_estimators,
+        estimator_configuration=estimator_configuration,
+        n_folds=len(fold_results),
+    )
+
+    observation_coordinate = _coordinate_for_dimension(observed_snapshot, sample_dim)
+    if observation_coordinate is not None:
+        observation_coordinate = observation_coordinate.copy()
+    input_descriptions = [
+        _dataset_description(X, "X"),
+        _dataset_description(observed_snapshot, "y"),
+    ]
+    if groups_summary is not None:
+        input_descriptions.append(
+            _DatasetDescription(
+                role="groups",
+                name=None,
+                title=None,
+                shape=(geometry.n_observations,),
+                dims=(sample_dim,),
+                units=None,
+            )
+        )
+
+    return _CrossValidationResult(
+        estimator=estimator_configuration,
+        splitter=splitter_configuration,
+        n_splits=len(fold_results),
+        sample_dim=sample_dim,
+        x_sample_axis=geometry.x_sample_axis,
+        y_sample_axis=geometry.y_sample_axis,
+        observation_coordinate=observation_coordinate,
+        groups=groups_summary,
+        observed=observed_snapshot,
+        oof_predictions=prediction_snapshot,
+        residuals=global_result.residuals,
+        global_metrics=global_metrics,
+        n_valid=global_result.n_valid,
+        folds=tuple(fold_results),
+        warnings=warning_snapshot,
+        undefined_metrics=tuple(undefined_metrics),
+        fold_estimators=retained_estimators,
+        operation=_ValidationDescription(
+            operation="cross_validate",
+            inputs=tuple(input_descriptions),
+            note=(
+                "Internal non-executable operation description; no automatic "
+                "provenance capture, fingerprint, registry, or replay contract."
+            ),
+        ),
     )

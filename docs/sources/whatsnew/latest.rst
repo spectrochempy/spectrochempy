@@ -21,3 +21,8 @@ Developer
   and their supported steps (#1654), and per-target regression metric kernels
   with explicit validity reporting (#1655).  No public cross-validation API
   is introduced.
+- MAINT: Added an internal structured cross-validation result prototype that
+  validates complete out-of-fold coverage and records aligned predictions,
+  residuals, metrics, fold positions, configuration snapshots, and optional
+  fitted fold estimators.  It remains private and does not add a validation
+  engine or public API (#1656).
