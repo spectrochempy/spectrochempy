@@ -61,20 +61,36 @@ def _coordinate_for_dimension(dataset, dim):
     return coordinate
 
 
-def _ordered_values_equal(left, right):
+def _ordered_values_equal(left, right, *, converted=False):
     left_values = np.asarray(left)
     right_values = np.asarray(right)
     if left_values.shape != right_values.shape:
         return False
-    if np.issubdtype(left_values.dtype, np.number) and np.issubdtype(
-        right_values.dtype, np.number
+    if not converted:
+        return np.array_equal(left_values, right_values)
+    if not (
+        np.issubdtype(left_values.dtype, np.number)
+        and np.issubdtype(right_values.dtype, np.number)
     ):
-        return np.allclose(left_values, right_values, rtol=1.0e-12, atol=1.0e-12)
-    return np.array_equal(left_values, right_values)
+        return np.array_equal(left_values, right_values)
+
+    precisions = [np.finfo(float).eps]
+    for values in (left_values, right_values):
+        if np.issubdtype(values.dtype, np.inexact):
+            precisions.append(np.finfo(values.dtype).eps)
+    scale = max(
+        1.0,
+        float(np.max(np.abs(left_values))),
+        float(np.max(np.abs(right_values))),
+    )
+    tolerance = 8.0 * max(precisions) * scale
+    return np.allclose(left_values, right_values, rtol=0.0, atol=tolerance)
 
 
 def _validate_coordinate_alignment(left, right, *, context, allow_missing=True):
     """Validate shared coordinate information without changing either side."""
+    if left is None and right is None:
+        return
     if left is None or right is None:
         if allow_missing:
             # A missing observation coordinate leaves positional alignment as the only
@@ -99,10 +115,14 @@ def _validate_coordinate_alignment(left, right, *, context, allow_missing=True):
                 raise SpectroChemPyError(
                     f"{context} coordinate units are not compatible."
                 )
-            right_values = right.to(left.units, inplace=False).data
+            converted = right.units != left.units
+            right_values = (
+                right.to(left.units, inplace=False).data if converted else right.data
+            )
         else:
+            converted = False
             right_values = right.data
-        if not _ordered_values_equal(left.data, right_values):
+        if not _ordered_values_equal(left.data, right_values, converted=converted):
             raise SpectroChemPyError(
                 f"{context} coordinate values or ordering do not match."
             )

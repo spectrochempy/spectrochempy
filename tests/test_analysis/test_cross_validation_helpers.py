@@ -152,6 +152,24 @@ def test_physically_equivalent_observation_coordinate_units_are_accepted(aligned
     assert y.coordset["y"].units == scp.ur.ms
 
 
+def test_large_permuted_integer_observation_identifiers_are_rejected():
+    X_samples = scp.Coord([1_000_000_000_000, 1_000_000_000_001])
+    y_samples = scp.Coord([1_000_000_000_001, 1_000_000_000_000])
+    X = scp.NDDataset(
+        np.arange(4.0).reshape(2, 2),
+        coordset=[X_samples, scp.Coord([0, 1])],
+        dims=["y", "x"],
+    )
+    y = scp.NDDataset(
+        np.arange(2.0).reshape(2, 1),
+        coordset=[y_samples, scp.Coord([0])],
+        dims=["y", "x"],
+    )
+
+    with pytest.raises(SpectroChemPyError, match="values or ordering"):
+        _resolve_sample_geometry(X, y)
+
+
 @pytest.mark.parametrize(
     "mismatch", ["values", "order", "labels", "units", "missing-units"]
 )
@@ -390,6 +408,30 @@ def test_prediction_round_trip_restores_target_geometry(aligned_data, transpose_
     expected_mask = prediction.mask.T if transpose_y else prediction.mask
     assert np.array_equal(restored.mask, expected_mask)
     assert restored.meta.method == "synthetic"
+
+
+@pytest.mark.parametrize("coordinate_mode", ["missing-target", "no-coordinates"])
+def test_prediction_restoration_accepts_symmetric_missing_coordinates(
+    aligned_data, coordinate_mode
+):
+    X, y = aligned_data
+    if coordinate_mode == "missing-target":
+        y.set_coordset(y=y.coordset["y"].copy(), x=None)
+    else:
+        X.delete_coordset()
+        y.delete_coordset()
+    fold = _prepare_fold_subsets(X, y, [0, 1, 2, 3], [4, 5, 6])
+    prediction = fold.y_validation.copy()
+    prediction.data = prediction.data + 1.0
+
+    restored = _restore_prediction_geometry(prediction, fold.target_geometry)
+
+    assert_allclose(restored.data, y.data[[4, 5, 6]] + 1.0)
+    if coordinate_mode == "missing-target":
+        assert restored.coordset["x"].is_empty
+        assert restored.coordset["y"] == y.coordset["y"][[4, 5, 6]]
+    else:
+        assert restored.coordset is None
 
 
 @pytest.mark.parametrize(
