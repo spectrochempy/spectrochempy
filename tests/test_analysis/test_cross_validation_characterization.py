@@ -15,11 +15,6 @@ from sklearn.model_selection import LeaveOneOut
 import spectrochempy as scp
 from spectrochempy.utils._estimator import clone_unfitted
 from spectrochempy.utils._estimator import is_fitted
-from spectrochempy.utils.exceptions import SpectroChemPyError
-
-
-class _ExpectedPipelineCloneGapError(Exception):
-    """Identify only the currently documented Pipeline cloning gap."""
 
 
 @pytest.fixture()
@@ -213,12 +208,7 @@ def test_pipeline_fit_uses_fresh_fold_local_preprocessing_state(cv_data):
     )
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=_ExpectedPipelineCloneGapError,
-    reason="The accepted CV contract requires Pipeline-aware unfitted cloning.",
-)
-def test_clone_unfitted_pipeline_contract_gap():
+def test_clone_unfitted_pipeline_contract():
     pipeline = scp.Pipeline(
         [
             ("center", scp.CenterTransformer(dim="y")),
@@ -226,13 +216,7 @@ def test_clone_unfitted_pipeline_contract_gap():
         ]
     )
 
-    try:
-        cloned = clone_unfitted(pipeline)
-    except SpectroChemPyError as exc:
-        expected = "Pipeline is not supported by the pipeline v1 estimator contract."
-        if str(exc) != expected:
-            raise
-        raise _ExpectedPipelineCloneGapError from exc
+    cloned = clone_unfitted(pipeline)
 
     assert cloned is not pipeline
     assert cloned._fitted is False
