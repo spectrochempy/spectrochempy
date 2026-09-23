@@ -5,6 +5,7 @@
 # ======================================================================================
 """Implementation of Partial Least Square regression (using scikit-learn library)."""
 
+import numpy as np
 import traitlets as tr
 from sklearn import cross_decomposition
 
@@ -51,6 +52,7 @@ class PLSRegression(CrossDecompositionAnalysis):
         "_n_iter",
         "_n_feature_in",
         "_n_components",
+        "_fit_masked_feature_columns",
     )
 
     # ----------------------------------------------------------------------------------
@@ -207,7 +209,24 @@ class PLSRegression(CrossDecompositionAnalysis):
         fit_transform : Fit the model with an input dataset ``X`` and apply the dimensionality reduction on ``X``.
 
         """
-        return super().fit(X, Y)
+        if isinstance(X, NDDataset):
+            n_features = X.shape[-1]
+            masked_features = self._analysis_full_columns(X.mask)
+        else:
+            values = np.ma.asarray(X)
+            n_features = values.shape[-1]
+            masked_features = self._analysis_full_columns(
+                np.ma.getmaskarray(values),
+            )
+        if masked_features is None:
+            masked_features = np.zeros(n_features, dtype=bool)
+        else:
+            masked_features = np.array(masked_features, dtype=bool, copy=True)
+
+        fitted = super().fit(X, Y)
+        masked_features.flags.writeable = False
+        self._fit_masked_feature_columns = masked_features
+        return fitted
 
     @property
     @_wrap_ndarray_output_to_nddataset(

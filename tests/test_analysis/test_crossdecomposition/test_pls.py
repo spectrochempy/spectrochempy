@@ -21,6 +21,7 @@ import spectrochempy as scp
 from spectrochempy.analysis.crossdecomposition.pls import PLSRegression
 from spectrochempy.utils import docutils as chd
 from spectrochempy.utils.constants import MASKED
+from spectrochempy.utils.exceptions import SpectroChemPyError
 
 
 # ---------------------------------------------------------------------------
@@ -335,6 +336,34 @@ class TestPLSMaskedData:
         mid_end = 2 * d["n_features"] // 3
         Xc[:, mid_start:mid_end] = MASKED
         pls.fit(Xc, d["yc"])
+        active_features = np.ones(d["n_features"], dtype=bool)
+        active_features[mid_start:mid_end] = False
+        reference = PLSRegression(n_components=n_comp).fit(
+            Xc[:, active_features],
+            d["yc"],
+        )
         expected_cols = d["n_features"] - (mid_end - mid_start)
         assert pls._X.shape == (d["n_cal"], expected_cols)
         assert pls.X.shape == (d["n_cal"], d["n_features"])
+        prediction = pls.predict(Xc)
+        assert prediction.shape == d["yc"].shape
+        assert np.all(np.isfinite(prediction.data))
+        assert_allclose(
+            prediction.data,
+            reference.predict(Xc[:, active_features]).data,
+        )
+
+    def test_predict_rejects_different_masked_feature_positions(self, pls_data):
+        d = pls_data
+        n_masked = d["n_features"] // 3
+        Xfit = d["Xc"].copy()
+        Xfit[:, -n_masked:] = MASKED
+        pls = PLSRegression(n_components=2).fit(Xfit, d["yc"])
+
+        Xpredict = d["Xc"].copy()
+        Xpredict[:, :n_masked] = MASKED
+        with pytest.raises(
+            SpectroChemPyError,
+            match="prediction feature columns must match",
+        ):
+            pls.predict(Xpredict)
