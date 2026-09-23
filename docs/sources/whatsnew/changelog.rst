@@ -63,5 +63,6 @@ Developer
 - MAINT: Added an internal structured cross-validation result prototype that
   validates complete out-of-fold coverage and records aligned predictions,
   residuals, metrics, fold positions, configuration snapshots, and optional
-  fitted fold estimators.  It remains private and does not add a validation
-  engine or public API (#1656).
+  fitted fold estimators (#1656), followed by a private supervised execution
+  engine with fold-local cloning, fitting, prediction, and OOF assembly
+  (#1657).  The implementation remains private and does not add a public API.

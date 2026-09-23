@@ -206,6 +206,20 @@ class _CrossValidationResult:
         raise KeyError(name)
 
 
+@dataclass(frozen=True)
+class _CrossValidationPlan:
+    """Validated, materialized execution plan shared by engine and builder."""
+
+    geometry: _SampleGeometry
+    metric_names: tuple[str, ...]
+    estimator_configuration: _EstimatorConfiguration
+    splitter_configuration: _SplitterConfiguration
+    groups_values: np.ndarray | None
+    groups_summary: _GroupsSummary | None
+    folds: tuple[tuple[np.ndarray, np.ndarray], ...]
+    active_x_features: np.ndarray | None
+
+
 _REGRESSION_METRICS = ("rmse", "r2", "bias", "mae")
 _NO_OBSERVATIONS = "no_observations"
 _INVALID_PREDICTION = "invalid_prediction"
@@ -401,13 +415,35 @@ def _prepare_fold_subsets(
             "Training and validation positions must be disjoint within a fold."
         )
 
+    return _prepare_validated_fold_subsets(X, y, train, validation, geometry)
+
+
+def _prepare_validated_fold_subsets(
+    X,
+    y,
+    train,
+    validation,
+    geometry,
+    *,
+    active_x_features=None,
+):
+    """Slice one fold whose geometry and positions were already validated."""
+
     X_train = _slice_along_axis(X, train, geometry.x_sample_axis)
     X_validation = _slice_along_axis(X, validation, geometry.x_sample_axis)
+    if active_x_features is not None:
+        feature_axis = 1 - geometry.x_sample_axis
+        X_train = _slice_along_axis(X_train, active_x_features, feature_axis)
+        X_validation = _slice_along_axis(
+            X_validation,
+            active_x_features,
+            feature_axis,
+        )
     y_train = _slice_along_axis(y, train, geometry.y_sample_axis)
     y_validation = _slice_along_axis(y, validation, geometry.y_sample_axis)
     target_geometry = _TargetGeometry(
         template=y_validation.copy(),
-        sample_dim=sample_dim,
+        sample_dim=geometry.sample_dim,
         sample_axis=geometry.y_sample_axis,
     )
 
@@ -1047,7 +1083,7 @@ def _prepare_groups(groups, observed, *, sample_dim, n_observations):
     return values, _GroupsSummary(n_groups=len(summary_counts), counts=summary_counts)
 
 
-def _validate_splitter(splitter, *, groups, n_observations, n_folds):
+def _validate_splitter_scope(splitter, *, groups):
     class_name = _qualified_class_name(splitter)
     supported = {
         "sklearn.model_selection._split.KFold",
@@ -1063,6 +1099,11 @@ def _validate_splitter(splitter, *, groups, n_observations, n_folds):
         raise SpectroChemPyError("GroupKFold requires groups.")
     if not is_group_splitter and groups is not None:
         raise SpectroChemPyError("groups must not be supplied to a non-group splitter.")
+    return class_name
+
+
+def _validate_splitter(splitter, *, groups, n_observations, n_folds):
+    _validate_splitter_scope(splitter, groups=groups)
     try:
         expected_folds = splitter.get_n_splits(
             np.empty((n_observations, 1)), groups=groups
@@ -1076,6 +1117,176 @@ def _validate_splitter(splitter, *, groups, n_observations, n_folds):
             f"Splitter expects {expected_folds} folds but {n_folds} were supplied."
         )
     return _snapshot_splitter_configuration(splitter)
+
+
+def _validate_cross_validation_input_values(X, observed, geometry):
+    """Enforce the conservative v1 input mask and finite-value policy."""
+    observed_masked = np.ma.asarray(observed.masked_data)
+    if np.any(np.ma.getmaskarray(observed_masked)):
+        raise SpectroChemPyError("Observed targets must not contain masked values.")
+    try:
+        observed_finite = np.isfinite(np.ma.getdata(observed_masked))
+    except TypeError as exc:
+        raise SpectroChemPyError(
+            "Observed targets must contain numeric values."
+        ) from exc
+    if not np.all(observed_finite):
+        raise SpectroChemPyError("Observed targets must not contain non-finite values.")
+
+    X_masked = np.ma.asarray(X.masked_data)
+    X_mask = np.ma.getmaskarray(X_masked)
+    row_masks = np.moveaxis(X_mask, geometry.x_sample_axis, 0)
+    if row_masks.shape[0] == 0:
+        raise SpectroChemPyError("Cross-validation requires at least one observation.")
+    if not np.array_equal(row_masks, np.broadcast_to(row_masks[0], row_masks.shape)):
+        raise SpectroChemPyError(
+            "X masks must select the same feature positions for every observation."
+        )
+    try:
+        X_finite = np.isfinite(np.ma.getdata(X_masked))
+    except TypeError as exc:
+        raise SpectroChemPyError("X must contain numeric values.") from exc
+    if not np.all(X_finite):
+        raise SpectroChemPyError("X must not contain non-finite values.")
+    feature_mask = np.asarray(row_masks[0], dtype=bool)
+    if np.all(feature_mask):
+        raise SpectroChemPyError("X must contain at least one unmasked feature.")
+    if np.any(feature_mask):
+        active = np.flatnonzero(~feature_mask).astype(np.intp, copy=False)
+        active.flags.writeable = False
+        return active
+    return None
+
+
+def _materialize_splitter_folds(splitter, *, groups, n_observations):
+    """Consume one splitter iteration and isolate its returned position arrays."""
+    try:
+        execution_splitter = copy.deepcopy(splitter)
+        generated = execution_splitter.split(
+            np.empty((n_observations, 1)),
+            groups=groups,
+        )
+        return tuple(
+            (np.asarray(train).copy(), np.asarray(validation).copy())
+            for train, validation in generated
+        )
+    except Exception as exc:
+        raise SpectroChemPyError(
+            "Cannot materialize cross-validation folds from the splitter."
+        ) from exc
+
+
+def _validate_cross_validation_folds(folds, *, geometry, groups):
+    """Validate an already-materialized complete OOF partition."""
+    supplied_folds = tuple(folds)
+    if not supplied_folds:
+        raise SpectroChemPyError("At least one CV fold must be supplied.")
+
+    coverage = np.zeros(geometry.n_observations, dtype=np.intp)
+    validated = []
+    for fold_index, fold in enumerate(supplied_folds):
+        if not isinstance(fold, tuple | list) or len(fold) != 2:
+            raise SpectroChemPyError(
+                "Each fold must contain training and validation positions."
+            )
+        train = _validate_fold_positions(
+            fold[0],
+            n_observations=geometry.n_observations,
+            name=f"Fold {fold_index} training",
+        )
+        validation = _validate_fold_positions(
+            fold[1],
+            n_observations=geometry.n_observations,
+            name=f"Fold {fold_index} validation",
+        )
+        if np.intersect1d(train, validation).size:
+            raise SpectroChemPyError(
+                f"Fold {fold_index} training and validation positions overlap."
+            )
+        if groups is not None:
+            training_groups = set(groups[train].tolist())
+            validation_groups = set(groups[validation].tolist())
+            if training_groups & validation_groups:
+                raise SpectroChemPyError(
+                    f"Fold {fold_index} places a group in both training and "
+                    "validation positions."
+                )
+        coverage[validation] += 1
+        validated.append((_readonly_positions(train), _readonly_positions(validation)))
+
+    if np.any(coverage == 0):
+        raise SpectroChemPyError(
+            "Validation folds do not cover every observation exactly once."
+        )
+    if np.any(coverage > 1):
+        raise SpectroChemPyError(
+            "Validation folds repeat one or more observation positions."
+        )
+    return tuple(validated)
+
+
+def _prepare_cross_validation_plan(
+    *,
+    estimator,
+    splitter,
+    X,
+    observed,
+    folds=None,
+    sample_dim="y",
+    metrics=_REGRESSION_METRICS,
+    groups=None,
+):
+    """Validate inputs and return a complete plan before any estimator fit."""
+    geometry = _resolve_sample_geometry(X, observed, sample_dim=sample_dim)
+    active_x_features = _validate_cross_validation_input_values(
+        X,
+        observed,
+        geometry,
+    )
+    metric_names = _validate_metric_names(metrics)
+    estimator_configuration = _snapshot_estimator_configuration(estimator)
+    groups_values, groups_summary = _prepare_groups(
+        groups,
+        observed,
+        sample_dim=sample_dim,
+        n_observations=geometry.n_observations,
+    )
+    _validate_splitter_scope(splitter, groups=groups_values)
+
+    supplied_folds = folds
+    if supplied_folds is None:
+        supplied_folds = _materialize_splitter_folds(
+            splitter,
+            groups=groups_values,
+            n_observations=geometry.n_observations,
+        )
+    supplied_folds = tuple(supplied_folds)
+    if not supplied_folds:
+        raise SpectroChemPyError("At least one CV fold must be supplied.")
+    splitter_configuration = _validate_splitter(
+        splitter,
+        groups=groups_values,
+        n_observations=geometry.n_observations,
+        n_folds=len(supplied_folds),
+    )
+    validated_folds = _validate_cross_validation_folds(
+        supplied_folds,
+        geometry=geometry,
+        groups=groups_values,
+    )
+    if groups_values is not None:
+        groups_values.flags.writeable = False
+
+    return _CrossValidationPlan(
+        geometry=geometry,
+        metric_names=metric_names,
+        estimator_configuration=estimator_configuration,
+        splitter_configuration=splitter_configuration,
+        groups_values=groups_values,
+        groups_summary=groups_summary,
+        folds=validated_folds,
+        active_x_features=active_x_features,
+    )
 
 
 def _readonly_positions(values):
@@ -1211,41 +1422,20 @@ def _copy_fold_estimators(
     return tuple(retained)
 
 
-def _build_cross_validation_result(
+def _assemble_cross_validation_result(
     *,
-    estimator,
-    splitter,
+    plan,
     X,
     observed,
     oof_predictions,
-    folds,
-    sample_dim="y",
-    metrics=_REGRESSION_METRICS,
-    groups=None,
     warnings=(),
     retain_estimators=False,
     fold_estimators=None,
 ):
-    """Build a coherent internal structured CV result from complete OOF data."""
-    geometry = _resolve_sample_geometry(X, observed, sample_dim=sample_dim)
-    metric_names = _validate_metric_names(metrics)
-    estimator_configuration = _snapshot_estimator_configuration(estimator)
-    groups_values, groups_summary = _prepare_groups(
-        groups,
-        observed,
-        sample_dim=sample_dim,
-        n_observations=geometry.n_observations,
-    )
-
-    supplied_folds = tuple(folds)
-    if not supplied_folds:
-        raise SpectroChemPyError("At least one CV fold must be supplied.")
-    splitter_configuration = _validate_splitter(
-        splitter,
-        groups=groups_values,
-        n_observations=geometry.n_observations,
-        n_folds=len(supplied_folds),
-    )
+    """Assemble a result from a validated plan and complete OOF predictions."""
+    geometry = plan.geometry
+    metric_names = plan.metric_names
+    sample_dim = geometry.sample_dim
 
     observed_snapshot = observed.copy()
     prediction_snapshot = _validate_metric_inputs(
@@ -1264,38 +1454,9 @@ def _build_cross_validation_result(
         for metric in global_result.metrics
     )
 
-    coverage = np.zeros(geometry.n_observations, dtype=np.intp)
     fold_results = []
     undefined_metrics = _undefined_metric_records(global_metrics, scope="global")
-    for fold_index, fold in enumerate(supplied_folds):
-        if not isinstance(fold, tuple | list) or len(fold) != 2:
-            raise SpectroChemPyError(
-                "Each fold must contain training and validation positions."
-            )
-        train = _validate_fold_positions(
-            fold[0],
-            n_observations=geometry.n_observations,
-            name=f"Fold {fold_index} training",
-        )
-        validation = _validate_fold_positions(
-            fold[1],
-            n_observations=geometry.n_observations,
-            name=f"Fold {fold_index} validation",
-        )
-        if np.intersect1d(train, validation).size:
-            raise SpectroChemPyError(
-                f"Fold {fold_index} training and validation positions overlap."
-            )
-        if groups_values is not None:
-            training_groups = set(groups_values[train].tolist())
-            validation_groups = set(groups_values[validation].tolist())
-            if training_groups & validation_groups:
-                raise SpectroChemPyError(
-                    f"Fold {fold_index} places a group in both training and "
-                    "validation positions."
-                )
-        coverage[validation] += 1
-
+    for fold_index, (train, validation) in enumerate(plan.folds):
         fold_observed = _slice_along_axis(
             observed_snapshot, validation, geometry.y_sample_axis
         )
@@ -1326,15 +1487,6 @@ def _build_cross_validation_result(
             )
         )
 
-    if np.any(coverage == 0):
-        raise SpectroChemPyError(
-            "Validation folds do not cover every observation exactly once."
-        )
-    if np.any(coverage > 1):
-        raise SpectroChemPyError(
-            "Validation folds repeat one or more observation positions."
-        )
-
     if isinstance(warnings, str):
         raise SpectroChemPyError("warnings must be a sequence of strings.")
     warning_snapshot = tuple(warnings)
@@ -1344,7 +1496,7 @@ def _build_cross_validation_result(
     retained_estimators = _copy_fold_estimators(
         fold_estimators,
         retain_estimators=retain_estimators,
-        estimator_configuration=estimator_configuration,
+        estimator_configuration=plan.estimator_configuration,
         n_folds=len(fold_results),
     )
 
@@ -1355,7 +1507,7 @@ def _build_cross_validation_result(
         _dataset_description(X, "X"),
         _dataset_description(observed_snapshot, "y"),
     ]
-    if groups_summary is not None:
+    if plan.groups_summary is not None:
         input_descriptions.append(
             _DatasetDescription(
                 role="groups",
@@ -1368,14 +1520,14 @@ def _build_cross_validation_result(
         )
 
     return _CrossValidationResult(
-        estimator=estimator_configuration,
-        splitter=splitter_configuration,
+        estimator=plan.estimator_configuration,
+        splitter=plan.splitter_configuration,
         n_splits=len(fold_results),
         sample_dim=sample_dim,
         x_sample_axis=geometry.x_sample_axis,
         y_sample_axis=geometry.y_sample_axis,
         observation_coordinate=observation_coordinate,
-        groups=groups_summary,
+        groups=plan.groups_summary,
         observed=observed_snapshot,
         oof_predictions=prediction_snapshot,
         residuals=global_result.residuals,
@@ -1393,4 +1545,126 @@ def _build_cross_validation_result(
                 "provenance capture, fingerprint, registry, or replay contract."
             ),
         ),
+    )
+
+
+def _build_cross_validation_result(
+    *,
+    estimator,
+    splitter,
+    X,
+    observed,
+    oof_predictions,
+    folds,
+    sample_dim="y",
+    metrics=_REGRESSION_METRICS,
+    groups=None,
+    warnings=(),
+    retain_estimators=False,
+    fold_estimators=None,
+):
+    """Build a coherent internal structured CV result from complete OOF data."""
+    plan = _prepare_cross_validation_plan(
+        estimator=estimator,
+        splitter=splitter,
+        X=X,
+        observed=observed,
+        folds=folds,
+        sample_dim=sample_dim,
+        metrics=metrics,
+        groups=groups,
+    )
+    return _assemble_cross_validation_result(
+        plan=plan,
+        X=X,
+        observed=observed,
+        oof_predictions=oof_predictions,
+        warnings=warnings,
+        retain_estimators=retain_estimators,
+        fold_estimators=fold_estimators,
+    )
+
+
+def _execute_cross_validation(
+    estimator,
+    X,
+    observed,
+    *,
+    splitter,
+    groups=None,
+    sample_dim="y",
+    metrics=_REGRESSION_METRICS,
+    return_estimators=False,
+):
+    """Execute bounded supervised CV without exposing a public API."""
+    plan = _prepare_cross_validation_plan(
+        estimator=estimator,
+        splitter=splitter,
+        X=X,
+        observed=observed,
+        sample_dim=sample_dim,
+        metrics=metrics,
+        groups=groups,
+    )
+
+    output_dtype = np.result_type(
+        np.asarray(np.ma.getdata(np.ma.asarray(observed.masked_data))).dtype,
+        np.float64,
+    )
+    oof_values = np.ma.masked_all(observed.shape, dtype=output_dtype)
+    retained_estimators = [] if return_estimators else None
+
+    for fold_index, (train, validation) in enumerate(plan.folds):
+        fold = _prepare_validated_fold_subsets(
+            X,
+            observed,
+            train,
+            validation,
+            plan.geometry,
+            active_x_features=plan.active_x_features,
+        )
+        try:
+            fold_estimator = clone_unfitted(estimator)
+        except Exception as exc:
+            raise SpectroChemPyError(
+                f"Cross-validation fold {fold_index} failed during estimator cloning."
+            ) from exc
+        try:
+            fold_estimator.fit(fold.X_train, fold.y_train)
+        except Exception as exc:
+            raise SpectroChemPyError(
+                f"Cross-validation fold {fold_index} failed during fit."
+            ) from exc
+        try:
+            row_prediction = fold_estimator.predict(fold.X_validation)
+        except Exception as exc:
+            raise SpectroChemPyError(
+                f"Cross-validation fold {fold_index} failed during predict."
+            ) from exc
+        try:
+            prediction = _restore_prediction_geometry(
+                row_prediction,
+                fold.target_geometry,
+            )
+        except Exception as exc:
+            raise SpectroChemPyError(
+                f"Cross-validation fold {fold_index} returned an invalid prediction."
+            ) from exc
+
+        index = [slice(None)] * observed.ndim
+        index[plan.geometry.y_sample_axis] = validation
+        oof_values[tuple(index)] = prediction.masked_data
+        if retained_estimators is not None:
+            retained_estimators.append(fold_estimator)
+
+    oof_predictions = observed.copy()
+    oof_predictions.data = oof_values
+    oof_predictions.title = "OOF predictions"
+    return _assemble_cross_validation_result(
+        plan=plan,
+        X=X,
+        observed=observed,
+        oof_predictions=oof_predictions,
+        retain_estimators=return_estimators,
+        fold_estimators=retained_estimators,
     )
