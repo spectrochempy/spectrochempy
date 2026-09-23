@@ -21,6 +21,7 @@ in the gallery (:ref:`examples-index`).
    peak_integration
    fitting
    pipeline
+   cross_validation
    pca
    pls
    mcr_als
