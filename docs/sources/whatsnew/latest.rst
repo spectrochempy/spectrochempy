@@ -23,6 +23,13 @@ New Features
   ``scp.LeaveOneOut`` so supported validation protocols can be constructed from
   the SpectroChemPy namespace (#1660).
 
+Bug Fixes
+~~~~~~~~~
+
+- Dataset arithmetic now rejects different last-dimension coordinate grids
+  carrying the same unit instead of silently accepting a scientifically
+  incompatible pairing.
+
 Developer
 ~~~~~~~~~
 
