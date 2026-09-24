@@ -471,9 +471,7 @@ def test_nddataset_binary_operation_with_other_1D():
     coord1 = Coord(np.linspace(0.0, 10.0, 10))
     coord2 = Coord(np.linspace(1.0, 5.5, 5))
     d1 = NDDataset(np.random.random((10, 5)), coordset=[coord1, coord2])
-    # Remove the significant singleton observation coordinate before repeating
-    # this reference spectrum over all observations.
-    d2 = d1[0].squeeze()
+    d2 = d1[0]
     # This should work independently of the value of the coordinates on dimension y
     d3 = d1 - d2
     assert_array_equal(d3.data, d1.data - d2.data)
@@ -1050,7 +1048,7 @@ def test_issue417():
                 ],
                 units="absorbance",
             )
-            x = X - X[-1].squeeze()
+            x = X - X[-1]
 
             f = X.write("X.scp")
             X_r = scp.read("X.scp", allow_unsafe_legacy=True)
@@ -1061,7 +1059,7 @@ def test_issue417():
             assert_units_equal(X.units, X_r.units)
             assert_dataset_equal(X[-1], X_r[-1])
 
-            x_r = X_r - X_r[-1].squeeze()
+            x_r = X_r - X_r[-1]
 
             x_r2 = X_r - X_r[-1].data
 
@@ -1459,7 +1457,7 @@ def test_simple_arithmetic_on_full_dataset():
         units="absorbance",
     )
     # Suppress the first spectrum from all other spectra
-    result = dataset - dataset[0].squeeze()
+    result = dataset - dataset[0]
     assert isinstance(result, NDDataset)
     assert result.shape == dataset.shape
 

@@ -3121,17 +3121,6 @@ class NDMath:
     # ------------------------------------------------------------------
 
     @staticmethod
-    def _coordinate_is_significant(coord) -> bool:
-        """Return whether an axis coordinate carries values or labels."""
-        if coord is None:
-            return False
-        if coord._implements("CoordSet"):
-            return builtins.any(
-                NDMath._coordinate_is_significant(item) for item in coord
-            )
-        return not coord.is_empty
-
-    @staticmethod
     def _axis_coordinate(dataset, axis: int):
         """Return an axis coordinate/group, including empty coordinates."""
         if dataset._coordset is None:
@@ -3146,9 +3135,6 @@ class NDMath:
     def _prepare_broadcast_geometry(obj, other, *, inplace=False):
         """Plan positional result geometry for two NDDataset operands."""
         from spectrochempy.core.dataset.coordset import CoordSet  # noqa: PLC0415
-        from spectrochempy.utils.exceptions import (  # noqa: PLC0415
-            CoordinatesMismatchError,
-        )
 
         try:
             shape = np.broadcast_shapes(obj.shape, other.shape)
@@ -3211,11 +3197,6 @@ class NDMath:
                     continue
                 if axis[2] == 1 and result_size != 1:
                     expanded = True
-                    if NDMath._coordinate_is_significant(axis[4]):
-                        raise CoordinatesMismatchError(
-                            axis[4].data,
-                            provider[4].data if provider[4] is not None else None,
-                        )
             expanded_axes.append(expanded)
 
         duplicates = sorted(

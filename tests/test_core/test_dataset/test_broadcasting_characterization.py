@@ -131,6 +131,31 @@ def test_two_complementary_singleton_axes_broadcast_without_coordinates():
     np.testing.assert_allclose(forward.data, reversed_.data)
 
 
+def test_complementary_singleton_axes_use_non_singleton_provider_coordinates():
+    samples, variables = _axes()
+    column = scp.NDDataset(
+        [[1.0], [2.0], [3.0]],
+        dims=["y", "x"],
+        coordset=[samples, scp.Coord([999.0], title="slot")],
+    )
+    row = scp.NDDataset(
+        [[1.0, 2.0, 3.0, 4.0]],
+        dims=["y", "x"],
+        coordset=[scp.Coord(labels=["reference"]), variables],
+    )
+
+    for result in (column * row, row * column):
+        assert result.shape == (3, 4)
+        assert result.ndim == 2
+        assert result.dims == ["y", "x"]
+        np.testing.assert_allclose(result.data, column.data * row.data)
+        np.testing.assert_allclose(result.y.data, samples.data)
+        np.testing.assert_allclose(result.x.data, variables.data)
+
+    np.testing.assert_allclose(column.x.data, [999.0])
+    assert row.y.labels.tolist() == ["reference"]
+
+
 def test_empty_singleton_coordinate_inherits_the_expanding_axis():
     _, column, profile = _requested_operands()
 
@@ -194,7 +219,7 @@ def test_non_commutative_broadcast_preserves_operand_order(operation, expected):
     assert forward.dims == reversed_.dims == ["y", "x"]
 
 
-def test_significant_singleton_coordinates_are_not_treated_as_expandable():
+def test_numeric_and_labeled_singleton_coordinates_can_expand():
     samples, variables = _axes()
     value_column = scp.NDDataset(
         [[1.0], [2.0], [3.0]],
@@ -217,15 +242,72 @@ def test_significant_singleton_coordinates_are_not_treated_as_expandable():
         coordset=[scp.Coord(labels=["a", "b", "c", "d"])],
     )
 
-    with pytest.raises(CoordinatesMismatchError):
-        value_column * numeric_profile
-    with pytest.raises(CoordinatesMismatchError):
-        numeric_profile * value_column
-    with pytest.raises(CoordinatesMismatchError):
-        label_column * label_profile
+    numeric_results = (
+        value_column * numeric_profile,
+        numeric_profile * value_column,
+    )
+    for result in numeric_results:
+        assert result.shape == (3, 4)
+        assert result.dims == ["y", "x"]
+        np.testing.assert_allclose(
+            result.data, value_column.data * numeric_profile.data
+        )
+        np.testing.assert_allclose(result.y.data, samples.data)
+        np.testing.assert_allclose(result.x.data, variables.data)
+
+    label_results = (label_column * label_profile, label_profile * label_column)
+    for result in label_results:
+        assert result.shape == (3, 4)
+        assert result.dims == ["y", "x"]
+        np.testing.assert_allclose(result.data, label_column.data * label_profile.data)
+        assert result.y.data.tolist() == samples.data.tolist()
+        assert result.x.labels.tolist() == ["a", "b", "c", "d"]
+
+    numeric_results[0].x[0] = 42.0
+    label_results[0].x.labels[0] = "changed"
+
+    np.testing.assert_allclose(value_column.x.data, [999.0])
+    np.testing.assert_allclose(numeric_profile.x.data, variables.data)
+    assert label_column.x.labels.tolist() == ["slot"]
+    assert label_profile.x.labels.tolist() == ["a", "b", "c", "d"]
 
 
-def test_selected_reference_spectrum_requires_explicit_squeeze():
+def test_same_dimension_singleton_group_can_expand_without_recursion():
+    samples, variables = _axes()
+    singleton_group = scp.CoordSet(
+        scp.Coord([999.0], title="slot value"),
+        scp.Coord(labels=["slot"], title="slot label"),
+        sorted=False,
+    )
+    provider_group = scp.CoordSet(
+        variables,
+        scp.Coord(labels=["a", "b", "c", "d"], title="bands"),
+        sorted=False,
+    )
+    provider_group.select(2)
+    column = scp.NDDataset(
+        [[1.0], [2.0], [3.0]],
+        dims=["y", "x"],
+        coordset=[samples, singleton_group],
+    )
+    profile = scp.NDDataset([1.0, 2.0, 3.0, 4.0], dims=["x"], coordset=[provider_group])
+
+    for result in (column * profile, profile * column):
+        assert result.shape == (3, 4)
+        assert result.dims == ["y", "x"]
+        np.testing.assert_allclose(result.data, column.data * profile.data)
+        assert result.x.is_same_dim
+        assert result.x.names == profile.x.names
+        assert result.x.default_index == profile.x.default_index
+        np.testing.assert_allclose(result.x.default.data, profile.x.default.data)
+        assert result.x is not profile.x
+
+    assert column.x.sizes == 1
+    np.testing.assert_allclose(column.x.coords[1].data, [999.0])
+    assert column.x.coords[0].labels.tolist() == ["slot"]
+
+
+def test_selected_reference_spectrum_broadcasts_without_squeeze():
     samples, variables = _axes()
     matrix = scp.NDDataset(
         np.arange(12.0).reshape(3, 4),
@@ -234,12 +316,29 @@ def test_selected_reference_spectrum_requires_explicit_squeeze():
     )
     selected = matrix[0]
 
-    with pytest.raises(CoordinatesMismatchError):
-        matrix - selected
+    matrix_before = matrix.copy()
+    selected_before = selected.copy()
+    operations = (
+        (matrix - selected, matrix.data - selected.data),
+        (selected - matrix, selected.data - matrix.data),
+        (np.subtract(matrix, selected), matrix.data - selected.data),
+        (np.subtract(selected, matrix), selected.data - matrix.data),
+    )
 
-    result = matrix - selected.squeeze()
-    np.testing.assert_allclose(result.data, matrix.data - selected.data)
-    assert result.dims == ["y", "x"]
+    for result, expected in operations:
+        assert result.shape == matrix.shape
+        assert result.ndim == matrix.ndim
+        assert result.dims == matrix.dims
+        np.testing.assert_allclose(result.data, expected)
+        np.testing.assert_allclose(result.y.data, matrix.y.data)
+        np.testing.assert_allclose(result.x.data, matrix.x.data)
+
+    operations[0][0].y[0] = 42.0
+    np.testing.assert_allclose(matrix.data, matrix_before.data)
+    np.testing.assert_allclose(selected.data, selected_before.data)
+    np.testing.assert_allclose(matrix.y.data, matrix_before.y.data)
+    np.testing.assert_allclose(selected.y.data, selected_before.y.data)
+    assert selected.shape == (1, 4)
 
 
 def test_matching_and_mismatching_label_only_coordinates():

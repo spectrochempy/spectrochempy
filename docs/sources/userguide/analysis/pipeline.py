@@ -95,9 +95,8 @@ _ = dataset.plot(show=False)
 # %% [markdown]
 # Broadcasting is positional and right-aligned: dimension names do not align or
 # reorder operands, and coordinates are never interpolated. An absent or empty
-# singleton coordinate may inherit the coordinate of the axis that expands it;
-# a significant singleton coordinate and duplicate result dimension names are
-# rejected explicitly.
+# singleton axis inherits the name and coordinate of the operand providing the
+# non-singleton axis. Duplicate result dimension names are rejected explicitly.
 
 # %% [markdown]
 # A complete calibration/test example
