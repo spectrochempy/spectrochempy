@@ -18,8 +18,7 @@
 # .. _userguide_units_masks:
 
 # %% [markdown]
-# Units, quantities, and masks
-# ===========================
+# # Units, quantities, and masks
 #
 # SpectroChemPy uses Pint for units and NumPy masked arrays for excluded values, while
 # keeping the original Pint and NumPy objects available from the public ``scp``
@@ -30,8 +29,7 @@
 import spectrochempy as scp
 
 # %% [markdown]
-# Units, quantities, and the registry
-# -----------------------------------
+# ## Units, quantities, and the registry
 #
 # ``scp.ur`` is the unit registry configured by SpectroChemPy. It contains standard
 # Pint units together with project definitions and formatting, including absorbance,
@@ -48,7 +46,8 @@ first = scp.Quantity(2.5, "cm")
 second = 2.5 * scp.ur.cm
 third = scp.ur.Quantity(2.5, "cm")
 
-first, second, third, length_unit
+print("Unit:", length_unit)
+print("Equivalent quantities:", first, second, third)
 
 # %% [markdown]
 # A ``Quantity`` carries a magnitude and units, but no named dimensions,
@@ -62,7 +61,7 @@ wavenumber = scp.Coord(
     units="cm^-1",
 )
 spectrum = scp.NDDataset(
-    [0.25, 0.50, 0.75],
+    [0.25, 2.00, 0.75],
     coordset=[wavenumber],
     dims=["x"],
     title="absorbance",
@@ -82,8 +81,7 @@ shifted = scp.NDDataset([1.0, 2.0], units="cm") + 5.0 * scp.ur.mm
 total, shifted
 
 # %% [markdown]
-# Conversions and mutation
-# ~~~~~~~~~~~~~~~~~~~~~~~~
+# ### Conversions and mutation
 #
 # ``Quantity.to()`` and ``NDDataset.to()`` create converted objects. ``ito()`` converts
 # in place and returns ``None``. The examples below show the original and converted
@@ -92,22 +90,26 @@ total, shifted
 # %%
 distance = 2500.0 * scp.ur.nm
 distance_um = distance.to("um")
-distance, distance_um, distance_um is distance
+print("Original:", distance)
+print("Converted copy:", distance_um)
 
 # %%
 mutable_distance = distance.copy()
 returned = mutable_distance.ito("um")
-returned, mutable_distance
+print("In-place result:", mutable_distance)
+print("Return value:", returned)
 
 # %%
 wavelengths = scp.NDDataset([1000.0, 2000.0], units="nm")
 wavelengths_um = wavelengths.to("um")
-wavelengths, wavelengths_um, wavelengths_um is wavelengths
+print("Original:", wavelengths)
+print("Converted copy:", wavelengths_um)
 
 # %%
 mutable_wavelengths = wavelengths.copy()
 returned = mutable_wavelengths.ito("um")
-returned, mutable_wavelengths
+print("In-place result:", mutable_wavelengths)
+print("Return value:", returned)
 
 # %% [markdown]
 # SpectroChemPy enables Pint's spectroscopy, Boltzmann, and chemistry contexts.
@@ -142,8 +144,7 @@ percentage = (0.5 * scp.ur.dimensionless).to("percent")
 fraction, percentage
 
 # %% [markdown]
-# Masks on NDDataset
-# ------------------
+# ## Masks on NDDataset
 #
 # Assigning ``scp.MASKED`` excludes a value without deleting it. The data shape and
 # coordinate remain unchanged, while ``mask`` records the excluded position and
@@ -152,9 +153,14 @@ fraction, percentage
 # %%
 masked = spectrum.copy()
 masked.meta.source = "synthetic example"
+mean_before = scp.mean(masked)
 masked[1] = scp.MASKED
+mean_after = scp.mean(masked)
 
-masked.data, masked.mask, masked.masked_data, masked.x
+print("Stored values:", masked.data)
+print("Mask:", masked.mask)
+print("Mean before masking:", mean_before)
+print("Mean after masking:", mean_after)
 
 # %% [markdown]
 # SpectroChemPy calculations preserve the mask. Reductions such as ``mean`` ignore the
@@ -163,18 +169,44 @@ masked.data, masked.mask, masked.masked_data, masked.x
 
 # %%
 offset = masked + 0.1 * scp.ur.absorbance
-offset, scp.mean(masked)
+print("Offset values:", offset.masked_data)
+print("Mean after offset:", scp.mean(offset))
 
 # %% [markdown]
-# Plotting receives masked values as a masked array. In this one-dimensional example,
-# the plotted line keeps the same mask, so the excluded position is not drawn as an
-# ordinary data point. ``show_mask=True`` requests the plotter's mask visualization
-# where the selected plot type supports one.
+# A longer signal makes the plotting behavior easier to see. The original signal is
+# shown in gray. The masked copy is superimposed in blue, with the excluded interval
+# highlighted. The blue line stops on each side of that interval: the plot does not
+# interpolate across masked values. The gray curve remains visible there only as a
+# reference for the stored original signal.
 
 # %%
-ax = masked.plot(show_mask=True, marker="o")
-plotted = ax.lines[0].get_ydata()
-type(plotted), plotted.mask
+time = scp.Coord.linspace(0.0, 10.0, 101, title="time", units="s")
+original_signal = scp.NDDataset(
+    scp.sin(2.0 * time.data) + 0.25 * scp.cos(5.0 * time.data),
+    coordset=[time],
+    dims=["x"],
+    title="signal",
+)
+masked_signal = original_signal.copy()
+masked_signal[40:61] = scp.MASKED
+
+ax = original_signal.plot(
+    color="0.65",
+    linewidth=2,
+    label="original signal",
+    show=False,
+)
+_ = masked_signal.plot(
+    ax=ax,
+    clear=False,
+    color="tab:blue",
+    linewidth=2,
+    label="masked signal",
+    show=False,
+)
+_ = ax.axvspan(4.0, 6.0, color="tab:orange", alpha=0.18, label="masked interval")
+_ = ax.set_title("A mask creates a real gap in the plotted signal")
+_ = ax.legend()
 
 # %% [markdown]
 # ``scp.NOMASK`` is the NumPy sentinel returned when no value is masked. To remove an
@@ -184,11 +216,13 @@ type(plotted), plotted.mask
 
 # %%
 returned = masked.remove_masks()
-returned, masked.mask, masked.data, masked.x, masked.meta.source
+print("Restored value:", masked.data[1])
+print("Shape preserved:", masked.shape)
+print("Mask after removal:", masked.mask)
+print("Return value:", returned)
 
 # %% [markdown]
-# Masked values are not NaN values
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ### Masked values are not NaN values
 #
 # A NaN remains an unmasked numerical value. It propagates through the tested mean,
 # whereas the explicitly masked value is excluded. Neither operation removes a
@@ -204,11 +238,12 @@ nan_spectrum = scp.NDDataset(
 masked_again = spectrum.copy()
 masked_again[1] = scp.MASKED
 
-nan_spectrum.mask, scp.mean(nan_spectrum), scp.mean(masked_again)
+print("Mean with NaN:", scp.mean(nan_spectrum))
+print("Mean with a mask:", scp.mean(masked_again))
+print("Both datasets keep", nan_spectrum.size, "positions")
 
 # %% [markdown]
-# Interoperability with raw arrays
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ### Interoperability with raw arrays
 #
 # Use ``NDDataset`` in normal SpectroChemPy workflows. Raw accessors deliberately carry
 # less information:
@@ -230,18 +265,14 @@ masked_data = masked_again.masked_data
 quantity_values = masked_again.values
 array_copy = masked_again.to_array()
 
-(
-    type(raw_data),
-    type(masked_data),
-    type(quantity_values),
-    type(quantity_values.magnitude),
-    type(array_copy),
-    type(scp.MASKED),
-)
+print("data:", type(raw_data).__name__, "(mask and units separate)")
+print("masked_data:", type(masked_data).__name__, "(mask retained)")
+print("values:", type(quantity_values).__name__, "(mask and units retained)")
+print("to_array():", type(array_copy).__name__, "(mask retained)")
+print("MASKED:", type(scp.MASKED).__name__)
 
 # %% [markdown]
-# Identity and further help
-# -------------------------
+# ## Identity and further help
 #
 # SpectroChemPy intentionally preserves the Pint registry, classes, exception, and the
 # NumPy sentinels and masked-array classes. Therefore ``help(scp.Quantity)`` or
