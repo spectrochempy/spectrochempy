@@ -914,7 +914,7 @@ def test_failed_inplace_numeric_conversion_is_atomic_and_preserves_shared_buffer
     np.testing.assert_array_equal(incompatible, incompatible_before)
 
 
-def test_late_inplace_trait_notification_failure_rolls_back_complete_state():
+def test_late_inplace_trait_notification_failure_rolls_back_operation_state():
     primary = scp.Coord([1000.0, 1001.0], units="cm^-1")
     alternate = scp.Coord([10.0, 20.0], title="alternate")
     spectral_group = scp.CoordSet(primary, alternate, sorted=False)

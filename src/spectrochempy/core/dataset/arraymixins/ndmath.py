@@ -3950,7 +3950,13 @@ class NDMath:
         return func
 
     def _apply_inplace_result(self, data, units, mask, title, history):
-        """Apply a fully prepared in-place result atomically."""
+        """
+        Apply a fully prepared in-place result as one trait transaction.
+
+        The rollback covers trait replacements made by this operation.  It does
+        not undo arbitrary in-place mutations performed by custom observers on
+        mutable objects referenced by other traits.
+        """
         previous_trait_values = self._trait_values.copy()
 
         try:
@@ -3968,8 +3974,10 @@ class NDMath:
         except Exception:
             # Traitlets rolls back cross-validation failures, but notification
             # callbacks can also fail after several held traits were assigned.
-            # Restore the complete trait store so data and every observable
-            # metadata field, including modification dates, remain unchanged.
+            # Restore the trait references replaced by this operation.  This is
+            # intentionally shallow: side effects performed inside custom
+            # observers on other mutable trait values are outside the rollback
+            # guarantee.
             self._trait_values.clear()
             self._trait_values.update(previous_trait_values)
             raise
