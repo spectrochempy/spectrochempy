@@ -6,13 +6,15 @@
 """Integration tests for the private supervised cross-validation engine."""
 
 import inspect
+import subprocess
+import sys
 
 import numpy as np
 import pytest
 from numpy.testing import assert_allclose
-from sklearn.model_selection import GroupKFold
-from sklearn.model_selection import KFold
-from sklearn.model_selection import LeaveOneOut
+from sklearn.model_selection import GroupKFold as SklearnGroupKFold
+from sklearn.model_selection import KFold as SklearnKFold
+from sklearn.model_selection import LeaveOneOut as SklearnLeaveOneOut
 from sklearn.model_selection import ShuffleSplit
 
 import spectrochempy as scp
@@ -20,6 +22,10 @@ from spectrochempy.analysis._cross_validation import _execute_cross_validation
 from spectrochempy.utils._estimator import clone_unfitted
 from spectrochempy.utils._estimator import is_fitted
 from spectrochempy.utils.exceptions import SpectroChemPyError
+
+GroupKFold = SklearnGroupKFold
+KFold = SklearnKFold
+LeaveOneOut = SklearnLeaveOneOut
 
 
 @pytest.fixture()
@@ -87,14 +93,25 @@ def _manual_oof(template, X, y, folds):
 
 def test_public_exports_and_signature_match_the_contract():
     assert all(
-        scp._LAZY_IMPORTS[name] == "spectrochempy.analysis.cross_validation"
+        scp._LAZY_IMPORTS[name] == "spectrochempy.analysis.model_selection"
         for name in ("KFold", "GroupKFold", "LeaveOneOut")
     )
     assert scp.cross_validate.__name__ == "cross_validate"
     assert scp.CrossValidationResult.__name__ == "CrossValidationResult"
-    assert scp.KFold is KFold
-    assert scp.GroupKFold is GroupKFold
-    assert scp.LeaveOneOut is LeaveOneOut
+    assert scp.KFold is not SklearnKFold
+    assert scp.GroupKFold is not SklearnGroupKFold
+    assert scp.LeaveOneOut is not SklearnLeaveOneOut
+    assert issubclass(scp.KFold, SklearnKFold)
+    assert issubclass(scp.GroupKFold, SklearnGroupKFold)
+    assert issubclass(scp.LeaveOneOut, SklearnLeaveOneOut)
+    assert scp.KFold.__module__ == "spectrochempy.analysis.model_selection"
+    assert scp.GroupKFold.__module__ == "spectrochempy.analysis.model_selection"
+    assert scp.LeaveOneOut.__module__ == "spectrochempy.analysis.model_selection"
+    assert str(inspect.signature(scp.KFold)) == (
+        "(n_splits=5, *, shuffle=False, random_state=None)"
+    )
+    assert str(inspect.signature(scp.GroupKFold)) == "(n_splits=5)"
+    assert str(inspect.signature(scp.LeaveOneOut)) == "()"
     signature = inspect.signature(scp.cross_validate)
     assert tuple(signature.parameters) == (
         "estimator",
@@ -121,6 +138,76 @@ def test_public_exports_and_signature_match_the_contract():
             "return_estimators",
         )
     )
+
+
+def test_public_splitter_module_is_loaded_lazily():
+    code = """
+import sys
+import spectrochempy as scp
+
+module = "spectrochempy.analysis.model_selection"
+assert module not in sys.modules
+assert scp.KFold.__module__ == module
+assert module in sys.modules
+"""
+    completed = subprocess.run(
+        [sys.executable, "-c", code],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert completed.returncode == 0, completed.stderr
+
+
+def test_public_splitter_documentation_is_native_without_mutating_sklearn():
+    sklearn_docs = {
+        SklearnKFold: SklearnKFold.__doc__,
+        SklearnGroupKFold: SklearnGroupKFold.__doc__,
+        SklearnLeaveOneOut: SklearnLeaveOneOut.__doc__,
+    }
+
+    for adapter, original in (
+        (scp.KFold, SklearnKFold),
+        (scp.GroupKFold, SklearnGroupKFold),
+        (scp.LeaveOneOut, SklearnLeaveOneOut),
+    ):
+        assert "SpectroChemPy adaptation" in adapter.__doc__
+        assert "scp.cross_validate" in adapter.__doc__
+        assert adapter.__doc__ != original.__doc__
+        assert "SpectroChemPy adaptation" not in original.__doc__
+        assert original.__module__.startswith("sklearn.")
+        assert original.__doc__ == sklearn_docs[original]
+
+
+@pytest.mark.parametrize(
+    ("adapter", "original", "split_args"),
+    [
+        (
+            scp.KFold(n_splits=4, shuffle=True, random_state=7),
+            SklearnKFold(n_splits=4, shuffle=True, random_state=7),
+            {},
+        ),
+        (
+            scp.GroupKFold(n_splits=4),
+            SklearnGroupKFold(n_splits=4),
+            {"groups": np.repeat(np.arange(4), 2)},
+        ),
+        (scp.LeaveOneOut(), SklearnLeaveOneOut(), {}),
+    ],
+)
+def test_public_splitter_adapters_match_sklearn_folds(adapter, original, split_args):
+    positions = np.arange(8)
+    adapter_folds = list(adapter.split(positions, **split_args))
+    original_folds = list(original.split(positions, **split_args))
+
+    assert len(adapter_folds) == len(original_folds)
+    for adapter_fold, original_fold in zip(adapter_folds, original_folds, strict=True):
+        assert all(
+            np.array_equal(adapter_positions, original_positions)
+            for adapter_positions, original_positions in zip(
+                adapter_fold, original_fold, strict=True
+            )
+        )
 
 
 def test_public_splitter_exports_execute_their_bounded_contract(supervised_data):
@@ -152,6 +239,12 @@ def test_public_splitter_exports_execute_their_bounded_contract(supervised_data)
     assert loo.n_splits == X.shape[0]
     assert all(len(fold.validation_positions) == 1 for fold in loo.folds)
 
+    sklearn_loo = scp.cross_validate(template, X, y, cv=SklearnLeaveOneOut())
+    assert sklearn_loo.splitter.class_name == (
+        "sklearn.model_selection._split.LeaveOneOut"
+    )
+    assert_allclose(sklearn_loo.oof_predictions.data, loo.oof_predictions.data)
+
 
 def test_integer_cv_matches_explicit_splitter_and_manual_oof(supervised_data):
     X, y = supervised_data
@@ -163,7 +256,12 @@ def test_integer_cv_matches_explicit_splitter_and_manual_oof(supervised_data):
     explicit_result = scp.cross_validate(template, X, y, cv=KFold(n_splits=4))
 
     assert isinstance(integer_result, scp.CrossValidationResult)
-    assert integer_result.splitter.class_name.endswith(".KFold")
+    assert integer_result.splitter.class_name == (
+        "spectrochempy.analysis.model_selection.KFold"
+    )
+    assert explicit_result.splitter.class_name == (
+        "sklearn.model_selection._split.KFold"
+    )
     assert integer_result.splitter.parameters["n_splits"] == 4
     assert integer_result.splitter.parameters["shuffle"] is False
     assert_allclose(integer_result.oof_predictions.data, manual.data)
@@ -187,7 +285,12 @@ def test_integer_cv_with_groups_matches_groupkfold(supervised_data):
         groups=groups,
     )
 
-    assert integer_result.splitter.class_name.endswith(".GroupKFold")
+    assert integer_result.splitter.class_name == (
+        "spectrochempy.analysis.model_selection.GroupKFold"
+    )
+    assert explicit_result.splitter.class_name == (
+        "sklearn.model_selection._split.GroupKFold"
+    )
     assert integer_result.groups.n_groups == 4
     assert_allclose(
         integer_result.oof_predictions.data,
@@ -234,6 +337,59 @@ def test_public_options_are_validated_before_fit(
             **overrides,
         )
     assert fit_calls == 0
+
+
+@pytest.mark.parametrize(
+    "splitter",
+    [
+        type("CustomSklearnKFold", (SklearnKFold,), {})(n_splits=2),
+        type("CustomSCPKFold", (scp.KFold,), {})(n_splits=2),
+    ],
+)
+def test_arbitrary_splitter_subclasses_remain_out_of_scope(
+    supervised_data, monkeypatch, splitter
+):
+    X, y = supervised_data
+    fit_calls = 0
+
+    def unexpected_fit(self, X_train, y_train):
+        nonlocal fit_calls
+        fit_calls += 1
+        return self
+
+    monkeypatch.setattr(scp.PLSRegression, "fit", unexpected_fit)
+    with pytest.raises(SpectroChemPyError, match="KFold, GroupKFold, or LeaveOneOut"):
+        scp.cross_validate(
+            scp.PLSRegression(n_components=1),
+            X,
+            y,
+            cv=splitter,
+        )
+    assert fit_calls == 0
+
+
+def test_supplied_adapter_state_and_snapshot_identity_are_preserved(supervised_data):
+    X, y = supervised_data
+    random_state = np.random.RandomState(7)
+    before = random_state.get_state()
+    splitter = scp.KFold(n_splits=4, shuffle=True, random_state=random_state)
+
+    result = scp.cross_validate(
+        scp.PLSRegression(n_components=1, scale=False),
+        X,
+        y,
+        cv=splitter,
+    )
+
+    after = random_state.get_state()
+    assert before[0] == after[0]
+    assert np.array_equal(before[1], after[1])
+    assert before[2:] == after[2:]
+    assert result.splitter.class_name == (
+        "spectrochempy.analysis.model_selection.KFold"
+    )
+    assert result.splitter.parameters["n_splits"] == 4
+    assert result.splitter.parameters["shuffle"] is True
 
 
 @pytest.mark.parametrize(

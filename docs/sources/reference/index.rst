@@ -691,11 +691,12 @@ Supervised cross-validation
 
 ``cross_validate`` evaluates one fixed PLS or PLS-ending Pipeline
 configuration. It does not perform hyperparameter search or nested
-cross-validation. ``KFold``, ``GroupKFold``, and ``LeaveOneOut`` are direct
-reexports of the corresponding scikit-learn classes: they produce fold
-positions, while ``cross_validate`` handles ``NDDataset`` alignment and
-``sample_dim``, fold-local estimator cloning and preprocessing, out-of-fold
-predictions, and metrics.
+cross-validation. ``KFold``, ``GroupKFold``, and ``LeaveOneOut`` are thin,
+documented SpectroChemPy subclasses of the corresponding scikit-learn classes.
+They reuse scikit-learn's partitioning algorithms to produce fold positions,
+while ``cross_validate`` handles ``NDDataset`` alignment and ``sample_dim``,
+fold-local estimator cloning and preprocessing, out-of-fold predictions, and
+metrics. The original scikit-learn classes remain accepted explicitly.
 
 ``KFold`` partitions observations into folds, with optional shuffling and a
 reproducible random seed. ``GroupKFold`` keeps each supplied group entirely in

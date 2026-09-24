@@ -16,6 +16,7 @@ __all__ = [
     "decomposition",
     "integration",
     "kinetic",
+    "model_selection",
     "peakfinding",
     "pipeline",
 ]
@@ -29,5 +30,6 @@ from . import curvefitting
 from . import decomposition
 from . import integration
 from . import kinetic
+from . import model_selection
 from . import peakfinding
 from . import pipeline

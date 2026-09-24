@@ -5,17 +5,10 @@
 # ======================================================================================
 """Public supervised cross-validation interface."""
 
-from sklearn.model_selection import GroupKFold
-from sklearn.model_selection import KFold
-from sklearn.model_selection import LeaveOneOut
-
 from spectrochempy.analysis._cross_validation import CrossValidationResult
 from spectrochempy.analysis._cross_validation import cross_validate
 
 __all__ = [
     "CrossValidationResult",
-    "GroupKFold",
-    "KFold",
-    "LeaveOneOut",
     "cross_validate",
 ]
