@@ -3926,30 +3926,61 @@ class NDMath:
         def func(self, other):
             fname = f.__name__
             if hasattr(self, "history"):
-                self.history = f"Inplace binary op: {fname}  with `{_get_name(other)}` "
-            # else:
-            #    history = None
+                history = f"Inplace binary op: {fname}  with `{_get_name(other)}` "
+            else:
+                history = None
             objs = [self, other]
             fm, objs, reflected = self._check_order(fname, objs)
 
             data, units, mask, returntype, reflected, _geometry = self._op(
                 fm, objs, reflected=reflected, inplace=True
             )
-            self._data = data
-            self._units = units
-            self._mask = mask
 
             # Apply the shared arithmetic title engine in place: same canonical
             # names as the plain operators (``iadd`` -> ``add``, ``ipow`` ->
             # ``power``, ...) so ``ds **= 2`` behaves like ``ds = ds ** 2``.
+            title = _TITLE_PRESERVE_SENTINEL
             if returntype != "Coord":
                 title = _title_for(fname, [self, other], reflected)
-                if title is not _TITLE_PRESERVE_SENTINEL:
-                    self._title = title
+
+            self._apply_inplace_result(data, units, mask, title, history)
 
             return self
 
         return func
+
+    def _apply_inplace_result(self, data, units, mask, title, history):
+        """
+        Apply a fully prepared in-place result as one trait transaction.
+
+        The rollback covers trait replacements made by this operation.  It does
+        not undo arbitrary in-place mutations performed by custom observers on
+        mutable objects referenced by other traits.
+        """
+        previous_trait_values = self._trait_values.copy()
+
+        try:
+            with self.hold_trait_notifications():
+                self._data = data
+                self._units = units
+                self._mask = mask
+                if title is not _TITLE_PRESERVE_SENTINEL:
+                    self._title = title
+                if history is not None and hasattr(self, "history"):
+                    # The public history setter appends in place.  Replace the
+                    # list first so the rollback snapshot remains untouched.
+                    self._history = list(self._history)
+                    self.history = history
+        except Exception:
+            # Traitlets rolls back cross-validation failures, but notification
+            # callbacks can also fail after several held traits were assigned.
+            # Restore the trait references replaced by this operation.  This is
+            # intentionally shallow: side effects performed inside custom
+            # observers on other mutable trait values are outside the rollback
+            # guarantee.
+            self._trait_values.clear()
+            self._trait_values.update(previous_trait_values)
+            raise
 
     def _op_result(
         self,

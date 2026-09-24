@@ -5,10 +5,14 @@
 # ======================================================================================
 """Characterize coordinate-aware NDDataset broadcasting before its redesign."""
 
+import copy as cpy
+import operator
+
 import numpy as np
 import pytest
 
 import spectrochempy as scp
+from spectrochempy.core.units import DimensionalityError
 from spectrochempy.utils.exceptions import CoordinatesMismatchError
 
 
@@ -42,6 +46,104 @@ def _requested_operands():
         dims=["x"],
     )
     return concentration, column, profile
+
+
+def _observable_state(dataset):
+    """Capture arithmetic state that NDDataset equality deliberately ignores."""
+    coordset = cpy.deepcopy(dataset._coordset)
+    defaults = {}
+    if dataset._coordset is not None:
+        defaults = {
+            dim: getattr(dataset._coordset[dim], "default_index", None)
+            for dim in dataset.dims
+        }
+    return {
+        "data_object": dataset._data,
+        "data": dataset._data.copy(),
+        "dtype": dataset.dtype,
+        "mask_object": dataset._mask,
+        "mask": np.asarray(dataset.mask).copy(),
+        "units_object": dataset._units,
+        "units": dataset.units,
+        "dims_object": dataset._dims,
+        "dims": list(dataset.dims),
+        "coordset_object": dataset._coordset,
+        "coordset": coordset,
+        "references": (
+            None if dataset._coordset is None else dict(dataset._coordset.references)
+        ),
+        "defaults": defaults,
+        "title": dataset.title,
+        "name": dataset.name,
+        "meta_object": dataset._meta,
+        "meta": cpy.deepcopy(dataset.meta),
+        "history_object": dataset._history,
+        "history": list(dataset._history),
+        "rendered_history": list(dataset.history),
+        "author": dataset.author,
+        "description": dataset.description,
+        "origin": dataset.origin,
+        "created": dataset._created,
+        "modified": dataset._modified,
+        "transposed": dataset._transposed,
+    }
+
+
+def _assert_observable_state(dataset, before):
+    """Assert values, metadata, dates, and backing objects are unchanged."""
+    assert dataset._data is before["data_object"]
+    np.testing.assert_array_equal(dataset.data, before["data"])
+    assert dataset.dtype == before["dtype"]
+    assert dataset._mask is before["mask_object"]
+    np.testing.assert_array_equal(np.asarray(dataset.mask), before["mask"])
+    assert dataset._units is before["units_object"]
+    assert dataset.units == before["units"]
+    assert dataset._dims is before["dims_object"]
+    assert dataset.dims == before["dims"]
+    assert dataset._coordset is before["coordset_object"]
+    if before["coordset"] is None:
+        assert dataset._coordset is None
+    else:
+        assert dataset._coordset == before["coordset"]
+        assert dataset._coordset.references == before["references"]
+        assert {
+            dim: getattr(dataset._coordset[dim], "default_index", None)
+            for dim in dataset.dims
+        } == before["defaults"]
+    assert dataset.title == before["title"]
+    assert dataset.name == before["name"]
+    assert dataset._meta is before["meta_object"]
+    assert dataset.meta == before["meta"]
+    assert dataset._history is before["history_object"]
+    assert dataset._history == before["history"]
+    assert dataset.history == before["rendered_history"]
+    assert dataset.author == before["author"]
+    assert dataset.description == before["description"]
+    assert dataset.origin == before["origin"]
+    assert dataset._created == before["created"]
+    assert dataset._modified == before["modified"]
+    assert dataset._transposed == before["transposed"]
+
+
+def _stateful_dataset(data, *, dims=None, coordset=None, mask=None, units="m"):
+    kwargs = {
+        "units": units,
+        "title": "signal",
+        "name": "atomicity-target",
+    }
+    if dims is not None:
+        kwargs["dims"] = dims
+    if coordset is not None:
+        kwargs["coordset"] = coordset
+    if mask is not None:
+        kwargs["mask"] = mask
+    dataset = scp.NDDataset(data, **kwargs)
+    dataset.author = "maintainer"
+    dataset.description = "in-place atomicity regression"
+    dataset.origin = "synthetic"
+    dataset.meta.experiment = {"kind": "atomicity", "replicate": 1}
+    dataset.history = "Initial state"
+    return dataset
 
 
 def test_reshape_adds_an_empty_coordinate_for_the_new_singleton_dimension():
@@ -737,29 +839,184 @@ def test_inplace_broadcast_requires_the_target_shape_to_stay_unchanged():
     np.testing.assert_allclose(profile.data, profile_before.data)
 
 
-def test_failed_expanding_inplace_broadcast_currently_changes_history():
-    column = scp.NDDataset(
+def test_failed_expanding_inplace_broadcast_is_atomic():
+    column = _stateful_dataset(
         [[1.0], [2.0], [3.0]],
         dims=["y", "x"],
         mask=[[False], [True], [False]],
-        units="m",
-        title="signal",
     )
-    profile = scp.NDDataset([1.0, 2.0, 3.0, 4.0], dims=["x"])
-    data_before = column.data.copy()
-    mask_before = column.mask.copy()
-    units_before = column.units
-    title_before = column.title
-    history_before = list(column.history)
+    profile = _stateful_dataset([1.0, 2.0, 3.0, 4.0], dims=["x"])
+    column_before = _observable_state(column)
+    profile_before = _observable_state(profile)
 
     with pytest.raises(ArithmeticError, match="non-broadcastable output operand"):
         column *= profile
 
-    assert column.shape == (3, 1)
-    assert column.dims == ["y", "x"]
-    assert column.coordset is None
-    assert column.units == units_before
-    assert column.title == title_before
-    np.testing.assert_array_equal(column.data, data_before)
-    np.testing.assert_array_equal(column.mask, mask_before)
-    assert column.history != history_before
+    _assert_observable_state(column, column_before)
+    _assert_observable_state(profile, profile_before)
+
+
+def test_failed_inplace_incompatible_shapes_are_atomic():
+    target = _stateful_dataset(np.arange(6.0).reshape(2, 3), dims=["y", "x"])
+    other = _stateful_dataset(np.ones((2, 2)), dims=["y", "x"])
+    target_before = _observable_state(target)
+    other_before = _observable_state(other)
+
+    with pytest.raises(ArithmeticError, match="could not be broadcast"):
+        target += other
+
+    _assert_observable_state(target, target_before)
+    _assert_observable_state(other, other_before)
+
+
+def test_failed_inplace_same_unit_coordinate_mismatch_is_atomic():
+    target_coord = scp.Coord([1000.0, 1001.0, 1002.0], units="cm^-1")
+    other_coord = scp.Coord([1000.0, 1001.0, 1002.01], units="cm^-1")
+    target = _stateful_dataset([1.0, 2.0, 3.0], dims=["x"], coordset=[target_coord])
+    other = _stateful_dataset([3.0, 2.0, 1.0], dims=["x"], coordset=[other_coord])
+    target_before = _observable_state(target)
+    other_before = _observable_state(other)
+
+    with pytest.raises(CoordinatesMismatchError):
+        target -= other
+
+    _assert_observable_state(target, target_before)
+    _assert_observable_state(other, other_before)
+
+
+def test_failed_inplace_incompatible_units_are_atomic():
+    target = _stateful_dataset([1.0, 2.0], units="m")
+    other = _stateful_dataset([1.0, 2.0], units="s")
+    target_before = _observable_state(target)
+    other_before = _observable_state(other)
+
+    with pytest.raises(DimensionalityError):
+        target += other
+
+    _assert_observable_state(target, target_before)
+    _assert_observable_state(other, other_before)
+
+
+def test_failed_inplace_numeric_conversion_is_atomic_and_preserves_shared_buffer():
+    source = np.array([1.0, 2.0])
+    target = _stateful_dataset(source)
+    incompatible = np.array(["not-a-number", "still-not-a-number"])
+    source_before = source.copy()
+    incompatible_before = incompatible.copy()
+    target_before = _observable_state(target)
+    assert np.shares_memory(target.data, source)
+
+    with pytest.raises(TypeError):
+        target += incompatible
+
+    _assert_observable_state(target, target_before)
+    np.testing.assert_array_equal(source, source_before)
+    np.testing.assert_array_equal(incompatible, incompatible_before)
+
+
+def test_late_inplace_trait_notification_failure_rolls_back_operation_state():
+    primary = scp.Coord([1000.0, 1001.0], units="cm^-1")
+    alternate = scp.Coord([10.0, 20.0], title="alternate")
+    spectral_group = scp.CoordSet(primary, alternate, sorted=False)
+    coordset = scp.CoordSet(x=spectral_group, y="x")
+    target = _stateful_dataset(
+        [[1.0, 2.0], [3.0, 4.0]],
+        dims=["y", "x"],
+        coordset=coordset,
+        mask=[[False, False], [False, False]],
+    )
+    other = _stateful_dataset(
+        [[1.0, 1.0], [1.0, 1.0]],
+        dims=["y", "x"],
+        coordset=coordset.copy(),
+        mask=[[False, True], [False, False]],
+    )
+    target_before = _observable_state(target)
+    other_before = _observable_state(other)
+
+    def fail_after_assignment(_change):
+        raise RuntimeError("controlled late trait notification failure")
+
+    target.observe(fail_after_assignment, names="_mask")
+    try:
+        with pytest.raises(RuntimeError, match="controlled late trait"):
+            target += other
+    finally:
+        target.unobserve(fail_after_assignment, names="_mask")
+
+    _assert_observable_state(target, target_before)
+    _assert_observable_state(other, other_before)
+
+
+@pytest.mark.parametrize(
+    ("inplace_op", "plain_op", "scalar"),
+    [
+        (operator.iadd, operator.add, 2.0),
+        (operator.isub, operator.sub, 2.0),
+        (operator.imul, operator.mul, 2.0),
+        (operator.itruediv, operator.truediv, 2.0),
+    ],
+)
+def test_successful_inplace_scalar_operations_commit_once(inplace_op, plain_op, scalar):
+    samples = scp.Coord([0.0, 1.0], title="sample")
+    variables = scp.Coord([1000.0, 1001.0], units="cm^-1")
+    target = _stateful_dataset(
+        [[2.0, 4.0], [6.0, 8.0]],
+        dims=["y", "x"],
+        coordset=[samples, variables],
+    )
+    expected = plain_op(target.copy(), scalar)
+    identity = id(target)
+    history_length = len(target._history)
+    coordset = target._coordset
+    meta = target._meta
+
+    result = inplace_op(target, scalar)
+
+    assert result is target
+    assert id(target) == identity
+    np.testing.assert_allclose(target.data, expected.data)
+    np.testing.assert_array_equal(target.mask, expected.mask)
+    assert target.dtype == expected.dtype
+    assert target.units == expected.units
+    assert target.title == expected.title
+    assert target._coordset is coordset
+    assert target._meta is meta
+    assert len(target._history) == history_length + 1
+    assert "Inplace binary op" in target.history[-1]
+
+
+def test_successful_inplace_selected_reference_preserves_geometry_and_masks():
+    samples, variables = _axes()
+    values = np.arange(1.0, 13.0).reshape(3, 4)
+    mask = np.zeros_like(values, dtype=bool)
+    mask[0, 1] = True
+    mask[2, 3] = True
+    target = _stateful_dataset(
+        values.copy(),
+        dims=["y", "x"],
+        coordset=[samples, variables],
+        mask=mask,
+    )
+    reference = target[0]
+    target_coordset = target._coordset
+    target_dims = target._dims
+    target_meta = target._meta
+    reference_before = _observable_state(reference)
+    history_length = len(target._history)
+    expected_mask = mask | np.broadcast_to(reference.mask, target.shape)
+    expected_data = values - reference.data
+
+    result = operator.isub(target, reference)
+
+    assert result is target
+    np.testing.assert_allclose(target.data, expected_data)
+    np.testing.assert_array_equal(target.mask, expected_mask)
+    assert target.units == scp.ur.m
+    assert target._coordset is target_coordset
+    assert target._dims is target_dims
+    assert target._meta is target_meta
+    np.testing.assert_array_equal(target.y.data, samples.data)
+    np.testing.assert_array_equal(target.x.data, variables.data)
+    assert len(target._history) == history_length + 1
+    _assert_observable_state(reference, reference_before)

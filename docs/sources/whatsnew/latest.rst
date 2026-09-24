@@ -26,6 +26,10 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- Refused NDDataset in-place arithmetic operations now roll back data, units,
+  masks, titles, history, and other trait replacements made by the operation.
+  Side effects performed by custom Traitlets observers remain the observer's
+  responsibility.
 - NDDataset arithmetic now reconstructs dimensions and coordinates after
   positional broadcasting. When a singleton axis expands, the result uses the
   name and coordinate of the operand providing the non-singleton axis.
