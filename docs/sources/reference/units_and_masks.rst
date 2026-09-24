@@ -7,8 +7,9 @@ Units, quantities, and masks
 
 SpectroChemPy exposes selected Pint and NumPy objects unchanged so that unit-aware and
 masked data interoperate with their originating libraries. This page documents their
-role in the SpectroChemPy API. The :ref:`userguide_units_masks` guide provides verified
-examples of construction, conversion, masking, plotting, and raw-array access.
+role in the SpectroChemPy API. The
+:ref:`units and masks guide <userguide_units_masks>` provides verified examples of
+construction, conversion, masking, plotting, and raw-array access.
 
 Units and quantities
 --------------------
@@ -62,7 +63,7 @@ Masks and masked-array interoperability
 
 ``help()`` for these exact objects continues to show NumPy documentation. The
 SpectroChemPy-specific accessors and information retained by each conversion are
-documented in :ref:`userguide_units_masks`.
+documented in the :ref:`units and masks guide <userguide_units_masks>`.
 
 External references
 -------------------
