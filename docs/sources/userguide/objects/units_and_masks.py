@@ -173,9 +173,8 @@ offset, scp.mean(masked)
 # where the selected plot type supports one.
 
 # %%
-ax = masked.plot(show_mask=True)
+ax = masked.plot(show_mask=True, marker="o")
 plotted = ax.lines[0].get_ydata()
-ax.figure.clear()
 type(plotted), plotted.mask
 
 # %% [markdown]

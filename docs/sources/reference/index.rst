@@ -469,8 +469,9 @@ interoperability; routine workflows should keep data in `NDDataset`. See
 Units manipulation
 ===================
 
-``ur`` is the unit registry configured by SpectroChemPy. ``Unit``, ``Quantity``, and
-``DimensionalityError`` retain their Pint identities and use that registry. See
+``ur`` is the unit registry configured by SpectroChemPy; ``Unit`` and ``Quantity`` use
+that registry while retaining their Pint identities. ``DimensionalityError`` is the
+original Pint exception class retained for interoperability. See
 :ref:`reference_units_masks` for project-specific construction, conversion, mutation,
 dimensionless-value, and error-handling guidance.
 
