@@ -438,13 +438,14 @@ def test_post_final_conda_recipe_version(tagged_repository, tmp_path, monkeypatc
         target = tmp_path / relative
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(source_root / relative, target)
-    subprocess.run(
+    result = subprocess.run(
         [sys.executable, ".github/workflows/scripts/generate_conda_recipe.py"],
         env={**os.environ, "SETUPTOOLS_SCM_PRETEND_VERSION": version},
-        check=True,
+        check=False,
         capture_output=True,
         text=True,
     )
+    assert result.returncode == 0, result.stdout + result.stderr
     recipe = yaml.safe_load((tmp_path / "recipe/recipe.yaml").read_text())
     assert recipe["package"]["version"] == "1.0.1"
     assert recipe["build"]["string"] == "dev1"
