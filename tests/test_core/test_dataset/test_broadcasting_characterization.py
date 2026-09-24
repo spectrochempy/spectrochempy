@@ -225,6 +225,43 @@ def test_physically_equivalent_coordinates_with_different_units_currently_succee
     assert result.x.units == scp.ur("cm^-1")
 
 
+@pytest.mark.parametrize(
+    "right_units",
+    [
+        pytest.param("m^-1", id="same-dimension-units"),
+        pytest.param("s", id="incompatible-units"),
+        pytest.param(None, id="unit-on-one-side"),
+    ],
+)
+def test_other_coordinate_unit_policies_remain_unresolved(right_units):
+    """The same-unit fix does not define other coordinate-unit policies."""
+    left_coord = scp.Coord([1.0, 2.0, 3.0, 4.0], units="cm^-1")
+    right_coord = scp.Coord([1.0, 2.0, 3.0, 4.0], units=right_units)
+    left = scp.NDDataset(np.ones(4), dims=["x"], coordset=[left_coord])
+    right = scp.NDDataset(np.ones(4), dims=["x"], coordset=[right_coord])
+
+    result = left + right
+
+    np.testing.assert_array_equal(result.data, np.full(4, 2.0))
+    np.testing.assert_array_equal(result.x.data, left_coord.data)
+
+
+def test_one_sided_coordinate_unit_still_uses_raw_value_validation():
+    left = scp.NDDataset(
+        np.ones(4),
+        dims=["x"],
+        coordset=[scp.Coord([1.0, 2.0, 3.0, 4.0], units="cm^-1")],
+    )
+    right = scp.NDDataset(
+        np.ones(4),
+        dims=["x"],
+        coordset=[scp.Coord([2.0, 3.0, 4.0, 5.0])],
+    )
+
+    with pytest.raises(CoordinatesMismatchError):
+        left + right
+
+
 def test_incompatible_unitless_coordinates_are_rejected():
     left = scp.NDDataset(
         np.ones(4),
@@ -241,8 +278,48 @@ def test_incompatible_unitless_coordinates_are_rejected():
         left + right
 
 
-def test_incompatible_unitful_coordinates_currently_escape_validation():
-    """Unit-bearing coordinate differences currently pass the last-axis guard."""
+def test_matching_unitless_coordinates_are_accepted():
+    coordinate = scp.Coord([1000.0, 1100.0, 1200.0, 1300.0])
+    left = scp.NDDataset(np.ones(4), dims=["x"], coordset=[coordinate])
+    right = scp.NDDataset(np.full(4, 2.0), dims=["x"], coordset=[coordinate.copy()])
+
+    result = left + right
+
+    np.testing.assert_array_equal(result.data, np.full(4, 3.0))
+
+
+def test_identical_same_unit_coordinates_are_accepted():
+    coordinate = scp.Coord(
+        [1000.0, 1100.0, 1200.0, 1300.0],
+        units="cm^-1",
+    )
+    left = scp.NDDataset(np.ones(4), dims=["x"], coordset=[coordinate])
+    right = scp.NDDataset(np.full(4, 2.0), dims=["x"], coordset=[coordinate.copy()])
+    left_before = left.x.copy()
+    right_before = right.x.copy()
+
+    operator_result = left + right
+    ufunc_result = np.add(left, right)
+
+    np.testing.assert_array_equal(operator_result.data, np.full(4, 3.0))
+    np.testing.assert_array_equal(ufunc_result.data, np.full(4, 3.0))
+    np.testing.assert_array_equal(left.x.data, left_before.data)
+    np.testing.assert_array_equal(right.x.data, right_before.data)
+    assert left.x.units == left_before.units
+    assert right.x.units == right_before.units
+
+
+@pytest.mark.parametrize(
+    "operation",
+    [
+        pytest.param(lambda left, right: left + right, id="operator"),
+        pytest.param(lambda left, right: right + left, id="reversed-operator"),
+        pytest.param(lambda left, right: np.add(left, right), id="ufunc"),
+        pytest.param(lambda left, right: np.add(right, left), id="reversed-ufunc"),
+    ],
+)
+def test_incompatible_same_unit_coordinates_are_rejected(operation):
+    """Same-unit coordinate differences fail the last-axis guard."""
     left_coord = scp.Coord(
         [1000.0, 1100.0, 1200.0, 1300.0],
         units="cm^-1",
@@ -253,10 +330,32 @@ def test_incompatible_unitful_coordinates_currently_escape_validation():
     )
     left = scp.NDDataset(np.ones(4), dims=["x"], coordset=[left_coord])
     right = scp.NDDataset(np.ones(4), dims=["x"], coordset=[right_coord])
+    left_before = left.x.copy()
+    right_before = right.x.copy()
 
-    result = left + right
+    with pytest.raises(CoordinatesMismatchError):
+        operation(left, right)
 
-    np.testing.assert_allclose(result.x.data, left_coord.data)
+    np.testing.assert_array_equal(left.x.data, left_before.data)
+    np.testing.assert_array_equal(right.x.data, right_before.data)
+    assert left.x.units == left_before.units
+    assert right.x.units == right_before.units
+
+
+def test_same_unit_coordinate_validation_preserves_existing_tolerance():
+    """Coord precision exposes differences on either side of decimal=3."""
+    left_coord = scp.Coord([0.0, 1.0], units="cm^-1")
+    close_coord = scp.Coord([0.0014, 1.0014], units="cm^-1")
+    far_coord = scp.Coord([0.0016, 1.0016], units="cm^-1")
+    left = scp.NDDataset(np.ones(2), dims=["x"], coordset=[left_coord])
+    close = scp.NDDataset(np.ones(2), dims=["x"], coordset=[close_coord])
+    far = scp.NDDataset(np.ones(2), dims=["x"], coordset=[far_coord])
+
+    np.testing.assert_array_equal(close.x.data, [0.001, 1.001])
+    np.testing.assert_array_equal(far.x.data, [0.002, 1.002])
+    np.testing.assert_array_equal((left + close).data, np.full(2, 2.0))
+    with pytest.raises(CoordinatesMismatchError):
+        left + far
 
 
 def test_dimension_names_do_not_align_operands():

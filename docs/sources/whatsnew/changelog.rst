@@ -33,6 +33,10 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Dataset arithmetic now rejects different last-dimension coordinate grids
+  carrying the same unit instead of silently accepting a scientifically
+  incompatible pairing (#1665).
+
 
 .. section
 

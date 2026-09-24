@@ -3260,12 +3260,34 @@ class NDMath:
         # The previous `elif other._squeeze_ndim > 1` branch was removed because
         # it was unreachable (``>= 1`` matched first).
         try:
-            assert_coord_almost_equal(
-                obc[obj.dims[-1]],
-                otc[other.dims[-1]],
-                decimal=3,
-                data_only=True,
-            )
+            xobc = obc[obj.dims[-1]]
+            xotc = otc[other.dims[-1]]
+            if (
+                xobc._implements("Coord")
+                and xotc._implements("Coord")
+                and xobc.data is not None
+                and xotc.data is not None
+                and xobc.units is not None
+                and xobc.units == xotc.units
+            ):
+                # ``assert_coord_almost_equal(..., data_only=True)`` delegates
+                # unit-bearing coordinates to a conversion path that currently
+                # does not raise when converted values differ.  Keep the
+                # established decimal tolerance while closing only the
+                # unambiguous same-unit gap here.  Reconciliation between
+                # different coordinate units remains a separate contract issue.
+                np.testing.assert_array_almost_equal(
+                    xobc.data,
+                    xotc.data,
+                    decimal=3,
+                )
+            else:
+                assert_coord_almost_equal(
+                    xobc,
+                    xotc,
+                    decimal=3,
+                    data_only=True,
+                )
         except TypeError:
             xobc = (
                 None if obc is None or obc[obj.dims[-1]].is_empty else obc[obj.dims[-1]]
