@@ -40,23 +40,24 @@
 # spectra do not accidentally influence centering or scaling statistics.
 
 # %%
-import numpy as np
-
 import spectrochempy as scp
 
-rng = np.random.default_rng(42)
 wavenumbers = scp.Coord.linspace(1000.0, 1200.0, 80, title="wavenumber", units="cm^-1")
-concentration = np.linspace(0.1, 1.2, 12)
+concentration = scp.linspace(0.1, 1.2, 12).data
 samples = scp.Coord.arange(concentration.size, title="sample")
 
-band_a = np.exp(-0.5 * ((wavenumbers.data - 1060.0) / 12.0) ** 2)
-band_b = np.exp(-0.5 * ((wavenumbers.data - 1140.0) / 18.0) ** 2)
+band_a = scp.exp(-0.5 * ((wavenumbers.data - 1060.0) / 12.0) ** 2)
+band_b = scp.exp(-0.5 * ((wavenumbers.data - 1140.0) / 18.0) ** 2)
 baseline = 0.03 + 0.0005 * (wavenumbers.data - wavenumbers.data.mean())
 spectra = (
     baseline
     + concentration[:, None] * band_a
     + 0.35 * concentration[:, None] * band_b
-    + rng.normal(scale=0.015, size=(concentration.size, wavenumbers.size))
+    + scp.normal(
+        scale=0.015,
+        size=(concentration.size, wavenumbers.size),
+        seed=42,
+    ).data
 )
 
 dataset = scp.NDDataset(
@@ -103,22 +104,15 @@ regression_pipeline = scp.Pipeline(
 regression_pipeline.fit(X_cal, y_cal)
 y_pred = regression_pipeline.predict(X_test)
 residuals = y_test - y_pred
-rmse = np.sqrt(np.mean(np.asarray(residuals.data) ** 2))
+rmse = float(((residuals**2).mean() ** 0.5).magnitude)
 
-summary = scp.NDDataset(
-    np.column_stack([y_test.data, y_pred.data, residuals.data]),
-    coordset=[
-        y_test.coordset[0].copy(),
-        scp.Coord(
-            np.arange(3),
-            labels=["observed", "predicted", "residual"],
-            title="quantity",
-        ),
-    ],
-    dims=["y", "x"],
-    units=y_test.units,
-    title=f"test predictions, RMSE = {rmse:.3f}",
+summary = scp.concatenate(y_test, y_pred, residuals, axis=1)
+summary.x = scp.Coord.arange(
+    3,
+    labels=["observed", "predicted", "residual"],
+    title="quantity",
 )
+summary.title = f"test predictions, RMSE = {rmse:.3f}"
 summary
 
 # %% [markdown]
