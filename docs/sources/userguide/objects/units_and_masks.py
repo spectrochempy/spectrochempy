@@ -14,11 +14,10 @@
 #     name: python3
 # ---
 
-# %% [markdown]
-# :orphan:
-#
+# %% [raw] raw_mimetype="text/restructuredtext"
 # .. _userguide_units_masks:
-#
+
+# %% [markdown]
 # Units, quantities, and masks
 # ===========================
 #
@@ -247,6 +246,8 @@ array_copy = masked_again.to_array()
 # SpectroChemPy intentionally preserves the Pint registry, classes, exception, and the
 # NumPy sentinels and masked-array classes. Therefore ``help(scp.Quantity)`` or
 # ``help(scp.MaskedArray)`` can continue to show documentation from the originating
-# library. See the [units and masks reference](../../reference/units_and_masks.html)
-# for the stable SpectroChemPy integration summary and links to the external
-# low-level references.
+# library.
+
+# %% [raw] raw_mimetype="text/restructuredtext"
+# See :ref:`reference_units_masks` for the stable SpectroChemPy integration
+# summary and links to the external low-level references.

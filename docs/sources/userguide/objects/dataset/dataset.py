@@ -370,9 +370,9 @@ in_joules
 # %%
 d1D  # still expressed in eV
 
-# %% [markdown]
-# See the [units and masks guide](../units_and_masks.html) for verified examples of
-# quantities, compatible and context-enabled conversions, in-place conversion,
+# %% [raw] raw_mimetype="text/restructuredtext"
+# See :ref:`userguide_units_masks` for verified examples of quantities,
+# compatible and context-enabled conversions, in-place conversion,
 # incompatibility errors, and masks.
 
 # %% [markdown]
