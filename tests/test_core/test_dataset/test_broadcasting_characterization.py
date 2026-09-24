@@ -95,6 +95,19 @@ def test_rank_expanding_broadcast_currently_keeps_stale_left_dimensions():
     assert len(reversed_.dims) != reversed_.ndim
 
 
+def test_broadcast_dimension_name_collision_case_depends_on_left_template():
+    """Positional axes with the same name expose a proposed-contract collision."""
+    column = scp.NDDataset([[1.0], [2.0], [3.0]], dims=["y", "x"])
+    same_named_profile = scp.NDDataset([1.0, 2.0, 3.0, 4.0], dims=["y"])
+
+    forward = column * same_named_profile
+    reversed_ = same_named_profile * column
+
+    assert forward.shape == reversed_.shape == (3, 4)
+    assert forward.dims == ["y", "x"]
+    assert reversed_.dims == ["y"]
+
+
 def test_column_and_vector_broadcast_without_coordinates():
     column = scp.NDDataset([[1.0], [2.0], [3.0]], dims=["y", "x"])
     profile = scp.NDDataset([1.0, 2.0, 3.0, 4.0], dims=["x"])
@@ -315,15 +328,21 @@ def test_masks_units_and_sources_follow_existing_broadcast_contract():
 
 def test_result_coordinates_are_copied_from_the_left_operand():
     samples, variables = _axes()
+    labeled_variables = scp.Coord(
+        variables.data.copy(),
+        labels=["a", "b", "c", "d"],
+        title=variables.title,
+        units=variables.units,
+    )
     left = scp.NDDataset(
         np.ones((3, 4)),
         dims=["y", "x"],
-        coordset=[samples, variables],
+        coordset=[samples, labeled_variables],
     )
     right = scp.NDDataset(
         np.ones((3, 4)),
         dims=["y", "x"],
-        coordset=[samples.copy(), variables.copy()],
+        coordset=[samples.copy(), labeled_variables.copy()],
     )
 
     result = left + right
@@ -332,9 +351,12 @@ def test_result_coordinates_are_copied_from_the_left_operand():
     assert result.x is not left.x
     assert result.y is not right.y
     assert result.x is not right.x
-    result.x = scp.Coord([42.0, 43.0, 44.0, 45.0], title="changed")
+    result.x[0] = 42.0
+    result.x.labels[0] = "changed"
     assert left.x.data[0] == 1000.0
     assert right.x.data[0] == 1000.0
+    assert left.x.labels.tolist() == ["a", "b", "c", "d"]
+    assert right.x.labels.tolist() == ["a", "b", "c", "d"]
 
 
 def test_equal_same_dimension_coordinate_sets_are_preserved():
@@ -396,10 +418,19 @@ def test_inplace_broadcast_requires_the_target_shape_to_stay_unchanged():
     np.testing.assert_allclose(profile.data, profile_before.data)
 
 
-def test_failed_expanding_inplace_broadcast_currently_changes_history_only():
-    column = scp.NDDataset([[1.0], [2.0], [3.0]], dims=["y", "x"])
+def test_failed_expanding_inplace_broadcast_currently_changes_history():
+    column = scp.NDDataset(
+        [[1.0], [2.0], [3.0]],
+        dims=["y", "x"],
+        mask=[[False], [True], [False]],
+        units="m",
+        title="signal",
+    )
     profile = scp.NDDataset([1.0, 2.0, 3.0, 4.0], dims=["x"])
     data_before = column.data.copy()
+    mask_before = column.mask.copy()
+    units_before = column.units
+    title_before = column.title
     history_before = list(column.history)
 
     with pytest.raises(ArithmeticError, match="non-broadcastable output operand"):
@@ -407,5 +438,9 @@ def test_failed_expanding_inplace_broadcast_currently_changes_history_only():
 
     assert column.shape == (3, 1)
     assert column.dims == ["y", "x"]
+    assert column.coordset is None
+    assert column.units == units_before
+    assert column.title == title_before
     np.testing.assert_array_equal(column.data, data_before)
+    np.testing.assert_array_equal(column.mask, mask_before)
     assert column.history != history_before
