@@ -40,10 +40,13 @@
 # spectra do not accidentally influence centering or scaling statistics.
 
 # %%
+import numpy as np
+
 import spectrochempy as scp
 
+rng = np.random.default_rng(42)
 wavenumbers = scp.Coord.linspace(1000.0, 1200.0, 80, title="wavenumber", units="cm^-1")
-concentration = scp.linspace(0.1, 1.2, 12).data
+concentration = np.linspace(0.1, 1.2, 12)
 samples = scp.Coord.arange(concentration.size, title="sample")
 
 band_a = scp.exp(-0.5 * ((wavenumbers.data - 1060.0) / 12.0) ** 2)
@@ -53,11 +56,7 @@ spectra = (
     baseline
     + concentration[:, None] * band_a
     + 0.35 * concentration[:, None] * band_b
-    + scp.normal(
-        scale=0.015,
-        size=(concentration.size, wavenumbers.size),
-        seed=42,
-    ).data
+    + rng.normal(scale=0.015, size=(concentration.size, wavenumbers.size))
 )
 
 dataset = scp.NDDataset(
