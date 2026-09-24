@@ -33,6 +33,11 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- NDDataset arithmetic now reconstructs dimensions and coordinates after
+  positional broadcasting. Empty singleton axes can inherit the expanding
+  coordinate, while significant singleton coordinates and duplicate result
+  dimension names are rejected explicitly. Squeeze a selected reference
+  spectrum before intentionally repeating it across observations.
 - Dataset arithmetic now rejects different last-dimension coordinate grids
   carrying the same unit instead of silently accepting a scientifically
   incompatible pairing (#1665).
