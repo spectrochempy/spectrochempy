@@ -86,8 +86,15 @@ def _manual_oof(template, X, y, folds):
 
 
 def test_public_exports_and_signature_match_the_contract():
+    assert all(
+        scp._LAZY_IMPORTS[name] == "spectrochempy.analysis.cross_validation"
+        for name in ("KFold", "GroupKFold", "LeaveOneOut")
+    )
     assert scp.cross_validate.__name__ == "cross_validate"
     assert scp.CrossValidationResult.__name__ == "CrossValidationResult"
+    assert scp.KFold is KFold
+    assert scp.GroupKFold is GroupKFold
+    assert scp.LeaveOneOut is LeaveOneOut
     signature = inspect.signature(scp.cross_validate)
     assert tuple(signature.parameters) == (
         "estimator",
@@ -114,6 +121,36 @@ def test_public_exports_and_signature_match_the_contract():
             "return_estimators",
         )
     )
+
+
+def test_public_splitter_exports_execute_their_bounded_contract(supervised_data):
+    X, y = supervised_data
+    template = scp.PLSRegression(n_components=1, scale=False)
+
+    shuffled = scp.KFold(n_splits=4, shuffle=True, random_state=7)
+    shuffled_repeat = scp.KFold(n_splits=4, shuffle=True, random_state=7)
+    first = scp.cross_validate(template, X, y, cv=shuffled)
+    repeated = scp.cross_validate(template, X, y, cv=shuffled_repeat)
+    assert [fold.validation_positions.tolist() for fold in first.folds] == [
+        fold.validation_positions.tolist() for fold in repeated.folds
+    ]
+
+    groups = np.repeat(np.arange(4), 2)
+    grouped = scp.cross_validate(
+        template,
+        X,
+        y,
+        cv=scp.GroupKFold(n_splits=4),
+        groups=groups,
+    )
+    for fold in grouped.folds:
+        assert set(groups[fold.train_positions]).isdisjoint(
+            groups[fold.validation_positions]
+        )
+
+    loo = scp.cross_validate(template, X, y, cv=scp.LeaveOneOut())
+    assert loo.n_splits == X.shape[0]
+    assert all(len(fold.validation_positions) == 1 for fold in loo.folds)
 
 
 def test_integer_cv_matches_explicit_splitter_and_manual_oof(supervised_data):
