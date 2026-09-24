@@ -15,21 +15,25 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 New Features
 ~~~~~~~~~~~~
 
-- Added ``cross_validate`` and ``CrossValidationResult`` for bounded supervised
-  PLS and Pipeline cross-validation with aligned ``NDDataset`` outputs,
-  per-target metrics, fold records, and optional fitted fold estimators (#1658).
-- Added documented SpectroChemPy adapters for scikit-learn's ``KFold``,
-  ``GroupKFold``, and ``LeaveOneOut`` as ``scp.KFold``, ``scp.GroupKFold``, and
-  ``scp.LeaveOneOut`` so supported validation protocols can be constructed from
-  the SpectroChemPy namespace (#1660).
+- Added a bounded supervised cross-validation API for PLS and PLS-ending
+  Pipelines. ``cross_validate`` fits preprocessing inside each fold and returns
+  an aligned ``CrossValidationResult`` with out-of-fold predictions,
+  per-target metrics, fold records, and optional fitted estimators. Documented
+  ``KFold``, ``GroupKFold``, and ``LeaveOneOut`` adapters are available from the
+  SpectroChemPy namespace, together with a user guide and Gallery example
+  (#1658, #1659, #1660).
 
 Bug Fixes
 ~~~~~~~~~
 
+- ``PLSRegression.predict`` now verifies that masked feature positions match
+  those used at fit time, preventing coefficients from being applied silently
+  to different variables. Cross-validation also preserves the original feature
+  geometry for preprocessors such as MSC (#1657).
 - Refused NDDataset in-place arithmetic operations now roll back data, units,
   masks, titles, history, and other trait replacements made by the operation.
   Side effects performed by custom Traitlets observers remain the observer's
-  responsibility.
+  responsibility (#1668).
 - NDDataset arithmetic now reconstructs dimensions and coordinates after
   positional broadcasting. When a singleton axis expands, the result uses the
   name and coordinate of the operand providing the non-singleton axis.
@@ -38,18 +42,22 @@ Bug Fixes
   carrying the same unit instead of silently accepting a scientifically
   incompatible pairing (#1665).
 
+Breaking Changes
+~~~~~~~~~~~~~~~~
+
+- NDDataset arithmetic now rejects two ambiguous pairings that 1.0.0 could
+  accept: a broadcast result with duplicate dimension names, and different
+  same-unit coordinate grids on a non-expanded final axis. Rename colliding
+  dimensions or align the coordinate grids explicitly before the operation
+  (#1665, #1667).
+
 Developer
 ~~~~~~~~~
 
-- MAINT: Added the cross-validation building blocks used by the public API:
-  helpers for resolving
-  observation dimensions, validating and slicing aligned folds, and restoring
-  prediction geometry (#1653), plus unfitted cloning of ``Pipeline`` templates
-  and their supported steps (#1654), and per-target regression metric kernels
-  with explicit validity reporting (#1655).
-- MAINT: Added an internal structured cross-validation result prototype that
-  validates complete out-of-fold coverage and records aligned predictions,
-  residuals, metrics, fold positions, configuration snapshots, and optional
-  fitted fold estimators (#1656), followed by a private supervised execution
-  engine with fold-local cloning, fitting, prediction, and OOF assembly
-  (#1657).
+- Improved the public units and masks documentation and simplified examples to
+  favor SpectroChemPy-native construction, plotting, and arithmetic where that
+  keeps the scientific intent clear (#1661, #1662, #1663).
+- Corrected development-package version selection so stable core tags sort
+  after their older release candidates. Python and Conda builds now derive
+  ``1.0.1.devN`` from ``spectrochempy-v1.0.0`` rather than falling back to an
+  obsolete RC series (#1666).
