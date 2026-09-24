@@ -26,6 +26,10 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- NDDataset arithmetic now reconstructs dimensions and coordinates after
+  positional broadcasting. When a singleton axis expands, the result uses the
+  name and coordinate of the operand providing the non-singleton axis.
+  Duplicate result dimension names are rejected explicitly (#1667).
 - Dataset arithmetic now rejects different last-dimension coordinate grids
   carrying the same unit instead of silently accepting a scientifically
   incompatible pairing (#1665).

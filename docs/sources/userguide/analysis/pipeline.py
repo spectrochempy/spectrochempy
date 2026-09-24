@@ -41,8 +41,8 @@
 #
 # The synthetic concentrations, spectral profiles, and noise below remain
 # ``NDDataset`` objects. Reshaping concentration as a column lets the public
-# arithmetic operations broadcast it over the spectral dimension. Coordinates are
-# attached once the spectra have their final ``(y, x)`` geometry.
+# arithmetic operations broadcast it over the spectral dimension while preserving
+# the sample and spectral coordinates.
 
 # %%
 import spectrochempy as scp
@@ -52,6 +52,7 @@ concentration = scp.linspace(
     0.1,
     1.2,
     samples.size,
+    coordset=[samples],
     dims=["y"],
 )
 
@@ -62,6 +63,7 @@ wavenumbers = scp.linspace(
     dims=["x"],
     units="cm^-1",
 )
+wavenumbers.set_coordset(x=scp.Coord(wavenumbers, title="wavenumber"))
 band_a = scp.exp(
     -0.5 * ((wavenumbers - 1060.0 * scp.ur("cm^-1")) / (12.0 * scp.ur("cm^-1"))) ** 2
 )
@@ -82,18 +84,19 @@ noise = scp.normal(
     dims=["y", "x"],
 )
 dataset = contribution_a + baseline + contribution_b + noise
-dataset.set_coordset(
-    y=samples,
-    x=scp.Coord(wavenumbers, title="wavenumber"),
-)
 dataset.units = "absorbance"
 dataset.title = "calibration spectra"
 
-concentration.set_coordset(y=samples)
 target = concentration.copy()
 target.units = "mol/L"
 target.title = "concentration"
 _ = dataset.plot(show=False)
+
+# %% [markdown]
+# Broadcasting is positional and right-aligned: dimension names do not align or
+# reorder operands, and coordinates are never interpolated. A singleton axis
+# inherits the name and coordinate of the operand providing the
+# non-singleton axis. Duplicate result dimension names are rejected explicitly.
 
 # %% [markdown]
 # A complete calibration/test example

@@ -79,8 +79,7 @@ def test_scalar_and_trailing_vector_broadcast_keep_left_geometry():
     np.testing.assert_allclose(multiplied.x.data, variables.data)
 
 
-def test_rank_expanding_broadcast_currently_keeps_stale_left_dimensions():
-    """A 1D left operand can currently return 2D data with only one dim."""
+def test_rank_expanding_broadcast_reconstructs_result_dimensions():
     matrix = scp.NDDataset(np.arange(1.0, 13.0).reshape(3, 4), dims=["y", "x"])
     profile = scp.NDDataset([1.0, 2.0, 3.0, 4.0], dims=["x"])
 
@@ -90,22 +89,19 @@ def test_rank_expanding_broadcast_currently_keeps_stale_left_dimensions():
     np.testing.assert_allclose(forward.data, matrix.data - profile.data)
     np.testing.assert_allclose(reversed_.data, profile.data - matrix.data)
     assert forward.shape == reversed_.shape == (3, 4)
-    assert forward.dims == ["y", "x"]
-    assert reversed_.dims == ["x"]
-    assert len(reversed_.dims) != reversed_.ndim
+    assert forward.dims == reversed_.dims == ["y", "x"]
+    assert len(forward.dims) == forward.ndim
+    assert len(reversed_.dims) == reversed_.ndim
 
 
-def test_broadcast_dimension_name_collision_case_depends_on_left_template():
-    """Positional axes with the same name expose a proposed-contract collision."""
+def test_broadcast_dimension_name_collision_is_rejected():
     column = scp.NDDataset([[1.0], [2.0], [3.0]], dims=["y", "x"])
     same_named_profile = scp.NDDataset([1.0, 2.0, 3.0, 4.0], dims=["y"])
 
-    forward = column * same_named_profile
-    reversed_ = same_named_profile * column
-
-    assert forward.shape == reversed_.shape == (3, 4)
-    assert forward.dims == ["y", "x"]
-    assert reversed_.dims == ["y"]
+    with pytest.raises(ValueError, match="collision.*'y'.*axes 0/1"):
+        column * same_named_profile
+    with pytest.raises(ValueError, match="collision.*'y'.*axes 0/1"):
+        same_named_profile * column
 
 
 def test_column_and_vector_broadcast_without_coordinates():
@@ -135,18 +131,52 @@ def test_two_complementary_singleton_axes_broadcast_without_coordinates():
     np.testing.assert_allclose(forward.data, reversed_.data)
 
 
-def test_requested_empty_singleton_coordinate_is_rejected_before_broadcast():
+def test_complementary_singleton_axes_use_non_singleton_provider_coordinates():
+    samples, variables = _axes()
+    column = scp.NDDataset(
+        [[1.0], [2.0], [3.0]],
+        dims=["y", "x"],
+        coordset=[samples, scp.Coord([999.0], title="slot")],
+    )
+    row = scp.NDDataset(
+        [[1.0, 2.0, 3.0, 4.0]],
+        dims=["y", "x"],
+        coordset=[scp.Coord(labels=["reference"]), variables],
+    )
+
+    for result in (column * row, row * column):
+        assert result.shape == (3, 4)
+        assert result.ndim == 2
+        assert result.dims == ["y", "x"]
+        np.testing.assert_allclose(result.data, column.data * row.data)
+        np.testing.assert_allclose(result.y.data, samples.data)
+        np.testing.assert_allclose(result.x.data, variables.data)
+
+    np.testing.assert_allclose(column.x.data, [999.0])
+    assert row.y.labels.tolist() == ["reference"]
+
+
+def test_empty_singleton_coordinate_inherits_the_expanding_axis():
     _, column, profile = _requested_operands()
 
-    with pytest.raises(CoordinatesMismatchError):
-        column * profile
-    with pytest.raises(CoordinatesMismatchError):
-        profile * column
-    with pytest.raises(CoordinatesMismatchError):
-        np.multiply(column, profile)
+    expected = column.data * profile.data
+    for result in (
+        column * profile,
+        profile * column,
+        np.multiply(column, profile),
+        np.multiply(profile, column),
+    ):
+        assert result.shape == (3, 4)
+        assert result.ndim == 2
+        assert result.dims == ["y", "x"]
+        assert result.y.size == 3
+        assert result.x.size == 4
+        np.testing.assert_allclose(result.data, expected)
+        np.testing.assert_allclose(result.y.data, column.y.data)
+        np.testing.assert_allclose(result.x.data, profile.x.data)
 
 
-def test_absent_coordinate_is_tolerated_but_secondary_coordinate_is_not_adopted():
+def test_absent_coordinate_inherits_the_expanding_axis_coordinate():
     _, variables = _axes()
     column = scp.NDDataset([[1.0], [2.0], [3.0]], dims=["y", "x"])
     profile = scp.NDDataset(
@@ -158,10 +188,38 @@ def test_absent_coordinate_is_tolerated_but_secondary_coordinate_is_not_adopted(
     result = column * profile
 
     assert result.shape == (3, 4)
-    assert result.coordset is None
+    assert result.y.is_empty
+    np.testing.assert_allclose(result.x.data, variables.data)
 
 
-def test_significant_singleton_coordinates_are_not_treated_as_expandable():
+@pytest.mark.parametrize(
+    "operation, expected",
+    [
+        pytest.param(
+            lambda left, right: left - right,
+            lambda left, right: left - right,
+            id="subtract",
+        ),
+        pytest.param(
+            lambda left, right: left / right,
+            lambda left, right: left / right,
+            id="divide",
+        ),
+    ],
+)
+def test_non_commutative_broadcast_preserves_operand_order(operation, expected):
+    column = scp.NDDataset([[2.0], [4.0], [8.0]], dims=["y", "x"])
+    profile = scp.NDDataset([1.0, 2.0, 4.0, 8.0], dims=["x"])
+
+    forward = operation(column, profile)
+    reversed_ = operation(profile, column)
+
+    np.testing.assert_allclose(forward.data, expected(column.data, profile.data))
+    np.testing.assert_allclose(reversed_.data, expected(profile.data, column.data))
+    assert forward.dims == reversed_.dims == ["y", "x"]
+
+
+def test_numeric_and_labeled_singleton_coordinates_can_expand():
     samples, variables = _axes()
     value_column = scp.NDDataset(
         [[1.0], [2.0], [3.0]],
@@ -184,10 +242,103 @@ def test_significant_singleton_coordinates_are_not_treated_as_expandable():
         coordset=[scp.Coord(labels=["a", "b", "c", "d"])],
     )
 
-    with pytest.raises(CoordinatesMismatchError):
-        value_column * numeric_profile
-    with pytest.raises(CoordinatesMismatchError):
-        label_column * label_profile
+    numeric_results = (
+        value_column * numeric_profile,
+        numeric_profile * value_column,
+    )
+    for result in numeric_results:
+        assert result.shape == (3, 4)
+        assert result.dims == ["y", "x"]
+        np.testing.assert_allclose(
+            result.data, value_column.data * numeric_profile.data
+        )
+        np.testing.assert_allclose(result.y.data, samples.data)
+        np.testing.assert_allclose(result.x.data, variables.data)
+
+    label_results = (label_column * label_profile, label_profile * label_column)
+    for result in label_results:
+        assert result.shape == (3, 4)
+        assert result.dims == ["y", "x"]
+        np.testing.assert_allclose(result.data, label_column.data * label_profile.data)
+        assert result.y.data.tolist() == samples.data.tolist()
+        assert result.x.labels.tolist() == ["a", "b", "c", "d"]
+
+    numeric_results[0].x[0] = 42.0
+    label_results[0].x.labels[0] = "changed"
+
+    np.testing.assert_allclose(value_column.x.data, [999.0])
+    np.testing.assert_allclose(numeric_profile.x.data, variables.data)
+    assert label_column.x.labels.tolist() == ["slot"]
+    assert label_profile.x.labels.tolist() == ["a", "b", "c", "d"]
+
+
+def test_same_dimension_singleton_group_can_expand_without_recursion():
+    samples, variables = _axes()
+    singleton_group = scp.CoordSet(
+        scp.Coord([999.0], title="slot value"),
+        scp.Coord(labels=["slot"], title="slot label"),
+        sorted=False,
+    )
+    provider_group = scp.CoordSet(
+        variables,
+        scp.Coord(labels=["a", "b", "c", "d"], title="bands"),
+        sorted=False,
+    )
+    provider_group.select(2)
+    column = scp.NDDataset(
+        [[1.0], [2.0], [3.0]],
+        dims=["y", "x"],
+        coordset=[samples, singleton_group],
+    )
+    profile = scp.NDDataset([1.0, 2.0, 3.0, 4.0], dims=["x"], coordset=[provider_group])
+
+    for result in (column * profile, profile * column):
+        assert result.shape == (3, 4)
+        assert result.dims == ["y", "x"]
+        np.testing.assert_allclose(result.data, column.data * profile.data)
+        assert result.x.is_same_dim
+        assert result.x.names == profile.x.names
+        assert result.x.default_index == profile.x.default_index
+        np.testing.assert_allclose(result.x.default.data, profile.x.default.data)
+        assert result.x is not profile.x
+
+    assert column.x.sizes == 1
+    np.testing.assert_allclose(column.x.coords[1].data, [999.0])
+    assert column.x.coords[0].labels.tolist() == ["slot"]
+
+
+def test_selected_reference_spectrum_broadcasts_without_squeeze():
+    samples, variables = _axes()
+    matrix = scp.NDDataset(
+        np.arange(12.0).reshape(3, 4),
+        dims=["y", "x"],
+        coordset=[samples, variables],
+    )
+    selected = matrix[0]
+
+    matrix_before = matrix.copy()
+    selected_before = selected.copy()
+    operations = (
+        (matrix - selected, matrix.data - selected.data),
+        (selected - matrix, selected.data - matrix.data),
+        (np.subtract(matrix, selected), matrix.data - selected.data),
+        (np.subtract(selected, matrix), selected.data - matrix.data),
+    )
+
+    for result, expected in operations:
+        assert result.shape == matrix.shape
+        assert result.ndim == matrix.ndim
+        assert result.dims == matrix.dims
+        np.testing.assert_allclose(result.data, expected)
+        np.testing.assert_allclose(result.y.data, matrix.y.data)
+        np.testing.assert_allclose(result.x.data, matrix.x.data)
+
+    operations[0][0].y[0] = 42.0
+    np.testing.assert_allclose(matrix.data, matrix_before.data)
+    np.testing.assert_allclose(selected.data, selected_before.data)
+    np.testing.assert_allclose(matrix.y.data, matrix_before.y.data)
+    np.testing.assert_allclose(selected.y.data, selected_before.y.data)
+    assert selected.shape == (1, 4)
 
 
 def test_matching_and_mismatching_label_only_coordinates():
@@ -458,6 +609,54 @@ def test_result_coordinates_are_copied_from_the_left_operand():
     assert right.x.labels.tolist() == ["a", "b", "c", "d"]
 
 
+def test_inherited_coordinate_values_and_labels_are_deep_copied():
+    samples, variables = _axes()
+    labeled_variables = scp.Coord(
+        variables.data.copy(),
+        labels=["a", "b", "c", "d"],
+        title=variables.title,
+        units=variables.units,
+    )
+    column = scp.NDDataset(
+        [[1.0], [2.0], [3.0]],
+        dims=["y", "x"],
+        coordset=[samples, None],
+    )
+    profile = scp.NDDataset(
+        [1.0, 2.0, 3.0, 4.0],
+        dims=["x"],
+        coordset=[labeled_variables],
+    )
+
+    result = column * profile
+    result.x[0] = 42.0
+    result.x.labels[0] = "changed"
+
+    assert profile.x.data[0] == 1000.0
+    assert profile.x.labels.tolist() == ["a", "b", "c", "d"]
+    assert column.y.data[0] == 0
+
+
+def test_inherited_same_dimension_coordinate_group_keeps_default():
+    samples, variables = _axes()
+    alternate = scp.Coord([9.0, 10.0, 11.0, 12.0], title="index")
+    multi = scp.CoordSet(variables, alternate, sorted=False)
+    multi.select(2)
+    column = scp.NDDataset(
+        [[1.0], [2.0], [3.0]],
+        dims=["y", "x"],
+        coordset=[samples, None],
+    )
+    profile = scp.NDDataset([1.0, 2.0, 3.0, 4.0], dims=["x"], coordset=[multi])
+
+    result = column * profile
+
+    assert result.x.is_same_dim
+    assert result.x.names == profile.x.names
+    assert result.x.default_index == profile.x.default_index
+    assert result.x is not profile.x
+
+
 def test_equal_same_dimension_coordinate_sets_are_preserved():
     samples, variables = _axes()
     alternate = scp.Coord([9.0, 10.0, 11.0, 12.0], title="index")
@@ -493,6 +692,27 @@ def test_shared_coordinate_references_are_copied_with_left_geometry():
     np.testing.assert_allclose(result.y.data, result.x.data)
     assert result.coordset is not left.coordset
     assert result.x is not left.x
+
+
+def test_references_between_selected_axes_survive_mixed_geometry():
+    shared = scp.Coord([1.0, 2.0], title="shared")
+    left = scp.NDDataset(
+        np.ones((2, 2, 1)),
+        dims=["z", "y", "x"],
+        coordset=scp.CoordSet(z="y", y=shared, x=None),
+    )
+    profile = scp.NDDataset(
+        [1.0, 2.0, 3.0],
+        dims=["x"],
+        coordset=[scp.Coord([10.0, 20.0, 30.0])],
+    )
+
+    for result in (left * profile, profile * left):
+        assert result.shape == (2, 2, 3)
+        assert result.dims == ["z", "y", "x"]
+        assert result.coordset.references == {"z": "y"}
+        np.testing.assert_allclose(result.z.data, result.y.data)
+        np.testing.assert_allclose(result.x.data, profile.x.data)
 
 
 def test_inplace_broadcast_requires_the_target_shape_to_stay_unchanged():

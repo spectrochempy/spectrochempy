@@ -1,6 +1,7 @@
 """NDMath class - Mathematical operations for N-dimensional arrays."""
 
 # Standard library imports
+import builtins
 import copy as cpy
 import functools
 import inspect
@@ -9,6 +10,7 @@ import re
 import sys
 from collections.abc import Callable
 from collections.abc import Sequence
+from dataclasses import dataclass
 from typing import Any
 from typing import TypeVar
 
@@ -696,6 +698,16 @@ LOGICAL_BINARY_STR = """
 _COORDINATE_POLICY: str = "spectroscopic-last-dim"
 
 
+@dataclass(frozen=True)
+class _BroadcastGeometry:
+    """Private result geometry for positional NDDataset broadcasting."""
+
+    shape: tuple[int, ...]
+    dims: tuple[str, ...]
+    coordset: Any
+    last_axis_expanded: bool
+
+
 class _ExecutionPlan:
     """Named numeric execution branches for NDMath operations."""
 
@@ -859,7 +871,9 @@ class NDMath:
             return (getattr(np, fname))(inputs[0].masked_data)
 
         # case of a dataset
-        data, units, mask, returntype, reflected = self._op(ufunc, inputs, isufunc=True)
+        data, units, mask, returntype, reflected, geometry = self._op(
+            ufunc, inputs, isufunc=True
+        )
 
         # The title is computed by the shared arithmetic-title-semantics engine
         # (`_title_for`), identical for the operator and the ufunc paths.
@@ -872,6 +886,7 @@ class NDMath:
             fname=fname,
             operands=inputs,
             reflected=reflected,
+            geometry=geometry,
         )
 
     # ----------------------------------------------------------------------------------
@@ -3106,6 +3121,144 @@ class NDMath:
     # ------------------------------------------------------------------
 
     @staticmethod
+    def _axis_coordinate(dataset, axis: int):
+        """Return an axis coordinate/group, including empty coordinates."""
+        if dataset._coordset is None:
+            return None
+        dim = dataset.dims[axis]
+        try:
+            return dataset._coordset[dim]
+        except (KeyError, TypeError):
+            return None
+
+    @staticmethod
+    def _prepare_broadcast_geometry(obj, other, *, inplace=False):
+        """Plan positional result geometry for two NDDataset operands."""
+        from spectrochempy.core.dataset.coordset import CoordSet  # noqa: PLC0415
+
+        try:
+            shape = np.broadcast_shapes(obj.shape, other.shape)
+        except ValueError as err:
+            raise ArithmeticError(
+                "operands could not be broadcast together with shapes "
+                f"{obj.shape} {other.shape}"
+            ) from err
+
+        if inplace and shape != obj.shape:
+            raise ArithmeticError(
+                "non-broadcastable output operand with shape "
+                f"{obj.shape} doesn't match the broadcast shape {shape}"
+            )
+
+        ndim = len(shape)
+        offsets = (ndim - obj.ndim, ndim - other.ndim)
+        selected_dims = []
+        selected_coords = []
+        selected_sources = []
+        selected_source_dims = []
+        expanded_axes = []
+
+        for result_axis, result_size in enumerate(shape):
+            axes = []
+            for operand, offset in ((obj, offsets[0]), (other, offsets[1])):
+                operand_axis = result_axis - offset
+                if operand_axis < 0:
+                    axes.append(None)
+                    continue
+                axes.append(
+                    (
+                        operand,
+                        operand_axis,
+                        operand.shape[operand_axis],
+                        operand.dims[operand_axis],
+                        NDMath._axis_coordinate(operand, operand_axis),
+                    )
+                )
+
+            left, right = axes
+            non_singletons = [
+                axis for axis in axes if axis is not None and axis[2] != 1
+            ]
+            if len(non_singletons) == 1:
+                provider = non_singletons[0]
+            elif len(non_singletons) == 2:
+                provider = left
+            else:
+                provider = left if left is not None else right
+
+            selected_dims.append(provider[3])
+            selected_coords.append(provider[4])
+            selected_sources.append(provider[0])
+            selected_source_dims.append(provider[3])
+
+            expanded = False
+            for axis in axes:
+                if axis is None:
+                    continue
+                if axis[2] == 1 and result_size != 1:
+                    expanded = True
+            expanded_axes.append(expanded)
+
+        duplicates = sorted(
+            {dim for dim in selected_dims if selected_dims.count(dim) > 1}
+        )
+        if duplicates:
+            details = ", ".join(
+                f"{name!r} on axes "
+                + "/".join(
+                    str(index)
+                    for index, selected in enumerate(selected_dims)
+                    if selected == name
+                )
+                for name in duplicates
+            )
+            raise ValueError(
+                "Broadcast result dimension names must be unique; "
+                f"collision for {details}. Rename an operand dimension explicitly."
+            )
+
+        # Keeping a complete source CoordSet is important for reference topology.
+        if tuple(selected_dims) == tuple(obj.dims) and builtins.all(
+            source is obj for source in selected_sources
+        ):
+            coordset = cpy.deepcopy(obj._coordset)
+        elif builtins.all(coord is None for coord in selected_coords):
+            coordset = None
+        else:
+            coordinates = {}
+            selected_axes = list(
+                zip(selected_sources, selected_source_dims, strict=True)
+            )
+            for dim, coord, source, source_dim in zip(
+                selected_dims,
+                selected_coords,
+                selected_sources,
+                selected_source_dims,
+                strict=True,
+            ):
+                reference = (
+                    source._coordset.references.get(source_dim)
+                    if source._coordset is not None
+                    else None
+                )
+                reference_is_selected = reference is not None and builtins.any(
+                    selected_source is source and selected_dim == reference
+                    for selected_source, selected_dim in selected_axes
+                )
+                if reference_is_selected:
+                    coordinates[dim] = reference
+                else:
+                    coordinates[dim] = cpy.deepcopy(coord)
+            coordset = CoordSet(**coordinates)
+
+        return _BroadcastGeometry(
+            shape=shape,
+            dims=tuple(selected_dims),
+            coordset=coordset,
+            last_axis_expanded=expanded_axes[-1] if expanded_axes else False,
+        )
+
+    @staticmethod
     def _prepare_operation_quantities(
         obj,
         other,
@@ -3116,6 +3269,7 @@ class NDMath:
         is_dataset,
         objtype,
         othertype,
+        broadcast_geometry=None,
     ):
         """
         Build probe quantities *q*, *otherqs* and operand *args* list.
@@ -3191,6 +3345,7 @@ class NDMath:
                 is_dataset,
                 objtype,
                 othertype,
+                broadcast_geometry,
             )
 
             # Extract raw data from other
@@ -3220,6 +3375,7 @@ class NDMath:
         is_dataset: bool,
         objtype: str,
         othertype: str,
+        broadcast_geometry=None,
     ) -> None:
         """
         Check coordinate compatibility under the ``spectroscopic-last-dim`` policy.
@@ -3243,6 +3399,8 @@ class NDMath:
         )
 
         if not (is_dataset and othertype == "NDDataset"):
+            return
+        if broadcast_geometry is not None and broadcast_geometry.last_axis_expanded:
             return
         if other._coordset == obj._coordset:
             return
@@ -3582,7 +3740,7 @@ class NDMath:
         isufunc: bool = False,
         reflected: bool = False,
         inplace: bool = False,
-    ) -> tuple[np.ndarray, str | None, np.ndarray, str | None, bool]:
+    ) -> tuple[np.ndarray, str | None, np.ndarray, str | None, bool, Any]:
         # Achieve an operation f on the objs
 
         fname = f.__name__
@@ -3623,6 +3781,12 @@ class NDMath:
         # ------------------------------------------------------------------------------
         is_dataset = objtype == "NDDataset"
 
+        broadcast_geometry = None
+        if is_dataset and othertype == "NDDataset":
+            broadcast_geometry = self._prepare_broadcast_geometry(
+                obj, other, inplace=inplace
+            )
+
         d = obj.data
 
         # Prepare probe quantities and operand data
@@ -3636,6 +3800,7 @@ class NDMath:
             is_dataset,
             objtype,
             othertype,
+            broadcast_geometry,
         )
 
         # Resolve operation units
@@ -3652,7 +3817,7 @@ class NDMath:
         )
 
         # return calculated data, units and mask
-        return data, units, mask, returntype, reflected
+        return data, units, mask, returntype, reflected, broadcast_geometry
 
     @staticmethod
     def _unary_op(f):
@@ -3664,7 +3829,7 @@ class NDMath:
             else:
                 history = None
 
-            data, units, mask, returntype, reflected = self._op(f, [self])
+            data, units, mask, returntype, reflected, geometry = self._op(f, [self])
             return self._op_result(
                 data,
                 units,
@@ -3674,6 +3839,7 @@ class NDMath:
                 fname=fname,
                 operands=[self],
                 reflected=reflected,
+                geometry=geometry,
             )
 
         return func
@@ -3737,7 +3903,7 @@ class NDMath:
             else:
                 history = None
 
-            data, units, mask, returntype, reflected = self._op(
+            data, units, mask, returntype, reflected, geometry = self._op(
                 fm, objs, reflected=reflected
             )
             return self._op_result(
@@ -3749,6 +3915,7 @@ class NDMath:
                 fname=fname,
                 operands=operands,
                 reflected=reflected,
+                geometry=geometry,
             )
 
         return func
@@ -3765,7 +3932,7 @@ class NDMath:
             objs = [self, other]
             fm, objs, reflected = self._check_order(fname, objs)
 
-            data, units, mask, returntype, reflected = self._op(
+            data, units, mask, returntype, reflected, _geometry = self._op(
                 fm, objs, reflected=reflected, inplace=True
             )
             self._data = data
@@ -3794,6 +3961,7 @@ class NDMath:
         fname=None,
         operands=None,
         reflected=False,
+        geometry=None,
     ):
         # make a new NDArray resulting of some operation
 
@@ -3804,6 +3972,10 @@ class NDMath:
             new = NDDataset(new)
 
         new._data = cpy.deepcopy(data)
+
+        if geometry is not None:
+            new._dims = list(geometry.dims)
+            new._coordset = cpy.deepcopy(geometry.coordset)
 
         # update the attributes
         new._units = cpy.copy(units)
