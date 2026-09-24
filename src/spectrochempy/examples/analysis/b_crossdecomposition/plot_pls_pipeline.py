@@ -85,7 +85,7 @@ if ds_list is not None:
     # ^^^^^^^^^^^^^^^^^^^^^^^^^^
     y_val_pred = pipeline.predict(X_val)
     residuals = y_val - y_val_pred
-    rmse_val = float(((residuals**2).mean() ** 0.5).magnitude)
+    rmse_val = float(scp.Quantity((residuals**2).mean() ** 0.5).magnitude)
     units = f" {y_val.units}" if y_val.units else ""
     print(f"Validation RMSE: {rmse_val:.3f}{units}")
 
