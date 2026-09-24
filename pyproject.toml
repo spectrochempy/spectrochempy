@@ -99,6 +99,8 @@ plugins = [
     "spectrochempy-perkinelmer>=0.1,<0.2",
 ]
 test = [
+  "setuptools_scm>=8",
+  "toml",
   "coverage",
   "ipywidgets",
   "pyfakefs",

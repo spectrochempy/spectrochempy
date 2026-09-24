@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# ruff: noqa: T201
+# ruff: noqa: S603, S607, T201
 """
 Shared PEP 440 release-version semantics for the SpectroChemPy release tooling.
 
@@ -31,6 +31,10 @@ Usage
     next_dev=1.0.0rc2
     pypi_classifier=4 - Beta
 
+The ``latest-tag`` command selects the highest supported core release tag
+using final/RC semantics, independently of Git's version-sort configuration.
+It can run before dependencies are installed. Tags must have been fetched.
+
 The ``describe`` output is emitted as ``key=value`` lines so that GitHub
 Actions steps can forward them to ``$GITHUB_OUTPUT`` or ``$GITHUB_ENV``.
 """
@@ -38,6 +42,7 @@ Actions steps can forward them to ``$GITHUB_OUTPUT`` or ``$GITHUB_ENV``.
 from __future__ import annotations
 
 import re
+import subprocess
 
 try:
     from packaging.version import InvalidVersion
@@ -179,10 +184,51 @@ def describe(version: str) -> dict[str, str]:
     }
 
 
+def latest_core_tag() -> str:
+    """
+    Select the highest supported core release, with finals after their RCs.
+
+    Git's version sort does not implement prerelease ordering. Keep the
+    existing repository-wide tag scope, excluding plugin and unsupported tags.
+    The numeric key implements PEP 440 ordering for our final/RC-only grammar
+    and also works during bootstrap without site packages.
+    """
+    # Fixed Git command and arguments; no shell or user-provided command.
+    tags = subprocess.check_output(
+        ["git", "tag", "--list", f"{TAG_PREFIX}*"],
+        text=True,
+    ).splitlines()
+    candidates = []
+    for tag in tags:
+        try:
+            version = parse_release(tag.removeprefix(TAG_PREFIX))
+        except ReleaseVersionError:
+            continue
+        key = (
+            version.major,
+            version.minor,
+            version.micro,
+            version.pre is None,
+            version.pre[1] if version.pre else 0,
+        )
+        candidates.append((key, tag))
+    if not candidates:
+        raise ReleaseVersionError("No supported core release tag found.")
+    return max(candidates)[1]
+
+
 def main(argv: list[str]) -> int:
+    if argv == ["latest-tag"]:
+        try:
+            print(latest_core_tag())
+        except (ReleaseVersionError, subprocess.CalledProcessError) as exc:
+            print(str(exc), file=__import__("sys").stderr)
+            return 1
+        return 0
+
     if len(argv) < 2:
         print(
-            "usage: release_version.py {validate|describe|next-dev} <version>",
+            "usage: release_version.py latest-tag | {validate|describe|next-dev} <version>",
             file=__import__("sys").stderr,
         )
         return 2

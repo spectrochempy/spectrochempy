@@ -43,6 +43,8 @@ dependencies:
     # TEST dependencies
     # -----------------
 
+    - setuptools_scm>=8
+    - toml
     - coverage
     - ipywidgets
     - pyfakefs

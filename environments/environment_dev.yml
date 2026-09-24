@@ -54,6 +54,8 @@ dependencies:
     - nodejs
     - jupyter_server
     # test
+    - setuptools_scm>=8
+    - toml
     - coverage
     - ipywidgets
     - pyfakefs
