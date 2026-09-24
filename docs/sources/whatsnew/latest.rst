@@ -26,6 +26,8 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- Refused NDDataset in-place arithmetic operations now leave the target
+  entirely unchanged instead of appending history or partially updating state.
 - NDDataset arithmetic now reconstructs dimensions and coordinates after
   positional broadcasting. When a singleton axis expands, the result uses the
   name and coordinate of the operand providing the non-singleton axis.
