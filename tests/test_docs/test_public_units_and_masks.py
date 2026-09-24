@@ -59,15 +59,19 @@ def test_public_dimensionality_error_and_spectroscopy_context():
 def test_dataset_mask_and_nan_remain_distinct():
     coordinate = scp.Coord([1000.0, 1100.0, 1200.0], units="cm^-1")
     dataset = scp.NDDataset(
-        [0.25, 0.50, 0.75],
+        [0.25, 2.00, 0.75],
         coordset=[coordinate],
         dims=["x"],
         units="absorbance",
     )
     dataset.meta.source = "synthetic"
+    original_shape = dataset.shape
+
+    assert scp.mean(dataset) == 1.0 * scp.ur.absorbance
+
     dataset[1] = scp.MASKED
 
-    assert dataset.data.tolist() == [0.25, 0.50, 0.75]
+    assert dataset.data.tolist() == [0.25, 2.00, 0.75]
     assert dataset.mask.tolist() == [False, True, False]
     assert dataset.x == coordinate
     assert dataset.meta.source == "synthetic"
@@ -75,12 +79,35 @@ def test_dataset_mask_and_nan_remain_distinct():
 
     assert dataset.remove_masks() is None
     assert dataset.mask is scp.NOMASK
+    assert dataset.data.tolist() == [0.25, 2.00, 0.75]
+    assert dataset.shape == original_shape
     assert dataset.x == coordinate
     assert dataset.meta.source == "synthetic"
 
     nan_dataset = scp.NDDataset([0.25, np.nan, 0.75], units="absorbance")
     assert nan_dataset.mask is scp.NOMASK
     assert np.isnan(scp.mean(nan_dataset).magnitude)
+
+
+def test_masked_plot_keeps_a_real_gap():
+    time = scp.Coord.linspace(0.0, 10.0, 101, title="time", units="s")
+    original = scp.NDDataset(
+        scp.sin(2.0 * time.data) + 0.25 * scp.cos(5.0 * time.data),
+        coordset=[time],
+        dims=["x"],
+    )
+    masked = original.copy()
+    masked[40:61] = scp.MASKED
+
+    ax = original.plot(color="0.65", show=False)
+    _ = masked.plot(ax=ax, clear=False, color="tab:blue", show=False)
+
+    original_line = ax.lines[0].get_ydata()
+    masked_line = ax.lines[1].get_ydata()
+    assert not np.ma.getmaskarray(original_line).any()
+    assert np.ma.getmaskarray(masked_line)[40:61].all()
+    assert not np.ma.getmaskarray(masked_line)[:40].any()
+    assert not np.ma.getmaskarray(masked_line)[61:].any()
 
 
 def test_raw_accessors_preserve_only_their_documented_information():
