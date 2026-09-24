@@ -309,3 +309,143 @@ def test_update_script_no_longer_truncates_rc_versions():
     assert "'.'.join(version.split('.')[:3])" not in content
     assert "from release_version import" in content
     assert "v(\\d+\\.\\d+\\.\\d+(?:rc\\d+)?)\\.rst" in content
+
+
+@pytest.fixture
+def tagged_repository(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+
+    def git(*args):
+        return subprocess.check_output(["git", *args], text=True).strip()
+
+    git("init", "--quiet")
+    git(
+        "-c",
+        "user.name=Test",
+        "-c",
+        "user.email=test@example.org",
+        "commit",
+        "--quiet",
+        "--allow-empty",
+        "-m",
+        "Initial",
+    )
+    return git
+
+
+@pytest.mark.parametrize(
+    ("tags", "expected", "next_dev"),
+    [
+        (["1.0.0rc1"], "1.0.0rc1", "1.0.0rc2"),
+        (["1.0.0rc1", "1.0.0"], "1.0.0", "1.0.1"),
+        (["1.0.0", "1.0.1rc1"], "1.0.1rc1", "1.0.1rc2"),
+        (["1.0.0rc2", "1.0.0rc10"], "1.0.0rc10", "1.0.0rc11"),
+        (["1.9.0", "1.10.0"], "1.10.0", "1.10.1"),
+    ],
+)
+def test_latest_tag_semantic_order(tagged_repository, tags, expected, next_dev):
+    for version in tags:
+        tagged_repository("tag", rv.TAG_PREFIX + version)
+    # Plugin and unsupported core tags must never determine the version.
+    tagged_repository("tag", "spectrochempy-nmr-v99.0.0")
+    tagged_repository("tag", "spectrochempy-v99.0.0.dev1")
+    assert rv.latest_core_tag() == rv.TAG_PREFIX + expected
+    assert rv.next_dev_version(expected) == next_dev
+    result = subprocess.run(
+        [sys.executable, "-S", str(SCRIPT_PATH), "latest-tag"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert result.stdout.strip() == rv.TAG_PREFIX + expected
+
+
+def test_latest_tag_handles_annotated_release(tagged_repository):
+    tagged_repository("tag", "spectrochempy-v1.0.0rc1")
+    tagged_repository(
+        "-c",
+        "user.name=Test",
+        "-c",
+        "user.email=test@example.org",
+        "tag",
+        "-a",
+        "spectrochempy-v1.0.0",
+        "-m",
+        "Release",
+    )
+    assert rv.latest_core_tag() == "spectrochempy-v1.0.0"
+
+
+def test_latest_tag_fails_without_supported_tags(tagged_repository):
+    tagged_repository("tag", "spectrochempy-nmr-v1.0.0")
+    result = subprocess.run(
+        [sys.executable, str(SCRIPT_PATH), "latest-tag"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 1
+    assert not result.stdout
+    assert "No supported core release tag" in result.stderr
+
+
+@pytest.mark.parametrize(
+    "workflow",
+    [
+        "build_package.yml",
+        "test_package.yml",
+        "pre-commit.yml",
+        "validate_release_artifacts.yml",
+    ],
+)
+def test_core_workflows_select_tags_semantically(workflow):
+    content = (WORKFLOWS / workflow).read_text()
+    assert "release_version.py latest-tag" in content
+    assert "--sort=-v:refname" not in content
+
+
+def test_post_final_conda_recipe_version(tagged_repository, tmp_path, monkeypatch):
+    """Exercise the real recipe generator with the post-final dev version."""
+    import os
+    import shutil
+
+    import yaml
+
+    tagged_repository("tag", "spectrochempy-v1.0.0rc1")
+    tagged_repository("tag", "spectrochempy-v1.0.0")
+    tagged_repository(
+        "-c",
+        "user.name=Test",
+        "-c",
+        "user.email=test@example.org",
+        "commit",
+        "--quiet",
+        "--allow-empty",
+        "-m",
+        "Development",
+    )
+    tag = rv.latest_core_tag()
+    count = tagged_repository("rev-list", "--count", f"{tag}..HEAD")
+    version = f"{rv.next_dev_version(tag.removeprefix(rv.TAG_PREFIX))}.dev{count}"
+    assert version == "1.0.1.dev1"
+    source_root = SCRIPT_PATH.parents[3]
+    for relative in [
+        "pyproject.toml",
+        "README.md",
+        ".github/workflows/scripts/generate_conda_recipe.py",
+        ".github/workflows/scripts/templates/recipe.tmpl",
+    ]:
+        target = tmp_path / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source_root / relative, target)
+    subprocess.run(
+        [sys.executable, ".github/workflows/scripts/generate_conda_recipe.py"],
+        env={**os.environ, "SETUPTOOLS_SCM_PRETEND_VERSION": version},
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    recipe = yaml.safe_load((tmp_path / "recipe/recipe.yaml").read_text())
+    assert recipe["package"]["version"] == "1.0.1"
+    assert recipe["build"]["string"] == "dev1"
+    assert "SETUPTOOLS_SCM_PRETEND_VERSION=1.0.1 " in recipe["build"]["script"]
