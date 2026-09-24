@@ -454,6 +454,11 @@ Complex
 Masks
 =====
 
+``MASKED`` and ``NOMASK`` are the public sentinels used to set and represent
+dataset masks. ``MaskedArray`` and ``MaskedConstant`` retain their NumPy identities for
+interoperability; routine workflows should keep data in `NDDataset`. See
+:ref:`reference_units_masks` for their SpectroChemPy roles and verified examples.
+
 .. autosummary::
     :nosignatures:
     :toctree: generated/
@@ -464,12 +469,24 @@ Masks
 Units manipulation
 ===================
 
+``ur`` is the unit registry configured by SpectroChemPy; ``Unit`` and ``Quantity`` use
+that registry while retaining their Pint identities. ``DimensionalityError`` is the
+original Pint exception class retained for interoperability. See
+:ref:`reference_units_masks` for project-specific construction, conversion, mutation,
+dimensionless-value, and error-handling guidance.
+
+.. toctree::
+   :hidden:
+
+   units_and_masks
+
 .. autosummary::
     :nosignatures:
     :toctree: generated/
 
     Unit
     Quantity
+    DimensionalityError
     to
     to_base_units
     to_reduced_units

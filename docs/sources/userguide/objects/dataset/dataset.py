@@ -359,17 +359,21 @@ time = 5.0 * ur.second
 d1D / time  # here we get results in eV/s
 
 # %% [markdown]
-# Conversion can be done between different units transparently
+# Compatible conversion returns a new dataset by default and leaves ``d1D`` unchanged.
+# Conversions such as energy to temperature or wavenumber to wavelength instead use
+# physical equivalence contexts; they are not ordinary same-dimensional rescaling.
 
 # %%
-d1D.to("J")
+in_joules = d1D.to("J")
+in_joules
 
 # %%
-d1D.to("K")
+d1D  # still expressed in eV
 
-# %% [markdown]
-# For more examples on how to use units with NDDataset, see the
-# :ref:`examples-gallery`.
+# %% [raw] raw_mimetype="text/restructuredtext"
+# See :ref:`units and masks guide <userguide_units_masks>` for verified examples
+# of quantities, compatible and context-enabled conversions, in-place
+# conversion, incompatibility errors, and masks.
 
 # %% [markdown]
 # ## Coordinates
