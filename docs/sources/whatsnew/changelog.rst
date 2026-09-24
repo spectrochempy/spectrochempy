@@ -37,7 +37,7 @@ Bug Fixes
   positional broadcasting. Empty singleton axes can inherit the expanding
   coordinate, while significant singleton coordinates and duplicate result
   dimension names are rejected explicitly. Squeeze a selected reference
-  spectrum before intentionally repeating it across observations.
+  spectrum before intentionally repeating it across observations (#1667).
 - Dataset arithmetic now rejects different last-dimension coordinate grids
   carrying the same unit instead of silently accepting a scientifically
   incompatible pairing (#1665).
