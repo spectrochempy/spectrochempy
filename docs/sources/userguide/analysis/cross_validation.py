@@ -35,8 +35,6 @@
 # [CrossValidationResult](../../reference/generated/spectrochempy.CrossValidationResult.rst).
 
 # %%
-from sklearn.model_selection import KFold
-
 import spectrochempy as scp
 
 sample = scp.Coord.arange(18, title="sample")
@@ -75,7 +73,7 @@ y = scp.NDDataset(
 # coordinates, and any groups are aligned in the same order.
 
 # %%
-splitter = KFold(n_splits=6, shuffle=True, random_state=7)
+splitter = scp.KFold(n_splits=6, shuffle=True, random_state=7)
 pipeline = scp.Pipeline(
     [
         ("center", scp.CenterTransformer(dim="y")),

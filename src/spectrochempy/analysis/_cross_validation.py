@@ -14,16 +14,29 @@ from numbers import Number
 from types import MappingProxyType
 
 import numpy as np
-from sklearn.model_selection import GroupKFold
-from sklearn.model_selection import KFold
-from sklearn.model_selection import LeaveOneOut
+from sklearn.model_selection import GroupKFold as _SklearnGroupKFold
+from sklearn.model_selection import KFold as _SklearnKFold
+from sklearn.model_selection import LeaveOneOut as _SklearnLeaveOneOut
 
+from spectrochempy.analysis.model_selection import GroupKFold
+from spectrochempy.analysis.model_selection import KFold
+from spectrochempy.analysis.model_selection import LeaveOneOut
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils._estimator import clone_unfitted
 from spectrochempy.utils.exceptions import SpectroChemPyError
 
 __all__ = ["CrossValidationResult", "cross_validate"]
+
+_SUPPORTED_SPLITTER_TYPES = (
+    KFold,
+    GroupKFold,
+    LeaveOneOut,
+    _SklearnKFold,
+    _SklearnGroupKFold,
+    _SklearnLeaveOneOut,
+)
+_GROUP_SPLITTER_TYPES = (GroupKFold, _SklearnGroupKFold)
 
 
 @dataclass(frozen=True)
@@ -1178,22 +1191,17 @@ def _prepare_groups(groups, observed, *, sample_dim, n_observations):
 
 
 def _validate_splitter_scope(splitter, *, groups):
-    class_name = _qualified_class_name(splitter)
-    supported = {
-        "sklearn.model_selection._split.KFold",
-        "sklearn.model_selection._split.GroupKFold",
-        "sklearn.model_selection._split.LeaveOneOut",
-    }
-    if class_name not in supported:
+    splitter_type = type(splitter)
+    if splitter_type not in _SUPPORTED_SPLITTER_TYPES:
         raise SpectroChemPyError(
             f"{splitter.__class__.__name__} is not a supported v1 CV splitter."
         )
-    is_group_splitter = class_name.endswith(".GroupKFold")
+    is_group_splitter = splitter_type in _GROUP_SPLITTER_TYPES
     if is_group_splitter and groups is None:
         raise SpectroChemPyError("GroupKFold requires groups.")
     if not is_group_splitter and groups is not None:
         raise SpectroChemPyError("groups must not be supplied to a non-group splitter.")
-    return class_name
+    return _qualified_class_name(splitter)
 
 
 def _validate_splitter(splitter, *, groups, n_observations, n_folds):
@@ -1803,7 +1811,7 @@ def _resolve_public_splitter(cv, *, groups):
         return GroupKFold(n_splits=n_splits)
     if isinstance(cv, Number):
         raise SpectroChemPyError("cv must not be a floating-point value.")
-    if type(cv) not in (KFold, GroupKFold, LeaveOneOut):
+    if type(cv) not in _SUPPORTED_SPLITTER_TYPES:
         raise SpectroChemPyError(
             "cv must be an integer or an explicit KFold, GroupKFold, or "
             "LeaveOneOut splitter."

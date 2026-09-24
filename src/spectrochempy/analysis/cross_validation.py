@@ -8,4 +8,7 @@
 from spectrochempy.analysis._cross_validation import CrossValidationResult
 from spectrochempy.analysis._cross_validation import cross_validate
 
-__all__ = ["CrossValidationResult", "cross_validate"]
+__all__ = [
+    "CrossValidationResult",
+    "cross_validate",
+]

@@ -20,9 +20,7 @@ by Eigenvector with permission. Here we use only the M5 spectra and moisture.
 """
 
 # %%
-# Import packages
-from sklearn.model_selection import KFold
-
+# Import package
 import spectrochempy as scp
 
 # %%
@@ -63,7 +61,7 @@ _ = ax.set_title("Every eighth M5 corn spectrum")
 # Five PLS components match the established fixed configuration used in the
 # SpectroChemPy corn tutorial. They are fixed before this comparison and are
 # not selected from the scores below.
-splitter = KFold(n_splits=5, shuffle=True, random_state=7)
+splitter = scp.KFold(n_splits=5, shuffle=True, random_state=7)
 metrics = ("rmsecv", "r2", "bias", "mae")
 
 pls = scp.PLSRegression(n_components=5)

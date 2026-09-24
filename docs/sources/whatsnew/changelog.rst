@@ -22,6 +22,10 @@ New Features
 - Added ``cross_validate`` and ``CrossValidationResult`` for bounded supervised
   PLS and Pipeline cross-validation with aligned ``NDDataset`` outputs,
   per-target metrics, fold records, and optional fitted fold estimators (#1658).
+- Added documented SpectroChemPy adapters for scikit-learn's ``KFold``,
+  ``GroupKFold``, and ``LeaveOneOut`` as ``scp.KFold``, ``scp.GroupKFold``, and
+  ``scp.LeaveOneOut`` so supported validation protocols can be constructed from
+  the SpectroChemPy namespace (#1660).
 
 .. section
 
