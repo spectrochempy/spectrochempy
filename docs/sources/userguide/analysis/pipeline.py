@@ -40,62 +40,56 @@
 # spectra do not accidentally influence centering or scaling statistics.
 #
 # The synthetic concentrations, spectral profiles, and noise below remain
-# ``NDDataset`` objects. Promoting concentration to a column lets the public
+# ``NDDataset`` objects. Reshaping concentration as a column lets the public
 # arithmetic operations broadcast it over the spectral dimension. Coordinates are
-# attached once each broadcast contribution has its final ``(y, x)`` geometry.
+# attached once the spectra have their final ``(y, x)`` geometry.
 
 # %%
 import spectrochempy as scp
 
-wavenumbers = scp.Coord.linspace(1000.0, 1200.0, 80, title="wavenumber", units="cm^-1")
 samples = scp.Coord.arange(12, title="sample")
 concentration = scp.linspace(
     0.1,
     1.2,
     samples.size,
-    coordset=[samples],
     dims=["y"],
 )
 
-spectral_position = scp.linspace(
+wavenumbers = scp.linspace(
     1000.0,
     1200.0,
-    wavenumbers.size,
+    80,
     dims=["x"],
     units="cm^-1",
 )
 band_a = scp.exp(
-    -0.5
-    * ((spectral_position - 1060.0 * scp.ur("cm^-1")) / (12.0 * scp.ur("cm^-1"))) ** 2
+    -0.5 * ((wavenumbers - 1060.0 * scp.ur("cm^-1")) / (12.0 * scp.ur("cm^-1"))) ** 2
 )
 band_b = scp.exp(
-    -0.5
-    * ((spectral_position - 1140.0 * scp.ur("cm^-1")) / (18.0 * scp.ur("cm^-1"))) ** 2
+    -0.5 * ((wavenumbers - 1140.0 * scp.ur("cm^-1")) / (18.0 * scp.ur("cm^-1"))) ** 2
 )
-baseline = (spectral_position - spectral_position.mean()) * (0.0005 * scp.ur.cm)
+baseline = (wavenumbers - wavenumbers.mean()) * (0.0005 * scp.ur.cm)
 baseline += 0.03
 
-concentration_column = concentration.atleast_2d().swapdims("u", "y")
+concentration_column = concentration.reshape((samples.size, 1), dims=("y", "x"))
 contribution_a = concentration_column * band_a
 contribution_b = 0.35 * concentration_column * band_b
-
-for profile in (band_a, band_b, baseline):
-    profile.set_coordset(x=wavenumbers)
-for contribution in (contribution_a, contribution_b):
-    contribution.dims = ["y", "x"]
-    contribution.set_coordset(y=samples, x=wavenumbers)
 
 noise = scp.normal(
     scale=0.015,
     size=(samples.size, wavenumbers.size),
     seed=42,
-    coordset=[samples, wavenumbers],
     dims=["y", "x"],
 )
 dataset = contribution_a + baseline + contribution_b + noise
+dataset.set_coordset(
+    y=samples,
+    x=scp.Coord(wavenumbers, title="wavenumber"),
+)
 dataset.units = "absorbance"
 dataset.title = "calibration spectra"
 
+concentration.set_coordset(y=samples)
 target = concentration.copy()
 target.units = "mol/L"
 target.title = "concentration"
