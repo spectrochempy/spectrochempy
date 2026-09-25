@@ -316,6 +316,7 @@ class Pipeline:
                 _instrument.CENTER_TRANSFORM_OPERATION_ID,
                 *_instrument.BINARY_OPERATION_IDS,
                 *_instrument.ASSEMBLY_OPERATION_IDS,
+                *_instrument.PCA_OPERATION_IDS,
             ):
                 if y is None:
                     step.fit(X)
@@ -333,6 +334,7 @@ class Pipeline:
                 _instrument.CENTER_TRANSFORM_OPERATION_ID,
                 *_instrument.BINARY_OPERATION_IDS,
                 *_instrument.ASSEMBLY_OPERATION_IDS,
+                *_instrument.PCA_OPERATION_IDS,
             ):
                 result = step.transform(X)
         except Exception as exc:

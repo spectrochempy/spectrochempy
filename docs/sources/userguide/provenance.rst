@@ -18,9 +18,11 @@ context-local capture mechanism. P2 adds the first runtime instrumentation:
 out-of-place ``NDDataset`` slicing and ``NDDataset.transpose`` create one
 operation record each while a capture context is active. P5 adds direct calls
 to ``CenterTransformer.fit()`` and ``CenterTransformer.transform()``. P3 adds
-four out-of-place binary operations between two ``NDDataset`` operands. Other
-P4 adds ordered ``concatenate`` and ``stack`` assembly. Other scientific
-operations remain uninstrumented unless this page states otherwise.
+four out-of-place binary operations between two ``NDDataset`` operands. P4
+adds ordered ``concatenate`` and ``stack`` assembly. P6 adds a direct
+``PCA.fit()`` and ``PCA.transform()`` cycle, with bounded evidence about the
+fitted estimator. Other scientific operations remain uninstrumented unless
+this page states otherwise.
 
 Captured slicing and transpose
 ------------------------------
@@ -268,6 +270,91 @@ the numeric fingerprint covers data, shape, and dtype but not masks,
 coordinates, units, or metadata. Its retained digest is bounded, while
 fingerprint work scales with the total input data read.
 
+
+Direct PCA fit and score transform
+----------------------------------
+
+Direct :meth:`PCA.fit <spectrochempy.PCA.fit>` and
+:meth:`PCA.transform <spectrochempy.PCA.transform>` calls record one estimator
+identity across its fitted states and link that estimator to calibration,
+source, and score datasets:
+
+.. code-block:: python
+
+   model = scp.PCA(n_components=3, svd_solver="full")
+
+   with scp.provenance.ProvenanceCapture() as capture:
+       calibration = dataset[:8]
+       model.fit(calibration)
+       scores = model.transform(calibration, n_components=2)
+
+   selection_record, fit_record, transform_record = capture.ledger.operation_records
+   assert fit_record.inputs[1].reference == selection_record.outputs[0].reference
+   assert transform_record.inputs[0].reference == fit_record.outputs[0].reference
+   assert transform_record.inputs[1].reference == fit_record.inputs[1].reference
+
+The fit inputs use the roles ``estimator`` and ``calibration``. Its
+``fitted_estimator`` output advances the same estimator object to a new state.
+The transform inputs use ``estimator`` and ``source`` and its ``result`` output
+is a new dataset state. This lets an existing P2, P3, P4, or P5 dataset state
+flow into PCA and lets later instrumented operations continue from the score
+dataset.
+
+PCA configuration at the call boundary is kept under
+``parameters.requested.configuration``. Explicit transform arguments, such as
+``n_components``, are kept separately under ``parameters.requested.call``.
+``parameters.resolved`` reports the effective solver, fitted component count,
+preprocessing flags, input geometry, transform component count, and result
+geometry. This separation is significant when ``svd_solver="auto"`` is
+resolved by the backend or when transform returns fewer than all fitted
+components.
+The configuration snapshot covers ``n_components``, ``svd_solver``, ``whiten``,
+``tol``, ``iterated_power``, ``n_oversamples``,
+``power_iteration_normalizer``, ``random_state``, ``scaled``, and
+``standardized``. ``log_level`` is diagnostic rather than scientific. The
+current private ``warm_start`` flag does not participate in PCA backend
+construction, fit, or direct transform and is not included. A ``RandomState``
+instance is described without its internal values in the record, while its
+state participates in the transient continuity fingerprint.
+
+
+The fit summary stores only bounded scalar facts and array descriptors for the
+learned PCA state. Component, mean, variance, variance-ratio, and singular-value
+values are explicitly omitted; the fitted scikit-learn model is not serialized.
+The fit record is therefore ``partial``. Continuity nevertheless fingerprints
+that configuration, fitted status, the wrapper's resolved component count,
+and backend solver, components, mean, explained variances, variance ratios,
+singular values, noise variance, sample count, and feature count. Computing
+the fingerprint reads the complete learned arrays and may make contiguous
+copies, while the immutable ledger retains neither the arrays nor the model.
+
+An unrecorded change to relevant PCA configuration or learned backend state
+breaks verified continuity and makes the next PCA record ``partial``. A failed
+initial fit records no output and reports whether the estimator stayed
+unchanged. A failed refit preserves PCA's existing behavior: because fitting
+invalidates managed fitted state before backend work, the old fit cannot be
+silently reused. The failure record reports the observed state effect, and a
+subsequent transform still raises the normal not-fitted error. No rollback is
+introduced.
+
+Capture preparation or append failure never changes a successful scientific
+operation or masks its exception. If a successful fit cannot be recorded, the
+estimator identity is invalidated. If a successful transform cannot be
+recorded, its result is invalidated so a later captured operation cannot claim
+complete continuity through the missing boundary.
+
+P6 is deliberately limited to exact ``PCA`` instances and direct
+``NDDataset`` arguments. It does not capture:
+
+- ``fit_transform()``, ``inverse_transform()``, or scores/loadings accessors;
+- subclasses of ``PCA`` or other estimators;
+- PCA steps invoked internally by ``Pipeline`` or other composites;
+- persistence, manifest, replay, or ``Project`` ownership.
+
+The exclusion of subclasses prevents a derived estimator with additional
+configuration or learned state from being attributed to the base PCA contract.
+Composite suppression is local to the PCA operation identifiers and does not
+suppress existing dataset records outside the composite boundary.
 
 Demonstrator: interactive selection followed by transpose
 ---------------------------------------------------------
