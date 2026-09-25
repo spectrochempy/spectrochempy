@@ -45,6 +45,7 @@ _CONFIGURATION_NAMES = (
 )
 _BACKEND_STATE_NAMES = (
     "_fit_svd_solver",
+    "whiten",
     "components_",
     "explained_variance_",
     "explained_variance_ratio_",

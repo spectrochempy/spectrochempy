@@ -323,8 +323,9 @@ learned PCA state. Component, mean, variance, variance-ratio, and singular-value
 values are explicitly omitted; the fitted scikit-learn model is not serialized.
 The fit record is therefore ``partial``. Continuity nevertheless fingerprints
 that configuration, fitted status, the wrapper's resolved component count,
-and backend solver, components, mean, explained variances, variance ratios,
-singular values, noise variance, sample count, and feature count. Computing
+and backend solver, effective whitening flag, components, mean, explained
+variances, variance ratios, singular values, noise variance, sample count, and
+feature count. Computing
 the fingerprint reads the complete learned arrays and may make contiguous
 copies, while the immutable ledger retains neither the arrays nor the model.
 

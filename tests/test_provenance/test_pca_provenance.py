@@ -278,6 +278,30 @@ def test_unrecorded_estimator_changes_break_verified_continuity(mutation):
         assert resolved["configuration"]["whiten"] is False
 
 
+def test_unrecorded_backend_whiten_change_breaks_verified_continuity():
+    source = _dataset()
+    control = scp.PCA(n_components=2, svd_solver="full")
+    expected = control.fit(source).transform(source)
+    estimator = scp.PCA(n_components=2, svd_solver="full")
+
+    with ProvenanceCapture() as capture:
+        estimator.fit(source)
+        estimator._pca.whiten = True
+        result = estimator.transform(source)
+
+    fit, transform = capture.ledger.operation_records
+    assert not np.allclose(np.abs(result.data), np.abs(expected.data))
+    assert transform.inputs[0].reference != fit.outputs[0].reference
+    assert transform.inputs[0].reference.object == fit.outputs[0].reference.object
+    assert transform.capture["status"] == "partial"
+    assert any(
+        omission["reason"] == "unrecorded_state_change"
+        for omission in transform.capture["omissions"]
+    )
+    resolved = _parameter_values(transform, "resolved")
+    assert resolved["configuration"]["whiten"] is True
+
+
 def test_set_params_invalidation_is_not_reported_as_old_fitted_state():
     source = _dataset()
     estimator = scp.PCA(n_components=2, svd_solver="full")
