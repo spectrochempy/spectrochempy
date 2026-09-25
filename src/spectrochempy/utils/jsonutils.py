@@ -314,7 +314,17 @@ def json_encoder(byte_obj, encoding=None, *, _root=True):
 
         dic = {}
         for name in objnames:
-            if (
+            if name == "history" and hasattr(byte_obj, "_history"):
+                # ``history`` is a rendered compatibility view.  Persist the
+                # authoritative entries so native files retain their structure.
+                val = [
+                    {
+                        **entry,
+                        "date": entry["date"].isoformat(),
+                    }
+                    for entry in byte_obj._history
+                ]
+            elif (
                 name in ["readonly"]
                 or (name == "dims" and "datasets" in objnames)
                 or [name in ["parent", "name"] and isinstance(byte_obj, PreferencesSet)]

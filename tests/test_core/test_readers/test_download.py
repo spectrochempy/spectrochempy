@@ -30,7 +30,7 @@ def test_download_nist_replaces_import_history_without_losing_later_entries(
         dataset.history = "Imported from jdx file"
         dataset.history = "Vendor processing retained"
         source_holder["dataset"] = dataset
-        source_holder["first_date"] = dataset._history[0][0]
+        source_holder["first_date"] = dataset._history[0]["date"]
         return dataset
 
     monkeypatch.setattr(
@@ -42,7 +42,7 @@ def test_download_nist_replaces_import_history_without_losing_later_entries(
     result = download_module.download_nist_ir("7732-18-5", index=0)
 
     assert result is source_holder["dataset"]
-    assert result._history[0][0] == source_holder["first_date"]
+    assert result._history[0]["date"] == source_holder["first_date"]
     assert len(result.history) == 2
     assert "Downloaded from NIST:" in result.history[0]
     assert "Imported from jdx file" not in result.history[0]

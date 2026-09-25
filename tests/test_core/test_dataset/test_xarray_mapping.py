@@ -94,14 +94,20 @@ def test_to_xarray_returns_dataset():
     assert xds.attrs["scpy_modified"] == _portable_attr_datetime(ds._modified)
 
 
-def test_to_xarray_exports_history_as_portable_text_list():
+def test_to_xarray_exports_history_as_portable_structured_list():
     ds = _make_dataset()
     ds._history = _make_history_entries()
     ds._modified = datetime(2024, 1, 2, 6, 7, 8, tzinfo=UTC)
 
     xds = ds.to_xarray()
 
-    assert xds.attrs["scpy_history"] == ds.history
+    assert xds.attrs["scpy_history"] == [
+        {
+            **entry,
+            "date": entry["date"].isoformat(sep=" ", timespec="seconds"),
+        }
+        for entry in ds.history_entries
+    ]
 
 
 def test_xarray_roundtrip_preserves_numerical_data_dims_and_coordinates():

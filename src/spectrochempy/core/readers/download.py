@@ -150,10 +150,11 @@ def download_nist_ir(CAS, index="all"):
             # replace the default entry ":imported from jdx file":
             message = f"Downloaded from NIST: {url}"
             if ds._history:
-                date, _ = ds._history[0]
-                ds._history[0] = (date, message)
+                entry = dict(ds._history[0])
+                entry["message"] = message
+                ds._history[0] = entry
             else:
-                ds.history = message
+                ds.annotate(message)
             out.append(ds)
             (Path() / "temp.jdx").unlink()
 

@@ -297,40 +297,60 @@ nd.created
 # ## About the `history` attribute
 
 # %% [markdown]
-# The history is saved internally as a list, but it has a different behavior than
-# the usual list.
-# The first time a NDDataset is created, the list is empty.
+# A new dataset starts with an empty history. The public ``history`` attribute is
+# the readable, timestamped view.
 
 # %%
 nd = NDDataset()
 nd.history
 
 # %% [markdown]
-# Assigning a string to the history attribute has two effects. First,
-# the string is appended automatically to the previous history list, and second, it is
-# preceded by the time it was added.
+# Add a user note explicitly with ``annotate()``. Assigning a string to ``history``
+# remains a shorthand for the same append operation.
 
 # %%
-nd.history = "some history"
-nd.history = "another history to append"
-nd.history = "..."
+nd.annotate("sample loaded")
+nd.history = "checked by operator"
 nd.history
 
 # %% [markdown]
-# If you want to erase the history, assign an empty list
+# Operations can retain structured details while keeping the familiar readable text.
+# This small before/after example records only the operations implemented by this
+# prototype.
 
 # %%
-nd.history = []
+before = nd.history
+processed = nd.T + 2
+after = processed.history
+before, after
+
+# %%
+processed.history_entries
+
+# %% [markdown]
+# ``history_entries`` returns a detached list of dictionaries with ``date``,
+# ``operation``, ``parameters``, and ``message`` fields. Changing that returned
+# value does not change the dataset. Parameters contain compact values or explicit
+# descriptions; they never retain live datasets or large arrays.
+#
+# Use the explicit methods below when replacement or removal is intended.
+
+# %%
+nd.replace_history(["replacement note", "another note"])
+nd.history
+
+# %%
+nd.clear_history()
 nd.history
 
 # %% [markdown]
-# If you want to replace the full history, use brackets around your history line:
-
-# %%
-nd.history = "Created from scratch"
-nd.history = "A second line that will be erased"
-nd.history = ["A more interesting message"]
-nd.history
+# Assigning a list to ``history`` is retained as a compatibility shorthand for
+# ``replace_history()`` and now keeps every list element. Histories loaded from older
+# files keep their timestamp and text, but no operation or parameters are inferred
+# from prose.
+#
+# This is an operation log, not an integrity or complete provenance mechanism. It
+# does not detect arbitrary mutations, construct a graph, or replay computations.
 
 # %% [markdown]
 # ## Units

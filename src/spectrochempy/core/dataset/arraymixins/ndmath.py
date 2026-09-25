@@ -316,6 +316,33 @@ def _get_name(x):
     return str(x.name if hasattr(x, "name") else x)
 
 
+def _history_operand(value, role):
+    """Describe one arithmetic operand without retaining the live object."""
+    if hasattr(value, "_implements") and value._implements("NDDataset"):
+        title = getattr(value, "_title", None)
+        return {
+            "role": role,
+            "kind": "NDDataset",
+            "name": value.name or None,
+            "title": None if title == "<untitled>" else title,
+            "shape": list(value.shape),
+        }
+    if np.isscalar(value):
+        scalar = value.item() if isinstance(value, np.generic) else value
+        if isinstance(scalar, str | int | float | bool) or scalar is None:
+            return {"role": role, "kind": "scalar", "value": scalar}
+        return {
+            "role": role,
+            "kind": "scalar",
+            "description": f"{type(scalar).__name__} value not stored",
+        }
+    return {
+        "role": role,
+        "kind": type(value).__name__,
+        "description": f"{type(value).__name__} operand not stored",
+    }
+
+
 # --------------------------------------------------------------------------------------
 # Arithmetic title semantics
 #
@@ -3893,6 +3920,18 @@ class NDMath:
             # Keep the operands in mathematical order for the title engine;
             # `_check_order` may reorder them in place for computation.
             operands = [self, other] if not reflexive else [other, self]
+            history_entry = None
+            if fname == "add" and self._implements("NDDataset"):
+                right = operands[1]
+                history_entry = {
+                    "operation": "add",
+                    "parameters": {
+                        "sources": [
+                            _history_operand(operands[0], "left"),
+                            _history_operand(right, "right"),
+                        ]
+                    },
+                }
             fm, objs, reflected = self._check_order(fname, list(operands))
 
             if hasattr(self, "history"):
@@ -3902,6 +3941,8 @@ class NDMath:
                 )
             else:
                 history = None
+            if history_entry is not None:
+                history_entry["message"] = history.strip()
 
             data, units, mask, returntype, reflected, geometry = self._op(
                 fm, objs, reflected=reflected
@@ -3916,6 +3957,7 @@ class NDMath:
                 operands=operands,
                 reflected=reflected,
                 geometry=geometry,
+                history_entry=history_entry,
             )
 
         return func
@@ -3993,6 +4035,7 @@ class NDMath:
         operands=None,
         reflected=False,
         geometry=None,
+        history_entry=None,
     ):
         # make a new NDArray resulting of some operation
 
@@ -4012,7 +4055,9 @@ class NDMath:
         new._units = cpy.copy(units)
         if mask is not None and np.any(mask != NOMASK):
             new._mask = cpy.copy(mask)
-        if history is not None and hasattr(new, "history"):
+        if history_entry is not None and hasattr(new, "_append_history_entry"):
+            new._append_history_entry(**history_entry)
+        elif history is not None and hasattr(new, "history"):
             new.history = history.strip()
 
         # apply the arithmetic title semantics (shared engine for operators and

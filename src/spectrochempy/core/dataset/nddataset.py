@@ -32,7 +32,9 @@ import json
 import textwrap
 
 # Lazy import to avoid triggering matplotlib at module load time
+from collections.abc import Mapping
 from contextlib import suppress
+from copy import deepcopy
 from datetime import UTC
 from datetime import datetime
 from datetime import tzinfo
@@ -82,6 +84,89 @@ def _normalize_json_compatible(value: Any) -> Any:
         return [_normalize_json_compatible(item) for item in value]
 
     raise TypeError(f"Value of type {type(value).__name__} is not JSON-compatible")
+
+
+def _normalize_history_parameter(value: Any) -> Any:
+    """Return a detached, compact value suitable for a history entry."""
+    try:
+        return _normalize_json_compatible(value)
+    except TypeError:
+        if isinstance(value, np.ndarray):
+            description = f"ndarray(shape={value.shape}, dtype={value.dtype})"
+        else:
+            description = f"{type(value).__name__} value not stored"
+        return {"description": description}
+
+
+def _history_datetime(value: Any) -> datetime:
+    """Return a history datetime from a native or portable value."""
+    if isinstance(value, datetime):
+        return value
+    if isinstance(value, str):
+        return datetime.fromisoformat(value)
+    raise TypeError(
+        f"History date must be a datetime or ISO string, got {type(value).__name__}"
+    )
+
+
+def _history_entry(
+    *,
+    date: datetime | str | None = None,
+    operation: str | None = None,
+    parameters: Mapping[str, Any] | None = None,
+    message: str = "",
+) -> dict[str, Any]:
+    """Build one detached canonical history entry."""
+    if date is None:
+        date = utcnow()
+    date = _history_datetime(date)
+    if operation is not None and not isinstance(operation, str):
+        raise TypeError("History operation must be a string or None")
+    if parameters is None:
+        parameters = {}
+    if not isinstance(parameters, Mapping):
+        raise TypeError("History parameters must be a mapping")
+    if not isinstance(message, str):
+        raise TypeError("History message must be a string")
+    if operation is None and not message:
+        raise ValueError("A textual history entry requires a message")
+
+    return {
+        "date": date,
+        "operation": operation,
+        "parameters": {
+            str(key): _normalize_history_parameter(value)
+            for key, value in parameters.items()
+        },
+        "message": message,
+    }
+
+
+def _coerce_history_entry(value: Any) -> dict[str, Any]:
+    """Normalize structured, legacy tuple, or legacy rendered history."""
+    if isinstance(value, Mapping):
+        return _history_entry(
+            date=value.get("date"),
+            operation=value.get("operation"),
+            parameters=value.get("parameters"),
+            message=value.get("message", ""),
+        )
+
+    if isinstance(value, (list, tuple)) and len(value) == 2:
+        date, message = value
+        return _history_entry(date=date, message=message)
+
+    if isinstance(value, str):
+        date_text, separator, message = value.partition("> ")
+        if separator:
+            with suppress(TypeError, ValueError):
+                return _history_entry(date=date_text, message=message)
+        return _history_entry(message=value)
+
+    raise TypeError(
+        "History entries must be mappings, legacy (date, message) pairs, "
+        f"or strings; got {type(value).__name__}"
+    )
 
 
 def _is_portable_labels(labels):
@@ -139,44 +224,38 @@ def _restore_portable_datetime(value):
     return datetime.fromisoformat(value)
 
 
-def _serialize_portable_history(history) -> list[str] | None:
-    """Return a portable textual history payload or ``None`` for empty history."""
+def _serialize_portable_history(history) -> list[dict[str, Any]] | None:
+    """Return a JSON-compatible structured history payload."""
     if not history:
         return None
     if not isinstance(history, list):
         raise TypeError(
             f"Portable history must be exported as a list, got {type(history).__name__}"
         )
-    for entry in history:
-        if not isinstance(entry, str):
-            raise TypeError(
-                "Portable history entries must be strings, "
-                f"got {type(entry).__name__}"
-            )
-    return list(history)
+
+    serialized = []
+    for value in history:
+        entry = _coerce_history_entry(value)
+        serialized.append(
+            {
+                "date": entry["date"].isoformat(sep=" "),
+                "operation": entry["operation"],
+                "parameters": deepcopy(entry["parameters"]),
+                "message": entry["message"],
+            }
+        )
+    return serialized
 
 
 def _restore_portable_history(value):
-    """Return internal history tuples restored from portable textual content."""
+    """Return canonical history entries from structured or legacy content."""
     if value is None:
-        return None
+        return []
     if not isinstance(value, list):
         raise TypeError(
             f"Portable history attr must be a list, got {type(value).__name__}"
         )
-
-    restored = []
-    for entry in value:
-        if not isinstance(entry, str):
-            raise TypeError(
-                "Portable history entries must be strings, "
-                f"got {type(entry).__name__}"
-            )
-        date_text, separator, message = entry.partition("> ")
-        if separator != "> " or not message:
-            raise ValueError("Portable history entry must use '<timestamp> <text>'")
-        restored.append((datetime.fromisoformat(date_text), message))
-    return restored
+    return [_coerce_history_entry(entry) for entry in value]
 
 
 def _prepare_xarray_dataset_for_netcdf(dataset):
@@ -421,7 +500,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
     )
 
     # history
-    _history = tr.List(tr.Tuple(), allow_none=True)
+    _history = tr.List(allow_none=True)
 
     # Dates
     _acquisition_date = tr.Instance(datetime, allow_none=True)
@@ -732,10 +811,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
     @tr.validate("_history")
     def _history_validate(self, proposal):
         history = proposal["value"]
-        if isinstance(history, list) or history is None:
-            # reset
-            self._history = None
-        return history
+        return _restore_portable_history(history)
 
     # @tr.validate("_modified")
     # def _modified_validate(self, proposal):
@@ -1043,15 +1119,20 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
 
     @property
     def history(self):
-        """Describes the history of actions made on this array (List of strings)."""
+        """Return the readable rendering of this dataset's history."""
         history = []
-        for date, value in self._history:
-            date = date.astimezone(self._timezone).isoformat(
-                sep=" ",
-                timespec="seconds",
+        for entry in self._history:
+            date = (
+                entry["date"]
+                .astimezone(self._timezone)
+                .isoformat(
+                    sep=" ",
+                    timespec="seconds",
+                )
             )
-            value = value[0].capitalize() + value[1:]
-            history.append(f"{date}> {value}")
+            message = entry["message"] or entry["operation"] or "History entry"
+            message = message[0].capitalize() + message[1:]
+            history.append(f"{date}> {message}")
         return history
 
     @history.setter
@@ -1059,13 +1140,52 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         if value is None:
             return
         if isinstance(value, list):
-            # history will be replaced
-            self._history = []
-            if len(value) == 0:
-                return
-            value = value[0]
-        date = utcnow()
-        self._history.append((date, value))
+            self.replace_history(value)
+            return
+        self.annotate(value)
+
+    @property
+    def history_entries(self):
+        """
+        Return detached structured history entries.
+
+        Each entry contains date, operation, parameters, and message fields.
+        Mutating the returned list or its dictionaries does not affect the
+        dataset.
+        """
+        return deepcopy(self._history)
+
+    def annotate(self, message, *, date=None):
+        """Append a free-form user annotation."""
+        self._append_history_entry(date=date, message=message)
+
+    def replace_history(self, entries):
+        """Replace history explicitly with structured or legacy entries."""
+        if not isinstance(entries, list):
+            raise TypeError("History replacement requires a list of entries")
+        self._history = [_coerce_history_entry(entry) for entry in entries]
+
+    def clear_history(self):
+        """Remove every history entry."""
+        self._history = []
+
+    def _append_history_entry(
+        self,
+        *,
+        operation=None,
+        parameters=None,
+        message="",
+        date=None,
+    ):
+        """Append one canonical entry after a successful action."""
+        self._history.append(
+            _history_entry(
+                date=date,
+                operation=operation,
+                parameters=parameters,
+                message=message,
+            )
+        )
 
     def coord(self, dim="x"):
         """
@@ -1686,7 +1806,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             serialized = _serialize_portable_datetime(value)
             if serialized is not None:
                 dataset_attrs[dataset_attr] = serialized
-        serialized_history = _serialize_portable_history(self.history)
+        serialized_history = _serialize_portable_history(self._history)
         if serialized_history is not None:
             dataset_attrs["scpy_history"] = serialized_history
         if meta:
@@ -1988,8 +2108,15 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         swapdims : Interchange two dimensions of a NDDataset.
         """
         new = super().transpose(*dims, inplace=inplace)
-        new.history = (
-            f"Data transposed between dims: {dims}" if dims else "Data transposed"
+        message = f"Data transposed between dims: {dims}" if dims else "Data transposed"
+        new._append_history_entry(
+            operation="transpose",
+            parameters={
+                "requested_dims": list(dims),
+                "result_dims": list(new.dims),
+                "inplace": inplace,
+            },
+            message=message,
         )
 
         return new
