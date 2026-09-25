@@ -12,7 +12,6 @@ Purpose: establish a precise baseline before discussing any future changes.
 See also: audit/~metadata-architecture-audit.md §4, §5
 """
 
-
 import numpy as np
 import pytest
 
@@ -197,7 +196,7 @@ class TestReductions:
         """Mean with explicit dim appends."""
         result = ds2d.mean(dim="y")
         assert len(result.history) == 1
-        assert "`mean`" in _entry(result.history[0])
+        assert "Mean computed along y" in _entry(result.history[0])
 
     def test_std_appends(self, ds2d):
         """Std with explicit dim appends."""
@@ -556,16 +555,19 @@ class TestHistoryPatterns:
 
     def test_reduction_uses_consistent_format(self, ds2d):
         """
-        All reductions use the same format string.
+        Mean uses its structured message; other reductions retain the generic text.
 
-        Format: 'Dataset resulting from application of `{method}` method'
+        Generic format: 'Dataset resulting from application of `{method}` method'
         """
         reductions = ["sum", "mean", "std", "var"]
         for method_name in reductions:
             result = getattr(ds2d, method_name)(dim="y")
             text = _entry(result.history[-1])
+            expected = (
+                "Mean computed along y" if method_name == "mean" else f"`{method_name}`"
+            )
             assert (
-                f"`{method_name}`" in text
+                expected in text
             ), f"Expected method name {method_name} in history, got: {text}"
 
     def test_ufunc_format_consistent(self, ds1):
