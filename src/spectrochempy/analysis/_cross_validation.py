@@ -1727,14 +1727,20 @@ def _execute_cross_validation(
                 f"Cross-validation fold {fold_index} failed during estimator cloning."
             ) from exc
         try:
-            with _instrument.suppress_provenance(*_instrument.BINARY_OPERATION_IDS):
+            with _instrument.suppress_provenance(
+                *_instrument.BINARY_OPERATION_IDS,
+                *_instrument.ASSEMBLY_OPERATION_IDS,
+            ):
                 fold_estimator.fit(fold.X_train, fold.y_train)
         except Exception as exc:
             raise SpectroChemPyError(
                 f"Cross-validation fold {fold_index} failed during fit."
             ) from exc
         try:
-            with _instrument.suppress_provenance(*_instrument.BINARY_OPERATION_IDS):
+            with _instrument.suppress_provenance(
+                *_instrument.BINARY_OPERATION_IDS,
+                *_instrument.ASSEMBLY_OPERATION_IDS,
+            ):
                 row_prediction = fold_estimator.predict(fold.X_validation)
         except Exception as exc:
             raise SpectroChemPyError(

@@ -42,6 +42,14 @@ New Features
   scalar, external-array, in-place, ``out=``, concatenate/stack, persistence,
   and replay paths outside this bounded slice.
 
+- Added experimental provenance for ``concatenate`` and ``stack`` over
+  supported ``NDDataset`` inputs. One record preserves every ordered input
+  position, reuses the same state reference for repeated objects, distinguishes
+  explicitly requested dimension arguments from their resolved axis and
+  dimension, and creates one linked result state without retaining datasets.
+  NumPy array-conversion paths and unsupported input forms remain outside this
+  bounded slice.
+
 - Added ``cross_validate`` and ``CrossValidationResult`` for bounded supervised
   PLS and Pipeline cross-validation with aligned ``NDDataset`` outputs,
   per-target metrics, fold records, and optional fitted fold estimators (#1658).
