@@ -87,9 +87,12 @@ def test_transform_reuses_fitted_state_and_chains_a_p2_selection():
         validation = source[4:]
         result = transformer.transform(validation)
 
-    slice_calibration, fit, slice_validation, transform = (
-        capture.ledger.operation_records
-    )
+    (
+        slice_calibration,
+        fit,
+        slice_validation,
+        transform,
+    ) = capture.ledger.operation_records
     assert fit.inputs[1].reference == slice_calibration.outputs[0].reference
     assert transform.inputs[0].reference == fit.outputs[0].reference
     assert transform.inputs[1].reference == slice_validation.outputs[0].reference
