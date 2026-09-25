@@ -178,6 +178,24 @@ class ProvenanceCapture:
     def _observe_source(self, value: Any) -> ObservedState:
         return self.__identity.observe(value)
 
+    def _observe_state(self, value: Any, fingerprint: bytes | None) -> ObservedState:
+        return self.__identity.observe(value, fingerprint=fingerprint)
+
+    def _advance_state(
+        self,
+        value: Any,
+        state_ref: StateRef,
+        fingerprint: bytes | None,
+    ) -> StateRef:
+        return self.__identity.advance(
+            value,
+            state_ref,
+            fingerprint=fingerprint,
+        )
+
+    def _invalidate_state(self, value: Any) -> None:
+        self.__identity.invalidate(value)
+
     def _register_output(self, value: Any) -> StateRef:
         return self.__identity.register_output(value)
 

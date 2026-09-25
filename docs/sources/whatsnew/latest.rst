@@ -28,6 +28,13 @@ New Features
   in-place slicing and in-place transpose - remain uninstrumented and create no
   record.
 
+- Added bounded experimental provenance for direct ``CenterTransformer.fit()``
+  and ``CenterTransformer.transform()`` calls. Records preserve one transformer
+  identity across fitted states, link calibration and transformed datasets,
+  summarize learned state without retaining learned arrays, and report failed
+  refit mutation explicitly. Composite, functional, inverse, persistence, and
+  replay paths, and ``CenterTransformer`` subclasses remain outside this slice.
+
 - Added ``cross_validate`` and ``CrossValidationResult`` for bounded supervised
   PLS and Pipeline cross-validation with aligned ``NDDataset`` outputs,
   per-target metrics, fold records, and optional fitted fold estimators (#1658).
