@@ -870,24 +870,78 @@ class NDMath:
         if fname in ["sign", "logical_not", "isnan", "isfinite", "isinf", "signbit"]:
             return (getattr(np, fname))(inputs[0].masked_data)
 
-        # case of a dataset
-        data, units, mask, returntype, reflected, geometry = self._op(
-            ufunc, inputs, isufunc=True
-        )
+        capture = boundary = None
+        operation_id = None
+        requested_parameters = {"ufunc_kwargs": dict(kwargs)}
+        if "out" not in kwargs:
+            from spectrochempy.provenance import _binary  # noqa: PLC0415
+            from spectrochempy.provenance import _instrument  # noqa: PLC0415
 
-        # The title is computed by the shared arithmetic-title-semantics engine
-        # (`_title_for`), identical for the operator and the ufunc paths.
-        return self._op_result(
-            data,
-            units,
-            mask,
-            history,
-            returntype,
-            fname=fname,
-            operands=inputs,
-            reflected=reflected,
-            geometry=geometry,
-        )
+            operation_id = _binary.operation_id(fname)
+            if operation_id is not None and _binary.is_dataset_pair(inputs):
+                capture, started_at = _instrument.provenance_boundary(operation_id)
+                if capture is not None:
+                    boundary = _binary.prepare_boundary(
+                        capture,
+                        inputs[0],
+                        inputs[1],
+                        operation_id=operation_id,
+                        started_at=started_at,
+                    )
+
+        try:
+            # case of a dataset
+            data, units, mask, returntype, reflected, geometry = self._op(
+                ufunc, inputs, isufunc=True
+            )
+
+            # The title is computed by the shared arithmetic-title-semantics engine
+            # (`_title_for`), identical for the operator and the ufunc paths.
+            result = self._op_result(
+                data,
+                units,
+                mask,
+                history,
+                returntype,
+                fname=fname,
+                operands=inputs,
+                reflected=reflected,
+                geometry=geometry,
+            )
+        except Exception as exc:
+            if boundary is not None:
+                _binary.record_failure(
+                    boundary,
+                    exc,
+                    operation_id=operation_id,
+                    implementation=(
+                        "spectrochempy.core.dataset.arraymixins.ndmath."
+                        "NDMath.__array_ufunc__"
+                    ),
+                    requested_parameters=requested_parameters,
+                    dispatch="numpy_ufunc",
+                )
+            raise
+
+        if boundary is not None:
+            _binary.record_success(
+                boundary,
+                result,
+                operation_id=operation_id,
+                implementation=(
+                    "spectrochempy.core.dataset.arraymixins.ndmath."
+                    "NDMath.__array_ufunc__"
+                ),
+                requested_parameters=requested_parameters,
+                dispatch="numpy_ufunc",
+            )
+        elif capture is not None:
+            _binary.invalidate_unrecorded_result(
+                capture,
+                result,
+                operation_id=operation_id,
+            )
+        return result
 
     # ----------------------------------------------------------------------------------
     # public methods
@@ -3893,30 +3947,82 @@ class NDMath:
             # Keep the operands in mathematical order for the title engine;
             # `_check_order` may reorder them in place for computation.
             operands = [self, other] if not reflexive else [other, self]
-            fm, objs, reflected = self._check_order(fname, list(operands))
+            capture = boundary = None
+            operation_id = None
+            from spectrochempy.provenance import _binary  # noqa: PLC0415
+            from spectrochempy.provenance import _instrument  # noqa: PLC0415
 
-            if hasattr(self, "history"):
-                history = (
-                    f"Binary operation {fm.__name__} with "
-                    f"`{_get_name(objs[-1])}` has been performed"
+            operation_id = _binary.operation_id(fname)
+            if operation_id is not None and _binary.is_dataset_pair(operands):
+                capture, started_at = _instrument.provenance_boundary(operation_id)
+                if capture is not None:
+                    boundary = _binary.prepare_boundary(
+                        capture,
+                        operands[0],
+                        operands[1],
+                        operation_id=operation_id,
+                        started_at=started_at,
+                    )
+
+            try:
+                fm, objs, reflected = self._check_order(fname, list(operands))
+
+                if hasattr(self, "history"):
+                    history = (
+                        f"Binary operation {fm.__name__} with "
+                        f"`{_get_name(objs[-1])}` has been performed"
+                    )
+                else:
+                    history = None
+
+                data, units, mask, returntype, reflected, geometry = self._op(
+                    fm, objs, reflected=reflected
                 )
-            else:
-                history = None
+                result = self._op_result(
+                    data,
+                    units,
+                    mask,
+                    history,
+                    returntype,
+                    fname=fname,
+                    operands=operands,
+                    reflected=reflected,
+                    geometry=geometry,
+                )
+            except Exception as exc:
+                if boundary is not None:
+                    _binary.record_failure(
+                        boundary,
+                        exc,
+                        operation_id=operation_id,
+                        implementation=(
+                            "spectrochempy.core.dataset.arraymixins.ndmath."
+                            f"NDMath.__{fname}__"
+                        ),
+                        requested_parameters={},
+                        dispatch="operator",
+                    )
+                raise
 
-            data, units, mask, returntype, reflected, geometry = self._op(
-                fm, objs, reflected=reflected
-            )
-            return self._op_result(
-                data,
-                units,
-                mask,
-                history,
-                returntype,
-                fname=fname,
-                operands=operands,
-                reflected=reflected,
-                geometry=geometry,
-            )
+            if boundary is not None:
+                _binary.record_success(
+                    boundary,
+                    result,
+                    operation_id=operation_id,
+                    implementation=(
+                        "spectrochempy.core.dataset.arraymixins.ndmath."
+                        f"NDMath.__{fname}__"
+                    ),
+                    requested_parameters={},
+                    dispatch="operator",
+                )
+            elif capture is not None:
+                _binary.invalidate_unrecorded_result(
+                    capture,
+                    result,
+                    operation_id=operation_id,
+                )
+            return result
 
         return func
 

@@ -10,7 +10,8 @@
 Experimental, opt-in structured provenance substrate.
 
 This namespace contains passive immutable values and a context-local ledger.
-P1 performs no automatic operation capture and provides no manifest or replay.
+The current bounded runtime slices capture selected dataset and CenterTransformer
+operations only. They provide no manifest or replay.
 """
 
 from spectrochempy.provenance._capture import ProvenanceCapture

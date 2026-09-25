@@ -7,10 +7,11 @@
 Best-effort helpers shared by the bounded provenance runtime slices.
 
 Out-of-place dataset selection and transpose use the record helpers in this
-module. Direct Center lifecycle capture lives in :mod:`._center` and reuses the
-context-local boundary and operation-specific suppression defined here.
-Capture code never alters scientific values, mutates scientific arguments, or
-masks a scientific exception.
+module. Direct Center lifecycle capture lives in :mod:`._center`, and bounded
+binary dataset arithmetic capture lives in :mod:`._binary`; both reuse the
+context-local boundary and operation-specific suppression defined here. Capture
+code never alters scientific values, mutates scientific arguments, or masks a
+scientific exception.
 """
 
 from __future__ import annotations
@@ -35,6 +36,16 @@ SLICE_OPERATION_ID = "org.spectrochempy.dataset.slice"
 TRANSPOSE_OPERATION_ID = "org.spectrochempy.dataset.transpose"
 CENTER_FIT_OPERATION_ID = "org.spectrochempy.preprocessing.center.fit"
 CENTER_TRANSFORM_OPERATION_ID = "org.spectrochempy.preprocessing.center.transform"
+BINARY_ADD_OPERATION_ID = "org.spectrochempy.dataset.binary.add"
+BINARY_SUBTRACT_OPERATION_ID = "org.spectrochempy.dataset.binary.subtract"
+BINARY_MULTIPLY_OPERATION_ID = "org.spectrochempy.dataset.binary.multiply"
+BINARY_TRUE_DIVIDE_OPERATION_ID = "org.spectrochempy.dataset.binary.true_divide"
+BINARY_OPERATION_IDS = (
+    BINARY_ADD_OPERATION_ID,
+    BINARY_SUBTRACT_OPERATION_ID,
+    BINARY_MULTIPLY_OPERATION_ID,
+    BINARY_TRUE_DIVIDE_OPERATION_ID,
+)
 
 _SUPPRESSED_OPERATIONS: ContextVar[frozenset[str]] = ContextVar(
     "spectrochempy_suppressed_provenance_operations",

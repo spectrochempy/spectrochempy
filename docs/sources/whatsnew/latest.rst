@@ -35,6 +35,13 @@ New Features
   refit mutation explicitly. Composite, functional, inverse, persistence, and
   replay paths, and ``CenterTransformer`` subclasses remain outside this slice.
 
+- Added experimental provenance for out-of-place addition, subtraction,
+  multiplication, and true division between two ``NDDataset`` operands.
+  Records preserve ordered ``left`` and ``right`` input roles across operator
+  and direct NumPy-ufunc dispatch, create one linked result state, and leave
+  scalar, external-array, in-place, ``out=``, concatenate/stack, persistence,
+  and replay paths outside this bounded slice.
+
 - Added ``cross_validate`` and ``CrossValidationResult`` for bounded supervised
   PLS and Pipeline cross-validation with aligned ``NDDataset`` outputs,
   per-target metrics, fold records, and optional fitted fold estimators (#1658).

@@ -1693,6 +1693,8 @@ def _execute_cross_validation(
     return_estimators=False,
 ):
     """Execute bounded supervised CV without exposing a public API."""
+    from spectrochempy.provenance import _instrument  # noqa: PLC0415
+
     plan = _prepare_cross_validation_plan(
         estimator=estimator,
         splitter=splitter,
@@ -1725,13 +1727,15 @@ def _execute_cross_validation(
                 f"Cross-validation fold {fold_index} failed during estimator cloning."
             ) from exc
         try:
-            fold_estimator.fit(fold.X_train, fold.y_train)
+            with _instrument.suppress_provenance(*_instrument.BINARY_OPERATION_IDS):
+                fold_estimator.fit(fold.X_train, fold.y_train)
         except Exception as exc:
             raise SpectroChemPyError(
                 f"Cross-validation fold {fold_index} failed during fit."
             ) from exc
         try:
-            row_prediction = fold_estimator.predict(fold.X_validation)
+            with _instrument.suppress_provenance(*_instrument.BINARY_OPERATION_IDS):
+                row_prediction = fold_estimator.predict(fold.X_validation)
         except Exception as exc:
             raise SpectroChemPyError(
                 f"Cross-validation fold {fold_index} failed during predict."
