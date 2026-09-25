@@ -50,11 +50,11 @@ a
 # ~~~~~~~~~~~~~~~~~~~
 # ``scp.fromfunction`` builds an NDDataset directly from a Python function.
 # The function receives the coordinate arrays and returns the intensity values.
-import numpy as np
+from math import tau
 
 
 def synth_func(temperature, time, wavenumber):
-    return np.sin(2.0 * np.pi * wavenumber / 4000.0) * np.exp(-time / 60) * temperature
+    return scp.sin(tau * wavenumber / 4000.0) * scp.exp(-time / 60) * temperature
 
 
 mydataset = scp.fromfunction(

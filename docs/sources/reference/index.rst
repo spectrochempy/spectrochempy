@@ -454,6 +454,11 @@ Complex
 Masks
 =====
 
+``MASKED`` and ``NOMASK`` are the public sentinels used to set and represent
+dataset masks. ``MaskedArray`` and ``MaskedConstant`` retain their NumPy identities for
+interoperability; routine workflows should keep data in `NDDataset`. See
+:ref:`reference_units_masks` for their SpectroChemPy roles and verified examples.
+
 .. autosummary::
     :nosignatures:
     :toctree: generated/
@@ -464,12 +469,24 @@ Masks
 Units manipulation
 ===================
 
+``ur`` is the unit registry configured by SpectroChemPy; ``Unit`` and ``Quantity`` use
+that registry while retaining their Pint identities. ``DimensionalityError`` is the
+original Pint exception class retained for interoperability. See
+:ref:`reference_units_masks` for project-specific construction, conversion, mutation,
+dimensionless-value, and error-handling guidance.
+
+.. toctree::
+   :hidden:
+
+   units_and_masks
+
 .. autosummary::
     :nosignatures:
     :toctree: generated/
 
     Unit
     Quantity
+    DimensionalityError
     to
     to_base_units
     to_reduced_units
@@ -711,6 +728,41 @@ Partial Least Square regression
     :toctree: generated/
 
     PLSRegression
+
+Supervised cross-validation
+============================
+
+``cross_validate`` evaluates one fixed PLS or PLS-ending Pipeline
+configuration. It does not perform hyperparameter search or nested
+cross-validation. ``KFold``, ``GroupKFold``, and ``LeaveOneOut`` are thin,
+documented SpectroChemPy subclasses of the corresponding scikit-learn classes.
+They reuse scikit-learn's partitioning algorithms to produce fold positions,
+while ``cross_validate`` handles ``NDDataset`` alignment and ``sample_dim``,
+fold-local estimator cloning and preprocessing, out-of-fold predictions, and
+metrics. The original scikit-learn classes remain accepted explicitly.
+
+``KFold`` partitions observations into folds, with optional shuffling and a
+reproducible random seed. ``GroupKFold`` keeps each supplied group entirely in
+calibration or validation within a fold. ``LeaveOneOut`` validates one
+observation per fold. Calling a splitter's ``split`` method directly requires
+an array-like input appropriate for scikit-learn; the splitter alone does not
+interpret ``NDDataset`` dimensions or coordinates.
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    cross_validate
+    KFold
+    GroupKFold
+    LeaveOneOut
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+    :template: autosummary/result-class.rst
+
+    CrossValidationResult
 
 Evolving factor analysis
 ========================

@@ -62,6 +62,8 @@ def test_constructs_valid_one_step_transformer_pipeline():
     pipeline = Pipeline([("center", scp.CenterTransformer(dim="y"))])
 
     assert scp.Pipeline is Pipeline
+    assert pipeline_module.__all__ == ["Pipeline"]
+    assert not hasattr(pipeline_module, "__configurables__")
     assert pipeline.steps[0][0] == "center"
     assert isinstance(pipeline.named_steps, MappingProxyType)
     assert pipeline.named_steps["center"] is pipeline.steps[0][1]
