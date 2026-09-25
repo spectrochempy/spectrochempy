@@ -200,6 +200,32 @@ def test_read_spg_history_appended():
     assert "Sorted by date" in history_text
 
 
+def test_read_spg_history_uses_source_name_and_preserves_source(tmp_path):
+    source_name = "spectre échantillon.spg"
+    paths = []
+    for directory in (tmp_path / "first", tmp_path / "second folder"):
+        directory.mkdir()
+        path = directory / source_name
+        path.write_bytes(WODGER.read_bytes())
+        paths.append(path)
+
+    datasets = [
+        scp.read_spg(paths[0], sortbydate=True),
+        scp.read_spg(str(paths[1]), sortbydate=True),
+    ]
+
+    assert_dataset_equal(*datasets)
+    for dataset, path in zip(datasets, paths, strict=True):
+        messages = [entry["message"] for entry in dataset.history_entries]
+        assert messages == [
+            f"Imported from spg file {source_name}.",
+            "Sorted by date",
+        ]
+        assert str(path.parent) not in messages[0]
+        assert Path(dataset.filename) == path
+        assert str(path) in dataset.description
+
+
 def test_return_ifg_validation(tmp_path):
     """Regression test for #1144: invalid return_ifg values must warn clearly.
     The Importer catches exceptions and re-emits them as warnings, so we check

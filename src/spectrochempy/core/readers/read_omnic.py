@@ -845,7 +845,9 @@ def _read_spg(*args, **kwargs):
                     f"Omnic title: {spg_title}\nOmnic filename: {filename}",
                 )
                 single._date = utcnow()
-                single.history = f"Imported from spg file {filename} (spectrum {i})."
+                single.history = (
+                    f"Imported from spg file {filename.name} (spectrum {i})."
+                )
                 datasets.append(single)
 
             fid.close()
@@ -914,7 +916,7 @@ def _read_spg(*args, **kwargs):
 
     dataset._date = utcnow()
 
-    dataset.history = f"Imported from spg file {filename}."
+    dataset.history = f"Imported from spg file {filename.name}."
 
     # Attach acquisition metadata from the header.
     # Acquisition parameters (collection_length, reference_frequency,
