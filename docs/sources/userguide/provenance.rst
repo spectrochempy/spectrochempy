@@ -19,7 +19,8 @@ out-of-place ``NDDataset`` slicing and ``NDDataset.transpose`` create one
 operation record each while a capture context is active. P5 adds direct calls
 to ``CenterTransformer.fit()`` and ``CenterTransformer.transform()``. P3 adds
 four out-of-place binary operations between two ``NDDataset`` operands. Other
-scientific operations remain uninstrumented unless this page states otherwise.
+P4 adds ordered ``concatenate`` and ``stack`` assembly. Other scientific
+operations remain uninstrumented unless this page states otherwise.
 
 Captured slicing and transpose
 ------------------------------
@@ -197,7 +198,7 @@ This P3 slice deliberately excludes:
 - in-place operations and every ufunc call supplying ``out=``;
 - scalar, quantity, coordinate, and external-array operands;
 - unary operations, powers, comparisons, reductions, and other ufunc methods;
-- concatenate/stack, persistence, replay, and ``Project`` ownership;
+- persistence, replay, and ``Project`` ownership;
 - arithmetic executed inside an uninstrumented ``Pipeline`` step or estimator
   fit/predict invoked by ``cross_validate``.
 
@@ -206,6 +207,67 @@ does not retain either dataset or a scientific buffer. Fingerprint calculation
 still reads both complete numeric input buffers and may make contiguous copies,
 so capture cost grows with input size even though retained record size stays
 bounded.
+
+
+Ordered concatenate and stack assembly
+--------------------------------------
+
+Direct :func:`~spectrochempy.concatenate` and
+:func:`~spectrochempy.stack` calls over supported `NDDataset` inputs create
+one ``combine`` record. The same boundary is used when these functions are
+called as dataset methods. Every normalized input position is retained in
+order through roles ``source[0]``, ``source[1]``, and so on:
+
+.. code-block:: python
+
+   with scp.provenance.ProvenanceCapture() as capture:
+       assembled = scp.concatenate([left, right, left], dims="y")
+
+   record = capture.ledger.operation_records[0]
+   assert [link.role for link in record.inputs] == [
+       "source[0]",
+       "source[1]",
+       "source[2]",
+   ]
+   assert record.inputs[0].reference == record.inputs[2].reference
+
+A repeated object is observed and fingerprinted once at that public boundary;
+each of its positions reuses the same state reference. The complete ordered
+input list remains in the record: reference storage therefore grows linearly
+with the number of inputs and is not silently truncated.
+
+For ``concatenate``, ``parameters.requested`` contains only explicitly
+supplied ``dims``, ``dim``, and ``axis`` arguments. The resolved
+mapping records the effective axis and dimension after the existing alias and
+default rules. Normal concatenation reports ``existing_dimension``; the
+already-supported 1D ``axis=1`` promotion reports ``new_dimension``
+instead. For ``stack``, an omitted ``axis`` is absent from requested
+parameters while the resolved axis is ``0``; stacking always reports the new
+dimension it creates.
+
+One public call creates one P4 record. In particular, ``stack`` suppresses
+the internal ``concatenate`` boundary used by its implementation, and
+function/method exposure does not duplicate capture. P4 operations executed
+inside the existing ``Pipeline`` and ``cross_validate`` composite boundaries
+are suppressed until those composites have their own record contract. Existing
+``numpy.concatenate`` and ``numpy.stack`` calls still follow NumPy's
+array-conversion path, return ``ndarray``, and create no P4 record; this
+slice adds no NumPy dispatch support.
+
+Scientific failures keep their original exception and a failed record has no
+output. Capture preparation or record-append failure cannot change a successful
+scientific result; that result is invalidated in the transient registry so a
+later captured operation reports partial continuity. Values, shapes,
+coordinates, units, masks, metadata, titles, and textual histories continue to
+come solely from the existing assembly implementation.
+
+P4 does not capture unsupported non-dataset inputs or introduce new iterable,
+empty-input, axis, unit, or coordinate behavior. It adds no in-place assembly,
+persistence, manifest, replay, or ``Project`` ownership. As in P2 and P3,
+the numeric fingerprint covers data, shape, and dtype but not masks,
+coordinates, units, or metadata. Its retained digest is bounded, while
+fingerprint work scales with the total input data read.
+
 
 Demonstrator: interactive selection followed by transpose
 ---------------------------------------------------------

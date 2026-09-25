@@ -40,12 +40,15 @@ BINARY_ADD_OPERATION_ID = "org.spectrochempy.dataset.binary.add"
 BINARY_SUBTRACT_OPERATION_ID = "org.spectrochempy.dataset.binary.subtract"
 BINARY_MULTIPLY_OPERATION_ID = "org.spectrochempy.dataset.binary.multiply"
 BINARY_TRUE_DIVIDE_OPERATION_ID = "org.spectrochempy.dataset.binary.true_divide"
+CONCATENATE_OPERATION_ID = "org.spectrochempy.dataset.concatenate"
+STACK_OPERATION_ID = "org.spectrochempy.dataset.stack"
 BINARY_OPERATION_IDS = (
     BINARY_ADD_OPERATION_ID,
     BINARY_SUBTRACT_OPERATION_ID,
     BINARY_MULTIPLY_OPERATION_ID,
     BINARY_TRUE_DIVIDE_OPERATION_ID,
 )
+ASSEMBLY_OPERATION_IDS = (CONCATENATE_OPERATION_ID, STACK_OPERATION_ID)
 
 _SUPPRESSED_OPERATIONS: ContextVar[frozenset[str]] = ContextVar(
     "spectrochempy_suppressed_provenance_operations",

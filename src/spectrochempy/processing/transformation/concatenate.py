@@ -7,6 +7,7 @@ __all__ = ["concatenate", "stack"]
 
 __dataset_methods__ = __all__
 
+from contextlib import suppress
 from copy import deepcopy
 
 import numpy as np
@@ -19,7 +20,7 @@ from spectrochempy.utils.meta import Meta
 from spectrochempy.utils.objects import OrderedSet
 
 
-def concatenate(*datasets, **kwargs):
+def _concatenate_impl(*datasets, **kwargs):
     r"""
     Concatenation of `NDDataset` objects along a given axis.
 
@@ -188,7 +189,7 @@ def concatenate(*datasets, **kwargs):
     return out
 
 
-def stack(*datasets, **kwargs):
+def _stack_impl(*datasets, **kwargs):
     """
     Stack of `NDDataset` objects along a new dimension.
 
@@ -355,9 +356,7 @@ def _should_promote_1d_column_concatenation(datasets, kwargs):
 
     if axis in (1, -1):
         return True
-    if dims == 1 or dim == 1:
-        return True
-    return False
+    return bool(dims == 1 or dim == 1)
 
 
 # utility functions
@@ -488,3 +487,170 @@ def _consensus_acquisition_date(datasets):
 def _make_history_entry(operation, names):
     rendered = ", ".join(names)
     return f"Created by {operation} from {len(names)} datasets: {rendered}"
+
+
+def _requested_parameters(kwargs):
+    return {name: kwargs[name] for name in ("dims", "dim", "axis") if name in kwargs}
+
+
+def _concatenate_resolved_parameters(sources, kwargs, result):
+    promoted = _should_promote_1d_column_concatenation(sources, kwargs)
+    if promoted:
+        axis = 1
+        dim = result.dims[axis]
+        mode = "new_dimension"
+    else:
+        axis, dim = sources[0].get_axis(**kwargs)
+        mode = "existing_dimension"
+    return {
+        "axis": axis,
+        "dim": dim,
+        "mode": mode,
+        "input_count": len(sources),
+        "result_shape": list(result.shape),
+        "result_dims": list(result.dims),
+    }
+
+
+def concatenate(*datasets, **kwargs):
+    """Concatenate NDDataset inputs along an existing dimension."""
+    from spectrochempy.provenance import _assembly  # noqa: PLC0415
+    from spectrochempy.provenance import _instrument  # noqa: PLC0415
+
+    sources = _normalize_datasets(datasets)
+    sources = [_reject_coord_input(dataset) for dataset in sources]
+    internal_stack_call = "_metadata_operation" in kwargs
+    requested = _requested_parameters(kwargs)
+    capture = None
+    boundary = None
+    if not internal_stack_call and _assembly.is_dataset_sequence(sources):
+        capture, started_at = _instrument.provenance_boundary(
+            _instrument.CONCATENATE_OPERATION_ID
+        )
+        if capture is not None:
+            boundary = _assembly.prepare_boundary(
+                capture,
+                sources,
+                operation_id=_instrument.CONCATENATE_OPERATION_ID,
+                started_at=started_at,
+            )
+    try:
+        result = _concatenate_impl(*datasets, **kwargs)
+    except Exception as exc:
+        if boundary is not None:
+            _assembly.record_failure(
+                boundary,
+                exc,
+                operation_id=_instrument.CONCATENATE_OPERATION_ID,
+                implementation="spectrochempy.concatenate",
+                requested_parameters=requested,
+            )
+        raise
+    if capture is not None:
+        if boundary is None:
+            _assembly.invalidate_unrecorded_result(
+                capture,
+                result,
+                operation_id=_instrument.CONCATENATE_OPERATION_ID,
+            )
+        else:
+            try:
+                resolved = _concatenate_resolved_parameters(sources, kwargs, result)
+            except Exception as exc:  # noqa: BLE001
+                with suppress(Exception):
+                    capture._note_capture_warning(
+                        _instrument.CONCATENATE_OPERATION_ID, exc
+                    )
+                _assembly.invalidate_unrecorded_result(
+                    capture,
+                    result,
+                    operation_id=_instrument.CONCATENATE_OPERATION_ID,
+                )
+            else:
+                _assembly.record_success(
+                    boundary,
+                    result,
+                    operation_id=_instrument.CONCATENATE_OPERATION_ID,
+                    implementation="spectrochempy.concatenate",
+                    requested_parameters=requested,
+                    resolved_parameters=resolved,
+                )
+    return result
+
+
+concatenate.__doc__ = _concatenate_impl.__doc__
+
+
+def stack(*datasets, **kwargs):
+    """Stack NDDataset inputs along a new dimension."""
+    from spectrochempy.provenance import _assembly  # noqa: PLC0415
+    from spectrochempy.provenance import _instrument  # noqa: PLC0415
+
+    sources = _normalize_datasets(datasets)
+    sources = [_reject_coord_input(dataset) for dataset in sources]
+    requested = _requested_parameters(kwargs)
+    capture = None
+    boundary = None
+    if _assembly.is_dataset_sequence(sources):
+        capture, started_at = _instrument.provenance_boundary(
+            _instrument.STACK_OPERATION_ID
+        )
+        if capture is not None:
+            boundary = _assembly.prepare_boundary(
+                capture,
+                sources,
+                operation_id=_instrument.STACK_OPERATION_ID,
+                started_at=started_at,
+            )
+    try:
+        result = _stack_impl(*datasets, **kwargs)
+    except Exception as exc:
+        if boundary is not None:
+            _assembly.record_failure(
+                boundary,
+                exc,
+                operation_id=_instrument.STACK_OPERATION_ID,
+                implementation="spectrochempy.stack",
+                requested_parameters=requested,
+            )
+        raise
+    if capture is not None:
+        if boundary is None:
+            _assembly.invalidate_unrecorded_result(
+                capture,
+                result,
+                operation_id=_instrument.STACK_OPERATION_ID,
+            )
+        else:
+            try:
+                requested_axis = kwargs.get("axis", 0)
+                axis = 1 if requested_axis in (1, -1) else 0
+                resolved = {
+                    "axis": axis,
+                    "dim": result.dims[axis],
+                    "mode": "new_dimension",
+                    "input_count": len(sources),
+                    "result_shape": list(result.shape),
+                    "result_dims": list(result.dims),
+                }
+            except Exception as exc:  # noqa: BLE001
+                with suppress(Exception):
+                    capture._note_capture_warning(_instrument.STACK_OPERATION_ID, exc)
+                _assembly.invalidate_unrecorded_result(
+                    capture,
+                    result,
+                    operation_id=_instrument.STACK_OPERATION_ID,
+                )
+            else:
+                _assembly.record_success(
+                    boundary,
+                    result,
+                    operation_id=_instrument.STACK_OPERATION_ID,
+                    implementation="spectrochempy.stack",
+                    requested_parameters=requested,
+                    resolved_parameters=resolved,
+                )
+    return result
+
+
+stack.__doc__ = _stack_impl.__doc__

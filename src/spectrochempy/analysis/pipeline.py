@@ -158,7 +158,10 @@ class Pipeline:
         from spectrochempy.provenance import _instrument  # noqa: PLC0415
 
         try:
-            with _instrument.suppress_provenance(*_instrument.BINARY_OPERATION_IDS):
+            with _instrument.suppress_provenance(
+                *_instrument.BINARY_OPERATION_IDS,
+                *_instrument.ASSEMBLY_OPERATION_IDS,
+            ):
                 return fitted_final.predict(current)
         except Exception as exc:
             raise self._step_error(
@@ -187,7 +190,10 @@ class Pipeline:
         from spectrochempy.provenance import _instrument  # noqa: PLC0415
 
         try:
-            with _instrument.suppress_provenance(*_instrument.BINARY_OPERATION_IDS):
+            with _instrument.suppress_provenance(
+                *_instrument.BINARY_OPERATION_IDS,
+                *_instrument.ASSEMBLY_OPERATION_IDS,
+            ):
                 return fitted_final.score(current, y)
         except Exception as exc:
             raise self._step_error(
@@ -309,6 +315,7 @@ class Pipeline:
                 _instrument.CENTER_FIT_OPERATION_ID,
                 _instrument.CENTER_TRANSFORM_OPERATION_ID,
                 *_instrument.BINARY_OPERATION_IDS,
+                *_instrument.ASSEMBLY_OPERATION_IDS,
             ):
                 if y is None:
                     step.fit(X)
@@ -325,6 +332,7 @@ class Pipeline:
                 _instrument.CENTER_FIT_OPERATION_ID,
                 _instrument.CENTER_TRANSFORM_OPERATION_ID,
                 *_instrument.BINARY_OPERATION_IDS,
+                *_instrument.ASSEMBLY_OPERATION_IDS,
             ):
                 result = step.transform(X)
         except Exception as exc:
