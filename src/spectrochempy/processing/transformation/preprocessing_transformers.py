@@ -484,6 +484,9 @@ class CenterTransformer(BasePreprocessor):
 
     @wraps(BasePreprocessor.fit)
     def fit(self, dataset):
+        if type(self) is not CenterTransformer:
+            return super().fit(dataset)
+
         from spectrochempy.provenance import _center  # noqa: PLC0415
         from spectrochempy.provenance import _instrument  # noqa: PLC0415
 
@@ -512,6 +515,9 @@ class CenterTransformer(BasePreprocessor):
 
     @wraps(BasePreprocessor.transform)
     def transform(self, dataset):
+        if type(self) is not CenterTransformer:
+            return super().transform(dataset)
+
         from spectrochempy.provenance import _center  # noqa: PLC0415
         from spectrochempy.provenance import _instrument  # noqa: PLC0415
 
@@ -536,10 +542,15 @@ class CenterTransformer(BasePreprocessor):
             raise
         if boundary is not None:
             _center.record_transform_success(boundary, self, dataset, result)
+        else:
+            _center.invalidate_unrecorded_result(capture, result)
         return result
 
     @wraps(BasePreprocessor.fit_transform)
     def fit_transform(self, dataset):
+        if type(self) is not CenterTransformer:
+            return super().fit_transform(dataset)
+
         from spectrochempy.provenance import _instrument  # noqa: PLC0415
 
         with _instrument.suppress_provenance(

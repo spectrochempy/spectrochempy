@@ -273,6 +273,35 @@ def test_fit_boundary_capture_failure_starts_conservative_identity(monkeypatch):
     )
 
 
+def test_transform_boundary_capture_failure_invalidates_result_for_p2(monkeypatch):
+    source = _dataset()
+    transformer = scp.CenterTransformer(dim="y")
+    with ProvenanceCapture() as capture:
+        transformer.fit(source)
+        observe_state = capture._observe_state
+
+        def fail_observation(value, fingerprint):
+            raise RuntimeError("identity registry unavailable")
+
+        monkeypatch.setattr(capture, "_observe_state", fail_observation)
+        result = transformer.transform(source)
+        monkeypatch.setattr(capture, "_observe_state", observe_state)
+        transposed = result.transpose()
+
+    assert transposed.shape == tuple(reversed(result.shape))
+    assert capture.capture_warnings[0]["status"] == "capture_failed"
+    assert [record.operation_id for record in capture.ledger] == [
+        _instrument.CENTER_FIT_OPERATION_ID,
+        _instrument.TRANSPOSE_OPERATION_ID,
+    ]
+    transpose = capture.ledger.operation_records[-1]
+    assert transpose.capture["status"] == "partial"
+    assert any(
+        omission["reason"] == "unrecorded_state_change"
+        for omission in transpose.capture["omissions"]
+    )
+
+
 def test_transform_capture_failure_breaks_later_p2_result_continuity(monkeypatch):
     source = _dataset()
     transformer = scp.CenterTransformer(dim="y")
@@ -315,6 +344,26 @@ def test_excluded_direct_paths_emit_no_center_records():
 
     assert not _records(capture, _instrument.CENTER_FIT_OPERATION_ID)
     assert not _records(capture, _instrument.CENTER_TRANSFORM_OPERATION_ID)
+
+
+def test_center_subclass_is_not_implicitly_instrumented():
+    class ExtendedCenter(scp.CenterTransformer):
+        _learned_attributes = (*scp.CenterTransformer._learned_attributes, "extra_")
+
+        def _fit(self, dataset):
+            super()._fit(dataset)
+            self.extra_ = np.ma.mean(dataset.masked_data)
+
+    source = _dataset()
+    transformer = ExtendedCenter(dim="y")
+
+    with ProvenanceCapture() as capture:
+        returned = transformer.fit(source)
+        result = transformer.transform(source)
+
+    assert returned is transformer
+    assert result.shape == source.shape
+    assert len(capture.ledger) == 0
 
 
 def test_pipeline_suppresses_center_records_without_suppressing_p2():

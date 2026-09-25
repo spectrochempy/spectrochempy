@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import math
+from contextlib import suppress
 from dataclasses import dataclass
 from datetime import UTC
 from datetime import datetime
@@ -142,6 +143,15 @@ def prepare_boundary(
         capture._note_capture_warning(operation_id, exc)
         capture._invalidate_state(transformer)
         return None
+
+
+def invalidate_unrecorded_result(capture: ProvenanceCapture, result: Any) -> None:
+    """Break result continuity after a transform boundary capture failure."""
+    try:
+        capture._invalidate_state(result)
+    except Exception as exc:  # noqa: BLE001
+        with suppress(Exception):
+            capture._note_capture_warning(CENTER_TRANSFORM_OPERATION_ID, exc)
 
 
 def _capture_mapping(

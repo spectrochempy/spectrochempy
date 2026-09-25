@@ -33,7 +33,7 @@ New Features
   identity across fitted states, link calibration and transformed datasets,
   summarize learned state without retaining learned arrays, and report failed
   refit mutation explicitly. Composite, functional, inverse, persistence, and
-  replay paths remain outside this slice.
+  replay paths, and ``CenterTransformer`` subclasses remain outside this slice.
 
 - Added ``cross_validate`` and ``CrossValidationResult`` for bounded supervised
   PLS and Pipeline cross-validation with aligned ``NDDataset`` outputs,

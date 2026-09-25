@@ -141,6 +141,8 @@ paths create no new Center records:
 
 - ``fit_transform()`` and ``inverse_transform()``;
 - the procedural ``center()`` adapter;
+- subclasses of ``CenterTransformer``, whose additional learned state requires
+  its own explicit capture contract;
 - Center steps invoked internally by ``Pipeline`` or ``cross_validate``;
 - all other preprocessors and estimators.
 
