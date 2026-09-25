@@ -50,6 +50,7 @@ __dataset_methods__ = [
 ]
 
 import inspect
+from functools import wraps
 
 import numpy as np
 
@@ -480,6 +481,72 @@ class CenterTransformer(BasePreprocessor):
     """
 
     _learned_attributes = ("mean_", "_dim_name", "_fit_signature_")
+
+    @wraps(BasePreprocessor.fit)
+    def fit(self, dataset):
+        from spectrochempy.provenance import _center  # noqa: PLC0415
+        from spectrochempy.provenance import _instrument  # noqa: PLC0415
+
+        capture, started_at = _instrument.provenance_boundary(
+            _instrument.CENTER_FIT_OPERATION_ID
+        )
+        if capture is None:
+            return super().fit(dataset)
+
+        boundary = _center.prepare_boundary(
+            capture,
+            self,
+            dataset,
+            operation_id=_instrument.CENTER_FIT_OPERATION_ID,
+            started_at=started_at,
+        )
+        try:
+            result = super().fit(dataset)
+        except Exception as exc:
+            if boundary is not None:
+                _center.record_fit_failure(boundary, self, dataset, exc)
+            raise
+        if boundary is not None:
+            _center.record_fit_success(boundary, self, dataset)
+        return result
+
+    @wraps(BasePreprocessor.transform)
+    def transform(self, dataset):
+        from spectrochempy.provenance import _center  # noqa: PLC0415
+        from spectrochempy.provenance import _instrument  # noqa: PLC0415
+
+        capture, started_at = _instrument.provenance_boundary(
+            _instrument.CENTER_TRANSFORM_OPERATION_ID
+        )
+        if capture is None:
+            return super().transform(dataset)
+
+        boundary = _center.prepare_boundary(
+            capture,
+            self,
+            dataset,
+            operation_id=_instrument.CENTER_TRANSFORM_OPERATION_ID,
+            started_at=started_at,
+        )
+        try:
+            result = super().transform(dataset)
+        except Exception as exc:
+            if boundary is not None:
+                _center.record_transform_failure(boundary, self, dataset, exc)
+            raise
+        if boundary is not None:
+            _center.record_transform_success(boundary, self, dataset, result)
+        return result
+
+    @wraps(BasePreprocessor.fit_transform)
+    def fit_transform(self, dataset):
+        from spectrochempy.provenance import _instrument  # noqa: PLC0415
+
+        with _instrument.suppress_provenance(
+            _instrument.CENTER_FIT_OPERATION_ID,
+            _instrument.CENTER_TRANSFORM_OPERATION_ID,
+        ):
+            return super().fit_transform(dataset)
 
     def _fit(self, dataset):
         axis, self._dim_name = dataset.get_axis(self.dim)
@@ -1106,7 +1173,7 @@ class ParetoScaleTransformer(BasePreprocessor):
         std_safe = np.where(self.std_ == 0, 1, self.std_)
         self._set_data(new, data * np.sqrt(std_safe) + self.mean_)
         new.history = (
-            f"ParetoScaleTransformer inverse applied on dimension " f"{self._dim_name}"
+            f"ParetoScaleTransformer inverse applied on dimension {self._dim_name}"
         )
         return new
 
@@ -1178,7 +1245,7 @@ class RangeScaleTransformer(BasePreprocessor):
 
         self._set_data(new, data * self.range_)
         new.history = (
-            f"RangeScaleTransformer inverse applied on dimension " f"{self._dim_name}"
+            f"RangeScaleTransformer inverse applied on dimension {self._dim_name}"
         )
         return new
 
@@ -1249,7 +1316,7 @@ class RobustScaleTransformer(BasePreprocessor):
 
         self._set_data(new, data * self.mad_ + self.median_)
         new.history = (
-            f"RobustScaleTransformer inverse applied on dimension " f"{self._dim_name}"
+            f"RobustScaleTransformer inverse applied on dimension {self._dim_name}"
         )
         return new
 

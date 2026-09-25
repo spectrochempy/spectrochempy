@@ -4,19 +4,20 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-Best-effort instrumentation helpers for the first provenance runtime slice.
+Best-effort helpers shared by the bounded provenance runtime slices.
 
-Only out-of-place single-source dataset selection (slicing) and transpose are
-instrumented. Capture code never alters scientific values, never mutates
-scientific arguments, and never masks a scientific exception. Parameter
-description is evaluated inside the capture protection so that a failure in
-capture never raises into scientific code; the offending parameter is then
-recorded as an omission and the capture is downgraded to ``partial``.
+Out-of-place dataset selection and transpose use the record helpers in this
+module. Direct Center lifecycle capture lives in :mod:`._center` and reuses the
+context-local boundary and operation-specific suppression defined here.
+Capture code never alters scientific values, mutates scientific arguments, or
+masks a scientific exception.
 """
 
 from __future__ import annotations
 
 from collections.abc import Callable
+from contextlib import contextmanager
+from contextvars import ContextVar
 from datetime import UTC
 from datetime import datetime
 from typing import TYPE_CHECKING
@@ -32,14 +33,36 @@ if TYPE_CHECKING:
 PROVIDER_NAME = "spectrochempy"
 SLICE_OPERATION_ID = "org.spectrochempy.dataset.slice"
 TRANSPOSE_OPERATION_ID = "org.spectrochempy.dataset.transpose"
+CENTER_FIT_OPERATION_ID = "org.spectrochempy.preprocessing.center.fit"
+CENTER_TRANSFORM_OPERATION_ID = "org.spectrochempy.preprocessing.center.transform"
+
+_SUPPRESSED_OPERATIONS: ContextVar[frozenset[str]] = ContextVar(
+    "spectrochempy_suppressed_provenance_operations",
+    default=frozenset(),
+)
 
 _UNRECORDED_CHANGE_REASON = "unrecorded_state_change"
 
 
-def provenance_boundary() -> tuple[ProvenanceCapture | None, datetime | None]:
-    """Return the active capture and a boundary timestamp, if any."""
-    from spectrochempy.provenance._capture import ProvenanceCapture
+@contextmanager
+def suppress_provenance(*operation_ids: str):
+    """Suppress selected operation families in this execution context."""
+    suppressed = _SUPPRESSED_OPERATIONS.get()
+    token = _SUPPRESSED_OPERATIONS.set(suppressed.union(operation_ids))
+    try:
+        yield
+    finally:
+        _SUPPRESSED_OPERATIONS.reset(token)
 
+
+def provenance_boundary(
+    operation_id: str | None = None,
+) -> tuple[ProvenanceCapture | None, datetime | None]:
+    """Return the active capture and a boundary timestamp, if any."""
+    from spectrochempy.provenance._capture import ProvenanceCapture  # noqa: PLC0415
+
+    if operation_id is not None and operation_id in _SUPPRESSED_OPERATIONS.get():
+        return None, None
     capture = ProvenanceCapture.current()
     if capture is None:
         return None, None

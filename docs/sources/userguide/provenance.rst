@@ -16,8 +16,10 @@ SpectroChemPy 1.0 release and its contract may still evolve.
 P1 establishes immutable references and records, an append-only ledger, and a
 context-local capture mechanism. P2 adds the first runtime instrumentation:
 out-of-place ``NDDataset`` slicing and ``NDDataset.transpose`` create one
-operation record each while a capture context is active. Every other scientific
-operation remains uninstrumented and creates no record.
+operation record each while a capture context is active. The next bounded slice
+adds direct calls to ``CenterTransformer.fit()`` and
+``CenterTransformer.transform()``. Other scientific operations remain
+uninstrumented unless this page states otherwise.
 
 Captured slicing and transpose
 ------------------------------
@@ -79,6 +81,72 @@ in-place operations, arithmetic, concatenation, estimators, and readers are not
 instrumented. In particular, in-place slicing
 (``dataset[:, ..., INPLACE]``) and in-place transpose are outside the capture
 scope and create no record.
+
+Direct CenterTransformer fit and transform
+--------------------------------------------
+
+Direct calls to :meth:`CenterTransformer.fit
+<spectrochempy.CenterTransformer.fit>` and
+:meth:`CenterTransformer.transform <spectrochempy.CenterTransformer.transform>`
+record the lifecycle of one transformer identity:
+
+.. code-block:: python
+
+   transformer = scp.CenterTransformer(dim="y")
+
+   with scp.provenance.ProvenanceCapture() as capture:
+       calibration = dataset[:8]
+       transformer.fit(calibration)
+       centered = transformer.transform(calibration)
+
+   selection_record, fit_record, transform_record = capture.ledger.operation_records
+   assert fit_record.inputs[1].reference == selection_record.outputs[0].reference
+   assert transform_record.inputs[0].reference == fit_record.outputs[0].reference
+
+The fit record references the transformer's prior state and the calibration
+dataset, then advances the same transformer object to a fitted state. The
+transform record references that fitted state and its source dataset, and
+creates a new dataset object/state. ``fit()`` and ``transform()`` accept no
+configuration arguments at their call boundaries, so their
+``parameters.requested`` mappings are empty. ``parameters.resolved`` records
+the current ``dim`` configuration together with the resolved axis and dimension
+name.
+
+The fitted-state summary reports only bounded facts about ``mean_``: dtype,
+shape, size, and masked count. Mean values are explicitly marked ``omitted``
+and are not stored in the ledger, so a successful fit record is ``partial``.
+This is passive trace evidence, not persistence of a fitted transformer and not
+replay.
+
+Within an active capture, continuity checks digest the transformer's current
+configuration, fitted flag, compatibility signature, and learned mean,
+including its mask. The stored digest is bounded, but calculating it reads the
+learned arrays and compatibility-coordinate arrays in full and may create
+contiguous copies. Direct configuration or learned-state changes therefore
+start a new observed state and make the next record ``partial`` with an
+``unrecorded_state_change`` omission. Unsupported runtime state is treated as
+unverifiable rather than complete. These checks do not extend the P2 dataset
+fingerprint, whose mask, coordinate, unit, and metadata limitations remain
+unchanged.
+
+A failed refit records whether the transformer's state is known to be changed,
+unchanged, or unknown. In particular, the existing scientific behavior is
+preserved: a failed refit may leave a previously fitted transformer unfitted.
+No rollback is added for provenance. Capture failure never masks the scientific
+result or exception; if a successful fit cannot be recorded, later operations
+do not claim verified continuity with that missing fit.
+
+Only direct ``fit()`` and ``transform()`` calls are in scope. The following
+paths create no new Center records:
+
+- ``fit_transform()`` and ``inverse_transform()``;
+- the procedural ``center()`` adapter;
+- Center steps invoked internally by ``Pipeline`` or ``cross_validate``;
+- all other preprocessors and estimators.
+
+Suppression is local to the current execution context and to the two Center
+operation identifiers. It composes with nested capture contexts and does not
+suppress the existing P2 slice or transpose records.
 
 Demonstrator: interactive selection followed by transpose
 ---------------------------------------------------------

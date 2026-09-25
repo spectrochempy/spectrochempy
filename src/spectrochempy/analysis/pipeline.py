@@ -296,17 +296,29 @@ class Pipeline:
             raise self._step_error("clone", name, position, template, exc) from exc
 
     def _fit_step(self, step, X, y, name, position):
+        from spectrochempy.provenance import _instrument  # noqa: PLC0415
+
         try:
-            if y is None:
-                step.fit(X)
-            else:
-                step.fit(X, y)
+            with _instrument.suppress_provenance(
+                _instrument.CENTER_FIT_OPERATION_ID,
+                _instrument.CENTER_TRANSFORM_OPERATION_ID,
+            ):
+                if y is None:
+                    step.fit(X)
+                else:
+                    step.fit(X, y)
         except Exception as exc:
             raise self._step_error("fit", name, position, step, exc) from exc
 
     def _transform_step(self, step, X, name, position, operation="transform"):
+        from spectrochempy.provenance import _instrument  # noqa: PLC0415
+
         try:
-            result = step.transform(X)
+            with _instrument.suppress_provenance(
+                _instrument.CENTER_FIT_OPERATION_ID,
+                _instrument.CENTER_TRANSFORM_OPERATION_ID,
+            ):
+                result = step.transform(X)
         except Exception as exc:
             raise self._step_error(operation, name, position, step, exc) from exc
         if not isinstance(result, NDDataset):
