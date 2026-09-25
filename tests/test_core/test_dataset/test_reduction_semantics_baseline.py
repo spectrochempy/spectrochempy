@@ -198,7 +198,7 @@ class TestMeanCharacterization:
 
     def test_mean_appends_history(self, reduction_dataset):
         assert_history_appended(
-            reduction_dataset.mean(dim="x"), reduction_dataset, "`mean`"
+            reduction_dataset.mean(dim="x"), reduction_dataset, "Mean computed along x"
         )
 
     def test_mean_coordset_reduced(self, reduction_dataset):
@@ -567,7 +567,7 @@ class TestReductionHistory:
 
     def test_mean_history_message(self, reduction_dataset):
         m = reduction_dataset.mean(dim="x")
-        assert "`mean`" in m.history[1]
+        assert "Mean computed along x" in m.history[1]
 
     def test_std_history_message(self, reduction_dataset):
         s = reduction_dataset.std(dim="x")

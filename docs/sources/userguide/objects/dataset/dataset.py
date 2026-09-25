@@ -370,6 +370,12 @@ corrected.name = "referenced-OH-region"
 corrected.plot()
 
 # %%
+reference.history
+
+# %%
+[entry for entry in reference.history_entries if entry["operation"] == "mean"]
+
+# %%
 corrected.history
 
 # %%
@@ -380,12 +386,11 @@ corrected.history
 ]
 
 # %% [markdown]
-# The final log follows the main dataset: it records its import, spectral selection,
-# and subtraction. The reduction used to create ``reference`` is still a readable
-# text-only entry in ``reference.history``; its separate chronology is not merged
-# into ``corrected``. The subtraction entry instead identifies the two operands in
-# mathematical order. This keeps the log linear and readable without presenting it
-# as complete provenance.
+# The reference log records that its mean was computed along ``y``. Its separate
+# chronology is not merged into ``corrected``: the final log follows the main dataset
+# and records its import, spectral selection, and subtraction. The subtraction entry
+# instead identifies the two operands in mathematical order. This keeps both logs
+# linear and readable without presenting either as complete provenance.
 
 # %% [markdown]
 # ## Units

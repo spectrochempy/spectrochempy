@@ -276,7 +276,8 @@ class _from_numpy_method:
             #     # delete all coordinates
             #     new._coordset = None
 
-            new.history = f"Dataset resulting from application of `{method}` method"
+            if method != "mean":
+                new.history = f"Dataset resulting from application of `{method}` method"
             return new
 
         return func
@@ -2407,6 +2408,8 @@ class NDMath:
         Coord: [float64] cm⁻¹ (size: 5549)
 
         """
+        requested_dim = dim
+        source_dims = list(cls.dims)
         axis, dim = cls.get_axis(dim, allows_none=True)
         m = np.ma.mean(dataset, axis=axis, dtype=dtype, keepdims=keepdims)
 
@@ -2418,6 +2421,44 @@ class NDMath:
         cls._mask = m.mask
         cls.dims = dims
         cls._coordset = coordset
+
+        if cls._implements("NDDataset"):
+            requested_dims = (
+                None
+                if requested_dim is None
+                else list(requested_dim)
+                if isinstance(requested_dim, list | tuple)
+                else [requested_dim]
+            )
+            resolved_dims = (
+                source_dims
+                if dim is None
+                else list(dim)
+                if isinstance(dim, list | tuple)
+                else [dim]
+            )
+            all_dimensions = len(resolved_dims) == len(source_dims) and set(
+                resolved_dims
+            ) == set(source_dims)
+            if all_dimensions:
+                message = "Mean computed over all dimensions"
+            elif len(resolved_dims) == 1:
+                message = f"Mean computed along {resolved_dims[0]}"
+            else:
+                message = (
+                    f"Mean computed along {', '.join(resolved_dims[:-1])} and "
+                    f"{resolved_dims[-1]}"
+                )
+            cls._append_history_entry(
+                operation="mean",
+                parameters={
+                    "requested_dims": requested_dims,
+                    "resolved_dims": resolved_dims,
+                    "all_dimensions": all_dimensions,
+                    "keepdims": keepdims,
+                },
+                message=message,
+            )
 
         return cls
 

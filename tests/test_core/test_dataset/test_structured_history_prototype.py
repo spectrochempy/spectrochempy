@@ -15,6 +15,7 @@ from datetime import datetime
 import numpy as np
 import pytest
 
+import spectrochempy as scp
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.dataset.nddataset import _prepare_xarray_dataset_for_netcdf
@@ -349,6 +350,147 @@ def test_failed_subtraction_does_not_change_source_history():
         dataset - object()
 
     assert dataset.history_entries == before
+
+
+def test_mean_named_dimension_preserves_science_and_records_exact_entry():
+    dataset = _dataset()
+    dataset.units = "m"
+    dataset.annotate("prepared")
+    before = dataset.history_entries
+
+    result = dataset.mean(dim="y")
+    expected = np.ma.mean(dataset.masked_data, axis=0)
+
+    np.testing.assert_allclose(result.data, expected.data)
+    assert np.array_equal(
+        np.broadcast_to(result.mask, result.shape), np.ma.getmaskarray(expected)
+    )
+    assert result.units == dataset.units
+    assert list(result.dims) == ["x"]
+    assert np.array_equal(result.coord("x").data, dataset.coord("x").data)
+    assert dataset.history_entries == before
+    assert result.history_entries[:-1] == before
+    entry = result.history_entries[-1]
+    assert entry["operation"] == "mean"
+    assert entry["parameters"] == {
+        "requested_dims": ["y"],
+        "resolved_dims": ["y"],
+        "all_dimensions": False,
+        "keepdims": False,
+    }
+    assert entry["message"] == "Mean computed along y"
+
+
+@pytest.mark.parametrize("form", ["instance", "class", "api", "numpy"])
+def test_mean_public_forms_append_one_entry_with_resolved_numeric_axis(form):
+    dataset = _dataset()
+    dataset.annotate("prepared")
+
+    if form == "instance":
+        result = dataset.mean(dim=0)
+    elif form == "class":
+        result = NDDataset.mean(dataset, dim=0)
+    elif form == "api":
+        result = scp.mean(dataset, dim=0)
+    else:
+        result = np.mean(dataset, axis=0)
+
+    assert len(result.history_entries) == len(dataset.history_entries) + 1
+    mean_entries = [
+        entry for entry in result.history_entries if entry["operation"] == "mean"
+    ]
+    assert len(mean_entries) == 1
+    assert mean_entries[0]["parameters"] == {
+        "requested_dims": [0],
+        "resolved_dims": ["y"],
+        "all_dimensions": False,
+        "keepdims": False,
+    }
+    assert mean_entries[0]["message"] == "Mean computed along y"
+
+
+def test_mean_default_scalar_preserves_source_without_artificial_history():
+    dataset = _dataset()
+    dataset.annotate("prepared")
+    before = dataset.history_entries
+
+    result = dataset.mean()
+
+    assert not isinstance(result, NDDataset)
+    assert np.isclose(result, np.ma.mean(dataset.masked_data))
+    assert dataset.history_entries == before
+
+
+def test_mean_keepdims_records_all_dimensions_explicitly():
+    dataset = _dataset()
+
+    result = dataset.mean(keepdims=True)
+
+    assert result.shape == (1, 1)
+    assert list(result.dims) == ["y", "x"]
+    entry = result.history_entries[-1]
+    assert entry["operation"] == "mean"
+    assert entry["parameters"] == {
+        "requested_dims": None,
+        "resolved_dims": ["y", "x"],
+        "all_dimensions": True,
+        "keepdims": True,
+    }
+    assert entry["message"] == "Mean computed over all dimensions"
+
+
+def test_mean_multiple_dimensions_records_request_and_resolution():
+    dataset = _dataset()
+
+    result = dataset.mean(dim=("x", "y"), keepdims=True)
+
+    entry = result.history_entries[-1]
+    assert entry["parameters"] == {
+        "requested_dims": ["x", "y"],
+        "resolved_dims": ["x", "y"],
+        "all_dimensions": True,
+        "keepdims": True,
+    }
+    assert entry["message"] == "Mean computed over all dimensions"
+
+
+def test_mean_multiple_dimensions_uses_readable_partial_reduction_message():
+    dataset = NDDataset(np.arange(24).reshape(2, 3, 4))
+
+    result = dataset.mean(dim=("z", "x"))
+
+    assert result.shape == (3,)
+    assert list(result.dims) == ["y"]
+    entry = result.history_entries[-1]
+    assert entry["parameters"] == {
+        "requested_dims": ["z", "x"],
+        "resolved_dims": ["z", "x"],
+        "all_dimensions": False,
+        "keepdims": False,
+    }
+    assert entry["message"] == "Mean computed along z and x"
+
+
+def test_failed_mean_does_not_change_source_history():
+    dataset = _dataset()
+    dataset.annotate("prepared")
+    before = dataset.history_entries
+
+    with pytest.raises(ValueError, match="not recognized"):
+        dataset.mean(dim="z")
+
+    assert dataset.history_entries == before
+
+
+def test_mean_entry_survives_copy_and_native_roundtrip():
+    result = _dataset().mean(dim="y")
+
+    copied = result.copy()
+    rebuilt = NDDataset.loads(json_loads(result.dumps()))
+
+    assert copied.history_entries == result.history_entries
+    assert rebuilt.history_entries == result.history_entries
+    assert rebuilt.history == result.history
 
 
 @pytest.mark.parametrize("deep", [False, True])
