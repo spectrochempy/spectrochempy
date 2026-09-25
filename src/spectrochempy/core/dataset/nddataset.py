@@ -151,6 +151,12 @@ def _history_selector(selector: Any) -> dict[str, Any]:
                 "selected": int(values.sum()),
                 "values": values.tolist() if values.size <= 16 else "not stored",
             }
+        if np.issubdtype(values.dtype, np.floating):
+            return {
+                "kind": "coordinate_values",
+                "shape": list(values.shape),
+                "values": values.tolist() if values.size <= 16 else "not stored",
+            }
         return {
             "kind": "indices",
             "shape": list(values.shape),
@@ -164,7 +170,11 @@ def _history_selector(selector: Any) -> dict[str, Any]:
     }
 
 
-def _history_selection(items: Any, dims: list[str]) -> dict[str, Any]:
+def _history_selection(
+    items: Any,
+    dims: list[str],
+    resolved_items: Any,
+) -> dict[str, Any]:
     """Describe the requested selection without claiming resolved indexes."""
     selectors = list(items) if isinstance(items, tuple) else [items]
     inplace = bool(selectors and str(selectors[-1]) == INPLACE)
@@ -180,11 +190,31 @@ def _history_selection(items: Any, dims: list[str]) -> dict[str, Any]:
                 expanded.append(selector)
         selectors = expanded
 
+    routed_dims = list(dims[: len(selectors)])
+    resolved = (
+        list(resolved_items) if isinstance(resolved_items, tuple) else [resolved_items]
+    )
+    if len(selectors) == 1:
+        if len(resolved) == len(dims):
+            selected_axes = [
+                axis
+                for axis, selector in enumerate(resolved)
+                if not (
+                    isinstance(selector, slice)
+                    and selector.start is None
+                    and selector.stop is None
+                    and selector.step is None
+                )
+            ]
+            routed_dims = [dims[selected_axes[0]]] if len(selected_axes) == 1 else []
+        elif len(dims) != 1:
+            routed_dims = []
+
     requested = []
     for position, selector in enumerate(selectors):
         description = _history_selector(selector)
-        if position < len(dims):
-            description = {"dimension": dims[position], **description}
+        if position < len(routed_dims):
+            description = {"dimension": routed_dims[position], **description}
         requested.append(description)
 
     return {
@@ -206,7 +236,7 @@ def _history_selection_message(parameters: Mapping[str, Any]) -> str:
 
     parts = []
     for selector in parameters["requested"]:
-        dim = selector.get("dimension", "?")
+        dim = f"{selector['dimension']} " if "dimension" in selector else ""
         kind = selector["kind"]
         if kind.endswith("_slice") or kind == "all":
             label = {
@@ -215,17 +245,23 @@ def _history_selection_message(parameters: Mapping[str, Any]) -> str:
                 "index_slice": "indices",
                 "all": "indices",
             }[kind]
-            requested = ":".join(
-                boundary(selector[name]) for name in ("start", "stop", "step")
-            ).rstrip(":")
-            parts.append(f"{dim} {label} [{requested or ':'}]")
+            start = boundary(selector["start"])
+            stop = boundary(selector["stop"])
+            step = boundary(selector["step"])
+            requested = f"{start}:{stop}"
+            if step:
+                requested = f"{requested}:{step}"
+            parts.append(f"{dim}{label} [{requested}]")
         elif kind in {"coordinate", "label", "index"}:
-            parts.append(f"{dim} {kind} [{boundary(selector['value'])}]")
-        elif kind in {"indices", "boolean_mask"}:
+            parts.append(f"{dim}{kind} [{boundary(selector['value'])}]")
+        elif kind in {"indices", "coordinate_values", "boolean_mask"}:
             values = selector["values"]
-            parts.append(f"{dim} {kind.replace('_', ' ')} [{values}]")
+            label = (
+                "coordinates" if kind == "coordinate_values" else kind.replace("_", " ")
+            )
+            parts.append(f"{dim}{label} {values}")
         else:
-            parts.append(f"{dim} {selector.get('description', kind)}")
+            parts.append(f"{dim}{selector.get('description', kind)}")
     return f"Slice extracted: {', '.join(parts)}"
 
 
@@ -768,7 +804,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             new_coords = self._coordset._slice_dims(self.dims, items)
             new.set_coordset(*new_coords, keepnames=True)
 
-        parameters = _history_selection(saveditems, list(self.dims))
+        parameters = _history_selection(saveditems, list(self.dims), items)
         new._append_history_entry(
             operation="slice",
             parameters=parameters,

@@ -212,6 +212,49 @@ def test_slice_parameters_are_detached_and_large_index_lists_are_not_stored():
     }
 
 
+def test_single_row_slice_uses_the_dimension_routed_by_indexing():
+    dataset = NDDataset(
+        np.arange(6).reshape(1, 6),
+        coordset=[Coord([0.0]), Coord([0.0, 10.0, 20.0, 30.0, 40.0, 50.0])],
+    )
+
+    result = dataset[1:3]
+
+    assert np.array_equal(result.data, dataset.data[:, 1:3])
+    selector = result.history_entries[-1]["parameters"]["requested"][0]
+    assert selector["dimension"] == "x"
+    assert result.history_entries[-1]["message"] == "Slice extracted: x indices [1:3]"
+
+
+def test_float_fancy_selection_is_described_as_coordinate_values():
+    dataset = NDDataset(
+        np.arange(6),
+        coordset=[Coord([0.0, 10.0, 20.0, 30.0, 40.0, 50.0])],
+    )
+
+    result = dataset[[10.0, 30.0]]
+
+    assert np.array_equal(result.data, dataset.data[[1, 3]])
+    selector = result.history_entries[-1]["parameters"]["requested"][0]
+    assert selector == {
+        "dimension": "x",
+        "kind": "coordinate_values",
+        "shape": [2],
+        "values": [10.0, 30.0],
+    }
+    assert result.history_entries[-1]["message"] == (
+        "Slice extracted: x coordinates [10.0, 30.0]"
+    )
+
+
+def test_open_ended_slice_keeps_its_trailing_colon():
+    dataset = NDDataset(np.arange(6))
+
+    result = dataset[2:]
+
+    assert result.history_entries[-1]["message"] == "Slice extracted: x indices [2:]"
+
+
 def test_failed_slice_does_not_change_source_history():
     dataset = _dataset()
     before = dataset.history_entries
