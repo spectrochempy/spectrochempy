@@ -353,6 +353,41 @@ nd.history
 # does not detect arbitrary mutations, construct a graph, or replay computations.
 
 # %% [markdown]
+# A short infrared workflow shows how the two views complement each other. We select
+# six spectra in the OH region, calculate a reference from the first three, and
+# subtract that reference from every selected spectrum.
+
+# %%
+spectra = scp.read("irdata/nh4y-activation.spg")
+region = spectra[:6, 3700.0:3300.0]
+region.name = "OH-region"
+reference = region[:3].mean(dim="y")
+reference.name = "mean-reference"
+corrected = region - reference
+corrected.name = "referenced-OH-region"
+
+# %%
+corrected.plot()
+
+# %%
+corrected.history
+
+# %%
+[
+    entry
+    for entry in corrected.history_entries
+    if entry["operation"] in {"slice", "subtract"}
+]
+
+# %% [markdown]
+# The final log follows the main dataset: it records its import, spectral selection,
+# and subtraction. The reduction used to create ``reference`` is still a readable
+# text-only entry in ``reference.history``; its separate chronology is not merged
+# into ``corrected``. The subtraction entry instead identifies the two operands in
+# mathematical order. This keeps the log linear and readable without presenting it
+# as complete provenance.
+
+# %% [markdown]
 # ## Units
 
 # %% [markdown]

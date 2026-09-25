@@ -153,6 +153,204 @@ def test_failed_addition_does_not_change_source_history():
     assert dataset.history_entries == before
 
 
+def test_slice_preserves_science_and_describes_requested_coordinates():
+    dataset = _dataset()
+    dataset.units = "m"
+    dataset.annotate("prepared")
+    before = dataset.history_entries
+
+    result = dataset[:1, 100.0:200.0]
+
+    assert result.shape == (1, 2)
+    assert np.array_equal(result.data, dataset.data[:1])
+    assert np.array_equal(result.mask, dataset.mask[:1])
+    assert result.units == dataset.units
+    assert np.array_equal(result.coord("x").data, dataset.coord("x").data)
+    assert np.array_equal(result.coord("y").data, dataset.coord("y").data[:1])
+    assert dataset.history_entries == before
+    assert result.history_entries[:-1] == before
+    entry = result.history_entries[-1]
+    assert entry["operation"] == "slice"
+    assert entry["message"] == (
+        "Slice extracted: y indices [:1], x coordinates [100.0:200.0]"
+    )
+    assert entry["parameters"] == {
+        "source_dims": ["y", "x"],
+        "requested": [
+            {
+                "dimension": "y",
+                "kind": "index_slice",
+                "start": None,
+                "stop": 1,
+                "step": None,
+            },
+            {
+                "dimension": "x",
+                "kind": "coordinate_slice",
+                "start": 100.0,
+                "stop": 200.0,
+                "step": None,
+            },
+        ],
+        "inplace": False,
+    }
+
+
+def test_slice_parameters_are_detached_and_large_index_lists_are_not_stored():
+    dataset = NDDataset(np.arange(20), name="series")
+    requested = list(range(17))
+
+    result = dataset[requested]
+    requested[0] = 19
+
+    selector = result.history_entries[-1]["parameters"]["requested"][0]
+    assert selector == {
+        "dimension": "x",
+        "kind": "indices",
+        "shape": [17],
+        "values": "not stored",
+    }
+
+
+def test_single_row_slice_uses_the_dimension_routed_by_indexing():
+    dataset = NDDataset(
+        np.arange(6).reshape(1, 6),
+        coordset=[Coord([0.0]), Coord([0.0, 10.0, 20.0, 30.0, 40.0, 50.0])],
+    )
+
+    result = dataset[1:3]
+
+    assert np.array_equal(result.data, dataset.data[:, 1:3])
+    selector = result.history_entries[-1]["parameters"]["requested"][0]
+    assert selector["dimension"] == "x"
+    assert result.history_entries[-1]["message"] == "Slice extracted: x indices [1:3]"
+
+
+def test_float_fancy_selection_is_described_as_coordinate_values():
+    dataset = NDDataset(
+        np.arange(6),
+        coordset=[Coord([0.0, 10.0, 20.0, 30.0, 40.0, 50.0])],
+    )
+
+    result = dataset[[10.0, 30.0]]
+
+    assert np.array_equal(result.data, dataset.data[[1, 3]])
+    selector = result.history_entries[-1]["parameters"]["requested"][0]
+    assert selector == {
+        "dimension": "x",
+        "kind": "coordinate_values",
+        "shape": [2],
+        "values": [10.0, 30.0],
+    }
+    assert result.history_entries[-1]["message"] == (
+        "Slice extracted: x coordinates [10.0, 30.0]"
+    )
+
+
+def test_open_ended_slice_keeps_its_trailing_colon():
+    dataset = NDDataset(np.arange(6))
+
+    result = dataset[2:]
+
+    assert result.history_entries[-1]["message"] == "Slice extracted: x indices [2:]"
+
+
+def test_failed_slice_does_not_change_source_history():
+    dataset = _dataset()
+    before = dataset.history_entries
+
+    with pytest.raises((IndexError, TypeError)):
+        dataset[object()]
+
+    assert dataset.history_entries == before
+
+
+def test_scalar_subtraction_preserves_science_and_source_history():
+    dataset = _dataset()
+    dataset.units = "m"
+    dataset.annotate("prepared")
+    before = dataset.history_entries
+
+    result = dataset - 2
+
+    valid = ~dataset.mask
+    assert np.array_equal(result.data[valid], (dataset.data - 2)[valid])
+    assert np.array_equal(result.mask, dataset.mask)
+    assert result.units == dataset.units
+    assert tuple(result.dims) == tuple(dataset.dims)
+    assert np.array_equal(result.coord("x").data, dataset.coord("x").data)
+    assert np.array_equal(result.coord("y").data, dataset.coord("y").data)
+    assert dataset.history_entries == before
+    assert result.history_entries[:-1] == before
+    entry = result.history_entries[-1]
+    assert entry["operation"] == "subtract"
+    assert entry["message"] == "Subtracted `2` from `left`"
+    assert entry["parameters"]["sources"] == [
+        {
+            "role": "left",
+            "kind": "NDDataset",
+            "name": "left",
+            "title": None,
+            "shape": [2, 2],
+        },
+        {"role": "right", "kind": "scalar", "value": 2},
+    ]
+
+
+def test_reflected_subtraction_records_mathematical_operand_order():
+    dataset = _dataset()
+
+    result = 10 - dataset
+
+    valid = ~dataset.mask
+    assert np.array_equal(result.data[valid], (10 - dataset.data)[valid])
+    entry = result.history_entries[-1]
+    assert entry["operation"] == "subtract"
+    assert entry["message"] == "Subtracted `left` from `10`"
+    assert entry["parameters"]["sources"] == [
+        {"role": "left", "kind": "scalar", "value": 10},
+        {
+            "role": "right",
+            "kind": "NDDataset",
+            "name": "left",
+            "title": None,
+            "shape": [2, 2],
+        },
+    ]
+
+
+def test_dataset_subtraction_does_not_merge_or_retain_right_source():
+    left = _dataset("left")
+    right = _dataset("right")
+    left.annotate("left preparation")
+    right.annotate("right preparation")
+
+    result = left - right
+    right.name = "renamed later"
+
+    assert [entry["message"] for entry in result.history_entries[:-1]] == [
+        "left preparation"
+    ]
+    assert "right preparation" not in [
+        entry["message"] for entry in result.history_entries
+    ]
+    sources = result.history_entries[-1]["parameters"]["sources"]
+    assert [(source["role"], source["name"]) for source in sources] == [
+        ("left", "left"),
+        ("right", "right"),
+    ]
+
+
+def test_failed_subtraction_does_not_change_source_history():
+    dataset = _dataset()
+    before = dataset.history_entries
+
+    with pytest.raises((TypeError, ValueError)):
+        dataset - object()
+
+    assert dataset.history_entries == before
+
+
 @pytest.mark.parametrize("deep", [False, True])
 def test_copy_history_is_independent_even_for_shallow_copy(deep):
     dataset = _dataset()
@@ -184,7 +382,7 @@ def test_unsupported_parameter_is_described_without_retaining_value():
 
 
 def test_native_roundtrip_preserves_structured_entries():
-    dataset = (_dataset() + 2).T
+    dataset = (_dataset()[:1] - 2).T
 
     rebuilt = NDDataset.loads(json_loads(dataset.dumps()))
 
