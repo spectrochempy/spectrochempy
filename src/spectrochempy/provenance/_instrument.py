@@ -36,6 +36,8 @@ SLICE_OPERATION_ID = "org.spectrochempy.dataset.slice"
 TRANSPOSE_OPERATION_ID = "org.spectrochempy.dataset.transpose"
 CENTER_FIT_OPERATION_ID = "org.spectrochempy.preprocessing.center.fit"
 CENTER_TRANSFORM_OPERATION_ID = "org.spectrochempy.preprocessing.center.transform"
+PCA_FIT_OPERATION_ID = "org.spectrochempy.analysis.pca.fit"
+PCA_TRANSFORM_OPERATION_ID = "org.spectrochempy.analysis.pca.transform"
 BINARY_ADD_OPERATION_ID = "org.spectrochempy.dataset.binary.add"
 BINARY_SUBTRACT_OPERATION_ID = "org.spectrochempy.dataset.binary.subtract"
 BINARY_MULTIPLY_OPERATION_ID = "org.spectrochempy.dataset.binary.multiply"
@@ -49,6 +51,7 @@ BINARY_OPERATION_IDS = (
     BINARY_TRUE_DIVIDE_OPERATION_ID,
 )
 ASSEMBLY_OPERATION_IDS = (CONCATENATE_OPERATION_ID, STACK_OPERATION_ID)
+PCA_OPERATION_IDS = (PCA_FIT_OPERATION_ID, PCA_TRANSFORM_OPERATION_ID)
 
 _SUPPRESSED_OPERATIONS: ContextVar[frozenset[str]] = ContextVar(
     "spectrochempy_suppressed_provenance_operations",

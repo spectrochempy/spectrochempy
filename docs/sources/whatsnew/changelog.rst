@@ -54,6 +54,14 @@ New Features
   NumPy array-conversion paths and unsupported input forms remain outside this
   bounded slice.
 
+- Added bounded experimental provenance for a direct ``PCA.fit()`` and
+  ``PCA.transform()`` cycle. Records preserve one estimator identity, separate
+  requested configuration from resolved solver and component choices, link
+  calibration, source, and score datasets, and summarize learned state without
+  retaining arrays or a serialized model. Failed refits expose their observed
+  state effect. ``fit_transform()``, inverse and accessor paths, subclasses,
+  composites, persistence, manifests, and replay remain outside this slice.
+
 - Added ``cross_validate`` and ``CrossValidationResult`` for bounded supervised
   PLS and Pipeline cross-validation with aligned ``NDDataset`` outputs,
   per-target metrics, fold records, and optional fitted fold estimators (#1658).

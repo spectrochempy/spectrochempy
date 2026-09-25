@@ -5,6 +5,8 @@
 # ======================================================================================
 """Implementation of Principal Component Analysis (using scikit-learn library)."""
 
+from functools import wraps
+
 import numpy as np
 import traitlets as tr
 from numpy.random import RandomState
@@ -15,6 +17,7 @@ from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis._base._analysisbase import _wrap_ndarray_output_to_nddataset
 from spectrochempy.analysis._base._result import AnalysisResult
 from spectrochempy.application.application import info_
+from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 
 __all__ = ["PCA"]
@@ -334,7 +337,92 @@ for reproducible results across multiple function calls.""",
         fit_transform : Fit the model and apply dimensionality reduction.
 
         """
-        return super().fit(X, Y=None)
+        if type(self) is not PCA or not isinstance(X, NDDataset):
+            return super().fit(X, Y=None)
+
+        from spectrochempy.provenance import _instrument  # noqa: PLC0415
+        from spectrochempy.provenance import _pca  # noqa: PLC0415
+
+        capture, started_at = _instrument.provenance_boundary(
+            _instrument.PCA_FIT_OPERATION_ID
+        )
+        if capture is None:
+            return super().fit(X, Y=None)
+
+        boundary = _pca.prepare_boundary(
+            capture,
+            self,
+            X,
+            operation_id=_instrument.PCA_FIT_OPERATION_ID,
+            started_at=started_at,
+        )
+        try:
+            result = super().fit(X, Y=None)
+        except Exception as exc:
+            if boundary is not None:
+                _pca.record_fit_failure(boundary, self, X, exc)
+            raise
+        if boundary is not None:
+            _pca.record_fit_success(boundary, self, X)
+        return result
+
+    @wraps(DecompositionAnalysis.transform)
+    def transform(self, X=None, **kwargs):
+        """Apply the fitted PCA model to a directly supplied dataset."""
+        if type(self) is not PCA or not isinstance(X, NDDataset):
+            return super().transform(X, **kwargs)
+
+        from spectrochempy.provenance import _instrument  # noqa: PLC0415
+        from spectrochempy.provenance import _pca  # noqa: PLC0415
+
+        capture, started_at = _instrument.provenance_boundary(
+            _instrument.PCA_TRANSFORM_OPERATION_ID
+        )
+        if capture is None:
+            return super().transform(X, **kwargs)
+
+        requested = _pca.requested_transform_parameters(kwargs)
+        boundary = _pca.prepare_boundary(
+            capture,
+            self,
+            X,
+            operation_id=_instrument.PCA_TRANSFORM_OPERATION_ID,
+            started_at=started_at,
+        )
+        try:
+            result = super().transform(X, **kwargs)
+        except Exception as exc:
+            if boundary is not None:
+                _pca.record_transform_failure(
+                    boundary,
+                    self,
+                    X,
+                    exc,
+                    requested_call=requested,
+                )
+            raise
+        if boundary is None:
+            _pca.invalidate_unrecorded_result(capture, result)
+        else:
+            _pca.record_transform_success(
+                boundary,
+                self,
+                X,
+                result,
+                requested_call=requested,
+            )
+        return result
+
+    @wraps(DecompositionAnalysis.fit_transform)
+    def fit_transform(self, X, Y=None, **kwargs):
+        """Fit and transform without emitting the direct-call P6 records."""
+        if type(self) is not PCA:
+            return super().fit_transform(X, Y=Y, **kwargs)
+
+        from spectrochempy.provenance import _instrument  # noqa: PLC0415
+
+        with _instrument.suppress_provenance(*_instrument.PCA_OPERATION_IDS):
+            return super().fit_transform(X, Y=Y, **kwargs)
 
     @property
     def loadings(self):
