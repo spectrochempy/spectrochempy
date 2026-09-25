@@ -1246,12 +1246,16 @@ class NDArray(tr.HasTraits):
         new = make_new_object(self)
         for attr in self._attributes_():
             try:
-                _attr = do_copy(getattr(self, f"_{attr}"))
+                source = getattr(self, f"_{attr}")
+                # History entries contain nested parameter dictionaries. They
+                # must never be shared, including for an explicitly shallow
+                # dataset copy.
+                _attr = cpy.deepcopy(source) if attr == "history" else do_copy(source)
                 setattr(new, f"_{attr}", _attr)
 
             except ValueError:
                 # ensure that if deepcopy do not work, a shallow copy can be done
-                _attr = do_copy(getattr(self, f"_{attr}"))
+                _attr = do_copy(source)
                 setattr(new, f"_{attr}", _attr)
 
         if hasattr(self, "_filename_explicit_none"):

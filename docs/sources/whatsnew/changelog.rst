@@ -59,6 +59,13 @@ Breaking Changes
 ~~~~~~~~~~~~~~~~
 .. Add here new breaking changes (do not delete this comment)
 
+- ``NDDataset.history`` now has structured operation entries, and assigning a
+  list retains every supplied entry instead of only the first. New native
+  ``.scp``/``.pscp`` files use format version 3 and portable xarray/NetCDF
+  exports use version 2; current readers still accept native version 2 and
+  portable version 1 histories, but older readers are not expected to read the
+  new structured-history payloads.
+
 
 .. section
 

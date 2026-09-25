@@ -434,12 +434,13 @@ class TestHistoryProperty:
         entries = _entries(d)
         assert entries == ["First", "Second"]
 
-    def test_history_setter_list_uses_first_element(self):
-        """Setting history = [list] takes first element and discards rest."""
+    def test_history_setter_list_replaces_with_all_elements(self):
+        """Setting history to a list explicitly replaces it with every element."""
         d = scp.NDDataset([1.0], name="list_test")
         d.history = ["First", "Second"]
-        assert len(d.history) == 1
+        assert len(d.history) == 2
         assert _entry(d.history[0]) == "First"
+        assert _entry(d.history[1]) == "Second"
 
     def test_multiple_strings_accumulate(self):
         """Multiple string assignments accumulate."""
