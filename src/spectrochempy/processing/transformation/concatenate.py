@@ -535,7 +535,7 @@ def concatenate(*datasets, **kwargs):
                 started_at=started_at,
             )
     try:
-        result = _concatenate_impl(*sources, **kwargs)
+        result = _concatenate_impl(*datasets, **kwargs)
     except Exception as exc:
         if boundary is not None:
             _assembly.record_failure(
@@ -603,7 +603,7 @@ def stack(*datasets, **kwargs):
                 started_at=started_at,
             )
     try:
-        result = _stack_impl(*sources, **kwargs)
+        result = _stack_impl(*datasets, **kwargs)
     except Exception as exc:
         if boundary is not None:
             _assembly.record_failure(

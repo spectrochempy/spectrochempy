@@ -415,3 +415,24 @@ def test_single_list_tuple_and_invalid_iterable_behaviors_are_preserved():
         concatenate()
     with pytest.raises(AttributeError):
         concatenate(iter([source, source]))
+
+
+@pytest.mark.parametrize(
+    ("call", "error"),
+    [
+        (lambda _source: stack([]), DimensionsCompatibilityError),
+        (lambda _source: stack([], axis=1), ValueError),
+        (lambda source: concatenate([[source, source]], dims="y"), AttributeError),
+    ],
+)
+def test_argument_validation_order_is_preserved_with_and_without_capture(call, error):
+    source = _dataset()
+
+    with pytest.raises(error) as without_capture:
+        call(source)
+
+    with ProvenanceCapture() as capture, pytest.raises(error) as with_capture:
+        call(source)
+
+    assert str(with_capture.value) == str(without_capture.value)
+    assert len(capture.ledger) == 0
