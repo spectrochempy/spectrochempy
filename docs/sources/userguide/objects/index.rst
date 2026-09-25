@@ -31,6 +31,14 @@ NDDataset
 
    dataset/dataset
 
+Units, quantities, and masks
+****************************
+
+.. toctree::
+   :maxdepth: 2
+
+   units_and_masks
+
 Project
 *******
 
