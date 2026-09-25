@@ -155,8 +155,11 @@ class Pipeline:
             )
         current = self._transform_intermediates(X, operation="predict")
         fitted_final = self.fitted_steps_[-1][1]
+        from spectrochempy.provenance import _instrument  # noqa: PLC0415
+
         try:
-            return fitted_final.predict(current)
+            with _instrument.suppress_provenance(*_instrument.BINARY_OPERATION_IDS):
+                return fitted_final.predict(current)
         except Exception as exc:
             raise self._step_error(
                 "predict", final_name, len(self._steps) - 1, fitted_final, exc
@@ -181,8 +184,11 @@ class Pipeline:
                 f"Pipeline.score requires y for final step '{final_name}'."
             )
         current = self._transform_intermediates(X, operation="score")
+        from spectrochempy.provenance import _instrument  # noqa: PLC0415
+
         try:
-            return fitted_final.score(current, y)
+            with _instrument.suppress_provenance(*_instrument.BINARY_OPERATION_IDS):
+                return fitted_final.score(current, y)
         except Exception as exc:
             raise self._step_error(
                 "score", final_name, len(self._steps) - 1, fitted_final, exc
@@ -302,6 +308,7 @@ class Pipeline:
             with _instrument.suppress_provenance(
                 _instrument.CENTER_FIT_OPERATION_ID,
                 _instrument.CENTER_TRANSFORM_OPERATION_ID,
+                *_instrument.BINARY_OPERATION_IDS,
             ):
                 if y is None:
                     step.fit(X)
@@ -317,6 +324,7 @@ class Pipeline:
             with _instrument.suppress_provenance(
                 _instrument.CENTER_FIT_OPERATION_ID,
                 _instrument.CENTER_TRANSFORM_OPERATION_ID,
+                *_instrument.BINARY_OPERATION_IDS,
             ):
                 result = step.transform(X)
         except Exception as exc:

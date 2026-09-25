@@ -16,10 +16,10 @@ SpectroChemPy 1.0 release and its contract may still evolve.
 P1 establishes immutable references and records, an append-only ledger, and a
 context-local capture mechanism. P2 adds the first runtime instrumentation:
 out-of-place ``NDDataset`` slicing and ``NDDataset.transpose`` create one
-operation record each while a capture context is active. The next bounded slice
-adds direct calls to ``CenterTransformer.fit()`` and
-``CenterTransformer.transform()``. Other scientific operations remain
-uninstrumented unless this page states otherwise.
+operation record each while a capture context is active. P5 adds direct calls
+to ``CenterTransformer.fit()`` and ``CenterTransformer.transform()``. P3 adds
+four out-of-place binary operations between two ``NDDataset`` operands. Other
+scientific operations remain uninstrumented unless this page states otherwise.
 
 Captured slicing and transpose
 ------------------------------
@@ -77,8 +77,9 @@ The selection is captured as a JSON-safe structural description (``slice``,
 order. Slicing and transpose never mutate the source, and the textual
 :attr:`~spectrochempy.NDDataset.history` produced by the operation is
 unchanged. This first slice covers only single-source out-of-place operations;
-in-place operations, arithmetic, concatenation, estimators, and readers are not
-instrumented. In particular, in-place slicing
+in-place operations, concatenation, estimators, readers, and arithmetic beyond
+the bounded P3 cases described below are not instrumented. In particular,
+in-place slicing
 (``dataset[:, ..., INPLACE]``) and in-place transpose are outside the capture
 scope and create no record.
 
@@ -149,6 +150,62 @@ paths create no new Center records:
 Suppression is local to the current execution context and to the two Center
 operation identifiers. It composes with nested capture contexts and does not
 suppress the existing P2 slice or transpose records.
+
+Binary arithmetic between datasets
+----------------------------------
+
+Out-of-place addition, subtraction, multiplication, and true division between
+two ``NDDataset`` operands create one ``combine`` record. The operands keep
+their mathematical order through the explicit ``left`` and ``right`` roles,
+and the new dataset has the ``result`` role:
+
+.. code-block:: python
+
+   left = scp.NDDataset(np.arange(6.0).reshape(2, 3))
+   right = scp.NDDataset(np.ones((2, 3)))
+
+   with scp.provenance.ProvenanceCapture() as capture:
+       difference = left - right
+
+   record = capture.ledger.operation_records[0]
+   assert [link.role for link in record.inputs] == ["left", "right"]
+   assert [link.role for link in record.outputs] == ["result"]
+
+The same boundary applies to direct ``numpy.add``, ``numpy.subtract``,
+``numpy.multiply``, and ``numpy.true_divide`` calls with two datasets. Operator
+dispatch and direct NumPy-ufunc dispatch each emit exactly one record; delegated
+numeric work does not emit a second record. For ``dataset - dataset``, both
+roles intentionally point to the same object and state rather than inventing a
+second identity.
+
+The operands are represented by input references rather than parameters.
+Operator records therefore have an empty ``parameters.requested`` mapping.
+Direct ufunc records retain bounded, normalized explicitly supplied ufunc
+keywords. ``parameters.resolved`` identifies the public dispatch route and the
+result shape and dimensions. This does not change how broadcasting, units,
+coordinates, masks, titles, or textual history are calculated.
+
+The existing numeric continuity fingerprint is used independently for both
+inputs. It covers numeric data values, shape, and dtype, but not masks,
+coordinates, units, or metadata. A successful result whose record cannot be
+prepared or appended is invalidated in the transient registry, so a following
+captured operation reports partial continuity. Scientific exceptions remain
+unchanged; failed records have ordered inputs and no output.
+
+This P3 slice deliberately excludes:
+
+- in-place operations and every ufunc call supplying ``out=``;
+- scalar, quantity, coordinate, and external-array operands;
+- unary operations, powers, comparisons, reductions, and other ufunc methods;
+- concatenate/stack, persistence, replay, and ``Project`` ownership;
+- arithmetic executed inside an uninstrumented ``Pipeline`` step or estimator
+  fit/predict invoked by ``cross_validate``.
+
+The operation record stores only opaque references and bounded descriptors. It
+does not retain either dataset or a scientific buffer. Fingerprint calculation
+still reads both complete numeric input buffers and may make contiguous copies,
+so capture cost grows with input size even though retained record size stays
+bounded.
 
 Demonstrator: interactive selection followed by transpose
 ---------------------------------------------------------
