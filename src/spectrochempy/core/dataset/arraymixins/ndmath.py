@@ -203,8 +203,7 @@ class _from_numpy_method:
                 ]
                 if unknown:
                     raise TypeError(
-                        f"{method}() got an unexpected keyword argument "
-                        f"{unknown[0]!r}",
+                        f"{method}() got an unexpected keyword argument {unknown[0]!r}",
                     )
 
                 # --- Single-axis rejection (M2 family) -----------------------
@@ -3921,10 +3920,10 @@ class NDMath:
             # `_check_order` may reorder them in place for computation.
             operands = [self, other] if not reflexive else [other, self]
             history_entry = None
-            if fname == "add" and self._implements("NDDataset"):
+            if fname in {"add", "sub"} and self._implements("NDDataset"):
                 right = operands[1]
                 history_entry = {
-                    "operation": "add",
+                    "operation": "add" if fname == "add" else "subtract",
                     "parameters": {
                         "sources": [
                             _history_operand(operands[0], "left"),
@@ -3935,10 +3934,16 @@ class NDMath:
             fm, objs, reflected = self._check_order(fname, list(operands))
 
             if hasattr(self, "history"):
-                history = (
-                    f"Binary operation {fm.__name__} with "
-                    f"`{_get_name(objs[-1])}` has been performed"
-                )
+                if fname == "sub":
+                    history = (
+                        f"Subtracted `{_get_name(operands[1])}` from "
+                        f"`{_get_name(operands[0])}`"
+                    )
+                else:
+                    history = (
+                        f"Binary operation {fm.__name__} with "
+                        f"`{_get_name(objs[-1])}` has been performed"
+                    )
             else:
                 history = None
             if history_entry is not None:

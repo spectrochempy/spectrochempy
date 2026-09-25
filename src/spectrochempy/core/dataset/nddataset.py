@@ -57,7 +57,9 @@ from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 from spectrochempy.core.dataset.basearrays.ndcomplex import NDComplexArray
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
+from spectrochempy.core.units import Quantity
 from spectrochempy.utils._logging import warning_
+from spectrochempy.utils.constants import INPLACE
 from spectrochempy.utils.datetimeutils import utcnow
 from spectrochempy.utils.exceptions import SpectroChemPyError
 from spectrochempy.utils.optional import import_optional_dependency
@@ -100,6 +102,131 @@ def _normalize_history_parameter(value: Any) -> Any:
         else:
             description = f"{type(value).__name__} value not stored"
         return {"description": description}
+
+
+def _history_selection_value(value: Any) -> Any:
+    """Describe a slice boundary without retaining its source object."""
+    if isinstance(value, Quantity):
+        return {
+            "value": _normalize_history_parameter(value.magnitude),
+            "units": str(value.units),
+        }
+    return _normalize_history_parameter(value)
+
+
+def _history_selector(selector: Any) -> dict[str, Any]:
+    """Return a compact description of one requested selector."""
+    if isinstance(selector, slice):
+        boundaries = (selector.start, selector.stop, selector.step)
+        if any(isinstance(value, str) for value in boundaries):
+            kind = "label_slice"
+        elif any(
+            isinstance(value, Quantity | float | np.floating)
+            for value in boundaries
+            if value is not None
+        ):
+            kind = "coordinate_slice"
+        elif all(value is None for value in boundaries):
+            kind = "all"
+        else:
+            kind = "index_slice"
+        return {
+            "kind": kind,
+            "start": _history_selection_value(selector.start),
+            "stop": _history_selection_value(selector.stop),
+            "step": _history_selection_value(selector.step),
+        }
+    if isinstance(selector, str):
+        return {"kind": "label", "value": selector}
+    if isinstance(selector, Quantity | float | np.floating):
+        return {"kind": "coordinate", "value": _history_selection_value(selector)}
+    if isinstance(selector, int | np.integer):
+        return {"kind": "index", "value": int(selector)}
+    if isinstance(selector, list | np.ndarray):
+        values = np.asarray(selector)
+        if values.dtype == bool:
+            return {
+                "kind": "boolean_mask",
+                "shape": list(values.shape),
+                "selected": int(values.sum()),
+                "values": values.tolist() if values.size <= 16 else "not stored",
+            }
+        return {
+            "kind": "indices",
+            "shape": list(values.shape),
+            "values": values.tolist() if values.size <= 16 else "not stored",
+        }
+    if selector is None:
+        return {"kind": "new_axis"}
+    return {
+        "kind": type(selector).__name__,
+        "description": f"{type(selector).__name__} selector not stored",
+    }
+
+
+def _history_selection(items: Any, dims: list[str]) -> dict[str, Any]:
+    """Describe the requested selection without claiming resolved indexes."""
+    selectors = list(items) if isinstance(items, tuple) else [items]
+    inplace = bool(selectors and str(selectors[-1]) == INPLACE)
+    if inplace:
+        selectors.pop()
+
+    if any(selector is Ellipsis for selector in selectors):
+        expanded = []
+        for selector in selectors:
+            if selector is Ellipsis:
+                expanded.extend([slice(None)] * (len(dims) - len(selectors) + 1))
+            else:
+                expanded.append(selector)
+        selectors = expanded
+
+    requested = []
+    for position, selector in enumerate(selectors):
+        description = _history_selector(selector)
+        if position < len(dims):
+            description = {"dimension": dims[position], **description}
+        requested.append(description)
+
+    return {
+        "source_dims": list(dims),
+        "requested": requested,
+        "inplace": inplace,
+    }
+
+
+def _history_selection_message(parameters: Mapping[str, Any]) -> str:
+    """Render a compact readable view of requested selectors."""
+
+    def boundary(value):
+        if value is None:
+            return ""
+        if isinstance(value, dict) and set(value) == {"value", "units"}:
+            return f"{value['value']} {value['units']}"
+        return str(value)
+
+    parts = []
+    for selector in parameters["requested"]:
+        dim = selector.get("dimension", "?")
+        kind = selector["kind"]
+        if kind.endswith("_slice") or kind == "all":
+            label = {
+                "coordinate_slice": "coordinates",
+                "label_slice": "labels",
+                "index_slice": "indices",
+                "all": "indices",
+            }[kind]
+            requested = ":".join(
+                boundary(selector[name]) for name in ("start", "stop", "step")
+            ).rstrip(":")
+            parts.append(f"{dim} {label} [{requested or ':'}]")
+        elif kind in {"coordinate", "label", "index"}:
+            parts.append(f"{dim} {kind} [{boundary(selector['value'])}]")
+        elif kind in {"indices", "boolean_mask"}:
+            values = selector["values"]
+            parts.append(f"{dim} {kind.replace('_', ' ')} [{values}]")
+        else:
+            parts.append(f"{dim} {selector.get('description', kind)}")
+    return f"Slice extracted: {', '.join(parts)}"
 
 
 def _history_datetime(value: Any) -> datetime:
@@ -641,7 +768,12 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             new_coords = self._coordset._slice_dims(self.dims, items)
             new.set_coordset(*new_coords, keepnames=True)
 
-        new.history = f"Slice extracted: ({saveditems})"
+        parameters = _history_selection(saveditems, list(self.dims))
+        new._append_history_entry(
+            operation="slice",
+            parameters=parameters,
+            message=_history_selection_message(parameters),
+        )
         return new
 
     def __getattr__(self, item):
