@@ -20,7 +20,8 @@ UNSAFE_LEGACY_LOADING_MESSAGE = (
     "if the file comes from a known and trusted source."
 )
 SAFE_SCP_DOCUMENT_FORMATS = frozenset({"scp", "pscp"})
-SAFE_SCP_DOCUMENT_VERSION = 2
+SAFE_SCP_DOCUMENT_VERSION = 3
+SUPPORTED_SAFE_SCP_DOCUMENT_VERSIONS = frozenset({2, SAFE_SCP_DOCUMENT_VERSION})
 
 
 def fromisoformat(s):
@@ -64,7 +65,7 @@ def _validate_safe_document_markers(document):
             f"Unsupported SCP/PSCP document format marker: {document['__format__']!r}.",
         )
 
-    if document["__version__"] != SAFE_SCP_DOCUMENT_VERSION:
+    if document["__version__"] not in SUPPORTED_SAFE_SCP_DOCUMENT_VERSIONS:
         _raise_safe_payload_error(
             "Unsupported SCP/PSCP document version: " f"{document['__version__']!r}.",
         )

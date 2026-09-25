@@ -301,7 +301,7 @@ nd.created
 # the readable, timestamped view.
 
 # %%
-nd = NDDataset()
+nd = NDDataset([[1.0, 2.0], [3.0, 4.0]], name="history_demo")
 nd.history
 
 # %% [markdown]

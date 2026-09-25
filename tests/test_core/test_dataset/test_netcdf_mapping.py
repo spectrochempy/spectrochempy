@@ -182,6 +182,8 @@ def test_netcdf_file_is_readable_by_xarray_open_dataset(tmp_path):
     ds.to_netcdf(filename)
 
     with xr.open_dataset(filename, engine="scipy") as opened:
+        assert opened.attrs["scpy_format"] == "nddataset-xarray"
+        assert opened.attrs["scpy_version"] == 2
         assert opened.attrs["scpy_primary_variable"] == "spectra"
         assert opened.attrs["scpy_mask_variable"] == "spectra__mask"
         assert opened.attrs["scpy_description"] == ds.description

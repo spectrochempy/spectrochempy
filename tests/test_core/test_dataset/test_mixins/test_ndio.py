@@ -423,7 +423,7 @@ def test_ndio_safe_roundtrip_uses_versioned_payload(tmp_path):
         js = json.loads(zipf.read(member).decode("utf-8"))
 
     assert js["__format__"] == "scp"
-    assert js["__version__"] == 2
+    assert js["__version__"] == 3
     assert js["data"]["encoding"] == "raw-base64"
 
     loaded = NDDataset.load(filename)
@@ -586,7 +586,7 @@ def test_migrate_legacy_file_converts_to_safe_format(tmp_path):
         js = json.loads(zipf.read(member).decode("utf-8"))
     assert js["data"]["encoding"] == "raw-base64"
     assert js["__format__"] == "scp"
-    assert js["__version__"] == 2
+    assert js["__version__"] == 3
 
 
 def test_migrate_legacy_file_safe_load_after_migration(tmp_path, monkeypatch):
@@ -758,7 +758,7 @@ def test_migrate_legacy_file_pscp_roundtrip(tmp_path):
         member = zipf.namelist()[0]
         js = json.loads(zipf.read(member).decode("utf-8"))
     assert js["__format__"] == "pscp"
-    assert js["__version__"] == 2
+    assert js["__version__"] == 3
 
 
 def test_migrate_legacy_file_atomic_replaces_existing(tmp_path):

@@ -69,6 +69,10 @@ from spectrochempy.utils.print import colored_output
 from spectrochempy.utils.system import get_user_and_node
 from spectrochempy.utils.typeutils import is_sequence
 
+NDDATASET_XARRAY_FORMAT = "nddataset-xarray"
+NDDATASET_XARRAY_VERSION = 2
+SUPPORTED_NDDATASET_XARRAY_VERSIONS = frozenset({1, NDDATASET_XARRAY_VERSION})
+
 
 def _normalize_json_compatible(value: Any) -> Any:
     """Return a JSON-compatible copy of *value* or raise ``TypeError``."""
@@ -1789,8 +1793,8 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             data_attrs["units"] = str(self.units)
 
         dataset_attrs = {
-            "scpy_format": "nddataset-xarray",
-            "scpy_version": 1,
+            "scpy_format": NDDATASET_XARRAY_FORMAT,
+            "scpy_version": NDDATASET_XARRAY_VERSION,
             "scpy_primary_variable": primary_name,
             "scpy_name": self.name,
             "scpy_title": self.title,
@@ -1911,6 +1915,18 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
 
         if not isinstance(dataset, xr.Dataset):
             raise SpectroChemPyError("from_xarray() expects an xarray.Dataset.")
+
+        format_marker = dataset.attrs.get("scpy_format")
+        if format_marker is not None and format_marker != NDDATASET_XARRAY_FORMAT:
+            raise SpectroChemPyError(
+                f"Unsupported NDDataset xarray format: {format_marker!r}."
+            )
+        if format_marker == NDDATASET_XARRAY_FORMAT:
+            version = dataset.attrs.get("scpy_version")
+            if version not in SUPPORTED_NDDATASET_XARRAY_VERSIONS:
+                raise SpectroChemPyError(
+                    f"Unsupported NDDataset xarray format version: {version!r}."
+                )
 
         primary_name = dataset.attrs.get("scpy_primary_variable")
         if primary_name is None:

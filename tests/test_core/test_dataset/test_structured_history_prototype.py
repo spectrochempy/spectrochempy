@@ -7,6 +7,8 @@
 
 from __future__ import annotations
 
+import json
+import zipfile
 from datetime import UTC
 from datetime import datetime
 
@@ -15,6 +17,8 @@ import pytest
 
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.nddataset import _prepare_xarray_dataset_for_netcdf
+from spectrochempy.utils.exceptions import SpectroChemPyError
 from spectrochempy.utils.jsonutils import json_loads
 
 
@@ -202,6 +206,74 @@ def test_native_loader_accepts_legacy_rendered_history_without_inventing_structu
         }
     ]
     assert rebuilt.history[0].endswith("> Legacy processing message")
+
+
+def test_native_loader_accepts_version_2_with_textual_history(tmp_path):
+    dataset = _dataset()
+    dataset.annotate(
+        "legacy native entry",
+        date=datetime(2024, 1, 2, 3, 4, 5, tzinfo=UTC),
+    )
+    filename = dataset.save_as(tmp_path / "legacy-history-v2", confirm=False)
+    with zipfile.ZipFile(filename, "r") as archive:
+        member = archive.namelist()[0]
+        payload = json.loads(archive.read(member).decode("utf-8"))
+    payload["__version__"] = 2
+    payload["history"] = dataset.history
+    with zipfile.ZipFile(filename, "w") as archive:
+        archive.writestr(member, json.dumps(payload))
+
+    rebuilt = NDDataset.load(filename)
+
+    assert rebuilt.history == dataset.history
+    assert rebuilt.history_entries[0]["operation"] is None
+    assert rebuilt.history_entries[0]["parameters"] == {}
+
+
+def test_xarray_loader_accepts_version_1_with_textual_history():
+    dataset = _dataset("spectra")
+    dataset.annotate(
+        "legacy portable entry",
+        date=datetime(2024, 1, 2, 3, 4, 5, tzinfo=UTC),
+    )
+    portable = dataset.to_xarray()
+    portable.attrs["scpy_version"] = 1
+    portable.attrs["scpy_history"] = dataset.history
+
+    rebuilt = NDDataset.from_xarray(portable)
+
+    assert rebuilt.history == dataset.history
+    assert rebuilt.history_entries[0]["operation"] is None
+    assert rebuilt.history_entries[0]["parameters"] == {}
+
+
+def test_netcdf_loader_accepts_version_1_with_textual_history(tmp_path):
+    dataset = _dataset("spectra")
+    dataset.annotate(
+        "legacy NetCDF entry",
+        date=datetime(2024, 1, 2, 3, 4, 5, tzinfo=UTC),
+    )
+    portable = dataset.to_xarray()
+    portable.attrs["scpy_version"] = 1
+    portable.attrs["scpy_history"] = dataset.history
+    filename = tmp_path / "legacy-history-v1.nc"
+    _prepare_xarray_dataset_for_netcdf(portable).to_netcdf(filename, engine="scipy")
+
+    rebuilt = NDDataset.from_netcdf(filename)
+
+    assert rebuilt.history == dataset.history
+    assert rebuilt.history_entries[0]["operation"] is None
+    assert rebuilt.history_entries[0]["parameters"] == {}
+
+
+def test_xarray_loader_rejects_unknown_format_version():
+    portable = _dataset("spectra").to_xarray()
+    portable.attrs["scpy_version"] = 999
+
+    with pytest.raises(
+        SpectroChemPyError, match="Unsupported NDDataset xarray format version"
+    ):
+        NDDataset.from_xarray(portable)
 
 
 def test_xarray_and_netcdf_roundtrips_preserve_structured_entries(tmp_path):

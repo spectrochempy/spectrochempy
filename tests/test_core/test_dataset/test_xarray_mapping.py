@@ -86,6 +86,8 @@ def test_to_xarray_returns_dataset():
     xds = ds.to_xarray()
 
     assert isinstance(xds, xr.Dataset)
+    assert xds.attrs["scpy_format"] == "nddataset-xarray"
+    assert xds.attrs["scpy_version"] == 2
     assert xds.attrs["scpy_primary_variable"] == "spectra"
     assert xds.attrs["scpy_description"] == ds.description
     assert xds.attrs["scpy_author"] == ds.author
