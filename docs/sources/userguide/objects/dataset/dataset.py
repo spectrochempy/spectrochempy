@@ -390,7 +390,9 @@ corrected.history
 # chronology is not merged into ``corrected``: the final log follows the main dataset
 # and records its import, spectral selection, and subtraction. The subtraction entry
 # instead identifies the two operands in mathematical order. This keeps both logs
-# linear and readable without presenting either as complete provenance.
+# linear and readable without presenting either as complete provenance. The SPG import
+# entry displays only ``nh4y-activation.spg`` so the log stays portable; the complete
+# source path remains available from ``spectra.filename`` and its reader metadata.
 
 # %% [markdown]
 # ## Units
