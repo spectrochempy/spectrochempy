@@ -59,9 +59,11 @@ For documentation-only edits where executing examples is not needed, use::
 
     python docs/make.py --no-exec html
 
-On the published site, the root of ``gh-pages`` is the ``latest``
-documentation. Stable releases are published under version directories such as
-``0.9.2/``.
+On the published site, the root contains the latest stable documentation.
+Unreleased documentation from ``master`` is published under ``latest/``.
+Stable releases also remain available under version directories such as
+``VERSION/``. Documentation-focused branches publish identifiable previews under
+their sanitized branch name and do not redirect to stable documentation.
 
 Build Options
 ~~~~~~~~~~~~~

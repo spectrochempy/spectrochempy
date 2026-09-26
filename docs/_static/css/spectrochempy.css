@@ -210,38 +210,78 @@ html.writer-html5 .rst-content dl[class]:not(.option-list):not(.field-list):not(
     color: #555;
 }
 
-/* Style for version selector */
+/* Documentation version selector */
 .wy-side-nav-search>div.switch-menus {
-    position: relative;
-    display: block;
-    margin-top: -1.7em;
-    margin-bottom: .2em;
-    font-weight: 400;
-    color: hsla(0, 0%, 100%, .3);
-}
-
-.version-selector {
     display: flex;
-    align-items: center;
-    margin: .3em;
+    flex-direction: column;
+    gap: .3rem;
+    margin: .6rem 0 .8rem;
+    text-align: left;
 }
 
-.version-selector select {
-    margin-right: 10px;
-    font-size: 11pt;
+.switch-menus label {
+    color: #fff;
+    font-size: .8rem;
+    font-weight: 600;
 }
 
-select {
-    background: #2c3e50;
-    border: none;
-    box-shadow: none;
-    color: #fffdfd;
+#versions-dropdown {
+    width: 100%;
+    min-height: 2.25rem;
+    padding: .35rem .5rem;
+    border: 1px solid rgba(255, 255, 255, .65);
+    border-radius: 3px;
+    background: #243442;
+    color: #fff;
+    font-size: .9rem;
 }
 
-/* style dropdown options for desktop Chromium/Brave contrast */
-#versions-dropdown option {
-    background: #2c3e50;
-    color: #fffdfd;
+#versions-dropdown:focus-visible {
+    outline: 3px solid #ffdf85;
+    outline-offset: 2px;
+}
+
+#versions-dropdown option,
+#versions-dropdown optgroup {
+    background: #243442;
+    color: #fff;
+}
+
+#docs-current-version {
+    min-height: 1rem;
+    color: rgba(255, 255, 255, .9);
+    font-size: .75rem;
+    line-height: 1.25;
+}
+
+.docs-context-banner {
+    margin: 0 0 1.25rem;
+    padding: .65rem .85rem;
+    border-left: 4px solid #3a6e8f;
+    background: #e9f2f7;
+    color: #243442;
+    font-size: .9rem;
+}
+
+.docs-context-banner a {
+    white-space: nowrap;
+    font-weight: 600;
+}
+
+.docs-preview-banner {
+    border-left-color: #8a6400;
+    background: #fff6d8;
+}
+
+@media screen and (max-width: 768px) {
+    .wy-side-nav-search>div.switch-menus {
+        margin-right: .5rem;
+        margin-left: .5rem;
+    }
+
+    .docs-context-banner a {
+        white-space: normal;
+    }
 }
 
 /* Hide the breadcrumbs */

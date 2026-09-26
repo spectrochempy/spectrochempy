@@ -156,8 +156,9 @@ def _get_published_versions(html_dir=HTML):
 def _write_versions_manifest(html_dir=HTML):
     versions = _get_published_versions(html_dir)
     manifest = {
-        "schema_version": 1,
+        "schema_version": 2,
         "latest": "latest",
+        "development": "latest",
         "stable": versions[0] if versions else "",
         "versions": versions,
     }
@@ -209,6 +210,47 @@ def refresh_versions_index(html_dir=HTML):
     _update_version_template_data(html_dir)
     _sync_versions_script(html_dir)
     return _write_versions_manifest(html_dir)
+
+
+def _sync_stable_docs_to_root(html_dir=HTML, stable_version=""):
+    """
+    Mirror the published stable documentation at the site root.
+
+    Version directories, development documentation, and branch previews stay in
+    place. Only entries produced by the stable or development Sphinx builds are
+    replaced at the root, which also handles the first migration from a root
+    that previously contained development documentation.
+    """
+    html_dir = Path(html_dir)
+    if not stable_version:
+        versions = _get_published_versions(html_dir)
+        stable_version = versions[0] if versions else ""
+
+    stable_dir = html_dir / stable_version
+    if not stable_version or not stable_dir.is_dir():
+        return ""
+
+    generated_names = {item.name for item in stable_dir.iterdir()}
+    development_dir = html_dir / "latest"
+    if development_dir.is_dir():
+        generated_names.update(item.name for item in development_dir.iterdir())
+
+    protected_names = {".git", "CNAME"}
+    for name in generated_names - protected_names:
+        target = html_dir / name
+        if target.is_dir() and not target.is_symlink():
+            shutil.rmtree(target)
+        elif target.exists() or target.is_symlink():
+            target.unlink()
+
+    for item in stable_dir.iterdir():
+        destination = html_dir / item.name
+        if item.is_dir() and not item.is_symlink():
+            shutil.copytree(item, destination, dirs_exist_ok=True)
+        else:
+            shutil.copy2(item, destination, follow_symlinks=False)
+
+    return stable_version
 
 
 # ======================================================================================
@@ -986,13 +1028,15 @@ class BuildDocumentation:
         # Post-build actions.
 
         doc_version = self._doc_version
+        docs_context = environ.get("SCPY_DOCS_CONTEXT", "local")
 
         # Check if the source directory exists and is not empty
         source_dir = HTML / doc_version
         if source_dir.exists() and any(source_dir.iterdir()):
-            # Copy all files, including hidden ones, from source_dir to HTML
-            # except if we are building an oldest version or version is dirty
-            if not self.tagname:
+            # Local builds and branch previews keep their historical root layout.
+            # Published development docs remain under /latest so the root can
+            # mirror the most recent stable release instead.
+            if not self.tagname and docs_context not in {"development", "stable"}:
                 for item in source_dir.iterdir():
                     dest = HTML / item.name
                     if item.is_dir():
@@ -1003,12 +1047,29 @@ class BuildDocumentation:
         else:
             print(f"Warning: Source directory {source_dir} does not exist or is empty")
 
-        # Remove it if doc_version is 'latest' as all content is in the parent directory
-        if doc_version == "latest" and source_dir.exists():
+        # Local builds and previews copy /latest to their own root. The public
+        # development build intentionally retains /latest.
+        if (
+            doc_version == "latest"
+            and source_dir.exists()
+            and docs_context not in {"development", "stable"}
+        ):
             shutil.rmtree(source_dir)
             print(f"Removed directory {source_dir}")
 
         manifest = refresh_versions_index(HTML)
+        if docs_context in {"development", "stable"}:
+            stable_version = _sync_stable_docs_to_root(
+                HTML, stable_version=manifest["stable"]
+            )
+            if stable_version:
+                manifest = refresh_versions_index(HTML)
+                print(
+                    "Synchronized documentation root from stable version "
+                    f"{stable_version}"
+                )
+            else:
+                print("No published stable documentation was available for the root")
         print(f"Updated docs versions manifest: {manifest['versions']}")
 
         # Remove the environment variables

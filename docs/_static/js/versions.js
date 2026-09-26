@@ -1,125 +1,223 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const versionsDropdown = document.getElementById("versions-dropdown");
+document.addEventListener("DOMContentLoaded", () => {
+    const selector = document.getElementById("versions-dropdown");
+    if (!selector) {
+        return;
+    }
 
-    // Get the base URL path by analyzing the current location
+    const currentLabel = document.getElementById("docs-current-version");
+    const versionPattern = /^\d+\.\d+\.\d+(?:rc\d+)?$/;
+
     function getBasePath() {
+        const marker = "/spectrochempy/";
         const path = window.location.pathname;
-
-        // Check if we're on the main site (spectrochempy.fr)
-        if (window.location.hostname === 'www.spectrochempy.fr') {
-            return '/';
+        if (window.location.hostname.endsWith("github.io") && path.includes(marker)) {
+            return path.slice(0, path.indexOf(marker) + marker.length);
         }
-
-        // For GitHub Pages or other hosts, extract the base path
-        // Example: for fernandezc.github.io/spectrochempy/1.2.3/
-        // we want /spectrochempy/
-        const parts = path.split('/');
-        if (parts.length >= 2) {
-            // Look for the first part that could be a version number
-            for (let i = 1; i < parts.length; i++) {
-                if (parts[i] === 'spectrochempy') {
-                    return '/' + parts[i] + '/';
-                }
-            }
-        }
-
-        // Default to root if no specific path is found
-        return '/';
+        return "/";
     }
 
     const basePath = getBasePath();
+    const previewPath = (selector.dataset.previewName || "").replaceAll("/", "-");
 
-    // Get current version from URL
-    function getCurrentVersion() {
-        const pathParts = window.location.pathname
-            .replace(basePath, '/')
-            .split('/')
-            .filter(part => part.length > 0);
-
-        const versionPattern = /^\d+\.\d+\.\d+(?:rc\d+)?$/;
-        return pathParts.length > 0 && versionPattern.test(pathParts[0])
-            ? pathParts[0]
-            : 'latest';
+    function relativePathFromBase() {
+        const pathname = window.location.pathname;
+        const relative = pathname.startsWith(basePath)
+            ? pathname.slice(basePath.length)
+            : pathname.replace(/^\/+/, "");
+        const parts = relative.split("/").filter(Boolean);
+        const first = parts[0] || "";
+        if (first === "latest" || first === "dev" || versionPattern.test(first)
+            || (previewPath && first === previewPath)) {
+            parts.shift();
+        }
+        if (parts.length === 0) {
+            return "index.html";
+        }
+        return parts.join("/") + (pathname.endsWith("/") ? "/" : "");
     }
 
-    function parseVersion(v) {
-        const match = v.match(/^(\d+)\.(\d+)\.(\d+)(?:rc(\d+))?$/);
-        if (!match) {
-            return [0, 0, 0, Infinity];
+    function currentLocation(manifest) {
+        const relative = window.location.pathname.startsWith(basePath)
+            ? window.location.pathname.slice(basePath.length)
+            : window.location.pathname.replace(/^\/+/, "");
+        const first = relative.split("/").filter(Boolean)[0] || "";
+        if (previewPath && first === previewPath) {
+            return {kind: "preview", version: previewPath};
         }
-        const rc = match[4] === undefined ? Infinity : Number(match[4]);
+        if (first === "latest" || first === "dev") {
+            return {kind: "development", version: manifest.development};
+        }
+        if (versionPattern.test(first)) {
+            return {
+                kind: first === manifest.stable ? "stable" : "archived",
+                version: first,
+            };
+        }
+        if (selector.dataset.docsContext === "preview") {
+            return {kind: "preview", version: previewPath};
+        }
+        return {kind: "stable", version: manifest.stable};
+    }
+
+    function parseVersion(value) {
+        const match = value.match(/^(\d+)\.(\d+)\.(\d+)(?:rc(\d+))?$/);
+        if (!match) {
+            return [0, 0, 0, -1];
+        }
+        const rc = match[4] === undefined ? Number.MAX_SAFE_INTEGER : Number(match[4]);
         return [Number(match[1]), Number(match[2]), Number(match[3]), rc];
     }
 
     function sortVersions(versions) {
-        return versions
-            .filter(v => typeof v === 'string' && v)
-            .sort((a, b) => {
-                const partsA = parseVersion(a);
-                const partsB = parseVersion(b);
-                for (let i = 0; i < partsA.length; i++) {
-                    if (partsA[i] !== partsB[i]) {
-                        return partsB[i] - partsA[i];
+        return [...new Set(versions)]
+            .filter(version => typeof version === "string" && versionPattern.test(version))
+            .sort((left, right) => {
+                const leftParts = parseVersion(left);
+                const rightParts = parseVersion(right);
+                for (let index = 0; index < leftParts.length; index += 1) {
+                    if (leftParts[index] !== rightParts[index]) {
+                        return rightParts[index] - leftParts[index];
                     }
-                }
-                // A final release sorts above its own release candidate
-                if (a.includes('rc') !== b.includes('rc') && partsA[0] === partsB[0]
-                    && partsA[1] === partsB[1] && partsA[2] === partsB[2]) {
-                    return a.includes('rc') ? 1 : -1;
                 }
                 return 0;
             });
     }
 
-    async function loadVersions() {
-        const fallback = (document.documentElement.dataset.versions || '').split(',');
+    function fallbackManifest() {
+        const versions = (selector.dataset.versions || "").split(",").filter(Boolean);
+        const stable = selector.dataset.stableVersion || sortVersions(versions)[0] || "";
+        return {development: "latest", stable, versions};
+    }
+
+    async function loadManifest() {
+        const fallback = fallbackManifest();
         try {
-            const response = await fetch(`${window.location.origin}${basePath}_static/versions.json`, {
-                cache: 'no-cache',
-            });
+            const manifestUrl = new URL(`${basePath}_static/versions.json`, window.location.origin);
+            const response = await fetch(manifestUrl, {cache: "no-cache"});
             if (!response.ok) {
                 return fallback;
             }
-            const manifest = await response.json();
-            if (Array.isArray(manifest.versions)) {
-                return manifest.versions;
+            const payload = await response.json();
+            if (Array.isArray(payload)) {
+                const versions = payload
+                    .map(item => typeof item === "string" ? item : item?.name)
+                    .filter(Boolean);
+                return {...fallback, versions};
             }
-            if (Array.isArray(manifest)) {
-                return manifest
-                    .map(item => typeof item === 'string' ? item : item?.name)
-                    .filter(name => /^\d+\.\d+\.\d+(?:rc\d+)?$/.test(name));
-            }
-            return fallback;
+            return {
+                development: payload.development || payload.latest || "latest",
+                stable: payload.stable || fallback.stable,
+                versions: Array.isArray(payload.versions) ? payload.versions : fallback.versions,
+            };
         } catch {
             return fallback;
         }
     }
 
-    function populateDropdown(versions) {
-        const currentVersion = getCurrentVersion();
-        const sortedVersions = sortVersions(versions);
-
-        const latestOption = document.createElement("option");
-        latestOption.value = window.location.origin + basePath;
-        latestOption.textContent = "latest";
-        latestOption.selected = currentVersion === 'latest';
-        versionsDropdown.appendChild(latestOption);
-
-        sortedVersions.forEach(version => {
-            const option = document.createElement("option");
-            option.value = `${window.location.origin}${basePath}${version}/`;
-            option.textContent = version;
-            option.selected = currentVersion === version;
-            versionsDropdown.appendChild(option);
-        });
+    function targetRoot(segment) {
+        return `${basePath}${segment ? `${segment}/` : ""}`;
     }
 
-    loadVersions().then(populateDropdown);
+    function addOption(parent, label, root, selected) {
+        const option = document.createElement("option");
+        option.value = root;
+        option.textContent = label;
+        option.selected = selected;
+        parent.appendChild(option);
+        return option;
+    }
 
-    versionsDropdown.addEventListener("change", function () {
-        const selectedVersion = this.value;
-        if (selectedVersion) {
-            window.location.href = selectedVersion;
+    function populateSelector(manifest) {
+        selector.replaceChildren();
+        const current = currentLocation(manifest);
+        const sorted = sortVersions(manifest.versions);
+
+        if (current.kind === "preview") {
+            addOption(
+                selector,
+                `Preview — ${selector.dataset.previewName || current.version || "pull request"}`,
+                targetRoot(previewPath),
+                true,
+            );
+        }
+
+        if (manifest.stable) {
+            addOption(
+                selector,
+                `Stable — ${manifest.stable}`,
+                targetRoot(manifest.stable),
+                current.kind === "stable",
+            );
+        }
+        addOption(
+            selector,
+            "Development — unreleased",
+            targetRoot(manifest.development || "latest"),
+            current.kind === "development",
+        );
+
+        const archived = sorted.filter(version => version !== manifest.stable);
+        if (current.kind === "archived" && !archived.includes(current.version)) {
+            archived.unshift(current.version);
+        }
+        if (archived.length > 0) {
+            const group = document.createElement("optgroup");
+            group.label = "Previous versions";
+            archived.forEach(version => {
+                addOption(
+                    group,
+                    version,
+                    targetRoot(version),
+                    current.kind === "archived" && current.version === version,
+                );
+            });
+            selector.appendChild(group);
+        }
+
+        const selected = selector.selectedOptions[0];
+        if (currentLabel && selected) {
+            currentLabel.textContent = `Currently viewing: ${selected.textContent}`;
+        }
+    }
+
+    async function pageExists(url) {
+        try {
+            let response = await fetch(url, {method: "HEAD", redirect: "follow"});
+            if (response.status === 405) {
+                response = await fetch(url, {method: "GET", redirect: "follow"});
+            }
+            return response.ok;
+        } catch {
+            return false;
+        }
+    }
+
+    async function navigateToVersion(root) {
+        const relative = relativePathFromBase();
+        const candidate = new URL(relative, new URL(root, window.location.origin));
+        const destination = await pageExists(candidate)
+            ? candidate
+            : new URL("index.html", new URL(root, window.location.origin));
+        destination.search = window.location.search;
+        destination.hash = window.location.hash;
+        window.location.assign(destination.href);
+    }
+
+    selector.addEventListener("change", () => {
+        if (selector.value) {
+            navigateToVersion(selector.value);
         }
     });
+
+    document.querySelectorAll("[data-docs-target='stable']").forEach(link => {
+        link.addEventListener("click", event => {
+            const stable = selector.dataset.stableVersion;
+            if (stable) {
+                event.preventDefault();
+                navigateToVersion(targetRoot(stable));
+            }
+        });
+    });
+
+    loadManifest().then(populateSelector);
 });

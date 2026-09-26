@@ -6,7 +6,7 @@
 #   /<branch-name>/ on GitHub Pages.
 # - Branch names are sanitised: "/" becomes "-".
 # - Example: branch "docs/plotting-pass" → /docs-plotting-pass/
-# - Stable docs at root level remain untouched.
+# - Stable docs at root level remain untouched by branch previews.
 # - Preview docs are automatically removed when the branch is deleted
 #   via the cleanup workflow (cleanup_branch_docs.yml).
 
@@ -207,10 +207,21 @@ jobs:
           fi
           EVENT="${{ github.event_name }}"
 
-          # Stable builds publish the root documentation.
-          if [[ "$BRANCH" == "master" || "$EVENT" == "release" ]]; then
+          # A release publishes its versioned documentation and refreshes the
+          # root from that exact stable build.
+          if [[ "$EVENT" == "release" ]]; then
             echo "publish=true" >> "$GITHUB_OUTPUT"
             echo "mode=stable" >> "$GITHUB_OUTPUT"
+            echo "docs_context=stable" >> "$GITHUB_OUTPUT"
+            echo "is_preview=false" >> "$GITHUB_OUTPUT"
+            echo "preview_path=" >> "$GITHUB_OUTPUT"
+            echo "build_subdir=" >> "$GITHUB_OUTPUT"
+          # Master publishes unreleased documentation under /latest and keeps
+          # the root synchronized from the newest versioned stable build.
+          elif [[ "$BRANCH" == "master" ]]; then
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+            echo "mode=development" >> "$GITHUB_OUTPUT"
+            echo "docs_context=development" >> "$GITHUB_OUTPUT"
             echo "is_preview=false" >> "$GITHUB_OUTPUT"
             echo "preview_path=" >> "$GITHUB_OUTPUT"
             echo "build_subdir=" >> "$GITHUB_OUTPUT"
@@ -219,12 +230,14 @@ jobs:
             SANITIZED=$(echo "$BRANCH" | tr '/' '-')
             echo "publish=true" >> "$GITHUB_OUTPUT"
             echo "mode=preview" >> "$GITHUB_OUTPUT"
+            echo "docs_context=preview" >> "$GITHUB_OUTPUT"
             echo "is_preview=true" >> "$GITHUB_OUTPUT"
             echo "preview_path=$SANITIZED" >> "$GITHUB_OUTPUT"
             echo "build_subdir=build/branch_preview" >> "$GITHUB_OUTPUT"
           else
             echo "publish=false" >> "$GITHUB_OUTPUT"
             echo "mode=none" >> "$GITHUB_OUTPUT"
+            echo "docs_context=development" >> "$GITHUB_OUTPUT"
             echo "is_preview=false" >> "$GITHUB_OUTPUT"
             echo "preview_path=" >> "$GITHUB_OUTPUT"
             echo "build_subdir=" >> "$GITHUB_OUTPUT"
@@ -291,6 +304,9 @@ jobs:
 
       # ---------- build docs ----------
       - name: Build docs
+        env:
+          SCPY_DOCS_CONTEXT: ${{ steps.publish.outputs.docs_context }}
+          SCPY_DOCS_PREVIEW_NAME: ${{ steps.docs_mode.outputs.branch }}
         run: |
           set -e
           . .venv/bin/activate
@@ -330,7 +346,7 @@ jobs:
       # post-merge artifact deployed to GitHub Pages.
 
       - name: Prune legacy preview documentation
-        if: steps.publish.outputs.mode == 'stable'
+        if: steps.publish.outputs.mode == 'stable' || steps.publish.outputs.mode == 'development'
         run: |
           declare -A allowed_preview_dirs=()
           declare -A root_doc_dirs=(
@@ -370,7 +386,7 @@ jobs:
           done < <(find build/html -mindepth 1 -maxdepth 1 -type d -printf '%f\n')
 
       - name: Prune stable version retention set
-        if: steps.publish.outputs.mode == 'stable'
+        if: steps.publish.outputs.mode == 'stable' || steps.publish.outputs.mode == 'development'
         run: |
           keep_count=4
           oldest_supported="0.6.10"
