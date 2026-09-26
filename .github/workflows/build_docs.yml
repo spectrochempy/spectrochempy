@@ -170,10 +170,14 @@ jobs:
           python .github/workflows/scripts/ci_diagnostics.py environment
 
       - name: Verify local checkout and version
+        env:
+          EXPECTED_RELEASE_VERSION: ${{ steps.release_scope.outputs.version }}
         run: |
           set -e
           . .venv/bin/activate
           python -c "
+          import os
+
           import spectrochempy as scp
           print(f'scp.__version__ = {scp.__version__}')
           print(f'scp.__file__   = {scp.__file__}')
@@ -185,7 +189,7 @@ jobs:
           assert stale not in scp.__version__, \
               f'FAIL: version {scp.__version__} contains stale hardcoded value {stale!r} -- setuptools_scm did not compute version from git tags'
           print(f'OK: version {scp.__version__} is computed from git tags')
-          expected = "${{ steps.release_scope.outputs.version }}"
+          expected = os.environ.get("EXPECTED_RELEASE_VERSION", "")
           if expected:
               assert scp.__version__ == expected, (
                   f'FAIL: stable docs release installed {scp.__version__}, expected {expected}'
