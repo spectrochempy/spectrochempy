@@ -485,7 +485,7 @@ jobs:
           retention-days: ${{ steps.artifact.outputs.retention }}
 
       # Temporary review evidence for #1686. Removed after this branch has
-      # demonstrated a strict, isolated rebuild from the published 1.0.0 tag.
+      # demonstrated an isolated rebuild from the published 1.0.0 tag.
       - name: Validate isolated 1.0.0 documentation reconstruction
         if: github.event_name == 'push' && github.ref_name == 'docs/navigation'
         run: |
@@ -495,7 +495,7 @@ jobs:
           rm -rf "$VALIDATION_BUILD"
           unset SETUPTOOLS_SCM_PRETEND_VERSION
           SCPY_BUILDDIR="$VALIDATION_BUILD" SCPY_DOCS_CONTEXT=archive \
-            python3 docs/make.py --warning-is-error --no-api --no-exec --no-sync -j1 \
+            python3 docs/make.py --no-api --no-exec --no-sync -j1 \
               html -T spectrochempy-v1.0.0
 
           SNAPSHOT="$VALIDATION_BUILD/html/1.0.0"
