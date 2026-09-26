@@ -153,6 +153,18 @@ def _get_published_versions(html_dir=HTML):
     return sorted(versions, key=_version_sort_key, reverse=True)
 
 
+def prune_stable_versions(html_dir=HTML, keep_count=5):
+    """Keep the numerically newest final core documentation versions."""
+    html_dir = Path(html_dir)
+    versions = _get_published_versions(html_dir)
+    removed = []
+    for version in versions[keep_count:]:
+        shutil.rmtree(html_dir / version)
+        removed.append(version)
+    manifest = _write_versions_manifest(html_dir)
+    return removed, manifest
+
+
 def _write_versions_manifest(html_dir=HTML):
     versions = _get_published_versions(html_dir)
     manifest = {
@@ -1027,12 +1039,13 @@ class BuildDocumentation:
         try:
             sp.build()
             _trace_ci(f"Sphinx build completed with statuscode={sp.statuscode!r}")
+            if sp.statuscode:
+                raise RuntimeError(
+                    f"Sphinx build failed with status code {sp.statuscode}"
+                )
             return 0
         except Exception as e:
             print(f"Warning: Build encountered an error: {e}")
-            if "build-finished" in str(e):
-                print("Build completed despite embed_code_links error")
-                return 0
             raise
 
     def _post_build(self):
@@ -1363,7 +1376,11 @@ def _main():
 
             # Create BuildDocumentation instance directly (don't import it)
             build = BuildDocumentation(
+                noexec=args.no_exec,
+                nosync=args.no_sync,
+                verbosity=args.verbosity,
                 jobs=args.jobs,
+                warningiserror=args.warning_is_error,
                 tagname=build_old.doc_version,
                 workingdir=build_old.workingdir,
             )

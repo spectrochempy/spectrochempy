@@ -8,6 +8,8 @@ import importlib.util
 import sys
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).parents[3]
 DOCS_MAKE = ROOT / "docs" / "make.py"
 
@@ -120,3 +122,92 @@ def test_stable_context_uses_the_published_release_tag(monkeypatch):
     build.tagname = None
 
     assert build._determine_version() == ("1.0.0", "1.0.0", "1.0.0")
+
+
+def test_docs_workflow_limits_stable_publication_to_final_core_releases():
+    workflow = (ROOT / ".github" / "workflows" / "build_docs.yml").read_text(
+        encoding="utf-8"
+    )
+
+    assert "stable-tag-version" in workflow
+    assert "steps.release_scope.outputs.is_stable_core" in workflow
+    assert "Stable core documentation release installs exact version" in workflow
+    assert "SCPY_DOCS_RELEASE_TAG: ${{ steps.release_scope.outputs.tag }}" in workflow
+
+
+def test_tag_build_propagates_strict_sphinx_options():
+    docs_make = (ROOT / "docs" / "make.py").read_text(encoding="utf-8")
+
+    assert "warningiserror=args.warning_is_error" in docs_make
+    assert "noexec=args.no_exec" in docs_make
+    assert "Sphinx build failed with status code" in docs_make
+
+
+def test_failed_sphinx_build_cannot_run_post_build_or_write_marker(
+    tmp_path, monkeypatch
+):
+    docs_make = _load_docs_make()
+    monkeypatch.setattr(docs_make, "HTML", tmp_path)
+
+    stable = tmp_path / "1.0.0"
+    stable.mkdir()
+    (stable / "index.html").write_text("partial build", encoding="utf-8")
+
+    build = docs_make.BuildDocumentation.__new__(docs_make.BuildDocumentation)
+    build.settings = {"noexec": True}
+    build._prepare_build = lambda: None
+
+    def fail_build():
+        raise RuntimeError("Sphinx build failed with status code 1")
+
+    build._run_sphinx_build = fail_build
+    build._post_build = lambda: pytest.fail("post-build ran after a failed build")
+
+    with pytest.raises(RuntimeError, match="status code 1"):
+        build._make_docs()
+
+    assert not (stable / ".spectrochempy-doc-version").exists()
+
+
+def test_stable_retention_keeps_five_newest_numeric_versions_and_refreshes_catalogue(
+    tmp_path,
+):
+    docs_make = _load_docs_make()
+    versions = [
+        "0.6.10",
+        "0.12.7",
+        "0.12.8",
+        "0.12.9",
+        "0.12.10",
+        "1.0.0",
+        "1.1.0",
+    ]
+    for version in versions:
+        (tmp_path / version).mkdir()
+    for distinct in ("latest", "1.2.0rc1", "docs-navigation"):
+        (tmp_path / distinct).mkdir()
+
+    removed, manifest = docs_make.prune_stable_versions(tmp_path, keep_count=5)
+
+    assert removed == ["0.12.7", "0.6.10"]
+    assert manifest["versions"] == [
+        "1.1.0",
+        "1.0.0",
+        "0.12.10",
+        "0.12.9",
+        "0.12.8",
+    ]
+    assert not (tmp_path / "0.6.10").exists()
+    assert (tmp_path / "latest").is_dir()
+    assert (tmp_path / "1.2.0rc1").is_dir()
+    assert (tmp_path / "docs-navigation").is_dir()
+    assert (tmp_path / "versions.json").is_file()
+
+
+def test_both_docs_workflows_use_the_same_five_version_retention_rule():
+    workflow_dir = ROOT / ".github" / "workflows"
+    for name in ("build_docs.yml", "build_docs_archived_versions.yml"):
+        workflow = (workflow_dir / name).read_text(encoding="utf-8")
+        assert "prune_stable_versions" in workflow
+        assert "keep_count=5" in workflow
+        assert "oldest_supported" not in workflow

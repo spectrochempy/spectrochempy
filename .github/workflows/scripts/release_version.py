@@ -119,6 +119,20 @@ def tag_name(version: str) -> str:
     return TAG_PREFIX + canonical_version(version)
 
 
+def stable_core_version_from_tag(tag: str) -> str | None:
+    """Return the version for a final core release tag, otherwise ``None``."""
+    if not isinstance(tag, str) or not tag.startswith(TAG_PREFIX):
+        return None
+    version = tag.removeprefix(TAG_PREFIX)
+    try:
+        canonical = canonical_version(version)
+    except ReleaseVersionError:
+        return None
+    if tag != TAG_PREFIX + canonical or not is_stable(canonical):
+        return None
+    return canonical
+
+
 def release_notes_name(version: str) -> str:
     """Return the what's-new file name associated with ``version``."""
     return f"v{canonical_version(version)}.rst"
@@ -228,11 +242,22 @@ def main(argv: list[str]) -> int:
 
     if len(argv) < 2:
         print(
-            "usage: release_version.py latest-tag | {validate|describe|next-dev} <version>",
+            "usage: release_version.py latest-tag | stable-tag-version <tag> | {validate|describe|next-dev} <version>",
             file=__import__("sys").stderr,
         )
         return 2
     command, version = argv[0], argv[1]
+
+    if command == "stable-tag-version":
+        stable_version = stable_core_version_from_tag(version)
+        if stable_version is None:
+            print(
+                f"Not a final core release tag: {version!r}",
+                file=__import__("sys").stderr,
+            )
+            return 1
+        print(stable_version)
+        return 0
 
     if command == "next-dev":
         try:

@@ -110,16 +110,37 @@ jobs:
           duration=$((SECONDS - start))
           echo "uv installation: ${duration}s" | tee -a "$CI_TIMING_FILE"
 
-      - name: Derive local core version for monorepo validation
+      - name: Classify release documentation event
+        id: release_scope
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          echo "is_stable_core=false" >> "$GITHUB_OUTPUT"
+          echo "version=" >> "$GITHUB_OUTPUT"
+          echo "tag=" >> "$GITHUB_OUTPUT"
+          if [[ "${{ github.event_name }}" == "release" ]] &&
+             VERSION=$(python .github/workflows/scripts/release_version.py \
+               stable-tag-version "$RELEASE_TAG" 2>/dev/null); then
+            echo "is_stable_core=true" >> "$GITHUB_OUTPUT"
+            echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+            echo "tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Derive installed core version
         run: |
           set -e
-          LATEST_TAG=$(python .github/workflows/scripts/release_version.py latest-tag)
-          VERSION="${LATEST_TAG#spectrochempy-v}"
-          NEXT_DEV=$(python .github/workflows/scripts/release_version.py next-dev "$VERSION")
-          VALIDATION_VERSION=$(python .github/workflows/scripts/check_plugin_core_compatibility.py \
-            --validation-version "${NEXT_DEV}.dev0")
+          if [[ "${{ steps.release_scope.outputs.is_stable_core }}" == "true" ]]; then
+            VALIDATION_VERSION="${{ steps.release_scope.outputs.version }}"
+            echo "Stable core documentation release installs exact version $VALIDATION_VERSION"
+          else
+            LATEST_TAG=$(python .github/workflows/scripts/release_version.py latest-tag)
+            VERSION="${LATEST_TAG#spectrochempy-v}"
+            NEXT_DEV=$(python .github/workflows/scripts/release_version.py next-dev "$VERSION")
+            VALIDATION_VERSION=$(python .github/workflows/scripts/check_plugin_core_compatibility.py \
+              --validation-version "${NEXT_DEV}.dev0")
+            echo "Monorepo plugin validation uses local core version $VALIDATION_VERSION"
+          fi
           echo "SETUPTOOLS_SCM_PRETEND_VERSION=$VALIDATION_VERSION" >> "$GITHUB_ENV"
-          echo "Monorepo plugin validation uses local core version $VALIDATION_VERSION"
 
       - name: Install spectrochempy
         run: |
@@ -164,6 +185,12 @@ jobs:
           assert stale not in scp.__version__, \
               f'FAIL: version {scp.__version__} contains stale hardcoded value {stale!r} -- setuptools_scm did not compute version from git tags'
           print(f'OK: version {scp.__version__} is computed from git tags')
+          expected = "${{ steps.release_scope.outputs.version }}"
+          if expected:
+              assert scp.__version__ == expected, (
+                  f'FAIL: stable docs release installed {scp.__version__}, expected {expected}'
+              )
+              print(f'OK: stable release uses exact installed version {expected}')
           "
 
       - name: Install Pandoc
@@ -207,9 +234,9 @@ jobs:
           fi
           EVENT="${{ github.event_name }}"
 
-          # A release publishes its versioned documentation and refreshes the
-          # root from that exact stable build.
-          if [[ "$EVENT" == "release" ]]; then
+          # Only a final core release publishes versioned stable documentation.
+          # Plugin releases and core prereleases never update the stable channel.
+          if [[ "$EVENT" == "release" && "${{ steps.release_scope.outputs.is_stable_core }}" == "true" ]]; then
             echo "publish=true" >> "$GITHUB_OUTPUT"
             echo "mode=stable" >> "$GITHUB_OUTPUT"
             echo "docs_context=stable" >> "$GITHUB_OUTPUT"
@@ -307,7 +334,7 @@ jobs:
         env:
           SCPY_DOCS_CONTEXT: ${{ steps.publish.outputs.docs_context }}
           SCPY_DOCS_PREVIEW_NAME: ${{ steps.docs_mode.outputs.branch }}
-          SCPY_DOCS_RELEASE_TAG: ${{ github.event.release.tag_name }}
+          SCPY_DOCS_RELEASE_TAG: ${{ steps.release_scope.outputs.tag }}
         run: |
           set -e
           . .venv/bin/activate
@@ -410,38 +437,15 @@ jobs:
       - name: Prune stable version retention set
         if: steps.publish.outputs.mode == 'stable' || steps.publish.outputs.mode == 'development'
         run: |
-          keep_count=4
-          oldest_supported="0.6.10"
+          python3 - <<'PY'
+          from pathlib import Path
 
-          mapfile -t versions < <(
-            find build/html -mindepth 1 -maxdepth 1 -type d -printf '%f\n' |
-              grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' |
-              sort -V
-          )
+          from docs.make import prune_stable_versions
 
-          declare -A keep_versions=()
-
-          if (( ${#versions[@]} > 0 )); then
-            start_index=0
-            if (( ${#versions[@]} > keep_count )); then
-              start_index=$((${#versions[@]} - keep_count))
-            fi
-
-            for ((i=start_index; i<${#versions[@]}; i++)); do
-              keep_versions["${versions[i]}"]=1
-            done
-          fi
-
-          if [[ -d "build/html/$oldest_supported" ]]; then
-            keep_versions["$oldest_supported"]=1
-          fi
-
-          for version in "${versions[@]}"; do
-            if [[ -z "${keep_versions[$version]:-}" ]]; then
-              rm -rf "build/html/$version"
-              echo "Removed archived docs version: $version"
-            fi
-          done
+          removed, manifest = prune_stable_versions(Path("build/html"), keep_count=5)
+          print(f"Removed stable documentation versions: {removed}")
+          print(f"Published version catalogue: {manifest['versions']}")
+          PY
 
       # ---------- install branch preview into gh-pages clone ----------
       - name: Install branch preview into gh-pages
@@ -475,6 +479,28 @@ jobs:
           name: ${{ steps.artifact.outputs.name }}
           path: ${{ steps.artifact.outputs.path }}
           retention-days: ${{ steps.artifact.outputs.retention }}
+
+      # Temporary review evidence for #1686. Removed after this branch has
+      # demonstrated a strict, isolated rebuild from the published 1.0.0 tag.
+      - name: Validate isolated 1.0.0 documentation reconstruction
+        if: github.event_name == 'push' && github.ref_name == 'docs/navigation'
+        run: |
+          set -e
+          . .venv/bin/activate
+          VALIDATION_BUILD="$RUNNER_TEMP/stable-docs-validation"
+          rm -rf "$VALIDATION_BUILD"
+          unset SETUPTOOLS_SCM_PRETEND_VERSION
+          SCPY_BUILDDIR="$VALIDATION_BUILD" SCPY_DOCS_CONTEXT=archive \
+            python3 docs/make.py --warning-is-error --no-exec --no-sync -j1 \
+              html -T spectrochempy-v1.0.0
+
+          SNAPSHOT="$VALIDATION_BUILD/html/1.0.0"
+          test "$(cat "$SNAPSHOT/.spectrochempy-doc-version")" = "1.0.0"
+          grep -q "What's New in Revision 1.0.0" "$SNAPSHOT/whatsnew/latest.html"
+          if grep -q "1.0.1.dev" "$SNAPSHOT/whatsnew/latest.html"; then
+            echo "Development release notes leaked into the stable snapshot" >&2
+            exit 1
+          fi
 
       # ---------- deploy to gh-pages ----------
       - name: Deployment
