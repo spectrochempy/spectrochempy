@@ -189,7 +189,7 @@ jobs:
           assert stale not in scp.__version__, \
               f'FAIL: version {scp.__version__} contains stale hardcoded value {stale!r} -- setuptools_scm did not compute version from git tags'
           print(f'OK: version {scp.__version__} is computed from git tags')
-          expected = os.environ.get("EXPECTED_RELEASE_VERSION", "")
+          expected = os.environ.get('EXPECTED_RELEASE_VERSION', '')
           if expected:
               assert scp.__version__ == expected, (
                   f'FAIL: stable docs release installed {scp.__version__}, expected {expected}'
