@@ -46,7 +46,7 @@ def _left_shift(array, pts=0.0, **kwargs):
 def _roll(array, pts=0.0, neg=False, **kwargs):
     points = int(pts)
     shifted = np.roll(array, points, axis=-1)
-    if neg:
+    if neg and points:
         if points > 0:
             shifted[..., :points] = -shifted[..., :points]
         else:

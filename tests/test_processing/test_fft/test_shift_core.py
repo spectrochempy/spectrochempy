@@ -152,3 +152,45 @@ def test_negated_roll_moves_mask_without_negating_it():
 
     assert_array_equal(result.data, [-4.0, 1.0, 99.0, 3.0])
     assert_array_equal(result.mask, [False, False, True, False])
+
+
+@pytest.mark.parametrize("name", ["roll", "cs"])
+@pytest.mark.parametrize("inplace", [False, True])
+def test_zero_negated_circular_shift_is_noop_with_single_history(name, inplace):
+    source = NDDataset(np.array([1.0, 99.0, 3.0, 4.0]))
+    source.mask = np.array([False, True, False, False])
+    source.annotate("Synthetic source")
+    original_data = source.data.copy()
+    original_mask = source.mask.copy()
+    original_history = source.history_entries
+
+    result = getattr(source, name)(pts=0, neg=True, inplace=inplace)
+
+    assert (result is source) is inplace
+    assert_array_equal(result.data, original_data)
+    assert_array_equal(result.mask, original_mask)
+    assert result.history_entries[:-1] == original_history
+    assert len(result.history_entries) == len(original_history) + 1
+    assert "`roll` shift performed" in result.history_entries[-1]["message"]
+    if not inplace:
+        assert_array_equal(source.data, original_data)
+        assert_array_equal(source.mask, original_mask)
+        assert source.history_entries == original_history
+
+
+def test_cs_matches_roll_and_adds_one_history_entry():
+    source = NDDataset(np.array([1.0, 99.0, 3.0, 4.0]))
+    source.mask = np.array([False, True, False, False])
+    source.annotate("Synthetic source")
+    original_history = source.history_entries
+
+    rolled = source.roll(pts=1, neg=True)
+    shifted = source.cs(pts=1, neg=True)
+
+    assert_array_equal(shifted.data, rolled.data)
+    assert_array_equal(shifted.mask, rolled.mask)
+    for result in (rolled, shifted):
+        assert result.history_entries[:-1] == original_history
+        assert len(result.history_entries) == len(original_history) + 1
+        assert "`roll` shift performed" in result.history_entries[-1]["message"]
+    assert source.history_entries == original_history
