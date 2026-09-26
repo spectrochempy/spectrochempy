@@ -80,9 +80,10 @@ X
 # - `created` is the creation date of the NDDataset (again not that of the .spg file).
 #   It can be accessed (or even changed) using `X.created`.
 #
-# - `description` indicates the complete pathname of the .spg file. As the pathname is
-#   also given in the history (below), it can be a good practice to give a
-#   self-explaining description of the group, for instance:
+# - `description` initially indicates the complete pathname of the .spg file. The
+#   complete path remains available from `X.filename` if the description is replaced;
+#   the history keeps only the portable filename. It can therefore be a good practice
+#   to give a self-explaining description of the group, for instance:
 
 
 # %%

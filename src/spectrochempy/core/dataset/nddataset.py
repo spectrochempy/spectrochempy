@@ -1291,7 +1291,14 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
 
     @property
     def history(self):
-        """Return the readable rendering of this dataset's history."""
+        """
+        Return the readable, timestamped view of the dataset history.
+
+        This list of strings is rendered from the single structured history
+        store. Assigning a string appends a text annotation, while assigning a
+        list replaces the history with all its elements. Assigning `None` does
+        nothing. Use `history_entries` to inspect detached structured entries.
+        """
         history = []
         for entry in self._history:
             date = (
@@ -1321,24 +1328,27 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         """
         Return detached structured history entries.
 
-        Each entry contains date, operation, parameters, and message fields.
-        Mutating the returned list or its dictionaries does not affect the
+        Every entry has four fields: ``date`` is a `datetime`, ``operation`` is
+        a string identifier or `None`, ``parameters`` is a detached dictionary,
+        and ``message`` is readable text. Text-only entries normally use
+        ``operation=None`` and an empty parameters dictionary. Mutating the
+        returned list, dictionaries, or nested values does not affect the
         dataset.
         """
         return deepcopy(self._history)
 
     def annotate(self, message, *, date=None):
-        """Append a free-form user annotation."""
+        """Append a text-only annotation, optionally at a supplied date."""
         self._append_history_entry(date=date, message=message)
 
     def replace_history(self, entries):
-        """Replace history explicitly with structured or legacy entries."""
+        """Replace history with every structured or legacy entry in a list."""
         if not isinstance(entries, list):
             raise TypeError("History replacement requires a list of entries")
         self._history = [_coerce_history_entry(entry) for entry in entries]
 
     def clear_history(self):
-        """Remove every history entry."""
+        """Remove every entry from the dataset history."""
         self._history = []
 
     def _append_history_entry(

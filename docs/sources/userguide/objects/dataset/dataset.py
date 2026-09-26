@@ -297,8 +297,9 @@ nd.created
 # ## About the `history` attribute
 
 # %% [markdown]
-# A new dataset starts with an empty history. The public ``history`` attribute is
-# the readable, timestamped view.
+# A new dataset starts with an empty history. One internal structured list is the
+# authoritative store. The public ``history`` attribute renders that store as a
+# readable, timestamped ``list[str]``; it is a view, not a second history.
 
 # %%
 nd = NDDataset([[1.0, 2.0], [3.0, 4.0]], name="history_demo")
@@ -328,10 +329,20 @@ before, after
 processed.history_entries
 
 # %% [markdown]
-# ``history_entries`` returns a detached list of dictionaries with ``date``,
-# ``operation``, ``parameters``, and ``message`` fields. Changing that returned
-# value does not change the dataset. Parameters contain compact values or explicit
-# descriptions; they never retain live datasets or large arrays.
+# ``history_entries`` returns a deep, detached copy of the structured entries.
+# Every entry has exactly four fields:
+#
+# - ``date``: the operation timestamp as a Python ``datetime``;
+# - ``operation``: a short string identifier, or ``None`` for text-only entries;
+# - ``parameters``: a detached dictionary of compact, JSON-like values;
+# - ``message``: readable text used by the ``history`` view.
+#
+# Changing the returned list, one of its dictionaries, or a nested parameter does
+# not change the dataset. Unsupported parameter values are represented by a compact
+# description instead of retaining a live object or a large array. Entries with
+# ``operation=None`` and an empty parameters dictionary are normal: reader messages,
+# older histories, user annotations, and operations outside the structured coverage
+# can all be text-only.
 #
 # Use the explicit methods below when replacement or removal is intended.
 
@@ -344,13 +355,35 @@ nd.clear_history()
 nd.history
 
 # %% [markdown]
-# Assigning a list to ``history`` is retained as a compatibility shorthand for
-# ``replace_history()`` and now keeps every list element. Histories loaded from older
-# files keep their timestamp and text, but no operation or parameters are inferred
-# from prose.
+# ``annotate()`` appends one text-only entry. Assigning a string to ``history`` is a
+# shorthand for that method, assigning ``None`` does nothing, and assigning a list is
+# a compatibility shorthand for ``replace_history()``: every list element replaces
+# the previous history. ``clear_history()`` removes all entries. Structured mappings,
+# legacy ``(date, message)`` pairs, and strings can be supplied to
+# ``replace_history()``. Histories loaded from older files keep their timestamp and
+# text, but no operation or parameters are inferred from prose.
 #
-# This is an operation log, not an integrity or complete provenance mechanism. It
-# does not detect arbitrary mutations, construct a graph, or replay computations.
+# Both shallow and deep dataset copies receive independent histories, including
+# nested parameter values. Native SCP/PSCP files preserve the same structured
+# entries with format version 3. The xarray mapping and NetCDF representation use
+# version 2. Current readers also accept native version 2 and portable version 1
+# textual histories. Files written with the new structured formats are not
+# guaranteed to be readable by older SpectroChemPy versions; acceptance of that
+# one-way compatibility remains a maintainer decision before stable publication.
+#
+# Structured entries are currently produced only for transposition, selection,
+# out-of-place addition and subtraction (scalar or ``NDDataset`` operands), and
+# ``mean()`` when its result remains an ``NDDataset``. An entry is appended only
+# after the operation succeeds; an exception does not add a success entry. In-place
+# arithmetic such as ``+=`` and ``-=`` remains text-only. Selection records the
+# requested indices, bounds, steps, labels, or coordinate values; it does not claim
+# to store fully resolved indices.
+#
+# This is a readable operation log, not exhaustive provenance. Histories are linear
+# and separate: operands are described compactly but their chronologies are not
+# merged. It does not detect arbitrary mutations, construct a graph, or replay
+# computations. Messages remain intended for people and their exact wording is not
+# a stable machine-readable contract; inspect structured fields when available.
 
 # %% [markdown]
 # A short infrared workflow shows how the two views complement each other. We select
@@ -389,10 +422,13 @@ corrected.history
 # The reference log records that its mean was computed along ``y``. Its separate
 # chronology is not merged into ``corrected``: the final log follows the main dataset
 # and records its import, spectral selection, and subtraction. The subtraction entry
-# instead identifies the two operands in mathematical order. This keeps both logs
-# linear and readable without presenting either as complete provenance. The SPG import
-# entry displays only ``nh4y-activation.spg`` so the log stays portable; the complete
-# source path remains available from ``spectra.filename`` and its reader metadata.
+# instead identifies the two operands in mathematical order. Understanding that the
+# subtracted reference is the mean of the first three spectra therefore requires its
+# own ``reference.history``; the corrected dataset alone does not contain that
+# construction. This keeps both logs linear and readable without presenting either
+# as complete provenance. The SPG import entry displays only
+# ``nh4y-activation.spg`` so the log stays portable; the complete source path remains
+# available from ``spectra.filename`` and its reader metadata.
 
 # %% [markdown]
 # ## Units
