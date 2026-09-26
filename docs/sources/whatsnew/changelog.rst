@@ -19,6 +19,11 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- Added a structured operation history for ``NDDataset`` with a readable
+  ``history`` view and detached ``history_entries``. Structured entries cover
+  transposition, selection, out-of-place addition and subtraction, and
+  ``mean()`` when it returns an ``NDDataset``; other operations may continue to
+  record normal text-only entries.
 - Added ``cross_validate`` and ``CrossValidationResult`` for bounded supervised
   PLS and Pipeline cross-validation with aligned ``NDDataset`` outputs,
   per-target metrics, fold records, and optional fitted fold estimators (#1658).
@@ -59,12 +64,12 @@ Breaking Changes
 ~~~~~~~~~~~~~~~~
 .. Add here new breaking changes (do not delete this comment)
 
-- ``NDDataset.history`` now has structured operation entries, and assigning a
-  list retains every supplied entry instead of only the first. New native
-  ``.scp``/``.pscp`` files use format version 3 and portable xarray/NetCDF
-  exports use version 2; current readers still accept native version 2 and
-  portable version 1 histories, but older readers are not expected to read the
-  new structured-history payloads.
+- Assigning a list to ``NDDataset.history`` now retains every supplied entry
+  instead of only the first.
+- Native ``.scp``/``.pscp`` files containing structured histories use format
+  version 3, and portable xarray/NetCDF mappings use version 2. New readers
+  continue to accept native version 2 and portable version 1 textual histories;
+  reading the new formats with older SpectroChemPy versions is not guaranteed.
 
 
 .. section

@@ -316,8 +316,8 @@ nd.history
 
 # %% [markdown]
 # Operations can retain structured details while keeping the familiar readable text.
-# This small before/after example records only the operations implemented by this
-# prototype.
+# This small before/after example records only the operations covered by the
+# stabilized structured-history contract.
 
 # %%
 before = nd.history
@@ -368,8 +368,9 @@ nd.history
 # entries with format version 3. The xarray mapping and NetCDF representation use
 # version 2. Current readers also accept native version 2 and portable version 1
 # textual histories. Files written with the new structured formats are not
-# guaranteed to be readable by older SpectroChemPy versions; acceptance of that
-# one-way compatibility remains a maintainer decision before stable publication.
+# guaranteed to be readable by older SpectroChemPy versions. This one-way
+# compatibility policy has been accepted and will be announced before stable
+# publication of the structured-history formats.
 #
 # Structured entries are currently produced only for transposition, selection,
 # out-of-place addition and subtraction (scalar or ``NDDataset`` operands), and
