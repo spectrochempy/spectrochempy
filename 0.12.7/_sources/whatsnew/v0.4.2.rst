@@ -1,0 +1,23 @@
+What's new in revision 0.4.2 [2022-03-16]
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-0.4.2. See :ref:`release` for a full changelog
+including other versions of SpectroChemPy.
+
+New features
+~~~~~~~~~~~~
+
+-  ``stack()`` method now generates a new dim, even if a dim of size one
+   in present.
+
+
+Deprecations
+~~~~~~~~~~~~
+
+-  “force_stack” keyword in ``concatenate()`` now deprecated.
+
+Bug fixes
+~~~~~~~~~
+
+-  Issue #417
+-  Transmittance and absorbance units now correctly handled.

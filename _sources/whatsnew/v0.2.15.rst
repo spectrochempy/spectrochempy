@@ -1,0 +1,19 @@
+What's new in revision 0.2.15 [2021-03-29]
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-0.2.15. See :ref:`release` for a full changelog
+including other versions of SpectroChemPy.
+
+New features
+~~~~~~~~~~~~
+
+-  Added a baseline correction method: ``basc`` .
+-  Baseline ranges can be stored in meta.regions[‘baseline’] - basc will
+   recognize them.
+
+Bug fixes
+~~~~~~~~~
+
+-  Comparison of dataset when containing metadata in testing functions.
+-  Project.
+-  Bug in the ``to`` function.
