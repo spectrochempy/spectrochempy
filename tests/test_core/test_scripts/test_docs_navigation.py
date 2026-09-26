@@ -132,6 +132,7 @@ def test_docs_workflow_limits_stable_publication_to_final_core_releases():
     assert "stable-tag-version" in workflow
     assert "steps.release_scope.outputs.is_stable_core" in workflow
     assert "Stable core documentation release installs exact version" in workflow
+    assert "--no-api --no-exec --no-sync -j1 html -T" in workflow
     assert "SCPY_DOCS_RELEASE_TAG: ${{ steps.release_scope.outputs.tag }}" in workflow
 
 
