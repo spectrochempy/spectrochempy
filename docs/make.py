@@ -1376,6 +1376,7 @@ def _main():
 
             # Create BuildDocumentation instance directly (don't import it)
             build = BuildDocumentation(
+                noapi=args.no_api,
                 noexec=args.no_exec,
                 nosync=args.no_sync,
                 verbosity=args.verbosity,

@@ -139,6 +139,7 @@ def test_tag_build_propagates_strict_sphinx_options():
     docs_make = (ROOT / "docs" / "make.py").read_text(encoding="utf-8")
 
     assert "warningiserror=args.warning_is_error" in docs_make
+    assert "noapi=args.no_api" in docs_make
     assert "noexec=args.no_exec" in docs_make
     assert "Sphinx build failed with status code" in docs_make
 
