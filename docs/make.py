@@ -734,6 +734,17 @@ class BuildDocumentation:
         last_tag = self._get_previous_tag() if not self.tagname else None
         if self.tagname is not None:
             return self.tagname, last_tag, self.tagname
+
+        docs_context = environ.get("SCPY_DOCS_CONTEXT", "local")
+        if docs_context in {"development", "preview"}:
+            return version, last_tag, "latest"
+
+        if docs_context == "stable":
+            release_tag = environ.get("SCPY_DOCS_RELEASE_TAG", "")
+            if release_tag:
+                _candidates, release_version = _canonical_doc_tag(release_tag)
+                return release_version, last_tag, release_version
+
         try:
             is_final = (
                 not Version(version).is_prerelease
@@ -1033,6 +1044,10 @@ class BuildDocumentation:
         # Check if the source directory exists and is not empty
         source_dir = HTML / doc_version
         if source_dir.exists() and any(source_dir.iterdir()):
+            if self.tagname or docs_context == "stable":
+                (source_dir / ".spectrochempy-doc-version").write_text(
+                    f"{doc_version}\n", encoding="utf-8"
+                )
             # Local builds and branch previews keep their historical root layout.
             # Published development docs remain under /latest so the root can
             # mirror the most recent stable release instead.

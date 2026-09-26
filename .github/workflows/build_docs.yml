@@ -29,7 +29,6 @@ on:
 
 permissions:
   contents: write  # Required for pushing to gh-pages
-  pages: write     # Required for requesting the legacy Pages build
   actions: read    # Default permission for actions
   id-token: none   # Explicitly disable id-token unless needed
 
@@ -308,6 +307,7 @@ jobs:
         env:
           SCPY_DOCS_CONTEXT: ${{ steps.publish.outputs.docs_context }}
           SCPY_DOCS_PREVIEW_NAME: ${{ steps.docs_mode.outputs.branch }}
+          SCPY_DOCS_RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
           set -e
           . .venv/bin/activate
@@ -332,6 +332,27 @@ jobs:
           fi
           duration=$((SECONDS - start))
           echo "documentation build: ${duration}s" | tee -a "$CI_TIMING_FILE"
+
+      # The stable root must come from the published tag, never from master.
+      # Rebuild the snapshot once when its provenance marker is absent or stale.
+      - name: Repair published stable documentation snapshot
+        if: steps.publish.outputs.mode == 'development'
+        run: |
+          set -e
+          . .venv/bin/activate
+          STABLE_TAG=$(python .github/workflows/scripts/release_version.py latest-tag)
+          STABLE_VERSION="${STABLE_TAG#spectrochempy-v}"
+          MARKER="build/html/${STABLE_VERSION}/.spectrochempy-doc-version"
+
+          if [[ ! -f "$MARKER" ]] || [[ "$(cat "$MARKER")" != "$STABLE_VERSION" ]]; then
+            echo "Rebuilding stable documentation from $STABLE_TAG"
+            rm -rf "build/html/$STABLE_VERSION"
+            unset SETUPTOOLS_SCM_PRETEND_VERSION
+            SCPY_DOCS_CONTEXT=archive \
+              python3 docs/make.py --warning-is-error -j1 html -T "$STABLE_TAG"
+          fi
+
+          python3 -c "from pathlib import Path; from docs.make import _sync_stable_docs_to_root, refresh_versions_index; root=Path('build/html'); manifest=refresh_versions_index(root); selected=_sync_stable_docs_to_root(root, manifest['stable']); refresh_versions_index(root); print(f'Synchronized root from stable version {selected}')"
 
       - name: CI diagnostics summary
         if: ${{ always() }}
@@ -464,12 +485,3 @@ jobs:
           folder: build/html/
           single-commit: true
           repository-name: ${{ github.repository }}
-
-      # Pushes made with GITHUB_TOKEN do not trigger a second workflow run.
-      # Explicitly ask the legacy branch-based Pages service to publish the
-      # freshly updated gh-pages branch.
-      - name: Request GitHub Pages build
-        if: steps.publish.outputs.publish == 'true' && (github.event_name != 'pull_request' && !github.event.act)
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh api --method POST "repos/${{ github.repository }}/pages/builds"

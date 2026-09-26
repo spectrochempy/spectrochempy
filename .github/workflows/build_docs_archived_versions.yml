@@ -115,8 +115,10 @@ jobs:
           for ((i=start_index; i<${#tags[@]}; i++)); do
             tag="${tags[i]}"
             version="${tag#spectrochempy-v}"
-            if [ ! -d "build/html/$version" ]; then
-              echo "Building v$version docs"
+            marker="build/html/$version/.spectrochempy-doc-version"
+            if [[ ! -f "$marker" ]] || [[ "$(cat "$marker")" != "$version" ]]; then
+              echo "Rebuilding v$version docs from $tag"
+              rm -rf "build/html/$version"
               python3 docs/make.py -j1 html -T "$tag"
             fi
           done

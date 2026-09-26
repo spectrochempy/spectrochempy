@@ -89,7 +89,34 @@ def test_navigation_labels_contexts_and_page_fallback_are_present():
     assert 'echo "docs_context=stable"' in workflow
     assert 'echo "docs_context=development"' in workflow
     assert 'echo "docs_context=preview"' in workflow
-    assert "pages: write" in workflow
-    assert (
-        'gh api --method POST "repos/${{ github.repository }}/pages/builds"' in workflow
+
+
+def test_development_context_never_writes_into_the_stable_version(
+    monkeypatch,
+):
+    docs_make = _load_docs_make()
+    monkeypatch.setenv("SCPY_DOCS_CONTEXT", "development")
+    monkeypatch.setattr(
+        docs_make.BuildDocumentation, "_get_previous_tag", lambda self: "1.0.0"
     )
+    monkeypatch.setattr("spectrochempy.version", "1.1.0")
+
+    build = docs_make.BuildDocumentation.__new__(docs_make.BuildDocumentation)
+    build.tagname = None
+
+    assert build._determine_version() == ("1.1.0", "1.0.0", "latest")
+
+
+def test_stable_context_uses_the_published_release_tag(monkeypatch):
+    docs_make = _load_docs_make()
+    monkeypatch.setenv("SCPY_DOCS_CONTEXT", "stable")
+    monkeypatch.setenv("SCPY_DOCS_RELEASE_TAG", "spectrochempy-v1.0.0")
+    monkeypatch.setattr(
+        docs_make.BuildDocumentation, "_get_previous_tag", lambda self: "1.0.0"
+    )
+    monkeypatch.setattr("spectrochempy.version", "1.1.0")
+
+    build = docs_make.BuildDocumentation.__new__(docs_make.BuildDocumentation)
+    build.tagname = None
+
+    assert build._determine_version() == ("1.0.0", "1.0.0", "1.0.0")
