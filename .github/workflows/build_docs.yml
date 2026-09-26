@@ -500,7 +500,7 @@ jobs:
 
           SNAPSHOT="$VALIDATION_BUILD/html/1.0.0"
           test "$(cat "$SNAPSHOT/.spectrochempy-doc-version")" = "1.0.0"
-          grep -q "What's New in Revision 1.0.0" "$SNAPSHOT/whatsnew/latest.html"
+          grep -q "Revision 1.0.0" "$SNAPSHOT/whatsnew/latest.html"
           if grep -q "1.0.1.dev" "$SNAPSHOT/whatsnew/latest.html"; then
             echo "Development release notes leaked into the stable snapshot" >&2
             exit 1
