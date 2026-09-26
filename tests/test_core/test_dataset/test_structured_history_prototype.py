@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import json
+import operator
 import zipfile
 from datetime import UTC
 from datetime import datetime
@@ -66,6 +67,95 @@ def test_replace_and_clear_are_explicit_and_list_assignment_keeps_all_entries():
         "first replacement",
         "second replacement",
     ]
+    dataset.clear_history()
+    assert dataset.history == []
+
+
+def test_history_view_preserves_list_read_compatibility():
+    dataset = _dataset()
+    dataset.annotate("first")
+    dataset.annotate("second")
+
+    history = dataset.history
+
+    assert isinstance(history, list)
+    assert history == list(history)
+    assert history[0].endswith("> First")
+    assert history[:1] == [history[0]]
+    assert list(iter(history)) == history
+    assert "First" in repr(history)
+
+    mutable_copy = list(history)
+    mutable_copy.append("local only")
+    assert len(mutable_copy) == 3
+    assert dataset.history == history
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        pytest.param(lambda history: history.append("third"), id="append"),
+        pytest.param(lambda history: history.extend(["third"]), id="extend"),
+        pytest.param(lambda history: history.insert(0, "third"), id="insert"),
+        pytest.param(lambda history: history.clear(), id="clear"),
+        pytest.param(lambda history: history.pop(), id="pop"),
+        pytest.param(lambda history: history.remove(history[0]), id="remove"),
+        pytest.param(lambda history: history.sort(), id="sort"),
+        pytest.param(lambda history: history.reverse(), id="reverse"),
+        pytest.param(
+            lambda history: operator.setitem(history, 0, "changed"),
+            id="set-item",
+        ),
+        pytest.param(
+            lambda history: operator.setitem(history, slice(None), ["changed"]),
+            id="set-slice",
+        ),
+        pytest.param(lambda history: operator.delitem(history, 0), id="del-item"),
+        pytest.param(
+            lambda history: operator.delitem(history, slice(None)),
+            id="del-slice",
+        ),
+        pytest.param(lambda history: operator.iadd(history, ["third"]), id="iadd"),
+        pytest.param(lambda history: operator.imul(history, 2), id="imul"),
+    ],
+)
+def test_history_view_rejects_mutation_through_alias(mutation):
+    dataset = _dataset()
+    dataset.annotate("first")
+    dataset.annotate("second")
+    before = dataset.history_entries
+    history = dataset.history
+
+    with pytest.raises(TypeError, match="history view is read-only"):
+        mutation(history)
+
+    assert dataset.history_entries == before
+
+
+def test_history_view_rejects_direct_mutation():
+    dataset = _dataset()
+    dataset.annotate("first")
+
+    with pytest.raises(TypeError, match="Use dataset.annotate"):
+        dataset.history.append("lost before the read-only view")
+
+
+def test_public_history_writers_remain_available():
+    dataset = _dataset()
+
+    dataset.annotate("annotated")
+    dataset.history = "assigned annotation"
+    before_none = dataset.history_entries
+    dataset.history = None
+    assert dataset.history_entries == before_none
+
+    dataset.replace_history(["replacement one", "replacement two"])
+    assert [entry["message"] for entry in dataset.history_entries] == [
+        "replacement one",
+        "replacement two",
+    ]
+    dataset.history = ["assigned replacement one", "assigned replacement two"]
+    assert len(dataset.history_entries) == 2
     dataset.clear_history()
     assert dataset.history == []
 

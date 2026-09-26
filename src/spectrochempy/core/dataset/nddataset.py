@@ -343,6 +343,38 @@ def _is_portable_labels(labels):
     return all(isinstance(v, str) or v is None for v in labels)
 
 
+class _ReadOnlyHistory(list):
+    """List-compatible readable history view that rejects in-place mutation."""
+
+    __slots__ = ()
+
+    @staticmethod
+    def _raise_read_only(*args, **kwargs):
+        raise TypeError(
+            "The history view is read-only. Use dataset.annotate(), "
+            "dataset.replace_history(), or dataset.clear_history()."
+        )
+
+    def __copy__(self):
+        return type(self)(self)
+
+    def __deepcopy__(self, memo):
+        return type(self)(deepcopy(list(self), memo))
+
+    append = _raise_read_only
+    extend = _raise_read_only
+    insert = _raise_read_only
+    clear = _raise_read_only
+    pop = _raise_read_only
+    remove = _raise_read_only
+    sort = _raise_read_only
+    reverse = _raise_read_only
+    __setitem__ = _raise_read_only
+    __delitem__ = _raise_read_only
+    __iadd__ = _raise_read_only
+    __imul__ = _raise_read_only
+
+
 def _export_labels(coord, dim, aux_vars):
     """Append label export variables to *aux_vars* or emit a warning."""
     labels = coord.labels
@@ -1294,10 +1326,12 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         """
         Return the readable, timestamped view of the dataset history.
 
-        This list of strings is rendered from the single structured history
-        store. Assigning a string appends a text annotation, while assigning a
-        list replaces the history with all its elements. Assigning `None` does
-        nothing. Use `history_entries` to inspect detached structured entries.
+        This read-only, list-compatible view of strings is rendered from the
+        single structured history store. Mutating the view raises `TypeError`;
+        use `annotate`, `replace_history`, or `clear_history` instead. Assigning
+        a string appends a text annotation, assigning a list replaces the
+        history with all its elements, and assigning `None` does nothing. Use
+        `history_entries` to inspect detached structured entries.
         """
         history = []
         for entry in self._history:
@@ -1312,7 +1346,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             message = entry["message"] or entry["operation"] or "History entry"
             message = message[0].capitalize() + message[1:]
             history.append(f"{date}> {message}")
-        return history
+        return _ReadOnlyHistory(history)
 
     @history.setter
     def history(self, value):

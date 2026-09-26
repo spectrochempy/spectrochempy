@@ -1216,6 +1216,7 @@ def _read_srs(*args, **kwargs):
     try:
         # read the file and determine whether it is a rapidscan or a high speed real time
         is_rapidscan, is_highspeed, is_tg = False, False, False
+        history = None
 
         """ At pos=304 (hex:130) is the position of the '02' key for series. Here we don't use it.
         Instead, we use one of the following sequence :
@@ -1412,7 +1413,6 @@ def _read_srs(*args, **kwargs):
 
             pos_info_data = index[0]
             pos_bg = index[1]
-            pos_x = index[2]
             pos_data = index[3]
 
             if len(index) != 4:
@@ -1595,14 +1595,12 @@ def _read_srs(*args, **kwargs):
         dataset.origin = "omnic"
         dataset.description = kwargs.get("description", "Dataset from omnic srs file.")
 
-        if "history" in locals():
-            dataset.history.append(
+        if history:
+            dataset.annotate(
                 "Omnic 'DATA PROCESSING HISTORY' :\n"
                 "--------------------------------\n" + history,
             )
-        dataset.history.append(
-            str(utcnow()) + ": imported from srs file " + str(filename)
-        )
+        dataset.annotate("imported from srs file " + str(filename))
 
         dataset.meta.laser_frequency = info["reference_frequency"] * ur("cm^-1")
         dataset.meta.collection_length = info["collection_length"] * ur("s")

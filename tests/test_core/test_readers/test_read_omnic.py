@@ -226,6 +226,65 @@ def test_read_spg_history_uses_source_name_and_preserves_source(tmp_path):
         assert str(path) in dataset.description
 
 
+@pytest.mark.usefixtures("_skip_if_no_testdata")
+@pytest.mark.parametrize(
+    ("name", "return_bg", "has_vendor_history"),
+    [
+        ("rapid_scan.srs", False, True),
+        ("GC_Demo.srs", False, False),
+        ("high_speed.srs", True, False),
+    ],
+)
+def test_read_srs_persists_vendor_and_import_history(
+    name,
+    return_bg,
+    has_vendor_history,
+):
+    """SRS series and backgrounds retain every applicable reader message."""
+    path = IRDATA / "omnic_series" / name
+
+    dataset = scp.read_srs(path, return_bg=return_bg)
+
+    entries = dataset.history_entries
+    messages = [entry["message"] for entry in entries]
+    expected_import = f"imported from srs file {path}"
+    assert messages[-1] == expected_import
+    assert all(entry["operation"] is None for entry in entries)
+    assert all(entry["parameters"] == {} for entry in entries)
+    assert all(isinstance(entry["date"], datetime) for entry in entries)
+
+    vendor_messages = [
+        message
+        for message in messages
+        if message.startswith("Omnic 'DATA PROCESSING HISTORY'")
+    ]
+    assert bool(vendor_messages) is has_vendor_history
+    if has_vendor_history:
+        assert len(vendor_messages[0].splitlines()) > 2
+
+
+@pytest.mark.usefixtures("_skip_if_no_testdata")
+def test_read_srs_empty_vendor_history_keeps_only_import_message(monkeypatch):
+    """An empty native processing block is not recorded as an empty annotation."""
+    from spectrochempy.core.readers import read_omnic
+
+    path = IRDATA / "omnic_series" / "rapid_scan_reprocessed.srs"
+    real_readbtext = read_omnic._readbtext
+
+    def _empty_null_terminated_text(fid, pos, size):
+        if size is None:
+            return ""
+        return real_readbtext(fid, pos, size)
+
+    monkeypatch.setattr(read_omnic, "_readbtext", _empty_null_terminated_text)
+
+    dataset = scp.read_srs(path)
+
+    assert [entry["message"] for entry in dataset.history_entries] == [
+        f"imported from srs file {path}",
+    ]
+
+
 def test_return_ifg_validation(tmp_path):
     """Regression test for #1144: invalid return_ifg values must warn clearly.
     The Importer catches exceptions and re-emits them as warnings, so we check

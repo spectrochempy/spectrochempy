@@ -300,6 +300,12 @@ nd.created
 # A new dataset starts with an empty history. One internal structured list is the
 # authoritative store. The public ``history`` attribute renders that store as a
 # readable, timestamped ``list[str]``; it is a view, not a second history.
+# The view supports normal list reading, slicing, display, iteration, and comparison,
+# but is read-only: calls such as ``nd.history.append(...)`` and mutations made
+# through an alias raise ``TypeError``. Use ``annotate()``, ``replace_history()``,
+# or ``clear_history()`` to update the dataset. An explicitly detached
+# ``list(nd.history)`` remains an ordinary mutable list, and changing it does not
+# affect the dataset.
 
 # %%
 nd = NDDataset([[1.0, 2.0], [3.0, 4.0]], name="history_demo")

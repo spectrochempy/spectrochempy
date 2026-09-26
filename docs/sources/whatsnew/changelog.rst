@@ -38,6 +38,9 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- OMNIC SRS imports now retain both useful vendor processing history and the
+  import message. Empty vendor blocks are omitted, and the import message no
+  longer embeds a second timestamp.
 - Refused NDDataset in-place arithmetic operations now roll back data, units,
   masks, titles, history, and other trait replacements made by the operation.
   Side effects performed by custom Traitlets observers remain the observer's
@@ -64,6 +67,10 @@ Breaking Changes
 ~~~~~~~~~~~~~~~~
 .. Add here new breaking changes (do not delete this comment)
 
+- Direct mutations of the readable ``NDDataset.history`` view now raise
+  ``TypeError`` instead of being silently lost. Use ``annotate()``,
+  ``replace_history()``, or ``clear_history()``; ``list(dataset.history)``
+  remains an ordinary mutable copy.
 - Assigning a list to ``NDDataset.history`` now retains every supplied entry
   instead of only the first.
 - Native ``.scp``/``.pscp`` files containing structured histories use format
