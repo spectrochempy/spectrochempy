@@ -90,6 +90,14 @@ def test_kind():
     assert rv.kind("1.0.0rc1") == "rc"
 
 
+def test_only_final_core_tags_are_stable_documentation_releases():
+    assert rv.stable_core_version_from_tag("spectrochempy-v1.0.0") == "1.0.0"
+    assert rv.stable_core_version_from_tag("spectrochempy-v1.0.0rc1") is None
+    assert rv.stable_core_version_from_tag("spectrochempy-nmr-v0.1.13") is None
+    assert rv.stable_core_version_from_tag("1.0.0") is None
+    assert rv.stable_core_version_from_tag("spectrochempy-v1.0.0.dev1") is None
+
+
 def test_prerelease_flags():
     assert rv.is_prerelease("1.0.0rc1") is True
     assert rv.is_prerelease("1.0.0") is False
@@ -206,6 +214,19 @@ def test_cli_run_as_subprocess():
     )
     assert result.returncode == 0
     assert "tag=spectrochempy-v1.0.0" in result.stdout
+
+
+def test_cli_stable_tag_version_accepts_only_final_core_tags(capsys):
+    assert rv.main(["stable-tag-version", "spectrochempy-v1.0.0"]) == 0
+    assert capsys.readouterr().out.strip() == "1.0.0"
+
+    for tag in (
+        "spectrochempy-v1.0.0rc1",
+        "spectrochempy-nmr-v0.1.13",
+        "spectrochempy-v1.0.0.dev1",
+    ):
+        assert rv.main(["stable-tag-version", tag]) == 1
+        capsys.readouterr()
 
 
 def test_cli_next_dev_bootstraps_without_site_packages():

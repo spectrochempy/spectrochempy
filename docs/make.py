@@ -153,11 +153,24 @@ def _get_published_versions(html_dir=HTML):
     return sorted(versions, key=_version_sort_key, reverse=True)
 
 
+def prune_stable_versions(html_dir=HTML, keep_count=5):
+    """Keep the numerically newest final core documentation versions."""
+    html_dir = Path(html_dir)
+    versions = _get_published_versions(html_dir)
+    removed = []
+    for version in versions[keep_count:]:
+        shutil.rmtree(html_dir / version)
+        removed.append(version)
+    manifest = _write_versions_manifest(html_dir)
+    return removed, manifest
+
+
 def _write_versions_manifest(html_dir=HTML):
     versions = _get_published_versions(html_dir)
     manifest = {
-        "schema_version": 1,
+        "schema_version": 2,
         "latest": "latest",
+        "development": "latest",
         "stable": versions[0] if versions else "",
         "versions": versions,
     }
@@ -209,6 +222,47 @@ def refresh_versions_index(html_dir=HTML):
     _update_version_template_data(html_dir)
     _sync_versions_script(html_dir)
     return _write_versions_manifest(html_dir)
+
+
+def _sync_stable_docs_to_root(html_dir=HTML, stable_version=""):
+    """
+    Mirror the published stable documentation at the site root.
+
+    Version directories, development documentation, and branch previews stay in
+    place. Only entries produced by the stable or development Sphinx builds are
+    replaced at the root, which also handles the first migration from a root
+    that previously contained development documentation.
+    """
+    html_dir = Path(html_dir)
+    if not stable_version:
+        versions = _get_published_versions(html_dir)
+        stable_version = versions[0] if versions else ""
+
+    stable_dir = html_dir / stable_version
+    if not stable_version or not stable_dir.is_dir():
+        return ""
+
+    generated_names = {item.name for item in stable_dir.iterdir()}
+    development_dir = html_dir / "latest"
+    if development_dir.is_dir():
+        generated_names.update(item.name for item in development_dir.iterdir())
+
+    protected_names = {".git", "CNAME"}
+    for name in generated_names - protected_names:
+        target = html_dir / name
+        if target.is_dir() and not target.is_symlink():
+            shutil.rmtree(target)
+        elif target.exists() or target.is_symlink():
+            target.unlink()
+
+    for item in stable_dir.iterdir():
+        destination = html_dir / item.name
+        if item.is_dir() and not item.is_symlink():
+            shutil.copytree(item, destination, dirs_exist_ok=True)
+        else:
+            shutil.copy2(item, destination, follow_symlinks=False)
+
+    return stable_version
 
 
 # ======================================================================================
@@ -692,6 +746,17 @@ class BuildDocumentation:
         last_tag = self._get_previous_tag() if not self.tagname else None
         if self.tagname is not None:
             return self.tagname, last_tag, self.tagname
+
+        docs_context = environ.get("SCPY_DOCS_CONTEXT", "local")
+        if docs_context in {"development", "preview"}:
+            return version, last_tag, "latest"
+
+        if docs_context == "stable":
+            release_tag = environ.get("SCPY_DOCS_RELEASE_TAG", "")
+            if release_tag:
+                _candidates, release_version = _canonical_doc_tag(release_tag)
+                return release_version, last_tag, release_version
+
         try:
             is_final = (
                 not Version(version).is_prerelease
@@ -974,25 +1039,32 @@ class BuildDocumentation:
         try:
             sp.build()
             _trace_ci(f"Sphinx build completed with statuscode={sp.statuscode!r}")
+            if sp.statuscode:
+                raise RuntimeError(
+                    f"Sphinx build failed with status code {sp.statuscode}"
+                )
             return 0
         except Exception as e:
             print(f"Warning: Build encountered an error: {e}")
-            if "build-finished" in str(e):
-                print("Build completed despite embed_code_links error")
-                return 0
             raise
 
     def _post_build(self):
         # Post-build actions.
 
         doc_version = self._doc_version
+        docs_context = environ.get("SCPY_DOCS_CONTEXT", "local")
 
         # Check if the source directory exists and is not empty
         source_dir = HTML / doc_version
         if source_dir.exists() and any(source_dir.iterdir()):
-            # Copy all files, including hidden ones, from source_dir to HTML
-            # except if we are building an oldest version or version is dirty
-            if not self.tagname:
+            if self.tagname or docs_context == "stable":
+                (source_dir / ".spectrochempy-doc-version").write_text(
+                    f"{doc_version}\n", encoding="utf-8"
+                )
+            # Local builds and branch previews keep their historical root layout.
+            # Published development docs remain under /latest so the root can
+            # mirror the most recent stable release instead.
+            if not self.tagname and docs_context not in {"development", "stable"}:
                 for item in source_dir.iterdir():
                     dest = HTML / item.name
                     if item.is_dir():
@@ -1003,12 +1075,29 @@ class BuildDocumentation:
         else:
             print(f"Warning: Source directory {source_dir} does not exist or is empty")
 
-        # Remove it if doc_version is 'latest' as all content is in the parent directory
-        if doc_version == "latest" and source_dir.exists():
+        # Local builds and previews copy /latest to their own root. The public
+        # development build intentionally retains /latest.
+        if (
+            doc_version == "latest"
+            and source_dir.exists()
+            and docs_context not in {"development", "stable"}
+        ):
             shutil.rmtree(source_dir)
             print(f"Removed directory {source_dir}")
 
         manifest = refresh_versions_index(HTML)
+        if docs_context in {"development", "stable"}:
+            stable_version = _sync_stable_docs_to_root(
+                HTML, stable_version=manifest["stable"]
+            )
+            if stable_version:
+                manifest = refresh_versions_index(HTML)
+                print(
+                    "Synchronized documentation root from stable version "
+                    f"{stable_version}"
+                )
+            else:
+                print("No published stable documentation was available for the root")
         print(f"Updated docs versions manifest: {manifest['versions']}")
 
         # Remove the environment variables
@@ -1287,7 +1376,12 @@ def _main():
 
             # Create BuildDocumentation instance directly (don't import it)
             build = BuildDocumentation(
+                noapi=args.no_api,
+                noexec=args.no_exec,
+                nosync=args.no_sync,
+                verbosity=args.verbosity,
                 jobs=args.jobs,
+                warningiserror=args.warning_is_error,
                 tagname=build_old.doc_version,
                 workingdir=build_old.workingdir,
             )
