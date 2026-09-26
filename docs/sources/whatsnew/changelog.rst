@@ -46,6 +46,12 @@ Bug Fixes
 - ``pk()`` and ``pk_exp()`` now reject the unsupported ``inv=True`` option with
   ``NotImplementedError`` before modifying the dataset. Their default and
   explicit ``inv=False`` behavior is unchanged.
+- Discrete shifts now move masks with their corresponding values. Circular
+  shifts therefore preserve masked statistics, while the zeros introduced by
+  left and right shifts are valid, unmasked points. A zero-point left shift no
+  longer clears the dataset, a zero-point circular shift with ``neg=True`` no
+  longer negates it, and ``cs()`` once again delegates successfully to
+  ``roll()`` with a single history entry.
 - Harmonized newly generated history messages across core and official-plugin
   imports, common spectral treatments, and analysis results. Individual-file
   imports now identify the format and portable filename while the complete

@@ -960,7 +960,12 @@ def _wrap_ndarray_output_to_nddataset(
 
 
 # ======================================================================================
-def _units_agnostic_method(method):
+def _units_agnostic_method(method=None, *, mask_transform=None):
+    if method is None:
+        return lambda wrapped: _units_agnostic_method(
+            wrapped, mask_transform=mask_transform
+        )
+
     @functools.wraps(method)
     def wrapper(dataset, **kwargs):
         # On which axis do we want to shift (get axis from arguments)
@@ -976,6 +981,8 @@ def _units_agnostic_method(method):
 
         data = method(new.data, **kwargs)
         new._data = data
+        if mask_transform is not None and new.is_masked:
+            new._mask = mask_transform(new.mask, **kwargs)
 
         new.history = (
             f"`{method.__name__}` shift performed on dimension "
