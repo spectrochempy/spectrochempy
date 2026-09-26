@@ -14,6 +14,7 @@ from datetime import datetime
 
 import numpy as np
 import pytest
+import xarray as xr
 
 import spectrochempy as scp
 from spectrochempy.core.dataset.coord import Coord
@@ -502,10 +503,38 @@ def test_copy_history_is_independent_even_for_shallow_copy(deep):
         message="example",
     )
 
+    detached = dataset.history_entries
+    detached[0]["parameters"]["nested"]["values"].append(3)
     copied = dataset.copy(deep=deep)
-    copied._history[0]["parameters"]["nested"]["values"].append(3)
+    copied._history[0]["parameters"]["nested"]["values"].append(4)
 
     assert dataset.history_entries[0]["parameters"]["nested"]["values"] == [1, 2]
+
+
+def test_inplace_addition_and_subtraction_remain_text_only():
+    dataset = _dataset()
+
+    dataset += 2
+    addition = dataset.history_entries[-1]
+    dataset -= 1
+    subtraction = dataset.history_entries[-1]
+
+    assert addition["operation"] is None
+    assert addition["parameters"] == {}
+    assert "iadd" in addition["message"]
+    assert subtraction["operation"] is None
+    assert subtraction["parameters"] == {}
+    assert "isub" in subtraction["message"]
+
+
+def test_failed_inplace_operation_does_not_append_success_entry():
+    dataset = _dataset()
+    before = dataset.history_entries
+
+    with pytest.raises((TypeError, ValueError)):
+        dataset += object()
+
+    assert dataset.history_entries == before
 
 
 def test_unsupported_parameter_is_described_without_retaining_value():
@@ -558,6 +587,8 @@ def test_native_loader_accepts_version_2_with_textual_history(tmp_path):
     with zipfile.ZipFile(filename, "r") as archive:
         member = archive.namelist()[0]
         payload = json.loads(archive.read(member).decode("utf-8"))
+    assert payload["__format__"] == "scp"
+    assert payload["__version__"] == 3
     payload["__version__"] = 2
     payload["history"] = dataset.history
     with zipfile.ZipFile(filename, "w") as archive:
@@ -623,10 +654,16 @@ def test_xarray_and_netcdf_roundtrips_preserve_structured_entries(tmp_path):
         date=datetime(2024, 1, 2, 3, 4, 5, 123456, tzinfo=UTC),
     )
 
-    from_xarray = NDDataset.from_xarray(dataset.to_xarray())
+    portable = dataset.to_xarray()
+    assert portable.attrs["scpy_format"] == "nddataset-xarray"
+    assert portable.attrs["scpy_version"] == 2
+    from_xarray = NDDataset.from_xarray(portable)
     filename = tmp_path / "history.nc"
     dataset.to_netcdf(filename)
     from_netcdf = NDDataset.from_netcdf(filename)
+    with xr.open_dataset(filename) as stored:
+        assert stored.attrs["scpy_format"] == "nddataset-xarray"
+        assert stored.attrs["scpy_version"] == 2
 
     assert from_xarray.history_entries == dataset.history_entries
     assert from_netcdf.history_entries == dataset.history_entries
