@@ -7,6 +7,7 @@ Usage:
     python check_plugin_core_compatibility.py VERSION [--bypass]
     python check_plugin_core_compatibility.py 1.0.0rc1
     python check_plugin_core_compatibility.py 1.0.0rc1 --bypass
+    python check_plugin_core_compatibility.py --validation-version 1.0.1.dev0
 
 The gating scope is the six OFFICIAL plugins (declared with
 ``[tool.spectrochempy] official-plugin = true``).  Cantera and the plugin
@@ -85,13 +86,70 @@ def version_allowed(version: str, specifier: str) -> bool:
     return parsed in SpecifierSet(specifier, prereleases=True)
 
 
+def validation_core_version(preferred: str, pyprojects: list[Path]) -> str:
+    """
+    Return a local core version compatible with every official plugin.
+
+    The normal development version is retained when possible. When a plugin
+    deliberately targets a later final core release, use the highest inclusive
+    lower bound declared by the official plugins. This supports monorepo CI
+    before that final core version has been tagged without weakening the
+    published dependency constraint (a ``.devN`` or ``rcN`` release does not
+    satisfy a final ``>=X.Y.Z`` bound).
+    """
+    try:
+        preferred_version = Version(preferred)
+    except InvalidVersion as exc:
+        msg = f"Invalid preferred core version {preferred!r}: {exc}"
+        raise ValueError(msg) from exc
+
+    constraints = []
+    for pyproject in pyprojects:
+        constraint = read_spectrochempy_constraint(pyproject)
+        if constraint is not None:
+            constraints.append((pyproject.parent.name, SpecifierSet(constraint)))
+
+    if all(preferred_version in spec for _, spec in constraints):
+        return str(preferred_version)
+
+    lower_bounds = []
+    for _name, spec in constraints:
+        for item in spec:
+            if item.operator in {">=", "=="} and "*" not in item.version:
+                lower_bounds.append(Version(item.version))
+
+    if not lower_bounds:
+        msg = "Official plugin constraints provide no inclusive lower bound"
+        raise ValueError(msg)
+
+    candidate = max(lower_bounds)
+    incompatible = [name for name, spec in constraints if candidate not in spec]
+    if incompatible:
+        joined = ", ".join(incompatible)
+        msg = (
+            "No validation version could be derived from inclusive lower bounds; "
+            f"{candidate} is incompatible with: {joined}"
+        )
+        raise ValueError(msg)
+    return str(candidate)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Check plugin core version constraint compatibility"
     )
     parser.add_argument(
         "version",
+        nargs="?",
         help="Core version to check (e.g. 0.12.8, 1.0.0rc1, 1.0.0)",
+    )
+    parser.add_argument(
+        "--validation-version",
+        metavar="PREFERRED",
+        help=(
+            "Print the local core version to use for monorepo plugin validation. "
+            "The preferred development version is retained when compatible."
+        ),
     )
     parser.add_argument(
         "--bypass",
@@ -100,18 +158,30 @@ def main():
     )
     args = parser.parse_args()
 
+    pyprojects = find_plugin_pyprojects()
+    official = [p for p in pyprojects if is_official_plugin(p)]
+
+    if args.validation_version is not None:
+        try:
+            print(validation_core_version(args.validation_version, official))
+        except ValueError as exc:
+            print(f"::error::{exc}")
+            sys.exit(1)
+        sys.exit(0)
+
+    if args.version is None:
+        parser.error("version is required unless --validation-version is used")
+
     try:
         Version(args.version)
     except InvalidVersion as exc:
         print(f"::error::Invalid core version {args.version!r}: {exc}")
         sys.exit(1)
 
-    pyprojects = find_plugin_pyprojects()
     if not pyprojects:
         print("No plugin pyproject.toml files found — skipping constraint check.")
         sys.exit(0)
 
-    official = [p for p in pyprojects if is_official_plugin(p)]
     informational = [p for p in pyprojects if not is_official_plugin(p)]
 
     print(

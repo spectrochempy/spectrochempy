@@ -80,6 +80,44 @@ def test_version_allowed_invalid(checker):
     assert not checker.version_allowed("not-a-version", ">=0.12,<2")
 
 
+def test_validation_version_preserves_compatible_development_version(checker, tmp_path):
+    plugin = tmp_path / "spectrochempy-official"
+    _write_pyproject(plugin, official=True, constraint=">=1.1.0,<2")
+
+    assert (
+        checker.validation_core_version("1.1.1.dev0", [plugin / "pyproject.toml"])
+        == "1.1.1.dev0"
+    )
+
+
+def test_validation_version_uses_final_plugin_floor(checker, tmp_path):
+    old_plugin = tmp_path / "spectrochempy-old"
+    new_plugin = tmp_path / "spectrochempy-new"
+    _write_pyproject(old_plugin, official=True, constraint=">=0.9.0,<2")
+    _write_pyproject(new_plugin, official=True, constraint=">=1.1.0,<2")
+
+    assert (
+        checker.validation_core_version(
+            "1.0.1.dev0",
+            [old_plugin / "pyproject.toml", new_plugin / "pyproject.toml"],
+        )
+        == "1.1.0"
+    )
+
+
+def test_validation_version_rejects_incompatible_bounds(checker, tmp_path):
+    first = tmp_path / "spectrochempy-first"
+    second = tmp_path / "spectrochempy-second"
+    _write_pyproject(first, official=True, constraint=">=1.1.0,<1.2")
+    _write_pyproject(second, official=True, constraint=">=1.2.0,<2")
+
+    with pytest.raises(ValueError, match="incompatible with"):
+        checker.validation_core_version(
+            "1.0.1.dev0",
+            [first / "pyproject.toml", second / "pyproject.toml"],
+        )
+
+
 def test_is_official_plugin(checker, tmp_path):
     official = tmp_path / "spectrochempy-official"
     non_official = tmp_path / "spectrochempy-non-official"

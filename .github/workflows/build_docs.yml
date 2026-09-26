@@ -103,11 +103,23 @@ jobs:
           . .venv/bin/activate
           start=$SECONDS
           python -m pip install --upgrade pip
+          python -m pip install --upgrade packaging
           python -m pip install --upgrade uv
           which uv
           uv --version
           duration=$((SECONDS - start))
           echo "uv installation: ${duration}s" | tee -a "$CI_TIMING_FILE"
+
+      - name: Derive local core version for monorepo validation
+        run: |
+          set -e
+          LATEST_TAG=$(python .github/workflows/scripts/release_version.py latest-tag)
+          VERSION="${LATEST_TAG#spectrochempy-v}"
+          NEXT_DEV=$(python .github/workflows/scripts/release_version.py next-dev "$VERSION")
+          VALIDATION_VERSION=$(python .github/workflows/scripts/check_plugin_core_compatibility.py \
+            --validation-version "${NEXT_DEV}.dev0")
+          echo "SETUPTOOLS_SCM_PRETEND_VERSION=$VALIDATION_VERSION" >> "$GITHUB_ENV"
+          echo "Monorepo plugin validation uses local core version $VALIDATION_VERSION"
 
       - name: Install spectrochempy
         run: |
