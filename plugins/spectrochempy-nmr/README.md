@@ -14,6 +14,11 @@ processing workflow.
 
 ## Installation
 
+The next release, 0.1.13, requires SpectroChemPy 1.1.0 or later (and remains
+restricted to SpectroChemPy versions below 2). Users who stay on
+SpectroChemPy 1.0.0 should keep an earlier compatible version of this plugin.
+
+
 ```bash
 pip install spectrochempy[nmr]
 ```

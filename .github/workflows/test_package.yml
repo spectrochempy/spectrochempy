@@ -162,14 +162,18 @@ jobs:
             ${{ runner.os }}-py${{ matrix.pythonVersion }}-test-runtime-
             ${{ runner.os }}-test-runtime-
 
-      - name: Derive pretend version from latest git tag
+      - name: Derive local core version for monorepo validation
         if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
         run: |
           set -e
+          python -m pip install --quiet packaging
           LATEST_TAG=$(python .github/workflows/scripts/release_version.py latest-tag)
           VERSION="${LATEST_TAG#spectrochempy-v}"
           NEXT_DEV=$(python .github/workflows/scripts/release_version.py next-dev "$VERSION")
-          echo "SETUPTOOLS_SCM_PRETEND_VERSION=${NEXT_DEV}.dev0" >> "$GITHUB_ENV"
+          VALIDATION_VERSION=$(python .github/workflows/scripts/check_plugin_core_compatibility.py \
+            --validation-version "${NEXT_DEV}.dev0")
+          echo "SETUPTOOLS_SCM_PRETEND_VERSION=$VALIDATION_VERSION" >> "$GITHUB_ENV"
+          echo "Monorepo plugin validation uses local core version $VALIDATION_VERSION"
 
       - name: Install spectrochempy
         if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
