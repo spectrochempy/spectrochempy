@@ -105,11 +105,9 @@ Installing SpectroChemPy
 
          mamba install -c spectrocat spectrochempy
 
-      Development-channel build:
-
-      .. code-block:: bat
-
-         mamba install -c spectrocat/label/dev spectrochempy
+      Development versions are not published to a Conda ``dev`` channel.
+      To use unreleased code, follow the source installation instructions in
+      :doc:`install_sources`.
 
    .. tab:: Using pip
 

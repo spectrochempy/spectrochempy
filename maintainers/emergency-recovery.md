@@ -202,9 +202,9 @@ Le job `build_and_publish_conda_package` échoue.
    anaconda show spectrocat/spectrochempy
    ```
 3. **Labels** :
-   - Sur release : upload vers le label `main` (avec `--force`, pour déplacer
-     si nécessaire une build déjà publiée sur `dev` vers le label stable)
-   - Sur push : upload vers le label `dev` (avec `--force`)
+   - Sur release : upload vers le label `main` avec `--force`
+   - Sur push ou pull request : aucun upload ; le paquet de validation reste
+     un artefact GitHub Actions temporaire
 4. **Version déjà publiée** : si Anaconda refuse malgré tout l'upload,
    supprimer la version sur Anaconda si nécessaire :
    ```bash
@@ -254,10 +254,10 @@ Le solveur conda utilise `conda-forge` en priorité. Comme
 le solveur exclut les versions plus récentes de `spectrocat` à cause
 de la priorité stricte.
 
-*Résolution* : l'ordre des canaux dans le build des plugins a été
-inversé : `spectrocat/label/dev` (pour le core dev construit sur push) et
-`spectrocat` passent avant `conda-forge`. Les plugins eux-mêmes ne sont
-uploadés sur Anaconda.org que pendant une release stable de plugin.
+*Résolution historique* : le canal SpectroChemPy était placé avant
+`conda-forge`. Les builds actuels utilisent le paquet core construit localement
+pour leur validation et ne publient plus de paquets de développement. Seules
+les releases stables sont uploadées sur le label `main` d'Anaconda.org.
 
 ### Résolution pour une release déjà publiée
 

@@ -103,10 +103,10 @@ the corresponding feature is accessed.
 
    **Development builds**
 
-   Conda development builds are available for the core package, but official
-   plugin development builds are not currently uploaded automatically. Stable
-   plugin packages are published on the main ``spectrocat`` channel. For plugin
-   development, install the plugin from a local source checkout as shown above.
+   Conda development builds are not published for the core or official
+   plugins. Stable packages are published on the main ``spectrocat`` channel.
+   For development versions, install the core and required plugins from a local
+   source checkout as shown above.
 
 .. seealso::
 

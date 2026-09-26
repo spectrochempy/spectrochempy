@@ -3,11 +3,11 @@
 # - Anaconda Cloud
 #
 # Conda publication strategy:
-#   - Core non-release builds (pushes, PRs) are uploaded to the Anaconda dev label.
-#   - Core release builds are uploaded to the main (stable) label.
+#   - Core non-release builds (pushes, PRs) are retained as CI artifacts only.
+#   - Core release builds are uploaded to the main (stable) label only.
 #   - Plugin release builds are uploaded to the main label only.
 #   - Plugin dev builds use temporary next-patch .devN versions derived from
-#     plugin tags, and push builds with plugin changes upload to the dev label.
+#     plugin tags for validation and are retained as CI artifacts only.
 #   - Plugin conda recipes should declare a bounded dependency on the core
 #     package, e.g.  spectrochempy >=0.9.0.dev0,<0.10
 
@@ -286,10 +286,8 @@ jobs:
       - name: Upload to Anaconda.org
         if: |
           github.repository == 'spectrochempy/spectrochempy' &&
-          (
-            github.event_name == 'push' ||
-            (github.event_name == 'release' && startsWith(github.ref_name, 'spectrochempy-v'))
-          )
+          github.event_name == 'release' &&
+          startsWith(github.ref_name, 'spectrochempy-v')
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
         run: |
@@ -319,14 +317,7 @@ jobs:
             done
           }
 
-          if [ "${{ github.event_name }}" = "release" ]; then
-            # Stable label: force upload so the label is correctly set to
-            # "main", even if a push build already uploaded it to "dev".
-            upload_package "main" "--force"
-          else
-            # Dev label: allow overwrite so the latest dev build is always available.
-            upload_package "dev" "--force"
-          fi
+          upload_package "main" "--force"
 
   discover-conda-plugins:
     name: Discover plugins with conda recipes
@@ -477,9 +468,7 @@ jobs:
           upload-artifact: false
           # spectrocat channels come first so that spectrochempy is resolved from
           # our channel (avoiding strict channel priority exclusion by conda-forge).
-          # For non-release builds, the dev label provides the latest dev core.
           build-args: >-
-            -c spectrocat/label/dev
             -c spectrocat
             -c conda-forge
 
@@ -503,53 +492,14 @@ jobs:
           git restore --worktree -- "${{ matrix.plugin.recipe }}"
           git diff --exit-code -- "${{ matrix.plugin.recipe }}"
 
-      - name: Upload plugin dev package to Anaconda.org
+      - name: Keep plugin development package as a CI artifact only
         if: |
-          github.repository == 'spectrochempy/spectrochempy' &&
-          github.event_name == 'push' &&
-          github.ref_name == 'master' &&
-          steps.plugin-version.outputs.has_changes == 'true'
-        env:
-          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
+          !(github.event_name == 'release' && startsWith(github.ref_name, matrix.plugin.name))
         run: |
-          set -euo pipefail
-          shopt -s nullglob globstar
-
-          echo "Plugin development build detected; uploading ${{ matrix.plugin.name }} to Anaconda label: dev"
+          echo "Development Conda packages are validation artifacts and are not published."
+          echo "Plugin: ${{ matrix.plugin.name }}"
           echo "Computed development version: ${{ steps.plugin-version.outputs.dev_version }}"
-
-          if [ -z "${ANACONDA_API_TOKEN:-}" ]; then
-            echo "::error::ANACONDA_API_TOKEN is not set. Cannot upload to Anaconda.org."
-            exit 1
-          fi
-
-          packages=(output/**/*.tar.bz2 output/**/*.conda)
-          if [ ${#packages[@]} -eq 0 ]; then
-            echo "::error::No conda packages found in output/"
-            exit 1
-          fi
-
-          for package in "${packages[@]}"; do
-            basename=$(basename "$package")
-            if [[ "$basename" == spectrochempy-[0-9]* ]]; then
-              echo "Skipping core package (already uploaded): $package"
-              continue
-            fi
-            echo "Uploading $package with label: dev"
-            anaconda --token "$ANACONDA_API_TOKEN" upload --force -l "dev" "$package"
-          done
-
-          echo "::notice::Plugin ${{ matrix.plugin.name }} uploaded to Anaconda label: dev"
-
-      - name: Skip plugin dev upload
-        if: |
-          github.repository == 'spectrochempy/spectrochempy' &&
-          !(github.event_name == 'release' && startsWith(github.ref_name, matrix.plugin.name)) &&
-          !(github.event_name == 'push' && github.ref_name == 'master' && steps.plugin-version.outputs.has_changes == 'true')
-        run: |
-          echo "Skipping dev upload for plugin ${{ matrix.plugin.name }}."
-          echo "Computed development version: ${{ steps.plugin-version.outputs.dev_version }}"
-          echo "Upload happens only on push to master when release-relevant plugin files changed."
+          echo "Install a development checkout from source instead."
 
       - name: Upload plugin to Anaconda.org
         if: |
