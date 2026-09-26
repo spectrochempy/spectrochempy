@@ -55,6 +55,13 @@ def test_version_allowed_accepts_release_candidates(checker):
     assert checker.version_allowed("1.0.0", ">=0.12,<2")
 
 
+def test_final_release_minimum_rejects_prereleases(checker):
+    constraint = ">=1.1.0,<2"
+    assert not checker.version_allowed("1.1.0.dev1", constraint)
+    assert not checker.version_allowed("1.1.0rc1", constraint)
+    assert checker.version_allowed("1.1.0", constraint)
+
+
 def test_version_allowed_accepts_late_012(checker):
     assert checker.version_allowed("0.12.8", ">=0.12,<2")
 
@@ -71,6 +78,44 @@ def test_version_allowed_rejects_below_minimum(checker):
 
 def test_version_allowed_invalid(checker):
     assert not checker.version_allowed("not-a-version", ">=0.12,<2")
+
+
+def test_validation_version_preserves_compatible_development_version(checker, tmp_path):
+    plugin = tmp_path / "spectrochempy-official"
+    _write_pyproject(plugin, official=True, constraint=">=1.1.0,<2")
+
+    assert (
+        checker.validation_core_version("1.1.1.dev0", [plugin / "pyproject.toml"])
+        == "1.1.1.dev0"
+    )
+
+
+def test_validation_version_uses_final_plugin_floor(checker, tmp_path):
+    old_plugin = tmp_path / "spectrochempy-old"
+    new_plugin = tmp_path / "spectrochempy-new"
+    _write_pyproject(old_plugin, official=True, constraint=">=0.9.0,<2")
+    _write_pyproject(new_plugin, official=True, constraint=">=1.1.0,<2")
+
+    assert (
+        checker.validation_core_version(
+            "1.0.1.dev0",
+            [old_plugin / "pyproject.toml", new_plugin / "pyproject.toml"],
+        )
+        == "1.1.0"
+    )
+
+
+def test_validation_version_rejects_incompatible_bounds(checker, tmp_path):
+    first = tmp_path / "spectrochempy-first"
+    second = tmp_path / "spectrochempy-second"
+    _write_pyproject(first, official=True, constraint=">=1.1.0,<1.2")
+    _write_pyproject(second, official=True, constraint=">=1.2.0,<2")
+
+    with pytest.raises(ValueError, match="incompatible with"):
+        checker.validation_core_version(
+            "1.0.1.dev0",
+            [first / "pyproject.toml", second / "pyproject.toml"],
+        )
 
 
 def test_is_official_plugin(checker, tmp_path):
@@ -96,3 +141,26 @@ def test_read_spectrochempy_constraint_missing(checker, tmp_path):
     plugin_dir.mkdir()
     (plugin_dir / "pyproject.toml").write_text("unrelated = true\n")
     assert checker.read_spectrochempy_constraint(plugin_dir / "pyproject.toml") is None
+
+
+@pytest.mark.parametrize(
+    ("plugin", "import_name"),
+    [
+        ("spectrochempy-nmr", "spectrochempy_nmr"),
+        ("spectrochempy-perkinelmer", "spectrochempy_perkinelmer"),
+        ("spectrochempy-iris", "spectrochempy_iris"),
+        ("spectrochempy-tensor", "spectrochempy_tensor"),
+    ],
+)
+def test_1_1_plugin_constraints_are_aligned(checker, plugin, import_name):
+    repo_root = Path(__file__).parents[3]
+    plugin_dir = repo_root / "plugins" / plugin
+
+    assert (
+        checker.read_spectrochempy_constraint(plugin_dir / "pyproject.toml")
+        == ">=1.1.0,<2"
+    )
+    assert "spectrochempy >=1.1.0,<2" in (plugin_dir / "recipe.yaml").read_text()
+
+    init_text = (plugin_dir / "src" / import_name / "__init__.py").read_text()
+    assert 'spectrochempy_min_version = "1.1.0"' in init_text

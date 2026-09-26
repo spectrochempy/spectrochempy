@@ -79,6 +79,14 @@ Bug Fixes
   carrying the same unit instead of silently accepting a scientifically
   incompatible pairing (#1665).
 
+Dependency Updates
+~~~~~~~~~~~~~~~~~~
+
+- The next NMR 0.1.13, PerkinElmer 0.1.6, IRIS 0.1.10, and Tensor 0.1.7
+  plugin releases require SpectroChemPy 1.1.0 or later and remain restricted
+  to versions below 2. Existing compatible plugin releases remain available
+  for installations pinned to SpectroChemPy 1.0.0.
+
 Breaking Changes
 ~~~~~~~~~~~~~~~~
 

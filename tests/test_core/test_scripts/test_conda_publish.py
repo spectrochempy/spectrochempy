@@ -1700,7 +1700,7 @@ class TestPerkinElmerRecipe:
 
     def test_recipe_matches_convention(self):
         recipe = (self._plugin_dir() / "recipe.yaml").read_text()
-        assert "spectrochempy >=0.12,<2" in recipe
+        assert "spectrochempy >=1.1.0,<2" in recipe
         assert "python >=3.11" in recipe
         assert "LicenseRef-CeCILL-B" in recipe
         assert ".find_spec('spectrochempy_perkinelmer')" in recipe

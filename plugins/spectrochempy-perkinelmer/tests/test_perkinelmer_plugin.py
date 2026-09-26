@@ -3,6 +3,7 @@
 """Tests for the spectrochempy-perkinelmer plugin."""
 
 import warnings
+from importlib.metadata import version
 
 import numpy as np
 import pytest
@@ -83,7 +84,7 @@ def test_sp_parser_invalid_signature() -> None:
 def test_plugin_metadata() -> None:
     plugin = PerkinElmerPlugin()
     assert plugin.name == "perkinelmer"
-    assert plugin.version == "0.1.5"
+    assert plugin.version == version("spectrochempy-perkinelmer")
     assert plugin.description
     assert PluginCapability.READER in plugin.capabilities
 

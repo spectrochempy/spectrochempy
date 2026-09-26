@@ -35,7 +35,7 @@ class PerkinElmerPlugin(SpectroChemPyPlugin):
     name = "perkinelmer"
     version = "0.1.5"
     description = "PerkinElmer file reader for SpectroChemPy"
-    spectrochempy_min_version = "0.9.0"
+    spectrochempy_min_version = "1.1.0"
     PLUGIN_API_VERSION = CORE_PLUGIN_API_VERSION
     capabilities = [PluginCapability.READER]
 
