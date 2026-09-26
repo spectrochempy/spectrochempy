@@ -143,6 +143,30 @@ def test_nmr_manual_1D_phasing(NMR_dataset_1D):
     assert transfph5 is transf
 
 
+def test_nmr_inplace_phasing_detaches_readonly_data_alias(NMR_dataset_1D):
+    dataset = NMR_dataset_1D.copy()
+    dataset /= dataset.real.data.max()
+    transformed = dataset.fft(tdeff=8192, size=2**15)
+
+    data_alias = transformed.data
+    original_data = data_alias.copy()
+    data_alias.flags.writeable = False
+    original_history = transformed.history_entries
+
+    result = transformed.pk(phc0=40.0, inplace=True)
+
+    assert result is transformed
+    assert_array_equal(data_alias, original_data)
+    assert not np.shares_memory(result.data, data_alias)
+    assert not np.array_equal(result.data, original_data)
+    assert result.data.flags.writeable
+    assert result.history_entries[:-1] == original_history
+    assert result.history_entries[-1]["operation"] is None
+    assert result.history_entries[-1]["message"].startswith(
+        "Applied pk phasing on dimension"
+    )
+
+
 # ---------------------------------------------------------------------------
 # 2D reader
 # ---------------------------------------------------------------------------

@@ -120,7 +120,9 @@ def _phase_method(method):
                         _phased_by_plugin = True
 
             if not _phased_by_plugin:
-                new._data *= apod
+                previous_history = new.history_entries
+                new *= apod
+                new.replace_history(previous_history)
 
             new.history = (
                 f"Applied {method.__name__} phasing on dimension {dim} "
