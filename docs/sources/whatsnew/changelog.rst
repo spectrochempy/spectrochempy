@@ -38,6 +38,11 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Discrete shifts now move masks with their corresponding values. Circular
+  shifts therefore preserve masked statistics, while the zeros introduced by
+  left and right shifts are valid, unmasked points. A zero-point left shift no
+  longer clears the dataset, and ``cs()`` once again delegates successfully to
+  ``roll()``.
 - Harmonized newly generated history messages across core and official-plugin
   imports, common spectral treatments, and analysis results. Individual-file
   imports now identify the format and portable filename while the complete
