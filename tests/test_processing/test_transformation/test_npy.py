@@ -58,6 +58,26 @@ def test_npy(ds1):
     assert x.shape == (a.x.size, b.x.size)
 
 
+def test_dot_appends_history_to_returned_dataset():
+    a = NDDataset(np.eye(2), name="left")
+    b = NDDataset(np.eye(2), name="right")
+    a.history = "source history"
+    b.history = "right history"
+    left_history = a.history_entries
+    right_history = b.history_entries
+
+    result = dot(a, b)
+
+    assert a.history_entries == left_history
+    assert b.history_entries == right_history
+    assert len(result.history_entries) == 1
+    assert result.history_entries[-1]["operation"] is None
+    assert (
+        result.history_entries[-1]["message"]
+        == "Computed dot product of left and right"
+    )
+
+
 def test_dot_strict_mask_propagation():
     # `strict` must be honoured and forwarded to numpy.ma.dot.
     # With a masked entry in row 0 of `a`, strict propagation masks the whole

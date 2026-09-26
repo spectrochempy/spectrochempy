@@ -44,7 +44,7 @@ def test_json_encoder_decoder_base64(IR_dataset_2D):
     # encoding base 64
     js = json_encoder(nd, encoding="base64")
     assert js["__format__"] == "scp"
-    assert js["__version__"] == 2
+    assert js["__version__"] == 3
     assert js["data"]["encoding"] == "raw-base64"
     js_string = json.dumps(js, indent=2)
     print("base64", len(js_string))

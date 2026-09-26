@@ -290,6 +290,6 @@ def _read_tnt(*args, **kwargs):
         if dt is not None:
             dataset.acquisition_date = dt
 
-    dataset.history = "Imported from TecMag TNT dataset"
+    dataset.history = f"Imported TecMag TNT file {path.name}"
 
     return dataset

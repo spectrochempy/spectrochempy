@@ -203,8 +203,7 @@ class _from_numpy_method:
                 ]
                 if unknown:
                     raise TypeError(
-                        f"{method}() got an unexpected keyword argument "
-                        f"{unknown[0]!r}",
+                        f"{method}() got an unexpected keyword argument {unknown[0]!r}",
                     )
 
                 # --- Single-axis rejection (M2 family) -----------------------
@@ -277,7 +276,8 @@ class _from_numpy_method:
             #     # delete all coordinates
             #     new._coordset = None
 
-            new.history = f"Dataset resulting from application of `{method}` method"
+            if method != "mean":
+                new.history = f"Dataset resulting from application of `{method}` method"
             return new
 
         return func
@@ -314,6 +314,33 @@ def _reduce_dims(cls, dim, keepdims=False):
 
 def _get_name(x):
     return str(x.name if hasattr(x, "name") else x)
+
+
+def _history_operand(value, role):
+    """Describe one arithmetic operand without retaining the live object."""
+    if hasattr(value, "_implements") and value._implements("NDDataset"):
+        title = getattr(value, "_title", None)
+        return {
+            "role": role,
+            "kind": "NDDataset",
+            "name": value.name or None,
+            "title": None if title == "<untitled>" else title,
+            "shape": list(value.shape),
+        }
+    if np.isscalar(value):
+        scalar = value.item() if isinstance(value, np.generic) else value
+        if isinstance(scalar, str | int | float | bool) or scalar is None:
+            return {"role": role, "kind": "scalar", "value": scalar}
+        return {
+            "role": role,
+            "kind": "scalar",
+            "description": f"{type(scalar).__name__} value not stored",
+        }
+    return {
+        "role": role,
+        "kind": type(value).__name__,
+        "description": f"{type(value).__name__} operand not stored",
+    }
 
 
 # --------------------------------------------------------------------------------------
@@ -2381,6 +2408,8 @@ class NDMath:
         Coord: [float64] cm⁻¹ (size: 5549)
 
         """
+        requested_dim = dim
+        source_dims = list(cls.dims)
         axis, dim = cls.get_axis(dim, allows_none=True)
         m = np.ma.mean(dataset, axis=axis, dtype=dtype, keepdims=keepdims)
 
@@ -2392,6 +2421,44 @@ class NDMath:
         cls._mask = m.mask
         cls.dims = dims
         cls._coordset = coordset
+
+        if cls._implements("NDDataset"):
+            requested_dims = (
+                None
+                if requested_dim is None
+                else list(requested_dim)
+                if isinstance(requested_dim, list | tuple)
+                else [requested_dim]
+            )
+            resolved_dims = (
+                source_dims
+                if dim is None
+                else list(dim)
+                if isinstance(dim, list | tuple)
+                else [dim]
+            )
+            all_dimensions = len(resolved_dims) == len(source_dims) and set(
+                resolved_dims
+            ) == set(source_dims)
+            if all_dimensions:
+                message = "Mean computed over all dimensions"
+            elif len(resolved_dims) == 1:
+                message = f"Mean computed along {resolved_dims[0]}"
+            else:
+                message = (
+                    f"Mean computed along {', '.join(resolved_dims[:-1])} and "
+                    f"{resolved_dims[-1]}"
+                )
+            cls._append_history_entry(
+                operation="mean",
+                parameters={
+                    "requested_dims": requested_dims,
+                    "resolved_dims": resolved_dims,
+                    "all_dimensions": all_dimensions,
+                    "keepdims": keepdims,
+                },
+                message=message,
+            )
 
         return cls
 
@@ -3893,15 +3960,35 @@ class NDMath:
             # Keep the operands in mathematical order for the title engine;
             # `_check_order` may reorder them in place for computation.
             operands = [self, other] if not reflexive else [other, self]
+            history_entry = None
+            if fname in {"add", "sub"} and self._implements("NDDataset"):
+                right = operands[1]
+                history_entry = {
+                    "operation": "add" if fname == "add" else "subtract",
+                    "parameters": {
+                        "sources": [
+                            _history_operand(operands[0], "left"),
+                            _history_operand(right, "right"),
+                        ]
+                    },
+                }
             fm, objs, reflected = self._check_order(fname, list(operands))
 
             if hasattr(self, "history"):
-                history = (
-                    f"Binary operation {fm.__name__} with "
-                    f"`{_get_name(objs[-1])}` has been performed"
-                )
+                if fname == "sub":
+                    history = (
+                        f"Subtracted `{_get_name(operands[1])}` from "
+                        f"`{_get_name(operands[0])}`"
+                    )
+                else:
+                    history = (
+                        f"Binary operation {fm.__name__} with "
+                        f"`{_get_name(objs[-1])}` has been performed"
+                    )
             else:
                 history = None
+            if history_entry is not None:
+                history_entry["message"] = history.strip()
 
             data, units, mask, returntype, reflected, geometry = self._op(
                 fm, objs, reflected=reflected
@@ -3916,6 +4003,7 @@ class NDMath:
                 operands=operands,
                 reflected=reflected,
                 geometry=geometry,
+                history_entry=history_entry,
             )
 
         return func
@@ -3993,6 +4081,7 @@ class NDMath:
         operands=None,
         reflected=False,
         geometry=None,
+        history_entry=None,
     ):
         # make a new NDArray resulting of some operation
 
@@ -4012,7 +4101,9 @@ class NDMath:
         new._units = cpy.copy(units)
         if mask is not None and np.any(mask != NOMASK):
             new._mask = cpy.copy(mask)
-        if history is not None and hasattr(new, "history"):
+        if history_entry is not None and hasattr(new, "_append_history_entry"):
+            new._append_history_entry(**history_entry)
+        elif history is not None and hasattr(new, "history"):
             new.history = history.strip()
 
         # apply the arithmetic title semantics (shared engine for operators and

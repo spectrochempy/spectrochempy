@@ -19,6 +19,11 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- Added a structured operation history for ``NDDataset`` with a readable
+  ``history`` view and detached ``history_entries``. Structured entries cover
+  transposition, selection, out-of-place addition and subtraction, and
+  ``mean()`` when it returns an ``NDDataset``; other operations may continue to
+  record normal text-only entries.
 - Added ``cross_validate`` and ``CrossValidationResult`` for bounded supervised
   PLS and Pipeline cross-validation with aligned ``NDDataset`` outputs,
   per-target metrics, fold records, and optional fitted fold estimators (#1658).
@@ -33,6 +38,16 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Harmonized newly generated history messages across core and official-plugin
+  imports, common spectral treatments, and analysis results. Individual-file
+  imports now identify the format and portable filename while the complete
+  source remains in ``dataset.filename``; directory experiments retain useful
+  logical identifiers, and OPUS messages no longer add their own timestamp.
+  Histories restored from existing files and opaque vendor histories are
+  unchanged.
+- OMNIC SRS imports now retain both useful vendor processing history and the
+  import message. Empty vendor blocks are omitted, and the import message no
+  longer embeds a second timestamp.
 - Refused NDDataset in-place arithmetic operations now roll back data, units,
   masks, titles, history, and other trait replacements made by the operation.
   Side effects performed by custom Traitlets observers remain the observer's
@@ -58,6 +73,17 @@ Dependency Updates
 Breaking Changes
 ~~~~~~~~~~~~~~~~
 .. Add here new breaking changes (do not delete this comment)
+
+- Direct mutations of the readable ``NDDataset.history`` view now raise
+  ``TypeError`` instead of being silently lost. Use ``annotate()``,
+  ``replace_history()``, or ``clear_history()``; ``list(dataset.history)``
+  remains an ordinary mutable copy.
+- Assigning a list to ``NDDataset.history`` now retains every supplied entry
+  instead of only the first.
+- Native ``.scp``/``.pscp`` files containing structured histories use format
+  version 3, and portable xarray/NetCDF mappings use version 2. New readers
+  continue to accept native version 2 and portable version 1 textual histories;
+  reading the new formats with older SpectroChemPy versions is not guaranteed.
 
 
 .. section

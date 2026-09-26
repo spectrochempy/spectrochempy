@@ -86,6 +86,11 @@ class TestTecMagReader:
         assert dataset is not None
         assert dataset.ndim == 1
         assert dataset.shape == (8192,)
+        assert dataset.history_entries[-1]["operation"] is None
+        assert (
+            dataset.history_entries[-1]["message"]
+            == "Imported TecMag TNT file LiCl_ref1.tnt"
+        )
 
     def test_read_tecmag_metadata_sw(self):
         dataset = _read_tecmag_or_skip(str(TECMAG_DIR / "LiCl_ref1.tnt"))

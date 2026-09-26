@@ -98,7 +98,7 @@ def test_read_matlab_single_1d_array_currently_uses_row_shape_and_no_coordset(tm
     assert dataset.coordset is None
     assert dataset.x is None
     assert dataset.y is None
-    assert any("Imported from .mat file" in str(entry) for entry in dataset.history)
+    assert any("Imported MATLAB file" in str(entry) for entry in dataset.history)
 
 
 def test_read_matlab_single_2d_array_preserves_values_without_materialized_coords(
@@ -118,7 +118,7 @@ def test_read_matlab_single_2d_array_preserves_values_without_materialized_coord
     assert dataset.coordset is None
     assert dataset.x is None
     assert dataset.y is None
-    assert any("Imported from .mat file" in str(entry) for entry in dataset.history)
+    assert any("Imported MATLAB file" in str(entry) for entry in dataset.history)
 
 
 def test_read_matlab_same_shape_arrays_are_stacked(tmp_path):

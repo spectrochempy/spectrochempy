@@ -845,7 +845,9 @@ def _read_spg(*args, **kwargs):
                     f"Omnic title: {spg_title}\nOmnic filename: {filename}",
                 )
                 single._date = utcnow()
-                single.history = f"Imported from spg file {filename} (spectrum {i})."
+                single.history = (
+                    f"Imported OMNIC SPG file {filename.name} (spectrum {i})"
+                )
                 datasets.append(single)
 
             fid.close()
@@ -914,7 +916,7 @@ def _read_spg(*args, **kwargs):
 
     dataset._date = utcnow()
 
-    dataset.history = f"Imported from spg file {filename}."
+    dataset.history = f"Imported OMNIC SPG file {filename.name}"
 
     # Attach acquisition metadata from the header.
     # Acquisition parameters (collection_length, reference_frequency,
@@ -1141,7 +1143,7 @@ def _finalize_spa_dataset(dataset, filename, kwargs, parsed, return_ifg):
         dataset.description += "# Comments from Omnic:\n"
         for comment in parsed.comments:
             dataset.description += comment + "\n---------------------\n"
-    dataset.history = "Imported from spa file(s)"
+    dataset.history = f"Imported OMNIC SPA file {filename.name}"
     if parsed.history and parsed.history.strip():
         dataset.history = (
             "Data processing history from Omnic :\n------------------------------------\n"
@@ -1214,6 +1216,7 @@ def _read_srs(*args, **kwargs):
     try:
         # read the file and determine whether it is a rapidscan or a high speed real time
         is_rapidscan, is_highspeed, is_tg = False, False, False
+        history = None
 
         """ At pos=304 (hex:130) is the position of the '02' key for series. Here we don't use it.
         Instead, we use one of the following sequence :
@@ -1410,7 +1413,6 @@ def _read_srs(*args, **kwargs):
 
             pos_info_data = index[0]
             pos_bg = index[1]
-            pos_x = index[2]
             pos_data = index[3]
 
             if len(index) != 4:
@@ -1593,14 +1595,12 @@ def _read_srs(*args, **kwargs):
         dataset.origin = "omnic"
         dataset.description = kwargs.get("description", "Dataset from omnic srs file.")
 
-        if "history" in locals():
-            dataset.history.append(
+        if history:
+            dataset.annotate(
                 "Omnic 'DATA PROCESSING HISTORY' :\n"
                 "--------------------------------\n" + history,
             )
-        dataset.history.append(
-            str(utcnow()) + ": imported from srs file " + str(filename)
-        )
+        dataset.annotate(f"Imported OMNIC SRS file {filename.name}")
 
         dataset.meta.laser_frequency = info["reference_frequency"] * ur("cm^-1")
         dataset.meta.collection_length = info["collection_length"] * ur("s")

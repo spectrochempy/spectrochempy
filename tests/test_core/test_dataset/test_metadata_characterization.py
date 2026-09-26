@@ -253,7 +253,7 @@ def test_dot_drops_meta_and_source_provenance(metadata_dataset):
     np.testing.assert_allclose(result.y.data, metadata_dataset.y.data)
     np.testing.assert_allclose(result.x.data, metadata_dataset.y.data)
     assert len(result.history) == 1
-    assert "Dot product between sample_001 and sample_002" in result.history[0]
+    assert "Computed dot product of sample_001 and sample_002" in result.history[0]
 
 
 def test_find_peaks_preserves_metadata_with_name_and_history_overrides(
@@ -278,4 +278,4 @@ def test_find_peaks_preserves_metadata_with_name_and_history_overrides(
     assert "Initial history marker" in result.history[0]
     assert "Data squeezed" in result.history[1]
     assert "Slice extracted" in result.history[2]
-    assert "Find_peaks(): 4 peak(s) found" in result.history[3]
+    assert "Found 4 peak(s) with find_peaks" in result.history[3]

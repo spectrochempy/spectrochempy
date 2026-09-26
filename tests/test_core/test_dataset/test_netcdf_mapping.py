@@ -182,6 +182,8 @@ def test_netcdf_file_is_readable_by_xarray_open_dataset(tmp_path):
     ds.to_netcdf(filename)
 
     with xr.open_dataset(filename, engine="scipy") as opened:
+        assert opened.attrs["scpy_format"] == "nddataset-xarray"
+        assert opened.attrs["scpy_version"] == 2
         assert opened.attrs["scpy_primary_variable"] == "spectra"
         assert opened.attrs["scpy_mask_variable"] == "spectra__mask"
         assert opened.attrs["scpy_description"] == ds.description
@@ -192,7 +194,16 @@ def test_netcdf_file_is_readable_by_xarray_open_dataset(tmp_path):
         assert opened.attrs["scpy_acquisition_date"] == _portable_attr_datetime(
             ds._acquisition_date
         )
-        assert opened.attrs["scpy_history"] == json.dumps(ds.history, sort_keys=True)
+        expected_history = [
+            {
+                **entry,
+                "date": entry["date"].isoformat(sep=" ", timespec="seconds"),
+            }
+            for entry in ds.history_entries
+        ]
+        assert opened.attrs["scpy_history"] == json.dumps(
+            expected_history, sort_keys=True
+        )
         assert opened["spectra"].dims == ("y", "x")
         assert opened["spectra__mask"].dims == ("y", "x")
 

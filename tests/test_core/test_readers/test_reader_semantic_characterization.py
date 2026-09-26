@@ -310,7 +310,7 @@ class TestOmnicCharacterization:
             description_contains="Omnic title: wodger.spg",
             acquisition_date_present=True,
         )
-        assert_history_present(dataset, "Imported from spg file", "Sorted by date")
+        assert_history_present(dataset, "Imported OMNIC SPG file", "Sorted by date")
 
         x = assert_coordinate_semantics(dataset, "x", title="wavenumbers", units="cm⁻¹")
         y = assert_coordinate_semantics(
@@ -348,7 +348,7 @@ class TestOmnicCharacterization:
             origin="omnic",
             acquisition_date_present=True,
         )
-        assert_history_present(dataset, "Imported from spa file")
+        assert_history_present(dataset, "Imported OMNIC SPA file")
         assert_coordinate_semantics(
             dataset, "y", title="acquisition timestamp (GMT)", units="s"
         )
@@ -416,7 +416,7 @@ class TestOpusCharacterization:
             description_contains="opus files",
             acquisition_date_present=True,
         )
-        assert_history_present(dataset, "import from opus files")
+        assert_history_present(dataset, "Imported Bruker OPUS file")
 
         x = assert_coordinate_semantics(dataset, "x", title="wavenumber")
         assert str(x.units) in {"cm^-1", "cm⁻¹"}
@@ -439,7 +439,7 @@ class TestOpusCharacterization:
             origin="opus-AB",
             acquisition_date_present=True,
         )
-        assert_history_present(dataset, "import from opus files")
+        assert_history_present(dataset, "Imported Bruker OPUS file")
         assert_coordinate_semantics(dataset, "x", title="wavenumber", units="cm⁻¹")
         y = assert_coordinate_semantics(dataset, "y", title="elapsed time", units="s")
         assert y.labels is None
@@ -467,7 +467,7 @@ class TestJcampCharacterization:
             acquisition_date_present=True,
         )
         assert dataset._acquisition_date == datetime(2016, 7, 6, 19, 3, 14, tzinfo=UTC)
-        assert_history_present(dataset, "Imported from jdx file", "Sorted by date")
+        assert_history_present(dataset, "Imported JCAMP-DX file", "Sorted by date")
         assert_coordinate_semantics(dataset, "x", title="wavenumbers", units="cm⁻¹")
         y = assert_coordinate_semantics(
             dataset, "y", title="acquisition timestamp (GMT)", units="s"
@@ -497,7 +497,7 @@ class TestJcampCharacterization:
         assert dataset._acquisition_date == datetime(2016, 7, 6, 19, 3, 14, tzinfo=UTC)
         assert dataset.author != "reader-owner"
         assert dataset.y.is_empty
-        assert_history_present(dataset, "Imported from jdx file")
+        assert_history_present(dataset, "Imported JCAMP-DX file")
 
     def test_linked_jcamp_multi_origin_uses_deterministic_join(
         self, jcamp_linked_multi_origin_dataset
@@ -511,7 +511,7 @@ class TestJcampCharacterization:
             description_contains="Dataset from jdx file: 'IR_multi_origin'",
             acquisition_date_present=True,
         )
-        assert_history_present(dataset, "Imported from jdx file", "Sorted by date")
+        assert_history_present(dataset, "Imported JCAMP-DX file", "Sorted by date")
 
     def test_single_jcamp_without_date_keeps_acquisition_date_empty(
         self, jcamp_single_without_date
@@ -544,7 +544,7 @@ class TestCsvCharacterization:
             description_contains="read from .csv file",
             acquisition_date_present=False,
         )
-        assert_history_present(dataset, "Read from .csv file")
+        assert_history_present(dataset, "Imported CSV file")
         assert_coordinate_semantics(dataset, "x")
         assert_coordinate_semantics(dataset, "y")
         assert dataset.y.labels is None
@@ -567,7 +567,7 @@ class TestCsvCharacterization:
             description_contains="Dataset from .csv file",
             acquisition_date_present=False,
         )
-        assert_history_present(dataset, "Read from .csv file", "Read from omnic")
+        assert_history_present(dataset, "Imported CSV file", "Applied OMNIC metadata")
 
         assert_coordinate_semantics(dataset, "x", title="wavenumbers", units="cm⁻¹")
         y = assert_coordinate_semantics(
@@ -600,7 +600,7 @@ class TestLabSpecCharacterization:
             acquisition_date_present=True,
         )
         assert dataset._acquisition_date == datetime(2024, 1, 1, 0, 0, 0)
-        assert_history_present(dataset, "Imported from LabSpec6 text file")
+        assert_history_present(dataset, "Imported LabSpec6 text file")
 
         assert_coordinate_semantics(dataset, "x", title="Raman shift", units="cm⁻¹")
         y = assert_coordinate_semantics(dataset, "y", title="Time", units="s")
@@ -617,7 +617,7 @@ class TestLabSpecCharacterization:
             origin="labspec",
             acquisition_date_present=True,
         )
-        assert_history_present(dataset, "Imported from LabSpec6 text file")
+        assert_history_present(dataset, "Imported LabSpec6 text file")
         assert_coordinate_semantics(dataset, "x", title="Raman shift", units="cm⁻¹")
         y = assert_coordinate_semantics(dataset, "y", title="Time", units="s")
         labels = assert_label_structure(y)
@@ -641,7 +641,7 @@ class TestWireCharacterization:
         )
         assert "WiRE" in dataset.origin
         assert dataset.author
-        assert_history_present(dataset, "Imported from sp.wdf")
+        assert_history_present(dataset, "Imported Renishaw WiRE WDF file sp.wdf")
 
         assert_coordinate_semantics(dataset, "x")
         y = assert_coordinate_semantics(dataset, "y")
@@ -664,7 +664,7 @@ class TestWireCharacterization:
         )
         assert "WiRE" in dataset.origin
         assert dataset.author
-        assert_history_present(dataset, "Imported from depth.wdf")
+        assert_history_present(dataset, "Imported Renishaw WiRE WDF file depth.wdf")
 
         assert_coordinate_semantics(dataset, "x")
         assert_coordinate_semantics(dataset, "y")
@@ -679,7 +679,7 @@ class TestWireCharacterization:
 class TestQuaderaCharacterization:
     """Characterize current Quadera semantic placement."""
 
-    CURRENT_DESCRIPTION = "Imported from Quadera asc file"
+    CURRENT_DESCRIPTION = "Imported Quadera ASC file"
 
     def test_synthetic_identity_provenance_coordinates_and_labels(
         self, quadera_synthetic_dataset
@@ -737,8 +737,8 @@ class TestSocCharacterization:
         )
         assert_history_present(
             dataset,
-            "Imported from spa file",
-            "Imported from SOC DDR file",
+            "Imported OMNIC SPA file",
+            "Imported SOC DDR file",
         )
 
         assert_coordinate_semantics(dataset, "x", title="wavenumbers", units="cm⁻¹")
@@ -757,7 +757,7 @@ class TestSocCharacterization:
     def test_ddr_history_contains_omnic_and_soc(self, soc_ddr_dataset):
         dataset = soc_ddr_dataset
         assert_history_present(
-            dataset, "Imported from spa file", "Imported from SOC DDR file"
+            dataset, "Imported OMNIC SPA file", "Imported SOC DDR file"
         )
 
     def test_all_variants_set_soc_origin(
@@ -793,13 +793,13 @@ class TestSocCharacterization:
             )
 
     def test_ddr_variant_history_message(self, soc_ddr_dataset):
-        assert_history_present(soc_ddr_dataset, "Imported from SOC DDR file")
+        assert_history_present(soc_ddr_dataset, "Imported SOC DDR file")
 
     def test_hdr_variant_history_message(self, soc_hdr_dataset):
-        assert_history_present(soc_hdr_dataset, "Imported from SOC HDR file")
+        assert_history_present(soc_hdr_dataset, "Imported SOC HDR file")
 
     def test_sdr_variant_history_message(self, soc_sdr_dataset):
-        assert_history_present(soc_sdr_dataset, "Imported from SOC SDR file")
+        assert_history_present(soc_sdr_dataset, "Imported SOC SDR file")
 
 
 GALACTICDATA = prefs.datadir / "galacticdata"
@@ -841,7 +841,7 @@ class TestSpcCharacterization:
             acquisition_date_present=True,
         )
         assert dataset._acquisition_date.year == 1997
-        assert_history_present(dataset, "Imported from spc file")
+        assert_history_present(dataset, "Imported Galactic SPC file")
 
         x_coord = assert_coordinate_semantics(dataset, "x", title="Wavenumbers")
         assert str(x_coord.units) in {"cm^-1", "cm⁻¹"}
@@ -862,7 +862,7 @@ class TestSpcCharacterization:
             acquisition_date_present=True,
         )
         assert dataset._acquisition_date == datetime(1997, 3, 9, 8, 46, 0)
-        assert_history_present(dataset, "Imported from spc file")
+        assert_history_present(dataset, "Imported Galactic SPC file")
 
         assert_coordinate_semantics(dataset, "x", size=179)
         assert_coordinate_semantics(dataset, "y", title="axis title", size=19)
@@ -893,7 +893,7 @@ class TestSpcCharacterization:
 class TestMatlabCharacterization:
     """Characterize current MATLAB/DSO semantic placement."""
 
-    CURRENT_HISTORY = "Imported from .mat file"
+    CURRENT_HISTORY = "Imported MATLAB file"
 
     @pytest.fixture
     def matlab_generic_dataset(self, tmp_path):
@@ -935,7 +935,7 @@ class TestMatlabCharacterization:
         assert_history_present(
             dataset,
             "Created by traverta@DESKTOP-98Q6FCE",
-            "Imported by spectrochempy",
+            "Imported SpectroChemPy MATLAB dataset",
         )
 
     @pytest.mark.data
@@ -959,5 +959,5 @@ class TestMatlabCharacterization:
             "Created by traverta@DESKTOP-98Q6FCE",
             "spgreadr",
             "Delsamps",
-            "Imported by spectrochempy",
+            "Imported SpectroChemPy MATLAB dataset",
         )

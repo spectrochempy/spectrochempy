@@ -1072,7 +1072,7 @@ def _read_spc(*args, **kwargs):
         dataset.meta.fileformat = spcf.format
         dataset.meta.scpversion = spcf.version
 
-        dataset.history = f"Imported from spc file {filename}."
+        dataset.history = f"Imported Galactic SPC file {filename.name}"
 
         if spcf.acqdate.timestamp() > 0:
             dataset.acquisition_date = spcf.acqdate

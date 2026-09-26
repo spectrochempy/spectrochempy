@@ -92,6 +92,12 @@ def test_ftir_interferogram_fft_coordinate_matches_spectrum_window():
     _compare_to_omnic(transformed)
     assert np.array_equal(ir.data, source_data)
     assert np.array_equal(ir.x.data, source_coord)
+    assert work.history_entries[-1]["operation"] is None
+    assert "Applied zf_size zero filling" in work.history_entries[-1]["message"]
+    assert transformed.history_entries[-1]["operation"] is None
+    assert transformed.history_entries[-1]["message"].startswith(
+        "Applied FFT on dimension"
+    )
 
 
 def test_ftir_interferogram_hamming_fft_coordinate_matches_spectrum_window():
@@ -105,6 +111,12 @@ def test_ftir_interferogram_hamming_fft_coordinate_matches_spectrum_window():
     _compare_to_omnic(transformed)
     assert np.array_equal(ir.data, source_data)
     assert np.array_equal(ir.x.data, source_coord)
+    messages = [entry["message"] for entry in work.history_entries]
+    assert any("Applied general_hamming apodization" in message for message in messages)
+    assert "Applied zf_size zero filling" in messages[-1]
+    assert transformed.history_entries[-1]["message"].startswith(
+        "Applied FFT on dimension"
+    )
 
 
 def test_generic_complex_fft_coordinate_matches_shifted_frequency_order():
@@ -119,6 +131,8 @@ def test_generic_complex_fft_coordinate_matches_shifted_frequency_order():
         coordset=[scp.Coord(time, units="s")],
         meta={"td": [size], "isfreq": [False]},
     )
+    dataset.history = "source history"
+    source_history = dataset.history_entries
 
     transformed = dataset.fft()
     x = np.asarray(transformed.x.data, dtype=float)
@@ -130,6 +144,13 @@ def test_generic_complex_fft_coordinate_matches_shifted_frequency_order():
     assert np.isclose(x[-1], 1.0 / (2.0 * spacing) - 1.0 / (size * spacing))
     assert np.all(np.diff(x) > 0)
     assert abs(peak_frequency - frequency) < 1.0 / (size * spacing)
+    assert dataset.history_entries == source_history
+    assert transformed.history_entries[0] == source_history[0]
+    assert any(
+        entry["operation"] is None
+        and entry["message"].startswith("Applied FFT on dimension")
+        for entry in transformed.history_entries
+    )
 
 
 def test_generic_real_fft_coordinate_matches_shifted_frequency_order():

@@ -196,8 +196,93 @@ def test_read_spg_history_appended():
     nd = scp.read_spg(WODGER, sortbydate=True)
     # History is a list of timestamp-prefixed strings
     history_text = " ".join(nd.history)
-    assert "Imported from spg file" in history_text
+    assert "Imported OMNIC SPG file" in history_text
     assert "Sorted by date" in history_text
+
+
+def test_read_spg_history_uses_source_name_and_preserves_source(tmp_path):
+    source_name = "spectre échantillon.spg"
+    paths = []
+    for directory in (tmp_path / "first", tmp_path / "second folder"):
+        directory.mkdir()
+        path = directory / source_name
+        path.write_bytes(WODGER.read_bytes())
+        paths.append(path)
+
+    datasets = [
+        scp.read_spg(paths[0], sortbydate=True),
+        scp.read_spg(str(paths[1]), sortbydate=True),
+    ]
+
+    assert_dataset_equal(*datasets)
+    for dataset, path in zip(datasets, paths, strict=True):
+        messages = [entry["message"] for entry in dataset.history_entries]
+        assert messages == [
+            f"Imported OMNIC SPG file {source_name}",
+            "Sorted by date",
+        ]
+        assert str(path.parent) not in messages[0]
+        assert Path(dataset.filename) == path
+        assert str(path) in dataset.description
+
+
+@pytest.mark.usefixtures("_skip_if_no_testdata")
+@pytest.mark.parametrize(
+    ("name", "return_bg", "has_vendor_history"),
+    [
+        ("rapid_scan.srs", False, True),
+        ("GC_Demo.srs", False, False),
+        ("high_speed.srs", True, False),
+    ],
+)
+def test_read_srs_persists_vendor_and_import_history(
+    name,
+    return_bg,
+    has_vendor_history,
+):
+    """SRS series and backgrounds retain every applicable reader message."""
+    path = IRDATA / "omnic_series" / name
+
+    dataset = scp.read_srs(path, return_bg=return_bg)
+
+    entries = dataset.history_entries
+    messages = [entry["message"] for entry in entries]
+    expected_import = f"Imported OMNIC SRS file {path.name}"
+    assert messages[-1] == expected_import
+    assert all(entry["operation"] is None for entry in entries)
+    assert all(entry["parameters"] == {} for entry in entries)
+    assert all(isinstance(entry["date"], datetime) for entry in entries)
+
+    vendor_messages = [
+        message
+        for message in messages
+        if message.startswith("Omnic 'DATA PROCESSING HISTORY'")
+    ]
+    assert bool(vendor_messages) is has_vendor_history
+    if has_vendor_history:
+        assert len(vendor_messages[0].splitlines()) > 2
+
+
+@pytest.mark.usefixtures("_skip_if_no_testdata")
+def test_read_srs_empty_vendor_history_keeps_only_import_message(monkeypatch):
+    """An empty native processing block is not recorded as an empty annotation."""
+    from spectrochempy.core.readers import read_omnic
+
+    path = IRDATA / "omnic_series" / "rapid_scan_reprocessed.srs"
+    real_readbtext = read_omnic._readbtext
+
+    def _empty_null_terminated_text(fid, pos, size):
+        if size is None:
+            return ""
+        return real_readbtext(fid, pos, size)
+
+    monkeypatch.setattr(read_omnic, "_readbtext", _empty_null_terminated_text)
+
+    dataset = scp.read_srs(path)
+
+    assert [entry["message"] for entry in dataset.history_entries] == [
+        f"Imported OMNIC SRS file {path.name}",
+    ]
 
 
 def test_return_ifg_validation(tmp_path):

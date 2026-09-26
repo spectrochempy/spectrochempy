@@ -362,7 +362,7 @@ def _read_csv(*args, **kwargs):
     dataset.title = kwargs.get("title", None)
     dataset.units = kwargs.get("units", None)
     dataset.description = kwargs.get("description", '"name" ' + "read from .csv file")
-    dataset.history = "Read from .csv file"
+    dataset.history = f"Imported CSV file {filename.name}"
 
     if kwargs.get("title", None) is None and "dataset_title" in header_metadata:
         dataset.title = header_metadata["dataset_title"]
@@ -404,7 +404,7 @@ def _add_omnic_info(dataset, **kwargs):
     dataset.title = "absorbance"
     dataset.name = name
     dataset.description = f"Dataset from .csv file: {desc}\n"
-    dataset.history = "Read from omnic exported csv file."
+    dataset.history = f"Applied OMNIC metadata to CSV file {dataset.filename.name}"
     dataset.origin = "omnic"
 
     # x axis

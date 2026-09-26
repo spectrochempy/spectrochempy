@@ -8,6 +8,7 @@
 """Tests for SIMPSON NMR reader."""
 
 import numpy as np
+import pytest
 
 import spectrochempy as scp
 
@@ -170,14 +171,20 @@ class TestSimpsonParser:
 class TestSimpsonReader:
     """Tests for the public read_simpson() API."""
 
-    def test_read_simpson_text_1d(self, tmp_path):
+    @pytest.mark.parametrize("use_string_path", [False, True])
+    def test_read_simpson_text_1d(self, tmp_path, use_string_path):
         path = tmp_path / "1d_text.spe"
         _write_text_1d(path)
-        ds = scp.nmr.read_simpson(str(path))
+        ds = scp.nmr.read_simpson(str(path) if use_string_path else path)
         assert ds is not None
         assert ds.ndim == 1
         assert ds.shape == (8,)
         assert ds.origin == "simpson"
+        assert ds.history_entries[-1]["operation"] is None
+        assert ds.history_entries[-1]["message"].startswith(
+            "Imported SIMPSON dataset 1d_text.spe"
+        )
+        assert ds.filename == path
 
     def test_read_simpson_text_2d(self, tmp_path):
         path = tmp_path / "2d_text.spe"

@@ -519,7 +519,7 @@ class CP(DecompositionAnalysis):
             }
         )
         self._A.name = f"Factor A of CP({self._X.name})"
-        self._A.history = "Created by SpectroChemPy CP"
+        self._A.history = "Computed CP factor A"
         return self._A
 
     def _get_B(self):
@@ -539,7 +539,7 @@ class CP(DecompositionAnalysis):
             }
         )
         self._B.name = f"Factor B of CP({self._X.name})"
-        self._B.history = "Created by SpectroChemPy CP"
+        self._B.history = "Computed CP factor B"
         return self._B
 
     def _get_C(self):
@@ -560,7 +560,7 @@ class CP(DecompositionAnalysis):
                 }
             )
             self._C.name = f"Factor C of CP({self._X.name})"
-            self._C.history = "Created by SpectroChemPy CP"
+            self._C.history = "Computed CP factor C"
             return self._C
         self._C = None
         return None
@@ -666,7 +666,7 @@ class CP(DecompositionAnalysis):
         X_hat.units = self._X.units
         X_hat.title = self._X.title
         X_hat.name = f"rank-{self.n_components} CP inverse transform of {self._X.name}"
-        X_hat.history = "Created by SpectroChemPy CP"
+        X_hat.history = "Reconstructed dataset with CP"
 
         return X_hat
 

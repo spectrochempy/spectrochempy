@@ -786,7 +786,7 @@ class IRIS(DecompositionAnalysis):
 
         f = self._outfit[0]
         f = NDDataset(f, name="2D distribution functions", title="density")
-        f.history = "2D IRIS analysis of {X.name} dataset"
+        f.history = f"Computed 2D IRIS distribution from {self._X.name}"
         f.set_coordset(z=self._lambdas, y=self._q, x=self._channels)
         if np.any(self._X_mask):
             # restore masked column if necessary

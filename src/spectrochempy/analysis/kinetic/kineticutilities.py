@@ -701,7 +701,7 @@ class ActionMassKinetics(tr.HasTraits):
                         labels=[f"species #{i}" for i in range(left_op.shape[0])],
                         title="species",
                     )
-                C[i].history = "Created using ActionMassKinetics.integrate"
+                C[i].history = "Integrated action-mass kinetics"
                 C[i].meta.update(bunch)
 
                 # uncomment for debugging and optimization

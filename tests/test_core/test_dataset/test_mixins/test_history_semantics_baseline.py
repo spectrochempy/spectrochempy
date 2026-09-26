@@ -12,7 +12,6 @@ Purpose: establish a precise baseline before discussing any future changes.
 See also: audit/~metadata-architecture-audit.md §4, §5
 """
 
-
 import numpy as np
 import pytest
 
@@ -197,7 +196,7 @@ class TestReductions:
         """Mean with explicit dim appends."""
         result = ds2d.mean(dim="y")
         assert len(result.history) == 1
-        assert "`mean`" in _entry(result.history[0])
+        assert "Mean computed along y" in _entry(result.history[0])
 
     def test_std_appends(self, ds2d):
         """Std with explicit dim appends."""
@@ -340,7 +339,7 @@ class TestMultiSourceOperations:
         )
 
     def test_importer_merge_replaces_history(self):
-        """Importer merge replaces history with 'Merged from several files'."""
+        """Importer merge records the assembled dataset count."""
         a = scp.NDDataset([[1, 2], [3, 4]], name="A")
         b = scp.NDDataset([[5, 6], [7, 8]], name="B")
         a.history = ["History A"]
@@ -354,7 +353,7 @@ class TestMultiSourceOperations:
 
         assert len(result) == 1
         text = _entry(result[0].history[-1])
-        assert text in ("Merged from several files", "Stacked from several files")
+        assert text == "Merged 2 imported datasets"
 
 
 # ===========================================================================
@@ -434,12 +433,13 @@ class TestHistoryProperty:
         entries = _entries(d)
         assert entries == ["First", "Second"]
 
-    def test_history_setter_list_uses_first_element(self):
-        """Setting history = [list] takes first element and discards rest."""
+    def test_history_setter_list_replaces_with_all_elements(self):
+        """Setting history to a list explicitly replaces it with every element."""
         d = scp.NDDataset([1.0], name="list_test")
         d.history = ["First", "Second"]
-        assert len(d.history) == 1
+        assert len(d.history) == 2
         assert _entry(d.history[0]) == "First"
+        assert _entry(d.history[1]) == "Second"
 
     def test_multiple_strings_accumulate(self):
         """Multiple string assignments accumulate."""
@@ -555,16 +555,19 @@ class TestHistoryPatterns:
 
     def test_reduction_uses_consistent_format(self, ds2d):
         """
-        All reductions use the same format string.
+        Mean uses its structured message; other reductions retain the generic text.
 
-        Format: 'Dataset resulting from application of `{method}` method'
+        Generic format: 'Dataset resulting from application of `{method}` method'
         """
         reductions = ["sum", "mean", "std", "var"]
         for method_name in reductions:
             result = getattr(ds2d, method_name)(dim="y")
             text = _entry(result.history[-1])
+            expected = (
+                "Mean computed along y" if method_name == "mean" else f"`{method_name}`"
+            )
             assert (
-                f"`{method_name}`" in text
+                expected in text
             ), f"Expected method name {method_name} in history, got: {text}"
 
     def test_ufunc_format_consistent(self, ds1):

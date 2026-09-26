@@ -111,7 +111,13 @@ def test_to_xarray_currently_exports_aligned_identity_and_selected_provenance():
         "vendor_metadata": {"firmware": "1.2.3", "serial": "abc"},
     }
     assert "scpy_filename" not in xds.attrs
-    assert xds.attrs["scpy_history"] == ds.history
+    assert xds.attrs["scpy_history"] == [
+        {
+            **entry,
+            "date": entry["date"].isoformat(sep=" ", timespec="seconds"),
+        }
+        for entry in ds.history_entries
+    ]
 
 
 def test_from_xarray_currently_preserves_aligned_provenance_and_only_still_loses_filename():
@@ -244,7 +250,16 @@ def test_netcdf_currently_omits_only_remaining_unaligned_filename_attr(tmp_path)
         assert opened.attrs["scpy_acquisition_date"] == _portable_attr_datetime(
             ds._acquisition_date
         )
-        assert opened.attrs["scpy_history"] == json.dumps(ds.history, sort_keys=True)
+        expected_history = [
+            {
+                **entry,
+                "date": entry["date"].isoformat(sep=" ", timespec="seconds"),
+            }
+            for entry in ds.history_entries
+        ]
+        assert opened.attrs["scpy_history"] == json.dumps(
+            expected_history, sort_keys=True
+        )
         assert "scpy_filename" not in opened.attrs
 
 

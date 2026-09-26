@@ -217,7 +217,10 @@ def test_read_topspin_missing_file():
 def test_topspin_name_and_history():
     nd = _read_topspin_or_skip(_require_path(nmrdir / "topspin_1d/1/fid"))
     assert nd.name == "topspin_1d expno:1 procno:1 (FID)"
-    assert any("Imported from TopSpin dataset" in entry for entry in nd.history)
+    assert any(
+        "Imported TopSpin dataset topspin_1d (expno=1, procno=1, FID)" in entry
+        for entry in nd.history
+    )
 
 
 # --------------------------------------------------------------------------

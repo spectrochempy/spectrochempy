@@ -26,8 +26,15 @@ def test_apodization_ir_2d_zpd():
     ds = NDDataset(
         data, coordset=[Coord(np.arange(nrows)), x], meta={"interferogram": True}
     )
+    ds.history = "source history"
+    source_history = ds.history_entries
     result = ds.em(lb=50.0)
     assert result.shape == (nrows, ncols)
+
+    assert ds.history_entries == source_history
+    assert result.history_entries[0] == source_history[0]
+    assert result.history_entries[-1]["operation"] is None
+    assert "Applied em apodization" in result.history_entries[-1]["message"]
 
 
 def test_apodization_ir_1d_zpd():
