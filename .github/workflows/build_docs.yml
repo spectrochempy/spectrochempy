@@ -484,28 +484,6 @@ jobs:
           path: ${{ steps.artifact.outputs.path }}
           retention-days: ${{ steps.artifact.outputs.retention }}
 
-      # Temporary review evidence for #1686. Removed after this branch has
-      # demonstrated an isolated rebuild from the published 1.0.0 tag.
-      - name: Validate isolated 1.0.0 documentation reconstruction
-        if: github.event_name == 'push' && github.ref_name == 'docs/navigation'
-        run: |
-          set -e
-          . .venv/bin/activate
-          VALIDATION_BUILD="$RUNNER_TEMP/stable-docs-validation"
-          rm -rf "$VALIDATION_BUILD"
-          unset SETUPTOOLS_SCM_PRETEND_VERSION
-          SCPY_BUILDDIR="$VALIDATION_BUILD" SCPY_DOCS_CONTEXT=archive \
-            python3 docs/make.py --no-api --no-exec --no-sync -j1 \
-              html -T spectrochempy-v1.0.0
-
-          SNAPSHOT="$VALIDATION_BUILD/html/1.0.0"
-          test "$(cat "$SNAPSHOT/.spectrochempy-doc-version")" = "1.0.0"
-          grep -q "Revision 1.0.0" "$SNAPSHOT/whatsnew/latest.html"
-          if grep -q "1.0.1.dev" "$SNAPSHOT/whatsnew/latest.html"; then
-            echo "Development release notes leaked into the stable snapshot" >&2
-            exit 1
-          fi
-
       # ---------- deploy to gh-pages ----------
       - name: Deployment
         if: steps.publish.outputs.publish == 'true' && (github.event_name != 'pull_request' && !github.event.act)
