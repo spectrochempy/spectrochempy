@@ -377,10 +377,9 @@ jobs:
 
           if [[ ! -f "$MARKER" ]] || [[ "$(cat "$MARKER")" != "$STABLE_VERSION" ]]; then
             echo "Rebuilding stable documentation from $STABLE_TAG"
-            rm -rf "build/html/$STABLE_VERSION"
-            unset SETUPTOOLS_SCM_PRETEND_VERSION
-            SCPY_DOCS_CONTEXT=archive \
-              python3 docs/make.py --no-api --no-exec --no-sync -j1 html -T "$STABLE_TAG"
+            python .github/workflows/scripts/stable_docs_snapshot.py rebuild \
+              --project-root . --published-root build/html \
+              --tag "$STABLE_TAG" --promote
           fi
 
           python3 -c "from pathlib import Path; from docs.make import _sync_stable_docs_to_root, refresh_versions_index; root=Path('build/html'); manifest=refresh_versions_index(root); selected=_sync_stable_docs_to_root(root, manifest['stable']); refresh_versions_index(root); print(f'Synchronized root from stable version {selected}')"
@@ -483,6 +482,19 @@ jobs:
           name: ${{ steps.artifact.outputs.name }}
           path: ${{ steps.artifact.outputs.path }}
           retention-days: ${{ steps.artifact.outputs.retention }}
+
+      # Temporary review evidence for #1687. Remove after this branch has
+      # demonstrated a complete isolated rebuild of the published stable tag.
+      - name: Validate complete isolated stable documentation reconstruction
+        if: github.event_name == 'push' && github.ref_name == 'docs/fix-stable-snapshot-repair'
+        run: |
+          set -e
+          . .venv/bin/activate
+          STABLE_TAG=$(python .github/workflows/scripts/release_version.py latest-tag)
+          PROOF_ROOT="$RUNNER_TEMP/stable-docs-proof"
+          rm -rf "$PROOF_ROOT"
+          python .github/workflows/scripts/stable_docs_snapshot.py rebuild \
+            --project-root . --published-root "$PROOF_ROOT" --tag "$STABLE_TAG"
 
       # ---------- deploy to gh-pages ----------
       - name: Deployment
