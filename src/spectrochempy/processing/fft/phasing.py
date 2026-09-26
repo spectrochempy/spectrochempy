@@ -260,7 +260,14 @@ def pk_exp(dataset, phc0=0.0, pivot=0.0, exptc=0.0, **kwargs):
     pk : Automatic or manual phasing.
 
     """
-    return pk(dataset, phc0=phc0, phc1=0, pivot=pivot, exptc=exptc)
+    return pk(
+        dataset,
+        phc0=phc0,
+        phc1=0,
+        pivot=pivot,
+        exptc=exptc,
+        **kwargs,
+    )
 
 
 # Reference: MASAI auto-phase algorithms (negmin + entropy minimization).

@@ -31,6 +31,11 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- ``hamming()`` and ``hann()`` now honor their documented dimension, axis,
+  in-place, returned-window, reverse, and inverse options when delegating to
+  ``general_hamming()``. ``pk_exp()`` likewise forwards dimension, axis, and
+  in-place options to ``pk()`` instead of silently applying the correction on
+  the default axis to a copy.
 - Harmonized newly generated history messages across core and official-plugin
   imports, common spectral treatments, and analysis results. Individual-file
   imports now identify the format and portable filename while the complete
