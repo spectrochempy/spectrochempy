@@ -1142,13 +1142,12 @@ entrées sont incorrectes car :
 
 ### Conda plugin builds
 
-- [ ] Pendant une release core (`spectrochempy-vX.Y.Z`), le workflow
-      `build_package.yml` construit également les plugins conda comme
-      **vérification de compatibilité** (les packages sont uploadés sur le
-      label `dev` d'Anaconda.org, pas sur `main`)
-- [ ] L'échec de ces builds plugins n'est **pas bloquant** pour la release
-      core — le build step utilise `continue-on-error: true` pour les
-      événements qui ne sont pas des releases plugins
+- [ ] Sur les pushes et pull requests, `build_package.yml` construit les
+      plugins conda comme **vérification de compatibilité**. Ces paquets restent
+      des artefacts CI et ne sont pas publiés sur Anaconda.org.
+- [ ] L'échec de ces builds plugins de validation n'est **pas bloquant** — le
+      build step utilise `continue-on-error: true` pour les événements qui ne
+      sont pas des releases plugins
 - [ ] Causes possibles d'échec non-bloquant :
       - Contrainte de version du core dans `recipe.yaml` pas encore mise à
         jour (ex: `>=0.10,<0.11` alors que le core est maintenant `0.11.0`)

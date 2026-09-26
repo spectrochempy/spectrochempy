@@ -1738,6 +1738,35 @@ class TestConcurrencyKeyBehavior:
             assert line != "cancel-in-progress: true"
 
 
+class TestNoCondaDevelopmentPublication:
+    """Development packages remain CI artifacts and never reach Anaconda.org."""
+
+    @staticmethod
+    def _workflow():
+        return (
+            Path(__file__).parents[3] / ".github" / "workflows" / "build_package.yml"
+        ).read_text()
+
+    def test_no_dev_channel_or_upload(self):
+        workflow = self._workflow()
+        assert "spectrocat/label/dev" not in workflow
+        assert 'upload_package "dev"' not in workflow
+        assert '-l "dev"' not in workflow
+        assert "Upload plugin dev package" not in workflow
+
+    def test_core_upload_is_release_only(self):
+        import yaml
+
+        workflow = yaml.safe_load(self._workflow())
+        steps = workflow["jobs"]["build_and_publish_conda_package"]["steps"]
+        upload = next(
+            step for step in steps if step["name"] == "Upload to Anaconda.org"
+        )
+        condition = upload["if"]
+        assert "github.event_name == 'release'" in condition
+        assert "github.event_name == 'push'" not in condition
+
+
 # ---------------------------------------------------------------------------
 # Discovered-plugins matrix (conda release guard and recipe extraction)
 # ---------------------------------------------------------------------------

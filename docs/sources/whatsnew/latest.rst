@@ -78,6 +78,10 @@ Dependency Updates
 Breaking Changes
 ~~~~~~~~~~~~~~~~
 
+- Conda development builds are no longer published to the ``dev`` label for
+  either the core or official plugins. Stable releases remain available from
+  the main ``spectrocat`` channel; unreleased versions should be installed from
+  a source checkout.
 - Direct mutations of the readable ``NDDataset.history`` view now raise
   ``TypeError`` instead of being silently lost. Use ``annotate()``,
   ``replace_history()``, or ``clear_history()``; ``list(dataset.history)``

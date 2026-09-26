@@ -279,12 +279,12 @@ published to Anaconda.org automatically by ``build_package.yml``.
 
       mamba install -c spectrocat -c conda-forge spectrochempy-nmr
 
-* **Development builds** on ``master`` use generated versions such as
-  ``0.1.4.dev12`` and upload to ``spectrocat/label/dev`` only when the
-  computed plugin status reports release-relevant changes.  Pull requests build
-  the packages for validation but do not publish them.
+* **Development builds** use generated versions such as ``0.1.4.dev12`` for CI
+  validation. Their artifacts are retained for workflow diagnostics but are
+  not published to Anaconda.org. Install a local source checkout to exercise
+  unreleased plugin code.
 
-  Stable plugin release uploads remain on the ``main`` label.
+  Only stable plugin releases are uploaded, on the ``main`` label.
 
 Plugin recipes should declare a bounded dependency on the core package,
 e.g. ``spectrochempy >=0.9,<0.10``.
