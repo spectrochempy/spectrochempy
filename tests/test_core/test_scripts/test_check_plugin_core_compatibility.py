@@ -55,6 +55,13 @@ def test_version_allowed_accepts_release_candidates(checker):
     assert checker.version_allowed("1.0.0", ">=0.12,<2")
 
 
+def test_final_release_minimum_rejects_prereleases(checker):
+    constraint = ">=1.1.0,<2"
+    assert not checker.version_allowed("1.1.0.dev1", constraint)
+    assert not checker.version_allowed("1.1.0rc1", constraint)
+    assert checker.version_allowed("1.1.0", constraint)
+
+
 def test_version_allowed_accepts_late_012(checker):
     assert checker.version_allowed("0.12.8", ">=0.12,<2")
 
@@ -96,3 +103,26 @@ def test_read_spectrochempy_constraint_missing(checker, tmp_path):
     plugin_dir.mkdir()
     (plugin_dir / "pyproject.toml").write_text("unrelated = true\n")
     assert checker.read_spectrochempy_constraint(plugin_dir / "pyproject.toml") is None
+
+
+@pytest.mark.parametrize(
+    ("plugin", "import_name"),
+    [
+        ("spectrochempy-nmr", "spectrochempy_nmr"),
+        ("spectrochempy-perkinelmer", "spectrochempy_perkinelmer"),
+        ("spectrochempy-iris", "spectrochempy_iris"),
+        ("spectrochempy-tensor", "spectrochempy_tensor"),
+    ],
+)
+def test_1_1_plugin_constraints_are_aligned(checker, plugin, import_name):
+    repo_root = Path(__file__).parents[3]
+    plugin_dir = repo_root / "plugins" / plugin
+
+    assert (
+        checker.read_spectrochempy_constraint(plugin_dir / "pyproject.toml")
+        == ">=1.1.0,<2"
+    )
+    assert "spectrochempy >=1.1.0,<2" in (plugin_dir / "recipe.yaml").read_text()
+
+    init_text = (plugin_dir / "src" / import_name / "__init__.py").read_text()
+    assert 'spectrochempy_min_version = "1.1.0"' in init_text

@@ -11,7 +11,7 @@ readme = "README.md"
 classifiers = [
 ]
 dependencies = [
-    "spectrochempy>=0.12,<2",
+    "spectrochempy>=1.1.0,<2",
     "tensorly",
 ]
 
