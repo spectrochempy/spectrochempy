@@ -8,7 +8,6 @@ import importlib.util
 import sys
 from pathlib import Path
 
-
 ROOT = Path(__file__).parents[3]
 DOCS_MAKE = ROOT / "docs" / "make.py"
 
@@ -52,7 +51,9 @@ def test_stable_root_sync_preserves_development_versions_and_previews(tmp_path):
     (stable / "index.html").write_text("stable", encoding="utf-8")
     (stable / "stable-only.html").write_text("stable page", encoding="utf-8")
     (development / "index.html").write_text("development", encoding="utf-8")
-    (development / "development-only.html").write_text("development page", encoding="utf-8")
+    (development / "development-only.html").write_text(
+        "development page", encoding="utf-8"
+    )
     (preview / "index.html").write_text("preview", encoding="utf-8")
 
     selected = docs_make._sync_stable_docs_to_root(tmp_path, "1.0.0")
@@ -67,9 +68,7 @@ def test_stable_root_sync_preserves_development_versions_and_previews(tmp_path):
 
 
 def test_navigation_labels_contexts_and_page_fallback_are_present():
-    layout = (ROOT / "docs" / "_templates" / "layout.html").read_text(
-        encoding="utf-8"
-    )
+    layout = (ROOT / "docs" / "_templates" / "layout.html").read_text(encoding="utf-8")
     script = (ROOT / "docs" / "_static" / "js" / "versions.js").read_text(
         encoding="utf-8"
     )
@@ -90,3 +89,7 @@ def test_navigation_labels_contexts_and_page_fallback_are_present():
     assert 'echo "docs_context=stable"' in workflow
     assert 'echo "docs_context=development"' in workflow
     assert 'echo "docs_context=preview"' in workflow
+    assert "pages: write" in workflow
+    assert (
+        'gh api --method POST "repos/${{ github.repository }}/pages/builds"' in workflow
+    )
