@@ -423,7 +423,7 @@ def test_ndio_safe_roundtrip_uses_versioned_payload(tmp_path):
         js = json.loads(zipf.read(member).decode("utf-8"))
 
     assert js["__format__"] == "scp"
-    assert js["__version__"] == 2
+    assert js["__version__"] == 3
     assert js["data"]["encoding"] == "raw-base64"
 
     loaded = NDDataset.load(filename)
@@ -447,9 +447,14 @@ def test_ndio_loads_roundtrip_preserves_exact_history_without_zip(history_entrie
     _assert_preserved_dataset_roundtrip(rebuilt, ds)
 
 
-def test_ndio_loads_restores_serialized_history_instead_of_using_public_setter():
+def test_ndio_loads_preserves_structure_that_rendered_text_cannot_reconstruct():
     ds = _make_history_dataset()
-    ds._history = _make_exact_history_entries()
+    ds._append_history_entry(
+        date=datetime(2024, 1, 2, 3, 4, 5, tzinfo=UTC),
+        operation="import",
+        parameters={"reader": "demo"},
+        message="ENTRY_A imported",
+    )
     serialized_history = list(ds.history)
 
     rebuilt = NDDataset.loads(json_loads(ds.dumps()))
@@ -457,7 +462,7 @@ def test_ndio_loads_restores_serialized_history_instead_of_using_public_setter()
     setter_target.history = serialized_history
 
     _assert_exact_history(rebuilt, ds)
-    assert setter_target.history != ds.history
+    assert setter_target.history == ds.history
     assert setter_target._history != ds._history
 
 
@@ -492,7 +497,12 @@ def test_ndio_save_load_allows_normal_history_append_after_restore(
     )
 
     assert reloaded._history[:2] == source._history
-    assert reloaded._history[2] == (appended_at, "ENTRY_C appended after load")
+    assert reloaded._history[2] == {
+        "date": appended_at,
+        "operation": None,
+        "parameters": {},
+        "message": "ENTRY_C appended after load",
+    }
     assert reloaded.history[-1].endswith("> ENTRY_C appended after load")
 
 
@@ -576,7 +586,7 @@ def test_migrate_legacy_file_converts_to_safe_format(tmp_path):
         js = json.loads(zipf.read(member).decode("utf-8"))
     assert js["data"]["encoding"] == "raw-base64"
     assert js["__format__"] == "scp"
-    assert js["__version__"] == 2
+    assert js["__version__"] == 3
 
 
 def test_migrate_legacy_file_safe_load_after_migration(tmp_path, monkeypatch):
@@ -748,7 +758,7 @@ def test_migrate_legacy_file_pscp_roundtrip(tmp_path):
         member = zipf.namelist()[0]
         js = json.loads(zipf.read(member).decode("utf-8"))
     assert js["__format__"] == "pscp"
-    assert js["__version__"] == 2
+    assert js["__version__"] == 3
 
 
 def test_migrate_legacy_file_atomic_replaces_existing(tmp_path):

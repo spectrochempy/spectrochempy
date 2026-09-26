@@ -395,7 +395,7 @@ def _read_jdx(*args, **kwargs):
 
     dataset.description = f"Dataset from jdx file: '{jdx_title}'"
 
-    dataset.history = "Imported from jdx file"
+    dataset.history = f"Imported JCAMP-DX file {filename.name}"
 
     if sortbydate and nspec > 1:
         dataset.sort(dim="y", inplace=True)

@@ -324,9 +324,9 @@ def _read_simpson_core(dataset, path):
     dataset.title = "intensity"
     dataset.origin = "simpson"
     dataset.name = f"{path.stem} ({meta.datatype})"
-    dataset.filename = path.parent
+    dataset.filename = path
 
-    dataset.history = "Imported from SIMPSON dataset"
+    dataset.history = f"Imported SIMPSON dataset {path.name} ({meta.datatype})"
 
     return dataset
 

@@ -72,7 +72,10 @@ def flat_peaks_dataset():
 
 def test_basic_peak_finding(simple_peaks_dataset):
     """Test basic peak finding with clear peaks."""
+    simple_peaks_dataset.history = "source history"
+    source_history = simple_peaks_dataset.history_entries
     peaks, properties = find_peaks(simple_peaks_dataset, height=0.5)
+    assert simple_peaks_dataset.history_entries == source_history
 
     assert len(peaks) == 3
 
@@ -81,6 +84,9 @@ def test_basic_peak_finding(simple_peaks_dataset):
 
     # Check peak positions approximately match the known positions
     assert np.allclose(peaks.x.values, [2, 5, 8] * ur("cm^-1"), atol=0.1)
+    assert peaks.history_entries[0] == source_history[0]
+    assert peaks.history_entries[-1]["operation"] is None
+    assert peaks.history_entries[-1]["message"] == "Found 3 peak(s) with find_peaks"
 
 
 def test_noisy_peak_finding(noisy_peaks_dataset):

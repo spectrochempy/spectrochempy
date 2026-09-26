@@ -265,7 +265,7 @@ class TestBaselineWrappers:
         r = getattr(ds, method)()
         assert len(r.history) == 2
         assert "original entry" in r.history[0].lower()
-        assert "Binary operation" in r.history[1]
+        assert "Subtracted" in r.history[1]
 
     @pytest.mark.parametrize("method", ["basc", "detrend", "asls"])
     def test_modeldata_preserved(self, ds, method):

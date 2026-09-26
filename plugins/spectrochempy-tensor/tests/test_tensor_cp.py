@@ -109,6 +109,11 @@ class TestCP:
         assert cp.A.shape == (6, 2), f"A shape should be (6, 2), got {cp.A.shape}"
         assert cp.B.shape == (8, 2), f"B shape should be (8, 2), got {cp.B.shape}"
         assert cp.C.shape == (10, 2), f"C shape should be (10, 2), got {cp.C.shape}"
+        for factor, label in zip((cp.A, cp.B, cp.C), "ABC", strict=True):
+            assert factor.history_entries[-1]["operation"] is None
+            assert factor.history_entries[-1]["message"] == (
+                f"Computed CP factor {label}"
+            )
 
     def test_cp_factor_dims_and_coords(self):
         """Test factor dims and coordinates."""
@@ -170,6 +175,8 @@ class TestCP:
         assert X_hat.dims == ds.dims
         assert X_hat.units == ds.units
         assert X_hat.title == ds.title
+        assert X_hat.history_entries[-1]["operation"] is None
+        assert X_hat.history_entries[-1]["message"] == ("Reconstructed dataset with CP")
 
     def test_cp_weights(self):
         """Test weights property."""

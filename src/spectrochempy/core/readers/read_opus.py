@@ -499,7 +499,7 @@ def _read_opus(*args, **kwargs):
     dataset.filename = filename
     dataset.origin = f"opus-{type_parameter}"
     dataset.description = "Dataset from opus files. \nSpectra type: " + desc
-    dataset.history = str(datetime.now(UTC)) + ": import from opus files \n"
+    dataset.history = f"Imported Bruker OPUS file {filename.name}"
 
     # add other parameters in metadata
     dataset.meta = _load_parameters_into_meta(opus_data)

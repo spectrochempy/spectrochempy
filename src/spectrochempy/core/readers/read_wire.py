@@ -949,5 +949,5 @@ def _read_wdf(*args, **kwargs):
         return None
     dataset.name = filename.stem
     dataset.filename = filename
-    dataset.history = f"Imported from {filename.name}"
+    dataset.history = f"Imported Renishaw WiRE WDF file {filename.name}"
     return dataset

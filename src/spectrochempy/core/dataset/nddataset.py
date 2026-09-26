@@ -32,7 +32,9 @@ import json
 import textwrap
 
 # Lazy import to avoid triggering matplotlib at module load time
+from collections.abc import Mapping
 from contextlib import suppress
+from copy import deepcopy
 from datetime import UTC
 from datetime import datetime
 from datetime import tzinfo
@@ -55,7 +57,9 @@ from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 from spectrochempy.core.dataset.basearrays.ndcomplex import NDComplexArray
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
+from spectrochempy.core.units import Quantity
 from spectrochempy.utils._logging import warning_
+from spectrochempy.utils.constants import INPLACE
 from spectrochempy.utils.datetimeutils import utcnow
 from spectrochempy.utils.exceptions import SpectroChemPyError
 from spectrochempy.utils.optional import import_optional_dependency
@@ -66,6 +70,10 @@ from spectrochempy.utils.print import _render_sections
 from spectrochempy.utils.print import colored_output
 from spectrochempy.utils.system import get_user_and_node
 from spectrochempy.utils.typeutils import is_sequence
+
+NDDATASET_XARRAY_FORMAT = "nddataset-xarray"
+NDDATASET_XARRAY_VERSION = 2
+SUPPORTED_NDDATASET_XARRAY_VERSIONS = frozenset({1, NDDATASET_XARRAY_VERSION})
 
 
 def _normalize_json_compatible(value: Any) -> Any:
@@ -84,11 +92,287 @@ def _normalize_json_compatible(value: Any) -> Any:
     raise TypeError(f"Value of type {type(value).__name__} is not JSON-compatible")
 
 
+def _normalize_history_parameter(value: Any) -> Any:
+    """Return a detached, compact value suitable for a history entry."""
+    try:
+        return _normalize_json_compatible(value)
+    except TypeError:
+        if isinstance(value, np.ndarray):
+            description = f"ndarray(shape={value.shape}, dtype={value.dtype})"
+        else:
+            description = f"{type(value).__name__} value not stored"
+        return {"description": description}
+
+
+def _history_selection_value(value: Any) -> Any:
+    """Describe a slice boundary without retaining its source object."""
+    if isinstance(value, Quantity):
+        return {
+            "value": _normalize_history_parameter(value.magnitude),
+            "units": str(value.units),
+        }
+    return _normalize_history_parameter(value)
+
+
+def _history_selector(selector: Any) -> dict[str, Any]:
+    """Return a compact description of one requested selector."""
+    if isinstance(selector, slice):
+        boundaries = (selector.start, selector.stop, selector.step)
+        if any(isinstance(value, str) for value in boundaries):
+            kind = "label_slice"
+        elif any(
+            isinstance(value, Quantity | float | np.floating)
+            for value in boundaries
+            if value is not None
+        ):
+            kind = "coordinate_slice"
+        elif all(value is None for value in boundaries):
+            kind = "all"
+        else:
+            kind = "index_slice"
+        return {
+            "kind": kind,
+            "start": _history_selection_value(selector.start),
+            "stop": _history_selection_value(selector.stop),
+            "step": _history_selection_value(selector.step),
+        }
+    if isinstance(selector, str):
+        return {"kind": "label", "value": selector}
+    if isinstance(selector, Quantity | float | np.floating):
+        return {"kind": "coordinate", "value": _history_selection_value(selector)}
+    if isinstance(selector, int | np.integer):
+        return {"kind": "index", "value": int(selector)}
+    if isinstance(selector, list | np.ndarray):
+        values = np.asarray(selector)
+        if values.dtype == bool:
+            return {
+                "kind": "boolean_mask",
+                "shape": list(values.shape),
+                "selected": int(values.sum()),
+                "values": values.tolist() if values.size <= 16 else "not stored",
+            }
+        if np.issubdtype(values.dtype, np.floating):
+            return {
+                "kind": "coordinate_values",
+                "shape": list(values.shape),
+                "values": values.tolist() if values.size <= 16 else "not stored",
+            }
+        return {
+            "kind": "indices",
+            "shape": list(values.shape),
+            "values": values.tolist() if values.size <= 16 else "not stored",
+        }
+    if selector is None:
+        return {"kind": "new_axis"}
+    return {
+        "kind": type(selector).__name__,
+        "description": f"{type(selector).__name__} selector not stored",
+    }
+
+
+def _history_selection(
+    items: Any,
+    dims: list[str],
+    resolved_items: Any,
+) -> dict[str, Any]:
+    """Describe the requested selection without claiming resolved indexes."""
+    selectors = list(items) if isinstance(items, tuple) else [items]
+    inplace = bool(selectors and str(selectors[-1]) == INPLACE)
+    if inplace:
+        selectors.pop()
+
+    if any(selector is Ellipsis for selector in selectors):
+        expanded = []
+        for selector in selectors:
+            if selector is Ellipsis:
+                expanded.extend([slice(None)] * (len(dims) - len(selectors) + 1))
+            else:
+                expanded.append(selector)
+        selectors = expanded
+
+    routed_dims = list(dims[: len(selectors)])
+    resolved = (
+        list(resolved_items) if isinstance(resolved_items, tuple) else [resolved_items]
+    )
+    if len(selectors) == 1:
+        if len(resolved) == len(dims):
+            selected_axes = [
+                axis
+                for axis, selector in enumerate(resolved)
+                if not (
+                    isinstance(selector, slice)
+                    and selector.start is None
+                    and selector.stop is None
+                    and selector.step is None
+                )
+            ]
+            routed_dims = [dims[selected_axes[0]]] if len(selected_axes) == 1 else []
+        elif len(dims) != 1:
+            routed_dims = []
+
+    requested = []
+    for position, selector in enumerate(selectors):
+        description = _history_selector(selector)
+        if position < len(routed_dims):
+            description = {"dimension": routed_dims[position], **description}
+        requested.append(description)
+
+    return {
+        "source_dims": list(dims),
+        "requested": requested,
+        "inplace": inplace,
+    }
+
+
+def _history_selection_message(parameters: Mapping[str, Any]) -> str:
+    """Render a compact readable view of requested selectors."""
+
+    def boundary(value):
+        if value is None:
+            return ""
+        if isinstance(value, dict) and set(value) == {"value", "units"}:
+            return f"{value['value']} {value['units']}"
+        return str(value)
+
+    parts = []
+    for selector in parameters["requested"]:
+        dim = f"{selector['dimension']} " if "dimension" in selector else ""
+        kind = selector["kind"]
+        if kind.endswith("_slice") or kind == "all":
+            label = {
+                "coordinate_slice": "coordinates",
+                "label_slice": "labels",
+                "index_slice": "indices",
+                "all": "indices",
+            }[kind]
+            start = boundary(selector["start"])
+            stop = boundary(selector["stop"])
+            step = boundary(selector["step"])
+            requested = f"{start}:{stop}"
+            if step:
+                requested = f"{requested}:{step}"
+            parts.append(f"{dim}{label} [{requested}]")
+        elif kind in {"coordinate", "label", "index"}:
+            parts.append(f"{dim}{kind} [{boundary(selector['value'])}]")
+        elif kind in {"indices", "coordinate_values", "boolean_mask"}:
+            values = selector["values"]
+            label = (
+                "coordinates" if kind == "coordinate_values" else kind.replace("_", " ")
+            )
+            parts.append(f"{dim}{label} {values}")
+        else:
+            parts.append(f"{dim}{selector.get('description', kind)}")
+    return f"Slice extracted: {', '.join(parts)}"
+
+
+def _history_datetime(value: Any) -> datetime:
+    """Return a history datetime from a native or portable value."""
+    if isinstance(value, datetime):
+        return value
+    if isinstance(value, str):
+        return datetime.fromisoformat(value)
+    raise TypeError(
+        f"History date must be a datetime or ISO string, got {type(value).__name__}"
+    )
+
+
+def _history_entry(
+    *,
+    date: datetime | str | None = None,
+    operation: str | None = None,
+    parameters: Mapping[str, Any] | None = None,
+    message: str = "",
+) -> dict[str, Any]:
+    """Build one detached canonical history entry."""
+    if date is None:
+        date = utcnow()
+    date = _history_datetime(date)
+    if operation is not None and not isinstance(operation, str):
+        raise TypeError("History operation must be a string or None")
+    if parameters is None:
+        parameters = {}
+    if not isinstance(parameters, Mapping):
+        raise TypeError("History parameters must be a mapping")
+    if not isinstance(message, str):
+        raise TypeError("History message must be a string")
+    if operation is None and not message:
+        raise ValueError("A textual history entry requires a message")
+
+    return {
+        "date": date,
+        "operation": operation,
+        "parameters": {
+            str(key): _normalize_history_parameter(value)
+            for key, value in parameters.items()
+        },
+        "message": message,
+    }
+
+
+def _coerce_history_entry(value: Any) -> dict[str, Any]:
+    """Normalize structured, legacy tuple, or legacy rendered history."""
+    if isinstance(value, Mapping):
+        return _history_entry(
+            date=value.get("date"),
+            operation=value.get("operation"),
+            parameters=value.get("parameters"),
+            message=value.get("message", ""),
+        )
+
+    if isinstance(value, (list, tuple)) and len(value) == 2:
+        date, message = value
+        return _history_entry(date=date, message=message)
+
+    if isinstance(value, str):
+        date_text, separator, message = value.partition("> ")
+        if separator:
+            with suppress(TypeError, ValueError):
+                return _history_entry(date=date_text, message=message)
+        return _history_entry(message=value)
+
+    raise TypeError(
+        "History entries must be mappings, legacy (date, message) pairs, "
+        f"or strings; got {type(value).__name__}"
+    )
+
+
 def _is_portable_labels(labels):
     """Return True if labels are exportable as portable string labels."""
     if labels is None or labels.ndim != 1 or len(labels) == 0:
         return False
     return all(isinstance(v, str) or v is None for v in labels)
+
+
+class _ReadOnlyHistory(list):
+    """List-compatible readable history view that rejects in-place mutation."""
+
+    __slots__ = ()
+
+    @staticmethod
+    def _raise_read_only(*args, **kwargs):
+        raise TypeError(
+            "The history view is read-only. Use dataset.annotate(), "
+            "dataset.replace_history(), or dataset.clear_history()."
+        )
+
+    def __copy__(self):
+        return type(self)(self)
+
+    def __deepcopy__(self, memo):
+        return type(self)(deepcopy(list(self), memo))
+
+    append = _raise_read_only
+    extend = _raise_read_only
+    insert = _raise_read_only
+    clear = _raise_read_only
+    pop = _raise_read_only
+    remove = _raise_read_only
+    sort = _raise_read_only
+    reverse = _raise_read_only
+    __setitem__ = _raise_read_only
+    __delitem__ = _raise_read_only
+    __iadd__ = _raise_read_only
+    __imul__ = _raise_read_only
 
 
 def _export_labels(coord, dim, aux_vars):
@@ -139,44 +423,38 @@ def _restore_portable_datetime(value):
     return datetime.fromisoformat(value)
 
 
-def _serialize_portable_history(history) -> list[str] | None:
-    """Return a portable textual history payload or ``None`` for empty history."""
+def _serialize_portable_history(history) -> list[dict[str, Any]] | None:
+    """Return a JSON-compatible structured history payload."""
     if not history:
         return None
     if not isinstance(history, list):
         raise TypeError(
             f"Portable history must be exported as a list, got {type(history).__name__}"
         )
-    for entry in history:
-        if not isinstance(entry, str):
-            raise TypeError(
-                "Portable history entries must be strings, "
-                f"got {type(entry).__name__}"
-            )
-    return list(history)
+
+    serialized = []
+    for value in history:
+        entry = _coerce_history_entry(value)
+        serialized.append(
+            {
+                "date": entry["date"].isoformat(sep=" "),
+                "operation": entry["operation"],
+                "parameters": deepcopy(entry["parameters"]),
+                "message": entry["message"],
+            }
+        )
+    return serialized
 
 
 def _restore_portable_history(value):
-    """Return internal history tuples restored from portable textual content."""
+    """Return canonical history entries from structured or legacy content."""
     if value is None:
-        return None
+        return []
     if not isinstance(value, list):
         raise TypeError(
             f"Portable history attr must be a list, got {type(value).__name__}"
         )
-
-    restored = []
-    for entry in value:
-        if not isinstance(entry, str):
-            raise TypeError(
-                "Portable history entries must be strings, "
-                f"got {type(entry).__name__}"
-            )
-        date_text, separator, message = entry.partition("> ")
-        if separator != "> " or not message:
-            raise ValueError("Portable history entry must use '<timestamp> <text>'")
-        restored.append((datetime.fromisoformat(date_text), message))
-    return restored
+    return [_coerce_history_entry(entry) for entry in value]
 
 
 def _prepare_xarray_dataset_for_netcdf(dataset):
@@ -421,7 +699,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
     )
 
     # history
-    _history = tr.List(tr.Tuple(), allow_none=True)
+    _history = tr.List(allow_none=True)
 
     # Dates
     _acquisition_date = tr.Instance(datetime, allow_none=True)
@@ -558,7 +836,12 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             new_coords = self._coordset._slice_dims(self.dims, items)
             new.set_coordset(*new_coords, keepnames=True)
 
-        new.history = f"Slice extracted: ({saveditems})"
+        parameters = _history_selection(saveditems, list(self.dims), items)
+        new._append_history_entry(
+            operation="slice",
+            parameters=parameters,
+            message=_history_selection_message(parameters),
+        )
         return new
 
     def __getattr__(self, item):
@@ -732,10 +1015,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
     @tr.validate("_history")
     def _history_validate(self, proposal):
         history = proposal["value"]
-        if isinstance(history, list) or history is None:
-            # reset
-            self._history = None
-        return history
+        return _restore_portable_history(history)
 
     # @tr.validate("_modified")
     # def _modified_validate(self, proposal):
@@ -1043,29 +1323,85 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
 
     @property
     def history(self):
-        """Describes the history of actions made on this array (List of strings)."""
+        """
+        Return the readable, timestamped view of the dataset history.
+
+        This read-only, list-compatible view of strings is rendered from the
+        single structured history store. Mutating the view raises `TypeError`;
+        use `annotate`, `replace_history`, or `clear_history` instead. Assigning
+        a string appends a text annotation, assigning a list replaces the
+        history with all its elements, and assigning `None` does nothing. Use
+        `history_entries` to inspect detached structured entries.
+        """
         history = []
-        for date, value in self._history:
-            date = date.astimezone(self._timezone).isoformat(
-                sep=" ",
-                timespec="seconds",
+        for entry in self._history:
+            date = (
+                entry["date"]
+                .astimezone(self._timezone)
+                .isoformat(
+                    sep=" ",
+                    timespec="seconds",
+                )
             )
-            value = value[0].capitalize() + value[1:]
-            history.append(f"{date}> {value}")
-        return history
+            message = entry["message"] or entry["operation"] or "History entry"
+            message = message[0].capitalize() + message[1:]
+            history.append(f"{date}> {message}")
+        return _ReadOnlyHistory(history)
 
     @history.setter
     def history(self, value):
         if value is None:
             return
         if isinstance(value, list):
-            # history will be replaced
-            self._history = []
-            if len(value) == 0:
-                return
-            value = value[0]
-        date = utcnow()
-        self._history.append((date, value))
+            self.replace_history(value)
+            return
+        self.annotate(value)
+
+    @property
+    def history_entries(self):
+        """
+        Return detached structured history entries.
+
+        Every entry has four fields: ``date`` is a `datetime`, ``operation`` is
+        a string identifier or `None`, ``parameters`` is a detached dictionary,
+        and ``message`` is readable text. Text-only entries normally use
+        ``operation=None`` and an empty parameters dictionary. Mutating the
+        returned list, dictionaries, or nested values does not affect the
+        dataset.
+        """
+        return deepcopy(self._history)
+
+    def annotate(self, message, *, date=None):
+        """Append a text-only annotation, optionally at a supplied date."""
+        self._append_history_entry(date=date, message=message)
+
+    def replace_history(self, entries):
+        """Replace history with every structured or legacy entry in a list."""
+        if not isinstance(entries, list):
+            raise TypeError("History replacement requires a list of entries")
+        self._history = [_coerce_history_entry(entry) for entry in entries]
+
+    def clear_history(self):
+        """Remove every entry from the dataset history."""
+        self._history = []
+
+    def _append_history_entry(
+        self,
+        *,
+        operation=None,
+        parameters=None,
+        message="",
+        date=None,
+    ):
+        """Append one canonical entry after a successful action."""
+        self._history.append(
+            _history_entry(
+                date=date,
+                operation=operation,
+                parameters=parameters,
+                message=message,
+            )
+        )
 
     def coord(self, dim="x"):
         """
@@ -1669,8 +2005,8 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             data_attrs["units"] = str(self.units)
 
         dataset_attrs = {
-            "scpy_format": "nddataset-xarray",
-            "scpy_version": 1,
+            "scpy_format": NDDATASET_XARRAY_FORMAT,
+            "scpy_version": NDDATASET_XARRAY_VERSION,
             "scpy_primary_variable": primary_name,
             "scpy_name": self.name,
             "scpy_title": self.title,
@@ -1686,7 +2022,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             serialized = _serialize_portable_datetime(value)
             if serialized is not None:
                 dataset_attrs[dataset_attr] = serialized
-        serialized_history = _serialize_portable_history(self.history)
+        serialized_history = _serialize_portable_history(self._history)
         if serialized_history is not None:
             dataset_attrs["scpy_history"] = serialized_history
         if meta:
@@ -1791,6 +2127,18 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
 
         if not isinstance(dataset, xr.Dataset):
             raise SpectroChemPyError("from_xarray() expects an xarray.Dataset.")
+
+        format_marker = dataset.attrs.get("scpy_format")
+        if format_marker is not None and format_marker != NDDATASET_XARRAY_FORMAT:
+            raise SpectroChemPyError(
+                f"Unsupported NDDataset xarray format: {format_marker!r}."
+            )
+        if format_marker == NDDATASET_XARRAY_FORMAT:
+            version = dataset.attrs.get("scpy_version")
+            if version not in SUPPORTED_NDDATASET_XARRAY_VERSIONS:
+                raise SpectroChemPyError(
+                    f"Unsupported NDDataset xarray format version: {version!r}."
+                )
 
         primary_name = dataset.attrs.get("scpy_primary_variable")
         if primary_name is None:
@@ -1988,8 +2336,15 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         swapdims : Interchange two dimensions of a NDDataset.
         """
         new = super().transpose(*dims, inplace=inplace)
-        new.history = (
-            f"Data transposed between dims: {dims}" if dims else "Data transposed"
+        message = f"Data transposed between dims: {dims}" if dims else "Data transposed"
+        new._append_history_entry(
+            operation="transpose",
+            parameters={
+                "requested_dims": list(dims),
+                "result_dims": list(new.dims),
+                "inplace": inplace,
+            },
+            message=message,
         )
 
         return new

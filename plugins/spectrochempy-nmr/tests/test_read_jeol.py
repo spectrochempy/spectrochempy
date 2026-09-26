@@ -110,6 +110,8 @@ class TestReadJeol:
         ds = _read_jeol_or_skip(str(JEOL_DIR / "1H.jdf"))
         assert ds.shape == (32768,)
         assert ds.origin == "jeol"
+        assert ds.history_entries[-1]["operation"] is None
+        assert ds.history_entries[-1]["message"] == "Imported JEOL JDF file 1H.jdf"
 
     def test_read_13c(self):
         ds = _read_jeol_or_skip(str(JEOL_DIR / "13C.jdf"))

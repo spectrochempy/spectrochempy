@@ -473,7 +473,7 @@ class PSD(BaseConfigurable):
             x=time_coord.copy(),
         )
         T.title = "Demodulation coefficients"
-        T.history = "Created by SpectroChemPy PSD"
+        T.history = "Computed PSD demodulation coefficients"
 
         return T
 
@@ -617,14 +617,14 @@ class PSD(BaseConfigurable):
         in_phase.set_coordset(x=x_coord)
         in_phase.units = prs.units
         in_phase.title = "In-phase spectrum (0°)"
-        in_phase.history = "Created by SpectroChemPy PSD"
+        in_phase.history = "Extracted PSD in-phase spectrum"
 
         quadrature = NDDataset(quadrature_data)
         quadrature.dims = ["x"]
         quadrature.set_coordset(x=x_coord)
         quadrature.units = prs.units
         quadrature.title = "Quadrature spectrum (90°)"
-        quadrature.history = "Created by SpectroChemPy PSD"
+        quadrature.history = "Extracted PSD quadrature spectrum"
 
         # Compute amplitude
         amplitude_data = np.sqrt(in_phase.data**2 + quadrature.data**2)
@@ -633,7 +633,7 @@ class PSD(BaseConfigurable):
         amplitude.set_coordset(**in_phase.coordset)
         amplitude.units = in_phase.units
         amplitude.title = "PSD Amplitude"
-        amplitude.history = "Created by SpectroChemPy PSD"
+        amplitude.history = "Computed PSD amplitude"
 
         # Compute phase lag using np.arctan2
         phase_lag_data = np.arctan2(quadrature.data, in_phase.data)
@@ -651,7 +651,7 @@ class PSD(BaseConfigurable):
         phase_lag.set_coordset(**in_phase.coordset)
         phase_lag.units = phase_lag_units
         phase_lag.title = "Phase lag"
-        phase_lag.history = "Created by SpectroChemPy PSD"
+        phase_lag.history = f"Computed PSD phase lag in {self.phase_unit}"
 
         return in_phase, quadrature, amplitude, phase_lag
 
@@ -714,7 +714,7 @@ class PSD(BaseConfigurable):
 
         psd.units = X.units if hasattr(X, "units") else None
         psd.title = X.title if hasattr(X, "title") else "data"
-        psd.history = "Created by SpectroChemPy PSD"
+        psd.history = f"Computed PSD using {self.demodulation} demodulation"
 
         # Extract in_phase (phi=0°), quadrature (phi=90°), amplitude, phase lag
         in_phase, quadrature, amplitude, phase_lag = self._extract_components(

@@ -379,7 +379,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
 
         # update history
         s = "ifft" if inv else "fft"
-        new.history = f"{s} applied on dimension {dim}"
+        new.history = f"Applied {s.upper()} on dimension {dim}"
 
         # PHASE ?
         iscomplex = new.is_complex or new.is_interleaved

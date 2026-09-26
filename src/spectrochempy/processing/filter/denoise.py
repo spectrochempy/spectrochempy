@@ -202,6 +202,6 @@ def despike(dataset, size=9, delta=2, method="katsumoto"):
             X[select] -= (X - A)[select]
 
         new.data[k] = X
-    new.history = f"despiked with method={method}, size={size}, delta={delta}"
+    new.history = f"Removed spikes using {method} (size={size}, delta={delta})"
 
     return new

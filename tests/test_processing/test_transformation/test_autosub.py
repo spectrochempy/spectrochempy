@@ -89,6 +89,8 @@ def test_autosub(IR_dataset_2D):
 
 def test_autosub_synthetic_last_dimension():
     dataset, ref_x, _ = _make_synthetic_autosub_dataset()
+    dataset.history = "source history"
+    source_history = dataset.history_entries
 
     result = dataset.autosub(
         ref_x,
@@ -103,6 +105,10 @@ def test_autosub_synthetic_last_dimension():
         dataset.data, np.outer([1.0, 2.0, -0.5, 0.25], ref_x.data)
     )
     np.testing.assert_allclose(result.data, 0.0, atol=1.0e-10)
+    assert dataset.history_entries == source_history
+    assert result.history_entries[0] == source_history[0]
+    assert result.history_entries[-1]["operation"] is None
+    assert result.history_entries[-1]["message"].startswith("Subtracted reference ")
 
 
 def test_autosub_synthetic_non_last_dimension():

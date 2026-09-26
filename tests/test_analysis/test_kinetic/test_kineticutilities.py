@@ -108,6 +108,8 @@ class TestActionMassKinetics:
         C = kin.integrate(time)
         assert C.shape == (10, 3)
         assert np.all(np.isfinite(C.data))
+        assert C.history_entries[-1]["operation"] is None
+        assert C.history_entries[-1]["message"] == "Integrated action-mass kinetics"
 
     def test_fit_isothermal(self):
         """Isothermal fitting should recover true Arrhenius parameters."""

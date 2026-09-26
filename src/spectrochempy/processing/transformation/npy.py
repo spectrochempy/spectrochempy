@@ -84,7 +84,7 @@ def dot(a, b, strict=False, out=None):
     coordy = getattr(a, a.dims[0]) if a.coordset is not None else None
     coordx = getattr(b, b.dims[1]) if b.coordset is not None else None
 
-    history = f"Dot product between {a.name} and {b.name}"
+    history = f"Computed dot product of {a.name} and {b.name}"
 
     # make the output
     # ----------------------------------------------------------------------------------

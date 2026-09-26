@@ -404,7 +404,7 @@ def _read_sp(*args, **kwargs):
     dataset.origin = "perkinelmer"
     dataset.name = Path(filename).stem
     dataset.filename = filename
-    dataset.history = f"Imported from PerkinElmer .sp file {filename}."
+    dataset.history = f"Imported PerkinElmer SP file {Path(filename).name}"
 
     # Coordinates
     x = Coord(spf.wavelength, title="wavelength", units="nm")

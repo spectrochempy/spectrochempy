@@ -126,6 +126,10 @@ def test_IRIS():
 
     f1 = iris1.f.copy()
     assert f1.shape == (1, q[2], X.shape[1])
+    assert f1.history_entries[-1]["operation"] is None
+    assert f1.history_entries[-1]["message"] == (
+        f"Computed 2D IRIS distribution from {X.name}"
+    )
 
     X_hat = iris1.inverse_transform()
     assert X_hat.squeeze().shape == X.shape

@@ -304,9 +304,7 @@ class TestDatasetScalarArithmetic:
         )
 
     def test_sub_history(self, rich_dataset):
-        assert_history_appended(
-            rich_dataset - 2.0, rich_dataset, "Binary operation sub"
-        )
+        assert_history_appended(rich_dataset - 2.0, rich_dataset, "Subtracted")
 
     def test_mul_history(self, rich_dataset):
         assert_history_appended(
@@ -444,7 +442,7 @@ class TestDatasetDatasetArithmetic:
 
     def test_sub_history(self, rich_dataset, compatible_dataset):
         assert_history_appended(
-            rich_dataset - compatible_dataset, rich_dataset, "Binary operation sub"
+            rich_dataset - compatible_dataset, rich_dataset, "Subtracted"
         )
 
     # ---- metadata from first operand ----
@@ -761,7 +759,7 @@ class TestHistoryBehavior:
         assert "Initial creation" in str(result.history[0])
         assert "Binary operation add" in str(result.history[1])
         assert "Binary operation mul" in str(result.history[2])
-        assert "Binary operation sub" in str(result.history[3])
+        assert "Subtracted" in str(result.history[3])
 
     def test_abs_history_message(self, rich_dataset):
         result = abs(rich_dataset)

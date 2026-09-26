@@ -58,7 +58,10 @@ def _zf_method(method):
             x._data = np.arange(offset, offset + new._data.shape[-1] * inc, inc)
             # update with the new td
             new.meta.td[-1] = x.size
-            new.history = f"`{method.__name__}` shift performed on dimension `{dim}` with parameters: {kwargs}"
+            new.history = (
+                f"Applied {method.__name__} zero filling on dimension {dim} "
+                f"with parameters: {kwargs}"
+            )
 
         else:
             error_(

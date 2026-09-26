@@ -119,8 +119,15 @@ def test_nmr_manual_1D_phasing(NMR_dataset_1D):
     dataset1D.em(lb=10.0 * ur.Hz)
     transf = dataset1D.fft(tdeff=8192, size=2**15)
 
+    source_history = transf.history_entries
     # phasing with default pivot and phc0=0 should return same data
     transfph = transf.pk(verbose=True)
+    assert transf.history_entries == source_history
+    assert transfph.history_entries[:-1] == source_history
+    assert transfph.history_entries[-1]["operation"] is None
+    assert transfph.history_entries[-1]["message"].startswith(
+        "Applied pk phasing on dimension"
+    )
     assert_array_equal(transfph.data, transf.data)
 
     # with phc0=0 (default), pivot position doesn't change the data
@@ -134,6 +141,30 @@ def test_nmr_manual_1D_phasing(NMR_dataset_1D):
     # inplace=True returns the same object
     transfph5 = transf.pk(pivot=100, verbose=True, inplace=True)
     assert transfph5 is transf
+
+
+def test_nmr_inplace_phasing_detaches_readonly_data_alias(NMR_dataset_1D):
+    dataset = NMR_dataset_1D.copy()
+    dataset /= dataset.real.data.max()
+    transformed = dataset.fft(tdeff=8192, size=2**15)
+
+    data_alias = transformed.data
+    original_data = data_alias.copy()
+    data_alias.flags.writeable = False
+    original_history = transformed.history_entries
+
+    result = transformed.pk(phc0=40.0, inplace=True)
+
+    assert result is transformed
+    assert_array_equal(data_alias, original_data)
+    assert not np.shares_memory(result.data, data_alias)
+    assert not np.array_equal(result.data, original_data)
+    assert result.data.flags.writeable
+    assert result.history_entries[:-1] == original_history
+    assert result.history_entries[-1]["operation"] is None
+    assert result.history_entries[-1]["message"].startswith(
+        "Applied pk phasing on dimension"
+    )
 
 
 # ---------------------------------------------------------------------------

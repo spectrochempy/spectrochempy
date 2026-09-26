@@ -121,7 +121,7 @@ def _apodize_method(**units):
 
                 if not dryrun:
                     new.history = (
-                        f"`{method.__name__}` apodization performed on dimension `{dim}` "
+                        f"Applied {method.__name__} apodization on dimension {dim} "
                         f"with parameters: {apod}"
                     )
 
