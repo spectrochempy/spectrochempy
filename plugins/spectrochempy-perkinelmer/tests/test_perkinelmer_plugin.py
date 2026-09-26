@@ -83,7 +83,7 @@ def test_sp_parser_invalid_signature() -> None:
 def test_plugin_metadata() -> None:
     plugin = PerkinElmerPlugin()
     assert plugin.name == "perkinelmer"
-    assert plugin.version == "0.1.2"
+    assert plugin.version == "0.1.5"
     assert plugin.description
     assert PluginCapability.READER in plugin.capabilities
 
