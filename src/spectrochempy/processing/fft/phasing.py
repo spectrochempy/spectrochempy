@@ -37,6 +37,11 @@ pi = np.pi
 def _phase_method(method):
     @functools.wraps(method)
     def wrapper(dataset, **kwargs):
+        if kwargs.pop("inv", False):
+            raise NotImplementedError(
+                "Inverse phasing is not implemented. Pass inv=False or omit it."
+            )
+
         # On which axis do we want to phase (get axis from arguments)
         axis, dim = dataset.get_axis(**kwargs, negative_axis=True)
 
@@ -200,7 +205,8 @@ def pk(dataset, phc0=0.0, phc1=0.0, exptc=0.0, pivot=0.0, **kwargs):
         Specify on which dimension to apply the phase. If `dim` is specified as an integer it is equivalent
         to the usual `axis` numpy parameter.
     inv : bool, keyword parameter, optional, default=False.
-        True for inverse phasing.
+        Inverse phasing is not implemented. Passing `True` raises
+        `NotImplementedError` before the dataset is modified.
     inplace : bool, keyword parameter, optional, default=False.
         True if we make the transform inplace.  If False, the function return a new dataset.
 
@@ -250,7 +256,8 @@ def pk_exp(dataset, phc0=0.0, pivot=0.0, exptc=0.0, **kwargs):
         Specify on which dimension to apply the phase. If `dim` is specified as an integer it is equivalent
         to the usual `axis` numpy parameter.
     inv : bool, keyword parameter, optional, default=False.
-        True for inverse phasing.
+        Inverse phasing is not implemented. Passing `True` raises
+        `NotImplementedError` before the dataset is modified.
     inplace : bool, keyword parameter, optional, default=False.
         True if we make the transform inplace.  If False, the function return a new dataset.
 

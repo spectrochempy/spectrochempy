@@ -4,6 +4,8 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 
+import copy
+
 import numpy as np
 import pytest
 
@@ -135,3 +137,41 @@ def test_pk_exp_inplace_preserves_buffer_isolation_and_single_history_entry():
     assert result.history_entries[-1]["message"].startswith(
         "Applied pk phasing on dimension"
     )
+
+
+@pytest.mark.parametrize("name", ["pk", "pk_exp"])
+def test_phasing_rejects_inverse_before_mutating_source(name):
+    source = _phasing_dataset()
+    source.annotate("Synthetic source")
+    source.meta.sample_name = "inverse rejection"
+    original_data = source.data.copy()
+    original_dims = list(source.dims)
+    original_meta = copy.deepcopy(source.meta)
+    original_history = source.history_entries
+
+    with pytest.raises(NotImplementedError, match="Inverse phasing is not implemented"):
+        getattr(source, name)(
+            phc0=30,
+            exptc=1,
+            dim="y",
+            inplace=True,
+            inv=True,
+        )
+
+    np.testing.assert_array_equal(source.data, original_data)
+    assert source.dims == original_dims
+    assert source.meta == original_meta
+    assert source.history_entries == original_history
+
+
+@pytest.mark.parametrize("name", ["pk", "pk_exp"])
+def test_phasing_inv_false_matches_default(name):
+    source = _phasing_dataset()
+    options = {"phc0": 30, "exptc": 1, "dim": "y"}
+
+    default = getattr(source, name)(**options)
+    explicit = getattr(source, name)(**options, inv=False)
+
+    np.testing.assert_allclose(explicit.data, default.data)
+    assert explicit.dims == default.dims
+    assert explicit.meta == default.meta

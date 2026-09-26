@@ -36,6 +36,9 @@ Bug Fixes
   ``general_hamming()``. ``pk_exp()`` likewise forwards dimension, axis, and
   in-place options to ``pk()`` instead of silently applying the correction on
   the default axis to a copy.
+- ``pk()`` and ``pk_exp()`` now reject the unsupported ``inv=True`` option with
+  ``NotImplementedError`` before modifying the dataset. Their default and
+  explicit ``inv=False`` behavior is unchanged.
 - Harmonized newly generated history messages across core and official-plugin
   imports, common spectral treatments, and analysis results. Individual-file
   imports now identify the format and portable filename while the complete
