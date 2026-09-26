@@ -10,7 +10,6 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
-
 _MUTATING_METHODS = {
     "append",
     "extend",
@@ -55,9 +54,12 @@ def _direct_view_mutations(tree):
             targets = [node.target]
 
         for target in targets:
-            if isinstance(node, ast.AugAssign) and isinstance(target, ast.Attribute):
-                if target.attr in _VIEW_ATTRIBUTES:
-                    yield node.lineno, ast.unparse(target)
+            if (
+                isinstance(node, ast.AugAssign)
+                and isinstance(target, ast.Attribute)
+                and target.attr in _VIEW_ATTRIBUTES
+            ):
+                yield node.lineno, ast.unparse(target)
             if isinstance(target, ast.Subscript):
                 owner = target.value
                 if isinstance(owner, ast.Attribute) and owner.attr in _VIEW_ATTRIBUTES:
@@ -65,7 +67,8 @@ def _direct_view_mutations(tree):
 
 
 def test_production_code_does_not_mutate_detached_history_views_directly():
-    """Reject obvious ineffective writes without claiming full alias analysis.
+    """
+    Reject obvious ineffective writes without claiming full alias analysis.
 
     The single allowlisted call is the MCR-ALS model iteration history, not an
     ``NDDataset`` history. Public setters and legitimate canonical ``_history``
