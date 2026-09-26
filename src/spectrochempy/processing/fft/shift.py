@@ -28,10 +28,40 @@ from spectrochempy.utils.decorators import _units_agnostic_method
 pi = np.pi
 
 
+def _right_shift(array, pts=0.0, **kwargs):
+    points = int(pts)
+    shifted = np.roll(array, points, axis=-1)
+    shifted[..., :points] = 0
+    return shifted
+
+
+def _left_shift(array, pts=0.0, **kwargs):
+    points = int(pts)
+    shifted = np.roll(array, -points, axis=-1)
+    if points:
+        shifted[..., -points:] = 0
+    return shifted
+
+
+def _roll(array, pts=0.0, neg=False, **kwargs):
+    points = int(pts)
+    shifted = np.roll(array, points, axis=-1)
+    if neg and points:
+        if points > 0:
+            shifted[..., :points] = -shifted[..., :points]
+        else:
+            shifted[..., points:] = -shifted[..., points:]
+    return shifted
+
+
+def _roll_mask(mask, pts=0.0, **kwargs):
+    return np.roll(mask, int(pts), axis=-1)
+
+
 # ======================================================================================
 # Public methods
 # ======================================================================================
-@_units_agnostic_method
+@_units_agnostic_method(mask_transform=_right_shift)
 def rs(dataset, pts=0.0, **kwargs):
     """
     Right shift and zero fill.
@@ -50,6 +80,8 @@ def rs(dataset, pts=0.0, **kwargs):
     -------
     dataset
         Dataset right shifted and zero filled.
+        Masked source points move with their values; introduced zeros are
+        valid, unmasked points.
 
     Other Parameters
     ----------------
@@ -64,12 +96,10 @@ def rs(dataset, pts=0.0, **kwargs):
     roll : shift without zero filling.
 
     """
-    data = np.roll(dataset, int(pts), axis=-1)
-    data[..., : int(pts)] = 0
-    return data
+    return _right_shift(dataset, pts=pts)
 
 
-@_units_agnostic_method
+@_units_agnostic_method(mask_transform=_left_shift)
 def ls(dataset, pts=0.0, **kwargs):
     """
     Left shift and zero fill.
@@ -88,6 +118,8 @@ def ls(dataset, pts=0.0, **kwargs):
     -------
     `NDDataset`
         Modified dataset.
+        Masked source points move with their values; introduced zeros are
+        valid, unmasked points.
 
     Other Parameters
     ----------------
@@ -102,9 +134,7 @@ def ls(dataset, pts=0.0, **kwargs):
     roll : shift without zero filling.
 
     """
-    data = np.roll(dataset, -int(pts), axis=-1)
-    data[..., -int(pts) :] = 0
-    return data
+    return _left_shift(dataset, pts=pts)
 
 
 # no decorator as it delegate to roll
@@ -142,10 +172,10 @@ def cs(dataset, pts=0.0, neg=False, **kwargs):
     roll : shift without zero filling.
 
     """
-    return roll(dataset, pts, neg, **kwargs)
+    return roll(dataset, pts=pts, neg=neg, **kwargs)
 
 
-@_units_agnostic_method
+@_units_agnostic_method(mask_transform=_roll_mask)
 def roll(dataset, pts=0.0, neg=False, **kwargs):
     """
     Roll dimensions.
@@ -180,13 +210,7 @@ def roll(dataset, pts=0.0, neg=False, **kwargs):
     ls, rs, cs, fsh, fsh2
 
     """
-    data = np.roll(dataset, int(pts), axis=-1)
-    if neg:
-        if pts > 0:
-            data[..., : int(pts)] = -data[..., : int(pts)]
-        else:
-            data[..., int(pts) :] = -data[..., int(pts) :]
-    return data
+    return _roll(dataset, pts=pts, neg=neg)
 
 
 @_units_agnostic_method

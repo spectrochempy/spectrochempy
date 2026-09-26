@@ -38,6 +38,20 @@ Bug Fixes
   those used at fit time, preventing coefficients from being applied silently
   to different variables. Cross-validation also preserves the original feature
   geometry for preprocessors such as MSC (#1657).
+- ``hamming()`` and ``hann()`` now honor their documented dimension, axis,
+  in-place, returned-window, reverse, and inverse options when delegating to
+  ``general_hamming()``. ``pk_exp()`` likewise forwards dimension, axis, and
+  in-place options to ``pk()`` instead of silently applying the correction on
+  the default axis to a copy (#1682).
+- ``pk()`` and ``pk_exp()`` now reject the unsupported ``inv=True`` option with
+  ``NotImplementedError`` before modifying the dataset. Their default and
+  explicit ``inv=False`` behavior is unchanged (#1682).
+- Discrete shifts now move masks with their corresponding values. Circular
+  shifts therefore preserve masked statistics, while the zeros introduced by
+  left and right shifts are valid, unmasked points. A zero-point left shift no
+  longer clears the dataset, a zero-point circular shift with ``neg=True`` no
+  longer negates it, and ``cs()`` once again delegates successfully to
+  ``roll()`` with a single history entry (#1683).
 - Harmonized newly generated history messages in core readers, common spectral
   treatments, and analysis results. Individual-file imports identify the
   format and portable filename while the complete source remains in

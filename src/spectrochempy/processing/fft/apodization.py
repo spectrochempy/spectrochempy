@@ -560,7 +560,7 @@ def hamming(dataset, **kwargs):
     general_hamming, hann
 
     """
-    return general_hamming(dataset, alpha=0.54)
+    return general_hamming(dataset, alpha=0.54, **kwargs)
 
 
 def hann(dataset, **kwargs):
@@ -613,7 +613,7 @@ def hann(dataset, **kwargs):
     general_hamming, hamming
 
     """
-    return general_hamming(dataset, alpha=0.5)
+    return general_hamming(dataset, alpha=0.5, **kwargs)
 
 
 @_apodize_method()
