@@ -372,7 +372,7 @@ def _read_mat(*args, **kwargs):
             dataset.name = name
             dataset.filename = filename
             dataset.origin = "matlab"
-            dataset.history = "Imported from .mat file"
+            dataset.history = f"Imported MATLAB file {filename.name}"
             # TODO: reshape from fortran/Matlab order to C opder
             # for 3D or higher datasets ?
             datasets.append(dataset)
@@ -500,5 +500,5 @@ def _read_dso(dataset, name, data):
     for entry in data["history"][0, 0].ravel():
         dataset.history = entry.item()
 
-    dataset.history = "Imported by spectrochempy."
+    dataset.history = "Imported SpectroChemPy MATLAB dataset"
     return dataset

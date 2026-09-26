@@ -178,6 +178,11 @@ class TestSimpsonReader:
         assert ds.ndim == 1
         assert ds.shape == (8,)
         assert ds.origin == "simpson"
+        assert ds.history_entries[-1]["operation"] is None
+        assert ds.history_entries[-1]["message"].startswith(
+            "Imported SIMPSON dataset 1d_text.spe"
+        )
+        assert ds.filename == path.parent
 
     def test_read_simpson_text_2d(self, tmp_path):
         path = tmp_path / "2d_text.spe"

@@ -119,8 +119,15 @@ def test_nmr_manual_1D_phasing(NMR_dataset_1D):
     dataset1D.em(lb=10.0 * ur.Hz)
     transf = dataset1D.fft(tdeff=8192, size=2**15)
 
+    source_history = transf.history_entries
     # phasing with default pivot and phc0=0 should return same data
     transfph = transf.pk(verbose=True)
+    assert transf.history_entries == source_history
+    assert transfph.history_entries[:-1] == source_history
+    assert transfph.history_entries[-1]["operation"] is None
+    assert transfph.history_entries[-1]["message"].startswith(
+        "Applied pk phasing on dimension"
+    )
     assert_array_equal(transfph.data, transf.data)
 
     # with phc0=0 (default), pivot position doesn't change the data

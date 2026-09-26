@@ -458,6 +458,8 @@ def _read_agilent(*args, **kwargs):
         with contextlib.suppress(ValueError, TypeError):
             dataset.acquisition_date = datetime.fromisoformat(str(date_str))
 
-    dataset.history = "Imported from Agilent/Varian dataset"
+    dataset.history = (
+        f"Imported Agilent/Varian dataset {data_dir.name} ({meta.datatype})"
+    )
 
     return dataset

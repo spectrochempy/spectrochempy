@@ -380,9 +380,22 @@ class TestPSD:
     def test_psd_output_components(self, grouped_3d):
         """Output components exist, are finite, and DC offset does not affect results."""
         ds, _, _, _ = grouped_3d
+        ds.history = "source history"
+        source_history = ds.history_entries
         psd = PSD(demodulation="matrix", phi=np.arange(0.0, 360.0, 15.0))
         result = psd.transform(ds)
 
+        assert ds.history_entries == source_history
+        for dataset, expected_message in (
+            (result.prs, "Computed PSD using matrix demodulation"),
+            (result.in_phase, "Extracted PSD in-phase spectrum"),
+            (result.quadrature, "Extracted PSD quadrature spectrum"),
+            (result.amplitude, "Computed PSD amplitude"),
+            (result.phase_lag, "Computed PSD phase lag in degrees"),
+            (result.T, "Computed PSD demodulation coefficients"),
+        ):
+            assert dataset.history_entries[-1]["operation"] is None
+            assert dataset.history_entries[-1]["message"] == expected_message
         assert result.in_phase is not None
         assert result.quadrature is not None
         assert result.amplitude is not None

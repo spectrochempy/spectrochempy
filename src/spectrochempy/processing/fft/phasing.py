@@ -120,9 +120,12 @@ def _phase_method(method):
                         _phased_by_plugin = True
 
             if not _phased_by_plugin:
-                new *= apod
+                new._data *= apod
 
-            new.history = f"`{method.__name__}` applied to dimension `{dim}` with parameters: {kwargs}"
+            new.history = (
+                f"Applied {method.__name__} phasing on dimension {dim} "
+                f"with parameters: {kwargs}"
+            )
 
             if not new.meta.phased[-1]:
                 new.meta.phased[-1] = True

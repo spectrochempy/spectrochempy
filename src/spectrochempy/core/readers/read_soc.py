@@ -473,7 +473,7 @@ def read_sdr(*paths, **kwargs):
 def _read_ddr(*args, **kwargs):
     ds = _read_spa(*args, **kwargs)
     ds.origin = "soc"
-    ds.history = "Imported from SOC DDR file"
+    ds.history = f"Imported SOC DDR file {ds.filename.name}"
     return ds
 
 
@@ -481,7 +481,7 @@ def _read_ddr(*args, **kwargs):
 def _read_hdr(*args, **kwargs):
     ds = _read_spa(*args, **kwargs)
     ds.origin = "soc"
-    ds.history = "Imported from SOC HDR file"
+    ds.history = f"Imported SOC HDR file {ds.filename.name}"
     return ds
 
 
@@ -489,5 +489,5 @@ def _read_hdr(*args, **kwargs):
 def _read_sdr(*args, **kwargs):
     ds = _read_spa(*args, **kwargs)
     ds.origin = "soc"
-    ds.history = "Imported from SOC SDR file"
+    ds.history = f"Imported SOC SDR file {ds.filename.name}"
     return ds

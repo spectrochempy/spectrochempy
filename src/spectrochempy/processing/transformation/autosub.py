@@ -160,7 +160,7 @@ def autosub(
     if swapped:
         new = new.swapdims(axis, -1)
 
-    new.history = f"Automatic subtraction of {ref.name}"
+    new.history = f"Subtracted reference {ref.name} automatically"
 
     if return_coefs:
         return new, x

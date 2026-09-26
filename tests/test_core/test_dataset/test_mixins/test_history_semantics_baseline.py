@@ -339,7 +339,7 @@ class TestMultiSourceOperations:
         )
 
     def test_importer_merge_replaces_history(self):
-        """Importer merge replaces history with 'Merged from several files'."""
+        """Importer merge records the assembled dataset count."""
         a = scp.NDDataset([[1, 2], [3, 4]], name="A")
         b = scp.NDDataset([[5, 6], [7, 8]], name="B")
         a.history = ["History A"]
@@ -353,7 +353,7 @@ class TestMultiSourceOperations:
 
         assert len(result) == 1
         text = _entry(result[0].history[-1])
-        assert text in ("Merged from several files", "Stacked from several files")
+        assert text == "Merged 2 imported datasets"
 
 
 # ===========================================================================

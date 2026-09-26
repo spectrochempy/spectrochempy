@@ -196,7 +196,7 @@ def test_read_spg_history_appended():
     nd = scp.read_spg(WODGER, sortbydate=True)
     # History is a list of timestamp-prefixed strings
     history_text = " ".join(nd.history)
-    assert "Imported from spg file" in history_text
+    assert "Imported OMNIC SPG file" in history_text
     assert "Sorted by date" in history_text
 
 
@@ -218,7 +218,7 @@ def test_read_spg_history_uses_source_name_and_preserves_source(tmp_path):
     for dataset, path in zip(datasets, paths, strict=True):
         messages = [entry["message"] for entry in dataset.history_entries]
         assert messages == [
-            f"Imported from spg file {source_name}.",
+            f"Imported OMNIC SPG file {source_name}",
             "Sorted by date",
         ]
         assert str(path.parent) not in messages[0]
@@ -247,7 +247,7 @@ def test_read_srs_persists_vendor_and_import_history(
 
     entries = dataset.history_entries
     messages = [entry["message"] for entry in entries]
-    expected_import = f"imported from srs file {path}"
+    expected_import = f"Imported OMNIC SRS file {path.name}"
     assert messages[-1] == expected_import
     assert all(entry["operation"] is None for entry in entries)
     assert all(entry["parameters"] == {} for entry in entries)
@@ -281,7 +281,7 @@ def test_read_srs_empty_vendor_history_keeps_only_import_message(monkeypatch):
     dataset = scp.read_srs(path)
 
     assert [entry["message"] for entry in dataset.history_entries] == [
-        f"imported from srs file {path}",
+        f"Imported OMNIC SRS file {path.name}",
     ]
 
 

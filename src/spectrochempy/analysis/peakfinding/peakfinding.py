@@ -847,7 +847,7 @@ def find_peaks(
             ]
 
     out.name = "peaks of " + X.name
-    out.history = f"find_peaks(): {len(peaks)} peak(s) found"
+    out.history = f"Found {len(peaks)} peak(s) with find_peaks"
 
     if as_result:
         return PeakFindingResult(

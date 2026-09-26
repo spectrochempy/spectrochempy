@@ -860,10 +860,10 @@ def merge_datasets(datasets, **kwargs):
         try:
             if datasets[0].ndim == 1:
                 dataset = stack(datasets)
-                dataset.history = "Stacked from several files"
+                dataset.history = f"Stacked {len(datasets)} imported datasets"
             else:
                 dataset = concatenate(datasets, axis=0)
-                dataset.history = "Merged from several files"
+                dataset.history = f"Merged {len(datasets)} imported datasets"
 
             # Set merged origin and name
             origins = sorted({ds.origin for ds in datasets if ds.origin})
@@ -893,10 +893,10 @@ def merge_datasets(datasets, **kwargs):
             try:
                 if datasets[0].ndim == 1:
                     dataset = stack(datasets)
-                    dataset.history = "Stacked from several files"
+                    dataset.history = f"Stacked {len(datasets)} imported datasets"
                 else:
                     dataset = concatenate(datasets, axis=0)
-                    dataset.history = "Merged from several files"
+                    dataset.history = f"Merged {len(datasets)} imported datasets"
 
                 if dataset.coordset is not None and kwargs.pop("sortbydate", True):
                     dataset.sort(dim=0, inplace=True)
@@ -924,10 +924,10 @@ def merge_datasets(datasets, **kwargs):
             try:
                 if shape_group[0].ndim == 1:
                     merged = stack(shape_group)
-                    merged.history = "Stacked from several files"
+                    merged.history = f"Stacked {len(shape_group)} imported datasets"
                 else:
                     merged = concatenate(shape_group, axis=0)
-                    merged.history = "Merged from several files"
+                    merged.history = f"Merged {len(shape_group)} imported datasets"
 
                 if merged.coordset is not None and kwargs.pop("sortbydate", True):
                     merged.sort(dim=0, inplace=True)

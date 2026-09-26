@@ -320,6 +320,6 @@ def _read_jdf(*args, **kwargs):
                 creation.get("day", 1),
             )
 
-    dataset.history = "Imported from JEOL JDF dataset"
+    dataset.history = f"Imported JEOL JDF file {path.name}"
 
     return dataset

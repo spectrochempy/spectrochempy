@@ -846,7 +846,7 @@ def _read_spg(*args, **kwargs):
                 )
                 single._date = utcnow()
                 single.history = (
-                    f"Imported from spg file {filename.name} (spectrum {i})."
+                    f"Imported OMNIC SPG file {filename.name} (spectrum {i})"
                 )
                 datasets.append(single)
 
@@ -916,7 +916,7 @@ def _read_spg(*args, **kwargs):
 
     dataset._date = utcnow()
 
-    dataset.history = f"Imported from spg file {filename.name}."
+    dataset.history = f"Imported OMNIC SPG file {filename.name}"
 
     # Attach acquisition metadata from the header.
     # Acquisition parameters (collection_length, reference_frequency,
@@ -1143,7 +1143,7 @@ def _finalize_spa_dataset(dataset, filename, kwargs, parsed, return_ifg):
         dataset.description += "# Comments from Omnic:\n"
         for comment in parsed.comments:
             dataset.description += comment + "\n---------------------\n"
-    dataset.history = "Imported from spa file(s)"
+    dataset.history = f"Imported OMNIC SPA file {filename.name}"
     if parsed.history and parsed.history.strip():
         dataset.history = (
             "Data processing history from Omnic :\n------------------------------------\n"
@@ -1600,7 +1600,7 @@ def _read_srs(*args, **kwargs):
                 "Omnic 'DATA PROCESSING HISTORY' :\n"
                 "--------------------------------\n" + history,
             )
-        dataset.annotate("imported from srs file " + str(filename))
+        dataset.annotate(f"Imported OMNIC SRS file {filename.name}")
 
         dataset.meta.laser_frequency = info["reference_frequency"] * ur("cm^-1")
         dataset.meta.collection_length = info["collection_length"] * ur("s")

@@ -170,6 +170,13 @@ def test_read_perkinelmer_returns_nddataset() -> None:
     ds = read_perkinelmer(DATADIR_SP)
     assert hasattr(ds, "_implements")
     assert ds._implements() == "NDDataset"
+    assert ds.history_entries[-1]["operation"] is None
+    assert (
+        ds.history_entries[-1]["message"]
+        == f"Imported PerkinElmer SP file {DATADIR_SP.name}"
+    )
+    assert ds.filename.name == DATADIR_SP.name
+    assert str(ds.filename.parent) not in {"", "."}
 
 
 @pytest.mark.skipif(not DATADIR_SP.exists(), reason="test .sp file not available")

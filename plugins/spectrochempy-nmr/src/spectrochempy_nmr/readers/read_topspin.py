@@ -1275,6 +1275,9 @@ def _read_topspin(*args, **kwargs):
         with contextlib.suppress(ValueError, OSError, TypeError, OverflowError):
             dataset.acquisition_date = datetime.fromtimestamp(dataset.meta.date[-1])
 
-    dataset.history = "Imported from TopSpin dataset"
+    dataset.history = (
+        f"Imported TopSpin dataset {f_name.name} "
+        f"(expno={expno}, procno={procno}, {datatype})"
+    )
 
     return dataset

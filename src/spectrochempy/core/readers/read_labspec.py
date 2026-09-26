@@ -233,7 +233,7 @@ def _read_txt(*args, **kwargs):
     dataset.description = "Spectrum acquisition : " + str(date_acq)
 
     # Set origin, description and history
-    dataset.history = f"Imported from LabSpec6 text file {filename}"
+    dataset.history = f"Imported LabSpec6 text file {filename.name}"
 
     # reset modification date to cretion date
     dataset._modified = dataset._created

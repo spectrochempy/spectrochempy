@@ -38,6 +38,13 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Harmonized newly generated history messages across core and official-plugin
+  imports, common spectral treatments, and analysis results. Individual-file
+  imports now identify the format and portable filename while the complete
+  source remains in ``dataset.filename``; directory experiments retain useful
+  logical identifiers, and OPUS messages no longer add their own timestamp.
+  Histories restored from existing files and opaque vendor histories are
+  unchanged.
 - OMNIC SRS imports now retain both useful vendor processing history and the
   import message. Empty vendor blocks are omitted, and the import message no
   longer embeds a second timestamp.

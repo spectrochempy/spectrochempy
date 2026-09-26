@@ -239,7 +239,7 @@ def _read_asc(*args, **kwargs):
     # Set origin, acquisition date, description and history
     dataset.origin = "quadera"
     dataset.acquisition_date = datetime.fromtimestamp(min(times[:, 0]), tz=UTC)
-    dataset.history = f"Imported from Quadera asc file {filename}"
+    dataset.history = f"Imported Quadera ASC file {filename.name}"
 
     # reset modification date to cretion date
     dataset._modified = dataset._created

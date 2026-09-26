@@ -124,6 +124,11 @@ class TestReadAgilent:
         assert ds.shape == (1500,)
         assert ds.origin == "agilent"
         assert np.issubdtype(ds.data.dtype, np.complexfloating)
+        assert ds.history_entries[-1]["operation"] is None
+        assert (
+            ds.history_entries[-1]["message"]
+            == "Imported Agilent/Varian dataset agilent_1d (FID)"
+        )
 
     def test_read_1d_directory(self):
         ds = _read_agilent_or_skip(str(AGILENT_DIR / "agilent_1d"))
