@@ -483,19 +483,6 @@ jobs:
           path: ${{ steps.artifact.outputs.path }}
           retention-days: ${{ steps.artifact.outputs.retention }}
 
-      # Temporary review evidence for #1687. Remove after this branch has
-      # demonstrated a complete isolated rebuild of the published stable tag.
-      - name: Validate complete isolated stable documentation reconstruction
-        if: github.event_name == 'push' && github.ref_name == 'docs/fix-stable-snapshot-repair'
-        run: |
-          set -e
-          . .venv/bin/activate
-          STABLE_TAG=$(python .github/workflows/scripts/release_version.py latest-tag)
-          PROOF_ROOT="$RUNNER_TEMP/stable-docs-proof"
-          rm -rf "$PROOF_ROOT"
-          python .github/workflows/scripts/stable_docs_snapshot.py rebuild \
-            --project-root . --published-root "$PROOF_ROOT" --tag "$STABLE_TAG"
-
       # ---------- deploy to gh-pages ----------
       - name: Deployment
         if: steps.publish.outputs.publish == 'true' && (github.event_name != 'pull_request' && !github.event.act)
