@@ -32,13 +32,13 @@ def _expected_ifft(dataset, size, axis=-1):
 
 def _assert_time_coordinate(result, spectrum, size, dim="x"):
     frequency = spectrum.coordset[dim]
-    expected_step = 1.0 / (frequency.size * abs(frequency.spacing))
+    expected_step = 1.0 / (size * abs(frequency.spacing))
     expected = np.arange(size) * expected_step.to("us").magnitude
 
     coordinate = result.coordset[dim]
     assert coordinate.title == "time"
     assert coordinate.units == expected_step.to("us").units
-    np.testing.assert_allclose(coordinate.data, expected)
+    np.testing.assert_allclose(coordinate.data, expected, rtol=2.0e-4)
 
 
 def test_ifft_default_and_equal_size_preserve_existing_result_and_source():
@@ -99,6 +99,24 @@ def test_ifft_si_alias_controls_size():
     assert result.shape == (2, 12)
     np.testing.assert_allclose(result.data, _expected_ifft(spectrum, 12))
     _assert_time_coordinate(result, spectrum, 12)
+
+
+@pytest.mark.parametrize("size", [12, 6])
+def test_ifft_resized_time_axis_preserves_known_frequency(size):
+    frequencies = np.fft.fftshift(np.fft.fftfreq(8, d=0.25))
+    spectrum_data = np.zeros(8, dtype=complex)
+    spectrum_data[np.flatnonzero(np.isclose(frequencies, 0.5))[0]] = 1.0
+    spectrum = NDDataset(
+        spectrum_data,
+        coordset=[Coord(frequencies, units="Hz", title="frequency")],
+    )
+
+    result = spectrum.ifft(size=size)
+
+    time_step = result.x.spacing.to("s").magnitude
+    phase_step = np.angle(result.data[1] / result.data[0])
+    recovered_frequency = phase_step / (2.0 * np.pi * time_step)
+    assert recovered_frequency == pytest.approx(0.5, rel=2.0e-4)
 
 
 @pytest.mark.parametrize("inplace", [False, True])

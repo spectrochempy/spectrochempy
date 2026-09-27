@@ -341,10 +341,9 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
         else:
             # frequency to time
             if x.units is not None and x.units.dimensionality == "1/[time]":
-                # For N regularly spaced frequency bins, the reciprocal time
-                # step is 1 / (N * df), independently of the requested output
-                # size used for padding or truncation.
-                deltat = (1.0 / (x.size * abs(x.spacing))).to("us")
+                # With a preserved frequency-bin spacing, the reciprocal time
+                # step is 1 / (size * df) for the requested output size.
+                deltat = (1.0 / (size * abs(x.spacing))).to("us")
             else:
                 # For ppm or dimensionless coordinates we cannot determine the
                 # correct time step without extra context.  Use a placeholder
