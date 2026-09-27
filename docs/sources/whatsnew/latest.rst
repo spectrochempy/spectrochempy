@@ -31,6 +31,9 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- SPC files containing sub-spectra with distinct x axes now retain each
+  spectrum's x and sub-spectrum coordinates, including their titles and units.
+
 - ``NDDataset.acquisition_date`` is now preserved by copies, out-of-place
   arithmetic results, and native ``.scp`` round trips, including its timezone
   offset. Existing native files without an acquisition date remain readable.

@@ -181,7 +181,17 @@ def test_read_spc_without_collection_time_keeps_acquisition_date_empty(galacticd
     assert str(dataset.y.units) == "s"
 
 
-def _build_spc_header(ftflgs=0x80, npts=0, nsub=0, first=0.0, last=0.0):
+def _build_spc_header(
+    ftflgs=0x80,
+    npts=0,
+    nsub=0,
+    first=0.0,
+    last=0.0,
+    xtype=0,
+    ytype=0,
+    ztype=0,
+    date=0,
+):
     """Build a 512-byte SPC header using the exact struct layout from the reader."""
     head_fmt = "<cccciddicccci9s9sh32s130s30siicchf48sfifc187s"
     return struct.pack(
@@ -194,11 +204,11 @@ def _build_spc_header(ftflgs=0x80, npts=0, nsub=0, first=0.0, last=0.0):
         float(first),  # ffirst
         float(last),  # flast
         nsub,  # fnsub
-        b"\x00",  # fxtype
-        b"\x00",  # fytype
-        b"\x00",  # fztype
+        bytes([xtype]),  # fxtype
+        bytes([ytype]),  # fytype
+        bytes([ztype]),  # fztype
         b"\x00",  # fpost
-        0,  # fdate
+        date,  # fdate
         b"\x00" * 9,  # fres
         b"\x00" * 9,  # fsource
         0,  # fpeakpt
@@ -273,41 +283,128 @@ def _make_xmy_spc(npts=3, nsub=3, shared_x=None, y_lists=None):
     return bytes(buf)
 
 
-def _make_mxy_spc(nsub=3, npts_per_sub=None):
+def _make_mxy_spc(
+    nsub=3,
+    npts_per_sub=None,
+    x_lists=None,
+    y_lists=None,
+    z_values=None,
+    xtype=0,
+    ytype=0,
+    ztype=0,
+    date=0,
+):
     """Build a directory-based MXY SPC file (per-subfile X, TMULTI+TXVALS+TXYXYS).
 
-    Layout: header(512) + directory(nsub*12) + subfiles.
+    Layout: header(512) + subfiles + directory(nsub*12).
     Each subfile: subhdr(32) + X(npts*4) + Y(npts*4).
     """
-    if npts_per_sub is None:
-        npts_per_sub = [4, 3, 5]
-    header = _build_spc_header(ftflgs=0xC4, npts=512, nsub=nsub)
-    dir_offset = 512
-    dir_size = nsub * 12
-    sub_start = dir_offset + dir_size
-    buf = bytearray(header)
-    all_x = []
-    all_y = []
+    if x_lists is None:
+        if npts_per_sub is None:
+            npts_per_sub = [4, 3, 5]
+        x_lists = [
+            np.arange(100 * (i + 1), 100 * (i + 1) + npts, dtype="<f4")
+            for i, npts in enumerate(npts_per_sub)
+        ]
+    else:
+        x_lists = [np.asarray(x, dtype="<f4") for x in x_lists]
+        npts_per_sub = [len(x) for x in x_lists]
+        nsub = len(x_lists)
+    if y_lists is None:
+        y_lists = [
+            np.full(npts, i + 1, dtype="<f4") for i, npts in enumerate(npts_per_sub)
+        ]
+    else:
+        y_lists = [np.asarray(y, dtype="<f4") for y in y_lists]
+    if z_values is None:
+        z_values = np.arange(nsub, dtype="<f4")
+
+    assert len(y_lists) == len(x_lists) == len(z_values)
+    assert all(len(x) == len(y) for x, y in zip(x_lists, y_lists, strict=True))
+
     sub_positions = []
-    pos = sub_start
+    pos = 512
     for i, npts in enumerate(npts_per_sub):
-        x = np.arange(100 * (i + 1), 100 * (i + 1) + npts, dtype="<f4")
-        y = np.ones(npts, dtype="<f4") * (i + 1)
-        all_x.append(x)
-        all_y.append(y)
         ssfsize = 32 + npts * 4 + npts * 4
-        sub_positions.append((pos, ssfsize, float(i)))
+        sub_positions.append((pos, ssfsize, float(z_values[i])))
         pos += ssfsize
-    for ssfposn, ssfsize, ssftime in sub_positions:
-        buf.extend(struct.pack("<IIf", ssfposn, ssfsize, ssftime))
+    directory_offset = pos
+    header = _build_spc_header(
+        ftflgs=0xC4,
+        npts=directory_offset,
+        nsub=nsub,
+        xtype=xtype,
+        ytype=ytype,
+        ztype=ztype,
+        date=date,
+    )
+    buf = bytearray(header)
     for i, npts in enumerate(npts_per_sub):
         subhdr = _build_subheader(
-            subindx=i, subtime=float(i), subnext=float(i + 1), npts=npts
+            subindx=i,
+            subtime=float(z_values[i]),
+            subnext=float(z_values[i] + 1),
+            npts=npts,
         )
         buf.extend(subhdr)
-        buf.extend(all_x[i].tobytes())
-        buf.extend(all_y[i].tobytes())
-    return bytes(buf), all_x, all_y
+        buf.extend(x_lists[i].tobytes())
+        buf.extend(y_lists[i].tobytes())
+    for ssfposn, ssfsize, ssftime in sub_positions:
+        buf.extend(struct.pack("<IIf", ssfposn, ssfsize, ssftime))
+    return bytes(buf), x_lists, y_lists
+
+
+def test_read_spc_preserves_coordinates_for_distinct_x_axes(tmp_path):
+    x_values = [
+        np.array([4000.0, 3990.0, 3980.0], dtype="<f4"),
+        np.array([3500.0, 3480.0, 3460.0], dtype="<f4"),
+    ]
+    y_values = [
+        np.array([0.1, 0.2, 0.3], dtype="<f4"),
+        np.array([1.1, 1.2, 1.3], dtype="<f4"),
+    ]
+    z_values = np.array([2.5, 7.5], dtype="<f4")
+    acquisition_date = datetime(2026, 9, 27, 14, 30)
+    encoded_date = (2026 << 20) | (9 << 16) | (27 << 11) | (14 << 6) | 30
+    content, _, _ = _make_mxy_spc(
+        x_lists=x_values,
+        y_lists=y_values,
+        z_values=z_values,
+        xtype=1,
+        ytype=2,
+        ztype=4,
+        date=encoded_date,
+    )
+    path = tmp_path / "distinct-x.spc"
+    path.write_bytes(content)
+
+    datasets = scp.read_spc(path)
+
+    assert len(datasets) == 2
+    for dataset, expected_x, expected_y, expected_z in zip(
+        datasets, x_values, y_values, z_values, strict=True
+    ):
+        assert isinstance(dataset, scp.NDDataset)
+        assert dataset.dims == ["y", "x"]
+        assert dataset.shape == (1, 3)
+        np.testing.assert_allclose(dataset.data, expected_y[np.newaxis, :])
+        assert dataset.title == "Absorbance"
+        assert dataset.units == "absorbance"
+        np.testing.assert_allclose(dataset.x.data, expected_x)
+        assert dataset.x.title == "Wavenumbers"
+        assert dataset.x.units == scp.ur("cm^-1")
+        np.testing.assert_allclose(dataset.y.data, [expected_z])
+        assert dataset.y.title == "Time"
+        assert dataset.y.units == scp.ur("s")
+        assert dataset.filename == path
+        assert dataset.origin == "thermo galactic"
+        assert dataset.meta.fileformat == "MXY"
+        assert dataset.meta.scpversion == "new LSB 1st"
+        assert dataset.meta.technique == "General SPC"
+        assert dataset._acquisition_date == acquisition_date
+
+    assert datasets[0].x is not datasets[1].x
+    assert datasets[0].y is not datasets[1].y
 
 
 def test_extract_x_data_reads_from_supplied_offset():
