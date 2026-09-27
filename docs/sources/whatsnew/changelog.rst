@@ -38,6 +38,9 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- CSV round trips now preserve each recognized coordinate and data title and
+  unit independently when only one column has units, instead of discarding all
+  header metadata.
 - SPC files containing sub-spectra with distinct x axes now retain each
   spectrum's x and sub-spectrum coordinates, including their titles and units.
 
