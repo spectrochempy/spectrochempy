@@ -4,23 +4,17 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 
-import importlib.util
-import sys
+import importlib
 from pathlib import Path
 
 import pytest
 
 ROOT = Path(__file__).parents[3]
-DOCS_MAKE = ROOT / "docs" / "make.py"
 
 
 def _load_docs_make():
-    sys.path.insert(0, str(ROOT / "docs"))
-    spec = importlib.util.spec_from_file_location("spectrochempy_docs_make", DOCS_MAKE)
-    module = importlib.util.module_from_spec(spec)
-    assert spec.loader is not None
-    spec.loader.exec_module(module)
-    return module
+    """Import ``docs.make`` the way the workflows do, from the repository root."""
+    return importlib.import_module("docs.make")
 
 
 def test_versions_manifest_distinguishes_stable_and_development(tmp_path):
