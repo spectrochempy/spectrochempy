@@ -34,6 +34,9 @@ def concatenate(*datasets, **kwargs):
         #. coordinate values and labels on the concatenated dimension must
            each be present for every input or absent from every input. A
            label-only coordinate is valid.
+        #. a coordinate reference on the concatenated dimension is rejected,
+           because changing only that dimension cannot preserve the shared
+           geometry represented by the reference.
         #. along the non-concatenated dimensions, shapes must match.
 
     Parameters
@@ -65,7 +68,8 @@ def concatenate(*datasets, **kwargs):
     ------
     DimensionsCompatibilityError
         If coordinate values or labels on the concatenated dimension are
-        present for only some inputs.
+        present for only some inputs, or if that dimension uses a coordinate
+        reference.
 
     See Also
     --------
@@ -428,6 +432,15 @@ def _coordinate_representation(coordinate):
 
 def _validate_concatenated_dimension_coordinates(datasets, dim):
     """Reject coordinate assembly that would lose or invent information."""
+    if any(
+        dataset.coordset is not None and dim in dataset.coordset.references
+        for dataset in datasets
+    ):
+        raise exceptions.DimensionsCompatibilityError(
+            "Cannot concatenate datasets: a coordinate reference on dimension "
+            f"'{dim}' cannot be preserved when that dimension changes size."
+        )
+
     coordinates = [_coordinate_for_dimension(dataset, dim) for dataset in datasets]
     present = [coordinate is not None for coordinate in coordinates]
 

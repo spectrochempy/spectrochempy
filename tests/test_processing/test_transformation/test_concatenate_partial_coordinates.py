@@ -44,6 +44,8 @@ def _dataset(rows, offset, coordinate_kind, *, masked_row=None):
         dataset.set_coordset(y=scp.Coord(None, size=rows), x=x)
     elif coordinate_kind == "absent":
         dataset.set_coordset(x=x)
+    elif coordinate_kind == "reference":
+        dataset.set_coordset(y="x", x=x)
     else:
         raise ValueError(f"Unknown coordinate kind: {coordinate_kind}")
 
@@ -171,6 +173,26 @@ def test_concatenate_rejects_mixed_numeric_and_label_only_coordinates():
         match="coordinate representations.*dimension 'y'",
     ):
         scp.concatenate(numeric, labels, dims="y")
+
+
+def test_concatenate_rejects_reference_on_concatenated_dimension():
+    first = _dataset(2, 10, "reference")
+    second = _dataset(2, 20, "reference")
+    snapshots = [first.copy(), second.copy()]
+
+    assert first.shape == second.shape == (2, 2)
+    assert first.coordset.names == second.coordset.names == ["x"]
+    assert first.coordset.references == second.coordset.references == {"y": "x"}
+    assert first.y == first.x
+    assert second.y == second.x
+
+    with pytest.raises(
+        DimensionsCompatibilityError,
+        match="coordinate reference.*dimension 'y'.*cannot be preserved",
+    ):
+        scp.concatenate(first, second, dims="y")
+
+    _assert_sources_unchanged([first, second], snapshots)
 
 
 def test_stack_path_remains_valid_with_missing_existing_coordinates():
