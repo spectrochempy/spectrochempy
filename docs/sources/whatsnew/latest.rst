@@ -33,30 +33,38 @@ Bug Fixes
 
 - JCAMP-DX LINK exports now retain the first text and datetime labels when
   either appears in label column zero, preserving distinct ordered spectrum
-  titles instead of silently replacing them with generated titles.
+  titles instead of silently replacing them with generated titles
+  (:pr:`1693`).
 - CSV round trips now preserve each recognized coordinate and data title and
   unit independently when only one column has units, instead of discarding all
-  header metadata.
+  header metadata (:pr:`1692`).
 - SPC files containing sub-spectra with distinct x axes now retain each
-  spectrum's x and sub-spectrum coordinates, including their titles and units.
+  spectrum's x and sub-spectrum coordinates, including their titles and units
+  (:pr:`1691`).
+
+- ``ifft(size=...)`` now honors the requested output size, including on a
+  non-final dimension, and reconstructs frequency-based time coordinates from
+  the frequency-bin spacing. Larger sizes zero-pad and smaller sizes truncate
+  the unshifted input before the inverse transform (:pr:`1694`).
 
 - ``NDDataset.acquisition_date`` is now preserved by copies, out-of-place
   arithmetic results, and native ``.scp`` round trips, including its timezone
-  offset. Existing native files without an acquisition date remain readable.
+  offset. Existing native files without an acquisition date remain readable
+  (:pr:`1688`).
 - ``hamming()`` and ``hann()`` now honor their documented dimension, axis,
   in-place, returned-window, reverse, and inverse options when delegating to
   ``general_hamming()``. ``pk_exp()`` likewise forwards dimension, axis, and
   in-place options to ``pk()`` instead of silently applying the correction on
-  the default axis to a copy.
+  the default axis to a copy (:pr:`1682`).
 - ``pk()`` and ``pk_exp()`` now reject the unsupported ``inv=True`` option with
   ``NotImplementedError`` before modifying the dataset. Their default and
-  explicit ``inv=False`` behavior is unchanged.
+  explicit ``inv=False`` behavior is unchanged (:pr:`1682`).
 - Discrete shifts now move masks with their corresponding values. Circular
   shifts therefore preserve masked statistics, while the zeros introduced by
   left and right shifts are valid, unmasked points. A zero-point left shift no
   longer clears the dataset, a zero-point circular shift with ``neg=True`` no
   longer negates it, and ``cs()`` once again delegates successfully to
-  ``roll()`` with a single history entry.
+  ``roll()`` with a single history entry (:pr:`1683`).
 - Harmonized newly generated history messages across core and official-plugin
   imports, common spectral treatments, and analysis results. Individual-file
   imports now identify the format and portable filename while the complete

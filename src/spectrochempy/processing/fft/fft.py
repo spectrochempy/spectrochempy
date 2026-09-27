@@ -24,8 +24,8 @@ def _fft(data):
     return np.fft.fftshift(np.fft.fft(data), -1)
 
 
-def _ifft(data):
-    return np.fft.ifft(np.fft.ifftshift(data, -1))
+def _ifft(data, size=None):
+    return np.fft.ifft(np.fft.ifftshift(data, -1), n=size)
 
 
 def _qf_fft(data):
@@ -89,8 +89,10 @@ def ifft(dataset, size=None, **kwargs):
     dataset : `NDDataset`
         The dataset on which to apply the fft transformation.
     size : int, optional
-        Size of the transformed dataset dimension - a shorter parameter is `si` . by default, the size is the closest
-        power of two greater than the data size.
+        Size of the transformed dataset dimension; the shorter alias is `si`.
+        By default, the input size is used. If `size` is larger or smaller than
+        the input, the unshifted frequency data are padded with zeros or
+        truncated, respectively, before the inverse transform.
     **kwargs
         Optional keyword parameters (see Other Parameters).
 
@@ -139,7 +141,8 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
         The number of effective data point to take into account for the transformation. By default it is equal to the
         data size, but may be smaller.
     inv : bool, optional, default=False
-        If True, an inverse Fourier transform is performed - size parameter is not taken into account.
+        If True, an inverse Fourier transform is performed. The `size`
+        parameter controls its output size as described for `ifft`.
     **kwargs
         Optional keyword parameters (see Other Parameters).
 
@@ -243,36 +246,30 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
     if not error:
         # OK we can proceed
 
-        # time domain size
-        td = None
-        if not inv:
-            td = x.size
-
         # if no size (or si) parameter then use the size of the data
-        # (size not used for inverse transform
-        if size is None or inv:
+        if size is None:
             size = kwargs.get("si", x.size)
 
-        # do we have an effective td to apply
-        tdeff = sizeff
-        if tdeff is None:
-            tdeff = kwargs.get("tdeff", td)
+        if not inv:
+            # do we have an effective td to apply
+            tdeff = sizeff
+            if tdeff is None:
+                tdeff = kwargs.get("tdeff", x.size)
 
-        if tdeff is None or tdeff < 5 or tdeff > size:
-            tdeff = size
+            if tdeff is None or tdeff < 5 or tdeff > size:
+                tdeff = size
 
-        # Eventually apply the effective size
-        new[..., tdeff:] = 0.0
+            # Eventually apply the effective size
+            new[..., tdeff:] = 0.0
 
         # Determine whether the data are complex (or plugin-specific interleaved)
         # interleaved is in case of >2D data  ( # TODO: >D not yet implemented in ndcomplex.py
-        iscomplex = False
-        if axis == -1:
-            iscomplex = new.is_complex
+        iscomplex = new.is_complex
         if new.is_interleaved:
             iscomplex = True
 
-        zf_size(new, size=size, inplace=True)
+        if not inv:
+            zf_size(new, size=size, inplace=True)
 
         # Perform the fft
         if encoding != "undefined":
@@ -295,7 +292,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
 
         elif iscomplex and inv:
             # We assume no special encoding for inverse complex fft transform
-            data = _ifft(new.data)
+            data = _ifft(new.data, size=size)
 
         elif not iscomplex and not inv and is_ir:
             # transform interferogram
@@ -343,15 +340,15 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
 
         else:
             # frequency to time
-            sw = abs(x.data[-1] - x.data[0])
-            # sw is a plain float here (x.data is an ndarray).  Multiply by the
-            # original coordinate unit so that 1/sw has time dimensionality.
             if x.units is not None and x.units.dimensionality == "1/[time]":
-                deltat = (1.0 / (sw * x.units)).to("us")
+                # With a preserved frequency-bin spacing, the reciprocal time
+                # step is 1 / (size * df) for the requested output size.
+                deltat = (1.0 / (size * abs(x.spacing))).to("us")
             else:
                 # For ppm or dimensionless coordinates we cannot determine the
                 # correct time step without extra context.  Use a placeholder
                 # so that plugins (e.g. NMR) can replace the coordinate.
+                sw = abs(x.data[-1] - x.data[0])
                 deltat = (1.0 / sw) * ur.us
 
             newcoord = Coord.arange(coord_size) * deltat
