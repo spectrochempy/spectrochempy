@@ -96,7 +96,7 @@ def validate_snapshot(snapshot: Path, version: str) -> None:
     reference_content = _require_file(reference)
     pages = [reference]
     for relative in REPRESENTATIVE_API_PAGES:
-        reference_link = str(Path(relative).relative_to("reference"))
+        reference_link = Path(relative).relative_to("reference").as_posix()
         if reference_link not in reference_content:
             raise RuntimeError(f"Reference index does not link to {reference_link}")
         pages.append(snapshot / relative)
