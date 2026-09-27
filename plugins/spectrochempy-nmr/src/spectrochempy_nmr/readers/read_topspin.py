@@ -34,6 +34,7 @@ from spectrochempy.utils._logging import warning_
 from spectrochempy.utils.meta import Meta
 from spectrochempy_nmr.extern.nmrglue import read_fid
 from spectrochempy_nmr.extern.nmrglue import read_pdata
+from spectrochempy_nmr.readers._metadata import apply_reader_metadata_options
 
 # ======================================================================================
 # Constants
@@ -727,16 +728,7 @@ def read_topspin(*paths, **kwargs):
         dimension) is returned. In the case not all datasets have compatible dimensions or types/origins,
         then several NDDatasets can be returned for different groups of compatible datasets.
     origin : str, optional
-        If provided it may be used to define the type of experiment: e.g., 'ir', 'raman',..
-        or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
-        automatically, but can be set manually.
-
-        It is used for instance when reading directory with different types of files, for merging
-        the datasets with compatible dimensions and different origin into different groups.
-
-        It is also used when reading with the CSV protocol. In order to properly interpret CSV file
-        it can be necessary to set the origin of the spectra. Up to now only ``'omnic'`` and ``'tga'``
-        have been implemented.
+        Override the origin label (default ``'topspin'``).
     pattern : `str`, optional
         A pattern to filter the files to read.
 
@@ -1268,7 +1260,7 @@ def _read_topspin(*args, **kwargs):
 
     dataset.units = "count"
     dataset.title = "intensity"
-    dataset.origin = "topspin"
+    apply_reader_metadata_options(dataset, kwargs, default_origin="topspin")
     dataset.name = f"{f_name.name} expno:{expno} procno:{procno} ({datatype})"
     dataset.filename = f_name
     if dataset.meta.date is not None:

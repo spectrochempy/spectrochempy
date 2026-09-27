@@ -33,6 +33,7 @@ from spectrochempy.core.units import ur
 from spectrochempy.utils._logging import warning_
 from spectrochempy.utils.meta import Meta
 from spectrochempy_nmr.extern.nmrglue import read_varian
+from spectrochempy_nmr.readers._metadata import apply_reader_metadata_options
 
 # ======================================================================================
 # Valid Agilent parameter names for metadata extraction
@@ -448,7 +449,7 @@ def _read_agilent(*args, **kwargs):
 
     dataset.units = "count"
     dataset.title = "intensity"
-    dataset.origin = "agilent"
+    apply_reader_metadata_options(dataset, kwargs, default_origin="agilent")
     dataset.name = f"{data_dir.name} ({meta.datatype})"
     dataset.filename = data_dir
 
