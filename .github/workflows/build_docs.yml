@@ -377,10 +377,9 @@ jobs:
 
           if [[ ! -f "$MARKER" ]] || [[ "$(cat "$MARKER")" != "$STABLE_VERSION" ]]; then
             echo "Rebuilding stable documentation from $STABLE_TAG"
-            rm -rf "build/html/$STABLE_VERSION"
-            unset SETUPTOOLS_SCM_PRETEND_VERSION
-            SCPY_DOCS_CONTEXT=archive \
-              python3 docs/make.py --warning-is-error -j1 html -T "$STABLE_TAG"
+            python .github/workflows/scripts/stable_docs_snapshot.py rebuild \
+              --project-root . --published-root build/html \
+              --tag "$STABLE_TAG" --promote
           fi
 
           python3 -c "from pathlib import Path; from docs.make import _sync_stable_docs_to_root, refresh_versions_index; root=Path('build/html'); manifest=refresh_versions_index(root); selected=_sync_stable_docs_to_root(root, manifest['stable']); refresh_versions_index(root); print(f'Synchronized root from stable version {selected}')"
