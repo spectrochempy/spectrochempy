@@ -33,6 +33,7 @@ from spectrochempy.core.units import ur
 from spectrochempy.utils._logging import warning_
 from spectrochempy.utils.meta import Meta
 from spectrochempy_nmr.extern.nmrglue._tecmag import read as _read_tnt_raw
+from spectrochempy_nmr.readers._metadata import apply_reader_metadata_options
 
 # ======================================================================================
 # Public entry point
@@ -279,7 +280,7 @@ def _read_tnt(*args, **kwargs):
 
     dataset.units = "count"
     dataset.title = "intensity"
-    dataset.origin = "tecmag"
+    apply_reader_metadata_options(dataset, kwargs, default_origin="tecmag")
     dataset.name = f"{path.stem} ({meta.datatype})"
     dataset.filename = path.parent
 

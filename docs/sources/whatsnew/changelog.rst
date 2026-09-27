@@ -38,6 +38,11 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- The NMR plugin's JEOL, TecMag, SIMPSON, Agilent, and TopSpin readers now
+  honor explicit ``origin`` and ``description`` values while retaining their
+  existing defaults when either option is omitted or set to ``None``
+  (:pr:`1696`).
+
 - JCAMP-DX LINK exports now retain the first text and datetime labels when
   either appears in label column zero, preserving distinct ordered spectrum
   titles instead of silently replacing them with generated titles
