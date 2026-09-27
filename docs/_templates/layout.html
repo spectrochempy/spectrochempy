@@ -14,9 +14,9 @@
 </a>
 
 <div class="switch-menus">
-    <label for="versions-dropdown">Documentation version</label>
     <select id="versions-dropdown"
             aria-label="Documentation version"
+            title="Documentation version"
             data-docs-context="{{ docs_context }}"
             data-build-version="{{ docs_build_version }}"
             data-stable-version="{{ stable_release_version }}"
@@ -24,7 +24,6 @@
             data-versions="{{ previous_versions|join(',') if previous_versions else '' }}">
         <option selected disabled>Loading versions…</option>
     </select>
-    <span id="docs-current-version" aria-live="polite"></span>
 </div>
 
 {%- include "searchbox.html" %}

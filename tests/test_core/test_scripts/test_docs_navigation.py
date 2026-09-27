@@ -4,23 +4,17 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 
-import importlib.util
-import sys
+import importlib
 from pathlib import Path
 
 import pytest
 
 ROOT = Path(__file__).parents[3]
-DOCS_MAKE = ROOT / "docs" / "make.py"
 
 
 def _load_docs_make():
-    sys.path.insert(0, str(ROOT / "docs"))
-    spec = importlib.util.spec_from_file_location("spectrochempy_docs_make", DOCS_MAKE)
-    module = importlib.util.module_from_spec(spec)
-    assert spec.loader is not None
-    spec.loader.exec_module(module)
-    return module
+    """Import ``docs.make`` the way the workflows do, from the repository root."""
+    return importlib.import_module("docs.make")
 
 
 def test_versions_manifest_distinguishes_stable_and_development(tmp_path):
@@ -91,6 +85,37 @@ def test_navigation_labels_contexts_and_page_fallback_are_present():
     assert 'echo "docs_context=stable"' in workflow
     assert 'echo "docs_context=development"' in workflow
     assert 'echo "docs_context=preview"' in workflow
+
+
+def test_version_selector_keeps_its_accessible_name_and_drops_its_visible_title():
+    layout = (ROOT / "docs" / "_templates" / "layout.html").read_text(encoding="utf-8")
+    script = (ROOT / "docs" / "_static" / "js" / "versions.js").read_text(
+        encoding="utf-8"
+    )
+    style = (ROOT / "docs" / "_static" / "css" / "spectrochempy.css").read_text(
+        encoding="utf-8"
+    )
+
+    # The selected option already names the consulted version, so the
+    # "Currently viewing" line and the visible title are both redundant.
+    assert "docs-current-version" not in layout
+    assert "docs-current-version" not in script
+    assert "docs-current-version" not in style
+    assert "Currently viewing" not in script
+    assert '<label for="versions-dropdown">' not in layout
+    assert ".switch-menus label" not in style
+
+    # Removing the visible title must not remove the accessible name.
+    assert 'aria-label="Documentation version"' in layout
+    assert 'title="Documentation version"' in layout
+    assert 'id="versions-dropdown"' in layout
+
+    # The context banners and the option labels are part of the contract.
+    assert "This is development documentation." in layout
+    assert "pull request documentation preview" in layout
+    assert "Stable — ${manifest.stable}" in script
+    assert "Development — unreleased" in script
+    assert "Preview — ${selector.dataset.previewName" in script
 
 
 def test_development_context_never_writes_into_the_stable_version(
