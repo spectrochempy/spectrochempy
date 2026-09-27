@@ -31,6 +31,9 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- JCAMP-DX LINK exports now retain the first text and datetime labels when
+  either appears in label column zero, preserving distinct ordered spectrum
+  titles instead of silently replacing them with generated titles.
 - CSV round trips now preserve each recognized coordinate and data title and
   unit independently when only one column has units, instead of discarding all
   header metadata.

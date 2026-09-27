@@ -151,15 +151,15 @@ def _write_jcamp(*args, **kwargs):
             fid.write("##DATA TYPE=INFRARED SPECTRUM\n")
 
         # Determine whether the spectra have a title and a datetime field in the labels,
-        # by default, the title if any will be is the first string; the timestamp will
-        # be the fist datetime.datetime
+        # by default, the title if any will be the first string; the timestamp will
+        # be the first datetime.datetime
         title_index = None
         timestamp_index = None
         if dataset.y.labels is not None:
             for i, label in enumerate(dataset.y.labels[0]):
-                if not title_index and isinstance(label, str):
+                if title_index is None and isinstance(label, str):
                     title_index = i
-                if not timestamp_index and type(label) is datetime:
+                if timestamp_index is None and type(label) is datetime:
                     timestamp_index = i
 
         if timestamp_index is None:
@@ -174,7 +174,7 @@ def _write_jcamp(*args, **kwargs):
             if dataset.shape[0] > 1:
                 title = (
                     dataset.y.labels[i][title_index]
-                    if title_index
+                    if title_index is not None
                     else f"spectrum #{i}"
                 )
                 fid.write(f"##TITLE={title}\n")
