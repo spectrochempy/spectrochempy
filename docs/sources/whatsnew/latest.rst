@@ -31,6 +31,9 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- ``NDDataset.acquisition_date`` is now preserved by copies, out-of-place
+  arithmetic results, and native ``.scp`` round trips, including its timezone
+  offset. Existing native files without an acquisition date remain readable.
 - ``hamming()`` and ``hann()`` now honor their documented dimension, axis,
   in-place, returned-window, reverse, and inverse options when delegating to
   ``general_hamming()``. ``pk_exp()`` likewise forwards dimension, axis, and
