@@ -808,7 +808,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             "history",
             "created",
             "modified",
-            # "acquisition_date",
+            "acquisition_date",
             "origin",
             "transposed",
             # "processeddata",
