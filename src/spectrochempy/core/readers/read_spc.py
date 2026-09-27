@@ -1046,7 +1046,7 @@ def _read_spc(*args, **kwargs):
                 ds = NDDataset([y], title=spcf.y_title, units=spcf.y_units)
                 coordx = Coord(x, title=spcf.x_title, units=spcf.x_units)
                 coordy = Coord([z], title=spcf.z_title or "z", units=spcf.z_units)
-                dataset.set_coordset(y=coordy, x=coordx)
+                ds.set_coordset(y=coordy, x=coordx)
                 ds.name = f"{str(filename)}_{i}"
                 datasets.append(ds)
 
