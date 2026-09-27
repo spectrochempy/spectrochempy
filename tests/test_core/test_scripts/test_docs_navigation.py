@@ -87,7 +87,7 @@ def test_navigation_labels_contexts_and_page_fallback_are_present():
     assert 'echo "docs_context=preview"' in workflow
 
 
-def test_version_selector_keeps_its_label_and_drops_the_current_version_line():
+def test_version_selector_keeps_its_accessible_name_and_drops_its_visible_title():
     layout = (ROOT / "docs" / "_templates" / "layout.html").read_text(encoding="utf-8")
     script = (ROOT / "docs" / "_static" / "js" / "versions.js").read_text(
         encoding="utf-8"
@@ -96,15 +96,21 @@ def test_version_selector_keeps_its_label_and_drops_the_current_version_line():
         encoding="utf-8"
     )
 
-    # The selected option already names the consulted version.
+    # The selected option already names the consulted version, so the
+    # "Currently viewing" line and the visible title are both redundant.
     assert "docs-current-version" not in layout
     assert "docs-current-version" not in script
     assert "docs-current-version" not in style
     assert "Currently viewing" not in script
+    assert '<label for="versions-dropdown">' not in layout
+    assert ".switch-menus label" not in style
 
-    # The accessible label and the context banners are part of the contract.
-    assert '<label for="versions-dropdown">Documentation version</label>' in layout
+    # Removing the visible title must not remove the accessible name.
     assert 'aria-label="Documentation version"' in layout
+    assert 'title="Documentation version"' in layout
+    assert 'id="versions-dropdown"' in layout
+
+    # The context banners and the option labels are part of the contract.
     assert "This is development documentation." in layout
     assert "pull request documentation preview" in layout
     assert "Stable — ${manifest.stable}" in script

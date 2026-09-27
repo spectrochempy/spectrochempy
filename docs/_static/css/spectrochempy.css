@@ -214,15 +214,8 @@ html.writer-html5 .rst-content dl[class]:not(.option-list):not(.field-list):not(
 .wy-side-nav-search>div.switch-menus {
     display: flex;
     flex-direction: column;
-    gap: .3rem;
     margin: .2rem 0 .8rem;
     text-align: left;
-}
-
-.switch-menus label {
-    color: #fff;
-    font-size: .8rem;
-    font-weight: 600;
 }
 
 #versions-dropdown {
