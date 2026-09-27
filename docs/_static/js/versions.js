@@ -4,7 +4,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
-    const currentLabel = document.getElementById("docs-current-version");
     const versionPattern = /^\d+\.\d+\.\d+(?:rc\d+)?$/;
 
     function getBasePath() {
@@ -172,11 +171,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 );
             });
             selector.appendChild(group);
-        }
-
-        const selected = selector.selectedOptions[0];
-        if (currentLabel && selected) {
-            currentLabel.textContent = `Currently viewing: ${selected.textContent}`;
         }
     }
 
