@@ -28,34 +28,41 @@ def _parse_spectrochempy_csv_header(row):
     """
     Parse the simple metadata header emitted by ``write_csv()``.
 
-    The current writer emits either:
+    The writer emits one cell for a data-only export or two cells for a
+    coordinate-plus-data export. Each cell contains either a title alone or a
+    title and unit separated by the explicit ``" / "`` marker.
 
-    * ``[dataset_title / dataset_units]`` for data-only 1D exports; or
-    * ``[coord_title / coord_units, dataset_title / dataset_units]`` for 1D
-      exports with coordinates.
-
-    Metadata reconstruction is intentionally conservative: cells must contain
-    the explicit ``" / "`` separator used by the writer. Any parse failure
-    falls back to ``None`` metadata so generic external CSV files keep the
-    current semantics.
+    Metadata reconstruction is intentionally conservative: a one- or two-cell
+    row is recognized only when at least one cell contains a well-formed
+    separator. A row made only of titles remains ambiguous with a generic
+    external CSV header and keeps the existing external-file semantics. Once a
+    row is recognized, title-only cells retain their title with no unit, and a
+    malformed cell does not discard valid metadata from the other cell.
+    An empty unit after the separator represents the writer's explicit
+    dimensionless unit and remains distinct from an absent unit.
     """
 
     def _split_title_and_unit(cell):
-        if not isinstance(cell, str) or " / " not in cell:
-            return None, None
+        if not isinstance(cell, str):
+            return None, None, False
+        stripped_cell = cell.strip()
+        if not stripped_cell:
+            return None, None, False
+        if " / " not in cell:
+            return stripped_cell, None, False
         title, unit = cell.rsplit(" / ", 1)
         title = title.strip()
         unit = unit.strip()
-        if not title or not unit:
-            return None, None
-        return title, unit
+        if not title:
+            return None, None, False
+        return title, unit, True
 
     if not row:
         return {}
 
     if len(row) == 1:
-        dataset_title, dataset_units = _split_title_and_unit(row[0])
-        if dataset_title is None:
+        dataset_title, dataset_units, has_unit_marker = _split_title_and_unit(row[0])
+        if not has_unit_marker:
             return {}
         return {
             "dataset_title": dataset_title,
@@ -63,16 +70,23 @@ def _parse_spectrochempy_csv_header(row):
         }
 
     if len(row) == 2:
-        coord_title, coord_units = _split_title_and_unit(row[0])
-        dataset_title, dataset_units = _split_title_and_unit(row[1])
-        if coord_title is None or dataset_title is None:
+        coord_title, coord_units, coord_has_unit_marker = _split_title_and_unit(row[0])
+        dataset_title, dataset_units, dataset_has_unit_marker = _split_title_and_unit(
+            row[1]
+        )
+        if not (coord_has_unit_marker or dataset_has_unit_marker):
             return {}
-        return {
-            "coord_title": coord_title,
-            "coord_units": coord_units,
-            "dataset_title": dataset_title,
-            "dataset_units": dataset_units,
-        }
+
+        metadata = {}
+        if coord_title is not None:
+            metadata["coord_title"] = coord_title
+        if coord_units is not None:
+            metadata["coord_units"] = coord_units
+        if dataset_title is not None:
+            metadata["dataset_title"] = dataset_title
+        if dataset_units is not None:
+            metadata["dataset_units"] = dataset_units
+        return metadata
 
     return {}
 
