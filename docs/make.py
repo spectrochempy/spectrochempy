@@ -82,7 +82,13 @@ except ImportError:  # pragma: no cover
             raise InvalidVersion(f"packaging is not available: {version}")
 
 
-from tools.helpers import sh
+# ``tools`` is a sibling of this script, so it is only reachable as a top-level
+# name when the file is executed directly. Import it by package when this module
+# is loaded as ``docs.make`` and by directory entry otherwise.
+if __package__:
+    from .tools.helpers import sh
+else:
+    from tools.helpers import sh
 
 # Suppress other specific warnings
 warnings.filterwarnings(action="ignore", module="matplotlib", category=UserWarning)
