@@ -34,9 +34,10 @@ def concatenate(*datasets, **kwargs):
         #. coordinate values and labels on the concatenated dimension must
            each be present for every input or absent from every input. A
            label-only coordinate is valid.
-        #. a coordinate reference on the concatenated dimension is rejected,
-           because changing only that dimension cannot preserve the shared
-           geometry represented by the reference.
+        #. a coordinate reference involving the concatenated dimension is
+           rejected, whether that dimension is the reference or its target,
+           because changing only one dimension cannot preserve their shared
+           geometry.
         #. along the non-concatenated dimensions, shapes must match.
 
     Parameters
@@ -68,8 +69,8 @@ def concatenate(*datasets, **kwargs):
     ------
     DimensionsCompatibilityError
         If coordinate values or labels on the concatenated dimension are
-        present for only some inputs, or if that dimension uses a coordinate
-        reference.
+        present for only some inputs, or if that dimension is a coordinate
+        reference or the target of one.
 
     See Also
     --------
@@ -433,12 +434,16 @@ def _coordinate_representation(coordinate):
 def _validate_concatenated_dimension_coordinates(datasets, dim):
     """Reject coordinate assembly that would lose or invent information."""
     if any(
-        dataset.coordset is not None and dim in dataset.coordset.references
+        dataset.coordset is not None
+        and (
+            dim in dataset.coordset.references
+            or dim in dataset.coordset.references.values()
+        )
         for dataset in datasets
     ):
         raise exceptions.DimensionsCompatibilityError(
-            "Cannot concatenate datasets: a coordinate reference on dimension "
-            f"'{dim}' cannot be preserved when that dimension changes size."
+            "Cannot concatenate datasets: a coordinate reference involving "
+            f"dimension '{dim}' cannot be preserved when that dimension changes size."
         )
 
     coordinates = [_coordinate_for_dimension(dataset, dim) for dataset in datasets]

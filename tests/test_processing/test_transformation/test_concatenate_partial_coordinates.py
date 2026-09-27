@@ -175,7 +175,8 @@ def test_concatenate_rejects_mixed_numeric_and_label_only_coordinates():
         scp.concatenate(numeric, labels, dims="y")
 
 
-def test_concatenate_rejects_reference_on_concatenated_dimension():
+@pytest.mark.parametrize("dim", ["y", "x"])
+def test_concatenate_rejects_reference_involving_concatenated_dimension(dim):
     first = _dataset(2, 10, "reference")
     second = _dataset(2, 20, "reference")
     snapshots = [first.copy(), second.copy()]
@@ -188,9 +189,9 @@ def test_concatenate_rejects_reference_on_concatenated_dimension():
 
     with pytest.raises(
         DimensionsCompatibilityError,
-        match="coordinate reference.*dimension 'y'.*cannot be preserved",
+        match=rf"coordinate reference.*dimension '{dim}'.*cannot be preserved",
     ):
-        scp.concatenate(first, second, dims="y")
+        scp.concatenate(first, second, dims=dim)
 
     _assert_sources_unchanged([first, second], snapshots)
 
