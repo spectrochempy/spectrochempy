@@ -215,7 +215,7 @@ html.writer-html5 .rst-content dl[class]:not(.option-list):not(.field-list):not(
     display: flex;
     flex-direction: column;
     gap: .3rem;
-    margin: .6rem 0 .8rem;
+    margin: .2rem 0 .8rem;
     text-align: left;
 }
 
@@ -245,13 +245,6 @@ html.writer-html5 .rst-content dl[class]:not(.option-list):not(.field-list):not(
 #versions-dropdown optgroup {
     background: #243442;
     color: #fff;
-}
-
-#docs-current-version {
-    min-height: 1rem;
-    color: rgba(255, 255, 255, .9);
-    font-size: .75rem;
-    line-height: 1.25;
 }
 
 .docs-context-banner {

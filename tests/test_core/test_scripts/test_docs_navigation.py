@@ -87,6 +87,31 @@ def test_navigation_labels_contexts_and_page_fallback_are_present():
     assert 'echo "docs_context=preview"' in workflow
 
 
+def test_version_selector_keeps_its_label_and_drops_the_current_version_line():
+    layout = (ROOT / "docs" / "_templates" / "layout.html").read_text(encoding="utf-8")
+    script = (ROOT / "docs" / "_static" / "js" / "versions.js").read_text(
+        encoding="utf-8"
+    )
+    style = (ROOT / "docs" / "_static" / "css" / "spectrochempy.css").read_text(
+        encoding="utf-8"
+    )
+
+    # The selected option already names the consulted version.
+    assert "docs-current-version" not in layout
+    assert "docs-current-version" not in script
+    assert "docs-current-version" not in style
+    assert "Currently viewing" not in script
+
+    # The accessible label and the context banners are part of the contract.
+    assert '<label for="versions-dropdown">Documentation version</label>' in layout
+    assert 'aria-label="Documentation version"' in layout
+    assert "This is development documentation." in layout
+    assert "pull request documentation preview" in layout
+    assert "Stable — ${manifest.stable}" in script
+    assert "Development — unreleased" in script
+    assert "Preview — ${selector.dataset.previewName" in script
+
+
 def test_development_context_never_writes_into_the_stable_version(
     monkeypatch,
 ):
