@@ -1094,7 +1094,7 @@ def basc(dataset, *ranges, **kwargs):
     return dataset - get_baseline(dataset, *ranges, **kwargs)
 
 
-def detrend(dataset, order="linear", breakpoints=None, **kwargs):
+def detrend(dataset, order="linear", breakpoints=None):
     r"""
     Remove polynomial trend along a dimension from dataset.
 

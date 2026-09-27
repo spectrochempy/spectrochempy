@@ -53,6 +53,9 @@ Bug Fixes
   non-final dimension, and reconstructs frequency-based time coordinates from
   the frequency-bin spacing. Larger sizes zero-pad and smaller sizes truncate
   the unshifted input before the inverse transform (:pr:`1694`).
+- ``detrend()`` now rejects unsupported keyword arguments instead of silently
+  ignoring them. Its supported ``order`` and ``breakpoints`` parameters are
+  unchanged (:pr:`1695`).
 
 - ``NDDataset.acquisition_date`` is now preserved by copies, out-of-place
   arithmetic results, and native ``.scp`` round trips, including its timezone
