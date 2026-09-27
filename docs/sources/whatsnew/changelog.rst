@@ -38,6 +38,10 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- ``concatenate()`` now rejects inputs whose concatenated dimension carries
+  coordinate values or labels for only some datasets, instead of returning a
+  geometrically inconsistent result. Coordinates may still be omitted from
+  every input, and label-only coordinates remain supported (:pr:`1697`).
 - The NMR plugin's JEOL, TecMag, SIMPSON, Agilent, and TopSpin readers now
   honor explicit ``origin`` and ``description`` values while retaining their
   existing defaults when either option is omitted or set to ``None``
