@@ -86,15 +86,11 @@ def align(dataset, *others, **kwargs):
 
     interpolate_method : enum ['linear','pchip']. Optional, default='linear'
         Method of interpolation to performs for the alignment.
-    interpolate_sampling : 'auto', int or float. Optional, default='auto'
-        Values:
-
-        * 'auto' : sampling is determined automatically from the existing data.
-        * int :  if an integer values is specified, then the
-          sampling interval for the interpolated data will be split in
-          this number of points.
-        * float : If a float value is provided, it determines the interval
-          between the interpolated data.
+    interpolate_sampling : {'auto'}, optional, default='auto'
+        Sampling of the target coordinate when ``method='interpolate'``.
+        ``'auto'`` uses the first dataset coordinate unchanged. Numeric target
+        sampling is not implemented and is explicitly refused; use
+        `NDDataset.interpolate` with an explicit target coordinate instead.
 
     coord :  `Coord` , optional, default=None
         Coordinates to use for alignment. Ignore those corresponding to the
@@ -115,6 +111,9 @@ def align(dataset, *others, **kwargs):
         Issued when the dimensions given in `dim` or `dims` argument are not
         compatibles (units, titles, etc.).
 
+    NotImplementedError
+        Issued when ``interpolate_sampling`` is not ``'auto'``.
+
     """
     # TODO: Perform an alignment along numeric labels
     # TODO: add example in docs
@@ -130,6 +129,18 @@ def align(dataset, *others, **kwargs):
 
     # what's the method to use (by default='outer')
     method = kwargs.pop("method", "outer")
+
+    # Only the existing first-coordinate target is implemented. Constructing
+    # a new grid from a numeric sampling request needs an explicit policy for
+    # bounds, units and irregular source coordinates.
+    interpolate_sampling = kwargs.pop("interpolate_sampling", "auto")
+    if not (isinstance(interpolate_sampling, str) and interpolate_sampling == "auto"):
+        raise NotImplementedError(
+            "align() only supports interpolate_sampling='auto', which uses the "
+            "first dataset coordinate as the interpolation target. Other values "
+            "require target-grid construction that is not implemented; use "
+            "NDDataset.interpolate() with an explicit coordinate instead."
+        )
 
     # trivial cases where alignment is not possible or unnecessary
     if not objects:
