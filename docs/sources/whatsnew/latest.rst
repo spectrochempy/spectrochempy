@@ -17,10 +17,13 @@ New Features
 
 - Added a structured operation history for ``NDDataset`` with a readable
   ``history`` view and detached ``history_entries``. Structured entries cover
-  transposition, selection, out-of-place addition and subtraction, and the
+  transposition, selection, out-of-place addition and subtraction, the
   numerical reductions ``mean()``, ``sum()``, ``std()``, and ``var()`` when
-  they return an ``NDDataset``; other operations may continue to record normal
-  text-only entries.
+  they return an ``NDDataset``, and the shape operations ``squeeze()``,
+  ``swapdims()``, and ``reshape()``. Temporary internal dimension swaps no
+  longer add shape-operation entries to a treatment's history; other operations
+  may continue to record normal text-only entries (:pr:`1681`, :pr:`1703`,
+  :pr:`1704`).
 - Added ``cross_validate`` and ``CrossValidationResult`` for bounded supervised
   PLS and Pipeline cross-validation with aligned ``NDDataset`` outputs,
   per-target metrics, fold records, and optional fitted fold estimators (#1658).

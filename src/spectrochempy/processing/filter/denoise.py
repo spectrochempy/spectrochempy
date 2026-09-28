@@ -58,7 +58,7 @@ def denoise(dataset, ratio=99.8, **kwargs):
     axis, _ = dataset.get_axis(dim, negative_axis=True)
     swapped = False
     if axis != -1:
-        dataset = dataset.swapdims(axis, -1)
+        dataset = dataset._swapdims_without_history(axis, -1)
         swapped = True
 
     pca = PCA(n_components=ratio, svd_solver="full", log_level=log_level)
@@ -75,7 +75,7 @@ def denoise(dataset, ratio=99.8, **kwargs):
         )
     data = pca.inverse_transform()
     if swapped:
-        data = data.swapdims(-1, axis)
+        data = data._swapdims_without_history(-1, axis)
 
     return data
 

@@ -976,7 +976,7 @@ def _units_agnostic_method(method=None, *, mask_transform=None):
 
         swapped = False
         if axis != -1:
-            new.swapdims(axis, -1, inplace=True)  # must be done in  place
+            new._swapdims_without_history(axis, -1, inplace=True)
             swapped = True
 
         data = method(new.data, **kwargs)
@@ -991,7 +991,7 @@ def _units_agnostic_method(method=None, *, mask_transform=None):
 
         # restore original data order if it was swapped
         if swapped:
-            new.swapdims(axis, -1, inplace=True)  # must be done inplace
+            new._swapdims_without_history(axis, -1, inplace=True)
 
         return new
 

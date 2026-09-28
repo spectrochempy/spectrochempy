@@ -1727,8 +1727,17 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             of length 1.
 
         """
+        # Validate an explicit in-place request before NDArray.squeeze()
+        # removes dimension names. NumPy then raises without partially mutating
+        # the caller when a selected dimension is not a singleton.
+        if inplace and dims:
+            selected_dims = self._get_dims_from_args(*dims)
+            selected_axes = self._get_dims_index(selected_dims)
+            np.squeeze(self._data, axis=selected_axes)
+
         # make a copy of the original dims
         old = self.dims[:]
+        requested_dims = list(dims)
 
         # squeeze the data and determine which axis must be squeezed
         new, axis = super().squeeze(*dims, inplace=inplace, return_axis=True)
@@ -1741,7 +1750,18 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
                 missing="ignore",
             )
 
-        new.history = "Data squeezed"
+        resolved_axes = [] if axis is None else [int(item) for item in axis]
+        new._append_history_entry(
+            operation="squeeze",
+            parameters={
+                "requested_dims": requested_dims,
+                "resolved_dims": [old[item] for item in resolved_axes],
+                "resolved_axes": resolved_axes,
+                "result_dims": list(new.dims),
+                "inplace": inplace,
+            },
+            message="Data squeezed",
+        )
         return new
 
     def atleast_2d(self, inplace=False):
@@ -1808,9 +1828,30 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         transpose : Transpose a dataset.
 
         """
-        new = super().swapdims(dim1, dim2, inplace=inplace)
-        new.history = f"Data swapped between dims {dim1} and {dim2}"
+        source_dims = list(self.dims)
+        if self.ndim < 2:
+            resolved_axes = []
+            resolved_dims = []
+        else:
+            resolved_axes = [int(item) for item in self._get_dims_index([dim1, dim2])]
+            resolved_dims = [source_dims[item] for item in resolved_axes]
+        new = self._swapdims_without_history(dim1, dim2, inplace=inplace)
+        new._append_history_entry(
+            operation="swapdims",
+            parameters={
+                "requested_dims": [dim1, dim2],
+                "resolved_dims": resolved_dims,
+                "resolved_axes": resolved_axes,
+                "result_dims": list(new.dims),
+                "inplace": inplace,
+            },
+            message=f"Data swapped between dims {dim1} and {dim2}",
+        )
         return new
+
+    def _swapdims_without_history(self, dim1, dim2, inplace=False):
+        """Swap dimensions for an internal temporary geometry change."""
+        return super().swapdims(dim1, dim2, inplace=inplace)
 
     @property
     def T(self):
@@ -2409,13 +2450,17 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
 
         >>> Y = X.reshape((2, 60, 1000), dims=("cycle", "time", "x"))  # doctest: +SKIP
         """
+        requested_shape = tuple(shape) if is_sequence(shape) else (shape,)
+        source_shape = self.shape
+        source_dims = list(self.dims)
+
         if coord_policy not in {"safe", "drop", "strict"}:
             raise ValueError(
                 f"coord_policy must be 'safe', 'drop', or 'strict'. Got {coord_policy!r}."
             )
 
         # Resolve the shape, handling -1 like NumPy
-        shape = tuple(shape) if is_sequence(shape) else (shape,)
+        shape = requested_shape
         if -1 in shape:
             known_size = 1
             n_minus_one = 0
@@ -2440,16 +2485,10 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
                 f"Cannot reshape array of size {self.size} into shape {shape}"
             )
 
-        new = self.copy() if not inplace else self
-
-        # Reshape data and mask
-        new._data = new._data.reshape(shape)
-        if new.is_masked:
-            new._mask = new._mask.reshape(shape)
-
+        # Resolve and validate geometry before mutating an in-place caller.
         # --- Dimension names ------------------------------------------------
-        old_shape = self.shape
-        old_dims = list(self.dims)
+        old_shape = source_shape
+        old_dims = source_dims
         new_ndim = len(shape)
 
         if dims is not None:
@@ -2490,8 +2529,6 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
                             break
                 seen.add(d)
 
-        new._dims = new_dims
-
         # --- Coordinate handling --------------------------------------------
         old_coordset = self.coordset
 
@@ -2510,9 +2547,9 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
                     )
 
         if old_coordset is None:
-            new._coordset = None
+            new_coordset = None
         else:
-            new._coordset = old_coordset._reshape_dims(
+            new_coordset = old_coordset._reshape_dims(
                 old_dims,
                 old_shape,
                 new_dims,
@@ -2521,7 +2558,27 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
                 coords=coords,
             )
 
-        new.history = f"Data reshaped from {old_shape} to {shape}"
+        new = self.copy() if not inplace else self
+        new._data = new._data.reshape(shape)
+        if new.is_masked:
+            new._mask = new._mask.reshape(shape)
+        new._dims = new_dims
+        new._coordset = new_coordset
+
+        new._append_history_entry(
+            operation="reshape",
+            parameters={
+                "requested_shape": list(requested_shape),
+                "resolved_shape": list(shape),
+                "source_dims": source_dims,
+                "requested_dims": None if dims is None else list(dims),
+                "result_dims": list(new.dims),
+                "coord_policy": coord_policy,
+                "coordinate_overrides": [] if coords is None else list(coords),
+                "inplace": inplace,
+            },
+            message=f"Data reshaped from {source_shape} to {shape}",
+        )
         return new
 
     # ======================================================================================

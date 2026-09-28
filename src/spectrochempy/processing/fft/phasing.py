@@ -52,7 +52,7 @@ def _phase_method(method):
 
         swapped = False
         if axis != -1:
-            new.swapdims(axis, -1, inplace=True)  # must be done in  place
+            new._swapdims_without_history(axis, -1, inplace=True)
             swapped = True
 
         # Get the coordinates for the last dimension
@@ -163,7 +163,7 @@ def _phase_method(method):
 
         # restore original data order if it was swapped
         if swapped:
-            new.swapdims(axis, -1, inplace=True)  # must be done inplace
+            new._swapdims_without_history(axis, -1, inplace=True)
 
         return new
 
