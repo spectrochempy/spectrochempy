@@ -52,6 +52,25 @@ def _exclude_incomplete_slices(data, slice_mask, axis):
 def _integrate_method(method):
     @functools.wraps(method)
     def wrapper(dataset, *args, **kwargs):
+        # "even" was deprecated in SciPy 1.11.0 and removed in SciPy 1.14.0.
+        # Reject it before resolving the axis, reading any coordinate or copying
+        # the dataset, so that no silent fallback is possible.
+        if "even" in kwargs:
+            even = kwargs.pop("even")
+            raise TypeError(
+                f"The 'even' keyword is not supported by "
+                f"NDDataset.{method.__name__}() (received even={even!r}). It was "
+                f"removed from scipy.integrate.simpson in SciPy 1.14.0, after "
+                f"being deprecated in SciPy 1.11.0. Omit the keyword to use the "
+                f"current SciPy strategy. With N samples there are N-1 intervals, "
+                f"and the Simpson 1/3 rule needs an even number of intervals: for "
+                f"an even number of samples the current strategy follows the "
+                f"former even='simpson' behaviour, while for an odd number of "
+                f"samples the keyword had no effect at all. This migration may "
+                f"change the result compared with the former even='avg', "
+                f"even='first' and even='last' strategies."
+            )
+
         # handle the various syntax to pass the axis
         if args:
             kwargs["dim"] = args[0]
@@ -59,8 +78,13 @@ def _integrate_method(method):
 
         axis, dim = dataset.get_axis(**kwargs)
 
-        if kwargs.get("dim"):
-            kwargs.pop("dim")
+        # get_axis() reads the dimension selector from its own copy of the
+        # keywords, so every accepted synonym must be dropped here before the
+        # remaining keywords are forwarded to SciPy. A truthiness test would
+        # leave the integer 0 in place, and the "axis" synonym is not dropped
+        # at all, which collides with the axis argument passed below.
+        for selector in ("dim", "dims", "axis"):
+            kwargs.pop(selector, None)
 
         # SciPy integration routines expect a plain ndarray-like coordinate.
         # Some NumPy/SciPy combinations are stricter with ndarray subclasses or
@@ -170,7 +194,8 @@ def trapezoid(dataset, **kwargs):
     dim : `int` or `str`, optional, default: ``"x"``
         Dimension along which to integrate.
         If an integer is provided, it is equivalent to the numpy axis
-        parameter for ``numpy.ndarray``.
+        parameter for ``numpy.ndarray``. The ``dims`` and ``axis`` keywords are
+        accepted as equivalent synonyms of ``dim``.
 
     See Also
     --------
@@ -197,7 +222,12 @@ def simpson(dataset, *args, **kwargs):
 
     If there are an even number of samples, ``N``, then there are an odd
     number of intervals (``N-1``), but Simpson's rule requires an even number
-    of intervals. The parameter 'even' controls how this is handled.
+    of intervals. The former ``even`` keyword that selected how this was handled
+    was deprecated in SciPy 1.11.0 and removed in SciPy 1.14.0, and is rejected
+    here. Omitting it selects the current SciPy strategy, which for an even
+    number of samples follows the former ``even='simpson'`` behaviour, so the
+    result may differ from the former ``even='avg'``, ``even='first'`` and
+    ``even='last'`` strategies.
 
     Parameters
     ----------
@@ -231,17 +261,10 @@ def simpson(dataset, *args, **kwargs):
     ----------------
     dim : `int` or `str`, optional, default: ``"x"``
         Dimension along which to integrate.
-        If an integer is provided, it is equivalent to the ``numpy.axis`` parameter
-        for ``numpy.ndarray``.
-    even : {``'avg'``, ``'first'``, ``'last'``}, optional, default: ``'avg'``
+        If an integer is provided, it is equivalent to the ``numpy.axis``
+        parameter for ``numpy.ndarray``. The ``dims`` and ``axis`` keywords are
+        accepted as equivalent synonyms of ``dim``.
 
-        * ``'avg'`` : Average two results: 1) use the first N-2 intervals with
-          a trapezoidal rule on the last interval and 2) use the last
-          ``N-2`` intervals with a trapezoidal rule on the first interval.
-        * ``'first'`` : Use Simpson's rule for the first ``N-2`` intervals with
-          a trapezoidal rule on the last interval.
-        * ``'last'`` : Use Simpson's rule for the last ``N-2`` intervals with a
-          trapezoidal rule on the first interval.
 
     See Also
     --------

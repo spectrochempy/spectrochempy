@@ -563,7 +563,9 @@ class PSD(BaseConfigurable):
 
         # Integrate over spectra dimension (axis=1)
         if integration_rule == "simpson":
-            psd = (2.0 / T_period) * simpson(integrand, time_data, axis=1)
+            # `x` must be passed by keyword: it only became positional in
+            # SciPy 1.15.0, and the declared minimum is 1.14.1.
+            psd = (2.0 / T_period) * simpson(integrand, x=time_data, axis=1)
         elif integration_rule == "riemann":
             # Right-endpoint rectangular rule: sum * (T_period / n)
             # Combined with global factor (2 / T_period) gives scaling 2/n.

@@ -121,12 +121,27 @@ class TestReturnTypeShapeDims:
         assert r.shape == ()
         assert r.dims == []
 
-    def test_dim_none_is_not_supported(self, integration_dataset):
-        with pytest.raises(TypeError, match="unexpected keyword argument 'dim'"):
-            integration_dataset.trapezoid(dim=None)
+    def test_dim_none_is_equivalent_to_no_selector(self, integration_dataset):
+        # Replaces the previous characterization of this case, which recorded
+        # `TypeError: trapezoid() got an unexpected keyword argument 'dim'` for
+        # `trapezoid(dim=None)`. That error was the selector keyword leaking to
+        # SciPy, not a designed contract: the wrapper only removed `dim` when it
+        # was truthy, so `dim=None` survived and reached the SciPy call. The
+        # same leak produced the failure reported for `dim=0`.
+        #
+        # The guarantee now asserted is that `dim`, `dims` and `axis` are always
+        # consumed after axis resolution, so `dim=None` selects the default
+        # dimension exactly as omitting the selector does.
+        r = integration_dataset.trapezoid(dim=None)
+        assert r.shape == (2,)
+        assert r.dims == ["y"]
+        np.testing.assert_allclose(r.data, integration_dataset.trapezoid().data)
 
     def test_keepdims_is_not_supported(self, integration_dataset):
-        with pytest.raises(TypeError, match="unexpected keyword argument 'dim'"):
+        # The expected message is now the one about 'keepdims' itself. It
+        # previously matched "unexpected keyword argument 'dim'" because the
+        # leaked selector keyword raised first and masked the real error.
+        with pytest.raises(TypeError, match="unexpected keyword argument 'keepdims'"):
             integration_dataset.trapezoid(dim=None, keepdims=True)
 
     def test_multi_axis_via_axis_kwarg_not_supported(self, integration_dataset):

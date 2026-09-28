@@ -39,6 +39,16 @@ Bug Fixes
   masked value with a raw ``NaN``. No estimate of the missing area is attempted,
   and the values hidden under the mask never reach the quadrature. Unmasked inputs
   are unaffected (:pr:`1698`).
+- ``trapezoid()`` and ``simpson()`` now accept ``dim``, ``dims`` and ``axis``
+  interchangeably on every dimension, including the first one: ``dim=0`` and
+  ``axis=0`` previously failed with a ``TypeError`` naming the keyword, and
+  ``dim=None`` is now equivalent to omitting the selector. The ``even`` keyword
+  of ``simpson()`` is removed: it was deprecated in SciPy 1.11.0, removed
+  upstream in SciPy 1.14.0, and is now refused with a message explaining the
+  current strategy instead of raising an unrelated ``TypeError``. Omitting it
+  selects the current SciPy behaviour, which may differ from the former
+  ``'avg'``, ``'first'`` and ``'last'`` strategies for an even number of
+  samples. SpectroChemPy now requires ``scipy>=1.14.1`` (:pr:`1699`).
 - ``concatenate()`` now rejects inputs whose concatenated dimension carries
   coordinate values or labels for only some datasets, instead of returning a
   geometrically inconsistent result. Coordinates may still be omitted from

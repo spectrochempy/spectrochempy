@@ -37,7 +37,7 @@ dependencies:
     - pyyaml
     - requests
     - scikit-learn
-    - scipy
+    - scipy>=1.14.1
     - tzlocal
 
     # PLUGINS dependencies
