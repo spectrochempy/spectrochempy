@@ -89,6 +89,16 @@ jobs:
             test_targets: ""
             validation: compatibility
             check_name: Test using ubuntu-latest and python 3.11
+          - os: ubuntu-latest
+            pythonVersion: "3.11"
+            coverage: false
+            docs_examples: false
+            plugins: true
+            core_only: false
+            test_targets: ""
+            minimum_dependencies: true
+            validation: minimum-dependencies
+            check_name: Test minimum dependencies using ubuntu-latest and python 3.11
           - os: windows-latest
             pythonVersion: "3.14"
             coverage: false
@@ -175,6 +185,20 @@ jobs:
           echo "SETUPTOOLS_SCM_PRETEND_VERSION=$VALIDATION_VERSION" >> "$GITHUB_ENV"
           echo "Monorepo plugin validation uses local core version $VALIDATION_VERSION"
 
+      # The declared minimum in pyproject.toml is scipy>=1.14.1. This job pins
+      # the minimum and a NumPy build that is compatible with it. The pins are
+      # exported through PIP_CONSTRAINT so that every later pip invocation
+      # obeys them, not just this one: the plugin installs use --no-deps, but
+      # the plugin runtime dependencies that follow are resolved by pip and
+      # would otherwise be free to pull a newer numpy or scipy in.
+      - name: Pin minimum dependency versions
+        if: ${{ matrix.minimum_dependencies }}
+        run: |
+          set -e
+          printf 'scipy==1.14.1\nnumpy==2.2.6\n' > "$RUNNER_TEMP/minimum-constraints.txt"
+          echo "PIP_CONSTRAINT=$RUNNER_TEMP/minimum-constraints.txt" >> "$GITHUB_ENV"
+          python -m pip install "scipy==1.14.1" "numpy==2.2.6"
+
       - name: Install spectrochempy
         if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
         run: |
@@ -203,6 +227,16 @@ jobs:
         if: ${{ matrix.plugins && !(env.ACT && matrix.pythonVersion == '3.14') }}
         run: |
           python .github/workflows/scripts/ci_diagnostics.py environment
+
+      # Checked only now, once every install of the job is done, so that an
+      # upgrade introduced while resolving the plugin dependencies is caught
+      # here rather than passing unnoticed.
+      - name: Verify the minimum dependency versions were not upgraded
+        if: ${{ matrix.minimum_dependencies }}
+        run: |
+          set -e
+          python -c "import numpy, scipy; print('numpy', numpy.__version__); print('scipy', scipy.__version__); assert scipy.__version__ == '1.14.1', 'scipy was silently upgraded to ' + scipy.__version__; assert numpy.__version__ == '2.2.6', 'numpy was silently upgraded to ' + numpy.__version__"
+          python -m pip check
 
       - name: Core-only environment diagnostics
         if: ${{ matrix.core_only && !(env.ACT && matrix.pythonVersion == '3.14') }}

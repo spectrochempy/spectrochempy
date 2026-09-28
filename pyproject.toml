@@ -32,7 +32,7 @@ dependencies = [
   "pyyaml",
   "requests",
   "scikit-learn",
-  "scipy",
+  "scipy>=1.14.1",
   "tzlocal",
 ]
 description = "Processing, analysis and modelling Spectroscopic data for Chemistry with Python"
@@ -148,7 +148,7 @@ local_scheme = "dirty-tag"
 
 [tool.ruff]
 line-length = 88
-target-version = "py312"
+target-version = "py311"
 
 [tool.ruff.lint]
 # Enable specific rules
