@@ -150,8 +150,9 @@ ndadd.shape
 # * **inner** which means that the intersection of the coordinates is used
 # * **first** which means that the first dataset is used as reference
 # * **last** which means that the last dataset is used as reference
-# * **interpolate** means that interpolation is performed to handle missing points whenever it is possible (Not yet
-# implemented)
+# * **interpolate** interpolates every dataset onto the first dataset coordinate. The default and only supported
+# value of `interpolate_sampling` is `"auto"`, which preserves that target grid. Numeric sampling requests are
+# explicitly refused; use `NDDataset.interpolate` with an explicit target coordinate when a new grid is required.
 
 # %% [markdown]
 # ### `inner` method

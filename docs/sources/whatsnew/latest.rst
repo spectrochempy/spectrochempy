@@ -31,6 +31,12 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- ``align()`` no longer silently ignores ``interpolate_sampling`` requests.
+  The omitted value and ``"auto"`` preserve the existing interpolation onto
+  the first dataset coordinate; numeric and other values are explicitly refused
+  before input mutation because construction of a new sampling grid is not
+  implemented. Call ``NDDataset.interpolate()`` with an explicit coordinate
+  when a different target grid is required (:pr:`1702`).
 - Multidimensional interferogram FFTs now apply the existing Mertz correction
   independently to every trace, using each trace's own zero path difference.
   Transforming a calibrated stack is therefore numerically equivalent to
