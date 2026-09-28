@@ -168,12 +168,12 @@ def test_positional_selector_matches_keyword(dataset_2d, method_name):
 def test_selectors_match_independent_reference(dataset_2d, method_name, selector):
     # Valid results are compared against a hand-computed trapezoidal reference,
     # integrated along the first dimension: row areas over y = [10, 20] K.
+    # Two samples per dimension give a single interval, which is a plain
+    # trapezoid for Simpson too, so one reference serves both methods.
     result = getattr(dataset_2d, method_name)(**selector)
-    if method_name == "trapezoid":
-        expected = 0.5 * (10.0 * np.array([1.0, 2.0, 3.0]) + 10.0 * np.array([4.0, 5.0, 6.0]))
-    else:
-        # A single pair of intervals is a plain trapezoid for Simpson too.
-        expected = 0.5 * (10.0 * np.array([1.0, 2.0, 3.0]) + 10.0 * np.array([4.0, 5.0, 6.0]))
+    lower = 10.0 * np.array([1.0, 2.0, 3.0])
+    upper = 10.0 * np.array([4.0, 5.0, 6.0])
+    expected = 0.5 * (lower + upper)
     np.testing.assert_allclose(result.data, expected)
 
 
