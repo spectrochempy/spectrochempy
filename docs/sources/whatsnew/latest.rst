@@ -17,9 +17,10 @@ New Features
 
 - Added a structured operation history for ``NDDataset`` with a readable
   ``history`` view and detached ``history_entries``. Structured entries cover
-  transposition, selection, out-of-place addition and subtraction, and
-  ``mean()`` when it returns an ``NDDataset``; other operations may continue to
-  record normal text-only entries.
+  transposition, selection, out-of-place addition and subtraction, and the
+  numerical reductions ``mean()``, ``sum()``, ``std()``, and ``var()`` when
+  they return an ``NDDataset``; other operations may continue to record normal
+  text-only entries.
 - Added ``cross_validate`` and ``CrossValidationResult`` for bounded supervised
   PLS and Pipeline cross-validation with aligned ``NDDataset`` outputs,
   per-target metrics, fold records, and optional fitted fold estimators (#1658).

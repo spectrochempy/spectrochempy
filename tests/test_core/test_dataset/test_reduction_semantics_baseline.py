@@ -141,12 +141,12 @@ class TestSumCharacterization:
         assert_history_appended(
             reduction_dataset.sum(dim="x"),
             reduction_dataset,
-            "Dataset resulting from application",
+            "Sum computed along x",
         )
 
     def test_sum_history_message_format(self, reduction_dataset):
         s = reduction_dataset.sum(dim="x")
-        assert "`sum`" in s.history[1]
+        assert "Sum computed along x" in s.history[1]
 
     def test_sum_masked_values_ignored(self):
         arr = np.ma.MaskedArray(
@@ -247,7 +247,9 @@ class TestStdCharacterization:
 
     def test_std_appends_history(self, reduction_dataset):
         assert_history_appended(
-            reduction_dataset.std(dim="x"), reduction_dataset, "`std`"
+            reduction_dataset.std(dim="x"),
+            reduction_dataset,
+            "Standard deviation computed along x",
         )
 
     def test_std_keepdims(self, reduction_dataset):
@@ -563,7 +565,7 @@ class TestReductionHistory:
 
     def test_reduction_history_message_format(self, reduction_dataset):
         s = reduction_dataset.sum(dim="x")
-        assert "Dataset resulting from application of `sum` method" in s.history[1]
+        assert "Sum computed along x" in s.history[1]
 
     def test_mean_history_message(self, reduction_dataset):
         m = reduction_dataset.mean(dim="x")
@@ -571,7 +573,7 @@ class TestReductionHistory:
 
     def test_std_history_message(self, reduction_dataset):
         s = reduction_dataset.std(dim="x")
-        assert "`std`" in s.history[1]
+        assert "Standard deviation computed along x" in s.history[1]
 
     def test_max_history_message(self, reduction_dataset):
         mx = reduction_dataset.max(dim="x")
