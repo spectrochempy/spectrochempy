@@ -191,6 +191,8 @@ def _build_spc_header(
     ytype=0,
     ztype=0,
     date=0,
+    peakpt=0,
+    fcatxt=b"\x00" * 30,
 ):
     """Build a 512-byte SPC header using the exact struct layout from the reader."""
     head_fmt = "<cccciddicccci9s9sh32s130s30siicchf48sfifc187s"
@@ -211,10 +213,10 @@ def _build_spc_header(
         date,  # fdate
         b"\x00" * 9,  # fres
         b"\x00" * 9,  # fsource
-        0,  # fpeakpt
+        peakpt,  # fpeakpt: zero path difference sample, 0 = not known
         b"\x00" * 32,  # fspare
         b"\x00" * 130,  # fcmnt
-        b"\x00" * 30,  # fcatxt
+        fcatxt,  # fcatxt: axis labels, only read when the TALABS flag is set
         0,  # flogoff
         0,  # fmods
         b"\x00",  # fprocs
@@ -520,3 +522,122 @@ def test_read_spc_old_format_xey(galacticdata):
         np.asarray(x),
         np.linspace(float(spc.first), float(spc.last), 31528),
     )
+
+
+# ======================================================================================
+# INTERFEROGRAM DETECTION FROM THE ORIGINAL SPC FORMAT CODE
+# ======================================================================================
+
+
+def _make_ytype_spc(ytype, peakpt=0, fcatxt=b"\x00" * 30, ftflgs=0x80, npts=4):
+    """Build a minimal X-Y SPC file declaring a specific original y format code."""
+    x_values = np.array([10.0, 20.0, 30.0, 40.0], dtype="<f4")
+    y_values = np.array([1.0, 8.0, 1.0, 8.0], dtype="<f4")
+    header = _build_spc_header(
+        ftflgs=ftflgs,
+        npts=npts,
+        xtype=0,
+        ytype=ytype,
+        peakpt=peakpt,
+        fcatxt=fcatxt,
+    )
+    subhdr = _build_subheader(subindx=0, subtime=0.0, subnext=1.0, npts=npts)
+    return header + x_values.tobytes() + subhdr + y_values.tobytes()
+
+
+def test_interferogram_is_detected_from_the_original_format_code(tmp_path):
+    # y format code 1 is the interferogram. The reader used to test
+    # spcf.y_units == "Interferogram", but code 1 maps to ("Interferogram", None),
+    # so the units are None and the branch was unreachable.
+    path = tmp_path / "IG_SYNTH.SPC"
+    path.write_bytes(_make_ytype_spc(ytype=1))
+
+    dataset = scp.read_spc(path)
+
+    assert dataset.meta.interferogram is True
+    assert dataset.meta.td == list(dataset.shape)
+    assert dataset.shape == (1, 4)
+
+
+def test_ordinary_spectrum_is_not_turned_into_an_interferogram(tmp_path):
+    # y format code 2 is an absorbance spectrum and must stay untouched.
+    path = tmp_path / "SP_SYNTH.SPC"
+    path.write_bytes(_make_ytype_spc(ytype=2))
+
+    dataset = scp.read_spc(path)
+
+    assert dataset.meta.interferogram is None
+    assert "td" not in dataset.meta
+    assert dataset.title == "Absorbance"
+
+
+def test_interferogram_metadata_uses_only_values_present_in_the_file(tmp_path):
+    # fpeakpt is the only instrument value the SPC header carries for an
+    # interferogram. The reader used to hard-code a 15798.26 cm^-1 laser
+    # frequency, which the format does not store at all.
+    path = tmp_path / "IG_ZPD.SPC"
+    path.write_bytes(_make_ytype_spc(ytype=1, peakpt=2))
+
+    dataset = scp.read_spc(path)
+
+    assert dataset.x._zpd == 2
+    assert "laser_frequency" not in dataset.meta
+    # The axis is left as the file declared it, not converted to an optical
+    # path difference from an assumed laser frequency.
+    assert dataset.x.units is None
+    assert dataset.x.title != "optical path difference"
+
+
+def test_unknown_zero_path_difference_is_not_reported_as_sample_zero(tmp_path):
+    # 0 means "not known" for fpeakpt, so _zpd must stay at its default instead
+    # of claiming the first sample is the zero path difference.
+    path = tmp_path / "IG_NOZPD.SPC"
+    path.write_bytes(_make_ytype_spc(ytype=1, peakpt=0))
+
+    dataset = scp.read_spc(path)
+
+    assert dataset.meta.interferogram is True
+    assert dataset.x._zpd == 0
+
+
+def test_axis_label_customization_does_not_hide_an_interferogram(tmp_path):
+    # With the TALABS flag, fcatxt overwrites the mapped titles. Detection must
+    # not follow the title, or a renamed interferogram would be missed.
+    # fcatxt holds the x, y and z labels separated by nulls; the empty x slot
+    # leaves the mapped x title in place and renames the y axis.
+    fcatxt = b"\x00my own label\x00".ljust(30, b"\x00")
+    path = tmp_path / "IG_LABELLED.SPC"
+    path.write_bytes(_make_ytype_spc(ytype=1, ftflgs=0x80 | 0x20, fcatxt=fcatxt))
+
+    dataset = scp.read_spc(path)
+
+    assert dataset.meta.interferogram is True
+    assert dataset.title == "my own label"
+
+
+def test_axis_label_customization_does_not_invent_an_interferogram(tmp_path):
+    # The mirror case: an ordinary spectrum that renames itself "Interferogram"
+    # must still not be treated as one.
+    fcatxt = b"\x00Interferogram\x00".ljust(30, b"\x00")
+    path = tmp_path / "SP_FAKEIG.SPC"
+    path.write_bytes(_make_ytype_spc(ytype=2, ftflgs=0x80 | 0x20, fcatxt=fcatxt))
+
+    dataset = scp.read_spc(path)
+
+    assert dataset.title == "Interferogram"
+    assert dataset.meta.interferogram is None
+    assert "td" not in dataset.meta
+
+
+def test_interferogram_coordinates_stay_coherent(tmp_path):
+    path = tmp_path / "IG_COORDS.SPC"
+    path.write_bytes(_make_ytype_spc(ytype=1, peakpt=1))
+
+    dataset = scp.read_spc(path)
+
+    assert dataset.x is not None
+    assert dataset.y is not None
+    np.testing.assert_array_almost_equal(
+        np.asarray(dataset.x), np.array([10.0, 20.0, 30.0, 40.0])
+    )
+    assert dataset.x.shape[0] == dataset.shape[-1]

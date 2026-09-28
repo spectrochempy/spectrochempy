@@ -56,6 +56,17 @@ Bug Fixes
   selects the current SciPy behaviour, which may differ from the former
   ``'avg'``, ``'first'`` and ``'last'`` strategies for an even number of
   samples. SpectroChemPy now requires ``scipy>=1.14.1`` (:pr:`1699`).
+- SPC files that declare the original interferogram data type are now recognised
+  as interferograms. The reader tested the y axis *units* against the string
+  ``"Interferogram"``, but the format code for an interferogram maps to the axis
+  *title* with no unit, so the branch was unreachable and no SPC interferogram
+  was ever flagged: ``meta.interferogram`` stayed unset and ``meta.td`` was
+  never recorded. Detection now uses the original format code from the file
+  header, which a file-supplied axis label cannot override, and the zero path
+  difference is taken from the header field that carries it. A laser frequency
+  is no longer invented for these files, since the SPC header does not record
+  one, and the x axis is left as the file declared it rather than being rebuilt
+  from an assumed laser (:pr:`1700`).
 - ``concatenate()`` now rejects inputs whose concatenated dimension carries
   coordinate values or labels for only some datasets, instead of returning a
   geometrically inconsistent result. Coordinates may still be omitted from
