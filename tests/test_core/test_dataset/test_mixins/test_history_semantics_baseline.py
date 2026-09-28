@@ -190,7 +190,7 @@ class TestReductions:
         """Sum with explicit dim appends."""
         result = ds2d.sum(dim="y")
         assert len(result.history) == 1
-        assert "`sum`" in _entry(result.history[0])
+        assert "Sum computed along y" in _entry(result.history[0])
 
     def test_mean_appends(self, ds2d):
         """Mean with explicit dim appends."""
@@ -202,13 +202,13 @@ class TestReductions:
         """Std with explicit dim appends."""
         result = ds2d.std(dim="y")
         assert len(result.history) == 1
-        assert "`std`" in _entry(result.history[0])
+        assert "Standard deviation computed along y" in _entry(result.history[0])
 
     def test_var_appends(self, ds2d):
         """Var with explicit dim appends."""
         result = ds2d.var(dim="y")
         assert len(result.history) == 1
-        assert "`var`" in _entry(result.history[0])
+        assert "Variance computed along y" in _entry(result.history[0])
 
     def test_1d_sum_returns_scalar(self, ds1):
         """For 1D input, sum with default axis returns scalar, not NDDataset."""
@@ -238,7 +238,7 @@ class TestReductions:
         ds2d.history = "Prior"
         result = ds2d.sum(dim="y", keepdims=True)
         assert len(result.history) == 2
-        assert "`sum`" in _entry(result.history[-1])
+        assert "Sum computed along y" in _entry(result.history[-1])
 
     def test_reduction_preserves_prior_history(self, ds2d):
         """Reduction appends to, doesn't replace, prior history."""
@@ -554,21 +554,16 @@ class TestHistoryPatterns:
         assert "neg" in text.lower()
 
     def test_reduction_uses_consistent_format(self, ds2d):
-        """
-        Mean uses its structured message; other reductions retain the generic text.
-
-        Generic format: 'Dataset resulting from application of `{method}` method'
-        """
-        reductions = ["sum", "mean", "std", "var"]
-        for method_name in reductions:
+        """Numeric reductions use consistent operation-oriented messages."""
+        expected_messages = {
+            "sum": "Sum computed along y",
+            "mean": "Mean computed along y",
+            "std": "Standard deviation computed along y",
+            "var": "Variance computed along y",
+        }
+        for method_name, expected in expected_messages.items():
             result = getattr(ds2d, method_name)(dim="y")
-            text = _entry(result.history[-1])
-            expected = (
-                "Mean computed along y" if method_name == "mean" else f"`{method_name}`"
-            )
-            assert (
-                expected in text
-            ), f"Expected method name {method_name} in history, got: {text}"
+            assert _entry(result.history[-1]) == expected
 
     def test_ufunc_format_consistent(self, ds1):
         """All ufuncs start with 'Ufunc' prefix."""
