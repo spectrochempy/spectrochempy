@@ -1095,8 +1095,13 @@ def _read_spc(*args, **kwargs):
             dataset.meta.interferogram = True
             dataset.meta.td = list(dataset.shape)
             # fpeakpt is the zero path difference sample, and 0 means "not
-            # known" in the format. Leave _zpd alone in that case rather than
-            # claiming the first sample is the zero path difference.
+            # known" in the format. Keep the raw header value in the metadata,
+            # as the OMNIC reader does, because Coord._zpd is a plain integer
+            # defaulting to 0 and cannot tell "not known" from "the first
+            # sample is the zero path difference". The metadata is therefore
+            # the only place where that distinction survives; the reader does
+            # not guess a ZPD, and does not touch Coord to make room for one.
+            dataset.meta.interferogram_peak_position = spcf.peakpt
             if spcf.peakpt:
                 dataset.x._zpd = spcf.peakpt
 

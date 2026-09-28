@@ -15,6 +15,7 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.units import ur
 from spectrochempy.processing.fft.zero_filling import zf_size
 from spectrochempy.utils.decorators import _units_agnostic_method
+from spectrochempy.utils.exceptions import SpectroChemPyError
 
 
 # ======================================================================================
@@ -241,6 +242,32 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
         error = True
 
     if hasattr(x, "_use_time_axis"):
+        # Transforming an interferogram yields a wavenumber axis, which is only
+        # physically meaningful when the input axis is a calibrated time or
+        # optical path difference axis. Without that calibration the transform
+        # still runs and labels the result "cm^-1", which would be a physically
+        # calibrated axis built on an implicit assumption. The generic
+        # dimensionality check above already cancels the computation, but
+        # error_ only logs, and the assignment below mutates the caller's
+        # dataset when inplace=True. Refuse explicitly, and refuse before that
+        # assignment, so nothing is touched.
+        if (
+            is_ir
+            and not inv
+            and not x.dimensionless
+            and not x.unitless
+            and x.units.dimensionality != "[time]"
+        ):
+            raise SpectroChemPyError(
+                "Fourier transforming an interferogram requires a calibrated "
+                "time or optical path difference axis, from which a wavenumber "
+                f"axis can be built. The interferogram axis here is "
+                f"{x.title!r} with units {x.units}, which is neither, and the "
+                "dataset records no laser frequency to convert it with. Call "
+                "Coord.set_laser_frequency() with the value of your instrument "
+                "first, or convert the axis yourself. The dataset was left "
+                "untouched."
+            )
         x._use_time_axis = True  # we need to have dimentionless or time units
 
     if not error:

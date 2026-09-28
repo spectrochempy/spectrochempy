@@ -581,6 +581,7 @@ def test_interferogram_metadata_uses_only_values_present_in_the_file(tmp_path):
     dataset = scp.read_spc(path)
 
     assert dataset.x._zpd == 2
+    assert dataset.meta.interferogram_peak_position == 2
     assert "laser_frequency" not in dataset.meta
     # The axis is left as the file declared it, not converted to an optical
     # path difference from an assumed laser frequency.
@@ -588,15 +589,19 @@ def test_interferogram_metadata_uses_only_values_present_in_the_file(tmp_path):
     assert dataset.x.title != "optical path difference"
 
 
-def test_unknown_zero_path_difference_is_not_reported_as_sample_zero(tmp_path):
-    # 0 means "not known" for fpeakpt, so _zpd must stay at its default instead
-    # of claiming the first sample is the zero path difference.
+def test_unknown_zero_path_difference_is_preserved_as_unknown(tmp_path):
+    # 0 means "not known" for fpeakpt. Coord._zpd is a plain integer that
+    # defaults to 0, so it cannot express the difference, and asserting
+    # _zpd == 0 would assert nothing: the value is left untouched rather than
+    # claimed to be the first sample. The raw header value is kept in the
+    # metadata, which is what a caller has to consult.
     path = tmp_path / "IG_NOZPD.SPC"
     path.write_bytes(_make_ytype_spc(ytype=1, peakpt=0))
 
     dataset = scp.read_spc(path)
 
     assert dataset.meta.interferogram is True
+    assert dataset.meta.interferogram_peak_position == 0
     assert dataset.x._zpd == 0
 
 
@@ -641,3 +646,38 @@ def test_interferogram_coordinates_stay_coherent(tmp_path):
         np.asarray(dataset.x), np.array([10.0, 20.0, 30.0, 40.0])
     )
     assert dataset.x.shape[0] == dataset.shape[-1]
+
+
+def test_fft_of_an_uncalibrated_spc_interferogram_is_refused(galacticdata):
+    # Reading an SPC interferogram now flags it as one, which routes fft() down
+    # the interferogram branch. That branch builds a wavenumber axis, so it may
+    # only run on a calibrated time or optical path difference axis. This file
+    # has neither, and records no laser frequency, so fft() must refuse
+    # explicitly rather than label an assumed axis "cm^-1".
+    dataset = scp.read_spc(galacticdata / "IG_MULTI.SPC")
+
+    assert dataset.meta.interferogram is True
+    with pytest.raises(Exception, match="calibrated time or optical path"):
+        dataset.fft()
+
+
+def test_refused_fft_does_not_mutate_the_source_with_inplace(galacticdata):
+    # inplace=True aliases the source, so a refusal that still touched the
+    # dataset would corrupt it. error_ only logs, so the guard has to come
+    # before the first assignment.
+    dataset = scp.read_spc(galacticdata / "IG_MULTI.SPC")
+
+    before_data = dataset.x.data.copy()
+    before_flag = dataset.x._use_time_axis
+    before_title = dataset.x.title
+    before_units = dataset.x.units
+    before_history = list(dataset.history)
+
+    with pytest.raises(Exception, match="calibrated time or optical path"):
+        dataset.fft(inplace=True)
+
+    np.testing.assert_array_equal(dataset.x.data, before_data)
+    assert dataset.x._use_time_axis == before_flag
+    assert dataset.x.title == before_title
+    assert dataset.x.units == before_units
+    assert list(dataset.history) == before_history

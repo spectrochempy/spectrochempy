@@ -60,6 +60,20 @@ Bug Fixes
   is no longer invented for these files, since the SPC header does not record
   one, and the x axis is left as the file declared it rather than being rebuilt
   from an assumed laser (:pr:`1700`).
+  ``meta.interferogram_peak_position`` now always carries the raw header value,
+  including ``0``, which is the format's "not known" sentinel. A coordinate's
+  zero path difference is an integer that defaults to ``0`` and cannot
+  distinguish "not known" from "the first sample is the zero path difference",
+  so the metadata is where that distinction is now recorded.
+- Fourier transforming a dataset flagged as an interferogram now raises
+  ``SpectroChemPyError`` when its x axis is neither time nor dimensionless, for
+  instance when it is the uncalibrated wavenumber axis an SPC interferogram
+  carries. This branch of ``fft()`` derives a wavenumber axis from the input
+  spacing, and it previously only logged an error and continued, so the call
+  returned an untransformed dataset whose coordinate had nevertheless been
+  switched to a time axis, mutating the caller's dataset when ``inplace=True``.
+  The refusal is now raised before anything is modified. Interferograms with a
+  calibrated time or optical path difference axis are unaffected (:pr:`1700`).
 - ``concatenate()`` now rejects inputs whose concatenated dimension carries
   coordinate values or labels for only some datasets, instead of returning a
   geometrically inconsistent result. Coordinates may still be omitted from
