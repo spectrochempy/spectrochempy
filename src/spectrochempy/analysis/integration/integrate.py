@@ -14,10 +14,73 @@ import functools
 import numpy as np
 import scipy.integrate
 
+from spectrochempy.utils.constants import NOMASK
+
+
+def _reduced_slice_mask(mask, axis):
+    """
+    Reduce a source mask along the integrated axis.
+
+    A masked point is a scientific exclusion, so an output slice is considered
+    valid only if it was built without any masked point. The canonical unmasked
+    sentinel is returned unchanged and whenever no slice is affected, so an
+    unmasked input keeps the canonical unmasked representation.
+    """
+    if not isinstance(mask, np.ndarray):
+        # NOMASK, and any other scalar sentinel, means nothing is excluded.
+        return NOMASK
+    reduced = np.any(mask, axis=axis)
+    return reduced if np.any(reduced) else NOMASK
+
+
+def _exclude_incomplete_slices(data, slice_mask, axis):
+    """
+    Blank the incomplete slices before the numerical integration.
+
+    The values hidden under a mask are excluded from the calculation, so they
+    must neither reach the quadrature nor overflow it. They are replaced by
+    zeros, which only affects the incomplete slices whose result is discarded
+    afterwards. Complete slices keep their exact values.
+    """
+    if not np.any(slice_mask):
+        return data
+    if np.ndim(slice_mask) > 0:
+        slice_mask = np.expand_dims(slice_mask, axis)
+    return np.where(slice_mask, 0.0, data)
+
 
 def _integrate_method(method):
     @functools.wraps(method)
     def wrapper(dataset, *args, **kwargs):
+        # "even" was deprecated in SciPy 1.11.0 and removed in SciPy 1.14.0.
+        # Reject it before resolving the axis, reading any coordinate or copying
+        # the dataset, so that no silent fallback is possible.
+        if "even" in kwargs:
+            even = kwargs.pop("even")
+            if method.__name__ == "simpson":
+                raise TypeError(
+                    f"The 'even' keyword is not supported by "
+                    f"NDDataset.simpson() (received even={even!r}). It was "
+                    f"removed from scipy.integrate.simpson in SciPy 1.14.0, "
+                    f"after being deprecated in SciPy 1.11.0. Omit the keyword to "
+                    f"use the current SciPy strategy. With N samples there are "
+                    f"N-1 intervals, and the Simpson 1/3 rule needs an even number "
+                    f"of intervals: for an even number of samples the current "
+                    f"strategy follows the former even='simpson' behaviour, while "
+                    f"for an odd number of samples the keyword had no effect at "
+                    f"all. This migration may change the result compared with the "
+                    f"former even='avg', even='first' and even='last' strategies."
+                )
+            # trapezoid() never had this parameter, in SciPy or here, so there is
+            # no deprecation to explain and no strategy to offer.
+            raise TypeError(
+                f"The 'even' keyword is not supported by "
+                f"NDDataset.{method.__name__}() (received even={even!r}). "
+                f"trapezoid() has no such parameter and never did, so there is no "
+                f"strategy for it to select. Call it without the keyword, or use "
+                f"NDDataset.simpson() if the Simpson 1/3 rule is what you need."
+            )
+
         # handle the various syntax to pass the axis
         if args:
             kwargs["dim"] = args[0]
@@ -25,14 +88,26 @@ def _integrate_method(method):
 
         axis, dim = dataset.get_axis(**kwargs)
 
-        if kwargs.get("dim"):
-            kwargs.pop("dim")
+        # get_axis() reads the dimension selector from its own copy of the
+        # keywords, so every accepted synonym must be dropped here before the
+        # remaining keywords are forwarded to SciPy. A truthiness test would
+        # leave the integer 0 in place, and the "axis" synonym is not dropped
+        # at all, which collides with the axis argument passed below.
+        for selector in ("dim", "dims", "axis"):
+            kwargs.pop(selector, None)
 
         # SciPy integration routines expect a plain ndarray-like coordinate.
         # Some NumPy/SciPy combinations are stricter with ndarray subclasses or
         # view semantics, so normalize the integration axis coordinate here.
         x = np.asarray(dataset.coord(dim).data)
-        y = dataset.data
+        y = np.asarray(dataset.data)
+
+        # A masked point is a scientific exclusion. Reduce the source mask along
+        # the integrated axis first, so that the validity of each output slice
+        # is known before anything is computed.
+        slice_mask = _reduced_slice_mask(dataset.mask, axis)
+        y = _exclude_incomplete_slices(y, slice_mask, axis)
+
         try:
             data = method(y, x=x, axis=axis, **kwargs)
         except NotImplementedError as exc:
@@ -48,8 +123,15 @@ def _integrate_method(method):
         if dataset.coord(dim).reversed:
             data *= -1
 
+        if np.any(slice_mask):
+            # A slice whose contribution is incomplete has no published area.
+            # Publish it as unavailable instead of a number derived from
+            # excluded points.
+            data = np.where(slice_mask, np.nan, data)
+
         new = dataset.copy()
         new._data = data
+        new._mask = slice_mask
 
         del new._dims[axis]
         if (
@@ -101,12 +183,29 @@ def trapezoid(dataset, **kwargs):
     `~spectrochempy.core.dataset.ndataset.NDDataset`
         Definite integral as approximated by trapezoidal rule.
 
+    Notes
+    -----
+    SpectroChemPy does not publish an integral for a slice whose contribution is
+    incomplete. A masked point is a scientific exclusion: an output slice is
+    integrated normally, and is not masked, when it was built without any masked
+    point. A slice that used at least one masked point, including a fully masked
+    slice, is instead published as a masked value with a raw `numpy.nan`.
+
+    No estimate of the missing area is made, so masked points are not replaced,
+    removed or interpolated. The values hidden under the mask never reach the
+    quadrature, so they cannot influence a result nor overflow it.
+
+    The result mask is always compatible with the result shape: a 1D input
+    yields a zero-dimensional result with a scalar mask, and an unmasked input
+    yields the canonical unmasked `numpy.False_` mask.
+
     Other Parameters
     ----------------
     dim : `int` or `str`, optional, default: ``"x"``
         Dimension along which to integrate.
         If an integer is provided, it is equivalent to the numpy axis
-        parameter for ``numpy.ndarray``.
+        parameter for ``numpy.ndarray``. The ``dims`` and ``axis`` keywords are
+        accepted as equivalent synonyms of ``dim``.
 
     See Also
     --------
@@ -133,7 +232,12 @@ def simpson(dataset, *args, **kwargs):
 
     If there are an even number of samples, ``N``, then there are an odd
     number of intervals (``N-1``), but Simpson's rule requires an even number
-    of intervals. The parameter 'even' controls how this is handled.
+    of intervals. The former ``even`` keyword that selected how this was handled
+    was deprecated in SciPy 1.11.0 and removed in SciPy 1.14.0, and is rejected
+    here. Omitting it selects the current SciPy strategy, which for an even
+    number of samples follows the former ``even='simpson'`` behaviour, so the
+    result may differ from the former ``even='avg'``, ``even='first'`` and
+    ``even='last'`` strategies.
 
     Parameters
     ----------
@@ -147,21 +251,30 @@ def simpson(dataset, *args, **kwargs):
     `~spectrochempy.core.dataset.ndataset.NDDataset`
         Definite integral as approximated using the composite Simpson's rule.
 
+    Notes
+    -----
+    SpectroChemPy does not publish an integral for a slice whose contribution is
+    incomplete. A masked point is a scientific exclusion: an output slice is
+    integrated normally, and is not masked, when it was built without any masked
+    point. A slice that used at least one masked point, including a fully masked
+    slice, is instead published as a masked value with a raw `numpy.nan`.
+
+    No estimate of the missing area is made, so masked points are not replaced,
+    removed or interpolated. The values hidden under the mask never reach the
+    quadrature, so they cannot influence a result nor overflow it.
+
+    The result mask is always compatible with the result shape: a 1D input
+    yields a zero-dimensional result with a scalar mask, and an unmasked input
+    yields the canonical unmasked `numpy.False_` mask.
+
     Other Parameters
     ----------------
     dim : `int` or `str`, optional, default: ``"x"``
         Dimension along which to integrate.
-        If an integer is provided, it is equivalent to the ``numpy.axis`` parameter
-        for ``numpy.ndarray``.
-    even : {``'avg'``, ``'first'``, ``'last'``}, optional, default: ``'avg'``
+        If an integer is provided, it is equivalent to the ``numpy.axis``
+        parameter for ``numpy.ndarray``. The ``dims`` and ``axis`` keywords are
+        accepted as equivalent synonyms of ``dim``.
 
-        * ``'avg'`` : Average two results: 1) use the first N-2 intervals with
-          a trapezoidal rule on the last interval and 2) use the last
-          ``N-2`` intervals with a trapezoidal rule on the first interval.
-        * ``'first'`` : Use Simpson's rule for the first ``N-2`` intervals with
-          a trapezoidal rule on the last interval.
-        * ``'last'`` : Use Simpson's rule for the last ``N-2`` intervals with a
-          trapezoidal rule on the first interval.
 
     See Also
     --------

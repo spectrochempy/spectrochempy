@@ -6,7 +6,7 @@
 #   /<branch-name>/ on GitHub Pages.
 # - Branch names are sanitised: "/" becomes "-".
 # - Example: branch "docs/plotting-pass" → /docs-plotting-pass/
-# - Stable docs at root level remain untouched.
+# - Stable docs at root level remain untouched by branch previews.
 # - Preview docs are automatically removed when the branch is deleted
 #   via the cleanup workflow (cleanup_branch_docs.yml).
 
@@ -110,16 +110,37 @@ jobs:
           duration=$((SECONDS - start))
           echo "uv installation: ${duration}s" | tee -a "$CI_TIMING_FILE"
 
-      - name: Derive local core version for monorepo validation
+      - name: Classify release documentation event
+        id: release_scope
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          echo "is_stable_core=false" >> "$GITHUB_OUTPUT"
+          echo "version=" >> "$GITHUB_OUTPUT"
+          echo "tag=" >> "$GITHUB_OUTPUT"
+          if [[ "${{ github.event_name }}" == "release" ]] &&
+             VERSION=$(python .github/workflows/scripts/release_version.py \
+               stable-tag-version "$RELEASE_TAG" 2>/dev/null); then
+            echo "is_stable_core=true" >> "$GITHUB_OUTPUT"
+            echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+            echo "tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Derive installed core version
         run: |
           set -e
-          LATEST_TAG=$(python .github/workflows/scripts/release_version.py latest-tag)
-          VERSION="${LATEST_TAG#spectrochempy-v}"
-          NEXT_DEV=$(python .github/workflows/scripts/release_version.py next-dev "$VERSION")
-          VALIDATION_VERSION=$(python .github/workflows/scripts/check_plugin_core_compatibility.py \
-            --validation-version "${NEXT_DEV}.dev0")
+          if [[ "${{ steps.release_scope.outputs.is_stable_core }}" == "true" ]]; then
+            VALIDATION_VERSION="${{ steps.release_scope.outputs.version }}"
+            echo "Stable core documentation release installs exact version $VALIDATION_VERSION"
+          else
+            LATEST_TAG=$(python .github/workflows/scripts/release_version.py latest-tag)
+            VERSION="${LATEST_TAG#spectrochempy-v}"
+            NEXT_DEV=$(python .github/workflows/scripts/release_version.py next-dev "$VERSION")
+            VALIDATION_VERSION=$(python .github/workflows/scripts/check_plugin_core_compatibility.py \
+              --validation-version "${NEXT_DEV}.dev0")
+            echo "Monorepo plugin validation uses local core version $VALIDATION_VERSION"
+          fi
           echo "SETUPTOOLS_SCM_PRETEND_VERSION=$VALIDATION_VERSION" >> "$GITHUB_ENV"
-          echo "Monorepo plugin validation uses local core version $VALIDATION_VERSION"
 
       - name: Install spectrochempy
         run: |
@@ -149,10 +170,14 @@ jobs:
           python .github/workflows/scripts/ci_diagnostics.py environment
 
       - name: Verify local checkout and version
+        env:
+          EXPECTED_RELEASE_VERSION: ${{ steps.release_scope.outputs.version }}
         run: |
           set -e
           . .venv/bin/activate
           python -c "
+          import os
+
           import spectrochempy as scp
           print(f'scp.__version__ = {scp.__version__}')
           print(f'scp.__file__   = {scp.__file__}')
@@ -164,6 +189,12 @@ jobs:
           assert stale not in scp.__version__, \
               f'FAIL: version {scp.__version__} contains stale hardcoded value {stale!r} -- setuptools_scm did not compute version from git tags'
           print(f'OK: version {scp.__version__} is computed from git tags')
+          expected = os.environ.get('EXPECTED_RELEASE_VERSION', '')
+          if expected:
+              assert scp.__version__ == expected, (
+                  f'FAIL: stable docs release installed {scp.__version__}, expected {expected}'
+              )
+              print(f'OK: stable release uses exact installed version {expected}')
           "
 
       - name: Install Pandoc
@@ -207,10 +238,21 @@ jobs:
           fi
           EVENT="${{ github.event_name }}"
 
-          # Stable builds publish the root documentation.
-          if [[ "$BRANCH" == "master" || "$EVENT" == "release" ]]; then
+          # Only a final core release publishes versioned stable documentation.
+          # Plugin releases and core prereleases never update the stable channel.
+          if [[ "$EVENT" == "release" && "${{ steps.release_scope.outputs.is_stable_core }}" == "true" ]]; then
             echo "publish=true" >> "$GITHUB_OUTPUT"
             echo "mode=stable" >> "$GITHUB_OUTPUT"
+            echo "docs_context=stable" >> "$GITHUB_OUTPUT"
+            echo "is_preview=false" >> "$GITHUB_OUTPUT"
+            echo "preview_path=" >> "$GITHUB_OUTPUT"
+            echo "build_subdir=" >> "$GITHUB_OUTPUT"
+          # Master publishes unreleased documentation under /latest and keeps
+          # the root synchronized from the newest versioned stable build.
+          elif [[ "$BRANCH" == "master" ]]; then
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+            echo "mode=development" >> "$GITHUB_OUTPUT"
+            echo "docs_context=development" >> "$GITHUB_OUTPUT"
             echo "is_preview=false" >> "$GITHUB_OUTPUT"
             echo "preview_path=" >> "$GITHUB_OUTPUT"
             echo "build_subdir=" >> "$GITHUB_OUTPUT"
@@ -219,12 +261,14 @@ jobs:
             SANITIZED=$(echo "$BRANCH" | tr '/' '-')
             echo "publish=true" >> "$GITHUB_OUTPUT"
             echo "mode=preview" >> "$GITHUB_OUTPUT"
+            echo "docs_context=preview" >> "$GITHUB_OUTPUT"
             echo "is_preview=true" >> "$GITHUB_OUTPUT"
             echo "preview_path=$SANITIZED" >> "$GITHUB_OUTPUT"
             echo "build_subdir=build/branch_preview" >> "$GITHUB_OUTPUT"
           else
             echo "publish=false" >> "$GITHUB_OUTPUT"
             echo "mode=none" >> "$GITHUB_OUTPUT"
+            echo "docs_context=development" >> "$GITHUB_OUTPUT"
             echo "is_preview=false" >> "$GITHUB_OUTPUT"
             echo "preview_path=" >> "$GITHUB_OUTPUT"
             echo "build_subdir=" >> "$GITHUB_OUTPUT"
@@ -291,6 +335,10 @@ jobs:
 
       # ---------- build docs ----------
       - name: Build docs
+        env:
+          SCPY_DOCS_CONTEXT: ${{ steps.publish.outputs.docs_context }}
+          SCPY_DOCS_PREVIEW_NAME: ${{ steps.docs_mode.outputs.branch }}
+          SCPY_DOCS_RELEASE_TAG: ${{ steps.release_scope.outputs.tag }}
         run: |
           set -e
           . .venv/bin/activate
@@ -316,6 +364,26 @@ jobs:
           duration=$((SECONDS - start))
           echo "documentation build: ${duration}s" | tee -a "$CI_TIMING_FILE"
 
+      # The stable root must come from the published tag, never from master.
+      # Rebuild the snapshot once when its provenance marker is absent or stale.
+      - name: Repair published stable documentation snapshot
+        if: steps.publish.outputs.mode == 'development'
+        run: |
+          set -e
+          . .venv/bin/activate
+          STABLE_TAG=$(python .github/workflows/scripts/release_version.py latest-tag)
+          STABLE_VERSION="${STABLE_TAG#spectrochempy-v}"
+          MARKER="build/html/${STABLE_VERSION}/.spectrochempy-doc-version"
+
+          if [[ ! -f "$MARKER" ]] || [[ "$(cat "$MARKER")" != "$STABLE_VERSION" ]]; then
+            echo "Rebuilding stable documentation from $STABLE_TAG"
+            python .github/workflows/scripts/stable_docs_snapshot.py rebuild \
+              --project-root . --published-root build/html \
+              --tag "$STABLE_TAG" --promote
+          fi
+
+          python3 -c "from pathlib import Path; from docs.make import _sync_stable_docs_to_root, refresh_versions_index; root=Path('build/html'); manifest=refresh_versions_index(root); selected=_sync_stable_docs_to_root(root, manifest['stable']); refresh_versions_index(root); print(f'Synchronized root from stable version {selected}')"
+
       - name: CI diagnostics summary
         if: ${{ always() }}
         run: |
@@ -330,7 +398,7 @@ jobs:
       # post-merge artifact deployed to GitHub Pages.
 
       - name: Prune legacy preview documentation
-        if: steps.publish.outputs.mode == 'stable'
+        if: steps.publish.outputs.mode == 'stable' || steps.publish.outputs.mode == 'development'
         run: |
           declare -A allowed_preview_dirs=()
           declare -A root_doc_dirs=(
@@ -370,40 +438,17 @@ jobs:
           done < <(find build/html -mindepth 1 -maxdepth 1 -type d -printf '%f\n')
 
       - name: Prune stable version retention set
-        if: steps.publish.outputs.mode == 'stable'
+        if: steps.publish.outputs.mode == 'stable' || steps.publish.outputs.mode == 'development'
         run: |
-          keep_count=4
-          oldest_supported="0.6.10"
+          python3 - <<'PY'
+          from pathlib import Path
 
-          mapfile -t versions < <(
-            find build/html -mindepth 1 -maxdepth 1 -type d -printf '%f\n' |
-              grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' |
-              sort -V
-          )
+          from docs.make import prune_stable_versions
 
-          declare -A keep_versions=()
-
-          if (( ${#versions[@]} > 0 )); then
-            start_index=0
-            if (( ${#versions[@]} > keep_count )); then
-              start_index=$((${#versions[@]} - keep_count))
-            fi
-
-            for ((i=start_index; i<${#versions[@]}; i++)); do
-              keep_versions["${versions[i]}"]=1
-            done
-          fi
-
-          if [[ -d "build/html/$oldest_supported" ]]; then
-            keep_versions["$oldest_supported"]=1
-          fi
-
-          for version in "${versions[@]}"; do
-            if [[ -z "${keep_versions[$version]:-}" ]]; then
-              rm -rf "build/html/$version"
-              echo "Removed archived docs version: $version"
-            fi
-          done
+          removed, manifest = prune_stable_versions(Path("build/html"), keep_count=5)
+          print(f"Removed stable documentation versions: {removed}")
+          print(f"Published version catalogue: {manifest['versions']}")
+          PY
 
       # ---------- install branch preview into gh-pages clone ----------
       - name: Install branch preview into gh-pages

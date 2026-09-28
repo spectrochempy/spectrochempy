@@ -34,6 +34,7 @@ from spectrochempy.core.units import ur
 from spectrochempy.utils._logging import warning_
 from spectrochempy.utils.meta import Meta
 from spectrochempy_nmr.extern.nmrglue._simpson import read as _read_simpson_raw
+from spectrochempy_nmr.readers._metadata import apply_reader_metadata_options
 
 # ======================================================================================
 # Public entry point
@@ -148,7 +149,7 @@ def _parse_simpson_in(filepath):
 # ======================================================================================
 
 
-def _read_simpson_core(dataset, path):
+def _read_simpson_core(dataset, path, **kwargs):
     """Core SIMPSON reading logic shared across file extensions."""
     if not path.exists():
         warning_(f"File not found: {path}")
@@ -322,7 +323,7 @@ def _read_simpson_core(dataset, path):
 
     dataset.units = "count"
     dataset.title = "intensity"
-    dataset.origin = "simpson"
+    apply_reader_metadata_options(dataset, kwargs, default_origin="simpson")
     dataset.name = f"{path.stem} ({meta.datatype})"
     dataset.filename = path
 
@@ -334,19 +335,19 @@ def _read_simpson_core(dataset, path):
 @_importer_method
 def _read_spe(*args, **kwargs):
     """Read a SIMPSON ``.spe`` file."""
-    return _read_simpson_core(args[0], args[1])
+    return _read_simpson_core(args[0], args[1], **kwargs)
 
 
 @_importer_method
 def _read_fid(*args, **kwargs):
     """Read a SIMPSON ``.fid`` file."""
-    return _read_simpson_core(args[0], args[1])
+    return _read_simpson_core(args[0], args[1], **kwargs)
 
 
 @_importer_method
 def _read_in(*args, **kwargs):
     """Read a SIMPSON ``.in`` input file (data file resolved separately)."""
-    return _read_simpson_core(args[0], args[1])
+    return _read_simpson_core(args[0], args[1], **kwargs)
 
 
 def _is_spe(path, dic):

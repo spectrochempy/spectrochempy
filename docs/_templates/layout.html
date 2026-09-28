@@ -14,7 +14,16 @@
 </a>
 
 <div class="switch-menus">
-    <select id="versions-dropdown"></select>
+    <select id="versions-dropdown"
+            aria-label="Documentation version"
+            title="Documentation version"
+            data-docs-context="{{ docs_context }}"
+            data-build-version="{{ docs_build_version }}"
+            data-stable-version="{{ stable_release_version }}"
+            data-preview-name="{{ docs_preview_name }}"
+            data-versions="{{ previous_versions|join(',') if previous_versions else '' }}">
+        <option selected disabled>Loading versions…</option>
+    </select>
 </div>
 
 {%- include "searchbox.html" %}
@@ -26,71 +35,22 @@
 {% endblock %}
 
 {% block document %}
-{% if current_version == 'latest' %}
-<div id="version-popup" class="popup-warning">
-    <span class="close-btn" onclick="closePopup()">×</span>
-    ⚠️ You are reading the development version documentation.<br />
-    <a href="{{ stable_release_url }}">Read here the documentation of the last stable release</a>.
+{% if docs_context == 'development' %}
+<div class="docs-context-banner docs-development-banner" role="status">
+    This is development documentation. Some features are not available in the stable release.
+    <a href="{{ stable_release_url }}" data-docs-target="stable">View stable documentation.</a>
 </div>
-<script>
-    function showPopup() {
-        document.getElementById('version-popup').style.display = 'block';
-        setTimeout(function () {
-            closePopup();
-        }, 5000); // Hide after 5 seconds
-    }
-
-    function closePopup() {
-        const popup = document.getElementById('version-popup');
-        popup.style.opacity = '0';
-        popup.style.transition = 'opacity 0.5s';
-        setTimeout(function () {
-            popup.style.display = 'none';
-        }, 500);
-    }
-
-    // Afficher le popup au chargement de la page
-    document.addEventListener('DOMContentLoaded', showPopup);
-</script>
+{% elif docs_context == 'preview' %}
+<div class="docs-context-banner docs-preview-banner" role="status">
+    This is a pull request documentation preview{% if docs_preview_name %} for
+    <code>{{ docs_preview_name }}</code>{% endif %}. Content may change before merge.
+    <a href="{{ stable_release_url }}" data-docs-target="stable">View stable documentation.</a>
+</div>
 {% endif %}
 {{ super() }}
 {% endblock %}
 
 {% block extrahead %}
 {{ super() }}
-<style>
-    .popup-warning {
-        display: none;
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        z-index: 1000;
-        background: #d8d7d5;
-        border: 1px solid #2c2c2b;
-        border-radius: 4px;
-        padding: 10px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-        animation: slideIn 0.5s ease-out;
-        font-size: smaller;
-    }
-
-
-    @keyframes slideIn {
-        from {
-            transform: translateX(100%);
-        }
-
-        to {
-            transform: translateX(0);
-        }
-    }
-
-    .popup-warning .close-btn {
-        float: right;
-        cursor: pointer;
-        margin-left: 10px;
-    }
-</style>
-<html data-versions="{{ previous_versions|join(',') if previous_versions else '' }}">
-<script src="{{ pathto('_static/js/versions.js', 1) }}"></script>
+<script defer src="{{ pathto('_static/js/versions.js', 1) }}"></script>
 {% endblock %}

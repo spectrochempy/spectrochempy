@@ -14,6 +14,8 @@ import pickle
 import zipfile
 from datetime import UTC
 from datetime import datetime
+from datetime import timedelta
+from datetime import timezone
 from unittest.mock import patch
 
 import numpy as np
@@ -804,6 +806,54 @@ def test_migrate_legacy_file_rejects_destination_without_suffix(tmp_path):
         migrate_legacy_file(
             filename, destination=tmp_path / "output", allow_unsafe_legacy=True
         )
+
+
+def test_native_roundtrip_preserves_aware_acquisition_date(tmp_path):
+    acquisition_date = datetime(
+        2024,
+        1,
+        2,
+        3,
+        4,
+        5,
+        tzinfo=timezone(timedelta(hours=2)),
+    )
+    dataset = NDDataset([1.0, 2.0, 3.0], name="aware_acquisition")
+    dataset.acquisition_date = acquisition_date
+    source_data = dataset.data.copy()
+    source_public_date = dataset.acquisition_date
+    source_created = dataset._created
+    source_modified = dataset._modified
+
+    filename = dataset.dump(tmp_path / "aware_acquisition.scp")
+    restored = NDDataset.load(filename)
+
+    assert restored._acquisition_date == acquisition_date
+    assert restored._acquisition_date.tzinfo == acquisition_date.tzinfo
+    assert restored.acquisition_date == source_public_date
+    assert dataset._created == source_created
+    assert dataset._modified == source_modified
+    assert_array_equal(restored.data, source_data)
+    assert_array_equal(dataset.data, source_data)
+    assert dataset._acquisition_date == acquisition_date
+
+
+def test_native_load_accepts_dataset_without_acquisition_date(tmp_path):
+    dataset = NDDataset([1.0, 2.0, 3.0], name="legacy_without_acquisition")
+    filename = dataset.dump(tmp_path / "legacy_without_acquisition.scp")
+
+    with zipfile.ZipFile(filename, "r") as zipf:
+        member = zipf.namelist()[0]
+        document = json.loads(zipf.read(member).decode("utf-8"))
+
+    document.pop("acquisition_date", None)
+    with zipfile.ZipFile(filename, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
+        zipf.writestr(member, json.dumps(document, indent=2))
+
+    restored = NDDataset.load(filename)
+
+    assert restored._acquisition_date is None
+    assert restored.acquisition_date is None
 
 
 if __name__ == "__main__":

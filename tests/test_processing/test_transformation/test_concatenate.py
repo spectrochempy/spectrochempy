@@ -308,14 +308,17 @@ def test_concatenate_preserves_non_first_default():
     assert result.coordset["x"].default_index == 1
 
 
-def test_concatenate_none_coord_warns():
-    """Concatenate warns when a dataset has None coordinate data along dim."""
+def test_concatenate_rejects_partially_present_coord():
+    """Concatenate rejects a coordinate missing from only some inputs."""
     x1 = scp.Coord(np.arange(3.0))
     x2 = scp.Coord(None, size=3)
     ds1 = scp.NDDataset(np.ones((2, 3)), coordset=[scp.Coord(np.arange(2.0)), x1])
     ds2 = scp.NDDataset(np.ones((2, 3)), coordset=[scp.Coord(np.arange(2.0)), x2])
 
-    with pytest.warns(UserWarning, match=".*coordinates.*None.*"):
+    with pytest.raises(
+        DimensionsCompatibilityError,
+        match="coordinates.*dimension 'x'.*provided by every input",
+    ):
         concatenate(ds1, ds2, dims="x")
 
 

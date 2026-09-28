@@ -65,6 +65,35 @@ Masks and masked-array interoperability
 SpectroChemPy-specific accessors and information retained by each conversion are
 documented in the :ref:`units and masks guide <userguide_units_masks>`.
 
+Masks and definite integrals
+----------------------------
+
+``NDDataset.trapezoid()`` and ``NDDataset.simpson()`` reduce one dimension. A
+masked point is a scientific exclusion, so SpectroChemPy does not publish an
+integral for a slice whose contribution is incomplete. Each output slice is
+treated as follows:
+
+* a slice built without any masked point is integrated normally and the
+  corresponding output is not masked;
+* a slice that used at least one masked point, including a fully masked slice,
+  produces a masked output whose raw value is ``numpy.nan``. The area is
+  explicitly unavailable; no estimate of the missing contribution is made, so
+  masked points are never replaced by zero, removed, or interpolated;
+* the values hidden under the mask never reach the quadrature, so they cannot
+  change a published result nor overflow the calculation;
+* the result mask is always compatible with the result shape. A 1D input yields
+  a zero-dimensional result carrying a scalar mask, and an unmasked input yields
+  the canonical ``scp.NOMASK`` mask.
+
+Because only the affected slices are affected, a batch where a single spectrum
+contains a masked point keeps all the other valid areas. Use
+``NDDataset.masked_data`` rather than ``NDDataset.data`` to read a result
+containing unavailable areas.
+
+These rules are the SpectroChemPy policy for these two methods. They do not
+extend automatically to the other reductions, whose own mask behavior is
+unchanged.
+
 External references
 -------------------
 

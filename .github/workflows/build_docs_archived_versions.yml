@@ -84,14 +84,6 @@ jobs:
           git clone --branch=gh-pages --single-branch \
             https://github.com/${{ github.repository }}.git build/html
 
-      - name: Build oldest version of the documentation
-        run: |
-          . .venv/bin/activate
-          if [ ! -d build/html/0.6.10 ]; then
-            echo "Recreating oldest docs"
-            python3 docs/make.py -j1 html -T 0.6.10
-          fi
-
       - name: Build missing stable versions
         run: |
           . .venv/bin/activate
@@ -106,7 +98,7 @@ jobs:
             fi
           done
           tags=("${stable_tags[@]}")
-          keep_count=4
+          keep_count=5
           start_index=0
           if (( ${#tags[@]} > keep_count )); then
             start_index=$((${#tags[@]} - keep_count))
@@ -115,46 +107,25 @@ jobs:
           for ((i=start_index; i<${#tags[@]}; i++)); do
             tag="${tags[i]}"
             version="${tag#spectrochempy-v}"
-            if [ ! -d "build/html/$version" ]; then
-              echo "Building v$version docs"
+            marker="build/html/$version/.spectrochempy-doc-version"
+            if [[ ! -f "$marker" ]] || [[ "$(cat "$marker")" != "$version" ]]; then
+              echo "Rebuilding v$version docs from $tag"
+              rm -rf "build/html/$version"
               python3 docs/make.py -j1 html -T "$tag"
             fi
           done
 
       - name: Prune stable version retention set
         run: |
-          keep_count=4
-          oldest_supported="0.6.10"
+          python3 - <<'PY'
+          from pathlib import Path
 
-          mapfile -t versions < <(
-            find build/html -mindepth 1 -maxdepth 1 -type d -printf '%f\n' |
-              grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' |
-              sort -V
-          )
+          from docs.make import prune_stable_versions
 
-          declare -A keep_versions=()
-
-          if (( ${#versions[@]} > 0 )); then
-            start_index=0
-            if (( ${#versions[@]} > keep_count )); then
-              start_index=$((${#versions[@]} - keep_count))
-            fi
-
-            for ((i=start_index; i<${#versions[@]}; i++)); do
-              keep_versions["${versions[i]}"]=1
-            done
-          fi
-
-          if [[ -d "build/html/$oldest_supported" ]]; then
-            keep_versions["$oldest_supported"]=1
-          fi
-
-          for version in "${versions[@]}"; do
-            if [[ -z "${keep_versions[$version]:-}" ]]; then
-              rm -rf "build/html/$version"
-              echo "Removed archived docs version: $version"
-            fi
-          done
+          removed, manifest = prune_stable_versions(Path("build/html"), keep_count=5)
+          print(f"Removed stable documentation versions: {removed}")
+          print(f"Published version catalogue: {manifest['versions']}")
+          PY
 
       - name: Upload archived docs artifact
         uses: actions/upload-artifact@v7

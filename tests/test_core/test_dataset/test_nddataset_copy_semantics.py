@@ -8,6 +8,9 @@
 from __future__ import annotations
 
 import copy
+from datetime import datetime
+from datetime import timedelta
+from datetime import timezone
 from pathlib import Path
 
 import numpy as np
@@ -245,6 +248,33 @@ def test_copy_surfaces_preserve_explicit_filename_none(copy_factory):
     assert result is not dataset
     assert result.filename is None
     _assert_minimal_filename_snapshot(dataset, before)
+
+
+def test_copy_and_out_of_place_arithmetic_preserve_acquisition_date(rich_dataset):
+    """Derived datasets retain the exact aware acquisition datetime."""
+    acquisition_date = datetime(
+        2024,
+        1,
+        2,
+        3,
+        4,
+        5,
+        tzinfo=timezone(timedelta(hours=2)),
+    )
+    rich_dataset.acquisition_date = acquisition_date
+    source_data = rich_dataset.data.copy()
+    source_public_date = rich_dataset.acquisition_date
+
+    copied = rich_dataset.copy()
+    multiplied = rich_dataset * 2
+
+    for result in (copied, multiplied):
+        assert result._acquisition_date == acquisition_date
+        assert result._acquisition_date.tzinfo == acquisition_date.tzinfo
+        assert result.acquisition_date == source_public_date
+    assert_array_equal(rich_dataset.data, source_data)
+    assert rich_dataset._acquisition_date == acquisition_date
+    assert rich_dataset.acquisition_date == source_public_date
 
 
 def _snapshot_minimal_filename(dataset):

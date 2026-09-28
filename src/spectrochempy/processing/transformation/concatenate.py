@@ -13,6 +13,7 @@ import numpy as np
 
 from spectrochempy.core.dataset.basearrays.ndarray import DEFAULT_DIM_NAME
 from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.utils import exceptions
 from spectrochempy.utils.datetimeutils import utcnow
 from spectrochempy.utils.meta import Meta
@@ -30,6 +31,13 @@ def concatenate(*datasets, **kwargs):
         #. all inputs must be valid `NDDataset` objects;
         #. units of data must be compatible
         #. concatenation is along the axis specified or the last one;
+        #. coordinate values and labels on the concatenated dimension must
+           each be present for every input or absent from every input. A
+           label-only coordinate is valid.
+        #. a coordinate reference involving the concatenated dimension is
+           rejected, whether that dimension is the reference or its target,
+           because changing only one dimension cannot preserve their shared
+           geometry.
         #. along the non-concatenated dimensions, shapes must match.
 
     Parameters
@@ -56,6 +64,13 @@ def concatenate(*datasets, **kwargs):
 
         For 1D datasets, ``axis=1`` promotes inputs to a 2D dataset and
         concatenates them as columns.
+
+    Raises
+    ------
+    DimensionsCompatibilityError
+        If coordinate values or labels on the concatenated dimension are
+        present for only some inputs, or if that dimension is a coordinate
+        reference or the target of one.
 
     See Also
     --------
@@ -116,6 +131,8 @@ def concatenate(*datasets, **kwargs):
             "all input arrays must have the same shape",
         )
 
+    _validate_concatenated_dimension_coordinates(datasets, dim)
+
     # check units
     units = tuple({ds.units for ds in datasets})
     if len(units) == 1:
@@ -163,12 +180,13 @@ def concatenate(*datasets, **kwargs):
     # now manage coordinates and labels
     coords = datasets[0].coordset
 
-    if coords is not None and not coords[dim].is_empty:
+    concat_coord = _coordinate_for_dimension(datasets[0], dim)
+    if concat_coord is not None:
         coords = coords._concatenate_dim(dim, [ds.coordset for ds in datasets])
 
     out = dataset.copy()
     out._data = data
-    if coords is not None:
+    if coords is not None and concat_coord is not None:
         out._coordset[dim] = coords[dim]
 
     # Let plugins post-process the concatenation result.
@@ -384,6 +402,73 @@ def _normalize_datasets(datasets):
     if isinstance(datasets, tuple) and isinstance(datasets[0], list | tuple):
         datasets = datasets[0]
     return list(datasets)
+
+
+def _coordinate_for_dimension(dataset, dim):
+    """Return the non-empty coordinate for *dim*, or ``None`` when absent."""
+    coordset = dataset.coordset
+    if coordset is None or dim not in coordset.names:
+        return None
+    coordinate = coordset[dim]
+    if coordinate.is_empty:
+        return None
+    return coordinate
+
+
+def _coordinate_representation(coordinate):
+    """Describe which coordinate components carry values and labels."""
+    if isinstance(coordinate, CoordSet):
+        return (
+            "CoordSet",
+            tuple(_coordinate_representation(coord) for coord in coordinate.coords),
+        )
+    if isinstance(coordinate, Coord):
+        return (
+            "Coord",
+            coordinate.data is not None,
+            coordinate.labels is not None,
+        )
+    return (type(coordinate).__name__,)
+
+
+def _validate_concatenated_dimension_coordinates(datasets, dim):
+    """Reject coordinate assembly that would lose or invent information."""
+    if any(
+        dataset.coordset is not None
+        and (
+            dim in dataset.coordset.references
+            or dim in dataset.coordset.references.values()
+        )
+        for dataset in datasets
+    ):
+        raise exceptions.DimensionsCompatibilityError(
+            "Cannot concatenate datasets: a coordinate reference involving "
+            f"dimension '{dim}' cannot be preserved when that dimension changes size."
+        )
+
+    coordinates = [_coordinate_for_dimension(dataset, dim) for dataset in datasets]
+    present = [coordinate is not None for coordinate in coordinates]
+
+    if any(present) and not all(present):
+        raise exceptions.DimensionsCompatibilityError(
+            "Cannot concatenate datasets: coordinates for dimension "
+            f"'{dim}' must be provided by every input or removed from all inputs."
+        )
+
+    if not any(present):
+        return
+
+    representations = [
+        _coordinate_representation(coordinate) for coordinate in coordinates
+    ]
+    if any(
+        representation != representations[0] for representation in representations[1:]
+    ):
+        raise exceptions.DimensionsCompatibilityError(
+            "Cannot concatenate datasets: coordinate representations for dimension "
+            f"'{dim}' differ; numeric values and labels must each be present for "
+            "every input or absent from every input."
+        )
 
 
 def _apply_combination_metadata(out, datasets, *, operation):

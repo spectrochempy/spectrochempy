@@ -15,6 +15,7 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.units import ur
 from spectrochempy.processing.fft.zero_filling import zf_size
 from spectrochempy.utils.decorators import _units_agnostic_method
+from spectrochempy.utils.exceptions import SpectroChemPyError
 
 
 # ======================================================================================
@@ -24,8 +25,8 @@ def _fft(data):
     return np.fft.fftshift(np.fft.fft(data), -1)
 
 
-def _ifft(data):
-    return np.fft.ifft(np.fft.ifftshift(data, -1))
+def _ifft(data, size=None):
+    return np.fft.ifft(np.fft.ifftshift(data, -1), n=size)
 
 
 def _qf_fft(data):
@@ -33,8 +34,8 @@ def _qf_fft(data):
     return np.fft.fftshift(np.fft.fft(np.conjugate(data)), -1)
 
 
-def _interferogram_fft(data):
-    """FFT transform for rapid-scan interferograms. Phase corrected using the Mertz method."""
+def _single_interferogram_fft(data):
+    """Apply the historical Mertz transform to one interferogram."""
 
     def _get_zpd(data, mode="max"):
         if mode == "max":
@@ -69,6 +70,33 @@ def _interferogram_fft(data):
     return data.real[..., ::-1] / 2.0
 
 
+def _interferogram_fft(data):
+    """Apply the Mertz transform independently to each interferogram."""
+    data = np.asarray(data)
+    trace_count = int(np.prod(data.shape[:-1])) if data.ndim > 1 else 1
+
+    # Preserve the exact historical numerical path for strict 1D inputs and
+    # singleton leading geometry.
+    if trace_count == 1:
+        return _single_interferogram_fft(data)
+
+    size = data.shape[-1]
+    traces = data.reshape(trace_count, size)
+    transformed = np.stack(
+        [_single_interferogram_fft(trace[np.newaxis, :])[0] for trace in traces]
+    )
+    return transformed.reshape(*data.shape[:-1], transformed.shape[-1])
+
+
+def _has_calibrated_interferogram_axis(coord):
+    """Return whether *coord* can define an interferogram spectral scale."""
+    if coord.units is None:
+        return False
+    if coord.units.dimensionality == "[time]":
+        return True
+    return coord.units.dimensionality == "[length]" and "laser_frequency" in coord.meta
+
+
 # ======================================================================================
 # Public methods
 # ======================================================================================
@@ -89,8 +117,10 @@ def ifft(dataset, size=None, **kwargs):
     dataset : `NDDataset`
         The dataset on which to apply the fft transformation.
     size : int, optional
-        Size of the transformed dataset dimension - a shorter parameter is `si` . by default, the size is the closest
-        power of two greater than the data size.
+        Size of the transformed dataset dimension; the shorter alias is `si`.
+        By default, the input size is used. If `size` is larger or smaller than
+        the input, the unshifted frequency data are padded with zeros or
+        truncated, respectively, before the inverse transform.
     **kwargs
         Optional keyword parameters (see Other Parameters).
 
@@ -139,7 +169,8 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
         The number of effective data point to take into account for the transformation. By default it is equal to the
         data size, but may be smaller.
     inv : bool, optional, default=False
-        If True, an inverse Fourier transform is performed - size parameter is not taken into account.
+        If True, an inverse Fourier transform is performed. The `size`
+        parameter controls its output size as described for `ifft`.
     **kwargs
         Optional keyword parameters (see Other Parameters).
 
@@ -168,6 +199,22 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
     # On which axis do we want to apply transform (get axis from arguments)
     dim = kwargs.pop("dim", kwargs.pop("axis", -1))
     axis, dim = dataset.get_axis(dim, negative_axis=True)
+
+    # Validate the original target coordinate before an in-place swap can
+    # mutate the caller. Interferogram FFTs build a physical wavenumber axis,
+    # so indices and dimensionless coordinates are insufficient; calibrated
+    # time and optical path difference coordinates are both valid.
+    target_coord = dataset.coordset[dim]
+    if is_ir and not inv and not _has_calibrated_interferogram_axis(target_coord):
+        raise SpectroChemPyError(
+            "Fourier transforming an interferogram requires a calibrated "
+            "time or optical path difference axis, from which a wavenumber "
+            f"axis can be built. The interferogram axis here is "
+            f"{target_coord.title!r} with units {target_coord.units}. Call "
+            "Coord.set_laser_frequency() with the value of your instrument "
+            "first, or convert the axis yourself. The dataset was left "
+            "untouched."
+        )
 
     # output dataset inplace or not
     inplace = kwargs.pop("inplace", False)
@@ -199,6 +246,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
         and not x.unitless
         and not x.dimensionless
         and x.units.dimensionality != "[time]"
+        and not (is_ir and x.units.dimensionality == "[length]")
     ):
         error_(
             Exception,
@@ -237,42 +285,47 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
 
         error = True
 
-    if hasattr(x, "_use_time_axis"):
-        x._use_time_axis = True  # we need to have dimentionless or time units
+    is_ir_opd = (
+        is_ir
+        and not inv
+        and x.units is not None
+        and x.units.dimensionality == "[length]"
+    )
+    if hasattr(x, "_use_time_axis") and not is_ir_opd:
+        x._use_time_axis = True  # we need to have dimensionless or time units
 
     if not error:
         # OK we can proceed
 
-        # time domain size
-        td = None
-        if not inv:
-            td = x.size
-
         # if no size (or si) parameter then use the size of the data
-        # (size not used for inverse transform
-        if size is None or inv:
+        if size is None:
             size = kwargs.get("si", x.size)
 
-        # do we have an effective td to apply
-        tdeff = sizeff
-        if tdeff is None:
-            tdeff = kwargs.get("tdeff", td)
+        if not inv:
+            # do we have an effective td to apply
+            tdeff = sizeff
+            if tdeff is None:
+                tdeff = kwargs.get("tdeff", x.size)
 
-        if tdeff is None or tdeff < 5 or tdeff > size:
-            tdeff = size
+            if tdeff is None or tdeff < 5 or tdeff > size:
+                tdeff = size
 
-        # Eventually apply the effective size
-        new[..., tdeff:] = 0.0
+            # Eventually apply the effective size
+            new[..., tdeff:] = 0.0
 
         # Determine whether the data are complex (or plugin-specific interleaved)
         # interleaved is in case of >2D data  ( # TODO: >D not yet implemented in ndcomplex.py
-        iscomplex = False
-        if axis == -1:
-            iscomplex = new.is_complex
+        iscomplex = new.is_complex
         if new.is_interleaved:
             iscomplex = True
 
-        zf_size(new, size=size, inplace=True)
+        if not inv:
+            zf_size(new, size=size, inplace=True)
+            if is_ir_opd:
+                # zf_size currently normalizes interferogram coordinates to
+                # time. Restore the explicitly calibrated OPD grid so the
+                # reciprocal-length FFT scale uses its physical spacing.
+                x._use_time_axis = False
 
         # Perform the fft
         if encoding != "undefined":
@@ -295,7 +348,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
 
         elif iscomplex and inv:
             # We assume no special encoding for inverse complex fft transform
-            data = _ifft(new.data)
+            data = _ifft(new.data, size=size)
 
         elif not iscomplex and not inv and is_ir:
             # transform interferogram
@@ -343,15 +396,15 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
 
         else:
             # frequency to time
-            sw = abs(x.data[-1] - x.data[0])
-            # sw is a plain float here (x.data is an ndarray).  Multiply by the
-            # original coordinate unit so that 1/sw has time dimensionality.
             if x.units is not None and x.units.dimensionality == "1/[time]":
-                deltat = (1.0 / (sw * x.units)).to("us")
+                # With a preserved frequency-bin spacing, the reciprocal time
+                # step is 1 / (size * df) for the requested output size.
+                deltat = (1.0 / (size * abs(x.spacing))).to("us")
             else:
                 # For ppm or dimensionless coordinates we cannot determine the
                 # correct time step without extra context.  Use a placeholder
                 # so that plugins (e.g. NMR) can replace the coordinate.
+                sw = abs(x.data[-1] - x.data[0])
                 deltat = (1.0 / sw) * ur.us
 
             newcoord = Coord.arange(coord_size) * deltat

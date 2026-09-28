@@ -8,6 +8,8 @@ import base64
 import json
 import pickle
 from datetime import datetime
+from datetime import timedelta
+from datetime import timezone
 from functools import partial
 
 import numpy as np
@@ -287,3 +289,26 @@ def test_json_loads_rejects_object_dtype_safe_array():
 def test_json_encoder_rejects_object_dtype_array_for_safe_write():
     with pytest.raises(SpectroChemPyError, match="object-dtype arrays"):
         json_encoder(np.array([{"unsafe": True}], dtype=object), encoding="base64")
+
+
+def test_datetime_json_decoder_accepts_iso_offset():
+    restored = json_decoder(
+        {
+            "__class__": "DATETIME",
+            "isoformat": "2024-01-02T03:04:05.678901+02:00",
+        }
+    )
+
+    expected = datetime(
+        2024, 1, 2, 3, 4, 5, 678901, tzinfo=timezone(timedelta(hours=2))
+    )
+    assert restored == expected
+    assert restored.tzinfo == expected.tzinfo
+
+
+def test_datetime_json_decoder_accepts_legacy_encoding():
+    restored = json_decoder(
+        {"__class__": "DATETIME", "isoformat": "2024-01-02T03:04:05.678901UTC"}
+    )
+
+    assert restored == datetime(2024, 1, 2, 3, 4, 5, 678901)

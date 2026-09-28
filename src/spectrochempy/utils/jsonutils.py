@@ -26,10 +26,12 @@ SUPPORTED_SAFE_SCP_DOCUMENT_VERSIONS = frozenset({2, SAFE_SCP_DOCUMENT_VERSION})
 
 def fromisoformat(s):
     try:
-        date = datetime.datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%f%Z")
-    except Exception:
-        date = datetime.datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%f")
-    return date
+        return datetime.datetime.fromisoformat(s)
+    except ValueError:
+        try:
+            return datetime.datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%f%Z")
+        except ValueError:
+            return datetime.datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%f")
 
 
 # ======================================================================================
@@ -344,7 +346,13 @@ def json_encoder(byte_obj, encoding=None, *, _root=True):
                 ):
                     dic[name] = json_encoder(val.tolist(), encoding=None, _root=False)
                     continue
-                dic[name] = json_encoder(val, encoding=encoding, _root=False)
+                if name == "acquisition_date" and isinstance(val, datetime.datetime):
+                    dic[name] = {
+                        "isoformat": val.isoformat(),
+                        "__class__": "DATETIME",
+                    }
+                else:
+                    dic[name] = json_encoder(val, encoding=encoding, _root=False)
             # we need to differentiate normal dic from Meta object
             if byte_obj._implements("Meta"):
                 dic["__class__"] = "META"

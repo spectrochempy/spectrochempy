@@ -50,7 +50,7 @@ asls : Perform an Asymmetric Least Squares Smoothing baseline correction.
 snip : Perform a Simple Non-Iterative Peak (SNIP) detection algorithm.
 rubberband : Perform a Rubberband baseline correction.
 autosub: Perform an automatic subtraction of reference.
-detrend : Remove polynomial trend along a dimension from dataset.
+detrend : Remove a polynomial trend along the last dimension of a dataset.
 """
 
 
@@ -134,7 +134,7 @@ class Baseline(AnalysisConfigurable):
     snip : Perform a Simple Non-Iterative Peak (SNIP) detection algorithm.
     rubberband : Perform a Rubberband baseline correction.
     autosub: Perform an automatic subtraction of reference.
-    detrend : Remove polynomial trend along a dimension from dataset.
+    detrend : Remove a polynomial trend along the last dimension of a dataset.
 
     """
 
@@ -1019,7 +1019,7 @@ def get_baseline(dataset, *ranges, **kwargs):
     snip : Perform a Simple Non-Iterative Peak (SNIP) detection algorithm.
     rubberband : Perform a Rubberband baseline correction.
     autosub: Perform an automatic subtraction of reference.
-    detrend : Remove polynomial trend along a dimension from dataset.
+    detrend : Remove a polynomial trend along the last dimension of a dataset.
 
     Notes
     -----
@@ -1081,7 +1081,7 @@ def basc(dataset, *ranges, **kwargs):
     snip : Perform a Simple Non-Iterative Peak (SNIP) detection algorithm.
     rubberband : Perform a Rubberband baseline correction.
     autosub: Perform an automatic subtraction of reference.
-    detrend : Remove polynomial trend along a dimension from dataset.
+    detrend : Remove a polynomial trend along the last dimension of a dataset.
 
     Notes
     -----
@@ -1094,13 +1094,13 @@ def basc(dataset, *ranges, **kwargs):
     return dataset - get_baseline(dataset, *ranges, **kwargs)
 
 
-def detrend(dataset, order="linear", breakpoints=None, **kwargs):
+def detrend(dataset, order="linear", breakpoints=None):
     r"""
-    Remove polynomial trend along a dimension from dataset.
+    Remove a polynomial trend along the last dimension of a dataset.
 
     Depending on the ``order`` parameter, `detrend` removes the best-fit
-    polynomial line (in the least-squares sense) from the data and returns the
-    remaining data.
+    polynomial line (in the least-squares sense) along the last dimension and
+    returns the remaining data in a new dataset. The input is not modified.
 
     Parameters
     ----------
@@ -1126,7 +1126,8 @@ def detrend(dataset, order="linear", breakpoints=None, **kwargs):
     Returns
     -------
     `NDDataset`
-        The detrended dataset.
+        A new dataset detrended along its last dimension. The input dataset is
+        unchanged.
 
     See Also
     --------
@@ -1137,7 +1138,7 @@ def detrend(dataset, order="linear", breakpoints=None, **kwargs):
     snip : Perform a Simple Non-Iterative Peak (SNIP) detection algorithm.
     rubberband : Perform a Rubberband baseline correction.
     autosub: Perform an automatic subtraction of reference.
-    detrend : Remove polynomial trend along a dimension from dataset.
+    detrend : Remove a polynomial trend along the last dimension of a dataset.
 
     """
     if breakpoints is None:
@@ -1191,7 +1192,7 @@ def asls(dataset, lamb=1e5, asymmetry=0.05, tol=1e-3, max_iter=50):
     snip : Perform a Simple Non-Iterative Peak (SNIP) detection algorithm.
     rubberband : Perform a Rubberband baseline correction.
     autosub: Perform an automatic subtraction of reference.
-    detrend : Remove polynomial trend along a dimension from dataset.
+    detrend : Remove a polynomial trend along the last dimension of a dataset.
 
     """
     blc = Baseline()
@@ -1234,7 +1235,7 @@ def snip(dataset, snip_width=50):
     snip : Perform a Simple Non-Iterative Peak (SNIP) detection algorithm.
     rubberband : Perform a Rubberband baseline correction.
     autosub: Perform an automatic subtraction of reference.
-    detrend : Remove polynomial trend along a dimension from dataset.
+    detrend : Remove a polynomial trend along the last dimension of a dataset.
 
     """
     blc = Baseline()
@@ -1273,7 +1274,7 @@ def rubberband(dataset):
     snip : Perform a Simple Non-Iterative Peak (SNIP) detection algorithm.
     rubberband : Perform a Rubberband baseline correction.
     autosub: Perform an automatic subtraction of reference.
-    detrend : Remove polynomial trend along a dimension from dataset.
+    detrend : Remove a polynomial trend along the last dimension of a dataset.
 
     """
     blc = Baseline()

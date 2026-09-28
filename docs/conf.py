@@ -412,12 +412,20 @@ def _stable_release_version():
 
 
 last_release = _stable_release_version()
+docs_context = os.environ.get("SCPY_DOCS_CONTEXT", "").strip()
+if docs_context not in {"development", "preview", "stable"}:
+    docs_context = "development" if _is_prerelease_or_dev(version) else "stable"
+preview_name = os.environ.get("SCPY_DOCS_PREVIEW_NAME", "").strip()
 
 html_context = {
-    "current_version": "latest" if _is_prerelease_or_dev(version) else "stable",
-    "latest_version": f"{root}/index.html",
+    "current_version": docs_context,
+    "docs_context": docs_context,
+    "docs_build_version": release,
+    "docs_preview_name": preview_name,
+    "development_url": f"{root}/latest/index.html",
     "stable_release_url": f"{root}/{last_release}/index.html" if last_release else "",
-    "previous_versions": os.environ.get("PREVIOUS_VERSIONS", "").split(","),  # Added
+    "stable_release_version": last_release,
+    "previous_versions": os.environ.get("PREVIOUS_VERSIONS", "").split(","),
     # This is for the citing page
     "version": release,
     "bibversion": "{" + release + "}",

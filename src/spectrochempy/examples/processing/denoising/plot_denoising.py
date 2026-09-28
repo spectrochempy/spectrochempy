@@ -35,8 +35,8 @@ _ = nd.plot(title="original data")
 
 # %%
 # Detrend for easier comparison:
-nd1 = nd.detrend(title="detrended data")
-_ = nd1.plot()
+nd1 = nd.detrend()
+_ = nd1.plot(title="detrended data")
 
 # %%
 # Denoise with default parameters

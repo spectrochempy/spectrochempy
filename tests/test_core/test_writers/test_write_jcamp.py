@@ -89,6 +89,23 @@ def _linked_dataset():
     return ds
 
 
+def _linked_label_dataset(label_rows):
+    x = scp.Coord([4000.0, 3999.0, 3998.0], units="cm^-1", title="wavenumber")
+    y = scp.Coord([0.0, 1.0])
+    y.labels = np.array(label_rows, dtype=object)
+    ds = scp.NDDataset(
+        np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]),
+        coordset=[y, x],
+        units="absorbance",
+        name="linked_labels",
+    )
+    ds.mask = np.array(
+        [[False, False, False], [False, True, False]],
+        dtype=bool,
+    )
+    return ds
+
+
 def _parse_jcamp_blocks(text):
     blocks = []
     current = None
@@ -436,6 +453,107 @@ def test_write_jcamp_link_extrema_are_computed_per_spectrum(tmp_path):
         np.nan_to_num(expected_data, nan=0.0),
     )
     assert np.array_equal(np.isnan(back.data), np.isnan(expected_data))
+
+
+@pytest.mark.parametrize(
+    ("label_rows", "expected_titles"),
+    [
+        ([["first"], ["second"]], ["first", "second"]),
+        (
+            [
+                ["first", datetime(2024, 1, 1, 12, 0, tzinfo=UTC)],
+                ["second", datetime(2024, 1, 1, 12, 1, tzinfo=UTC)],
+            ],
+            ["first", "second"],
+        ),
+        (
+            [
+                [datetime(2024, 1, 1, 12, 0, tzinfo=UTC), "first"],
+                [datetime(2024, 1, 1, 12, 1, tzinfo=UTC), "second"],
+            ],
+            ["first", "second"],
+        ),
+        (
+            [["first", "ignored"], ["second", "also ignored"]],
+            ["first", "second"],
+        ),
+        (
+            [
+                [datetime(2024, 1, 1, 12, 0, tzinfo=UTC)],
+                [datetime(2024, 1, 1, 12, 1, tzinfo=UTC)],
+            ],
+            ["spectrum #0", "spectrum #1"],
+        ),
+    ],
+)
+def test_write_jcamp_link_uses_first_text_label_for_spectrum_titles(
+    tmp_path, label_rows, expected_titles
+):
+    dataset = _linked_label_dataset(label_rows)
+    source_data = dataset.data.copy()
+    source_x = dataset.x.data.copy()
+    source_y = dataset.y.data.copy()
+    source_labels = dataset.y.labels.copy()
+    source_mask = np.ma.getmaskarray(dataset.masked_data).copy()
+    source_units = dataset.units
+    source_x_units = dataset.x.units
+    source_x_title = dataset.x.title
+
+    path = dataset.write_jcamp(tmp_path / "linked_labels.jdx", confirm=False)
+    blocks = _parse_jcamp_blocks(path.read_text())
+
+    assert len(blocks) == 2
+    assert [block["TITLE"] for block in blocks] == expected_titles
+    assert all(block["XUNITS"] == "1/CM" for block in blocks)
+    assert all(block["YUNITS"] == "ABSORBANCE" for block in blocks)
+    assert all(block["xydata"] for block in blocks)
+    assert "?" in " ".join(blocks[1]["xydata"])
+
+    back = scp.read_jcamp(path, sortbydate=False)
+    assert list(back.y.labels[1]) == expected_titles
+    np.testing.assert_allclose(
+        back.data,
+        np.array([[1.0, 2.0, 3.0], [4.0, np.nan, 6.0]]),
+        equal_nan=True,
+    )
+    np.testing.assert_allclose(back.x.data, source_x)
+    assert back.units == source_units
+    assert back.x.units == source_x_units
+
+    np.testing.assert_array_equal(dataset.data, source_data)
+    np.testing.assert_array_equal(dataset.x.data, source_x)
+    np.testing.assert_array_equal(dataset.y.data, source_y)
+    np.testing.assert_array_equal(dataset.y.labels, source_labels)
+    np.testing.assert_array_equal(np.ma.getmaskarray(dataset.masked_data), source_mask)
+    assert dataset.units == source_units
+    assert dataset.x.units == source_x_units
+    assert dataset.x.title == source_x_title
+
+
+def test_write_jcamp_link_uses_first_datetime_label(tmp_path):
+    first_datetimes = [
+        datetime(2024, 1, 1, 12, 0, tzinfo=UTC),
+        datetime(2024, 1, 2, 13, 1, tzinfo=UTC),
+    ]
+    later_datetimes = [
+        datetime(2025, 2, 3, 14, 2, tzinfo=UTC),
+        datetime(2025, 2, 4, 15, 3, tzinfo=UTC),
+    ]
+    dataset = _linked_label_dataset(
+        [
+            [first_datetimes[0], later_datetimes[0], "first"],
+            [first_datetimes[1], later_datetimes[1], "second"],
+        ]
+    )
+
+    path = dataset.write_jcamp(tmp_path / "linked_datetimes.jdx", confirm=False)
+    blocks = _parse_jcamp_blocks(path.read_text())
+
+    assert [block["LONGDATE"] for block in blocks] == ["2024/01/01", "2024/01/02"]
+    assert [block["TIME"] for block in blocks] == ["12:00:00", "13:01:00"]
+
+    back = scp.read_jcamp(path, sortbydate=False)
+    assert list(back.y.labels[0]) == first_datetimes
 
 
 def test_write_jcamp_link_uses_same_unit_policy_as_singletons(tmp_path):

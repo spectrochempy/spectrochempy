@@ -35,6 +35,7 @@ from spectrochempy.core.units import ur
 from spectrochempy.utils._logging import warning_
 from spectrochempy.utils.meta import Meta
 from spectrochempy_nmr.extern.nmrglue._jeol import read_jeol as _read_jeol_raw
+from spectrochempy_nmr.readers._metadata import apply_reader_metadata_options
 
 # ======================================================================================
 # Public entry point
@@ -306,7 +307,7 @@ def _read_jdf(*args, **kwargs):
 
     dataset.units = "count"
     dataset.title = "intensity"
-    dataset.origin = "jeol"
+    apply_reader_metadata_options(dataset, kwargs, default_origin="jeol")
     dataset.name = f"{path.stem} ({meta.datatype})"
     dataset.filename = path.parent
 

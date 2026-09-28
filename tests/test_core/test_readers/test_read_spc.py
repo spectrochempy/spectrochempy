@@ -14,6 +14,8 @@ import pytest
 import spectrochempy as scp
 from spectrochempy.application.preferences import preferences as prefs
 from spectrochempy.core.readers.read_spc import _SpcFile
+from spectrochempy.core.units import ur
+from spectrochempy.utils.exceptions import SpectroChemPyError
 
 DATADIR = prefs.datadir
 
@@ -181,7 +183,19 @@ def test_read_spc_without_collection_time_keeps_acquisition_date_empty(galacticd
     assert str(dataset.y.units) == "s"
 
 
-def _build_spc_header(ftflgs=0x80, npts=0, nsub=0, first=0.0, last=0.0):
+def _build_spc_header(
+    ftflgs=0x80,
+    npts=0,
+    nsub=0,
+    first=0.0,
+    last=0.0,
+    xtype=0,
+    ytype=0,
+    ztype=0,
+    date=0,
+    peakpt=0,
+    fcatxt=b"\x00" * 30,
+):
     """Build a 512-byte SPC header using the exact struct layout from the reader."""
     head_fmt = "<cccciddicccci9s9sh32s130s30siicchf48sfifc187s"
     return struct.pack(
@@ -194,17 +208,17 @@ def _build_spc_header(ftflgs=0x80, npts=0, nsub=0, first=0.0, last=0.0):
         float(first),  # ffirst
         float(last),  # flast
         nsub,  # fnsub
-        b"\x00",  # fxtype
-        b"\x00",  # fytype
-        b"\x00",  # fztype
+        bytes([xtype]),  # fxtype
+        bytes([ytype]),  # fytype
+        bytes([ztype]),  # fztype
         b"\x00",  # fpost
-        0,  # fdate
+        date,  # fdate
         b"\x00" * 9,  # fres
         b"\x00" * 9,  # fsource
-        0,  # fpeakpt
+        peakpt,  # fpeakpt: zero path difference sample, 0 = not known
         b"\x00" * 32,  # fspare
         b"\x00" * 130,  # fcmnt
-        b"\x00" * 30,  # fcatxt
+        fcatxt,  # fcatxt: axis labels, only read when the TALABS flag is set
         0,  # flogoff
         0,  # fmods
         b"\x00",  # fprocs
@@ -273,41 +287,128 @@ def _make_xmy_spc(npts=3, nsub=3, shared_x=None, y_lists=None):
     return bytes(buf)
 
 
-def _make_mxy_spc(nsub=3, npts_per_sub=None):
+def _make_mxy_spc(
+    nsub=3,
+    npts_per_sub=None,
+    x_lists=None,
+    y_lists=None,
+    z_values=None,
+    xtype=0,
+    ytype=0,
+    ztype=0,
+    date=0,
+):
     """Build a directory-based MXY SPC file (per-subfile X, TMULTI+TXVALS+TXYXYS).
 
-    Layout: header(512) + directory(nsub*12) + subfiles.
+    Layout: header(512) + subfiles + directory(nsub*12).
     Each subfile: subhdr(32) + X(npts*4) + Y(npts*4).
     """
-    if npts_per_sub is None:
-        npts_per_sub = [4, 3, 5]
-    header = _build_spc_header(ftflgs=0xC4, npts=512, nsub=nsub)
-    dir_offset = 512
-    dir_size = nsub * 12
-    sub_start = dir_offset + dir_size
-    buf = bytearray(header)
-    all_x = []
-    all_y = []
+    if x_lists is None:
+        if npts_per_sub is None:
+            npts_per_sub = [4, 3, 5]
+        x_lists = [
+            np.arange(100 * (i + 1), 100 * (i + 1) + npts, dtype="<f4")
+            for i, npts in enumerate(npts_per_sub)
+        ]
+    else:
+        x_lists = [np.asarray(x, dtype="<f4") for x in x_lists]
+        npts_per_sub = [len(x) for x in x_lists]
+        nsub = len(x_lists)
+    if y_lists is None:
+        y_lists = [
+            np.full(npts, i + 1, dtype="<f4") for i, npts in enumerate(npts_per_sub)
+        ]
+    else:
+        y_lists = [np.asarray(y, dtype="<f4") for y in y_lists]
+    if z_values is None:
+        z_values = np.arange(nsub, dtype="<f4")
+
+    assert len(y_lists) == len(x_lists) == len(z_values)
+    assert all(len(x) == len(y) for x, y in zip(x_lists, y_lists, strict=True))
+
     sub_positions = []
-    pos = sub_start
+    pos = 512
     for i, npts in enumerate(npts_per_sub):
-        x = np.arange(100 * (i + 1), 100 * (i + 1) + npts, dtype="<f4")
-        y = np.ones(npts, dtype="<f4") * (i + 1)
-        all_x.append(x)
-        all_y.append(y)
         ssfsize = 32 + npts * 4 + npts * 4
-        sub_positions.append((pos, ssfsize, float(i)))
+        sub_positions.append((pos, ssfsize, float(z_values[i])))
         pos += ssfsize
-    for ssfposn, ssfsize, ssftime in sub_positions:
-        buf.extend(struct.pack("<IIf", ssfposn, ssfsize, ssftime))
+    directory_offset = pos
+    header = _build_spc_header(
+        ftflgs=0xC4,
+        npts=directory_offset,
+        nsub=nsub,
+        xtype=xtype,
+        ytype=ytype,
+        ztype=ztype,
+        date=date,
+    )
+    buf = bytearray(header)
     for i, npts in enumerate(npts_per_sub):
         subhdr = _build_subheader(
-            subindx=i, subtime=float(i), subnext=float(i + 1), npts=npts
+            subindx=i,
+            subtime=float(z_values[i]),
+            subnext=float(z_values[i] + 1),
+            npts=npts,
         )
         buf.extend(subhdr)
-        buf.extend(all_x[i].tobytes())
-        buf.extend(all_y[i].tobytes())
-    return bytes(buf), all_x, all_y
+        buf.extend(x_lists[i].tobytes())
+        buf.extend(y_lists[i].tobytes())
+    for ssfposn, ssfsize, ssftime in sub_positions:
+        buf.extend(struct.pack("<IIf", ssfposn, ssfsize, ssftime))
+    return bytes(buf), x_lists, y_lists
+
+
+def test_read_spc_preserves_coordinates_for_distinct_x_axes(tmp_path):
+    x_values = [
+        np.array([4000.0, 3990.0, 3980.0], dtype="<f4"),
+        np.array([3500.0, 3480.0, 3460.0], dtype="<f4"),
+    ]
+    y_values = [
+        np.array([0.1, 0.2, 0.3], dtype="<f4"),
+        np.array([1.1, 1.2, 1.3], dtype="<f4"),
+    ]
+    z_values = np.array([2.5, 7.5], dtype="<f4")
+    acquisition_date = datetime(2026, 9, 27, 14, 30)
+    encoded_date = (2026 << 20) | (9 << 16) | (27 << 11) | (14 << 6) | 30
+    content, _, _ = _make_mxy_spc(
+        x_lists=x_values,
+        y_lists=y_values,
+        z_values=z_values,
+        xtype=1,
+        ytype=2,
+        ztype=4,
+        date=encoded_date,
+    )
+    path = tmp_path / "distinct-x.spc"
+    path.write_bytes(content)
+
+    datasets = scp.read_spc(path)
+
+    assert len(datasets) == 2
+    for dataset, expected_x, expected_y, expected_z in zip(
+        datasets, x_values, y_values, z_values, strict=True
+    ):
+        assert isinstance(dataset, scp.NDDataset)
+        assert dataset.dims == ["y", "x"]
+        assert dataset.shape == (1, 3)
+        np.testing.assert_allclose(dataset.data, expected_y[np.newaxis, :])
+        assert dataset.title == "Absorbance"
+        assert dataset.units == "absorbance"
+        np.testing.assert_allclose(dataset.x.data, expected_x)
+        assert dataset.x.title == "Wavenumbers"
+        assert dataset.x.units == scp.ur("cm^-1")
+        np.testing.assert_allclose(dataset.y.data, [expected_z])
+        assert dataset.y.title == "Time"
+        assert dataset.y.units == scp.ur("s")
+        assert dataset.filename == path
+        assert dataset.origin == "thermo galactic"
+        assert dataset.meta.fileformat == "MXY"
+        assert dataset.meta.scpversion == "new LSB 1st"
+        assert dataset.meta.technique == "General SPC"
+        assert dataset._acquisition_date == acquisition_date
+
+    assert datasets[0].x is not datasets[1].x
+    assert datasets[0].y is not datasets[1].y
 
 
 def test_extract_x_data_reads_from_supplied_offset():
@@ -423,3 +524,222 @@ def test_read_spc_old_format_xey(galacticdata):
         np.asarray(x),
         np.linspace(float(spc.first), float(spc.last), 31528),
     )
+
+
+# ======================================================================================
+# INTERFEROGRAM DETECTION FROM THE ORIGINAL SPC FORMAT CODE
+# ======================================================================================
+
+
+def _make_ytype_spc(ytype, peakpt=0, fcatxt=b"\x00" * 30, ftflgs=0x80, npts=4):
+    """Build a minimal X-Y SPC file declaring a specific original y format code."""
+    x_values = np.array([10.0, 20.0, 30.0, 40.0], dtype="<f4")
+    y_values = np.array([1.0, 8.0, 1.0, 8.0], dtype="<f4")
+    header = _build_spc_header(
+        ftflgs=ftflgs,
+        npts=npts,
+        xtype=0,
+        ytype=ytype,
+        peakpt=peakpt,
+        fcatxt=fcatxt,
+    )
+    subhdr = _build_subheader(subindx=0, subtime=0.0, subnext=1.0, npts=npts)
+    return header + x_values.tobytes() + subhdr + y_values.tobytes()
+
+
+def test_synthetic_spc_without_collection_time_is_readable(tmp_path):
+    path = tmp_path / "UNDATED_SYNTH.SPC"
+    path.write_bytes(_make_ytype_spc(ytype=2))
+
+    dataset = scp.read_spc(path)
+
+    assert dataset is not None
+    assert dataset.acquisition_date is None
+    assert dataset.y.data.tolist() == [0.0]
+
+
+def test_interferogram_is_detected_from_the_original_format_code(tmp_path):
+    # y format code 1 is the interferogram. The reader used to test
+    # spcf.y_units == "Interferogram", but code 1 maps to ("Interferogram", None),
+    # so the units are None and the branch was unreachable.
+    path = tmp_path / "IG_SYNTH.SPC"
+    path.write_bytes(_make_ytype_spc(ytype=1))
+
+    dataset = scp.read_spc(path)
+
+    assert dataset.meta.interferogram is True
+    assert dataset.meta.td == list(dataset.shape)
+    assert dataset.shape == (1, 4)
+
+
+def test_ordinary_spectrum_is_not_turned_into_an_interferogram(tmp_path):
+    # y format code 2 is an absorbance spectrum and must stay untouched.
+    path = tmp_path / "SP_SYNTH.SPC"
+    path.write_bytes(_make_ytype_spc(ytype=2))
+
+    dataset = scp.read_spc(path)
+
+    assert dataset.meta.interferogram is None
+    assert "td" not in dataset.meta
+    assert dataset.title == "Absorbance"
+
+
+def test_interferogram_metadata_uses_only_values_present_in_the_file(tmp_path):
+    # fpeakpt is the only instrument value the SPC header carries for an
+    # interferogram. The reader used to hard-code a 15798.26 cm^-1 laser
+    # frequency, which the format does not store at all.
+    path = tmp_path / "IG_ZPD.SPC"
+    path.write_bytes(_make_ytype_spc(ytype=1, peakpt=2))
+
+    dataset = scp.read_spc(path)
+
+    assert dataset.x._zpd == 2
+    assert dataset.meta.interferogram_peak_position == 2
+    assert "laser_frequency" not in dataset.meta
+    # The axis is left as the file declared it, not converted to an optical
+    # path difference from an assumed laser frequency.
+    assert dataset.x.units is None
+    assert dataset.x.title != "optical path difference"
+
+
+def test_unknown_zero_path_difference_is_preserved_as_unknown(tmp_path):
+    # 0 means "not known" for fpeakpt. Coord._zpd is a plain integer that
+    # defaults to 0, so it cannot express the difference, and asserting
+    # _zpd == 0 would assert nothing: the value is left untouched rather than
+    # claimed to be the first sample. The raw header value is kept in the
+    # metadata, which is what a caller has to consult.
+    path = tmp_path / "IG_NOZPD.SPC"
+    path.write_bytes(_make_ytype_spc(ytype=1, peakpt=0))
+
+    dataset = scp.read_spc(path)
+
+    assert dataset.meta.interferogram is True
+    assert dataset.meta.interferogram_peak_position == 0
+    assert dataset.x._zpd == 0
+
+
+def test_axis_label_customization_does_not_hide_an_interferogram(tmp_path):
+    # With the TALABS flag, fcatxt overwrites the mapped titles. Detection must
+    # not follow the title, or a renamed interferogram would be missed.
+    # fcatxt holds the x, y and z labels separated by nulls; the empty x slot
+    # leaves the mapped x title in place and renames the y axis.
+    fcatxt = b"\x00my own label\x00".ljust(30, b"\x00")
+    path = tmp_path / "IG_LABELLED.SPC"
+    path.write_bytes(_make_ytype_spc(ytype=1, ftflgs=0x80 | 0x20, fcatxt=fcatxt))
+
+    dataset = scp.read_spc(path)
+
+    assert dataset.meta.interferogram is True
+    assert dataset.title == "my own label"
+
+
+def test_axis_label_customization_does_not_invent_an_interferogram(tmp_path):
+    # The mirror case: an ordinary spectrum that renames itself "Interferogram"
+    # must still not be treated as one.
+    fcatxt = b"\x00Interferogram\x00".ljust(30, b"\x00")
+    path = tmp_path / "SP_FAKEIG.SPC"
+    path.write_bytes(_make_ytype_spc(ytype=2, ftflgs=0x80 | 0x20, fcatxt=fcatxt))
+
+    dataset = scp.read_spc(path)
+
+    assert dataset.title == "Interferogram"
+    assert dataset.meta.interferogram is None
+    assert "td" not in dataset.meta
+
+
+def test_interferogram_coordinates_stay_coherent(tmp_path):
+    path = tmp_path / "IG_COORDS.SPC"
+    path.write_bytes(_make_ytype_spc(ytype=1, peakpt=1))
+
+    dataset = scp.read_spc(path)
+
+    assert dataset.x is not None
+    assert dataset.y is not None
+    np.testing.assert_array_almost_equal(
+        np.asarray(dataset.x), np.array([10.0, 20.0, 30.0, 40.0])
+    )
+    assert dataset.x.shape[0] == dataset.shape[-1]
+
+
+def test_fft_of_an_uncalibrated_spc_interferogram_is_refused(galacticdata):
+    # Reading an SPC interferogram now flags it as one, which routes fft() down
+    # the interferogram branch. That branch builds a wavenumber axis, so it may
+    # only run on a calibrated time or optical path difference axis. This file
+    # has neither, and records no laser frequency, so fft() must refuse
+    # explicitly rather than label an assumed axis "cm^-1".
+    dataset = scp.read_spc(galacticdata / "IG_MULTI.SPC")
+
+    assert dataset.meta.interferogram is True
+    with pytest.raises(Exception, match="calibrated time or optical path"):
+        dataset.fft()
+
+
+def test_refused_fft_does_not_mutate_the_source_with_inplace(galacticdata):
+    # inplace=True aliases the source, so a refusal that still touched the
+    # dataset would corrupt it. error_ only logs, so the guard has to come
+    # before the first assignment.
+    dataset = scp.read_spc(galacticdata / "IG_MULTI.SPC")
+
+    before_data = dataset.x.data.copy()
+    before_flag = dataset.x._use_time_axis
+    before_title = dataset.x.title
+    before_units = dataset.x.units
+    before_history = list(dataset.history)
+
+    with pytest.raises(Exception, match="calibrated time or optical path"):
+        dataset.fft(inplace=True)
+
+    np.testing.assert_array_equal(dataset.x.data, before_data)
+    assert dataset.x._use_time_axis == before_flag
+    assert dataset.x.title == before_title
+    assert dataset.x.units == before_units
+    assert list(dataset.history) == before_history
+
+
+def test_unitless_interferogram_fft_refuses_before_nonfinal_swap(tmp_path):
+    path = tmp_path / "IG_UNCALIBRATED.SPC"
+    path.write_bytes(_make_ytype_spc(ytype=1, peakpt=1))
+    dataset = scp.read_spc(path).T
+    before = dataset.copy()
+
+    assert dataset.dims[-1] != "x"
+    assert dataset.x.units is None
+    with pytest.raises(
+        SpectroChemPyError,
+        match="calibrated time or optical path difference",
+    ):
+        dataset.fft(dim="x", inplace=True)
+
+    np.testing.assert_array_equal(dataset.data, before.data)
+    np.testing.assert_array_equal(dataset.mask, before.mask)
+    assert dataset.shape == before.shape
+    assert dataset.dims == before.dims
+    assert dataset.coordset == before.coordset
+    assert dataset.meta == before.meta
+    assert dataset.title == before.title
+    assert dataset.units == before.units
+    assert dataset.history_entries == before.history_entries
+
+
+def test_calibrated_spc_opd_fft_builds_expected_spectral_scale(tmp_path):
+    path = tmp_path / "IG_CALIBRATED.SPC"
+    path.write_bytes(_make_ytype_spc(ytype=1, peakpt=1))
+    dataset = scp.read_spc(path)
+    dataset.x.set_laser_frequency(16000.0 * ur("cm^-1"))
+    source_coord = dataset.x.copy()
+
+    transformed = dataset.fft()
+
+    assert dataset.x == source_coord
+    assert dataset.x.units == ur.mm
+    assert dataset.x.title == "optical path difference"
+    assert transformed.shape == (1, 2)
+    assert transformed.x.units == ur("cm^-1")
+    assert transformed.x.title == "wavenumbers"
+    expected = scp.Coord(
+        np.fft.rfftfreq(dataset.x.size)[: transformed.x.size][::-1]
+        / abs(source_coord.spacing)
+    ).to("cm^-1")
+    np.testing.assert_allclose(transformed.x.data, expected.data, rtol=1.0e-12)
+    assert transformed.x.data[0] == pytest.approx(4000.0, rel=2.0e-4)
+    assert transformed.x.data[-1] == 0.0

@@ -1035,10 +1035,10 @@ class CoordSet(HasTraits):
         data_tuple = tuple(
             self._coord_data_in_base_units(cs[dim], base, dim) for cs in coordsets
         )
-        none_coord = any(x is None for x in data_tuple)
-        if not none_coord:
+        has_data = tuple(data is not None for data in data_tuple)
+        if all(has_data):
             result[dim]._data = np.concatenate(data_tuple)
-        else:
+        elif any(has_data):
             warnings.warn(
                 f"Some dataset(s) coordinates in the {dim} dimension are None.",
                 stacklevel=2,
