@@ -123,6 +123,32 @@ def test_zero_filled_shifts_structure_default_axis_and_move_mask(name, expected)
     assert source.history_entries == source_history
 
 
+@pytest.mark.parametrize("name", ["rs", "ls", "roll"])
+def test_discrete_shifts_distinguish_requested_and_effective_points(name):
+    source = _shift_dataset()
+
+    result = getattr(source, name)(pts=1.9)
+
+    parameters = result.history_entries[-1]["parameters"]
+    assert parameters["scientific_parameters"]["pts"] == 1
+    assert parameters["requested_parameters"]["pts"] == 1.9
+
+
+def test_explicit_none_dimension_keeps_precedence_over_axis():
+    source = _shift_dataset()
+
+    result = source.roll(pts=1, dim=None, axis=0)
+
+    np.testing.assert_array_equal(result.data, np.roll(source.data, 1, axis=-1))
+    assert result.history_entries[-1]["parameters"] == {
+        "requested_dim": None,
+        "resolved_dim": "x",
+        "resolved_axis": 1,
+        "scientific_parameters": {"pts": 1, "neg": False},
+        "inplace": False,
+    }
+
+
 def test_cs_delegates_to_roll_without_duplicate_entry_and_preserves_noop_policy():
     source = _shift_dataset()
     source_history = source.history_entries
@@ -162,9 +188,7 @@ def test_fourier_shifts_record_the_executed_kernel(name):
             np.exp(phase_sign * 2.0j * np.pi * 0.5 * np.arange(size) / size)
             * transformed
         )
-        expected = np.fft.fftshift(
-            np.fft.ifft(shifted).astype(shifted.dtype)
-        ) * size
+        expected = np.fft.fftshift(np.fft.ifft(shifted).astype(shifted.dtype)) * size
 
     assert result.shape == source.shape
     assert result.dims == source.dims

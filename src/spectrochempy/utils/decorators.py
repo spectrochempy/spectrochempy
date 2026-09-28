@@ -962,10 +962,7 @@ def _wrap_ndarray_output_to_nddataset(
 # ======================================================================================
 def _processing_requested_dimension(kwargs):
     """Return the dimension selector that wins under the public precedence."""
-    for key in ("dims", "dim", "axis"):
-        if key in kwargs and kwargs[key] is not None:
-            return kwargs[key]
-    return None
+    return kwargs.get("dims", kwargs.get("dim", kwargs.get("axis")))
 
 
 def _processing_scientific_parameters(method, kwargs):
@@ -1041,16 +1038,24 @@ def _units_agnostic_method(
             f"`{dim}` with parameters: {kwargs}"
         )
         if structured_history:
+            requested_parameters = _processing_scientific_parameters(method, kwargs)
+            scientific_parameters = dict(requested_parameters)
+            if method.__name__ in {"rs", "ls", "roll"}:
+                scientific_parameters["pts"] = int(scientific_parameters["pts"])
+            parameters = _processing_history_parameters(
+                method,
+                kwargs,
+                requested_dim=requested_dim,
+                resolved_dim=dim,
+                resolved_axis=resolved_axis,
+                inplace=inplace,
+                scientific_parameters=scientific_parameters,
+            )
+            if requested_parameters != scientific_parameters:
+                parameters["requested_parameters"] = requested_parameters
             new._append_history_entry(
                 operation=method.__name__,
-                parameters=_processing_history_parameters(
-                    method,
-                    kwargs,
-                    requested_dim=requested_dim,
-                    resolved_dim=dim,
-                    resolved_axis=resolved_axis,
-                    inplace=inplace,
-                ),
+                parameters=parameters,
                 message=message,
             )
         else:
