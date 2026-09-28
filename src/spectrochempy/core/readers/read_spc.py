@@ -17,7 +17,6 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.core.readers.importer import _openfid
-from spectrochempy.core.units import Quantity
 from spectrochempy.utils._logging import debug_
 from spectrochempy.utils._logging import warning_
 
@@ -311,6 +310,13 @@ class _SpcFile:
         xtype = int.from_bytes(self._Fxtype, self._endian)
         ytype = int.from_bytes(self._Fytype, self._endian)
         ztype = int.from_bytes(self._Fztype, self._endian)
+        # Keep the original format codes. y_info maps them to a (title, units)
+        # pair, and fcatxt can overwrite the titles below, so the mapped title
+        # is not a reliable record of what the file declared. The code itself
+        # is what the format defines and is never overwritten.
+        self.xtype = xtype
+        self.ytype = ytype
+        self.ztype = ztype
         self.x_title, self.x_units = self.xz_info.get(xtype, (None, None))
         self.y_title, self.y_units = self.y_info.get(ytype, (None, None))
         self.z_title, self.z_units = self.xz_info.get(ztype, (None, None))
@@ -1074,19 +1080,34 @@ def _read_spc(*args, **kwargs):
 
         dataset.history = f"Imported Galactic SPC file {filename.name}"
 
-        if spcf.acqdate.timestamp() > 0:
+        # Reuse the timestamp decoded from the header. Converting the fallback
+        # naive epoch datetime back with datetime.timestamp() raises EINVAL on
+        # Windows in some time zones, making otherwise valid undated SPC files
+        # unreadable.
+        if spcf.timestamp > 0:
             dataset.acquisition_date = spcf.acqdate
 
-        if spcf.y_units == "Interferogram":
-            # interferogram
+        # The historical condition compared spcf.y_units against "Interferogram",
+        # but y_info maps the y format code to a (title, units) pair in which
+        # code 1 is ("Interferogram", None): the value sits in y_title, and
+        # y_units is None, so the branch could never be taken and no
+        # interferogram file was ever flagged. Detect on the original format
+        # code instead, which fcatxt cannot overwrite, and which no user-supplied
+        # title can influence. A file-provided axis label still renames the
+        # dataset as before.
+        if spcf.ytype == 1:
             dataset.meta.interferogram = True
             dataset.meta.td = list(dataset.shape)
-            dataset.x._zpd = spcf.peakpt
-            dataset.meta.laser_frequency = Quantity("15798.26 cm^-1")
-            dataset.x.set_laser_frequency()
-            dataset.x._use_time_axis = (
-                False  # True to have time, else it will be optical path difference
-            )
+            # fpeakpt is the zero path difference sample, and 0 means "not
+            # known" in the format. Keep the raw header value in the metadata,
+            # as the OMNIC reader does, because Coord._zpd is a plain integer
+            # defaulting to 0 and cannot tell "not known" from "the first
+            # sample is the zero path difference". The metadata is therefore
+            # the only place where that distinction survives; the reader does
+            # not guess a ZPD, and does not touch Coord to make room for one.
+            dataset.meta.interferogram_peak_position = spcf.peakpt
+            if spcf.peakpt:
+                dataset.x._zpd = spcf.peakpt
 
     fid.close()
     return datasets[0] if len(datasets) == 1 else datasets

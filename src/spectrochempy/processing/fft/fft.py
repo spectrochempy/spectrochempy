@@ -15,6 +15,7 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.units import ur
 from spectrochempy.processing.fft.zero_filling import zf_size
 from spectrochempy.utils.decorators import _units_agnostic_method
+from spectrochempy.utils.exceptions import SpectroChemPyError
 
 
 # ======================================================================================
@@ -67,6 +68,15 @@ def _interferogram_fft(data):
 
     # The imaginary part can be now discarder
     return data.real[..., ::-1] / 2.0
+
+
+def _has_calibrated_interferogram_axis(coord):
+    """Return whether *coord* can define an interferogram spectral scale."""
+    if coord.units is None:
+        return False
+    if coord.units.dimensionality == "[time]":
+        return True
+    return coord.units.dimensionality == "[length]" and "laser_frequency" in coord.meta
 
 
 # ======================================================================================
@@ -172,6 +182,22 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
     dim = kwargs.pop("dim", kwargs.pop("axis", -1))
     axis, dim = dataset.get_axis(dim, negative_axis=True)
 
+    # Validate the original target coordinate before an in-place swap can
+    # mutate the caller. Interferogram FFTs build a physical wavenumber axis,
+    # so indices and dimensionless coordinates are insufficient; calibrated
+    # time and optical path difference coordinates are both valid.
+    target_coord = dataset.coordset[dim]
+    if is_ir and not inv and not _has_calibrated_interferogram_axis(target_coord):
+        raise SpectroChemPyError(
+            "Fourier transforming an interferogram requires a calibrated "
+            "time or optical path difference axis, from which a wavenumber "
+            f"axis can be built. The interferogram axis here is "
+            f"{target_coord.title!r} with units {target_coord.units}. Call "
+            "Coord.set_laser_frequency() with the value of your instrument "
+            "first, or convert the axis yourself. The dataset was left "
+            "untouched."
+        )
+
     # output dataset inplace or not
     inplace = kwargs.pop("inplace", False)
     new = dataset.copy() if not inplace else dataset
@@ -202,6 +228,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
         and not x.unitless
         and not x.dimensionless
         and x.units.dimensionality != "[time]"
+        and not (is_ir and x.units.dimensionality == "[length]")
     ):
         error_(
             Exception,
@@ -240,8 +267,14 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
 
         error = True
 
-    if hasattr(x, "_use_time_axis"):
-        x._use_time_axis = True  # we need to have dimentionless or time units
+    is_ir_opd = (
+        is_ir
+        and not inv
+        and x.units is not None
+        and x.units.dimensionality == "[length]"
+    )
+    if hasattr(x, "_use_time_axis") and not is_ir_opd:
+        x._use_time_axis = True  # we need to have dimensionless or time units
 
     if not error:
         # OK we can proceed
@@ -270,6 +303,11 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
 
         if not inv:
             zf_size(new, size=size, inplace=True)
+            if is_ir_opd:
+                # zf_size currently normalizes interferogram coordinates to
+                # time. Restore the explicitly calibrated OPD grid so the
+                # reciprocal-length FFT scale uses its physical spacing.
+                x._use_time_axis = False
 
         # Perform the fft
         if encoding != "undefined":

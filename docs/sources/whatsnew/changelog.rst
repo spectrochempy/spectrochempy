@@ -56,6 +56,32 @@ Bug Fixes
   selects the current SciPy behaviour, which may differ from the former
   ``'avg'``, ``'first'`` and ``'last'`` strategies for an even number of
   samples. SpectroChemPy now requires ``scipy>=1.14.1`` (:pr:`1699`).
+- SPC files that declare the original interferogram data type are now recognised
+  as interferograms. The reader tested the y axis *units* against the string
+  ``"Interferogram"``, but the format code for an interferogram maps to the axis
+  *title* with no unit, so the branch was unreachable and no SPC interferogram
+  was ever flagged: ``meta.interferogram`` stayed unset and ``meta.td`` was
+  never recorded. Detection now uses the original format code from the file
+  header, which a file-supplied axis label cannot override, and the zero path
+  difference is taken from the header field that carries it. A laser frequency
+  is no longer invented for these files, since the SPC header does not record
+  one, and the x axis is left as the file declared it rather than being rebuilt
+  from an assumed laser (:pr:`1700`).
+  ``meta.interferogram_peak_position`` now always carries the raw header value,
+  including ``0``, which is the format's "not known" sentinel. A coordinate's
+  zero path difference is an integer that defaults to ``0`` and cannot
+  distinguish "not known" from "the first sample is the zero path difference",
+  so the metadata is where that distinction is now recorded. Undated SPC files
+  also remain readable on Windows, where converting the fallback epoch datetime
+  back to a timestamp could raise ``EINVAL``.
+- Fourier transforming a dataset flagged as an interferogram now raises
+  ``SpectroChemPyError`` unless its target axis is calibrated as time or optical
+  path difference; unitless and dimensionless sample indices are therefore
+  refused as well as unrelated physical units. Validation now precedes any
+  dimension swap, so a refused non-final in-place transform leaves data,
+  dimensions, coordinates and metadata untouched. An optical path difference
+  axis created by an explicit ``set_laser_frequency()`` call remains accepted
+  and produces its spectral scale from the calibrated spacing (:pr:`1700`).
 - ``concatenate()`` now rejects inputs whose concatenated dimension carries
   coordinate values or labels for only some datasets, instead of returning a
   geometrically inconsistent result. Coordinates may still be omitted from
