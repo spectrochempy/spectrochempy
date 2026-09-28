@@ -64,7 +64,9 @@ Bug Fixes
   including ``0``, which is the format's "not known" sentinel. A coordinate's
   zero path difference is an integer that defaults to ``0`` and cannot
   distinguish "not known" from "the first sample is the zero path difference",
-  so the metadata is where that distinction is now recorded.
+  so the metadata is where that distinction is now recorded. Undated SPC files
+  also remain readable on Windows, where converting the fallback epoch datetime
+  back to a timestamp could raise ``EINVAL``.
 - Fourier transforming a dataset flagged as an interferogram now raises
   ``SpectroChemPyError`` when its x axis is neither time nor dimensionless, for
   instance when it is the uncalibrated wavenumber axis an SPC interferogram

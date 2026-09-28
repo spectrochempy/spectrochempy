@@ -1080,7 +1080,11 @@ def _read_spc(*args, **kwargs):
 
         dataset.history = f"Imported Galactic SPC file {filename.name}"
 
-        if spcf.acqdate.timestamp() > 0:
+        # Reuse the timestamp decoded from the header. Converting the fallback
+        # naive epoch datetime back with datetime.timestamp() raises EINVAL on
+        # Windows in some time zones, making otherwise valid undated SPC files
+        # unreadable.
+        if spcf.timestamp > 0:
             dataset.acquisition_date = spcf.acqdate
 
         # The historical condition compared spcf.y_units against "Interferogram",

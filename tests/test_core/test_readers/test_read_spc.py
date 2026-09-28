@@ -545,6 +545,17 @@ def _make_ytype_spc(ytype, peakpt=0, fcatxt=b"\x00" * 30, ftflgs=0x80, npts=4):
     return header + x_values.tobytes() + subhdr + y_values.tobytes()
 
 
+def test_synthetic_spc_without_collection_time_is_readable(tmp_path):
+    path = tmp_path / "UNDATED_SYNTH.SPC"
+    path.write_bytes(_make_ytype_spc(ytype=2))
+
+    dataset = scp.read_spc(path)
+
+    assert dataset is not None
+    assert dataset.acquisition_date is None
+    assert dataset.y.data.tolist() == [0.0]
+
+
 def test_interferogram_is_detected_from_the_original_format_code(tmp_path):
     # y format code 1 is the interferogram. The reader used to test
     # spcf.y_units == "Interferogram", but code 1 maps to ("Interferogram", None),
