@@ -15,7 +15,7 @@ from spectrochempy.core.units import ur
 
 def _trace(size, zpd, frequency):
     index = np.arange(size)
-    envelope = np.exp(-((index - zpd) / 5.0) ** 2)
+    envelope = np.exp(-(((index - zpd) / 5.0) ** 2))
     return envelope * np.cos(frequency * (index - zpd))
 
 
