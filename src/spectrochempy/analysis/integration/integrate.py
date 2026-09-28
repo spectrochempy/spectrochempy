@@ -14,6 +14,41 @@ import functools
 import numpy as np
 import scipy.integrate
 
+from spectrochempy.utils.constants import NOMASK
+
+
+def _reduced_slice_mask(mask, axis):
+    """
+    Reduce a source mask along the integrated axis.
+
+    A definite integral is only defined when every point that contributed to it
+    is visible. An output slice is therefore considered valid only if it was
+    built without any masked point. The canonical unmasked sentinel is returned
+    unchanged and whenever no slice is affected, so an unmasked input keeps the
+    canonical unmasked representation.
+    """
+    if not isinstance(mask, np.ndarray):
+        # NOMASK, and any other scalar sentinel, means nothing is excluded.
+        return NOMASK
+    reduced = np.any(mask, axis=axis)
+    return reduced if np.any(reduced) else NOMASK
+
+
+def _exclude_incomplete_slices(data, slice_mask, axis):
+    """
+    Blank the incomplete slices before the numerical integration.
+
+    The values hidden under a mask are not part of any valid integral, so they
+    must neither reach the quadrature nor overflow it. They are replaced by
+    zeros, which only affects the incomplete slices whose result is discarded
+    afterwards. Complete slices keep their exact values.
+    """
+    if not np.any(slice_mask):
+        return data
+    if np.ndim(slice_mask) > 0:
+        slice_mask = np.expand_dims(slice_mask, axis)
+    return np.where(slice_mask, 0.0, data)
+
 
 def _integrate_method(method):
     @functools.wraps(method)
@@ -32,7 +67,14 @@ def _integrate_method(method):
         # Some NumPy/SciPy combinations are stricter with ndarray subclasses or
         # view semantics, so normalize the integration axis coordinate here.
         x = np.asarray(dataset.coord(dim).data)
-        y = dataset.data
+        y = np.asarray(dataset.data)
+
+        # A definite integral is only defined over visible points. Reduce the
+        # source mask along the integrated axis first, so that the validity of
+        # each output slice is known before anything is computed.
+        slice_mask = _reduced_slice_mask(dataset.mask, axis)
+        y = _exclude_incomplete_slices(y, slice_mask, axis)
+
         try:
             data = method(y, x=x, axis=axis, **kwargs)
         except NotImplementedError as exc:
@@ -48,8 +90,14 @@ def _integrate_method(method):
         if dataset.coord(dim).reversed:
             data *= -1
 
+        if np.any(slice_mask):
+            # The integral of an incomplete slice is not defined. Publish it as
+            # unavailable instead of a number derived from excluded points.
+            data = np.where(slice_mask, np.nan, data)
+
         new = dataset.copy()
         new._data = data
+        new._mask = slice_mask
 
         del new._dims[axis]
         if (
@@ -101,6 +149,22 @@ def trapezoid(dataset, **kwargs):
     `~spectrochempy.core.dataset.ndataset.NDDataset`
         Definite integral as approximated by trapezoidal rule.
 
+    Notes
+    -----
+    A definite integral is only defined when every point that contributed to it
+    is visible. An output slice is therefore integrated normally when it was
+    built without any masked point, and is published as a masked value with a
+    raw `numpy.nan` when it used at least one masked point. This applies to a
+    fully masked slice as well. The values hidden under the mask never reach
+    the quadrature, so they cannot influence a result nor overflow it. The
+    result mask is always compatible with the result shape: a 1D input yields a
+    zero-dimensional result with a scalar mask, and an unmasked input yields the
+    canonical unmasked `numpy.False_` mask.
+
+    No estimate of the missing area is attempted: masked points are not
+    replaced, removed or interpolated. Remove or unmask the affected points
+    first if a complete area is required.
+
     Other Parameters
     ----------------
     dim : `int` or `str`, optional, default: ``"x"``
@@ -146,6 +210,22 @@ def simpson(dataset, *args, **kwargs):
     -------
     `~spectrochempy.core.dataset.ndataset.NDDataset`
         Definite integral as approximated using the composite Simpson's rule.
+
+    Notes
+    -----
+    A definite integral is only defined when every point that contributed to it
+    is visible. An output slice is therefore integrated normally when it was
+    built without any masked point, and is published as a masked value with a
+    raw `numpy.nan` when it used at least one masked point. This applies to a
+    fully masked slice as well. The values hidden under the mask never reach
+    the quadrature, so they cannot influence a result nor overflow it. The
+    result mask is always compatible with the result shape: a 1D input yields a
+    zero-dimensional result with a scalar mask, and an unmasked input yields the
+    canonical unmasked `numpy.False_` mask.
+
+    No estimate of the missing area is attempted: masked points are not
+    replaced, removed or interpolated. Remove or unmask the affected points
+    first if a complete area is required.
 
     Other Parameters
     ----------------
