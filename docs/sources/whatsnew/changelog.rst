@@ -38,6 +38,11 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Multidimensional interferogram FFTs now apply the existing Mertz correction
+  independently to every trace, using each trace's own zero path difference.
+  Transforming a calibrated stack is therefore numerically equivalent to
+  transforming its traces separately, including when the transformed dimension
+  is not final; the single-interferogram convention is unchanged (:pr:`1701`).
 - ``trapezoid()`` and ``simpson()`` no longer integrate masked points as if they
   were valid data, and no longer return a reduced result carrying a source-shaped
   mask. SpectroChemPy does not publish an integral for a slice whose contribution
