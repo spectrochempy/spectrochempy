@@ -960,19 +960,64 @@ def _wrap_ndarray_output_to_nddataset(
 
 
 # ======================================================================================
-def _units_agnostic_method(method=None, *, mask_transform=None):
+def _processing_requested_dimension(kwargs):
+    """Return the dimension selector that wins under the public precedence."""
+    return kwargs.get("dims", kwargs.get("dim", kwargs.get("axis")))
+
+
+def _processing_scientific_parameters(method, kwargs):
+    """Return compact effective parameters declared by a processing kernel."""
+    parameters = {}
+    for name, parameter in inspect.signature(method).parameters.items():
+        if name == "dataset" or parameter.kind == inspect.Parameter.VAR_KEYWORD:
+            continue
+        if name in kwargs:
+            parameters[name] = kwargs[name]
+        elif parameter.default is not inspect.Parameter.empty:
+            parameters[name] = parameter.default
+    return parameters
+
+
+def _processing_history_parameters(
+    method,
+    kwargs,
+    *,
+    requested_dim,
+    resolved_dim,
+    resolved_axis,
+    inplace,
+    scientific_parameters=None,
+):
+    """Describe one successful last-axis processing wrapper call."""
+    if scientific_parameters is None:
+        scientific_parameters = _processing_scientific_parameters(method, kwargs)
+    return {
+        "requested_dim": requested_dim,
+        "resolved_dim": resolved_dim,
+        "resolved_axis": resolved_axis,
+        "scientific_parameters": scientific_parameters,
+        "inplace": inplace,
+    }
+
+
+def _units_agnostic_method(
+    method=None, *, mask_transform=None, structured_history=False
+):
     if method is None:
         return lambda wrapped: _units_agnostic_method(
-            wrapped, mask_transform=mask_transform
+            wrapped,
+            mask_transform=mask_transform,
+            structured_history=structured_history,
         )
 
     @functools.wraps(method)
     def wrapper(dataset, **kwargs):
-        # On which axis do we want to shift (get axis from arguments)
+        requested_dim = _processing_requested_dimension(kwargs)
         axis, dim = dataset.get_axis(**kwargs, negative_axis=True)
+        resolved_axis = axis % dataset.ndim
 
-        # output dataset inplace (by default) or not
-        new = dataset.copy() if not kwargs.pop("inplace", False) else dataset
+        inplace = kwargs.pop("inplace", False)
+        new = dataset.copy() if not inplace else dataset
 
         swapped = False
         if axis != -1:
@@ -984,14 +1029,37 @@ def _units_agnostic_method(method=None, *, mask_transform=None):
         if mask_transform is not None and new.is_masked:
             new._mask = mask_transform(new.mask, **kwargs)
 
-        new.history = (
-            f"`{method.__name__}` shift performed on dimension "
-            f"`{dim}` with parameters: {kwargs}"
-        )
-
         # restore original data order if it was swapped
         if swapped:
             new._swapdims_without_history(axis, -1, inplace=True)
+
+        message = (
+            f"`{method.__name__}` shift performed on dimension "
+            f"`{dim}` with parameters: {kwargs}"
+        )
+        if structured_history:
+            requested_parameters = _processing_scientific_parameters(method, kwargs)
+            scientific_parameters = dict(requested_parameters)
+            if method.__name__ in {"rs", "ls", "roll"}:
+                scientific_parameters["pts"] = int(scientific_parameters["pts"])
+            parameters = _processing_history_parameters(
+                method,
+                kwargs,
+                requested_dim=requested_dim,
+                resolved_dim=dim,
+                resolved_axis=resolved_axis,
+                inplace=inplace,
+                scientific_parameters=scientific_parameters,
+            )
+            if requested_parameters != scientific_parameters:
+                parameters["requested_parameters"] = requested_parameters
+            new._append_history_entry(
+                operation=method.__name__,
+                parameters=parameters,
+                message=message,
+            )
+        else:
+            new.history = message
 
         return new
 
