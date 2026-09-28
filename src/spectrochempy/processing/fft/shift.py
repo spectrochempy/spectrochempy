@@ -61,7 +61,7 @@ def _roll_mask(mask, pts=0.0, **kwargs):
 # ======================================================================================
 # Public methods
 # ======================================================================================
-@_units_agnostic_method(mask_transform=_right_shift)
+@_units_agnostic_method(mask_transform=_right_shift, structured_history=True)
 def rs(dataset, pts=0.0, **kwargs):
     """
     Right shift and zero fill.
@@ -99,7 +99,7 @@ def rs(dataset, pts=0.0, **kwargs):
     return _right_shift(dataset, pts=pts)
 
 
-@_units_agnostic_method(mask_transform=_left_shift)
+@_units_agnostic_method(mask_transform=_left_shift, structured_history=True)
 def ls(dataset, pts=0.0, **kwargs):
     """
     Left shift and zero fill.
@@ -175,7 +175,7 @@ def cs(dataset, pts=0.0, neg=False, **kwargs):
     return roll(dataset, pts=pts, neg=neg, **kwargs)
 
 
-@_units_agnostic_method(mask_transform=_roll_mask)
+@_units_agnostic_method(mask_transform=_roll_mask, structured_history=True)
 def roll(dataset, pts=0.0, neg=False, **kwargs):
     """
     Roll dimensions.
@@ -213,7 +213,7 @@ def roll(dataset, pts=0.0, neg=False, **kwargs):
     return _roll(dataset, pts=pts, neg=neg)
 
 
-@_units_agnostic_method
+@_units_agnostic_method(structured_history=True)
 def fsh(dataset, pts, **kwargs):
     """
     Frequency shift by Fourier transform. Negative signed phase correction.
@@ -257,7 +257,7 @@ def fsh(dataset, pts, **kwargs):
     return _fft(data)
 
 
-@_units_agnostic_method
+@_units_agnostic_method(structured_history=True)
 def fsh2(dataset, pts, **kwargs):
     """
     Frequency Shift by Fourier transform. Positive signed phase correction.

@@ -232,7 +232,7 @@ def test_internal_nonfinal_swaps_do_not_add_shape_entries():
     assert zero_filled.dims == ["y", "x"]
     assert zero_filled.history_entries[:-1] == source_history
     assert len(zero_filled.history_entries) == len(source_history) + 1
-    assert zero_filled.history_entries[-1]["operation"] is None
+    assert zero_filled.history_entries[-1]["operation"] == "zf_size"
     assert zero_filled.history_entries[-1]["message"].startswith(
         "Applied zf_size zero filling on dimension y"
     )

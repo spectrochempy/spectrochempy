@@ -19,11 +19,12 @@ New Features
   ``history`` view and detached ``history_entries``. Structured entries cover
   transposition, selection, out-of-place addition and subtraction, the
   numerical reductions ``mean()``, ``sum()``, ``std()``, and ``var()`` when
-  they return an ``NDDataset``, and the shape operations ``squeeze()``,
-  ``swapdims()``, and ``reshape()``. Temporary internal dimension swaps no
+  they return an ``NDDataset``, the shape operations ``squeeze()``,
+  ``swapdims()``, and ``reshape()``, and the shared wrappers for point, circular
+  and Fourier shifts and zero filling. Temporary internal dimension swaps no
   longer add shape-operation entries to a treatment's history; other operations
   may continue to record normal text-only entries (:pr:`1681`, :pr:`1703`,
-  :pr:`1704`).
+  :pr:`1704`, :pr:`1705`).
 - Added ``cross_validate`` and ``CrossValidationResult`` for bounded supervised
   PLS and Pipeline cross-validation with aligned ``NDDataset`` outputs,
   per-target metrics, fold records, and optional fitted fold estimators (#1658).
@@ -35,6 +36,10 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- A refused zero-filling operation on a non-final dimension now validates the
+  coordinate before its temporary axis permutation, so returning the unchanged
+  source no longer leaves its dimensions, coordinates, metadata, data or history
+  reordered (:pr:`1705`).
 - ``align()`` no longer silently ignores ``interpolate_sampling`` requests.
   The omitted value and ``"auto"`` preserve the existing interpolation onto
   the first dataset coordinate; numeric and other values are explicitly refused
