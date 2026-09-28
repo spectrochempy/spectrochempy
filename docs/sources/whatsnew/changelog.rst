@@ -38,6 +38,14 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- ``trapezoid()`` and ``simpson()`` no longer integrate masked points as if they
+  were valid data, and no longer return a reduced result carrying a source-shaped
+  mask. SpectroChemPy does not publish an integral for a slice whose contribution
+  is incomplete: each output slice built without any masked point is integrated
+  normally, while a slice that used at least one masked point is published as a
+  masked value with a raw ``NaN``. No estimate of the missing area is attempted,
+  and the values hidden under the mask never reach the quadrature. Unmasked inputs
+  are unaffected (:pr:`1698`).
 - ``concatenate()`` now rejects inputs whose concatenated dimension carries
   coordinate values or labels for only some datasets, instead of returning a
   geometrically inconsistent result. Coordinates may still be omitted from

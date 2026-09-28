@@ -22,8 +22,11 @@ Key observed patterns:
     - Title/description/history rewritten for that derived quantity
     - Name / author / origin / filename / meta preserved by copy-first assembly
     - Units combine data units with the integrated coordinate units
-    - Mask information survives on the returned object, but masked source
-      values still contribute numerically to the computed integral
+    - SpectroChemPy publishes no integral for a slice whose contribution is
+      incomplete: an incomplete slice is published as a masked NaN, complete
+      slices are integrated normally, and the result mask always matches the
+      result shape
+      (see test_integration_mask_semantics.py for the full contract)
 """
 
 from pathlib import Path
@@ -322,7 +325,18 @@ class TestLabelsAndMasks:
         assert not bool(r.mask)
         assert not r.is_masked
 
-    def test_masked_values_affect_mask_but_not_numeric_integration(self):
+    def test_masked_points_are_not_integrated(self):
+        # Replaces the previous characterization of this case, which recorded
+        # `trap.data == 202.0`, `simp.data == 268.0` and a three-element mask
+        # on a zero-dimensional result. Those two observations described the
+        # pre-correction defects: excluded values were integrated as if they
+        # were valid, and the copied source mask kept the source shape.
+        #
+        # The guarantee now asserted is the SpectroChemPy policy for a slice
+        # whose contribution is incomplete: the value hidden under the mask is
+        # not integrated, the zero-dimensional result carries a coherent scalar
+        # mask, and the unavailable area is published as a masked NaN rather
+        # than as a number derived from excluded points.
         arr = np.ma.MaskedArray([1.0, 200.0, 3.0], mask=[0, 1, 0])
         ds = NDDataset(
             arr,
@@ -333,12 +347,15 @@ class TestLabelsAndMasks:
         trap = ds.trapezoid()
         simp = ds.simpson()
 
-        assert np.isclose(trap.data, 202.0)
-        assert np.isclose(simp.data, 268.0)
-        assert np.array_equal(trap.mask, [False, True, False])
-        assert np.array_equal(simp.mask, [False, True, False])
-        assert trap.is_masked
-        assert simp.is_masked
+        assert isinstance(trap, NDDataset)
+        assert isinstance(simp, NDDataset)
+        assert trap.shape == () and simp.shape == ()
+        for result in (trap, simp):
+            assert result.is_masked
+            assert np.asarray(result.mask).shape == result.data.shape
+            assert bool(result.mask)
+            assert np.isnan(float(np.asarray(result.data)))
+            assert np.ma.isMaskedArray(result.masked_data)
 
 
 # ======================================================================================
