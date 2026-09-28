@@ -34,8 +34,8 @@ def _qf_fft(data):
     return np.fft.fftshift(np.fft.fft(np.conjugate(data)), -1)
 
 
-def _interferogram_fft(data):
-    """FFT transform for rapid-scan interferograms. Phase corrected using the Mertz method."""
+def _single_interferogram_fft(data):
+    """Apply the historical Mertz transform to one interferogram."""
 
     def _get_zpd(data, mode="max"):
         if mode == "max":
@@ -68,6 +68,24 @@ def _interferogram_fft(data):
 
     # The imaginary part can be now discarder
     return data.real[..., ::-1] / 2.0
+
+
+def _interferogram_fft(data):
+    """Apply the Mertz transform independently to each interferogram."""
+    data = np.asarray(data)
+    trace_count = int(np.prod(data.shape[:-1])) if data.ndim > 1 else 1
+
+    # Preserve the exact historical numerical path for strict 1D inputs and
+    # singleton leading geometry.
+    if trace_count == 1:
+        return _single_interferogram_fft(data)
+
+    size = data.shape[-1]
+    traces = data.reshape(trace_count, size)
+    transformed = np.stack(
+        [_single_interferogram_fft(trace[np.newaxis, :])[0] for trace in traces]
+    )
+    return transformed.reshape(*data.shape[:-1], transformed.shape[-1])
 
 
 def _has_calibrated_interferogram_axis(coord):
