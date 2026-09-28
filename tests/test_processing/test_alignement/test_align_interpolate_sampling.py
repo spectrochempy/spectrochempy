@@ -17,9 +17,7 @@ def _datasets(*, identical_grids=False, masked=False):
         second_x = scp.Coord([0.0, 2.0, 4.0], title="distance", units="m")
         second_data = [2.0, 6.0, 10.0]
     else:
-        second_x = scp.Coord(
-            [0.0, 100.0, 300.0, 400.0], title="distance", units="cm"
-        )
+        second_x = scp.Coord([0.0, 100.0, 300.0, 400.0], title="distance", units="cm")
         second_data = [1.0, 3.0, 7.0, 9.0]
 
     first = scp.NDDataset(
