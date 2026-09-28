@@ -34,9 +34,7 @@ def _snapshot(dataset):
         "data": dataset.data.copy(),
         "mask": dataset.mask.copy(),
         "dims": list(dataset.dims),
-        "coords": {
-            dim: dataset.coord(dim).copy() for dim in dataset.dims
-        },
+        "coords": {dim: dataset.coord(dim).copy() for dim in dataset.dims},
         "units": dataset.units,
         "meta": copy.deepcopy(dataset.meta),
         "history": dataset.history_entries,
@@ -104,9 +102,7 @@ def test_squeeze_noop_retains_existing_recording_convention():
     ("selectors", "requested"),
     [((0, -1), [0, -1]), (("z", "x"), ["z", "x"])],
 )
-def test_swapdims_records_requested_and_resolved_axes(
-    inplace, selectors, requested
-):
+def test_swapdims_records_requested_and_resolved_axes(inplace, selectors, requested):
     source = _dataset()
     snapshot = _snapshot(source)
 
@@ -175,9 +171,7 @@ def test_shape_failures_do_not_append_success_entries():
         lambda dataset: dataset.squeeze("y", inplace=True),
         lambda dataset: dataset.swapdims("missing", "x", inplace=True),
         lambda dataset: dataset.reshape((5, 5), inplace=True),
-        lambda dataset: dataset.reshape(
-            (2, 3, 4), dims=("a", "b"), inplace=True
-        ),
+        lambda dataset: dataset.reshape((2, 3, 4), dims=("a", "b"), inplace=True),
         lambda dataset: dataset.reshape(
             (2, 3, 4),
             dims=("z", "y", "x"),
