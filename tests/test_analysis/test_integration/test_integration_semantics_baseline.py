@@ -22,9 +22,10 @@ Key observed patterns:
     - Title/description/history rewritten for that derived quantity
     - Name / author / origin / filename / meta preserved by copy-first assembly
     - Units combine data units with the integrated coordinate units
-    - A definite integral is only defined over visible points: an incomplete
-      slice is published as a masked NaN, complete slices are integrated
-      normally, and the result mask always matches the result shape
+    - SpectroChemPy publishes no integral for a slice whose contribution is
+      incomplete: an incomplete slice is published as a masked NaN, complete
+      slices are integrated normally, and the result mask always matches the
+      result shape
       (see test_integration_mask_semantics.py for the full contract)
 """
 
@@ -331,11 +332,11 @@ class TestLabelsAndMasks:
         # pre-correction defects: excluded values were integrated as if they
         # were valid, and the copied source mask kept the source shape.
         #
-        # The guarantee now asserted is that an integral is only defined over
-        # visible points: the value hidden under the mask is not integrated,
-        # the zero-dimensional result carries a coherent scalar mask, and the
-        # unavailable area is published as a masked NaN rather than as a
-        # number derived from excluded points.
+        # The guarantee now asserted is the SpectroChemPy policy for a slice
+        # whose contribution is incomplete: the value hidden under the mask is
+        # not integrated, the zero-dimensional result carries a coherent scalar
+        # mask, and the unavailable area is published as a masked NaN rather
+        # than as a number derived from excluded points.
         arr = np.ma.MaskedArray([1.0, 200.0, 3.0], mask=[0, 1, 0])
         ds = NDDataset(
             arr,

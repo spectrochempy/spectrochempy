@@ -7,8 +7,8 @@ r"""
 Regressions for the mask contract of ``NDDataset.trapezoid()`` and
 ``NDDataset.simpson()``.
 
-A definite integral is only defined when every point that contributed to it is
-visible. The contract under test is:
+SpectroChemPy does not publish an integral for a slice whose contribution is
+incomplete. A masked point is a scientific exclusion. The contract under test is:
 
 - no masked point in a slice: the slice is integrated normally and the
   corresponding output is not masked;

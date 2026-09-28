@@ -68,9 +68,10 @@ documented in the :ref:`units and masks guide <userguide_units_masks>`.
 Masks and definite integrals
 ----------------------------
 
-``NDDataset.trapezoid()`` and ``NDDataset.simpson()`` reduce one dimension, so a
-definite integral is only defined when every point that contributed to it is
-visible. Each output slice is therefore treated as follows:
+``NDDataset.trapezoid()`` and ``NDDataset.simpson()`` reduce one dimension. A
+masked point is a scientific exclusion, so SpectroChemPy does not publish an
+integral for a slice whose contribution is incomplete. Each output slice is
+treated as follows:
 
 * a slice built without any masked point is integrated normally and the
   corresponding output is not masked;
@@ -88,6 +89,10 @@ Because only the affected slices are affected, a batch where a single spectrum
 contains a masked point keeps all the other valid areas. Use
 ``NDDataset.masked_data`` rather than ``NDDataset.data`` to read a result
 containing unavailable areas.
+
+These rules are the SpectroChemPy policy for these two methods. They do not
+extend automatically to the other reductions, whose own mask behavior is
+unchanged.
 
 External references
 -------------------

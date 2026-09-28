@@ -21,11 +21,10 @@ def _reduced_slice_mask(mask, axis):
     """
     Reduce a source mask along the integrated axis.
 
-    A definite integral is only defined when every point that contributed to it
-    is visible. An output slice is therefore considered valid only if it was
-    built without any masked point. The canonical unmasked sentinel is returned
-    unchanged and whenever no slice is affected, so an unmasked input keeps the
-    canonical unmasked representation.
+    A masked point is a scientific exclusion, so an output slice is considered
+    valid only if it was built without any masked point. The canonical unmasked
+    sentinel is returned unchanged and whenever no slice is affected, so an
+    unmasked input keeps the canonical unmasked representation.
     """
     if not isinstance(mask, np.ndarray):
         # NOMASK, and any other scalar sentinel, means nothing is excluded.
@@ -38,7 +37,7 @@ def _exclude_incomplete_slices(data, slice_mask, axis):
     """
     Blank the incomplete slices before the numerical integration.
 
-    The values hidden under a mask are not part of any valid integral, so they
+    The values hidden under a mask are excluded from the calculation, so they
     must neither reach the quadrature nor overflow it. They are replaced by
     zeros, which only affects the incomplete slices whose result is discarded
     afterwards. Complete slices keep their exact values.
@@ -69,9 +68,9 @@ def _integrate_method(method):
         x = np.asarray(dataset.coord(dim).data)
         y = np.asarray(dataset.data)
 
-        # A definite integral is only defined over visible points. Reduce the
-        # source mask along the integrated axis first, so that the validity of
-        # each output slice is known before anything is computed.
+        # A masked point is a scientific exclusion. Reduce the source mask along
+        # the integrated axis first, so that the validity of each output slice
+        # is known before anything is computed.
         slice_mask = _reduced_slice_mask(dataset.mask, axis)
         y = _exclude_incomplete_slices(y, slice_mask, axis)
 
@@ -91,8 +90,9 @@ def _integrate_method(method):
             data *= -1
 
         if np.any(slice_mask):
-            # The integral of an incomplete slice is not defined. Publish it as
-            # unavailable instead of a number derived from excluded points.
+            # A slice whose contribution is incomplete has no published area.
+            # Publish it as unavailable instead of a number derived from
+            # excluded points.
             data = np.where(slice_mask, np.nan, data)
 
         new = dataset.copy()
@@ -151,19 +151,19 @@ def trapezoid(dataset, **kwargs):
 
     Notes
     -----
-    A definite integral is only defined when every point that contributed to it
-    is visible. An output slice is therefore integrated normally when it was
-    built without any masked point, and is published as a masked value with a
-    raw `numpy.nan` when it used at least one masked point. This applies to a
-    fully masked slice as well. The values hidden under the mask never reach
-    the quadrature, so they cannot influence a result nor overflow it. The
-    result mask is always compatible with the result shape: a 1D input yields a
-    zero-dimensional result with a scalar mask, and an unmasked input yields the
-    canonical unmasked `numpy.False_` mask.
+    SpectroChemPy does not publish an integral for a slice whose contribution is
+    incomplete. A masked point is a scientific exclusion: an output slice is
+    integrated normally, and is not masked, when it was built without any masked
+    point. A slice that used at least one masked point, including a fully masked
+    slice, is instead published as a masked value with a raw `numpy.nan`.
 
-    No estimate of the missing area is attempted: masked points are not
-    replaced, removed or interpolated. Remove or unmask the affected points
-    first if a complete area is required.
+    No estimate of the missing area is made, so masked points are not replaced,
+    removed or interpolated. The values hidden under the mask never reach the
+    quadrature, so they cannot influence a result nor overflow it.
+
+    The result mask is always compatible with the result shape: a 1D input
+    yields a zero-dimensional result with a scalar mask, and an unmasked input
+    yields the canonical unmasked `numpy.False_` mask.
 
     Other Parameters
     ----------------
@@ -213,19 +213,19 @@ def simpson(dataset, *args, **kwargs):
 
     Notes
     -----
-    A definite integral is only defined when every point that contributed to it
-    is visible. An output slice is therefore integrated normally when it was
-    built without any masked point, and is published as a masked value with a
-    raw `numpy.nan` when it used at least one masked point. This applies to a
-    fully masked slice as well. The values hidden under the mask never reach
-    the quadrature, so they cannot influence a result nor overflow it. The
-    result mask is always compatible with the result shape: a 1D input yields a
-    zero-dimensional result with a scalar mask, and an unmasked input yields the
-    canonical unmasked `numpy.False_` mask.
+    SpectroChemPy does not publish an integral for a slice whose contribution is
+    incomplete. A masked point is a scientific exclusion: an output slice is
+    integrated normally, and is not masked, when it was built without any masked
+    point. A slice that used at least one masked point, including a fully masked
+    slice, is instead published as a masked value with a raw `numpy.nan`.
 
-    No estimate of the missing area is attempted: masked points are not
-    replaced, removed or interpolated. Remove or unmask the affected points
-    first if a complete area is required.
+    No estimate of the missing area is made, so masked points are not replaced,
+    removed or interpolated. The values hidden under the mask never reach the
+    quadrature, so they cannot influence a result nor overflow it.
+
+    The result mask is always compatible with the result shape: a 1D input
+    yields a zero-dimensional result with a scalar mask, and an unmasked input
+    yields the canonical unmasked `numpy.False_` mask.
 
     Other Parameters
     ----------------
