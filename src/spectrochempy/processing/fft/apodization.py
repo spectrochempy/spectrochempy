@@ -58,7 +58,7 @@ def _apodize_method(**units):
             # If needed, we swap the dimensions to be sure to be in this situation
             swapped = False
             if axis != -1:
-                new.swapdims(axis, -1, inplace=True)  # must be done in  place
+                new._swapdims_without_history(axis, -1, inplace=True)
                 swapped = True
 
             # Get the coordinates for the last dimension
@@ -138,7 +138,7 @@ def _apodize_method(**units):
 
             # restore original data order if it was swapped
             if swapped:
-                new.swapdims(axis, -1, inplace=True)  # must be done inplace
+                new._swapdims_without_history(axis, -1, inplace=True)
 
             if hasattr(x, "_use_time_axis"):
                 new.x._use_time_axis = store

@@ -233,7 +233,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
     # If needed, we swap the dimensions to be sure to be in this situation
     swapped = False
     if axis != -1:
-        new.swapdims(axis, -1, inplace=True)  # must be done in  place
+        new._swapdims_without_history(axis, -1, inplace=True)
         swapped = True
 
     # Select the last coordinates
@@ -482,7 +482,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
 
     # restore original data order if it was swapped
     if swapped:
-        new.swapdims(axis, -1, inplace=True)  # must be done inplace
+        new._swapdims_without_history(axis, -1, inplace=True)
 
     return new
 
