@@ -14,6 +14,8 @@ import pytest
 import spectrochempy as scp
 from spectrochempy.application.preferences import preferences as prefs
 from spectrochempy.core.readers.read_spc import _SpcFile
+from spectrochempy.core.units import ur
+from spectrochempy.utils.exceptions import SpectroChemPyError
 
 DATADIR = prefs.datadir
 
@@ -692,3 +694,52 @@ def test_refused_fft_does_not_mutate_the_source_with_inplace(galacticdata):
     assert dataset.x.title == before_title
     assert dataset.x.units == before_units
     assert list(dataset.history) == before_history
+
+
+def test_unitless_interferogram_fft_refuses_before_nonfinal_swap(tmp_path):
+    path = tmp_path / "IG_UNCALIBRATED.SPC"
+    path.write_bytes(_make_ytype_spc(ytype=1, peakpt=1))
+    dataset = scp.read_spc(path).T
+    before = dataset.copy()
+
+    assert dataset.dims[-1] != "x"
+    assert dataset.x.units is None
+    with pytest.raises(
+        SpectroChemPyError,
+        match="calibrated time or optical path difference",
+    ):
+        dataset.fft(dim="x", inplace=True)
+
+    np.testing.assert_array_equal(dataset.data, before.data)
+    np.testing.assert_array_equal(dataset.mask, before.mask)
+    assert dataset.shape == before.shape
+    assert dataset.dims == before.dims
+    assert dataset.coordset == before.coordset
+    assert dataset.meta == before.meta
+    assert dataset.title == before.title
+    assert dataset.units == before.units
+    assert dataset.history_entries == before.history_entries
+
+
+def test_calibrated_spc_opd_fft_builds_expected_spectral_scale(tmp_path):
+    path = tmp_path / "IG_CALIBRATED.SPC"
+    path.write_bytes(_make_ytype_spc(ytype=1, peakpt=1))
+    dataset = scp.read_spc(path)
+    dataset.x.set_laser_frequency(16000.0 * ur("cm^-1"))
+    source_coord = dataset.x.copy()
+
+    transformed = dataset.fft()
+
+    assert dataset.x == source_coord
+    assert dataset.x.units == ur.mm
+    assert dataset.x.title == "optical path difference"
+    assert transformed.shape == (1, 2)
+    assert transformed.x.units == ur("cm^-1")
+    assert transformed.x.title == "wavenumbers"
+    expected = scp.Coord(
+        np.fft.rfftfreq(dataset.x.size)[: transformed.x.size][::-1]
+        / abs(source_coord.spacing)
+    ).to("cm^-1")
+    np.testing.assert_allclose(transformed.x.data, expected.data, rtol=1.0e-12)
+    assert transformed.x.data[0] == pytest.approx(4000.0, rel=2.0e-4)
+    assert transformed.x.data[-1] == 0.0

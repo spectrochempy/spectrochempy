@@ -75,14 +75,13 @@ Bug Fixes
   also remain readable on Windows, where converting the fallback epoch datetime
   back to a timestamp could raise ``EINVAL``.
 - Fourier transforming a dataset flagged as an interferogram now raises
-  ``SpectroChemPyError`` when its x axis is neither time nor dimensionless, for
-  instance when it is the uncalibrated wavenumber axis an SPC interferogram
-  carries. This branch of ``fft()`` derives a wavenumber axis from the input
-  spacing, and it previously only logged an error and continued, so the call
-  returned an untransformed dataset whose coordinate had nevertheless been
-  switched to a time axis, mutating the caller's dataset when ``inplace=True``.
-  The refusal is now raised before anything is modified. Interferograms with a
-  calibrated time or optical path difference axis are unaffected (:pr:`1700`).
+  ``SpectroChemPyError`` unless its target axis is calibrated as time or optical
+  path difference; unitless and dimensionless sample indices are therefore
+  refused as well as unrelated physical units. Validation now precedes any
+  dimension swap, so a refused non-final in-place transform leaves data,
+  dimensions, coordinates and metadata untouched. An optical path difference
+  axis created by an explicit ``set_laser_frequency()`` call remains accepted
+  and produces its spectral scale from the calibrated spacing (:pr:`1700`).
 - ``concatenate()`` now rejects inputs whose concatenated dimension carries
   coordinate values or labels for only some datasets, instead of returning a
   geometrically inconsistent result. Coordinates may still be omitted from
