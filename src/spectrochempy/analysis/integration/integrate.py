@@ -57,18 +57,28 @@ def _integrate_method(method):
         # the dataset, so that no silent fallback is possible.
         if "even" in kwargs:
             even = kwargs.pop("even")
+            if method.__name__ == "simpson":
+                raise TypeError(
+                    f"The 'even' keyword is not supported by "
+                    f"NDDataset.simpson() (received even={even!r}). It was "
+                    f"removed from scipy.integrate.simpson in SciPy 1.14.0, "
+                    f"after being deprecated in SciPy 1.11.0. Omit the keyword to "
+                    f"use the current SciPy strategy. With N samples there are "
+                    f"N-1 intervals, and the Simpson 1/3 rule needs an even number "
+                    f"of intervals: for an even number of samples the current "
+                    f"strategy follows the former even='simpson' behaviour, while "
+                    f"for an odd number of samples the keyword had no effect at "
+                    f"all. This migration may change the result compared with the "
+                    f"former even='avg', even='first' and even='last' strategies."
+                )
+            # trapezoid() never had this parameter, in SciPy or here, so there is
+            # no deprecation to explain and no strategy to offer.
             raise TypeError(
                 f"The 'even' keyword is not supported by "
-                f"NDDataset.{method.__name__}() (received even={even!r}). It was "
-                f"removed from scipy.integrate.simpson in SciPy 1.14.0, after "
-                f"being deprecated in SciPy 1.11.0. Omit the keyword to use the "
-                f"current SciPy strategy. With N samples there are N-1 intervals, "
-                f"and the Simpson 1/3 rule needs an even number of intervals: for "
-                f"an even number of samples the current strategy follows the "
-                f"former even='simpson' behaviour, while for an odd number of "
-                f"samples the keyword had no effect at all. This migration may "
-                f"change the result compared with the former even='avg', "
-                f"even='first' and even='last' strategies."
+                f"NDDataset.{method.__name__}() (received even={even!r}). "
+                f"trapezoid() has no such parameter and never did, so there is no "
+                f"strategy for it to select. Call it without the keyword, or use "
+                f"NDDataset.simpson() if the Simpson 1/3 rule is what you need."
             )
 
         # handle the various syntax to pass the axis

@@ -36,9 +36,11 @@ number of samples. The contract under test is:
   negative axis, and for a multi-dimensional dataset;
 - the existing precedence between the synonyms is untouched, and an
   unsupported tuple or list selector is still rejected;
-- any presence of ``even`` is refused with a message that names the removal, the
-  current strategy and the risk of a changed result, whether the value is a
-  former strategy, an unknown string, or ``None``;
+- any presence of ``even`` is refused, whether the value is a former strategy,
+  an unknown string, or ``None``. For ``simpson`` the message names the removal,
+  the current strategy and the risk of a changed result; for ``trapezoid``,
+  which never had the parameter, it says so instead of describing a SciPy
+  removal that never applied to it;
 - the refusal happens before any computation or copy, so the source is intact;
 - the masked-slice policy of #1698 is preserved: a slice that used a masked
   point yields a masked result with a raw ``NaN``, and the values hidden under
@@ -256,12 +258,21 @@ def test_even_is_refused(dataset_4_samples, method_name, even_value):
     assert "even" in message
     # The message must name the method that was called.
     assert method_name in message
-    # It must explain the removal, the way forward, and the result risk.
-    assert "1.14.0" in message
-    assert "Omit the keyword" in message
-    assert "may change the result" in message
     # The value must be echoed so a caller can see what was rejected.
     assert repr(even_value) in message
+
+    if method_name == "simpson":
+        # simpson() really did lose the parameter, so the message explains the
+        # removal, the way forward, and the result risk.
+        assert "1.14.0" in message
+        assert "Omit the keyword" in message
+        assert "may change the result" in message
+    else:
+        # trapezoid() never had it, so talking about a SciPy removal or about a
+        # Simpson strategy would be misleading.
+        assert "1.14.0" not in message
+        assert "no strategy" in message
+        assert "simpson()" in message
 
 
 @pytest.mark.parametrize("method_name", ["trapezoid", "simpson"])
@@ -313,15 +324,22 @@ def test_call_without_even_works_for_even_and_odd_sample_counts(
     np.testing.assert_allclose(odd_n.data, expected)
 
 
-def test_simpson_odd_sample_count_is_exact(dataset_3_samples):
-    # Four samples give three intervals, which Simpson 1/3 cannot use; the
-    # current SciPy strategy still returns a finite value.
-    result = dataset_3_samples.simpson()
-    assert np.isfinite(result.data)
-    # A trapezoid reference is close but not equal, which is the documented
-    # consequence of handling an odd number of intervals.
-    trapezoidal = dataset_3_samples.trapezoid()
-    assert result.data != trapezoidal.data
+def test_four_samples_simpson_is_exact_where_trapezoid_is_not(dataset_4_samples):
+    # Four samples of t**2 on a unit grid over [0, 3] give three intervals, an odd
+    # number, which is the case the former 'even' keyword existed to steer. This is
+    # exactly the case a caller pinning the old default even='avg' got wrong.
+    #
+    # The integral of t**2 over [0, 3] is 9. The current Simpson strategy is exact
+    # for a cubic, so it returns 9; the trapezoidal rule returns 9.5, so the two
+    # methods are demonstrably not interchangeable here.
+    simpson_result = dataset_4_samples.simpson()
+    trapezoid_result = dataset_4_samples.trapezoid()
+
+    np.testing.assert_allclose(simpson_result.data, 9.0, rtol=0, atol=1e-12)
+    np.testing.assert_allclose(trapezoid_result.data, 9.5, rtol=0, atol=1e-12)
+    assert simpson_result.data != trapezoid_result.data
+    # The accuracy is the property being asserted, not incidental finiteness.
+    assert abs(simpson_result.data - 9.0) < abs(trapezoid_result.data - 9.0)
 
 
 @pytest.mark.parametrize("even_value", EVEN_VALUES)
@@ -339,12 +357,14 @@ def test_even_refusal_preserves_the_mask_policy(masked_dataset_2d, even_value):
 
 def test_even_refusal_does_not_mutate_masked_source(masked_dataset_2d):
     before_data = masked_dataset_2d.data.copy()
-    before_mask = np.ma.getmaskarray(masked_dataset_2d.data)
+    # 'data' is the plain ndarray: its mask lives in 'mask', so a prior copy of
+    # 'mask' is what actually has to survive. Reading the mask off 'data' would
+    # compare an all-False array and assert nothing.
+    before_mask = masked_dataset_2d.mask.copy()
+    assert before_mask.any(), "fixture must really carry a masked point"
 
     with pytest.raises(TypeError, match="even"):
         masked_dataset_2d.simpson(dim=0, even="avg")
 
     np.testing.assert_array_equal(masked_dataset_2d.data, before_data)
-    np.testing.assert_array_equal(
-        np.ma.getmaskarray(masked_dataset_2d.data), before_mask
-    )
+    np.testing.assert_array_equal(masked_dataset_2d.mask, before_mask)
