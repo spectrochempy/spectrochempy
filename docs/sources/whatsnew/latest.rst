@@ -38,6 +38,23 @@ New Features
   1.0, and a negative ``shifted`` passed to ``em()`` or ``gm()`` records an
   effective 0.0. A request that survives unchanged is not duplicated, whether or
   not it carries units.
+- Added structured history to the shared phasing wrapper behind ``pk()`` and
+  ``pk_exp()``. A successful correction records one ``pk`` entry, so
+  ``pk_exp()``, which hands a zero first order phase to ``pk``, is described by
+  the kernel that actually ran. The entry records the correction that was
+  applied, not the phase that was asked for: the wrapper subtracts the phase
+  already stored in the metadata and negates the request for a dimension that
+  has not been phased yet, so ``pk(phc0=30)`` on a dimension already phased at
+  10 degree records an effective ``phc0`` of 20.0 and keeps the requested 30,
+  while the same call on an unphased dimension records an effective ``phc0`` of
+  -30.0. Because a positive ``exptc`` makes the exponential window ignore
+  ``phc1`` entirely, the entry does not report a first order correction in that
+  case and keeps the requested ``phc1`` separately instead; the kernel and the
+  recorder share that rule so they cannot disagree. A request carrying units,
+  such as ``pk(phc0=30 * scp.ur.degree)`` or ``pk(exptc=5 * scp.ur.us)``, keeps
+  the requested magnitude and unit next to the effective value expressed in
+  degrees and in the units of the phased coordinate, and ``rel`` is recorded
+  because it selects an accumulated correction rather than an absolute one.
   Temporary internal dimension swaps no
   longer add shape-operation entries to a treatment's history; other operations
   may continue to record normal text-only entries (:pr:`1681`, :pr:`1703`,
