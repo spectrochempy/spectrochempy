@@ -200,9 +200,10 @@ def test_integrate_preserves_metadata_with_operation_overrides(metadata_dataset)
     assert_dims_equal(result, ["y"])
     assert result.coordset is not None
     np.testing.assert_allclose(result.y.data, metadata_dataset.y.data)
-    assert len(result.history) == 1
+    assert result.history_entries[:-1] == metadata_dataset.history_entries
+    assert result.history_entries[-1]["operation"] == "trapezoid"
     assert (
-        "Dataset resulting from application of `trapezoid` method" in result.history[0]
+        "Dataset resulting from application of `trapezoid` method" in result.history[-1]
     )
 
 

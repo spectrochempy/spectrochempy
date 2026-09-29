@@ -215,23 +215,25 @@ class TestReductions:
         result = ds1.sum()
         assert not isinstance(result, scp.NDDataset)
 
-    def test_trapezoid_replaces_history(self):
-        """Trapezoid REPLACES history (not appends)."""
+    def test_trapezoid_appends_structured_history(self):
+        """Trapezoid preserves history and appends one structured entry."""
         d = scp.NDDataset([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], name="trapz_test")
         d.set_coordset(x=scp.Coord([0.1, 0.2, 0.3]))
         d.history = "Prior op"
         result = d.trapezoid(dim="x")
-        assert len(result.history) == 1
-        assert "trapezoid" in _entry(result.history[0])
+        assert len(result.history) == 2
+        assert _entry(result.history[0]) == "Prior op"
+        assert result.history_entries[-1]["operation"] == "trapezoid"
 
-    def test_simpson_replaces_history(self):
-        """Simpson REPLACES history (not appends)."""
+    def test_simpson_appends_structured_history(self):
+        """Simpson preserves history and appends one structured entry."""
         d = scp.NDDataset([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], name="simp_test")
         d.set_coordset(x=scp.Coord([0.1, 0.2, 0.3]))
         d.history = "Prior op"
         result = d.simpson(dim="x")
-        assert len(result.history) == 1
-        assert "simpson" in _entry(result.history[0])
+        assert len(result.history) == 2
+        assert _entry(result.history[0]) == "Prior op"
+        assert result.history_entries[-1]["operation"] == "simpson"
 
     def test_sum_with_keepdims_appends(self, ds2d):
         """Sum with keepdims=True still appends."""
@@ -581,12 +583,12 @@ class TestHistoryPatterns:
 
 
 # ===========================================================================
-# 10. Operations that lose history
+# 10. History replacement and continuity
 # ===========================================================================
 
 
-class TestHistoryLoss:
-    """Operations known to lose prior history."""
+class TestHistoryReplacementAndContinuity:
+    """Characterize replacement and preservation across result families."""
 
     def test_concatenate_loses_input_histories(self):
         """Concatenate results have no trace of input histories."""
@@ -599,14 +601,15 @@ class TestHistoryLoss:
             _entry(result.history[0]) == "Created by concatenate from 2 datasets: A, B"
         )
 
-    def test_integration_loses_prior_history(self):
-        """Integration results lose prior operation history."""
+    def test_integration_preserves_prior_history(self):
+        """Integration preserves prior history before its structured entry."""
         d = scp.NDDataset([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], name="int_loss_test")
         d.set_coordset(x=scp.Coord([0.1, 0.2, 0.3]))
         d.history = "Prior operation"
         result = d.trapezoid(dim="x")
-        assert len(result.history) == 1
-        assert "trapezoid" in _entry(result.history[0])
+        assert len(result.history) == 2
+        assert _entry(result.history[0]) == "Prior operation"
+        assert result.history_entries[-1]["operation"] == "trapezoid"
 
     def test_diagonal_preserves_prior_history(self):
         """Diagonal preserves prior history."""

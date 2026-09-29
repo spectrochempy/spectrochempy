@@ -19,7 +19,8 @@ Key observed patterns:
     - Reduction-like assembly over exactly one dimension
     - Result always remains an NDDataset, including 0-d results
     - Integration produces a derived scientific quantity
-    - Title/description/history rewritten for that derived quantity
+    - Title and description rewritten for that derived quantity, with one
+      structured integration entry appended to the inherited history
     - Name / author / origin / filename / meta preserved by copy-first assembly
     - Units combine data units with the integrated coordinate units
     - SpectroChemPy publishes no integral for a slice whose contribution is
@@ -287,19 +288,23 @@ class TestMetadata:
 class TestHistoryProvenance:
     """Characterize history behavior after integration."""
 
-    def test_history_replaced_not_appended(self, integration_dataset):
+    def test_history_preserved_and_appended(self, integration_dataset):
+        # This replaces the historical observation that integration discarded
+        # the copied chronology by assigning a one-item history list.
         r = integration_dataset.trapezoid(dim="x")
-        assert len(r.history) == 1
-        assert "original history entry" not in r.history[0].lower()
+        assert len(r.history) == len(integration_dataset.history) + 1
+        assert "original history entry" in r.history[0].lower()
+        assert r.history_entries[-1]["operation"] == "trapezoid"
 
     def test_history_mentions_method_name(self, integration_dataset):
         r = integration_dataset.simpson(dim="x")
-        assert "`simpson` method" in r.history[0]
+        assert "`simpson` method" in r.history[-1]
 
     def test_history_contains_timestamp_prefix(self, integration_dataset):
         r = integration_dataset.trapezoid(dim="x")
         assert (
-            "> Dataset resulting from application of `trapezoid` method" in r.history[0]
+            "> Dataset resulting from application of `trapezoid` method"
+            in r.history[-1]
         )
 
 
@@ -317,8 +322,8 @@ class TestIdentity:
         r = integration_dataset.trapezoid(dim="x")
         assert r.title == "area"
         assert r.description == "Integration of NDDataset 'source_name' along dim: 'x'."
-        assert len(r.history) == 1
-        assert "`trapezoid` method" in r.history[0]
+        assert len(r.history) == len(integration_dataset.history) + 1
+        assert "`trapezoid` method" in r.history[-1]
 
 
 # ======================================================================================
