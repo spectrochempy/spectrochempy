@@ -522,12 +522,42 @@ When possible:
 pre-commit run --all-files
 ```
 
-This is **mandatory**.  A branch that has not been pre-commit-cleaned must not
-be pushed.  If pre-commit modifies files, amend the commit and push again.
+This is **mandatory**. A branch that has not been pre-commit-cleaned must not
+be pushed. If pre-commit modifies files, **stage them and run pre-commit
+again** until it passes cleanly (0 failures, no file changes). Do **not**
+assume that a single pass is always sufficient: some hooks can modify files
+after others, and running only once is insufficient when that happens. If
+pre-commit modified files on the first pass, you must run it again (or
+repeatedly, until clean) before committing and pushing. Also remember: hooks
+such as `update_version_and_release_notes` compare against the committed git
+state, so always run pre-commit **after** staging/committing the intended
+changes.
 
 During normal development (before the final push), do **not** run pre-commit
 repeatedly — it wastes CI quota and agent time.  Pre-commit hooks are
-deterministic; a single final run is sufficient.
+deterministic; a single final run is sufficient — **but that final run must
+come after every file is tracked by git**, and it must be repeated if it
+modifies anything.
+
+**Important — untracked files are invisible to `--all-files`.**
+`pre-commit run --all-files` only inspects paths reported by `git ls-files`.
+A brand-new test or source file that is still untracked (`??` in
+`git status`) will be silently skipped by every hook, including `ruff` and
+`ruff-format`. Staging first is therefore not cosmetic: without `git add` on
+new files, a single "green" pre-commit run can still leave unformatted code in
+the commit, and the CI pre-commit job then fails on a branch that looked clean
+locally. The safe sequence for any change that adds files is:
+
+```bash
+git add -A                  # make new files visible to the hooks
+pre-commit run --all-files  # then run; repeat while it modifies files
+```
+
+The 2026-09-29 lot `feat/structured-apodization-history` shipped a red
+pre-commit CI job and a red test matrix for exactly this reason: the new test
+module was untracked at the moment pre-commit ran, so it was committed
+unformatted, and two of its assertions also pinned a micro sign code point that
+the units backend spells differently across platforms.
 
 When not delegated:
 
