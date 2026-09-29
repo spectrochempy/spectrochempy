@@ -46,9 +46,10 @@ Bug Fixes
   geometry for preprocessors such as MSC (:pr:`1657`).
 - Dataset arithmetic rejects incompatible same-unit coordinate grids,
   reconstructs dimensions and coordinates correctly after positional
-  broadcasting, refuses duplicate result dimension names, and rolls back all
-  dataset state after a refused in-place operation (:pr:`1665`, :pr:`1667`,
-  :pr:`1668`).
+  broadcasting, refuses duplicate result dimension names, and rolls back data,
+  units, masks, titles, history, and other trait replacements made by a refused
+  in-place operation. Side effects performed by custom Traitlets observers
+  remain the observer's responsibility (:pr:`1665`, :pr:`1667`, :pr:`1668`).
 - Spectral-processing wrappers now forward their documented selectors and
   execution options consistently. ``hamming()``, ``hann()``, and ``pk_exp()``
   no longer fall back silently to the default dimension or an out-of-place
@@ -126,13 +127,17 @@ Breaking Changes
   Rename colliding dimensions or align coordinate grids explicitly
   (:pr:`1665`, :pr:`1667`).
 - Requests that previously appeared to succeed while being unsupported now
-  fail explicitly: ``pk(..., inv=True)``, unknown ``detrend()`` options,
-  non-default ``align(interpolate_sampling=...)`` targets, and the removed
-  ``simpson(even=...)`` strategies. Use forward phasing, supported detrending
-  options, ``NDDataset.interpolate()`` with an explicit grid, or the current
-  SciPy Simpson behavior respectively (:pr:`1682`, :pr:`1695`, :pr:`1699`,
-  :pr:`1702`).
-- FFT of an SPC interferogram now requires an explicitly calibrated time or
+  fail explicitly: ``pk(..., inv=True)``, unknown ``detrend()`` options, and
+  non-default ``align(interpolate_sampling=...)`` targets. Use forward
+  phasing, supported detrending options, or ``NDDataset.interpolate()`` with an
+  explicit grid respectively (:pr:`1682`, :pr:`1695`, :pr:`1702`).
+- ``simpson()`` no longer accepts ``even`` because SciPy removed that option.
+  These strategies were functional with earlier SciPy versions: omitting
+  ``even`` selects the current SciPy behavior and can change results for an
+  even number of samples compared with the former ``"avg"``, ``"first"``,
+  or ``"last"`` strategies. ``trapezoid()`` never accepted ``even``
+  (:pr:`1699`).
+- FFT of an interferogram now requires an explicitly calibrated time or
   optical-path-difference coordinate; raw sample indices and unrelated units
   are refused before mutation (:pr:`1700`).
 - Conda development builds are no longer published to the ``dev`` label for
