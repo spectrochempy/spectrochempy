@@ -372,8 +372,12 @@ class TestEncodingHandler:
 
     def test_dispatch_unknown_complex_encoding_uses_direct_fallback(self):
         """Missing complex encoding uses the vendor-independent direct FFT."""
-        data = np.ones((8, 16), dtype=np.complex128)
+        values = np.arange(8 * 16, dtype=float).reshape(8, 16)
+        data = values + 1j * np.flip(values, axis=-1)
         expected = np.fft.fftshift(np.fft.fft(np.conjugate(data)), -1)
+        without_conjugation = np.fft.fftshift(np.fft.fft(data), -1)
+
+        assert not np.allclose(expected, without_conjugation)
         assert_allclose(_fft_encoding_handler(data, "UNKNOWN"), expected)
 
     def test_dispatch_unknown_quaternion_encoding_is_rejected(self):
