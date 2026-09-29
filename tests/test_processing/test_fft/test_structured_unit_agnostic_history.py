@@ -15,8 +15,12 @@ def _dataset(*, shape=(3, 4), complex_data=True):
     data = real + 1.0j * (real + 0.5) if complex_data else real
     dims = ["z", "y", "x"][-len(shape) :]
     coords = [
-        scp.Coord.arange(size, units="s", title=f"time {dim}")
-        for size, dim in zip(shape, dims, strict=True)
+        scp.Coord(
+            np.arange(size, dtype=float) * (index + 1) + 10 ** (index + 1),
+            units="s",
+            title=f"coordinate {dim}",
+        )
+        for index, (size, dim) in enumerate(zip(shape, dims, strict=True))
     ]
     dataset = scp.NDDataset(
         data,
@@ -29,6 +33,7 @@ def _dataset(*, shape=(3, 4), complex_data=True):
     mask.reshape(-1)[min(2, mask.size - 1)] = True
     dataset.mask = mask
     dataset.meta.sample = "synthetic"
+    dataset.meta.axis_marker = [f"metadata {dim}" for dim in dims]
     dataset.annotate("prepared")
     return dataset
 
@@ -158,22 +163,130 @@ def test_one_dimensional_hilbert_transform_retains_larger_explicit_n():
     _assert_snapshot(source, snapshot)
 
 
+@pytest.mark.parametrize("name", ["mc", "ps"])
+@pytest.mark.parametrize("inplace", [False, True])
 @pytest.mark.parametrize(
-    ("name", "kwargs", "error"),
+    ("selector", "requested"),
     [
-        ("mc", {"dim": "y"}, TypeError),
-        ("ps", {"axis": 0}, TypeError),
-        ("ht", {"N": 4, "dim": "y"}, TypeError),
-        ("ht", {}, TypeError),
-        ("ht", {"N": 2}, ValueError),
+        ({"dim": 0}, 0),
+        ({"dims": 0}, 0),
+        ({"axis": 0}, 0),
+        ({"dim": "y"}, "y"),
+        ({"dim": -2}, -2),
     ],
 )
-def test_preexisting_unsupported_calls_do_not_record_success(name, kwargs, error):
+def test_modulus_and_power_spectrum_accept_dimension_selectors(
+    name, inplace, selector, requested
+):
+    source = _dataset()
+    snapshot = _snapshot(source)
+    expected = snapshot["data"].real ** 2 + snapshot["data"].imag ** 2
+    if name == "mc":
+        expected = np.sqrt(expected)
+
+    result = getattr(source, name)(inplace=inplace, **selector)
+
+    assert (result is source) is inplace
+    np.testing.assert_allclose(result.data, expected)
+    _assert_preserved_geometry(result, snapshot)
+    assert result.history_entries[-1]["parameters"]["requested_dim"] == requested
+    assert result.history_entries[-1]["parameters"]["resolved_dim"] == "y"
+    assert result.history_entries[-1]["parameters"]["resolved_axis"] == 0
+    assert not any(entry["operation"] == "swapdims" for entry in result.history_entries)
+    if not inplace:
+        _assert_snapshot(source, snapshot)
+
+
+@pytest.mark.parametrize("inplace", [False, True])
+@pytest.mark.parametrize(
+    ("selector", "requested"),
+    [
+        ({"dim": 0}, 0),
+        ({"dims": 0}, 0),
+        ({"axis": 0}, 0),
+        ({"dim": "y"}, "y"),
+        ({"axis": -2}, -2),
+    ],
+)
+def test_hilbert_transform_accepts_dimension_selectors(selector, requested, inplace):
+    source = _dataset()
+    snapshot = _snapshot(source)
+    size = source.shape[0]
+    expected = hilbert(snapshot["data"].real, size, axis=0)
+    expected.real = snapshot["data"].real
+
+    result = source.ht(N=size, inplace=inplace, **selector)
+
+    assert (result is source) is inplace
+    np.testing.assert_allclose(result.data, expected)
+    _assert_preserved_geometry(result, snapshot)
+    assert result.history_entries[:-1] == snapshot["history"]
+    assert result.history_entries[-1]["parameters"] == {
+        "requested_dim": requested,
+        "resolved_dim": "y",
+        "resolved_axis": 0,
+        "scientific_parameters": {"N": size},
+        "inplace": inplace,
+    }
+    assert not any(entry["operation"] == "swapdims" for entry in result.history_entries)
+    if not inplace:
+        _assert_snapshot(source, snapshot)
+
+
+def test_dimension_selector_precedence_matches_get_axis():
+    source = _dataset()
+    snapshot = _snapshot(source)
+
+    default_result = source.ht(N=source.shape[-1], dim=None, axis=0)
+    primary_result = source.ht(N=source.shape[0], dims=0, dim="x", axis=1)
+
+    expected_default = hilbert(snapshot["data"].real, source.shape[-1], axis=-1)
+    expected_default.real = snapshot["data"].real
+    expected_primary = hilbert(snapshot["data"].real, source.shape[0], axis=0)
+    expected_primary.real = snapshot["data"].real
+    np.testing.assert_allclose(default_result.data, expected_default)
+    np.testing.assert_allclose(primary_result.data, expected_primary)
+    assert default_result.history_entries[-1]["parameters"]["requested_dim"] is None
+    assert default_result.history_entries[-1]["parameters"]["resolved_dim"] == "x"
+    assert primary_result.history_entries[-1]["parameters"]["requested_dim"] == 0
+    assert primary_result.history_entries[-1]["parameters"]["resolved_dim"] == "y"
+    _assert_snapshot(source, snapshot)
+
+
+def test_invalid_selector_is_rejected_before_inplace_permutation():
+    source = _dataset()
+    snapshot = _snapshot(source)
+
+    with pytest.raises(ValueError):
+        source.mc(dim="invalid", inplace=True)
+
+    _assert_snapshot(source, snapshot)
+
+
+def test_kernel_failure_restores_inplace_permutation():
+    source = _dataset(shape=(3, 5))
+    snapshot = _snapshot(source)
+    assert np.asarray(source.mask).any()
+
+    with pytest.raises(TypeError):
+        source.ht(N=None, dim="y", inplace=True)
+
+    _assert_snapshot(source, snapshot)
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "error"),
+    [
+        ({}, TypeError),
+        ({"N": 2}, ValueError),
+    ],
+)
+def test_preexisting_unsupported_hilbert_calls_do_not_record_success(kwargs, error):
     source = _dataset()
     snapshot = _snapshot(source)
 
     with pytest.raises(error):
-        getattr(source, name)(**kwargs)
+        source.ht(**kwargs)
 
     _assert_snapshot(source, snapshot)
 
