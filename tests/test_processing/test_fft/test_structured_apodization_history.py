@@ -2,6 +2,7 @@
 
 import copy
 import json
+import unicodedata
 
 import numpy as np
 import pytest
@@ -35,9 +36,7 @@ def _dataset(shape=(1, 64), units="ps", sample_size=64):
         units="K",
         title="apodization history",
     )
-    dataset.x = scp.Coord(
-        np.linspace(0, 10, sample_size), units=units, title="time"
-    )
+    dataset.x = scp.Coord(np.linspace(0, 10, sample_size), units=units, title="time")
     dataset.meta.sample = "synthetic"
     dataset.annotate("prepared")
     return dataset
@@ -96,8 +95,28 @@ def _last(dataset):
     return dataset.history_entries[-1]
 
 
+def _assert_requested_parameters(actual, expected):
+    """
+    Compare requested parameters, ignoring equivalent unit spellings.
+
+    The micro prefix has two canonically equivalent code points, MICRO SIGN and
+    GREEK SMALL LETTER MU. Which one a units backend returns depends on the
+    installed version and the platform, so pinning one of them here would test
+    the backend rather than the history contract. NFKC maps both to the same
+    character, so comparing under it keeps the assertion about the retained
+    magnitude and unit rather than about their encoding.
+    """
+    assert set(actual) == set(expected)
+    for key, reference in expected.items():
+        assert actual[key]["value"] == pytest.approx(reference["value"])
+        assert unicodedata.normalize(
+            "NFKC", actual[key]["units"]
+        ) == unicodedata.normalize("NFKC", reference["units"])
+
+
 def _general_hamming_reference(size, alpha):
-    """Independent reference for the generalized Hamming window.
+    """
+    Independent reference for the generalized Hamming window.
 
     Written from the documented functional form rather than delegated to the
     same SciPy helper the kernel uses, so the comparison is not circular.
@@ -181,10 +200,13 @@ def test_unit_bearing_parameters_record_effective_and_requested_forms():
     assert scientific["lb"] == pytest.approx(2.5e-10)
     assert scientific["shifted"] == pytest.approx(1500000.0)
     # The request is kept separately, serializable, and physically meaningful.
-    assert parameters["requested_parameters"] == {
-        "lb": {"value": 250, "units": "Hz"},
-        "shifted": {"value": 1.5, "units": "µs"},
-    }
+    _assert_requested_parameters(
+        parameters["requested_parameters"],
+        {
+            "lb": {"value": 250, "units": "Hz"},
+            "shifted": {"value": 1.5, "units": "µs"},
+        },
+    )
     # No live Quantity object is retained.
     json.dumps(parameters)
 
@@ -395,9 +417,10 @@ def test_parameters_contain_no_live_objects():
     result = dataset.em(lb="250 Hz", shifted="1.5 us")
 
     # Round-tripping through JSON must not describe anything as unretained.
-    assert json.loads(json.dumps(_last(result)["parameters"])) == _last(result)[
-        "parameters"
-    ]
+    assert (
+        json.loads(json.dumps(_last(result)["parameters"]))
+        == _last(result)["parameters"]
+    )
 
 
 def test_scp_roundtrip_preserves_the_unit_bearing_parameters(tmp_path):
@@ -410,7 +433,10 @@ def test_scp_roundtrip_preserves_the_unit_bearing_parameters(tmp_path):
 
     assert rebuilt.history_entries == result.history_entries
     assert rebuilt.history == result.history
-    assert rebuilt.history_entries[-1]["parameters"]["requested_parameters"] == {
-        "lb": {"value": 250, "units": "Hz"},
-        "shifted": {"value": 1.5, "units": "µs"},
-    }
+    _assert_requested_parameters(
+        rebuilt.history_entries[-1]["parameters"]["requested_parameters"],
+        {
+            "lb": {"value": 250, "units": "Hz"},
+            "shifted": {"value": 1.5, "units": "µs"},
+        },
+    )
