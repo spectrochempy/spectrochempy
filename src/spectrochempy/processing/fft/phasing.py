@@ -69,10 +69,16 @@ def _phase_history_parameters(
     Describe one successful phase correction call.
 
     ``scientific_parameters`` holds the correction the kernel was actually
-    given, in degrees for the phases and in the units of the phased coordinate
-    for ``pivot`` and ``exptc``. That correction is not the phase the caller
-    asked for: the wrapper subtracts the phase already recorded in the metadata
-    and negates the request when the dimension has not been phased yet.
+    given, in degrees for the phases. ``pivot`` and ``exptc`` follow two
+    different conventions, both pre-existing: ``pivot`` is converted *to* the
+    units of the phased coordinate, whereas a unit-bearing ``exptc`` is a time
+    quantity converted *to the inverse* of those units, so ``exptc=5 us`` is
+    5e-06 on a ``Hz`` coordinate and 0.005 on a ``kHz`` one. A dimensionless
+    number is taken as already expressed in those units, except for ``exptc``
+    which the kernel then reads as a plain number. That correction is not the
+    phase the caller asked for: the wrapper subtracts the phase already recorded
+    in the metadata and negates the request when the dimension has not been
+    phased yet.
 
     ``requested_parameters`` therefore carries the request, as a serializable
     magnitude and units pair, for every parameter that does not match the applied
@@ -117,8 +123,9 @@ def _phase_requested_value(value):
     described = _history_selection_value(value)
     if isinstance(described, dict):
         return described
-    # A plain number carries no unit: the caller wrote none, and the effective
-    # value is expressed in the units of the phased coordinate.
+    # A plain number carries no unit: the caller wrote none, and it is kept as
+    # the effective value the kernel is given, since the wrapper applies the
+    # coordinate convention to it without any conversion to record.
     return {"value": described, "units": None}
 
 

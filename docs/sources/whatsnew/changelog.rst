@@ -57,7 +57,11 @@ New Features
   recorder share that rule so they cannot disagree. A request carrying units,
   such as ``pk(phc0=30 * scp.ur.degree)`` or ``pk(exptc=5 * scp.ur.us)``, keeps
   the requested magnitude and unit next to the effective value expressed in
-  degrees and in the units of the phased coordinate, and ``rel`` is recorded
+  degrees. The two time-like parameters follow the pre-existing conventions of
+  the wrapper: ``pivot`` is converted to the units of the phased coordinate,
+  while a unit-bearing ``exptc`` is converted to the inverse of those units, so
+  ``pk(exptc=5 * scp.ur.us)`` is effective 5e-06 on a ``Hz`` coordinate and
+  0.005 on a ``kHz`` one. ``rel`` is recorded
   because it selects an accumulated correction rather than an absolute one.
   Temporary internal dimension swaps no
   longer add shape-operation entries to a treatment's history; other operations
