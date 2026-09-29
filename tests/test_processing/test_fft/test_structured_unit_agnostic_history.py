@@ -324,6 +324,21 @@ def test_invalid_selector_is_rejected_before_inplace_permutation():
     _assert_snapshot(source, snapshot)
 
 
+def test_kernel_failure_restores_inplace_permutation():
+    source = _dataset(shape=(3, 5))
+    snapshot = _snapshot(source)
+
+    with pytest.raises(TypeError, match="unexpected keyword argument 'unknown_option'"):
+        source.ht(
+            N=source.shape[0],
+            dim="y",
+            inplace=True,
+            unknown_option=True,
+        )
+
+    _assert_snapshot(source, snapshot)
+
+
 @pytest.mark.parametrize(
     ("shape", "selector", "axis", "requested_n"),
     [
