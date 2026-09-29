@@ -93,6 +93,12 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- ``trapezoid()`` and ``simpson()`` now preserve the complete history copied
+  from their source dataset instead of replacing it with one generic message.
+  Each successful integration appends one structured entry naming the method
+  and recording the requested dimension, resolved dimension, and source axis;
+  the numerical result, mask, coordinates, units, metadata, and readable
+  message are unchanged.
 - ``ht()`` now uses the selected dimension length when ``N`` is omitted or
   ``None`` and supports equal or larger transform sizes on multidimensional
   datasets. It rejects invalid or smaller sizes before mutation, preserves the

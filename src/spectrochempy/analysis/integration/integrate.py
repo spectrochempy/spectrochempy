@@ -15,6 +15,7 @@ import numpy as np
 import scipy.integrate
 
 from spectrochempy.utils.constants import NOMASK
+from spectrochempy.utils.decorators import _processing_requested_dimension
 
 
 def _reduced_slice_mask(mask, axis):
@@ -86,7 +87,9 @@ def _integrate_method(method):
             kwargs["dim"] = args[0]
             args = []
 
+        requested_dim = _processing_requested_dimension(kwargs)
         axis, dim = dataset.get_axis(**kwargs)
+        resolved_axis = axis % dataset.ndim
 
         # get_axis() reads the dimension selector from its own copy of the
         # keywords, so every accepted synonym must be dropped here before the
@@ -153,9 +156,18 @@ def _integrate_method(method):
             new._units = dataset.units
         elif dataset.coord(dim).units is not None:
             new._units = dataset.coord(dim).units
-        new.history = [
-            f"Dataset resulting from application of `{method.__name__}` method",
-        ]
+        # The wrapper always supplies the coordinate through ``x``, so SciPy
+        # ignores ``dx``. Do not record it as a determining scientific parameter.
+        message = f"Dataset resulting from application of `{method.__name__}` method"
+        new._append_history_entry(
+            operation=method.__name__,
+            parameters={
+                "requested_dim": requested_dim,
+                "resolved_dim": dim,
+                "resolved_axis": resolved_axis,
+            },
+            message=message,
+        )
 
         return new
 
