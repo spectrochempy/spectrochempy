@@ -86,6 +86,11 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- ``mc()``, ``ps()`` and ``ht(N=...)`` now honor ``dim``, ``dims`` and
+  ``axis`` selectors instead of forwarding them to numerical kernels that do
+  not accept them. Shared-wrapper operations also restore a temporary
+  dimension permutation when an in-place kernel call fails, preserving the
+  dataset geometry, mask, per-dimension metadata and history.
 - A refused zero-filling operation on a non-final dimension now validates the
   coordinate before its temporary axis permutation, so returning the unchanged
   source no longer leaves its dimensions, coordinates, metadata, data or history

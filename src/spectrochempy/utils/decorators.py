@@ -1025,6 +1025,11 @@ def _units_agnostic_method(
         axis_size = dataset.shape[resolved_axis]
 
         inplace = kwargs.pop("inplace", False)
+        message_kwargs = dict(kwargs)
+        for selector in ("dims", "dim", "axis"):
+            if selector in kwargs:
+                del kwargs[selector]
+
         new = dataset.copy() if not inplace else dataset
 
         swapped = False
@@ -1032,18 +1037,22 @@ def _units_agnostic_method(
             new._swapdims_without_history(axis, -1, inplace=True)
             swapped = True
 
-        data = method(new.data, **kwargs)
-        new._data = data
-        if mask_transform is not None and new.is_masked:
-            new._mask = mask_transform(new.mask, **kwargs)
-
-        # restore original data order if it was swapped
-        if swapped:
-            new._swapdims_without_history(axis, -1, inplace=True)
+        try:
+            data = method(new.data, **kwargs)
+            mask = None
+            if mask_transform is not None and new.is_masked:
+                mask = mask_transform(new.mask, **kwargs)
+            new._data = data
+            if mask is not None:
+                new._mask = mask
+        finally:
+            # Always restore the public geometry, including after kernel errors.
+            if swapped:
+                new._swapdims_without_history(axis, -1, inplace=True)
 
         message = (
             f"`{method.__name__}` {history_description} on dimension "
-            f"`{dim}` with parameters: {kwargs}"
+            f"`{dim}` with parameters: {message_kwargs}"
         )
         if structured_history:
             requested_parameters = _processing_scientific_parameters(method, kwargs)
