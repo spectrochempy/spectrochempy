@@ -445,6 +445,12 @@ def test_scp_roundtrip_preserves_the_unit_bearing_parameters(tmp_path):
 
 # Kernels that clamp or reduce a parameter before building their window. The
 # entry must describe the window that was executed, not the value handed in.
+def _magnitude(requested):
+    return (
+        scp.Quantity(requested).magnitude if isinstance(requested, str) else requested
+    )
+
+
 CLAMPING_CASES = [
     ("sp", {"pow": 4}, "pow", 2, 4),
     ("sp", {"pow": 3}, "pow", 1, 3),
@@ -483,12 +489,6 @@ def test_reduced_parameter_records_the_effective_value(
     )
 
 
-def _magnitude(requested):
-    return (
-        scp.Quantity(requested).magnitude if isinstance(requested, str) else requested
-    )
-
-
 @pytest.mark.parametrize(
     ("kernel", "arguments", "key", "effective", "requested"),
     CLAMPING_CASES,
@@ -496,9 +496,18 @@ def _magnitude(requested):
 def test_recorded_effective_parameters_reproduce_the_executed_window(
     kernel, arguments, key, effective, requested
 ):
-    # The strongest available check of the contract: replaying the kernel with
-    # the recorded effective parameters must reproduce the applied window. This
-    # fails whenever an entry records a value the kernel did not use.
+    # Two checks, neither sufficient on its own.
+    #
+    # The replay checks that the recorded parameters are a sufficient and
+    # coherent description of the window: feeding them back to the kernel must
+    # reproduce what was applied, so a parameter that is missing or recorded
+    # wrongly enough to change the window is caught.
+    #
+    # It does not, however, detect a value the kernel silently normalizes.
+    # Replaying sp with a recorded pow of 4 builds the same window as pow of 2,
+    # because the kernel reduces it again, so the replay passes whether or not
+    # the entry says 2 or 4. Detecting that is the job of the explicit expected
+    # value assertion below, which is what failed on the previous wrapper.
     dataset = _dataset()
 
     result = getattr(dataset, kernel)(**arguments)
