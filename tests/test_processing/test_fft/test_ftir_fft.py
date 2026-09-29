@@ -92,7 +92,7 @@ def test_ftir_interferogram_fft_coordinate_matches_spectrum_window():
     _compare_to_omnic(transformed)
     assert np.array_equal(ir.data, source_data)
     assert np.array_equal(ir.x.data, source_coord)
-    assert work.history_entries[-1]["operation"] is None
+    assert work.history_entries[-1]["operation"] == "zf_size"
     assert "Applied zf_size zero filling" in work.history_entries[-1]["message"]
     assert transformed.history_entries[-1]["operation"] is None
     assert transformed.history_entries[-1]["message"].startswith(

@@ -1,4 +1,3 @@
-
 :orphan:
 
 What's New in Revision {{ revision }}
@@ -19,21 +18,28 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
-- Added a structured operation history for ``NDDataset`` with a readable,
-  list-compatible, read-only ``history`` view and detached
-  ``history_entries``. Update history through ``annotate()``,
-  ``replace_history()``, ``clear_history()``, or the compatible ``history``
-  assignments. Structured entries cover transposition, selection, out-of-place
-  addition and subtraction, and ``mean()`` when it returns an ``NDDataset``;
-  other operations may continue to record normal text-only entries
-  (:pr:`1676`–:pr:`1681`).
-- Added a bounded supervised cross-validation API for PLS and PLS-ending
-  Pipelines. ``cross_validate`` fits preprocessing inside each fold and returns
-  an aligned ``CrossValidationResult`` with out-of-fold predictions,
-  per-target metrics, fold records, and optional fitted estimators. Documented
-  ``KFold``, ``GroupKFold``, and ``LeaveOneOut`` adapters are available from the
-  SpectroChemPy namespace, together with a user guide and Gallery example
-  (:pr:`1658`, :pr:`1659`, :pr:`1660`).
+- Added a structured operation history for ``NDDataset``. ``history`` is a
+  readable, list-compatible, read-only view; ``history_entries`` returns a
+  detached structured copy; and ``annotate()``, ``replace_history()``, and
+  ``clear_history()`` provide explicit editing operations. Structured entries
+  cover selection and transposition, supported arithmetic and reductions,
+  shape operations, shifts and zero filling, apodization, phasing,
+  ``mc()``, ``ps()``, ``ht()``, ``dc()``, and numerical integration. Entries
+  identify the executed kernel and, where meaningful, requested and effective
+  parameters plus the requested and resolved dimension and source axis.
+  Existing chronology is preserved by copies, supported persistence,
+  ``trapezoid()``, ``simpson()``, and ``snv()``; structured and text-only
+  entries coexist normally, with ``snv()`` retaining the single text entry
+  ``SNVTransformer applied``. This journal is not an exhaustive provenance or
+  replay system (:pr:`1676`, :pr:`1677`, :pr:`1678`, :pr:`1679`, :pr:`1680`,
+  :pr:`1681`, :pr:`1703`, :pr:`1704`, :pr:`1705`, :pr:`1706`, :pr:`1707`,
+  :pr:`1708`, :pr:`1709`, :pr:`1710`, :pr:`1711`, :pr:`1712`, :pr:`1714`).
+- Added bounded supervised cross-validation for PLS and PLS-ending Pipelines.
+  ``cross_validate`` fits preprocessing inside each fold and returns an aligned
+  ``CrossValidationResult`` with out-of-fold predictions, per-target metrics,
+  fold records, and optional fitted estimators. ``KFold``, ``GroupKFold``, and
+  ``LeaveOneOut`` adapters are available from the SpectroChemPy namespace,
+  with a user guide and Gallery example (:pr:`1658`, :pr:`1659`, :pr:`1660`).
 
 .. section
 
@@ -42,90 +48,60 @@ Bug Fixes
 .. Add here new bug fixes (do not delete this comment)
 
 - ``PLSRegression.predict`` now verifies that masked feature positions match
-  those used at fit time, preventing coefficients from being applied silently
-  to different variables. Cross-validation also preserves the original feature
+  those used at fit time, and cross-validation preserves the original feature
   geometry for preprocessors such as MSC (:pr:`1657`).
+- Dataset arithmetic rejects incompatible same-unit coordinate grids,
+  reconstructs dimensions and coordinates correctly after positional
+  broadcasting, refuses duplicate result dimension names, and rolls back all
+  dataset state after a refused in-place operation (:pr:`1665`, :pr:`1667`,
+  :pr:`1668`).
+- Spectral-processing wrappers now forward their documented selectors and
+  execution options consistently. ``hamming()``, ``hann()``, and ``pk_exp()``
+  no longer fall back silently to the default dimension or an out-of-place
+  result; unsupported inverse phasing is refused; discrete shifts move masks
+  with values and handle zero shifts correctly; and refused zero filling or a
+  later kernel failure restores any temporary in-place permutation
+  (:pr:`1682`, :pr:`1683`, :pr:`1705`, :pr:`1709`).
+- ``ifft(size=...)`` now honors larger and smaller sizes on final and non-final
+  dimensions and reconstructs physical time coordinates from the retained
+  frequency-bin spacing (:pr:`1694`).
+- SPC interferograms are detected from their format code without inventing a
+  laser frequency. Their raw peak position is retained, undated files remain
+  readable on Windows, and FFT validates calibration before mutation while
+  accepting explicitly calibrated time and optical-path-difference axes.
+  Multidimensional FFT applies the existing Mertz correction independently to
+  each trace and its own zero path difference (:pr:`1700`, :pr:`1701`).
+- ``mc()``, ``ps()``, and ``ht()`` honor ``dim``, ``dims``, and ``axis``.
+  ``ht()`` uses the selected dimension length when ``N`` is omitted or
+  ``None``, supports equal or larger transform sizes on multidimensional data,
+  preserves the input shape and real component, and rejects invalid or smaller
+  sizes before mutation (:pr:`1709`, :pr:`1710`).
+- ``trapezoid()`` and ``simpson()`` exclude masked values from quadrature and
+  publish incomplete slices as masked raw ``NaN`` values. They consume all
+  supported dimension selectors consistently, including integer zero, and
+  explicitly refuse the removed SciPy ``even`` option (:pr:`1698`,
+  :pr:`1699`).
+- ``concatenate()`` refuses partial coordinate information and shared
+  coordinate references whose geometry cannot survive the concatenated size,
+  rather than returning an inconsistent dataset (:pr:`1697`).
+- ``detrend()`` rejects unsupported keyword arguments, and ``align()`` refuses
+  unsupported target-sampling requests instead of silently ignoring them.
+  Omitting ``interpolate_sampling`` or using ``"auto"`` preserves alignment on
+  the first dataset grid; use ``NDDataset.interpolate()`` for an explicit
+  alternative grid (:pr:`1695`, :pr:`1702`).
 - ``NDDataset.acquisition_date`` is preserved by copies, out-of-place
   arithmetic, and native ``.scp`` round trips, including timezone offsets
   (:pr:`1688`).
-- SPC sub-spectra with distinct x axes retain their associated x and
-  sub-spectrum coordinates, titles, and units (:pr:`1691`). CSV round trips
-  preserve each recognized coordinate and data title and unit independently
-  when only one column carries units (:pr:`1692`). JCAMP-DX LINK exports retain
-  text and datetime labels stored in label column zero (:pr:`1693`).
-- ``ifft(size=...)`` honors larger and smaller output sizes, including on a
-  non-final dimension, and reconstructs physical time coordinates from the
-  frequency-bin spacing (:pr:`1694`).
-- ``detrend()`` rejects unsupported keyword arguments instead of silently
-  ignoring them; its supported ``order`` and ``breakpoints`` parameters are
-  unchanged (:pr:`1695`).
-- The NMR plugin readers for JEOL, TecMag, SIMPSON, Agilent, and TopSpin honor
-  explicit ``origin`` and ``description`` overrides while retaining their
-  defaults when either option is omitted or ``None`` (:pr:`1696`).
-- ``concatenate()`` rejects partial coordinate information and shared
-  coordinate references whose geometry cannot survive the concatenated size,
-  instead of returning an inconsistent dataset (:pr:`1697`).
-- ``trapezoid()`` and ``simpson()`` no longer integrate masked points as valid
-  data. Any incomplete output slice is represented by a masked raw ``NaN``;
-  complete neighboring slices remain available (:pr:`1698`).
-- ``trapezoid()`` and ``simpson()`` consistently consume ``dim``, ``dims``,
-  and ``axis`` selectors, including integer zero. The removed SciPy ``even``
-  option is refused explicitly, and SpectroChemPy now requires
-  ``scipy>=1.14.1`` (:pr:`1699`).
-- SPC interferograms are detected from their original format code without
-  inventing a laser frequency. Their raw peak-position header is retained,
-  undated files remain readable on Windows, and FFT refuses uncalibrated,
-  unitless, dimensionless, or unrelated axes before mutation while accepting
-  explicitly calibrated time and optical-path-difference axes (:pr:`1700`).
-- Multidimensional interferogram FFTs apply the existing Mertz correction
-  independently to every trace, using each trace's own zero path difference;
-  the single-interferogram convention is unchanged (:pr:`1701`).
-- ``align()`` preserves its existing first-dataset interpolation grid when
-  ``interpolate_sampling`` is omitted or ``"auto"`` and explicitly refuses
-  numeric or other unsupported target-sampling requests before mutation.
-  Call ``NDDataset.interpolate()`` with an explicit coordinate for a different
-  target grid (:pr:`1702`).
-- ``hamming()`` and ``hann()`` now honor their documented dimension, axis,
-  in-place, returned-window, reverse, and inverse options when delegating to
-  ``general_hamming()``. ``pk_exp()`` likewise forwards dimension, axis, and
-  in-place options to ``pk()`` instead of silently applying the correction on
-  the default axis to a copy (:pr:`1682`).
-- ``pk()`` and ``pk_exp()`` now reject the unsupported ``inv=True`` option with
-  ``NotImplementedError`` before modifying the dataset. Their default and
-  explicit ``inv=False`` behavior is unchanged (:pr:`1682`).
-- Discrete shifts now move masks with their corresponding values. Circular
-  shifts therefore preserve masked statistics, while the zeros introduced by
-  left and right shifts are valid, unmasked points. A zero-point left shift no
-  longer clears the dataset, a zero-point circular shift with ``neg=True`` no
-  longer negates it, and ``cs()`` once again delegates successfully to
-  ``roll()`` with a single history entry (:pr:`1683`).
-- Harmonized newly generated history messages in core readers, common spectral
-  treatments, and analysis results. Individual-file imports identify the
-  format and portable filename while the complete source remains in
-  ``dataset.filename``; OPUS messages no longer add their own timestamp.
-  Histories restored from existing files and opaque vendor histories remain
-  unchanged (:pr:`1681`).
-- OMNIC SRS imports now retain both useful vendor processing history and the
-  import message. Empty vendor blocks are omitted, and the import message no
-  longer embeds a second timestamp (:pr:`1681`).
-- Corresponding releases of the NMR, PerkinElmer, IRIS, and Tensor plugins
-  harmonize their import or analysis-result messages. These plugin-side changes
-  require respectively ``spectrochempy-nmr>=0.1.13``,
-  ``spectrochempy-perkinelmer>=0.1.6``, ``spectrochempy-iris>=0.1.10``,
-  and ``spectrochempy-tensor>=0.1.7``; they are not contained in the core
-  package (:pr:`1681`).
-- Refused NDDataset in-place arithmetic operations now roll back data, units,
-  masks, titles, history, and other trait replacements made by the operation.
-  Side effects performed by custom Traitlets observers remain the observer's
-  responsibility (:pr:`1668`).
-- NDDataset arithmetic now reconstructs dimensions and coordinates after
-  positional broadcasting. When a singleton axis expands, the result uses the
-  name and coordinate of the operand providing the non-singleton axis.
-  Duplicate result dimension names are rejected explicitly (:pr:`1667`).
-- Dataset arithmetic now rejects different last-dimension coordinate grids
-  carrying the same unit instead of silently accepting a scientifically
-  incompatible pairing (:pr:`1665`).
-
+- Reader and exporter metadata are no longer lost in several partial or
+  multi-spectrum cases: SPC sub-spectra retain their associated coordinates,
+  CSV round trips preserve each recognized title and unit independently,
+  JCAMP-DX LINK exports retain labels in column zero, and NMR plugin readers
+  honor explicit ``origin`` and ``description`` overrides (:pr:`1691`,
+  :pr:`1692`, :pr:`1693`, :pr:`1696`).
+- Newly generated histories from core readers, spectral treatments, analysis
+  results, and OMNIC SRS imports now use consistent messages without duplicate
+  timestamps while preserving useful vendor history. Corresponding official
+  plugin releases apply the same message conventions (:pr:`1681`).
 
 .. section
 
@@ -133,11 +109,13 @@ Dependency Updates
 ~~~~~~~~~~~~~~~~~~
 .. Add here new dependency updates (do not delete this comment)
 
-- The next NMR 0.1.13, PerkinElmer 0.1.6, IRIS 0.1.10, and Tensor 0.1.7
-  plugin releases require SpectroChemPy 1.1.0 or later and remain restricted
-  to versions below 2. Existing compatible plugin releases remain available
-  for installations pinned to SpectroChemPy 1.0.0.
-
+- SpectroChemPy continues to require Python 3.11 or later and now requires
+  ``scipy>=1.14.1`` for the supported Simpson integration behavior
+  (:pr:`1699`).
+- The next NMR 0.1.13, PerkinElmer 0.1.6, IRIS 0.1.10, and Tensor 0.1.7 plugin
+  releases require SpectroChemPy 1.1.0 or later and remain restricted to
+  versions below 2. Existing compatible plugin releases remain available for
+  installations pinned to SpectroChemPy 1.0.0 (:pr:`1684`).
 
 .. section
 
@@ -145,27 +123,34 @@ Breaking Changes
 ~~~~~~~~~~~~~~~~
 .. Add here new breaking changes (do not delete this comment)
 
-- NDDataset arithmetic now rejects two ambiguous pairings that 1.0.0 could
-  accept: a broadcast result with duplicate dimension names, and different
-  same-unit coordinate grids on a non-expanded final axis. Rename colliding
-  dimensions or align the coordinate grids explicitly before the operation
-  (:pr:`1665`, :pr:`1667`).
-- Conda development builds are no longer published to the ``dev`` label for
-  either the core or official plugins. Stable releases remain available from
-  the main ``spectrocat`` channel; unreleased versions should be installed from
-  a source checkout.
 - Direct mutations of the readable ``NDDataset.history`` view now raise
   ``TypeError`` instead of being silently lost. Use ``annotate()``,
-  ``replace_history()``, ``clear_history()``, or the supported ``history``
-  assignments; ``list(dataset.history)`` remains an ordinary mutable copy
-  (:pr:`1681`).
-- Assigning a list to ``NDDataset.history`` now retains every supplied entry
-  instead of only the first (:pr:`1676`).
+  ``replace_history()``, ``clear_history()``, or supported ``history``
+  assignment; assigning a list now retains every supplied entry
+  (:pr:`1676`, :pr:`1681`).
 - Native ``.scp``/``.pscp`` files containing structured histories use format
-  version 3, and portable xarray/NetCDF mappings use version 2. New readers
-  continue to accept native version 2 and portable version 1 textual histories;
-  reading the new formats with older SpectroChemPy versions is not guaranteed
+  version 3, and portable xarray/NetCDF mappings use version 2. The new readers
+  accept native version 2 and portable version 1 textual histories, but older
+  SpectroChemPy versions are not guaranteed to read the new formats
   (:pr:`1676`, :pr:`1680`).
+- Arithmetic now refuses ambiguous broadcast results with duplicate dimension
+  names and different same-unit coordinate grids on a non-expanded final axis.
+  Rename colliding dimensions or align coordinate grids explicitly
+  (:pr:`1665`, :pr:`1667`).
+- Requests that previously appeared to succeed while being unsupported now
+  fail explicitly: ``pk(..., inv=True)``, unknown ``detrend()`` options,
+  non-default ``align(interpolate_sampling=...)`` targets, and the removed
+  ``simpson(even=...)`` strategies. Use forward phasing, supported detrending
+  options, ``NDDataset.interpolate()`` with an explicit grid, or the current
+  SciPy Simpson behavior respectively (:pr:`1682`, :pr:`1695`, :pr:`1699`,
+  :pr:`1702`).
+- FFT of an SPC interferogram now requires an explicitly calibrated time or
+  optical-path-difference coordinate; raw sample indices and unrelated units
+  are refused before mutation (:pr:`1700`).
+- Conda development builds are no longer published to the ``dev`` label for
+  either core or official plugins. Stable releases remain on the main
+  ``spectrocat`` channel; install unreleased versions from a source checkout
+  (:pr:`1685`).
 
 .. section
 
@@ -180,21 +165,14 @@ Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
 
-- MAINT: Added the cross-validation building blocks used by the public API:
-  helpers for resolving observation dimensions, validating and slicing aligned
-  folds, and restoring prediction geometry (:pr:`1653`), plus unfitted cloning
-  of ``Pipeline`` templates and their supported steps (:pr:`1654`), and
-  per-target regression metric kernels with explicit validity reporting (:pr:`1655`).
-- MAINT: Added an internal structured cross-validation result prototype that
-  validates complete out-of-fold coverage and records aligned predictions,
-  residuals, metrics, fold positions, configuration snapshots, and optional
-  fitted fold estimators (:pr:`1656`), followed by a private supervised execution
-  engine with fold-local cloning, fitting, prediction, and OOF assembly
-  (:pr:`1657`).
+- Added the cross-validation building blocks used by the public API: aligned
+  fold validation and slicing, unfitted Pipeline cloning, per-target metrics,
+  structured result assembly, and the supervised execution engine
+  (:pr:`1653`, :pr:`1654`, :pr:`1655`, :pr:`1656`, :pr:`1657`).
 - Improved the public units and masks documentation and simplified examples to
   favor SpectroChemPy-native construction, plotting, and arithmetic where that
-  keeps the scientific intent clear (:pr:`1661`, :pr:`1662`, :pr:`1663`).
+  preserves the scientific intent (:pr:`1661`, :pr:`1662`, :pr:`1663`).
 - Corrected development-package version selection so stable core tags sort
-  after their older release candidates. Python and Conda builds now derive
-  ``1.0.1.devN`` from ``spectrochempy-v1.0.0`` rather than falling back to an
-  obsolete RC series (:pr:`1666`).
+  after older release candidates, and strengthened documentation builds and
+  selector examples used by the release documentation (:pr:`1666`, :pr:`1686`,
+  :pr:`1687`, :pr:`1689`, :pr:`1690`).

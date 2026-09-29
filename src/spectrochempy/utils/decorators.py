@@ -960,38 +960,140 @@ def _wrap_ndarray_output_to_nddataset(
 
 
 # ======================================================================================
-def _units_agnostic_method(method=None, *, mask_transform=None):
+def _processing_requested_dimension(kwargs):
+    """Return the dimension selector that wins under the public precedence."""
+    return kwargs.get("dims", kwargs.get("dim", kwargs.get("axis")))
+
+
+def _processing_scientific_parameters(method, kwargs, *, include_defaults=True):
+    """Return compact parameters declared by a processing kernel."""
+    parameters = {}
+    for name, parameter in inspect.signature(method).parameters.items():
+        if name == "dataset" or parameter.kind == inspect.Parameter.VAR_KEYWORD:
+            continue
+        if name in kwargs:
+            parameters[name] = kwargs[name]
+        elif include_defaults and parameter.default is not inspect.Parameter.empty:
+            parameters[name] = parameter.default
+    return parameters
+
+
+def _processing_history_parameters(
+    method,
+    kwargs,
+    *,
+    requested_dim,
+    resolved_dim,
+    resolved_axis,
+    inplace,
+    scientific_parameters=None,
+):
+    """Describe one successful last-axis processing wrapper call."""
+    if scientific_parameters is None:
+        scientific_parameters = _processing_scientific_parameters(method, kwargs)
+    return {
+        "requested_dim": requested_dim,
+        "resolved_dim": resolved_dim,
+        "resolved_axis": resolved_axis,
+        "scientific_parameters": scientific_parameters,
+        "inplace": inplace,
+    }
+
+
+def _units_agnostic_method(
+    method=None,
+    *,
+    mask_transform=None,
+    structured_history=False,
+    history_description="shift performed",
+    history_parameter_transform=None,
+    parameter_preprocessor=None,
+):
     if method is None:
         return lambda wrapped: _units_agnostic_method(
-            wrapped, mask_transform=mask_transform
+            wrapped,
+            mask_transform=mask_transform,
+            structured_history=structured_history,
+            history_description=history_description,
+            history_parameter_transform=history_parameter_transform,
+            parameter_preprocessor=parameter_preprocessor,
         )
 
     @functools.wraps(method)
     def wrapper(dataset, **kwargs):
-        # On which axis do we want to shift (get axis from arguments)
+        requested_dim = _processing_requested_dimension(kwargs)
         axis, dim = dataset.get_axis(**kwargs, negative_axis=True)
+        resolved_axis = axis % dataset.ndim
+        axis_size = dataset.shape[resolved_axis]
 
-        # output dataset inplace (by default) or not
-        new = dataset.copy() if not kwargs.pop("inplace", False) else dataset
+        inplace = kwargs.pop("inplace", False)
+        message_kwargs = dict(kwargs)
+        for selector in ("dims", "dim", "axis"):
+            if selector in kwargs:
+                del kwargs[selector]
+
+        requested_parameters = None
+        if parameter_preprocessor is not None:
+            requested_parameters = _processing_scientific_parameters(
+                method,
+                kwargs,
+                include_defaults=False,
+            )
+            kwargs = parameter_preprocessor(kwargs, axis_size=axis_size)
+
+        new = dataset.copy() if not inplace else dataset
 
         swapped = False
         if axis != -1:
-            new.swapdims(axis, -1, inplace=True)  # must be done in  place
+            new._swapdims_without_history(axis, -1, inplace=True)
             swapped = True
 
-        data = method(new.data, **kwargs)
-        new._data = data
-        if mask_transform is not None and new.is_masked:
-            new._mask = mask_transform(new.mask, **kwargs)
+        try:
+            data = method(new.data, **kwargs)
+            mask = None
+            if mask_transform is not None and new.is_masked:
+                mask = mask_transform(new.mask, **kwargs)
+            new._data = data
+            if mask is not None:
+                new._mask = mask
+        finally:
+            # Always restore the public geometry, including after kernel errors.
+            if swapped:
+                new._swapdims_without_history(axis, -1, inplace=True)
 
-        new.history = (
-            f"`{method.__name__}` shift performed on dimension "
-            f"`{dim}` with parameters: {kwargs}"
+        message = (
+            f"`{method.__name__}` {history_description} on dimension "
+            f"`{dim}` with parameters: {message_kwargs}"
         )
-
-        # restore original data order if it was swapped
-        if swapped:
-            new.swapdims(axis, -1, inplace=True)  # must be done inplace
+        if structured_history:
+            if requested_parameters is None:
+                requested_parameters = _processing_scientific_parameters(method, kwargs)
+            scientific_parameters = _processing_scientific_parameters(method, kwargs)
+            if method.__name__ in {"rs", "ls", "roll"}:
+                scientific_parameters["pts"] = int(scientific_parameters["pts"])
+            if history_parameter_transform is not None:
+                scientific_parameters = history_parameter_transform(
+                    scientific_parameters,
+                    axis_size=axis_size,
+                )
+            parameters = _processing_history_parameters(
+                method,
+                kwargs,
+                requested_dim=requested_dim,
+                resolved_dim=dim,
+                resolved_axis=resolved_axis,
+                inplace=inplace,
+                scientific_parameters=scientific_parameters,
+            )
+            if requested_parameters and requested_parameters != scientific_parameters:
+                parameters["requested_parameters"] = requested_parameters
+            new._append_history_entry(
+                operation=method.__name__,
+                parameters=parameters,
+                message=message,
+            )
+        else:
+            new.history = message
 
         return new
 

@@ -70,6 +70,14 @@ _M2_METHODS = frozenset(
     }
 )
 
+_STRUCTURED_REDUCTION_METHODS = frozenset({"mean", "std", "sum", "var"})
+_REDUCTION_HISTORY_LABELS = {
+    "mean": "Mean",
+    "std": "Standard deviation",
+    "sum": "Sum",
+    "var": "Variance",
+}
+
 
 def _reduce_method(method: Callable) -> Callable:
     # Decorator that sets the reduce flag to true for _from_numpy decorator.
@@ -276,7 +284,7 @@ class _from_numpy_method:
             #     # delete all coordinates
             #     new._coordset = None
 
-            if method != "mean":
+            if method not in _STRUCTURED_REDUCTION_METHODS:
                 new.history = f"Dataset resulting from application of `{method}` method"
             return new
 
@@ -310,6 +318,65 @@ def _reduce_dims(cls, dim, keepdims=False):
             new_coordset = None
 
     return dims, new_coordset
+
+
+def _append_reduction_history(
+    dataset,
+    *,
+    operation,
+    requested_dim,
+    resolved_dim,
+    source_dims,
+    keepdims,
+    dtype=None,
+    ddof=None,
+):
+    """Append one structured entry for a successful dataset reduction."""
+    requested_dims = (
+        None
+        if requested_dim is None
+        else list(requested_dim)
+        if isinstance(requested_dim, list | tuple)
+        else [requested_dim]
+    )
+    resolved_dims = (
+        source_dims
+        if resolved_dim is None
+        else list(resolved_dim)
+        if isinstance(resolved_dim, list | tuple)
+        else [resolved_dim]
+    )
+    all_dimensions = len(resolved_dims) == len(source_dims) and set(
+        resolved_dims
+    ) == set(source_dims)
+
+    label = _REDUCTION_HISTORY_LABELS[operation]
+    if all_dimensions:
+        message = f"{label} computed over all dimensions"
+    elif len(resolved_dims) == 1:
+        message = f"{label} computed along {resolved_dims[0]}"
+    else:
+        message = (
+            f"{label} computed along {', '.join(resolved_dims[:-1])} and "
+            f"{resolved_dims[-1]}"
+        )
+
+    parameters = {
+        "requested_dims": requested_dims,
+        "resolved_dims": resolved_dims,
+        "all_dimensions": all_dimensions,
+        "keepdims": keepdims,
+    }
+    if dtype is not None:
+        parameters["dtype"] = str(np.dtype(dtype))
+    if ddof is not None:
+        parameters["ddof"] = ddof
+
+    dataset._append_history_entry(
+        operation=operation,
+        parameters=parameters,
+        message=message,
+    )
 
 
 def _get_name(x):
@@ -2423,41 +2490,14 @@ class NDMath:
         cls._coordset = coordset
 
         if cls._implements("NDDataset"):
-            requested_dims = (
-                None
-                if requested_dim is None
-                else list(requested_dim)
-                if isinstance(requested_dim, list | tuple)
-                else [requested_dim]
-            )
-            resolved_dims = (
-                source_dims
-                if dim is None
-                else list(dim)
-                if isinstance(dim, list | tuple)
-                else [dim]
-            )
-            all_dimensions = len(resolved_dims) == len(source_dims) and set(
-                resolved_dims
-            ) == set(source_dims)
-            if all_dimensions:
-                message = "Mean computed over all dimensions"
-            elif len(resolved_dims) == 1:
-                message = f"Mean computed along {resolved_dims[0]}"
-            else:
-                message = (
-                    f"Mean computed along {', '.join(resolved_dims[:-1])} and "
-                    f"{resolved_dims[-1]}"
-                )
-            cls._append_history_entry(
+            _append_reduction_history(
+                cls,
                 operation="mean",
-                parameters={
-                    "requested_dims": requested_dims,
-                    "resolved_dims": resolved_dims,
-                    "all_dimensions": all_dimensions,
-                    "keepdims": keepdims,
-                },
-                message=message,
+                requested_dim=requested_dim,
+                resolved_dim=dim,
+                source_dims=source_dims,
+                keepdims=keepdims,
+                dtype=dtype,
             )
 
         return cls
@@ -2824,6 +2864,8 @@ class NDMath:
         array([ 0.08521,  0.08543, ...,    0.251,   0.2537])
 
         """
+        requested_dim = dim
+        source_dims = list(cls.dims)
         axis, dim = cls.get_axis(dim, allows_none=True)
         m = np.ma.std(dataset, axis=axis, dtype=dtype, ddof=ddof, keepdims=keepdims)
 
@@ -2835,6 +2877,18 @@ class NDMath:
         cls._mask = m.mask
         cls.dims = dims
         cls._coordset = coordset
+
+        if cls._implements("NDDataset"):
+            _append_reduction_history(
+                cls,
+                operation="std",
+                requested_dim=requested_dim,
+                resolved_dim=dim,
+                source_dims=source_dims,
+                keepdims=keepdims,
+                dtype=dtype,
+                ddof=ddof,
+            )
 
         return cls
 
@@ -2886,6 +2940,8 @@ class NDMath:
         array([   100.7,    100.7, ...,       74,    73.98])
 
         """
+        requested_dim = dim
+        source_dims = list(cls.dims)
         axis, dim = cls.get_axis(dim, allows_none=True)
         m = np.ma.sum(dataset, axis=axis, dtype=dtype, keepdims=keepdims)
 
@@ -2897,6 +2953,17 @@ class NDMath:
         cls._mask = m.mask
         cls.dims = dims
         cls._coordset = coordset
+
+        if cls._implements("NDDataset"):
+            _append_reduction_history(
+                cls,
+                operation="sum",
+                requested_dim=requested_dim,
+                resolved_dim=dim,
+                source_dims=source_dims,
+                keepdims=keepdims,
+                dtype=dtype,
+            )
 
         return cls
 
@@ -2977,6 +3044,8 @@ class NDMath:
         array([0.007262, 0.007299, ...,  0.06298,  0.06438])
 
         """
+        requested_dim = dim
+        source_dims = list(cls.dims)
         axis, dim = cls.get_axis(dim, allows_none=True)
         m = np.ma.var(dataset, axis=axis, dtype=dtype, ddof=ddof, keepdims=keepdims)
 
@@ -2990,6 +3059,18 @@ class NDMath:
         cls._coordset = coordset
         if cls.units is not None:
             cls._units = cls.units**2
+
+        if cls._implements("NDDataset"):
+            _append_reduction_history(
+                cls,
+                operation="var",
+                requested_dim=requested_dim,
+                resolved_dim=dim,
+                source_dims=source_dims,
+                keepdims=keepdims,
+                dtype=dtype,
+                ddof=ddof,
+            )
 
         return cls
 

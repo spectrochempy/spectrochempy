@@ -215,9 +215,8 @@ def snv(dataset, inplace=False):
     result = SNVTransformer().fit_transform(dataset)
     if inplace:
         dataset._data = result._data
-        dataset.history = "snv applied"
+        dataset.replace_history(result.history_entries)
         return dataset
-    result.history = "snv applied"
     return result
 
 

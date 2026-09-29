@@ -25,10 +25,108 @@ import functools
 import numpy as np
 
 from spectrochempy.application.application import error_
+from spectrochempy.core.dataset.nddataset import _history_selection_value
 from spectrochempy.core.units import Quantity
 from spectrochempy.core.units import ur
+from spectrochempy.utils.decorators import _processing_history_parameters
+from spectrochempy.utils.decorators import _processing_requested_dimension
+from spectrochempy.utils.decorators import _processing_scientific_parameters
 
 pi = np.pi
+
+# Sentinel telling a requested parameter apart from one the kernel never used.
+_NOT_APPLIED = object()
+
+
+# ======================================================================================
+# Effective parameters
+# ======================================================================================
+def _first_order_contributes(exptc):
+    """
+    Whether the first order phase enters the ``pk`` window.
+
+    ``pk`` drops ``phc1`` as soon as ``exptc`` is positive: the exponential
+    branch ignores it entirely, so a requested first order phase has no effect
+    on the window. The kernel and the history recorder share this predicate so
+    the recorded parameters cannot claim a first order correction that was never
+    applied.
+    """
+    return not exptc > 0.0
+
+
+def _phase_history_parameters(
+    method,
+    kwargs,
+    *,
+    requested_phasing,
+    requested_dim,
+    resolved_dim,
+    resolved_axis,
+    inplace,
+    rel,
+):
+    """
+    Describe one successful phase correction call.
+
+    ``scientific_parameters`` holds the correction the kernel was actually
+    given, in degrees for the phases. ``pivot`` and ``exptc`` follow two
+    different conventions, both pre-existing: ``pivot`` is converted *to* the
+    units of the phased coordinate, whereas a unit-bearing ``exptc`` is a time
+    quantity converted *to the inverse* of those units, so ``exptc=5 us`` is
+    5e-06 on a ``Hz`` coordinate and 0.005 on a ``kHz`` one. A dimensionless
+    number is taken as already expressed in those units, except for ``exptc``
+    which the kernel then reads as a plain number. That correction is not the
+    phase the caller asked for: the wrapper subtracts the phase already recorded
+    in the metadata and negates the request when the dimension has not been
+    phased yet.
+
+    ``requested_parameters`` therefore carries the request, as a serializable
+    magnitude and units pair, for every parameter that does not match the applied
+    correction. That single rule covers the target versus correction difference,
+    the sign convention applied to a not yet phased dimension, a unit conversion,
+    and a first order phase that a positive ``exptc`` leaves unused.
+    """
+    scientific_parameters = _processing_scientific_parameters(method, kwargs)
+    if not _first_order_contributes(scientific_parameters.get("exptc", 0)):
+        # The kernel ignored phc1, so it must not be reported as applied.
+        scientific_parameters.pop("phc1", None)
+
+    parameters = _processing_history_parameters(
+        method,
+        kwargs,
+        requested_dim=requested_dim,
+        resolved_dim=resolved_dim,
+        resolved_axis=resolved_axis,
+        inplace=inplace,
+        scientific_parameters=scientific_parameters,
+    )
+    # ``rel`` selects a correction accumulated onto the recorded phase rather
+    # than one replacing it, and it is not a kernel parameter.
+    parameters["rel"] = rel
+
+    requested = {
+        name: _phase_requested_value(value) for name, value in requested_phasing.items()
+    }
+    changed = {
+        name: value
+        for name, value in requested.items()
+        if scientific_parameters.get(name, _NOT_APPLIED) is _NOT_APPLIED
+        or scientific_parameters[name] != value["value"]
+    }
+    if changed:
+        parameters["requested_parameters"] = changed
+    return parameters
+
+
+def _phase_requested_value(value):
+    """Describe a requested phase parameter without retaining a live object."""
+    described = _history_selection_value(value)
+    if isinstance(described, dict):
+        return described
+    # A plain number carries no unit: the caller wrote none, and it is kept as
+    # the effective value the kernel is given, since the wrapper applies the
+    # coordinate convention to it without any conversion to record.
+    return {"value": described, "units": None}
 
 
 # ======================================================================================
@@ -43,16 +141,29 @@ def _phase_method(method):
             )
 
         # On which axis do we want to phase (get axis from arguments)
+        requested_dim = _processing_requested_dimension(kwargs)
         axis, dim = dataset.get_axis(**kwargs, negative_axis=True)
+        resolved_axis = axis % dataset.ndim
+
+        # The request is captured before any unit conversion, subtraction of the
+        # inherited phase or sign convention rewrites ``kwargs``, so the caller
+        # expression survives next to the correction that was actually applied.
+        # Only the parameters the caller passed are retained: a parameter left
+        # out is not a request, and the effective value already shows what was
+        # inherited from the metadata.
+        requested_phasing = {
+            name: kwargs[name]
+            for name in ("phc0", "phc1", "pivot", "exptc")
+            if name in kwargs
+        }
 
         # output dataset inplace (by default) or not
-        new = (
-            dataset.copy() if not kwargs.pop("inplace", False) else dataset
-        )  # copy to be sure not to modify this dataset
+        inplace = kwargs.pop("inplace", False)
+        new = dataset.copy() if not inplace else dataset
 
         swapped = False
         if axis != -1:
-            new.swapdims(axis, -1, inplace=True)  # must be done in  place
+            new._swapdims_without_history(axis, -1, inplace=True)
             swapped = True
 
         # Get the coordinates for the last dimension
@@ -129,9 +240,23 @@ def _phase_method(method):
                 new *= apod
                 new.replace_history(previous_history)
 
-            new.history = (
+            message = (
                 f"Applied {method.__name__} phasing on dimension {dim} "
                 f"with parameters: {kwargs}"
+            )
+            new._append_history_entry(
+                operation=method.__name__,
+                parameters=_phase_history_parameters(
+                    method,
+                    kwargs,
+                    requested_phasing=requested_phasing,
+                    requested_dim=requested_dim,
+                    resolved_dim=dim,
+                    resolved_axis=resolved_axis,
+                    inplace=inplace,
+                    rel=rel,
+                ),
+                message=message,
             )
 
             if not new.meta.phased[-1]:
@@ -163,7 +288,7 @@ def _phase_method(method):
 
         # restore original data order if it was swapped
         if swapped:
-            new.swapdims(axis, -1, inplace=True)  # must be done inplace
+            new._swapdims_without_history(axis, -1, inplace=True)
 
         return new
 
@@ -219,7 +344,7 @@ def pk(dataset, phc0=0.0, phc1=0.0, exptc=0.0, pivot=0.0, **kwargs):
     phc0 = pi * phc0 / 180.0
     size = dataset.shape[-1]
 
-    if exptc > 0.0:
+    if not _first_order_contributes(exptc):
         apod = np.exp(1.0j * (phc0 * np.exp(-exptc * (np.arange(size) - pivot) / size)))
 
     else:

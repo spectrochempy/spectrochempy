@@ -124,7 +124,7 @@ def test_nmr_manual_1D_phasing(NMR_dataset_1D):
     transfph = transf.pk(verbose=True)
     assert transf.history_entries == source_history
     assert transfph.history_entries[:-1] == source_history
-    assert transfph.history_entries[-1]["operation"] is None
+    assert transfph.history_entries[-1]["operation"] == "pk"
     assert transfph.history_entries[-1]["message"].startswith(
         "Applied pk phasing on dimension"
     )
@@ -161,7 +161,7 @@ def test_nmr_inplace_phasing_detaches_readonly_data_alias(NMR_dataset_1D):
     assert not np.array_equal(result.data, original_data)
     assert result.data.flags.writeable
     assert result.history_entries[:-1] == original_history
-    assert result.history_entries[-1]["operation"] is None
+    assert result.history_entries[-1]["operation"] == "pk"
     assert result.history_entries[-1]["message"].startswith(
         "Applied pk phasing on dimension"
     )

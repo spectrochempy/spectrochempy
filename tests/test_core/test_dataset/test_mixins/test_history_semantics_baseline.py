@@ -190,7 +190,7 @@ class TestReductions:
         """Sum with explicit dim appends."""
         result = ds2d.sum(dim="y")
         assert len(result.history) == 1
-        assert "`sum`" in _entry(result.history[0])
+        assert "Sum computed along y" in _entry(result.history[0])
 
     def test_mean_appends(self, ds2d):
         """Mean with explicit dim appends."""
@@ -202,43 +202,45 @@ class TestReductions:
         """Std with explicit dim appends."""
         result = ds2d.std(dim="y")
         assert len(result.history) == 1
-        assert "`std`" in _entry(result.history[0])
+        assert "Standard deviation computed along y" in _entry(result.history[0])
 
     def test_var_appends(self, ds2d):
         """Var with explicit dim appends."""
         result = ds2d.var(dim="y")
         assert len(result.history) == 1
-        assert "`var`" in _entry(result.history[0])
+        assert "Variance computed along y" in _entry(result.history[0])
 
     def test_1d_sum_returns_scalar(self, ds1):
         """For 1D input, sum with default axis returns scalar, not NDDataset."""
         result = ds1.sum()
         assert not isinstance(result, scp.NDDataset)
 
-    def test_trapezoid_replaces_history(self):
-        """Trapezoid REPLACES history (not appends)."""
+    def test_trapezoid_appends_structured_history(self):
+        """Trapezoid preserves history and appends one structured entry."""
         d = scp.NDDataset([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], name="trapz_test")
         d.set_coordset(x=scp.Coord([0.1, 0.2, 0.3]))
         d.history = "Prior op"
         result = d.trapezoid(dim="x")
-        assert len(result.history) == 1
-        assert "trapezoid" in _entry(result.history[0])
+        assert len(result.history) == 2
+        assert _entry(result.history[0]) == "Prior op"
+        assert result.history_entries[-1]["operation"] == "trapezoid"
 
-    def test_simpson_replaces_history(self):
-        """Simpson REPLACES history (not appends)."""
+    def test_simpson_appends_structured_history(self):
+        """Simpson preserves history and appends one structured entry."""
         d = scp.NDDataset([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], name="simp_test")
         d.set_coordset(x=scp.Coord([0.1, 0.2, 0.3]))
         d.history = "Prior op"
         result = d.simpson(dim="x")
-        assert len(result.history) == 1
-        assert "simpson" in _entry(result.history[0])
+        assert len(result.history) == 2
+        assert _entry(result.history[0]) == "Prior op"
+        assert result.history_entries[-1]["operation"] == "simpson"
 
     def test_sum_with_keepdims_appends(self, ds2d):
         """Sum with keepdims=True still appends."""
         ds2d.history = "Prior"
         result = ds2d.sum(dim="y", keepdims=True)
         assert len(result.history) == 2
-        assert "`sum`" in _entry(result.history[-1])
+        assert "Sum computed along y" in _entry(result.history[-1])
 
     def test_reduction_preserves_prior_history(self, ds2d):
         """Reduction appends to, doesn't replace, prior history."""
@@ -554,21 +556,16 @@ class TestHistoryPatterns:
         assert "neg" in text.lower()
 
     def test_reduction_uses_consistent_format(self, ds2d):
-        """
-        Mean uses its structured message; other reductions retain the generic text.
-
-        Generic format: 'Dataset resulting from application of `{method}` method'
-        """
-        reductions = ["sum", "mean", "std", "var"]
-        for method_name in reductions:
+        """Numeric reductions use consistent operation-oriented messages."""
+        expected_messages = {
+            "sum": "Sum computed along y",
+            "mean": "Mean computed along y",
+            "std": "Standard deviation computed along y",
+            "var": "Variance computed along y",
+        }
+        for method_name, expected in expected_messages.items():
             result = getattr(ds2d, method_name)(dim="y")
-            text = _entry(result.history[-1])
-            expected = (
-                "Mean computed along y" if method_name == "mean" else f"`{method_name}`"
-            )
-            assert (
-                expected in text
-            ), f"Expected method name {method_name} in history, got: {text}"
+            assert _entry(result.history[-1]) == expected
 
     def test_ufunc_format_consistent(self, ds1):
         """All ufuncs start with 'Ufunc' prefix."""
@@ -586,12 +583,12 @@ class TestHistoryPatterns:
 
 
 # ===========================================================================
-# 10. Operations that lose history
+# 10. History replacement and continuity
 # ===========================================================================
 
 
-class TestHistoryLoss:
-    """Operations known to lose prior history."""
+class TestHistoryReplacementAndContinuity:
+    """Characterize replacement and preservation across result families."""
 
     def test_concatenate_loses_input_histories(self):
         """Concatenate results have no trace of input histories."""
@@ -604,14 +601,15 @@ class TestHistoryLoss:
             _entry(result.history[0]) == "Created by concatenate from 2 datasets: A, B"
         )
 
-    def test_integration_loses_prior_history(self):
-        """Integration results lose prior operation history."""
+    def test_integration_preserves_prior_history(self):
+        """Integration preserves prior history before its structured entry."""
         d = scp.NDDataset([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], name="int_loss_test")
         d.set_coordset(x=scp.Coord([0.1, 0.2, 0.3]))
         d.history = "Prior operation"
         result = d.trapezoid(dim="x")
-        assert len(result.history) == 1
-        assert "trapezoid" in _entry(result.history[0])
+        assert len(result.history) == 2
+        assert _entry(result.history[0]) == "Prior operation"
+        assert result.history_entries[-1]["operation"] == "trapezoid"
 
     def test_diagonal_preserves_prior_history(self):
         """Diagonal preserves prior history."""

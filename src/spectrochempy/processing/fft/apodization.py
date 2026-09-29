@@ -25,10 +25,48 @@ import numpy as np
 from scipy.signal import windows
 
 from spectrochempy.application.application import error_
+from spectrochempy.core.dataset.nddataset import _history_selection_value
+from spectrochempy.core.dataset.nddataset import _normalize_history_parameter
 from spectrochempy.core.units import Quantity
 from spectrochempy.utils.constants import EPSILON
+from spectrochempy.utils.decorators import _processing_history_parameters
+from spectrochempy.utils.decorators import _processing_requested_dimension
+from spectrochempy.utils.decorators import _processing_scientific_parameters
 
 pi = np.pi
+
+
+# ======================================================================================
+# Effective parameters
+# ======================================================================================
+# A kernel may clamp or reduce a scientific parameter before building its window,
+# in which case the value it was handed is not the value it used. The rules live
+# in the functions below, which the kernels call and the history recorder reuses,
+# so a recorded effective value cannot drift from the executed one. Kernels that
+# use their parameters exactly as given are absent from the mapping.
+
+
+def _em_effective_parameters(lb, shifted):
+    # A negative shift is not meaningful for a magnitude envelope and is
+    # normalized to zero, so the window never runs backwards in time.
+    return {"lb": lb, "shifted": 0.0 if shifted < EPSILON else shifted}
+
+
+def _gm_effective_parameters(gb, lb, shifted):
+    return {
+        "gb": gb,
+        "lb": lb,
+        "shifted": 0.0 if shifted < EPSILON else shifted,
+    }
+
+
+def _sp_effective_parameters(ssb, pow):
+    # ``ssb`` below one has the same effect as one, and only the parity of
+    # ``pow`` matters: four is executed as two, three as one.
+    return {
+        "ssb": 1.0 if ssb < 1.0 else ssb,
+        "pow": 2 if int(pow) % 2 == 0 else 1,
+    }
 
 
 # ======================================================================================
@@ -45,20 +83,25 @@ def _apodize_method(**units):
             dryrun = kwargs.pop("dryrun", False)
             is_ir = dataset.meta.interferogram
 
+            # Requested selector, kept exactly as the caller expressed it. The
+            # resolved dimension below may differ, for instance when a positive
+            # axis or a dimension name resolves to a negative one.
+            requested_dim = _processing_requested_dimension(kwargs)
+
             # On which axis do we want to apodize? (get axis from arguments)
             axis, dim = dataset.get_axis(**kwargs, negative_axis=True)
+            resolved_axis = axis % dataset.ndim
 
             # output dataset inplace (by default) or not
-            if not kwargs.pop("inplace", False) and not dryrun:
-                new = dataset.copy()  # copy to be sure not to modify this dataset
-            else:
-                new = dataset
+            inplace = kwargs.pop("inplace", False)
+            # copy to be sure not to modify this dataset
+            new = dataset.copy() if not inplace and not dryrun else dataset
 
             # The last dimension is always the dimension on which we apply the apodization window.
             # If needed, we swap the dimensions to be sure to be in this situation
             swapped = False
             if axis != -1:
-                new.swapdims(axis, -1, inplace=True)  # must be done in  place
+                new._swapdims_without_history(axis, -1, inplace=True)
                 swapped = True
 
             # Get the coordinates for the last dimension
@@ -115,19 +158,86 @@ def _apodize_method(**units):
 
                 if kwargs.pop("rev", False):
                     apod_arr = apod_arr[::-1]  # reverse apodization
+                    reversed_window = True
+                else:
+                    reversed_window = False
 
                 if kwargs.pop("inv", False):
                     apod_arr = 1.0 / apod_arr  # invert apodization
-
-                if not dryrun:
-                    new.history = (
-                        f"Applied {method.__name__} apodization on dimension {dim} "
-                        f"with parameters: {apod}"
-                    )
+                    inverse_window = True
+                else:
+                    inverse_window = False
 
                 # Apply?
                 if not dryrun:
                     new._data *= apod_arr
+                    # The kernel signature declares the compact scientific
+                    # parameters; unit conversion has already replaced the
+                    # requested magnitudes by the ones the kernel is handed.
+                    # A kernel may still clamp or reduce them, so the recorded
+                    # effective values come from the same rule the kernel
+                    # applied rather than from what it was given.
+                    requested_scientific = _processing_scientific_parameters(
+                        method, kwargs
+                    )
+                    # ``method`` is the undecorated kernel the wrapper closed
+                    # over, which is how the registry is keyed.
+                    normalizer = _EFFECTIVE_PARAMETERS.get(method)
+                    scientific_parameters = (
+                        normalizer(**requested_scientific)
+                        if normalizer is not None
+                        else requested_scientific
+                    )
+                    parameters = _processing_history_parameters(
+                        method,
+                        kwargs,
+                        requested_dim=requested_dim,
+                        resolved_dim=dim,
+                        resolved_axis=resolved_axis,
+                        inplace=inplace,
+                        scientific_parameters=scientific_parameters,
+                    )
+                    parameters["inv"] = inverse_window
+                    parameters["rev"] = reversed_window
+
+                    # A request that conversion or normalization changed is kept
+                    # separately, as a serializable magnitude/units pair rather
+                    # than a live Quantity. A unit-bearing request keeps the unit
+                    # it was written in; a dimensionless one has no unit, so the
+                    # field is None. Only the parameters that actually differ are
+                    # retained, so a request that survives normalization unchanged
+                    # is not duplicated. The shape is the one already used for
+                    # unit-bearing selection values, so no new representation
+                    # category is introduced.
+                    requested_parameters = {
+                        key: _history_selection_value(value)
+                        for key, value in apod.items()
+                    }
+                    for key, value in requested_scientific.items():
+                        requested_parameters.setdefault(
+                            key,
+                            {
+                                "value": _normalize_history_parameter(value),
+                                "units": None,
+                            },
+                        )
+                    changed = {
+                        key: value
+                        for key, value in requested_parameters.items()
+                        if key in scientific_parameters
+                        and value["value"] != scientific_parameters[key]
+                    }
+                    if changed:
+                        parameters["requested_parameters"] = changed
+
+                    new._append_history_entry(
+                        operation=method.__name__,
+                        parameters=parameters,
+                        message=(
+                            f"Applied {method.__name__} apodization on dimension {dim} "
+                            f"with parameters: {apod}"
+                        ),
+                    )
 
             else:  # not (x.unitless or x.dimensionless or x.units.dimensionality != '[time]')
                 error_(
@@ -138,7 +248,7 @@ def _apodize_method(**units):
 
             # restore original data order if it was swapped
             if swapped:
-                new.swapdims(axis, -1, inplace=True)  # must be done inplace
+                new._swapdims_without_history(axis, -1, inplace=True)
 
             if hasattr(x, "_use_time_axis"):
                 new.x._use_time_axis = store
@@ -224,8 +334,7 @@ def em(dataset, lb=1, shifted=0, **kwargs):
 
     if abs(lb) <= EPSILON:
         return e
-    if shifted < EPSILON:
-        shifted = 0.0
+    shifted = _em_effective_parameters(lb, shifted)["shifted"]
 
     tc = 1.0 / lb
     xs = pi * np.abs(x - shifted)
@@ -303,8 +412,7 @@ def gm(dataset, gb=1, lb=0, shifted=0, **kwargs):
 
     if abs(lb) <= EPSILON and abs(gb) <= EPSILON:
         return g
-    if shifted < EPSILON:
-        shifted = 0.0
+    shifted = _gm_effective_parameters(gb, lb, shifted)["shifted"]
 
     xs = pi * np.abs(x - shifted)
 
@@ -384,12 +492,9 @@ def sp(dataset, ssb=1, pow=1, **kwargs):
     """
     x = dataset
 
-    # ssb
-    if ssb < 1.0:
-        ssb = 1.0
-
-    # pow
-    pow = 2 if int(pow) % 2 == 0 else 1
+    effective = _sp_effective_parameters(ssb, pow)
+    ssb = effective["ssb"]
+    pow = effective["pow"]
 
     aq = x[-1] - x[0]
     t = x / aq
@@ -764,3 +869,17 @@ def blackmanharris(dataset, **kwargs):
     x = dataset
 
     return x * windows.blackmanharris(len(x), sym=True)
+
+
+# ======================================================================================
+# Effective parameter registry
+# ======================================================================================
+# Keyed on each kernel as the decorator saw it. The module-level names refer to the
+# decorated kernels, while the wrapper closes over the undecorated one, so the
+# undecorated function is the key. A kernel missing from this mapping uses its
+# parameters unchanged.
+_EFFECTIVE_PARAMETERS = {
+    em.__wrapped__: _em_effective_parameters,
+    gm.__wrapped__: _gm_effective_parameters,
+    sp.__wrapped__: _sp_effective_parameters,
+}

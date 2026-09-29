@@ -12,6 +12,9 @@ import functools
 import numpy as np
 
 from spectrochempy.application.application import error_
+from spectrochempy.utils.decorators import _processing_history_parameters
+from spectrochempy.utils.decorators import _processing_requested_dimension
+from spectrochempy.utils.decorators import _processing_scientific_parameters
 from spectrochempy.utils.numutils import largest_power_of_2
 
 
@@ -21,59 +24,90 @@ from spectrochempy.utils.numutils import largest_power_of_2
 def _zf_method(method):
     @functools.wraps(method)
     def wrapper(dataset, **kwargs):
-        # On which axis do we want to shift (get axis from arguments)
+        requested_dim = _processing_requested_dimension(kwargs)
         axis, dim = dataset.get_axis(**kwargs, negative_axis=True)
+        resolved_axis = axis % dataset.ndim
+        source_size = dataset.shape[resolved_axis]
+        source_coord = dataset.coordset[dim]
+        validation_coord = source_coord.copy()
+        if hasattr(validation_coord, "_use_time_axis"):
+            validation_coord._use_time_axis = True
 
-        # output dataset inplace (by default) or not
-        new = dataset.copy() if not kwargs.pop("inplace", False) else dataset
-
-        swapped = False
-        if axis != -1:
-            new.swapdims(axis, -1, inplace=True)  # must be done in  place
-            swapped = True
-
-        x = new.coordset[dim]
-
-        if not x.linear:
-            # this method is not valid for non-linear coordinates
+        # Refused calls return the original dataset. Validate a coordinate copy
+        # before copying or temporarily permuting an in-place caller.
+        if not validation_coord.linear:
             error_(
                 "zero-filling apply only to linear coordinates\n"
                 "The processing was thus cancelled",
             )
-            return dataset  # return the original dataset
-
-        if hasattr(x, "_use_time_axis"):
-            x._use_time_axis = True  # we need to have dimensionless or time units
-
-        # get the lastcoord
-        if x.unitless or x.dimensionless or x.units.dimensionality == "[time]":
-            # we can apply the method
-            data = method(new.data, **kwargs)
-            new._data = data
-
-            # we need to increase the x coordinates array to match the new data size
-            offset = x.data[0]
-            size = x.size
-            inc = np.ptp(x._data) / (size - 1)
-            x._data = np.arange(offset, offset + new._data.shape[-1] * inc, inc)
-            # update with the new td
-            new.meta.td[-1] = x.size
-            new.history = (
-                f"Applied {method.__name__} zero filling on dimension {dim} "
-                f"with parameters: {kwargs}"
-            )
-
-        else:
+            return dataset
+        if not (
+            validation_coord.unitless
+            or validation_coord.dimensionless
+            or validation_coord.units.dimensionality == "[time]"
+        ):
             error_(
                 "zero-filling apply only to dimensions with [time] dimensionality or dimensionless coords\n"
                 "The processing was thus cancelled",
             )
-            return dataset  # return the original dataset
+            return dataset
 
-        # restore original data order if it was swapped
+        inplace = kwargs.pop("inplace", False)
+        new = dataset.copy() if not inplace else dataset
+
+        swapped = False
+        if axis != -1:
+            new._swapdims_without_history(axis, -1, inplace=True)
+            swapped = True
+
+        x = new.coordset[dim]
+        if hasattr(x, "_use_time_axis"):
+            x._use_time_axis = True
+
+        requested_parameters = _processing_scientific_parameters(method, kwargs)
+        data = method(new.data, **kwargs)
+        new._data = data
+
+        # Increase the selected coordinate to match the new data size.
+        offset = x.data[0]
+        size = x.size
+        inc = np.ptp(x._data) / (size - 1)
+        x._data = np.arange(offset, offset + new._data.shape[-1] * inc, inc)
+        new.meta.td[-1] = x.size
+        result_size = new._data.shape[-1]
+
         if swapped:
-            new.swapdims(axis, -1, inplace=True)  # must be done inplace
+            new._swapdims_without_history(axis, -1, inplace=True)
 
+        scientific_parameters = dict(requested_parameters)
+        if method.__name__ == "zf_size":
+            scientific_parameters["size"] = result_size
+        parameters = _processing_history_parameters(
+            method,
+            kwargs,
+            requested_dim=requested_dim,
+            resolved_dim=dim,
+            resolved_axis=resolved_axis,
+            inplace=inplace,
+            scientific_parameters=scientific_parameters,
+        )
+        parameters.update(
+            {
+                "source_size": source_size,
+                "result_size": result_size,
+            }
+        )
+        if requested_parameters != scientific_parameters:
+            parameters["requested_parameters"] = requested_parameters
+
+        new._append_history_entry(
+            operation=method.__name__,
+            parameters=parameters,
+            message=(
+                f"Applied {method.__name__} zero filling on dimension {dim} "
+                f"with parameters: {kwargs}"
+            ),
+        )
         return new
 
     return wrapper

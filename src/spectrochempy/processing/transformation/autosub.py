@@ -97,7 +97,7 @@ def autosub(
 
     swapped = False
     if axis != -1:
-        new = new.swapdims(axis, -1)
+        new = new._swapdims_without_history(axis, -1)
         swapped = True
 
     # TODO: detect the case where the ref is not exactly with same coords: interpolate?
@@ -158,7 +158,7 @@ def autosub(
     new._data -= x.reshape(coef_shape) * ref_data.reshape(ref_shape)
 
     if swapped:
-        new = new.swapdims(axis, -1)
+        new = new._swapdims_without_history(axis, -1)
 
     new.history = f"Subtracted reference {ref.name} automatically"
 

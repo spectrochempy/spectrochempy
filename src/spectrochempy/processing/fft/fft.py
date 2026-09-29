@@ -233,7 +233,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
     # If needed, we swap the dimensions to be sure to be in this situation
     swapped = False
     if axis != -1:
-        new.swapdims(axis, -1, inplace=True)  # must be done in  place
+        new._swapdims_without_history(axis, -1, inplace=True)
         swapped = True
 
     # Select the last coordinates
@@ -482,7 +482,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
 
     # restore original data order if it was swapped
     if swapped:
-        new.swapdims(axis, -1, inplace=True)  # must be done inplace
+        new._swapdims_without_history(axis, -1, inplace=True)
 
     return new
 
@@ -491,8 +491,34 @@ ft = fft
 ift = ifft
 
 
+def _normalize_ht_parameters(kwargs, *, axis_size):
+    """Resolve and validate Hilbert-transform parameters before data mutation."""
+    parameters = dict(kwargs)
+    n = parameters.get("N")
+    if n is None:
+        n = axis_size
+    elif isinstance(n, (bool, np.bool_)) or not isinstance(n, (int, np.integer)):
+        raise TypeError("N must be None or a Python/NumPy integer, excluding booleans.")
+    else:
+        n = int(n)
+
+    if n <= 0:
+        raise ValueError("N must be a positive integer.")
+    if n < axis_size:
+        raise ValueError(
+            "N must be greater than or equal to the selected dimension length "
+            f"({axis_size})."
+        )
+
+    parameters["N"] = n
+    return parameters
+
+
 # Modulus Calculation
-@_units_agnostic_method
+@_units_agnostic_method(
+    structured_history=True,
+    history_description="modulus calculated",
+)
 def mc(dataset):
     """
     Modulus calculation.
@@ -502,7 +528,10 @@ def mc(dataset):
     return np.sqrt(dataset.real**2 + dataset.imag**2)
 
 
-@_units_agnostic_method
+@_units_agnostic_method(
+    structured_history=True,
+    history_description="power spectrum calculated",
+)
 def ps(dataset):
     """
     Power spectrum. Squared version.
@@ -512,7 +541,11 @@ def ps(dataset):
     return dataset.real**2 + dataset.imag**2
 
 
-@_units_agnostic_method
+@_units_agnostic_method(
+    structured_history=True,
+    history_description="Hilbert transform performed",
+    parameter_preprocessor=_normalize_ht_parameters,
+)
 def ht(dataset, N=None):
     """
     Hilbert transform.
@@ -524,9 +557,11 @@ def ht(dataset, N=None):
     ----------
     dataset : array-like
         Real or complex NMR data. The Hilbert transform is applied along the
-        last dimension.
+        selected dimension, which is the last dimension by default.
     N : int or None, optional
-        Number of Fourier components passed to the Hilbert transform.
+        Number of Fourier components passed to the Hilbert transform. ``None``
+        uses the selected dimension length. Values smaller than that length are
+        not supported.
 
     Returns
     -------
@@ -534,14 +569,12 @@ def ht(dataset, N=None):
         Complex NMR data reconstructed by the Hilbert transform.
 
     """
-    # create an empty output array
-    fac = N / dataset.shape[-1]
-    z = np.empty(dataset.shape, dtype=(dataset.flat[0] + dataset.flat[1] * 1.0j).dtype)
-    if dataset.ndim == 1:
-        z[:] = hilbert(dataset.real, N)[: dataset.shape[-1]] * fac
-    else:
-        for i, vec in enumerate(dataset):
-            z[i] = hilbert(vec.real, N)[: dataset.shape[-1]] * fac
+    source_size = dataset.shape[-1]
+    fac = N / source_size
+    transformed = hilbert(dataset.real, N, axis=-1)[..., :source_size] * fac
+    sample = dataset.flat[0]
+    output_dtype = (sample + sample * 1.0j).dtype
+    z = np.asarray(transformed, dtype=output_dtype)
 
     # correct the real data as sometimes it changes
     z.real = dataset.real
