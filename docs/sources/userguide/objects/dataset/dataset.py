@@ -297,100 +297,137 @@ nd.created
 # ## About the `history` attribute
 
 # %% [markdown]
-# A new dataset starts with an empty history. One internal structured list is the
-# authoritative store. The public ``history`` attribute renders that store as a
-# readable, timestamped ``list[str]``; it is a view, not a second history.
-# The view supports normal list reading, slicing, display, iteration, and comparison,
-# but is read-only: calls such as ``nd.history.append(...)`` and mutations made
-# through an alias raise ``TypeError``. Use ``annotate()``, ``replace_history()``,
-# or ``clear_history()`` to update the dataset. An explicitly detached
-# ``list(nd.history)`` remains an ordinary mutable list, and changing it does not
-# affect the dataset.
-
-# %%
-nd = NDDataset([[1.0, 2.0], [3.0, 4.0]], name="history_demo")
-nd.history
-
-# %% [markdown]
-# Add a user note explicitly with ``annotate()``. Assigning a string to ``history``
-# remains a shorthand for the same append operation.
-
-# %%
-nd.annotate("sample loaded")
-nd.history = "checked by operator"
-nd.history
-
-# %% [markdown]
-# Operations can retain structured details while keeping the familiar readable text.
-# This small before/after example records only the operations covered by the
-# stabilized structured-history contract.
-
-# %%
-before = nd.history
-processed = nd.T + 2
-after = processed.history
-before, after
-
-# %%
-processed.history_entries
-
-# %% [markdown]
-# ``history_entries`` returns a deep, detached copy of the structured entries.
-# Every entry has exactly four fields:
+# An `NDDataset` owns one authoritative history store. The public ``history``
+# attribute renders it as a readable, timestamped, list-compatible view. The view
+# supports reading, slicing, display, iteration, and comparison, but is read-only:
+# direct mutations such as ``dataset.history.append(...)`` raise ``TypeError``.
+# Use ``annotate()``, ``replace_history()``, or ``clear_history()`` when a change is
+# intentional.
+#
+# ``history_entries`` provides the structured view as a deep, detached copy. Every
+# entry has exactly four fields:
 #
 # - ``date``: the operation timestamp as a Python ``datetime``;
-# - ``operation``: a short string identifier, or ``None`` for text-only entries;
-# - ``parameters``: a detached dictionary of compact, JSON-like values;
-# - ``message``: readable text used by the ``history`` view.
+# - ``operation``: a short identifier, or ``None`` for a text-only entry;
+# - ``parameters``: a detached dictionary of compact values;
+# - ``message``: the readable text rendered by ``history``.
 #
-# Changing the returned list, one of its dictionaries, or a nested parameter does
-# not change the dataset. Unsupported parameter values are represented by a compact
-# description instead of retaining a live object or a large array. Entries with
-# ``operation=None`` and an empty parameters dictionary are normal: reader messages,
-# older histories, user annotations, and operations outside the structured coverage
-# can all be text-only.
-#
-# Use the explicit methods below when replacement or removal is intended.
-
-# %%
-nd.replace_history(["replacement note", "another note"])
-nd.history
-
-# %%
-nd.clear_history()
-nd.history
+# Structured and text-only entries normally coexist. Reader messages, user
+# annotations, older histories, and treatments outside the structured coverage may
+# all have ``operation=None`` and an empty parameter dictionary.
 
 # %% [markdown]
-# ``annotate()`` appends one text-only entry. Assigning a string to ``history`` is a
-# shorthand for that method, assigning ``None`` does nothing, and assigning a list is
-# a compatibility shorthand for ``replace_history()``: every list element replaces
-# the previous history. ``clear_history()`` removes all entries. Structured mappings,
-# legacy ``(date, message)`` pairs, and strings can be supplied to
-# ``replace_history()``. Histories loaded from older files keep their timestamp and
-# text, but no operation or parameters are inferred from prose.
+# This autonomous example starts with synthetic spectra and a user annotation, then
+# applies a structured shift and integrates along the same dimension. The integration
+# keeps the complete chronology that it receives.
+
+# %%
+history_demo = NDDataset(
+    np.array([[1.0, 2.0, 4.0, 8.0], [2.0, 3.0, 5.0, 9.0]]),
+    dims=["y", "x"],
+    coordset=[
+        Coord([0.0, 1.0], title="sample"),
+        Coord(
+            [1000.0, 1100.0, 1200.0, 1300.0],
+            units="cm^-1",
+            title="wavenumber",
+        ),
+    ],
+    name="history_demo",
+)
+history_demo.annotate("synthetic spectra prepared")
+shifted = history_demo.roll(pts=1.9, dim="x")
+integrated = shifted.trapezoid(dim="x")
+integrated.history
+
+# %% [markdown]
+# The final entry names the integration kernel and records the requested dimension,
+# the resolved dimension, and the corresponding axis in its source dataset.
+# Parameter dictionaries are specific to each operation family; there is no universal
+# parameter schema.
+
+# %%
+integration_entry = integrated.history_entries[-1]
+integration_entry["operation"], integration_entry["parameters"]
+
+# %% [markdown]
+# A public alias can delegate to a differently named kernel, so structured entries
+# name the kernel that actually ran. When normalization, conversion, rounding, or
+# clamping makes an effective scientific parameter differ from the request, supported
+# families can retain both. Here the discrete shift applies one point even though
+# ``1.9`` was requested.
+
+# %%
+shift_entry = shifted.history_entries[-1]
+(
+    shift_entry["parameters"]["scientific_parameters"],
+    shift_entry["parameters"]["requested_parameters"],
+)
+
+# %% [markdown]
+# ``history_entries`` is detached all the way through nested parameters. Changing the
+# returned copy does not modify the dataset. An explicit ``list(dataset.history)`` is
+# likewise an ordinary mutable copy of the readable strings.
+
+# %%
+detached_entries = integrated.history_entries
+detached_entries[-1]["parameters"]["resolved_axis"] = 99
+integrated.history_entries[-1]["parameters"]["resolved_axis"]
+
+# %% [markdown]
+# Explicit history-management methods make destructive intent visible. Assigning a
+# string to ``history`` remains a compatibility shorthand for ``annotate()``; assigning
+# a list is a shorthand for ``replace_history()``; assigning ``None`` does nothing.
+# Structured mappings, legacy ``(date, message)`` pairs, and strings can be supplied to
+# ``replace_history()``.
+
+# %%
+editable_history = history_demo.copy()
+editable_history.replace_history(["replacement note", "another note"])
+editable_history.history
+
+# %%
+editable_history.clear_history()
+editable_history.history
+
+# %% [markdown]
+# Both shallow and deep dataset copies receive independent histories, including nested
+# parameter values. Supported native SCP/PSCP persistence preserves structured entries
+# with format version 3; xarray mapping and the NetCDF representation use version 2.
+# Current readers also accept native version 2 and portable version 1 textual histories,
+# retaining their dates and messages without inferring semantics from prose. Files
+# written with the newer structured formats are not guaranteed to be readable by older
+# SpectroChemPy versions. This is deliberately one-way compatibility.
 #
-# Both shallow and deep dataset copies receive independent histories, including
-# nested parameter values. Native SCP/PSCP files preserve the same structured
-# entries with format version 3. The xarray mapping and NetCDF representation use
-# version 2. Current readers also accept native version 2 and portable version 1
-# textual histories. Files written with the new structured formats are not
-# guaranteed to be readable by older SpectroChemPy versions. This one-way
-# compatibility policy has been accepted and will be announced before stable
-# publication of the structured-history formats.
+# For the forthcoming 1.1.0 release, structured entries cover the following bounded
+# families:
 #
-# Structured entries are currently produced only for transposition, selection,
-# out-of-place addition and subtraction (scalar or ``NDDataset`` operands), and
-# ``mean()`` when its result remains an ``NDDataset``. An entry is appended only
-# after the operation succeeds; an exception does not add a success entry. In-place
-# arithmetic such as ``+=`` and ``-=`` remains text-only. Selection records the
-# requested indices, bounds, steps, labels, or coordinate values; it does not claim
-# to store fully resolved indices.
+# - dataset selection and slicing, and transposition;
+# - out-of-place scalar or ``NDDataset`` addition and subtraction;
+# - ``mean()``, ``sum()``, ``std()``, and ``var()`` when they return an ``NDDataset``;
+# - ``squeeze()``, ``swapdims()``, and ``reshape()``;
+# - point, circular, and Fourier shifts, and zero filling;
+# - apodization and phasing;
+# - successful ``mc()``, ``ps()``, ``ht()``, and ``dc()`` processing paths;
+# - ``trapezoid()`` and ``simpson()`` integration.
 #
-# This is a readable operation log, not exhaustive provenance. Histories are linear
-# and separate: operands are described compactly but their chronologies are not
-# merged. It does not detect arbitrary mutations, construct a graph, or replay
-# computations. Messages remain intended for people and their exact wording is not
-# a stable machine-readable contract; inspect structured fields when available.
+# The recorded compact parameters depend on the family. Where its contract establishes
+# them, an entry may distinguish requested and effective scientific parameters, the
+# requested and resolved dimension, the axis in the source dataset, and execution
+# mode. These fields do not form a universal replay schema. Not every arithmetic
+# operation, reduction, or transformation is structured. In-place arithmetic remains
+# text-only, and ``snv()`` intentionally adds the single text entry
+# ``SNVTransformer applied`` in both execution modes. This coverage is present on the
+# development branch for 1.1.0; it is not a claim about an already published stable
+# version.
+#
+# This is a readable operation log, not exhaustive provenance. Several treatments
+# remain text-only; learned estimator state and every input chronology of a multi-source
+# assembly are not recorded. Histories are linear and separate, and they do not detect
+# arbitrary mutations, construct a provenance graph, or replay computations. The NMR
+# plugin processing trace and estimator-specific logs are separate mechanisms, not
+# ``NDDataset.history``. Exact message wording is intended for people and is not a
+# stable machine-readable contract; inspect structured fields when available.
 
 # %% [markdown]
 # A short infrared workflow shows how the two views complement each other. We select
