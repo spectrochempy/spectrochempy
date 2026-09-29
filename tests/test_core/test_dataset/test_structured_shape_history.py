@@ -262,7 +262,11 @@ def test_internal_phasing_swap_does_not_add_shape_entries():
     assert phased.dims == source.dims
     assert phased.history_entries[:-1] == source_history
     assert len(phased.history_entries) == len(source_history) + 1
-    assert phased.history_entries[-1]["operation"] is None
+    # The internal swap adds no entry of its own: the only addition is the
+    # structured pk entry, which resolves the dimension that was requested.
+    assert phased.history_entries[-1]["operation"] == "pk"
+    assert phased.history_entries[-1]["parameters"]["resolved_dim"] == "y"
+    assert phased.history_entries[-1]["parameters"]["resolved_axis"] == 0
     assert phased.history_entries[-1]["message"].startswith(
         "Applied pk phasing on dimension y"
     )
