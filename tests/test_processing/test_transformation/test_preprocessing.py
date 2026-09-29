@@ -324,7 +324,7 @@ class TestSNV:
         nd_snv = snv(simple_2d)
         nd_as = autoscale(simple_2d, dim="x")
         assert np.allclose(nd_snv.data, nd_as.data)
-        assert "snv applied" in nd_snv.history[-1].lower()
+        assert "SNVTransformer applied" in nd_snv.history[-1]
 
     def test_inplace(self, simple_2d):
         nd = simple_2d.copy()
