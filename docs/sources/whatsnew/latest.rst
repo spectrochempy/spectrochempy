@@ -86,6 +86,10 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- ``ht()`` now uses the selected dimension length when ``N`` is omitted or
+  ``None`` and supports equal or larger transform sizes on multidimensional
+  datasets. It rejects invalid or smaller sizes before mutation, preserves the
+  input shape and real component, and handles one-point dimensions.
 - ``mc()``, ``ps()`` and ``ht(N=...)`` now honor ``dim``, ``dims`` and
   ``axis`` selectors instead of forwarding them to numerical kernels that do
   not accept them. Shared-wrapper operations also restore a temporary
