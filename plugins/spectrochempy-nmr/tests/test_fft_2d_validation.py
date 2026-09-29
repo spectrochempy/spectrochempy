@@ -248,32 +248,13 @@ class TestEmFFT2DBrukerEchoAntiecho:
         assert abs(y_peak - ref_y) < 1.0
         assert abs(x_peak - ref_x) < 1.0
 
-    def test_bruker_echoanti_two_step_fft_real_peak_near_reference(self):
-        """
-        The displayed real spectrum should also align with the TopSpin reference.
-
-        This guards the remaining quadrature-phase failure mode where the
-        magnitude peak is correct but the real part still needs the conventional
-        -90° intermediate F2 phase before the F1 transform.
-        """
+    def test_experiment_rejects_bruker_echoanti_2d_processing(self):
+        """The public Experiment processor remains limited to validated 1D data."""
         ds = scp.read_topspin(BRUKER_ECHOANTI_2D, expno=3, remove_digital_filter=True)
         ref = scp.read_topspin(BRUKER_ECHOANTI_2D / "3" / "pdata" / "1" / "2rr")
 
-        f2 = scp.nmr.Experiment(ds).process(apodization="em", lb=2.0, size=ref.shape[1])
-        f1 = f2.zf_size(size=ref.shape[0], dim="y").em(lb=2.0, dim="y").fft(dim="y")
-
-        ref_real = np.abs(np.asarray(ref.real.data))
-        ref_idx = np.unravel_index(np.argmax(ref_real), ref_real.shape)
-        ref_y = float(ref.y.data[ref_idx[0]])
-        ref_x = float(ref.x.data[ref_idx[1]])
-
-        fft_real = np.abs(np.asarray(f1.real.data))
-        idx = np.unravel_index(np.argmax(fft_real), fft_real.shape)
-        y_peak = float(f1.y.data[idx[0]])
-        x_peak = float(f1.x.data[idx[1]])
-
-        assert abs(y_peak - ref_y) < 1.0
-        assert abs(x_peak - ref_x) < 1.0
+        with pytest.raises(NotImplementedError, match="only validated 1D experiments"):
+            scp.nmr.Experiment(ds).process(apodization="em", lb=2.0, size=ref.shape[1])
 
 
 @pytest.mark.skipif(not _has_agilent_data(), reason="Agilent test data not available")
@@ -430,7 +411,7 @@ class TestQuaternionPhasing:
         f2 = ds.fft()
         assert f2.meta.isfreq == [False, True]
         assert str(f2.x.units) == "ppm"
-        assert str(f2.y.units) == "µs"
+        assert f2.y.units == scp.ur.microsecond
         assert "27" in f2.x.title
 
         f1 = f2.zf_size(size=256, dim="y").fft(dim="y")
