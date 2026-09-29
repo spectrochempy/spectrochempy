@@ -10,8 +10,8 @@ from scipy.signal import hilbert
 import spectrochempy as scp
 
 
-def _dataset(*, shape=(3, 4), complex_data=True):
-    real = np.arange(np.prod(shape), dtype=float).reshape(shape) + 1.0
+def _dataset(*, shape=(3, 4), complex_data=True, dtype=float):
+    real = np.arange(np.prod(shape), dtype=dtype).reshape(shape) + 1.0
     data = real + 1.0j * (real + 0.5) if complex_data else real
     dims = ["z", "y", "x"][-len(shape) :]
     coords = [
@@ -39,9 +39,11 @@ def _dataset(*, shape=(3, 4), complex_data=True):
 
 
 def _snapshot(dataset):
+    mask = np.asarray(dataset.mask).copy()
+    assert mask.any()
     return {
         "data": dataset.data.copy(),
-        "mask": np.asarray(dataset.mask).copy(),
+        "mask": mask,
         "dims": list(dataset.dims),
         "coords": {dim: dataset.coord(dim).copy() for dim in dataset.dims},
         "units": dataset.units,
@@ -68,6 +70,16 @@ def _assert_preserved_geometry(dataset, snapshot):
         assert dataset.coord(dim) == coord
     assert dataset.units == snapshot["units"]
     assert dataset.meta == snapshot["meta"]
+
+
+def _hilbert_reference(data, n, axis):
+    source_size = data.shape[axis]
+    transformed = hilbert(data.real, n, axis=axis)
+    selection = [slice(None)] * data.ndim
+    selection[axis] = slice(source_size)
+    result = transformed[tuple(selection)] * (n / source_size)
+    result.real = data.real
+    return result
 
 
 @pytest.mark.parametrize("name", ["mc", "ps"])
@@ -149,9 +161,7 @@ def test_one_dimensional_hilbert_transform_retains_larger_explicit_n():
     source = _dataset(shape=(4,), complex_data=False)
     snapshot = _snapshot(source)
     requested_n = 8
-    expected = hilbert(snapshot["data"], requested_n)[: source.size]
-    expected *= requested_n / source.size
-    expected.real = snapshot["data"]
+    expected = _hilbert_reference(snapshot["data"], requested_n, axis=0)
 
     result = source.ht(N=requested_n)
 
@@ -160,6 +170,57 @@ def test_one_dimensional_hilbert_transform_retains_larger_explicit_n():
     assert result.history_entries[-1]["parameters"]["scientific_parameters"] == {
         "N": requested_n
     }
+    _assert_snapshot(source, snapshot)
+
+
+@pytest.mark.parametrize("inplace", [False, True])
+@pytest.mark.parametrize(
+    ("kwargs", "requested_parameters"),
+    [({}, None), ({"N": None}, {"N": None})],
+)
+def test_hilbert_transform_resolves_default_n(kwargs, requested_parameters, inplace):
+    source = _dataset(shape=(3, 5))
+    snapshot = _snapshot(source)
+    expected = _hilbert_reference(snapshot["data"], source.shape[-1], axis=-1)
+
+    result = source.ht(inplace=inplace, **kwargs)
+
+    assert (result is source) is inplace
+    np.testing.assert_allclose(result.data, expected)
+    _assert_preserved_geometry(result, snapshot)
+    assert result.history_entries[:-1] == snapshot["history"]
+    assert result.history_entries[-1]["operation"] == "ht"
+    parameters = result.history_entries[-1]["parameters"]
+    assert parameters["scientific_parameters"] == {"N": source.shape[-1]}
+    assert json.loads(json.dumps(parameters)) == parameters
+    if requested_parameters is None:
+        assert "requested_parameters" not in parameters
+    else:
+        assert parameters["requested_parameters"] == requested_parameters
+    if not inplace:
+        _assert_snapshot(source, snapshot)
+
+
+@pytest.mark.parametrize("complex_data", [False, True])
+@pytest.mark.parametrize(
+    ("shape", "selector", "axis"),
+    [((1,), {}, 0), ((2, 1, 3), {"dim": "y"}, 1)],
+)
+def test_one_point_hilbert_transform_does_not_require_a_second_value(
+    shape, selector, axis, complex_data
+):
+    source = _dataset(shape=shape, complex_data=complex_data, dtype=np.float32)
+    snapshot = _snapshot(source)
+    expected = _hilbert_reference(snapshot["data"], 1, axis=axis)
+
+    result = source.ht(**selector)
+
+    np.testing.assert_allclose(result.data, expected)
+    assert result.dtype == expected.dtype
+    _assert_preserved_geometry(result, snapshot)
+    assert result.history_entries[:-1] == snapshot["history"]
+    assert result.history_entries[-1]["operation"] == "ht"
+    assert not any(entry["operation"] == "swapdims" for entry in result.history_entries)
     _assert_snapshot(source, snapshot)
 
 
@@ -263,40 +324,59 @@ def test_invalid_selector_is_rejected_before_inplace_permutation():
     _assert_snapshot(source, snapshot)
 
 
-def test_kernel_failure_restores_inplace_permutation():
+@pytest.mark.parametrize(
+    ("shape", "selector", "axis", "requested_n"),
+    [
+        ((3, 5), {"dim": "x"}, 1, 8),
+        ((3, 5), {"dims": "y"}, 0, 6),
+        ((2, 3, 4), {"axis": -1}, 2, 7),
+        ((2, 3, 4), {"dim": "y"}, 1, 5),
+        ((2, 3, 4), {"dims": "z"}, 0, 4),
+    ],
+)
+@pytest.mark.parametrize("inplace", [False, True])
+def test_hilbert_transform_supports_larger_n_on_any_dimension(
+    shape, selector, axis, requested_n, inplace
+):
+    source = _dataset(shape=shape)
+    snapshot = _snapshot(source)
+    expected = _hilbert_reference(snapshot["data"], requested_n, axis=axis)
+
+    result = source.ht(N=np.int64(requested_n), inplace=inplace, **selector)
+
+    assert (result is source) is inplace
+    np.testing.assert_allclose(result.data, expected)
+    _assert_preserved_geometry(result, snapshot)
+    assert result.history_entries[:-1] == snapshot["history"]
+    assert result.history_entries[-1]["operation"] == "ht"
+    parameters = result.history_entries[-1]["parameters"]
+    assert parameters["scientific_parameters"] == {"N": requested_n}
+    assert "requested_parameters" not in parameters
+    assert not any(entry["operation"] == "swapdims" for entry in result.history_entries)
+    if not inplace:
+        _assert_snapshot(source, snapshot)
+
+
+@pytest.mark.parametrize(
+    ("invalid_n", "error"),
+    [
+        (2, ValueError),
+        (0, ValueError),
+        (-1, ValueError),
+        (True, TypeError),
+        (np.bool_(False), TypeError),
+        (3.0, TypeError),
+        (np.float64(3.0), TypeError),
+        ("3", TypeError),
+    ],
+)
+def test_invalid_hilbert_sizes_are_rejected_without_mutation(invalid_n, error):
     source = _dataset(shape=(3, 5))
     snapshot = _snapshot(source)
     assert np.asarray(source.mask).any()
 
-    with pytest.raises(TypeError):
-        source.ht(N=None, dim="y", inplace=True)
-
-    _assert_snapshot(source, snapshot)
-
-
-@pytest.mark.parametrize(
-    ("kwargs", "error"),
-    [
-        ({}, TypeError),
-        ({"N": 2}, ValueError),
-    ],
-)
-def test_preexisting_unsupported_hilbert_calls_do_not_record_success(kwargs, error):
-    source = _dataset()
-    snapshot = _snapshot(source)
-
-    with pytest.raises(error):
-        source.ht(**kwargs)
-
-    _assert_snapshot(source, snapshot)
-
-
-def test_three_dimensional_hilbert_with_different_n_remains_unsupported():
-    source = _dataset(shape=(2, 3, 4))
-    snapshot = _snapshot(source)
-
-    with pytest.raises(ValueError, match="could not broadcast"):
-        source.ht(N=6)
+    with pytest.raises(error, match="N must be"):
+        source.ht(N=invalid_n, dim="y", inplace=True)
 
     _assert_snapshot(source, snapshot)
 

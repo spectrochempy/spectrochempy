@@ -965,15 +965,15 @@ def _processing_requested_dimension(kwargs):
     return kwargs.get("dims", kwargs.get("dim", kwargs.get("axis")))
 
 
-def _processing_scientific_parameters(method, kwargs):
-    """Return compact effective parameters declared by a processing kernel."""
+def _processing_scientific_parameters(method, kwargs, *, include_defaults=True):
+    """Return compact parameters declared by a processing kernel."""
     parameters = {}
     for name, parameter in inspect.signature(method).parameters.items():
         if name == "dataset" or parameter.kind == inspect.Parameter.VAR_KEYWORD:
             continue
         if name in kwargs:
             parameters[name] = kwargs[name]
-        elif parameter.default is not inspect.Parameter.empty:
+        elif include_defaults and parameter.default is not inspect.Parameter.empty:
             parameters[name] = parameter.default
     return parameters
 
@@ -1007,6 +1007,7 @@ def _units_agnostic_method(
     structured_history=False,
     history_description="shift performed",
     history_parameter_transform=None,
+    parameter_preprocessor=None,
 ):
     if method is None:
         return lambda wrapped: _units_agnostic_method(
@@ -1015,6 +1016,7 @@ def _units_agnostic_method(
             structured_history=structured_history,
             history_description=history_description,
             history_parameter_transform=history_parameter_transform,
+            parameter_preprocessor=parameter_preprocessor,
         )
 
     @functools.wraps(method)
@@ -1029,6 +1031,15 @@ def _units_agnostic_method(
         for selector in ("dims", "dim", "axis"):
             if selector in kwargs:
                 del kwargs[selector]
+
+        requested_parameters = None
+        if parameter_preprocessor is not None:
+            requested_parameters = _processing_scientific_parameters(
+                method,
+                kwargs,
+                include_defaults=False,
+            )
+            kwargs = parameter_preprocessor(kwargs, axis_size=axis_size)
 
         new = dataset.copy() if not inplace else dataset
 
@@ -1055,8 +1066,9 @@ def _units_agnostic_method(
             f"`{dim}` with parameters: {message_kwargs}"
         )
         if structured_history:
-            requested_parameters = _processing_scientific_parameters(method, kwargs)
-            scientific_parameters = dict(requested_parameters)
+            if requested_parameters is None:
+                requested_parameters = _processing_scientific_parameters(method, kwargs)
+            scientific_parameters = _processing_scientific_parameters(method, kwargs)
             if method.__name__ in {"rs", "ls", "roll"}:
                 scientific_parameters["pts"] = int(scientific_parameters["pts"])
             if history_parameter_transform is not None:
@@ -1073,7 +1085,7 @@ def _units_agnostic_method(
                 inplace=inplace,
                 scientific_parameters=scientific_parameters,
             )
-            if requested_parameters != scientific_parameters:
+            if requested_parameters and requested_parameters != scientific_parameters:
                 parameters["requested_parameters"] = requested_parameters
             new._append_history_entry(
                 operation=method.__name__,
