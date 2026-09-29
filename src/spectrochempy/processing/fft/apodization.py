@@ -25,8 +25,12 @@ import numpy as np
 from scipy.signal import windows
 
 from spectrochempy.application.application import error_
+from spectrochempy.core.dataset.nddataset import _history_selection_value
 from spectrochempy.core.units import Quantity
 from spectrochempy.utils.constants import EPSILON
+from spectrochempy.utils.decorators import _processing_history_parameters
+from spectrochempy.utils.decorators import _processing_requested_dimension
+from spectrochempy.utils.decorators import _processing_scientific_parameters
 
 pi = np.pi
 
@@ -45,14 +49,19 @@ def _apodize_method(**units):
             dryrun = kwargs.pop("dryrun", False)
             is_ir = dataset.meta.interferogram
 
+            # Requested selector, kept exactly as the caller expressed it. The
+            # resolved dimension below may differ, for instance when a positive
+            # axis or a dimension name resolves to a negative one.
+            requested_dim = _processing_requested_dimension(kwargs)
+
             # On which axis do we want to apodize? (get axis from arguments)
             axis, dim = dataset.get_axis(**kwargs, negative_axis=True)
+            resolved_axis = axis % dataset.ndim
 
             # output dataset inplace (by default) or not
-            if not kwargs.pop("inplace", False) and not dryrun:
-                new = dataset.copy()  # copy to be sure not to modify this dataset
-            else:
-                new = dataset
+            inplace = kwargs.pop("inplace", False)
+            # copy to be sure not to modify this dataset
+            new = dataset.copy() if not inplace and not dryrun else dataset
 
             # The last dimension is always the dimension on which we apply the apodization window.
             # If needed, we swap the dimensions to be sure to be in this situation
@@ -115,19 +124,62 @@ def _apodize_method(**units):
 
                 if kwargs.pop("rev", False):
                     apod_arr = apod_arr[::-1]  # reverse apodization
+                    reversed_window = True
+                else:
+                    reversed_window = False
 
                 if kwargs.pop("inv", False):
                     apod_arr = 1.0 / apod_arr  # invert apodization
-
-                if not dryrun:
-                    new.history = (
-                        f"Applied {method.__name__} apodization on dimension {dim} "
-                        f"with parameters: {apod}"
-                    )
+                    inverse_window = True
+                else:
+                    inverse_window = False
 
                 # Apply?
                 if not dryrun:
                     new._data *= apod_arr
+                    # The kernel signature declares the compact scientific
+                    # parameters; unit conversion has already replaced the
+                    # requested magnitudes by the effective ones, in the units
+                    # the kernel actually received.
+                    scientific_parameters = _processing_scientific_parameters(
+                        method, kwargs
+                    )
+                    parameters = _processing_history_parameters(
+                        method,
+                        kwargs,
+                        requested_dim=requested_dim,
+                        resolved_dim=dim,
+                        resolved_axis=resolved_axis,
+                        inplace=inplace,
+                        scientific_parameters=scientific_parameters,
+                    )
+                    parameters["inv"] = inverse_window
+                    parameters["rev"] = reversed_window
+
+                    # A unit-bearing request that conversion or normalization
+                    # changed is kept separately, as a serializable
+                    # magnitude/units pair rather than a live Quantity. The
+                    # shape is the one already used for unit-bearing selection
+                    # values, so no new representation category is introduced.
+                    requested_parameters = {
+                        key: _history_selection_value(value)
+                        for key, value in apod.items()
+                    }
+                    if any(
+                        key in scientific_parameters
+                        and scientific_parameters[key] != value["value"]
+                        for key, value in requested_parameters.items()
+                    ):
+                        parameters["requested_parameters"] = requested_parameters
+
+                    new._append_history_entry(
+                        operation=method.__name__,
+                        parameters=parameters,
+                        message=(
+                            f"Applied {method.__name__} apodization on dimension {dim} "
+                            f"with parameters: {apod}"
+                        ),
+                    )
 
             else:  # not (x.unitless or x.dimensionless or x.units.dimensionality != '[time]')
                 error_(

@@ -20,8 +20,18 @@ New Features
   transposition, selection, out-of-place addition and subtraction, the
   numerical reductions ``mean()``, ``sum()``, ``std()``, and ``var()`` when
   they return an ``NDDataset``, the shape operations ``squeeze()``,
-  ``swapdims()``, and ``reshape()``, and the shared wrappers for point, circular
-  and Fourier shifts and zero filling. Temporary internal dimension swaps no
+  ``swapdims()``, and ``reshape()``, the shared wrappers for point, circular
+  and Fourier shifts and zero filling, and the shared apodization wrapper used by
+  ``em()``, ``gm()``, ``sp()``, ``general_hamming()``, ``triang()``,
+  ``bartlett()`` and ``blackmanharris()``. An apodization entry names the kernel
+  that actually ran, so the delegating wrappers ``hamming()``, ``hann()``,
+  ``sine()``, ``sinm()`` and ``qsin()`` record one entry for ``general_hamming``
+  or ``sp`` rather than one of their own, and it records the effective window
+  coefficient, the requested and resolved dimension, the ``inv`` and ``rev``
+  window options and the execution mode. A unit-bearing request such as
+  ``em(lb="250 Hz")`` also keeps the requested magnitude and unit alongside the
+  effective value expressed in the units of the dataset coordinate.
+  Temporary internal dimension swaps no
   longer add shape-operation entries to a treatment's history; other operations
   may continue to record normal text-only entries (:pr:`1681`, :pr:`1703`,
   :pr:`1704`, :pr:`1705`).

@@ -33,7 +33,9 @@ def test_apodization_ir_2d_zpd():
 
     assert ds.history_entries == source_history
     assert result.history_entries[0] == source_history[0]
-    assert result.history_entries[-1]["operation"] is None
+    # The entry is now structured: the executed kernel is named, and the
+    # characterization is updated from the former text-only "None".
+    assert result.history_entries[-1]["operation"] == "em"
     assert "Applied em apodization" in result.history_entries[-1]["message"]
 
 
