@@ -1001,13 +1001,20 @@ def _processing_history_parameters(
 
 
 def _units_agnostic_method(
-    method=None, *, mask_transform=None, structured_history=False
+    method=None,
+    *,
+    mask_transform=None,
+    structured_history=False,
+    history_description="shift performed",
+    history_parameter_transform=None,
 ):
     if method is None:
         return lambda wrapped: _units_agnostic_method(
             wrapped,
             mask_transform=mask_transform,
             structured_history=structured_history,
+            history_description=history_description,
+            history_parameter_transform=history_parameter_transform,
         )
 
     @functools.wraps(method)
@@ -1015,6 +1022,7 @@ def _units_agnostic_method(
         requested_dim = _processing_requested_dimension(kwargs)
         axis, dim = dataset.get_axis(**kwargs, negative_axis=True)
         resolved_axis = axis % dataset.ndim
+        axis_size = dataset.shape[resolved_axis]
 
         inplace = kwargs.pop("inplace", False)
         new = dataset.copy() if not inplace else dataset
@@ -1034,7 +1042,7 @@ def _units_agnostic_method(
             new._swapdims_without_history(axis, -1, inplace=True)
 
         message = (
-            f"`{method.__name__}` shift performed on dimension "
+            f"`{method.__name__}` {history_description} on dimension "
             f"`{dim}` with parameters: {kwargs}"
         )
         if structured_history:
@@ -1042,6 +1050,11 @@ def _units_agnostic_method(
             scientific_parameters = dict(requested_parameters)
             if method.__name__ in {"rs", "ls", "roll"}:
                 scientific_parameters["pts"] = int(scientific_parameters["pts"])
+            if history_parameter_transform is not None:
+                scientific_parameters = history_parameter_transform(
+                    scientific_parameters,
+                    axis_size=axis_size,
+                )
             parameters = _processing_history_parameters(
                 method,
                 kwargs,

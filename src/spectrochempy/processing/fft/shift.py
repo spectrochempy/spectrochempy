@@ -58,6 +58,19 @@ def _roll_mask(mask, pts=0.0, **kwargs):
     return np.roll(mask, int(pts), axis=-1)
 
 
+def _dc_tail_selection(length, size):
+    """Return the executed tail slice and its normalized number of points."""
+    selection = slice(-int(length * size), None)
+    start, stop, step = selection.indices(size)
+    return selection, len(range(start, stop, step))
+
+
+def _dc_history_parameters(parameters, *, axis_size):
+    """Describe the tail that the DC kernel actually averages."""
+    _, tail_points = _dc_tail_selection(parameters["len"], axis_size)
+    return {"tail_points": tail_points}
+
+
 # ======================================================================================
 # Public methods
 # ======================================================================================
@@ -298,8 +311,12 @@ def fsh2(dataset, pts, **kwargs):
     return np.fft.fftshift(np.fft.ifft(data).astype(data.dtype)) * data.shape[-1]
 
 
-@_units_agnostic_method
-def dc(dataset, **kwargs):
+@_units_agnostic_method(
+    structured_history=True,
+    history_description="DC baseline correction performed",
+    history_parameter_transform=_dc_history_parameters,
+)
+def dc(dataset, len=0.25, **kwargs):
     """
     Time domain baseline correction.
 
@@ -307,22 +324,17 @@ def dc(dataset, **kwargs):
     ----------
     dataset : nddataset
         The time domain dataset to be corrected.
-    kwargs : dict, optional
-        Additional parameters.
+    len : float, optional
+        Fraction of the final part of the selected dimension to average.
 
     Returns
     -------
     dc
         DC corrected array.
 
-    Other Parameters
-    ----------------
-    len : float, optional
-        Proportion in percent of the data at the end of the dataset to take into account. By default, 25%.
-
     """
-    len = int(kwargs.pop("len", 0.25) * dataset.shape[-1])
-    dc = np.mean(np.atleast_2d(dataset)[..., -len:])
+    selection, _ = _dc_tail_selection(len, dataset.shape[-1])
+    dc = np.mean(np.atleast_2d(dataset)[..., selection])
     dataset -= dc
 
     return dataset

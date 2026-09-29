@@ -63,6 +63,18 @@ New Features
   longer add shape-operation entries to a treatment's history; other operations
   may continue to record normal text-only entries (:pr:`1681`, :pr:`1703`,
   :pr:`1704`, :pr:`1705`).
+- Added structured history for the remaining users of the shared
+  unit-agnostic processing wrapper: modulus calculation ``mc()``, power
+  spectrum ``ps()``, successful Hilbert transforms ``ht(N=...)``, and DC
+  baseline correction ``dc()``. Successful entries record the actual kernel,
+  requested and resolved dimension, execution mode, and compact effective
+  parameters. ``dc()`` records the number of tail points actually averaged
+  after its existing integer rounding and retains the requested ``len``
+  separately. Their readable messages now name the calculation or transform
+  instead of incorrectly calling every operation a shift. Numerical behavior,
+  shapes, dtypes, masks, coordinates, units, metadata, and return conventions
+  are unchanged.
+
 - Added ``cross_validate`` and ``CrossValidationResult`` for bounded supervised
   PLS and Pipeline cross-validation with aligned ``NDDataset`` outputs,
   per-target metrics, fold records, and optional fitted fold estimators (#1658).

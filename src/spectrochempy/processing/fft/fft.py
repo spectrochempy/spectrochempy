@@ -492,7 +492,10 @@ ift = ifft
 
 
 # Modulus Calculation
-@_units_agnostic_method
+@_units_agnostic_method(
+    structured_history=True,
+    history_description="modulus calculated",
+)
 def mc(dataset):
     """
     Modulus calculation.
@@ -502,7 +505,10 @@ def mc(dataset):
     return np.sqrt(dataset.real**2 + dataset.imag**2)
 
 
-@_units_agnostic_method
+@_units_agnostic_method(
+    structured_history=True,
+    history_description="power spectrum calculated",
+)
 def ps(dataset):
     """
     Power spectrum. Squared version.
@@ -512,7 +518,10 @@ def ps(dataset):
     return dataset.real**2 + dataset.imag**2
 
 
-@_units_agnostic_method
+@_units_agnostic_method(
+    structured_history=True,
+    history_description="Hilbert transform performed",
+)
 def ht(dataset, N=None):
     """
     Hilbert transform.
