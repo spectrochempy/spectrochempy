@@ -370,10 +370,16 @@ class TestEncodingHandler:
         with pytest.raises(NotImplementedError, match="QSEQ"):
             _fft_encoding_handler(data, "QSEQ")
 
-    def test_dispatch_unknown_encoding(self):
-        """Unknown encoding should raise NotImplementedError."""
+    def test_dispatch_unknown_complex_encoding_uses_direct_fallback(self):
+        """Missing complex encoding uses the vendor-independent direct FFT."""
         data = np.ones((8, 16), dtype=np.complex128)
-        with pytest.raises(NotImplementedError, match="not supported"):
+        expected = np.fft.fftshift(np.fft.fft(np.conjugate(data)), -1)
+        assert_allclose(_fft_encoding_handler(data, "UNKNOWN"), expected)
+
+    def test_dispatch_unknown_quaternion_encoding_is_rejected(self):
+        """Missing encoding remains invalid for hypercomplex data."""
+        data = _make_states_data(8, 16, 1.0, 2.0)
+        with pytest.raises(NotImplementedError, match="metadata is missing"):
             _fft_encoding_handler(data, "UNKNOWN")
 
 

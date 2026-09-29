@@ -546,7 +546,10 @@ class TestStep7EndToEndFFT:
         peak = np.unravel_index(np.argmax(magnitude), magnitude.shape)
 
         expected_f1 = (nf1 // 2 - int(f1_freq)) % nf1
-        expected_f2 = (nf2 // 2 - int(f2_freq)) % nf2
+        # DQD is the direct-dimension encoding.  Its two quaternion channels
+        # contain positive complex exponentials, so the shifted FFT peak is on
+        # the positive-frequency side.
+        expected_f2 = (nf2 // 2 + int(f2_freq)) % nf2
 
         assert (
             abs(peak[0] - expected_f1) <= 1
@@ -580,14 +583,15 @@ class TestStep7EndToEndFFT:
         )
         pipe_peak = np.unravel_index(np.argmax(pipe_mag), pipe_mag.shape)
 
-        # Manual numpy workflow
+        # Independent NumPy reference for the documented two-pass workflow.
+        # The direct DQD dimension transforms the two complex channels; STATES
+        # recombination belongs to the indirect second pass.
         RR, RI, IR, II = _extract_quaternion_components(ser)
-        sr, si = _prepare_states(RR, RI, IR, II)
-        fr = np.fft.fftshift(np.fft.fft(sr, axis=-1), axes=-1)
-        fi = np.fft.fftshift(np.fft.fft(si, axis=-1), axes=-1)
+        fr = np.fft.fftshift(np.fft.fft(RR + 1j * RI, axis=-1), axes=-1)
+        fi = np.fft.fftshift(np.fft.fft(IR + 1j * II, axis=-1), axes=-1)
         f1_fr = np.fft.fftshift(np.fft.fft(fr, axis=0), axes=0)
         f1_fi = np.fft.fftshift(np.fft.fft(fi, axis=0), axes=0)
-        manual_mag = np.abs(f1_fr) + np.abs(f1_fi)
+        manual_mag = np.abs((f1_fr - 1j * f1_fi) / 2.0)
         manual_peak = np.unravel_index(np.argmax(manual_mag), manual_mag.shape)
 
         assert (
