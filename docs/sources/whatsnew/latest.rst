@@ -86,6 +86,10 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- ``snv()`` now appends only the existing ``SNVTransformer applied`` history
+  entry in both execution modes. Out-of-place calls no longer add a redundant
+  ``snv applied`` annotation, while in-place calls transfer the complete,
+  detached transformer history instead of replacing its message.
 - ``trapezoid()`` and ``simpson()`` now preserve the complete history copied
   from their source dataset instead of replacing it with one generic message.
   Each successful integration appends one structured entry naming the method
