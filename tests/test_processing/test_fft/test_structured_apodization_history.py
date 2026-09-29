@@ -8,6 +8,7 @@ import numpy as np
 import pytest
 
 import spectrochempy as scp
+from spectrochempy.processing.fft import apodization as apodization_module
 
 DIRECT_KERNELS = [
     ("em", {}),
@@ -440,3 +441,106 @@ def test_scp_roundtrip_preserves_the_unit_bearing_parameters(tmp_path):
             "shifted": {"value": 1.5, "units": "µs"},
         },
     )
+
+
+# Kernels that clamp or reduce a parameter before building their window. The
+# entry must describe the window that was executed, not the value handed in.
+CLAMPING_CASES = [
+    ("sp", {"pow": 4}, "pow", 2, 4),
+    ("sp", {"pow": 3}, "pow", 1, 3),
+    ("sp", {"pow": 0}, "pow", 2, 0),
+    ("sp", {"ssb": 0.5}, "ssb", 1.0, 0.5),
+    ("sp", {"ssb": 0}, "ssb", 1.0, 0),
+    ("em", {"lb": "250 Hz", "shifted": "-1.5 us"}, "shifted", 0.0, "-1.5 us"),
+    (
+        "gm",
+        {"lb": "250 Hz", "gb": "0 Hz", "shifted": "-1.5 us"},
+        "shifted",
+        0.0,
+        "-1.5 us",
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    ("kernel", "arguments", "key", "effective", "requested"),
+    CLAMPING_CASES,
+)
+def test_reduced_parameter_records_the_effective_value(
+    kernel, arguments, key, effective, requested
+):
+    # sp reduces pow to 1 or 2 and raises ssb to 1, and em and gm clamp a
+    # negative shift to zero. Recording the value handed in would misdescribe
+    # the window that was actually applied.
+    dataset = _dataset()
+
+    result = getattr(dataset, kernel)(**arguments)
+
+    parameters = _last(result)["parameters"]
+    assert parameters["scientific_parameters"][key] == pytest.approx(effective)
+    assert parameters["requested_parameters"][key]["value"] == pytest.approx(
+        _magnitude(requested)
+    )
+
+
+def _magnitude(requested):
+    return (
+        scp.Quantity(requested).magnitude if isinstance(requested, str) else requested
+    )
+
+
+@pytest.mark.parametrize(
+    ("kernel", "arguments", "key", "effective", "requested"),
+    CLAMPING_CASES,
+)
+def test_recorded_effective_parameters_reproduce_the_executed_window(
+    kernel, arguments, key, effective, requested
+):
+    # The strongest available check of the contract: replaying the kernel with
+    # the recorded effective parameters must reproduce the applied window. This
+    # fails whenever an entry records a value the kernel did not use.
+    dataset = _dataset()
+
+    result = getattr(dataset, kernel)(**arguments)
+
+    recorded = _last(result)["parameters"]["scientific_parameters"]
+    # The wrapper builds the window from the coordinate values, so the replay
+    # must use the same input to be comparable. The undecorated kernel is used
+    # so that the recorded values are the only input to the replay.
+    coordinate = dataset.coordset["x"].data
+    replayed = getattr(apodization_module, kernel).__wrapped__(coordinate, **recorded)
+    assert np.allclose(result.data, dataset.data * replayed)
+    assert recorded[key] == pytest.approx(effective)
+
+
+def test_dimensionless_request_is_retained_without_a_unit():
+    dataset = _dataset()
+
+    result = dataset.sp(pow=4)
+
+    requested = _last(result)["parameters"]["requested_parameters"]
+    assert requested["pow"] == {"value": 4, "units": None}
+    # A dimensionless request stays serializable.
+    json.dumps(_last(result)["parameters"])
+
+
+def test_a_request_surviving_normalization_unchanged_is_not_duplicated():
+    # pow=2 is already the value sp uses, so no separate request is retained.
+    unchanged = _last(_dataset().sp(pow=2))["parameters"]
+    assert unchanged["scientific_parameters"]["pow"] == 2
+    assert "requested_parameters" not in unchanged
+
+    # Likewise for an ssb that is not clamped.
+    for ssb in (2, 3):
+        parameters = _last(_dataset().sp(ssb=ssb))["parameters"]
+        assert parameters["scientific_parameters"]["ssb"] == pytest.approx(ssb)
+        assert "requested_parameters" not in parameters
+
+
+def test_only_the_parameters_that_changed_are_retained():
+    # ssb is clamped while pow is already effective, so only ssb is duplicated.
+    result = _dataset().sp(ssb=0.5, pow=2)
+
+    requested = _last(result)["parameters"]["requested_parameters"]
+    assert set(requested) == {"ssb"}
+    assert requested["ssb"] == {"value": 0.5, "units": None}
