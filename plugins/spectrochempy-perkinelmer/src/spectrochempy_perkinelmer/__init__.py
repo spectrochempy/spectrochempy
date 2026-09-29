@@ -33,7 +33,7 @@ class PerkinElmerPlugin(SpectroChemPyPlugin):
     """PerkinElmer plugin providing the ``.sp`` file reader."""
 
     name = "perkinelmer"
-    version = "0.1.5"
+    version = "0.1.6"
     description = "PerkinElmer file reader for SpectroChemPy"
     spectrochempy_min_version = "1.1.0"
     PLUGIN_API_VERSION = CORE_PLUGIN_API_VERSION
