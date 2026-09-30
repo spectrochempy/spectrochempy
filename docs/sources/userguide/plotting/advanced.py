@@ -97,8 +97,11 @@ _ = ax.set_title(r"Beer-Lambert: $A = \epsilon c l$")
 # - `ds.plot(output="spectrum.png")`, for any method it dispatches
 # - `scp.plot_multiple([ds, ds2], labels=["a", "b"], output="overlay.png")`
 # - `scp.multiplot([ds, ds2, ds3], output="grid.png")`
-# - `ds.plot_score()`, `ds.plot_scree()`, `ds.plot_compare()`, `ds.plot_merit()`,
-#   `ds.plot_baseline()`, and `ds.plot_parity()`
+# - the analysis methods, such as `pca.plot_score()`, `pca.plot_scree()`, and
+#   `pca.plot_merit()`, plus `analysis.plot_parity()` where the model provides
+#   it
+# - the standalone composite functions, such as `scp.plot_compare()` and
+#   `scp.plot_baseline()`
 #
 # Two limits are worth knowing. The low-level renderers called directly, such
 # as `scp.plot_pen()` or `scp.plot_image()`, only draw: they ignore `output`, so

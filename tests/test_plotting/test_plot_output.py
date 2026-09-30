@@ -330,8 +330,16 @@ class TestPlotMultipleSingleDataset:
 class TestOutputScopeBoundary:
     """Pin the interfaces that write files, so the documentation cannot drift."""
 
-    def test_low_level_renderers_do_not_write(self, nd_1d, tmp_path):
-        """``plot_pen()`` and friends only draw: no file, no error."""
+    def test_low_level_renderers_still_ignore_output(self, nd_1d, tmp_path):
+        """
+        Known gap: the direct renderers silently ignore ``output``.
+
+        This characterization is temporary, not an endorsed behavior. It keeps
+        a witness of the remaining defect until the public-shortcut
+        harmonization PR makes ``ds.plot_pen(output=...)`` equivalent to
+        ``ds.plot(method="pen", output=...)``. When that PR lands, this test
+        has to assert that a file is written instead.
+        """
         _small_dpi()
 
         scp.plot_pen(nd_1d, output=tmp_path / "pen.png")
