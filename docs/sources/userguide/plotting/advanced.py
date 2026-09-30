@@ -91,12 +91,19 @@ _ = ax.set_title(r"Beer-Lambert: $A = \epsilon c l$")
 # %% [markdown]
 # ## Saving Figures
 #
-# Every plotting function that returns axes or a figure accepts an `output`
+# The dataset plotting path and the figure-level helpers accept an `output`
 # argument, which writes the finished figure to a file:
 #
-# - `ds.plot(output="spectrum.png")`
+# - `ds.plot(output="spectrum.png")`, for any method it dispatches
 # - `scp.plot_multiple([ds, ds2], labels=["a", "b"], output="overlay.png")`
 # - `scp.multiplot([ds, ds2, ds3], output="grid.png")`
+# - `ds.plot_score()`, `ds.plot_scree()`, `ds.plot_compare()`, `ds.plot_merit()`,
+#   `ds.plot_baseline()`, and `ds.plot_parity()`
+#
+# Two limits are worth knowing. The low-level renderers called directly, such
+# as `scp.plot_pen()` or `scp.plot_image()`, only draw: they ignore `output`, so
+# route those calls through `ds.plot()`. And the IRIS plugin keeps its own
+# plotting methods, which are outside this contract.
 #
 # The file name is used as given: the format follows the extension, and a name
 # without extension is written with the `savefig.format` preference. Both `str`
@@ -167,18 +174,21 @@ with TemporaryDirectory() as tmpdir:
 
 # %%
 def plot_spectrum(dataset, title=None, output_path=None):
-    """Plot a spectrum with consistent styling."""
-    ax = dataset.plot(
+    """
+    Plot a spectrum with consistent styling.
+
+    The title and axis labels are passed to the plotting call itself, so that
+    an ``output_path`` file contains the finished figure.
+    """
+    return dataset.plot(
+        title=title,
+        xlabel=r"Wavenumber (cm$^{-1}$)",
+        ylabel="Absorbance",
         linewidth=1.5,
         color="navy",
         grid=True,
         output=output_path,
     )
-    if title:
-        ax.set_title(title)
-    ax.set_xlabel(r"Wavenumber (cm$^{-1}$)")
-    ax.set_ylabel("Absorbance")
-    return ax
 
 
 # Each call produces consistent results

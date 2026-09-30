@@ -98,10 +98,9 @@ def plot_1D(dataset, method=None, **kwargs):
     offset : float
         offset of the model individual lines.
     output : str or `pathlib.Path`, optional
-        File name where the completed figure is saved. `str` and
-        `pathlib.Path` are both accepted. The whole figure is written
-        once the plot is complete, before the display step, and the
-        file format follows the extension.
+        Not handled by this low-level renderer, which only draws. Use
+        ``dataset.plot(output=...)`` to write the completed figure, or
+        ``plot_multiple()`` and ``multiplot()`` for overlays and grids.
     plot_model : Bool,
         plot model data if available.
     plottitle: bool, optional, default: False
@@ -605,10 +604,9 @@ def plot_scatter(dataset, **kwargs):
     offset : float
         offset of the model individual lines.
     output : str or `pathlib.Path`, optional
-        File name where the completed figure is saved. `str` and
-        `pathlib.Path` are both accepted. The whole figure is written
-        once the plot is complete, before the display step, and the
-        file format follows the extension.
+        Not handled by this low-level renderer, which only draws. Use
+        ``dataset.plot(output=...)`` to write the completed figure, or
+        ``plot_multiple()`` and ``multiplot()`` for overlays and grids.
     plot_model : Bool,
         plot model data if available.
     plottitle: bool, optional, default: False
@@ -721,10 +719,9 @@ def plot_pen(dataset, **kwargs):
     offset : float
         offset of the model individual lines.
     output : str or `pathlib.Path`, optional
-        File name where the completed figure is saved. `str` and
-        `pathlib.Path` are both accepted. The whole figure is written
-        once the plot is complete, before the display step, and the
-        file format follows the extension.
+        Not handled by this low-level renderer, which only draws. Use
+        ``dataset.plot(output=...)`` to write the completed figure, or
+        ``plot_multiple()`` and ``multiplot()`` for overlays and grids.
     plot_model : Bool,
         plot model data if available.
     plottitle: bool, optional, default: False
@@ -836,10 +833,9 @@ def plot_scatter_pen(dataset, **kwargs):
     offset : float
         offset of the model individual lines.
     output : str or `pathlib.Path`, optional
-        File name where the completed figure is saved. `str` and
-        `pathlib.Path` are both accepted. The whole figure is written
-        once the plot is complete, before the display step, and the
-        file format follows the extension.
+        Not handled by this low-level renderer, which only draws. Use
+        ``dataset.plot(output=...)`` to write the completed figure, or
+        ``plot_multiple()`` and ``multiplot()`` for overlays and grids.
     plot_model : Bool,
         plot model data if available.
     plottitle: bool, optional, default: False
@@ -951,10 +947,9 @@ def plot_bar(dataset, **kwargs):
     offset : float
         offset of the model individual lines.
     output : str or `pathlib.Path`, optional
-        File name where the completed figure is saved. `str` and
-        `pathlib.Path` are both accepted. The whole figure is written
-        once the plot is complete, before the display step, and the
-        file format follows the extension.
+        Not handled by this low-level renderer, which only draws. Use
+        ``dataset.plot(output=...)`` to write the completed figure, or
+        ``plot_multiple()`` and ``multiplot()`` for overlays and grids.
     plot_model : Bool,
         plot model data if available.
     plottitle: bool, optional, default: False
@@ -1064,8 +1059,9 @@ def plot_multiple(
     ax : `~matplotlib.axes.Axes`, optional
         Axes to plot on. If None, a new figure is created.
     clear : `bool`, optional
-        Whether to clear the axes before plotting. Default: True.
-        Only used when ``ax`` is provided.
+        Whether to start from a clean figure. Default: True. An explicit
+        ``ax`` owns its figure and ignores this flag; without ``ax``,
+        ``clear=False`` reuses the current figure, as in ``dataset.plot()``.
     show : `bool`, optional
         Whether to display the figure. Default: True.
     output : `str` or `pathlib.Path`, optional
@@ -1092,7 +1088,12 @@ def plot_multiple(
 
     output = kwargs.pop("output", None)
 
-    if not is_sequence(datasets):
+    # A single dataset is not a list of datasets: NDDataset is iterable, so the
+    # is_sequence() test alone would iterate its values instead of delegating.
+    # This mirrors the guard used by multiplot().
+    from spectrochempy import NDDataset
+
+    if isinstance(datasets, NDDataset) or not is_sequence(datasets):
         return datasets.plot(
             method=method,
             pen=pen,
@@ -1101,6 +1102,8 @@ def plot_multiple(
             ls=ls,
             lw=lw,
             ax=ax,
+            clear=clear,
+            show=show,
             output=output,
             **kwargs,
         )

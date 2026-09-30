@@ -37,7 +37,10 @@ Bug Fixes
   extension, the existing ``savefig.*`` preferences drive resolution,
   background, and bounding box, and a missing parent directory is reported as
   an ``OSError`` instead of being created silently. ``multiplot()`` also
-  performs a single display step for the whole grid instead of one per panel
+  performs a single display step for the whole grid instead of one per panel,
+  and ``plot_multiple()`` given a single dataset now delegates to
+  ``dataset.plot()``, as documented, instead of iterating the values of the
+  dataset and dropping its ``show``, ``clear``, and ``output`` arguments
   (:pr:`1717`).
 
 

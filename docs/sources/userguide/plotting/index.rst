@@ -67,12 +67,15 @@ For day-to-day use, the plotting contract is:
   ``marker`` input can mean different things for lines, scatter plots, contour
   plots, and image-like plots.
 - ``ax``, ``clear``, and ``show`` control figure lifecycle for both ordinary
-  dataset plots and   composite plots (``plot_score``, ``plot_scree``,
+  dataset plots and composite plots (``plot_score``, ``plot_scree``,
   ``plot_compare``, ``plot_merit``, ``plot_baseline``, ``plot_parity``).
   Here ``show`` means "perform SpectroChemPy's explicit display step after
   plotting", not "guarantee figure visibility". In notebook environments,
   figures can still render inline without that explicit call.
-- ``output`` is the destination file of the finished figure. It accepts a
+- ``output`` is the destination file of the finished figure, and is accepted
+  by ``dataset.plot()``, ``plot_multiple()``, ``multiplot()``, and the
+  composite plots above. The low-level renderers listed above only draw and
+  ignore it, so route them through ``dataset.plot()``. It accepts a
   ``str`` or a ``pathlib.Path``, writes the whole figure once the plot is
   complete (legend, colorbars, and multi-panel layouts included), and does so
   before the display step. The format follows the extension, and the

@@ -66,10 +66,9 @@ def plot_surface(dataset, **kwargs):
     offset : float
         offset of the model individual lines.
     output : str or `pathlib.Path`, optional
-        File name where the completed figure is saved. `str` and
-        `pathlib.Path` are both accepted. The whole figure is written
-        once the plot is complete, before the display step, and the
-        file format follows the extension.
+        Not handled by this low-level renderer, which only draws. Use
+        ``dataset.plot(output=...)`` to write the completed figure, or
+        ``plot_multiple()`` and ``multiplot()`` for overlays and grids.
     plot_model : Bool,
         plot model data if available.
     plottitle: bool, optional, default: False
@@ -187,10 +186,9 @@ def plot_waterfall(dataset, **kwargs):
     offset : float
         offset of the model individual lines.
     output : str or `pathlib.Path`, optional
-        File name where the completed figure is saved. `str` and
-        `pathlib.Path` are both accepted. The whole figure is written
-        once the plot is complete, before the display step, and the
-        file format follows the extension.
+        Not handled by this low-level renderer, which only draws. Use
+        ``dataset.plot(output=...)`` to write the completed figure, or
+        ``plot_multiple()`` and ``multiplot()`` for overlays and grids.
     plot_model : Bool,
         plot model data if available.
     plottitle: bool, optional, default: False
@@ -329,10 +327,9 @@ def plot_3D(dataset, method="surface", **kwargs):
     offset : float
         offset of the model individual lines.
     output : str or `pathlib.Path`, optional
-        File name where the completed figure is saved. `str` and
-        `pathlib.Path` are both accepted. The whole figure is written
-        once the plot is complete, before the display step, and the
-        file format follows the extension.
+        Not handled by this low-level renderer, which only draws. Use
+        ``dataset.plot(output=...)`` to write the completed figure, or
+        ``plot_multiple()`` and ``multiplot()`` for overlays and grids.
     plot_model : Bool,
         plot model data if available.
     plottitle: bool, optional, default: False

@@ -100,10 +100,6 @@ def plot_compare(
         Residual offset as a percentage of the joint signal range.
     nb_traces : int or "all", default="all"
         Number of evenly spaced traces to display from 2D datasets.
-    output : str or `pathlib.Path`, optional
-        File name where the completed merit plot is saved. It cannot be
-        combined with an iterable of ``index`` values, because each index is
-        rendered in its own figure.
     **kwargs
         Additional rendering options passed to the line renderer.
 
@@ -409,6 +405,25 @@ def plot_merit(
     Plot merit for an analysis object.
 
     Delegates rendering to plot_compare().
+
+    Parameters
+    ----------
+    index : int or iterable of int, optional
+        Restricts the plot to one reconstruction, or to one figure per value
+        when an iterable is given. With no index, every reconstruction is
+        overlaid on a single axes.
+    output : str or `pathlib.Path`, optional
+        File name where the completed merit plot is saved. It cannot be
+        combined with an iterable of ``index`` values, because each index is
+        rendered in its own figure; pass one ``output`` per index in that
+        case.
+    **kwargs
+        Other parameters, such as ``ax``, ``clear``, ``title``,
+        ``show_yaxis``, and ``show``, are passed to `plot_compare()`.
+
+    See Also
+    --------
+    plot_compare : Standalone two-dataset comparison plot.
     """
 
     # Backward compatibility (old IRIS API)

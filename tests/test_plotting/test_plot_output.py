@@ -244,6 +244,115 @@ class TestSavedFigureContent:
 
 
 # ======================================================================================
+# plot_multiple: the single-dataset delegation keeps the lifecycle flags
+# ======================================================================================
+
+
+class TestPlotMultipleSingleDataset:
+    """A single dataset is delegated without losing ``show``, ``clear``, ``output``."""
+
+    def test_single_dataset_draws_one_trace(self, nd_1d):
+        """The delegation plots the dataset, not the values it iterates over."""
+        result = scp.plot_multiple(nd_1d, method="pen", show=False)
+
+        assert len(result.lines) == 1
+        assert list(result.lines[0].get_xdata()) == [0, 1, 2, 3]
+
+    def test_show_false_does_not_display(self, nd_1d, monkeypatch):
+        """``show=False`` must survive the delegation to ``dataset.plot()``."""
+        calls = []
+        monkeypatch.setattr(
+            "spectrochempy.utils.mplutils.show", lambda: calls.append(1)
+        )
+
+        scp.plot_multiple(nd_1d, show=False)
+
+        assert calls == []
+
+    def test_show_true_displays_once(self, nd_1d, monkeypatch):
+        calls = []
+        monkeypatch.setattr(
+            "spectrochempy.utils.mplutils.show", lambda: calls.append(1)
+        )
+
+        scp.plot_multiple(nd_1d, show=True)
+
+        assert len(calls) == 1
+
+    def test_output_is_written_without_display(self, nd_1d, tmp_path, monkeypatch):
+        _small_dpi()
+        target = tmp_path / "single.png"
+        calls = []
+        monkeypatch.setattr(
+            "spectrochempy.utils.mplutils.show", lambda: calls.append(1)
+        )
+
+        scp.plot_multiple(nd_1d, output=target, show=False)
+
+        assert _is_png(target)
+        assert calls == []
+
+    def test_explicit_axes_are_reused(self, nd_1d):
+        """An explicit ``ax`` is used as is, without creating another axes."""
+        figure = plt.figure()
+        ax = figure.add_subplot(111)
+
+        result = scp.plot_multiple(nd_1d, ax=ax, clear=False, show=False)
+
+        assert result is ax
+        assert result.get_figure() is figure
+
+    def test_clear_false_reuses_the_current_figure(self, nd_1d):
+        """``clear=False`` is forwarded, so the current figure is reused."""
+        figure = plt.figure()
+
+        result = scp.plot_multiple(nd_1d, clear=False, show=False)
+
+        assert result.get_figure() is figure
+
+    def test_default_clear_creates_a_figure(self, nd_1d, tmp_path):
+        """Without ``ax`` and with ``clear=True``, the delegation makes its own figure."""
+        _small_dpi()
+        target = tmp_path / "own_figure.png"
+        previous = plt.figure()
+
+        result = scp.plot_multiple(nd_1d, output=target, show=False)
+
+        assert result.get_figure() is not previous
+        assert _is_png(target)
+
+
+# ======================================================================================
+# the documented scope: low-level renderers only draw
+# ======================================================================================
+
+
+class TestOutputScopeBoundary:
+    """Pin the interfaces that write files, so the documentation cannot drift."""
+
+    def test_low_level_renderers_do_not_write(self, nd_1d, tmp_path):
+        """``plot_pen()`` and friends only draw: no file, no error."""
+        _small_dpi()
+
+        scp.plot_pen(nd_1d, output=tmp_path / "pen.png")
+        scp.plot_scatter(nd_1d, output=tmp_path / "scatter.png")
+
+        assert _files(tmp_path) == []
+
+    def test_dataset_plot_writes_for_every_dispatched_method(
+        self, nd_1d, nd_2d, tmp_path
+    ):
+        """The same intent through the dispatcher is what writes the file."""
+        _small_dpi()
+
+        nd_1d.plot(output=tmp_path / "pen.png", show=False)
+        nd_1d.plot(method="scatter", output=tmp_path / "scatter.png", show=False)
+        nd_2d.plot(method="map", output=tmp_path / "map.png", show=False)
+
+        assert _files(tmp_path) == ["map.png", "pen.png", "scatter.png"]
+
+
+# ======================================================================================
 # composite and multi-panel plotters
 # ======================================================================================
 
