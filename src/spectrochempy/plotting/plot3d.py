@@ -9,6 +9,7 @@ __all__ = ["plot_3D", "plot_surface", "plot_waterfall"]
 
 __dataset_methods__ = __all__
 
+from spectrochempy.plotting.dispatcher import plot_dataset as _plot_dataset
 
 # ======================================================================================
 # nddataset plot3D functions
@@ -66,9 +67,8 @@ def plot_surface(dataset, **kwargs):
     offset : float
         offset of the model individual lines.
     output : str or `pathlib.Path`, optional
-        Not handled by this low-level renderer, which only draws. Use
-        ``dataset.plot(output=...)`` to write the completed figure, or
-        ``plot_multiple()`` and ``multiplot()`` for overlays and grids.
+        Destination file for the completed figure. Saving and display use the
+        same lifecycle as ``dataset.plot(method=...)``.
     plot_model : Bool,
         plot model data if available.
     plottitle: bool, optional, default: False
@@ -132,7 +132,7 @@ def plot_surface(dataset, **kwargs):
     plot_image
     plot_waterfall
     """
-    return plot_3D(dataset, method="surface", **kwargs)
+    return _plot_dataset(dataset, method="surface", **kwargs)
 
 
 def plot_waterfall(dataset, **kwargs):
@@ -186,9 +186,8 @@ def plot_waterfall(dataset, **kwargs):
     offset : float
         offset of the model individual lines.
     output : str or `pathlib.Path`, optional
-        Not handled by this low-level renderer, which only draws. Use
-        ``dataset.plot(output=...)`` to write the completed figure, or
-        ``plot_multiple()`` and ``multiplot()`` for overlays and grids.
+        Destination file for the completed figure. Saving and display use the
+        same lifecycle as ``dataset.plot(method=...)``.
     plot_model : Bool,
         plot model data if available.
     plottitle: bool, optional, default: False
@@ -253,9 +252,7 @@ def plot_waterfall(dataset, **kwargs):
     plot_surface
 
     """
-    from spectrochempy.plotting.plot2d import plot_2D
-
-    return plot_2D(dataset, method="waterfall", **kwargs)
+    return _plot_dataset(dataset, method="waterfall", **kwargs)
 
 
 def plot_3D(dataset, method="surface", **kwargs):

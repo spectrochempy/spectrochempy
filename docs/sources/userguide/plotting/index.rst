@@ -73,15 +73,15 @@ For day-to-day use, the plotting contract is:
   plotting", not "guarantee figure visibility". In notebook environments,
   figures can still render inline without that explicit call.
 - ``output`` is the destination file of the finished figure, and is accepted
-  by ``dataset.plot()``, ``plot_multiple()``, ``multiplot()``, and the
-  composite plots above. The low-level renderers listed above only draw and
-  ignore it, so route them through ``dataset.plot()``. It accepts a
+  by ``dataset.plot()``, the explicit geometry helpers listed above,
+  ``plot_multiple()``, ``multiplot()``, and the composite plots. It accepts a
   ``str`` or a ``pathlib.Path``, writes the whole figure once the plot is
   complete (legend, colorbars, and multi-panel layouts included), and does so
   before the display step. The format follows the extension, and the
   ``savefig.*`` preferences control resolution, background, and bounding box.
   Missing parent directories are reported as an ``OSError`` instead of being
-  created silently.
+  created silently. The internal ``plot_1D()``, ``plot_2D()``, and
+  ``plot_3D()`` renderers remain draw-only implementation functions.
 - ``plot_multiple()`` overlays several datasets on one axes, while
   ``multiplot()`` creates a grid of axes.
 

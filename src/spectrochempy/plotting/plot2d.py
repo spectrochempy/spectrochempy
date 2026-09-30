@@ -38,6 +38,7 @@ from spectrochempy.plotting._render import render_lines
 from spectrochempy.plotting._style import resolve_2d_colormap
 from spectrochempy.plotting._style import resolve_line_style
 from spectrochempy.plotting._style import resolve_stack_colors
+from spectrochempy.plotting.dispatcher import plot_dataset as _plot_dataset
 from spectrochempy.utils.mplutils import make_label
 
 # ======================================================================================
@@ -352,9 +353,8 @@ def plot_lines(dataset, **kwargs):
     offset : float
         offset of the model individual lines.
     output : str or `pathlib.Path`, optional
-        Not handled by this low-level renderer, which only draws. Use
-        ``dataset.plot(output=...)`` to write the completed figure, or
-        ``plot_multiple()`` and ``multiplot()`` for overlays and grids.
+        Destination file for the completed figure. Saving and display use the
+        same lifecycle as ``dataset.plot(method=...)``.
     palette : {"auto", "categorical", "continuous"} or str or list, optional
         Color palette for stack plot (plot_lines only).
 
@@ -430,7 +430,7 @@ def plot_lines(dataset, **kwargs):
     plot_waterfall
     plot_stack
     """
-    return plot_2D(dataset, method="lines", **kwargs)
+    return _plot_dataset(dataset, method="lines", **kwargs)
 
 
 def plot_contour(dataset, **kwargs):
@@ -497,9 +497,8 @@ def plot_contour(dataset, **kwargs):
     offset : float
         offset of the model individual lines.
     output : str or `pathlib.Path`, optional
-        Not handled by this low-level renderer, which only draws. Use
-        ``dataset.plot(output=...)`` to write the completed figure, or
-        ``plot_multiple()`` and ``multiplot()`` for overlays and grids.
+        Destination file for the completed figure. Saving and display use the
+        same lifecycle as ``dataset.plot(method=...)``.
     plot_model : Bool,
         plot model data if available.
     plottitle: bool, optional, default: False
@@ -566,7 +565,7 @@ def plot_contour(dataset, **kwargs):
     plot_waterfall
     plot_map
     """
-    return plot_2D(dataset, method="contour", **kwargs)
+    return _plot_dataset(dataset, method="contour", **kwargs)
 
 
 def plot_contourf(dataset, **kwargs):
@@ -634,9 +633,8 @@ def plot_contourf(dataset, **kwargs):
     offset : float
         offset of the model individual lines.
     output : str or `pathlib.Path`, optional
-        Not handled by this low-level renderer, which only draws. Use
-        ``dataset.plot(output=...)`` to write the completed figure, or
-        ``plot_multiple()`` and ``multiplot()`` for overlays and grids.
+        Destination file for the completed figure. Saving and display use the
+        same lifecycle as ``dataset.plot(method=...)``.
     plot_model : Bool,
         plot model data if available.
     plottitle: bool, optional, default: False
@@ -703,7 +701,7 @@ def plot_contourf(dataset, **kwargs):
     plot_waterfall
     plot_image
     """
-    return plot_2D(dataset, method="contourf", **kwargs)
+    return _plot_dataset(dataset, method="contourf", **kwargs)
 
 
 # ======================================================================================
@@ -773,9 +771,8 @@ def plot_stack(dataset, **kwargs):
     offset : float
         offset of the model individual lines.
     output : str or `pathlib.Path`, optional
-        Not handled by this low-level renderer, which only draws. Use
-        ``dataset.plot(output=...)`` to write the completed figure, or
-        ``plot_multiple()`` and ``multiplot()`` for overlays and grids.
+        Destination file for the completed figure. Saving and display use the
+        same lifecycle as ``dataset.plot(method=...)``.
     palette : str or list, optional, default: None
         Color palette for stack plot. If None, auto-detect based on dataset.
         If "continuous": use continuous colormap (viridis).
@@ -846,7 +843,7 @@ def plot_stack(dataset, **kwargs):
     plot_surface
     plot_waterfall
     """
-    return plot_2D(dataset, method="stack", **kwargs)
+    return _plot_dataset(dataset, method="stack", **kwargs)
 
 
 def plot_map(dataset, **kwargs):
@@ -915,9 +912,8 @@ def plot_map(dataset, **kwargs):
     offset : float
         offset of the model individual lines.
     output : str or `pathlib.Path`, optional
-        Not handled by this low-level renderer, which only draws. Use
-        ``dataset.plot(output=...)`` to write the completed figure, or
-        ``plot_multiple()`` and ``multiplot()`` for overlays and grids.
+        Destination file for the completed figure. Saving and display use the
+        same lifecycle as ``dataset.plot(method=...)``.
     plot_model : Bool,
         plot model data if available.
     plottitle: bool, optional, default: False
@@ -980,7 +976,7 @@ def plot_map(dataset, **kwargs):
     plot_surface
     plot_waterfall
     """
-    return plot_2D(dataset, method="map", **kwargs)
+    return _plot_dataset(dataset, method="map", **kwargs)
 
 
 def plot_image(dataset, **kwargs):
@@ -1050,9 +1046,8 @@ def plot_image(dataset, **kwargs):
     offset : float
         offset of the model individual lines.
     output : str or `pathlib.Path`, optional
-        Not handled by this low-level renderer, which only draws. Use
-        ``dataset.plot(output=...)`` to write the completed figure, or
-        ``plot_multiple()`` and ``multiplot()`` for overlays and grids.
+        Destination file for the completed figure. Saving and display use the
+        same lifecycle as ``dataset.plot(method=...)``.
     plot_model : Bool,
         plot model data if available.
     plottitle: bool, optional, default: False
@@ -1115,7 +1110,7 @@ def plot_image(dataset, **kwargs):
     plot_surface
     plot_waterfall
     """
-    return plot_2D(dataset, method="image", **kwargs)
+    return _plot_dataset(dataset, method="image", **kwargs)
 
 
 def plot_2D(dataset, method=None, **kwargs):

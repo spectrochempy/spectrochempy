@@ -95,6 +95,9 @@ _ = ax.set_title(r"Beer-Lambert: $A = \epsilon c l$")
 # argument, which writes the finished figure to a file:
 #
 # - `ds.plot(output="spectrum.png")`, for any method it dispatches
+# - the equivalent geometry shortcuts, such as
+#   `ds.plot_pen(output="spectrum.png")` or
+#   `scp.plot_image(ds, output="map.png")`
 # - `scp.plot_multiple([ds, ds2], labels=["a", "b"], output="overlay.png")`
 # - `scp.multiplot([ds, ds2, ds3], output="grid.png")`
 # - the analysis methods, such as `pca.plot_score()`, `pca.plot_scree()`, and
@@ -103,10 +106,9 @@ _ = ax.set_title(r"Beer-Lambert: $A = \epsilon c l$")
 # - the standalone composite functions, such as `scp.plot_compare()` and
 #   `scp.plot_baseline()`
 #
-# Two limits are worth knowing. The low-level renderers called directly, such
-# as `scp.plot_pen()` or `scp.plot_image()`, only draw: they ignore `output`, so
-# route those calls through `ds.plot()`. And the IRIS plugin keeps its own
-# plotting methods, which are outside this contract.
+# The internal `plot_1D()`, `plot_2D()`, and `plot_3D()` renderers still only
+# draw; public geometry shortcuts route through the shared lifecycle. The IRIS
+# plugin keeps its own plotting methods, which are outside this contract.
 #
 # The file name is used as given: the format follows the extension, and a name
 # without extension is written with the `savefig.format` preference. Both `str`
@@ -123,7 +125,7 @@ from tempfile import TemporaryDirectory
 
 with TemporaryDirectory() as tmpdir:
     png_path = Path(tmpdir) / "spectrum.png"
-    _ = ds1.plot(output=png_path, show=False)
+    _ = ds1.plot_pen(output=png_path, show=False)
     print(f"wrote {png_path.name}: {png_path.stat().st_size} bytes")
 
 # %% [markdown]
