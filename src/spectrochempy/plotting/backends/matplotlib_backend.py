@@ -15,6 +15,7 @@ Current responsibility split:
 - `plot1d.py`, `plot2d.py`, and `plot3d.py` create matplotlib artists.
 """
 
+from importlib import import_module
 from typing import Any
 
 from spectrochempy.plotting._kwargs import normalize_plot_kwargs
@@ -29,41 +30,38 @@ from spectrochempy.utils.mplutils import _finalize_plot
 _WARNED_ALIASES = set()
 
 
-# Mapping of canonical dispatch keys to standalone plot functions.
-_PLOT_FUNCTIONS = {}
+# Canonical dispatch key -> (module, renderer name, renderer method string).
+# The dispatcher calls the renderer with the method already set, while the
+# public shortcuts (plot_pen, plot_map, ...) delegate through this same
+# lifecycle step. Storing names keeps this module free of any import of the
+# plot modules and prevents the shortcuts from recursing into the dispatcher.
+_PLOT_FUNCTIONS = {
+    "pen": ("spectrochempy.plotting.plot1d", "plot_1D", "pen"),
+    "scatter": ("spectrochempy.plotting.plot1d", "plot_1D", "scatter"),
+    "scatter_pen": (
+        "spectrochempy.plotting.plot1d",
+        "plot_1D",
+        "scatter_pen",
+    ),
+    "bar": ("spectrochempy.plotting.plot1d", "plot_1D", "bar"),
+    "multiple": ("spectrochempy.plotting.plot1d", "plot_multiple", None),
+    "lines": ("spectrochempy.plotting.plot2d", "plot_2D", "lines"),
+    "contour": ("spectrochempy.plotting.plot2d", "plot_2D", "contour"),
+    "contourf": ("spectrochempy.plotting.plot2d", "plot_2D", "contourf"),
+    "surface": ("spectrochempy.plotting.plot3d", "plot_3D", "surface"),
+    "waterfall": ("spectrochempy.plotting.plot2d", "plot_2D", "waterfall"),
+}
 
 
 def _get_plot_function(method: str):
-    """Lazily get the plot function for a given method."""
-    if method not in _PLOT_FUNCTIONS:
-        # Import all plot modules to populate the mapping
-        from spectrochempy.plotting import plot1d
-        from spectrochempy.plotting import plot2d
-        from spectrochempy.plotting import plot3d
+    """Return ``(renderer_callable, renderer_method)`` for a dispatch key."""
+    entry = _PLOT_FUNCTIONS.get(get_dispatch_method_key(method))
+    if entry is None:
+        return None
 
-        _PLOT_FUNCTIONS.update(
-            {
-                # Canonical 1D methods
-                "pen": plot1d.plot_pen,
-                "scatter": plot1d.plot_scatter,
-                "bar": plot1d.plot_bar,
-                "multiple": plot1d.plot_multiple,
-                "scatter_pen": plot1d.plot_scatter_pen,
-                # Canonical 2D methods
-                "lines": plot2d.plot_lines,
-                "contour": plot2d.plot_contour,
-                "contourf": plot2d.plot_contourf,
-                # Legacy 2D methods (deprecated, point to canonical functions)
-                "stack": plot2d.plot_stack,
-                "map": plot2d.plot_map,
-                "image": plot2d.plot_image,
-                # 3D methods
-                "surface": plot3d.plot_surface,
-                "waterfall": plot3d.plot_waterfall,
-            }
-        )
-
-    return _PLOT_FUNCTIONS.get(get_dispatch_method_key(method))
+    module_name, func_name, renderer_method = entry
+    func = getattr(import_module(module_name), func_name)
+    return func, renderer_method
 
 
 def plot_dataset_impl(
@@ -118,8 +116,8 @@ def plot_dataset_impl(
     method = normalize_backend_method(method, warned_aliases=_WARNED_ALIASES)
 
     # Get the standalone plot function
-    plot_func = _get_plot_function(method) if method else None
-    if plot_func is None:
+    plot_func_data = _get_plot_function(method) if method else None
+    if plot_func_data is None:
         from spectrochempy.utils._logging import error_
 
         error_(
@@ -132,8 +130,13 @@ def plot_dataset_impl(
     show = kwargs.pop("show", True)
     output = kwargs.pop("output", None)
 
-    # Call the standalone plot function with dataset as first argument
-    ax = plot_func(dataset, **kwargs)
+    # Call the renderer with the method already set, so the public shortcuts
+    # can delegate here without recursing into each other
+    plot_func, render_method = plot_func_data
+    if render_method is None:
+        ax = plot_func(dataset, **kwargs)
+    else:
+        ax = plot_func(dataset, method=render_method, **kwargs)
 
     # Save and/or display the completed figure
     _finalize_plot(ax, show=show, output=output)

@@ -6,12 +6,14 @@
 """
 Behavioral tests for the ``output`` contract of the plotting API.
 
-``output`` is documented on ``dataset.plot()`` and on the composite plotters.
-These tests check the *observable* result: a real image file appears at the
-requested path, it holds the whole figure rather than a bare axes, and it is
-written before any display step. The ``savefig`` preferences are checked
-through the produced files, not through mocks.
+``output`` is documented on ``dataset.plot()``, its geometry shortcuts, and
+the composite plotters. These tests check the *observable* result: a real image
+file appears at the requested path, it holds the whole figure rather than a
+bare axes, and it is written before any display step. The ``savefig``
+preferences are checked through the produced files, not through mocks.
 """
+
+import warnings
 
 import matplotlib
 
@@ -323,41 +325,110 @@ class TestPlotMultipleSingleDataset:
 
 
 # ======================================================================================
-# the documented scope: low-level renderers only draw
+# public geometry shortcuts share the dataset.plot lifecycle
 # ======================================================================================
 
 
-class TestOutputScopeBoundary:
-    """Pin the interfaces that write files, so the documentation cannot drift."""
+class TestPublicShortcutOutput:
+    """Public geometry shortcuts use the same lifecycle as ``dataset.plot``."""
 
-    def test_low_level_renderers_still_ignore_output(self, nd_1d, tmp_path):
-        """
-        Known gap: the direct renderers silently ignore ``output``.
-
-        This characterization is temporary, not an endorsed behavior. It keeps
-        a witness of the remaining defect until the public-shortcut
-        harmonization PR makes ``ds.plot_pen(output=...)`` equivalent to
-        ``ds.plot(method="pen", output=...)``. When that PR lands, this test
-        has to assert that a file is written instead.
-        """
-        _small_dpi()
-
-        scp.plot_pen(nd_1d, output=tmp_path / "pen.png")
-        scp.plot_scatter(nd_1d, output=tmp_path / "scatter.png")
-
-        assert _files(tmp_path) == []
-
-    def test_dataset_plot_writes_for_every_dispatched_method(
-        self, nd_1d, nd_2d, tmp_path
+    @pytest.mark.parametrize(
+        ("shortcut", "fixture_name"),
+        [
+            ("plot_pen", "nd_1d"),
+            ("plot_scatter", "nd_1d"),
+            ("plot_scatter_pen", "nd_1d"),
+            ("plot_bar", "nd_1d"),
+            ("plot_lines", "nd_2d"),
+            ("plot_contour", "nd_2d"),
+            ("plot_contourf", "nd_2d"),
+            ("plot_stack", "nd_2d"),
+            ("plot_map", "nd_2d"),
+            ("plot_image", "nd_2d"),
+            ("plot_surface", "nd_2d"),
+            ("plot_waterfall", "nd_2d"),
+        ],
+    )
+    def test_standalone_shortcut_writes_a_real_file(
+        self, shortcut, fixture_name, request, tmp_path
     ):
-        """The same intent through the dispatcher is what writes the file."""
+        """Every public geometry shortcut reaches the shared finalizer."""
         _small_dpi()
+        target = tmp_path / f"{shortcut}.png"
+        dataset = request.getfixturevalue(fixture_name)
 
-        nd_1d.plot(output=tmp_path / "pen.png", show=False)
-        nd_1d.plot(method="scatter", output=tmp_path / "scatter.png", show=False)
-        nd_2d.plot(method="map", output=tmp_path / "map.png", show=False)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            result = getattr(scp, shortcut)(dataset, output=target, show=False)
 
-        assert _files(tmp_path) == ["map.png", "pen.png", "scatter.png"]
+        assert isinstance(result, plt.Axes)
+        assert _is_png(target)
+
+    @pytest.mark.parametrize(
+        ("shortcut", "method", "fixture_name"),
+        [
+            ("plot_pen", "pen", "nd_1d"),
+            ("plot_image", "image", "nd_2d"),
+            ("plot_surface", "surface", "nd_2d"),
+        ],
+    )
+    def test_bound_shortcut_matches_explicit_method(
+        self, shortcut, method, fixture_name, request, tmp_path
+    ):
+        """The bound shortcut and explicit method both save and return axes."""
+        _small_dpi()
+        dataset = request.getfixturevalue(fixture_name)
+        shortcut_target = tmp_path / f"{shortcut}.png"
+        method_target = tmp_path / f"{method}.png"
+
+        shortcut_ax = getattr(dataset, shortcut)(
+            output=shortcut_target,
+            show=False,
+        )
+        method_ax = dataset.plot(method=method, output=method_target, show=False)
+
+        assert type(shortcut_ax) is type(method_ax)
+        assert _is_png(shortcut_target)
+        assert _is_png(method_target)
+
+    @pytest.mark.parametrize(("show", "expected_calls"), [(False, 0), (True, 1)])
+    def test_shortcut_display_step_runs_at_most_once(
+        self, nd_1d, monkeypatch, show, expected_calls
+    ):
+        calls = []
+        monkeypatch.setattr(
+            "spectrochempy.utils.mplutils.show", lambda: calls.append(1)
+        )
+
+        nd_1d.plot_pen(show=show)
+
+        assert len(calls) == expected_calls
+
+    def test_shortcut_saves_the_explicit_axes_figure(
+        self, nd_1d, tmp_path, clean_figures
+    ):
+        _small_dpi()
+        target = tmp_path / "shortcut-foreign.png"
+        foreign = plt.figure(figsize=(6, 2))
+        foreign_ax = foreign.add_subplot(111)
+        plt.figure(figsize=(8, 8))
+
+        result = nd_1d.plot_pen(ax=foreign_ax, output=target, show=False)
+
+        from PIL import Image
+
+        assert result is foreign_ax
+        assert Image.open(target).size == (int(6 * 72), int(2 * 72))
+
+    def test_internal_renderer_still_only_draws(self, nd_1d, tmp_path):
+        """The internal renderer stays free of save and display ownership."""
+        from spectrochempy.plotting.plot1d import plot_1D
+
+        target = tmp_path / "internal.png"
+        result = plot_1D(nd_1d, method="pen", output=target)
+
+        assert isinstance(result, plt.Axes)
+        assert not target.exists()
 
 
 # ======================================================================================

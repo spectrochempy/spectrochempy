@@ -30,6 +30,7 @@ from spectrochempy.plotting._kwargs import normalize_plot_kwargs
 from spectrochempy.plotting._kwargs import normalize_style_argument
 from spectrochempy.plotting._methods import validate_method_for_target_dimension
 from spectrochempy.plotting._style import resolve_line_style
+from spectrochempy.plotting.dispatcher import plot_dataset as _plot_dataset
 from spectrochempy.utils.mplutils import make_label
 from spectrochempy.utils.typeutils import is_sequence
 
@@ -604,9 +605,8 @@ def plot_scatter(dataset, **kwargs):
     offset : float
         offset of the model individual lines.
     output : str or `pathlib.Path`, optional
-        Not handled by this low-level renderer, which only draws. Use
-        ``dataset.plot(output=...)`` to write the completed figure, or
-        ``plot_multiple()`` and ``multiplot()`` for overlays and grids.
+        Destination file for the completed figure. Saving and display use the
+        same lifecycle as ``dataset.plot(method=...)``.
     plot_model : Bool,
         plot model data if available.
     plottitle: bool, optional, default: False
@@ -664,7 +664,7 @@ def plot_scatter(dataset, **kwargs):
     plot_multiple
     multiplot
     """
-    return plot_1D(dataset, method="scatter", **kwargs)
+    return _plot_dataset(dataset, method="scatter", **kwargs)
 
 
 def plot_pen(dataset, **kwargs):
@@ -719,9 +719,8 @@ def plot_pen(dataset, **kwargs):
     offset : float
         offset of the model individual lines.
     output : str or `pathlib.Path`, optional
-        Not handled by this low-level renderer, which only draws. Use
-        ``dataset.plot(output=...)`` to write the completed figure, or
-        ``plot_multiple()`` and ``multiplot()`` for overlays and grids.
+        Destination file for the completed figure. Saving and display use the
+        same lifecycle as ``dataset.plot(method=...)``.
     plot_model : Bool,
         plot model data if available.
     plottitle: bool, optional, default: False
@@ -779,7 +778,7 @@ def plot_pen(dataset, **kwargs):
     plot_multiple
     multiplot
     """
-    return plot_1D(dataset, method="pen", **kwargs)
+    return _plot_dataset(dataset, method="pen", **kwargs)
 
 
 def plot_scatter_pen(dataset, **kwargs):
@@ -833,9 +832,8 @@ def plot_scatter_pen(dataset, **kwargs):
     offset : float
         offset of the model individual lines.
     output : str or `pathlib.Path`, optional
-        Not handled by this low-level renderer, which only draws. Use
-        ``dataset.plot(output=...)`` to write the completed figure, or
-        ``plot_multiple()`` and ``multiplot()`` for overlays and grids.
+        Destination file for the completed figure. Saving and display use the
+        same lifecycle as ``dataset.plot(method=...)``.
     plot_model : Bool,
         plot model data if available.
     plottitle: bool, optional, default: False
@@ -893,7 +891,7 @@ def plot_scatter_pen(dataset, **kwargs):
     plot_multiple
     multiplot
     """
-    return plot_1D(dataset, method="scatter_pen", **kwargs)
+    return _plot_dataset(dataset, method="scatter_pen", **kwargs)
 
 
 def plot_bar(dataset, **kwargs):
@@ -947,9 +945,8 @@ def plot_bar(dataset, **kwargs):
     offset : float
         offset of the model individual lines.
     output : str or `pathlib.Path`, optional
-        Not handled by this low-level renderer, which only draws. Use
-        ``dataset.plot(output=...)`` to write the completed figure, or
-        ``plot_multiple()`` and ``multiplot()`` for overlays and grids.
+        Destination file for the completed figure. Saving and display use the
+        same lifecycle as ``dataset.plot(method=...)``.
     plot_model : Bool,
         plot model data if available.
     plottitle: bool, optional, default: False
@@ -1007,7 +1004,7 @@ def plot_bar(dataset, **kwargs):
     plot_multiple
     multiplot
     """
-    return plot_1D(dataset, method="bar", **kwargs)
+    return _plot_dataset(dataset, method="bar", **kwargs)
 
 
 def plot_multiple(
