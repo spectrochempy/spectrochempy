@@ -20,7 +20,7 @@ import numpy as np
 
 from spectrochempy.plotting._render import render_lines
 from spectrochempy.plotting._style import resolve_stack_colors
-from spectrochempy.utils.mplutils import _maybe_show
+from spectrochempy.utils.mplutils import _finalize_plot
 from spectrochempy.utils.mplutils import make_label
 
 
@@ -36,6 +36,7 @@ def plot_baseline(
     ax=None,
     clear=True,
     show=True,
+    output=None,
     linewidth=1.0,
     linestyle="-",
     baseline_linestyle="-",
@@ -69,6 +70,9 @@ def plot_baseline(
         If True, clear axes before plotting. Default is True.
     show : bool, optional
         If True, display the figure. Default is True.
+    output : str or `pathlib.Path`, optional
+        File name where the completed two-axes figure is saved. Saving happens
+        after both panels, the region shading, and the labels are drawn.
     linewidth : float, optional
         Line width for all lines. Default is 1.0.
     linestyle : str, optional
@@ -281,6 +285,6 @@ def plot_baseline(
         if reversed_flag:
             ax1.invert_xaxis()
 
-    _maybe_show(show)
+    _finalize_plot((ax1, ax2), show=show, output=output)
 
     return (ax1, ax2)

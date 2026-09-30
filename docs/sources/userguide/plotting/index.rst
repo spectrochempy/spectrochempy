@@ -72,6 +72,13 @@ For day-to-day use, the plotting contract is:
   Here ``show`` means "perform SpectroChemPy's explicit display step after
   plotting", not "guarantee figure visibility". In notebook environments,
   figures can still render inline without that explicit call.
+- ``output`` is the destination file of the finished figure. It accepts a
+  ``str`` or a ``pathlib.Path``, writes the whole figure once the plot is
+  complete (legend, colorbars, and multi-panel layouts included), and does so
+  before the display step. The format follows the extension, and the
+  ``savefig.*`` preferences control resolution, background, and bounding box.
+  Missing parent directories are reported as an ``OSError`` instead of being
+  created silently.
 - ``plot_multiple()`` overlays several datasets on one axes, while
   ``multiplot()`` creates a grid of axes.
 

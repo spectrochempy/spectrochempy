@@ -89,6 +89,70 @@ _ = ax.set_ylabel(r"$ \epsilon$ (mol$^{-1}$·L·cm$^{-1}$)")
 _ = ax.set_title(r"Beer-Lambert: $A = \epsilon c l$")
 
 # %% [markdown]
+# ## Saving Figures
+#
+# Every plotting function that returns axes or a figure accepts an `output`
+# argument, which writes the finished figure to a file:
+#
+# - `ds.plot(output="spectrum.png")`
+# - `scp.plot_multiple([ds, ds2], labels=["a", "b"], output="overlay.png")`
+# - `scp.multiplot([ds, ds2, ds3], output="grid.png")`
+#
+# The file name is used as given: the format follows the extension, and a name
+# without extension is written with the `savefig.format` preference. Both `str`
+# and `pathlib.Path` are accepted. Parent directories are never created
+# silently - a missing directory is reported as an `OSError`.
+#
+# The whole figure is written once the plot is complete, so legends, colorbars,
+# titles, and multi-panel layouts are all part of the file. Saving happens
+# before the display step, so combining `output` with `show=True` is safe.
+
+# %%
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+with TemporaryDirectory() as tmpdir:
+    png_path = Path(tmpdir) / "spectrum.png"
+    _ = ds1.plot(output=png_path, show=False)
+    print(f"wrote {png_path.name}: {png_path.stat().st_size} bytes")
+
+# %% [markdown]
+# Matplotlib decides the file format from the extension, and vector formats
+# stay vector:
+
+# %%
+with TemporaryDirectory() as tmpdir:
+    _ = ds1.plot(output=Path(tmpdir) / "spectrum.svg", show=False)
+    _ = ds1.plot(output=Path(tmpdir) / "spectrum.pdf", show=False)
+    print(sorted(p.name for p in Path(tmpdir).iterdir()))
+
+# %% [markdown]
+# The resolution, background, and bounding box of the written files come from
+# the `savefig` preferences, so publication settings are changed once for the
+# whole session:
+
+# %%
+prefs = scp.preferences
+print("savefig dpi:", prefs.savefig_dpi)
+print("savefig format:", prefs.savefig_format)
+print("savefig transparent:", prefs.savefig_transparent)
+
+# %%
+prefs.savefig_dpi = 150
+with TemporaryDirectory() as tmpdir:
+    _ = ds1.plot(output=Path(tmpdir) / "high_resolution.png", show=False)
+prefs.savefig_dpi = 300  # restore the default
+
+# %% [markdown]
+# For anything the `output` argument does not cover, keep using Matplotlib
+# directly on the returned axes or figure.
+
+# %%
+with TemporaryDirectory() as tmpdir:
+    ax = ds1.plot(show=False)
+    ax.figure.savefig(Path(tmpdir) / "manual.pdf", bbox_inches="tight")
+
+# %% [markdown]
 # ## Reproducibility
 #
 # Avoid modifying global Matplotlib state. Instead:
@@ -108,6 +172,7 @@ def plot_spectrum(dataset, title=None, output_path=None):
         linewidth=1.5,
         color="navy",
         grid=True,
+        output=output_path,
     )
     if title:
         ax.set_title(title)

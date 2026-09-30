@@ -10,8 +10,8 @@ Current responsibility split:
 
 - `_methods.py` normalizes plotting vocabulary;
 - `_kwargs.py` normalizes plotting keyword arguments;
-- this backend selects the plotter and owns the final `show` step for the
-  main dataset plotting path;
+- this backend selects the plotter and owns the final `show` and `output`
+  steps for the main dataset plotting path;
 - `plot1d.py`, `plot2d.py`, and `plot3d.py` create matplotlib artists.
 """
 
@@ -23,7 +23,7 @@ from spectrochempy.plotting._methods import get_dispatch_method_key
 from spectrochempy.plotting._methods import normalize_backend_method
 from spectrochempy.plotting.plot_setup import lazy_ensure_mpl_config
 from spectrochempy.plotting.profile import ensure_plot_profile_loaded
-from spectrochempy.utils.mplutils import show as mpl_show
+from spectrochempy.utils.mplutils import _finalize_plot
 
 # Track which aliases we've warned about (warn once per session)
 _WARNED_ALIASES = set()
@@ -86,6 +86,7 @@ def plot_dataset_impl(
         ``show`` controls whether SpectroChemPy performs its explicit display
         step after plotting. In notebook environments, figures may still
         render inline without that explicit call.
+        ``output`` is the destination file of the finished figure.
 
     Returns
     -------
@@ -127,14 +128,14 @@ def plot_dataset_impl(
         )
         raise OSError
 
-    # Handle show parameter
+    # Handle the lifecycle parameters owned by this layer
     show = kwargs.pop("show", True)
+    output = kwargs.pop("output", None)
 
     # Call the standalone plot function with dataset as first argument
     ax = plot_func(dataset, **kwargs)
 
-    # Show the figure if requested
-    if show:
-        mpl_show()
+    # Save and/or display the completed figure
+    _finalize_plot(ax, show=show, output=output)
 
     return ax

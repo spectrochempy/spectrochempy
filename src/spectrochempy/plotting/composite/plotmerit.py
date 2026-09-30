@@ -20,7 +20,7 @@ import numpy as np
 from matplotlib.lines import Line2D
 
 from spectrochempy.plotting._render import render_lines
-from spectrochempy.utils.mplutils import _maybe_show
+from spectrochempy.utils.mplutils import _finalize_plot
 from spectrochempy.utils.mplutils import _setup_axes
 from spectrochempy.utils.mplutils import make_label
 
@@ -39,6 +39,7 @@ def plot_compare(
     title=None,
     show_yaxis=True,
     show=True,
+    output=None,
     exp_c=None,
     calc_c=None,
     resid_c=None,
@@ -79,6 +80,9 @@ def plot_compare(
         Display the y-axis.
     show : bool, default=True
         Perform SpectroChemPy's explicit display step after plotting.
+    output : str or `pathlib.Path`, optional
+        File name where the completed comparison plot is saved. Saving
+        happens after the residual trace, title, and legend are drawn.
     exp_c, calc_c, resid_c : color, optional
         Colors of the experimental, comparison, and residual traces.
     exp_linestyle, calc_linestyle, resid_linestyle : str, optional
@@ -96,6 +100,10 @@ def plot_compare(
         Residual offset as a percentage of the joint signal range.
     nb_traces : int or "all", default="all"
         Number of evenly spaced traces to display from 2D datasets.
+    output : str or `pathlib.Path`, optional
+        File name where the completed merit plot is saved. It cannot be
+        combined with an iterable of ``index`` values, because each index is
+        rendered in its own figure.
     **kwargs
         Additional rendering options passed to the line renderer.
 
@@ -373,7 +381,7 @@ def plot_compare(
 
     ax.yaxis.set_visible(show_yaxis)
 
-    _maybe_show(show)
+    _finalize_plot(ax, show=show, output=output)
 
     return ax
 
@@ -394,6 +402,7 @@ def plot_merit(
     title=None,
     show_yaxis=True,
     show=True,
+    output=None,
     **kwargs,
 ):
     """
@@ -445,7 +454,7 @@ def plot_merit(
             if title is not None:
                 ax.set_title(title)
 
-            _maybe_show(show)
+            _finalize_plot(ax, show=show, output=output)
 
             return ax
 
@@ -461,11 +470,18 @@ def plot_merit(
                 title=title,
                 show_yaxis=show_yaxis,
                 show=show,
+                output=output,
                 **kwargs,
             )
 
         # Iterable of indices
         indices = list(index)
+        if output is not None:
+            raise ValueError(
+                "`output` cannot be used with an iterable of `index` values: "
+                "each index is rendered in its own figure. Plot one index at a "
+                "time, or call `plot_compare` directly.",
+            )
         axes_list = []
 
         for i in indices:
@@ -498,6 +514,7 @@ def plot_merit(
             title=title,
             show_yaxis=show_yaxis,
             show=show,
+            output=output,
             **kwargs,
         )
 

@@ -14,7 +14,7 @@ __all__ = ["plot_scree"]
 
 import numpy as np
 
-from spectrochempy.utils.mplutils import _maybe_show
+from spectrochempy.utils.mplutils import _finalize_plot
 from spectrochempy.utils.mplutils import _setup_axes
 
 
@@ -28,6 +28,7 @@ def plot_scree(
     bar_color="tab:blue",
     line_color="tab:orange",
     show=True,
+    output=None,
 ):
     """
     Plot a scree plot with explained variance bars and cumulative curve.
@@ -57,6 +58,9 @@ def plot_scree(
         Color for the cumulative line. Default: "tab:orange".
     show : bool, optional
         Whether to display the figure. Default: True.
+    output : str or `pathlib.Path`, optional
+        File name where the completed scree plot is saved. Saving happens
+        after the bars, the cumulative curve, and the secondary axis are drawn.
 
     Returns
     -------
@@ -108,6 +112,6 @@ def plot_scree(
     if title is not None:
         ax.set_title(title)
 
-    _maybe_show(show)
+    _finalize_plot(ax, show=show, output=output)
 
     return ax

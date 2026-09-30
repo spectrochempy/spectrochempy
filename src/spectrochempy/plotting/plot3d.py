@@ -65,8 +65,11 @@ def plot_surface(dataset, **kwargs):
         line style of the model.
     offset : float
         offset of the model individual lines.
-    output : str,
-        name of the file to save the figure.
+    output : str or `pathlib.Path`, optional
+        File name where the completed figure is saved. `str` and
+        `pathlib.Path` are both accepted. The whole figure is written
+        once the plot is complete, before the display step, and the
+        file format follows the extension.
     plot_model : Bool,
         plot model data if available.
     plottitle: bool, optional, default: False
@@ -183,8 +186,11 @@ def plot_waterfall(dataset, **kwargs):
         line style of the model.
     offset : float
         offset of the model individual lines.
-    output : str,
-        name of the file to save the figure.
+    output : str or `pathlib.Path`, optional
+        File name where the completed figure is saved. `str` and
+        `pathlib.Path` are both accepted. The whole figure is written
+        once the plot is complete, before the display step, and the
+        file format follows the extension.
     plot_model : Bool,
         plot model data if available.
     plottitle: bool, optional, default: False
@@ -322,8 +328,11 @@ def plot_3D(dataset, method="surface", **kwargs):
         line style of the model.
     offset : float
         offset of the model individual lines.
-    output : str,
-        name of the file to save the figure.
+    output : str or `pathlib.Path`, optional
+        File name where the completed figure is saved. `str` and
+        `pathlib.Path` are both accepted. The whole figure is written
+        once the plot is complete, before the display step, and the
+        file format follows the extension.
     plot_model : Bool,
         plot model data if available.
     plottitle: bool, optional, default: False

@@ -14,9 +14,11 @@ Responsibilities:
 - Custom Axes classes supporting pint quantities
 - Figure factory (headless-safe)
 - Explicit, non-invasive figure display helper
+- Shared figure saving, driven by the ``savefig`` preferences
 """
 
 from contextlib import suppress
+from os import PathLike
 
 __all__ = [
     "show",
@@ -233,6 +235,161 @@ def _maybe_show(do_show=True):
     """Display the current figure if *do_show* is *True*."""
     if do_show:
         show()
+
+
+def _resolve_save_figure(target):
+    """
+    Return the Matplotlib figure carrying a complete plot.
+
+    Plotting functions return an axes, a figure, or - for composite two-panel
+    layouts - a tuple of axes belonging to a single figure. This helper maps any
+    of those results to the figure that must be written to disk, so that saving
+    never depends on which figure happens to be globally active.
+
+    Parameters
+    ----------
+    target : `~matplotlib.figure.Figure`, `~matplotlib.axes.Axes`, or sequence of Axes
+        Result of a plotting call.
+
+    Returns
+    -------
+    `~matplotlib.figure.Figure`
+        Figure that holds the whole plot.
+
+    Raises
+    ------
+    TypeError
+        If *target* is not a figure, an axes, or a sequence of axes.
+    ValueError
+        If a sequence of axes is given whose members belong to different figures.
+    """
+    from matplotlib.axes import Axes
+    from matplotlib.figure import Figure
+
+    if isinstance(target, Figure):
+        return target
+
+    if isinstance(target, Axes):
+        return target.figure
+
+    if isinstance(target, (tuple, list)):
+        figures = []
+        for item in target:
+            figure = _resolve_save_figure(item)
+            if not any(figure is known for known in figures):
+                figures.append(figure)
+        if len(figures) > 1:
+            raise ValueError(
+                "A single output file cannot hold panels belonging to different "
+                "figures. Use one `output` per figure.",
+            )
+        if not figures:
+            raise ValueError("No figure to save.")
+        return figures[0]
+
+    raise TypeError(
+        f"Cannot determine the figure to save from a {type(target).__name__} object.",
+    )
+
+
+def _save_figure(fig, output):
+    """
+    Save *fig* to *output* using the SpectroChemPy ``savefig`` preferences.
+
+    This is the single place where SpectroChemPy writes figure files. It only
+    forwards the ``savefig`` preferences to :meth:`~matplotlib.figure.Figure.savefig`
+    so that formats, extensions, and overwrite behaviour stay those of
+    Matplotlib: the file is written exactly at *output*, an existing file is
+    overwritten, and missing parent directories are reported rather than
+    created.
+
+    Parameters
+    ----------
+    fig : `~matplotlib.figure.Figure`
+        Figure to write.
+    output : str or `pathlib.Path`
+        Destination file. ``str`` and :class:`pathlib.Path` are both accepted,
+        following the SpectroChemPy path conventions.
+
+    Raises
+    ------
+    TypeError
+        If *output* is neither a string nor a path-like object.
+    OSError
+        If the file cannot be written. The original error is chained.
+    """
+    from spectrochempy.application.preferences import preferences as prefs
+    from spectrochempy.utils.file import pathclean
+
+    if not isinstance(output, (str, PathLike)):
+        raise TypeError(
+            f"`output` must be a str or a pathlib.Path, not {type(output).__name__}.",
+        )
+
+    path = pathclean(str(output))
+
+    # The `savefig` preferences are declared as text traits, while Matplotlib
+    # expects a number for `dpi` and `None`, "tight", or a Bbox for
+    # `bbox_inches`. Translate the legacy values once, here.
+    dpi = prefs.savefig_dpi
+    if isinstance(dpi, str) and dpi != "figure":
+        dpi = float(dpi)
+
+    bbox_inches = prefs.savefig_bbox
+    if bbox_inches == "standard":
+        # "standard" means the full figure, which is the Matplotlib default.
+        bbox_inches = None
+
+    transparent = prefs.savefig_transparent
+
+    savefig_options = {
+        "dpi": dpi,
+        "bbox_inches": bbox_inches,
+        "pad_inches": prefs.savefig_pad_inches,
+        "transparent": transparent,
+    }
+    if not transparent:
+        # Matplotlib already makes the whole figure transparent when
+        # `transparent=True`; an explicit background color would defeat it.
+        savefig_options["facecolor"] = prefs.savefig_facecolor
+        savefig_options["edgecolor"] = prefs.savefig_edgecolor
+
+    # Without a suffix Matplotlib cannot infer a format: fall back on the
+    # configured default format rather than renaming the requested file.
+    if not path.suffix:
+        savefig_options["format"] = prefs.savefig_format
+
+    try:
+        fig.savefig(path, **savefig_options)
+    except Exception as exc:
+        message = f"Could not save the figure to '{path}': {exc}"
+        error_type = type(exc) if isinstance(exc, OSError) else OSError
+        raise error_type(message) from exc
+
+
+def _finalize_plot(target, *, show=True, output=None):
+    """
+    Shared final step of a plotting call: optional saving, then optional display.
+
+    Both the dataset plotting backend and the composite plotters close their
+    plot with this helper, so ``show`` and ``output`` behave identically
+    everywhere. Saving happens before any blocking display so that the file is
+    on disk even when ``show=True`` keeps a window open.
+
+    Parameters
+    ----------
+    target : `~matplotlib.figure.Figure`, `~matplotlib.axes.Axes`, or sequence of Axes
+        Completed plot, as returned by the plotting function.
+    show : bool, optional, default: True
+        Whether SpectroChemPy should perform its explicit display step.
+    output : str or `pathlib.Path`, optional
+        Destination file for the whole figure. When given, the figure is saved
+        once the plot is complete - after all panels, legends, and colorbars.
+    """
+    if output is not None:
+        _save_figure(_resolve_save_figure(target), output)
+
+    _maybe_show(show)
 
 
 def _apply_window_position(fig, prefs):

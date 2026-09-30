@@ -351,8 +351,11 @@ def plot_lines(dataset, **kwargs):
         line style of the model.
     offset : float
         offset of the model individual lines.
-    output : str,
-        name of the file to save the figure.
+    output : str or `pathlib.Path`, optional
+        File name where the completed figure is saved. `str` and
+        `pathlib.Path` are both accepted. The whole figure is written
+        once the plot is complete, before the display step, and the
+        file format follows the extension.
     palette : {"auto", "categorical", "continuous"} or str or list, optional
         Color palette for stack plot (plot_lines only).
 
@@ -494,8 +497,11 @@ def plot_contour(dataset, **kwargs):
         line style of the model.
     offset : float
         offset of the model individual lines.
-    output : str,
-        name of the file to save the figure.
+    output : str or `pathlib.Path`, optional
+        File name where the completed figure is saved. `str` and
+        `pathlib.Path` are both accepted. The whole figure is written
+        once the plot is complete, before the display step, and the
+        file format follows the extension.
     plot_model : Bool,
         plot model data if available.
     plottitle: bool, optional, default: False
@@ -629,8 +635,11 @@ def plot_contourf(dataset, **kwargs):
         line style of the model.
     offset : float
         offset of the model individual lines.
-    output : str,
-        name of the file to save the figure.
+    output : str or `pathlib.Path`, optional
+        File name where the completed figure is saved. `str` and
+        `pathlib.Path` are both accepted. The whole figure is written
+        once the plot is complete, before the display step, and the
+        file format follows the extension.
     plot_model : Bool,
         plot model data if available.
     plottitle: bool, optional, default: False
@@ -766,8 +775,11 @@ def plot_stack(dataset, **kwargs):
         line style of the model.
     offset : float
         offset of the model individual lines.
-    output : str,
-        name of the file to save the figure.
+    output : str or `pathlib.Path`, optional
+        File name where the completed figure is saved. `str` and
+        `pathlib.Path` are both accepted. The whole figure is written
+        once the plot is complete, before the display step, and the
+        file format follows the extension.
     palette : str or list, optional, default: None
         Color palette for stack plot. If None, auto-detect based on dataset.
         If "continuous": use continuous colormap (viridis).
@@ -906,8 +918,11 @@ def plot_map(dataset, **kwargs):
         line style of the model.
     offset : float
         offset of the model individual lines.
-    output : str,
-        name of the file to save the figure.
+    output : str or `pathlib.Path`, optional
+        File name where the completed figure is saved. `str` and
+        `pathlib.Path` are both accepted. The whole figure is written
+        once the plot is complete, before the display step, and the
+        file format follows the extension.
     plot_model : Bool,
         plot model data if available.
     plottitle: bool, optional, default: False
@@ -1039,8 +1054,11 @@ def plot_image(dataset, **kwargs):
         line style of the model.
     offset : float
         offset of the model individual lines.
-    output : str,
-        name of the file to save the figure.
+    output : str or `pathlib.Path`, optional
+        File name where the completed figure is saved. `str` and
+        `pathlib.Path` are both accepted. The whole figure is written
+        once the plot is complete, before the display step, and the
+        file format follows the extension.
     plot_model : Bool,
         plot model data if available.
     plottitle: bool, optional, default: False
@@ -1174,8 +1192,11 @@ def plot_2D(dataset, method=None, **kwargs):
         line style of the model.
     offset : float
         offset of the model individual lines.
-    output : str,
-        name of the file to save the figure.
+    output : str or `pathlib.Path`, optional
+        File name where the completed figure is saved. `str` and
+        `pathlib.Path` are both accepted. The whole figure is written
+        once the plot is complete, before the display step, and the
+        file format follows the extension.
     plot_model : Bool,
         plot model data if available.
     plottitle: bool, optional, default: False

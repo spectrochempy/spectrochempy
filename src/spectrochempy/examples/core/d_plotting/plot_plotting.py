@@ -8,11 +8,12 @@
 Introduction to the plotting library
 ====================================
 
-This short gallery example shows three common ideas:
+This short gallery example shows four common ideas:
 
 - the default ``dataset.plot()`` entry point;
 - per-call style changes that do not mutate later plots;
-- ``plot_multiple()`` overlaying several 1D datasets on one shared axes.
+- ``plot_multiple()`` overlaying several 1D datasets on one shared axes;
+- saving any of them to a file with ``output``.
 """
 
 import numpy as np
@@ -48,6 +49,27 @@ datasets = [dataset[index] for index in sample_indices]
 labels = [f"sample {index}" for index in sample_indices]
 
 _ = scp.plot_multiple(method="scatter", datasets=datasets, labels=labels, legend="best")
+
+# %%
+# Saving a figure with ``output``
+# -------------------------------
+# The ``output`` argument writes the finished figure to a file: the whole
+# figure, legend included, written before any display step. ``str`` and
+# ``pathlib.Path`` are both accepted, and the format follows the extension.
+
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+with TemporaryDirectory() as tmpdir:
+    _ = scp.plot_multiple(
+        method="scatter",
+        datasets=datasets,
+        labels=labels,
+        legend="best",
+        output=Path(tmpdir) / "overlay.png",
+        show=False,
+    )
+    # `output` also works on `dataset.plot` and on `multiplot`.
 
 # %%
 # The style change applies only to this call:
