@@ -1754,17 +1754,25 @@ class TestNoCondaDevelopmentPublication:
         assert '-l "dev"' not in workflow
         assert "Upload plugin dev package" not in workflow
 
-    def test_core_upload_is_release_only(self):
+    def test_core_upload_is_stable_release_only(self):
         import yaml
 
         workflow = yaml.safe_load(self._workflow())
+        detector = workflow["jobs"]["detect-release-scope"]
+        assert "is_stable_core_release" in detector["outputs"]
+        detect_step = next(
+            step for step in detector["steps"] if step["name"] == "Detect release type"
+        )
+        assert "stable-tag-version" in detect_step["run"]
         steps = workflow["jobs"]["build_and_publish_conda_package"]["steps"]
         upload = next(
             step for step in steps if step["name"] == "Upload to Anaconda.org"
         )
         condition = upload["if"]
         assert "github.event_name == 'release'" in condition
+        assert "is_stable_core_release == 'true'" in condition
         assert "github.event_name == 'push'" not in condition
+        assert "startsWith(github.ref_name, 'spectrochempy-v')" not in condition
 
 
 # ---------------------------------------------------------------------------

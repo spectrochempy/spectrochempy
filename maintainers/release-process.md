@@ -447,9 +447,10 @@ Pour publier une **release candidate** (ex. `1.0.0rc1`, avant la finale
    **prerelease** (flag automatique dérivé de la version) :
    - Tag : `spectrochempy-vX.Y.ZrcN`
    - Titre : `SpectroChemPy vX.Y.ZrcN`
-3. Publier la Draft comme d'habitude — la publication déclenche PyPI,
-   Anaconda.org et les docs. PyPI reçoit une version `X.Y.ZrcN`
-   (PEP 440, plus récente que les dev mais plus vieille que la finale).
+3. Publier la Draft comme d'habitude — la publication déclenche PyPI et les
+   docs. PyPI reçoit une version `X.Y.ZrcN` (PEP 440, plus récente que les dev
+   mais plus vieille que la finale). Le paquet Conda de la RC reste un
+   artefact CI : le label `main` est réservé aux releases finales stables.
 4. Zenodo **ignore automatiquement les prereleases GitHub** : aucune
    archive DOI n'est produite pour l'RC (comportement de l'intégration
    Zenodo). Ce n'est pas une erreur.
@@ -1142,6 +1143,9 @@ entrées sont incorrectes car :
 
 ### Conda plugin builds
 
+- [ ] Le label Conda `main` reçoit uniquement les releases finales stables du
+      core et les releases stables du seul plugin concerné. Les prereleases et
+      paquets de développement restent des artefacts CI temporaires.
 - [ ] Sur les pushes et pull requests, `build_package.yml` construit les
       plugins conda comme **vérification de compatibilité**. Ces paquets restent
       des artefacts CI et ne sont pas publiés sur Anaconda.org.

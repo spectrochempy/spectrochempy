@@ -4,7 +4,8 @@
 #
 # Conda publication strategy:
 #   - Core non-release builds (pushes, PRs) are retained as CI artifacts only.
-#   - Core release builds are uploaded to the main (stable) label only.
+#   - Final core release builds are uploaded to the main (stable) label only.
+#   - Core prerelease builds are retained as CI artifacts only.
 #   - Plugin release builds are uploaded to the main label only.
 #   - Plugin dev builds use temporary next-patch .devN versions derived from
 #     plugin tags for validation and are retained as CI artifacts only.
@@ -91,6 +92,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       is_core_release: ${{ steps.detect.outputs.is_core_release }}
+      is_stable_core_release: ${{ steps.detect.outputs.is_stable_core_release }}
       is_plugin_release: ${{ steps.detect.outputs.is_plugin_release }}
       plugin_name: ${{ steps.detect.outputs.plugin_name }}
       plugin_version: ${{ steps.detect.outputs.plugin_version }}
@@ -128,6 +130,15 @@ jobs:
             echo "is_core_release=false" >> "$GITHUB_OUTPUT"
             echo "is_plugin_release=false" >> "$GITHUB_OUTPUT"
             echo "Detected: non-release event (${{ github.event_name }}, ref=${{ github.ref_name }})"
+          fi
+
+          if [[ "${{ github.event_name }}" == "release" ]] &&
+             python3 .github/workflows/scripts/release_version.py \
+               stable-tag-version "${{ github.ref_name }}" >/dev/null; then
+            echo "is_stable_core_release=true" >> "$GITHUB_OUTPUT"
+            echo "Detected: final core release eligible for Conda main"
+          else
+            echo "is_stable_core_release=false" >> "$GITHUB_OUTPUT"
           fi
 
   build-and-publish_pypi:
@@ -209,7 +220,7 @@ jobs:
 
   build_and_publish_conda_package:
     name: Build and publish conda package to Anaconda.org
-    needs: classify-pr-scope
+    needs: [classify-pr-scope, detect-release-scope]
     if: >
       (github.repository == 'spectrochempy/spectrochempy' ||
       github.event_name == 'workflow_dispatch') &&
@@ -287,7 +298,7 @@ jobs:
         if: |
           github.repository == 'spectrochempy/spectrochempy' &&
           github.event_name == 'release' &&
-          startsWith(github.ref_name, 'spectrochempy-v')
+          needs.detect-release-scope.outputs.is_stable_core_release == 'true'
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
         run: |
