@@ -206,6 +206,10 @@ def multiplot(
         Whether SpectroChemPy should perform its explicit display step after
         plotting. In notebook environments, figures may still render inline
         without this explicit call.
+    output : str or `pathlib.Path`, optional
+        File name where the whole grid is saved. Saving happens once every
+        panel is drawn and the layout is finalized, so titles, shared limits,
+        and the tight layout are part of the file.
     **kwargs
         Additional figure-layout, style, and dataset-plot options.
 
@@ -237,10 +241,10 @@ def multiplot(
 
     from spectrochempy.application.preferences import preferences as prefs
     from spectrochempy.utils.mplutils import get_figure
-    from spectrochempy.utils.mplutils import show as mpl_show
 
     kwargs = normalize_plot_kwargs(kwargs)
     user_show = kwargs.pop("show", True)
+    user_output = kwargs.pop("output", None)
 
     # Resolve plotting style(s) locally (do not mutate global rcParams)
     style = normalize_style_argument(kwargs.pop("style", None), default=["scpy"])
@@ -309,7 +313,12 @@ def multiplot(
             current_method = normalize_multiplot_method(
                 method, getattr(datasets[0], "ndim", None)
             )
-            return datasets[0].plot(method=current_method, **kwargs)
+            return datasets[0].plot(
+                method=current_method,
+                show=user_show,
+                output=user_output,
+                **kwargs,
+            )
         if nrow * ncol < len(datasets):
             nrow = ncol = len(datasets) // 2
             if nrow * ncol < len(datasets):
@@ -482,6 +491,8 @@ def multiplot(
                     autolayout=False,
                     colorbar=colorbar,
                     data_transposed=transposed,
+                    # the grid owns the single display step performed at the end
+                    show=False,
                     **kwargs,
                 )
 
@@ -579,8 +590,10 @@ def multiplot(
             fig.canvas.mpl_connect("figure_enter_event", _onenter)
             fig.canvas.mpl_connect("figure_leave_event", _onenter)
 
-        if user_show:
-            mpl_show()
+        if user_show or user_output is not None:
+            from spectrochempy.utils.mplutils import _finalize_plot
+
+            _finalize_plot(fig, show=user_show, output=user_output)
 
         # Return based on contract
         if return_dict:

@@ -15,7 +15,7 @@ __all__ = ["plot_parity", "parityplot"]
 
 
 from spectrochempy.utils.decorators import deprecated
-from spectrochempy.utils.mplutils import _maybe_show
+from spectrochempy.utils.mplutils import _finalize_plot
 from spectrochempy.utils.mplutils import _setup_axes
 
 
@@ -26,6 +26,7 @@ def plot_parity(
     ax=None,
     clear=True,
     show=True,
+    output=None,
     s=None,
     c=None,
     marker=None,
@@ -59,6 +60,9 @@ def plot_parity(
         Only used when ``ax`` is provided.
     show : `bool`, optional
         Whether to display the figure. Default: True.
+    output : str or `pathlib.Path`, optional
+        File name where the completed parity plot is saved. Saving happens
+        after the reference line, the legend, and the labels are drawn.
     s : `float` or array-like, optional
         Marker size in points**2.
     c : array-like or list of colors, optional
@@ -135,7 +139,7 @@ def plot_parity(
     ax.set_ylabel("predicted values")
     ax.figure.tight_layout()
 
-    _maybe_show(show)
+    _finalize_plot(ax, show=show, output=output)
     return ax
 
 

@@ -65,8 +65,10 @@ def plot_surface(dataset, **kwargs):
         line style of the model.
     offset : float
         offset of the model individual lines.
-    output : str,
-        name of the file to save the figure.
+    output : str or `pathlib.Path`, optional
+        Not handled by this low-level renderer, which only draws. Use
+        ``dataset.plot(output=...)`` to write the completed figure, or
+        ``plot_multiple()`` and ``multiplot()`` for overlays and grids.
     plot_model : Bool,
         plot model data if available.
     plottitle: bool, optional, default: False
@@ -183,8 +185,10 @@ def plot_waterfall(dataset, **kwargs):
         line style of the model.
     offset : float
         offset of the model individual lines.
-    output : str,
-        name of the file to save the figure.
+    output : str or `pathlib.Path`, optional
+        Not handled by this low-level renderer, which only draws. Use
+        ``dataset.plot(output=...)`` to write the completed figure, or
+        ``plot_multiple()`` and ``multiplot()`` for overlays and grids.
     plot_model : Bool,
         plot model data if available.
     plottitle: bool, optional, default: False
@@ -322,8 +326,10 @@ def plot_3D(dataset, method="surface", **kwargs):
         line style of the model.
     offset : float
         offset of the model individual lines.
-    output : str,
-        name of the file to save the figure.
+    output : str or `pathlib.Path`, optional
+        Not handled by this low-level renderer, which only draws. Use
+        ``dataset.plot(output=...)`` to write the completed figure, or
+        ``plot_multiple()`` and ``multiplot()`` for overlays and grids.
     plot_model : Bool,
         plot model data if available.
     plottitle: bool, optional, default: False

@@ -15,7 +15,7 @@ __all__ = ["plot_score"]
 import numpy as np
 from matplotlib.lines import Line2D
 
-from spectrochempy.utils.mplutils import _maybe_show
+from spectrochempy.utils.mplutils import _finalize_plot
 from spectrochempy.utils.mplutils import _setup_axes
 
 
@@ -36,6 +36,7 @@ def plot_score(
     s=None,
     alpha=None,
     show=True,
+    output=None,
     **kwargs,
 ):
     """
@@ -89,6 +90,9 @@ def plot_score(
         Transparency (0-1) for scatter points. If None, fully opaque.
     show : bool, optional
         Whether to display the figure. Default: True.
+    output : str or `pathlib.Path`, optional
+        File name where the completed plot is saved. Saving happens after the
+        points, and any label annotations, are drawn.
     **kwargs
         Additional keyword arguments passed to ``ax.scatter``.
 
@@ -337,6 +341,6 @@ def plot_score(
                     fontsize=8,
                 )
 
-    _maybe_show(show)
+    _finalize_plot(ax, show=show, output=output)
 
     return ax
