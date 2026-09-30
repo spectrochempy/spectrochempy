@@ -30,7 +30,8 @@ Bug Fixes
   ``spectrochempy.plot_image()`` now share the save and display lifecycle of
   the equivalent ``dataset.plot(method=...)`` call. They honor ``output`` and
   ``show`` once, return the same Matplotlib axes, and keep the internal
-  ``plot_1D()``, ``plot_2D()``, and ``plot_3D()`` renderers focused on drawing.
+  ``plot_1D()``, ``plot_2D()``, and ``plot_3D()`` renderers focused on drawing
+  (:pr:`1720`).
 
 - ``output`` is now honored by the plotting API. ``dataset.plot()``,
   ``plot_multiple()``, ``multiplot()``, and the composite plotters
