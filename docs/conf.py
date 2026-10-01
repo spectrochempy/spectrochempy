@@ -97,6 +97,14 @@ build_gallery = PROFILE in ("full", "gallery")
 # Absolute base URL of the companion project, so the two sites can link to each
 # other. Left empty when the companion project is not known yet, in which case
 # the pages keep their in-tree references.
+#
+# The value must be a fully versioned URL, language and version included, for
+# example ``https://spectrochempy.readthedocs.io/en/latest``. A bare project
+# root is not enough: Read the Docs serves a documentation tree under
+# ``/<language>/<version-slug>/`` and does not serve ``/<language>/<page>``, so
+# links to a specific page of the companion would end up on a 404. See
+# docs/rtd/README.md for how the version slug is derived from a prefixed
+# release tag.
 main_docs_url = os.environ.get("SCPY_DOCS_MAIN_URL", "").strip().rstrip("/")
 gallery_docs_url = os.environ.get("SCPY_DOCS_GALLERY_URL", "").strip().rstrip("/")
 

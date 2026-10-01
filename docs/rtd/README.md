@@ -29,18 +29,62 @@ Both projects need a GitHub App integration for PR previews. Enable
 *Admin > Settings > Integrations > Add your integration*, and enable
 previews under *Settings > Pull request previews*.
 
-The `https://spectrochempy.readthedocs.io` and
-`https://spectrochempy-gallery.readthedocs.io` URLs in the two configuration
-files must be updated to the slugs actually created, because the projects link to
-each other. Keep them without a trailing slash.
+The `https://spectrochempy.readthedocs.io/en/latest` and
+`https://spectrochempy-gallery.readthedocs.io/en/latest` URLs in the two
+configuration files must be updated to the slugs actually created, because the
+projects link to each other. Keep them without a trailing slash.
 
-## Version selection
+## Versions
 
-Read the Docs derives versions from branches and tags. The release tags of this
-repository are prefixed (`spectrochempy-v1.1.1`), which is not the semantic
-versioning form the automatic `stable` selection expects. Until the tag scheme
-is validated on Read the Docs, **select the `stable` version manually** in the
-dashboard and verify that plugin tags do not become active versions.
+Three separate mechanisms are involved. They are not interchangeable.
+
+**Versions come from branches and tags.** Every branch and every tag of the
+repository becomes a version, created as *inactive* and *not hidden*. The plugin
+tags (`spectrochempy-nmr-v0.1.13` and the others) are tags too, so they become
+versions as well and must be deactivated explicitly, or each of them will build
+and consume build quota.
+
+**The default version** is a dashboard setting. The bare project URL redirects
+to it. It defaults to `latest`, which points at the default branch of the
+repository, and can be changed to any active version.
+
+**`stable`** is a reserved version name with a fixed slug. It is created
+automatically only when the repository has a tag or branch whose name follows
+semantic versioning, with or without a `v` prefix. The release tags of this
+repository are prefixed (`spectrochempy-v1.1.1`), so that automatic selection
+does not fire. To get a `stable` version, [create a tag or a branch named
+`stable`](https://docs.readthedocs.com/platform/stable/versions.html) in the
+repository; if both exist, the tag wins. The slug of `stable` is managed by
+Read the Docs and cannot be renamed. Choosing a default version is a different
+action and does not create a `stable` version.
+
+A release is therefore published by two independent steps: activate the version
+for the release tag, and either point the default version at it or move the
+`stable` tag/branch. This prototype does not decide between them, and it does
+not create the `stable` tag or branch.
+
+### Version slugs and cross-project links
+
+The slug is derived from the branch or tag name, lowercased, with `/` replaced
+by `-`. A release tag therefore yields the slug of the whole prefixed name:
+
+| Git ref | Version slug | URL path |
+|---|---|---|
+| default branch | `latest` | `/en/latest/` |
+| tag `spectrochempy-v1.1.1` | `spectrochempy-v1.1.1` | `/en/spectrochempy-v1.1.1/` |
+| tag or branch `stable` | `stable` | `/en/stable/` |
+
+This is why `SCPY_DOCS_MAIN_URL` and `SCPY_DOCS_GALLERY_URL` must be fully
+versioned. Read the Docs serves a documentation tree under
+`/<language>/<version-slug>/` and does **not** serve `/<language>/<page>`, so a
+bare project root plus `/userguide/...` is a 404. Both configuration files
+therefore use the `/en/latest` form.
+
+For the first trial both projects link to `latest`, which is enough to check that
+the cross-project links resolve. A release page should instead link to the
+companion release, so a `1.1.1` page links to the companion
+`spectrochempy-v1.1.1` and not to `latest`. That mapping, and the default
+version or `stable` tag that goes with it, is not implemented yet.
 
 ## Profiles
 
@@ -64,7 +108,9 @@ Two companion URLs are read from the environment:
 | `SCPY_DOCS_GALLERY_URL` | `main` | links the guides to the published gallery |
 
 Both are optional. When a URL is missing the cross-project reference is replaced
-by plain text, so a build never fails on an unresolvable `:ref:`.
+by plain text, so a build never fails on an unresolvable `:ref:`. When a URL is
+given it must be fully versioned, `/<language>/<version-slug>`, for the reason
+given in [Versions](#versions-slugs-and-cross-project-links).
 
 ## Read the Docs specific behaviour
 
@@ -75,10 +121,30 @@ by plain text, so a build never fails on an unresolvable `:ref:`.
   `~doctrees_<profile>` inside `SCPY_BUILDDIR`;
 - the gh-pages post-build (version manifest, stable mirroring, pruning, upload)
   is skipped, so Read the Docs never clones or rewrites the published tree;
-- `build.jobs.post_checkout` unshallow the clone, because `docs/make.py` reads
-  the release tags to determine the version;
+- `build.jobs.post_checkout` unshallow the clone, because both
+  `docs/make.py` and the editable install need the release tags;
 - every profile keeps `index` as the root document, so `index.html` exists at
   the root of each published site.
+
+## Plugin installation
+
+`pip install ".[docs,plugins]"` is **not** used. The `plugins` extra resolves the
+plugins published on PyPI, so a pull request that modifies a plugin of this
+monorepo would build its documentation against the previously released
+implementation.
+
+Both configurations therefore install only `.[docs]`, then install the plugins
+from the checkout in `build.jobs.post_install`:
+
+```bash
+for name in $(python -m spectrochempy.ci.install_plugins --list-names); do
+  python -m pip install --no-deps -e "plugins/$name"; done
+python -m pip install osqp scipy numpy-quaternion tensorly
+```
+
+This is the same sequence as the "Install SpectroChemPy plugins" step of
+`.github/workflows/build_docs.yml`, including the runtime dependencies that
+`--no-deps` skips.
 
 ## Reproducing locally
 
@@ -86,14 +152,17 @@ by plain text, so a build never fails on an unresolvable `:ref:`.
 reference by `main` and the plugin examples by `gallery`.
 
 ```bash
-python -m spectrochempy.ci.install_plugins --editable --no-deps all
+python -m pip install -e ".[docs]"
+for name in $(python -m spectrochempy.ci.install_plugins --list-names); do
+  python -m pip install --no-deps -e "plugins/$name"; done
+python -m pip install osqp scipy numpy-quaternion tensorly
 
 # main project
-SCPY_DOCS_GALLERY_URL=https://spectrochempy-gallery.readthedocs.io \
+SCPY_DOCS_GALLERY_URL=https://spectrochempy-gallery.readthedocs.io/en/latest \
   python docs/make.py html --profile main --warning-is-error -j auto
 
 # gallery project
-SCPY_DOCS_MAIN_URL=https://spectrochempy.readthedocs.io \
+SCPY_DOCS_MAIN_URL=https://spectrochempy.readthedocs.io/en/latest \
   python docs/make.py html --profile gallery --warning-is-error -j auto
 ```
 
@@ -123,11 +192,15 @@ image is expected to be roughly twice as slow as the measurements above.
 
 ## Not covered by this prototype
 
-- dependency isolation per profile: both projects install `.[docs,plugins]`. A
-  split such as `docs-sphinx` / `docs-notebooks` / `docs-gallery` in
-  `pyproject.toml` is still to be done, and is not required for the split to
-  build.
+- dependency isolation per profile: both projects install the whole `docs` extra
+  and all six plugins. A split such as `docs-sphinx` / `docs-notebooks` /
+  `docs-gallery` in `pyproject.toml` is still to be done, and is not required
+  for the split to build.
 - data isolation: both profiles download the full test data directory.
-- cross-project `intersphinx`, canonical URLs and version-pinned companion links.
+- version-matched cross-project links: both projects link to `latest`, so a
+  release page will point readers at the development gallery.
+- the `stable` version: the prefixed release tags do not trigger Read the Docs'
+  automatic selection, and no `stable` tag or branch is created here.
+- cross-project `intersphinx` and canonical URLs.
 - NMR as a third profile.
 - old tags, which predate these configuration files.
