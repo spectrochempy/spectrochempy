@@ -39,10 +39,11 @@ projects link to each other. Keep them without a trailing slash.
 Three separate mechanisms are involved. They are not interchangeable.
 
 **Versions come from branches and tags.** Every branch and every tag of the
-repository becomes a version, created as *inactive* and *not hidden*. The plugin
-tags (`spectrochempy-nmr-v0.1.13` and the others) are tags too, so they become
-versions as well and must be deactivated explicitly, or each of them will build
-and consume build quota.
+repository is imported as an *inactive* version, and inactive versions do not
+build. The plugin tags (`spectrochempy-nmr-v0.1.13` and the others) are tags too,
+so they are imported as inactive versions as well. **Leave them inactive.** Do not
+activate them, and do not bulk-activate all versions, or each plugin tag would
+build and consume build quota.
 
 **The default version** is a dashboard setting. The bare project URL redirects
 to it. It defaults to `latest`, which points at the default branch of the
