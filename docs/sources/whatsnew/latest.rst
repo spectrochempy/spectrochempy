@@ -6,60 +6,8 @@
 
 :orphan:
 
-What's New in Revision 1.1.1
+What's New in Revision 1.1.2.dev
 ---------------------------------------------------------------------------------------
 
-These are the changes in SpectroChemPy-1.1.1.
+These are the changes in SpectroChemPy-1.1.2.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
-
-Bug Fixes
-~~~~~~~~~
-
-- ``output`` is now honored by the plotting API instead of being silently
-  ignored, fixing a longstanding defect reported by a user in :issue:`1719`.
-  ``dataset.plot()``,
-  ``plot_multiple()``, ``multiplot()``, and the composite plotters
-  (``plot_score()``, ``plot_scree()``, ``plot_compare()``, ``plot_merit()``,
-  ``plot_baseline()``, and ``plot_parity()``) write the finished figure to the
-  requested file, accepting both ``str`` and ``pathlib.Path``. The whole figure
-  is saved once the plot is complete - legend, colorbars, and multi-panel
-  layouts included - and before the display step, so the file is on disk even
-  when ``show=True`` keeps a window open. The file format follows the
-  extension, the existing ``savefig.*`` preferences drive resolution,
-  background, and bounding box, and a missing parent directory is reported as
-  an ``OSError`` instead of being created silently. When axes are supplied
-  explicitly, the saved figure is the one that owns those axes, even when it
-  is not the active Matplotlib figure. ``multiplot()`` also
-  performs a single display step for the whole grid instead of one per panel,
-  and ``plot_multiple()`` given a single dataset now delegates to
-  ``dataset.plot()``, as documented, instead of iterating the values of the
-  dataset and dropping its ``show``, ``clear``, and ``output`` arguments
-  (:pr:`1717`).
-
-  For example, a pen plot can be saved without displaying it:
-
-  .. code-block:: python
-
-     dataset.plot_pen(output="spectrum.png", show=False)
-
-- All twelve public geometry shortcuts now follow that same finalization path:
-  ``plot_scatter()``, ``plot_pen()``, ``plot_scatter_pen()``, ``plot_bar()``,
-  ``plot_lines()``, ``plot_contour()``, ``plot_contourf()``, ``plot_stack()``,
-  ``plot_map()``, ``plot_image()``, ``plot_surface()``, and
-  ``plot_waterfall()``. Both bound dataset methods and top-level functions save
-  the completed figure before any requested display, honor ``show`` exactly
-  once, and return the same Matplotlib axes as the equivalent
-  ``dataset.plot(method=...)`` call. Plugin-owned plotting APIs, including the
-  IRIS methods, are outside the scope of this core fix (:pr:`1720`).
-
-Developer
-~~~~~~~~~
-
-- Conda ``main`` uploads are now restricted to final core release tags.
-  Release candidates remain downloadable CI artifacts and are not published
-  to Conda (:pr:`1721`).
-
-- Version metadata commits for independently released Carroucell 0.1.10,
-  IRIS 0.1.10, NMR 0.1.13, PerkinElmer 0.1.6, and Tensor 0.1.7 are present in
-  the monorepo history since core 1.1.0. The core 1.1.1 release does not
-  republish these plugins.
