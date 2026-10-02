@@ -137,6 +137,8 @@ Load the relevant skill before starting work:
 | `spectrochempy-review` | Separate review in a new session (see above) |
 | `spectrochempy-release` | Preparing a release (without publishing) |
 
+**For Codex:** skills are in `.opencode/skills/` — read the relevant `SKILL.md` directly.
+
 ---
 
 ## Example Prompts
