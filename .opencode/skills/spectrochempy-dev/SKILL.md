@@ -105,15 +105,15 @@ it repeatedly. Ruff and other linters are executed by the final pre-commit run.
 branch:**
 
 ```bash
-git add -A
+git add <files>
 pre-commit run --all-files
 ```
 
 Repeat until clean (0 failures, no file modifications). This is mandatory.
 
 **Important:** `pre-commit run --all-files` only inspects `git ls-files` paths.
-Untracked files are silently skipped. Always `git add -A` first, especially
-when adding new files.
+Untracked files are silently skipped. Stage the task-relevant files (including
+new files) explicitly before running it.
 
 ### VSCode Source Control Handoff (Default)
 
