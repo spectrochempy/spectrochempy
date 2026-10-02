@@ -64,6 +64,10 @@ Unless explicitly delegated:
 When a task is authorized, proceed to a validated solution and a first review
 of the diff without requesting confirmation for ordinary technical choices.
 
+## PR Base
+
+Always base PRs on `upstream/master` unless explicitly instructed otherwise.
+
 ## VSCode Source Control Handoff
 
 By default, the agent stages modified files (`git add`) so the full diff is
