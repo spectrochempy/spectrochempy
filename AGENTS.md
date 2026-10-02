@@ -151,7 +151,7 @@ Load the relevant skill before starting work:
 
 ```
 Corrige le bug de serialization NDDataset en gardant les tests à jour.
-Valide avec le marker approprié et mets à jour la note d'audit.
+Validate with the appropriate marker and update the audit note.
 ```
 
 ### 2. Review a PR
@@ -171,10 +171,10 @@ du changelog. Ne pousse pas et n'ouvre pas de PR.
 ### 4. Separate review in a new session
 
 ```
-Revue séparée — branche fix/coordset-negative-axis, commit abc1234
+Revue séparée — branch fix/coordset-negative-axis, commit abc1234
 Base : a1b2c3d.
 Besoin : permettre les axes décroissants dans CoordSet sans casser la
-sérialisation.
+serialization.
 Points sensibles : (1) suppose que axis.step conserve son signe après
 reshape, (2) le test test_coordset_reverse ne vérifie pas la round-trip
 JSON, (3) aucun test pour les axes non-monotoniques.

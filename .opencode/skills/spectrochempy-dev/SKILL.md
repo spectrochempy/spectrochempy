@@ -264,7 +264,7 @@ not authority.
 Example handoff prompt:
 
 ```
-Revue séparée — branche fix/coordset-negative-axis, commit abc1234
+Revue séparée — branch fix/coordset-negative-axis, commit abc1234
 Besoin : permettre les axes décroissants dans CoordSet sans casser la
 sérialisation. Base : a1b2c3d.
 Points sensibles : (1) suppose que axis.step conserve son signe après
