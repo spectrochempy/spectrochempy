@@ -137,9 +137,9 @@ Edit `docs/sources/whatsnew/changelog.rst` only. Never edit
 When modifying `changelog.rst`, run the generation workflow so `latest.rst`
 is regenerated. Include its diff in the commit.
 
-**If no changelog entry is provided with the task, do NOT add one.** The
-maintainer will decide whether a changelog entry is needed. Use the
-`no-changelog` label on PRs for:
+**If no changelog entry is provided with the task, do NOT add one.** Apply
+the `no-changelog` label to the PR. The maintainer will decide whether a
+changelog entry is needed. Use the `no-changelog` label on PRs for:
 * internal refactoring with no user-visible change;
 * test-only changes;
 * documentation-only changes;

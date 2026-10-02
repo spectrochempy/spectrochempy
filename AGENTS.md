@@ -68,6 +68,11 @@ of the diff without requesting confirmation for ordinary technical choices.
 
 Always base PRs on `upstream/master` unless explicitly instructed otherwise.
 
+## Changelog
+
+If no changelog entry is provided with the task, do NOT add one. Apply the
+`no-changelog` label to the PR.
+
 ## VSCode Source Control Handoff
 
 By default, the agent stages modified files (`git add`) so the full diff is
