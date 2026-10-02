@@ -69,6 +69,8 @@ of the diff without requesting confirmation for ordinary technical choices.
 ## PR Base
 
 Always base PRs on `upstream/master` unless explicitly instructed otherwise.
+Before creating a new branch, fetch `upstream/master` and branch from it
+directly (see `spectrochempy-dev` skill).
 
 ---
 

@@ -24,8 +24,9 @@ The reviewer works from:
 
 1. **The original need** — problem statement or requirement provided in the
    handoff prompt.
-2. **Applicable instructions** — `AGENTS.md`, relevant skill (`spectrochempy-dev`
-   conventions), `CONTRIBUTING.md`.
+2. **Applicable instructions** — `AGENTS.md`, `CONTRIBUTING.md`, and only the
+   relevant conventions from the `spectrochempy-dev` skill (read the specific
+   sections needed, not the skill in full).
 3. **The diff** — exact commit or branch range to examine.
 4. **Relevant sources** — the implementation code and tests.
 
@@ -43,7 +44,13 @@ A handoff prompt from the implementer containing:
 * Base commit and commit to examine.
 * Sensitive points flagged by the implementer.
 
-If any element is missing, ask the maintainer before proceeding.
+**Do not ask the maintainer for missing elements.** First, try to find them:
+* Need: read the PR description or linked issue.
+* Base and commit: use `gh pr view` or `git log` to identify the merge base
+  and the commit to review.
+* Sensitive points: examine the diff and identify them yourself.
+
+Only ask the maintainer if a genuine ambiguity remains after investigation.
 
 ---
 
