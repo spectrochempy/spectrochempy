@@ -20,13 +20,13 @@ Read `CONTRIBUTING.md` at the start of each session.
 Push rule: push to `origin` only, never to `upstream`. PRs are opened from
 `origin/<branch>` → `upstream/master`.
 
-**Before creating a new branch, always sync with upstream/master:**
+**Before creating a new branch, inspect the local state first
+(`git status`, current branch), then branch directly from the updated
+`upstream/master` — without modifying the local `master`:**
 
 ```bash
 git fetch upstream
-git checkout master
-git merge --ff-only upstream/master
-git checkout -b <new-branch>
+git checkout -b <new-branch> upstream/master
 ```
 
 Do NOT create branches, commit, push, or open PRs unless explicitly delegated.

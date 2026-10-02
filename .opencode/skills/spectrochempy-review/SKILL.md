@@ -24,8 +24,9 @@ The reviewer works from:
 
 1. **The original need** — problem statement or requirement provided in the
    handoff prompt.
-2. **Applicable instructions** — `AGENTS.md`, relevant skill (`spectrochempy-dev`
-   conventions), `CONTRIBUTING.md`.
+2. **Applicable instructions** — `AGENTS.md`, `CONTRIBUTING.md`, and only the
+   relevant conventions from the `spectrochempy-dev` skill (read the specific
+   sections needed, not the skill in full).
 3. **The diff** — exact commit or branch range to examine.
 4. **Relevant sources** — the implementation code and tests.
 
