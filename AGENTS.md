@@ -8,6 +8,8 @@ development in SpectroChemPy.
 Procedural details live in the project's OpenCode skills and in
 `CONTRIBUTING.md`. Load the relevant skill before starting work.
 
+**Read `CONTRIBUTING.md` at the start of each session.**
+
 When rules overlap, follow the stricter requirement.
 
 ---

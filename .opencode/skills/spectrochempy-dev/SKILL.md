@@ -11,6 +11,8 @@ metadata:
 Use this skill when modifying source code, tests, or documentation in the
 SpectroChemPy ecosystem.
 
+Read `CONTRIBUTING.md` at the start of each session.
+
 ---
 
 ## Git Operations
