@@ -43,7 +43,13 @@ A handoff prompt from the implementer containing:
 * Base commit and commit to examine.
 * Sensitive points flagged by the implementer.
 
-If any element is missing, ask the maintainer before proceeding.
+**Do not ask the maintainer for missing elements.** First, try to find them:
+* Need: read the PR description or linked issue.
+* Base and commit: use `gh pr view` or `git log` to identify the merge base
+  and the commit to review.
+* Sensitive points: examine the diff and identify them yourself.
+
+Only ask the maintainer if a genuine ambiguity remains after investigation.
 
 ---
 

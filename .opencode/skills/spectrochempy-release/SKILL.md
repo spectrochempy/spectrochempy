@@ -38,19 +38,20 @@ generation workflow (pre-commit hook or doc build tooling).
 
 ### 2. Check version consistency
 
-* The version in `pyproject.toml` (or `setup.cfg`/`setup.py`) matches the
-  target.
-* The version in `src/spectrochempy/__init__.py` matches.
-* The version in `docs/sources/whatsnew/` changelog headers matches.
+The project uses `setuptools-scm` with `dynamic = ["version"]` in
+`pyproject.toml`. The version is derived from git tags, not hardcoded.
+
+* Check the latest tag: `git describe --tags`
+* Check the version in `src/spectrochempy/__init__.py` matches.
+* Check the version in `docs/sources/whatsnew/` changelog headers matches.
 
 ### 3. Verify CI is green on the current branch
 
 ```bash
-git log --oneline -1
+gh pr checks <PR_NUMBER> --json name,state
 ```
 
-Confirm the latest commit passed CI. If unsure, ask the maintainer to verify
-rather than polling CI in a loop.
+Check the CI status once for the exact commit. Do not poll CI in a loop.
 
 ### 4. Check open blockers
 
