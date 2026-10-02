@@ -88,7 +88,11 @@ possible.
 
 ## Pre-commit Policy
 
-**Before pushing to a PR branch:**
+**Pre-commit is NOT needed during development.** It is a waste of time to run
+it repeatedly. Ruff and other linters are executed by the final pre-commit run.
+
+**Pre-commit is MANDATORY only once, before the final commit and push to a PR
+branch:**
 
 ```bash
 git add -A
@@ -101,26 +105,24 @@ Repeat until clean (0 failures, no file modifications). This is mandatory.
 Untracked files are silently skipped. Always `git add -A` first, especially
 when adding new files.
 
-During normal development, do NOT run pre-commit repeatedly. A single final run
-before pushing is sufficient (hooks are deterministic).
-
 ### VSCode Source Control Handoff (Default)
 
 By default, after implementing and self-reviewing:
 
 1. Stage all modified files: `git add -A`
-2. Run pre-commit once to ensure the hooks pass (and the diff is clean)
-3. Show the staged diff briefly
-4. **Stop — do not commit or push**
+2. Show the staged diff briefly
+3. **Stop — do not commit or push**
 
 This lets the maintainer examine the full diff in VSCode Source Control
 before deciding whether to commit, amend, or request changes.
 
+When the maintainer asks to commit and push to a PR:
+
 ```bash
-# Final preparation sequence
 git add -A
 pre-commit run --all-files   # repeat if it modifies files
-git diff --cached --stat     # show summary for handoff
+git commit -m "PREFIX: message"
+git push origin <branch>
 ```
 
 Override explicitly if you want the agent to commit or push directly.
@@ -135,7 +137,9 @@ Edit `docs/sources/whatsnew/changelog.rst` only. Never edit
 When modifying `changelog.rst`, run the generation workflow so `latest.rst`
 is regenerated. Include its diff in the commit.
 
-Use the `no-changelog` label on PRs for:
+**If no changelog entry is provided with the task, do NOT add one.** The
+maintainer will decide whether a changelog entry is needed. Use the
+`no-changelog` label on PRs for:
 * internal refactoring with no user-visible change;
 * test-only changes;
 * documentation-only changes;
@@ -279,5 +283,12 @@ Before reporting completion:
 3. Audit note updated in maintainer repository.
 4. Self-review performed and issues fixed.
 5. If required, handoff prompt for separate review produced.
-6. Files staged (`git add -A`) and pre-commit clean (default handoff to VSCode
-   Source Control). Do not commit or push unless explicitly delegated.
+6. Files staged (`git add -A`) for VSCode Source Control handoff. Do not
+   commit or push unless explicitly delegated.
+
+When committing and pushing to a PR (explicitly delegated):
+
+1. `git add -A`
+2. `pre-commit run --all-files` (repeat until clean)
+3. `git commit -m "PREFIX: message"`
+4. `git push origin <branch>`

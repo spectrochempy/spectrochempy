@@ -66,10 +66,14 @@ of the diff without requesting confirmation for ordinary technical choices.
 
 ## VSCode Source Control Handoff
 
-By default, the agent stages modified files (`git add`) and runs pre-commit
-so the full diff is visible and reviewable in VSCode Source Control — but does
-**not** commit or push. The maintainer examines the diff in VSCode, then
-decides whether to commit, amend, or request changes.
+By default, the agent stages modified files (`git add`) so the full diff is
+visible and reviewable in VSCode Source Control — but does **not** commit or
+push. The maintainer examines the diff in VSCode, then decides whether to
+commit, amend, or request changes.
+
+Pre-commit is **not** needed during development. It is mandatory only once,
+before the final commit and push to a PR branch. Ruff and other linters are
+executed by that final pre-commit run.
 
 Override explicitly if you want the agent to commit directly (e.g., "commit
 and push on my behalf").
