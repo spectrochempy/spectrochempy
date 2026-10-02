@@ -78,6 +78,7 @@ savefig
 
 # Open code
 .opencode/*
+!.opencode/rules.md
 !.opencode/skills/
 .opencode/skills/*
 !.opencode/skills/*/
