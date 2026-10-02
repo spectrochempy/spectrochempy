@@ -2,22 +2,17 @@
 
 ## Scope
 
-This document supplements:
+This document defines permanent rules and authorization limits for AI-assisted
+development in SpectroChemPy.
 
-* CONTRIBUTING.md
-* docs/sources/devguide/
-* maintainers/ (release procedures only — all other maintainer docs have moved
-  to the private SpectroChemPy Maintainer Repository)
-
-Agents must follow all project contribution rules defined there.
-
-This file defines additional requirements specific to AI-assisted development.
+Procedural details live in the project's OpenCode skills and in
+`CONTRIBUTING.md`. Load the relevant skill before starting work.
 
 When rules overlap, follow the stricter requirement.
 
 ---
 
-# Core Principles
+## Core Principles
 
 Priorities:
 
@@ -27,13 +22,12 @@ Priorities:
 4. reviewability;
 5. resource efficiency.
 
-Prefer small, reversible, reviewable changes.
-
-Avoid broad rewrites unless explicitly requested.
+Prefer small, reversible, reviewable changes. Avoid broad rewrites unless
+explicitly requested.
 
 ---
 
-# Public Behavior Preservation
+## Public Behavior Preservation
 
 Unless explicitly requested otherwise:
 
@@ -44,671 +38,156 @@ Unless explicitly requested otherwise:
 * preserve warning behavior;
 * preserve documented semantics.
 
-Internal refactoring should not introduce user-visible behavior changes.
+Internal refactoring must not introduce user-visible behavior changes.
 
-When adding or exposing a new public top-level API symbol
-(``spectrochempy.<name>`` / ``scp.<name>``), also update
-`docs/sources/reference/index.rst` in the appropriate section of the public API
-reference.
-
----
-
-# Architecture Strategy
-
-For large refactoring or migration projects, prefer:
-
-```text id="px8jk3"
-behavioral tests
-    ->
-responsibility extraction
-    ->
-adapter layer
-    ->
-internal migration
-    ->
-implementation switch
-    ->
-serialization update
-```
-
-Avoid combining multiple migration phases in a single PR.
-
-Prefer incremental migration.
+When adding a new public top-level API symbol (`spectrochempy.<name>` /
+`scp.<name>`), also update `docs/sources/reference/index.rst` in the
+appropriate section.
 
 ---
 
-# Audit Policy
+## Authorization Limits
 
-## Working notes
+The maintainer controls commits, branches, pushes, pull requests, releases,
+and package publication.
 
-All implementation reports, investigations, reviews and working notes that are
-useful beyond a single session must be written in the
-**SpectroChemPy Maintainer Repository** (`spectrochempy_maintainer`), under the
-appropriate subdirectory:
-
-* `notes/audits/` — active investigations, campaign logs, risk analysis, test
-  results, architecture audits;
-* `notes/` — general maintainer notes, migration records, research summaries;
-* `archive/audits/` — historical PR-by-PR notes and completed campaign logs;
-* `proposals/` — incubating design proposals;
-* `roadmap/` — maintainer-facing planning and campaign sequencing;
-* `governance/` — cross-cutting process and philosophy documents.
-
-Use audit notes (in `spectrochempy_maintainer/notes/audits/`) for:
-
-* migration details;
-* architectural decisions;
-* implementation notes;
-* roadmap planning;
-* risk analysis;
-* test results.
-
-For multi-PR projects, maintain dedicated audit files in
-`spectrochempy_maintainer/notes/audits/`.
-
-Local scratch notes (truly temporary, single session) may remain locally
-unversioned. They must not be introduced into the public `spectrochempy/`
-repository.
-
-The old `audit/` directory in the public repository has been removed. No new
-files should be created there.
-
-## Promotion destinations
-
-All design contracts, architecture notes, roadmaps, and API conventions have
-been moved to the **SpectroChemPy Maintainer Repository**
-(`spectrochempy_maintainer`).  The public repository only retains release and
-emergency recovery procedures under `maintainers/`.
-
-When an audit leads to a durable architectural decision, promote that knowledge
-into the appropriate destination within the maintainer repository:
-
-| Destination | Use for |
-|---|---|
-| `spectrochempy_maintainer/rfcs/` | Normative behavior contracts and accepted decisions |
-| `spectrochempy_maintainer/architecture/` | Durable architecture notes and current reference |
-| `spectrochempy_maintainer/roadmap/` | Migration roadmaps and campaign ordering |
-
-**Promotion never consists of simply moving or copying the audit file.**
-The maintainer document must be a **rewritten, maintained document** that
-extracts the durable knowledge from the audit.  The original audit remains in
-the SpectroChemPy Maintainer Repository as historical context.
-
-The original working note is a transient document and is not the authoritative
-reference.
-
-## Curated governance notes in the maintainer repository
-
-Some audits retain long-term value as historical context even though they are
-no longer primary authority.  They remain in the SpectroChemPy Maintainer
-Repository as curated governance notes
-(`spectrochempy_maintainer/archive/` or `spectrochempy_maintainer/notes/`).
-
-These governance notes preserve decision-space analysis, migration baselines,
-and risk maps for future maintainers.  They are **not copies** of local working
-notes.  They are distinct from:
-
-- `spectrochempy_maintainer/notes/audits/` — active working notes;
-- `spectrochempy_maintainer/architecture/` — current durable architecture reference;
-- `spectrochempy_maintainer/rfcs/` — normative behavior contracts.
-
-Only preserve a note as a governance note when it records knowledge that
-future maintainers will need for context, not for authority.
-
-## Campaign closure
-
-Before closing a campaign, verify whether the working notes contain any
-architectural, maintenance, compatibility, or roadmap knowledge that future
-maintainers will need.
-
-If so, summarize that information in the appropriate
-`spectrochempy_maintainer/` destination before considering the campaign
-complete.
-
-## Examples
-
-```text
-# Local scratch note (disposable, never versioned)
-/tmp/my-scratch-notes.md
-
-# Working note (shared in maintainer repository)
-spectrochempy_maintainer/notes/audits/campaign-architecture-audit.md
-
-# Curated governance note (promoted to spectrochempy_maintainer)
-spectrochempy_maintainer/archive/coordinate-arithmetic-audit.md
-
-# Accepted RFC (tracked, normative)
-spectrochempy_maintainer/rfcs/namespace-api-convention.md
-
-# Durable architecture note (tracked, current reference)
-spectrochempy_maintainer/architecture/reader-normalization-architecture.md
-
-# Roadmap (tracked)
-spectrochempy_maintainer/roadmap/vendor-io-migration.md
-```
-
-Detailed implementation history belongs in working notes in the maintainer
-repository, not changelog entries.
-
-Agents must produce or update a note in the SpectroChemPy Maintainer Repository
-after each work session, documenting what was done, key decisions, test results,
-risks, and next steps.  For multi-PR projects, maintain dedicated files in
-`spectrochempy_maintainer/notes/audits/` and update them before considering a
-task complete.
-
-## Maintainer repository hygiene
-
-When writing into `spectrochempy_maintainer` during work on `spectrochempy`,
-prefer updating an existing active document over creating a new one.
-
-Before creating a new note, verify whether the same topic already has:
-
-* an active audit in `spectrochempy_maintainer/notes/audits/`;
-* a maintained roadmap entry in `spectrochempy_maintainer/roadmap/`;
-* a maintained contract in `spectrochempy_maintainer/rfcs/`;
-* a maintained architecture note in `spectrochempy_maintainer/architecture/`.
-
-Do not create a new document when extending the existing one would preserve
-clarity.
-
-For any active topic, keep a single obvious entry point:
-
-* roadmap for current priority and campaign state;
-* RFC for the normative contract or decision;
-* architecture note for the maintained current model;
-* audit for evidence, implementation notes, and unresolved questions.
-
-Audits in `spectrochempy_maintainer/notes/audits/` must contain only:
-
-* active investigations;
-* ongoing campaign logs;
-* unresolved implementation/design notes.
-
-Move a note to `spectrochempy_maintainer/archive/audits/` once it becomes
-primarily:
-
-* a validation log;
-* a post-merge confirmation;
-* an implementation history record;
-* evidence already absorbed by code and maintained documents.
-
-When promoting knowledge from an audit or proposal into
-`spectrochempy_maintainer/rfcs/`, `architecture/`, or `roadmap/`:
-
-* rewrite the durable content instead of copying it;
-* update the source note with a clear status and link to the maintained
-  destination;
-* archive the source note when it no longer carries an open decision.
-
-Keep `spectrochempy_maintainer/roadmap/current-roadmap.md` short.  It should
-contain only:
-
-* active priorities;
-* near-term follow-up;
-* pointers to deeper documents.
-
-Deferred or backlog material belongs in a separate governance note, not in the
-main current roadmap.
-
-At the end of the session, explicitly decide for every maintainer note touched:
-
-* still active;
-* promoted to maintained reference;
-* archived as historical context.
-
----
-
-# Architecture Documentation Lifecycle
-
-Architecture work should normally progress through the following lifecycle:
-
-```text
-Audit
-  ↓
-RFC (optional)
-  ↓
-Implementation
-  ↓
-Architecture Note / Maintainer Reference
-```
-
-The goal is to ensure that durable architectural knowledge does not remain
-exclusively in local audit notes after a campaign is completed.
-
-## Audit
-
-Use audits for:
-
-* exploration;
-* characterization;
-* investigation;
-* design discussion.
-
-Audits are working documents.
-
-Audits are not authoritative by default for current maintained contracts.
-
-## RFC
-
-Use RFCs to:
-
-* define a proposed contract;
-* record decisions;
-* guide implementation.
-
-RFCs may be:
-
-* proposed;
-* accepted;
-* implemented;
-* superseded.
-
-## Architecture Notes
-
-Use architecture notes to:
-
-* describe current architecture;
-* capture stable contracts;
-* document important design decisions;
-* serve as maintainer references.
-
-Architecture notes become the authoritative source once a design stabilizes.
-
-## Promotion Requirement
-
-When a campaign results in:
-
-* an accepted RFC;
-* significant architectural change;
-* multiple implementation PRs;
-* a long-term contract;
-
-the maintainer should evaluate whether part of the audit material must be
-promoted into the appropriate destination within the maintainer repository:
-
-* `spectrochempy_maintainer/rfcs/` — for normative contracts and decisions;
-* `spectrochempy_maintainer/architecture/` — for durable current architecture reference;
-* `spectrochempy_maintainer/roadmap/` — for migration ordering and campaign planning;
-* `spectrochempy_maintainer/archive/` or `spectrochempy_maintainer/notes/` —
-  for historical context that future maintainers will need (non-authoritative),
-  curated and rewritten.
-
-before the campaign is considered complete.
-
-Architectural reasoning should not remain exclusively in audit documents.
-
-## Audit Deliverables
-
-Major architecture audits should end with a final section named:
-
-```text
-Promotion Candidates
-```
-
-That section should identify:
-
-* content suitable for RFCs;
-* content suitable for architecture notes;
-* content that should remain historical only.
-
-Where possible, suggest target filenames.
-
-This requirement applies to major architecture audits, not to minor bug
-investigations or narrow implementation notes.
-
-## Campaign Closure Checklist
-
-Before closing a major architecture campaign, verify:
-
-* RFC status updated;
-* roadmap updated;
-* relevant architecture notes updated or created;
-* promotion candidates reviewed;
-* authoritative documentation synchronized.
-
-This checklist is meant to keep durable knowledge discoverable, not to add
-heavy process.
-
----
-
-# Changelog Policy
-
-The changelog is a release document.
-
-It should explain:
-
-* what changed;
-* why it matters.
-
-Do not use the changelog as a PR-by-PR implementation journal.
-
-For multi-PR projects:
-
-* keep detailed history in research notes in the maintainer repository;
-* consolidate related work into meaningful release-level entries;
-* prefer updating an existing entry over creating many near-duplicate entries.
-
-Never edit:
-
-```text id="c90b8w"
-docs/sources/whatsnew/latest.rst
-```
-
-manually.
-
-Edit:
-
-```text id="z9ggiw"
-docs/sources/whatsnew/changelog.rst
-```
-
-only.
-
-Generated files derived from changelog entries (for example `latest.rst`)
-should not be edited manually.
-
-Agents should update `changelog.rst` only and leave generation of derived files
-to the normal project workflow.
-
-When `docs/sources/whatsnew/changelog.rst` is modified, agents must run the
-normal generation workflow (for example the relevant pre-commit hook or the
-documentation build tooling) so `docs/sources/whatsnew/latest.rst` is
-regenerated. The generated `latest.rst` diff must be included in the final
-commit; omitting it causes CI failures. The prohibition is against hand-editing
-generated files, not against committing tool-generated updates.
-
-## Changelog CI Workflow Bypass
-
-A CI workflow verifies that every PR has a corresponding changelog entry in
-``docs/sources/whatsnew/changelog.rst`` after applying the ``no-changelog``
-label.
-
-Use the ``no-changelog`` label when the PR does not need a changelog entry:
-
-* internal refactoring with no user-visible behavior change;
-* test-only changes (unless they test a new user-facing feature);
-* documentation-only changes (example gallery, docstrings);
-* trivial fixes (typos, comment corrections);
-* multi-PR campaign internal changes where the changelog entry is consolidated
-  in a later PR.
-
-To apply the label on an open PR:
-
-```bash
-gh pr edit <PR_NUMBER> --add-label no-changelog
-```
-
-The label must be applied before the workflow runs, or CI will fail.
-
----
-
-# Cost-Aware Development
-
-Assume agent actions consume limited resources.
-
-Prefer:
-
-* focused context;
-* focused searches;
-* targeted validation;
-* incremental work.
-
-Avoid unnecessary expensive operations.
-
-Prefer analysis over execution whenever possible.
-
-When multiple valid approaches exist, prefer the one requiring:
-
-* fewer agent actions;
-* fewer test executions;
-* fewer CI runs;
-* fewer GitHub operations.
-
----
-
-# Python Environment
-
-Prefer using an existing Conda environment over creating ad-hoc venvs or
-relying on system paths.  If a micromanba, mamba or conda environment named ``scpy-core`` exists
-(the project's test environment), use it for all Python and pytest commands:
-
-```bash
-micromamba run -n scpy-core python ...
-micromamba run -n scpy-core python -m pytest ...
-```
-
-or
-
-```bash
-conda run -n scpy-core python ...
-conda run -n scpy-core python -m pytest ...
-```
-
-If ``scpy-core`` is not available, fall back to the project's ``.venv`` or a
-system Python with ``PYTHONPATH`` pointing to ``src/``.
-
----
-
-# Testing Policy
-
-Run only the smallest validation necessary.
-
-Prefer:
-
-* a single test;
-* a focused test file;
-* a targeted marker selection;
-
-over broad test execution.
-
-Do not run large validation suites unless:
-
-* explicitly requested;
-* preparing final validation;
-* investigating a specific failure.
-
-When possible:
-
-* propose validation commands;
-* let the maintainer execute them.
-
----
-
-# Pre-commit Policy
-
-**Before opening a PR or pushing to a branch that will become a PR**, run:
-
-```bash
-pre-commit run --all-files
-```
-
-This is **mandatory**. A branch that has not been pre-commit-cleaned must not
-be pushed. If pre-commit modifies files, **stage them and run pre-commit
-again** until it passes cleanly (0 failures, no file changes). Do **not**
-assume that a single pass is always sufficient: some hooks can modify files
-after others, and running only once is insufficient when that happens. If
-pre-commit modified files on the first pass, you must run it again (or
-repeatedly, until clean) before committing and pushing. Also remember: hooks
-such as `update_version_and_release_notes` compare against the committed git
-state, so always run pre-commit **after** staging/committing the intended
-changes.
-
-During normal development (before the final push), do **not** run pre-commit
-repeatedly — it wastes CI quota and agent time.  Pre-commit hooks are
-deterministic; a single final run is sufficient — **but that final run must
-come after every file is tracked by git**, and it must be repeated if it
-modifies anything.
-
-**Important — untracked files are invisible to `--all-files`.**
-`pre-commit run --all-files` only inspects paths reported by `git ls-files`.
-A brand-new test or source file that is still untracked (`??` in
-`git status`) will be silently skipped by every hook, including `ruff` and
-`ruff-format`. Staging first is therefore not cosmetic: without `git add` on
-new files, a single "green" pre-commit run can still leave unformatted code in
-the commit, and the CI pre-commit job then fails on a branch that looked clean
-locally. The safe sequence for any change that adds files is:
-
-```bash
-git add -A                  # make new files visible to the hooks
-pre-commit run --all-files  # then run; repeat while it modifies files
-```
-
-The 2026-09-29 lot `feat/structured-apodization-history` shipped a red
-pre-commit CI job and a red test matrix for exactly this reason: the new test
-module was untracked at the moment pre-commit ran, so it was committed
-unformatted, and two of its assertions also pinned a micro sign code point that
-the units backend spells differently across platforms.
-
-When not delegated:
-
-* provide the command;
-* explain why it should be run;
-* **run it before pushing** if the branch is being pushed as a PR.
-
----
-
-# Local and Remote Action Policy
-
-The maintainer controls:
-
-* commits;
-* branches;
-* pushes;
-* pull requests;
-* releases;
-* package publication.
-
-Agents assist development.
-
-Agents do not operate the repository by default.
-
----
-
-# Allowed By Default
-
-Agents may:
-
-* inspect files;
-* modify source code;
-* modify tests;
-* modify documentation;
-* update audit notes;
-* analyze architecture;
-* review code;
-* suggest validation commands.
-
----
-
-# Not Allowed By Default
-
-Unless explicitly requested, do not:
-
-* create branches;
-* create commits;
-* push branches;
-* open pull requests;
-* merge pull requests;
-* create releases;
-* publish packages;
-* run broad test suites;
-* run pre-commit during normal development (see Pre-commit Policy — it **is**
-  required before a push to a PR branch).
-
----
-
-# Task Execution Defaults
-
-Unless explicitly requested otherwise:
+Unless explicitly delegated:
 
 * do not create branches;
-* do not commit changes;
-* do not push changes;
-* do not open pull requests;
-* do not run pre-commit during normal development (see Pre-commit Policy — it
-  **is** required before a push to a PR);
-* do not run broad test suites.
+* do not commit;
+* do not push;
+* do not open or merge pull requests;
+* do not create releases or publish packages;
+* do not run pre-commit during development (required only before pushing a PR
+  branch — see `spectrochempy-dev` skill).
 
-Prefer producing:
+When a task is authorized, proceed to a validated solution and a first review
+of the diff without requesting confirmation for ordinary technical choices.
 
-* code changes;
-* audit updates;
-* suggested commit title;
-* suggested PR title;
-* concise PR description;
-* targeted validation commands.
+## VSCode Source Control Handoff
 
-The maintainer is expected to perform final validation, commits, pushes, and
-PR creation unless explicitly delegated otherwise.
+By default, the agent stages modified files (`git add`) and runs pre-commit
+so the full diff is visible and reviewable in VSCode Source Control — but does
+**not** commit or push. The maintainer examines the diff in VSCode, then
+decides whether to commit, amend, or request changes.
 
----
-
-# Commit and PR Titles
-
-Follow the prefix conventions defined in CONTRIBUTING.md.
-
-Always propose:
-
-* a prefixed commit title;
-* a prefixed PR title.
-
-Never propose unprefixed titles.
+Override explicitly if you want the agent to commit directly (e.g., "commit
+and push on my behalf").
 
 ---
 
-# Branch Names
+## Task Execution
 
-Do **not** create branches starting with ``release/`` for pull requests.
+Unless explicitly delegated to finalize:
 
-The ``release/`` prefix is reserved for the official publication process:
-
-* ``.github/workflows/publish_draft_new_release.yml`` creates a GitHub release
-  from any merged PR whose head branch starts with ``release/`` (the branch
-  name is decoded as the release version);
-* ``.github/workflows/pre-commit.yml`` skips CI pre-commit on ``release/``
-  head branches.
-
-A branch created by an agent must never carry the ``release/`` prefix, even
-for release-related chores such as consolidating changelog entries: it would
-trigger (or suppress) release machinery that does not belong to a normal PR.
-Use a descriptive non-reserved prefix instead (for example ``chore/``,
-``fix/``, ``docs/``, ``feat/``, ``refactor/``).
-
----
-
-# Default Deliverable
-
-Unless explicitly delegated to finalize work, provide:
-
-* source changes;
-* test updates if needed;
-* documentation updates if needed;
-* audit updates;
-* suggested commit title;
-* suggested PR title;
-* concise PR description;
-* targeted validation commands;
-* remaining risks;
-* recommended follow-up work.
+* produce code changes, test updates, documentation updates;
+* update audit notes in `spectrochempy_maintainer/notes/audits/`;
+* propose a prefixed commit title and PR title (see `CONTRIBUTING.md`);
+* propose targeted validation commands;
+* list remaining risks and recommended follow-up.
 
 For multi-PR projects, update or create the relevant audit note before
 considering the task complete.
 
-Do not perform git operations automatically.
+---
 
-When delegated to push or create a PR, always run ``pre-commit run --all-files``
-first and amend the commit if it modifies files.
+## Self-Review vs. Separate Review
+
+### Self-Review (Implementation)
+
+The implementer performs a short self-review of the final diff before
+completing. This is **not** an independent review — it is the implementer's
+final check.
+
+Check: conformance to need, omissions, consistency of tests and
+documentation, obvious errors. Fix any problem found before finishing.
+
+### Separate Review
+
+A separate review in a **new OpenCode session** is required for changes
+affecting:
+
+* behavior (user-visible changes, bug fixes with semantic impact);
+* API (new, modified, or removed public symbols);
+* scientific computation (numerical methods, transforms, fitting);
+* readers / I/O (file formats, serialization);
+* CI / publication (workflows, release process).
+
+A separate review is **not** required for pure documentation edits,
+mechanical refactoring with no behavior change, or test-only additions that
+verify existing behavior. Justify briefly when skipping.
+
+### Handoff to Separate Review
+
+When a separate review is required, do **not** launch a second session or
+another model automatically. Produce a short prompt for a new session
+containing: the need, the branch or PR, the base and commit to examine, and
+the sensitive points. The reviewer starts from this prompt, the applicable
+instructions, the diff, and the relevant sources.
 
 ---
 
-# Code Review Expectations
+## Skills
 
-Evaluate:
+Load the relevant skill before starting work:
 
-* correctness;
-* behavior preservation;
-* regression risk;
-* architectural consistency;
-* testing adequacy;
-* roadmap alignment.
+| Skill | When to load |
+|---|---|
+| `spectrochempy-dev` | Any development, refactoring, or bug fix |
+| `spectrochempy-review` | Separate review in a new session (see above) |
+| `spectrochempy-release` | Preparing a release (without publishing) |
 
-Do not approve changes solely because tests pass.
+---
+
+## Example Prompts
+
+### 1. Fix a bug
+
+```
+Corrige le bug de serialization NDDataset en gardant les tests à jour.
+Valide avec le marker approprié et mets à jour la note d'audit.
+```
+
+### 2. Review a PR
+
+```
+Revois la PR #1842 en focalisant sur la préservation de l'API publique.
+Produis un verdict et les commandes de validation avant merge.
+```
+
+### 3. Prepare a release
+
+```
+Prépare la release 1.2.0 — vérifie la cohérence de version et la complétude
+du changelog. Ne pousse pas et n'ouvre pas de PR.
+```
+
+### 4. Separate review in a new session
+
+```
+Revue séparée — branche fix/coordset-negative-axis, commit abc1234
+Base : a1b2c3d.
+Besoin : permettre les axes décroissants dans CoordSet sans casser la
+sérialisation.
+Points sensibles : (1) suppose que axis.step conserve son signe après
+reshape, (2) le test test_coordset_reverse ne vérifie pas la round-trip
+JSON, (3) aucun test pour les axes non-monotoniques.
+```
+
+---
+
+## Repository Map
+
+* `spectrochempy/` — Main library (this repository)
+* `spectrochempy_maintainer/` — Private maintainer governance, RFCs, audits,
+  roadmap (separate clone, see its own `AGENTS.md`)
+* `spectrochempy_assistant/` — Companion assistant application
+* `spectrochempy_data/` — Reference datasets
+
+---
+
+## References
+
+* `CONTRIBUTING.md` — Commit/PR prefixes, full PR workflow, developer guide
+* `docs/sources/devguide/` — Full developer documentation
+* `maintainers/` — Release and emergency recovery procedures only
