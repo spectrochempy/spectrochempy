@@ -1,20 +1,19 @@
-# Read the Docs configuration for the main SpectroChemPy documentation.
+# Read the Docs configuration for the SpectroChemPy example gallery.
 #
-# This project publishes the full documentation, including the guides,
-# notebooks, API reference, and example gallery. The optional split-gallery
-# configuration remains in docs/rtd/gallery/.readthedocs.yaml.
+# This is the companion project of the main documentation. On Read the Docs,
+# set the configuration file path of the gallery project to
+# ``docs/rtd/gallery/.readthedocs.yaml`` in the project dashboard
+# (Admin > Settings > Advanced settings). All paths inside this file are
+# relative to the repository root.
 #
 # NOTE: the project slug below must match the actual Read the Docs project.
-# The two projects link to each other through SCPY_DOCS_MAIN_URL and
-# SCPY_DOCS_GALLERY_URL, which are set on the build command.
 version: 2
 
 build:
   os: ubuntu-24.04
   tools:
     python: "3.13"
-  # pandoc is required by nbsphinx to render the markdown cells of the
-  # notebooks.
+  # sphinx-gallery uses pandoc to render the downloadable notebook versions.
   apt_packages:
     - pandoc
   jobs:
@@ -28,7 +27,8 @@ build:
       - python -m pip install --upgrade pip
       # The ``plugins`` extra is deliberately NOT requested here: it would
       # resolve the plugins published on PyPI, and the post_install job below
-      # replaces them with the ones from this checkout.
+      # replaces them with the ones from this checkout. The plugin examples are
+      # generated against those local plugins.
       - python -m pip install -e ".[docs]"
     post_install:
       # Install the plugins from the checkout, not from PyPI, so a pull
@@ -46,5 +46,11 @@ build:
         # profile specific exclusions) and writes to
         # $READTHEDOCS_OUTPUT/html when that variable is set.
         #
-        - SCPY_DOCS_PROFILE=full
-          python docs/make.py html --profile full --warning-is-error -j auto
+        # The companion URL is fully versioned, language and version included,
+        # because Read the Docs serves the tree under /<language>/<version>/.
+        # For the first trial both projects link to their own ``latest``
+        # version. Matching a release page to the companion release still has
+        # to be done, see docs/rtd/README.md.
+        - SCPY_DOCS_PROFILE=gallery
+          SCPY_DOCS_MAIN_URL=https://spectrochempy.readthedocs.io/en/latest
+          python docs/make.py html --profile gallery --warning-is-error -j auto

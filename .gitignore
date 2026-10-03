@@ -77,7 +77,13 @@ savefig
 .spyproject
 
 # Open code
-.opencode/
+.opencode/*
+!.opencode/rules.md
+!.opencode/skills/
+.opencode/skills/*
+!.opencode/skills/*/
+.opencode/skills/*/*
+!.opencode/skills/*/SKILL.md
 opencode.json
 instruction_ai.md
 

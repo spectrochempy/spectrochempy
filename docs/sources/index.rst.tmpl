@@ -17,7 +17,19 @@
     .. image:: https://anaconda.org/spectrocat/spectrochempy/badges/license.svg
         :target: https://anaconda.org/spectrocat/spectrochempy
 
-{% if not single -%}
+{% if profile == 'gallery' -%}
+.. _home:
+
+    .. toctree::
+        :hidden:
+        :maxdepth: 2
+        :titlesonly:
+        :caption: Examples
+
+        gettingstarted/examples/index
+        reference/bibliography
+
+{% elif not single -%}
 .. _home:
 
 #####################################################################
@@ -60,7 +72,13 @@ SpectroChemPy: Advanced Spectroscopic Data Analysis
         Start learning SpectroChemPy with tutorials and guides
 
     .. grid-item-card:: 📈 Gallery of Examples
+        {%- if build_gallery %}
         :link: gettingstarted/examples/index
+        {%- elif gallery_docs_url %}
+        :link: {{ gallery_docs_url }}
+        {%- else %}
+        :link: gettingstarted/examples/index
+        {%- endif %}
 
         Explore the examples notebooks
 

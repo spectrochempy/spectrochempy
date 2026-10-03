@@ -43,11 +43,17 @@ Options
 --single-doc : Build a single document
 --directory, -d : Build a specific directory
 --whatsnew : Build only the whatsnew document
+--profile, -P : Build profile: full (default), main or gallery
+--no-data : Do not download the test data (fast smoke builds only)
 
 Examples
 --------
 Build HTML docs using all CPU cores:
     python make.py html -j auto
+
+Build only one slice of the documentation, as done for Read the Docs:
+    python make.py html --profile main
+    python make.py html --profile gallery
 
 Clean build artifacts:
     python make.py clean
@@ -554,6 +560,22 @@ class BuildDocumentation:
 
         # Set environmetnt variables for sphinx
         environ["SPHINX_NOEXEC"] = "1" if settings["noexec"] else "0"
+
+        # Build profile. ``full`` reproduces the historical single-site build and
+        # is what the GitHub Pages workflow publishes; ``main`` and ``gallery``
+        # are the two slices published as separate Read the Docs projects.
+        self.profile = (
+            settings["profile"]
+            or environ.get("SCPY_DOCS_PROFILE", "").strip()
+            or "full"
+        )
+        if self.profile not in ("full", "main", "gallery"):
+            raise ValueError(
+                f"Unknown documentation profile {self.profile!r}. "
+                "Expected 'full', 'main' or 'gallery'."
+            )
+        environ["SCPY_DOCS_PROFILE"] = self.profile
+
         self.singledoc = settings["singledoc"]
         self.directory = settings["directory"]
 
@@ -595,6 +617,8 @@ class BuildDocumentation:
             "tagname": kwargs.get("tagname", None),
             "singledoc": kwargs.get("singledoc", None),
             "directory": kwargs.get("directory", None),
+            "profile": kwargs.get("profile", None),
+            "nodata": kwargs.get("nodata", False),
         }
 
     def _single_doc(self, singledoc):
@@ -874,6 +898,7 @@ class BuildDocumentation:
         _trace_ci("_prepare_build completed")
         build_result = self._run_sphinx_build()
         _trace_ci(f"_run_sphinx_build returned {build_result!r}")
+        # On Read the Docs the build is already in its final location.
         source_dir = (
             Path(os.environ["READTHEDOCS_OUTPUT"]) / "html"
             if os.environ.get("READTHEDOCS_OUTPUT")
@@ -908,7 +933,7 @@ class BuildDocumentation:
                 f"\n{'-' * 80}"
             )
 
-        if not self.settings["whatsnew"]:
+        if not self.settings["whatsnew"] and not self.settings["nodata"]:
             print("Loading spectrochempy and downloading test data...")
 
             from spectrochempy import preferences as prefs
@@ -1019,10 +1044,13 @@ class BuildDocumentation:
         if source_root not in sys.path:
             sys.path.insert(0, source_root)
 
+        # On Read the Docs the HTML has to land directly in
+        # $READTHEDOCS_OUTPUT/html. Everything else keeps the versioned layout
+        # under build/html/<version> used by GitHub Pages.
         rtd_output = os.environ.get("READTHEDOCS_OUTPUT")
         if rtd_output:
             outdir = str(Path(rtd_output) / "html")
-            doctreesdir = str(BUILDDIR / "~doctrees_rtd")
+            doctreesdir = str(BUILDDIR / f"~doctrees_{self.profile}")
         else:
             outdir = f"{HTML}/{doc_version}"
             doctreesdir = f"{DOCTREES}/{doc_version}"
@@ -1279,6 +1307,23 @@ def _main():
     )
 
     parser.add_argument(
+        "--no-data",
+        help="do not download the test data (fast smoke builds only)",
+        action="store_true",
+    )
+
+    parser.add_argument(
+        "--profile",
+        "-P",
+        default=None,
+        choices=("full", "main", "gallery"),
+        help=(
+            "documentation profile to build: 'full' (default, single site), "
+            "'main' (guides and API) or 'gallery' (examples only)"
+        ),
+    )
+
+    parser.add_argument(
         "--upload-tutorials", "-Z", help="zip and upload tutorials", action="store_true"
     )
 
@@ -1378,6 +1423,8 @@ def _main():
             whatsnew=args.whatsnew,
             singledoc=args.single_doc,
             directory=args.directory,
+            profile=args.profile,
+            nodata=args.no_data,
         )
 
         buildcommand = getattr(build, args.command)
