@@ -599,6 +599,8 @@ class BuildDocumentation:
 
         self._prepare_build()
         build_result = self._run_sphinx_build()
+        if os.environ.get("READTHEDOCS_OUTPUT"):
+            return build_result
         self._post_build()
         return build_result
 
@@ -708,8 +710,13 @@ class BuildDocumentation:
         environ["SPHINX_CONFDIR"] = confdir = str(DOCS)
         environ["SOURCES"] = str(self.PROJECT_SOURCES)
 
-        outdir = f"{HTML}/{doc_version}"
-        doctreesdir = f"{DOCTREES}/{doc_version}"
+        rtd_output = os.environ.get("READTHEDOCS_OUTPUT")
+        if rtd_output:
+            outdir = str(Path(rtd_output) / "html")
+            doctreesdir = str(BUILDDIR / "~doctrees_rtd")
+        else:
+            outdir = f"{HTML}/{doc_version}"
+            doctreesdir = f"{DOCTREES}/{doc_version}"
 
         sp = Sphinx(
             srcdir,
