@@ -2,7 +2,7 @@
 #
 # This project serves the guides, the notebooks and the API reference. The
 # example gallery is published as a companion project, configured in
-# docs/rtd/gallery.readthedocs.yaml.
+# docs/rtd/gallery/.readthedocs.yaml.
 #
 # NOTE: the project slug below must match the actual Read the Docs project.
 # The two projects link to each other through SCPY_DOCS_MAIN_URL and

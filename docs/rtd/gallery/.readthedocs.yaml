@@ -2,7 +2,7 @@
 #
 # This is the companion project of the main documentation. On Read the Docs,
 # set the configuration file path of the gallery project to
-# ``docs/rtd/gallery.readthedocs.yaml`` in the project dashboard
+# ``docs/rtd/gallery/.readthedocs.yaml`` in the project dashboard
 # (Admin > Settings > Advanced settings). All paths inside this file are
 # relative to the repository root.
 #
