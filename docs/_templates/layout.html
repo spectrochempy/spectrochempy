@@ -2,9 +2,6 @@
 
 {%- block sidebartitle %}
 
-{% if READTHEDOCS %}
-{{ super() }}
-{% else %}
 {# the logo helper function was removed in Sphinx 6 and deprecated since Sphinx 4 #}
 {# the master_doc variable was renamed to root_doc in Sphinx 4 (master_doc still exists in later Sphinx versions) #}
 {%- set _logo_url = logo_url|default(pathto('_static/' + (logo or ""), 1)) %}
@@ -16,12 +13,13 @@
     {%- endif %}
 </a>
 
+{% if not READTHEDOCS %}
 <div class="switch-menus">
     <select id="versions-dropdown"></select>
 </div>
+{% endif %}
 
 {%- include "searchbox.html" %}
-{% endif %}
 
 {%- endblock %}
 {% block menu %}
@@ -30,7 +28,7 @@
 {% endblock %}
 
 {% block document %}
-{% if current_version == 'latest' %}
+{% if not READTHEDOCS and current_version == 'latest' %}
 <div id="version-popup" class="popup-warning">
     <span class="close-btn" onclick="closePopup()">×</span>
     ⚠️ You are reading the development version documentation.<br />
