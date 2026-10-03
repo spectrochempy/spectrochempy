@@ -2,6 +2,9 @@
 
 {%- block sidebartitle %}
 
+{% if READTHEDOCS %}
+{{ super() }}
+{% else %}
 {# the logo helper function was removed in Sphinx 6 and deprecated since Sphinx 4 #}
 {# the master_doc variable was renamed to root_doc in Sphinx 4 (master_doc still exists in later Sphinx versions) #}
 {%- set _logo_url = logo_url|default(pathto('_static/' + (logo or ""), 1)) %}
@@ -27,6 +30,7 @@
 </div>
 
 {%- include "searchbox.html" %}
+{% endif %}
 
 {%- endblock %}
 {% block menu %}
@@ -52,5 +56,7 @@
 
 {% block extrahead %}
 {{ super() }}
-<script defer src="{{ pathto('_static/js/versions.js', 1) }}"></script>
+{% if not READTHEDOCS %}
+<script defer src="{{ pathto('_static/js/github-pages-versions.js', 1) }}"></script>
+{% endif %}
 {% endblock %}
