@@ -74,15 +74,16 @@ If unavailable, fall back to `.venv` or system Python with `PYTHONPATH=src/`.
 
 ## Temporary Files
 
-Use the temporary directory of the current environment. Do not assume its
-path, its backing store, or how long it survives: `tempfile` resolves all three
-from `TMPDIR`, `TEMP`, `TMP` and the platform defaults.
+Use the temporary directory of the current environment. `tempfile` resolves its
+location from `TMPDIR`, `TEMP`, `TMP` and the platform defaults. Whether that
+location is backed by RAM or disk, and how long it survives, remain the
+platform's business.
 
 ```python
 import tempfile
 from pathlib import Path
 
-with tempfile.TemporaryDirectory(prefix="opencode-<job>-") as tmp:
+with tempfile.TemporaryDirectory(prefix="opencode-validation-") as tmp:
     work = Path(tmp)
     build(work)  # build tree, generated documentation, validation copy
 ```

@@ -83,8 +83,9 @@ directly (see `spectrochempy-dev` skill).
 
 Scratch space is disposable by definition. It belongs in the temporary
 directory of the current environment; its location, backing store and lifetime
-are the platform's business, not this repository's. `tempfile` already resolves
-them (`TMPDIR`, `TEMP`, `TMP`, platform defaults), so no path is hardcoded.
+are the platform's business, not this repository's. `tempfile` resolves the
+location itself (`TMPDIR`, `TEMP`, `TMP`, platform defaults), so no path is
+hardcoded.
 
 * Repository code uses context-managed temporary directories
   (`tempfile.TemporaryDirectory()`) or the pytest `tmp_path` fixture.
