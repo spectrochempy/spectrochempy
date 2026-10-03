@@ -199,14 +199,26 @@ As a rule of thumb:
 
 ## Linting & formatting
 
+Read-only checks, safe to run at any time:
+
 ```bash
 ruff check src/spectrochempy/
+ruff format --check src/spectrochempy/
+```
+
+Rewriting pass — run it deliberately, then inspect the diff:
+
+```bash
+ruff check --fix src/spectrochempy/
 ruff format src/spectrochempy/
 ```
 
 Configuration is defined in `pyproject.toml`.
 
 SpectroChemPy uses Ruff only (no standalone Black or isort).
+
+The pre-push hooks run the same tools. They are the authority before a push;
+a direct rewriting pass is a convenience, not a substitute.
 
 ---
 
