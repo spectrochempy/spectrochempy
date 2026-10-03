@@ -75,9 +75,8 @@ def test_navigation_labels_contexts_and_page_fallback_are_present():
     assert "Documentation version" in layout
     assert "This is development documentation." in layout
     assert "pull request documentation preview" in layout
-    assert "{% if READTHEDOCS %}" in layout
     assert "{% if not READTHEDOCS %}" in layout
-    assert "{{ super() }}" in layout
+    assert "not READTHEDOCS and docs_context" in layout
     assert "Stable — ${manifest.stable}" in script
     assert "Development — unreleased" in script
     assert 'group.label = "Previous versions"' in script
