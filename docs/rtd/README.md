@@ -131,6 +131,12 @@ given in [Versions](#versions-slugs-and-cross-project-links).
 - every profile keeps `index` as the root document, so `index.html` exists at
   the root of each published site.
 
+The GitHub Pages site keeps its custom version selector and its
+`github-pages-versions.js` navigation script. On Read the Docs, the custom
+selector is omitted so the `sphinx_rtd_theme` native selector is the only one
+shown. The theme supports that selector in its standard sidebar-header location
+(above search), not a supported bottom-of-sidebar slot.
+
 ## Plugin installation
 
 `pip install ".[docs,plugins]"` is **not** used. The `plugins` extra resolves the
