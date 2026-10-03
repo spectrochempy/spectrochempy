@@ -65,7 +65,7 @@ def test_stable_root_sync_preserves_development_versions_and_previews(tmp_path):
 
 def test_navigation_labels_contexts_and_page_fallback_are_present():
     layout = (ROOT / "docs" / "_templates" / "layout.html").read_text(encoding="utf-8")
-    script = (ROOT / "docs" / "_static" / "js" / "versions.js").read_text(
+    script = (ROOT / "docs" / "_static" / "js" / "github-pages-versions.js").read_text(
         encoding="utf-8"
     )
     workflow = (ROOT / ".github" / "workflows" / "build_docs.yml").read_text(
@@ -75,6 +75,9 @@ def test_navigation_labels_contexts_and_page_fallback_are_present():
     assert "Documentation version" in layout
     assert "This is development documentation." in layout
     assert "pull request documentation preview" in layout
+    assert "{% if READTHEDOCS %}" in layout
+    assert "{% if not READTHEDOCS %}" in layout
+    assert "{{ super() }}" in layout
     assert "Stable — ${manifest.stable}" in script
     assert "Development — unreleased" in script
     assert 'group.label = "Previous versions"' in script
@@ -89,7 +92,7 @@ def test_navigation_labels_contexts_and_page_fallback_are_present():
 
 def test_version_selector_keeps_its_accessible_name_and_drops_its_visible_title():
     layout = (ROOT / "docs" / "_templates" / "layout.html").read_text(encoding="utf-8")
-    script = (ROOT / "docs" / "_static" / "js" / "versions.js").read_text(
+    script = (ROOT / "docs" / "_static" / "js" / "github-pages-versions.js").read_text(
         encoding="utf-8"
     )
     style = (ROOT / "docs" / "_static" / "css" / "spectrochempy.css").read_text(
@@ -109,6 +112,7 @@ def test_version_selector_keeps_its_accessible_name_and_drops_its_visible_title(
     assert 'aria-label="Documentation version"' in layout
     assert 'title="Documentation version"' in layout
     assert 'id="versions-dropdown"' in layout
+    assert "github-pages-versions.js" in layout
 
     # The context banners and the option labels are part of the contract.
     assert "This is development documentation." in layout
