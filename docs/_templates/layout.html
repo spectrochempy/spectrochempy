@@ -2,9 +2,6 @@
 
 {%- block sidebartitle %}
 
-{% if READTHEDOCS %}
-{{ super() }}
-{% else %}
 {# the logo helper function was removed in Sphinx 6 and deprecated since Sphinx 4 #}
 {# the master_doc variable was renamed to root_doc in Sphinx 4 (master_doc still exists in later Sphinx versions) #}
 {%- set _logo_url = logo_url|default(pathto('_static/' + (logo or ""), 1)) %}
@@ -16,6 +13,7 @@
     {%- endif %}
 </a>
 
+{% if not READTHEDOCS %}
 <div class="switch-menus">
     <select id="versions-dropdown"
             aria-label="Documentation version"
@@ -28,9 +26,9 @@
         <option selected disabled>Loading versions…</option>
     </select>
 </div>
+{% endif %}
 
 {%- include "searchbox.html" %}
-{% endif %}
 
 {%- endblock %}
 {% block menu %}
@@ -39,12 +37,12 @@
 {% endblock %}
 
 {% block document %}
-{% if docs_context == 'development' %}
+{% if not READTHEDOCS and docs_context == 'development' %}
 <div class="docs-context-banner docs-development-banner" role="status">
     This is development documentation. Some features are not available in the stable release.
     <a href="{{ stable_release_url }}" data-docs-target="stable">View stable documentation.</a>
 </div>
-{% elif docs_context == 'preview' %}
+{% elif not READTHEDOCS and docs_context == 'preview' %}
 <div class="docs-context-banner docs-preview-banner" role="status">
     This is a pull request documentation preview{% if docs_preview_name %} for
     <code>{{ docs_preview_name }}</code>{% endif %}. Content may change before merge.
