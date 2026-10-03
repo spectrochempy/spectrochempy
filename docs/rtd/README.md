@@ -10,7 +10,7 @@ differ only by the documentation profile they select.
 | Project | Configuration | Profile | Content |
 |---|---|---|---|
 | main | `.readthedocs.yaml` | `main` | guides, notebooks, API reference, plugins guide |
-| gallery | `docs/rtd/gallery.readthedocs.yaml` | `gallery` | executed examples, figures, downloads |
+| gallery | `docs/rtd/gallery/.readthedocs.yaml` | `gallery` | executed examples, figures, downloads |
 
 ## Dashboard setup
 
@@ -22,7 +22,7 @@ For the **main** project: *Admin > Settings > Advanced settings > Configuration
 file*, leave it as `.readthedocs.yaml`.
 
 For the **gallery** project: set the configuration file to
-`docs/rtd/gallery.readthedocs.yaml`. All paths inside the file stay relative to
+`docs/rtd/gallery/.readthedocs.yaml`. All paths inside the file stay relative to
 the repository root, including `docs/make.py`.
 
 Both projects need a GitHub App integration for PR previews. Enable
