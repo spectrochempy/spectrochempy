@@ -72,6 +72,36 @@ If unavailable, fall back to `.venv` or system Python with `PYTHONPATH=src/`.
 
 ---
 
+## Temporary Files
+
+Use the temporary directory of the current environment. `tempfile` resolves its
+location from `TMPDIR`, `TEMP`, `TMP` and the platform defaults. Whether that
+location is backed by RAM or disk, and how long it survives, remain the
+platform's business.
+
+```python
+import tempfile
+from pathlib import Path
+
+with tempfile.TemporaryDirectory(prefix="opencode-validation-") as tmp:
+    work = Path(tmp)
+    build(work)  # build tree, generated documentation, validation copy
+```
+
+* The context manager removes the directory when the task ends, on every
+  platform — and it fails loudly on Windows if a handle is still open, rather
+  than leaving a directory behind silently.
+* For a large build, do not assume the default location has room: check the
+  free space, and pass `dir=` to place the work on a local disk.
+* Never hardcode a temporary path in repository code: use
+  `tempfile.TemporaryDirectory()` or the pytest `tmp_path` fixture.
+* Keeping a result and committing it are different acts. A report or a note
+  worth keeping belongs in a repository; a build tree, an environment or a
+  dataset may stay in a persistent non-versioned location. Say which is which
+  when reporting, and where you left anything.
+
+---
+
 ## Testing Policy
 
 Run only the smallest validation necessary:
@@ -99,7 +129,14 @@ validation. Execute the targeted tests and report their results.
 ## Pre-commit Policy
 
 **Pre-commit is NOT needed during development.** It is a waste of time to run
-it repeatedly. Ruff and other linters are executed by the final pre-commit run.
+it repeatedly: the final pre-push run owns lint and formatting.
+
+A read-only check on a targeted path is fine — `ruff check <path>`,
+`ruff format --check <path>`. A rewriting pass (`ruff check --fix`,
+`ruff format`) is not a development step, and neither is re-running one to
+"fix" a file you are editing: the hooks rewrite code as well, so review the
+diff after any run that modifies files. If the hooks cannot be installed,
+report that instead of substituting a direct rewriting run.
 
 **Pre-commit is MANDATORY only once, before the final commit and push to a PR
 branch:**

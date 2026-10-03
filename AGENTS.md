@@ -62,6 +62,11 @@ Unless explicitly delegated:
 * do not create releases or publish packages;
 * do not run pre-commit during development (required only before pushing a PR
   branch — see `spectrochempy-dev` skill).
+* do not run a broad or repeated rewriting pass (`ruff check --fix`,
+  `ruff format`) while developing; read-only checks (`ruff check`,
+  `ruff format --check`) on targeted paths are fine. The pre-push hooks remain
+  mandatory: they own lint and formatting, they may rewrite code, so inspect
+  the diff after any run that modifies files.
 
 When a task is authorized, proceed to a validated solution and a first review
 of the diff without requesting confirmation for ordinary technical choices.
@@ -71,6 +76,24 @@ of the diff without requesting confirmation for ordinary technical choices.
 Always base PRs on `upstream/master` unless explicitly instructed otherwise.
 Before creating a new branch, fetch `upstream/master` and branch from it
 directly (see `spectrochempy-dev` skill).
+
+---
+
+## Temporary Files
+
+Scratch space is disposable by definition. It belongs in the temporary
+directory of the current environment; its location, backing store and lifetime
+are the platform's business, not this repository's. `tempfile` resolves the
+location itself (`TMPDIR`, `TEMP`, `TMP`, platform defaults), so no path is
+hardcoded.
+
+* Repository code uses context-managed temporary directories
+  (`tempfile.TemporaryDirectory()`) or the pytest `tmp_path` fixture.
+* Remove scratch space in the task that created it, and report what was left
+  behind.
+* Keeping a result and committing it are different acts: a report or a note
+  worth keeping belongs in a repository, while a build tree, an environment or
+  a dataset may stay in a persistent non-versioned location.
 
 ---
 
