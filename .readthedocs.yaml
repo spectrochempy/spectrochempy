@@ -1,4 +1,4 @@
-# Read the Docs configuration for the integrated SpectroChemPy 1.1.1 site.
+# Read the Docs configuration for the integrated SpectroChemPy 1.1.0 site.
 version: 2
 
 build:
