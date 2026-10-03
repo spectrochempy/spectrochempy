@@ -72,6 +72,32 @@ If unavailable, fall back to `.venv` or system Python with `PYTHONPATH=src/`.
 
 ---
 
+## Temporary Files
+
+`/tmp` is a shared, size-limited `tmpfs` (RAM). Create every piece of scratch
+space under one prefixed parent, so what remains is identifiable at a glance:
+
+```bash
+mkdir -p /tmp/opencode
+work=$(mktemp -d /tmp/opencode/<job>.XXXXXX)
+trap 'rm -rf "$work"' EXIT
+```
+
+* Create the parent directory first: `mktemp` does not create intermediate
+  directories, so it fails when `/tmp/opencode` is absent — on a fresh machine,
+  or after a cleanup that removed it.
+* Use this for build trees, generated documentation, throwaway virtual
+  environments and validation copies.
+* Remove it in the same task that created it, and report any directory left
+  behind.
+* Never use a hardcoded `/tmp/...` path in repository code: use
+  `tempfile.TemporaryDirectory()` or the pytest `tmp_path` fixture.
+* A result that must outlive the task goes into the repository under an explicit
+  name, never to `/tmp`; `maintainers/` stays restricted to release and
+  emergency recovery procedures.
+
+---
+
 ## Testing Policy
 
 Run only the smallest validation necessary:
@@ -100,6 +126,10 @@ validation. Execute the targeted tests and report their results.
 
 **Pre-commit is NOT needed during development.** It is a waste of time to run
 it repeatedly. Ruff and other linters are executed by the final pre-commit run.
+Do not run `ruff` or `ruff format` directly while developing either, not even on
+the files being edited: the hooks own lint and formatting, since a standalone
+run may rewrite code that was never reviewed. If the hooks cannot be installed,
+report that instead of substituting a direct run.
 
 **Pre-commit is MANDATORY only once, before the final commit and push to a PR
 branch:**
