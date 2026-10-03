@@ -189,14 +189,14 @@ def _update_version_template_data(html_dir=HTML):
 
 
 def _sync_versions_script(html_dir=HTML):
-    source = STATIC / "js" / "versions.js"
+    source = STATIC / "js" / "github-pages-versions.js"
     if not source.exists():
         return
 
     html_dir = Path(html_dir)
-    targets = [html_dir / "_static" / "js" / "versions.js"]
+    targets = [html_dir / "_static" / "js" / "github-pages-versions.js"]
     targets.extend(
-        version_dir / "_static" / "js" / "versions.js"
+        version_dir / "_static" / "js" / "github-pages-versions.js"
         for version_dir in html_dir.glob("[0-9]*.[0-9]*.[0-9]*")
     )
 
@@ -803,10 +803,17 @@ class BuildDocumentation:
         _trace_ci("_prepare_build completed")
         build_result = self._run_sphinx_build()
         _trace_ci(f"_run_sphinx_build returned {build_result!r}")
-        source_dir = HTML / self._doc_version
+        source_dir = (
+            Path(os.environ["READTHEDOCS_OUTPUT"]) / "html"
+            if os.environ.get("READTHEDOCS_OUTPUT")
+            else HTML / self._doc_version
+        )
         if source_dir.exists() and any(source_dir.iterdir()):
             self._validate_built_html(source_dir)
             _trace_ci("_validate_built_html completed")
+        if os.environ.get("READTHEDOCS_OUTPUT"):
+            _trace_ci("Skipping docs post-build actions on Read the Docs")
+            return build_result
         if environ.get("SCPY_SKIP_POST_BUILD") == "1":
             _trace_ci("Skipping docs post-build actions (SCPY_SKIP_POST_BUILD=1)")
             return build_result
@@ -941,8 +948,13 @@ class BuildDocumentation:
         if source_root not in sys.path:
             sys.path.insert(0, source_root)
 
-        outdir = f"{HTML}/{doc_version}"
-        doctreesdir = f"{DOCTREES}/{doc_version}"
+        rtd_output = os.environ.get("READTHEDOCS_OUTPUT")
+        if rtd_output:
+            outdir = str(Path(rtd_output) / "html")
+            doctreesdir = str(BUILDDIR / "~doctrees_rtd")
+        else:
+            outdir = f"{HTML}/{doc_version}"
+            doctreesdir = f"{DOCTREES}/{doc_version}"
 
         sp = Sphinx(
             srcdir,
