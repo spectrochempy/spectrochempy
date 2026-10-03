@@ -1,16 +1,18 @@
 # Read the Docs prototype
 
-This directory holds the Read the Docs configuration of the **example gallery**
-project. The main documentation project uses `.readthedocs.yaml` at the root of
-the repository.
+This directory holds the optional Read the Docs configuration of the **example
+gallery** project. The main documentation project uses `.readthedocs.yaml` at
+the root of the repository and publishes the integrated site.
 
-Both projects build the same sources, with the same `docs/make.py` driver, and
-differ only by the documentation profile they select.
+Both projects build the same sources with the same `docs/make.py` driver, and
+differ only by the documentation profile they select. The separate gallery
+configuration is retained for now, but is no longer the primary published
+experience.
 
 | Project | Configuration | Profile | Content |
 |---|---|---|---|
-| main | `.readthedocs.yaml` | `main` | guides, notebooks, API reference, plugins guide |
-| gallery | `docs/rtd/gallery/.readthedocs.yaml` | `gallery` | executed examples, figures, downloads |
+| main | `.readthedocs.yaml` | `full` | guides, notebooks, API reference, gallery, plugins guide |
+| gallery | `docs/rtd/gallery/.readthedocs.yaml` | `gallery` | optional split example site |
 
 ## Dashboard setup
 
@@ -21,18 +23,20 @@ projects per repository, and the configuration path is a per-project setting.
 For the **main** project: *Admin > Settings > Advanced settings > Configuration
 file*, leave it as `.readthedocs.yaml`.
 
-For the **gallery** project: set the configuration file to
-`docs/rtd/gallery/.readthedocs.yaml`. All paths inside the file stay relative to
-the repository root, including `docs/make.py`.
+For the **gallery** project: its configuration remains
+`docs/rtd/gallery/.readthedocs.yaml`. It can be disabled manually after the
+integrated main-site preview has been accepted. All paths inside the file stay
+relative to the repository root, including `docs/make.py`.
 
 Both projects need a GitHub App integration for PR previews. Enable
 *Admin > Settings > Integrations > Add your integration*, and enable
 previews under *Settings > Pull request previews*.
 
-The `https://spectrochempy.readthedocs.io/en/latest` and
-`https://spectrochempy-gallery.readthedocs.io/en/latest` URLs in the two
-configuration files must be updated to the slugs actually created, because the
-projects link to each other. Keep them without a trailing slash.
+The optional split profiles use the
+`https://spectrochempy.readthedocs.io/en/latest` and
+`https://spectrochempy-gallery.readthedocs.io/en/latest` companion URLs. Update
+them to the slugs actually created and keep them without a trailing slash. The
+integrated `full` main site does not use a companion URL.
 
 ## Versions
 
@@ -94,9 +98,9 @@ from the `--profile/-P` flag.
 
 | Profile | Meaning |
 |---|---|
-| `full` | default, the current single site published on GitHub Pages |
-| `main` | everything except the example gallery |
-| `gallery` | the example gallery only |
+| `full` | default and primary RTD site: guides, API reference, and example gallery |
+| `main` | everything except the example gallery; retained for split-build experiments |
+| `gallery` | the example gallery only; retained for split-build experiments |
 
 The default is `full`, so an unset variable keeps the current behaviour. The
 generated output of the `full` profile is unchanged by this mechanism.
@@ -158,11 +162,10 @@ for name in $(python -m spectrochempy.ci.install_plugins --list-names); do
   python -m pip install --no-deps -e "plugins/$name"; done
 python -m pip install osqp scipy numpy-quaternion tensorly
 
-# main project
-SCPY_DOCS_GALLERY_URL=https://spectrochempy-gallery.readthedocs.io/en/latest \
-  python docs/make.py html --profile main --warning-is-error -j auto
+# integrated main project
+python docs/make.py html --profile full --warning-is-error -j auto
 
-# gallery project
+# optional split gallery project
 SCPY_DOCS_MAIN_URL=https://spectrochempy.readthedocs.io/en/latest \
   python docs/make.py html --profile gallery --warning-is-error -j auto
 ```
@@ -174,6 +177,28 @@ For a clean RTD-like validation, use empty directories for both
 from satisfying references to excluded profile content. If the build downloads
 test data, also use an isolated `HOME` and `SCP_CONFIG_HOME` so the local data
 directory and preferences remain untouched.
+
+### Integrated-site preview checklist
+
+Before accepting the main-project PR preview, validate the `full` profile as
+the historical integrated site, not merely as a successful Sphinx build:
+
+- the gallery landing page exposes every category and example page through the
+  normal site navigation;
+- Sphinx-Gallery cross-references are generated, including the small example
+  thumbnails at the bottom of public API pages;
+- inspect several API pages for objects used by gallery examples (for example
+  `NDDataset`, `MCRALS`, and `PCA`): their thumbnails must be present and each
+  link must resolve locally to the corresponding generated example page;
+- confirm that gallery-to-API and notebook-to-gallery links are local links,
+  not companion-project URLs;
+- confirm that the `main` and `gallery` profile conditions do not remove the
+  gallery, its backreferences, thumbnails, navigation, or local links in the
+  `full` preview.
+
+The Read the Docs preview must retain the content, navigation, and internal
+links of the previous integrated documentation before the optional split gallery
+project is disabled.
 
 ## Measured on the development machine
 
