@@ -13,6 +13,7 @@ Please note that the number of examples is currently quite limited. We are activ
 If you have examples to suggest from your own use of spectrochempy, don't hesitate to suggest them
 in the `discussions <https://github.com/spectrochempy/spectrochempy/discussions>`__ or by creating a pull-request.
 
+{% if build_gallery %}
 .. contents:: Table of Contents
    :local:
    :depth: 2
@@ -26,3 +27,12 @@ in the `discussions <https://github.com/spectrochempy/spectrochempy/discussions>
    gallery/auto_examples_analysis/index
    gallery/auto_examples_processing/index
    gallery/auto_examples_plugins/index
+{% else %}
+.. note::
+
+   The examples are built as a separate documentation project so that they can
+   be published and iterated on independently from this one.
+   {%- if gallery_docs_url %}
+   Browse them in the `online gallery <{{ gallery_docs_url }}>`__.
+   {%- endif %}
+{% endif %}

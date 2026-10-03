@@ -1,0 +1,56 @@
+# Read the Docs configuration for the main SpectroChemPy documentation.
+#
+# This project serves the guides, the notebooks and the API reference. The
+# example gallery is published as a companion project, configured in
+# docs/rtd/gallery.readthedocs.yaml.
+#
+# NOTE: the project slug below must match the actual Read the Docs project.
+# The two projects link to each other through SCPY_DOCS_MAIN_URL and
+# SCPY_DOCS_GALLERY_URL, which are set on the build command.
+version: 2
+
+build:
+  os: ubuntu-24.04
+  tools:
+    python: "3.13"
+  # pandoc is required by nbsphinx to render the markdown cells of the
+  # notebooks.
+  apt_packages:
+    - pandoc
+  jobs:
+    post_checkout:
+      # The build needs the release tags, both for the version and for the
+      # setuptools_scm version of the editable install below. Read the Docs
+      # clones shallowly.
+      - git fetch --unshallow || true
+      - git fetch --all --tags || true
+    install:
+      - python -m pip install --upgrade pip
+      # The ``plugins`` extra is deliberately NOT requested here: it would
+      # resolve the plugins published on PyPI, and the post_install job below
+      # replaces them with the ones from this checkout.
+      - python -m pip install -e ".[docs]"
+    post_install:
+      # Install the plugins from the checkout, not from PyPI, so a pull
+      # request that changes a plugin documents the plugin it contains.
+      # This mirrors the install sequence of .github/workflows/build_docs.yml.
+      - |
+        for name in $(python -m spectrochempy.ci.install_plugins --list-names); do
+          python -m pip install --no-deps -e "plugins/$name"
+        done
+      # Runtime dependencies that --no-deps skips.
+      - python -m pip install osqp scipy numpy-quaternion tensorly
+    build:
+      html:
+        # ``make.py`` drives the whole build (notebook sync, gallery staging,
+        # profile specific exclusions) and writes to
+        # $READTHEDOCS_OUTPUT/html when that variable is set.
+        #
+        # The companion URL is fully versioned, language and version included,
+        # because Read the Docs serves the tree under /<language>/<version>/.
+        # For the first trial both projects link to their own ``latest``
+        # version. Matching a release page to the companion release still has
+        # to be done, see docs/rtd/README.md.
+        - SCPY_DOCS_PROFILE=main
+          SCPY_DOCS_GALLERY_URL=https://spectrochempy-gallery.readthedocs.io/en/latest
+          python docs/make.py html --profile main --warning-is-error -j auto
