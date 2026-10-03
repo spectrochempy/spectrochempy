@@ -168,14 +168,14 @@ def _update_version_template_data(html_dir=HTML):
 
 
 def _sync_versions_script(html_dir=HTML):
-    source = STATIC / "js" / "versions.js"
+    source = STATIC / "js" / "github-pages-versions.js"
     if not source.exists():
         return
 
     html_dir = Path(html_dir)
-    targets = [html_dir / "_static" / "js" / "versions.js"]
+    targets = [html_dir / "_static" / "js" / "github-pages-versions.js"]
     targets.extend(
-        version_dir / "_static" / "js" / "versions.js"
+        version_dir / "_static" / "js" / "github-pages-versions.js"
         for version_dir in html_dir.glob("[0-9]*.[0-9]*.[0-9]*")
     )
 
@@ -717,6 +717,10 @@ class BuildDocumentation:
 
         self._prepare_build()
         build_result = self._run_sphinx_build()
+        if os.environ.get("READTHEDOCS_OUTPUT"):
+            return build_result
+        if environ.get("SCPY_SKIP_POST_BUILD") == "1":
+            return build_result
         self._post_build()
         return build_result
 
@@ -836,8 +840,13 @@ class BuildDocumentation:
         environ["SPHINX_CONFDIR"] = confdir = str(DOCS)
         environ["SOURCES"] = str(self.PROJECT_SOURCES)
 
-        outdir = f"{HTML}/{doc_version}"
-        doctreesdir = f"{DOCTREES}/{doc_version}"
+        rtd_output = os.environ.get("READTHEDOCS_OUTPUT")
+        if rtd_output:
+            outdir = str(Path(rtd_output) / "html")
+            doctreesdir = str(BUILDDIR / "~doctrees_rtd")
+        else:
+            outdir = f"{HTML}/{doc_version}"
+            doctreesdir = f"{DOCTREES}/{doc_version}"
 
         sp = Sphinx(
             srcdir,
