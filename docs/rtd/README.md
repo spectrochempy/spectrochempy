@@ -169,6 +169,12 @@ SCPY_DOCS_MAIN_URL=https://spectrochempy.readthedocs.io/en/latest \
 
 `--no-exec` and `--no-data` shorten a smoke build considerably.
 
+For a clean RTD-like validation, use empty directories for both
+`SCPY_BUILDDIR` and `READTHEDOCS_OUTPUT`; this prevents old doctrees and HTML
+from satisfying references to excluded profile content. If the build downloads
+test data, also use an isolated `HOME` and `SCP_CONFIG_HOME` so the local data
+directory and preferences remain untouched.
+
 ## Measured on the development machine
 
 Warm caches, `-j 4`, executed notebooks and examples, test data downloaded.
