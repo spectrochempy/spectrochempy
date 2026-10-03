@@ -214,14 +214,14 @@ def _update_version_template_data(html_dir=HTML):
 
 
 def _sync_versions_script(html_dir=HTML):
-    source = STATIC / "js" / "versions.js"
+    source = STATIC / "js" / "github-pages-versions.js"
     if not source.exists():
         return
 
     html_dir = Path(html_dir)
-    targets = [html_dir / "_static" / "js" / "versions.js"]
+    targets = [html_dir / "_static" / "js" / "github-pages-versions.js"]
     targets.extend(
-        version_dir / "_static" / "js" / "versions.js"
+        version_dir / "_static" / "js" / "github-pages-versions.js"
         for version_dir in html_dir.glob("[0-9]*.[0-9]*.[0-9]*")
     )
 
