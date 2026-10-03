@@ -62,10 +62,11 @@ Unless explicitly delegated:
 * do not create releases or publish packages;
 * do not run pre-commit during development (required only before pushing a PR
   branch — see `spectrochempy-dev` skill).
-* do not run `ruff` or `ruff format` directly while developing, not even on the
-  files being edited: the hooks own lint and formatting, since a standalone run
-  may rewrite code that was never reviewed. If the hooks cannot be installed,
-  report that instead of substituting a direct run.
+* do not run a broad or repeated rewriting pass (`ruff check --fix`,
+  `ruff format`) while developing; read-only checks (`ruff check`,
+  `ruff format --check`) on targeted paths are fine. The pre-push hooks remain
+  mandatory: they own lint and formatting, they may rewrite code, so inspect
+  the diff after any run that modifies files.
 
 When a task is authorized, proceed to a validated solution and a first review
 of the diff without requesting confirmation for ordinary technical choices.
@@ -80,23 +81,18 @@ directly (see `spectrochempy-dev` skill).
 
 ## Temporary Files
 
-`/tmp` is a shared, size-limited resource (a `tmpfs`, i.e. RAM). What is left
-there is invisible to the repositories and does not survive a reboot, so it can
-never hold the only copy of a result.
+Scratch space is disposable by definition. It belongs in the temporary
+directory of the current environment; its location, backing store and lifetime
+are the platform's business, not this repository's. `tempfile` already resolves
+them (`TMPDIR`, `TEMP`, `TMP`, platform defaults), so no path is hardcoded.
 
 * Repository code uses context-managed temporary directories
-  (`tempfile.TemporaryDirectory()`) or the pytest `tmp_path` fixture, never a
-  hardcoded `/tmp/...` path.
-* Scratch space created while working — build trees, documentation output,
-  throwaway virtual environments, validation copies — goes under
-  `/tmp/opencode/<job>.XXXXXX`, where the `mktemp` suffix marks it disposable.
-  Create `/tmp/opencode` first when it is missing: `mktemp` does not create
-  intermediate directories.
-* Remove that scratch space in the same task that created it
-  (`trap 'rm -rf "$work"' EXIT`), and report the directories left behind.
-* Anything that must outlive the task belongs in the repository, under an
-  explicit name — never in `/tmp`. `maintainers/` stays restricted to release
-  and emergency recovery procedures.
+  (`tempfile.TemporaryDirectory()`) or the pytest `tmp_path` fixture.
+* Remove scratch space in the task that created it, and report what was left
+  behind.
+* Keeping a result and committing it are different acts: a report or a note
+  worth keeping belongs in a repository, while a build tree, an environment or
+  a dataset may stay in a persistent non-versioned location.
 
 ---
 

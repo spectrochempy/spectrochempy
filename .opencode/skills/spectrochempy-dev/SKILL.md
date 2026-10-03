@@ -74,27 +74,30 @@ If unavailable, fall back to `.venv` or system Python with `PYTHONPATH=src/`.
 
 ## Temporary Files
 
-`/tmp` is a shared, size-limited `tmpfs` (RAM). Create every piece of scratch
-space under one prefixed parent, so what remains is identifiable at a glance:
+Use the temporary directory of the current environment. Do not assume its
+path, its backing store, or how long it survives: `tempfile` resolves all three
+from `TMPDIR`, `TEMP`, `TMP` and the platform defaults.
 
-```bash
-mkdir -p /tmp/opencode
-work=$(mktemp -d /tmp/opencode/<job>.XXXXXX)
-trap 'rm -rf "$work"' EXIT
+```python
+import tempfile
+from pathlib import Path
+
+with tempfile.TemporaryDirectory(prefix="opencode-<job>-") as tmp:
+    work = Path(tmp)
+    build(work)  # build tree, generated documentation, validation copy
 ```
 
-* Create the parent directory first: `mktemp` does not create intermediate
-  directories, so it fails when `/tmp/opencode` is absent — on a fresh machine,
-  or after a cleanup that removed it.
-* Use this for build trees, generated documentation, throwaway virtual
-  environments and validation copies.
-* Remove it in the same task that created it, and report any directory left
-  behind.
-* Never use a hardcoded `/tmp/...` path in repository code: use
+* The context manager removes the directory when the task ends, on every
+  platform — and it fails loudly on Windows if a handle is still open, rather
+  than leaving a directory behind silently.
+* For a large build, do not assume the default location has room: check the
+  free space, and pass `dir=` to place the work on a local disk.
+* Never hardcode a temporary path in repository code: use
   `tempfile.TemporaryDirectory()` or the pytest `tmp_path` fixture.
-* A result that must outlive the task goes into the repository under an explicit
-  name, never to `/tmp`; `maintainers/` stays restricted to release and
-  emergency recovery procedures.
+* Keeping a result and committing it are different acts. A report or a note
+  worth keeping belongs in a repository; a build tree, an environment or a
+  dataset may stay in a persistent non-versioned location. Say which is which
+  when reporting, and where you left anything.
 
 ---
 
@@ -125,11 +128,14 @@ validation. Execute the targeted tests and report their results.
 ## Pre-commit Policy
 
 **Pre-commit is NOT needed during development.** It is a waste of time to run
-it repeatedly. Ruff and other linters are executed by the final pre-commit run.
-Do not run `ruff` or `ruff format` directly while developing either, not even on
-the files being edited: the hooks own lint and formatting, since a standalone
-run may rewrite code that was never reviewed. If the hooks cannot be installed,
-report that instead of substituting a direct run.
+it repeatedly: the final pre-push run owns lint and formatting.
+
+A read-only check on a targeted path is fine — `ruff check <path>`,
+`ruff format --check <path>`. A rewriting pass (`ruff check --fix`,
+`ruff format`) is not a development step, and neither is re-running one to
+"fix" a file you are editing: the hooks rewrite code as well, so review the
+diff after any run that modifies files. If the hooks cannot be installed,
+report that instead of substituting a direct rewriting run.
 
 **Pre-commit is MANDATORY only once, before the final commit and push to a PR
 branch:**
