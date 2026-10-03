@@ -1,0 +1,16 @@
+What's new in revision 0.5.0 [2023-01-11]
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-0.5.0. See :ref:`release` for a full changelog
+including other versions of SpectroChemPy.
+
+New features
+~~~~~~~~~~~~
+
+-  Improved documentation.
+
+Breaking changes
+~~~~~~~~~~~~~~~~
+
+-  numpy ufunc function can no longer be called as
+   ``scp.ufunc(nddataset)`` , use ``np.ufunc(nddataset)`` instead.

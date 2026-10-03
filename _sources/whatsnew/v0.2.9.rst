@@ -1,0 +1,10 @@
+What's new in revision 0.2.9 [2021-11-29]
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-0.2.9. See :ref:`release` for a full changelog
+including other versions of SpectroChemPy.
+
+Bug fixes
+~~~~~~~~~
+
+-  Hotfix regarding display of NMR x scale

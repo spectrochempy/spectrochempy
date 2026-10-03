@@ -1,0 +1,13 @@
+{
+  "schema_version": 2,
+  "latest": "latest",
+  "development": "latest",
+  "stable": "1.1.1",
+  "versions": [
+    "1.1.1",
+    "1.1.0",
+    "1.0.0",
+    "0.12.8",
+    "0.12.7"
+  ]
+}

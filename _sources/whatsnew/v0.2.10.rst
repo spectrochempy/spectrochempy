@@ -1,0 +1,18 @@
+What's new in revision 0.2.10 [2021-02-14]
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-0.2.10. See :ref:`release` for a full changelog
+including other versions of SpectroChemPy.
+
+New features
+~~~~~~~~~~~~
+
+-  All data for tests and examples are now external. They are now
+   located in a separate conda package: ``spectrochempy_data`` .
+-  Installation in Colab with Examples is now supported.
+
+
+Bug fixes
+~~~~~~~~~
+
+-  Read_quadera() and examples now based on a correct asc file
