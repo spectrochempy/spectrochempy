@@ -13,9 +13,11 @@
     {%- endif %}
 </a>
 
+{% if not READTHEDOCS %}
 <div class="switch-menus">
     <select id="versions-dropdown"></select>
 </div>
+{% endif %}
 
 {%- include "searchbox.html" %}
 
@@ -26,7 +28,7 @@
 {% endblock %}
 
 {% block document %}
-{% if current_version == 'latest' %}
+{% if not READTHEDOCS and current_version == 'latest' %}
 <div id="version-popup" class="popup-warning">
     <span class="close-btn" onclick="closePopup()">×</span>
     ⚠️ You are reading the development version documentation.<br />
@@ -58,6 +60,7 @@
 
 {% block extrahead %}
 {{ super() }}
+{% if not READTHEDOCS %}
 <style>
     .popup-warning {
         display: none;
@@ -93,4 +96,5 @@
 </style>
 <html data-versions="{{ previous_versions|join(',') if previous_versions else '' }}">
 <script src="{{ pathto('_static/js/versions.js', 1) }}"></script>
+{% endif %}
 {% endblock %}
