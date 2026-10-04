@@ -37,7 +37,7 @@
 {% endblock %}
 
 {% block document %}
-{% if not READTHEDOCS and docs_context == 'development' %}
+{% if docs_context == 'development' %}
 <div class="docs-context-banner docs-development-banner" role="status">
     This is development documentation. Some features are not available in the stable release.
     <a href="{{ stable_release_url }}" data-docs-target="stable">View stable documentation.</a>
