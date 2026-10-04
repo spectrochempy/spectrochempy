@@ -43,17 +43,12 @@ Options
 --single-doc : Build a single document
 --directory, -d : Build a specific directory
 --whatsnew : Build only the whatsnew document
---profile, -P : Build profile: full (default), main or gallery
 --no-data : Do not download the test data (fast smoke builds only)
 
 Examples
 --------
 Build HTML docs using all CPU cores:
     python make.py html -j auto
-
-Build only one slice of the documentation, as done for Read the Docs:
-    python make.py html --profile main
-    python make.py html --profile gallery
 
 Clean build artifacts:
     python make.py clean
@@ -561,21 +556,6 @@ class BuildDocumentation:
         # Set environmetnt variables for sphinx
         environ["SPHINX_NOEXEC"] = "1" if settings["noexec"] else "0"
 
-        # Build profile. ``full`` reproduces the historical single-site build and
-        # is what the GitHub Pages workflow publishes; ``main`` and ``gallery``
-        # are the two slices published as separate Read the Docs projects.
-        self.profile = (
-            settings["profile"]
-            or environ.get("SCPY_DOCS_PROFILE", "").strip()
-            or "full"
-        )
-        if self.profile not in ("full", "main", "gallery"):
-            raise ValueError(
-                f"Unknown documentation profile {self.profile!r}. "
-                "Expected 'full', 'main' or 'gallery'."
-            )
-        environ["SCPY_DOCS_PROFILE"] = self.profile
-
         self.singledoc = settings["singledoc"]
         self.directory = settings["directory"]
 
@@ -617,7 +597,6 @@ class BuildDocumentation:
             "tagname": kwargs.get("tagname", None),
             "singledoc": kwargs.get("singledoc", None),
             "directory": kwargs.get("directory", None),
-            "profile": kwargs.get("profile", None),
             "nodata": kwargs.get("nodata", False),
         }
 
@@ -1050,7 +1029,7 @@ class BuildDocumentation:
         rtd_output = os.environ.get("READTHEDOCS_OUTPUT")
         if rtd_output:
             outdir = str(Path(rtd_output) / "html")
-            doctreesdir = str(BUILDDIR / f"~doctrees_{self.profile}")
+            doctreesdir = str(BUILDDIR / "~doctrees")
         else:
             outdir = f"{HTML}/{doc_version}"
             doctreesdir = f"{DOCTREES}/{doc_version}"
@@ -1313,17 +1292,6 @@ def _main():
     )
 
     parser.add_argument(
-        "--profile",
-        "-P",
-        default=None,
-        choices=("full", "main", "gallery"),
-        help=(
-            "documentation profile to build: 'full' (default, single site), "
-            "'main' (guides and API) or 'gallery' (examples only)"
-        ),
-    )
-
-    parser.add_argument(
         "--upload-tutorials", "-Z", help="zip and upload tutorials", action="store_true"
     )
 
@@ -1423,7 +1391,6 @@ def _main():
             whatsnew=args.whatsnew,
             singledoc=args.single_doc,
             directory=args.directory,
-            profile=args.profile,
             nodata=args.no_data,
         )
 
