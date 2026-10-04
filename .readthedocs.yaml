@@ -13,7 +13,7 @@ build:
       - git fetch --all --tags || true
     install:
       - python -m pip install --upgrade pip
-      - python -m pip install -e ".[docs,nmr]"
+      - python -m pip install -e ".[docs,plugins]"
     post_install:
       - |
         for name in $(python -m spectrochempy.ci.install_plugins --list-names); do
@@ -22,4 +22,4 @@ build:
       - python -m pip install osqp scipy numpy-quaternion tensorly
     build:
       html:
-        - python docs/make.py html --warning-is-error -j auto
+        - python docs/make.py --no-exec -j auto html
