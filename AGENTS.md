@@ -68,6 +68,9 @@ Unless explicitly delegated:
   mandatory: they own lint and formatting, they may rewrite code, so inspect
   the diff after any run that modifies files.
 
+When a push is explicitly delegated, push to `origin` unless the maintainer
+explicitly directs a push to `upstream`.
+
 When a task is authorized, proceed to a validated solution and a first review
 of the diff without requesting confirmation for ordinary technical choices.
 
@@ -113,11 +116,11 @@ Load the relevant skill before starting work:
 
 ## Repository Map
 
-* `spectrochempy/` — Main library (this repository)
-* `spectrochempy_maintainer/` — Private maintainer governance, RFCs, audits,
+* `.` — Main library (this repository)
+* `../spectrochempy_maintainer/` — Private maintainer governance, RFCs, audits,
   roadmap (separate clone, see its own `AGENTS.md`)
-* `spectrochempy_assistant/` — Companion assistant application
-* `spectrochempy_data/` — Reference datasets
+* `../spectrochempy_assistant/` — Companion assistant application
+* `../spectrochempy_data/` — Reference datasets
 
 ---
 
