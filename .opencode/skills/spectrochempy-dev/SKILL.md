@@ -17,8 +17,9 @@ Read `CONTRIBUTING.md` at the start of each session.
 
 ## Git Operations
 
-Push rule: push to `origin` only, never to `upstream`. PRs are opened from
-`origin/<branch>` → `upstream/master`.
+Push to `origin` by default. Push to `upstream` only when the maintainer
+explicitly directs it. PRs are opened from `origin/<branch>` →
+`upstream/master`.
 
 **Before creating a new branch, inspect the local state first
 (`git status`, current branch), then branch directly from the updated
@@ -227,19 +228,22 @@ Avoid combining multiple migration phases in a single PR.
 
 ## Audit Notes
 
-Create or update an audit note in `spectrochempy_maintainer/notes/audits/`
+Create or update an audit note in `../spectrochempy_maintainer/notes/audits/`
 when the task involves multi-PR coordination, architectural decisions, or
 durable knowledge worth preserving. For simple bug fixes or small changes,
 skip the audit note.
 
-If `spectrochempy_maintainer` is not cloned, skip audit notes and report it.
+For multi-PR work, update or create the relevant audit note before considering
+the task complete.
+
+If `../spectrochempy_maintainer` is not cloned, skip audit notes and report it.
 
 Hygiene rules:
 * Prefer editing an existing document over creating a new one.
 * Before creating a new note, check for existing audit, roadmap, RFC, or
   architecture note on the same topic.
 * Keep `roadmap/current-roadmap.md` short.
-* Archive notes in `spectrochempy_maintainer/archive/audits/` once they become
+* Archive notes in `../spectrochempy_maintainer/archive/audits/` once they become
   primarily historical.
 
 ---
