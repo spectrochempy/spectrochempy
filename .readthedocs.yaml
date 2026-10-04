@@ -13,7 +13,7 @@ build:
       - git fetch --all --tags || true
     install:
       - python -m pip install --upgrade pip
-      - python -m pip install -e ".[docs]"
+      - python -m pip install -e ".[docs,nmr]"
     post_install:
       - |
         for name in $(python -m spectrochempy.ci.install_plugins --list-names); do
