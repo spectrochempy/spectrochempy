@@ -1,6 +1,10 @@
 ---
 name: spectrochempy-review
-description: Independent code review in a fresh session. Use when a separate review is needed: the reviewer starts from the need, the diff, and sources — not the implementer's history. Checks assumptions, finds counter-examples and regressions, evaluates whether tests prove the expected behavior.
+description: >-
+  Independent code review in a fresh session. Use when a separate review is
+  needed: the reviewer starts from the need, the diff, and sources — not the
+  implementer's history. Checks assumptions, finds counter-examples and
+  regressions, evaluates whether tests prove the expected behavior.
 metadata:
   audience: maintainer
   workflow: review
@@ -9,8 +13,8 @@ metadata:
 ## Trigger
 
 Use this skill when asked to perform a **separate review** of an
-implementation. This review runs in a **new OpenCode session** without the
-implementation history.
+implementation. This review runs in a **new independent OpenCode or Codex
+session** without the implementation history.
 
 Do **not** use this for trivial changes (typos, formatting, mechanical
 refactoring with no behavior change). Those are covered by the implementer's

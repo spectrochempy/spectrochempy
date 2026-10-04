@@ -5,8 +5,9 @@
 This document defines permanent rules and authorization limits for AI-assisted
 development in SpectroChemPy.
 
-Procedural details live in the project's OpenCode skills and in
-`CONTRIBUTING.md`. Load the relevant skill before starting work.
+Procedural details live in the shared OpenCode and Codex skills in
+`.agents/skills/` and in `CONTRIBUTING.md`. Load the relevant skill before
+starting work.
 
 **Read `CONTRIBUTING.md` at the start of each session.**
 
@@ -110,7 +111,8 @@ Load the relevant skill before starting work:
 | `spectrochempy-review` | Separate review in a new session (see skill) |
 | `spectrochempy-release` | Preparing a release (without publishing) |
 
-**For Codex:** skills are in `.opencode/skills/` — read the relevant `SKILL.md` directly.
+The skills are shared by OpenCode and Codex. Load the relevant skill from
+`.agents/skills/` before starting work.
 
 ---
 
