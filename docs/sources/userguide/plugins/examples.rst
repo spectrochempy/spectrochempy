@@ -28,16 +28,8 @@ Plugin-dependent examples should use short, consistent notes such as:
 
 Official plugins declare their gallery examples in an ``examples/gallery.toml``
 manifest.
-{% if build_gallery -%}
 The current list of plugin-dependent examples is generated from
 these manifests in :ref:`plugin-examples-list`.
-{%- elif gallery_docs_url -%}
-The current list of plugin-dependent examples is generated from
-these manifests in the `online gallery <{{ gallery_docs_url }}/gettingstarted/examples/gallery/auto_examples_plugins/index.html>`__.
-{%- else -%}
-The current list of plugin-dependent examples is generated from
-these manifests in the gallery.
-{%- endif %}
 
 This convention keeps the beginner path uncluttered while still making
 specialized workflows easy to find.

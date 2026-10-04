@@ -1,12 +1,4 @@
-# Read the Docs configuration for the main SpectroChemPy documentation.
-#
-# This project publishes the full documentation, including the guides,
-# notebooks, API reference, and example gallery. The optional split-gallery
-# configuration remains in docs/rtd/gallery/.readthedocs.yaml.
-#
-# NOTE: the project slug below must match the actual Read the Docs project.
-# The two projects link to each other through SCPY_DOCS_MAIN_URL and
-# SCPY_DOCS_GALLERY_URL, which are set on the build command.
+# Read the Docs configuration for the integrated SpectroChemPy documentation.
 version: 2
 
 build:
@@ -42,9 +34,6 @@ build:
       - python -m pip install osqp scipy numpy-quaternion tensorly
     build:
       html:
-        # ``make.py`` drives the whole build (notebook sync, gallery staging,
-        # profile specific exclusions) and writes to
+        # ``make.py`` drives the whole integrated build and writes to
         # $READTHEDOCS_OUTPUT/html when that variable is set.
-        #
-        - SCPY_DOCS_PROFILE=full
-          python docs/make.py html --profile full --warning-is-error -j auto
+        - python docs/make.py html --warning-is-error -j auto

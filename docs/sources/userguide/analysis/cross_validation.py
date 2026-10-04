@@ -143,10 +143,4 @@ print("valid pairs:", int(result.n_valid.data.squeeze()))
 #
 # A complete application to real NIR spectra, including OOF predictions and
 # parity/residual plots, is available in the
-# {% if build_gallery %}
 # [Gallery example](../../gettingstarted/examples/gallery/auto_examples_analysis/b_crossdecomposition/plot_cross_validation.rst).
-# {% elif gallery_docs_url %}
-# [Gallery example]({{ gallery_docs_url }}/gettingstarted/examples/gallery/auto_examples_analysis/b_crossdecomposition/plot_cross_validation.html).
-# {% else %}
-# Gallery example.
-# {% endif %}
