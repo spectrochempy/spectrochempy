@@ -13,6 +13,7 @@
     {%- endif %}
 </a>
 
+{% if not READTHEDOCS %}
 <div class="switch-menus">
     <select id="versions-dropdown"
             aria-label="Documentation version"
@@ -25,6 +26,7 @@
         <option selected disabled>Loading versions…</option>
     </select>
 </div>
+{% endif %}
 
 {%- include "searchbox.html" %}
 
@@ -40,7 +42,7 @@
     This is development documentation. Some features are not available in the stable release.
     <a href="{{ stable_release_url }}" data-docs-target="stable">View stable documentation.</a>
 </div>
-{% elif docs_context == 'preview' %}
+{% elif not READTHEDOCS and docs_context == 'preview' %}
 <div class="docs-context-banner docs-preview-banner" role="status">
     This is a pull request documentation preview{% if docs_preview_name %} for
     <code>{{ docs_preview_name }}</code>{% endif %}. Content may change before merge.
@@ -52,5 +54,7 @@
 
 {% block extrahead %}
 {{ super() }}
-<script defer src="{{ pathto('_static/js/versions.js', 1) }}"></script>
+{% if not READTHEDOCS %}
+<script defer src="{{ pathto('_static/js/github-pages-versions.js', 1) }}"></script>
+{% endif %}
 {% endblock %}

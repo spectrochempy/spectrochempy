@@ -1,0 +1,39 @@
+# Read the Docs configuration for the integrated SpectroChemPy documentation.
+version: 2
+
+build:
+  os: ubuntu-24.04
+  tools:
+    python: "3.13"
+  # pandoc is required by nbsphinx to render the markdown cells of the
+  # notebooks.
+  apt_packages:
+    - pandoc
+  jobs:
+    post_checkout:
+      # The build needs the release tags, both for the version and for the
+      # setuptools_scm version of the editable install below. Read the Docs
+      # clones shallowly.
+      - git fetch --unshallow || true
+      - git fetch --all --tags || true
+    install:
+      - python -m pip install --upgrade pip
+      # The ``plugins`` extra is deliberately NOT requested here: it would
+      # resolve the plugins published on PyPI, and the post_install job below
+      # replaces them with the ones from this checkout.
+      - python -m pip install -e ".[docs]"
+    post_install:
+      # Install the plugins from the checkout, not from PyPI, so a pull
+      # request that changes a plugin documents the plugin it contains.
+      # This mirrors the install sequence of .github/workflows/build_docs.yml.
+      - |
+        for name in $(python -m spectrochempy.ci.install_plugins --list-names); do
+          python -m pip install --no-deps -e "plugins/$name"
+        done
+      # Runtime dependencies that --no-deps skips.
+      - python -m pip install osqp scipy numpy-quaternion tensorly
+    build:
+      html:
+        # ``make.py`` drives the whole integrated build and writes to
+        # $READTHEDOCS_OUTPUT/html when that variable is set.
+        - python docs/make.py html --warning-is-error -j auto

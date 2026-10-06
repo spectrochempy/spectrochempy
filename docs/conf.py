@@ -73,6 +73,7 @@ GALLERY = GETTINGSTARTED / "examples" / "gallery"
 # Get sphinx pattern
 pattern = os.environ.get("SPHINX_PATTERN")
 single_doc_or_dir = pattern is not None and pattern not in ["noapi", "whatsnew"]
+
 include_api = pattern is None
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -101,11 +102,13 @@ extensions = [
     "sphinx.ext.linkcode",
     "sphinx.ext.todo",
     "sphinx_tabs.tabs",
+    "sphinxcontrib.bibtex",
+    "sphinx_design",
+]
+extensions += [
     "IPython.sphinxext.ipython_console_highlighting",
     "IPython.sphinxext.ipython_directive",
-    "sphinxcontrib.bibtex",
     "nbsphinx",
-    "sphinx_design",
 ]
 if not single_doc_or_dir:
     extensions += [
@@ -652,27 +655,37 @@ def _get_default_image_scraper():
 
 
 if not single_doc_or_dir:
-    # generate example only if were are in full doc mode
     from sphinx_gallery.sorting import FileNameSortKey
 
+if not single_doc_or_dir:
     plugin_gallery_entries = _load_plugin_gallery_entries()
     example_source_dir = _stage_gallery_examples()
     _write_plugin_gallery_readmes(example_source_dir, plugin_gallery_entries)
 
+    gallery_examples_dirs = [
+        f"{example_source_dir}/{section}" for section in gallery_sections
+    ]
+    gallery_output_dirs = [
+        f"{example_generated_dir}/auto_examples_core",
+        f"{example_generated_dir}/auto_examples_processing",
+        f"{example_generated_dir}/auto_examples_analysis",
+        f"{example_generated_dir}/auto_examples_plugins",
+    ]
+else:
+    # The API reference templates emit ``.. minigallery::`` directives, so
+    # sphinx-gallery must stay loaded even where no gallery is generated. With
+    # no example directories it registers the directive and does nothing else.
+    gallery_examples_dirs = []
+    gallery_output_dirs = []
+
+if not single_doc_or_dir:
     sphinx_gallery_conf = {
         "plot_gallery": not noexec,
         "doc_module": "spectrochempy",
         # Source example files in separate directory
-        "examples_dirs": [
-            f"{example_source_dir}/{section}" for section in gallery_sections
-        ],
+        "examples_dirs": gallery_examples_dirs,
         # Generated RST files in generated directory
-        "gallery_dirs": [
-            f"{example_generated_dir}/auto_examples_core",
-            f"{example_generated_dir}/auto_examples_processing",
-            f"{example_generated_dir}/auto_examples_analysis",
-            f"{example_generated_dir}/auto_examples_plugins",
-        ],
+        "gallery_dirs": gallery_output_dirs,
         "backreferences_dir": f"{example_generated_dir}/backreferences",
         "reference_url": {
             "spectrochempy": None,

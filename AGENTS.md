@@ -5,8 +5,9 @@
 This document defines permanent rules and authorization limits for AI-assisted
 development in SpectroChemPy.
 
-Procedural details live in the project's OpenCode skills and in
-`CONTRIBUTING.md`. Load the relevant skill before starting work.
+Procedural details live in the shared OpenCode and Codex skills in
+`.agents/skills/` and in `CONTRIBUTING.md`. Load the relevant skill before
+starting work.
 
 **Read `CONTRIBUTING.md` at the start of each session.**
 
@@ -62,6 +63,14 @@ Unless explicitly delegated:
 * do not create releases or publish packages;
 * do not run pre-commit during development (required only before pushing a PR
   branch — see `spectrochempy-dev` skill).
+* do not run a broad or repeated rewriting pass (`ruff check --fix`,
+  `ruff format`) while developing; read-only checks (`ruff check`,
+  `ruff format --check`) on targeted paths are fine. The pre-push hooks remain
+  mandatory: they own lint and formatting, they may rewrite code, so inspect
+  the diff after any run that modifies files.
+
+When a push is explicitly delegated, push to `origin` unless the maintainer
+explicitly directs a push to `upstream`.
 
 When a task is authorized, proceed to a validated solution and a first review
 of the diff without requesting confirmation for ordinary technical choices.
@@ -69,6 +78,26 @@ of the diff without requesting confirmation for ordinary technical choices.
 ## PR Base
 
 Always base PRs on `upstream/master` unless explicitly instructed otherwise.
+Before creating a new branch, fetch `upstream/master` and branch from it
+directly (see `spectrochempy-dev` skill).
+
+---
+
+## Temporary Files
+
+Scratch space is disposable by definition. It belongs in the temporary
+directory of the current environment; its location, backing store and lifetime
+are the platform's business, not this repository's. `tempfile` resolves the
+location itself (`TMPDIR`, `TEMP`, `TMP`, platform defaults), so no path is
+hardcoded.
+
+* Repository code uses context-managed temporary directories
+  (`tempfile.TemporaryDirectory()`) or the pytest `tmp_path` fixture.
+* Remove scratch space in the task that created it, and report what was left
+  behind.
+* Keeping a result and committing it are different acts: a report or a note
+  worth keeping belongs in a repository, while a build tree, an environment or
+  a dataset may stay in a persistent non-versioned location.
 
 ---
 
@@ -82,17 +111,18 @@ Load the relevant skill before starting work:
 | `spectrochempy-review` | Separate review in a new session (see skill) |
 | `spectrochempy-release` | Preparing a release (without publishing) |
 
-**For Codex:** skills are in `.opencode/skills/` — read the relevant `SKILL.md` directly.
+The skills are shared by OpenCode and Codex. Load the relevant skill from
+`.agents/skills/` before starting work.
 
 ---
 
 ## Repository Map
 
-* `spectrochempy/` — Main library (this repository)
-* `spectrochempy_maintainer/` — Private maintainer governance, RFCs, audits,
+* `.` — Main library (this repository)
+* `../spectrochempy_maintainer/` — Private maintainer governance, RFCs, audits,
   roadmap (separate clone, see its own `AGENTS.md`)
-* `spectrochempy_assistant/` — Companion assistant application
-* `spectrochempy_data/` — Reference datasets
+* `../spectrochempy_assistant/` — Companion assistant application
+* `../spectrochempy_data/` — Reference datasets
 
 ---
 

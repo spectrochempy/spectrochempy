@@ -27,7 +27,8 @@ Plugin-dependent examples should use short, consistent notes such as:
     Install with: ``python -m pip install "spectrochempy[nmr]"``
 
 Official plugins declare their gallery examples in an ``examples/gallery.toml``
-manifest. The current list of plugin-dependent examples is generated from
+manifest.
+The current list of plugin-dependent examples is generated from
 these manifests in :ref:`plugin-examples-list`.
 
 This convention keeps the beginner path uncluttered while still making

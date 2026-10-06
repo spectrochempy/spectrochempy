@@ -43,6 +43,7 @@ Options
 --single-doc : Build a single document
 --directory, -d : Build a specific directory
 --whatsnew : Build only the whatsnew document
+--no-data : Do not download the test data (fast smoke builds only)
 
 Examples
 --------
@@ -208,14 +209,14 @@ def _update_version_template_data(html_dir=HTML):
 
 
 def _sync_versions_script(html_dir=HTML):
-    source = STATIC / "js" / "versions.js"
+    source = STATIC / "js" / "github-pages-versions.js"
     if not source.exists():
         return
 
     html_dir = Path(html_dir)
-    targets = [html_dir / "_static" / "js" / "versions.js"]
+    targets = [html_dir / "_static" / "js" / "github-pages-versions.js"]
     targets.extend(
-        version_dir / "_static" / "js" / "versions.js"
+        version_dir / "_static" / "js" / "github-pages-versions.js"
         for version_dir in html_dir.glob("[0-9]*.[0-9]*.[0-9]*")
     )
 
@@ -554,6 +555,7 @@ class BuildDocumentation:
 
         # Set environmetnt variables for sphinx
         environ["SPHINX_NOEXEC"] = "1" if settings["noexec"] else "0"
+
         self.singledoc = settings["singledoc"]
         self.directory = settings["directory"]
 
@@ -595,6 +597,7 @@ class BuildDocumentation:
             "tagname": kwargs.get("tagname", None),
             "singledoc": kwargs.get("singledoc", None),
             "directory": kwargs.get("directory", None),
+            "nodata": kwargs.get("nodata", False),
         }
 
     def _single_doc(self, singledoc):
@@ -874,10 +877,18 @@ class BuildDocumentation:
         _trace_ci("_prepare_build completed")
         build_result = self._run_sphinx_build()
         _trace_ci(f"_run_sphinx_build returned {build_result!r}")
-        source_dir = HTML / self._doc_version
+        # On Read the Docs the build is already in its final location.
+        source_dir = (
+            Path(os.environ["READTHEDOCS_OUTPUT"]) / "html"
+            if os.environ.get("READTHEDOCS_OUTPUT")
+            else HTML / self._doc_version
+        )
         if source_dir.exists() and any(source_dir.iterdir()):
             self._validate_built_html(source_dir)
             _trace_ci("_validate_built_html completed")
+        if os.environ.get("READTHEDOCS_OUTPUT"):
+            _trace_ci("Skipping docs post-build actions on Read the Docs")
+            return build_result
         if environ.get("SCPY_SKIP_POST_BUILD") == "1":
             _trace_ci("Skipping docs post-build actions (SCPY_SKIP_POST_BUILD=1)")
             return build_result
@@ -901,7 +912,7 @@ class BuildDocumentation:
                 f"\n{'-' * 80}"
             )
 
-        if not self.settings["whatsnew"]:
+        if not self.settings["whatsnew"] and not self.settings["nodata"]:
             print("Loading spectrochempy and downloading test data...")
 
             from spectrochempy import preferences as prefs
@@ -1012,8 +1023,16 @@ class BuildDocumentation:
         if source_root not in sys.path:
             sys.path.insert(0, source_root)
 
-        outdir = f"{HTML}/{doc_version}"
-        doctreesdir = f"{DOCTREES}/{doc_version}"
+        # On Read the Docs the HTML has to land directly in
+        # $READTHEDOCS_OUTPUT/html. Everything else keeps the versioned layout
+        # under build/html/<version> used by GitHub Pages.
+        rtd_output = os.environ.get("READTHEDOCS_OUTPUT")
+        if rtd_output:
+            outdir = str(Path(rtd_output) / "html")
+            doctreesdir = str(BUILDDIR / "~doctrees")
+        else:
+            outdir = f"{HTML}/{doc_version}"
+            doctreesdir = f"{DOCTREES}/{doc_version}"
 
         sp = Sphinx(
             srcdir,
@@ -1267,6 +1286,12 @@ def _main():
     )
 
     parser.add_argument(
+        "--no-data",
+        help="do not download the test data (fast smoke builds only)",
+        action="store_true",
+    )
+
+    parser.add_argument(
         "--upload-tutorials", "-Z", help="zip and upload tutorials", action="store_true"
     )
 
@@ -1366,6 +1391,7 @@ def _main():
             whatsnew=args.whatsnew,
             singledoc=args.single_doc,
             directory=args.directory,
+            nodata=args.no_data,
         )
 
         buildcommand = getattr(build, args.command)

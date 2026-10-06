@@ -78,12 +78,9 @@ savefig
 
 # Open code
 .opencode/*
-!.opencode/skills/
-.opencode/skills/*
-!.opencode/skills/*/
-.opencode/skills/*/*
-!.opencode/skills/*/SKILL.md
+!.opencode/rules.md
 opencode.json
+!opencode.json
 instruction_ai.md
 
 ###############################
