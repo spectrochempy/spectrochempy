@@ -623,54 +623,73 @@ def _remove_digital_filter(dic, data):
     """
     Remove the digital filter from Bruker data.
 
-    nmrglue modified Digital Filter Processing.
+    Algorithm follows nmrglue-ng ``rm_dig_filter`` (BSD license, see
+    NMRGLUE_LICENSE.rst), with one improvement: ``DSPFVS < 10`` is clamped
+    to 10 (default for DQD) instead of raising, so older Bruker files
+    remain readable.
+
+    Parameters
+    ----------
+    dic : dict
+        Bruker parameter dictionary. Must contain ``acqus`` with
+        ``DECIM`` and ``DSPFVS``; ``GRPDLY`` is optional.
+    data : ndarray
+        NMR data (complex). The last axis is the direct dimension.
+
+    Returns
+    -------
+    ndarray
+        Data with the digital filter removed (delay corrected and tail
+        truncated). The input dictionary is not modified.
+
+    Raises
+    ------
+    ValueError
+        If ``acqus`` parameters are missing or the DECIM/DSPFVS
+        combination is not in the lookup table.
     """
     if "acqus" not in dic:
-        raise KeyError("dictionary does not contain acqus parameters")
+        raise ValueError("dictionary does not contain acqus parameters")
 
     if "DECIM" not in dic["acqus"]:
-        raise KeyError("dictionary does not contain DECIM parameter")
+        raise ValueError("dictionary does not contain DECIM parameter")
     decim = dic["acqus"]["DECIM"]
 
     if "DSPFVS" not in dic["acqus"]:
-        raise KeyError("dictionary does not contain DSPFVS parameter")
+        raise ValueError("dictionary does not contain DSPFVS parameter")
     dspfvs = dic["acqus"]["DSPFVS"]
 
     grpdly = dic["acqus"].get("GRPDLY", 0)
 
-    if grpdly > 0:  # use group delay value if provided (not 0 or -1)
-        phase = grpdly
-
-    # Determine the phase correction
-    elif dspfvs >= 14:  # DSPFVS greater than 14 give no phase correction.
+    if grpdly > 0:
+        phase = float(grpdly)
+    elif dspfvs >= 14:
         phase = 0.0
     else:
         if dspfvs < 10:
-            dspfvs = 10  # default for DQD  # loop up the phase in the table
+            dspfvs = 10
         if dspfvs not in bruker_dsp_table:
-            raise KeyError("dspfvs not in lookup table")
+            raise ValueError("dspfvs not in lookup table")
         if decim not in bruker_dsp_table[dspfvs]:
-            raise KeyError("decim not in lookup table")
+            raise ValueError("decim not in lookup table")
         phase = bruker_dsp_table[dspfvs][decim]
-    # fft
+
+    phase = np.floor(phase)
+
     si = data.shape[-1]
-    pdata = np.fft.fftshift(np.fft.fft(data, si, axis=-1), -1) / float(si / 2)
-    pdata = (pdata.T - pdata.T[0]).T  # remove Bruker smile
+    s = float(si)
 
-    # Phasing
-    si = float(pdata.shape[-1])
-    ph = 2.0j * np.pi * phase * np.arange(si) / si
-    pdata = pdata * np.exp(ph)
+    pdata = np.fft.fft(np.fft.ifftshift(data, -1), axis=-1) / s
+    pdata = pdata * np.exp(2.0j * np.pi * phase * np.arange(s) / s)
+    pdata = np.fft.fftshift(np.fft.ifft(pdata, axis=-1), -1) * s
 
-    # ifft
-    data = np.fft.ifft(np.fft.ifftshift(pdata, -1), n=int(si), axis=-1) * float(si / 2)
+    skip = int(np.floor(phase + 2.0))
+    add = int(max(skip - 6, 0))
 
-    # remove last points * 2
-    rp = 2 * (phase // 2)
-    td = dic["acqus"]["TD"] // 2
-    td = int(td) - int(rp)
-    dic["acqus"]["TD"] = td * 2
-    return data[..., :td]
+    if add > 0:
+        pdata[..., :add] = pdata[..., :add] + pdata[..., : -(add + 1) : -1]
+
+    return pdata[..., :-skip]
 
 
 # ======================================================================================
@@ -744,6 +763,14 @@ def read_topspin(*paths, **kwargs):
         the directory parameter.
     recursive : `bool`, optional, default: `False`
         Read also in subfolders.
+    remove_digital_filter : `bool`, optional, default: `True`
+        Remove the Bruker digital filter (group delay correction) from raw
+        FID/SER data. Set to `False` to keep the uncorrected data.
+    remove_dc_offset : `bool`, optional, default: `False`
+        Remove the receiver DC offset from the FID before digital filter
+        removal. This subtracts the mean of each row along the last axis,
+        which removes the spike at the centre of the spectrum caused by the
+        receiver DC offset. Requires ``remove_digital_filter=True``.
     replace_existing: `bool`, optional, default: `False`
         Used only when url are specified. By default, existing files are not replaced
         so not downloaded.
@@ -924,6 +951,8 @@ def _read_topspin(*args, **kwargs):
 
         # Eliminate the digital filter
         if kwargs.get("remove_digital_filter", True) and dic["acqus"]["DECIM"] > 1:
+            if kwargs.get("remove_dc_offset", False):
+                data = data - data.mean(axis=-1, keepdims=True)
             data = _remove_digital_filter(dic, data)
 
     else:

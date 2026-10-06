@@ -19,12 +19,28 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- The NMR reader now accepts a ``remove_dc_offset`` keyword argument
+  (default ``False``). When ``True``, the receiver DC offset is removed
+  from the FID before digital filter correction, which eliminates the
+  spike at the centre of the spectrum caused by the receiver electronics.
+  This matches the ``remove_dc_offset`` parameter added to nmrglue-ng
+  (:pr:`1744`).
 
 .. section
 
 Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
+
+- The NMR digital filter removal algorithm in the TopSpin reader has been
+  rewritten to follow nmrglue-ng's ``rm_dig_filter`` exactly. The previous
+  implementation introduced a constant phase rotation
+  (``exp(i*pi*phase)``) with no physical justification, added a flat
+  pedestal to the spectrum via an incorrect DC subtraction, derived the
+  output length from ``TD//2`` instead of the actual data size, and
+  mutated the input dictionary. All four defects are fixed. The output is
+  now bit-identical to nmrglue-ng on all available Bruker fixtures
+  (:pr:`1744`).
 
 
 .. section
