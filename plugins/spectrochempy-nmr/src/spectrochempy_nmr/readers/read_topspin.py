@@ -773,7 +773,7 @@ def read_topspin(*paths, **kwargs):
         Remove the receiver DC offset from the FID before digital filter
         removal. This subtracts the mean of each row along the last axis,
         which removes the spike at the centre of the spectrum caused by the
-        receiver DC offset. Requires ``remove_digital_filter=True``.
+        receiver DC offset.
     replace_existing: `bool`, optional, default: `False`
         Used only when url are specified. By default, existing files are not replaced
         so not downloaded.

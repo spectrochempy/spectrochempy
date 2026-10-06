@@ -233,6 +233,25 @@ def test_remove_dc_offset_flag():
 
 
 @pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_remove_dc_offset_without_digital_filter():
+    """remove_dc_offset works independently of remove_digital_filter."""
+    nd_filter_dc = _read_topspin_or_skip(
+        _require_path(nmrdir / "topspin_1d/1/fid"),
+        remove_digital_filter=False,
+        remove_dc_offset=True,
+    )
+    nd_no_filter_no_dc = _read_topspin_or_skip(
+        _require_path(nmrdir / "topspin_1d/1/fid"),
+        remove_digital_filter=False,
+        remove_dc_offset=False,
+    )
+    # Both should have the same shape (no digital filter applied)
+    assert nd_filter_dc.x.size == nd_no_filter_no_dc.x.size
+    # The data should differ (DC removed in one but not the other)
+    assert not np.allclose(nd_filter_dc.data, nd_no_filter_no_dc.data)
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
 def test_use_list_returns_time_axis():
     relax_ser = nmrdir / "relax" / "100" / "ser"
     if not relax_ser.exists():
