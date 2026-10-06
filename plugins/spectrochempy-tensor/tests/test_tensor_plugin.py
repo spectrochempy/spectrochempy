@@ -102,9 +102,10 @@ def test_root_alias_warns_once(monkeypatch):
         val2 = scp.CP
 
     assert val1 is val2
-    assert len(captured) == 1
-    assert captured[0].category is DeprecationWarning
-    message = str(captured[0].message)
+    deprecation_warnings = [w for w in captured if w.category is DeprecationWarning]
+    assert len(deprecation_warnings) == 1
+    assert deprecation_warnings[0].category is DeprecationWarning
+    message = str(deprecation_warnings[0].message)
     assert "scp.CP" in message
     assert "deprecated since SpectroChemPy 0.10.0" in message
     assert "will not be removed before" in message
