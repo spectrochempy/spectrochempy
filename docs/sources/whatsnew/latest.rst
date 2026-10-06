@@ -11,3 +11,29 @@ What's New in Revision 1.1.2.dev
 
 These are the changes in SpectroChemPy-1.1.2.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
+
+New Features
+~~~~~~~~~~~~
+
+- The NMR reader now accepts a ``remove_dc_offset`` keyword argument
+  (default ``False``). When ``True``, the receiver DC offset is removed
+  from the FID before digital filter correction, which eliminates the
+  spike at the centre of the spectrum caused by the receiver electronics.
+  This matches the ``remove_dc_offset`` parameter added to nmrglue-ng
+  (`spectrochempy/nmrglue-ng#50 <https://github.com/spectrochempy/nmrglue-ng/pull/50>`_)
+  (:pr:`1745`).
+
+Bug Fixes
+~~~~~~~~~
+
+- The NMR digital filter removal algorithm in the TopSpin reader has been
+  rewritten to follow nmrglue-ng's ``rm_dig_filter`` exactly. The previous
+  implementation introduced a constant phase rotation
+  (``exp(i*pi*phase)``) with no physical justification, added a flat
+  pedestal to the spectrum via an incorrect DC subtraction, derived the
+  output length from ``TD//2`` instead of the actual data size, and
+  mutated the input dictionary. All four defects are fixed. The output is
+  now bit-identical to nmrglue-ng on all available Bruker fixtures
+  (`spectrochempy/nmrglue-ng#50 <https://github.com/spectrochempy/nmrglue-ng/pull/50>`_,
+  `spectrochempy/nmrglue-ng#51 <https://github.com/spectrochempy/nmrglue-ng/pull/51>`_)
+  (:pr:`1745`).

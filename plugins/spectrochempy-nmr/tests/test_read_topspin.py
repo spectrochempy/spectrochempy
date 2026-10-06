@@ -81,15 +81,15 @@ def test_read_topspin():
     assert nd.x.size == 1024
 
     nd = _read_topspin_or_skip(_require_path(nmrdir / "topspin_1d/1/fid"))
-    assert str(nd) == "NDDataset: [complex128] count (size: 12411)"
-    assert nd.x.size == 12411
+    assert str(nd) == "NDDataset: [complex128] count (size: 12466)"
+    assert nd.x.size == 12466
 
     nd = _read_topspin_or_skip(_require_path(nmrdir / "topspin_1d/1/pdata/1/1r"))
     assert str(nd) == "NDDataset: [complex128] count (size: 16384)"
     assert nd.x.size == 16384
 
     nd = _read_topspin_or_skip(_require_path(nmrdir / "topspin_2d/1/ser"))
-    assert str(nd) == "NDDataset: [quaternion] count (shape: (y:96, x:948))"
+    assert str(nd) == "NDDataset: [quaternion] count (shape: (y:96, x:946))"
 
     nd = _read_topspin_or_skip(_require_path(nmrdir / "topspin_2d/1/pdata/1/2rr"))
     assert str(nd) == "NDDataset: [quaternion] count (shape: (y:1024, x:2048))"
@@ -143,7 +143,7 @@ def test_1d_fid_metadata():
     assert nd.meta.isfreq == [False]
     assert nd.meta.iscomplex == [True]
     assert nd.meta.nuc1 == ["1H"]
-    assert nd.x.size == 12411
+    assert nd.x.size == 12466
     assert nd.x.title == "F1 acquisition time"
 
 
@@ -171,7 +171,15 @@ def test_2d_ser_metadata():
     assert nd.meta.fnmode[0] == 5  # STATES-TPPI
     # Direct dimension uses AQ_mod
     assert nd.meta.aq_mod[1] == 3  # DQD
-    assert nd.shape == (96, 948)
+    # Shape depends on whether spectrochempy-hypercomplex is installed:
+    # with it, paired F1 rows become a single quaternion row (96, 946);
+    # without it, the raw (192, 946) is returned.
+    try:
+        import spectrochempy_hypercomplex  # noqa: F401
+
+        assert nd.shape == (96, 946)
+    except ImportError:
+        assert nd.shape == (192, 946)
 
 
 @pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
@@ -194,6 +202,53 @@ def test_remove_digital_filter_flag():
         remove_digital_filter=False,
     )
     assert nd_filter.x.size != nd_no_filter.x.size
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_remove_dc_offset_flag():
+    """remove_dc_offset=True removes the DC spike from the spectrum."""
+    nd_off = _read_topspin_or_skip(
+        _require_path(nmrdir / "topspin_1d/1/fid"),
+        remove_dc_offset=False,
+    )
+    nd_on = _read_topspin_or_skip(
+        _require_path(nmrdir / "topspin_1d/1/fid"),
+        remove_dc_offset=True,
+    )
+    # Both should have the same shape (same data, just DC removed)
+    assert nd_off.x.size == nd_on.x.size
+    # The spectra should differ (DC spike removed)
+    assert not np.allclose(nd_off.data, nd_on.data)
+    # The DC spike should be smaller after removal: compute the centre-bin
+    # ratio relative to its neighbours in the spectrum (after FFT).
+    sp_off = np.fft.fftshift(np.fft.fft(nd_off.data.squeeze()))
+    sp_on = np.fft.fftshift(np.fft.fft(nd_on.data.squeeze()))
+    c = len(sp_off) // 2
+    nb = np.concatenate([sp_off[c - 5 : c - 1], sp_off[c + 2 : c + 6]])
+    ratio_off = abs(sp_off[c]) / (np.abs(nb).mean() + 1e-30)
+    ratio_on = abs(sp_on[c]) / (np.abs(nb).mean() + 1e-30)
+    assert (
+        ratio_on < ratio_off
+    ), f"DC spike not reduced: ratio_off={ratio_off:.3f}, ratio_on={ratio_on:.3f}"
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_remove_dc_offset_without_digital_filter():
+    """remove_dc_offset works independently of remove_digital_filter."""
+    nd_filter_dc = _read_topspin_or_skip(
+        _require_path(nmrdir / "topspin_1d/1/fid"),
+        remove_digital_filter=False,
+        remove_dc_offset=True,
+    )
+    nd_no_filter_no_dc = _read_topspin_or_skip(
+        _require_path(nmrdir / "topspin_1d/1/fid"),
+        remove_digital_filter=False,
+        remove_dc_offset=False,
+    )
+    # Both should have the same shape (no digital filter applied)
+    assert nd_filter_dc.x.size == nd_no_filter_no_dc.x.size
+    # The data should differ (DC removed in one but not the other)
+    assert not np.allclose(nd_filter_dc.data, nd_no_filter_no_dc.data)
 
 
 @pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
@@ -458,35 +513,35 @@ def test_topspin_vendor_profile_is_not_consumed_by_experiment_process(tmp_path):
 
 
 def test_remove_digital_filter_missing_acqus():
-    """_remove_digital_filter raises KeyError when acqus is absent."""
+    """_remove_digital_filter raises ValueError when acqus is absent."""
     import numpy as np
     from spectrochempy_nmr.readers.read_topspin import _remove_digital_filter
 
-    with pytest.raises(KeyError, match="acqus"):
+    with pytest.raises(ValueError, match="acqus"):
         _remove_digital_filter({}, np.zeros(10, dtype=complex))
 
 
 def test_remove_digital_filter_missing_decim():
-    """_remove_digital_filter raises KeyError when DECIM is absent."""
+    """_remove_digital_filter raises ValueError when DECIM is absent."""
     import numpy as np
     from spectrochempy_nmr.readers.read_topspin import _remove_digital_filter
 
-    with pytest.raises(KeyError, match="DECIM"):
+    with pytest.raises(ValueError, match="DECIM"):
         _remove_digital_filter({"acqus": {"DSPFVS": 10}}, np.zeros(10, dtype=complex))
 
 
 def test_remove_digital_filter_missing_dspfvs():
-    """_remove_digital_filter raises KeyError when DSPFVS is absent."""
+    """_remove_digital_filter raises ValueError when DSPFVS is absent."""
     import numpy as np
     from spectrochempy_nmr.readers.read_topspin import _remove_digital_filter
 
-    with pytest.raises(KeyError, match="DSPFVS"):
+    with pytest.raises(ValueError, match="DSPFVS"):
         _remove_digital_filter({"acqus": {"DECIM": 2}}, np.zeros(10, dtype=complex))
 
 
 def test_remove_digital_filter_unknown_dspfvs():
     """
-    _remove_digital_filter raises KeyError for DSPFVS not in lookup table.
+    _remove_digital_filter raises ValueError for DSPFVS not in lookup table.
 
     The table contains only keys 10-13.  Values < 10 are remapped to 10,
     values >= 14 yield phase=0.  An unreachable path in theory, but
@@ -503,11 +558,11 @@ def test_remove_digital_filter_unknown_dspfvs():
 
 
 def test_remove_digital_filter_unknown_decim():
-    """_remove_digital_filter raises KeyError for unknown DECIM."""
+    """_remove_digital_filter raises ValueError for unknown DECIM."""
     import numpy as np
     from spectrochempy_nmr.readers.read_topspin import _remove_digital_filter
 
-    with pytest.raises(KeyError, match="decim"):
+    with pytest.raises(ValueError, match="decim"):
         _remove_digital_filter(
             {"acqus": {"DECIM": 77, "DSPFVS": 10, "TD": 20}},
             np.zeros(10, dtype=complex),
