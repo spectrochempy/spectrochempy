@@ -205,6 +205,23 @@ def test_remove_digital_filter_flag():
 
 
 @pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_remove_dc_offset_flag():
+    """remove_dc_offset=True removes the DC spike from the spectrum."""
+    nd_off = _read_topspin_or_skip(
+        _require_path(nmrdir / "topspin_1d/1/fid"),
+        remove_dc_offset=False,
+    )
+    nd_on = _read_topspin_or_skip(
+        _require_path(nmrdir / "topspin_1d/1/fid"),
+        remove_dc_offset=True,
+    )
+    # Both should have the same shape (same data, just DC removed)
+    assert nd_off.x.size == nd_on.x.size
+    # The spectra should differ (DC spike removed)
+    assert not np.allclose(nd_off.data, nd_on.data)
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
 def test_use_list_returns_time_axis():
     relax_ser = nmrdir / "relax" / "100" / "ser"
     if not relax_ser.exists():

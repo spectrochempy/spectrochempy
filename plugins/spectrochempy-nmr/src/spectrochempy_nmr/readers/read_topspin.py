@@ -667,6 +667,9 @@ def _remove_digital_filter(dic, data):
         phase = 0.0
     else:
         if dspfvs < 10:
+            # Clamp to DSPFVS=10 (DQD default). No Bruker specification
+            # confirms this phase is correct for DSPFVS=0..9; it is the
+            # best available guess. Values < 0 are also clamped here.
             dspfvs = 10
         if dspfvs not in bruker_dsp_table:
             raise ValueError("dspfvs not in lookup table")
