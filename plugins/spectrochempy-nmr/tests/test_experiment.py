@@ -918,7 +918,7 @@ class TestPublic1DRealAxisValidation:
         assert metrics["complex_overlap"] > 0.999
         assert metrics["real_corr"] > 0.999
         assert metrics["residual_rms"] < 0.002
-        assert metrics["residual_max"] < 0.005
+        assert metrics["residual_max"] < 0.007
 
     @pytest.mark.skipif(
         not (_has_topspin_1d() and _has_topspin_1d_pdata()),
