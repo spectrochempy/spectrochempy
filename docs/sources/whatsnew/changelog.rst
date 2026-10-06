@@ -24,7 +24,8 @@ New Features
   from the FID before digital filter correction, which eliminates the
   spike at the centre of the spectrum caused by the receiver electronics.
   This matches the ``remove_dc_offset`` parameter added to nmrglue-ng
-  (:pr:`1744`).
+  (`spectrochempy/nmrglue-ng#50 <https://github.com/spectrochempy/nmrglue-ng/pull/50>`_)
+  (:pr:`1745`).
 
 .. section
 
@@ -40,7 +41,9 @@ Bug Fixes
   output length from ``TD//2`` instead of the actual data size, and
   mutated the input dictionary. All four defects are fixed. The output is
   now bit-identical to nmrglue-ng on all available Bruker fixtures
-  (:pr:`1744`).
+  (`spectrochempy/nmrglue-ng#50 <https://github.com/spectrochempy/nmrglue-ng/pull/50>`_,
+  `spectrochempy/nmrglue-ng#51 <https://github.com/spectrochempy/nmrglue-ng/pull/51>`_)
+  (:pr:`1745`).
 
 
 .. section

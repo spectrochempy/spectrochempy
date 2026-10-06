@@ -58,23 +58,24 @@ class TestRemoveDigitalFilter:
         """The FID is delayed by floor(GRPDLY) points."""
         fn = _get_function()
         n = 256
-        # Create a FID with a known delay
         delay = 76
-        t = np.arange(n + delay)
-        fid_delayed = np.exp(-t / 50.0).astype(np.complex128)
-        dic = _make_dic(grpdly=float(delay), td=2 * (n + delay))
+        # Build a reference (undelayed) signal
+        t = np.arange(n)
+        reference = np.exp(-t / 50.0).astype(np.complex128)
+        # Build a delayed version: prepend `delay` zeros so the signal
+        # starts at index `delay`, exactly as Bruker's digital filter does.
+        fid_delayed = np.concatenate([np.zeros(delay), reference])
+        dic = _make_dic(grpdly=float(delay), td=2 * len(fid_delayed))
         out = fn(dic, fid_delayed.copy())
-        # After correction, the output should match the undelayed signal
-        # (except for the tail-restoration region at the head and the
-        # truncated tail)
-        skip = delay + 2
-        add = max(skip - 6, 0)
-        # Compare points after the tail-restoration region
+        skip = int(np.floor(delay + 2.0))
+        add = int(max(skip - 6, 0))
+        # After correction, the output should match the undelayed reference
+        # except for the tail-restoration region at the head.
         if add > 0:
-            expected = fid_delayed[delay + add : delay + len(out)]
+            expected = reference[add : len(out)]
             actual = out[add:]
         else:
-            expected = fid_delayed[delay : delay + len(out)]
+            expected = reference[: len(out)]
             actual = out
         assert np.allclose(actual, expected, atol=1e-10)
 

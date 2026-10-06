@@ -219,6 +219,17 @@ def test_remove_dc_offset_flag():
     assert nd_off.x.size == nd_on.x.size
     # The spectra should differ (DC spike removed)
     assert not np.allclose(nd_off.data, nd_on.data)
+    # The DC spike should be smaller after removal: compute the centre-bin
+    # ratio relative to its neighbours in the spectrum (after FFT).
+    sp_off = np.fft.fftshift(np.fft.fft(nd_off.data.squeeze()))
+    sp_on = np.fft.fftshift(np.fft.fft(nd_on.data.squeeze()))
+    c = len(sp_off) // 2
+    nb = np.concatenate([sp_off[c - 5 : c - 1], sp_off[c + 2 : c + 6]])
+    ratio_off = abs(sp_off[c]) / (np.abs(nb).mean() + 1e-30)
+    ratio_on = abs(sp_on[c]) / (np.abs(nb).mean() + 1e-30)
+    assert (
+        ratio_on < ratio_off
+    ), f"DC spike not reduced: ratio_off={ratio_off:.3f}, ratio_on={ratio_on:.3f}"
 
 
 @pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
