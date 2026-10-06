@@ -1080,7 +1080,7 @@ def _read_topspin(*args, **kwargs):
 
         # Eliminate the digital filter
         if kwargs.get("remove_digital_filter", True) and dic["acqus"]["DECIM"] > 1:
-            if kwargs.get("remove_carrier", False):
+            if kwargs.get("remove_dc_offset", False):
                 data = data - data.mean(axis=-1, keepdims=True)
             data = _remove_digital_filter(dic, data)
 
