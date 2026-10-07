@@ -104,9 +104,7 @@ def test_read_topspin():
     assert any("topspin_2d" in n for n in names)
     assert any("topspin_1d" in n for n in names)
 
-    nd = _read_topspin_or_skip(
-        _require_path(nmrdir), glob="topspin*/*/pdata/*/[12]r*"
-    )
+    nd = _read_topspin_or_skip(_require_path(nmrdir), glob="topspin*/*/pdata/*/[12]r*")
     assert isinstance(nd, list)
     assert str(nd[0]) == "NDDataset: [complex128] count (size: 16384)"
     assert str(nd[1]) == "NDDataset: [quaternion] count (shape: (y:1024, x:2048))"
@@ -1006,9 +1004,7 @@ def test_non_numeric_directory_no_none_return():
 @pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
 def test_component_file_2ri_readable():
     """2ri is an entry point to the full assembled quaternion spectrum."""
-    nd = _read_topspin_or_skip(
-        _require_path(nmrdir / "topspin_2d/1/pdata/1/2ri")
-    )
+    nd = _read_topspin_or_skip(_require_path(nmrdir / "topspin_2d/1/pdata/1/2ri"))
     assert nd is not None
     assert nd.shape == (1024, 2048)
 
@@ -1016,9 +1012,7 @@ def test_component_file_2ri_readable():
 @pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
 def test_component_file_2ir_readable():
     """2ir is an entry point to the full assembled quaternion spectrum."""
-    nd = _read_topspin_or_skip(
-        _require_path(nmrdir / "topspin_2d/1/pdata/1/2ir")
-    )
+    nd = _read_topspin_or_skip(_require_path(nmrdir / "topspin_2d/1/pdata/1/2ir"))
     assert nd is not None
     assert nd.shape == (1024, 2048)
 
@@ -1026,9 +1020,7 @@ def test_component_file_2ir_readable():
 @pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
 def test_component_file_2ii_readable():
     """2ii is an entry point to the full assembled quaternion spectrum."""
-    nd = _read_topspin_or_skip(
-        _require_path(nmrdir / "topspin_2d/1/pdata/1/2ii")
-    )
+    nd = _read_topspin_or_skip(_require_path(nmrdir / "topspin_2d/1/pdata/1/2ii"))
     assert nd is not None
     assert nd.shape == (1024, 2048)
 
@@ -1036,9 +1028,7 @@ def test_component_file_2ii_readable():
 @pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
 def test_component_file_1i_readable():
     """1i is an entry point to the full assembled complex spectrum."""
-    nd = _read_topspin_or_skip(
-        _require_path(nmrdir / "topspin_1d/1/pdata/1/1i")
-    )
+    nd = _read_topspin_or_skip(_require_path(nmrdir / "topspin_1d/1/pdata/1/1i"))
     assert nd is not None
     assert nd.x.size == 16384
 
@@ -1046,9 +1036,7 @@ def test_component_file_1i_readable():
 @pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
 def test_component_files_same_shape_as_canonical():
     """Component files return the same shape as the canonical file."""
-    nd_2rr = _read_topspin_or_skip(
-        _require_path(nmrdir / "topspin_2d/1/pdata/1/2rr")
-    )
+    nd_2rr = _read_topspin_or_skip(_require_path(nmrdir / "topspin_2d/1/pdata/1/2rr"))
     for comp in ["2ri", "2ir", "2ii"]:
         nd_comp = _read_topspin_or_skip(
             _require_path(nmrdir / f"topspin_2d/1/pdata/1/{comp}")
@@ -1091,9 +1079,7 @@ def test_component_file_without_canonical_fails(tmp_path):
 @pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
 def test_component_files_return_same_data_as_canonical():
     """Reading any component file returns the same assembled data."""
-    nd_2rr = _read_topspin_or_skip(
-        _require_path(nmrdir / "topspin_2d/1/pdata/1/2rr")
-    )
+    nd_2rr = _read_topspin_or_skip(_require_path(nmrdir / "topspin_2d/1/pdata/1/2rr"))
     for comp in ["2ri", "2ir", "2ii"]:
         nd_comp = _read_topspin_or_skip(
             _require_path(nmrdir / f"topspin_2d/1/pdata/1/{comp}")
@@ -1105,12 +1091,8 @@ def test_component_files_return_same_data_as_canonical():
         assert float(nd_comp.x.data[0]) == float(nd_2rr.x.data[0])
         assert float(nd_comp.y.data[0]) == float(nd_2rr.y.data[0])
 
-    nd_1r = _read_topspin_or_skip(
-        _require_path(nmrdir / "topspin_1d/1/pdata/1/1r")
-    )
-    nd_1i = _read_topspin_or_skip(
-        _require_path(nmrdir / "topspin_1d/1/pdata/1/1i")
-    )
+    nd_1r = _read_topspin_or_skip(_require_path(nmrdir / "topspin_1d/1/pdata/1/1r"))
+    nd_1i = _read_topspin_or_skip(_require_path(nmrdir / "topspin_1d/1/pdata/1/1i"))
     np.testing.assert_array_equal(
         np.asarray(nd_1r.data),
         np.asarray(nd_1i.data),

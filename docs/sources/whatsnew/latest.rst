@@ -56,3 +56,22 @@ Bug Fixes
   (`spectrochempy/nmrglue-ng#50 <https://github.com/spectrochempy/nmrglue-ng/pull/50>`_,
   `spectrochempy/nmrglue-ng#51 <https://github.com/spectrochempy/nmrglue-ng/pull/51>`_)
   (:pr:`1745`).
+
+- The TopSpin reader now resolves non-numeric experiment directories
+  (e.g. ``my_experiment/1/fid``) without returning ``None``.  Previously,
+  a non-numeric parent directory name caused ``int(expno)`` to fail, and
+  the generic exception handler silently returned ``None``.  The resolver
+  now discovers experiment directories with Bruker data files regardless
+  of the parent directory name.
+
+- Component processed data files (``1i``, ``2ri``, ``2ir``, ``2ii``) are
+  now accepted as entry points to the full assembled spectrum.  Previously,
+  these files were excluded from the valid filename set, causing a futile
+  remote download attempt followed by a bare ``FileNotFoundError``.
+  Reading ``2ri`` returns the same quaternion spectrum as ``2rr`` (all four
+  components assembled); reading ``1i`` returns the same complex spectrum
+  as ``1r``.  Individual channel isolation is not supported.
+
+- The TopSpin test suite no longer skips ``test_read_topspin`` due to a
+  404 download error.  Local fixture assertions are now independent of
+  remote download behaviour.

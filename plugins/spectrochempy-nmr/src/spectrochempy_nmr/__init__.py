@@ -385,9 +385,7 @@ def _resolve_topspin_directory_target(filename, **kwargs):
                         continue
                     sub_expnos = sorted(subdir.glob("[0-9]*"))
                     for sub_expno in sub_expnos:
-                        if (sub_expno / "fid").exists() or (
-                            sub_expno / "ser"
-                        ).exists():
+                        if (sub_expno / "fid").exists() or (sub_expno / "ser").exists():
                             candidates.append(sub_expno)
                 if candidates:
                     # Return the list of all experiment directories found.
@@ -399,9 +397,7 @@ def _resolve_topspin_directory_target(filename, **kwargs):
                         else:
                             files_.append(cand / "fid")
                     return [
-                        item
-                        for item in files_
-                        if item.name in _VALID_TOPSPIN_FILENAMES
+                        item for item in files_ if item.name in _VALID_TOPSPIN_FILENAMES
                     ]
                 # Last resort: try "1" for backward compatibility
                 # (a remote download may still supply it).
