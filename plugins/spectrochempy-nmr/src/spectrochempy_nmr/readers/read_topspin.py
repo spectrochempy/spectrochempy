@@ -623,7 +623,7 @@ def _remove_digital_filter(dic, data):
     """
     Remove the digital filter from Bruker data.
 
-    Algorithm follows nmrglue-ng ``rm_dig_filter`` (BSD license, see
+    Algorithm follows nmrglue ``rm_dig_filter`` (BSD license, see
     NMRGLUE_LICENSE.rst), with one improvement: ``DSPFVS < 10`` is clamped
     to 10 (default for DQD) instead of raising, so older Bruker files
     remain readable.
