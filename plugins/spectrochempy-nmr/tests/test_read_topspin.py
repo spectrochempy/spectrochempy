@@ -872,7 +872,7 @@ def test_proc_axis_no_effect_on_raw_fid():
     nd = _read_topspin_or_skip(
         _require_path(nmrdir / "topspin_1d/1/fid"), proc_axis=True
     )
-    assert nd.x.units == "us"
+    assert nd.x.units.dimensionality == "[time]"
     assert float(nd.x.data[0]) == 0.0
 
 
