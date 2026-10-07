@@ -223,7 +223,17 @@ def _nmr_concat_postprocess(out, datasets, **kwargs):
     return out
 
 
-_VALID_TOPSPIN_FILENAMES = {"fid", "ser", "1r", "2rr", "3rrr"}
+_VALID_TOPSPIN_FILENAMES = {
+    "fid",
+    "ser",
+    "1r",
+    "1i",
+    "2rr",
+    "2ri",
+    "2ir",
+    "2ii",
+    "3rrr",
+}
 
 
 _VALID_AGILENT_FILENAMES = {"fid"}
@@ -363,9 +373,42 @@ def _resolve_topspin_directory_target(filename, **kwargs):
 
         if expno is None:
             expnos = sorted(filename.glob("[0-9]*"))
-            # A missing local directory can still be fetched remotely. TopSpin
-            # experiment directories conventionally begin at experiment 1.
-            expno = expnos[0] if expnos else 1
+            if expnos:
+                expno = expnos[0]
+            elif filename.is_dir():
+                # No numeric experiment directories at this level.
+                # Look for dataset directories containing numeric experiment
+                # subdirectories with Bruker data files.
+                candidates = []
+                for subdir in sorted(filename.iterdir()):
+                    if not subdir.is_dir():
+                        continue
+                    sub_expnos = sorted(subdir.glob("[0-9]*"))
+                    for sub_expno in sub_expnos:
+                        if (sub_expno / "fid").exists() or (
+                            sub_expno / "ser"
+                        ).exists():
+                            candidates.append(sub_expno)
+                if candidates:
+                    # Return the list of all experiment directories found.
+                    # The caller will iterate over them.
+                    files_ = []
+                    for cand in candidates:
+                        if (cand / "ser").exists():
+                            files_.append(cand / "ser")
+                        else:
+                            files_.append(cand / "fid")
+                    return [
+                        item
+                        for item in files_
+                        if item.name in _VALID_TOPSPIN_FILENAMES
+                    ]
+                # Last resort: try "1" for backward compatibility
+                # (a remote download may still supply it).
+                expno = 1
+            else:
+                # Directory does not exist locally; try "1" for remote fetch.
+                expno = 1
 
         if procno is None:
             f = filename / str(expno)

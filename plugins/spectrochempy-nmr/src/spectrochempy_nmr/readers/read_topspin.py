@@ -1273,7 +1273,7 @@ def _read_topspin(*args, **kwargs):
         meta.td = list(data.shape)
 
     # add some additional information in meta
-    meta.expno = [int(expno)]
+    meta.expno = [int(expno) if str(expno).isdigit() else expno]
 
     # and the metadata (and make them readonly)
     meta.datatype = datatype
