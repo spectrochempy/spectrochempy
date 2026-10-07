@@ -606,3 +606,357 @@ def test_invalid_date_does_not_crash():
         datetime.fromtimestamp(float("-1e20"))
     # If we reach here, the guard worked — no unhandled exception.
     assert True
+
+
+# --------------------------------------------------------------------------
+# Axis contract tests: parameter source selection (#1742)
+# --------------------------------------------------------------------------
+
+
+def _shift_procs_offset(text, shift):
+    import re
+
+    m = re.search(r"##\$OFFSET=\s*([\d.]+)", text)
+    if m:
+        old = float(m.group(1))
+        return text.replace(m.group(0), f"##$OFFSET= {old + shift}")
+    return text
+
+
+def _copy_topspin_1d_pdata(tmp_path: Path, procs_transform=None) -> Path:
+    source = _require_path(nmrdir / "topspin_1d" / "1")
+    target = tmp_path / "1"
+    pdata = target / "pdata" / "1"
+    pdata.mkdir(parents=True)
+    for filename in ["fid", "acqu", "acqus", "pulseprogram"]:
+        src = source / filename
+        if src.exists():
+            shutil.copy2(src, target / filename)
+    procs_text = (source / "pdata" / "1" / "procs").read_text()
+    if procs_transform is not None:
+        procs_text = procs_transform(procs_text)
+    pdata.joinpath("procs").write_text(procs_text)
+    for filename in ["1r", "1i"]:
+        src = source / "pdata" / "1" / filename
+        if src.exists():
+            shutil.copy2(src, pdata / filename)
+    return target / "pdata" / "1" / "1r"
+
+
+def _copy_topspin_2d_with_shifted_offsets(
+    tmp_path: Path, delta_x: float, delta_y: float
+) -> Path:
+    source = _require_path(nmrdir / "topspin_2d" / "1")
+    target = tmp_path / "1"
+    pdata = target / "pdata" / "1"
+    pdata.mkdir(parents=True)
+    for filename in ["ser", "acqu", "acqus", "acqu2", "acqu2s", "pulseprogram"]:
+        src = source / filename
+        if src.exists():
+            shutil.copy2(src, target / filename)
+    procs = (source / "pdata" / "1" / "procs").read_text()
+    pdata.joinpath("procs").write_text(_shift_procs_offset(procs, delta_x))
+    proc2s = (source / "pdata" / "1" / "proc2s").read_text()
+    pdata.joinpath("proc2s").write_text(_shift_procs_offset(proc2s, delta_y))
+    for filename in ["2rr", "2ri", "2ir", "2ii"]:
+        src = source / "pdata" / "1" / filename
+        if src.exists():
+            shutil.copy2(src, pdata / filename)
+    return target / "pdata" / "1" / "2rr"
+
+
+def _read_procs_si(path):
+    import re
+
+    text = Path(path).read_text()
+    m = re.search(r"##\$SI=\s*(\d+)", text)
+    return int(m.group(1)) if m else None
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_default_axis_ignores_proc_offset(tmp_path):
+    """
+    Default (proc_axis=False) keeps the acquisition-based axis.
+
+    Shifting OFFSET in procs must NOT move the axis when proc_axis is not
+    requested, preserving the historical behaviour.
+    """
+    delta = 5.0
+    original = _read_topspin_or_skip(_require_path(nmrdir / "topspin_1d/1/pdata/1/1r"))
+    modified = _read_topspin_or_skip(
+        _copy_topspin_1d_pdata(tmp_path, lambda t: _shift_procs_offset(t, delta))
+    )
+    orig_first = float(original.x.data[0])
+    mod_first = float(modified.x.data[0])
+    assert mod_first == pytest.approx(orig_first, abs=0.001)
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_processed_1d_axis_uses_offset_from_procs():
+    """proc_axis=True: 1D axis starts at OFFSET from procs."""
+    nd = _read_topspin_or_skip(
+        _require_path(nmrdir / "topspin_1d/1/pdata/1/1r"), proc_axis=True
+    )
+    assert nd.meta.offset is not None
+    offset = float(nd.meta.offset[0])
+    x_first = float(nd.x.data[0])
+    assert x_first == pytest.approx(offset, abs=0.001)
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_processed_2d_axes_use_offset_from_proc_files():
+    """proc_axis=True: 2D axes use OFFSET from procs and proc2s."""
+    nd = _read_topspin_or_skip(
+        _require_path(nmrdir / "topspin_2d/1/pdata/1/2rr"), proc_axis=True
+    )
+    assert nd.meta.offset is not None
+    offset_x = float(nd.meta.offset[1])
+    offset_y = float(nd.meta.offset[0])
+    x_first = float(nd.x.data[0])
+    y_first = float(nd.y.data[0])
+    assert x_first == pytest.approx(offset_x, abs=0.001)
+    assert y_first == pytest.approx(offset_y, abs=0.001)
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_processed_axis_endpoints_match_offset_formula():
+    """
+    proc_axis=True: first = OFFSET, last = OFFSET - (N-1)*SW_p/(SF*N).
+
+    Point convention (TopSpin / Bruker Software Manual): the first sample
+    is at OFFSET (the spectral edge), the bin width is SW_p / (SF * N),
+    and the last (N-th) sample is at OFFSET - (N-1) * SW_p / (SF * N).
+    The spectral edge OFFSET is NOT a sample position at the opposite end;
+    the opposite edge is OFFSET - SW_p / SF and lies one full bin beyond the
+    last sample.
+    """
+    nd = _read_topspin_or_skip(
+        _require_path(nmrdir / "topspin_2d/1/pdata/1/2rr"), proc_axis=True
+    )
+    for axis_idx, coord in [(0, nd.y), (1, nd.x)]:
+        offset = float(nd.meta.offset[axis_idx])
+        sw_p = float(nd.meta.sw_p[axis_idx])
+        sf = float(nd.meta.sf[axis_idx].m)
+        n = int(nd.meta.si[axis_idx])
+        step = sw_p / (sf * n)
+        expected_first = offset
+        expected_last = offset - (n - 1) * step
+        actual_first = float(coord.data[0])
+        actual_last = float(coord.data[-1])
+        assert actual_first == pytest.approx(expected_first, abs=0.001)
+        assert actual_last == pytest.approx(expected_last, abs=0.001)
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_offset_shift_propagates_to_processed_axis(tmp_path):
+    """proc_axis=True: shifting OFFSET by +1 ppm shifts the axis by +1 ppm."""
+    delta = 1.0
+    original = _read_topspin_or_skip(
+        _require_path(nmrdir / "topspin_1d/1/pdata/1/1r"), proc_axis=True
+    )
+    modified = _read_topspin_or_skip(
+        _copy_topspin_1d_pdata(tmp_path, lambda t: _shift_procs_offset(t, delta)),
+        proc_axis=True,
+    )
+    orig_first = float(original.x.data[0])
+    mod_first = float(modified.x.data[0])
+    assert mod_first == pytest.approx(orig_first + delta, abs=0.001)
+    orig_last = float(original.x.data[-1])
+    mod_last = float(modified.x.data[-1])
+    assert mod_last == pytest.approx(orig_last + delta, abs=0.001)
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_2d_offset_shift_propagates_to_axes(tmp_path):
+    """proc_axis=True: OFFSET shifts in procs/proc2s move both axes."""
+    delta_x = 2.5
+    delta_y = -3.0
+    modified = _read_topspin_or_skip(
+        _copy_topspin_2d_with_shifted_offsets(tmp_path, delta_x, delta_y),
+        proc_axis=True,
+    )
+    original = _read_topspin_or_skip(
+        _require_path(nmrdir / "topspin_2d/1/pdata/1/2rr"), proc_axis=True
+    )
+    orig_x_first = float(original.x.data[0])
+    mod_x_first = float(modified.x.data[0])
+    assert mod_x_first == pytest.approx(orig_x_first + delta_x, abs=0.01)
+    orig_y_first = float(original.y.data[0])
+    mod_y_first = float(modified.y.data[0])
+    assert mod_y_first == pytest.approx(orig_y_first + delta_y, abs=0.01)
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_exam2d_hc_axes_match_offset():
+    """proc_axis=True: exam2d_HC axes match procs/proc2s OFFSET."""
+    nd = _read_topspin_or_skip(
+        _require_path(nmrdir / "exam2d_HC/3/pdata/1/2rr"), proc_axis=True
+    )
+    assert nd.meta.offset is not None
+    offset_x = float(nd.meta.offset[1])
+    offset_y = float(nd.meta.offset[0])
+    x_first = float(nd.x.data[0])
+    y_first = float(nd.y.data[0])
+    assert x_first == pytest.approx(offset_x, abs=0.001)
+    assert y_first == pytest.approx(offset_y, abs=0.001)
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_spectral_width_preserved_with_proc_axis():
+    """proc_axis=True: width = (N-1)/N * SW_p/SF (point convention)."""
+    nd = _read_topspin_or_skip(
+        _require_path(nmrdir / "topspin_2d/1/pdata/1/2rr"), proc_axis=True
+    )
+    for axis_idx, coord in [(0, nd.y), (1, nd.x)]:
+        sw_p = float(nd.meta.sw_p[axis_idx])
+        sf = float(nd.meta.sf[axis_idx].m)
+        n = int(nd.meta.si[axis_idx])
+        expected_width = (n - 1) * sw_p / (sf * n)
+        actual_width = float(coord.data[0]) - float(coord.data[-1])
+        assert actual_width == pytest.approx(expected_width, abs=0.01)
+
+
+# --------------------------------------------------------------------------
+# Error and fallback paths for proc_axis
+# --------------------------------------------------------------------------
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_proc_axis_warns_on_extraction(tmp_path):
+    """
+    proc_axis=True warns and falls back when STSR/STSI extraction is set.
+
+    Extraction is detected when STSR != 0 or STSI differs from SI (the
+    values STSR=0, STSI=SI denote the full grid, not extraction).  The
+    reader warns and falls back to the acquisition-based axis rather than
+    silently building a stretched processing-parameter axis.
+    """
+
+    def _set_extraction(text):
+        return text.replace("##END=\n", "##$STSR= 100\n##$STSI= 512\n##END=\n")
+
+    path = _copy_topspin_1d_pdata(tmp_path, _set_extraction)
+    import warnings
+
+    with warnings.catch_warnings(record=True) as recorded:
+        warnings.simplefilter("always")
+        nd = scp.read_topspin(path, proc_axis=True)
+    assert nd is not None
+    assert any("extracted" in str(w.message) for w in recorded)
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_proc_axis_missing_params_falls_back_with_warning(tmp_path):
+    """proc_axis=True warns and falls back when OFFSET is missing."""
+
+    def _remove_offset(text):
+        import re
+
+        return re.sub(r"##\$OFFSET=\s*[\d.]+\n", "", text)
+
+    path = _copy_topspin_1d_pdata(tmp_path, _remove_offset)
+    import warnings
+
+    with warnings.catch_warnings(record=True) as recorded:
+        warnings.simplefilter("always")
+        nd = scp.read_topspin(path, proc_axis=True)
+    assert nd is not None
+    assert any("OFFSET" in str(w.message) for w in recorded)
+    original = _read_topspin_or_skip(_require_path(nmrdir / "topspin_1d/1/pdata/1/1r"))
+    assert float(nd.x.data[0]) == pytest.approx(float(original.x.data[0]), abs=0.001)
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_proc_axis_no_effect_on_raw_fid():
+    """proc_axis=True has no effect on raw FID time-domain axes."""
+    nd = _read_topspin_or_skip(
+        _require_path(nmrdir / "topspin_1d/1/fid"), proc_axis=True
+    )
+    assert nd.x.units.dimensionality == "[time]"
+    assert float(nd.x.data[0]) == 0.0
+
+
+# --------------------------------------------------------------------------
+# Full-spectra scope and SI verification
+# --------------------------------------------------------------------------
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_si_from_proc_file_matches_data_shape():
+    """
+    SI read from the procs file must match the stored data shape.
+
+    This verifies against the file parameter directly (not meta.si, which
+    is built from data.shape and would be tautological).  Only full
+    spectra are validated; STSR/STSI extraction is rejected by
+    proc_axis=True (see test_proc_axis_rejects_extraction).
+    """
+    cases = [
+        (
+            nmrdir / "topspin_1d/1/pdata/1/1r",
+            [nmrdir / "topspin_1d/1/pdata/1/procs"],
+        ),
+        (
+            nmrdir / "topspin_2d/1/pdata/1/2rr",
+            [
+                nmrdir / "topspin_2d/1/pdata/1/proc2s",
+                nmrdir / "topspin_2d/1/pdata/1/procs",
+            ],
+        ),
+        (
+            nmrdir / "exam2d_HC/3/pdata/1/2rr",
+            [
+                nmrdir / "exam2d_HC/3/pdata/1/proc2s",
+                nmrdir / "exam2d_HC/3/pdata/1/procs",
+            ],
+        ),
+    ]
+    for path, proc_files in cases:
+        nd = _read_topspin_or_skip(_require_path(path))
+        for axis_idx, proc_file in enumerate(proc_files):
+            si_file = _read_procs_si(_require_path(proc_file))
+            if si_file is not None:
+                assert nd.data.shape[axis_idx] == si_file, (
+                    f"{path}: data.shape[{axis_idx}]="
+                    f"{nd.data.shape[axis_idx]} != SI in "
+                    f"{proc_file.name} ({si_file})"
+                )
+
+
+# --------------------------------------------------------------------------
+# Numeric processing stability (data values, normalisation, components)
+# --------------------------------------------------------------------------
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_spectral_values_not_changed_by_axis_selection():
+    """proc_axis must not change data values, only coordinates."""
+    ref = _read_topspin_or_skip(_require_path(nmrdir / "topspin_2d/1/pdata/1/2rr"))
+    nd = _read_topspin_or_skip(
+        _require_path(nmrdir / "topspin_2d/1/pdata/1/2rr"), proc_axis=True
+    )
+    import numpy as np
+
+    np.testing.assert_array_equal(np.asarray(ref.data), np.asarray(nd.data))
+    assert np.isfinite(np.asarray(nd.data)).all()
+    assert np.abs(np.asarray(nd.data)).max() > 0
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_offset_populated_in_metadata():
+    """meta.offset is populated from procs regardless of proc_axis."""
+    nd = _read_topspin_or_skip(_require_path(nmrdir / "topspin_1d/1/pdata/1/1r"))
+    assert nd.meta.offset is not None
+    assert len(nd.meta.offset) == 1
+    assert nd.meta.offset[0] is not None
+    assert float(nd.meta.offset[0]) == pytest.approx(253.0909, abs=0.01)
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_offset_populated_in_2d_metadata():
+    """meta.offset has entries for both dimensions in 2D processed data."""
+    nd = _read_topspin_or_skip(_require_path(nmrdir / "topspin_2d/1/pdata/1/2rr"))
+    assert nd.meta.offset is not None
+    assert len(nd.meta.offset) == 2
+    assert nd.meta.offset[0] is not None
+    assert nd.meta.offset[1] is not None

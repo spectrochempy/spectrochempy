@@ -439,7 +439,7 @@ nmr_valid_meta = [
     # ('nust2', ''),
     # ('nustd', ''),
     # ('nzp', ''),
-    # ('offset', ''),
+    ("offset", ""),
     # ('pacoil', ''),
     # ('pc', ''),
     # ('pexsel', ''),
@@ -755,6 +755,21 @@ def read_topspin(*paths, **kwargs):
         A pattern to filter the files to read.
 
         .. versionadded:: 0.7.2
+    proc_axis : `bool`, optional, default: `False`
+        Select the processing parameters (``OFFSET``, ``SW_p``, ``SF`` in
+        ``procs``/``proc2s``) as the source for processed spectral axes,
+        following the TopSpin convention: the first point is at ``OFFSET``,
+        the bin width is ``SW_p / (SF * SI)``, and the last sample is at
+        ``OFFSET - (SI - 1) * SW_p / (SF * SI)``.  Only full spectra are
+        supported (``STSR``/``STSI`` extraction triggers a warning and
+        falls back to the acquisition-based axis).
+
+        The default (``False``) preserves the historical behaviour of
+        deriving axes from acquisition parameters (``SFO1``, ``SW``).  The
+        two references can disagree when a spectrum was re-referenced
+        during processing.  This option selects the axis parameter source;
+        it does not replay or apply vendor processing.  Has no effect on
+        raw FID/SER time-domain axes.
     protocol : `str`, optional
         ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
         ``'opus'``, ``'topspin'``, ``'matlab'``, ``'jcamp'``,
@@ -803,6 +818,12 @@ def read_topspin(*paths, **kwargs):
 
     >>> scp.nmr.read('irdata/topspin/1/pdata/1/1r')
     NDDataset: [float64] a.u. (shape: (y:1, x:16384))
+
+    Selecting processing-parameter axes for a processed spectrum
+
+    >>> nd = scp.nmr.read('irdata/topspin/1/pdata/1/1r', proc_axis=True)
+    >>> nd.x[0]  # doctest: +SKIP
+    253.0909 ppm
 
     """
     kwargs["filetypes"] = ["TopSpin files (1r, 1i, *dir/*, 1r/*)"]
@@ -877,6 +898,67 @@ def _build_topspin_nmr_processing(dic):
     }
 
     return nmr_processing
+
+
+def _proc_file_key(axis, parmode):
+    if axis == parmode:
+        return "procs"
+    return f"proc{parmode + 1 - axis}s"
+
+
+def _validate_proc_axis(dic, data, parmode):
+    use_proc = [False] * (parmode + 1)
+    for axis in range(parmode + 1):
+        key = _proc_file_key(axis, parmode)
+        proc = dic.get(key) or {}
+        file_si = proc.get("SI")
+        stsr = proc.get("STSR", 0) or 0
+        stsi = proc.get("STSI", 0) or 0
+        extracted = stsr != 0 or (stsi != 0 and stsi != file_si)
+        if extracted:
+            warning_(
+                f"proc_axis=True does not support extracted spectra "
+                f"(STSR={stsr}, STSI={stsi} in '{key}', SI={file_si}).  "
+                f"The processing parameters describe the full spectral "
+                f"grid; building an axis from them would stretch the "
+                f"extracted region.  Using the acquisition-based axis for "
+                f"this dimension.",
+                stacklevel=2,
+            )
+            continue
+        if file_si is not None and int(file_si) != data.shape[axis]:
+            warning_(
+                f"proc_axis=True: SI in '{key}' ({int(file_si)}) differs "
+                f"from the stored data size ({data.shape[axis]}) on "
+                f"dimension {axis}.  The spectral axis may be incorrect.",
+                stacklevel=2,
+            )
+        offset = proc.get("OFFSET")
+        sw_p = proc.get("SW_p")
+        sf = proc.get("SF")
+        missing = [
+            name
+            for name, val in [("OFFSET", offset), ("SW_p", sw_p), ("SF", sf)]
+            if val is None
+        ]
+        if missing:
+            warning_(
+                f"proc_axis=True requires OFFSET, SW_p and SF in '{key}'. "
+                f"Missing on dimension {axis}: {', '.join(missing)}.  "
+                f"Using the acquisition-based axis for this dimension.",
+                stacklevel=2,
+            )
+            continue
+        if not (sw_p > 0) or not (sf > 0):
+            warning_(
+                f"proc_axis=True: SW_p={sw_p} or SF={sf} in '{key}' is "
+                f"not positive on dimension {axis}.  Using the "
+                f"acquisition-based axis for this dimension.",
+                stacklevel=2,
+            )
+            continue
+        use_proc[axis] = True
+    return use_proc
 
 
 @_importer_method
@@ -1208,6 +1290,11 @@ def _read_topspin(*args, **kwargs):
     axe_range = list(range(parmode + 1))
 
     use_list = kwargs.pop("use_list", False)
+    proc_axis = bool(kwargs.get("proc_axis", False)) and processed
+    if proc_axis:
+        use_proc_axis = _validate_proc_axis(dic, data, parmode)
+    else:
+        use_proc_axis = [False] * (parmode + 1)
 
     for axis in axe_range:
         if parmode > 0 and use_list and axis == 0:
@@ -1240,14 +1327,29 @@ def _read_topspin(*args, **kwargs):
             coords.append(coord)
         else:
             size = meta.si[axis]
-            sizem = max(size - 1, 1)
-            deltaf = -meta.sw_h[axis] / sizem
-            first = meta.sfo1[axis] - meta.sf[axis] - deltaf * sizem / 2.0
+            sw_p_val = meta.sw_p[axis] if meta.sw_p is not None else None
+            offset_val = meta.get("offset", [None] * data.ndim)[axis]
+            sf_val = meta.sf[axis]
 
-            coordpoints = np.arange(size) * deltaf + first
-            coord = Coord(coordpoints)
+            if (
+                use_proc_axis[axis]
+                and sw_p_val is not None
+                and offset_val is not None
+                and sf_val is not None
+            ):
+                step = float(sw_p_val) / float(sf_val.m)
+                coordpoints = np.arange(size) * (-step / size) + float(offset_val)
+                coord = Coord(coordpoints, units="ppm")
+            else:
+                sizem = max(size - 1, 1)
+                deltaf = -meta.sw_h[axis] / sizem
+                first = meta.sfo1[axis] - meta.sf[axis] - deltaf * sizem / 2.0
+                coordpoints = np.arange(size) * deltaf + first
+                coord = Coord(coordpoints)
+                coord.meta["acquisition_frequency"] = meta.sfo1[axis]
+                coord.ito("ppm")
+
             coord.meta["acquisition_frequency"] = meta.sfo1[axis]
-            coord.ito("ppm")
             if meta.nuc1 is not None:
                 nuc1 = meta.nuc1[axis]
                 regex = r"([^a-zA-Z]+)([a-zA-Z]+)"

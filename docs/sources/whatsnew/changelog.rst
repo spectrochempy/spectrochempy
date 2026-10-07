@@ -19,6 +19,25 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- The TopSpin reader accepts a ``proc_axis`` keyword to select the
+  processing parameters (``OFFSET``, ``SW_p``, ``SF`` in
+  ``procs``/``proc2s``) as the source for processed spectral axes,
+  following the TopSpin convention (first point at ``OFFSET``, bin width
+  ``SW_p / (SF * SI)``).  The default preserves the historical
+  acquisition-based axis; the two references can disagree when a spectrum
+  was re-referenced during processing.  This selects the axis parameter
+  source and does not replay or apply vendor processing.  Only full
+  spectra are supported (``STSR``/``STSI`` extraction triggers a warning
+  and falls back to the acquisition-based axis).
+  See also `spectrochempy/nmrglue-ng#55
+  <https://github.com/spectrochempy/nmrglue-ng/pull/55>`_ and
+  `spectrochempy/nmrglue-ng#58
+  <https://github.com/spectrochempy/nmrglue-ng/pull/58>`_ for the
+  corresponding ``pdata`` option in nmrglue-ng, and
+  `jjhelmus/nmrglue#285
+  <https://github.com/jjhelmus/nmrglue/issues/285>`_ for the upstream
+  discussion (:issue:`1742`).
+
 - The NMR reader now accepts a ``remove_dc_offset`` keyword argument
   (default ``False``). When ``True``, the receiver DC offset is removed
   from the FID before digital filter correction, which eliminates the
