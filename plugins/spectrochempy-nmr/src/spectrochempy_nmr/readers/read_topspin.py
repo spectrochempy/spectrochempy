@@ -623,7 +623,7 @@ def _remove_digital_filter(dic, data):
     """
     Remove the digital filter from Bruker data.
 
-    Algorithm follows nmrglue-ng ``rm_dig_filter`` (BSD license, see
+    Algorithm follows nmrglue ``rm_dig_filter`` (BSD license, see
     NMRGLUE_LICENSE.rst), with one improvement: ``DSPFVS < 10`` is clamped
     to 10 (default for DQD) instead of raising, so older Bruker files
     remain readable.
@@ -1273,7 +1273,7 @@ def _read_topspin(*args, **kwargs):
         meta.td = list(data.shape)
 
     # add some additional information in meta
-    meta.expno = [int(expno)]
+    meta.expno = [int(expno) if str(expno).isdigit() else expno]
 
     # and the metadata (and make them readonly)
     meta.datatype = datatype
