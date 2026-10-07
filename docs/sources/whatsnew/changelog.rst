@@ -28,22 +28,13 @@ New Features
   was re-referenced during processing.  This selects the axis parameter
   source and does not replay or apply vendor processing.  Only full
   spectra are supported (``STSR``/``STSI`` extraction triggers a warning
-  and falls back to the acquisition-based axis).
-  See also `spectrochempy/nmrglue-ng#55
-  <https://github.com/spectrochempy/nmrglue-ng/pull/55>`_ and
-  `spectrochempy/nmrglue-ng#58
-  <https://github.com/spectrochempy/nmrglue-ng/pull/58>`_ for the
-  corresponding ``pdata`` option in nmrglue-ng, and
-  `jjhelmus/nmrglue#285
-  <https://github.com/jjhelmus/nmrglue/issues/285>`_ for the upstream
-  discussion (:issue:`1742`).
+  and falls back to the acquisition-based axis)
+  (:issue:`1742`).
 
 - The NMR reader now accepts a ``remove_dc_offset`` keyword argument
   (default ``False``). When ``True``, the receiver DC offset is removed
   from the FID before digital filter correction, which eliminates the
-  spike at the centre of the spectrum caused by the receiver electronics.
-  This matches the ``remove_dc_offset`` parameter added to nmrglue-ng
-  (`spectrochempy/nmrglue-ng#50 <https://github.com/spectrochempy/nmrglue-ng/pull/50>`_)
+  spike at the centre of the spectrum caused by the receiver electronics
   (:pr:`1745`).
 
 .. section
@@ -53,16 +44,11 @@ Bug Fixes
 .. Add here new bug fixes (do not delete this comment)
 
 - The NMR digital filter removal algorithm in the TopSpin reader has been
-  rewritten to follow nmrglue-ng's ``rm_dig_filter`` exactly. The previous
-  implementation introduced a constant phase rotation
-  (``exp(i*pi*phase)``) with no physical justification, added a flat
-  pedestal to the spectrum via an incorrect DC subtraction, derived the
+  rewritten. The previous implementation introduced a constant phase
+  rotation (``exp(i*pi*phase)``) with no physical justification, added a
+  flat pedestal to the spectrum via an incorrect DC subtraction, derived the
   output length from ``TD//2`` instead of the actual data size, and
-  mutated the input dictionary. All four defects are fixed. The output is
-  now bit-identical to nmrglue-ng on all available Bruker fixtures
-  (`spectrochempy/nmrglue-ng#50 <https://github.com/spectrochempy/nmrglue-ng/pull/50>`_,
-  `spectrochempy/nmrglue-ng#51 <https://github.com/spectrochempy/nmrglue-ng/pull/51>`_)
-  (:pr:`1745`).
+  mutated the input dictionary. All four defects are fixed (:pr:`1745`).
 
 - The TopSpin reader now resolves non-numeric experiment directories
   (e.g. ``my_experiment/1/fid``) without returning ``None``.  Previously,
