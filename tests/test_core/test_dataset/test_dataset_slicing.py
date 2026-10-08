@@ -38,6 +38,41 @@ def test_nddataset_loc2index(ref_ds, ds1):
     assert da._loc2index(0, 0) == (9, "out_of_limits")  # return the high limit index
 
 
+@pytest.mark.parametrize("selected", [1, 2])
+@pytest.mark.parametrize("quantity", [False, True])
+@pytest.mark.parametrize("transpose", [False, True])
+def test_nested_coordset_location_selection(selected, quantity, transpose):
+    time = scp.Coord([0.0, 10.0, 20.0, 30.0], units="min", title="time")
+    temperature = scp.Coord([20.0, 40.0, 60.0, 80.0], units="degC")
+    ds = scp.NDDataset(
+        np.arange(12).reshape(4, 3),
+        coordset=scp.CoordSet(y=[temperature, time], x=scp.Coord([1, 2, 3])),
+    )
+    ds.y.select(selected)
+    coord = ds.y.default
+    single = ds.copy()
+    single.y = coord.copy()
+    if transpose:
+        ds = ds.T
+        single = single.T
+
+    start, stop = 20.0, 30.0
+    if quantity:
+        start = scp.Quantity(start, coord.units)
+        stop = scp.Quantity(stop, coord.units)
+    key = (slice(None), slice(start, stop)) if transpose else slice(start, stop)
+    result = ds[key]
+    expected = single[key]
+    assert_array_equal(result.data, expected.data)
+    assert_coord_equal(result.y.default, expected.y)
+    assert len(result.y.coords) == 2
+
+    key = (slice(None), start) if transpose else start
+    assert_array_equal(ds[key].data, single[key].data)
+    with pytest.raises(ValueError, match="Units of the location"):
+        ds[:, 20.0 * ur.m] if transpose else ds[20.0 * ur.m]
+
+
 def test_nddataset_slicing_by_index(ref_ds, ds1):
     da = ds1
     ref = ref_ds
