@@ -1214,15 +1214,11 @@ class CoordSet(HasTraits):
             coord = (coord,)
         self._storage[:0] = coord
 
-    def _loc2index(self, loc):
+    def _loc2index(self, loc, *, units=None):
         # Return the index of a location
-        for coord in self.coords:
-            try:
-                return coord._loc2index(loc)
-            except IndexError:
-                continue
-        # not found!
-        raise IndexError
+        if self.default is None:
+            raise IndexError
+        return self.default._loc2index(loc, units=units)
 
     def _set_names(self, names):
         # utility function to change names of coordinates (in batch)
