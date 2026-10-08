@@ -199,6 +199,27 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
     # On which axis do we want to apply transform (get axis from arguments)
     dim = kwargs.pop("dim", kwargs.pop("axis", -1))
     axis, dim = dataset.get_axis(dim, negative_axis=True)
+    dim = str(dim)
+
+    domain_state = getattr(dataset.meta, "isfreq", None)
+    if domain_state is not None:
+        meta_axis = dataset.dims.index(dim)
+        if meta_axis < len(domain_state):
+            is_frequency = domain_state[meta_axis]
+            if is_frequency is not None and not inv and bool(is_frequency):
+                raise SpectroChemPyError(
+                    f"Cannot apply FFT on dimension {dim!r} because metadata "
+                    "marks it as already in the frequency domain. Use ifft() "
+                    "for a frequency-to-time transform, or choose a time-domain "
+                    "dimension."
+                )
+            if is_frequency is not None and inv and not bool(is_frequency):
+                raise SpectroChemPyError(
+                    f"Cannot apply IFFT on dimension {dim!r} because metadata "
+                    "marks it as still in the time domain. Use fft() for a "
+                    "time-to-frequency transform, or choose a frequency-domain "
+                    "dimension."
+                )
 
     # Validate the original target coordinate before an in-place swap can
     # mutate the caller. Interferogram FFTs build a physical wavenumber axis,

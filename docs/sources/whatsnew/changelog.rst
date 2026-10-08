@@ -69,6 +69,12 @@ Bug Fixes
   404 download error.  Local fixture assertions are now independent of
   remote download behaviour.
 
+- TopSpin spectra read from processed data are now consistently treated as
+  frequency-domain data by FFT processing.  Calling ``fft`` on an already
+  frequency-domain dimension now raises an explicit diagnostic naming the
+  incompatible dimension, while raw FID/SER data and remaining time-domain
+  dimensions in partially transformed 2D data remain transformable.
+
 
 .. section
 

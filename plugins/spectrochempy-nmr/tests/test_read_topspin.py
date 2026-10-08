@@ -13,6 +13,7 @@ import pytest
 from spectrochempy_nmr.experiment import Experiment
 
 import spectrochempy as scp
+from spectrochempy.utils.exceptions import SpectroChemPyError
 
 DATADIR = scp.preferences.datadir
 NMRDATA = DATADIR / "nmrdata"
@@ -157,6 +158,9 @@ def test_1d_processed_metadata():
     assert nd.meta.datatype == "1D"
     assert nd.meta.isfreq == [True]
     assert nd.meta.iscomplex == [False]
+    assert nd.meta.si == [nd.x.size]
+    assert Experiment(nd).domains == ("frequency",)
+    assert Experiment(nd).source_kind == "processed_1d"
     assert nd.x.units == "ppm"
     assert nd.x.size == 16384
     assert "^{1}H" in nd.x.title
@@ -192,7 +196,57 @@ def test_2d_processed_metadata():
     assert nd.meta.datatype == "2D"
     assert nd.meta.isfreq == [True, True]
     assert nd.meta.iscomplex == [False, False]
+    assert nd.meta.si == list(nd.shape)
+    assert Experiment(nd).domains == ("frequency", "frequency")
+    assert Experiment(nd).source_kind == "processed_2d"
     assert nd.shape == (1024, 2048)
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_fft_on_processed_topspin_reports_frequency_domain():
+    nd = _read_topspin_or_skip(_require_path(nmrdir / "topspin_2d/1/pdata/1/2rr"))
+    before = np.asarray(nd.data).copy()
+
+    with pytest.raises(SpectroChemPyError, match="dimension 'x'.*frequency domain"):
+        nd.fft(dim="x")
+
+    np.testing.assert_array_equal(np.asarray(nd.data), before)
+    assert nd.meta.isfreq == [True, True]
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_fft_partial_topspin_domain_guard_preserves_remaining_dimension():
+    ds = _read_topspin_or_skip(_require_path(nmrdir / "topspin_2d/1/ser"))
+    original = np.asarray(ds.data).copy()
+
+    f2 = ds.fft(dim="x")
+    assert f2.meta.isfreq == [False, True]
+    assert Experiment(f2).domains == ("time", "frequency")
+    np.testing.assert_array_equal(np.asarray(ds.data), original)
+    assert ds.meta.isfreq == [False, False]
+
+    with pytest.raises(SpectroChemPyError, match="dimension 'x'.*frequency domain"):
+        f2.fft(dim="x")
+
+    f1 = f2.fft(dim="y")
+    assert f1.meta.isfreq == [True, True]
+    assert Experiment(f1).domains == ("frequency", "frequency")
+
+
+@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+def test_fft_domain_guard_resolves_transposed_dimensions():
+    ds = _read_topspin_or_skip(_require_path(nmrdir / "topspin_2d/1/ser"))
+    f2 = ds.fft(dim="x")
+    transposed = f2.T
+
+    assert transposed.dims == ["x", "y"]
+    assert transposed.meta.isfreq == [True, False]
+
+    with pytest.raises(SpectroChemPyError, match="dimension 'x'.*frequency domain"):
+        transposed.fft(dim="x")
+
+    transformed = transposed.fft(dim="y")
+    assert transformed.meta.isfreq == [True, True]
 
 
 @pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
@@ -1090,6 +1144,8 @@ def test_component_files_return_same_data_as_canonical():
         )
         assert float(nd_comp.x.data[0]) == float(nd_2rr.x.data[0])
         assert float(nd_comp.y.data[0]) == float(nd_2rr.y.data[0])
+        assert nd_comp.meta.isfreq == nd_2rr.meta.isfreq
+        assert nd_comp.meta.si == nd_2rr.meta.si
 
     nd_1r = _read_topspin_or_skip(_require_path(nmrdir / "topspin_1d/1/pdata/1/1r"))
     nd_1i = _read_topspin_or_skip(_require_path(nmrdir / "topspin_1d/1/pdata/1/1i"))
@@ -1099,3 +1155,5 @@ def test_component_files_return_same_data_as_canonical():
     )
     assert float(nd_1i.x.data[0]) == float(nd_1r.x.data[0])
     assert float(nd_1i.x.data[-1]) == float(nd_1r.x.data[-1])
+    assert nd_1i.meta.isfreq == nd_1r.meta.isfreq
+    assert nd_1i.meta.si == nd_1r.meta.si
