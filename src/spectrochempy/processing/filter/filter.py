@@ -25,7 +25,7 @@ __configurables__ = ["Filter"]
 __all__ = __dataset_methods__ + __configurables__
 
 
-def _detect_uniform_spacing(dataset, dim):
+def _detect_uniform_spacing(dataset, dim, *, coordset=None):
     """
     Detect uniform spacing from the coordinate along *dim*.
 
@@ -40,6 +40,8 @@ def _detect_uniform_spacing(dataset, dim):
         The dataset whose coordinate is inspected.
     dim : int
         The resolved integer axis index.
+    coordset : `CoordSet`, optional
+        Original coordinates to inspect before masked samples were removed.
 
     Returns
     -------
@@ -50,7 +52,7 @@ def _detect_uniform_spacing(dataset, dim):
         Explanation when *delta_signed* is ``None``, else ``None``.
     """
     try:
-        coord = dataset.coord(dim)
+        coord = dataset.coord(dim) if coordset is None else coordset[dataset.dims[dim]]
     except AttributeError:
         return None, "no coordinate available"
 
@@ -201,7 +203,8 @@ class Filter(ProcessingConfigurable):
         "This is only used if deriv > 0.\n\n"
         "When ``None`` (the default), the signed spacing "
         "is automatically derived from the coordinate of the processed axis "
-        "if the coordinate is uniformly spaced.  On a non-uniform or "
+        "if the retained samples are uniformly spaced, otherwise from the "
+        "original coordinate if it is uniform. On a non-uniform or "
         "missing coordinate a warning is emitted and the index-based "
         "``delta=1.0`` is used as a fallback.\n\n"
         "When set to a numeric value, that value is passed directly to "
@@ -309,6 +312,12 @@ and ‘nearest’.
                         self._X,
                         self._dim,
                     )
+                    if delta_signed is None and np.any(self._X_mask):
+                        delta_signed, msg = _detect_uniform_spacing(
+                            self._X,
+                            self._dim,
+                            coordset=self._X_coordset,
+                        )
                     if delta_signed is not None:
                         delta_used = delta_signed
                         delta_source = "coordinate"
@@ -470,8 +479,9 @@ def differentiate(
         ``order`` parameter of `savgol` and must be less than ``size``.
     delta : `float` or ``None``, optional, default: ``None``
         Signed sample spacing. When ``None``, `savgol` derives it from a
-        uniformly spaced coordinate. If that is not possible, `savgol` warns
-        and falls back to index-based spacing.
+        uniformly spaced coordinate, preferring the retained samples and then
+        the original axis before masked samples were removed. If neither is
+        uniform, `savgol` warns and falls back to index-based spacing.
     dim : `int` or `str`, optional, default: -1
         Axis along which to differentiate. A dimension name such as ``"x"``
         or an integer axis index can be used.
@@ -498,6 +508,12 @@ def differentiate(
     history, dimension selection, and numerical validation follow `savgol`
     unchanged. This facade additionally requires a positive derivative order
     no greater than the polynomial order.
+
+    With masked data, windows spanning a masked gap can produce unreliable
+    derivatives at nearby unmasked points. Combining regular subsampling
+    with masked blocks can also give incorrect automatic scaling away from
+    the gaps; supply the signed spacing of the retained samples as ``delta``
+    in that case. See the masked-data notes in `savgol` for details.
 
     Examples
     --------
@@ -557,10 +573,12 @@ def savgol(dataset, size=5, order=2, dim=-1, delta=None, **kwargs):
         Sample spacing passed to ``scipy.signal.savgol_filter``.
 
         * ``None`` (default) — when ``deriv > 0``, the signed spacing is
-          automatically derived from the coordinate of the processed axis
-          if the coordinate is uniformly spaced.  On a non-uniform or
-          missing coordinate a warning is emitted and the index-based
-          ``delta=1.0`` is used as a fallback.
+          automatically derived from the retained samples of the processed
+          axis if they are uniformly spaced. Otherwise, the original
+          coordinate before masked samples were removed is used if it is
+          uniform. If neither coordinate is uniform or no coordinate is
+          available, a warning is emitted and the index-based ``delta=1.0``
+          is used as a fallback.
         * A numeric value — passed directly to SciPy with its sign.  The
           value is interpreted in the current unit of the selected
           coordinate.  No unit-based correction (``_reversed``) is applied.
@@ -606,6 +624,30 @@ def savgol(dataset, size=5, order=2, dim=-1, delta=None, **kwargs):
     ``scipy.signal.savgol_filter``.  The Savitzky-Golay algorithm is
     fundamentally index-based; the detected delta scales the derivative
     coefficients during the convolution.
+
+    **Masked data.** Masked rows and columns are removed before filtering,
+    and the input mask is restored afterwards. Automatic spacing detection
+    first uses the retained samples if they are uniformly spaced (including
+    regular subsampling). Otherwise it uses the original coordinate if that
+    is uniform, so a masked block does not force index-based scaling.
+    If neither coordinate is uniform, the index-based fallback is used.
+
+    Using the original spacing assumes that masking creates gaps without
+    changing the sampling step elsewhere. Masks combining regular subsampling
+    with a masked block can therefore give incorrectly scaled derivatives
+    even far from the gaps, without a warning. In that case, set ``delta``
+    explicitly to the signed spacing of the retained samples outside the
+    gaps (for example, twice the original step when every other sample is
+    removed). This corrects the scaling but not the effects of crossing gaps.
+
+    Removing a masked block joins its two sides in the filtered series.
+    Windows spanning this gap can therefore give unreliable values at
+    unmasked points near the gap, even with physical units and spacing.
+    Interior convolution windows can affect up to ``size // 2`` retained
+    points on each side of a gap.
+    The output mask is not expanded to cover these points. This also applies
+    to smoothing and to an explicit ``delta``. For ``mode="interp"``,
+    edge polynomial fits use a full window and can also span a nearby gap.
 
     When ``delta`` is a numeric value, it is passed to SciPy exactly as
     provided, with its sign.  The coordinate units (``cm⁻¹``, ``ppm``,
