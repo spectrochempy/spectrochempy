@@ -43,6 +43,10 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Selection by coordinate value on a dimension with multiple coordinates now
+  uses the selected default coordinate and handles quantities as for a single
+  coordinate, instead of raising a ``TypeError`` (:issue:`1751`).
+
 - The NMR digital filter removal algorithm in the TopSpin reader has been
   rewritten. The previous implementation introduced a constant phase
   rotation (``exp(i*pi*phase)``) with no physical justification, added a
