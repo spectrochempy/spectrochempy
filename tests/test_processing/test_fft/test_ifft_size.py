@@ -76,6 +76,23 @@ def test_fft_ifft_roundtrip_preserves_values_coordinate_and_domain_metadata():
     np.testing.assert_allclose(result.x.to("s").data, source.x.data)
 
 
+def test_fft_without_domain_metadata_keeps_generic_behavior():
+    data = np.arange(8, dtype=float) + 1.0j * np.arange(8, 16, dtype=float)
+    time = Coord.arange(8) * 0.25
+    time.units = "s"
+    source = NDDataset(data, coordset=[time])
+    source.meta.td = [source.size]
+
+    spectrum = source.fft()
+
+    assert spectrum.shape == source.shape
+    np.testing.assert_allclose(
+        spectrum.data,
+        np.fft.fftshift(np.fft.fft(source.data)),
+    )
+    assert "isfreq" not in source.meta
+
+
 @pytest.mark.parametrize("size", [12, 6])
 def test_ifft_size_controls_values_shape_and_coordinate(size):
     spectrum = _frequency_dataset()
