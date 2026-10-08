@@ -31,6 +31,79 @@ from spectrochempy.processing.filter.filter import _detect_uniform_spacing
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
+@pytest.mark.parametrize("api", ["savgol", "differentiate"])
+@pytest.mark.parametrize("deriv", [1, 2])
+@pytest.mark.parametrize("descending", [False, True])
+@pytest.mark.parametrize("layout", ["1d", "2d", "transposed"])
+@pytest.mark.parametrize("mask_pattern", ["block", "thinning"])
+def test_masked_derivative_preserves_physical_scaling(
+    api, deriv, descending, layout, mask_pattern
+):
+    x = np.linspace(10.0, 130.0, 61)
+    if descending:
+        x = x[::-1]
+    ds = NDDataset(3.0 * x**2, coordset=[Coord(x, units="cm^-1")], units="volt")
+    if layout != "1d":
+        ds = scp.stack([ds, ds])
+    masked = ds.copy()
+    if mask_pattern == "block":
+        masked[..., 25:30] = scp.MASKED
+    else:
+        masked[..., 1::2] = scp.MASKED
+    if layout == "transposed":
+        ds = ds.T
+        masked = masked.T
+    dim = "x"
+    kwargs = {"deriv": deriv} if api == "savgol" else {"derivative_order": deriv}
+    original = masked.copy()
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        result = getattr(masked, api)(size=7, dim=dim, **kwargs)
+    assert not any("Falling back" in str(w.message) for w in caught)
+    reference = getattr(ds, api)(size=7, dim=dim, **kwargs)
+    delta = (x[1] - x[0]) * (2 if mask_pattern == "thinning" else 1)
+    explicit = getattr(masked, api)(size=7, dim=dim, delta=delta, **kwargs)
+    assert result.units == reference.units == ds.units / ds.coord(dim).units ** deriv
+    np.testing.assert_array_equal(result.mask, masked.mask)
+    np.testing.assert_allclose(result.data[~result.mask], explicit.data[~result.mask])
+    actual = result.data.T if layout == "transposed" else result.data
+    expected = 6.0 * x if deriv == 1 else np.full_like(x, 6.0)
+    expected = np.broadcast_to(expected, actual.shape)
+    if mask_pattern == "block":
+        np.testing.assert_allclose(actual[..., :22], expected[..., :22], atol=1e-9)
+        np.testing.assert_allclose(actual[..., 33:], expected[..., 33:], atol=1e-9)
+    else:
+        np.testing.assert_allclose(actual[..., ::2], expected[..., ::2], atol=1e-9)
+    assert result.coordset == masked.coordset
+    np.testing.assert_array_equal(masked.data, original.data)
+    np.testing.assert_array_equal(masked.mask, original.mask)
+
+
+@pytest.mark.parametrize("survivors_uniform", [False, True])
+def test_masked_derivative_original_irregular_coordinate(survivors_uniform):
+    x = np.arange(61, dtype=float)
+    x[1::2] += 0.5
+    if not survivors_uniform:
+        x[20] += 0.25
+    ds = NDDataset(3.0 * x**2, coordset=[Coord(x, units="s")], units="volt")
+    ds[1::2] = scp.MASKED
+    if survivors_uniform:
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            result = ds.savgol(size=7, deriv=1)
+        assert not any("Falling back" in str(w.message) for w in caught)
+        assert result.units == ds.units / ds.x.units
+        expected = 6.0 * x[::2]
+    else:
+        with pytest.warns(UserWarning, match="not uniformly spaced"):
+            result = ds.savgol(size=7, deriv=1)
+        assert result.units == ds.units
+        expected = scipy.signal.savgol_filter(ds.data[::2], 7, 2, deriv=1, delta=1.0)
+    np.testing.assert_allclose(result.data[::2], expected, atol=1e-9)
+    np.testing.assert_array_equal(result.mask, ds.mask)
+
+
 H = 0.18367346938775511  # (10-1)/49  — spacing of linspace(1, 10, 50)
 
 

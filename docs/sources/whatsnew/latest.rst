@@ -71,3 +71,11 @@ Bug Fixes
   frequency-domain dimension now raises an explicit diagnostic naming the
   incompatible dimension, while raw FID/SER data and remaining time-domain
   dimensions in partially transformed 2D data remain transformable.
+
+- Savitzky-Golay derivatives in ``savgol`` and ``differentiate`` now use
+  the original uniform coordinate spacing when removing a masked block makes
+  the retained coordinate irregular, restoring derivative scaling and units.
+  Uniformly spaced retained samples take priority, so regular subsampling
+  uses its actual step. Filter windows spanning a masked gap can still give
+  unreliable values near that gap; this limitation is now documented
+  (:issue:`1748`).
