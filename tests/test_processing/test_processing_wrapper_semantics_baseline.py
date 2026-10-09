@@ -17,9 +17,9 @@ Two distinct assembly patterns exist:
         name preserved, no modeldata attribute,
         history appended
 
-The Savitzky-Golay derivative (``deriv > 0``) and the PCA-based ``denoise``
-keep their historical Group A behavior (name recompute, history replace)
-until their classification is decided (RFC DQ1 / DQ2).
+Savitzky-Golay derivatives (``deriv > 0``) also preserve name and append
+history. PCA-based ``denoise`` follows its derived analysis-output policy
+(name recompute, history replace).
 """
 
 from datetime import datetime
@@ -507,7 +507,7 @@ class TestFilterSourceContext:
 
     The processing output wrapper must transfer the acquisition date along
     the other mono-source context fields, including for Savitzky-Golay
-    derivatives (whose name/history policy remains deferred, DQ1).
+    derivatives (whose name is preserved and history appended, per DQ1).
     """
 
     @pytest.mark.parametrize(("method", "kwargs"), _FILTER_CONTEXT_CASES)

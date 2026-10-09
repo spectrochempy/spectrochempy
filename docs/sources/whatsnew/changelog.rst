@@ -26,6 +26,12 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Savitzky-Golay derivatives now preserve the source dataset name and retain
+  prior history, appending one processing entry per call instead of generating
+  a ``_Filter.transform`` name and replacing the history. This applies to
+  ``savgol``, ``savgol_filter``, ``differentiate`` and ``Filter.transform``;
+  derivative titles and unit scaling are unchanged (:issue:`1756`).
+
 - Filter outputs (``smooth``, ``savgol`` including its derivatives,
   ``whittaker`` and ``Filter.transform``) now retain the acquisition date of
   their source dataset alongside the other single-source context fields

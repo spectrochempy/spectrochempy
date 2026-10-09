@@ -9,11 +9,12 @@ for the Filter family (smooth, savgol, savgol_filter, whittaker):
   operation, retaining all prior entries;
 - the behavior is identical across entry forms (functional wrapper,
   NDDataset method, configurable ``Filter(...).transform``);
-- excluded families keep their historical behavior: the Savitzky-Golay
-  derivative (DQ1), ``denoise`` / ``inverse_transform`` (DQ2), and
-  Category C analysis outputs.
+- Savitzky-Golay derivatives preserve identity and append history (DQ1);
+- ``denoise`` / ``inverse_transform`` and Category C analysis outputs keep
+  their own derived-output policies.
 
-The assertions check entry count and message prefix only, never timestamps.
+Prior structured entries are compared exactly; new entries are checked by
+count and message without fixing their generated timestamps.
 """
 
 import numpy as np
@@ -119,18 +120,95 @@ class TestCategoryA1D:
         assert "data squeezed" not in " ".join(result.history).lower()
 
 
-# ======================================================================================
-# Exclusions: deferred families keep their historical behavior
-# ======================================================================================
+class TestDerivativeIdentityAndHistory:
+    @pytest.mark.parametrize("ndim", [1, 2])
+    @pytest.mark.parametrize("deriv", [1, 2])
+    @pytest.mark.parametrize(
+        "entry",
+        [
+            "savgol_function",
+            "savgol_method",
+            "alias_function",
+            "alias_method",
+            "differentiate_function",
+            "differentiate_method",
+            "transform",
+        ],
+    )
+    def test_derivative_preserves_identity_and_appends_once(
+        self, ds, ndim, deriv, entry
+    ):
+        ds.units = "absorbance"
+        source = ds[0].squeeze() if ndim == 1 else ds
+        source.annotate("prepared for differentiation")
+        before = source.copy()
+        kwargs = {"size": 5, "order": 2, "deriv": deriv}
+
+        if entry == "savgol_function":
+            result = scp.savgol(source, **kwargs)
+        elif entry == "savgol_method":
+            result = source.savgol(**kwargs)
+        elif entry == "alias_function":
+            result = scp.savgol_filter(source, **kwargs)
+        elif entry == "alias_method":
+            result = source.savgol_filter(**kwargs)
+        elif entry == "differentiate_function":
+            result = scp.differentiate(source, derivative_order=deriv, size=5)
+        elif entry == "differentiate_method":
+            result = source.differentiate(derivative_order=deriv, size=5)
+        else:
+            result = scp.Filter(method="savgol", **kwargs).transform(dataset=source)
+
+        assert result.name == source.name
+        assert result.history_entries[:-1] == before.history_entries
+        assert len(result.history_entries) == len(before.history_entries) + 1
+        assert result.history_entries[-1]["message"] == _FILTER_ENTRY
+        assert result.shape == source.shape
+        assert result.dims == source.dims
+        assert result.coordset == source.coordset
+        assert result.units == source.units / source.x.units**deriv
+        ordinal = "1st" if deriv == 1 else "2nd"
+        assert result.title == f"{source.title} ({ordinal} derivative)"
+        result.annotate("result annotation")
+        assert source.history_entries == before.history_entries
+        assert source.name == before.name
+        assert source.title == before.title
+        assert source.units == before.units
+        np.testing.assert_array_equal(source.data, before.data)
+
+    def test_repeated_derivatives_keep_prior_operations(self, ds):
+        first = ds.savgol(size=3, order=2, deriv=1)
+        second = first.differentiate(size=3)
+        assert first.name == second.name == ds.name
+        assert second.history_entries[:-1] == first.history_entries
+        assert len(second.history_entries) == len(ds.history_entries) + 2
+
+    def test_reused_filter_preserves_each_source_lineage(self, ds):
+        processor = scp.Filter(method="savgol", size=3, order=2, deriv=1)
+        first = processor.transform(ds)
+        other = ds.copy()
+        other.name = "other_source"
+        other.annotate("second source preparation")
+        processor.deriv = 0
+        second = processor.transform(other)
+        assert first.name == ds.name
+        assert first.history_entries[:-1] == ds.history_entries
+        assert second.name == other.name
+        assert second.history_entries[:-1] == other.history_entries
+        assert len(second.history_entries) == len(other.history_entries) + 1
+        assert second.title == other.title
+
+    def test_masked_derivative_preserves_lineage(self, ds):
+        ds[0] = scp.MASKED
+        before = ds.history_entries
+        result = ds.differentiate(size=3)
+        assert result.name == ds.name
+        assert result.history_entries[:-1] == before
+        np.testing.assert_array_equal(result.mask, ds.mask)
+        assert ds.history_entries == before
 
 
 class TestCategoryAExclusions:
-    def test_savgol_derivative_unchanged(self, ds):
-        result = scp.savgol(ds, size=3, order=2, deriv=1)
-        assert result.name == "ds_name_Filter.transform"
-        assert len(result.history) == 1
-        assert _FILTER_ENTRY in result.history[0]
-
     def test_denoise_unchanged(self, ds):
         result = ds.denoise(ratio=99.0)
         assert result.name == "ds_name_PCA.reconstruction"
