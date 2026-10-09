@@ -8,6 +8,7 @@ import copy
 import functools
 import inspect
 import re
+from datetime import datetime
 from functools import partial
 from functools import update_wrapper
 from inspect import Parameter
@@ -515,6 +516,56 @@ def signature_has_configurable_traits(cls: type[T]) -> type[T]:
 
 
 # ======================================================================================
+# Shared single-source context transfer
+# ======================================================================================
+def transfer_source_context(
+    source, target, *, author=None, include_acquisition_date=True
+):
+    """
+    Transfer the single-source scientific context from *source* onto *target*.
+
+    The transferred fields form the mono-source context: ``meta``, ``author``,
+    ``description``, ``origin``, ``filename`` and the acquisition date.
+    Mutable metadata is deep-copied so that the result never shares state with
+    the source, and the source itself is never modified.
+
+    Parameters
+    ----------
+    source : `NDDataset` or source-context snapshot
+        Object exposing the context fields. Both a dataset and a snapshot such
+        as `AnalysisSourceMetadata` (captured before a coercing trait
+        assignment) are accepted.
+    target : `NDDataset`
+        Result dataset receiving the context.
+    author : `str`, optional
+        Author to use instead of ``source.author``, e.g. when a captured
+        snapshot is more authoritative than a coerced stored dataset.
+    include_acquisition_date : `bool`, optional, default: `True`
+        Set to ``False`` for outputs whose metadata policy is explicitly
+        deferred (e.g. the estimated baseline), so that the acquisition date
+        is left out of the transfer instead of being decided implicitly.
+
+    Notes
+    -----
+    The acquisition date is copied from the raw ``_acquisition_date`` datetime
+    of a dataset (the public ``acquisition_date`` getter returns a formatted
+    string, not the value accepted by the trait). Values that are neither a
+    `datetime` nor `None` are ignored rather than assigned.
+    """
+    target.meta = copy.deepcopy(source.meta)
+    target.author = copy.copy(source.author if author is None else author)
+    target.description = copy.copy(source.description)
+    target.origin = copy.copy(source.origin)
+    target.filename = copy.copy(source.filename)
+    if include_acquisition_date:
+        candidate = getattr(source, "_acquisition_date", None)
+        if not isinstance(candidate, datetime):
+            candidate = getattr(source, "acquisition_date", None)
+        acquisition_date = candidate if isinstance(candidate, datetime) else None
+        target._acquisition_date = copy.copy(acquisition_date)
+
+
+# ======================================================================================
 # A decorator to transform np.ndarray output from models to NDDataset
 # according to the X (default) and/or Y input
 # ======================================================================================
@@ -532,6 +583,7 @@ class _set_output:
         preserve_identity=False,
         use_snapshot=True,  # reuse the fit metadata snapshot on stored paths
         analysis_role=None,
+        include_acquisition_date=True,  # False for deferred-policy outputs
     ):
         self.method = method
         update_wrapper(self, method)
@@ -544,6 +596,7 @@ class _set_output:
         self.preserve_identity = preserve_identity
         self.use_snapshot = use_snapshot
         self.analysis_role = analysis_role
+        self.include_acquisition_date = include_acquisition_date
 
     @preserve_signature
     def __get__(self, obj, objtype):
@@ -721,7 +774,6 @@ class _set_output:
                 X_new.name = X.name
                 X = X_new
 
-            X_transf.meta = copy.deepcopy(metadata_source.meta)
             # The exact author of the scientific source is preferred over the
             # value recreated by the NDDataset coercion of the stored input.
             # A direct NDDataset argument is authoritative for the output of
@@ -737,10 +789,12 @@ class _set_output:
                 source_metadata = getattr(obj, f"{meta_from}_source_metadata", None)
                 if source_metadata is not None:
                     author = source_metadata.author
-            X_transf.author = copy.copy(author)
-            X_transf.description = copy.copy(metadata_source.description)
-            X_transf.origin = copy.copy(metadata_source.origin)
-            X_transf.filename = copy.copy(metadata_source.filename)
+            transfer_source_context(
+                metadata_source,
+                X_transf,
+                author=author,
+                include_acquisition_date=self.include_acquisition_date,
+            )
             # Allow a processing method to override output units dynamically
             # by setting ``_output_units`` on the instance (e.g. for physically
             # scaled derivatives in Savitzky-Golay).  Always clear afterwards
@@ -934,6 +988,7 @@ def _wrap_ndarray_output_to_nddataset(
     preserve_identity=False,
     use_snapshot=True,
     analysis_role=None,
+    include_acquisition_date=True,
 ):
     # wrap _set_output to allow for deferred calling
     if method:
@@ -953,6 +1008,7 @@ def _wrap_ndarray_output_to_nddataset(
                 preserve_identity=preserve_identity,
                 use_snapshot=use_snapshot,
                 analysis_role=analysis_role,
+                include_acquisition_date=include_acquisition_date,
             )
 
         out = wrapper

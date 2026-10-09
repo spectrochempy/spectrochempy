@@ -26,6 +26,23 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Filter outputs (``smooth``, ``savgol`` including its derivatives,
+  ``whittaker`` and ``Filter.transform``) now retain the acquisition date of
+  their source dataset alongside the other single-source context fields
+  (description, author, origin, filename and user metadata). The same shared
+  context transfer now supplies the acquisition date for the other generic
+  outputs it assembles from a single fitted source; role-based analysis
+  outputs keep their own date policies. The estimated baseline output is
+  excluded: its metadata policy is decided separately
+  (:issue:`1756`).
+
+- The baseline-corrected signal produced by the ``Baseline`` class
+  (``corrected`` and ``transform``, on both strictly 1D and 2D inputs) now
+  keeps the source description, author, origin, acquisition date, filename
+  and user metadata, which were previously recreated by the internal input
+  coercion. Its history now matches the existing baseline subtraction
+  policy used by ``basc`` and 2D corrections (:issue:`1756`).
+
 
 .. section
 
