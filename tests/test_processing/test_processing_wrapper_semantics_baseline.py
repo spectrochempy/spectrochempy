@@ -22,12 +22,30 @@ keep their historical Group A behavior (name recompute, history replace)
 until their classification is decided (RFC DQ1 / DQ2).
 """
 
+from datetime import datetime
+from datetime import timedelta
+from datetime import timezone
+from pathlib import Path
+
 import numpy as np
 import pytest
 
 import spectrochempy as scp
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.utils.decorators import transfer_source_context
+from tests.test_core.test_dataset._semantic_dataset_helpers import (
+    assert_source_context_preserved,
+)
+from tests.test_core.test_dataset._semantic_dataset_helpers import (
+    assert_source_not_modified,
+)
+from tests.test_core.test_dataset._semantic_dataset_helpers import (
+    make_semantic_1d_dataset,
+)
+from tests.test_core.test_dataset._semantic_dataset_helpers import (
+    make_semantic_2d_dataset,
+)
 
 
 def _call_filter(ds, method):
@@ -425,3 +443,168 @@ class TestIdentityProvenance:
         r = ds.basc()
         assert len(r.history) == 2
         assert "original entry" in r.history[0].lower()
+
+
+# ======================================================================================
+# SOURCE CONTEXT PROPAGATION (issue #1756)
+# ======================================================================================
+
+_AWARE_DATE = datetime(2020, 1, 1, 12, 30, 0, tzinfo=timezone(timedelta(hours=2)))
+
+_FILTER_CONTEXT_CASES = [
+    pytest.param("smooth", {"size": 3}, id="smooth"),
+    pytest.param("savgol", {"size": 5}, id="savgol_deriv0"),
+    pytest.param("savgol", {"size": 5, "deriv": 1}, id="savgol_deriv1"),
+    pytest.param("whittaker", {"lamb": 1.0}, id="whittaker"),
+]
+
+
+def _context_2d(tag="ctx", acquisition_date=_AWARE_DATE):
+    return make_semantic_2d_dataset(
+        title="ds_title",
+        name=f"ds_name_{tag}",
+        author=f"author_{tag}",
+        description=f"description_{tag}",
+        origin=f"origin_{tag}",
+        meta_project=f"project_{tag}",
+        meta_settings={"gain": 1},
+        filename=f"{tag}.spc",
+        acquisition_date=acquisition_date,
+        history="original entry",
+    )
+
+
+def _context_1d(tag="ctx", acquisition_date=_AWARE_DATE):
+    return make_semantic_1d_dataset(
+        title="ds_title",
+        name=f"ds_name_{tag}",
+        author=f"author_{tag}",
+        description=f"description_{tag}",
+        origin=f"origin_{tag}",
+        meta_project=f"project_{tag}",
+        meta_settings={"gain": 1},
+        filename=f"{tag}.spc",
+        acquisition_date=acquisition_date,
+        history="original entry",
+    )
+
+
+@pytest.fixture
+def ds_ctx():
+    """2D dataset carrying a complete single-source context."""
+    return _context_2d()
+
+
+@pytest.fixture
+def ds_ctx_1d():
+    """Strictly 1D dataset carrying a complete single-source context."""
+    return _context_1d()
+
+
+class TestFilterSourceContext:
+    """
+    Source-context propagation through filter outputs (issue #1756).
+
+    The processing output wrapper must transfer the acquisition date along
+    the other mono-source context fields, including for Savitzky-Golay
+    derivatives (whose name/history policy remains deferred, DQ1).
+    """
+
+    @pytest.mark.parametrize(("method", "kwargs"), _FILTER_CONTEXT_CASES)
+    def test_acquisition_date_preserved(self, ds_ctx, method, kwargs):
+        result = getattr(ds_ctx, method)(**kwargs)
+        assert result._acquisition_date == ds_ctx._acquisition_date
+
+    @pytest.mark.parametrize("form", ["function", "method", "transform"])
+    def test_entry_form_acquisition_date_preserved(self, ds_ctx, form):
+        if form == "function":
+            result = scp.smooth(ds_ctx, size=3)
+        elif form == "method":
+            result = ds_ctx.smooth(size=3)
+        else:
+            result = scp.Filter(size=3).transform(ds_ctx)
+        assert result._acquisition_date == ds_ctx._acquisition_date
+
+    @pytest.mark.parametrize("method", ["smooth", "savgol"])
+    def test_acquisition_date_preserved_1d(self, ds_ctx_1d, method):
+        result = getattr(ds_ctx_1d, method)(size=3)
+        assert result._acquisition_date == ds_ctx_1d._acquisition_date
+
+    def test_acquisition_date_none_stays_none(self):
+        ds = _context_2d(acquisition_date=None)
+        result = ds.smooth(size=3)
+        assert result._acquisition_date is None
+
+    def test_duck_source_invalid_private_acquisition_date_ignored(self):
+        class DuckSource:
+            meta = {}
+            author = "duck_author"
+            description = "duck_description"
+            origin = "duck_origin"
+            filename = Path("duck.spc")
+            _acquisition_date = "bad"
+            acquisition_date = "bad"
+
+        target = NDDataset([1.0, 2.0])
+        transfer_source_context(DuckSource(), target)
+        assert target._acquisition_date is None
+
+    @pytest.mark.parametrize(("method", "kwargs"), _FILTER_CONTEXT_CASES)
+    def test_source_context_preserved(self, ds_ctx, method, kwargs):
+        result = getattr(ds_ctx, method)(**kwargs)
+        assert_source_context_preserved(
+            result, ds_ctx, meta_keys=("project", "settings")
+        )
+
+    def test_nested_meta_independent(self, ds_ctx):
+        result = ds_ctx.smooth(size=3)
+        result.meta.settings["gain"] = 99
+        assert ds_ctx.meta.settings == {"gain": 1}
+
+    def test_source_not_modified(self, ds_ctx):
+        ds_ctx.smooth(size=3)
+        assert_source_not_modified(
+            ds_ctx,
+            description="description_ctx",
+            author="author_ctx",
+            origin="origin_ctx",
+            filename=Path("ctx.spc"),
+            meta={"project": "project_ctx", "settings": {"gain": 1}},
+        )
+
+    def test_filter_instance_reuse_no_context_leak(self):
+        filters = scp.Filter(size=3)
+        first = filters.transform(_context_2d("one"))
+        second = filters.transform(_context_2d("two"))
+        assert first.author == "author_one"
+        assert first._acquisition_date == _AWARE_DATE
+        assert second.author == "author_two"
+        assert second.description == "description_two"
+        assert second.filename.name == "two.spc"
+
+
+class TestBaselineWrapperSourceContext:
+    """
+    Source-context propagation through the baseline correction outputs
+    (``basc`` and the ``Baseline`` class, issue #1756).
+    """
+
+    def test_basc_source_context_preserved(self, ds_ctx):
+        result = ds_ctx.basc()
+        assert_source_context_preserved(
+            result, ds_ctx, meta_keys=("project", "settings")
+        )
+
+    def test_basc_acquisition_date_preserved_1d(self, ds_ctx_1d):
+        result = ds_ctx_1d.basc()
+        assert result._acquisition_date == ds_ctx_1d._acquisition_date
+
+    def test_basc_acquisition_date_none_stays_none(self):
+        ds = _context_2d(acquisition_date=None)
+        assert ds.basc()._acquisition_date is None
+
+    def test_class_and_function_context_coherent(self, ds_ctx):
+        result = ds_ctx.basc()
+        assert result.description == ds_ctx.description
+        assert result.author == ds_ctx.author
+        assert result._acquisition_date == ds_ctx._acquisition_date
