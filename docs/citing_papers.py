@@ -15,6 +15,7 @@ from pathlib import Path
 
 import latexcodec  # noqa: F401  (registers the "ulatex" codec)
 from pybtex.database import parse_file
+from pybtex.richtext import Text
 
 CITING_FIELD = "spectrochempy_citing"
 MARKER = ".. citing-papers-list"
@@ -117,3 +118,38 @@ def insert_citing_papers(source, bibfile):
     if MARKER not in source:
         return source
     return source.replace(MARKER, citing_papers_rst(Path(bibfile)))
+
+
+def year_suffixes(bibfile):
+    """
+    Return a/b/... suffixes for entries sharing first author and year.
+
+    Author-year citations of such entries would otherwise be identical,
+    e.g. two "Rejman et al. [2026]"; suffixes are assigned in key order.
+    """
+    database = parse_file(str(bibfile))
+    groups = {}
+    for key, entry in database.entries.items():
+        year = str(entry.fields.get("year", ""))
+        groups.setdefault((_first_author(entry), year), []).append(key)
+    suffixes = {}
+    for (author, year), keys in groups.items():
+        if author and year and len(keys) > 1:
+            for index, key in enumerate(sorted(keys, key=str.lower)):
+                suffixes[key.lower()] = "abcdefghijklmnopqrstuvwxyz"[index]
+    return suffixes
+
+
+def install_year_suffixes(bibfile):
+    """Add the year suffixes to the year shown in author-year citations."""
+    from sphinxcontrib.bibtex.style import template
+
+    suffixes = year_suffixes(bibfile)
+    original = template.year.f
+
+    def year_with_suffix(children, data):
+        text = original(children, data)
+        suffix = suffixes.get(data["entry"].key.lower())
+        return Text(text, suffix) if suffix else text
+
+    template.year.f = year_with_suffix

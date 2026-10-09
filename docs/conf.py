@@ -764,6 +764,12 @@ bibtex_default_style = "plain"
 bibtex_reference_style = "author_year"
 bibtex_cite_id = "{key}"
 
+# Distinguish author-year citations of the same first author and year
+# (e.g. "Rejman et al. [2026a]" and "[2026b]").
+from citing_papers import install_year_suffixes  # noqa: E402
+
+install_year_suffixes(REFERENCE / "bibliography.bib")
+
 # Configuration for intersphinx --------------------------------------------------------
 
 intersphinx_mapping = {
