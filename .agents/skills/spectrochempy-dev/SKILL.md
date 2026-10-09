@@ -288,8 +288,9 @@ Fix any problem found before considering the task complete.
 
 ## When a Separate Review Is Required
 
-A separate review in a new independent OpenCode or Codex session, without the
-implementation history, is required for changes that affect:
+A separate review in a new independent OpenCode, Codex, or Claude Code
+session, without the implementation history, is required for changes that
+affect:
 
 * **Behavior** — any user-visible behavior change, bug fix with semantic
   impact, or algorithm modification.
@@ -313,7 +314,7 @@ Justify briefly when skipping the separate review based on actual risk.
 
 When a separate review is required, do **not** launch a second session or
 another model automatically. Instead, produce a short prompt directly usable
-in a new independent OpenCode or Codex session. Include:
+in a new independent OpenCode, Codex, or Claude Code session. Include:
 
 1. **Need** — the original requirement or problem statement.
 2. **Branch / PR** — the branch name or PR number to review.

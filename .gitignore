@@ -83,6 +83,10 @@ opencode.json
 !opencode.json
 instruction_ai.md
 
+# Claude Code local state (.claude/skills/ stays tracked)
+CLAUDE.local.md
+.claude/settings.local.json
+
 ###############################
 # Operating System           #
 ###############################
