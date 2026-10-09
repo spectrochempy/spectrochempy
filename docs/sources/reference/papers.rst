@@ -7,6 +7,12 @@ Papers citing `SpectroChemPy`
 2026
 ====
 
+- Why some FT-IR peaks disappear in drug-loaded nanocarriers, polymers, and formulated granules? Unmasking the invisible and the role of AI in spectral interpretation
+  :cite:t:`ebrahimzadeh:2026`, `DOI: 10.5267/j.ccl.2026.7.006 <https://doi.org/10.5267/j.ccl.2026.7.006>`__.
+
+- The influence of nonlinear resonance on human cortical oscillations,
+  :cite:t:`wang:2026`, `DOI: 10.1038/s42003-026-10164-5 <https://doi.org/10.1038/s42003-026-10164-5>`__.
+
 - Agentic AI in Process Analytical Technology: LLM Assistants for Chemometric Workflows
   :cite:t:`rittig:2026`, `DOI: 10.26434/chemrxiv.15007499/v1 <https://chemrxiv.org/doi/abs/10.26434/chemrxiv.15007499/v1>`__.
 
@@ -47,7 +53,7 @@ Papers citing `SpectroChemPy`
   :cite:t:`al_atrach:2026`, `DOI: 10.1039/D6TA03011D <https://doi.org/10.1039/D6TA03011D>`__.
 
 - Speciation of silanol groups on commercial precipitated silicas via IR spectroscopy,
-  :cite:t:`debs:2026`, `DOI: 10.26434/chemrxiv.15002422/v1 <https://chemrxiv.org/doi/abs/10.26434/chemrxiv.15002422/v1>`__.
+  :cite:t:`debs:2026`, `DOI: 10.1021/acs.langmuir.6c02305 <https://doi.org/10.1021/acs.langmuir.6c02305>`__.
 
 - Multivariate analysis coupled to infrared spectroscopy unravels the diversity of adsorption sites and strengths of a zeolite surface
   :cite:t:`aboulayt:2026`, `DOI: 10.1039/d6cy00101g <https://doi.org/10.1039/d6cy00101g>`__.
@@ -89,22 +95,19 @@ Papers citing `SpectroChemPy`
   :cite:t:`alassaad:2025`, `DOI: 10.1039/D5CP02957K <https://doi.org/10.1039/D5CP02957K>`__.
 
 - La programmacion Como Herramienta Esencial Para El Ingeniero Quimico Del Siglo XXI
-  :cite:t:`flores:2025`, `URL: http://rd.buap.mx/ojs-rdicuap/index.php/rdicuap/article/view/1598/1571 <http://rd.buap.mx/ojs-rdicuap/index.php/rdicuap/article/view/1598/1571>`__.
-
-- Whole brain resting-state EEG dynamic: A mixture of linear aperiodic and nonlinear resonant stochastic processes,
-  :cite:t:`wang:2025`, `DOI: 10.1101/2025.06.27.661950 <https://doi.org/10.1101/2025.06.27.661950>`__.
+  :cite:t:`flores:2025`, `DOI: 10.32399/icuap.rdic.2448-5829.2025.32.1598 <https://doi.org/10.32399/icuap.rdic.2448-5829.2025.32.1598>`__.
 
 - AutoSDT: Scaling Data-Driven Discovery Tasks Toward Open Co-Scientists,
   :cite:t:`Li:2025`, `DOI: 10.48550/arXiv.2506.08140 <https://doi.org/10.48550/arXiv.2506.08140>`__.
 
-- Unveiling Capacity Limitations of MnO2 in Rechargeable Zn Chemistry,
-  :cite:t:`Liu:2025`, `DOI: 10.26434/chemrxiv-2025-f5j9d <https://doi.org/10.26434/chemrxiv-2025-f5j9d>`__.
+- Unveiling capacity limitations of MnO2 in rechargeable Zn chemistry,
+  :cite:t:`Liu:2025`, `DOI: 10.1039/d5ee03588k <https://doi.org/10.1039/d5ee03588k>`__.
 
 - Characterising the Interfacial Bonding in Organic-Inorganic Hybrid Materials from Their Thermal Stability,
   :cite:t:`Schade:2025`, `DOI: 10.1016/j.ctta.2025.100221 <https://doi.org/10.1016/j.ctta.2025.100221>`__.
 
 - External Acidity as Performance Descriptor in Polyolefin Cracking using Zeolite-Based Materials,
-  :cite:t:`Rejman:2025a`, `DOI: 10.1038/s41467-025-57158-110.1038/s41467-025-57158-1 <https://doi.org/10.1038/s41467-025-57158-1>`__.
+  :cite:t:`Rejman:2025a`, `DOI: 10.1038/s41467-025-57158-1 <https://doi.org/10.1038/s41467-025-57158-1>`__.
 
 - Tracking solid electrolyte interphase dynamics using operando fibre-optic infrared spectroscopy and multivariate curve regression,
   :cite:t:`Leau:2025`, `DOI: 10.1038/s41467-024-55339-y <https://doi.org/10.1038/s41467-024-55339-y>`__.
@@ -117,6 +120,12 @@ Papers citing `SpectroChemPy`
 
 - Absorbance Discrimination of Ready-to-Drink Tea Samples By Derivative Spectroscopy and Multivariate Analysis,
   :cite:t:`hernandez:2025`, `URL: www.westmont.edu/sites/default/files/2025-02/Elmer-Rico%20Mojica_final_tea_1.pdf <https://www.westmont.edu/sites/default/files/2025-02/Elmer-Rico%20Mojica_final_tea_1.pdf>`__.
+
+- Élaboration de matériaux à changement de phase dans une matrice cellulosique : caractérisations spectroscopiques et thermiques,
+  :cite:t:`rouzaud:2025`, `HAL: tel-05406643 <https://theses.hal.science/tel-05406643>`__.
+
+- Zéolithes de type pentasil avancées pour applications catalytiques,
+  :cite:t:`wu:2025`, `HAL: tel-05754788 <https://theses.hal.science/tel-05754788>`__.
 
 2024
 ====
@@ -138,7 +147,7 @@ Papers citing `SpectroChemPy`
 - An intuitive approach for spike removal in Raman spectra based on peaks’ prominence and width,
   :cite:t:`coca-lopez:2024`, `DOI: 10.1016/j.aca.2024.342312 <https://doi.org/10.1016/j.aca.2024.342312>`__.
 
-- Adsοrptiοn de l'isοbutanοl dans les zeοlithes : appοrt des analyses multivariées,
+- Adsorption de l'isobutanol dans les zeolithes : apport des analyses multivariées,
   :cite:t:`aboulayt:2024`, `HAL: tel-04934402 <https://theses.hal.science/tel-04934402>`__.
 
 2023
@@ -164,6 +173,9 @@ Papers citing `SpectroChemPy`
 
 - Electronic Communication in Bridged Ruthenium Acetylide Complexes,
   :cite:`naik:2023`, `DOI: 10.26190/unsworks/25240 <https://dx.doi.org/10.26190/unsworks/25240>`__.
+
+- Activité et caractérisation des matériaux lamellaires comme catalyseurs pour la conversion de la biomasse,
+  :cite:t:`bekkali:2023`, `HAL: tel-04304009 <https://theses.hal.science/tel-04304009>`__.
 
 2022
 ====
