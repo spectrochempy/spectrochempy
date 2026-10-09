@@ -7,6 +7,24 @@ Papers citing `SpectroChemPy`
 2026
 ====
 
+- Agentic AI in Process Analytical Technology: LLM Assistants for Chemometric Workflows
+  :cite:t:`rittig:2026`, `DOI: 10.26434/chemrxiv.15007499/v1 <https://chemrxiv.org/doi/abs/10.26434/chemrxiv.15007499/v1>`__.
+
+- Shedding light on the formation mechanisms of Islamic polychrome lusters: A Cu, Fe, Ag micro XANES study
+  :cite:t:`sadurni:2026`, `DOI: 10.1126/sciadv.aeg5529 <https://doi.org/10.1126/sciadv.aeg5529>`__.
+
+- Time-resolved near-infrared spectroscopy for controlled lignin esterification and scale-up in reactive extrusion
+  :cite:t:`garcia:2026`, `DOI: 10.1016/j.biortech.2026.135516 <https://doi.org/10.1016/j.biortech.2026.135516>`__.
+
+- Osteogenic differentiation restores physiological mineralization pathways in SaOS-2 osteosarcoma cells
+  :cite:t:`rossi:2026`, `DOI: 10.1016/j.actbio.2026.08.045 <https://doi.org/10.1016/j.actbio.2026.08.045>`__.
+
+- Electronic Communication in Oxidized Di- and Trinuclear Ruthenium Acetylide Complexes
+  :cite:t:`naik:2026`, `DOI: 10.1021/acs.inorgchem.6c02469 <https://doi.org/10.1021/acs.inorgchem.6c02469>`__.
+
+- Surface hydroxyls act as key intermediates in the selective oxidative dehydrogenation of 2-propanol on Co3O4
+  :cite:t:`ticali:2026`, `DOI: 10.26434/chemrxiv.15009864/v1 <https://chemrxiv.org/doi/abs/10.26434/chemrxiv.15009864/v1>`__.
+
 - Unveiling amorphous intermediates in mechanochemical metal--organic synthesis through in situ PXRD and THz-Raman coupling
   :cite:t:`macchietti:2026`, `DOI: 10.1039/D6MR00045B <https://doi.org/10.1039/D6MR00045B>`__.
 
@@ -52,11 +70,11 @@ Papers citing `SpectroChemPy`
 - The Effect of Inorganic Impurities in Post-Consumer Plastic Waste on the Cracking of Polyolefins with Zeolite-based Catalysts,
   :cite:t:`rejman:2026b`, `10.26434/chemrxiv-2025-0nfrn/v2 <https://chemrxiv.org/doi/abs/10.26434/chemrxiv-2025-0nfrn/v2>`__.
 
+- Structure and Sulfur: Tuning the Viscoelastic and Surface Properties of Natural Keratin Fibers
+  :cite:t:`czibula:2026`, `DOI: 10.1021/acsmaterialsau.5c00130 <https://doi.org/10.1021/acsmaterialsau.5c00130>`__.
+
 2025
 ====
-
-- Structure and Sulfur: Tuning the Viscoelastic and Surface Properties of Natural Keratin Fibers
-  :cite:t:`czibula:2025`, `DOI: 10.1021/acsmaterialsau.5c00130 <https://doi.org/10.1021/acsmaterialsau.5c00130>`__.
 
 - Rapid, clean and quantitative analysis of Cu2+ in copper refining electrolyte via chemometrics-driven Vis–SWNIR absorption spectroscopy
   :cite:t:`yuan:2025`, `DOI: 10.1039/D5AY01465D <http://dx.doi.org/10.1039/D5AY01465D>`__.
