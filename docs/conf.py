@@ -6,6 +6,7 @@
 # ruff: noqa: T201,S603
 """SpectroChemPy documentation build configuration file."""
 
+import contextlib
 import inspect
 import json
 import os
@@ -28,6 +29,8 @@ DOCS_PROJECT = DOCS_CONFDIR.parent
 DOCS_SOURCE_ROOT = DOCS_PROJECT / "src"
 if str(DOCS_SOURCE_ROOT) not in sys.path:
     sys.path.insert(0, str(DOCS_SOURCE_ROOT))
+if str(DOCS_CONFDIR) not in sys.path:
+    sys.path.insert(0, str(DOCS_CONFDIR))
 current_pythonpath = os.environ.get("PYTHONPATH", "")
 pythonpath_entries = current_pythonpath.split(os.pathsep) if current_pythonpath else []
 if str(DOCS_SOURCE_ROOT) not in pythonpath_entries:
@@ -762,6 +765,15 @@ bibtex_default_style = "plain"
 bibtex_reference_style = "author_year"
 bibtex_cite_id = "{key}"
 
+# Distinguish author-year citations of the same first author and year
+# (e.g. "Rejman et al. [2026a]" and "[2026b]").
+from citing_papers import install_year_suffixes  # noqa: E402
+
+# Only when the documentation dependencies are installed (not, for example,
+# when tests import this configuration).
+with contextlib.suppress(ImportError):
+    install_year_suffixes(REFERENCE / "bibliography.bib")
+
 # Configuration for intersphinx --------------------------------------------------------
 
 intersphinx_mapping = {
@@ -966,7 +978,17 @@ def rstjinja(app, docname, source):
     source[0] = rendered
 
 
+def citing_papers(app, docname, source):
+    """Generate the list of papers citing SpectroChemPy from the bibliography."""
+    if docname != "reference/papers":
+        return
+    from citing_papers import insert_citing_papers
+
+    source[0] = insert_citing_papers(source[0], REFERENCE / "bibliography.bib")
+
+
 def setup(app):
+    app.connect("source-read", citing_papers)
     app.connect("source-read", rstjinja)
     app.connect("autodoc-skip-member", autodoc_skip_member)
     app.connect("autodoc-process-signature", shorter_signature)
