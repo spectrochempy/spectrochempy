@@ -6,6 +6,7 @@
 # ruff: noqa: T201,S603
 """SpectroChemPy documentation build configuration file."""
 
+import contextlib
 import inspect
 import json
 import os
@@ -768,7 +769,10 @@ bibtex_cite_id = "{key}"
 # (e.g. "Rejman et al. [2026a]" and "[2026b]").
 from citing_papers import install_year_suffixes  # noqa: E402
 
-install_year_suffixes(REFERENCE / "bibliography.bib")
+# Only when the documentation dependencies are installed (not, for example,
+# when tests import this configuration).
+with contextlib.suppress(ImportError):
+    install_year_suffixes(REFERENCE / "bibliography.bib")
 
 # Configuration for intersphinx --------------------------------------------------------
 

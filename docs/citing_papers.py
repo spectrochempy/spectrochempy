@@ -13,9 +13,9 @@ import contextlib
 import re
 from pathlib import Path
 
-import latexcodec  # noqa: F401  (registers the "ulatex" codec)
-from pybtex.database import parse_file
-from pybtex.richtext import Text
+# pybtex and latexcodec come with the documentation dependencies
+# (sphinxcontrib-bibtex); they are imported when needed, so that importing
+# docs/conf.py (e.g. in tests) does not require them.
 
 CITING_FIELD = "spectrochempy_citing"
 MARKER = ".. citing-papers-list"
@@ -24,6 +24,8 @@ HAL_THESES = "theses.hal.science"  # codespell:ignore
 
 def _plain(text):
     """Convert BibTeX/LaTeX text to plain Unicode text."""
+    import latexcodec  # noqa: F401, PLC0415  (registers the "ulatex" codec)
+
     text = text or ""
     with contextlib.suppress(ValueError, UnicodeError):
         text = codecs.decode(text, "ulatex")
@@ -94,6 +96,8 @@ def _first_author(entry):
 
 def citing_papers_rst(bibfile):
     """Return the RST list of citing papers, grouped by year."""
+    from pybtex.database import parse_file  # noqa: PLC0415
+
     database = parse_file(str(bibfile))
     by_year = {}
     for key, entry in database.entries.items():
@@ -127,6 +131,8 @@ def year_suffixes(bibfile):
     Author-year citations of such entries would otherwise be identical,
     e.g. two "Rejman et al. [2026]"; suffixes are assigned in key order.
     """
+    from pybtex.database import parse_file  # noqa: PLC0415
+
     database = parse_file(str(bibfile))
     groups = {}
     for key, entry in database.entries.items():
@@ -142,7 +148,8 @@ def year_suffixes(bibfile):
 
 def install_year_suffixes(bibfile):
     """Add the year suffixes to the year shown in author-year citations."""
-    from sphinxcontrib.bibtex.style import template
+    from pybtex.richtext import Text  # noqa: PLC0415
+    from sphinxcontrib.bibtex.style import template  # noqa: PLC0415
 
     suffixes = year_suffixes(bibfile)
     original = template.year.f
