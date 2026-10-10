@@ -42,11 +42,11 @@ print("NDDataset names: " + str([d.name for d in ds]))
 D = scp.NDDataset(ds[1][:, 1:].data.T)
 # The time values stored in the file are in seconds since the start of the
 # reaction; converting them to minutes gives the ``y`` coordinate below.
-D.y = scp.Coord(ds[0].data.squeeze(), title="time / min") / 60
+D.y = scp.Coord(ds[0].data.squeeze(), title="time") / 60
 D.y.units = "min"
 # The first column of ``ds[1]`` holds the wavelength axis of the UV-Vis spectra
 # (in nm):
-D.x = scp.Coord(ds[1][:, 0].data.squeeze(), title="wavelength / nm")
+D.x = scp.Coord(ds[1][:, 0].data.squeeze(), title="wavelength")
 D.x.units = "nm"
 D = D[::4]
 _ = D.plot()

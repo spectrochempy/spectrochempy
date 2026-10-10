@@ -37,8 +37,8 @@ _ = pca.fit(dataset)
 # %%
 # The number of retained components is given by the ``n_components`` attribute.
 # Because only 11 spectra were kept (``[::5]``), the rank of the (centered)
-# dataset is at most 10, so no more than 10 principal components can be
-# extracted. The threshold ``n_components=0.999`` retains the number shown
+# dataset is at most 10, so at most 10 principal components have nonzero
+# variance. The threshold ``n_components=0.999`` retains the number shown
 # below:
 pca.n_components
 
