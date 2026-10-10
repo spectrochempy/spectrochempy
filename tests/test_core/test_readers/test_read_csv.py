@@ -5,6 +5,8 @@
 # ======================================================================================
 # ruff: noqa
 
+import locale
+
 import pytest
 
 import spectrochempy as scp
@@ -114,3 +116,36 @@ def test_read_csv_autodetects_tab_delimiter_for_simple_numeric_table():
     assert dataset.shape == (1, 3)
     assert list(dataset.x.data) == [1.0, 2.0, 3.0]
     assert list(dataset.data.squeeze()) == [10.0, 20.0, 30.0]
+
+
+def test_read_csv_omnic_date_parses_independently_of_ambient_locale():
+    """The OMNIC CSV acquisition date must parse regardless of the locale.
+
+    ``datetime.strptime`` resolves weekday and month names through the current
+    locale. The reader must not rely on a process-wide ``en_US`` locale being
+    installed and set at import time; it should force an English date locale
+    (``LC_TIME=\"C\"``) around the date parsing instead, leaving the rest of
+    the process locale untouched.
+    """
+    content = b"4000.0,0.5\n4001.0,0.6\n"
+
+    # Force a non-English ambient date locale for the test duration.
+    if not locale.setlocale(locale.LC_TIME):  # pragma: no cover - defensive
+        pytest.skip("Cannot determine the current LC_TIME locale.")
+    ambient = locale.setlocale(locale.LC_TIME)
+    try:
+        locale.setlocale(locale.LC_TIME, "C")
+        en = scp.read_csv({"acq_Wed Jul 06 21-00-38 2016.csv": content}, origin="omnic")
+        fr = scp.read_csv(
+            {"acq_Mer Aout 06 21-00-38 2016.csv": content}, origin="omnic"
+        )
+    finally:
+        locale.setlocale(locale.LC_TIME, ambient)
+
+    for dataset in (en, fr):
+        assert dataset.y.title == "acquisition timestamp (GMT)"
+        assert str(dataset.y.units) == "s"
+        assert float(dataset.y.data[0]) > 0
+
+    # The reader must not leave the process-wide locale modified.
+    assert locale.setlocale(locale.LC_TIME) == ambient

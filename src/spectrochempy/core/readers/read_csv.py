@@ -11,7 +11,7 @@ import csv
 # standard and other imports
 # --------------------------------------------------------------------------------------
 import locale
-import warnings
+from contextlib import contextmanager
 from datetime import datetime
 
 import numpy as np
@@ -134,18 +134,6 @@ def _detect_csv_delimiter(lines, fallback):
             best_score = score
 
     return best
-
-
-try:
-    locale.setlocale(locale.LC_ALL, "en_US")  # to avoid problems with date format
-except Exception:  # pragma: no cover
-    try:
-        locale.setlocale(
-            locale.LC_ALL,
-            "en_US.utf8",
-        )  # to avoid problems with date format
-    except Exception:
-        warnings.warn("Could not set locale: en_US or en_US.utf8", stacklevel=2)
 
 
 # ======================================================================================
@@ -409,6 +397,27 @@ def _read_csv(*args, **kwargs):
     return dataset
 
 
+@contextmanager
+def _english_dates():
+    """
+    Force an English date locale for ``strptime`` parsing only.
+
+    ``datetime.strptime`` resolves weekday and month names through the current
+    locale, so parsing OMNIC CSV exports that store English names fails on
+    systems without an English locale installed. Setting only ``LC_TIME`` to
+    the always-available ``"C"`` locale keeps this scoped to the parsing call
+    and avoids mutating the process-wide locale for the rest of the
+    application.
+    """
+
+    previous = locale.setlocale(locale.LC_TIME)
+    try:
+        locale.setlocale(locale.LC_TIME, "C")
+        yield
+    finally:
+        locale.setlocale(locale.LC_TIME, previous)
+
+
 def _add_omnic_info(dataset, **kwargs):
     # get the time and name
     name = desc = dataset.name
@@ -440,7 +449,8 @@ def _add_omnic_info(dataset, **kwargs):
             dat = dat.replace("Aout", "Aug")
 
             # get the dates
-            acqdate = datetime.strptime(dat, "%a %b %d %H-%M-%S %Y")
+            with _english_dates():
+                acqdate = datetime.strptime(dat, "%a %b %d %H-%M-%S %Y")
 
             # Transform back to timestamp for storage in the Coord object
             # use datetime.fromtimestamp(d, timezone.utc))
