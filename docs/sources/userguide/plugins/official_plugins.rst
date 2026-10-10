@@ -38,7 +38,7 @@ Current official plugins
    * - Hypercomplex
      - ``spectrochempy-hypercomplex``
      - ``dataset.hyper``
-     - Quaternion/hypercomplex support for phase-sensitive 2D NMR.
+     - Quaternion/hypercomplex representation for phase-sensitive 2D NMR data.
    * - Carroucell
      - ``spectrochempy-carroucell``
      - ``scp.carroucell``
@@ -144,7 +144,7 @@ provide the user-facing details:
 * :doc:`iris` for 2D-IRIS workflows and the ``scp.iris`` / ``dataset.iris`` APIs
 * :doc:`nmr` for TopSpin reading and NMR-specific processing workflows
 * :doc:`tensor` for TensorLy-backed tensor decompositions such as CP/PARAFAC
-* :doc:`hypercomplex` for quaternion support used in phase-sensitive 2D NMR
+* :doc:`hypercomplex` for the quaternion representation of phase-sensitive 2D NMR data
 * :doc:`carroucell` for carroucell experiment directory imports
 * :doc:`perkinelmer` for PerkinElmer ``.sp`` IR file reading
 
