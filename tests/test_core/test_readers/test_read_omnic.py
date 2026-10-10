@@ -20,6 +20,8 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils.datetimeutils import UTC
 from spectrochempy.utils.testing import assert_dataset_equal
 
+from _omnic_synthetic import synthetic_spa_with_optical_velocity
+
 DATADIR = prefs.datadir
 IRDATA = DATADIR / "irdata"
 WODGER = Path(__file__).parent / "ressources" / "omnic" / "wodger.spg"
@@ -361,81 +363,10 @@ def test_read_spa_key_table_rejects_truncated_table():
         _read_spa_key_table(io.BytesIO(content))
 
 
-def _synthetic_spa_with_optical_velocity(
-    mirror,
-    canonical=None,
-    *,
-    xunits=1,
-    reference_frequency=15798.0,
-    raman_frequency=0.0,
-    timestamp=0,
-    library=False,
-    scan_points=0,
-    peak_position=0,
-    sample_scans=0,
-    fft_points=0,
-    trailing_geometry=0,
-    background_scans=0,
-    background_gain=0.0,
-    aperture=0.0,
-    digitizer_bits=0,
-    high_pass=0.0,
-    low_pass=0.0,
-    sample_gain=0.0,
-):
-    """Build a minimal SPA with optional canonical optical-velocity metadata."""
-    content = bytearray(768)
-    content[:18] = b"Spectral Data File"
-    content[30:42] = b"synthetic.spa"
-
-    records = [(2, 400, 140)]
-    if canonical is not None:
-        records.append((106, 700, 56))
-    if library:
-        records.append((0x53, 0, 0))
-    payload_position = 756 if canonical is not None else 700
-    if library and canonical is None:
-        payload_position = 700
-    records.append((3, payload_position, 8))
-    struct.pack_into("<H", content, 294, len(records))
-    struct.pack_into("<I", content, 296, timestamp)
-    for offset, (key, position, length) in zip((304, 320, 336), records):
-        struct.pack_into("<BBII", content, offset, key, 0, position, length)
-    if library:
-        content[304 + 16 * len(records)] = 1
-
-    header = 400
-    struct.pack_into("<I", content, header + 4, 2)
-    content[header + 8] = xunits
-    content[header + 12] = 17
-    struct.pack_into("<ff", content, header + 16, 4000.0, 3999.0)
-    struct.pack_into("<I", content, header + 28, scan_points)
-    struct.pack_into("<I", content, header + 32, peak_position)
-    struct.pack_into("<I", content, header + 36, sample_scans)
-    struct.pack_into("<I", content, header + 44, fft_points)
-    struct.pack_into("<I", content, header + 48, trailing_geometry)
-    struct.pack_into("<I", content, header + 52, background_scans)
-    struct.pack_into("<f", content, header + 56, background_gain)
-    struct.pack_into("<I", content, header + 68, 100)
-    struct.pack_into("<f", content, header + 80, reference_frequency)
-    struct.pack_into("<f", content, header + 84, 1.0)
-    struct.pack_into("<f", content, header + 92, aperture)
-    struct.pack_into("<f", content, header + 96, raman_frequency)
-    struct.pack_into("<f", content, header + 188, mirror)
-    if canonical is not None:
-        struct.pack_into("<I", content, 700 + 16, digitizer_bits)
-        struct.pack_into("<f", content, 700 + 20, high_pass)
-        struct.pack_into("<f", content, 700 + 24, low_pass)
-        struct.pack_into("<f", content, 700 + 44, sample_gain)
-        struct.pack_into("<f", content, 700 + 48, canonical)
-    struct.pack_into("<ff", content, payload_position, 1.0, 2.0)
-    return bytes(content)
-
-
 def test_spa_uses_canonical_optical_velocity(tmp_path):
     """The 0x6a value wins over the legacy 0x02 header mirror."""
     path = tmp_path / "canonical.spa"
-    path.write_bytes(_synthetic_spa_with_optical_velocity(0.0, 8.8617))
+    path.write_bytes(synthetic_spa_with_optical_velocity(0.0, 8.8617))
 
     dataset = scp.read_spa(path)
 
@@ -445,7 +376,7 @@ def test_spa_uses_canonical_optical_velocity(tmp_path):
 def test_spa_preserves_matching_optical_velocity_layout(tmp_path):
     """The canonical and mirrored values remain unchanged when they agree."""
     path = tmp_path / "matching.spa"
-    path.write_bytes(_synthetic_spa_with_optical_velocity(8.8617, 8.8617))
+    path.write_bytes(synthetic_spa_with_optical_velocity(8.8617, 8.8617))
 
     dataset = scp.read_spa(path)
 
@@ -455,7 +386,7 @@ def test_spa_preserves_matching_optical_velocity_layout(tmp_path):
 def test_spa_falls_back_to_mirror_without_canonical_parameters(tmp_path):
     """The legacy mirror remains supported when no 0x6a record is present."""
     path = tmp_path / "legacy.spa"
-    path.write_bytes(_synthetic_spa_with_optical_velocity(8.8617))
+    path.write_bytes(synthetic_spa_with_optical_velocity(8.8617))
 
     dataset = scp.read_spa(path)
 
@@ -465,7 +396,7 @@ def test_spa_falls_back_to_mirror_without_canonical_parameters(tmp_path):
 def test_spa_exposes_mature_acquisition_metadata(tmp_path):
     path = tmp_path / "acquisition-metadata.spa"
     path.write_bytes(
-        _synthetic_spa_with_optical_velocity(
+        synthetic_spa_with_optical_velocity(
             8.8617,
             8.8617,
             scan_points=1234,
@@ -503,7 +434,7 @@ def test_spa_raman_uses_excitation_and_preserves_reference_frequency(tmp_path):
 
     path = tmp_path / "raman.spa"
     path.write_bytes(
-        _synthetic_spa_with_optical_velocity(
+        synthetic_spa_with_optical_velocity(
             8.8617,
             xunits=0x20,
             reference_frequency=15798.2,
@@ -525,7 +456,7 @@ def test_spa_raman_uses_excitation_and_preserves_reference_frequency(tmp_path):
 def test_spa_library_timestamp_is_not_promoted(tmp_path):
     path = tmp_path / "library.spa"
     path.write_bytes(
-        _synthetic_spa_with_optical_velocity(
+        synthetic_spa_with_optical_velocity(
             8.8617,
             timestamp=1577962800,
             library=True,
