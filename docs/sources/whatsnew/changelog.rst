@@ -26,6 +26,16 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- The CSV reader no longer changes the process-wide locale at import time.
+  It previously forced ``LC_ALL`` to ``en_US`` (through
+  ``locale.setlocale``), which emitted a spurious *"Could not set locale:
+  en_US or en_US.utf8"* warning on systems where that locale is not
+  installed (e.g. the docs build) and left the process locale modified
+  afterwards. OMNIC CSV acquisition dates are now parsed under a scoped
+  English date locale (``LC_TIME="C"``), so exports with translated French
+  weekday/month names also parse correctly where ``en_US`` is unavailable
+  (:pr:`1767`).
+
 - Savitzky-Golay derivatives now preserve the source dataset name and retain
   prior history, appending one processing entry per call instead of generating
   a ``_Filter.transform`` name and replacing the history. This applies to
