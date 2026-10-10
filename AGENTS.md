@@ -5,9 +5,9 @@
 This document defines permanent rules and authorization limits for AI-assisted
 development in SpectroChemPy.
 
-Procedural details live in the shared OpenCode and Codex skills in
-`.agents/skills/` and in `CONTRIBUTING.md`. Load the relevant skill before
-starting work.
+Procedural details live in the shared OpenCode, Codex, and Claude Code
+skills in `.agents/skills/` and in `CONTRIBUTING.md`. Load the relevant skill
+before starting work.
 
 **Read `CONTRIBUTING.md` at the start of each session.**
 
@@ -111,8 +111,13 @@ Load the relevant skill before starting work:
 | `spectrochempy-review` | Separate review in a new session (see skill) |
 | `spectrochempy-release` | Preparing a release (without publishing) |
 
-The skills are shared by OpenCode and Codex. Load the relevant skill from
-`.agents/skills/` before starting work.
+The skills are shared by OpenCode, Codex, and Claude Code. They live only in
+`.agents/skills/`; Claude Code reaches them through relative symlinks in
+`.claude/skills/`.
+
+<!-- On Windows checkouts, these relative symlinks need Developer Mode (or
+admin rights) and `git config core.symlinks true`; otherwise Git materializes
+them as plain text files and Claude Code cannot discover the skills. -->
 
 ---
 
