@@ -3,7 +3,15 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""Extend NDDataset with the import method for Surface Optics Corp. (soc) data files."""
+"""
+Extend NDDataset with the import method for Surface Optics Corp. files.
+
+SOC ``.ddr``, ``.hdr`` and ``.sdr`` files are SPA-compatible binary files and
+are parsed with the same private SPA parser as OMNIC ``.spa`` files.  The
+public SOC readers remain separate convenience entry points so users can select
+the known file family explicitly and keep the established SOC default of
+``merge=False`` for multi-file inputs.
+"""
 
 __all__ = ["read_soc", "read_ddr", "read_sdr", "read_hdr"]
 
@@ -16,6 +24,15 @@ from spectrochempy.core.readers.read_omnic import _read_spa
 # ======================================================================================
 # Public functions
 # ======================================================================================
+def _read_soc_importer(paths, kwargs, filetypes, protocol):
+    kwargs["filetypes"] = [filetypes]
+    kwargs["protocol"] = protocol
+    if "merge" not in kwargs:
+        kwargs["merge"] = False
+    importer = Importer()
+    return importer(*paths, **kwargs)
+
+
 def read_soc(*paths, **kwargs):
     r"""
     Read a Surface Optics Corp. file or a list of files with extension :file:`.ddr`, :file:`.hdr` or :file:`.sdr`.
@@ -24,6 +41,10 @@ def read_soc(*paths, **kwargs):
     :func:`spectrochempy.read` for generic format autodetection and
     ``scp.soc.read(...)`` or :func:`spectrochempy.read_soc` when the SOC format
     is already known.
+
+    SOC files use the same SPA-compatible binary layout as OMNIC ``.spa``
+    files, so this reader delegates parsing to the shared private SPA parser and
+    records SOC provenance on the returned dataset(s).
 
     Non-merged multi-file reads may return a list-like `ScpObjectList`
     exposing helper methods for dataset selection. See
@@ -42,8 +63,9 @@ def read_soc(*paths, **kwargs):
 
         - e.g., ( [filename1, filename2, ...], kwargs )
 
-        The returned datasets are merged to form a single dataset,
-        except if ``merge`` is set to ``False``.
+        By default, SOC datasets are kept separate even when the filenames are
+        passed as a list or tuple. Set ``merge=True`` to request merging of
+        compatible datasets.
     **kwargs : keyword parameters, optional
         See Other Parameters.
 
@@ -121,19 +143,17 @@ def read_soc(*paths, **kwargs):
 
     >>> scp.soc.read('irdata/soc/sample.hdr')
 
-    Using the legacy top-level alias
+    Using the top-level API
 
     >>> scp.read_soc('irdata/soc/sample.hdr')
 
     """
-    kwargs["filetypes"] = ["Surface Optics Corp. (*.ddr *.hdr *.sdr)"]
-    kwargs["protocol"] = ["soc", "ddr", "hdr", "sdr"]
-    # For SOC files with multiple subfiles, don't merge them by default
-    # Each subfile should be a separate dataset
-    if "merge" not in kwargs:
-        kwargs["merge"] = False
-    importer = Importer()
-    return importer(*paths, **kwargs)
+    return _read_soc_importer(
+        paths,
+        kwargs,
+        "Surface Optics Corp. (*.ddr *.hdr *.sdr)",
+        ["soc", "ddr", "hdr", "sdr"],
+    )
 
 
 def read_ddr(*paths, **kwargs):
@@ -145,6 +165,9 @@ def read_ddr(*paths, **kwargs):
     :func:`spectrochempy.read_soc` or ``scp.soc.read(...)`` for the broader SOC
     entry point.
 
+    DDR files are SPA-compatible and are parsed with the shared private SPA
+    parser before SOC provenance is recorded.
+
     Non-merged multi-file reads may return a list-like `ScpObjectList`
     exposing helper methods for dataset selection. See
     :func:`spectrochempy.read` for the complete description of the generic
@@ -162,8 +185,9 @@ def read_ddr(*paths, **kwargs):
 
         - e.g., ( [filename1, filename2, ...], kwargs )
 
-        The returned datasets are merged to form a single dataset,
-        except if ``merge`` is set to ``False``.
+        By default, datasets are kept separate even when the filenames are
+        passed as a list or tuple. Set ``merge=True`` to request merging of
+        compatible datasets.
     **kwargs : keyword parameters, optional
         See Other Parameters.
 
@@ -237,13 +261,7 @@ def read_ddr(*paths, **kwargs):
     read_soc : Read Surface Optics Corp. files.
 
     """
-    kwargs["filetypes"] = ["Surface Optics Corp. (*.ddr)"]
-    kwargs["protocol"] = ["ddr"]
-    # Don't merge files by default - preserve individual datasets
-    if "merge" not in kwargs:
-        kwargs["merge"] = False
-    importer = Importer()
-    return importer(*paths, **kwargs)
+    return _read_soc_importer(paths, kwargs, "Surface Optics Corp. (*.ddr)", ["ddr"])
 
 
 def read_hdr(*paths, **kwargs):
@@ -255,6 +273,9 @@ def read_hdr(*paths, **kwargs):
     :func:`spectrochempy.read_soc` or ``scp.soc.read(...)`` for the broader SOC
     entry point.
 
+    HDR files are SPA-compatible and are parsed with the shared private SPA
+    parser before SOC provenance is recorded.
+
     Non-merged multi-file reads may return a list-like `ScpObjectList`
     exposing helper methods for dataset selection. See
     :func:`spectrochempy.read` for the complete description of the generic
@@ -272,8 +293,9 @@ def read_hdr(*paths, **kwargs):
 
         - e.g., ( [filename1, filename2, ...], kwargs )
 
-        The returned datasets are merged to form a single dataset,
-        except if ``merge`` is set to ``False``.
+        By default, datasets are kept separate even when the filenames are
+        passed as a list or tuple. Set ``merge=True`` to request merging of
+        compatible datasets.
     **kwargs : keyword parameters, optional
         See Other Parameters.
 
@@ -347,13 +369,7 @@ def read_hdr(*paths, **kwargs):
     read_soc : Read Surface Optics Corp. files.
 
     """
-    kwargs["filetypes"] = ["Surface Optics Corp. (*.hdr)"]
-    kwargs["protocol"] = ["hdr"]
-    # Don't merge files by default - preserve individual datasets
-    if "merge" not in kwargs:
-        kwargs["merge"] = False
-    importer = Importer()
-    return importer(*paths, **kwargs)
+    return _read_soc_importer(paths, kwargs, "Surface Optics Corp. (*.hdr)", ["hdr"])
 
 
 def read_sdr(*paths, **kwargs):
@@ -365,6 +381,9 @@ def read_sdr(*paths, **kwargs):
     :func:`spectrochempy.read_soc` or ``scp.soc.read(...)`` for the broader SOC
     entry point.
 
+    SDR files are SPA-compatible and are parsed with the shared private SPA
+    parser before SOC provenance is recorded.
+
     Non-merged multi-file reads may return a list-like `ScpObjectList`
     exposing helper methods for dataset selection. See
     :func:`spectrochempy.read` for the complete description of the generic
@@ -382,8 +401,9 @@ def read_sdr(*paths, **kwargs):
 
         - e.g., ( [filename1, filename2, ...], kwargs )
 
-        The returned datasets are merged to form a single dataset,
-        except if ``merge`` is set to ``False``.
+        By default, datasets are kept separate even when the filenames are
+        passed as a list or tuple. Set ``merge=True`` to request merging of
+        compatible datasets.
     **kwargs : keyword parameters, optional
         See Other Parameters.
 
@@ -457,13 +477,7 @@ def read_sdr(*paths, **kwargs):
     read_soc : Read Surface Optics Corp. files.
 
     """
-    kwargs["filetypes"] = ["Surface Optics Corp. (*.sdr)"]
-    kwargs["protocol"] = ["sdr"]
-    # Don't merge files by default - preserve individual datasets
-    if "merge" not in kwargs:
-        kwargs["merge"] = False
-    importer = Importer()
-    return importer(*paths, **kwargs)
+    return _read_soc_importer(paths, kwargs, "Surface Optics Corp. (*.sdr)", ["sdr"])
 
 
 # ======================================================================================
@@ -471,23 +485,21 @@ def read_sdr(*paths, **kwargs):
 # ======================================================================================
 @_importer_method
 def _read_ddr(*args, **kwargs):
-    ds = _read_spa(*args, **kwargs)
-    ds.origin = "soc"
-    ds.history = f"Imported SOC DDR file {ds.filename.name}"
-    return ds
+    return _read_soc_spa(*args, suffix="DDR", **kwargs)
 
 
 @_importer_method
 def _read_hdr(*args, **kwargs):
-    ds = _read_spa(*args, **kwargs)
-    ds.origin = "soc"
-    ds.history = f"Imported SOC HDR file {ds.filename.name}"
-    return ds
+    return _read_soc_spa(*args, suffix="HDR", **kwargs)
 
 
 @_importer_method
 def _read_sdr(*args, **kwargs):
+    return _read_soc_spa(*args, suffix="SDR", **kwargs)
+
+
+def _read_soc_spa(*args, suffix, **kwargs):
     ds = _read_spa(*args, **kwargs)
     ds.origin = "soc"
-    ds.history = f"Imported SOC SDR file {ds.filename.name}"
+    ds.history = f"Imported SOC {suffix} file {ds.filename.name}"
     return ds
