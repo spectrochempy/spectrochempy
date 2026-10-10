@@ -38,10 +38,16 @@ print("NDDataset names: " + str([d.name for d in ds]))
 
 # %%
 # We load the experimental spectra (in ``ds[1]``), add the ``y`` (time) and ``x``
-# (wavelength) coordinates, and keep one spectrum of out 4:
+# (wavelength) coordinates, and keep one spectrum out of 4:
 D = scp.NDDataset(ds[1][:, 1:].data.T)
-D.y = scp.Coord(ds[0].data.squeeze(), title="time") / 60
-D.x = scp.Coord(ds[1][:, 0].data.squeeze(), title="wavelength / cm$^{-1}$")
+# The time values stored in the file are in seconds since the start of the
+# reaction; converting them to minutes gives the ``y`` coordinate below.
+D.y = scp.Coord(ds[0].data.squeeze(), title="time / min") / 60
+D.y.units = "min"
+# The first column of ``ds[1]`` holds the wavelength axis of the UV-Vis spectra
+# (in nm):
+D.x = scp.Coord(ds[1][:, 0].data.squeeze(), title="wavelength / nm")
+D.x.units = "nm"
 D = D[::4]
 _ = D.plot()
 
@@ -66,7 +72,8 @@ _ = mcr_1.St.plot()
 # %%
 # Kinetic constraints can be added, i.e., imposing that the concentration profiles obey
 # a kinetic model. To do so we first define an ActionMAssKinetics object with
-# roughly estimated rate constants:
+# roughly estimated rate constants. Because the ``y`` time coordinate is in
+# minutes, these rate constants are expressed per minute (min\ :sup:`-1`):
 reactions = ("A -> B", "B -> C")
 species_concentrations = {"A": 5.0, "B": 0.0, "C": 0.0}
 k0 = [0.5, 0.05]

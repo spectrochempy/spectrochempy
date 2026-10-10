@@ -85,8 +85,15 @@ _ = ds.plot_image(cmap="RdBu_r", norm=norm, colorbar=True)
 # %%
 ax = ds1.plot()
 _ = ax.set_xlabel(r"$ \tilde{\nu}$ (cm$^{-1}$)")
-_ = ax.set_ylabel(r"$ \epsilon$ (mol$^{-1}$·L·cm$^{-1}$)")
+_ = ax.set_ylabel(r"$A$ (a.u.)")
 _ = ax.set_title(r"Beer-Lambert: $A = \epsilon c l$")
+
+# %% [markdown]
+# Note that the plotted quantity is the dimensionless absorbance $A$, not the
+# molar absorptivity $\epsilon$. The title recalls the Beer-Lambert law
+# $A = \epsilon c l$ that relates them; relabeling the axis as $\epsilon$
+# without the concentration $c$ and path length $l$ used for the measurement
+# would be misleading.
 
 # %% [markdown]
 # ## Saving Figures

@@ -28,7 +28,8 @@ Hypercomplex data is powerful but niche. Keeping it in the core would:
 By extracting hypercomplex support into an official plugin:
 
 * the core stays lightweight and domain-neutral;
-* NMR users can install full 2D support on demand;
+* NMR users can install the hypercomplex *representation* used in
+  phase-sensitive 2D NMR on demand;
 * the hypercomplex backend can evolve independently;
 * other scientific domains can reuse the same mechanism if needed.
 
@@ -85,8 +86,8 @@ In 2D NMR this corresponds to four real arrays: RR, RI, IR, II
 
 The core SpectroChemPy package understands ordinary complex data natively.
 Hypercomplex data requires the plugin. Once installed, the plugin provides the
-``dataset.hyper`` accessor and enables supported math and 2D NMR operations on
-quaternion arrays.
+``dataset.hyper`` accessor and enables quaternion-aware math and display on
+such datasets.
 
 .. _hypercomplex-api:
 
@@ -101,9 +102,11 @@ The public API reference for the hypercomplex plugin is listed in
 Examples
 ========
 
-After reading a 2D TopSpin dataset, the NMR plugin can optionally
-convert the data to hypercomplex form (this happens automatically when
-both the NMR and hypercomplex plugins are installed):
+After reading a 2D TopSpin dataset, the NMR reader stores the two quadrature
+pairs as a hypercomplex (quaternion) array when both the NMR and hypercomplex
+plugins are installed. This is a *representation*: the four components
+``RR``, ``RI``, ``IR``, ``II`` are kept explicitly instead of being collapsed
+into a single complex spectrum.
 
 .. code-block:: python
 
@@ -117,12 +120,16 @@ both the NMR and hypercomplex plugins are installed):
     if not dataset.hyper.is_quaternion:
         dataset.hyper.set_quaternion(inplace=True)
 
-    # Now fft() understands STATES / TPPI / ECHO-ANTIECHO encodings
-    spectrum = dataset.fft()
-
-    # Extract a component for display
-    rr = spectrum.hyper.RR
+    # Extract one component (a plain numpy array); rebuild a dataset
+    # with the acquisition coordinates for display.
+    rr = dataset.hyper.RR
+    rr = scp.NDDataset(rr, coordset=dataset.coordset, dims=dataset.dims)
     rr.plot(method="map")
+
+The ``dataset.hyper.RR``, ``RI``, ``IR`` and ``II`` accessors extract the
+corresponding real components, and ``component()`` selects them by name. This
+reading-and-representation scope is validated for 1D and 2D hypercomplex NMR
+data, including raw ``ser`` time-domain data and vendor-processed 2D spectra.
 
 .. _hypercomplex-future:
 
@@ -133,4 +140,15 @@ The hypercomplex plugin is intentionally narrow at this stage:
 
 * it supports quaternion data in ``NDDataset``;
 * it provides the numeric hooks needed by the core math framework;
-* it enables 2D NMR phase-sensitive workflows.
+* it enables representation and component extraction for phase-sensitive 2D NMR.
+
+Public NMR *processing* remains deliberately limited to validated 1D
+experiments: ``scp.nmr.Experiment(...).process()`` raises
+``NotImplementedError`` for datasets with more than one dimension. The
+low-level transforms used to characterize multi-dimensional encodings (such as
+``fft()`` and the apodization functions) exist at the array level, but they do
+not form a supported public 2D processing chain, and a single ``dataset.fft()``
+call is **not** a complete 2D processing recipe. Pseudo-2D series — a list of
+ordinary 1D spectra sharing a secondary coordinate (for example a relaxation or
+kinetics series) — must also be kept distinct from a genuine 2D experiment in
+which both dimensions are Fourier-transformed.

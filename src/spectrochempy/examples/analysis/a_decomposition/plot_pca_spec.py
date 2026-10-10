@@ -35,8 +35,11 @@ pca = scp.PCA(n_components=0.999)
 _ = pca.fit(dataset)
 
 # %%
-# The number of fitted components is given by the n_components attribute
-# (We obtain 23 components)
+# The number of retained components is given by the ``n_components`` attribute.
+# Because only 11 spectra were kept (``[::5]``), the rank of the (centered)
+# dataset is at most 10, so no more than 10 principal components can be
+# extracted. The threshold ``n_components=0.999`` retains the number shown
+# below:
 pca.n_components
 
 # %%
@@ -87,9 +90,20 @@ _ = pca.fit(dataset)
 pca.n_components
 
 # %%
-# As seen above, now only 4 components instead of 23 are necessary to 99.9% of
-# explained variance.
+# After masking the saturated region, fewer components are needed to reach the
+# same 99.9% variance threshold, as shown below. The masked interval (882 to
+# 1280 cm^-1) is dominated by a strongly saturated (truncated) detector
+# response: masking it removes a large, non-informative source of variance, so
+# the number of retained components decreases accordingly. The saturated band
+# is not chemically meaningful, so it must be excluded before the analysis.
 _ = pca.plot_scree()
+
+# %%
+# Note that the number of retained PCA components is set by the variance
+# threshold. It is neither the effective rank of the dataset nor the number of
+# independent chemical species: ``PCA(n_components=0.999)`` simply keeps the
+# smallest number of principal components whose cumulative variance reaches
+# 99.9%.
 
 # %%
 # Displays the loadings

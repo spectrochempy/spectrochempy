@@ -29,11 +29,13 @@ X = scp.read("matlabdata/als2004dataset.MAT")[-1]
 
 X.title = "absorbance"
 X.units = "absorbance"
+# The archived file does not store the physical elution time and wavelength
+# coordinates, so the axes below are plain sample/channel indices without
+# physical units (see also the MCR-ALS example on the same dataset).
 X.y = scp.Coord.arange(
-    X.shape[0], dtype="float", title="elution time"
+    X.shape[0], dtype="float", title="elution time (index)"
 )  # floats to trigger sequential colormap
-X.y.units = "min"
-X.x.title = "wavelength"
+X.x.title = "wavelength (index)"
 _ = X.plot()
 
 # %%
