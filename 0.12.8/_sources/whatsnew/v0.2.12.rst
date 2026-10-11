@@ -1,0 +1,16 @@
+What's new in revision 0.2.12 [2021-02-23]
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-0.2.12. See :ref:`release` for a full changelog
+including other versions of SpectroChemPy.
+
+Bug fixes
+~~~~~~~~~
+
+-  LinearCoord operations now working.
+-  Baseline default now “sequential” as expected. **WARNING**: It was
+   wrongly set to “mutivariate” in previous releases, so you should
+   expect some difference with processing you may have done before.
+-  Comparison of coordinates now correct for mathematical operations.
+-  Alignment methods now working (except for multidimensional
+   alignment).

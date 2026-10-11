@@ -1,0 +1,23 @@
+What's new in revision 0.4.10 [2023-01-07]
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-0.4.10. See :ref:`release` for a full changelog
+including other versions of SpectroChemPy.
+
+New features
+~~~~~~~~~~~~
+
+-  Modified attribute history: Its behavior have been improved. Dates
+   for entries are set automatically and are timezone-aware. See the
+   docs for more information:
+   `About-the-history-attribute <https://www.spectrochempy.fr/latest/userguide/dataset/dataset.html#About-the-history-attribute>`__
+-  A new attribute allows the user to change the timezone of the
+   dataset. This affect the way attributes such are ``created`` are
+   displayed. Internally stored in UTC format, they are displayed
+   according to the timezone info.
+
+Bug fixes
+~~~~~~~~~
+
+-  Suppression of the error when automatically checking the update but
+   working offline.

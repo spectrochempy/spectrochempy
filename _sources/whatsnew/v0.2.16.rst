@@ -1,0 +1,29 @@
+What's new in revision 0.2.16 [2021-11-11]
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-0.2.16. See :ref:`release` for a full changelog
+including other versions of SpectroChemPy.
+
+New features
+~~~~~~~~~~~~
+
+-  IRIS: Added 1D datasets.
+-  IRIS: Added kernel function for diffusion .
+-  EFA: Added indication of progress.
+-  Cantera: Added differential evolution algorithm in cantera utilities.
+-  Cantera: Added PFR object in cantera utilities.
+-  DOC: Added list of papers citing spectrochempy.
+-  Github action workflows to test, build and publish conda package and
+   docs in replacement of Travis CI.
+-  Use CodeClimate to show Coverage info
+
+Bug fixes
+~~~~~~~~~
+
+-  IRIS example after modification of readers.
+-  IRIS: automatic search of the L-curve corner.
+-  MCR-ALS returns the ‘soft’ concentration matrix.
+-  Document building configuration after update of external packages.
+-  DOC: several broken links.
+-  Baseline correction default changed.
+-  Compatibility with newest change in Colab

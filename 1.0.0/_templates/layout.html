@@ -1,0 +1,60 @@
+{% extends "!layout.html" %}
+
+{%- block sidebartitle %}
+
+{# the logo helper function was removed in Sphinx 6 and deprecated since Sphinx 4 #}
+{# the master_doc variable was renamed to root_doc in Sphinx 4 (master_doc still exists in later Sphinx versions) #}
+{%- set _logo_url = logo_url|default(pathto('_static/' + (logo or ""), 1)) %}
+{%- set _root_doc = root_doc|default(master_doc) %}
+<a href="{{ pathto(_root_doc) }}">
+    {% if not theme_logo_only %}{{ project }}{% endif %}
+    {%- if logo or logo_url %}
+    <img src="{{ _logo_url }}" class="logo" alt="{{ _('Logo') }}" />
+    {%- endif %}
+</a>
+
+{% if not READTHEDOCS %}
+<div class="switch-menus">
+    <select id="versions-dropdown"
+            aria-label="Documentation version"
+            title="Documentation version"
+            data-docs-context="{{ docs_context }}"
+            data-build-version="{{ docs_build_version }}"
+            data-stable-version="{{ stable_release_version }}"
+            data-preview-name="{{ docs_preview_name }}"
+            data-versions="1.1.2,1.1.1,1.1.0,1.0.0,0.12.8">
+        <option selected disabled>Loading versions…</option>
+    </select>
+</div>
+{% endif %}
+
+{%- include "searchbox.html" %}
+
+{%- endblock %}
+{% block menu %}
+
+{{ super() }}
+{% endblock %}
+
+{% block document %}
+{% if docs_context == 'development' %}
+<div class="docs-context-banner docs-development-banner" role="status">
+    This is development documentation. Some features are not available in the stable release.
+    <a href="{{ stable_release_url }}" data-docs-target="stable">View stable documentation.</a>
+</div>
+{% elif not READTHEDOCS and docs_context == 'preview' %}
+<div class="docs-context-banner docs-preview-banner" role="status">
+    This is a pull request documentation preview{% if docs_preview_name %} for
+    <code>{{ docs_preview_name }}</code>{% endif %}. Content may change before merge.
+    <a href="{{ stable_release_url }}" data-docs-target="stable">View stable documentation.</a>
+</div>
+{% endif %}
+{{ super() }}
+{% endblock %}
+
+{% block extrahead %}
+{{ super() }}
+{% if not READTHEDOCS %}
+<script defer src="{{ pathto('_static/js/github-pages-versions.js', 1) }}"></script>
+{% endif %}
+{% endblock %}

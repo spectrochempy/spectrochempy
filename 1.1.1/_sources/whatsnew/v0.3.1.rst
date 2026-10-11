@@ -1,0 +1,13 @@
+What's new in revision 0.3.1 [2022-01-21]
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-0.3.1. See :ref:`release` for a full changelog
+including other versions of SpectroChemPy.
+
+New features
+~~~~~~~~~~~~
+
+-  Added a ``show_versions`` method in the API.
+-  Improved bug reports and pull request templates. Requests for help
+   are now made in github discussions.
+-  Docs API reference has been hopefully improved.
