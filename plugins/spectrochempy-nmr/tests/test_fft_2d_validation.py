@@ -17,6 +17,8 @@ Known limitations (not tested here):
 
 from __future__ import annotations
 
+import hashlib
+
 import numpy as np
 import pytest
 
@@ -33,6 +35,19 @@ TOPSPIN_2D = (
 BRUKER_ECHOANTI_2D = (
     scp.preferences.datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "exam2d_HC"
 )
+EXAM2D_HH = (
+    scp.preferences.datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "exam2d_HH"
+)
+
+EXAM2D_HH_SHA256 = {
+    "ser": "641707c170f8352785ee3bc923c52f85a335984c38e0ace7c591c054d32ccc6b",
+    "acqus": "ed1db82749fac2dd724305260ac02c26ed76bb11b5b6e20d1dc2652ef21f4636",
+    "acqu2": "81ee757018006fac238924cb5003e542f6ce21d47883921305050fe31ddfb843",
+    "acqu2s": "b3831b60edfa84e06a89137b121958a8c905b37dfbcf0d056ee3318722611989",
+    "pdata/1/2rr": "3852aaed6d3fcea61fcb022c73802efd5b62de1e2c41eb6cd1ea3ded29fe28ed",
+    "pdata/1/procs": "15083e49296a29e66dfb85c41519680ab4157c0cdebf455f89af9195dec73261",
+    "pdata/1/proc2s": "f5f4838b2e39188de217214882c105f3d04a8de81d2fbaba565dab596b8bb5b8",
+}
 
 
 def _has_agilent_data():
@@ -49,6 +64,78 @@ def _has_topspin_2d():
 
 def _has_bruker_echoanti_2d():
     return (BRUKER_ECHOANTI_2D / "3" / "ser").exists()
+
+
+def _has_exam2d_hh():
+    return (EXAM2D_HH / "1" / "ser").exists()
+
+
+def _sha256(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _jcamp_value(path, key):
+    prefix = f"##${key}="
+    for line in path.read_text().splitlines():
+        if line.startswith(prefix):
+            return line[len(prefix) :].strip()
+    raise KeyError(key)
+
+
+def _sine_window(size):
+    return np.sin(np.pi * (np.arange(size) + 0.5) / size)
+
+
+def _qf_cosy_exam2d_hh(raw):
+    data = np.asarray(raw.data).copy()
+    direct = np.zeros((1024, 1024), dtype=np.complex128)
+    direct[: data.shape[0], : data.shape[1]] = data * _sine_window(data.shape[1])
+    f2 = np.fft.fftshift(np.fft.fft(direct, axis=1), axes=1)
+    f2 *= _sine_window(f2.shape[0])[:, None]
+    return np.abs(np.fft.fftshift(np.fft.ifft(f2, axis=0), axes=0))
+
+
+def _normalized(data):
+    data = np.asarray(data, dtype=np.float64)
+    return data / np.max(np.abs(data))
+
+
+def _top_peaks(data, count=10, radius=3, border=5):
+    work = np.asarray(data).copy()
+    work[:border, :] = 0.0
+    work[-border:, :] = 0.0
+    work[:, :border] = 0.0
+    work[:, -border:] = 0.0
+    peaks = []
+    for _ in range(count):
+        idx = np.unravel_index(np.argmax(work), work.shape)
+        peaks.append((idx, float(work[idx])))
+        y, x = idx
+        work[
+            max(0, y - radius) : min(work.shape[0], y + radius + 1),
+            max(0, x - radius) : min(work.shape[1], x + radius + 1),
+        ] = 0.0
+    return peaks
+
+
+def _match_peak(data, idx, radius=1):
+    y, x = idx
+    window = data[
+        max(0, y - radius) : min(data.shape[0], y + radius + 1),
+        max(0, x - radius) : min(data.shape[1], x + radius + 1),
+    ]
+    local = np.unravel_index(np.argmax(window), window.shape)
+    return max(0, y - radius) + local[0], max(0, x - radius) + local[1]
+
+
+def _normalized_overlap(left, right):
+    return float(
+        np.vdot(left.ravel(), right.ravel()).real
+        / np.sqrt(
+            np.vdot(left.ravel(), left.ravel()).real
+            * np.vdot(right.ravel(), right.ravel()).real
+        )
+    )
 
 
 def _mag_from_quat_or_complex(ds):
@@ -213,6 +300,90 @@ class TestEmFFT2DTopSpin:
         mirror_max = float(mag[row_slice, col_slice].max())
 
         assert mirror_max / float(mag[idx]) < 0.2
+
+
+@pytest.mark.skipif(not _has_exam2d_hh(), reason="exam2d_HH data not available")
+class TestExam2DHHQFCOSY:
+    """Bounded raw SER → QF/COSY comparison for exam2d_HH/1 only."""
+
+    def test_exam2d_hh_raw_ser_qf_cosy_matches_2rr_topology(self):
+        root = EXAM2D_HH / "1"
+        for relative, expected in EXAM2D_HH_SHA256.items():
+            assert _sha256(root / relative) == expected
+
+        raw = scp.read_topspin(EXAM2D_HH, expno=1, remove_digital_filter=True)
+        reference = scp.read_topspin(root / "pdata" / "1" / "2rr", proc_axis=True)
+
+        raw_data = np.asarray(raw.data).copy()
+        raw_processing = raw.meta.nmr_processing.copy()
+
+        assert raw.meta.parmode[-1] == 1
+        assert int(_jcamp_value(root / "acqus", "TD")) == 2048
+        assert int(_jcamp_value(root / "acqu2", "TD")) == 128
+        assert raw.meta.fnmode[0] == 1
+        assert raw.meta.encoding[0] == "QF"
+        for proc_file in (
+            root / "pdata" / "1" / "proc2s",
+            root / "pdata" / "1" / "procs",
+        ):
+            assert int(_jcamp_value(proc_file, "SI")) == 1024
+            assert int(_jcamp_value(proc_file, "FT_mod")) == 6
+            assert int(_jcamp_value(proc_file, "MC2")) == 0
+            assert int(_jcamp_value(proc_file, "WDW")) == 3
+            assert float(_jcamp_value(proc_file, "LB")) == 0.0
+            assert float(_jcamp_value(proc_file, "GB")) == 0.0
+            assert int(_jcamp_value(proc_file, "SSB")) == 0
+            assert float(_jcamp_value(proc_file, "PHC0")) == 0.0
+            assert float(_jcamp_value(proc_file, "PHC1")) == 0.0
+
+        calculated = _normalized(_qf_cosy_exam2d_hh(raw))
+        ref = _normalized(np.asarray(reference.data).real)
+
+        assert calculated.shape == (1024, 1024)
+        assert ref.shape == (1024, 1024)
+
+        expected_x = reference.meta.offset[1] - np.arange(1024) * (
+            float(reference.meta.sw_p[1]) / float(reference.meta.sf[1].m) / 1024
+        )
+        expected_y = reference.meta.offset[0] - np.arange(1024) * (
+            float(reference.meta.sw_p[0]) / float(reference.meta.sf[0].m) / 1024
+        )
+        half_x_bin = abs(expected_x[1] - expected_x[0]) / 2.0
+        half_y_bin = abs(expected_y[1] - expected_y[0]) / 2.0
+        np.testing.assert_allclose(reference.x.data, expected_x, atol=half_x_bin)
+        np.testing.assert_allclose(reference.y.data, expected_y, atol=half_y_bin)
+        assert np.all(np.diff(reference.x.data) < 0)
+        assert np.all(np.diff(reference.y.data) < 0)
+
+        ref_peaks = _top_peaks(ref)
+        matched_values = []
+        for (ref_y, ref_x), ref_value in ref_peaks:
+            calc_y, calc_x = _match_peak(calculated, (ref_y, ref_x))
+            assert abs(calc_y - ref_y) <= 1
+            assert abs(calc_x - ref_x) <= 1
+            matched_values.append(float(calculated[calc_y, calc_x]))
+            assert matched_values[-1] >= 0.5 * ref_value
+
+        rank_preserved = sum(
+            left >= right
+            for left, right in zip(matched_values, matched_values[1:], strict=False)
+        )
+        assert rank_preserved >= 8
+
+        residual = calculated - ref
+        assert float(np.sqrt(np.mean(residual**2))) <= 0.01
+        assert _normalized_overlap(calculated, ref) >= 0.85
+
+        inner = np.s_[5:-5, 5:-5]
+        inner_residual = calculated[inner] - ref[inner]
+        assert float(np.sqrt(np.mean(inner_residual**2))) <= 0.01
+        assert _normalized_overlap(calculated[inner], ref[inner]) >= 0.85
+
+        np.testing.assert_array_equal(raw.data, raw_data)
+        assert raw.meta.nmr_processing == raw_processing
+        assert "vendor_profile" in raw.meta.nmr_processing
+        assert "requested" not in raw.meta.nmr_processing
+        assert "applied" not in raw.meta.nmr_processing
 
 
 @pytest.mark.skipif(
