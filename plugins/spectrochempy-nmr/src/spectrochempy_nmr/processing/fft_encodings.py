@@ -79,6 +79,11 @@ def _qf_fft(data):
     return np.fft.fftshift(np.fft.fft(np.conjugate(data)), -1)
 
 
+def _complex_fft(data):
+    """Apply a standard complex FFT with NMR-centered output ordering."""
+    return np.fft.fftshift(np.fft.fft(data), -1)
+
+
 def _states_second_pass_fft(data, *, tppi=False):
     """
     Process the indirect dimension for STATES / STATES-TPPI data.
@@ -169,6 +174,13 @@ def _fft_encoding_handler(data, encoding, **kwargs):
     # complex subspectra directly and FFT along axis=-1 (which is F1 after
     # swapdims).
     if original_axis != -1:
+        if (
+            hasattr(data, "dtype")
+            and data.dtype.kind != "V"
+            and ("QF" in encoding or "QSIM" in encoding or "DQD" in encoding)
+        ):
+            return _qf_fft(data)
+
         if "STATES" in encoding:
             return _states_second_pass_fft(data, tppi=tppi or "TPPI" in encoding)
         if "ECHO-ANTIECHO" in encoding:
@@ -224,7 +236,7 @@ def _fft_encoding_handler(data, encoding, **kwargs):
         return _rebuild_quaternion(fr, fi)
 
     if "QF" in encoding or "QSIM" in encoding or "DQD" in encoding:
-        return _qf_fft(data)
+        return _qf_fft(data) if data.ndim == 1 else _complex_fft(data)
     if "QSEQ" in encoding:
         msg = "QSEQ NMR encoding is not yet implemented"
         raise NotImplementedError(msg)

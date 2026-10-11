@@ -306,6 +306,27 @@ class TestEmFFT2DTopSpin:
 class TestExam2DHHQFCOSY:
     """Bounded raw SER → QF/COSY comparison for exam2d_HH/1 only."""
 
+    def test_exam2d_hh_public_fft_uses_qf_dqd_complex_conventions(self):
+        raw = scp.read_topspin(EXAM2D_HH, expno=1, remove_digital_filter=True)
+
+        f2 = raw.fft(dim="x", size=1024)
+        expected_f2 = np.fft.fftshift(
+            np.fft.fft(np.asarray(raw.data), n=1024, axis=-1),
+            axes=-1,
+        )
+        np.testing.assert_allclose(f2.data, expected_f2, rtol=1e-12, atol=1e-12)
+
+        f1 = f2.fft(dim="y", size=1024)
+        f1_time = np.zeros((1024, f2.shape[1]), dtype=np.complex128)
+        f1_time[: f2.shape[0], :] = f2.data
+        expected_f1 = np.fft.fftshift(
+            np.fft.fft(np.conjugate(f1_time), axis=0),
+            axes=0,
+        )
+
+        assert f1.dtype == np.complex128
+        np.testing.assert_allclose(f1.data, expected_f1, rtol=1e-12, atol=1e-12)
+
     def test_exam2d_hh_raw_ser_qf_cosy_matches_2rr_topology(self):
         root = EXAM2D_HH / "1"
         for relative, expected in EXAM2D_HH_SHA256.items():

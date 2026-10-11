@@ -178,6 +178,44 @@ class TestQFEncoding:
             peak_idx == n // 2
         ), f"DC peak should be at center ({n//2}), got {peak_idx}"
 
+    @pytest.mark.parametrize("encoding", ["QF", "QSIM", "DQD"])
+    def test_direct_multidimensional_qf_encodings_use_standard_complex_fft(
+        self, encoding
+    ):
+        """The direct dimension of 2D complex Bruker data is not reconjugated."""
+        n = 32
+        t = np.arange(n)
+        data = np.vstack(
+            [
+                np.exp(2j * np.pi * 5 * t / n),
+                np.exp(2j * np.pi * 7 * t / n),
+            ],
+        )
+
+        result = _fft_encoding_handler(data, encoding, original_axis=-1)
+        expected = np.fft.fftshift(np.fft.fft(data), -1)
+        conjugated = np.fft.fftshift(np.fft.fft(np.conjugate(data)), -1)
+
+        assert_allclose(result, expected, atol=1e-12)
+        assert not np.allclose(result, conjugated)
+
+    def test_indirect_qf_complex_uses_conjugated_fft_without_quaternion(self):
+        """QF F1 data are complex arrays, not quaternion subspectra."""
+        n = 32
+        t = np.arange(n)
+        data = np.vstack(
+            [
+                np.exp(2j * np.pi * 5 * t / n),
+                np.exp(2j * np.pi * 7 * t / n),
+            ],
+        )
+
+        result = _fft_encoding_handler(data, "QF", original_axis=0)
+        expected = _qf_fft(data)
+
+        assert result.dtype == np.complex128
+        assert_allclose(result, expected, atol=1e-12)
+
 
 # ---------------------------------------------------------------------------
 # STATES encoding tests

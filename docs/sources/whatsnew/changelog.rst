@@ -26,6 +26,12 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Bruker 2D QF/DQD FFT dispatch now keeps direct complex dimensions in the
+  standard complex Fourier convention and processes indirect QF complex data
+  without routing it through quaternion extraction. This fixes the public
+  ``raw.fft()`` path for the bounded ``exam2d_HH`` QF/COSY case while
+  preserving the existing 1D QSIM convention.
+
 - The CSV reader no longer changes the process-wide locale at import time.
   It previously forced ``LC_ALL`` to ``en_US`` (through
   ``locale.setlocale``), which emitted a spurious *"Could not set locale:
