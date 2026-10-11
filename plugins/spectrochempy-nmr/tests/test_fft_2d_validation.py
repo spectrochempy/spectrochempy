@@ -322,7 +322,10 @@ class TestExam2DHHQFCOSY:
         assert int(_jcamp_value(root / "acqu2", "TD")) == 128
         assert raw.meta.fnmode[0] == 1
         assert raw.meta.encoding[0] == "QF"
-        for proc_file in (root / "pdata" / "1" / "proc2s", root / "pdata" / "1" / "procs"):
+        for proc_file in (
+            root / "pdata" / "1" / "proc2s",
+            root / "pdata" / "1" / "procs",
+        ):
             assert int(_jcamp_value(proc_file, "SI")) == 1024
             assert int(_jcamp_value(proc_file, "FT_mod")) == 6
             assert int(_jcamp_value(proc_file, "MC2")) == 0
