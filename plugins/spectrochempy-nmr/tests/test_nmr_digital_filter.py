@@ -6,8 +6,18 @@
 # ruff: noqa: S101, F841
 """Regression tests for the NMR digital filter removal algorithm."""
 
+import hashlib
+from pathlib import Path
+
 import numpy as np
 import pytest
+from spectrochempy_nmr.extern.nmrglue import read_fid
+from spectrochempy_nmr.readers.read_topspin import _remove_digital_filter
+
+import spectrochempy as scp
+
+_TOPSPIN_1D_FID = scp.preferences.datadir / "nmrdata/bruker/tests/nmr/topspin_1d/1/fid"
+_REFERENCE_FILE = Path(__file__).resolve().parent / "data/topspin_1d_rmdig_ref.npz"
 
 
 def _make_dic(grpdly=None, dspfvs=20, decim=3328, td=None):
@@ -120,3 +130,43 @@ class TestRemoveDigitalFilter:
         out = fn(dic, data.copy())
         # phase=0, skip=2, so output length = n - 2
         assert len(out) == n - 2
+
+    def test_known_good_reference_topspin_1d(self):
+        """
+        Compare `_remove_digital_filter` output to a static nmrglue-ng reference.
+
+        Input: ``topspin_1d/1/fid`` (CC BY 4.0, Christian Fernandez, LCS).
+        ``fid`` SHA-256
+        ``a471ce0ec0c5f28b02c1ae05200f1b0300e29f042d36c3d5ff2d53c433219ed6``;
+        ``acqus`` SHA-256
+        ``00f86298b13a4f9a116feba96b9691fde6bf163ca4d1291a84d4ac8a82d12560``;
+        ``DECIM=80``, ``DSPFVS=21``, ``GRPDLY=76``. The ``pdata/1/1r`` and
+        ``1i`` pair is a processed spectrum (FFT, apodization, phase), not a
+        filter-only reference, and is deliberately not used here.
+
+        Expected: complex128, shape ``(12466,)``, produced once by nmrglue-ng
+        ``e34ad7e90de215219087374009e6564fdb168220``
+        (``nmrglue/fileio/bruker.py::remove_digital_filter``); raw-output
+        SHA-256
+        ``810a05b9471b6a47123b388883ff4137391ec079d797dd5a4e889196ed4d4a75``.
+        The bundled ``read_fid`` feeds the exact reader path used by
+        ``read_topspin``.
+
+        Tolerance: ``atol=1e-8``/``rtol=1e-12`` leave a wide margin over the
+        observed FFT last-bit scatter (max abs delta 4.66e-10, RMS 2.21e-11 on
+        amplitudes up to ~2.1e6) while still pinning the numerical result.
+        """
+        if not _TOPSPIN_1D_FID.exists():
+            pytest.skip(f"NMR test data not available: {_TOPSPIN_1D_FID}")
+
+        dic, data = read_fid(_TOPSPIN_1D_FID.parent)
+        out = _remove_digital_filter(dic, data)
+
+        reference = np.load(_REFERENCE_FILE)["expected"]
+        assert (
+            hashlib.sha256(reference.tobytes()).hexdigest()
+            == "810a05b9471b6a47123b388883ff4137391ec079d797dd5a4e889196ed4d4a75"
+        )
+        assert out.shape == reference.shape
+        assert out.dtype == reference.dtype
+        assert np.allclose(out, reference, rtol=1e-12, atol=1e-8)
