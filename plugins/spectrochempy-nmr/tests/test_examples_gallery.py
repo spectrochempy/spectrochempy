@@ -27,6 +27,7 @@ VISIBLE_EXAMPLES = [
     "processing/apodization/plot_proc_em.py",
     "processing/apodization/plot_proc_sp.py",
     "processing/nmr/plot_read_nmr_topspin.py",
+    "processing/nmr/plot_exam2d_hh_qf_cosy.py",
     "processing/nmr/plot_processing_nmr.py",
     "processing/nmr/plot_processing_nmr_relax.py",
 ]
@@ -41,7 +42,7 @@ def _has_nmr_example_data() -> bool:
     return all(path.exists() for path in required)
 
 
-def test_nmr_gallery_manifest_focuses_on_public_1d_examples():
+def test_nmr_gallery_manifest_focuses_on_public_examples():
     manifest = tomllib.loads(MANIFEST.read_text(encoding="utf-8"))
     example_paths = [entry["path"] for entry in manifest["examples"]]
 
