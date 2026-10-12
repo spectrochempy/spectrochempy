@@ -159,6 +159,9 @@ replayed_scaled, overlap, rms_rel = _scaled_metrics(replayed_raw, topspin_raw)
 topspin = _normalized(topspin_raw)
 replayed = _normalized(replayed_scaled)
 residual = replayed - topspin
+topspin_diagonal = np.diag(topspin)
+replayed_diagonal = np.diag(replayed)
+residual_diagonal = replayed_diagonal - topspin_diagonal
 
 x_ppm = np.asarray(topspin_2rr.x.data, dtype=float)
 y_ppm = np.asarray(topspin_2rr.y.data, dtype=float)
@@ -194,6 +197,7 @@ for ax, data, title in [
     (axes[1], replayed, "ser replay with F1 LP"),
 ]:
     ax.contour(x_ppm, y_ppm, data, levels=levels, colors="black", linewidths=0.8)
+    ax.plot(x_ppm, y_ppm, color="tab:red", linewidth=0.8, alpha=0.6)
     ax.set_title(title)
     ax.set_xlim(window)
     ax.set_ylim(window)
@@ -211,6 +215,7 @@ mesh = axes[2].contourf(
     extend="both",
 )
 axes[2].set_title("Scaled residual")
+axes[2].plot(x_ppm, y_ppm, color="black", linewidth=0.8, alpha=0.6)
 axes[2].set_xlim(window)
 axes[2].set_ylim(window)
 axes[2].set_xlabel("F2 / ppm")
@@ -228,6 +233,36 @@ fig.text(
 )
 
 fig.suptitle("exam2d_HH/1 QF/COSY: TopSpin 2rr vs bounded ser replay")
+
+# %%
+# Diagonal profile
+# ----------------
+# The global residual is small, but the diagonal profile exposes remaining local
+# differences in peak shape and intensity along the COSY autocorrelation line.
+fig_diag, ax_diag = plt.subplots(figsize=(7, 3), constrained_layout=True)
+
+ax_diag.plot(x_ppm, topspin_diagonal, label="TopSpin 2rr", linewidth=1.4)
+ax_diag.plot(
+    x_ppm,
+    replayed_diagonal,
+    label="bounded ser replay",
+    linewidth=1.2,
+    linestyle="--",
+)
+ax_diag.plot(
+    x_ppm,
+    residual_diagonal,
+    label="replay - TopSpin",
+    linewidth=0.9,
+    color="tab:red",
+    alpha=0.8,
+)
+ax_diag.axhline(0.0, color="0.4", linewidth=0.6)
+ax_diag.set_xlim(window)
+ax_diag.set_xlabel("F2/F1 diagonal / ppm")
+ax_diag.set_ylabel("normalized intensity")
+ax_diag.set_title("Diagonal cut through the TopSpin and replayed spectra")
+ax_diag.legend(loc="upper left")
 
 # %%
 # The F1 linear prediction step is essential here: without it, the indirect
