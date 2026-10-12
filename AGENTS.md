@@ -49,6 +49,21 @@ appropriate section.
 
 ---
 
+## Gallery and Documentation Tutorials
+
+Prefer public SpectroChemPy functions (`scp.*`) and `NDDataset` methods over
+NumPy (`np.*`) or custom array implementations whenever an equivalent operation
+is available. Preserve coordinates, units, metadata, and history through the
+example's processing chain.
+
+If an operation cannot be expressed with the public SCP API, identify the gap
+in the example and in the implementation/review report or PR description.
+State which operation is missing or unsuitable, why the fallback is necessary,
+and its validation limits. See the native-API guidance in
+`docs/sources/devguide/contributing_documentation.rst`.
+
+---
+
 ## Authorization Limits
 
 The maintainer controls commits, branches, pushes, pull requests, releases,
