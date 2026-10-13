@@ -161,6 +161,32 @@ class TestFFT2DTopSpin:
     """Type A: TopSpin 2D SER read + FFT."""
 
     @pytest.mark.skipif(not _has_topspin_2d(), reason="TopSpin 2D data not available")
+    def test_topspin_states_tppi_components_match_fixed_slots(self):
+        """Keep the established raw-to-TopSpin component correspondence."""
+        pdata = TOPSPIN_2D / "1" / "pdata" / "1" / "2rr"
+        reference = scp.read_topspin(pdata)
+        raw = scp.nmr.read(TOPSPIN_2D, expno=1, remove_digital_filter=True)
+
+        f2 = raw.em(lb="50 Hz", dim="x").fft(dim="x", size=reference.shape[1])
+        f2.data[0, :] *= 0.5
+        result = f2.zf_size(size=reference.shape[0], dim="y").fft(dim="y")
+
+        actual_slots = quaternion.as_float_array(result.data)
+        reference_slots = quaternion.as_float_array(reference.data)
+        limits = (0.06, 0.06, 0.11, 0.11)
+        for actual, expected, limit in zip(
+            np.moveaxis(actual_slots, -1, 0),
+            np.moveaxis(reference_slots, -1, 0),
+            limits,
+            strict=True,
+        ):
+            scale = np.vdot(actual, expected) / np.vdot(actual, actual)
+            relative_l2 = np.linalg.norm(scale * actual - expected) / np.linalg.norm(
+                expected
+            )
+            assert relative_l2 < limit
+
+    @pytest.mark.skipif(not _has_topspin_2d(), reason="TopSpin 2D data not available")
     def test_topspin_2d_fft_peak(self):
         ds = scp.read_topspin(TOPSPIN_2D, expno=1, remove_digital_filter=True)
         fft = ds.fft()

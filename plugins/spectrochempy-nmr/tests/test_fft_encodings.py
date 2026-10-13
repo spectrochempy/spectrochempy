@@ -381,6 +381,125 @@ class TestEncodingHandler:
         result = _fft_encoding_handler(data, "STATES-TPPI", tppi=True)
         assert result.shape == data.shape
 
+    def test_indirect_states_transforms_cross_pairs(self):
+        """Second-pass STATES transforms the indirect quaternion cross-pairs."""
+        nf1, nf2 = 8, 6
+        t2 = np.arange(nf2)[:, None]
+        t1 = np.arange(nf1)[None, :]
+        fr = (1.0 + t2 / 10.0) * np.exp(2j * np.pi * t1 / nf1)
+        fi = (0.5 + t2 / 20.0) * np.exp(4j * np.pi * t1 / nf1)
+        data = _make_quat(np.stack([fr.real, fr.imag, fi.real, fi.imag], axis=-1))
+
+        result = _fft_encoding_handler(data, "STATES", original_axis=0)
+
+        cross_real = np.conjugate(fr.real + 1j * fi.real)
+        cross_imag = np.conjugate(fr.imag + 1j * fi.imag)
+        expected_real = np.fft.fftshift(np.fft.fft(cross_real), -1)
+        expected_imag = np.fft.fftshift(np.fft.fft(cross_imag), -1)
+        w, x, y, z = _get_components(result)
+
+        assert_allclose(w, expected_real.real, atol=1e-12)
+        assert_allclose(x, expected_real.imag, atol=1e-12)
+        assert_allclose(y, expected_imag.real, atol=1e-12)
+        assert_allclose(z, expected_imag.imag, atol=1e-12)
+        assert np.any(np.abs(y) > 0.0)
+        assert np.any(np.abs(z) > 0.0)
+
+    def test_states_tppi_two_pass_matches_cross_pair_reference(self):
+        """STATES-TPPI F2 then F1 follows the documented cross-pair workflow."""
+        nf1, nf2 = 8, 10
+        t1 = np.arange(nf1)[:, None]
+        t2 = np.arange(nf2)[None, :]
+        f1_freq = 2
+        f2_freq = 3
+        f1_freq_2 = -1
+        f2_freq_2 = 1
+        f1_phase = 0.37
+        f2_phase = -0.58
+        f1_delay = 0.31
+        f2_delay = -0.42
+
+        # Fractional delays mimic non-zero acquisition origins. With multiple
+        # frequencies they produce a first-order phase relation, not merely a
+        # single constant phase offset.
+        signal = np.exp(
+            1j
+            * (
+                2 * np.pi * f1_freq * (t1 + f1_delay) / nf1
+                + 2 * np.pi * f2_freq * (t2 + f2_delay) / nf2
+                + f1_phase
+                + f2_phase
+            )
+        ) + 0.35 * np.exp(
+            1j
+            * (
+                2 * np.pi * f1_freq_2 * (t1 + f1_delay) / nf1
+                + 2 * np.pi * f2_freq_2 * (t2 + f2_delay) / nf2
+                - 0.2 * f1_phase
+                + 0.5 * f2_phase
+            )
+        )
+
+        # Bruker SER-style storage after pairing real and imaginary t1 rows:
+        # first complex channel is the real indirect branch, second channel is
+        # the imaginary indirect branch.
+        raw = _make_quat(
+            np.stack(
+                [
+                    signal.real,
+                    signal.imag,
+                    0.4 * signal.real + 0.1 * signal.imag,
+                    0.4 * signal.imag - 0.1 * signal.real,
+                ],
+                axis=-1,
+            )
+        )
+
+        from spectrochempy import Coord
+        from spectrochempy import NDDataset
+
+        dataset = NDDataset(
+            raw,
+            coordset=[Coord.arange(nf1, unit="s"), Coord.arange(nf2, unit="s")],
+        )
+        dataset.meta.encoding = ["STATES-TPPI", "DQD"]
+        dataset.meta.iscomplex = [True, True]
+        dataset.meta.td = [nf1, nf2]
+        dataset.meta.si = [nf1, nf2]
+        dataset.meta.phc0 = [0, 0]
+        dataset.meta.phc1 = [0, 0]
+        dataset.meta.phased = [False, False]
+
+        after_f2 = dataset.fft(dim="x")
+        result = after_f2.fft(dim="y")
+
+        q0, q1, q2, q3 = _get_components(after_f2.data)
+        real_branch = q0 + 1j * q2
+        imag_branch = q1 + 1j * q3
+        real_branch[1::2, ...] = -real_branch[1::2, ...]
+        imag_branch[1::2, ...] = -imag_branch[1::2, ...]
+        expected_real = np.fft.fftshift(
+            np.fft.fft(np.conjugate(real_branch), axis=0),
+            axes=0,
+        )
+        expected_imag = np.fft.fftshift(
+            np.fft.fft(np.conjugate(imag_branch), axis=0),
+            axes=0,
+        )
+
+        w, x, y, z = _get_components(result.data)
+        assert_allclose(w, expected_real.real, atol=1e-12)
+        assert_allclose(x, expected_real.imag, atol=1e-12)
+        assert_allclose(y, expected_imag.real, atol=1e-12)
+        assert_allclose(z, expected_imag.imag, atol=1e-12)
+
+        wrong_real = q0 + 1j * q1
+        wrong_imag = q2 + 1j * q3
+        wrong_real[1::2, ...] = -wrong_real[1::2, ...]
+        wrong_imag[1::2, ...] = -wrong_imag[1::2, ...]
+        wrong = np.fft.fftshift(np.fft.fft(np.conjugate(wrong_real), axis=0), axes=0)
+        assert not np.allclose(w + 1j * x, wrong)
+
     def test_dispatch_tppi(self):
         """Handler should dispatch TPPI."""
         data = _make_tppi_data(8, 16, 1.0, 2.0)
