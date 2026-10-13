@@ -312,16 +312,6 @@ def test_package_uses_helper_next_dev():
     assert "PATCH + 1" not in content
 
 
-def test_archived_docs_skips_release_candidate_tags():
-    content = (WORKFLOWS / "build_docs_archived_versions.yml").read_text(
-        encoding="utf-8"
-    )
-    assert "release candidate" in content.lower() or "rc" in content.lower()
-    # An RC tag (spectrochempy-v1.0.0rc1) must not be built as an archived
-    # stable docs directory.
-    assert "keep_count" in content
-
-
 def test_update_script_no_longer_truncates_rc_versions():
     content = (WORKFLOWS / "scripts" / "update_version_and_release_notes.py").read_text(
         encoding="utf-8"

@@ -1675,7 +1675,7 @@ class TestRecoveryWorkflow:
     def test_never_publishes_or_uses_token(self):
         text = self.WORKFLOW.read_text()
         assert "ANACONDA_API_TOKEN" not in text
-        assert "upload-artifact@v7" in text
+        assert "actions/upload-artifact" not in text
         assert "no publication" in text.lower() or "never" in text.lower()
 
     def test_no_github_interpolation_in_run_blocks(self):
