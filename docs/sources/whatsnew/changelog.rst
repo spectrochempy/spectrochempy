@@ -26,6 +26,11 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Bruker 2D States/States-TPPI indirect Fourier processing now uses the
+  hypercomplex cross-pairs formed after the direct-dimension transform. This
+  preserves all four processed components instead of collapsing the indirect
+  image branch, improving component replay for phase-sensitive TopSpin data.
+
 - Bruker 2D QF/DQD FFT dispatch now keeps direct complex dimensions in the
   standard complex Fourier convention and processes indirect QF complex data
   without routing it through quaternion extraction. This fixes the public
