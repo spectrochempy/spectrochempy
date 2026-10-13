@@ -64,16 +64,6 @@ jobs:
         run: |
           python -m build --sdist --wheel --outdir dist/ .
 
-      - name: Upload build artifacts
-        if: ${{ !env.ACT }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: pypi-package
-          path: |
-            dist/*.whl
-            dist/*.tar.gz
-          retention-days: 5
-
       - name: Publish package to TestPyPI
         if: |
           github.event_name == 'workflow_dispatch' &&

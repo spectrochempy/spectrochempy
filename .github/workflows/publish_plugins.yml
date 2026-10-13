@@ -153,16 +153,6 @@ jobs:
         run: |
           python -m build --sdist --wheel --outdir dist/${{ matrix.plugin.name }} ${{ matrix.plugin.path }}
 
-      - name: Upload plugin build artifacts
-        if: ${{ !env.ACT }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: pypi-package-${{ matrix.plugin.name }}
-          path: |
-            dist/${{ matrix.plugin.name }}/*.whl
-            dist/${{ matrix.plugin.name }}/*.tar.gz
-          retention-days: 5
-
       - name: Publish plugin package to TestPyPI
         if: |
           github.repository == 'spectrochempy/spectrochempy' &&
