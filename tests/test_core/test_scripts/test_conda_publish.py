@@ -1774,6 +1774,17 @@ class TestNoCondaDevelopmentPublication:
         assert "github.event_name == 'push'" not in condition
         assert "startsWith(github.ref_name, 'spectrochempy-v')" not in condition
 
+    def test_plugin_build_merges_output_with_restored_core_channel(self):
+        import yaml
+
+        workflow = yaml.safe_load(self._workflow())
+        steps = workflow["jobs"]["build_and_publish_conda_plugins"]["steps"]
+        merge = next(
+            step for step in steps if step["name"] == "Merge conda build output"
+        )
+        assert "cp -r ../output/. output/" in merge["run"]
+        assert "mv ../output ." not in merge["run"]
+
 
 # ---------------------------------------------------------------------------
 # Discovered-plugins matrix (conda release guard and recipe extraction)

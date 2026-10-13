@@ -467,9 +467,9 @@ jobs:
             -c spectrocat
             -c conda-forge
 
-      - name: Move conda build output
+      - name: Merge conda build output
         run: |
-          mv ../output .
+          cp -r ../output/. output/
 
       - name: Restore plugin version metadata
         if: ${{ always() && !(github.event_name == 'release' && startsWith(github.ref_name, matrix.plugin.name)) }}
