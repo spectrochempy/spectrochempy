@@ -455,18 +455,39 @@ class TestEncodingHandler:
             )
         )
 
-        after_f2 = _fft_encoding_handler(raw, "DQD", original_axis=-1)
-        result = _fft_encoding_handler(after_f2, "STATES-TPPI", original_axis=0)
+        from spectrochempy import Coord
+        from spectrochempy import NDDataset
 
-        q0, q1, q2, q3 = _get_components(after_f2)
+        dataset = NDDataset(
+            raw,
+            coordset=[Coord.arange(nf1, unit="s"), Coord.arange(nf2, unit="s")],
+        )
+        dataset.meta.encoding = ["STATES-TPPI", "DQD"]
+        dataset.meta.iscomplex = [True, True]
+        dataset.meta.td = [nf1, nf2]
+        dataset.meta.si = [nf1, nf2]
+        dataset.meta.phc0 = [0, 0]
+        dataset.meta.phc1 = [0, 0]
+        dataset.meta.phased = [False, False]
+
+        after_f2 = dataset.fft(dim="x")
+        result = after_f2.fft(dim="y")
+
+        q0, q1, q2, q3 = _get_components(after_f2.data)
         real_branch = q0 + 1j * q2
         imag_branch = q1 + 1j * q3
-        real_branch[..., 1::2] = -real_branch[..., 1::2]
-        imag_branch[..., 1::2] = -imag_branch[..., 1::2]
-        expected_real = np.fft.fftshift(np.fft.fft(np.conjugate(real_branch)), -1)
-        expected_imag = np.fft.fftshift(np.fft.fft(np.conjugate(imag_branch)), -1)
+        real_branch[1::2, ...] = -real_branch[1::2, ...]
+        imag_branch[1::2, ...] = -imag_branch[1::2, ...]
+        expected_real = np.fft.fftshift(
+            np.fft.fft(np.conjugate(real_branch), axis=0),
+            axes=0,
+        )
+        expected_imag = np.fft.fftshift(
+            np.fft.fft(np.conjugate(imag_branch), axis=0),
+            axes=0,
+        )
 
-        w, x, y, z = _get_components(result)
+        w, x, y, z = _get_components(result.data)
         assert_allclose(w, expected_real.real, atol=1e-12)
         assert_allclose(x, expected_real.imag, atol=1e-12)
         assert_allclose(y, expected_imag.real, atol=1e-12)
@@ -474,9 +495,9 @@ class TestEncodingHandler:
 
         wrong_real = q0 + 1j * q1
         wrong_imag = q2 + 1j * q3
-        wrong_real[..., 1::2] = -wrong_real[..., 1::2]
-        wrong_imag[..., 1::2] = -wrong_imag[..., 1::2]
-        wrong = np.fft.fftshift(np.fft.fft(np.conjugate(wrong_real)), -1)
+        wrong_real[1::2, ...] = -wrong_real[1::2, ...]
+        wrong_imag[1::2, ...] = -wrong_imag[1::2, ...]
+        wrong = np.fft.fftshift(np.fft.fft(np.conjugate(wrong_real), axis=0), axes=0)
         assert not np.allclose(w + 1j * x, wrong)
 
     def test_dispatch_tppi(self):
