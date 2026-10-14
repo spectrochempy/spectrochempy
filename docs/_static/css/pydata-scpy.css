@@ -1,0 +1,43 @@
+/*
+ * SpectroChemPy branding overlay for pydata-sphinx-theme.
+ *
+ * Overrides the theme's CSS custom properties with the SpectroChemPy palette
+ * instead of the default colors. Keep this file focused on branding; layout
+ * tweaks should be minimal and documented.
+ */
+
+:root {
+  /* Brand blue, reused for links, active nav items and primary buttons. */
+  --pst-color-primary: #0069d6;
+  --pst-color-primary-highlight: #074fb3;
+  --pst-color-secondary: #2d7ff9;
+  --pst-color-secondary-highlight: #074fb3;
+  --pst-color-link: #0069d6;
+  --pst-color-link-hover: #074fb3;
+
+  /* Slightly narrower content column for a calmer reading measure. */
+  --pst-sidebar-secondary: 15rem;
+}
+
+html[data-theme="dark"] {
+  --pst-color-primary: #5aa2f0;
+  --pst-color-primary-highlight: #8bbcff;
+  --pst-color-link: #74c0fc;
+  --pst-color-link-hover: #a5d8ff;
+}
+
+/* Scale the logo in the navbar to the header height. */
+.navbar-brand img {
+  max-height: 40px;
+  width: auto;
+}
+
+/* Tighten inline monospace to sit better with the body text. */
+code.literal {
+  font-size: 0.875em;
+}
+
+/* Separate the primary sidebar from the content column. */
+.bd-sidebar-primary {
+  border-right: 1px solid var(--pst-color-border);
+}

@@ -294,13 +294,30 @@ html_theme = "pydata_sphinx_theme"
 # documentation.
 html_theme_options = {
     "navbar_align": "left",
+    "navbar_end": ["theme-switcher", "navbar-icon-links"],
+    "navbar_persistent": ["search-button-field"],
+    "header_links_before_dropdown": 6,
+    "show_nav_level": 2,
+    "navigation_depth": 4,
+    "collapse_navigation": False,
     "show_toc_level": 2,
-    "use_edit_page_button": False,
+    "use_edit_page_button": True,
+    "search_bar_text": "Search the documentation...",
     "icon_links": [
         {
             "name": "GitHub",
             "url": "https://github.com/spectrochempy/spectrochempy",
             "icon": "fa-brands fa-github",
+        },
+        {
+            "name": "PyPI",
+            "url": "https://pypi.org/project/spectrochempy/",
+            "icon": "fa-brands fa-python",
+        },
+        {
+            "name": "Conda",
+            "url": "https://anaconda.org/spectrocat/spectrochempy",
+            "icon": "fa-solid fa-box-open",
         },
     ],
 }
@@ -329,6 +346,7 @@ html_static_path = ["_static"]
 html_css_files = [
     "css/spectrochempy.css",
     "css/custom.css",
+    "css/pydata-scpy.css",
 ]
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
@@ -441,6 +459,11 @@ html_context = {
     "bibyear": "{" + f"{datetime.today().year}" + "}",
     "on_github_actions": on_github_actions,
     "github_repository": github_repository,
+    # Required by pydata-sphinx-theme's "Edit this page" button.
+    "github_user": "spectrochempy",
+    "github_repo": "spectrochempy",
+    "github_version": "master",
+    "doc_path": "docs/sources",
 }
 
 # Sphinx-gallery ---------------------------------------------------------------
