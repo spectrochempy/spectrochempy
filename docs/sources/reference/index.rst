@@ -11,6 +11,15 @@ The `SpectroChemPy` :term:`API` publicly exposes many objects and functions.
 They are listed below exhaustively.
 What is not listed here is reserved for developers and should not normally be necessary for normal use of `SpectroChemPy` .
 
+.. toctree::
+   :hidden:
+   :maxdepth: 1
+
+   plugins
+   glossary
+   bibliography
+   papers
+
 .. contents:: Table of Contents
 
 ***************

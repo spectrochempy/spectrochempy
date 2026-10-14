@@ -24,14 +24,6 @@
 SpectroChemPy: Advanced Spectroscopic Data Analysis
 #####################################################################
 
-.. toctree::
-    :hidden:
-    :caption: Navigation
-
-.. toctree::
-    :hidden:
-    :caption: Summary
-
 **SpectroChemPy** is a powerful Python framework for processing, analyzing and modeling spectroscopic data in chemistry. This cross-platform solution provides:
 
 ⚡️ **Key Features**
@@ -77,64 +69,17 @@ SpectroChemPy: Advanced Spectroscopic Data Analysis
     :hidden:
 
     whatsnew/latest
-
-.. toctree::
-    :maxdepth: 1
-    :hidden:
-    :caption: 🚀 Getting Started
-
-    Why SpectroChemPy? <gettingstarted/whyscpy>
-    5-minute quickstart <gettingstarted/quickstart>
-    Installation guide <gettingstarted/install/index>
-    Example's gallery <gettingstarted/examples/index>
-    Getting help  <gettingstarted/getting_help>
-
-.. toctree::
-    :maxdepth: 3
-    :hidden:
-    :caption: 📚 User's Guide & Tutorials
-
-
-    userguide/introduction/introduction
-    userguide/importexport/index
-    userguide/plotting/index
-    userguide/processing/index
-    userguide/analysis/index
-    userguide/plugins/index
-    userguide/api/api
-    userguide/objects/index
-
-.. toctree::
-    :maxdepth: 1
-    :hidden:
-    :caption: 🔍 Reference
-
+    🚀 Getting Started <gettingstarted/index>
+    📚 User's Guide & Tutorials <userguide/index>
     {% if include_api -%}
-    reference/index
-    reference/plugins
+    🔍 Reference <reference/index>
+    {% else -%}
+    🔍 Reference <reference/glossary>
+    Bibliography <reference/bibliography>
+    Papers <reference/papers>
     {% endif -%}
-    reference/glossary
-    reference/bibliography
-    reference/papers
-
-.. toctree::
-    :maxdepth: 1
-    :hidden:
-    :caption: 🛠️ Contribute
-
-    Bug reports & feature request <devguide/issues>
-    Sharing examples & tutorials <devguide/examples>
-    devguide/index
-
-.. toctree::
-    :maxdepth: 1
-    :hidden:
-    :caption: ✨ Credits
-
-    credits/credits
-    credits/citing
-    credits/license
-    credits/seealso
+    🛠️ Contribute <devguide/index>
+    ✨ Credits <credits/index>
 
 {% elif single and pattern.endswith('.ipynb') -%}
 .. toctree::

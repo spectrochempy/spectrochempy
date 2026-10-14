@@ -297,7 +297,7 @@ html_theme_options = {
     "navbar_end": ["theme-switcher", "navbar-icon-links"],
     "navbar_persistent": ["search-button-field"],
     "header_links_before_dropdown": 6,
-    "show_nav_level": 2,
+    "show_nav_level": 1,
     "navigation_depth": 4,
     "collapse_navigation": False,
     "show_toc_level": 2,
