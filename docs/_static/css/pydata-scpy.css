@@ -208,6 +208,7 @@ body:has(.scp-home) .bd-sidebar-secondary {
 .bd-article-container:has(.scp-home) .bd-header-article,
 .bd-article-container:has(.scp-home) .editthispage,
 .bd-article-container:has(.scp-home) .bd-footer-article,
+.bd-article-container:has(.scp-home) .prev-next-footer,
 .bd-article-container:has(.scp-home) #searchbox {
   display: none;
 }
