@@ -240,6 +240,7 @@ with open(os.path.join(SRC, "index.rst"), "w", encoding="utf-8") as f:
             include_api=include_api,
             single=single_doc_or_dir,
             pattern=pattern,
+            version=release,
         )
     )
 
@@ -294,6 +295,8 @@ html_theme = "pydata_sphinx_theme"
 # documentation.
 html_theme_options = {
     "navbar_align": "left",
+    # Show the project name and version next to the logo in the navbar.
+    "logo": {"text": project},
     "navbar_end": ["theme-switcher", "navbar-icon-links"],
     "navbar_persistent": ["search-button-field"],
     "header_links_before_dropdown": 6,
@@ -993,10 +996,65 @@ def rstjinja(app, docname, source):
     source[0] = rendered
 
 
+# Generated autosummary stubs (``reference/generated/spectrochempy.*.html``) are
+# listed exhaustively on the "Public API reference" page. Their links are pruned
+# from the navigation sidebar to keep it readable.
+_API_STUB_HREF = re.compile(r"spectrochempy(?:\.[A-Za-z0-9_]+)+\.html")
+
+
+def _prune_api_stub_links(toctree):
+    """
+    Drop sidebar links pointing to autosummary-generated API stubs.
+
+    ``generate_toctree_html`` returns a BeautifulSoup object for the sidebar;
+    we remove the ``<li>`` whose link targets an API stub page, then clean up
+    the collapsible wrappers left without children.
+    """
+    if not hasattr(toctree, "find_all"):
+        return
+
+    for li in toctree.find_all("li"):
+        link = li.find("a", href=True)
+        if link is not None and _API_STUB_HREF.search(link["href"]):
+            li.decompose()
+
+    for ul in toctree.find_all("ul"):
+        if not ul.find("li"):
+            (ul.find_parent("details") or ul).decompose()
+
+    for li in toctree.find_all("li"):
+        classes = li.get("class")
+        if classes and "has-children" in classes and not li.find("ul"):
+            li["class"] = [name for name in classes if name != "has-children"]
+
+
+def strip_generated_api_links(app, pagename, templatename, context, doctree):
+    """
+    Wrap the sidebar toctree generator so it hides the generated API stubs.
+
+    pydata-sphinx-theme exposes ``generate_toctree_html`` in the page context.
+    We wrap it so its "sidebar" output is pruned before rendering. Connecting
+    with priority greater than the default (500) makes this run after the
+    theme's own handler, so the function is already present.
+    """
+    original = context.get("generate_toctree_html")
+    if original is None:
+        return
+
+    def generate_sidebar_toctree(kind="sidebar", **kwargs):
+        toctree = original(kind, **kwargs)
+        if kind == "sidebar":
+            _prune_api_stub_links(toctree)
+        return toctree
+
+    context["generate_toctree_html"] = generate_sidebar_toctree
+
+
 def setup(app):
     app.connect("source-read", rstjinja)
     app.connect("autodoc-skip-member", autodoc_skip_member)
     app.connect("autodoc-process-signature", shorter_signature)
+    app.connect("html-page-context", strip_generated_api_links, priority=999)
     app.add_autodocumenter(SpectroChemPyClassDocumenter, override=True)
     app.add_css_file("css/spectrochempy.css")  # also can be a full URL
     app.config.rst_mimetype = rst_mimetype

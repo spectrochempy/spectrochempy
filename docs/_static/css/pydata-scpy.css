@@ -26,10 +26,17 @@ html[data-theme="dark"] {
   --pst-color-link-hover: #a5d8ff;
 }
 
-/* Scale the logo in the navbar to the header height. */
+/* Scale the logo in the navbar to the header content height. */
 .navbar-brand img {
-  max-height: 40px;
+  max-height: 48px;
   width: auto;
+}
+
+/* Project name + version shown next to the logo in the navbar. */
+.navbar-brand .logo__title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 /* Tighten inline monospace to sit better with the body text. */
