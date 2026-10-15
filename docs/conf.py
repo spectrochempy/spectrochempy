@@ -1083,7 +1083,7 @@ def strip_generated_api_links(app, pagename, templatename, context, doctree):
             navigation = original_header(*args, **kwargs)
             latest = relative_uri(f"{pagename}.html", "whatsnew/latest.html")
             return re.sub(
-                r"(<a\b[^>]*\bhref=\")[^\"]+(\"[^>]*>\s*What's New\s*</a>)",
+                r"(<a\b[^>]*\bhref=\")[^\"]+(\"[^>]*>\s*(?:🆕\s*)?What's New\s*</a>)",
                 rf"\g<1>{latest}\g<2>",
                 navigation,
             )
@@ -1106,9 +1106,18 @@ def _section_title(env, pagename):
             for child in env.toctree_includes.get(docname, ())
         )
 
+    section_titles = {
+        "gettingstarted/index": "🚀 Getting Started",
+        "userguide/index": "📚 Guides",
+        "reference/index": "🔍 Reference",
+        "whatsnew/index": "🆕 What's New",
+        "devguide/index": "🛠️ Contribute",
+        "credits/index": "✨ Credits",
+    }
+
     for section in env.toctree_includes.get(env.config.root_doc, ()):
         if contains(section, pagename, set()):
-            return env.titles[section].astext()
+            return section_titles.get(section, env.titles[section].astext())
     return None
 
 

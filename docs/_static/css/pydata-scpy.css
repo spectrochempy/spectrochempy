@@ -103,6 +103,27 @@ code.literal {
   background: rgba(255, 255, 255, 0.22);
 }
 
+.bd-footer {
+  background: var(--scp-header-blue);
+  border-top-color: rgba(255, 255, 255, 0.24);
+  color: #ffffff;
+}
+
+.bd-footer p,
+.bd-footer .nav-link,
+.bd-footer .footer-item,
+.bd-footer .footer-item p {
+  color: #ffffff !important;
+}
+
+.bd-footer a {
+  color: var(--scp-gold) !important;
+}
+
+.bd-footer a:hover {
+  color: #ffffff !important;
+}
+
 .bd-sidebar-primary {
   background: var(--scp-sidebar);
   border-right-color: rgba(255, 255, 255, 0.1);
@@ -154,6 +175,18 @@ code.literal {
 
 body:has(.scp-home) .bd-container__inner {
   max-width: none;
+}
+
+body:has(.scp-home) .bd-container,
+body:has(.scp-home) .bd-container__inner,
+body:has(.scp-home) .bd-main,
+body:has(.scp-home) .bd-content,
+body:has(.scp-home) .bd-article-container,
+body:has(.scp-home) .bd-article {
+  margin: 0;
+  max-width: none;
+  padding: 0;
+  width: 100%;
 }
 
 body:has(.scp-home) .bd-sidebar-primary {
@@ -330,15 +363,17 @@ body:has(.scp-home) #pst-header .primary-toggle {
 }
 
 .scp-spectrum-footer {
-  justify-content: flex-start;
-  gap: 0.65rem;
+  gap: 0.4rem;
+  justify-content: space-between;
   align-items: center;
   margin-top: 0.85rem;
   color: #a9cbdc;
+  font-size: 0.65rem;
 }
 
 .scp-spectrum-footer i {
-  width: 1.6rem;
+  flex: 1;
+  min-width: 0.6rem;
   height: 1px;
   background: #5c91ad;
 }
