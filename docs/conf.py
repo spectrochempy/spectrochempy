@@ -21,6 +21,7 @@ import jinja2
 from packaging.version import InvalidVersion
 from packaging.version import Version
 from sphinx.ext.autodoc import ClassDocumenter
+from sphinx.util.osutil import relative_uri
 
 # Ensure docs and executed notebooks import the in-tree source tree first.
 DOCS_CONFDIR = Path(__file__).parent
@@ -1065,6 +1066,8 @@ def strip_generated_api_links(app, pagename, templatename, context, doctree):
     if original is None:
         return
 
+    original_header = context.get("generate_header_nav_html")
+
     def generate_sidebar_toctree(kind="sidebar", **kwargs):
         toctree = original(kind, **kwargs)
         if kind == "sidebar":
@@ -1074,6 +1077,39 @@ def strip_generated_api_links(app, pagename, templatename, context, doctree):
         return toctree
 
     context["generate_toctree_html"] = generate_sidebar_toctree
+    if original_header is not None:
+
+        def generate_header_nav_html(*args, **kwargs):
+            navigation = original_header(*args, **kwargs)
+            latest = relative_uri(f"{pagename}.html", "whatsnew/latest.html")
+            return re.sub(
+                r"(<a\b[^>]*\bhref=\")[^\"]+(\"[^>]*>\s*What's New\s*</a>)",
+                rf"\g<1>{latest}\g<2>",
+                navigation,
+            )
+
+        context["generate_header_nav_html"] = generate_header_nav_html
+    context["section_title"] = _section_title(app.env, pagename)
+
+
+def _section_title(env, pagename):
+    """Return the top-level documentation section containing *pagename*."""
+
+    def contains(docname, target, seen):
+        if docname == target:
+            return True
+        if docname in seen:
+            return False
+        seen.add(docname)
+        return any(
+            contains(child, target, seen)
+            for child in env.toctree_includes.get(docname, ())
+        )
+
+    for section in env.toctree_includes.get(env.config.root_doc, ()):
+        if contains(section, pagename, set()):
+            return env.titles[section].astext()
+    return None
 
 
 def setup(app):
