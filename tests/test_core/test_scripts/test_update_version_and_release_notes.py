@@ -70,11 +70,11 @@ def test_release_index_is_orphan(update_module, fake_whatsnew):
     assert index.startswith(":orphan:\n\n.. _release:")
 
 
-def test_current_release_is_top_level_navigation():
+def test_release_notes_index_is_top_level_navigation():
     index_template = INDEX_TEMPLATE.read_text(encoding="utf-8")
 
-    assert "\n    whatsnew/latest\n" in index_template
-    assert "\n    whatsnew/index\n" not in index_template
+    assert "\n    🆕 What's New <whatsnew/index>\n" in index_template
+    assert "\n    whatsnew/latest\n" not in index_template
 
 
 def test_rc_version_keeps_rc_suffix_in_release_notes(update_module, tmp_path):

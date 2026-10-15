@@ -37,6 +37,11 @@ if str(DOCS_SOURCE_ROOT) not in pythonpath_entries:
 
 import spectrochempy
 
+
+def _compact_version_label(value):
+    return re.sub(r"\.dev\d*$", "dev", value)
+
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation general, use os.path.abspath to make it absolute, like shown
@@ -137,6 +142,7 @@ master_doc = "index"
 # built documents.
 version = spectrochempy.version
 release = version.split("+")[0]
+logo_version = _compact_version_label(release)
 project = f"SpectroChemPy v{version}"
 copyright = spectrochempy.copyright
 
@@ -240,7 +246,6 @@ with open(os.path.join(SRC, "index.rst"), "w", encoding="utf-8") as f:
             include_api=include_api,
             single=single_doc_or_dir,
             pattern=pattern,
-            version=release,
         )
     )
 
@@ -295,8 +300,7 @@ html_theme = "pydata_sphinx_theme"
 # documentation.
 html_theme_options = {
     "navbar_align": "left",
-    # Show the project name and version next to the logo in the navbar.
-    "logo": {"text": project},
+    "logo": {"text": logo_version},
     "navbar_end": ["theme-switcher", "navbar-icon-links"],
     "navbar_persistent": ["search-button-field"],
     "header_links_before_dropdown": 6,
@@ -1000,6 +1004,10 @@ def rstjinja(app, docname, source):
 # listed exhaustively on the "Public API reference" page. Their links are pruned
 # from the navigation sidebar to keep it readable.
 _API_STUB_HREF = re.compile(r"spectrochempy(?:\.[A-Za-z0-9_]+)+\.html")
+_WHATSNEW_VERSION_TITLE = re.compile(
+    r"^What(?:'|’)s [Nn]ew in [Rr]evision (?P<version>.+?)(?: \[[^]]+\])?$"
+)
+_WHATSNEW_RANGE_TITLE = re.compile(r"^Revisions (?P<first>[\d.]+) to (?P<last>[\d.]+)$")
 
 
 def _prune_api_stub_links(toctree):
@@ -1028,6 +1036,22 @@ def _prune_api_stub_links(toctree):
             li["class"] = [name for name in classes if name != "has-children"]
 
 
+def _compact_whatsnew_sidebar_labels(toctree):
+    """Replace verbose release-note titles with their version labels."""
+    for link in toctree.find_all("a", href=True):
+        label = link.get_text(" ", strip=True)
+        version_match = _WHATSNEW_VERSION_TITLE.fullmatch(label)
+        if version_match:
+            link.clear()
+            link.append(_compact_version_label(version_match["version"]))
+            continue
+
+        range_match = _WHATSNEW_RANGE_TITLE.fullmatch(label)
+        if range_match:
+            link.clear()
+            link.append(f"{range_match['first']}-{range_match['last']}")
+
+
 def strip_generated_api_links(app, pagename, templatename, context, doctree):
     """
     Wrap the sidebar toctree generator so it hides the generated API stubs.
@@ -1045,6 +1069,8 @@ def strip_generated_api_links(app, pagename, templatename, context, doctree):
         toctree = original(kind, **kwargs)
         if kind == "sidebar":
             _prune_api_stub_links(toctree)
+            if pagename.startswith("whatsnew/"):
+                _compact_whatsnew_sidebar_labels(toctree)
         return toctree
 
     context["generate_toctree_html"] = generate_sidebar_toctree
