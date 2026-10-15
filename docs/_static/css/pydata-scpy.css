@@ -189,6 +189,10 @@ body:has(.scp-home) .bd-article {
   width: 100%;
 }
 
+body:has(.scp-home) .bd-main .bd-content .bd-article-container .bd-article {
+  padding: 0 !important;
+}
+
 body:has(.scp-home) .bd-sidebar-primary {
   display: none;
 }
