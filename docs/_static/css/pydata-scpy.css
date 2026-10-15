@@ -266,14 +266,14 @@ body:has(.scp-home) #pst-header .primary-toggle {
 }
 
 .scp-scroll-cue span:last-child {
-  font-size: 1.15rem;
+  font-size: 1.55rem;
   line-height: 1;
   animation: scp-scroll-cue 1.8s ease-in-out infinite;
 }
 
 @keyframes scp-scroll-cue {
   50% {
-    transform: translateY(0.25rem);
+    transform: translateY(0.4rem);
   }
 }
 
@@ -681,14 +681,6 @@ html[data-theme="dark"] .scp-stage:hover {
     min-height: auto;
     padding-right: 1.25rem;
     padding-left: 1.25rem;
-  }
-
-  .scp-scroll-cue {
-    position: static;
-    grid-column: 1;
-    justify-self: center;
-    margin-top: 2rem;
-    transform: none;
   }
 
   .scp-spectrum-card {
