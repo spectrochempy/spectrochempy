@@ -9,24 +9,35 @@
       <section class="scp-hero">
         <div class="scp-hero-copy">
           <p class="scp-eyebrow">Scientific Python for spectroscopic data</p>
-          <h1 id="scp-home-title">Turn spectra into understanding.</h1>
-          <p class="scp-hero-lede">SpectroChemPy gives chemists one coherent workspace to import, process, visualize, and model spectroscopic data.</p>
+          <h1 id="scp-home-title">SpectroChemPy</h1>
+          <p class="scp-hero-tagline">Turn spectra into understanding.</p>
+          <p class="scp-hero-lede">One coherent workspace to import, process, visualize, and model spectroscopic data.</p>
           <p class="scp-hero-note">Build reproducible workflows across IR, Raman, UV-visible, and NMR data without leaving the scientific Python ecosystem.</p>
           <div class="scp-actions">
+            <a class="scp-button scp-button-secondary" href="gettingstarted/whyscpy.html">Why SpectroChemPy?</a>
             <a class="scp-button scp-button-primary" href="gettingstarted/quickstart.html">Start in five minutes <span aria-hidden="true">&rarr;</span></a>
             <a class="scp-button scp-button-secondary" href="gettingstarted/examples/index.html">Explore examples</a>
           </div>
         </div>
-        <div class="scp-spectrum-card" aria-label="Illustration of connected infrared, Raman, and NMR spectra">
-          <div class="scp-spectrum-heading"><span>Signal workspace</span><span>IR / Raman / NMR</span></div>
+        <div class="scp-spectrum-card" aria-label="Diagram of the SpectroChemPy data workflow">
+          <div class="scp-spectrum-heading"><span>Scientific data workflow</span><span>Files → data → results</span></div>
           <svg viewBox="0 0 560 345" aria-hidden="true">
             <rect x="0" y="0" width="560" height="345" rx="12" fill="#123b5c"/>
-            <g stroke="#35617c" stroke-width="1"><path d="M42 69H518M42 171H518M42 273H518"/><path d="M42 28V307M161 28V307M280 28V307M399 28V307M518 28V307" opacity="0.5"/></g>
-            <g fill="#b8d8e7" font-family="system-ui, sans-serif" font-size="13" font-weight="700" letter-spacing="1.5"><text x="42" y="49">INFRARED</text><text x="42" y="151">RAMAN</text><text x="42" y="253">NMR</text></g>
-            <path d="M42 103 C70 100 78 84 95 100 S123 111 136 91 S158 119 179 108 S205 65 227 103 S254 115 275 103 S303 74 320 95 S352 109 373 102 S397 66 418 101 S449 111 474 89 S503 104 518 95" fill="none" stroke="#65c5f1" stroke-width="4" stroke-linecap="round"/>
-            <path d="M42 205 C62 202 72 194 84 205 S104 208 119 197 S140 210 153 205 S171 179 187 205 S206 211 224 193 S248 205 262 199 S282 165 301 204 S326 209 340 197 S365 210 379 204 S396 175 414 204 S438 209 455 192 S488 203 518 197" fill="none" stroke="#ffd36d" stroke-width="4" stroke-linecap="round"/>
-            <path d="M42 304 L82 304 L89 300 L94 304 L151 304 L159 270 L164 304 L238 304 L245 291 L249 304 L328 304 L335 252 L341 304 L406 304 L414 282 L419 304 L490 304 L498 294 L502 304 L518 304" fill="none" stroke="#ff784f" stroke-width="4" stroke-linejoin="round"/>
-            <g fill="#dfeef5" font-family="system-ui, sans-serif" font-size="12"><text x="42" y="329">raw data</text><text x="437" y="329">interpretable result</text></g>
+            <defs><marker id="scp-arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0L6 3L0 6Z" fill="#78c7ee"/></marker></defs>
+            <g fill="#dfeef5" font-family="system-ui, sans-serif"><text x="42" y="43" font-size="13" font-weight="700" letter-spacing="1.3">EXPERIMENTAL FILES</text><text x="221" y="43" font-size="13" font-weight="700" letter-spacing="1.3">NDDATASET</text><text x="414" y="43" font-size="13" font-weight="700" letter-spacing="1.3">INTERPRETATION</text></g>
+            <g fill="#1a4a69" stroke="#65c5f1" stroke-width="2"><rect x="42" y="70" width="110" height="178" rx="8"/><rect x="55" y="84" width="84" height="42" rx="4"/><rect x="55" y="137" width="84" height="42" rx="4"/><rect x="55" y="190" width="84" height="42" rx="4"/></g>
+            <g fill="none" stroke-linecap="round" stroke-width="2"><path d="M62 110C72 110 76 93 84 110S98 110 105 99S119 111 132 104" stroke="#65c5f1"/><path d="M62 163L79 163L84 145L89 163L108 163L115 152L120 163L132 163" stroke="#ffd36d"/><path d="M62 216L79 216L84 198L89 216L108 216L114 205L119 216L132 216" stroke="#ff784f"/></g>
+            <g fill="#b8d8e7" font-family="system-ui, sans-serif" font-size="10" font-weight="700"><text x="62" y="99">IR</text><text x="62" y="152">RAMAN</text><text x="62" y="205">NMR</text></g>
+            <path d="M161 159H201" fill="none" stroke="#78c7ee" stroke-width="3" marker-end="url(#scp-arrow)"/>
+            <rect x="209" y="70" width="145" height="178" rx="8" fill="#1a4a69" stroke="#78c7ee" stroke-width="2"/>
+            <rect x="224" y="104" width="115" height="86" rx="3" fill="#123b5c" stroke="#35617c"/>
+            <g stroke="#35617c" stroke-width="1"><path d="M252 104V190M281 104V190M310 104V190"/><path d="M224 126H339M224 147H339M224 168H339"/></g>
+            <g fill="#dfeef5" font-family="system-ui, sans-serif"><text x="235" y="91" font-size="16" font-weight="700">data + context</text><text x="228" y="211" font-size="11">coordinates · units</text><text x="228" y="229" font-size="11">metadata · history</text></g>
+            <path d="M363 159H403" fill="none" stroke="#78c7ee" stroke-width="3" marker-end="url(#scp-arrow)"/>
+            <rect x="411" y="70" width="107" height="178" rx="8" fill="#1a4a69" stroke="#ffd36d" stroke-width="2"/>
+            <g fill="none" stroke-linecap="round"><path d="M427 190V112H501" stroke="#35617c" stroke-width="1.5"/><path d="M431 179C444 171 451 183 461 148S478 162 492 122" stroke="#ffd36d" stroke-width="3"/><path d="M428 216L443 207L457 211L472 187L487 197L502 164" stroke="#65c5f1" stroke-width="3"/></g>
+            <g fill="#dfeef5" font-family="system-ui, sans-serif" font-size="11" font-weight="700"><text x="426" y="91">PLOTS</text><text x="426" y="237">MODELS</text></g>
+            <g fill="#a9cbdc" font-family="system-ui, sans-serif" font-size="12"><text x="42" y="287">spectra from instruments</text><text x="224" y="287">one scientific object</text><text x="411" y="287">defensible results</text></g>
           </svg>
           <div class="scp-spectrum-footer"><span>Import</span><i></i><span>Process</span><i></i><span>Analyze</span></div>
         </div>
@@ -83,9 +94,8 @@
 .. toctree::
     :hidden:
 
-    What's New <whatsnew/index>
-    Start Here <gettingstarted/index>
-    Tutorials <userguide/index>
+    Getting Started <gettingstarted/index>
+    Guides <userguide/index>
     {% if include_api -%}
     🔍 Reference <reference/index>
     {% else -%}
@@ -93,6 +103,7 @@
     Bibliography <reference/bibliography>
     Papers <reference/papers>
     {% endif -%}
+    What's New <whatsnew/index>
     🛠️ Contribute <devguide/index>
     ✨ Credits <credits/index>
 

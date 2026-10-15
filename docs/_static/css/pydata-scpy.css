@@ -160,6 +160,10 @@ body:has(.scp-home) .bd-sidebar-primary {
   display: none;
 }
 
+body:has(.scp-home) .bd-sidebar-secondary {
+  display: none;
+}
+
 .bd-content:has(.scp-home) {
   padding: 0;
 }
@@ -196,7 +200,7 @@ body:has(.scp-home) #pst-header .primary-toggle {
 .scp-hero {
   display: grid;
   grid-template-columns: minmax(0, 1.04fr) minmax(21rem, 0.96fr);
-  gap: clamp(2.5rem, 6vw, 6rem);
+  gap: clamp(2rem, 4vw, 4rem);
   align-items: center;
   min-height: 37rem;
   padding: clamp(3.5rem, 8vw, 7.5rem) max(5vw, calc((100% - 78rem) / 2));
@@ -218,10 +222,20 @@ body:has(.scp-home) #pst-header .primary-toggle {
   max-width: 48rem;
   margin: 0;
   color: var(--scp-ink);
-  font-size: clamp(3.15rem, 7.2vw, 6.2rem);
+  font-size: clamp(3.15rem, 6vw, 5.35rem);
   font-weight: 760;
   letter-spacing: -0.065em;
-  line-height: 0.94;
+  line-height: 1;
+}
+
+.scp-hero-tagline {
+  max-width: 48rem;
+  margin: 0.7rem 0 0;
+  color: var(--scp-ink);
+  font-size: clamp(1.75rem, 3.6vw, 3.1rem);
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  line-height: 1.05;
 }
 
 .scp-hero-lede {
@@ -590,7 +604,7 @@ html[data-theme="dark"] .scp-stage:hover {
   background: #1b3545;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1100px) {
   .scp-hero {
     grid-template-columns: 1fr;
     min-height: auto;
