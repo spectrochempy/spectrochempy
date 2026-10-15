@@ -243,9 +243,38 @@ body:has(.scp-home) #pst-header .primary-toggle {
   align-items: center;
   min-height: 37rem;
   padding: clamp(3.5rem, 8vw, 7.5rem) max(5vw, calc((100% - 78rem) / 2));
+  position: relative;
   background:
     radial-gradient(circle at 88% 12%, rgba(101, 197, 241, 0.24), transparent 24rem),
     linear-gradient(135deg, #f8fbfd 0%, #edf4f8 56%, #e3eef4 100%);
+}
+
+.scp-scroll-cue {
+  position: absolute;
+  bottom: 1.25rem;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  color: #357da8 !important;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transform: translateX(-50%);
+}
+
+.scp-scroll-cue span:last-child {
+  font-size: 1.15rem;
+  line-height: 1;
+  animation: scp-scroll-cue 1.8s ease-in-out infinite;
+}
+
+@keyframes scp-scroll-cue {
+  50% {
+    transform: translateY(0.25rem);
+  }
 }
 
 .scp-eyebrow {
@@ -389,6 +418,7 @@ body:has(.scp-home) #pst-header .primary-toggle {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   max-width: 78rem;
   margin: 0 auto;
+  scroll-margin-top: calc(var(--pst-header-height) + 1rem);
   border-right: 1px solid var(--scp-line);
   border-left: 1px solid var(--scp-line);
   background: #ffffff;
@@ -653,6 +683,14 @@ html[data-theme="dark"] .scp-stage:hover {
     padding-left: 1.25rem;
   }
 
+  .scp-scroll-cue {
+    position: static;
+    grid-column: 1;
+    justify-self: center;
+    margin-top: 2rem;
+    transform: none;
+  }
+
   .scp-spectrum-card {
     max-width: 43rem;
   }
@@ -730,5 +768,9 @@ html[data-theme="dark"] .scp-stage:hover {
 @media (prefers-reduced-motion: reduce) {
   .scp-home * {
     transition: none !important;
+  }
+
+  .scp-scroll-cue span:last-child {
+    animation: none;
   }
 }
