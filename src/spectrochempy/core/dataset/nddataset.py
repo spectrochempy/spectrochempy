@@ -1913,6 +1913,34 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
                 "https://en.wikipedia.org/wiki/tr.List_of_tz_database_time_zones ",
             ) from e
 
+    def to_markdown_report(self, *, title, metadata=(), figures=()):
+        """
+        Render this dataset as a deterministic scientific Markdown report.
+
+        Parameters
+        ----------
+        title : str
+            Document title.
+        metadata : sequence of str, optional
+            Explicit metadata keys to include, in report order.
+        figures : sequence of FigureReference, optional
+            Explicit figure references. Matplotlib figures are not captured.
+
+        Returns
+        -------
+        str
+            Markdown text. Rendering does not modify this dataset.
+        """
+        # The renderer validates NDDataset instances, so importing it here avoids a cycle.
+        from spectrochempy.reporting import render_dataset_markdown  # noqa: PLC0415
+
+        return render_dataset_markdown(
+            self,
+            title=title,
+            metadata=metadata,
+            figures=figures,
+        )
+
     def to_array(self):
         """
         Return a numpy masked array.
