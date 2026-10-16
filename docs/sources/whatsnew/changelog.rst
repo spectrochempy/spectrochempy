@@ -23,6 +23,11 @@ New Features
   checks before in-place axis changes, resizing or numerical preparation.
   Validators can reject a request without leaving the caller partly modified.
 
+- ``NDDataset.to_markdown_report()`` now renders a deterministic Markdown
+  summary of one explicitly supplied dataset, selected metadata, structured
+  history and explicit figure references. It does not capture Matplotlib state
+  or claim exhaustive provenance.
+
 
 .. section
 
