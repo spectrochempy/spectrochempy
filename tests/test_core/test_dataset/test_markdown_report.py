@@ -109,6 +109,11 @@ def test_to_markdown_report_escapes_structural_markdown():
         "data.fid",
         "figures/spectrum.png",
         "example.com",
+        "private report.csv",
+        "figures/my spectrum.png",
+        "notes / private.csv",
+        "report.spectrochempy",
+        "report.123456789",
         "C:\\private\\data",
     ],
 )
@@ -139,6 +144,8 @@ def test_to_markdown_report_preserves_scientific_text_with_a_slash():
         "600.13 MHz",
         "Dr. Smith",
         "1.5",
+        "version 1.12",
+        "1.5.3",
     ],
 )
 def test_to_markdown_report_renders_punctuated_scientific_text(value):
