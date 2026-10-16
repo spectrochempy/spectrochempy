@@ -29,7 +29,8 @@ _MAX_COLLECTION_ITEMS = 32
 _MAX_NESTING_DEPTH = 4
 _MAX_TEXT_LENGTH = 4096
 _WINDOWS_PATH = re.compile(r"^[A-Za-z]:[\\/]")
-_FILE_EXTENSION = re.compile(r"^\.[A-Za-z][A-Za-z0-9]{0,7}$")
+_SUFFIX = re.compile(r"\.([A-Za-z][A-Za-z0-9]*|[0-9]+)$")
+_NUMERIC_STEM = re.compile(r"^[+-]?[0-9]+(?:\.[0-9]+)*$")
 _MASKED_PATH = "[masqué : chemin ou nom de fichier]"
 
 
@@ -286,23 +287,32 @@ def _looks_like_path(value: str) -> bool:
     """
     Return whether free text is more likely a path, file name or host.
 
-    Structural separators are conclusive. A suffix-like dotted token only counts
-    when the value has no whitespace and the extension is file-like
-    (``report.csv``, ``example.com``), so sentences, versions and decimals such as
-    ``TopSpin 4.0``, ``600.13 MHz`` or ``1.5`` stay scientific text.
+    Structural separators are conclusive whatever the whitespace. A trailing
+    extension is also conclusive whatever the whitespace: a letter one masks
+    ``private report.csv`` or ``notes / private.csv`` whatever its length
+    (``report.spectrochempy``), while a numeric one only masks a token whose
+    stem is a word (``report.123456789``), so ``1.5``, ``TopSpin 4.0`` and
+    ``version 1.12`` stay scientific text.
 
-    Extension-less file names (``1r``, ``acqus``) are not masked; recognizing them
-    would require an explicit allowlist rather than a shape heuristic.
+    Whitespace still wins over a bare ``/``: ``A/B calibration`` is a ratio, not
+    a path, and is rendered. Extension-less file names (``1r``, ``acqus``) are
+    not masked; recognizing them would require an explicit allowlist.
     """
     if value.startswith(("/", "~/", "./", "../")) or _WINDOWS_PATH.match(value):
         return True
     if "\\" in value:
         return True
+    match = _SUFFIX.search(value)
+    if match is not None:
+        extension = match.group(1)
+        if extension[:1].isalpha():
+            return True
+        if any(character.isspace() for character in value):
+            return False
+        return not _NUMERIC_STEM.match(value[: match.start()])
     if any(character.isspace() for character in value):
         return False
-    if "/" in value:
-        return True
-    return bool(_FILE_EXTENSION.match(Path(value).suffix))
+    return "/" in value
 
 
 def _safe_text(value) -> str:
