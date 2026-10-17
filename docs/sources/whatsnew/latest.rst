@@ -12,6 +12,14 @@ What's New in Revision 1.1.3
 These are the changes in SpectroChemPy-1.1.3.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
 
+New Features
+~~~~~~~~~~~~
+
+- ``NDDataset.to_markdown_report()`` now renders a deterministic Markdown
+  summary of one explicitly supplied dataset, selected metadata, structured
+  history and explicit figure references. It does not capture Matplotlib state
+  or claim exhaustive provenance.
+
 Bug Fixes
 ~~~~~~~~~
 
