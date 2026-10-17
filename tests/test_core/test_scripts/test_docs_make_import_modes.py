@@ -4,13 +4,12 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-Regressions for the two execution modes of ``docs/make.py``.
+Regressions for the execution modes of ``docs/make.py``.
 
-The documentation workflows both run ``python3 docs/make.py`` and import the same
-module from the repository root with ``from docs.make import ...``. The sibling
-``tools`` package is only reachable as a top-level name in the first mode, so the
-unqualified import broke every ``docs.make`` import used by ``build_docs.yml`` and
-``build_docs_archived_versions.yml``.
+Read the Docs and local maintainer commands run ``python3 docs/make.py`` from the
+repository root.  Some checks import the same module as ``docs.make``. The sibling
+``tools`` package is only reachable as a top-level name in script mode, so the
+unqualified import broke imports of ``docs.make``.
 
 Every check below runs a fresh interpreter started at the repository root with
 ``PYTHONPATH`` removed, so neither mode can be masked by an inherited path and no
@@ -41,8 +40,6 @@ ARCHIVED_VERSIONS = ("0.12.5", "0.12.6", "0.12.7", "0.12.8", "0.12.9", "0.12.10"
 RETAINED_VERSIONS = ["1.0.0", "0.12.10", "0.12.9", "0.12.8", "0.12.7"]
 PRUNED_VERSIONS = ["0.12.6", "0.12.5"]
 
-WORKFLOWS = ("build_docs.yml", "build_docs_archived_versions.yml")
-
 
 def _isolated_env():
     """Copy the environment without an inherited ``PYTHONPATH``."""
@@ -65,7 +62,7 @@ def _run_from_repo_root(*argv, stdin=None):
 
 
 def _sync_command(published_root):
-    """The stable root synchronisation used by ``build_docs.yml``."""
+    """The stable root synchronisation used by versioned local docs builds."""
     return (
         "from pathlib import Path; from docs.make import "
         "_sync_stable_docs_to_root, refresh_versions_index; "
@@ -118,7 +115,7 @@ def _write_stable_snapshot(root, version, marker):
 
 
 def _build_published_root(root):
-    """Populate a directory that mirrors the published gh-pages layout."""
+    """Populate a directory that mirrors the historical published docs layout."""
     root.mkdir(parents=True)
     (root / "CNAME").write_text("www.spectrochempy.fr", encoding="utf-8")
 
@@ -241,22 +238,11 @@ def test_internal_helper_import_errors_are_not_masked(tmp_path, mode):
     assert "spectrochempy_module_that_does_not_exist" in result.stderr
 
 
-def test_docs_workflows_import_docs_make_without_a_pythonpath_workaround():
-    for name in WORKFLOWS:
-        workflow = (REPO_ROOT / ".github" / "workflows" / name).read_text(
-            encoding="utf-8"
-        )
-
-        assert "from docs.make import" in workflow
-        assert "PYTHONPATH" not in workflow
-        assert "sys.path" not in workflow
-
-
 # ======================================================================================
 # Documentation publication sequence, in fresh interpreters
 # ======================================================================================
 def test_stable_snapshot_sync_to_root_in_a_fresh_interpreter(tmp_path):
-    published = tmp_path / "gh-pages"
+    published = tmp_path / "published-docs"
     _build_published_root(published)
 
     result = _run_from_repo_root("-c", _sync_command(published))
@@ -272,7 +258,7 @@ def test_stable_snapshot_sync_to_root_in_a_fresh_interpreter(tmp_path):
 
 
 def test_stable_version_retention_and_catalogue_in_a_fresh_interpreter(tmp_path):
-    published = tmp_path / "gh-pages"
+    published = tmp_path / "published-docs"
     _build_published_root(published)
 
     result = _run_from_repo_root("-", stdin=_prune_script(published))
@@ -296,7 +282,7 @@ def test_stable_version_retention_and_catalogue_in_a_fresh_interpreter(tmp_path)
 
 
 def test_post_rebuild_sequence_in_a_gh_pages_like_directory(tmp_path):
-    published = tmp_path / "gh-pages"
+    published = tmp_path / "published-docs"
     _build_published_root(published)
     candidate = tmp_path / "candidate" / STABLE_VERSION
     _write_stable_snapshot(candidate, STABLE_VERSION, STABLE_VERSION)

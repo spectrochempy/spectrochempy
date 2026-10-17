@@ -41,9 +41,11 @@ if ds_list is not None:
     # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     # The 5th dataset ``m5spec`` contains NIR spectra from 80 corn samples
     # recorded on the same instrument. The properties to predict are in the
-    # ``propval`` dataset.
+    # ``propval`` dataset. The ``corn.mat`` archive does not record whether the
+    # intensities are stored as reflectance or as ``log(1/R)`` absorbance, so
+    # the series is labeled with the neutral title "NIR spectra":
     X = ds_list[4]
-    X.title = "reflectance"
+    X.title = "NIR spectra"
     X.x.title = "Wavelength"
     X.x.units = "nm"
     _ = X.plot(cmap=None, show=False)

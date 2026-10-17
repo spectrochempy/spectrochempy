@@ -35,9 +35,12 @@ if ds_list is not None:
     # Inspect the spectra
     # ^^^^^^^^^^^^^^^^^^^^
     # The 5th dataset ``m5spec`` contains NIR spectra from 80 corn samples
-    # recorded on the same instrument:
+    # recorded on the same instrument. The ``corn.mat`` archive does not
+    # record whether the intensities are stored as reflectance or as
+    # ``log(1/R)`` absorbance, so the series is labeled with the neutral title
+    # "NIR spectra" and no intensity unit is imposed:
     X = ds_list[4]
-    X.title = "reflectance"
+    X.title = "NIR spectra"
     X.x.title = "Wavelength"
     X.x.units = "nm"
     _ = X.plot(cmap=None)
@@ -55,7 +58,8 @@ if ds_list is not None:
     # %%
     # Split into training and test sets
     # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    # Use 57 samples (2/3) for calibration and the rest for validation:
+    # Use the first 57 samples (out of 80) for calibration and the rest for
+    # validation:
     X_train = X[:57]
     X_test = X[57:]
     y_train = y[:57]

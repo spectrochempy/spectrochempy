@@ -368,6 +368,26 @@ Le workflow `publish_draft_new_release.yml` crée une **Draft Release** avec :
 - Corps : lien permanent vers le fichier de notes relu dans le commit exact
   de la release ; la page GitHub n'est donc jamais créée sans description
 
+Pour une release **finale** uniquement (flag `prerelease` faux), la même
+exécution met aussi à jour les branches documentaires, **dès la fusion de la PR
+de release** (donc avant la publication de la Draft) :
+
+- elle vérifie d'abord que `stable` existe et que le commit de release **en
+  descend** : elle n'avance jamais `stable` vers un commit antérieur, ce qui
+  empêche qu'un *Re-run* d'une ancienne exécution fasse reculer la documentation
+  `stable` ;
+- elle crée la branche d'archive `X.Y.Z` au commit de fusion de la PR de
+  release, si elle n'existe pas encore ; si elle existe déjà à un autre
+  commit, le workflow échoue sans rien modifier ;
+- elle avance la branche `stable` au même commit
+  (`git push --force-with-lease`), afin que la documentation `stable` suive
+  cette release.
+
+Une release candidate ne crée ni branche `X.Y.Z` ni déplacement de `stable`.
+Ces branches ne sont pas protégées par les rulesets du dépôt et sont poussées
+par le `GITHUB_TOKEN` du workflow (`contents: write`). Aucun tag `X.Y.Z` n'est
+créé.
+
 Aller sur la
 [page des releases](https://github.com/spectrochempy/spectrochempy/releases)
 pour vérifier la Draft.
@@ -400,6 +420,17 @@ release pour cette récupération : son commit de fusion changerait la cible
 RC1. Pour une autre version, adapter explicitement version, commit et statut
 de préversion.
 
+Une récupération manuelle ne déclenche pas la mise à jour des branches
+documentaires décrite au §6. Si le workflow n'a pas pu la faire, créer la
+branche d'archive et avancer `stable` sur le commit de release — après avoir
+vérifié que ce commit descend bien de `stable` :
+
+```bash
+git push origin <commit-de-release>:refs/heads/X.Y.Z
+git push --force-with-lease=refs/heads/stable:<sha-actuel-de-stable> \
+  origin <commit-de-release>:refs/heads/stable
+```
+
 ### 7. Publier la Release GitHub
 
 - Éditer la Draft Release si nécessaire (ajouter des notes)
@@ -412,29 +443,36 @@ de préversion.
     déjà publiée sur `dev` vers le label stable)
   - **Zenodo** (via l'intégration GitHub)
 
-- La publication déclenche également le workflow **Docs** (`build_docs.yml`)
-  via l'événement `release: [published]` :
-
-  > **Note sur la construction de la documentation** : ce build est volontaire.
-  > Il vérifie que la documentation de release peut être construite avec le
-  > tag publié (`spectrochempy-vX.Y.Z`). Il alimente aussi la documentation
-  > versionnée (accessible sous `/<version>/`) et le dropdown des versions.
-  > **Ne pas supprimer ce job** dans le workflow `build_docs.yml`.
-
 ### Modèle actuel de documentation versionnée
 
-Le site publié par GitHub Pages est construit dans la branche `gh-pages` :
+Read the Docs est le canal de validation et de publication de la documentation.
+La configuration `.readthedocs.yaml` construit la documentation avec Python 3.13,
+`pandoc`, l'installation editable `.[docs]`, les plugins locaux et
+`python docs/make.py html --warning-is-error -j auto`.
 
-- la documentation `latest` est publiée à la racine du site et correspond à
-  l'état courant de `master` ;
-- chaque release stable du core est publiée dans un répertoire `X.Y.Z/`
-  (par exemple `0.9.2/`) ;
-- le dropdown des versions est généré à partir des répertoires semver présents
-  dans `gh-pages` ;
-- les tags Git du core utilisent le format canonique `spectrochempy-vX.Y.Z`,
-  mais le répertoire public de documentation reste `X.Y.Z/` ;
-- les tags plugins (`spectrochempy-<plugin>-vX.Y.Z`) ne doivent pas créer de
-  documentation stable séparée.
+Il n'existe plus de workflow GitHub Actions de publication documentaire ni de
+déploiement `gh-pages`. Les tags Git du core conservent le format canonique
+`spectrochempy-vX.Y.Z`. Les tags plugins (`spectrochempy-<plugin>-vX.Y.Z`)
+ne doivent pas créer de version documentaire stable séparée.
+
+Les versions documentaires de Read the Docs proviennent des **branches** et des
+**tags** du dépôt :
+
+| Version RTD | Source | Mise à jour |
+|---|---|---|
+| `latest` | branche `master` | à chaque push sur `master` |
+| `stable` | **branche** `stable` | avancée automatiquement à chaque release finale (cf. §6) |
+| `X.Y.Z` | **branche** d'archive `X.Y.Z` | créée une fois au commit de release, jamais déplacée |
+| `spectrochempy-vX.Y.Z` | tag du core | archives historiques, jamais réécrites |
+
+Deux points importants :
+
+- Une branche `stable` réelle **prime sur l'alias automatique** `stable` de
+  Read the Docs : RTD ne déplace donc jamais `stable` de lui-même, quel que
+  soit le format des tags. C'est le workflow de release qui l'avance.
+- Les tags du core (`spectrochempy-vX.Y.Z`) ne sont pas reconnus comme versions
+  sémantiques par RTD. L'archive consultable d'une version est la **branche**
+  `X.Y.Z`, pas un tag. Ne pas créer de tag alias `X.Y.Z`.
 
 ### Release candidate (RC) du core
 
@@ -447,21 +485,19 @@ Pour publier une **release candidate** (ex. `1.0.0rc1`, avant la finale
    **prerelease** (flag automatique dérivé de la version) :
    - Tag : `spectrochempy-vX.Y.ZrcN`
    - Titre : `SpectroChemPy vX.Y.ZrcN`
-3. Publier la Draft comme d'habitude — la publication déclenche PyPI et les
-   docs. PyPI reçoit une version `X.Y.ZrcN` (PEP 440, plus récente que les dev
+3. Publier la Draft comme d'habitude — la publication déclenche PyPI. PyPI
+   reçoit une version `X.Y.ZrcN` (PEP 440, plus récente que les dev
    mais plus vieille que la finale). Le paquet Conda de la RC reste un
    artefact CI : le label `main` est réservé aux releases finales stables.
 4. Zenodo **ignore automatiquement les prereleases GitHub** : aucune
    archive DOI n'est produite pour l'RC (comportement de l'intégration
    Zenodo). Ce n'est pas une erreur.
-5. La documentation de l'RC est publiée à la racine (docs `latest`) et
-   affiche la bannière « développement » ; aucune release candidate ne crée
-   de répertoire versionné propre (`X.Y.ZrcN/`) ni d'entrée dans le
-   dropdown des versions.
+5. La documentation de l'RC est prise en charge par Read the Docs selon sa
+   configuration de versions ; aucune release candidate ne doit créer de
+   publication GitHub Pages séparée.
 6. Pour la finale `1.0.0`, relancer simplement le workflow avec
    `versionString = 1.0.0`. La release finale est une release stable,
-   qui obtient le tag `spectrochempy-v1.0.0`, son répertoire de docs
-   versionné `1.0.0/` et son archive Zenodo.
+   qui obtient le tag `spectrochempy-v1.0.0` et son archive Zenodo.
 7. Après la publication de la finale, le classifieur PyPI passe à
    `5 - Production/Stable` (dérivé par `release_version.py`) — les RC et
    les versions 0.x restent en `4 - Beta`.
@@ -490,25 +526,23 @@ python -c "import spectrochempy; print(spectrochempy.__version__)"
 Vérifier également que le DOI Zenodo a été mis à jour sur la
 [page Zenodo](https://zenodo.org/communities/spectrochempy).
 
-Vérifier enfin la documentation :
+Vérifier enfin la documentation sur Read the Docs :
 
-- le workflow **Docs** (`build_docs.yml`) a réussi après publication de la
-  release ;
-- `https://www.spectrochempy.fr/X.Y.Z/` existe pour la nouvelle version ;
-- le dropdown des versions contient `X.Y.Z` ;
-- la racine du site affiche toujours la documentation `latest`.
+- le build Read the Docs de la branche `stable` a réussi ;
+- `stable` sert bien la version qui vient d'être publiée, et non la
+  précédente ;
+- la branche d'archive `X.Y.Z` est visible dans le sélecteur de versions ; si
+  elle reste *Inactive*, l'activer dans l'interface RTD (la découverte d'une
+  branche ne l'active pas automatiquement) ;
+- `latest` suit toujours `master` ;
+- les versions antérieures ne sont accessibles que si leur version RTD a été
+  **activée** : la découverte d'une branche ou d'un tag ne les active pas, et
+  elles renvoient 404 tant qu'elles restent *Inactive*.
 
-Si la version n'apparaît pas dans le dropdown alors que la release existe :
-
-1. Vérifier que `gh-pages` contient bien le répertoire `X.Y.Z/`.
-2. Si le répertoire existe, lancer **Actions → Repair docs version index** :
-   ce workflow régénère seulement `versions.json` et le dropdown, sans
-   reconstruire toute la documentation.
-3. Si le répertoire est absent, relancer manuellement
-   **Actions → Docs → Run workflow** depuis `master`.
-4. Vérifier que le tag core suit le format `spectrochempy-vX.Y.Z`.
-5. Ne pas créer de tag alias local `X.Y.Z` : `docs/make.py -T` accepte les
-   tags canoniques `spectrochempy-vX.Y.Z`.
+Ces vérifications sont des opérations d'interface Read the Docs et ne
+demandent aucune modification de tag. Ne pas créer de tag alias `X.Y.Z` :
+l'archive consultable d'une version est une **branche** (cf. « Modèle actuel
+de documentation versionnée »).
 
 ---
 
@@ -1120,7 +1154,7 @@ entrées sont incorrectes car :
 - [ ] Vérifier PyPI : `pip install spectrochempy==X.Y.Z`
 - [ ] Vérifier Anaconda : `anaconda show spectrocat/spectrochempy`
 - [ ] Vérifier Zenodo : le DOI pointe vers la nouvelle version
-- [ ] Vérifier que les docs sont déployées sur `gh-pages`
+- [ ] Vérifier que le build Read the Docs attendu est réussi et publié
 
 ### Release des plugins
 
