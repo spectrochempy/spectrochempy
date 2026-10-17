@@ -115,10 +115,6 @@ The skills are shared by OpenCode, Codex, and Claude Code. They live only in
 `.agents/skills/`; Claude Code reaches them through relative symlinks in
 `.claude/skills/`.
 
-<!-- On Windows checkouts, these relative symlinks need Developer Mode (or
-admin rights) and `git config core.symlinks true`; otherwise Git materializes
-them as plain text files and Claude Code cannot discover the skills. -->
-
 ---
 
 ## Repository Map
