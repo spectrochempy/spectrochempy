@@ -368,6 +368,26 @@ Le workflow `publish_draft_new_release.yml` crée une **Draft Release** avec :
 - Corps : lien permanent vers le fichier de notes relu dans le commit exact
   de la release ; la page GitHub n'est donc jamais créée sans description
 
+Pour une release **finale** uniquement (flag `prerelease` faux), la même
+exécution met aussi à jour les branches documentaires, **dès la fusion de la PR
+de release** (donc avant la publication de la Draft) :
+
+- elle vérifie d'abord que `stable` existe et que le commit de release **en
+  descend** : elle n'avance jamais `stable` vers un commit antérieur, ce qui
+  empêche qu'un *Re-run* d'une ancienne exécution fasse reculer la documentation
+  `stable` ;
+- elle crée la branche d'archive `X.Y.Z` au commit de fusion de la PR de
+  release, si elle n'existe pas encore ; si elle existe déjà à un autre
+  commit, le workflow échoue sans rien modifier ;
+- elle avance la branche `stable` au même commit
+  (`git push --force-with-lease`), afin que la documentation `stable` suive
+  cette release.
+
+Une release candidate ne crée ni branche `X.Y.Z` ni déplacement de `stable`.
+Ces branches ne sont pas protégées par les rulesets du dépôt et sont poussées
+par le `GITHUB_TOKEN` du workflow (`contents: write`). Aucun tag `X.Y.Z` n'est
+créé.
+
 Aller sur la
 [page des releases](https://github.com/spectrochempy/spectrochempy/releases)
 pour vérifier la Draft.
@@ -400,6 +420,17 @@ release pour cette récupération : son commit de fusion changerait la cible
 RC1. Pour une autre version, adapter explicitement version, commit et statut
 de préversion.
 
+Une récupération manuelle ne déclenche pas la mise à jour des branches
+documentaires décrite au §6. Si le workflow n'a pas pu la faire, créer la
+branche d'archive et avancer `stable` sur le commit de release — après avoir
+vérifié que ce commit descend bien de `stable` :
+
+```bash
+git push origin <commit-de-release>:refs/heads/X.Y.Z
+git push --force-with-lease=refs/heads/stable:<sha-actuel-de-stable> \
+  origin <commit-de-release>:refs/heads/stable
+```
+
 ### 7. Publier la Release GitHub
 
 - Éditer la Draft Release si nécessaire (ajouter des notes)
@@ -423,6 +454,25 @@ Il n'existe plus de workflow GitHub Actions de publication documentaire ni de
 déploiement `gh-pages`. Les tags Git du core conservent le format canonique
 `spectrochempy-vX.Y.Z`. Les tags plugins (`spectrochempy-<plugin>-vX.Y.Z`)
 ne doivent pas créer de version documentaire stable séparée.
+
+Les versions documentaires de Read the Docs proviennent des **branches** et des
+**tags** du dépôt :
+
+| Version RTD | Source | Mise à jour |
+|---|---|---|
+| `latest` | branche `master` | à chaque push sur `master` |
+| `stable` | **branche** `stable` | avancée automatiquement à chaque release finale (cf. §6) |
+| `X.Y.Z` | **branche** d'archive `X.Y.Z` | créée une fois au commit de release, jamais déplacée |
+| `spectrochempy-vX.Y.Z` | tag du core | archives historiques, jamais réécrites |
+
+Deux points importants :
+
+- Une branche `stable` réelle **prime sur l'alias automatique** `stable` de
+  Read the Docs : RTD ne déplace donc jamais `stable` de lui-même, quel que
+  soit le format des tags. C'est le workflow de release qui l'avance.
+- Les tags du core (`spectrochempy-vX.Y.Z`) ne sont pas reconnus comme versions
+  sémantiques par RTD. L'archive consultable d'une version est la **branche**
+  `X.Y.Z`, pas un tag. Ne pas créer de tag alias `X.Y.Z`.
 
 ### Release candidate (RC) du core
 
@@ -478,14 +528,21 @@ Vérifier également que le DOI Zenodo a été mis à jour sur la
 
 Vérifier enfin la documentation sur Read the Docs :
 
-- le build Read the Docs de la branche ou du tag concerné a réussi ;
-- la version publiée attendue est visible dans le sélecteur de versions RTD ;
-- la documentation stable et la documentation de développement pointent vers les
-  versions RTD attendues.
+- le build Read the Docs de la branche `stable` a réussi ;
+- `stable` sert bien la version qui vient d'être publiée, et non la
+  précédente ;
+- la branche d'archive `X.Y.Z` est visible dans le sélecteur de versions ; si
+  elle reste *Inactive*, l'activer dans l'interface RTD (la découverte d'une
+  branche ne l'active pas automatiquement) ;
+- `latest` suit toujours `master` ;
+- les versions antérieures ne sont accessibles que si leur version RTD a été
+  **activée** : la découverte d'une branche ou d'un tag ne les active pas, et
+  elles renvoient 404 tant qu'elles restent *Inactive*.
 
-Si la version n'apparaît pas alors que la release existe, vérifier la
-configuration du projet Read the Docs et que le tag core suit le format
-`spectrochempy-vX.Y.Z`. Ne pas créer de tag alias local `X.Y.Z`.
+Ces vérifications sont des opérations d'interface Read the Docs et ne
+demandent aucune modification de tag. Ne pas créer de tag alias `X.Y.Z` :
+l'archive consultable d'une version est une **branche** (cf. « Modèle actuel
+de documentation versionnée »).
 
 ---
 
