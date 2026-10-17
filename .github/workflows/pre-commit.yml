@@ -28,7 +28,7 @@ jobs:
           echo "::error::No core tag found — cannot determine core version"
           exit 1
         fi
-        BASE="${LATEST_CORE_TAG#spectrochempy-v}"
+        BASE=$(python .github/workflows/scripts/release_version.py tag-version "$LATEST_CORE_TAG")
         python -m pip install --quiet packaging
         NEXT_DEV=$(python .github/workflows/scripts/release_version.py next-dev "$BASE")
         CORE_VERSION="${NEXT_DEV}.dev0"

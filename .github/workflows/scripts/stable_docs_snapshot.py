@@ -17,7 +17,9 @@ from urllib.parse import unquote
 from urllib.parse import urlsplit
 
 FINAL_VERSION_RE = re.compile(r"^\d+\.\d+\.\d+$")
-CORE_TAG_RE = re.compile(r"^spectrochempy-v(?P<version>\d+\.\d+\.\d+)$")
+# Core release tags, either the current PEP 440 form (vX.Y.Z) or the
+# historical spectrochempy-vX.Y.Z form.  Plugin tags never match.
+CORE_TAG_RE = re.compile(r"^(?:spectrochempy-)?v(?P<version>\d+\.\d+\.\d+)$")
 PLUGIN_PACKAGES = (
     "spectrochempy-carroucell",
     "spectrochempy-hypercomplex",

@@ -202,8 +202,9 @@ Release policy
 
 Plugins are released **independently** from the core package.
 
-* A core release tag such as ``spectrochempy-v0.9.0`` publishes the core wheel only;
-  it does **not** trigger plugin uploads.
+* A core release tag such as ``v1.1.4`` (or the historical
+  ``spectrochempy-v0.9.0`` form) publishes the core wheel only; it does **not**
+  trigger plugin uploads.
 * A plugin release tag such as ``spectrochempy-nmr-v0.1.1`` triggers the
   ``publish_plugins.yml`` and ``build_package.yml`` workflows for that
   plugin only.

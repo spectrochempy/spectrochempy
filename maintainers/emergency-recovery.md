@@ -245,7 +245,7 @@ buildé avec une version incorrecte.
 
 *Résolution* : le workflow `build_package.yml` inclut maintenant une
 étape "Determine core version for conda build" qui extrait la version
-depuis le dernier tag `spectrochempy-v*`.
+depuis le dernier tag core (`v*` ou `spectrochempy-v*`).
 
 **2. Strict channel priority exclut spectrocat**
 
@@ -288,7 +288,7 @@ vers une version antérieure.
 2. **Release GitHub publiée** : Zenodo ne se déclenche que sur les
    Releases **publiées** (pas les Drafts)
 3. **Tag de release** : le tag doit suivre le format
-   `spectrochempy-vX.Y.Z` pour que Zenodo le reconnaisse
+   `vX.Y.Z` (ou l'ancien `spectrochempy-vX.Y.Z`) pour que Zenodo le reconnaisse
 
 ### Résolution
 

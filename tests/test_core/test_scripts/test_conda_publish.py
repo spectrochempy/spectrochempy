@@ -1720,8 +1720,14 @@ class TestConcurrencyKeyBehavior:
         ).read_text()
         # Should NOT cancel in-progress for stable releases
         assert "cancel-in-progress:" in workflow
-        # Should have conditional cancel logic
-        assert "startsWith(github.ref_name, 'spectrochempy-v')" in workflow
+        # Should have conditional cancel logic covering the current ``vX.Y.Z``
+        # core tags and the historical ``spectrochempy-vX.Y.Z`` ones (through
+        # the ``-v`` plugin guard).
+        cancel_line = next(
+            line for line in workflow.splitlines() if "cancel-in-progress:" in line
+        )
+        assert "startsWith(github.ref_name, 'v')" in cancel_line
+        assert "contains(github.ref_name, '-v')" in cancel_line
 
     def test_no_unconditional_cancel(self):
         workflow = (

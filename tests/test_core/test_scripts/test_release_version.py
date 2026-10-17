@@ -91,11 +91,38 @@ def test_kind():
 
 
 def test_only_final_core_tags_are_stable_documentation_releases():
+    assert rv.stable_core_version_from_tag("v1.0.0") == "1.0.0"
     assert rv.stable_core_version_from_tag("spectrochempy-v1.0.0") == "1.0.0"
+    assert rv.stable_core_version_from_tag("v1.0.0rc1") is None
     assert rv.stable_core_version_from_tag("spectrochempy-v1.0.0rc1") is None
     assert rv.stable_core_version_from_tag("spectrochempy-nmr-v0.1.13") is None
     assert rv.stable_core_version_from_tag("1.0.0") is None
     assert rv.stable_core_version_from_tag("spectrochempy-v1.0.0.dev1") is None
+
+
+def test_core_tag_version_accepts_both_conventions():
+    assert rv.core_tag_version("v1.1.4") == "1.1.4"
+    assert rv.core_tag_version("spectrochempy-v1.1.3") == "1.1.3"
+    assert rv.core_tag_version("v1.2.0rc1") == "1.2.0rc1"
+    assert rv.core_tag_version("spectrochempy-v1.0.0rc1") == "1.0.0rc1"
+
+
+@pytest.mark.parametrize(
+    "tag",
+    [
+        "spectrochempy-nmr-v0.1.15",
+        "1.1.0",
+        "v1.0.0.dev1",
+        "spectrochempy-v1.0.0.dev1",
+        "v1.1",
+        "v1.1.4-rc1",
+        "",
+        None,
+        1.0,
+    ],
+)
+def test_core_tag_version_rejects_non_core_tags(tag):
+    assert rv.core_tag_version(tag) is None
 
 
 def test_prerelease_flags():
@@ -111,8 +138,8 @@ def test_prerelease_flags():
 
 
 def test_tag_name():
-    assert rv.tag_name("1.0.0") == "spectrochempy-v1.0.0"
-    assert rv.tag_name("1.0.0rc1") == "spectrochempy-v1.0.0rc1"
+    assert rv.tag_name("1.0.0") == "v1.0.0"
+    assert rv.tag_name("1.0.0rc1") == "v1.0.0rc1"
 
 
 def test_release_notes_name():
@@ -144,7 +171,7 @@ def test_describe():
     data = rv.describe("1.0.0rc1")
     assert data == {
         "version": "1.0.0rc1",
-        "tag": "spectrochempy-v1.0.0rc1",
+        "tag": "v1.0.0rc1",
         "prerelease": "true",
         "kind": "rc",
         "release_notes": "v1.0.0rc1.rst",
@@ -180,7 +207,7 @@ def test_cli_describe_key_value(capsys):
     assert rv.main(["describe", "1.0.0rc2"]) == 0
     out = capsys.readouterr().out.strip().splitlines()
     pairs = dict(line.split("=", 1) for line in out)
-    assert pairs["tag"] == "spectrochempy-v1.0.0rc2"
+    assert pairs["tag"] == "v1.0.0rc2"
     assert pairs["prerelease"] == "true"
     assert pairs["next_dev"] == "1.0.0rc3"
 
@@ -213,14 +240,34 @@ def test_cli_run_as_subprocess():
         check=False,
     )
     assert result.returncode == 0
-    assert "tag=spectrochempy-v1.0.0" in result.stdout
+    assert "tag=v1.0.0" in result.stdout
+
+
+def test_cli_is_core_tag(capsys):
+    assert rv.main(["is-core-tag", "v1.1.4"]) == 0
+    assert rv.main(["is-core-tag", "spectrochempy-v1.1.3"]) == 0
+    capsys.readouterr()
+    assert rv.main(["is-core-tag", "spectrochempy-nmr-v0.1.15"]) == 1
+    capsys.readouterr()
+
+
+def test_cli_tag_version(capsys):
+    assert rv.main(["tag-version", "v1.1.4"]) == 0
+    assert capsys.readouterr().out.strip() == "1.1.4"
+    assert rv.main(["tag-version", "spectrochempy-v1.1.3"]) == 0
+    assert capsys.readouterr().out.strip() == "1.1.3"
+    assert rv.main(["tag-version", "1.1.0"]) == 1
+    capsys.readouterr()
 
 
 def test_cli_stable_tag_version_accepts_only_final_core_tags(capsys):
     assert rv.main(["stable-tag-version", "spectrochempy-v1.0.0"]) == 0
     assert capsys.readouterr().out.strip() == "1.0.0"
+    assert rv.main(["stable-tag-version", "v1.0.0"]) == 0
+    assert capsys.readouterr().out.strip() == "1.0.0"
 
     for tag in (
+        "v1.0.0rc1",
         "spectrochempy-v1.0.0rc1",
         "spectrochempy-nmr-v0.1.13",
         "spectrochempy-v1.0.0.dev1",
@@ -387,6 +434,17 @@ def test_latest_tag_handles_annotated_release(tagged_repository):
     assert rv.latest_core_tag() == "spectrochempy-v1.0.0"
 
 
+def test_latest_tag_mixes_both_conventions(tagged_repository):
+    tagged_repository("tag", "spectrochempy-v1.1.3")
+    tagged_repository("tag", "v1.1.4")
+    # An RC still ranks above the previous final release...
+    tagged_repository("tag", "v1.2.0rc1")
+    assert rv.latest_core_tag() == "v1.2.0rc1"
+    # ...but the matching final release wins over its RC.
+    tagged_repository("tag", "v1.2.0")
+    assert rv.latest_core_tag() == "v1.2.0"
+
+
 def test_latest_tag_fails_without_supported_tags(tagged_repository):
     tagged_repository("tag", "spectrochempy-nmr-v1.0.0")
     result = subprocess.run(
@@ -415,6 +473,70 @@ def test_core_workflows_select_tags_semantically(workflow):
     assert "--sort=-v:refname" not in content
 
 
+@pytest.mark.parametrize(
+    "workflow",
+    [
+        "build_package.yml",
+        "test_package.yml",
+        "pre-commit.yml",
+        "validate_release_artifacts.yml",
+    ],
+)
+def test_core_workflows_decode_tags_with_helper(workflow):
+    content = (WORKFLOWS / workflow).read_text()
+    # No fragile manual stripping of a single hard-coded tag prefix.
+    assert "#spectrochempy-v" not in content
+    assert "release_version.py tag-version" in content
+
+
+def test_build_package_detects_both_core_tag_conventions():
+    content = (WORKFLOWS / "build_package.yml").read_text()
+    assert "release_version.py is-core-tag" in content
+    # The release publish and conda conditions must accept both conventions.
+    assert "startsWith(github.ref_name, 'v')" in content
+    assert "startsWith(github.ref_name, 'spectrochempy-v')" in content
+
+
+def test_setuptools_scm_matches_both_tag_conventions():
+    pyproject = (SCRIPT_PATH.parents[3] / "pyproject.toml").read_text(encoding="utf-8")
+    assert "'v[0-9]*'" in pyproject
+    assert "'spectrochempy-v[0-9]*'" in pyproject
+
+
+def test_core_pypi_publication_is_release_only_and_covers_both_conventions():
+    import yaml
+
+    content = (WORKFLOWS / "build_package.yml").read_text(encoding="utf-8")
+    yml = yaml.safe_load(content)
+    steps = yml["jobs"]["build-and-publish_pypi"]["steps"]
+
+    publish = next(s for s in steps if s["name"] == "Publish package to PyPI")
+    condition = publish["if"]
+    # A future ``v1.1.4`` release must reach PyPI exactly like the historical
+    # ``spectrochempy-v*`` tags, and only on a published GitHub release.
+    assert "github.event_name == 'release'" in condition
+    assert "github.event.action == 'published'" in condition
+    assert "startsWith(github.ref_name, 'v')" in condition
+    assert "startsWith(github.ref_name, 'spectrochempy-v')" in condition
+    assert "push" not in condition
+
+    # Exactly one production PyPI upload step (TestPyPI uses repository-url).
+    production = [
+        s
+        for s in steps
+        if "gh-action-pypi-publish" in str(s.get("uses", ""))
+        and "repository-url" not in str(s.get("with", ""))
+    ]
+    assert len(production) == 1
+
+
+def test_update_script_describe_command_matches_both_conventions():
+    script = WORKFLOWS / "scripts" / "update_version_and_release_notes.py"
+    content = script.read_text(encoding="utf-8")
+    assert '"v[0-9]*"' in content
+    assert '"spectrochempy-v[0-9]*"' in content
+
+
 def test_post_final_conda_recipe_version(tagged_repository, tmp_path, monkeypatch):
     """Exercise the real recipe generator with the post-final dev version."""
     import os
@@ -437,7 +559,7 @@ def test_post_final_conda_recipe_version(tagged_repository, tmp_path, monkeypatc
     )
     tag = rv.latest_core_tag()
     count = tagged_repository("rev-list", "--count", f"{tag}..HEAD")
-    version = f"{rv.next_dev_version(tag.removeprefix(rv.TAG_PREFIX))}.dev{count}"
+    version = f"{rv.next_dev_version(rv.core_tag_version(tag))}.dev{count}"
     assert version == "1.0.1.dev1"
     source_root = SCRIPT_PATH.parents[3]
     for relative in [

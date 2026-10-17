@@ -21,6 +21,35 @@ def _load_helper():
     return module
 
 
+@pytest.mark.parametrize(
+    ("tag", "expected"),
+    [
+        ("v1.1.4", "1.1.4"),
+        ("spectrochempy-v1.1.3", "1.1.3"),
+    ],
+)
+def test_core_tag_re_accepts_both_conventions(tag, expected):
+    helper = _load_helper()
+    match = helper.CORE_TAG_RE.match(tag)
+    assert match is not None
+    assert match.group("version") == expected
+
+
+@pytest.mark.parametrize(
+    "tag",
+    [
+        "spectrochempy-nmr-v0.1.15",
+        "1.1.0",
+        "v1.0.0rc1",
+        "spectrochempy-v1.0.0rc1",
+        "v1.1.4.dev1",
+    ],
+)
+def test_core_tag_re_rejects_plugins_rc_and_dev(tag):
+    helper = _load_helper()
+    assert helper.CORE_TAG_RE.match(tag) is None
+
+
 def _write_snapshot(root, version="1.0.0", *, broken_link=False):
     (root / "whatsnew").mkdir(parents=True)
     generated = root / "reference" / "generated"

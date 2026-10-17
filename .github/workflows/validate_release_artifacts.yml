@@ -69,10 +69,10 @@ jobs:
             echo "::error::No core tag found — cannot determine core version"
             exit 1
           fi
-          if [[ "${{ github.ref_name }}" == spectrochempy-v* ]]; then
-            CORE_VERSION="${GITHUB_REF_NAME#spectrochempy-v}"
+          LATEST_CORE_VERSION=$(python3 .github/workflows/scripts/release_version.py tag-version "$LATEST_CORE_TAG")
+          if python3 .github/workflows/scripts/release_version.py is-core-tag "${{ github.ref_name }}"; then
+            CORE_VERSION=$(python3 .github/workflows/scripts/release_version.py tag-version "${{ github.ref_name }}")
           else
-            LATEST_CORE_VERSION="${LATEST_CORE_TAG#spectrochempy-v}"
             COMMITS_SINCE_CORE_TAG=$(git rev-list --count "$LATEST_CORE_TAG"..HEAD)
             CORE_DEV_BASE=$(python3 .github/workflows/scripts/release_version.py next-dev "$LATEST_CORE_VERSION")
             CORE_VERSION="${CORE_DEV_BASE}.dev${COMMITS_SINCE_CORE_TAG}"
@@ -163,7 +163,9 @@ jobs:
     name: Validate core Conda package
     needs: detect-version
     if: |
-      (github.event_name == 'release' && startsWith(github.ref_name, 'spectrochempy-v')) ||
+      (github.event_name == 'release' &&
+      (startsWith(github.ref_name, 'v') ||
+      startsWith(github.ref_name, 'spectrochempy-v'))) ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.validate_conda == 'true')
     runs-on: ubuntu-latest
     defaults:

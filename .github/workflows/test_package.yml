@@ -178,7 +178,7 @@ jobs:
           set -e
           python -m pip install --quiet packaging
           LATEST_TAG=$(python .github/workflows/scripts/release_version.py latest-tag)
-          VERSION="${LATEST_TAG#spectrochempy-v}"
+          VERSION=$(python .github/workflows/scripts/release_version.py tag-version "$LATEST_TAG")
           NEXT_DEV=$(python .github/workflows/scripts/release_version.py next-dev "$VERSION")
           VALIDATION_VERSION=$(python .github/workflows/scripts/check_plugin_core_compatibility.py \
             --validation-version "${NEXT_DEV}.dev0")

@@ -145,6 +145,35 @@ def test_stable_context_uses_the_published_release_tag(monkeypatch):
     assert build._determine_version() == ("1.0.0", "1.0.0", "1.0.0")
 
 
+def test_stable_context_accepts_the_pep440_release_tag(monkeypatch):
+    docs_make = _load_docs_make()
+    monkeypatch.setenv("SCPY_DOCS_CONTEXT", "stable")
+    monkeypatch.setenv("SCPY_DOCS_RELEASE_TAG", "v1.1.4")
+    monkeypatch.setattr(
+        docs_make.BuildDocumentation, "_get_previous_tag", lambda self: "1.1.3"
+    )
+    monkeypatch.setattr("spectrochempy.version", "1.2.0")
+
+    build = docs_make.BuildDocumentation.__new__(docs_make.BuildDocumentation)
+    build.tagname = None
+
+    assert build._determine_version() == ("1.1.4", "1.1.3", "1.1.4")
+
+
+def test_canonical_doc_tag_supports_both_conventions():
+    docs_make = _load_docs_make()
+
+    assert docs_make._canonical_doc_tag("v1.1.4") == (["v1.1.4"], "1.1.4")
+    assert docs_make._canonical_doc_tag("spectrochempy-v1.1.3") == (
+        ["spectrochempy-v1.1.3"],
+        "1.1.3",
+    )
+    assert docs_make._canonical_doc_tag("1.1.0") == (
+        ["1.1.0", "v1.1.0", "spectrochempy-v1.1.0"],
+        "1.1.0",
+    )
+
+
 def test_tag_build_propagates_strict_sphinx_options():
     docs_make = (ROOT / "docs" / "make.py").read_text(encoding="utf-8")
 

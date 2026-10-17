@@ -62,6 +62,8 @@ gitversion = get_version(
         "--always",
         "--first-parent",
         "--match",
+        "v[0-9]*",
+        "--match",
         "spectrochempy-v[0-9]*",
     ],
 )

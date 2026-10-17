@@ -92,7 +92,7 @@ Avant de lancer une release core :
 
 - **Zenodo (core uniquement)** : l'intégration GitHub → Zenodo doit être activée sur le dépôt
   ([instructions Zenodo](https://docs.github.com/en/repositories/archiving-a-github-repository/referencing-and-citing-content)).
-  Une Release GitHub du **core** (tag `spectrochempy-vX.Y.Z`) déclenche automatiquement l'archivage DOI.
+  Une Release GitHub du **core** (tag `vX.Y.Z`) déclenche automatiquement l'archivage DOI.
   Les releases plugins (tag `spectrochempy-XXX-vX.Y.Z`) ne doivent **pas** être archivées par Zenodo
   (voir [Zenodo and plugin releases](#zenodo-and-plugin-releases)).
 
@@ -306,7 +306,9 @@ confirm_zenodo_enabled = true                  # ← cocher après avoir vérifi
 
 > **Format de version accepté** : `X.Y.Z` (stable) ou `X.Y.ZrcN`
 > (release candidate, ex. `1.0.0rc1`). Le tag git canonique correspondant
-> est `spectrochempy-vX.Y.Z` ou `spectrochempy-vX.Y.ZrcN`. Le workflow
+> est `vX.Y.Z` ou `vX.Y.ZrcN` (convention PEP 440 ; l'ancien préfixe
+> `spectrochempy-v` reste reconnu en lecture pour les releases passées).
+> Le workflow
 > `prepare_new_release.yml` valide le format avant tout traitement et
 > dérive automatiquement le tag, le flag « prerelease » GitHub, le fichier
 > de release notes (`vX.Y.ZrcN.rst`), la version de développement suivante
@@ -363,7 +365,7 @@ Dans la Pull Request :
 
 Le workflow `publish_draft_new_release.yml` crée une **Draft Release** avec :
 
-- Tag : `spectrochempy-vX.Y.Z`
+- Tag : `vX.Y.Z`
 - Titre : `SpectroChemPy vX.Y.Z`
 - Corps : lien permanent vers le fichier de notes relu dans le commit exact
   de la release ; la page GitHub n'est donc jamais créée sans description
@@ -400,6 +402,10 @@ release pour cette récupération : son commit de fusion changerait la cible
 RC1. Pour une autre version, adapter explicitement version, commit et statut
 de préversion.
 
+> **Note (migration PEP 440)** : l'exemple ci-dessus est historique (tag
+> `spectrochempy-v1.0.0rc1`). Pour toute release à partir de la 1.1.4,
+> utiliser le tag canonique `vX.Y.ZrcN` / `vX.Y.Z`.
+
 ### 7. Publier la Release GitHub
 
 - Éditer la Draft Release si nécessaire (ajouter des notes)
@@ -420,9 +426,18 @@ La configuration `.readthedocs.yaml` construit la documentation avec Python 3.13
 `python docs/make.py html --warning-is-error -j auto`.
 
 Il n'existe plus de workflow GitHub Actions de publication documentaire ni de
-déploiement `gh-pages`. Les tags Git du core conservent le format canonique
-`spectrochempy-vX.Y.Z`. Les tags plugins (`spectrochempy-<plugin>-vX.Y.Z`)
+déploiement `gh-pages`. Les tags Git du core utilisent le format canonique
+`vX.Y.Z` (PEP 440) ; l'ancien format `spectrochempy-vX.Y.Z` reste reconnu pour
+les versions déjà publiées. Les tags plugins (`spectrochempy-<plugin>-vX.Y.Z`)
 ne doivent pas créer de version documentaire stable séparée.
+
+> **Read the Docs — versions automatiques** : RTD reconnaît nativement les
+> tags semver avec préfixe `v` optionnel (`v1.1.4`), et met à jour l'alias
+> `stable` automatiquement lorsqu'une version PEP 440 supérieure à la version
+> stable courante est activée. Les anciens tags `spectrochempy-vX.Y.Z` ne sont
+> pas reconnus comme semver par RTD : une règle d'automatisation `Custom match`
+> est utilisée pendant la transition (voir la note maintainer
+> `notes/audits/pep440-release-tags-migration-2026-10-17.md`).
 
 ### Release candidate (RC) du core
 
@@ -433,7 +448,7 @@ Pour publier une **release candidate** (ex. `1.0.0rc1`, avant la finale
    (validé par `release_version.py`, cf. format ci-dessus).
 2. Le workflow de publication crée une **Draft Release** marquée
    **prerelease** (flag automatique dérivé de la version) :
-   - Tag : `spectrochempy-vX.Y.ZrcN`
+   - Tag : `vX.Y.ZrcN`
    - Titre : `SpectroChemPy vX.Y.ZrcN`
 3. Publier la Draft comme d'habitude — la publication déclenche PyPI. PyPI
    reçoit une version `X.Y.ZrcN` (PEP 440, plus récente que les dev
@@ -446,8 +461,9 @@ Pour publier une **release candidate** (ex. `1.0.0rc1`, avant la finale
    configuration de versions ; aucune release candidate ne doit créer de
    publication GitHub Pages séparée.
 6. Pour la finale `1.0.0`, relancer simplement le workflow avec
-   `versionString = 1.0.0`. La release finale est une release stable,
-   qui obtient le tag `spectrochempy-v1.0.0` et son archive Zenodo.
+   `versionString = 1.0.0`. La release finale est une release stable, qui
+   obtient le tag stable `vX.Y.Z` (historiquement `spectrochempy-v1.0.0`) et
+   son archive Zenodo.
 7. Après la publication de la finale, le classifieur PyPI passe à
    `5 - Production/Stable` (dérivé par `release_version.py`) — les RC et
    les versions 0.x restent en `4 - Beta`.
@@ -485,7 +501,9 @@ Vérifier enfin la documentation sur Read the Docs :
 
 Si la version n'apparaît pas alors que la release existe, vérifier la
 configuration du projet Read the Docs et que le tag core suit le format
-`spectrochempy-vX.Y.Z`. Ne pas créer de tag alias local `X.Y.Z`.
+`vX.Y.Z` (PEP 440) ; l'ancien format `spectrochempy-vX.Y.Z` reste reconnu par
+les workflows mais n'est pas activé automatiquement par RTD. Ne pas créer de
+tag alias local `X.Y.Z`.
 
 ---
 
@@ -1001,7 +1019,7 @@ entrées sont incorrectes car :
 ### Politique
 
 - **Zenodo doit être réservé aux releases du core SpectroChemPy** (tags
-  `spectrochempy-vX.Y.Z`).
+  `vX.Y.Z`, ou l'ancien format `spectrochempy-vX.Y.Z`).
 - **Les releases plugins ne doivent pas être archivées dans Zenodo** tant
   que les plugins restent dans le monorepo.
 - Si un plugin nécessite son propre DOI à long terme, il devra soit être

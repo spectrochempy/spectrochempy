@@ -120,7 +120,9 @@ DOWNLOADS = HTML / "downloads"
 TEMPDIRS = PROJECT.parent / "tempdirs"
 
 ON_GITHUB = os.environ.get("GITHUB_ACTIONS") == "true"
-CORE_TAG_PREFIX = "spectrochempy-v"
+# Core release tag prefixes recognized when reading tags: the current PEP 440
+# form (``vX.Y.Z``) and the historical one (``spectrochempy-vX.Y.Z``).
+CORE_TAG_PREFIXES = ("spectrochempy-v", "v")
 SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
 RELEASE_VERSION_RE = re.compile(r"^\d+\.\d+\.\d+(?:rc\d+)?$")
 
@@ -132,12 +134,13 @@ def _trace_ci(message):
 
 def _canonical_doc_tag(tagname):
     """Return possible git tags and the version directory for a docs tag."""
-    if tagname.startswith(CORE_TAG_PREFIX):
-        version = tagname.removeprefix(CORE_TAG_PREFIX)
-        if RELEASE_VERSION_RE.match(version):
-            return [tagname], version
+    for prefix in CORE_TAG_PREFIXES:
+        if tagname.startswith(prefix):
+            version = tagname.removeprefix(prefix)
+            if RELEASE_VERSION_RE.match(version):
+                return [tagname], version
     if RELEASE_VERSION_RE.match(tagname):
-        return [tagname, f"{CORE_TAG_PREFIX}{tagname}"], tagname
+        return [tagname, f"v{tagname}", f"spectrochempy-v{tagname}"], tagname
     return [tagname], tagname
 
 
@@ -778,7 +781,7 @@ class BuildDocumentation:
     @staticmethod
     def _get_previous_tag():
         # Get the previous core release tag from the git repository.
-        # Accept both current prefixed core tags (e.g. spectrochempy-v0.12.3)
+        # Accept both current core tags (e.g. v0.12.3 or spectrochempy-v0.12.3)
         # and legacy plain semver tags (e.g. 0.9.0), while excluding
         # prereleases such as 0.9.0.dev0.
         # Returns: str - The previous release tag
@@ -795,7 +798,7 @@ class BuildDocumentation:
                 if SEMVER_RE.fullmatch(version):
                     stable_versions.append(version)
             if stable_versions:
-                return stable_versions[0]
+                return max(stable_versions, key=_version_sort_key)
         return ""
 
     @staticmethod

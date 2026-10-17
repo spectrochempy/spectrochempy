@@ -37,7 +37,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   # Never cancel in-progress builds for stable releases or tags.
   # Only cancel draft/dev builds when a newer push arrives on the same ref.
-  cancel-in-progress: ${{ !startsWith(github.ref_name, 'spectrochempy-v') && !contains(github.ref_name, '-v') }}
+  # Core tags use the ``vX.Y.Z`` (current) or ``spectrochempy-vX.Y.Z``
+  # (historical) form; plugin tags contain ``-v``.
+  cancel-in-progress: ${{ !startsWith(github.ref_name, 'v') && !contains(github.ref_name, '-v') }}
 
 jobs:
   classify-pr-scope:
@@ -114,7 +116,8 @@ jobs:
           python3 .github/workflows/scripts/conda_publish.py verify-tag \
             "${{ github.ref_name }}" && IS_PLUGIN=true || IS_PLUGIN=false
 
-          if [[ "${{ github.ref_name }}" == spectrochempy-v* ]] && [[ "${{ github.event_name }}" == "release" ]]; then
+          if python3 .github/workflows/scripts/release_version.py is-core-tag "${{ github.ref_name }}" \
+             && [[ "${{ github.event_name }}" == "release" ]]; then
             echo "is_core_release=true" >> "$GITHUB_OUTPUT"
             echo "is_plugin_release=false" >> "$GITHUB_OUTPUT"
             echo "Detected: core release (${{ github.ref_name }})"
@@ -174,10 +177,10 @@ jobs:
             echo "::error::No core tag found — cannot determine core version"
             exit 1
           fi
-          if [[ "${{ github.ref_name }}" == spectrochempy-v* ]]; then
-            CORE_VERSION="${GITHUB_REF_NAME#spectrochempy-v}"
+          LATEST_CORE_VERSION=$(python3 .github/workflows/scripts/release_version.py tag-version "$LATEST_CORE_TAG")
+          if python3 .github/workflows/scripts/release_version.py is-core-tag "${{ github.ref_name }}"; then
+            CORE_VERSION=$(python3 .github/workflows/scripts/release_version.py tag-version "${{ github.ref_name }}")
           else
-            LATEST_CORE_VERSION="${LATEST_CORE_TAG#spectrochempy-v}"
             COMMITS_SINCE_CORE_TAG=$(git rev-list --count "$LATEST_CORE_TAG"..HEAD)
             CORE_DEV_BASE=$(python3 .github/workflows/scripts/release_version.py next-dev "$LATEST_CORE_VERSION")
             CORE_VERSION="${CORE_DEV_BASE}.dev${COMMITS_SINCE_CORE_TAG}"
@@ -205,7 +208,8 @@ jobs:
           github.event_name == 'release' &&
           github.event.action == 'published' &&
           github.repository == 'spectrochempy/spectrochempy' &&
-          startsWith(github.ref_name, 'spectrochempy-v')
+          (startsWith(github.ref_name, 'v') ||
+          startsWith(github.ref_name, 'spectrochempy-v'))
         uses: pypa/gh-action-pypi-publish@release/v1
 
   build_and_publish_conda_package:
@@ -245,10 +249,10 @@ jobs:
             echo "::error::No core tag found — cannot determine core version"
             exit 1
           fi
-          if [[ "${{ github.ref_name }}" == spectrochempy-v* ]]; then
-            CORE_VERSION="${GITHUB_REF_NAME#spectrochempy-v}"
+          LATEST_CORE_VERSION=$(python3 .github/workflows/scripts/release_version.py tag-version "$LATEST_CORE_TAG")
+          if python3 .github/workflows/scripts/release_version.py is-core-tag "${{ github.ref_name }}"; then
+            CORE_VERSION=$(python3 .github/workflows/scripts/release_version.py tag-version "${{ github.ref_name }}")
           else
-            LATEST_CORE_VERSION="${LATEST_CORE_TAG#spectrochempy-v}"
             COMMITS_SINCE_CORE_TAG=$(git rev-list --count "$LATEST_CORE_TAG"..HEAD)
             CORE_DEV_BASE=$(python3 .github/workflows/scripts/release_version.py next-dev "$LATEST_CORE_VERSION")
             CORE_VERSION="${CORE_DEV_BASE}.dev${COMMITS_SINCE_CORE_TAG}"

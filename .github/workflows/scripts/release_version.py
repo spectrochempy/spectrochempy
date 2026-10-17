@@ -17,13 +17,21 @@ Everything else is rejected: ``v``-prefixed strings, incomplete versions
 (``1.0``), alphabetic/beta pre-releases, development, post or local releases,
 and any non canonical spelling (``1.0.0-rc1``).
 
+Tag conventions
+---------------
+Core release tags use the PEP 440 friendly form ``vX.Y.Z`` (and
+``vX.Y.ZrcN`` for release candidates).  The historical ``spectrochempy-v``
+prefix is still *recognized* when reading existing tags so that old releases
+remain valid; it is no longer produced by :func:`tag_name`.  Plugin tags
+(``spectrochempy-<plugin>-vX.Y.Z``) never match a core tag.
+
 Usage
 -----
 .. code-block:: console
 
     $ python release_version.py describe 1.0.0rc1
     version=1.0.0rc1
-    tag=spectrochempy-v1.0.0rc1
+    tag=v1.0.0rc1
     prerelease=true
     kind=rc
     release_notes=v1.0.0rc1.rst
@@ -34,6 +42,9 @@ Usage
 The ``latest-tag`` command selects the highest supported core release tag
 using final/RC semantics, independently of Git's version-sort configuration.
 It can run before dependencies are installed. Tags must have been fetched.
+
+The ``is-core-tag`` and ``tag-version`` commands let the workflows recognize
+and decode a core tag (either convention) without string manipulation.
 
 The ``describe`` output is emitted as ``key=value`` lines so that GitHub
 Actions steps can forward them to ``$GITHUB_OUTPUT`` or ``$GITHUB_ENV``.
@@ -71,7 +82,13 @@ except ImportError:  # pragma: no cover - exercised in a dependency-free subproc
             return f"{base}{self.pre[0]}{self.pre[1]}"
 
 
-TAG_PREFIX = "spectrochempy-v"
+TAG_PREFIX = "v"
+
+# Historical prefix kept for reading tags created before the PEP 440
+# migration.  ``CORE_TAG_PREFIXES`` is ordered longest-first so that a tag is
+# split on the most specific prefix.
+LEGACY_TAG_PREFIX = "spectrochempy-v"
+CORE_TAG_PREFIXES = (LEGACY_TAG_PREFIX, TAG_PREFIX)
 
 # Canonical accepted forms only: final X.Y.Z or release candidate X.Y.ZrcN.
 RELEASE_VERSION_RE = re.compile(r"^\d+\.\d+\.\d+(?:rc\d+)?$")
@@ -119,16 +136,41 @@ def tag_name(version: str) -> str:
     return TAG_PREFIX + canonical_version(version)
 
 
-def stable_core_version_from_tag(tag: str) -> str | None:
-    """Return the version for a final core release tag, otherwise ``None``."""
-    if not isinstance(tag, str) or not tag.startswith(TAG_PREFIX):
+def _split_core_tag(tag: str) -> tuple[str, str] | None:
+    """Split a core tag into ``(prefix, version_body)`` or ``None``."""
+    if not isinstance(tag, str):
         return None
-    version = tag.removeprefix(TAG_PREFIX)
+    for prefix in CORE_TAG_PREFIXES:
+        if tag.startswith(prefix):
+            return prefix, tag[len(prefix) :]
+    return None
+
+
+def core_tag_version(tag: str) -> str | None:
+    """
+    Return the version of a supported core tag (final or RC), else ``None``.
+
+    Both the current ``vX.Y.Z[rcN]`` form and the historical
+    ``spectrochempy-vX.Y.Z[rcN]`` form are accepted.  Plugin tags and
+    non-canonical spellings return ``None``.
+    """
+    split = _split_core_tag(tag)
+    if split is None:
+        return None
+    prefix, version = split
     try:
         canonical = canonical_version(version)
     except ReleaseVersionError:
         return None
-    if tag != TAG_PREFIX + canonical or not is_stable(canonical):
+    if tag != prefix + canonical:
+        return None
+    return canonical
+
+
+def stable_core_version_from_tag(tag: str) -> str | None:
+    """Return the version for a final core release tag, otherwise ``None``."""
+    canonical = core_tag_version(tag)
+    if canonical is None or not is_stable(canonical):
         return None
     return canonical
 
@@ -188,7 +230,7 @@ def describe(version: str) -> dict[str, str]:
     canonical = str(parsed)
     return {
         "version": canonical,
-        "tag": TAG_PREFIX + canonical,
+        "tag": tag_name(canonical),
         "prerelease": str(parsed.is_prerelease).lower(),
         "kind": "rc" if parsed.is_prerelease else "stable",
         "release_notes": release_notes_name(canonical),
@@ -204,26 +246,27 @@ def latest_core_tag() -> str:
 
     Git's version sort does not implement prerelease ordering. Keep the
     existing repository-wide tag scope, excluding plugin and unsupported tags.
-    The numeric key implements PEP 440 ordering for our final/RC-only grammar
-    and also works during bootstrap without site packages.
+    Both the current ``vX.Y.Z`` form and the historical ``spectrochempy-vX.Y.Z``
+    form are considered.  The numeric key implements PEP 440 ordering for our
+    final/RC-only grammar and also works during bootstrap without site packages.
     """
     # Fixed Git command and arguments; no shell or user-provided command.
     tags = subprocess.check_output(
-        ["git", "tag", "--list", f"{TAG_PREFIX}*"],
+        ["git", "tag", "--list", *[f"{prefix}*" for prefix in CORE_TAG_PREFIXES]],
         text=True,
     ).splitlines()
     candidates = []
     for tag in tags:
-        try:
-            version = parse_release(tag.removeprefix(TAG_PREFIX))
-        except ReleaseVersionError:
+        version = core_tag_version(tag)
+        if version is None:
             continue
+        parsed = parse_release(version)
         key = (
-            version.major,
-            version.minor,
-            version.micro,
-            version.pre is None,
-            version.pre[1] if version.pre else 0,
+            parsed.major,
+            parsed.minor,
+            parsed.micro,
+            parsed.pre is None,
+            parsed.pre[1] if parsed.pre else 0,
         )
         candidates.append((key, tag))
     if not candidates:
@@ -242,11 +285,24 @@ def main(argv: list[str]) -> int:
 
     if len(argv) < 2:
         print(
-            "usage: release_version.py latest-tag | stable-tag-version <tag> | {validate|describe|next-dev} <version>",
+            "usage: release_version.py latest-tag | "
+            "is-core-tag <tag> | tag-version <tag> | "
+            "stable-tag-version <tag> | {validate|describe|next-dev} <version>",
             file=__import__("sys").stderr,
         )
         return 2
     command, version = argv[0], argv[1]
+
+    if command == "is-core-tag":
+        return 0 if core_tag_version(version) is not None else 1
+
+    if command == "tag-version":
+        core_version = core_tag_version(version)
+        if core_version is None:
+            print(f"Not a core release tag: {version!r}", file=__import__("sys").stderr)
+            return 1
+        print(core_version)
+        return 0
 
     if command == "stable-tag-version":
         stable_version = stable_core_version_from_tag(version)
