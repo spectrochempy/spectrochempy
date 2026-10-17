@@ -316,3 +316,10 @@ for details.
 * Full developer guide: `docs/sources/devguide/`
 * Maintainer documentation: `maintainers/` (release and recovery procedures)
 * AGENTS.md: concise guidance for AI-assisted development
+* Agent skills: shared by OpenCode, Codex, and Claude Code in
+  `.agents/skills/`; Claude Code reaches them through relative symlinks in
+  `.claude/skills/`. On Windows, enable Developer Mode (or use administrator
+  rights) so the system can create symlinks, and set
+  `git config core.symlinks true` before checking out — both are required;
+  otherwise Git writes the links as plain text files and Claude Code does not
+  find the skills.
