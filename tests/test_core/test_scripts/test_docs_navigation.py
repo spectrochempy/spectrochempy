@@ -68,9 +68,6 @@ def test_navigation_labels_contexts_and_page_fallback_are_present():
     script = (ROOT / "docs" / "_static" / "js" / "github-pages-versions.js").read_text(
         encoding="utf-8"
     )
-    workflow = (ROOT / ".github" / "workflows" / "build_docs.yml").read_text(
-        encoding="utf-8"
-    )
 
     assert "Documentation version" in layout
     assert "This is development documentation." in layout
@@ -83,10 +80,6 @@ def test_navigation_labels_contexts_and_page_fallback_are_present():
     assert "relativePathFromBase" in script
     assert "pageExists(candidate)" in script
     assert 'new URL("index.html"' in script
-    assert "SCPY_DOCS_CONTEXT" in workflow
-    assert 'echo "docs_context=stable"' in workflow
-    assert 'echo "docs_context=development"' in workflow
-    assert 'echo "docs_context=preview"' in workflow
 
 
 def test_version_selector_keeps_its_accessible_name_and_drops_its_visible_title():
@@ -150,17 +143,6 @@ def test_stable_context_uses_the_published_release_tag(monkeypatch):
     build.tagname = None
 
     assert build._determine_version() == ("1.0.0", "1.0.0", "1.0.0")
-
-
-def test_docs_workflow_limits_stable_publication_to_final_core_releases():
-    workflow = (ROOT / ".github" / "workflows" / "build_docs.yml").read_text(
-        encoding="utf-8"
-    )
-
-    assert "stable-tag-version" in workflow
-    assert "steps.release_scope.outputs.is_stable_core" in workflow
-    assert "Stable core documentation release installs exact version" in workflow
-    assert "SCPY_DOCS_RELEASE_TAG: ${{ steps.release_scope.outputs.tag }}" in workflow
 
 
 def test_tag_build_propagates_strict_sphinx_options():
@@ -231,12 +213,3 @@ def test_stable_retention_keeps_five_newest_numeric_versions_and_refreshes_catal
     assert (tmp_path / "1.2.0rc1").is_dir()
     assert (tmp_path / "docs-navigation").is_dir()
     assert (tmp_path / "versions.json").is_file()
-
-
-def test_both_docs_workflows_use_the_same_five_version_retention_rule():
-    workflow_dir = ROOT / ".github" / "workflows"
-    for name in ("build_docs.yml", "build_docs_archived_versions.yml"):
-        workflow = (workflow_dir / name).read_text(encoding="utf-8")
-        assert "prune_stable_versions" in workflow
-        assert "keep_count=5" in workflow
-        assert "oldest_supported" not in workflow

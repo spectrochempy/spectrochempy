@@ -177,12 +177,7 @@ jobs:
             exit 1
           fi
 
-      - name: Upload recovered package artifact (no publication)
-        if: ${{ !env.ACT }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: recovery-spectrochempy-perkinelmer-${{ inputs.version || '0.1.4' }}
-          path: |
-            recovery-output/**/*.conda
-            recovery-output/**/*.tar.bz2
-          retention-days: 30
+      - name: Report recovered package location
+        run: |
+          echo "Recovered package was built and verified locally in recovery-output/."
+          echo "The package is not uploaded or retained as a GitHub Actions artifact."

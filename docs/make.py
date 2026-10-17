@@ -1024,8 +1024,8 @@ class BuildDocumentation:
             sys.path.insert(0, source_root)
 
         # On Read the Docs the HTML has to land directly in
-        # $READTHEDOCS_OUTPUT/html. Everything else keeps the versioned layout
-        # under build/html/<version> used by GitHub Pages.
+        # $READTHEDOCS_OUTPUT/html. Local builds keep the versioned layout
+        # under build/html/<version>.
         rtd_output = os.environ.get("READTHEDOCS_OUTPUT")
         if rtd_output:
             outdir = str(Path(rtd_output) / "html")

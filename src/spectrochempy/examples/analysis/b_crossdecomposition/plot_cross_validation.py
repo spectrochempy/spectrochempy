@@ -34,7 +34,10 @@ X = next(dataset for dataset in datasets if dataset.name == "m5spec").copy()
 properties = next(dataset for dataset in datasets if dataset.name == "propvals").copy()
 y = properties[:, "Moisture"].squeeze()
 
-X.title = "NIR absorbance"
+# The ``corn.mat`` archive does not record whether the intensities are stored
+# as reflectance or as ``log(1/R)`` absorbance, so the series is labeled with
+# the neutral title "NIR spectra" and no intensity unit is imposed.
+X.title = "NIR spectra"
 X.x.title = "Wavelength"
 X.x.units = "nm"
 X.y.title = "sample"

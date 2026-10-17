@@ -151,6 +151,12 @@ pre-commit run --all-files
 
 Repeat until clean (0 failures, no file modifications). This is mandatory.
 
+Do not treat targeted validation as a substitute for this pre-push gate:
+`ruff check`, `ruff format --check`, focused pytest commands, or a green local
+test are useful during development, but they do not satisfy the mandatory
+`pre-commit run --all-files` requirement before committing and pushing to a PR
+branch.
+
 **Important:** `pre-commit run --all-files` only inspects `git ls-files` paths.
 Untracked files are silently skipped. Stage the task-relevant files (including
 new files) explicitly before running it.
