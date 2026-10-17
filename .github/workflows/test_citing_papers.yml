@@ -1,0 +1,43 @@
+# Run the tests of the generated list of papers citing SpectroChemPy.
+# The main test workflow does not install Sphinx and sphinxcontrib-bibtex, so
+# these tests are skipped there. This workflow installs only what they need,
+# without building the documentation.
+
+name: Citing papers 📚
+
+on:
+  pull_request:
+    paths:
+      - 'docs/citing_papers.py'
+      - 'docs/conf.py'
+      - 'docs/sources/reference/bibliography.bib'
+      - 'docs/sources/reference/papers.rst'
+      - 'tests/test_docs/test_citing_papers.py'
+      - '.github/workflows/test_citing_papers.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test-citing-papers:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v7
+    - uses: actions/setup-python@v7
+      with:
+        python-version: '3.11'
+    - name: Install test dependencies
+      # Same Sphinx and sphinxcontrib-bibtex versions as the docs extra of pyproject.toml
+      run: |
+        python -m pip install --quiet pytest pytest-doctestplus "sphinx==7.4.7" "sphinxcontrib-bibtex==2.6.3"
+        # Fail here rather than letting the tests be skipped
+        python -c "import latexcodec, pybtex, sphinx, sphinxcontrib.bibtex"
+    - name: Run the citing-papers tests
+      # --noconftest: tests/conftest.py imports spectrochempy, which these tests do not need
+      run: |
+        python -m pytest --noconftest -p no:cacheprovider -rs tests/test_docs/test_citing_papers.py
