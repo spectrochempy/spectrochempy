@@ -5,12 +5,18 @@ NMR plugin for SpectroChemPy.
 This package is the home for NMR-specific readers and tools that are useful in
 SpectroChemPy but should not live in the core package. It currently provides a
 validated public 1D workflow for reading data and processing raw 1D FIDs
-through `scp.nmr.read(...)` and `scp.nmr.Experiment(...)`.
+through `scp.nmr.read(...)` and `scp.nmr.Experiment(...)`. The readers also
+load raw 2D time-domain data and vendor-processed 2D spectra and can represent
+them as hypercomplex arrays; this reading/representation scope is separate from
+processing, which remains limited to validated 1D experiments.
 
 Future NMR readers or processing helpers can be added here without creating a
-new plugin package for each vendor format. Multi-dimensional NMR remains under
-active characterization and is not currently part of the public supported
-processing workflow.
+new plugin package for each vendor format. Multi-dimensional NMR processing
+remains under active characterization and is not currently part of the public
+supported processing workflow. A pseudo-2D series (a list of ordinary 1D
+spectra sharing a secondary coordinate, such as a relaxation series) must be
+distinguished from a genuine 2D experiment with two Fourier dimensions: the
+former follows the validated 1D processing path per spectrum.
 
 ## Installation
 

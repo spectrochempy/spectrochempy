@@ -29,14 +29,14 @@ ds = lnd[-1]
 _ = ds.plot()
 
 # %%
-# Add metadata for a nicer display:
+# Add metadata for a nicer display. The archived file does not store the
+# physical elution time and wavelength coordinates, so the axes are plain
+# indices without physical units:
 ds.title = "absorbance"
 ds.units = "absorbance"
 ds.set_coordset(None, None)
-ds.y.title = "elution time"
-ds.x.title = "wavelength"
-ds.y.units = "hours"
-ds.x.units = "nm"
+ds.y.title = "elution time (index)"
+ds.x.title = "wavelength (index)"
 
 # %%
 # Fit the SIMPLISMA model

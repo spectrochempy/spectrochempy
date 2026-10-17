@@ -79,36 +79,35 @@ def _qf_fft(data):
     return np.fft.fftshift(np.fft.fft(np.conjugate(data)), -1)
 
 
+def _complex_fft(data):
+    """Apply a standard complex FFT with NMR-centered output ordering."""
+    return np.fft.fftshift(np.fft.fft(data), -1)
+
+
 def _states_second_pass_fft(data, *, tppi=False):
     """
     Process the indirect dimension for STATES / STATES-TPPI data.
 
-    After the first pass the quaternion stores the two complex subspectra
-    ``fr`` and ``fi`` directly.  A second complex FFT along F1 must then be
-    followed by the usual phase-sensitive recombination:
-
-    ``positive = (Fr - 1j * Fi) / 2``
-
-    Keeping both ``Fr - 1j*Fi`` and ``Fr + 1j*Fi`` would preserve the image
-    branch, which is exactly what we want to suppress for a normal 2D
-    STATES/STATES-TPPI reconstruction.
+    After the first pass the quaternion stores the direct-dimension complex
+    result as ``[Re(R), Im(R), Re(I), Im(I)]``.  The indirect complex axis is
+    therefore represented by cross-pairs ``Re(R)+1j*Re(I)`` and
+    ``Im(R)+1j*Im(I)``.  Transform those pairs along F1 and rebuild the
+    quaternion as the four processed hypercomplex components.
     """
     from spectrochempy_nmr.processing.hypercomplex import _extract_quaternion_components
     from spectrochempy_nmr.processing.hypercomplex import _rebuild_quaternion
 
     RR, RI, IR, II = _extract_quaternion_components(data)
-    fr = RR + 1j * RI
-    fi = IR + 1j * II
+    fr = RR + 1j * IR
+    fi = RI + 1j * II
 
     if tppi:
         fr[..., 1::2] = -fr[..., 1::2]
         fi[..., 1::2] = -fi[..., 1::2]
 
-    fr = np.fft.fftshift(np.fft.fft(fr), -1)
-    fi = np.fft.fftshift(np.fft.fft(fi), -1)
-
-    positive = (fr - 1j * fi) / 2.0
-    return _rebuild_quaternion(positive, np.zeros_like(positive))
+    fr = np.fft.fftshift(np.fft.fft(np.conjugate(fr)), -1)
+    fi = np.fft.fftshift(np.fft.fft(np.conjugate(fi)), -1)
+    return _rebuild_quaternion(fr, fi)
 
 
 def _echoanti_second_pass_fft(data):
@@ -169,6 +168,13 @@ def _fft_encoding_handler(data, encoding, **kwargs):
     # complex subspectra directly and FFT along axis=-1 (which is F1 after
     # swapdims).
     if original_axis != -1:
+        if (
+            hasattr(data, "dtype")
+            and data.dtype.kind != "V"
+            and ("QF" in encoding or "QSIM" in encoding or "DQD" in encoding)
+        ):
+            return _qf_fft(data)
+
         if "STATES" in encoding:
             return _states_second_pass_fft(data, tppi=tppi or "TPPI" in encoding)
         if "ECHO-ANTIECHO" in encoding:
@@ -224,7 +230,7 @@ def _fft_encoding_handler(data, encoding, **kwargs):
         return _rebuild_quaternion(fr, fi)
 
     if "QF" in encoding or "QSIM" in encoding or "DQD" in encoding:
-        return _qf_fft(data)
+        return _qf_fft(data) if data.ndim == 1 else _complex_fft(data)
     if "QSEQ" in encoding:
         msg = "QSEQ NMR encoding is not yet implemented"
         raise NotImplementedError(msg)

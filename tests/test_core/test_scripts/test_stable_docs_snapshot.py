@@ -111,18 +111,9 @@ def test_valid_candidate_atomically_replaces_published_snapshot(tmp_path):
     assert not (published / ".1.0.0.backup").exists()
 
 
-def test_workflow_uses_isolated_compatible_environment_and_validated_promotion():
-    workflow = (ROOT / ".github" / "workflows" / "build_docs.yml").read_text(
-        encoding="utf-8"
-    )
+def test_snapshot_helper_uses_isolated_compatible_environment_and_validated_promotion():
     helper = HELPER.read_text(encoding="utf-8")
-    repair = workflow.split(
-        "- name: Repair published stable documentation snapshot", maxsplit=1
-    )[1].split("- name: CI diagnostics summary", maxsplit=1)[0]
 
-    assert "stable_docs_snapshot.py rebuild" in repair
-    assert '--tag "$STABLE_TAG" --promote' in repair
-    assert "--no-api" not in repair
     assert chr(91) + 'uv, "venv"' in helper
     assert 'f"spectrochempy=={version}"' in helper
     for plugin in (

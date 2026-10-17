@@ -25,7 +25,7 @@ build:
     post_install:
       # Install the plugins from the checkout, not from PyPI, so a pull
       # request that changes a plugin documents the plugin it contains.
-      # This mirrors the install sequence of .github/workflows/build_docs.yml.
+      # This mirrors the local documentation build sequence for plugins.
       - |
         for name in $(python -m spectrochempy.ci.install_plugins --list-names); do
           python -m pip install --no-deps -e "plugins/$name"
