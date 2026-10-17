@@ -124,6 +124,17 @@ def insert_citing_papers(source, bibfile):
     return source.replace(MARKER, citing_papers_rst(Path(bibfile)))
 
 
+def citing_papers_source_read(app, source, bibfile):
+    """
+    Fill the list of ``papers.rst`` from a Sphinx ``source-read`` handler.
+
+    The bibliography is declared as a dependency of the page, so that an
+    incremental build re-reads the page when ``bibliography.bib`` changes.
+    """
+    app.env.note_dependency(str(bibfile))
+    source[0] = insert_citing_papers(source[0], bibfile)
+
+
 def year_suffixes(bibfile):
     """
     Return a/b/... suffixes for entries sharing first author and year.
@@ -152,7 +163,10 @@ def install_year_suffixes(bibfile):
     from sphinxcontrib.bibtex.style import template  # noqa: PLC0415
 
     suffixes = year_suffixes(bibfile)
-    original = template.year.f
+    # Keep the original function, so that repeated calls (e.g. several Sphinx
+    # applications in one process) replace the suffixes instead of adding more.
+    original = getattr(template.year, "_original_f", template.year.f)
+    template.year._original_f = original
 
     def year_with_suffix(children, data):
         text = original(children, data)

@@ -982,9 +982,9 @@ def citing_papers(app, docname, source):
     """Generate the list of papers citing SpectroChemPy from the bibliography."""
     if docname != "reference/papers":
         return
-    from citing_papers import insert_citing_papers
+    from citing_papers import citing_papers_source_read
 
-    source[0] = insert_citing_papers(source[0], REFERENCE / "bibliography.bib")
+    citing_papers_source_read(app, source, REFERENCE / "bibliography.bib")
 
 
 def setup(app):
