@@ -41,7 +41,9 @@ import spectrochempy as scp
 # $$ Y = S_Y L_Y^T + E_Y $$
 # $$ S_X, S_y = \textrm{argmax}_{S_X, S_Y}(\textrm{cov}(S_X, S_Y)) $$
 # $S_X$ and $S_Y$ are $n \times k$ matrices often called score matrices, and $L_X^T$ and $L_Y^T$ are,
-# respectively, $k \times l$ and $k \times m$ loading matrices. Matrices $E_X$ and $E_Y$ are the error
+# respectively, $k \times m$ and $k \times l$ loading matrices (so that $X = S_X L_X^T$ is
+# $(n \times k)(k \times m) = n \times m$ and $Y = S_Y L_Y^T$ is $(n \times k)(k \times l) = n \times l$).
+# Matrices $E_X$ and $E_Y$ are the error
 # terms or residuals.
 # As indicated by the third equation, the decompositions of $X$ and $Y$ are made to maximise
 # the covariance of the score matrices.
@@ -70,11 +72,13 @@ for a in A:
 # on one of the instruments and `'propvals'` giving the property values of the 80 corn samples.
 #
 # Let's name the spectra NDDataset `X`, add a few pieces of information about the x-scale and plot it, before and
-# after detrend:
+# after detrend. The ``corn.mat`` archive does not record whether the intensities are stored as reflectance
+# or as ``log(1/R)`` absorbance, so the series is labeled with the neutral title "NIR spectra" and no
+# intensity unit is imposed:
 
 # %%
 X = A[-3]
-X.title = "absorbance"
+X.title = "NIR spectra"
 X.x.title = "Wavelength"
 X.x.units = "nm"
 _ = X.plot(cmap=None)
@@ -98,7 +102,7 @@ _ = Y_std.T.plot(cmap=None, legend=Y.x.labels)
 
 # %% [markdown]
 # ## Running PLSRegression
-# First we select 57 first samples (2/3 of the total) to train/calibrate the model and the remaining ones
+# First we select the first 57 samples (out of the 80 total) to train/calibrate the model and the remaining ones
 # to test/validate the model, and we restrict first our analysis to the moisture content:
 
 # %%
@@ -121,7 +125,7 @@ _ = pls.fit(X_train, y_train)
 # In this example we keep using the direct estimator surface, which remains
 # supported in this release. In particular, `score()` stays an estimator method
 # because it depends on the evaluation data. Let's for instance plot the
-# $S_X$ matrix:
+# $X$ loading matrix $L_X$ (the ``x_loadings`` output):
 
 # %%
 _ = pls.x_loadings.plot()

@@ -14,8 +14,10 @@ from scipy.sparse.linalg import spsolve
 from scipy.spatial import ConvexHull
 
 from spectrochempy.analysis._base._analysisbase import AnalysisConfigurable
+from spectrochempy.analysis._base._analysisbase import AnalysisSourceMetadata
 from spectrochempy.application.application import info_
 from spectrochempy.application.application import warning_
+from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.processing.baselineprocessing.baselineutils import lls
 from spectrochempy.processing.baselineprocessing.baselineutils import lls_inv
 from spectrochempy.utils.constants import TYPE_FLOAT
@@ -23,6 +25,7 @@ from spectrochempy.utils.constants import TYPE_INTEGER
 from spectrochempy.utils.coordrange import trim_ranges
 from spectrochempy.utils.decorators import _wrap_ndarray_output_to_nddataset
 from spectrochempy.utils.decorators import signature_has_configurable_traits
+from spectrochempy.utils.decorators import transfer_source_context
 from spectrochempy.utils.exceptions import NotFittedError
 from spectrochempy.utils.traits import NDDatasetType
 
@@ -791,6 +794,7 @@ baseline/trends for different segments of the data.
         # Reset the fitted state first: a rejected fit must not leave the
         # instance exposing results from a previous successful fit.
         self._fitted = False
+        self._source_context = None
 
         # Reject invalid last-axis coordinates before any copy, range
         # construction, mask removal, sort or numerical work.
@@ -802,6 +806,15 @@ baseline/trends for different segments of the data.
         # -----
         X = X.copy()
         self._X_input_was_1d = X.ndim == 1
+
+        # Capture the scientific source context before the ``_X`` trait
+        # coercion (``NDDatasetType.validate`` rebuilds the dataset through
+        # ``NDDataset(value)`` and re-defaults ``description`` and ``author``).
+        # Each fit replaces the snapshot so no context can leak between two
+        # fits of the same instance.
+        self._source_context = (
+            AnalysisSourceMetadata(X) if isinstance(X, NDDataset) else None
+        )
 
         if (
             self.model == "asls"
@@ -879,7 +892,10 @@ baseline/trends for different segments of the data.
         return self
 
     @property
-    @_wrap_ndarray_output_to_nddataset
+    # The estimated baseline output keeps its own (explicitly deferred)
+    # metadata policy: the acquisition date is not transferred to it, so its
+    # public behavior is unchanged by the single-source context transfer.
+    @_wrap_ndarray_output_to_nddataset(include_acquisition_date=False)
     def baseline(self):
         """Computed baseline."""
         if not self._fitted:
@@ -896,15 +912,37 @@ baseline/trends for different segments of the data.
             Dataset with baseline correction applied
         """
         if self.model == "asls" and hasattr(self, "Xmasked"):
-            return self.Xmasked - self.baseline
+            corrected = self.Xmasked - self.baseline
+            self._restore_corrected_context(corrected)
+            return corrected
 
         corrected = self.X - self.baseline
         if getattr(self, "_X_input_was_1d", False):
             restored = self.baseline.copy()
             restored._data = np.ma.getdata(corrected.data)[0]
+            # The strict-1D rebuild starts from the estimated baseline, so the
+            # source context and the operation history of the corrected signal
+            # are restored explicitly to match the plain subtraction result.
+            self._restore_corrected_context(restored)
+            restored._history = list(corrected._history or [])
             return restored
 
+        self._restore_corrected_context(corrected)
         return corrected
+
+    def _restore_corrected_context(self, out):
+        """
+        Restore the pre-coercion source context onto a corrected output.
+
+        The corrected signal is a single-source output (the estimated baseline
+        is derived from the same source), so it receives the source context
+        captured at fit time. The estimated baseline output is intentionally
+        left untouched (its own policy is decided separately).
+        """
+        context = getattr(self, "_source_context", None)
+        if context is not None:
+            transfer_source_context(context, out)
+        return out
 
     @property
     def corrected(self):

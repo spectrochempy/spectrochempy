@@ -47,8 +47,11 @@ class AnalysisSourceMetadata:
     mutable reference to ``meta``, ``coordset``, ``history`` or ``mask``).
 
     Only ``author`` is currently consumed by the output wrapping decorator.
-    The other fields are preserved for the deterministic identity/history
-    alignment (see the accepted analysis output metadata policy, PR 2).
+    The full context set is consumed by stateful processing outputs that
+    restore the source context of a corrected signal (see
+    `transfer_source_context`). The other fields are preserved for the
+    deterministic identity/history alignment (see the accepted analysis output
+    metadata policy, PR 2).
     """
 
     def __init__(self, source: NDDataset):

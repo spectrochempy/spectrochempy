@@ -1,5 +1,9 @@
 import warnings
+from datetime import datetime
+from datetime import timedelta
+from datetime import timezone
 from functools import partial
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -11,6 +15,18 @@ from spectrochempy.processing.baselineprocessing.baselineprocessing import Basel
 from spectrochempy.processing.transformation.concatenate import concatenate
 from spectrochempy.utils.exceptions import NotFittedError
 from spectrochempy.utils.testing import assert_dataset_equal
+from tests.test_core.test_dataset._semantic_dataset_helpers import (
+    assert_source_context_preserved,
+)
+from tests.test_core.test_dataset._semantic_dataset_helpers import (
+    assert_source_not_modified,
+)
+from tests.test_core.test_dataset._semantic_dataset_helpers import (
+    make_semantic_1d_dataset,
+)
+from tests.test_core.test_dataset._semantic_dataset_helpers import (
+    make_semantic_2d_dataset,
+)
 
 
 def _make_simple_baseline_dataset(
@@ -1128,3 +1144,154 @@ def test_baseline_wrapper_functions_preserve_mask_1d(
 
     unmasked = ~np.asarray(corrected.mask).ravel()
     assert np.all(np.isfinite(corrected.data.ravel()[unmasked]))
+
+
+# ======================================================================================
+# SOURCE CONTEXT OF THE CORRECTED SIGNAL (issue #1756)
+# ======================================================================================
+
+_AWARE_DATE = datetime(2020, 1, 1, 12, 30, 0, tzinfo=timezone(timedelta(hours=2)))
+
+
+def _context_dataset_2d(tag="ctx", acquisition_date=_AWARE_DATE):
+    return make_semantic_2d_dataset(
+        title="ds_title",
+        name=f"ds_name_{tag}",
+        author=f"author_{tag}",
+        description=f"description_{tag}",
+        origin=f"origin_{tag}",
+        meta_project=f"project_{tag}",
+        meta_settings={"gain": 1},
+        filename=f"{tag}.spc",
+        acquisition_date=acquisition_date,
+        history="original entry",
+    )
+
+
+def _context_dataset_1d(tag="ctx", acquisition_date=_AWARE_DATE):
+    return make_semantic_1d_dataset(
+        title="ds_title",
+        name=f"ds_name_{tag}",
+        author=f"author_{tag}",
+        description=f"description_{tag}",
+        origin=f"origin_{tag}",
+        meta_project=f"project_{tag}",
+        meta_settings={"gain": 1},
+        filename=f"{tag}.spc",
+        acquisition_date=acquisition_date,
+        history="original entry",
+    )
+
+
+def _context_dataset(two_d, tag="ctx", acquisition_date=_AWARE_DATE):
+    builder = _context_dataset_2d if two_d else _context_dataset_1d
+    return builder(tag=tag, acquisition_date=acquisition_date)
+
+
+class TestBaselineCorrectedSourceContext:
+    """
+    The baseline-corrected signal is a single-source output and must keep the
+    source context captured before the ``_X`` trait coercion (issue #1756).
+
+    The estimated ``baseline`` output follows its own (deferred) policy and is
+    not covered here.
+    """
+
+    @pytest.mark.parametrize("two_d", [False, True], ids=["1d", "2d"])
+    def test_corrected_preserves_source_context(self, two_d):
+        ds = _context_dataset(two_d)
+        blc = Baseline()
+        blc.fit(ds)
+        corrected = blc.corrected
+        assert_source_context_preserved(
+            corrected, ds, meta_keys=("project", "settings")
+        )
+
+    def test_transform_matches_corrected_context(self):
+        ds = _context_dataset(two_d=True)
+        blc = Baseline()
+        blc.fit(ds)
+        assert_source_context_preserved(
+            blc.transform(), ds, meta_keys=("project", "settings")
+        )
+
+    @pytest.mark.parametrize("two_d", [False, True], ids=["1d", "2d"])
+    def test_asls_corrected_preserves_source_context(self, two_d):
+        ds = _context_dataset(two_d)
+        blc = Baseline(model="asls", lamb=1e5, asymmetry=0.05)
+        blc.fit(ds)
+        assert_source_context_preserved(
+            blc.corrected, ds, meta_keys=("project", "settings")
+        )
+
+    @pytest.mark.parametrize("two_d", [False, True], ids=["1d", "2d"])
+    def test_acquisition_date_none_stays_none(self, two_d):
+        ds = _context_dataset(two_d, acquisition_date=None)
+        blc = Baseline()
+        blc.fit(ds)
+        assert blc.corrected._acquisition_date is None
+
+    def test_refit_replaces_source_context(self):
+        blc = Baseline()
+        blc.fit(_context_dataset(two_d=True, tag="one"))
+        blc.fit(_context_dataset(two_d=True, tag="two"))
+        corrected = blc.corrected
+        assert corrected.description == "description_two"
+        assert corrected.author == "author_two"
+        assert corrected.origin == "origin_two"
+        assert corrected.filename.name == "two.spc"
+        assert corrected._acquisition_date == _AWARE_DATE
+
+    @pytest.mark.parametrize("two_d", [False, True], ids=["1d", "2d"])
+    def test_nested_meta_independent_and_source_unmodified(self, two_d):
+        ds = _context_dataset(two_d)
+        blc = Baseline()
+        blc.fit(ds)
+        corrected = blc.corrected
+        corrected.meta.settings["gain"] = 99
+        assert ds.meta.settings == {"gain": 1}
+        assert_source_not_modified(
+            ds,
+            description="description_ctx",
+            author="author_ctx",
+            origin="origin_ctx",
+            filename=Path("ctx.spc"),
+            meta={"project": "project_ctx", "settings": {"gain": 1}},
+        )
+
+    @pytest.mark.parametrize("two_d", [False, True], ids=["1d", "2d"])
+    def test_estimated_baseline_keeps_deferred_metadata_policy(self, two_d):
+        ds = _context_dataset(two_d)
+        blc = Baseline()
+        blc.fit(ds)
+        baseline = blc.baseline
+        # The estimated baseline is a separate output role with an explicitly
+        # deferred policy: it must not inherit the pre-coercion source context
+        # and its behavior must stay as before this fix.
+        assert baseline._acquisition_date is None
+        assert baseline.description == blc._X.description
+        assert baseline.author == blc._X.author
+
+    @pytest.mark.parametrize("two_d", [False, True], ids=["1d", "2d"])
+    def test_corrected_data_matches_subtraction(self, two_d):
+        ds = _context_dataset(two_d)
+        blc = Baseline()
+        blc.fit(ds)
+        corrected = blc.corrected
+        np.testing.assert_allclose(
+            np.asarray(corrected.data),
+            np.asarray(ds.data) - np.asarray(blc.baseline.data),
+        )
+        assert corrected.dims == ds.dims
+        assert corrected.shape == ds.shape
+
+    @pytest.mark.parametrize("two_d", [False, True], ids=["1d", "2d"])
+    def test_history_matches_subtraction_policy(self, two_d):
+        ds = _context_dataset(two_d)
+        blc = Baseline()
+        blc.fit(ds)
+        corrected = blc.corrected
+        source_messages = [entry["message"] for entry in ds.history_entries]
+        corrected_messages = [entry["message"] for entry in corrected.history_entries]
+        assert corrected_messages[: len(source_messages)] == source_messages
+        assert "Subtracted" in corrected_messages[-1]

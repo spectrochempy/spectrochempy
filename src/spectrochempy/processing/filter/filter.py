@@ -370,7 +370,6 @@ and ‘nearest’.
                     self.deriv, f"{self.deriv}th"
                 )
                 self._output_title_suffix = f"({ordinal} derivative)"
-                self._preserve_identity = False
 
         # Whittaker-Eilers filter
         # -----------------------
@@ -619,6 +618,12 @@ def savgol(dataset, size=5, order=2, dim=-1, delta=None, **kwargs):
 
     Notes
     -----
+    Smoothing and derivative outputs preserve the source dataset name and
+    retain its history, appending one processing entry per call. This also
+    applies to `savgol_filter`, `differentiate`, and `Filter.transform`.
+    Derivative titles identify the derivative order, and units follow the
+    scaling rules below.
+
     When ``delta`` is ``None`` (the default), the sample spacing is
     detected from the coordinate and passed directly to
     ``scipy.signal.savgol_filter``.  The Savitzky-Golay algorithm is

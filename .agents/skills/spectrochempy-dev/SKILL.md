@@ -151,6 +151,12 @@ pre-commit run --all-files
 
 Repeat until clean (0 failures, no file modifications). This is mandatory.
 
+Do not treat targeted validation as a substitute for this pre-push gate:
+`ruff check`, `ruff format --check`, focused pytest commands, or a green local
+test are useful during development, but they do not satisfy the mandatory
+`pre-commit run --all-files` requirement before committing and pushing to a PR
+branch.
+
 **Important:** `pre-commit run --all-files` only inspects `git ls-files` paths.
 Untracked files are silently skipped. Stage the task-relevant files (including
 new files) explicitly before running it.
@@ -232,11 +238,23 @@ Avoid combining multiple migration phases in a single PR.
 
 Create or update an audit note in `../spectrochempy_maintainer/notes/audits/`
 when the task involves multi-PR coordination, architectural decisions, or
-durable knowledge worth preserving. For simple bug fixes or small changes,
-skip the audit note.
+durable knowledge worth preserving.
 
-For multi-PR work, update or create the relevant audit note before considering
-the task complete.
+A small diff or narrowly scoped PR is **not** by itself a reason to skip the
+maintainer note. Durable decisions include, for example:
+
+* retaining, deprecating, or deliberately not changing a public API;
+* reader relationships, format routing, or serialization policy;
+* architectural or compatibility boundaries;
+* known limitations deliberately deferred out of scope;
+* rationale that a future maintainer would otherwise have to reconstruct from
+  closed issues or PR discussions.
+
+Skip the audit note only when the change is both locally scoped **and**
+introduces no durable project decision worth recovering later.
+
+For multi-PR work, or whenever such a durable decision is made, update or
+create the relevant audit note before considering the task complete.
 
 If `../spectrochempy_maintainer` is not cloned, skip audit notes and report it.
 
@@ -261,9 +279,13 @@ This is **not** an independent review — it is the implementer's final check.
    omissions or scope creep?
 2. **Consistency** — Are tests, documentation, and code coherent? Do test
    names and docstrings reflect the actual behavior?
-3. **Obvious errors** — Typos, wrong variable names, off-by-one, incorrect
+3. **Maintainer coherence** — Does the task confirm, supersede, or introduce
+   durable information tracked in `../spectrochempy_maintainer`? Update the
+   relevant existing note when necessary; do not create a duplicate note merely
+   to record a PR.
+4. **Obvious errors** — Typos, wrong variable names, off-by-one, incorrect
    imports, dead code, leftover debug statements.
-4. **Behavior preservation** — Does the diff preserve existing public behavior?
+5. **Behavior preservation** — Does the diff preserve existing public behavior?
    Are there unintended side effects?
 
 Fix any problem found before considering the task complete.

@@ -23,8 +23,10 @@ def make_semantic_2d_dataset(
     meta_project="test_project",
     meta_instrument=None,
     meta_processing=None,
+    meta_settings=None,
     history="original entry",
     filename=None,
+    acquisition_date=None,
     x_labels=None,
     y_values=None,
     x_values=None,
@@ -53,8 +55,52 @@ def make_semantic_2d_dataset(
         dataset.meta.instrument = meta_instrument
     if meta_processing is not None:
         dataset.meta.processing = list(meta_processing)
+    if meta_settings is not None:
+        dataset.meta.settings = dict(meta_settings)
     if filename is not None:
         dataset.filename = Path(filename)
+    if acquisition_date is not None:
+        dataset.acquisition_date = acquisition_date
+    dataset.history = history
+    return dataset
+
+
+def make_semantic_1d_dataset(
+    *,
+    data=None,
+    title,
+    name,
+    units=None,
+    author="test_author",
+    description="test description",
+    origin="test_origin",
+    meta_project="test_project",
+    meta_settings=None,
+    history="original entry",
+    filename=None,
+    acquisition_date=None,
+    x_values=None,
+):
+    """Build a semantic-rich strictly 1D dataset used across characterization suites."""
+    x = Coord(
+        np.linspace(0.0, 9.0, 10) if x_values is None else x_values,
+        title="wavenumber",
+        units="cm^-1",
+    )
+    if data is None:
+        data = np.arange(10.0, dtype="float64")
+
+    dataset = NDDataset(data, coordset=[x], units=units, title=title, name=name)
+    dataset.author = author
+    dataset.description = description
+    dataset.origin = origin
+    dataset.meta.project = meta_project
+    if meta_settings is not None:
+        dataset.meta.settings = dict(meta_settings)
+    if filename is not None:
+        dataset.filename = Path(filename)
+    if acquisition_date is not None:
+        dataset.acquisition_date = acquisition_date
     dataset.history = history
     return dataset
 
@@ -87,6 +133,34 @@ def assert_basic_metadata_preserved(
         assert getattr(result.meta, key) == getattr(source.meta, key)
     if check_filename:
         assert result.filename == source.filename
+
+
+def assert_source_context_preserved(
+    result,
+    source,
+    *,
+    check_filename=True,
+    meta_keys=("project",),
+):
+    """Assert the mono-source scientific context was preserved to the result."""
+    assert result.description == source.description
+    assert result.author == source.author
+    assert result.origin == source.origin
+    assert result._acquisition_date == source._acquisition_date
+    if check_filename:
+        assert result.filename == source.filename
+    for key in meta_keys:
+        assert getattr(result.meta, key) == getattr(source.meta, key)
+
+
+def assert_source_not_modified(source, *, description, author, origin, filename, meta):
+    """Assert the source dataset context was not modified by an operation."""
+    assert source.description == description
+    assert source.author == author
+    assert source.origin == origin
+    assert source.filename == filename
+    for key, value in meta.items():
+        assert getattr(source.meta, key) == value
 
 
 def assert_dims_equal(result, expected_dims):
