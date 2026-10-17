@@ -20,7 +20,9 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils.datetimeutils import UTC
 from spectrochempy.utils.testing import assert_dataset_equal
 
-from _omnic_synthetic import synthetic_spa_with_optical_velocity
+from tests.test_core.test_readers._omnic_synthetic import (
+    synthetic_spa_with_optical_velocity,
+)
 
 DATADIR = prefs.datadir
 IRDATA = DATADIR / "irdata"

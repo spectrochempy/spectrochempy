@@ -16,7 +16,9 @@ from spectrochempy.core.readers.read_omnic import _read_spa
 from spectrochempy.utils.objects import ScpObjectList
 from spectrochempy.utils.testing import assert_dataset_equal
 
-from _omnic_synthetic import synthetic_spa_with_optical_velocity
+from tests.test_core.test_readers._omnic_synthetic import (
+    synthetic_spa_with_optical_velocity,
+)
 
 
 def _write_synthetic_soc_triplet(tmp_path):
@@ -87,6 +89,32 @@ def test_soc_specific_readers_use_spa_parser_and_record_soc_provenance(
     _assert_soc_dataset(dataset, paths[index], suffix)
 
 
+@pytest.mark.parametrize(
+    ("reader", "index", "suffix"),
+    [
+        (scp.read_ddr, 0, "ddr"),
+        (scp.read_hdr, 1, "hdr"),
+        (scp.read_sdr, 2, "sdr"),
+        (scp.read_soc, 1, "hdr"),
+    ],
+)
+def test_soc_readers_accept_stray_suffix_keyword(tmp_path, reader, index, suffix):
+    """A caller-provided ``suffix`` must not collide with the private kind label.
+
+    Regression test for the SOC reader clarification (spectrochempy#1763): the
+    private shared helper must not name an internal parameter ``suffix``.
+    Previously ``reader(path, suffix="x")`` returned ``None`` with a
+    "got multiple values for keyword argument 'suffix'" warning instead of the
+    dataset. As on ``master``, the unknown keyword is forwarded and ignored.
+    """
+    paths = _write_synthetic_soc_triplet(tmp_path)
+
+    dataset = reader(paths[index], suffix="ignored")
+
+    assert isinstance(dataset, NDDataset)
+    _assert_soc_dataset(dataset, paths[index], suffix)
+
+
 def test_read_soc_single_file_and_generic_read_route_to_soc(tmp_path):
     paths = _write_synthetic_soc_triplet(tmp_path)
 
@@ -149,6 +177,15 @@ def test_read_soc_directory_keeps_default_merge_false(tmp_path):
 
 
 def test_read_soc_directory_keyword_keeps_existing_merge_true_behavior(tmp_path):
+    """Characterize the pre-existing ``directory=`` / ``merge=True`` behavior.
+
+    This is a characterization test of the *current* behavior, not a desired
+    specification: when files are discovered through ``directory=``, compatible
+    datasets split across extensions are not merged, although the documented
+    ``merge`` contract expects a single merged dataset here. Tracked in
+    spectrochempy#1780; fixing it is out of scope for the SOC reader clarification
+    (spectrochempy#1763).
+    """
     _write_synthetic_soc_triplet(tmp_path)
 
     datasets = scp.read_soc(directory=tmp_path, pattern="*.?dr", merge=True)

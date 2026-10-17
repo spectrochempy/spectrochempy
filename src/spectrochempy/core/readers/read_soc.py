@@ -485,21 +485,23 @@ def read_sdr(*paths, **kwargs):
 # ======================================================================================
 @_importer_method
 def _read_ddr(*args, **kwargs):
-    return _read_soc_spa(*args, suffix="DDR", **kwargs)
+    return _read_soc_spa(*args, _soc_kind="DDR", **kwargs)
 
 
 @_importer_method
 def _read_hdr(*args, **kwargs):
-    return _read_soc_spa(*args, suffix="HDR", **kwargs)
+    return _read_soc_spa(*args, _soc_kind="HDR", **kwargs)
 
 
 @_importer_method
 def _read_sdr(*args, **kwargs):
-    return _read_soc_spa(*args, suffix="SDR", **kwargs)
+    return _read_soc_spa(*args, _soc_kind="SDR", **kwargs)
 
 
-def _read_soc_spa(*args, suffix, **kwargs):
+def _read_soc_spa(*args, _soc_kind, **kwargs):
+    # ``_soc_kind`` is a private label: it must not collide with a caller-provided
+    # keyword (e.g. ``suffix``) that the importer forwards down to the SPA parser.
     ds = _read_spa(*args, **kwargs)
     ds.origin = "soc"
-    ds.history = f"Imported SOC {suffix} file {ds.filename.name}"
+    ds.history = f"Imported SOC {_soc_kind} file {ds.filename.name}"
     return ds
