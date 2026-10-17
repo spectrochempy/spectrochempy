@@ -1,5 +1,3 @@
-:orphan:
-
 .. _userguide:
 .. _user_guide:
 
@@ -10,7 +8,6 @@ A comprehensive guide to using SCPY.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
    introduction/introduction
    importexport/index
