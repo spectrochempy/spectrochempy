@@ -61,3 +61,29 @@ def test_external_links_and_static_templates_are_not_local_pages(tmp_path):
 def test_empty_build_is_not_a_success(tmp_path):
     with pytest.raises(ValueError, match="No index.html"):
         checker.check_html_links(tmp_path)
+
+
+@pytest.mark.parametrize(
+    ("source", "anchors"),
+    [
+        (
+            "index.rst.tmpl",
+            {"home", "spectrochempy-advanced-spectroscopic-data-analysis"},
+        ),
+        ("userguide/index.rst", {"user-guide-and-tutorials"}),
+        ("gettingstarted/examples/index.rst", {"example-s-gallery"}),
+        ("devguide/issues.rst", {"contributing-bugs-report"}),
+    ],
+)
+def test_document_heading_anchors_remain_rendered(source, anchors):
+    docutils = pytest.importorskip("docutils.core")
+    jinja2 = pytest.importorskip("jinja2")
+    text = (SCRIPT.parents[1] / "sources" / source).read_text(encoding="utf-8")
+    if source.endswith(".tmpl"):
+        text = jinja2.Template(text).render(single=False, include_api=False)
+    text = text.split(".. toctree::", 1)[0]
+    parts = docutils.publish_parts(
+        text, writer_name="html5", settings_overrides={"doctitle_xform": False}
+    )
+    page = checker.Page(parts["body"])
+    assert anchors <= page.anchors

@@ -1,5 +1,6 @@
 .. _userguide:
 .. _user_guide:
+.. _user-guide-and-tutorials:
 
 Guides
 ======

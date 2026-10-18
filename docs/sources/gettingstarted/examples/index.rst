@@ -1,5 +1,6 @@
 .. _examples-gallery:
 .. _examples-index:
+.. _example-s-gallery:
 
 ========
 Examples
