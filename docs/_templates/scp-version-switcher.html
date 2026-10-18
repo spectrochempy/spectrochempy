@@ -1,0 +1,5 @@
+<div class="scp-version-switcher"{% if version_preview_json %} data-preview-json="{{ pathto(version_preview_json, 1) }}"{% endif %} data-build-label="{{ version_button_label }}">
+  <select aria-label="Documentation version" title="Documentation version" disabled>
+    <option>{{ version_button_label }}</option>
+  </select>
+</div>

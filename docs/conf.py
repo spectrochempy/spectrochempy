@@ -301,7 +301,8 @@ html_theme = "pydata_sphinx_theme"
 # documentation.
 html_theme_options = {
     "navbar_align": "left",
-    "logo": {"text": logo_version},
+    "logo": {"text": ""},
+    "navbar_start": ["navbar-logo", "scp-version-switcher"],
     "navbar_end": ["theme-switcher", "navbar-icon-links"],
     "navbar_persistent": ["search-button-field"],
     "header_links_before_dropdown": 6,
@@ -451,6 +452,8 @@ if docs_context not in {"development", "preview", "stable"}:
 preview_name = os.environ.get("SCPY_DOCS_PREVIEW_NAME", "").strip()
 
 html_context = {
+    "version_preview_json": os.environ.get("SCPY_VERSION_PREVIEW_JSON", ""),
+    "version_button_label": logo_version,
     "current_version": docs_context,
     "docs_context": docs_context,
     "docs_build_version": release,
