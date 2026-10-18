@@ -126,7 +126,7 @@ X
 # | read_labspec  | LABSPEC6 spectral data files                   | .txt           |
 # | read_wire,<br/>read_wdf | Renishaw Wire files                     | .wdf           |
 # | read_scp      | SpectroChemPy-specific files                   | .scp           |
-# | read_soc,<br/>read_ddr,<br/>read_hdr,<br/>read_sdr     | Surface Optics Corporation files               | .ddr, .hdr, .sdr |
+# | read_soc,<br/>read_ddr,<br/>read_hdr,<br/>read_sdr     | Surface Optics Corporation SPA-compatible files | .ddr, .hdr, .sdr |
 # | read_galactic | Galactic spectral files                        | .spc           |
 # | read_quadera  | Pfeiffer Vacuum QUADERA mass spectrometer files | .txt           |
 # | scp.perkinelmer.read | PerkinElmer SP files   (requires spectrochempy-perkinelmer plugin) | .sp |
@@ -137,6 +137,10 @@ X
 #
 # The `read_dir` function scans a directory and reads all supported files,
 # returning a list of `NDDataset` objects.
+# SOC readers remain explicit convenience APIs for Surface Optics Corporation
+# files. Internally, `.ddr`, `.hdr` and `.sdr` files use the same SPA-compatible
+# binary parser as OMNIC `.spa` files, while preserving SOC provenance and the
+# SOC multi-file default of keeping datasets separate unless `merge=True` is set.
 #
 # Historical ``.scp`` and ``.pscp`` files are trusted native persistence
 # archives. If such a file requires legacy pickle-based decoding, load it
