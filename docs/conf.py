@@ -147,6 +147,29 @@ logo_version = _compact_version_label(release)
 project = "SpectroChemPy"
 copyright = spectrochempy.copyright
 
+
+def _current_whatsnew_doc(release_str, whatsnew_dir=None):
+    """
+    Changelog page matching the version being documented.
+
+    Development builds point to the rolling ``latest`` changelog, released
+    versions to their own ``vX.Y.Z`` notes. The release-notes index stays the
+    fallback (and remains reachable from every changelog page).
+    """
+    directory = SRC / "whatsnew" if whatsnew_dir is None else Path(whatsnew_dir)
+    try:
+        is_development = Version(release_str).is_devrelease
+    except InvalidVersion:
+        return "whatsnew/index"
+    name = "latest" if is_development else f"v{release_str}"
+    if not (directory / f"{name}.rst").is_file():
+        name = "index"
+    return f"whatsnew/{name}"
+
+
+# "What's new" entry point used by the navigation and the documentation home page.
+current_whatsnew_doc = _current_whatsnew_doc(release)
+
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
 # today = ''
@@ -247,6 +270,7 @@ with open(os.path.join(SRC, "index.rst"), "w", encoding="utf-8") as f:
             include_api=include_api,
             single=single_doc_or_dir,
             pattern=pattern,
+            current_whatsnew_doc=current_whatsnew_doc,
         )
     )
 
@@ -454,6 +478,7 @@ preview_name = os.environ.get("SCPY_DOCS_PREVIEW_NAME", "").strip()
 html_context = {
     "version_preview_json": os.environ.get("SCPY_VERSION_PREVIEW_JSON", ""),
     "version_button_label": logo_version,
+    "current_whatsnew_doc": current_whatsnew_doc,
     "current_version": docs_context,
     "docs_context": docs_context,
     "docs_build_version": release,
@@ -1084,10 +1109,10 @@ def strip_generated_api_links(app, pagename, templatename, context, doctree):
 
         def generate_header_nav_html(*args, **kwargs):
             navigation = original_header(*args, **kwargs)
-            latest = relative_uri(f"{pagename}.html", "whatsnew/latest.html")
+            whatsnew = relative_uri(f"{pagename}.html", f"{current_whatsnew_doc}.html")
             return re.sub(
                 r"(<a\b[^>]*\bhref=\")[^\"]+(\"[^>]*>\s*(?:🆕\s*)?What's New\s*</a>)",
-                rf"\g<1>{latest}\g<2>",
+                rf"\g<1>{whatsnew}\g<2>",
                 navigation,
             )
 

@@ -4,12 +4,70 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 
+import ast
 import importlib
 from pathlib import Path
 
 import pytest
+from packaging.version import InvalidVersion
+from packaging.version import Version
 
 ROOT = Path(__file__).parents[3]
+
+
+def _load_whatsnew_target_helper():
+    """Extract ``_current_whatsnew_doc`` from conf.py without executing it."""
+    tree = ast.parse((ROOT / "docs" / "conf.py").read_text(encoding="utf-8"))
+    helper = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef) and node.name == "_current_whatsnew_doc"
+    )
+    namespace = {
+        "Path": Path,
+        "Version": Version,
+        "InvalidVersion": InvalidVersion,
+        "SRC": ROOT / "docs" / "sources",
+    }
+    exec(  # noqa: S102 - the function is read from the repository itself
+        compile(ast.Module(body=[helper], type_ignores=[]), "conf.py", "exec"),
+        namespace,
+    )
+    return namespace["_current_whatsnew_doc"]
+
+
+def test_whatsnew_target_follows_the_documented_version(tmp_path):
+    helper = _load_whatsnew_target_helper()
+    for name in ("latest.rst", "v1.1.3.rst", "v1.2.0rc1.rst"):
+        (tmp_path / name).write_text("", encoding="utf-8")
+
+    # Development builds read the rolling changelog...
+    assert helper("1.1.4.dev12", tmp_path) == "whatsnew/latest"
+    assert helper("1.1.4.dev", tmp_path) == "whatsnew/latest"
+
+    # ...while released versions read their own release notes.
+    assert helper("1.1.3", tmp_path) == "whatsnew/v1.1.3"
+    assert helper("1.2.0rc1", tmp_path) == "whatsnew/v1.2.0rc1"
+
+    # Missing or unreadable versions keep the release-notes index.
+    assert helper("1.0.0", tmp_path) == "whatsnew/index"
+    assert helper("not-a-version", tmp_path) == "whatsnew/index"
+
+
+def test_whatsnew_entry_points_use_the_version_aware_target():
+    template = (ROOT / "docs" / "sources" / "index.rst.tmpl").read_text(
+        encoding="utf-8"
+    )
+    navbar = (ROOT / "docs" / "_templates" / "navbar-nav.html").read_text(
+        encoding="utf-8"
+    )
+    conf = (ROOT / "docs" / "conf.py").read_text(encoding="utf-8")
+
+    assert 'href="{{ current_whatsnew_doc }}.html"' in template
+    assert "whatsnew/index.html" not in template
+    assert "(current_whatsnew_doc," in navbar
+    assert '"current_whatsnew_doc": current_whatsnew_doc' in conf
+    assert "current_whatsnew_doc=current_whatsnew_doc" in conf
 
 
 def _load_docs_make():
