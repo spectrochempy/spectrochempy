@@ -1107,12 +1107,12 @@ def _section_title(env, pagename):
         )
 
     section_titles = {
-        "gettingstarted/index": "🚀 Getting Started",
-        "userguide/index": "📚 Guides",
-        "reference/index": "🔍 Reference",
-        "whatsnew/index": "🆕 What's New",
-        "devguide/index": "🛠️ Contribute",
-        "credits/index": "✨ Credits",
+        "gettingstarted/index": "Getting started",
+        "userguide/index": "Guides",
+        "reference/navigation": "API",
+        "reference/glossary": "API",
+        "gettingstarted/examples/index": "Examples",
+        "credits/index": "About",
     }
 
     for section in env.toctree_includes.get(env.config.root_doc, ()):
