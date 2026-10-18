@@ -144,7 +144,7 @@ master_doc = "index"
 version = spectrochempy.version
 release = version.split("+")[0]
 logo_version = _compact_version_label(release)
-project = f"SpectroChemPy v{version}"
+project = "SpectroChemPy"
 copyright = spectrochempy.copyright
 
 # There are two options for replacing |today|: either, you set today to some

@@ -81,6 +81,7 @@ code.literal {
 .bd-header .navbar-brand:hover .logo__title,
 .bd-header .navbar-nav > .nav-item > .nav-link,
 .bd-header .navbar-nav > .nav-item > .dropdown-toggle,
+.bd-sidebar-primary .sidebar-header-items .dropdown-toggle,
 .bd-header .navbar-icon-links a,
 .bd-header .theme-switch-button {
   color: #ffffff !important;
@@ -88,6 +89,7 @@ code.literal {
 
 .bd-header .navbar-nav > .nav-item > .nav-link:hover,
 .bd-header .navbar-nav > .nav-item > .dropdown-toggle:hover,
+.bd-sidebar-primary .sidebar-header-items .dropdown-toggle:hover,
 .bd-header .navbar-icon-links a:hover,
 .bd-header .theme-switch-button:hover {
   color: var(--scp-gold) !important;
@@ -232,10 +234,6 @@ body:has(.scp-home) .bd-main .bd-content .bd-article-container .bd-article {
   padding: 0 !important;
 }
 
-body:has(.scp-home) .bd-sidebar-primary {
-  display: none;
-}
-
 body:has(.scp-home) .bd-sidebar-secondary {
   display: none;
 }
@@ -252,8 +250,16 @@ body:has(.scp-home) .bd-sidebar-secondary {
   display: none;
 }
 
-body:has(.scp-home) #pst-header .primary-toggle {
+body:has(.scp-home) #pst-header .secondary-toggle,
+body:has(.scp-home) .bd-docs-nav {
   display: none;
+}
+
+@media (min-width: 960px) {
+  body:has(.scp-home) .bd-sidebar-primary,
+  body:has(.scp-home) #pst-header .primary-toggle {
+    display: none;
+  }
 }
 
 .scp-home {
