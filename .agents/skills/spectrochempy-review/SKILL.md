@@ -13,8 +13,8 @@ metadata:
 ## Trigger
 
 Use this skill when asked to perform a **separate review** of an
-implementation. This review runs in a **new independent OpenCode or Codex
-session** without the implementation history.
+implementation. This review runs in a **new independent OpenCode, Codex, or
+Claude Code session** without the implementation history.
 
 Do **not** use this for trivial changes (typos, formatting, mechanical
 refactoring with no behavior change). Those are covered by the implementer's

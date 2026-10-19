@@ -283,6 +283,20 @@ def test_publish_draft_release_links_reviewed_release_notes():
     assert "pull_request.merge_commit_sha" in content
 
 
+def test_publish_draft_release_creates_archive_branch_and_advances_stable():
+    content = (WORKFLOWS / "publish_draft_new_release.yml").read_text(encoding="utf-8")
+    # Final releases only: a release candidate must never create a numeric
+    # archive branch nor move the mobile "stable" branch.
+    assert "steps.vsem.outputs.prerelease == 'false'" in content
+    # The archive branch is derived from the released version and is immutable.
+    assert "refs/heads/$archive_branch" in content
+    assert "refusing to move an existing archive branch" in content
+    # "stable" is the only moving branch; it moves forward only, under a lease.
+    assert "refs/heads/stable" in content
+    assert "git merge-base --is-ancestor" in content
+    assert "--force-with-lease" in content
+
+
 def test_prepare_release_validates_version_before_proceeding():
     content = (WORKFLOWS / "prepare_new_release.yml").read_text(encoding="utf-8")
     assert "release_version.py" in content
