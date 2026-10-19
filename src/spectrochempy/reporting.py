@@ -28,15 +28,31 @@ _SCOPE_MESSAGE = (
 _MAX_COLLECTION_ITEMS = 32
 _MAX_NESTING_DEPTH = 4
 _MAX_TEXT_LENGTH = 4096
+_MAX_RENDERED_NODES = 256
+_MAX_RENDERED_CHARS = 16384
 _WINDOWS_PATH = re.compile(r"^[A-Za-z]:[\\/]")
 _SUFFIX = re.compile(r"\.([A-Za-z][A-Za-z0-9]*|[0-9]+)$")
 _NUMERIC_STEM = re.compile(r"^[+-]?[0-9]+(?:\.[0-9]+)*$")
 _MASKED_PATH = "[masqué : chemin ou nom de fichier]"
+_RENDER_BUDGET = "[omis : budget de rendu épuisé]"
 
 
 @dataclass(frozen=True)
 class FigureReference:
-    """An explicit, report-relative or HTTPS figure reference."""
+    """
+    An explicit, report-relative or HTTPS figure reference.
+
+    Parameters
+    ----------
+    label
+        Figure label, used for the section heading and the image alternative
+        text.
+    target
+        HTTP(S) URL or safe relative POSIX path. The target is not checked for
+        existence and is never copied.
+    caption
+        Optional caption rendered after the image.
+    """
 
     label: str
     target: str
@@ -55,15 +71,20 @@ def render_dataset_markdown(
 
     Parameters
     ----------
-    dataset
+    dataset : NDDataset
         Dataset to describe. The renderer does not modify it.
-    title
+    title : str
         Required document title.
-    metadata
+    metadata : sequence of str, optional
         Explicit metadata keys to include, in report order.
-    figures
+    figures : sequence of FigureReference, optional
         Explicit figure references. Matplotlib figures and implicit capture are
         not supported.
+
+    Returns
+    -------
+    str
+        Deterministic Markdown document ending with a single newline.
     """
     if not isinstance(dataset, NDDataset):
         raise TypeError("dataset must be an NDDataset")
@@ -95,7 +116,7 @@ def render_dataset_markdown(
 
 def _dataset_heading(dataset: NDDataset) -> str:
     if dataset.has_defined_name:
-        return _escape(dataset.name)
+        return _text(dataset.name)
     return "Jeu de données"
 
 
@@ -104,19 +125,23 @@ def _dataset_summary(dataset: NDDataset) -> list[str]:
     lines.append("- Dimensions: " + _code(", ".join(dataset.dims)))
     lines.append("- Unité des données: " + _unit(dataset.units))
     if dataset.title != "<untitled>":
-        lines.append("- Titre: " + _escape(dataset.title))
-    if dataset.origin is not None:
-        lines.append("- Origine: " + _safe_text(dataset.origin))
+        lines.append("- Titre: " + _text(dataset.title))
+    origin = dataset.origin
+    if isinstance(origin, str) and not origin.strip():
+        origin = None
+    lines.append("- Origine: " + _value(origin))
     return lines
 
 
 def _coordinates(dataset: NDDataset) -> list[str]:
     lines = ["", "#### Coordonnées", ""]
-    if dataset.coordset is None:
+    coordset = dataset.coordset
+    if coordset is None:
         return [*lines, "- Aucune coordonnée fournie."]
 
+    names = coordset.names
     for dim in dataset.dims:
-        coord = dataset.coord(dim)
+        coord = dataset.coord(dim) if dim in names else None
         if coord is None:
             lines.append(f"- `{_escape(dim)}`: —")
             continue
@@ -127,7 +152,7 @@ def _coordinates(dataset: NDDataset) -> list[str]:
             continue
         label = coord.title if coord.title != "<untitled>" else coord.name
         summary = [
-            f"{_code(dim)} — {_escape(label)}",
+            f"{_code(dim)} — {_text(label)}",
             f"taille: {coord.size}",
             f"unité: {_unit(coord.units)}",
         ]
@@ -164,7 +189,7 @@ def _history(dataset: NDDataset) -> list[str]:
         operation = entry["operation"] if entry["operation"] is not None else "texte"
         lines.append(f"{index}. {_code(_datetime(entry['date']))} — {_code(operation)}")
         lines.append(f"   - Paramètres: {_value(entry['parameters'])}")
-        lines.append(f"   - Message: {_escape(entry['message'])}")
+        lines.append(f"   - Message: {_value(entry['message'])}")
     return lines
 
 
@@ -174,10 +199,11 @@ def _figures(figures: Sequence[FigureReference]) -> list[str]:
     lines = ["", "## Figures", ""]
     for figure in figures:
         target = _figure_target(figure.target)
-        lines.append(f"### {_escape(figure.label)}")
-        lines.extend(["", f"![{_escape(figure.label)}]({target})"])
+        label = _text(figure.label)
+        lines.append(f"### {label}")
+        lines.extend(["", f"![{label}]({target})"])
         if figure.caption is not None:
-            lines.extend(["", _escape(figure.caption)])
+            lines.extend(["", _text(figure.caption)])
         lines.append("")
     return lines
 
@@ -196,8 +222,10 @@ def _validate_figures(figures: Sequence[FigureReference]) -> None:
 def _figure_target(target: str) -> str:
     if not isinstance(target, str) or not target:
         raise ValueError("figure target must be a non-empty string")
-    if any(character in target for character in "\r\n()<>"):
-        raise ValueError("figure target must not contain Markdown control characters")
+    if any(character in target for character in "\r\n\t ()<>"):
+        raise ValueError(
+            "figure target must not contain whitespace or Markdown control characters"
+        )
     parsed = urlparse(target)
     if parsed.scheme in {"http", "https"} and parsed.netloc:
         return target
@@ -223,17 +251,23 @@ def _unit(value) -> str:
     return "—" if value is None else _code(str(value))
 
 
-def _value(value, *, depth: int = 0) -> str:
+def _value(value, *, depth: int = 0, _budget=None) -> str:
+    budget = (
+        _budget if _budget is not None else [_MAX_RENDERED_NODES, _MAX_RENDERED_CHARS]
+    )
+    if budget[0] <= 0 or budget[1] <= 0:
+        return _RENDER_BUDGET
+    budget[0] -= 1
     if value is None:
         return "—"
     if isinstance(value, Path):
         return _MASKED_PATH
     if isinstance(value, str):
-        if len(value) > _MAX_TEXT_LENGTH:
-            return "[omis : texte trop long]"
-        if _looks_like_path(value):
-            return _MASKED_PATH
-        return _escape(value)
+        rendered = _text(value)
+        if len(rendered) > budget[1]:
+            return _RENDER_BUDGET
+        budget[1] -= len(rendered)
+        return rendered
     if isinstance(value, bool):
         return str(value)
     if isinstance(value, Integral | np.integer):
@@ -247,23 +281,33 @@ def _value(value, *, depth: int = 0) -> str:
     if isinstance(value, Unit):
         return _unit(value)
     if isinstance(value, Quantity):
-        return f"{_value(value.magnitude, depth=depth + 1)} {_unit(value.units)}"
+        magnitude = _value(value.magnitude, depth=depth + 1, _budget=budget)
+        return f"{magnitude} {_unit(value.units)}"
     if isinstance(value, Mapping):
         if depth >= _MAX_NESTING_DEPTH:
             return "[omis : profondeur maximale]"
         if len(value) > _MAX_COLLECTION_ITEMS:
             return "[omis : collection trop grande]"
-        pairs = [
-            f"{_escape(str(key))}: {_value(value[key], depth=depth + 1)}"
-            for key in sorted(value, key=str)
-        ]
+        pairs = []
+        for key in sorted(value, key=str):
+            if budget[0] <= 0 or budget[1] <= 0:
+                pairs.append(_RENDER_BUDGET)
+                break
+            rendered = _value(value[key], depth=depth + 1, _budget=budget)
+            pairs.append(f"{_text(str(key))}: {rendered}")
         return "{" + ", ".join(pairs) + "}"
     if isinstance(value, list | tuple):
         if depth >= _MAX_NESTING_DEPTH:
             return "[omis : profondeur maximale]"
         if len(value) > _MAX_COLLECTION_ITEMS:
             return "[omis : collection trop grande]"
-        return "[" + ", ".join(_value(item, depth=depth + 1) for item in value) + "]"
+        items = []
+        for item in value:
+            if budget[0] <= 0 or budget[1] <= 0:
+                items.append(_RENDER_BUDGET)
+                break
+            items.append(_value(item, depth=depth + 1, _budget=budget))
+        return "[" + ", ".join(items) + "]"
     return f"[omis : {type(value).__name__}]"
 
 
@@ -287,36 +331,44 @@ def _looks_like_path(value: str) -> bool:
     """
     Return whether free text is more likely a path, file name or host.
 
-    Structural separators are conclusive whatever the whitespace. A trailing
-    extension is also conclusive whatever the whitespace: a letter one masks
-    ``private report.csv`` or ``notes / private.csv`` whatever its length
-    (``report.spectrochempy``), while a numeric one only masks a token whose
-    stem is a word (``report.123456789``), so ``1.5``, ``TopSpin 4.0`` and
-    ``version 1.12`` stay scientific text.
+    Structural prefixes are conclusive: ``/…``, ``~/``, ``./``, ``../``,
+    Windows drives and backslashes. A trailing extension is also conclusive
+    whatever the whitespace: a letter-initial extension masks
+    ``private report.csv`` or ``report.spectrochempy`` whatever its length,
+    while a numeric one masks a word-stem token such as ``report.123456789``.
 
-    Whitespace still wins over a bare ``/``: ``A/B calibration`` is a ratio, not
-    a path, and is rendered. Extension-less file names (``1r``, ``acqus``) are
-    not masked; recognizing them would require an explicit allowlist.
+    A bare ``/`` is not conclusive, so scientific text such as ``N/A``,
+    ``mg/L``, ``and/or``, ``24/7``, ``absorbance/a.u.`` or a DOI stays
+    rendered; consequently an extension-less relative path without ``./`` or
+    ``../`` is not masked. Decimals and versions (``1.5``, ``1.5.3``,
+    ``version 1.12``) stay text, and so do extension-less file names
+    (``1r``, ``acqus``), which would need an explicit allowlist.
     """
     if value.startswith(("/", "~/", "./", "../")) or _WINDOWS_PATH.match(value):
         return True
     if "\\" in value:
         return True
     match = _SUFFIX.search(value)
-    if match is not None:
-        extension = match.group(1)
-        if extension[:1].isalpha():
-            return True
-        if any(character.isspace() for character in value):
-            return False
-        return not _NUMERIC_STEM.match(value[: match.start()])
+    if match is None:
+        return False
+    extension = match.group(1)
+    if extension[:1].isalpha():
+        return True
     if any(character.isspace() for character in value):
         return False
-    return "/" in value
+    if "/" in value:
+        return False
+    if len(extension) == 1:
+        return False
+    return not _NUMERIC_STEM.match(value[: match.start()])
 
 
-def _safe_text(value) -> str:
-    return _value(value)
+def _text(value: str) -> str:
+    if len(value) > _MAX_TEXT_LENGTH:
+        return "[omis : texte trop long]"
+    if _looks_like_path(value):
+        return _MASKED_PATH
+    return _escape(value)
 
 
 def _escape(value: str) -> str:
@@ -333,4 +385,6 @@ def _code(value: str) -> str:
     delimiter = "`"
     while delimiter in value:
         delimiter += "`"
+    if not value or value.startswith("`") or value.endswith("`"):
+        value = f" {value} "
     return f"{delimiter}{value}{delimiter}"
