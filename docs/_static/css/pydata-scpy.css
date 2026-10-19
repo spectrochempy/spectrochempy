@@ -726,7 +726,7 @@ html[data-theme="dark"] .scp-stage:hover {
 
 @media (max-width: 1100px) {
   .scp-hero {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     min-height: auto;
     padding-right: 1.25rem;
     padding-left: 1.25rem;
@@ -769,7 +769,8 @@ html[data-theme="dark"] .scp-stage:hover {
 
 @media (max-width: 560px) {
   .scp-hero h1 {
-    font-size: clamp(2.8rem, 16vw, 4.4rem);
+    overflow-wrap: break-word;
+    font-size: clamp(2rem, 11.5vw, 2.8rem);
   }
 
   .scp-actions,
