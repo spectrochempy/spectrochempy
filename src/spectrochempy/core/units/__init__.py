@@ -31,11 +31,11 @@ def _register_dotted_symbols(registry):
     """
     Allow parsing SpectroChemPy custom dotted symbols.
 
-    pint interprets ``.`` as a multiplication operator, so SpectroChemPy's
-    dotted display symbols (``a.u.`` for absorbance, ``K.M.`` for Kubelka-Munk)
-    round-trip on output but cannot be read back from a string. This installs a
-    registry preprocessor that rewrites those symbols, with or without their
-    trailing dot, to the canonical unit name before parsing. See issue #913.
+    pint tokenizes the dot of SpectroChemPy's dotted display symbols (``a.u.``
+    for absorbance, ``K.M.`` for Kubelka-Munk), so they round-trip on output but
+    cannot be read back from a string. This installs a registry preprocessor
+    that rewrites those symbols, with or without their trailing dot, to the
+    canonical unit name before parsing. See issue #913.
     """
     mapping = {
         "a.u.": "absorbance",
@@ -44,15 +44,36 @@ def _register_dotted_symbols(registry):
         "K.M": "Kubelka_Munk",
     }
 
+    symbols_with_dot = ("a.u.", "K.M.")
+    symbols_without_dot = ("a.u", "K.M")
     pattern = re.compile(
         r"(?<![\w.])("
-        + "|".join(re.escape(s) for s in sorted(mapping, key=len, reverse=True))
+        + "|".join(re.escape(s) for s in symbols_with_dot)
+        + r")(?=\.|[^\w.]|$)|(?<![\w.])("
+        + "|".join(re.escape(s) for s in symbols_without_dot)
         + r")(?![\w.])"
     )
 
     registry.preprocessors.append(
-        lambda string: pattern.sub(lambda m: mapping[m.group(1)], string)
+        lambda string: pattern.sub(lambda m: mapping[m.group(1) or m.group(2)], string)
     )
+
+
+def _register_dot_separators(registry):
+    """
+    Allow parsing unit expressions that use ``.`` as a separator.
+
+    pint 0.26.2 rejects unknown operators, so expressions such as ``kg.m`` or
+    ``cm.s^-1`` no longer parse. This installs a registry preprocessor that
+    rewrites separator dots to implicit multiplication, while leaving decimal
+    numbers, scientific notation and the custom dotted symbols untouched.
+    """
+    # A separator dot follows a unit atom and precedes another unit atom or an
+    # opening parenthesis. The context preserves decimal and scientific
+    # notation with a digit after the dot or exponent marker.
+    pattern = re.compile(r"(?<=[\w)\]])\s*\.\s*(?![eE][+-]?\d)(?=[^\W\d]|\()")
+
+    registry.preprocessors.append(lambda string: pattern.sub(" ", string))
 
 
 from functools import wraps
@@ -250,12 +271,13 @@ if globals().get("ur", None) is None:
     ur.define("Kubelka_Munk = 1. = K.M.")
     ur.define("ppm = 1. = ppm")
 
-    # pint reads "." as multiplication, so custom display symbols that
-    # contain dots (e.g. "a.u." for absorbance, "K.M." for Kubelka-Munk)
-    # cannot be parsed back from their string form. Register a preprocessor
-    # mapping those symbols (with or without the trailing dot) to their
-    # canonical unit name before parsing. See #913.
+    # custom display symbols that contain dots (e.g. "a.u." for absorbance,
+    # "K.M." for Kubelka-Munk) cannot be parsed back from their string form.
+    # Register a preprocessor mapping those symbols (with or without the
+    # trailing dot) to their canonical unit name before normalizing separator
+    # dots. See #913.
     _register_dotted_symbols(ur)
+    _register_dot_separators(ur)
 
     set_application_registry(ur)
     del UnitRegistry  # to avoid importing it
