@@ -1,39 +1,39 @@
-# Rapport d’essai
+# Report
 
-## Portée et limites
+## Scope and limitations
 
-> Ce rapport synthétise les objets et l’historique fournis. Il ne constitue pas une recette exécutable ni une preuve de provenance exhaustive.
+> This report summarizes the supplied objects and history. It is not an executable recipe or a proof of exhaustive provenance. It renders supplied text with Markdown escaping but does not detect or certify that it is free of sensitive information; select and sanitize metadata, origin and history before rendering.
 
-## Jeux de données
+## Datasets
 
 ### sample
 
-- Forme: `(3,)`
+- Shape: `(3,)`
 - Dimensions: `x`
-- Unité des données: `a.u.`
-- Titre: Absorbance
-- Origine: instrument
+- Data unit: `a.u.`
+- Title: Absorbance
+- Origin: instrument
 
-#### Coordonnées
+#### Coordinates
 
-- `x` — Wavenumber; taille: 3; unité: `cm⁻¹`; étendue: 1.0 à 3.0
+- `x` — Wavenumber; size: 3; unit: `cm⁻¹`; min 1.0; max 3.0
 
-#### Metadata sélectionnée
+#### Selected metadata
 
 - `operator`: Ada
-- `path`: [masqué : chemin ou nom de fichier]
-- `missing`: —
+- `path`: [redacted: path]
+- `missing`: [absent]
 
-#### Historique
+#### History
 
-1. `2026-10-16T00:00:00+00:00` — `texte`
-   - Paramètres: {}
+1. `2026-10-16T00:00:00+00:00` — `text`
+   - Parameters: {}
    - Message: Imported sample
 
 ## Figures
 
-### Spectre
+### Spectrum
 
-![Spectre](figures/spectrum.png)
+![Spectrum](figures/spectrum.png)
 
-Signal mesuré\.
+Measured signal\.
