@@ -1917,6 +1917,12 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         """
         Render this dataset as a deterministic scientific Markdown report.
 
+        This is a shortcut for
+        :func:`spectrochempy.reporting.render_dataset_markdown`. Free text is
+        rendered as supplied; only :class:`pathlib.Path` values are redacted.
+        Select safe metadata keys and sanitize titles, origin, history and
+        figure labels or captions before rendering.
+
         Parameters
         ----------
         title : str
@@ -1930,6 +1936,27 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         -------
         str
             Markdown text. Rendering does not modify this dataset.
+
+        See Also
+        --------
+        reporting.render_dataset_markdown : Standalone renderer.
+        reporting.FigureReference : Explicit figure reference.
+
+        Examples
+        --------
+        .. code-block:: python
+
+           import spectrochempy as scp
+           from spectrochempy.reporting import FigureReference
+
+           dataset = scp.NDDataset([1.0, 2.0, 3.0], title="Absorbance")
+           dataset.meta.operator = "Ada"
+           report = dataset.to_markdown_report(
+               title="IR experiment",
+               metadata=("operator",),
+               figures=(FigureReference("Spectrum", "figures/spectrum.png"),),
+           )
+           print(report)
         """
         # The renderer validates NDDataset instances, so importing it here avoids a cycle.
         from spectrochempy.reporting import render_dataset_markdown  # noqa: PLC0415

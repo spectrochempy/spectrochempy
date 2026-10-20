@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 import math
-import re
 from collections.abc import Mapping
 from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import datetime
 from numbers import Integral
 from pathlib import Path
+from pathlib import PurePosixPath
 from urllib.parse import urlparse
 
 import numpy as np
@@ -22,19 +22,21 @@ __all__ = ["FigureReference", "render_dataset_markdown"]
 
 
 _SCOPE_MESSAGE = (
-    "Ce rapport synthétise les objets et l’historique fournis. Il ne constitue pas "
-    "une recette exécutable ni une preuve de provenance exhaustive."
+    "This report summarizes the supplied objects and history. It is not an "
+    "executable recipe or a proof of exhaustive provenance. It renders supplied "
+    "text with Markdown escaping but does not detect or certify that it is free "
+    "of sensitive information; select and sanitize metadata, origin and history "
+    "before rendering."
 )
 _MAX_COLLECTION_ITEMS = 32
 _MAX_NESTING_DEPTH = 4
 _MAX_TEXT_LENGTH = 4096
 _MAX_RENDERED_NODES = 256
 _MAX_RENDERED_CHARS = 16384
-_WINDOWS_PATH = re.compile(r"^[A-Za-z]:[\\/]")
-_SUFFIX = re.compile(r"\.([A-Za-z][A-Za-z0-9]*|[0-9]+)$")
-_NUMERIC_STEM = re.compile(r"^[+-]?[0-9]+(?:\.[0-9]+)*$")
-_MASKED_PATH = "[masqué : chemin ou nom de fichier]"
-_RENDER_BUDGET = "[omis : budget de rendu épuisé]"
+_RENDER_BUDGET = "[omitted: render budget exhausted]"
+_MISSING = "[absent]"
+_REDACTED_PATH = "[redacted: path]"
+_HEX_DIGITS = frozenset("0123456789abcdefABCDEF")
 
 
 @dataclass(frozen=True)
@@ -42,16 +44,37 @@ class FigureReference:
     """
     An explicit, report-relative or HTTPS figure reference.
 
+    The caller supplies every reference; the renderer never captures Matplotlib
+    state.
+
     Parameters
     ----------
-    label
+    label : str
         Figure label, used for the section heading and the image alternative
         text.
-    target
-        HTTP(S) URL or safe relative POSIX path. The target is not checked for
-        existence and is never copied.
-    caption
+    target : str
+        HTTP(S) URL or safe relative POSIX path. Whitespace, control
+        characters, Markdown syntax characters and invalid percent escapes are
+        rejected. The target is not checked for existence and is never copied.
+    caption : str, optional
         Optional caption rendered after the image.
+
+    See Also
+    --------
+    reporting.render_dataset_markdown : Render a dataset report.
+    NDDataset.to_markdown_report : Shortcut on a dataset instance.
+
+    Examples
+    --------
+    .. code-block:: python
+
+       from spectrochempy.reporting import FigureReference
+
+       figure = FigureReference(
+           "Spectrum",
+           "figures/spectrum.png",
+           "Measured signal.",
+       )
     """
 
     label: str
@@ -69,6 +92,9 @@ def render_dataset_markdown(
     """
     Render one :class:`NDDataset` as a deterministic Markdown report.
 
+    Rendering is deterministic, does not modify the dataset, and never captures
+    Matplotlib state.
+
     Parameters
     ----------
     dataset : NDDataset
@@ -76,7 +102,9 @@ def render_dataset_markdown(
     title : str
         Required document title.
     metadata : sequence of str, optional
-        Explicit metadata keys to include, in report order.
+        Explicit metadata keys to include, in report order. This allowlist is
+        the only metadata selection mechanism; no key is discovered
+        automatically.
     figures : sequence of FigureReference, optional
         Explicit figure references. Matplotlib figures and implicit capture are
         not supported.
@@ -85,6 +113,34 @@ def render_dataset_markdown(
     -------
     str
         Deterministic Markdown document ending with a single newline.
+
+    See Also
+    --------
+    NDDataset.to_markdown_report : Shortcut on a dataset instance.
+    reporting.FigureReference : Explicit figure reference.
+
+    Notes
+    -----
+    Free text is rendered as supplied and escaped for Markdown. The renderer
+    does not guess which strings are sensitive: only :class:`pathlib.Path`
+    values are redacted. Select safe metadata keys and sanitize titles, origin,
+    history and figure labels or captions before rendering.
+
+    Examples
+    --------
+    .. code-block:: python
+
+       import spectrochempy as scp
+       from spectrochempy.reporting import FigureReference
+
+       dataset = scp.NDDataset([1.0, 2.0, 3.0], title="Absorbance")
+       dataset.meta.operator = "Ada"
+       report = dataset.to_markdown_report(
+           title="IR experiment",
+           metadata=("operator",),
+           figures=(FigureReference("Spectrum", "figures/spectrum.png"),),
+       )
+       print(report)
     """
     if not isinstance(dataset, NDDataset):
         raise TypeError("dataset must be an NDDataset")
@@ -99,13 +155,13 @@ def render_dataset_markdown(
     _validate_figures(figures)
 
     lines = [
-        f"# {_escape(title)}",
+        f"# {_text(title)}",
         "",
-        "## Portée et limites",
+        "## Scope and limitations",
         "",
         f"> {_SCOPE_MESSAGE}",
     ]
-    lines.extend(["", "## Jeux de données", "", f"### {_dataset_heading(dataset)}", ""])
+    lines.extend(["", "## Datasets", "", f"### {_dataset_heading(dataset)}", ""])
     lines.extend(_dataset_summary(dataset))
     lines.extend(_coordinates(dataset))
     lines.extend(_metadata(dataset, metadata))
@@ -117,27 +173,27 @@ def render_dataset_markdown(
 def _dataset_heading(dataset: NDDataset) -> str:
     if dataset.has_defined_name:
         return _text(dataset.name)
-    return "Jeu de données"
+    return "Dataset"
 
 
 def _dataset_summary(dataset: NDDataset) -> list[str]:
-    lines = ["- Forme: " + _code(repr(dataset.shape))]
+    lines = ["- Shape: " + _code(repr(dataset.shape))]
     lines.append("- Dimensions: " + _code(", ".join(dataset.dims)))
-    lines.append("- Unité des données: " + _unit(dataset.units))
+    lines.append("- Data unit: " + _unit(dataset.units))
     if dataset.title != "<untitled>":
-        lines.append("- Titre: " + _text(dataset.title))
+        lines.append("- Title: " + _text(dataset.title))
     origin = dataset.origin
     if isinstance(origin, str) and not origin.strip():
         origin = None
-    lines.append("- Origine: " + _value(origin))
+    lines.append("- Origin: " + _value(origin))
     return lines
 
 
 def _coordinates(dataset: NDDataset) -> list[str]:
-    lines = ["", "#### Coordonnées", ""]
+    lines = ["", "#### Coordinates", ""]
     coordset = dataset.coordset
     if coordset is None:
-        return [*lines, "- Aucune coordonnée fournie."]
+        return [*lines, "- No coordinates provided."]
 
     names = coordset.names
     for dim in dataset.dims:
@@ -153,12 +209,12 @@ def _coordinates(dataset: NDDataset) -> list[str]:
         label = coord.title if coord.title != "<untitled>" else coord.name
         summary = [
             f"{_code(dim)} — {_text(label)}",
-            f"taille: {coord.size}",
-            f"unité: {_unit(coord.units)}",
+            f"size: {coord.size}",
+            f"unit: {_unit(coord.units)}",
         ]
         extent = _coordinate_extent(coord)
         if extent is not None:
-            summary.append(f"étendue: {extent}")
+            summary.append(extent)
         lines.append("- " + "; ".join(summary))
     return lines
 
@@ -167,28 +223,37 @@ def _coordinate_extent(coord) -> str | None:
     data = coord.data
     if data is None or len(data) == 0:
         return None
-    return f"{_value(data[0])} à {_value(data[-1])}"
+    array = np.ma.asarray(data)
+    if array.dtype.kind in "iuf":
+        valid = np.ma.masked_invalid(array).compressed()
+        if valid.size == 0:
+            return None
+        return f"min {_value(valid.min())}; max {_value(valid.max())}"
+    return f"first {_value(data[0])}; last {_value(data[-1])}"
 
 
 def _metadata(dataset: NDDataset, keys: Sequence[str]) -> list[str]:
     if not keys:
         return []
-    lines = ["", "#### Metadata sélectionnée", ""]
+    lines = ["", "#### Selected metadata", ""]
     for key in keys:
-        lines.append(f"- {_code(key)}: {_value(dataset.meta.get(key))}")
+        if key not in dataset.meta:
+            lines.append(f"- {_code(key)}: {_MISSING}")
+            continue
+        lines.append(f"- {_code(key)}: {_value(dataset.meta[key])}")
     return lines
 
 
 def _history(dataset: NDDataset) -> list[str]:
-    lines = ["", "#### Historique", ""]
+    lines = ["", "#### History", ""]
     entries = dataset.history_entries
     if not entries:
-        return [*lines, "- Aucune entrée d’historique fournie."]
+        return [*lines, "- No history entry provided."]
 
     for index, entry in enumerate(entries, start=1):
-        operation = entry["operation"] if entry["operation"] is not None else "texte"
+        operation = entry["operation"] if entry["operation"] is not None else "text"
         lines.append(f"{index}. {_code(_datetime(entry['date']))} — {_code(operation)}")
-        lines.append(f"   - Paramètres: {_value(entry['parameters'])}")
+        lines.append(f"   - Parameters: {_value(entry['parameters'])}")
         lines.append(f"   - Message: {_value(entry['message'])}")
     return lines
 
@@ -222,14 +287,27 @@ def _validate_figures(figures: Sequence[FigureReference]) -> None:
 def _figure_target(target: str) -> str:
     if not isinstance(target, str) or not target:
         raise ValueError("figure target must be a non-empty string")
-    if any(character in target for character in "\r\n\t ()<>"):
+    if any(character in target for character in " \t()<>\"'`"):
         raise ValueError(
             "figure target must not contain whitespace or Markdown control characters"
         )
-    parsed = urlparse(target)
+    if not target.isprintable():
+        raise ValueError("figure target must not contain control characters")
+    if not _has_safe_percent_encoding(target):
+        raise ValueError(
+            "figure target must use valid percent-encoding without control characters"
+        )
+    try:
+        parsed = urlparse(target)
+    except ValueError as exc:
+        raise ValueError(
+            "figure target must be a valid URL or safe relative POSIX path"
+        ) from exc
     if parsed.scheme in {"http", "https"} and parsed.netloc:
+        if "\\" in target:
+            raise ValueError("figure target must not contain backslashes")
         return target
-    path = Path(target)
+    path = PurePosixPath(target)
     if (
         parsed.scheme
         or path.is_absolute()
@@ -241,6 +319,21 @@ def _figure_target(target: str) -> str:
             "figure target must be an HTTP(S) URL or a safe relative POSIX path"
         )
     return target
+
+
+def _has_safe_percent_encoding(value: str) -> bool:
+    index = value.find("%")
+    while index != -1:
+        escape = value[index + 1 : index + 3]
+        if len(escape) != 2 or any(
+            character not in _HEX_DIGITS for character in escape
+        ):
+            return False
+        byte = int(escape, 16)
+        if byte < 0x20 or byte == 0x7F:
+            return False
+        index = value.find("%", index + 3)
+    return True
 
 
 def _datetime(value: datetime) -> str:
@@ -261,7 +354,7 @@ def _value(value, *, depth: int = 0, _budget=None) -> str:
     if value is None:
         return "—"
     if isinstance(value, Path):
-        return _MASKED_PATH
+        return _REDACTED_PATH
     if isinstance(value, str):
         rendered = _text(value)
         if len(rendered) > budget[1]:
@@ -285,9 +378,9 @@ def _value(value, *, depth: int = 0, _budget=None) -> str:
         return f"{magnitude} {_unit(value.units)}"
     if isinstance(value, Mapping):
         if depth >= _MAX_NESTING_DEPTH:
-            return "[omis : profondeur maximale]"
+            return "[omitted: maximum depth]"
         if len(value) > _MAX_COLLECTION_ITEMS:
-            return "[omis : collection trop grande]"
+            return "[omitted: collection too large]"
         pairs = []
         for key in sorted(value, key=str):
             if budget[0] <= 0 or budget[1] <= 0:
@@ -298,9 +391,9 @@ def _value(value, *, depth: int = 0, _budget=None) -> str:
         return "{" + ", ".join(pairs) + "}"
     if isinstance(value, list | tuple):
         if depth >= _MAX_NESTING_DEPTH:
-            return "[omis : profondeur maximale]"
+            return "[omitted: maximum depth]"
         if len(value) > _MAX_COLLECTION_ITEMS:
-            return "[omis : collection trop grande]"
+            return "[omitted: collection too large]"
         items = []
         for item in value:
             if budget[0] <= 0 or budget[1] <= 0:
@@ -308,7 +401,7 @@ def _value(value, *, depth: int = 0, _budget=None) -> str:
                 break
             items.append(_value(item, depth=depth + 1, _budget=budget))
         return "[" + ", ".join(items) + "]"
-    return f"[omis : {type(value).__name__}]"
+    return f"[omitted: {type(value).__name__}]"
 
 
 def _float(value: float) -> str:
@@ -327,47 +420,9 @@ def _numpy_float(value: np.floating) -> str:
     return str(value)
 
 
-def _looks_like_path(value: str) -> bool:
-    """
-    Return whether free text is more likely a path, file name or host.
-
-    Structural prefixes are conclusive: ``/…``, ``~/``, ``./``, ``../``,
-    Windows drives and backslashes. A trailing extension is also conclusive
-    whatever the whitespace: a letter-initial extension masks
-    ``private report.csv`` or ``report.spectrochempy`` whatever its length,
-    while a numeric one masks a word-stem token such as ``report.123456789``.
-
-    A bare ``/`` is not conclusive, so scientific text such as ``N/A``,
-    ``mg/L``, ``and/or``, ``24/7``, ``absorbance/a.u.`` or a DOI stays
-    rendered; consequently an extension-less relative path without ``./`` or
-    ``../`` is not masked. Decimals and versions (``1.5``, ``1.5.3``,
-    ``version 1.12``) stay text, and so do extension-less file names
-    (``1r``, ``acqus``), which would need an explicit allowlist.
-    """
-    if value.startswith(("/", "~/", "./", "../")) or _WINDOWS_PATH.match(value):
-        return True
-    if "\\" in value:
-        return True
-    match = _SUFFIX.search(value)
-    if match is None:
-        return False
-    extension = match.group(1)
-    if extension[:1].isalpha():
-        return True
-    if any(character.isspace() for character in value):
-        return False
-    if "/" in value:
-        return False
-    if len(extension) == 1:
-        return False
-    return not _NUMERIC_STEM.match(value[: match.start()])
-
-
 def _text(value: str) -> str:
     if len(value) > _MAX_TEXT_LENGTH:
-        return "[omis : texte trop long]"
-    if _looks_like_path(value):
-        return _MASKED_PATH
+        return "[omitted: text too long]"
     return _escape(value)
 
 
