@@ -5,7 +5,7 @@
 # ======================================================================================
 # ruff: noqa
 
-from spectrochempy import Quantity, ur
+from spectrochempy import NDDataset, Quantity, ur
 
 
 def test_ppm():
@@ -15,14 +15,29 @@ def test_ppm():
 
 def test_dotted_symbol_parsing():
     # custom display symbols that contain dots must parse back to the unit
-    # they are the symbol of (pint reads "." as multiplication). See #913.
+    # they are the symbol of. See #913.
     assert ur.Unit("a.u.") == ur.absorbance
     assert ur.Unit("a.u") == ur.absorbance
     assert ur.Unit("K.M.") == ur.Kubelka_Munk
     assert ur.Unit("K.M") == ur.Kubelka_Munk
-    # the full names keep working and ordinary dotted products are untouched
+    assert Quantity("a.u..cm^-1").units == ur.absorbance * ur.cm**-1
+    assert Quantity("K.M..cm^-1").units == ur.Kubelka_Munk * ur.cm**-1
+    # the full names keep working and separator dots are normalized
     assert ur.Unit("absorbance") == ur.absorbance
     assert ur.Unit("kg.m") == ur.kg * ur.m
+    assert ur.Unit("kg . m") == ur.kg * ur.m
+    assert ur.Unit("cm.s^-1") == ur.cm / ur.s
+    assert ur.Unit("kg.m.s^-2") == ur.kg * ur.m / ur.s**2
+    assert ur.Unit("kg.(m/s)") == ur.kg * ur.m / ur.s
+    assert Quantity("10 cm.s^-1") == 10 * ur.cm / ur.s
+    # decimals and scientific notation are left untouched
+    assert Quantity("1.5 m") == 1.5 * ur.m
+    assert Quantity("1.e3 m") == 1000 * ur.m
+
+
+def test_nddataset_dotted_unit_parsing():
+    assert NDDataset([1.0], units="cm.s^-1").units == ur.cm / ur.s
+    assert NDDataset([1.0], units="a.u..cm^-1").units == ur.absorbance * ur.cm**-1
 
 
 def test_units():
