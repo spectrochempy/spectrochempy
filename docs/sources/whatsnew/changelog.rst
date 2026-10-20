@@ -26,6 +26,9 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Restored parsing of unit expressions that use a dot as a separator (e.g.
+  ``kg.m`` or ``cm.s^-1``), which pint 0.26.2 rejects. (#1781)
+
 
 .. section
 

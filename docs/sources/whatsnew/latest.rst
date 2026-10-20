@@ -11,3 +11,9 @@ What's New in Revision 1.1.4.dev
 
 These are the changes in SpectroChemPy-1.1.4.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
+
+Bug Fixes
+~~~~~~~~~
+
+- Restored parsing of unit expressions that use a dot as a separator (e.g.
+  ``kg.m`` or ``cm.s^-1``), which pint 0.26.2 rejects. (#1781)
