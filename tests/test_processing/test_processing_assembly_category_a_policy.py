@@ -41,7 +41,19 @@ _OP_METHOD = {
     "whittaker": "whittaker",
 }
 
-_FILTER_ENTRY = "Created using method Filter.transform"
+_FILTER_OPERATIONS = {
+    "smooth": "avg",
+    "savgol": "savgol",
+    "savgol_filter": "savgol",
+    "whittaker": "whittaker",
+}
+
+_FILTER_PARAMETERS = {
+    "smooth": {"size": 3, "mode": "reflect"},
+    "savgol": {"size": 3, "order": 2, "deriv": 0, "mode": "interp"},
+    "savgol_filter": {"size": 3, "order": 2, "deriv": 0, "mode": "interp"},
+    "whittaker": {"lamb": 1.0, "order": 2},
+}
 
 
 def _apply(dataset, op, form, **kwargs):
@@ -81,7 +93,11 @@ class TestCategoryANameAndHistory:
         result = _apply(ds, op, form, **_OP_KWARGS[op])
         assert len(result.history) == len(ds.history) + 1
         assert result.history[0] == ds.history[0]
-        assert _FILTER_ENTRY in result.history[-1]
+        entry = result.history_entries[-1]
+        assert entry["operation"] == _FILTER_OPERATIONS[op]
+        assert entry["parameters"]["dimension"] == "x"
+        assert entry["parameters"]["axis"] == -1
+        assert entry["parameters"].items() >= _FILTER_PARAMETERS[op].items()
 
     def test_prior_entries_retained_in_order(self, ds):
         ds.history = "second entry"
@@ -89,7 +105,7 @@ class TestCategoryANameAndHistory:
         assert len(result.history) == 3
         assert "original entry" in result.history[0].lower()
         assert "second entry" in result.history[1].lower()
-        assert _FILTER_ENTRY in result.history[2]
+        assert result.history_entries[2]["operation"] == "avg"
 
     def test_entry_forms_equivalent(self, ds):
         for form in ("function", "method", "transform"):
@@ -97,11 +113,28 @@ class TestCategoryANameAndHistory:
             assert result.name == "ds_name"
             assert len(result.history) == 2
             assert result.history[0] == ds.history[0]
-            assert _FILTER_ENTRY in result.history[-1]
+            assert result.history_entries[-1]["operation"] == "savgol"
 
     def test_savgol_filter_no_double_entry(self, ds):
         result = scp.savgol_filter(ds, size=3)
         assert len(result.history) == len(ds.history) + 1
+
+    def test_median_history_records_effective_padding(self, ds):
+        result = scp.Filter(
+            method="median", size=3, mode="constant", cval=42.0
+        ).transform(ds)
+
+        assert result.history_entries[-1]["operation"] == "median"
+        assert (
+            result.history_entries[-1]["parameters"].items()
+            >= {
+                "dimension": "x",
+                "axis": -1,
+                "size": 3,
+                "mode": "constant",
+                "cval": 42.0,
+            }.items()
+        )
 
 
 # ======================================================================================
@@ -162,7 +195,20 @@ class TestDerivativeIdentityAndHistory:
         assert result.name == source.name
         assert result.history_entries[:-1] == before.history_entries
         assert len(result.history_entries) == len(before.history_entries) + 1
-        assert result.history_entries[-1]["message"] == _FILTER_ENTRY
+        history_entry = result.history_entries[-1]
+        assert history_entry["operation"] == "savgol"
+        assert (
+            history_entry["parameters"].items()
+            >= {
+                "dimension": "x",
+                "axis": -1,
+                "size": 5,
+                "order": 2,
+                "deriv": deriv,
+                "mode": "interp",
+            }.items()
+        )
+        assert "delta" in history_entry["parameters"]
         assert result.shape == source.shape
         assert result.dims == source.dims
         assert result.coordset == source.coordset
@@ -182,6 +228,16 @@ class TestDerivativeIdentityAndHistory:
         assert first.name == second.name == ds.name
         assert second.history_entries[:-1] == first.history_entries
         assert len(second.history_entries) == len(ds.history_entries) + 2
+        assert [entry["operation"] for entry in second.history_entries[-2:]] == [
+            "savgol",
+            "savgol",
+        ]
+
+    def test_savgol_history_survives_native_round_trip(self, ds, tmp_path):
+        result = ds.savgol(size=5, order=2, deriv=1)
+        restored = type(result).load(result.save_as(tmp_path / "savgol", confirm=False))
+
+        assert restored.history_entries == result.history_entries
 
     def test_reused_filter_preserves_each_source_lineage(self, ds):
         processor = scp.Filter(method="savgol", size=3, order=2, deriv=1)
