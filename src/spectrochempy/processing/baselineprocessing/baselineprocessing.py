@@ -1090,10 +1090,13 @@ baseline/trends for different segments of the data.
 # Instead of using directly the Baseline class, we provide here some functions
 # which are eventually more user-friendly and which can be used directly on NDDataset or
 # called from the API.
+_MISSING = object()
+
+
 def _resolve_baseline_ranges(ranges, kwargs):
     """Resolve positional ranges and the public ``ranges`` keyword alias."""
-    keyword_ranges = kwargs.pop("ranges", None)
-    if keyword_ranges is None:
+    keyword_ranges = kwargs.pop("ranges", _MISSING)
+    if keyword_ranges is _MISSING:
         return ranges
     if ranges:
         raise TypeError(

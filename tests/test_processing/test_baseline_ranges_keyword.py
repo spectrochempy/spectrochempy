@@ -2,6 +2,7 @@
 
 import numpy as np
 import pytest
+from traitlets import TraitError
 
 import spectrochempy as scp
 
@@ -36,11 +37,12 @@ def test_keyword_ranges_match_positional(function):
     np.testing.assert_allclose(keyword.data, positional.data)
 
 
-def test_basc_keyword_single_range_matches_positional():
+@pytest.mark.parametrize("function", ["basc", "get_baseline"])
+def test_keyword_single_range_matches_positional(function):
     dataset = _curved_dataset()
 
-    positional = dataset.basc([3600.0, 3400.0], order=2)
-    keyword = dataset.basc(ranges=[3600.0, 3400.0], order=2)
+    positional = getattr(scp, function)(dataset, [3600.0, 3400.0], order=2)
+    keyword = getattr(scp, function)(dataset, ranges=[3600.0, 3400.0], order=2)
 
     np.testing.assert_allclose(keyword.data, positional.data)
 
@@ -49,6 +51,12 @@ def test_basc_empty_keyword_ranges_matches_default():
     dataset = _curved_dataset()
 
     np.testing.assert_allclose(dataset.basc(ranges=[]).data, dataset.basc().data)
+
+
+@pytest.mark.parametrize("function", ["basc", "get_baseline"])
+def test_keyword_ranges_none_is_rejected(function):
+    with pytest.raises(TraitError):
+        getattr(scp, function)(_curved_dataset(), ranges=None)
 
 
 @pytest.mark.parametrize("function", ["basc", "get_baseline"])
