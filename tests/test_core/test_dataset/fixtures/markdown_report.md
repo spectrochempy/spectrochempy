@@ -36,4 +36,4 @@
 
 ![Spectrum](figures/spectrum.png)
 
-Measured signal\.
+Caption: Measured signal\.
