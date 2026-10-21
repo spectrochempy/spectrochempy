@@ -813,7 +813,13 @@ class _set_output:
                 X_transf._history = list(metadata_source._history or [])
             else:
                 X_transf.name = f"{X.name}_{obj.name}.{self.method.__name__}"
-            X_transf.history = f"Created using method {obj.name}.{self.method.__name__}"
+            history_entry = getattr(obj, "_processing_history_entry", lambda: None)()
+            if history_entry is None:
+                X_transf.history = (
+                    f"Created using method {obj.name}.{self.method.__name__}"
+                )
+            else:
+                X_transf._append_history_entry(**history_entry)
             if self.title is not None:
                 if self.title == "keep":
                     X_transf.title = X.title

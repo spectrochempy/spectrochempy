@@ -180,9 +180,8 @@ def test_wrapper_based_filter_preserves_scientific_context_metadata(
     assert_units_preserved(result, metadata_dataset)
     assert_dims_equal(result, ["y", "x"])
     assert_coordset_matches(result, metadata_dataset)
-    assert_history_appended(
-        result, metadata_dataset, "Created using method Filter.transform"
-    )
+    assert_history_appended(result, metadata_dataset, "Applied Savitzky-Golay filter")
+    assert result.history_entries[-1]["operation"] == "savgol"
 
 
 def test_integrate_preserves_metadata_with_operation_overrides(metadata_dataset):

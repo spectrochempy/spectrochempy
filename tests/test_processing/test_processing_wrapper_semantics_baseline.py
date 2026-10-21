@@ -191,7 +191,7 @@ class TestFilterWrappers:
         r = _call_filter(ds, method)
         assert len(r.history) == 2
         assert "original entry" in r.history[0].lower()
-        assert "Created using method Filter.transform" in r.history[1]
+        assert r.history_entries[1]["operation"] in {"avg", "savgol", "whittaker"}
 
     @pytest.mark.parametrize("method", ["smooth", "savgol", "whittaker"])
     def test_modeldata_dropped(self, ds, method):
@@ -437,7 +437,7 @@ class TestIdentityProvenance:
         r = ds.smooth(size=3)
         assert len(r.history) == 2
         assert r.history[0] == ds.history[0]
-        assert "Filter.transform" in r.history[1]
+        assert r.history_entries[1]["operation"] == "avg"
 
     def test_baseline_provenance_extended(self, ds):
         r = ds.basc()

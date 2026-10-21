@@ -26,6 +26,10 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Filter outputs now retain the applied method, effective dimension, and
+  compact filter parameters in their structured history entries.
+- Whittaker-Eilers filtering now applies along the requested dimension.
+
 - Restored parsing of unit expressions that use a dot as a separator (e.g.
   ``kg.m`` or ``cm.s^-1``), which pint 0.26.2 rejects. (#1781)
 
