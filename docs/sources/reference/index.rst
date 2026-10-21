@@ -244,8 +244,8 @@ Scientific reporting
     :nosignatures:
     :toctree: generated/
 
-    spectrochempy.reporting.FigureReference
-    spectrochempy.reporting.render_dataset_markdown
+    reporting.FigureReference
+    reporting.render_dataset_markdown
 
 
 ********
