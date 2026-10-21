@@ -283,13 +283,102 @@ class TestBaselineWrappers:
         r = getattr(ds, method)()
         assert len(r.history) == 2
         assert "original entry" in r.history[0].lower()
-        assert "Subtracted" in r.history[1]
+        assert "Corrected baseline using" in r.history[1]
 
     @pytest.mark.parametrize("method", ["basc", "detrend", "asls"])
     def test_modeldata_preserved(self, ds, method):
         """Notable: wrappers no longer expose a modeldata attribute."""
         r = getattr(ds, method)()
         assert not hasattr(r, "modeldata")
+
+
+class TestBaselineStructuredHistory:
+    """Baseline outputs record the applied model instead of only subtraction."""
+
+    def test_basc_records_method_and_effective_parameters(self, ds):
+        before = ds.history_entries
+        result = ds.basc()
+
+        assert len(result.history_entries) == len(before) + 1
+        assert result.history_entries[:-1] == before
+        entry = result.history_entries[-1]
+        assert entry["operation"] == "baseline_correction"
+        assert (
+            entry["parameters"].items()
+            >= {
+                "model": "polynomial",
+                "order": 1,
+                "include_limits": True,
+            }.items()
+        )
+        assert entry["parameters"]["ranges"]
+        assert [source["role"] for source in entry["parameters"]["sources"]] == [
+            "left",
+            "right",
+        ]
+        assert entry["message"] == "Corrected baseline using polynomial model (order 1)"
+
+    def test_basc_records_requested_polynomial_order_and_range(self, ds):
+        result = ds.basc([3500.0, 3000.0], order=2)
+
+        entry = result.history_entries[-1]
+        assert entry["parameters"]["model"] == "polynomial"
+        assert entry["parameters"]["order"] == 2
+        assert any(
+            start <= 3000.0 <= stop and start <= 3500.0 <= stop
+            for start, stop in entry["parameters"]["ranges"]
+        )
+
+    def test_baseline_class_records_asls_parameters(self, ds):
+        processor = scp.Baseline(model="asls", lamb=1e4)
+        result = processor.fit(ds).transform()
+
+        entry = result.history_entries[-1]
+        assert entry["operation"] == "baseline_correction"
+        assert (
+            entry["parameters"].items()
+            >= {
+                "model": "asls",
+                "lamb": 1e4,
+                "asymmetry": 0.05,
+                "tol": 1e-3,
+                "max_iter": 50,
+            }.items()
+        )
+        assert entry["message"] == "Corrected baseline using asls model"
+
+    def test_detrend_records_effective_order(self, ds):
+        result = scp.detrend(ds, order="linear")
+
+        entry = result.history_entries[-1]
+        assert entry["parameters"].items() >= {"model": "detrend", "order": 1}.items()
+
+    def test_basc_history_survives_native_round_trip(self, ds, tmp_path):
+        result = ds.basc()
+        restored = type(result).load(result.save_as(tmp_path / "basc", confirm=False))
+
+        assert restored.history_entries == result.history_entries
+
+    def test_basc_does_not_modify_source(self, ds):
+        data = ds.data.copy()
+        history = ds.history_entries
+        metadata = (ds.name, ds.title, ds.author, ds.description, ds.origin)
+
+        ds.basc()
+
+        np.testing.assert_array_equal(ds.data, data)
+        assert ds.history_entries == history
+        assert (ds.name, ds.title, ds.author, ds.description, ds.origin) == metadata
+
+    def test_basc_1d_preserves_identity_and_records_method(self, ds_1d):
+        source = ds_1d.copy()
+        source.name = "one_d"
+        result = source.basc()
+
+        assert result.shape == source.shape
+        assert result.name == source.name
+        assert result.history_entries[-1]["operation"] == "baseline_correction"
+        assert result.history_entries[-1]["parameters"]["model"] == "polynomial"
 
 
 # ======================================================================================

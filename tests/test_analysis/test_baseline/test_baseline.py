@@ -1286,7 +1286,7 @@ class TestBaselineCorrectedSourceContext:
         assert corrected.shape == ds.shape
 
     @pytest.mark.parametrize("two_d", [False, True], ids=["1d", "2d"])
-    def test_history_matches_subtraction_policy(self, two_d):
+    def test_history_records_baseline_correction(self, two_d):
         ds = _context_dataset(two_d)
         blc = Baseline()
         blc.fit(ds)
@@ -1294,4 +1294,5 @@ class TestBaselineCorrectedSourceContext:
         source_messages = [entry["message"] for entry in ds.history_entries]
         corrected_messages = [entry["message"] for entry in corrected.history_entries]
         assert corrected_messages[: len(source_messages)] == source_messages
-        assert "Subtracted" in corrected_messages[-1]
+        assert corrected.history_entries[-1]["operation"] == "baseline_correction"
+        assert "Corrected baseline" in corrected_messages[-1]
