@@ -597,25 +597,26 @@ body:has(.scp-home) .bd-docs-nav {
 .scp-stage-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1px;
-  overflow: hidden;
-  border: 1px solid var(--scp-line);
-  border-radius: 0.55rem;
-  background: var(--scp-line);
+  gap: 1rem;
 }
 
-.scp-stage {
+.scp-stage,
+.scp-path {
   display: flex;
   flex-direction: column;
   padding: 1.2rem;
+  border: 1px solid var(--scp-line);
+  border-top: 4px solid var(--scp-header-blue);
   background: var(--scp-home-surface);
   color: var(--scp-ink) !important;
-  transition: background 160ms ease, transform 160ms ease;
+  transition: background-color 160ms ease;
 }
 
-.scp-stage:hover {
+.scp-stage:is(:hover, :focus-visible),
+.scp-path:hover,
+a.scp-path:focus-visible,
+.scp-community .scp-path:has(a:focus-visible) {
   background: var(--scp-home-hover);
-  transform: translateY(-2px);
 }
 
 .scp-stage-mark {
@@ -675,28 +676,18 @@ body:has(.scp-home) .bd-docs-nav {
   gap: 1rem;
 }
 
-.scp-path {
-  display: flex;
-  flex-direction: column;
-  padding: 1.2rem;
-  border: 1px solid var(--scp-line);
-  border-top: 4px solid var(--scp-header-blue);
-  background: var(--scp-home-surface);
-  color: var(--scp-ink) !important;
-  transition: border-color 160ms ease, transform 160ms ease;
-}
-
+.scp-stage-process,
 .scp-path:nth-child(2) {
   border-top-color: var(--scp-gold);
 }
 
+.scp-stage-analyze,
 .scp-path:nth-child(3) {
   border-top-color: var(--scp-orange);
 }
 
-.scp-path:hover {
-  border-color: var(--scp-header-blue);
-  transform: translateY(-3px);
+.scp-stage-plot {
+  border-top-color: var(--scp-home-accent-4);
 }
 
 .scp-path > span {
@@ -728,10 +719,6 @@ body:has(.scp-home) .bd-docs-nav {
   color: inherit;
   font-size: 1.35rem;
   letter-spacing: -0.025em;
-}
-
-.scp-community .scp-path:hover {
-  transform: none;
 }
 
 .scp-community-links {
