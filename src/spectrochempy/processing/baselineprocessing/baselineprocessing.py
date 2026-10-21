@@ -1090,8 +1090,24 @@ baseline/trends for different segments of the data.
 # Instead of using directly the Baseline class, we provide here some functions
 # which are eventually more user-friendly and which can be used directly on NDDataset or
 # called from the API.
+def _resolve_baseline_ranges(ranges, kwargs):
+    """Resolve positional ranges and the public ``ranges`` keyword alias."""
+    keyword_ranges = kwargs.pop("ranges", None)
+    if keyword_ranges is None:
+        return ranges
+    if ranges:
+        raise TypeError(
+            "Baseline ranges must be passed either positionally or with the "
+            "'ranges' keyword, not both."
+        )
+    if isinstance(keyword_ranges, list | tuple):
+        return tuple(keyword_ranges)
+    return (keyword_ranges,)
+
+
 def _fitted_baseline(dataset, ranges, kwargs):
     """Return one fitted `Baseline` processor for a public wrapper call."""
+    ranges = _resolve_baseline_ranges(ranges, kwargs)
     blc = Baseline()
     # by default, model is 'polynomial' and order is 1.
     # kwargs can overwrite these default values
