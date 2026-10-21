@@ -428,63 +428,93 @@ body:has(.scp-home) .bd-docs-nav {
 }
 
 .scp-spectrum-card {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 1rem minmax(0, 1.15fr) 1rem minmax(0, 1fr);
+  align-items: center;
+  align-self: center;
   min-width: 0;
-  padding: 1.2rem;
-  border: 1px solid rgba(101, 197, 241, 0.45);
+  margin: 0;
+  padding: 1.5rem 1rem 1.1rem;
+  border: 1px solid #28618a;
   border-radius: 0.7rem;
-  background: #123b5c;
+  background: linear-gradient(135deg, #103c5e, #092c47);
   box-shadow: 0 1.8rem 4.5rem rgba(21, 65, 95, 0.24);
 }
 
-.scp-spectrum-heading,
-.scp-spectrum-footer {
-  display: flex;
-  justify-content: space-between;
-  color: #d8edf8;
-  font-size: 0.72rem;
-  font-weight: 750;
-  letter-spacing: 0.08em;
+.scp-science-step {
+  min-width: 0;
+  text-align: center;
+}
+
+.scp-science-step h2 {
+  margin: 0 0 1rem;
+  color: #a1d9f6;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
-.scp-spectrum-heading {
-  margin: 0.1rem 0 1rem;
-}
-
-.scp-spectrum-heading span:last-child {
-  color: #8ad4f5;
-}
-
-.scp-spectrum-visual {
-  position: relative;
-  flex: 1;
-  min-height: 0;
-}
-
-.scp-spectrum-card svg {
-  position: absolute;
-  inset: 0;
+.scp-science-step img {
   display: block;
   width: 100%;
-  height: 100%;
+  height: 11.5rem;
+  object-fit: contain;
 }
 
-.scp-spectrum-footer {
-  gap: 0.4rem;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 0.85rem;
-  color: #a9cbdc;
-  font-size: 0.65rem;
+.scp-dataset-structure {
+  display: grid;
+  gap: 0.3rem;
+  height: 11.5rem;
+  margin: 0;
+  padding: 0.5rem;
+  border: 1px solid #527d9c;
+  border-radius: 0.4rem;
+  background: rgba(30, 83, 119, 0.35);
+  list-style: none;
+  text-align: left;
 }
 
-.scp-spectrum-footer i {
-  flex: 1;
-  min-width: 0.6rem;
-  height: 1px;
-  background: #5c91ad;
+.scp-dataset-structure li {
+  --scp-field-color: #8bcfff;
+  margin: 0;
+  padding-left: 0.6rem;
+  border-left: 2px solid var(--scp-field-color);
+  color: var(--scp-field-color);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.scp-dataset-structure li:nth-child(2) { --scp-field-color: #69e0da; }
+.scp-dataset-structure li:nth-child(3) { --scp-field-color: #f5d384; }
+.scp-dataset-structure li:nth-child(4) { --scp-field-color: #d6b5f3; }
+.scp-dataset-structure li:nth-child(5) { --scp-field-color: #f1b7d4; }
+.scp-dataset-structure li:nth-child(6) { --scp-field-color: #a9c8e4; }
+
+.scp-science-arrow {
+  color: #78b9df;
+  text-align: center;
+}
+
+.scp-spectrum-card .scp-science-operations {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  color: #a1d9f6;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.scp-science-operations span {
+  white-space: nowrap;
+}
+
+.scp-science-operations span:first-child::after {
+  content: " ·";
 }
 
 .scp-quick-nav-band {
@@ -743,13 +773,6 @@ body:has(.scp-home) .bd-docs-nav {
     padding-left: 1.25rem;
   }
 
-  .scp-spectrum-visual {
-    flex: auto;
-    min-height: 8rem;
-    aspect-ratio: 600 / 190;
-    max-height: 14rem;
-  }
-
   .scp-quick-nav,
   .scp-stage-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -779,6 +802,43 @@ body:has(.scp-home) .bd-docs-nav {
 }
 
 @media (max-width: 560px) {
+  .scp-spectrum-card {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.35rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+
+  .scp-science-step h2 {
+    margin-bottom: 0.5rem;
+  }
+
+  .scp-science-step img {
+    height: 9rem;
+  }
+
+  .scp-dataset-structure {
+    max-width: 12rem;
+    margin: 0 auto;
+  }
+
+  .scp-science-arrow {
+    transform: rotate(90deg);
+  }
+
+  .scp-spectrum-card .scp-science-operations {
+    grid-row: auto;
+    margin-top: 0.35rem;
+  }
+
+  .scp-science-operations span {
+    display: block;
+  }
+
+  .scp-science-operations span:first-child::after {
+    content: none;
+  }
+
   .scp-hero h1 {
     overflow-wrap: break-word;
     font-size: clamp(2rem, 11.5vw, 2.8rem);

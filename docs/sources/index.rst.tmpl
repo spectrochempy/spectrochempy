@@ -16,23 +16,30 @@
           <p class="scp-hero-lede">One coherent workspace to import, process, visualize, and model spectroscopic data.</p>
           <p class="scp-hero-note">Build reproducible workflows across IR, Raman, UV-visible, and NMR data without leaving the scientific Python ecosystem.</p>
         </div>
-        <div class="scp-spectrum-card" aria-label="Diagram of the SpectroChemPy data workflow">
-          <div class="scp-spectrum-heading"><span>Scientific data workflow</span><span>Files → data → results</span></div>
-          <div class="scp-spectrum-visual"><svg viewBox="0 0 600 190" aria-hidden="true">
-            <defs><marker id="scp-arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0L6 3L0 6Z" fill="#78c7ee"/></marker></defs>
-            <g fill="#dfeef5" font-family="system-ui, sans-serif" font-size="15" font-weight="700" text-anchor="middle"><text x="84" y="20">SPECTRA</text><text x="300" y="20">NDDATASET</text><text x="516" y="20">RESULTS</text></g>
-            <g fill="#1a4a69" stroke="#78c7ee" stroke-width="2"><rect x="2" y="34" width="164" height="152" rx="8"/><rect x="218" y="34" width="164" height="152" rx="8"/><rect x="434" y="34" width="164" height="152" rx="8"/></g>
-            <g fill="none" stroke-linecap="round" stroke-width="3"><path d="M16 77H38C48 77 48 48 58 77S78 77 88 60S110 77 152 77" stroke="#65c5f1"/><path d="M16 120H53L62 91L71 120H112L122 101L132 120H152" stroke="#ffd36d"/><path d="M16 164H47L55 135L63 164H105L113 143L121 164H152" stroke="#ff784f"/></g>
-            <g fill="#dfeef5" font-family="system-ui, sans-serif" font-size="12"><text x="16" y="53">IR</text><text x="16" y="97">Raman</text><text x="16" y="141">NMR</text></g>
-            <g fill="none" stroke="#78c7ee" stroke-width="3" marker-end="url(#scp-arrow)"><path d="M174 110H210"/><path d="M390 110H426"/></g>
-            <rect x="233" y="49" width="134" height="64" fill="#123b5c" stroke="#78c7ee"/>
-            <path d="M266 49V113M300 49V113M334 49V113M233 70H367M233 91H367" fill="none" stroke="#35617c"/>
-            <g fill="#dfeef5" font-family="system-ui, sans-serif" font-size="13" text-anchor="middle"><text x="300" y="137">coordinates · units</text><text x="300" y="160">metadata · history</text></g>
-            <path d="M450 165V51M450 165H582" fill="none" stroke="#78c7ee"/>
-            <g fill="none" stroke-width="3" stroke-linecap="round"><path d="M458 144C478 145 477 72 496 102S523 149 541 79S562 82 583 54" stroke="#ffd36d"/><path d="M458 155L479 142L499 148L522 119L541 126L561 100L583 110" stroke="#65c5f1"/></g>
-          </svg></div>
-          <div class="scp-spectrum-footer"><span>Import</span><i></i><span>Process</span><i></i><span>Analyze</span><i></i><span>Plot</span><i></i><span>Report</span></div>
-        </div>
+        <figure class="scp-spectrum-card" aria-label="From spectra to scientific insights through a structured NDDataset.">
+          <div class="scp-science-step">
+            <h2>Spectra</h2>
+            <img class="dark-light" src="_static/images/home-iris-spectra.svg" width="280" height="330" alt="Six experimental infrared spectra measured during CO adsorption.">
+          </div>
+          <span class="scp-science-arrow" aria-hidden="true">→</span>
+          <div class="scp-science-step">
+            <h2>NDDataset</h2>
+            <ul class="scp-dataset-structure" aria-label="NDDataset structure">
+              <li>Data</li>
+              <li>Coordinates</li>
+              <li>Units</li>
+              <li>Metadata</li>
+              <li>History</li>
+              <li>Mask</li>
+            </ul>
+          </div>
+          <div class="scp-science-operations"><span>Import · Process · Analyze</span> <span>Model · Plot · Report</span></div>
+          <span class="scp-science-arrow" aria-hidden="true">→</span>
+          <div class="scp-science-step">
+            <h2>Insights</h2>
+            <img class="dark-light" src="_static/images/home-iris-insights.svg" width="251" height="306" alt="Contours of a recovered spectral distribution over wavenumber and adsorption energy.">
+          </div>
+        </figure>
       </section>
 
       <div class="scp-quick-nav-band">
