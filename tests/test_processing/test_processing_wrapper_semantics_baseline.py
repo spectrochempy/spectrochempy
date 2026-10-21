@@ -319,15 +319,23 @@ class TestBaselineStructuredHistory:
         assert entry["message"] == "Corrected baseline using polynomial model (order 1)"
 
     def test_basc_records_requested_polynomial_order_and_range(self, ds):
-        result = ds.basc([3500.0, 3000.0], order=2)
+        result = ds.basc([2500.0, 2500.0], order=2)
 
         entry = result.history_entries[-1]
         assert entry["parameters"]["model"] == "polynomial"
         assert entry["parameters"]["order"] == 2
-        assert any(
-            start <= 3000.0 <= stop and start <= 3500.0 <= stop
-            for start, stop in entry["parameters"]["ranges"]
-        )
+        assert entry["parameters"]["ranges"] == [
+            [1000.0, 2000.0],
+            [2500.0, 2500.0],
+            [3000.0, 4000.0],
+        ]
+
+    def test_basc_records_ranges_without_feature_limits(self, ds):
+        result = ds.basc([2500.0, 2500.0], order=0, include_limits=False)
+
+        parameters = result.history_entries[-1]["parameters"]
+        assert parameters["include_limits"] is False
+        assert parameters["ranges"] == [[2500.0, 2500.0]]
 
     def test_baseline_class_records_asls_parameters(self, ds):
         processor = scp.Baseline(model="asls", lamb=1e4)
@@ -352,6 +360,36 @@ class TestBaselineStructuredHistory:
 
         entry = result.history_entries[-1]
         assert entry["parameters"].items() >= {"model": "detrend", "order": 1}.items()
+
+    def test_detrend_records_breakpoints(self, ds):
+        result = scp.detrend(ds, order="linear", breakpoints=[2500.0])
+
+        assert result.history_entries[-1]["parameters"]["breakpoints"] == [2500.0]
+
+    def test_baseline_class_records_snip_width(self, ds):
+        result = scp.Baseline(model="snip", snip_width=2).fit(ds).transform()
+
+        assert (
+            result.history_entries[-1]["parameters"].items()
+            >= {
+                "model": "snip",
+                "width": 2,
+            }.items()
+        )
+
+    def test_baseline_class_records_effective_multivariate_components(self, ds):
+        processor = scp.Baseline(model="polynomial")
+        processor.multivariate = True
+        processor.n_components = 5
+        result = processor.fit(ds[:3]).transform()
+
+        assert (
+            result.history_entries[-1]["parameters"].items()
+            >= {
+                "multivariate": True,
+                "n_components": 3,
+            }.items()
+        )
 
     def test_basc_history_survives_native_round_trip(self, ds, tmp_path):
         result = ds.basc()
