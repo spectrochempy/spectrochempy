@@ -26,6 +26,15 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Filter outputs now retain the applied method, effective dimension, and
+  compact filter parameters in their structured history entries.
+- Whittaker-Eilers filtering now applies along the requested dimension.
+- Baseline correction outputs now record the fitted model and its effective
+  parameters in their structured history entry instead of only an arithmetic
+  subtraction.
+- ``basc()`` and ``get_baseline()`` now honor ``ranges=`` passed as a keyword
+  instead of silently overwriting it with the positional ranges.
+
 - Restored parsing of unit expressions that use a dot as a separator (e.g.
   ``kg.m`` or ``cm.s^-1``), which pint 0.26.2 rejects. (#1781)
 

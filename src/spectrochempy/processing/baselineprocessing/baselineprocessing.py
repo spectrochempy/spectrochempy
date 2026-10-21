@@ -913,10 +913,12 @@ baseline/trends for different segments of the data.
         """
         if self.model == "asls" and hasattr(self, "Xmasked"):
             corrected = self.Xmasked - self.baseline
+            self._annotate_corrected_history(corrected)
             self._restore_corrected_context(corrected)
             return corrected
 
         corrected = self.X - self.baseline
+        self._annotate_corrected_history(corrected)
         if getattr(self, "_X_input_was_1d", False):
             restored = self.baseline.copy()
             restored._data = np.ma.getdata(corrected.data)[0]
@@ -943,6 +945,67 @@ baseline/trends for different segments of the data.
         if context is not None:
             transfer_source_context(context, out)
         return out
+
+    def _history_parameters(self):
+        """Return the effective scientific parameters of the fitted baseline."""
+        parameters = {"model": self.model}
+        if self.model in {"polynomial", "detrend"}:
+            parameters["order"] = self.order
+        if self.model == "polynomial":
+            parameters["ranges"] = self._ranges
+            parameters["include_limits"] = self.include_limits
+        if self.model == "asls":
+            parameters.update(
+                lamb=self.lamb,
+                asymmetry=self.asymmetry,
+                tol=self.tol,
+                max_iter=self.max_iter,
+            )
+        if self.model == "snip":
+            parameters["width"] = self.snip_width
+        if self.breakpoints:
+            parameters["breakpoints"] = self.breakpoints
+        if self.multivariate:
+            parameters["multivariate"] = self.multivariate
+            parameters["n_components"] = self.n_components
+        return parameters
+
+    def _history_message(self):
+        """Return the readable description of the applied baseline correction."""
+        message = f"Corrected baseline using {self.model} model"
+        if self.model in {"polynomial", "detrend"}:
+            message += f" (order {self.order})"
+        if self.multivariate:
+            message += f" (multivariate {self.multivariate})"
+        return message
+
+    def _annotate_corrected_history(self, corrected):
+        """
+        Record the baseline method in place of the arithmetic subtraction step.
+
+        The corrected signal is computed by subtracting the fitted baseline, so
+        the shared arithmetic machinery appends one ``subtract`` entry first.
+        That entry keeps the compact operand descriptions; this method replaces
+        it with the scientific operation and its effective parameters so the
+        implementation detail does not hide the method that was applied.
+        """
+        entries = corrected.history_entries
+        if not entries or entries[-1]["operation"] != "subtract":
+            return corrected
+
+        subtraction = entries[-1]
+        parameters = self._history_parameters()
+        sources = subtraction["parameters"].get("sources")
+        if sources is not None:
+            parameters["sources"] = sources
+        entries[-1] = {
+            "date": subtraction["date"],
+            "operation": "baseline_correction",
+            "parameters": parameters,
+            "message": self._history_message(),
+        }
+        corrected.replace_history(entries)
+        return corrected
 
     @property
     def corrected(self):
@@ -1027,6 +1090,48 @@ baseline/trends for different segments of the data.
 # Instead of using directly the Baseline class, we provide here some functions
 # which are eventually more user-friendly and which can be used directly on NDDataset or
 # called from the API.
+_MISSING = object()
+
+
+def _resolve_baseline_ranges(ranges, kwargs):
+    """Resolve positional ranges and the public ``ranges`` keyword alias."""
+    keyword_ranges = kwargs.pop("ranges", _MISSING)
+    if keyword_ranges is _MISSING:
+        return ranges
+    if ranges:
+        raise TypeError(
+            "Baseline ranges must be passed either positionally or with the "
+            "'ranges' keyword, not both."
+        )
+    if isinstance(keyword_ranges, list | tuple):
+        return tuple(keyword_ranges)
+    return (keyword_ranges,)
+
+
+def _fitted_baseline(dataset, ranges, kwargs):
+    """Return one fitted `Baseline` processor for a public wrapper call."""
+    ranges = _resolve_baseline_ranges(ranges, kwargs)
+    blc = Baseline()
+    # by default, model is 'polynomial' and order is 1.
+    # kwargs can overwrite these default values
+    for key, value in kwargs.items():
+        setattr(blc, key, value)
+
+    # if model is 'polynomial' and no ranges is provided, we use the features limits
+    # and order='linear'
+    if blc.model == "polynomial":
+        if not ranges and blc.order != 1:
+            warning_(
+                f"As no ranges were provided, baseline() uses the feature limits "
+                f"with order='linear'. Provided order={blc.order} is ignored",
+            )
+            blc.order = "linear"
+        blc.ranges = ranges
+
+    blc.fit(dataset)
+    return blc
+
+
 def get_baseline(dataset, *ranges, **kwargs):
     r"""
     Compute a baseline using the Baseline class processor.
@@ -1067,24 +1172,7 @@ def get_baseline(dataset, *ranges, **kwargs):
     Masked input regions are preserved on the returned baseline.
 
     """
-    blc = Baseline()
-    # by default, model is 'polynomial' and order is 1.
-    # kwargs can overwrite these default values
-    for key, value in kwargs.items():
-        setattr(blc, key, value)
-
-    # if model is 'polynomial' and no ranges is provided, we use the features limits
-    # and order='linear'
-    if blc.model == "polynomial":
-        if not ranges and blc.order != 1:
-            warning_(
-                f"As no ranges were provided, baseline() uses the feature limits "
-                f"with order='linear'. Provided order={blc.order} is ignored",
-            )
-            blc.order = "linear"
-        blc.ranges = ranges
-
-    blc.fit(dataset)
+    blc = _fitted_baseline(dataset, ranges, kwargs)
     return blc.baseline
 
 
@@ -1129,7 +1217,10 @@ def basc(dataset, *ranges, **kwargs):
     Masked input regions are preserved on the returned corrected dataset.
 
     """
-    return dataset - get_baseline(dataset, *ranges, **kwargs)
+    blc = _fitted_baseline(dataset, ranges, kwargs)
+    corrected = dataset - blc.baseline
+    blc._annotate_corrected_history(corrected)
+    return corrected
 
 
 def detrend(dataset, order="linear", breakpoints=None):
