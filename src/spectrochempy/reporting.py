@@ -10,6 +10,7 @@ from datetime import datetime
 from numbers import Integral
 from pathlib import Path
 from pathlib import PurePosixPath
+from urllib.parse import unquote
 from urllib.parse import urlparse
 
 import numpy as np
@@ -268,7 +269,7 @@ def _figures(figures: Sequence[FigureReference]) -> list[str]:
         lines.append(f"### {label}")
         lines.extend(["", f"![{label}]({target})"])
         if figure.caption is not None:
-            lines.extend(["", _text(figure.caption)])
+            lines.extend(["", f"Caption: {_text(figure.caption)}"])
         lines.append("")
     return lines
 
@@ -287,7 +288,7 @@ def _validate_figures(figures: Sequence[FigureReference]) -> None:
 def _figure_target(target: str) -> str:
     if not isinstance(target, str) or not target:
         raise ValueError("figure target must be a non-empty string")
-    if any(character in target for character in " \t()<>\"'`"):
+    if any(character in target for character in " \t&()<>\"'`"):
         raise ValueError(
             "figure target must not contain whitespace or Markdown control characters"
         )
@@ -297,6 +298,12 @@ def _figure_target(target: str) -> str:
         raise ValueError(
             "figure target must use valid percent-encoding without control characters"
         )
+    decoded_target = unquote(target)
+    if not decoded_target.isprintable() or "\\" in decoded_target:
+        raise ValueError(
+            "figure target must be a safe relative POSIX path without control "
+            "characters or backslashes"
+        )
     try:
         parsed = urlparse(target)
     except ValueError as exc:
@@ -304,15 +311,16 @@ def _figure_target(target: str) -> str:
             "figure target must be a valid URL or safe relative POSIX path"
         ) from exc
     if parsed.scheme in {"http", "https"} and parsed.netloc:
-        if "\\" in target:
-            raise ValueError("figure target must not contain backslashes")
+        decoded_path = PurePosixPath(unquote(parsed.path))
+        if "." in decoded_path.parts or ".." in decoded_path.parts:
+            raise ValueError("figure target must not contain dot path segments")
         return target
-    path = PurePosixPath(target)
+    path = PurePosixPath(decoded_target)
     if (
         parsed.scheme
         or path.is_absolute()
-        or target.startswith("~")
-        or "\\" in target
+        or decoded_target.startswith("~")
+        or "." in path.parts
         or ".." in path.parts
     ):
         raise ValueError(
@@ -330,7 +338,7 @@ def _has_safe_percent_encoding(value: str) -> bool:
         ):
             return False
         byte = int(escape, 16)
-        if byte < 0x20 or byte == 0x7F:
+        if byte < 0x20 or byte == 0x7F or byte in {0x2E, 0x2F, 0x5C}:
             return False
         index = value.find("%", index + 3)
     return True
@@ -430,7 +438,7 @@ def _escape(value: str) -> str:
     value = value.replace("\\", "\\\\")
     value = value.replace("\r\n", "\n").replace("\r", "\n")
     value = value.replace("\n", "\\n")
-    for character in "`*_{}[]<>#+-.!|()":
+    for character in "`*_{}[]<>#+-.!|()~":
         value = value.replace(character, f"\\{character}")
     return value
 

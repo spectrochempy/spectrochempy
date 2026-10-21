@@ -52,7 +52,9 @@ def test_to_markdown_report_matches_golden_file_without_mutation():
         ),
     )
 
-    expected = (Path(__file__).parent / "fixtures" / "markdown_report.md").read_text()
+    expected = (Path(__file__).parent / "fixtures" / "markdown_report.md").read_text(
+        encoding="utf-8"
+    )
     assert report == expected
     assert dataset.history_entries == before["history"]
     assert dataset.meta.to_dict() == before["meta"]
@@ -148,6 +150,27 @@ def test_to_markdown_report_rejects_unsafe_figure_target_percent_encoding(target
 @pytest.mark.parametrize(
     "target",
     [
+        "&#47;etc/passwd",
+        "&#46;&#46;/secret.png",
+        "&#92;private\\spectrum.png",
+        "figures/%2e%2e/secret.png",
+        "figures/%2E%2E/secret.png",
+        "figures%2fsecret.png",
+        "figures/%5csecret.png",
+        "https://example.org/a&#46;&#46;/b.png",
+    ],
+)
+def test_to_markdown_report_rejects_encoded_unsafe_figure_targets(target):
+    with pytest.raises(ValueError):
+        _dataset().to_markdown_report(
+            title="Report",
+            figures=(FigureReference("Spectrum", target),),
+        )
+
+
+@pytest.mark.parametrize(
+    "target",
+    [
         "figures/my%20spectrum.png",
         "https://example.org/a%20b.png",
         "https://example.org/spectrum.png",
@@ -178,6 +201,22 @@ def test_to_markdown_report_escapes_structural_markdown():
     assert "Report\\n\\#\\# forged" in report
     assert "hi\\n\\#\\# forged \\`heading\\`" in report
     assert "label\\n\\#\\# forged" in report
+
+
+@pytest.mark.parametrize(
+    "caption", ["~~~", "    indented caption", "\tindented caption"]
+)
+def test_to_markdown_report_captions_cannot_open_markdown_blocks(caption):
+    report = _dataset().to_markdown_report(
+        title="Report",
+        figures=(
+            FigureReference("First", "figures/first.png", caption),
+            FigureReference("Second", "figures/second.png", "Second caption"),
+        ),
+    )
+
+    assert f"Caption: {_escape(caption)}" in report
+    assert "### Second\n\n![Second](figures/second.png)" in report
 
 
 def test_to_markdown_report_redacts_path_objects():
