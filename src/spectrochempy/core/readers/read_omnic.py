@@ -258,6 +258,10 @@ def read_spg(*paths, **kwargs):
     r"""
     Open a Thermo Nicolet file or a list of files with extension ``.spg``.
 
+    .. note::
+       The reverse-engineered binary layout of the ``.spg`` format is
+       documented in :doc:`/devguide/file_formats/omnic/spg`.
+
     Parameters
     ----------
     *paths : `str`, `~pathlib.Path` object objects or valid urls, optional
@@ -376,6 +380,10 @@ def read_spg(*paths, **kwargs):
 def read_spa(*paths, **kwargs):
     r"""
     Open a Thermo Nicolet file or a list of files with extension ``.spa``.
+
+    .. note::
+       The reverse-engineered binary layout of the ``.spa`` format is
+       documented in :doc:`/devguide/file_formats/omnic/spa`.
 
     Parameters
     ----------
@@ -679,16 +687,16 @@ def _read_spg(*args, **kwargs):
     # for instance hex[02 6a 6b 69 1b 03 82] -> dec[02 106  107 105 27 03 130]
     # Each of these lines provides positions of data and metadata in the file:
     #
-    #     key: hex 02, dec  02: position of spectral header (=> nx, firstx,
-    #     lastx, nscans, nbkgscans)
+    #     key: hex 02, dec  02: position of the data header (=> nx, X
+    #     endpoints, units, scans; one per spectrum)
     #     key: hex 03, dec  03: intensity position
     #     key: hex 04, dec  04: user text position
     #     key: hex 1B, dec  27: position of History text
     #     key: hex 66  dec 102: sample interferogram
     #     key: hex 67  dec 103: background interferogram
     #     key: hex 6a, dec 106: canonical acquisition-parameter block
-    #     key: hex 6b, dec 107: position of spectrum title, the acquisition
-    #     date follows at +256(dec)
+    #     key: hex 6b, dec 107: position of spectrum title, the native
+    #     timestamp follows at +256(dec); the event it represents is unknown
     #
     # the number of line per block may change from file to file but the total
     # number of lines is given at hex 294, hence allowing counting the
@@ -779,11 +787,12 @@ def _read_spg(*args, **kwargs):
         fid.seek(position6B[i] + 2)  # go to line and skip 2 bytes
         spa_title_pos = fromfile(fid, "uint32", 1)
 
-        # read omnic filename
+        # read the spectrum title (0x6b +0, 256-byte text region)
         spa_title = _readbtext(fid, spa_title_pos, 256)
         spectitles.append(spa_title)
 
-        # and the acquisition date
+        # and the native timestamp (0x6b +256); exposed as the acquisition
+        # date, although the physical event it represents is not established
         fid.seek(spa_title_pos + 256)
         timestamp = fromfile(fid, dtype="uint32", count=1)
         acqdate = _decode_omnic_timestamp(int(timestamp))
@@ -919,10 +928,13 @@ def _read_spg(*args, **kwargs):
     dataset.history = f"Imported OMNIC SPG file {filename.name}"
 
     # Attach acquisition metadata from the header.
-    # Acquisition parameters (collection_length, reference_frequency,
-    # optical_velocity) are global to the SPG file — the header at
-    # position02 stores them once, not per spectrum.  Reusing the last
-    # parsed header is therefore intentional.
+    # Each spectrum has its own data header, so these parameters are stored
+    # per spectrum and may differ between members of a group. The reader
+    # reduces them to the values of the last parsed header (a simplification,
+    # not a format property). The optical velocity is read at header +188,
+    # beyond the 140-byte 0x02 block: it is only valid when the 0x6a block is
+    # stored right after the data header (see the OMNIC format reference,
+    # "Offsets beyond the 140-byte block").
     dataset.meta.collection_length = info["collection_length"] / 100 * ur("s")
     dataset.meta.optical_velocity = info["optical_velocity"]
     dataset.meta.laser_frequency = info["reference_frequency"] * ur("cm^-1")
@@ -1613,7 +1625,8 @@ def _read_srs(*args, **kwargs):
             # interferogram
             dataset.meta.interferogram = True
             dataset.meta.td = list(dataset.shape)
-            dataset.x._zpd = int(np.argmax(dataset)[-1])  # zero path difference
+            # This is the data-derived peak index, not formal physical ZPD.
+            dataset.x._zpd = int(np.argmax(dataset)[-1])
             dataset.x.set_laser_frequency()
             dataset.x._use_time_axis = (
                 False  # True to have time, else it will  be optical path difference
@@ -1743,7 +1756,10 @@ def _nextline(pos):
 
 def _read_header(fid, pos, is_first_spectrum=True):
     r"""
-    Read spectrum/ifg/series header.
+    Read an OMNIC data header.
+
+    The data header is the SPA/SPG ``0x02`` block or an SRS series or
+    background header.
 
     Parameters
     ----------
@@ -1758,15 +1774,16 @@ def _read_header(fid, pos, is_first_spectrum=True):
 
     Returns
     -------
-        dict, int
-        Dictionary and current position in file
+        dict
+        Dictionary of decoded header fields.
 
     Notes
     -----
-        So far, the header structure is as follows (offsets are relative to the
-        header base position; the positioning of the srs series header and the
-        full field map are documented in the public format reference
-        :doc:`/devguide/file_formats/omnic/srs`):
+        The data-header layout and its certainty levels are documented in the
+        public format references :doc:`/devguide/file_formats/omnic/common`
+        (data header, unit codes) and :doc:`/devguide/file_formats/omnic/srs`
+        (series header). Summary of the fields read here (offsets are relative
+        to the header base position):
 
         - starts with b'\x01' , b'\x02', b'\x03' ... maybe indicating the header "type"
         - nx (UInt32): 4 bytes behind
@@ -1783,16 +1800,20 @@ def _read_header(fid, pos, is_first_spectrum=True):
           correspondence:
 
             * \x0B : reflectance (%)
-            * \x0C : Kubelka_Munk
+            * \x0C : log(1/R)
             * \x0F : single beam
-            * \x11 : absorbance
             * \x10 : transmittance (%)
+            * \x11 : absorbance
+            * \x14 : Kubelka-Munk
+            * \x15 : reflectance
             * \x16 : Volts (interferogram)
             * \x1A : photoacoustic
             * \x1F : Raman intensity
 
-        - first x value (float32), 16 bytes behind
-        - last x value (float32), 20 bytes behind
+        - OMNIC "Last X" (float32), 16 bytes behind (``native_last_x``, also
+          exposed under the historical alias ``firstx``)
+        - OMNIC "First X" (float32), 20 bytes behind (``native_first_x``, alias
+          ``lastx``)
         - ... unknown
         - scan points (UInt32), 28 bytes behind
         - interferogram peak position (UInt32), 32 bytes behind
@@ -1806,12 +1827,18 @@ def _read_header(fid, pos, is_first_spectrum=True):
           last time at +1006 (see below), not from this field.
         - ... unknown
         - reference frequency (float32), 80 bytes behind
-        - ...
+        - sample spacing (float32), 84 bytes behind
+        - aperture (float32), 92 bytes behind
+        - Raman excitation frequency (float32), 96 bytes behind
         - optical velocity (float32), 188 bytes behind
-        - ...
-        - spectrum history (text), 208 bytes behind
+        - spectrum history / background marker (text), 208 bytes behind
 
-        For "rapid-scan" srs files:
+        In SPA/SPG files the ``0x02`` block is 140 bytes long: the +188 and
+        +208 reads fall into whichever block is stored next (``0x6a``, ``0x6b``,
+        a zero-filled ``0x80`` block, or the payload). Use the ``0x6a`` block
+        as the canonical source of the optical velocity when it is available.
+
+        For srs series headers (all acquisition families):
 
         - series name (text), 938 bytes behind
         - series minimum / first time in minutes (float32), 1002 bytes
@@ -1821,8 +1848,8 @@ def _read_header(fid, pos, is_first_spectrum=True):
           converted to seconds (x60) it is the OMNIC "Total collection time"
           and the public `collection_length` for srs series.
         - regular time step in minutes (float32), 1010 bytes behind. This
-          field was historically misnamed "first y": it is the series step,
-          not the minimum (the minimum is the +1002 field above).
+          field is still stored under the historical key ``firsty``: it is the
+          series step, not the minimum (the minimum is the +1002 field above).
         - ny (UInt32), 1026
         - ... y unit could be at pos+1030 with 01 = minutes ?
         - history (text), 1200 bytes behind (only initial history.
@@ -2055,7 +2082,8 @@ def _read_spa_key_table(fid):
     The active table starts at file offset 304 and contains ``nlines`` records,
     where ``nlines`` is the little-endian uint16 at offset 294. Any
     variant-dependent terminator, padding, or post-table grid is deliberately
-    outside this representation; see the public SPA format reference.
+    outside this representation; see the public OMNIC format references
+    (common key table and SPA key-table layout).
     """
     fid.seek(294)
     count_bytes = fid.read(2)

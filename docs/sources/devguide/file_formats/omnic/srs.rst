@@ -10,39 +10,38 @@ OMNIC SRS file format
    across several observed SRS variants. OMNIC producers and versions may use
    different subsets of these structures. The certainty tags below describe
    the strength and scope of each claim; they do not turn this page into an
-   official vendor specification. See :ref:`omnic-file-formats` for
-   provenance and the definitions of the certainty levels. Contributors with
-   access to other OMNIC ``.srs`` variants are encouraged to report
-   differences so that this reference can be improved.
+   official vendor specification. See :ref:`fileformats-provenance` for
+   provenance and :ref:`fileformats-evidence` for the definitions of the
+   certainty levels and evidence methods.
 
 Evidence and scope
 ------------------
 
-This reference separates structural evidence from semantic interpretation:
-
-* ``[ESTABLISHED]`` means that a structure or relationship is supported by
-  independent binary/oracle evidence, controlled behavior, or exact
-  arithmetic in multiple native cases.
-* ``[OBSERVED]`` means that a reproducible structure or correlation was seen
-  in the analyzed variants but is not established as universal.
-* ``[HYPOTHESIS]`` means that a semantic interpretation is plausible but not
-  demonstrated.
-* ``[UNKNOWN]`` means that the position or structure may be known while its
-  meaning remains unresolved.
-
-The evidence derives from independent controlled binary and oracle analysis
+The certainty levels and evidence methods are defined in
+:ref:`fileformats-evidence`. The evidence derives from binary inspection
 across several observed SRS variants, spanning the RapidScan, HighSpeed and
 TG/GC acquisition families: ordinary spectral series, rapid-scan
 interferogram series, reprocessed series, and background-containing variants.
-One independently controlled TG/GC series served as a controlled OMNIC
-export oracle: its individual spectra were exported by OMNIC as SPA files and
-compared against the raw SRS samples (see :ref:`srs-spectral-sample-order`),
-and the same series also exercised the trailer's SeriesProfile, Gram-Schmidt
-and Area structures (see :ref:`srs-seriesprofile`). These descriptions are
-generic; they do not depend on particular proprietary files or on the
-availability of OMNIC-distributed examples. Specimen-level provenance and the
-detailed audit records behind these claims are maintained outside this
-reference.
+One TG/GC series acquired under controlled conditions was also compared
+with the vendor software: its individual spectra were exported by OMNIC as
+SPA files and compared with the raw SRS records, and the same series
+contains SeriesProfile, Gram-Schmidt and Area structures.
+
+.. list-table:: SRS evidence corpus (distinct files)
+   :header-rows: 1
+
+   * - Acquisition family
+     - Files
+     - Processing flag (offset 292)
+   * - RapidScan
+     - 2
+     - one pristine, one reprocessed
+   * - HighSpeed
+     - 1
+     - pristine
+   * - TG/GC
+     - 6
+     - two pristine, three reprocessed, one with another flag value
 
 Overall file organization
 -------------------------
@@ -83,14 +82,16 @@ number/layout of the trailer blocks are version-dependent
 Offset conventions
 ------------------
 
-* File-header / key-table offsets are file-relative (relative to the start of
-  the file).
-* Series-header offsets are relative to the located *series-header base*
-  (at the position referenced by the ``key[0]`` entry — entry offset +2 —
+The common OMNIC conventions apply (see :ref:`omnic-conventions`):
+file-relative offsets are plain decimal numbers and block-relative offsets
+are written ``+N``. In this page:
+
+* series-header offsets are relative to the located *series-header base*
+  (at the position referenced by the ``key[0]`` entry — entry offset ``+2`` —
   i.e. the position of the first detection signature minus 152; see
   :ref:`srs-detection-signatures`).
-* Repeated-record offsets use the record start as origin; trailer offsets use
-  the trailer start; SeriesProfile fields use the block start as origin.
+* repeated-record offsets use the record start as origin, trailer offsets
+  the trailer start, and SeriesProfile fields the block start.
 
 Header and key structures
 -------------------------
@@ -134,8 +135,8 @@ File header / key-table region (file-relative)
      - UInt32
      - Native series-level acquisition timestamp (``Collected``): seconds
        since the OMNIC epoch (1899-12-31 00:00:00 UTC), unsigned
-       little-endian. This is the canonical series-absolute anchor used
-       by the reader (see :ref:`srs-time-representation`). Zeroed in
+       little-endian. This is the series-absolute time anchor (see
+       :ref:`srs-time-representation`). Zeroed in
        reprocessed files; holds unrelated bytes in GC variants.
      - ``[ESTABLISHED]`` for RapidScan / HighSpeed / TGA;
        ``[OBSERVED]`` absence for GC
@@ -148,12 +149,10 @@ File header / key-table region (file-relative)
 Key-table entry (16 bytes; entry-relative offsets)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-``[ESTABLISHED]`` Each key record occupies 16 bytes and follows the generic
-OMNIC key-record layout also used by the SPA/SPG families (see
-:ref:`spa-format`): a 1-byte key, a reserved/variant byte, a 4-byte
-file-relative block position, a 4-byte block length and 6
-trailing/variant-dependent bytes. Only the first entry — the **series**
-entry — is interpreted here; the remaining entries are unresolved.
+``[ESTABLISHED]`` Each key record occupies 16 bytes and follows the common
+OMNIC key-record layout (see :ref:`omnic-key-table`). Only the first entry —
+the **series** entry — is interpreted here; the remaining entries are
+unresolved.
 
 .. list-table::
    :widths: 10 6 6 58 20
@@ -164,31 +163,31 @@ entry — is interpreted here; the remaining entries are unresolved.
      - Type
      - Meaning
      - Certainty
-   * - 0
+   * - ``+0``
      - 1
      - UInt8
      - Key / role indicator (``0x02`` identifies the series entry;
        ``nlines`` at offset 294 counts the entries).
      - ``[ESTABLISHED]`` for the first entry
-   * - 1
+   * - ``+1``
      - 1
      - UInt8
      - Reserved / variant-dependent byte (0 in the observed variants).
      - ``[OBSERVED]``
-   * - 2
+   * - ``+2``
      - 4
      - UInt32
      - File-relative position of the referenced block. For the first
        entry this is the series-header base, exactly 152 bytes before the
        first detection signature (identical in all observed variants).
      - ``[ESTABLISHED]`` for the first entry
-   * - 6
+   * - ``+6``
      - 4
      - UInt32
      - Referenced block length in bytes (0 for the first entry in the
        observed variants).
      - ``[OBSERVED]`` value / ``[UNKNOWN]`` role
-   * - 10
+   * - ``+10``
      - 6
      - bytes
      - Trailing / variant-dependent data; ``8c 00 00 00 01 00`` for the
@@ -211,6 +210,9 @@ unmapped.
 Signal and acquisition fields
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+The first fields of the series header follow the OMNIC data-header layout
+(see :ref:`omnic-data-header`); background headers use the same layout.
+
 .. list-table::
    :widths: 10 6 6 58 20
    :header-rows: 1
@@ -220,109 +222,111 @@ Signal and acquisition fields
      - Type
      - Meaning
      - Certainty
-   * - 0
+   * - ``+0``
      - 1
      - UInt8
      - Header type marker (``0x01``/``0x02``/``0x03`` …).
      - ``[OBSERVED]``
-   * - 4
+   * - ``+4``
      - 4
      - UInt32
      - ``nx`` — points per spectrum.
      - ``[ESTABLISHED]``
-   * - 8
+   * - ``+8``
      - 1
      - UInt8
-     - X-unit code: 1 = cm⁻¹, 2 = data points (interferogram), 3 = nm,
-       4 = µm, 32 = Raman shift (cm⁻¹).
-     - ``[ESTABLISHED]`` for codes 1 and 2; ``[OBSERVED]`` for the
+     - X-unit code: ``0x01`` cm⁻¹, ``0x02`` data points (interferogram),
+       ``0x03`` nm, ``0x04`` µm, ``0x20`` Raman shift (cm⁻¹); see
+       :ref:`omnic-unit-codes`.
+     - ``[ESTABLISHED]`` for ``0x01`` and ``0x02``; ``[OBSERVED]`` for the
        others
-   * - 12
+   * - ``+12``
      - 1
      - UInt8
-     - Y/data-unit code: 0x11 absorbance, 0x10 transmittance (%),
-       0x0F single beam, 0x16 detector signal (V), 0x1A photoacoustic,
-       0x1F Raman intensity, among others shared with the SPA/SPG
-       readers.
+     - Y/data-unit code: ``0x11`` absorbance, ``0x10`` transmittance (%),
+       ``0x0f`` single beam, ``0x16`` detector signal (V), ``0x1a``
+       photoacoustic, ``0x1f`` Raman intensity, among others shared with the
+       SPA/SPG formats (see :ref:`omnic-unit-codes`).
      - ``[OBSERVED]``
-   * - 16
+   * - ``+16``
      - 4
      - Float32
-     - Raw ``firstx`` (stored ordering, not normalized).
+     - OMNIC **Last X** (higher wavenumber in the observed spectral
+       series; see :ref:`omnic-x-endpoints`).
      - ``[ESTABLISHED]``
-   * - 20
+   * - ``+20``
      - 4
      - Float32
-     - Raw ``lastx`` (stored ordering, not normalized).
+     - OMNIC **First X** (lower wavenumber in the observed spectral
+       series).
      - ``[ESTABLISHED]``
-   * - 24
+   * - ``+24``
      - 4
      - Float32
      - Per-variant varying, registration-like factor; see
        :ref:`srs-unknown-fields`.
      - ``[HYPOTHESIS]`` / ``[UNKNOWN]``
-   * - 28
+   * - ``+28``
      - 4
      - UInt32
      - Scan point count.
      - ``[OBSERVED]``
-   * - 32
+   * - ``+32``
      - 4
      - UInt32
      - Interferogram peak position (matches OMNIC's series-info field
        in all observed variants). Equivalence with the physical
        zero-path-difference position is not established.
      - ``[ESTABLISHED]``
-   * - 36
+   * - ``+36``
      - 4
      - UInt32
      - Number of scans.
      - ``[OBSERVED]``
-   * - 52
+   * - ``+52``
      - 4
      - UInt32
      - Number of background scans.
      - ``[OBSERVED]``
-   * - 56
+   * - ``+56``
      - 4
      - Float32
      - Value pattern that differs between RapidScan and other observed
        variants; see :ref:`srs-unknown-fields`.
      - ``[OBSERVED]`` (correlated only)
-   * - 68
+   * - ``+68``
      - 4
      - UInt32
      - General-header *collection length* in 1/100 s. This is the
-       shared acquisition-time field of the OMNIC header family; it must
-       **not** be conflated with the series minimum/first time at +1002
-       (nor with the public SRS ``collection_length`` derived from
-       +1006).
+       shared acquisition-time field of the OMNIC data header; it must
+       **not** be conflated with the series minimum/first time at ``+1002``
+       nor with the series last time at ``+1006``.
      - ``[OBSERVED]``
-   * - 80
+   * - ``+80``
      - 4
      - Float32
      - Reference (laser) frequency.
      - ``[OBSERVED]``
-   * - 84
+   * - ``+84``
      - 4
      - Float32
      - OMNIC **sample spacing** (matches the series-info field of the
        same name in all observed variants). Varies with acquisition
        configuration, not with the acquisition family.
      - ``[ESTABLISHED]``
-   * - 184
+   * - ``+184``
      - 4
      - Float32
      - Not covered by OMNIC's reported series-info fields; in some
-       observed variants its value differs from that of +84; see
+       observed variants its value differs from that of ``+84``; see
        :ref:`srs-unknown-fields`.
      - ``[OBSERVED]`` value / ``[UNKNOWN]`` semantic
-   * - 188
+   * - ``+188``
      - 4
      - Float32
      - Optical velocity.
      - ``[OBSERVED]``
-   * - 208
+   * - ``+208``
      - var
      - text
      - Spectrum history text; a record whose text starts with
@@ -341,81 +345,77 @@ Series identity and time-model fields
      - Type
      - Meaning
      - Certainty
-   * - 296
+   * - ``+296``
      - 8
      - UInt64
      - Raw file size (series-header-relative; not to be confused with the
        file-relative offset 296 ``Collected`` timestamp above).
      - ``[HYPOTHESIS]``
-   * - 938
+   * - ``+938``
      - ≤ 256
      - text
-     - Series name (the reader splits on the first newline).
+     - Series name (text up to the first newline).
      - ``[OBSERVED]``
-   * - 1002
+   * - ``+1002``
      - 4
      - Float32
      - **Series minimum / first time, in minutes** — the time-axis
-       anchor. Historically misinterpreted as a "collection length";
-       the general-header collection-length field is the one at +68 (not
-       to be conflated either). The public ``collection_length`` for SRS
-       series is derived from +1006, not from this field.
+       anchor. It is not a collection length; the general-header
+       collection-length field is the one at ``+68``.
      - ``[ESTABLISHED]``
-   * - 1006
+   * - ``+1006``
      - 4
      - Float32
      - Series maximum / last time, in minutes. Converted to seconds
-       (× 60) it is the OMNIC "Total collection time" and the public
-       ``collection_length`` exposed by the reader for SRS series.
+       (× 60) it is the OMNIC "Total collection time".
      - ``[ESTABLISHED]``
-   * - 1010
+   * - ``+1010``
      - 4
      - Float32
-     - **Regular time step, in minutes** (historically misnamed
-       ``firsty``; it is *not* the series minimum). See
+     - **Regular time step, in minutes** (*not* the series minimum). See
        :ref:`srs-time-representation`.
      - ``[ESTABLISHED]``
-   * - 1026
+   * - ``+1026``
      - 4
      - UInt32
      - ``ny`` — number of spectra in the series.
      - ``[ESTABLISHED]``
-   * - 1030
+   * - ``+1030``
      - 1
      - UInt8
      - Y-unit code; a value of 1 may mean minutes.
      - ``[HYPOTHESIS]``
-   * - 1036
+   * - ``+1036``
      - 4
      - Float32
      - Flow-cell temperature (°C; TG/GC variants only). Matches
        OMNIC's reported series-info value in the TG/GC variants; 0.0
        in the other variants.
      - ``[ESTABLISHED]`` (TG/GC variants)
-   * - 1040
+   * - ``+1040``
      - 4
      - Float32
      - Transfer-line temperature (°C; TG/GC variants only). Matches
        OMNIC's reported series-info value in the TG/GC variants; 0.0
        in the other variants.
      - ``[ESTABLISHED]`` (TG/GC variants)
-   * - 1044
+   * - ``+1044``
      - 2
      - UInt16
      - Gram-Schmidt offset; see :ref:`srs-gram-schmidt`.
      - ``[OBSERVED]`` value / ``[UNKNOWN]`` semantic
-   * - 1046
+   * - ``+1046``
      - 2
      - UInt16
      - Gram-Schmidt interferogram points; see :ref:`srs-gram-schmidt`.
      - ``[OBSERVED]`` / ``[HYPOTHESIS]``
-   * - 1048
+   * - ``+1048``
      - 2
      - UInt16
      - Constant value in the observed variants; see
        :ref:`srs-unknown-fields`.
      - ``[UNKNOWN]``
-   * - 1200
+   * - ``+1200``
      - var
      - text
      - Initial history text (pristine variants). Reprocessed variants
@@ -426,19 +426,14 @@ Series identity and time-model fields
 Background data
 ---------------
 
-``[OBSERVED]`` Spectral backgrounds have their own header, located through
-the second detection signature (signature position − 152), with their own X
+``[OBSERVED]`` Spectral backgrounds have their own header, located through the
+second detection signature (signature position − 152), with their own X
 endpoints. In the observed variants where both headers were decoded, the
 **endpoint ordering can differ from that of the series header**: spectral
-background headers store raw ``firstx < lastx`` (ascending) while the
-corresponding spectral series headers store raw ``firstx > lastx``
-(descending). No single raw-order rule has been observed to apply to the
-whole file; any normalization must be applied per record.
-
-The present reader normalizes spectral backgrounds per record to the same
-public descending-wavenumber grid as the series. Only a subset of background
-layouts is currently decoded (the reader's ``return_bg`` path returns no data
-for some background record shapes).
+background headers store ``+16 < +20`` (ascending) while the corresponding
+spectral series headers store ``+16 > +20`` (descending). No single raw-order
+rule has been observed to apply to the whole file; any normalization must be
+applied per record. Not every background record layout has been decoded.
 
 .. _srs-repeated-records:
 
@@ -478,18 +473,18 @@ spectral series and interferogram records:
      - Type
      - Meaning
      - Certainty
-   * - 0 .. null
+   * - ``+0`` .. NUL
      - var
      - ASCII
      - Spectrum name, null-terminated.
      - ``[ESTABLISHED]``
-   * - 22 .. 75
+   * - ``+22..+75``
      - var
      - bytes
      - Mostly per-file constant metadata; semantics not fully
        interpreted.
      - ``[OBSERVED]`` values / ``[UNKNOWN]`` semantics
-   * - 76
+   * - ``+76``
      - 4
      - Float32
      - Spectrum minimum Y value.
@@ -519,19 +514,19 @@ trailer is instead repurposed for series statistics.
      - Type
      - Meaning
      - Certainty
-   * - 0
+   * - ``+0``
      - 4
      - UInt32
      - ``0x20`` (32) in the observed variants.
      - ``[OBSERVED]``
-   * - 4
+   * - ``+4``
      - 4
      - UInt32
      - Cumulative elapsed-time counter in centiseconds for the **next**
        spectrum (non-final records only; see
        :ref:`srs-time-representation`).
      - ``[OBSERVED]``
-   * - 8
+   * - ``+8``
      - 8
      - UInt64
      - Zeros in the observed variants.
@@ -586,36 +581,36 @@ not.
      - Type
      - Meaning
      - Certainty
-   * - 0
+   * - ``+0``
      - 4
      - UInt32
      - ``ny`` marker equal to the series spectrum count — a reliable
        block boundary marker.
      - ``[ESTABLISHED]`` boundary; ``[OBSERVED]`` value
-   * - 4
+   * - ``+4``
      - 4
      - UInt32
      - Profile-type code: 6 for "peak area of one peak" (Area), 0 for
        Chemigram, in the observed variants.
      - ``[HYPOTHESIS]`` (higher confidence for code 6, medium for
        code 0)
-   * - 8
+   * - ``+8``
      - 4
      - UInt32
      - Gram-Schmidt offset, copied unchanged from the series metadata
        into every block examined.
      - ``[OBSERVED]`` value / ``[UNKNOWN]`` semantic
-   * - 12
+   * - ``+12``
      - 4
      - Float32
      - Series minimum time, copied into every block examined.
      - ``[OBSERVED]``
-   * - 16
+   * - ``+16``
      - 4
      - Float32
      - Series maximum time, copied into every block examined.
      - ``[OBSERVED]``
-   * - 20
+   * - ``+20``
      - ~26
      - ASCII
      - Human-readable profile label, e.g. ``Area [lo, hi]`` or
@@ -650,14 +645,14 @@ Time representation
 
 Four quantities describe the series time axis; they must not be conflated:
 
-* **Series minimum / first time** — header +1002 (Float32, minutes). This is
-  the time of the first spectrum and the anchor of the axis.
-* **Last / max time** — header +1006 (Float32, minutes).
-* **Regular time step** — header +1010 (Float32, minutes). In the
+* **Series minimum / first time** — header ``+1002`` (Float32, minutes). This
+  is the time of the first spectrum and the anchor of the axis.
+* **Last / max time** — header ``+1006`` (Float32, minutes).
+* **Regular time step** — header ``+1010`` (Float32, minutes). In the
   independently controlled series this equals ``(last time − first time) /
   (ny − 1)`` exactly to float32 precision, which confirms it is a step, not
-  a minimum (the historical ``firsty`` misreading).
-* **Number of spectra** — ``ny`` (header +1026).
+  a minimum.
+* **Number of spectra** — ``ny`` (header ``+1026``).
 
 ``[OBSERVED]`` the time axis follows the regular model
 
@@ -665,7 +660,7 @@ Four quantities describe the series time axis; they must not be conflated:
 
    T[i] = time_min + i * step        (i = 0 .. ny-1)
 
-where ``time_min`` reads from +1002 and ``step`` from +1010.
+where ``time_min`` reads from ``+1002`` and ``step`` from ``+1010``.
 
 The trailer's centisecond counter provides an independent confirmation:
 ``[OBSERVED]`` for non-final records, the counter stored in the trailer of
@@ -691,20 +686,18 @@ exported spectrum's timestamp is ``Collected + time_min`` (≈ ``time_min`` ≈
 4.96 s after ``Collected`` in the controlled TGA series), **not**
 ``Collected`` itself.
 
-The field has header-relative copies that the reader verifies against before
-trusting it (the offsets differ between families, and are relative to the
-series-header base):
+The field has header-relative copies (the offsets differ between families,
+and are relative to the series-header base):
 
 * series-header base + 836 for RapidScan / HighSpeed;
 * series-header base + 368 and series-header base + 828 for TG/GC-family
   TGA files.
 
-``[OBSERVED]`` The copy-check prevents false positives: GC files, whose
-offset 296 holds unrelated bytes (ASCII text / assorted values), and
-reprocessed RapidScan files, whose field is zeroed, yield *no* absolute
-anchor (``None``) rather than a fabricated date. The reader only accepts the
-evidence-backed copy locations listed above; a layout with different copy
-offsets is unsupported and yields ``None``.
+``[OBSERVED]`` Checking the value against these copies avoids false
+positives: in GC files, offset 296 holds unrelated bytes (ASCII text /
+assorted values), and in reprocessed RapidScan files the field is zeroed, so
+neither carries an absolute anchor. Layouts with copies at other offsets have
+not been observed.
 
 Combined with the regular time model above, the per-spectrum absolute
 datetimes follow Model A
@@ -713,19 +706,12 @@ datetimes follow Model A
 
     datetime[i] = Collected + timedelta(minutes=time_min + i * step)
 
-computed in full precision from the native float32 ``time_min`` (+1002) and
-``step`` (+1010) fields, preserving the full precision represented by the
-native float32 timing fields rather than the already-rounded three-decimal
-public Y coordinate. The derived datetimes agree with the OMNIC-exported
-SPA timestamps at their serialization precision (whole seconds), while
-SpectroChemPy retains the full precision derived from the native series
-fields.
-The reader exposes the anchor through the standard ``acquisition_date``
-convention and the derived datetimes as an additional Y-label column (see
-:ref:`srs-implementation-references`).  Which acquisition event (integration
-start, midpoint, end, ...) the OMNIC timestamp corresponds to is not
-experimentally established (see the Open questions section); no physical
-start/end interpretation is implied.
+computed from the native float32 ``time_min`` (``+1002``) and ``step``
+(``+1010``) fields. The derived datetimes agree with the OMNIC-exported SPA
+timestamps at their serialization precision (whole seconds). Which acquisition
+event (integration start, midpoint, end, ...) the OMNIC timestamp corresponds
+to is not experimentally established (see the Open questions section); no
+physical start/end interpretation is implied.
 
 .. _srs-spectral-sample-order:
 
@@ -735,18 +721,16 @@ Spectral sample order
 ``[OBSERVED]``
 
 In the SRS variants examined, spectral intensity samples are stored in
-**ascending-wavenumber physical order** (sample 0 = lowest wavenumber). This
+**ascending-wavenumber physical order** (sample 0 = lowest wavenumber). The
+series header stores Last X (``+16``) above First X (``+20``), so sample 0
+corresponds to ``+20``, the opposite of the SPA convention (see
+:ref:`omnic-x-endpoints`). This
 ordering was independently confirmed for one controlled series against
 individual spectra exported by OMNIC as SPA files: the raw SRS samples match
 the OMNIC-exported SPA data exactly in the correct physical order, while the
 reversed orientation does not match. It should not yet be treated as a
-guaranteed invariant for every SRS producer/version.
-
-This page describes the **raw storage order**. Presentational conventions of
-particular software are separate: SpectroChemPy, for instance, presents SRS
-spectral datasets with a *descending* wavenumber axis (matching its SPA
-convention) while the raw file order is ascending (see
-:ref:`srs-implementation-references`).
+guaranteed invariant for every SRS producer/version. This is the **raw
+storage order**; software may present the axis in either direction.
 
 Rapid-scan interferograms
 -------------------------
@@ -758,15 +742,15 @@ coordinates.
 
 Do **not** equate "no xunit code" with "interferogram": a record whose X-unit
 code is unrecognized also lacks a physical xunit, yet is not a data-points
-interferogram. The current reader therefore distinguishes three cases:
+interferogram. Three cases should therefore be distinguished:
 
 * a known spectral axis (x-unit codes 1/3/4/32);
 * an explicit data-points interferogram (x-unit code 2);
-* an unknown X-axis type (unrecognized code), which is neither treated as
-  an interferogram nor spectral-normalized.
+* an unknown X-axis type (unrecognized code), which is neither an
+  interferogram nor a known spectral axis.
 
-This three-way distinction is presented as the current observed evidence for
-the variants examined, not as a universal OMNIC invariant.
+This three-way distinction reflects the observed evidence for the variants
+examined, not a universal OMNIC invariant.
 
 Gram-Schmidt / Chemigram / Area structures
 ------------------------------------------
@@ -784,8 +768,8 @@ values. Whether every SRS family places this region first in the trailer
 has not been verified.
 
 ``[OBSERVED]`` The number of Gram-Schmidt interferogram points also appears
-as a series-header field at +1046 (UInt16), and the Gram-Schmidt offset
-value (header +1044, UInt16) is copied into every SeriesProfile block
+as a series-header field at ``+1046`` (UInt16), and the Gram-Schmidt offset
+value (header ``+1044``, UInt16) is copied into every SeriesProfile block
 examined. ``[UNKNOWN]`` The exact meaning of the offset and the
 reconstruction role of the matrix are not yet established.
 
@@ -823,24 +807,24 @@ listed as correlated observations only; no unsupported semantic is assigned.
      - Type
      - Observed pattern
      - Certainty
-   * - Series header +24
+   * - Series header ``+24``
      - 4
      - Float32
      - Nonzero and per-file varying in non-RapidScan variants, 0.0 in
        the RapidScan variants examined; registration-like.
      - ``[HYPOTHESIS]`` / ``[UNKNOWN]``
-   * - Series header +56
+   * - Series header ``+56``
      - 4
      - Float32
      - 0.0 in RapidScan variants, 1.0 in the other variants examined.
      - ``[OBSERVED]`` (correlated only)
-   * - Series header +184
+   * - Series header ``+184``
      - 4
      - Float32
      - 2.0 in RapidScan variants, 1.0 in the other variants examined;
        not covered by OMNIC's reported series-info fields.
      - ``[OBSERVED]`` (correlated only)
-   * - Series header +1048
+   * - Series header ``+1048``
      - 2
      - UInt16
      - Constant value in the observed variants.
@@ -852,7 +836,7 @@ listed as correlated observations only; no unsupported semantic is assigned.
      - Key values, referenced positions, lengths and trailing data not
        yet interpreted.
      - ``[UNKNOWN]``
-   * - Record prefix +22..75
+   * - Record prefix ``+22``..75
      - var
      - bytes
      - Mostly per-file constant metadata.
@@ -883,47 +867,3 @@ Open questions and limitations
   per-spectrum OMNIC timestamp correspond to physically? The arithmetic
   mapping (Model A) is established, but the physical semantics of the
   native timestamp are not.
-
-.. _srs-implementation-references:
-
-SpectroChemPy implementation
-----------------------------
-
-The reader is implemented in ``src/spectrochempy/core/readers/read_omnic.py``.
-:func:`spectrochempy.read_srs` is the public entry point for ``.srs``
-files; it delegates to the OMNIC importer with the ``.srs`` file-type
-constraint.
-
-Format-to-public-behaviour mapping:
-
-* Spectral series are presented with a **descending wavenumber** X axis
-  (high to low), matching the convention used by ``read_spa``. The
-  normalization is applied per-spectrum from each record's own
-  ``firstx``/``lastx`` endpoints.
-* Rapid-scan interferograms retain the raw **ascending data-points**
-  coordinate. These records are flagged internally (``meta.interferogram``);
-  their ZPD index is the data-derived peak index, and the laser frequency is
-  set to the reader's standard default rather than derived from these
-  records' coordinate or data.
-* Records with an unrecognized X-unit code are left in raw storage
-  orientation with an informational message; they are neither treated as
-  interferograms nor spectral-normalized.
-* The Y coordinate is **relative series time in minutes** (``time_min``
-  to ``lasty``, rounded to 3 decimal places; title "Time", units
-  "minute").
-* When a validated native ``Collected`` timestamp exists at file offset
-  296 (see :ref:`srs-time-representation`), the reader exposes it through
-  ``dataset.acquisition_date`` (the standard SPA convention). The Y
-  coordinate then gains a second label column with the per-spectrum
-  absolute datetimes derived as
-  ``Collected + timedelta(minutes=time_min + i * step)`` in full
-  precision from the native series fields.
-* Variants without a valid absolute anchor (GC, reprocessed RapidScan)
-  leave ``acquisition_date`` unset and keep single-column
-  names-only Y labels.
-* The public ``collection_length`` metadata attribute is derived from
-  header +1006 (series last time × 60), not from the general-header
-  field at +68.
-* The historical ``reverse_x`` keyword is a deprecated no-op:
-  spectral orientation is handled automatically and supplying the
-  keyword emits a ``DeprecationWarning``.
