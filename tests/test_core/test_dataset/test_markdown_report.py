@@ -313,6 +313,127 @@ def test_to_markdown_report_preserves_history_order_and_redacts_nested_paths():
     assert "{later: 2, path: [redacted: path]}" in report
 
 
+def test_to_markdown_report_renders_nested_history_parameters_and_sources():
+    dataset = _dataset()
+    dataset.replace_history(
+        [
+            {
+                "date": datetime(2026, 10, 17, tzinfo=UTC),
+                "operation": "custom_processing",
+                "parameters": {
+                    "model": "example",
+                    "settings": {
+                        "alpha": 1,
+                        "danger\n## key": "safe",
+                        "items": ["first", {"note": "second\n## forged"}],
+                    },
+                    "sources": [
+                        {
+                            "role": "right",
+                            "name": "fitted_baseline",
+                            "shape": [3],
+                        },
+                        {
+                            "role": "left",
+                            "name": "sample *signal*",
+                            "shape": [3],
+                        },
+                    ],
+                },
+                "message": "Applied custom processing",
+            }
+        ]
+    )
+
+    report = dataset.to_markdown_report(title="Report")
+
+    assert "##### 1. Custom processing" in report
+    assert "- Method: `example`" in report
+    assert "- Parameters:\n  - Settings:" in report
+    assert "    - Danger\\n\\#\\# key: safe" in report
+    assert "        - Note: second\\n\\#\\# forged" in report
+    assert "- Sources:\n  - Right:" in report
+    assert "    - Name: fitted\\_baseline" in report
+    assert "  - Left:\n    - Name: sample \\*signal\\*" in report
+    assert report.index("  - Right:") < report.index("  - Left:")
+    assert "Parameters: {" not in report
+    assert "\n## forged" not in report
+
+
+def test_to_markdown_report_bounds_nested_history_parameters():
+    dataset = _dataset()
+    dataset.replace_history(
+        [
+            {
+                "date": datetime(2026, 10, 17, tzinfo=UTC),
+                "operation": "bounded",
+                "parameters": {
+                    "large": list(range(33)),
+                    "deep": {"one": {"two": {"three": {"four": 4}}}},
+                },
+                "message": "Bounded parameters",
+            }
+        ]
+    )
+
+    report = dataset.to_markdown_report(title="Report")
+
+    assert "[omitted: collection too large]" in report
+    assert "[omitted: maximum depth]" in report
+
+
+def test_to_markdown_report_bounds_history_output():
+    dataset = _dataset()
+    dataset.replace_history(
+        [
+            {
+                "date": datetime(2026, 10, 17, tzinfo=UTC),
+                "operation": "step",
+                "parameters": {},
+                "message": f"Step {index}",
+            }
+            for index in range(300)
+        ]
+    )
+
+    report = dataset.to_markdown_report(title="Report")
+
+    assert "[omitted: render budget exhausted]" in report
+
+
+def test_to_markdown_report_identifies_baseline_and_smoothing_methods():
+    coord = scp.Coord(
+        np.linspace(4000.0, 1000.0, 80),
+        title="Wavenumber",
+        units="1/cm",
+    )
+    dataset = scp.NDDataset(
+        np.linspace(1.0, 0.0, 80) + np.exp(-0.5 * ((np.arange(80) - 40) / 6) ** 2),
+        coordset=[coord],
+        name="sample",
+        title="Spectrum",
+        units="absorbance",
+    )
+    before = dataset.history_entries
+
+    processed = scp.savgol(dataset.basc(), size=7, order=2)
+    report = processed.to_markdown_report(title="Report")
+
+    assert "##### 1. Baseline correction" in report
+    assert "- Method: `polynomial`" in report
+    assert "##### 2. Savgol" in report
+    assert "  - Size: 7" in report
+    assert "  - Order: 2" in report
+    assert "  - Operation: `baseline_correction`" in report
+    assert "  - Operation: `savgol`" in report
+    assert "Created using method" not in report
+    assert [entry["operation"] for entry in processed.history_entries] == [
+        "baseline_correction",
+        "savgol",
+    ]
+    assert dataset.history_entries == before
+
+
 def test_to_markdown_report_marks_absent_origin():
     report = scp.NDDataset([1.0, 2.0, 3.0]).to_markdown_report(title="Report")
 

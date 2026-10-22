@@ -246,17 +246,182 @@ def _metadata(dataset: NDDataset, keys: Sequence[str]) -> list[str]:
 
 
 def _history(dataset: NDDataset) -> list[str]:
-    lines = ["", "#### History", ""]
+    lines = ["", "#### Processing history", ""]
     entries = dataset.history_entries
     if not entries:
         return [*lines, "- No history entry provided."]
 
+    budget = [_MAX_RENDERED_NODES, _MAX_RENDERED_CHARS, False]
     for index, entry in enumerate(entries, start=1):
         operation = entry["operation"] if entry["operation"] is not None else "text"
-        lines.append(f"{index}. {_code(_datetime(entry['date']))} — {_code(operation)}")
-        lines.append(f"   - Parameters: {_value(entry['parameters'])}")
-        lines.append(f"   - Message: {_value(entry['message'])}")
+        if not _history_line(
+            lines,
+            f"##### {index}. {_history_label(operation)}",
+            budget,
+        ):
+            break
+        lines.append("")
+        if not _history_parameters(lines, entry["parameters"], budget):
+            break
+        if not _history_line(lines, "- Details:", budget):
+            break
+        if not _history_line(
+            lines,
+            f"  - Timestamp: {_code(_datetime(entry['date']))}",
+            budget,
+        ):
+            break
+        if not _history_line(lines, f"  - Operation: {_code(operation)}", budget):
+            break
+        if not _history_line(
+            lines,
+            f"  - Message: {_value(entry['message'])}",
+            budget,
+        ):
+            break
+        if index != len(entries):
+            lines.append("")
     return lines
+
+
+def _history_parameters(lines: list[str], parameters, budget: list) -> bool:
+    if not isinstance(parameters, Mapping):
+        return _history_line(lines, f"- Parameters: {_value(parameters)}", budget)
+
+    model = parameters.get("model", _MISSING)
+    if model is not _MISSING:
+        method = _code(model) if isinstance(model, str) else _value(model)
+        if not _history_line(lines, f"- Method: {method}", budget):
+            return False
+
+    remaining = {
+        key: value
+        for key, value in parameters.items()
+        if key not in {"model", "sources"}
+    }
+    if not remaining:
+        if not _history_line(lines, "- Parameters: —", budget):
+            return False
+    elif not _history_line(lines, "- Parameters:", budget) or not _history_mapping(
+        lines,
+        remaining,
+        indent="  ",
+        depth=0,
+        budget=budget,
+    ):
+        return False
+
+    if "sources" not in parameters:
+        return True
+    if not _history_line(lines, "- Sources:", budget):
+        return False
+    return _history_sources(lines, parameters["sources"], budget)
+
+
+def _history_sources(lines: list[str], sources, budget: list) -> bool:
+    if not isinstance(sources, list | tuple):
+        return _history_value(lines, sources, indent="  ", depth=0, budget=budget)
+    if not sources:
+        return _history_line(lines, "  - —", budget)
+
+    for index, source in enumerate(sources, start=1):
+        if isinstance(source, Mapping):
+            role = source.get("role", f"source {index}")
+            remaining = {key: value for key, value in source.items() if key != "role"}
+            if not _history_line(lines, f"  - {_history_label(role)}:", budget):
+                return False
+            if not _history_mapping(
+                lines,
+                remaining,
+                indent="    ",
+                depth=0,
+                budget=budget,
+            ):
+                return False
+        elif not _history_line(lines, f"  - Source {index}: {_value(source)}", budget):
+            return False
+    return True
+
+
+def _history_mapping(
+    lines: list[str], value: Mapping, *, indent: str, depth: int, budget: list
+) -> bool:
+    if depth >= _MAX_NESTING_DEPTH:
+        return _history_line(lines, f"{indent}- [omitted: maximum depth]", budget)
+    if len(value) > _MAX_COLLECTION_ITEMS:
+        return _history_line(
+            lines, f"{indent}- [omitted: collection too large]", budget
+        )
+    if not value:
+        return _history_line(lines, f"{indent}- {{}}", budget)
+
+    for key in sorted(value, key=str):
+        label = _history_label(key)
+        child = value[key]
+        if isinstance(child, Mapping | list | tuple):
+            if not _history_line(lines, f"{indent}- {label}:", budget):
+                return False
+            if not _history_value(
+                lines,
+                child,
+                indent=f"{indent}  ",
+                depth=depth + 1,
+                budget=budget,
+            ):
+                return False
+        elif not _history_line(lines, f"{indent}- {label}: {_value(child)}", budget):
+            return False
+    return True
+
+
+def _history_value(
+    lines: list[str], value, *, indent: str, depth: int, budget: list
+) -> bool:
+    if isinstance(value, Mapping):
+        return _history_mapping(lines, value, indent=indent, depth=depth, budget=budget)
+    if isinstance(value, list | tuple):
+        if depth >= _MAX_NESTING_DEPTH:
+            return _history_line(lines, f"{indent}- [omitted: maximum depth]", budget)
+        if len(value) > _MAX_COLLECTION_ITEMS:
+            return _history_line(
+                lines, f"{indent}- [omitted: collection too large]", budget
+            )
+        if not value:
+            return _history_line(lines, f"{indent}- []", budget)
+        for index, item in enumerate(value, start=1):
+            if isinstance(item, Mapping | list | tuple):
+                if not _history_line(lines, f"{indent}- Item {index}:", budget):
+                    return False
+                if not _history_value(
+                    lines,
+                    item,
+                    indent=f"{indent}  ",
+                    depth=depth + 1,
+                    budget=budget,
+                ):
+                    return False
+            elif not _history_line(lines, f"{indent}- {_value(item)}", budget):
+                return False
+        return True
+    return _history_line(lines, f"{indent}- {_value(value)}", budget)
+
+
+def _history_line(lines: list[str], line: str, budget: list) -> bool:
+    if budget[0] <= 0 or budget[1] < len(line) + 1:
+        if not budget[2]:
+            indent = line[: len(line) - len(line.lstrip())]
+            lines.append(f"{indent}- {_RENDER_BUDGET}")
+            budget[2] = True
+        return False
+    budget[0] -= 1
+    budget[1] -= len(line) + 1
+    lines.append(line)
+    return True
+
+
+def _history_label(value) -> str:
+    label = str(value).replace("_", " ")
+    return _text(label[:1].upper() + label[1:])
 
 
 def _figures(figures: Sequence[FigureReference]) -> list[str]:
