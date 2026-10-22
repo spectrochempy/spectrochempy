@@ -145,7 +145,7 @@ Create a batch file (`.bat`) with:
 
     @REM launch cmd in scpy environment
     @CALL CD C:\<yourWorkingFolder>
-    @CALL CMD /K C:\<yourMiniforgeFolder>\Scripts\activate.bat scpy
+    @CALL CMD /K C:\<yourWorkingFolder>\Scripts\activate.bat scpy
 
 Save as `activate-scpy.bat` and create a shortcut named "Miniforge prompt (scpy)".
 
