@@ -11,11 +11,13 @@ can be copied and pasted.
    :local:
    :depth: 2
 
-Choosing a Method
------------------
+Choosing an Installation Method
+-------------------------------
 
-Three methods are described below. **Pick one and follow only its tab, from
-the first step to the last.** The steps of one tab do not apply to the others.
+Three installation methods are described below, each based on a different
+*package manager* (the tool that installs Python packages). **Pick one and
+follow only its tab, from the first step to the last.** The steps of one tab
+do not apply to the others.
 
 * **uv** (recommended): the simplest choice if you are new to Python. uv
   also downloads Python for you.
