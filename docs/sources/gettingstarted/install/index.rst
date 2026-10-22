@@ -7,7 +7,8 @@ Choose the guide for your computer. Each one gives complete, step-by-step
 instructions, from installing the tools to checking that SpectroChemPy works:
 
 * :doc:`install_win`
-* :doc:`install_mac_linux`
+* :doc:`install_mac`
+* :doc:`install_linux`
 * :doc:`install_colab`: run SpectroChemPy in your browser, with nothing to
   install on your computer
 
@@ -37,7 +38,8 @@ uv) or ``"spectrochempy=1.0.0"`` (conda, mamba).
     :hidden:
 
     install_win
-    install_mac_linux
+    install_mac
+    install_linux
     install_colab
     install_adds
     install_sources

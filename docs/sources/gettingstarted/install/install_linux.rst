@@ -1,10 +1,10 @@
-.. _install_mac:
+.. _install_linux:
 
-Installation Guide for Mac OSX and Linux
-========================================
+Installation Guide for Linux
+============================
 
-This guide walks you through installing SpectroChemPy on macOS or Linux, step
-by step. No previous experience with the command line is needed: every
+This guide walks you through installing SpectroChemPy on Linux, step by
+step. No previous experience with the command line is needed: every
 command can be copied and pasted in a *terminal*, the window where commands
 are typed (see the tip below to open one).
 
@@ -25,8 +25,8 @@ do not apply to the others.
 * **conda / mamba**: choose it if you already use Miniforge, Anaconda or
   conda environments, or if you also want other scientific tools from
   conda-forge.
-* **pip and venv**: uses a Python that you install yourself (from
-  python.org or Homebrew on macOS, from your distribution on Linux).
+* **pip and venv**: uses the Python provided by your distribution, if it is
+  recent enough.
 
 Two folders are involved, and it is good practice to keep them separate:
 
@@ -38,28 +38,22 @@ Two folders are involved, and it is good practice to keep them separate:
   It can be any folder you like, for instance a ``spectrochempy`` folder in
   your *Documents*. Below, it is written ``<yourWorkingFolder>``: replace it
   with the full path of your folder (for instance
-  ``/Users/<yourName>/Documents/spectrochempy`` on macOS or
-  ``/home/<yourName>/Documents/spectrochempy`` on Linux). To get this path
-  without typing it: on macOS, select the folder in the Finder, then
-  right-click while holding :kbd:`Option` and choose "Copy ... as
-  Pathname"; on Linux, open
-  the folder in the file manager and press :kbd:`Ctrl+L` to show its path.
+  ``/home/<yourName>/Documents/spectrochempy``). To get this path without
+  typing it, open the folder in the file manager and press :kbd:`Ctrl+L`:
+  the path appears in the address bar and can be copied.
 
 .. warning::
 
    Do not create the environment in a folder synchronized with the cloud
-   (iCloud Drive, OneDrive, Google Drive, Dropbox...): it contains thousands
-   of files, which slows down the synchronization and can break the
-   environment. On macOS, iCloud may synchronize the *Documents* and
-   *Desktop* folders. Your working folder, on the other hand, can be
-   synchronized.
+   (Nextcloud, Dropbox, Google Drive...): it contains thousands of files,
+   which slows down the synchronization and can break the environment.
+   Your working folder, on the other hand, can be synchronized.
 
 .. tip::
 
-   To open a **terminal**: on macOS, press :kbd:`Cmd+Space`, type
-   ``Terminal`` and press :kbd:`Enter`; on most Linux desktops, press
-   :kbd:`Ctrl+Alt+T`. To paste a command, press :kbd:`Cmd+V` (macOS) or
-   :kbd:`Ctrl+Shift+V` (Linux), then press :kbd:`Enter`.
+   To open a **terminal**, press :kbd:`Ctrl+Alt+T` on most desktops, or
+   look for "Terminal" in the applications menu. To paste a command in it,
+   press :kbd:`Ctrl+Shift+V`, then press :kbd:`Enter`.
 
 Step-by-step Installation
 -------------------------
@@ -75,7 +69,7 @@ Step-by-step Installation
          curl -LsSf https://astral.sh/uv/install.sh | sh
 
       Then close the terminal and open a new one. Other ways to install uv
-      (Homebrew, ``pipx``...) are listed in
+      (``pipx``, your distribution's packages...) are listed in
       `uv's installation guide <https://docs.astral.sh/uv/getting-started/installation/>`_.
 
       **2. Create and activate the environment** in ``~/scpy`` (uv downloads
@@ -107,15 +101,11 @@ Step-by-step Installation
       ``scpy`` environment already active, so you do not have to type the
       activation commands each time. Run the following line once, after replacing
       ``<yourWorkingFolder>`` with the path of your working folder (keep the
-      quotes). On macOS, the shell is ``zsh`` and its configuration file is
-      ``~/.zshrc``; on most Linux distributions, it is ``bash`` and ``~/.bashrc``:
+      quotes). Most distributions use the ``bash`` shell, which reads
+      its settings from ``~/.bashrc``:
 
       .. code-block:: bash
 
-         # macOS
-         echo 'alias scpy="cd \"<yourWorkingFolder>\" && source ~/scpy/bin/activate"' >> ~/.zshrc
-
-         # Linux
          echo 'alias scpy="cd \"<yourWorkingFolder>\" && source ~/scpy/bin/activate"' >> ~/.bashrc
 
       **5. Check the installation.** Close the terminal, open a new one and
@@ -136,15 +126,18 @@ Step-by-step Installation
 
       .. admonition:: If something goes wrong
 
+         * ``curl: command not found``: install it first, with
+           ``sudo apt install curl`` (Debian / Ubuntu) or
+           ``sudo dnf install curl`` (Fedora).
          * ``uv: command not found``: the terminal was opened before uv was
            installed. Close it and open a new one.
          * ``A virtual environment already exists``: the environment was already
            created. To start again from scratch, add ``--clear`` to the
            ``uv venv`` command.
-         * ``scpy: command not found``: the alias was added to another shell
-           configuration file than the one your terminal uses (``echo $SHELL``
-           tells which shell you use: ``zsh`` reads ``~/.zshrc``, ``bash`` reads
-           ``~/.bashrc``), or the terminal was not reopened.
+         * ``scpy: command not found``: the terminal was not reopened after
+           adding the alias, or your terminal uses another shell than
+           ``bash`` (``echo $SHELL`` tells which one): for ``zsh``, add the
+           alias to ``~/.zshrc`` instead of ``~/.bashrc``.
          * Otherwise, see :doc:`../getting_help`.
 
    .. tab:: Using conda / mamba
@@ -199,15 +192,11 @@ Step-by-step Installation
       ``scpy`` environment already active, so you do not have to type the
       activation commands each time. Run the following line once, after replacing
       ``<yourWorkingFolder>`` with the path of your working folder (keep the
-      quotes). On macOS, the shell is ``zsh`` and its configuration file is
-      ``~/.zshrc``; on most Linux distributions, it is ``bash`` and ``~/.bashrc``:
+      quotes). Most distributions use the ``bash`` shell, which reads
+      its settings from ``~/.bashrc``:
 
       .. code-block:: bash
 
-         # macOS
-         echo 'alias scpy="cd \"<yourWorkingFolder>\" && conda activate scpy"' >> ~/.zshrc
-
-         # Linux
          echo 'alias scpy="cd \"<yourWorkingFolder>\" && conda activate scpy"' >> ~/.bashrc
 
       **6. Check the installation.** Close the terminal, open a new one and
@@ -228,13 +217,17 @@ Step-by-step Installation
 
       .. admonition:: If something goes wrong
 
+         * ``curl: command not found``: install it first, with
+           ``sudo apt install curl`` (Debian / Ubuntu) or
+           ``sudo dnf install curl`` (Fedora).
          * ``conda: command not found``: the installer did not initialize conda, or
-           the terminal was not reopened. Run ``~/miniforge3/bin/conda init`` and
+           the terminal was not reopened. Run ``~/miniforge3/bin/conda init bash``
+           and
            open a new terminal.
-         * ``scpy: command not found``: the alias was added to another shell
-           configuration file than the one your terminal uses (``echo $SHELL``
-           tells which shell you use: ``zsh`` reads ``~/.zshrc``, ``bash`` reads
-           ``~/.bashrc``), or the terminal was not reopened.
+         * ``scpy: command not found``: the terminal was not reopened after
+           adding the alias, or your terminal uses another shell than
+           ``bash`` (``echo $SHELL`` tells which one): for ``zsh``, add the
+           alias to ``~/.zshrc`` instead of ``~/.bashrc``.
          * Otherwise, see :doc:`../getting_help`.
 
    .. tab:: Using pip and venv
@@ -252,9 +245,6 @@ Step-by-step Installation
 
       **2. Install Python, if needed:**
 
-      * macOS: download the installer from
-        `python.org <https://www.python.org/downloads/macos/>`_, or, with
-        `Homebrew <https://brew.sh>`_, run ``brew install python``.
       * Debian / Ubuntu: ``sudo apt install python3 python3-venv`` (the
         ``python3-venv`` package is required to create environments, even if
         Python is already installed).
@@ -283,15 +273,11 @@ Step-by-step Installation
       ``scpy`` environment already active, so you do not have to type the
       activation commands each time. Run the following line once, after replacing
       ``<yourWorkingFolder>`` with the path of your working folder (keep the
-      quotes). On macOS, the shell is ``zsh`` and its configuration file is
-      ``~/.zshrc``; on most Linux distributions, it is ``bash`` and ``~/.bashrc``:
+      quotes). Most distributions use the ``bash`` shell, which reads
+      its settings from ``~/.bashrc``:
 
       .. code-block:: bash
 
-         # macOS
-         echo 'alias scpy="cd \"<yourWorkingFolder>\" && source ~/scpy/bin/activate"' >> ~/.zshrc
-
-         # Linux
          echo 'alias scpy="cd \"<yourWorkingFolder>\" && source ~/scpy/bin/activate"' >> ~/.bashrc
 
       **6. Check the installation.** Close the terminal, open a new one and
@@ -316,10 +302,10 @@ Step-by-step Installation
            Ubuntu, install the ``python3-venv`` package.
          * ``python3 --version`` prints a version older than 3.11: use the uv or
            conda / mamba method instead.
-         * ``scpy: command not found``: the alias was added to another shell
-           configuration file than the one your terminal uses (``echo $SHELL``
-           tells which shell you use: ``zsh`` reads ``~/.zshrc``, ``bash`` reads
-           ``~/.bashrc``), or the terminal was not reopened.
+         * ``scpy: command not found``: the terminal was not reopened after
+           adding the alias, or your terminal uses another shell than
+           ``bash`` (``echo $SHELL`` tells which one): for ``zsh``, add the
+           alias to ``~/.zshrc`` instead of ``~/.bashrc``.
          * Otherwise, see :doc:`../getting_help`.
 
 Next Steps
