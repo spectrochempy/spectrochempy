@@ -72,7 +72,7 @@ Step-by-step Installation
       ``pipx``...) are listed in
       `uv's installation guide <https://docs.astral.sh/uv/getting-started/installation/>`_.
 
-      **2. Open the Command Prompt.**
+      **2. Open a new Command Prompt** (Start menu, type ``cmd``).
 
       **3. Create and activate the environment** in ``%USERPROFILE%\scpy``
       (uv downloads Python if needed):
@@ -141,6 +141,21 @@ Step-by-step Installation
 
          cd /D "<yourWorkingFolder>"
          "%USERPROFILE%\scpy\Scripts\activate"
+
+      .. admonition:: If something goes wrong
+
+         * ``'uv' is not recognized as an internal or external command``: the
+           Command Prompt was opened before uv was installed. Close it and open a
+           new one. The message printed by the uv installer about ``Path`` can be
+           ignored.
+         * ``A virtual environment already exists``: the environment was already
+           created. To start again from scratch, add ``--clear`` to the
+           ``uv venv`` command.
+         * ``The system cannot find the path specified`` when opening the shortcut:
+           the path of the working folder or of the environment in the ``.bat`` file
+           is wrong. Copy it again from the address bar of the File Explorer, and
+           keep the quotes.
+         * Otherwise, see :doc:`../getting_help`.
 
    .. tab:: Using conda / mamba
 
@@ -233,6 +248,19 @@ Step-by-step Installation
          cd /D "<yourWorkingFolder>"
          conda activate scpy
 
+      .. admonition:: If something goes wrong
+
+         * ``'conda' (or 'mamba') is not recognized as an internal or external
+           command``: you are in the plain Command Prompt. Open the Miniforge
+           Prompt instead.
+         * ``The system cannot find the path specified`` when opening the shortcut:
+           the path of the working folder or of the environment in the ``.bat`` file
+           is wrong. Copy it again from the address bar of the File Explorer, and
+           keep the quotes.
+           If Miniforge is not in ``%USERPROFILE%\miniforge3``, use its actual
+           installation folder.
+         * Otherwise, see :doc:`../getting_help`.
+
    .. tab:: Using pip and venv
 
       **1. Install Python** (3.11 or newer) from
@@ -310,6 +338,19 @@ Step-by-step Installation
 
          cd /D "<yourWorkingFolder>"
          "%USERPROFILE%\scpy\Scripts\activate"
+
+      .. admonition:: If something goes wrong
+
+         * The Microsoft Store opens when you type ``python``: Python is not on the
+           PATH. Run the python.org installer again and check "Add python.exe to
+           PATH", then open a new Command Prompt.
+         * ``python --version`` prints a version older than 3.11: install a recent
+           Python from python.org, or use the uv method instead.
+         * ``The system cannot find the path specified`` when opening the shortcut:
+           the path of the working folder or of the environment in the ``.bat`` file
+           is wrong. Copy it again from the address bar of the File Explorer, and
+           keep the quotes.
+         * Otherwise, see :doc:`../getting_help`.
 
 Next Steps
 ----------

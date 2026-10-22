@@ -125,6 +125,19 @@ Step-by-step Installation
       Type ``exit`` to leave IPython. From now on, open a terminal and type
       ``scpy`` each time you work with SpectroChemPy.
 
+      .. admonition:: If something goes wrong
+
+         * ``uv: command not found``: the terminal was opened before uv was
+           installed. Close it and open a new one.
+         * ``A virtual environment already exists``: the environment was already
+           created. To start again from scratch, add ``--clear`` to the
+           ``uv venv`` command.
+         * ``scpy: command not found``: the alias was added to another shell
+           configuration file than the one your terminal uses (``echo $SHELL``
+           tells which shell you use: ``zsh`` reads ``~/.zshrc``, ``bash`` reads
+           ``~/.bashrc``), or the terminal was not reopened.
+         * Otherwise, see :doc:`../getting_help`.
+
    .. tab:: Using conda / mamba
 
       **1. Install Miniforge.** Skip this step if Miniforge (or Anaconda) is
@@ -204,6 +217,17 @@ Step-by-step Installation
       Type ``exit`` to leave IPython. From now on, open a terminal and type
       ``scpy`` each time you work with SpectroChemPy.
 
+      .. admonition:: If something goes wrong
+
+         * ``conda: command not found``: the installer did not initialize conda, or
+           the terminal was not reopened. Run ``~/miniforge3/bin/conda init`` and
+           open a new terminal.
+         * ``scpy: command not found``: the alias was added to another shell
+           configuration file than the one your terminal uses (``echo $SHELL``
+           tells which shell you use: ``zsh`` reads ``~/.zshrc``, ``bash`` reads
+           ``~/.bashrc``), or the terminal was not reopened.
+         * Otherwise, see :doc:`../getting_help`.
+
    .. tab:: Using pip and venv
 
       **1. Check your Python version.** Open a terminal and run:
@@ -276,6 +300,18 @@ Step-by-step Installation
 
       Type ``exit`` to leave IPython. From now on, open a terminal and type
       ``scpy`` each time you work with SpectroChemPy.
+
+      .. admonition:: If something goes wrong
+
+         * ``No module named venv`` or ``ensurepip is not available``: on Debian /
+           Ubuntu, install the ``python3-venv`` package.
+         * ``python3 --version`` prints a version older than 3.11: use the uv or
+           conda / mamba method instead.
+         * ``scpy: command not found``: the alias was added to another shell
+           configuration file than the one your terminal uses (``echo $SHELL``
+           tells which shell you use: ``zsh`` reads ``~/.zshrc``, ``bash`` reads
+           ``~/.bashrc``), or the terminal was not reopened.
+         * Otherwise, see :doc:`../getting_help`.
 
 Next Steps
 ----------
