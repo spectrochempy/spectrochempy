@@ -46,8 +46,10 @@ Environment Setup
       1. Install Miniforge:
 
          * Download `Miniforge <https://github.com/conda-forge/miniforge>`_
-         * Run the installer
-         * Open cmd prompt
+         * Run the installer and note the installation folder it proposes
+           (by default ``%USERPROFILE%\miniforge3``); it is referred to below
+           as ``<yourMiniforgeFolder>``
+         * Open the "Miniforge Prompt" from the Start menu
 
       2. Add required channels:
 
@@ -147,7 +149,9 @@ how the environment was created.
 
    .. tab:: Using uv or venv
 
-      The environment is the ``scpy`` folder created in your working folder:
+      The environment is the ``scpy`` folder created by ``uv venv scpy`` (or
+      ``python -m venv scpy``) in the folder where you ran that command, here
+      assumed to be your working folder:
 
       .. code-block:: bat
 
@@ -157,8 +161,9 @@ how the environment was created.
 
    .. tab:: Using conda / mamba
 
-      ``activate.bat`` is provided by Miniforge (by default, Miniforge is
-      installed in ``%USERPROFILE%\miniforge3``):
+      ``activate.bat`` is provided by Miniforge, in the installation folder
+      chosen during `Environment Setup`_ (by default
+      ``%USERPROFILE%\miniforge3``):
 
       .. code-block:: bat
 
