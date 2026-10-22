@@ -101,22 +101,23 @@ Pick one method and follow only its tab. Commands are given for macOS / Linux
             git clone https://github.com/spectrochempy/spectrochempy.git
             cd spectrochempy
 
-        **2. Create and activate the environment** from the development
-        environment file, which lists all dependencies, including the
-        development tools (tests, documentation, linters). On Windows, use
-        the Miniforge Prompt:
+        **2. Create and activate the environment** from the environment
+        file, which installs the core dependencies from conda-forge, then add
+        ``pip``. On Windows, use the Miniforge Prompt:
 
         .. code-block:: bash
 
-            mamba env create -n scpy-dev -f environments/environment_dev.yml
+            mamba env create -n scpy-dev -f environments/environment.yml
             conda activate scpy-dev
+            mamba install pip
 
-        **3. Install SpectroChemPy in editable mode**, without dependencies
-        (they come from the environment file):
+        **3. Install SpectroChemPy in editable mode**, with the development
+        tools (tests, documentation, linters), which pip adds to the
+        environment:
 
         .. code-block:: bash
 
-            python -m pip install -e . --no-deps
+            python -m pip install -e ".[dev]"
 
         **4. Check the installation:**
 
@@ -134,7 +135,9 @@ Pick one method and follow only its tab. Commands are given for macOS / Linux
         .. code-block:: bash
 
             git pull origin master --ff-only
-            mamba env update -n scpy-dev -f environments/environment_dev.yml   # only needed if dependencies changed
+            # only needed if dependencies changed:
+            mamba env update -n scpy-dev -f environments/environment.yml
+            python -m pip install -e ".[dev]"
 
         **6. Next time**, go to the ``spectrochempy`` folder and run
         ``conda activate scpy-dev``.
