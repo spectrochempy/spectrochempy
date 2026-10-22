@@ -18,7 +18,7 @@ instructions, from installing the tools to checking that SpectroChemPy works:
 Other cases:
 
 * :doc:`install_sources`: development version, contributors
-* :doc:`install_adds`: optional components and plugins
+* :doc:`install_adds`: plugins, example data and other optional packages
 
 Quick Install (experienced users)
 ---------------------------------
