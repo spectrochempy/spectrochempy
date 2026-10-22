@@ -97,7 +97,7 @@ Step-by-step Installation
 
       .. code-block:: bat
 
-         uv pip install spectrochempy --pre
+         uv pip install spectrochempy --prerelease allow
 
       **5. Create a desktop shortcut.** It opens a Command Prompt in your
       working folder with the ``scpy`` environment already active, so you do not

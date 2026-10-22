@@ -95,7 +95,7 @@ Step-by-step Installation
 
       .. code-block:: bash
 
-         uv pip install spectrochempy --pre
+         uv pip install spectrochempy --prerelease allow
 
       **4. Create a shortcut command.** It opens your working folder with the
       ``scpy`` environment already active, so you do not have to type the
