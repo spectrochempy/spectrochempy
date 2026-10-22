@@ -24,11 +24,15 @@
 - `path`: [redacted: path]
 - `missing`: [absent]
 
-#### History
+#### Processing history
 
-1. `2026-10-16T00:00:00+00:00` — `text`
-   - Parameters: {}
-   - Message: Imported sample
+##### 1. Text
+
+- Parameters: —
+- Details:
+  - Timestamp: `2026-10-16T00:00:00+00:00`
+  - Operation: `text`
+  - Message: Imported sample
 
 ## Figures
 

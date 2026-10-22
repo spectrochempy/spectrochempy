@@ -16,8 +16,10 @@ complete provenance.
 
 This example builds a polymer-like IR spectrum with several line shapes, a
 linear baseline and deterministic noise. It then corrects the baseline, smooths
-the spectrum and locates peak maxima. The final report contains selected
-metadata, processing history and an explicit reference to the exported figure.
+the spectrum and locates peak maxima. The final report presents each recorded
+transformation as a readable section with its method, parameters, input sources
+and traceability details, alongside selected metadata and an explicit reference
+to the exported figure.
 """
 
 from pathlib import Path
@@ -60,6 +62,14 @@ raw.meta.sample = "Synthetic polymer film"
 baseline_corrected = raw.basc()
 processed = scp.savgol(baseline_corrected, size=21, order=3)
 peaks, _ = processed.find_peaks(distance="120 cm^-1", prominence=0.08)
+
+# %%
+# ``basc()`` and ``savgol()`` transform the dataset and append structured
+# history entries identifying the polynomial baseline model and the
+# Savitzky-Golay window and polynomial order. ``find_peaks()`` is an analysis:
+# it returns a separate peak result and leaves the processed spectrum history
+# unchanged. Plotting is a visualization step and is not recorded as a
+# transformation.
 
 # %%
 # Export the raw spectrum and the processed result. The detected maxima are
