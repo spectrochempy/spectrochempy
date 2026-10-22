@@ -364,10 +364,14 @@ class PreferencesSet(Meta):
 
         if to_mpl:
             # make it also accessible to pyplot
+            from matplotlib import pyplot as plt
+
             stylelib = (
                 pathclean(mpl.get_configdir()) / "stylelib" / stylename
             ).with_suffix(".mplstyle")
+            stylelib.parent.mkdir(parents=True, exist_ok=True)
             stylelib.write_text(txt)
+            plt.style.reload_library()
 
         return stylename
 

@@ -101,8 +101,8 @@ prefs.font.family = "monospace"
 prefs.font.size = 30
 prefs.axes.grid = True
 
-# Create a custom style
-prefs.makestyle("mycustom")
+# Create a custom style, also registered with Matplotlib
+prefs.makestyle("mycustom", to_mpl=True)
 
 # Reset to defaults
 prefs.reset()

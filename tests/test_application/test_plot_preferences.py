@@ -68,3 +68,21 @@ def test_makestyle_skips_deprecated_matplotlib_rcparams(monkeypatch, tmp_path):
 
     assert "text.hinting_factor" not in text
     assert "text.kerning_factor" not in text
+
+
+def test_makestyle_to_mpl_registers_style(monkeypatch, tmp_path, fake_mpl_dirs):
+    from matplotlib import pyplot as plt
+
+    prefs = scp.preferences
+    monkeypatch.setattr(prefs, "stylesheets", str(tmp_path))
+    configdir, _, _ = fake_mpl_dirs
+    reloads = []
+    monkeypatch.setattr(plt.style, "reload_library", lambda: reloads.append(True))
+
+    prefs.makestyle("tmpstyle_mpl", to_mpl=True)
+
+    stylesheet = configdir / "stylelib" / "tmpstyle_mpl.mplstyle"
+    assert (
+        stylesheet.read_text() == (Path(tmp_path) / "tmpstyle_mpl.mplstyle").read_text()
+    )
+    assert reloads

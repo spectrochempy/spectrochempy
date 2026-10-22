@@ -30,4 +30,5 @@ Bug Fixes
   Matplotlib "Bad key" warnings with Matplotlib older than 3.11, e.g. on Google
   Colab. A generated ``mycustom.mplstyle`` shipped by mistake in 1.1.1 to 1.1.3
   is removed, along with its unmodified installed copies. (#1789)
-- ``preferences.makestyle(..., to_mpl=True)`` no longer raises ``TypeError``.
+- ``preferences.makestyle(..., to_mpl=True)`` no longer raises ``TypeError`` and
+  makes the new style immediately usable by name, e.g. ``plot(style=...)``.
