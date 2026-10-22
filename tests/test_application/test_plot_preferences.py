@@ -86,3 +86,34 @@ def test_makestyle_to_mpl_registers_style(monkeypatch, tmp_path, fake_mpl_dirs):
         stylesheet.read_text() == (Path(tmp_path) / "tmpstyle_mpl.mplstyle").read_text()
     )
     assert reloads
+
+
+def test_makestyle_to_mpl_style_usable_by_name(monkeypatch, tmp_path, fake_mpl_dirs):
+    import matplotlib as mpl
+    import matplotlib.style
+    from matplotlib import pyplot as plt
+
+    prefs = scp.preferences
+    monkeypatch.setattr(prefs, "stylesheets", str(tmp_path))
+    configdir, _, _ = fake_mpl_dirs
+    # Matplotlib >= 3.11 keeps the user library paths in matplotlib.style,
+    # older versions in matplotlib.style.core.
+    style_module = (
+        matplotlib.style
+        if hasattr(matplotlib.style, "USER_LIBRARY_PATHS")
+        else matplotlib.style.core
+    )
+    monkeypatch.setattr(
+        style_module, "USER_LIBRARY_PATHS", [str(configdir / "stylelib")]
+    )
+
+    try:
+        with mpl.rc_context({"lines.linewidth": 7.5}):
+            prefs.makestyle("tmpstyle_usable", to_mpl=True)
+
+        assert "tmpstyle_usable" in plt.style.available
+        with plt.style.context("tmpstyle_usable"):
+            assert mpl.rcParams["lines.linewidth"] == 7.5
+    finally:
+        monkeypatch.undo()
+        plt.style.reload_library()
