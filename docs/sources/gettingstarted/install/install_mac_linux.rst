@@ -4,7 +4,9 @@ Installation Guide for Mac OSX and Linux
 ========================================
 
 This guide walks you through installing SpectroChemPy on macOS or Linux, step
-by step. Every command can be copied and pasted in a terminal.
+by step. No previous experience with the command line is needed: every
+command can be copied and pasted in a *terminal*, the window where commands
+are typed (see the tip below to open one).
 
 .. contents:: Table of Contents
    :local:
@@ -23,7 +25,8 @@ do not apply to the others.
 * **conda / mamba**: choose it if you already use Miniforge, Anaconda or
   conda environments, or if you also want other scientific tools from
   conda-forge.
-* **pip and venv**: uses a Python that you install yourself.
+* **pip and venv**: uses a Python that you install yourself (from
+  python.org or Homebrew on macOS, from your distribution on Linux).
 
 Two folders are involved, and it is good practice to keep them separate:
 
@@ -32,9 +35,15 @@ Two folders are involved, and it is good practice to keep them separate:
   venv, this guide puts it in ``~/scpy`` (``~`` is your home folder); with
   conda / mamba, Miniforge stores it in its own folder.
 * your **working folder**, which contains your data, scripts and notebooks.
-  It can be any folder you like, for instance ``~/Documents/spectrochempy``.
-  Below, it is written ``<yourWorkingFolder>``: replace it with the full path
-  of your folder.
+  It can be any folder you like, for instance a ``spectrochempy`` folder in
+  your *Documents*. Below, it is written ``<yourWorkingFolder>``: replace it
+  with the full path of your folder (for instance
+  ``/Users/<yourName>/Documents/spectrochempy`` on macOS or
+  ``/home/<yourName>/Documents/spectrochempy`` on Linux). To get this path
+  without typing it: on macOS, drag the folder from the Finder into the
+  terminal window, or select it in the Finder, then right-click while
+  holding :kbd:`Option` and choose "Copy ... as Pathname"; on Linux, open
+  the folder in the file manager and press :kbd:`Ctrl+L` to show its path.
 
 .. warning::
 
