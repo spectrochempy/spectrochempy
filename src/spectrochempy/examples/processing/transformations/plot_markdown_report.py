@@ -24,17 +24,16 @@ to the exported figure.
 
 from pathlib import Path
 
-import numpy as np
-from matplotlib import pyplot as plt
-
 import spectrochempy as scp
 from spectrochempy.reporting import FigureReference
 
 # %%
 # Create a synthetic polymer-like IR spectrum. The line-shape helpers use FWHM
 # widths; the random generator has a fixed seed for reproducibility.
-wavenumber = scp.Coord(
-    np.linspace(4000.0, 600.0, 1401),
+wavenumber = scp.Coord.linspace(
+    4000.0,
+    600.0,
+    1401,
     title="Wavenumber",
     units="cm^-1",
 )
@@ -46,9 +45,9 @@ bands = (
     + scp.gaussian(wavenumber, ampl=0.5, pos=1240.0, width=110.0, normalized=False)
 )
 baseline = 0.08 + 0.00001 * (4000.0 - wavenumber.data)
-noise = np.random.default_rng(42).normal(0.0, 0.018, wavenumber.size)
+noise = scp.normal(0.0, 0.018, size=wavenumber.size, seed=42)
 raw = scp.NDDataset(
-    bands.data + baseline + noise,
+    bands.data + baseline + noise.data,
     coordset=[wavenumber],
     name="synthetic-polymer",
     title="Synthetic polymer spectrum",
@@ -72,41 +71,57 @@ peaks, _ = processed.find_peaks(distance="120 cm^-1", prominence=0.08)
 # transformation.
 
 # %%
-# Export the raw spectrum and the processed result. The detected maxima are
-# visualized only in the final panel; the report receives the saved filename,
-# not the live Matplotlib figure.
-figure, (raw_axis, processed_axis) = plt.subplots(1, 2, figsize=(11, 4), sharey=True)
-raw_axis.plot(wavenumber.data, raw.data, color="0.35", label="Raw spectrum")
-raw_axis.plot(wavenumber.data, baseline, color="C3", ls="--", label="Baseline")
-raw_axis.set(title="Before processing", xlabel="Wavenumber / cm⁻¹", ylabel="Absorbance")
-raw_axis.invert_xaxis()
-raw_axis.legend()
-
-processed_axis.plot(
-    wavenumber.data,
-    processed.data,
-    color="C0",
-    label="Baseline-corrected and smoothed",
-)
-processed_axis.scatter(
-    peaks.x.values.m, peaks.data, color="C3", zorder=3, label="Peaks"
-)
-for position, intensity in zip(peaks.x.values.m, peaks.data, strict=False):
-    processed_axis.annotate(
-        f"{position:.0f}",
-        (position, intensity),
-        xytext=(0, 7),
-        textcoords="offset points",
-        ha="center",
-        fontsize=8,
-    )
-processed_axis.set(title="After processing", xlabel="Wavenumber / cm⁻¹")
-processed_axis.invert_xaxis()
-processed_axis.legend()
-figure.tight_layout()
-
+# Export the raw spectrum and the processed result with SpectroChemPy's plotting
+# helpers. ``multiplot`` creates the shared layout, while ``plot_multiple``
+# overlays the fitted baseline and the detected maxima on the respective panels.
+# ``plot_multiple`` applies one geometry to all traces, so the marker and
+# line-style lists keep the spectrum as a line and render the peaks as markers
+# only. Explicit axis limits preserve the full spectral range and keep both
+# panels on the same absorbance scale after the overlays. The report receives
+# the saved filename, not the live figure.
 figure_path = Path("processed-synthetic-polymer-spectrum.png")
-figure.savefig(figure_path, dpi=150, bbox_inches="tight")
+axes = scp.multiplot(
+    [raw, processed],
+    nrow=1,
+    ncol=2,
+    sharey=True,
+    method="pen",
+    figsize=(11, 4),
+    show=False,
+)
+fitted_baseline = scp.get_baseline(raw)
+scp.plot_multiple(
+    [raw, fitted_baseline],
+    ax=axes[0],
+    clear=True,
+    labels=["Raw spectrum", "Baseline"],
+    legend="best",
+    method="pen",
+    color=["0.35", "C3"],
+    ls=["-", "--"],
+    title="Before processing",
+    xlim=(4000, 600),
+    ylim=(-0.05, 1.15),
+    ylabel="Absorbance",
+    show=False,
+)
+scp.plot_multiple(
+    [processed, peaks],
+    ax=axes[1],
+    clear=True,
+    labels=["Baseline-corrected and smoothed", "Peaks"],
+    legend="best",
+    method="pen",
+    marker=["", "o"],
+    ls=["-", "None"],
+    color=["C0", "C3"],
+    title="After processing",
+    xlim=(4000, 600),
+    ylim=(-0.05, 1.15),
+    ylabel="Absorbance",
+    output=figure_path,
+    show=False,
+)
 
 # %%
 # Render and save the report. Metadata and figure references are opt-in, and
