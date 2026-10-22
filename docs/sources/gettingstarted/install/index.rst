@@ -3,6 +3,9 @@
 Installation Guide
 ==================
 
+Step-by-step Guides
+-------------------
+
 Choose the guide for your computer. Each one gives complete, step-by-step
 instructions, from installing the tools to checking that SpectroChemPy works:
 
@@ -17,8 +20,8 @@ Other cases:
 * :doc:`install_sources`: development version, contributors
 * :doc:`install_adds`: optional components and plugins
 
-Quick Install
--------------
+Quick Install (experienced users)
+---------------------------------
 
 For users already familiar with Python environments: SpectroChemPy requires
 Python 3.11 or newer and is available on PyPI and on the ``spectrocat`` conda
