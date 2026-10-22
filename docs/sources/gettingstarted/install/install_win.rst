@@ -24,19 +24,27 @@ the first step to the last.** The steps of one tab do not apply to the others.
   conda-forge.
 * **pip and venv**: uses a Python that you install yourself from python.org.
 
-In all methods, you work in a *working folder* that holds your SpectroChemPy
-environment and, if you like, your data and notebooks. The examples use
-``%USERPROFILE%\spectrochempy`` (that is,
-``C:\Users\<yourName>\spectrochempy``); you can choose another folder, as
-long as you use it consistently in every step.
+Two folders are involved, and it is good practice to keep them separate:
+
+* the **environment**, named ``scpy``, which contains Python, SpectroChemPy
+  and its dependencies. You never need to open or modify it. With uv and
+  venv, this guide puts it in ``%USERPROFILE%\scpy`` (that is,
+  ``C:\Users\<yourName>\scpy``); with conda / mamba, Miniforge stores it in
+  its own folder.
+* your **working folder**, which contains your data, scripts and notebooks.
+  It can be any folder you like, for instance a ``spectrochempy`` folder in
+  your *Documents*. Below, it is written ``<yourWorkingFolder>``: replace it
+  with the full path of your folder, which you can copy from the address bar
+  of the File Explorer (for instance
+  ``C:\Users\<yourName>\Documents\spectrochempy``).
 
 .. warning::
 
-   Do not put the working folder in a folder synchronized with the cloud
-   (OneDrive, Google Drive, Dropbox...). On many computers, OneDrive
-   synchronizes the *Documents* and *Desktop* folders: an environment
-   contains thousands of files, which slows down the synchronization and
-   can break the environment. Your data files can stay wherever you want.
+   Do not create the environment in a folder synchronized with the cloud
+   (OneDrive, Google Drive, Dropbox...): it contains thousands of files,
+   which slows down the synchronization and can break the environment. On
+   many computers, OneDrive synchronizes the *Documents* and *Desktop*
+   folders. Your working folder, on the other hand, can be synchronized.
 
 .. tip::
 
@@ -60,21 +68,15 @@ Step-by-step Installation
 
       Then close PowerShell.
 
-      **2. Open the Command Prompt** and go to your working folder. If the folder already exists,
-      ``mkdir`` prints an error message that you can ignore:
+      **2. Open the Command Prompt.**
+
+      **3. Create and activate the environment** in ``%USERPROFILE%\scpy``
+      (uv downloads Python if needed):
 
       .. code-block:: bat
 
-         mkdir "%USERPROFILE%\spectrochempy"
-         cd /D "%USERPROFILE%\spectrochempy"
-
-      **3. Create and activate the environment.** This creates a ``scpy``
-      folder in your working folder; uv downloads Python if needed:
-
-      .. code-block:: bat
-
-         uv venv scpy --python 3.13
-         scpy\Scripts\activate
+         uv venv "%USERPROFILE%\scpy" --python 3.13
+         "%USERPROFILE%\scpy\Scripts\activate"
 
       The prompt now starts with ``(scpy)``.
 
@@ -97,8 +99,8 @@ Step-by-step Installation
 
       .. code-block:: bat
 
-         cd /D "%USERPROFILE%\spectrochempy"
-         scpy\Scripts\activate
+         cd /D "<yourWorkingFolder>"
+         "%USERPROFILE%\scpy\Scripts\activate"
 
       or create the desktop shortcut described in
       `Creating a Desktop Shortcut`_, with this content:
@@ -106,8 +108,8 @@ Step-by-step Installation
       .. code-block:: bat
 
          @REM open a Command Prompt in the scpy environment
-         @CD /D "%USERPROFILE%\spectrochempy"
-         @CMD /K "%USERPROFILE%\spectrochempy\scpy\Scripts\activate.bat"
+         @CD /D "<yourWorkingFolder>"
+         @CMD /K "%USERPROFILE%\scpy\Scripts\activate.bat"
 
    .. tab:: Using conda / mamba
 
@@ -121,14 +123,7 @@ Step-by-step Installation
 
       **2. Open the Miniforge Prompt** from the Start menu (type
       ``miniforge``). Use it instead of the plain Command Prompt, where
-      ``conda`` and ``mamba`` are not available. Then go to your working
-      folder. If the folder already exists, ``mkdir`` prints an error message
-      that you can ignore:
-
-      .. code-block:: bat
-
-         mkdir "%USERPROFILE%\spectrochempy"
-         cd /D "%USERPROFILE%\spectrochempy"
+      ``conda`` and ``mamba`` are not available.
 
       **3. Add the required channels** (needed only once):
 
@@ -145,7 +140,8 @@ Step-by-step Installation
          conda activate scpy
 
       The prompt now starts with ``(scpy)``. The environment is stored in
-      Miniforge's own folder, not in your working folder.
+      Miniforge's own folder (``envs\scpy``), separate from your working
+      folder.
 
       **5. Install SpectroChemPy:**
 
@@ -161,7 +157,7 @@ Step-by-step Installation
 
       .. code-block:: bat
 
-         cd /D "%USERPROFILE%\spectrochempy"
+         cd /D "<yourWorkingFolder>"
          conda activate scpy
 
       or create the desktop shortcut described in
@@ -171,7 +167,7 @@ Step-by-step Installation
       .. code-block:: bat
 
          @REM open a Command Prompt in the scpy environment
-         @CD /D "%USERPROFILE%\spectrochempy"
+         @CD /D "<yourWorkingFolder>"
          @CMD /K "%USERPROFILE%\miniforge3\Scripts\activate.bat" scpy
 
    .. tab:: Using pip and venv
@@ -190,26 +186,17 @@ Step-by-step Installation
       instead, Python is not on the PATH: run the installer again and check
       "Add python.exe to PATH".
 
-      **3. Go to your working folder.** If the folder already exists, ``mkdir``
-      prints an error message that you can ignore:
+      **3. Create and activate the environment** in ``%USERPROFILE%\scpy``:
 
       .. code-block:: bat
 
-         mkdir "%USERPROFILE%\spectrochempy"
-         cd /D "%USERPROFILE%\spectrochempy"
-
-      **4. Create and activate the environment.** This creates a ``scpy``
-      folder in your working folder:
-
-      .. code-block:: bat
-
-         python -m venv scpy
-         scpy\Scripts\activate
+         python -m venv "%USERPROFILE%\scpy"
+         "%USERPROFILE%\scpy\Scripts\activate"
          python -m pip install --upgrade pip
 
       The prompt now starts with ``(scpy)``.
 
-      **5. Install SpectroChemPy:**
+      **4. Install SpectroChemPy:**
 
       .. code-block:: bat
 
@@ -218,12 +205,12 @@ Step-by-step Installation
          :: or if you want to install interactive version (including jupyter)
          python -m pip install "spectrochempy[interactive]"
 
-      **6. Next time**, open the Command Prompt and run:
+      **5. Next time**, open the Command Prompt and run:
 
       .. code-block:: bat
 
-         cd /D "%USERPROFILE%\spectrochempy"
-         scpy\Scripts\activate
+         cd /D "<yourWorkingFolder>"
+         "%USERPROFILE%\scpy\Scripts\activate"
 
       or create the desktop shortcut described in
       `Creating a Desktop Shortcut`_, with this content:
@@ -231,8 +218,8 @@ Step-by-step Installation
       .. code-block:: bat
 
          @REM open a Command Prompt in the scpy environment
-         @CD /D "%USERPROFILE%\spectrochempy"
-         @CMD /K "%USERPROFILE%\spectrochempy\scpy\Scripts\activate.bat"
+         @CD /D "<yourWorkingFolder>"
+         @CMD /K "%USERPROFILE%\scpy\Scripts\activate.bat"
 
 Verifying Installation
 ----------------------
@@ -259,7 +246,8 @@ environment already active, so you do not have to type the activation
 commands each time.
 
 1. Open Notepad and paste the content given at the end of your method's tab
-   above (it differs between methods).
+   above (it differs between methods). Replace ``<yourWorkingFolder>`` with
+   the path of your working folder, keeping the quotes.
 2. Choose *File > Save as*, select "All files (\*.*)" as file type, and save
    it as ``activate-scpy.bat`` in your working folder.
 3. In the File Explorer, right-click ``activate-scpy.bat`` and choose
