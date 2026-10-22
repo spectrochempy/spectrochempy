@@ -177,10 +177,6 @@ Step-by-step Installation
 
          mamba install -c spectrocat spectrochempy
 
-      Development versions are not published to a Conda ``dev`` channel.
-      To use unreleased code, follow the source installation instructions in
-      :doc:`install_sources`.
-
       **5. Create a shortcut command.** It opens your working folder with the
       ``scpy`` environment already active, so you do not have to type the
       activation commands each time. Run the following line once, after replacing

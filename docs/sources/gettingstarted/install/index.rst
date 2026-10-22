@@ -39,6 +39,17 @@ To pin an exact version, use ``"spectrochempy==1.0.0"`` (pip, uv) or
 available: ``uv pip install spectrochempy --prerelease allow`` (or
 ``python -m pip install --pre spectrochempy``).
 
+To install the development version (the current ``master`` branch, documented
+as *latest* on this site), `git <https://git-scm.com>`_ must be installed:
+
+.. code-block:: bash
+
+   uv pip install "spectrochempy @ git+https://github.com/spectrochempy/spectrochempy.git"
+   # or: python -m pip install "spectrochempy @ git+https://github.com/spectrochempy/spectrochempy.git"
+
+Development versions are not published on the conda channels. To modify the
+code or contribute, see :doc:`install_sources`.
+
 .. toctree::
     :maxdepth: 3
     :hidden:
