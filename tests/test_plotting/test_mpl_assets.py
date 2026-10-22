@@ -11,6 +11,7 @@ Note: Font installation has been removed. SpectroChemPy now relies on
 Matplotlib's built-in fonts.
 """
 
+import hashlib
 from pathlib import Path
 
 import pytest
@@ -45,3 +46,35 @@ def test_stylesheets_idempotent(caplog):
 
     ensure_mpl_assets_installed()
     ensure_mpl_assets_installed()
+
+
+def test_obsolete_stylesheet_removed_only_if_unmodified(fake_mpl_dirs, monkeypatch):
+    from spectrochempy.plotting import _mpl_assets
+
+    configdir, datadir, _ = fake_mpl_dirs
+    shipped = b"axes3d.depthshade : True\n"
+    monkeypatch.setattr(
+        _mpl_assets,
+        "_OBSOLETE_STYLESHEETS",
+        {"mycustom.mplstyle": hashlib.sha256(shipped).hexdigest()},
+    )
+
+    user_copy = configdir / "stylelib" / "mycustom.mplstyle"
+    system_copy = datadir / "stylelib" / "mycustom.mplstyle"
+    for path in (user_copy, system_copy):
+        path.parent.mkdir(parents=True)
+    user_copy.write_bytes(shipped)
+    system_copy.write_bytes(b"lines.linewidth : 2\n")
+
+    _mpl_assets.ensure_mpl_assets_installed()
+
+    assert not user_copy.exists()
+    assert system_copy.read_bytes() == b"lines.linewidth : 2\n"
+
+
+def test_no_obsolete_stylesheet_shipped():
+    from spectrochempy.plotting import _mpl_assets
+
+    stylesheets_src = Path(_mpl_assets.__file__).parent / "stylesheets"
+    for name in _mpl_assets._OBSOLETE_STYLESHEETS:
+        assert not (stylesheets_src / name).exists()

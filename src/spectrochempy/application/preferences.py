@@ -367,7 +367,7 @@ class PreferencesSet(Meta):
             stylelib = (
                 pathclean(mpl.get_configdir()) / "stylelib" / stylename
             ).with_suffix(".mplstyle")
-            stylelib.write_text()
+            stylelib.write_text(txt)
 
         return stylename
 

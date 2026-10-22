@@ -41,8 +41,45 @@ def ensure_mpl_assets_installed():
         )
 
 
+# Generated stylesheets shipped by mistake in earlier releases, by SHA-256.
+# Installed copies are removed only when they are unmodified.
+_OBSOLETE_STYLESHEETS = {
+    # spectrochempy 1.1.1 to 1.1.3
+    "mycustom.mplstyle": (
+        "9a6c66e8ee4fda8ac86a9e2e6c4fc385c86c39c1cad9be3a85d75e455b67971f"
+    ),
+}
+
+
+def _remove_obsolete_stylesheets(*stylelibs):
+    import hashlib
+
+    removed = False
+    for stylelib in stylelibs:
+        for name, digest in _OBSOLETE_STYLESHEETS.items():
+            path = stylelib / name
+            try:
+                if (
+                    path.is_file()
+                    and hashlib.sha256(path.read_bytes()).hexdigest() == digest
+                ):
+                    path.unlink()
+                    debug_("Removed obsolete stylesheet %s", path)
+                    removed = True
+            except Exception as exc:
+                warning_(f"Failed to remove obsolete stylesheet {path}: {exc}")
+    return removed
+
+
 def _install_stylesheets():
     import matplotlib as mpl
+
+    # Done before importing pyplot, which parses the user stylelib.
+    removed = _remove_obsolete_stylesheets(
+        Path(mpl.get_configdir()) / "stylelib",
+        Path(mpl.get_data_path()) / "stylelib",
+    )
+
     import matplotlib.pyplot as plt
 
     stylesheets_src = Path(__file__).parent / "stylesheets"
@@ -69,7 +106,7 @@ def _install_stylesheets():
     except Exception as exc:
         warning_(f"Failed to create system stylelib directory: {exc}")
 
-    installed = False
+    installed = removed
 
     for src in style_files:
         # Try user stylelib first
