@@ -139,15 +139,35 @@ Additional Tips
 Creating a Permanent Environment Shortcut
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Create a batch file (`.bat`) with:
+Create a batch file (`.bat`) that opens a command prompt in your working
+folder with the ``scpy`` environment activated. The activation line depends on
+how the environment was created.
 
-.. code-block:: bat
+.. tabs::
 
-    @REM launch cmd in scpy environment
-    @CALL CD C:\<yourWorkingFolder>
-    @CALL CMD /K C:\<yourWorkingFolder>\Scripts\activate.bat scpy
+   .. tab:: Using uv or venv
 
-Save as `activate-scpy.bat` and create a shortcut named "Miniforge prompt (scpy)".
+      The environment is the ``scpy`` folder created in your working folder:
+
+      .. code-block:: bat
+
+         @REM launch cmd in scpy environment
+         @CD /D C:\<yourWorkingFolder>
+         @CMD /K C:\<yourWorkingFolder>\scpy\Scripts\activate.bat
+
+   .. tab:: Using conda / mamba
+
+      ``activate.bat`` is provided by Miniforge (by default, Miniforge is
+      installed in ``%USERPROFILE%\miniforge3``):
+
+      .. code-block:: bat
+
+         @REM launch cmd in scpy environment
+         @CD /D C:\<yourWorkingFolder>
+         @CMD /K C:\<yourMiniforgeFolder>\Scripts\activate.bat scpy
+
+Save it as `activate-scpy.bat` and create a shortcut to it named, for
+instance, "SpectroChemPy prompt (scpy)".
 
 Next Steps
 ----------
