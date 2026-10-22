@@ -161,6 +161,9 @@ Step-by-step Installation
          conda config --add channels conda-forge
          conda config --add channels spectrocat
 
+      With Miniforge, the first command may print ``Warning: 'conda-forge'
+      already in 'channels' list, moving to the top``: this is harmless.
+
       **4. Create and activate the environment:**
 
       .. code-block:: bat
@@ -168,7 +171,9 @@ Step-by-step Installation
          mamba create --name scpy python=3.13
          conda activate scpy
 
-      The prompt now starts with ``(scpy)``. The environment is stored in
+      At the end, ``mamba create`` suggests ``mamba activate scpy``; both
+      commands work, this guide uses ``conda activate``. The prompt now starts
+      with ``(scpy)``. The environment is stored in
       Miniforge's own folder (``envs\scpy``), separate from your working
       folder.
 

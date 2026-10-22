@@ -12,6 +12,8 @@ Prerequisites
 
 `SpectroChemPy` requires Python 3.11 or higher (tested up to 3.14). Python is a widely-adopted
 scientific programming language, particularly suited for data analysis and scientific computing.
+You do not need to install Python beforehand if you use ``uv`` or ``conda`` / ``mamba``: they
+install it for you.
 
 Choosing an Installation Method
 -------------------------------
@@ -47,184 +49,35 @@ The best installation method depends on your workflow and experience level:
 
    **pip** works everywhere and is documented as a universal fallback.
 
-Installing Python
------------------
-
-``uv`` (Recommended)
-~~~~~~~~~~~~~~~~~~~~~
-
-`uv <https://docs.astral.sh/uv/>`_ manages Python installations automatically.
-Install uv, then let it download and manage the required Python version:
-
-.. code-block:: bash
-
-   # Install uv (macOS/Linux)
-   curl -LsSf https://astral.sh/uv/install.sh | sh
-
-   # Install uv (Windows)
-   # powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
-
-   # Install Python
-   uv python install 3.13
-
-See `uv's installation guide <https://docs.astral.sh/uv/getting-started/installation/>`_
-for alternatives (``pipx``, ``brew``, ``winget``, etc.).
-
-``Miniforge`` (conda / mamba)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Miniforge provides Python along with the ``conda`` and ``mamba`` package managers:
-
-* Download `Miniforge <https://github.com/conda-forge/miniforge>`_
-* Run the installer for your platform
-* Verify the installation:
-
-.. code-block:: bash
-
-   conda --version  # or mamba --version
-
-For users who prefer a full distribution:
-
-* `Anaconda <https://www.anaconda.com/distribution/>`_ - Full scientific distribution (~3GB)
-* `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`_ - Minimal distribution (~400MB)
-
-System package manager
-~~~~~~~~~~~~~~~~~~~~~~
-
-If you prefer a standalone Python installation, use your platform's method:
-
-.. tabs::
-
-   .. tab:: macOS
-
-      **Using Homebrew:**
-
-      .. code-block:: bash
-
-         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-         brew install python
-         python3 --version
-
-      **Using Official Installer:**
-
-      * Download from `Python.org (macOS) <https://www.python.org/downloads/macos/>`_
-      * Run the installer
-      * Verify with ``python3 --version``
-
-   .. tab:: Windows
-
-      **Using Official Installer:**
-
-      * Download from `Python.org (Windows) <https://www.python.org/downloads/windows/>`_
-      * Run installer (check "Add Python to PATH")
-      * Verify with ``python --version``
-
-      **Using Microsoft Store:**
-
-      * Search for "Python" in Microsoft Store
-      * Install the latest version
-      * Verify in Command Prompt
-
-   .. tab:: Linux
-
-      Most distributions include Python. To install a specific version:
-
-      **Ubuntu/Debian:**
-
-      .. code-block:: bash
-
-         sudo apt update
-         sudo apt install python3.13
-
-      **Fedora:**
-
-      .. code-block:: bash
-
-         sudo dnf install python3.13
-
-Installing SpectroChemPy
-------------------------
-
-Create Environment
-~~~~~~~~~~~~~~~~~~
-
-First, create and activate a dedicated environment:
-
-.. tabs::
-
-   .. tab:: Using uv (Recommended)
-
-      .. code-block:: bash
-
-         uv venv scpy --python 3.13
-         source scpy/bin/activate  # On Windows: scpy\Scripts\activate
-
-   .. tab:: Using conda / mamba
-
-      .. code-block:: bash
-
-         mamba create -n scpy python=3.13
-         mamba activate scpy
-
-   .. tab:: Using pip / venv
-
-      .. code-block:: bash
-
-         python -m venv scpy
-         source scpy/bin/activate  # On Windows: scpy\Scripts\activate
-
-Install Package
-~~~~~~~~~~~~~~~
-
-.. tabs::
-
-   .. tab:: Using uv (Recommended)
-
-      .. code-block:: bash
-
-         uv pip install spectrochempy
-
-   .. tab:: Using mamba
-
-      .. code-block:: bash
-
-         mamba install -c spectrocat spectrochempy
-
-   .. tab:: Using conda
-
-      .. code-block:: bash
-
-         conda install -c spectrocat spectrochempy
-
-   .. tab:: Using pip
-
-      .. code-block:: bash
-
-         python -m pip install spectrochempy
-
-Verifying the stable 1.0 installation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The ordinary installation commands above now select the stable 1.0 release.
-For a reproducible environment, install and verify the exact version
-explicitly:
-
-.. code-block:: bash
-
-   python -m pip install "spectrochempy==1.0.0"
-   python -c "import spectrochempy as scp; print(scp.__version__)"
-
-
-Additional Resources
---------------------
-
-For more detailed instructions and alternative installation methods:
-
-* :doc:`install_win` - Windows installation
-* :doc:`install_mac_linux` - macOS/Linux installation
-* :doc:`install_colab` - Using Google Colab
+Installation Guides
+-------------------
+
+Each guide below gives complete, step-by-step instructions, from installing the
+tools to checking that SpectroChemPy works:
+
+* :doc:`install_win` - Windows
+* :doc:`install_mac_linux` - macOS and Linux
+* :doc:`install_colab` - Using Google Colab, with nothing to install on your computer
+* :doc:`install_sources` - Installing from sources (contributors)
 * :doc:`install_adds` - Additional components
-* :doc:`install_sources` - Installing from sources
+
+Installing a Specific Version
+-----------------------------
+
+The installation commands of these guides select the latest stable release.
+For a reproducible environment, install an exact version, for instance:
+
+.. code-block:: bash
+
+   uv pip install "spectrochempy==1.0.0"
+   # or: python -m pip install "spectrochempy==1.0.0"
+   # or: mamba install -c spectrocat "spectrochempy=1.0.0"
+
+and check it with:
+
+.. code-block:: bash
+
+   python -c "import spectrochempy as scp; print(scp.__version__)"
 
 .. toctree::
     :maxdepth: 3
