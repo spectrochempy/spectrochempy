@@ -95,21 +95,48 @@ Step-by-step Installation
 
          uv pip install spectrochempy --pre
 
-      **5. Next time**, open the Command Prompt and run:
+      **5. Create a desktop shortcut.** It opens a Command Prompt in your
+      working folder with the ``scpy`` environment already active, so you do not
+      have to type the activation commands each time.
+
+      * Open Notepad and paste the following lines. Replace
+        ``<yourWorkingFolder>`` with the path of your working folder, keeping the
+        quotes:
+
+        .. code-block:: bat
+
+            @REM open a Command Prompt in the scpy environment
+            @CD /D "<yourWorkingFolder>"
+            @CMD /K "%USERPROFILE%\scpy\Scripts\activate.bat"
+
+      * Choose *File > Save as*, select "All files (\*.*)" as file type, and
+        save it as ``activate-scpy.bat`` in your working folder.
+      * In the File Explorer, right-click ``activate-scpy.bat`` and choose
+        *Send to > Desktop (create shortcut)* (on Windows 11, first choose
+        *Show more options*).
+      * Rename the shortcut on the desktop, for instance "SpectroChemPy prompt
+        (scpy)".
+
+      **6. Check the installation.** Double-click the shortcut: the prompt
+      opens in your working folder and starts with ``(scpy)``. Start IPython and
+      import SpectroChemPy:
+
+      .. code-block:: bat
+
+         ipython
+
+      .. code-block:: ipython
+
+         In [1]: import spectrochempy as scp
+
+      Type ``exit`` to leave IPython. From now on, use the shortcut each time
+      you work with SpectroChemPy. Without the shortcut, open the
+      Command Prompt and run:
 
       .. code-block:: bat
 
          cd /D "<yourWorkingFolder>"
          "%USERPROFILE%\scpy\Scripts\activate"
-
-      or create the desktop shortcut described in
-      `Creating a Desktop Shortcut`_, with this content:
-
-      .. code-block:: bat
-
-         @REM open a Command Prompt in the scpy environment
-         @CD /D "<yourWorkingFolder>"
-         @CMD /K "%USERPROFILE%\scpy\Scripts\activate.bat"
 
    .. tab:: Using conda / mamba
 
@@ -118,7 +145,7 @@ Step-by-step Installation
       `Miniforge <https://github.com/conda-forge/miniforge>`_ and run it,
       keeping the default options. Note the installation folder it proposes
       (by default ``%USERPROFILE%\miniforge3``): you need it for the desktop
-      shortcut. Skip this step if Miniforge (or Anaconda) is already
+      shortcut (step 6). Skip this step if Miniforge (or Anaconda) is already
       installed.
 
       **2. Open the Miniforge Prompt** from the Start menu (type
@@ -153,22 +180,49 @@ Step-by-step Installation
       To use unreleased code, follow the source installation instructions in
       :doc:`install_sources`.
 
-      **6. Next time**, open the Miniforge Prompt and run:
+      **6. Create a desktop shortcut.** It opens a Command Prompt in your
+      working folder with the ``scpy`` environment already active, so you do not
+      have to type the activation commands each time.
+
+      * Open Notepad and paste the following lines. Replace
+        ``<yourWorkingFolder>`` with the path of your working folder, keeping the
+        quotes. If Miniforge is not installed in ``%USERPROFILE%\miniforge3``,
+        also replace that path with its installation folder:
+
+        .. code-block:: bat
+
+            @REM open a Command Prompt in the scpy environment
+            @CD /D "<yourWorkingFolder>"
+            @CMD /K "%USERPROFILE%\miniforge3\Scripts\activate.bat" scpy
+
+      * Choose *File > Save as*, select "All files (\*.*)" as file type, and
+        save it as ``activate-scpy.bat`` in your working folder.
+      * In the File Explorer, right-click ``activate-scpy.bat`` and choose
+        *Send to > Desktop (create shortcut)* (on Windows 11, first choose
+        *Show more options*).
+      * Rename the shortcut on the desktop, for instance "SpectroChemPy prompt
+        (scpy)".
+
+      **7. Check the installation.** Double-click the shortcut: the prompt
+      opens in your working folder and starts with ``(scpy)``. Start IPython and
+      import SpectroChemPy:
+
+      .. code-block:: bat
+
+         ipython
+
+      .. code-block:: ipython
+
+         In [1]: import spectrochempy as scp
+
+      Type ``exit`` to leave IPython. From now on, use the shortcut each time
+      you work with SpectroChemPy. Without the shortcut, open the
+      Miniforge Prompt and run:
 
       .. code-block:: bat
 
          cd /D "<yourWorkingFolder>"
          conda activate scpy
-
-      or create the desktop shortcut described in
-      `Creating a Desktop Shortcut`_, with this content (replace
-      ``%USERPROFILE%\miniforge3`` if Miniforge is installed elsewhere):
-
-      .. code-block:: bat
-
-         @REM open a Command Prompt in the scpy environment
-         @CD /D "<yourWorkingFolder>"
-         @CMD /K "%USERPROFILE%\miniforge3\Scripts\activate.bat" scpy
 
    .. tab:: Using pip and venv
 
@@ -205,58 +259,48 @@ Step-by-step Installation
          :: or if you want to install interactive version (including jupyter)
          python -m pip install "spectrochempy[interactive]"
 
-      **5. Next time**, open the Command Prompt and run:
+      **5. Create a desktop shortcut.** It opens a Command Prompt in your
+      working folder with the ``scpy`` environment already active, so you do not
+      have to type the activation commands each time.
+
+      * Open Notepad and paste the following lines. Replace
+        ``<yourWorkingFolder>`` with the path of your working folder, keeping the
+        quotes:
+
+        .. code-block:: bat
+
+            @REM open a Command Prompt in the scpy environment
+            @CD /D "<yourWorkingFolder>"
+            @CMD /K "%USERPROFILE%\scpy\Scripts\activate.bat"
+
+      * Choose *File > Save as*, select "All files (\*.*)" as file type, and
+        save it as ``activate-scpy.bat`` in your working folder.
+      * In the File Explorer, right-click ``activate-scpy.bat`` and choose
+        *Send to > Desktop (create shortcut)* (on Windows 11, first choose
+        *Show more options*).
+      * Rename the shortcut on the desktop, for instance "SpectroChemPy prompt
+        (scpy)".
+
+      **6. Check the installation.** Double-click the shortcut: the prompt
+      opens in your working folder and starts with ``(scpy)``. Start IPython and
+      import SpectroChemPy:
+
+      .. code-block:: bat
+
+         ipython
+
+      .. code-block:: ipython
+
+         In [1]: import spectrochempy as scp
+
+      Type ``exit`` to leave IPython. From now on, use the shortcut each time
+      you work with SpectroChemPy. Without the shortcut, open the
+      Command Prompt and run:
 
       .. code-block:: bat
 
          cd /D "<yourWorkingFolder>"
          "%USERPROFILE%\scpy\Scripts\activate"
-
-      or create the desktop shortcut described in
-      `Creating a Desktop Shortcut`_, with this content:
-
-      .. code-block:: bat
-
-         @REM open a Command Prompt in the scpy environment
-         @CD /D "<yourWorkingFolder>"
-         @CMD /K "%USERPROFILE%\scpy\Scripts\activate.bat"
-
-Verifying Installation
-----------------------
-
-With the ``scpy`` environment active (the prompt starts with ``(scpy)``):
-
-1. Start IPython:
-
-   .. code-block:: bat
-
-      ipython
-
-2. Import SpectroChemPy:
-
-   .. code-block:: ipython
-
-      In [1]: import spectrochempy as scp
-
-Creating a Desktop Shortcut
----------------------------
-
-A shortcut opens a Command Prompt in your working folder with the ``scpy``
-environment already active, so you do not have to type the activation
-commands each time.
-
-1. Open Notepad and paste the content given at the end of your method's tab
-   above (it differs between methods). Replace ``<yourWorkingFolder>`` with
-   the path of your working folder, keeping the quotes.
-2. Choose *File > Save as*, select "All files (\*.*)" as file type, and save
-   it as ``activate-scpy.bat`` in your working folder.
-3. In the File Explorer, right-click ``activate-scpy.bat`` and choose
-   *Send to > Desktop (create shortcut)* (on Windows 11, first choose
-   *Show more options*).
-4. Rename the shortcut on the desktop, for instance "SpectroChemPy prompt
-   (scpy)".
-
-Double-clicking the shortcut opens the prompt, which starts with ``(scpy)``.
 
 Next Steps
 ----------
