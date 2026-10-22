@@ -93,7 +93,7 @@ Step-by-step Installation
          :: or with interactive extras (Jupyter, etc.)
          uv pip install "spectrochempy[interactive]"
 
-      Latest prerelease:
+      If you want to install the latest pre-release:
 
       .. code-block:: bat
 
