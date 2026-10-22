@@ -26,9 +26,17 @@ the first step to the last.** The steps of one tab do not apply to the others.
 
 In all methods, you work in a *working folder* that holds your SpectroChemPy
 environment and, if you like, your data and notebooks. The examples use
-``%USERPROFILE%\Documents\spectrochempy`` (that is,
-``C:\Users\<yourName>\Documents\spectrochempy``); you can choose another
-folder, as long as you use it consistently in every step.
+``%USERPROFILE%\spectrochempy`` (that is,
+``C:\Users\<yourName>\spectrochempy``); you can choose another folder, as
+long as you use it consistently in every step.
+
+.. warning::
+
+   Do not put the working folder in a folder synchronized with the cloud
+   (OneDrive, Google Drive, Dropbox...). On many computers, OneDrive
+   synchronizes the *Documents* and *Desktop* folders: an environment
+   contains thousands of files, which slows down the synchronization and
+   can break the environment. Your data files can stay wherever you want.
 
 .. tip::
 
@@ -57,8 +65,8 @@ Step-by-step Installation
 
       .. code-block:: bat
 
-         mkdir "%USERPROFILE%\Documents\spectrochempy"
-         cd /D "%USERPROFILE%\Documents\spectrochempy"
+         mkdir "%USERPROFILE%\spectrochempy"
+         cd /D "%USERPROFILE%\spectrochempy"
 
       **3. Create and activate the environment.** This creates a ``scpy``
       folder in your working folder; uv downloads Python if needed:
@@ -89,7 +97,7 @@ Step-by-step Installation
 
       .. code-block:: bat
 
-         cd /D "%USERPROFILE%\Documents\spectrochempy"
+         cd /D "%USERPROFILE%\spectrochempy"
          scpy\Scripts\activate
 
       or create the desktop shortcut described in
@@ -98,8 +106,8 @@ Step-by-step Installation
       .. code-block:: bat
 
          @REM open a Command Prompt in the scpy environment
-         @CD /D "%USERPROFILE%\Documents\spectrochempy"
-         @CMD /K "%USERPROFILE%\Documents\spectrochempy\scpy\Scripts\activate.bat"
+         @CD /D "%USERPROFILE%\spectrochempy"
+         @CMD /K "%USERPROFILE%\spectrochempy\scpy\Scripts\activate.bat"
 
    .. tab:: Using conda / mamba
 
@@ -119,8 +127,8 @@ Step-by-step Installation
 
       .. code-block:: bat
 
-         mkdir "%USERPROFILE%\Documents\spectrochempy"
-         cd /D "%USERPROFILE%\Documents\spectrochempy"
+         mkdir "%USERPROFILE%\spectrochempy"
+         cd /D "%USERPROFILE%\spectrochempy"
 
       **3. Add the required channels** (needed only once):
 
@@ -153,7 +161,7 @@ Step-by-step Installation
 
       .. code-block:: bat
 
-         cd /D "%USERPROFILE%\Documents\spectrochempy"
+         cd /D "%USERPROFILE%\spectrochempy"
          conda activate scpy
 
       or create the desktop shortcut described in
@@ -163,7 +171,7 @@ Step-by-step Installation
       .. code-block:: bat
 
          @REM open a Command Prompt in the scpy environment
-         @CD /D "%USERPROFILE%\Documents\spectrochempy"
+         @CD /D "%USERPROFILE%\spectrochempy"
          @CMD /K "%USERPROFILE%\miniforge3\Scripts\activate.bat" scpy
 
    .. tab:: Using pip and venv
@@ -187,8 +195,8 @@ Step-by-step Installation
 
       .. code-block:: bat
 
-         mkdir "%USERPROFILE%\Documents\spectrochempy"
-         cd /D "%USERPROFILE%\Documents\spectrochempy"
+         mkdir "%USERPROFILE%\spectrochempy"
+         cd /D "%USERPROFILE%\spectrochempy"
 
       **4. Create and activate the environment.** This creates a ``scpy``
       folder in your working folder:
@@ -214,7 +222,7 @@ Step-by-step Installation
 
       .. code-block:: bat
 
-         cd /D "%USERPROFILE%\Documents\spectrochempy"
+         cd /D "%USERPROFILE%\spectrochempy"
          scpy\Scripts\activate
 
       or create the desktop shortcut described in
@@ -223,8 +231,8 @@ Step-by-step Installation
       .. code-block:: bat
 
          @REM open a Command Prompt in the scpy environment
-         @CD /D "%USERPROFILE%\Documents\spectrochempy"
-         @CMD /K "%USERPROFILE%\Documents\spectrochempy\scpy\Scripts\activate.bat"
+         @CD /D "%USERPROFILE%\spectrochempy"
+         @CMD /K "%USERPROFILE%\spectrochempy\scpy\Scripts\activate.bat"
 
 Verifying Installation
 ----------------------
