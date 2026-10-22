@@ -40,9 +40,9 @@ Two folders are involved, and it is good practice to keep them separate:
   with the full path of your folder (for instance
   ``/Users/<yourName>/Documents/spectrochempy`` on macOS or
   ``/home/<yourName>/Documents/spectrochempy`` on Linux). To get this path
-  without typing it: on macOS, drag the folder from the Finder into the
-  terminal window, or select it in the Finder, then right-click while
-  holding :kbd:`Option` and choose "Copy ... as Pathname"; on Linux, open
+  without typing it: on macOS, select the folder in the Finder, then
+  right-click while holding :kbd:`Option` and choose "Copy ... as
+  Pathname"; on Linux, open
   the folder in the file manager and press :kbd:`Ctrl+L` to show its path.
 
 .. warning::
