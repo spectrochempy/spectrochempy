@@ -68,7 +68,9 @@ Step-by-step Installation
 
          powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 
-      Then close PowerShell.
+      Then close PowerShell. Other ways to install uv (``winget``,
+      ``pipx``...) are listed in
+      `uv's installation guide <https://docs.astral.sh/uv/getting-started/installation/>`_.
 
       **2. Open the Command Prompt.**
 

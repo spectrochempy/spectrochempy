@@ -65,7 +65,9 @@ Step-by-step Installation
 
          curl -LsSf https://astral.sh/uv/install.sh | sh
 
-      Then close the terminal and open a new one.
+      Then close the terminal and open a new one. Other ways to install uv
+      (Homebrew, ``pipx``...) are listed in
+      `uv's installation guide <https://docs.astral.sh/uv/getting-started/installation/>`_.
 
       **2. Create and activate the environment** in ``~/scpy`` (uv downloads
       Python if needed):
