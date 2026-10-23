@@ -1193,8 +1193,13 @@ def _read_topspin(*args, **kwargs):
         from spectrochempy_hypercomplex import (  # noqa: PLC0415
             is_available as _hypercomplex_available,
         )
-    except ModuleNotFoundError:
-        _hypercomplex_available = False
+    except ModuleNotFoundError as exc:
+        raise ImportError(
+            "Reading hypercomplex TopSpin data requires the "
+            "spectrochempy-hypercomplex plugin and its numpy-quaternion "
+            "dependency. Install spectrochempy-hypercomplex with its "
+            "dependencies before reading this dataset."
+        ) from exc
 
     _needs_ser_quaternion = False
 
