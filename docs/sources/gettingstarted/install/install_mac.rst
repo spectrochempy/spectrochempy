@@ -117,8 +117,10 @@ Step-by-step Installation
 
          In [1]: import spectrochempy as scp
 
-      Type ``exit`` to leave IPython. From now on, open a terminal and type
-      ``scpy`` each time you work with SpectroChemPy.
+      Type ``exit`` to leave IPython. To work with notebooks, type
+      ``jupyter lab``: JupyterLab opens in your browser, in your working folder.
+      From now on, open a terminal and type ``scpy`` each time you work with
+      SpectroChemPy.
 
       .. admonition:: If something goes wrong
 
@@ -204,8 +206,10 @@ Step-by-step Installation
 
          In [1]: import spectrochempy as scp
 
-      Type ``exit`` to leave IPython. From now on, open a terminal and type
-      ``scpy`` each time you work with SpectroChemPy.
+      Type ``exit`` to leave IPython. To work with notebooks, type
+      ``jupyter lab``: JupyterLab opens in your browser, in your working folder.
+      From now on, open a terminal and type ``scpy`` each time you work with
+      SpectroChemPy.
 
       .. admonition:: If something goes wrong
 
@@ -283,8 +287,10 @@ Step-by-step Installation
 
          In [1]: import spectrochempy as scp
 
-      Type ``exit`` to leave IPython. From now on, open a terminal and type
-      ``scpy`` each time you work with SpectroChemPy.
+      Type ``exit`` to leave IPython. To work with notebooks, type
+      ``jupyter lab``: JupyterLab opens in your browser, in your working folder.
+      From now on, open a terminal and type ``scpy`` each time you work with
+      SpectroChemPy.
 
       .. admonition:: If something goes wrong
 

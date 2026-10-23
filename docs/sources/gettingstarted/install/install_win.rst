@@ -127,9 +127,10 @@ Step-by-step Installation
 
          In [1]: import spectrochempy as scp
 
-      Type ``exit`` to leave IPython. From now on, use the shortcut each time
-      you work with SpectroChemPy. Without the shortcut, open the
-      Command Prompt and run:
+      Type ``exit`` to leave IPython. To work with notebooks, type
+      ``jupyter lab``: JupyterLab opens in your browser, in your working folder.
+      From now on, use the shortcut each time you work with SpectroChemPy.
+      Without the shortcut, open the Command Prompt and run:
 
       .. code-block:: bat
 
@@ -232,9 +233,10 @@ Step-by-step Installation
 
          In [1]: import spectrochempy as scp
 
-      Type ``exit`` to leave IPython. From now on, use the shortcut each time
-      you work with SpectroChemPy. Without the shortcut, open the
-      Miniforge Prompt and run:
+      Type ``exit`` to leave IPython. To work with notebooks, type
+      ``jupyter lab``: JupyterLab opens in your browser, in your working folder.
+      From now on, use the shortcut each time you work with SpectroChemPy.
+      Without the shortcut, open the Miniforge Prompt and run:
 
       .. code-block:: bat
 
@@ -323,9 +325,10 @@ Step-by-step Installation
 
          In [1]: import spectrochempy as scp
 
-      Type ``exit`` to leave IPython. From now on, use the shortcut each time
-      you work with SpectroChemPy. Without the shortcut, open the
-      Command Prompt and run:
+      Type ``exit`` to leave IPython. To work with notebooks, type
+      ``jupyter lab``: JupyterLab opens in your browser, in your working folder.
+      From now on, use the shortcut each time you work with SpectroChemPy.
+      Without the shortcut, open the Command Prompt and run:
 
       .. code-block:: bat
 

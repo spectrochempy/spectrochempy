@@ -35,7 +35,6 @@
 # # Quickstart Tutorial 🚀
 #
 # **Contents**
-# - [Installing SpectroChemPy](#installing-spectrochempy)
 # - [Getting Started](#getting-started)
 # - [Working with Spectroscopic Data](#working-with-spectroscopic-data)
 # - [Data Processing Techniques](#data-processing-techniques)
@@ -48,35 +47,12 @@
 # > * Use advanced analysis methods
 
 # %% [markdown]
-# ## Installing SpectroChemPy
+# ## Before you start
 #
-# > **Prerequisites** ✅
-# > * Python 3.11 or later
-# > * Basic knowledge of Python
-# > * Jupyter notebook environment
-#
-# You can install SpectroChemPy using uv, pip, or mamba:
-#
-# **Using uv (recommended):**
-# ```bash
-# uv pip install spectrochempy
-# ```
-#
-# **Using pip:**
-# ```bash
-# pip install spectrochempy
-# ```
-#
-# **Using mamba:**
-# ```bash
-# mamba install -c spectrocat spectrochempy
-# ```
-#
-# See the [Installation Guide](install/index.rst) for detailed instructions.
-
-# %% [markdown]
-# In the following, we assume that we are running `spectrochempy` in a Jupyter notebook.
-# See [here](../userguide/introduction/interface.ipynb) for details on how to start a Jupyter notebook.
+# This tutorial assumes that SpectroChemPy is already installed and that you
+# run it in a Jupyter notebook. If not, follow the
+# [Installation Guide](install/index.rst) for your system, then see
+# [how to start a Jupyter notebook](../userguide/introduction/interface.ipynb).
 
 # %% [markdown]
 # ## Getting Started
