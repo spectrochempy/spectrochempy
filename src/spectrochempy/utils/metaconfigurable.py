@@ -12,6 +12,7 @@
 """Implements the base class for all configurables."""
 
 import threading
+from contextlib import contextmanager
 from pathlib import Path
 
 import numpy as np
@@ -42,6 +43,7 @@ class MetaConfigurable(Configurable):
     name = tr.Unicode(allow_none=True, help="Object name")
     _warning_lock = threading.Lock()
     _warned_persistence_failures: set[tuple[str, str, str, str]] = set()
+    _pending_persistence = None
 
     def __init__(self, **kwargs):
         # keep only the current config section
@@ -170,17 +172,32 @@ class MetaConfigurable(Configurable):
                 value = [str(v) if isinstance(v, Quantity) else v for v in value]
                 value = [v.tolist() if isinstance(v, np.ndarray) else v for v in value]
 
-            try:
-                self.cfg.update(
-                    self.name,
-                    {
-                        self.__class__.__name__: {
-                            change.name: value,
-                        },
-                    },
-                )
-            except Exception as e:
-                self._warn_config_persistence_failure(change.name, e)
+            if self._pending_persistence is not None:
+                self._pending_persistence[change.name] = value
+                return
+
+            self._persist({change.name: value})
+
+    @contextmanager
+    def batched_persistence(self):
+        """Save the configuration changes made inside the block in a single write."""
+        if self._pending_persistence is not None:
+            yield
+            return
+        self._pending_persistence = {}
+        try:
+            yield
+        finally:
+            values = self._pending_persistence
+            self._pending_persistence = None
+            if values:
+                self._persist(values)
+
+    def _persist(self, values):
+        try:
+            self.cfg.update(self.name, {self.__class__.__name__: values})
+        except Exception as e:
+            self._warn_config_persistence_failure(", ".join(values), e)
 
     def _warn_config_persistence_failure(self, trait_name, exc):
         filename = Path(self.cfg.config_dir) / f"{self.name}.json"

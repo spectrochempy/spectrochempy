@@ -93,3 +93,7 @@ Deprecations
 Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
+
+- The test suite and the documentation build use a temporary SpectroChemPy
+  configuration directory (one per executed document for the docs), so they
+  neither read nor overwrite the saved preferences of the user. (#1799)

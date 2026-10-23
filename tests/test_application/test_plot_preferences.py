@@ -141,3 +141,27 @@ def test_first_plot_keeps_saved_plot_preferences(tmp_path, monkeypatch):
 
     assert (tmp_path / "PlotPreferences.json").exists()
     assert _new_app(tmp_path).plot_preferences.colormap == "magma"
+
+
+def test_plot_preferences_reload_after_several_styles(tmp_path):
+    prefs = _new_app(tmp_path).plot_preferences
+    prefs.style = "ggplot"
+    prefs.axes_facecolor = "yellow"
+    prefs.style = ["paper", "talk"]
+    expected = prefs.trait_values(config=True)
+
+    prefs = _new_app(tmp_path).plot_preferences
+    assert prefs.trait_values(config=True) == expected
+
+
+def test_style_change_is_saved_in_one_write(tmp_path, monkeypatch):
+    prefs = _new_app(tmp_path).plot_preferences
+    writes = []
+    update = prefs.cfg.update
+    monkeypatch.setattr(
+        prefs.cfg, "update", lambda *args: writes.append(args) or update(*args)
+    )
+
+    prefs.style = "ggplot"
+
+    assert len(writes) == 2

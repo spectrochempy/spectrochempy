@@ -13,6 +13,7 @@ import os
 import re
 import shutil
 import sys
+import tempfile
 import tomllib
 import warnings
 from datetime import datetime
@@ -38,6 +39,11 @@ if str(DOCS_SOURCE_ROOT) not in pythonpath_entries:
     os.environ["PYTHONPATH"] = os.pathsep.join(
         [str(DOCS_SOURCE_ROOT), *filter(None, pythonpath_entries)]
     )
+
+# Preferences are saved: keep the user configuration out of the build, and
+# give each executed document its own configuration (see isolate_scp_config).
+_SCP_DOCS_CONFIG = tempfile.TemporaryDirectory(prefix="scp-docs-config-")
+os.environ["SCP_CONFIG_HOME"] = _SCP_DOCS_CONFIG.name
 
 import spectrochempy
 
@@ -1170,7 +1176,14 @@ def citing_papers(app, docname, source):
     citing_papers_source_read(app, source, REFERENCE / "bibliography.bib")
 
 
+def isolate_scp_config(app, docname, source):
+    config_home = Path(_SCP_DOCS_CONFIG.name) / docname.replace("/", "__")
+    config_home.mkdir(parents=True, exist_ok=True)
+    os.environ["SCP_CONFIG_HOME"] = str(config_home)
+
+
 def setup(app):
+    app.connect("source-read", isolate_scp_config)
     app.connect("source-read", citing_papers)
     app.connect("source-read", rstjinja)
     app.connect("autodoc-skip-member", autodoc_skip_member)

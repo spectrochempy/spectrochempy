@@ -54,3 +54,10 @@ Bug Fixes
 
 - TopSpin imports now report when hypercomplex data require the optional
   ``spectrochempy-hypercomplex`` and ``numpy-quaternion`` dependencies. (#1743)
+
+Developer
+~~~~~~~~~
+
+- The test suite and the documentation build use a temporary SpectroChemPy
+  configuration directory (one per executed document for the docs), so they
+  neither read nor overwrite the saved preferences of the user. (#1799)

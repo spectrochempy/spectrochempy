@@ -1370,15 +1370,13 @@ class PlotPreferences(MetaConfigurable):
         changes = change.new
         if not isinstance(changes, list):
             changes = [changes]
-        for _style in changes:
-            try:
+        with self.batched_persistence():
+            for _style in changes:
                 if isinstance(_style, list | tuple):
                     for s in _style:
                         self._apply_style(s)
                 else:
                     self._apply_style(_style)
-            except Exception as e:
-                raise e
         # Note: LaTeX font settings are now applied locally in plotting contexts
         # via rc_context, not via global rcParams mutation
 
