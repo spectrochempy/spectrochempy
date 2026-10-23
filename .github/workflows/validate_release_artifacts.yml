@@ -65,7 +65,8 @@ jobs:
         with:
           python-version: "3.11"
 
-      - uses: ./.github/actions/verified-pip
+      - name: Secure pip bootstrap
+        uses: ./.github/actions/verified-pip
 
       - name: Determine core version
         id: version
@@ -146,7 +147,8 @@ jobs:
         with:
           python-version: "3.11"
 
-      - uses: ./.github/actions/verified-pip
+      - name: Secure pip bootstrap
+        uses: ./.github/actions/verified-pip
 
       - name: Build wheel and sdist
         run: |
@@ -268,7 +270,8 @@ jobs:
         with:
           python-version: "3.11"
 
-      - uses: ./.github/actions/verified-pip
+      - name: Secure pip bootstrap
+        uses: ./.github/actions/verified-pip
 
       - name: Install core wheel into the base environment
         run: |

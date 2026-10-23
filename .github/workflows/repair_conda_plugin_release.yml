@@ -355,7 +355,8 @@ jobs:
         with:
           python-version: "3.11"
 
-      - uses: ./.github/actions/verified-pip
+      - name: Secure pip bootstrap
+        uses: ./.github/actions/verified-pip
 
       - name: Install anaconda-client
         run: |

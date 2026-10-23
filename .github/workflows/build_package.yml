@@ -166,7 +166,8 @@ jobs:
         with:
           python-version: "3.11"
 
-      - uses: ./.github/actions/verified-pip
+      - name: Secure pip bootstrap
+        uses: ./.github/actions/verified-pip
 
       - name: Determine core version for PyPI build
         run: |
@@ -244,7 +245,8 @@ jobs:
       - name: Report Micromamba version
         run: micromamba --version
 
-      - uses: ./.github/actions/verified-pip
+      - name: Secure pip bootstrap
+        uses: ./.github/actions/verified-pip
 
       - name: Configure Rattler Build to use system certificates
         run: |
