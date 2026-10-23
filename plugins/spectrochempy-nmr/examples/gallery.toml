@@ -23,6 +23,11 @@ section = "NMR processing"
 section_ref = "examples-processing-nmr-index"
 
 [[examples]]
+path = "processing/nmr/plot_exam2d_hh_qf_cosy.py"
+section = "NMR processing"
+section_ref = "examples-processing-nmr-index"
+
+[[examples]]
 path = "processing/nmr/plot_processing_nmr.py"
 section = "NMR processing"
 section_ref = "examples-processing-nmr-index"
