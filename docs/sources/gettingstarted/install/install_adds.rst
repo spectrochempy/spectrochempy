@@ -51,7 +51,7 @@ instance with the shortcut created during installation).
 
       .. code-block:: bash
 
-         mamba install -c spectrocat spectrochempy-nmr    # one plugin
+         mamba install -c conda-forge -c spectrocat spectrochempy-nmr    # one plugin
 
       Replace ``spectrochempy-nmr`` by the name of the plugin you need; to
       install several plugins, list their names in the same command.
@@ -93,7 +93,7 @@ to work without an internet connection:
 
 .. code-block:: bash
 
-   mamba install -c spectrocat spectrochempy_data
+   mamba install -c conda-forge -c spectrocat spectrochempy_data
 
 Other Optional Packages
 -----------------------

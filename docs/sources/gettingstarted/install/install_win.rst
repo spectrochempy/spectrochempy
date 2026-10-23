@@ -193,7 +193,7 @@ Step-by-step Installation
 
       .. code-block:: bat
 
-         mamba install -c spectrocat spectrochempy jupyterlab
+         mamba install -c conda-forge -c spectrocat spectrochempy jupyterlab
 
       JupyterLab is optional: it is needed only to work in notebooks. To install
       SpectroChemPy alone, omit ``jupyterlab`` from the command.
