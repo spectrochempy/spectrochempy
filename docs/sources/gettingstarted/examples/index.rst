@@ -1,9 +1,10 @@
 .. _examples-gallery:
 .. _examples-index:
+.. _example-s-gallery:
 
-=================
-Example's gallery
-=================
+========
+Examples
+========
 
 Many examples on the use of the API can be found in this gallery.
 
@@ -22,7 +23,7 @@ in the `discussions <https://github.com/spectrochempy/spectrochempy/discussions>
    :titlesonly:
    :caption: Examples
 
-   gallery/auto_examples_core/index
-   gallery/auto_examples_analysis/index
-   gallery/auto_examples_processing/index
-   gallery/auto_examples_plugins/index
+   Datasets and plotting <gallery/auto_examples_core/index>
+   Processing <gallery/auto_examples_processing/index>
+   Analysis <gallery/auto_examples_analysis/index>
+   Plugins <gallery/auto_examples_plugins/index>

@@ -30,3 +30,5 @@ repository and are intentionally kept outside this published guide.
     plotting_architecture
     plugins/index
     file_formats/index
+    issues
+    examples
