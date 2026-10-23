@@ -1262,6 +1262,15 @@ class PlotPreferences(MetaConfigurable):
                 raise NotImplementedError
             self._members.add(lis[0])
 
+        # Loading the saved configuration applies the saved style after the
+        # other saved values: restore them, as they were saved after the style.
+        saved = self.config.get(self.name, {})
+        if "style" in saved:
+            config_traits = self.trait_names(config=True)
+            for name, value in saved.items():
+                if name != "style" and name in config_traits:
+                    setattr(self, name, value)
+
     @property
     def available_styles(self):
         return available_styles()
@@ -1718,22 +1727,6 @@ class PlotPreferences(MetaConfigurable):
             rckey += "."
         rckey += "_".join(lis)
         return rckey
-
-    # @observe(All)  # DISABLED: Remove automatic global rcParams mutation
-
-    def _anytrait_changed(self, change):
-        """
-        Handle trait changes - no longer applies to global matplotlib state.
-
-        Preference changes are now handled locally in plotting contexts,
-        not through global matplotlib state mutation.
-
-        Note: LaTeX font settings are now applied via rc_context in plotting
-        functions (plot1d.py, plot2d.py), not via trait observers.
-        """
-        # LaTeX font changes are handled locally in plotting contexts
-        # via rc_context, not via global rcParams mutation
-        super()._anytrait_changed(change)
 
 
 # =============================================================================

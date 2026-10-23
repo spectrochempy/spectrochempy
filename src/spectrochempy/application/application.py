@@ -295,7 +295,7 @@ class SpectroChemPy(Application):
                         configfiles.append(pyname)
                 elif fil.suffix == ".json":
                     jsonname = self.config_dir / fil
-                    if self.reset_config or fil == "PlotPreferences.json":
+                    if self.reset_config:
                         # remove the user json file to reset to defaults
                         jsonname.unlink()
                     else:

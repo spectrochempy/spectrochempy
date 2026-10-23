@@ -26,6 +26,11 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Plot preferences are saved again in ``PlotPreferences.json`` and restored
+  at the next session, including values set after choosing a style, and the
+  first plot no longer moves this file away. ``preferences.reset()`` now
+  resets every plot preference, including the ``colormap_*`` ones, and
+  removes the saved file. (#1799)
 - Filter outputs now retain the applied method, effective dimension, and
   compact filter parameters in their structured history entries.
 - Whittaker-Eilers filtering now applies along the requested dimension.
