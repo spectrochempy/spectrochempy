@@ -20,15 +20,16 @@ Other cases:
 * :doc:`install_sources`: development version, contributors
 * :doc:`install_adds`: plugins, example data and other optional packages
 
-.. warning::
+.. note::
 
-   A certificate-authority incident announced in October 2026 affects old
-   package-management tools. Before downloading SpectroChemPy or its plugins,
-   update the package manager you use: ``pip`` to 26.2.2 or newer, or ``uv`` to
-   0.13.4 or newer. Update ``certifi`` to 2026.10.19 or newer when it is
-   installed. The Python
-   Packaging Authority provides a `hash-verified pip upgrade command and
-   current guidance <https://discuss.python.org/t/information-for-python-users-regarding-emudhra-emsign-ca-certificate-security-incident/109576>`_.
+   **Installation security notice**
+
+   Due to a recent security issue affecting Python package managers, please
+   make sure your installation tools are up to date before installing
+   SpectroChemPy.
+
+   See the `official Python Packaging Authority guidance
+   <https://discuss.python.org/t/information-for-python-users-regarding-emudhra-emsign-ca-certificate-security-incident/109576>`_ for instructions.
 
 Quick Install (experienced users)
 ---------------------------------
