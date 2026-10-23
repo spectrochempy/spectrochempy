@@ -34,6 +34,13 @@ git checkout -b <new-branch> upstream/master
 
 Do NOT create branches, commit, push, or open PRs unless explicitly delegated.
 
+## GitHub Content
+
+Before creating or editing a GitHub issue, pull-request description, comment,
+review, or reply, show the exact proposed text to the maintainer and obtain
+explicit validation. Treat a request to write GitHub content as a request for a
+draft unless the maintainer separately authorizes its publication after review.
+
 ### Branch Names
 
 Do **not** create branches starting with `release/`. That prefix is reserved
@@ -209,6 +216,15 @@ internal (refactoring, tests, docs), apply the `no-changelog` label to the PR.
 * Prefer existing helpers over new ones.
 * Never add new dependencies without explicit approval.
 * Never create new public API without asking.
+* In gallery examples and user-facing documentation, prefer the public
+  SpectroChemPy API over direct NumPy imports. Use helpers such as
+  `scp.Coord.linspace`, `scp.linspace`, and `scp.normal` rather than importing
+  NumPy solely to create arrays. Keep NumPy when the example specifically
+  demonstrates interoperability or when no suitable public equivalent exists.
+* Likewise, prefer `dataset.plot()`, `scp.multiplot()`, `scp.plot_multiple()`,
+  and their `output=` lifecycle over direct Matplotlib calls. Keep Matplotlib
+  when the example demonstrates integration or needs a feature the public
+  plotting API does not expose.
 
 ---
 
