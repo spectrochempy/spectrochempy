@@ -46,3 +46,6 @@ Bug Fixes
   matched to them. Rapid-scan interferograms keep their ascending data-points
   axis and records with an unrecognized X-axis type are left unchanged with a
   warning.
+
+- TopSpin imports now report when hypercomplex data require the optional
+  ``spectrochempy-hypercomplex`` and ``numpy-quaternion`` dependencies. (#1743)
