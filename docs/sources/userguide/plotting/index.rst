@@ -4,6 +4,11 @@ Plotting
 SpectroChemPy provides a high-level plotting interface built on top of
 Matplotlib, tailored for scientific spectroscopy workflows.
 
+.. seealso::
+
+   :doc:`Executable plotting examples </gettingstarted/examples/gallery/auto_examples_core/d_plotting/index>`
+   and the :func:`~spectrochempy.plot_multiple` API for comparing datasets.
+
 Most scientific plots in SpectroChemPy require only **one line of code**.
 
 The goal is simple:
