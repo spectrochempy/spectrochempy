@@ -60,10 +60,20 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+
+      - name: Upgrade pip with the verified security release
+        run: >-
+          python -m pip install
+          "pip @ https://files.pythonhosted.org/packages/3f/06/3e4420302363fbb71be3c7f35ce042f54bfca330e3e66b3a2e3c4cca579f/pip-26.2.2-py3-none-any.whl#sha256=fd7f4dfa8190e014013b9f08f3e973f4e4c26ffd179a204895533a7254813a70"
+
       - name: Determine core version
         id: version
         run: |
-          python3 -m pip install --quiet packaging
+          python -m pip install --quiet "certifi>=2026.10.19" packaging
           LATEST_CORE_TAG=$(python .github/workflows/scripts/release_version.py latest-tag)
           if [[ -z "$LATEST_CORE_TAG" ]]; then
             echo "::error::No core tag found — cannot determine core version"
@@ -139,9 +149,14 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Upgrade pip with the verified security release
+        run: >-
+          python -m pip install
+          "pip @ https://files.pythonhosted.org/packages/3f/06/3e4420302363fbb71be3c7f35ce042f54bfca330e3e66b3a2e3c4cca579f/pip-26.2.2-py3-none-any.whl#sha256=fd7f4dfa8190e014013b9f08f3e973f4e4c26ffd179a204895533a7254813a70"
+
       - name: Build wheel and sdist
         run: |
-          python -m pip install build twine
+          python -m pip install "certifi>=2026.10.19" build twine
           SETUPTOOLS_SCM_PRETEND_VERSION=${{ needs.detect-version.outputs.core_version }} \
             python -m build --sdist --wheel --outdir dist .
 
@@ -180,10 +195,21 @@ jobs:
         with:
           environment-file: environments/environment_build.yml
           environment-name: scpy_validate
+          condarc: |
+            ssl_verify: /etc/ssl/certs/ca-certificates.crt
           create-args: >-
             python=3.11
             zstandard
           cache-environment: true
+
+      - name: Report Micromamba version
+        run: micromamba --version
+
+      - name: Configure Rattler Build to use system certificates
+        run: |
+          mkdir -p "$RUNNER_TEMP/rattler"
+          printf 'tls-root-certs = "native"\n' > "$RUNNER_TEMP/rattler/config.toml"
+          echo "RATTLER_HOME=$RUNNER_TEMP/rattler" >> "$GITHUB_ENV"
 
       - name: Generate conda recipe
         run: |
@@ -195,6 +221,7 @@ jobs:
         env:
           CONDA_BLD_PATH: ../output
         with:
+          rattler-build-version: v0.77.0
           recipe-path: recipe/recipe.yaml
           upload-artifact: false
           build-args: "-c conda-forge -c spectrocat"
@@ -247,9 +274,14 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Upgrade pip with the verified security release
+        run: >-
+          python -m pip install
+          "pip @ https://files.pythonhosted.org/packages/3f/06/3e4420302363fbb71be3c7f35ce042f54bfca330e3e66b3a2e3c4cca579f/pip-26.2.2-py3-none-any.whl#sha256=fd7f4dfa8190e014013b9f08f3e973f4e4c26ffd179a204895533a7254813a70"
+
       - name: Install core wheel into the base environment
         run: |
-          python -m pip install build twine
+          python -m pip install "certifi>=2026.10.19" build twine
           SETUPTOOLS_SCM_PRETEND_VERSION=${{ needs.detect-version.outputs.core_version }} \
             python -m build --sdist --wheel --outdir dist-core .
           python -m pip install dist-core/*.whl
