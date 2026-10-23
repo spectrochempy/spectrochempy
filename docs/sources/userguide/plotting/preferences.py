@@ -56,10 +56,14 @@ prefs.colormap = "magma"
 prefs.figure.figsize = (8, 4)
 
 # %% [markdown]
-# Now all plots use these new defaults:
+# Now all plots use these new defaults. The figure size applies to every plot,
+# while `prefs.colormap` applies to image and contour plots:
 
 # %%
 _ = ds.plot()
+
+# %%
+_ = ds.plot_image()
 
 # %% [markdown]
 # ## Resetting to Defaults
@@ -126,14 +130,12 @@ prefs.help("colormap")
 # %% [markdown]
 # ## The Mental Model
 #
-# - **Keyword arguments** (`ds.plot(cmap="red")`) → single plot
-# - **Preferences** (`prefs.colormap = "red"`) → all future plots
+# - **Keyword arguments** (`ds.plot(cmap="magma")`) → single plot
+# - **Preferences** (`prefs.colormap = "magma"`) → all future plots
 # - **Style** (`ds.plot(style="grayscale")`) → appearance theme
 #
 # Use preferences for session-long defaults; kwargs for one-off changes.
 
 # %% [markdown]
-# Below is the list of all available preferences:
-
-# %%
-prefs.list_all()  # Uncomment to see all preferences
+# To list all available preferences with their current and default values,
+# run `prefs.list_all()`.

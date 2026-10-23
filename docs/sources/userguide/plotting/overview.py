@@ -101,15 +101,19 @@ _ = ds.plot_image()
 _ = ds.plot_lines(palette="categorical")
 
 # %% [markdown]
-# For images and contours, you can also override the default sequential/diverging colormap behavior. Lets first have a
-# a dataset with both positive and negative values:
-# ds_neg = ds - ds.mean()
-# ds_neg.plot_image(colorbar=True)
+# For images and contours, you can also override the default sequential/diverging colormap behavior. Let's first
+# create a dataset with both positive and negative values:
+
+# %%
+ds_neg = ds - ds.mean()
+_ = ds_neg.plot_image(colorbar=True)
 
 # %% [markdown]
-# As expected,the default diverging colormap has been chosen . But this can be overridden using:
-#
-# ds_neg.plot_image(cmap_mode='sequential')   # forces sequential colormap even for data with negative values
+# As expected, the default diverging colormap has been chosen. But this can be overridden using `cmap_mode`, which
+# here forces a sequential colormap even for data with negative values:
+
+# %%
+_ = ds_neg.plot_image(cmap_mode="sequential")
 
 # %% [markdown]
 # The switch between sequential and diverging colormaps is based on the actual data values, with a `diverging_margin`
@@ -120,10 +124,12 @@ _ = ds.plot_lines(palette="categorical")
 # provide meaningful color differentiation. The default value for `diverging_margin` is 0.05, meaning that if the
 # negative values are less than 5% of the data range, a sequential colormap will be used even if there are negative
 # values present.
-# You can adjust this threshold as needed. For example, in the above example, setting `diverging_margin=0.5` will
+# You can adjust this threshold as needed. For example, in the above example, setting `diverging_margin=0.5`
 # allows for a much larger proportion of negative values (up to 50% of the data range) before switching to a diverging
 # colormap, which is why the sequential colormap is used in this case:
-# ds_neg.plot_image(diverging_margin=0.5)
+
+# %%
+_ = ds_neg.plot_image(diverging_margin=0.5)
 
 # %% [markdown]
 # ## Colorbars
