@@ -22,6 +22,7 @@ import jinja2
 from packaging.version import InvalidVersion
 from packaging.version import Version
 from sphinx.ext.autodoc import ClassDocumenter
+from sphinx.util.osutil import relative_uri
 
 # Ensure docs and executed notebooks import the in-tree source tree first.
 DOCS_CONFDIR = Path(__file__).parent
@@ -39,6 +40,11 @@ if str(DOCS_SOURCE_ROOT) not in pythonpath_entries:
     )
 
 import spectrochempy
+
+
+def _compact_version_label(value):
+    return re.sub(r"\.dev\d*$", "dev", value)
+
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -140,8 +146,32 @@ master_doc = "index"
 # built documents.
 version = spectrochempy.version
 release = version.split("+")[0]
-project = f"SpectroChemPy v{version}"
+logo_version = _compact_version_label(release)
+project = "SpectroChemPy"
 copyright = spectrochempy.copyright
+
+
+def _current_whatsnew_doc(release_str, whatsnew_dir=None):
+    """
+    Changelog page matching the version being documented.
+
+    Development builds point to the rolling ``latest`` changelog, released
+    versions to their own ``vX.Y.Z`` notes. The release-notes index stays the
+    fallback (and remains reachable from every changelog page).
+    """
+    directory = SRC / "whatsnew" if whatsnew_dir is None else Path(whatsnew_dir)
+    try:
+        is_development = Version(release_str).is_devrelease
+    except InvalidVersion:
+        return "whatsnew/index"
+    name = "latest" if is_development else f"v{release_str}"
+    if not (directory / f"{name}.rst").is_file():
+        name = "index"
+    return f"whatsnew/{name}"
+
+
+# "What's new" entry point used by the navigation and the documentation home page.
+current_whatsnew_doc = _current_whatsnew_doc(release)
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
@@ -243,6 +273,7 @@ with open(os.path.join(SRC, "index.rst"), "w", encoding="utf-8") as f:
             include_api=include_api,
             single=single_doc_or_dir,
             pattern=pattern,
+            current_whatsnew_doc=current_whatsnew_doc,
         )
     )
 
@@ -290,18 +321,41 @@ with open(os.path.join(SRC, "credits", "credits.rst"), "w", encoding="utf-8") as
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = "sphinx_rtd_theme"
+html_theme = "pydata_sphinx_theme"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {
-    "logo_only": True,
+    "navbar_align": "left",
+    "logo": {"text": ""},
+    "navbar_start": ["navbar-logo", "scp-version-switcher"],
+    "navbar_end": ["theme-switcher", "navbar-icon-links"],
+    "navbar_persistent": ["search-button-field"],
+    "header_links_before_dropdown": 6,
+    "show_nav_level": 1,
+    "navigation_depth": 4,
     "collapse_navigation": False,
-    "navigation_depth": 5,
-    "sticky_navigation": True,
-    "titles_only": True,
-    "prev_next_buttons_location": "both",
+    "show_toc_level": 2,
+    "use_edit_page_button": True,
+    "search_bar_text": "Search the documentation...",
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/spectrochempy/spectrochempy",
+            "icon": "fa-brands fa-github",
+        },
+        {
+            "name": "PyPI",
+            "url": "https://pypi.org/project/spectrochempy/",
+            "icon": "fa-brands fa-python",
+        },
+        {
+            "name": "Conda",
+            "url": "https://anaconda.org/spectrocat/spectrochempy",
+            "icon": "fa-solid fa-box-open",
+        },
+    ],
 }
 
 # Add any paths that contain custom themes here, relative to this directory.
@@ -328,6 +382,7 @@ html_static_path = ["_static"]
 html_css_files = [
     "css/spectrochempy.css",
     "css/custom.css",
+    "css/pydata-scpy.css",
 ]
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
@@ -424,6 +479,9 @@ if docs_context not in {"development", "preview", "stable"}:
 preview_name = os.environ.get("SCPY_DOCS_PREVIEW_NAME", "").strip()
 
 html_context = {
+    "version_preview_json": os.environ.get("SCPY_VERSION_PREVIEW_JSON", ""),
+    "version_button_label": logo_version,
+    "current_whatsnew_doc": current_whatsnew_doc,
     "current_version": docs_context,
     "docs_context": docs_context,
     "docs_build_version": release,
@@ -440,6 +498,11 @@ html_context = {
     "bibyear": "{" + f"{datetime.today().year}" + "}",
     "on_github_actions": on_github_actions,
     "github_repository": github_repository,
+    # Required by pydata-sphinx-theme's "Edit this page" button.
+    "github_user": "spectrochempy",
+    "github_repo": "spectrochempy",
+    "github_version": "master",
+    "doc_path": "docs/sources",
 }
 
 # Sphinx-gallery ---------------------------------------------------------------
@@ -978,6 +1041,126 @@ def rstjinja(app, docname, source):
     source[0] = rendered
 
 
+# Generated autosummary stubs (``reference/generated/spectrochempy.*.html``) are
+# listed exhaustively on the "Public API reference" page. Their links are pruned
+# from the navigation sidebar to keep it readable.
+_API_STUB_HREF = re.compile(r"spectrochempy(?:\.[A-Za-z0-9_]+)+\.html")
+_WHATSNEW_VERSION_TITLE = re.compile(
+    r"^What(?:'|’)s [Nn]ew in [Rr]evision (?P<version>.+?)(?: \[[^]]+\])?$"
+)
+_WHATSNEW_RANGE_TITLE = re.compile(r"^Revisions (?P<first>[\d.]+) to (?P<last>[\d.]+)$")
+
+
+def _prune_api_stub_links(toctree):
+    """
+    Drop sidebar links pointing to autosummary-generated API stubs.
+
+    ``generate_toctree_html`` returns a BeautifulSoup object for the sidebar;
+    we remove the ``<li>`` whose link targets an API stub page, then clean up
+    the collapsible wrappers left without children.
+    """
+    if not hasattr(toctree, "find_all"):
+        return
+
+    for li in toctree.find_all("li"):
+        link = li.find("a", href=True)
+        if link is not None and _API_STUB_HREF.search(link["href"]):
+            li.decompose()
+
+    for ul in toctree.find_all("ul"):
+        if not ul.find("li"):
+            (ul.find_parent("details") or ul).decompose()
+
+    for li in toctree.find_all("li"):
+        classes = li.get("class")
+        if classes and "has-children" in classes and not li.find("ul"):
+            li["class"] = [name for name in classes if name != "has-children"]
+
+
+def _compact_whatsnew_sidebar_labels(toctree):
+    """Replace verbose release-note titles with their version labels."""
+    for link in toctree.find_all("a", href=True):
+        label = link.get_text(" ", strip=True)
+        version_match = _WHATSNEW_VERSION_TITLE.fullmatch(label)
+        if version_match:
+            link.clear()
+            link.append(_compact_version_label(version_match["version"]))
+            continue
+
+        range_match = _WHATSNEW_RANGE_TITLE.fullmatch(label)
+        if range_match:
+            link.clear()
+            link.append(f"{range_match['first']}-{range_match['last']}")
+
+
+def strip_generated_api_links(app, pagename, templatename, context, doctree):
+    """
+    Wrap the sidebar toctree generator so it hides the generated API stubs.
+
+    pydata-sphinx-theme exposes ``generate_toctree_html`` in the page context.
+    We wrap it so its "sidebar" output is pruned before rendering. Connecting
+    with priority greater than the default (500) makes this run after the
+    theme's own handler, so the function is already present.
+    """
+    original = context.get("generate_toctree_html")
+    if original is None:
+        return
+
+    original_header = context.get("generate_header_nav_html")
+
+    def generate_sidebar_toctree(kind="sidebar", **kwargs):
+        toctree = original(kind, **kwargs)
+        if kind == "sidebar":
+            _prune_api_stub_links(toctree)
+            if pagename.startswith("whatsnew/"):
+                _compact_whatsnew_sidebar_labels(toctree)
+        return toctree
+
+    context["generate_toctree_html"] = generate_sidebar_toctree
+    if original_header is not None:
+
+        def generate_header_nav_html(*args, **kwargs):
+            navigation = original_header(*args, **kwargs)
+            whatsnew = relative_uri(f"{pagename}.html", f"{current_whatsnew_doc}.html")
+            return re.sub(
+                r"(<a\b[^>]*\bhref=\")[^\"]+(\"[^>]*>\s*(?:🆕\s*)?What's New\s*</a>)",
+                rf"\g<1>{whatsnew}\g<2>",
+                navigation,
+            )
+
+        context["generate_header_nav_html"] = generate_header_nav_html
+    context["section_title"] = _section_title(app.env, pagename)
+
+
+def _section_title(env, pagename):
+    """Return the top-level documentation section containing *pagename*."""
+
+    def contains(docname, target, seen):
+        if docname == target:
+            return True
+        if docname in seen:
+            return False
+        seen.add(docname)
+        return any(
+            contains(child, target, seen)
+            for child in env.toctree_includes.get(docname, ())
+        )
+
+    section_titles = {
+        "gettingstarted/index": "Getting started",
+        "userguide/index": "Guides",
+        "reference/navigation": "API",
+        "reference/glossary": "API",
+        "gettingstarted/examples/index": "Examples",
+        "credits/index": "About",
+    }
+
+    for section in env.toctree_includes.get(env.config.root_doc, ()):
+        if contains(section, pagename, set()):
+            return section_titles.get(section, env.titles[section].astext())
+    return None
+
+
 def citing_papers(app, docname, source):
     """Generate the list of papers citing SpectroChemPy from the bibliography."""
     if docname != "reference/papers":
@@ -992,6 +1175,7 @@ def setup(app):
     app.connect("source-read", rstjinja)
     app.connect("autodoc-skip-member", autodoc_skip_member)
     app.connect("autodoc-process-signature", shorter_signature)
+    app.connect("html-page-context", strip_generated_api_links, priority=999)
     app.add_autodocumenter(SpectroChemPyClassDocumenter, override=True)
     app.add_css_file("css/spectrochempy.css")  # also can be a full URL
     app.config.rst_mimetype = rst_mimetype

@@ -12,6 +12,7 @@ They are listed below exhaustively.
 What is not listed here is reserved for developers and should not normally be necessary for normal use of `SpectroChemPy` .
 
 .. contents:: Table of Contents
+   :backlinks: none
 
 ***************
 Loading the API

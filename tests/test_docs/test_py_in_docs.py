@@ -48,7 +48,16 @@ scripts = [
     for script in scripts
     if not any(
         x in str(script)
-        for x in ["checkpoint", "make.py", "conf.py", "apigen.py", "gallery"]
+        for x in [
+            "checkpoint",
+            "make.py",
+            "conf.py",
+            "apigen.py",
+            "gallery",
+            # Command-line utilities require arguments and are not runnable
+            # example scripts.
+            "tools/check_html_links.py",
+        ]
     )
 ]
 
