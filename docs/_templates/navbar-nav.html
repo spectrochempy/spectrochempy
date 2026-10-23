@@ -1,0 +1,59 @@
+{% set menus = [
+  ('Getting started', [
+    ('gettingstarted/install/index', 'Installation'),
+    ('gettingstarted/quickstart', '5-minute quickstart'),
+    ('gettingstarted/getting_help', 'Getting help')
+  ]),
+  ('Guides', [
+    ('userguide/introduction/introduction', 'Introduction'),
+    ('userguide/importexport/index', 'Import and export'),
+    ('userguide/processing/index', 'Processing'),
+    ('userguide/analysis/index', 'Analysis and modeling'),
+    ('userguide/plotting/index', 'Plotting'),
+    ('userguide/plugins/index', 'Plugins'),
+    ('userguide/api/api', 'Using the API'),
+    ('userguide/objects/index', 'Data objects'),
+    ('devguide/index', 'Contribute / developer guide')
+  ]),
+  ('API', [
+    ('reference/index', 'Public API'),
+    ('reference/plugins', 'Plugin API'),
+    ('reference/glossary', 'Glossary')
+  ]),
+  ('Examples', [
+    ('gettingstarted/examples/gallery/auto_examples_core/index', 'Datasets and plotting'),
+    ('gettingstarted/examples/gallery/auto_examples_processing/index', 'Processing'),
+    ('gettingstarted/examples/gallery/auto_examples_analysis/index', 'Analysis'),
+    ('gettingstarted/examples/gallery/auto_examples_plugins/index', 'Plugins')
+  ]),
+  ('About', [
+    ('gettingstarted/whyscpy', 'Why SpectroChemPy?'),
+    (current_whatsnew_doc, "What's new"),
+    ('reference/papers', 'Papers citing SpectroChemPy'),
+    ('reference/bibliography', 'Bibliography'),
+    ('credits/citing', 'Citing SpectroChemPy'),
+    ('credits/credits', 'Contributors'),
+    ('credits/license', 'SpectroChempy License'),
+    ('credits/seealso', 'Related projects')
+  ])
+] %}
+{% set active_group = section_title %}
+<nav aria-label="{{ _('Main navigation') }}">
+  <ul class="bd-navbar-elements navbar-nav">
+    {% for label, pages in menus %}
+      {% set menu_id = unique_html_id('scp-nav-menu') %}
+      <li class="nav-item dropdown{% if active_group == label %} current active{% endif %}">
+        <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="{{ menu_id }}">{{ label }}</button>
+        <ul id="{{ menu_id }}" class="dropdown-menu">
+          {% for target, title in pages %}
+            {% if hasdoc(target) %}
+              <li><a class="dropdown-item{% if pagename == target %} active{% endif %}" href="{{ pathto(target) }}"{% if pagename == target %} aria-current="page"{% endif %}>{{ title }}</a></li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </li>
+    {% endfor %}
+  </ul>
+</nav>

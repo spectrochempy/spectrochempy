@@ -74,6 +74,25 @@
     font-size: 10pt;
 }
 
+/* Keep generated output legible on the dark theme background. */
+html[data-theme="dark"] .scp-output .attr-name {
+    color: #5ee7a3;
+}
+
+html[data-theme="dark"] .scp-output .numeric,
+html[data-theme="dark"] .scp-output .attr-value .numeric {
+    color: #74c0fc;
+}
+
+html[data-theme="dark"] .scp-output .label,
+html[data-theme="dark"] .scp-output .attr-value .label {
+    color: #5eead4;
+}
+
+html[data-theme="dark"] .scp-output summary:hover {
+    color: #b4c7d3;
+}
+
 /*
  * Hide execution prompts in notebooks rendered by nbsphinx.
  * Sphinx-Gallery uses different markup and is not affected.
