@@ -4,7 +4,6 @@ import spectrochempy as scp
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils.objects import ScpObjectList
 
-
 JDX = """##TITLE=generic
 ##JCAMP-DX=5.01
 ##DATA TYPE=INFRARED SPECTRUM

@@ -127,7 +127,11 @@ class Importer(HasTraits):
 
         # Directory discovery groups files by extension. Merge compatible results
         # across those groups only after all readers have completed.
-        if kwargs.get("merge", False) and len(self.files) > 1 and len(self.datasets) > 1:
+        if (
+            kwargs.get("merge", False)
+            and len(self.files) > 1
+            and len(self.datasets) > 1
+        ):
             groups = group_datasets_by_origin(self.datasets)
             merged = []
             for group in groups.values():
