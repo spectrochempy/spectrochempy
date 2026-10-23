@@ -248,7 +248,7 @@ _ = scp.plot_compare(
 # %%
 import matplotlib.pyplot as plt
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
+_, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
 _ = pca.plot_score(ax=ax1, show=False)
 _ = pca.plot_scree(ax=ax2, show=True)
 
