@@ -158,7 +158,7 @@ class PreferencesSet(Meta):
                 f.unlink()
 
         plot_preferences = app.plot_preferences
-        with plot_preferences.batched_persistence():
+        with plot_preferences._batched_persistence():
             plot_preferences.reset()
             plot_preferences._apply_style("scpy")
             self.style = "scpy"

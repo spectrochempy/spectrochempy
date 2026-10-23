@@ -179,7 +179,7 @@ class MetaConfigurable(Configurable):
             self._persist({change.name: value})
 
     @contextmanager
-    def batched_persistence(self):
+    def _batched_persistence(self):
         """Save the configuration changes made inside the block in a single write."""
         if self._pending_persistence is not None:
             yield

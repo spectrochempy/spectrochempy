@@ -1370,7 +1370,7 @@ class PlotPreferences(MetaConfigurable):
         changes = change.new
         if not isinstance(changes, list):
             changes = [changes]
-        with self.batched_persistence():
+        with self._batched_persistence():
             for _style in changes:
                 if isinstance(_style, list | tuple):
                     for s in _style:
