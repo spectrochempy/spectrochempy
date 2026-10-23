@@ -232,8 +232,20 @@ Export a NDDataset
     write_mat
     write_matlab
     to_array
+    NDDataset.to_markdown_report
     to_netcdf
     to_xarray
+
+
+Scientific reporting
+====================
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    reporting.FigureReference
+    reporting.render_dataset_markdown
 
 
 ********

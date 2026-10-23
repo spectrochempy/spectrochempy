@@ -19,6 +19,11 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- ``NDDataset.to_markdown_report()`` now renders a deterministic Markdown
+  summary of one explicitly supplied dataset, selected metadata, structured
+  history and explicit figure references. It does not capture Matplotlib state
+  or claim exhaustive provenance.
+
 
 .. section
 
