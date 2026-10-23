@@ -47,6 +47,13 @@ as *latest* on this site), `git <https://git-scm.com>`_ must be installed:
    uv pip install "spectrochempy @ git+https://github.com/spectrochempy/spectrochempy.git"
    # or: python -m pip install "spectrochempy @ git+https://github.com/spectrochempy/spectrochempy.git"
 
+.. warning::
+
+   Before installing SpectroChemPy or its plugins, update your installation
+   tools (``pip`` 26.2.2 or newer and ``uv`` 0.13.4 or newer). For potentially
+   affected installations, follow the `Python Packaging Authority guidance
+   <https://discuss.python.org/t/information-for-python-users-regarding-emudhra-emsign-ca-certificate-security-incident/109576>`_.
+
 Development versions are not published on the conda channels. To modify the
 code or contribute, see :doc:`install_sources`.
 

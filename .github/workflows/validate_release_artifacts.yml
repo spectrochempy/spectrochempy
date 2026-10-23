@@ -60,6 +60,8 @@ jobs:
         with:
           fetch-depth: 0
 
+      - uses: ./.github/actions/verified-pip
+
       - name: Determine core version
         id: version
         run: |
@@ -139,9 +141,11 @@ jobs:
         with:
           python-version: "3.11"
 
+      - uses: ./.github/actions/verified-pip
+
       - name: Build wheel and sdist
         run: |
-          python -m pip install build twine
+          python -m pip install "certifi>=2026.10.19" build twine
           SETUPTOOLS_SCM_PRETEND_VERSION=${{ needs.detect-version.outputs.core_version }} \
             python -m build --sdist --wheel --outdir dist .
 
@@ -247,9 +251,11 @@ jobs:
         with:
           python-version: "3.11"
 
+      - uses: ./.github/actions/verified-pip
+
       - name: Install core wheel into the base environment
         run: |
-          python -m pip install build twine
+          python -m pip install "certifi>=2026.10.19" build twine
           SETUPTOOLS_SCM_PRETEND_VERSION=${{ needs.detect-version.outputs.core_version }} \
             python -m build --sdist --wheel --outdir dist-core .
           python -m pip install dist-core/*.whl

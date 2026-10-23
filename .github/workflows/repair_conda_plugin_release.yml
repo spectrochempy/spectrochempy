@@ -96,6 +96,7 @@ jobs:
         with:
           python-version: "3.11"
 
+      - uses: ./.github/actions/verified-pip
       - name: Validate inputs and derive release tag
         id: validate
         env:
@@ -343,6 +344,7 @@ jobs:
         with:
           python-version: "3.11"
 
+      - uses: ./.github/actions/verified-pip
       - name: Install anaconda-client
         run: |
           # The upload runs on a fresh runner without the Micromamba build

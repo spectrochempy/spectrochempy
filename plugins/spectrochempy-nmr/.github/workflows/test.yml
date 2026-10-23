@@ -14,6 +14,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+      - uses: ./.github/actions/verified-pip
       - name: Install core spectrochempy
         run: pip install -e ../..
       - name: Install plugin

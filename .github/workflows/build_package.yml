@@ -166,6 +166,8 @@ jobs:
         with:
           python-version: "3.11"
 
+      - uses: ./.github/actions/verified-pip
+
       - name: Determine core version for PyPI build
         run: |
           python3 -m pip install --quiet packaging
@@ -187,7 +189,7 @@ jobs:
 
       - name: Install pypa/build
         run: |
-          python -m pip install build --user
+          python -m pip install "certifi>=2026.10.19" build --user
 
       - name: Build a binary wheel and a source tarball
         run: |
@@ -236,6 +238,8 @@ jobs:
           create-args: >-
             python=3.11
           cache-environment: true
+
+      - uses: ./.github/actions/verified-pip
 
       - name: Determine core version for conda build
         run: |
