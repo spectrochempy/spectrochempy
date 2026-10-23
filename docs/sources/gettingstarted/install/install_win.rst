@@ -88,10 +88,10 @@ Step-by-step Installation
 
       .. code-block:: bat
 
-         uv pip install spectrochempy
+         uv pip install spectrochempy jupyterlab
 
-         :: or with interactive extras (Jupyter, etc.)
-         uv pip install "spectrochempy[interactive]"
+      JupyterLab is optional: it is needed only to work in notebooks. To install
+      SpectroChemPy alone, omit ``jupyterlab`` from the command.
 
       **5. Create a desktop shortcut.** It opens a Command Prompt in your
       working folder with the ``scpy`` environment already active, so you do not
@@ -192,7 +192,10 @@ Step-by-step Installation
 
       .. code-block:: bat
 
-         mamba install -c spectrocat spectrochempy
+         mamba install -c spectrocat spectrochempy jupyterlab
+
+      JupyterLab is optional: it is needed only to work in notebooks. To install
+      SpectroChemPy alone, omit ``jupyterlab`` from the command.
 
       **6. Create a desktop shortcut.** It opens a Command Prompt in your
       working folder with the ``scpy`` environment already active, so you do not
@@ -281,10 +284,10 @@ Step-by-step Installation
 
       .. code-block:: bat
 
-         python -m pip install spectrochempy
+         python -m pip install spectrochempy jupyterlab
 
-         :: or if you want to install interactive version (including jupyter)
-         python -m pip install "spectrochempy[interactive]"
+      JupyterLab is optional: it is needed only to work in notebooks. To install
+      SpectroChemPy alone, omit ``jupyterlab`` from the command.
 
       **5. Create a desktop shortcut.** It opens a Command Prompt in your
       working folder with the ``scpy`` environment already active, so you do not
