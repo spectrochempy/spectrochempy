@@ -125,6 +125,19 @@ class Importer(HasTraits):
                 # here files are read / or remotely from the disk using filenames
                 self._switch_protocol(key, self.files, **kwargs)
 
+        # Directory discovery groups files by extension. Merge compatible results
+        # across those groups only after all readers have completed.
+        if (
+            kwargs.get("merge", False)
+            and len(self.files) > 1
+            and len(self.datasets) > 1
+        ):
+            groups = group_datasets_by_origin(self.datasets)
+            merged = []
+            for group in groups.values():
+                merged.extend(merge_datasets(group, **kwargs))
+            self.datasets = merged
+
         # now we will reset preference for this newly loaded datasets
         if len(self.datasets) > 0:
             if all(self.datasets) is None:
