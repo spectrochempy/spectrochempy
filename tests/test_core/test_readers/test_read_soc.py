@@ -176,23 +176,17 @@ def test_read_soc_directory_keeps_default_merge_false(tmp_path):
     assert {Path(dataset.filename) for dataset in datasets} == set(paths)
 
 
-def test_read_soc_directory_keyword_keeps_existing_merge_true_behavior(tmp_path):
-    """Characterize the pre-existing ``directory=`` / ``merge=True`` behavior.
-
-    This is a characterization test of the *current* behavior, not a desired
-    specification: when files are discovered through ``directory=``, compatible
-    datasets split across extensions are not merged, although the documented
-    ``merge`` contract expects a single merged dataset here. Tracked in
-    spectrochempy#1780; fixing it is out of scope for the SOC reader clarification
-    (spectrochempy#1763).
-    """
+def test_read_soc_directory_merges_compatible_extensions(tmp_path):
+    """Merge compatible SOC files discovered across extensions."""
     _write_synthetic_soc_triplet(tmp_path)
 
-    datasets = scp.read_soc(directory=tmp_path, pattern="*.?dr", merge=True)
+    dataset = scp.read_soc(directory=tmp_path, pattern="*.?dr", merge=True)
 
-    assert isinstance(datasets, ScpObjectList)
-    assert len(datasets) == 3
-    assert all(dataset.origin == "soc" for dataset in datasets)
+    assert isinstance(dataset, NDDataset)
+    assert dataset.origin == "merged [soc]"
+    assert dataset.name == "merged [soc]"
+    assert dataset.filename is None
+    assert dataset.shape == (3, 2)
 
 
 @pytest.mark.network
