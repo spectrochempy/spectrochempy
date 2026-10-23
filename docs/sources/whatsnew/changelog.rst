@@ -68,6 +68,9 @@ Dependency Updates
 ~~~~~~~~~~~~~~~~~~
 .. Add here new dependency updates (do not delete this comment)
 
+- Updated the documentation dependency ``nbconvert`` to 7.17.2 to address an
+  arbitrary-file-write vulnerability when converting untrusted notebooks.
+
 
 .. section
 

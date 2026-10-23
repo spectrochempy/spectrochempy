@@ -1,0 +1,7 @@
+name: Secure pip bootstrap
+description: Bootstrap an affected pip safely, then upgrade pip normally.
+runs:
+  using: composite
+  steps:
+    - shell: python {0}
+      run: python ${{ github.action_path }}/verified_pip.py

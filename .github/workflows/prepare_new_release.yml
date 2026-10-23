@@ -44,6 +44,7 @@ jobs:
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
 
+      - uses: ./.github/actions/verified-pip
       - name: Check Zenodo integration is enabled
         run: |
           if [ "${{ inputs.confirm_zenodo_enabled }}" != "true" ]; then
