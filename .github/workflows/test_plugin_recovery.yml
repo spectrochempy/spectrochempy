@@ -145,11 +145,18 @@ jobs:
           python3 .github/workflows/scripts/conda_publish.py validate-release \
             "$RUNNER_TEMP/recovery/plugins/spectrochempy-perkinelmer" "$TAG_VERSION"
 
+      - name: Configure Rattler Build to use system certificates
+        run: |
+          mkdir -p "$RUNNER_TEMP/rattler"
+          printf 'tls-root-certs = "native"\n' > "$RUNNER_TEMP/rattler/config.toml"
+          echo "RATTLER_HOME=$RUNNER_TEMP/rattler" >> "$GITHUB_ENV"
+
       - name: Build recovered recipe with rattler-build
         uses: prefix-dev/rattler-build-action@v0.2.39
         env:
           CONDA_BLD_PATH: ../recovery-output
         with:
+          rattler-build-version: v0.77.0
           recipe-path: ${{ steps.resolve.outputs.recipe_path }}/${{ steps.resolve.outputs.recipe_file }}
           upload-artifact: false
           # spectrocat comes first so spectrochempy resolves from our channel.

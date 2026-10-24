@@ -60,6 +60,12 @@ Bug Fixes
 - TopSpin imports now report when hypercomplex data require the optional
   ``spectrochempy-hypercomplex`` and ``numpy-quaternion`` dependencies. (#1743)
 
+Dependency Updates
+~~~~~~~~~~~~~~~~~~
+
+- Updated the documentation dependency ``nbconvert`` to 7.17.2 to address an
+  arbitrary-file-write vulnerability when converting untrusted notebooks.
+
 Developer
 ~~~~~~~~~
 
