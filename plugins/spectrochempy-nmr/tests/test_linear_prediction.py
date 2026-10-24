@@ -39,10 +39,39 @@ def test_forward_linear_prediction_extends_each_trace_independently():
     np.testing.assert_allclose(actual[1], 0.8 ** np.arange(20), rtol=1e-12, atol=1e-12)
 
 
+@pytest.mark.parametrize("dtype", (np.float32, np.complex64))
+def test_forward_linear_prediction_preserves_low_precision_nmr_trace_dtypes(dtype):
+    samples = np.arange(128)
+    trace = 0.98**samples * np.exp(
+        2j * np.pi * 0.12 * samples
+    ) + 0.4 * 0.95**samples * np.exp(2j * np.pi * 0.16 * samples)
+    noise = np.random.default_rng(12345).normal(scale=0.01, size=trace.shape)
+    if dtype == np.float32:
+        trace = (trace.real + noise).astype(dtype)
+    else:
+        trace = (trace + noise + 1j * noise[::-1]).astype(dtype)
+
+    actual = _linear_predict_after(trace, final_size=256, order=32)
+
+    assert actual.dtype == trace.dtype
+    assert np.isfinite(actual).all()
+
+
 @pytest.mark.parametrize(
     ("final_size", "order", "message"),
-    ((3, 1, "final_size"), (5, 0, "order"), (5, 5, "order")),
+    ((3, 1, "final_size"), (5, 0, "order"), (5, 5, "order"), (5, 3, "half")),
 )
 def test_forward_linear_prediction_rejects_invalid_sizes(final_size, order, message):
     with pytest.raises(ValueError, match=message):
         _linear_predict_after(np.ones(4), final_size=final_size, order=order)
+
+
+@pytest.mark.parametrize("invalid", (np.array(1.0), np.array([1.0, np.nan])))
+def test_forward_linear_prediction_rejects_non_finite_or_scalar_data(invalid):
+    with pytest.raises(ValueError):
+        _linear_predict_after(invalid, final_size=4, order=1)
+
+
+def test_forward_linear_prediction_rejects_integer_data():
+    with pytest.raises(TypeError, match="dtype"):
+        _linear_predict_after(np.ones(4, dtype=int), final_size=4, order=1)

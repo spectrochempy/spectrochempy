@@ -14,12 +14,21 @@ def _linear_predict_after(data, final_size, order):
     prevent an increasing extrapolation.
     """
     values = np.asarray(data)
+    if values.ndim == 0:
+        msg = "data must have at least one dimension"
+        raise ValueError(msg)
+    if values.dtype.kind not in "fc":
+        msg = "data must have a floating-point or complex dtype"
+        raise TypeError(msg)
+    if not np.isfinite(values).all():
+        msg = "data must contain only finite values"
+        raise ValueError(msg)
     initial_size = values.shape[-1]
     if final_size < initial_size:
         msg = "final_size must be at least the input size"
         raise ValueError(msg)
-    if not 0 < order < initial_size:
-        msg = "order must be positive and smaller than the input size"
+    if not 0 < order <= initial_size // 2:
+        msg = "order must be positive and at most half the input size"
         raise ValueError(msg)
 
     output = np.empty((*values.shape[:-1], final_size), dtype=values.dtype)

@@ -49,6 +49,8 @@ EXAM2D_HH_SHA256 = {
     "pdata/1/procs": "15083e49296a29e66dfb85c41519680ab4157c0cdebf455f89af9195dec73261",
     "pdata/1/proc2s": "f5f4838b2e39188de217214882c105f3d04a8de81d2fbaba565dab596b8bb5b8",
 }
+EXAM2D_HH_F1_NCOEF = 32
+EXAM2D_HH_F1_LPBIN = 256
 
 
 def _has_agilent_data():
@@ -93,7 +95,9 @@ def _qf_cosy_exam2d_hh(raw, *, apply_linear_prediction=False):
     direct[: data.shape[0], : data.shape[1]] = data * _sine_window(data.shape[1])
     f2 = np.fft.fftshift(np.fft.fft(direct, axis=1), axes=1)
     if apply_linear_prediction:
-        f2 = _linear_predict_after(f2.T, final_size=256, order=32).T
+        f2 = _linear_predict_after(
+            f2.T, final_size=EXAM2D_HH_F1_LPBIN, order=EXAM2D_HH_F1_NCOEF
+        ).T
     indirect = np.zeros((1024, 1024), dtype=np.complex128)
     indirect[: f2.shape[0]] = f2 * _sine_window(f2.shape[0])[:, None]
     return np.abs(np.fft.fftshift(np.fft.ifft(indirect, axis=0), axes=0))
@@ -386,6 +390,15 @@ class TestExam2DHHQFCOSY:
             assert int(_jcamp_value(proc_file, "SSB")) == 0
             assert float(_jcamp_value(proc_file, "PHC0")) == 0.0
             assert float(_jcamp_value(proc_file, "PHC1")) == 0.0
+        assert int(_jcamp_value(root / "pdata" / "1" / "proc2s", "ME_mod")) == 2
+        assert (
+            int(_jcamp_value(root / "pdata" / "1" / "proc2s", "NCOEF"))
+            == EXAM2D_HH_F1_NCOEF
+        )
+        assert (
+            int(_jcamp_value(root / "pdata" / "1" / "proc2s", "LPBIN"))
+            == EXAM2D_HH_F1_LPBIN
+        )
 
         without_lp = _normalized(_qf_cosy_exam2d_hh(raw))
         calculated = _normalized(_qf_cosy_exam2d_hh(raw, apply_linear_prediction=True))
