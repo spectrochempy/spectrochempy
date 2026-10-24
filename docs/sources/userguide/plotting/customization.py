@@ -157,10 +157,10 @@ import matplotlib as mpl
 norm = mpl.colors.CenteredNorm()
 _ = ds.plot_image(cmap="RdBu_r", norm=norm)
 
-# %% [markdown]
+# %%
 # Log norm - useful for data spanning several orders of magnitude
-# norm = mpl.colors.LogNorm(vmin=0.01, vmax=1.0)
-# _ = ds.plot_image(cmap="viridis", norm=norm)
+norm = mpl.colors.LogNorm(vmin=0.01, vmax=1.0)
+_ = ds.plot_image(cmap="viridis", norm=norm)
 
 # %% [markdown]
 # ## Combining Customizations
@@ -188,21 +188,14 @@ _ = ds.plot(
 #
 # The `plot_score` function (accessible via `PCA.plot_score` or standalone
 # `scp.plot_score`) supports `marker`, `s` (marker size), and `alpha`
-# (transparency):
-#
+# (transparency). For a PCA model fitted on the dataset used above:
+
 # %%
-# Load example data and fit PCA
-# (requires an NDDataset - replace with your own data)
-import spectrochempy as scp
+pca = scp.PCA(n_components=3)
+pca.fit(ds)
+_ = pca.plot_score(marker="s", s=30, alpha=0.7)
 
 # %% [markdown]
-# For a fitted PCA model:
-#
-# ```python
-# pca = scp.PCA(n_components=5).fit(dataset)
-# ax = pca.plot_score(marker="s", s=30, alpha=0.7)
-# ```
-#
 # These parameters are forwarded to `matplotlib.axes.Axes.scatter`.
 #
 # ### Compare / Merit Plot: Line Style Parameters
@@ -218,14 +211,20 @@ import spectrochempy as scp
 # | `offset` | Vertical separation between groups | `None` |
 # | `nb_traces` | Number of traces to display | `"all"` |
 #
-# Example:
-#
-# ```python
-# scp.plot_compare(original, reconstructed,
-#     exp_linestyle="-", calc_linestyle=":",
-#     exp_linewidth=1.5, calc_linewidth=2.0,
-#     offset=0.1)
-# ```
+# Example, comparing the dataset with its PCA reconstruction:
+
+# %%
+_ = scp.plot_compare(
+    ds,
+    pca.inverse_transform(),
+    exp_linestyle="-",
+    calc_linestyle=":",
+    exp_linewidth=1.5,
+    calc_linewidth=2.0,
+    offset=0.1,
+)
+
+# %% [markdown]
 #
 # ### Parity Plot: Scatter Parameters
 #
@@ -245,12 +244,15 @@ import spectrochempy as scp
 # - `clear`: Whether to clear the axes before plotting (`True` by default;
 #   set to `False` to overlay on existing axes).
 # - `show`: Whether to display the figure (`True` by default).
-#
-# ```python
-# fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
-# plot_score(scores, ax=ax1, show=False)
-# plot_parity(Y, Y_hat, ax=ax2, show=True)
-# ```
+
+# %%
+import matplotlib.pyplot as plt
+
+_, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
+_ = pca.plot_score(ax=ax1, show=False)
+_ = pca.plot_scree(ax=ax2, show=True)
+
+# %% [markdown]
 #
 # ## The Mental Model
 #
