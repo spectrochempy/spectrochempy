@@ -27,7 +27,7 @@ jsonschema == 4.23.0
 jupyter == 1.1.1
 jupyter-sphinx
 jupytext == 1.16.7
-nbconvert == 7.17.1
+nbconvert == 7.17.2
 nbformat == 5.10.4
 nbsphinx == 0.9.6
 numpydoc == 1.8.0
@@ -39,7 +39,7 @@ sphinx-tabs == 3.4.7
 sphinx-copybutton == 0.5.2
 sphinx-design == 0.6.0
 sphinx-gallery == 0.19.0
-sphinx-rtd-theme == 3.0.2
+pydata-sphinx-theme == 0.17.1
 sphinxcontrib-bibtex == 2.6.3
 xarray
 json5 == 0.10.0

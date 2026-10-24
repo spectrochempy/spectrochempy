@@ -1,6 +1,103 @@
 :orphan:
 
-.. container:: status-badges
+{% if not single -%}
+.. _home:
+
+.. title:: SpectroChemPy
+
+.. raw:: html
+
+    <main id="home" class="scp-home" aria-labelledby="scp-home-title">
+      <section id="spectrochempy-advanced-spectroscopic-data-analysis" class="scp-hero">
+        <div class="scp-hero-copy">
+          <p class="scp-eyebrow">Open-source scientific Python for spectroscopic data</p>
+          <h1 id="scp-home-title">SpectroChemPy</h1>
+          <p class="scp-hero-tagline">Turn spectra into understanding.</p>
+          <p class="scp-hero-lede">Import, process, visualize, and model IR, Raman, UV-visible, and NMR spectra in reproducible workflows.</p>
+        </div>
+        <figure class="scp-spectrum-card" aria-label="From spectra to scientific insights through a structured NDDataset.">
+          <div class="scp-science-step">
+            <h2>Spectra</h2>
+            <img class="dark-light" src="_static/images/home-iris-spectra.svg" width="280" height="330" alt="Six experimental infrared spectra measured during CO adsorption.">
+          </div>
+          <span class="scp-science-arrow" aria-hidden="true">→</span>
+          <div class="scp-science-step">
+            <h2>NDDataset</h2>
+            <ul class="scp-dataset-structure" aria-label="NDDataset structure">
+              <li>Data</li>
+              <li>Coordinates</li>
+              <li>Units</li>
+              <li>Metadata</li>
+              <li>History</li>
+              <li>Mask</li>
+            </ul>
+          </div>
+          <div class="scp-science-operations"><span>Import · Process · Analyze</span> <span>Model · Plot · Report</span></div>
+          <span class="scp-science-arrow" aria-hidden="true">→</span>
+          <div class="scp-science-step">
+            <h2>Insights</h2>
+            <img class="dark-light" src="_static/images/home-iris-insights.svg" width="251" height="306" alt="Contours of a recovered spectral distribution over wavenumber and adsorption energy.">
+          </div>
+        </figure>
+      </section>
+
+      <div class="scp-quick-nav-band">
+      <nav id="scp-quick-nav" class="scp-quick-nav" aria-label="Documentation entry points">
+        <a href="gettingstarted/whyscpy.html"><strong>Why SpectroChemPy?</strong><span>Discover the approach</span></a>
+        <a href="gettingstarted/install/index.html"><strong>Install SpectroChemPy</strong><span>Choose your setup</span></a>
+        <a href="userguide/importexport/import.html#Using-a-specific-reader"><strong>Supported file formats</strong><span>Core and plugin readers</span></a>
+        <a href="{{ current_whatsnew_doc }}.html"><strong>What's new?</strong><span>Read the current changelog</span></a>
+      </nav>
+      </div>
+
+      <section class="scp-workflow" aria-labelledby="scp-workflow-title">
+        <div class="scp-paths-heading">
+          <p id="scp-workflow-title" class="scp-eyebrow">A workflow that stays connected</p>
+        </div>
+        <div class="scp-stage-grid">
+          <a class="scp-stage scp-stage-import" href="userguide/importexport/index.html"><span class="scp-stage-mark">01</span><strong>Import and organize</strong><span>Read experimental data while preserving coordinates and metadata.</span><b>Import and export guide <span aria-hidden="true">&rarr;</span></b></a>
+          <a class="scp-stage scp-stage-process" href="userguide/processing/index.html"><span class="scp-stage-mark">02</span><strong>Preprocess spectra</strong><span>Correct baselines, filter noise, transform signals, and track supported processing steps.</span><b>Processing tools <span aria-hidden="true">&rarr;</span></b></a>
+          <a class="scp-stage scp-stage-analyze" href="userguide/analysis/index.html"><span class="scp-stage-mark">03</span><strong>Analyze and model</strong><span>Integrate and fit peaks, apply multivariate analysis and supported models.</span><b>Analysis methods <span aria-hidden="true">&rarr;</span></b></a>
+          <a class="scp-stage scp-stage-plot" href="userguide/plotting/index.html"><span class="scp-stage-mark">04</span><strong>Visualize clearly</strong><span>Create publication-ready figures that stay linked to the data behind them.</span><b>Plotting guide <span aria-hidden="true">&rarr;</span></b></a>
+        </div>
+      </section>
+
+      <section class="scp-paths" aria-labelledby="scp-paths-title">
+        <div class="scp-paths-heading"><p id="scp-paths-title" class="scp-eyebrow">Choose your starting point</p></div>
+        <div class="scp-path-grid">
+          <a class="scp-path" href="gettingstarted/quickstart.html"><span>New to SpectroChemPy?</span><strong>Run your first workflow</strong><p>Install the package, load a dataset, and make a first plot in a focused five-minute introduction.</p><b>Open the quickstart <span aria-hidden="true">&rarr;</span></b></a>
+          <a class="scp-path" href="gettingstarted/examples/index.html"><span>Learn from working data</span><strong>Browse executable examples</strong><p>Follow complete notebooks that make the transition from raw measurements to interpretation explicit.</p><b>View the gallery <span aria-hidden="true">&rarr;</span></b></a>
+          <a class="scp-path" href="reference/index.html"><span>Already know what you need?</span><strong>Go directly to the API</strong><p>Find objects and functions, then connect their reference pages to concrete usage in the guides.</p><b>Browse the reference <span aria-hidden="true">&rarr;</span></b></a>
+        </div>
+      </section>
+
+      <section id="scp-community" class="scp-paths scp-community" aria-labelledby="scp-community-title">
+        <div class="scp-paths-heading"><p id="scp-community-title" class="scp-eyebrow">Research and community</p></div>
+        <div class="scp-path-grid">
+          <article class="scp-path">
+            <span>Research in practice</span>
+            <h3>How people use SpectroChemPy</h3>
+            <p>Explore papers citing SpectroChemPy, from operando FTIR in catalysis to materials characterization and biomedical Raman spectroscopy.</p>
+            <div class="scp-community-links"><a href="reference/papers.html">See the publications <span aria-hidden="true">&rarr;</span></a></div>
+          </article>
+          <article class="scp-path">
+            <span>A connected toolbox</span>
+            <h3>Built to be extended</h3>
+            <p>Go further with plugins for NMR, tensor methods, and instrument formats.</p>
+            <div class="scp-community-links"><a href="userguide/plugins/index.html">Discover the plugins <span aria-hidden="true">&rarr;</span></a><a href="credits/seealso.html">Explore related projects <span aria-hidden="true">&rarr;</span></a></div>
+          </article>
+          <article class="scp-path">
+            <span>Take part</span>
+            <h3>Cite it, share it, improve it</h3>
+            <p>Using SpectroChemPy in your research? Find the citation and BibTeX entry, share an example, or help improve the project.</p>
+            <div class="scp-community-links"><a href="credits/citing.html">Cite SpectroChemPy <span aria-hidden="true">&rarr;</span></a><a href="devguide/index.html">Ways to contribute <span aria-hidden="true">&rarr;</span></a></div>
+          </article>
+        </div>
+      </section>
+
+    </main>
+
+.. container:: scp-status-badges
 
     .. image:: https://img.shields.io/pypi/v/spectrochempy.svg
         :target: https://pypi.org/project/spectrochempy/
@@ -17,124 +114,18 @@
     .. image:: https://anaconda.org/spectrocat/spectrochempy/badges/license.svg
         :target: https://anaconda.org/spectrocat/spectrochempy
 
-{% if not single -%}
-.. _home:
-
-#####################################################################
-SpectroChemPy: Advanced Spectroscopic Data Analysis
-#####################################################################
-
-.. toctree::
-    :hidden:
-    :caption: Navigation
-
-.. toctree::
-    :hidden:
-    :caption: Summary
-
-**SpectroChemPy** is a powerful Python framework for processing, analyzing and modeling spectroscopic data in chemistry. This cross-platform solution provides:
-
-⚡️ **Key Features**
-
-* Advanced data import with metadata preservation
-* Comprehensive preprocessing tools
-* Multi-dataset analysis capabilities
-* Rich visualization and plotting
-* Statistical analysis (PCA, SVD, EFA, PLS, MCR-ALS, ...)
-* Modern curve fitting and modeling
-
-🚀 **Quick Start**
-
-* :doc:`Why Spectrochempy? <gettingstarted/whyscpy>`
-* :doc:`5-minute quickstart <gettingstarted/quickstart>`
-* :doc:`Installation guide <gettingstarted/install/index>`
-* :doc:`Getting help  <gettingstarted/getting_help>`
-
-.. grid:: 2
-    :gutter: 3
-
-
-    .. grid-item-card:: 📚 Learn
-        :link: userguide/index.html
-
-        Start learning SpectroChemPy with tutorials and guides
-
-    .. grid-item-card:: 📈 Gallery of Examples
-        :link: gettingstarted/examples/index.html
-
-        Explore the examples notebooks
-
-    .. grid-item-card:: 🔍 API reference
-        :link: reference/index.html
-
-        Explore the comprehensive API documentation
-
-    .. grid-item-card:: 🔧 Develop
-        :link: devguide/index.html
-
-        Contribute to SpectroChemPy development
 .. toctree::
     :hidden:
 
-    whatsnew/latest
-
-.. toctree::
-    :maxdepth: 1
-    :hidden:
-    :caption: 🚀 Getting Started
-
-    Why SpectroChemPy? <gettingstarted/whyscpy>
-    5-minute quickstart <gettingstarted/quickstart>
-    Installation guide <gettingstarted/install/index>
-    Example's gallery <gettingstarted/examples/index>
-    Getting help  <gettingstarted/getting_help>
-
-.. toctree::
-    :maxdepth: 3
-    :hidden:
-    :caption: 📚 User's Guide & Tutorials
-
-
-    userguide/introduction/introduction
-    userguide/importexport/index
-    userguide/plotting/index
-    userguide/processing/index
-    userguide/analysis/index
-    userguide/plugins/index
-    userguide/api/api
-    userguide/objects/index
-
-.. toctree::
-    :maxdepth: 1
-    :hidden:
-    :caption: 🔍 Reference
-
+    Getting started <gettingstarted/index>
+    Guides <userguide/index>
     {% if include_api -%}
-    reference/index
-    reference/plugins
+    API <reference/navigation>
+    {% else -%}
+    API <reference/glossary>
     {% endif -%}
-    reference/glossary
-    reference/bibliography
-    reference/papers
-
-.. toctree::
-    :maxdepth: 1
-    :hidden:
-    :caption: 🛠️ Contribute
-
-    Bug reports & feature request <devguide/issues>
-    Sharing examples & tutorials <devguide/examples>
-    devguide/index
-
-.. toctree::
-    :maxdepth: 1
-    :hidden:
-    :caption: ✨ Credits
-
-    credits/credits
-    credits/citing
-    credits/license
-    credits/seealso
+    Examples <gettingstarted/examples/index>
+    About <credits/index>
 
 {% elif single and pattern.endswith('.ipynb') -%}
 .. toctree::

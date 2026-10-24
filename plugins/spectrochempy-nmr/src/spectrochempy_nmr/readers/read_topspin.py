@@ -1189,12 +1189,24 @@ def _read_topspin(*args, **kwargs):
     # The td adjustment for complex axes (except last) assumes quaternion/hypercomplex
     # conversion which is handled by the spectrochempy-hypercomplex plugin. Without it
     # the raw data shape must be preserved so that coordinates match.
-    try:
-        from spectrochempy_hypercomplex import (  # noqa: PLC0415
-            is_available as _hypercomplex_available,
-        )
-    except ModuleNotFoundError:
-        _hypercomplex_available = False
+    _hypercomplex_available = False
+    if any(meta.iscomplex[:-1]):
+        try:
+            from spectrochempy_hypercomplex import (  # noqa: PLC0415
+                is_available as _hypercomplex_available,
+            )
+        except ModuleNotFoundError as exc:
+            raise ImportError(
+                "Reading hypercomplex TopSpin data requires the "
+                "spectrochempy-hypercomplex plugin and its numpy-quaternion "
+                "dependency. Install spectrochempy-hypercomplex with its "
+                "dependencies before reading this dataset."
+            ) from exc
+        if not _hypercomplex_available:
+            raise ImportError(
+                "Reading hypercomplex TopSpin data requires numpy-quaternion "
+                "and the spectrochempy-hypercomplex plugin."
+            )
 
     _needs_ser_quaternion = False
 

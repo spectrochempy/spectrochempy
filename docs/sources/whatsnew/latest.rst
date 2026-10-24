@@ -34,3 +34,32 @@ Bug Fixes
 
 - Restored parsing of unit expressions that use a dot as a separator (e.g.
   ``kg.m`` or ``cm.s^-1``), which pint 0.26.2 rejects. (#1781)
+- Fix ``directory=`` imports with ``merge=True`` so compatible datasets
+  discovered under different file extensions can be merged across extension
+  groups, rather than being returned separately. (#1780)
+
+- Fixed ``scp.simpson`` so it always resolves to the public numerical
+  integration function ``simpson(dataset, dim='x')``, even when a plugin
+  contributes a SIMPSON I/O reader; ``scp.read_simpson`` and
+  ``scp.nmr.read_simpson`` remain the explicit file-reading surfaces and
+  ``dataset.simpson()`` is unchanged.
+- Correct OMNIC ``.spa`` interferogram optical-path-difference coordinates by
+  honoring the native header sample-spacing factor instead of always assuming
+  a doubled step.
+- Correct OMNIC ``.srs`` series time-axis anchoring (it now starts from the
+  recorded series minimum time) and fix per-spectrum labels, which no longer
+  include binary metadata leaked past the 84-byte record.
+- Normalize OMNIC ``.srs`` spectral series to the public ``read_spa``
+  convention: wavenumbers are exposed descending with the intensity data
+  matched to them. Rapid-scan interferograms keep their ascending data-points
+  axis and records with an unrecognized X-axis type are left unchanged with a
+  warning.
+
+- TopSpin imports now report when hypercomplex data require the optional
+  ``spectrochempy-hypercomplex`` and ``numpy-quaternion`` dependencies. (#1743)
+
+Dependency Updates
+~~~~~~~~~~~~~~~~~~
+
+- Updated the documentation dependency ``nbconvert`` to 7.17.2 to address an
+  arbitrary-file-write vulnerability when converting untrusted notebooks.
