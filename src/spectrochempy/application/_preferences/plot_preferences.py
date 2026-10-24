@@ -97,6 +97,7 @@ from traitlets import default
 from traitlets import observe
 from traitlets import validate
 
+from spectrochempy.utils._logging import warning_
 from spectrochempy.utils.metaconfigurable import MetaConfigurable
 
 
@@ -200,6 +201,7 @@ class PlotPreferences(MetaConfigurable):
     _groups = Set(Unicode())
     _subgroups = Set(Unicode())
     _members = Set(Unicode())
+    _restoring_style = False
 
     # ----------------------------------------------------------------------------------
     # Matplotlib rcParams mirrored as traitlets
@@ -1367,16 +1369,33 @@ class PlotPreferences(MetaConfigurable):
         Each style is processed by _apply_style(),
         which parses mplstyle files and sets trait values.
         """
+        if self._restoring_style:
+            return
         changes = change.new
         if not isinstance(changes, list):
             changes = [changes]
+        previous = {
+            name: value
+            for name, value in self.trait_values(config=True).items()
+            if name != "style"
+        }
         with self._batched_persistence():
-            for _style in changes:
-                if isinstance(_style, list | tuple):
-                    for s in _style:
-                        self._apply_style(s)
-                else:
-                    self._apply_style(_style)
+            try:
+                for _style in changes:
+                    if isinstance(_style, list | tuple):
+                        for s in _style:
+                            self._apply_style(s)
+                    else:
+                        self._apply_style(_style)
+            except Exception:
+                self._restoring_style = True
+                try:
+                    self.style = change.old
+                    for name, value in previous.items():
+                        setattr(self, name, value)
+                finally:
+                    self._restoring_style = False
+                raise
         # Note: LaTeX font settings are now applied locally in plotting contexts
         # via rc_context, not via global rcParams mutation
 
@@ -1697,15 +1716,21 @@ class PlotPreferences(MetaConfigurable):
             trait = self.traits().get(trait_name)
             coerced = self._coerce_for_trait(trait, raw_value, parsed)
 
-            setattr(self, trait_name, coerced)
+            try:
+                setattr(self, trait_name, coerced)
 
-            # SpectroChemPy-only parameters
-            if line.strip().startswith("##@"):
-                name, value = line[3:].split(":", maxsplit=1)
-                name = name.strip()
-                value = value.strip()
-                value = self._coerce_style_value(name, value)
-                setattr(self, name, value)
+                # SpectroChemPy-only parameters
+                if line.strip().startswith("##@"):
+                    name, value = line[3:].split(":", maxsplit=1)
+                    name = name.strip()
+                    value = value.strip()
+                    value = self._coerce_style_value(name, value)
+                    setattr(self, name, value)
+            except TraitError as exc:
+                warning_(
+                    f"Style '{_style}', line {lineno}: '{name}' is ignored: {exc}",
+                    UserWarning,
+                )
 
     def to_rc_key(self, key):
         """

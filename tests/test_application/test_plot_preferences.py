@@ -8,6 +8,8 @@
 import json
 from pathlib import Path
 
+import pytest
+
 import spectrochempy as scp
 
 
@@ -107,26 +109,24 @@ def test_plot_preferences_set_after_style_survive_reload(tmp_path):
     assert prefs.font_size == 20.0
 
 
-def test_reset_restores_all_plot_preferences():
+def test_reset_restores_all_plot_preferences(tmp_path):
     from spectrochempy.application.application import app
 
     prefs = scp.preferences
     config_dir = Path(app.general_preferences.cfg.config_dir)
+    prefs.style = "paper"
     prefs.colormap_sequential = "jet"
     prefs.colormap_categorical_small = "Set1"
     prefs.number_of_contours = 10
 
     prefs.reset()
 
-    plot_prefs = app.plot_preferences
-    for name in (
-        "colormap_sequential",
-        "colormap_categorical_small",
-        "number_of_contours",
-    ):
-        assert getattr(prefs, name) == plot_prefs.traits()[name].default_value
-    assert prefs.style == "scpy"
+    after_reset = app.plot_preferences.trait_values(config=True)
     assert not (config_dir / "PlotPreferences.json").exists()
+    assert after_reset == _new_app(tmp_path).plot_preferences.trait_values(config=True)
+    assert after_reset == _new_app(config_dir).plot_preferences.trait_values(
+        config=True
+    )
 
 
 def test_first_plot_keeps_saved_plot_preferences(tmp_path, monkeypatch):
@@ -154,7 +154,7 @@ def test_plot_preferences_reload_after_several_styles(tmp_path):
     assert prefs.trait_values(config=True) == expected
 
 
-def test_style_change_is_saved_in_one_write(tmp_path, monkeypatch):
+def test_style_values_and_style_name_are_saved_in_two_writes(tmp_path, monkeypatch):
     prefs = _new_app(tmp_path).plot_preferences
     writes = []
     update = prefs.cfg.update
@@ -165,3 +165,31 @@ def test_style_change_is_saved_in_one_write(tmp_path, monkeypatch):
     prefs.style = "ggplot"
 
     assert len(writes) == 2
+
+
+def test_failed_style_change_leaves_preferences_unchanged(tmp_path):
+    prefs = _new_app(tmp_path).plot_preferences
+    prefs.colormap = "magma"
+    before = prefs.trait_values(config=True)
+    saved = (tmp_path / "PlotPreferences.json").read_text()
+
+    with pytest.raises(Exception):
+        prefs.style = ["ggplot", "__not_a_style__"]
+
+    assert prefs.trait_values(config=True) == before
+    assert (tmp_path / "PlotPreferences.json").read_text() == saved
+    assert _new_app(tmp_path).plot_preferences.trait_values(config=True) == before
+
+
+def test_invalid_value_in_style_is_skipped_with_a_warning(tmp_path):
+    prefs = _new_app(tmp_path).plot_preferences
+    prefs.stylesheets = str(tmp_path)
+    (tmp_path / "partly_invalid.mplstyle").write_text(
+        "axes.titley : None\nlines.linewidth : 3\n"
+    )
+
+    with pytest.warns(UserWarning, match="axes.titley"):
+        prefs.style = "partly_invalid"
+
+    assert prefs.style == "partly_invalid"
+    assert prefs.lines_linewidth == 3.0

@@ -41,7 +41,8 @@ if str(DOCS_SOURCE_ROOT) not in pythonpath_entries:
     )
 
 # Preferences are saved: keep the user configuration out of the build, and
-# give each executed document its own configuration (see isolate_scp_config).
+# give each executed notebook its own configuration (see isolate_scp_config)
+# and each gallery example default preferences (see reset_scp_preferences).
 _SCP_DOCS_CONFIG = tempfile.TemporaryDirectory(prefix="scp-docs-config-")
 os.environ["SCP_CONFIG_HOME"] = _SCP_DOCS_CONFIG.name
 
@@ -750,6 +751,13 @@ else:
     gallery_examples_dirs = []
     gallery_output_dirs = []
 
+
+def reset_scp_preferences(gallery_conf, fname):
+    from spectrochempy.application.preferences import preferences
+
+    preferences.reset()
+
+
 if not single_doc_or_dir:
     sphinx_gallery_conf = {
         "plot_gallery": not noexec,
@@ -779,6 +787,8 @@ if not single_doc_or_dir:
         "ignore_pattern": "__init__.py",
         "min_reported_time": 0,
         "show_signature": False,  # Disable the signature if it's causing issues
+        # Examples run in this process: start each one from default preferences
+        "reset_modules": ("matplotlib", "seaborn", reset_scp_preferences),
     }
 
 # External links configuration -----------------------------------------------

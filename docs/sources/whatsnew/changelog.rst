@@ -29,8 +29,13 @@ Bug Fixes
 - Plot preferences are saved again in ``PlotPreferences.json`` and restored
   at the next session, including values set after choosing a style, and the
   first plot no longer moves this file away. ``preferences.reset()`` now
-  resets every plot preference, including the ``colormap_*`` ones, and
-  removes the saved file. (#1799)
+  resets every plot preference, including the ``colormap_*`` ones, to the
+  values of a new session, and removes the saved file. (#1799)
+- Setting ``preferences.style`` to a style that cannot be found, alone or in a
+  list, now leaves the preferences unchanged instead of partly applied. A
+  value of a style that does not fit its preference is skipped with a warning
+  naming it, instead of silently stopping the style at that line; the
+  ``grayscale`` style is now applied completely. (#1799)
 - Filter outputs now retain the applied method, effective dimension, and
   compact filter parameters in their structured history entries.
 - Whittaker-Eilers filtering now applies along the requested dimension.
@@ -95,5 +100,6 @@ Developer
 .. Add here developer changes (do not delete this comment)
 
 - The test suite and the documentation build use a temporary SpectroChemPy
-  configuration directory (one per executed document for the docs), so they
-  neither read nor overwrite the saved preferences of the user. (#1799)
+  configuration directory (one per executed notebook for the docs, and
+  default preferences before each gallery example), so they neither read nor
+  overwrite the saved preferences of the user. (#1799)

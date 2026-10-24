@@ -148,7 +148,14 @@ class PreferencesSet(Meta):
     # Public methods
     # ----------------------------------------------------------------------------------
     def reset(self, include_all=False):
-        """Reset plot preferences to their defaults and remove the saved ones."""
+        """
+        Reset plot preferences to their defaults and remove the saved ones.
+
+        After a reset, plot preferences have the values of a new session
+        without saved preferences: the default value of each preference, and
+        the default ``scpy`` style.
+        """
+        self._ensure_app_ready()
         config_dir = pathclean(app.general_preferences.cfg.config_dir)
 
         if include_all:
@@ -160,8 +167,9 @@ class PreferencesSet(Meta):
         plot_preferences = app.plot_preferences
         with plot_preferences._batched_persistence():
             plot_preferences.reset()
-            plot_preferences._apply_style("scpy")
-            self.style = "scpy"
+            for name, value in plot_preferences.params(default=True).items():
+                if name != "style":
+                    setattr(plot_preferences, name, value)
 
         (config_dir / "PlotPreferences.json").unlink(missing_ok=True)
 

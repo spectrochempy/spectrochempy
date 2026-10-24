@@ -33,7 +33,7 @@ font.family: sans-serif
 ##
 ## ADDITIONAL PARAMETERS FOR SPECTROCHEMPY
 ##
-##@colorbar                              : auto
+##@colorbar                              : None
 ##@colormap                              : auto
 ##@colormap_sequential                   : gray
 ##@colormap_diverging                    : gray

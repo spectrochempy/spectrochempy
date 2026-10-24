@@ -180,18 +180,24 @@ class MetaConfigurable(Configurable):
 
     @contextmanager
     def _batched_persistence(self):
-        """Save the configuration changes made inside the block in a single write."""
+        """
+        Save the configuration changes made inside the block in a single write.
+
+        Nothing is saved if the block raises an exception.
+        """
         if self._pending_persistence is not None:
             yield
             return
         self._pending_persistence = {}
         try:
             yield
-        finally:
-            values = self._pending_persistence
+        except BaseException:
             self._pending_persistence = None
-            if values:
-                self._persist(values)
+            raise
+        values = self._pending_persistence
+        self._pending_persistence = None
+        if values:
+            self._persist(values)
 
     def _persist(self, values):
         try:
