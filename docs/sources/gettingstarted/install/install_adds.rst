@@ -51,7 +51,7 @@ instance with the shortcut created during installation).
 
       .. code-block:: bash
 
-         mamba install -c spectrocat spectrochempy-nmr    # one plugin
+         mamba install -c conda-forge -c spectrocat spectrochempy-nmr    # one plugin
 
       Replace ``spectrochempy-nmr`` by the name of the plugin you need; to
       install several plugins, list their names in the same command.
@@ -93,14 +93,15 @@ to work without an internet connection:
 
 .. code-block:: bash
 
-   mamba install -c spectrocat spectrochempy_data
+   mamba install -c conda-forge -c spectrocat spectrochempy_data
 
 Other Optional Packages
 -----------------------
 
-* **Jupyter**: installed with the ``[interactive]`` extra (pip, uv) or with
-  ``mamba install jupyterlab`` (conda / mamba), as described in the
-  installation guides.
+* **JupyterLab**: installed together with SpectroChemPy by the commands of the
+  installation guides. To add it later to an existing environment:
+  ``uv pip install jupyterlab``, ``python -m pip install jupyterlab`` or
+  ``mamba install jupyterlab``.
 * **xarray**: needed only to convert datasets to and from
   `xarray <https://xarray.dev>`_ objects
   (``uv pip install xarray``, ``python -m pip install xarray`` or
