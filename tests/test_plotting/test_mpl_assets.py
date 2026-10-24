@@ -48,7 +48,9 @@ def test_stylesheets_idempotent(caplog):
     ensure_mpl_assets_installed()
 
 
-def test_obsolete_stylesheet_removed_only_if_unmodified(fake_mpl_dirs, monkeypatch):
+def test_obsolete_stylesheet_removed_from_user_stylelib_only(
+    fake_mpl_dirs, monkeypatch
+):
     from spectrochempy.plotting import _mpl_assets
 
     configdir, datadir, _ = fake_mpl_dirs
@@ -63,13 +65,31 @@ def test_obsolete_stylesheet_removed_only_if_unmodified(fake_mpl_dirs, monkeypat
     system_copy = datadir / "stylelib" / "mycustom.mplstyle"
     for path in (user_copy, system_copy):
         path.parent.mkdir(parents=True)
-    user_copy.write_bytes(shipped)
-    system_copy.write_bytes(b"lines.linewidth : 2\n")
+        path.write_bytes(shipped)
 
     _mpl_assets.ensure_mpl_assets_installed()
 
     assert not user_copy.exists()
-    assert system_copy.read_bytes() == b"lines.linewidth : 2\n"
+    assert system_copy.read_bytes() == shipped
+
+
+def test_modified_obsolete_stylesheet_kept(fake_mpl_dirs, monkeypatch):
+    from spectrochempy.plotting import _mpl_assets
+
+    configdir, _, _ = fake_mpl_dirs
+    monkeypatch.setattr(
+        _mpl_assets,
+        "_OBSOLETE_STYLESHEETS",
+        {"mycustom.mplstyle": hashlib.sha256(b"shipped\n").hexdigest()},
+    )
+
+    user_copy = configdir / "stylelib" / "mycustom.mplstyle"
+    user_copy.parent.mkdir(parents=True)
+    user_copy.write_bytes(b"lines.linewidth : 2\n")
+
+    _mpl_assets.ensure_mpl_assets_installed()
+
+    assert user_copy.read_bytes() == b"lines.linewidth : 2\n"
 
 
 def test_no_obsolete_stylesheet_shipped():

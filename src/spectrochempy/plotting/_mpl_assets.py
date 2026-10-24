@@ -42,7 +42,8 @@ def ensure_mpl_assets_installed():
 
 
 # Generated stylesheets shipped by mistake in earlier releases, by SHA-256.
-# Installed copies are removed only when they are unmodified.
+# Copies in the user stylelib are removed only when they are unmodified;
+# the Matplotlib installation directory is left untouched.
 _OBSOLETE_STYLESHEETS = {
     # spectrochempy 1.1.1 to 1.1.3
     "mycustom.mplstyle": (
@@ -51,23 +52,22 @@ _OBSOLETE_STYLESHEETS = {
 }
 
 
-def _remove_obsolete_stylesheets(*stylelibs):
+def _remove_obsolete_stylesheets(stylelib):
     import hashlib
 
     removed = False
-    for stylelib in stylelibs:
-        for name, digest in _OBSOLETE_STYLESHEETS.items():
-            path = stylelib / name
-            try:
-                if (
-                    path.is_file()
-                    and hashlib.sha256(path.read_bytes()).hexdigest() == digest
-                ):
-                    path.unlink()
-                    debug_("Removed obsolete stylesheet %s", path)
-                    removed = True
-            except Exception as exc:
-                warning_(f"Failed to remove obsolete stylesheet {path}: {exc}")
+    for name, digest in _OBSOLETE_STYLESHEETS.items():
+        path = stylelib / name
+        try:
+            if (
+                path.is_file()
+                and hashlib.sha256(path.read_bytes()).hexdigest() == digest
+            ):
+                path.unlink()
+                debug_("Removed obsolete stylesheet %s", path)
+                removed = True
+        except Exception as exc:
+            warning_(f"Failed to remove obsolete stylesheet {path}: {exc}")
     return removed
 
 
@@ -75,10 +75,7 @@ def _install_stylesheets():
     import matplotlib as mpl
 
     # Done before importing pyplot, which parses the user stylelib.
-    removed = _remove_obsolete_stylesheets(
-        Path(mpl.get_configdir()) / "stylelib",
-        Path(mpl.get_data_path()) / "stylelib",
-    )
+    removed = _remove_obsolete_stylesheets(Path(mpl.get_configdir()) / "stylelib")
 
     import matplotlib.pyplot as plt
 
