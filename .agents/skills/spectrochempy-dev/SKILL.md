@@ -290,6 +290,30 @@ Hygiene rules:
 * Archive notes in `../spectrochempy_maintainer/archive/audits/` once they become
   primarily historical.
 
+### Maintainer Reconciliation After Push or Merge
+
+For maintainer-directed work, reconciliation is mandatory after every push that
+updates a PR and again after its merge. Do not treat a product PR as complete
+while its maintainer records are only local, staged, or on an unrelated branch.
+
+After a push, verify the remote branch, PR head, CI-relevant labels, and local
+worktree status. Update the associated Bead and run
+`bd -C ../spectrochempy_maintainer backup sync` when Beads data changed.
+
+After a merge, verify the merge on GitHub, fetch the official product `master`,
+then reconcile `spectrochempy_maintainer` against the merged result:
+
+1. update and publish the relevant audit, plan, or decision note on maintainer
+   `master` (unless the maintainer explicitly defers it);
+2. review the applicable README/index, task status, roadmap, and archive
+   placement so active, completed, and deferred work agree;
+3. update/close the associated Bead and synchronize its backup;
+4. inspect every task-owned worktree and remove clean merged worktrees;
+5. leave no task-owned notes staged locally or only pushed to a side branch.
+
+If a reconciliation item is intentionally deferred, record the reason in the
+maintainer note or Bead before reporting the merge as complete.
+
 ---
 
 ## Self-Review (Implementation)
