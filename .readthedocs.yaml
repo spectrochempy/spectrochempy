@@ -17,7 +17,7 @@ build:
       - git fetch --unshallow || true
       - git fetch --all --tags || true
     install:
-      - python -m pip install --upgrade pip
+      - python .github/actions/verified-pip/verified_pip.py
       # The ``plugins`` extra is deliberately NOT requested here: it would
       # resolve the plugins published on PyPI, and the post_install job below
       # replaces them with the ones from this checkout.
