@@ -21,6 +21,7 @@ import hashlib
 
 import numpy as np
 import pytest
+from spectrochempy_nmr.processing.linear_prediction import _linear_predict_after
 
 import spectrochempy as scp
 
@@ -48,6 +49,8 @@ EXAM2D_HH_SHA256 = {
     "pdata/1/procs": "15083e49296a29e66dfb85c41519680ab4157c0cdebf455f89af9195dec73261",
     "pdata/1/proc2s": "f5f4838b2e39188de217214882c105f3d04a8de81d2fbaba565dab596b8bb5b8",
 }
+EXAM2D_HH_F1_NCOEF = 32
+EXAM2D_HH_F1_LPBIN = 256
 
 
 def _has_agilent_data():
@@ -86,13 +89,18 @@ def _sine_window(size):
     return np.sin(np.pi * (np.arange(size) + 0.5) / size)
 
 
-def _qf_cosy_exam2d_hh(raw):
+def _qf_cosy_exam2d_hh(raw, *, apply_linear_prediction=False):
     data = np.asarray(raw.data).copy()
-    direct = np.zeros((1024, 1024), dtype=np.complex128)
+    direct = np.zeros((data.shape[0], 1024), dtype=np.complex128)
     direct[: data.shape[0], : data.shape[1]] = data * _sine_window(data.shape[1])
     f2 = np.fft.fftshift(np.fft.fft(direct, axis=1), axes=1)
-    f2 *= _sine_window(f2.shape[0])[:, None]
-    return np.abs(np.fft.fftshift(np.fft.ifft(f2, axis=0), axes=0))
+    if apply_linear_prediction:
+        f2 = _linear_predict_after(
+            f2.T, final_size=EXAM2D_HH_F1_LPBIN, order=EXAM2D_HH_F1_NCOEF
+        ).T
+    indirect = np.zeros((1024, 1024), dtype=np.complex128)
+    indirect[: f2.shape[0]] = f2 * _sine_window(f2.shape[0])[:, None]
+    return np.abs(np.fft.fftshift(np.fft.ifft(indirect, axis=0), axes=0))
 
 
 def _normalized(data):
@@ -382,8 +390,18 @@ class TestExam2DHHQFCOSY:
             assert int(_jcamp_value(proc_file, "SSB")) == 0
             assert float(_jcamp_value(proc_file, "PHC0")) == 0.0
             assert float(_jcamp_value(proc_file, "PHC1")) == 0.0
+        assert int(_jcamp_value(root / "pdata" / "1" / "proc2s", "ME_mod")) == 2
+        assert (
+            int(_jcamp_value(root / "pdata" / "1" / "proc2s", "NCOEF"))
+            == EXAM2D_HH_F1_NCOEF
+        )
+        assert (
+            int(_jcamp_value(root / "pdata" / "1" / "proc2s", "LPBIN"))
+            == EXAM2D_HH_F1_LPBIN
+        )
 
-        calculated = _normalized(_qf_cosy_exam2d_hh(raw))
+        without_lp = _normalized(_qf_cosy_exam2d_hh(raw))
+        calculated = _normalized(_qf_cosy_exam2d_hh(raw, apply_linear_prediction=True))
         ref = _normalized(np.asarray(reference.data).real)
 
         assert calculated.shape == (1024, 1024)
@@ -418,13 +436,17 @@ class TestExam2DHHQFCOSY:
         assert rank_preserved >= 8
 
         residual = calculated - ref
-        assert float(np.sqrt(np.mean(residual**2))) <= 0.01
-        assert _normalized_overlap(calculated, ref) >= 0.85
+        assert float(np.sqrt(np.mean(residual**2))) <= 0.001
+        assert _normalized_overlap(calculated, ref) >= 0.99
+        assert (
+            _normalized_overlap(calculated, ref)
+            >= _normalized_overlap(without_lp, ref) + 0.1
+        )
 
         inner = np.s_[5:-5, 5:-5]
         inner_residual = calculated[inner] - ref[inner]
-        assert float(np.sqrt(np.mean(inner_residual**2))) <= 0.01
-        assert _normalized_overlap(calculated[inner], ref[inner]) >= 0.85
+        assert float(np.sqrt(np.mean(inner_residual**2))) <= 0.001
+        assert _normalized_overlap(calculated[inner], ref[inner]) >= 0.99
 
         np.testing.assert_array_equal(raw.data, raw_data)
         assert raw.meta.nmr_processing == raw_processing
