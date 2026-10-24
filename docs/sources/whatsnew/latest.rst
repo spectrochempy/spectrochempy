@@ -26,6 +26,14 @@ Bug Fixes
 
 - Restored parsing of unit expressions that use a dot as a separator (e.g.
   ``kg.m`` or ``cm.s^-1``), which pint 0.26.2 rejects. (#1781)
+- Importing SpectroChemPy or plotting no longer floods the output with
+  Matplotlib "Bad key" warnings with Matplotlib older than 3.11, e.g. on Google
+  Colab. A generated ``mycustom.mplstyle`` shipped by mistake in 1.1.1 to 1.1.3
+  is removed, along with its unmodified copy in the user Matplotlib stylelib.
+  A copy left in Matplotlib's own ``mpl-data/stylelib`` directory is not
+  touched; delete it by hand if the warnings persist. (#1789)
+- ``preferences.makestyle(..., to_mpl=True)`` no longer raises ``TypeError`` and
+  makes the new style immediately usable by name, e.g. ``plot(style=...)``.
 - Fix ``directory=`` imports with ``merge=True`` so compatible datasets
   discovered under different file extensions can be merged across extension
   groups, rather than being returned separately. (#1780)
