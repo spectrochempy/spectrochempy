@@ -13,6 +13,7 @@ import os
 import re
 import shutil
 import sys
+import tempfile
 import tomllib
 import warnings
 from datetime import datetime
@@ -38,6 +39,12 @@ if str(DOCS_SOURCE_ROOT) not in pythonpath_entries:
     os.environ["PYTHONPATH"] = os.pathsep.join(
         [str(DOCS_SOURCE_ROOT), *filter(None, pythonpath_entries)]
     )
+
+# Preferences are saved: keep the user configuration out of the build, and
+# give each executed notebook its own configuration (see isolate_scp_config)
+# and each gallery example default preferences (see reset_scp_preferences).
+_SCP_DOCS_CONFIG = tempfile.TemporaryDirectory(prefix="scp-docs-config-")
+os.environ["SCP_CONFIG_HOME"] = _SCP_DOCS_CONFIG.name
 
 import spectrochempy
 
@@ -744,6 +751,13 @@ else:
     gallery_examples_dirs = []
     gallery_output_dirs = []
 
+
+def reset_scp_preferences(gallery_conf, fname):
+    from spectrochempy.application.preferences import preferences
+
+    preferences.reset()
+
+
 if not single_doc_or_dir:
     sphinx_gallery_conf = {
         "plot_gallery": not noexec,
@@ -773,6 +787,8 @@ if not single_doc_or_dir:
         "ignore_pattern": "__init__.py",
         "min_reported_time": 0,
         "show_signature": False,  # Disable the signature if it's causing issues
+        # Examples run in this process: start each one from default preferences
+        "reset_modules": ("matplotlib", "seaborn", reset_scp_preferences),
     }
 
 # External links configuration -----------------------------------------------
@@ -1170,7 +1186,14 @@ def citing_papers(app, docname, source):
     citing_papers_source_read(app, source, REFERENCE / "bibliography.bib")
 
 
+def isolate_scp_config(app, docname, source):
+    config_home = Path(_SCP_DOCS_CONFIG.name) / docname.replace("/", "__")
+    config_home.mkdir(parents=True, exist_ok=True)
+    os.environ["SCP_CONFIG_HOME"] = str(config_home)
+
+
 def setup(app):
+    app.connect("source-read", isolate_scp_config)
     app.connect("source-read", citing_papers)
     app.connect("source-read", rstjinja)
     app.connect("autodoc-skip-member", autodoc_skip_member)

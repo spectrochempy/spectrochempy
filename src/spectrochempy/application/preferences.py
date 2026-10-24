@@ -148,12 +148,15 @@ class PreferencesSet(Meta):
     # Public methods
     # ----------------------------------------------------------------------------------
     def reset(self, include_all=False):
-        """Remove the matplotlib_user json file to reset to defaults."""
-        config_dir = pathclean(app.general_preferences.cfg.config_dir)
+        """
+        Reset plot preferences to their defaults and remove the saved ones.
 
-        f = config_dir / "PlotPreferences.json"
-        if f.exists():
-            f.unlink()
+        After a reset, plot preferences have the values of a new session
+        without saved preferences: the default value of each preference, and
+        the default ``scpy`` style.
+        """
+        self._ensure_app_ready()
+        config_dir = pathclean(app.general_preferences.cfg.config_dir)
 
         if include_all:
             # by default we do not delete general preferences
@@ -161,36 +164,14 @@ class PreferencesSet(Meta):
             if f.exists():
                 f.unlink()
 
-        app.plot_preferences._apply_style("scpy")
-        self.style = "scpy"
+        plot_preferences = app.plot_preferences
+        with plot_preferences._batched_persistence():
+            plot_preferences.reset()
+            for name, value in plot_preferences.params(default=True).items():
+                if name != "style":
+                    setattr(plot_preferences, name, value)
 
-        # reset also non-matplolib preferences
-        nonmplpars = [
-            # Active non-matplotlib preferences:
-            "colorbar",
-            "show_projections",
-            "show_projection_x",
-            "show_projection_y",
-            "colormap",
-            "max_lines_in_stack",
-            "number_of_x_labels",
-            "number_of_y_labels",
-            "number_of_z_labels",
-            "number_of_contours",
-            "contour_alpha",
-            "contour_start",
-            "antialiased",
-            "rcount",
-            "ccount",
-            # New preferences (v1.0+):
-            "axes3d_elev",
-            "axes3d_azim",
-            "baseline_region_color",
-            "baseline_region_alpha",
-            "image_equal_aspect",
-        ]
-        for par in nonmplpars:
-            setattr(self, par, app.plot_preferences.traits()[par].default_value)
+        (config_dir / "PlotPreferences.json").unlink(missing_ok=True)
 
         self._data = {}
 

@@ -13,10 +13,18 @@ import matplotlib
 matplotlib.use("Agg", force=True)
 
 import os
+import tempfile
 from pathlib import Path
 
 import numpy as np
 import pytest
+
+# Preferences are saved: keep the user configuration out of the tests, with one
+# directory per process (this module is also imported as ``tests.conftest``).
+if os.environ.get("SCP_TEST_CONFIG_PID") != str(os.getpid()):
+    _SCP_TEST_CONFIG = tempfile.TemporaryDirectory(prefix="scp-test-config-")
+    os.environ["SCP_CONFIG_HOME"] = _SCP_TEST_CONFIG.name
+    os.environ["SCP_TEST_CONFIG_PID"] = str(os.getpid())
 
 import spectrochempy
 

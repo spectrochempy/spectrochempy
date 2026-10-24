@@ -97,6 +97,7 @@ from traitlets import default
 from traitlets import observe
 from traitlets import validate
 
+from spectrochempy.utils._logging import warning_
 from spectrochempy.utils.metaconfigurable import MetaConfigurable
 
 
@@ -200,6 +201,7 @@ class PlotPreferences(MetaConfigurable):
     _groups = Set(Unicode())
     _subgroups = Set(Unicode())
     _members = Set(Unicode())
+    _restoring_style = False
 
     # ----------------------------------------------------------------------------------
     # Matplotlib rcParams mirrored as traitlets
@@ -1262,6 +1264,15 @@ class PlotPreferences(MetaConfigurable):
                 raise NotImplementedError
             self._members.add(lis[0])
 
+        # Loading the saved configuration applies the saved style after the
+        # other saved values: restore them, as they were saved after the style.
+        saved = self.config.get(self.name, {})
+        if "style" in saved:
+            config_traits = self.trait_names(config=True)
+            for name, value in saved.items():
+                if name != "style" and name in config_traits:
+                    setattr(self, name, value)
+
     @property
     def available_styles(self):
         return available_styles()
@@ -1358,18 +1369,33 @@ class PlotPreferences(MetaConfigurable):
         Each style is processed by _apply_style(),
         which parses mplstyle files and sets trait values.
         """
+        if self._restoring_style:
+            return
         changes = change.new
         if not isinstance(changes, list):
             changes = [changes]
-        for _style in changes:
+        previous = {
+            name: value
+            for name, value in self.trait_values(config=True).items()
+            if name != "style"
+        }
+        with self._batched_persistence():
             try:
-                if isinstance(_style, list | tuple):
-                    for s in _style:
-                        self._apply_style(s)
-                else:
-                    self._apply_style(_style)
-            except Exception as e:
-                raise e
+                for _style in changes:
+                    if isinstance(_style, list | tuple):
+                        for s in _style:
+                            self._apply_style(s)
+                    else:
+                        self._apply_style(_style)
+            except Exception:
+                self._restoring_style = True
+                try:
+                    self.style = change.old
+                    for name, value in previous.items():
+                        setattr(self, name, value)
+                finally:
+                    self._restoring_style = False
+                raise
         # Note: LaTeX font settings are now applied locally in plotting contexts
         # via rc_context, not via global rcParams mutation
 
@@ -1690,15 +1716,21 @@ class PlotPreferences(MetaConfigurable):
             trait = self.traits().get(trait_name)
             coerced = self._coerce_for_trait(trait, raw_value, parsed)
 
-            setattr(self, trait_name, coerced)
+            try:
+                setattr(self, trait_name, coerced)
 
-            # SpectroChemPy-only parameters
-            if line.strip().startswith("##@"):
-                name, value = line[3:].split(":", maxsplit=1)
-                name = name.strip()
-                value = value.strip()
-                value = self._coerce_style_value(name, value)
-                setattr(self, name, value)
+                # SpectroChemPy-only parameters
+                if line.strip().startswith("##@"):
+                    name, value = line[3:].split(":", maxsplit=1)
+                    name = name.strip()
+                    value = value.strip()
+                    value = self._coerce_style_value(name, value)
+                    setattr(self, name, value)
+            except TraitError as exc:
+                warning_(
+                    f"Style '{_style}', line {lineno}: '{name}' is ignored: {exc}",
+                    UserWarning,
+                )
 
     def to_rc_key(self, key):
         """
@@ -1718,22 +1750,6 @@ class PlotPreferences(MetaConfigurable):
             rckey += "."
         rckey += "_".join(lis)
         return rckey
-
-    # @observe(All)  # DISABLED: Remove automatic global rcParams mutation
-
-    def _anytrait_changed(self, change):
-        """
-        Handle trait changes - no longer applies to global matplotlib state.
-
-        Preference changes are now handled locally in plotting contexts,
-        not through global matplotlib state mutation.
-
-        Note: LaTeX font settings are now applied via rc_context in plotting
-        functions (plot1d.py, plot2d.py), not via trait observers.
-        """
-        # LaTeX font changes are handled locally in plotting contexts
-        # via rc_context, not via global rcParams mutation
-        super()._anytrait_changed(change)
 
 
 # =============================================================================
