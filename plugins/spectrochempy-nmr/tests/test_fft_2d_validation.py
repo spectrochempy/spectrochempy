@@ -240,7 +240,17 @@ class TestFFT2DAgilent:
 
         mag = _mag_from_quat_or_complex(fft)
         idx, maxval = _peak_info(mag)
+        assert np.isfinite(mag).all(), "Non-finite values after Agilent 2D TPPI FFT"
         assert maxval > 0, "No peak found after Agilent 2D TPPI FFT"
+
+    def test_agilent_2d_tppi_two_step_fft_stays_finite(self):
+        ds = scp.read_agilent(EXTRA_NMR / "agilent" / "agilent_2d_tppi")
+
+        result = ds.fft(dim="x").fft(dim="y")
+
+        assert result.shape == ds.shape
+        assert np.isfinite(result.data).all()
+        assert np.max(np.abs(result.data)) > 0
 
     def test_agilent_2d_fft_encoding_preserved(self):
         ds = scp.read_agilent(EXTRA_NMR / "agilent" / "agilent_2d")
