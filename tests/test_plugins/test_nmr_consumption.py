@@ -24,6 +24,8 @@ import spectrochempy as scp
 
 pytestmark = pytest.mark.plugin
 
+_MISSING = object()
+
 pytest.importorskip(
     "spectrochempy_nmr",
     reason="requires the optional spectrochempy-nmr plugin",
@@ -138,11 +140,27 @@ def test_synthetic_topspin_directory_reads(tmp_path):
 
 def test_nmr_unit_context_converts_ppm_and_hertz():
     """The plugin contributes the ppm/frequency conversion context."""
-    scp.nmr.set_nmr_context(400.13 * scp.ur.MHz)
+    contexts = scp.ur._contexts
+    previous_context = contexts.get("nmr")
+    previous_larmor = (
+        previous_context.defaults.get("larmor", _MISSING)
+        if previous_context is not None
+        else _MISSING
+    )
 
-    with scp.ur.context("nmr"):
-        ppm = (400.13 * scp.ur.Hz).to("ppm")
-        hertz = (1.0 * scp.ur.ppm).to("Hz")
+    try:
+        scp.nmr.set_nmr_context(400.13 * scp.ur.MHz)
+
+        with scp.ur.context("nmr"):
+            ppm = (400.13 * scp.ur.Hz).to("ppm")
+            hertz = (1.0 * scp.ur.ppm).to("Hz")
+    finally:
+        if previous_context is None:
+            contexts.pop("nmr", None)
+        elif previous_larmor is _MISSING:
+            previous_context.defaults.pop("larmor", None)
+        else:
+            previous_context.defaults["larmor"] = previous_larmor
 
     assert f"{ppm:~.3f}" == "1.000 ppm"
     assert f"{hertz:~.3f}" == "400.130 Hz"
