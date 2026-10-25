@@ -31,6 +31,8 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Fixed the Agilent TPPI direct FFT path so ordinary complex acquisitions are
+  no longer interpreted as quaternion data, preventing non-finite results.
 - Filter outputs now retain the applied method, effective dimension, and
   compact filter parameters in their structured history entries.
 - Whittaker-Eilers filtering now applies along the requested dimension.

@@ -11,19 +11,6 @@ from __future__ import annotations
 import pytest
 
 import spectrochempy as scp
-from tests.test_core.test_readers._reader_semantic_helpers import (
-    assert_coordinate_semantics,
-)
-from tests.test_core.test_readers._reader_semantic_helpers import (
-    assert_dataset_identity,
-)
-from tests.test_core.test_readers._reader_semantic_helpers import (
-    assert_dataset_provenance,
-)
-from tests.test_core.test_readers._reader_semantic_helpers import assert_history_present
-from tests.test_core.test_readers._reader_semantic_helpers import (
-    assert_meta_keys_present,
-)
 
 pytest.importorskip("spectrochempy_nmr", reason="requires the NMR plugin")
 
@@ -56,6 +43,12 @@ def _assert_topspin_time_provenance(dataset):
         assert dataset.meta.date is not None
 
 
+def _assert_import_history(dataset):
+    assert dataset.history
+    history_text = " ".join(str(entry) for entry in dataset.history)
+    assert "Imported TopSpin dataset" in history_text
+
+
 @pytest.fixture
 def topspin_dataset_1d():
     return _read_topspin_or_skip(_require_path(NMRDIR / "topspin_1d" / "1" / "fid"))
@@ -72,20 +65,19 @@ def test_topspin_1d_currently_sets_origin_filename_typed_acquisition_date_and_me
 ):
     dataset = topspin_dataset_1d
 
-    assert_dataset_identity(dataset, title="intensity")
+    assert dataset.title == "intensity"
     assert str(dataset.units) == "count"
-    assert_dataset_provenance(
-        dataset,
-        origin="topspin",
-        filename_name="topspin_1d",
-    )
+    assert dataset.origin == "topspin"
+    assert dataset.filename.name == "topspin_1d"
     _assert_topspin_time_provenance(dataset)
     assert "expno:1" in dataset.name
-    assert_history_present(dataset, "Imported TopSpin dataset")
+    _assert_import_history(dataset)
 
-    x = assert_coordinate_semantics(dataset, "x")
+    x = dataset.coord("x")
+    assert x is not None
     assert x.meta["acquisition_frequency"] is not None
-    assert_meta_keys_present(dataset, "date", "datatype", "pathname", "expno")
+    for key in ("date", "datatype", "pathname", "expno"):
+        assert key in dataset.meta
     assert dataset.meta.readonly
 
 
@@ -95,16 +87,14 @@ def test_topspin_2d_currently_sets_import_history(
 ):
     dataset = topspin_dataset_2d
 
-    assert_dataset_identity(dataset, title="intensity")
+    assert dataset.title == "intensity"
     assert str(dataset.units) == "count"
-    assert_dataset_provenance(
-        dataset,
-        origin="topspin",
-        filename_name="topspin_2d",
-    )
+    assert dataset.origin == "topspin"
+    assert dataset.filename.name == "topspin_2d"
     _assert_topspin_time_provenance(dataset)
-    assert_history_present(dataset, "Imported TopSpin dataset")
-    assert_coordinate_semantics(dataset, "x")
-    y = assert_coordinate_semantics(dataset, "y")
+    _assert_import_history(dataset)
+    assert dataset.coord("x") is not None
+    y = dataset.coord("y")
+    assert y is not None
     assert y.title in {"time", "Time", "F1 acquisition time", None}
     assert y.size == dataset.shape[0]
