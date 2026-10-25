@@ -145,11 +145,18 @@ jobs:
           python3 .github/workflows/scripts/conda_publish.py validate-release \
             "$RUNNER_TEMP/recovery/plugins/spectrochempy-perkinelmer" "$TAG_VERSION"
 
+      - name: Configure Rattler Build to use system certificates
+        run: |
+          mkdir -p "$RUNNER_TEMP/rattler"
+          printf 'tls-root-certs = "native"\n' > "$RUNNER_TEMP/rattler/config.toml"
+          echo "RATTLER_HOME=$RUNNER_TEMP/rattler" >> "$GITHUB_ENV"
+
       - name: Build recovered recipe with rattler-build
         uses: prefix-dev/rattler-build-action@v0.2.39
         env:
           CONDA_BLD_PATH: ../recovery-output
         with:
+          rattler-build-version: v0.77.0
           recipe-path: ${{ steps.resolve.outputs.recipe_path }}/${{ steps.resolve.outputs.recipe_file }}
           upload-artifact: false
           # spectrocat comes first so spectrochempy resolves from our channel.
@@ -177,12 +184,7 @@ jobs:
             exit 1
           fi
 
-      - name: Upload recovered package artifact (no publication)
-        if: ${{ !env.ACT }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: recovery-spectrochempy-perkinelmer-${{ inputs.version || '0.1.4' }}
-          path: |
-            recovery-output/**/*.conda
-            recovery-output/**/*.tar.bz2
-          retention-days: 30
+      - name: Report recovered package location
+        run: |
+          echo "Recovered package was built and verified locally in recovery-output/."
+          echo "The package is not uploaded or retained as a GitHub Actions artifact."

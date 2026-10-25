@@ -12,6 +12,7 @@ They are listed below exhaustively.
 What is not listed here is reserved for developers and should not normally be necessary for normal use of `SpectroChemPy` .
 
 .. contents:: Table of Contents
+   :backlinks: none
 
 ***************
 Loading the API
@@ -173,6 +174,11 @@ Reader functions may return either a single ``NDDataset`` or a list-like
 case, helper methods such as ``datasets.names``,
 ``datasets.select_largest(ndim=2)``, and ``datasets.select_by_name("spectra")``
 make it easier to pick the dataset you want while staying in the public API.
+
+The SOC readers ``read_soc``, ``read_ddr``, ``read_hdr`` and ``read_sdr`` are
+kept as explicit public entry points. Their ``.ddr``, ``.hdr`` and ``.sdr``
+files are SPA-compatible and share the private OMNIC SPA parser, but the SOC
+readers preserve SOC provenance and their established multi-file defaults.
 
 The NMR readers ``read_topspin`` and ``read_agilent`` require the
 ``spectrochempy-nmr`` plugin to be installed. The PerkinElmer reader

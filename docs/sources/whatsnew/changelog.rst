@@ -26,44 +26,42 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
-- Bruker 2D QF/DQD FFT dispatch now keeps direct complex dimensions in the
-  standard complex Fourier convention and processes indirect QF complex data
-  without routing it through quaternion extraction. This fixes the public
-  ``raw.fft()`` path for the bounded ``exam2d_HH`` QF/COSY case while
-  preserving the existing 1D QSIM convention.
+- Fixed the Agilent TPPI direct FFT path so ordinary complex acquisitions are
+  no longer interpreted as quaternion data, preventing non-finite results.
+- Filter outputs now retain the applied method, effective dimension, and
+  compact filter parameters in their structured history entries.
+- Whittaker-Eilers filtering now applies along the requested dimension.
+- Baseline correction outputs now record the fitted model and its effective
+  parameters in their structured history entry instead of only an arithmetic
+  subtraction.
+- ``basc()`` and ``get_baseline()`` now honor ``ranges=`` passed as a keyword
+  instead of silently overwriting it with the positional ranges.
 
-- The CSV reader no longer changes the process-wide locale at import time.
-  It previously forced ``LC_ALL`` to ``en_US`` (through
-  ``locale.setlocale``), which emitted a spurious *"Could not set locale:
-  en_US or en_US.utf8"* warning on systems where that locale is not
-  installed (e.g. the docs build) and left the process locale modified
-  afterwards. OMNIC CSV acquisition dates are now parsed under a scoped
-  English date locale (``LC_TIME="C"``), so exports with translated French
-  weekday/month names also parse correctly where ``en_US`` is unavailable
-  (:pr:`1767`).
+- Restored parsing of unit expressions that use a dot as a separator (e.g.
+  ``kg.m`` or ``cm.s^-1``), which pint 0.26.2 rejects. (#1781)
+- Fix ``directory=`` imports with ``merge=True`` so compatible datasets
+  discovered under different file extensions can be merged across extension
+  groups, rather than being returned separately. (#1780)
 
-- Savitzky-Golay derivatives now preserve the source dataset name and retain
-  prior history, appending one processing entry per call instead of generating
-  a ``_Filter.transform`` name and replacing the history. This applies to
-  ``savgol``, ``savgol_filter``, ``differentiate`` and ``Filter.transform``;
-  derivative titles and unit scaling are unchanged (:issue:`1756`).
+- Fixed ``scp.simpson`` so it always resolves to the public numerical
+  integration function ``simpson(dataset, dim='x')``, even when a plugin
+  contributes a SIMPSON I/O reader; ``scp.read_simpson`` and
+  ``scp.nmr.read_simpson`` remain the explicit file-reading surfaces and
+  ``dataset.simpson()`` is unchanged.
+- Correct OMNIC ``.spa`` interferogram optical-path-difference coordinates by
+  honoring the native header sample-spacing factor instead of always assuming
+  a doubled step.
+- Correct OMNIC ``.srs`` series time-axis anchoring (it now starts from the
+  recorded series minimum time) and fix per-spectrum labels, which no longer
+  include binary metadata leaked past the 84-byte record.
+- Normalize OMNIC ``.srs`` spectral series to the public ``read_spa``
+  convention: wavenumbers are exposed descending with the intensity data
+  matched to them. Rapid-scan interferograms keep their ascending data-points
+  axis and records with an unrecognized X-axis type are left unchanged with a
+  warning.
 
-- Filter outputs (``smooth``, ``savgol`` including its derivatives,
-  ``whittaker`` and ``Filter.transform``) now retain the acquisition date of
-  their source dataset alongside the other single-source context fields
-  (description, author, origin, filename and user metadata). The same shared
-  context transfer now supplies the acquisition date for the other generic
-  outputs it assembles from a single fitted source; role-based analysis
-  outputs keep their own date policies. The estimated baseline output is
-  excluded: its metadata policy is decided separately
-  (:issue:`1756`).
-
-- The baseline-corrected signal produced by the ``Baseline`` class
-  (``corrected`` and ``transform``, on both strictly 1D and 2D inputs) now
-  keeps the source description, author, origin, acquisition date, filename
-  and user metadata, which were previously recreated by the internal input
-  coercion. Its history now matches the existing baseline subtraction
-  policy used by ``basc`` and 2D corrections (:issue:`1756`).
+- TopSpin imports now report when hypercomplex data require the optional
+  ``spectrochempy-hypercomplex`` and ``numpy-quaternion`` dependencies. (#1743)
 
 
 .. section
@@ -71,6 +69,9 @@ Bug Fixes
 Dependency Updates
 ~~~~~~~~~~~~~~~~~~
 .. Add here new dependency updates (do not delete this comment)
+
+- Updated the documentation dependency ``nbconvert`` to 7.17.2 to address an
+  arbitrary-file-write vulnerability when converting untrusted notebooks.
 
 
 .. section

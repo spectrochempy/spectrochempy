@@ -336,8 +336,20 @@ class TestFilterFamilyDimSelection:
         assert r.dims == ["y", "x"]
 
     def test_whittaker_dim_y(self, ds_2d):
-        r = scp.whittaker(ds_2d, lamb=1.0, order=1, dim="y")
-        assert r.shape == (5, 50)
+        result_y = scp.whittaker(ds_2d, lamb=1.0, order=1, dim="y")
+        result_x = scp.whittaker(ds_2d, lamb=1.0, order=1, dim="x")
+
+        assert result_y.shape == (5, 50)
+        assert not np.allclose(result_y.data, result_x.data)
+        assert (
+            result_y.history_entries[-1]["parameters"].items()
+            >= {
+                "dimension": "y",
+                "axis": -2,
+                "lamb": 1.0,
+                "order": 1,
+            }.items()
+        )
 
     def test_whittaker_dim_int(self, ds_2d):
         r_str = scp.whittaker(ds_2d, lamb=1.0, dim="x")

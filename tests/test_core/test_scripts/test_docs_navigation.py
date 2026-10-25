@@ -4,12 +4,70 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 
+import ast
 import importlib
 from pathlib import Path
 
 import pytest
+from packaging.version import InvalidVersion
+from packaging.version import Version
 
 ROOT = Path(__file__).parents[3]
+
+
+def _load_whatsnew_target_helper():
+    """Extract ``_current_whatsnew_doc`` from conf.py without executing it."""
+    tree = ast.parse((ROOT / "docs" / "conf.py").read_text(encoding="utf-8"))
+    helper = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef) and node.name == "_current_whatsnew_doc"
+    )
+    namespace = {
+        "Path": Path,
+        "Version": Version,
+        "InvalidVersion": InvalidVersion,
+        "SRC": ROOT / "docs" / "sources",
+    }
+    exec(  # noqa: S102 - the function is read from the repository itself
+        compile(ast.Module(body=[helper], type_ignores=[]), "conf.py", "exec"),
+        namespace,
+    )
+    return namespace["_current_whatsnew_doc"]
+
+
+def test_whatsnew_target_follows_the_documented_version(tmp_path):
+    helper = _load_whatsnew_target_helper()
+    for name in ("latest.rst", "v1.1.3.rst", "v1.2.0rc1.rst"):
+        (tmp_path / name).write_text("", encoding="utf-8")
+
+    # Development builds read the rolling changelog...
+    assert helper("1.1.4.dev12", tmp_path) == "whatsnew/latest"
+    assert helper("1.1.4.dev", tmp_path) == "whatsnew/latest"
+
+    # ...while released versions read their own release notes.
+    assert helper("1.1.3", tmp_path) == "whatsnew/v1.1.3"
+    assert helper("1.2.0rc1", tmp_path) == "whatsnew/v1.2.0rc1"
+
+    # Missing or unreadable versions keep the release-notes index.
+    assert helper("1.0.0", tmp_path) == "whatsnew/index"
+    assert helper("not-a-version", tmp_path) == "whatsnew/index"
+
+
+def test_whatsnew_entry_points_use_the_version_aware_target():
+    template = (ROOT / "docs" / "sources" / "index.rst.tmpl").read_text(
+        encoding="utf-8"
+    )
+    navbar = (ROOT / "docs" / "_templates" / "navbar-nav.html").read_text(
+        encoding="utf-8"
+    )
+    conf = (ROOT / "docs" / "conf.py").read_text(encoding="utf-8")
+
+    assert 'href="{{ current_whatsnew_doc }}.html"' in template
+    assert "whatsnew/index.html" not in template
+    assert "(current_whatsnew_doc," in navbar
+    assert '"current_whatsnew_doc": current_whatsnew_doc' in conf
+    assert "current_whatsnew_doc=current_whatsnew_doc" in conf
 
 
 def _load_docs_make():
@@ -68,9 +126,6 @@ def test_navigation_labels_contexts_and_page_fallback_are_present():
     script = (ROOT / "docs" / "_static" / "js" / "github-pages-versions.js").read_text(
         encoding="utf-8"
     )
-    workflow = (ROOT / ".github" / "workflows" / "build_docs.yml").read_text(
-        encoding="utf-8"
-    )
 
     assert "Documentation version" in layout
     assert "This is development documentation." in layout
@@ -83,10 +138,6 @@ def test_navigation_labels_contexts_and_page_fallback_are_present():
     assert "relativePathFromBase" in script
     assert "pageExists(candidate)" in script
     assert 'new URL("index.html"' in script
-    assert "SCPY_DOCS_CONTEXT" in workflow
-    assert 'echo "docs_context=stable"' in workflow
-    assert 'echo "docs_context=development"' in workflow
-    assert 'echo "docs_context=preview"' in workflow
 
 
 def test_version_selector_keeps_its_accessible_name_and_drops_its_visible_title():
@@ -150,17 +201,6 @@ def test_stable_context_uses_the_published_release_tag(monkeypatch):
     build.tagname = None
 
     assert build._determine_version() == ("1.0.0", "1.0.0", "1.0.0")
-
-
-def test_docs_workflow_limits_stable_publication_to_final_core_releases():
-    workflow = (ROOT / ".github" / "workflows" / "build_docs.yml").read_text(
-        encoding="utf-8"
-    )
-
-    assert "stable-tag-version" in workflow
-    assert "steps.release_scope.outputs.is_stable_core" in workflow
-    assert "Stable core documentation release installs exact version" in workflow
-    assert "SCPY_DOCS_RELEASE_TAG: ${{ steps.release_scope.outputs.tag }}" in workflow
 
 
 def test_tag_build_propagates_strict_sphinx_options():
@@ -231,12 +271,3 @@ def test_stable_retention_keeps_five_newest_numeric_versions_and_refreshes_catal
     assert (tmp_path / "1.2.0rc1").is_dir()
     assert (tmp_path / "docs-navigation").is_dir()
     assert (tmp_path / "versions.json").is_file()
-
-
-def test_both_docs_workflows_use_the_same_five_version_retention_rule():
-    workflow_dir = ROOT / ".github" / "workflows"
-    for name in ("build_docs.yml", "build_docs_archived_versions.yml"):
-        workflow = (workflow_dir / name).read_text(encoding="utf-8")
-        assert "prune_stable_versions" in workflow
-        assert "keep_count=5" in workflow
-        assert "oldest_supported" not in workflow

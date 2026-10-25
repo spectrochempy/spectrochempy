@@ -65,6 +65,7 @@ jobs:
             -v ${{ github.workspace }}:/workspace \
             europe-docker.pkg.dev/colab-images/public/runtime:latest \
             -c "
+              python3 /workspace/.github/actions/verified-pip/verified_pip.py && \
               pip install -q setuptools wheel build setuptools-scm && \
               git config --global --add safe.directory /workspace && \
               SETUPTOOLS_SCM_PRETEND_VERSION=${SCPY_COLAB_PRETEND_VERSION} \
@@ -81,6 +82,7 @@ jobs:
             -v ${{ github.workspace }}:/workspace \
             europe-docker.pkg.dev/colab-images/public/runtime:latest \
             -c "
+              python3 /workspace/.github/actions/verified-pip/verified_pip.py && \
               pip install -q setuptools wheel build setuptools-scm && \
               git config --global --add safe.directory /workspace && \
               SETUPTOOLS_SCM_PRETEND_VERSION=${SCPY_COLAB_PRETEND_VERSION} \

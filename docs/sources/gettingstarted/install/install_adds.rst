@@ -1,131 +1,42 @@
 .. _install_adds:
 
-Optional Dependencies
-=====================
+Plugins and Example Data
+========================
 
-.. warning::
-   Make sure your base installation is working before adding optional dependencies.
+This page is for users who already have a working SpectroChemPy
+installation (see :doc:`index`). Plugins add features for specific
+techniques or file formats; install only those you need.
 
-Overview
---------
-SpectroChemPy can be extended with optional dependencies for specific functionality.
-Missing dependencies will only raise an ``ImportError`` when the specific feature is used.
-
-Examples and Testing Data
--------------------------
-
-.. note::
-   Example data is not included in the main package to reduce installation size.
-
-Installation options:
-
-.. tabs::
-
-   .. tab:: Using uv (Recommended)
-
-      .. code-block:: bash
-
-         uv pip install spectrochempy_data
-
-   .. tab:: Using mamba
-
-      .. code-block:: bash
-
-         mamba install -c spectrocat spectrochempy_data
-
-   .. tab:: Manual download
-
-      Download from `GitHub releases <https://github.com/spectrochempy/spectrochempy_data/tags>`__
-      and extract to your preferred location.
-
-      .. note::
-         You may need to configure data paths when using manual installation.
+.. contents:: Table of Contents
+   :local:
+   :depth: 2
 
 .. _install_adds_plugins:
 
-Optional Plugins
-----------------
+Plugins
+-------
 
-SpectroChemPy includes several optional plugins that extend its capabilities
-for specific domains. Install them as needed:
+.. list-table::
+   :header-rows: 1
 
-.. tabs::
+   * - Plugin
+     - What it adds
+   * - ``spectrochempy-nmr``
+     - Bruker TopSpin reader and NMR processing
+   * - ``spectrochempy-iris``
+     - 2D-IRIS analysis
+   * - ``spectrochempy-tensor``
+     - Tensor decompositions (based on TensorLy)
+   * - ``spectrochempy-hypercomplex``
+     - Hypercomplex (quaternion) data
+   * - ``spectrochempy-carroucell``
+     - Reader for Carroucell experiments
+   * - ``spectrochempy-perkinelmer``
+     - Reader for PerkinElmer ``.sp`` files
 
-    .. tab:: Using uv (Recommended)
-
-       .. code-block:: bash
-
-          uv pip install "spectrochempy[iris]"      # 2D-IRIS analysis
-          uv pip install "spectrochempy[nmr]"       # Bruker TopSpin reader & NMR processing
-          uv pip install "spectrochempy[tensor]"    # TensorLy-backed tensor decompositions
-          uv pip install spectrochempy-hypercomplex # Quaternion support
-          uv pip install spectrochempy-carroucell   # Carroucell experiment reader
-          uv pip install spectrochempy-perkinelmer  # PerkinElmer .sp reader
-
-    .. tab:: Using pip
-
-       .. code-block:: bash
-
-          python -m pip install "spectrochempy[iris]"      # 2D-IRIS analysis
-          python -m pip install "spectrochempy[nmr]"       # Bruker TopSpin reader & NMR processing
-          python -m pip install "spectrochempy[tensor]"    # TensorLy-backed tensor decompositions
-          python -m pip install spectrochempy-hypercomplex # Quaternion support
-          python -m pip install spectrochempy-carroucell   # Carroucell experiment reader
-          python -m pip install spectrochempy-perkinelmer  # PerkinElmer .sp reader
-
-    .. tab:: Using mamba
-
-       .. code-block:: bash
-
-          mamba install -c spectrocat spectrochempy-iris    # 2D-IRIS analysis
-          mamba install -c spectrocat spectrochempy-nmr     # Bruker TopSpin & NMR
-          mamba install -c spectrocat spectrochempy-tensor  # Tensor decompositions
-          mamba install -c spectrocat spectrochempy-hypercomplex  # Quaternion support
-          mamba install -c spectrocat spectrochempy-carroucell  # Carroucell reader
-          mamba install -c spectrocat spectrochempy-perkinelmer  # PerkinElmer .sp reader
-
-    .. tab:: Development install (from source)
-
-      .. code-block:: bash
-
-         pip install -e plugins/spectrochempy-iris
-         pip install -e plugins/spectrochempy-nmr
-         pip install -e plugins/spectrochempy-tensor
-         pip install -e plugins/spectrochempy-hypercomplex
-         pip install -e plugins/spectrochempy-carroucell
-         pip install -e plugins/spectrochempy-perkinelmer
-
-Each plugin is independently versioned and maintained. Missing plugins
-raise a clear ``MissingPluginError`` with installation instructions when
-the corresponding feature is accessed.
-
-.. note::
-
-   **Development builds**
-
-   Conda development builds are not published for the core or official
-   plugins. Stable packages are published on the main ``spectrocat`` channel.
-   For development versions, install the core and required plugins from a local
-   source checkout as shown above.
-
-.. seealso::
-
-   :doc:`/userguide/plugins/index` for more details on the plugin system.
-
-Cantera (experimental)
-~~~~~~~~~~~~~~~~~~~~~~
-
-.. warning::
-   The ``spectrochempy-cantera`` plugin is **experimental** and **not**
-   officially supported. It is not included in aggregate extras and must be
-   installed manually::
-
-      pip install spectrochempy-cantera
-
-   See :doc:`/userguide/plugins/experimental_plugins` for details.
-
-For users who still need the Cantera library outside of SpectroChemPy,
-it can be installed separately:
+Install a plugin in the same environment as SpectroChemPy, with the method
+you used to install SpectroChemPy. Activate the environment first (for
+instance with the shortcut created during installation).
 
 .. tabs::
 
@@ -133,79 +44,66 @@ it can be installed separately:
 
       .. code-block:: bash
 
-         uv pip install cantera
+         uv pip install spectrochempy-nmr           # one plugin
+         uv pip install "spectrochempy[plugins]"    # all plugins
 
-   .. tab:: Using mamba
+   .. tab:: Using conda / mamba
 
       .. code-block:: bash
 
-         mamba install -c cantera cantera
+         mamba install -c spectrocat spectrochempy-nmr    # one plugin
+
+      Replace ``spectrochempy-nmr`` by the name of the plugin you need; to
+      install several plugins, list their names in the same command.
 
    .. tab:: Using pip
 
       .. code-block:: bash
 
-         pip install cantera
+         python -m pip install spectrochempy-nmr           # one plugin
+         python -m pip install "spectrochempy[plugins]"    # all plugins
 
-GUI Support
------------
+   .. tab:: From sources
 
-Qt Backend
-~~~~~~~~~~
-For interactive matplotlib plots:
-
-.. tabs::
-
-   .. tab:: Using uv (Recommended)
+      From the ``spectrochempy`` folder of a source installation (see
+      :doc:`install_sources`), with the environment active:
 
       .. code-block:: bash
 
-         uv pip install "pyqt5>=5.15.0"
+         python -m pip install -e plugins/spectrochempy-nmr
 
-   .. tab:: Using mamba
+      Each plugin is in its own folder of ``plugins/``.
 
-      .. code-block:: bash
+Each plugin is versioned independently. If you use a feature whose plugin is
+missing, SpectroChemPy raises a ``MissingPluginError`` that tells you which
+plugin to install. See :doc:`/userguide/plugins/index` for details on each
+plugin.
 
-         mamba install "pyqt>=5.15.0"
+Example Data
+------------
 
-   .. tab:: Using pip
+The examples and tutorials of this documentation use example data files,
+which are not included in the package to keep it small. **There is nothing to
+install:** SpectroChemPy downloads them automatically the first time they are
+needed, into the ``testdata`` folder of your SpectroChemPy settings folder
+(``~/.spectrochempy``; on Windows, ``%USERPROFILE%\.spectrochempy``).
 
-      .. code-block:: bash
-
-         pip install "pyqt5>=5.15.0"
-
-Usage in Jupyter:
-
-.. code-block:: ipython
-
-   %matplotlib qt
-
-.. note::
-   Qt backend is recommended for detailed plot manipulation and better interactivity.
-
-Jupyter Kernel
-~~~~~~~~~~~~~~
-
-To use SpectroChemPy in JupyterLab or Jupyter Notebook, register your
-conda/venv environment as a Jupyter kernel:
+With conda / mamba, you can instead install them as a package, for instance
+to work without an internet connection:
 
 .. code-block:: bash
 
-   python -m ipykernel install --user --name myenv --display-name "Python (myenv)"
+   mamba install -c spectrocat spectrochempy_data
 
-Replace ``myenv`` with your environment name (e.g. ``scpy`` for development,
-``scpy-core`` for testing).  After registration, select the corresponding
-kernel from **Kernel → Change Kernel** in JupyterLab.
+Other Optional Packages
+-----------------------
 
-.. note::
-   ``ipykernel`` must be installed in the environment first.  It is included
-   in the ``[dev]`` extra: ``pip install -e ".[dev]"``.
+* **Jupyter**: installed with the ``[interactive]`` extra (pip, uv) or with
+  ``mamba install jupyterlab`` (conda / mamba), as described in the
+  installation guides.
+* **xarray**: needed only to convert datasets to and from
+  `xarray <https://xarray.dev>`_ objects
+  (``uv pip install xarray``, ``python -m pip install xarray`` or
+  ``mamba install xarray``).
 
-Troubleshooting
----------------
-If you encounter issues:
-
-1. Verify base installation: ``python -c "import spectrochempy"``
-2. Check dependency versions: ``mamba list`` / ``pip list``
-3. Update all packages: ``mamba update --all`` / ``pip install --upgrade spectrochempy``
-4. See :doc:`../getting_help` for support
+If something goes wrong, see :doc:`../getting_help`.

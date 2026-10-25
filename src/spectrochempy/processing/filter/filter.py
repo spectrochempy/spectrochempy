@@ -258,6 +258,7 @@ and ‘nearest’.
     # Private methods
     # ----------------------------------------------------------------------------------
     def _transform(self, X):
+        self._history_delta = None
         kwargs = {  # param for avg and convolution filters
             "axis": self._dim,
             "mode": "reflect" if self.mode == "interp" else self.mode,
@@ -347,6 +348,7 @@ and ‘nearest’.
                 "cval": self.cval,
             }
             data = scipy.signal.savgol_filter(X, self.size, self.order, **kwargs)
+            self._history_delta = delta_used
 
             # Propagate units for derivative paths that claim physical scaling.
             # Smoothing (deriv=0) and index fallbacks keep source units.
@@ -374,9 +376,52 @@ and ‘nearest’.
         # Whittaker-Eilers filter
         # -----------------------
         elif self.method == "whittaker":
-            data = np.apply_along_axis(ws, -1, X, self.lamb, self.order)
+            data = np.apply_along_axis(ws, self._dim, X, self.lamb, self.order)
 
         return data
+
+    def _processing_history_entry(self):
+        dimension = self._X.dims[self._dim]
+        parameters = {
+            "dimension": dimension,
+            "axis": self._dim,
+        }
+        labels = {
+            "avg": "moving-average",
+            "han": "Hann",
+            "hamming": "Hamming",
+            "bartlett": "Bartlett",
+            "blackman": "Blackman",
+            "median": "median",
+            "savgol": "Savitzky-Golay",
+            "whittaker": "Whittaker-Eilers",
+        }
+        if self.method == "whittaker":
+            parameters.update(lamb=self.lamb, order=self.order)
+        else:
+            parameters.update(size=self.size)
+            if self.method == "savgol":
+                parameters.update(order=self.order, deriv=self.deriv, mode=self.mode)
+                if self.deriv:
+                    parameters["delta"] = self._history_delta
+                if self.mode == "constant":
+                    parameters["cval"] = self.cval
+            elif self.method in {
+                "avg",
+                "han",
+                "hamming",
+                "bartlett",
+                "blackman",
+                "median",
+            }:
+                parameters["mode"] = "reflect" if self.mode == "interp" else self.mode
+                if self.mode == "constant":
+                    parameters["cval"] = self.cval
+        return {
+            "operation": self.method,
+            "parameters": parameters,
+            "message": f"Applied {labels[self.method]} filter on dimension {dimension}",
+        }
 
 
 # ======================================================================================
@@ -619,8 +664,9 @@ def savgol(dataset, size=5, order=2, dim=-1, delta=None, **kwargs):
     Notes
     -----
     Smoothing and derivative outputs preserve the source dataset name and
-    retain its history, appending one processing entry per call. This also
-    applies to `savgol_filter`, `differentiate`, and `Filter.transform`.
+    retain its history, appending one structured ``savgol`` entry per call.
+    This also applies to `savgol_filter`, `differentiate`, and
+    `Filter.transform`.
     Derivative titles identify the derivative order, and units follow the
     scaling rules below.
 

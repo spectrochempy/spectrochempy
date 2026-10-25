@@ -166,6 +166,9 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Secure pip bootstrap
+        uses: ./.github/actions/verified-pip
+
       - name: Determine core version for PyPI build
         run: |
           python3 -m pip install --quiet packaging
@@ -187,21 +190,11 @@ jobs:
 
       - name: Install pypa/build
         run: |
-          python -m pip install build --user
+          python -m pip install "certifi>=2026.10.19" build --user
 
       - name: Build a binary wheel and a source tarball
         run: |
           python -m build --sdist --wheel --outdir dist/ .
-
-      - name: Upload PyPI build artifacts
-        if: ${{ !env.ACT }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: pypi-package
-          path: |
-            dist/*.whl
-            dist/*.tar.gz
-          retention-days: 5
 
       - name: Publish package to Test PyPI
         if: github.event_name == 'push' && github.repository == 'spectrochempy/spectrochempy'
@@ -243,13 +236,27 @@ jobs:
         with:
           environment-file: environments/environment_build.yml
           environment-name: scpy_build
+          condarc: |
+            ssl_verify: /etc/ssl/certs/ca-certificates.crt
           create-args: >-
             python=3.11
           cache-environment: true
 
+      - name: Report Micromamba version
+        run: micromamba --version
+
+      - name: Secure pip bootstrap
+        uses: ./.github/actions/verified-pip
+
+      - name: Configure Rattler Build to use system certificates
+        run: |
+          mkdir -p "$RUNNER_TEMP/rattler"
+          printf 'tls-root-certs = "native"\n' > "$RUNNER_TEMP/rattler/config.toml"
+          echo "RATTLER_HOME=$RUNNER_TEMP/rattler" >> "$GITHUB_ENV"
+
       - name: Determine core version for conda build
         run: |
-          python3 -m pip install --quiet packaging
+          python -m pip install --quiet "certifi>=2026.10.19" packaging
           LATEST_CORE_TAG=$(python .github/workflows/scripts/release_version.py latest-tag)
           if [[ -z "$LATEST_CORE_TAG" ]]; then
             echo "::error::No core tag found — cannot determine core version"
@@ -276,6 +283,7 @@ jobs:
         env:
           CONDA_BLD_PATH: ../output
         with:
+          rattler-build-version: v0.77.0
           recipe-path: recipe/recipe.yaml
           upload-artifact: false
           build-args: "-c conda-forge -c spectrocat"
@@ -284,15 +292,12 @@ jobs:
         run: |
           mv ../output .
 
-      - name: Upload conda build artifacts
-        if: ${{ !env.ACT }}
-        uses: actions/upload-artifact@v7
+      - name: Save core conda package for plugin builds
+        if: ${{ !env.ACT && github.event_name != 'release' }}
+        uses: actions/cache/save@v6
         with:
-          name: conda-package
-          path: |
-            output/**/*.conda
-            output/**/*.tar.bz2
-          retention-days: 5
+          path: output
+          key: core-conda-package-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Upload to Anaconda.org
         if: |
@@ -434,28 +439,36 @@ jobs:
         with:
           environment-file: environments/environment_build.yml
           environment-name: scpy_build
+          condarc: |
+            ssl_verify: /etc/ssl/certs/ca-certificates.crt
           create-args: >-
             python=3.11
           cache-environment: true
 
-      - name: Download core conda package
-        uses: actions/download-artifact@v8
+      - name: Report Micromamba version
+        run: micromamba --version
+
+      - name: Configure Rattler Build to use system certificates
+        run: |
+          mkdir -p "$RUNNER_TEMP/rattler"
+          printf 'tls-root-certs = "native"\n' > "$RUNNER_TEMP/rattler/config.toml"
+          echo "RATTLER_HOME=$RUNNER_TEMP/rattler" >> "$GITHUB_ENV"
+
+      - name: Restore core conda package from core build
+        uses: actions/cache/restore@v6
         with:
-          name: conda-package
-          path: /tmp/core-pkg
+          path: output
+          key: core-conda-package-${{ github.run_id }}-${{ github.run_attempt }}
+          fail-on-cache-miss: true
 
       - name: Setup local conda channel from core build
         run: |
-          echo "=== Artifact structure ==="
-          find /tmp/core-pkg -type f 2>/dev/null || echo "(empty)"
+          echo "=== Restored core package structure ==="
+          find output -type f 2>/dev/null || echo "(empty)"
           echo "=== Copying to local channel ==="
           PARENT=$(dirname "${{ github.workspace }}")
           mkdir -p "$PARENT/output"
-          if [ -d /tmp/core-pkg/output ]; then
-            cp -r /tmp/core-pkg/output/* "$PARENT/output/"
-          else
-            cp -r /tmp/core-pkg/* "$PARENT/output/"
-          fi
+          cp -r output/* "$PARENT/output/"
           echo "=== Local channel contents ==="
           find "$PARENT/output" -type f
 
@@ -475,6 +488,7 @@ jobs:
         env:
           CONDA_BLD_PATH: ../output
         with:
+          rattler-build-version: v0.77.0
           recipe-path: ${{ matrix.plugin.recipe }}/${{ matrix.plugin.recipe_file }}
           upload-artifact: false
           # spectrocat channels come first so that spectrochempy is resolved from
@@ -483,19 +497,9 @@ jobs:
             -c spectrocat
             -c conda-forge
 
-      - name: Move conda build output
+      - name: Merge conda build output
         run: |
-          mv ../output .
-
-      - name: Upload conda build artifacts
-        if: ${{ !env.ACT }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: conda-package-${{ matrix.plugin.name }}
-          path: |
-            output/**/*.conda
-            output/**/*.tar.bz2
-          retention-days: 5
+          cp -r ../output/. output/
 
       - name: Restore plugin version metadata
         if: ${{ always() && !(github.event_name == 'release' && startsWith(github.ref_name, matrix.plugin.name)) }}
@@ -503,11 +507,11 @@ jobs:
           git restore --worktree -- "${{ matrix.plugin.recipe }}"
           git diff --exit-code -- "${{ matrix.plugin.recipe }}"
 
-      - name: Keep plugin development package as a CI artifact only
+      - name: Keep plugin development package unpublished
         if: |
           !(github.event_name == 'release' && startsWith(github.ref_name, matrix.plugin.name))
         run: |
-          echo "Development Conda packages are validation artifacts and are not published."
+          echo "Development Conda packages are validation outputs and are not published or retained as artifacts."
           echo "Plugin: ${{ matrix.plugin.name }}"
           echo "Computed development version: ${{ steps.plugin-version.outputs.dev_version }}"
           echo "Install a development checkout from source instead."
@@ -608,9 +612,20 @@ jobs:
         with:
           environment-file: environments/environment_build.yml
           environment-name: scpy_build
+          condarc: |
+            ssl_verify: /etc/ssl/certs/ca-certificates.crt
           create-args: >-
             python=3.11
           cache-environment: true
+
+      - name: Report Micromamba version
+        run: micromamba --version
+
+      - name: Configure Rattler Build to use system certificates
+        run: |
+          mkdir -p "$RUNNER_TEMP/rattler"
+          printf 'tls-root-certs = "native"\n' > "$RUNNER_TEMP/rattler/config.toml"
+          echo "RATTLER_HOME=$RUNNER_TEMP/rattler" >> "$GITHUB_ENV"
 
       - name: Extract plugin recipe info from matrix
         id: recipe-info
@@ -627,6 +642,7 @@ jobs:
         env:
           CONDA_BLD_PATH: ../output
         with:
+          rattler-build-version: v0.77.0
           recipe-path: ${{ steps.recipe-info.outputs.recipe }}/${{ steps.recipe-info.outputs.recipe_file }}
           upload-artifact: false
           build-args: >-
@@ -661,16 +677,6 @@ jobs:
           fi
 
           echo "Package verification passed: $PLUGIN==$VERSION"
-
-      - name: Upload conda build artifacts
-        if: ${{ !env.ACT }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: conda-plugin-release-${{ needs.detect-release-scope.outputs.plugin_name }}
-          path: |
-            output/**/*.conda
-            output/**/*.tar.bz2
-          retention-days: 30
 
       - name: Upload plugin to Anaconda.org (main label)
         env:

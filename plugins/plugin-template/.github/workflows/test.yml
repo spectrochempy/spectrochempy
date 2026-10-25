@@ -19,6 +19,8 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Secure pip bootstrap
+        uses: ./.github/actions/verified-pip
       - name: Install SpectroChemPy (editable)
         run: |
           git clone https://github.com/spectrochempy/spectrochempy.git

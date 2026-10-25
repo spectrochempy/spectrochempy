@@ -230,9 +230,20 @@ jobs:
         with:
           environment-file: environments/environment_build.yml
           environment-name: scpy_build
+          condarc: |
+            ssl_verify: /etc/ssl/certs/ca-certificates.crt
           create-args: >-
             python=3.11
           cache-environment: true
+
+      - name: Report Micromamba version
+        run: micromamba --version
+
+      - name: Configure Rattler Build to use system certificates
+        run: |
+          mkdir -p "$RUNNER_TEMP/rattler"
+          printf 'tls-root-certs = "native"\n' > "$RUNNER_TEMP/rattler/config.toml"
+          echo "RATTLER_HOME=$RUNNER_TEMP/rattler" >> "$GITHUB_ENV"
 
       - name: Stash tooling and master recipe
         id: stash
@@ -274,6 +285,7 @@ jobs:
         env:
           CONDA_BLD_PATH: ../output
         with:
+          rattler-build-version: v0.77.0
           recipe-path: ${{ steps.recipe.outputs.recipe_path }}/${{ steps.recipe.outputs.recipe_file }}
           upload-artifact: false
           build-args: >-
@@ -312,15 +324,12 @@ jobs:
 
           echo "Package verification passed: $PLUGIN==$VERSION"
 
-      - name: Upload conda build artifacts
-        if: ${{ !env.ACT }}
-        uses: actions/upload-artifact@v7
+      - name: Save Conda package for publish job
+        if: ${{ !env.ACT && inputs.dry_run != true && inputs.confirm_upload == true }}
+        uses: actions/cache/save@v6
         with:
-          name: conda-repair-${{ needs.validate.outputs.plugin }}
-          path: |
-            output/**/*.conda
-            output/**/*.tar.bz2
-          retention-days: 30
+          path: output
+          key: conda-repair-${{ github.run_id }}-${{ github.run_attempt }}-${{ needs.validate.outputs.plugin }}
 
   publish:
     name: Publish to Conda main
@@ -346,17 +355,21 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Secure pip bootstrap
+        uses: ./.github/actions/verified-pip
+
       - name: Install anaconda-client
         run: |
           # The upload runs on a fresh runner without the Micromamba build
           # environment, so the anaconda CLI must be installed explicitly.
-          python -m pip install anaconda-client
+          python -m pip install "certifi>=2026.10.19" anaconda-client
 
-      - name: Download build artifact
-        uses: actions/download-artifact@v8
+      - name: Restore built Conda package
+        uses: actions/cache/restore@v6
         with:
-          name: conda-repair-${{ needs.validate.outputs.plugin }}
-          path: /tmp/conda-pkg
+          path: output
+          key: conda-repair-${{ github.run_id }}-${{ github.run_attempt }}-${{ needs.validate.outputs.plugin }}
+          fail-on-cache-miss: true
 
       - name: Upload to Anaconda.org (main label)
         env:
@@ -381,7 +394,7 @@ jobs:
 
           echo "Uploading $PLUGIN==$VERSION to Anaconda label: main"
 
-          packages=(/tmp/conda-pkg/**/*.tar.bz2 /tmp/conda-pkg/**/*.conda)
+          packages=(output/**/*.tar.bz2 output/**/*.conda)
           if [ ${#packages[@]} -eq 0 ]; then
             echo "::error::No conda packages found in artifact"
             exit 1
@@ -443,6 +456,6 @@ jobs:
           echo "Version: $VERSION"
           echo "Tag: $RELEASE_TAG"
           echo "Recipe origin: $ORIGIN"
-          echo "Artifact: conda-repair-$PLUGIN"
+          echo "Artifact: none (dry-run builds are not retained as GitHub Actions artifacts)"
           echo ""
           echo "No upload was performed. To upload, re-run with dry_run=false and confirm_upload=true."

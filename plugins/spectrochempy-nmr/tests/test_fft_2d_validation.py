@@ -21,6 +21,7 @@ import hashlib
 
 import numpy as np
 import pytest
+from spectrochempy_nmr.processing.linear_prediction import _linear_predict_after
 
 import spectrochempy as scp
 
@@ -48,6 +49,8 @@ EXAM2D_HH_SHA256 = {
     "pdata/1/procs": "15083e49296a29e66dfb85c41519680ab4157c0cdebf455f89af9195dec73261",
     "pdata/1/proc2s": "f5f4838b2e39188de217214882c105f3d04a8de81d2fbaba565dab596b8bb5b8",
 }
+EXAM2D_HH_F1_NCOEF = 32
+EXAM2D_HH_F1_LPBIN = 256
 
 
 def _has_agilent_data():
@@ -86,13 +89,18 @@ def _sine_window(size):
     return np.sin(np.pi * (np.arange(size) + 0.5) / size)
 
 
-def _qf_cosy_exam2d_hh(raw):
+def _qf_cosy_exam2d_hh(raw, *, apply_linear_prediction=False):
     data = np.asarray(raw.data).copy()
-    direct = np.zeros((1024, 1024), dtype=np.complex128)
+    direct = np.zeros((data.shape[0], 1024), dtype=np.complex128)
     direct[: data.shape[0], : data.shape[1]] = data * _sine_window(data.shape[1])
     f2 = np.fft.fftshift(np.fft.fft(direct, axis=1), axes=1)
-    f2 *= _sine_window(f2.shape[0])[:, None]
-    return np.abs(np.fft.fftshift(np.fft.ifft(f2, axis=0), axes=0))
+    if apply_linear_prediction:
+        f2 = _linear_predict_after(
+            f2.T, final_size=EXAM2D_HH_F1_LPBIN, order=EXAM2D_HH_F1_NCOEF
+        ).T
+    indirect = np.zeros((1024, 1024), dtype=np.complex128)
+    indirect[: f2.shape[0]] = f2 * _sine_window(f2.shape[0])[:, None]
+    return np.abs(np.fft.fftshift(np.fft.ifft(indirect, axis=0), axes=0))
 
 
 def _normalized(data):
@@ -161,6 +169,32 @@ class TestFFT2DTopSpin:
     """Type A: TopSpin 2D SER read + FFT."""
 
     @pytest.mark.skipif(not _has_topspin_2d(), reason="TopSpin 2D data not available")
+    def test_topspin_states_tppi_components_match_fixed_slots(self):
+        """Keep the established raw-to-TopSpin component correspondence."""
+        pdata = TOPSPIN_2D / "1" / "pdata" / "1" / "2rr"
+        reference = scp.read_topspin(pdata)
+        raw = scp.nmr.read(TOPSPIN_2D, expno=1, remove_digital_filter=True)
+
+        f2 = raw.em(lb="50 Hz", dim="x").fft(dim="x", size=reference.shape[1])
+        f2.data[0, :] *= 0.5
+        result = f2.zf_size(size=reference.shape[0], dim="y").fft(dim="y")
+
+        actual_slots = quaternion.as_float_array(result.data)
+        reference_slots = quaternion.as_float_array(reference.data)
+        limits = (0.06, 0.06, 0.11, 0.11)
+        for actual, expected, limit in zip(
+            np.moveaxis(actual_slots, -1, 0),
+            np.moveaxis(reference_slots, -1, 0),
+            limits,
+            strict=True,
+        ):
+            scale = np.vdot(actual, expected) / np.vdot(actual, actual)
+            relative_l2 = np.linalg.norm(scale * actual - expected) / np.linalg.norm(
+                expected
+            )
+            assert relative_l2 < limit
+
+    @pytest.mark.skipif(not _has_topspin_2d(), reason="TopSpin 2D data not available")
     def test_topspin_2d_fft_peak(self):
         ds = scp.read_topspin(TOPSPIN_2D, expno=1, remove_digital_filter=True)
         fft = ds.fft()
@@ -206,7 +240,17 @@ class TestFFT2DAgilent:
 
         mag = _mag_from_quat_or_complex(fft)
         idx, maxval = _peak_info(mag)
+        assert np.isfinite(mag).all(), "Non-finite values after Agilent 2D TPPI FFT"
         assert maxval > 0, "No peak found after Agilent 2D TPPI FFT"
+
+    def test_agilent_2d_tppi_two_step_fft_stays_finite(self):
+        ds = scp.read_agilent(EXTRA_NMR / "agilent" / "agilent_2d_tppi")
+
+        result = ds.fft(dim="x").fft(dim="y")
+
+        assert result.shape == ds.shape
+        assert np.isfinite(result.data).all()
+        assert np.max(np.abs(result.data)) > 0
 
     def test_agilent_2d_fft_encoding_preserved(self):
         ds = scp.read_agilent(EXTRA_NMR / "agilent" / "agilent_2d")
@@ -356,8 +400,18 @@ class TestExam2DHHQFCOSY:
             assert int(_jcamp_value(proc_file, "SSB")) == 0
             assert float(_jcamp_value(proc_file, "PHC0")) == 0.0
             assert float(_jcamp_value(proc_file, "PHC1")) == 0.0
+        assert int(_jcamp_value(root / "pdata" / "1" / "proc2s", "ME_mod")) == 2
+        assert (
+            int(_jcamp_value(root / "pdata" / "1" / "proc2s", "NCOEF"))
+            == EXAM2D_HH_F1_NCOEF
+        )
+        assert (
+            int(_jcamp_value(root / "pdata" / "1" / "proc2s", "LPBIN"))
+            == EXAM2D_HH_F1_LPBIN
+        )
 
-        calculated = _normalized(_qf_cosy_exam2d_hh(raw))
+        without_lp = _normalized(_qf_cosy_exam2d_hh(raw))
+        calculated = _normalized(_qf_cosy_exam2d_hh(raw, apply_linear_prediction=True))
         ref = _normalized(np.asarray(reference.data).real)
 
         assert calculated.shape == (1024, 1024)
@@ -392,13 +446,17 @@ class TestExam2DHHQFCOSY:
         assert rank_preserved >= 8
 
         residual = calculated - ref
-        assert float(np.sqrt(np.mean(residual**2))) <= 0.01
-        assert _normalized_overlap(calculated, ref) >= 0.85
+        assert float(np.sqrt(np.mean(residual**2))) <= 0.001
+        assert _normalized_overlap(calculated, ref) >= 0.99
+        assert (
+            _normalized_overlap(calculated, ref)
+            >= _normalized_overlap(without_lp, ref) + 0.1
+        )
 
         inner = np.s_[5:-5, 5:-5]
         inner_residual = calculated[inner] - ref[inner]
-        assert float(np.sqrt(np.mean(inner_residual**2))) <= 0.01
-        assert _normalized_overlap(calculated[inner], ref[inner]) >= 0.85
+        assert float(np.sqrt(np.mean(inner_residual**2))) <= 0.001
+        assert _normalized_overlap(calculated[inner], ref[inner]) >= 0.99
 
         np.testing.assert_array_equal(raw.data, raw_data)
         assert raw.meta.nmr_processing == raw_processing
