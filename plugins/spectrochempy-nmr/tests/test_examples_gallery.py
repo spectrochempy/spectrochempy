@@ -19,8 +19,7 @@ import pytest
 
 import spectrochempy as scp
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
-PLUGIN_ROOT = REPO_ROOT / "plugins" / "spectrochempy-nmr"
+PLUGIN_ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = PLUGIN_ROOT / "examples" / "gallery.toml"
 VISIBLE_EXAMPLES = [
     "core/c_importer/plot_read_nmr_from_bruker.py",
@@ -61,17 +60,10 @@ def test_public_nmr_gallery_examples_execute(relative_path, tmp_path):
     env["MPLBACKEND"] = "Agg"
     env["MPLCONFIGDIR"] = str(tmp_path / "mpl")
     env["SCP_CONFIG_HOME"] = str(tmp_path / "scp-config")
-    env["PYTHONPATH"] = os.pathsep.join(
-        [
-            str(REPO_ROOT / "src"),
-            str(PLUGIN_ROOT / "src"),
-            env.get("PYTHONPATH", ""),
-        ]
-    ).rstrip(os.pathsep)
 
     result = subprocess.run(
         [sys.executable, str(example)],
-        cwd=REPO_ROOT,
+        cwd=PLUGIN_ROOT,
         env=env,
         capture_output=True,
         text=True,
