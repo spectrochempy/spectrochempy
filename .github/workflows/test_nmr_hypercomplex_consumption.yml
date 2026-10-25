@@ -1,0 +1,158 @@
+name: Test NMR and hypercomplex wheel consumption
+
+on: [push, pull_request, workflow_dispatch]
+
+permissions:
+  contents: read
+
+env:
+  NMR_REPOSITORY: spectrochempy/spectrochempy_nmr
+  NMR_COMMIT: d4796521217970673971fe843e6ca29ec729b247
+  HYPERCOMPLEX_REPOSITORY: spectrochempy/spectrochempy_hypercomplex
+  HYPERCOMPLEX_COMMIT: a40fe535549b1af3041f30bec3c329c801f52e2e
+  PYTHON_VERSION: "3.13"
+
+jobs:
+  wheels:
+    name: Build core and pinned plugin wheels
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Secure pip bootstrap
+        uses: ./.github/actions/verified-pip
+      - name: Build core wheel
+        run: |
+          python -m pip install --quiet build
+          python -m build --wheel --outdir dist .
+      - uses: actions/checkout@v7
+        with:
+          repository: ${{ env.NMR_REPOSITORY }}
+          ref: ${{ env.NMR_COMMIT }}
+          path: nmr-source
+      - uses: actions/checkout@v7
+        with:
+          repository: ${{ env.HYPERCOMPLEX_REPOSITORY }}
+          ref: ${{ env.HYPERCOMPLEX_COMMIT }}
+          path: hypercomplex-source
+      - name: Build pinned plugin wheels
+        run: |
+          python -m build --wheel --outdir dist nmr-source
+          python -m build --wheel --outdir dist hypercomplex-source
+      - uses: actions/upload-artifact@v7
+        with:
+          name: nmr-hypercomplex-consumption-wheels
+          path: dist/*.whl
+          if-no-files-found: error
+
+  core-only:
+    name: Core only
+    needs: wheels
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Secure pip bootstrap
+        uses: ./.github/actions/verified-pip
+      - uses: actions/download-artifact@v8
+        with:
+          name: nmr-hypercomplex-consumption-wheels
+          path: dist
+      - name: Install core only
+        run: python -m pip install --quiet dist/spectrochempy-*.whl
+      - name: Verify both optional distributions are absent
+        run: |
+          python -I - <<'PY'
+          import importlib.util
+          import spectrochempy as scp
+
+          assert importlib.util.find_spec("spectrochempy_nmr") is None
+          assert importlib.util.find_spec("spectrochempy_hypercomplex") is None
+          assert not hasattr(scp.NDDataset([1.0]), "hyper")
+          PY
+
+  nmr-only:
+    name: NMR only
+    needs: wheels
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Secure pip bootstrap
+        uses: ./.github/actions/verified-pip
+      - uses: actions/download-artifact@v8
+        with:
+          name: nmr-hypercomplex-consumption-wheels
+          path: dist
+      - name: Install core wheel only
+        run: python -m pip install --quiet dist/spectrochempy-*.whl
+      - name: Install core and NMR wheel only
+        run: |
+          python -m pip install --quiet dist/spectrochempy_nmr-*.whl pytest pytest-doctestplus
+          python -m pip check
+      - name: Verify hypercomplex remains absent
+        run: |
+          python -I - <<'PY'
+          import importlib.util
+          import spectrochempy_nmr
+
+          assert spectrochempy_nmr.NMRPlugin
+          assert importlib.util.find_spec("spectrochempy_hypercomplex") is None
+          PY
+      - name: Run NMR-only contract
+        run: python -I -m pytest tests/test_plugins/test_nmr_consumption.py -v
+
+  hypercomplex-only:
+    name: Hypercomplex only
+    needs: wheels
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Secure pip bootstrap
+        uses: ./.github/actions/verified-pip
+      - uses: actions/download-artifact@v8
+        with:
+          name: nmr-hypercomplex-consumption-wheels
+          path: dist
+      - name: Install core and hypercomplex wheel only
+        run: |
+          python -m pip install --quiet dist/spectrochempy-*.whl dist/spectrochempy_hypercomplex-*.whl pytest pytest-doctestplus
+          python -m pip check
+          python -I -c "from spectrochempy_hypercomplex import HyperComplexPlugin"
+      - name: Run hypercomplex-only contract
+        run: python -I -m pytest tests/test_plugins/test_hypercomplex_consumption.py -v
+
+  combined:
+    name: NMR and hypercomplex
+    needs: wheels
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Secure pip bootstrap
+        uses: ./.github/actions/verified-pip
+      - uses: actions/download-artifact@v8
+        with:
+          name: nmr-hypercomplex-consumption-wheels
+          path: dist
+      - name: Install core and both plugin wheels
+        run: |
+          python -m pip install --quiet dist/spectrochempy-*.whl dist/spectrochempy_nmr-*.whl dist/spectrochempy_hypercomplex-*.whl pytest pytest-doctestplus
+          python -m pip check
+          python -I -c "from spectrochempy_nmr import NMRPlugin; from spectrochempy_hypercomplex import HyperComplexPlugin"
+      - name: Run combined contract
+        run: |
+          python -I -m pytest tests/test_plugins/test_hypercomplex_consumption.py tests/test_plugins/test_nmr_consumption.py -v
