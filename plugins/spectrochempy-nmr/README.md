@@ -20,7 +20,7 @@ former follows the validated 1D processing path per spectrum.
 
 ## Installation
 
-The next release, 0.1.13, requires SpectroChemPy 1.1.0 or later (and remains
+This plugin requires SpectroChemPy 1.1.0 or later (and remains
 restricted to SpectroChemPy versions below 2). Users who stay on
 SpectroChemPy 1.0.0 should keep an earlier compatible version of this plugin.
 
@@ -80,6 +80,26 @@ it is not exposed as `dataset.read_topspin(...)` or
 
 ## Development
 
+From the plugin directory, install the plugin against an installed compatible
+core (or install the desired core wheel first):
+
 ```bash
+python -m pip install -e ".[hypercomplex]" pytest
 python -m pytest tests/ -v
 ```
+
+Tests and examples can run outside the monorepo. Real-data tests still use
+`scp.preferences.datadir` and its sibling `testdata-extra`; unavailable fixtures
+may cause skips. A scientific baseline must record which datasets were available
+and must not treat skipped cases as validated.
+
+Build source and wheel distributions from this directory:
+
+```bash
+python -m pip install build
+python -m build
+```
+
+Both distributions include `LICENSE` (CeCILL-B) and `NMRGLUE_LICENSE.rst`
+(the notice for the adapted/vendorized parsers). Repository extraction does not
+change those parsers or introduce a dependency on nmrglue-ng.
