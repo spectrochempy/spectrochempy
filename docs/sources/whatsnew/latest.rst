@@ -51,6 +51,8 @@ Bug Fixes
 
 - TopSpin imports now report when hypercomplex data require the optional
   ``spectrochempy-hypercomplex`` and ``numpy-quaternion`` dependencies. (#1743)
+- Native ``.scp`` loads now preserve the dataset modification timestamp instead
+  of replacing it while restoring the filename and name.
 
 Dependency Updates
 ~~~~~~~~~~~~~~~~~~
