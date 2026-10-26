@@ -9,6 +9,11 @@ SpectroChemPy plugins.
 
 Workflow-oriented plugin guides remain in :doc:`/userguide/plugins/index`.
 
+The generated entries below target the public objects exported by each
+standalone plugin package. The ``scp.nmr.*`` and equivalent namespace routes
+remain the recommended user-facing aliases, but they are lazy proxies and are
+not suitable as autodoc targets.
+
 NMR plugin
 ==========
 
@@ -16,10 +21,10 @@ NMR plugin
     :nosignatures:
     :toctree: generated/
 
-    spectrochempy.nmr.read
-    spectrochempy.nmr.read_topspin
-    spectrochempy.nmr.read_agilent
-    spectrochempy.nmr.Experiment
+    spectrochempy_nmr.read
+    spectrochempy_nmr.read_topspin
+    spectrochempy_nmr.read_agilent
+    spectrochempy_nmr.Experiment
 
 PerkinElmer plugin
 ==================
