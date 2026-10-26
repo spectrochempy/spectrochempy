@@ -57,5 +57,8 @@ Bug Fixes
 Dependency Updates
 ~~~~~~~~~~~~~~~~~~
 
+- Extend the official NMR and hypercomplex extra bounds to admit their
+  autonomous 0.2.x releases while preserving compatibility with existing
+  0.1.x installations during the publication transition.
 - Updated the documentation dependency ``nbconvert`` to 7.17.2 to address an
   arbitrary-file-write vulnerability when converting untrusted notebooks.
