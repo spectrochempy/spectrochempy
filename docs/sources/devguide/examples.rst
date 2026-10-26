@@ -21,3 +21,7 @@ There are two ways to do this:
 
 * Create a pull request: For this operation, if you are a newcomer with the ``git`` version system,
   please refer to the :ref:`develguide`  section .
+
+Follow the :ref:`SpectroChemPy-native API guidance <documentation_native_api>`:
+prefer ``scp.*`` and ``NDDataset`` methods over NumPy, and explicitly report any
+operation that requires a fallback because the public SCP API cannot provide it.

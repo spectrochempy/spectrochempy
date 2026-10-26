@@ -43,6 +43,25 @@ Guides & Tutorials
 - Provide high-level overviews and examples
 - All code examples are tested
 
+.. _documentation_native_api:
+
+Use the SpectroChemPy API in examples
+------------------------------------
+
+Gallery examples and documentation tutorials should demonstrate the public
+SpectroChemPy API. Prefer ``scp.*`` functions and ``NDDataset`` methods over
+``np.*`` calls or custom array implementations whenever an equivalent operation
+is available. Keep datasets, coordinates, units, metadata, and history through
+the processing chain instead of extracting arrays to reimplement an existing
+SpectroChemPy operation. This also applies to data creation, arithmetic,
+reductions, interpolation, and plotting where suitable public APIs exist.
+
+If the public SCP API cannot perform an operation, make the exception explicit
+in the example and in the implementation or review report / pull request
+description. Identify the missing or unsuitable operation, explain why the
+NumPy, SciPy, or other fallback is needed, and report its validation limits.
+Record any follow-up needed to support the operation in SpectroChemPy.
+
 Building Documentation
 ----------------------
 
