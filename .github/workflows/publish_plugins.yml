@@ -10,7 +10,7 @@
 # Release policy:
 #   - Official plugins are released independently from the core package.
 #   - Plugin releases are triggered by GitHub releases whose tag matches the
-#     plugin name, e.g.  spectrochempy-nmr-v0.1.1
+#     plugin name; NMR and hypercomplex are released from standalone repositories.
 #   - A core release tag (e.g. spectrochempy-v0.9.0) does NOT publish plugins.
 #   - plugin-template is excluded from discovery — it is a developer scaffold.
 #   - PyPI upload uses skip-existing so an already-published version never
@@ -83,6 +83,9 @@ jobs:
           plugins = []
           for d in sorted(Path('plugins').glob('*/')):
               name = d.name
+              if name in {'spectrochempy-nmr', 'spectrochempy-hypercomplex'}:
+                  print(f'Skipping {name} (published from standalone repository)', file=sys.stderr)
+                  continue
               if name == 'plugin-template':
                   print(f'Skipping {name} (developer template, not publishable)', file=sys.stderr)
                   continue
