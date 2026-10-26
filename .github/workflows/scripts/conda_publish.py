@@ -72,7 +72,7 @@ def validate_tag_format(
     if result is None:
         raise ValueError(
             f"Tag '{tag}' does not match the plugin release pattern "
-            f"'<plugin_name>-v<version>' (e.g. spectrochempy-nmr-v0.1.1)"
+            f"'<plugin_name>-v<version>' (e.g. spectrochempy-iris-v0.1.1)"
         )
     plugin, version = result
     if expected_plugin and plugin != expected_plugin:
@@ -780,14 +780,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
     # verify-tag
     p_tag = sub.add_parser("verify-tag", help="Validate a plugin tag format")
-    p_tag.add_argument("tag", help="Tag to validate (e.g. spectrochempy-nmr-v0.1.1)")
+    p_tag.add_argument("tag", help="Tag to validate (e.g. spectrochempy-iris-v0.1.1)")
     p_tag.add_argument("--plugin", help="Expected plugin name")
 
     # check-release
     p_check = sub.add_parser(
         "check-release", help="Check consistency of a plugin release"
     )
-    p_check.add_argument("plugin", help="Plugin name (e.g. spectrochempy-nmr)")
+    p_check.add_argument("plugin", help="Plugin name (e.g. spectrochempy-iris)")
     p_check.add_argument("version", help="Version to check (e.g. 0.1.11)")
     p_check.add_argument(
         "--skip-network",
@@ -861,7 +861,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         ),
     )
     p_off.add_argument(
-        "plugin_dir", help="Path to plugin directory (e.g. plugins/spectrochempy-nmr)"
+        "plugin_dir", help="Path to plugin directory (e.g. plugins/spectrochempy-iris)"
     )
 
     # validate-release

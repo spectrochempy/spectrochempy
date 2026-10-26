@@ -7,8 +7,6 @@ skip =
     .ruff_cache,
     LICENSE,
     ./LICENSE,
-    plugins/spectrochempy-nmr/LICENSE,
-    ./plugins/spectrochempy-nmr/LICENSE,
     LICENSES/*,
     ./LICENSES/*,
     maintainers/*,

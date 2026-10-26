@@ -146,7 +146,6 @@ def test_read_spectrochempy_constraint_missing(checker, tmp_path):
 @pytest.mark.parametrize(
     ("plugin", "import_name"),
     [
-        ("spectrochempy-nmr", "spectrochempy_nmr"),
         ("spectrochempy-perkinelmer", "spectrochempy_perkinelmer"),
         ("spectrochempy-iris", "spectrochempy_iris"),
         ("spectrochempy-tensor", "spectrochempy_tensor"),
