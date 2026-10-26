@@ -56,11 +56,11 @@ fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 3))
 
 # Plot 1: full spectrum
 _ = ds.plot(ax=ax1)
-ax1.set_title("Full Spectrum")
+_ = ax1.set_title("Full Spectrum")
 
 # Plot 2: subset
 _ = ds[:, 1800.0:1500.0].plot(ax=ax2)
-ax2.set_title("Water bending Region")
+_ = ax2.set_title("Water bending Region")
 
 plt.tight_layout()
 
@@ -213,7 +213,7 @@ ax2 = plot_spectrum(ds1 * 1.5, title="Sample 2 (amplified)")
 # SpectroChemPy is built on Matplotlib. For advanced customization:
 #
 # - [Matplotlib Axes documentation](https://matplotlib.org/stable/api/axes_api.html)
-# - [Matplotlib customization guide](https://matplotlib.org/stable/tutorials/introductory/customizing.html)
+# - [Matplotlib customization guide](https://matplotlib.org/stable/users/explain/customizing.html)
 # - SpectroChemPy API reference for plot method options
 #
 # The combination of SpectroChemPy's convenience with Matplotlib's power
