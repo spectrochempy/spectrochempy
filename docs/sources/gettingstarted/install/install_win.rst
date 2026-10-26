@@ -88,10 +88,10 @@ Step-by-step Installation
 
       .. code-block:: bat
 
-         uv pip install spectrochempy
+         uv pip install spectrochempy jupyterlab
 
-         :: or with interactive extras (Jupyter, etc.)
-         uv pip install "spectrochempy[interactive]"
+      JupyterLab is optional: it is needed only to work in notebooks. To install
+      SpectroChemPy alone, omit ``jupyterlab`` from the command.
 
       **5. Create a desktop shortcut.** It opens a Command Prompt in your
       working folder with the ``scpy`` environment already active, so you do not
@@ -127,9 +127,10 @@ Step-by-step Installation
 
          In [1]: import spectrochempy as scp
 
-      Type ``exit`` to leave IPython. From now on, use the shortcut each time
-      you work with SpectroChemPy. Without the shortcut, open the
-      Command Prompt and run:
+      Type ``exit`` to leave IPython. To work with notebooks, type
+      ``jupyter lab``: JupyterLab opens in your browser, in your working folder.
+      From now on, use the shortcut each time you work with SpectroChemPy.
+      Without the shortcut, open the Command Prompt and run:
 
       .. code-block:: bat
 
@@ -192,7 +193,10 @@ Step-by-step Installation
 
       .. code-block:: bat
 
-         mamba install -c spectrocat spectrochempy
+         mamba install -c conda-forge -c spectrocat spectrochempy jupyterlab
+
+      JupyterLab is optional: it is needed only to work in notebooks. To install
+      SpectroChemPy alone, omit ``jupyterlab`` from the command.
 
       **6. Create a desktop shortcut.** It opens a Command Prompt in your
       working folder with the ``scpy`` environment already active, so you do not
@@ -229,9 +233,10 @@ Step-by-step Installation
 
          In [1]: import spectrochempy as scp
 
-      Type ``exit`` to leave IPython. From now on, use the shortcut each time
-      you work with SpectroChemPy. Without the shortcut, open the
-      Miniforge Prompt and run:
+      Type ``exit`` to leave IPython. To work with notebooks, type
+      ``jupyter lab``: JupyterLab opens in your browser, in your working folder.
+      From now on, use the shortcut each time you work with SpectroChemPy.
+      Without the shortcut, open the Miniforge Prompt and run:
 
       .. code-block:: bat
 
@@ -281,10 +286,10 @@ Step-by-step Installation
 
       .. code-block:: bat
 
-         python -m pip install spectrochempy
+         python -m pip install spectrochempy jupyterlab
 
-         :: or if you want to install interactive version (including jupyter)
-         python -m pip install "spectrochempy[interactive]"
+      JupyterLab is optional: it is needed only to work in notebooks. To install
+      SpectroChemPy alone, omit ``jupyterlab`` from the command.
 
       **5. Create a desktop shortcut.** It opens a Command Prompt in your
       working folder with the ``scpy`` environment already active, so you do not
@@ -320,9 +325,10 @@ Step-by-step Installation
 
          In [1]: import spectrochempy as scp
 
-      Type ``exit`` to leave IPython. From now on, use the shortcut each time
-      you work with SpectroChemPy. Without the shortcut, open the
-      Command Prompt and run:
+      Type ``exit`` to leave IPython. To work with notebooks, type
+      ``jupyter lab``: JupyterLab opens in your browser, in your working folder.
+      From now on, use the shortcut each time you work with SpectroChemPy.
+      Without the shortcut, open the Command Prompt and run:
 
       .. code-block:: bat
 
