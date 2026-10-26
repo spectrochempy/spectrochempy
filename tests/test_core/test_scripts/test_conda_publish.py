@@ -1579,10 +1579,18 @@ class TestRepairWorkflowStructure:
         assert "tag" not in inputs
 
     def test_closed_plugin_choice(self):
+        import yaml
+
+        data = yaml.safe_load(self._text())
+        trigger = data.get("on") or data.get(True)
+        choices = trigger["workflow_dispatch"]["inputs"]["plugin_name"]["options"]
+        assert "spectrochempy-perkinelmer" in choices
+        assert "spectrochempy-nmr" not in choices
+        assert "spectrochempy-hypercomplex" not in choices
+
+    def test_standalone_plugins_are_rejected_before_conda_repair(self):
         text = self._text()
-        assert "spectrochempy-perkinelmer" in text
-        assert "spectrochempy-nmr" in text
-        assert "e.g. 0.1.8" in text
+        assert "is released from its standalone repository" in text
 
     def test_explicit_refs_tags_checkout(self):
         text = self._text()

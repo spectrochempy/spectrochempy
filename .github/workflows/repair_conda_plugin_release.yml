@@ -107,6 +107,13 @@ jobs:
           PLUGIN="$INPUT_PLUGIN"
           VERSION="$INPUT_VERSION"
 
+          case "$PLUGIN" in
+            spectrochempy-nmr|spectrochempy-hypercomplex)
+              echo "::error::$PLUGIN is released from its standalone repository."
+              exit 1
+              ;;
+          esac
+
           # Strict version validation + canonical tag derivation + explicit
           # existence check (rev-parse refs/tags/<tag>^{commit}), with the
           # available releases listed if the tag is missing.
