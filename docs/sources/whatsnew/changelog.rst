@@ -62,6 +62,8 @@ Bug Fixes
 
 - TopSpin imports now report when hypercomplex data require the optional
   ``spectrochempy-hypercomplex`` and ``numpy-quaternion`` dependencies. (#1743)
+- Native ``.scp`` loads now preserve the dataset modification timestamp instead
+  of replacing it while restoring the filename and name.
 
 
 .. section
@@ -70,6 +72,9 @@ Dependency Updates
 ~~~~~~~~~~~~~~~~~~
 .. Add here new dependency updates (do not delete this comment)
 
+- Extend the official NMR and hypercomplex extra bounds to admit their
+  autonomous 0.2.x releases while preserving compatibility with existing
+  0.1.x installations during the publication transition.
 - Updated the documentation dependency ``nbconvert`` to 7.17.2 to address an
   arbitrary-file-write vulnerability when converting untrusted notebooks.
 

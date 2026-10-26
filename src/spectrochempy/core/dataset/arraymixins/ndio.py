@@ -351,8 +351,11 @@ class NDIO(tr.HasTraits):
         new = cls.loads(js)
 
         if resolved_filename is not None:
+            restored_modified = getattr(new, "_modified", None)
             new._filename = resolved_filename
             new.name = resolved_filename.stem
+            if restored_modified is not None:
+                new._modified = restored_modified
 
         return new
 
