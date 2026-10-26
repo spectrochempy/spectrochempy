@@ -40,7 +40,7 @@ def test_next_patch_dev_version_is_newer_than_latest_stable():
 
 def test_release_relevant_paths_excludes_tests_and_docs(tmp_path):
     module = load_module()
-    plugin_dir = tmp_path / "plugins" / "spectrochempy-nmr"
+    plugin_dir = tmp_path / "plugins" / "spectrochempy-iris"
     (plugin_dir / "src").mkdir(parents=True)
     (plugin_dir / "tests").mkdir()
     (plugin_dir / "docs").mkdir()
@@ -58,21 +58,21 @@ def test_release_relevant_paths_excludes_tests_and_docs(tmp_path):
 
 def test_apply_dev_version_updates_plugin_metadata(tmp_path, monkeypatch):
     module = load_module()
-    plugin_dir = tmp_path / "plugins" / "spectrochempy-nmr"
-    init_dir = plugin_dir / "src" / "spectrochempy_nmr"
+    plugin_dir = tmp_path / "plugins" / "spectrochempy-iris"
+    init_dir = plugin_dir / "src" / "spectrochempy_iris"
     init_dir.mkdir(parents=True)
     (plugin_dir / "pyproject.toml").write_text(
-        '[project]\nname = "spectrochempy-nmr"\nversion = "0.1.3"\n'
+        '[project]\nname = "spectrochempy-iris"\nversion = "0.1.3"\n'
     )
     (plugin_dir / "recipe.yaml").write_text(
-        'context:\n  name: spectrochempy-nmr\n  version: "0.1.3"\n'
+        'context:\n  name: spectrochempy-iris\n  version: "0.1.3"\n'
     )
-    (init_dir / "__init__.py").write_text('class NMRPlugin:\n    version = "0.1.3"\n')
+    (init_dir / "__init__.py").write_text('class IrisPlugin:\n    version = "0.1.3"\n')
     monkeypatch.chdir(tmp_path)
     status = module.PluginVersionStatus(
-        plugin="spectrochempy-nmr",
-        plugin_dir="plugins/spectrochempy-nmr",
-        latest_tag="spectrochempy-nmr-v0.1.3",
+        plugin="spectrochempy-iris",
+        plugin_dir="plugins/spectrochempy-iris",
+        latest_tag="spectrochempy-iris-v0.1.3",
         base_version="0.1.3",
         commits_since_tag=12,
         dev_version="0.1.4.dev12",
@@ -83,9 +83,9 @@ def test_apply_dev_version_updates_plugin_metadata(tmp_path, monkeypatch):
     changed_paths = module.apply_dev_version(status)
 
     assert changed_paths == [
-        "plugins/spectrochempy-nmr/pyproject.toml",
-        "plugins/spectrochempy-nmr/recipe.yaml",
-        "plugins/spectrochempy-nmr/src/spectrochempy_nmr/__init__.py",
+        "plugins/spectrochempy-iris/pyproject.toml",
+        "plugins/spectrochempy-iris/recipe.yaml",
+        "plugins/spectrochempy-iris/src/spectrochempy_iris/__init__.py",
     ]
     assert 'version = "0.1.4.dev12"' in (plugin_dir / "pyproject.toml").read_text()
     assert 'version: "0.1.4.dev12"' in (plugin_dir / "recipe.yaml").read_text()
@@ -118,24 +118,6 @@ def test_discover_official_plugins_with_marker(tmp_path, monkeypatch):
     result = module._discover_official_plugins()
 
     assert result == ("spectrochempy-carroucell",)
-
-
-def test_discover_official_plugins_excludes_standalone_plugins(tmp_path, monkeypatch):
-    """Standalone NMR plugins are not release-managed by the monorepo."""
-    module = load_module()
-
-    plugins_dir = tmp_path / "plugins"
-    plugins_dir.mkdir()
-    for name in ("spectrochempy-nmr", "spectrochempy-hypercomplex"):
-        plugin = plugins_dir / name
-        plugin.mkdir()
-        (plugin / "pyproject.toml").write_text(
-            f'[project]\nname = "{name}"\n'
-            "[tool.spectrochempy]\nofficial-plugin = true\n"
-        )
-
-    monkeypatch.chdir(tmp_path)
-    assert module._discover_official_plugins() == ()
 
 
 def test_discover_official_plugins_empty(tmp_path, monkeypatch):

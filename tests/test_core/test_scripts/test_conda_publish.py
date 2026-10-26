@@ -1801,8 +1801,8 @@ class TestNoCondaDevelopmentPublication:
 
 class _MatrixMixin:
     @staticmethod
-    def _matrix(plugins=("spectrochempy-hypercomplex",)):
-        """Six-entry matrix as emitted by the discover-conda-plugins job."""
+    def _matrix(plugins=("spectrochempy-carroucell",)):
+        """Four-entry matrix as emitted by the discover-conda-plugins job."""
         return json.dumps(
             {
                 "plugin": [
@@ -1813,9 +1813,7 @@ class _MatrixMixin:
                     }
                     for name in (
                         "spectrochempy-carroucell",
-                        "spectrochempy-hypercomplex",
                         "spectrochempy-iris",
-                        "spectrochempy-nmr",
                         "spectrochempy-perkinelmer",
                         "spectrochempy-tensor",
                     )
@@ -1828,9 +1826,7 @@ class _MatrixMixin:
 class TestMatrixPluginNames(_MatrixMixin):
     OFFICIAL = (
         "spectrochempy-carroucell",
-        "spectrochempy-hypercomplex",
         "spectrochempy-iris",
-        "spectrochempy-nmr",
         "spectrochempy-perkinelmer",
         "spectrochempy-tensor",
     )
@@ -1859,11 +1855,11 @@ class TestMatrixPluginNames(_MatrixMixin):
 
 
 class TestMatrixPluginEntry(_MatrixMixin):
-    def test_hypercomplex_entry(self):
+    def test_carroucell_entry(self):
         module = load_module()
-        entry = module.matrix_plugin_entry(self._matrix(), "spectrochempy-hypercomplex")
-        assert entry["name"] == "spectrochempy-hypercomplex"
-        assert entry["recipe"] == "plugins/spectrochempy-hypercomplex/recipe"
+        entry = module.matrix_plugin_entry(self._matrix(), "spectrochempy-carroucell")
+        assert entry["name"] == "spectrochempy-carroucell"
+        assert entry["recipe"] == "plugins/spectrochempy-carroucell/recipe"
         assert entry["recipe_file"] == "recipe.yaml"
 
     def test_unknown_plugin_raises(self):
@@ -1879,7 +1875,7 @@ class TestCmdMatrixContains(_MatrixMixin):
         assert (
             module.cmd_matrix_contains(
                 argparse.Namespace(
-                    plugin="spectrochempy-hypercomplex", matrix=self._matrix()
+                    plugin="spectrochempy-carroucell", matrix=self._matrix()
                 )
             )
             == 0
@@ -1900,7 +1896,7 @@ class TestCmdMatrixContains(_MatrixMixin):
         module = load_module()
         assert (
             module.cmd_matrix_contains(
-                argparse.Namespace(plugin="spectrochempy-hypercomplex", matrix="nope")
+                argparse.Namespace(plugin="spectrochempy-carroucell", matrix="nope")
             )
             == 2
         )
@@ -1913,13 +1909,13 @@ class TestCmdMatrixRecipe(_MatrixMixin):
         assert (
             module.cmd_matrix_recipe(
                 argparse.Namespace(
-                    plugin="spectrochempy-hypercomplex", matrix=self._matrix()
+                    plugin="spectrochempy-carroucell", matrix=self._matrix()
                 )
             )
             == 0
         )
         lines = [ln for ln in capsys.readouterr().out.splitlines() if "=" in ln]
-        assert "recipe=plugins/spectrochempy-hypercomplex/recipe" in lines
+        assert "recipe=plugins/spectrochempy-carroucell/recipe" in lines
         assert "recipe_file=recipe.yaml" in lines
 
     def test_unknown_plugin_exit_two(self, capsys):

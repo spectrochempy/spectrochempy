@@ -26,7 +26,6 @@ def test_core_install():
     import spectrochempy as scp
 
     print(f"  SpectroChemPy {scp.__version__}")
-
     ds = scp.NDDataset([1, 2, 3])
     assert ds.shape == (3,), f"NDDataset shape mismatch: {ds.shape}"
     print("  PASS: NDDataset created successfully")
@@ -81,6 +80,7 @@ def test_with_plugins():
     import spectrochempy as scp
 
     print(f"  SpectroChemPy {scp.__version__}")
+    failures = []
 
     ds = scp.NDDataset([1, 2, 3])
     assert ds.shape == (3,), f"NDDataset shape mismatch: {ds.shape}"
@@ -94,6 +94,7 @@ def test_with_plugins():
             print(f"  PASS: scp.{ns} is accessible")
         except Exception as e:
             print(f"  WARN: scp.{ns} raised {type(e).__name__}")
+            failures.append(f"namespace {ns}: {e}")
 
     # Verify plugin modules import
     print("\n  --- Plugin module imports ---")
@@ -109,6 +110,7 @@ def test_with_plugins():
             print(f"  PASS: {mod_name} imported")
         except Exception as e:
             print(f"  FAIL: {mod_name} import failed: {e}")
+            failures.append(f"module {mod_name}: {e}")
 
     # Lightweight feature access
     print("\n  --- Lightweight feature smoke tests ---")
@@ -123,6 +125,7 @@ def test_with_plugins():
             print(f"  PASS: {label} imported ({type(obj).__name__})")
         except Exception as e:
             print(f"  WARN: {label} import failed: {e}")
+            failures.append(f"feature {label}: {e}")
 
     # scp.plugins() listing
     print("\n  --- Plugin listing ---")
@@ -134,8 +137,15 @@ def test_with_plugins():
         print(f"  Discovered: {len(result.discovered)}")
     except Exception as e:
         print(f"  INFO: scp.plugins() raised {type(e).__name__}: {e}")
+        failures.append(f"plugin listing: {e}")
 
     print("\n" + "=" * 60)
+    if failures:
+        print("  Core + plugins smoke test FAILED")
+        for failure in failures:
+            print(f"    - {failure}")
+        print("=" * 60)
+        return False
     print("  Core + plugins smoke test PASSED")
     print("=" * 60)
     return True

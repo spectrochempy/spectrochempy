@@ -18,18 +18,20 @@ build:
       - git fetch --all --tags || true
     install:
       - python .github/actions/verified-pip/verified_pip.py
-      # The ``plugins`` extra is deliberately NOT requested here: it would
-      # resolve the plugins published on PyPI, and the post_install job below
-      # replaces them with the ones from this checkout.
+      # The ``plugins`` extra is deliberately NOT requested here: the
+      # post_install job installs checkout plugins explicitly and installs
+      # standalone plugins from their published distributions.
       - python -m pip install -e ".[docs]"
     post_install:
-      # Install the plugins from the checkout, not from PyPI, so a pull
-      # request that changes a plugin documents the plugin it contains.
-      # This mirrors the local documentation build sequence for plugins.
+      # Install the plugins that remain in this checkout in editable mode so
+      # a pull request that changes one documents the plugin it contains.
       - |
         for name in $(python -m spectrochempy.ci.install_plugins --list-names); do
           python -m pip install --no-deps -e "plugins/$name"
         done
+      # NMR and hypercomplex are maintained in standalone repositories. Their
+      # public API pages are generated from the released distributions.
+      - python -m pip install "spectrochempy-nmr>=0.2,<0.3" "spectrochempy-hypercomplex>=0.2,<0.3"
       # Runtime dependencies that --no-deps skips.
       - python -m pip install osqp scipy numpy-quaternion tensorly
     build:

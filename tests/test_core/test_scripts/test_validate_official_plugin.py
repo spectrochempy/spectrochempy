@@ -31,7 +31,7 @@ def _write_plugin_pyproject(
     keep_legacy_classifier: bool = False,
 ) -> Path:
     """Write a minimal pyproject.toml and return the plugin directory."""
-    plugin_dir = tmp_path / "spectrochempy-nmr"
+    plugin_dir = tmp_path / "spectrochempy-iris"
     plugin_dir.mkdir()
     classifiers = []
     if keep_legacy_classifier:
@@ -42,7 +42,7 @@ def _write_plugin_pyproject(
         "\n[tool.spectrochempy]\nofficial-plugin = true" if official_marker else ""
     )
     (plugin_dir / "pyproject.toml").write_text(
-        f'[project]\nname = "spectrochempy-nmr"\nversion = "0.1.0"'
+        f'[project]\nname = "spectrochempy-iris"\nversion = "0.1.0"'
         f"{classifiers_str}\n{tool_section}\n"
     )
     return plugin_dir
@@ -89,7 +89,7 @@ class TestValidatePlugin:
 
     def test_missing_pyproject(self, tmp_path):
         module = load_module()
-        plugin_dir = tmp_path / "spectrochempy-nmr"
+        plugin_dir = tmp_path / "spectrochempy-iris"
         plugin_dir.mkdir()
 
         errors = module.validate_plugin(plugin_dir)

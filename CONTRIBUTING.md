@@ -275,15 +275,16 @@ final PR state and should not be discarded after pre-commit runs.
 
 ## Plugin development
 
-Plugins are separate packages located in `plugins/`.
+Plugins are separate packages. Some official plugins are maintained in
+standalone repositories.
 
 Example:
 
 ```bash
-pip install -e plugins/spectrochempy-nmr
+pip install -e plugins/spectrochempy-iris
 ```
 
-Each plugin:
+Each plugin kept in this repository:
 
 * has its own `pyproject.toml`;
 * registers through
