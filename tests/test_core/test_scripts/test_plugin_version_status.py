@@ -100,10 +100,10 @@ def test_discover_official_plugins_with_marker(tmp_path, monkeypatch):
     plugins_dir.mkdir()
 
     # Official plugin: has official-plugin = true
-    official = plugins_dir / "spectrochempy-nmr"
+    official = plugins_dir / "spectrochempy-carroucell"
     official.mkdir()
     (official / "pyproject.toml").write_text(
-        '[project]\nname = "spectrochempy-nmr"\n'
+        '[project]\nname = "spectrochempy-carroucell"\n'
         "[tool.spectrochempy]\nofficial-plugin = true\n"
     )
 
@@ -117,7 +117,25 @@ def test_discover_official_plugins_with_marker(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     result = module._discover_official_plugins()
 
-    assert result == ("spectrochempy-nmr",)
+    assert result == ("spectrochempy-carroucell",)
+
+
+def test_discover_official_plugins_excludes_standalone_plugins(tmp_path, monkeypatch):
+    """Standalone NMR plugins are not release-managed by the monorepo."""
+    module = load_module()
+
+    plugins_dir = tmp_path / "plugins"
+    plugins_dir.mkdir()
+    for name in ("spectrochempy-nmr", "spectrochempy-hypercomplex"):
+        plugin = plugins_dir / name
+        plugin.mkdir()
+        (plugin / "pyproject.toml").write_text(
+            f'[project]\nname = "{name}"\n'
+            "[tool.spectrochempy]\nofficial-plugin = true\n"
+        )
+
+    monkeypatch.chdir(tmp_path)
+    assert module._discover_official_plugins() == ()
 
 
 def test_discover_official_plugins_empty(tmp_path, monkeypatch):

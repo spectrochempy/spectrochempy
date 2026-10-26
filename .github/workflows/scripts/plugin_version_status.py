@@ -15,6 +15,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 OFFICIAL_CLASSIFIER = "Framework :: SpectroChemPy :: Official Plugin"  # legacy, kept for strip_official_classifier
+STANDALONE_PLUGINS = {"spectrochempy-nmr", "spectrochempy-hypercomplex"}
 
 
 def _discover_official_plugins() -> tuple[str, ...]:
@@ -33,7 +34,10 @@ def _discover_official_plugins() -> tuple[str, ...]:
         try:
             data = tomllib.loads(pyproject.read_text())
             tool_sc = data.get("tool", {}).get("spectrochempy", {})
-            if tool_sc.get("official-plugin") is True:
+            if (
+                tool_sc.get("official-plugin") is True
+                and pyproject.parent.name not in STANDALONE_PLUGINS
+            ):
                 results.append(pyproject.parent.name)
         except Exception as exc:
             print(f"Warning: could not read {pyproject}: {exc}", file=sys.stderr)

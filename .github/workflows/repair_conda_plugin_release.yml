@@ -44,9 +44,7 @@ on:
         type: choice
         options:
           - spectrochempy-carroucell
-          - spectrochempy-hypercomplex
           - spectrochempy-iris
-          - spectrochempy-nmr
           - spectrochempy-perkinelmer
           - spectrochempy-tensor
       version:

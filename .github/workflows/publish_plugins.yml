@@ -83,6 +83,9 @@ jobs:
           plugins = []
           for d in sorted(Path('plugins').glob('*/')):
               name = d.name
+              if name in {'spectrochempy-nmr', 'spectrochempy-hypercomplex'}:
+                  print(f'Skipping {name} (published from standalone repository)', file=sys.stderr)
+                  continue
               if name == 'plugin-template':
                   print(f'Skipping {name} (developer template, not publishable)', file=sys.stderr)
                   continue
