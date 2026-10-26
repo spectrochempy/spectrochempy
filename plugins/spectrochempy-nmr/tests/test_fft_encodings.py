@@ -286,6 +286,15 @@ class TestSTATESEncoding:
 class TestTPPIEncoding:
     """TPPI encoding: sign alternation on odd points before FFT."""
 
+    def test_complex_tppi_direct_pass_uses_standard_complex_fft(self):
+        data = np.array([[1.0, 2.0j, -3.0, -4.0j], [2.0, 3.0j, -4.0, -5.0j]])
+
+        actual = _fft_encoding_handler(data, "TPPI", original_axis=-1)
+        expected = np.fft.fftshift(np.fft.fft(data), axes=-1)
+
+        assert actual.dtype == data.dtype
+        assert_allclose(actual, expected)
+
     def test_tppi_single_peak(self):
         """TPPI FFT should place the peak at the correct position."""
         nf1, nf2 = 16, 32

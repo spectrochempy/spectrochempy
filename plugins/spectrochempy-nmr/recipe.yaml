@@ -7,7 +7,7 @@ package:
   version: "${{ version }}"
 
 source:
-  path: ../../plugins/spectrochempy-nmr
+  path: .
 
 build:
   number: 0
@@ -18,7 +18,7 @@ requirements:
   host:
     - python >=3.11
     - pip
-    - setuptools >=64
+    - setuptools >=77
   run:
     - python >=3.11
     - spectrochempy >=1.1.0,<2
@@ -36,6 +36,9 @@ about:
     contexts for SpectroChemPy.
   homepage: https://www.spectrochempy.fr
   license: LicenseRef-CeCILL-B
+  license_file:
+    - LICENSE
+    - NMRGLUE_LICENSE.rst
   repository: https://github.com/spectrochempy/spectrochempy
 
 extra:

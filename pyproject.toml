@@ -61,7 +61,7 @@ docs = [
   "jupyter == 1.1.1",
   "jupyter-sphinx",
   "jupytext == 1.16.7",
-  "nbconvert == 7.17.1",
+  "nbconvert == 7.17.2",
   "nbformat == 5.10.4",
   "nbsphinx == 0.9.6",
   "numpydoc == 1.8.0",
@@ -87,14 +87,14 @@ interactive = [
   "nodejs",
   "jupyter_server",
 ]
-nmr = ["spectrochempy-nmr>=0.1,<0.2"]
+nmr = ["spectrochempy-nmr>=0.1,<0.3"]
 iris = ["spectrochempy-iris>=0.1,<0.2"]
 tensor = ["spectrochempy-tensor>=0.1,<0.2"]
 plugins = [
     "spectrochempy[nmr]",
     "spectrochempy[iris]",
     "spectrochempy[tensor]",
-    "spectrochempy-hypercomplex>=0.1,<0.2",
+    "spectrochempy-hypercomplex>=0.1,<0.3",
     "spectrochempy-carroucell>=0.1,<0.2",
     "spectrochempy-perkinelmer>=0.1,<0.2",
 ]
