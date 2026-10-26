@@ -833,6 +833,7 @@ def test_native_roundtrip_preserves_aware_acquisition_date(tmp_path):
     assert restored.acquisition_date == source_public_date
     assert dataset._created == source_created
     assert dataset._modified == source_modified
+    assert restored._modified == source_modified
     assert_array_equal(restored.data, source_data)
     assert_array_equal(dataset.data, source_data)
     assert dataset._acquisition_date == acquisition_date

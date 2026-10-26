@@ -166,6 +166,9 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Secure pip bootstrap
+        uses: ./.github/actions/verified-pip
+
       - name: Determine core version for PyPI build
         run: |
           python3 -m pip install --quiet packaging
@@ -187,7 +190,7 @@ jobs:
 
       - name: Install pypa/build
         run: |
-          python -m pip install build --user
+          python -m pip install "certifi>=2026.10.19" build --user
 
       - name: Build a binary wheel and a source tarball
         run: |
@@ -233,13 +236,27 @@ jobs:
         with:
           environment-file: environments/environment_build.yml
           environment-name: scpy_build
+          condarc: |
+            ssl_verify: /etc/ssl/certs/ca-certificates.crt
           create-args: >-
             python=3.11
           cache-environment: true
 
+      - name: Report Micromamba version
+        run: micromamba --version
+
+      - name: Secure pip bootstrap
+        uses: ./.github/actions/verified-pip
+
+      - name: Configure Rattler Build to use system certificates
+        run: |
+          mkdir -p "$RUNNER_TEMP/rattler"
+          printf 'tls-root-certs = "native"\n' > "$RUNNER_TEMP/rattler/config.toml"
+          echo "RATTLER_HOME=$RUNNER_TEMP/rattler" >> "$GITHUB_ENV"
+
       - name: Determine core version for conda build
         run: |
-          python3 -m pip install --quiet packaging
+          python -m pip install --quiet "certifi>=2026.10.19" packaging
           LATEST_CORE_TAG=$(python .github/workflows/scripts/release_version.py latest-tag)
           if [[ -z "$LATEST_CORE_TAG" ]]; then
             echo "::error::No core tag found — cannot determine core version"
@@ -266,6 +283,7 @@ jobs:
         env:
           CONDA_BLD_PATH: ../output
         with:
+          rattler-build-version: v0.77.0
           recipe-path: recipe/recipe.yaml
           upload-artifact: false
           build-args: "-c conda-forge -c spectrocat"
@@ -421,9 +439,20 @@ jobs:
         with:
           environment-file: environments/environment_build.yml
           environment-name: scpy_build
+          condarc: |
+            ssl_verify: /etc/ssl/certs/ca-certificates.crt
           create-args: >-
             python=3.11
           cache-environment: true
+
+      - name: Report Micromamba version
+        run: micromamba --version
+
+      - name: Configure Rattler Build to use system certificates
+        run: |
+          mkdir -p "$RUNNER_TEMP/rattler"
+          printf 'tls-root-certs = "native"\n' > "$RUNNER_TEMP/rattler/config.toml"
+          echo "RATTLER_HOME=$RUNNER_TEMP/rattler" >> "$GITHUB_ENV"
 
       - name: Restore core conda package from core build
         uses: actions/cache/restore@v6
@@ -459,6 +488,7 @@ jobs:
         env:
           CONDA_BLD_PATH: ../output
         with:
+          rattler-build-version: v0.77.0
           recipe-path: ${{ matrix.plugin.recipe }}/${{ matrix.plugin.recipe_file }}
           upload-artifact: false
           # spectrocat channels come first so that spectrochempy is resolved from
@@ -582,9 +612,20 @@ jobs:
         with:
           environment-file: environments/environment_build.yml
           environment-name: scpy_build
+          condarc: |
+            ssl_verify: /etc/ssl/certs/ca-certificates.crt
           create-args: >-
             python=3.11
           cache-environment: true
+
+      - name: Report Micromamba version
+        run: micromamba --version
+
+      - name: Configure Rattler Build to use system certificates
+        run: |
+          mkdir -p "$RUNNER_TEMP/rattler"
+          printf 'tls-root-certs = "native"\n' > "$RUNNER_TEMP/rattler/config.toml"
+          echo "RATTLER_HOME=$RUNNER_TEMP/rattler" >> "$GITHUB_ENV"
 
       - name: Extract plugin recipe info from matrix
         id: recipe-info
@@ -601,6 +642,7 @@ jobs:
         env:
           CONDA_BLD_PATH: ../output
         with:
+          rattler-build-version: v0.77.0
           recipe-path: ${{ steps.recipe-info.outputs.recipe }}/${{ steps.recipe-info.outputs.recipe_file }}
           upload-artifact: false
           build-args: >-
