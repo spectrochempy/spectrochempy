@@ -731,6 +731,7 @@ a.scp-path:focus-visible,
 }
 
 .scp-community-links a {
+  font-size: 0.9rem;
   font-weight: 700;
 }
 

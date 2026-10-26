@@ -237,6 +237,8 @@ def _fft_encoding_handler(data, encoding, **kwargs):
     if "STATES" in encoding:
         return _states_fft(data, tppi=tppi)
     if "TPPI" in encoding and "STATES" not in encoding:
+        if hasattr(data, "dtype") and data.dtype.kind != "V":
+            return _complex_fft(data)
         return _tppi_fft(data)
     if "ECHO-ANTIECHO" in encoding:
         return _echoanti_fft(data)
