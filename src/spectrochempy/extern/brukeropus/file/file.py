@@ -80,7 +80,7 @@ class OPUSFile:
         width = 120
         c3_width = width - c1_width - c2_width
         if self.is_opus:
-            lines = ["=" * width, f"{'OPUS File: ' + self.filepath:^{width}}"]
+            lines = ["=" * width, f"{'OPUS File: ' + self.name:^{width}}"]
             lines.append(
                 f"{'Attribute':<{c1_width}}{'Class type':<{c2_width}}" + "Description"
             )
@@ -115,18 +115,24 @@ class OPUSFile:
                 )
             lines.append("―" * width)
             return "\n".join(lines)
-        return "Not an OPUS file: " + str(self.filepath)
+        return "Not an OPUS file: " + self.name
 
     def __bool__(self):
         return self.is_opus
 
     def __getattr__(self, name):
+        params = self.__dict__.get("params")
+        rf_params = self.__dict__.get("rf_params")
         if name == "blocks":
-            return self.directory.blocks
-        if name.lower() in self.params.keys():
-            return getattr(self.params, name)
-        if name.lower() in self.rf_params.keys():
-            return getattr(self.rf_params, name)
+            directory = self.__dict__.get("directory")
+            if directory is not None:
+                return directory.blocks
+            raise AttributeError(name)
+        if params is not None and name.lower() in params.keys():
+            return getattr(params, name)
+        if rf_params is not None and name.lower() in rf_params.keys():
+            return getattr(rf_params, name)
+        raise AttributeError(name)
 
     def __init__(self, filepath, debug: bool = False):
         """Note: a list of `FileBlock` is initially loaded and parsed using the `FileDirectory` class.  This list is

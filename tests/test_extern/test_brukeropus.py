@@ -1,5 +1,6 @@
 import os  # kept for os.walk
 import struct
+from io import BytesIO
 from pathlib import Path
 
 import numpy as np
@@ -85,6 +86,22 @@ def test_opus_file_detection(test_directory):
     assert (
         len(invalid_opus) == 0
     ), f"Found {len(invalid_opus)} files with OPUS extension that are not valid OPUS files"
+
+
+def test_filelike_opus_string_uses_normalized_name(test_directory):
+    path = test_directory / "test.0000"
+    opusfile = OPUSFile(BytesIO(path.read_bytes()))
+
+    assert "OPUS File: <file object>" in str(opusfile)
+
+
+def test_invalid_filelike_opus_raises_attribute_error_for_missing_attributes():
+    opusfile = OPUSFile(BytesIO(b"not an OPUS file"))
+
+    assert not opusfile
+    assert str(opusfile) == "Not an OPUS file: <file object>"
+    with pytest.raises(AttributeError):
+        _ = opusfile.missing_attribute
 
 
 def test_block_consistency(opus_data):
