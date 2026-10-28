@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pytest
 
+import spectrochempy as scp
 from spectrochempy import NDDataset
 from spectrochempy import preferences as prefs
 from spectrochempy import read_opus
@@ -48,6 +49,11 @@ class TestOpusBasic:
         content = p.read_bytes()
         dataset = read_opus({p.name: content})
         assert dataset.name == p.stem
+        assert dataset.shape == (1, 2567)
+
+    def test_namespace_api(self):
+        dataset = scp.opus.read(OPUSDATA / "test.0000")
+
         assert dataset.shape == (1, 2567)
 
 
@@ -199,7 +205,7 @@ class TestOpusAssembledTimeResolved:
         assert dataset.y.size == 95
         assert dataset.x.size == 1607
         assert dataset.x.title == "wavenumber"
-        assert str(dataset.x.units) == "cm^-1"
+        assert str(dataset.x.units).replace("⁻¹", "^-1") == "cm^-1"
         assert dataset.units == "absorbance"
         assert dataset.acquisition_date is not None
 

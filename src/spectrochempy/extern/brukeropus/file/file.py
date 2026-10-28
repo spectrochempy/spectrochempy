@@ -1,14 +1,16 @@
-import datetime
-
-import numpy as np
+# ruff: noqa
+import os
 
 from spectrochempy.extern.brukeropus.file.block import FileBlock
-from spectrochempy.extern.brukeropus.file.block import FileDirectory
 from spectrochempy.extern.brukeropus.file.block import pair_data_and_status_blocks
+from spectrochempy.extern.brukeropus.file.data import Data
+from spectrochempy.extern.brukeropus.file.data import DataSeries
+from spectrochempy.extern.brukeropus.file.directory import FileDirectory
+from spectrochempy.extern.brukeropus.file.params import Parameters
 from spectrochempy.extern.brukeropus.file.parse import read_opus_file_bytes
+from spectrochempy.extern.brukeropus.file.report import Report
 from spectrochempy.extern.brukeropus.file.utils import _print_block_header
 from spectrochempy.extern.brukeropus.file.utils import _print_cols
-from spectrochempy.extern.brukeropus.file.utils import get_block_type_label
 from spectrochempy.extern.brukeropus.file.utils import get_param_label
 
 __docformat__ = "google"
@@ -22,20 +24,19 @@ information.
 
 
 class OPUSFile:
-    """
-    Class that contains the data and metadata contained in a bruker OPUS file.
+    """Class that contains the data and metadata contained in a bruker OPUS file.
 
     Args:
-    ----
         filepath: full path to the OPUS file to be parsed. Can be a string or Path object and is required to initilize
             an `OPUSFile` object.
+        debug: whether to read the file in debug mode (default: False)
 
     Attributes:
-    ----------
         is_opus: True if filepath points to an OPUS file, False otherwise. Also returned for dunder `__bool__()`
         filepath: full path pointing to the OPUS file
+        name: base filename of the OPUS file
         params: class containing all general parameter metadata for the OPUS file. To save typing, the
-            three char parameters from params also become attributes of the `OPUSFile` class (e.g. bms, apt, src)
+            three char parameters from params also become attributes of the `OPUSFile` class (e.g. bms, apt, src).
         rf_params: class containing all reference parameter metadata for the OPUS file
         data_keys: list of all `Data` attributes stored in the file (e.g. sm, rf, t, a, r, igsm, igrf, phsm, etc.).
             This only includes 1D data (i.e. omits `DataSeries`).
@@ -43,11 +44,13 @@ class OPUSFile:
             This only includes data series (i.e. omits 1D `Data`).
         all_data_keys: list of all `Data` and `DataSeries` attributes stored in the file (1D and series comingled).
         datetime: Returns the most recent datetime of all the data blocks stored in the file (typically result spectra)
+        reports: list of `Report` class containing all reports in the file.
         directory: `FileDirectory` class containing information about all the various data blocks in the file.
         history: History (file-log) containing text about how the file was generated/edited (not always saved)
         unmatched_data_blocks: list of data `FileBlock` that were not uniquely matched to a data status block
         unmatched_data_status_blocks: list of data status `FileBlock` that were not uniquely matched to a data block
         unknown_blocks: list of `FileBlock` that were not parsed and/or assigned to attributes into the class
+        parse_error_blocks: list of `FileBlock` that raised an error while attempting to parse
 
     Data Attributes:
         **sm:** Single-channel sample spectra
@@ -72,9 +75,46 @@ class OPUSFile:
     """
 
     def __str__(self):
+        c1_width = 15
+        c2_width = 20
+        width = 120
+        c3_width = width - c1_width - c2_width
         if self.is_opus:
-            data_str = ", ".join(self.all_data_keys)
-            return "OPUS File: " + str(self.filepath) + "\n\tSpectra: " + data_str
+            lines = ["=" * width, f"{'OPUS File: ' + self.filepath:^{width}}"]
+            lines.append(
+                f"{'Attribute':<{c1_width}}{'Class type':<{c2_width}}" + "Description"
+            )
+            lines.append("―" * width)
+            for attr in ("params", "rf_params"):
+                val = getattr(self, attr)
+                if val.keys():
+                    lines.append(
+                        f"{attr:<{c1_width}}{'Parameters':<{c2_width}}"
+                        + val.label[:c3_width]
+                    )
+            for attr in self.data_keys:
+                val = getattr(self, attr)
+                lines.append(
+                    f"{attr:<{c1_width}}{'Data':<{c2_width}}" + val.label[:c3_width]
+                )
+            for attr in self.series_keys:
+                val = getattr(self, attr)
+                lines.append(
+                    f"{attr:<{c1_width}}{'DataSeries':<{c2_width}}"
+                    + val.label[:c3_width]
+                )
+            for i, report in enumerate(self.reports):
+                lines.append(
+                    f"{'reports[' + str(i) + ']':<{c1_width}}{'Report':<{c2_width}}"
+                    + report.title
+                )
+            if self.history:
+                lines.append(
+                    f"{'history':<{c1_width}}{'str':<{c2_width}}"
+                    + "History log of file"
+                )
+            lines.append("―" * width)
+            return "\n".join(lines)
         return "Not an OPUS file: " + str(self.filepath)
 
     def __bool__(self):
@@ -83,69 +123,94 @@ class OPUSFile:
     def __getattr__(self, name):
         if name == "blocks":
             return self.directory.blocks
-        return None
+        if name.lower() in self.params.keys():
+            return getattr(self.params, name)
+        if name.lower() in self.rf_params.keys():
+            return getattr(self.rf_params, name)
 
-    def __init__(self, filepath):
-        """
-        Note: a list of `FileBlock` is initially loaded and parsed using the `FileDirectory` class.  This list is
+    def __init__(self, filepath, debug: bool = False):
+        """Note: a list of `FileBlock` is initially loaded and parsed using the `FileDirectory` class.  This list is
         located in `OPUSFile.directory.blocks`. After parsing all the file blocks (performed by the `FileBlock` class),
         data from those blocks are saved to various attributes within the `OPUSFile` class.  Subsequently, the block is
-        removed from `OPUSFile.directory.blocks` to eliminate redundant data and reduce memory footprint.
-        """
+        removed from `OPUSFile.directory.blocks` to eliminate redundant data and reduce memory footprint."""
         self.filepath = filepath
+        self.name = (
+            os.path.basename(filepath)
+            if isinstance(filepath, (str, os.PathLike))
+            else "<file object>"
+        )
         self.is_opus = False
         self.data_keys = []
         self.series_keys = []
         self.all_data_keys = []
+        self.reports = []
         self.unknown_blocks = []
-        self.special_blocks = []
         self.unmatched_data_blocks = []
         self.unmatched_data_status_blocks = []
         filebytes = read_opus_file_bytes(filepath)
+        if debug:
+            self.bytes = filebytes
         if filebytes:
             self.is_opus = True
-            self.directory = FileDirectory(filebytes)
+            self.directory = FileDirectory(filebytes, debug=debug)
             self._init_directory()
             self._init_params("rf_params", "is_rf_param")
             self._init_params("params", "is_sm_param")
-            self._init_history()
             self._init_data()
-            self.unknown_blocks = list(self.directory.blocks)
-            self._remove_blocks(self.unknown_blocks)
+            self._init_reports()
+            self._init_history()
+            self.unknown_blocks = [block for block in self.directory.blocks]
+            self._remove_blocks(self.unknown_blocks, "unknown_blocks")
+            self.parse_error_blocks = [
+                block for block in self.directory.parse_error_blocks
+            ]
+            self._remove_blocks(self.parse_error_blocks, "parse_error_blocks")
 
     def _init_directory(self):
         """Moves the directory `FileBlock` into the directory attribute."""
-        dir_block = [b for b in self.directory.blocks if b.is_directory()][0]
+        try:
+            dir_block = [b for b in self.directory.blocks if b.is_directory()][0]
+            self._remove_blocks([dir_block], "directory")
+        except:
+            dir_block = None
         self.directory.block = dir_block
-        self._remove_blocks([dir_block])
 
     def _init_params(self, attr: str, is_param: str):
-        """
-        Sets `Parameter` attributes (`self.params`, `self.rf_params`) from directory blocks and removes them from
-        the directory.
-        """
+        """Sets `Parameter` attributes (`self.params`, `self.rf_params`) from directory blocks and removes them from
+        the directory."""
         blocks = [
             b
             for b in self.directory.blocks
-            if getattr(b, is_param)() and isinstance(b.data, dict)
+            if getattr(b, is_param)() and type(b.data) is dict
         ]
         setattr(self, attr, Parameters(blocks))
-        self._remove_blocks(blocks)
+        self._remove_blocks(blocks, attr)
+
+    def _init_reports(self):
+        """Adds all reports (`Report`) from the file to the `.reports` attribute."""
+        report_blocks = [b for b in self.directory.blocks if b.is_report()]
+        for b in report_blocks:
+            try:
+                self.reports.append(Report(b))
+            except Exception as e:
+                b.parse_error = e
+                self.directory.parse_error_blocks.append(b)
+        self._remove_blocks(report_blocks, "reports")
 
     def _init_history(self):
         """Sets the history attribute to the parsed history (file_log) data and removes the block."""
         hist_blocks = [b for b in self.directory.blocks if b.is_file_log()]
         if len(hist_blocks) > 0:
-            self.special_blocks = self.special_blocks + hist_blocks
             self.history = "\n\n".join([b.data for b in hist_blocks])
-        self._remove_blocks(hist_blocks)
+            self.history_blocks = hist_blocks
+            self._remove_blocks(hist_blocks, "history")
 
     def _get_unused_data_key(self, data_block: FileBlock):
         """Returns a shorthand attribute key for the data_block type. If key already exists"""
         key = data_block.get_data_key()
         if key in self.all_data_keys:
             for i in range(10):
-                sub_key = key + "_" + str(i + 1)
+                sub_key = key + "_" + str(i + 2)
                 if sub_key not in self.all_data_keys:
                     key = sub_key
                     break
@@ -153,18 +218,16 @@ class OPUSFile:
 
     def _get_data_vel(self, data_block: FileBlock):
         """Get the mirror velocity setting for the data `Fileblock` (based on whether it is reference or sample)"""
-        if data_block.type[1] == 2 and "vel" in self.rf_params.keys():  # noqa: SIM118
+        if data_block.type[1] == 2 and "vel" in self.rf_params.keys():
             return self.rf_params.vel
-        if data_block.type[1] != 2 and "vel" in self.params.keys():  # noqa: SIM118
+        if data_block.type[1] != 2 and "vel" in self.params.keys():
             return self.params.vel
         return 0
 
     def _init_data(self):
-        """
-        Pairs data and data_series `Fileblock`, sets all `Data` and `DataSeries` attributes, and removes the blocks
-        from the directory. Unmatched blocks are moved to `unmached_data_blocks` or `unmatched_data_status_blocks`
-        """
-        matches = pair_data_and_status_blocks(list(self.directory.blocks))
+        """Pairs data and data_series `Fileblock`, sets all `Data` and `DataSeries` attributes, and removes the blocks
+        from the directory. Unmatched blocks are moved to `unmached_data_blocks` or `unmatched_data_status_blocks`"""
+        matches = pair_data_and_status_blocks([b for b in self.directory.blocks])
         for data, status in matches:
             key = self._get_unused_data_key(data)
             vel = self._get_data_vel(data)
@@ -176,19 +239,32 @@ class OPUSFile:
                 self.series_keys.append(key)
             setattr(self, key, data_class(data, status, key=key, vel=vel))
             self.all_data_keys.append(key)
-            self._remove_blocks([data, status])
+            self._remove_blocks([data, status], key)
         self.unmatched_data_blocks = [
             b for b in self.directory.blocks if b.is_data() or b.is_data_series()
         ]
-        self._remove_blocks(self.unmatched_data_blocks)
+        self._remove_blocks(self.unmatched_data_blocks, "unmatched_data_blocks")
         self.unmatched_data_status_blocks = [
             b for b in self.directory.blocks if b.is_data_status()
         ]
-        self._remove_blocks(self.unmatched_data_status_blocks)
+        self._remove_blocks(
+            self.unmatched_data_status_blocks, "unmatched_data_status_blocks"
+        )
 
-    def _remove_blocks(self, blocks: list):
+    def _get_toc_entry(self, block: FileBlock, attr_name: str):
+        entry = {
+            "type": block.type,
+            "attr": attr_name,
+            "start": block.start,
+            "size": block.size,
+        }
+        return entry
+
+    def _remove_blocks(self, blocks: list, attr_name: str):
         """Removes blocks from the directory whose data has been stored elsewhere in class (e.g. params, data, etc.)."""
         starts = [b.start for b in blocks]
+        for b in blocks:
+            self.directory.toc.append(self._get_toc_entry(b, attr_name))
         self.directory.blocks = [
             b for b in self.directory.blocks if b.start not in starts
         ]
@@ -220,7 +296,7 @@ class OPUSFile:
             _print_block_header(title + " (" + attr + ")", width=width, sep="=")
             blocks = getattr(self, attr).blocks
             for block in blocks:
-                label = get_block_type_label(block.type)
+                label = block.type.label
                 _print_block_header(label, width=width, sep=".")
                 _print_cols(("Key", "Label", "Value"), col_widths=col_widths)
                 for key in block.keys:
@@ -229,270 +305,8 @@ class OPUSFile:
                     _print_cols((key.upper(), label, value), col_widths=col_widths)
 
 
-class Parameters:
-    """
-    Class containing parameter metadata of an OPUS file.
-
-    Parameters of an OPUS file are stored as key, val pairs, where the key is always three chars.  For example, the
-    beamsplitter is stored in the `bms` attribute, source in `src` etc.  A list of known keys, with friendly label can
-    be found in `brukeropus.file.constants.PARAM_LABELS`.  The keys in an OPUS file are not case sensitive, and stored
-    in all CAPS (i.e. `BMS`, `SRC`, etc.) but this class uses lower case keys to follow python convention.  The class is
-    initialized from a list of `FileBlock` parsed as parameters.  The key, val items in blocks of the list are combined
-    into one parameter class, so care must be taken not to pass blocks that will overwrite each others keys.  Analagous
-    to a dict, the keys, values, and (key, val) can be iterated over using the functions: `keys()`, `values()`, and
-    `items()` respectively.
-
-    Args:
-    ----
-        blocks: list of `FileBlock`; that has been parsed as parameters.
-
-    Attributes:
-    ----------
-        xxx: parameter attributes are stored as three char keys. Which keys are generated depends on the list of
-            `FileBlock` that is used to initialize the class. If input list contains a single data status
-            `FileBlock`, attributes will include: `fxv`, `lxv`, `npt` (first x-val, last x-val, number of points),
-            etc. Other blocks produce attributes such as: `bms`, `src`, `apt` (beamsplitter, source, aperture) etc. A
-            full list of keys available in a given `Parameters` instance are given by the `keys()` method.
-        datetime: if blocks contain the keys: `dat` (date) and `tim` (time), the `datetime` attribute of this class will
-            be set to a python `datetime` object. Currently, only data status blocks are known to have these keys. If
-            `dat` and `tim` are not present in the class, the `datetime` attribute will return `None`.
-        blocks: list of `FileBlock` with data removed to save memory (keys saved for reference)
-    """
-
-    __slots__ = ("_params", "datetime", "blocks")
-
-    def __init__(self, blocks: list):
-        self._params = {}
-        if isinstance(blocks, FileBlock):
-            blocks = [blocks]
-        for block in blocks:
-            self._params.update(block.data)
-            block.data = None
-        self.blocks = blocks
-        self._set_datetime()
-
-    def __getattr__(self, name):
-        if name.lower() in self._params:
-            return self._params[name.lower()]
-        text = (
-            str(name)
-            + " not a valid attribute. For list of valid parameter keys, use: .keys()"
-        )
-        raise AttributeError(text)
-
-    def __getitem__(self, item):
-        return self._params.__getitem__(item)
-
-    def _set_datetime(self):
-        if "dat" in self.keys() and "tim" in self.keys():
-            try:
-                date_str = self.dat
-                time_str = self.tim
-                dt_str = date_str + "-" + time_str[: time_str.index(" (")]
-                try:
-                    fmt = "%d/%m/%Y-%H:%M:%S.%f"
-                    dt = datetime.datetime.strptime(dt_str, fmt)
-                except:  # noqa: E722
-                    try:
-                        fmt = "%Y/%m/%d-%H:%M:%S.%f"
-                        dt = datetime.datetime.strptime(dt_str, fmt)
-                    except:  # noqa: E722
-                        self.datetime = None
-                self.datetime = dt
-            except:  # noqa: E722
-                self.datetime = None
-        else:
-            self.datetime = None
-
-    def keys(self):
-        """Returns a `dict_keys` class of all valid keys in the class (i.e. dict.keys())"""
-        return self._params.keys()
-
-    def values(self):
-        """Returns a `dict_values` class of all the values in the class (i.e. dict.values())"""
-        return self._params.values()
-
-    def items(self):
-        """Returns a `dict_items` class of all the values in the class (i.e. dict.items())"""
-        return self._params.items()
-
-
-class Data:
-    """
-    Class containing array data and associated parameter/metadata from an OPUS file.
-
-    Args:
-    ----
-        data_block: parsed `FileBlock` instance of a data block
-        data_status_block: `parsed FileBlock` instance of a data status block which contains metadata about the data
-            block. This block is a parameter block.
-        key: attribute name (string) assigned to the data
-        vel: mirror velocity setting for the measurement (from param or rf_param block as appropriate)
-
-    Attributes:
-    ----------
-        params: `Parameter` class with metadata associated with the data block such as first x point: `fxp`, last x
-            point: `lxp`, number of points: `npt`, date: `dat`, time: `tim` etc.
-        y: 1D `numpy` array containing y values of data block
-        x: 1D `numpy` array containing x values of data block. Units of x array are given by `dxu` parameter.
-        label: human-readable string label describing the data block (e.g. Sample Spectrum, Absorbance, etc.)
-        key: attribute name (string) assigned to the data
-        vel: mirror velocity setting for the measurement (used to calculate modulation frequency)
-        block: data `FileBlock` used to generate the `Data` class
-        blocks: [data, data_status] `FileBlock` used to generate the `Data` class
-
-    Extended Attributes:
-        **wn:** Returns the x array in wavenumber (cm⁻¹) units regardless of what units the x array was originally
-            saved in. This is only valid for spectral data blocks such as sample, reference, transmission, etc., not
-            interferogram or phase blocks.
-        **wl:** Returns the x array in wavelength (µm) units regardless of what units the x array was originally
-            saved in. This is only valid for spectral data blocks such as sample, reference, transmission, etc., not
-            interferogram or phase blocks.
-        **f:** Returns the x array in modulation frequency units (Hz) regardless of what units the x array was
-            originally saved in. This is only valid for spectral data blocks such as sample, reference, transmission,
-            etc., not interferogram or phase blocks.
-        **datetime:** Returns a `datetime` class of when the data was taken (extracted from data status parameter
-            block).
-        **xxx:** the various three char parameter keys from the `params` attribute can be directly called from the
-            `Data` class for convenience. Common parameters include `dxu` (x units), `mxy` (max y value), `mny` (min y
-            value), etc.
-    """
-
-    __slots__ = ("key", "params", "y", "x", "label", "vel", "block", "blocks")
-
-    def __init__(
-        self, data_block: FileBlock, data_status_block: FileBlock, key: str, vel: float
-    ):
-        self.key = key
-        self.params = Parameters(data_status_block)
-        y = data_block.data
-        self.y = (
-            self.params.csf * y[: self.params.npt]
-        )  # Trim extra values on some spectra
-        self.x = np.linspace(self.params.fxv, self.params.lxv, self.params.npt)
-        self.label = data_block.get_label()
-        self.vel = vel
-        data_block.data = None
-        self.block = data_block
-        self.blocks = self.params.blocks + [self.block]
-
-    def __getattr__(self, name):
-        if name.lower() == "wn" and self.params.dxu in ("WN", "MI", "LGW"):
-            return self._get_wn()
-        if name.lower() == "wl" and self.params.dxu in ("WN", "MI", "LGW"):
-            return self._get_wl()
-        if name.lower() == "f" and self.params.dxu in ("WN", "MI", "LGW"):
-            return self._get_freq()
-        if name.lower() in self.params:
-            return getattr(self.params, name.lower())
-        if name == "datetime":
-            return self.params.datetime
-        text = str(name) + " is not a valid attribute for Data: " + str(self.key)
-        raise AttributeError(text)
-
-    def _get_wn(self):
-        if self.params.dxu == "WN":
-            return self.x
-        if self.params.dxu == "MI":
-            return 10000.0 / self.x
-        if self.params.dxu == "LGW":
-            return np.exp(self.x)
-        return None
-
-    def _get_wl(self):
-        if self.params.dxu == "WN":
-            return 10000.0 / self.x
-        if self.params.dxu == "MI":
-            return self.x
-        if self.params.dxu == "LGW":
-            return 10000 / np.exp(self.x)
-        return None
-
-    def _get_freq(self):
-        vel = 1000 * np.float(self.vel) / 7900  # cm/s
-        return vel * self.wn
-
-
-class DataSeries(Data):
-    """
-    Class containing a data series (3D specra) and associated parameter/metadata from an OPUS file.
-
-    Args:
-    ----
-        data_block: parsed `FileBlock` instance of a data block
-        data_status_block: `parsed FileBlock` instance of a data status block which contains metadata about the data
-            block. This block is a parameter block.
-        key: attribute name (string) assigned to the data
-        vel: mirror velocity setting for measurement (from param or rf_param block as appropriate)
-
-    Attributes:
-    ----------
-        params: `Parameter` class with metadata associated with the data block such as first x point: `fxp`, last x
-            point: `lxp`, number of points: `npt`, date: `dat`, time: `tim` etc.
-        y: 2D numpy array containing y values of data block
-        x: 1D numpy array containing x values of data block. Units of x array are given by `.dxu` attribute.
-        num_spectra: number of spectra in the series (i.e. length of y)
-        label: human-readable string label describing the data block (e.g. Sample Spectrum, Absorbance, etc.)
-        key: attribute name (string) assigned to the data
-        vel: mirror velocity setting for measurement (used to calculate modulation frequency)
-        block: data `FileBlock` used to generate the `DataSeries` class
-        blocks: [data, data_status] `FileBlock` used to generate the `DataSeries` class
-
-    Extended Attributes:
-        **wn:** Returns the x array in wavenumber (cm⁻¹) units regardless of what units the x array was originally saved
-            in. This is only valid for spectral data blocks such as sample, reference, transmission, etc., not
-            interferogram or phase blocks.
-        **wl:** Returns the x array in wavelength (µm) units regardless of what units the x array was originally saved
-            in. This is only valid for spectral data blocks such as sample, reference, transmission, etc., not
-            interferogram or phase blocks.
-        **datetime:** Returns a `datetime` class of when the data was taken (extracted from data status parameter
-            block).
-        **xxx:** the various three char parameter keys from the `params` attribute can be directly called from the data
-            class for convenience. Several of these parameters return arrays, rather than singular values because they
-            are recorded for every spectra in the series, e.g. `npt`, `mny`, `mxy`, `srt`, 'ert', `nsn`.
-    """
-
-    __slots__ = (
-        "key",
-        "params",
-        "y",
-        "x",
-        "label",
-        "vel",
-        "block",
-        "blocks",
-        "num_spectra",
-    )
-
-    def __init__(
-        self, data_block: FileBlock, data_status_block: FileBlock, key: str, vel: float
-    ):
-        self.key = key
-        self.params = Parameters(data_status_block)
-        data = data_block.data
-        self.y = data["y"][:, : self.params.npt]  # Trim extra values on some spectra
-        self.x = np.linspace(self.params.fxv, self.params.lxv, self.params.npt)
-        self.num_spectra = data["num_blocks"]
-        for key, val in data.items():
-            if key not in [
-                "y",
-                "version",
-                "offset",
-                "num_blocks",
-                "data_size",
-                "info_size",
-            ]:
-                self.params._params[key] = val
-        self.label = data_block.get_label()
-        self.vel = vel
-        data_block.data = None
-        self.block = data_block
-        self.blocks = self.params.blocks + [self.block]
-
-
-def read_opus(filepath: str) -> OPUSFile:
-    """
-    Return an `OPUSFile` object from an OPUS file filepath.
+def read_opus(filepath: str, debug: bool = False) -> OPUSFile:
+    """Return an `OPUSFile` object from an OPUS file filepath.
 
     The following produces identical results:
         ```python
@@ -501,9 +315,9 @@ def read_opus(filepath: str) -> OPUSFile:
         ```
     Args:
         filepath (str or Path): filepath of an OPUS file (typically *.0)
+        debug: whether to read the file in debug mode (default: False)
 
-    Returns
-    -------
+    Returns:
         opus_file: an instance of the `OPUSFile` class containing all data/metadata extracted from the file.
     """
-    return OPUSFile(filepath)
+    return OPUSFile(filepath, debug=debug)
