@@ -4,8 +4,12 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 
+import importlib
+from io import BytesIO
 from pathlib import Path
+from types import SimpleNamespace
 
+import numpy as np
 import pytest
 
 import spectrochempy as scp
@@ -13,6 +17,8 @@ from spectrochempy import NDDataset
 from spectrochempy import preferences as prefs
 from spectrochempy import read_opus
 from spectrochempy.utils.testing import assert_dataset_equal
+
+opus_reader = importlib.import_module("spectrochempy.core.readers.read_opus")
 
 DATADIR = prefs.datadir
 OPUSDATA = DATADIR / "irdata" / "OPUS"
@@ -55,6 +61,78 @@ class TestOpusBasic:
         dataset = scp.opus.read(OPUSDATA / "test.0000")
 
         assert dataset.shape == (1, 2567)
+
+    @pytest.mark.parametrize("type_parameter", ["SM_2CH", "SM_C"])
+    def test_variant_data_type_selectors(self, monkeypatch, tmp_path, type_parameter):
+        data = SimpleNamespace(
+            params=SimpleNamespace(
+                dat="01/01/2020",
+                dxu="WN",
+                fxv=0.0,
+                lxv=1.0,
+                tim="00:00:00.0 (GMT+0)",
+            ),
+            x=np.array([0.0, 1.0]),
+            y=np.array([[1.0, 2.0]]),
+        )
+        opus_data = SimpleNamespace(
+            all_data_keys=["sm_2ch", "sm_c", "a", "unrecognized"],
+            a=data,
+            params=SimpleNamespace(snm="sample"),
+            rf_params=SimpleNamespace(blocks=[]),
+            sm_2ch=data,
+            sm_c=data,
+        )
+        path = tmp_path / "variant.0000"
+        path.write_bytes(b"")
+        monkeypatch.setattr(opus_reader, "OPUSFile", lambda fid: opus_data)
+        monkeypatch.setattr(
+            opus_reader, "_load_parameters_into_meta", lambda _: opus_reader.Meta()
+        )
+        monkeypatch.setattr(
+            opus_reader, "_openfid", lambda filename, **kwargs: (BytesIO(), kwargs)
+        )
+
+        dataset = opus_reader._read_opus(NDDataset(), path, type=type_parameter)
+
+        assert dataset.shape == (1, 2)
+        assert dataset.origin == f"opus-{type_parameter}"
+
+    def test_unrecognized_variant_does_not_hide_standard_type(
+        self, monkeypatch, tmp_path
+    ):
+        data = SimpleNamespace(
+            params=SimpleNamespace(
+                dat="01/01/2020",
+                dxu="WN",
+                fxv=0.0,
+                lxv=1.0,
+                tim="00:00:00.0 (GMT+0)",
+            ),
+            x=np.array([0.0, 1.0]),
+            y=np.array([[1.0, 2.0]]),
+        )
+        opus_data = SimpleNamespace(
+            all_data_keys=["sm_2ch", "unrecognized", "a"],
+            a=data,
+            params=SimpleNamespace(snm="sample"),
+            rf_params=SimpleNamespace(blocks=[]),
+            sm_2ch=data,
+        )
+        path = tmp_path / "variant.0000"
+        path.write_bytes(b"")
+        monkeypatch.setattr(opus_reader, "OPUSFile", lambda fid: opus_data)
+        monkeypatch.setattr(
+            opus_reader, "_load_parameters_into_meta", lambda _: opus_reader.Meta()
+        )
+        monkeypatch.setattr(
+            opus_reader, "_openfid", lambda filename, **kwargs: (BytesIO(), kwargs)
+        )
+
+        dataset = opus_reader._read_opus(NDDataset(), path, type="AB")
+
+        assert dataset.shape == (1, 2)
+        assert dataset.origin == "opus-AB"
 
 
 class TestOpusSpecialTypes:

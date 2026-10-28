@@ -333,6 +333,29 @@ _blocks_parameters = {
 
 _blocks_parameters_inv = {v: k for k, v in _blocks_parameters.items()}
 
+
+def _get_data_type_options(data_keys):
+    """Map public type selectors to the concrete keys exposed by OPUSFile."""
+    options = {}
+    variants = {}
+    for data_key in data_keys:
+        type_parameter = _types_parameters_inv.get(data_key)
+        if type_parameter is not None:
+            options[type_parameter] = data_key
+            continue
+        for base_key, variant_parameter in _types_parameters_inv.items():
+            if data_key.startswith(base_key + "_"):
+                suffix = data_key[len(base_key) :]
+                selector = (variant_parameter + suffix).upper()
+                options[selector] = data_key
+                variants.setdefault(variant_parameter, []).append(data_key)
+                break
+    for type_parameter, data_keys_for_type in variants.items():
+        if type_parameter not in options and len(data_keys_for_type) == 1:
+            options[type_parameter] = data_keys_for_type[0]
+    return options
+
+
 _units = {
     "WN": ("wavenumber", "cm^-1"),
     "WL": ("wavelength", "µm"),
@@ -403,7 +426,8 @@ def _read_opus(*args, **kwargs):
 
     # Which data are present in the file?
     all_data_types = opus_data.all_data_keys  # type of data present in the file
-    possible_type_parameters = [_types_parameters_inv[k] for k in all_data_types]
+    data_type_options = _get_data_type_options(all_data_types)
+    possible_type_parameters = list(data_type_options)
 
     # Get type parameter
     type_parameter = kwargs.get("type")
@@ -441,9 +465,10 @@ def _read_opus(*args, **kwargs):
             f"The data type {type_parameter} is not present in the file. Possible values for this file are: {possible_type_parameters}"
         )
 
-    data_type = _types_parameters[type_parameter]
+    data_key = data_type_options[type_parameter]
+    data_type = data_key.split("_", 1)[0]
 
-    d = getattr(opus_data, data_type)
+    d = getattr(opus_data, data_key)
 
     # data
     dataset.data = d.y if d.y.ndim > 1 else d.y[np.newaxis]
