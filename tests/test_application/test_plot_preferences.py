@@ -55,16 +55,20 @@ def test_plotpreferences(IR_dataset_2D):
         prefs.style = original_style
 
 
-def test_makestyle_skips_deprecated_matplotlib_rcparams(monkeypatch, tmp_path):
+def test_makestyle_skips_deprecated_matplotlib_rcparams(tmp_path):
     prefs = scp.preferences
-    monkeypatch.setattr(prefs, "stylesheets", str(tmp_path))
+    original_stylesheets = prefs.stylesheets
+    try:
+        prefs.stylesheets = str(tmp_path)
 
-    stylename = prefs.makestyle("tmpstyle")
+        stylename = prefs.makestyle("tmpstyle")
 
-    assert stylename == "tmpstyle"
+        assert stylename == "tmpstyle"
 
-    stylesheet = Path(tmp_path) / "tmpstyle.mplstyle"
-    text = stylesheet.read_text()
+        stylesheet = Path(tmp_path) / "tmpstyle.mplstyle"
+        text = stylesheet.read_text()
 
-    assert "text.hinting_factor" not in text
-    assert "text.kerning_factor" not in text
+        assert "text.hinting_factor" not in text
+        assert "text.kerning_factor" not in text
+    finally:
+        prefs.stylesheets = original_stylesheets
