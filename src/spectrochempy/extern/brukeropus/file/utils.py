@@ -1,16 +1,10 @@
-# ruff: noqa: T201
-
+# ruff: noqa
 import os
 import re
 
+from spectrochempy.extern.brukeropus.file.block import BlockType
 from spectrochempy.extern.brukeropus.file.block import FileBlock
-from spectrochempy.extern.brukeropus.file.constants import CODE_3_ABR  # noqa: F401
-from spectrochempy.extern.brukeropus.file.constants import PARAM_LABELS  # noqa: F401
-from spectrochempy.extern.brukeropus.file.constants import (
-    TYPE_CODE_LABELS,  # noqa: F401
-)
-from spectrochempy.extern.brukeropus.file.labels import get_block_type_label
-from spectrochempy.extern.brukeropus.file.labels import get_param_label
+from spectrochempy.extern.brukeropus.file.params import get_param_label
 from spectrochempy.extern.brukeropus.file.parse import parse_directory
 from spectrochempy.extern.brukeropus.file.parse import parse_header
 from spectrochempy.extern.brukeropus.file.parse import read_opus_file_bytes
@@ -21,26 +15,28 @@ __all__ = ["find_opus_files", "parse_file_and_print"]
 __docformat__ = "google"
 
 
+def get_block_type_label(block_type):
+    """Return the maintained label API used by the SpectroChemPy adapter."""
+    return BlockType(block_type).get_label()
+
+
 def find_opus_files(directory, recursive: bool = False):
-    """
-    Finds all files in a directory with a strictly numeric extension (OPUS file convention).
+    """Finds all files in a directory with a strictly numeric extension (OPUS file convention).
 
     Returns a list of all files in directory that end in .# (e.g. file.0, file.1, file.1001, etc.). Setting recursive
     to true will search directory and all sub directories recursively. No attempt is made to verify the files are
     actually OPUS files (requires opening the file); the function simply looks for files that match the naming pattern.
 
     Args:
-    ----
         directory (str or Path): path indicating directory to search
         recursive: Set to True to recursively search sub directories as well
 
     Returns:
-    -------
         filepaths (list): list of filepaths that match OPUS naming convention (numeric extension)
     """
     pattern = re.compile(r".+\.[0-9]+$")
     file_list = []
-    for root, _dirnames, filenames in os.walk(directory):
+    for root, dirnames, filenames in os.walk(directory):
         for filename in filenames:
             if pattern.match(filename):
                 file_list.append(os.path.join(root, filename))
@@ -50,20 +46,18 @@ def find_opus_files(directory, recursive: bool = False):
 
 
 def parse_file_and_print(filepath, width=120):
-    """
-    Parses an OPUS file and prints the block information as it goes along to the console.
+    """Parses an OPUS file and prints the block information as it goes along to the console.
 
     This function demonstrates the basic usage and interaction of the parsing functions.  It
     can also be used to diagnose a file parsing issue if one comes up.
 
     Args:
-    ----
         filepath (str or Path): filepath to an OPUS file.
     """
     filebytes = read_opus_file_bytes(filepath)
     if filebytes is not None:
         width = 120
-        info_col_widths = (28, 15, 16, 61)
+        info_col_widths = (19, 15, 16, 61)
         info_col_labels = (
             "Block Type",
             "Size (bytes)",
@@ -88,7 +82,8 @@ def parse_file_and_print(filepath, width=120):
             filebytes[dir_start : dir_start + num_blocks * 3 * 4]
         ):
             try:
-                vals = [b_type, size, start, get_block_type_label(b_type)]
+                b_type = BlockType(b_type)
+                vals = [b_type.get_aligned_tuple_str(), size, start, b_type.label]
                 _print_cols(vals, info_col_widths)
                 block_infos.append((b_type, size, start))
             except Exception as e:
@@ -107,28 +102,28 @@ def parse_file_and_print(filepath, width=120):
 
 
 def _print_block_header(label, width, sep="="):
-    """Helper function for: parse_file_and_print"""
+    "Helper function for: parse_file_and_print"
     print("\n" + sep * width)
     _print_centered(label, width)
 
 
 def _print_centered(text, width):
-    """Helper function for: parse_file_and_print"""
+    "Helper function for: parse_file_and_print"
     print(" " * int((width - len(text)) / 2) + text)
 
 
 def _print_block(block: FileBlock, width: int):
-    """Helper function for: parse_file_and_print"""
+    "Helper function for: parse_file_and_print"
     param_col_widths = (10, 45, 45)
     key_width = 10
     key_label_width = 45
     param_col_widths = (key_width, key_label_width, width - key_width - key_label_width)
     param_col_labels = ("Key", "Friendly Name", "Value")
     if not block.is_directory():
-        _print_block_header(get_block_type_label(block.type), width)
+        _print_block_header(block.type.label, width)
         if block.is_param():
             _print_cols(param_col_labels, param_col_widths)
-            if isinstance(block.data, dict):
+            if type(block.data) is dict:
                 for key, val in block.data.items():
                     _print_cols(
                         (key.upper(), get_param_label(key), val), param_col_widths
@@ -138,7 +133,7 @@ def _print_block(block: FileBlock, width: int):
         elif block.is_data():
             print(block.data)
         elif block.is_data_series():
-            if isinstance(block.data, dict):
+            if type(block.data) is dict:
                 _print_centered("Num Blocks: " + str(block.data["num_blocks"]), width)
                 _print_centered("Store Table: " + str(block.data["store_table"]), width)
                 print(block.data["y"])
@@ -157,7 +152,7 @@ def _print_cols(
     vals,
     col_widths,
 ):
-    """Helper function for: parse_file_and_print"""
+    "Helper function for: parse_file_and_print"
     string = ""
     for i, val in enumerate(vals):
         col_width = col_widths[i]

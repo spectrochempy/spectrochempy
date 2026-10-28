@@ -1,3 +1,4 @@
+# ruff: noqa
 """
 The `brukeropus.file` submodule of `brukeropus` includes all the functions and classes for reading and exploring OPUS
 files. This includes both high-level functions like `read_opus` that returns an `OPUSFile` class, as well as low-level
@@ -10,7 +11,7 @@ OPUS files are typically saved with a numeric file extension (e.g. file.0, file.
 a list of OPUS files in a directory a little more cumbersome than a traditional "*.csv" search.  To address this,
 `brukeropus` includes a `find_opus_files` function:
 ```python
-from spectrochempy.brukeropus import find_opus_files
+from spectrochempy.extern.brukeropus import find_opus_files
 
 filepaths = find_opus_files(r'path\\to\\opus\\files', recursive=True)
 ```
@@ -20,7 +21,7 @@ see `brukeropus.file.utils.find_opus_files`.
 `brukeropus` parses OPUS files and assembles them into an `OPUSFile` object that contains the extracted data (and
 metadata) within the file.  You can generate an `OPUSFile` object in one of two ways:
 ```python
-from spectrochempy.brukeropus import read_opus, OPUSFile
+from spectrochempy.extern.brukeropus import read_opus, OPUSFile
 
 filepath = r'path\\to\\opusfile.0'
 
@@ -38,6 +39,47 @@ if data:
 else:
     print(data.filepath, 'is not an OPUS file')
 ```
+The `OPUSFile` class provides an interface for accessing the data (stored as blocks) in an OPUS file.  Accessible data
+includes:
+
+**Parameters** (`brukeropus.file.params`): measurement metadata
+
+**Data** (`brukeropus.file.data.Data`): measurements spectra (1D)
+
+**DataSeries** (`brukeropus.file.data.DataSeries`): series of measurements spectra (3D)
+
+**Report** (`brukeropus.file.report`): tabular report info (e.g. multi-evaluation test reports)
+
+To view a quick summary of the data contained in an `OPUSFile` instance, simply print it to the console:
+
+```python
+data = read_opus('file.0')
+print(data)
+```
+```console
+========================================================================================================================
+                                                 OPUS File: file.0
+Attribute      Class type          Description
+――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+params         Parameters          Optical, Fourier Transform, Acquisition, Sample Origin, Instrument Status Parameters
+rf_params      Parameters          Instrument Status, Optical, Acquisition, Fourier Transform Reference Parameters
+rf             Data                Reference Spectrum
+igrf           Data                Reference Interferogram
+a              Data                Absorbance
+sm             Data                Sample Spectrum
+phsm           Data                Sample Phase
+igsm           Data                Sample Interferogram
+history        str                 History log of file
+――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+```
+The output listed here will depend on what data blocks were saved in the OPUS file.  The following sections will go
+over the various data class types in more detail.
+
+###Parameters (brukeropus.file.params.Parameters)
+
+The metadata in an OPUS file is stored in  `Parameters` classes.  These classes can be stored in the `params` and
+`rf_params` attributes which contain the sample and reference parameter metadata respectively.
+
 To view all parameter metadata in the file, you can print to the console using the class method: `print_parameters`.
 This will let you view all the key, value parameter data extracted from the file with labels for what the parameter keys
 are referring to wherever known.
@@ -316,8 +358,11 @@ pgn: 3
 ... continued ...
 ```
 
-Depending on the settings used to save the OPUS file, different data blocks can be stored.  To retrieve a list of data
-blocks stored in the OPUS File, you can use the `all_data_keys` attribute:
+###Data and DataSeries (brukeropus.file.data)
+
+Depending on the settings used to save the OPUS file, different data blocks can be stored. These can include phase,
+interferograms, single-channel spectra and result spectra (e.g. absorbance, transmittance, etc.). To retrieve a list of
+the data blocks stored in the OPUS File, you can use the `all_data_keys` attribute:
 
 ```python
 data = read_opus('file.0')
@@ -357,8 +402,8 @@ plt.ylim((0, 1))
 plt.show()
 ```
 
-For spectra with wavenumber as valid unit (e.g. single-channel or ratioed spectra), the `x` array can be given in
-wavenumber [`cm⁻¹`] or wavelength [`µm`] or modulation frequency [`Hz`] units by using the attributes `wn`, `wl`, or `f`
+For spectra with wavenumber as valid unit (e.g. single-channel or result spectra), the `x` array can be given in
+wavenumber [`cm⁻¹`], wavelength [`µm`], or modulation frequency [`Hz`] units by using the attributes: `wn`, `wl`, or `f`
 respectively:
 
 ```python
@@ -378,16 +423,208 @@ print('Sample spectra y-min:', data.sm.mny, 'y-max:', data.sm.mxy)
 ```console
 Sample spectra y-min: 1.2147593224653974e-05 y-max: 0.03543896973133087
 ```
-For full API documentation, see:
-`OPUSFile`: `brukeropus.file.file.OPUSFile`
-`Data`: `brukeropus.file.file.Data`
-`DataSeries`: `brukeropus.file.file.DataSeries`
+
+###Reports (brukeropus.file.report)
+
+OPUS files may also store a variety of reports which typically contain data in tabular format.  Because an OPUS file may
+contain multiple reports, they are stored as a `list` in the `reports` attribute (even if only one is available). For
+OPUS files with no reports, the `reports` attribute will simply return an empty list.  Reports can be printed to the
+console.  As an example of how to access the report data, we will use a Multi-Evaluation Test Report (mev):
+
+```python
+data = read_opus(mevfile.0)
+print(data.reports[0])
+```
+
+```console
+====================================================================================================
+                                    Multi Evaluation Test Report
+____________________________________________________________________________________________________
+         Version: 4
+     Method Path: C:\\Users\\Public\\Documents\\Bruker\\OPUS_8.9.7\\ME_Base\\ME
+     Method Name: IPA Water Int Q1 Q2.mev
+Method Date Time: 2025/04/03 17:39:01 (GMT-5)
+
+
+Multi Evaluation Test Report (table): cols: 6, rows: 4
+----------------------------------------------------------------------------------------------------
+       Type: Q2  Q2  INT  INT  Q1  Q1
+  Subreport: 1   1   2    2    3   3
+        Row: 1   2   1    2    1   2
+Last Change: 0   0   0    0    0   0
+----------------------------------------------------------------------------------------------------
+Subreport 0
+Quant 2 (table): cols: 2, rows: 35
+----------------------------------------------------------------------------------------------------
+                  Method_Path: C:\\Users\\Public\\Docume...  C:\\Users\\Public\\Docume...
+                  Method_Name: IPA Method.q2              H2O Method.q2
+             Date_Time_Method: 2025/04/03 11:50:33 (G...  2025/04/03 11:47:05 (G...
+           Date_Time_Analysis: 2025/04/03 21:26:08 (G...  2025/04/03 21:26:09 (G...
+                 X_Startpoint: 8920                       9900
+                   X_Endpoint: 5396                       6028
+               Component_Name: IPA                        H2O
+               Component_Unit: %                          %
+          Component_Name_User: IPA                        H2O
+          Component_Unit_User: %                          %
+                   Formatting: %.5G                       %.5G
+                   Prediction: -0.0157854                 100.162
+           Prediction_Outside: 1                          1
+        Prediction_Calculated: -0.0157854                 100.162
+Prediction_Calculated_Outside: 0                          0
+                      Formula:
+                External_Bias: 3.40282e+38                3.40282e+38
+         Target_Concentration: 3.40282e+38                3.40282e+38
+          Warning_Upper_Limit: 3.40282e+38                3.40282e+38
+          Warning_Lower_Limit: 3.40282e+38                3.40282e+38
+            Alarm_Upper_Limit: 3.40282e+38                3.40282e+38
+            Alarm_Lower_Limit: 3.40282e+38                3.40282e+38
+                     Mah_Dist: 0.281401                   0.330205
+               Mah_Dist_Limit: 0.569619                   0.717409
+     Mah_Dist_Limit_By_Factor: 0.569619                   0.717409
+             Mah_Dist_Outlier: 0                          0
+                          MDI: 0.494015                   0.460275
+                Spec_Residual: 0.000657344                0.000157652
+                      F_Value: 1.78523                    0.977421
+                       F_Prob: 0.801844                   0.664059
+                 F_Prob_Limit: 0.99                       0.99
+        Spec_Residual_Outlier: 0                          0
+      Component_Value_Density: 3.40282e+38                3.40282e+38
+Component_Value_Density_Limit: 3.40282e+38                3.40282e+38
+         Process_Channel_Name:
+----------------------------------------------------------------------------------------------------
+Subreport 1
+Integration (table): cols: 2, rows: 25
+----------------------------------------------------------------------------------------------------
+                  Method_Path: C:\\Users\\Public\\Docume...  C:\\Users\\Public\\Docume...
+                  Method_Name: Water Integration.int      IPA Integration.int
+             Date_Time_Method: 2025/04/03 12:49:06 (G...  2025/04/03 12:45:18 (G...
+           Date_Time_Analysis: 2025/04/03 21:26:09 (G...  2025/04/03 21:26:09 (G...
+                 X_Startpoint: 8127.6                     5970.95
+                   X_Endpoint: 7368.4                     5874.2
+                        Label: H2O                        IPA
+                   Label_User: H2O                        IPA
+                         Type: B                          B
+                   Formatting: %.6G                       %.6G
+           Integration_Result: -155.238                   -0.918539
+Integration_Result_Calculated: -155.238                   -0.918539
+                      Formula:
+                       Freq_1: 8127.6                     5970.95
+                       Freq_2: 7368.4                     5874.2
+                       Freq_3: 1.001e-199                 1.001e-199
+                       Freq_4: 1.001e-199                 1.001e-199
+                       Freq_5: 1.001e-199                 1.001e-199
+                       Freq_6: 1.001e-199                 1.001e-199
+         Target_Concentration: 3.40282e+38                3.40282e+38
+          Warning_Upper_Limit: 3.40282e+38                3.40282e+38
+          Warning_Lower_Limit: 3.40282e+38                3.40282e+38
+            Alarm_Upper_Limit: 3.40282e+38                3.40282e+38
+            Alarm_Lower_Limit: 3.40282e+38                3.40282e+38
+         Process_Channel_Name:
+----------------------------------------------------------------------------------------------------
+Subreport 2
+Quant 1 (table): cols: 2, rows: 22
+----------------------------------------------------------------------------------------------------
+          Method_Path: C:\\Users\\Public\\Docume...  C:\\Users\\Public\\Docume...
+          Method_Name: Water Quant 1_Linear.q1    IPA Quant 1_Linear.q1
+     Date_Time_Method: 2025/04/03 12:48:16 (G...  2025/04/03 09:03:49 (G...
+   Date_Time_Analysis: 2025/04/03 21:26:09 (G...  2025/04/03 21:26:09 (G...
+         X_Startpoint: 7368.4                     5874.2
+           X_Endpoint: 8127.6                     5970.95
+       Component_Name: Water                      IPA
+       Component_Unit: %                          %
+  Component_Name_User: Water                      IPA
+  Component_Unit_User: %                          %
+           Formatting: %.4G                       %.4G
+           Prediction: 86.3654                    -7.54551
+Prediction_Calculated: 86.3654                    -7.54551
+              Formula:
+                Sigma: 9.65275                    10.7219
+   Integration_Result: 159.336                    135.308
+ Target_Concentration: 3.40282e+38                3.40282e+38
+  Warning_Upper_Limit: 3.40282e+38                3.40282e+38
+  Warning_Lower_Limit: 3.40282e+38                3.40282e+38
+    Alarm_Upper_Limit: 3.40282e+38                3.40282e+38
+    Alarm_Lower_Limit: 3.40282e+38                3.40282e+38
+ Process_Channel_Name:
+----------------------------------------------------------------------------------------------------
+====================================================================================================
+```
+
+At the very top of the report, you see a centered title.  This title can be accessed by the `title`
+attribute of the `Report`.
+
+```python
+report = data.reports[0]
+print(report.title)
+```
+```console
+Multi Evaluation Test Report
+```
+
+After the title, you see a list of report properties.  These properties are stored as a `dict` in
+the `properties` attribute of a `Report`, but can also be accessed by indexing the report using the
+property key (case insensitive):
+```python
+for key, val in report.properties.items():
+    print(key, val)
+print('\\nAccessing report properties by name:')
+print(report['Method Name'], report['Method Name'] == report['method name'])
+```
+```console
+Version 4
+Method Path C:\\Users\\Public\\Documents\\Bruker\\OPUS_8.9.7\\ME_Base\\ME
+Method Name IPA Water Int Q1 Q2.mev
+Method Date Time 2025/04/03 17:39:01 (GMT-5)
+
+Accessing report properties by name:
+IPA Water Int Q1 Q2.mev True
+```
+
+Following the report properties is a table.  This data is stored in the `table` attribute of a
+`Report` as a `ReportTable` class (`brukeropus.file.report.ReportTable`).  `ReportTable`s have
+titles, headers, and values.  Below is a snippet showing how to access data from the report table:
+
+```python
+print('Table title:', report.table.title)
+print('Table Headers:', report.table.header)
+print('Table row values by name:', report.table['Type'])
+print('Table row values by index:', report.table[1])
+print('Last value of a table row:', report.table['Type'][-1])
+```
+```console
+Table title: Multi Evaluation Test Report
+Table Headers: ['Type', 'Subreport', 'Row', 'Last Change']
+Table row values by name: ['Q2', 'Q2', 'INT', 'INT', 'Q1', 'Q1']
+Table row values by index: [1, 1, 2, 2, 3, 3]
+Last value of a table row: Q1
+```
+
+In this report, the table is followed by a series of subreports.  Because a report can have multiple
+subreports (this file has 3), they are stored as a `list` in the `sub` attribute of a `Report`.
+Subreports can be accessed by indexing the `sub` attribute, or directly indexing the `Report`.
+Because these subreports are `ReportTable`s, they have the same interface as above:
+
+```python
+print('First subreport title:', report.sub[0].title)
+print('Second subreport title:', report[1].title)
+print('First subreport Method Names:', report[0]['method_name'])
+print('First method name of the first subreport:', report[0]['method_name'][0])
+```
+```console
+First subreport title: Quant 2
+Second subreport title: Integration
+First subreport Method Names: ['IPA Method.q2', 'H2O Method.q2']
+First method name of the first subreport: IPA Method.q2
+```
 """
 
-# ruff: noqa: F403
 from spectrochempy.extern.brukeropus.file.block import *
 from spectrochempy.extern.brukeropus.file.constants import *
+from spectrochempy.extern.brukeropus.file.data import *
+from spectrochempy.extern.brukeropus.file.directory import *
 from spectrochempy.extern.brukeropus.file.file import *
 from spectrochempy.extern.brukeropus.file.labels import *
+from spectrochempy.extern.brukeropus.file.params import *
 from spectrochempy.extern.brukeropus.file.parse import *
+from spectrochempy.extern.brukeropus.file.report import *
 from spectrochempy.extern.brukeropus.file.utils import *
