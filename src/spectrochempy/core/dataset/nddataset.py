@@ -1913,6 +1913,61 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
                 "https://en.wikipedia.org/wiki/tr.List_of_tz_database_time_zones ",
             ) from e
 
+    def to_markdown_report(self, *, title, metadata=(), figures=()):
+        """
+        Render this dataset as a deterministic scientific Markdown report.
+
+        This is a shortcut for
+        :func:`spectrochempy.reporting.render_dataset_markdown`. Free text is
+        rendered as supplied; only :class:`pathlib.Path` values are redacted.
+        Select safe metadata keys and sanitize titles, origin, history and
+        figure labels or captions before rendering.
+
+        Parameters
+        ----------
+        title : str
+            Document title.
+        metadata : sequence of str, optional
+            Explicit metadata keys to include, in report order.
+        figures : sequence of FigureReference, optional
+            Explicit figure references. Matplotlib figures are not captured.
+
+        Returns
+        -------
+        str
+            Markdown text. Rendering does not modify this dataset.
+
+        See Also
+        --------
+        reporting.render_dataset_markdown : Standalone renderer.
+        reporting.FigureReference : Explicit figure reference.
+
+        Examples
+        --------
+        .. code-block:: python
+
+           import spectrochempy as scp
+           from spectrochempy.reporting import FigureReference
+
+           dataset = scp.NDDataset([1.0, 2.0, 3.0], title="Absorbance")
+           dataset.meta.operator = "Ada"
+           report = dataset.to_markdown_report(
+               title="IR experiment",
+               metadata=("operator",),
+               figures=(FigureReference("Spectrum", "figures/spectrum.png"),),
+           )
+           print(report)
+        """
+        # The renderer validates NDDataset instances, so importing it here avoids a cycle.
+        from spectrochempy.reporting import render_dataset_markdown  # noqa: PLC0415
+
+        return render_dataset_markdown(
+            self,
+            title=title,
+            metadata=metadata,
+            figures=figures,
+        )
+
     def to_array(self):
         """
         Return a numpy masked array.
