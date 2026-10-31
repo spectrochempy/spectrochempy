@@ -38,4 +38,4 @@ build:
       html:
         # ``make.py`` drives the whole integrated build and writes to
         # $READTHEDOCS_OUTPUT/html when that variable is set.
-        - python docs/make.py html --warning-is-error -j auto
+        - SCPY_DOCS_TRACE=1 python -u docs/make.py html --warning-is-error -j auto
