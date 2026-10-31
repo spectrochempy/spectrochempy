@@ -20,10 +20,13 @@ __all__ = ["PeakFindingResult", "PeakTable", "find_peaks"]
 __dataset_methods__ = ["find_peaks"]
 
 import csv
+from collections.abc import Mapping
+from copy import deepcopy
 from pathlib import Path
 
 import numpy as np
 import scipy
+from scipy import ndimage
 
 from spectrochempy.application.application import error_
 from spectrochempy.application.application import warning_
@@ -187,10 +190,16 @@ class PeakTable:
 
     Parameters
     ----------
-    peaks : NDDataset or None
-        Dataset containing identified peak positions and heights.
+    peaks : NDDataset, PeakTable or None
+        Dataset containing identified peaks for 1D results, or a table-backed
+        representation for 2D results.
     properties : dict or None
         Peak properties returned by :func:`scipy.signal.find_peaks`.
+
+    columns : sequence of str, optional
+        Explicit stable column schema for row-backed multidimensional results.
+    history_entries : list of dict, optional
+        Detached structured history entries for row-backed results.
 
     Notes
     -----
@@ -206,6 +215,9 @@ class PeakTable:
         "sample_position",
         "sample_height",
         "_rows",
+        "_columns",
+        "_history_entries",
+        "_history",
     )
 
     def __init__(
@@ -217,6 +229,9 @@ class PeakTable:
         sample_index=None,
         sample_position=None,
         sample_height=None,
+        columns=None,
+        history_entries=None,
+        history=None,
     ):
         self.peaks = peaks
         self.properties = dict(properties or {})
@@ -224,6 +239,9 @@ class PeakTable:
         self.sample_position = _copy_values(sample_position)
         self.sample_height = _copy_values(sample_height)
         self._rows = None if rows is None else [dict(row) for row in rows]
+        self._columns = None if columns is None else tuple(columns)
+        self._history_entries = deepcopy(history_entries)
+        self._history = tuple(history or ())
 
     def __len__(self):
         if self._rows is not None:
@@ -239,6 +257,8 @@ class PeakTable:
     @property
     def columns(self):
         """Return stable base columns plus currently available optional columns."""
+        if self._columns is not None:
+            return tuple(_fieldnames(self.to_dict(), columns=self._columns))
         columns = list(_BASE_PEAK_COLUMNS)
         if _has_sample_fields(
             self.sample_index,
@@ -247,6 +267,24 @@ class PeakTable:
         ):
             columns.extend(_SAMPLE_PEAK_COLUMNS)
         return tuple(_fieldnames(self.to_dict(), columns=columns))
+
+    @property
+    def history_entries(self):
+        """Return detached structured history entries for the result table."""
+        if self._history_entries is not None:
+            return deepcopy(self._history_entries)
+        if self.peaks is not None:
+            return self.peaks.history_entries
+        return []
+
+    @property
+    def history(self):
+        """Return the read-only rendered history for the result table."""
+        if self._history:
+            return self._history
+        if self.peaks is not None:
+            return self.peaks.history
+        return ()
 
     def to_dict(self):
         """
@@ -275,7 +313,14 @@ class PeakTable:
         n : int
             Number of rows to keep.
         """
-        return PeakTable(None, None, rows=self.to_dict()[:n])
+        return PeakTable(
+            None,
+            None,
+            rows=self.to_dict()[:n],
+            columns=self._columns,
+            history_entries=self.history_entries,
+            history=self.history,
+        )
 
     def column(self, name, *, unit=None, as_float=False):
         """
@@ -317,7 +362,14 @@ class PeakTable:
             key=lambda row: _column_value(row[name], unit=unit, as_float=True),
             reverse=reverse,
         )
-        return PeakTable(None, None, rows=rows)
+        return PeakTable(
+            None,
+            None,
+            rows=rows,
+            columns=self._columns,
+            history_entries=self.history_entries,
+            history=self.history,
+        )
 
     def top(self, n, *, by, reverse=True, unit=None):
         """
@@ -373,8 +425,9 @@ class PeakFindingResult:
 
     Parameters
     ----------
-    peaks : NDDataset or None
-        Dataset containing identified peak positions and heights.
+    peaks : NDDataset, PeakTable or None
+        Dataset containing identified peak positions and heights for 1D results;
+        a :class:`PeakTable` for 2D results.
     properties : dict or None
         Peak properties returned by :func:`scipy.signal.find_peaks`.
 
@@ -390,6 +443,8 @@ class PeakFindingResult:
         "sample_index",
         "sample_position",
         "sample_height",
+        "analysis_dims",
+        "parameters",
     )
 
     def __init__(
@@ -400,12 +455,16 @@ class PeakFindingResult:
         sample_index=None,
         sample_position=None,
         sample_height=None,
+        analysis_dims=None,
+        parameters=None,
     ):
         self.peaks = peaks
         self.properties = dict(properties or {})
         self.sample_index = _copy_values(sample_index)
         self.sample_position = _copy_values(sample_position)
         self.sample_height = _copy_values(sample_height)
+        self.analysis_dims = None if analysis_dims is None else tuple(analysis_dims)
+        self.parameters = deepcopy(parameters or {})
 
     def __len__(self):
         return 0 if self.peaks is None else len(self.peaks)
@@ -421,6 +480,8 @@ class PeakFindingResult:
     @property
     def table(self):
         """Return a dependency-light tabular view of the detected peaks."""
+        if isinstance(self.peaks, PeakTable):
+            return self.peaks
         return PeakTable(
             self.peaks,
             self.properties,
@@ -438,6 +499,8 @@ class PeakFindingResult:
         per-peak properties whose length matches the number of detected peaks.
         Values keep their native units when they are unit-bearing quantities.
         """
+        if isinstance(self.peaks, PeakTable):
+            return self.peaks.to_dict()
         return _peak_rows(
             self.peaks,
             self.properties,
@@ -463,6 +526,8 @@ class PeakFindingResult:
         pathlib.Path
             The written path.
         """
+        if isinstance(self.peaks, PeakTable):
+            return self.peaks.to_csv(path, delimiter=delimiter)
         path = Path(path)
         rows = self.to_dict()
         fieldnames = _fieldnames(rows)
@@ -476,6 +541,16 @@ class PeakFindingResult:
                 )
 
         return path
+
+    @property
+    def history_entries(self):
+        """Return detached history entries for the result."""
+        return self.table.history_entries
+
+    @property
+    def history(self):
+        """Return the rendered history for the result."""
+        return self.table.history
 
 
 def _as_peakfinding_quantity(value):
@@ -559,6 +634,442 @@ def _normalize_interpolation_window(window_length):
     return window_length
 
 
+def _resolve_peakfinding_dims(dataset, dims):
+    """Resolve a homogeneous sequence of dimension names or indices."""
+    if isinstance(dims, (str, bytes)) or not isinstance(dims, (tuple, list)):
+        raise TypeError("dims must be a sequence of dimension names or indices")
+    if len(dims) != dataset.ndim:
+        raise ValueError(
+            f"dims must contain exactly {dataset.ndim} dimension(s) for this dataset"
+        )
+    if not dims:
+        raise ValueError("dims must not be empty")
+
+    accepted_names = all(isinstance(dim, str) for dim in dims)
+    accepted_indices = all(
+        isinstance(dim, (int, np.integer)) and not isinstance(dim, (bool, np.bool_))
+        for dim in dims
+    )
+    if not accepted_names and not accepted_indices:
+        unsupported = [
+            dim
+            for dim in dims
+            if not isinstance(dim, str)
+            and not (
+                isinstance(dim, (int, np.integer))
+                and not isinstance(dim, (bool, np.bool_))
+            )
+        ]
+        if unsupported:
+            raise TypeError("dims elements must be dimension names or integer indices")
+        raise ValueError("dims must use either names or indices, not a mixture")
+
+    name_dims = accepted_names
+
+    resolved = []
+    for dim in dims:
+        if name_dims:
+            if dim not in dataset.dims:
+                raise ValueError(f"Unknown dimension name: {dim!r}")
+            axis = dataset.dims.index(dim)
+        else:
+            axis = int(dim)
+            if axis < 0:
+                axis += dataset.ndim
+            if axis < 0 or axis >= dataset.ndim:
+                raise ValueError(f"Dimension index {dim!r} is out of range")
+        if axis in [item[0] for item in resolved]:
+            raise ValueError("dims must contain distinct dimensions")
+        resolved.append((axis, dataset.dims[axis]))
+    return tuple(resolved)
+
+
+def _peakfinding_working_data(dataset):
+    """Return a detached float64 work array and its scientific validity mask."""
+    source = np.asarray(dataset.data)
+    if source.dtype.kind not in "iuf" or source.dtype.kind == "b":
+        raise ValueError("2D peak finding requires real numeric data")
+    if source.ndim != 2:
+        raise ValueError("2D peak finding requires a two-dimensional dataset")
+
+    try:
+        values = np.array(source, dtype=np.float64, copy=True)
+    except (TypeError, ValueError, OverflowError) as exc:
+        raise ValueError("2D peak finding requires real numeric data") from exc
+
+    source_mask = dataset.mask
+    if source_mask is None:
+        mask = np.zeros(source.shape, dtype=bool)
+    else:
+        try:
+            mask = np.broadcast_to(np.asarray(source_mask, dtype=bool), source.shape)
+        except ValueError as exc:
+            raise ValueError("dataset mask must match the data shape") from exc
+    valid = np.array(~mask & np.isfinite(values), dtype=bool, copy=True)
+    values[~valid] = -np.inf
+    return values, valid
+
+
+def _peakfinding_coordinates(dataset, resolved_dims, *, use_coord):
+    """Resolve and validate coordinate arrays for the selected source axes."""
+    coordinates = {}
+    for axis, dim in resolved_dims:
+        coord = dataset.coord(dim)
+        if coord is None or not coord.has_data:
+            if use_coord:
+                raise ValueError(
+                    f"Coordinate-aware 2D peak finding requires coordinates for {dim!r}"
+                )
+            coordinates[dim] = None
+            continue
+
+        raw = np.asarray(coord.data)
+        if raw.ndim != 1 or raw.size != dataset.shape[axis]:
+            raise ValueError(f"Coordinate for dimension {dim!r} has an invalid shape")
+
+        if use_coord:
+            if raw.dtype.kind not in "iuf" or raw.dtype.kind == "b":
+                raise ValueError(
+                    f"Physical coordinates for dimension {dim!r} must be numeric"
+                )
+            numeric = np.asarray(raw, dtype=np.float64)
+            if not np.isfinite(numeric).all():
+                raise ValueError(
+                    f"Physical coordinates for dimension {dim!r} must be finite"
+                )
+            differences = np.diff(numeric)
+            if not (np.all(differences > 0) or np.all(differences < 0)):
+                raise ValueError(
+                    f"Physical coordinates for dimension {dim!r} must be strictly monotonic"
+                )
+            coordinates[dim] = (numeric, coord.units)
+        else:
+            coordinates[dim] = (raw, coord.units)
+    return coordinates
+
+
+def _normalize_2d_distance(distance, resolved_dims, coordinates, *, use_coord):
+    """Normalize 2D distance constraints while preserving requested values."""
+    if distance is None:
+        return {"mode": "none", "requested": None, "effective": None}, None
+
+    dim_names = [dim for _, dim in resolved_dims]
+    if isinstance(distance, Mapping):
+        if set(distance) != set(dim_names) or any(
+            not isinstance(key, str) for key in distance
+        ):
+            raise ValueError("distance mapping keys must exactly match dims names")
+        requested_values = [distance[dim] for dim in dim_names]
+    elif isinstance(distance, (tuple, list)) and len(distance) == 2:
+        requested_values = list(distance)
+    else:
+        raise ValueError(
+            "2D distance must be None, a two-value sequence, or a dims mapping"
+        )
+
+    def is_quantity(value):
+        return isinstance(value, Quantity)
+
+    modes = [is_quantity(value) for value in requested_values]
+    if any(modes) and not all(modes):
+        raise ValueError("2D distances cannot mix point values and Pint quantities")
+    mode = "physical" if all(modes) else "points"
+    if mode == "physical" and not use_coord:
+        raise ValueError("Pint distances require use_coord=True")
+
+    requested = {}
+    effective = {}
+    numeric_distances = []
+    for dim, value in zip(dim_names, requested_values, strict=True):
+        if mode == "physical":
+            coords = coordinates.get(dim)
+            if coords is None or coords[1] is None:
+                raise ValueError(
+                    f"Physical distance for dimension {dim!r} requires coordinate units"
+                )
+            coord_values, coord_units = coords
+            try:
+                magnitude = float(value.to(coord_units).magnitude)
+            except (DimensionalityError, TypeError, ValueError) as exc:
+                raise ValueError(
+                    _format_peakfinding_units_error(
+                        "distance", value.units, coord_units, dim
+                    )
+                ) from exc
+            requested[dim] = {
+                "value": float(value.magnitude),
+                "units": str(value.units),
+            }
+            effective[dim] = {"value": magnitude, "units": str(coord_units)}
+        else:
+            if not isinstance(
+                value, (int, float, np.integer, np.floating)
+            ) or isinstance(value, (bool, np.bool_)):
+                raise ValueError("Point distances must be real numeric scalars")
+            magnitude = float(value)
+            requested[dim] = {"value": magnitude, "units": "point"}
+            effective[dim] = {"value": magnitude, "units": "point"}
+
+        if not np.isfinite(magnitude) or magnitude < 0:
+            raise ValueError("2D distances must be finite and non-negative")
+        numeric_distances.append(magnitude)
+
+    history = {"mode": mode, "requested": requested, "effective": effective}
+    return history, tuple(numeric_distances)
+
+
+def _normalize_2d_height(height, dataset):
+    """Validate and convert a scalar 2D positive-height threshold."""
+    if height is None:
+        return None, {"mode": "positive"}
+    if isinstance(height, Quantity):
+        if dataset.units is None:
+            raise ValueError("A unit-bearing height requires dataset units")
+        try:
+            value = float(height.to(dataset.units).magnitude)
+        except (DimensionalityError, TypeError, ValueError) as exc:
+            raise ValueError(
+                f"Height units {height.units} are incompatible with dataset units {dataset.units}"
+            ) from exc
+        units = str(dataset.units)
+        requested = {"value": float(height.magnitude), "units": str(height.units)}
+    else:
+        if not isinstance(height, (int, float, np.integer, np.floating)) or isinstance(
+            height, (bool, np.bool_)
+        ):
+            raise ValueError(
+                "2D height must be a positive real scalar or Pint quantity"
+            )
+        value = float(height)
+        units = str(dataset.units) if dataset.units is not None else "dimensionless"
+        requested = {"value": value, "units": units}
+
+    if not np.isfinite(value) or value <= 0:
+        raise ValueError("2D height must be finite and strictly positive")
+    return value, {"value": value, "units": units, "requested": requested}
+
+
+def _peak_position(value, units, *, use_coord):
+    if not use_coord:
+        return value
+    if units is None:
+        return value
+    return value * units
+
+
+def _history_for_2d_peaks(dataset, parameters, count):
+    """Build detached dataset-compatible structured and rendered history."""
+    result_dataset = dataset.copy(deep=False)
+    result_dataset._append_history_entry(
+        operation="find_peaks_2d",
+        parameters=parameters,
+        message=f"Found {count} peak(s) with find_peaks (2D)",
+    )
+    return result_dataset.history_entries, tuple(result_dataset.history)
+
+
+def _find_peaks_2d(
+    dataset,
+    *,
+    height,
+    window_length,
+    threshold,
+    distance,
+    prominence,
+    width,
+    wlen,
+    rel_height,
+    plateau_size,
+    use_coord,
+    as_result,
+    dims,
+):
+    """Find deterministic positive maxima in an explicitly selected 2D spectrum."""
+    if dataset.ndim != 2:
+        raise ValueError("Explicit 2D peak finding requires a 2D dataset")
+    resolved_dims = _resolve_peakfinding_dims(dataset, dims)
+    dim_names = tuple(dim for _, dim in resolved_dims)
+
+    unsupported = {
+        "threshold": threshold,
+        "prominence": prominence,
+        "width": width,
+        "wlen": wlen,
+        "plateau_size": plateau_size,
+    }
+    provided = [name for name, value in unsupported.items() if value is not None]
+    if provided:
+        raise NotImplementedError(
+            "2D peak finding does not yet support: " + ", ".join(provided)
+        )
+    if rel_height != 0.5:
+        raise NotImplementedError("2D peak finding does not support rel_height")
+    if window_length != 3:
+        raise NotImplementedError("2D peak finding does not interpolate peak positions")
+    if not isinstance(use_coord, (bool, np.bool_)):
+        raise ValueError("use_coord must be a boolean")
+
+    values, valid = _peakfinding_working_data(dataset)
+    coordinates = _peakfinding_coordinates(
+        dataset, resolved_dims, use_coord=bool(use_coord)
+    )
+    height_value, height_history = _normalize_2d_height(height, dataset)
+    distance_history, distances = _normalize_2d_distance(
+        distance, resolved_dims, coordinates, use_coord=bool(use_coord)
+    )
+
+    axes = tuple(axis for axis, _ in resolved_dims)
+    if axes != (0, 1):
+        working_values = np.transpose(values, axes)
+        working_valid = np.transpose(valid, axes)
+    else:
+        working_values = values
+        working_valid = valid
+
+    filtered = ndimage.maximum_filter(
+        working_values,
+        size=(3, 3),
+        mode="constant",
+        cval=-np.inf,
+    )
+    if height_value is None:
+        candidate_mask = (
+            working_valid & (working_values > 0) & (working_values == filtered)
+        )
+    else:
+        candidate_mask = (
+            working_valid
+            & (working_values >= height_value)
+            & (working_values == filtered)
+        )
+
+    labels, n_labels = ndimage.label(
+        candidate_mask,
+        structure=np.ones((3, 3), dtype=bool),
+    )
+    candidates = []
+    for label_id in range(1, n_labels + 1):
+        cells = np.argwhere(labels == label_id)
+        if not cells.size:
+            continue
+        representative = min(tuple(int(v) for v in cell) for cell in cells)
+        candidates.append((representative, float(working_values[representative])))
+
+    if distances is not None:
+        constrained_axes = [value > 0 for value in distances]
+
+        def too_close(left, right):
+            if not any(constrained_axes):
+                return False
+            for axis, distance_value in enumerate(distances):
+                if distance_value <= 0:
+                    continue
+                if use_coord and distance_history["mode"] == "physical":
+                    dim = dim_names[axis]
+                    coord_values, _coord_units = coordinates[dim]
+                    delta = abs(
+                        float(coord_values[left[0][axis]])
+                        - float(coord_values[right[0][axis]])
+                    )
+                else:
+                    delta = abs(left[0][axis] - right[0][axis])
+                if delta >= distance_value:
+                    return False
+            return True
+
+        ranked = sorted(candidates, key=lambda item: (-item[1], item[0]))
+        retained = []
+        for candidate in ranked:
+            if not any(too_close(candidate, prior) for prior in retained):
+                retained.append(candidate)
+        candidates = retained
+
+    candidates.sort(key=lambda item: item[0])
+    columns = ["index"]
+    columns.extend(f"{dim}_index" for dim in dim_names)
+    columns.extend(f"{dim}_position" for dim in dim_names)
+    columns.append("height")
+
+    rows = []
+    for ordinal, (indices, magnitude) in enumerate(candidates):
+        source_indices = {dim: int(indices[pos]) for pos, dim in enumerate(dim_names)}
+        source_positions = {}
+        for pos, dim in enumerate(dim_names):
+            if use_coord:
+                coordinate_values, coordinate_units = coordinates[dim]
+                coordinate = _peak_position(
+                    float(coordinate_values[indices[pos]]),
+                    coordinate_units,
+                    use_coord=True,
+                )
+            else:
+                coordinate = int(indices[pos])
+            source_positions[dim] = coordinate
+        row = {"index": ordinal}
+        row.update({f"{dim}_index": source_indices[dim] for dim in dim_names})
+        row.update({f"{dim}_position": source_positions[dim] for dim in dim_names})
+        row["height"] = (
+            magnitude * dataset.units if dataset.units is not None else magnitude
+        )
+        rows.append(row)
+
+    properties = {
+        "peak_heights": [
+            row["height"].magnitude
+            if hasattr(row["height"], "magnitude")
+            else row["height"]
+            for row in rows
+        ]
+    }
+    if not candidates:
+        properties = {}
+
+    effective_distance = distance_history
+    parameters = {
+        "dims": list(dim_names),
+        "axes": list(axes),
+        "algorithm": "maximum_filter",
+        "height": height_history,
+        "distance": effective_distance,
+        "neighborhood": {"shape": [3, 3], "connectivity": 8},
+        "plateau": {"connectivity": 8, "representative": "lexicographic_min"},
+        "invalid_policy": "exclude_masked_nonfinite",
+        "tie_break": "intensity_desc_then_lexicographic",
+        "interpolation": "none",
+        "n_peaks": len(candidates),
+    }
+    history_entries, history = _history_for_2d_peaks(
+        dataset, parameters, len(candidates)
+    )
+    table = PeakTable(
+        None,
+        properties,
+        rows=rows,
+        columns=columns,
+        history_entries=history_entries,
+        history=history,
+    )
+    if as_result:
+        peak_indices = np.asarray(
+            [[row[f"{dim}_index"] for dim in dim_names] for row in rows],
+            dtype=int,
+        ).reshape((-1, 2))
+        peak_positions = [
+            tuple(row[f"{dim}_position"] for dim in dim_names) for row in rows
+        ]
+        peak_heights = [row["height"] for row in rows]
+        return PeakFindingResult(
+            table,
+            properties,
+            sample_index=peak_indices,
+            sample_position=peak_positions,
+            sample_height=peak_heights,
+            analysis_dims=dim_names,
+            parameters=parameters,
+        )
+    return table, properties
+
+
 def find_peaks(
     dataset,
     height=None,
@@ -572,6 +1083,8 @@ def find_peaks(
     plateau_size=None,
     use_coord=True,
     as_result=False,
+    *,
+    dims=None,
 ):
     """
     Find and analyze peaks in spectroscopic data with advanced filtering options.
@@ -584,9 +1097,11 @@ def find_peaks(
     Parameters
     ----------
     dataset : NDDataset
-        Input dataset containing spectral data. Must be 1D or 2D with len(X.y) == 1.
+        Input dataset containing spectral data. The historical path accepts
+        1D data (including squeezed singleton data). A true 2D spectrum must
+        explicitly provide both dimensions through ``dims``.
     height : float or array-like, optional
-        Minimum and/or maximum peak height criteria. Can be specified as:
+        In 1D, minimum and/or maximum peak height criteria. Can be specified as:
         - Single value for minimum height
         - Tuple (min, max) for height range
         - Array matching x for position-dependent criteria
@@ -597,8 +1112,11 @@ def find_peaks(
         Minimum height difference between peak and neighboring points.
         Useful for filtering out noise-related peaks.
     distance : float, optional
-        Minimum separation between peaks. Peaks closer than this are filtered
-        based on their prominence.
+        Minimum separation between peaks. In 1D, this follows SciPy peak
+        spacing behavior. In 2D, use ``dims`` and provide a pair of distances
+        or a mapping from each selected dimension name to a point count or
+        physical distance. 2D suppression uses the documented rectangular
+        anisotropic metric.
     prominence : float or array-like, optional
         Required prominence (height above surrounding baseline) of peaks.
     width : float or array-like, optional
@@ -616,18 +1134,24 @@ def find_peaks(
     as_result : bool, default: False
         If True, return a :class:`PeakFindingResult` object. If False, preserve
         the historical ``(peaks, properties)`` tuple return.
+    dims : sequence of str or int, optional
+        Explicit dimensions to analyze. ``None`` preserves historical dispatch.
+        One dimension selects the existing 1D engine; exactly two dimensions
+        select deterministic positive-maximum detection for a true 2D spectrum.
 
     Returns
     -------
-    peaks : NDDataset or None
-        Dataset containing identified peaks with interpolated positions and
-        heights. Returned when ``as_result=False``.
-    properties : dict or None
-        Peak properties including heights, widths, prominences, and more.
-        All values use appropriate units when use_coord=True. Returned when
+    peaks : NDDataset, PeakTable or None
+        Dataset containing identified 1D peaks with interpolated positions, or
+        a :class:`PeakTable` containing discrete 2D peaks. Returned when
         ``as_result=False``.
+    properties : dict or None
+        In 1D, SciPy peak properties. In 2D, ``peak_heights`` only. Values use
+        appropriate units when applicable. Returned when ``as_result=False``.
     result : PeakFindingResult
-        Structured peak finding result. Returned when ``as_result=True``.
+        Structured peak finding result. For 1D, ``peaks`` is an NDDataset; for
+        2D, ``peaks`` and ``table`` are the same :class:`PeakTable`. Returned
+        when ``as_result=True``.
         Result rows include ``sample_index``, ``sample_position`` and
         ``sample_height`` for the discrete detector sample in addition to the
         refined ``position`` and ``height``.
@@ -643,6 +1167,12 @@ def find_peaks(
       are the coordinate and signal value at that sample, and ``position`` and
       ``height`` are the existing refined values. No global index into a parent
       dataset is reported for sliced inputs.
+    - The 2D path is selected only with ``dims=(dim0, dim1)`` and returns rows
+      with native source indices and one position per selected dimension.
+    - The 2D path supports positive maxima in real numeric data only. It does
+      not calculate interpolated positions, widths, prominence, volumes, or
+      integrals. A true 2D dataset without explicit ``dims`` retains the
+      historical dimensionality error.
 
     Examples
     --------
@@ -677,8 +1207,49 @@ def find_peaks(
     >>> len(rows)
     2
 
+    Explicit 2D detection with physical, anisotropic coordinate distances:
+
+    >>> y = scp.Coord.linspace(-1.0, 1.0, 41, title="y", units="ppm")
+    >>> x = scp.Coord.linspace(0.0, 2.0, 81, title="x", units="ppm")
+    >>> yy, xx = np.meshgrid(y.data, x.data, indexing="ij")
+    >>> z = np.exp(-((yy + 0.4) ** 2 + (xx - 0.6) ** 2) / 0.02)
+    >>> z += 0.8 * np.exp(-((yy - 0.45) ** 2 + (xx - 1.5) ** 2) / 0.03)
+    >>> map2d = scp.NDDataset(z, coordset=[y, x], units="absorbance")
+    >>> result2d = map2d.find_peaks(
+    ...     dims=("y", "x"),
+    ...     height=0.2,
+    ...     distance={"y": 0.2 * scp.ur.ppm, "x": 0.25 * scp.ur.ppm},
+    ...     as_result=True,
+    ... )
+    >>> result2d.table.columns
+    ('index', 'y_index', 'x_index', 'y_position', 'x_position', 'height')
+
     """
-    # get the dataset
+    if dims is not None:
+        if dataset.ndim == 1:
+            _resolve_peakfinding_dims(dataset, dims)
+        elif dataset.ndim == 2:
+            return _find_peaks_2d(
+                dataset,
+                height=height,
+                window_length=window_length,
+                threshold=threshold,
+                distance=distance,
+                prominence=prominence,
+                width=width,
+                wlen=wlen,
+                rel_height=rel_height,
+                plateau_size=plateau_size,
+                use_coord=use_coord,
+                as_result=as_result,
+                dims=dims,
+            )
+        else:
+            raise ValueError(
+                "Explicit peak finding supports only one or two dimensions"
+            )
+
+    # get the dataset; keep the original no-dims path unchanged.
     X = dataset.squeeze()
     if X.ndim > 1:
         raise ValueError(
