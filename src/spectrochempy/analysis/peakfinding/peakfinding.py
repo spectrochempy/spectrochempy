@@ -1026,9 +1026,11 @@ def _find_peaks_2d(
 
     effective_distance = distance_history
     parameters = {
+        "dims_requested": [dim if isinstance(dim, str) else int(dim) for dim in dims],
         "dims": list(dim_names),
         "axes": list(axes),
         "algorithm": "maximum_filter",
+        "use_coord": bool(use_coord),
         "height": height_history,
         "distance": effective_distance,
         "neighborhood": {"shape": [3, 3], "connectivity": 8},
@@ -1173,6 +1175,10 @@ def find_peaks(
       not calculate interpolated positions, widths, prominence, volumes, or
       integrals. A true 2D dataset without explicit ``dims`` retains the
       historical dimensionality error.
+    - 2D intensities are processed in a detached ``float64`` working array.
+      Integer-valued intensities above ``2**53`` may lose unit precision during
+      conversion; scale such data before peak detection when that precision is
+      scientifically important.
 
     Examples
     --------
