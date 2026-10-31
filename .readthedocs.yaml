@@ -40,4 +40,11 @@ build:
         # ``make.py`` drives the whole integrated build and writes to
         # $READTHEDOCS_OUTPUT/html when that variable is set.
         - SCPY_DOCS_TRACE=1 python -u docs/tools/trace_build.py --help
-        - SCPY_DOCS_TRACE=1 timeout --signal=INT --kill-after=30s 15m python -u docs/tools/trace_build.py html --warning-is-error -j auto
+        - |
+          log=$(mktemp)
+          trap 'rm -f "$log"' EXIT
+          status=0
+          SCPY_DOCS_TRACE=1 timeout --signal=INT --kill-after=30s 15m python -u docs/tools/trace_build.py html --warning-is-error -j auto </dev/null >"$log" 2>&1 || status=$?
+          cat "$log"
+          echo "[docs supervisor] exit_code=$status"
+          exit "$status"
