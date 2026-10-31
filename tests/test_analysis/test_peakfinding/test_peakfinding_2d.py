@@ -466,3 +466,21 @@ def test_2d_index_dimensions_and_distance_sequence_follow_requested_order():
         (6, 7),
         (18, 23),
     ]
+
+
+def test_2d_history_records_index_dims_and_point_coordinates_mode():
+    dataset = _two_peaks()
+    result = find_peaks(
+        dataset,
+        dims=(1, 0),
+        use_coord=False,
+        distance=(2, 3),
+        as_result=True,
+    )
+
+    parameters = result.history_entries[-1]["parameters"]
+    assert parameters["dims_requested"] == [1, 0]
+    assert parameters["dims"] == ["x", "y"]
+    assert parameters["axes"] == [1, 0]
+    assert parameters["use_coord"] is False
+    assert parameters["distance"]["mode"] == "points"
