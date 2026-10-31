@@ -115,10 +115,10 @@ _ = ax.annotate(
 # ## Find maxima with an automated method: `find_peaks()`
 # Exploring the spectra manually is useful, but it cannot be done systematically
 # for large datasets with many, possibly shifting, peaks. The maxima of a given
-# spectrum can be found automatically by the `find_peaks()` method, which is based
+# 1D spectrum can be found automatically by the `find_peaks()` method, which is based
 # on [scipy.signal.find_peaks()](
 # https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.find_peaks.html).
-# It returns two outputs: `peaks`, an NDDataset grouping the peak maxima
+# For a 1D spectrum it returns two outputs: `peaks`, an NDDataset grouping the peak maxima
 # (wavenumbers and absorbance), and `properties`, a dictionary containing
 # properties of the returned peaks. The dictionary is empty if no particular
 # option is selected; see below for more information.
@@ -349,6 +349,76 @@ _ = (peaks + offset).plot_scatter(
 )
 
 _ = ax.legend(fontsize=6)
+
+# %% [markdown]
+# ## Finding maxima in a true 2D spectrum
+#
+# A true 2D spectrum must select both analyzed dimensions explicitly. Here we
+# construct a synthetic map from two separable products of 1D Gaussian profiles
+# on independent wavenumber axes. This is an algorithm example, not a physical
+# simulation of a complete 2D IR experiment. ``normalized=False`` makes the
+# Gaussian amplitude represent peak height rather than integrated area.
+
+# %%
+ycoord = scp.Coord.linspace(1900, 2200, 61, title="y", units="cm^-1")
+xcoord = scp.Coord.linspace(1900, 2200, 101, title="x", units="cm^-1")
+
+
+def two_peaks(x, y):
+    g1 = scp.gaussian(x, pos=1980, width=25, normalized=False) * scp.gaussian(
+        y, pos=2010, width=30, normalized=False
+    )
+    g2 = (
+        0.8
+        * scp.gaussian(x, pos=2110, width=35, normalized=False)
+        * scp.gaussian(y, pos=2080, width=25, normalized=False)
+    )
+    return g1 + g2
+
+
+map2d = scp.fromfunction(
+    two_peaks,
+    coordset=scp.CoordSet(x=xcoord, y=ycoord),
+    units="absorbance",
+    title="Synthetic 2D spectrum",
+)
+
+# %% [markdown]
+# Pass the two dimensions explicitly. The `PeakFindingResult` provides a
+# `PeakTable` with native source indices, physical positions, and peak heights.
+# The detected grid maxima are near x=1980, y=2010 cm$^{-1}$ and x=2110,
+# y=2080 cm$^{-1}$, with heights close to 1.0 and 0.8. Positions are discrete
+# grid coordinates; this first 2D version does not interpolate subpixel peaks.
+# When `as_result` is omitted, the 2D call returns `(PeakTable, properties)`.
+
+# %%
+result2d = map2d.find_peaks(
+    dims=("y", "x"),
+    height=0.2,
+    distance={"y": 0.2 * scp.ur.ppm, "x": 0.25 * scp.ur.ppm},
+    as_result=True,
+)
+result2d.table.to_dict()
+
+# %% [markdown]
+# Each table row stores positions in its corresponding axis units and height
+# in the dataset intensity units. The table can be exported or accessed by its
+# dimension-named columns:
+
+# %%
+result2d.table.column("x_position", unit="cm^-1", as_float=True)
+
+# %% [markdown]
+# The 2D path uses an 8-connected 3×3 neighborhood. Equal-valued connected
+# plateaus have one deterministic representative, and distance suppression is
+# rectangular and independent by axis. Coordinates used for physical distances
+# must be finite, numeric, strictly monotone, and duplicate-free. Masked and
+# non-finite values are excluded. The historical 1D call, including its result
+# types and interpolation behavior, is unchanged; 2D data without `dims` keep
+# the historical dimensionality error.
+# Intensities are copied to float64 for filtering, so integer values above
+# `2**53` may lose unit precision; scale such data first if exact integer
+# ordering is scientifically important.
 
 # %% [markdown]
 # ### More on peak properties

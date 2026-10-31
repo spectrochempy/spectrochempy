@@ -19,6 +19,9 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- ``find_peaks`` now supports explicitly selected true 2D spectra with
+  deterministic positive-maximum detection, anisotropic point/physical spacing,
+  and structured ``PeakTable`` results. The historical 1D behavior is unchanged.
 
 .. section
 
