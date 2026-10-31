@@ -396,6 +396,9 @@ result2d.table.to_dict()
 # non-finite values are excluded. The historical 1D call, including its result
 # types and interpolation behavior, is unchanged; 2D data without `dims` keep
 # the historical dimensionality error.
+# Intensities are copied to float64 for filtering, so integer values above
+# `2**53` may lose unit precision; scale such data first if exact integer
+# ordering is scientifically important.
 
 # %% [markdown]
 # ### More on peak properties

@@ -395,6 +395,9 @@ def test_2d_history_is_reproducible_detached_and_export_methods_work(tmp_path):
     entry = table.history_entries[-1]
     assert entry["operation"] == "find_peaks_2d"
     assert entry["parameters"]["axes"] == [1, 0]
+    assert entry["parameters"]["dims_requested"] == ["x", "y"]
+    assert entry["parameters"]["dims"] == ["x", "y"]
+    assert entry["parameters"]["use_coord"] is True
     assert entry["parameters"]["distance"] == {
         "mode": "none",
         "requested": None,
