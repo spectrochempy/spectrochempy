@@ -22,6 +22,7 @@ build:
       # post_install job installs checkout plugins explicitly and installs
       # standalone plugins from their published distributions.
       - python -m pip install -e ".[docs]"
+      - python -m pip install "ipython==9.17.1" "jupyterlab==4.6.4" "notebook==7.6.3"
     post_install:
       # Install the plugins that remain in this checkout in editable mode so
       # a pull request that changes one documents the plugin it contains.
