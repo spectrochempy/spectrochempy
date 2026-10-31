@@ -395,7 +395,10 @@ map2d = scp.fromfunction(
 result2d = map2d.find_peaks(
     dims=("y", "x"),
     height=0.2,
-    distance={"y": 0.2 * scp.ur.ppm, "x": 0.25 * scp.ur.ppm},
+    distance={
+        "y": 15 * scp.ur("cm^-1"),
+        "x": 20 * scp.ur("cm^-1"),
+    },
     as_result=True,
 )
 result2d.table.to_dict()
