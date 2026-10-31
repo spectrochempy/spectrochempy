@@ -115,10 +115,10 @@ _ = ax.annotate(
 # ## Find maxima with an automated method: `find_peaks()`
 # Exploring the spectra manually is useful, but it cannot be done systematically
 # for large datasets with many, possibly shifting, peaks. The maxima of a given
-# spectrum can be found automatically by the `find_peaks()` method, which is based
+# 1D spectrum can be found automatically by the `find_peaks()` method, which is based
 # on [scipy.signal.find_peaks()](
 # https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.find_peaks.html).
-# It returns two outputs: `peaks`, an NDDataset grouping the peak maxima
+# For a 1D spectrum it returns two outputs: `peaks`, an NDDataset grouping the peak maxima
 # (wavenumbers and absorbance), and `properties`, a dictionary containing
 # properties of the returned peaks. The dictionary is empty if no particular
 # option is selected; see below for more information.
@@ -349,6 +349,53 @@ _ = (peaks + offset).plot_scatter(
 )
 
 _ = ax.legend(fontsize=6)
+
+# %% [markdown]
+# ## Finding maxima in a true 2D spectrum
+#
+# A true 2D spectrum must select both analyzed dimensions explicitly. The 2D
+# detector reports discrete peak positions in the source coordinates and uses
+# an anisotropic rectangular distance: each axis has its own point or physical
+# distance. This initial implementation supports positive maxima in real data;
+# it does not estimate widths, fit overlapping peaks, or calculate peak volumes.
+
+# %%
+import numpy as np
+
+ycoord = scp.Coord.linspace(-1.0, 1.0, 41, title="y", units="ppm")
+xcoord = scp.Coord.linspace(0.0, 2.0, 81, title="x", units="ppm")
+ygrid, xgrid = np.meshgrid(ycoord.data, xcoord.data, indexing="ij")
+map_data = np.exp(-((ygrid + 0.4) ** 2 + (xgrid - 0.6) ** 2) / 0.02)
+map_data += 0.8 * np.exp(-((ygrid - 0.45) ** 2 + (xgrid - 1.5) ** 2) / 0.03)
+map2d = scp.NDDataset(
+    map_data,
+    coordset=[ycoord, xcoord],
+    units="absorbance",
+    title="Synthetic 2D spectrum",
+)
+
+# %% [markdown]
+# Pass the two dimensions explicitly. The `PeakFindingResult` provides a
+# `PeakTable` with native source indices, physical positions, and peak heights.
+# When `as_result` is omitted, the 2D call returns `(PeakTable, properties)`.
+
+# %%
+result2d = map2d.find_peaks(
+    dims=("y", "x"),
+    height=0.2,
+    distance={"y": 0.2 * scp.ur.ppm, "x": 0.25 * scp.ur.ppm},
+    as_result=True,
+)
+result2d.table.to_dict()
+
+# %% [markdown]
+# The 2D path uses an 8-connected 3×3 neighborhood. Equal-valued connected
+# plateaus have one deterministic representative, and distance suppression is
+# rectangular and independent by axis. Coordinates used for physical distances
+# must be finite, numeric, strictly monotone, and duplicate-free. Masked and
+# non-finite values are excluded. The historical 1D call, including its result
+# types and interpolation behavior, is unchanged; 2D data without `dims` keep
+# the historical dimensionality error.
 
 # %% [markdown]
 # ### More on peak properties
