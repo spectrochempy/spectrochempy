@@ -353,23 +353,32 @@ _ = ax.legend(fontsize=6)
 # %% [markdown]
 # ## Finding maxima in a true 2D spectrum
 #
-# A true 2D spectrum must select both analyzed dimensions explicitly. The 2D
-# detector reports discrete peak positions in the source coordinates and uses
-# an anisotropic rectangular distance: each axis has its own point or physical
-# distance. This initial implementation supports positive maxima in real data;
-# it does not estimate widths, fit overlapping peaks, or calculate peak volumes.
+# A true 2D spectrum must select both analyzed dimensions explicitly. Here we
+# construct a synthetic map from two separable products of 1D Gaussian profiles
+# on independent wavenumber axes. This is an algorithm example, not a physical
+# simulation of a complete 2D IR experiment. ``normalized=False`` makes the
+# Gaussian amplitude represent peak height rather than integrated area.
 
 # %%
-import numpy as np
+ycoord = scp.Coord.linspace(1900, 2200, 61, title="y", units="cm^-1")
+xcoord = scp.Coord.linspace(1900, 2200, 101, title="x", units="cm^-1")
 
-ycoord = scp.Coord.linspace(-1.0, 1.0, 41, title="y", units="ppm")
-xcoord = scp.Coord.linspace(0.0, 2.0, 81, title="x", units="ppm")
-ygrid, xgrid = np.meshgrid(ycoord.data, xcoord.data, indexing="ij")
-map_data = np.exp(-((ygrid + 0.4) ** 2 + (xgrid - 0.6) ** 2) / 0.02)
-map_data += 0.8 * np.exp(-((ygrid - 0.45) ** 2 + (xgrid - 1.5) ** 2) / 0.03)
-map2d = scp.NDDataset(
-    map_data,
-    coordset=[ycoord, xcoord],
+
+def two_peaks(x, y):
+    g1 = scp.gaussian(x, pos=1980, width=25, normalized=False) * scp.gaussian(
+        y, pos=2010, width=30, normalized=False
+    )
+    g2 = (
+        0.8
+        * scp.gaussian(x, pos=2110, width=35, normalized=False)
+        * scp.gaussian(y, pos=2080, width=25, normalized=False)
+    )
+    return g1 + g2
+
+
+map2d = scp.fromfunction(
+    two_peaks,
+    coordset=scp.CoordSet(x=xcoord, y=ycoord),
     units="absorbance",
     title="Synthetic 2D spectrum",
 )
@@ -377,6 +386,9 @@ map2d = scp.NDDataset(
 # %% [markdown]
 # Pass the two dimensions explicitly. The `PeakFindingResult` provides a
 # `PeakTable` with native source indices, physical positions, and peak heights.
+# The detected grid maxima are near x=1980, y=2010 cm$^{-1}$ and x=2110,
+# y=2080 cm$^{-1}$, with heights close to 1.0 and 0.8. Positions are discrete
+# grid coordinates; this first 2D version does not interpolate subpixel peaks.
 # When `as_result` is omitted, the 2D call returns `(PeakTable, properties)`.
 
 # %%
@@ -387,6 +399,14 @@ result2d = map2d.find_peaks(
     as_result=True,
 )
 result2d.table.to_dict()
+
+# %% [markdown]
+# Each table row stores positions in its corresponding axis units and height
+# in the dataset intensity units. The table can be exported or accessed by its
+# dimension-named columns:
+
+# %%
+result2d.table.column("x_position", unit="cm^-1", as_float=True)
 
 # %% [markdown]
 # The 2D path uses an 8-connected 3×3 neighborhood. Equal-valued connected
