@@ -69,6 +69,34 @@ def test_supervisor_help_runs_real_builder():
     assert "[docs supervisor] EXIT exit_code=0" in result.stdout
 
 
+def test_rtd_probe_reports_internal_deadline_without_builder():
+    result = subprocess.run(
+        [
+            "timeout",
+            "--signal=TERM",
+            "--kill-after=2s",
+            "20s",
+            sys.executable,
+            "-u",
+            "docs/tools/probe_supervisor.py",
+        ],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        timeout=25,
+        check=False,
+    )
+    assert result.returncode == 124, result.stdout + result.stderr
+    assert "[rtd probe] ENTER expected_exit=124" in result.stdout
+    assert "[rtd probe child] STDOUT before sleep" in result.stdout
+    assert "[rtd probe child] STDERR before sleep" in result.stdout
+    assert "[docs supervisor] deadline; signalling" in result.stdout
+    assert "[docs supervisor] EXIT exit_code=124" in result.stdout
+    assert "log_delivery_failed=False" in result.stdout
+    assert "[rtd probe] RETURN supervisor_code=124" in result.stdout
+    assert "[docs runner]" not in result.stdout + result.stderr
+
+
 def _run(source, **kwargs):
     return subprocess.run(
         [sys.executable, "-u", "-c", source],

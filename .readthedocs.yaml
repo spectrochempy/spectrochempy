@@ -39,4 +39,5 @@ build:
       html:
         # ``make.py`` drives the whole integrated build and writes to
         # $READTHEDOCS_OUTPUT/html when that variable is set.
-        - SCPY_DOCS_TRACE=1 python -u docs/tools/supervise_build.py html --warning-is-error -j auto
+        - python -u -c "print('[rtd probe] CONTROL python startup', flush=True)"
+        - timeout --signal=TERM --kill-after=2s 20s python -u docs/tools/probe_supervisor.py
