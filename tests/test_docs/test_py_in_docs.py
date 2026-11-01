@@ -46,7 +46,8 @@ scripts = list((repo / "docs").glob("**/*.py"))
 scripts = [
     script
     for script in scripts
-    if not any(
+    if not script.is_relative_to(repo / "docs" / "tools")
+    and not any(
         x in str(script)
         for x in [
             "checkpoint",
@@ -54,9 +55,6 @@ scripts = [
             "conf.py",
             "apigen.py",
             "gallery",
-            # Command-line utilities require arguments and are not runnable
-            # example scripts.
-            "tools/check_html_links.py",
         ]
     )
 ]
@@ -294,6 +292,12 @@ def test_unit__requires_external_network(tmp_path):
     p2 = tmp_path / "no_network.py"
     p2.write_text("x = 1 + 1")
     assert _requires_external_network(p2) is None
+
+
+def test_unit__nbsphinx_discovery_excludes_build_tools():
+    """Build utilities are not examples, while the quickstart remains collected."""
+    assert not any(path.is_relative_to(repo / "docs" / "tools") for path in scripts)
+    assert repo / "docs" / "sources" / "gettingstarted" / "quickstart.py" in scripts
 
 
 def test_unit__looks_like_external_network_failure_FileNotFoundError_with_url():

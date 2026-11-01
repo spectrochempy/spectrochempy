@@ -83,3 +83,20 @@ def test_runner_watchdog_remains_active_during_atexit():
     assert "Timeout (0:00:00.050000)!" in result.stderr
     assert "in finalizer" in result.stderr
     assert result.stderr.index("BUILDER_RETURN") < result.stderr.index("Timeout (")
+
+
+@pytest.mark.parametrize("code", [0, 2])
+def test_runner_without_resource_preserves_status_and_diagnostics(code):
+    result = run_script(
+        "import sys\n"
+        "sys.modules['resource'] = None\n"
+        "from docs.tools import trace_build as runner\n"
+        "def build(*args, **kwargs):\n"
+        f"    raise SystemExit({code})\n"
+        "runner.runpy.run_path = build\n"
+        "runner.main()\n"
+    )
+    assert result.returncode == code
+    assert "[docs runner] START" in result.stderr
+    assert f"SystemExit code={code}" in result.stderr
+    assert "rss_self_peak_kib=unavailable" in result.stderr

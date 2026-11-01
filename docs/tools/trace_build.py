@@ -3,7 +3,6 @@
 import faulthandler
 import multiprocessing
 import os
-import resource
 import runpy
 import sys
 import time
@@ -11,6 +10,11 @@ import traceback
 from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version
 from pathlib import Path
+
+try:
+    import resource
+except ImportError:
+    resource = None
 
 _DIAGNOSTIC_STREAMS = []
 
@@ -59,9 +63,12 @@ def main():
         diagnostic.flush()
         raise
     finally:
+        rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss if resource else None
+        if rss is not None and sys.platform == "darwin":
+            rss /= 1024
         print(
             f"[docs runner] BUILDER_RETURN elapsed={time.monotonic() - started:.3f}s "
-            f"rss_self_peak_kib={resource.getrusage(resource.RUSAGE_SELF).ru_maxrss} "
+            f"rss_self_peak_kib={rss if rss is not None else 'unavailable'} "
             "(runner only, excludes workers and kernels; shutdown not complete)",
             file=diagnostic,
             flush=True,
