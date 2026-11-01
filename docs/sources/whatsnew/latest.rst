@@ -12,6 +12,13 @@ What's New in Revision 1.1.4.dev
 These are the changes in SpectroChemPy-1.1.4.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
 
+New Features
+~~~~~~~~~~~~
+
+- ``find_peaks`` now supports explicitly selected true 2D spectra with
+  deterministic positive-maximum detection, anisotropic point/physical spacing,
+  and structured ``PeakTable`` results. The historical 1D behavior is unchanged.
+
 Bug Fixes
 ~~~~~~~~~
 
