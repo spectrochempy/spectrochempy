@@ -69,6 +69,20 @@ def test_supervisor_help_runs_real_builder():
     assert "[docs supervisor] EXIT exit_code=0" in result.stdout
 
 
+def test_rtd_probe_control_without_supervisor():
+    result = subprocess.run(
+        [sys.executable, "-u", "docs/tools/probe_supervisor.py", "--control-only"],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        timeout=5,
+        check=False,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert result.stdout == "[rtd probe] CONTROL python startup\n"
+    assert result.stderr == ""
+
+
 def test_rtd_probe_reports_internal_deadline_without_builder():
     result = subprocess.run(
         [

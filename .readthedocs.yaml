@@ -39,5 +39,5 @@ build:
       html:
         # ``make.py`` drives the whole integrated build and writes to
         # $READTHEDOCS_OUTPUT/html when that variable is set.
-        - python -u -c "print('[rtd probe] CONTROL python startup', flush=True)"
+        - python -u docs/tools/probe_supervisor.py --control-only
         - timeout --signal=TERM --kill-after=2s 20s python -u docs/tools/probe_supervisor.py

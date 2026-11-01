@@ -3,11 +3,15 @@
 
 import sys
 
-from supervise_build import supervise
-
 
 def main():
     """Expect an internal deadline, visible child output, and exit status 124."""
+    if sys.argv[1:] == ["--control-only"]:
+        print("[rtd probe] CONTROL python startup", flush=True)
+        return 0
+
+    from supervise_build import supervise
+
     print("[rtd probe] ENTER expected_exit=124", flush=True)
     child = (
         "import sys, time\n"
