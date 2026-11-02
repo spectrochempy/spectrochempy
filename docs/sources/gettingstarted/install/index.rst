@@ -40,10 +40,11 @@ channel. In an activated environment:
 
 .. code-block:: bash
 
-   uv pip install spectrochempy jupyterlab                # or: python -m pip install spectrochempy jupyterlab
-   mamba install -c conda-forge -c spectrocat spectrochempy jupyterlab
+   uv pip install spectrochempy                    # or: python -m pip install spectrochempy
+   mamba install -c conda-forge -c spectrocat spectrochempy
 
-JupyterLab is optional: omit ``jupyterlab`` to install SpectroChemPy alone.
+To run the tutorial notebooks, also install JupyterLab (``uv pip install jupyterlab``,
+``python -m pip install jupyterlab`` or ``mamba install -c conda-forge jupyterlab``).
 To pin an exact version, use ``"spectrochempy==1.0.0"`` (pip, uv) or
 ``"spectrochempy=1.0.0"`` (conda, mamba). To install a pre-release, when one is
 available: ``uv pip install spectrochempy --prerelease allow`` (or

@@ -88,10 +88,15 @@ Step-by-step Installation
 
       .. code-block:: bash
 
-         uv pip install spectrochempy jupyterlab
+         uv pip install spectrochempy
 
-      JupyterLab is optional: it is needed only to work in notebooks. To install
-      SpectroChemPy alone, omit ``jupyterlab`` from the command.
+      **Optional: JupyterLab.** The tutorials of this documentation are
+      notebooks. To run them, beginners are advised to install JupyterLab in
+      the same environment:
+
+      .. code-block:: bash
+
+         uv pip install jupyterlab
 
       **4. Create a shortcut command.** It opens your working folder with the
       ``scpy`` environment already active, so you do not have to type the
@@ -117,7 +122,7 @@ Step-by-step Installation
 
          In [1]: import spectrochempy as scp
 
-      Type ``exit`` to leave IPython. To work with notebooks, type
+      Type ``exit`` to leave IPython. If you installed JupyterLab, type
       ``jupyter lab``: JupyterLab opens in your browser, in your working folder.
       From now on, open a terminal and type ``scpy`` each time you work with
       SpectroChemPy.
@@ -177,10 +182,15 @@ Step-by-step Installation
 
       .. code-block:: bash
 
-         mamba install -c conda-forge -c spectrocat spectrochempy jupyterlab
+         mamba install -c conda-forge -c spectrocat spectrochempy
 
-      JupyterLab is optional: it is needed only to work in notebooks. To install
-      SpectroChemPy alone, omit ``jupyterlab`` from the command.
+      **Optional: JupyterLab.** The tutorials of this documentation are
+      notebooks. To run them, beginners are advised to install JupyterLab in
+      the same environment:
+
+      .. code-block:: bash
+
+         mamba install -c conda-forge jupyterlab
 
       **5. Create a shortcut command.** It opens your working folder with the
       ``scpy`` environment already active, so you do not have to type the
@@ -206,7 +216,7 @@ Step-by-step Installation
 
          In [1]: import spectrochempy as scp
 
-      Type ``exit`` to leave IPython. To work with notebooks, type
+      Type ``exit`` to leave IPython. If you installed JupyterLab, type
       ``jupyter lab``: JupyterLab opens in your browser, in your working folder.
       From now on, open a terminal and type ``scpy`` each time you work with
       SpectroChemPy.
@@ -258,10 +268,15 @@ Step-by-step Installation
 
       .. code-block:: bash
 
-         python -m pip install spectrochempy jupyterlab
+         python -m pip install spectrochempy
 
-      JupyterLab is optional: it is needed only to work in notebooks. To install
-      SpectroChemPy alone, omit ``jupyterlab`` from the command.
+      **Optional: JupyterLab.** The tutorials of this documentation are
+      notebooks. To run them, beginners are advised to install JupyterLab in
+      the same environment:
+
+      .. code-block:: bash
+
+         python -m pip install jupyterlab
 
       **5. Create a shortcut command.** It opens your working folder with the
       ``scpy`` environment already active, so you do not have to type the
@@ -287,7 +302,7 @@ Step-by-step Installation
 
          In [1]: import spectrochempy as scp
 
-      Type ``exit`` to leave IPython. To work with notebooks, type
+      Type ``exit`` to leave IPython. If you installed JupyterLab, type
       ``jupyter lab``: JupyterLab opens in your browser, in your working folder.
       From now on, open a terminal and type ``scpy`` each time you work with
       SpectroChemPy.

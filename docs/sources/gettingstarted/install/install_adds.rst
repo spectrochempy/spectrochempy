@@ -98,10 +98,10 @@ to work without an internet connection:
 Other Optional Packages
 -----------------------
 
-* **JupyterLab**: installed together with SpectroChemPy by the commands of the
-  installation guides. To add it later to an existing environment:
+* **JupyterLab**: an optional step of the installation guides, needed to run the
+  tutorial notebooks. To add it later to an existing environment:
   ``uv pip install jupyterlab``, ``python -m pip install jupyterlab`` or
-  ``mamba install jupyterlab``.
+  ``mamba install -c conda-forge jupyterlab``.
 * **xarray**: needed only to convert datasets to and from
   `xarray <https://xarray.dev>`_ objects
   (``uv pip install xarray``, ``python -m pip install xarray`` or
