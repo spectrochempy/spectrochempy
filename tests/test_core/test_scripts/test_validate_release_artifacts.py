@@ -1316,9 +1316,8 @@ class TestInstallSmokeTest:
 class TestPluginConfig:
     def test_official_plugins_defined(self):
         module = load_module()
-        assert "spectrochempy-nmr" in module.OFFICIAL_PLUGINS
         assert "spectrochempy-perkinelmer" in module.OFFICIAL_PLUGINS
-        assert len(module.OFFICIAL_PLUGINS) == 6
+        assert len(module.OFFICIAL_PLUGINS) == 4
 
     def test_get_module_name_core(self):
         module = load_module()
@@ -1326,7 +1325,7 @@ class TestPluginConfig:
 
     def test_get_module_name_plugin(self):
         module = load_module()
-        assert module.get_module_name("spectrochempy-nmr") == "spectrochempy_nmr"
+        assert module.get_module_name("spectrochempy-iris") == "spectrochempy_iris"
 
     def test_get_module_name_unknown(self):
         module = load_module()

@@ -55,37 +55,47 @@ def test_plotpreferences(IR_dataset_2D):
         prefs.style = original_style
 
 
-def test_makestyle_skips_deprecated_matplotlib_rcparams(monkeypatch, tmp_path):
+def test_makestyle_skips_deprecated_matplotlib_rcparams(tmp_path):
     prefs = scp.preferences
-    monkeypatch.setattr(prefs, "stylesheets", str(tmp_path))
+    original_stylesheets = prefs.stylesheets
+    try:
+        prefs.stylesheets = str(tmp_path)
 
-    stylename = prefs.makestyle("tmpstyle")
+        stylename = prefs.makestyle("tmpstyle")
 
-    assert stylename == "tmpstyle"
+        assert stylename == "tmpstyle"
 
-    stylesheet = Path(tmp_path) / "tmpstyle.mplstyle"
-    text = stylesheet.read_text()
+        stylesheet = Path(tmp_path) / "tmpstyle.mplstyle"
+        text = stylesheet.read_text()
 
-    assert "text.hinting_factor" not in text
-    assert "text.kerning_factor" not in text
+        assert "text.hinting_factor" not in text
+        assert "text.kerning_factor" not in text
+    finally:
+        prefs.stylesheets = original_stylesheets
 
 
 def test_makestyle_to_mpl_registers_style(monkeypatch, tmp_path, fake_mpl_dirs):
     from matplotlib import pyplot as plt
 
     prefs = scp.preferences
-    monkeypatch.setattr(prefs, "stylesheets", str(tmp_path))
+    original_stylesheets = prefs.stylesheets
     configdir, _, _ = fake_mpl_dirs
     reloads = []
     monkeypatch.setattr(plt.style, "reload_library", lambda: reloads.append(True))
 
-    prefs.makestyle("tmpstyle_mpl", to_mpl=True)
+    try:
+        prefs.stylesheets = str(tmp_path)
 
-    stylesheet = configdir / "stylelib" / "tmpstyle_mpl.mplstyle"
-    assert (
-        stylesheet.read_text() == (Path(tmp_path) / "tmpstyle_mpl.mplstyle").read_text()
-    )
-    assert reloads
+        prefs.makestyle("tmpstyle_mpl", to_mpl=True)
+
+        stylesheet = configdir / "stylelib" / "tmpstyle_mpl.mplstyle"
+        assert (
+            stylesheet.read_text()
+            == (Path(tmp_path) / "tmpstyle_mpl.mplstyle").read_text()
+        )
+        assert reloads
+    finally:
+        prefs.stylesheets = original_stylesheets
 
 
 def test_makestyle_to_mpl_style_usable_by_name(monkeypatch, tmp_path, fake_mpl_dirs):
@@ -94,7 +104,7 @@ def test_makestyle_to_mpl_style_usable_by_name(monkeypatch, tmp_path, fake_mpl_d
     from matplotlib import pyplot as plt
 
     prefs = scp.preferences
-    monkeypatch.setattr(prefs, "stylesheets", str(tmp_path))
+    original_stylesheets = prefs.stylesheets
     configdir, _, _ = fake_mpl_dirs
     # Matplotlib >= 3.11 keeps the user library paths in matplotlib.style,
     # older versions in matplotlib.style.core.
@@ -108,6 +118,8 @@ def test_makestyle_to_mpl_style_usable_by_name(monkeypatch, tmp_path, fake_mpl_d
     )
 
     try:
+        prefs.stylesheets = str(tmp_path)
+
         with mpl.rc_context({"lines.linewidth": 7.5}):
             prefs.makestyle("tmpstyle_usable", to_mpl=True)
 
@@ -115,5 +127,6 @@ def test_makestyle_to_mpl_style_usable_by_name(monkeypatch, tmp_path, fake_mpl_d
         with plt.style.context("tmpstyle_usable"):
             assert mpl.rcParams["lines.linewidth"] == 7.5
     finally:
+        prefs.stylesheets = original_stylesheets
         monkeypatch.undo()
         plt.style.reload_library()
