@@ -64,6 +64,10 @@ Bug Fixes
   ``spectrochempy-hypercomplex`` and ``numpy-quaternion`` dependencies. (#1743)
 - Native ``.scp`` loads now preserve the dataset modification timestamp instead
   of replacing it while restoring the filename and name.
+- Synchronize the vendored OPUS reader with ``brukeropus`` upstream commit
+  ``af5a508cef7de8089acd27a215d644ab451257dd``. This adds robust handling for
+  compact and multichannel spectra, incomplete data series and reports while
+  preserving the ``scp.read_opus()`` and ``scp.opus.read()`` APIs.
 
 
 .. section

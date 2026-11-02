@@ -96,6 +96,12 @@ jobs:
 
       - name: Validate plugin name
         run: |
+          case "${{ inputs.plugin_name }}" in
+            spectrochempy-nmr|spectrochempy-hypercomplex)
+              echo "::error::${{ inputs.plugin_name }} is released from its standalone repository."
+              exit 1
+              ;;
+          esac
           python3 .github/workflows/scripts/validate_official_plugin.py \
             "plugins/${{ inputs.plugin_name }}"
 

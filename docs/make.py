@@ -65,9 +65,11 @@ import re
 import shutil
 import sys
 import tempfile
+import time
 import traceback
 import warnings
 import zipfile
+from contextlib import contextmanager
 from contextlib import suppress
 from os import environ
 from pathlib import Path
@@ -120,6 +122,8 @@ DOWNLOADS = HTML / "downloads"
 TEMPDIRS = PROJECT.parent / "tempdirs"
 
 ON_GITHUB = os.environ.get("GITHUB_ACTIONS") == "true"
+DOCS_TRACE = os.environ.get("SCPY_DOCS_TRACE") == "1"
+_DOCS_TRACE_START = time.monotonic()
 CORE_TAG_PREFIX = "spectrochempy-v"
 SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
 RELEASE_VERSION_RE = re.compile(r"^\d+\.\d+\.\d+(?:rc\d+)?$")
@@ -128,6 +132,29 @@ RELEASE_VERSION_RE = re.compile(r"^\d+\.\d+\.\d+(?:rc\d+)?$")
 def _trace_ci(message):
     if ON_GITHUB:
         print(f"[docs make] {message}", flush=True)
+
+
+@contextmanager
+def _trace_docs_span(label):
+    if not DOCS_TRACE:
+        yield
+        return
+    started = time.monotonic()
+    print(
+        f"[docs trace {time.strftime('%Y-%m-%dT%H:%M:%S%z')}] "
+        f"+{started - _DOCS_TRACE_START:.3f}s START {label}",
+        flush=True,
+    )
+    try:
+        yield
+    finally:
+        ended = time.monotonic()
+        print(
+            f"[docs trace {time.strftime('%Y-%m-%dT%H:%M:%S%z')}] "
+            f"+{ended - _DOCS_TRACE_START:.3f}s END {label} "
+            f"duration={ended - started:.3f}s",
+            flush=True,
+        )
 
 
 def _canonical_doc_tag(tagname):
@@ -665,6 +692,10 @@ class BuildDocumentation:
         # Finds and synchronizes all notebook/script pairs using jupytext,
         # with error handling for individual files.
 
+        with _trace_docs_span("_sync_notebooks"):
+            self._sync_notebooks_impl()
+
+    def _sync_notebooks_impl(self):
         print(f"\n{'-' * 80}\nSync *.py and *.ipynb using jupytext\n{'-' * 80}")
         if self.settings["nosync"] or self.settings["whatsnew"]:
             print("Skipping notebook synchronization as option --no-sync is set")
@@ -868,14 +899,23 @@ class BuildDocumentation:
         # Simplified documentation building process.
         # Returns: int - Sphinx build result
 
+        with _trace_docs_span("_make_docs"):
+            return self._make_docs_impl()
+
+    def _make_docs_impl(self):
+        # Simplified documentation building process.
+        # Returns: int - Sphinx build result
+
         _trace_ci(
             "_make_docs start "
             f"noexec={self.settings['noexec']} "
             f"skip_post={environ.get('SCPY_SKIP_POST_BUILD', '0')}"
         )
-        self._prepare_build()
+        with _trace_docs_span("_prepare_build"):
+            self._prepare_build()
         _trace_ci("_prepare_build completed")
-        build_result = self._run_sphinx_build()
+        with _trace_docs_span("_run_sphinx_build"):
+            build_result = self._run_sphinx_build()
         _trace_ci(f"_run_sphinx_build returned {build_result!r}")
         # On Read the Docs the build is already in its final location.
         source_dir = (
@@ -884,7 +924,8 @@ class BuildDocumentation:
             else HTML / self._doc_version
         )
         if source_dir.exists() and any(source_dir.iterdir()):
-            self._validate_built_html(source_dir)
+            with _trace_docs_span("HTML validation"):
+                self._validate_built_html(source_dir)
             _trace_ci("_validate_built_html completed")
         if os.environ.get("READTHEDOCS_OUTPUT"):
             _trace_ci("Skipping docs post-build actions on Read the Docs")
@@ -899,6 +940,10 @@ class BuildDocumentation:
     def _prepare_build(self):
         # Prepare the build environment.
 
+        with _trace_docs_span("_prepare_build body"):
+            self._prepare_build_impl()
+
+    def _prepare_build_impl(self):
         if self.tagname:
             print(
                 f"\n{'-' * 80}\n"
@@ -923,7 +968,8 @@ class BuildDocumentation:
                 download_full_testdata_directory,
             )
 
-            download_full_testdata_directory(datadir, force=True)
+            with _trace_docs_span("download_full_testdata_directory"):
+                download_full_testdata_directory(datadir, force=True)
 
         # Determine the version of the documentation to build
         self._version, self._last_release, self._doc_version = self._determine_version()
@@ -1034,16 +1080,17 @@ class BuildDocumentation:
             outdir = f"{HTML}/{doc_version}"
             doctreesdir = f"{DOCTREES}/{doc_version}"
 
-        sp = Sphinx(
-            srcdir,
-            confdir,
-            outdir,
-            doctreesdir,
-            "html",
-            warningiserror=self.settings["warningiserror"],
-            parallel=self.settings["jobs"],
-            verbosity=self.settings["verbosity"],
-        )
+        with _trace_docs_span("Sphinx initialization"):
+            sp = Sphinx(
+                srcdir,
+                confdir,
+                outdir,
+                doctreesdir,
+                "html",
+                warningiserror=self.settings["warningiserror"],
+                parallel=self.settings["jobs"],
+                verbosity=self.settings["verbosity"],
+            )
 
         class SafeEventEmitter:
             def __init__(self, original_emit):
@@ -1062,7 +1109,8 @@ class BuildDocumentation:
         sp.events.emit = SafeEventEmitter(sp.events.emit)
 
         try:
-            sp.build()
+            with _trace_docs_span("sp.build"):
+                sp.build()
             _trace_ci(f"Sphinx build completed with statuscode={sp.statuscode!r}")
             if sp.statuscode:
                 raise RuntimeError(
