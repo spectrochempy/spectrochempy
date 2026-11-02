@@ -15,9 +15,9 @@ Usage::
         --dist dist/
 
     python validate_release_artifacts.py conda \\
-        --package spectrochempy-nmr \\
+        --package spectrochempy-iris \\
         --version 0.1.4 \\
-        --artifact output/spectrochempy-nmr-0.1.4-0_abc.conda
+        --artifact output/spectrochempy-iris-0.1.4-0_abc.conda
 
     python validate_release_artifacts.py all ...
 """
@@ -1477,9 +1477,7 @@ def install_and_smoketest_conda(
 
 OFFICIAL_PLUGINS: dict[str, dict[str, str]] = {
     "spectrochempy-carroucell": {"module": "spectrochempy_carroucell"},
-    "spectrochempy-hypercomplex": {"module": "spectrochempy_hypercomplex"},
     "spectrochempy-iris": {"module": "spectrochempy_iris"},
-    "spectrochempy-nmr": {"module": "spectrochempy_nmr"},
     "spectrochempy-perkinelmer": {"module": "spectrochempy_perkinelmer"},
     "spectrochempy-tensor": {"module": "spectrochempy_tensor"},
 }

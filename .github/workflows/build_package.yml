@@ -121,6 +121,12 @@ jobs:
           elif [[ "$IS_PLUGIN" == "true" ]] && [[ "${{ github.event_name }}" == "release" ]]; then
             PLUGIN=$(echo "${{ github.ref_name }}" | sed 's/-v[0-9.]*$//')
             VERSION=$(echo "${{ github.ref_name }}" | sed 's/^.*-v//')
+            if [[ "$PLUGIN" == "spectrochempy-nmr" || "$PLUGIN" == "spectrochempy-hypercomplex" ]]; then
+              echo "is_core_release=false" >> "$GITHUB_OUTPUT"
+              echo "is_plugin_release=false" >> "$GITHUB_OUTPUT"
+              echo "Detected standalone plugin release; monorepo Conda publication is disabled for $PLUGIN"
+              exit 0
+            fi
             echo "is_core_release=false" >> "$GITHUB_OUTPUT"
             echo "is_plugin_release=true" >> "$GITHUB_OUTPUT"
             echo "plugin_name=$PLUGIN" >> "$GITHUB_OUTPUT"
@@ -368,6 +374,10 @@ jobs:
           plugins=()
           for dir in plugins/*/; do
             name=$(basename "$dir")
+            if [[ "$name" == "spectrochempy-nmr" || "$name" == "spectrochempy-hypercomplex" ]]; then
+              echo "Skipping $name (published from standalone repository)"
+              continue
+            fi
             if [ "$name" = "plugin-template" ]; then
               echo "Skipping $name (developer template, not publishable)"
               continue

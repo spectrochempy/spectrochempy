@@ -24,6 +24,6 @@
 spectrochempy[nmr]
 spectrochempy[iris]
 spectrochempy[tensor]
-spectrochempy-hypercomplex>=0.1,<0.2
+spectrochempy-hypercomplex>=0.1,<0.3
 spectrochempy-carroucell>=0.1,<0.2
 spectrochempy-perkinelmer>=0.1,<0.2

@@ -36,6 +36,8 @@ Bug Fixes
   value of a style that does not fit its preference is skipped with a warning
   naming it, instead of silently stopping the style at that line; the
   ``grayscale`` style is now applied completely. (#1799)
+- Fixed the Agilent TPPI direct FFT path so ordinary complex acquisitions are
+  no longer interpreted as quaternion data, preventing non-finite results.
 - Filter outputs now retain the applied method, effective dimension, and
   compact filter parameters in their structured history entries.
 - Whittaker-Eilers filtering now applies along the requested dimension.
@@ -70,6 +72,12 @@ Bug Fixes
 
 - TopSpin imports now report when hypercomplex data require the optional
   ``spectrochempy-hypercomplex`` and ``numpy-quaternion`` dependencies. (#1743)
+- Native ``.scp`` loads now preserve the dataset modification timestamp instead
+  of replacing it while restoring the filename and name.
+- Synchronize the vendored OPUS reader with ``brukeropus`` upstream commit
+  ``af5a508cef7de8089acd27a215d644ab451257dd``. This adds robust handling for
+  compact and multichannel spectra, incomplete data series and reports while
+  preserving the ``scp.read_opus()`` and ``scp.opus.read()`` APIs.
 
 
 .. section
@@ -78,6 +86,9 @@ Dependency Updates
 ~~~~~~~~~~~~~~~~~~
 .. Add here new dependency updates (do not delete this comment)
 
+- Extend the official NMR and hypercomplex extra bounds to admit their
+  autonomous 0.2.x releases while preserving compatibility with existing
+  0.1.x installations during the publication transition.
 - Updated the documentation dependency ``nbconvert`` to 7.17.2 to address an
   arbitrary-file-write vulnerability when converting untrusted notebooks.
 

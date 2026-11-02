@@ -7,8 +7,8 @@ The plugin class attribute ``version = "..."`` is updated to match the
 release version.  The corresponding file path is derived from the plugin
 package name:
 
-    spectrochempy-nmr
-    -> plugins/spectrochempy-nmr/src/spectrochempy_nmr/__init__.py
+    spectrochempy-iris
+    -> plugins/spectrochempy-iris/src/spectrochempy_iris/__init__.py
 """
 
 import re

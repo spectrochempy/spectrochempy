@@ -65,14 +65,14 @@ instance with the shortcut created during installation).
 
    .. tab:: From sources
 
-      From the ``spectrochempy`` folder of a source installation (see
-      :doc:`install_sources`), with the environment active:
+      From the plugin repository folder, with the environment active:
 
       .. code-block:: bash
 
-         python -m pip install -e plugins/spectrochempy-nmr
+         python -m pip install -e /path/to/plugin
 
-      Each plugin is in its own folder of ``plugins/``.
+      The NMR and hypercomplex plugins are maintained in standalone
+      repositories; the other source plugins remain under ``plugins/``.
 
 Each plugin is versioned independently. If you use a feature whose plugin is
 missing, SpectroChemPy raises a ``MissingPluginError`` that tells you which

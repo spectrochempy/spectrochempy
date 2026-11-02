@@ -1,0 +1,154 @@
+# Cross-repository consumption gate for the extracted spectrochempy-nmr plugin.
+#
+# The main test workflow installs plugins from the monorepo (editable), which
+# proves that the plugin sources work in-tree. This workflow proves the other
+# half of the contract: a core wheel built from this repository consumes an NMR
+# plugin wheel built from the external spectrochempy_nmr repository at a pinned
+# commit, and a core-only environment keeps actionable missing-plugin errors.
+#
+# Both sides are tested through the public surface only (entry point, namespace,
+# aliases, synthetic TopSpin read, unit context, FFT/domain transition). Update
+# NMR_COMMIT deliberately when a new plugin commit becomes the consumption
+# reference; the pin is part of the compatibility matrix.
+
+name: Test NMR plugin wheel consumption
+
+on:
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - 'docs/**'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NMR_REPOSITORY: spectrochempy/spectrochempy_nmr
+  NMR_COMMIT: d4796521217970673971fe843e6ca29ec729b247
+  PYTHON_VERSION: "3.13"
+
+jobs:
+  wheels:
+    name: Build core and pinned NMR wheels
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout core repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Secure pip bootstrap
+        uses: ./.github/actions/verified-pip
+
+      - name: Build core wheel
+        run: |
+          python -m pip install --quiet build
+          python -m build --wheel --outdir dist .
+
+      - name: Checkout pinned NMR repository
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ env.NMR_REPOSITORY }}
+          ref: ${{ env.NMR_COMMIT }}
+          path: nmr-source
+
+      - name: Build pinned NMR wheel
+        run: |
+          python -m build --wheel --outdir dist nmr-source
+
+      - name: Upload wheels
+        uses: actions/upload-artifact@v7
+        with:
+          name: nmr-consumption-wheels
+          path: dist/*.whl
+          if-no-files-found: error
+
+  plugin-present:
+    name: Plugin present
+    needs: wheels
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout core repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Secure pip bootstrap
+        uses: ./.github/actions/verified-pip
+
+      - name: Download wheels
+        uses: actions/download-artifact@v8
+        with:
+          name: nmr-consumption-wheels
+          path: dist
+
+      - name: Install core and pinned NMR wheels
+        run: |
+          python -m pip install --quiet dist/*.whl pytest pytest-doctestplus
+          python -m pip check
+
+      - name: Verify the pinned plugin imports
+        run: |
+          python -I -c "from spectrochempy_nmr import NMRPlugin"
+
+      - name: Run consumption contract
+        run: |
+          python -I -m pytest tests/test_plugins/test_nmr_consumption.py -v
+
+  plugin-absent:
+    name: Plugin absent
+    needs: wheels
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout core repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Secure pip bootstrap
+        uses: ./.github/actions/verified-pip
+
+      - name: Download wheels
+        uses: actions/download-artifact@v8
+        with:
+          name: nmr-consumption-wheels
+          path: dist
+
+      - name: Install core wheel only
+        run: |
+          python -m pip install --quiet dist/spectrochempy-*.whl pytest pytest-doctestplus
+          python -m pip check
+
+      - name: Verify the plugin is absent
+        run: |
+          python -I -c "import importlib.util; assert importlib.util.find_spec('spectrochempy_nmr') is None"
+
+      - name: Run core-only contract
+        run: |
+          python -I -m pytest tests/test_plugins/test_nmr_consumption_absent.py -v
