@@ -71,6 +71,7 @@ import warnings
 import zipfile
 from contextlib import contextmanager
 from contextlib import suppress
+from importlib import metadata
 from os import environ
 from pathlib import Path
 
@@ -132,6 +133,34 @@ RELEASE_VERSION_RE = re.compile(r"^\d+\.\d+\.\d+(?:rc\d+)?$")
 def _trace_ci(message):
     if ON_GITHUB:
         print(f"[docs make] {message}", flush=True)
+
+
+def _trace_docs_environment(jobs):
+    if not DOCS_TRACE:
+        return
+    try:
+        affinity = sorted(os.sched_getaffinity(0))
+    except (AttributeError, OSError):
+        affinity = None
+    versions = {}
+    for package in ("ipython", "jupyterlab", "notebook"):
+        try:
+            versions[package] = metadata.version(package)
+        except metadata.PackageNotFoundError:
+            versions[package] = "not installed"
+    print(
+        "[docs trace] environment="
+        + json.dumps(
+            {
+                "os.cpu_count": os.cpu_count(),
+                "multiprocessing.cpu_count": mp.cpu_count(),
+                "affinity": affinity,
+                "sphinx_workers": jobs,
+                "versions": versions,
+            }
+        ),
+        flush=True,
+    )
 
 
 @contextmanager
@@ -906,6 +935,7 @@ class BuildDocumentation:
         # Simplified documentation building process.
         # Returns: int - Sphinx build result
 
+        _trace_docs_environment(self.settings["jobs"])
         _trace_ci(
             "_make_docs start "
             f"noexec={self.settings['noexec']} "
