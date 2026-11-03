@@ -1,42 +1,9 @@
-# Read the Docs configuration for the integrated SpectroChemPy documentation.
 version: 2
 
 build:
   os: ubuntu-24.04
   tools:
     python: "3.13"
-  # pandoc is required by nbsphinx to render the markdown cells of the
-  # notebooks.
-  apt_packages:
-    - pandoc
-  jobs:
-    post_checkout:
-      # The build needs the release tags, both for the version and for the
-      # setuptools_scm version of the editable install below. Read the Docs
-      # clones shallowly.
-      - git fetch --unshallow || true
-      - git fetch --all --tags || true
-    install:
-      - python .github/actions/verified-pip/verified_pip.py
-      # The ``plugins`` extra is deliberately NOT requested here: the
-      # post_install job installs checkout plugins explicitly and installs
-      # standalone plugins from their published distributions.
-      - python -m pip install -e ".[docs]"
-      - python -m pip install "ipython==9.17.1" "jupyterlab==4.6.4" "notebook==7.6.3"
-    post_install:
-      # Install the plugins that remain in this checkout in editable mode so
-      # a pull request that changes one documents the plugin it contains.
-      - |
-        for name in $(python -m spectrochempy.ci.install_plugins --list-names); do
-          python -m pip install --no-deps -e "plugins/$name"
-        done
-      # NMR and hypercomplex are maintained in standalone repositories. Their
-      # public API pages are generated from the released distributions.
-      - python -m pip install "spectrochempy-nmr>=0.2,<0.3" "spectrochempy-hypercomplex>=0.2,<0.3"
-      # Runtime dependencies that --no-deps skips.
-      - python -m pip install osqp scipy numpy-quaternion tensorly
-    build:
-      html:
-        # ``make.py`` drives the whole integrated build and writes to
-        # $READTHEDOCS_OUTPUT/html when that variable is set.
-        - SCPY_DOCS_TRACE=1 python -u docs/make.py html --warning-is-error -j auto
+  commands:
+    - git fetch --depth 1 origin ef092a238d3a968bf21f9129e2e3934c3d1a07ce
+    - python -u .github/workflows/scripts/rtd_process_capture_probe.py run
