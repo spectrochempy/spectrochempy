@@ -5,6 +5,7 @@ import importlib.util
 import io
 import json
 import os
+import shutil
 import signal
 import subprocess
 import sys
@@ -24,6 +25,37 @@ pytestmark = pytest.mark.skipif(
 )
 
 
+@pytest.fixture(scope="module")
+def historical_supervisor():
+    """Fetch only the probe's historical dependency, only when it is missing."""
+    git = shutil.which("git")
+    assert git is not None, "git is required for the historical supervisor tests"
+    object_name = f"{probe.REVISION}:docs/tools/supervise_build.py"
+    present = subprocess.run(
+        [git, "cat-file", "-e", object_name],
+        cwd=ROOT,
+        capture_output=True,
+        timeout=5,
+        check=False,
+    )
+    if present.returncode:
+        subprocess.run(
+            [git, "fetch", "--no-tags", "origin", probe.REVISION],
+            cwd=ROOT,
+            capture_output=True,
+            timeout=60,
+            check=True,
+        )
+        subprocess.run(
+            [git, "cat-file", "-e", object_name],
+            cwd=ROOT,
+            capture_output=True,
+            timeout=5,
+            check=True,
+        )
+
+
+@pytest.mark.usefixtures("historical_supervisor")
 def test_paired_capture_and_historical_cleanup(tmp_path):
     scratch = tmp_path / "scratch"
     scratch.mkdir()
@@ -82,6 +114,7 @@ def test_paired_capture_and_historical_cleanup(tmp_path):
     assert (tmp_path / "output" / "html" / "index.html").exists()
 
 
+@pytest.mark.usefixtures("historical_supervisor")
 def test_external_interruption_cleans_only_probe_processes(tmp_path):
     scratch = tmp_path / "scratch"
     scratch.mkdir()
