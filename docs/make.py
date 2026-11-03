@@ -65,7 +65,6 @@ import re
 import shutil
 import sys
 import tempfile
-import time
 import traceback
 import warnings
 import zipfile
@@ -90,8 +89,12 @@ except ImportError:  # pragma: no cover
 # is loaded as ``docs.make`` and by directory entry otherwise.
 if __package__:
     from .tools.helpers import sh
+    from .tools.lifecycle_trace import observe
+    from .tools.lifecycle_trace import span
 else:
     from tools.helpers import sh
+    from tools.lifecycle_trace import observe
+    from tools.lifecycle_trace import span
 
 # Suppress other specific warnings
 warnings.filterwarnings(action="ignore", module="matplotlib", category=UserWarning)
@@ -122,8 +125,6 @@ DOWNLOADS = HTML / "downloads"
 TEMPDIRS = PROJECT.parent / "tempdirs"
 
 ON_GITHUB = os.environ.get("GITHUB_ACTIONS") == "true"
-DOCS_TRACE = os.environ.get("SCPY_DOCS_TRACE") == "1"
-_DOCS_TRACE_START = time.monotonic()
 CORE_TAG_PREFIX = "spectrochempy-v"
 SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
 RELEASE_VERSION_RE = re.compile(r"^\d+\.\d+\.\d+(?:rc\d+)?$")
@@ -136,25 +137,8 @@ def _trace_ci(message):
 
 @contextmanager
 def _trace_docs_span(label):
-    if not DOCS_TRACE:
+    with span(label):
         yield
-        return
-    started = time.monotonic()
-    print(
-        f"[docs trace {time.strftime('%Y-%m-%dT%H:%M:%S%z')}] "
-        f"+{started - _DOCS_TRACE_START:.3f}s START {label}",
-        flush=True,
-    )
-    try:
-        yield
-    finally:
-        ended = time.monotonic()
-        print(
-            f"[docs trace {time.strftime('%Y-%m-%dT%H:%M:%S%z')}] "
-            f"+{ended - _DOCS_TRACE_START:.3f}s END {label} "
-            f"duration={ended - started:.3f}s",
-            flush=True,
-        )
 
 
 def _canonical_doc_tag(tagname):
@@ -914,7 +898,7 @@ class BuildDocumentation:
         with _trace_docs_span("_prepare_build"):
             self._prepare_build()
         _trace_ci("_prepare_build completed")
-        with _trace_docs_span("_run_sphinx_build"):
+        with _trace_docs_span("_run_sphinx_build"), observe():
             build_result = self._run_sphinx_build()
         _trace_ci(f"_run_sphinx_build returned {build_result!r}")
         # On Read the Docs the build is already in its final location.
