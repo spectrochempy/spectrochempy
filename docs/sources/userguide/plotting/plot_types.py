@@ -89,12 +89,6 @@ _ = ds.plot_image()
 _ = ds.plot_image(colorbar=True)
 
 # %% [markdown]
-# Hide the colorbar if needed:
-
-# %%
-_ = ds.plot_image(colorbar=False)
-
-# %% [markdown]
 # ## Contour Plot
 #
 # For continuous data with smooth transitions:
@@ -196,8 +190,7 @@ _ = ds.plot_image(
 # |-------------|----------------|
 # | `plot_stack()` or `method="stack"` | `plot_lines()` or `method="lines"` |
 # | `plot_map()` or `method="map"` | `plot_contour()` or `method="contour"` |
-# | `plot_image()` or `method="image"` | `plot_contourf()` when you want the canonical geometry name |
 #
-# `plot_image()` remains a supported explicit helper for image-style plotting, so
-# choose between `plot_image()` and `plot_contourf()` based on which name makes
+# `plot_image()` is not deprecated: it remains a supported explicit helper for
+# image-style plotting, alongside `plot_contourf()`. Choose the name that makes
 # your intent clearer.

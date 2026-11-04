@@ -714,7 +714,7 @@ class BuildDocumentation:
                 continue
             try:
                 if self.settings["delnb"]:
-                    item.with_suffix(".ipynb").unlink()
+                    item.with_suffix(".ipynb").unlink(missing_ok=True)
                 self._sync_notebook_pair(item)
             except Exception as e:
                 print(f"Failed to sync {item}: {e}")
