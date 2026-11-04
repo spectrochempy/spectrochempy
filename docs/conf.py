@@ -746,7 +746,9 @@ else:
 
 if not single_doc_or_dir:
     sphinx_gallery_conf = {
-        "plot_gallery": not noexec,
+        "plot_gallery": (
+            not noexec and os.environ.get("SCPY_DOCS_GALLERY_EXECUTE", "1") == "1"
+        ),
         "doc_module": "spectrochempy",
         # Source example files in separate directory
         "examples_dirs": gallery_examples_dirs,
