@@ -4,7 +4,7 @@ Validate that a plugin directory is declared as an official SpectroChemPy plugin
 
 Usage::
 
-    python .github/workflows/scripts/validate_official_plugin.py plugins/spectrochempy-nmr
+    python .github/workflows/scripts/validate_official_plugin.py plugins/spectrochempy-iris
 
 Checks that ``pyproject.toml`` contains::
 

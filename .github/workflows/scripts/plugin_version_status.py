@@ -303,7 +303,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     plugin_group = parser.add_mutually_exclusive_group(required=True)
     plugin_group.add_argument(
-        "--plugin", help="Plugin package name, e.g. spectrochempy-nmr"
+        "--plugin", help="Plugin package name, e.g. spectrochempy-iris"
     )
     plugin_group.add_argument(
         "--all-official",
