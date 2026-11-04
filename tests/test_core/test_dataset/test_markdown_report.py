@@ -56,6 +56,13 @@ def test_to_markdown_report_matches_golden_file_without_mutation():
         encoding="utf-8"
     )
     assert report == expected
+    assert report == dataset.to_markdown_report(
+        title="Report",
+        metadata=("operator", "path", "missing"),
+        figures=(
+            FigureReference("Spectrum", "figures/spectrum.png", "Measured signal."),
+        ),
+    )
     assert dataset.history_entries == before["history"]
     assert dataset.meta.to_dict() == before["meta"]
     assert (dataset.data == before["data"]).all()
@@ -64,125 +71,48 @@ def test_to_markdown_report_matches_golden_file_without_mutation():
 @pytest.mark.parametrize(
     "target",
     [
-        "/private/spectrum.png",
-        "../spectrum.png",
-        "~/spectrum.png",
-        "C:\\private\\spectrum.png",
-        "C:/private/spectrum.png",
+        "javascript:alert(1)",
+        "data:image/png;base64,abc",
+        "/spectrum.png",
+        "//example.org/a.png",
+        "https://",
+        "figures/a\n## forged.png",
     ],
 )
-def test_to_markdown_report_rejects_sensitive_figure_paths(target):
-    dataset = _dataset()
-
-    with pytest.raises(ValueError, match="safe relative POSIX path"):
-        dataset.to_markdown_report(
-            title="Report",
-            figures=(FigureReference("Spectrum", target),),
-        )
-
-
-def test_to_markdown_report_rejects_malformed_figure_url():
-    with pytest.raises(ValueError, match="valid URL"):
+def test_to_markdown_report_rejects_invalid_figure_targets(target):
+    with pytest.raises(ValueError):
         _dataset().to_markdown_report(
-            title="Report",
-            figures=(FigureReference("Spectrum", "http://[::1"),),
+            title="Report", figures=(FigureReference("Spectrum", target),)
         )
+
+
+@pytest.mark.parametrize(
+    "target, encoded",
+    [
+        ("../figures/my spectrum(1).png", "../figures/my%20spectrum%281%29.png"),
+        ("./figures/échantillon.png", "./figures/%C3%A9chantillon.png"),
+        ("~/spectrum%20one.png", "~/spectrum%20one.png"),
+        ("figures/50%.png", "figures/50%.png"),
+        ("figures/spectrum#1?.png", "figures/spectrum%231%3F.png"),
+        ("https://[::1]/spectrum(1).png", "https://[::1]/spectrum%281%29.png"),
+        (
+            "https://example.org/a b.png?x=1&y=2",
+            "https://example.org/a%20b.png?x=1&y=2",
+        ),
+        ("http://example.org/spectrum.png", "http://example.org/spectrum.png"),
+        ('figures/a[1]"<>.png', "figures/a%5B1%5D%22%3C%3E.png"),
+    ],
+)
+def test_to_markdown_report_encodes_figure_targets(target, encoded):
+    report = _dataset().to_markdown_report(
+        title="Report", figures=(FigureReference("Spectrum", target),)
+    )
+    assert f"![Spectrum]({encoded})" in report
 
 
 def test_to_markdown_report_rejects_implicit_figures():
     with pytest.raises(TypeError, match="FigureReference"):
         _dataset().to_markdown_report(title="Report", figures=(object(),))
-
-
-@pytest.mark.parametrize(
-    "target",
-    [
-        "figures/spectrum\n## forged.png",
-        "figures/spectrum\r.png",
-        "figures/spectrum\x00.png",
-        "figures/spectrum\u200b.png",
-    ],
-)
-def test_to_markdown_report_rejects_figure_target_control_characters(target):
-    with pytest.raises(ValueError, match="control characters"):
-        _dataset().to_markdown_report(
-            title="Report",
-            figures=(FigureReference("Spectrum", target),),
-        )
-
-
-@pytest.mark.parametrize(
-    "target",
-    [
-        "figures/spectrum(1).png",
-        "figures/spectrum<1>.png",
-        'figures/spectrum"1".png',
-        "figures/spectrum'1'.png",
-        "figures/spectrum`1`.png",
-    ],
-)
-def test_to_markdown_report_rejects_figure_target_markdown_syntax(target):
-    with pytest.raises(ValueError, match="Markdown control characters"):
-        _dataset().to_markdown_report(
-            title="Report",
-            figures=(FigureReference("Spectrum", target),),
-        )
-
-
-@pytest.mark.parametrize(
-    "target",
-    [
-        "figures/spectrum%2.png",
-        "figures/spectrum%zz.png",
-        "figures/spectrum%0A.png",
-        "figures/spectrum%00.png",
-        "figures/spectrum%7F.png",
-    ],
-)
-def test_to_markdown_report_rejects_unsafe_figure_target_percent_encoding(target):
-    with pytest.raises(ValueError, match="percent-encoding"):
-        _dataset().to_markdown_report(
-            title="Report",
-            figures=(FigureReference("Spectrum", target),),
-        )
-
-
-@pytest.mark.parametrize(
-    "target",
-    [
-        "&#47;etc/passwd",
-        "&#46;&#46;/secret.png",
-        "&#92;private\\spectrum.png",
-        "figures/%2e%2e/secret.png",
-        "figures/%2E%2E/secret.png",
-        "figures%2fsecret.png",
-        "figures/%5csecret.png",
-        "https://example.org/a&#46;&#46;/b.png",
-    ],
-)
-def test_to_markdown_report_rejects_encoded_unsafe_figure_targets(target):
-    with pytest.raises(ValueError):
-        _dataset().to_markdown_report(
-            title="Report",
-            figures=(FigureReference("Spectrum", target),),
-        )
-
-
-@pytest.mark.parametrize(
-    "target",
-    [
-        "figures/my%20spectrum.png",
-        "https://example.org/a%20b.png",
-        "https://example.org/spectrum.png",
-    ],
-)
-def test_to_markdown_report_accepts_safe_figure_targets(target):
-    report = _dataset().to_markdown_report(
-        title="Report",
-        figures=(FigureReference("Spectrum", target),),
-    )
-
-    assert f"![Spectrum]({target})" in report
 
 
 def test_to_markdown_report_escapes_structural_markdown():
@@ -219,14 +149,14 @@ def test_to_markdown_report_captions_cannot_open_markdown_blocks(caption):
     assert "### Second\n\n![Second](figures/second.png)" in report
 
 
-def test_to_markdown_report_redacts_path_objects():
+def test_to_markdown_report_renders_path_objects():
     dataset = _dataset()
     dataset.meta.path = Path("/secret/sample")
 
     report = dataset.to_markdown_report(title="Report", metadata=("path",))
 
-    assert "- `path`: [redacted: path]" in report
-    assert "/secret/sample" not in report
+    assert "- `path`: /secret/sample" in report
+    assert "[redacted" not in report
 
 
 def test_to_markdown_report_does_not_guess_sensitive_strings():
@@ -235,8 +165,7 @@ def test_to_markdown_report_does_not_guess_sensitive_strings():
 
     report = dataset.to_markdown_report(title="Report", metadata=("note",))
 
-    assert "does not detect or certify" in report
-    assert "/home/user/data\\.csv" in report
+    assert "/home/user/data.csv" in report
 
 
 @pytest.mark.parametrize(
@@ -275,7 +204,7 @@ def test_to_markdown_report_renders_dotted_origin():
 
     report = dataset.to_markdown_report(title="Report")
 
-    assert "- Origin: Bruker BioSpin 4\\.0" in report
+    assert "- Origin: Bruker BioSpin 4.0" in report
 
 
 def test_to_markdown_report_preserves_numpy_longdouble_precision():
@@ -295,11 +224,11 @@ def test_to_markdown_report_bounds_metadata_collections():
 
     report = dataset.to_markdown_report(title="Report", metadata=("large", "deep"))
 
-    assert "[omitted: collection too large]" in report
-    assert "[omitted: maximum depth]" in report
+    assert "[truncated: 1 more items]" in report
+    assert "[truncated: maximum depth]" in report
 
 
-def test_to_markdown_report_preserves_history_order_and_redacts_nested_paths():
+def test_to_markdown_report_preserves_history_order_and_nested_paths():
     dataset = _dataset()
     dataset.annotate(
         "Second entry",
@@ -310,7 +239,7 @@ def test_to_markdown_report_preserves_history_order_and_redacts_nested_paths():
     report = dataset.to_markdown_report(title="Report", metadata=("nested",))
 
     assert report.index("Imported sample") < report.index("Second entry")
-    assert "{later: 2, path: [redacted: path]}" in report
+    assert "{later: 2, path: /secret/nested}" in report
 
 
 def test_to_markdown_report_renders_nested_history_parameters_and_sources():
@@ -352,10 +281,10 @@ def test_to_markdown_report_renders_nested_history_parameters_and_sources():
     assert "- Parameters:\n  - Settings:" in report
     assert "    - Danger\\n\\#\\# key: safe" in report
     assert "        - Note: second\\n\\#\\# forged" in report
-    assert "- Sources:\n  - Right:" in report
-    assert "    - Name: fitted\\_baseline" in report
-    assert "  - Left:\n    - Name: sample \\*signal\\*" in report
-    assert report.index("  - Right:") < report.index("  - Left:")
+    assert "- Sources:\n  - Item 1:" in report
+    assert "    - Name: fitted_baseline" in report
+    assert "    - Name: sample \\*signal\\*" in report
+    assert report.index("    - Role: right") < report.index("    - Role: left")
     assert "Parameters: {" not in report
     assert "\n## forged" not in report
 
@@ -378,17 +307,17 @@ def test_to_markdown_report_bounds_nested_history_parameters():
 
     report = dataset.to_markdown_report(title="Report")
 
-    assert "[omitted: collection too large]" in report
-    assert "[omitted: maximum depth]" in report
+    assert "[truncated: 1 more items]" in report
+    assert "[truncated: maximum depth]" in report
 
 
-def test_to_markdown_report_bounds_history_output():
+def test_to_markdown_report_preserves_every_operation_in_long_history():
     dataset = _dataset()
     dataset.replace_history(
         [
             {
                 "date": datetime(2026, 10, 17, tzinfo=UTC),
-                "operation": "step",
+                "operation": f"step_{index}",
                 "parameters": {},
                 "message": f"Step {index}",
             }
@@ -398,7 +327,10 @@ def test_to_markdown_report_bounds_history_output():
 
     report = dataset.to_markdown_report(title="Report")
 
-    assert "[omitted: render budget exhausted]" in report
+    assert report.count("##### ") == 300
+    positions = [report.index(f"  - Operation: `step_{index}`") for index in range(300)]
+    assert positions == sorted(positions)
+    assert "Step 299" in report
 
 
 def test_to_markdown_report_identifies_baseline_and_smoothing_methods():
@@ -454,22 +386,6 @@ def test_to_markdown_report_distinguishes_missing_metadata_from_none():
     assert "- `missing`: [absent]" in report
 
 
-@pytest.mark.parametrize(
-    "target",
-    [
-        "figures/my spectrum.png",
-        "figures/my\tspectrum.png",
-        "https://example.org/fig a.png",
-    ],
-)
-def test_to_markdown_report_rejects_figure_targets_with_whitespace(target):
-    with pytest.raises(ValueError, match="whitespace"):
-        _dataset().to_markdown_report(
-            title="Report",
-            figures=(FigureReference("Spectrum", target),),
-        )
-
-
 def test_to_markdown_report_accepts_https_figure_target():
     report = _dataset().to_markdown_report(
         title="Report",
@@ -493,8 +409,8 @@ def test_to_markdown_report_escapes_paths_in_titles_and_keys():
         metadata=("nested",),
     )
 
-    assert "/home/user/title\\.csv" in report
-    assert "/home/user/data\\.csv" in report
+    assert "/home/user/title.csv" in report
+    assert "/home/user/data.csv" in report
     assert "/secret/key: 1" in report
 
 
@@ -546,19 +462,17 @@ def test_to_markdown_report_partial_coordset_does_not_log_error(caplog):
     assert "could not find this dimension name" not in caplog.text
 
 
-def test_to_markdown_report_bounds_total_render_budget():
-    def build(depth):
-        if depth == 0:
-            return "x" * 50
-        return {f"k{index}": build(depth - 1) for index in range(32)}
-
+def test_to_markdown_report_truncates_values_without_losing_later_operations():
     dataset = _dataset()
-    dataset.meta.huge = build(4)
-
-    report = dataset.to_markdown_report(title="Report", metadata=("huge",))
-
-    assert len(report) < 50_000
-    assert "[omitted: render budget exhausted]" in report
+    dataset.meta.note = "signal. Savitzky-Golay " + "x" * 5000
+    report = dataset.to_markdown_report(title="Report", metadata=("note",))
+    assert "signal. Savitzky-Golay " in report
+    assert "[truncated: text too long]" in report
+    assert "Imported sample" in report
+    assert report.endswith(
+        "It is not an executable workflow or a complete provenance record.\n"
+    )
+    assert "## Scope and limitations" not in report
 
 
 @pytest.mark.parametrize(
@@ -589,3 +503,54 @@ def test_render_dataset_markdown_rejects_blank_title():
 def test_render_dataset_markdown_rejects_string_metadata():
     with pytest.raises(TypeError, match="sequence"):
         render_dataset_markdown(_dataset(), title="Report", metadata="operator")
+
+
+def test_to_markdown_report_sorts_mappings_independently_of_insertion_order():
+    dataset = _dataset()
+    dataset.meta.settings = {"z": 2, "a": 1}
+    first = dataset.to_markdown_report(title="Report", metadata=("settings",))
+    dataset.meta.settings = {"a": 1, "z": 2}
+    assert first == dataset.to_markdown_report(title="Report", metadata=("settings",))
+
+
+def test_to_markdown_report_bounds_history_values_and_keeps_following_operation():
+    dataset = _dataset()
+    dataset.replace_history(
+        [
+            {
+                "date": datetime(2026, 10, 17, tzinfo=UTC),
+                "operation": "large",
+                "parameters": {
+                    "sources": [{"name": str(i)} for i in range(40)],
+                    "settings": {str(i): i for i in range(40)},
+                },
+                "message": "x" * 5000,
+            },
+            {
+                "date": datetime(2026, 10, 17, tzinfo=UTC),
+                "operation": "last",
+                "parameters": {},
+                "message": "Finished",
+            },
+        ]
+    )
+    report = dataset.to_markdown_report(title="Report")
+    assert report.count("[truncated: 8 more items]") == 2
+    assert "[truncated: text too long]" in report
+    assert "##### 2. Last" in report
+    assert "  - Operation: `last`" in report
+    assert "  - Message: Finished" in report
+
+
+def test_to_markdown_report_keeps_image_labels_and_captions_literal():
+    report = _dataset().to_markdown_report(
+        title="signal. Savitzky-Golay",
+        figures=(
+            FigureReference(
+                "a](/evil)![b", "spectrum.png", "<script>alert(1)</script>"
+            ),
+        ),
+    )
+    assert report.startswith("# signal. Savitzky-Golay\n")
+    assert r"![a\](/evil)!\[b](spectrum.png)" in report
+    assert "<script>" not in report

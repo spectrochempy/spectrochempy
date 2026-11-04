@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 import math
+import re
 from collections.abc import Mapping
 from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import datetime
 from numbers import Integral
 from pathlib import Path
-from pathlib import PurePosixPath
-from urllib.parse import unquote
+from urllib.parse import quote
 from urllib.parse import urlparse
 
 import numpy as np
@@ -23,27 +23,19 @@ __all__ = ["FigureReference", "render_dataset_markdown"]
 
 
 _SCOPE_MESSAGE = (
-    "This report summarizes the supplied objects and history. It is not an "
-    "executable recipe or a proof of exhaustive provenance. It renders supplied "
-    "text with Markdown escaping but does not detect or certify that it is free "
-    "of sensitive information; select and sanitize metadata, origin and history "
-    "before rendering."
+    "This report summarizes recorded dataset information and processing history. "
+    "It is not an executable workflow or a complete provenance record."
 )
 _MAX_COLLECTION_ITEMS = 32
 _MAX_NESTING_DEPTH = 4
 _MAX_TEXT_LENGTH = 4096
-_MAX_RENDERED_NODES = 256
-_MAX_RENDERED_CHARS = 16384
-_RENDER_BUDGET = "[omitted: render budget exhausted]"
 _MISSING = "[absent]"
-_REDACTED_PATH = "[redacted: path]"
-_HEX_DIGITS = frozenset("0123456789abcdefABCDEF")
 
 
 @dataclass(frozen=True)
 class FigureReference:
     """
-    An explicit, report-relative or HTTPS figure reference.
+    An explicit, report-relative or HTTP(S) figure reference.
 
     The caller supplies every reference; the renderer never captures Matplotlib
     state.
@@ -54,9 +46,10 @@ class FigureReference:
         Figure label, used for the section heading and the image alternative
         text.
     target : str
-        HTTP(S) URL or safe relative POSIX path. Whitespace, control
-        characters, Markdown syntax characters and invalid percent escapes are
-        rejected. The target is not checked for existence and is never copied.
+        HTTP(S) URL or relative POSIX path, resolved relative to the exported
+        Markdown file. Spaces and Markdown delimiters are URL-encoded.
+        Other URL schemes and absolute paths are rejected. The target is not
+        checked for existence and is never copied.
     caption : str, optional
         Optional caption rendered after the image.
 
@@ -123,9 +116,11 @@ def render_dataset_markdown(
     Notes
     -----
     Free text is rendered as supplied and escaped for Markdown. The renderer
-    does not guess which strings are sensitive: only :class:`pathlib.Path`
-    values are redacted. Select safe metadata keys and sanitize titles, origin,
-    history and figure labels or captions before rendering.
+    does not detect confidential information or redact paths. Callers are
+    responsible for the metadata, origin, history and figure references they
+    include. Select metadata keys and sanitize sensitive content before sharing.
+    Every recorded history entry is rendered in its original order. Individual
+    values may be explicitly truncated for length, collection size or depth.
 
     Examples
     --------
@@ -158,16 +153,17 @@ def render_dataset_markdown(
     lines = [
         f"# {_text(title)}",
         "",
-        "## Scope and limitations",
+        "## Datasets",
         "",
-        f"> {_SCOPE_MESSAGE}",
+        f"### {_dataset_heading(dataset)}",
+        "",
     ]
-    lines.extend(["", "## Datasets", "", f"### {_dataset_heading(dataset)}", ""])
     lines.extend(_dataset_summary(dataset))
     lines.extend(_coordinates(dataset))
     lines.extend(_metadata(dataset, metadata))
     lines.extend(_history(dataset))
     lines.extend(_figures(figures))
+    lines.extend(["", _SCOPE_MESSAGE])
     return "\n".join(lines).rstrip() + "\n"
 
 
@@ -251,172 +247,70 @@ def _history(dataset: NDDataset) -> list[str]:
     if not entries:
         return [*lines, "- No history entry provided."]
 
-    budget = [_MAX_RENDERED_NODES, _MAX_RENDERED_CHARS, False]
     for index, entry in enumerate(entries, start=1):
         operation = entry["operation"] if entry["operation"] is not None else "text"
-        if not _history_line(
-            lines,
-            f"##### {index}. {_history_label(operation)}",
-            budget,
-        ):
-            break
-        lines.append("")
-        if not _history_parameters(lines, entry["parameters"], budget):
-            break
-        if not _history_line(lines, "- Details:", budget):
-            break
-        if not _history_line(
-            lines,
-            f"  - Timestamp: {_code(_datetime(entry['date']))}",
-            budget,
-        ):
-            break
-        if not _history_line(lines, f"  - Operation: {_code(operation)}", budget):
-            break
-        if not _history_line(
-            lines,
-            f"  - Message: {_value(entry['message'])}",
-            budget,
-        ):
-            break
-        if index != len(entries):
-            lines.append("")
-    return lines
-
-
-def _history_parameters(lines: list[str], parameters, budget: list) -> bool:
-    if not isinstance(parameters, Mapping):
-        return _history_line(lines, f"- Parameters: {_value(parameters)}", budget)
-
-    model = parameters.get("model", _MISSING)
-    if model is not _MISSING:
-        method = _code(model) if isinstance(model, str) else _value(model)
-        if not _history_line(lines, f"- Method: {method}", budget):
-            return False
-
-    remaining = {
-        key: value
-        for key, value in parameters.items()
-        if key not in {"model", "sources"}
-    }
-    if not remaining:
-        if not _history_line(lines, "- Parameters: —", budget):
-            return False
-    elif not _history_line(lines, "- Parameters:", budget) or not _history_mapping(
-        lines,
-        remaining,
-        indent="  ",
-        depth=0,
-        budget=budget,
-    ):
-        return False
-
-    if "sources" not in parameters:
-        return True
-    if not _history_line(lines, "- Sources:", budget):
-        return False
-    return _history_sources(lines, parameters["sources"], budget)
-
-
-def _history_sources(lines: list[str], sources, budget: list) -> bool:
-    if not isinstance(sources, list | tuple):
-        return _history_value(lines, sources, indent="  ", depth=0, budget=budget)
-    if not sources:
-        return _history_line(lines, "  - —", budget)
-
-    for index, source in enumerate(sources, start=1):
-        if isinstance(source, Mapping):
-            role = source.get("role", f"source {index}")
-            remaining = {key: value for key, value in source.items() if key != "role"}
-            if not _history_line(lines, f"  - {_history_label(role)}:", budget):
-                return False
-            if not _history_mapping(
-                lines,
-                remaining,
-                indent="    ",
-                depth=0,
-                budget=budget,
-            ):
-                return False
-        elif not _history_line(lines, f"  - Source {index}: {_value(source)}", budget):
-            return False
-    return True
-
-
-def _history_mapping(
-    lines: list[str], value: Mapping, *, indent: str, depth: int, budget: list
-) -> bool:
-    if depth >= _MAX_NESTING_DEPTH:
-        return _history_line(lines, f"{indent}- [omitted: maximum depth]", budget)
-    if len(value) > _MAX_COLLECTION_ITEMS:
-        return _history_line(
-            lines, f"{indent}- [omitted: collection too large]", budget
+        lines.extend([f"##### {index}. {_history_label(operation)}", ""])
+        parameters = entry["parameters"]
+        if isinstance(parameters, Mapping):
+            if "model" in parameters:
+                model = parameters["model"]
+                method = _code(model) if isinstance(model, str) else _value(model)
+                lines.append(f"- Method: {method}")
+            remaining = {
+                key: value
+                for key, value in parameters.items()
+                if key not in {"model", "sources"}
+            }
+            if remaining:
+                lines.append("- Parameters:")
+                lines.extend(_history_value(remaining))
+            else:
+                lines.append("- Parameters: —")
+            if "sources" in parameters:
+                lines.append("- Sources:")
+                lines.extend(_history_value(parameters["sources"]))
+        else:
+            lines.append(f"- Parameters: {_value(parameters)}")
+        lines.extend(
+            [
+                "- Details:",
+                f"  - Timestamp: {_code(_datetime(entry['date']))}",
+                f"  - Operation: {_code(operation)}",
+                f"  - Message: {_value(entry['message'])}",
+                "",
+            ]
         )
+    return lines[:-1]
+
+
+def _history_value(value, *, depth: int = 0, indent: str = "  ") -> list[str]:
+    if not isinstance(value, Mapping | list | tuple):
+        return [f"{indent}- {_value(value)}"]
+    if depth >= _MAX_NESTING_DEPTH:
+        return [f"{indent}- [truncated: maximum depth]"]
     if not value:
-        return _history_line(lines, f"{indent}- {{}}", budget)
-
-    for key in sorted(value, key=str):
+        return [f"{indent}- {'{}' if isinstance(value, Mapping) else '[]'}"]
+    items = (
+        [(key, value[key]) for key in sorted(value, key=str)[:_MAX_COLLECTION_ITEMS]]
+        if isinstance(value, Mapping)
+        else [
+            (f"Item {i}", item)
+            for i, item in enumerate(value[:_MAX_COLLECTION_ITEMS], start=1)
+        ]
+    )
+    lines = []
+    for key, child in items:
         label = _history_label(key)
-        child = value[key]
         if isinstance(child, Mapping | list | tuple):
-            if not _history_line(lines, f"{indent}- {label}:", budget):
-                return False
-            if not _history_value(
-                lines,
-                child,
-                indent=f"{indent}  ",
-                depth=depth + 1,
-                budget=budget,
-            ):
-                return False
-        elif not _history_line(lines, f"{indent}- {label}: {_value(child)}", budget):
-            return False
-    return True
-
-
-def _history_value(
-    lines: list[str], value, *, indent: str, depth: int, budget: list
-) -> bool:
-    if isinstance(value, Mapping):
-        return _history_mapping(lines, value, indent=indent, depth=depth, budget=budget)
-    if isinstance(value, list | tuple):
-        if depth >= _MAX_NESTING_DEPTH:
-            return _history_line(lines, f"{indent}- [omitted: maximum depth]", budget)
-        if len(value) > _MAX_COLLECTION_ITEMS:
-            return _history_line(
-                lines, f"{indent}- [omitted: collection too large]", budget
-            )
-        if not value:
-            return _history_line(lines, f"{indent}- []", budget)
-        for index, item in enumerate(value, start=1):
-            if isinstance(item, Mapping | list | tuple):
-                if not _history_line(lines, f"{indent}- Item {index}:", budget):
-                    return False
-                if not _history_value(
-                    lines,
-                    item,
-                    indent=f"{indent}  ",
-                    depth=depth + 1,
-                    budget=budget,
-                ):
-                    return False
-            elif not _history_line(lines, f"{indent}- {_value(item)}", budget):
-                return False
-        return True
-    return _history_line(lines, f"{indent}- {_value(value)}", budget)
-
-
-def _history_line(lines: list[str], line: str, budget: list) -> bool:
-    if budget[0] <= 0 or budget[1] < len(line) + 1:
-        if not budget[2]:
-            indent = line[: len(line) - len(line.lstrip())]
-            lines.append(f"{indent}- {_RENDER_BUDGET}")
-            budget[2] = True
-        return False
-    budget[0] -= 1
-    budget[1] -= len(line) + 1
-    lines.append(line)
-    return True
+            lines.append(f"{indent}- {label}:")
+            lines.extend(_history_value(child, depth=depth + 1, indent=indent + "  "))
+        else:
+            lines.append(f"{indent}- {label}: {_value(child)}")
+    if len(value) > _MAX_COLLECTION_ITEMS:
+        lines.append(
+            f"{indent}- [truncated: {len(value) - _MAX_COLLECTION_ITEMS} more items]"
+        )
+    return lines
 
 
 def _history_label(value) -> str:
@@ -436,7 +330,7 @@ def _figures(figures: Sequence[FigureReference]) -> list[str]:
         if figure.caption is not None:
             lines.extend(["", f"Caption: {_text(figure.caption)}"])
         lines.append("")
-    return lines
+    return lines[:-1]
 
 
 def _validate_figures(figures: Sequence[FigureReference]) -> None:
@@ -453,60 +347,26 @@ def _validate_figures(figures: Sequence[FigureReference]) -> None:
 def _figure_target(target: str) -> str:
     if not isinstance(target, str) or not target:
         raise ValueError("figure target must be a non-empty string")
-    if any(character in target for character in " \t&()<>\"'`"):
-        raise ValueError(
-            "figure target must not contain whitespace or Markdown control characters"
-        )
-    if not target.isprintable():
+    if any(ord(character) < 32 or ord(character) == 127 for character in target):
         raise ValueError("figure target must not contain control characters")
-    if not _has_safe_percent_encoding(target):
-        raise ValueError(
-            "figure target must use valid percent-encoding without control characters"
-        )
-    decoded_target = unquote(target)
-    if not decoded_target.isprintable() or "\\" in decoded_target:
-        raise ValueError(
-            "figure target must be a safe relative POSIX path without control "
-            "characters or backslashes"
-        )
     try:
         parsed = urlparse(target)
     except ValueError as exc:
-        raise ValueError(
-            "figure target must be a valid URL or safe relative POSIX path"
-        ) from exc
-    if parsed.scheme in {"http", "https"} and parsed.netloc:
-        decoded_path = PurePosixPath(unquote(parsed.path))
-        if "." in decoded_path.parts or ".." in decoded_path.parts:
-            raise ValueError("figure target must not contain dot path segments")
-        return target
-    path = PurePosixPath(decoded_target)
-    if (
-        parsed.scheme
-        or path.is_absolute()
-        or decoded_target.startswith("~")
-        or "." in path.parts
-        or ".." in path.parts
-    ):
-        raise ValueError(
-            "figure target must be an HTTP(S) URL or a safe relative POSIX path"
-        )
-    return target
-
-
-def _has_safe_percent_encoding(value: str) -> bool:
-    index = value.find("%")
-    while index != -1:
-        escape = value[index + 1 : index + 3]
-        if len(escape) != 2 or any(
-            character not in _HEX_DIGITS for character in escape
-        ):
-            return False
-        byte = int(escape, 16)
-        if byte < 0x20 or byte == 0x7F or byte in {0x2E, 0x2F, 0x5C}:
-            return False
-        index = value.find("%", index + 3)
-    return True
+        raise ValueError("figure target must be a valid URL or relative path") from exc
+    if parsed.scheme:
+        if parsed.scheme.lower() not in {"http", "https"} or not parsed.netloc:
+            raise ValueError("figure target must be an HTTP(S) URL or relative path")
+    elif target.startswith(("/", "\\")):
+        raise ValueError("figure target must be an HTTP(S) URL or relative path")
+    if parsed.scheme:
+        return parsed._replace(
+            netloc=quote(parsed.netloc, safe="[]:@%"),
+            path=quote(parsed.path, safe="/:%+@,;~!$&*-"),
+            params=quote(parsed.params, safe="=:%+@,;~!$&*-"),
+            query=quote(parsed.query, safe="/?:=+@,;~!$&*-%"),
+            fragment=quote(parsed.fragment, safe="/?:=+@,;~!$&*-%"),
+        ).geturl()
+    return quote(target, safe="/%+@,~!$*-")
 
 
 def _datetime(value: datetime) -> str:
@@ -517,26 +377,12 @@ def _unit(value) -> str:
     return "—" if value is None else _code(str(value))
 
 
-def _value(value, *, depth: int = 0, _budget=None) -> str:
-    budget = (
-        _budget if _budget is not None else [_MAX_RENDERED_NODES, _MAX_RENDERED_CHARS]
-    )
-    if budget[0] <= 0 or budget[1] <= 0:
-        return _RENDER_BUDGET
-    budget[0] -= 1
+def _value(value, *, depth: int = 0) -> str:
     if value is None:
         return "—"
-    if isinstance(value, Path):
-        return _REDACTED_PATH
-    if isinstance(value, str):
-        rendered = _text(value)
-        if len(rendered) > budget[1]:
-            return _RENDER_BUDGET
-        budget[1] -= len(rendered)
-        return rendered
-    if isinstance(value, bool):
-        return str(value)
-    if isinstance(value, Integral | np.integer):
+    if isinstance(value, str | Path):
+        return _text(str(value))
+    if isinstance(value, bool | Integral | np.integer):
         return str(value)
     if isinstance(value, float):
         return _float(value)
@@ -547,33 +393,26 @@ def _value(value, *, depth: int = 0, _budget=None) -> str:
     if isinstance(value, Unit):
         return _unit(value)
     if isinstance(value, Quantity):
-        magnitude = _value(value.magnitude, depth=depth + 1, _budget=budget)
-        return f"{magnitude} {_unit(value.units)}"
-    if isinstance(value, Mapping):
+        return f"{_value(value.magnitude, depth=depth + 1)} {_unit(value.units)}"
+    if isinstance(value, Mapping | list | tuple):
         if depth >= _MAX_NESTING_DEPTH:
-            return "[omitted: maximum depth]"
+            return "[truncated: maximum depth]"
+        if isinstance(value, Mapping):
+            items = [
+                f"{_text(str(key))}: {_value(value[key], depth=depth + 1)}"
+                for key in sorted(value, key=str)[:_MAX_COLLECTION_ITEMS]
+            ]
+            opening, closing = "{", "}"
+        else:
+            items = [
+                _value(item, depth=depth + 1) for item in value[:_MAX_COLLECTION_ITEMS]
+            ]
+            opening, closing = "[", "]"
         if len(value) > _MAX_COLLECTION_ITEMS:
-            return "[omitted: collection too large]"
-        pairs = []
-        for key in sorted(value, key=str):
-            if budget[0] <= 0 or budget[1] <= 0:
-                pairs.append(_RENDER_BUDGET)
-                break
-            rendered = _value(value[key], depth=depth + 1, _budget=budget)
-            pairs.append(f"{_text(str(key))}: {rendered}")
-        return "{" + ", ".join(pairs) + "}"
-    if isinstance(value, list | tuple):
-        if depth >= _MAX_NESTING_DEPTH:
-            return "[omitted: maximum depth]"
-        if len(value) > _MAX_COLLECTION_ITEMS:
-            return "[omitted: collection too large]"
-        items = []
-        for item in value:
-            if budget[0] <= 0 or budget[1] <= 0:
-                items.append(_RENDER_BUDGET)
-                break
-            items.append(_value(item, depth=depth + 1, _budget=budget))
-        return "[" + ", ".join(items) + "]"
+            items.append(
+                f"[truncated: {len(value) - _MAX_COLLECTION_ITEMS} more items]"
+            )
+        return opening + ", ".join(items) + closing
     return f"[omitted: {type(value).__name__}]"
 
 
@@ -595,7 +434,7 @@ def _numpy_float(value: np.floating) -> str:
 
 def _text(value: str) -> str:
     if len(value) > _MAX_TEXT_LENGTH:
-        return "[omitted: text too long]"
+        return _escape(value[:_MAX_TEXT_LENGTH]) + " [truncated: text too long]"
     return _escape(value)
 
 
@@ -603,9 +442,9 @@ def _escape(value: str) -> str:
     value = value.replace("\\", "\\\\")
     value = value.replace("\r\n", "\n").replace("\r", "\n")
     value = value.replace("\n", "\\n")
-    for character in "`*_{}[]<>#+-.!|()~":
+    for character in "`*[]<>#~":
         value = value.replace(character, f"\\{character}")
-    return value
+    return re.sub(r"(?<!\w)_|_(?!\w)", r"\\_", value)
 
 
 def _code(value: str) -> str:

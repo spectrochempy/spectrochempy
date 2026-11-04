@@ -1,9 +1,5 @@
 # Report
 
-## Scope and limitations
-
-> This report summarizes the supplied objects and history. It is not an executable recipe or a proof of exhaustive provenance. It renders supplied text with Markdown escaping but does not detect or certify that it is free of sensitive information; select and sanitize metadata, origin and history before rendering.
-
 ## Datasets
 
 ### sample
@@ -21,7 +17,7 @@
 #### Selected metadata
 
 - `operator`: Ada
-- `path`: [redacted: path]
+- `path`: /secret/sample
 - `missing`: [absent]
 
 #### Processing history
@@ -40,4 +36,6 @@
 
 ![Spectrum](figures/spectrum.png)
 
-Caption: Measured signal\.
+Caption: Measured signal.
+
+This report summarizes recorded dataset information and processing history. It is not an executable workflow or a complete provenance record.

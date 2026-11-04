@@ -1919,7 +1919,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
 
         This is a shortcut for
         :func:`spectrochempy.reporting.render_dataset_markdown`. Free text is
-        rendered as supplied; only :class:`pathlib.Path` values are redacted.
+        rendered as supplied, including paths; no confidential content is detected.
         Select safe metadata keys and sanitize titles, origin, history and
         figure labels or captions before rendering.
 
