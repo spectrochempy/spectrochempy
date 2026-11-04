@@ -24,7 +24,7 @@ def _dataset():
     )
     dataset.origin = "instrument"
     dataset.meta.operator = "Ada"
-    dataset.meta.path = Path("/secret/sample")
+    dataset.meta.path = "/secret/sample"
     dataset.annotate(
         "Imported sample",
         date=datetime(2026, 10, 16, tzinfo=UTC),
@@ -149,13 +149,17 @@ def test_to_markdown_report_captions_cannot_open_markdown_blocks(caption):
     assert "### Second\n\n![Second](figures/second.png)" in report
 
 
-def test_to_markdown_report_renders_path_objects():
+@pytest.mark.parametrize(
+    "path", [Path("/secret/sample"), Path("measurements") / "sample.csv"]
+)
+def test_to_markdown_report_renders_path_objects(path):
     dataset = _dataset()
-    dataset.meta.path = Path("/secret/sample")
+    dataset.meta.path = path
 
     report = dataset.to_markdown_report(title="Report", metadata=("path",))
 
-    assert "- `path`: /secret/sample" in report
+    expected = str(path).replace("\\", "\\\\")
+    assert f"- `path`: {expected}" in report
     assert "[redacted" not in report
 
 
@@ -239,7 +243,8 @@ def test_to_markdown_report_preserves_history_order_and_nested_paths():
     report = dataset.to_markdown_report(title="Report", metadata=("nested",))
 
     assert report.index("Imported sample") < report.index("Second entry")
-    assert "{later: 2, path: /secret/nested}" in report
+    expected = str(Path("/secret/nested")).replace("\\", "\\\\")
+    assert f"{{later: 2, path: {expected}}}" in report
 
 
 def test_to_markdown_report_renders_nested_history_parameters_and_sources():
@@ -554,3 +559,12 @@ def test_to_markdown_report_keeps_image_labels_and_captions_literal():
     assert report.startswith("# signal. Savitzky-Golay\n")
     assert r"![a\](/evil)!\[b](spectrum.png)" in report
     assert "<script>" not in report
+
+
+def test_to_markdown_report_escapes_windows_path_text():
+    dataset = _dataset()
+    dataset.meta.path = r"C:\measurements\sample.csv"
+
+    report = dataset.to_markdown_report(title="Report", metadata=("path",))
+
+    assert r"- `path`: C:\\measurements\\sample.csv" in report
