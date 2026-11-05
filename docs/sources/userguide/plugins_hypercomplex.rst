@@ -1,6 +1,6 @@
 :orphan:
 
-Hypercomplex plugin
-===================
+Legacy NMR documentation
+========================
 
-This page has moved to :doc:`plugins/hypercomplex`.
+See :doc:`plugins/hypercomplex` for the standalone documentation link.

@@ -1118,7 +1118,6 @@ class TestValidatePluginName:
         module = load_module()
         for name in (
             "spectrochempy-carroucell",
-            "spectrochempy-hypercomplex",
             "spectrochempy-iris",
             "spectrochempy-nmr",
             "spectrochempy-perkinelmer",
@@ -1586,7 +1585,6 @@ class TestRepairWorkflowStructure:
         choices = trigger["workflow_dispatch"]["inputs"]["plugin_name"]["options"]
         assert "spectrochempy-perkinelmer" in choices
         assert "spectrochempy-nmr" not in choices
-        assert "spectrochempy-hypercomplex" not in choices
 
     def test_standalone_plugins_are_rejected_before_conda_repair(self):
         text = self._text()

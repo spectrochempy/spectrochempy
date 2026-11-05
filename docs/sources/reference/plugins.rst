@@ -65,31 +65,3 @@ Tensor plugin
     :toctree: generated/
 
     spectrochempy.tensor.CP
-
-Hypercomplex plugin
-===================
-
-The recommended public API is the ``dataset.hyper`` accessor.
-
-All hypercomplex operations are accessed through ``dataset.hyper``:
-
-.. list-table::
-   :header-rows: 1
-
-   * - Operation
-     - Example
-   * - Convert to quaternion
-     - ``dataset.hyper.set_quaternion(inplace=True)``
-   * - Check type
-     - ``dataset.hyper.is_quaternion``
-   * - Extract RR component
-     - ``dataset.hyper.RR``
-   * - Extract RI component
-     - ``dataset.hyper.component("RI")``
-   * - Extract IR component
-     - ``dataset.hyper.IR``
-   * - Extract II component
-     - ``dataset.hyper.II``
-
-For workflow-oriented explanations and examples, see
-:doc:`/userguide/plugins/hypercomplex`.

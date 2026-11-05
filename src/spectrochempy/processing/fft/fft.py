@@ -241,11 +241,6 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
     inplace = kwargs.pop("inplace", False)
     new = dataset.copy() if not inplace else dataset
 
-    # Capture the encoding for the target axis BEFORE any swap.
-    # swapdims reorders meta.encoding, so encoding[0] would point to the
-    # wrong encoding after a swap.  For quaternion (hypercomplex) data the
-    # encoding at index 0 always describes the indirect dimension and knows
-    # how to decompose quaternion → complex subspectra.
     encoding = "undefined"
     if not inv and "encoding" in new.meta:
         encoding = new.meta.encoding[axis]
@@ -457,11 +452,6 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
 
         # PHASE ?
         iscomplex = new.is_complex or new.is_interleaved
-        # Quaternion/hypercomplex data from the encoding handler is in the
-        # frequency domain but is_complex is False.  Treat it as phaseable
-        # when the encoding handler ran (encoding != "undefined").
-        if not iscomplex and encoding != "undefined":
-            iscomplex = True
         if iscomplex and not inv:
             # phase frequency domain
 
@@ -483,21 +473,8 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
             if not new.meta.pivot:
                 new.meta.pivot = [0] * new.ndim
 
-            # Apply auto-phasing for complex and quaternion data.
-            # Quaternion data is handled by the plugin-provided pk.execute
-            # handler which decomposes → phases subspectra → rebuilds.
             new.pk(inplace=True)
-            if new.is_complex:
-                new.meta.pivot[-1] = abs(new).coordmax(dim=dim)
-            else:
-                # Quaternion: compute pivot from quaternion modulus
-                import quaternion as _quat  # noqa: PLC0415
-
-                _qarr = _quat.as_float_array(new.data)
-                _mod = np.sqrt(np.sum(_qarr**2, axis=-1))
-                _mod_ds = new.copy()
-                _mod_ds.data = _mod
-                new.meta.pivot[-1] = _mod_ds.coordmax(dim=dim)
+            new.meta.pivot[-1] = abs(new).coordmax(dim=dim)
 
             new.meta.readonly = True
 

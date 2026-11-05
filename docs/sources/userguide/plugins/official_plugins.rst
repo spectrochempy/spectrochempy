@@ -35,10 +35,6 @@ Current official plugins
      - ``spectrochempy-tensor``
      - ``scp.tensor``
      - TensorLy-backed tensor decompositions such as CP/PARAFAC.
-   * - Hypercomplex
-     - ``spectrochempy-hypercomplex``
-     - ``dataset.hyper``
-     - Quaternion/hypercomplex representation for phase-sensitive 2D NMR data.
    * - Carroucell
      - ``spectrochempy-carroucell``
      - ``scp.carroucell``
@@ -59,12 +55,11 @@ Official plugins can be installed through SpectroChemPy extras:
     python -m pip install "spectrochempy[nmr]"
     python -m pip install "spectrochempy[tensor]"
 
-The Hypercomplex and PerkinElmer plugins do not have dedicated extras in the
-core distribution. Install their packages directly:
+The PerkinElmer plugin does not have a dedicated extra in the core
+distribution. Install its package directly:
 
 .. code-block:: bash
 
-    python -m pip install "spectrochempy[nmr]" spectrochempy-hypercomplex
     python -m pip install spectrochempy-perkinelmer
 
 or directly:
@@ -74,7 +69,6 @@ or directly:
     pip install spectrochempy-iris
     pip install spectrochempy-nmr
     pip install spectrochempy-tensor
-    pip install spectrochempy-hypercomplex
     pip install spectrochempy-carroucell
     pip install spectrochempy-perkinelmer
 
@@ -144,7 +138,6 @@ provide the user-facing details:
 * :doc:`iris` for 2D-IRIS workflows and the ``scp.iris`` / ``dataset.iris`` APIs
 * :doc:`nmr` for TopSpin reading and NMR-specific processing workflows
 * :doc:`tensor` for TensorLy-backed tensor decompositions such as CP/PARAFAC
-* :doc:`hypercomplex` for the quaternion representation of phase-sensitive 2D NMR data
 * :doc:`carroucell` for carroucell experiment directory imports
 * :doc:`perkinelmer` for PerkinElmer ``.sp`` IR file reading
 

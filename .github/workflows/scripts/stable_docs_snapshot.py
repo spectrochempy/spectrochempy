@@ -20,7 +20,6 @@ FINAL_VERSION_RE = re.compile(r"^\d+\.\d+\.\d+$")
 CORE_TAG_RE = re.compile(r"^spectrochempy-v(?P<version>\d+\.\d+\.\d+)$")
 PLUGIN_PACKAGES = (
     "spectrochempy-carroucell",
-    "spectrochempy-hypercomplex",
     "spectrochempy-iris",
     "spectrochempy-nmr",
     "spectrochempy-perkinelmer",

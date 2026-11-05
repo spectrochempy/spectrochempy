@@ -40,6 +40,11 @@ Breaking Changes
 ~~~~~~~~~~~~~~~~
 .. Add here new breaking changes (do not delete this comment)
 
+- Remove built-in quaternion handling and the Hypercomplex plugin from the
+  official plugin catalog, bundled extras, development environments and CI.
+  Specialized NMR representations belong to the standalone NMR plugin; use
+  ordinary complex arrays for core numerical operations.
+
 
 .. section
 

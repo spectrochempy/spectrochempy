@@ -819,7 +819,7 @@ class _ExecutionPlan:
                 return result
 
         # Only REAL execution is built into core;
-        # other branches (e.g. quaternion) are plugin-provided via handlers.
+        # Other branches are plugin-provided via handlers.
         return f(d, *args)
 
     @staticmethod

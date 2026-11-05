@@ -84,7 +84,6 @@ Extend SpectroChemPy with official plugins (installed separately):
 | Plugin | Install | What it provides |
 |--------|---------|------------------|
 | `spectrochempy-carroucell` | `uv pip install spectrochempy-carroucell` | Carroucell experiment reader |
-| `spectrochempy-hypercomplex` | `uv pip install spectrochempy-hypercomplex` | Quaternion / hypercomplex support |
 | `spectrochempy-iris` | `uv pip install spectrochempy-iris` | 2D-IRIS analysis tools |
 | `spectrochempy-nmr` | `uv pip install spectrochempy-nmr` | Bruker TopSpin reader, NMR-specific processing |
 | `spectrochempy-perkinelmer` | `uv pip install spectrochempy-perkinelmer` | PerkinElmer ``.sp`` IR file reader |

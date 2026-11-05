@@ -77,7 +77,6 @@ def pip2conda(package):
     # Mapping between conda and pip package names
     renaming = {  # pip to conda
         "gitpython": "git",  # Full package name
-        "numpy-quaternion": "quaternion",  # Full package name
         "matplotlib": "matplotlib-base",  # Base package name
         "pypandoc_binary": "pypandoc",  # Full package name
     }

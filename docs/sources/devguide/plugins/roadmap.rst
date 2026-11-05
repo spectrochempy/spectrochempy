@@ -12,7 +12,6 @@ Completed decoupling
 ====================
 
 * NMR unit contexts live in the NMR plugin.
-* Hypercomplex/quaternion support lives in ``spectrochempy-hypercomplex``.
 * TensorLy-backed tensor decompositions live in ``spectrochempy-tensor``.
 * 2D NMR FFT encodings are delegated through ``fft.encoding``.
 * Directory-to-file resolution for plugin formats is delegated through
@@ -55,8 +54,8 @@ NMR roadmap (priority order)
    ``NMRMetadata`` fields must carry the same meaning across all five
    readers.
 
-2. **2D NMR processing** — Implement full 2D transformation (quaternion →
-   complex for DQD/QSIM, indirect-dimension FFT).  This is the major
+2. **2D NMR processing** — Validate channel-based transformations and
+   indirect-dimension FFTs in the NMR plugin.  This is the major
    functional limitation today.
 
 3. **Phasing boundary clarification** — Decide whether ``pk``/``pk_exp``

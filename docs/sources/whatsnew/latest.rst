@@ -6,76 +6,16 @@
 
 :orphan:
 
-What's New in Revision 1.1.4
+What's New in Revision 1.1.5.dev
 ---------------------------------------------------------------------------------------
 
-These are the changes in SpectroChemPy-1.1.4.
+These are the changes in SpectroChemPy-1.1.5.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
 
-Bug Fixes
-~~~~~~~~~
+Breaking Changes
+~~~~~~~~~~~~~~~~
 
-- Plot preferences are saved again in ``PlotPreferences.json`` and restored
-  at the next session, including values set after choosing a style, and the
-  first plot no longer moves this file away. ``preferences.reset()`` now
-  resets every plot preference, including the ``colormap_*`` ones, to the
-  values of a new session, and removes the saved file. (#1799)
-- Setting ``preferences.style`` to a style that cannot be found, alone or in a
-  list, now leaves the preferences unchanged instead of partly applied. A
-  value of a style that does not fit its preference is skipped with a warning
-  naming it, instead of silently stopping the style at that line; the
-  ``grayscale`` style is now applied completely. (#1799)
-- Fixed the Agilent TPPI direct FFT path so ordinary complex acquisitions are
-  no longer interpreted as quaternion data, preventing non-finite results.
-- Filter outputs now retain the applied method, effective dimension, and
-  compact filter parameters in their structured history entries.
-- Whittaker-Eilers filtering now applies along the requested dimension.
-- Baseline correction outputs now record the fitted model and its effective
-  parameters in their structured history entry instead of only an arithmetic
-  subtraction.
-- ``basc()`` and ``get_baseline()`` now honor ``ranges=`` passed as a keyword
-  instead of silently overwriting it with the positional ranges.
-
-- Restored parsing of unit expressions that use a dot as a separator (e.g.
-  ``kg.m`` or ``cm.s^-1``), which pint 0.26.2 rejects. (#1781)
-- Importing SpectroChemPy or plotting no longer floods the output with
-  Matplotlib "Bad key" warnings with Matplotlib older than 3.11, e.g. on Google
-  Colab. A generated ``mycustom.mplstyle`` shipped by mistake in 1.1.1 to 1.1.3
-  is removed, along with its unmodified copy in the user Matplotlib stylelib.
-  A copy left in Matplotlib's own ``mpl-data/stylelib`` directory is not
-  touched; delete it by hand if the warnings persist. (#1789)
-- ``preferences.makestyle(..., to_mpl=True)`` no longer raises ``TypeError`` and
-  makes the new style immediately usable by name, e.g. ``plot(style=...)``.
-- Fix ``directory=`` imports with ``merge=True`` so compatible datasets
-  discovered under different file extensions can be merged across extension
-  groups, rather than being returned separately. (#1780)
-
-- TopSpin imports now report when hypercomplex data require the optional
-  ``spectrochempy-hypercomplex`` and ``numpy-quaternion`` dependencies. (#1743)
-- Native ``.scp`` loads now preserve the dataset modification timestamp instead
-  of replacing it while restoring the filename and name.
-- Synchronize the vendored OPUS reader with ``brukeropus`` upstream commit
-  ``af5a508cef7de8089acd27a215d644ab451257dd``. This adds robust handling for
-  compact and multichannel spectra, incomplete data series and reports while
-  preserving the ``scp.read_opus()`` and ``scp.opus.read()`` APIs.
-
-Dependency Updates
-~~~~~~~~~~~~~~~~~~
-
-- Extend the official NMR and hypercomplex extra bounds to admit their
-  autonomous 0.2.x releases while preserving compatibility with existing
-  0.1.x installations during the publication transition.
-- Updated the documentation dependency ``nbconvert`` to 7.17.2 to address an
-  arbitrary-file-write vulnerability when converting untrusted notebooks.
-
-Developer
-~~~~~~~~~
-
-- The test suite and the documentation build use a temporary SpectroChemPy
-  configuration directory (one per executed notebook for the docs, and
-  default preferences before each gallery example), so they neither read nor
-  overwrite the saved preferences of the user. (#1799)
-- MAINT: Moved the official NMR and Hypercomplex plugin sources to their
-  standalone repositories. Core CI now validates consumption of their built
-  wheels and retains coverage for core-only and plugin-absent installations.
-  (#1813, #1816, #1817)
+- Remove built-in quaternion handling and the Hypercomplex plugin from the
+  official plugin catalog, bundled extras, development environments and CI.
+  Specialized NMR representations belong to the standalone NMR plugin; use
+  ordinary complex arrays for core numerical operations.

@@ -28,8 +28,6 @@ from spectrochempy.utils.testing import assert_dataset_equal
 from spectrochempy.utils.testing import assert_units_equal
 
 # Type definitions
-# typequaternion = np.dtype(np.quaternion)
-# from quaternion import quaternion
 
 # ===============================================================================
 # UNARY OPERATIONS TESTS
@@ -1463,7 +1461,6 @@ def test_simple_arithmetic_on_full_dataset():
 
 
 # ===============================================================================
-# CHARACTERIZATION TESTS — ufunc methods, operators, masks, quaternion, coords
 # ===============================================================================
 # These tests document existing behaviour to support safe refactoring.
 

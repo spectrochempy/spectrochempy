@@ -62,12 +62,6 @@ OFFICIAL_PLUGINS = {
         "extra": "spectrochempy[tensor]",
         "namespace": "tensor",
     },
-    "hypercomplex": {
-        "title": "Hypercomplex plugin",
-        "package": "spectrochempy-hypercomplex",
-        "extra": "spectrochempy-hypercomplex",
-        "namespace": "",
-    },
     "carroucell": {
         "title": "Carroucell plugin",
         "package": "spectrochempy-carroucell",

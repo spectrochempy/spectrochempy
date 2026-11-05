@@ -26,7 +26,6 @@ deps = pyproject["project"]["dependencies"]
 # Mapping between pip and conda package names
 renaming = {  # pip to conda
     "gitpython": "git",  # Full package name
-    "numpy-quaternion": "quaternion",  # Full package name
     "matplotlib": "matplotlib-base",  # Base package name
 }
 

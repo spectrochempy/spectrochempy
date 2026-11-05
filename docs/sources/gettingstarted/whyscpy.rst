@@ -162,7 +162,7 @@ with general statistical learning tools.
 
 A **scientific core** is separated from optional **plugins** that cover
 domain-specific needs: readers for NMR experiments, PerkinElmer instruments,
-and Carroucell systems, as well as hypercomplex data, tensor learning, and
+and Carroucell systems, as well as tensor learning and
 2D-IRIS analysis tools. Plugins are installed when needed and are listed in the
 :ref:`plugin documentation <plugins>`.
 

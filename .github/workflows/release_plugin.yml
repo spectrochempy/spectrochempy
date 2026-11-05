@@ -97,7 +97,7 @@ jobs:
       - name: Validate plugin name
         run: |
           case "${{ inputs.plugin_name }}" in
-            spectrochempy-nmr|spectrochempy-hypercomplex)
+            spectrochempy-nmr)
               echo "::error::${{ inputs.plugin_name }} is released from its standalone repository."
               exit 1
               ;;

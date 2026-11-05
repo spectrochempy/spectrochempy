@@ -11,7 +11,7 @@ Usage:
 
 The gating scope is official plugins declared in the monorepo's ``plugins/``
 directory (with ``[tool.spectrochempy] official-plugin = true``). The standalone
-NMR and Hypercomplex distributions are validated separately from PyPI by the
+NMR distribution is validated separately from PyPI by the
 release workflow. Cantera and the plugin template are informational only and
 never block the release.
 

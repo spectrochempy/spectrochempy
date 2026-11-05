@@ -88,7 +88,7 @@ def test_with_plugins():
 
     # Verify plugin namespaces are accessible
     print("\n  --- Plugin namespaces ---")
-    for ns in ("iris", "nmr", "carroucell", "hypercomplex"):
+    for ns in ("iris", "nmr", "carroucell"):
         try:
             getattr(scp, ns)
             print(f"  PASS: scp.{ns} is accessible")
@@ -102,7 +102,6 @@ def test_with_plugins():
         "spectrochempy_iris",
         "spectrochempy_nmr",
         "spectrochempy_tensor",
-        "spectrochempy_hypercomplex",
         "spectrochempy_carroucell",
     ):
         try:

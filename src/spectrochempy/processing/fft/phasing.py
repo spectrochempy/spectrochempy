@@ -214,9 +214,6 @@ def _phase_method(method):
 
             apod = method(new.data, **kwargs)
 
-            # Check for plugin-provided phasing (e.g. quaternion-aware).
-            # The plugin handler decomposes quaternion into complex subspectra,
-            # applies the phase apodization to each, and rebuilds quaternion.
             _phased_by_plugin = False
             if not new.is_complex:
                 try:
