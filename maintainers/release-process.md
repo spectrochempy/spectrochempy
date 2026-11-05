@@ -279,6 +279,18 @@ même motif que `test_conda_publish.py` (chargement du script via
 > de release plugin, la réactiver (voir
 > [Zenodo and plugin releases](#zenodo-and-plugin-releases)).
 
+Le workflow de préparation exécute deux contrôles de compatibilité distincts :
+
+- `check_plugin_core_compatibility.py` vérifie les contraintes des plugins
+  officiels dont les sources restent dans `plugins/`.
+- Un job séparé, en lecture seule, construit le wheel core avec la version
+  demandée, résout normalement les distributions NMR et Hypercomplex publiées
+  sur PyPI, exécute `pip check` et les tests core-side de consommation. Ce job
+  précède la création de la branche de release ; un échec bloque la préparation.
+
+Le paramètre `bypass_plugin_check` ne contourne que le contrôle des plugins
+monorepo ; il ne désactive pas la validation des distributions autonomes.
+
 ### 1. Vérifier l'état de `master`
 
 ```bash

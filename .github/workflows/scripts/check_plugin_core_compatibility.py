@@ -9,9 +9,11 @@ Usage:
     python check_plugin_core_compatibility.py 1.0.0rc1 --bypass
     python check_plugin_core_compatibility.py --validation-version 1.0.1.dev0
 
-The gating scope is the six OFFICIAL plugins (declared with
-``[tool.spectrochempy] official-plugin = true``).  Cantera and the plugin
-template are checked as informational only and never block the release.
+The gating scope is official plugins declared in the monorepo's ``plugins/``
+directory (with ``[tool.spectrochempy] official-plugin = true``). The standalone
+NMR and Hypercomplex distributions are validated separately from PyPI by the
+release workflow. Cantera and the plugin template are informational only and
+never block the release.
 
 ``packaging.specifiers.SpecifierSet`` is used so PEP 440 semantics (including
 release candidates such as ``1.0.0rc1``) are honored.
