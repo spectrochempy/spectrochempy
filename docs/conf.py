@@ -801,6 +801,8 @@ nbsphinx_exclude_patterns = [
 
 # Execute notebooks before conversion: 'always', 'never', 'auto' (default)
 nbsphinx_execute = "never" if noexec else "auto"
+if os.environ.get("SCPY_DOCS_PREEXECUTED") == "1":
+    nbsphinx_execute = "never"
 nbsphinx_allow_errors = True
 nbsphinx_timeout = 90
 

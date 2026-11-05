@@ -53,6 +53,7 @@ scripts = [
             "make.py",
             "conf.py",
             "apigen.py",
+            "preexecute_notebooks.py",
             "gallery",
             # Command-line utilities require arguments and are not runnable
             # example scripts.
