@@ -132,9 +132,61 @@ def test_real_kernel_saves_outputs_cwd_and_allowed_errors(workspace):
         runner.execute("sample.ipynb")
 
 
-def test_failure_stops_and_cannot_pass_verification(workspace, monkeypatch):
+def test_real_kernels_isolate_preferences_between_notebooks(workspace, monkeypatch):
+    sources, _ = workspace
+    user_config = sources / "user-config"
+    user_config.mkdir()
+    user_preferences = user_config / "PlotPreferences.json"
+    saved_preferences = json.dumps({"PlotPreferences": {"lines_linewidth": 7.5}})
+    user_preferences.write_text(saved_preferences)
+    monkeypatch.setenv("SCP_CONFIG_HOME", str(user_config))
+    source = (
+        "import os\n"
+        "from pathlib import Path\n"
+        "import spectrochempy as scp\n"
+        "from spectrochempy.application.application import app\n"
+        "prefs = scp.preferences\n"
+        "assert prefs.lines.linewidth == "
+        "app.plot_preferences.traits()['lines_linewidth'].default_value\n"
+        "prefs.lines.linewidth = 9.5\n"
+        "config_home = Path(os.environ['SCP_CONFIG_HOME'])\n"
+        "assert (config_home / 'PlotPreferences.json').is_file()\n"
+        "print(config_home)"
+    )
+    _write_manifest(
+        sources,
+        {"first.ipynb": _notebook(source), "second.ipynb": _notebook(source)},
+        allow_errors=False,
+    )
+    config_homes = []
+    for name in ("first.ipynb", "second.ipynb"):
+        runner.execute(name)
+        saved = nbformat.read(sources / name, as_version=4)
+        output = next(
+            output
+            for output in saved.cells[0].outputs
+            if output.output_type == "stream"
+        )
+        config_home = Path(output.text.strip())
+        assert config_home != user_config
+        assert not config_home.exists()
+        assert os.environ["SCP_CONFIG_HOME"] == str(user_config)
+        assert user_preferences.read_text() == saved_preferences
+        config_homes.append(config_home)
+    assert config_homes[0] != config_homes[1]
+
+
+@pytest.mark.parametrize("inherited_config", [False, True])
+def test_failure_stops_and_cannot_pass_verification(
+    workspace, monkeypatch, inherited_config
+):
     sources, _ = workspace
     _write_manifest(sources, {"sample.ipynb": _notebook()})
+    if inherited_config:
+        monkeypatch.setenv("SCP_CONFIG_HOME", str(sources))
+    else:
+        monkeypatch.delenv("SCP_CONFIG_HOME", raising=False)
+    config_homes = []
 
     class FailingProcessor:
         def __init__(self, **kwargs):
@@ -142,11 +194,20 @@ def test_failure_stops_and_cannot_pass_verification(workspace, monkeypatch):
             assert kwargs["allow_errors"] is True
 
         def preprocess(self, *_):
+            config_home = Path(os.environ["SCP_CONFIG_HOME"])
+            assert config_home.is_dir()
+            assert config_home != sources
+            config_homes.append(config_home)
             raise TimeoutError("cell timeout")
 
     monkeypatch.setattr(runner, "ExecutePreprocessor", FailingProcessor)
     with pytest.raises(TimeoutError, match="cell timeout"):
         runner.execute("sample.ipynb")
+    assert len(config_homes) == 1
+    assert not config_homes[0].exists()
+    assert os.environ.get("SCP_CONFIG_HOME") == (
+        str(sources) if inherited_config else None
+    )
     with pytest.raises(RuntimeError, match="incomplete"):
         runner.verify()
 

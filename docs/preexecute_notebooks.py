@@ -7,6 +7,7 @@ import hashlib
 import json
 import os
 import sys
+import tempfile
 import time
 import traceback
 
@@ -125,7 +126,16 @@ def execute(name):
                 f"CELL {name} index={cell_index} type={cell.cell_type}"
             ),
         )
-        processor.preprocess(notebook, {"metadata": {"path": str(path.parent)}})
+        with tempfile.TemporaryDirectory(prefix="scp-notebook-config-") as config_home:
+            previous_config_home = os.environ.get("SCP_CONFIG_HOME")
+            os.environ["SCP_CONFIG_HOME"] = config_home
+            try:
+                processor.preprocess(notebook, {"metadata": {"path": str(path.parent)}})
+            finally:
+                if previous_config_home is None:
+                    os.environ.pop("SCP_CONFIG_HOME", None)
+                else:
+                    os.environ["SCP_CONFIG_HOME"] = previous_config_home
     notebook.metadata.setdefault("nbsphinx", {})["execute"] = "never"
     nbformat.write(notebook, path)
     entry["output_sha256"] = _digest(path)
