@@ -24,7 +24,6 @@ Usage:
 """
 
 import json
-import warnings
 from contextlib import suppress
 from pathlib import Path
 from typing import Any
@@ -105,7 +104,6 @@ class PlotProfileManager:
             return
 
         self._ensure_profiles_directory()
-        self._migrate_legacy_preferences()
         self._load_active_profile()
         self._initialized = True
 
@@ -337,47 +335,6 @@ class PlotProfileManager:
 
         with open(active_file, "w") as f:
             json.dump({"name": name}, f)
-
-    def _migrate_legacy_preferences(self) -> None:
-        """Migrate existing PlotPreferences.json to profiles system if needed."""
-        legacy_file = self.config_dir / "PlotPreferences.json"
-
-        default_profile = self.profiles_dir / "default.json"
-        if default_profile.exists() and legacy_file.exists():
-            import shutil
-
-            backup_file = legacy_file.with_suffix(".json.bak")
-            if not backup_file.exists():
-                shutil.move(str(legacy_file), str(backup_file))
-            return
-
-        if legacy_file.exists() and not default_profile.exists():
-            import shutil
-
-            try:
-                with open(legacy_file) as f:
-                    legacy_data = json.load(f)
-
-                plot_prefs = legacy_data.get("PlotPreferences", {})
-
-                if "mpl_style" not in plot_prefs:
-                    plot_prefs["mpl_style"] = "scpy"
-
-                plot_prefs["name"] = "default"
-                plot_prefs["description"] = "Default profile (migrated from legacy)"
-
-                with open(default_profile, "w") as f:
-                    json.dump(plot_prefs, f, indent=4)
-
-                self._save_active_profile_marker("default")
-
-                backup_file = legacy_file.with_suffix(".json.bak")
-                shutil.move(str(legacy_file), str(backup_file))
-
-            except (json.JSONDecodeError, OSError) as e:
-                warnings.warn(
-                    f"Failed to migrate legacy preferences: {e}", stacklevel=2
-                )
 
     def _is_serializable(self, value: Any) -> bool:
         """Check if a value is JSON serializable."""

@@ -85,20 +85,16 @@ def test_preferences():
     assert not scp.preferences.data
 
 
-def test_config_directory():
+def test_config_directory(monkeypatch):
     """Test config directory handling"""
     # Test with environment variable
     test_config_path = Path.home() / ".spectrochempy_test"
-    os.environ["SCP_CONFIG_HOME"] = str(test_config_path)
+    monkeypatch.setenv("SCP_CONFIG_HOME", str(test_config_path))
 
     if test_config_path.exists():
         config_dir = app.config_dir
         assert config_dir.exists()
         assert str(test_config_path) in str(config_dir)
-
-    # Clean up
-    if "SCP_CONFIG_HOME" in os.environ:
-        del os.environ["SCP_CONFIG_HOME"]
 
 
 def test_datadir():
