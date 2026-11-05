@@ -15,7 +15,9 @@ on:
         type: boolean
         default: false
       bypass_plugin_check:
-        description: "Bypass the official plugin version constraint check (not recommended)"
+        description: >-
+          Bypass the in-monorepo plugin constraint check (not recommended);
+          the standalone NMR/Hypercomplex check cannot be bypassed.
         required: false
         type: boolean
         default: false
@@ -25,10 +27,87 @@ permissions:
   pull-requests: write
 
 jobs:
+  validate_published_plugins:
+    name: Validate published NMR and Hypercomplex against candidate core
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: github.repository == 'spectrochempy/spectrochempy'
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Create an isolated validation environment
+        run: |
+          python -m venv "$RUNNER_TEMP/release-plugin-check"
+          echo "$RUNNER_TEMP/release-plugin-check/bin" >> "$GITHUB_PATH"
+
+      - name: Secure pip bootstrap
+        uses: ./.github/actions/verified-pip
+
+      - name: Validate release version
+        env:
+          RELEASE_VERSION: ${{ inputs.versionString }}
+        run: python .github/workflows/scripts/release_version.py validate "$RELEASE_VERSION"
+
+      - name: Install wheel build frontend
+        run: python -m pip install build
+
+      - name: Build candidate core wheel with the requested version
+        env:
+          SETUPTOOLS_SCM_PRETEND_VERSION: ${{ inputs.versionString }}
+        run: python -m build --wheel --outdir "$RUNNER_TEMP/core-dist" .
+
+      - name: Resolve published standalone plugins against the candidate wheel
+        env:
+          RELEASE_VERSION: ${{ inputs.versionString }}
+        run: |
+          set -euo pipefail
+          wheel="$(find "$RUNNER_TEMP/core-dist" -maxdepth 1 -type f -name 'spectrochempy-*.whl' -print -quit)"
+          if [ -z "$wheel" ]; then
+            echo "::error::Candidate SpectroChemPy wheel was not built."
+            exit 1
+          fi
+
+          wheel_with_nmr_extra="${wheel}[nmr]"
+          python -m pip install \
+            "$wheel_with_nmr_extra" \
+            "spectrochempy-nmr>=0.2,<0.3" \
+            "spectrochempy-hypercomplex>=0.2,<0.3" \
+            pytest pytest-doctestplus
+          python -m pip check
+
+          python - <<'PY'
+          import os
+          from importlib.metadata import version
+
+          core = version("spectrochempy")
+          nmr = version("spectrochempy-nmr")
+          hypercomplex = version("spectrochempy-hypercomplex")
+          print(f"SpectroChemPy: {core}")
+          print(f"spectrochempy-nmr: {nmr}")
+          print(f"spectrochempy-hypercomplex: {hypercomplex}")
+          assert core == os.environ["RELEASE_VERSION"]
+          PY
+
+      - name: Run core-side plugin consumption contracts
+        run: >-
+          python -I -m pytest -q
+          tests/test_plugins/test_nmr_consumption.py
+          tests/test_plugins/test_hypercomplex_consumption.py
+
   Prepare_new_release:
     name: "Prepare a new release"
     runs-on: ubuntu-latest
     if: github.repository == 'spectrochempy/spectrochempy'
+    needs: validate_published_plugins
 
     steps:
       - name: Generate app token
