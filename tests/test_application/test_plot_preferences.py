@@ -197,3 +197,61 @@ def test_invalid_value_in_style_is_skipped_with_a_warning(tmp_path):
 
     assert prefs.style == "partly_invalid"
     assert prefs.lines_linewidth == 3.0
+
+
+def test_makestyle_to_mpl_registers_style(monkeypatch, tmp_path, fake_mpl_dirs):
+    from matplotlib import pyplot as plt
+
+    prefs = scp.preferences
+    original_stylesheets = prefs.stylesheets
+    configdir, _, _ = fake_mpl_dirs
+    reloads = []
+    monkeypatch.setattr(plt.style, "reload_library", lambda: reloads.append(True))
+
+    try:
+        prefs.stylesheets = str(tmp_path)
+
+        prefs.makestyle("tmpstyle_mpl", to_mpl=True)
+
+        stylesheet = configdir / "stylelib" / "tmpstyle_mpl.mplstyle"
+        assert (
+            stylesheet.read_text()
+            == (Path(tmp_path) / "tmpstyle_mpl.mplstyle").read_text()
+        )
+        assert reloads
+    finally:
+        prefs.stylesheets = original_stylesheets
+
+
+def test_makestyle_to_mpl_style_usable_by_name(monkeypatch, tmp_path, fake_mpl_dirs):
+    import matplotlib as mpl
+    import matplotlib.style
+    from matplotlib import pyplot as plt
+
+    prefs = scp.preferences
+    original_stylesheets = prefs.stylesheets
+    configdir, _, _ = fake_mpl_dirs
+    # Matplotlib >= 3.11 keeps the user library paths in matplotlib.style,
+    # older versions in matplotlib.style.core.
+    style_module = (
+        matplotlib.style
+        if hasattr(matplotlib.style, "USER_LIBRARY_PATHS")
+        else matplotlib.style.core
+    )
+    monkeypatch.setattr(
+        style_module, "USER_LIBRARY_PATHS", [str(configdir / "stylelib")]
+    )
+
+    try:
+        prefs.stylesheets = str(tmp_path)
+
+        with mpl.rc_context({"lines.linewidth": 7.5}):
+            prefs.makestyle("tmpstyle_usable", to_mpl=True)
+
+        assert "tmpstyle_usable" in plt.style.available
+        with plt.style.context("tmpstyle_usable"):
+            assert mpl.rcParams["lines.linewidth"] == 7.5
+    finally:
+        prefs.stylesheets = original_stylesheets
+        monkeypatch.undo()
+        plt.style.reload_library()
