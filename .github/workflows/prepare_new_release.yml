@@ -84,6 +84,20 @@ jobs:
             pytest pytest-doctestplus
           python -m pip check
 
+      - name: Require imports from both published plugins
+        run: |
+          python - <<'PY'
+          from spectrochempy_hypercomplex import HyperComplexPlugin
+          from spectrochempy_nmr import NMRPlugin
+
+          print(f"NMRPlugin: {NMRPlugin}")
+          print(f"HyperComplexPlugin: {HyperComplexPlugin}")
+          PY
+
+      - name: Confirm installed distribution versions
+        env:
+          RELEASE_VERSION: ${{ inputs.versionString }}
+        run: |
           python - <<'PY'
           import os
           from importlib.metadata import version
