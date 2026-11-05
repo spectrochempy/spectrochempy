@@ -2,16 +2,20 @@
 
 from __future__ import annotations
 
+import importlib
 import json
 import os
 from pathlib import Path
 from types import SimpleNamespace
 
-import nbformat
 import pytest
 import yaml
 
-from docs import preexecute_notebooks as runner
+nbformat = pytest.importorskip("nbformat")
+pytest.importorskip("nbconvert")
+pytest.importorskip("sphinx")
+
+runner = importlib.import_module("docs.preexecute_notebooks")
 
 
 @pytest.fixture
@@ -194,3 +198,8 @@ def test_rtd_commands_cover_inventory_and_preserve_gallery():
         "SCPY_DOCS_PREEXECUTED=1 SCPY_DOCS_TRACE=1 python -u docs/make.py "
         "html --warning-is-error --no-sync --no-data -j auto"
     )
+
+
+def test_preexecution_cli_is_not_collected_as_a_notebook_example():
+    examples = importlib.import_module("tests.test_docs.test_py_in_docs")
+    assert Path(runner.__file__).resolve() not in examples.scripts
