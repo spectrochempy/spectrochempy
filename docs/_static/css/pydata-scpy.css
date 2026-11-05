@@ -221,6 +221,17 @@ code.literal {
   color: #ffffff;
 }
 
+.bd-sidebar-primary .sidebar-header-items .dropdown-menu {
+  --bs-dropdown-bg: var(--scp-sidebar);
+  --bs-dropdown-color: #eceae7;
+  --bs-dropdown-border-color: rgba(255, 255, 255, 0.2);
+  --bs-dropdown-link-color: #eceae7;
+  --bs-dropdown-link-hover-color: #ffffff;
+  --bs-dropdown-link-hover-bg: var(--scp-sidebar-hover);
+  --bs-dropdown-link-active-color: #ffffff;
+  --bs-dropdown-link-active-bg: var(--scp-sidebar-hover);
+}
+
 .bd-sidebar-primary .bd-links .current > a {
   border-left: 3px solid var(--scp-gold);
   background: var(--scp-sidebar-hover);
