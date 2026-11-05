@@ -23,7 +23,6 @@ OPTIONAL_DEPENDENCIES = [
     "pandas",
     "pint",
     "quadprog",
-    "quaternion",
     "scipy",
     "sklearn",
     "traitlets",

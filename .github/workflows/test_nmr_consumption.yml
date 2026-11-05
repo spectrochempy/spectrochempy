@@ -1,0 +1,100 @@
+name: Test NMR wheel consumption
+
+on: [push, pull_request, workflow_dispatch]
+
+permissions:
+  contents: read
+
+env:
+  NMR_REPOSITORY: spectrochempy/spectrochempy_nmr
+  NMR_COMMIT: d4796521217970673971fe843e6ca29ec729b247
+  PYTHON_VERSION: "3.13"
+
+jobs:
+  wheels:
+    name: Build core and pinned plugin wheels
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Secure pip bootstrap
+        uses: ./.github/actions/verified-pip
+      - name: Build core wheel
+        run: |
+          python -m pip install --quiet build
+          python -m build --wheel --outdir dist .
+      - uses: actions/checkout@v7
+        with:
+          repository: ${{ env.NMR_REPOSITORY }}
+          ref: ${{ env.NMR_COMMIT }}
+          path: nmr-source
+      - name: Build pinned plugin wheels
+        run: |
+          python -m build --wheel --outdir dist nmr-source
+      - uses: actions/upload-artifact@v7
+        with:
+          name: nmr-consumption-wheels
+          path: dist/*.whl
+          if-no-files-found: error
+
+  core-only:
+    name: Core only
+    needs: wheels
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Secure pip bootstrap
+        uses: ./.github/actions/verified-pip
+      - uses: actions/download-artifact@v8
+        with:
+          name: nmr-consumption-wheels
+          path: dist
+      - name: Install core only
+        run: python -m pip install --quiet dist/spectrochempy-*.whl
+      - name: Verify the optional NMR distribution is absent
+        run: |
+          python -I - <<'PY'
+          import importlib.util
+          import spectrochempy as scp
+
+          assert importlib.util.find_spec("spectrochempy_nmr") is None
+          PY
+
+  nmr-only:
+    name: NMR only
+    needs: wheels
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Secure pip bootstrap
+        uses: ./.github/actions/verified-pip
+      - uses: actions/download-artifact@v8
+        with:
+          name: nmr-consumption-wheels
+          path: dist
+      - name: Install core wheel only
+        run: python -m pip install --quiet dist/spectrochempy-*.whl
+      - name: Install core and NMR wheel only
+        run: |
+          python -m pip install --quiet dist/spectrochempy_nmr-*.whl pytest pytest-doctestplus
+          python -m pip check
+      - name: Verify NMR import
+        run: |
+          python -I - <<'PY'
+          import importlib.util
+          import spectrochempy_nmr
+
+          assert spectrochempy_nmr.NMRPlugin
+          PY
+      - name: Run NMR-only contract
+        run: python -I -m pytest tests/test_plugins/test_nmr_consumption.py -v

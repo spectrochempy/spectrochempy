@@ -122,8 +122,9 @@ Currently, the user-facing documentation for this plugin focuses on TopSpin
 datasets and related NMR workflows.
 
 The plugin reads 1D FIDs and spectra, raw 2D time-domain data (``ser``), and
-vendor-processed 2D spectra, and it can represent the two quadrature pairs of
-phase-sensitive 2D data as a hypercomplex array (see :doc:`hypercomplex`).
+vendor-processed 2D spectra. Storage layouts and processing conventions are
+documented by the `standalone NMR project
+<https://spectrochempy-nmr.readthedocs.io/latest/>`_.
 
 The public *processing* workflow, :func:`spectrochempy.nmr.Experiment`,
 remains limited to validated 1D experiments: ``Experiment(...).process()``

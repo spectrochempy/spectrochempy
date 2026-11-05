@@ -27,8 +27,6 @@ Plugins
      - 2D-IRIS analysis
    * - ``spectrochempy-tensor``
      - Tensor decompositions (based on TensorLy)
-   * - ``spectrochempy-hypercomplex``
-     - Hypercomplex (quaternion) data
    * - ``spectrochempy-carroucell``
      - Reader for Carroucell experiments
    * - ``spectrochempy-perkinelmer``
@@ -71,8 +69,8 @@ instance with the shortcut created during installation).
 
          python -m pip install -e /path/to/plugin
 
-      The NMR and hypercomplex plugins are maintained in standalone
-      repositories; the other source plugins remain under ``plugins/``.
+      The NMR plugin has a standalone repository; other source plugins remain
+      under ``plugins/``.
 
 Each plugin is versioned independently. If you use a feature whose plugin is
 missing, SpectroChemPy raises a ``MissingPluginError`` that tells you which

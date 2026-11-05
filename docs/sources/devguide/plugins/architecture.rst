@@ -273,7 +273,7 @@ A plugin can implement any combination of the following methods:
 
     Importer handlers are the right place for directory layouts and
     extensionless filenames owned by a plugin format. Numeric handlers are the
-    right place for plugin-owned array backends such as quaternion data.
+    right place for plugin-owned specialized array backends.
 
 
 Returning an empty list (or ``None``) from a hook is treated as "no

@@ -21,8 +21,8 @@ The project distinguishes:
 * **advanced or specialized plugins** for heavier optional workflows.
 
 This is an ongoing architectural evolution. APIs, packaging details, and
-plugin boundaries may still evolve, but the major extraction of NMR-specific
-and hypercomplex semantics from the core is now in place.
+plugin boundaries may still evolve, but NMR-specific semantics are delegated
+to the standalone NMR plugin.
 
 Official plugins
 ================
@@ -40,7 +40,7 @@ Official plugins should:
 * keep examples in the central gallery, clearly marked when a plugin is
   required.
 
-Domain-specific numeric backends (for example quaternion data) should be
+Domain-specific numeric backends should be
 implemented as plugins that register generic core hooks rather than
 embedding domain knowledge in the core. The core provides extension points
 such as ``ndmath.execution_branch`` and ``fft.encoding``; the plugin

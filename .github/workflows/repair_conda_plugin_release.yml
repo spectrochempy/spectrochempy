@@ -108,7 +108,7 @@ jobs:
           VERSION="$INPUT_VERSION"
 
           case "$PLUGIN" in
-            spectrochempy-nmr|spectrochempy-hypercomplex)
+            spectrochempy-nmr)
               echo "::error::$PLUGIN is released from its standalone repository."
               exit 1
               ;;

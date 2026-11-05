@@ -11,7 +11,6 @@ operation:
 .. code-block:: python
 
     result = dataset.iris.kernel_matrix(kernel_type="langmuir")
-    dataset.hyper.set_quaternion(inplace=True)
 
 Do not use accessors for readers, constructors, or simulations that create
 objects independently. Those belong under package-level namespaces:

@@ -126,7 +126,7 @@ Numeric backends and unit contexts
 ==================================
 
 Use numeric backend handlers when plugin data needs a non-standard execution
-path, such as quaternion arrays. Use unit contexts when unit conversion needs
+path for specialized arrays. Use unit contexts when unit conversion needs
 domain metadata, such as an acquisition frequency.
 
 Official and third-party plugins

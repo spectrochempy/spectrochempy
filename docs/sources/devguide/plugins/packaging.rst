@@ -96,7 +96,7 @@ used by PyPI wheels:
 
     pip install -e .
     python -m spectrochempy.ci.install_plugins --editable --no-deps all
-    pip install osqp xlrd numpy-quaternion tensorly
+    pip install osqp xlrd tensorly
     pip install -e plugins/spectrochempy-cantera  # experimental, not auto-discovered
 
 The bundled plugins can also be installed with the helper:

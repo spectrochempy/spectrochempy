@@ -118,7 +118,6 @@ def test_snapshot_helper_uses_isolated_compatible_environment_and_validated_prom
     assert 'f"spectrochempy=={version}"' in helper
     for plugin in (
         "spectrochempy-carroucell",
-        "spectrochempy-hypercomplex",
         "spectrochempy-iris",
         "spectrochempy-nmr",
         "spectrochempy-perkinelmer",

@@ -33,8 +33,6 @@ Operations that act on an existing dataset use dataset accessors:
 .. code-block:: python
 
     kernel = dataset.iris.kernel_matrix(kernel_type="langmuir")
-    dataset.hyper.set_quaternion(inplace=True)
-    ri = dataset.hyper.component("RI")
 
 Some former top-level names remain as compatibility aliases. New code should
 prefer namespaced APIs such as ``scp.nmr.read``, ``scp.iris.IRIS``,
@@ -81,7 +79,6 @@ Plugin pages
    official_plugins
    nmr
    tensor
-   hypercomplex
    iris
    carroucell
    perkinelmer

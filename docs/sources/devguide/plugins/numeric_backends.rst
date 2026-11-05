@@ -8,8 +8,7 @@ The core numeric path handles ordinary NumPy arrays and ordinary complex
 numbers. Plugins can provide additional execution branches for specialized
 array types without adding those dependencies to the core.
 
-The hypercomplex plugin uses this pattern for quaternion arrays. A plugin can
-register:
+A plugin can register:
 
 * ``ndmath.execution_branch`` to identify a plugin-owned numeric branch;
 * ``ndmath.execute`` to run an operation for that branch;

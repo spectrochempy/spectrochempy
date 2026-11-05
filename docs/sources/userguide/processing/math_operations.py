@@ -616,8 +616,3 @@ dac
 
 # %% [markdown]
 # Note the `x`dimension size is divided by a factor of two
-
-# %% [markdown]
-# **Hypercomplex (quaternion) data** — 2D hypercomplex datasets (useful for phase-sensitive NMR data)
-# are supported via the optional `spectrochempy-hypercomplex` plugin.
-# Install it and use `dataset.hyper.set_quaternion()` to convert compatible data.

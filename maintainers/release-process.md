@@ -133,7 +133,6 @@ services externes.
   anaconda show spectrocat/spectrochempy-nmr
   anaconda show spectrocat/spectrochempy-iris
   anaconda show spectrocat/spectrochempy-tensor
-  anaconda show spectrocat/spectrochempy-hypercomplex
   anaconda show spectrocat/spectrochempy-carroucell
   ```
 
@@ -284,7 +283,7 @@ Le workflow de préparation exécute deux contrôles de compatibilité distincts
 - `check_plugin_core_compatibility.py` vérifie les contraintes des plugins
   officiels dont les sources restent dans `plugins/`.
 - Un job séparé, en lecture seule, construit le wheel core avec la version
-  demandée, résout normalement les distributions NMR et Hypercomplex publiées
+  demandée, résout normalement la distribution NMR publiée
   sur PyPI, exécute `pip check` et les tests core-side de consommation. Ce job
   précède la création de la branche de release ; un échec bloque la préparation.
 
@@ -893,8 +892,8 @@ Si la publication PyPI a réussi mais que la publication Conda a échoué
      par interpolation GitHub `${{ inputs.* }}` directe dans les blocs
      `run:`.  Cette garantie structurelle empêche toute injection shell
      depuis le texte saisi par l'opérateur.
-   - Le plugin est sélectionné dans une **liste fermée** des 6 plugins
-     officiels (carroucell, hypercomplex, iris, nmr, perkinelmer, tensor).
+   - Le plugin est sélectionné dans une **liste fermée** des plugins encore maintenus dans le monorepo
+     (carroucell, iris, perkinelmer, tensor).
    - Sélectionner le mode dry-run par défaut pour valider la construction
    - Vérifier l'artifact produit
    - Relancer avec `dry_run=false` et `confirm_upload=true` pour publier
@@ -1125,7 +1124,6 @@ entrées sont incorrectes car :
    - `spectrochempy-nmr`
    - `spectrochempy-iris`
    - `spectrochempy-tensor`
-   - `spectrochempy-hypercomplex`
    - `spectrochempy-carroucell`
 
 > **Note** : `spectrochempy-cantera` est actuellement **expérimental**
@@ -1184,7 +1182,7 @@ entrées sont incorrectes car :
 - [ ] Vérifier Anaconda : `anaconda show spectrocat/spectrochempy-XXX`
 - [ ] Si le paquet Conda est absent de `main`, lancer **Repair plugin Conda publication**
       en mode dry-run pour diagnostiquer, puis publier après review
-- [ ] Répéter pour chaque plugin (nmr → iris → tensor → hypercomplex → carroucell)
+- [ ] Répéter pour chaque plugin (nmr → iris → tensor → carroucell)
 - [ ] Réactiver l'intégration GitHub → Zenodo (avant la prochaine release core)
 
 ### Conda plugin builds

@@ -17,7 +17,7 @@ on:
       bypass_plugin_check:
         description: >-
           Bypass the in-monorepo plugin constraint check (not recommended);
-          the standalone NMR/Hypercomplex check cannot be bypassed.
+          the standalone NMR check cannot be bypassed.
         required: false
         type: boolean
         default: false
@@ -28,7 +28,7 @@ permissions:
 
 jobs:
   validate_published_plugins:
-    name: Validate published NMR and Hypercomplex against candidate core
+    name: Validate published NMR against candidate core
     runs-on: ubuntu-latest
     timeout-minutes: 30
     if: github.repository == 'spectrochempy/spectrochempy'
@@ -80,18 +80,15 @@ jobs:
           python -m pip install \
             "$wheel_with_nmr_extra" \
             "spectrochempy-nmr>=0.2,<0.3" \
-            "spectrochempy-hypercomplex>=0.2,<0.3" \
             pytest pytest-doctestplus
           python -m pip check
 
-      - name: Require imports from both published plugins
+      - name: Require the published NMR plugin
         run: |
           python - <<'PY'
-          from spectrochempy_hypercomplex import HyperComplexPlugin
           from spectrochempy_nmr import NMRPlugin
 
           print(f"NMRPlugin: {NMRPlugin}")
-          print(f"HyperComplexPlugin: {HyperComplexPlugin}")
           PY
 
       - name: Confirm installed distribution versions
@@ -104,10 +101,8 @@ jobs:
 
           core = version("spectrochempy")
           nmr = version("spectrochempy-nmr")
-          hypercomplex = version("spectrochempy-hypercomplex")
           print(f"SpectroChemPy: {core}")
           print(f"spectrochempy-nmr: {nmr}")
-          print(f"spectrochempy-hypercomplex: {hypercomplex}")
           assert core == os.environ["RELEASE_VERSION"]
           PY
 
@@ -115,7 +110,6 @@ jobs:
         run: >-
           python -I -m pytest -q
           tests/test_plugins/test_nmr_consumption.py
-          tests/test_plugins/test_hypercomplex_consumption.py
 
   Prepare_new_release:
     name: "Prepare a new release"
