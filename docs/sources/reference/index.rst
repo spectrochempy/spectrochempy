@@ -744,6 +744,27 @@ interpret ``NDDataset`` dimensions or coordinates.
 
     CrossValidationResult
 
+Two-dimensional correlation spectroscopy
+=========================================
+
+``correlation_2d`` calculates synchronous and asynchronous maps from a
+two-dimensional spectral series. The perturbation coordinate must be
+uniformly spaced; interpolate missing or irregularly spaced acquisitions
+before calculation. The asynchronous sign follows the perturbation order.
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+    :template: autosummary/result-class.rst
+
+    Correlation2DResult
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    correlation_2d
+
 Evolving factor analysis
 ========================
 

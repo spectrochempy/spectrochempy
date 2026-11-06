@@ -10,6 +10,7 @@ __all__ = [
     "_base",
     "_cross_validation",
     "constraints",
+    "correlation_2d",
     "cross_validation",
     "crossdecomposition",
     "curvefitting",
@@ -24,6 +25,7 @@ __all__ = [
 from . import _base
 from . import _cross_validation
 from . import constraints
+from . import correlation_2d
 from . import cross_validation
 from . import crossdecomposition
 from . import curvefitting

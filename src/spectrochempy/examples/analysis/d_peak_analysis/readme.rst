@@ -3,4 +3,5 @@
 Peak analysis
 -------------
 
-This section contains examples for peak detection and peak integration workflows.
+This section contains peak detection, peak integration, and two-dimensional
+correlation spectroscopy examples.
