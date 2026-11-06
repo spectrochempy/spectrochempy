@@ -7,7 +7,7 @@
 # sphinx_gallery_thumbnail_number = 2
 """
 Explore an IR activation series with Noda's 2D-COS
-================================================
+==================================================
 
 Generalized two-dimensional correlation spectroscopy (2D-COS) compares the
 changes of spectral intensities along an external perturbation, here acquisition
@@ -30,7 +30,7 @@ import spectrochempy as scp
 
 # %%
 # Regularize the perturbation coordinate
-# -------------------------------------
+# --------------------------------------
 # The series has one missing acquisition. The discrete Hilbert–Noda transform
 # requires equally spaced perturbation points: merely relabeling the time axis
 # would not supply the missing spectrum. Linear interpolation estimates it on
@@ -50,7 +50,7 @@ spectra = spectra.interpolate(dim="y", coord=uniform_times, method="linear")
 
 # %%
 # Exclude saturation and estimate the baseline
-# ------------------------------------------
+# --------------------------------------------
 # Retain 1250–4000 cm-1: the saturated region below 1250 cm-1 is excluded
 # before baseline fitting and correlation. Saturated intensities cannot be
 # recovered by baseline correction.
@@ -90,7 +90,7 @@ _ = scp.multiplot(
 
 # %%
 # Calculate the two correlation maps
-# ---------------------------------
+# ----------------------------------
 # The function subtracts the mean spectrum along time to form dynamic spectra
 # A. The synchronous map is A.T @ A / (n - 1), a covariance map: a positive
 # cross-peak indicates same-direction variations, and a negative one indicates
@@ -112,7 +112,7 @@ result = scp.correlation_spectroscopy(corrected[:, ::4], perturbation_dim="y")
 
 # %%
 # Contours with reference spectra above
-# ------------------------------------
+# -------------------------------------
 # Each display map is divided by its own maximum absolute intensity. This
 # keeps weak asynchronous features visible without suggesting that their
 # amplitudes equal synchronous amplitudes. The original result maps retain

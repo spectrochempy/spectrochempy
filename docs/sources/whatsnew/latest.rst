@@ -37,7 +37,9 @@ Bug Fixes
 
 - Restored the documented 0.1 percent default coordinate linearization
   tolerance in the ``Coord`` constructor. Use ``linearize_below`` explicitly
-  when a more permissive tolerance is required.
+  when a more permissive tolerance is required. FTIR FFT coordinates convert
+  frequency bins to wavenumbers before display rounding to preserve uniform
+  bin spacing with the standard tolerance.
 
 Breaking Changes
 ~~~~~~~~~~~~~~~~
