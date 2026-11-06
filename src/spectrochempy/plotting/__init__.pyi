@@ -11,6 +11,7 @@ __all__ = [
     "_kwargs",
     "_methods",
     "_mpl_assets",
+    "_projections",
     "_render",
     "_style",
     "composite",
@@ -27,6 +28,7 @@ from . import _colorbar_utils
 from . import _kwargs
 from . import _methods
 from . import _mpl_assets
+from . import _projections
 from . import _render
 from . import _style
 from . import composite

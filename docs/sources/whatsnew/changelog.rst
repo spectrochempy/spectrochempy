@@ -19,6 +19,11 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- Added coordinate-aware marginal panels to 2D contour plots, with selectable
+  dimensions, calculated projections or external reference spectra, and signed
+  contour colors/styles. ``multiplot`` composes these panels, supports mixed
+  1D/2D datasets and per-panel options, and saves the completed figure once.
+
 - Added the generic ``fft.validate_input`` plugin hook for read-only FFT/IFFT
   checks before in-place axis changes, resizing or numerical preparation.
   Validators can reject a request without leaving the caller partly modified.

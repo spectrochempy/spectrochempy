@@ -242,13 +242,14 @@ def _resolve_save_figure(target):
     Return the Matplotlib figure carrying a complete plot.
 
     Plotting functions return an axes, a figure, or - for composite two-panel
-    layouts - a tuple of axes belonging to a single figure. This helper maps any
+    layouts - a tuple of axes belonging to a single figure. With return_dict,
+    they return a mapping containing fig. This helper maps any
     of those results to the figure that must be written to disk, so that saving
     never depends on which figure happens to be globally active.
 
     Parameters
     ----------
-    target : `~matplotlib.figure.Figure`, `~matplotlib.axes.Axes`, or sequence of Axes
+    target : Figure, Axes, sequence of Axes, or dict containing fig
         Result of a plotting call.
 
     Returns
@@ -259,12 +260,15 @@ def _resolve_save_figure(target):
     Raises
     ------
     TypeError
-        If *target* is not a figure, an axes, or a sequence of axes.
+        If *target* cannot be resolved to a figure or axes.
     ValueError
         If a sequence of axes is given whose members belong to different figures.
     """
     from matplotlib.axes import Axes
     from matplotlib.figure import Figure
+
+    if isinstance(target, dict) and "fig" in target:
+        return _resolve_save_figure(target["fig"])
 
     if isinstance(target, Figure):
         return target
