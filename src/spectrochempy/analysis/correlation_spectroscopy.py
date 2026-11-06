@@ -49,8 +49,8 @@ def correlation_spectroscopy(
     ``A.T @ N @ A / (n - 1)``. The asynchronous sign follows the input order of
     the perturbation sequence.
 
-    The perturbation coordinate must be numeric, monotonic, and classified as
-    linear by its SpectroChemPy ``Coord``. This classification follows the
+    The perturbation coordinate must be real numeric, monotonic, and classified
+    as linear by its SpectroChemPy ``Coord``. This classification follows the
     coordinate's ``sigdigits`` and ``linearize_below`` settings. A default
     ``Coord`` uses ``linearize_below=0.1`` and may normalize a near-linear
     source axis before this function sees it. Configure ``linearize_below``
@@ -78,8 +78,8 @@ def correlation_spectroscopy(
         If *dataset* is not an NDDataset or its values are not real numeric data.
     ValueError
         If the input is not two-dimensional, has fewer than two perturbation
-        points, contains masked or non-finite values, or has a non-monotonic or
-        non-uniform perturbation coordinate.
+        points, contains masked or non-finite values, or has a complex,
+        non-monotonic, or non-uniform perturbation coordinate.
 
     Notes
     -----
@@ -113,6 +113,8 @@ def correlation_spectroscopy(
     perturbation_coord = dataset.coord(perturbation_dim)
     if not isinstance(perturbation_coord, Coord):
         raise ValueError("perturbation dimension must have a single Coord")
+    if np.iscomplexobj(perturbation_coord.data):
+        raise ValueError("perturbation coordinate must be real numeric data")
     try:
         perturbation_values = np.asarray(perturbation_coord.data, dtype=float)
     except (AttributeError, TypeError, ValueError) as exc:

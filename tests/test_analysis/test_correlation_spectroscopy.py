@@ -4,6 +4,8 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 
+import warnings
+
 import numpy as np
 import pytest
 
@@ -226,3 +228,24 @@ def test_correlation_spectroscopy_rejects_irregular_times_with_default_coord():
 
     with pytest.raises(ValueError, match="uniformly spaced"):
         correlation_spectroscopy(dataset)
+
+
+@pytest.mark.parametrize(
+    "perturbation",
+    [
+        [0.0 + 1.0j, 1.0 + 2.0j, 2.0 + 3.0j],
+        [complex(0.0, np.nan), complex(1.0, np.nan)],
+    ],
+    ids=["finite-complex", "imaginary-nan"],
+)
+def test_correlation_spectroscopy_rejects_complex_perturbation(perturbation):
+    dataset = NDDataset(np.arange(2 * len(perturbation)).reshape(-1, 2))
+    dataset.set_coordset(
+        y=Coord(perturbation, dtype="complex128", rounding=False),
+        x=Coord([1000.0, 1100.0]),
+    )
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        with pytest.raises(ValueError, match="perturbation coordinate must be real"):
+            correlation_spectroscopy(dataset)

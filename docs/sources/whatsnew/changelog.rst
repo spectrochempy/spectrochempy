@@ -28,8 +28,8 @@ New Features
   and structured ``PeakTable`` results. The historical 1D behavior is unchanged.
 
 - Added ``correlation_spectroscopy`` for synchronous and asynchronous 2D correlation
-  spectroscopy maps, with coordinate-aware validation of uniform perturbation
-  spacing.
+  spectroscopy maps, with coordinate-aware validation of real, uniformly spaced
+  perturbation coordinates.
 
 - Added a gallery example for 2D-IR peak finding on an experimental spectrum.
 

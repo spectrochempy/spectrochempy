@@ -748,7 +748,7 @@ Two-dimensional correlation spectroscopy
 =========================================
 
 ``correlation_spectroscopy`` calculates synchronous and asynchronous maps from a
-two-dimensional spectral series. The perturbation coordinate must be
+two-dimensional spectral series. The perturbation coordinate must be real and
 classified as linear by ``Coord``; its ``sigdigits`` and ``linearize_below``
 settings determine how near-linear source coordinates are normalized. A
 default ``Coord`` uses ``linearize_below=0.1``; set a stricter value when source
