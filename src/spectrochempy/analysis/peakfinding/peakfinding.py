@@ -51,6 +51,18 @@ def _as_scalar(value):
     return value
 
 
+def _history_scalar(value):
+    """Normalize numerical scalars while retaining extended precision in history."""
+    value = _as_scalar(value)
+    if isinstance(value, np.longdouble):
+        return str(value)
+    if isinstance(value, np.integer):
+        return int(value)
+    if isinstance(value, np.floating):
+        return float(value)
+    return value
+
+
 def _sequence_item(values, index):
     """Return item *index* from numpy arrays, quantities, or Python sequences."""
     try:
@@ -75,6 +87,14 @@ def _column_value(value, *, unit=None, as_float=False):
     if as_float:
         return float(getattr(value, "magnitude", value))
     return value
+
+
+def _column_sort_value(value, *, unit=None):
+    """Return a unit-normalized sortable magnitude without float coercion."""
+    value = _as_scalar(value)
+    if unit is not None and hasattr(value, "to"):
+        value = value.to(unit)
+    return _as_scalar(getattr(value, "magnitude", value))
 
 
 _BASE_PEAK_COLUMNS = (
@@ -359,7 +379,7 @@ class PeakTable:
             raise KeyError(f"Unknown peak-table column: {name!r}")
         rows = self.to_dict()
         rows.sort(
-            key=lambda row: _column_value(row[name], unit=unit, as_float=True),
+            key=lambda row: _column_sort_value(row[name], unit=unit),
             reverse=reverse,
         )
         return PeakTable(
@@ -713,8 +733,11 @@ def _peakfinding_working_data(dataset):
 def _peakfinding_coordinates(dataset, resolved_dims, *, use_coord):
     """Resolve and validate coordinate arrays for the selected source axes."""
     coordinates = {}
+    coordset = dataset.coordset
     for axis, dim in resolved_dims:
-        coord = dataset.coord(dim)
+        coord = (
+            coordset[dim] if coordset is not None and dim in coordset.names else None
+        )
         if coord is None or not coord.has_data:
             if use_coord:
                 raise ValueError(
@@ -723,7 +746,7 @@ def _peakfinding_coordinates(dataset, resolved_dims, *, use_coord):
             coordinates[dim] = None
             continue
 
-        raw = np.asarray(coord.data)
+        raw = np.asarray(coord._data)
         if raw.ndim != 1 or raw.size != dataset.shape[axis]:
             raise ValueError(f"Coordinate for dimension {dim!r} has an invalid shape")
 
@@ -732,20 +755,40 @@ def _peakfinding_coordinates(dataset, resolved_dims, *, use_coord):
                 raise ValueError(
                     f"Physical coordinates for dimension {dim!r} must be numeric"
                 )
-            numeric = np.asarray(raw, dtype=np.float64)
-            if not np.isfinite(numeric).all():
+            if not np.isfinite(raw).all():
                 raise ValueError(
                     f"Physical coordinates for dimension {dim!r} must be finite"
                 )
-            differences = np.diff(numeric)
-            if not (np.all(differences > 0) or np.all(differences < 0)):
+            increasing = np.all(raw[1:] > raw[:-1])
+            decreasing = np.all(raw[1:] < raw[:-1])
+            if not (increasing or decreasing):
                 raise ValueError(
                     f"Physical coordinates for dimension {dim!r} must be strictly monotonic"
                 )
-            coordinates[dim] = (numeric, coord.units)
+            coordinates[dim] = (raw, coord.units)
         else:
             coordinates[dim] = (raw, coord.units)
     return coordinates
+
+
+def _coordinate_delta_is_less_than(left, right, limit):
+    """Compare a coordinate difference without integer or float overflow."""
+    if isinstance(left, (int, np.integer)) and isinstance(right, (int, np.integer)):
+        return abs(int(left) - int(right)) < limit
+
+    if isinstance(left, np.floating):
+        left = left.item()
+    if isinstance(right, np.floating):
+        right = right.item()
+
+    left_numerator, left_denominator = left.as_integer_ratio()
+    right_numerator, right_denominator = right.as_integer_ratio()
+    limit_numerator, limit_denominator = limit.as_integer_ratio()
+    delta_numerator = abs(
+        left_numerator * right_denominator - right_numerator * left_denominator
+    )
+    delta_denominator = left_denominator * right_denominator
+    return delta_numerator * limit_denominator < limit_numerator * delta_denominator
 
 
 def _normalize_2d_distance(distance, resolved_dims, coordinates, *, use_coord):
@@ -789,7 +832,7 @@ def _normalize_2d_distance(distance, resolved_dims, coordinates, *, use_coord):
                 )
             coord_values, coord_units = coords
             try:
-                magnitude = float(value.to(coord_units).magnitude)
+                magnitude = _as_scalar(value.to(coord_units).magnitude)
             except (DimensionalityError, TypeError, ValueError) as exc:
                 raise ValueError(
                     _format_peakfinding_units_error(
@@ -797,18 +840,21 @@ def _normalize_2d_distance(distance, resolved_dims, coordinates, *, use_coord):
                     )
                 ) from exc
             requested[dim] = {
-                "value": float(value.magnitude),
+                "value": _history_scalar(value.magnitude),
                 "units": str(value.units),
             }
-            effective[dim] = {"value": magnitude, "units": str(coord_units)}
+            effective[dim] = {
+                "value": _history_scalar(magnitude),
+                "units": str(coord_units),
+            }
         else:
             if not isinstance(
                 value, (int, float, np.integer, np.floating)
             ) or isinstance(value, (bool, np.bool_)):
                 raise ValueError("Point distances must be real numeric scalars")
-            magnitude = float(value)
-            requested[dim] = {"value": magnitude, "units": "point"}
-            effective[dim] = {"value": magnitude, "units": "point"}
+            magnitude = _as_scalar(value)
+            requested[dim] = {"value": _history_scalar(magnitude), "units": "point"}
+            effective[dim] = {"value": _history_scalar(magnitude), "units": "point"}
 
         if not np.isfinite(magnitude) or magnitude < 0:
             raise ValueError("2D distances must be finite and non-negative")
@@ -826,13 +872,16 @@ def _normalize_2d_height(height, dataset):
         if dataset.units is None:
             raise ValueError("A unit-bearing height requires dataset units")
         try:
-            value = float(height.to(dataset.units).magnitude)
+            value = _as_scalar(height.to(dataset.units).magnitude)
         except (DimensionalityError, TypeError, ValueError) as exc:
             raise ValueError(
                 f"Height units {height.units} are incompatible with dataset units {dataset.units}"
             ) from exc
         units = str(dataset.units)
-        requested = {"value": float(height.magnitude), "units": str(height.units)}
+        requested = {
+            "value": _history_scalar(height.magnitude),
+            "units": str(height.units),
+        }
     else:
         if not isinstance(height, (int, float, np.integer, np.floating)) or isinstance(
             height, (bool, np.bool_)
@@ -840,13 +889,17 @@ def _normalize_2d_height(height, dataset):
             raise ValueError(
                 "2D height must be a positive real scalar or Pint quantity"
             )
-        value = float(height)
+        value = _as_scalar(height)
         units = str(dataset.units) if dataset.units is not None else "dimensionless"
-        requested = {"value": value, "units": units}
+        requested = {"value": _history_scalar(value), "units": units}
 
     if not np.isfinite(value) or value <= 0:
         raise ValueError("2D height must be finite and strictly positive")
-    return value, {"value": value, "units": units, "requested": requested}
+    return value, {
+        "value": _history_scalar(value),
+        "units": units,
+        "requested": requested,
+    }
 
 
 def _peak_position(value, units, *, use_coord):
@@ -948,12 +1001,18 @@ def _find_peaks_2d(
         structure=np.ones((3, 3), dtype=bool),
     )
     candidates = []
-    for label_id in range(1, n_labels + 1):
-        cells = np.argwhere(labels == label_id)
-        if not cells.size:
-            continue
-        representative = min(tuple(int(v) for v in cell) for cell in cells)
-        candidates.append((representative, float(working_values[representative])))
+    if n_labels:
+        flat_labels = labels.ravel()
+        nonzero = np.flatnonzero(flat_labels)
+        first_cells = np.full(n_labels + 1, flat_labels.size, dtype=np.intp)
+        np.minimum.at(first_cells, flat_labels[nonzero], nonzero)
+        for flat_index in first_cells[1:]:
+            if flat_index == flat_labels.size:
+                continue
+            representative = tuple(
+                int(value) for value in np.unravel_index(flat_index, labels.shape)
+            )
+            candidates.append((representative, float(working_values[representative])))
 
     if distances is not None:
         constrained_axes = [value > 0 for value in distances]
@@ -967,14 +1026,16 @@ def _find_peaks_2d(
                 if use_coord and distance_history["mode"] == "physical":
                     dim = dim_names[axis]
                     coord_values, _coord_units = coordinates[dim]
-                    delta = abs(
-                        float(coord_values[left[0][axis]])
-                        - float(coord_values[right[0][axis]])
-                    )
+                    left_value = coord_values[left[0][axis]]
+                    right_value = coord_values[right[0][axis]]
+                    if not _coordinate_delta_is_less_than(
+                        left_value, right_value, distance_value
+                    ):
+                        return False
                 else:
                     delta = abs(left[0][axis] - right[0][axis])
-                if delta >= distance_value:
-                    return False
+                    if delta >= distance_value:
+                        return False
             return True
 
         ranked = sorted(candidates, key=lambda item: (-item[1], item[0]))
@@ -998,7 +1059,7 @@ def _find_peaks_2d(
             if use_coord:
                 coordinate_values, coordinate_units = coordinates[dim]
                 coordinate = _peak_position(
-                    float(coordinate_values[indices[pos]]),
+                    _as_scalar(coordinate_values[indices[pos]]),
                     coordinate_units,
                     use_coord=True,
                 )

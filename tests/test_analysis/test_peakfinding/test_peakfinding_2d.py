@@ -1,5 +1,6 @@
 import copy
 import json
+import logging
 
 import numpy as np
 import pytest
@@ -8,6 +9,7 @@ from spectrochempy.analysis.peakfinding.peakfinding import PeakFindingResult
 from spectrochempy.analysis.peakfinding.peakfinding import PeakTable
 from spectrochempy.analysis.peakfinding.peakfinding import find_peaks
 from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.units import ur
 
@@ -217,9 +219,7 @@ def test_2d_coordinates_preserve_source_axes_when_dims_are_reversed():
         (6, 7),
         (18, 23),
     ]
-    assert reversed_dims[0]["y_position"].magnitude == pytest.approx(
-        dataset.coord("y").values[7].magnitude
-    )
+    assert reversed_dims[0]["y_position"].magnitude == pytest.approx(10 - 7 / 3)
 
 
 def test_2d_physical_distances_support_different_units_and_irregular_axes():
@@ -247,6 +247,131 @@ def test_2d_physical_distances_support_different_units_and_irregular_axes():
     ]
     assert table.to_dict()[0]["y_position"].units == ur("cm^-1")
     assert table.to_dict()[0]["x_position"].units == ur.nm
+
+
+def test_2d_physical_coordinates_preserve_large_integer_precision():
+    base = 2**55
+    y_values = np.array([base, base + 1, base + 3], dtype=np.int64)
+    data = np.zeros((3, 3))
+    data[0, 1] = 2
+    data[2, 1] = 1
+    dataset = NDDataset(
+        data,
+        coordset=[
+            Coord(y_values, title="y", units="cm^-1", rounding=False),
+            Coord(np.arange(3), title="x", units="nm"),
+        ],
+        units="absorbance",
+    )
+
+    retained, _ = find_peaks(
+        dataset,
+        dims=("y", "x"),
+        distance={"y": 2.5 * ur("cm^-1"), "x": 0 * ur.nm},
+    )
+    rows = retained.to_dict()
+    assert [(row["y_index"], row["x_index"]) for row in rows] == [(0, 1), (2, 1)]
+    assert [row["y_position"].magnitude for row in rows] == [base, base + 3]
+    assert [
+        row["y_index"] for row in retained.sort_by("y_position", reverse=True).to_dict()
+    ] == [2, 0]
+    assert retained.top(1, by="y_position").to_dict()[0]["y_index"] == 2
+
+    suppressed, _ = find_peaks(
+        dataset,
+        dims=("y", "x"),
+        distance={"y": 3.5 * ur("cm^-1"), "x": 0 * ur.nm},
+    )
+    assert [(row["y_index"], row["x_index"]) for row in suppressed.to_dict()] == [
+        (0, 1)
+    ]
+
+
+def test_2d_physical_distance_comparison_does_not_overflow_float32():
+    y_values = np.array([-2e38, -1e38, 1e38, 2e38], dtype=np.float32)
+    data = np.zeros((4, 3))
+    data[0, 1] = 2
+    data[3, 1] = 1
+    dataset = NDDataset(
+        data,
+        coordset=[
+            Coord(y_values, title="y", units="ppm", rounding=False),
+            Coord(np.arange(3), title="x", units="nm"),
+        ],
+        units="absorbance",
+    )
+
+    suppressed, _ = find_peaks(
+        dataset,
+        dims=("y", "x"),
+        distance={"y": 4.5e38 * ur.ppm, "x": 0 * ur.nm},
+    )
+    assert [(row["y_index"], row["x_index"]) for row in suppressed.to_dict()] == [
+        (0, 1)
+    ]
+
+    retained, _ = find_peaks(
+        dataset,
+        dims=("y", "x"),
+        distance={"y": 3.5e38 * ur.ppm, "x": 0 * ur.nm},
+    )
+    assert [(row["y_index"], row["x_index"]) for row in retained.to_dict()] == [
+        (0, 1),
+        (3, 1),
+    ]
+
+
+def test_2d_physical_distance_comparison_preserves_strict_float_boundary():
+    maximum = np.finfo(np.float64).max
+    data = np.zeros((3, 3))
+    data[0, 1] = 2
+    data[2, 1] = 1
+    dataset = NDDataset(
+        data,
+        coordset=[
+            Coord([1.0, 2.0, maximum], title="y", units="ppm", rounding=False),
+            Coord(np.arange(3), title="x", units="nm"),
+        ],
+        units="absorbance",
+    )
+
+    table, _ = find_peaks(
+        dataset,
+        dims=("y", "x"),
+        distance={"y": maximum * ur.ppm, "x": 0 * ur.nm},
+    )
+    assert [(row["y_index"], row["x_index"]) for row in table.to_dict()] == [(0, 1)]
+
+
+def test_2d_longdouble_thresholds_preserve_precision_and_history_serialization():
+    coords = [
+        Coord(np.arange(5), title="y", units="ppm"),
+        Coord(np.arange(5), title="x", units="nm"),
+    ]
+    threshold = np.nextafter(np.longdouble(1), np.longdouble(2))
+    one_peak = np.zeros((5, 5))
+    one_peak[2, 2] = 1.0
+    dataset = NDDataset(one_peak, coordset=coords, units="absorbance")
+    above_peak, _ = find_peaks(
+        dataset,
+        dims=("y", "x"),
+        height=threshold * ur.absorbance,
+    )
+    assert len(above_peak) == 0
+
+    two_peaks = np.zeros((5, 5))
+    two_peaks[1, 2] = 2.0
+    two_peaks[3, 2] = 1.0
+    dataset.data = two_peaks
+    distance = np.nextafter(np.longdouble(2), np.longdouble(3))
+    result = find_peaks(
+        dataset,
+        dims=("y", "x"),
+        distance={"y": distance * ur.ppm, "x": 0 * ur.nm},
+        as_result=True,
+    )
+    assert [(row["y_index"], row["x_index"]) for row in result.to_dict()] == [(1, 2)]
+    json.dumps(result.history_entries[-1]["parameters"])
 
 
 def test_2d_irregular_physical_distance_uses_coordinate_differences_directly():
@@ -442,6 +567,36 @@ def test_2d_unit_aware_mapping_rejects_incompatible_units_and_missing_coords():
     )
     assert point_table.to_dict()[0]["y_position"] == 2
     assert point_table.to_dict()[0]["x_position"] == 3
+
+
+def test_2d_index_mode_with_partial_coordset_does_not_log_missing_coordinate(
+    caplog,
+):
+    dataset = NDDataset(np.zeros((3, 4)))
+    dataset.data[1, 2] = 1.0
+    dataset.coordset = CoordSet(x=Coord(np.arange(4), title="x"))
+
+    with caplog.at_level(logging.ERROR, logger="spectrochempy.application.application"):
+        table, _ = find_peaks(dataset, dims=("y", "x"), use_coord=False)
+
+    assert [(row["y_position"], row["x_position"]) for row in table.to_dict()] == [
+        (1, 2)
+    ]
+    assert not any(
+        "could not find this dimension name" in record.message
+        for record in caplog.records
+    )
+
+    caplog.clear()
+    with (
+        caplog.at_level(logging.ERROR, logger="spectrochempy.application.application"),
+        pytest.raises(ValueError, match="requires coordinates"),
+    ):
+        find_peaks(dataset, dims=("y", "x"), use_coord=True)
+    assert not any(
+        "could not find this dimension name" in record.message
+        for record in caplog.records
+    )
 
 
 def test_2d_threshold_and_unused_legacy_parameters_are_rejected():
