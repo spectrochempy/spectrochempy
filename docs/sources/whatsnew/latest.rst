@@ -12,6 +12,13 @@ What's New in Revision 1.1.5.dev
 These are the changes in SpectroChemPy-1.1.5.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
 
+New Features
+~~~~~~~~~~~~
+
+- Added the generic ``fft.validate_input`` plugin hook for read-only FFT/IFFT
+  checks before in-place axis changes, resizing or numerical preparation.
+  Validators can reject a request without leaving the caller partly modified.
+
 Breaking Changes
 ~~~~~~~~~~~~~~~~
 
