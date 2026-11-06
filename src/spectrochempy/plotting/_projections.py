@@ -228,6 +228,7 @@ def _draw_projections(ax, prepared, *, clear, preserve_title=False):
         _set_panel_title(ax, title)
         return
     if clear:
+        ax._scp_panel_title = ax.get_title()
         for marginal in previous.values():
             marginal.remove()
         if previous:

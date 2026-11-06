@@ -471,3 +471,17 @@ def test_overlay_preserves_panel_titles_unless_explicitly_replaced(spectral_map)
     assert top.get_title() == ""
     spectral_map.plot_contour(ax=main, projections="x", clear=True, show=False)
     assert main._scp_projection_axes["top"].get_title() == ""
+
+
+def test_removing_projections_clears_the_previous_panel_title(spectral_map):
+    result = spectral_map.plot_contour(
+        title="Old",
+        projections="x",
+        return_dict=True,
+        show=False,
+    )
+    main = result["axes"]["main"]
+    spectral_map.plot_contour(ax=main, projections=False, clear=True, show=False)
+    assert main.get_title() == ""
+    spectral_map.plot_contour(ax=main, projections="x", clear=False, show=False)
+    assert main._scp_projection_axes["top"].get_title() == ""
