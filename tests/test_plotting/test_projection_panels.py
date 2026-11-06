@@ -434,3 +434,40 @@ def test_panel_title_is_above_top_projection(spectral_map, grid):
     assert axes["top"].get_title() == "Map A\nProjection"
     renderer = result["fig"].canvas.get_renderer()
     assert axes["top"].title.get_window_extent(renderer).y0 > axes["top"].bbox.y1
+
+
+def test_overlay_preserves_panel_titles_unless_explicitly_replaced(spectral_map):
+    result = spectral_map.plot_contour(
+        title="Map A",
+        projections="x",
+        projection_kwargs={"x": {"title": "Reference"}},
+        return_dict=True,
+        show=False,
+    )
+    main, top = result["axes"]["main"], result["axes"]["top"]
+    spectral_map.plot_contour(ax=main, projections="x", clear=False, show=False)
+    assert top.get_title() == "Map A\nReference"
+    spectral_map.plot_contour(
+        ax=main,
+        title="Map B",
+        projections="x",
+        clear=False,
+        show=False,
+    )
+    assert top.get_title() == "Map B\nReference"
+    spectral_map.plot_contour(ax=main, title="Map C", clear=False, show=False)
+    assert top.get_title() == "Map C\nReference"
+    assert main.get_title() == ""
+    spectral_map.plot_contour(ax=main, clear=False, show=False)
+    assert top.get_title() == "Map C\nReference"
+    spectral_map.plot_contour(
+        ax=main,
+        title="",
+        projections="x",
+        projection_kwargs={"x": {"title": ""}},
+        clear=False,
+        show=False,
+    )
+    assert top.get_title() == ""
+    spectral_map.plot_contour(ax=main, projections="x", clear=True, show=False)
+    assert main._scp_projection_axes["top"].get_title() == ""

@@ -2403,7 +2403,12 @@ def plot_2D(dataset, method=None, **kwargs):
             hi = min(max(ax.get_xlim()), max(ax.get_ylim()))
             if lo < hi:
                 ax.plot([lo, hi], [lo, hi], color="0.6", linestyle=":", linewidth=0.7)
-        _draw_projections(ax, projection_panels, clear=kwargs.get("clear", True))
+        _draw_projections(
+            ax,
+            projection_panels,
+            clear=kwargs.get("clear", True),
+            preserve_title=not kwargs.get("clear", True) and "title" not in kwargs,
+        )
         if kwargs.get("return_dict", False):
             return {"fig": fig, "axes": _panel_axes(ax)}
         return ax

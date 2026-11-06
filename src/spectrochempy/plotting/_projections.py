@@ -208,7 +208,7 @@ def _prepare_projections(dataset, method, kwargs, prefs):
             "linewidths": _expand(options.get("linewidth", 1.0), count, "linewidth"),
             "labels": labels,
             "legend": options.get("legend", False),
-            "title": options.get("title", ""),
+            "title": options.get("title"),
             "label": options.get("intensity_label", intensity_label),
             "size": float(size),
             "pad": float(pad),
@@ -216,12 +216,16 @@ def _prepare_projections(dataset, method, kwargs, prefs):
     return prepared
 
 
-def _draw_projections(ax, prepared, *, clear):
+def _draw_projections(ax, prepared, *, clear, preserve_title=False):
     """Attach aligned marginal axes to a main axes, including explicit subplots."""
     previous = getattr(ax, "_scp_projection_axes", {})
     if previous and not clear and set(previous) != set(prepared):
         if prepared:
             raise ValueError("clear=False cannot change the projection panels")
+        title = ax.get_title()
+        if preserve_title and not title:
+            title = getattr(ax, "_scp_panel_title", "")
+        _set_panel_title(ax, title)
         return
     if clear:
         for marginal in previous.values():
@@ -257,8 +261,11 @@ def _draw_projections(ax, prepared, *, clear):
         else:
             marginal.tick_params(labelleft=False)
             marginal.set_xlabel(spec["label"])
-        marginal.set_title(spec["title"])
-        marginal._scp_projection_title = spec["title"]
+        projection_title = spec["title"]
+        if projection_title is None:
+            projection_title = getattr(marginal, "_scp_projection_title", "")
+        marginal.set_title(projection_title)
+        marginal._scp_projection_title = projection_title
         if spec["legend"]:
             marginal.legend(
                 loc=spec["legend"] if isinstance(spec["legend"], str) else "best"
@@ -268,10 +275,14 @@ def _draw_projections(ax, prepared, *, clear):
     ax.set_ylim(ylim)
     ax._scp_projection_axes = marginals
     if "top" in marginals:
-        _set_panel_title(ax, ax.get_title())
+        title = ax.get_title()
+        if preserve_title and not title:
+            title = getattr(ax, "_scp_panel_title", "")
+        _set_panel_title(ax, title)
 
 
 def _set_panel_title(ax, title, **kwargs):
+    ax._scp_panel_title = title
     top = getattr(ax, "_scp_projection_axes", {}).get("top")
     if top is None:
         ax.set_title(title, **kwargs)
