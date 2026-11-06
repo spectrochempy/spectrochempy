@@ -10,6 +10,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 
 __all__ = ["Correlation2DResult", "correlation_2d"]
@@ -48,9 +49,13 @@ def correlation_2d(
     ``A.T @ N @ A / (n - 1)``. The asynchronous sign follows the input order of
     the perturbation sequence.
 
-    The perturbation coordinate must be numeric, monotonic, and uniformly
-    spaced. Interpolate irregularly sampled data onto a uniform grid before
-    calling this function.
+    The perturbation coordinate must be numeric, monotonic, and classified as
+    linear by its SpectroChemPy ``Coord``. This classification follows the
+    coordinate's ``sigdigits`` and ``linearize_below`` settings. A default
+    ``Coord`` uses ``linearize_below=1.0`` and may normalize a near-linear
+    source axis before this function sees it. Configure ``linearize_below``
+    when constructing the coordinate if source deviations must remain visible
+    to this validation.
 
     Parameters
     ----------
@@ -79,8 +84,8 @@ def correlation_2d(
     Notes
     -----
     The Hilbert–Noda transform assumes equally spaced perturbation points. The
-    function rejects irregular coordinates rather than silently treating their
-    sequence indices as equally spaced.
+    function follows the ``Coord.linear`` classification rather than applying
+    a second numeric tolerance to coordinate differences.
     """
     if not isinstance(dataset, NDDataset):
         raise TypeError("dataset must be an NDDataset")
@@ -100,6 +105,8 @@ def correlation_2d(
     perturbation_axis = dimensions.index(perturbation_dim)
     spectral_dim = dimensions[1 - perturbation_axis]
     perturbation_coord = dataset.coord(perturbation_dim)
+    if not isinstance(perturbation_coord, Coord):
+        raise ValueError("perturbation dimension must have a single Coord")
     try:
         perturbation_values = np.asarray(perturbation_coord.data, dtype=float)
     except (AttributeError, TypeError, ValueError) as exc:
@@ -115,7 +122,7 @@ def correlation_2d(
     spacing = np.diff(perturbation_values)
     if not (np.all(spacing > 0.0) or np.all(spacing < 0.0)):
         raise ValueError("perturbation coordinate must be strictly monotonic")
-    if not np.allclose(spacing, spacing[0], rtol=1e-5, atol=1e-12):
+    if spacing.size > 1 and not perturbation_coord.linear:
         raise ValueError(
             "perturbation coordinate must be uniformly spaced; "
             "interpolate the dataset before calculating 2D correlation spectra"

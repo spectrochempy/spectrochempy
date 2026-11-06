@@ -90,6 +90,56 @@ def test_correlation_2d_rejects_invalid_perturbation_coordinates(perturbation, m
         correlation_2d(_series([[1.0, 4.0], [2.0, 2.0], [4.0, 1.0]], perturbation))
 
 
+def test_correlation_2d_spacing_validation_respects_coord_precision():
+    tiny_irregular = NDDataset(
+        [[1.0, 4.0], [2.0, 2.0], [4.0, 1.0]],
+        coordset=[
+            Coord([0.0, 1e-15, 3e-15], title="time", units="s", rounding=False),
+            Coord([1000.0, 1100.0], title="wavenumber", units="cm^-1"),
+        ],
+    )
+    with pytest.raises(ValueError, match="uniformly spaced"):
+        correlation_2d(tiny_irregular)
+
+    epoch_seconds = 1.7e9 + np.arange(10) * 0.001
+    regular_epoch = NDDataset(
+        np.arange(20, dtype=float).reshape(10, 2),
+        coordset=[
+            Coord(epoch_seconds, title="time", units="s", rounding=False),
+            Coord([1000.0, 1100.0], title="wavenumber", units="cm^-1"),
+        ],
+    )
+    assert regular_epoch.y.linear
+    assert correlation_2d(regular_epoch).synchronous.shape == (2, 2)
+
+
+def test_correlation_2d_follows_coord_linearization_settings():
+    data = [[1.0, 4.0], [2.0, 2.0], [4.0, 1.0]]
+    spectral = Coord([1000.0, 1100.0], title="wavenumber", units="cm^-1")
+
+    normalized_coord = Coord([0.0, 1.0, 2.01], title="time", units="s")
+    assert normalized_coord.linear
+    np.testing.assert_allclose(normalized_coord.data, [0.0, 1.005, 2.01])
+    normalized_dataset = NDDataset(
+        data, coordset=[normalized_coord, spectral], units="absorbance"
+    )
+    assert correlation_2d(normalized_dataset).synchronous.shape == (2, 2)
+
+    strict_coord = Coord(
+        [0.0, 1.0, 2.01],
+        title="time",
+        units="s",
+        rounding=False,
+        linearize_below=0.0,
+    )
+    assert not strict_coord.linear
+    strict_dataset = NDDataset(data, units="absorbance")
+    strict_dataset.set_coordset(y=strict_coord, x=spectral)
+    assert not strict_dataset.y.linear
+    with pytest.raises(ValueError, match="uniformly spaced"):
+        correlation_2d(strict_dataset)
+
+
 def test_correlation_2d_rejects_missing_or_nonfinite_signal_values():
     with pytest.raises(ValueError, match="finite values"):
         correlation_2d(_series([[1.0, 4.0], [2.0, np.nan], [4.0, 1.0]]))
