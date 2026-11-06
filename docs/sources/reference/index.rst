@@ -747,11 +747,11 @@ interpret ``NDDataset`` dimensions or coordinates.
 Two-dimensional correlation spectroscopy
 =========================================
 
-``correlation_2d`` calculates synchronous and asynchronous maps from a
+``correlation_spectroscopy`` calculates synchronous and asynchronous maps from a
 two-dimensional spectral series. The perturbation coordinate must be
 classified as linear by ``Coord``; its ``sigdigits`` and ``linearize_below``
 settings determine how near-linear source coordinates are normalized. A
-default ``Coord`` uses ``linearize_below=1.0``; set a stricter value when source
+default ``Coord`` uses ``linearize_below=0.1``; set a stricter value when source
 deviations must remain visible to validation. Interpolate missing acquisitions
 before calculation. The asynchronous sign follows the perturbation order.
 
@@ -766,7 +766,7 @@ before calculation. The asynchronous sign follows the perturbation order.
     :nosignatures:
     :toctree: generated/
 
-    correlation_2d
+    correlation_spectroscopy
 
 Evolving factor analysis
 ========================

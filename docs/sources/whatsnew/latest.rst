@@ -23,9 +23,16 @@ New Features
   deterministic positive-maximum detection, anisotropic point/physical spacing,
   and structured ``PeakTable`` results. The historical 1D behavior is unchanged.
 
-- Added ``correlation_2d`` for synchronous and asynchronous 2D correlation
+- Added ``correlation_spectroscopy`` for synchronous and asynchronous 2D correlation
   spectroscopy maps, with coordinate-aware validation of uniform perturbation
   spacing.
+
+Bug Fixes
+~~~~~~~~~
+
+- Restored the documented 0.1 percent default coordinate linearization
+  tolerance in the ``Coord`` constructor. Use ``linearize_below`` explicitly
+  when a more permissive tolerance is required.
 
 Breaking Changes
 ~~~~~~~~~~~~~~~~

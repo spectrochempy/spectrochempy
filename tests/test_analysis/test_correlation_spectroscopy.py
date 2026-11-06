@@ -10,9 +10,9 @@ import pytest
 from spectrochempy import Coord
 from spectrochempy import Correlation2DResult as PublicCorrelation2DResult
 from spectrochempy import NDDataset
-from spectrochempy import correlation_2d as public_correlation_2d
-from spectrochempy.analysis.correlation_2d import Correlation2DResult
-from spectrochempy.analysis.correlation_2d import correlation_2d
+from spectrochempy import correlation_spectroscopy as public_correlation_spectroscopy
+from spectrochempy.analysis.correlation_spectroscopy import Correlation2DResult
+from spectrochempy.analysis.correlation_spectroscopy import correlation_spectroscopy
 
 
 def _series(data, perturbation=(0.0, 1.0, 2.0)):
@@ -26,15 +26,15 @@ def _series(data, perturbation=(0.0, 1.0, 2.0)):
     )
 
 
-def test_correlation_2d_is_exposed_at_the_package_root():
-    assert public_correlation_2d is correlation_2d
+def test_correlation_spectroscopy_is_exposed_at_the_package_root():
+    assert public_correlation_spectroscopy is correlation_spectroscopy
     assert PublicCorrelation2DResult is Correlation2DResult
 
 
-def test_correlation_2d_returns_symmetric_and_antisymmetric_maps():
+def test_correlation_spectroscopy_returns_symmetric_and_antisymmetric_maps():
     dataset = _series([[1.0, 4.0], [2.0, 2.0], [4.0, 1.0]])
 
-    result = correlation_2d(dataset)
+    result = correlation_spectroscopy(dataset)
 
     centered = dataset.data - dataset.data.mean(axis=0, keepdims=True)
     expected_synchronous = centered.T @ centered / (len(dataset.y) - 1)
@@ -60,7 +60,7 @@ def test_correlation_2d_returns_symmetric_and_antisymmetric_maps():
     assert result.asynchronous.units == dataset.units**2
 
 
-def test_correlation_2d_accepts_x_as_perturbation_dimension():
+def test_correlation_spectroscopy_accepts_x_as_perturbation_dimension():
     dataset = NDDataset(
         [[1.0, 4.0, 3.0], [2.0, 1.0, 2.0]],
         coordset=[
@@ -70,7 +70,7 @@ def test_correlation_2d_accepts_x_as_perturbation_dimension():
         units="absorbance",
     )
 
-    result = correlation_2d(dataset, perturbation_dim="x")
+    result = correlation_spectroscopy(dataset, perturbation_dim="x")
 
     assert result.perturbation_dim == "x"
     assert result.synchronous.shape == (2, 2)
@@ -85,12 +85,16 @@ def test_correlation_2d_accepts_x_as_perturbation_dimension():
         ((0.0, 1.0, 3.0), "uniformly spaced"),
     ],
 )
-def test_correlation_2d_rejects_invalid_perturbation_coordinates(perturbation, message):
+def test_correlation_spectroscopy_rejects_invalid_perturbation_coordinates(
+    perturbation, message
+):
     with pytest.raises(ValueError, match=message):
-        correlation_2d(_series([[1.0, 4.0], [2.0, 2.0], [4.0, 1.0]], perturbation))
+        correlation_spectroscopy(
+            _series([[1.0, 4.0], [2.0, 2.0], [4.0, 1.0]], perturbation)
+        )
 
 
-def test_correlation_2d_spacing_validation_respects_coord_precision():
+def test_correlation_spectroscopy_spacing_validation_respects_coord_precision():
     tiny_irregular = NDDataset(
         [[1.0, 4.0], [2.0, 2.0], [4.0, 1.0]],
         coordset=[
@@ -99,7 +103,7 @@ def test_correlation_2d_spacing_validation_respects_coord_precision():
         ],
     )
     with pytest.raises(ValueError, match="uniformly spaced"):
-        correlation_2d(tiny_irregular)
+        correlation_spectroscopy(tiny_irregular)
 
     epoch_seconds = 1.7e9 + np.arange(10) * 0.001
     regular_epoch = NDDataset(
@@ -110,20 +114,22 @@ def test_correlation_2d_spacing_validation_respects_coord_precision():
         ],
     )
     assert regular_epoch.y.linear
-    assert correlation_2d(regular_epoch).synchronous.shape == (2, 2)
+    assert correlation_spectroscopy(regular_epoch).synchronous.shape == (2, 2)
 
 
-def test_correlation_2d_follows_coord_linearization_settings():
+def test_correlation_spectroscopy_follows_coord_linearization_settings():
     data = [[1.0, 4.0], [2.0, 2.0], [4.0, 1.0]]
     spectral = Coord([1000.0, 1100.0], title="wavenumber", units="cm^-1")
 
-    normalized_coord = Coord([0.0, 1.0, 2.01], title="time", units="s")
+    normalized_coord = Coord(
+        [0.0, 1.0, 2.01], title="time", units="s", linearize_below=1.0
+    )
     assert normalized_coord.linear
     np.testing.assert_allclose(normalized_coord.data, [0.0, 1.005, 2.01])
     normalized_dataset = NDDataset(
         data, coordset=[normalized_coord, spectral], units="absorbance"
     )
-    assert correlation_2d(normalized_dataset).synchronous.shape == (2, 2)
+    assert correlation_spectroscopy(normalized_dataset).synchronous.shape == (2, 2)
 
     strict_coord = Coord(
         [0.0, 1.0, 2.01],
@@ -137,29 +143,86 @@ def test_correlation_2d_follows_coord_linearization_settings():
     strict_dataset.set_coordset(y=strict_coord, x=spectral)
     assert not strict_dataset.y.linear
     with pytest.raises(ValueError, match="uniformly spaced"):
-        correlation_2d(strict_dataset)
+        correlation_spectroscopy(strict_dataset)
 
 
-def test_correlation_2d_rejects_missing_or_nonfinite_signal_values():
+def test_correlation_spectroscopy_rejects_missing_or_nonfinite_signal_values():
     with pytest.raises(ValueError, match="finite values"):
-        correlation_2d(_series([[1.0, 4.0], [2.0, np.nan], [4.0, 1.0]]))
+        correlation_spectroscopy(_series([[1.0, 4.0], [2.0, np.nan], [4.0, 1.0]]))
 
     masked = _series([[1.0, 4.0], [2.0, 2.0], [4.0, 1.0]])
     masked.mask = np.array([[False, False], [False, True], [False, False]], dtype=bool)
     with pytest.raises(ValueError, match="masked values"):
-        correlation_2d(masked)
+        correlation_spectroscopy(masked)
 
     complex_dataset = _series([[1.0 + 1.0j, 4.0], [2.0, 2.0], [4.0, 1.0]])
     with pytest.raises(TypeError, match="real numeric data"):
-        correlation_2d(complex_dataset)
+        correlation_spectroscopy(complex_dataset)
 
 
-def test_correlation_2d_validates_input_and_dimension():
+def test_correlation_spectroscopy_validates_input_and_dimension():
     with pytest.raises(TypeError, match="NDDataset"):
-        correlation_2d([[1.0, 2.0]])
+        correlation_spectroscopy([[1.0, 2.0]])
 
     with pytest.raises(ValueError, match="two-dimensional"):
-        correlation_2d(NDDataset([1.0, 2.0]))
+        correlation_spectroscopy(NDDataset([1.0, 2.0]))
 
     with pytest.raises(ValueError, match="perturbation_dim"):
-        correlation_2d(_series([[1.0, 4.0], [2.0, 2.0], [4.0, 1.0]]), "z")
+        correlation_spectroscopy(_series([[1.0, 4.0], [2.0, 2.0], [4.0, 1.0]]), "z")
+
+
+def test_correlation_spectroscopy_matches_analytic_three_point_series():
+    dataset = _series([[1.0, 4.0], [2.0, 1.0], [3.0, 4.0]])
+
+    result = correlation_spectroscopy(dataset)
+
+    np.testing.assert_allclose(result.synchronous.data, [[1.0, 0.0], [0.0, 3.0]])
+    cross_peak = 3.0 / (2.0 * np.pi)
+    np.testing.assert_allclose(
+        result.asynchronous.data,
+        [[0.0, cross_peak], [-cross_peak, 0.0]],
+        atol=1e-14,
+    )
+
+
+def test_correlation_spectroscopy_reversing_time_changes_only_asynchronous_sign():
+    dataset = _series([[1.0, 4.0], [2.0, 1.0], [3.0, 4.0]])
+
+    forward = correlation_spectroscopy(dataset)
+    backward = correlation_spectroscopy(dataset[::-1])
+
+    np.testing.assert_allclose(backward.synchronous.data, forward.synchronous.data)
+    np.testing.assert_allclose(
+        backward.asynchronous.data, -forward.asynchronous.data, atol=1e-14
+    )
+    transposed = correlation_spectroscopy(dataset.T, perturbation_dim="y")
+    np.testing.assert_allclose(transposed.synchronous.data, forward.synchronous.data)
+    np.testing.assert_allclose(transposed.asynchronous.data, forward.asynchronous.data)
+
+
+def test_correlation_spectroscopy_mean_centering_removes_static_spectrum():
+    dataset = _series([[1.0, 4.0], [2.0, 1.0], [3.0, 4.0]])
+    shifted = dataset.copy()
+    shifted.data = dataset.data + [100.0, -50.0]
+
+    original = correlation_spectroscopy(dataset)
+    result = correlation_spectroscopy(shifted)
+
+    np.testing.assert_allclose(result.synchronous.data, original.synchronous.data)
+    np.testing.assert_allclose(result.asynchronous.data, original.asynchronous.data)
+
+
+def test_correlation_spectroscopy_proportional_changes_have_no_asynchronous_map():
+    dataset = _series([[1.0, 6.0], [2.0, 4.0], [3.0, 2.0]])
+
+    result = correlation_spectroscopy(dataset)
+
+    np.testing.assert_allclose(result.synchronous.data, [[1.0, -2.0], [-2.0, 4.0]])
+    np.testing.assert_allclose(result.asynchronous.data, 0.0, atol=1e-14)
+
+
+def test_correlation_spectroscopy_rejects_irregular_times_with_default_coord():
+    dataset = _series([[1.0, 4.0], [2.0, 1.0], [3.0, 4.0]], (0.0, 1.0, 2.01))
+
+    with pytest.raises(ValueError, match="uniformly spaced"):
+        correlation_spectroscopy(dataset)

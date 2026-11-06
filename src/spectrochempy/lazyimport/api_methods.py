@@ -19,12 +19,12 @@ SpectroChemPy API.
 """
 
 _LAZY_IMPORTS = {
-    "Correlation2DResult": "spectrochempy.analysis.correlation_2d",
+    "Correlation2DResult": "spectrochempy.analysis.correlation_spectroscopy",
     "CrossValidationResult": "spectrochempy.analysis.cross_validation",
     "GroupKFold": "spectrochempy.analysis.model_selection",
     "KFold": "spectrochempy.analysis.model_selection",
     "LeaveOneOut": "spectrochempy.analysis.model_selection",
-    "correlation_2d": "spectrochempy.analysis.correlation_2d",
+    "correlation_spectroscopy": "spectrochempy.analysis.correlation_spectroscopy",
     "cross_validate": "spectrochempy.analysis.cross_validation",
     "PLSRegression": "spectrochempy.analysis.crossdecomposition.pls",
     "polynomial": "spectrochempy.analysis.curvefitting._models",

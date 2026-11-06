@@ -96,7 +96,7 @@ class Coord(NDMath, NDArray):
         It is optional but recommended to give a title to each ndarray.
     dlabel :  str, optional
         Alias of `title` .
-    linearize_below : float, optional, default=1.0
+    linearize_below : float, optional, default=0.1
         Variation of spacing in percent below which the coordinate is linearized.
     rounding : bool, optional, default=True
         If True, the data will be rounded to the number of significant
@@ -156,7 +156,7 @@ class Coord(NDMath, NDArray):
     _show_datapoints = tr.Bool(True)
     _zpd = tr.Integer()
 
-    _linearize_below = tr.Float(1.0)
+    _linearize_below = tr.Float(0.1)
     _linear = tr.Bool(False)
     _sigdigits = tr.Int(4)
     _rounding = tr.Bool(True)
@@ -177,7 +177,7 @@ class Coord(NDMath, NDArray):
         if data is None and _size is not None and _increment is not None:
             data = np.arange(_size) * _increment + _offset
 
-        self._linearize_below = kwargs.pop("linearize_below", 1.0)
+        self._linearize_below = kwargs.pop("linearize_below", 0.1)
 
         # extract parameters for linearization and data rounding
         self._sigdigits = kwargs.pop("sigdigits", 4)

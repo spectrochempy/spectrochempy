@@ -13,13 +13,13 @@ import numpy as np
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 
-__all__ = ["Correlation2DResult", "correlation_2d"]
+__all__ = ["Correlation2DResult", "correlation_spectroscopy"]
 
 
 @dataclass(frozen=True)
 class Correlation2DResult:
     """
-    Maps returned by :func:`correlation_2d`.
+    Maps returned by :func:`correlation_spectroscopy`.
 
     Attributes
     ----------
@@ -36,7 +36,7 @@ class Correlation2DResult:
     perturbation_dim: str
 
 
-def correlation_2d(
+def correlation_spectroscopy(
     dataset: NDDataset,
     perturbation_dim: str = "y",
 ) -> Correlation2DResult:
@@ -52,7 +52,7 @@ def correlation_2d(
     The perturbation coordinate must be numeric, monotonic, and classified as
     linear by its SpectroChemPy ``Coord``. This classification follows the
     coordinate's ``sigdigits`` and ``linearize_below`` settings. A default
-    ``Coord`` uses ``linearize_below=1.0`` and may normalize a near-linear
+    ``Coord`` uses ``linearize_below=0.1`` and may normalize a near-linear
     source axis before this function sees it. Configure ``linearize_below``
     when constructing the coordinate if source deviations must remain visible
     to this validation.
@@ -86,6 +86,12 @@ def correlation_2d(
     The Hilbert–Noda transform assumes equally spaced perturbation points. The
     function follows the ``Coord.linear`` classification rather than applying
     a second numeric tolerance to coordinate differences.
+
+    References
+    ----------
+    I. Noda, "Generalized Two-Dimensional Correlation Method Applicable to
+    Infrared, Raman, and Other Types of Spectroscopy", Applied Spectroscopy
+    47, 1329–1336 (1993), https://doi.org/10.1366/0003702934067694.
     """
     if not isinstance(dataset, NDDataset):
         raise TypeError("dataset must be an NDDataset")
