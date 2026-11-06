@@ -10,6 +10,8 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
+import pytest
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 EXAMPLE_ROOTS = (
     REPO_ROOT / "src" / "spectrochempy" / "examples",
@@ -40,7 +42,7 @@ def _example_files() -> list[Path]:
     )
 
 
-def _module_docstring_start(lines: list[str], source: str) -> int | None:
+def _module_docstring_end(source: str) -> int | None:
     module = ast.parse(source)
     if (
         module.body
@@ -48,15 +50,12 @@ def _module_docstring_start(lines: list[str], source: str) -> int | None:
         and isinstance(module.body[0].value, ast.Constant)
         and isinstance(module.body[0].value.value, str)
     ):
-        return module.body[0].lineno
+        return module.body[0].end_lineno
 
-    for lineno, line in enumerate(lines, start=1):
-        if line.strip().startswith('"""') or line.strip().startswith("'''"):
-            return lineno
     return None
 
 
-def test_thumbnail_directives_precede_module_docstring():
+def test_thumbnail_directives_follow_module_docstring():
     misplaced = []
     for path in _example_files():
         source = path.read_text(encoding="utf-8")
@@ -69,21 +68,16 @@ def test_thumbnail_directives_precede_module_docstring():
         if not directive_indexes:
             continue
 
-        docstring_start = _module_docstring_start(lines, source)
+        docstring_end = _module_docstring_end(source)
         first_cell = next(
             (index for index, line in enumerate(lines) if line.startswith("# %%")),
             None,
         )
         first_directive = directive_indexes[0]
-        ruff_index = next(
-            (index for index, line in enumerate(lines) if line.startswith("# ruff:")),
-            None,
-        )
         if (
             len(directive_indexes) != 1
-            or docstring_start is None
-            or first_directive >= docstring_start - 1
-            or (ruff_index is not None and first_directive != ruff_index + 1)
+            or docstring_end is None
+            or first_directive < docstring_end
             or (first_cell is not None and first_directive > first_cell)
         ):
             misplaced.append(path.relative_to(REPO_ROOT).as_posix())
@@ -137,3 +131,22 @@ def test_gallery_examples_use_datadir_relative_paths():
                 offenders.append(path.relative_to(REPO_ROOT).as_posix())
 
     assert sorted(set(offenders)) == []
+
+
+def test_thumbnail_configuration_is_recognized_by_sphinx_gallery():
+    parser = pytest.importorskip("sphinx_gallery.py_source_parser")
+    for path in _example_files():
+        source = path.read_text(encoding="utf-8")
+        directives = [
+            line
+            for line in source.splitlines()
+            if line.strip().startswith(THUMBNAIL_PREFIXES)
+        ]
+        if not directives:
+            continue
+        configuration = parser.split_code_and_text_blocks(str(path))[0]
+        for directive in directives:
+            key, value = directive.removeprefix("# sphinx_gallery_").split("=", 1)
+            assert configuration.get(key.strip()) == ast.literal_eval(
+                value.strip()
+            ), path

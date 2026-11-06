@@ -4,7 +4,6 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # ruff: noqa
-# sphinx_gallery_thumbnail_number = 2
 """
 PLS regression with a Pipeline
 ==============================
@@ -13,6 +12,8 @@ This example predicts corn moisture from NIR spectra using a SpectroChemPy
 ``Pipeline``. The pipeline learns preprocessing from the calibration spectra
 only, then reuses the fitted preprocessing when predicting validation spectra.
 """
+
+# sphinx_gallery_thumbnail_number = 2
 
 # %%
 # Import the packages

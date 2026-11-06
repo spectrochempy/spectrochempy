@@ -41,6 +41,9 @@ Bug Fixes
   frequency bins to wavenumbers before display rounding to preserve uniform
   bin spacing with the standard tolerance.
 
+- Fixed gallery thumbnail selection by placing Sphinx-Gallery configuration
+  after the example docstring so the requested figure is recognized.
+
 Breaking Changes
 ~~~~~~~~~~~~~~~~
 

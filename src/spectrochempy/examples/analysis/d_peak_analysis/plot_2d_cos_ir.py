@@ -4,7 +4,6 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # ruff: noqa
-# sphinx_gallery_thumbnail_number = 2
 """
 Explore an IR activation series with Noda's 2D-COS
 ==================================================
@@ -23,6 +22,8 @@ We use an NH4Y activation series, remove its saturated low-wavenumber region,
 and illustrate a multivariate polynomial baseline correction before calculating
 synchronous and asynchronous maps with ``correlation_spectroscopy``.
 """
+
+# sphinx_gallery_thumbnail_number = 2
 
 from matplotlib.colors import ListedColormap
 
