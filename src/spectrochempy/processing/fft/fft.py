@@ -7,6 +7,8 @@ __all__ = ["fft", "ifft", "mc", "ps", "ht"]
 
 __dataset_methods__ = __all__
 
+FFT_PREVALIDATION_API = 1
+
 import numpy as np
 from scipy.signal import hilbert
 
@@ -220,6 +222,12 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
                     "time-to-frequency transform, or choose a frequency-domain "
                     "dimension."
                 )
+
+    from spectrochempy.plugins import manager as manager_module  # noqa: PLC0415
+
+    validate = manager_module.plugin_manager.registry.get_handler("fft.validate_input")
+    if validate is not None:
+        validate(dataset, dim=dim, inv=inv, size=size, sizeff=sizeff, **kwargs)
 
     # Validate the original target coordinate before an in-place swap can
     # mutate the caller. Interferogram FFTs build a physical wavenumber axis,

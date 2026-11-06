@@ -19,6 +19,10 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- Added the generic ``fft.validate_input`` plugin hook for read-only FFT/IFFT
+  checks before in-place axis changes, resizing or numerical preparation.
+  Validators can reject a request without leaving the caller partly modified.
+
 
 .. section
 
