@@ -27,6 +27,11 @@ New Features
   spectroscopy maps, with coordinate-aware validation of uniform perturbation
   spacing.
 
+- Added a gallery example for 2D-IR peak finding on an experimental spectrum.
+
+- ``PeakFindingResult`` and ``PeakTable`` now display compact text and HTML
+  tables with units in column headers and a bounded preview of detected peaks.
+
 Bug Fixes
 ~~~~~~~~~
 
