@@ -4,7 +4,6 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # ruff: noqa
-# sphinx_gallery_thumbnail_number = 2
 """
 Find peaks in an experimental 2D-IR spectrum
 ============================================
@@ -27,6 +26,8 @@ The diagonal bleach is negative. See the `dataset README
 <https://github.com/spectrochempy/spectrochempy_data/blob/master/testdata/irdata/2dir/README.md>`_
 for the original filename and preparation details.
 """
+
+# sphinx_gallery_thumbnail_number = 2
 
 import spectrochempy as scp
 

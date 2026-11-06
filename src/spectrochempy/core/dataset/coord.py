@@ -97,7 +97,7 @@ class Coord(NDMath, NDArray):
     dlabel :  str, optional
         Alias of `title` .
     linearize_below : float, optional, default=0.1
-        variation of spacing in % below which the coordinate is linearized. Set it to
+        Variation of spacing in percent below which the coordinate is linearized.
     rounding : bool, optional, default=True
         If True, the data will be rounded to the number of significant
         digits given by `sigdigits`.
@@ -177,7 +177,7 @@ class Coord(NDMath, NDArray):
         if data is None and _size is not None and _increment is not None:
             data = np.arange(_size) * _increment + _offset
 
-        self._linearize_below = kwargs.pop("linearize_below", 1.0)
+        self._linearize_below = kwargs.pop("linearize_below", 0.1)
 
         # extract parameters for linearization and data rounding
         self._sigdigits = kwargs.pop("sigdigits", 4)

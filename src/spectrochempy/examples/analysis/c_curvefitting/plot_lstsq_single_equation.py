@@ -4,7 +4,6 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # ruff: noqa
-# sphinx_gallery_thumbnail_number = 2
 
 """
 Solve a linear equation using LSTSQ
@@ -14,6 +13,8 @@ In this example, we find the least  square solution of a simple linear
 equation.
 
 """
+
+# sphinx_gallery_thumbnail_number = 2
 
 # %%
 import spectrochempy as scp

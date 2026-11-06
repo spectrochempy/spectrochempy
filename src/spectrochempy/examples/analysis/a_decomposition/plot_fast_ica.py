@@ -4,13 +4,14 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # ruff: noqa
-# sphinx_gallery_thumbnail_number = 3
 
 """
 FastICA example
 ===============
 
 """
+
+# sphinx_gallery_thumbnail_number = 3
 
 # %%
 # Import the spectrochempy API package

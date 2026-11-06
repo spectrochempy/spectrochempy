@@ -402,7 +402,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
                 pass  # print()
             if is_ir:
                 kept_frequencies = np.fft.rfftfreq(size)[:coord_size][::-1]
-                newcoord = Coord(kept_frequencies / abs(dw))
+                newcoord = Coord((kept_frequencies / abs(dw)).to("cm^-1"))
             else:
                 shifted_frequencies = np.fft.fftshift(np.fft.fftfreq(coord_size))
                 newcoord = Coord(shifted_frequencies / dw)
@@ -413,7 +413,6 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
             if is_ir:
                 new._units = None
                 newcoord.title = "wavenumbers"
-                newcoord.ito("cm^-1")
             else:
                 newcoord.title = "frequency"
                 newcoord.ito("Hz")

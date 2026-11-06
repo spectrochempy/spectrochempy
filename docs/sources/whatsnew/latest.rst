@@ -23,10 +23,26 @@ New Features
   deterministic positive-maximum detection, anisotropic point/physical spacing,
   and structured ``PeakTable`` results. The historical 1D behavior is unchanged.
 
+- Added ``correlation_spectroscopy`` for synchronous and asynchronous 2D correlation
+  spectroscopy maps, with coordinate-aware validation of real, uniformly spaced
+  perturbation coordinates.
+
 - Added a gallery example for 2D-IR peak finding on an experimental spectrum.
 
 - ``PeakFindingResult`` and ``PeakTable`` now display compact text and HTML
   tables with units in column headers and a bounded preview of detected peaks.
+
+Bug Fixes
+~~~~~~~~~
+
+- Restored the documented 0.1 percent default coordinate linearization
+  tolerance in the ``Coord`` constructor. Use ``linearize_below`` explicitly
+  when a more permissive tolerance is required. FTIR FFT coordinates convert
+  frequency bins to wavenumbers before display rounding to preserve uniform
+  bin spacing with the standard tolerance.
+
+- Fixed gallery thumbnail selection by placing Sphinx-Gallery configuration
+  after the example docstring so the requested figure is recognized.
 
 Breaking Changes
 ~~~~~~~~~~~~~~~~
