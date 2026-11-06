@@ -442,10 +442,16 @@ result2d.table.column("x_position", unit="cm^-1", as_float=True)
 # `sample_position` and `sample_height` giving the exact coordinate and signal
 # value at that point. `position` and `height` remain the refined values and may
 # differ after interpolation.
+#
+# Displaying the result or its table produces a compact HTML table in notebooks
+# and a text table in the terminal. Units appear in column headers, and previews
+# show at most ten peaks with six significant digits. This formatting does not
+# change stored values or exports. Use `result.table.top(5, by="height")` to
+# display the five highest peaks.
 
 # %%
 result = s.find_peaks(height=(0.15, 0.22), prominence=0, as_result=True)
-result.table.to_dict()
+result.table
 
 # %% [markdown]
 # #### Prominence

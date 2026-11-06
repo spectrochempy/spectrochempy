@@ -225,7 +225,7 @@ def test_peak_table_exposes_singular_column_names(simple_peaks_dataset):
     rows = table.to_dict()
 
     assert isinstance(table, PeakTable)
-    assert repr(table) == "PeakTable(n_peaks=3)"
+    assert repr(table).startswith("PeakTable(n_peaks=3)\n")
     assert len(table) == 3
     assert list(table) == rows
     assert "peak_height" in table.columns
