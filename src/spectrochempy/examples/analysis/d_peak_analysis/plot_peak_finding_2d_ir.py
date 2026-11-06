@@ -4,6 +4,7 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # ruff: noqa
+# sphinx_gallery_thumbnail_number = 2
 """
 Find peaks in an experimental 2D-IR spectrum
 ============================================
@@ -33,6 +34,7 @@ import spectrochempy as scp
 # Download and read the 2D matrix
 # --------------------------------
 dataset = scp.read("irdata/2dir/silicalite_210C_0ps_2DIR.scp")
+_ = dataset.plot(method="lines", figsize=(7, 5), colorbar=True)
 
 # %%
 # Detect positive cross-peaks and negative diagonal bleach
