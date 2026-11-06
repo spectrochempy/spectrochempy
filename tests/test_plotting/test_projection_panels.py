@@ -485,3 +485,19 @@ def test_removing_projections_clears_the_previous_panel_title(spectral_map):
     assert main.get_title() == ""
     spectral_map.plot_contour(ax=main, projections="x", clear=False, show=False)
     assert main._scp_projection_axes["top"].get_title() == ""
+
+
+@pytest.mark.parametrize("selection", [None, True, "z"])
+def test_map_with_nonstandard_dimensions_uses_only_existing_preferences(
+    spectral_map, selection
+):
+    spectral_map.dims = ["z", "x"]
+    options = {} if selection is None else {"projections": selection}
+    result = spectral_map.plot_image(return_dict=True, show=False, **options)
+    expected = {None: {"main"}, True: {"main", "top", "right"}, "z": {"main", "right"}}
+    assert set(result["axes"]) == expected[selection]
+    if selection is not None:
+        np.testing.assert_allclose(
+            result["axes"]["right"].lines[0].get_xdata(),
+            spectral_map.data.sum(axis=1),
+        )

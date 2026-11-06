@@ -79,13 +79,14 @@ def _prepare_projections(dataset, method, kwargs, prefs):
     selection = kwargs.get("projections")
     if selection is None:
         all_axes = kwargs.get("show_projections", prefs.show_projections)
+        legacy_defaults = {"x": prefs.show_projection_x, "y": prefs.show_projection_y}
         selection = [
             dim
             for dim in dimensions
             if all_axes
             or kwargs.get(
                 f"show_projection_{dim}",
-                getattr(prefs, f"show_projection_{dim}", False),
+                legacy_defaults.get(dim, False),
             )
         ]
         selection.extend(dim for dim in data if dim not in selection)
