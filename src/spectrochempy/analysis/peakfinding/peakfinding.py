@@ -22,6 +22,7 @@ __dataset_methods__ = ["find_peaks"]
 import csv
 from collections.abc import Mapping
 from copy import deepcopy
+from html import escape
 from pathlib import Path
 
 import numpy as np
@@ -95,6 +96,80 @@ def _column_sort_value(value, *, unit=None):
     if unit is not None and hasattr(value, "to"):
         value = value.to(unit)
     return _as_scalar(getattr(value, "magnitude", value))
+
+
+def _peak_table_preview(table):
+    """Build a bounded display without altering the unit-aware source rows."""
+    rows = table.to_dict()
+    headers = []
+    columns = []
+    for name in table.columns:
+        values = [row.get(name) for row in rows]
+        unit = next(
+            (value.units for value in values if isinstance(value, Quantity)), None
+        )
+        if unit is not None:
+            try:
+                values = [
+                    None if value is None else value.to(unit).magnitude
+                    for value in values
+                ]
+            except (AttributeError, DimensionalityError, TypeError, ValueError):
+                unit = None
+                values = [row.get(name) for row in rows]
+        headers.append(name if unit is None else f"{name} ({unit:~P})")
+        columns.append([_peak_display_value(value) for value in values[:10]])
+    cells = list(zip(*columns, strict=True)) if columns else []
+    return headers, cells, len(rows)
+
+
+def _peak_display_value(value):
+    """Format display precision independently of stored numerical precision."""
+    if value is None:
+        return ""
+    value = _as_scalar(value)
+    if isinstance(value, (float, np.floating)):
+        return f"{value:.6g}"
+    return str(value)
+
+
+def _peak_table_text(table, summary):
+    """Render a compact terminal table."""
+    headers, rows, count = _peak_table_preview(table)
+    widths = [
+        max(len(header), *(len(row[i]) for row in rows)) if rows else len(header)
+        for i, header in enumerate(headers)
+    ]
+
+    def line(values):
+        return "  ".join(
+            value.rjust(width) for value, width in zip(values, widths, strict=True)
+        )
+
+    lines = [summary, line(headers), line(["-" * width for width in widths])]
+    lines.extend(line(row) for row in rows)
+    if count > len(rows):
+        lines.append(f"Showing {len(rows)} of {count} peaks.")
+    return "\n".join(lines)
+
+
+def _peak_table_html(table, summary):
+    """Render escaped HTML suitable for notebook and gallery display."""
+    headers, rows, count = _peak_table_preview(table)
+    heading = "".join(f'<th scope="col">{escape(header)}</th>' for header in headers)
+    body = "".join(
+        "<tr>" + "".join(f"<td>{escape(value)}</td>" for value in row) + "</tr>"
+        for row in rows
+    )
+    footer = (
+        f"<p>Showing {len(rows)} of {count} peaks.</p>" if count > len(rows) else ""
+    )
+    return (
+        '<div class="scp-output" style="overflow-x: auto">'
+        f"<table><caption>{escape(summary)}</caption>"
+        f"<thead><tr>{heading}</tr></thead><tbody>{body}</tbody></table>"
+        f"{footer}</div>"
+    )
 
 
 _BASE_PEAK_COLUMNS = (
@@ -226,6 +301,11 @@ class PeakTable:
     ``PeakTable`` uses user-facing singular column names such as
     ``peak_height``, ``prominence`` and ``width``. The raw SciPy property
     dictionary remains available on :class:`PeakFindingResult`.
+
+    Text and HTML displays show at most ten peaks, with compatible units in
+    column headers and six significant digits. Stored values and exports retain
+    their original precision. Use :meth:`top` or :meth:`head` to select an
+    explicit subset for display.
     """
 
     __slots__ = (
@@ -272,7 +352,10 @@ class PeakTable:
         return iter(self.to_dict())
 
     def __repr__(self):
-        return f"PeakTable(n_peaks={len(self)})"
+        return _peak_table_text(self, f"PeakTable(n_peaks={len(self)})")
+
+    def _repr_html_(self):
+        return _peak_table_html(self, f"PeakTable(n_peaks={len(self)})")
 
     @property
     def columns(self):
@@ -455,6 +538,9 @@ class PeakFindingResult:
     -----
     The object is intentionally dependency-light. It exposes Python-native
     table helpers and does not require pandas.
+
+    Text and HTML displays summarize the number of peaks and selected analysis
+    dimensions, followed by a preview of :attr:`table`.
     """
 
     __slots__ = (
@@ -495,7 +581,14 @@ class PeakFindingResult:
         yield self.properties
 
     def __repr__(self):
-        return f"PeakFindingResult(n_peaks={len(self)})"
+        return _peak_table_text(self.table, self._display_summary())
+
+    def _repr_html_(self):
+        return _peak_table_html(self.table, self._display_summary())
+
+    def _display_summary(self):
+        dims = f", dims={self.analysis_dims!r}" if self.analysis_dims else ""
+        return f"PeakFindingResult(n_peaks={len(self)}{dims})"
 
     @property
     def table(self):
