@@ -12,34 +12,12 @@ This example loads a pump-probe 2D-IR spectrum, finds positive cross-peaks and
 negative diagonal bleach peaks, and inspects their coordinates.
 """
 
-import csv
-
 import spectrochempy as scp
 
 # %%
 # Download and read the 2D matrix
 # --------------------------------
-data_file = "irdata/2dir/silicalite_210C_0ps_2DIR.csv"
-csv_path = scp.preferences.datadir / data_file
-if not csv_path.exists():
-    scp.read_csv(data_file, download_only=True)
-
-with csv_path.open(encoding="utf-8", newline="") as stream:
-    rows = list(csv.reader(stream))
-
-pump = [float(value) for value in rows[0][1:]]
-probe = [float(row[0]) for row in rows[1:]]
-signal = [[float(value) for value in row[1:]] for row in rows[1:]]
-
-dataset = scp.NDDataset(
-    signal,
-    coordset=[
-        scp.Coord(probe, title="probe wavenumber", units="cm^-1"),
-        scp.Coord(pump, title="pump wavenumber", units="cm^-1"),
-    ],
-    title="2D-IR difference absorbance",
-    units="absorbance",
-)
+dataset = scp.read("irdata/2dir/silicalite_210C_0ps_2DIR.scp")
 
 prefs = scp.preferences
 prefs.figure.figsize = (7, 5)
