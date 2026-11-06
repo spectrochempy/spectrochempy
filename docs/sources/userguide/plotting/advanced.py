@@ -15,7 +15,7 @@
 # ---
 
 # %% [markdown]
-# # Advanced Matplotlib Integration
+# # Advanced Plotting and Matplotlib Integration
 #
 # SpectroChemPy plots return Matplotlib Axes objects, giving you full
 # access to Matplotlib's capabilities.
@@ -63,6 +63,119 @@ _ = ds[:, 1800.0:1500.0].plot(ax=ax2)
 _ = ax2.set_title("Water bending Region")
 
 plt.tight_layout()
+
+# %% [markdown]
+# ## External Spectra Above a Map
+#
+# A calculated projection summarizes the map itself. External reference
+# spectra answer a different question: what did the measured spectra look
+# like at selected times? Here the map shows deviations from the mean while
+# the top curves show the original start and end spectra.
+#
+# Select 1250–4000 cm$^{-1}$ to exclude the saturated low-wavenumber region.
+# Subsample for a compact plotting demonstration; this is not preprocessing
+# guidance for quantitative analysis.
+
+# %%
+map_data = ds[:, 4000.0:1250.0][:, ::10]
+map_data.y -= map_data.y[0]
+map_data.y.ito("hour")
+map_data.y.title = "Time on stream"
+deviations = map_data - map_data.mean(dim="y")
+references = [map_data[0].squeeze(), map_data[-1].squeeze()]
+reference_options = {
+    "labels": ["Start", "End"],
+    "color": ["gray", "black"],
+    "legend": True,
+    "intensity_label": "Absorbance",
+}
+panel = deviations.plot_contour(
+    projections="x",
+    projection_data={"x": references},
+    projection_kwargs={"x": reference_options},
+    projection_size=0.3,
+    positive_color="red",
+    negative_color="blue",
+    positive_linestyle="-",
+    negative_linestyle="--",
+    colorbar=True,
+    title="Deviations from the mean: red positive, blue negative",
+    return_dict=True,
+    figsize=(8, 5),
+)
+
+# %% [markdown]
+# `projection_data` maps a retained dimension to one 1D dataset, a list of
+# datasets, or a 2D series with one curve per row. Its coordinates may use a
+# different sampling grid: compatible units are converted without interpolation
+# or input mutation. Incompatible units and non-overlapping ranges are rejected.
+# Reference signal units are independent of map signal units, allowing, for
+# example, absorbance spectra above a squared-absorbance correlation map.
+#
+# Signed colors use a zero-centered palette shared with the colorbar and take
+# precedence over `cmap` and `norm`. Red positive and blue dashed negative are
+# display conventions, not automatic chemical assignments.
+#
+# `return_dict=True` exposes `panel["fig"]` and `panel["axes"]`, with roles
+# `main`, `top` and/or `right`. To change the styles, use `projection_kwargs`
+# rather than accessing Matplotlib collections.
+
+# %%
+print(sorted(panel["axes"]))
+
+# %% [markdown]
+# ## Composing Complete Panels with scp
+#
+# `multiplot` owns the grid and its marginal panels. Common options apply to
+# every map; `panel_kwargs` supplies one dictionary per dataset for differences
+# such as reference spectra, reducer or contour levels. Here one panel shows
+# external spectra and the other shows the maximum of the deviation map.
+
+# %%
+comparison = scp.multiplot(
+    [deviations, deviations],
+    ncol=2,
+    method="contour",
+    labels=["Measured reference spectra", "Calculated maximum projection"],
+    projections="x",
+    positive_color="red",
+    negative_color="blue",
+    negative_linestyle="--",
+    panel_kwargs=[
+        {
+            "projection_data": {"x": references},
+            "projection_kwargs": {"x": reference_options},
+        },
+        {"projection_reducer": "max"},
+    ],
+    return_dict=True,
+    figsize=(12, 5),
+)
+
+# %% [markdown]
+# `comparison["axes_dict"]` identifies the main grid axes, while
+# `comparison["panel_axes"]["axe11"]["top"]` identifies the first top panel.
+# `height_ratios` and `width_ratios` set the relative grid sizes. Mixed 1D/2D
+# grids use a method list; avoid sharing axes for different physical quantities.
+
+# %%
+_ = scp.multiplot(
+    [references[0], deviations],
+    nrow=2,
+    method=["pen", "contour"],
+    height_ratios=[1, 3],
+    labels=["Start spectrum", "Deviations from the mean"],
+    figsize=(8, 7),
+)
+
+# %% [markdown]
+# For the scientific interpretation and preprocessing of synchronous and
+# asynchronous maps, see the
+# [NH4Y 2D-COS gallery example](../../gettingstarted/examples/gallery/auto_examples_analysis/d_peak_analysis/plot_2d_cos_ir.rst).
+# It uses the same composition API with corrected reference spectra above
+# signed correlation contours, independent amplitude scales and square maps.
+# `equal_aspect=True` is appropriate there because both map axes use the same
+# spectral units; it is not appropriate for the time/wavenumber maps above.
 
 
 # %% [markdown]
@@ -134,6 +247,23 @@ with TemporaryDirectory() as tmpdir:
     png_path = Path(tmpdir) / "spectrum.png"
     _ = ds1.plot_pen(output=png_path, show=False)
     print(f"wrote {png_path.name}: {png_path.stat().st_size} bytes")
+
+# %% [markdown]
+# Export a composite with `output` on the composing call. All map, reference,
+# legend and colorbar artists are drawn before the figure is saved once:
+
+# %%
+with TemporaryDirectory() as tmpdir:
+    _ = scp.multiplot(
+        [deviations, deviations],
+        ncol=2,
+        method="contour",
+        projections="x",
+        projection_data={"x": references},
+        projection_kwargs={"x": reference_options},
+        output=Path(tmpdir) / "complete_panels.png",
+        show=False,
+    )
 
 # %% [markdown]
 # Matplotlib decides the file format from the extension, and vector formats

@@ -1917,7 +1917,9 @@ def plot_2D(dataset, method=None, **kwargs):
                     else "#b2182b",
                 ]
             )
-            bound = float(np.ma.max(np.ma.abs(zdata))) or 1.0
+            zdata = np.ma.masked_invalid(zdata)
+            bound = float(np.ma.max(np.ma.abs(zdata))) if zdata.count() else 0.0
+            bound = bound or 1.0
             norm = TwoSlopeNorm(vmin=-bound, vcenter=0.0, vmax=bound)
 
         # Initialize mappable tracker for colorbar

@@ -548,7 +548,9 @@ def multiplot(
                     **options,
                 )
 
-                ax.set_title(label, fontsize=8)
+                from spectrochempy.plotting._projections import _set_panel_title
+
+                _set_panel_title(ax, label, fontsize=8)
                 if sharex and irow < nrow - 1:
                     ax.xaxis.label.set_visible(False)
                 if sharey and icol > 0:

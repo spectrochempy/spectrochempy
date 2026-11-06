@@ -88,8 +88,7 @@ def _prepare_projections(dataset, method, kwargs, prefs):
                 getattr(prefs, f"show_projection_{dim}", False),
             )
         ]
-        if not selection and data:
-            selection = list(data)
+        selection.extend(dim for dim in data if dim not in selection)
     elif isinstance(selection, (bool, np.bool_)):
         selection = list(dimensions) if selection else []
     elif isinstance(selection, str):
@@ -259,6 +258,7 @@ def _draw_projections(ax, prepared, *, clear):
             marginal.tick_params(labelleft=False)
             marginal.set_xlabel(spec["label"])
         marginal.set_title(spec["title"])
+        marginal._scp_projection_title = spec["title"]
         if spec["legend"]:
             marginal.legend(
                 loc=spec["legend"] if isinstance(spec["legend"], str) else "best"
@@ -267,6 +267,21 @@ def _draw_projections(ax, prepared, *, clear):
     ax.set_xlim(xlim)
     ax.set_ylim(ylim)
     ax._scp_projection_axes = marginals
+    if "top" in marginals:
+        _set_panel_title(ax, ax.get_title())
+
+
+def _set_panel_title(ax, title, **kwargs):
+    top = getattr(ax, "_scp_projection_axes", {}).get("top")
+    if top is None:
+        ax.set_title(title, **kwargs)
+        return
+    ax.set_title("")
+    projection_title = getattr(top, "_scp_projection_title", "")
+    top.set_title(
+        "\n".join(text for text in (title, projection_title) if text),
+        **(kwargs if title else {}),
+    )
 
 
 def _panel_axes(ax):

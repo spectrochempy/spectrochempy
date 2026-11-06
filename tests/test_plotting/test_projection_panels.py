@@ -278,6 +278,49 @@ def test_nan_samples_follow_contour_masking(spectral_map):
     )
 
 
+@pytest.mark.parametrize("nonfinite", [np.nan, np.inf, -np.inf])
+@pytest.mark.parametrize("method", ["contour", "contourf"])
+def test_signed_normalization_ignores_nonfinite_values(spectral_map, nonfinite, method):
+    values = spectral_map.data.copy()
+    values[0, 0] = nonfinite
+    spectral_map.data = values
+    ax = spectral_map.plot(
+        method=method,
+        positive_color="red",
+        negative_color="blue",
+        show=False,
+    )
+    assert ax.collections[0].norm.vmin == -5.0
+    assert ax.collections[0].norm.vmax == 5.0
+
+
+def test_reference_dimensions_extend_implicit_projection_preferences(spectral_map):
+    scp.preferences.show_projection_x = True
+    result = spectral_map.plot_contour(
+        projection_data={"y": spectral_map[:, 0].squeeze()},
+        return_dict=True,
+        show=False,
+    )
+    assert set(result["axes"]) == {"main", "top", "right"}
+    np.testing.assert_allclose(
+        result["axes"]["right"].lines[0].get_xdata(),
+        spectral_map.data[:, 0],
+    )
+
+
+@pytest.mark.parametrize("method", ["contour", "contourf"])
+def test_fully_masked_signed_map_has_finite_fallback_range(spectral_map, method):
+    spectral_map.mask = np.ones(spectral_map.shape, dtype=bool)
+    ax = spectral_map.plot(
+        method=method,
+        levels=[-1, 0, 1],
+        positive_color="red",
+        show=False,
+    )
+    assert ax.collections[0].norm.vmin == -1.0
+    assert ax.collections[0].norm.vmax == 1.0
+
+
 def test_reversed_index_axis_projects_the_displayed_rows():
     dataset = scp.NDDataset(np.arange(12.0).reshape(3, 4))
     result = dataset.plot_contour(
@@ -364,3 +407,30 @@ def test_none_sign_colors_keep_default_palette(spectral_map):
         spectral_map.plot_contour(positive_color=None, negative_color=None, show=False)
         is not None
     )
+
+
+@pytest.mark.parametrize("grid", [False, True])
+def test_panel_title_is_above_top_projection(spectral_map, grid):
+    options = {
+        "projections": "x",
+        "projection_kwargs": {"x": {"title": "Projection"}},
+        "show": False,
+        "return_dict": True,
+    }
+    if grid:
+        result = scp.multiplot(
+            [spectral_map, spectral_map],
+            ncol=2,
+            labels=["Map A", "Map B"],
+            method="contour",
+            **options,
+        )
+        axes = result["panel_axes"]["axe11"]
+    else:
+        result = spectral_map.plot_contour(title="Map A", **options)
+        axes = result["axes"]
+    result["fig"].canvas.draw()
+    assert axes["main"].get_title() == ""
+    assert axes["top"].get_title() == "Map A\nProjection"
+    renderer = result["fig"].canvas.get_renderer()
+    assert axes["top"].title.get_window_extent(renderer).y0 > axes["top"].bbox.y1
