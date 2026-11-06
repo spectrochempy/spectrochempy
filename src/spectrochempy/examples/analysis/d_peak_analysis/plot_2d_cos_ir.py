@@ -25,8 +25,6 @@ synchronous and asynchronous maps with ``correlation_spectroscopy``.
 
 # sphinx_gallery_thumbnail_number = 2
 
-from matplotlib.colors import ListedColormap
-
 import spectrochempy as scp
 
 # %%
@@ -120,8 +118,8 @@ result = scp.correlation_spectroscopy(corrected[:, ::4], perturbation_dim="y")
 # their squared signal units; the panel titles report their absolute maxima.
 # Contours are at ±2.5, 5, 10, 20, 35, 50, 65, 80 and 90 percent of each
 # maximum. Zero is omitted; red solid contours are positive and blue dashed
-# contours are negative. A two-color Matplotlib palette keeps weak contours
-# legible on white; all spectral and contour rendering uses the scp API.
+# contours are negative. Explicit sign colors keep weak contours legible on
+# white; all rendering and panel composition use the scp API.
 maps = [result.synchronous, result.asynchronous]
 maxima = [float(abs(dataset.data).max()) for dataset in maps]
 display_maps = []
@@ -133,81 +131,61 @@ for dataset, maximum in zip(maps, maxima, strict=True):
 
 fractions = [0.025, 0.05, 0.1, 0.2, 0.35, 0.5, 0.65, 0.8, 0.9]
 levels = [-value for value in fractions[::-1]] + fractions
+indices = [0, corrected.shape[0] // 2, corrected.shape[0] - 1]
+references = [corrected[index].squeeze() for index in indices]
+reference_style = {
+    "labels": ["Start", "Middle", "End"],
+    "color": ["0.5", "#a08010", "0.1"],
+    "intensity_label": "Corrected\nabsorbance",
+}
+panel_options = [
+    {
+        "projection_kwargs": {
+            "x": {
+                **reference_style,
+                "title": f"{title}: max |C| = {maximum:.3g} {dataset.units:~P}",
+                "legend": "upper center" if index == 0 else False,
+            }
+        }
+    }
+    for index, (title, maximum, dataset) in enumerate(
+        zip(["Synchronous", "Asynchronous"], maxima, maps, strict=True)
+    )
+]
+
+# ``projections=("x",)`` selects the retained spectral dimension. Supplying
+# ``projection_data`` puts the corrected reference spectra in its top panel;
+# these curves are not sums of the correlation maps. Without external data,
+# ``projection_reducer`` selects a sum, mean or maximum over the other axis.
+# The plotting API owns alignment, signed contour styles and the complete
+# figure lifecycle. Use ``output="correlation.png"`` to save the whole grid.
 panels = scp.multiplot(
     display_maps,
     method="contour",
     ncol=2,
     levels=levels,
-    cmap=ListedColormap(["#2166ac", "#b2182b"]),
-    vmin=-1.0,
-    vmax=1.0,
-    contrast_safe=False,
-    linewidth=0.8,
+    positive_color="#b2182b",
+    negative_color="#2166ac",
+    positive_linestyle="-",
+    negative_linestyle="--",
+    projections=("x",),
+    projection_data={"x": references},
+    projection_size=0.25,
+    panel_kwargs=panel_options,
+    equal_aspect=True,
+    diagonal=True,
+    xlim=(4000, 1250),
+    ylim=(4000, 1250),
+    xlabel="Wavenumber / cm$^{-1}$",
+    ylabel="Wavenumber / cm$^{-1}$",
     colorbar=False,
     figsize=(12, 8),
+    suptitle=(
+        "NH4Y activation: 2D-COS\n"
+        "Red solid: positive; blue dashed: negative — levels scaled separately"
+    ),
     return_dict=True,
     show=False,
-    mpl_event=False,
-)
-
-# SpectroChemPy creates and draws all plots. The returned Figure and Axes
-# provide the custom layout: a short spectral panel above each square map.
-# These are corrected reference spectra, not sums of the correlation maps.
-fig = panels["fig"]
-grid = fig.add_gridspec(
-    2,
-    2,
-    height_ratios=[1, 4],
-    left=0.08,
-    right=0.97,
-    bottom=0.09,
-    top=0.88,
-    hspace=0.08,
-    wspace=0.25,
-)
-indices = [0, corrected.shape[0] // 2, corrected.shape[0] - 1]
-references = [corrected[index].squeeze() for index in indices]
-for column, (ax, title, maximum) in enumerate(
-    zip(panels["axes"], ["Synchronous", "Asynchronous"], maxima, strict=True)
-):
-    ax.set_subplotspec(grid[1, column])
-    for contours in ax.collections:
-        contours.set_linestyle(["dashed"] * len(fractions) + ["solid"] * len(fractions))
-    ax.set_xlim(4000, 1250)
-    ax.set_ylim(4000, 1250)
-    ax.set_aspect("equal")
-    ax.plot([4000, 1250], [4000, 1250], color="0.6", linestyle=":", linewidth=0.7)
-    ax.set_xlabel("Wavenumber / cm$^{-1}$")
-    ax.set_ylabel("Wavenumber / cm$^{-1}$")
-    top = fig.add_subplot(grid[0, column], sharex=ax)
-    _ = scp.plot_multiple(
-        references,
-        method="pen",
-        ax=top,
-        labels=["Start", "Middle", "End"],
-        color=["0.5", "#a08010", "0.1"],
-        legend="upper left" if column == 0 else None,
-        linewidth=1.0,
-        autolayout=False,
-        show=False,
-    )
-    top.set_title(f"{title}: max |C| = {maximum:.3g} {maps[column].units:~P}")
-    top.set_ylabel("Corrected\nabsorbance")
-    top.set_xlabel("")
-    top.tick_params(labelbottom=False)
-    fig.canvas.draw()
-    position = ax.get_position()
-    top_position = top.get_position()
-    top.set_position(
-        [position.x0, top_position.y0, position.width, top_position.height]
-    )
-
-fig.set_layout_engine(None)
-_ = fig.suptitle(
-    "NH4Y activation: 2D-COS\n"
-    "Red solid: positive; blue dashed: negative — levels scaled separately",
-    y=0.98,
-    fontsize=14,
 )
 
 # %%

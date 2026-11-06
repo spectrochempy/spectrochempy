@@ -123,6 +123,7 @@ def multiplot(
     suptitle_color="k",
     mpl_event=True,
     return_dict=False,
+    panel_kwargs=None,
     **kwargs,
 ):
     """
@@ -200,8 +201,9 @@ def multiplot(
         Connect the interactive Matplotlib layout callbacks. Callbacks are
         connected only when Matplotlib is in interactive mode.
     return_dict : bool, default=False
-        Return the figure, axes array, and named axes dictionary instead of
-        only the axes collection.
+        Return fig, axes (main axes array), axes_dict and panel_axes instead of
+        only the axes collection. panel_axes maps each grid name to the roles
+        main and any top/right marginal axes.
     show : bool, optional, default: True
         Whether SpectroChemPy should perform its explicit display step after
         plotting. In notebook environments, figures may still render inline
@@ -210,8 +212,19 @@ def multiplot(
         File name where the whole grid is saved. Saving happens once every
         panel is drawn and the layout is finalized, so titles, shared limits,
         and the tight layout are part of the file.
+    panel_kwargs : list of dict, optional
+        Per-panel plot options, merged over common kwargs. Supply one dictionary
+        per dataset. Use this for different reference spectra, projection styles,
+        contour levels or colorbar choices. Lifecycle and method options remain
+        owned by the grid and cannot be overridden here.
+    height_ratios, width_ratios : sequence of float, optional
+        Relative row heights and column widths.
     **kwargs
-        Additional figure-layout, style, and dataset-plot options.
+        Additional figure-layout, style, and dataset-plot options. Marginal
+        projection panels are supported by contour/contourf maps, including
+        their projection_data and projection_kwargs options. Mixed 1D and 2D
+        datasets may use a method list; sharing axes across incompatible
+        physical quantities is the caller's responsibility.
 
     Returns
     -------
@@ -308,26 +321,59 @@ def multiplot(
         #     # not enough labels given in this list.
         #     raise ValueError('Not enough labels given in this list')
 
+        if panel_kwargs is None:
+            panel_kwargs = [{} for _ in datasets]
+        if len(panel_kwargs) != len(datasets) or any(
+            not isinstance(options, dict) for options in panel_kwargs
+        ):
+            raise ValueError(
+                "panel_kwargs must contain one options dictionary per dataset"
+            )
+        reserved = {
+            "ax",
+            "fig",
+            "show",
+            "output",
+            "clear",
+            "autolayout",
+            "method",
+            "return_dict",
+            "data_transposed",
+        }
+        if any(reserved.intersection(options) for options in panel_kwargs):
+            raise ValueError(
+                "panel_kwargs cannot override plot lifecycle or method options"
+            )
+
         if nrow == ncol and nrow == 1 and not show_transposed and single:
             # obviously a single plot, return it
             current_method = normalize_multiplot_method(
                 method, getattr(datasets[0], "ndim", None)
             )
-            return datasets[0].plot(
+            options = {**kwargs, **panel_kwargs[0]}
+            ax = datasets[0].plot(
                 method=current_method,
                 show=user_show,
                 output=user_output,
-                **kwargs,
+                **options,
             )
+            if return_dict:
+                from spectrochempy.plotting._projections import _panel_axes
+
+                return {
+                    "fig": ax.figure,
+                    "axes": np.array([ax]),
+                    "axes_dict": {"axe11": ax},
+                    "panel_axes": {"axe11": _panel_axes(ax)},
+                }
+            return ax
         if nrow * ncol < len(datasets):
             nrow = ncol = len(datasets) // 2
             if nrow * ncol < len(datasets):
                 ncol += 1
 
         ndims = {dataset.ndim for dataset in datasets}
-        if len(ndims) > 1:
-            raise NotImplementedError("mixed dataset shape.")
-        ndim = list(ndims)[0]
+        ndim = next(iter(ndims)) if len(ndims) == 1 else None
 
         # create the subplots and plot the ndarrays
         # ------------------------------------------------------------------------
@@ -356,6 +402,12 @@ def multiplot(
         # axes is dictionary with keys such as 'axe12', where  the fist number
         # is the row and the second the column
         axes = {}
+        grid = fig.add_gridspec(
+            nrow,
+            ncol,
+            height_ratios=kwargs.pop("height_ratios", None),
+            width_ratios=kwargs.pop("width_ratios", None),
+        )
 
         # limits
         xlims = []
@@ -434,7 +486,7 @@ def multiplot(
                     or (sharex == "col" and irow == 0)
                     or (sharey == "row" and icol == 0)
                 ):
-                    ax = fig.add_subplot(nrow, ncol, irow * ncol + icol + 1)
+                    ax = fig.add_subplot(grid[idx])
 
                 else:
                     if sharex == "all":
@@ -455,7 +507,7 @@ def multiplot(
                     elif sharez == "col":
                         _sharez = axes[f"axe1{icol + 1}"]
 
-                    ax = _Axes(fig, nrow, ncol, idx + 1, sharex=_sharex, sharey=_sharey)
+                    ax = _Axes(fig, grid[idx], sharex=_sharex, sharey=_sharey)
                     ax = fig.add_subplot(ax)
 
                 ax._sharez = _sharez  # we add a new share info to the ax.
@@ -484,16 +536,16 @@ def multiplot(
 
                 transposed = bool(show_transposed and irow == 1)
 
+                options = {"colorbar": colorbar, **kwargs, **panel_kwargs[idx]}
                 dataset.plot(
                     method=current_method,
                     ax=ax,
                     clear=False,
                     autolayout=False,
-                    colorbar=colorbar,
                     data_transposed=transposed,
                     # the grid owns the single display step performed at the end
                     show=False,
-                    **kwargs,
+                    **options,
                 )
 
                 ax.set_title(label, fontsize=8)
@@ -544,7 +596,11 @@ def multiplot(
                 renderer = canvas.get_renderer()
 
             # Rest of tight_layout code
-            axeslist = list(axes.values())
+            from spectrochempy.plotting._projections import _panel_axes
+
+            axeslist = [
+                panel for ax in axes.values() for panel in _panel_axes(ax).values()
+            ]
             subplots_list = list(get_subplotspec_list(axeslist))
             kw = get_tight_layout_figure(
                 fig,
@@ -601,5 +657,9 @@ def multiplot(
                 "fig": fig,
                 "axes": np.array(list(axes.values())),
                 "axes_dict": axes,
+                "panel_axes": {
+                    name: {"main": ax, **getattr(ax, "_scp_projection_axes", {})}
+                    for name, ax in axes.items()
+                },
             }
         return np.array(list(axes.values()))
