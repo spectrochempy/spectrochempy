@@ -23,6 +23,9 @@ New Features
   checks before in-place axis changes, resizing or numerical preparation.
   Validators can reject a request without leaving the caller partly modified.
 
+- ``find_peaks`` now supports explicitly selected true 2D spectra with
+  deterministic positive-maximum detection, anisotropic point/physical spacing,
+  and structured ``PeakTable`` results. The historical 1D behavior is unchanged.
 
 .. section
 
