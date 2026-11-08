@@ -46,33 +46,48 @@ def _parameter_value(value, unit, name, *, interval=False):
                 quantity = Quantity(magnitude, _interval_unit(quantity.units))
                 unit = _interval_unit(unit)
             magnitude = quantity.to(unit).magnitude
-        magnitude = float(magnitude)
+        numeric = float(magnitude)
     except PintError as exc:
         raise ValueError(f"Incompatible units for {name}") from exc
     except OverflowError as exc:
         raise ValueError(f"{name} must be a finite real scalar") from exc
-    if not np.isfinite(magnitude):
+    if not np.isfinite(numeric):
         raise ValueError(f"{name} must be a finite real scalar")
-    return magnitude
+    return int(magnitude) if isinstance(magnitude, (int, np.integer)) else numeric
+
+
+def _scaled_offsets(values, center, width):
+    """Subtract the center before rounding an integer grid to floating point."""
+    if values.dtype.kind in "iu" and int(center) == center:
+        displacement = (values.astype(object) - int(center)).astype(float)
+    else:
+        dtype = np.result_type(values.dtype, np.float64)
+        displacement = values.astype(dtype) - float(center)
+    offsets = displacement / float(width)
+    overflow = np.isinf(displacement)
+    offsets[overflow] = values[overflow] / float(width) - float(center) / float(width)
+    return offsets
 
 
 def _evaluate_separable_peak(shape, coordinates, peak):
     """Evaluate one normalized peak using a broadcast vector for each axis."""
-    contribution = np.full(shape, peak["height"])
-    with np.errstate(over="ignore", invalid="ignore"):
+    height = peak["height"]
+    contribution = np.full(shape, height, dtype=float)
+    if height == 0:
+        return contribution
+
+    profiles = []
+    with np.errstate(over="ignore", invalid="ignore", under="ignore"):
         for axis, (dim, values) in enumerate(coordinates.items()):
             params = peak["axes"][dim]
             model = params["model"]
-            center, width = params["center"], params["width"]
-            displacement = values - center
-            offsets = displacement / width
-            overflow = np.isinf(displacement)
-            offsets[overflow] = values[overflow] / width - center / width
+            offsets = _scaled_offsets(values, params["center"], params["width"])
             if model == "lorentzian":
                 tail = np.abs(offsets) > 1
                 reciprocal = 0.5 / offsets[tail]
-                offsets[tail] = 0.5 * reciprocal
-                profile = lorentzian(offsets, normalized=False)
+                arguments = offsets.copy()
+                arguments[tail] = 0.5 * reciprocal
+                profile = lorentzian(arguments, normalized=False)
                 profile[tail] *= reciprocal**2
             else:
                 profile = gaussian(
@@ -80,7 +95,20 @@ def _evaluate_separable_peak(shape, coordinates, peak):
                 )
             axis_shape = [1] * len(shape)
             axis_shape[axis] = values.size
-            contribution *= profile.reshape(axis_shape)
+            profile = profile.reshape(axis_shape)
+            profiles.append((model, offsets.reshape(axis_shape), profile))
+            contribution *= profile
+
+        if any(np.any(profile < np.finfo(float).tiny) for _, _, profile in profiles):
+            recover = np.zeros(shape, dtype=bool)
+            log_magnitude = np.full(shape, np.log(float(abs(height))))
+            for model, offsets, profile in profiles:
+                recover |= profile < np.finfo(float).tiny
+                if model == "lorentzian":
+                    log_magnitude -= 2 * (np.log(2) + np.log(np.hypot(0.5, offsets)))
+                else:
+                    log_magnitude -= 4 * np.log(2) * offsets**2
+            contribution[recover] = np.copysign(np.exp(log_magnitude[recover]), height)
     return contribution
 
 
@@ -146,7 +174,7 @@ def simulate_peaks(template, peaks):
             or not np.isfinite(values).all()
         ):
             raise ValueError(f"Dimension {dim!r} requires a finite numeric coordinate")
-        coordinates[dim] = values.astype(float)
+        coordinates[dim] = values
         units[dim] = coord.units
 
     parameters = []

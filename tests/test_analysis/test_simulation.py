@@ -120,6 +120,30 @@ def test_lorentzian_tail_remains_finite_beyond_square_overflow():
     np.testing.assert_allclose(result.data, [1e308, 0.0025], rtol=1e-10)
 
 
+def test_integer_grid_preserves_single_point_displacements_above_float_precision():
+    origin = 2**53
+    coord = scp.Coord([origin, origin + 1], dtype=np.int64)
+    template = scp.NDDataset([0, 0], coordset=[coord])
+    peak = {"height": 1, "axes": {"x": _axis("lorentzian", center=origin)}}
+
+    np.testing.assert_allclose(template.simulate_peaks([peak]).data, [1, 0.5])
+
+
+@pytest.mark.parametrize(
+    ("model", "position", "expected"),
+    [("lorentzian", 1e170, 2.5e-33), ("gaussian", 20, 2.2490905336086767e-174)],
+)
+def test_height_can_scale_an_underflowing_profile_to_a_representable_value(
+    model, position, expected
+):
+    template = scp.NDDataset([0, 0], coordset=[scp.Coord([0, position])])
+    peak = {"height": 1e308, "axes": {"x": _axis(model, width=1)}}
+    result = template.simulate_peaks([peak])
+
+    assert result.data[0] == 1e308
+    assert result.data[1] == pytest.approx(expected, rel=1e-10, abs=0)
+
+
 def test_reference_coordinates_are_preserved():
     coords = scp.CoordSet(x=scp.Coord([0, 1], units="s"), y="x")
     template = scp.NDDataset([[0, 0], [0, 0]], coordset=coords)
