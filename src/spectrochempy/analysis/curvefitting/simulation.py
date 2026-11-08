@@ -10,6 +10,7 @@ from collections.abc import Sequence
 from numbers import Real
 
 import numpy as np
+from pint import Quantity as PintQuantity
 from pint.errors import PintError
 
 from spectrochempy.analysis.curvefitting._models import _GAUSSIAN_WIDTH_PER_SIGMA
@@ -19,6 +20,7 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.units import Quantity
+from spectrochempy.core.units._conversion import _import_quantity
 
 __all__ = ["simulate_peaks"]
 __dataset_methods__ = ["simulate_peaks"]
@@ -27,24 +29,31 @@ _MODELS = ("gaussian", "lorentzian")
 _GAUSSIAN_MODEL_WIDTH = _GAUSSIAN_WIDTH_PER_SIGMA / np.sqrt(8 * np.log(2))
 
 
-def _interval_unit(unit):
+def _interval_unit(unit, quantity_type=Quantity):
     """Return the corresponding difference unit for an affine unit."""
-    return (Quantity(1, unit) - Quantity(0, unit)).units
+    return (quantity_type(1, unit) - quantity_type(0, unit)).units
 
 
 def _parameter_value(value, unit, name, *, interval=False):
     """Return a finite real magnitude in the target unit."""
-    quantity = value if isinstance(value, Quantity) else None
+    quantity = value if isinstance(value, PintQuantity) else None
     magnitude = quantity.magnitude if quantity is not None else value
-    if isinstance(magnitude, (bool, np.bool_)) or not isinstance(magnitude, Real):
+    if isinstance(magnitude, (bool, np.bool_, np.timedelta64)) or not isinstance(
+        magnitude, Real
+    ):
         raise ValueError(f"{name} must be a finite real scalar")
     try:
         if quantity is not None:
             if unit is None:
                 raise ValueError(f"{name} requires units on the template")
             if interval:
-                quantity = Quantity(magnitude, _interval_unit(quantity.units))
+                quantity_type = type(quantity)
+                quantity = quantity_type(
+                    magnitude, _interval_unit(quantity.units, quantity_type)
+                )
                 unit = _interval_unit(unit)
+            if not isinstance(quantity, Quantity):
+                quantity = _import_quantity(quantity, unit)
             magnitude = quantity.to(unit).magnitude
         numeric = (
             magnitude
@@ -83,7 +92,13 @@ def _scaled_offsets(values, center, width):
     offsets = displacement / width_value
     overflow = np.isinf(displacement)
     offsets[overflow] = values[overflow] / width_value - center_value / width_value
-    return offsets
+    infinite = np.isinf(offsets)
+    distances = np.abs(displacement[infinite])
+    large = np.isinf(distances)
+    distances[large] = np.abs(values[infinite][large] * 0.5 - center_value * 0.5)
+    log_offsets = np.log(distances) - np.log(width_value)
+    log_offsets[large] += np.log(2)
+    return offsets, log_offsets
 
 
 def _history_magnitude(value):
@@ -103,7 +118,9 @@ def _evaluate_separable_peak(shape, coordinates, peak):
         for axis, (dim, values) in enumerate(coordinates.items()):
             params = peak["axes"][dim]
             model = params["model"]
-            offsets = _scaled_offsets(values, params["center"], params["width"])
+            offsets, log_offsets = _scaled_offsets(
+                values, params["center"], params["width"]
+            )
             if model == "lorentzian":
                 tail = np.abs(offsets) > 1
                 reciprocal = 0.5 / offsets[tail]
@@ -118,22 +135,36 @@ def _evaluate_separable_peak(shape, coordinates, peak):
             axis_shape = [1] * len(shape)
             axis_shape[axis] = values.size
             profile = profile.reshape(axis_shape)
-            profiles.append((model, offsets.reshape(axis_shape), profile))
+            profiles.append((model, offsets, log_offsets, profile))
             contribution *= profile
 
         tiny = np.finfo(float).tiny
-        if np.any(np.abs(contribution) < tiny) or any(
-            np.any(profile < tiny) for _, _, profile in profiles
-        ):
-            recover = np.abs(contribution) < tiny
-            log_magnitude = np.full(shape, np.log(float(abs(height))))
-            for model, offsets, profile in profiles:
-                recover |= profile < tiny
+        tiny_profile = np.zeros(shape, dtype=bool)
+        for _, _, _, profile in profiles:
+            tiny_profile |= profile < tiny
+
+        subnormal = (np.abs(contribution) < tiny) & ~tiny_profile
+        if np.any(subnormal):
+            mantissa, exponent = np.frexp(float(height))
+            for axis, indices in enumerate(np.nonzero(subnormal)):
+                factor, power = np.frexp(profiles[axis][3].ravel()[indices])
+                mantissa = mantissa * factor
+                exponent = exponent + power
+            contribution[subnormal] = np.ldexp(mantissa, exponent)
+
+        if np.any(tiny_profile):
+            log_magnitude = np.log(float(abs(height)))
+            for axis, indices in enumerate(np.nonzero(tiny_profile)):
+                model, offsets, log_offsets, _ = profiles[axis]
                 if model == "lorentzian":
-                    log_magnitude -= 2 * (np.log(2) + np.log(np.hypot(0.5, offsets)))
+                    log_norm = np.log(np.hypot(0.5, offsets))
+                    log_norm[np.isinf(offsets)] = log_offsets
+                    log_magnitude = log_magnitude - 2 * (np.log(2) + log_norm[indices])
                 else:
-                    log_magnitude -= 4 * np.log(2) * offsets**2
-            contribution[recover] = np.copysign(np.exp(log_magnitude[recover]), height)
+                    log_magnitude = (
+                        log_magnitude - 4 * np.log(2) * offsets[indices] ** 2
+                    )
+            contribution[tiny_profile] = np.copysign(np.exp(log_magnitude), height)
     return contribution
 
 

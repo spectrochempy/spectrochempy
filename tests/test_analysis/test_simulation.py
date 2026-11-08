@@ -1,6 +1,7 @@
 import json
 
 import numpy as np
+import pint
 import pytest
 
 import spectrochempy as scp
@@ -204,6 +205,57 @@ def test_subnormal_nd_contribution_rounds_after_combining_profiles():
     result = template.simulate_peaks([{"height": height, "axes": axes}])
 
     np.testing.assert_array_equal(result.data, [[height, height], [height, 0]])
+
+
+def test_lorentzian_tail_survives_scaled_offset_overflow():
+    template = scp.NDDataset([0, 0], coordset=[scp.Coord([0, 1e155])])
+    peak = {"height": 1e308, "axes": {"x": _axis("lorentzian", width=1e-154)}}
+
+    result = template.simulate_peaks([peak])
+
+    assert result.data[0] == 1e308
+    assert result.data[1] == pytest.approx(2.5e-311, rel=1e-10, abs=0)
+
+
+def test_subnormal_intensity_below_halfway_rounds_to_zero():
+    template = scp.NDDataset([0, 0], coordset=[scp.Coord([0, 1])])
+    height = np.nextafter(0.0, 1.0)
+    axis = _axis("lorentzian", width=np.nextafter(2.0, 0.0))
+
+    result = template.simulate_peaks([{"height": height, "axes": {"x": axis}}])
+
+    np.testing.assert_array_equal(result.data, [height, 0])
+
+
+def test_external_pint_registry_converts_height_center_and_width():
+    registry = pint.UnitRegistry(system="cgs")
+    registry.formatter.default_format = "L"
+    registry.define("custom_voltage = 2 * volt")
+    template = scp.NDDataset(
+        [0, 0, 0], units="V", coordset=[scp.Coord([9, 10, 11], units="degC")]
+    )
+    axis = _axis(
+        "lorentzian",
+        registry.Quantity(283.15, "K"),
+        registry.Quantity(3.6, "delta_degF"),
+    )
+    peak = {"height": registry.Quantity(2, "custom_voltage"), "axes": {"x": axis}}
+
+    result = template.simulate_peaks([peak])
+
+    np.testing.assert_allclose(result.data, [2, 4, 2])
+
+
+@pytest.mark.parametrize("parameter", ["height", "center", "width"])
+def test_numpy_timedelta_is_not_a_real_parameter(parameter):
+    template = scp.NDDataset([0, 0], coordset=[scp.Coord([0, 1])])
+    axis = _axis("lorentzian")
+    peak = {"height": 1, "axes": {"x": axis}}
+    values = peak if parameter == "height" else axis
+    values[parameter] = np.timedelta64(1, "ns")
+
+    with pytest.raises(ValueError, match="finite real scalar"):
+        template.simulate_peaks([peak])
 
 
 def test_reference_coordinates_are_preserved():
