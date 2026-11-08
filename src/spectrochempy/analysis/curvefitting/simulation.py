@@ -46,7 +46,11 @@ def _parameter_value(value, unit, name, *, interval=False):
                 quantity = Quantity(magnitude, _interval_unit(quantity.units))
                 unit = _interval_unit(unit)
             magnitude = quantity.to(unit).magnitude
-        numeric = float(magnitude)
+        numeric = (
+            magnitude
+            if isinstance(magnitude, np.longdouble) and name != "height"
+            else float(magnitude)
+        )
     except PintError as exc:
         raise ValueError(f"Incompatible units for {name}") from exc
     except OverflowError as exc:
@@ -95,7 +99,7 @@ def _evaluate_separable_peak(shape, coordinates, peak):
         return contribution
 
     profiles = []
-    with np.errstate(over="ignore", invalid="ignore", under="ignore"):
+    with np.errstate(over="ignore", invalid="ignore", under="ignore", divide="ignore"):
         for axis, (dim, values) in enumerate(coordinates.items()):
             params = peak["axes"][dim]
             model = params["model"]
@@ -117,11 +121,14 @@ def _evaluate_separable_peak(shape, coordinates, peak):
             profiles.append((model, offsets.reshape(axis_shape), profile))
             contribution *= profile
 
-        if any(np.any(profile < np.finfo(float).tiny) for _, _, profile in profiles):
-            recover = np.zeros(shape, dtype=bool)
+        tiny = np.finfo(float).tiny
+        if np.any(np.abs(contribution) < tiny) or any(
+            np.any(profile < tiny) for _, _, profile in profiles
+        ):
+            recover = np.abs(contribution) < tiny
             log_magnitude = np.full(shape, np.log(float(abs(height))))
             for model, offsets, profile in profiles:
-                recover |= profile < np.finfo(float).tiny
+                recover |= profile < tiny
                 if model == "lorentzian":
                     log_magnitude -= 2 * (np.log(2) + np.log(np.hypot(0.5, offsets)))
                 else:

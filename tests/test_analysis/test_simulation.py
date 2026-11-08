@@ -171,6 +171,41 @@ def test_height_can_scale_an_underflowing_profile_to_a_representable_value(
     assert result.data[1] == pytest.approx(expected, rel=1e-10, abs=0)
 
 
+@pytest.mark.skipif(
+    np.finfo(np.longdouble).maxexp <= np.finfo(np.float64).maxexp,
+    reason="longdouble has no extended exponent range",
+)
+@pytest.mark.parametrize(
+    ("values", "center", "width", "expected"),
+    [
+        (["0", "5e308"], "0", "1e309", [1, 0.5]),
+        (["1e309", "2e309"], "1e309", "1", [1, 0]),
+    ],
+)
+def test_extended_precision_coordinates_and_parameters_outside_float64_range(
+    values, center, width, expected
+):
+    coord = scp.Coord(np.array(values, dtype=np.longdouble), dtype=np.longdouble)
+    template = scp.NDDataset([0, 0], coordset=[coord])
+    axis = _axis("lorentzian", np.longdouble(center), np.longdouble(width))
+
+    result = template.simulate_peaks([{"height": 1, "axes": {"x": axis}}])
+
+    np.testing.assert_allclose(result.data, expected)
+
+
+def test_subnormal_nd_contribution_rounds_after_combining_profiles():
+    template = scp.NDDataset(
+        np.zeros((2, 2)), coordset=[scp.Coord([0, 1]), scp.Coord([0, 1])]
+    )
+    height = np.nextafter(0.0, 1.0)
+    axes = {dim: _axis("lorentzian", width=np.sqrt(6)) for dim in template.dims}
+
+    result = template.simulate_peaks([{"height": height, "axes": axes}])
+
+    np.testing.assert_array_equal(result.data, [[height, height], [height, 0]])
+
+
 def test_reference_coordinates_are_preserved():
     coords = scp.CoordSet(x=scp.Coord([0, 1], units="s"), y="x")
     template = scp.NDDataset([[0, 0], [0, 0]], coordset=coords)
