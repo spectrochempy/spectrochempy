@@ -70,9 +70,29 @@ installation and compatibility.
      - Typical input
      - Reader
      - Required plugin
-   * - NMR acquisition, processed or simulation data
+   * - NMR with format detection
      - Experiment directory or files, depending on the format
      - ``scp.nmr.read``
+     - :doc:`NMR </userguide/plugins/nmr>`
+   * - Bruker TopSpin NMR
+     - Experiment directory, ``fid``, ``ser``, or processed files such as ``1r`` or ``2rr``
+     - ``scp.topspin.read``
+     - :doc:`NMR </userguide/plugins/nmr>`
+   * - Agilent / Varian NMR
+     - Experiment directory with ``fid`` and ``procpar``
+     - ``scp.agilent.read``
+     - :doc:`NMR </userguide/plugins/nmr>`
+   * - JEOL NMR
+     - ``.jdf``
+     - ``scp.jeol.read``
+     - :doc:`NMR </userguide/plugins/nmr>`
+   * - TecMag NMR
+     - ``.tnt``
+     - ``scp.tecmag.read``
+     - :doc:`NMR </userguide/plugins/nmr>`
+   * - SIMPSON simulation output
+     - ``.spe``, ``.fid``, ``.in``
+     - ``scp.nmr.read_simpson``
      - :doc:`NMR </userguide/plugins/nmr>`
    * - PerkinElmer IR
      - Single-spectrum ``.sp``
@@ -83,7 +103,6 @@ installation and compatibility.
      - ``scp.carroucell.read``
      - :doc:`Carroucell </userguide/plugins/carroucell>`
 
-The NMR plugin detects the format when you call ``scp.nmr.read(...)``.
-See its `guide to reading NMR data
+See the plugin's `guide to reading NMR data
 <https://spectrochempy-nmr.readthedocs.io/latest/userguide/reading_data.html>`_
-for supported formats and how to select one explicitly.
+for format-specific options and examples.
