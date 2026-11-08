@@ -215,6 +215,20 @@ def test_external_pint_system_does_not_rescale_equivalent_units():
     np.testing.assert_array_equal(labels.data, [0, 1])
 
 
+def test_external_alias_to_equivalent_target_preserves_integer_threshold():
+    registry = pint.UnitRegistry()
+    registry.define("custom_voltage = 1 * volt")
+    limit = 2**53 + 1
+    source = scp.NDDataset([limit, limit + 1], dtype=np.int64, units="V")
+
+    threshold = registry.Quantity(limit, "custom_voltage")
+    labels, _ = source.segment_regions(threshold=threshold, dim=0)
+
+    np.testing.assert_array_equal(labels.data, [0, 1])
+    effective = labels.history_entries[-1]["parameters"]["threshold"]["effective"]
+    assert effective["value"] == limit
+
+
 @pytest.mark.parametrize(("unit", "alias"), [("meter", "m"), ("volt", "V")])
 def test_external_pint_unit_name_cannot_hide_an_incompatible_dimension(unit, alias):
     registry = pint.UnitRegistry(None)

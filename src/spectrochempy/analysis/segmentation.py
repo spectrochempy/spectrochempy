@@ -77,29 +77,43 @@ def _above_threshold(data, threshold):
     return data > np.atleast_1d(threshold)
 
 
-def _import_threshold(quantity):
-    """Transfer a Pint scalar without re-scaling an equivalent unit."""
-    magnitude, units = quantity.to_tuple()
-    foreign_quantity = type(quantity)
+def _equivalent_registry_unit(foreign, local):
+    """Check that the registries use the same dimension and root conversion."""
+    if foreign.dimensionality != local.dimensionality:
+        return False
+
+    foreign_type = type(foreign)
+    _, foreign_spec = foreign.to_tuple()
+    _, local_spec = local.to_tuple()
+    for reference in (0, 1, 2):
+        foreign_root, foreign_units = (
+            foreign_type.from_tuple((reference, foreign_spec))
+            .to_root_units()
+            .to_tuple()
+        )
+        local_root, local_units = (
+            Quantity.from_tuple((reference, local_spec)).to_root_units().to_tuple()
+        )
+        if foreign_root != local_root or dict(foreign_units) != dict(local_units):
+            return False
+    return True
+
+
+def _import_threshold(quantity, units):
+    """Transfer a Pint scalar without an avoidable conversion through root units."""
     try:
-        local = Quantity.from_tuple((magnitude, units))
-        if local.dimensionality == quantity.dimensionality:
-            for reference in (0, 1, 2):
-                foreign_root, foreign_units = (
-                    foreign_quantity.from_tuple((reference, units))
-                    .to_root_units()
-                    .to_tuple()
-                )
-                local_root, local_units = (
-                    Quantity.from_tuple((reference, units)).to_root_units().to_tuple()
-                )
-                if foreign_root != local_root or dict(foreign_units) != dict(
-                    local_units
-                ):
-                    break
-            else:
-                return local
+        local_source = Quantity.from_tuple(quantity.to_tuple())
+        if _equivalent_registry_unit(quantity, local_source):
+            return local_source
     except UndefinedUnitError:
+        pass
+
+    local_target = Quantity(1, units)
+    try:
+        foreign_target = type(quantity).from_tuple(local_target.to_tuple())
+        if _equivalent_registry_unit(foreign_target, local_target):
+            return Quantity(quantity.to(foreign_target.units).magnitude, units)
+    except (UndefinedUnitError, DimensionalityError):
         pass
 
     imported = Quantity.from_tuple(quantity.to_root_units().to_tuple())
@@ -209,7 +223,7 @@ def segment_regions(dataset, *, threshold, dim=None, axis=None, connectivity="fa
             raise ValueError("A unit-bearing threshold requires dataset units")
         try:
             if not isinstance(threshold, Quantity):
-                threshold = _import_threshold(threshold)
+                threshold = _import_threshold(threshold, dataset.units)
             effective_value = _threshold_value(threshold.to(dataset.units).magnitude)
         except PintError as exc:
             raise ValueError(
