@@ -8,6 +8,7 @@
 import numpy as np
 from pint import Quantity as PintQuantity
 from pint.errors import PintError
+from pint.errors import UndefinedUnitError
 from scipy import ndimage
 
 from spectrochempy.core.dataset.nddataset import NDDataset
@@ -38,7 +39,7 @@ def _label_components(foreground, connectivity):
 
 def _threshold_value(value):
     """Validate a real threshold magnitude without casting to float64."""
-    if isinstance(value, (bool, np.bool_)) or not isinstance(
+    if isinstance(value, (bool, np.bool_, np.timedelta64)) or not isinstance(
         value, (int, float, np.integer, np.floating)
     ):
         raise ValueError("threshold must be a finite real scalar")
@@ -73,6 +74,30 @@ def _above_threshold(data, threshold):
             cutoff = np.nextafter(cutoff, data.dtype.type(-np.inf))
         return data > cutoff
     return data > np.atleast_1d(threshold)
+
+
+def _import_threshold(quantity):
+    """Transfer a Pint scalar without re-scaling an equivalent unit."""
+    magnitude, units = quantity.to_tuple()
+    foreign_quantity = type(quantity)
+    try:
+        local = Quantity.from_tuple((magnitude, units))
+        for reference in (0, 1):
+            foreign_base, foreign_units = (
+                foreign_quantity.from_tuple((reference, units))
+                .to_base_units()
+                .to_tuple()
+            )
+            local_base, local_units = (
+                Quantity.from_tuple((reference, units)).to_base_units().to_tuple()
+            )
+            if foreign_base != local_base or dict(foreign_units) != dict(local_units):
+                break
+        else:
+            return local
+    except UndefinedUnitError:
+        pass
+    return Quantity.from_tuple(quantity.to_base_units().to_tuple())
 
 
 def _threshold_record(value, units):
@@ -147,7 +172,7 @@ def segment_regions(dataset, *, threshold, dim=None, axis=None, connectivity="fa
     if len(requested) != dataset.ndim:
         raise ValueError("The selector must cover all dataset axes")
     if any(
-        isinstance(item, (bool, np.bool_))
+        isinstance(item, (bool, np.bool_, np.timedelta64))
         or not isinstance(item, (str, int, np.integer))
         for item in requested
     ):
@@ -171,8 +196,7 @@ def segment_regions(dataset, *, threshold, dim=None, axis=None, connectivity="fa
             raise ValueError("A unit-bearing threshold requires dataset units")
         try:
             if not isinstance(threshold, Quantity):
-                base = threshold.to_base_units()
-                threshold = Quantity(base.magnitude, str(base.units))
+                threshold = _import_threshold(threshold)
             effective_value = _threshold_value(threshold.to(dataset.units).magnitude)
         except PintError as exc:
             raise ValueError(

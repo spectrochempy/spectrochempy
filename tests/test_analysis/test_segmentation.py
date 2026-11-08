@@ -154,19 +154,45 @@ def test_integer_threshold_does_not_round_up_on_floating_grids(dtype, precision,
     np.testing.assert_array_equal(labels.data, [0, 1])
 
 
-def test_external_pint_registry_threshold_is_converted_in_base_units():
+@pytest.mark.parametrize("unit_format", ["", "L", "H"])
+def test_external_pint_registry_threshold_is_converted_in_base_units(unit_format):
     registry = pint.UnitRegistry()
+    registry.formatter.default_format = unit_format
     registry.define("custom_voltage = 2 * volt")
     source = scp.NDDataset([1, 2, 3], units="V")
     labels, _ = source.segment_regions(threshold=1 * registry.custom_voltage, dim=0)
 
     np.testing.assert_array_equal(labels.data, [0, 0, 1])
     assert labels.history_entries[-1]["parameters"]["threshold"] == {
-        "requested": {"value": 1, "units": "custom_voltage"},
+        "requested": {"value": 1, "units": str(registry.custom_voltage)},
         "effective": {"value": 2, "units": str(scp.ur.V)},
     }
     with pytest.raises(ValueError, match="must match"):
         source.segment_regions(threshold=1 * registry.second, dim=0)
+
+
+@pytest.mark.parametrize(
+    ("units", "values", "dtype"),
+    [("degC", [0.2, 1.2], np.float64), ("V", [2**53 + 1, 2**53 + 2], np.int64)],
+)
+def test_equivalent_external_pint_unit_preserves_exact_threshold(units, values, dtype):
+    registry = pint.UnitRegistry()
+    source = scp.NDDataset(values, units=units, dtype=dtype)
+    threshold = registry.Quantity(values[0], units)
+    labels, _ = source.segment_regions(threshold=threshold, dim=0)
+
+    np.testing.assert_array_equal(labels.data, [0, 1])
+    effective = labels.history_entries[-1]["parameters"]["threshold"]["effective"]
+    assert effective["value"] == values[0]
+
+
+def test_numpy_timedelta_is_not_an_axis_or_threshold():
+    source = scp.NDDataset([0, 2])
+    duration = np.timedelta64(0, "ns")
+    with pytest.raises(TypeError, match="name or integer"):
+        source.segment_regions(threshold=1, axis=duration)
+    with pytest.raises(ValueError, match="finite real scalar"):
+        source.segment_regions(threshold=duration, axis=0)
 
 
 @pytest.mark.parametrize("axis_type", [np.int8, np.int16, np.uint16])
