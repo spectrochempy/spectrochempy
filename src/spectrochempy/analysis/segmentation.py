@@ -82,22 +82,22 @@ def _import_threshold(quantity):
     foreign_quantity = type(quantity)
     try:
         local = Quantity.from_tuple((magnitude, units))
-        for reference in (0, 1):
-            foreign_base, foreign_units = (
+        for reference in (0, 1, 2):
+            foreign_root, foreign_units = (
                 foreign_quantity.from_tuple((reference, units))
-                .to_base_units()
+                .to_root_units()
                 .to_tuple()
             )
-            local_base, local_units = (
-                Quantity.from_tuple((reference, units)).to_base_units().to_tuple()
+            local_root, local_units = (
+                Quantity.from_tuple((reference, units)).to_root_units().to_tuple()
             )
-            if foreign_base != local_base or dict(foreign_units) != dict(local_units):
+            if foreign_root != local_root or dict(foreign_units) != dict(local_units):
                 break
         else:
             return local
     except UndefinedUnitError:
         pass
-    return Quantity.from_tuple(quantity.to_base_units().to_tuple())
+    return Quantity.from_tuple(quantity.to_root_units().to_tuple())
 
 
 def _threshold_record(value, units):
