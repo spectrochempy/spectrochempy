@@ -6,7 +6,10 @@
 """Connected segmentation on the native sample grid."""
 
 import numpy as np
+from pint import Quantity as PintQuantity
 from pint.errors import DimensionalityError
+from pint.errors import PintError
+from pint.errors import UndefinedUnitError
 from scipy import ndimage
 
 from spectrochempy.core.dataset.nddataset import NDDataset
@@ -37,7 +40,7 @@ def _label_components(foreground, connectivity):
 
 def _threshold_value(value):
     """Validate a real threshold magnitude without casting to float64."""
-    if isinstance(value, (bool, np.bool_)) or not isinstance(
+    if isinstance(value, (bool, np.bool_, np.timedelta64)) or not isinstance(
         value, (int, float, np.integer, np.floating)
     ):
         raise ValueError("threshold must be a finite real scalar")
@@ -47,7 +50,7 @@ def _threshold_value(value):
 
 
 def _above_threshold(data, threshold):
-    """Compare intensities without rounding integer data to floating point."""
+    """Compare intensities without rounding an integer operand across the threshold."""
     if data.dtype.kind in "iu":
         limit = (
             int(np.floor(threshold))
@@ -60,7 +63,68 @@ def _above_threshold(data, threshold):
         if limit >= bounds.max:
             return np.zeros(data.shape, dtype=bool)
         return data > data.dtype.type(limit)
+    if isinstance(threshold, (int, np.integer)):
+        limit = int(threshold)
+        largest = int(np.finfo(data.dtype).max)
+        if limit < -largest:
+            return np.ones(data.shape, dtype=bool)
+        if limit >= largest:
+            return np.zeros(data.shape, dtype=bool)
+        cutoff = data.dtype.type(limit)
+        if int(cutoff) > limit:
+            cutoff = np.nextafter(cutoff, data.dtype.type(-np.inf))
+        return data > cutoff
     return data > np.atleast_1d(threshold)
+
+
+def _equivalent_registry_unit(foreign, local):
+    """Check that the registries use the same dimension and root conversion."""
+    if foreign.dimensionality != local.dimensionality:
+        return False
+
+    foreign_type = type(foreign)
+    _, foreign_spec = foreign.to_tuple()
+    _, local_spec = local.to_tuple()
+    for reference in (0, 1, 2):
+        foreign_root, foreign_units = (
+            foreign_type.from_tuple((reference, foreign_spec))
+            .to_root_units()
+            .to_tuple()
+        )
+        local_root, local_units = (
+            Quantity.from_tuple((reference, local_spec)).to_root_units().to_tuple()
+        )
+        if foreign_root != local_root or dict(foreign_units) != dict(local_units):
+            return False
+    return True
+
+
+def _import_threshold(quantity, units):
+    """Transfer a Pint scalar without an avoidable conversion through root units."""
+    try:
+        local_source = Quantity.from_tuple(quantity.to_tuple())
+        if _equivalent_registry_unit(quantity, local_source):
+            return local_source
+    except UndefinedUnitError:
+        pass
+
+    local_target = Quantity(1, units)
+    try:
+        foreign_target = type(quantity).from_tuple(local_target.to_tuple())
+        if _equivalent_registry_unit(foreign_target, local_target):
+            return Quantity(quantity.to(foreign_target.units).magnitude, units)
+    except (UndefinedUnitError, DimensionalityError):
+        pass
+
+    imported = Quantity.from_tuple(quantity.to_root_units().to_tuple())
+    if imported.dimensionality != quantity.dimensionality:
+        raise DimensionalityError(
+            quantity.units,
+            imported.units,
+            quantity.dimensionality,
+            imported.dimensionality,
+        )
+    return imported
 
 
 def _threshold_record(value, units):
@@ -135,11 +199,14 @@ def segment_regions(dataset, *, threshold, dim=None, axis=None, connectivity="fa
     if len(requested) != dataset.ndim:
         raise ValueError("The selector must cover all dataset axes")
     if any(
-        isinstance(item, (bool, np.bool_))
+        isinstance(item, (bool, np.bool_, np.timedelta64))
         or not isinstance(item, (str, int, np.integer))
         for item in requested
     ):
         raise TypeError("Select each axis by name or integer index")
+    requested = tuple(
+        int(item) if isinstance(item, np.integer) else item for item in requested
+    )
     axes = dataset._get_dims_index(requested)
     if set(axes) != set(range(dataset.ndim)):
         raise ValueError("The selector must cover all dataset axes exactly once")
@@ -149,14 +216,16 @@ def segment_regions(dataset, *, threshold, dim=None, axis=None, connectivity="fa
     data = np.asarray(dataset.data)
     if data.dtype.kind not in "iuf":
         raise ValueError("segment_regions requires real numeric data")
-    if isinstance(threshold, Quantity):
+    if isinstance(threshold, PintQuantity):
         requested_value = _threshold_value(threshold.magnitude)
         requested_units = threshold.units
         if dataset.units is None:
             raise ValueError("A unit-bearing threshold requires dataset units")
         try:
+            if not isinstance(threshold, Quantity):
+                threshold = _import_threshold(threshold, dataset.units)
             effective_value = _threshold_value(threshold.to(dataset.units).magnitude)
-        except DimensionalityError as exc:
+        except PintError as exc:
             raise ValueError(
                 "Threshold units must match the dataset intensity"
             ) from exc

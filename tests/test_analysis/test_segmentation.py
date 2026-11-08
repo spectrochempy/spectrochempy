@@ -1,6 +1,7 @@
 import json
 
 import numpy as np
+import pint
 import pytest
 
 import spectrochempy as scp
@@ -137,6 +138,123 @@ def test_integer_intensity_comparison_retains_native_precision(threshold_type):
     labels, _ = source.segment_regions(threshold=threshold_type(limit), dim=0)
 
     np.testing.assert_array_equal(labels.data, [0, 1])
+
+
+@pytest.mark.parametrize(
+    ("dtype", "precision"),
+    [(np.float16, 11), (np.float32, 24), (np.float64, 53)],
+)
+@pytest.mark.parametrize("sign", [1, -1])
+def test_integer_threshold_does_not_round_up_on_floating_grids(dtype, precision, sign):
+    origin = 2**precision
+    low, high = sorted((sign * (origin + 2), sign * (origin + 4)))
+    source = scp.NDDataset([low, high], dtype=dtype)
+    labels, _ = source.segment_regions(threshold=low + 1, dim=0)
+
+    np.testing.assert_array_equal(labels.data, [0, 1])
+
+
+@pytest.mark.parametrize("unit_format", ["", "L", "H"])
+def test_external_pint_registry_threshold_is_converted_in_root_units(unit_format):
+    registry = pint.UnitRegistry()
+    registry.formatter.default_format = unit_format
+    registry.define("custom_voltage = 2 * volt")
+    source = scp.NDDataset([1, 2, 3], units="V")
+    labels, _ = source.segment_regions(threshold=1 * registry.custom_voltage, dim=0)
+
+    np.testing.assert_array_equal(labels.data, [0, 0, 1])
+    assert labels.history_entries[-1]["parameters"]["threshold"] == {
+        "requested": {"value": 1, "units": str(registry.custom_voltage)},
+        "effective": {"value": 2, "units": str(scp.ur.V)},
+    }
+    with pytest.raises(ValueError, match="must match"):
+        source.segment_regions(threshold=1 * registry.second, dim=0)
+
+
+@pytest.mark.parametrize(
+    ("units", "values", "dtype"),
+    [("degC", [0.2, 1.2], np.float64), ("V", [2**53 + 1, 2**53 + 2], np.int64)],
+)
+def test_equivalent_external_pint_unit_preserves_exact_threshold(units, values, dtype):
+    registry = pint.UnitRegistry()
+    source = scp.NDDataset(values, units=units, dtype=dtype)
+    threshold = registry.Quantity(values[0], units)
+    labels, _ = source.segment_regions(threshold=threshold, dim=0)
+
+    np.testing.assert_array_equal(labels.data, [0, 1])
+    effective = labels.history_entries[-1]["parameters"]["threshold"]["effective"]
+    assert effective["value"] == values[0]
+
+
+def test_external_pint_unit_redefinition_uses_foreign_scale():
+    registry = pint.UnitRegistry(system="imperial")
+    registry.define("yard = 2 * meter")
+    source = scp.NDDataset([1, 2, 3], units="m")
+    labels, _ = source.segment_regions(threshold=registry.Quantity(1, "yard"), dim=0)
+
+    np.testing.assert_array_equal(labels.data, [0, 0, 1])
+
+
+def test_external_pint_affine_unit_does_not_match_local_logarithmic_unit():
+    registry = pint.UnitRegistry()
+    registry.define("decibel = 0.2589254117941673; offset: 1 = dB")
+    source = scp.NDDataset([1.50, 1.55, 1.60], units="dimensionless")
+    labels, _ = source.segment_regions(threshold=registry.Quantity(2, "dB"), dim=0)
+
+    np.testing.assert_array_equal(labels.data, [0, 1, 1])
+
+
+def test_external_pint_system_does_not_rescale_equivalent_units():
+    registry = pint.UnitRegistry(system="cgs")
+    threshold = 2**53 + 1
+    source = scp.NDDataset([threshold, threshold + 1], units="m", dtype=np.int64)
+    labels, _ = source.segment_regions(
+        threshold=registry.Quantity(threshold, "m"), dim=0
+    )
+
+    np.testing.assert_array_equal(labels.data, [0, 1])
+
+
+def test_external_alias_to_equivalent_target_preserves_integer_threshold():
+    registry = pint.UnitRegistry()
+    registry.define("custom_voltage = 1 * volt")
+    limit = 2**53 + 1
+    source = scp.NDDataset([limit, limit + 1], dtype=np.int64, units="V")
+
+    threshold = registry.Quantity(limit, "custom_voltage")
+    labels, _ = source.segment_regions(threshold=threshold, dim=0)
+
+    np.testing.assert_array_equal(labels.data, [0, 1])
+    effective = labels.history_entries[-1]["parameters"]["threshold"]["effective"]
+    assert effective["value"] == limit
+
+
+@pytest.mark.parametrize(("unit", "alias"), [("meter", "m"), ("volt", "V")])
+def test_external_pint_unit_name_cannot_hide_an_incompatible_dimension(unit, alias):
+    registry = pint.UnitRegistry(None)
+    registry.define(f"{unit} = [time] = {alias}")
+    source = scp.NDDataset([1, 2, 3], units=alias)
+
+    with pytest.raises(ValueError, match="must match"):
+        source.segment_regions(threshold=registry.Quantity(2, alias), dim=0)
+
+
+def test_numpy_timedelta_is_not_an_axis_or_threshold():
+    source = scp.NDDataset([0, 2])
+    duration = np.timedelta64(0, "ns")
+    with pytest.raises(TypeError, match="name or integer"):
+        source.segment_regions(threshold=1, axis=duration)
+    with pytest.raises(ValueError, match="finite real scalar"):
+        source.segment_regions(threshold=duration, axis=0)
+
+
+@pytest.mark.parametrize("axis_type", [np.int8, np.int16, np.uint16])
+def test_all_numpy_integer_axis_types_are_accepted(axis_type):
+    source = scp.NDDataset([0, 2])
+    labels, _ = source.segment_regions(threshold=1, axis=axis_type(0))
+
+    np.testing.assert_array_equal(labels.data, [0, 1])
+    assert labels.history_entries[-1]["parameters"]["requested"] == [0]
 
 
 def test_float32_intensities_are_compared_to_full_precision_threshold():

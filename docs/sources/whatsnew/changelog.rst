@@ -53,6 +53,9 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Fixed strict threshold comparisons in ``segment_regions`` and support for
+  compatible quantities from external Pint registries and NumPy integer axes.
+
 - Restored the documented 0.1 percent default coordinate linearization
   tolerance in the ``Coord`` constructor. Use ``linearize_below`` explicitly
   when a more permissive tolerance is required. FTIR FFT coordinates convert
