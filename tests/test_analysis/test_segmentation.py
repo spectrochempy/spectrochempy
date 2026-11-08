@@ -1,6 +1,7 @@
 import json
 
 import numpy as np
+import pint
 import pytest
 
 import spectrochempy as scp
@@ -137,6 +138,44 @@ def test_integer_intensity_comparison_retains_native_precision(threshold_type):
     labels, _ = source.segment_regions(threshold=threshold_type(limit), dim=0)
 
     np.testing.assert_array_equal(labels.data, [0, 1])
+
+
+@pytest.mark.parametrize(
+    ("dtype", "precision"),
+    [(np.float16, 11), (np.float32, 24), (np.float64, 53)],
+)
+@pytest.mark.parametrize("sign", [1, -1])
+def test_integer_threshold_does_not_round_up_on_floating_grids(dtype, precision, sign):
+    origin = 2**precision
+    low, high = sorted((sign * (origin + 2), sign * (origin + 4)))
+    source = scp.NDDataset([low, high], dtype=dtype)
+    labels, _ = source.segment_regions(threshold=low + 1, dim=0)
+
+    np.testing.assert_array_equal(labels.data, [0, 1])
+
+
+def test_external_pint_registry_threshold_is_converted_in_base_units():
+    registry = pint.UnitRegistry()
+    registry.define("custom_voltage = 2 * volt")
+    source = scp.NDDataset([1, 2, 3], units="V")
+    labels, _ = source.segment_regions(threshold=1 * registry.custom_voltage, dim=0)
+
+    np.testing.assert_array_equal(labels.data, [0, 0, 1])
+    assert labels.history_entries[-1]["parameters"]["threshold"] == {
+        "requested": {"value": 1, "units": "custom_voltage"},
+        "effective": {"value": 2, "units": str(scp.ur.V)},
+    }
+    with pytest.raises(ValueError, match="must match"):
+        source.segment_regions(threshold=1 * registry.second, dim=0)
+
+
+@pytest.mark.parametrize("axis_type", [np.int8, np.int16, np.uint16])
+def test_all_numpy_integer_axis_types_are_accepted(axis_type):
+    source = scp.NDDataset([0, 2])
+    labels, _ = source.segment_regions(threshold=1, axis=axis_type(0))
+
+    np.testing.assert_array_equal(labels.data, [0, 1])
+    assert labels.history_entries[-1]["parameters"]["requested"] == [0]
 
 
 def test_float32_intensities_are_compared_to_full_precision_threshold():

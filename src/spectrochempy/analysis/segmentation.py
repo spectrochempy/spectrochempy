@@ -6,7 +6,8 @@
 """Connected segmentation on the native sample grid."""
 
 import numpy as np
-from pint.errors import DimensionalityError
+from pint import Quantity as PintQuantity
+from pint.errors import PintError
 from scipy import ndimage
 
 from spectrochempy.core.dataset.nddataset import NDDataset
@@ -47,7 +48,7 @@ def _threshold_value(value):
 
 
 def _above_threshold(data, threshold):
-    """Compare intensities without rounding integer data to floating point."""
+    """Compare intensities without rounding an integer operand across the threshold."""
     if data.dtype.kind in "iu":
         limit = (
             int(np.floor(threshold))
@@ -60,6 +61,17 @@ def _above_threshold(data, threshold):
         if limit >= bounds.max:
             return np.zeros(data.shape, dtype=bool)
         return data > data.dtype.type(limit)
+    if isinstance(threshold, (int, np.integer)):
+        limit = int(threshold)
+        largest = int(np.finfo(data.dtype).max)
+        if limit < -largest:
+            return np.ones(data.shape, dtype=bool)
+        if limit >= largest:
+            return np.zeros(data.shape, dtype=bool)
+        cutoff = data.dtype.type(limit)
+        if int(cutoff) > limit:
+            cutoff = np.nextafter(cutoff, data.dtype.type(-np.inf))
+        return data > cutoff
     return data > np.atleast_1d(threshold)
 
 
@@ -140,6 +152,9 @@ def segment_regions(dataset, *, threshold, dim=None, axis=None, connectivity="fa
         for item in requested
     ):
         raise TypeError("Select each axis by name or integer index")
+    requested = tuple(
+        int(item) if isinstance(item, np.integer) else item for item in requested
+    )
     axes = dataset._get_dims_index(requested)
     if set(axes) != set(range(dataset.ndim)):
         raise ValueError("The selector must cover all dataset axes exactly once")
@@ -149,14 +164,17 @@ def segment_regions(dataset, *, threshold, dim=None, axis=None, connectivity="fa
     data = np.asarray(dataset.data)
     if data.dtype.kind not in "iuf":
         raise ValueError("segment_regions requires real numeric data")
-    if isinstance(threshold, Quantity):
+    if isinstance(threshold, PintQuantity):
         requested_value = _threshold_value(threshold.magnitude)
         requested_units = threshold.units
         if dataset.units is None:
             raise ValueError("A unit-bearing threshold requires dataset units")
         try:
+            if not isinstance(threshold, Quantity):
+                base = threshold.to_base_units()
+                threshold = Quantity(base.magnitude, str(base.units))
             effective_value = _threshold_value(threshold.to(dataset.units).magnitude)
-        except DimensionalityError as exc:
+        except PintError as exc:
             raise ValueError(
                 "Threshold units must match the dataset intensity"
             ) from exc
