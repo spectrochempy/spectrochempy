@@ -33,8 +33,7 @@ Current official plugins
    * - NMR
      - ``spectrochempy-nmr``
      - ``scp.nmr``
-     - Bruker TopSpin, Agilent/Varian, JEOL, TecMag and SIMPSON reading, plus
-       NMR-specific processing utilities.
+     - NMR file readers and processing tools.
    * - Tensor
      - ``spectrochempy-tensor``
      - ``scp.tensor``
@@ -118,7 +117,7 @@ The recommended form is namespaced:
 
     analysis = scp.iris.IRIS()
     model = scp.tensor.CP(n_components=2)
-    dataset = scp.topspin.read("path/to/fid")
+    dataset = scp.nmr.read("path/to/fid")
 
 Dataset accessors are reserved for operations that act on an existing dataset:
 

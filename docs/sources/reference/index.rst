@@ -182,11 +182,10 @@ readers preserve SOC provenance and their established multi-file defaults.
 
 The :doc:`reader catalog </userguide/importexport/readers>` lists formats,
 explicit readers and required plugins. With ``spectrochempy-nmr`` installed,
-use ``scp.nmr.read(...)`` for NMR format detection or an explicit reader such
-as ``scp.topspin.read(...)`` for Bruker or ``scp.agilent.read(...)`` for
-Agilent/Varian. The ``read_topspin`` and ``read_agilent`` entries below are
-root-level compatibility aliases. The ``read_perkinelmer`` alias requires
-``spectrochempy-perkinelmer``.
+use ``scp.nmr.read(...)`` for NMR format detection. See the :doc:`NMR plugin
+guide </userguide/plugins/nmr>` for format selection. The root-level NMR
+entries below are compatibility aliases. The ``read_perkinelmer`` alias
+requires ``spectrochempy-perkinelmer``.
 
 .. autosummary::
     :nosignatures:

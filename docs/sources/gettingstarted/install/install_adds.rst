@@ -24,8 +24,7 @@ Plugins
    * - Plugin
      - What it adds
    * - ``spectrochempy-nmr``
-     - Bruker TopSpin, Agilent/Varian, JEOL, TecMag and SIMPSON readers, plus
-       NMR processing
+     - NMR file readers and processing tools
    * - ``spectrochempy-iris``
      - 2D-IRIS analysis
    * - ``spectrochempy-tensor``

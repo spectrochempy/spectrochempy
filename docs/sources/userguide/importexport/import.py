@@ -67,8 +67,8 @@ X
 # In this case, the data were in an OMNIC file format,
 # and the `read` method guessed it correctly using the file name extension.
 # The `read` method also handles formats such as OPUS, JCAMP-DX, CSV and
-# MATLAB. Installing a reader plugin adds its formats, such as Bruker
-# TopSpin with `spectrochempy-nmr`.
+# MATLAB. Installing a reader plugin adds its formats, such as NMR formats
+# with `spectrochempy-nmr`.
 
 # %% [markdown]
 # ## How the generic reader works
@@ -108,8 +108,8 @@ X
 
 # %% [markdown]
 # Use a format-specific reader when you know the format, for example
-# `scp.omnic.read(...)` for OMNIC data or `scp.topspin.read(...)` for Bruker
-# TopSpin data. The TopSpin reader is supplied by the NMR plugin.
+# `scp.omnic.read(...)` for OMNIC data. To detect a format among the readers
+# supplied by the optional NMR plugin, use `scp.nmr.read(...)`.
 #
 # See the [reader catalog](readers.rst) for formats, explicit readers, and
 # the plugins that provide them.

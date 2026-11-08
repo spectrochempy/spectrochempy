@@ -52,7 +52,7 @@ import spectrochempy as scp
 
 # %%
 path = scp.preferences.datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "h3po4"
-fid = scp.topspin.read(path, expno=4)
+fid = scp.nmr.read(path, expno=4)
 prefs = scp.preferences
 prefs.figure.figsize = (7, 3)
 _ = fid.plot(show_complex=True)
@@ -83,7 +83,7 @@ with warnings.catch_warnings():
         message=r"\(956,\)cannot be shaped into\(1024,\)",
         category=UserWarning,
     )
-    fid2 = scp.topspin.read(path, expno=100)
+    fid2 = scp.nmr.read(path, expno=100)
 _ = fid2.plot(show_complex=True)
 
 # %%

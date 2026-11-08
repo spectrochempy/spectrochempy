@@ -1005,7 +1005,7 @@ _ = nd.plot()
 path = datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_1d"
 
 # load the data directly (no need to create the dataset first)
-nd2 = scp.topspin.read(path, expno=1, remove_digital_filter=True)
+nd2 = scp.nmr.read(path, expno=1, remove_digital_filter=True)
 
 # view it...
 nd2.x.to("s")
