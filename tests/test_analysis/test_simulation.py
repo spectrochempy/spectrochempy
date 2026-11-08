@@ -217,6 +217,16 @@ def test_lorentzian_tail_survives_scaled_offset_overflow():
     assert result.data[1] == pytest.approx(2.5e-311, rel=1e-10, abs=0)
 
 
+def test_lorentzian_tail_above_subnormal_halfway_remains_representable():
+    template = scp.NDDataset([0, 0], coordset=[scp.Coord([0, 2.0**512])])
+    height = np.nextafter(2.0**-49, np.inf)
+    peak = {"height": height, "axes": {"x": _axis("lorentzian", width=1)}}
+
+    result = template.simulate_peaks([peak])
+
+    np.testing.assert_array_equal(result.data, [height, np.nextafter(0.0, 1.0)])
+
+
 def test_subnormal_intensity_below_halfway_rounds_to_zero():
     template = scp.NDDataset([0, 0], coordset=[scp.Coord([0, 1])])
     height = np.nextafter(0.0, 1.0)

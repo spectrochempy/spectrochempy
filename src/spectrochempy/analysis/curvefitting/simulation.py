@@ -92,13 +92,28 @@ def _scaled_offsets(values, center, width):
     offsets = displacement / width_value
     overflow = np.isinf(displacement)
     offsets[overflow] = values[overflow] / width_value - center_value / width_value
-    infinite = np.isinf(offsets)
-    distances = np.abs(displacement[infinite])
-    large = np.isinf(distances)
-    distances[large] = np.abs(values[infinite][large] * 0.5 - center_value * 0.5)
-    log_offsets = np.log(distances) - np.log(width_value)
-    log_offsets[large] += np.log(2)
-    return offsets, log_offsets
+    displacement[overflow] = values[overflow] * 0.5 - center_value * 0.5
+    return offsets, displacement, overflow
+
+
+def _profile_factors(model, profile, offsets, displacement, overflow, width):
+    """Keep profile tails as a mantissa and a binary exponent."""
+    mantissa, exponent = np.frexp(profile)
+    tiny = profile < np.finfo(float).tiny
+    if np.any(tiny):
+        if model == "lorentzian":
+            distance, power = np.frexp(np.abs(displacement[tiny]))
+            span, span_power = np.frexp(
+                float(width) if isinstance(width, int) else width
+            )
+            mantissa[tiny] = (0.5 * span / distance) ** 2
+            exponent[tiny] = 2 * (span_power - power - overflow[tiny])
+        else:
+            log2_profile = np.maximum(-4 * offsets[tiny] ** 2, -4096)
+            power = np.floor(log2_profile).astype(int)
+            mantissa[tiny] = np.exp2(log2_profile - power)
+            exponent[tiny] = power
+    return mantissa, exponent
 
 
 def _history_magnitude(value):
@@ -118,7 +133,7 @@ def _evaluate_separable_peak(shape, coordinates, peak):
         for axis, (dim, values) in enumerate(coordinates.items()):
             params = peak["axes"][dim]
             model = params["model"]
-            offsets, log_offsets = _scaled_offsets(
+            offsets, displacement, overflow = _scaled_offsets(
                 values, params["center"], params["width"]
             )
             if model == "lorentzian":
@@ -134,37 +149,28 @@ def _evaluate_separable_peak(shape, coordinates, peak):
                 )
             axis_shape = [1] * len(shape)
             axis_shape[axis] = values.size
-            profile = profile.reshape(axis_shape)
-            profiles.append((model, offsets, log_offsets, profile))
-            contribution *= profile
+            profiles.append(
+                (model, profile, offsets, displacement, overflow, params["width"])
+            )
+            contribution *= profile.reshape(axis_shape)
 
         tiny = np.finfo(float).tiny
-        tiny_profile = np.zeros(shape, dtype=bool)
-        for _, _, _, profile in profiles:
-            tiny_profile |= profile < tiny
+        recover = np.abs(contribution) < tiny
+        for axis, (_, profile, *_rest) in enumerate(profiles):
+            axis_shape = [1] * len(shape)
+            axis_shape[axis] = profile.size
+            recover |= (profile < tiny).reshape(axis_shape)
 
-        subnormal = (np.abs(contribution) < tiny) & ~tiny_profile
-        if np.any(subnormal):
+        if np.any(recover):
             mantissa, exponent = np.frexp(float(height))
-            for axis, indices in enumerate(np.nonzero(subnormal)):
-                factor, power = np.frexp(profiles[axis][3].ravel()[indices])
+            for axis, indices in enumerate(np.nonzero(recover)):
+                model, *vectors, width = profiles[axis]
+                factor, power = _profile_factors(
+                    model, *(vector[indices] for vector in vectors), width
+                )
                 mantissa = mantissa * factor
                 exponent = exponent + power
-            contribution[subnormal] = np.ldexp(mantissa, exponent)
-
-        if np.any(tiny_profile):
-            log_magnitude = np.log(float(abs(height)))
-            for axis, indices in enumerate(np.nonzero(tiny_profile)):
-                model, offsets, log_offsets, _ = profiles[axis]
-                if model == "lorentzian":
-                    log_norm = np.log(np.hypot(0.5, offsets))
-                    log_norm[np.isinf(offsets)] = log_offsets
-                    log_magnitude = log_magnitude - 2 * (np.log(2) + log_norm[indices])
-                else:
-                    log_magnitude = (
-                        log_magnitude - 4 * np.log(2) * offsets[indices] ** 2
-                    )
-            contribution[tiny_profile] = np.copysign(np.exp(log_magnitude), height)
+            contribution[recover] = np.ldexp(mantissa, exponent)
     return contribution
 
 
