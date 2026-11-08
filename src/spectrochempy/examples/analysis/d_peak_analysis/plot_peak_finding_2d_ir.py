@@ -10,6 +10,7 @@ Find peaks in an experimental 2D-IR spectrum
 
 This example loads a pump-probe 2D-IR spectrum, finds positive cross-peaks and
 negative diagonal bleach peaks, and locates them on a two-dimensional map.
+It then assigns the positive peaks to connected regions.
 
 The experimental data describe D-silicalite at 210 °C, measured with parallel
 polarization at a waiting time of 0 ps. They accompany Donaldson, Hawkins and
@@ -75,6 +76,42 @@ for result, marker, color, label in (
         label=label,
     )
 _ = ax.legend()
+
+# %%
+# Assign positive peaks to connected regions
+# ------------------------------------------
+# Label samples strictly above 0.008 in the dataset's intensity units.
+# This threshold retains connections below the 0.01 peak height cutoff.
+# The labels describe connected support at this threshold. Peaks in the
+# same region can still be distinct local maxima.
+
+labels, regions = dataset.segment_regions(dim=("y", "x"), threshold=0.008)
+
+# %%
+# Look up each peak using its native grid indices. Three positive maxima
+# share the largest region, and the other two belong to separate regions.
+
+rows = cross_peaks.table.to_dict()
+regions_by_label = {region["label"]: region for region in regions}
+for peak in rows:
+    label = int(labels.data[peak["y_index"], peak["x_index"]])
+    size = regions_by_label[label]["size"]
+    print(f"Peak {peak['index'] + 1}: region {label}, {size} samples")
+
+# %%
+# The same peak markers appear on the label map. Each color identifies a
+# region or the background (label zero).
+
+ax = labels.plot_image(figsize=(7, 5), cmap="tab10", colorbar=False)
+_ = ax.set_title("Connected regions above 0.008")
+_ = ax.scatter(
+    [peak["x_position"].magnitude for peak in rows],
+    [peak["y_position"].magnitude for peak in rows],
+    facecolors="none",
+    edgecolors="white",
+    linewidths=1.5,
+    s=65,
+)
 
 # %%
 # Uncomment the following line to display all figures when running the script
