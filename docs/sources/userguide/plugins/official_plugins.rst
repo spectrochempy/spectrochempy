@@ -12,6 +12,9 @@ examples, tests, and documentation are coordinated with the main project.
 Official plugins should feel like part of SpectroChemPy once installed. They are
 not loaded manually: import SpectroChemPy, then use the documented namespace.
 
+See the :doc:`reader catalog </userguide/importexport/readers>` for file
+formats, reader functions, and their required plugins.
+
 Current official plugins
 ========================
 
@@ -30,7 +33,8 @@ Current official plugins
    * - NMR
      - ``spectrochempy-nmr``
      - ``scp.nmr``
-     - TopSpin/Bruker NMR reading and NMR-specific processing utilities.
+     - Bruker TopSpin, Agilent/Varian, JEOL, TecMag and SIMPSON reading, plus
+       NMR-specific processing utilities.
    * - Tensor
      - ``spectrochempy-tensor``
      - ``scp.tensor``

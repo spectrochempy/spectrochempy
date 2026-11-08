@@ -8,6 +8,8 @@ This page collects the generated public API pages owned by official
 SpectroChemPy plugins.
 
 Workflow-oriented plugin guides remain in :doc:`/userguide/plugins/index`.
+For file formats and their public reader entry points, see the
+:doc:`reader catalog </userguide/importexport/readers>`.
 
 The generated entries below target the public objects exported by each
 standalone plugin package. The ``scp.nmr.*`` and equivalent namespace routes
