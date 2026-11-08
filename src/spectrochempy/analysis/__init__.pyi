@@ -20,6 +20,7 @@ __all__ = [
     "model_selection",
     "peakfinding",
     "pipeline",
+    "segmentation",
 ]
 
 from . import _base
@@ -35,3 +36,4 @@ from . import kinetic
 from . import model_selection
 from . import peakfinding
 from . import pipeline
+from . import segmentation

@@ -901,6 +901,15 @@ Find peaks
     PeakFindingResult
     PeakTable
 
+Segmentation
+------------
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    segment_regions
+
 Kinetics
 --------
 

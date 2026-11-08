@@ -18,6 +18,8 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
+- Added ``segment_regions`` for threshold-based connected segmentation of 1D
+  and 2D spectra, returning coordinate-preserving integer labels and region bounds.
 
 - Added coordinate-aware marginal panels to 2D contour plots, with selectable
   dimensions, calculated projections or external reference spectra, and signed
