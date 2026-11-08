@@ -23,7 +23,7 @@ Plugin APIs are usually exposed through namespaces:
 
     import spectrochempy as scp
 
-    dataset = scp.nmr.read("path/to/fid")
+    dataset = scp.topspin.read("path/to/fid")
     dataset = scp.perkinelmer.read("path/to/file.sp")
     analysis = scp.iris.IRIS()
     model = scp.tensor.CP(n_components=2)
@@ -35,8 +35,11 @@ Operations that act on an existing dataset use dataset accessors:
     kernel = dataset.iris.kernel_matrix(kernel_type="langmuir")
 
 Some former top-level names remain as compatibility aliases. New code should
-prefer namespaced APIs such as ``scp.nmr.read``, ``scp.iris.IRIS``,
+prefer namespaced APIs such as ``scp.topspin.read``, ``scp.iris.IRIS``,
 and ``scp.tensor.CP``.
+
+For format-specific readers and the plugins that supply them, see the
+:doc:`reader catalog </userguide/importexport/readers>`.
 
 Generated plugin API pages are collected in :doc:`/reference/plugins`.
 

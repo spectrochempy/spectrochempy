@@ -6,6 +6,8 @@ Plugins and Example Data
 This page is for users who already have a working SpectroChemPy
 installation (see :doc:`index`). Plugins add features for specific
 techniques or file formats; install only those you need.
+Use the :doc:`reader catalog </userguide/importexport/readers>` to check which
+plugin provides a given file reader.
 
 .. contents:: Table of Contents
    :local:
@@ -22,7 +24,8 @@ Plugins
    * - Plugin
      - What it adds
    * - ``spectrochempy-nmr``
-     - Bruker TopSpin reader and NMR processing
+     - Bruker TopSpin, Agilent/Varian, JEOL, TecMag and SIMPSON readers, plus
+       NMR processing
    * - ``spectrochempy-iris``
      - 2D-IRIS analysis
    * - ``spectrochempy-tensor``

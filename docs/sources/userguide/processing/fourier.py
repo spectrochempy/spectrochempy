@@ -44,14 +44,14 @@ import spectrochempy as scp
 # ## FFT of 1D NMR spectra
 
 # %% [markdown]
-# First we open read some time domain data. Here is a NMD free induction decay (FID):
+# First, use the TopSpin reader to open a Bruker free induction decay (FID).
 #
 # Requires the official ``spectrochempy-nmr`` plugin.
 # Install with: ``python -m pip install "spectrochempy[nmr]"``.
 
 # %%
 path = scp.preferences.datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_1d"
-fid = scp.nmr.read(path)
+fid = scp.topspin.read(path)
 fid
 
 # %% [markdown]
