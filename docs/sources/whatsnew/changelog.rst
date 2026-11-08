@@ -53,6 +53,9 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Fixed numerical edge cases in ``simulate_peaks`` and enabled compatible
+  quantities from external Pint registries.
+
 - Fixed strict threshold comparisons in ``segment_regions`` and support for
   compatible quantities from external Pint registries and NumPy integer axes.
 
