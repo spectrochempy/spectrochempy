@@ -53,20 +53,38 @@ def _parameter_value(value, unit, name, *, interval=False):
         raise ValueError(f"{name} must be a finite real scalar") from exc
     if not np.isfinite(numeric):
         raise ValueError(f"{name} must be a finite real scalar")
-    return int(magnitude) if isinstance(magnitude, (int, np.integer)) else numeric
+    if isinstance(magnitude, (int, np.integer)):
+        return int(magnitude)
+    return magnitude if isinstance(magnitude, np.longdouble) else numeric
 
 
 def _scaled_offsets(values, center, width):
-    """Subtract the center before rounding an integer grid to floating point."""
-    if values.dtype.kind in "iu" and int(center) == center:
-        displacement = (values.astype(object) - int(center)).astype(float)
+    """Compute centered distances without rounding either operand before subtraction."""
+    dtype = np.result_type(
+        values.dtype,
+        type(center) if isinstance(center, np.floating) else np.float64,
+        type(width) if isinstance(width, np.floating) else np.float64,
+    )
+    center_value = dtype.type(center)
+    width_value = dtype.type(width)
+    if values.dtype.kind in "iu":
+        whole_center = int(center)
+        displacement = (values.astype(object) - whole_center).astype(dtype)
+        if not isinstance(center, int):
+            displacement -= center_value - dtype.type(whole_center)
     else:
-        dtype = np.result_type(values.dtype, np.float64)
-        displacement = values.astype(dtype) - float(center)
-    offsets = displacement / float(width)
+        displacement = values.astype(dtype) - center_value
+        if isinstance(center, int):
+            displacement -= dtype.type(center - int(center_value))
+    offsets = displacement / width_value
     overflow = np.isinf(displacement)
-    offsets[overflow] = values[overflow] / float(width) - float(center) / float(width)
+    offsets[overflow] = values[overflow] / width_value - center_value / width_value
     return offsets
+
+
+def _history_magnitude(value):
+    """Serialize extended precision parameters without rounding them to float64."""
+    return str(value) if isinstance(value, np.longdouble) else value
 
 
 def _evaluate_separable_peak(shape, coordinates, peak):
@@ -234,7 +252,19 @@ def simulate_peaks(template, peaks):
             if template.units is not None
             else None,
             "amplitude": "signed_height_at_continuous_center",
-            "peaks": parameters,
+            "peaks": [
+                {
+                    "height": _history_magnitude(peak["height"]),
+                    "axes": {
+                        dim: {
+                            key: _history_magnitude(value)
+                            for key, value in spec.items()
+                        }
+                        for dim, spec in peak["axes"].items()
+                    },
+                }
+                for peak in parameters
+            ],
         },
         message=f"Simulated {len(parameters)} separable peak(s)",
     )

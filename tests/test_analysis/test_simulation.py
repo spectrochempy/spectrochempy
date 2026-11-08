@@ -129,6 +129,33 @@ def test_integer_grid_preserves_single_point_displacements_above_float_precision
     np.testing.assert_allclose(template.simulate_peaks([peak]).data, [1, 0.5])
 
 
+def test_integer_center_between_large_float_coordinates():
+    origin = 2**53
+    coord = scp.Coord([origin, origin + 2], dtype=np.float64)
+    template = scp.NDDataset([0, 0], coordset=[coord])
+    peak = {"height": 1, "axes": {"x": _axis("lorentzian", center=origin + 1)}}
+
+    np.testing.assert_allclose(template.simulate_peaks([peak]).data, [0.5, 0.5])
+
+
+@pytest.mark.skipif(
+    np.finfo(np.longdouble).nmant <= np.finfo(np.float64).nmant,
+    reason="longdouble has no additional precision",
+)
+def test_extended_precision_centers_are_used_and_serialized():
+    origin = np.longdouble(2**53)
+    coord = scp.Coord([origin, origin + 1], dtype=np.longdouble)
+    template = scp.NDDataset([0, 0], coordset=[coord])
+    peak = {"height": 1, "axes": {"x": _axis("lorentzian", center=origin + 1)}}
+    result = template.simulate_peaks([peak])
+
+    np.testing.assert_allclose(result.data, [0.5, 1])
+    parameters = result.history_entries[-1]["parameters"]
+    center = parameters["peaks"][0]["axes"]["x"]["center"]
+    assert np.longdouble(center) == origin + 1
+    json.dumps(parameters, allow_nan=False)
+
+
 @pytest.mark.parametrize(
     ("model", "position", "expected"),
     [("lorentzian", 1e170, 2.5e-33), ("gaussian", 20, 2.2490905336086767e-174)],
