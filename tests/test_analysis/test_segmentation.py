@@ -215,6 +215,16 @@ def test_external_pint_system_does_not_rescale_equivalent_units():
     np.testing.assert_array_equal(labels.data, [0, 1])
 
 
+@pytest.mark.parametrize(("unit", "alias"), [("meter", "m"), ("volt", "V")])
+def test_external_pint_unit_name_cannot_hide_an_incompatible_dimension(unit, alias):
+    registry = pint.UnitRegistry(None)
+    registry.define(f"{unit} = [time] = {alias}")
+    source = scp.NDDataset([1, 2, 3], units=alias)
+
+    with pytest.raises(ValueError, match="must match"):
+        source.segment_regions(threshold=registry.Quantity(2, alias), dim=0)
+
+
 def test_numpy_timedelta_is_not_an_axis_or_threshold():
     source = scp.NDDataset([0, 2])
     duration = np.timedelta64(0, "ns")

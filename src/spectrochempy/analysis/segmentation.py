@@ -7,6 +7,7 @@
 
 import numpy as np
 from pint import Quantity as PintQuantity
+from pint.errors import DimensionalityError
 from pint.errors import PintError
 from pint.errors import UndefinedUnitError
 from scipy import ndimage
@@ -82,22 +83,34 @@ def _import_threshold(quantity):
     foreign_quantity = type(quantity)
     try:
         local = Quantity.from_tuple((magnitude, units))
-        for reference in (0, 1, 2):
-            foreign_root, foreign_units = (
-                foreign_quantity.from_tuple((reference, units))
-                .to_root_units()
-                .to_tuple()
-            )
-            local_root, local_units = (
-                Quantity.from_tuple((reference, units)).to_root_units().to_tuple()
-            )
-            if foreign_root != local_root or dict(foreign_units) != dict(local_units):
-                break
-        else:
-            return local
+        if local.dimensionality == quantity.dimensionality:
+            for reference in (0, 1, 2):
+                foreign_root, foreign_units = (
+                    foreign_quantity.from_tuple((reference, units))
+                    .to_root_units()
+                    .to_tuple()
+                )
+                local_root, local_units = (
+                    Quantity.from_tuple((reference, units)).to_root_units().to_tuple()
+                )
+                if foreign_root != local_root or dict(foreign_units) != dict(
+                    local_units
+                ):
+                    break
+            else:
+                return local
     except UndefinedUnitError:
         pass
-    return Quantity.from_tuple(quantity.to_root_units().to_tuple())
+
+    imported = Quantity.from_tuple(quantity.to_root_units().to_tuple())
+    if imported.dimensionality != quantity.dimensionality:
+        raise DimensionalityError(
+            quantity.units,
+            imported.units,
+            quantity.dimensionality,
+            imported.dimensionality,
+        )
+    return imported
 
 
 def _threshold_record(value, units):
