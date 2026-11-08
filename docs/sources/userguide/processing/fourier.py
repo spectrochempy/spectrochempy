@@ -44,7 +44,7 @@ import spectrochempy as scp
 # ## FFT of 1D NMR spectra
 
 # %% [markdown]
-# First we open read some time domain data. Here is a NMD free induction decay (FID):
+# First, use the NMR plugin to open a free induction decay (FID).
 #
 # Requires the official ``spectrochempy-nmr`` plugin.
 # Install with: ``python -m pip install "spectrochempy[nmr]"``.

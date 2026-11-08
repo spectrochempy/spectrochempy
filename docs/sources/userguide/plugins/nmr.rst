@@ -19,16 +19,27 @@ Install it with:
 
     python -m pip install "spectrochempy[nmr]"
 
+Follow the `Bruker 1D quickstart in the NMR plugin documentation
+<https://spectrochempy-nmr.readthedocs.io/latest/getting_started/quickstart.html>`_
+to read a FID, process it with ``scp.nmr.Experiment``, and plot the
+resulting spectrum.
+
 Recommended API
 ===============
 
-Use the recommended namespaced API:
+Use the NMR plugin's format-detecting reader:
 
 .. code-block:: python
 
     import spectrochempy as scp
 
     dataset = scp.nmr.read("path/to/fid")
+
+See the plugin's `guide to reading NMR data
+<https://spectrochempy-nmr.readthedocs.io/latest/userguide/reading_data.html>`_
+for supported formats and how to select one explicitly. The
+:doc:`reader catalog </userguide/importexport/readers>` covers readers
+available across SpectroChemPy.
 
 The NMR plugin owns Bruker/TopSpin conventions such as experiment directory
 resolution, processed-data defaults, acquisition metadata, and NMR unit
@@ -95,13 +106,8 @@ Compatibility aliases
 
 Compatibility aliases:
 
-- ``scp.nmr.read_topspin(...)`` remains available as the explicit historical
-  namespaced form.
 - ``scp.read_topspin(...)`` remains available as the root-level compatibility
   alias when the plugin is installed.
-
-New documentation and examples should prefer the shorter
-``scp.nmr.read(...)`` form.
 
 API Reference
 =============

@@ -12,6 +12,9 @@ examples, tests, and documentation are coordinated with the main project.
 Official plugins should feel like part of SpectroChemPy once installed. They are
 not loaded manually: import SpectroChemPy, then use the documented namespace.
 
+See the :doc:`reader catalog </userguide/importexport/readers>` for file
+formats, reader functions, and their required plugins.
+
 Current official plugins
 ========================
 
@@ -30,7 +33,7 @@ Current official plugins
    * - NMR
      - ``spectrochempy-nmr``
      - ``scp.nmr``
-     - TopSpin/Bruker NMR reading and NMR-specific processing utilities.
+     - NMR file readers and processing tools.
    * - Tensor
      - ``spectrochempy-tensor``
      - ``scp.tensor``
@@ -136,7 +139,7 @@ The table above is the quick reference. The dedicated plugin pages below
 provide the user-facing details:
 
 * :doc:`iris` for 2D-IRIS workflows and the ``scp.iris`` / ``dataset.iris`` APIs
-* :doc:`nmr` for TopSpin reading and NMR-specific processing workflows
+* :doc:`nmr` for NMR readers and NMR-specific processing workflows
 * :doc:`tensor` for TensorLy-backed tensor decompositions such as CP/PARAFAC
 * :doc:`carroucell` for carroucell experiment directory imports
 * :doc:`perkinelmer` for PerkinElmer ``.sp`` IR file reading

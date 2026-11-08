@@ -353,9 +353,10 @@ If you need to provide dynamic metadata, override ``plugin_info()``::
 Full example: NMR plugin
 ========================
 
-The reference external plugin is ``spectrochempy-nmr``.  It currently
-provides the Bruker TopSpin reader, and can grow additional NMR readers
-and tools over time::
+The ``spectrochempy-nmr`` plugin registers several NMR readers. The example
+below shows a minimal registration for its Bruker TopSpin reader. See the
+:doc:`reader catalog </userguide/importexport/readers>` for the public entry
+points::
 
     # spectrochempy-nmr/src/spectrochempy_nmr/__init__.py
 

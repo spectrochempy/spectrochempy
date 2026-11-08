@@ -66,8 +66,9 @@ X
 # %% [markdown]
 # In this case, the data were in an OMNIC file format,
 # and the `read` method guessed it correctly using the file name extension.
-# The `read` method can also read other file formats, such as
-# OPUS, JCAMP-DX, CSV, MATLAB, TOPSPIN, etc. or even a directory.
+# The `read` method also handles formats such as OPUS, JCAMP-DX, CSV and
+# MATLAB. Installing a reader plugin adds its formats, such as NMR formats
+# with `spectrochempy-nmr`.
 
 # %% [markdown]
 # ## How the generic reader works
@@ -106,34 +107,12 @@ X
 # ## Using a specific reader
 
 # %% [markdown]
-# Instead of using the generic read method, you can also use a specific
-# reader, such as `read_omnic`, `read_opus`, `read_csv`, `read_jcamp`, etc.
-# These methods are more specific and will only read the file format
-# they are. For example, `read_omnic` will only read OMNIC files.
-
-# %% [markdown]
-# The following table lists the available file readers in SCPy
-# along with the corresponding file formats and extensions they support:
+# Use a format-specific reader when you know the format, for example
+# `scp.omnic.read(...)` for OMNIC data. To detect a format among the readers
+# supplied by the optional NMR plugin, use `scp.nmr.read(...)`.
 #
-# | Reader         | File Formats                                      | Extensions      |
-# |---------------|-------------------------------------------------|----------------|
-# | read_omnic,<br/>read_spa,<br/>read_spg,<br/>read_srs    | Thermo Scientific/Nicolet OMNIC files          | .spa, .spg, .srs     |
-# | read_opus     | Bruker OPUS files                              | .0, .1, .000, ... |
-# | read_csv      | Comma-Separated Values (CSV) files             | .csv           |
-# | read_jcamp, <br/>read_dx| JCAMP-DX spectral data files                   | .dx, .jdx      |
-# | read_matlab,<br/>read_mat   | MATLAB files                                   | .mat, .dso     |
-# | scp.nmr.read  | Bruker TopSpin NMR files   (requires spectrochempy-nmr plugin)  | fid, ser, 1r, 1i, 2rr... |
-# | read_labspec  | LABSPEC6 spectral data files                   | .txt           |
-# | read_wire,<br/>read_wdf | Renishaw Wire files                     | .wdf           |
-# | read_scp      | SpectroChemPy-specific files                   | .scp           |
-# | read_soc,<br/>read_ddr,<br/>read_hdr,<br/>read_sdr     | Surface Optics Corporation SPA-compatible files | .ddr, .hdr, .sdr |
-# | read_galactic | Galactic spectral files                        | .spc           |
-# | read_quadera  | Pfeiffer Vacuum QUADERA mass spectrometer files | .txt           |
-# | scp.perkinelmer.read | PerkinElmer SP files   (requires spectrochempy-perkinelmer plugin) | .sp |
-# | read          | Generic reader (automatically detects format)  | -              |
-# | read_dir      | Reads all supported files in a directory       | -              |
-# | read_zip      | Reads files from a ZIP archive                 | .zip           |
-# | scp.carroucell.read | Reads files from a carroucell experiment directory | -          | (requires spectrochempy-carroucell plugin)
+# See the [reader catalog](readers.rst) for formats, explicit readers, and
+# the plugins that provide them.
 #
 # The `read_dir` function scans a directory and reads all supported files,
 # returning a list of `NDDataset` objects.

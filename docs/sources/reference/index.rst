@@ -180,9 +180,12 @@ kept as explicit public entry points. Their ``.ddr``, ``.hdr`` and ``.sdr``
 files are SPA-compatible and share the private OMNIC SPA parser, but the SOC
 readers preserve SOC provenance and their established multi-file defaults.
 
-The NMR readers ``read_topspin`` and ``read_agilent`` require the
-``spectrochempy-nmr`` plugin to be installed. The PerkinElmer reader
-``read_perkinelmer`` requires the ``spectrochempy-perkinelmer`` plugin.
+The :doc:`reader catalog </userguide/importexport/readers>` lists formats,
+explicit readers and required plugins. With ``spectrochempy-nmr`` installed,
+use ``scp.nmr.read(...)`` for NMR format detection. See the :doc:`NMR plugin
+guide </userguide/plugins/nmr>` for format selection. The root-level NMR
+entries below are compatibility aliases. The ``read_perkinelmer`` alias
+requires ``spectrochempy-perkinelmer``.
 
 .. autosummary::
     :nosignatures:
