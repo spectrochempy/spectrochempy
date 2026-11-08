@@ -15,6 +15,9 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 New Features
 ~~~~~~~~~~~~
 
+- Added ``simulate_peaks`` to sum separable Gaussian and Lorentzian peaks
+  on a multidimensional coordinate grid with unit-aware parameters.
+
 - Added ``segment_regions`` for threshold-based connected segmentation of 1D
   and 2D spectra, returning coordinate-preserving integer labels and region bounds.
 

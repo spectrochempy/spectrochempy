@@ -13,6 +13,7 @@ __all__ = [
     "_parameters",
     "linearregression",
     "optimize",
+    "simulation",
 ]
 
 from . import _models
@@ -21,3 +22,4 @@ from . import _parameter_transform
 from . import _parameters
 from . import linearregression
 from . import optimize
+from . import simulation

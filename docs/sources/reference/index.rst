@@ -889,6 +889,7 @@ Lineshape models
     sigmoid
     sigmoidmodel
     polynomialbaseline
+    simulate_peaks
 
 Find peaks
 ----------

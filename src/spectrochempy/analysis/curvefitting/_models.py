@@ -13,6 +13,8 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.units import Quantity
 
+_GAUSSIAN_WIDTH_PER_SIGMA = 2.3548
+
 __all__ = [
     "polynomial",
     "polynomialbaseline",
@@ -458,7 +460,7 @@ class gaussianmodel:
 
     @make_units_compatibility
     def f(self, x, ampl, pos, width, **kwargs):
-        gb = width / 2.3548
+        gb = width / _GAUSSIAN_WIDTH_PER_SIGMA
         tsq = (x - pos) * 2**-0.5 / gb
         normalized = kwargs.get("normalized", True)
         if normalized:
