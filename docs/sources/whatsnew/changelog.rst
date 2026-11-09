@@ -19,6 +19,9 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- Added ``integrate_region`` for physical ND boxes with optional propagated
+  standard uncertainty on regular or irregular spectral grids.
+
 
 .. section
 

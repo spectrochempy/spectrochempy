@@ -55,6 +55,8 @@ _LAZY_IMPORTS = {
     "PSDResult": "spectrochempy.processing.psd.psd",
     "simpson": "spectrochempy.analysis.integration.integrate",
     "trapezoid": "spectrochempy.analysis.integration.integrate",
+    "integrate_region": "spectrochempy.analysis.integration.region",
+    "RegionIntegrationResult": "spectrochempy.analysis.integration.region",
     "ActionMassKinetics": "spectrochempy.analysis.kinetic.kineticutilities",
     "PFR": "spectrochempy.analysis.kinetic.kineticutilities",
     "find_peaks": "spectrochempy.analysis.peakfinding.peakfinding",
