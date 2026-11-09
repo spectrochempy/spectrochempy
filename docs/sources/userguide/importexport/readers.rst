@@ -86,10 +86,6 @@ installation and compatibility.
      - ``.jdf``
      - ``scp.jeol.read``
      - :doc:`NMR </userguide/plugins/nmr>`
-   * - TecMag NMR
-     - ``.tnt``
-     - ``scp.tecmag.read``
-     - :doc:`NMR </userguide/plugins/nmr>`
    * - SIMPSON simulation output
      - ``.spe``, ``.fid``, ``.in``
      - ``scp.nmr.read_simpson``
