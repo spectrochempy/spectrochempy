@@ -38,6 +38,8 @@ Bug Fixes
   display rounding, preserving uniform spacing. Set ``linearize_below``
   explicitly to use a different tolerance.
 - Fixed Sphinx-Gallery thumbnail selection for examples with several figures.
+- Preserved dataset modification timestamps and their UTC offsets when
+  saving and reopening native ``.scp`` files.
 
 Breaking Changes
 ~~~~~~~~~~~~~~~~
