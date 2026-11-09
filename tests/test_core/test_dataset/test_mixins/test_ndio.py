@@ -820,6 +820,7 @@ def test_native_roundtrip_preserves_aware_acquisition_date(tmp_path):
     )
     dataset = NDDataset([1.0, 2.0, 3.0], name="aware_acquisition")
     dataset.acquisition_date = acquisition_date
+    dataset._modified = datetime(2024, 1, 3, tzinfo=timezone.utc)
     source_data = dataset.data.copy()
     source_public_date = dataset.acquisition_date
     source_created = dataset._created

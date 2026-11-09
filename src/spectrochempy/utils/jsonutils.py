@@ -346,7 +346,9 @@ def json_encoder(byte_obj, encoding=None, *, _root=True):
                 ):
                     dic[name] = json_encoder(val.tolist(), encoding=None, _root=False)
                     continue
-                if name == "acquisition_date" and isinstance(val, datetime.datetime):
+                if name in {"acquisition_date", "modified"} and isinstance(
+                    val, datetime.datetime
+                ):
                     dic[name] = {
                         "isoformat": val.isoformat(),
                         "__class__": "DATETIME",

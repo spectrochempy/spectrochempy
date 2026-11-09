@@ -26,6 +26,7 @@ import json
 import os
 import pathlib
 import zipfile
+from datetime import UTC
 from typing import Any
 from typing import BinaryIO
 
@@ -399,6 +400,7 @@ class NDIO(tr.HasTraits):
             return coordset
 
         def item_to_attr(obj: Any, dic: dict[str, Any]) -> Any:
+            restored_modified = None
             legacy_ignored_fields = {
                 "roi",
                 "_roi",
@@ -424,6 +426,13 @@ class NDIO(tr.HasTraits):
 
                     if val is None:
                         pass
+
+                    elif key == "_modified" and isinstance(obj, NDDataset):
+                        # Restore the saved value after the other trait assignments.
+                        # Older files serialized UTC timestamps without an offset.
+                        restored_modified = (
+                            val if val.tzinfo else val.replace(tzinfo=UTC)
+                        )
 
                     elif key in ["_meta", "_preferences"]:  # "_ranges",
                         setattr(obj, key, item_to_attr(getattr(obj, key), val))
@@ -485,6 +494,8 @@ class NDIO(tr.HasTraits):
                 except Exception as e:
                     raise TypeError(f"for {key} {e}") from e
 
+            if restored_modified is not None:
+                obj._modified = restored_modified
             return obj
 
         # Create the class object and load it with the JSON content
@@ -521,8 +532,11 @@ class NDIO(tr.HasTraits):
         # tmpfile.unlink()
         zipf.close()
 
+        modified = getattr(self, "_modified", None)
         self.filename = filename
         self.name = filename.stem
+        if modified is not None:
+            self._modified = modified
 
         return filename
 

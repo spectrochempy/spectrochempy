@@ -6,65 +6,65 @@
 
 :orphan:
 
-What's New in Revision 1.1.5.dev
+What's New in Revision 1.2.0
 ---------------------------------------------------------------------------------------
 
-These are the changes in SpectroChemPy-1.1.5.dev.
+These are the changes in SpectroChemPy-1.2.0.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
 
 New Features
 ~~~~~~~~~~~~
 
-- Added ``simulate_peaks`` to sum separable Gaussian and Lorentzian peaks
-  on a multidimensional coordinate grid with unit-aware parameters.
+- **Multidimensional peak analysis.** ``find_peaks`` detects positive maxima on
+  explicitly selected 2D spectra, with per-axis separation in points or
+  physical units. ``PeakTable`` and ``PeakFindingResult`` show units and a
+  compact preview in text and HTML. ``simulate_peaks`` sums separable Gaussian
+  and Lorentzian peaks on multidimensional coordinate grids.
 
-- Added ``segment_regions`` for threshold-based connected segmentation of 1D
-  and 2D spectra, returning coordinate-preserving integer labels and region bounds.
+- **Segmentation and correlation spectroscopy.** ``segment_regions`` uses
+  connectivity and a threshold to return integer labels and region bounds
+  while preserving coordinates. ``correlation_spectroscopy`` computes
+  synchronous and asynchronous 2D correlation maps for real data with a
+  uniformly spaced perturbation coordinate.
 
-- Added coordinate-aware marginal panels to 2D contour plots, with selectable
-  dimensions, calculated projections or external reference spectra, and signed
-  contour colors/styles. ``multiplot`` composes these panels, supports mixed
-  1D/2D datasets and per-panel options, and saves the completed figure once.
-
-- Added the generic ``fft.validate_input`` plugin hook for read-only FFT/IFFT
-  checks before in-place axis changes, resizing or numerical preparation.
-  Validators can reject a request without leaving the caller partly modified.
-
-- ``find_peaks`` now supports explicitly selected true 2D spectra with
-  deterministic positive-maximum detection, anisotropic point/physical spacing,
-  and structured ``PeakTable`` results. The historical 1D behavior is unchanged.
-
-- Added ``correlation_spectroscopy`` for synchronous and asynchronous 2D correlation
-  spectroscopy maps, with coordinate-aware validation of real, uniformly spaced
-  perturbation coordinates.
-
-- Added a gallery example for 2D-IR peak finding on an experimental spectrum.
-
-- ``PeakFindingResult`` and ``PeakTable`` now display compact text and HTML
-  tables with units in column headers and a bounded preview of detected peaks.
+- **2D contour plotting.** Contour maps support signed line colors and
+  styles and marginal panels with calculated projections or external
+  reference spectra. ``multiplot`` combines 1D and 2D panels and exports
+  the complete figure.
 
 Bug Fixes
 ~~~~~~~~~
 
-- Fixed numerical edge cases in ``simulate_peaks`` and enabled compatible
-  quantities from external Pint registries.
-
-- Fixed strict threshold comparisons in ``segment_regions`` and support for
-  compatible quantities from external Pint registries and NumPy integer axes.
-
-- Restored the documented 0.1 percent default coordinate linearization
-  tolerance in the ``Coord`` constructor. Use ``linearize_below`` explicitly
-  when a more permissive tolerance is required. FTIR FFT coordinates convert
-  frequency bins to wavenumbers before display rounding to preserve uniform
-  bin spacing with the standard tolerance.
-
-- Fixed gallery thumbnail selection by placing Sphinx-Gallery configuration
-  after the example docstring so the requested figure is recognized.
+- Stabilized numerical tails in ``simulate_peaks`` and preserved strict
+  threshold comparisons in ``segment_regions``. Both accept compatible
+  quantities from external Pint registries. Segmentation accepts NumPy
+  integer axis selectors.
+- Restored the documented 0.1 percent coordinate linearization tolerance.
+  FTIR FFT coordinates convert frequency bins to wavenumbers before
+  display rounding, preserving uniform spacing. Set ``linearize_below``
+  explicitly to use a different tolerance.
+- Fixed Sphinx-Gallery thumbnail selection for examples with several figures.
+- Preserved dataset modification timestamps and their UTC offsets when
+  saving and reopening native ``.scp`` files.
 
 Breaking Changes
 ~~~~~~~~~~~~~~~~
 
-- Remove built-in quaternion handling and the Hypercomplex plugin from the
-  official plugin catalog, bundled extras, development environments and CI.
-  Specialized NMR representations belong to the standalone NMR plugin; use
-  ordinary complex arrays for core numerical operations.
+- Removed built-in quaternion handling and the Hypercomplex plugin from
+  the official catalog, extras, development environments and CI. Core
+  numerical operations use ordinary complex arrays. Specialized NMR
+  representations are provided by the standalone NMR plugin.
+
+Documentation
+~~~~~~~~~~~~~
+
+- Added a reader catalog that identifies the formats handled by the core and
+  by each plugin. A new gallery example demonstrates 2D peak finding on an
+  experimental IR spectrum.
+
+Developer
+~~~~~~~~~
+
+- The ``fft.validate_input`` plugin hook validates FFT and IFFT requests before
+  axis changes, resizing or numerical preparation. A rejected in-place request
+  leaves the input intact.
