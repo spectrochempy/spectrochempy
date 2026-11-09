@@ -107,6 +107,20 @@ def test_background_estimation_masks_and_disjoint_support():
         source.integrate_region({"x": (0, 1.5)}, noise_bounds={"x": (1.6, 4)})
 
 
+def test_large_integer_noise_is_recorded_without_overflow():
+    source = _dataset([1, 1], [0, 1])
+    result = source.integrate_region({"x": (0, 1)}, noise_std=10**50)
+    assert result.uncertainty == pytest.approx(10**50 / np.sqrt(2))
+    assert result.history_entries[-1]["parameters"]["noise"]["sigma"] == 10**50
+
+
+@pytest.mark.parametrize(("level", "dtype"), [(10**15, np.float64), (2**60, np.int64)])
+def test_background_std_preserves_noise_on_a_large_baseline(level, dtype):
+    source = _dataset([1, 1, 0, level, level + 1], [0, 1, 2, 3, 4], dtype=dtype)
+    result = source.integrate_region({"x": (0, 1)}, noise_bounds={"x": (3, 4)})
+    assert result.uncertainty == pytest.approx(0.5, rel=1e-15)
+
+
 def test_compatible_external_pint_bounds_and_noise():
     registry = pint.UnitRegistry(system="cgs")
     registry.formatter.default_format = "L"
@@ -176,3 +190,25 @@ def test_integer_grid_keeps_unit_spacing_above_float_precision():
         coordset=[scp.Coord([origin, origin + 1], dtype=np.int64)],
     )
     assert source.integrate_region({"x": (origin, origin + 1)}).value == 1.5
+
+
+def test_intersected_cells_define_support_even_if_a_weight_underflows():
+    span = np.finfo(np.longdouble).max / 4
+    coord = scp.Coord([0, span], dtype=np.longdouble)
+    source = scp.NDDataset([0, span], dtype=np.longdouble, coordset=[coord])
+    bounds = {"x": (0, 1e-100)}
+
+    result = source.integrate_region(bounds)
+    assert not result.valid and result.reason == "numeric_range"
+    assert result.history_entries[-1]["parameters"]["contributing_samples"] == 2
+
+    source.mask = [False, True]
+    result = source.integrate_region(bounds)
+    assert not result.valid and result.reason == "incomplete_support"
+
+
+def test_reversing_an_axis_preserves_reduction_order_under_cancellation():
+    source = _dataset([2e20, -1e20, 2], [0, 1, 2])
+    bounds = {"x": (0, 2)}
+    assert source.integrate_region(bounds).value == 1
+    assert source[::-1].integrate_region(bounds).value == 1

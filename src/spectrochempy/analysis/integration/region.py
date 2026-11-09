@@ -135,7 +135,28 @@ def _axis_weights(grid, low, high):
     indices = np.flatnonzero(intersects)
     weights[indices] = half * ((right - start) / span + (right - stop) / span)
     weights[indices + 1] += half * ((start - left) / span + (stop - left) / span)
-    return weights[::-1] if reverse else weights
+    supported = np.zeros(grid.size, dtype=bool)
+    supported[indices] = True
+    supported[indices + 1] = True
+    if reverse:
+        weights, supported = weights[::-1], supported[::-1]
+    indices = np.flatnonzero(supported)
+    return weights, indices[::-1] if reverse else indices
+
+
+def _background_std(samples):
+    """Preserve small variations around a large background level."""
+    if samples.dtype.kind in "iu":
+        shifted = (samples.astype(object) - int(samples[0])).astype(np.longdouble)
+    else:
+        samples = samples.astype(np.longdouble)
+        shifted = samples - samples[0]
+    scale_factor = 1
+    if not np.isfinite(shifted).all():
+        shifted = samples * 0.5 - samples[0] * 0.5
+        scale_factor = 2
+    scale = np.max(np.abs(shifted))
+    return np.std(shifted / scale, ddof=1) * scale * scale_factor if scale else 0
 
 
 def integrate_region(dataset, bounds, *, noise_std=None, noise_bounds=None):
@@ -214,6 +235,7 @@ def integrate_region(dataset, bounds, *, noise_std=None, noise_bounds=None):
         )
         axes[dim] = (grid, origin, coord)
 
+    contraction_order = tuple(sorted(range(len(axes)), key=list(axes).__getitem__))
     limits, bounds_record = _resolve_bounds(bounds, axes, "bounds")
     sigma, noise_record = None, {}
     noise_status = "not_requested"
@@ -225,13 +247,14 @@ def integrate_region(dataset, bounds, *, noise_std=None, noise_bounds=None):
         noise_status = "available"
 
     with np.errstate(over="ignore", invalid="ignore", under="ignore"):
-        weights = [
+        quadrature = [
             _axis_weights(grid, *limits[dim]) for dim, (grid, _, _) in axes.items()
         ]
-        positive = [np.flatnonzero(vector > 0) for vector in weights]
+        positive = [indices for _, indices in quadrature]
+        vectors = [weights[indices] for weights, indices in quadrature]
         numeric_support = all(
-            indices.size and np.isfinite(vector).all()
-            for indices, vector in zip(positive, weights, strict=True)
+            vector.size and np.isfinite(vector).all() and np.all(vector > 0)
+            for vector in vectors
         )
         support = np.ix_(*positive)
         mask = np.broadcast_to(dataset.mask, data.shape)
@@ -254,11 +277,16 @@ def integrate_region(dataset, bounds, *, noise_std=None, noise_bounds=None):
                 for a, b in zip(positive, background, strict=True)
             ):
                 raise ValueError("noise_bounds overlaps the signal quadrature support")
+            background = [
+                indices[::-1] if grid[0] > grid[-1] else indices
+                for indices, (grid, _, _) in zip(background, axes.values(), strict=True)
+            ]
             selection = np.ix_(*background)
-            samples = data[selection]
-            samples = samples[~mask[selection] & np.isfinite(samples)].astype(
-                np.longdouble
+            samples = data[selection].transpose(contraction_order)
+            valid_samples = ~mask[selection].transpose(contraction_order) & np.isfinite(
+                samples
             )
+            samples = samples[valid_samples]
             noise_record = {
                 "model": "uncorrelated",
                 "bounds": record,
@@ -267,36 +295,33 @@ def integrate_region(dataset, bounds, *, noise_std=None, noise_bounds=None):
             }
             noise_status = "insufficient_background"
             if samples.size >= 2:
-                scale = np.max(np.abs(samples))
-                sigma = np.std(samples / scale, ddof=1) * scale if scale else 0
+                sigma = _background_std(samples)
                 noise_status = "available"
 
         value, uncertainty, reason = None, None, None
-        if not numeric_support:
-            reason = "numeric_range"
-        elif invalid:
+        if invalid:
             reason = "incomplete_support"
+        elif not numeric_support:
+            reason = "numeric_range"
         else:
-            vectors = [
-                vector[index] for vector, index in zip(weights, positive, strict=True)
-            ]
-            integral = signal.astype(np.longdouble)
-            for vector in vectors:
+            integral = signal.transpose(contraction_order).astype(np.longdouble)
+            for axis in contraction_order:
+                vector = vectors[axis]
                 integral = vector @ integral.reshape(vector.size, -1)
             value = float(integral.item())
             if not np.isfinite(value):
                 value, reason = None, "numeric_range"
             elif sigma is not None:
                 propagated = np.longdouble(sigma)
-                for vector in vectors:
-                    propagated *= np.hypot.reduce(vector)
+                for axis in contraction_order:
+                    propagated *= np.hypot.reduce(vectors[axis])
                 uncertainty = float(propagated)
                 if not np.isfinite(uncertainty):
                     uncertainty, noise_status = None, "numeric_range"
 
     if reason is not None and noise_status != "not_requested":
         noise_status = reason
-    if sigma is not None and np.isfinite(sigma):
+    if sigma is not None and np.isfinite(np.longdouble(sigma)):
         noise_record["sigma"] = _record_number(sigma)
         noise_record["unit"] = str(dataset.units) if dataset.units is not None else None
     entry = _history_entry(
