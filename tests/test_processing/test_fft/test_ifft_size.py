@@ -9,6 +9,7 @@ import pytest
 
 from spectrochempy import Coord
 from spectrochempy import NDDataset
+from spectrochempy import ur
 
 
 def _frequency_dataset(shape=(2, 8), transformed_axis=-1):
@@ -90,7 +91,7 @@ def test_fft_ifft_roundtrip_with_dense_frequency_bins():
     spectrum = source.fft()
 
     assert spectrum.x.linear
-    assert spectrum.x.units == "Hz"
+    assert spectrum.x.units == ur.Hz
     np.testing.assert_allclose(
         spectrum.x.data,
         np.fft.fftshift(np.fft.fftfreq(size, d=dwell)),
