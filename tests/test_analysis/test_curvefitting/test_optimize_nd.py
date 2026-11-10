@@ -453,3 +453,58 @@ def test_fit_nd_confidence_interval_contains_extended_precision_center():
     assert result.stderr[0] > 0
     low, high = result.confidence_intervals[0]
     assert low <= result.peaks[0]["axes"]["x"]["center"] <= high
+
+
+def test_fit_nd_covariance_matches_represented_center():
+    offset = 2**53
+    relative_x = np.arange(-4, 8, 2)
+    relative_y = np.arange(-2, 3)
+    x = scp.Coord(offset + relative_x, dtype=np.int64)
+    y = scp.Coord(relative_y)
+    desired_center = 0.33333333
+    data = np.exp(
+        -np.log(2)
+        * ((relative_x[None, :] - desired_center) ** 2 + relative_y[:, None] ** 2)
+    )
+    spectrum = scp.NDDataset(data, coordset=[y, x])
+    peak = _fixed_peak(spectrum.dims)
+    peak["height"]["value"] = 1
+    peak["axes"]["x"]["center"] = offset
+    for dim in spectrum.dims:
+        peak["axes"][dim]["width"]["value"] = 2
+    opt = scp.Optimize(peaks=[peak]).fit(spectrum)
+    result = opt.result
+    assert result.diagnostics["success"]
+    center = result.peaks[0]["axes"]["x"]["center"] - offset
+    expected = -2 * np.log(2) * (relative_x[None, :] - center) * result.fitted.data
+    assert_allclose(opt.jacobian[:, 0], expected.ravel(), atol=3e-8, rtol=1e-6)
+    expected_covariance = (
+        result.diagnostics["rss"] / (spectrum.size - 1) / np.sum(expected**2)
+    )
+    assert_allclose(result.covariance[0, 0], expected_covariance, atol=0, rtol=1e-6)
+
+
+def test_fit_nd_scales_grid_before_subtraction_can_overflow():
+    x = scp.Coord([-1e308, 1.0, 2.0, 1e308], linearize_below=-1)
+    y = scp.Coord(np.arange(-2, 3))
+    grid = scp.NDDataset(np.zeros((5, 4)), coordset=[y, x])
+    truth = {
+        "height": 1,
+        "axes": {
+            "x": {"model": "lorentzian", "center": 1e308, "width": 1e308},
+            "y": {"model": "gaussian", "center": 0, "width": 2},
+        },
+    }
+    spectrum = scp.simulate_peaks(grid, [truth])
+    peak = _fixed_peak(spectrum.dims)
+    peak["height"]["value"] = 1
+    peak["axes"]["x"] = {
+        "model": "lorentzian",
+        "center": 1e308,
+        "width": {"value": 1e308, "fixed": True},
+    }
+    peak["axes"]["y"]["width"]["value"] = 2
+    opt = scp.Optimize(peaks=[peak]).fit(spectrum)
+    assert opt.result.diagnostics["success"]
+    assert_allclose(opt.predict().data[2, 0], 1 / 17, atol=0)
+    assert_allclose(opt.jacobian[8, 0] * 1e308, 16 / 289, rtol=1e-6)

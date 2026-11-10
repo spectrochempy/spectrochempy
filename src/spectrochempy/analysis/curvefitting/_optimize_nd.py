@@ -2,8 +2,10 @@
 
 from collections.abc import Mapping
 from collections.abc import Sequence
+from copy import deepcopy
 
 import numpy as np
+from scipy.optimize import approx_fprime
 from scipy.optimize import least_squares
 
 from spectrochempy.analysis.curvefitting.simulation import _MODELS
@@ -162,6 +164,27 @@ def _physical_value(origin, offset):
     return np.longdouble(origin) + offset
 
 
+def _solver_model(peaks, coordinates, center_origins):
+    solver_peaks = deepcopy(peaks)
+    targets = {}
+    grids = []
+    for peak, solver_peak in zip(peaks, solver_peaks, strict=True):
+        grid = coordinates.copy()
+        targets[id(peak)] = (solver_peak, 1)
+        for dim, axis in peak["axes"].items():
+            solver_axis = solver_peak["axes"][dim]
+            factor = 1
+            if id(axis) in center_origins:
+                factor = np.longdouble(axis["width"])
+                grid[dim] = _scaled_offsets(
+                    grid[dim], center_origins[id(axis)], factor
+                )[0]
+                solver_axis["width"] = 1
+            targets[id(axis)] = (solver_axis, factor)
+        grids.append(grid)
+    return solver_peaks, grids, targets
+
+
 def fit_separable_peaks(dataset, specs, max_calls):
     """Fit and reconstruct on the input grid with a fixed observation support."""
     coordinates, units = _grid(dataset)
@@ -191,15 +214,6 @@ def fit_separable_peaks(dataset, specs, max_calls):
         for (target, key), origin in zip(free, origins, strict=True)
         if key == "center"
     }
-    solver_grids = [
-        {
-            dim: _scaled_offsets(grid, center_origins[id(peak["axes"][dim])], 1)[0]
-            if id(peak["axes"][dim]) in center_origins
-            else grid
-            for dim, grid in coordinates.items()
-        }
-        for peak in peaks
-    ]
     intensity_scale = (
         max(np.max(np.abs(observed)), *(abs(peak["height"]) for peak in peaks)) or 1.0
     )
@@ -213,13 +227,11 @@ def fit_separable_peaks(dataset, specs, max_calls):
         dtype=np.longdouble,
     )
 
-    def model(values, grids, *, keep_components=False):
-        for (target, key), value in zip(free, values, strict=True):
-            target[key] = float(value) if key == "height" else value
+    def model(peak_list, grids, *, keep_components=False):
         total = np.zeros(dataset.shape)
         components = []
         with np.errstate(over="ignore", invalid="ignore"):
-            for peak, grid in zip(peaks, grids, strict=True):
+            for peak, grid in zip(peak_list, grids, strict=True):
                 component = _evaluate_separable_peak(dataset.shape, grid, peak)
                 total += component
                 if keep_components:
@@ -260,8 +272,17 @@ def fit_separable_peaks(dataset, specs, max_calls):
         ):
             raise ValueError("ND parameter bounds are outside the scaled solver range")
 
+        solver_peaks, solver_grids, targets = _solver_model(
+            peaks, coordinates, center_origins
+        )
+        solver_free = [(targets[id(target)], key) for target, key in free]
+
         def scaled_residuals(vector):
-            fitted, _ = model(scales * vector, solver_grids)
+            for ((target, factor), key), value in zip(
+                solver_free, scales * vector, strict=True
+            ):
+                target[key] = float(value) if key == "height" else value / factor
+            fitted, _ = model(solver_peaks, solver_grids)
             return residuals(fitted) / intensity_scale
 
         solution = least_squares(
@@ -274,10 +295,28 @@ def fit_separable_peaks(dataset, specs, max_calls):
             gtol=None,
             max_nfev=max_calls,
         )
-        values = [
-            _physical_value(origin, value)
-            for origin, value in zip(origins, scales * solution.x, strict=True)
-        ]
+        for (target, key), origin, offset in zip(
+            free, origins, scales * solution.x, strict=True
+        ):
+            value = _physical_value(origin, offset)
+            target[key] = float(value) if key == "height" else value
+            values.append(target[key])
+        public_vector = np.asarray(
+            [
+                _relative_value(value, origin) / scale
+                for value, origin, scale in zip(values, origins, scales, strict=True)
+            ],
+            dtype=float,
+        )
+        epsilon = np.finfo(float).eps
+        if not np.allclose(
+            public_vector, solution.x, rtol=8 * epsilon, atol=8 * epsilon
+        ):
+            step = np.sqrt(epsilon) * np.maximum(1, np.abs(public_vector))
+            solution.jac = np.atleast_2d(
+                approx_fprime(public_vector, scaled_residuals, epsilon=step)
+            )
+        solution.x = public_vector
         with np.errstate(over="ignore", under="ignore", invalid="ignore"):
             jacobian = np.asarray(
                 solution.jac.astype(np.longdouble)
@@ -285,9 +324,11 @@ def fit_separable_peaks(dataset, specs, max_calls):
                 dtype=float,
             )
 
-    fitted, components = model(values, [coordinates] * len(peaks), keep_components=True)
+    fitted, components = model(peaks, [coordinates] * len(peaks), keep_components=True)
     residual = np.zeros(dataset.shape)
     residual[valid] = residuals(fitted)
+    if solution is not None:
+        solution.fun = residual[valid] / intensity_scale
     diagnostics = _fit_diagnostics(observed, residual[valid], len(free))
     covariance, reason = _physical_covariance(
         solution, jacobian, scales, bounds, diagnostics
@@ -435,7 +476,7 @@ def _physical_covariance(solution, physical_jacobian, scales, bounds, diagnostic
             return None, "active_bounds"
 
     with np.errstate(over="ignore", under="ignore", invalid="ignore", divide="ignore"):
-        sigma = np.linalg.norm(solution.fun) / np.sqrt(dof)
+        sigma = np.hypot.reduce(solution.fun) / np.sqrt(dof)
         physical_scale = (np.longdouble(sigma) * scales) / column_scale
         scaled = np.asarray((right / singular[:, None]) * physical_scale, dtype=float)
         covariance = scaled.T @ scaled
