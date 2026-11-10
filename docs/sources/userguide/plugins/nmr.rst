@@ -19,6 +19,8 @@ selects plugin versions below 0.3. The plugin's
 <https://spectrochempy-nmr.readthedocs.io/latest/getting_started/installation.html>`_
 gives the requirements for each workflow.
 
+.. _compatibility-aliases:
+
 Read data through the namespaced API:
 
 .. code-block:: python
@@ -33,8 +35,14 @@ Use the standalone plugin documentation for the
 `1D processing <https://spectrochempy-nmr.readthedocs.io/latest/userguide/processing_1d.html>`_,
 and `2D processing and TopSpin replay
 <https://spectrochempy-nmr.readthedocs.io/latest/userguide/processing_2d.html>`_.
+
+.. _topspin-processing-profile:
+.. _spectrochempy-processing-trace:
+
 Recorded TopSpin recipes are applied when explicitly requested with
 ``Experiment.process(replay="topspin")`` on supported data.
+The processing guides explain how to inspect the recorded recipe and the
+processing trace on the result.
 
 See the :doc:`core plugin API index </reference/plugins>` and the standalone
 `NMR API reference
