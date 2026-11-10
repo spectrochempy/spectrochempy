@@ -17,3 +17,5 @@ Bug Fixes
 
 - Preserve uniform frequency bins for FFTs with finely spaced axes so the
   inverse transform can recover the time-domain signal.
+- Resolve physical phase pivots to sample indices before applying a
+  first-order phase correction.
