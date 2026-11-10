@@ -130,6 +130,14 @@ def test_nmr_manual_1D_phasing(NMR_dataset_1D):
     )
     assert_array_equal(transfph.data, transf.data)
 
+    # First-order phase is zero at the FFT's physical peak pivot.
+    pivot_index = np.argmax(np.abs(transf.data))
+    manual = transf.pk(phc0=23.0, phc1=-17.0, rel=True)
+    assert_array_almost_equal(
+        manual.data[pivot_index] / transf.data[pivot_index],
+        np.exp(1.0j * np.deg2rad(23.0)),
+    )
+
     # with phc0=0 (default), pivot position doesn't change the data
     transfph3 = transf.pk(pivot=50, verbose=True)
     assert_array_equal(transfph3.data, transfph.data)
