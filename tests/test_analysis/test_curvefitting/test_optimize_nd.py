@@ -455,26 +455,35 @@ def test_fit_nd_confidence_interval_contains_extended_precision_center():
     assert low <= result.peaks[0]["axes"]["x"]["center"] <= high
 
 
-def test_fit_nd_covariance_matches_represented_center():
+@pytest.mark.parametrize("height", [1.0, np.finfo(float).max])
+def test_fit_nd_covariance_matches_represented_center(height):
     offset = 2**53
     relative_x = np.arange(-4, 8, 2)
     relative_y = np.arange(-2, 3)
     x = scp.Coord(offset + relative_x, dtype=np.int64)
     y = scp.Coord(relative_y)
     desired_center = 0.33333333
-    data = np.exp(
+    data = height * np.exp(
         -np.log(2)
         * ((relative_x[None, :] - desired_center) ** 2 + relative_y[:, None] ** 2)
     )
     spectrum = scp.NDDataset(data, coordset=[y, x])
     peak = _fixed_peak(spectrum.dims)
-    peak["height"]["value"] = 1
+    if height == 1:
+        peak["height"]["value"] = height
+    else:
+        peak["height"] = {"value": height, "bounds": (height * 0.999, height)}
     peak["axes"]["x"]["center"] = offset
     for dim in spectrum.dims:
         peak["axes"][dim]["width"]["value"] = 2
     opt = scp.Optimize(peaks=[peak]).fit(spectrum)
     result = opt.result
     assert result.diagnostics["success"]
+    assert np.isfinite(opt.jacobian).all()
+    if height != 1:
+        assert result.peaks[0]["height"] <= height
+        assert result.diagnostics["n_observations"] == spectrum.size
+        return
     center = result.peaks[0]["axes"]["x"]["center"] - offset
     expected = -2 * np.log(2) * (relative_x[None, :] - center) * result.fitted.data
     assert_allclose(opt.jacobian[:, 0], expected.ravel(), atol=3e-8, rtol=1e-6)

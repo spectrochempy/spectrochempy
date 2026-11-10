@@ -5,7 +5,6 @@ from collections.abc import Sequence
 from copy import deepcopy
 
 import numpy as np
-from scipy.optimize import approx_fprime
 from scipy.optimize import least_squares
 
 from spectrochempy.analysis.curvefitting.simulation import _MODELS
@@ -185,6 +184,43 @@ def _solver_model(peaks, coordinates, center_origins):
     return solver_peaks, grids, targets
 
 
+class _NonfiniteResidualError(ValueError):
+    """A trial model cannot produce finite residuals."""
+
+
+def _bounded_jacobian(vector, residuals, bounds):
+    """Differentiate a reconstructed model using evaluable in-bounds steps."""
+    try:
+        baseline = residuals(vector)
+    except _NonfiniteResidualError:
+        return None
+    jacobian = np.empty((baseline.size, vector.size))
+    epsilon = np.sqrt(np.finfo(vector.dtype).eps)
+    for index, value in enumerate(vector):
+        step = epsilon * max(1, abs(value))
+        lower, upper = bounds[:, index]
+        with np.errstate(over="ignore"):
+            left = min(upper, max(lower, value - step))
+            right = min(upper, max(lower, value + step))
+        candidates = (left, right) if value - left > right - value else (right, left)
+        for candidate in candidates:
+            if candidate == value or not np.isfinite(candidate):
+                continue
+            trial = vector.copy()
+            trial[index] = candidate
+            try:
+                with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+                    column = (residuals(trial) - baseline) / (candidate - value)
+            except _NonfiniteResidualError:
+                continue
+            if np.isfinite(column).all():
+                jacobian[:, index] = column
+                break
+        else:
+            return None
+    return jacobian
+
+
 def fit_separable_peaks(dataset, specs, max_calls):
     """Fit and reconstruct on the input grid with a fixed observation support."""
     coordinates, units = _grid(dataset)
@@ -242,7 +278,9 @@ def fit_separable_peaks(dataset, specs, max_calls):
         with np.errstate(over="ignore", invalid="ignore"):
             residual = observed - fitted[valid]
         if not np.isfinite(residual).all():
-            raise ValueError("ND fitting produced non-finite residuals on the support")
+            raise _NonfiniteResidualError(
+                "ND fitting produced non-finite residuals on the support"
+            )
         return residual
 
     solution = None
@@ -283,7 +321,13 @@ def fit_separable_peaks(dataset, specs, max_calls):
             ):
                 target[key] = float(value) if key == "height" else value / factor
             fitted, _ = model(solver_peaks, solver_grids)
-            return residuals(fitted) / intensity_scale
+            with np.errstate(over="ignore", invalid="ignore"):
+                scaled = residuals(fitted) / intensity_scale
+            if not np.isfinite(scaled).all():
+                raise _NonfiniteResidualError(
+                    "ND residuals are outside the scaled solver range"
+                )
+            return scaled
 
         solution = least_squares(
             scaled_residuals,
@@ -312,17 +356,15 @@ def fit_separable_peaks(dataset, specs, max_calls):
         if not np.allclose(
             public_vector, solution.x, rtol=8 * epsilon, atol=8 * epsilon
         ):
-            step = np.sqrt(epsilon) * np.maximum(1, np.abs(public_vector))
-            solution.jac = np.atleast_2d(
-                approx_fprime(public_vector, scaled_residuals, epsilon=step)
-            )
+            solution.jac = _bounded_jacobian(public_vector, scaled_residuals, bounds)
         solution.x = public_vector
-        with np.errstate(over="ignore", under="ignore", invalid="ignore"):
-            jacobian = np.asarray(
-                solution.jac.astype(np.longdouble)
-                * (np.longdouble(intensity_scale) / scales),
-                dtype=float,
-            )
+        if solution.jac is not None:
+            with np.errstate(over="ignore", under="ignore", invalid="ignore"):
+                jacobian = np.asarray(
+                    solution.jac.astype(np.longdouble)
+                    * (np.longdouble(intensity_scale) / scales),
+                    dtype=float,
+                )
 
     fitted, components = model(peaks, [coordinates] * len(peaks), keep_components=True)
     residual = np.zeros(dataset.shape)
@@ -442,6 +484,8 @@ def _physical_covariance(solution, physical_jacobian, scales, bounds, diagnostic
     dof = diagnostics["degrees_of_freedom"]
     if dof <= 0:
         return None, "insufficient_degrees_of_freedom"
+    if physical_jacobian is None:
+        return None, "invalid_jacobian"
     if not np.isfinite(physical_jacobian).all():
         return None, "numeric_range"
 
