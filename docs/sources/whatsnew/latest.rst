@@ -12,6 +12,12 @@ What's New in Revision 1.2.1.dev
 These are the changes in SpectroChemPy-1.2.1.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
 
+New Features
+~~~~~~~~~~~~
+
+- Added ``integrate_region`` for physical ND boxes with optional propagated
+  standard uncertainty on regular or irregular spectral grids.
+
 Bug Fixes
 ~~~~~~~~~
 

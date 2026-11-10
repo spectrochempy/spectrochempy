@@ -445,6 +445,8 @@ Sums, integral, difference
     cumsum
     trapezoid
     simpson
+    integrate_region
+    RegionIntegrationResult
 
 
 Complex
