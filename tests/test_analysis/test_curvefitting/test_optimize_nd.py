@@ -1,6 +1,7 @@
 """Regression tests for separable multiplet fitting."""
 
 from copy import deepcopy
+from types import MappingProxyType
 
 import numpy as np
 import pytest
@@ -288,6 +289,7 @@ def test_fit_nd_rejects_invalid_inputs(case, message):
         (0.999, (1, 4), "active_bounds"),
         (1.0, (1, 4), "active_bounds"),
         (1.000001, (1, 4), None),
+        (1.000000001, (1, 4), None),
     ],
 )
 def test_fit_nd_height_scale_and_active_bounds(height, bounds, reason):
@@ -370,3 +372,84 @@ def test_fit_nd_preserves_large_fixed_integer_center():
     assert opt.result.peaks[0]["axes"]["x"]["center"] == offset + 1
     assert_array_equal(opt.predict().data, spectrum.data)
     assert_allclose(opt.predict().data[2, 2:4], [0.0625, 0.0625], atol=0)
+
+
+def test_fit_nd_large_integer_origin_preserves_center_derivative():
+    offset = 2**53
+    x = scp.Coord(offset + np.arange(-4, 8, 2), dtype=np.int64)
+    y = scp.Coord(np.arange(-2, 3))
+    grid = scp.NDDataset(np.zeros((5, 6)), coordset=[y, x])
+    truth = {
+        "height": 1,
+        "axes": {
+            "x": {"model": "gaussian", "center": offset + 1, "width": 2},
+            "y": {"model": "gaussian", "center": 0, "width": 2},
+        },
+    }
+    spectrum = scp.simulate_peaks(grid, [truth])
+    peak = _fixed_peak(grid.dims)
+    peak["height"]["value"] = 1
+    peak["axes"]["x"]["center"] = offset
+    for dim in grid.dims:
+        peak["axes"][dim]["width"]["value"] = 2
+    opt = scp.Optimize(peaks=[peak]).fit(spectrum)
+    assert opt.result.diagnostics["success"]
+    assert opt.result.peaks[0]["axes"]["x"]["center"] == offset + 1
+    assert_allclose(np.linalg.norm(opt.jacobian), 1.2037712, rtol=1e-6)
+    assert_array_equal(opt.predict().data, spectrum.data)
+
+
+def test_fit_nd_resolves_weak_peak_and_accepts_read_only_mappings():
+    grid = scp.NDDataset(
+        np.zeros((5, 21)),
+        coordset=[scp.Coord(np.arange(-2, 3)), scp.Coord(np.arange(-10, 11))],
+    )
+
+    def peak(height, center):
+        return {
+            "height": height,
+            "axes": {
+                "x": {"model": "gaussian", "center": center, "width": 0.25},
+                "y": {"model": "gaussian", "center": 0, "width": 0.25},
+            },
+        }
+
+    spectrum = scp.simulate_peaks(grid, [peak(1, -5), peak(2e-11, 5)])
+    specs = [peak(1, -5), peak(1e-11, 5)]
+    specs[0]["height"] = {"value": 1, "fixed": True}
+    for spec in specs:
+        for dim, axis in spec["axes"].items():
+            for key in ("center", "width"):
+                axis[key] = MappingProxyType({"value": axis[key], "fixed": True})
+            spec["axes"][dim] = MappingProxyType(axis)
+        spec["axes"] = MappingProxyType(spec["axes"])
+    opt = scp.Optimize(peaks=tuple(map(MappingProxyType, specs))).fit(spectrum)
+    assert opt.result.diagnostics["success"]
+    assert_allclose(opt.result.peaks[1]["height"], 2e-11, rtol=1e-8, atol=0)
+
+
+def test_fit_nd_confidence_interval_contains_extended_precision_center():
+    offset = 10**12
+    center = np.longdouble(offset) + np.longdouble("0.333333333")
+    x = scp.Coord(offset + np.arange(-4, 8, 2), dtype=np.int64)
+    y = scp.Coord(np.arange(-2, 3))
+    grid = scp.NDDataset(np.zeros((5, 6)), coordset=[y, x])
+    truth = {
+        "height": 1,
+        "axes": {
+            "x": {"model": "gaussian", "center": center, "width": 2},
+            "y": {"model": "gaussian", "center": 0, "width": 2},
+        },
+    }
+    spectrum = scp.simulate_peaks(grid, [truth])
+    spectrum.data[0, -1] += 1e-7
+    peak = _fixed_peak(grid.dims)
+    peak["height"]["value"] = 1
+    peak["axes"]["x"]["center"] = center
+    for dim in grid.dims:
+        peak["axes"][dim]["width"]["value"] = 2
+    result = scp.Optimize(peaks=[peak]).fit(spectrum).result
+    assert result.diagnostics["success"]
+    assert result.stderr[0] > 0
+    low, high = result.confidence_intervals[0]
+    assert low <= result.peaks[0]["axes"]["x"]["center"] <= high

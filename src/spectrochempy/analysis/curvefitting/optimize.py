@@ -25,6 +25,7 @@ from spectrochempy.analysis.curvefitting._modelspec import _FitModelSpec
 from spectrochempy.analysis.curvefitting._modelspec import _ParamSpec
 from spectrochempy.analysis.curvefitting._modelspec import prepare_model
 from spectrochempy.analysis.curvefitting._optimize_nd import fit_separable_peaks
+from spectrochempy.analysis.curvefitting._optimize_nd import snapshot_peaks
 from spectrochempy.analysis.curvefitting._parameter_transform import _to_external
 from spectrochempy.analysis.curvefitting._parameter_transform import _to_internal
 from spectrochempy.analysis.curvefitting._parameters import FitParameters
@@ -1035,7 +1036,7 @@ class Optimize(DecompositionAnalysis):
 
         # call the super class for initialisation of the configuration parameters
         # to do before anything else!
-        self._nd_peaks = deepcopy(peaks)
+        self._nd_peaks = snapshot_peaks(peaks)
         self._nd_fit = None
         if peaks is not None and "script" in kwargs:
             raise ValueError("ND fitting cannot be combined with a script")

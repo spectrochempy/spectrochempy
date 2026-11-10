@@ -11,11 +11,21 @@ from spectrochempy.analysis.curvefitting.simulation import _evaluate_separable_p
 from spectrochempy.analysis.curvefitting.simulation import _history_magnitude
 from spectrochempy.analysis.curvefitting.simulation import _interval_unit
 from spectrochempy.analysis.curvefitting.simulation import _parameter_value
+from spectrochempy.analysis.curvefitting.simulation import _scaled_offsets
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 
-_GRADIENT_TOLERANCE = 1e-10
+_BOUND_NEIGHBORHOOD = 1e-5
+
+
+def snapshot_peaks(spec):
+    """Copy the peak specification without requiring pickleable mappings."""
+    if isinstance(spec, Mapping):
+        return {key: snapshot_peaks(value) for key, value in spec.items()}
+    if isinstance(spec, Sequence) and not isinstance(spec, (str, bytes)):
+        return tuple(snapshot_peaks(value) for value in spec)
+    return spec
 
 
 def _grid(dataset):
@@ -135,6 +145,23 @@ def _prepare_peaks(specs, intensity_unit, units):
     return peaks, free, limits, tuple(names), tuple(parameter_units)
 
 
+def _relative_value(value, origin):
+    if isinstance(value, int) and isinstance(origin, int):
+        return value - origin
+    return np.longdouble(value) - np.longdouble(origin)
+
+
+def _physical_value(origin, offset):
+    if isinstance(origin, int) and origin:
+        whole = int(round(offset))
+        center = origin + whole
+        fraction = offset - whole
+        if abs(fraction) <= abs(np.spacing(np.longdouble(center))) / 2:
+            return center
+        return np.longdouble(center) + fraction
+    return np.longdouble(origin) + offset
+
+
 def fit_separable_peaks(dataset, specs, max_calls):
     """Fit and reconstruct on the input grid with a fixed observation support."""
     coordinates, units = _grid(dataset)
@@ -155,39 +182,51 @@ def fit_separable_peaks(dataset, specs, max_calls):
     observed = data[valid]
 
     initial = [target[key] for target, key in free]
-    origins = np.array(
-        [
-            value if key == "center" else 0
-            for (_, key), value in zip(free, initial, strict=True)
-        ],
-        dtype=np.longdouble,
-    )
+    origins = [
+        value if key == "center" else 0
+        for (_, key), value in zip(free, initial, strict=True)
+    ]
+    center_origins = {
+        id(target): origin
+        for (target, key), origin in zip(free, origins, strict=True)
+        if key == "center"
+    }
+    solver_grids = [
+        {
+            dim: _scaled_offsets(grid, center_origins[id(peak["axes"][dim])], 1)[0]
+            if id(peak["axes"][dim]) in center_origins
+            else grid
+            for dim, grid in coordinates.items()
+        }
+        for peak in peaks
+    ]
     intensity_scale = (
         max(np.max(np.abs(observed)), *(abs(peak["height"]) for peak in peaks)) or 1.0
     )
     scales = np.array(
         [
-            intensity_scale if key == "height" else target["width"]
+            (abs(target[key]) or intensity_scale)
+            if key == "height"
+            else target["width"]
             for target, key in free
         ],
         dtype=np.longdouble,
     )
 
-    def model(values, *, keep_components=False):
+    def model(values, grids, *, keep_components=False):
         for (target, key), value in zip(free, values, strict=True):
             target[key] = float(value) if key == "height" else value
         total = np.zeros(dataset.shape)
         components = []
         with np.errstate(over="ignore", invalid="ignore"):
-            for peak in peaks:
-                component = _evaluate_separable_peak(dataset.shape, coordinates, peak)
+            for peak, grid in zip(peaks, grids, strict=True):
+                component = _evaluate_separable_peak(dataset.shape, grid, peak)
                 total += component
                 if keep_components:
                     components.append(component)
         return total, components
 
-    def residuals(values):
-        fitted, _ = model(values)
+    def residuals(fitted):
         with np.errstate(over="ignore", invalid="ignore"):
             residual = observed - fitted[valid]
         if not np.isfinite(residual).all():
@@ -195,21 +234,35 @@ def fit_separable_peaks(dataset, specs, max_calls):
         return residual
 
     solution = None
-    values = np.array(initial, dtype=np.longdouble)
+    values = []
     jacobian = None
     bounds = None
     if free:
-        physical_bounds = np.asarray(limits, dtype=np.longdouble).T
+        relative = np.array(
+            [
+                [_relative_value(bound, origin) for bound in pair]
+                for pair, origin in zip(limits, origins, strict=True)
+            ],
+            dtype=np.longdouble,
+        ).T
         with np.errstate(over="ignore", under="ignore", invalid="ignore"):
-            bounds = np.asarray((physical_bounds - origins) / scales, dtype=float)
-            start = np.asarray((values - origins) / scales, dtype=float)
+            bounds = np.asarray(relative / scales, dtype=float)
+            start = np.asarray(
+                [
+                    _relative_value(value, origin)
+                    for value, origin in zip(initial, origins, strict=True)
+                ]
+                / scales,
+                dtype=float,
+            )
         if not np.isfinite(start).all() or np.any(
-            np.isfinite(physical_bounds) & ~np.isfinite(bounds)
+            np.isfinite(relative) & ~np.isfinite(bounds)
         ):
             raise ValueError("ND parameter bounds are outside the scaled solver range")
 
         def scaled_residuals(vector):
-            return residuals(origins + scales * vector) / intensity_scale
+            fitted, _ = model(scales * vector, solver_grids)
+            return residuals(fitted) / intensity_scale
 
         solution = least_squares(
             scaled_residuals,
@@ -218,10 +271,13 @@ def fit_separable_peaks(dataset, specs, max_calls):
             method="trf",
             jac="3-point",
             x_scale="jac",
-            gtol=_GRADIENT_TOLERANCE,
+            gtol=None,
             max_nfev=max_calls,
         )
-        values = origins + scales * solution.x
+        values = [
+            _physical_value(origin, value)
+            for origin, value in zip(origins, scales * solution.x, strict=True)
+        ]
         with np.errstate(over="ignore", under="ignore", invalid="ignore"):
             jacobian = np.asarray(
                 solution.jac.astype(np.longdouble)
@@ -229,9 +285,9 @@ def fit_separable_peaks(dataset, specs, max_calls):
                 dtype=float,
             )
 
+    fitted, components = model(values, [coordinates] * len(peaks), keep_components=True)
     residual = np.zeros(dataset.shape)
-    residual[valid] = residuals(values)
-    fitted, components = model(values, keep_components=True)
+    residual[valid] = residuals(fitted)
     diagnostics = _fit_diagnostics(observed, residual[valid], len(free))
     covariance, reason = _physical_covariance(
         solution, jacobian, scales, bounds, diagnostics
@@ -282,7 +338,7 @@ def fit_separable_peaks(dataset, specs, max_calls):
         ),
         "residuals": output(residual, "fit residuals"),
         "peaks": peaks,
-        "values": values,
+        "values": np.asarray(values, dtype=np.longdouble),
         "names": names,
         "units": parameter_units,
         "jacobian": jacobian,
@@ -363,13 +419,15 @@ def _physical_covariance(solution, physical_jacobian, scales, bounds, diagnostic
         return None, "rank_deficient"
 
     lower, upper = bounds
-    near = np.sqrt(_GRADIENT_TOLERANCE) * np.maximum(1, np.abs(solution.x))
+    near = _BOUND_NEIGHBORHOOD * np.maximum(1, np.abs(solution.x))
     near_lower = solution.x - lower <= near
     near_upper = upper - solution.x <= near
     if np.any(near_lower | near_upper):
         step = (right.T @ ((left.T @ solution.fun) / singular)) / column_scale
         unconstrained = solution.x - step
-        precision = rank_tolerance * np.maximum(1, np.abs(solution.x))
+        precision = (
+            16 * np.finfo(jacobian.dtype).eps * np.maximum(1, np.abs(solution.x))
+        )
         if np.any(
             (near_lower & (unconstrained <= lower + precision))
             | (near_upper & (unconstrained >= upper - precision))
