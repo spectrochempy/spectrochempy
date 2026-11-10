@@ -30,8 +30,7 @@ build:
         for name in $(python -m spectrochempy.ci.install_plugins --list-names); do
           python -m pip install --no-deps -e "plugins/$name"
         done
-      # NMR is maintained in a standalone repository. Its
-      # public API pages are generated from the released distributions.
+      # Use the released NMR plugin for examples that require it.
       - python -m pip install "spectrochempy-nmr>=0.2,<0.4"
       # Runtime dependencies that --no-deps skips.
       - python -m pip install osqp scipy tensorly

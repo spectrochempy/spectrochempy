@@ -221,7 +221,7 @@ jobs:
            # NMR is maintained in a standalone repository;
            # install its released distribution instead of resolving the
            # removed core source trees.
-           python -m pip install --no-deps "spectrochempy-nmr>=0.2,<0.4"
+           python -m pip install --no-deps "spectrochempy-nmr>=0.3,<0.4"
            # Install plugin runtime dependencies explicitly. In the mixed
            # editable/released workflow we must avoid resolving the core
            # package from PyPI before the next core release exists there.

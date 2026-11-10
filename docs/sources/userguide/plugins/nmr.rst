@@ -3,9 +3,13 @@
 NMR plugin
 ==========
 
+.. _introduction:
+
 The independently released ``spectrochempy-nmr`` plugin reads vendor
 and exchange formats and processes 1D and qualified 2D acquisitions.
 SpectroChemPy provides the dataset, units, plotting and generic processing API.
+
+.. _installation:
 
 Install or upgrade the plugin explicitly:
 
@@ -18,6 +22,8 @@ selects plugin versions below 0.3. The plugin's
 `installation and compatibility guide
 <https://spectrochempy-nmr.readthedocs.io/latest/getting_started/installation.html>`_
 gives the requirements for each workflow.
+
+.. _recommended-api:
 
 .. _compatibility-aliases:
 
@@ -44,6 +50,21 @@ Recorded TopSpin recipes are applied when explicitly requested with
 The processing guides explain how to inspect the recorded recipe and the
 processing trace on the result.
 
+.. _api-reference:
+
 See the standalone
 `NMR API reference
 <https://spectrochempy-nmr.readthedocs.io/latest/reference/nmr_api.html>`_.
+
+
+.. _examples:
+
+The plugin's `example gallery
+<https://spectrochempy-nmr.readthedocs.io/latest/examples_overview.html>`_
+shows how to read, process, and analyze NMR data.
+
+.. _limitations:
+
+See `compatibility and scope
+<https://spectrochempy-nmr.readthedocs.io/latest/compatibility.html>`_
+for supported workflows and their limits.
