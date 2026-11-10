@@ -4,29 +4,20 @@
 Plugin public API reference
 ###########################
 
-This page collects the generated public API pages owned by official
-SpectroChemPy plugins.
+This page provides links and reference pages for the public APIs of
+official SpectroChemPy plugins.
 
 Workflow-oriented plugin guides remain in :doc:`/userguide/plugins/index`.
 For file formats and their public reader entry points, see the
 :doc:`reader catalog </userguide/importexport/readers>`.
 
-The generated entries below target the public objects exported by each
-standalone plugin package. The ``scp.nmr.*`` and equivalent namespace routes
-remain the recommended user-facing aliases, but they are lazy proxies and are
-not suitable as autodoc targets.
-
 NMR plugin
 ==========
 
-.. autosummary::
-    :nosignatures:
-    :toctree: generated/
-
-    spectrochempy_nmr.read
-    spectrochempy_nmr.read_topspin
-    spectrochempy_nmr.read_agilent
-    spectrochempy_nmr.Experiment
+Use ``scp.nmr.read()`` to read NMR data. The standalone
+`NMR API reference
+<https://spectrochempy-nmr.readthedocs.io/latest/reference/nmr_api.html>`_
+documents the readers, ``Experiment``, and interoperability functions.
 
 PerkinElmer plugin
 ==================

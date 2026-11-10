@@ -44,6 +44,6 @@ Recorded TopSpin recipes are applied when explicitly requested with
 The processing guides explain how to inspect the recorded recipe and the
 processing trace on the result.
 
-See the :doc:`core plugin API index </reference/plugins>` and the standalone
+See the standalone
 `NMR API reference
 <https://spectrochempy-nmr.readthedocs.io/latest/reference/nmr_api.html>`_.

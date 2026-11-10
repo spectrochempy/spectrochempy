@@ -41,7 +41,7 @@ and ``scp.tensor.CP``.
 For format-specific readers and the plugins that supply them, see the
 :doc:`reader catalog </userguide/importexport/readers>`.
 
-Generated plugin API pages are collected in :doc:`/reference/plugins`.
+Plugin API pages and external references are listed in :doc:`/reference/plugins`.
 
 Install and inspect plugins
 ===========================
