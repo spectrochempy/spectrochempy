@@ -405,7 +405,12 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
                 newcoord = Coord((kept_frequencies / abs(dw)).to("cm^-1"))
             else:
                 shifted_frequencies = np.fft.fftshift(np.fft.fftfreq(coord_size))
-                newcoord = Coord(shifted_frequencies / dw)
+                frequencies = shifted_frequencies / dw
+                if x.unitless or x.dimensionless:
+                    newcoord = Coord(frequencies)
+                    newcoord.ito("Hz")
+                else:
+                    newcoord = Coord(frequencies.to("Hz"))
 
             newcoord.show_datapoints = False
             newcoord.name = x.name
@@ -415,7 +420,6 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
                 newcoord.title = "wavenumbers"
             else:
                 newcoord.title = "frequency"
-                newcoord.ito("Hz")
 
         else:
             # frequency to time
