@@ -14,6 +14,7 @@ from scipy.signal import hilbert
 
 from spectrochempy.application.application import error_
 from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.units import Quantity
 from spectrochempy.core.units import ur
 from spectrochempy.processing.fft.zero_filling import zf_size
 from spectrochempy.utils.decorators import _units_agnostic_method
@@ -486,6 +487,9 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
 
             new.pk(inplace=True)
             new.meta.pivot[-1] = abs(new).coordmax(dim=dim)
+            physical_pivots = list(new.meta.get("physical_pivots", [False] * new.ndim))
+            physical_pivots[-1] = isinstance(new.meta.pivot[-1], Quantity)
+            new.meta.physical_pivots = physical_pivots
 
             new.meta.readonly = True
 

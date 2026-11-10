@@ -531,13 +531,15 @@ def test_scp_roundtrip_preserves_the_phasing_entry(tmp_path):
 )
 @pytest.mark.parametrize("inherited", [False, True])
 def test_linear_phase_uses_physical_pivot_bin(
-    axis_units, coordinates, pivot, inherited
+    axis_units, coordinates, pivot, inherited, tmp_path
 ):
     source = _dataset(shape=(4,), units=axis_units)
     source.x = scp.Coord(coordinates, units=axis_units)
     kwargs = {}
     if inherited:
-        source.meta.pivot = [pivot]
+        path = tmp_path / "physical-pivot.scp"
+        source.pk(pivot=pivot, rel=True).dump(path)
+        source = scp.NDDataset.load(path)
     else:
         kwargs["pivot"] = pivot
 
@@ -565,3 +567,19 @@ def test_numeric_pivot_remains_a_bin_when_reused():
     window = _pk_window(4, 23, -17, 0, 2)
     np.testing.assert_allclose(first.data, source.data * window)
     np.testing.assert_allclose(second.data, source.data * window**2)
+
+
+def test_legacy_saved_pivot_quantity_remains_an_index(tmp_path):
+    # Older pk() versions attached the axis units to numeric sample indices.
+    source = _dataset(shape=(4,), pivot=Q(2, "Hz"))
+    source.x = scp.Coord([40, 30, 20, 10], units="Hz")
+    path = tmp_path / "legacy-pivot.scp"
+    source.dump(path)
+    restored = scp.NDDataset.load(path)
+
+    result = restored.pk(phc0=23, phc1=-17, rel=True)
+
+    np.testing.assert_allclose(
+        result.data, restored.data * _pk_window(4, 23, -17, 0, 2)
+    )
+    assert _last(result)["parameters"]["scientific_parameters"]["pivot"] == 2

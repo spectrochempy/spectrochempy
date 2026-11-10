@@ -196,6 +196,9 @@ def _phase_method(method):
                 _check_units(kwargs.get("phc1", 0), "degree") - current[1]
             ).magnitude
             pivot = kwargs.get("pivot", new.meta.pivot[-1])
+            physical_pivots = list(new.meta.get("physical_pivots", [False] * new.ndim))
+            if "pivot" in kwargs:
+                physical_pivots[-1] = isinstance(pivot, Quantity)
             pivot_in_axis_units = _check_units(pivot, dunits)
             kwargs["pivot"] = pivot_in_axis_units.magnitude
             kwargs["exptc"] = _check_units(
@@ -205,7 +208,7 @@ def _phase_method(method):
             ).magnitude
 
             resolved_physical_pivot = (
-                isinstance(pivot, Quantity)
+                physical_pivots[-1]
                 and dunits is not None
                 and kwargs["phc1"] != 0
                 and _first_order_contributes(kwargs["exptc"])
@@ -284,8 +287,19 @@ def _phase_method(method):
 
             if dunits is not None:
                 new.meta.pivot[-1] = (
-                    pivot_in_axis_units if isinstance(pivot, Quantity) else pivot
+                    pivot_in_axis_units
+                    if physical_pivots[-1]
+                    else pivot_in_axis_units.magnitude
                 )
+                if "physical_pivots" in new.meta:
+                    new.meta.physical_pivots[-1] = physical_pivots[-1]
+                elif physical_pivots[-1]:
+                    readonly = new.meta.readonly
+                    new.meta.readonly = False
+                    try:
+                        new.meta.physical_pivots = physical_pivots
+                    finally:
+                        new.meta.readonly = readonly
 
         else:  # not (x.unitless or x.dimensionless or x.units.dimensionality != '[time]')
             error_(
@@ -326,7 +340,8 @@ def pk(dataset, phc0=0.0, phc1=0.0, exptc=0.0, pivot=0.0, **kwargs):
     pivot : float or `Quantity`, optional, default=0
         For linear first-order phasing, a quantity selects the nearest sample
         in the axis units. A plain number specifies a sample index, including
-        when replaying recorded phase parameters.
+        when replaying recorded phase parameters. An inherited pivot is treated
+        as physical when its metadata records that convention.
 
     Returns
     -------
