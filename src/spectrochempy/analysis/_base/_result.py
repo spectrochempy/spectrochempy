@@ -341,7 +341,9 @@ class FitResult(ResultBase):
             and values is not None
             and degrees_of_freedom > 0
         ):
-            values = np.asarray(values, dtype=np.float64)
+            values = np.asarray(values)
+            if values.dtype != np.dtype(np.longdouble):
+                values = values.astype(np.float64, copy=False)
             if values.shape != stderr.shape:
                 return None
 
