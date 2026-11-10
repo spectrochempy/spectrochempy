@@ -39,6 +39,13 @@ true_peaks = [
 clean = scp.simulate_peaks(grid, true_peaks)
 noise = scp.normal(scale=0.015, size=grid.shape, seed=42, units=grid.units)
 spectrum = clean + noise
+
+# %%
+# Simulate missing observations near the first peak
+# ------------------------------------------------
+# Mask a small patch over the center of the first peak (x ≈ −0.5 Hz,
+# y ≈ −0.4 ppm) to mimic a gap in the measurements. The surrounding
+# points still constrain the fit. The slice uses row and column indices.
 spectrum[20:24, 25:28] = scp.MASKED
 
 # %%
@@ -72,6 +79,9 @@ for i, peak in enumerate(result.peaks, start=1):
 # %%
 # Compare observations, fit and residuals
 # ---------------------------------------
+# The fitted model is evaluated across the whole grid. Its output keeps
+# the mask so reconstructed values inside the gap remain distinguishable
+# from fitted values at observed points. No residual is reported there.
 for dataset, title in [
     (spectrum, "Observed"),
     (result.fitted, "Fitted"),
