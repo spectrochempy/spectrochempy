@@ -30,9 +30,8 @@ build:
         for name in $(python -m spectrochempy.ci.install_plugins --list-names); do
           python -m pip install --no-deps -e "plugins/$name"
         done
-      # NMR is maintained in a standalone repository. Its
-      # public API pages are generated from the released distributions.
-      - python -m pip install "spectrochempy-nmr>=0.2,<0.3"
+      # Use the released NMR plugin for examples that require it.
+      - python -m pip install "spectrochempy-nmr>=0.2,<0.4"
       # Runtime dependencies that --no-deps skips.
       - python -m pip install osqp scipy tensorly
     build:
@@ -68,15 +67,12 @@ build:
         - python -u -m docs.preexecute_notebooks execute userguide/plotting/preferences.ipynb
         - python -u -m docs.preexecute_notebooks execute userguide/plotting/styles.ipynb
         - python -u -m docs.preexecute_notebooks execute userguide/processing/alignment.ipynb
-        - python -u -m docs.preexecute_notebooks execute userguide/processing/apodization.ipynb
         - python -u -m docs.preexecute_notebooks execute userguide/processing/baseline.ipynb
         - python -u -m docs.preexecute_notebooks execute userguide/processing/denoising.ipynb
-        - python -u -m docs.preexecute_notebooks execute userguide/processing/fourier.ipynb
         - python -u -m docs.preexecute_notebooks execute userguide/processing/interferogram.ipynb
         - python -u -m docs.preexecute_notebooks execute userguide/processing/math_operations.ipynb
         - python -u -m docs.preexecute_notebooks execute userguide/processing/slicing.ipynb
         - python -u -m docs.preexecute_notebooks execute userguide/processing/smoothing.ipynb
-        - python -u -m docs.preexecute_notebooks execute userguide/processing/td_baseline.ipynb
         - python -u -m docs.preexecute_notebooks execute userguide/processing/transformations.ipynb
         - python -u -m docs.preexecute_notebooks verify
         - SCPY_DOCS_PREEXECUTED=1 SCPY_DOCS_TRACE=1 python -u docs/make.py html --warning-is-error --no-sync --no-data -j auto

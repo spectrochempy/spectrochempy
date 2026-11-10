@@ -88,7 +88,8 @@ jobs:
               SETUPTOOLS_SCM_PRETEND_VERSION=${SCPY_COLAB_PRETEND_VERSION} \
                 pip install --no-build-isolation --no-deps /workspace && \
               pip install -q colorama pint tensorly && \
-              pip install --no-deps "spectrochempy-nmr>=0.2,<0.3" && \
+              pip install 'nmrglue-ng>=1.2.4,<2' && \
+              pip install --no-deps 'spectrochempy-nmr>=0.2,<0.4' && \
               for dir in /workspace/plugins/spectrochempy-*/; do
                 if grep -q 'Official Plugin' \"\${dir}pyproject.toml\" 2>/dev/null; then
                   pip install --no-build-isolation --no-deps \"\$dir\"
