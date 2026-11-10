@@ -72,23 +72,23 @@ installation and compatibility.
      - Required plugin
    * - NMR with format detection
      - Experiment directory or files, depending on the format
-     - ``scp.nmr.read``
+     - `scp.nmr.read <https://www.spectrochempy.fr/projects/nmr/latest/reference/generated/spectrochempy_nmr.read.html>`_
      - :doc:`NMR </userguide/plugins/nmr>`
    * - Bruker TopSpin NMR
      - Experiment directory, ``fid``, ``ser``, or processed files such as ``1r`` or ``2rr``
-     - ``scp.topspin.read``
+     - `scp.nmr.read_topspin <https://www.spectrochempy.fr/projects/nmr/latest/reference/generated/spectrochempy_nmr.read_topspin.html>`_
      - :doc:`NMR </userguide/plugins/nmr>`
    * - Agilent / Varian NMR
      - Experiment directory with ``fid`` and ``procpar``
-     - ``scp.agilent.read``
+     - `scp.nmr.read_agilent <https://www.spectrochempy.fr/projects/nmr/latest/reference/generated/spectrochempy_nmr.read_agilent.html>`_
      - :doc:`NMR </userguide/plugins/nmr>`
    * - JEOL NMR
      - ``.jdf``
-     - ``scp.jeol.read``
+     - `scp.nmr.read_jeol <https://www.spectrochempy.fr/projects/nmr/latest/reference/generated/spectrochempy_nmr.read_jeol.html>`_
      - :doc:`NMR </userguide/plugins/nmr>`
    * - SIMPSON simulation output
      - ``.spe``, ``.fid``, ``.in``
-     - ``scp.nmr.read_simpson``
+     - `scp.nmr.read_simpson <https://www.spectrochempy.fr/projects/nmr/latest/reference/generated/spectrochempy_nmr.read_simpson.html>`_
      - :doc:`NMR </userguide/plugins/nmr>`
    * - PerkinElmer IR
      - Single-spectrum ``.sp``

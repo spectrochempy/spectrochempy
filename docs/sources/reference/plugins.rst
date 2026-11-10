@@ -14,10 +14,27 @@ For file formats and their public reader entry points, see the
 NMR plugin
 ==========
 
-Use ``scp.nmr.read()`` to read NMR data. The standalone
-`NMR API reference
-<https://spectrochempy-nmr.readthedocs.io/latest/reference/nmr_api.html>`_
-documents the readers, ``Experiment``, and interoperability functions.
+The standalone `NMR API reference
+<https://www.spectrochempy.fr/projects/nmr/latest/reference/nmr_api.html>`_
+provides the following entry points.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Public entry point
+     - Purpose
+   * - `scp.nmr.read() <https://www.spectrochempy.fr/projects/nmr/latest/reference/generated/spectrochempy_nmr.read.html>`_
+     - Select a reader from the input format.
+   * - `scp.nmr.read_topspin() <https://www.spectrochempy.fr/projects/nmr/latest/reference/generated/spectrochempy_nmr.read_topspin.html>`_
+     - Read Bruker TopSpin data.
+   * - `scp.nmr.read_agilent() <https://www.spectrochempy.fr/projects/nmr/latest/reference/generated/spectrochempy_nmr.read_agilent.html>`_
+     - Read Agilent and Varian data.
+   * - `scp.nmr.read_jeol() <https://www.spectrochempy.fr/projects/nmr/latest/reference/generated/spectrochempy_nmr.read_jeol.html>`_
+     - Read JEOL JDF data.
+   * - `scp.nmr.read_simpson() <https://www.spectrochempy.fr/projects/nmr/latest/reference/generated/spectrochempy_nmr.read_simpson.html>`_
+     - Read SIMPSON simulations.
+   * - `scp.nmr.Experiment <https://www.spectrochempy.fr/projects/nmr/latest/reference/generated/spectrochempy_nmr.Experiment.html>`_
+     - Inspect and process NMR acquisitions.
 
 PerkinElmer plugin
 ==================
