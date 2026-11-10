@@ -9,6 +9,7 @@ __configurables__ = __all__
 import inspect
 import re
 import sys
+from copy import deepcopy
 
 import numpy as np
 import traitlets as tr
@@ -23,6 +24,8 @@ from spectrochempy.analysis.curvefitting._modelspec import _ComponentSpec
 from spectrochempy.analysis.curvefitting._modelspec import _FitModelSpec
 from spectrochempy.analysis.curvefitting._modelspec import _ParamSpec
 from spectrochempy.analysis.curvefitting._modelspec import prepare_model
+from spectrochempy.analysis.curvefitting._optimize_nd import fit_separable_peaks
+from spectrochempy.analysis.curvefitting._optimize_nd import physical_covariance
 from spectrochempy.analysis.curvefitting._parameter_transform import _to_external
 from spectrochempy.analysis.curvefitting._parameter_transform import _to_internal
 from spectrochempy.analysis.curvefitting._parameters import FitParameters
@@ -167,18 +170,29 @@ def _extract_varying_parameter_values(fp):
     return array
 
 
-def _compute_fit_diagnostics(observed, fitted, solver_meta=None, fit_parameters=None):
+def _compute_fit_diagnostics(
+    observed,
+    fitted,
+    solver_meta=None,
+    fit_parameters=None,
+    *,
+    n_varying=None,
+    residuals=None,
+):
     """Compute residual output and basic fit-quality diagnostics."""
-    if getattr(observed, "size", None) == 0 or getattr(fitted, "size", None) == 0:
-        residuals = observed.copy()
-    else:
-        residuals = observed - fitted
+    if residuals is None:
+        if getattr(observed, "size", None) == 0 or getattr(fitted, "size", None) == 0:
+            residuals = observed.copy()
+        else:
+            residuals = observed - fitted
 
     residual_data = np.ma.masked_invalid(np.ma.asarray(residuals.real.masked_data))
     observed_data = np.ma.masked_invalid(np.ma.asarray(observed.real.masked_data))
 
     count = int(residual_data.count())
-    n_varying_parameters = _count_varying_parameters(fit_parameters)
+    n_varying_parameters = (
+        _count_varying_parameters(fit_parameters) if n_varying is None else n_varying
+    )
     degrees_of_freedom = count - n_varying_parameters
 
     sse = _scalar_from_masked(np.ma.sum(np.ma.abs(residual_data) ** 2), default=0.0)
@@ -909,8 +923,13 @@ class Optimize(DecompositionAnalysis):
 
     Notes
     -----
-    The current implementation supports only 1D fitting. Multi-dimensional
-    datasets are not yet handled by :meth:`fit`.
+    The script interface fits 1D spectra. Pass ``peaks`` to fit separable
+    Gaussian or Lorentzian profiles jointly on a multidimensional grid.
+    The ND fit uses unweighted residuals at finite, unmasked observations.
+    Its result includes fitted peaks suitable for ``simulate_peaks`` and
+    the parameter names and units in Jacobian column order. The local
+    covariance is available for converged, full-rank fits with positive
+    residual degrees of freedom and no active bounds.
 
     Parameters
     ----------
@@ -1002,6 +1021,7 @@ class Optimize(DecompositionAnalysis):
         *,
         log_level="WARNING",
         warm_start=False,
+        peaks=None,
         **kwargs,
     ):
         """
@@ -1015,6 +1035,11 @@ class Optimize(DecompositionAnalysis):
             Preserve the current estimator configuration rather than resetting
             it to defaults during estimator reinitialization. This does not
             add any dedicated `Optimize` backend-specific warm-start strategy.
+        peaks : sequence of mappings, optional
+            Enable ND fitting. Use the structure accepted by
+            :func:`simulate_peaks`, replacing each numerical value with an
+            optional mapping with keys ``value``, ``bounds`` and ``fixed``.
+            A varying width requires a strictly positive lower bound.
         **kwargs : dict
             Additional keyword arguments.
         """
@@ -1022,6 +1047,11 @@ class Optimize(DecompositionAnalysis):
 
         # call the super class for initialisation of the configuration parameters
         # to do before anything else!
+        self._nd_peaks = deepcopy(peaks)
+        self._nd_fit = None
+        if peaks is not None and "script" in kwargs:
+            raise ValueError("ND fitting cannot be combined with a script")
+
         super().__init__(
             log_level=log_level,
             warm_start=warm_start,
@@ -1399,6 +1429,8 @@ class Optimize(DecompositionAnalysis):
     @tr.default("_script")
     def _script_default(self):
         """Return a default script."""
+        if self._nd_peaks is not None:
+            return ""
         return """
         # -----------------------------------------------------------------------
         # syntax for parameters definition:
@@ -1855,6 +1887,8 @@ class Optimize(DecompositionAnalysis):
             The fitted model.
 
         """
+        if self._nd_peaks is not None:
+            return self._require_nd_fit()["fitted"].copy()
         return self.inverse_transform()
 
     def _get_components(self):
@@ -1883,12 +1917,125 @@ class Optimize(DecompositionAnalysis):
         fit_reduce : Alias of `fit_transform` (Deprecated).
 
         """
-        return super().fit(X, Y=None)
+        if self._nd_peaks is None:
+            return super().fit(X, Y=None)
+
+        self._fitted = False
+        self._nd_fit = None
+        if (
+            self.method.lower() != "least_squares"
+            or self.script
+            or self.constraints
+            or self.usermodels
+            or self.autobase
+            or self.autoampl
+            or self.dry
+            or self.amplitude_mode.lower() != "height"
+        ):
+            raise ValueError(
+                "ND fitting requires least_squares and explicit peak parameters"
+            )
+        max_calls = self.max_fun_calls or 4 * self.max_iter
+
+        (
+            observed,
+            fitted,
+            components,
+            residuals,
+            peaks,
+            values,
+            names,
+            units,
+            solution,
+        ) = fit_separable_peaks(X, self._nd_peaks, max_calls)
+        solver_meta = _normalize_solver_meta("trf", solution)
+        if solution is None:
+            solver_meta.update(success=True, message="All peak parameters are fixed")
+        else:
+            solver_meta.update(cost=float(solution.cost), ncalls=solution.nfev)
+        residuals, diagnostics = _compute_fit_diagnostics(
+            observed, fitted, solver_meta, n_varying=len(names), residuals=residuals
+        )
+        covariance, reason = physical_covariance(solution, diagnostics)
+        diagnostics["covariance_reason"] = reason
+        self._nd_fit = {
+            "observed": observed,
+            "fitted": fitted,
+            "components": components,
+            "residuals": residuals,
+            "peaks": peaks,
+            "values": values,
+            "names": names,
+            "units": units,
+            "diagnostics": diagnostics,
+            "covariance": covariance,
+            "jacobian": _freeze_jacobian_artifact(
+                solution.jac if solution is not None else None
+            ),
+            "config": {
+                "method": "trf",
+                "mode": "separable_peaks",
+                "max_fun_calls": max_calls,
+            },
+        }
+        self._n_components = len(components)
+        self._fitted = True
+        return self
+
+    def _require_nd_fit(self):
+        if not self._fitted or self._nd_fit is None:
+            raise NotFittedError("Call fit before accessing the ND fit")
+        return self._nd_fit
+
+    @property
+    def X(self):
+        """Return the fitted observations."""
+        if self._nd_peaks is not None:
+            return self._require_nd_fit()["observed"].copy()
+        return super().X
+
+    @property
+    def components(self):
+        """Return fitted components, one dataset per peak in ND mode."""
+        if self._nd_peaks is not None:
+            return self.get_components()
+        return super().components
+
+    def get_components(self, n_components=None):
+        """Return all or the requested number of fitted components."""
+        if self._nd_peaks is not None:
+            return tuple(
+                part.copy()
+                for part in self._require_nd_fit()["components"][:n_components]
+            )
+        return super().get_components(n_components)
+
+    def transform(self, X=None, **kwargs):
+        """Apply the legacy dimensionality reduction."""
+        if self._nd_peaks is not None:
+            raise NotImplementedError("ND fitting does not provide projections")
+        return super().transform(X, **kwargs)
+
+    def inverse_transform(self, X_transform=None, **kwargs):
+        """Apply the legacy inverse transform."""
+        if self._nd_peaks is not None:
+            raise NotImplementedError("Use predict() to reconstruct the ND fit")
+        return super().inverse_transform(X_transform, **kwargs)
+
+    def fit_transform(self, X, Y=None, **kwargs):
+        """Fit and apply the legacy dimensionality reduction."""
+        if self._nd_peaks is not None:
+            raise NotImplementedError("ND fitting does not provide projections")
+        return super().fit_transform(X, Y, **kwargs)
 
     @property
     def jacobian(self):
         """
-        Return the retained raw solver Jacobian when the backend provides one.
+        Return the retained solver Jacobian when the backend provides one.
+
+        In ND mode, rows follow finite, unmasked observations in native
+        C order. Columns follow the free parameters in physical magnitudes,
+        as identified by ``result.parameter_names`` and ``result.parameter_units``.
 
         Returns
         -------
@@ -1902,6 +2049,8 @@ class Optimize(DecompositionAnalysis):
                 "The fit method must be used before accessing the jacobian",
             )
 
+        if self._nd_peaks is not None:
+            return self._require_nd_fit()["jacobian"]
         return getattr(self, "_solver_artifacts", {}).get("jacobian")
 
     # ----------------------------------------------------------------------------------
@@ -1921,6 +2070,24 @@ class Optimize(DecompositionAnalysis):
         if not self._fitted:
             raise NotFittedError(
                 "The fit method must be used before accessing the result",
+            )
+
+        if self._nd_peaks is not None:
+            fit = self._require_nd_fit()
+            return FitResult(
+                estimator="Optimize",
+                parameters=fit["config"].copy(),
+                outputs={
+                    "fitted": fit["fitted"].copy(),
+                    "components": self.components,
+                    "residuals": fit["residuals"].copy(),
+                    "peaks": deepcopy(fit["peaks"]),
+                    "parameter_names": fit["names"],
+                    "parameter_units": fit["units"],
+                },
+                diagnostics=fit["diagnostics"].copy(),
+                covariance=fit["covariance"],
+                parameter_values=fit["values"],
             )
 
         # NOTE: a new FitResult is created on every access.

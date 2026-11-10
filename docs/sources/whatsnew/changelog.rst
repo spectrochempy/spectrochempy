@@ -21,6 +21,8 @@ New Features
 
 - Added ``integrate_region`` for physical ND boxes with optional propagated
   standard uncertainty on regular or irregular spectral grids.
+- Added bounded multiplet fitting on multidimensional spectral grids to
+  ``Optimize``, with fitted components, residuals and parameter uncertainties.
 
 
 .. section
