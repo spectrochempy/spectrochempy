@@ -11,3 +11,9 @@ What's New in Revision 1.2.1.dev
 
 These are the changes in SpectroChemPy-1.2.1.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
+
+Bug Fixes
+~~~~~~~~~
+
+- Preserve uniform frequency bins for FFTs with finely spaced axes so the
+  inverse transform can recover the time-domain signal.

@@ -26,6 +26,8 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Preserve uniform frequency bins for FFTs with finely spaced axes so the
+  inverse transform can recover the time-domain signal.
 
 .. section
 

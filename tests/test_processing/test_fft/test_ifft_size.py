@@ -76,6 +76,33 @@ def test_fft_ifft_roundtrip_preserves_values_coordinate_and_domain_metadata():
     np.testing.assert_allclose(result.x.to("s").data, source.x.data)
 
 
+def test_fft_ifft_roundtrip_with_dense_frequency_bins():
+    size = 32768
+    dwell = 1 / 12019.2307692
+    time = np.arange(size) * dwell
+    data = np.exp(2j * np.pi * 0.125 * np.arange(size))
+    source = NDDataset(
+        data,
+        coordset=[Coord(time, units="s", rounding=False, sigdigits=15)],
+        meta={"td": [size], "isfreq": [False]},
+    )
+
+    spectrum = source.fft()
+
+    assert spectrum.x.linear
+    assert spectrum.x.units == "Hz"
+    np.testing.assert_allclose(
+        spectrum.x.data,
+        np.fft.fftshift(np.fft.fftfreq(size, d=dwell)),
+        rtol=1e-4,
+        atol=1e-3,
+    )
+    restored = spectrum.ifft()
+    assert restored.meta.isfreq == [False]
+    np.testing.assert_allclose(restored.data, data, atol=1e-12)
+    np.testing.assert_allclose(restored.x.data, time * 1e6, rtol=2e-4)
+
+
 def test_fft_without_domain_metadata_keeps_generic_behavior():
     data = np.arange(8, dtype=float) + 1.0j * np.arange(8, 16, dtype=float)
     time = Coord.arange(8) * 0.25
