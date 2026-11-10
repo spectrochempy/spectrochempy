@@ -25,7 +25,6 @@ from spectrochempy.analysis.curvefitting._modelspec import _FitModelSpec
 from spectrochempy.analysis.curvefitting._modelspec import _ParamSpec
 from spectrochempy.analysis.curvefitting._modelspec import prepare_model
 from spectrochempy.analysis.curvefitting._optimize_nd import fit_separable_peaks
-from spectrochempy.analysis.curvefitting._optimize_nd import physical_covariance
 from spectrochempy.analysis.curvefitting._parameter_transform import _to_external
 from spectrochempy.analysis.curvefitting._parameter_transform import _to_internal
 from spectrochempy.analysis.curvefitting._parameters import FitParameters
@@ -170,29 +169,18 @@ def _extract_varying_parameter_values(fp):
     return array
 
 
-def _compute_fit_diagnostics(
-    observed,
-    fitted,
-    solver_meta=None,
-    fit_parameters=None,
-    *,
-    n_varying=None,
-    residuals=None,
-):
+def _compute_fit_diagnostics(observed, fitted, solver_meta=None, fit_parameters=None):
     """Compute residual output and basic fit-quality diagnostics."""
-    if residuals is None:
-        if getattr(observed, "size", None) == 0 or getattr(fitted, "size", None) == 0:
-            residuals = observed.copy()
-        else:
-            residuals = observed - fitted
+    if getattr(observed, "size", None) == 0 or getattr(fitted, "size", None) == 0:
+        residuals = observed.copy()
+    else:
+        residuals = observed - fitted
 
     residual_data = np.ma.masked_invalid(np.ma.asarray(residuals.real.masked_data))
     observed_data = np.ma.masked_invalid(np.ma.asarray(observed.real.masked_data))
 
     count = int(residual_data.count())
-    n_varying_parameters = (
-        _count_varying_parameters(fit_parameters) if n_varying is None else n_varying
-    )
+    n_varying_parameters = _count_varying_parameters(fit_parameters)
     degrees_of_freedom = count - n_varying_parameters
 
     sse = _scalar_from_masked(np.ma.sum(np.ma.abs(residual_data) ** 2), default=0.0)
@@ -1937,48 +1925,21 @@ class Optimize(DecompositionAnalysis):
             )
         max_calls = self.max_fun_calls or 4 * self.max_iter
 
-        (
-            observed,
-            fitted,
-            components,
-            residuals,
-            peaks,
-            values,
-            names,
-            units,
-            solution,
-        ) = fit_separable_peaks(X, self._nd_peaks, max_calls)
-        solver_meta = _normalize_solver_meta("trf", solution)
+        fit, solution = fit_separable_peaks(X, self._nd_peaks, max_calls)
+        diagnostics = fit["diagnostics"]
+        diagnostics.update(_normalize_solver_meta("trf", solution))
         if solution is None:
-            solver_meta.update(success=True, message="All peak parameters are fixed")
+            diagnostics.update(success=True, message="All peak parameters are fixed")
         else:
-            solver_meta.update(cost=float(solution.cost), ncalls=solution.nfev)
-        residuals, diagnostics = _compute_fit_diagnostics(
-            observed, fitted, solver_meta, n_varying=len(names), residuals=residuals
-        )
-        covariance, reason = physical_covariance(solution, diagnostics)
-        diagnostics["covariance_reason"] = reason
-        self._nd_fit = {
-            "observed": observed,
-            "fitted": fitted,
-            "components": components,
-            "residuals": residuals,
-            "peaks": peaks,
-            "values": values,
-            "names": names,
-            "units": units,
-            "diagnostics": diagnostics,
-            "covariance": covariance,
-            "jacobian": _freeze_jacobian_artifact(
-                solution.jac if solution is not None else None
-            ),
-            "config": {
-                "method": "trf",
-                "mode": "separable_peaks",
-                "max_fun_calls": max_calls,
-            },
+            diagnostics.update(cost=diagnostics["rss"] / 2, ncalls=solution.nfev)
+        fit["jacobian"] = _freeze_jacobian_artifact(fit["jacobian"])
+        fit["config"] = {
+            "method": "trf",
+            "mode": "separable_peaks",
+            "max_fun_calls": max_calls,
         }
-        self._n_components = len(components)
+        self._nd_fit = fit
+        self._n_components = len(fit["components"])
         self._fitted = True
         return self
 

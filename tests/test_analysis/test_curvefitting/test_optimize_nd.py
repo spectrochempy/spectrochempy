@@ -104,6 +104,7 @@ def test_fit_nd_reference_and_permuted_axes():
     ]
     assert_allclose(actual, oracle.x[order], atol=2e-5, rtol=0)
     j = oracle.jac[:, order]
+    assert_allclose(opt.jacobian, j, atol=3e-5, rtol=1e-4)
     expected = (rss / 2067) * np.linalg.inv(j.T @ j)
     stderr = np.sqrt(np.diag(expected))
     assert_allclose(result.stderr, stderr, rtol=0.01)
@@ -277,3 +278,95 @@ def test_fit_nd_rejects_invalid_inputs(case, message):
         peak["height"] = {"value": 2, "bounds": (-3, -1)}
     with pytest.raises(ValueError, match=message):
         scp.Optimize(peaks=[peak]).fit(spectrum)
+
+
+@pytest.mark.parametrize(
+    ("height", "bounds", "reason"),
+    [
+        (2e-9, (0, 4e-9), None),
+        (2e-9, (0, 4), None),
+        (0.999, (1, 4), "active_bounds"),
+        (1.0, (1, 4), "active_bounds"),
+        (1.000001, (1, 4), None),
+    ],
+)
+def test_fit_nd_height_scale_and_active_bounds(height, bounds, reason):
+    coords = [scp.Coord.linspace(-1, 1, 11) for _ in range(2)]
+    grid = scp.NDDataset(np.zeros((11, 11)), coordset=coords)
+    peak = _fixed_peak(grid.dims)
+    truth = {
+        "height": height,
+        "axes": {
+            dim: {"model": "gaussian", "center": 0, "width": 1} for dim in grid.dims
+        },
+    }
+    start = height / 2 if height < 1e-6 else 1.5
+    peak["height"] = {"value": start, "bounds": bounds}
+    result = scp.Optimize(peaks=[peak]).fit(scp.simulate_peaks(grid, [truth])).result
+    assert result.diagnostics["success"]
+    assert result.diagnostics["covariance_reason"] == reason
+    assert_allclose(
+        result.peaks[0]["height"], max(height, bounds[0]), rtol=1e-5, atol=0
+    )
+    if reason is None:
+        assert_allclose(result.diagnostics["r_squared"], 1)
+    else:
+        assert result.covariance is None
+
+
+@pytest.mark.parametrize("offset", [0.0, 1e6, 1e9])
+def test_fit_nd_recentered_coordinate(offset):
+    x = scp.Coord(offset + np.linspace(-2, 2, 21), units="Hz")
+    y = scp.Coord.linspace(-2, 2, 21, units="Hz")
+    grid = scp.NDDataset(np.zeros((21, 21)), coordset=[y, x])
+    truth = {
+        "height": -2,
+        "axes": {
+            "x": {"model": "gaussian", "center": offset + 0.24, "width": 1},
+            "y": {"model": "gaussian", "center": 0, "width": 1},
+        },
+    }
+    peak = _fixed_peak(grid.dims)
+    peak["axes"]["x"]["center"] = offset + 0.1
+    opt = scp.Optimize(peaks=[peak]).fit(scp.simulate_peaks(grid, [truth]))
+    assert opt.result.diagnostics["success"]
+    assert_allclose(
+        opt.result.peaks[0]["axes"]["x"]["center"] - offset, 0.24, atol=2e-7
+    )
+    assert opt.result.diagnostics["rss"] < 1e-12
+
+
+@pytest.mark.parametrize("height", [1e155, 1e-170])
+def test_fit_nd_diagnostics_scale_squared_residuals(height):
+    coords = [scp.Coord.linspace(-2, 2, 5) for _ in range(2)]
+    spectrum = scp.NDDataset(np.full((5, 5), height), coordset=coords)
+    peak = _fixed_peak(spectrum.dims)
+    peak["height"]["value"] = 0
+    diagnostics = scp.Optimize(peaks=[peak]).fit(spectrum).result.diagnostics
+    assert_allclose(diagnostics["rmse"], height, rtol=1e-14, atol=0)
+    assert_allclose(diagnostics["aic"], 50 * np.log(height))
+    assert diagnostics["rss_status"] == "numeric_range"
+    if height > 1:
+        assert np.isposinf(diagnostics["rss"])
+
+
+def test_fit_nd_preserves_large_fixed_integer_center():
+    offset = 2**53
+    x = scp.Coord(offset + np.arange(-4, 8, 2), dtype=np.int64)
+    y = scp.Coord(np.arange(-2, 3))
+    grid = scp.NDDataset(np.zeros((5, 6)), coordset=[y, x])
+    truth = {
+        "height": 1,
+        "axes": {
+            "x": {"model": "gaussian", "center": offset + 1, "width": 1},
+            "y": {"model": "gaussian", "center": 0, "width": 1},
+        },
+    }
+    peak = _fixed_peak(grid.dims)
+    peak["height"]["value"] = 1
+    peak["axes"]["x"]["center"]["value"] = offset + 1
+    spectrum = scp.simulate_peaks(grid, [truth])
+    opt = scp.Optimize(peaks=[peak]).fit(spectrum)
+    assert opt.result.peaks[0]["axes"]["x"]["center"] == offset + 1
+    assert_array_equal(opt.predict().data, spectrum.data)
+    assert_allclose(opt.predict().data[2, 2:4], [0.0625, 0.0625], atol=0)
