@@ -41,12 +41,15 @@ noise = scp.normal(scale=0.015, size=grid.shape, seed=42, units=grid.units)
 spectrum = clean + noise
 
 # %%
-# Simulate missing observations near the first peak
-# ------------------------------------------------
-# Mask a small patch over the center of the first peak (x ≈ −0.5 Hz,
-# y ≈ −0.4 ppm) to mimic a gap in the measurements. The surrounding
-# points still constrain the fit. The slice uses row and column indices.
-spectrum[20:24, 25:28] = scp.MASKED
+# Simulate missing rows and columns
+# ---------------------------------
+# Two bands of missing measurements cross near the first peak
+# (x ≈ −0.5 Hz, y ≈ −0.4 ppm). This illustrates how the fit uses the
+# observations on either side of each gap to constrain the model.
+missing = scp.zeros(spectrum.shape, dtype=bool).data
+missing[20:24, :] = True
+missing[:, 25:28] = True
+spectrum.mask = missing
 
 # %%
 # Fit both peaks together
@@ -80,8 +83,8 @@ for i, peak in enumerate(result.peaks, start=1):
 # Compare observations, fit and residuals
 # ---------------------------------------
 # The fitted model is evaluated across the whole grid. Its output keeps
-# the mask so reconstructed values inside the gap remain distinguishable
-# from fitted values at observed points. No residual is reported there.
+# the mask so reconstructed values in the gaps remain distinguishable
+# from fitted values at observed points. Residuals are masked in the same bands.
 for dataset, title in [
     (spectrum, "Observed"),
     (result.fitted, "Fitted"),
