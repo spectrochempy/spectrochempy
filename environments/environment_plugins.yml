@@ -44,7 +44,7 @@ dependencies:
     # --------------------
 
     # nmr
-    - spectrochempy-nmr>=0.1,<0.3
+    - spectrochempy-nmr>=0.1,<0.4
     # iris
     - spectrochempy-iris>=0.1,<0.2
     # tensor

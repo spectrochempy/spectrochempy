@@ -32,7 +32,7 @@ build:
         done
       # NMR is maintained in a standalone repository. Its
       # public API pages are generated from the released distributions.
-      - python -m pip install "spectrochempy-nmr>=0.2,<0.3"
+      - python -m pip install "spectrochempy-nmr>=0.2,<0.4"
       # Runtime dependencies that --no-deps skips.
       - python -m pip install osqp scipy tensorly
     build:

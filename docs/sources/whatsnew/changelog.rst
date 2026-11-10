@@ -19,6 +19,9 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- Allow the independently released NMR 0.3 plugin in the ``nmr`` extra and
+  link to its standalone reading and processing guides.
+
 - Added ``integrate_region`` for physical ND boxes with optional propagated
   standard uncertainty on regular or irregular spectral grids.
 - Added bounded multiplet fitting on multidimensional spectral grids to

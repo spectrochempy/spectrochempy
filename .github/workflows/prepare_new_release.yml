@@ -79,7 +79,7 @@ jobs:
           wheel_with_nmr_extra="${wheel}[nmr]"
           python -m pip install \
             "$wheel_with_nmr_extra" \
-            "spectrochempy-nmr>=0.2,<0.3" \
+            "spectrochempy-nmr>=0.2,<0.4" \
             pytest pytest-doctestplus
           python -m pip check
 

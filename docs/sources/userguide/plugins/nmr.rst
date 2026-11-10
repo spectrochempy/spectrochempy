@@ -1,33 +1,25 @@
 .. _nmr-plugin:
 
-==========
 NMR plugin
 ==========
 
-Introduction
-============
+The independently released ``spectrochempy-nmr`` plugin reads vendor
+and exchange formats and processes 1D and qualified 2D acquisitions.
+SpectroChemPy provides the dataset, units, plotting and generic processing API.
 
-The ``spectrochempy-nmr`` plugin provides NMR-specific readers and processing
-workflows, including the Bruker TopSpin reader.
-
-Installation
-============
-
-Install it with:
+Install or upgrade the plugin explicitly:
 
 .. code-block:: bash
 
-    python -m pip install "spectrochempy[nmr]"
+    python -m pip install --upgrade "spectrochempy-nmr>=0.3,<0.4"
 
-Follow the `Bruker 1D quickstart in the NMR plugin documentation
-<https://spectrochempy-nmr.readthedocs.io/latest/getting_started/quickstart.html>`_
-to read a FID, process it with ``scp.nmr.Experiment``, and plot the
-resulting spectrum.
+This command also works with SpectroChemPy 1.2.0, whose ``nmr`` extra
+selects plugin versions below 0.3. The plugin's
+`installation and compatibility guide
+<https://spectrochempy-nmr.readthedocs.io/latest/getting_started/installation.html>`_
+gives the requirements for each workflow.
 
-Recommended API
-===============
-
-Use the NMR plugin's format-detecting reader:
+Read data through the namespaced API:
 
 .. code-block:: python
 
@@ -35,107 +27,15 @@ Use the NMR plugin's format-detecting reader:
 
     dataset = scp.nmr.read("path/to/fid")
 
-See the plugin's `guide to reading NMR data
-<https://spectrochempy-nmr.readthedocs.io/latest/userguide/reading_data.html>`_
-for supported formats and how to select one explicitly. The
-:doc:`reader catalog </userguide/importexport/readers>` covers readers
-available across SpectroChemPy.
+``scp.read_topspin()`` remains available for explicit Bruker reads.
+Use the standalone plugin documentation for the
+`reader guide <https://spectrochempy-nmr.readthedocs.io/latest/userguide/reading_data.html>`_,
+`1D processing <https://spectrochempy-nmr.readthedocs.io/latest/userguide/processing_1d.html>`_,
+and `2D processing and TopSpin replay
+<https://spectrochempy-nmr.readthedocs.io/latest/userguide/processing_2d.html>`_.
+Recorded TopSpin recipes are applied when explicitly requested with
+``Experiment.process(replay="topspin")`` on supported data.
 
-The NMR plugin owns Bruker/TopSpin conventions such as experiment directory
-resolution, processed-data defaults, acquisition metadata, and NMR unit
-contexts. Core SpectroChemPy remains responsible for generic datasets, units,
-plotting, and ordinary FFT operations.
-
-TopSpin Processing Profile
-==========================
-
-TopSpin datasets may expose a descriptive vendor processing profile in
-``dataset.meta.nmr_processing``:
-
-.. code-block:: python
-
-    dataset = scp.nmr.read("path/to/fid")
-    profile = dataset.meta.nmr_processing["vendor_profile"]
-
-This profile records values read from the vendor ``procs`` file. It is
-descriptive only:
-
-- it is not applied automatically when reading a raw FID;
-- it is not replayed automatically by ``scp.nmr.Experiment(...).process()``;
-- it does not establish the exact historical processing sequence of an already
-  processed vendor spectrum such as TopSpin ``1r``;
-- SpectroChemPy-owned processing traces are handled separately from the vendor
-  profile.
-
-SpectroChemPy Processing Trace
-==============================
-
-The result of ``scp.nmr.Experiment(...).process()`` records the
-SpectroChemPy-owned processing call in
-``result.meta.nmr_processing["scp_processing"]``:
-
-.. code-block:: python
-
-    experiment = scp.nmr.Experiment(fid)
-    result = experiment.process(apodization="em", lb=5.0)
-
-    trace = result.meta.nmr_processing["scp_processing"]
-    requested = trace["requested"]
-    applied = trace["applied"]
-
-This trace is attached to the result only. The source dataset is not mutated.
-
-- ``requested`` contains only the arguments explicitly provided to
-  ``Experiment.process()``.
-- ``applied`` contains only the operations that SpectroChemPy actually
-  executed and the values those operations really consumed.
-- ``dataset.meta.nmr_processing["vendor_profile"]`` remains descriptive vendor
-  metadata and is never applied automatically.
-- the trace records the SpectroChemPy processing associated with the current
-  result, not a complete historical processing history for the dataset.
-- vendor replay is not implemented.
-- ``phase="metadata"`` applies the dataset's current ``meta.phc0`` /
-  ``meta.phc1`` state through the existing ``pk()`` path. It does not consult
-  ``vendor_profile`` and does not replay TopSpin ``PHC0`` / ``PHC1`` from
-  ``procs``. On the validated raw TopSpin 1D oracle path it is currently
-  numerically identical to ``phase=None``; on already frequency-domain spectra
-  carrying phase metadata, it can still apply a real phase correction.
-
-Compatibility aliases
-=====================
-
-Compatibility aliases:
-
-- ``scp.read_topspin(...)`` remains available as the root-level compatibility
-  alias when the plugin is installed.
-
-API Reference
-=============
-
-The generated public API page for the NMR plugin is listed in
-:doc:`/reference/plugins`. See :func:`spectrochempy.nmr.read`.
-
-Examples
-========
-
-The published public examples for this plugin currently focus on validated 1D
-workflows.
-
-Limitations
-===========
-
-Currently, the user-facing documentation for this plugin focuses on TopSpin
-datasets and related NMR workflows.
-
-The plugin reads 1D FIDs and spectra, raw 2D time-domain data (``ser``), and
-vendor-processed 2D spectra. Storage layouts and processing conventions are
-documented by the `standalone NMR project
-<https://spectrochempy-nmr.readthedocs.io/latest/>`_.
-
-The public *processing* workflow, :func:`spectrochempy.nmr.Experiment`,
-remains limited to validated 1D experiments: ``Experiment(...).process()``
-raises ``NotImplementedError`` for multi-dimensional datasets. A pseudo-2D
-series — a list of ordinary 1D spectra sharing a secondary coordinate, such as
-a relaxation or kinetics series — must be distinguished from a genuine 2D
-experiment in which both dimensions are Fourier-transformed: pseudo-2D series
-follow the validated 1D processing path, one spectrum at a time.
+See the :doc:`core plugin API index </reference/plugins>` and the standalone
+`NMR API reference
+<https://spectrochempy-nmr.readthedocs.io/latest/reference/nmr_api.html>`_.
