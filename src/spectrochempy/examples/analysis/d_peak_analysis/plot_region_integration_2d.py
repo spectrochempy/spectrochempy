@@ -13,8 +13,6 @@ background region. The spectrum is synthetic so that the assumption of
 independent noise with constant variance is known.
 """
 
-import numpy as np
-
 import spectrochempy as scp
 
 # %%
@@ -22,15 +20,18 @@ import spectrochempy as scp
 # ------------------------------------------
 x = scp.Coord.linspace(1950, 2150, 101, units="cm^-1", title="pump wavenumber")
 y = scp.Coord.linspace(1950, 2150, 81, units="cm^-1", title="probe wavenumber")
-signal = scp.gaussian(y.data, pos=2040, width=20, normalized=False)[:, None]
-signal = signal * scp.gaussian(x.data, pos=2070, width=25, normalized=False)
-rng = np.random.default_rng(42)
-spectrum = scp.NDDataset(
-    signal + rng.normal(0, 0.015, size=signal.shape),
-    coordset=[y, x],
-    units="absorbance",
-    title="Synthetic 2D spectrum",
-)
+grid = scp.zeros((y.size, x.size), coordset=[y, x], units="absorbance")
+peak = {
+    "height": 1.0,
+    "axes": {
+        "y": {"model": "gaussian", "center": 2040, "width": 20},
+        "x": {"model": "gaussian", "center": 2070, "width": 25},
+    },
+}
+signal = scp.simulate_peaks(grid, [peak])
+noise = scp.normal(scale=0.015, size=grid.shape, seed=42, units=grid.units)
+spectrum = signal + noise
+spectrum.title = "Synthetic 2D spectrum"
 
 # %%
 # Choose signal and background boxes

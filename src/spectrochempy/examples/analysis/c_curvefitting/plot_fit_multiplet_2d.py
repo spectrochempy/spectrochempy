@@ -12,8 +12,6 @@ Fit two separable peaks jointly, then compare the reconstructed spectrum
 and residuals on the input grid.
 """
 
-import numpy as np
-
 import spectrochempy as scp
 
 # %%
@@ -21,7 +19,7 @@ import spectrochempy as scp
 # --------------------------------
 x = scp.Coord.linspace(-4, 4, 61, units="Hz")
 y = scp.Coord.linspace(-3, 3, 51, units="ppm")
-grid = scp.NDDataset(np.zeros((y.size, x.size)), coordset=[y, x], units="V")
+grid = scp.zeros((y.size, x.size), coordset=[y, x], units="V")
 true_peaks = [
     {
         "height": 2.0,
@@ -39,8 +37,8 @@ true_peaks = [
     },
 ]
 clean = scp.simulate_peaks(grid, true_peaks)
-noise = np.random.default_rng(42).normal(0, 0.015, grid.shape)
-spectrum = scp.NDDataset(clean.data + noise, coordset=[y, x], units="V")
+noise = scp.normal(scale=0.015, size=grid.shape, seed=42, units=grid.units)
+spectrum = clean + noise
 spectrum[20:24, 25:28] = scp.MASKED
 
 # %%
