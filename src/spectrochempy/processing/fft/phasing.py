@@ -64,21 +64,19 @@ def _phase_history_parameters(
     resolved_axis,
     inplace,
     rel,
+    resolved_physical_pivot,
 ):
     """
     Describe one successful phase correction call.
 
     ``scientific_parameters`` holds the correction the kernel was actually
-    given, in degrees for the phases. ``pivot`` and ``exptc`` follow two
-    different conventions, both pre-existing: ``pivot`` is converted *to* the
-    units of the phased coordinate, whereas a unit-bearing ``exptc`` is a time
-    quantity converted *to the inverse* of those units, so ``exptc=5 us`` is
-    5e-06 on a ``Hz`` coordinate and 0.005 on a ``kHz`` one. A dimensionless
-    number is taken as already expressed in those units, except for ``exptc``
-    which the kernel then reads as a plain number. That correction is not the
-    phase the caller asked for: the wrapper subtracts the phase already recorded
-    in the metadata and negates the request when the dimension has not been
-    phased yet.
+    given, in degrees for the phases. For a linear first-order correction,
+    a unit-bearing pivot is resolved to a sample index. Other corrections
+    retain the historical pivot convention. A unit-bearing ``exptc`` is
+    converted to the inverse of the phased coordinate units. That correction
+    is not the phase the caller asked for: the wrapper subtracts the phase
+    already recorded in the metadata and negates the request when the dimension
+    has not been phased yet.
 
     ``requested_parameters`` therefore carries the request, as a serializable
     magnitude and units pair, for every parameter that does not match the applied
@@ -110,7 +108,8 @@ def _phase_history_parameters(
     changed = {
         name: value
         for name, value in requested.items()
-        if scientific_parameters.get(name, _NOT_APPLIED) is _NOT_APPLIED
+        if (name == "pivot" and resolved_physical_pivot)
+        or scientific_parameters.get(name, _NOT_APPLIED) is _NOT_APPLIED
         or scientific_parameters[name] != value["value"]
     }
     if changed:
@@ -196,15 +195,23 @@ def _phase_method(method):
             kwargs["phc1"] = (
                 _check_units(kwargs.get("phc1", 0), "degree") - current[1]
             ).magnitude
-            kwargs["pivot"] = _check_units(
-                kwargs.get("pivot", new.meta.pivot[-1]),
-                dunits,
-            ).magnitude
+            pivot = kwargs.get("pivot", new.meta.pivot[-1])
+            pivot_in_axis_units = _check_units(pivot, dunits)
+            kwargs["pivot"] = pivot_in_axis_units.magnitude
             kwargs["exptc"] = _check_units(
                 kwargs.get("exptc", new.meta.get("exptc", [0] * new.ndim)[-1]),
                 dunits,
                 inv=True,
             ).magnitude
+
+            resolved_physical_pivot = (
+                isinstance(pivot, Quantity)
+                and dunits is not None
+                and kwargs["phc1"] != 0
+                and _first_order_contributes(kwargs["exptc"])
+            )
+            if resolved_physical_pivot:
+                kwargs["pivot"] = int(x.loc2index(pivot_in_axis_units.magnitude))
 
             if not new.meta.phased[-1]:
                 # TODO(plugin-nmr): this imported-initial-phase convention belongs
@@ -252,6 +259,7 @@ def _phase_method(method):
                     resolved_axis=resolved_axis,
                     inplace=inplace,
                     rel=rel,
+                    resolved_physical_pivot=resolved_physical_pivot,
                 ),
                 message=message,
             )
@@ -275,7 +283,9 @@ def _phase_method(method):
                     new.meta.exptc[-1] = kwargs["exptc"] * (1 / dunits)
 
             if dunits is not None:
-                new.meta.pivot[-1] = kwargs["pivot"] * dunits
+                new.meta.pivot[-1] = (
+                    pivot_in_axis_units if isinstance(pivot, Quantity) else pivot
+                )
 
         else:  # not (x.unitless or x.dimensionless or x.units.dimensionality != '[time]')
             error_(
@@ -313,8 +323,10 @@ def pk(dataset, phc0=0.0, phc1=0.0, exptc=0.0, pivot=0.0, **kwargs):
         First order phase in degrees.
     exptc : float or `Quantity` , optional, default=0 us
         Exponential decay constant. If not 0, phc1 is ignored.
-    pivot: float or `Quantity` , optional, default=0 in units of the x coordinate
-        Units if any must be compatible with last dimension units.
+    pivot : float or `Quantity`, optional, default=0
+        For linear first-order phasing, a quantity selects the nearest sample
+        in the axis units. A plain number specifies a sample index, including
+        when replaying recorded phase parameters.
 
     Returns
     -------
