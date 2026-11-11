@@ -10,13 +10,17 @@ __all__ = ["read_jcamp"]
 import io
 import re
 from datetime import datetime
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 import numpy as np
 
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
+from spectrochempy.plugins.deps import MissingPluginNamespaceError
 from spectrochempy.utils.datetimeutils import UTC
+from spectrochempy.utils.exceptions import SpectroChemPyError
 
 # ======================================================================================
 # Public functions
@@ -25,7 +29,7 @@ from spectrochempy.utils.datetimeutils import UTC
 
 def read_jcamp(*paths, **kwargs):
     r"""
-    Open Infrared ``JCAMP-DX`` files with extension :file:`.jdx` or :file:`.dx`.
+    Open infrared and supported 1D processed NMR ``JCAMP-DX`` files with extension :file:`.jdx` or :file:`.dx`.
 
     This is the explicit JCAMP reader in the public import API. Use
     :func:`spectrochempy.read` for generic format autodetection and
@@ -37,7 +41,8 @@ def read_jcamp(*paths, **kwargs):
     :func:`spectrochempy.read` for the complete description of the generic
     import convention and multi-object return behavior.
 
-    Limited to AFFN encoding (see :cite:t:`mcdonald:1988`)
+    The infrared reader supports AFFN encoding (see :cite:t:`mcdonald:1988`).
+    Processed NMR spectra use the optional NMR plugin's interop reader.
 
     Parameters
     ----------
@@ -72,6 +77,10 @@ def read_jcamp(*paths, **kwargs):
         The most convenient way is to use a dictionary. This feature is particularly
         useful for a web application to handle drag and drop of files into a
         Browser.
+    jcamp_kind : {"auto", "ir", "nmr"}, optional
+        Route by the declared data type by default. Set a kind explicitly
+        when the declaration is ambiguous. Containers with conflicting
+        declared spectrum types are rejected.
     csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
         Set the column delimiter in CSV file.
     description : `str`, optional
@@ -154,44 +163,119 @@ def read_jcamp(*paths, **kwargs):
 # ======================================================================================
 # private functions
 # ======================================================================================
-@_importer_method
-def _read_jdx(*args, **kwargs):
-    # read jdx file
-    dataset, filename = args
-    content = kwargs.get("content")
-    sortbydate = kwargs.pop("sortbydate", True)
+def _declared_kind(stream, requested):
+    if requested not in ("auto", "ir", "nmr"):
+        raise SpectroChemPyError("jcamp_kind must be 'auto', 'ir' or 'nmr'")
 
-    if content is not None:
-        fid = io.StringIO(content.decode("utf-8"))
+    spectrum_types = set()
+    linked = False
+    tables = 0
+    for line in stream:
+        key, equal, value = line.partition("=")
+        key = "".join(key.lstrip("\ufeff").upper().split())
+        if linked and key in {"##XYDATA", "##XYPOINTS", "##PEAKTABLE", "##DATATABLE"}:
+            tables += 1
+        if not equal or key != "##DATATYPE":
+            continue
+        declared = "".join(value.partition("$$")[0].upper().split())
+        if declared == "LINK":
+            linked = True
+            continue
+        spectrum_types.add(declared)
+        if not linked:
+            break
+
+    if len(spectrum_types) > 1:
+        raise SpectroChemPyError("JCAMP-DX LINK contains conflicting data types")
+    declared = next(iter(spectrum_types), None)
+    if (
+        declared is not None
+        and declared.startswith("NMR")
+        and declared != "NMRSPECTRUM"
+    ):
+        raise SpectroChemPyError(
+            "JCAMP-DX routing supports processed 1D NMR spectra only"
+        )
+    kind = {"INFRAREDSPECTRUM": "ir", "NMRSPECTRUM": "nmr"}.get(declared)
+    if kind is not None:
+        if requested not in ("auto", kind):
+            raise SpectroChemPyError(
+                "jcamp_kind conflicts with the declared JCAMP-DX data type"
+            )
+        if kind == "nmr" and linked and tables != 1:
+            raise SpectroChemPyError(
+                "NMR JCAMP-DX LINK requires exactly one spectral table"
+            )
+        return kind, linked
+    if requested != "auto":
+        return requested, linked
+    if linked and not spectrum_types:
+        return "ir", linked
+    raise SpectroChemPyError(
+        "Cannot determine JCAMP-DX spectrum type. Set jcamp_kind='ir' or 'nmr'."
+    )
+
+
+def _read_nmr_jcamp(filename, content):
+    import spectrochempy as scp  # noqa: PLC0415
+
+    try:
+        reader = scp.nmr.read
+    except MissingPluginNamespaceError as exc:
+        raise SpectroChemPyError(
+            "NMR JCAMP-DX requires spectrochempy-nmr. "
+            "Install it with pip install 'spectrochempy[nmr]'."
+        ) from exc
+
+    def read(path):
+        try:
+            return reader(path, protocol="interop", profile="jcampdx-spectrum-1d")
+        except (ImportError, ValueError) as exc:
+            raise SpectroChemPyError(
+                f"Cannot read processed 1D NMR JCAMP-DX: {exc}"
+            ) from exc
+
+    if content is None:
+        dataset = read(filename)
     else:
-        fid = open(filename)  # noqa: SIM115
+        with TemporaryDirectory(prefix="scpy-jcamp-") as temporary:
+            path = Path(temporary) / Path(filename).name
+            path.write_bytes(content)
+            dataset = read(path)
+    dataset.filename = filename
+    dataset.origin = "jcamp-nmr"
+    dataset.history = f"Imported NMR JCAMP-DX file {Path(filename).name}"
+    return dataset
 
-    # Read header of outer Block
 
+@_importer_method
+def _read_jdx(dataset, filename, **kwargs):
+    content = kwargs.get("content")
+    stream = (
+        io.StringIO(content.decode("utf-8-sig"))
+        if content is not None
+        else open(filename, encoding="utf-8-sig")  # noqa: SIM115
+    )
+    with stream:
+        kind, linked = _declared_kind(stream, kwargs.get("jcamp_kind", "auto"))
+        if kind == "ir":
+            stream.seek(0)
+            return _read_ir_jcamp(
+                dataset, filename, stream, linked, kwargs.get("sortbydate", True)
+            )
+    return _read_nmr_jcamp(filename, content)
+
+
+def _read_ir_jcamp(dataset, filename, fid, linked, sortbydate):
     keyword = ""
-
     while keyword != "##TITLE":
-        keyword, text = _readl(fid)
-    if keyword != "EOF":
-        jdx_title = text
-    else:  # pragma: no cover
-        raise ValueError("No ##TITLE LR in outer block header")
+        keyword, jdx_title = _readl(fid)
 
-    while (keyword != "##DATA TYPE") and (keyword != "##DATATYPE"):
-        keyword, text = _readl(fid)
-    if keyword != "EOF":
-        jdx_data_type = text
-    else:  # pragma: no cover
-        raise ValueError("No ##DATA TYPE LR in outer block header")
-
-    if jdx_data_type == "LINK":
+    nspec = 1
+    if linked:
         while keyword != "##BLOCKS":
             keyword, text = _readl(fid)
         nspec = int(text)
-    elif jdx_data_type.replace(" ", "") == "INFRAREDSPECTRUM":
-        nspec = 1
-    else:
-        raise ValueError("DATA TYPE must be LINK or INFRARED SPECTRUM")
 
     # Create variables
 
@@ -352,7 +436,6 @@ def _read_jdx(*args, **kwargs):
     else:
         axisname = ""
         axisunit = ""
-    fid.close()
 
     dataset.data = data
     dataset.name = jdx_title
@@ -371,7 +454,7 @@ def _read_jdx(*args, **kwargs):
 
     # now add coordinates
     _x = Coord(xaxis, title=axisname, units=axisunit)
-    if jdx_data_type == "LINK":
+    if linked:
         _y = Coord(
             alltimestamps,
             title="acquisition timestamp (GMT)",
@@ -417,7 +500,7 @@ def _read_dx(*args, **kwargs):  # pragma: no cover
 def _readl(fid):
     line = fid.readline()
     if not line:
-        return "EOF", ""
+        raise ValueError("Unexpected end of JCAMP-DX file")
     line = line.strip(" \n")  # remove newline character
     if line[0:2] == "##":  # if line starts with "##"
         if line[0:5] == "##END":  # END KEYWORD, no text

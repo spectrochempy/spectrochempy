@@ -28,7 +28,8 @@ Readers included with SpectroChemPy
      - ``scp.csv.read``
    * - JCAMP-DX
      - ``.dx``, ``.jdx``
-     - ``scp.jcamp.read``
+     - ``scp.jcamp.read`` for infrared and supported processed 1D NMR spectra
+       (requires the NMR plugin for NMR files)
    * - MATLAB and Data Set Object
      - ``.mat``, ``.dso``
      - ``scp.matlab.read``
