@@ -33,12 +33,16 @@
 # %% [markdown]
 # # Import/Export of JCAMP-DX files
 #
-# [JCAMP-DX](https://artefacts.ceda.ac.uk/formats/jcamp_dx/) is an open format initially developed for IR
-# data and extended to other spectroscopies. At present, the JCAMP-DX reader implemented
-# in SpectroChemPy is limited to IR data and AFFN encoding (see <cite data-cite="mcdonald:1988">McDonald and Wilks, 1988</cite>.
+# [JCAMP-DX](https://artefacts.ceda.ac.uk/formats/jcamp_dx/) is an open format
+# used by several spectroscopies. Use `scp.read_jcamp()` or `scp.jcamp.read()`
+# to open infrared spectra and supported processed 1D NMR spectra. The reader
+# selects the workflow from the data type declared in the file. If that type
+# is ambiguous, use `jcamp_kind="ir"` or `jcamp_kind="nmr"`.
 #
-# The JCAMP-DX reader of SpectroChemPy has been essentially written to read JCAMP-DX files
-# exported by the SpectroChemPy `write_jdx()` writer.
+# The IR reader supports AFFN-encoded spectra on a regular grid, including
+# linked series on a shared grid. Reading processed 1D NMR spectra requires
+# the [SpectroChemPy NMR plugin](https://www.spectrochempy.fr/projects/nmr/latest/getting_started/installation.html).
+# The example below shows how to export and read back an infrared spectrum.
 #
 
 # %%
