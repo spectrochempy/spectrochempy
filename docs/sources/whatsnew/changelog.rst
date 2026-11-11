@@ -52,7 +52,7 @@ Breaking Changes
 ~~~~~~~~~~~~~~~~
 .. Add here new breaking changes (do not delete this comment)
 
-- ``fft()`` and ``ft()`` now leave phase correction to an explicit
+- ``fft()`` now leaves phase correction to an explicit
   ``pk()`` call. Pass the desired phase angles and pivot to ``pk()``.
 
 
