@@ -181,7 +181,14 @@ def _routing_headers(stream):
         key = re.sub(r"[\s\-_/]", "", key.upper())
         if key == "##DATATYPE":
             data_type = [value.partition("$$")[0]]
-        elif key in {"##XYDATA", "##XYPOINTS", "##PEAKTABLE", "##DATATABLE", "##END"}:
+        elif key in {
+            "##TITLE",
+            "##END",
+            "##XYDATA",
+            "##XYPOINTS",
+            "##PEAKTABLE",
+            "##DATATABLE",
+        }:
             yield key, ""
     if data_type is not None:
         yield "##DATATYPE", "".join("".join(data_type).upper().split())
@@ -195,21 +202,26 @@ def _declared_kind(stream, requested):
     linked = False
     tables = 0
     tables_outside_2d = 0
-    in_2d_block = False
+    block_types = []
     for key, declared in _routing_headers(stream):
+        if key == "##TITLE":
+            block_types.append(None)
+            continue
         if key == "##END":
-            in_2d_block = False
+            if block_types:
+                block_types.pop()
             continue
         if key != "##DATATYPE":
             tables += 1
-            tables_outside_2d += not in_2d_block
+            tables_outside_2d += not block_types or block_types[-1] != "NDNMRSPECTRUM"
             continue
+        if block_types:
+            block_types[-1] = declared
         if declared == "LINK":
             linked = True
             continue
         spectrum_types.add(declared)
-        in_2d_block = declared == "NDNMRSPECTRUM"
-        if not linked:
+        if not linked and declared != "NDNMRSPECTRUM":
             break
 
     if len(spectrum_types) > 1:
@@ -234,9 +246,9 @@ def _declared_kind(stream, requested):
             raise SpectroChemPyError(
                 "jcamp_kind conflicts with the declared JCAMP-DX data type"
             )
-        if dimension == "2d" and linked and tables_outside_2d:
+        if dimension == "2d" and tables_outside_2d:
             raise SpectroChemPyError(
-                "2D NMR JCAMP-DX LINK contains tables outside its spectrum"
+                "2D NMR JCAMP-DX contains tables outside its spectrum"
             )
         if kind == "nmr" and dimension == "1d" and linked and tables != 1:
             raise SpectroChemPyError(

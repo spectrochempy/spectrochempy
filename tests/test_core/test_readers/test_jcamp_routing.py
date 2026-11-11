@@ -142,6 +142,15 @@ def test_nmr_2d_link_with_an_untyped_table_is_rejected():
         scp.read_jcamp({"linked.jdx": linked})
 
 
+@pytest.mark.parametrize("linked", [False, True])
+def test_nmr_2d_with_a_nested_untyped_table_is_rejected(linked):
+    child = b"##TITLE=untyped child\n##XYDATA=(X++(Y..Y))\n10 1 2 3\n##END=\n"
+    nested = NMR_2D.replace(b"##END=\n", child + b"##END=\n")
+    payload = LINK.replace(NMR, nested) if linked else nested
+    with pytest.raises(SpectroChemPyError, match="tables outside its spectrum"):
+        scp.read_jcamp({"nested.jdx": payload})
+
+
 def test_mixed_link_is_rejected():
     mixed = LINK.replace(b"##BLOCKS=1", b"##BLOCKS=2")[:-7] + IR + b"##END=\n"
     with pytest.raises(SpectroChemPyError, match="conflicting data types"):
