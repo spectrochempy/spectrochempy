@@ -19,6 +19,8 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- Added grouping and apparent axial widths for detected 2D peaks.
+
 - Allow the independently released NMR 0.3 plugin in the ``nmr`` extra and
   link to its standalone reading and processing guides.
 

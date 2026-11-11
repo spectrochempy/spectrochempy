@@ -15,6 +15,8 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 New Features
 ~~~~~~~~~~~~
 
+- Added grouping and apparent axial widths for detected 2D peaks.
+
 - Allow the independently released NMR 0.3 plugin in the ``nmr`` extra and
   link to its standalone reading and processing guides.
 
