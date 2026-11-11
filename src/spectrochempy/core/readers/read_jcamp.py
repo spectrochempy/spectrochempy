@@ -171,8 +171,10 @@ def _declared_kind(stream, requested):
     linked = False
     tables = 0
     for line in stream:
+        if not line.lstrip().startswith("##"):
+            continue
         key, equal, value = line.partition("=")
-        key = "".join(key.lstrip("\ufeff").upper().split())
+        key = re.sub(r"[\s\-_/]", "", key.upper())
         if linked and key in {"##XYDATA", "##XYPOINTS", "##PEAKTABLE", "##DATATABLE"}:
             tables += 1
         if not equal or key != "##DATATYPE":
@@ -248,22 +250,25 @@ def _read_nmr_jcamp(filename, content):
     return dataset
 
 
+def _open_jcamp(filename, content, *, errors="strict"):
+    if content is not None:
+        return io.TextIOWrapper(
+            io.BytesIO(content), encoding="utf-8-sig", errors=errors
+        )
+    return open(filename, encoding="utf-8-sig", errors=errors)  # noqa: SIM115
+
+
 @_importer_method
 def _read_jdx(dataset, filename, **kwargs):
     content = kwargs.get("content")
-    stream = (
-        io.StringIO(content.decode("utf-8-sig"))
-        if content is not None
-        else open(filename, encoding="utf-8-sig")  # noqa: SIM115
-    )
-    with stream:
+    with _open_jcamp(filename, content, errors="replace") as stream:
         kind, linked = _declared_kind(stream, kwargs.get("jcamp_kind", "auto"))
-        if kind == "ir":
-            stream.seek(0)
-            return _read_ir_jcamp(
-                dataset, filename, stream, linked, kwargs.get("sortbydate", True)
-            )
-    return _read_nmr_jcamp(filename, content)
+    if kind == "nmr":
+        return _read_nmr_jcamp(filename, content)
+    with _open_jcamp(filename, content) as stream:
+        return _read_ir_jcamp(
+            dataset, filename, stream, linked, kwargs.get("sortbydate", True)
+        )
 
 
 def _read_ir_jcamp(dataset, filename, fid, linked, sortbydate):

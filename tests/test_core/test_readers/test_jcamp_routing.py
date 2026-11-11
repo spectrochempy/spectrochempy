@@ -31,7 +31,16 @@ IR = b"""##TITLE=IR specimen
 """
 
 
-@pytest.mark.parametrize("payload", [NMR, LINK])
+@pytest.mark.parametrize(
+    "payload",
+    [
+        NMR,
+        LINK,
+        LINK.replace(b"\n", b"\r"),
+        b"$$ comment \xe9\n" + LINK,
+        LINK.replace(b"DATA TYPE=NMR", b"DATA-TYPE=NMR"),
+    ],
+)
 @pytest.mark.parametrize("as_content", [False, True])
 def test_nmr_delegates_to_the_processed_interop_profile(
     monkeypatch, tmp_path, payload, as_content
@@ -76,8 +85,11 @@ def test_mixed_link_is_rejected():
         scp.read_jcamp({"mixed.jdx": mixed})
 
 
-def test_nmr_link_with_another_untyped_table_is_rejected():
-    extra = IR.replace(b"##DATA TYPE=INFRARED SPECTRUM\n", b"")
+@pytest.mark.parametrize("label", [b"XYDATA", b"X-Y-DATA", b"X_Y/DATA"])
+def test_nmr_link_with_another_untyped_table_is_rejected(label):
+    extra = IR.replace(b"##DATA TYPE=INFRARED SPECTRUM\n", b"").replace(
+        b"XYDATA", label
+    )
     mixed = LINK.replace(b"##BLOCKS=1", b"##BLOCKS=2")[:-7] + extra + b"##END=\n"
     with pytest.raises(SpectroChemPyError, match="exactly one spectral table"):
         scp.read_jcamp({"mixed.jdx": mixed})
