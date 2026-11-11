@@ -29,7 +29,7 @@ from spectrochempy.utils.exceptions import SpectroChemPyError
 
 def read_jcamp(*paths, **kwargs):
     r"""
-    Open infrared and supported 1D processed NMR ``JCAMP-DX`` files with extension :file:`.jdx` or :file:`.dx`.
+    Open infrared and supported processed 1D and real 2D NMR ``JCAMP-DX`` files with extension :file:`.jdx` or :file:`.dx`.
 
     This is the explicit JCAMP reader in the public import API. Use
     :func:`spectrochempy.read` for generic format autodetection and
@@ -80,7 +80,8 @@ def read_jcamp(*paths, **kwargs):
     jcamp_kind : {"auto", "ir", "nmr"}, optional
         Route by the declared data type by default. Set a kind explicitly
         when the declaration is ambiguous. Containers with conflicting
-        declared spectrum types are rejected.
+        declared spectrum types are rejected. Processed real 2D NMR spectra
+        use the NTUPLES profile and require nmrglue-ng 1.3 or later.
     csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
         Set the column delimiter in CSV file.
     description : `str`, optional
@@ -180,7 +181,14 @@ def _routing_headers(stream):
         key = re.sub(r"[\s\-_/]", "", key.upper())
         if key == "##DATATYPE":
             data_type = [value.partition("$$")[0]]
-        elif key in {"##XYDATA", "##XYPOINTS", "##PEAKTABLE", "##DATATABLE"}:
+        elif key in {
+            "##TITLE",
+            "##END",
+            "##XYDATA",
+            "##XYPOINTS",
+            "##PEAKTABLE",
+            "##DATATABLE",
+        }:
             yield key, ""
     if data_type is not None:
         yield "##DATATYPE", "".join("".join(data_type).upper().split())
@@ -193,15 +201,27 @@ def _declared_kind(stream, requested):
     spectrum_types = set()
     linked = False
     tables = 0
+    tables_outside_2d = 0
+    block_types = []
     for key, declared in _routing_headers(stream):
+        if key == "##TITLE":
+            block_types.append(None)
+            continue
+        if key == "##END":
+            if block_types:
+                block_types.pop()
+            continue
         if key != "##DATATYPE":
             tables += 1
+            tables_outside_2d += not block_types or block_types[-1] != "NDNMRSPECTRUM"
             continue
+        if block_types:
+            block_types[-1] = declared
         if declared == "LINK":
             linked = True
             continue
         spectrum_types.add(declared)
-        if not linked:
+        if not linked and declared != "NDNMRSPECTRUM":
             break
 
     if len(spectrum_types) > 1:
@@ -213,29 +233,38 @@ def _declared_kind(stream, requested):
         and declared != "NMRSPECTRUM"
     ):
         raise SpectroChemPyError(
-            "JCAMP-DX routing supports processed 1D NMR spectra only"
+            "JCAMP-DX routing supports processed 1D and real 2D NMR spectra only"
         )
-    kind = {"INFRAREDSPECTRUM": "ir", "NMRSPECTRUM": "nmr"}.get(declared)
+    kind = {
+        "INFRAREDSPECTRUM": "ir",
+        "NMRSPECTRUM": "nmr",
+        "NDNMRSPECTRUM": "nmr",
+    }.get(declared)
+    dimension = "2d" if declared == "NDNMRSPECTRUM" else "1d"
     if kind is not None:
         if requested not in ("auto", kind):
             raise SpectroChemPyError(
                 "jcamp_kind conflicts with the declared JCAMP-DX data type"
             )
-        if kind == "nmr" and linked and tables != 1:
+        if dimension == "2d" and tables_outside_2d:
+            raise SpectroChemPyError(
+                "2D NMR JCAMP-DX contains tables outside its spectrum"
+            )
+        if kind == "nmr" and dimension == "1d" and linked and tables != 1:
             raise SpectroChemPyError(
                 "NMR JCAMP-DX LINK requires exactly one spectral table"
             )
-        return kind, linked
+        return kind, linked, dimension
     if requested != "auto":
-        return requested, linked
+        return requested, linked, dimension
     if linked and not spectrum_types:
-        return "ir", linked
+        return "ir", linked, dimension
     raise SpectroChemPyError(
         "Cannot determine JCAMP-DX spectrum type. Set jcamp_kind='ir' or 'nmr'."
     )
 
 
-def _read_nmr_jcamp(filename, content):
+def _read_nmr_jcamp(filename, content, dimension):
     import spectrochempy as scp  # noqa: PLC0415
 
     try:
@@ -248,10 +277,12 @@ def _read_nmr_jcamp(filename, content):
 
     def read(path):
         try:
-            return reader(path, protocol="interop", profile="jcampdx-spectrum-1d")
+            return reader(
+                path, protocol="interop", profile=f"jcampdx-spectrum-{dimension}"
+            )
         except (ImportError, ValueError) as exc:
             raise SpectroChemPyError(
-                f"Cannot read processed 1D NMR JCAMP-DX: {exc}"
+                f"Cannot read processed {dimension.upper()} NMR JCAMP-DX: {exc}"
             ) from exc
 
     if content is None:
@@ -279,9 +310,11 @@ def _open_jcamp(filename, content, *, errors="strict"):
 def _read_jdx(dataset, filename, **kwargs):
     content = kwargs.get("content")
     with _open_jcamp(filename, content, errors="replace") as stream:
-        kind, linked = _declared_kind(stream, kwargs.get("jcamp_kind", "auto"))
+        kind, linked, dimension = _declared_kind(
+            stream, kwargs.get("jcamp_kind", "auto")
+        )
     if kind == "nmr":
-        return _read_nmr_jcamp(filename, content)
+        return _read_nmr_jcamp(filename, content, dimension)
     with _open_jcamp(filename, content) as stream:
         return _read_ir_jcamp(
             dataset, filename, stream, linked, kwargs.get("sortbydate", True)
