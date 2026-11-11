@@ -15,6 +15,28 @@ NMR = b"""##TITLE=NMR specimen
 0 1 2 3
 ##END=
 """
+NMR_2D = b"""##TITLE=Real 2D spectrum
+##JCAMP-DX=6.0
+##DATA TYPE=nD NMR SPECTRUM
+##DATA CLASS=NTUPLES
+##NUMDIM=2
+##NTUPLES=nD NMR SPECTRUM
+##SYMBOL=F1,F2,Y
+##VAR_DIM=2,3,6
+##UNITS=PPM,HZ,ARBITRARY UNITS
+##FIRST=1,10,2
+##LAST=3,8,12
+##FACTOR=1,1,2
+##PAGE=F1=1
+##DATA TABLE=(F2++(Y..Y)),PROFILE
+10 1 2 3
+##PAGE=F1=3
+##FIRST=3,10,8
+##DATA TABLE=(F2++(Y..Y)),PROFILE
+10 4 5 6
+##END NTUPLES=nD NMR SPECTRUM
+##END=
+"""
 LINK = b"##TITLE=container\n##DATA TYPE=LINK\n##BLOCKS=1\n" + NMR + b"##END=\n"
 IR = b"""##TITLE=IR specimen
 ##DATA TYPE=INFRARED SPECTRUM
@@ -83,6 +105,43 @@ def test_ir_routing_and_explicit_selection():
     assert scp.read_jcamp({"ir.dx": ambiguous}, jcamp_kind="ir").shape == (1, 3)
 
 
+def test_nmr_2d_delegates_to_the_processed_interop_profile(monkeypatch):
+    def read(path, **options):
+        assert Path(path).read_bytes() == NMR_2D
+        assert options == {"protocol": "interop", "profile": "jcampdx-spectrum-2d"}
+        return scp.NDDataset([[2, 4, 6], [8, 10, 12]])
+
+    monkeypatch.setitem(scp.__dict__, "nmr", SimpleNamespace(read=read))
+    dataset = scp.jcamp.read({"plane.jdx": NMR_2D}, jcamp_kind="nmr")
+    assert dataset.shape == (2, 3)
+    assert dataset.filename.name == "plane.jdx"
+    assert dataset.origin == "jcamp-nmr"
+
+
+@pytest.mark.parametrize("payload", [NMR_2D, LINK.replace(NMR, NMR_2D)])
+def test_nmr_2d_reads_values_and_axes_with_the_plugin(tmp_path, payload):
+    pytest.importorskip("spectrochempy_nmr")
+    interop = pytest.importorskip("nmrglue.interop")
+    if not hasattr(interop, "read_jcampdx_2d"):
+        pytest.skip("requires nmrglue-ng with JCAMP-DX 2D support")
+
+    source = tmp_path / "plane.jdx"
+    source.write_bytes(payload)
+    dataset = scp.read_jcamp(source)
+    assert dataset.data.tolist() == [[2, 4, 6], [8, 10, 12]]
+    assert dataset.y.data.tolist() == [1, 3]
+    assert dataset.x.data.tolist() == [10, 9, 8]
+    assert dataset.y.units == scp.ur.ppm
+    assert dataset.x.units == scp.ur.Hz
+
+
+def test_nmr_2d_link_with_an_untyped_table_is_rejected():
+    extra = IR.replace(b"##DATA TYPE=INFRARED SPECTRUM\n", b"")
+    linked = LINK.replace(NMR, NMR_2D + extra)
+    with pytest.raises(SpectroChemPyError, match="tables outside its spectrum"):
+        scp.read_jcamp({"linked.jdx": linked})
+
+
 def test_mixed_link_is_rejected():
     mixed = LINK.replace(b"##BLOCKS=1", b"##BLOCKS=2")[:-7] + IR + b"##END=\n"
     with pytest.raises(SpectroChemPyError, match="conflicting data types"):
@@ -117,5 +176,7 @@ def test_explicit_kind_cannot_override_a_conflicting_declaration():
 
 def test_nmr_fid_cannot_fall_back_to_ir():
     fid = NMR.replace(b"NMR SPECTRUM", b"NMR FID")
-    with pytest.raises(SpectroChemPyError, match="processed 1D NMR spectra only"):
+    with pytest.raises(
+        SpectroChemPyError, match="processed 1D and real 2D NMR spectra only"
+    ):
         scp.read_jcamp({"fid.jdx": fid}, jcamp_kind="ir")
