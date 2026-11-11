@@ -163,6 +163,29 @@ def read_jcamp(*paths, **kwargs):
 # ======================================================================================
 # private functions
 # ======================================================================================
+def _routing_headers(stream):
+    data_type = None
+    for line in stream:
+        line = line.strip()
+        if not line.startswith("##"):
+            if data_type is not None:
+                data_type.append(line.partition("$$")[0])
+            continue
+        if data_type is not None:
+            yield "##DATATYPE", "".join("".join(data_type).upper().split())
+            data_type = None
+        key, equal, value = line.partition("=")
+        if not equal:
+            continue
+        key = re.sub(r"[\s\-_/]", "", key.upper())
+        if key == "##DATATYPE":
+            data_type = [value.partition("$$")[0]]
+        elif key in {"##XYDATA", "##XYPOINTS", "##PEAKTABLE", "##DATATABLE"}:
+            yield key, ""
+    if data_type is not None:
+        yield "##DATATYPE", "".join("".join(data_type).upper().split())
+
+
 def _declared_kind(stream, requested):
     if requested not in ("auto", "ir", "nmr"):
         raise SpectroChemPyError("jcamp_kind must be 'auto', 'ir' or 'nmr'")
@@ -170,16 +193,10 @@ def _declared_kind(stream, requested):
     spectrum_types = set()
     linked = False
     tables = 0
-    for line in stream:
-        if not line.lstrip().startswith("##"):
-            continue
-        key, equal, value = line.partition("=")
-        key = re.sub(r"[\s\-_/]", "", key.upper())
-        if linked and key in {"##XYDATA", "##XYPOINTS", "##PEAKTABLE", "##DATATABLE"}:
+    for key, declared in _routing_headers(stream):
+        if key != "##DATATYPE":
             tables += 1
-        if not equal or key != "##DATATYPE":
             continue
-        declared = "".join(value.partition("$$")[0].upper().split())
         if declared == "LINK":
             linked = True
             continue

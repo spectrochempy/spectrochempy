@@ -39,6 +39,10 @@ IR = b"""##TITLE=IR specimen
         LINK.replace(b"\n", b"\r"),
         b"$$ comment \xe9\n" + LINK,
         LINK.replace(b"DATA TYPE=NMR", b"DATA-TYPE=NMR"),
+        LINK.replace(b"DATA TYPE=LINK", b"DATA TYPE=\nLINK").replace(
+            b"DATA TYPE=NMR", b"DATA TYPE=\nNMR"
+        ),
+        LINK.replace(b"##XYDATA=", b"##XYDATA\n##XYDATA="),
     ],
 )
 @pytest.mark.parametrize("as_content", [False, True])
