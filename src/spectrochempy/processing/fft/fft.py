@@ -14,7 +14,6 @@ from scipy.signal import hilbert
 
 from spectrochempy.application.application import error_
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.core.units import Quantity
 from spectrochempy.core.units import ur
 from spectrochempy.processing.fft.zero_filling import zf_size
 from spectrochempy.utils.decorators import _units_agnostic_method
@@ -107,8 +106,7 @@ def ifft(dataset, size=None, **kwargs):
     """
     Apply a inverse fast fourier transform.
 
-    For multidimensional NDDataset,
-    the apodization is by default performed on the last dimension.
+    For a multidimensional dataset, transform the last dimension by default.
 
     The data in the last dimension MUST be in frequency (or without dimension)
     or an error is raised.
@@ -150,10 +148,12 @@ def ifft(dataset, size=None, **kwargs):
 
 def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
     """
-    Apply a complex fast fourier transform.
+    Apply a complex fast Fourier transform.
 
-    For multidimensional NDDataset,
-    the apodization is by default performed on the last dimension.
+    Apply apodization before this operation and phase correction with
+    ``pk()`` afterwards when needed.
+
+    For a multidimensional dataset, transform the last dimension by default.
 
     The data in the last dimension MUST be in time-domain (or without dimension)
     or an error is raised.
@@ -462,34 +462,20 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
         s = "ifft" if inv else "fft"
         new.history = f"Applied {s.upper()} on dimension {dim}"
 
-        # PHASE ?
-        iscomplex = new.is_complex or new.is_interleaved
-        if iscomplex and not inv:
-            # phase frequency domain
-
-            # if some phase related metadata do not exist yet, initialize them
+        if (new.is_complex or new.is_interleaved) and not inv:
+            # Start explicit phasing from zero on the transformed axis.
             new.meta.readonly = False
-
-            if not new.meta.phased:
-                new.meta.phased = [False] * new.ndim
-
-            if not new.meta.phc0:
-                new.meta.phc0 = [0] * new.ndim
-
-            if not new.meta.phc1:
-                new.meta.phc1 = [0] * new.ndim
-
-            if not new.meta.exptc:
-                new.meta.exptc = [0] * new.ndim
-
-            if not new.meta.pivot:
-                new.meta.pivot = [0] * new.ndim
-
-            new.pk(inplace=True)
-            new.meta.pivot[-1] = abs(new).coordmax(dim=dim)
-            physical_pivots = list(new.meta.get("physical_pivots", [False] * new.ndim))
-            physical_pivots[-1] = isinstance(new.meta.pivot[-1], Quantity)
-            new.meta.physical_pivots = physical_pivots
+            for name, value in (
+                ("phased", True),
+                ("phc0", 0 * ur.degree),
+                ("phc1", 0 * ur.degree),
+                ("exptc", 0),
+                ("pivot", 0),
+                ("physical_pivots", False),
+            ):
+                values = list(new.meta.get(name) or [0] * new.ndim)
+                values[-1] = value
+                new.meta[name] = values
 
             new.meta.readonly = True
 
