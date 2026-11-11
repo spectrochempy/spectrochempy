@@ -908,6 +908,8 @@ Find peaks
     find_peaks
     PeakFindingResult
     PeakTable
+    characterize_peaks_2d
+    PeakCharacterizationResult
 
 Segmentation
 ------------

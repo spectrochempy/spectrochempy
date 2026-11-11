@@ -551,6 +551,7 @@ class PeakFindingResult:
         "sample_height",
         "analysis_dims",
         "parameters",
+        "_native_sample_heights",
     )
 
     def __init__(
@@ -571,6 +572,7 @@ class PeakFindingResult:
         self.sample_height = _copy_values(sample_height)
         self.analysis_dims = None if analysis_dims is None else tuple(analysis_dims)
         self.parameters = deepcopy(parameters or {})
+        self._native_sample_heights = None
 
     def __len__(self):
         return 0 if self.peaks is None else len(self.peaks)
@@ -1214,7 +1216,7 @@ def _find_peaks_2d(
             tuple(row[f"{dim}_position"] for dim in dim_names) for row in rows
         ]
         peak_heights = [row["height"] for row in rows]
-        return PeakFindingResult(
+        result = PeakFindingResult(
             table,
             properties,
             sample_index=peak_indices,
@@ -1223,6 +1225,11 @@ def _find_peaks_2d(
             analysis_dims=dim_names,
             parameters=parameters,
         )
+        native_data = np.asarray(dataset.data).transpose(axes)
+        result._native_sample_heights = {
+            indices: _as_scalar(native_data[indices]) for indices, _ in candidates
+        }
+        return result
     return table, properties
 
 

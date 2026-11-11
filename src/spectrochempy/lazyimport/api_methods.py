@@ -60,6 +60,8 @@ _LAZY_IMPORTS = {
     "ActionMassKinetics": "spectrochempy.analysis.kinetic.kineticutilities",
     "PFR": "spectrochempy.analysis.kinetic.kineticutilities",
     "find_peaks": "spectrochempy.analysis.peakfinding.peakfinding",
+    "characterize_peaks_2d": "spectrochempy.analysis.peakfinding.characterization",
+    "PeakCharacterizationResult": "spectrochempy.analysis.peakfinding.characterization",
     "segment_regions": "spectrochempy.analysis.segmentation",
     "simulate_peaks": "spectrochempy.analysis.curvefitting.simulation",
     "PeakFindingResult": "spectrochempy.analysis.peakfinding.peakfinding",
