@@ -121,3 +121,22 @@ def test_radius_rejects_nonlinear_spectroscopy_conversion(spectrum):
     peaks = detect(spectrum)
     with pytest.raises(ValueError, match="same dimensionality"):
         characterize(spectrum, peaks, x=100 * scp.ur("cm^-1"))
+
+
+def test_radius_rejects_logarithmic_interval(spectrum):
+    spectrum.x = scp.Coord(spectrum.x.data, units="percent")
+    peaks = detect(spectrum)
+    with pytest.raises(ValueError, match="non-logarithmic"):
+        characterize(spectrum, peaks, x=scp.ur.Quantity(1, "dB"))
+
+
+def test_affine_axis_uses_interval_units(spectrum):
+    spectrum.x = scp.Coord(spectrum.x.data, units="degC")
+    peaks = spectrum.find_peaks(
+        dims=("y", "x"), height=5, as_result=True, use_coord=False
+    )
+    result = characterize(spectrum, peaks, x=scp.ur.Quantity(6, "delta_degF"))
+    assert result.groups[0]["peak_indices"] == (0, 1)
+    assert result.rows[2]["widths"]["x"].to("delta_degC").magnitude == pytest.approx(
+        20 / 3
+    )

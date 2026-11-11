@@ -43,6 +43,12 @@ def _fraction(value):
     return Fraction(*value.as_integer_ratio())
 
 
+def _logarithmic_unit(unit):
+    return any(
+        unit._REGISTRY._units[name].converter.is_logarithmic for name in unit._units
+    )
+
+
 def _radii(radii, coordinates):
     if not isinstance(radii, Mapping) or set(radii) != set(coordinates):
         raise ValueError("radii must contain exactly the two dimension names")
@@ -55,6 +61,12 @@ def _radii(radii, coordinates):
             unit is None or supplied.dimensionality != unit.dimensionality
         ):
             raise ValueError(f"{name} must have the same dimensionality as the axis")
+        supplied_unit = supplied.units if isinstance(supplied, PintQuantity) else unit
+        if any(
+            candidate is not None and _logarithmic_unit(candidate)
+            for candidate in (unit, supplied_unit)
+        ):
+            raise ValueError(f"{name} requires non-logarithmic units")
         value = _parameter_value(supplied, unit, name, interval=True)
         if value <= 0:
             raise ValueError(f"{name} must be strictly positive")
@@ -62,9 +74,8 @@ def _radii(radii, coordinates):
         requested = (
             supplied.magnitude if isinstance(supplied, PintQuantity) else supplied
         )
-        requested_unit = supplied.units if isinstance(supplied, PintQuantity) else unit
         records[dim] = {
-            "requested": _threshold_record(requested, requested_unit),
+            "requested": _threshold_record(requested, supplied_unit),
             "effective": _threshold_record(
                 value, _interval_unit(unit) if unit is not None else None
             ),
@@ -219,7 +230,7 @@ def characterize_peaks_2d(dataset, peaks, *, threshold, radii, connectivity="fac
     radii : mapping
         Positive distances by dimension name. Numbers use each axis unit.
         Pint quantities must have the same dimensionality as the axis and
-        are converted as intervals.
+        are converted as intervals. Logarithmic units are unsupported.
     connectivity : {"face", "full"}, optional
         Connectivity for the thresholded regions.
 
