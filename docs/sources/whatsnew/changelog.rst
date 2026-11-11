@@ -19,6 +19,9 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- Route supported processed 1D NMR JCAMP-DX files through the optional NMR
+  plugin when using ``read_jcamp()`` or ``jcamp.read()``.
+
 
 .. section
 
