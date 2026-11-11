@@ -51,6 +51,10 @@ def _radii(radii, coordinates):
     for dim, (_, unit) in coordinates.items():
         supplied = radii[dim]
         name = f"radius for {dim!r}"
+        if isinstance(supplied, PintQuantity) and (
+            unit is None or supplied.dimensionality != unit.dimensionality
+        ):
+            raise ValueError(f"{name} must have the same dimensionality as the axis")
         value = _parameter_value(supplied, unit, name, interval=True)
         if value <= 0:
             raise ValueError(f"{name} must be strictly positive")
@@ -79,6 +83,7 @@ def _validate_peaks(dataset, peaks, coordinates, data, invalid):
     ):
         raise ValueError("peaks must be a 2D PeakFindingResult for these dimensions")
 
+    source_heights = getattr(peaks, "_native_sample_heights", None)
     result = {}
     cells = set()
     for row in peaks.table.to_dict():
@@ -102,6 +107,17 @@ def _validate_peaks(dataset, peaks, coordinates, data, invalid):
         height = _parameter_value(row.get("height"), dataset.units, "peak height")
         if height <= 0 or height != float(data[cell]):
             raise ValueError(f"Peak {index} height does not match the spectrum")
+        if source_heights is not None:
+            detected_cell = tuple(
+                cell[dataset.dims.index(dim)] for dim in peaks.analysis_dims
+            )
+            source_height = source_heights.get(detected_cell)
+            if source_height is None or _fraction(source_height) != _fraction(
+                data[cell]
+            ):
+                raise ValueError(
+                    f"Peak {index} native height does not match the spectrum"
+                )
         if peaks.parameters["use_coord"]:
             for dim, i in zip(dataset.dims, cell, strict=True):
                 grid, unit = coordinates[dim]
@@ -202,7 +218,8 @@ def characterize_peaks_2d(dataset, peaks, *, threshold, radii, connectivity="fac
         Segmentation threshold, strictly below every supplied peak.
     radii : mapping
         Positive distances by dimension name. Numbers use each axis unit.
-        Compatible Pint quantities are converted as intervals.
+        Pint quantities must have the same dimensionality as the axis and
+        are converted as intervals.
     connectivity : {"face", "full"}, optional
         Connectivity for the thresholded regions.
 
@@ -218,7 +235,8 @@ def characterize_peaks_2d(dataset, peaks, *, threshold, radii, connectivity="fac
     are the connected components of those links. For regions containing one
     supplied peak, widths use the first half-height crossing on each side
     of the sampled maximum, with a zero baseline. Shared regions and
-    truncated or ambiguous cuts report an unavailable width.
+    truncated or ambiguous cuts report an unavailable width. Widths outside
+    the representable float64 range have status ``numeric_range``.
 
     Examples
     --------

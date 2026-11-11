@@ -99,3 +99,25 @@ def test_threshold_and_radius_errors(spectrum):
         spectrum.characterize_peaks_2d(peaks, threshold=8, radii={"y": 1, "x": 3})
     with pytest.raises(ValueError, match="strictly positive"):
         characterize(spectrum, peaks, x=0)
+
+
+def test_native_height_change_below_float64_precision():
+    data = np.zeros((3, 3), dtype=np.int64)
+    data[1, 1] = 2**53 + 1
+    spectrum = scp.NDDataset(
+        data, dtype=data.dtype, coordset=[scp.Coord([0, 1, 2]), scp.Coord([0, 1, 2])]
+    )
+    peaks = detect(spectrum, dims=("x", "y"))
+    kwargs = {"threshold": 4, "radii": {"x": 1, "y": 1}}
+    result = spectrum.characterize_peaks_2d(peaks, **kwargs)
+    assert result.rows[0]["sample_height"] == 2**53 + 1
+    spectrum.data[1, 1] = 2**53
+    with pytest.raises(ValueError, match="native height does not match"):
+        spectrum.characterize_peaks_2d(peaks, **kwargs)
+
+
+def test_radius_rejects_nonlinear_spectroscopy_conversion(spectrum):
+    spectrum.x.units = "nm"
+    peaks = detect(spectrum)
+    with pytest.raises(ValueError, match="same dimensionality"):
+        characterize(spectrum, peaks, x=100 * scp.ur("cm^-1"))
