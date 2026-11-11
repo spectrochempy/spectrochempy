@@ -82,9 +82,8 @@ Versions and compatibility
 ==========================
 
 Official plugins are versioned independently from the SpectroChemPy core
-package. A core release and a plugin release therefore do not need to share the
-same version number. For example, a stable ``spectrochempy 0.9.2`` environment
-may use ``spectrochempy-nmr 0.1.3``.
+package. See the :doc:`NMR installation guide <nmr>` for the supported
+core and plugin combinations for NMR.
 
 Stable plugin packages are published on PyPI and on the main ``spectrocat``
 conda channel. Conda development builds are not published; users who need
@@ -102,9 +101,7 @@ plugin namespaces are available:
 
     scp.plugins()
 
-Use ``scp.plugins(verbose=True)`` to include lightweight package metadata such
-as versions. This inspection command reads entry-point and package metadata; it
-does not import optional plugin implementation modules.
+Use ``scp.plugins(verbose=True)`` to include installed versions.
 
 API convention
 ==============
@@ -147,9 +144,5 @@ provide the user-facing details:
 Examples and gallery convention
 ===============================
 
-Examples remain organized by scientific topic in the central SpectroChemPy
-gallery. Plugin-dependent examples live with the plugin source and are staged
-into the central gallery from the plugin ``examples/gallery.toml`` manifest.
-They should be clearly marked with their required plugin, but they do not need
-a separate plugin-only gallery. See :doc:`examples` for the user-facing example
-convention.
+See :doc:`examples` for examples in the core gallery and links to the NMR
+gallery.

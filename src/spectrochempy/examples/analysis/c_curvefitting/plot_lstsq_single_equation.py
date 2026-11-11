@@ -39,15 +39,20 @@ v, d0, rsquare
 
 # %%
 # Plot the result:
-import matplotlib.pyplot as plt
-
-_ = plt.plot(time, distance, "o", label="Original data", markersize=5)
+time_coord = scp.Coord(time, title="time", units="hour")
+observations = scp.NDDataset(
+    distance, coordset=[time_coord], title="distance", units="kilometer"
+)
 distance_fitted = lstsq.predict()
-_ = plt.plot(time, distance_fitted, ":r", label="Linear regression output")
-plt.xlabel("time / h")
-plt.ylabel("distance / km")
-plt.title(f"Linear regression, $R^2={rsquare:.3f}$")
-_ = plt.legend()
+fitted = scp.NDDataset(
+    distance_fitted, coordset=[time_coord], title="distance", units="kilometer"
+)
+_ = observations.plot_scatter(
+    label="Original data", markersize=5, title=f"Linear regression, $R^2={rsquare:.3f}$"
+)
+_ = fitted.plot_pen(
+    clear=False, color="red", ls=":", label="Linear regression output", legend=True
+)
 
 # %%
 # Using NDDatasets as input (X and Y)

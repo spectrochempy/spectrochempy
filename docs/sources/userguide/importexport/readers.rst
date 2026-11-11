@@ -101,5 +101,5 @@ installation and compatibility.
      - :doc:`Carroucell </userguide/plugins/carroucell>`
 
 See the plugin's `guide to reading NMR data
-<https://spectrochempy-nmr.readthedocs.io/latest/userguide/reading_data.html>`_
+<https://www.spectrochempy.fr/projects/nmr/latest/userguide/reading_data.html>`_
 for format-specific options and examples.

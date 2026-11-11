@@ -139,3 +139,13 @@ depending on private ``spectrochempy.plugins`` internals.
 
 See also :ref:`plugin-architecture`, :ref:`plugin-accessors`,
 :ref:`plugin-numeric-backends`, and :ref:`plugin-unit-contexts`.
+
+
+Gallery contributions
+=====================
+
+Keep examples alongside the plugin implementation. Declare examples that
+should be staged in the core gallery in the plugin's
+``examples/gallery.toml`` manifest. State the plugin requirement near the
+start of the example and use its public namespace, such as ``scp.iris``.
+Use the public SpectroChemPy API for dataset operations and plotting.

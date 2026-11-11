@@ -6,7 +6,7 @@ NMR plugin
 .. _introduction:
 
 The independently released ``spectrochempy-nmr`` plugin reads vendor
-and exchange formats and processes 1D and qualified 2D acquisitions.
+and exchange formats and processes 1D and supported 2D acquisitions.
 SpectroChemPy provides the dataset, units, plotting and generic processing API.
 
 .. _installation:
@@ -15,12 +15,11 @@ Install or upgrade the plugin explicitly:
 
 .. code-block:: bash
 
-    python -m pip install --upgrade "spectrochempy-nmr>=0.3,<0.4"
+    python -m pip install "spectrochempy[nmr]>=1.2.1"
 
-This command also works with SpectroChemPy 1.2.0, whose ``nmr`` extra
-selects plugin versions below 0.3. The plugin's
+The plugin's
 `installation and compatibility guide
-<https://spectrochempy-nmr.readthedocs.io/latest/getting_started/installation.html>`_
+<https://www.spectrochempy.fr/projects/nmr/latest/getting_started/installation.html>`_
 gives the requirements for each workflow.
 
 .. _recommended-api:
@@ -35,36 +34,36 @@ Read data through the namespaced API:
 
     dataset = scp.nmr.read("path/to/fid")
 
-``scp.read_topspin()`` remains available for explicit Bruker reads.
 Use the standalone plugin documentation for the
-`reader guide <https://spectrochempy-nmr.readthedocs.io/latest/userguide/reading_data.html>`_,
-`1D processing <https://spectrochempy-nmr.readthedocs.io/latest/userguide/processing_1d.html>`_,
+`reader guide <https://www.spectrochempy.fr/projects/nmr/latest/userguide/reading_data.html>`_,
+`1D processing <https://www.spectrochempy.fr/projects/nmr/latest/userguide/processing_1d.html>`_,
 and `2D processing and TopSpin replay
-<https://spectrochempy-nmr.readthedocs.io/latest/userguide/processing_2d.html>`_.
+<https://www.spectrochempy.fr/projects/nmr/latest/userguide/processing_2d.html>`_.
 
 .. _topspin-processing-profile:
 .. _spectrochempy-processing-trace:
 
 Recorded TopSpin recipes are applied when explicitly requested with
 ``Experiment.process(replay="topspin")`` on supported data.
-The processing guides explain how to inspect the recorded recipe and the
-processing trace on the result.
+See the plugin's
+`TopSpin processing guide <https://www.spectrochempy.fr/projects/nmr/latest/userguide/processing_2d.html>`_
+for supported workflows.
 
 .. _api-reference:
 
 See the standalone
 `NMR API reference
-<https://spectrochempy-nmr.readthedocs.io/latest/reference/nmr_api.html>`_.
+<https://www.spectrochempy.fr/projects/nmr/latest/reference/nmr_api.html>`_.
 
 
 .. _examples:
 
 The plugin's `example gallery
-<https://spectrochempy-nmr.readthedocs.io/latest/examples_overview.html>`_
+<https://www.spectrochempy.fr/projects/nmr/latest/examples_overview.html>`_
 shows how to read, process, and analyze NMR data.
 
 .. _limitations:
 
 See `compatibility and scope
-<https://spectrochempy-nmr.readthedocs.io/latest/compatibility.html>`_
+<https://www.spectrochempy.fr/projects/nmr/latest/compatibility.html>`_
 for supported workflows and their limits.

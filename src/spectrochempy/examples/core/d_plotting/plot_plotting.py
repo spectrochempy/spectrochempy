@@ -16,7 +16,6 @@ This short gallery example shows four common ideas:
 - saving any of them to a file with ``output``.
 """
 
-import numpy as np
 import spectrochempy as scp
 
 # %%
@@ -44,7 +43,7 @@ ax = dataset[0].plot()
 # -------------------------------
 dataset = dataset[:, ::100]
 
-sample_indices = np.linspace(0, dataset.shape[0] - 1, 5, dtype=int)
+sample_indices = [index * (dataset.shape[0] - 1) // 4 for index in range(5)]
 datasets = [dataset[index] for index in sample_indices]
 labels = [f"sample {index}" for index in sample_indices]
 

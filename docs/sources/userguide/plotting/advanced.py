@@ -50,19 +50,12 @@ _ = ax.annotate(
 # Create separate plots with different settings:
 
 # %%
-import matplotlib.pyplot as plt
-
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 3))
-
-# Plot 1: full spectrum
-_ = ds.plot(ax=ax1)
-_ = ax1.set_title("Full Spectrum")
-
-# Plot 2: subset
-_ = ds[:, 1800.0:1500.0].plot(ax=ax2)
-_ = ax2.set_title("Water bending Region")
-
-plt.tight_layout()
+_ = scp.multiplot(
+    [ds, ds[:, 1800.0:1500.0]],
+    labels=["Full spectrum", "Water bending region"],
+    ncol=2,
+    figsize=(10, 3),
+)
 
 # %% [markdown]
 # ## External Spectra Above a Map
