@@ -19,6 +19,11 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- Route supported processed 1D NMR JCAMP-DX files through the optional NMR
+  plugin when using ``read_jcamp()`` or ``jcamp.read()``.
+- Read supported real 2D NMR JCAMP-DX NTUPLES spectra through the same API
+  with the NMR plugin and nmrglue-ng 1.3 or later.
+
 
 .. section
 

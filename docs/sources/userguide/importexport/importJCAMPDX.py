@@ -35,13 +35,17 @@
 #
 # [JCAMP-DX](https://artefacts.ceda.ac.uk/formats/jcamp_dx/) is an open format
 # used by several spectroscopies. Use `scp.read_jcamp()` or `scp.jcamp.read()`
-# to open infrared spectra and supported processed 1D NMR spectra. The reader
-# selects the workflow from the data type declared in the file. If that type
+# to open infrared spectra and supported processed NMR spectra in 1D and 2D.
+# The reader selects the workflow from the data type declared in the file. If that type
 # is ambiguous, use `jcamp_kind="ir"` or `jcamp_kind="nmr"`.
 #
 # The IR reader supports AFFN-encoded spectra on a regular grid, including
-# linked series on a shared grid. Reading processed 1D NMR spectra requires
+# linked series on a shared grid. Reading processed NMR spectra requires
 # the [SpectroChemPy NMR plugin](https://www.spectrochempy.fr/projects/nmr/latest/getting_started/installation.html).
+# For a supported real 2D spectrum stored in JCAMP-DX NTUPLES, install
+# nmrglue-ng 1.3 or later and call `scp.read_jcamp("cosy.jdx")`. The reader
+# returns a 2D dataset with the F1 and F2 axes from the file.
+#
 # The example below shows how to export and read back an infrared spectrum.
 #
 

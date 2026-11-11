@@ -21,7 +21,6 @@ in the `discussions <https://github.com/spectrochempy/spectrochempy/discussions>
 .. toctree::
    :maxdepth: 2
    :titlesonly:
-   :caption: Examples
 
    Datasets and plotting <gallery/auto_examples_core/index>
    Processing <gallery/auto_examples_processing/index>
