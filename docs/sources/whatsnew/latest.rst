@@ -32,3 +32,9 @@ Bug Fixes
   inverse transform can recover the time-domain signal.
 - Resolve physical phase pivots to sample indices before applying a
   first-order phase correction.
+
+Breaking Changes
+~~~~~~~~~~~~~~~~
+
+- ``fft()`` now leaves phase correction to an explicit
+  ``pk()`` call. Pass the desired phase angles and pivot to ``pk()``.
