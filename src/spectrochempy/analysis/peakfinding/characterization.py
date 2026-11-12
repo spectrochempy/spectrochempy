@@ -1,4 +1,4 @@
-"""Grouping and apparent widths of detected 2D peaks."""
+"""Characterization and apparent widths of sampled peaks."""
 
 from collections import Counter
 from collections import defaultdict
@@ -6,6 +6,7 @@ from collections.abc import Mapping
 from copy import deepcopy
 from dataclasses import dataclass
 from fractions import Fraction
+from numbers import Integral
 
 import numpy as np
 from pint import Quantity as PintQuantity
@@ -17,10 +18,12 @@ from spectrochempy.analysis.peakfinding.peakfinding import PeakTable
 from spectrochempy.analysis.peakfinding.peakfinding import _peakfinding_coordinates
 from spectrochempy.analysis.segmentation import _threshold_record
 from spectrochempy.analysis.segmentation import segment_regions
+from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.units import Quantity
 
-__all__ = ["PeakCharacterizationResult", "characterize_peaks_2d"]
-__dataset_methods__ = ["characterize_peaks_2d"]
+__dataset_methods__ = ["characterize_peaks_1d", "characterize_peaks_2d"]
+__all__ = ["PeakCharacterizationResult", *__dataset_methods__]
 
 
 @dataclass(frozen=True)
@@ -182,14 +185,14 @@ def _groups(cells, region_ids, coordinates, limits):
     )
 
 
-def _crossing(signal, invalid, grid, start, step, half):
+def _crossing(signal, invalid, grid, start, step, half, *, require_monotonic):
     previous = _fraction(signal[start])
     stop = len(grid) if step > 0 else -1
     for i in range(start + step, stop, step):
         if invalid[i]:
             return None, "invalid_sample"
         value = _fraction(signal[i])
-        if value > previous:
+        if require_monotonic and value > previous:
             return None, "rising_profile"
         if value <= half:
             near, far = _fraction(grid[i - step]), _fraction(grid[i])
@@ -198,11 +201,15 @@ def _crossing(signal, invalid, grid, start, step, half):
     return None, "boundary"
 
 
-def _width(signal, invalid, grid, start, half):
-    low, reason = _crossing(signal, invalid, grid, start, -1, half)
+def _width(signal, invalid, grid, start, half, *, require_monotonic=True):
+    low, reason = _crossing(
+        signal, invalid, grid, start, -1, half, require_monotonic=require_monotonic
+    )
     if reason:
         return None, reason
-    high, reason = _crossing(signal, invalid, grid, start, 1, half)
+    high, reason = _crossing(
+        signal, invalid, grid, start, 1, half, require_monotonic=require_monotonic
+    )
     if reason:
         return None, reason
     try:
@@ -212,6 +219,126 @@ def _width(signal, invalid, grid, start, half):
     if width == 0:
         return None, "numeric_range"
     return width, "available"
+
+
+def characterize_peaks_1d(dataset, indices, *, baseline=0.0, use_coord=True):
+    """
+    Measure sampled peak positions, heights and apparent FWHM in a spectrum.
+
+    Parameters
+    ----------
+    dataset : NDDataset
+        A nonempty, real 1D spectrum.
+    indices : int or sequence of int
+        Zero-based sample indices of the peaks to measure, in output order.
+        For isolated peaks in a known window, use `NDDataset.argmax` on
+        that window to select a sample.
+    baseline : float or Quantity, optional
+        Constant reference level, in the signal units. Defaults to zero.
+    use_coord : bool, optional
+        Use the active numeric coordinate for positions and widths. The
+        coordinate must be finite, unmasked and strictly monotone.
+        Logarithmic coordinate units are unsupported.
+        If false, use sample indices and report widths in points.
+
+    Returns
+    -------
+    PeakCharacterizationResult
+        Rows contain `sample_index`, `position`, `sample_height`, `fwhm`
+        and `width_status`. Positions and widths use coordinate units
+        when present, and sampled heights retain signal units. Groups are
+        empty for this measurement.
+
+    Notes
+    -----
+    Each width uses the closest crossing of the level halfway between the
+    sampled height and the baseline on each side. Crossings are linearly
+    interpolated in coordinate space. The width is apparent and can include
+    contributions from neighboring peaks. A masked or non-finite sample
+    interrupts the search. Missing crossings and peaks at or below the
+    baseline produce a missing width with a status explaining why.
+
+    """
+    if not isinstance(dataset, NDDataset) or dataset.ndim != 1 or not dataset.size:
+        raise ValueError("Peak characterization requires a nonempty 1D spectrum")
+    data = np.asarray(dataset.data)
+    if data.dtype.kind not in "iuf":
+        raise ValueError("1D peak characterization requires real numeric data")
+
+    grid, unit = np.arange(dataset.size), None
+    if use_coord:
+        coord = getattr(dataset, dataset.dims[0], None)
+        if isinstance(coord, CoordSet):
+            coord = coord.default
+        if coord is None or not coord.has_data:
+            raise ValueError("1D peak characterization requires a numeric coordinate")
+        grid, unit = np.asarray(coord._data), coord.units
+        if unit is not None and _logarithmic_unit(unit):
+            raise ValueError("Peak widths require non-logarithmic coordinate units")
+        if (
+            grid.dtype.kind not in "iuf"
+            or coord.is_masked
+            or not np.isfinite(grid).all()
+        ):
+            raise ValueError("Peak coordinates must be numeric, finite and unmasked")
+        if not (np.all(grid[1:] > grid[:-1]) or np.all(grid[1:] < grid[:-1])):
+            raise ValueError("Peak coordinates must be strictly monotone")
+
+    baseline = _parameter_value(baseline, dataset.units, "baseline")
+    invalid = np.asarray(dataset.mask) | ~np.isfinite(data)
+    if isinstance(indices, Integral):
+        indices = (indices,)
+    try:
+        indices = tuple(indices)
+    except TypeError as exc:
+        raise ValueError(
+            "indices must be a sample index or a sequence of indices"
+        ) from exc
+
+    rows = []
+    for index in indices:
+        if (
+            isinstance(index, bool)
+            or not isinstance(index, Integral)
+            or not 0 <= index < dataset.size
+        ):
+            raise ValueError("Peak sample indices must be integers within the spectrum")
+        if invalid[index]:
+            raise ValueError("Peak samples must be finite and unmasked")
+        height = data[index].item()
+        width, status = None, "nonpositive_height"
+        if height > baseline:
+            half = (_fraction(height) + _fraction(baseline)) / 2
+            width, status = _width(
+                data, invalid, grid, index, half, require_monotonic=False
+            )
+        position = grid[index].item()
+        rows.append(
+            {
+                "sample_index": int(index),
+                "position": Quantity(position, unit) if unit is not None else position,
+                "sample_height": Quantity(height, dataset.units)
+                if dataset.units is not None
+                else height,
+                "fwhm": Quantity(width, _interval_unit(unit))
+                if width is not None and unit is not None
+                else width,
+                "width_status": status,
+            }
+        )
+
+    history = dataset.copy(deep=False)
+    history._append_history_entry(
+        operation="characterize_peaks_1d",
+        parameters={
+            "dim": dataset.dims[0],
+            "indices": [row["sample_index"] for row in rows],
+            "baseline": _threshold_record(baseline, dataset.units),
+            "use_coord": use_coord,
+        },
+        message="Characterized 1D peaks",
+    )
+    return PeakCharacterizationResult(tuple(rows), (), tuple(history.history_entries))
 
 
 def characterize_peaks_2d(dataset, peaks, *, threshold, radii, connectivity="face"):

@@ -529,6 +529,7 @@ Statistical operations
 
     mean
     average
+    rms
     std
     sum
     var
@@ -908,6 +909,7 @@ Find peaks
     find_peaks
     PeakFindingResult
     PeakTable
+    characterize_peaks_1d
     characterize_peaks_2d
     PeakCharacterizationResult
 

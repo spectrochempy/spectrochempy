@@ -3,13 +3,16 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
+import warnings
 from numbers import Integral
 
 import numpy as np
+import scipy.ndimage
 import scipy.signal
 import traitlets as tr
 
 import spectrochempy.utils.traits as mtr
+from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.extern.whittaker_smooth import whittaker_smooth as ws
 from spectrochempy.processing._base._processingbase import ProcessingConfigurable
 from spectrochempy.utils.decorators import signature_has_configurable_traits
@@ -56,6 +59,10 @@ def _detect_uniform_spacing(dataset, dim, *, coordset=None):
     except AttributeError:
         return None, "no coordinate available"
 
+    return _uniform_spacing(coord)
+
+
+def _uniform_spacing(coord):
     if coord is None:
         return None, "coordinate is None"
 
@@ -94,6 +101,9 @@ def _detect_uniform_spacing(dataset, dim, *, coordset=None):
     return float(mean_diff), None
 
 
+_SPECTRAL_METHODS = {"butterworth", "notch", "gaussian"}
+
+
 _common_see_also = """
 See Also
 --------
@@ -116,7 +126,9 @@ class Filter(ProcessingConfigurable):
 
     The filters can be applied to 1D datasets consisting in a single row
     with :term:`n_features` or to a 2D dataset with shape (:term:`n_observations`,
-    :term:`n_features`).
+    :term:`n_features`). Butterworth, notch and Gaussian filters also support
+    higher-dimensional datasets. Physical settings use the active coordinate
+    on axes with multiple coordinates.
 
     Various filters/smoothers can be applied to the data. The currently available
     filters are:
@@ -125,24 +137,57 @@ class Filter(ProcessingConfigurable):
     - Convolution filters (`han`, `hamming`, `bartlett`, `blackman`)
     - Savitzky-Golay filter (`savgol`)
     - Whittaker-Eilers filter (`whittaker`)
+    - Zero-phase Butterworth low-pass filter (`butterworth`)
+    - Zero-phase narrow band-stop filter (`notch`)
+    - Gaussian convolution (`gaussian`)
 
     Parameters
     ----------
     log_level : any of [``"INFO"``, ``"DEBUG"``, ``"WARNING"``, ``"ERROR"``], optional, default: ``"WARNING"``
         The log level at startup. It can be changed later on using the
         `set_log_level` method or by changing the ``log_level`` attribute.
-    method : any of [``"avg"``, ``"han"``, ``"hamming"``, ``"bartlett"``, ``"blackman"``, ``"median"``, ``"savgol"``, ``"whittaker"``], optional, default: ``"savgol"``
+    method : any of [``"avg"``, ``"han"``, ``"hamming"``, ``"bartlett"``, ``"blackman"``, ``"median"``, ``"savgol"``, ``"whittaker"``, ``"butterworth"``, ``"notch"``, ``"gaussian"``], optional, default: ``"savgol"``
         The filter method to be applied. By default, the Savitzky-Golay (savgol) filter is applied.
     size : `int`, optional, default: 5
         The size of the filter window. size must be a positive odd integer.
     order : `int`, optional, default: 2
-        The order of the polynomial used to fit the data.
+        For Savitzky-Golay, the order of the polynomial used to fit the data.
+        For Butterworth, the positive filter order per pass.
     deriv : `int`, optional, default: 0
         The order of the derivative to compute.
     lamb : `float`, optional, default: 10.0
         The smoothing parameter for the Whittaker-Eilers filter.
     cval : `float`, optional, default: 0.0
         The value to fill past the edges of the input if `mode` is ``'constant'``.
+
+    cutoff : `float`, optional
+        Required for Butterworth. Frequency in cycles per unit of the selected
+        coordinate. The combined forward-backward response is −3 dB at cutoff.
+    period : `float`, optional
+        Required for the notch filter. Period of the fringe in units of the
+        selected coordinate.
+    quality_factor : `float`, optional, default: 30.0
+        Notch center frequency divided by the single-pass −3 dB bandwidth.
+        Must exceed 0.5 and give a bandwidth below the Nyquist frequency.
+    sigma : `float`, optional
+        Required for Gaussian convolution. Standard deviation of the Gaussian.
+    sigma_units : {"points", "coordinate"}, optional, default: "points"
+        Interpret Gaussian sigma in sample points or in units of the selected
+        coordinate. FWHM equals sqrt(8 log(2)) times sigma.
+
+    Notes
+    -----
+    These three filters require finite, unmasked data. Butterworth, notch and
+    coordinate-based Gaussian filtering require a uniformly spaced coordinate.
+    Descending coordinates are supported. Butterworth and notch use odd
+    extension with SciPy's default padding and require more than the padding
+    length in samples along the selected axis. The padding is three times
+    the Butterworth order plus three, or nine points for the notch.
+    IIR settings whose response cannot be resolved in floating point are rejected.
+    Gaussian convolution uses the configured `mode` and `cval`.
+    Inputs outside SciPy's supported floating-point dtypes are converted
+    to double precision. Overflow during conversion is rejected.
+    The default `interp` selects SciPy's `reflect` mode for this method.
 
     See Also
     --------
@@ -162,6 +207,9 @@ class Filter(ProcessingConfigurable):
             "median",
             "savgol",
             "whittaker",
+            "butterworth",
+            "notch",
+            "gaussian",
         ],
         default_value="savgol",
         help="The filter method to be applied. By default, "
@@ -179,8 +227,31 @@ class Filter(ProcessingConfigurable):
         "in the case of the Savitzky-Golay (savgol) filter. "
         "`order` must be less than size.\n"
         "In the case of the Whittaker-Eilers filter, order is the "
-        "difference order of the penalized least squares.",
+        "difference order of the penalized least squares. "
+        "For Butterworth it is the positive filter order per pass.",
     ).tag(config=True, min=0)
+
+    cutoff = tr.Float(
+        None, allow_none=True, help="Butterworth cutoff in cycles per coordinate unit."
+    ).tag(config=True)
+
+    period = tr.Float(
+        None, allow_none=True, help="Notch period in coordinate units."
+    ).tag(config=True)
+
+    quality_factor = tr.Float(
+        30.0, help="Notch center frequency divided by single-pass bandwidth."
+    ).tag(config=True)
+
+    sigma = tr.Float(None, allow_none=True, help="Gaussian standard deviation.").tag(
+        config=True
+    )
+
+    sigma_units = tr.Enum(
+        ["points", "coordinate"],
+        default_value="points",
+        help="Interpret Gaussian sigma in points or in coordinate units.",
+    ).tag(config=True)
 
     deriv = tr.Integer(
         default_value=0,
@@ -257,6 +328,173 @@ and ‘nearest’.
     # ----------------------------------------------------------------------------------
     # Private methods
     # ----------------------------------------------------------------------------------
+    def transform(self, dataset, dim=-1):
+        """
+        Apply the configured filter along a dimension of the dataset.
+
+        Parameters
+        ----------
+        dataset : `NDDataset`
+            The dataset to filter.
+        dim : int or str, optional, default: -1
+            A dimension name or an axis index.
+
+        Returns
+        -------
+        `NDDataset`
+            The filtered dataset.
+
+        """
+        if self.method not in _SPECTRAL_METHODS:
+            return super().transform(dataset, dim=dim)
+
+        self._transformed = False
+        if dataset.ndim == 0:
+            raise ValueError(f"{self.method} filtering requires a dimension")
+        if np.any(dataset.mask):
+            raise ValueError(f"{self.method} filtering requires unmasked data")
+        if not np.all(np.isfinite(dataset.data)):
+            raise ValueError(f"{self.method} filtering requires finite data")
+
+        axis, dimension = dataset.get_axis(dim, negative_axis=True)
+        data, parameters = self._spectral_transform(dataset, axis, dimension)
+        with np.errstate(over="ignore", under="ignore"):
+            result = dataset.copy(keepname=True)
+        result._dtype = data.dtype
+        result._data = data
+        result._append_history_entry(
+            operation=self.method,
+            parameters={"dimension": dimension, "axis": axis, **parameters},
+            message=f"Applied {self.method} filter on dimension {dimension}",
+        )
+        self._transformed = True
+        return result
+
+    def _spectral_transform(self, dataset, axis, dimension):
+        parameter = {"butterworth": "cutoff", "notch": "period", "gaussian": "sigma"}[
+            self.method
+        ]
+        value = getattr(self, parameter)
+        if value is None or not np.isfinite(value) or value <= 0:
+            raise ValueError(f"{parameter} must be finite and positive")
+
+        data = dataset.data
+        gaussian = self.method == "gaussian"
+        physical_units = not gaussian or self.sigma_units == "coordinate"
+        spacing = 1.0
+        parameters = {parameter: value}
+        if physical_units:
+            coord = getattr(dataset, dimension, None)
+            if isinstance(coord, CoordSet):
+                coord = coord.default
+            delta, message = _uniform_spacing(coord)
+            if delta is None or not np.isfinite(delta) or delta == 0:
+                raise ValueError(
+                    f"{self.method} filtering requires a uniformly spaced coordinate"
+                    f" ({message or 'invalid spacing'})"
+                )
+            spacing = abs(delta)
+            parameters.update(
+                spacing=spacing,
+                coordinate_units=str(coord.units) if coord.units is not None else None,
+            )
+
+        if gaussian:
+            sigma_points = value / spacing
+            if not np.isfinite(sigma_points) or sigma_points <= 0:
+                raise ValueError("Gaussian sigma in points must be finite and positive")
+            mode = "reflect" if self.mode == "interp" else self.mode
+            parameters.update(
+                sigma_units=self.sigma_units, sigma_points=sigma_points, mode=mode
+            )
+            if mode == "constant":
+                if not np.isfinite(self.cval):
+                    raise ValueError("Gaussian cval must be finite in constant mode")
+                parameters["cval"] = self.cval
+
+            truncate = 4.0
+            if sigma_points < 0.5 / truncate:
+                return data.copy(), parameters
+            if data.dtype.type not in (
+                np.float32,
+                np.float64,
+                np.complex64,
+                np.complex128,
+            ):
+                dtype = np.complex128 if np.iscomplexobj(data) else np.float64
+                with np.errstate(over="ignore", under="ignore"):
+                    data = data.astype(dtype)
+                if not np.isfinite(data).all():
+                    raise ValueError(
+                        "Gaussian input exceeds the double-precision range"
+                    )
+            return (
+                scipy.ndimage.gaussian_filter1d(
+                    data,
+                    sigma_points,
+                    axis=axis,
+                    mode=mode,
+                    cval=self.cval,
+                    truncate=truncate,
+                ),
+                parameters,
+            )
+
+        nyquist_fraction = (
+            2.0 * spacing * value
+            if self.method == "butterworth"
+            else 2.0 * spacing / value
+        )
+        if not 0 < nyquist_fraction < 1:
+            raise ValueError(f"{parameter} must give a frequency below Nyquist")
+
+        if self.method == "butterworth":
+            if self.order < 1:
+                raise ValueError("Butterworth order must be positive")
+            padlen = 3 * (self.order + 1)
+            factor = (np.sqrt(2.0) - 1.0) ** (-0.5 / self.order)
+            critical = (2.0 / np.pi) * np.arctan(
+                factor * np.tan(np.pi * nyquist_fraction / 2.0)
+            )
+            parameters.update(order=self.order, critical_nyquist_fraction=critical)
+        else:
+            if not np.isfinite(self.quality_factor) or self.quality_factor <= 0.5:
+                raise ValueError("quality_factor must be finite and greater than 0.5")
+            if nyquist_fraction / self.quality_factor >= 1:
+                raise ValueError("quality_factor must give a bandwidth below Nyquist")
+            padlen = 9
+            parameters["quality_factor"] = self.quality_factor
+
+        if data.shape[axis] <= padlen:
+            raise ValueError(
+                f"{self.method} filtering requires at least {padlen + 1} "
+                f"samples along dimension {dimension!r}"
+            )
+        if self.method == "butterworth":
+            sos = scipy.signal.butter(self.order, critical, output="sos")
+            target_gain = 2.0**-0.25
+        else:
+            numerator, denominator = scipy.signal.iirnotch(
+                nyquist_fraction, self.quality_factor
+            )
+            sos = np.array([np.concatenate((numerator, denominator))])
+            target_gain = 0.0
+
+        with np.errstate(divide="ignore", invalid="ignore"):
+            _, response = scipy.signal.sosfreqz(
+                sos, worN=[0.0, np.pi * nyquist_fraction]
+            )
+        if not np.allclose(np.abs(response), [1.0, target_gain], rtol=1e-4, atol=1e-4):
+            raise ValueError(
+                f"{self.method} settings are outside the numerically reliable range"
+            )
+
+        parameters.update(padtype="odd", padlen=padlen)
+        return (
+            scipy.signal.sosfiltfilt(sos, data, axis=axis, padlen=padlen),
+            parameters,
+        )
+
     def _transform(self, X):
         self._history_delta = None
         kwargs = {  # param for avg and convolution filters
@@ -325,9 +563,7 @@ and ‘nearest’.
                     else:
                         delta_used = 1.0
                         delta_source = "fallback"
-                        import warnings as _warnings
-
-                        _warnings.warn(
+                        warnings.warn(
                             f"Savitzky-Golay derivative requested but {msg}. "
                             "Falling back to index-based delta=1.0. "
                             "To obtain physically scaled derivatives, provide "

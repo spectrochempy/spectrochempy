@@ -126,7 +126,7 @@ regression_pipeline = scp.Pipeline(
 regression_pipeline.fit(X_cal, y_cal)
 y_pred = regression_pipeline.predict(X_test)
 residuals = y_test - y_pred
-rmse = float(((residuals**2).mean() ** 0.5).magnitude)
+rmse = float(residuals.rms().magnitude)
 
 summary = scp.concatenate(y_test, y_pred, residuals, axis=1)
 summary.x = scp.Coord.arange(
