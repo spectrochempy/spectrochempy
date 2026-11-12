@@ -39,7 +39,7 @@
 # The reader selects the workflow from the data type declared in the file. If that type
 # is ambiguous, use `jcamp_kind="ir"` or `jcamp_kind="nmr"`.
 #
-# The IR reader supports AFFN-encoded spectra on a regular grid, including
+# The IR reader supports AFFN and DIFDUP spectra on a regular grid, including
 # linked series on a shared grid. Reading processed NMR spectra requires
 # the [SpectroChemPy NMR plugin](https://www.spectrochempy.fr/projects/nmr/latest/getting_started/installation.html).
 # For a supported real 2D spectrum stored in JCAMP-DX NTUPLES, install

@@ -8,6 +8,7 @@
 from datetime import datetime
 
 import numpy as np
+import pytest
 
 from spectrochempy import read_jcamp, read, Coord, NDDataset
 from spectrochempy.utils.datetimeutils import UTC
@@ -230,3 +231,80 @@ def test_write_jcamp_masked_values(tmp_path):
     arr = np.asarray(back.data, dtype=float).ravel()
     assert np.isnan(arr[10:20]).all()
     assert np.isfinite(np.concatenate([arr[:10], arr[20:]])).all()
+
+
+_DIFDUP_IR = b"""##TITLE=Compressed IR
+##DATA TYPE=INFRARED SPECTRUM
+##XUNITS=1/CM
+##YUNITS=TRANSMITTANCE
+##FIRSTX=20
+##LASTX=28
+##XFACTOR=2
+##YFACTOR=0.01 $$ Scale the stored integers
+##NPOINTS=5
+##XYDATA=(X++(Y..Y))
+10A0KT $$ Duplicate the +2 difference
+12A4%j
+14A3 $$ Final checkpoint
+##END=
+"""
+
+
+@pytest.mark.parametrize("compressed", [False, True])
+def test_jcamp_ir_scaled_anchors_and_comments(compressed):
+    payload = _DIFDUP_IR
+    if not compressed:
+        payload = payload.split(b"10A0KT", 1)[0] + b"10 10 12 14 14 13\n##END=\n"
+    ds = read_jcamp({"scaled.jdx": payload})
+    np.testing.assert_allclose(ds.data, [[0.10, 0.12, 0.14, 0.14, 0.13]])
+    np.testing.assert_array_equal(ds.x.data, [20, 22, 24, 26, 28])
+
+
+@pytest.mark.parametrize(
+    ("original", "replacement", "message"),
+    [
+        (b"12A4%j", b"12A5%j", "ordinate checkpoint"),
+        (b"12A4%j", b"15A4%j", "abscissa"),
+        (b"10A0KT", b"10A0KT999999", "exceeds NPOINTS"),
+        (b"14A3 $$ Final checkpoint\n", b"", "final DIF checkpoint"),
+    ],
+)
+def test_jcamp_ir_rejects_invalid_difdup(original, replacement, message):
+    payload = _DIFDUP_IR.replace(original, replacement)
+    with pytest.warns(UserWarning, match=message):
+        assert read_jcamp({"invalid.jdx": payload}) is None
+
+
+@pytest.mark.parametrize("anchor", [0, 1, 10])
+def test_jcamp_ir_sqz_ordinate_that_looks_like_an_exponent(anchor):
+    payload = (
+        _DIFDUP_IR.split(b"10A0KT", 1)[0]
+        .replace(b"##FIRSTX=20", f"##FIRSTX={2 * anchor}".encode())
+        .replace(b"##LASTX=28", f"##LASTX={2 * anchor + 2}".encode())
+        .replace(b"##NPOINTS=5", b"##NPOINTS=2")
+        + f"{anchor}E1?\n##END=\n".encode()
+    )
+    ds = read_jcamp({"exponent.jdx": payload})
+    assert ds.data[0, 0] == pytest.approx(0.51)
+    assert np.isnan(ds.data[0, 1])
+
+
+@pytest.mark.parametrize(
+    ("table", "message"),
+    [
+        (b"", "Missing JCAMP-DX XYDATA"),
+        (b"##XYDATA=(X++(Y..Y))\n10 10\n", "does not match NPOINTS"),
+    ],
+)
+def test_jcamp_ir_checks_count_before_allocating_the_axis(monkeypatch, table, message):
+    original = np.linspace
+
+    def linspace(start, stop, num=50, *args, **kwargs):
+        assert num != 1_000_000_000
+        return original(start, stop, num, *args, **kwargs)
+
+    monkeypatch.setattr(np, "linspace", linspace)
+    payload = _DIFDUP_IR.replace(b"##NPOINTS=5", b"##NPOINTS=1000000000")
+    payload = payload.split(b"##XYDATA=", 1)[0] + table + b"##END=\n"
+    with pytest.warns(UserWarning, match=message):
+        assert read_jcamp({"truncated.jdx": payload}) is None

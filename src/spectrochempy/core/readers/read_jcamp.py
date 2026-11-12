@@ -10,6 +10,7 @@ __all__ = ["read_jcamp"]
 import io
 import re
 from datetime import datetime
+from decimal import Decimal
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -41,7 +42,8 @@ def read_jcamp(*paths, **kwargs):
     :func:`spectrochempy.read` for the complete description of the generic
     import convention and multi-object return behavior.
 
-    The infrared reader supports AFFN encoding (see :cite:t:`mcdonald:1988`).
+    The infrared reader supports AFFN and DIFDUP encoding
+    (see :cite:t:`mcdonald:1988`).
     Processed NMR spectra use the optional NMR plugin's interop reader.
 
     Parameters
@@ -291,6 +293,121 @@ def _read_jdx(dataset, filename, **kwargs):
         )
 
 
+# JCAMP-DX IR 4.24, section 5 and table VII.
+_SQZ = dict(
+    zip("@ABCDEFGHIabcdefghi", (0, *range(1, 10), *range(-1, -10, -1)), strict=True)
+)
+_DIF = dict(
+    zip("%JKLMNOPQRjklmnopqr", (0, *range(1, 10), *range(-1, -10, -1)), strict=True)
+)
+_DUP = dict(zip("STUVWXYZs", range(1, 10), strict=True))
+_DECIMAL_NUMBER = r"[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)"
+_AFFN_NUMBER = rf"{_DECIMAL_NUMBER}(?:[Ee][+-]?[0-9]+)?"
+_AFFN_ROW = re.compile(rf"{_AFFN_NUMBER}(?:\s+(?:{_AFFN_NUMBER}|\?))+")
+_COMPRESSED_ROWS = tuple(
+    re.compile(rf"({number})\s*([@A-Ia-i?].*)")
+    for number in (_DECIMAL_NUMBER, _AFFN_NUMBER)
+)
+_PSEUDO_VALUE = re.compile(r"(?:[@A-Ia-i%J-Rj-rS-Zs][0-9]*|\?)")
+
+
+def _read_ir_xydata(fid, firstx, lastx, npoints, xfactor):
+    step = (lastx - firstx) / max(npoints - 1, 1)
+    values = []
+    checkpoint = False
+    while True:
+        keyword, text = _readl(fid)
+        if keyword == "##END":
+            break
+        if keyword:
+            raise ValueError(f"Unexpected JCAMP-DX record in XYDATA: {keyword}")
+        if not text:
+            continue
+        if not checkpoint and _AFFN_ROW.fullmatch(text):
+            values.extend(float(v) if v != "?" else np.nan for v in text.split()[1:])
+            if len(values) > npoints:
+                raise ValueError("JCAMP-DX XYDATA exceeds NPOINTS")
+            continue
+
+        index = len(values) - int(checkpoint)
+        if index >= npoints:
+            raise ValueError("JCAMP-DX XYDATA exceeds NPOINTS")
+        # E/e can introduce either an exponent or a SQZ ordinate. Prefer the
+        # closest grid position, with a compact SQZ ordinate first on ties.
+        expected_x = firstx + index * step
+        candidates = []
+        for pattern in _COMPRESSED_ROWS:
+            row = pattern.fullmatch(text)
+            if row is None:
+                continue
+            anchor, encoded = row.groups()
+            tokens = _PSEUDO_VALUE.findall(encoded)
+            if "".join(tokens) != "".join(encoded.split()):
+                continue
+            # Integer anchors are commonly rounded or truncated by the exporter.
+            precision = float(f"1e{Decimal(anchor).as_tuple().exponent}")
+            anchor_x = float(anchor) * xfactor
+            tolerance = abs(xfactor) * precision
+            if (
+                np.isfinite(anchor_x)
+                and np.isfinite(tolerance)
+                and np.isclose(anchor_x, expected_x, rtol=1e-12, atol=tolerance)
+            ):
+                candidates.append((abs(anchor_x - expected_x), tokens))
+        if not candidates:
+            raise ValueError("Invalid JCAMP-DX XYDATA row or abscissa")
+        _, tokens = min(candidates, key=lambda candidate: candidate[0])
+        difference = None
+        previous = None
+        for position, token in enumerate(tokens):
+            prefix, tail = token[0], token[1:]
+            if prefix in _DUP:
+                if previous is None:
+                    raise ValueError(
+                        "JCAMP-DX DUP has no preceding ordinate or difference"
+                    )
+                repeats = int(f"{_DUP[prefix]}{tail}") - 1
+                if len(values) + repeats > npoints:
+                    raise ValueError("JCAMP-DX XYDATA exceeds NPOINTS")
+                for _ in range(repeats):
+                    values.append(
+                        values[-1] + difference
+                        if difference is not None
+                        else values[-1]
+                    )
+                previous = None
+                continue
+
+            if prefix == "?":
+                value = np.nan
+                difference = None
+            else:
+                digits = _DIF if prefix in _DIF else _SQZ
+                leading = digits[prefix]
+                number = (-1 if leading < 0 else 1) * int(f"{abs(leading)}{tail}")
+                difference = number if prefix in _DIF else None
+                if difference is not None and (position == 0 or np.isnan(values[-1])):
+                    raise ValueError(
+                        "JCAMP-DX DIF requires a preceding absolute ordinate"
+                    )
+                value = values[-1] + difference if difference is not None else number
+            if position == 0 and checkpoint:
+                if value != values[-1]:
+                    raise ValueError("JCAMP-DX DIF ordinate checkpoint does not match")
+            else:
+                values.append(value)
+                if len(values) > npoints:
+                    raise ValueError("JCAMP-DX XYDATA exceeds NPOINTS")
+            previous = token if prefix != "?" else None
+        checkpoint = difference is not None
+
+    if checkpoint:
+        raise ValueError("JCAMP-DX XYDATA is missing its final DIF checkpoint")
+    if len(values) != npoints:
+        raise ValueError("JCAMP-DX XYDATA does not match NPOINTS")
+    return np.asarray(values, dtype=float)
+
+
 def _read_ir_jcamp(dataset, filename, fid, linked, sortbydate):
     keyword = ""
     while keyword != "##TITLE":
@@ -316,8 +433,8 @@ def _read_ir_jcamp(dataset, filename, fid, linked, sortbydate):
     )
     nx, firstx, lastx = (
         np.zeros(nspec, "int"),
-        np.zeros(nspec, "float"),
-        np.zeros(nspec, "float"),
+        np.full(nspec, np.nan),
+        np.full(nspec, np.nan),
     )
 
     # Read the spectra
@@ -325,6 +442,8 @@ def _read_ir_jcamp(dataset, filename, fid, linked, sortbydate):
     for i in range(nspec):
         # Reset variables
         keyword = ""
+        xfactor = yfactor = 1.0
+        values = None
 
         # (year, month,...) must be reset at each spectrum because labels "time"
         # and "longdate" are not required in JDX file
@@ -359,31 +478,22 @@ def _read_ir_jcamp(dataset, filename, fid, linked, sortbydate):
             elif keyword == "##NPOINTS":
                 nx[i] = float(text)
             elif keyword == "##XYDATA":
-                # Read the intensities
-                allintensities = []
-                while keyword != "##END":
-                    keyword, text = _readl(fid)
-                    # for each line, get all the values except the first one (first value = wavenumber)
-                    intensities = list(filter(None, text.split(" ")[1:]))
-                    if len(intensities) > 0:
-                        allintensities += intensities
-                spectra = np.array(
-                    [allintensities],
-                )  # convert allintensities into an array
-                spectra[
-                    spectra == "?"
-                ] = "nan"  # deals with missing or out of range intensity values
-                spectra = spectra.astype(np.float32)
-                spectra *= yfactor
-                # add spectra in "data" matrix
+                if (
+                    not np.isfinite([firstx[i], lastx[i], xfactor, yfactor]).all()
+                    or nx[i] <= 0
+                    or xfactor == 0
+                ):
+                    raise ValueError(
+                        "Invalid JCAMP-DX axis bounds, factors or point count"
+                    )
+                values = _read_ir_xydata(fid, firstx[i], lastx[i], nx[i], xfactor)
+                spectra = (values * yfactor)[None, :]
+                keyword = "##END"
                 data = spectra if not data.size else np.concatenate((data, spectra), 0)
 
-        # Check "firstx", "lastx" and "nx"
-        if firstx[i] != 0 and lastx[i] != 0 and nx[i] != 0:
+        if values is not None:
             if not xaxis.size:
-                # Creation of xaxis if it doesn't exist yet
-                xaxis = np.linspace(firstx[0], lastx[0], nx[0])
-                xaxis = np.around((xaxis * xfactor), 3)
+                xaxis = np.linspace(firstx[i], lastx[i], nx[i])
             else:
                 # Check the consistency of xaxis
                 if nx[i] - nx[i - 1] != 0:
@@ -399,9 +509,7 @@ def _read_ir_jcamp(dataset, filename, fid, linked, sortbydate):
                         "Inconsistent data set: the x axis should end at same value",
                     )
         else:
-            raise ValueError(
-                f"##FIRSTX, ##LASTX or ##NPOINTS are unusable in spectrum n°{i + 1}"
-            )
+            raise ValueError(f"Missing JCAMP-DX XYDATA in spectrum {i + 1}")
 
         # Creation of the acquisition date
         if (
@@ -478,7 +586,7 @@ def _read_ir_jcamp(dataset, filename, fid, linked, sortbydate):
         dataset._units = None
 
     # now add coordinates
-    _x = Coord(xaxis, title=axisname, units=axisunit)
+    _x = Coord(xaxis, title=axisname, units=axisunit, rounding=False, sigdigits=15)
     if linked:
         _y = Coord(
             alltimestamps,
@@ -526,7 +634,7 @@ def _readl(fid):
     line = fid.readline()
     if not line:
         raise ValueError("Unexpected end of JCAMP-DX file")
-    line = line.strip(" \n")  # remove newline character
+    line = line.partition("$$")[0].strip()
     if line[0:2] == "##":  # if line starts with "##"
         if line[0:5] == "##END":  # END KEYWORD, no text
             keyword = "##END"
