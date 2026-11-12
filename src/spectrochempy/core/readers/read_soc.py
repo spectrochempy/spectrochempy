@@ -85,8 +85,6 @@ def read_soc(*paths, **kwargs):
         The most convenient way is to use a dictionary. This feature is particularly
         useful for a web application to handle drag and drop of files into a
         Browser.
-    csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
-        Set the column delimiter in CSV file.
     description : `str`, optional
         A custom description.
     directory : `~pathlib.Path` object or valid urls, optional
@@ -112,11 +110,6 @@ def read_soc(*paths, **kwargs):
         A pattern to filter the files to read.
 
         .. versionadded:: 0.7.2
-    protocol : `str`, optional
-        ``Protocol`` used for reading, for example ``'scp'``, ``'omnic'``,
-        ``'opus'``, ``'matlab'``, ``'jcamp'``, ``'csv'``, or ``'excel'``.
-        If not provided, the correct protocol is inferred whenever possible
-        from the filename extension.
     read_only: `bool`, optional, default: `True`
         Used only when url are specified.  If True, saving of the
         files is performed in the current directory, or in the directory specified by
@@ -207,8 +200,6 @@ def read_ddr(*paths, **kwargs):
         The most convenient way is to use a dictionary. This feature is particularly
         useful for a web application to handle drag and drop of files into a
         Browser.
-    csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
-        Set the column delimiter in CSV file.
     description : `str`, optional
         A custom description.
     directory : `~pathlib.Path` object or valid urls, optional
@@ -234,11 +225,6 @@ def read_ddr(*paths, **kwargs):
         A pattern to filter the files to read.
 
         .. versionadded:: 0.7.2
-    protocol : `str`, optional
-        ``Protocol`` used for reading, for example ``'scp'``, ``'omnic'``,
-        ``'opus'``, ``'matlab'``, ``'jcamp'``, ``'csv'``, or ``'excel'``.
-        If not provided, the correct protocol is inferred whenever possible
-        from the filename extension.
     read_only: `bool`, optional, default: `True`
         Used only when url are specified.  If True, saving of the
         files is performed in the current directory, or in the directory specified by
@@ -315,8 +301,6 @@ def read_hdr(*paths, **kwargs):
         The most convenient way is to use a dictionary. This feature is particularly
         useful for a web application to handle drag and drop of files into a
         Browser.
-    csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
-        Set the column delimiter in CSV file.
     description : `str`, optional
         A custom description.
     directory : `~pathlib.Path` object or valid urls, optional
@@ -342,11 +326,6 @@ def read_hdr(*paths, **kwargs):
         A pattern to filter the files to read.
 
         .. versionadded:: 0.7.2
-    protocol : `str`, optional
-        ``Protocol`` used for reading, for example ``'scp'``, ``'omnic'``,
-        ``'opus'``, ``'matlab'``, ``'jcamp'``, ``'csv'``, or ``'excel'``.
-        If not provided, the correct protocol is inferred whenever possible
-        from the filename extension.
     read_only: `bool`, optional, default: `True`
         Used only when url are specified.  If True, saving of the
         files is performed in the current directory, or in the directory specified by
@@ -423,8 +402,6 @@ def read_sdr(*paths, **kwargs):
         The most convenient way is to use a dictionary. This feature is particularly
         useful for a web application to handle drag and drop of files into a
         Browser.
-    csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
-        Set the column delimiter in CSV file.
     description : `str`, optional
         A custom description.
     directory : `~pathlib.Path` object or valid urls, optional
@@ -450,11 +427,6 @@ def read_sdr(*paths, **kwargs):
         A pattern to filter the files to read.
 
         .. versionadded:: 0.7.2
-    protocol : `str`, optional
-        ``Protocol`` used for reading, for example ``'scp'``, ``'omnic'``,
-        ``'opus'``, ``'matlab'``, ``'jcamp'``, ``'csv'``, or ``'excel'``.
-        If not provided, the correct protocol is inferred whenever possible
-        from the filename extension.
     read_only: `bool`, optional, default: `True`
         Used only when url are specified.  If True, saving of the
         files is performed in the current directory, or in the directory specified by

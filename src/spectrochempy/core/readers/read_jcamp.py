@@ -46,18 +46,13 @@ def read_jcamp(*paths, **kwargs):
 
     Parameters
     ----------
-    *paths : `str`, `~pathlib.Path` object objects or valid urls, optional
-        The data source(s) can be specified by the name or a list of name for the
-        file(s) to be loaded:
-
-        - e.g., ( filename1, filename2, ...,  kwargs )
-
-        If the list of filenames are enclosed into brackets:
-
-        - e.g., ( [filename1, filename2, ...], kwargs )
-
-        The returned datasets are merged to form a single dataset,
-        except if ``merge`` is set to ``False``.
+    *paths : str or path-like, optional
+        JCAMP-DX file paths, URLs, or a list of paths.
+    jcamp_kind : {"auto", "ir", "nmr"}, optional
+        Route by the declared data type by default. Set a kind explicitly
+        when the declaration is ambiguous. Containers with conflicting
+        declared spectrum types are rejected. Processed real 2D NMR spectra
+        use the NTUPLES profile and require nmrglue-ng 1.3 or later.
     **kwargs : keyword parameters, optional
         See Other Parameters.
 
@@ -77,15 +72,6 @@ def read_jcamp(*paths, **kwargs):
         The most convenient way is to use a dictionary. This feature is particularly
         useful for a web application to handle drag and drop of files into a
         Browser.
-    jcamp_kind : {"auto", "ir", "nmr"}, optional
-        Route by the declared data type by default. Set a kind explicitly
-        when the declaration is ambiguous. Containers with conflicting
-        declared spectrum types are rejected. Processed real 2D NMR spectra
-        use the NTUPLES profile and require nmrglue-ng 1.3 or later.
-    csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
-        Set the column delimiter in CSV file.
-    description : `str`, optional
-        A custom description.
     directory : `~pathlib.Path` object objects or valid urls, optional
         From where to read the files.
     download_only: `bool`, optional, default: `False`
@@ -96,26 +82,10 @@ def read_jcamp(*paths, **kwargs):
         arguments, then a single `NDDataset` with merged dataset (stacked along the first
         dimension) is returned. In the case not all datasets have compatible dimensions or types/origins,
         then several NDDatasets can be returned for different groups of compatible datasets.
-    origin : str, optional
-        If provided it may be used to define the type of experiment: e.g., 'ir', 'raman',..
-        or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
-        automatically, but can be set manually.
-
-        It is used, for instance, when reading a directory with different types of
-        files and merging compatible datasets into separate groups by origin.
-
-        It is also used when reading with the CSV protocol. In order to properly interpret CSV file
-        it can be necessary to set the origin of the spectra. Up to now only ``'omnic'`` and ``'tga'``
-        have been implemented.
     pattern : `str`, optional
         A pattern to filter the files to read.
 
         .. versionadded:: 0.7.2
-    protocol : `str`, optional
-        ``Protocol`` used for reading, for example ``'scp'``, ``'omnic'``,
-        ``'opus'``, ``'matlab'``, ``'jcamp'``, ``'csv'``, or ``'excel'``.
-        If not provided, the correct protocol is inferred whenever possible
-        from the filename extension.
     read_only: `bool`, optional, default: `True`
         Used only when url are specified.  If True, saving of the
         files is performed in the current directory, or in the directory specified by
