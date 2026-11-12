@@ -15,6 +15,8 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 New Features
 ~~~~~~~~~~~~
 
+- Add Butterworth low-pass, narrow notch and Gaussian filters to ``Filter``,
+  with dimension selection and structured processing history. (#1852)
 - Route supported processed 1D NMR JCAMP-DX files through the optional NMR
   plugin when using ``read_jcamp()`` or ``jcamp.read()``.
 - Read supported real 2D NMR JCAMP-DX NTUPLES spectra through the same API
