@@ -275,19 +275,28 @@ def test_jcamp_ir_rejects_invalid_difdup(original, replacement, message):
         assert read_jcamp({"invalid.jdx": payload}) is None
 
 
-def test_jcamp_ir_sqz_ordinate_that_looks_like_an_exponent():
+@pytest.mark.parametrize("anchor", [0, 1, 10])
+def test_jcamp_ir_sqz_ordinate_that_looks_like_an_exponent(anchor):
     payload = (
         _DIFDUP_IR.split(b"10A0KT", 1)[0]
-        .replace(b"##LASTX=28", b"##LASTX=22")
+        .replace(b"##FIRSTX=20", f"##FIRSTX={2 * anchor}".encode())
+        .replace(b"##LASTX=28", f"##LASTX={2 * anchor + 2}".encode())
         .replace(b"##NPOINTS=5", b"##NPOINTS=2")
-        + b"10E1?\n##END=\n"
+        + f"{anchor}E1?\n##END=\n".encode()
     )
     ds = read_jcamp({"exponent.jdx": payload})
     assert ds.data[0, 0] == pytest.approx(0.51)
     assert np.isnan(ds.data[0, 1])
 
 
-def test_jcamp_ir_checks_count_before_allocating_the_axis(monkeypatch):
+@pytest.mark.parametrize(
+    ("table", "message"),
+    [
+        (b"", "Missing JCAMP-DX XYDATA"),
+        (b"##XYDATA=(X++(Y..Y))\n10 10\n", "does not match NPOINTS"),
+    ],
+)
+def test_jcamp_ir_checks_count_before_allocating_the_axis(monkeypatch, table, message):
     original = np.linspace
 
     def linspace(start, stop, num=50, *args, **kwargs):
@@ -296,6 +305,6 @@ def test_jcamp_ir_checks_count_before_allocating_the_axis(monkeypatch):
 
     monkeypatch.setattr(np, "linspace", linspace)
     payload = _DIFDUP_IR.replace(b"##NPOINTS=5", b"##NPOINTS=1000000000")
-    payload = payload.split(b"10A0KT", 1)[0] + b"10 10\n##END=\n"
-    with pytest.warns(UserWarning, match="does not match NPOINTS"):
+    payload = payload.split(b"##XYDATA=", 1)[0] + table + b"##END=\n"
+    with pytest.warns(UserWarning, match=message):
         assert read_jcamp({"truncated.jdx": payload}) is None

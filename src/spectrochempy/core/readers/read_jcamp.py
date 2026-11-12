@@ -306,7 +306,7 @@ _AFFN_NUMBER = rf"{_DECIMAL_NUMBER}(?:[Ee][+-]?[0-9]+)?"
 _AFFN_ROW = re.compile(rf"{_AFFN_NUMBER}(?:\s+(?:{_AFFN_NUMBER}|\?))+")
 _COMPRESSED_ROWS = tuple(
     re.compile(rf"({number})\s*([@A-Ia-i?].*)")
-    for number in (_AFFN_NUMBER, _DECIMAL_NUMBER)
+    for number in (_DECIMAL_NUMBER, _AFFN_NUMBER)
 )
 _PSEUDO_VALUE = re.compile(r"(?:[@A-Ia-i%J-Rj-rS-Zs][0-9]*|\?)")
 
@@ -332,26 +332,31 @@ def _read_ir_xydata(fid, firstx, lastx, npoints, xfactor):
         index = len(values) - int(checkpoint)
         if index >= npoints:
             raise ValueError("JCAMP-DX XYDATA exceeds NPOINTS")
-        # E/e can introduce either an exponent or a SQZ ordinate.
+        # E/e can introduce either an exponent or a SQZ ordinate. Prefer the
+        # closest grid position, with a compact SQZ ordinate first on ties.
+        expected_x = firstx + index * step
+        candidates = []
         for pattern in _COMPRESSED_ROWS:
             row = pattern.fullmatch(text)
             if row is None:
                 continue
             anchor, encoded = row.groups()
+            tokens = _PSEUDO_VALUE.findall(encoded)
+            if "".join(tokens) != "".join(encoded.split()):
+                continue
             # Integer anchors are commonly rounded or truncated by the exporter.
-            precision = float(Decimal(1).scaleb(Decimal(anchor).as_tuple().exponent))
-            if np.isclose(
-                float(anchor) * xfactor,
-                firstx + index * step,
-                rtol=1e-12,
-                atol=abs(xfactor) * precision,
+            precision = float(f"1e{Decimal(anchor).as_tuple().exponent}")
+            anchor_x = float(anchor) * xfactor
+            tolerance = abs(xfactor) * precision
+            if (
+                np.isfinite(anchor_x)
+                and np.isfinite(tolerance)
+                and np.isclose(anchor_x, expected_x, rtol=1e-12, atol=tolerance)
             ):
-                break
-        else:
+                candidates.append((abs(anchor_x - expected_x), tokens))
+        if not candidates:
             raise ValueError("Invalid JCAMP-DX XYDATA row or abscissa")
-        tokens = _PSEUDO_VALUE.findall(encoded)
-        if "".join(tokens) != "".join(encoded.split()):
-            raise ValueError("Invalid pseudodigit in JCAMP-DX XYDATA")
+        _, tokens = min(candidates, key=lambda candidate: candidate[0])
         difference = None
         previous = None
         for position, token in enumerate(tokens):
@@ -438,6 +443,7 @@ def _read_ir_jcamp(dataset, filename, fid, linked, sortbydate):
         # Reset variables
         keyword = ""
         xfactor = yfactor = 1.0
+        values = None
 
         # (year, month,...) must be reset at each spectrum because labels "time"
         # and "longdate" are not required in JDX file
@@ -485,7 +491,7 @@ def _read_ir_jcamp(dataset, filename, fid, linked, sortbydate):
                 keyword = "##END"
                 data = spectra if not data.size else np.concatenate((data, spectra), 0)
 
-        if np.isfinite([firstx[i], lastx[i]]).all() and nx[i] > 0:
+        if values is not None:
             if not xaxis.size:
                 xaxis = np.linspace(firstx[i], lastx[i], nx[i])
             else:
@@ -503,9 +509,7 @@ def _read_ir_jcamp(dataset, filename, fid, linked, sortbydate):
                         "Inconsistent data set: the x axis should end at same value",
                     )
         else:
-            raise ValueError(
-                f"##FIRSTX, ##LASTX or ##NPOINTS are unusable in spectrum n°{i + 1}"
-            )
+            raise ValueError(f"Missing JCAMP-DX XYDATA in spectrum {i + 1}")
 
         # Creation of the acquisition date
         if (
