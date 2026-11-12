@@ -19,10 +19,10 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
-- Add ``rms`` for dataset reductions and ``characterize_peaks_1d`` for sampled
-  peak positions, heights and apparent widths at half maximum.
-- Add Butterworth low-pass, narrow notch and Gaussian filters to ``Filter``,
-  with dimension selection and structured processing history. (#1852)
+- Add Butterworth low-pass, FTIR fringe notch and Gaussian methods to
+  ``Filter``. Measure their effects with ``rms()`` and
+  ``characterize_peaks_1d()``, which reports sampled peak position, height and
+  apparent full width at half maximum. (#1852)
 - Route supported processed 1D NMR JCAMP-DX files through the optional NMR
   plugin when using ``read_jcamp()`` or ``jcamp.read()``.
 - Read supported real 2D NMR JCAMP-DX NTUPLES spectra through the same API
