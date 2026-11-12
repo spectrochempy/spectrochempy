@@ -14,14 +14,14 @@ Whittaker and Gaussian smoothing. The noiseless spectrum provides reference
 peak positions, heights and full widths at half maximum (FWHM).
 """
 
-import numpy as np
-
 import spectrochempy as scp
 
-coordinate = scp.Coord.linspace(1000, 1255.75, 1024, units="cm^-1")
-axis = coordinate.data
-reference = np.exp(-0.5 * ((axis - 1075) / 1.5) ** 2)
-reference += 0.65 * np.exp(-0.5 * ((axis - 1160) / 3.0) ** 2)
+axis = scp.linspace(1000, 1255.75, 1024)
+reference = scp.exp(-0.5 * ((axis - 1075) / 1.5) ** 2)
+reference += 0.65 * scp.exp(-0.5 * ((axis - 1160) / 3.0) ** 2)
+reference.x = scp.Coord(axis.data, units="cm^-1")
+reference.units = "absorbance"
+reference.title = "absorbance"
 
 filters = {
     "Butterworth": scp.Filter(method="butterworth", cutoff=0.18, order=3),
@@ -37,67 +37,61 @@ filters = {
 # The filter settings are illustrative. Each spectrum uses the same noise
 # realization scaled to the specified standard deviation.
 
-baseline = (axis < 1050) | (axis > 1200)
-edges = (axis < 1005) | (axis > 1250)
-windows = [(abs(axis - center) < 8).nonzero()[0] for center in (1075, 1160)]
+centers = (1075.0, 1160.0)
 
 
-def half_max_crossing(signal, indices, half_height):
-    outer = np.flatnonzero(signal[indices] <= half_height)[0]
-    inside, outside = indices[outer - 1 : outer + 1]
-    fraction = (half_height - signal[inside]) / (signal[outside] - signal[inside])
-    return axis[inside] + fraction * (axis[outside] - axis[inside])
-
-
-def peak_metrics(signal):
+def peak_metrics(spectrum):
     metrics = []
-    for window in windows:
-        offset = np.argmax(signal[window])
-        peak = window[offset]
-        half_height = signal[peak] / 2
-        left = half_max_crossing(signal, window[: offset + 1][::-1], half_height)
-        right = half_max_crossing(signal, window[offset:], half_height)
-        metrics.append((axis[peak], signal[peak], right - left))
-    return np.array(metrics).T
+    for center in centers:
+        window = spectrum[center - 7.75 : center + 7.75]
+        peak = window.characterize_peaks_1d(window.argmax()).rows[0]
+        metrics.append(
+            (
+                peak["position"].magnitude,
+                peak["sample_height"].magnitude,
+                peak["fwhm"].magnitude,
+            )
+        )
+    return metrics
 
 
-def rms(values):
-    return np.sqrt(np.mean(values**2))
+def residual_rms(residual, left_end, right_start):
+    region = scp.concatenate(residual[:left_end], residual[right_start:])
+    return region.rms().magnitude
 
 
 reference_metrics = peak_metrics(reference)
-noise = np.random.default_rng(1852).standard_normal(axis.size)
+noise = scp.normal(
+    size=reference.shape, seed=1852, units=reference.units, coordset=[reference.x]
+)
 
 for noise_std in (0.02, 0.06):
-    dataset = scp.NDDataset(
-        reference + noise_std * noise,
-        coordset=[coordinate],
-        units="absorbance",
-        title="absorbance",
-    )
+    dataset = reference + noise_std * noise
     results = {name: model(dataset) for name, model in filters.items()}
     print(f"Noise standard deviation {noise_std:g}")
     print("Method            Baseline RMS  Edge RMS  Δposition   Δheight    ΔFWHM")
     for name, spectrum in {"Raw": dataset, **results}.items():
-        residual = spectrum.data - reference
-        position, height, width = np.max(
-            np.abs(peak_metrics(spectrum.data) - reference_metrics), axis=1
-        )
+        residual = spectrum - reference
+        peak_pairs = zip(peak_metrics(spectrum), reference_metrics, strict=True)
+        peak_errors = [
+            tuple(
+                abs(value - target)
+                for value, target in zip(actual, expected, strict=True)
+            )
+            for actual, expected in peak_pairs
+        ]
+        position, height, width = map(max, zip(*peak_errors, strict=True))
+        baseline = residual_rms(residual, 1049.75, 1200.25)
+        edges = residual_rms(residual, 1004.75, 1250.25)
         print(
-            f"{name:16} {rms(residual[baseline]):12.5f} {rms(residual[edges]):9.5f}"
+            f"{name:16} {baseline:12.5f} {edges:9.5f}"
             f" {position:10.3f} {height:9.5f} {width:9.3f}"
         )
 
 # %%
 # Plot the higher-noise comparison using the first reference peak.
 
-target = abs(axis - 1075) < 12
-comparison = scp.NDDataset(
-    np.stack([reference, dataset.data, *(item.data for item in results.values())])[
-        :, target
-    ],
-    coordset=[scp.Coord(labels=["Reference", "Raw", *results]), coordinate[target]],
-    units="absorbance",
-    title="absorbance",
-)
+comparison = scp.stack(reference, dataset, *results.values())
+comparison.y = scp.Coord(labels=["Reference", "Raw", *results])
+comparison = comparison[:, 1063.25:1086.75]
 _ = comparison.plot(method="lines", legend=True)

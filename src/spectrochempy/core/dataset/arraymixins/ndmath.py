@@ -49,6 +49,7 @@ _NUMPY_REDUCTION_KWARGS = frozenset(
 _M1_METHODS = frozenset(
     {
         "mean",
+        "rms",
         "sum",
         "std",
         "var",
@@ -70,8 +71,9 @@ _M2_METHODS = frozenset(
     }
 )
 
-_STRUCTURED_REDUCTION_METHODS = frozenset({"mean", "std", "sum", "var"})
+_STRUCTURED_REDUCTION_METHODS = frozenset({"mean", "rms", "std", "sum", "var"})
 _REDUCTION_HISTORY_LABELS = {
+    "rms": "Root mean square",
     "mean": "Mean",
     "std": "Standard deviation",
     "sum": "Sum",
@@ -2500,6 +2502,83 @@ class NDMath:
                 dtype=dtype,
             )
 
+        return cls
+
+    @_reduce_method
+    @_from_numpy_method
+    def rms(cls, dataset, dim=None, keepdims=False):
+        """
+        Compute the root mean square magnitude.
+
+        Parameters
+        ----------
+        dataset : array_like
+            Real or complex input. Masked samples are excluded.
+        dim : int, str, sequence, or None, optional
+            Dimensions to reduce. By default, reduce over all dimensions.
+        keepdims : bool, optional
+            Keep reduced dimensions with size one.
+
+        Returns
+        -------
+        float, Quantity, or NDDataset
+            Square root of the mean squared magnitude, in the input units.
+            An entirely masked slice produces a masked result. Unmasked NaNs
+            propagate, and a slice with infinity and no NaNs returns infinity.
+
+        """
+        requested_dim = dim
+        source_dims = list(cls.dims)
+        axis, dim = cls.get_axis(dim, allows_none=True)
+        dataset = np.ma.asarray(dataset)
+        values = np.asarray(
+            dataset.filled(0), dtype=np.result_type(dataset.dtype, np.float64)
+        )
+        components = np.maximum(np.abs(values.real), np.abs(values.imag))
+        scale = np.max(components, axis=axis, keepdims=True, initial=0)
+        finite = np.isfinite(scale)
+        nonzero = finite & (scale > 0)
+        real = np.divide(
+            values.real, scale, out=np.zeros_like(values.real), where=nonzero
+        )
+        square = real**2
+        if np.iscomplexobj(values):
+            imag = np.divide(
+                values.imag, scale, out=np.zeros_like(values.imag), where=nonzero
+            )
+            square += imag**2
+        mean_square = np.ma.mean(
+            np.ma.array(square, mask=np.ma.getmask(dataset)),
+            axis=axis,
+            keepdims=keepdims,
+        )
+        if not keepdims:
+            scale = np.squeeze(scale, axis=axis)
+            finite = np.isfinite(scale)
+        with np.errstate(over="ignore"):
+            magnitude = np.sqrt(np.ma.getdata(mean_square)) * np.where(finite, scale, 0)
+        result = np.where(finite, magnitude, scale)
+
+        if result.ndim == 0:
+            if np.ma.is_masked(mean_square):
+                return np.ma.masked
+            value = result[()]
+            return Quantity(value, cls.units) if cls.units is not None else value
+
+        dims, coordset = _reduce_dims(cls, dim, keepdims)
+        cls._data = result
+        cls._mask = np.ma.getmask(mean_square)
+        cls.dims = dims
+        cls._coordset = coordset
+        if cls._implements("NDDataset"):
+            _append_reduction_history(
+                cls,
+                operation="rms",
+                requested_dim=requested_dim,
+                resolved_dim=dim,
+                source_dims=source_dims,
+                keepdims=keepdims,
+            )
         return cls
 
     @_from_numpy_method

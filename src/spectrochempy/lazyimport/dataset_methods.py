@@ -26,6 +26,7 @@ _LAZY_DATASETS_IMPORTS = {
     "trapezoid": "spectrochempy.analysis.integration.integrate",
     "integrate_region": "spectrochempy.analysis.integration.region",
     "find_peaks": "spectrochempy.analysis.peakfinding.peakfinding",
+    "characterize_peaks_1d": "spectrochempy.analysis.peakfinding.characterization",
     "characterize_peaks_2d": "spectrochempy.analysis.peakfinding.characterization",
     "segment_regions": "spectrochempy.analysis.segmentation",
     "simulate_peaks": "spectrochempy.analysis.curvefitting.simulation",

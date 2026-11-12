@@ -15,6 +15,8 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 New Features
 ~~~~~~~~~~~~
 
+- Add ``rms`` for dataset reductions and ``characterize_peaks_1d`` for sampled
+  peak positions, heights and apparent widths at half maximum.
 - Add Butterworth low-pass, narrow notch and Gaussian filters to ``Filter``,
   with dimension selection and structured processing history. (#1852)
 - Route supported processed 1D NMR JCAMP-DX files through the optional NMR

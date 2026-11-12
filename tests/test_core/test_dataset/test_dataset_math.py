@@ -130,3 +130,40 @@ def test_take(dsm):
 
 if __name__ == "__main__":
     pytest.main([__file__])
+
+
+def test_rms_reduction_preserves_units_coordinates_and_masks():
+    ds = scp.NDDataset(
+        [[3, 4], [7, 9], [6, 8]],
+        units="V",
+        coordset=[scp.Coord([1, 2, 3], units="s"), scp.Coord([10, 20], units="Hz")],
+        mask=[[False, True], [True, True], [False, False]],
+    )
+    result = scp.rms(ds, dim="x", keepdims=True)
+    assert result.dims == ["y", "x"]
+    assert result.shape == (3, 1)
+    assert result.units == ds.units
+    assert_array_equal(result.y.data, ds.y.data)
+    assert_array_equal(result.mask, [[False], [True], [False]])
+    assert_array_almost_equal(result.data[[0, 2], 0], [3, np.sqrt(50)])
+    assert result.history_entries[-1]["operation"] == "rms"
+    assert ds.rms(dim=("y", "x")).magnitude == pytest.approx(np.sqrt(109 / 3))
+
+
+@pytest.mark.parametrize("value", [1e300, 1e-300, 1e-310])
+def test_rms_scales_real_and_complex_values(value):
+    result = scp.rms([value, -value])
+    assert result / value == pytest.approx(1.0)
+    data = scp.NDDataset([complex(value, value), 0j])
+    assert data.rms() / value == pytest.approx(1.0)
+
+
+def test_rms_nonfinite_and_entirely_masked():
+    ds = scp.NDDataset([[np.inf, 0], [np.inf, np.nan], [0, 1], [np.nan, 2]])
+    ds.mask = [[False, False], [False, False], [True, True], [True, False]]
+    reduced = ds.rms(axis=1)
+    assert_array_equal(reduced.mask, [False, False, True, False])
+    assert np.isposinf(reduced.data[0])
+    assert np.isnan(reduced.data[1])
+    assert reduced.data[3] == 2
+    assert np.ma.is_masked(ds[2].rms())

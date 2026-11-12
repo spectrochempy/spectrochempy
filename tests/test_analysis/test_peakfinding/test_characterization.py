@@ -140,3 +140,57 @@ def test_affine_axis_uses_interval_units(spectrum):
     assert result.rows[2]["widths"]["x"].to("delta_degC").magnitude == pytest.approx(
         20 / 3
     )
+
+
+def test_1d_characterization_uses_baseline_and_irregular_descending_axis():
+    dataset = scp.NDDataset(
+        [1.0, 3.0, 5.0, 4.0, 1.0],
+        units="V",
+        coordset=[scp.Coord([10.0, 8.0, 6.0, 5.0, 2.0], units="Hz")],
+    )
+    dataset.history = "Original acquisition"
+    result = scp.characterize_peaks_1d(dataset, [2], baseline=1000 * scp.ur.mV)
+    row = result.rows[0]
+    assert row["position"] == 6 * scp.ur.Hz
+    assert row["sample_height"] == 5 * scp.ur.V
+    assert row["fwhm"] == 4 * scp.ur.Hz
+    assert row["width_status"] == "available"
+    assert result.history_entries[:-1] == dataset.history_entries
+    assert result.history_entries[-1]["operation"] == "characterize_peaks_1d"
+
+
+def test_1d_characterization_first_crossing_on_noisy_flanks():
+    spectrum = scp.NDDataset([0, 6, 5.5, 10, 7, 5, 0])
+    result = spectrum.characterize_peaks_1d(np.int64(3), use_coord=False)
+    row = result.rows[0]
+    assert row["position"] == 3
+    assert row["fwhm"] == pytest.approx(4 + 1 / 6)
+
+
+@pytest.mark.parametrize(
+    ("data", "mask", "status"),
+    [
+        ([4, 6, 5], False, "boundary"),
+        ([0, 6, np.nan], False, "invalid_sample"),
+        ([0, 6, 0], [False, False, True], "invalid_sample"),
+        ([-2, -1, -2], False, "nonpositive_height"),
+    ],
+)
+def test_1d_characterization_unavailable_widths(data, mask, status):
+    spectrum = scp.NDDataset(data, mask=mask)
+    row = spectrum.characterize_peaks_1d(1, use_coord=False).rows[0]
+    assert row["fwhm"] is None
+    assert row["width_status"] == status
+
+
+def test_1d_characterization_rejects_invalid_inputs():
+    spectrum = scp.NDDataset([0, 3, 0])
+    with pytest.raises(ValueError, match="numeric coordinate"):
+        spectrum.characterize_peaks_1d(1)
+    with pytest.raises(ValueError, match="integers within"):
+        spectrum.characterize_peaks_1d(-1, use_coord=False)
+    with pytest.raises(ValueError, match="real numeric"):
+        scp.NDDataset([0j, 3j, 0j]).characterize_peaks_1d(1, use_coord=False)
+    spectrum.x = scp.Coord([0, 1, 1])
+    with pytest.raises(ValueError, match="strictly monotone"):
+        spectrum.characterize_peaks_1d(1)
