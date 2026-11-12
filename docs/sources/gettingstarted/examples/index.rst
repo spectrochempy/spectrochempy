@@ -21,14 +21,35 @@ in the `discussions <https://github.com/spectrochempy/spectrochempy/discussions>
 .. toctree::
    :maxdepth: 2
    :titlesonly:
+   :hidden:
 
    Datasets and plotting <gallery/auto_examples_core/index>
    Processing <gallery/auto_examples_processing/index>
    Analysis <gallery/auto_examples_analysis/index>
    Plugins <gallery/auto_examples_plugins/index>
 
+.. include:: gallery/auto_examples_core/index.rst
+   :start-after: .. gallery-overview-start
+   :end-before: .. toctree::
+
+.. include:: gallery/auto_examples_processing/index.rst
+   :start-after: .. gallery-overview-start
+   :end-before: .. toctree::
+
+.. include:: gallery/auto_examples_analysis/index.rst
+   :start-after: .. gallery-overview-start
+   :end-before: .. toctree::
+
+#######
+Plugins
+#######
+
+.. include:: gallery/auto_examples_plugins/index.rst
+   :start-after: .. gallery-overview-start
+
+############
 NMR examples
-============
+############
 
 Explore import, processing and analysis workflows in the SpectroChemPy NMR gallery.
 

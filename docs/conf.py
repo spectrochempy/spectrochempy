@@ -638,6 +638,8 @@ def _plugin_examples_table(entries: list[dict[str, str]]) -> str:
         "Examples requiring plugins",
         "==========================",
         "",
+        ".. gallery-overview-start",
+        "",
         "The examples listed below require one or more optional SpectroChemPy plugins.",
         "They appear in the :ref:`main gallery <examples-index>` alongside core-only",
         "examples, organised by scientific topic.",
