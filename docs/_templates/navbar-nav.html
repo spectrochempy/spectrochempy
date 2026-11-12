@@ -21,10 +21,7 @@
     ('reference/glossary', 'Glossary')
   ]),
   ('Examples', [
-    ('gettingstarted/examples/gallery/auto_examples_core/index', 'Datasets and plotting'),
-    ('gettingstarted/examples/gallery/auto_examples_processing/index', 'Processing'),
-    ('gettingstarted/examples/gallery/auto_examples_analysis/index', 'Analysis'),
-    ('gettingstarted/examples/gallery/auto_examples_plugins/index', 'Plugins')
+    ('gettingstarted/examples/index', 'Examples')
   ]),
   ('About', [
     ('gettingstarted/whyscpy', 'Why SpectroChemPy?'),
@@ -41,19 +38,28 @@
 <nav aria-label="{{ _('Main navigation') }}">
   <ul class="bd-navbar-elements navbar-nav">
     {% for label, pages in menus %}
-      {% set menu_id = unique_html_id('scp-nav-menu') %}
-      <li class="nav-item dropdown{% if active_group == label %} current active{% endif %}">
-        <button class="btn dropdown-toggle nav-item" type="button"
-                data-bs-toggle="dropdown" aria-expanded="false"
-                aria-controls="{{ menu_id }}">{{ label }}</button>
-        <ul id="{{ menu_id }}" class="dropdown-menu">
-          {% for target, title in pages %}
-            {% if hasdoc(target) %}
-              <li><a class="dropdown-item{% if pagename == target %} active{% endif %}" href="{{ pathto(target) }}"{% if pagename == target %} aria-current="page"{% endif %}>{{ title }}</a></li>
-            {% endif %}
-          {% endfor %}
-        </ul>
-      </li>
+      {% if pages | length == 1 %}
+        {% set target, title = pages[0] %}
+        {% if hasdoc(target) %}
+          <li class="nav-item{% if active_group == label %} current active{% endif %}">
+            <a class="nav-link{% if active_group == label %} active{% endif %}" href="{{ pathto(target) }}"{% if pagename == target %} aria-current="page"{% endif %}>{{ title }}</a>
+          </li>
+        {% endif %}
+      {% else %}
+        {% set menu_id = unique_html_id('scp-nav-menu') %}
+        <li class="nav-item dropdown{% if active_group == label %} current active{% endif %}">
+          <button class="btn dropdown-toggle nav-item" type="button"
+                  data-bs-toggle="dropdown" aria-expanded="false"
+                  aria-controls="{{ menu_id }}">{{ label }}</button>
+          <ul id="{{ menu_id }}" class="dropdown-menu">
+            {% for target, title in pages %}
+              {% if hasdoc(target) %}
+                <li><a class="dropdown-item{% if pagename == target %} active{% endif %}" href="{{ pathto(target) }}"{% if pagename == target %} aria-current="page"{% endif %}>{{ title }}</a></li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        </li>
+      {% endif %}
     {% endfor %}
   </ul>
 </nav>

@@ -1,5 +1,6 @@
 .. _examples-core-index:
+.. _core-functionalities:
 
-####################
-Core functionalities
-####################
+#####################
+Datasets and plotting
+#####################

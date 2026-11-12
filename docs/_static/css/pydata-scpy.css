@@ -143,6 +143,14 @@ code.literal {
   border-bottom-color: var(--scp-gold) !important;
 }
 
+.bd-header .navbar-nav .dropdown-menu {
+  --bs-dropdown-link-active-color: var(--pst-color-text-base);
+}
+
+.bd-header .navbar-nav .dropdown-item[aria-current="page"] {
+  font-weight: 650;
+}
+
 .bd-header .search-button-field {
   border-color: rgba(255, 255, 255, 0.65);
   background: rgba(255, 255, 255, 0.14);
