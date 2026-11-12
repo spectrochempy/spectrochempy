@@ -35,7 +35,7 @@ _ = restored.plot()
 
 # %%
 # Read a processed NMR spectrum with the same reader
-# -------------------------------------------------
+# --------------------------------------------------
 # With the optional plugin installed (``pip install 'spectrochempy-nmr>=0.3'``),
 # ``scp.read_jcamp`` recognizes the NMR data type declared in the file and
 # delegates the read to the plugin. Here is a small synthetic proton spectrum
