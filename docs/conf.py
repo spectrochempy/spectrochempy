@@ -730,6 +730,11 @@ def _get_default_image_scraper():
 if not single_doc_or_dir:
     from sphinx_gallery.sorting import FileNameSortKey
 
+    class GalleryExampleSortKey(FileNameSortKey):
+        def __call__(self, filename):
+            return filename != "plot_plotting.py", super().__call__(filename)
+
+
 if not single_doc_or_dir:
     plugin_gallery_entries = _load_plugin_gallery_entries()
     example_source_dir = _stage_gallery_examples()
@@ -779,7 +784,7 @@ if not single_doc_or_dir:
         "download_all_examples": False,
         "pypandoc": True,
         "remove_config_comments": True,
-        "within_subsection_order": FileNameSortKey,
+        "within_subsection_order": GalleryExampleSortKey,
         "image_scrapers": (
             _get_default_image_scraper(),
         ),  # Use the function getter instead of direct function reference

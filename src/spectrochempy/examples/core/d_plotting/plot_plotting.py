@@ -81,6 +81,12 @@ _ = scp.plot_multiple(
 _ = scp.plot_multiple(method="scatter", datasets=datasets, labels=labels, legend="best")
 
 # %%
+# Plotting options
+# ----------------
+# - :ref:`sphx_glr_gettingstarted_examples_gallery_auto_examples_core_d_plotting_plot_1d_options.py`
+# - :ref:`sphx_glr_gettingstarted_examples_gallery_auto_examples_core_d_plotting_plot_2d_projections.py`
+
+# %%
 # Uncomment the following line to display all figures when running the script
 # directly with Python.
 
