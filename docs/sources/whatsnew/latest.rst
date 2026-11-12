@@ -23,3 +23,9 @@ New Features
   plugin when using ``read_jcamp()`` or ``jcamp.read()``.
 - Read supported real 2D NMR JCAMP-DX NTUPLES spectra through the same API
   with the NMR plugin and nmrglue-ng 1.3 or later.
+
+Bug Fixes
+~~~~~~~~~
+
+- Read DIFDUP infrared JCAMP-DX data, handle inline comments, and preserve
+  physical spectral axis bounds when line abscissae use an X factor.

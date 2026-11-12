@@ -35,6 +35,9 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Read DIFDUP infrared JCAMP-DX data, handle inline comments, and preserve
+  physical spectral axis bounds when line abscissae use an X factor.
+
 
 .. section
 
