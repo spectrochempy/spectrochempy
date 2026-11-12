@@ -205,3 +205,21 @@ def test_rms_preserves_quantity_input_units(values, expected):
     result = scp.rms(quantity)
     assert result.units == quantity.units
     assert result.magnitude == pytest.approx(expected)
+
+
+def test_rms_empty_reductions_preserve_shape_and_units():
+    assert np.isnan(scp.rms([]))
+    result = scp.rms([], keepdims=True)
+    assert result.dims == ["x"]
+    np.testing.assert_array_equal(result.data, [np.nan])
+
+    empty = scp.NDDataset(np.empty((0, 2)), units="V")
+    global_rms = empty.rms(keepdims=True)
+    assert global_rms.dims == ["y", "x"]
+    np.testing.assert_array_equal(global_rms.data, [[np.nan]])
+
+    result = empty.rms(dim="y", keepdims=True)
+    assert result.dims == ["y", "x"]
+    assert result.units == empty.units
+    np.testing.assert_array_equal(result.data, [[np.nan, np.nan]])
+    assert empty.rms(dim="x").shape == (0,)

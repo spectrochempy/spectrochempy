@@ -185,6 +185,8 @@ class Filter(ProcessingConfigurable):
     the Butterworth order plus three, or nine points for the notch.
     IIR settings whose response cannot be resolved in floating point are rejected.
     Gaussian convolution uses the configured `mode` and `cval`.
+    Inputs outside SciPy's supported floating-point dtypes are converted
+    to double precision. Overflow during conversion is rejected.
     The default `interp` selects SciPy's `reflect` mode for this method.
 
     See Also
@@ -356,7 +358,9 @@ and ‘nearest’.
 
         axis, dimension = dataset.get_axis(dim, negative_axis=True)
         data, parameters = self._spectral_transform(dataset, axis, dimension)
-        result = dataset.copy(keepname=True)
+        with np.errstate(over="ignore", under="ignore"):
+            result = dataset.copy(keepname=True)
+        result._dtype = data.dtype
         result._data = data
         result._append_history_entry(
             operation=self.method,
@@ -411,6 +415,19 @@ and ‘nearest’.
             truncate = 4.0
             if sigma_points < 0.5 / truncate:
                 return data.copy(), parameters
+            if data.dtype.type not in (
+                np.float32,
+                np.float64,
+                np.complex64,
+                np.complex128,
+            ):
+                dtype = np.complex128 if np.iscomplexobj(data) else np.float64
+                with np.errstate(over="ignore", under="ignore"):
+                    data = data.astype(dtype)
+                if not np.isfinite(data).all():
+                    raise ValueError(
+                        "Gaussian input exceeds the double-precision range"
+                    )
             return (
                 scipy.ndimage.gaussian_filter1d(
                     data,

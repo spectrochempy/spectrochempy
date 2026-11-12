@@ -263,3 +263,16 @@ def test_coordinate_based_filter_preserves_axis_reference():
     result = model(dataset, dim="y")
     np.testing.assert_allclose(result.data, gaussian_filter1d(data, 2.0, axis=0))
     assert result.coordset.references == {"y": "x"}
+
+
+@pytest.mark.parametrize("dtype", [np.int16, np.float16, np.longdouble])
+def test_gaussian_filters_unsupported_scipy_dtypes_as_double(dtype):
+    impulse = [0, 1, 0, 0, 0, 0, 0, 0]
+    dataset = scp.NDDataset(impulse, dtype=dtype, units="V")
+    result = scp.Filter(method="gaussian", sigma=1.0)(dataset)
+    np.testing.assert_allclose(
+        result.data, gaussian_filter1d(np.array(impulse, float), 1)
+    )
+    assert result.dtype == np.dtype(np.float64)
+    assert result.units == dataset.units
+    assert dataset.dtype == np.dtype(dtype)

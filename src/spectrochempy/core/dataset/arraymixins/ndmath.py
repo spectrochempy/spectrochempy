@@ -2524,6 +2524,7 @@ class NDMath:
             Square root of the mean squared magnitude, in the input units.
             An entirely masked slice produces a masked result. Unmasked NaNs
             propagate, and a slice with infinity and no NaNs returns infinity.
+            Empty slices return NaN.
 
         """
         from spectrochempy.core.dataset.nddataset import NDDataset  # noqa: PLC0415
@@ -2537,11 +2538,16 @@ class NDMath:
             units = dataset.units if quantity else None
             array = np.ma.asarray(dataset.magnitude if quantity else dataset)
             dataset = NDDataset(array, dtype=array.dtype, units=units)
-        source_dims = list(dataset.dims)
-        axis, dim = dataset.get_axis(
+        masked = (
+            np.ma.asarray(dataset.masked_data)
+            if dataset.data is not None
+            else np.ma.array([])
+        )
+        geometry = dataset if masked.size else NDDataset(np.empty((1,) * masked.ndim))
+        source_dims = list(geometry.dims)
+        axis, dim = geometry.get_axis(
             requested_dim, allows_none=True, allow_multiple=True
         )
-        masked = np.ma.asarray(dataset.masked_data)
         values = np.asarray(
             masked.filled(0), dtype=np.result_type(masked.dtype, np.float64)
         )
@@ -2558,14 +2564,18 @@ class NDMath:
                 values.imag, scale, out=np.zeros_like(values.imag), where=nonzero
             )
             square += imag**2
-        mean_square = np.ma.mean(
-            np.ma.array(square, mask=np.ma.getmask(masked)),
-            axis=axis,
-            keepdims=keepdims,
-        )
         if not keepdims:
             scale = np.squeeze(scale, axis=axis)
             finite = np.isfinite(scale)
+        mean_square = (
+            np.ma.mean(
+                np.ma.array(square, mask=np.ma.getmask(masked)),
+                axis=axis,
+                keepdims=keepdims,
+            )
+            if masked.size
+            else np.full(scale.shape, np.nan, dtype=scale.dtype)
+        )
         with np.errstate(over="ignore"):
             magnitude = np.sqrt(np.ma.getdata(mean_square)) * np.where(finite, scale, 0)
         result = np.where(finite, magnitude, scale)
@@ -2578,13 +2588,14 @@ class NDMath:
                 Quantity(value, dataset.units) if dataset.units is not None else value
             )
 
-        dims, coordset = _reduce_dims(dataset, dim, keepdims)
+        dims, coordset = _reduce_dims(geometry, dim, keepdims)
         with np.errstate(over="ignore", under="ignore"):
             reduced = dataset.copy(deep=False)
         reduced._dtype = result.dtype
         reduced._data = result
         reduced._mask = np.ma.getmask(mean_square)
-        reduced.dims = dims
+        if result.size:
+            reduced.dims = dims
         reduced._coordset = coordset
         if reduced._implements("NDDataset"):
             _append_reduction_history(
