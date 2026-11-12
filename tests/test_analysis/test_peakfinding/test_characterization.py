@@ -194,3 +194,9 @@ def test_1d_characterization_rejects_invalid_inputs():
     spectrum.x = scp.Coord([0, 1, 1])
     with pytest.raises(ValueError, match="strictly monotone"):
         spectrum.characterize_peaks_1d(1)
+
+
+def test_1d_characterization_rejects_logarithmic_coordinate_units():
+    dataset = scp.NDDataset([0, 3, 0], coordset=[scp.Coord([0, 10, 20], units="dBm")])
+    with pytest.raises(ValueError, match="non-logarithmic coordinate"):
+        dataset.characterize_peaks_1d(1)

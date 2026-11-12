@@ -238,6 +238,7 @@ def characterize_peaks_1d(dataset, indices, *, baseline=0.0, use_coord=True):
     use_coord : bool, optional
         Use the active numeric coordinate for positions and widths. The
         coordinate must be finite, unmasked and strictly monotone.
+        Logarithmic coordinate units are unsupported.
         If false, use sample indices and report widths in points.
 
     Returns
@@ -272,6 +273,8 @@ def characterize_peaks_1d(dataset, indices, *, baseline=0.0, use_coord=True):
         if coord is None or not coord.has_data:
             raise ValueError("1D peak characterization requires a numeric coordinate")
         grid, unit = np.asarray(coord._data), coord.units
+        if unit is not None and _logarithmic_unit(unit):
+            raise ValueError("Peak widths require non-logarithmic coordinate units")
         if (
             grid.dtype.kind not in "iuf"
             or coord.is_masked

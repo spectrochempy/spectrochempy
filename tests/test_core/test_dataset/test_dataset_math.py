@@ -167,3 +167,41 @@ def test_rms_nonfinite_and_entirely_masked():
     assert np.isnan(reduced.data[1])
     assert reduced.data[3] == 2
     assert np.ma.is_masked(ds[2].rms())
+
+
+@pytest.mark.skipif(
+    np.finfo(np.longdouble).maxexp == np.finfo(np.float64).maxexp,
+    reason="extended floating-point range is unavailable",
+)
+@pytest.mark.parametrize("literal", ["1e4000", "1e-4000"])
+def test_rms_preserves_native_precision_in_both_entry_points(literal):
+    value = np.longdouble(literal)
+    ds = scp.NDDataset([[value, -value]], dtype=np.longdouble)
+    assert ds.rms() == value
+    assert scp.rms(dataset=ds) == value
+    assert ds.rms(dim="x", keepdims=True).data[0, 0] == value
+
+
+def test_rms_accepts_array_keyword_and_rejects_unsupported_arguments():
+    assert scp.rms(dataset=[3, 4]) == pytest.approx(np.sqrt(12.5))
+    ds = scp.NDDataset([3, 4], units="V")
+    with pytest.raises(TypeError, match="only one"):
+        ds.rms(dim="x", axis=0)
+    with pytest.raises(TypeError, match="units"):
+        scp.rms(ds, units="mV")
+    with pytest.raises(TypeError, match="where"):
+        ds.rms(where=[True, False])
+
+
+@pytest.mark.parametrize(
+    ("values", "expected"),
+    [
+        ([3.0, 4.0], np.sqrt(12.5)),
+        (np.ma.array([3.0, 4.0], mask=[True, False]), 4.0),
+    ],
+)
+def test_rms_preserves_quantity_input_units(values, expected):
+    quantity = scp.Quantity(values, "V")
+    result = scp.rms(quantity)
+    assert result.units == quantity.units
+    assert result.magnitude == pytest.approx(expected)

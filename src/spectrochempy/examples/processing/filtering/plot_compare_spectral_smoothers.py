@@ -93,5 +93,6 @@ for noise_std in (0.02, 0.06):
 
 comparison = scp.stack(reference, dataset, *results.values())
 comparison.y = scp.Coord(labels=["Reference", "Raw", *results])
+comparison.title = reference.title
 comparison = comparison[:, 1063.25:1086.75]
 _ = comparison.plot(method="lines", legend=True)
