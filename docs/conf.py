@@ -20,6 +20,7 @@ from datetime import datetime
 from pathlib import Path
 
 import jinja2
+from docutils import nodes
 from packaging.version import InvalidVersion
 from packaging.version import Version
 from sphinx.ext.autodoc import ClassDocumenter
@@ -1201,10 +1202,30 @@ def isolate_scp_config(app, docname, source):
     os.environ["SCP_CONFIG_HOME"] = str(config_home)
 
 
+def place_nmr_import_examples(app, doctree):
+    """Place the external import examples after the generated thumbnail grid."""
+    for block in doctree.findall(nodes.container):
+        if "nmr-import-examples" not in block["classes"]:
+            continue
+        section = block.parent
+        start = section.index(block) + 1
+        for index, node in enumerate(section.children[start:-1], start):
+            if (
+                isinstance(node, nodes.comment)
+                and node.astext() == "thumbnail-parent-div-close"
+                and isinstance(section[index + 1], nodes.raw)
+                and section[index + 1].astext().strip() == "</div>"
+            ):
+                section.insert(index + 2, block)
+                section.remove(block)
+                break
+
+
 def setup(app):
     app.connect("source-read", isolate_scp_config)
     app.connect("source-read", citing_papers)
     app.connect("source-read", rstjinja)
+    app.connect("doctree-read", place_nmr_import_examples)
     app.connect("autodoc-skip-member", autodoc_skip_member)
     app.connect("autodoc-process-signature", shorter_signature)
     app.connect("html-page-context", strip_generated_api_links, priority=999)
