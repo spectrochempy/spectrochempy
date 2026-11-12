@@ -10,9 +10,11 @@ Compare spectral smoothers on noisy peaks
 =========================================
 
 Use a seeded synthetic spectrum to compare Butterworth, Savitzky-Golay,
-Whittaker and Gaussian smoothing. The noiseless spectrum provides reference
-peak positions, heights and full widths at half maximum (FWHM).
+Whittaker, Gaussian and optional wavelet denoising. The noiseless spectrum
+provides reference peak positions, heights and full widths at half maximum (FWHM).
 """
+
+from importlib.util import find_spec
 
 import spectrochempy as scp
 
@@ -29,6 +31,12 @@ filters = {
     "Whittaker": scp.Filter(method="whittaker", lamb=32, order=2),
     "Gaussian": scp.Filter(method="gaussian", sigma=2.0),
 }
+
+# %%
+# Install the `wavelets` extra to include Symlet-4 soft thresholding.
+
+if find_spec("pywt") is not None:
+    filters["Wavelet"] = scp.Filter(method="wavelet")
 
 # %%
 # Measure RMS error in peak-free regions and near the edges. Find the maximum
