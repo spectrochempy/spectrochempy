@@ -14,9 +14,8 @@ Whittaker, Gaussian and optional wavelet denoising. The noiseless spectrum
 provides reference peak positions, heights and full widths at half maximum (FWHM).
 """
 
-from importlib.util import find_spec
-
 import spectrochempy as scp
+from spectrochempy.utils.optional import import_optional_dependency
 
 axis = scp.linspace(1000, 1255.75, 1024)
 reference = scp.exp(-0.5 * ((axis - 1075) / 1.5) ** 2)
@@ -35,7 +34,7 @@ filters = {
 # %%
 # Install the `wavelets` extra to include Symlet-4 soft thresholding.
 
-if find_spec("pywt") is not None:
+if import_optional_dependency("pywt", errors="ignore") is not None:
     filters["Wavelet"] = scp.Filter(method="wavelet")
 
 # %%
