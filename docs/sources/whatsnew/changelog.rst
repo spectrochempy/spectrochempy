@@ -74,3 +74,6 @@ Deprecations
 Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
+
+- List NMR examples in the gallery sidebar and include their import cards in
+  the main Import / Export grid. (#1872)
