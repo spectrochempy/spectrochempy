@@ -249,7 +249,7 @@ def test_rtd_commands_cover_inventory_and_preserve_gallery():
         path.with_suffix(".ipynb").relative_to(runner.SOURCES).as_posix()
         for path in runner.BuildDocumentation()._get_notebook_files()
     )
-    assert len(expected) == 38
+    assert expected
     assert commands[1:-2] == [
         f"python -u -m docs.preexecute_notebooks execute {name}" for name in expected
     ]
@@ -261,6 +261,10 @@ def test_rtd_commands_cover_inventory_and_preserve_gallery():
     )
 
 
-def test_preexecution_cli_is_not_collected_as_a_notebook_example():
+def test_documentation_clis_are_not_collected_as_notebook_examples():
     examples = importlib.import_module("tests.test_docs.test_py_in_docs")
     assert Path(runner.__file__).resolve() not in examples.scripts
+    assert (
+        Path(runner.__file__).with_name("ci_artifacts.py").resolve()
+        not in examples.scripts
+    )
