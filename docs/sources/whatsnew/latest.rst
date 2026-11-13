@@ -15,6 +15,8 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 New Features
 ~~~~~~~~~~~~
 
+- Read 1D Raman JCAMP-DX spectra with explicit Raman shift and intensity pairs.
+
 - Read 1D UV-visible JCAMP-DX spectra with explicit wavelength and intensity pairs.
 
 - Add ``mask_policy="split"`` to ``Filter`` to process contiguous unmasked
