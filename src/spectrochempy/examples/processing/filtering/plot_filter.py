@@ -7,7 +7,7 @@
 # ruff: noqa
 """
 Savitzky-Golay and Whittaker-Eilers smoothing of a Raman spectrum
-================================================================
+=================================================================
 In this example, we use the ``Filter`` processor to smooth a Raman spectrum.
 """
 
