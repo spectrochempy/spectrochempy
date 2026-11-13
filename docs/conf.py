@@ -1318,8 +1318,8 @@ def add_external_gallery_links(app, doctree):
         numbered=0,
         titlesonly=False,
     )
-    # Register the links after Sphinx-Gallery's local example entries.
-    doctree.append(tree)
+    # Keep external-only entries nested under the gallery page title.
+    next(doctree.findall(nodes.section)).append(tree)
 
 
 class LinkToPublishedPreviewPages(SphinxTransform):
