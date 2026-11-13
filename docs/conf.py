@@ -1248,8 +1248,13 @@ class LinkToPublishedPreviewPages(SphinxTransform):
             )
             if target in self.env.found_docs or target.startswith("../"):
                 continue
-            if (SRC / f"{target}.py").is_file() or (
-                suffix == ".rst" and (SRC / f"{target}.rst").is_file()
+            generated_page = suffix == ".rst" and target.startswith(
+                ("reference/generated/", f"{example_generated_dir}/")
+            )
+            if (
+                generated_page
+                or (SRC / f"{target}.py").is_file()
+                or (suffix == ".rst" and (SRC / f"{target}.rst").is_file())
             ):
                 node["refuri"] = uri._replace(
                     scheme="https",
