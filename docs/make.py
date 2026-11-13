@@ -1276,7 +1276,9 @@ class BuildDocumentation:
 
 
 # ======================================================================================
-def _build_preview(source, docname, *, gallery, noexec, jobs, warnings_as_errors):
+def _build_preview(
+    source, docname, *, gallery, noexec, jobs, verbosity, warnings_as_errors
+):
     root = BUILDDIR / "preview" / ("gallery" if gallery else "tutorial") / docname
     output = root / "html"
     with tempfile.TemporaryDirectory(prefix="scp-docs-preview-") as temporary:
@@ -1327,6 +1329,7 @@ def _build_preview(source, docname, *, gallery, noexec, jobs, warnings_as_errors
             "-d",
             str(workspace / "doctrees"),
         ]
+        command.extend(["-v"] * verbosity)
         if warnings_as_errors:
             command.append("-W")
         staging = workspace / "html"
@@ -1538,6 +1541,7 @@ def _main():
             gallery=gallery,
             noexec=args.no_exec,
             jobs=BuildDocumentation._get_jobs(args.jobs),
+            verbosity=args.verbosity,
             warnings_as_errors=args.warning_is_error,
         )
 
