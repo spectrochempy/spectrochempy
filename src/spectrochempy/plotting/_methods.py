@@ -13,6 +13,7 @@ CANONICAL_1D_METHODS = frozenset(
     {
         "pen",
         "bar",
+        "hist",
         "scatter",
         "scatter_pen",
         "scatter+pen",

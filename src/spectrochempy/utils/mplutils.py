@@ -197,7 +197,7 @@ def get_figure(**kwargs):
     return fig
 
 
-def _setup_axes(ax=None, *, clear=True, projection=None):
+def _setup_axes(ax=None, *, clear=True, projection=None, figsize=None):
     """
     Create or prepare a Matplotlib Axes for plotting.
 
@@ -218,13 +218,15 @@ def _setup_axes(ax=None, *, clear=True, projection=None):
     projection : str or None
         Matplotlib projection type passed to ``add_subplot`` when
         creating new axes (e.g. ``"3d"``).
+    figsize : tuple of float, optional
+        Width and height in inches when creating a figure.
 
     Returns
     -------
     Axes
     """
     if ax is None:
-        fig = get_figure()
+        fig = get_figure(figsize=figsize)
         ax = fig.add_subplot(111, projection=projection)
     elif clear:
         ax.clear()
