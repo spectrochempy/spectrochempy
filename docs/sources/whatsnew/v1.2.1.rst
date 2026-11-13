@@ -10,25 +10,32 @@ New Features
 ~~~~~~~~~~~~
 
 - Added grouping and apparent axial widths for detected 2D peaks.
+  (:pr:`1857`)
 
 - Allow the independently released NMR 0.3 plugin in the ``nmr`` extra and
   link to its standalone reading and processing guides.
+  (:pr:`1855`)
 
 - Added ``integrate_region`` for physical ND boxes with optional propagated
   standard uncertainty on regular or irregular spectral grids.
+  (:pr:`1849`)
 - Added bounded multiplet fitting on multidimensional spectral grids to
   ``Optimize``, with fitted components, residuals and parameter uncertainties.
+  (:pr:`1854`)
 
 Bug Fixes
 ~~~~~~~~~
 
 - Preserve uniform frequency bins for FFTs with finely spaced axes so the
   inverse transform can recover the time-domain signal.
+  (:pr:`1851`)
 - Resolve physical phase pivots to sample indices before applying a
   first-order phase correction.
+  (:pr:`1853`)
 
 Breaking Changes
 ~~~~~~~~~~~~~~~~
 
 - ``fft()`` now leaves phase correction to an explicit
   ``pk()`` call. Pass the desired phase angles and pivot to ``pk()``.
+  (:pr:`1856`)

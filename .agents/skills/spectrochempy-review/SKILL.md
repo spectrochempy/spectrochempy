@@ -130,7 +130,8 @@ If tests are missing or insufficient, report what should be added — but do
 * Code follows existing patterns.
 * No unnecessary new dependencies.
 * Commit messages use correct prefix.
-* Changelog updated or `no-changelog` label justified.
+* Changelog entries link to the correct PR in the owning repository, or the
+  `no-changelog` label is justified.
 
 ---
 
