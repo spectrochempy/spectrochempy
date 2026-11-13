@@ -11,6 +11,7 @@ import tempfile
 import time
 import traceback
 
+import jupytext
 import nbformat
 from nbconvert.preprocessors import ExecutePreprocessor
 
@@ -50,12 +51,16 @@ def _should_execute(notebook, default):
     )
 
 
-def prepare():
+def prepare(*, nodata=False, fresh=False):
     from sphinx.config import eval_config_file
     from sphinx.util.matching import Matcher
 
     MANIFEST.unlink(missing_ok=True)
-    builder = BuildDocumentation()
+    builder = (
+        BuildDocumentation(nodata=nodata, nosync=True)
+        if fresh
+        else BuildDocumentation()
+    )
     builder._prepare_build()
     config = eval_config_file(str(DOCS / "conf.py"), None)
     settings = {
@@ -80,6 +85,8 @@ def prepare():
         name = path.relative_to(SOURCES).as_posix()
         if excluded(name):
             continue
+        if fresh and stem.with_suffix(".py").is_file():
+            nbformat.write(jupytext.read(stem.with_suffix(".py")), path)
         notebook = nbformat.read(path, as_version=4)
         notebooks[name] = {
             "execute": _should_execute(notebook, settings["execute"]),
