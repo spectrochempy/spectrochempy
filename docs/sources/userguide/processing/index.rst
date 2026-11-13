@@ -19,6 +19,7 @@ Processing
    smoothing
    baseline
    denoising
+   wavelet_denoising
    apodization
    td_baseline
    fourier

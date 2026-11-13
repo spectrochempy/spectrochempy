@@ -22,6 +22,7 @@ VERSIONS = {
 
 INSTALL_MAPPING = {
     "jinja2": "Jinja2",
+    "pywt": "PyWavelets",
 }
 
 
