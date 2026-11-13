@@ -147,7 +147,12 @@ variable. The token needs read access to Actions in the SpectroChemPy
 repository. RTD waits up to 15 minutes for a successful workflow with both
 artifacts for its checkout and fails if none is available. If an artifact has
 expired, run the workflow again for the same branch or tag at the same commit
-before retrying the RTD build. External pull request previews continue to
+before retrying the RTD build. If the original ref has moved, create a
+temporary branch at the exact SHA and dispatch the workflow on it. For a
+manual retry, start RTD after the CI workflow succeeds. Before enabling
+artifact mode for automatic builds, verify that the RTD time limit covers
+both the CI wait and the Sphinx render, or arrange for CI to finish before
+triggering RTD. External pull request previews continue to
 prepare and execute their sources inside RTD.
 
 Writing Tips

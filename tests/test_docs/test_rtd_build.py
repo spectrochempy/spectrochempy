@@ -2,6 +2,7 @@
 
 import hashlib
 from io import BytesIO
+from urllib.error import HTTPError
 from zipfile import ZipFile
 
 import pytest
@@ -35,7 +36,7 @@ def test_selects_both_artifacts_from_one_successful_run(monkeypatch):
         return {"artifacts": responses[int(path.split("/")[1])]}
 
     monkeypatch.setattr(rtd_build, "_json", github)
-    selected = rtd_build._find_artifacts(commit, "test-token")
+    selected = rtd_build._find_artifacts(commit, "test-token", set())
     assert {kind: item["id"] for kind, item in selected.items()} == {
         "gallery": 40,
         "tutorials": 41,
@@ -75,3 +76,27 @@ def test_artifact_mode_is_private_and_excludes_external_builds(
     monkeypatch.setattr(rtd_build, "_render_on_rtd", lambda: called.append("local"))
     rtd_build.main()
     assert called == ["local" if version_type == "external" else "artifact"]
+
+
+def test_expired_download_retries_the_entire_pair(monkeypatch):
+    monkeypatch.setattr(rtd_build.ci_artifacts, "_commit", lambda: "commit")
+
+    def find(_commit, _token, unavailable):
+        if unavailable:
+            assert unavailable == {2}
+            return {"tutorials": {"id": 3}, "gallery": {"id": 4}}
+        return {"tutorials": {"id": 1}, "gallery": {"id": 2}}
+
+    def download(artifact, _token, path):
+        if artifact["id"] == 2:
+            raise HTTPError("https://api.github.com", 410, "Gone", {}, None)
+        path.write_text(str(artifact["id"]))
+
+    def render(root):
+        assert (root / "tutorials").read_text() == "3"
+        assert (root / "gallery").read_text() == "4"
+
+    monkeypatch.setattr(rtd_build, "_find_artifacts", find)
+    monkeypatch.setattr(rtd_build, "_download", download)
+    monkeypatch.setattr(rtd_build.ci_artifacts, "render", render)
+    rtd_build._render_from_actions("test-token")

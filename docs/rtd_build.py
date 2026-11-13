@@ -12,6 +12,7 @@ import sys
 import tempfile
 import time
 from pathlib import Path
+from urllib.error import HTTPError
 from urllib.parse import urlencode
 from urllib.request import Request
 from urllib.request import urlopen
@@ -43,7 +44,7 @@ def _json(path, token):
         return json.load(response)
 
 
-def _find_artifacts(commit, token):
+def _find_artifacts(commit, token, unavailable):
     query = urlencode({"head_sha": commit, "status": "success", "per_page": 100})
     runs = _json(f"workflows/{WORKFLOW}/runs?{query}", token)["workflow_runs"]
     names = {f"docs-{kind}-{commit}": kind for kind in ci_artifacts.KINDS}
@@ -59,7 +60,9 @@ def _find_artifacts(commit, token):
         matches = {
             names[item["name"]]: item
             for item in artifacts
-            if not item["expired"] and item["name"] in names
+            if not item["expired"]
+            and item["name"] in names
+            and item["id"] not in unavailable
         }
         if matches.keys() == set(ci_artifacts.KINDS):
             return matches
@@ -84,16 +87,28 @@ def _download(artifact, token, destination):
 def _render_from_actions(token):
     commit = ci_artifacts._commit()
     deadline = time.monotonic() + 900
-    while (artifacts := _find_artifacts(commit, token)) is None:
+    unavailable = set()
+    while True:
+        artifacts = _find_artifacts(commit, token, unavailable)
+        if artifacts is not None:
+            with tempfile.TemporaryDirectory(prefix="scp-rtd-artifacts-") as directory:
+                root = Path(directory)
+                for kind, artifact in artifacts.items():
+                    try:
+                        _download(artifact, token, root / kind)
+                    except HTTPError as error:
+                        if error.code != 410:
+                            raise
+                        unavailable.add(artifact["id"])
+                        break
+                else:
+                    ci_artifacts.render(root)
+                    return
         if time.monotonic() >= deadline:
             raise RuntimeError(f"No complete CI artifact pair found for {commit}")
         print(f"Waiting for documentation artifacts for {commit}", flush=True)
-        time.sleep(30)
-    with tempfile.TemporaryDirectory(prefix="scp-rtd-artifacts-") as directory:
-        root = Path(directory)
-        for kind, artifact in artifacts.items():
-            _download(artifact, token, root / kind)
-        ci_artifacts.render(root)
+        if artifacts is None:
+            time.sleep(30)
 
 
 def _render_on_rtd():
