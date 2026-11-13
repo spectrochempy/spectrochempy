@@ -487,6 +487,8 @@ def _read_explicit_jcamp(dataset, filename, stream, kind, technique):
     dataset.meta.jcamp_data_type = (
         "RAMAN SPECTRUM" if kind == "raman" else "UV/VIS SPECTRUM"
     )
+    if kind == "raman":
+        dataset._read_raman_jcamp = True
     dataset.meta.jcamp_xunits = xunits
     dataset.meta.jcamp_yunits = yunits
     dataset.history = f"Imported {technique} JCAMP-DX file {Path(filename).name}"

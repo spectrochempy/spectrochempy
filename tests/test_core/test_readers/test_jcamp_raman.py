@@ -62,3 +62,13 @@ def test_importer_merges_native_files_with_raman_metadata(tmp_path, metadata):
     ]
     merged = scp.read(*paths, merge=True)
     assert merged.shape == (2, 2)
+
+
+def test_importer_merges_native_bytes_saved_from_raman(tmp_path):
+    spectrum = scp.read_jcamp({"original.dx": RAMAN})
+    paths = [
+        scp.read_jcamp({"original.dx": RAMAN}).dump(tmp_path / name)
+        for name in ("first.scp", "second.scp")
+    ]
+    merged = scp.read({path.name: path.read_bytes() for path in paths}, merge=True)
+    assert merged.shape == (2, spectrum.size)
