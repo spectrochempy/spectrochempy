@@ -135,6 +135,7 @@ where = ["src"]
 ]
 "spectrochempy.data" = [
   "databases/*",
+  "gallery/*.dx",
   "*.json",
   "*.cff",
 ]
