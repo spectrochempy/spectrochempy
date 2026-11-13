@@ -28,7 +28,11 @@ jobs:
           python-version: "3.13"
       - &install
         name: Install documentation dependencies
+        env:
+          UPSTREAM_URL: https://github.com/spectrochempy/spectrochempy.git
         run: |
+          git fetch --no-tags "$UPSTREAM_URL" "refs/tags/spectrochempy-v*:refs/tags/spectrochempy-v*"
+          git describe --tags --match "spectrochempy-v[0-9]*"
           sudo apt-get update
           sudo apt-get install --yes pandoc
           python .github/actions/verified-pip/verified_pip.py
