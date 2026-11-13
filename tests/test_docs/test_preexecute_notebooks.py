@@ -261,6 +261,10 @@ def test_rtd_commands_cover_inventory_and_preserve_gallery():
     )
 
 
-def test_preexecution_cli_is_not_collected_as_a_notebook_example():
+def test_documentation_clis_are_not_collected_as_notebook_examples():
     examples = importlib.import_module("tests.test_docs.test_py_in_docs")
     assert Path(runner.__file__).resolve() not in examples.scripts
+    assert (
+        Path(runner.__file__).with_name("ci_artifacts.py").resolve()
+        not in examples.scripts
+    )
