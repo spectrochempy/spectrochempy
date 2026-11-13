@@ -146,7 +146,7 @@ the Docs test project with the same build time limit. Configure
 ``SCPY_RTD_DOCS_ARTIFACTS=1`` and set ``SCPY_RTD_GITHUB_TOKEN`` as a private
 environment variable with read access to Actions in the SpectroChemPy
 repository. Verify that the hosted build uses artifacts from its exact
-checkout SHA, keeps the expected URLs and navigation, and completes within
+checkout SHA and installed SpectroChemPy version, keeps the expected URLs and navigation, and completes within
 the time limit, including dependency installation, the CI wait, and rendering.
 If the concurrent workflow and RTD build exceed that limit, arrange for CI to
 finish before triggering RTD. External pull request previews execute their
@@ -156,8 +156,7 @@ RTD waits up to 15 minutes for a successful workflow with both artifacts for
 its checkout. If artifacts expire, start a new workflow run with
 ``workflow_dispatch`` in the upstream SpectroChemPy repository. Verify that
 the run uses the exact checkout SHA and retry RTD once CI succeeds. If the
-ref has moved and
-you need the old SHA, dispatch CI on a temporary branch at that SHA and build
+ref has moved and you need the old SHA, dispatch CI on a temporary branch at that SHA and build
 the corresponding RTD version of the temporary branch. To retry the original
 RTD version instead, generate artifacts for its current SHA. To restore
 execution inside RTD, unset ``SCPY_RTD_DOCS_ARTIFACTS``.

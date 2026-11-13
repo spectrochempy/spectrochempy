@@ -36,7 +36,8 @@ def test_selects_both_artifacts_from_one_successful_run(monkeypatch):
         return {"artifacts": responses[int(path.split("/")[1])]}
 
     monkeypatch.setattr(rtd_build, "_json", github)
-    selected = rtd_build._find_artifacts(commit, "test-token", set())
+    run_id, selected = rtd_build._find_artifacts(commit, "test-token", set())
+    assert run_id == 4
     assert {kind: item["id"] for kind, item in selected.items()} == {
         "gallery": 40,
         "tutorials": 41,
@@ -84,8 +85,8 @@ def test_expired_download_retries_the_entire_pair(monkeypatch):
     def find(_commit, _token, unavailable):
         if unavailable:
             assert unavailable == {2}
-            return {"tutorials": {"id": 3}, "gallery": {"id": 4}}
-        return {"tutorials": {"id": 1}, "gallery": {"id": 2}}
+            return 20, {"tutorials": {"id": 3}, "gallery": {"id": 4}}
+        return 10, {"tutorials": {"id": 1}, "gallery": {"id": 2}}
 
     def download(artifact, _token, path):
         if artifact["id"] == 2:
@@ -100,3 +101,12 @@ def test_expired_download_retries_the_entire_pair(monkeypatch):
     monkeypatch.setattr(rtd_build, "_download", download)
     monkeypatch.setattr(rtd_build.ci_artifacts, "render", render)
     rtd_build._render_from_actions("test-token")
+
+
+def test_same_commit_with_different_installed_version_is_rejected(tmp_path):
+    commit = "a" * 40
+    (tmp_path / "manifest.json").write_text(
+        f'{{"commit": "{commit}", "kind": "tutorials", "version": "0.dev0"}}'
+    )
+    with pytest.raises(rtd_build.ci_artifacts.ArtifactVersionMismatchError):
+        rtd_build.ci_artifacts._verified_files(tmp_path, "tutorials", commit)

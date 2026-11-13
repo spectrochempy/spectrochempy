@@ -65,7 +65,7 @@ def _find_artifacts(commit, token, unavailable):
             and item["id"] not in unavailable
         }
         if matches.keys() == set(ci_artifacts.KINDS):
-            return matches
+            return run["id"], matches
     return None
 
 
@@ -89,8 +89,9 @@ def _render_from_actions(token):
     deadline = time.monotonic() + 900
     unavailable = set()
     while True:
-        artifacts = _find_artifacts(commit, token, unavailable)
-        if artifacts is not None:
+        selection = _find_artifacts(commit, token, unavailable)
+        if selection is not None:
+            run_id, artifacts = selection
             with tempfile.TemporaryDirectory(prefix="scp-rtd-artifacts-") as directory:
                 root = Path(directory)
                 for kind, artifact in artifacts.items():
@@ -102,12 +103,25 @@ def _render_from_actions(token):
                         unavailable.add(artifact["id"])
                         break
                 else:
-                    ci_artifacts.render(root)
-                    return
+                    print(
+                        f"Checking CI artifact pair for {commit} from run {run_id}: "
+                        f"tutorials={artifacts['tutorials']['id']}, "
+                        f"gallery={artifacts['gallery']['id']}",
+                        flush=True,
+                    )
+                    try:
+                        ci_artifacts.render(root)
+                    except ci_artifacts.ArtifactVersionMismatchError as error:
+                        print(f"Skipping run {run_id}: {error}", flush=True)
+                        unavailable.update(
+                            artifact["id"] for artifact in artifacts.values()
+                        )
+                    else:
+                        return
         if time.monotonic() >= deadline:
             raise RuntimeError(f"No complete CI artifact pair found for {commit}")
         print(f"Waiting for documentation artifacts for {commit}", flush=True)
-        if artifacts is None:
+        if selection is None:
             time.sleep(30)
 
 
