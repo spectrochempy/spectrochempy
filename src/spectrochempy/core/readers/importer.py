@@ -867,7 +867,8 @@ def merge_datasets(datasets, **kwargs):
         return datasets
 
     def has_explicit_jcamp_grid(dataset):
-        return dataset.meta.get("jcamp_data_type") in {
+        data_type = dataset.meta.get("jcamp_data_type")
+        return isinstance(data_type, str) and data_type in {
             "UV/VIS SPECTRUM",
             "RAMAN SPECTRUM",
         }

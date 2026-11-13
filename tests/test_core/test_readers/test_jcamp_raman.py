@@ -49,3 +49,15 @@ def test_read_raman_rejects_non_shift_units():
     payload = RAMAN.replace(b"1/CM", b"NANOMETERS")
     with pytest.warns(UserWarning, match="Unsupported Raman JCAMP-DX XUNITS"):
         assert scp.read_jcamp({"invalid.dx": payload}) is None
+
+
+def test_importer_merges_native_files_with_list_metadata(tmp_path):
+    first = scp.NDDataset([1.0, 2.0], coordset=[scp.Coord([0, 1])])
+    first.meta.jcamp_data_type = ["Raman spectrum"]
+    second = scp.NDDataset([3.0, 4.0], coordset=[scp.Coord([0, 1])])
+    paths = [
+        first.dump(tmp_path / "first.scp"),
+        second.dump(tmp_path / "second.scp"),
+    ]
+    merged = scp.read(*paths, merge=True)
+    assert merged.shape == (2, 2)
