@@ -45,6 +45,7 @@ def read_jcamp(*paths, **kwargs):
     The infrared reader supports AFFN and DIFDUP encoding
     (see :cite:t:`mcdonald:1988`).
     UV-visible spectra use explicit ASCII X/Y pairs in XYDATA or XYPOINTS.
+    Multiple UV-visible files are returned as separate spectra.
     Processed NMR spectra use the optional NMR plugin's interop reader.
 
     Parameters
@@ -422,7 +423,7 @@ def _read_uvvis_jcamp(dataset, filename, stream):
     pairs = []
     reading = False
     while True:
-        label, value = _readl(stream)
+        label, value = _readl(stream, exact_end=True)
         label = re.sub(r"[\s\-_]", "", label.upper())
         value = value.strip()
         if label == "##END":
@@ -465,7 +466,6 @@ def _read_uvvis_jcamp(dataset, filename, stream):
     coord._set_data(x)
     dataset.data = y
     dataset.set_coordset(x=coord)
-    dataset.x._rounding = False
     dataset.name = headers.get("##TITLE", Path(filename).stem)
     dataset.filename = filename
     dataset.origin = headers.get("##ORIGIN") or "jcamp-uvvis"
@@ -701,13 +701,13 @@ def _read_dx(*args, **kwargs):  # pragma: no cover
     return _read_jdx(*args, **kwargs)
 
 
-def _readl(fid):
+def _readl(fid, *, exact_end=False):
     line = fid.readline()
     if not line:
         raise ValueError("Unexpected end of JCAMP-DX file")
     line = line.partition("$$")[0].strip()
     if line[0:2] == "##":  # if line starts with "##"
-        if line[0:5] == "##END":  # END KEYWORD, no text
+        if (line.split("=", 1)[0].rstrip() if exact_end else line[:5]) == "##END":
             keyword = "##END"
             text = ""
         else:  # keyword + text
