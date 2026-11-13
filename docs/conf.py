@@ -647,30 +647,32 @@ def _plugin_examples_table(entries: list[dict[str, str]]) -> str:
         "",
     ]
 
-    if entries:
+    lines.extend(
+        [
+            ".. list-table::",
+            "   :header-rows: 1",
+            "   :widths: 40 25 35",
+            "",
+            "   * - Example",
+            "     - Required plugin",
+            "     - Gallery section",
+            "   * - `NMR gallery <https://www.spectrochempy.fr/projects/nmr/latest/examples_overview.html>`__",
+            "     - ``spectrochempy-nmr``",
+            "     - :ref:`Import / Export <examples-importer-index>`,",
+            "       :ref:`Processing <examples-processing-index>`,",
+            "       :ref:`Analysis <examples-analysis-index>`,",
+            "       :ref:`Modeling and simulation <examples-simulation-index>`",
+        ]
+    )
+
+    for entry in entries:
         lines.extend(
             [
-                ".. list-table::",
-                "   :header-rows: 1",
-                "   :widths: 40 25 35",
-                "",
-                "   * - Example",
-                "     - Required plugin",
-                "     - Gallery section",
+                f"   * - :ref:`{_gallery_ref_for_example(entry['path'])}`",
+                f"     - ``{entry['plugin']}``",
+                f"     - {_section_cell(entry['section'], entry['section_ref'])}",
             ]
         )
-
-        for entry in entries:
-            lines.extend(
-                [
-                    f"   * - :ref:`{_gallery_ref_for_example(entry['path'])}`",
-                    f"     - ``{entry['plugin']}``",
-                    f"     - {_section_cell(entry['section'], entry['section_ref'])}",
-                ]
-            )
-    else:
-        lines.append("No plugin-dependent examples are currently registered.")
-
     lines.extend(
         ["", "See :ref:`plugins` for general plugin installation instructions.", ""]
     )

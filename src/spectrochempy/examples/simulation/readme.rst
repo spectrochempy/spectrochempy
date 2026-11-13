@@ -1,3 +1,5 @@
+.. _examples-simulation-index:
+
 .. gallery-overview-start
 
 #######################
