@@ -54,12 +54,12 @@ jobs:
     needs: execute
     runs-on: ubuntu-24.04
     timeout-minutes: 30
-    env:
-      READTHEDOCS_OUTPUT: ${{ runner.temp }}/docs-output
     steps:
       - *checkout
       - *python
       - *install
+      - name: Set output directory
+        run: echo "READTHEDOCS_OUTPUT=$RUNNER_TEMP/docs-output" >> "$GITHUB_ENV"
       - uses: actions/download-artifact@v8
         with:
           name: docs-tutorials-${{ github.sha }}
@@ -81,6 +81,6 @@ jobs:
       - uses: actions/upload-artifact@v7
         with:
           name: docs-html-${{ github.sha }}
-          path: ${{ env.READTHEDOCS_OUTPUT }}/html
+          path: ${{ runner.temp }}/docs-output/html
           if-no-files-found: error
           retention-days: 7
