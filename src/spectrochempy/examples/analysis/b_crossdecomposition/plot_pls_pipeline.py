@@ -17,8 +17,6 @@ only, then reuses the fitted preprocessing when predicting validation spectra.
 
 # %%
 # Import the packages
-import numpy as np
-
 import spectrochempy as scp
 
 # %%
@@ -61,7 +59,7 @@ if ds_list is not None:
     # set spans the concentration range instead of becoming a simple high-index
     # holdout. This deterministic split is used only for demonstration;
     # real validation splits should follow the experimental design.
-    moisture_order = np.argsort(np.asarray(y.data).ravel())
+    moisture_order = y.squeeze().argsort()
     validation_indices = sorted(moisture_order[3::4].tolist())
     calibration_indices = [i for i in range(X.shape[0]) if i not in validation_indices]
 

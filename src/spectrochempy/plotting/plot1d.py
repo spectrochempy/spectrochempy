@@ -34,6 +34,92 @@ from spectrochempy.plotting.dispatcher import plot_dataset as _plot_dataset
 from spectrochempy.utils.mplutils import make_label
 from spectrochempy.utils.typeutils import is_sequence
 
+
+def _plot_histogram(
+    dataset,
+    *,
+    bins=10,
+    density=False,
+    range=None,
+    histtype="bar",
+    orientation="vertical",
+    ax=None,
+    clear=True,
+    figsize=None,
+    dpi=None,
+    xlabel=None,
+    ylabel=None,
+    title=None,
+    xlim=None,
+    ylim=None,
+    **kwargs,
+):
+    values = np.asarray([] if dataset.data is None else dataset.data)
+    if np.iscomplexobj(values):
+        raise ValueError(
+            "Histograms require real values. Select dataset.real or dataset.imag."
+        )
+
+    valid = np.isfinite(values) & ~np.asarray(dataset.mask, dtype=bool)
+    weights = kwargs.pop("weights", None)
+    if weights is not None:
+        weights = np.asarray(weights)
+        if weights.shape != values.shape:
+            raise ValueError(
+                "Histogram weights must have the same shape as the dataset."
+            )
+        weights = weights[valid]
+    values = values[valid]
+    edges = np.histogram_bin_edges(values, bins=bins, range=range, weights=weights)
+    if edges.size < 2 or not np.all(np.diff(edges) > 0):
+        raise ValueError("Histogram bin edges must be strictly increasing.")
+    if density:
+        in_range = (values >= edges[0]) & (values <= edges[-1])
+        total = in_range.sum() if weights is None else weights[in_range].sum()
+        if not np.isfinite(total) or total == 0:
+            raise ValueError(
+                "A histogram density requires nonzero finite mass in the bins."
+            )
+
+    _, figure, axes = dataset._figure_setup(
+        ax=ax, clear=clear, figsize=figsize, dpi=dpi
+    )
+    ax = axes.get("main")
+    if ax is None:
+        ax = figure.gca()
+    ax.hist(
+        values,
+        bins=edges,
+        density=density,
+        histtype=histtype,
+        orientation=orientation,
+        weights=weights,
+        **kwargs,
+    )
+
+    values_label = make_label(dataset, "Values")
+    frequency_label = "Count"
+    if density:
+        units = dataset.units
+        density_units = units**-1 if units is not None else None
+        frequency_label = make_label(
+            Coord(title="Probability density", units=density_units)
+        )
+    if orientation == "horizontal":
+        values_label, frequency_label = frequency_label, values_label
+    ax.set(
+        xlabel=values_label if xlabel is None else xlabel,
+        ylabel=frequency_label if ylabel is None else ylabel,
+    )
+    if title is not None:
+        ax.set_title(title)
+    if xlim is not None:
+        ax.set_xlim(xlim)
+    if ylim is not None:
+        ax.set_ylim(ylim)
+    return ax
+
+
 # --------------------------------------------------------------------------------------
 # plot_1D
 # --------------------------------------------------------------------------------------
@@ -53,6 +139,7 @@ def plot_1D(dataset, method=None, **kwargs):
 
         Available 1D plotting methods include:
 
+        - ``hist``: histogram of all unmasked finite dataset values.
         - ``pen``: solid line plot
         - ``bar``: bar graph
         - ``scatter``: scatter plot
@@ -200,6 +287,10 @@ def plot_1D(dataset, method=None, **kwargs):
 
     # Apply styles and font overrides within context for entire plotting operation
     with plt.style.context(style), matplotlib.rc_context(merged_overrides):
+        if method == "hist":
+            kwargs.pop("pen", None)
+            return _plot_histogram(dataset, **kwargs)
+
         # Redirections ?
         # ------------------------------------------------------------------------
         # should we redirect the plotting to another method
@@ -1018,6 +1109,8 @@ def plot_multiple(
     lw=1,
     shift=0,
     *,
+    alpha=None,
+    figsize=None,
     ax=None,
     clear=True,
     show=True,
@@ -1053,6 +1146,13 @@ def plot_multiple(
         Line width. If lw is not provided then the line width is chosen automatically.
     shift: `float`, `list`of  `floats`, optional, default: 0.0
         Vertical shift of the lines.
+    alpha : float or sequence of float or None, optional
+        Opacity from 0 (transparent) to 1 (opaque). A scalar applies to all
+        traces. A sequence supplies one value per dataset. Use None for the
+        default opacity of a trace.
+    figsize : tuple of float, optional
+        Width and height in inches when creating a figure. An explicit
+        ``ax`` retains its figure size.
     ax : `~matplotlib.axes.Axes`, optional
         Axes to plot on. If None, a new figure is created.
     clear : `bool`, optional
@@ -1082,6 +1182,9 @@ def plot_multiple(
 
     """
     kwargs = normalize_plot_kwargs(kwargs)
+    alpha_alias = kwargs.pop("alpha", None)
+    if alpha is None:
+        alpha = alpha_alias
 
     output = kwargs.pop("output", None)
 
@@ -1098,6 +1201,8 @@ def plot_multiple(
             color=color,
             ls=ls,
             lw=lw,
+            alpha=alpha,
+            figsize=figsize,
             ax=ax,
             clear=clear,
             show=show,
@@ -1143,10 +1248,13 @@ def plot_multiple(
     ls = _valid(ls, "ls")
     lw = _valid(lw, "lw")
     shift = _valid(shift, "shift")
+    alphas = (
+        _valid(alpha, "alpha values") if is_sequence(alpha) else [alpha] * len(datasets)
+    )
 
     from spectrochempy.utils.mplutils import _setup_axes
 
-    ax = _setup_axes(ax=ax, clear=clear)
+    ax = _setup_axes(ax=ax, clear=clear, figsize=figsize)
     ax.name = "main"
 
     kwargs["show"] = False
@@ -1160,6 +1268,7 @@ def plot_multiple(
             color=color[i] if color != "AUTO" else color,
             ls=ls[i] if ls != "AUTO" else ls,
             lw=lw[i] if lw != "AUTO" else lw,
+            alpha=alphas[i],
             ax=ax,
             **kwargs,
         )

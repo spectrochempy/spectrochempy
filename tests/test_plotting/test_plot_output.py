@@ -245,6 +245,59 @@ class TestSavedFigureContent:
         assert with_legend.read_bytes() != without_legend.read_bytes()
 
 
+class TestPlotMultipleOverlayOptions:
+    def test_figsize_is_used_for_figure_and_output(self, nd_1d, tmp_path):
+        from PIL import Image
+
+        _small_dpi()
+        prefs.savefig_bbox = "standard"
+        target = tmp_path / "overlay.png"
+
+        ax = scp.plot_multiple(
+            [nd_1d, nd_1d * 2], figsize=(7, 2.5), output=target, show=False
+        )
+
+        assert tuple(ax.figure.get_size_inches()) == (7, 2.5)
+        with Image.open(target) as image:
+            assert image.size == (504, 180)
+
+    def test_figsize_does_not_resize_supplied_axes(self, nd_1d):
+        figure, ax = plt.subplots(figsize=(4, 3))
+
+        result = scp.plot_multiple(
+            [nd_1d, nd_1d * 2], ax=ax, figsize=(7, 2.5), show=False
+        )
+
+        assert result is ax
+        assert tuple(figure.get_size_inches()) == (4, 3)
+
+    @pytest.mark.parametrize(
+        ("alpha", "expected"),
+        [(0.4, [0.4, 0.4]), ([0.2, 0.8], [0.2, 0.8]), ((None, 0.0), [None, 0.0])],
+    )
+    def test_alpha_is_applied_to_each_trace(self, nd_1d, alpha, expected):
+        ax = scp.plot_multiple(
+            [nd_1d, nd_1d * 2], method="pen", alpha=alpha, show=False
+        )
+
+        assert [line.get_alpha() for line in ax.lines] == expected
+
+    @pytest.mark.parametrize(("alpha", "expected"), [(None, 0.25), (0.6, 0.6)])
+    def test_calpha_alias(self, nd_1d, alpha, expected):
+        ax = scp.plot_multiple(
+            [nd_1d, nd_1d * 2], method="pen", calpha=0.25, alpha=alpha, show=False
+        )
+
+        assert [line.get_alpha() for line in ax.lines] == [expected, expected]
+
+    def test_alpha_sequence_must_match_dataset_count(self, nd_1d):
+        figures = plt.get_fignums()
+        with pytest.raises(ValueError, match="alpha values"):
+            scp.plot_multiple([nd_1d, nd_1d * 2], alpha=[0.5], show=False)
+
+        assert plt.get_fignums() == figures
+
+
 # ======================================================================================
 # plot_multiple: the single-dataset delegation keeps the lifecycle flags
 # ======================================================================================
