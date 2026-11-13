@@ -129,6 +129,17 @@ Append the printed HTML path relative to ``build/preview/`` to
 ``http://127.0.0.1:8765/``. After editing, rerun the preview command and
 refresh the page in your browser. The URL works while the server is running.
 
+Documentation CI Prototype
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The manually triggered documentation artifact workflow runs the tutorials
+and gallery in separate jobs. Both jobs check out the workflow commit.
+The tutorial job saves executed notebooks. The gallery job saves generated
+reStructuredText, figures, thumbnails, downloads, and API backreferences.
+The final job checks the commit and file hashes of both artifacts before
+rendering one Sphinx site with the usual configuration and document paths.
+Download the HTML artifact from the workflow run to inspect the result.
+
 Writing Tips
 ------------
 

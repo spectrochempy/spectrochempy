@@ -97,6 +97,7 @@ single_doc_or_dir = pattern is not None and pattern not in ["noapi", "whatsnew"]
 
 local_preview = os.environ.get("SCPY_DOCS_LOCAL_PREVIEW")
 gallery_preview = local_preview == "gallery"
+gallery_from_artifact = os.environ.get("SCPY_DOCS_GALLERY_ARTIFACT") == "1"
 
 include_api = pattern is None
 
@@ -770,8 +771,9 @@ if gallery_preview:
     gallery_output_dirs = ["gallery"]
 elif not single_doc_or_dir:
     plugin_gallery_entries = _load_plugin_gallery_entries()
-    example_source_dir = _stage_gallery_examples()
-    _write_plugin_gallery_readmes(example_source_dir, plugin_gallery_entries)
+    if not gallery_from_artifact:
+        example_source_dir = _stage_gallery_examples()
+        _write_plugin_gallery_readmes(example_source_dir, plugin_gallery_entries)
 
     gallery_examples_dirs = [
         f"{example_source_dir}/{section}" for section in gallery_sections
@@ -799,7 +801,7 @@ def reset_scp_preferences(gallery_conf, fname):
 
 if not single_doc_or_dir or gallery_preview:
     sphinx_gallery_conf = {
-        "plot_gallery": not noexec,
+        "plot_gallery": not (noexec or gallery_from_artifact),
         "doc_module": "spectrochempy",
         # Source example files in separate directory
         "examples_dirs": gallery_examples_dirs,
@@ -1343,6 +1345,17 @@ def show_plotting_example_title(app, env, node, contnode):
 
 
 def setup(app):
+    if gallery_from_artifact:
+        from sphinx_gallery.gen_gallery import generate_gallery_rst
+
+        # Keep the gallery directives and HTML link resolution, but consume
+        # the generated pages, images and backreferences from CI.
+        for listener in app.events.listeners["builder-inited"]:
+            if listener.handler is generate_gallery_rst:
+                app.disconnect(listener.id)
+                break
+        else:
+            raise RuntimeError("Could not disable Sphinx-Gallery generation")
     if gallery_preview:
         app.connect("missing-reference", show_plotting_example_title)
     if local_preview == "tutorial":

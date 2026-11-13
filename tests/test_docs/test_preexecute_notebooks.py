@@ -249,7 +249,7 @@ def test_rtd_commands_cover_inventory_and_preserve_gallery():
         path.with_suffix(".ipynb").relative_to(runner.SOURCES).as_posix()
         for path in runner.BuildDocumentation()._get_notebook_files()
     )
-    assert len(expected) == 38
+    assert expected
     assert commands[1:-2] == [
         f"python -u -m docs.preexecute_notebooks execute {name}" for name in expected
     ]

@@ -1,0 +1,86 @@
+name: Documentation artifact prototype
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  execute:
+    name: Execute ${{ matrix.kind }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        kind: [tutorials, gallery]
+    steps:
+      - &checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - &python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - &install
+        name: Install documentation dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes pandoc
+          python .github/actions/verified-pip/verified_pip.py
+          python -m pip install -e ".[docs,wavelets]"
+          python -m pip install "ipython==9.17.1" "jupyterlab==4.6.4" "notebook==7.6.3"
+          names=$(python -m spectrochempy.ci.install_plugins --list-names)
+          for name in $names; do
+            python -m pip install --no-deps -e "plugins/$name"
+          done
+          python -m pip install "spectrochempy-nmr>=0.2,<0.4" osqp scipy tensorly
+          python -c 'from importlib.metadata import version; import spectrochempy as scp; assert callable(scp.nmr.read); print("NMR plugin", version("spectrochempy-nmr"))'
+      - name: Generate source artifact
+        run: python -m docs.ci_artifacts produce ${{ matrix.kind }} "${{ runner.temp }}/bundle"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: docs-${{ matrix.kind }}-${{ github.sha }}
+          path: ${{ runner.temp }}/bundle
+          if-no-files-found: error
+          retention-days: 7
+
+  render:
+    name: Render integrated Sphinx site
+    needs: execute
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      READTHEDOCS_OUTPUT: ${{ runner.temp }}/docs-output
+    steps:
+      - *checkout
+      - *python
+      - *install
+      - uses: actions/download-artifact@v8
+        with:
+          name: docs-tutorials-${{ github.sha }}
+          path: ${{ runner.temp }}/docs-inputs/tutorials
+      - uses: actions/download-artifact@v8
+        with:
+          name: docs-gallery-${{ github.sha }}
+          path: ${{ runner.temp }}/docs-inputs/gallery
+      - name: Verify source artifacts and build HTML
+        run: python -m docs.ci_artifacts render "${{ runner.temp }}/docs-inputs"
+      - name: Check integrated site entry points
+        run: |
+          test -s "$READTHEDOCS_OUTPUT/html/index.html"
+          test -s "$READTHEDOCS_OUTPUT/html/userguide/index.html"
+          test -s "$READTHEDOCS_OUTPUT/html/userguide/plotting/plot_types.html"
+          test -s "$READTHEDOCS_OUTPUT/html/gettingstarted/examples/index.html"
+          test -s "$READTHEDOCS_OUTPUT/html/gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_a_create_dataset.html"
+          test -s "$READTHEDOCS_OUTPUT/html/objects.inv"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: docs-html-${{ github.sha }}
+          path: ${{ env.READTHEDOCS_OUTPUT }}/html
+          if-no-files-found: error
+          retention-days: 7
