@@ -23,17 +23,17 @@ provides the following entry points.
 
    * - Public entry point
      - Purpose
-   * - `scp.nmr.read() <https://www.spectrochempy.fr/projects/nmr/latest/reference/generated/spectrochempy_nmr.read.html>`_
+   * - `spectrochempy.nmr.read <https://www.spectrochempy.fr/projects/nmr/latest/reference/generated/spectrochempy_nmr.read.html>`_
      - Select a reader from the input format.
-   * - `scp.nmr.read_topspin() <https://www.spectrochempy.fr/projects/nmr/latest/reference/generated/spectrochempy_nmr.read_topspin.html>`_
+   * - `spectrochempy.nmr.read_topspin <https://www.spectrochempy.fr/projects/nmr/latest/reference/generated/spectrochempy_nmr.read_topspin.html>`_
      - Read Bruker TopSpin data.
-   * - `scp.nmr.read_agilent() <https://www.spectrochempy.fr/projects/nmr/latest/reference/generated/spectrochempy_nmr.read_agilent.html>`_
+   * - `spectrochempy.nmr.read_agilent <https://www.spectrochempy.fr/projects/nmr/latest/reference/generated/spectrochempy_nmr.read_agilent.html>`_
      - Read Agilent and Varian data.
-   * - `scp.nmr.read_jeol() <https://www.spectrochempy.fr/projects/nmr/latest/reference/generated/spectrochempy_nmr.read_jeol.html>`_
+   * - `spectrochempy.nmr.read_jeol <https://www.spectrochempy.fr/projects/nmr/latest/reference/generated/spectrochempy_nmr.read_jeol.html>`_
      - Read JEOL JDF data.
-   * - `scp.nmr.read_simpson() <https://www.spectrochempy.fr/projects/nmr/latest/reference/generated/spectrochempy_nmr.read_simpson.html>`_
+   * - `spectrochempy.nmr.read_simpson <https://www.spectrochempy.fr/projects/nmr/latest/reference/generated/spectrochempy_nmr.read_simpson.html>`_
      - Read SIMPSON simulations.
-   * - `scp.nmr.Experiment <https://www.spectrochempy.fr/projects/nmr/latest/reference/generated/spectrochempy_nmr.Experiment.html>`_
+   * - `spectrochempy.nmr.Experiment <https://www.spectrochempy.fr/projects/nmr/latest/reference/generated/spectrochempy_nmr.Experiment.html>`_
      - Inspect and process NMR acquisitions.
 
 PerkinElmer plugin

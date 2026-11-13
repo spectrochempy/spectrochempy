@@ -1,5 +1,7 @@
 .. _examples-processing-index:
 
-####################
-Processing NDDataset
-####################
+.. gallery-overview-start
+
+##########
+Processing
+##########

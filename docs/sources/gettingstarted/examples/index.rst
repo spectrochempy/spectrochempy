@@ -14,6 +14,11 @@ Please note that the number of examples is currently quite limited. We are activ
 If you have examples to suggest from your own use of spectrochempy, don't hesitate to suggest them
 in the `discussions <https://github.com/spectrochempy/spectrochempy/discussions>`__ or by creating a pull-request.
 
+.. _nmr-examples:
+
+See the `full NMR gallery <https://www.spectrochempy.fr/projects/nmr/latest/examples_overview.html>`_.
+
+{% if include_gallery %}
 .. contents:: Table of Contents
    :local:
    :depth: 2
@@ -21,38 +26,33 @@ in the `discussions <https://github.com/spectrochempy/spectrochempy/discussions>
 .. toctree::
    :maxdepth: 2
    :titlesonly:
+   :hidden:
 
    Datasets and plotting <gallery/auto_examples_core/index>
    Processing <gallery/auto_examples_processing/index>
    Analysis <gallery/auto_examples_analysis/index>
+   Modeling and simulation <gallery/auto_examples_simulation/index>
    Plugins <gallery/auto_examples_plugins/index>
 
-NMR examples
-============
+.. include:: gallery/auto_examples_core/index.rst
+   :start-after: .. gallery-overview-start
+   :end-before: .. toctree::
 
-Explore import, processing and analysis workflows in the SpectroChemPy NMR gallery.
+.. include:: gallery/auto_examples_processing/index.rst
+   :start-after: .. gallery-overview-start
+   :end-before: .. toctree::
 
-.. raw:: html
+.. include:: gallery/auto_examples_analysis/index.rst
+   :start-after: .. gallery-overview-start
+   :end-before: .. toctree::
 
-   <div class="sphx-glr-thumbnails">
-     <a class="sphx-glr-thumbcontainer reference external"
-        href="https://www.spectrochempy.fr/projects/nmr/latest/examples/gallery/importer/plot_read_nmrpipe_2d.html">
-       <img alt="" loading="lazy"
-            src="https://www.spectrochempy.fr/projects/nmr/latest/_images/sphx_glr_plot_read_nmrpipe_2d_thumb.png">
-       <span>Read a processed NMRPipe 2D COSY</span>
-     </a>
-     <a class="sphx-glr-thumbcontainer reference external"
-        href="https://www.spectrochempy.fr/projects/nmr/latest/examples/gallery/nmr/plot_replay_mqmas_pst5.html">
-       <img alt="" loading="lazy"
-            src="https://www.spectrochempy.fr/projects/nmr/latest/_images/sphx_glr_plot_replay_mqmas_pst5_thumb.png">
-       <span>Process an MQMAS spectrum</span>
-     </a>
-     <a class="sphx-glr-thumbcontainer reference external"
-        href="https://www.spectrochempy.fr/projects/nmr/latest/examples/gallery/analysis/plot_analyze_cosy_2d.html">
-       <img alt="" loading="lazy"
-            src="https://www.spectrochempy.fr/projects/nmr/latest/_images/sphx_glr_plot_analyze_cosy_2d_thumb.png">
-       <span>Find and integrate cross-peaks in a 2D COSY</span>
-     </a>
-   </div>
+.. include:: gallery/auto_examples_simulation/index.rst
+   :start-after: .. gallery-overview-start
 
-See the `full NMR gallery <https://www.spectrochempy.fr/projects/nmr/latest/examples_overview.html>`_.
+#######
+Plugins
+#######
+
+.. include:: gallery/auto_examples_plugins/index.rst
+   :start-after: .. gallery-overview-start
+{% endif %}

@@ -509,6 +509,8 @@ if docs_context not in {"development", "preview", "stable"}:
 preview_name = os.environ.get("SCPY_DOCS_PREVIEW_NAME", "").strip()
 
 html_context = {
+    "include_gallery": not single_doc_or_dir,
+    "include_api": include_api,
     "version_preview_json": os.environ.get("SCPY_VERSION_PREVIEW_JSON", ""),
     "version_button_label": logo_version,
     "current_whatsnew_doc": current_whatsnew_doc,
@@ -540,7 +542,7 @@ html_context = {
 # Generate the plots for the gallery
 example_source_dir = SOURCES / "examples"
 example_generated_dir = "gettingstarted/examples/gallery"
-gallery_sections = ("core", "processing", "analysis", "plugins")
+gallery_sections = ("core", "processing", "analysis", "simulation", "plugins")
 
 # Check for the SPHINX_NOEXEC environment variable
 noexec = os.environ.get("SPHINX_NOEXEC") == "1"
@@ -662,36 +664,40 @@ def _plugin_examples_table(entries: list[dict[str, str]]) -> str:
         "Examples requiring plugins",
         "==========================",
         "",
+        ".. gallery-overview-start",
+        "",
         "The examples listed below require one or more optional SpectroChemPy plugins.",
         "They appear in the :ref:`main gallery <examples-index>` alongside core-only",
         "examples, organised by scientific topic.",
         "",
     ]
 
-    if entries:
+    lines.extend(
+        [
+            ".. list-table::",
+            "   :header-rows: 1",
+            "   :widths: 40 25 35",
+            "",
+            "   * - Example",
+            "     - Required plugin",
+            "     - Gallery section",
+            "   * - `NMR gallery <https://www.spectrochempy.fr/projects/nmr/latest/examples_overview.html>`__",
+            "     - ``spectrochempy-nmr``",
+            "     - :ref:`Import / Export <examples-importer-index>`,",
+            "       :ref:`Processing <examples-processing-index>`,",
+            "       :ref:`Analysis <examples-analysis-index>`,",
+            "       :ref:`Modeling and simulation <examples-simulation-index>`",
+        ]
+    )
+
+    for entry in entries:
         lines.extend(
             [
-                ".. list-table::",
-                "   :header-rows: 1",
-                "   :widths: 40 25 35",
-                "",
-                "   * - Example",
-                "     - Required plugin",
-                "     - Gallery section",
+                f"   * - :ref:`{_gallery_ref_for_example(entry['path'])}`",
+                f"     - ``{entry['plugin']}``",
+                f"     - {_section_cell(entry['section'], entry['section_ref'])}",
             ]
         )
-
-        for entry in entries:
-            lines.extend(
-                [
-                    f"   * - :ref:`{_gallery_ref_for_example(entry['path'])}`",
-                    f"     - ``{entry['plugin']}``",
-                    f"     - {_section_cell(entry['section'], entry['section_ref'])}",
-                ]
-            )
-    else:
-        lines.append("No plugin-dependent examples are currently registered.")
-
     lines.extend(
         ["", "See :ref:`plugins` for general plugin installation instructions.", ""]
     )
@@ -754,6 +760,11 @@ def _get_default_image_scraper():
 if not single_doc_or_dir or gallery_preview:
     from sphinx_gallery.sorting import FileNameSortKey
 
+    class GalleryExampleSortKey(FileNameSortKey):
+        def __call__(self, filename):
+            return filename != "plot_plotting.py", super().__call__(filename)
+
+
 if gallery_preview:
     gallery_examples_dirs = [str(SRC.parent / "examples")]
     gallery_output_dirs = ["gallery"]
@@ -769,6 +780,7 @@ elif not single_doc_or_dir:
         f"{example_generated_dir}/auto_examples_core",
         f"{example_generated_dir}/auto_examples_processing",
         f"{example_generated_dir}/auto_examples_analysis",
+        f"{example_generated_dir}/auto_examples_simulation",
         f"{example_generated_dir}/auto_examples_plugins",
     ]
 else:
@@ -808,7 +820,7 @@ if not single_doc_or_dir or gallery_preview:
         "download_all_examples": False,
         "pypandoc": True,
         "remove_config_comments": True,
-        "within_subsection_order": FileNameSortKey,
+        "within_subsection_order": GalleryExampleSortKey,
         "image_scrapers": (
             _get_default_image_scraper(),
         ),  # Use the function getter instead of direct function reference
@@ -1092,11 +1104,16 @@ def rstjinja(app, docname, source):
     Copied from site:
     https://ericholscher.com/blog/2016/jul/25/integrating-jinja-rst-sphinx/
     """
-    # Make sure we're outputting HTML
-    if app.builder.format != "html":
+    if app.builder.format != "html" and docname not in {
+        "credits/index",
+        "gettingstarted/examples/index",
+    }:
         return
     src = source[0]
-    rendered = app.builder.templates.render_string(src, app.config.html_context)
+    if app.builder.format == "html":
+        rendered = app.builder.templates.render_string(src, app.config.html_context)
+    else:
+        rendered = jinja2.Template(src).render(app.config.html_context)
     source[0] = rendered
 
 
@@ -1235,6 +1252,29 @@ def isolate_scp_config(app, docname, source):
     os.environ["SCP_CONFIG_HOME"] = str(config_home)
 
 
+def place_external_gallery_examples(app, doctree):
+    """Place external cards in or after the generated thumbnail grid."""
+    for block in list(doctree.findall(nodes.container)):
+        in_grid = "gallery-inline-examples" in block["classes"]
+        if not in_grid and "nmr-import-examples" not in block["classes"]:
+            continue
+        section = block.parent
+        start = section.index(block) + 1
+        for index, node in enumerate(section.children[start:-1], start):
+            if (
+                isinstance(node, nodes.comment)
+                and node.astext() == "thumbnail-parent-div-close"
+                and isinstance(section[index + 1], nodes.raw)
+                and section[index + 1].astext().strip() == "</div>"
+            ):
+                if in_grid:
+                    section.insert(index, block.children)
+                else:
+                    section.insert(index + 2, block)
+                section.remove(block)
+                break
+
+
 class LinkToPublishedPreviewPages(SphinxTransform):
     """Resolve notebook links to pages outside a targeted preview."""
 
@@ -1289,13 +1329,29 @@ class ResolvePreviewPageLinks(SphinxTransform):
                 del node["preview_target"]
 
 
+def show_plotting_example_title(app, env, node, contnode):
+    """Keep example titles readable when a targeted preview omits their pages."""
+    if node.get("reftype") != "ref":
+        return None
+    directory = f"{example_generated_dir}/auto_examples_core/d_plotting"
+    label_prefix = f"sphx_glr_{directory.replace('/', '_')}_"
+    target = node["reftarget"]
+    for example in ("plot_1d_options", "plot_2d_projections"):
+        if target == f"{label_prefix}{example}.py":
+            return contnode
+    return None
+
+
 def setup(app):
+    if gallery_preview:
+        app.connect("missing-reference", show_plotting_example_title)
     if local_preview == "tutorial":
         app.add_transform(LinkToPublishedPreviewPages)
         app.add_transform(ResolvePreviewPageLinks)
     app.connect("source-read", isolate_scp_config)
     app.connect("source-read", citing_papers)
     app.connect("source-read", rstjinja)
+    app.connect("doctree-read", place_external_gallery_examples)
     app.connect("autodoc-skip-member", autodoc_skip_member)
     app.connect("autodoc-process-signature", shorter_signature)
     app.connect("html-page-context", strip_generated_api_links, priority=999)

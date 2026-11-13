@@ -81,6 +81,12 @@ _ = scp.plot_multiple(
 _ = scp.plot_multiple(method="scatter", datasets=datasets, labels=labels, legend="best")
 
 # %%
+# Plotting options
+# ----------------
+# - :ref:`Show complex components and masks in 1D <sphx_glr_gettingstarted_examples_gallery_auto_examples_core_d_plotting_plot_1d_options.py>`
+# - :ref:`Add projections to a 2D contour plot <sphx_glr_gettingstarted_examples_gallery_auto_examples_core_d_plotting_plot_2d_projections.py>`
+
+# %%
 # Uncomment the following line to display all figures when running the script
 # directly with Python.
 

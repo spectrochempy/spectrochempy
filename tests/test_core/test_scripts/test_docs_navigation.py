@@ -58,14 +58,14 @@ def test_whatsnew_entry_points_use_the_version_aware_target():
     template = (ROOT / "docs" / "sources" / "index.rst.tmpl").read_text(
         encoding="utf-8"
     )
-    navbar = (ROOT / "docs" / "_templates" / "navbar-nav.html").read_text(
+    about = (ROOT / "docs" / "sources" / "credits" / "index.rst").read_text(
         encoding="utf-8"
     )
     conf = (ROOT / "docs" / "conf.py").read_text(encoding="utf-8")
 
     assert 'href="{{ current_whatsnew_doc }}.html"' in template
     assert "whatsnew/index.html" not in template
-    assert "(current_whatsnew_doc," in navbar
+    assert ":doc:`what's new in this version </{{ current_whatsnew_doc }}>`" in about
     assert '"current_whatsnew_doc": current_whatsnew_doc' in conf
     assert "current_whatsnew_doc=current_whatsnew_doc" in conf
 
