@@ -18,6 +18,7 @@ in the `discussions <https://github.com/spectrochempy/spectrochempy/discussions>
 
 See the `full NMR gallery <https://www.spectrochempy.fr/projects/nmr/latest/examples_overview.html>`_.
 
+{% if include_gallery %}
 .. contents:: Table of Contents
    :local:
    :depth: 2
@@ -54,3 +55,4 @@ Plugins
 
 .. include:: gallery/auto_examples_plugins/index.rst
    :start-after: .. gallery-overview-start
+{% endif %}

@@ -487,6 +487,7 @@ if docs_context not in {"development", "preview", "stable"}:
 preview_name = os.environ.get("SCPY_DOCS_PREVIEW_NAME", "").strip()
 
 html_context = {
+    "include_gallery": not single_doc_or_dir,
     "version_preview_json": os.environ.get("SCPY_VERSION_PREVIEW_JSON", ""),
     "version_button_label": logo_version,
     "current_whatsnew_doc": current_whatsnew_doc,
