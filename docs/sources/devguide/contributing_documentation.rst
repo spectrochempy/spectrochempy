@@ -141,19 +141,24 @@ The final job checks the commit and file hashes of both artifacts before
 rendering one Sphinx site with the usual configuration and document paths.
 Download the HTML artifact from the workflow run to inspect the result.
 
-To enable artifact builds on Read the Docs, set ``SCPY_RTD_DOCS_ARTIFACTS``
-to ``1`` and configure ``SCPY_RTD_GITHUB_TOKEN`` as a private environment
-variable. The token needs read access to Actions in the SpectroChemPy
-repository. RTD waits up to 15 minutes for a successful workflow with both
-artifacts for its checkout and fails if none is available. If an artifact has
-expired, run the workflow again for the same branch or tag at the same commit
-before retrying the RTD build. If the original ref has moved, create a
-temporary branch at the exact SHA and dispatch the workflow on it. For a
-manual retry, start RTD after the CI workflow succeeds. Before enabling
-artifact mode for automatic builds, verify that the RTD time limit covers
-both the CI wait and the Sphinx render, or arrange for CI to finish before
-triggering RTD. External pull request previews continue to
-prepare and execute their sources inside RTD.
+Before enabling artifact mode in production, validate it on a separate Read
+the Docs test project with the same build time limit. Configure
+``SCPY_RTD_DOCS_ARTIFACTS=1`` and set ``SCPY_RTD_GITHUB_TOKEN`` as a private
+environment variable with read access to Actions in the SpectroChemPy
+repository. Verify that the hosted build uses artifacts from its exact
+checkout SHA, keeps the expected URLs and navigation, and completes within
+the time limit, including dependency installation, the CI wait, and rendering.
+If the concurrent workflow and RTD build exceed that limit, arrange for CI to
+finish before triggering RTD. External pull request previews execute their
+sources inside RTD.
+
+RTD waits up to 15 minutes for a successful workflow with both artifacts for
+its checkout. If artifacts expire, rerun the workflow on the same branch or
+tag at the same SHA and retry RTD once CI succeeds. If the ref has moved and
+you need the old SHA, dispatch CI on a temporary branch at that SHA and build
+the corresponding RTD version of the temporary branch. To retry the original
+RTD version instead, generate artifacts for its current SHA. To restore
+execution inside RTD, unset ``SCPY_RTD_DOCS_ARTIFACTS``.
 
 Writing Tips
 ------------
