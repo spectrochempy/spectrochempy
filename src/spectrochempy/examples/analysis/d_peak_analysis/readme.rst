@@ -6,9 +6,10 @@ Peak analysis
 This section contains peak detection, peak integration, and two-dimensional
 correlation spectroscopy examples, including experimental 2D spectra.
 
-.. raw:: html
+.. container:: gallery-inline-examples
 
-   <div class="sphx-glr-thumbnails">
+   .. raw:: html
+
      <a class="sphx-glr-thumbcontainer reference external"
         href="https://www.spectrochempy.fr/projects/nmr/latest/examples/gallery/analysis/plot_analyze_cosy_2d.html">
        <img alt="" loading="lazy"
@@ -21,4 +22,3 @@ correlation spectroscopy examples, including experimental 2D spectra.
             src="https://www.spectrochempy.fr/projects/nmr/latest/_images/sphx_glr_plot_processing_nmr_thumb.png">
        <span>Find and fit peaks in a 1D NMR spectrum</span>
      </a>
-   </div>

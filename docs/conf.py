@@ -1203,10 +1203,11 @@ def isolate_scp_config(app, docname, source):
     os.environ["SCP_CONFIG_HOME"] = str(config_home)
 
 
-def place_nmr_import_examples(app, doctree):
-    """Place the external import examples after the generated thumbnail grid."""
-    for block in doctree.findall(nodes.container):
-        if "nmr-import-examples" not in block["classes"]:
+def place_external_gallery_examples(app, doctree):
+    """Place external cards in or after the generated thumbnail grid."""
+    for block in list(doctree.findall(nodes.container)):
+        in_grid = "gallery-inline-examples" in block["classes"]
+        if not in_grid and "nmr-import-examples" not in block["classes"]:
             continue
         section = block.parent
         start = section.index(block) + 1
@@ -1217,7 +1218,10 @@ def place_nmr_import_examples(app, doctree):
                 and isinstance(section[index + 1], nodes.raw)
                 and section[index + 1].astext().strip() == "</div>"
             ):
-                section.insert(index + 2, block)
+                if in_grid:
+                    section.insert(index, block.children)
+                else:
+                    section.insert(index + 2, block)
                 section.remove(block)
                 break
 
@@ -1226,7 +1230,7 @@ def setup(app):
     app.connect("source-read", isolate_scp_config)
     app.connect("source-read", citing_papers)
     app.connect("source-read", rstjinja)
-    app.connect("doctree-read", place_nmr_import_examples)
+    app.connect("doctree-read", place_external_gallery_examples)
     app.connect("autodoc-skip-member", autodoc_skip_member)
     app.connect("autodoc-process-signature", shorter_signature)
     app.connect("html-page-context", strip_generated_api_links, priority=999)
