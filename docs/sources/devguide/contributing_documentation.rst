@@ -129,16 +129,26 @@ Append the printed HTML path relative to ``build/preview/`` to
 ``http://127.0.0.1:8765/``. After editing, rerun the preview command and
 refresh the page in your browser. The URL works while the server is running.
 
-Documentation CI Prototype
+Documentation CI Artifacts
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The manually triggered documentation artifact workflow runs the tutorials
-and gallery in separate jobs. Both jobs check out the workflow commit.
+The documentation artifact workflow runs on pushes to master and release
+tags. It can also be triggered manually. The tutorial and gallery jobs
+check out the workflow commit.
 The tutorial job saves executed notebooks. The gallery job saves generated
 reStructuredText, figures, thumbnails, downloads, and API backreferences.
 The final job checks the commit and file hashes of both artifacts before
 rendering one Sphinx site with the usual configuration and document paths.
 Download the HTML artifact from the workflow run to inspect the result.
+
+To enable artifact builds on Read the Docs, set ``SCPY_RTD_DOCS_ARTIFACTS``
+to ``1`` and configure ``SCPY_RTD_GITHUB_TOKEN`` as a private environment
+variable. The token needs read access to Actions in the SpectroChemPy
+repository. RTD waits up to 15 minutes for a successful workflow with both
+artifacts for its checkout and fails if none is available. If an artifact has
+expired, run the workflow again for the same branch or tag at the same commit
+before retrying the RTD build. External pull request previews continue to
+prepare and execute their sources inside RTD.
 
 Writing Tips
 ------------

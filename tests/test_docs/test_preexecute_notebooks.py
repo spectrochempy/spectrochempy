@@ -241,24 +241,12 @@ def test_metadata_overrides_and_skipped_notebooks(workspace, monkeypatch):
         runner.verify()
 
 
-def test_rtd_commands_cover_inventory_and_preserve_gallery():
+def test_rtd_uses_the_artifact_aware_entry_point():
     root = Path(__file__).resolve().parents[2]
     config = yaml.safe_load((root / ".readthedocs.yaml").read_text())
-    commands = config["build"]["jobs"]["build"]["html"]
-    expected = sorted(
-        path.with_suffix(".ipynb").relative_to(runner.SOURCES).as_posix()
-        for path in runner.BuildDocumentation()._get_notebook_files()
-    )
-    assert expected
-    assert commands[1:-2] == [
-        f"python -u -m docs.preexecute_notebooks execute {name}" for name in expected
+    assert config["build"]["jobs"]["build"]["html"] == [
+        "SCPY_DOCS_TRACE=1 python -u -m docs.rtd_build"
     ]
-    assert commands[0].endswith("docs.preexecute_notebooks prepare")
-    assert commands[-2].endswith("docs.preexecute_notebooks verify")
-    assert commands[-1] == (
-        "SCPY_DOCS_PREEXECUTED=1 SCPY_DOCS_TRACE=1 python -u docs/make.py "
-        "html --warning-is-error --no-sync --no-data -j auto"
-    )
 
 
 def test_documentation_clis_are_not_collected_as_notebook_examples():
@@ -266,5 +254,9 @@ def test_documentation_clis_are_not_collected_as_notebook_examples():
     assert Path(runner.__file__).resolve() not in examples.scripts
     assert (
         Path(runner.__file__).with_name("ci_artifacts.py").resolve()
+        not in examples.scripts
+    )
+    assert (
+        Path(runner.__file__).with_name("rtd_build.py").resolve()
         not in examples.scripts
     )

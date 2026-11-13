@@ -2,6 +2,9 @@ name: Documentation artifact prototype
 
 on:
   workflow_dispatch:
+  push:
+    branches: [master]
+    tags: ["spectrochempy-v*", "v[0-9]*", "[0-9]*"]
 
 permissions:
   contents: read
@@ -51,7 +54,7 @@ jobs:
           name: docs-${{ matrix.kind }}-${{ github.sha }}
           path: ${{ runner.temp }}/bundle
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 90
 
   render:
     name: Render integrated Sphinx site
@@ -87,4 +90,4 @@ jobs:
           name: docs-html-${{ github.sha }}
           path: ${{ runner.temp }}/docs-output/html
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 90

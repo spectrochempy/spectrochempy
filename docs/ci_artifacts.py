@@ -154,11 +154,15 @@ def render(artifacts):
                     raise RuntimeError(f"Invalid gallery backreference: {target}")
                 example[1] = example[2] = str(target)
         path.write_text(json.dumps(backreferences), encoding="utf-8")
+    render_html(gallery_from_artifact=True)
+
+
+def render_html(*, gallery_from_artifact):
     subprocess.run(
         [
             sys.executable,
-            "-m",
-            "docs.make",
+            "-u",
+            "docs/make.py",
             "html",
             "--no-sync",
             "--no-data",
@@ -169,7 +173,7 @@ def render(artifacts):
         env={
             **os.environ,
             "SCPY_DOCS_PREEXECUTED": "1",
-            "SCPY_DOCS_GALLERY_ARTIFACT": "1",
+            "SCPY_DOCS_GALLERY_ARTIFACT": "1" if gallery_from_artifact else "0",
         },
         check=True,
     )
