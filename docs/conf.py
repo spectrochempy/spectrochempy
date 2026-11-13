@@ -1255,10 +1255,9 @@ def isolate_scp_config(app, docname, source):
 
 
 def place_external_gallery_examples(app, doctree):
-    """Place external cards in or after the generated thumbnail grid."""
+    """Append external cards to the generated thumbnail grid."""
     for block in list(doctree.findall(nodes.container)):
-        in_grid = "gallery-inline-examples" in block["classes"]
-        if not in_grid and "nmr-import-examples" not in block["classes"]:
+        if "gallery-inline-examples" not in block["classes"]:
             continue
         section = block.parent
         start = section.index(block) + 1
@@ -1269,12 +1268,60 @@ def place_external_gallery_examples(app, doctree):
                 and isinstance(section[index + 1], nodes.raw)
                 and section[index + 1].astext().strip() == "</div>"
             ):
-                if in_grid:
-                    section.insert(index, block.children)
-                else:
-                    section.insert(index + 2, block)
+                section.insert(index, block.children)
                 section.remove(block)
                 break
+
+
+def add_external_gallery_links(app, doctree):
+    """List the same external examples in the gallery sidebar and cards."""
+    docname = app.env.docname
+    if not docname.startswith(f"{example_generated_dir}/"):
+        return
+
+    from bs4 import BeautifulSoup  # noqa: PLC0415
+    from sphinx import addnodes  # noqa: PLC0415
+
+    # The category indexes repeat the cards from their subsection pages.
+    # Add each link at the deepest level that owns those cards.
+    trees = list(doctree.findall(addnodes.toctree))
+    if any(
+        child.endswith("/index") for tree in trees for child in tree["includefiles"]
+    ):
+        return
+
+    entries = []
+    for node in doctree.findall(nodes.raw):
+        if "sphx-glr-thumbcontainer reference external" not in node.astext():
+            continue
+        cards = BeautifulSoup(node.astext(), "html.parser")
+        entries.extend(
+            (card.get_text(" ", strip=True), card["href"])
+            for card in cards.select(
+                "a.sphx-glr-thumbcontainer.reference.external[href]"
+            )
+        )
+    if not entries:
+        return
+
+    if trees:
+        trees[-1]["entries"].extend(entries)
+        return
+
+    tree = addnodes.toctree(
+        parent=docname,
+        entries=entries,
+        includefiles=[],
+        maxdepth=-1,
+        caption=None,
+        glob=False,
+        hidden=True,
+        includehidden=False,
+        numbered=0,
+        titlesonly=False,
+    )
+    # Keep external-only entries nested under the gallery page title.
+    next(doctree.findall(nodes.section)).append(tree)
 
 
 class LinkToPublishedPreviewPages(SphinxTransform):
@@ -1365,6 +1412,7 @@ def setup(app):
     app.connect("source-read", citing_papers)
     app.connect("source-read", rstjinja)
     app.connect("doctree-read", place_external_gallery_examples)
+    app.connect("doctree-read", add_external_gallery_links, priority=400)
     app.connect("autodoc-skip-member", autodoc_skip_member)
     app.connect("autodoc-process-signature", shorter_signature)
     app.connect("html-page-context", strip_generated_api_links, priority=999)

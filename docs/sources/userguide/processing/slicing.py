@@ -21,14 +21,12 @@
 # prerequisite, the user is expected to have read the [Import tutorial](../importexport/import.rst).
 
 # %%
-import numpy as np
-
 import spectrochempy as scp
 
 # %% [markdown]
 # ## What is slicing?
 #
-# Slicing a list or an array means taking elements from a given index
+# Slicing an NDDataset means taking elements from a given index
 # (or set of indices) to another index (or set of indices).
 # Slicing is specified using the colon operator `:` with a `from` and `to` index
 # before and after the first colon, and a `step` after the second colon.
@@ -44,7 +42,7 @@ import spectrochempy as scp
 # Let's first illustrate the concept on a 1D example:
 
 # %%
-X = np.arange(10)  # generates a 1D array of 10 elements from 0 to 9
+X = scp.arange(10)
 print(X)
 print(X[2:5])  # selects all elements from 2 to 4
 print(X[::2])  # selects one out of two elements
@@ -57,7 +55,7 @@ print(
 # The same applies to multidimensional arrays by indicating slices separated by commas:
 
 # %%
-X = np.random.rand(10, 10)  # generates a 10x10 array filled with random values
+X = scp.arange(100).reshape((10, 10))
 print(X.shape)
 print(X[2:5, :].shape)  # slices along the 1st dimension, X[2:5,] is equivalent
 print(
