@@ -165,8 +165,9 @@ class Filter(ProcessingConfigurable):
     mask_policy : {"default", "split"}, optional, default: "default"
         With "split", filter each contiguous unmasked segment independently
         along the selected dimension, even when spectra have different masks.
-        Preserve the mask and apply the configured boundary mode at each
-        segment's ends. Masked values are carried into the output dtype.
+        Preserve the mask and apply the filter's boundary handling at each
+        segment's ends. Masked values are converted to the output dtype and
+        may be rounded if that dtype cannot represent them exactly.
         If any unmasked segment is too short for the configured filter,
         raise ValueError for the whole operation. Entirely masked spectra
         are skipped. The default uses the method's
