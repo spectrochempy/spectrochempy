@@ -1329,7 +1329,22 @@ class ResolvePreviewPageLinks(SphinxTransform):
                 del node["preview_target"]
 
 
+def show_plotting_example_title(app, env, node, contnode):
+    """Keep example titles readable when a targeted preview omits their pages."""
+    if node.get("reftype") != "ref":
+        return None
+    directory = f"{example_generated_dir}/auto_examples_core/d_plotting"
+    label_prefix = f"sphx_glr_{directory.replace('/', '_')}_"
+    target = node["reftarget"]
+    for example in ("plot_1d_options", "plot_2d_projections"):
+        if target == f"{label_prefix}{example}.py":
+            return contnode
+    return None
+
+
 def setup(app):
+    if gallery_preview:
+        app.connect("missing-reference", show_plotting_example_title)
     if local_preview == "tutorial":
         app.add_transform(LinkToPublishedPreviewPages)
         app.add_transform(ResolvePreviewPageLinks)
