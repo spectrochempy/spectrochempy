@@ -157,7 +157,7 @@ def test_split_keeps_filter_output_dtype(dtype, expected_dtype):
 def test_split_derivative_uses_active_coordinate(delta):
     x = np.arange(20.0)
     source = scp.NDDataset(3 * x, units="V")
-    source.set_coordset(x=[scp.Coord(x, units="cm"), scp.Coord(2 * x, units="s")])
+    source.set_coordset(x=[scp.Coord(2 * x, units="s"), scp.Coord(x, units="cm")])
     source.x.select(2)
     source[8:12] = scp.MASKED
 
