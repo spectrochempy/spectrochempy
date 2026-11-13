@@ -165,8 +165,8 @@ class Filter(ProcessingConfigurable):
     mask_policy : {"default", "split"}, optional, default: "default"
         With "split", filter each contiguous unmasked segment independently
         along the selected dimension, even when spectra have different masks.
-        Preserve masked samples and apply the configured boundary mode at
-        each segment's ends. If any unmasked segment is too short for the
+        Preserve the mask and apply the configured boundary mode at each
+        segment's ends. Masked values are carried into the output dtype. If any unmasked segment is too short for the
         configured filter, raise ValueError for the whole operation. Entirely
         masked spectra are copied unchanged. The default uses the method's
         original mask handling.
@@ -435,7 +435,7 @@ and ‘nearest’.
         data = np.moveaxis(dataset.data, axis, -1)
         mask = np.moveaxis(np.broadcast_to(dataset.mask, dataset.shape), axis, -1)
         spectral = self.method in _SPECTRAL_METHODS
-        if not spectral and dataset.has_complex_dims and not mask.all():
+        if not spectral and np.iscomplexobj(data) and not mask.all():
             raise ValueError(f"{self.method} split filtering requires real data")
         coord = getattr(dataset, dimension, None)
         output = None

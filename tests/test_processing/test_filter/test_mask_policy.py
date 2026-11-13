@@ -127,8 +127,9 @@ def test_split_derivative_warns_once_on_irregular_spacing():
 
 
 @pytest.mark.parametrize("masked", [False, True])
-def test_split_rejects_complex_window_filter_input(masked):
-    source = scp.NDDataset(np.arange(10.0) * (1 + 2j))
+@pytest.mark.parametrize("dtype", [np.complex128, np.clongdouble])
+def test_split_rejects_complex_window_filter_input(masked, dtype):
+    source = scp.NDDataset(np.arange(10.0) * (1 + 2j), dtype=dtype)
     if masked:
         source[5] = scp.MASKED
 
