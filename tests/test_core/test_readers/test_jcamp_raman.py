@@ -51,9 +51,10 @@ def test_read_raman_rejects_non_shift_units():
         assert scp.read_jcamp({"invalid.dx": payload}) is None
 
 
-def test_importer_merges_native_files_with_list_metadata(tmp_path):
+@pytest.mark.parametrize("metadata", [["Raman spectrum"], "RAMAN SPECTRUM"])
+def test_importer_merges_native_files_with_raman_metadata(tmp_path, metadata):
     first = scp.NDDataset([1.0, 2.0], coordset=[scp.Coord([0, 1])])
-    first.meta.jcamp_data_type = ["Raman spectrum"]
+    first.meta.jcamp_data_type = metadata
     second = scp.NDDataset([3.0, 4.0], coordset=[scp.Coord([0, 1])])
     paths = [
         first.dump(tmp_path / "first.scp"),

@@ -868,10 +868,16 @@ def merge_datasets(datasets, **kwargs):
 
     def has_explicit_jcamp_grid(dataset):
         data_type = dataset.meta.get("jcamp_data_type")
-        return isinstance(data_type, str) and data_type in {
-            "UV/VIS SPECTRUM",
-            "RAMAN SPECTRUM",
-        }
+        if not isinstance(data_type, str):
+            return False
+        if data_type == "UV/VIS SPECTRUM":
+            return True
+        filename = dataset.filename
+        return (
+            data_type == "RAMAN SPECTRUM"
+            and filename is not None
+            and filename.suffix.lower() in {".dx", ".jdx"}
+        )
 
     if any(map(has_explicit_jcamp_grid, datasets)):
         other = [ds for ds in datasets if not has_explicit_jcamp_grid(ds)]
