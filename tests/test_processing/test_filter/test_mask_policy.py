@@ -151,3 +151,33 @@ def test_split_keeps_filter_output_dtype(dtype, expected_dtype):
     np.testing.assert_allclose(filtered.data[:3], expected.data)
     assert filtered.data[3] == source.data[3]
     np.testing.assert_array_equal(filtered.mask, source.mask)
+
+
+@pytest.mark.parametrize("delta", [None, 2.0])
+def test_split_derivative_uses_active_coordinate(delta):
+    x = np.arange(20.0)
+    source = scp.NDDataset(3 * x, units="V")
+    source.set_coordset(x=[scp.Coord(x, units="cm"), scp.Coord(2 * x, units="s")])
+    source.x.select(2)
+    source[8:12] = scp.MASKED
+
+    result = source.savgol(deriv=1, delta=delta, mask_policy="split")
+
+    np.testing.assert_allclose(result.data[~source.mask], 1.5)
+    assert result.units == source.units / source.x.default.units
+
+
+def test_split_derivative_resolves_coordinate_reference():
+    x = np.arange(20.0) * -0.25
+    coord = scp.Coord(x, units="cm")
+    source = scp.NDDataset(
+        np.broadcast_to(3 * x, (20, 20)).T.copy(),
+        units="V",
+        coordset=scp.CoordSet(x=coord, y="x"),
+    )
+    source[8:12, :] = scp.MASKED
+
+    result = source.savgol(deriv=1, dim="y", mask_policy="split")
+
+    np.testing.assert_allclose(result.data[~source.mask], 3.0)
+    assert result.units == source.units / coord.units

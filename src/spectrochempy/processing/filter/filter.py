@@ -167,9 +167,9 @@ class Filter(ProcessingConfigurable):
         along the selected dimension, even when spectra have different masks.
         Preserve the mask and apply the configured boundary mode at each
         segment's ends. Masked values are carried into the output dtype.
-        If any unmasked segment is too short for the
-        configured filter, raise ValueError for the whole operation. Entirely
-        masked spectra are copied unchanged. The default uses the method's
+        If any unmasked segment is too short for the configured filter,
+        raise ValueError for the whole operation. Entirely masked spectra
+        are skipped. The default uses the method's
         original mask handling.
 
     cutoff : `float`, optional
@@ -477,7 +477,10 @@ and ‘nearest’.
                             and self.deriv
                             and self.delta is None
                         ):
-                            spacing_info = _detect_uniform_spacing(dataset, axis)
+                            active_coord = (
+                                coord.default if isinstance(coord, CoordSet) else coord
+                            )
+                            spacing_info = _uniform_spacing(active_coord)
                             if spacing_info[0] is None:
                                 self._warn_index_spacing(spacing_info[1])
                         values = self._transform(
@@ -842,7 +845,13 @@ and ‘nearest’.
             # Propagate units for derivative paths that claim physical scaling.
             # Smoothing (deriv=0) and index fallbacks keep source units.
             if self.deriv > 0 and delta_source in ("coordinate", "explicit"):
-                coord = dataset.coord(axis)
+                coord = (
+                    getattr(dataset, dataset.dims[axis], None)
+                    if split
+                    else dataset.coord(axis)
+                )
+                if split and isinstance(coord, CoordSet):
+                    coord = coord.default
                 coord_units = coord.units if coord is not None else None
                 source_units = dataset.units
                 if source_units is not None and coord_units is not None:
