@@ -1,7 +1,7 @@
 ---
 name: spectrochempy-review
 description: >-
-  Independent code review in a fresh session. Use when a separate review is
+  Independent code review in a temporary subagent session. Use when a separate review is
   needed: the reviewer starts from the need, the diff, and sources — not the
   implementer's history. Checks assumptions, finds counter-examples and
   regressions, evaluates whether tests prove the expected behavior.
@@ -13,8 +13,9 @@ metadata:
 ## Trigger
 
 Use this skill when asked to perform a **separate review** of an
-implementation. This review runs in a **new independent OpenCode, Codex, or
-Claude Code session** without the implementation history.
+implementation. This review runs in a **temporary subagent session** attached
+to the current task, with the review prompt and repository access but without
+the implementation history. Return the report to the parent agent.
 
 Do **not** use this for trivial changes (typos, formatting, mechanical
 refactoring with no behavior change). Those are covered by the implementer's
@@ -179,7 +180,7 @@ Propose targeted test commands that would confirm or refute the key concerns.
 * **Trust code and tests**, not the implementer's summary.
 * **Distinguish facts from judgments** — established defects vs.
   uncertainties vs. preferences.
-* **Do not launch a second session or another model.** Produce the report
+* **Do not delegate the review.** Return the report to the parent agent
   and stop.
 
 ---
