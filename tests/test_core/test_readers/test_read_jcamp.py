@@ -6,11 +6,12 @@
 # ruff: noqa
 
 from datetime import datetime
+from pathlib import Path
 
 import numpy as np
 import pytest
 
-from spectrochempy import read_jcamp, read, Coord, NDDataset
+from spectrochempy import read_jcamp, read, Coord, NDDataset, jcamp, ur
 from spectrochempy.utils.datetimeutils import UTC
 
 
@@ -308,3 +309,32 @@ def test_jcamp_ir_checks_count_before_allocating_the_axis(monkeypatch, table, me
     payload = payload.split(b"##XYDATA=", 1)[0] + table + b"##END=\n"
     with pytest.warns(UserWarning, match=message):
         assert read_jcamp({"truncated.jdx": payload}) is None
+
+
+@pytest.mark.parametrize("reader", [read_jcamp, jcamp.read])
+def test_jcamp_ir_polystyrene_fix_and_difdup(reader):
+    directory = Path(__file__).with_name("jcamp_data")
+    plain_path = directory / "jtpolys.dx"
+    plain_table = plain_path.read_text(encoding="ascii").split("##XYDATA=", 1)[1]
+    rows = plain_table.split("##END=", 1)[0].splitlines()[1:]
+    stored = np.array(
+        [int(value) for row in rows if row.strip() for value in row.split()[1:]]
+    )
+    assert stored.size == 1844
+
+    cases = [
+        (plain_path, 2.384185791e-9, 447.484259, 4002.28378),
+        (directory / "jtpolysd.dx", 2.3884185791e-9, 447.484259, 4002.284),
+    ]
+    for path, factor, first, last in cases:
+        spectrum = reader(path)
+        assert spectrum.size == stored.size
+        assert spectrum.x.units == ur.Unit("cm^-1")
+        assert spectrum.units == ur.transmittance
+        assert not np.any(spectrum.mask)
+        np.testing.assert_allclose(
+            spectrum.x.data, np.linspace(first, last, stored.size), rtol=0, atol=5e-9
+        )
+        np.testing.assert_allclose(
+            spectrum.data.ravel(), stored * factor, rtol=2e-15, atol=0
+        )
