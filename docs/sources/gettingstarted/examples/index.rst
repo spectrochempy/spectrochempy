@@ -30,6 +30,7 @@ See the `full NMR gallery <https://www.spectrochempy.fr/projects/nmr/latest/exam
    Datasets and plotting <gallery/auto_examples_core/index>
    Processing <gallery/auto_examples_processing/index>
    Analysis <gallery/auto_examples_analysis/index>
+   Modeling and simulation <gallery/auto_examples_simulation/index>
    Plugins <gallery/auto_examples_plugins/index>
 
 .. include:: gallery/auto_examples_core/index.rst
@@ -43,6 +44,9 @@ See the `full NMR gallery <https://www.spectrochempy.fr/projects/nmr/latest/exam
 .. include:: gallery/auto_examples_analysis/index.rst
    :start-after: .. gallery-overview-start
    :end-before: .. toctree::
+
+.. include:: gallery/auto_examples_simulation/index.rst
+   :start-after: .. gallery-overview-start
 
 #######
 Plugins

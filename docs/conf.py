@@ -517,7 +517,7 @@ html_context = {
 # Generate the plots for the gallery
 example_source_dir = SOURCES / "examples"
 example_generated_dir = "gettingstarted/examples/gallery"
-gallery_sections = ("core", "processing", "analysis", "plugins")
+gallery_sections = ("core", "processing", "analysis", "simulation", "plugins")
 
 # Check for the SPHINX_NOEXEC environment variable
 noexec = os.environ.get("SPHINX_NOEXEC") == "1"
@@ -750,6 +750,7 @@ if not single_doc_or_dir:
         f"{example_generated_dir}/auto_examples_core",
         f"{example_generated_dir}/auto_examples_processing",
         f"{example_generated_dir}/auto_examples_analysis",
+        f"{example_generated_dir}/auto_examples_simulation",
         f"{example_generated_dir}/auto_examples_plugins",
     ]
 else:
