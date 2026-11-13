@@ -16,6 +16,7 @@ New Features
 ~~~~~~~~~~~~
 
 - Read 1D UV-visible JCAMP-DX spectra with explicit wavelength and intensity pairs.
+  (:pr:`1875`)
 
 - Add ``mask_policy="split"`` to ``Filter`` to process contiguous unmasked
   segments independently and report segments too short for the chosen filter. (:pr:`1873`)

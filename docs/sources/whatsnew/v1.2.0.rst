@@ -40,11 +40,11 @@ Bug Fixes
 - Restored the documented 0.1 percent coordinate linearization tolerance.
   FTIR FFT coordinates convert frequency bins to wavenumbers before
   display rounding, preserving uniform spacing. Set ``linearize_below``
-  explicitly to use a different tolerance.
-- Fixed Sphinx-Gallery thumbnail selection for examples with several figures.
+  explicitly to use a different tolerance. (:pr:`1841`)
+- Fixed Sphinx-Gallery thumbnail selection for examples with several figures. (:pr:`1841`)
 - Preserved dataset modification timestamps and their UTC offsets when
   saving and reopening native ``.scp`` files.
-  (:pr:`1814`)
+  (:pr:`1848`)
 
 Breaking Changes
 ~~~~~~~~~~~~~~~~
