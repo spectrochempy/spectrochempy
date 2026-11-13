@@ -116,25 +116,18 @@ working Jupyter ``python3`` kernel. For prose or layout edits, add
 ``--no-exec`` to render the page without running its code or regenerating its
 figures.
 
-After each coherent set of edits, the agent rebuilds the affected previews.
-The agent checks whether a local HTTP server already serves
-``build/preview/`` from the current worktree and reuses it if so. Otherwise,
-it starts a server from the repository root and leaves it running for review::
+If your browser or editor preview needs an HTTP URL, reuse a local server
+already serving this worktree's ``build/preview/`` directory. To start one,
+run this command from the repository root.
+
+.. code-block:: bash
 
     python -m http.server 8765 --bind 127.0.0.1 --directory build/preview
 
-If that port is in use by another server, choose a free port and use it in
-the preview URLs. Append the printed HTML path relative to
-``build/preview/`` to the server URL. Verify that the server returns the
-updated page and include its direct HTTP link in the handoff. If the agent
-has access to a browser preview, reload the existing tab or open a new one
-and leave it available for review. For example, Codex can display the page
-in its right pane. The same URL can be opened in a regular browser on the
-machine running the server, including when working with OpenCode or Claude
-Code. The links work while the server is running.
-
-If execution is blocked, the agent can provide an HTML preview
-built with ``--no-exec`` and report that the code and figures were not verified.
+If port 8765 is busy, choose a free port and use it in the preview URL.
+Append the printed HTML path relative to ``build/preview/`` to
+``http://127.0.0.1:8765/``. After editing, rerun the preview command and
+refresh the page in your browser. The URL works while the server is running.
 
 Writing Tips
 ------------
