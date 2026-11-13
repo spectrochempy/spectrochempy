@@ -357,7 +357,7 @@ html_theme_options = {
     "navigation_depth": 4,
     "collapse_navigation": False,
     "show_toc_level": 2,
-    "use_edit_page_button": not gallery_preview,
+    "use_edit_page_button": not local_preview,
     "search_bar_text": "Search the documentation...",
     "icon_links": [
         {
