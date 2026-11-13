@@ -23,11 +23,9 @@ from urllib.parse import unquote
 from urllib.parse import urlsplit
 
 import jinja2
-from bs4 import BeautifulSoup
 from docutils import nodes
 from packaging.version import InvalidVersion
 from packaging.version import Version
-from sphinx import addnodes
 from sphinx.ext.autodoc import ClassDocumenter
 from sphinx.transforms import SphinxTransform
 from sphinx.util.osutil import relative_uri
@@ -1278,6 +1276,9 @@ def add_external_gallery_links(app, doctree):
     docname = app.env.docname
     if not docname.startswith(f"{example_generated_dir}/"):
         return
+
+    from bs4 import BeautifulSoup  # noqa: PLC0415
+    from sphinx import addnodes  # noqa: PLC0415
 
     # The category indexes repeat the cards from their subsection pages.
     # Add each link at the deepest level that owns those cards.

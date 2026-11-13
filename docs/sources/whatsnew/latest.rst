@@ -30,3 +30,9 @@ Bug Fixes
 
 - Read DIFDUP infrared JCAMP-DX data, handle inline comments, and preserve
   physical spectral axis bounds when line abscissae use an X factor.
+
+Developer
+~~~~~~~~~
+
+- List NMR examples in the gallery sidebar and include their import cards in
+  the main Import / Export grid. (#1872)
