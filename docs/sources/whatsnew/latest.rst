@@ -15,6 +15,8 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 New Features
 ~~~~~~~~~~~~
 
+- Read 1D UV-visible JCAMP-DX spectra with explicit wavelength and intensity pairs.
+
 - Add ``mask_policy="split"`` to ``Filter`` to process contiguous unmasked
   segments independently and report segments too short for the chosen filter.
 - Use ``NDDataset.argsort()`` to obtain the original indices of 1D data sorted
