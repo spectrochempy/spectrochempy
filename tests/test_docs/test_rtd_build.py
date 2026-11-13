@@ -79,28 +79,33 @@ def test_artifact_mode_is_private_and_excludes_external_builds(
     assert called == ["local" if version_type == "external" else "artifact"]
 
 
-def test_expired_download_retries_the_entire_pair(monkeypatch):
+@pytest.mark.parametrize("expired", [True, False], ids=["expired", "version-mismatch"])
+def test_unusable_artifact_retries_the_entire_pair(monkeypatch, expired):
     monkeypatch.setattr(rtd_build.ci_artifacts, "_commit", lambda: "commit")
+    rendered = []
 
     def find(_commit, _token, unavailable):
         if unavailable:
-            assert unavailable == {2}
+            assert unavailable == ({2} if expired else {1, 2})
             return 20, {"tutorials": {"id": 3}, "gallery": {"id": 4}}
         return 10, {"tutorials": {"id": 1}, "gallery": {"id": 2}}
 
     def download(artifact, _token, path):
-        if artifact["id"] == 2:
+        if expired and artifact["id"] == 2:
             raise HTTPError("https://api.github.com", 410, "Gone", {}, None)
         path.write_text(str(artifact["id"]))
 
     def render(root):
-        assert (root / "tutorials").read_text() == "3"
-        assert (root / "gallery").read_text() == "4"
+        pair = tuple((root / kind).read_text() for kind in ("tutorials", "gallery"))
+        rendered.append(pair)
+        if pair == ("1", "2"):
+            raise rtd_build.ci_artifacts.ArtifactVersionMismatchError("wrong version")
 
     monkeypatch.setattr(rtd_build, "_find_artifacts", find)
     monkeypatch.setattr(rtd_build, "_download", download)
     monkeypatch.setattr(rtd_build.ci_artifacts, "render", render)
     rtd_build._render_from_actions("test-token")
+    assert rendered == ([("3", "4")] if expired else [("1", "2"), ("3", "4")])
 
 
 def test_same_commit_with_different_installed_version_is_rejected(tmp_path):
