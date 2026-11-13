@@ -127,6 +127,20 @@ The skills are shared by OpenCode, Codex, and Claude Code. They live only in
 
 ---
 
+## Gallery and Tutorial Handoff
+
+After each coherent set of edits to a gallery example or tutorial, rebuild
+the HTML preview for each changed page. In Codex, reuse the local server for
+the current worktree's preview directory or start one if needed. Reload the
+matching tab in the in-app browser or open a new tab in the right pane.
+Verify the updated page, keep its tab open for the user, and include the
+direct HTTP link in the final response. Follow the preview instructions in
+`docs/sources/devguide/contributing_documentation.rst`.
+
+If execution is blocked, build with `--no-exec` when possible and report that
+the code and figures could not be verified. If the in-app browser is
+unavailable, give the user the HTTP link and report the limitation.
+
 ## References
 
 * `CONTRIBUTING.md` — Commit/PR prefixes, full PR workflow, developer guide

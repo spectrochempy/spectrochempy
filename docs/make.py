@@ -63,6 +63,7 @@ import multiprocessing as mp
 import os
 import re
 import shutil
+import subprocess
 import sys
 import tempfile
 import time
@@ -1275,6 +1276,76 @@ class BuildDocumentation:
 
 
 # ======================================================================================
+def _build_preview(source, docname, *, gallery, noexec, jobs, warnings_as_errors):
+    root = BUILDDIR / "preview" / ("gallery" if gallery else "tutorial") / docname
+    output = root / "html"
+    with tempfile.TemporaryDirectory(prefix="scp-docs-preview-") as temporary:
+        workspace = Path(temporary)
+        src = workspace / "sources"
+        shutil.copytree(
+            DOCS / "sources",
+            src,
+            ignore=shutil.ignore_patterns(
+                "gallery", "generated", ".ipynb_checkpoints", "*.ipynb"
+            ),
+        )
+        if gallery:
+            examples = workspace / "examples"
+            examples.mkdir()
+            shutil.copy2(source, examples / source.name)
+            (examples / "readme.rst").write_text(
+                "Gallery preview\n===============\n", encoding="utf-8"
+            )
+            pattern = f"gallery/{source.name}"
+            page = f"gallery/{source.stem}.html"
+        else:
+            pattern = f"{docname}.py"
+            page = f"{docname}.html"
+
+        env = {
+            **os.environ,
+            "SPHINX_CONFDIR": str(DOCS),
+            "SPHINX_SRCDIR": str(src),
+            "SPHINX_PATTERN": pattern,
+            "SPHINX_NOEXEC": "1" if noexec else "0",
+            "SCPY_DOCS_LOCAL_PREVIEW": "gallery" if gallery else "tutorial",
+        }
+        if gallery:
+            env["DOC_BUILDING"] = "1"
+        else:
+            env.pop("DOC_BUILDING", None)
+        command = [
+            sys.executable,
+            "-m",
+            "sphinx",
+            "-b",
+            "html",
+            "-c",
+            str(DOCS),
+            "-j",
+            str(jobs),
+            "-d",
+            str(workspace / "doctrees"),
+        ]
+        if warnings_as_errors:
+            command.append("-W")
+        staging = workspace / "html"
+        result = subprocess.run(
+            [*command, str(src), str(staging)], env=env, check=False
+        )
+        if result.returncode:
+            return result.returncode
+        html = output / page
+        if not (staging / page).is_file():
+            raise RuntimeError(f"Preview page was not generated: {page}")
+        if output.exists():
+            shutil.rmtree(output)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        shutil.move(staging, output)
+        print(f"HTML preview: {html.resolve()}")
+    return 0
+
+
 def _main():
     """
     Command-line interface for the documentation builder.
@@ -1367,10 +1438,16 @@ def _main():
         default=None,
         help=(
             "filename (relative to the 'source' folder) of section or method name to "
-            "compile, e.g. "
+            "compile (.rst, .ipynb or Jupytext .py), e.g. "
             "userguide/analysis.rst"
             ", 'spectrochempy.EFA'"
         ),
+    )
+
+    parser.add_argument(
+        "--gallery-example",
+        metavar="PATH",
+        help="preview a gallery script by its path relative to the repository root",
     )
 
     parser.add_argument(
@@ -1420,6 +1497,49 @@ def _main():
     if args.tag_name and args.command != "html":
         print("The --tagname option is only valid with the html command.")
         return 1
+
+    gallery = args.gallery_example is not None
+    tutorial = bool(args.single_doc and args.single_doc.endswith(".py"))
+    if gallery or tutorial:
+        if (
+            args.command != "html"
+            or args.tag_name
+            or args.directory
+            or args.whatsnew
+            or (gallery and args.single_doc)
+        ):
+            parser.error("select a single local HTML preview target")
+        if gallery:
+            path = Path(args.gallery_example)
+            base = PROJECT
+        else:
+            path = Path(args.single_doc)
+            base = DOCS / "sources"
+        source = (base / path).resolve()
+        if not source.is_relative_to(base.resolve()) or not source.is_file():
+            parser.error(f"preview source not found under {base}: {path}")
+        relative = source.relative_to(base.resolve())
+        if gallery:
+            parts = relative.parts
+            in_examples = parts[:3] == ("src", "spectrochempy", "examples") or (
+                len(parts) > 3 and parts[0] == "plugins" and parts[2] == "examples"
+            )
+            if (
+                not in_examples
+                or not source.name.startswith("plot")
+                or source.suffix != ".py"
+            ):
+                parser.error(
+                    "expected a plot*.py file under a gallery examples directory"
+                )
+        return _build_preview(
+            source,
+            relative.with_suffix("").as_posix(),
+            gallery=gallery,
+            noexec=args.no_exec,
+            jobs=BuildDocumentation._get_jobs(args.jobs),
+            warnings_as_errors=args.warning_is_error,
+        )
 
     if args.directory and not args.directory.endswith("/"):
         args.directory += "/"

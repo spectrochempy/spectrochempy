@@ -90,6 +90,9 @@ GALLERY = GETTINGSTARTED / "examples" / "gallery"
 pattern = os.environ.get("SPHINX_PATTERN")
 single_doc_or_dir = pattern is not None and pattern not in ["noapi", "whatsnew"]
 
+local_preview = os.environ.get("SCPY_DOCS_LOCAL_PREVIEW")
+gallery_preview = local_preview == "gallery"
+
 include_api = pattern is None
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -126,7 +129,7 @@ extensions += [
     "IPython.sphinxext.ipython_directive",
     "nbsphinx",
 ]
-if not single_doc_or_dir:
+if not single_doc_or_dir or gallery_preview:
     extensions += [
         "sphinx_gallery.gen_gallery",
     ]
@@ -231,10 +234,14 @@ exclude_patterns = [
     "**.md5",
     "locales",  # ignore locales directory
 ]
+if gallery_preview:
+    exclude_patterns.append("gallery/*.ipynb")
 
 if pattern:
     for path in SRC.rglob("*"):
-        if path.suffix in (".rst", ".ipynb"):
+        if path.suffix in (".rst", ".ipynb") or (
+            local_preview == "tutorial" and path.suffix == ".py"
+        ):
             rel_path = path.relative_to(SRC)
 
             # Skip root index.rst
@@ -278,6 +285,7 @@ with open(os.path.join(SRC, "index.rst"), "w", encoding="utf-8") as f:
     f.write(
         t.render(
             include_api=include_api,
+            gallery_preview=gallery_preview,
             single=single_doc_or_dir,
             pattern=pattern,
             current_whatsnew_doc=current_whatsnew_doc,
@@ -384,7 +392,11 @@ html_favicon = "_static/scpy.ico"
 # Add any paths that contain custom _static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin _static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
+html_static_path = [str(STATIC)] if local_preview else ["_static"]
+if local_preview:
+    html_logo = str(STATIC / "scpy.png")
+    html_favicon = str(STATIC / "scpy.ico")
+    templates_path = [str(TEMPLATES)]
 
 html_css_files = [
     "css/spectrochempy.css",
@@ -728,10 +740,13 @@ def _get_default_image_scraper():
     return sphinx_gallery.scrapers.matplotlib_scraper
 
 
-if not single_doc_or_dir:
+if not single_doc_or_dir or gallery_preview:
     from sphinx_gallery.sorting import FileNameSortKey
 
-if not single_doc_or_dir:
+if gallery_preview:
+    gallery_examples_dirs = [str(SRC.parent / "examples")]
+    gallery_output_dirs = ["gallery"]
+elif not single_doc_or_dir:
     plugin_gallery_entries = _load_plugin_gallery_entries()
     example_source_dir = _stage_gallery_examples()
     _write_plugin_gallery_readmes(example_source_dir, plugin_gallery_entries)
@@ -759,7 +774,7 @@ def reset_scp_preferences(gallery_conf, fname):
     preferences.reset()
 
 
-if not single_doc_or_dir:
+if not single_doc_or_dir or gallery_preview:
     sphinx_gallery_conf = {
         "plot_gallery": not noexec,
         "doc_module": "spectrochempy",
@@ -767,14 +782,16 @@ if not single_doc_or_dir:
         "examples_dirs": gallery_examples_dirs,
         # Generated RST files in generated directory
         "gallery_dirs": gallery_output_dirs,
-        "backreferences_dir": f"{example_generated_dir}/backreferences",
+        "backreferences_dir": (
+            None if gallery_preview else f"{example_generated_dir}/backreferences"
+        ),
         "reference_url": {
             "spectrochempy": None,
         },
         "show_memory": False,
         "thumbnail_size": (400, 400),
-        "abort_on_example_error": False,
-        "only_warn_on_example_error": True,
+        "abort_on_example_error": gallery_preview,
+        "only_warn_on_example_error": not gallery_preview,
         "capture_repr": ("_repr_html_", "__repr__"),
         "expected_failing_examples": [],
         "download_all_examples": False,
@@ -818,9 +835,9 @@ nbsphinx_exclude_patterns = [
 
 # Execute notebooks before conversion: 'always', 'never', 'auto' (default)
 nbsphinx_execute = "never" if noexec else "auto"
-if os.environ.get("SCPY_DOCS_PREEXECUTED") == "1":
+if not local_preview and os.environ.get("SCPY_DOCS_PREEXECUTED") == "1":
     nbsphinx_execute = "never"
-nbsphinx_allow_errors = True
+nbsphinx_allow_errors = not local_preview
 nbsphinx_timeout = 90
 
 # Code to be executed before each notebook cell
@@ -835,10 +852,9 @@ nbsphinx_epilog = """
 nbsphinx_kernel_name = "python3"
 
 # Support for notebook formats other than .ipynb
-nbsphinx_custom_formats = {
-    # ".pct.py": ["jupytext.reads", {"fmt": "py:percent"}],
-    # ".md": ["jupytext.reads", {"fmt": "Rmd"}],
-}
+nbsphinx_custom_formats = {}
+if local_preview == "tutorial":
+    nbsphinx_custom_formats[".py"] = ["jupytext.reads", {"fmt": "py:percent"}]
 
 # Configure sphinxcontrib-bibtex
 
@@ -867,6 +883,9 @@ intersphinx_mapping = {
     "sklearn": ("https://scikit-learn.org/stable/", None),
     "traitlets": ("https://traitlets.readthedocs.io/en/stable/", None),
 }
+
+if local_preview:
+    intersphinx_mapping = {}
 
 # linkcode -----------------------------------------------------------------------------
 

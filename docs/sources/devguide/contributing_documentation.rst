@@ -38,8 +38,8 @@ API Documentation
 
 Guides & Tutorials
 ~~~~~~~~~~~~~~~~~~
-- Written in reST or Jupyter notebooks
-- Located in ``docs/userguide/``
+- Written in reST or Jupytext Python files with ``# %%`` cells
+- Located in ``docs/sources/userguide/``
 - Provide high-level overviews and examples
 - All code examples are tested
 
@@ -88,6 +88,50 @@ Build Options
 
     python docs/make.py --single-doc spectrochempy.<class-or-method-name>
     # where ``<class-or-method-name>`` is the name of an importable method in the API.
+
+Preview a Gallery Example or Tutorial
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+From the repository root, use the documentation environment to render the
+page you are editing. For a gallery example, pass the script path relative to
+the repository root. This also works with scripts under a plugin's
+``examples/`` directory.
+
+.. code-block:: bash
+
+    python -m docs.make html --gallery-example src/spectrochempy/examples/core/a_nddataset/plot_a_create_dataset.py
+
+For a tutorial, pass its Jupytext source path relative to ``docs/sources/``.
+The preview reads the Python file directly.
+
+.. code-block:: bash
+
+    python -m docs.make html --single-doc userguide/plotting/plot_types.py
+
+Each command prints the absolute path to the generated HTML page under
+``build/preview/``. Open that page in a browser and keep the surrounding
+files so its styles and figures load. The preview uses the data and plugins
+available in the local documentation environment. Tutorials also need a
+working Jupyter ``python3`` kernel. For prose or layout edits, add
+``--no-exec`` to render the page without running its code or regenerating its
+figures.
+
+After each coherent set of edits, the agent rebuilds the affected previews.
+In Codex, the agent checks whether a local HTTP server already serves
+``build/preview/`` from the current worktree and reuses it if so. Otherwise,
+it starts a server from the repository root and leaves it running for review::
+
+    python -m http.server 8765 --bind 127.0.0.1 --directory build/preview
+
+If that port is in use by another server, choose a free port and use it in
+the preview URLs. Append the printed HTML path relative to
+``build/preview/`` to the server URL. In the Codex browser, reload an
+existing tab for that URL or open it in the right pane. Verify that the
+updated page loads, keep its tab open, and include the direct HTTP link in
+the handoff. The links work while the server is running.
+
+If execution is blocked, the agent can provide an HTML preview
+built with ``--no-exec`` and report that the code and figures were not verified.
 
 Writing Tips
 ------------
