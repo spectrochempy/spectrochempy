@@ -1,13 +1,19 @@
 """Test provenance and build selection for the Read the Docs entry point."""
 
 import hashlib
+import importlib
 from io import BytesIO
 from urllib.error import HTTPError
 from zipfile import ZipFile
 
 import pytest
 
-from docs import rtd_build
+pytest.importorskip("nbformat")
+pytest.importorskip("nbconvert")
+pytest.importorskip("jupytext")
+pytest.importorskip("sphinx")
+
+rtd_build = importlib.import_module("docs.rtd_build")
 
 
 def test_selects_both_artifacts_from_one_successful_run(monkeypatch):

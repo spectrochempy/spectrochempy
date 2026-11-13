@@ -65,6 +65,10 @@ jobs:
       - *checkout
       - *python
       - *install
+      - name: Test Read the Docs artifact integration
+        run: |
+          python -m pip install pytest
+          python -m pytest --noconftest -o addopts= tests/test_docs/test_rtd_build.py
       - name: Set output directory
         run: echo "READTHEDOCS_OUTPUT=$RUNNER_TEMP/docs-output" >> "$GITHUB_ENV"
       - uses: actions/download-artifact@v8
